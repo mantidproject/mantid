@@ -729,27 +729,18 @@ def _remove_masked_and_monitor_spectra(data_workspace: Workspace2D, correction_w
         if cal_workspace.dataY(wsIndex) == 0:
             detectors_to_mask.append(cal_workspace.getDetectorIDs(wsIndex)[0])
 
-    # Remove Masked and Monitor spectra
-    correction_workspace = mantid.ExtractMonitors(
-        InputWorkspace=correction_workspace,
-        DetectorWorkspace=correction_workspace,
-        EnableLogging=False,
-    )
-    mantid.MaskDetectors(correction_workspace, DetectorList=detectors_to_mask)
-    correction_workspace = mantid.RemoveMaskedSpectra(InputWorkspace=correction_workspace, OutputWorkspace=correction_workspace)
-    correction_workspace = mantid.RemoveSpectra(
-        InputWorkspace=correction_workspace, OutputWorkspace=correction_workspace, RemoveSpectraWithNoDetector=True
-    )
-    correction_workspace.clearMonitorWorkspace()
+    results_ws = []
+    for ws in [data_workspace, correction_workspace]:
+        # Remove Masked and Monitor spectra
+        ws = mantid.ExtractMonitors(
+            InputWorkspace=ws,
+            DetectorWorkspace=ws,
+            EnableLogging=False,
+        )
+        mantid.MaskDetectors(ws, DetectorList=detectors_to_mask)
+        ws = mantid.RemoveMaskedSpectra(InputWorkspace=ws, OutputWorkspace=ws)
+        ws = mantid.RemoveSpectra(InputWorkspace=ws, OutputWorkspace=ws, RemoveSpectraWithNoDetector=True)
+        ws.clearMonitorWorkspace()
+        results_ws.append(ws)
 
-    data_workspace = mantid.ExtractMonitors(
-        InputWorkspace=data_workspace,
-        DetectorWorkspace=data_workspace,
-        EnableLogging=False,
-    )
-    mantid.MaskDetectors(data_workspace, DetectorList=detectors_to_mask)
-    data_workspace = mantid.RemoveMaskedSpectra(InputWorkspace=data_workspace, OutputWorkspace=data_workspace)
-    data_workspace = mantid.RemoveSpectra(InputWorkspace=data_workspace, OutputWorkspace=data_workspace, RemoveSpectraWithNoDetector=True)
-    data_workspace.clearMonitorWorkspace()
-
-    return data_workspace, correction_workspace
+    return results_ws

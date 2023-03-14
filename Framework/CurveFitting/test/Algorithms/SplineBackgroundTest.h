@@ -56,6 +56,44 @@ public:
       TS_ASSERT_DELTA(Y[i], std::sin(X[i]), 0.2);
     }
     TS_ASSERT(outWS->getAxis(0)->unit() == ws->getAxis(0)->unit());
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void testFittingMultipleSpectra() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(SinFunction(), 3, 0.1, 10.1, 0.1, true);
+    WorkspaceCreationHelper::addNoise(ws, 0.1);
+    // Mask some bins out to test that functionality
+    const size_t nbins = 101;
+    int toMask = static_cast<int>(0.75 * nbins);
+    ws->maskBin(0, toMask - 1);
+    ws->maskBin(0, toMask);
+    ws->maskBin(0, toMask + 1);
+    ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+    const std::string wsName = "SplineBackground_points";
+    WorkspaceCreationHelper::storeWS(wsName, ws);
+
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("SplineBackground");
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", wsName);
+    alg->setPropertyValue("OutputWorkspace", "SplineBackground_out");
+    alg->setPropertyValue("WorkspaceIndex", "0");
+    alg->setPropertyValue("EndWorkspaceIndex", "1");
+    alg->execute();
+
+    MatrixWorkspace_sptr outWS = WorkspaceCreationHelper::getWS<MatrixWorkspace>("SplineBackground_out");
+
+    auto nHist = outWS->getNumberHistograms();
+    TS_ASSERT_EQUALS(nHist, 2);
+    const auto &X = outWS->x(0);
+    const auto &Y = outWS->y(0);
+
+    for (size_t i = 0; i < Y.size(); i++) {
+      TS_ASSERT_DELTA(Y[i], std::sin(X[i]), 0.2);
+    }
+    TS_ASSERT(outWS->getAxis(0)->unit() == ws->getAxis(0)->unit());
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(wsName);
   }
 };
 

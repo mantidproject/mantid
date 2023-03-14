@@ -196,16 +196,17 @@ double SplineBackground::calculateBinWeight(double errValue) {
     // Regardless of which warning we print we should
     // set the bin weight
     outBinWeight = 0;
-    // Temporarily removed this as the warnings slow the algorithm immensely
-    //    if (errValue <= 0) {
-    //      g_log.warning("Spline background found an error value of 0 or less on an unmasked"
-    //                    " bin. This bin will have no weight during the fitting process");
-    //    } else {
-    //      // nan / inf
-    //      g_log.warning("Spline background found an error value of nan or inf on an"
-    //                    " unmasked bin. This bin will have no weight during the fitting"
-    //                    " process");
-    //    }
+    if (g_log.is(Kernel::Logger::Priority::PRIO_WARNING)) {
+      if (errValue <= 0) {
+        g_log.warning("Spline background found an error value of 0 or less on an unmasked"
+                      " bin. This bin will have no weight during the fitting process");
+      } else {
+        // nan / inf
+        g_log.warning("Spline background found an error value of nan or inf on an"
+                      " unmasked bin. This bin will have no weight during the fitting"
+                      " process");
+      }
+    }
   } else {
     // Value is perfectly normal in every way
     outBinWeight = 1. / (errValue * errValue);

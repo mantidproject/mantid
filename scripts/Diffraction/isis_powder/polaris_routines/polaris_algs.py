@@ -245,17 +245,24 @@ def apply_placzek_correction_per_bank(
     return focused_ws
 
 
-def apply_placzek_correction_per_detector(input_workspace, sample_details, run_details):
+def apply_placzek_correction_per_detector(
+    input_workspace,
+    sample_details,
+    run_details,
+    placzek_order,
+    sample_temp,
+):
     # this correction should only be applied before focussing in the per_detector case
     raw_ws = mantid.Load(Filename="POLARIS" + str(run_details.run_number) + ".nxs")
-    sample_geometry = sample_details.generate_sample_geometry()
-    sample_material = sample_details.generate_sample_material()
+    sample_geometry_json = sample_details.generate_sample_geometry()
+    sample_material_json = sample_details.generate_sample_material()
     self_scattering_correction = mantid.TotScatCalculateSelfScattering(
         InputWorkspace=raw_ws,
         CalFileName=run_details.grouping_file_path,
-        SampleGeometry=sample_geometry,
-        SampleMaterial=sample_material,
-        CrystalDensity=sample_details.material_object.number_density_effective,
+        SampleGeometry=sample_geometry_json,
+        SampleMaterial=sample_material_json,
+        PlaczekOrder=placzek_order,
+        SampleTemp=sample_temp,
         ApplyPerDetector=True,
     )
     common.remove_intermediate_workspace(raw_ws)

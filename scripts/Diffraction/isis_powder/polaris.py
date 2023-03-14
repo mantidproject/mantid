@@ -75,13 +75,13 @@ class Polaris(AbstractInst):
             )
 
     def create_total_scattering_pdf(self, **kwargs):
-        if "pdf_type" not in kwargs or kwargs["pdf_type"] not in ["G(r)", "g(r)", "RDF(r)", "G_k(r)"]:
-            kwargs["pdf_type"] = "G(r)"
-            logger.warning("PDF type not specified or is invalid, defaulting to G(r)")
-        if "placzek_order" not in kwargs or kwargs["placzek_order"] not in [1, 2]:
-            kwargs["placzek_order"] = 1
-            logger.warning("Placzek correction order not specified or is invalid, defaulting to 1")
         self._inst_settings.update_attributes(kwargs=kwargs)
+        if self._inst_settings.pdf_type is None or self._inst_settings.pdf_type not in ["G(r)", "g(r)", "RDF(r)", "G_k(r)"]:
+            self._inst_settings.pdf_type = "G(r)"
+            logger.warning("PDF type not specified or is invalid, defaulting to G(r)")
+        if self._inst_settings.placzek_order is None or self._inst_settings.placzek_order not in [1, 2]:
+            self._inst_settings.placzek_order = 1
+            logger.warning("Placzek correction order not specified or is invalid, defaulting to 1")
         # Generate pdf
         run_details = self._get_run_details(self._inst_settings.run_number)
         focus_file_path = self._generate_out_file_paths(run_details)["nxs_filename"]
@@ -207,4 +207,15 @@ class Polaris(AbstractInst):
         return self._inst_settings.van_normalisation_method == "Absolute"
 
     def apply_additional_per_detector_corrections(self, input_workspace, sample_details, run_details):
-        return polaris_algs.apply_placzek_correction_per_detector(input_workspace, sample_details, run_details)
+        if self._inst_settings.mode.lower() == "pdf":
+            if self._inst_settings.placzek_order is None or self._inst_settings.placzek_order not in [1, 2]:
+                self._inst_settings.placzek_order = 1
+            if self._inst_settings.sample_temp is None:
+                sample_temperature = None
+            else:
+                sample_temperature = str(self._inst_settings.sample_temp)
+            return polaris_algs.apply_placzek_correction_per_detector(
+                input_workspace, sample_details, run_details, self._inst_settings.placzek_order, sample_temperature
+            )
+        else:
+            return input_workspace
