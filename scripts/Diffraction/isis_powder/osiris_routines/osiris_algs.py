@@ -87,6 +87,17 @@ class DrangeData(object):
     def get_samples(self):
         return self._sample
 
+    def get_samples_string(self):
+        run_number_string = ""
+
+        for s in self._sample:
+            run_number_string += str(s) + ","
+
+        return run_number_string[:-1]
+
+    def has_same_samples_string(self, run_number_string):
+        return self.get_samples_string() == run_number_string
+
     def has_sample(self):
         return len(self._sample) >= 1
 
@@ -228,23 +239,47 @@ def run_diffraction_focussing(run_number, drange_sets, calfile, van_norm=False, 
     return focused
 
 
-def get_run_details(run_number_string, inst_settings, is_vanadium_run):
+def create_drange_sets(run_number_string, inst, file_ext):
+    run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
+
+    drange_sets = {}
+    for run_number in run_number_list:
+        ws_name = inst._generate_input_file_name(run_number=run_number, file_ext=file_ext if file_ext else "")
+        ws = common.load_file(ws_name)
+        drange = get_osiris_d_range(ws)
+
+        if drange not in drange_sets:
+            drange_sets[drange] = DrangeData(drange)
+
+        drange_sets[drange].add_sample(run_number)
+
+    return drange_sets
+
+
+def get_run_details(run_number_string, inst_settings, is_vanadium_run, drange=None):
     all_run_numbers = get_cal_mapping_dict(run_number_string, inst_settings.cal_mapping_path)
-    empty_runs = _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="empty_run_numbers")
-    vanadium_runs = _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="vanadium_run_numbers")
+
+    if not drange:
+        empty_can_runs = (
+            _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="empty_run_numbers")
+            if inst_settings.subtract_empty_can
+            else None
+        )
+        vanadium_runs = _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="vanadium_run_numbers")
+    else:
+        empty_can_runs = get_empty_run_for_drange(all_run_numbers, drange) if inst_settings.subtract_empty_can else None
+        vanadium_runs = get_van_run_for_drange(all_run_numbers, drange)
 
     grouping_file_name = inst_settings.grouping
-
-    spline_identifier = []
 
     return create_run_details_object(
         run_number_string=run_number_string,
         inst_settings=inst_settings,
         is_vanadium_run=is_vanadium_run,
-        splined_name_list=spline_identifier,
+        empty_inst_run_number=None,
         grouping_file_name=grouping_file_name,
-        empty_inst_run_number=empty_runs,
         vanadium_string=vanadium_runs,
+        sample_empty_run=empty_can_runs,
     )
 
 
@@ -253,10 +288,12 @@ def get_van_runs_for_samples(run_number_string, inst_settings, drange_sets):
     van_numbers = ""
     for drange_set in drange_sets.values():
         if drange_set.has_sample():
-            van_numbers += (
-                _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="vanadium_" + drange_set.get_drange()) + ","
-            )
+            van_numbers += get_van_run_for_drange(all_run_numbers, drange_set.get_drange()) + ","
     return van_numbers[:-1]
+
+
+def get_van_run_for_drange(all_run_numbers, drange):
+    return _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="vanadium_" + drange)
 
 
 def get_empty_runs_for_samples(run_number_string, inst_settings, drange_sets):
@@ -264,10 +301,12 @@ def get_empty_runs_for_samples(run_number_string, inst_settings, drange_sets):
     empty_numbers = ""
     for drange_set in drange_sets.values():
         if drange_set.has_sample():
-            empty_numbers += (
-                _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="empty_" + drange_set.get_drange()) + ","
-            )
+            empty_numbers += get_empty_run_for_drange(all_run_numbers, drange_set.get_drange()) + ","
     return empty_numbers[:-1]
+
+
+def get_empty_run_for_drange(all_run_numbers, drange):
+    return _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="empty_" + drange)
 
 
 def get_vanadium_runs(inst_settings):
@@ -302,11 +341,21 @@ def _correct_drange_overlap(merged_ws, drange_sets):
     return merged_ws
 
 
-def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
+def merge_dspacing_runs(focussed_runs, drange_sets, run_number, split=False):
     if len(focussed_runs) == 1:
-        return [focussed_runs[0]]
+        if split:
+            grouped_spectra = GroupWorkspaces(
+                InputWorkspaces=focussed_runs, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED
+            )
+        else:
+            grouped_spectra = GroupWorkspaces(
+                InputWorkspaces=focussed_runs[0], OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED
+            )
+        return [_correct_drange_overlap(grouped_spectra, drange_sets)]
 
-    extracted_spectra = [common.extract_ws_spectra(ws) for ws in focussed_runs]
+    extracted_spectra = focussed_runs
+    if split:
+        extracted_spectra = [common.extract_ws_spectra(ws) for ws in focussed_runs]
 
     have_same_spectra_count = len({len(spectra) for spectra in extracted_spectra}) == 1
     if not have_same_spectra_count:
@@ -352,8 +401,8 @@ def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
     input_workspaces_str = ",".join([ws.name() for ws in merged_spectra])
     ConjoinSpectra(InputWorkspaces=input_workspaces_str, OutputWorkspace=output_name)
 
-    common.remove_intermediate_workspace([ws for group in matched_spectra for ws in group])
-    common.remove_intermediate_workspace(merged_spectra)
+    if split:
+        common.remove_intermediate_workspace([ws for ws_group in matched_spectra for ws in ws_group])
 
     joined_spectra = AnalysisDataService[output_name]
     return [_correct_drange_overlap(joined_spectra, drange_sets)]

@@ -7,7 +7,7 @@
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.osiris_routines import osiris_advanced_config, osiris_algs, osiris_param_mapping
-from isis_powder.routines import instrument_settings, common_output
+from isis_powder.routines import instrument_settings, common_output, common
 import copy
 import mantid.simpleapi as mantid
 import os
@@ -15,20 +15,7 @@ import os
 
 class Osiris(AbstractInst):
     def __init__(self, **kwargs):
-        self._drange_sets = {
-            "drange1": osiris_algs.DrangeData("drange1"),
-            "drange2": osiris_algs.DrangeData("drange2"),
-            "drange3": osiris_algs.DrangeData("drange3"),
-            "drange4": osiris_algs.DrangeData("drange4"),
-            "drange5": osiris_algs.DrangeData("drange5"),
-            "drange6": osiris_algs.DrangeData("drange6"),
-            "drange7": osiris_algs.DrangeData("drange7"),
-            "drange8": osiris_algs.DrangeData("drange8"),
-            "drange9": osiris_algs.DrangeData("drange9"),
-            "drange10": osiris_algs.DrangeData("drange10"),
-            "drange11": osiris_algs.DrangeData("drange11"),
-            "drange12": osiris_algs.DrangeData("drange12"),
-        }
+        self._drange_sets = {}
         self._inst_settings = instrument_settings.InstrumentSettings(
             param_map=osiris_param_mapping.attr_mapping, adv_conf_dict=osiris_advanced_config.get_all_adv_variables(), kwargs=kwargs
         )
@@ -48,6 +35,20 @@ class Osiris(AbstractInst):
         return self._load_raw_runs(run_details)
 
     def run_diffraction_focusing(self, **kwargs):
+        self._drange_sets = {
+            "drange1": osiris_algs.DrangeData("drange1"),
+            "drange2": osiris_algs.DrangeData("drange2"),
+            "drange3": osiris_algs.DrangeData("drange3"),
+            "drange4": osiris_algs.DrangeData("drange4"),
+            "drange5": osiris_algs.DrangeData("drange5"),
+            "drange6": osiris_algs.DrangeData("drange6"),
+            "drange7": osiris_algs.DrangeData("drange7"),
+            "drange8": osiris_algs.DrangeData("drange8"),
+            "drange9": osiris_algs.DrangeData("drange9"),
+            "drange10": osiris_algs.DrangeData("drange10"),
+            "drange11": osiris_algs.DrangeData("drange11"),
+            "drange12": osiris_algs.DrangeData("drange12"),
+        }
         self._inst_settings.update_attributes(kwargs=kwargs)
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_number)
         self._load_raw_runs(run_details)
@@ -61,9 +62,23 @@ class Osiris(AbstractInst):
         )
 
         if self._inst_settings.merge_drange:
-            focussed_runs = osiris_algs.merge_dspacing_runs(focussed_runs, self._drange_sets, self._inst_settings.run_number)
+            merged_runs = osiris_algs.merge_dspacing_runs(
+                focussed_runs,
+                self._drange_sets,
+                self._inst_settings.run_number,
+                split=True,
+            )
 
-        return self._output_focused_ws(focussed_runs, run_details)
+            d_spacing_group, tof_group = self._output_focused_ws([ws for ws_group in merged_runs for ws in ws_group], run_details)
+
+            if len(focussed_runs) != 1:
+                common.remove_intermediate_workspace(focussed_runs)
+        else:
+            d_spacing_group, tof_group = self._output_focused_ws(focussed_runs, run_details)
+
+            common.remove_intermediate_workspace(focussed_runs)
+
+        return d_spacing_group, tof_group
 
     def _load_raw_runs(self, run_details):
         sample_ws_list = osiris_algs.load_raw(self._inst_settings.run_number, self._drange_sets, "sample", self, run_details.file_extension)
@@ -73,22 +88,107 @@ class Osiris(AbstractInst):
         empty_ws_list = osiris_algs.load_raw(empty_numbers, self._drange_sets, "empty", self, run_details.file_extension)
         return sample_ws_list, vanadium_ws_list, empty_ws_list
 
+    def create_vanadiums(self, **kwargs):
+        self._inst_settings.update_attributes(kwargs=kwargs)
+        self._setup_drange_sets()
+
+        vanadiums = []
+        for drange in self._drange_sets.values():
+            run_number_string = drange.get_samples_string()
+            vanadium_d = self._create_vanadium(
+                run_number_string=run_number_string,
+                do_absorb_corrections=False,
+                do_spline=False,
+            )
+            vanadiums.append(vanadium_d)
+
+            run_details = self._get_run_details(run_number_string=run_number_string)
+            common.save_unsplined_vanadium(
+                vanadium_ws=vanadium_d,
+                output_path=run_details.unsplined_vanadium_file_path,
+                keep_unit=True,
+            )
+
+        return vanadiums
+
+    def focus(self, **kwargs):
+        self._inst_settings.update_attributes(kwargs=kwargs)
+
+        if not self._drange_sets:
+            self._setup_drange_sets()
+
+        focussed_runs = []
+
+        for drange in self._drange_sets.values():
+            run_number_string = drange.get_samples_string()
+
+            processed = self._focus(
+                run_number_string=run_number_string,
+                do_van_normalisation=self._inst_settings.van_norm,
+                do_absorb_corrections=False,
+            )
+
+            focussed_runs.extend(processed)
+
+        run_details = self._get_run_details(run_number_string=self._inst_settings.run_number)
+
+        if self._inst_settings.merge_drange:
+            merged_runs = osiris_algs.merge_dspacing_runs(
+                focussed_runs,
+                self._drange_sets,
+                self._inst_settings.run_number,
+            )
+
+            d_spacing_group, tof_group = self._output_focused_ws([ws for ws_group in merged_runs for ws in ws_group], run_details)
+
+            if len(focussed_runs) != 1:
+                common.remove_intermediate_workspace([ws for ws_group in focussed_runs for ws in ws_group])
+        else:
+            d_spacing_group, tof_group = self._output_focused_ws([ws for ws_group in focussed_runs for ws in ws_group], run_details)
+
+            common.remove_intermediate_workspace([ws for ws_group in focussed_runs for ws in ws_group])
+
+        return d_spacing_group, tof_group
+
+    def _setup_drange_sets(self):
+        self._drange_sets = osiris_algs.create_drange_sets(self._inst_settings.run_number, self, self._inst_settings.file_extension)
+
     def _get_run_details(self, run_number_string):
         """
         Returns a RunDetails object with various properties related to the current run set
         :param run_number_string: The run number to look up the properties of
         :return: A RunDetails object containing attributes relevant to that run_number_string
         """
-        run_number_string_key = self._generate_run_details_fingerprint(run_number_string, self._inst_settings.file_extension)
+        run_number_string_key = self._generate_run_details_fingerprint(
+            run_number_string, self._inst_settings.file_extension, self._is_vanadium
+        )
 
         if run_number_string_key in self._run_details_cached_obj:
             return self._run_details_cached_obj[run_number_string_key]
 
+        drange = self._get_drange_for_run_number(run_number_string)
+
         self._run_details_cached_obj[run_number_string_key] = osiris_algs.get_run_details(
-            run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium
+            run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium, drange=drange
         )
 
         return self._run_details_cached_obj[run_number_string_key]
+
+    def _get_drange_for_run_number(self, run_number_string):
+        for drange_name, drange_object in self._drange_sets.items():
+            if drange_object.get_samples_string() == run_number_string:
+                return drange_name
+        return None
+
+    def apply_drange_cropping(self, run_number_string, focused_ws):
+        drange = self._get_drange_for_run_number(run_number_string)
+
+        return mantid.CropWorkspace(
+            InputWorkspace=focused_ws,
+            XMin=osiris_algs.d_range_alice[drange][0],
+            XMax=osiris_algs.d_range_alice[drange][1],
+            OutputWorkspace=str(focused_ws),
+        )
 
     def _output_focused_ws(self, processed_spectra, run_details):
         """
@@ -140,6 +240,12 @@ class Osiris(AbstractInst):
 
         out_file_names["output_name"] = os.path.splitext(os.path.basename(out_file_names["nxs_filename"]))[0]
         return out_file_names
+
+    def should_subtract_empty_inst(self):
+        """
+        :return: Whether the empty run should be subtracted from a run being focused
+        """
+        return False
 
 
 def save_data(workspace_group, output_paths):
