@@ -100,7 +100,7 @@ class MSDFitTest(unittest.TestCase):
 
         self.assertRaisesRegex(
             RuntimeError,
-            "SpecMin must be less then SpecMax",
+            "SpecMin must be less than SpecMax",
             MSDFit,
             InputWorkspace=self._ws,
             XStart=0.0,
