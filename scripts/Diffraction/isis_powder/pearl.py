@@ -38,11 +38,12 @@ class Pearl(AbstractInst):
             if self._inst_settings.perform_atten:
                 if not hasattr(self._inst_settings, "attenuation_file"):
                     raise RuntimeError("Attenuation cannot be applied because attenuation_file not specified")
-            return self._focus(
+            focused_runs = self._focus(
                 run_number_string=self._inst_settings.run_number,
                 do_absorb_corrections=self._inst_settings.absorb_corrections,
                 do_van_normalisation=self._inst_settings.van_norm,
             )
+            return self._output_focused_runs(focused_runs, self._inst_settings.run_number)
 
     def create_vanadium(self, **kwargs):
         kwargs["perform_attenuation"] = None  # Hard code this off as we do not need an attenuation file
@@ -91,7 +92,6 @@ class Pearl(AbstractInst):
 
     @contextmanager
     def _apply_temporary_inst_settings(self, kwargs, run):
-
         self._inst_settings.update_attributes(kwargs=kwargs)
         self._switch_long_mode_inst_settings(self._inst_settings.long_mode)
 

@@ -33,11 +33,12 @@ class Gem(AbstractInst):
         self._inst_settings.update_attributes(kwargs=kwargs)
         self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
 
-        return self._focus(
+        focused_runs = self._focus(
             run_number_string=self._inst_settings.run_number,
             do_van_normalisation=self._inst_settings.do_van_norm,
             do_absorb_corrections=self._inst_settings.do_absorb_corrections,
         )
+        return self._output_focused_runs(focused_runs, self._inst_settings.run_number)
 
     def create_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
