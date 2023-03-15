@@ -101,7 +101,6 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             self.assertEqual(out.getPeak(ipk).getIntensity(), 0)
 
     def test_integrate_use_nearest_peak_false_update_peak_position_false_with_resolution_params(self):
-
         out = IntegratePeaksSkew(
             InputWorkspace=self.ws,
             PeaksWorkspace=self.peaks,
@@ -129,7 +128,6 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             self.assertAlmostEqual(pk_ws.getPeak(0).getIntensityOverSigma(), 12.7636, delta=1e-3)
 
     def test_integrate_use_nearest_peak_false_update_peak_position_false_with_back_to_back_params(self):
-
         out = IntegratePeaksSkew(
             InputWorkspace=self.ws,
             PeaksWorkspace=self.peaks,
@@ -404,13 +402,11 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         bank = self.peaks.column("BankName")[ipk]
         for nrows_edge in range(1, 3):
             for ncols_edge in range(1, 3):
-                *_, det_edges, dets = array_converter.get_peak_region_array(
-                    pk, detid, bank, nrows=7, ncols=7, nrows_edge=nrows_edge, ncols_edge=ncols_edge
-                )
-                self.assertTrue(det_edges[:nrows_edge, :].all())
-                self.assertTrue(det_edges[-nrows_edge:, :].all())
-                self.assertFalse(det_edges[nrows_edge:-nrows_edge:, ncols_edge:-ncols_edge].any())
-        self.assertTrue((dets == arange(25, 50).reshape(5, 5).T).all())
+                peak_data = array_converter.get_peak_data(pk, detid, bank, nrows=7, ncols=7, nrows_edge=nrows_edge, ncols_edge=ncols_edge)
+                self.assertTrue(peak_data.det_edges[:nrows_edge, :].all())
+                self.assertTrue(peak_data.det_edges[-nrows_edge:, :].all())
+                self.assertFalse(peak_data.det_edges[nrows_edge:-nrows_edge:, ncols_edge:-ncols_edge].any())
+        self.assertTrue((peak_data.detids == arange(25, 50).reshape(5, 5).T).all())
 
     def test_array_converter_finds_adjacent_banks_to_left_for_component_array_detectors(self):
         array_converter = InstrumentArrayConverter(self.ws_comp_arr)
@@ -418,13 +414,11 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         pk = self.peaks_comp_arr.getPeak(ipk)
         detid = self.peaks_comp_arr.column("DetID")[ipk]
         bank = self.peaks_comp_arr.column("BankName")[ipk]
-        *_, irow, icol, det_edges, dets = array_converter.get_peak_region_array(
-            pk, detid, bank, nrows=5, ncols=5, nrows_edge=1, ncols_edge=1
-        )
-        self.assertFalse(det_edges.any())  # no detector edges as found tubes in adjacent bank
+        peak_data = array_converter.get_peak_data(pk, detid, bank, nrows=5, ncols=5, nrows_edge=1, ncols_edge=1)
+        self.assertFalse(peak_data.det_edges.any())  # no detector edges as found tubes in adjacent bank
         self.assertTrue(
             (
-                dets
+                peak_data.detids
                 == array(
                     [
                         [10101253, 10100253, 9707253, 9706253, 9705253],
@@ -436,8 +430,8 @@ class IntegratePeaksSkewTest(unittest.TestCase):
                 )
             ).all()
         )
-        self.assertEqual(irow, 2)
-        self.assertEqual(icol, 2)
+        self.assertEqual(peak_data.irow, 2)
+        self.assertEqual(peak_data.icol, 2)
 
     def test_array_converter_finds_adjacent_banks_to_right_for_component_array_detectors(self):
         array_converter = InstrumentArrayConverter(self.ws_comp_arr)
@@ -445,13 +439,11 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         pk = self.peaks_comp_arr.getPeak(ipk)
         detid = self.peaks_comp_arr.column("DetID")[ipk]
         bank = self.peaks_comp_arr.column("BankName")[ipk]
-        *_, irow, icol, det_edges, dets = array_converter.get_peak_region_array(
-            pk, detid, bank, nrows=5, ncols=5, nrows_edge=1, ncols_edge=1
-        )
-        self.assertFalse(det_edges.any())  # no detector edges as found tubes in adjacent bank
+        peak_data = array_converter.get_peak_data(pk, detid, bank, nrows=5, ncols=5, nrows_edge=1, ncols_edge=1)
+        self.assertFalse(peak_data.det_edges.any())  # no detector edges as found tubes in adjacent bank
         self.assertTrue(
             (
-                dets
+                peak_data.detids
                 == array(
                     [
                         [10102253, 10101253, 10100253, 9707253, 9706253],
@@ -463,8 +455,8 @@ class IntegratePeaksSkewTest(unittest.TestCase):
                 )
             ).all()
         )
-        self.assertEqual(irow, 2)
-        self.assertEqual(icol, 2)
+        self.assertEqual(peak_data.irow, 2)
+        self.assertEqual(peak_data.icol, 2)
 
     def test_nrows_edge_ncols_edge_in_array_converter_component_array(self):
         array_converter = InstrumentArrayConverter(self.ws_comp_arr)
@@ -473,29 +465,27 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             pk = self.peaks_comp_arr.getPeak(ipk)
             detid = self.peaks_comp_arr.column("DetID")[ipk]
             bank = self.peaks_comp_arr.column("BankName")[ipk]
-            *_, irow, icol, det_edges, _ = array_converter.get_peak_region_array(
-                pk, detid, bank, nrows=7, ncols=5, nrows_edge=3, ncols_edge=2
-            )
+            peak_data = array_converter.get_peak_data(pk, detid, bank, nrows=7, ncols=5, nrows_edge=3, ncols_edge=2)
             irow_expected, icol_expected = (0, 0) if ipk == 0 else (3, 0)
-            self.assertEqual(irow, irow_expected)
-            self.assertEqual(icol, icol_expected)
+            self.assertEqual(peak_data.irow, irow_expected)
+            self.assertEqual(peak_data.icol, icol_expected)
             det_edges_expected = ones((4, 3), dtype=bool)
             if ipk == 0:
                 det_edges_expected[-1, -1] = False
             else:
                 det_edges_expected[0, -1] = False
-            self.assertTrue((det_edges == det_edges_expected).all())
+            self.assertTrue((peak_data.det_edges == det_edges_expected).all())
         # middle of 5th tube from end of bank 5 (no adjacent bank on RHS)
         ipk = 4
         pk = self.peaks_comp_arr.getPeak(ipk)
         detid = self.peaks_comp_arr.column("DetID")[ipk]
         bank = self.peaks_comp_arr.column("BankName")[ipk]
-        *_, irow, icol, det_edges, _ = array_converter.get_peak_region_array(pk, detid, bank, nrows=5, ncols=7, nrows_edge=1, ncols_edge=2)
-        self.assertEqual(irow, 2)
-        self.assertEqual(icol, 3)
+        peak_data = array_converter.get_peak_data(pk, detid, bank, nrows=5, ncols=7, nrows_edge=1, ncols_edge=2)
+        self.assertEqual(peak_data.irow, 2)
+        self.assertEqual(peak_data.icol, 3)
         det_edges_expected = zeros((5, 7), dtype=bool)
         det_edges_expected[:, -1] = True  # last tube in window is second from end of bank and ncols_edge=2
-        self.assertTrue((det_edges == det_edges_expected).all())
+        self.assertTrue((peak_data.det_edges == det_edges_expected).all())
 
 
 if __name__ == "__main__":

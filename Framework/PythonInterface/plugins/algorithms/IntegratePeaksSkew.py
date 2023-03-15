@@ -194,7 +194,7 @@ class InstrumentArrayConverter:
         icol_peak = np.where(dcol_vec == 0)[0][0]
         return detids, detector_edges, irow_peak, icol_peak
 
-    def get_peak_region_array(self, peak, detid, bank_name, nrows, ncols, nrows_edge, ncols_edge):
+    def get_peak_data(self, peak, detid, bank_name, nrows, ncols, nrows_edge, ncols_edge):
         """
         :param peak: peak object
         :param detid: detector id of peak (from peak table)
@@ -210,21 +210,23 @@ class InstrumentArrayConverter:
         bank = self.inst.getComponentByName(bank_name)
         row, col = peak.getRow(), peak.getCol()
         drows, dcols = nrows // 2, ncols // 2
-        detids, detector_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge)
+        detids, det_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge)
         # get signal and error from each spectrum
         ispecs = np.array(self.ws.getIndicesFromDetectorIDs([int(d) for d in detids.flatten()])).reshape(detids.shape)
         signal = np.zeros((*ispecs.shape, self.ws.blocksize()))
         errors = np.zeros(signal.shape)
+        xcens = np.zeros(signal.shape)
         for irow in range(signal.shape[0]):
             for icol in range(signal.shape[1]):
                 ispec = int(ispecs[irow, icol])
                 signal[irow, icol, :] = self.ws.readY(ispec)
                 errors[irow, icol, :] = self.ws.readE(ispec)
-        # get x bin centers
-        xvals = self.ws.readX(int(ispecs[irow_peak, icol_peak]))
-        if len(xvals) > self.ws.blocksize():
-            xvals = 0.5 * (xvals[:-1] + xvals[1:])  # convert to bin centers
-        return xvals, signal, errors, irow_peak, icol_peak, detector_edges, detids
+                xvals = self.ws.readX(int(ispecs[irow_peak, icol_peak]))
+                if len(xvals) > signal.shape[-1]:
+                    xvals = 0.5 * (xvals[:-1] + xvals[1:])  # convert to bin centers
+                xcens[irow, icol, :] = xvals
+        peak_data = PeakData(xcens, signal, errors, irow_peak, icol_peak, det_edges, detids, peak)
+        return peak_data
 
 
 class PeakData:
@@ -232,28 +234,39 @@ class PeakData:
     This class is used to hold data and integration parameters for single-crystal Bragg peaks
     """
 
-    def __init__(self, xpk, signal, error, irow, icol, det_edges, dets, peak, dTOF):
+    def __init__(self, xcens, signal, error, irow, icol, det_edges, detids, peak):
+        # set data
+        self.xcens = xcens
+        self.signal, self.error = signal, error
+        self.irow, self.icol = irow, icol
+        self.det_edges = det_edges
+        self.detids = detids
         # extract peak properties
         self.hkl = np.round(peak.getHKL(), 2)  # used for plot title
         self.wl = peak.getWavelength()
         self.theta = peak.getScattering() / 2
         self.tof = peak.getTOF()
-        # set data
-        self.xpk = xpk
-        self.signal, self.error = signal, error
-        self.irow, self.icol = irow, icol
-        self.det_edges = det_edges
-        self.dets = dets
-        # set initial integration limits
-        self.initial_frac_width = dTOF / self.tof
-        self.ixlo = np.argmin(abs(xpk - (self.tof - 0.5 * dTOF)))
-        self.ixhi = np.argmin(abs(xpk - (self.tof + 0.5 * dTOF)))
-        self.ixpk = np.argmin(abs(xpk - self.tof))
-        self.ixlo_opt, self.ixhi_opt = self.ixlo, self.ixhi
+        # null init attributes
+        self.initial_frac_width = None
+        self.ixpk = None
+        self.ixlo, self.ixhi = None, None
+        self.ixlo_opt, self.ixhi_opt = None, None
         self.ypk, self.epk_sq = None, None
         self.peak_mask, self.non_bg_mask = None, None
         self.status = None
         self.intens, self.sig = 0, 0
+
+    def get_xcens_at_pos(self):
+        return np.squeeze(self.xcens[self.irow, self.icol, :])
+
+    def calc_initial_integration_limits(self, dTOF):
+        self.initial_frac_width = dTOF / self.tof
+        xpk = self.get_xcens_at_pos()
+        self.ixpk = np.argmin(abs(xpk - self.tof))
+        self.ixlo = np.argmin(abs(xpk - (self.tof - 0.5 * dTOF)))
+        self.ixhi = np.argmin(abs(xpk - (self.tof + 0.5 * dTOF)))
+        self.ixpk = np.argmin(abs(xpk - self.tof))
+        self.ixlo_opt, self.ixhi_opt = self.ixlo, self.ixhi
 
     def integrate_peak(
         self,
@@ -419,7 +432,7 @@ class PeakData:
 
     def scale_intensity_by_bin_width(self):
         # multiply by bin width (as eventually want integrated intensity)
-        dx = np.diff(self.xpk)
+        dx = np.diff(self.get_xcens_at_pos())
         self.ypk[1:] = self.ypk[1:] * dx
         self.ypk[0] = self.ypk[0] * dx[0]  # assume first has same dx as adjacent bin
         self.epk_sq[1:] = self.epk_sq[1:] * (dx**2)
@@ -483,15 +496,16 @@ class PeakData:
 
     def update_peak_position(self):
         idet = np.argmax(self.signal[:, :, self.ixlo_opt : self.ixhi_opt].sum(axis=2)[self.peak_mask])
-        det = self.dets[self.peak_mask][idet]
-        self.irow, self.icol = np.where(self.dets == det)
+        det = self.detids[self.peak_mask][idet]
+        self.irow, self.icol = np.where(self.detids == det)
         # update tof
         imax = np.argmax(self.ypk[self.ixlo_opt : self.ixhi_opt]) + self.ixlo_opt
-        self.tof = self.xpk[imax]
+        self.tof = self.get_xcens_at_pos()[imax]
         return det, self.tof
 
     def get_dTOF_over_TOF(self):
-        return (self.xpk[self.ixhi_opt] - self.xpk[self.ixlo_opt]) / self.tof
+        xpk = self.get_xcens_at_pos()
+        return (xpk[self.ixhi_opt] - xpk[self.ixlo_opt]) / self.tof
 
     def plot_integrated_peak(self, fig, ax, ipk, norm_func):
         if self.status is not PEAK_MASK_STATUS.VALID:
@@ -510,8 +524,9 @@ class PeakData:
         # limits for 1D plot
         ipad = int((self.ixhi - self.ixlo) / 2)  # extra portion of data shown outside the 1D window
         istart = max(min(self.ixlo, self.ixlo_opt) - ipad, 0)
-        iend = min(max(self.ixhi, self.ixhi_opt) + ipad, len(self.xpk) - 1)
+        iend = min(max(self.ixhi, self.ixhi_opt) + ipad, self.xcens.shape[-1] - 1)
         # 2D plot - data integrated over optimal TOF range (not range for which mask determined)
+        xpk = self.get_xcens_at_pos()
         if not ax[0].images:
             # 2D colorfill
             img = ax[0].imshow(image_data, norm=norm)
@@ -522,10 +537,10 @@ class PeakData:
             cbar = fig.colorbar(img, orientation="horizontal", ax=ax[0], label="Intensity")
             cbar.ax.tick_params(labelsize=7, which="both")
             # 1D focused spectrum
-            ax[1].axvline(self.xpk[self.ixlo_opt], ls="--", color="b", label="Optimal window")
-            ax[1].axvline(self.xpk[self.ixhi_opt - 1], ls="--", color="b")
+            ax[1].axvline(xpk[self.ixlo_opt], ls="--", color="b", label="Optimal window")
+            ax[1].axvline(xpk[self.ixhi_opt - 1], ls="--", color="b")
             ax[1].errorbar(
-                self.xpk[istart:iend],
+                xpk[istart:iend],
                 self.ypk[istart:iend],
                 yerr=np.sqrt(self.epk_sq[istart:iend]),
                 marker="o",
@@ -535,8 +550,8 @@ class PeakData:
                 label="data",
             )
             ax[1].axvline(self.tof, ls="--", color="k", label="Centre")
-            ax[1].axvline(self.xpk[self.ixlo], ls=":", color="r", label="Initial window")
-            ax[1].axvline(self.xpk[self.ixhi - 1], ls=":", color="r")
+            ax[1].axvline(xpk[self.ixlo], ls=":", color="r", label="Initial window")
+            ax[1].axvline(xpk[self.ixhi - 1], ls=":", color="r")
             ax[1].axhline(0, ls=":", color="k")
             ax[1].legend(fontsize=7, loc=1, ncol=2)
             ax[1].set_xlabel(r"TOF ($\mu$s)")
@@ -555,14 +570,14 @@ class PeakData:
             # update 1D focused spectrum
             # vlines
             xlo, xhi, data, xtof, xlo_init, xhi_init, y0 = ax[1].lines
-            xlo.set_xdata([self.xpk[self.ixlo_opt]])
-            xhi.set_xdata([self.xpk[self.ixhi_opt - 1]])
-            xlo_init.set_xdata([self.xpk[self.ixlo]])
-            xhi_init.set_xdata([self.xpk[self.ixhi - 1]])
+            xlo.set_xdata([xpk[self.ixlo_opt]])
+            xhi.set_xdata([xpk[self.ixhi_opt - 1]])
+            xlo_init.set_xdata([xpk[self.ixlo]])
+            xhi_init.set_xdata([xpk[self.ixhi - 1]])
             xtof.set_xdata([self.tof])
             # spectrum
             yerr = np.sqrt(self.epk_sq[istart:iend])
-            data.set_xdata(self.xpk[istart:iend])
+            data.set_xdata(xpk[istart:iend])
             data.set_ydata(self.ypk[istart:iend])
             ax[1].collections[0].set_segments(
                 [
@@ -917,9 +932,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             pk_ws_int.addPeak(pk)
             pk = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)  # don't overwrite pk in input ws
             # get data array in window around peak region
-            xpk, signal, error, irow, icol, det_edges, dets = array_converter.get_peak_region_array(
-                pk, detid, bank_names[ipk], nrows, ncols, nrows_edge, ncols_edge
-            )
+            peak_data = array_converter.get_peak_data(pk, detid, bank_names[ipk], nrows, ncols, nrows_edge, ncols_edge)
             if get_dTOF_from_b2bexp_params:
                 fwhm = self.get_fwhm_from_back_to_back_params(pk, ws, detid)
                 if fwhm is None:
@@ -932,7 +945,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                     dTOF = n_b2b_fwhm * fwhm
             else:
                 dTOF = self.calc_initial_dTOF(pk, dt0_over_t0, dth, scale_dth)
-            peak_data = PeakData(xpk, signal, error, irow, icol, det_edges, dets, pk, dTOF)
+            peak_data.calc_initial_integration_limits(dTOF)
             peak_data.integrate_peak(
                 use_nearest,
                 integrate_on_edge,
