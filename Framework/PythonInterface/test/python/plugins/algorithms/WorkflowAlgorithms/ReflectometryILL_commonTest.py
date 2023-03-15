@@ -143,7 +143,7 @@ class ReflectometryILL_commonTest(unittest.TestCase):
         self.assertAlmostEqual(detector_angle, 1.862, delta=1e-3)
 
     def testDetectorAngleNonExistingFile(self):
-        self.assertRaises(RuntimeError, common.detector_angle, "wrong.nxs")
+        self.assertRaisesRegex(RuntimeError, "Cannot load file wrong.nxs.", common.detector_angle, "wrong.nxs")
 
     def testDetectorResolution(self):
         detector_resolution = common.detector_resolution()
@@ -155,7 +155,9 @@ class ReflectometryILL_commonTest(unittest.TestCase):
 
     def testInstrumentNameIncorrectInstrument(self):
         incorrect_ws = illhelpers.create_poor_mans_in5_workspace(0.0, illhelpers.default_test_detectors)
-        self.assertRaises(RuntimeError, common.instrument_name, incorrect_ws)
+        self.assertRaisesRegex(
+            RuntimeError, "Unrecognized instrument IN5. Only D17 and FIGARO are supported.", common.instrument_name, incorrect_ws
+        )
 
     def testPixelSizeD17(self):
         pixel_size = common.pixel_size("D17")
@@ -170,7 +172,7 @@ class ReflectometryILL_commonTest(unittest.TestCase):
         self.assertAlmostEqual(sample_angle, 0.002, delta=1e-3)
 
     def testSampleAngleNonExistingFile(self):
-        self.assertRaises(RuntimeError, common.sample_angle, "wrong.nxs")
+        self.assertRaisesRegex(RuntimeError, "Cannot load file wrong.nxs.", common.sample_angle, "wrong.nxs")
 
     def testSlitSizeLogEntryD17(self):
         slit_log_entry = common.slit_size_log_entry("D17", 1)
@@ -182,7 +184,7 @@ class ReflectometryILL_commonTest(unittest.TestCase):
 
     def testSlitSizeLogEntryIncorrectSlit(self):
         args = {"instr_name": "_", "slit_number": 3}
-        self.assertRaises(RuntimeError, common.slit_size_log_entry, **args)
+        self.assertRaisesRegex(RuntimeError, "Slit number out of range.", common.slit_size_log_entry, **args)
 
     def testSlitSizes(self):
         illhelpers.add_slit_configuration_D17(self._ws, 0.03, 0.02)

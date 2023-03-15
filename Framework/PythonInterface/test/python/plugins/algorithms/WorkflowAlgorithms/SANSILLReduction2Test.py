@@ -97,9 +97,16 @@ class SANSILLReduction2Test(unittest.TestCase):
         self._check_process_flag(mtd["sample"], "Sample")
 
     def test_kinetic_calibrants_not_allowed(self):
-        calibrants = ["EmptyBeam", "DarkCurrent", "Water", "EmptyContainer", "Solvent"]
+        calibrants = ["EmptyBeam", "DarkCurrent", "Water", "Solvent"]
         for process in calibrants:
-            self.assertRaises(RuntimeError, SANSILLReduction, OutputWorkspace="out", SampleRunsD1="017251", ProcessAs=process)
+            self.assertRaisesRegex(
+                RuntimeError,
+                "Only the sample and transmission can be kinetic measurements, the calibration measurements cannot.",
+                SANSILLReduction,
+                OutputWorkspace="out",
+                Runs="017251",
+                ProcessAs=process,
+            )
 
     def test_sample_tof(self):
         SANSILLReduction(Runs="042610", ProcessAs="Sample", OutputWorkspace="sample", NormaliseBy="Time")

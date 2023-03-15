@@ -86,22 +86,38 @@ class MatchAndMergeWorkspacesTest(unittest.TestCase):
     def test_MatchAndMergeWorkspaces_fails_with_wrong_number_min_limits(self):
         x_min = np.array([0])
         x_max = np.array([10, 20, 30, 40, 50])
-        self.assertRaises(RuntimeError, MatchAndMergeWorkspaces, InputWorkspaces="ws_group", XMin=x_min, XMax=x_max)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "XMin entries does not match size of workspace group",
+            MatchAndMergeWorkspaces,
+            InputWorkspaces="ws_group",
+            XMin=x_min,
+            XMax=x_max,
+            OutputWorkspace="wks",
+        )
 
     def test_MatchAndMergeWorkspaces_fails_with_wrong_number_max_limits(self):
         x_min = np.array([0, 5, 10, 15, 20])
         x_max = np.array([10])
-        self.assertRaises(RuntimeError, MatchAndMergeWorkspaces, InputWorkspaces="ws_group", XMin=x_min, XMax=x_max)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "XMax entries does not match size of workspace group",
+            MatchAndMergeWorkspaces,
+            InputWorkspaces="ws_group",
+            XMin=x_min,
+            XMax=x_max,
+            OutputWorkspace="wks",
+        )
 
     def test_MatchAndMergeWorkspaces_fails_with_wrong_ws_input(self):
         x_min = np.array([0, 5, 10, 15, 20])
         x_max = np.array([10, 20, 30, 40, 50])
-        self.assertRaises(ValueError, MatchAndMergeWorkspaces, InputWorkspaces="fake_group", XMin=x_min, XMax=x_max)
+        self.assertRaises(ValueError, MatchAndMergeWorkspaces, InputWorkspaces="fake_group", XMin=x_min, XMax=x_max, OutputWorkspace="wks")
 
     def test_MatchAndMergeWorkspaces_fails_with_min_larger_than_max(self):
         x_min = np.array([10, 20, 30, 40, 50])
         x_max = np.array([0, 5, 10, 15, 20])
-        self.assertRaises(ValueError, MatchAndMergeWorkspaces, InputWorkspaces="fake_group", XMin=x_min, XMax=x_max)
+        self.assertRaises(RuntimeError, MatchAndMergeWorkspaces, InputWorkspaces="ws_group", XMin=x_min, XMax=x_max, OutputWorkspace="wks")
 
     def test_exclude_banks(self):
         self.create_larger_group()
@@ -121,16 +137,40 @@ class MatchAndMergeWorkspacesTest(unittest.TestCase):
     def test_excluding_banks_fails_with_wrong_input(self):
         x_min = np.array([2, -1, 10, -1, 20])
         x_max = np.array([10, 20, 30, -1, 45])
-        self.assertRaises(RuntimeError, MatchAndMergeWorkspaces, InputWorkspaces="ws_group", XMin=x_min, XMax=x_max)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "The banks to be excluded in q_lims do not match. Please check that -1 has been added in the correct place on both lists.",
+            MatchAndMergeWorkspaces,
+            InputWorkspaces="ws_group",
+            XMin=x_min,
+            XMax=x_max,
+            OutputWorkspace="wks",
+        )
 
         x_min = np.array([2, 5, 10, -1, 20])
         x_max = np.array([10, -1, 30, -1, 45])
-        self.assertRaises(RuntimeError, MatchAndMergeWorkspaces, InputWorkspaces="ws_group", XMin=x_min, XMax=x_max)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "The banks to be excluded in q_lims do not match. Please check that -1 has been added in the correct place on both lists.",
+            MatchAndMergeWorkspaces,
+            InputWorkspaces="ws_group",
+            XMin=x_min,
+            XMax=x_max,
+            OutputWorkspace="wks",
+        )
 
     def test_excluding_all_banks_fails_with_wrong_input(self):
         x_min = np.array([-1, -1, -1, -1, -1])
         x_max = np.array([-1, -1, -1, -1, -1])
-        self.assertRaises(RuntimeError, MatchAndMergeWorkspaces, InputWorkspaces="ws_group", XMin=x_min, XMax=x_max)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "You have excluded all banks. Merging requires at least one bank.",
+            MatchAndMergeWorkspaces,
+            InputWorkspaces="ws_group",
+            XMin=x_min,
+            XMax=x_max,
+            OutputWorkspace="wks",
+        )
 
 
 if __name__ == "__main__":

@@ -20,7 +20,6 @@ from mantid.simpleapi import *
 
 
 class ResNorm(PythonAlgorithm):
-
     _res_ws_clone = None
     _res_ws = None
     _van_ws = None
@@ -70,7 +69,7 @@ class ResNorm(PythonAlgorithm):
 
         # Validate fitting range in energy
         if self._e_min > self._e_max:
-            issues["EnergyMax"] = "Must be less than EnergyMin"
+            issues["EnergyMax"] = "Must be greater than EnergyMin"
 
         res_ws = mtd[self._res_ws]
         # Can't use a WorkspaceGroup for resolution
