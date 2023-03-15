@@ -44,7 +44,7 @@ def run_diffraction_focusing(
     sample_runs,
     user_name,
     output_file,
-    merge_drage=False,
+    merge_drange=False,
     subtract_empty_can=False,
     vanadium_normalisation=False,
 ):
@@ -55,7 +55,7 @@ def run_diffraction_focusing(
     # Run diffraction focusing
     osiris_inst_obj.run_diffraction_focusing(
         run_number=sample_runs,
-        merge_drange=merge_drage,
+        merge_drange=merge_drange,
         subtract_empty_can=subtract_empty_can,
         vanadium_normalisation=vanadium_normalisation,
     )
@@ -144,9 +144,8 @@ class OSIRISDiffractionFocusingWithMergingTest(systemtesting.MantidSystemTest):
             "119977-119978",
             "Test_Merge",
             "OSI119977-119978_d_spacing.nxs",
-            merge_drage=True,
+            merge_drange=True,
         )
-        mantid.SaveNexus(InputWorkspace=self.calibration_results, Filename=r"C:\Users\joy22959\Documents\OSI119977-119978_d_spacing.nxs")
 
     def validate(self):
         foccussed_ws = self.calibration_results

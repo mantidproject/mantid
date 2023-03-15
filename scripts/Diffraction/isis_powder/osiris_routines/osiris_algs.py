@@ -290,6 +290,10 @@ def _correct_drange_overlap(merged_ws, drange_sets):
                     if d_range_alice[drange][0] <= data_x[j] <= d_range_alice[drange][1]:
                         data_y[j] += len(drange_sets[drange].get_samples())
 
+        for z in range(data_y.size):
+            if data_y[z] == 0:
+                data_y[z] = 1
+
         # apply scalar data to result workspace
         merged_ws.setY(i, merged_ws.dataY(i) / data_y)
         merged_ws.setE(i, merged_ws.dataE(i) / data_y)
