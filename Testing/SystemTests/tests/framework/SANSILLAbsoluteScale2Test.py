@@ -112,7 +112,7 @@ class D11_AbsoluteScale_Test(systemtesting.MantidSystemTest):
             OutputWorkspace="water_with_reference",
             Version=2,
         )
-        
+
         # Setting up proper X axis since SANSILLReductionv2 provides PointData workspaces
         sens = ConvertToHistogram(mtd["sens"])
         reference = ConvertToHistogram(mtd["reference"])
