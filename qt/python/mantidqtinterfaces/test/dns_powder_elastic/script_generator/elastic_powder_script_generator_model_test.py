@@ -17,7 +17,7 @@ from mantidqtinterfaces.dns_powder_tof.script_generator. \
 from mantidqtinterfaces.dns_powder_elastic.script_generator.elastic_powder_script_generator_model \
     import DNSElasticPowderScriptGeneratorModel  # yapf: disable
 from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import \
-    get_fake_elastic_datadic, get_elastic_standard_datadic
+    get_fake_elastic_datadic, get_elastic_standard_data_dic
 
 
 class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
@@ -46,7 +46,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         cls.sample_data.script_name = '123.txt'
         cls.standard_data = mock.create_autospec(DNSElasticDataset)
         cls.model._standard_data = cls.standard_data
-        cls.standard_data.data_dic = get_elastic_standard_datadic()
+        cls.standard_data.data_dic = get_elastic_standard_data_dic()
         cls.standard_data.format_dataset.return_value = '123456'
         cls.standard_data.fields = []
         cls.standard_data.two_theta = mock.Mock()

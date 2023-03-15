@@ -283,7 +283,7 @@ def get_fake_tof_datadic():
     }
 
 
-def get_elastic_standard_datadic():
+def get_elastic_standard_data_dic():
     return {
         'vana': {
             'path': 'C:/_knso_554573_to_554632_ip_vana',

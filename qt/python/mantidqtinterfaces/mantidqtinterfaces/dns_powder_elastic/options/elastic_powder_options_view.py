@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-DNS  powder elastic options tab view of DNS reduction GUI.
+DNS powder elastic options tab view of DNS reduction GUI.
 """
 
 from qtpy.QtCore import Signal
