@@ -172,10 +172,7 @@ void FilterByLogValue::exec() {
   // Initialise the progress reporting object
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
 
-  EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-
-  // Make a brand new EventWorkspace for the output
-  outputWS = create<EventWorkspace>(*inputWS);
+  EventWorkspace_sptr outputWS = create<EventWorkspace>(*inputWS);
 
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR_NO_WSP_CHECK()
