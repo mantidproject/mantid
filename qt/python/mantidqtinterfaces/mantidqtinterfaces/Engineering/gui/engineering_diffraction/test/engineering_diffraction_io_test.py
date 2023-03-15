@@ -34,7 +34,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 
 IO_VERSION = 1
 TEST_FILE = "ENGINX_277208_focused_bank_2.nxs"
-TEST_WS = "ENGINX_277208_focused_bank_2"
+TEST_WS = "ENGINX_277208_focused_bank_2_Fitting"
 FIT_WS = TEST_WS + "_Workspace"
 FIT_DICT = {
     "peak_centre_params": ["Gaussian_PeakCentre", "Gaussian_PeakCentre"],
