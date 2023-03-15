@@ -447,9 +447,9 @@ void SaveHKL::exec() {
 
           DblMatrix T = ol.getUB();
 
-          V3D t1 = T * V3D(1, 0, 0);
-          V3D t2 = T * V3D(0, 1, 0);
-          V3D t3 = T * V3D(0, 0, 1);
+          V3D t1 = V3D(T[0][0], T[1][0], T[2][0]);
+          V3D t2 = V3D(T[0][1], T[1][1], T[2][1]);
+          V3D t3 = V3D(T[0][2], T[1][2], T[2][2]);
 
           t1.normalize();
           t2.normalize();
@@ -460,21 +460,19 @@ void SaveHKL::exec() {
           T.setRow(2, t3);
 
           // This is the reverse incident beam
-          V3D reverse_incident = inst->getSource()->getPos() - inst->getSample()->getPos();
-          reverse_incident.normalize();
+          V3D reverse_incident_dir = inst->getSource()->getPos() - inst->getSample()->getPos();
+          reverse_incident_dir.normalize();
+
           // This is the scattered beam direction
-          V3D dir = p.getDetPos() - inst->getSample()->getPos();
-          dir.normalize();
+          V3D scattered_dir = p.getDetPos() - inst->getSample()->getPos();
+          scattered_dir.normalize();
 
-          V3D up = R * reverse_incident;
-          V3D us = R * dir;
-
-          V3D dir_cos_1 = T * up;
-          V3D dir_cos_2 = T * us;
+          V3D reverse_incident_cos = T * R * reverse_incident_dir;
+          V3D scattered_cos = T * R * scattered_dir;
 
           for (int k = 0; k < 3; ++k) {
-            out << std::setw(9) << std::fixed << std::setprecision(5) << dir_cos_1[k];
-            out << std::setw(9) << std::fixed << std::setprecision(5) << dir_cos_2[k];
+            out << std::setw(9) << std::fixed << std::setprecision(5) << reverse_incident_cos[k];
+            out << std::setw(9) << std::fixed << std::setprecision(5) << scattered_cos[k];
           }
 
           out << std::setw(6) << runNumber;
