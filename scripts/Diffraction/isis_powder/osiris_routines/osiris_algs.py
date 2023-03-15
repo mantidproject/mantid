@@ -289,7 +289,7 @@ def _correct_drange_overlap(merged_ws, drange_sets):
             if drange_sets[drange].has_sample():
                 for j in range(data_x.size):
                     if d_range_alice[drange][0] <= data_x[j] <= d_range_alice[drange][1]:
-                        data_y[j] += len(drange_sets[drange].get_samples())
+                        data_y[j] += 1
 
         for z in range(data_y.size):
             if data_y[z] == 0:
