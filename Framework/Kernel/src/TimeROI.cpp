@@ -478,6 +478,7 @@ const std::vector<SplittingInterval> TimeROI::toSplitters() const {
 }
 
 bool TimeROI::operator==(const TimeROI &other) const { return this->m_roi == other.m_roi; }
+bool TimeROI::operator!=(const TimeROI &other) const { return this->m_roi != other.m_roi; }
 
 /**
  * Returns the ROI boundaries to a string.

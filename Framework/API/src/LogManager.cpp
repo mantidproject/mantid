@@ -651,9 +651,13 @@ Kernel::TimeSeriesProperty<bool> *LogManager::getInvalidValuesFilter(const std::
   return nullptr;
 }
 
-bool LogManager::operator==(const LogManager &other) const { return *m_manager == *(other.m_manager); }
+bool LogManager::operator==(const LogManager &other) const {
+  return (*m_manager == *(other.m_manager)) && (*m_timeroi == *(other.m_timeroi));
+}
 
-bool LogManager::operator!=(const LogManager &other) const { return *m_manager != *(other.m_manager); }
+bool LogManager::operator!=(const LogManager &other) const {
+  return (*m_timeroi != *(other.m_timeroi)) || (*m_manager != *(other.m_manager));
+}
 
 //-----------------------------------------------------------------------------------------------------------------------
 // Private methods
