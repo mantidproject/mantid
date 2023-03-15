@@ -81,7 +81,7 @@ class AbstractInst(object):
         :return:
         """
         self._is_vanadium = False
-        return focus.focus(
+        focused_runs = focus.focus(
             run_number_string=run_number_string,
             perform_vanadium_norm=do_van_normalisation,
             instrument=self,
@@ -90,6 +90,8 @@ class AbstractInst(object):
             empty_can_subtraction_method=empty_can_subtraction_method,
             paalman_pings_events_per_point=paalman_pings_events_per_point,
         )
+
+        return self._output_focused_runs(focused_runs, run_number_string)
 
     def _output_focused_runs(self, focused_runs, run_number_string):
         run_details = self._get_run_details(run_number_string)

@@ -42,12 +42,11 @@ class HRPD(AbstractInst):
     def focus(self, **kwargs):
         self._switch_tof_window_inst_settings(kwargs.get("window"))
         self._inst_settings.update_attributes(kwargs=kwargs)
-        focused_runs = self._focus(
+        return self._focus(
             run_number_string=self._inst_settings.run_number,
             do_van_normalisation=self._inst_settings.do_van_norm,
             do_absorb_corrections=self._inst_settings.do_absorb_corrections,
         )
-        return self._output_focused_runs(focused_runs, self._inst_settings.run_number)
 
     def create_vanadium(self, **kwargs):
         self._switch_tof_window_inst_settings(kwargs.get("window"))

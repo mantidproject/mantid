@@ -34,7 +34,7 @@ class Polaris(AbstractInst):
     def focus(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
-        focused_runs = self._focus(
+        return self._focus(
             run_number_string=self._inst_settings.run_number,
             do_van_normalisation=self._inst_settings.do_van_normalisation,
             do_absorb_corrections=self._inst_settings.do_absorb_corrections,
@@ -42,7 +42,6 @@ class Polaris(AbstractInst):
             empty_can_subtraction_method=self._inst_settings.empty_can_subtraction_method,
             paalman_pings_events_per_point=self._inst_settings.paalman_pings_events_per_point,
         )
-        return self._output_focused_runs(focused_runs, self._inst_settings.run_number)
 
     def create_vanadium(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))

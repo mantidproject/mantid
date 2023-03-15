@@ -12,6 +12,8 @@ import copy
 import mantid.simpleapi as mantid
 import os
 
+from scripts.Diffraction.isis_powder.routines import focus
+
 
 class Osiris(AbstractInst):
     def __init__(self, **kwargs):
@@ -149,6 +151,32 @@ class Osiris(AbstractInst):
             common.remove_intermediate_workspace([ws for ws_group in focussed_runs for ws in ws_group])
 
         return d_spacing_group, tof_group
+
+    def _focus(
+        self,
+        run_number_string,
+        do_van_normalisation,
+        do_absorb_corrections,
+        sample_details=None,
+        empty_can_subtraction_method=None,
+        paalman_pings_events_per_point=None,
+    ):
+        """
+        Focuses the user specified run - should be called by the concrete instrument
+        :param run_number_string: The run number(s) to be processed
+        :param do_van_normalisation: True to divide by the vanadium run, false to not.
+        :return:
+        """
+        self._is_vanadium = False
+        return focus.focus(
+            run_number_string=run_number_string,
+            perform_vanadium_norm=do_van_normalisation,
+            instrument=self,
+            absorb=do_absorb_corrections,
+            sample_details=sample_details,
+            empty_can_subtraction_method=empty_can_subtraction_method,
+            paalman_pings_events_per_point=paalman_pings_events_per_point,
+        )
 
     def _setup_drange_sets(self):
         self._drange_sets = osiris_algs.create_drange_sets(self._inst_settings.run_number, self, self._inst_settings.file_extension)
