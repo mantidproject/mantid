@@ -434,30 +434,16 @@ class AddOperationTest(unittest.TestCase):
             value_out = prop_out.nthValue(index_out)
             self.assertEqual(value_in1, value_out)
 
-    def _add_single_log(self, workspace, name, value):
-        alg_log = AlgorithmManager.createUnmanaged("AddSampleLog")
-        alg_log.initialize()
-        alg_log.setChild(True)
-        alg_log.setProperty("Workspace", workspace)
-        alg_log.setProperty("LogName", name)
-        alg_log.setProperty("LogText", str(value))
-        alg_log.setProperty("LogType", "Number")
-        alg_log.execute()
-
     def test_two_files_are_added_correctly_for_overlay_on(self):
         isOverlay = True
         names = ["ws1", "ws2"]
         out_ws_name = "out_ws"
         # Create event ws1
         start_time_1 = "2010-01-01T00:00:00"
-        proton_charge_1 = 10.2
         ws1 = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift=0.0)
-        self._add_single_log(ws1, "gd_prtn_chrg", proton_charge_1)
         # Create event ws2
         start_time_2 = "2012-01-01T00:10:00"
-        proton_charge_2 = 30.2
         ws2 = provide_event_ws(names[1], start_time_2, extra_time_shift=0.0)
-        self._add_single_log(ws2, "gd_prtn_chrg", proton_charge_2)
         # Create adder
         adder = su.AddOperation(isOverlay, "")
         # Act
@@ -472,14 +458,10 @@ class AddOperationTest(unittest.TestCase):
         out_ws_name = "out_ws"
         # Create event ws1
         start_time_1 = "2012-01-01T00:10:00"
-        proton_charge_1 = 10.2
         ws1 = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift=0.0)
-        self._add_single_log(ws1, "gd_prtn_chrg", proton_charge_1)
         # Create event ws2
         start_time_2 = "2010-01-01T00:00:00"
-        proton_charge_2 = 30.2
         ws2 = provide_event_ws(names[1], start_time_2, extra_time_shift=0.0)
-        self._add_single_log(ws2, "gd_prtn_chrg", proton_charge_2)
         # Create adder
         adder = su.AddOperation(isOverlay, "")
         # Act
@@ -494,14 +476,10 @@ class AddOperationTest(unittest.TestCase):
         out_ws_name = "out_ws"
         # Create event ws1
         start_time_1 = "2010-01-01T00:00:00"
-        proton_charge_1 = 10.2
         ws1 = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift=0.0)
-        self._add_single_log(ws1, "gd_prtn_chrg", proton_charge_1)
         # Create event ws2
         start_time_2 = "2012-01-01T01:00:00"
-        proton_charge_2 = 30.2
         ws2 = provide_event_ws(names[1], start_time_2, extra_time_shift=0.0)
-        self._add_single_log(ws2, "gd_prtn_chrg", proton_charge_2)
         # Create adder
         adder = su.AddOperation(False, "")
         # Act
@@ -517,14 +495,10 @@ class AddOperationTest(unittest.TestCase):
         time_shift = 100
         # Create event ws1
         start_time_1 = "2010-01-01T00:00:00"
-        proton_charge_1 = 10.2
         ws1 = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift=0.0)
-        self._add_single_log(ws1, "gd_prtn_chrg", proton_charge_1)
         # Create event ws2
         start_time_2 = "2012-01-01T01:10:00"
-        proton_charge_2 = 30.2
         ws2 = provide_event_ws(names[1], start_time_2, extra_time_shift=time_shift)
-        self._add_single_log(ws2, "gd_prtn_chrg", proton_charge_2)
         # Create adder
         adder = su.AddOperation(True, str(time_shift))
         # Act
@@ -540,19 +514,13 @@ class AddOperationTest(unittest.TestCase):
         out_ws_name2 = "out_ws2"
         # Create event ws1
         start_time_1 = "2010-01-01T00:00:00"
-        proton_charge_1 = 10.2
         ws1 = provide_event_ws_with_entries(names[0], start_time_1, extra_time_shift=0.0)
-        self._add_single_log(ws1, "gd_prtn_chrg", proton_charge_1)
         # Create event ws2
         start_time_2 = "2012-01-01T00:00:00"
-        proton_charge_2 = 30.2
         ws2 = provide_event_ws(names[1], start_time_2, extra_time_shift=0.0)
-        self._add_single_log(ws2, "gd_prtn_chrg", proton_charge_2)
         # Create event ws3
         start_time_3 = "2013-01-01T00:00:00"
-        proton_charge_3 = 20.2
         ws3 = provide_event_ws(names[2], start_time_3, extra_time_shift=0.0)
-        self._add_single_log(ws3, "gd_prtn_chrg", proton_charge_3)
         # Create adder
         adder = su.AddOperation(True, "")
         # Act

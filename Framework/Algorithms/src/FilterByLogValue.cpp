@@ -165,6 +165,9 @@ void FilterByLogValue::exec() {
       // values will be skipped
     }
   }
+  if (roi->empty()) {
+    roi->replaceROI(TimeROI::USE_NONE);
+  }
 
   g_log.information() << splitter.size() << " entries in the filter.\n";
   size_t numberOfSpectra = inputWS->getNumberHistograms();
