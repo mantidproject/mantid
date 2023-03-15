@@ -22,6 +22,7 @@ from mantid.simpleapi import (
     ApplyDiffCal,
     ReplaceSpecialValues,
     ConjoinSpectra,
+    CreateWorkspace,
 )
 from mantid.api import AnalysisDataService
 
@@ -318,6 +319,35 @@ def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
     matched_spectra = [list(spectra) for spectra in zip(*extracted_spectra)]
     # Merge workspaces located at the same index
     merged_spectra = [MergeRuns(InputWorkspaces=spectra, OutputWorkspace=f"merged_{idx}") for idx, spectra in enumerate(matched_spectra)]
+
+    max_x_size = max([spectra.dataX(0).size for spectra in merged_spectra])
+    max_y_size = max([spectra.dataY(0).size for spectra in merged_spectra])
+    max_e_size = max([spectra.dataE(0).size for spectra in merged_spectra])
+
+    for i in range(len(merged_spectra)):
+        if (
+            merged_spectra[i].dataX(0).size != max_x_size
+            or merged_spectra[i].dataY(0).size != max_y_size
+            or merged_spectra[i].dataE(0).size != max_e_size
+        ):
+            dataX = merged_spectra[i].dataX(0)
+            dataY = merged_spectra[i].dataY(0)
+            dataE = merged_spectra[i].dataE(0)
+
+            dataX = np.append(dataX, [dataX[-1]] * (max_x_size - dataX.size))
+            dataY = np.append(dataY, [0] * (max_y_size - dataY.size))
+            dataE = np.append(dataE, [0] * (max_e_size - dataE.size))
+
+            merged_spectra[i] = CreateWorkspace(
+                NSpec=1,
+                DataX=dataX,
+                DataY=dataY,
+                DataE=dataE,
+                UnitX=merged_spectra[i].getAxis(0).getUnit().unitID(),
+                Distribution=merged_spectra[i].isDistribution(),
+                ParentWorkspace=merged_spectra[i].name(),
+                OutputWorkspace=merged_spectra[i].name(),
+            )
 
     input_workspaces_str = ",".join([ws.name() for ws in merged_spectra])
     ConjoinSpectra(InputWorkspaces=input_workspaces_str, OutputWorkspace=output_name)
