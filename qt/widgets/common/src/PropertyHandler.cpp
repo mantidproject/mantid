@@ -485,7 +485,7 @@ void PropertyHandler::renameChildren(const Mantid::API::CompositeFunction &cf) {
       }
       continue;
     }
-    // Refresh gui value incase it has been updated by the composite function re-indexing it's functions
+    // Refresh gui value in case it has been updated by the composite function re-indexing it's functions
     // after one is removed
     QStringList qtie = QString::fromStdString(tie->asString()).split("=");
     if (qtie.size() < 2)
