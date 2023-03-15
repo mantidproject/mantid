@@ -102,6 +102,7 @@ LogManager::~LogManager() = default;
 
 LogManager &LogManager::operator=(const LogManager &other) {
   *m_manager = *other.m_manager;
+  *m_timeroi = *other.m_timeroi;
   m_singleValueCache = std::make_unique<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>>(
       *other.m_singleValueCache);
   return *this;
