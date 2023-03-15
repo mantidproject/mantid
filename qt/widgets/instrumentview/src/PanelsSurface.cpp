@@ -439,11 +439,14 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   auto *info = new FlatBankInfo(this);
   m_flatBanks << info;
   // record the first detector index of the bank
-  info->startDetectorIndex = componentInfo.children(tubes.front()).front();
-  info->endDetectorIndex = componentInfo.children(tubes.back()).back();
+  auto corner1Index = componentInfo.children(tubes.front()).front();
+  auto corner2Index = componentInfo.children(tubes.front()).back();
+  auto corner3Index = componentInfo.children(tubes.back()).front();
+  auto corner4Index = componentInfo.children(tubes.back()).back();
+  info->startDetectorIndex = std::min(corner1Index, std::min(corner2Index, std::min(corner3Index, corner4Index)));
+  info->endDetectorIndex = std::max(corner1Index, std::max(corner2Index, std::max(corner3Index, corner4Index)));
 
-  // Now go over all detectors in the tubes and put them onto the unwrapped
-  // surfeace.
+  // Now go over all detectors in the tubes and put them onto the unwrapped surface.
   auto pos0 = componentInfo.position(componentInfo.children(tubes.front()).front());
   auto pos1 = componentInfo.position(componentInfo.children(tubes.front()).back());
 
