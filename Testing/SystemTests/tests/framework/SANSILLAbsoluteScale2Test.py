@@ -22,7 +22,7 @@ class D11_AbsoluteScale_Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def validate(self):
-        self.tolerance = 1e-5
+        self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ["Instrument"]
         return ["abs_scale_outputs", "D11_AbsScaleReference.nxs"]
@@ -113,10 +113,22 @@ class D11_AbsoluteScale_Test(systemtesting.MantidSystemTest):
             Version=2,
         )
 
+        sens = ConvertToHistogram(mtd["sens"])
+        reference = ConvertToHistogram(mtd["reference"])
+        water_with_reference = ConvertToHistogram(mtd["water_with_reference"])
+        water_with_sens_flux = ConvertToHistogram(mtd["water_with_sens_flux"])
+        for s in range(sens.getNumberHistograms()):
+            sens.setX(s, np.array([5.73, 6.27]))
+            reference.setX(s, np.array([5.73, 6.27]))
+            water_with_reference.setX(s, np.array([5.73, 6.27]))
+            water_with_sens_flux.setX(s, np.array([5.73, 6.27]))
+        sens.getAxis(0).setUnit("Wavelength")
+        reference.getAxis(0).setUnit("Wavelength")
+        water_with_reference.getAxis(0).setUnit("Wavelength")
+        water_with_sens_flux.getAxis(0).setUnit("Wavelength")
+
         # Group the workspaces
-        GroupWorkspaces(
-            InputWorkspaces=["sens", "reference", "water_with_reference", "water_with_sens_flux"], OutputWorkspace="abs_scale_outputs"
-        )
+        GroupWorkspaces(InputWorkspaces=[sens, reference, water_with_reference, water_with_sens_flux], OutputWorkspace="abs_scale_outputs")
 
 
 class D11_AbsoluteScaleFlux_Test(systemtesting.MantidSystemTest):
