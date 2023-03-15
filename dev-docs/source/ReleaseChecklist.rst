@@ -143,6 +143,8 @@ Smoke Testing
    `here <https://github.com/mantidproject/documents/tree/main/Project-Management/Tools/RoadmapUpdate/SmokeTesting>`__.
 *  Liaise with the Technical Release Manager and together announce the creation of the
    Smoke testing issues and Release Candidates in the *\#general* slack channel.
+*  During smoke testing it may be easier if at least one QA Manager acts as facilitator during the session. They will answer questions, co-ordinate testing
+   (especially when an arising issue needs testing on other OS) and ensure all testing is covered.
 
 
 .. _release-editor-checklist:
