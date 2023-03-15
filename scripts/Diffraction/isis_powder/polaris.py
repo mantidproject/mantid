@@ -76,10 +76,10 @@ class Polaris(AbstractInst):
 
     def create_total_scattering_pdf(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
-        if self._inst_settings.pdf_type is None or self._inst_settings.pdf_type not in ["G(r)", "g(r)", "RDF(r)", "G_k(r)"]:
+        if not hasattr(self._inst_settings, "pdf_type") or self._inst_settings.pdf_type not in ["G(r)", "g(r)", "RDF(r)", "G_k(r)"]:
             self._inst_settings.pdf_type = "G(r)"
             logger.warning("PDF type not specified or is invalid, defaulting to G(r)")
-        if self._inst_settings.placzek_order is None or self._inst_settings.placzek_order not in [1, 2]:
+        if not hasattr(self._inst_settings, "placzek_order") or self._inst_settings.placzek_order not in [1, 2]:
             self._inst_settings.placzek_order = 1
             logger.warning("Placzek correction order not specified or is invalid, defaulting to 1")
         # Generate pdf
@@ -208,9 +208,10 @@ class Polaris(AbstractInst):
 
     def apply_additional_per_detector_corrections(self, input_workspace, sample_details, run_details):
         if self._inst_settings.mode.lower() == "pdf":
-            if self._inst_settings.placzek_order is None or self._inst_settings.placzek_order not in [1, 2]:
+            if not hasattr(self._inst_settings, "placzek_order") or self._inst_settings.placzek_order not in [1, 2]:
                 self._inst_settings.placzek_order = 1
-            if self._inst_settings.sample_temp is None:
+                logger.warning("Placzek correction order not specified or is invalid, defaulting to 1")
+            if not hasattr(self._inst_settings, "sample_temp"):
                 sample_temperature = None
             else:
                 sample_temperature = str(self._inst_settings.sample_temp)
