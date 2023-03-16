@@ -125,13 +125,20 @@ public:
     m_fitPropertyBrowser->init();
     m_fitPropertyBrowser->createCompositeFunction(
         "name=Gaussian,Height=10.0,PeakCentre=-0.145,Sigma=0.135;name=FlatBackground,A0=10;"
-        "name=Gaussian,Height=10.0,PeakCentre=-0.555,Sigma=0.135;ties=(f0.Height=f2.Height)");
+        "name=Gaussian,Height=10.0,PeakCentre=-0.555,Sigma=0.135;ties=(f0.Height=f2.Sigma)");
+    auto cf = m_fitPropertyBrowser->compositeFunction();
     auto f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
     auto f1Handler = m_fitPropertyBrowser->getPeakHandler(QString("f1"));
-    TS_ASSERT_EQUALS(m_fitPropertyBrowser->getOldExpressionAsString(QString("f0.Height")), QString("f2.Height"));
+    auto tie = cf->getTie(cf->parameterIndex("f0.Height"));
+    std::string tie_str = tie->asString();
+    TS_ASSERT_EQUALS(tie_str.substr(tie_str.find("=") + 1), "f2.Sigma");
+
     m_fitPropertyBrowser->removeFunction(f1Handler);
+
     TS_ASSERT(f0Handler->hasTies());
-    TS_ASSERT_EQUALS(m_fitPropertyBrowser->getOldExpressionAsString(QString("f0.Height")), QString("f1.Height"));
+    tie = cf->getTie(cf->parameterIndex("f0.Height"));
+    tie_str = tie->asString();
+    TS_ASSERT_EQUALS(tie_str.substr(tie_str.find("=") + 1), "f1.Sigma");
   }
 
 private:
