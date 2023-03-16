@@ -71,7 +71,7 @@ class Osiris(AbstractInst):
                 split=True,
             )
 
-            d_spacing_group, tof_group = self._output_focused_ws([ws for ws_group in merged_runs for ws in ws_group], run_details)
+            d_spacing_group, tof_group = self._output_focused_ws(merged_runs, run_details)
 
             if len(focussed_runs) != 1:
                 common.remove_intermediate_workspace(focussed_runs)
@@ -141,7 +141,7 @@ class Osiris(AbstractInst):
                 self._inst_settings.run_number,
             )
 
-            d_spacing_group, tof_group = self._output_focused_ws([ws for ws_group in merged_runs for ws in ws_group], run_details)
+            d_spacing_group, tof_group = self._output_focused_ws(merged_runs, run_details)
 
             if len(focussed_runs) != 1:
                 common.remove_intermediate_workspace([ws for ws_group in focussed_runs for ws in ws_group])

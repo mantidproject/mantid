@@ -403,6 +403,7 @@ def merge_dspacing_runs(focussed_runs, drange_sets, run_number, split=False):
 
     if split:
         common.remove_intermediate_workspace([ws for ws_group in matched_spectra for ws in ws_group])
+    common.remove_intermediate_workspace([ws for ws in merged_spectra])
 
     joined_spectra = AnalysisDataService[output_name]
     return [_correct_drange_overlap(joined_spectra, drange_sets)]
