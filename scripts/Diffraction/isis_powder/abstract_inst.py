@@ -317,9 +317,9 @@ class AbstractInst(object):
         """
         output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
         output_directory = os.path.abspath(os.path.expanduser(output_directory))
-        dat_files_directory = output_directory
+        xye_files_directory = output_directory
         if self._inst_settings.dat_files_directory:
-            dat_files_directory = os.path.join(output_directory, self._inst_settings.dat_files_directory)
+            xye_files_directory = os.path.join(output_directory, self._inst_settings.dat_files_directory)
 
         file_type = "" if run_details.file_extension is None else run_details.file_extension.lstrip(".")
         out_file_names = {"output_folder": output_directory}
@@ -334,18 +334,21 @@ class AbstractInst(object):
         }
         format_options = self._add_formatting_options(format_options)
 
-        output_formats = {
-            "nxs_filename": output_directory,
-            "gss_filename": output_directory,
-            "tof_xye_filename": dat_files_directory,
-            "dspacing_xye_filename": dat_files_directory,
-        }
+        output_formats = self._get_output_formats(output_directory, xye_files_directory)
         for key, output_dir in output_formats.items():
             filepath = os.path.join(output_dir, getattr(self._inst_settings, key).format(**format_options))
             out_file_names[key] = filepath
 
         out_file_names["output_name"] = os.path.splitext(os.path.basename(out_file_names["nxs_filename"]))[0]
         return out_file_names
+
+    def _get_output_formats(self, output_directory, xye_files_directory):
+        return {
+            "nxs_filename": output_directory,
+            "gss_filename": output_directory,
+            "tof_xye_filename": xye_files_directory,
+            "dspacing_xye_filename": xye_files_directory,
+        }
 
     def _generate_inst_filename(self, run_number, file_ext):
         if isinstance(run_number, list):

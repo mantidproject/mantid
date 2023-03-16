@@ -89,43 +89,13 @@ class Pearl(AbstractInst):
     def should_subtract_empty_inst(self):
         return self._inst_settings.subtract_empty_inst
 
-    def _generate_out_file_paths(self, run_details):
-        """
-        Generates the various output paths and file names to be used during saving or as workspace names
-        :param run_details: The run details associated with this run
-        :return: A dictionary containing the various output paths and generated output name
-        """
-        output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
-        output_directory = os.path.abspath(os.path.expanduser(output_directory))
-        xye_files_directory = output_directory
-        if self._inst_settings.dat_files_directory:
-            xye_files_directory = os.path.join(output_directory, self._inst_settings.dat_files_directory)
-
-        file_type = "" if run_details.file_extension is None else run_details.file_extension.lstrip(".")
-        out_file_names = {"output_folder": output_directory}
-        format_options = {
-            "inst": self._inst_prefix,
-            "instlow": self._inst_prefix.lower(),
-            "instshort": self._inst_prefix_short,
-            "runno": run_details.output_run_string,
-            "fileext": file_type,
-            "_fileext": "_" + file_type if file_type else "",
-            "suffix": run_details.output_suffix if run_details.output_suffix else "",
-        }
-        format_options = self._add_formatting_options(format_options)
-
-        output_formats = {
+    def _get_output_formats(self, output_directory, xye_files_directory):
+        return {
             "nxs_filename": output_directory,
             "gss_filename": os.path.join(output_directory, "GSAS"),
             "tof_xye_filename": os.path.join(xye_files_directory, "ToF"),
             "dspacing_xye_filename": os.path.join(xye_files_directory, "dSpacing"),
         }
-        for key, output_dir in output_formats.items():
-            filepath = os.path.join(output_dir, getattr(self._inst_settings, key).format(**format_options))
-            out_file_names[key] = filepath
-
-        out_file_names["output_name"] = os.path.splitext(os.path.basename(out_file_names["nxs_filename"]))[0]
-        return out_file_names
 
     @contextmanager
     def _apply_temporary_inst_settings(self, kwargs, run):
