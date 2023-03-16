@@ -95,9 +95,6 @@ class DrangeData(object):
 
         return run_number_string[:-1]
 
-    def has_same_samples_string(self, run_number_string):
-        return self.get_samples_string() == run_number_string
-
     def has_sample(self):
         return len(self._sample) >= 1
 
