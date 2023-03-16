@@ -501,7 +501,7 @@ def spline_workspaces(focused_vanadium_spectra, num_splines):
     return splined_ws_list
 
 
-def generate_summed_runs(empty_ws_string, instrument, scale_factor=None, normalised=True):
+def generate_summed_runs(empty_ws_string, instrument, scale_factor=None):
     """
     Loads the list of empty runs specified by the empty_ws_string and sums
     them (and optionally scales). Returns the summed workspace.
