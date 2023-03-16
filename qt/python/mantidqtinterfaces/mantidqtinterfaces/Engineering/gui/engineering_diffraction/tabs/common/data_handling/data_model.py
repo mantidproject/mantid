@@ -9,20 +9,16 @@ from numpy import array, argsort
 from mantid.simpleapi import (
     Load,
     logger,
-    CreateEmptyTableWorkspace,
-    GroupWorkspaces,
     DeleteWorkspace,
     EnggEstimateFocussedBackground,
     SetUncertainties,
     Minus,
-    DeleteTableRows,
 )
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs import (
     SampleLogsGroupWorkspace,
-    write_table_row,
     _generate_workspace_name,
 )
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.workspace_record import FittingWorkspaceRecordContainer
@@ -246,7 +242,11 @@ class FittingDataModel(object):
         return self._data_workspaces[ws_name].loaded_ws.getSampleDetails().getLogData(log_name).value
 
     def get_all_log_workspaces_names(self):
-        return [ws.name() for ws in self._sample_logs_workspace_group.get_log_workspaces()] if self._sample_logs_workspace_group.get_log_workspaces() else []
+        return (
+            [ws.name() for ws in self._sample_logs_workspace_group.get_log_workspaces()]
+            if self._sample_logs_workspace_group.get_log_workspaces()
+            else []
+        )
 
     def get_log_workspace_group_name(self):
         return self._sample_logs_workspace_group.get_log_workspaces().name()
