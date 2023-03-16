@@ -7,12 +7,10 @@
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.osiris_routines import osiris_advanced_config, osiris_algs, osiris_param_mapping
-from isis_powder.routines import instrument_settings, common_output, common
+from isis_powder.routines import instrument_settings, common_output, common, focus
 import copy
 import mantid.simpleapi as mantid
 import os
-
-from scripts.Diffraction.isis_powder.routines import focus
 
 
 class Osiris(AbstractInst):
@@ -95,14 +93,22 @@ class Osiris(AbstractInst):
         self._setup_drange_sets()
 
         vanadiums = []
-        for drange in self._drange_sets.values():
+        for drange_idx, drange in self._drange_sets.items():
             run_number_string = drange.get_samples_string()
             vanadium_d = self._create_vanadium(
                 run_number_string=run_number_string,
                 do_absorb_corrections=False,
                 do_spline=False,
             )
-            vanadiums.append(vanadium_d)
+
+            vanadium_d = mantid.CropWorkspace(
+                InputWorkspace=vanadium_d,
+                XMin=osiris_algs.d_range_alice[drange_idx][0],
+                XMax=osiris_algs.d_range_alice[drange_idx][1],
+                OutputWorkspace=str(vanadium_d),
+            )
+
+            vanadium_d = mantid.ConvertUnits(InputWorkspace=vanadium_d, Target="TOF")
 
             run_details = self._get_run_details(run_number_string=run_number_string)
             common.save_unsplined_vanadium(
@@ -110,6 +116,7 @@ class Osiris(AbstractInst):
                 output_path=run_details.unsplined_vanadium_file_path,
                 keep_unit=True,
             )
+            vanadiums.append(vanadium_d)
 
         return vanadiums
 
@@ -129,6 +136,10 @@ class Osiris(AbstractInst):
                 do_van_normalisation=self._inst_settings.van_norm,
                 do_absorb_corrections=False,
             )
+
+            processed = [
+                [mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target="dSpacing") for ws_group in processed for ws in ws_group]
+            ]
 
             focussed_runs.extend(processed)
 

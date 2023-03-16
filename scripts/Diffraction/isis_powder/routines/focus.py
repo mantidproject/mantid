@@ -110,26 +110,30 @@ def _focus_one_ws(
                     Material=sample_details.generate_sample_material(),
                 )
 
-    solid_angle = instrument.get_solid_angle_corrections(run_details.vanadium_run_numbers, run_details)
+    # Align
+    mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace, CalibrationFile=run_details.offset_file_path)
+    aligned_ws = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="dSpacing")
 
-    focused_ws = _calibrate_and_focus_workspace(
-        input_workspace, run_details.offset_file_path, run_details.grouping_file_path, solid_angle=solid_angle
+    solid_angle = instrument.get_solid_angle_corrections(run_details.vanadium_run_numbers, run_details)
+    if solid_angle:
+        aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws, RHSWorkspace=solid_angle)
+        mantid.DeleteWorkspace(solid_angle)
+
+    # Focus the spectra into banks
+    focused_ws = mantid.DiffractionFocussing(
+        InputWorkspace=aligned_ws,
+        GroupingFileName=run_details.grouping_file_path,
+        OutputWorkspace=f"{run_number}_focused",
     )
 
-    if instrument.get_instrument_prefix() != "OSIRIS":
-        instrument.apply_calibration_to_focused_data(focused_ws)
-        focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, OutputWorkspace=focused_ws, Target="TOF")
-    else:
+    instrument.apply_calibration_to_focused_data(focused_ws)
+
+    if instrument.get_instrument_prefix() == "OSIRIS":
         focused_ws = instrument.apply_drange_cropping(run_number, focused_ws)
 
-    calibrated_spectra = common.extract_ws_spectra(focused_ws)
-    if perform_vanadium_norm:
-        calibrated_spectra = _apply_vanadium_corrections(
-            instrument=instrument,
-            input_spectra=calibrated_spectra,
-            run_number=run_number,
-            vanadium_ws=vanadium_ws,
-        )
+    calibrated_spectra = _apply_vanadium_corrections(
+        instrument=instrument, input_workspace=focused_ws, perform_vanadium_norm=perform_vanadium_norm, vanadium_ws=vanadium_ws
+    )
 
     output_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
 
@@ -140,38 +144,20 @@ def _focus_one_ws(
 
     # Tidy workspaces from Mantid
     common.remove_intermediate_workspace(input_workspace)
+    common.remove_intermediate_workspace(aligned_ws)
     common.remove_intermediate_workspace(focused_ws)
 
     return output_spectra
 
 
-def _calibrate_and_focus_workspace(
-    input_workspace,
-    calibration_file,
-    grouping_file_name,
-    solid_angle=None,
-):
-    mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace, CalibrationFile=calibration_file)
-    aligned_ws = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="dSpacing")
+def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_norm, vanadium_ws):
+    input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
+    split_data_spectra = common.extract_ws_spectra(input_workspace)
 
-    if solid_angle:
-        aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws, RHSWorkspace=solid_angle)
-        mantid.DeleteWorkspace(solid_angle)
-
-    focused_ws = mantid.DiffractionFocussing(
-        InputWorkspace=aligned_ws, GroupingFileName=grouping_file_name, OutputWorkspace=f"{input_workspace}_focused"
-    )
-
-    common.remove_intermediate_workspace(aligned_ws)
-
-    return focused_ws
-
-
-def _apply_vanadium_corrections(instrument, input_spectra, run_number, vanadium_ws):
-    if instrument.get_instrument_prefix() == "OSIRIS":
-        vanadium_ws = instrument.apply_drange_cropping(run_number, vanadium_ws.OutputWorkspace)
-
-    processed_spectra = _normalize_spectra(spectra_list=input_spectra, vanadium_ws=vanadium_ws, instrument=instrument)
+    if perform_vanadium_norm:
+        processed_spectra = _normalize_spectra(spectra_list=split_data_spectra, vanadium_ws=vanadium_ws, instrument=instrument)
+    else:
+        processed_spectra = split_data_spectra
 
     return processed_spectra
 
