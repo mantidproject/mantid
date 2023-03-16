@@ -116,42 +116,42 @@ class PlotSampleShapeTest(TestCase):
     def test_CSG_merged_shape_is_valid(self):
         workspace = setup_workspace_shape_from_CSG_merged()
         self.assertTrue(workspace.sample().getShape())
-        self.assertTrue(sample_shape.get_valid_sample_shape_from_workspace(workspace))
+        self.assertTrue(sample_shape.get_valid_sample_mesh_from_workspace(workspace) is not None)
 
     def test_CSG_sphere_is_valid(self):
         workspace = CreateSampleWorkspace(OutputWorkspace="ws_shape")
         self.assertTrue(workspace.sample().getShape())
-        self.assertTrue(sample_shape.get_valid_sample_shape_from_workspace(workspace))
+        self.assertTrue(sample_shape.get_valid_sample_mesh_from_workspace(workspace) is not None)
 
     def test_CSG_empty_shape_is_not_valid(self):
         workspace = CreateWorkspace(OutputWorkspace="ws_shape", DataX=[1, 1], DataY=[2, 2])
         self.assertTrue(workspace.sample().getShape())
-        self.assertFalse(sample_shape.get_valid_sample_shape_from_workspace(workspace))
+        self.assertFalse(sample_shape.get_valid_sample_mesh_from_workspace(workspace))
 
     def test_mesh_is_valid(self):
         workspace = setup_workspace_shape_from_mesh()
         self.assertTrue(workspace.sample().getShape())
-        self.assertTrue(sample_shape.get_valid_sample_shape_from_workspace(workspace))
+        self.assertTrue(sample_shape.get_valid_sample_mesh_from_workspace(workspace) is not None)
 
     def test_container_valid(self):
         workspace = setup_workspace_container_CSG()
-        self.assertTrue(sample_shape.get_valid_container_shape_from_workspace(workspace))
+        self.assertTrue(sample_shape.get_valid_container_mesh_from_workspace(workspace) is not None)
 
     @patch("mantidqt.plotting.sample_shape.is_mesh_not_empty")
     def test_container_invalid(self, mock_is_mesh_not_empty):
         workspace = setup_workspace_sample_container_and_components_from_mesh()
         mock_is_mesh_not_empty.return_value = False
-        self.assertFalse(sample_shape.get_valid_container_shape_from_workspace(workspace))
+        self.assertFalse(sample_shape.get_valid_container_mesh_from_workspace(workspace))
 
     def test_component_valid(self):
         workspace = setup_workspace_sample_container_and_components_from_mesh()
-        self.assertTrue(sample_shape.get_valid_component_shape_from_workspace(workspace, 1))
+        self.assertTrue(sample_shape.get_valid_component_mesh_from_workspace(workspace, 1) is not None)
 
     @patch("mantidqt.plotting.sample_shape.is_mesh_not_empty")
     def test_component_invalid(self, mock_is_mesh_not_empty):
         workspace = setup_workspace_sample_container_and_components_from_mesh()
         mock_is_mesh_not_empty.return_value = False
-        self.assertFalse(sample_shape.get_valid_container_shape_from_workspace(workspace))
+        self.assertFalse(sample_shape.get_valid_container_mesh_from_workspace(workspace))
 
     def test_plot_created_for_CSG_sphere_sample_only(self):
         CreateSampleWorkspace(OutputWorkspace="ws_shape")
@@ -260,7 +260,6 @@ class PlotSampleShapeTest(TestCase):
         assert_allclose([-0.1, -0.099993, -0.15, 0.1, 0.099993, 0.15], minmax_xyz, rtol=self.RELATIVE_TOLERANCE)
 
     def test_overall_limits_for_every_axis(self):
-
         mesh_points = np.array([np.array([3, 5, 1]), np.array([4, 7, 8]), np.array([5, 6, 9]), np.array([3, 4, 5])])
         self.assertEqual([3, 4, 1, 5, 7, 9], sample_shape.overall_limits_for_every_axis(mesh_points))
 
@@ -382,9 +381,9 @@ class PlotSampleShapeTest(TestCase):
         )
 
     @patch("mantidqt.plotting.sample_shape.overall_limits_for_every_axis")
-    @patch("mantidqt.plotting.sample_shape.get_valid_component_shape_from_workspace")
-    @patch("mantidqt.plotting.sample_shape.get_valid_container_shape_from_workspace")
-    @patch("mantidqt.plotting.sample_shape.get_valid_sample_shape_from_workspace")
+    @patch("mantidqt.plotting.sample_shape.get_valid_component_mesh_from_workspace")
+    @patch("mantidqt.plotting.sample_shape.get_valid_container_mesh_from_workspace")
+    @patch("mantidqt.plotting.sample_shape.get_valid_sample_mesh_from_workspace")
     def test_overall_limits_calls_get_valid_shape_methods(
         self, mock_get_valid_sample, mock_get_valid_container, mock_get_valid_component, mock_overall_limits
     ):
