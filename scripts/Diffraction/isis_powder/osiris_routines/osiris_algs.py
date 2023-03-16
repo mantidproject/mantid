@@ -8,6 +8,7 @@
 import isis_powder.routines.common as common
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 import numpy as np
+from mantid.kernel import logger
 from mantid.simpleapi import (
     NormaliseByCurrent,
     CropWorkspace,
@@ -18,9 +19,12 @@ from mantid.simpleapi import (
     ConvertUnits,
     MergeRuns,
     GroupWorkspaces,
+    ApplyDiffCal,
+    ReplaceSpecialValues,
+    ConjoinSpectra,
+    CreateWorkspace,
 )
 from mantid.api import AnalysisDataService
-
 
 d_range_with_time = {
     "drange1": [11700, 51700],
@@ -94,20 +98,19 @@ class DrangeData(object):
         self._empty = ws_name
         return
 
-    def calibrate_vanadium(self, calibration_file=""):
-        return self.calibrate_workspace(self._vanadium, calibration_file)
+    def calibrate_and_focus_vanadium(self, calibration_file=""):
+        return self.calibrate_and_focus_workspace(self._vanadium, calibration_file)
 
-    def calibrate_workspace(self, ws, calibration_file=""):
-        calibrate_ws = NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace="normalised", StoreInADS=False)
+    def calibrate_and_focus_workspace(self, ws, calibration_file=""):
+        calibrate_ws = NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace="__normalised")
+        ApplyDiffCal(InstrumentWorkspace=calibrate_ws, CalibrationFile=calibration_file)
+        calibrate_ws = ConvertUnits(
+            InputWorkspace=calibrate_ws, Target="dSpacing", Emode="Elastic", AlignBins=False, OutputWorkspace="aligned", StoreInADS=False
+        )
         if calibration_file:
             calibrate_ws = DiffractionFocussing(
                 InputWorkspace=calibrate_ws, GroupingFileName=calibration_file, OutputWorkspace="focused", StoreInADS=False
             )
-
-        calibrate_ws = ConvertUnits(
-            InputWorkspace=calibrate_ws, Target="dSpacing", Emode="Indirect", AlignBins=True, OutputWorkspace="aligned", StoreInADS=False
-        )
-
         calibrate_ws = CropWorkspace(
             InputWorkspace=calibrate_ws,
             XMin=d_range_alice[self._drange][0],
@@ -117,19 +120,37 @@ class DrangeData(object):
         )
         return calibrate_ws
 
-    def process_workspace(self, subtract_empty=False, vanadium_correct=False, focus_calibration_file=""):
+    def process_workspaces(self, subtract_empty=False, vanadium_correct=False, focus_calibration_file=""):
+        if len(self._sample) == 0:
+            return []
+
         processed = []
-        for sample in self._sample:
-            outputname = sample + WORKSPACE_SUFFIX.FOCUSED
-            if subtract_empty:
-                sample = self.subtract_container_from_sample(sample)
-            sample = self.calibrate_workspace(sample, focus_calibration_file)
-            if vanadium_correct:
-                van = self.calibrate_vanadium(focus_calibration_file)
-                calib_van = RebinToWorkspace(WorkspaceToRebin=van, WorkspaceToMatch=sample, OutputWorkspace="van_rb", StoreInADS=False)
-                sample = Divide(LHSWorkspace=sample, RHSWorkspace=calib_van, OutputWorkspace=outputname)
-            AnalysisDataService.addOrReplace(outputname, sample)
-            processed.append(sample)
+        sample_workspace = rebin_and_sum(self._sample)
+
+        run_numbers = "OSIRIS" + ",".join([str(ws)[6:-4] for ws in self._sample])
+        outputname = run_numbers + WORKSPACE_SUFFIX.FOCUSED
+        AnalysisDataService.addOrReplace(outputname, sample_workspace)
+
+        if subtract_empty:
+            sample_workspace = self.subtract_container_from_sample(outputname)
+        sample_workspace = self.calibrate_and_focus_workspace(sample_workspace, focus_calibration_file)
+        if vanadium_correct:
+            van = self.calibrate_and_focus_vanadium(focus_calibration_file)
+            calib_van = RebinToWorkspace(
+                WorkspaceToRebin=van, WorkspaceToMatch=sample_workspace, OutputWorkspace="van_rb", StoreInADS=False
+            )
+            sample_workspace = Divide(LHSWorkspace=sample_workspace, RHSWorkspace=calib_van, OutputWorkspace=outputname)
+            sample_workspace = ReplaceSpecialValues(
+                InputWorkspace=sample_workspace,
+                NaNValue=0.0,
+                InfinityValue=0.0,
+                StoreInADS=False,
+                EnableLogging=False,
+            )
+
+        AnalysisDataService.addOrReplace(outputname, sample_workspace)
+        processed.append(sample_workspace)
+
         return processed
 
     def subtract_container_from_sample(self, sample):
@@ -148,23 +169,62 @@ def load_raw(run_number_string, drange_sets, group, inst, file_ext):
     for ws in input_ws_list:
         drange = get_osiris_d_range(ws)
         if group == "sample":
-            drange_sets[drange].add_sample(ws.name())
+            drange_sets[drange].add_sample(ws)
         elif group == "vanadium":
-            drange_sets[drange].set_vanadium(ws.name())
+            drange_sets[drange].set_vanadium(ws)
         elif group == "empty":
-            drange_sets[drange].set_empty(ws.name())
+            drange_sets[drange].set_empty(ws)
     _group_workspaces(input_ws_list, "OSIRIS" + run_number_string + WORKSPACE_SUFFIX.GROUPED)
     return input_ws_list
+
+
+def rebin_and_sum(workspaces):
+    """
+    Rebins the specified list to the workspace with the smallest
+    x-range in the list then sums all the workspaces together.
+
+    :param workspaces: The list of workspaces to rebin to the smallest.
+    :return:           The summed and rebinned workspace
+    """
+    if len(workspaces) == 1:
+        return workspaces[0]
+
+    smallest_idx, smallest_ws = min(enumerate(workspaces), key=lambda x: x[1].blocksize())
+
+    rebinned_workspaces = []
+    for idx, workspace in enumerate(workspaces):
+        # Check whether this is the workspace with the smallest x-range.
+        # No reason to rebin workspace to match itself.
+        # NOTE: In the future this may append workspace.clone() - this will
+        # occur in the circumstance that the input files do not want to be
+        # removed from the ADS.
+        if idx == smallest_idx:
+            rebinned_workspaces.append(workspace)
+        else:
+            rebinned_workspaces.append(
+                RebinToWorkspace(
+                    WorkspaceToRebin=workspace,
+                    WorkspaceToMatch=smallest_ws,
+                    OutputWorkspace="rebinned",
+                    StoreInADS=False,
+                    EnableLogging=False,
+                )
+            )
+
+    # sum will add together the proton charge in the sample logs
+    # so when the NormalizeByCurrent is called we get an average of the workspaces
+    return sum(rebinned_workspaces)
 
 
 def run_diffraction_focussing(run_number, drange_sets, calfile, van_norm=False, subtract_empty=False):
     focused = []
     for drange in drange_sets:
-        processed = drange_sets[drange].process_workspace(
+        processed = drange_sets[drange].process_workspaces(
             subtract_empty=subtract_empty, vanadium_correct=van_norm, focus_calibration_file=calfile
         )
         focused.extend(processed)
-    _group_workspaces(focused, "OSIRIS" + run_number + WORKSPACE_SUFFIX.FOCUSED)
+    if len(focused) > 1:
+        _group_workspaces(focused, "OSIRIS" + run_number + WORKSPACE_SUFFIX.FOCUSED)
     return focused
 
 
@@ -221,25 +281,82 @@ def get_empty_runs(inst_settings):
 
 
 def _correct_drange_overlap(merged_ws, drange_sets):
-    # Create scalar data to cope with where merge has combined overlapping data.
-    data_x = (merged_ws.dataX(0)[1:] + merged_ws.dataX(0)[:-1]) / 2.0
-    data_y = np.zeros(data_x.size)
-    for drange in drange_sets:
-        if drange_sets[drange].has_sample():
-            for i in range(data_x.size):
-                if d_range_alice[drange][0] <= data_x[i] <= d_range_alice[drange][1]:
-                    data_y[i] += len(drange_sets[drange].get_samples())
-
-    # apply scalar data to result workspace
     for i in range(0, merged_ws.getNumberHistograms()):
+        # Create scalar data to cope with where merge has combined overlapping data.
+        data_x = (merged_ws.dataX(i)[1:] + merged_ws.dataX(i)[:-1]) / 2.0
+        data_y = np.zeros(data_x.size)
+        for drange in drange_sets:
+            if drange_sets[drange].has_sample():
+                for j in range(data_x.size):
+                    if d_range_alice[drange][0] <= data_x[j] <= d_range_alice[drange][1]:
+                        data_y[j] += 1
+
+        for z in range(data_y.size):
+            if data_y[z] == 0:
+                data_y[z] = 1
+
+        # apply scalar data to result workspace
         merged_ws.setY(i, merged_ws.dataY(i) / data_y)
         merged_ws.setE(i, merged_ws.dataE(i) / data_y)
+
     return merged_ws
 
 
-def _merge_dspacing_runs(run_number, drange_sets, ws_group):
-    merged = MergeRuns(InputWorkspaces=ws_group, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED)
-    return _correct_drange_overlap(merged, drange_sets)
+def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
+    if len(focussed_runs) == 1:
+        return [focussed_runs[0]]
+
+    extracted_spectra = [common.extract_ws_spectra(ws) for ws in focussed_runs]
+
+    have_same_spectra_count = len({len(spectra) for spectra in extracted_spectra}) == 1
+    if not have_same_spectra_count:
+        logger.warning("Cannot merge focussed workspaces with different number of spectra")
+        return [ws for ws in focussed_runs]
+
+    output_name = "OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED
+
+    # Group workspaces located at the same index
+    matched_spectra = [list(spectra) for spectra in zip(*extracted_spectra)]
+    # Merge workspaces located at the same index
+    merged_spectra = [MergeRuns(InputWorkspaces=spectra, OutputWorkspace=f"merged_{idx}") for idx, spectra in enumerate(matched_spectra)]
+
+    max_x_size = max([spectra.dataX(0).size for spectra in merged_spectra])
+    max_y_size = max([spectra.dataY(0).size for spectra in merged_spectra])
+    max_e_size = max([spectra.dataE(0).size for spectra in merged_spectra])
+
+    for i in range(len(merged_spectra)):
+        if (
+            merged_spectra[i].dataX(0).size != max_x_size
+            or merged_spectra[i].dataY(0).size != max_y_size
+            or merged_spectra[i].dataE(0).size != max_e_size
+        ):
+            dataX = merged_spectra[i].dataX(0)
+            dataY = merged_spectra[i].dataY(0)
+            dataE = merged_spectra[i].dataE(0)
+
+            dataX = np.append(dataX, [dataX[-1]] * (max_x_size - dataX.size))
+            dataY = np.append(dataY, [0] * (max_y_size - dataY.size))
+            dataE = np.append(dataE, [0] * (max_e_size - dataE.size))
+
+            merged_spectra[i] = CreateWorkspace(
+                NSpec=1,
+                DataX=dataX,
+                DataY=dataY,
+                DataE=dataE,
+                UnitX=merged_spectra[i].getAxis(0).getUnit().unitID(),
+                Distribution=merged_spectra[i].isDistribution(),
+                ParentWorkspace=merged_spectra[i].name(),
+                OutputWorkspace=merged_spectra[i].name(),
+            )
+
+    input_workspaces_str = ",".join([ws.name() for ws in merged_spectra])
+    ConjoinSpectra(InputWorkspaces=input_workspaces_str, OutputWorkspace=output_name)
+
+    common.remove_intermediate_workspace([ws for group in matched_spectra for ws in group])
+    common.remove_intermediate_workspace(merged_spectra)
+
+    joined_spectra = AnalysisDataService[output_name]
+    return [_correct_drange_overlap(joined_spectra, drange_sets)]
 
 
 def _group_workspaces(ws_list, output):
