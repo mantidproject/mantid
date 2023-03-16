@@ -118,7 +118,7 @@ public:
     // f0 should now be the flat background function
     f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
     TS_ASSERT(!f0Handler->hasTies());
-    TS_ASSERT(QString("f0-FlatBackground") == f0Handler->functionName());
+    TS_ASSERT_EQUALS(QString("f0-FlatBackground"), f0Handler->functionName());
   }
 
   void test_removeFunctionUpdatesTieString() {
@@ -128,10 +128,10 @@ public:
         "name=Gaussian,Height=10.0,PeakCentre=-0.555,Sigma=0.135;ties=(f0.Height=f2.Height)");
     auto f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
     auto f1Handler = m_fitPropertyBrowser->getPeakHandler(QString("f1"));
-    TS_ASSERT(m_fitPropertyBrowser->getOldExpressionAsString(QString("f0.Height")) == QString("f2.Height"));
+    TS_ASSERT_EQUALS(m_fitPropertyBrowser->getOldExpressionAsString(QString("f0.Height")), QString("f2.Height"));
     m_fitPropertyBrowser->removeFunction(f1Handler);
     TS_ASSERT(f0Handler->hasTies());
-    TS_ASSERT(m_fitPropertyBrowser->getOldExpressionAsString(QString("f0.Height")) == QString("f1.Height"));
+    TS_ASSERT_EQUALS(m_fitPropertyBrowser->getOldExpressionAsString(QString("f0.Height")), QString("f1.Height"));
   }
 
 private:
