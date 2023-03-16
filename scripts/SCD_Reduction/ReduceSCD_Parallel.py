@@ -150,7 +150,7 @@ while not all_done:
         thread.start()
     time.sleep(2)
     for thread in active_list:
-        if not thread.isAlive():
+        if not thread.is_alive():
             active_list.remove(thread)
     if len(procList) == 0 and len(active_list) == 0:
         all_done = True

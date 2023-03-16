@@ -2362,7 +2362,6 @@ class MainWindow(QMainWindow):
             # go through all rows
             num_rows = self.ui.tableWidget_surveyTable.rowCount()
             for i_row in range(num_rows):
-
                 select_line = True
 
                 # filter HKL (nuclear)
@@ -4001,7 +4000,7 @@ class MainWindow(QMainWindow):
             progress = int(sig_value - 0.5)
             if progress == 0:
                 # run start
-                self._startMeringScans = time.clock()
+                self._startMeringScans = time.process_time()
                 self._errorMessageEnsemble = ""
 
             self.ui.progressBar_mergeScans.setValue(progress)
@@ -4062,7 +4061,7 @@ class MainWindow(QMainWindow):
             self.ui.progressBar_mergeScans.setValue(progress)
 
             # set message to status bar
-            merge_run_end = time.clock()
+            merge_run_end = time.process_time()
             elapsed = merge_run_end - self._startMeringScans
             message = "Peak integration is over. Used %.2f seconds" % elapsed
             self.ui.statusbar.showMessage(message)
