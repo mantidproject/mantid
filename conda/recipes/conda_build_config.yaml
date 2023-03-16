@@ -16,7 +16,7 @@ llvm_openmp:                   # [osx]
   - 14                         # [osx]
 
 python:
-  - 3.8
+  - 3.10
 
 boost:
   - 1.77
