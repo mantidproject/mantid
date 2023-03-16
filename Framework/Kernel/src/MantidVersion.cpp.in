@@ -37,7 +37,7 @@ const MantidVersion::VersionInfo MantidVersion::versionInfo() {
 }
 
 std::string MantidVersion::versionForReleaseNotes(const VersionInfo& version) {
-  // Cast here in those cases where patch number is of the form 20131022.1356.
+  // Convert here in those cases where patch number is of the form "20131022.1356".
   const unsigned long patchVersion = std::stoul(version.patch);
   // For major/minor/patch/rc/local releases we point users to a specific release-notes.
   // For dev and nightly versions we point to the next main release notes.
