@@ -10,6 +10,7 @@ from numpy.testing import assert_allclose
 
 import abins
 from abins.input import AbInitioLoader
+from abins.test_helpers import dict_arrays_to_lists
 
 
 class Tester(object):
@@ -41,7 +42,6 @@ class Tester(object):
         atoms = len(correct_data["datasets"]["atoms_data"])
         array = {}
         for k in range(num_k):
-
             temp = (
                 np.loadtxt(abins.test_helpers.find_file("{seedname}_atomic_displacements_data_{k}.txt".format(seedname=seedname, k=k)))
                 .view(complex)
@@ -102,7 +102,6 @@ class Tester(object):
         assert_allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"])
 
     def _check_loader_data(self, correct_data=None, input_ab_initio_filename=None, extension=None, loader=None):
-
         try:
             read_filename = abins.test_helpers.find_file(input_ab_initio_filename + "." + extension)
             ab_initio_loader = loader(input_ab_initio_filename=read_filename)
@@ -220,19 +219,4 @@ class Tester(object):
                 eigenvector.flatten().view(float).tofile(f, sep=" ")
 
         with open("{seedname}_data.txt".format(seedname=seedname), "wt") as f:
-            json.dump(cls._arrays_to_lists(data), f, indent=4, sort_keys=True)
-
-    @classmethod
-    def _arrays_to_lists(cls, mydict):
-        """Recursively convert numpy arrays in a nested dict to lists (i.e. valid JSON)
-
-        Returns a processed *copy* of the input dictionary: in-place values will not be altered."""
-        clean_dict = {}
-        for key, value in mydict.items():
-            if isinstance(value, np.ndarray):
-                clean_dict[key] = value.tolist()
-            elif isinstance(value, dict):
-                clean_dict[key] = cls._arrays_to_lists(value)
-            else:
-                clean_dict[key] = value
-        return clean_dict
+            json.dump(dict_arrays_to_lists(data), f, indent=4, sort_keys=True)

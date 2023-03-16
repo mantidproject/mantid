@@ -184,10 +184,10 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
 
     @staticmethod
     def _write_data(*, data, filename):
-        from abins.input.tester import Tester
+        from abins.test_helpers import dict_arrays_to_lists
 
         with open(filename, "w") as fd:
-            json.dump(Tester._arrays_to_lists(data), fd, indent=4, sort_keys=True)
+            json.dump(dict_arrays_to_lists(data), fd, indent=4, sort_keys=True)
 
     # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):

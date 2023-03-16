@@ -24,6 +24,9 @@ class PowderData:
     :param num_atoms: Expected number of atoms in tensor data. If provided,
         this value is used for sanity-checking
 
+    :param n_plus_1: Bose occupation <n+1> values corresponding to
+        modes. b_tensors should already be scaled by <n+1>, a_tensors by <2n+1>
+
     """
 
     def __init__(
@@ -33,9 +36,9 @@ class PowderData:
         b_tensors: Dict[int, np.ndarray],
         frequencies: Dict[int, np.ndarray],
         num_atoms: Optional[int] = None,
+        n_plus_1: Dict[int, np.ndarray],
     ):
-
-        self._data = {"a_tensors": a_tensors, "b_tensors": b_tensors, "frequencies": frequencies}  # type: PowderDict
+        self._data = {"a_tensors": a_tensors, "b_tensors": b_tensors, "frequencies": frequencies, "n_plus_1": n_plus_1}  # type: PowderDict
 
         self._num_atoms = num_atoms
 
@@ -63,6 +66,9 @@ class PowderData:
     def get_frequencies(self) -> np.ndarray:
         return self._data["frequencies"]
 
+    def get_n_plus_1(self, k_index):
+        return self._data["n_plus_1"][k_index]
+
     def extract(self) -> PowderDict:
         """Get tensor data as dict"""
         return {key: {str(k): array for k, array in data.items()} for key, data in self._data.items()}
@@ -73,7 +79,8 @@ class PowderData:
         a_tensors = {int(k_index): data for k_index, data in dct["a_tensors"].items()}
         b_tensors = {int(k_index): data for k_index, data in dct["b_tensors"].items()}
         frequencies = {int(k_index): data for k_index, data in dct["frequencies"].items()}
-        return cls(a_tensors=a_tensors, b_tensors=b_tensors, frequencies=frequencies, num_atoms=num_atoms)
+        n_plus_1 = {int(k_index): data for k_index, data in dct["n_plus_1"].items()}
+        return cls(a_tensors=a_tensors, b_tensors=b_tensors, frequencies=frequencies, num_atoms=num_atoms, n_plus_1=n_plus_1)
 
     def _check_data(self) -> None:
         for key in "a_tensors", "b_tensors", "frequencies":

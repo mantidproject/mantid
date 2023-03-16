@@ -8,7 +8,7 @@
 Parameters for instruments and Abins
 
 These values are somewhat 'global' across Abins. In previous versions it was
-recommended that they could be changed by editing the AbinsParameters.py file.
+recommended that they could be changed by editing this source file.
 This is still possible, but in general it is recommended to edit the
 value dictionaries through the Python API if possible. e.g.::
 
@@ -153,6 +153,7 @@ sampling = {
     "s_relative_threshold": 0.01,  # low cutoff for S intensity (fraction of maximum S)
     "s_absolute_threshold": 1e-7,  # low cutoff for S intensity (absolute value)
     "broadening_scheme": "auto",
+    "broadening_range": 3,  # N*SIGMA cutoff for broadening kernels
     "force_constants": {  # Parameters related to imported Force Constants data (e.g. Phonopy .yaml)
         "qpt_cutoff": 15.0
     },  # Distance in Angstrom determining q-point sampling mesh

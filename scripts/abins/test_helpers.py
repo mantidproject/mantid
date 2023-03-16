@@ -5,6 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
+from typing import Any, Dict
+
+import numpy as np
 
 
 # Module with helper functions used to create tests.
@@ -47,3 +50,18 @@ def remove_output_files(list_of_names=None):
                 if os.path.isfile(full_path):
                     os.remove(full_path)
                 break
+
+
+def dict_arrays_to_lists(mydict: Dict[str, Any]) -> Dict[str, Any]:
+    """Recursively convert numpy arrays in a nested dict to lists (i.e. valid JSON)
+
+    Returns a processed *copy* of the input dictionary: in-place values will not be altered."""
+    clean_dict = {}
+    for key, value in mydict.items():
+        if isinstance(value, np.ndarray):
+            clean_dict[key] = value.tolist()
+        elif isinstance(value, dict):
+            clean_dict[key] = dict_arrays_to_lists(value)
+        else:
+            clean_dict[key] = value
+    return clean_dict
