@@ -346,9 +346,9 @@ class BaseSX(ABC):
                 if run_ref is not None and run_ref != run:
                     self.make_UB_consistent(self.get_peaks(run_ref, peak_type, integration_type), peaks)
                 mantid.CombinePeaksWorkspaces(LHSWorkspace=all_peaks, RHSWorkspace=peaks, OutputWorkspace=all_peaks)
-        filepath = path.join(save_dir, "_".join([all_peaks, save_format])) + ".int"
-        mantid.SaveReflections(InputWorkspace=all_peaks, Filename=filepath, Format=save_format, SplitFiles=False)
-        mantid.SaveNexus(InputWorkspace=all_peaks, Filename=filepath[:-3] + "nxs")
+            filepath = path.join(save_dir, "_".join([all_peaks, save_format])) + ".int"
+            mantid.SaveReflections(InputWorkspace=all_peaks, Filename=filepath, Format=save_format, SplitFiles=False)
+            mantid.SaveNexus(InputWorkspace=all_peaks, Filename=filepath[:-3] + "nxs")
 
     def _is_vanadium_processed(self):
         return self.van_ws is not None and ADS.doesExist(self.van_ws)

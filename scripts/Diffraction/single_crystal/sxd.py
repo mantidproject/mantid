@@ -1,6 +1,7 @@
 from typing import Sequence
 import numpy as np
 import mantid.simpleapi as mantid
+from mantid.kernel import logger
 from Diffraction.single_crystal.base_sx import BaseSX, PEAK_TYPE, INTEGRATION_TYPE
 from mantid.api import AnalysisDataService as ADS
 from FindGoniometerFromUB import getR
@@ -134,15 +135,21 @@ class SXD(BaseSX):
         :param maxShiftInMeters: for panel optimisation
         :return: xml_path
         """
+        tol_to_report = np.round(tol / 2, 3)  # use smaller tolerance to track improvement in calibration
+        npeaks = SXD.retrieve(peaks).getNumberPeaks()
         if ws is not None:
             wsname = SXD.retrieve(ws).name()
         else:
             wsname = "empty"
             mantid.LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace=wsname, EnableLogging=False)
         peaks_name = SXD.retrieve(peaks).name()
-        mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol)
-        initialUB = np.copy(SXD.retrieve(peaks_name).sample().getOrientedLattice().getUB())
+        # report inital indexing
+        nindexed, *_ = mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol_to_report, CommonUBForAll=False, EnableLogging=False)
+        logger.notice(f"Indexed initially = {nindexed}/{npeaks} peaks within {tol_to_report}")
+        mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol, CommonUBForAll=False, EnableLogging=False)
+
         # optimize global shift in detector (equivalent to sample placement)
+        initialUB = np.copy(SXD.retrieve(peaks_name).sample().getOrientedLattice().getUB())
         _, pos_table, *_ = mantid.OptimizeCrystalPlacement(
             PeaksWorkspace=peaks_name,
             ModifiedPeaksWorkspace="temp",
@@ -162,10 +169,15 @@ class SXD(BaseSX):
                 InputWorkspace=peaks_name, InstrumentWorkspace=wsname, OutputWorkspace=peaks_name, EnableLogging=False
             )
         newUB = getR(rotx, [1, 0, 0]) @ getR(roty, [0, 1, 0]) @ getR(rotz, [0, 0, 1]) @ initialUB
-        mantid.SetUB(peaks_name, UB=newUB)
-        mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol)
+        mantid.SetUB(peaks_name, UB=newUB, EnableLogging=False)
+        # report progress
+        nindexed, *_ = mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol_to_report, CommonUBForAll=False, EnableLogging=False)
+        logger.notice(f"Indexed after global instrument translation and rotation = {nindexed}/{npeaks} peaks within {tol_to_report}")
+        mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol, CommonUBForAll=False, EnableLogging=False)
+
         # optimize position of each bank independently
         for ibank in range(1, 12):
+            logger.notice(f"Optimizing bank position {ibank}")
             peaks_bank = peaks_name + "_bank"
             mantid.FilterPeaks(
                 InputWorkspace=peaks_name,
@@ -174,7 +186,12 @@ class SXD(BaseSX):
                 BankName="bank" + str(ibank),
                 EnableLogging=False,
             )
-            _, pos_table, *_ = mantid.OptimizeCrystalPlacement(
+            # report inital indexing
+            npeaks_bank = SXD.retrieve(peaks_bank).getNumberPeaks()
+            nindexed, *_ = mantid.IndexPeaks(PeaksWorkspace=peaks_bank, Tolerance=tol_to_report, CommonUBForAll=False, EnableLogging=False)
+            logger.notice(f"Indexed before optimization = {nindexed}/{npeaks_bank} peaks within {tol_to_report}")
+            mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol, CommonUBForAll=False, EnableLogging=False)
+            peaks_bank_mod, pos_table, *_ = mantid.OptimizeCrystalPlacement(
                 PeaksWorkspace=peaks_bank,
                 ModifiedPeaksWorkspace="temp",
                 AdjustSampleOffsets=True,
@@ -183,15 +200,28 @@ class SXD(BaseSX):
                 MaxSamplePositionChangeMeters=maxShiftInMeters,
                 EnableLogging=False,
             )
+            nindexed, *_ = mantid.IndexPeaks(
+                PeaksWorkspace=peaks_bank_mod, Tolerance=tol_to_report, CommonUBForAll=False, EnableLogging=False
+            )
+            # report progress
+            logger.notice(f"Indexed after optimization = {nindexed}/{npeaks_bank} peaks within {tol_to_report}")
             x, y, z = pos_table.cell(0, 1), pos_table.cell(1, 1), pos_table.cell(2, 1)
             mantid.MoveInstrumentComponent(
                 Workspace=wsname, ComponentName="bank" + str(ibank), RelativePosition=True, X=-x, Y=-y, Z=-z, EnableLogging=False
             )
-            mantid.ApplyInstrumentToPeaks(InputWorkspace=peaks_name, InstrumentWorkspace=wsname, OutputWorkspace=peaks_name)
-        mantid.DeleteWorkspace(peaks_bank)
-        mantid.DeleteWorkspace("temp")
+            mantid.ApplyInstrumentToPeaks(
+                InputWorkspace=peaks_name, InstrumentWorkspace=wsname, OutputWorkspace=peaks_name, EnableLogging=False
+            )
+        mantid.DeleteWorkspace(peaks_bank, EnableLogging=False)
+        mantid.DeleteWorkspace("temp", EnableLogging=False)
+
         # use SCD calibrate to refine detector orientation and save detcal
-        mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol)
+        # report initial indexing
+        logger.notice("Optimizing bank positions and rotations")
+        nindexed, *_ = mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol_to_report, CommonUBForAll=False, EnableLogging=False)
+        logger.notice(f"Indexed before optimization = {nindexed}/{npeaks} peaks within {tol_to_report}")
+        mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol, CommonUBForAll=False, EnableLogging=False)
+        # Optimize all panels independently
         detcal_path = path.join(save_dir, "_".join([peaks_name, "detcal"]))
         xml_path = detcal_path + ".xml"
         mantid.SCDCalibratePanels(
@@ -210,13 +240,19 @@ class SXD(BaseSX):
             CSVFilename=detcal_path + ".csv",
             EnableLogging=False,
         )
-        mantid.LoadInstrument(Workspace=wsname, InstrumentName="SXD", RewriteSpectraMap=False)  # reset instrument if already calibrated
-        mantid.LoadParameterFile(Workspace=wsname, Filename=xml_path)
-        mantid.ApplyInstrumentToPeaks(InputWorkspace=peaks_name, InstrumentWorkspace=wsname, OutputWorkspace=peaks_name)
-        mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol)
+        mantid.LoadInstrument(
+            Workspace=wsname, InstrumentName="SXD", RewriteSpectraMap=False, EnableLogging=False
+        )  # reset instrument if already calibrated
+        mantid.LoadParameterFile(Workspace=wsname, Filename=xml_path, EnableLogging=False)
+        mantid.ApplyInstrumentToPeaks(
+            InputWorkspace=peaks_name, InstrumentWorkspace=wsname, OutputWorkspace=peaks_name, EnableLogging=False
+        )
+        # report final progress
+        nindexed, *_ = mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol_to_report, CommonUBForAll=False, EnableLogging=False)
+        logger.notice(f"Indexed after optimization = {nindexed}/{npeaks} peaks within {tol_to_report}")
+        mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol, CommonUBForAll=False, EnableLogging=False)
         if ws is None:
-            mantid.DeleteWorkspace(wsname)
-
+            mantid.DeleteWorkspace(wsname, EnableLogging=False)
         return xml_path
 
     @BaseSX.default_apply_to_all_runs
