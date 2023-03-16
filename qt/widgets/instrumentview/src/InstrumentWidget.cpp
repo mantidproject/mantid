@@ -182,7 +182,7 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   } else {
     // create and setup the instrument actor immediately if not using the background thread
     m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
-                                                          scaleMin, scaleMax);
+                                                          scaleMin, scaleMax, m_settingsGroup);
     m_qtMetaObject->invokeMethod(m_instrumentActor.get(), "initialize", Qt::DirectConnection,
                                  Q_ARG(bool, resetGeometry), Q_ARG(bool, setDefaultView));
   }
@@ -374,7 +374,8 @@ void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling
   updateInfoText("Loading instrument...");
 
   m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
-                                                        scaleMin, scaleMax);
+                                                        scaleMin, scaleMax, m_settingsGroup);
+
   emit instrumentActorReset();
 
   if (m_useThread) {
@@ -1015,6 +1016,9 @@ void InstrumentWidget::saveSettings() {
 
   if (m_instrumentDisplay->getGLDisplay())
     settings.setValue("BackgroundColor", m_instrumentDisplay->getGLDisplay()->currentBackgroundColor());
+  if (m_instrumentActor) {
+    m_instrumentActor->saveSettings();
+  }
 
   auto surface = getSurface();
   if (surface) {
