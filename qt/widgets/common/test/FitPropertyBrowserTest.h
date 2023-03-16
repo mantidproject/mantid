@@ -113,7 +113,7 @@ public:
         "name=Gaussian,Height=10.0,PeakCentre=-0.145,Sigma=0.135;name=FlatBackground,A0=10;"
         "ties=(f0.Height=f1.A0)");
     auto f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
-    TS_ASSERT(QString("f0-Gaussian") == f0Handler->functionName());
+    TS_ASSERT_EQUALS(QString("f0-Gaussian"), f0Handler->functionName());
     m_fitPropertyBrowser->removeFunction(f0Handler);
     // f0 should now be the flat background function
     f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
