@@ -72,7 +72,7 @@ class D11_AbsoluteScale_Test(systemtesting.MantidSystemTest):
         # Water as reference
         SANSILLReduction(
             Runs="010453",
-            ProcessAs="Sample",
+            ProcessAs="Water",
             DarkCurrentWorkspace="Cdw",
             MaskWorkspace="mask",
             EmptyContainerWorkspace="wc",

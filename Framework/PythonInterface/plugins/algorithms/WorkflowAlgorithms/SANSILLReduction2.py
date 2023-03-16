@@ -1104,7 +1104,6 @@ class SANSILLReduction(DataProcessorAlgorithm):
                         if self.process == "Water":
                             self.generate_sensitivity(ws)
                         else:
-                            self.generate_sensitivity(ws)
                             self.apply_water(ws)
                             self.apply_sensitivity(ws)
                             self.progress.report()
