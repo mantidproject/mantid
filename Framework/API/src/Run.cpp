@@ -178,7 +178,7 @@ Run &Run::operator+=(const Run &rhs) {
     }
 
     // replace the values accordingly
-    m_timeroi->update_union(*(rhs.m_timeroi.get()));
+    m_timeroi->update_union(rightROI);
   }
 
   // determine the new start/end times
