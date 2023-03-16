@@ -268,6 +268,7 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run, drange=No
         vanadium_runs = get_van_run_for_drange(all_run_numbers, drange)
 
     grouping_file_name = inst_settings.grouping
+    inst_settings.sample_empty = empty_can_runs
 
     return create_run_details_object(
         run_number_string=run_number_string,
@@ -276,7 +277,6 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run, drange=No
         empty_inst_run_number=None,
         grouping_file_name=grouping_file_name,
         vanadium_string=vanadium_runs,
-        sample_empty_run=empty_can_runs,
     )
 
 
