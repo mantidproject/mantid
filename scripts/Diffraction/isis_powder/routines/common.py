@@ -511,13 +511,10 @@ def generate_summed_runs(empty_ws_string, instrument, scale_factor=None, normali
     :return: The summed and normalised empty runs
     """
 
-    if normalised:
-        empty_ws_list = load_current_normalised_ws_list(
-            run_number_string=empty_ws_string, instrument=instrument, input_batching=INPUT_BATCHING.Summed
-        )
-    else:
-        run_details = instrument._get_run_details(run_number_string=empty_ws_string)
-        empty_ws_list = load_raw_files(run_number_string=empty_ws_string, instrument=instrument, file_ext=run_details.file_extension)
+    empty_ws_list = load_current_normalised_ws_list(
+        run_number_string=empty_ws_string, instrument=instrument, input_batching=INPUT_BATCHING.Summed
+    )
+
     empty_ws = empty_ws_list[0]
     if scale_factor:
         empty_ws = mantid.Scale(InputWorkspace=empty_ws, OutputWorkspace=empty_ws, Factor=scale_factor, Operation="Multiply")
