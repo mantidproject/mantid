@@ -130,20 +130,14 @@ public:
     auto mockJobManager = makeJobManager();
     auto mockDockedWidgets = makePreviewDockedWidgets();
     auto mockRegionSelector = makeRegionSelector();
+    auto mockInstViewModel = makeInstViewModel();
 
-    expectRegionSelectorToolbarEnabled(*mockDockedWidgets, false);
-    expectLoadWorkspaceCompletedForLinearDetector(*mockView, *mockModel, *mockJobManager, *mockDockedWidgets,
-                                                  *mockRegionSelector);
+    expectLoadWorkspaceCompletedForLinearDetector(*mockModel, *mockJobManager, *mockDockedWidgets, *mockInstViewModel);
 
-    auto rawMockDockedWidgets = mockDockedWidgets.get();
-
-    auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
+    auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel),
                          std::move(mockDockedWidgets), std::move(mockRegionSelector));
     auto presenter = PreviewPresenter(std::move(deps));
 
-    expectRegionSelectorToolbarEnabled(*rawMockDockedWidgets, true);
-
-    EXPECT_CALL(*rawMockDockedWidgets, setInstViewToolbarEnabled(Eq(false))).Times(1);
     presenter.notifyLoadWorkspaceCompleted();
   }
 
@@ -596,18 +590,16 @@ private:
     EXPECT_CALL(linePlot, setPlotErrorBars(true)).Times(1);
   }
 
-  void expectLoadWorkspaceCompletedForLinearDetector(MockPreviewView &mockView, MockPreviewModel &mockModel,
-                                                     MockJobManager &mockJobManager,
+  void expectLoadWorkspaceCompletedForLinearDetector(MockPreviewModel &mockModel, MockJobManager &mockJobManager,
                                                      MockPreviewDockedWidgets &mockDockedWidgets,
-                                                     MockRegionSelector &mockRegionSelector) {
+                                                     MockInstViewModel &mockInstViewModel) {
     auto ws = createLinearDetectorWorkspace();
 
     EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
-
-    EXPECT_CALL(mockDockedWidgets, resetInstView()).Times(1);
-    EXPECT_CALL(mockModel, setSummedWs(ws)).Times(1);
-
-    expectRunReduction(mockView, mockModel, mockJobManager, mockRegionSelector);
+    EXPECT_CALL(mockModel, getDefaultTheta()).Times(1);
+    EXPECT_CALL(mockInstViewModel, updateWorkspace(ws)).Times(1);
+    EXPECT_CALL(mockDockedWidgets, setInstViewToolbarEnabled(true)).Times(1);
+    EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
   }
 
   void expectLoadWorkspaceCompletedUpdatesInstrumentView(MockPreviewDockedWidgets &mockDockedWidgets,

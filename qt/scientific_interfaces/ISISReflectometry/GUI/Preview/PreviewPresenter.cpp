@@ -116,21 +116,14 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
     m_view->setAngle(*theta);
   }
 
-  if (hasLinearDetector(ws)) {
-    m_dockedWidgets->resetInstView();
-    m_dockedWidgets->setInstViewToolbarEnabled(false);
-    m_model->setSummedWs(ws);
-    notifySumBanksCompleted();
-  } else {
-    // Notify the instrument view model that the workspace has changed before we get the surface
-    m_instViewModel->updateWorkspace(ws);
-    plotInstView();
-    // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
-    m_dockedWidgets->setInstViewToolbarEnabled(true);
-    notifyInstViewZoomRequested();
-    // Perform summing banks to update the next plot, if possible
-    runSumBanks();
-  }
+  // Notify the instrument view model that the workspace has changed before we get the surface
+  m_instViewModel->updateWorkspace(ws);
+  plotInstView();
+  // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
+  m_dockedWidgets->setInstViewToolbarEnabled(true);
+  notifyInstViewZoomRequested();
+  // Perform summing banks to update the next plot, if possible
+  runSumBanks();
 }
 
 void PreviewPresenter::notifyUpdateAngle() { runReduction(); }
