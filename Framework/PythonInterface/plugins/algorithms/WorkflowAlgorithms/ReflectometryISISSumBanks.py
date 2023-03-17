@@ -118,10 +118,6 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-    def _run_child_without_out_props(self, *args, **kwargs) -> None:
-        alg = self.createChildAlgorithm(*args, **kwargs)
-        alg.execute()
-
     def _prepend_monitors(self, input_workspace, summed_workspace):
         crop_alg = self.createChildAlgorithm(
             "ExtractMonitors", InputWorkspace=input_workspace, MonitorWorkspace="__preview_summed_ws_monitors"

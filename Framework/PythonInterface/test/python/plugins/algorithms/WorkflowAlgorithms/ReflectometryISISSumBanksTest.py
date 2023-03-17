@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
+from unittest.mock import MagicMock
+
 import numpy
 
 from mantid.api import MatrixWorkspace, WorkspaceGroup
@@ -67,6 +69,66 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
 
         issues = alg.validateInputs()
         self.assertEqual(len(issues), 0)
+
+    def test_execution_with_single_bank(self):
+        test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(1, 5, 5)
+
+        alg = ReflectometryISISSumBanks()
+        alg.initialize()
+        alg.setProperty("InputWorkspace", test_ws)
+        alg.exec_multi_bank = MagicMock()
+        alg.exec_single_bank = MagicMock()
+        mock_detector = MagicMock()
+        mock_detector.xpixels.return_value = 1
+        alg._get_rectangular_detector_component = MagicMock(return_value=mock_detector)
+
+        alg.PyExec()
+
+        alg.exec_single_bank.assert_called_once()
+        alg.exec_multi_bank.assert_not_called()
+
+    def test_execution_with_multiple_banks(self):
+        test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(1, 5, 5)
+
+        alg = ReflectometryISISSumBanks()
+        alg.initialize()
+        alg.setProperty("InputWorkspace", test_ws)
+        alg.exec_multi_bank = MagicMock()
+        alg.exec_single_bank = MagicMock()
+        mock_detector = MagicMock()
+        mock_detector.xpixels.return_value = 4
+        alg._get_rectangular_detector_component = MagicMock(return_value=mock_detector)
+
+        alg.PyExec()
+
+        alg.exec_single_bank.assert_not_called()
+        alg.exec_multi_bank.assert_called_once()
+
+    def test_exec_single_bank_with_default_roi(self):
+        test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(1, 5, 5)
+
+        alg = ReflectometryISISSumBanks()
+        alg.initialize()
+        alg.setProperty = MagicMock()
+        alg.exec_single_bank(test_ws)
+        alg.setProperty.assert_called_with(alg._OUTPUT_WS, test_ws)
+
+    def test_exec_single_bank_with_roi_selected(self):
+        test_ws = WorkspaceCreationHelper.createEventWorkspaceWithNonUniformInstrument(2, True)
+        masked_ws = WorkspaceCreationHelper.createEventWorkspaceWithNonUniformInstrument(1, True)
+        roi = 200
+
+        alg = ReflectometryISISSumBanks()
+        alg.initialize()
+        alg.getProperty = MagicMock()
+        alg.getProperty.return_value.isDefault = False
+        alg.getProperty.return_value.value = roi
+        alg.mask_detectors = MagicMock(return_value=masked_ws)
+        alg.setProperty = MagicMock()
+        alg.exec_single_bank(test_ws)
+
+        alg.setProperty.assert_called_with(alg._OUTPUT_WS, masked_ws)
+        alg.mask_detectors.assert_called_with(test_ws, roi)
 
     def test_mask_workspace(self):
         roi_detector_id = 200
