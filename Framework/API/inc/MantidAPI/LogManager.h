@@ -202,6 +202,8 @@ public:
   bool operator!=(const LogManager &other) const;
 
 protected:
+  bool hasStartTime() const;
+  bool hasEndTime() const;
   void loadNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &prefix);
   /// Load the run from a NeXus file with a given group name
   void loadNexus(::NeXus::File *file, const std::map<std::string, std::string> &entries);

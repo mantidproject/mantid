@@ -175,6 +175,10 @@ const Types::Core::DateAndTime LogManager::endTime() const {
   throw std::runtime_error("No valid end time has been set for this run.");
 }
 
+bool LogManager::hasStartTime() const { return hasProperty(START_TIME_NAME) || hasProperty("run_start"); }
+
+bool LogManager::hasEndTime() const { return hasProperty(END_TIME_NAME) || hasProperty("run_end"); }
+
 //-----------------------------------------------------------------------------------------------
 /**
  * Filter out a run by time. Takes out any TimeSeriesProperty log entries
