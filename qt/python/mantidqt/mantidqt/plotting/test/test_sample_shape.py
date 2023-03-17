@@ -102,11 +102,7 @@ def get_sample_container_components_meshes():
     workspace = setup_workspace_sample_container_and_components_from_mesh()
     sample_mesh = workspace.sample().getShape().getMesh()
     container_mesh = workspace.sample().getEnvironment().getContainer().getShape().getMesh()
-    component_meshes = []
-    number_of_components = workspace.sample().getEnvironment().nelements()
-    for component_index in range(1, number_of_components):
-        component_mesh = workspace.sample().getEnvironment().getComponent(component_index).getMesh()
-        component_meshes.append(component_mesh)
+    component_meshes = sample_shape.get_valid_component_meshes_from_workspace(workspace)
     return sample_mesh, container_mesh, component_meshes
 
 
@@ -157,7 +153,7 @@ class PlotSampleShapeTest(TestCase):
 
     def test_component_valid(self):
         workspace = setup_workspace_sample_container_and_components_from_mesh()
-        self.assertIsNotNone(sample_shape.get_valid_component_mesh_from_workspace(workspace, 1))
+        self.assertIsNotNone(sample_shape.get_valid_component_meshes_from_workspace(workspace))
 
     @patch("mantidqt.plotting.sample_shape.is_mesh_not_empty")
     def test_component_invalid(self, mock_is_mesh_not_empty):

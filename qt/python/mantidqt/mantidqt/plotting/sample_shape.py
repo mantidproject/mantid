@@ -66,12 +66,7 @@ class SampleShapePlot:
         workspace = ADS.retrieve(workspace_name)
         sample_mesh = get_valid_sample_mesh_from_workspace(workspace)
         container_mesh = get_valid_container_mesh_from_workspace(workspace)
-        component_meshes = []
-        if workspace.sample().hasEnvironment():
-            number_of_components = workspace.sample().getEnvironment().nelements()
-            for component_index in range(1, number_of_components):
-                component_mesh = get_valid_component_mesh_from_workspace(workspace, component_index)
-                component_meshes.append(component_mesh)
+        component_meshes = get_valid_component_meshes_from_workspace(workspace)
         if sample_mesh is None and container_mesh is None and not component_meshes:
             raise Exception("Workspace must have attached Sample Shape or Environment")
         if figure:
@@ -227,11 +222,16 @@ def get_container_shape_from_workspace(workspace_with_container):
         return workspace_with_container.sample().getEnvironment().getContainer().getShape()
 
 
-def get_valid_component_mesh_from_workspace(workspace, component_index):
-    component_shape = get_component_shape_from_workspace(workspace, component_index)
-    mesh = component_shape.getMesh()
-    if is_mesh_not_empty(mesh):
-        return mesh
+def get_valid_component_meshes_from_workspace(workspace):
+    component_meshes = []
+    if workspace.sample().hasEnvironment():
+        number_of_components = workspace.sample().getEnvironment().nelements()
+        for component_index in range(1, number_of_components):
+            component_shape = get_component_shape_from_workspace(workspace, component_index)
+            component_mesh = component_shape.getMesh()
+            if is_mesh_not_empty(component_mesh):
+                component_meshes.append(component_mesh)
+    return component_meshes
 
 
 def get_component_shape_from_workspace(workspace_with_components, component_index):
