@@ -128,8 +128,7 @@ def _focus_one_ws(
 
     instrument.apply_calibration_to_focused_data(focused_ws)
 
-    if instrument.get_instrument_prefix() == "OSIRIS":
-        focused_ws = instrument.apply_drange_cropping(run_number, focused_ws)
+    focused_ws = instrument.apply_drange_cropping(run_number, focused_ws)
 
     calibrated_spectra = _apply_vanadium_corrections(
         instrument=instrument, input_workspace=focused_ws, perform_vanadium_norm=perform_vanadium_norm, vanadium_ws=vanadium_ws

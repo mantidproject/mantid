@@ -212,6 +212,13 @@ class Osiris(AbstractInst):
         return None
 
     def apply_drange_cropping(self, run_number_string, focused_ws):
+        """
+        Apply dspacing range cropping to a focused workspace.
+        :param run_number_string: The run number to look up for the drange
+        :param focused_ws: The workspace to be cropped
+        :return: The cropped workspace in its drange
+        """
+
         drange = self._get_drange_for_run_number(run_number_string)
 
         return mantid.CropWorkspace(

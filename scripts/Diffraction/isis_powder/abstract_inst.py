@@ -141,6 +141,16 @@ class AbstractInst(object):
         """
         return False
 
+    def apply_drange_cropping(self, run_number_string, focused_ws):
+        """
+        Apply dspacing range cropping to a focused workspace. It is now only used with OSIRIS script
+        :param run_number_string: The run number to look up for the drange
+        :param focused_ws: The workspace to be cropped
+        :return: The cropped workspace in its drange
+        """
+
+        return focused_ws
+
     # Mandatory overrides
 
     def _get_run_details(self, run_number_string):
