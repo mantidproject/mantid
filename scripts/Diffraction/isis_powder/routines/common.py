@@ -10,7 +10,7 @@ import warnings
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, WorkspaceGroup, MatrixWorkspace
 from mantid.dataobjects import Workspace2D
 from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 from isis_powder.routines.param_map_entry import ParamMapEntry
@@ -720,20 +720,28 @@ def workspace_has_current(ws):
 
 
 def save_unsplined_vanadium(vanadium_ws, output_path, keep_unit=False):
-    converted_workspaces = []
-    for ws_index in range(vanadium_ws.getNumberOfEntries()):
-        ws = vanadium_ws.getItem(ws_index)
-        previous_units = ws.getAxis(0).getUnit().unitID()
+    if isinstance(vanadium_ws, MatrixWorkspace):
+        converted_output = vanadium_ws
+        current_units = converted_output.getAxis(0).getUnit().unitID()
+        if current_units != WORKSPACE_UNITS.tof:
+            converted_output = mantid.ConvertUnits(InputWorkspace=converted_output, Target=WORKSPACE_UNITS.tof)
 
-        if not keep_unit and previous_units != WORKSPACE_UNITS.tof:
-            ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
+    if isinstance(vanadium_ws, WorkspaceGroup):
+        converted_workspaces = []
+        for ws_index in range(vanadium_ws.getNumberOfEntries()):
+            ws = vanadium_ws.getItem(ws_index)
+            previous_units = ws.getAxis(0).getUnit().unitID()
 
-        ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
-        converted_workspaces.append(ws)
+            if not keep_unit and previous_units != WORKSPACE_UNITS.tof:
+                ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
 
-    converted_group = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
-    mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
-    mantid.DeleteWorkspace(converted_group)
+            ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
+            converted_workspaces.append(ws)
+
+        converted_output = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
+
+    mantid.SaveNexus(InputWorkspace=converted_output, Filename=output_path, Append=False)
+    mantid.DeleteWorkspace(converted_output)
 
 
 def _remove_masked_and_monitor_spectra(data_workspace: Workspace2D, correction_workspace: Workspace2D, run_details):
