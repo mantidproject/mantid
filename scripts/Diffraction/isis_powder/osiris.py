@@ -134,7 +134,6 @@ class Osiris(AbstractInst):
             processed = self._focus(
                 run_number_string=run_number_string,
                 do_van_normalisation=self._inst_settings.van_norm,
-                do_absorb_corrections=False,
             )
 
             processed = [
@@ -167,14 +166,10 @@ class Osiris(AbstractInst):
         self,
         run_number_string,
         do_van_normalisation,
-        do_absorb_corrections,
-        sample_details=None,
-        empty_can_subtraction_method=None,
-        paalman_pings_events_per_point=None,
     ):
         """
-        Focuses the user specified run - should be called by the concrete instrument
-        :param run_number_string: The run number(s) to be processed
+        Override parent _focus function, used to focus samples in a specific drange
+        :param run_number_string: The run number(s) of the drange
         :param do_van_normalisation: True to divide by the vanadium run, false to not.
         :return:
         """
@@ -183,10 +178,7 @@ class Osiris(AbstractInst):
             run_number_string=run_number_string,
             perform_vanadium_norm=do_van_normalisation,
             instrument=self,
-            absorb=do_absorb_corrections,
-            sample_details=sample_details,
-            empty_can_subtraction_method=empty_can_subtraction_method,
-            paalman_pings_events_per_point=paalman_pings_events_per_point,
+            absorb=False,
         )
 
     def _setup_drange_sets(self):
