@@ -99,7 +99,7 @@ class SXDProcessSampleData(systemtesting.MantidSystemTest):
         sxd.set_goniometer_axes([0, 1, 0, 1])  # ccw rotation around vertical
         runno = 23767
         sxd.process_data([runno], [0])
-        self.ws = sxd.get_ws(runno)
+        self.ws = sxd.get_ws_name(runno)
 
     def validate(self):
         return self.ws, "SXD23767_processed.nxs"
@@ -124,7 +124,7 @@ class SXDIntegrateData(systemtesting.MantidSystemTest):
         )
         sxd.set_goniometer_axes([0, 1, 0, 1])  # ccw rotation around vertical
         sxd.integrate_data(INTEGRATION_TYPE.MD_OPTIMAL_RADIUS, PEAK_TYPE.FOUND, scale=12)
-        self.integrated_peaks = sxd.get_peaks(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS)
+        self.integrated_peaks = sxd.get_peaks_name(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS)
 
     def validate(self):
         return self.integrated_peaks, "SXD23767_found_peaks_integrated.nxs"

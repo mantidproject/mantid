@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from typing import Sequence
 import numpy as np
 import mantid.simpleapi as mantid
@@ -7,14 +13,15 @@ from mantid.api import AnalysisDataService as ADS
 from FindGoniometerFromUB import getR
 from os import path
 
+tof_min = 700
+tof_max = 18800
+
 
 class SXD(BaseSX):
     def __init__(self, vanadium_runno=None, empty_runno=None, detcal_path=None):
         self.empty_runno = empty_runno
         self.detcal_path = detcal_path
         super().__init__(vanadium_runno)
-        self.grp_ws = None  # banks grouping workspace
-        self.ngrp = None  # no. groups (i.e. number of banks)
         self.sphere_shape = """<sphere id="sphere">
                                <centre x="0.0"  y="0.0" z="0.0" />
                                <radius val="0.003"/>
@@ -35,7 +42,7 @@ class SXD(BaseSX):
                     # gonio_angles is a list of individual or tuple motor angles for each run
                     self._set_goniometer_on_ws(wsname, gonio_angles[irun])
             # normalise by vanadium
-            self._divide_workspaces(wsname, self.van_ws)
+            self._divide_workspaces(wsname, self.van_ws)  # van_ws has been converted to TOF
             # set sample (must be done after gonio to rotate shape) and correct for attenuation
             if self.sample_dict is not None:
                 mantid.SetSample(wsname, EnableLogging=False, **self.sample_dict)
@@ -48,6 +55,7 @@ class SXD(BaseSX):
                     )
                 self._divide_workspaces(wsname, transmission)
                 mantid.DeleteWorkspace(transmission)
+                mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="TOF", EnableLogging=False)
             # save results in dictionary
             self.set_ws(run, wsname)
         return wsname
@@ -57,21 +65,21 @@ class SXD(BaseSX):
         mantid.Load(Filename=wsname + ".raw", OutputWorkspace=wsname, EnableLogging=False)
         if self.detcal_path is not None:
             mantid.LoadParameterFile(Workspace=wsname, Filename=self.detcal_path, EnableLogging=False)
-        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=700, XMax=18800, EnableLogging=False)
+        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=tof_min, XMax=tof_max, EnableLogging=False)
         mantid.NormaliseByCurrent(InputWorkspace=wsname, OutputWorkspace=wsname, EnableLogging=False)
         return wsname
 
-    def _replace_spectra_with_focussed_bank(self, wsname):
+    def _replace_spectra_with_focussed_bank(self, wsname, bank_grouping_ws, ngroups):
         # important to focus in TOF not d-spacing (lambda would be better but not compatible with Diffractionfocussing)!
         ws = SXD.retrieve(wsname)
         banks_foc = mantid.GroupDetectors(
             InputWorkspace=ws,
             OutputWorkspace="grouped",
             IgnoreGroupNumber=False,
-            CopyGroupingFromWorkspace=self.grp_ws,
+            CopyGroupingFromWorkspace=bank_grouping_ws,
             EnableLogging=False,
         )
-        for igrp in range(self.ngrp):
+        for igrp in range(ngroups):
             ybank = banks_foc.readY(igrp)
             ebank = banks_foc.readE(igrp)
             ybank_sum = ybank.sum()
@@ -91,11 +99,11 @@ class SXD(BaseSX):
         empty_ws = self.load_run(self.empty_runno)
         self.van_ws = self.load_run(self.van_runno)
         # create grouping file per bank
-        self.grp_ws, _, self.ngrp = mantid.CreateGroupingWorkspace(
+        bank_grouping_ws, _, ngroups = mantid.CreateGroupingWorkspace(
             InputWorkspace=self.van_ws, GroupDetectorsBy="bank", OutputWorkspace="bank_groups", EnableLogging=False
         )
         self._minus_workspaces(self.van_ws, empty_ws)
-        self._replace_spectra_with_focussed_bank(self.van_ws)
+        self._replace_spectra_with_focussed_bank(self.van_ws, bank_grouping_ws, ngroups)
         # correct vanadium for absorption
         mantid.SetSample(
             self.van_ws,
@@ -125,15 +133,18 @@ class SXD(BaseSX):
         )
 
     @staticmethod
-    def calibrate_sxd_panels(ws, peaks, save_dir, tol=0.15, maxShiftInMeters=0.025):
+    def calibrate_sxd_panels(ws, peaks, save_dir, tol=0.15, maxShiftInMeters=0.01):
         """
-        Calibrate SXD panels and apply the calibration to th
-        :param ws: workspace or name (or None) - if None then empty workspace is loaded
+        Calibrate SXD panels panels and apply the calibration to the workspace and peaks workspace.
+        This is an iterative process in which the global translation of the detectors with respect to the sample
+        is optimized and then the relative positions of the banks are optimized independently, before optimizing both
+        the position and rotation of each bank independently. Note L1 is not optimized.
+        :param ws: workspace or name (or None) - if None then empty workspace is loaded and deleted
         :param peaks: peak table with a UB
         :param save_dir: for xml file containing calibration
-        :param tol: for indexing
+        :param tol: for indexing (good to pick a relatively large tol as lots of peaks are required in each bank)
         :param maxShiftInMeters: for panel optimisation
-        :return: xml_path
+        :return: xml_path: path to detector calibration xml file which can be applied using apply_calibration_xml or in the class init
         """
         tol_to_report = np.round(tol / 2, 3)  # use smaller tolerance to track improvement in calibration
         npeaks = SXD.retrieve(peaks).getNumberPeaks()
@@ -212,8 +223,7 @@ class SXD(BaseSX):
             mantid.ApplyInstrumentToPeaks(
                 InputWorkspace=peaks_name, InstrumentWorkspace=wsname, OutputWorkspace=peaks_name, EnableLogging=False
             )
-        mantid.DeleteWorkspace(peaks_bank, EnableLogging=False)
-        mantid.DeleteWorkspace("temp", EnableLogging=False)
+        mantid.DeleteWorkspaces(WorkspaceList=[peaks_bank, "temp"], EnableLogging=False)
 
         # use SCD calibrate to refine detector orientation and save detcal
         # report initial indexing
@@ -251,6 +261,8 @@ class SXD(BaseSX):
         nindexed, *_ = mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol_to_report, CommonUBForAll=False, EnableLogging=False)
         logger.notice(f"Indexed after optimization = {nindexed}/{npeaks} peaks within {tol_to_report}")
         mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol, CommonUBForAll=False, EnableLogging=False)
+        # cleanup
+        mantid.DeleteWorkspaces(WorkspaceList=["CovarianceInfo", "FitInfoTable"], EnableLogging=False)
         if ws is None:
             mantid.DeleteWorkspace(wsname, EnableLogging=False)
         return xml_path
@@ -263,7 +275,7 @@ class SXD(BaseSX):
         :param xml_path: path to xml cal file
         """
         use_empty = False
-        ws = self.get_ws(run)
+        ws = self.get_ws_name(run)
         if ws is None:
             # need instrument ws to apply to peaks
             ws = "empty"
@@ -275,11 +287,11 @@ class SXD(BaseSX):
             )  # reset instrument if already calibrated
         mantid.LoadParameterFile(Workspace=ws, Filename=xml_path, EnableLogging=False)
         for pk_type in PEAK_TYPE:
-            pks = self.get_peaks(run, peak_type=pk_type, integration_type=None)
+            pks = self.get_peaks_name(run, peak_type=pk_type, integration_type=None)
             if pks is not None:
                 mantid.ApplyInstrumentToPeaks(InputWorkspace=pks, InstrumentWorkspace=ws, OutputWorkspace=pks, EnableLogging=False)
                 for int_type in INTEGRATION_TYPE:
-                    pks_int = self.get_peaks(run, peak_type=pk_type, integration_type=int_type)
+                    pks_int = self.get_peaks_name(run, peak_type=pk_type, integration_type=int_type)
                     if pks_int is not None:
                         mantid.ApplyInstrumentToPeaks(
                             InputWorkspace=pks_int, InstrumentWorkspace=ws, OutputWorkspace=pks_int, EnableLogging=False

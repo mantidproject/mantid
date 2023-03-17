@@ -1,15 +1,23 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from typing import Sequence
 import numpy as np
 import mantid.simpleapi as mantid
 from Diffraction.single_crystal.base_sx import BaseSX
 from mantid.api import AnalysisDataService as ADS
 
+tof_min = 6000
+tof_max = 99000
+lambda_min = 0.8
+
 
 class WishSX(BaseSX):
     def __init__(self, vanadium_runno=None):
         super().__init__(vanadium_runno)
-        self.grp_ws = None  # banks grouping workspace
-        self.ngrp = None  # no. groups (i.e. number of banks)
         self.sphere_shape = """<sphere id="sphere">
                                <centre x="0.0"  y="0.0" z="0.0" />
                                <radius val="0.0025"/>
@@ -30,7 +38,7 @@ class WishSX(BaseSX):
                     # gonio_angles is a list of individual or tuple motor angles for each run
                     self._set_goniometer_on_ws(wsname, gonio_angles[irun])
             # correct for empty counts and normalise by vanadium
-            self._divide_workspaces(wsname, self.van_ws)
+            self._divide_workspaces(wsname, self.van_ws)  # van_ws has been converted to TOF
             # set sample (must be done after gonio to rotate shape) and correct for attenuation
             if self.sample_dict is not None:
                 mantid.SetSample(wsname, EnableLogging=False, **self.sample_dict)
@@ -43,6 +51,7 @@ class WishSX(BaseSX):
                     )
                 self._divide_workspaces(wsname, transmission)
                 mantid.DeleteWorkspace(transmission)
+                mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="TOF", EnableLogging=False)
             # save results in dictionary
             self.set_ws(run, wsname)
         return wsname
@@ -59,8 +68,7 @@ class WishSX(BaseSX):
 
     @BaseSX.default_apply_to_all_runs
     def convert_to_MD(self, run=None, frame="Q (lab frame)"):
-        wsname = WishSX.retrieve(self.get_ws(run)).name()
-        WishSX.mask_detector_edges(wsname, nedge=16, ntubes=2)
+        WishSX.mask_detector_edges(self.get_ws_name(run), nedge=16, ntubes=2)
         super().convert_to_MD(run, frame)
 
     def process_vanadium(self):
@@ -84,14 +92,14 @@ class WishSX(BaseSX):
         wsname = "WISH000" + str(runno)
         ws, mon = mantid.LoadRaw(Filename=wsname + ".raw", OutputWorkspace=wsname, LoadMonitors="Separate")
         mon_name = mon.name()
-        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=6000, XMax=99000)
-        mantid.CropWorkspace(InputWorkspace=mon_name, OutputWorkspace=mon_name, XMin=6000, XMax=99000)
+        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=tof_min, XMax=tof_max)
+        mantid.CropWorkspace(InputWorkspace=mon_name, OutputWorkspace=mon_name, XMin=tof_min, XMax=tof_max)
         # replace empty bin errors with 1 count
         mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Wavelength")
         mantid.ConvertUnits(InputWorkspace=mon_name, OutputWorkspace=mon_name, Target="Wavelength")
         mantid.NormaliseToMonitor(InputWorkspace=wsname, OutputWorkspace=wsname, MonitorWorkspaceIndex=3, MonitorWorkspace=mon_name)
         mantid.ReplaceSpecialValues(InputWorkspace=wsname, OutputWorkspace=wsname, NaNValue=0, InfinityValue=0)
-        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=0.8)
+        mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=lambda_min)
         mantid.NormaliseByCurrent(InputWorkspace=wsname, OutputWorkspace=wsname)
         mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="TOF")
         return wsname

@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 import tempfile
 import shutil
 from os import path
@@ -15,7 +15,7 @@ from mantid.simpleapi import (
 from Diffraction.single_crystal.sxd import SXD
 from Diffraction.single_crystal.base_sx import PEAK_TYPE, INTEGRATION_TYPE
 
-sxd_path = "Diffraction.single_crystal.base_sx"
+sxd_path = "Diffraction.single_crystal.sxd"
 
 
 class SXDTest(unittest.TestCase):
@@ -37,36 +37,40 @@ class SXDTest(unittest.TestCase):
 
     # --- test BaseSX methods (parent class with abstract methods) that require class instantiation ---
 
-    def test_get_ws(self):
+    @patch(sxd_path + ".BaseSX.retrieve")
+    def test_get_ws(self, mock_retrieve):
         runno = 1234
         wsname = "wsname"
         self.sxd.runs = {str(runno): {"ws": wsname}}
+        mock_retrieve.side_effect = lambda name: make_mock_ws_with_name(name)
 
-        self.assertEqual(wsname, self.sxd.get_ws(runno))
-        self.assertIsNone(self.sxd.get_ws(101))
+        self.assertEqual(wsname, self.sxd.get_ws_name(runno))
+        self.assertIsNone(self.sxd.get_ws_name(101))
 
-    def test_get_md(self):
+    @patch(sxd_path + ".BaseSX.retrieve")
+    def test_get_md(self, mock_retrieve):
         runno = 1234
         mdname = "mdname"
         self.sxd.runs = {str(runno): {"MD": mdname}}
+        mock_retrieve.side_effect = lambda name: make_mock_ws_with_name(name)
 
-        self.assertEqual(mdname, self.sxd.get_md(runno))
-        self.assertIsNone(self.sxd.get_md(101))
+        self.assertEqual(mdname, self.sxd.get_md_name(runno))
+        self.assertIsNone(self.sxd.get_md_name(101))
 
     def test_get_peaks_no_integration_type(self):
         runno = 1234
         pkname = "peaks"
         self.sxd.runs = {str(runno): {"found": pkname}}
 
-        self.assertEqual(pkname, self.sxd.get_peaks(runno, PEAK_TYPE.FOUND))
-        self.assertIsNone(self.sxd.get_peaks(101, PEAK_TYPE.FOUND))
+        self.assertEqual(pkname, self.sxd.get_peaks_name(runno, PEAK_TYPE.FOUND))
+        self.assertIsNone(self.sxd.get_peaks_name(101, PEAK_TYPE.FOUND))
 
     def test_get_peaks_with_integration_type(self):
         runno = 1234
         pkname = "peaks"
         self.sxd.runs = {str(runno): {"found_int_MD_opt": pkname}}
 
-        self.assertEqual(pkname, self.sxd.get_peaks(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS))
+        self.assertEqual(pkname, self.sxd.get_peaks_name(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS))
 
     def test_set_mc_abs_nevents(self):
         self.assertEqual(1200, self.sxd.n_mcevents)
@@ -83,7 +87,7 @@ class SXDTest(unittest.TestCase):
         # set first run
         runno = 1234
         self.sxd.set_ws(runno, self.ws)
-        self.assertEqual("empty", self.sxd.get_ws(runno))
+        self.assertEqual("empty", self.sxd.get_ws_name(runno))
 
     def test_set_peaks_no_integration_type(self):
         runno = 1234
@@ -91,7 +95,7 @@ class SXDTest(unittest.TestCase):
 
         self.sxd.set_peaks(runno, self.peaks, PEAK_TYPE.FOUND)
 
-        self.assertEqual("peaks", self.sxd.get_peaks(runno, PEAK_TYPE.FOUND))
+        self.assertEqual("peaks", self.sxd.get_peaks_name(runno, PEAK_TYPE.FOUND))
 
     def test_set_peaks_with_integration_type(self):
         runno = 1234
@@ -99,7 +103,7 @@ class SXDTest(unittest.TestCase):
 
         self.sxd.set_peaks(runno, self.peaks, PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS)
 
-        self.assertEqual("peaks", self.sxd.get_peaks(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS))
+        self.assertEqual("peaks", self.sxd.get_peaks_name(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS))
 
     def test_set_md(self):
         runno = 1234
@@ -107,7 +111,7 @@ class SXDTest(unittest.TestCase):
 
         self.sxd.set_md(runno, self.ws)
 
-        self.assertEqual("empty", self.sxd.get_md(runno))  # stores ws name
+        self.assertEqual("empty", self.sxd.get_md_name(runno))  # stores ws name
 
     def test_set_goniometer_axes(self):
         self.sxd.set_goniometer_axes([0, 1, 0, 1], [1, 1, 0, -1])
@@ -129,16 +133,17 @@ class SXDTest(unittest.TestCase):
             for kwarg in int_md_kwargs:
                 self.assertTrue(mock_int_md.call_args_list[icall].kwargs[kwarg])
 
-        # test saving reflections
+    # test saving reflections
 
+    @patch(sxd_path + ".BaseSX.retrieve")
     @patch(sxd_path + ".mantid.SaveReflections")
     @patch(sxd_path + ".mantid.SaveNexus")
-    def test_save_peak_table(self, mock_save_nxs, mock_save_ref):
+    def test_save_peak_table(self, mock_save_nxs, mock_save_ref, mock_retrieve):
         runno = 1234
-        self.sxd.set_ws(runno, self.ws)  # to init dict
+        self.sxd.runs = {str(runno): {"ws": self.ws.name(), "found_int_MD_opt": self.peaks.name()}}
         pk_type, int_type = PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS
-        self.sxd.set_peaks(runno, self.peaks, PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS)
         fmt = "SHELX"
+        mock_retrieve.side_effect = lambda name: make_mock_ws_with_name(name)
 
         self.sxd.save_peak_table(runno, pk_type, int_type, self._test_dir, fmt)
 
@@ -191,6 +196,12 @@ class SXDTest(unittest.TestCase):
         for idet, detid in enumerate(detids):
             AddPeak(PeaksWorkspace=peaks, RunWorkspace=self.ws, DetectorID=detid, TOF=tofs[idet], EnableLogging=False)
         return peaks
+
+
+def make_mock_ws_with_name(name):
+    mock_ws = MagicMock()
+    mock_ws.name.return_value = name
+    return mock_ws
 
 
 if __name__ == "__main__":

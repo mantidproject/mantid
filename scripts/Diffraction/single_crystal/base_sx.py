@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 from typing import Sequence, Optional
 import numpy as np
 from enum import Enum
@@ -46,15 +52,25 @@ class BaseSX(ABC):
 
     def get_ws(self, run):
         try:
-            return self.runs[str(run)]["ws"]
+            return BaseSX.retrieve(self.runs[str(run)]["ws"])
         except:
             return None
 
+    def get_ws_name(self, run):
+        ws = self.get_ws(run)
+        if ws is not None:
+            return ws.name()
+
     def get_md(self, run):
         try:
-            return self.runs[str(run)]["MD"]
+            return BaseSX.retrieve(self.runs[str(run)]["MD"])
         except:
             return None
+
+    def get_md_name(self, run):
+        ws = self.get_md(run)
+        if ws is not None:
+            return ws.name()
 
     def get_peaks(self, run, peak_type, integration_type=None):
         if integration_type is None:
@@ -62,9 +78,14 @@ class BaseSX(ABC):
         else:
             fieldname = "_".join([peak_type.value, integration_type.value])
         try:
-            return self.runs[str(run)][fieldname]
+            return BaseSX.retrieve(self.runs[str(run)][fieldname])
         except:
             return None
+
+    def get_peaks_name(self, run, peak_type, integration_type=None):
+        ws = self.get_peaks(run, peak_type, integration_type)
+        if ws is not None:
+            return ws.name()
 
     @staticmethod
     def has_sample(ws):
@@ -155,11 +176,12 @@ class BaseSX(ABC):
         )
         BaseSX._normalise_by_bin_width_in_k(wsname, undo=True)  # normalise by bin-width in K = 2pi/lambda
         mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target=xunit, EnableLogging=False)
+        mantid.DeleteWorkspace("PreprocessedDetectorsWS")
         return wsMD
 
     @default_apply_to_all_runs
     def convert_to_MD(self, run=None, frame="Q (lab frame)"):
-        wsname = BaseSX.retrieve(self.get_ws(run)).name()
+        wsname = self.get_ws_name(run)
         md_name = wsname + "_MD"
         BaseSX.convert_ws_to_MD(wsname, md_name, frame)
         self.set_md(run, md_name)
@@ -178,17 +200,17 @@ class BaseSX(ABC):
 
     def find_ub_using_lattice_params(self, global_B, tol=0.15, **kwargs):
         if global_B:
-            peaks = [self.get_peaks(run, PEAK_TYPE.FOUND) for run in self.runs.keys()]
+            peaks = [self.get_peaks_name(run, PEAK_TYPE.FOUND) for run in self.runs.keys()]
             mantid.FindGlobalBMatrix(PeakWorkspaces=peaks, Tolerance=tol, **kwargs)
         else:
-            for run, data in self.runs.items():
-                peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
+            for run in self.runs.keys():
+                peaks = self.get_peaks_name(run, PEAK_TYPE.FOUND)
                 mantid.FindUBUsingLatticeParameters(PeaksWorkspace=peaks, Tolerance=tol, **kwargs)
                 mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
 
-    def calc_U_matrix(self, *args, **kwargs):
-        for run, data in self.runs.items():
-            mantid.CalculateUMatrix(PeaksWorkspace=data["found_pks"], *args, **kwargs)
+    @default_apply_to_all_runs
+    def calculate_U_matrix(self, run=None, **kwargs):
+        mantid.CalculateUMatrix(PeaksWorkspace=self.get_peaks_name(run, PEAK_TYPE.FOUND), **kwargs)
 
     @default_apply_to_all_runs
     def calibrate_sample_pos(self, tol=0.15, run=None):
@@ -210,12 +232,12 @@ class BaseSX(ABC):
         input_ws = None
         ws = self.get_ws(run)
         peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
-        if peaks is not None and BaseSX.retrieve(peaks).sample().hasOrientedLattice():
+        if peaks is not None and peaks.sample().hasOrientedLattice():
             input_ws = peaks
-        elif ws is not None and BaseSX.retrieve(ws).sample().hasOrientedLattice():
+        elif ws is not None and ws.sample().hasOrientedLattice():
             input_ws = ws
         if input_ws is not None:
-            out_peaks_name = "_".join([BaseSX.retrieve(input_ws).name(), peak_type.value])
+            out_peaks_name = "_".join([input_ws.name(), peak_type.value])
             if peak_type == PEAK_TYPE.PREDICT:
                 mantid.PredictPeaks(InputWorkspace=input_ws, OutputWorkspace=out_peaks_name, EnableLogging=False, **kwargs)
             else:
@@ -326,10 +348,10 @@ class BaseSX(ABC):
         self.set_peaks(run, peak_int_name, peak_type, integration_type)
 
     def save_peak_table(self, run, peak_type, integration_type, save_dir, save_format, run_ref=None):
-        peaks = self.get_peaks(run, peak_type, integration_type)
+        peaks = self.get_peaks_name(run, peak_type, integration_type)
         if run_ref is not None and run_ref != run:
-            self.make_UB_consistent(self.get_peaks(run_ref, peak_type, integration_type), peaks)
-        filepath = path.join(save_dir, "_".join([BaseSX.retrieve(peaks).name(), save_format])) + ".int"
+            self.make_UB_consistent(self.get_peaks_name(run_ref, peak_type, integration_type), peaks)
+        filepath = path.join(save_dir, "_".join([peaks, save_format])) + ".int"
         mantid.SaveReflections(InputWorkspace=peaks, Filename=filepath, Format=save_format, SplitFiles=False)
         mantid.SaveNexus(InputWorkspace=peaks, Filename=filepath[:-3] + "nxs")
 
