@@ -4,7 +4,6 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import numpy as np
 from mantid.simpleapi import BinMD, FakeMDEventData, CreateMDWorkspace
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
@@ -251,13 +250,15 @@ def get_fake_elastic_sc_options():
     return el_opt
 
 
-# OKcomment: not used anywhere
 def get_fake_tof_errors():  # matches data 1,2 above
     return {"channel_widths": [2.0, 1.6], "chan_error": True, "tof_channels": [1, 1000], "tof_error": True}
 
 
-# OKcomment: not used anywhere
-def get_fake_elastic_datadic():
+def get_fake_tof_data_dic():
+    return {"knso": {"path": "C:/data", -6.0: [0, 1, 2, 3, 4, 5, 6, 7, 8], -5.0: [2, 3, 4]}}
+
+
+def get_fake_elastic_data_dic():
     return {
         "knso": {
             "path": "C:/data",
@@ -269,10 +270,6 @@ def get_fake_elastic_datadic():
             "z_sf": range(554577, 554637, 6),
         },
     }
-
-
-def get_fake_tof_data_dic():
-    return {"knso": {"path": "C:/data", -6.0: [0, 1, 2, 3, 4, 5, 6, 7, 8], -5.0: [2, 3, 4]}}
 
 
 def get_elastic_standard_data_dic():
@@ -296,15 +293,6 @@ def get_elastic_standard_data_dic():
             "z_nsf": range(50, 60, 1),
             "z_sf": range(40, 50, 1),
         },
-    }
-
-
-def get_fake_elastic_sc_dataset():
-    return {
-        "ttheta": [0, 1, 2],
-        "omega": [4, 5],
-        "intensity": np.transpose(np.asarray([[8.0, 9.0, 10.0], [11.0, 12.0, 13.0]])),
-        "error": np.transpose(np.asarray([[14.0, 15.0, 16.0], [17.0, 18.0, 19.0]])),
     }
 
 
