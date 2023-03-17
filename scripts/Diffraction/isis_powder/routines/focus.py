@@ -191,7 +191,9 @@ def _batched_run_focusing(
     empty_can_subtraction_method,
     paalman_pings_events_per_point=None,
 ):
+    # The mode will always be summed so this will return one workspace
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string, instrument=instrument)
+    summed_sample_ws = read_ws_list[0]
 
     vanadium_ws = None
     if perform_vanadium_norm:
@@ -199,19 +201,18 @@ def _batched_run_focusing(
         vanadium_ws = _get_vanadium_ws(instrument, run_details)
 
     output = []
-    for ws in read_ws_list:
-        focused_ws = _focus_one_ws(
-            input_workspace=ws,
-            run_number=run_number_string,
-            instrument=instrument,
-            perform_vanadium_norm=perform_vanadium_norm,
-            absorb=absorb,
-            sample_details=sample_details,
-            vanadium_ws=vanadium_ws,
-            empty_can_subtraction_method=empty_can_subtraction_method,
-            paalman_pings_events_per_point=paalman_pings_events_per_point,
-        )
-        output.append(focused_ws)
+    focused_ws = _focus_one_ws(
+        input_workspace=summed_sample_ws,
+        run_number=run_number_string,
+        instrument=instrument,
+        perform_vanadium_norm=perform_vanadium_norm,
+        absorb=absorb,
+        sample_details=sample_details,
+        vanadium_ws=vanadium_ws,
+        empty_can_subtraction_method=empty_can_subtraction_method,
+        paalman_pings_events_per_point=paalman_pings_events_per_point,
+    )
+    output.append(focused_ws)
 
     # clean up ws in this special case
     if instrument.get_instrument_prefix() == "PEARL" and vanadium_ws is not None:
