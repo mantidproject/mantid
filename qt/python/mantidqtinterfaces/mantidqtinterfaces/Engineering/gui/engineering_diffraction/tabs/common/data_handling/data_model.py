@@ -249,7 +249,9 @@ class FittingDataModel(object):
         )
 
     def get_log_workspace_group_name(self):
-        return self._sample_logs_workspace_group.get_log_workspaces().name()
+        return (
+            self._sample_logs_workspace_group.get_log_workspaces().name() if self._sample_logs_workspace_group.get_log_workspaces() else ""
+        )
 
     def set_log_workspaces_none(self):
         # to be used in the event of Ads clear, as trying to reference the deleted grp ws results in an error
