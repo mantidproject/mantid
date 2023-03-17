@@ -21,6 +21,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -1456,6 +1458,14 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
         new_vector(shapeObjectWithScatter->material(), k, specialSingleScatterCalc);
   }
 
+  bool considerGaugeVolume = true; // eventually check if m_inputWS->run().hasProperty("GaugeVolume") is populated
+  if (considerGaugeVolume) {
+    auto collimatorCorridor = createCollimatorCorridorShape(detPos);
+    // is the final scatter point inside the collimatorCorridor shape?
+    if (!collimatorCorridor->isValid(track.startPoint()))
+      return {true, std::vector<double>(wValues.size(), 0.)};
+  }
+
   Kernel::V3D directionToDetector = detPos - track.startPoint();
   Kernel::V3D prevDirection = track.direction();
   directionToDetector.normalize();
@@ -1512,6 +1522,29 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
     }
   }
   return {true, weights};
+}
+
+std::shared_ptr<Geometry::CSGObject>
+DiscusMultipleScatteringCorrection::createCollimatorCorridorShape(const V3D &detPos) {
+  // construct cuboid with axis passing through gauge volume centre and detPos
+  Kernel::V3D gaugeVolCentre(0., 0., 0.); // hard code this for now to test
+  // gaugeVolumeCentre = gaugeVolume.centrePoint()
+  auto fromDetToGaugeVolCentre = gaugeVolCentre - detPos;
+  // make the cuboid height twice the  distance from detector to gauge volume centre to make sure it passes all way
+  // through sample
+  auto corridorHeight = 2 * fromDetToGaugeVolCentre.norm();
+
+  std::ostringstream shapeXMLStr;
+  shapeXMLStr << "<cuboid id='\"collimator-corridor\">"
+              << "<width val=\"1.0\">" // TODO: decide on width
+              << "<height val=\"" << corridorHeight << "\">"
+              << "<depth val=\"1.0\">" // TODO: decide on height
+              << "<axis x=\"" << fromDetToGaugeVolCentre.X() << "\" y=\"" << fromDetToGaugeVolCentre.Y() << "\" z=\""
+              << fromDetToGaugeVolCentre.Z() << "\">"
+              << "<centre x=\"" << gaugeVolCentre.X() << "\" y=\"" << gaugeVolCentre.Y() << "\" z=\""
+              << gaugeVolCentre.Z() << "\">";
+  Geometry::ShapeFactory shapeMaker;
+  return shapeMaker.createShape(shapeXMLStr.str());
 }
 
 double DiscusMultipleScatteringCorrection::getKf(const double deltaE, const double kinc) {

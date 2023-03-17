@@ -16,6 +16,7 @@
 #include "MantidAlgorithms/SampleCorrections/SparseWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
 #include <boost/container/small_vector.hpp>
@@ -112,6 +113,7 @@ protected:
   API::MatrixWorkspace_sptr integrateWS(const API::MatrixWorkspace_sptr &ws);
   void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) const;
   void prepareSampleBeamGeometry(const API::MatrixWorkspace_sptr &inputWS);
+  std::shared_ptr<Geometry::CSGObject> createCollimatorCorridorShape(const Kernel::V3D &detPos);
 
 private:
   void init() override;
