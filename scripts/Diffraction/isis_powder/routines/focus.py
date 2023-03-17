@@ -166,10 +166,7 @@ def _get_vanadium_ws(instrument, run_details):
     if van in mantid.mtd:
         return mantid.mtd[van]
 
-    if instrument.get_instrument_prefix() != "OSIRIS":
-        van_path = run_details.splined_vanadium_file_path
-    else:
-        van_path = run_details.unsplined_vanadium_file_path
+    van_path = instrument.get_vanadium_path(run_details)
 
     if not os.path.isfile(van_path):
         raise ValueError(

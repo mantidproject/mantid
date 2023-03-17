@@ -228,6 +228,15 @@ class Osiris(AbstractInst):
             OutputWorkspace=str(focused_ws),
         )
 
+    def get_vanadium_path(self, run_details):
+        """
+        Get the vanadium path from the run details
+        :param run_details: The run details of the run number
+        :return: the vanadium path
+        """
+
+        return run_details.unsplined_vanadium_file_path
+
     def _output_focused_ws(self, processed_spectra, run_details):
         """
         Takes a list of focused workspace banks and saves them out in an instrument appropriate format.

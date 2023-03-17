@@ -151,6 +151,15 @@ class AbstractInst(object):
 
         return focused_ws
 
+    def get_vanadium_path(self, run_details):
+        """
+        Get the vanadium path from the run details
+        :param run_details: The run details of the run number
+        :return: the vanadium path
+        """
+
+        return run_details.splined_vanadium_file_path
+
     # Mandatory overrides
 
     def _get_run_details(self, run_number_string):
