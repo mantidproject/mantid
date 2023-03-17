@@ -10,6 +10,7 @@ from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
 from mantid.kernel import logger
+from mantid.api import MatrixWorkspace, WorkspaceGroup
 
 
 class Polaris(AbstractInst):
@@ -46,22 +47,41 @@ class Polaris(AbstractInst):
     def create_vanadium(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
+
+        per_detector = False
+        if self._inst_settings.per_detector_vanadium:
+            per_detector = bool(self._inst_settings.per_detector_vanadium)
+
         vanadium_d = self._create_vanadium(
-            run_number_string=self._inst_settings.run_in_range, do_absorb_corrections=self._inst_settings.do_absorb_corrections
+            run_number_string=self._inst_settings.run_in_range,
+            do_absorb_corrections=self._inst_settings.do_absorb_corrections,
+            per_detector=per_detector,
         )
+        self.ensure_per_detector_and_vanadium_output_are_in_sync(vanadium_d, per_detector)
 
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
         polaris_algs.save_unsplined_vanadium(vanadium_ws=vanadium_d, output_path=run_details.unsplined_vanadium_file_path)
         return vanadium_d
 
+    def ensure_per_detector_and_vanadium_output_are_in_sync(self, vanadium_d, per_detector):
+        correct_per_detector_condition = isinstance(vanadium_d, MatrixWorkspace) and per_detector
+        correct_per_bank_condition = isinstance(vanadium_d, WorkspaceGroup) and not per_detector
+        if not correct_per_detector_condition and not correct_per_bank_condition:
+            raise ValueError(
+                f"The output from polaris._create_vanadium must be a WorkspaceGroup in the per_bank "
+                f"routine (default) and must be MatrixWorkspace in the per_detector routine. In this case,"
+                f"the output was type {type(vanadium_d)} and in the "
+                f"{'per_detector' if per_detector else 'per_bank'} routine"
+            )
+
     def create_total_scattering_pdf(self, **kwargs):
-        if "pdf_type" not in kwargs or kwargs["pdf_type"] not in ["G(r)", "g(r)", "RDF(r)", "G_k(r)"]:
-            kwargs["pdf_type"] = "G(r)"
-            logger.warning("PDF type not specified or is invalid, defaulting to G(r)")
-        if "placzek_order" not in kwargs or kwargs["placzek_order"] not in [1, 2]:
-            kwargs["placzek_order"] = 1
-            logger.warning("Placzek correction order not specified or is invalid, defaulting to 1")
         self._inst_settings.update_attributes(kwargs=kwargs)
+        if not hasattr(self._inst_settings, "pdf_type") or self._inst_settings.pdf_type not in ["G(r)", "g(r)", "RDF(r)", "G_k(r)"]:
+            self._inst_settings.pdf_type = "G(r)"
+            logger.warning("PDF type not specified or is invalid, defaulting to G(r)")
+        if not hasattr(self._inst_settings, "placzek_order") or self._inst_settings.placzek_order not in [1, 2]:
+            self._inst_settings.placzek_order = 1
+            logger.warning("Placzek correction order not specified or is invalid, defaulting to 1")
         # Generate pdf
         run_details = self._get_run_details(self._inst_settings.run_number)
         focus_file_path = self._generate_out_file_paths(run_details)["nxs_filename"]
@@ -84,6 +104,7 @@ class Polaris(AbstractInst):
             pdf_type=self._inst_settings.pdf_type,
             lorch_filter=self._inst_settings.lorch_filter,
             freq_params=self._inst_settings.freq_params,
+            per_detector=self._inst_settings.per_detector_vanadium,
             debug=self._inst_settings.debug,
         )
         return pdf_output
@@ -184,3 +205,18 @@ class Polaris(AbstractInst):
 
     def perform_abs_vanadium_norm(self):
         return self._inst_settings.van_normalisation_method == "Absolute"
+
+    def apply_additional_per_detector_corrections(self, input_workspace, sample_details, run_details):
+        if self._inst_settings.mode.lower() == "pdf":
+            if not hasattr(self._inst_settings, "placzek_order") or self._inst_settings.placzek_order not in [1, 2]:
+                self._inst_settings.placzek_order = 1
+                logger.warning("Placzek correction order not specified or is invalid, defaulting to 1")
+            if not hasattr(self._inst_settings, "sample_temp"):
+                sample_temperature = None
+            else:
+                sample_temperature = str(self._inst_settings.sample_temp)
+            return polaris_algs.apply_placzek_correction_per_detector(
+                input_workspace, sample_details, run_details, self._inst_settings.placzek_order, sample_temperature
+            )
+        else:
+            return input_workspace

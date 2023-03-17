@@ -20,7 +20,10 @@ attr_mapping = [
     ParamMapEntry(ext_name="do_absorb_corrections", int_name="do_absorb_corrections"),
     ParamMapEntry(ext_name="do_van_normalisation", int_name="do_van_normalisation"),
     ParamMapEntry(
-        ext_name="van_normalisation_method", int_name="van_normalisation_method", enum_class=VAN_NORMALISATION_METHOD, optional=True
+        ext_name="van_normalisation_method",
+        int_name="van_normalisation_method",
+        enum_class=VAN_NORMALISATION_METHOD,
+        optional=True,
     ),
     ParamMapEntry(
         ext_name="empty_can_subtraction_method",
@@ -28,7 +31,6 @@ attr_mapping = [
         enum_class=EMPTY_CAN_SUBTRACTION_METHOD,
         optional=True,
     ),
-    ParamMapEntry(ext_name="paalman_pings_events_per_point", int_name="paalman_pings_events_per_point", optional=True),
     ParamMapEntry(ext_name="file_ext", int_name="file_extension", optional=True),
     ParamMapEntry(ext_name="first_cycle_run_no", int_name="run_in_range"),
     ParamMapEntry(ext_name="focused_cropping_values", int_name="focused_cropping_values"),
@@ -40,7 +42,9 @@ attr_mapping = [
     ParamMapEntry(ext_name="merge_banks", int_name="merge_banks", optional=True),
     ParamMapEntry(ext_name="mode", int_name="mode", enum_class=POLARIS_CHOPPER_MODES, optional=True),
     ParamMapEntry(ext_name="multiple_scattering", int_name="multiple_scattering", optional=True),
+    ParamMapEntry(ext_name="paalman_pings_events_per_point", int_name="paalman_pings_events_per_point", optional=True),
     ParamMapEntry(ext_name="pdf_type", int_name="pdf_type"),
+    ParamMapEntry(ext_name="per_detector_vanadium", int_name="per_detector_vanadium", optional=True),
     ParamMapEntry(ext_name="placzek_order", int_name="placzek_order", optional=True),
     ParamMapEntry(ext_name="q_lims", int_name="q_lims", optional=True),
     ParamMapEntry(ext_name="raw_data_cropping_values", int_name="raw_data_crop_values"),
@@ -50,6 +54,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="sample_temp", int_name="sample_temp", optional=True),
     ParamMapEntry(ext_name="suffix", int_name="suffix", optional=True),
     ParamMapEntry(ext_name="spline_coefficient", int_name="spline_coeff"),
+    ParamMapEntry(ext_name="spline_coeff_per_detector", int_name="spline_coeff_per_detector", optional=True),
     ParamMapEntry(ext_name="output_directory", int_name="output_dir"),
     ParamMapEntry(ext_name="user_name", int_name="user_name"),
     ParamMapEntry(ext_name="vanadium_cropping_values", int_name="van_crop_values"),
