@@ -116,6 +116,9 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
     m_view->setAngle(*theta);
   }
 
+  // Clear the region selector to ensure all spectra are shown.
+  m_regionSelector->clearWorkspace();
+
   // Notify the instrument view model that the workspace has changed before we get the surface
   m_instViewModel->updateWorkspace(ws);
   plotInstView();

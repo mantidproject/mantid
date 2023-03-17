@@ -134,6 +134,8 @@ public:
 
     expectLoadWorkspaceCompletedForLinearDetector(*mockModel, *mockJobManager, *mockDockedWidgets, *mockInstViewModel);
 
+    EXPECT_CALL(*mockRegionSelector, clearWorkspace()).Times(1);
+
     auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel),
                          std::move(mockDockedWidgets), std::move(mockRegionSelector));
     auto presenter = PreviewPresenter(std::move(deps));
