@@ -88,6 +88,13 @@ class TimeSeriesPropertyTest : public CxxTest::TestSuite {
     return rois;
   }
 
+  // compare two vectors element-wise, allowing for a small difference between corresponding values.
+  void assert_two_vectors(const std::vector<double> &left, const std::vector<double> &right, double delta) {
+    TS_ASSERT_EQUALS(left.size(), right.size());
+    for (size_t i = 0; i < left.size(); i++)
+      TS_ASSERT_DELTA(left[i], right[i], delta);
+  }
+
 public:
   void setUp() override {
     iProp = new TimeSeriesProperty<int>("intProp");
@@ -366,37 +373,29 @@ public:
     delete log;
   }
 
-  void test_ComparisonOperator() {
-    // Setup two logs and two filters so that logs have different sizes but are
-    // the same size after applying the filter
-
-    TimeSeriesProperty<int> *log1 = new TimeSeriesProperty<int>("count_rate");
-    log1->addValue("2016-03-17T00:00:00", 1);
-    log1->addValue("2016-03-17T00:30:00", 2);
-    log1->addValue("2016-03-17T01:00:00", 3);
-    log1->addValue("2016-03-17T01:30:00", 4);
-    log1->addValue("2016-03-17T02:00:00", 5);
-    TimeSeriesProperty<bool> *filter1 = new TimeSeriesProperty<bool>("filter");
-    filter1->addValue("2016-Mar-17 00:00:00", 1);
-    filter1->addValue("2016-Mar-17 01:00:00", 0);
-    log1->filterWith(filter1);
-
-    TimeSeriesProperty<int> *log2 = new TimeSeriesProperty<int>("count_rate");
-    log2->addValue("2016-03-17T03:00:00", 1);
-    log2->addValue("2016-03-17T04:00:00", 2);
-    log2->addValue("2016-03-17T05:00:00", 3);
-    log2->addValue("2016-03-17T06:00:0", 4);
-    TimeSeriesProperty<bool> *filter2 = new TimeSeriesProperty<bool>("filter");
-    filter2->addValue("2016-Mar-17 03:00:00", 1);
-    filter2->addValue("2016-Mar-17 05:00:00", 0);
-    log2->filterWith(filter2);
-
-    TS_ASSERT(!(*log1 == *log2));
-
-    delete log1;
-    delete log2;
-    delete filter1;
-    delete filter2;
+  //----------------------------------------------------------------------------
+  void test_filteredValuesAsVector() {
+    TimeSeriesProperty<double> *log = createDoubleTSP();
+    // no filter
+    this->assert_two_vectors(log->filteredValuesAsVector(), log->valuesAsVector(), 0.01);
+    // filter encompassing all the time domain
+    TimeROI *rois = new TimeROI;
+    rois->addROI("2007-11-30T16:17:00", "2007-11-30T16:17:31");
+    this->assert_two_vectors(log->filteredValuesAsVector(rois), log->valuesAsVector(), 0.01);
+    // times are outside the ROI's. Some times are at the upper boundaries of the ROI's, thus are excluded
+    rois->clear();
+    rois->addROI("2007-11-30T16:16:00", "2007-11-30T16:17:00"); // before the first time, including the first time
+    rois->addROI("2007-11-30T16:17:01", "2007-11-30T16:17:09"); // between times 1st and 2nd
+    rois->addROI("2007-11-30T16:17:15", "2007-11-30T16:17:20"); // between times 2nd and 3rd, including time 3rd
+    rois->addROI("2007-11-30T16:17:45", "2007-11-30T16:18:00"); // after last time
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(rois).size(), 0);
+    //
+    rois->clear();
+    rois->addROI("2007-11-30T16:16:30", "2007-11-30T16:17:05"); // capture the first time
+    rois->addROI("2007-11-30T16:17:10", "2007-11-30T16:17:20"); // capture second time, exclude the third
+    rois->addROI("2007-11-30T16:17:30", "2007-11-30T16:18:00"); // ROI after last time, including last time
+    std::vector<double> expected{9.99, 7.55, 10.55};
+    this->assert_two_vectors(log->filteredValuesAsVector(rois), expected, 0.01);
   }
 
   //----------------------------------------------------------------------------
@@ -672,7 +671,7 @@ public:
   }
 
   void test_timeAverageValue() {
-    // values are equally spaced
+    // values are equally spaced in time
     auto dblLog = createDoubleTSP();
     auto intLog = createIntegerTSP(5);
 
@@ -1221,6 +1220,15 @@ public:
     delete p;
 
     return;
+  }
+
+  void test_durationInSeconds() {
+    TimeSeriesProperty<double> *log = createDoubleTSP();
+    TS_ASSERT_DELTA(log->durationInSeconds(), 40.0, 0.1);
+    TimeROI *rois = new TimeROI;
+    rois->addROI("2007-11-30T16:17:05", "2007-11-30T16:17:15");
+    rois->addROI("2007-11-30T16:17:25", "2007-11-30T16:17:35");
+    TS_ASSERT_DELTA(log->durationInSeconds(rois), 20.0, 0.1);
   }
 
   void test_firstLastTimeValue_emptyPropertyThrows() {
@@ -1838,315 +1846,6 @@ public:
   }
 
   /*
-   * Test filterWith() and clear filter
-   */
-  void test_filter() {
-    // 1. Create a base property
-    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
-    std::vector<double> deltaTs;
-    std::vector<double> valueXs;
-    for (int i = 0; i < 20; i++) {
-      deltaTs.emplace_back(static_cast<double>(i) * 10.0);
-      valueXs.emplace_back(static_cast<double>(i) + 1.0);
-    }
-    TimeSeriesProperty<double> *p1 = new TimeSeriesProperty<double>("BaseProperty");
-    p1->create(tStart, deltaTs, valueXs);
-
-    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
-    std::vector<double> values = p1->valuesAsVector();
-
-    // b) Copy size and interval information in order to verify clearFilter()
-    size_t origsize = p1->size();
-    std::vector<Mantid::Kernel::TimeInterval> dts;
-
-    for (size_t i = 0; i < origsize; i++) {
-      dts.emplace_back(p1->nthInterval(static_cast<int>(i)));
-    }
-
-    // 2. Create a filter
-    TimeSeriesProperty<bool> *filter = new TimeSeriesProperty<bool>("Filter");
-    filter->addValue("2007-11-30T16:17:06", true);
-    filter->addValue("2007-11-30T16:17:16", false);
-    filter->addValue("2007-11-30T16:18:40", true);
-    filter->addValue("2007-11-30T16:19:30", false);
-
-    p1->filterWith(filter);
-
-    // 4. Formal check (1) Size  (2) Number of Interval
-    p1->countSize();
-    TS_ASSERT_EQUALS(p1->size(), 7);
-
-    Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
-    TS_ASSERT_EQUALS(dt1.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    TS_ASSERT_EQUALS(dt1.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
-
-    Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
-    TS_ASSERT_EQUALS(dt2.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
-    TS_ASSERT_EQUALS(dt2.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
-
-    // 4. Clear filter
-    p1->clearFilter();
-    p1->countSize();
-
-    size_t finalsize = p1->size();
-    TS_ASSERT_EQUALS(finalsize, origsize);
-
-    if (finalsize == origsize) {
-      for (size_t i = 0; i < finalsize; i++) {
-        Mantid::Kernel::TimeInterval dt = p1->nthInterval(static_cast<int>(i));
-        TS_ASSERT_EQUALS(dt.start(), dts[i].start());
-        TS_ASSERT_EQUALS(dt.stop(), dts[i].stop());
-      }
-    }
-
-    // -1. Clean
-    delete p1;
-    delete filter;
-
-    return;
-  }
-
-  void test_filter_with_single_value_in_series() {
-    auto p1 = std::make_shared<TimeSeriesProperty<double>>("SingleValueTSP");
-    p1->addValue("2007-11-30T16:17:00", 1.5);
-
-    auto filterEndsBefore = std::make_shared<TimeSeriesProperty<bool>>("EndsBefore");
-    filterEndsBefore->addValue("2007-11-30T16:16:30", false);
-    filterEndsBefore->addValue("2007-11-30T16:16:58", true);
-    p1->filterWith(filterEndsBefore.get());
-    TS_ASSERT_EQUALS(1, p1->size());
-
-    p1->clearFilter();
-    auto filterEndsAfter = std::make_shared<TimeSeriesProperty<bool>>("EndsAfter");
-    filterEndsAfter->addValue("2007-11-30T16:16:30", false);
-    filterEndsAfter->addValue("2007-11-30T16:17:01", true);
-    p1->filterWith(filterEndsAfter.get());
-    TS_ASSERT_EQUALS(1, p1->size());
-  }
-
-  /*
-   * Test filterWith() on different boundary conditions
-   * Filter_T0 < Log_T0 < LogTf < Filter_Tf, T... F... T... F...
-   * Log will be extended to Filter_T0
-   */
-  void test_filterBoundary1() {
-    // 1. Create a base property
-    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
-    std::vector<double> deltaTs;
-    std::vector<double> valueXs;
-    for (int i = 0; i < 20; i++) {
-      deltaTs.emplace_back(static_cast<double>(i) * 10.0);
-      valueXs.emplace_back(static_cast<double>(i) + 1.0);
-    }
-    TimeSeriesProperty<double> *p1 = new TimeSeriesProperty<double>("BaseProperty");
-    p1->create(tStart, deltaTs, valueXs);
-
-    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
-    std::vector<double> values = p1->valuesAsVector();
-
-    // 2. Create a filter for T. F. T. F...
-    TimeSeriesProperty<bool> *filter = new TimeSeriesProperty<bool>("Filter");
-    filter->addValue("2007-11-30T16:16:06", true);
-    filter->addValue("2007-11-30T16:17:16", false);
-    filter->addValue("2007-11-30T16:18:40", true);
-    filter->addValue("2007-11-30T17:19:30", false);
-
-    p1->filterWith(filter);
-
-    // 3. Check size
-    p1->countSize();
-    TS_ASSERT_EQUALS(p1->size(), 12);
-
-    // 4. Check interval & Value
-    Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
-    TS_ASSERT_EQUALS(dt0.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(dt0.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    double v0 = p1->nthValue(0);
-    TS_ASSERT_DELTA(v0, 1, 0.00000001);
-
-    Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
-    TS_ASSERT_EQUALS(dt1.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    TS_ASSERT_EQUALS(dt1.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
-    double v1 = p1->nthValue(1);
-    TS_ASSERT_DELTA(v1, 2, 0.00000001);
-
-    Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
-    TS_ASSERT_EQUALS(dt2.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
-    TS_ASSERT_EQUALS(dt2.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
-    double v2 = p1->nthValue(2);
-    TS_ASSERT_DELTA(v2, 11, 0.00000001);
-
-    Mantid::Kernel::TimeInterval dt12 = p1->nthInterval(11);
-    TS_ASSERT_EQUALS(dt12.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:20:10"));
-    TS_ASSERT_EQUALS(dt12.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T17:19:30"));
-    double v12 = p1->nthValue(11);
-    TS_ASSERT_DELTA(v12, 20, 1.0E-8);
-
-    // 5. Clear filter
-    p1->clearFilter();
-
-    // -1. Clean
-    delete p1;
-    delete filter;
-
-    return;
-  }
-
-  /*
-   * Test filterWith() on different boundary conditions
-   * Filter_T0 < Log_T0 < LogTf < Filter_Tf, F... T... F... T... F...
-   */
-  void test_filterBoundary2() {
-    // 1. Create a base property
-    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
-    std::vector<double> deltaTs;
-    std::vector<double> valueXs;
-    for (int i = 0; i < 20; i++) {
-      deltaTs.emplace_back(static_cast<double>(i) * 10.0);
-      valueXs.emplace_back(static_cast<double>(i) + 1.0);
-    }
-    TimeSeriesProperty<double> *p1 = new TimeSeriesProperty<double>("BaseProperty");
-    p1->create(tStart, deltaTs, valueXs);
-
-    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
-    std::vector<double> values = p1->valuesAsVector();
-
-    // 2. Create a filter for T. F. T. F...
-    TimeSeriesProperty<bool> *filter = new TimeSeriesProperty<bool>("Filter");
-    filter->addValue("2007-11-30T16:16:06", false);
-    filter->addValue("2007-11-30T16:17:16", true);
-    filter->addValue("2007-11-30T16:18:40", false);
-    filter->addValue("2007-11-30T17:19:30", true);
-
-    p1->filterWith(filter);
-
-    // 3. Check size
-    p1->countSize();
-    TS_ASSERT_EQUALS(p1->size(), 10);
-
-    // 4. Check interval
-    Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
-    TS_ASSERT_EQUALS(dt0.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
-    TS_ASSERT_EQUALS(dt0.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
-    double v0 = p1->nthValue(0);
-    TS_ASSERT_DELTA(v0, 2, 1.0E-8);
-
-    // 5. Clear filter
-    p1->clearFilter();
-
-    // -1. Clean
-    delete p1;
-    delete filter;
-
-    return;
-  }
-
-  /*
-   * Test filterWith() on different boundary conditions
-   * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf, T... F... T... F...
-   */
-  void test_filterBoundary3() {
-    // 1. Create a base property
-    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
-    std::vector<double> deltaTs;
-    std::vector<double> valueXs;
-    for (int i = 0; i < 20; i++) {
-      deltaTs.emplace_back(static_cast<double>(i) * 10.0);
-      valueXs.emplace_back(static_cast<double>(i) + 1.0);
-    }
-    TimeSeriesProperty<double> *p1 = new TimeSeriesProperty<double>("BaseProperty");
-    p1->create(tStart, deltaTs, valueXs);
-
-    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
-    std::vector<double> values = p1->valuesAsVector();
-
-    // 2. Create a filter for T. F. T. F...
-    TimeSeriesProperty<bool> *filter = new TimeSeriesProperty<bool>("Filter");
-    filter->addValue("2007-11-30T16:17:06", true);
-    filter->addValue("2007-11-30T16:17:16", false);
-    filter->addValue("2007-11-30T16:18:40", true);
-    filter->addValue("2007-11-30T16:19:30", false);
-
-    p1->filterWith(filter);
-
-    // 3. Check size
-    p1->countSize();
-    TS_ASSERT_EQUALS(p1->size(), 7);
-
-    // 4. Check interval
-    Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
-    TS_ASSERT_EQUALS(dt1.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    TS_ASSERT_EQUALS(dt1.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
-    double v1 = p1->nthValue(1);
-    TS_ASSERT_DELTA(v1, 2, 1.0E-8);
-
-    Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
-    TS_ASSERT_EQUALS(dt2.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
-    TS_ASSERT_EQUALS(dt2.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
-    double v2 = p1->nthValue(2);
-    TS_ASSERT_DELTA(v2, 11, 1.0E-8);
-
-    // 5. Clear filter
-    p1->clearFilter();
-
-    // -1. Clean
-    delete p1;
-    delete filter;
-
-    return;
-  }
-
-  /*
-   * Test filterWith() on different boundary conditions
-   * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf,  F... T... F... T... F...
-   */
-
-  void test_filterBoundary4() {
-    // 1. Create a base property
-    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
-    std::vector<double> deltaTs;
-    std::vector<double> valueXs;
-    for (int i = 0; i < 20; i++) {
-      deltaTs.emplace_back(static_cast<double>(i) * 10.0);
-      valueXs.emplace_back(static_cast<double>(i) + 1.0);
-    }
-    TimeSeriesProperty<double> *p1 = new TimeSeriesProperty<double>("BaseProperty");
-    p1->create(tStart, deltaTs, valueXs);
-
-    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
-    std::vector<double> values = p1->valuesAsVector();
-
-    // 2. Create a filter for T. F. T. F...
-    TimeSeriesProperty<bool> *filter = new TimeSeriesProperty<bool>("Filter");
-    filter->addValue("2007-11-30T16:17:06", false);
-    filter->addValue("2007-11-30T16:17:16", true);
-    filter->addValue("2007-11-30T16:18:40", false);
-    filter->addValue("2007-11-30T16:19:30", true);
-
-    p1->filterWith(filter);
-
-    // 3. Check size
-    p1->countSize();
-    TS_ASSERT_EQUALS(p1->size(), 14);
-
-    // 4. Check interval
-    Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
-    TS_ASSERT_EQUALS(dt0.start(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
-    TS_ASSERT_EQUALS(dt0.stop(), Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
-    double v0 = p1->nthValue(0);
-    TS_ASSERT_DELTA(v0, 2, 1.0E-8);
-
-    // 5. Clear filter
-    p1->clearFilter();
-
-    // -1. Clean
-    delete p1;
-    delete filter;
-
-    return;
-  }
-
-  /*
    * Test getMemorySize()
    * Note that this will be same with new container
    */
@@ -2184,7 +1883,7 @@ public:
     series.addValue("2000-11-30T01:01:01", expectedFilteredValue);
     series.addValue("2000-11-30T01:01:02", 2);
 
-    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::FirstValue);
+    const double actualFilteredValue = series.extractStatistic(Mantid::Kernel::Math::FirstValue);
     TSM_ASSERT_EQUALS("Filtering by FirstValue is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
@@ -2195,7 +1894,7 @@ public:
     series.addValue("2000-11-30T01:01:01", 0);
     series.addValue("2000-11-30T01:01:02", expectedFilteredValue);
 
-    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::LastValue);
+    const double actualFilteredValue = series.extractStatistic(Mantid::Kernel::Math::LastValue);
     TSM_ASSERT_EQUALS("Filtering by LastValue is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
@@ -2208,7 +1907,7 @@ public:
                     expectedFilteredValue); // minimum. 1 < 3 < 4
     series.addValue("2000-11-30T01:01:03", 4);
 
-    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Minimum);
+    const double actualFilteredValue = series.extractStatistic(Mantid::Kernel::Math::Minimum);
     TSM_ASSERT_EQUALS("Filtering by Minimum is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
@@ -2221,7 +1920,7 @@ public:
                     expectedFilteredValue); // maximum. 1 > 0.9 > 0.1
     series.addValue("2000-11-30T01:01:03", 0.9);
 
-    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Maximum);
+    const double actualFilteredValue = series.extractStatistic(Mantid::Kernel::Math::Maximum);
     TSM_ASSERT_EQUALS("Filtering by Maximum is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
@@ -2235,7 +1934,7 @@ public:
                                             // (T1 + T2 + T3) / 3
     series.addValue("2000-11-30T01:01:03", 2);
 
-    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Mean);
+    const double actualFilteredValue = series.extractStatistic(Mantid::Kernel::Math::Mean);
     TSM_ASSERT_EQUALS("Filtering by Mean Time is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
@@ -2250,7 +1949,7 @@ public:
     series.addValue("2000-11-30T01:01:04", 4);
     series.addValue("2000-11-30T01:02:00", 5);
 
-    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Median);
+    const double actualFilteredValue = series.extractStatistic(Mantid::Kernel::Math::Median);
     TSM_ASSERT_EQUALS("Filtering by Median Time is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
@@ -2275,37 +1974,6 @@ public:
     delete log;
   }
 
-  /// Test that getStatistics respects the filter
-  void test_getStatistics_filtered() {
-    const auto &log = getFilteredTestLog();
-
-    // Get the stats and compare to expected values
-    const auto &stats = log->getStatistics();
-    TS_ASSERT_DELTA(stats.minimum, 1.0, 1e-6);
-    TS_ASSERT_DELTA(stats.maximum, 10.0, 1e-6);
-    TS_ASSERT_DELTA(stats.median, 6.0, 1e-6);
-    TS_ASSERT_DELTA(stats.mean, 5.77778, 1e-3);
-    TS_ASSERT_DELTA(stats.duration, 85.0, 1e-6);
-    TS_ASSERT_DELTA(stats.standard_deviation, 2.8974, 1e-4);
-  }
-
-  /// Test that timeAverageValue respects the filter
-  void test_timeAverageValue_filtered() {
-    const auto &log = getFilteredTestLog();
-    TS_ASSERT_DELTA(log->timeAverageValue(), 5.588, 1e-3);
-  }
-
-  void test_filteredValuesAsVector() {
-    const auto &log = getFilteredTestLog();
-
-    const auto &unfilteredValues = log->valuesAsVector();
-    const auto &filteredValues = log->filteredValuesAsVector();
-
-    TS_ASSERT_DIFFERS(unfilteredValues.size(), filteredValues.size());
-    TS_ASSERT_EQUALS(unfilteredValues.size(), 11);
-    TS_ASSERT_EQUALS(filteredValues.size(), 9);
-  }
-
   void test_getSplittingIntervals_noFilter() {
     const auto &log = getTestLog(); // no filter
     const auto &intervals = log->getSplittingIntervals();
@@ -2320,54 +1988,6 @@ public:
     TS_ASSERT_EQUALS(range.stop(), stop);
   }
 
-  void test_getSplittingIntervals_repeatedEntries() {
-    const auto &log = getTestLog();
-    // Add the filter
-    auto filter = std::make_unique<TimeSeriesProperty<bool>>("Filter");
-    Mantid::Types::Core::DateAndTime firstStart("2007-11-30T16:17:00"), firstEnd("2007-11-30T16:17:15"),
-        secondStart("2007-11-30T16:18:35"), secondEnd("2007-11-30T16:18:40");
-    filter->addValue(firstStart.toISO8601String(), true);
-    filter->addValue(firstEnd.toISO8601String(), false);
-    filter->addValue("2007-11-30T16:17:25", false);
-    filter->addValue(secondStart.toISO8601String(), true);
-    filter->addValue("2007-11-30T16:18:38", true);
-    filter->addValue(secondEnd.toISO8601String(), false);
-    log->filterWith(filter.get());
-    const auto &intervals = log->getSplittingIntervals();
-    TS_ASSERT_EQUALS(intervals.size(), 2);
-    if (intervals.size() == 2) {
-      const auto &firstRange = intervals.front(), &secondRange = intervals.back();
-      TS_ASSERT_EQUALS(firstRange.start(), firstStart);
-      TS_ASSERT_EQUALS(firstRange.stop(), firstEnd);
-      TS_ASSERT_EQUALS(secondRange.start(), secondStart);
-      TS_ASSERT_EQUALS(secondRange.stop(), secondEnd);
-    }
-  }
-
-  void test_getSplittingIntervals_startEndTimes() {
-    const auto &log = getTestLog();
-    // Add the filter
-    auto filter = std::make_unique<TimeSeriesProperty<bool>>("Filter");
-    Mantid::Types::Core::DateAndTime firstEnd("2007-11-30T16:17:05"), secondStart("2007-11-30T16:17:10"),
-        secondEnd("2007-11-30T16:17:15"), thirdStart("2007-11-30T16:18:35");
-    filter->addValue(log->firstTime(), true);
-    filter->addValue(firstEnd.toISO8601String(), false);
-    filter->addValue(secondStart.toISO8601String(), true);
-    filter->addValue(secondEnd.toISO8601String(), false);
-    filter->addValue(thirdStart.toISO8601String(), true);
-    log->filterWith(filter.get());
-    const auto &intervals = log->getSplittingIntervals();
-    TS_ASSERT_EQUALS(intervals.size(), 3);
-    if (intervals.size() == 3) {
-      TS_ASSERT_EQUALS(intervals[0].start(), log->firstTime());
-      TS_ASSERT_EQUALS(intervals[0].stop(), firstEnd);
-      TS_ASSERT_EQUALS(intervals[1].start(), secondStart);
-      TS_ASSERT_EQUALS(intervals[1].stop(), secondEnd);
-      TS_ASSERT_EQUALS(intervals[2].start(), thirdStart);
-      TS_ASSERT(intervals[2].stop() > thirdStart);
-    }
-  }
-
 private:
   /// Generate a test log
   std::unique_ptr<TimeSeriesProperty<double>> getTestLog() {
@@ -2380,20 +2000,6 @@ private:
       log->addValue(logTime.toISO8601String(), val);
       logTime += incrementSecs;
     }
-    return log;
-  }
-
-  /// Generate a test log that has been filtered
-  std::unique_ptr<TimeSeriesProperty<double>> getFilteredTestLog() {
-    // Build the log
-    auto log = getTestLog();
-    // Add the filter
-    auto filter = std::make_unique<TimeSeriesProperty<bool>>("Filter");
-    filter->addValue("2007-11-30T16:17:00", true);
-    filter->addValue("2007-11-30T16:17:15", false);
-    filter->addValue("2007-11-30T16:17:25", true);
-    filter->addValue("2007-11-30T16:18:35", false);
-    log->filterWith(filter.get());
     return log;
   }
 

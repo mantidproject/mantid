@@ -308,6 +308,7 @@ public:
 
     auto pclogFiltered1 = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("cryo_temp1"));
     // middle value is invalid and is filtered out
+    TS_ASSERT_EQUALS(pclogFiltered1->size(), 2);
     TS_ASSERT_DELTA(pclogFiltered1->nthValue(0), 3, 1e-5);
     TS_ASSERT_DELTA(pclogFiltered1->nthValue(1), 7, 1e-5);
 
@@ -318,6 +319,7 @@ public:
     // This seems stringe, but actually may be what people want,
     // It also resolves the question of what we should do with an entirely
     // invalid log.
+    TS_ASSERT_EQUALS(pclogFiltered2->size(), 3);
     TS_ASSERT_DELTA(pclogFiltered2->nthValue(0), 3, 1e-5);
     TS_ASSERT_DELTA(pclogFiltered2->nthValue(1), 5, 1e-5);
     TS_ASSERT_DELTA(pclogFiltered2->nthValue(2), 7, 1e-5);

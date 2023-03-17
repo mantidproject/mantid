@@ -18,6 +18,9 @@ namespace Kernel {
 //---------------------------------------------------------------------------
 // Forward Declarations
 //---------------------------------------------------------------------------
+namespace Math {
+enum StatisticType : int;
+}
 class SplittingInterval;
 class TimeInterval;
 struct TimeSeriesPropertyStatistics;
@@ -51,12 +54,18 @@ public:
   virtual double timeAverageValue(const TimeROI *timeRoi = nullptr) const = 0;
   /// Return a TimeSeriesPropertyStatistics object
   virtual TimeSeriesPropertyStatistics getStatistics(const TimeROI *roi = nullptr) const = 0;
+  /// Filtering the series according to the selected statistical measure
+  virtual double extractStatistic(Math::StatisticType selection, const TimeROI * = nullptr) const = 0;
   /// Returns the real size of the time series property map:
   virtual int realSize() const = 0;
   /// Deletes the series of values in the property
   virtual void clear() = 0;
   /// Deletes all but the 'last entry' in the property
   virtual void clearOutdated() = 0;
+
+  // Returns whether the time series has been filtered
+  virtual bool isFiltered() const = 0;
+
   /// Virtual destructor
   virtual ~ITimeSeriesProperty() = default;
 };

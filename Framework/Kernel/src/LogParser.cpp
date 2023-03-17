@@ -188,15 +188,13 @@ void LogParser::tryParsePeriod(const std::string &scom, const DateAndTime &time,
  *  @param log :: A pointer to the property
  */
 LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
-  Kernel::TimeSeriesProperty<int> *periods = new Kernel::TimeSeriesProperty<int>(periodsLogName());
-  Kernel::TimeSeriesProperty<bool> *status = new Kernel::TimeSeriesProperty<bool>(statusLogName());
-  m_periods.reset(periods);
-  m_status.reset(status);
+  m_periods.reset(new Kernel::TimeSeriesProperty<int>(periodsLogName()));
+  m_status.reset(new Kernel::TimeSeriesProperty<bool>(statusLogName()));
 
   const auto *icpLog = dynamic_cast<const Kernel::TimeSeriesProperty<std::string> *>(log);
   if (!icpLog || icpLog->size() == 0) {
-    periods->addValue(Types::Core::DateAndTime(), 1);
-    status->addValue(Types::Core::DateAndTime(), true);
+    m_periods->addValue(Types::Core::DateAndTime(), 1);
+    m_status->addValue(Types::Core::DateAndTime(), true);
     g_log.information() << "Cannot process ICPevent log. Period 1 assumed for all data.\n";
     return;
   }
@@ -214,25 +212,25 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
     idata >> scom;
     commands com = command_map[scom];
     if (com == commands::CHANGE_PERIOD) {
-      tryParsePeriod(scom, it->first, idata, periods);
+      tryParsePeriod(scom, it->first, idata, m_periods.get());
     } else if (com == commands::BEGIN) {
-      status->addValue(it->first, true);
+      m_status->addValue(it->first, true);
     } else if (com == commands::END) {
-      status->addValue(it->first, false);
+      m_status->addValue(it->first, false);
     } else if (com == commands::ABORT) {
       // Set all previous values to false
-      const auto &times = status->timesAsVector();
+      const auto &times = m_status->timesAsVector();
       const std::vector<bool> values(times.size(), false);
-      status->replaceValues(times, values);
+      m_status->replaceValues(times, values);
       // Add a new value at the present time
-      status->addValue(it->first, false);
+      m_status->addValue(it->first, false);
     }
   };
 
-  if (periods->size() == 0)
-    periods->addValue(icpLog->firstTime(), 1);
-  if (status->size() == 0)
-    status->addValue(icpLog->firstTime(), true);
+  if (m_periods->size() == 0)
+    m_periods->addValue(icpLog->firstTime(), 1);
+  if (m_status->size() == 0)
+    m_status->addValue(icpLog->firstTime(), true);
 }
 
 /** Creates a TimeSeriesProperty<bool> showing times when a particular period
@@ -250,10 +248,12 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
   auto it = pMap.begin();
   if (it->second != period)
     p->addValue(it->first, false);
-  for (; it != pMap.end(); ++it)
-    p->addValue(it->first, (it->second == period));
+  for (; it != pMap.end(); ++it) {
 
-  return p;
+    p->addValue(it->first, (it->second == period));
+  }
+
+  return std::move(p);
 }
 
 const std::string LogParser::currentPeriodLogName(const int period) {

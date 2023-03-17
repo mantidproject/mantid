@@ -94,7 +94,7 @@ private:
   using CommandMap = std::map<std::string, commands>;
 
   /// TimeSeriesProperty<int> containing data periods. Created by LogParser
-  std::shared_ptr<Kernel::Property> m_periods;
+  std::shared_ptr<Kernel::TimeSeriesProperty<int>> m_periods;
 
   /// TimeSeriesProperty<bool> containing running status. Created by LogParser
   std::shared_ptr<Kernel::TimeSeriesProperty<bool>> m_status;

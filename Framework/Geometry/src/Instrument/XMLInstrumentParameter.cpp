@@ -139,7 +139,7 @@ double XMLInstrumentParameter::createParamValue(TimeSeriesProperty<double> *logD
     if (m_extractSingleValueAs == "mean") {
       extractedValue = timeMean(logData);
     } else if (bUsingStandardStatistics) {
-      extractedValue = Kernel::filterByStatistic(logData, (*statisics_choice).second, roi);
+      extractedValue = logData->extractStatistic((*statisics_choice).second, roi);
     }
     // Looking for string: "position n", where n is an integer and is a 1-based
     // index

@@ -225,7 +225,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
     const int64_t item_length = info.dims[1];
     try {
       const int64_t nitems = info.dims[0];
-      const int64_t total_length = nitems * item_length;
+      const std::size_t total_length = std::size_t(nitems * item_length);
       boost::scoped_array<char> val_array(new char[total_length]);
       file.getData(val_array.get());
       file.closeData();
@@ -270,7 +270,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
 }
 
 /**
- * Creates a time series validity filter property from the currently opened log
+ * Creates a time series validity filter property for the currently opened log
  * entry. It is assumed to have been checked to have a time field and the value
  * entry's name is given as an argument
  * @param file :: A reference to the file handle
@@ -285,7 +285,7 @@ std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(::NeXus::File &
   const auto times = tsProp->timesAsVector();
   std::vector<int> values;
   std::vector<bool> boolValues;
-  // Now the the validity of the values
+  // Now the validity of the values
   // this should be a match int array to the data values (or times)
   // If not present assume all data is valid
   try {
@@ -329,6 +329,8 @@ std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(::NeXus::File &
     }
   }
   if (invalidDataFound) {
+    // Prepare the TimeSeriesProperty<bool>
+    // It's name will be the name of the property plus suffix "_invalid_values"
     const auto tspName = API::LogManager::getInvalidValuesFilterLogName(prop.name());
     auto tsp = std::make_unique<TimeSeriesProperty<bool>>(tspName);
     tsp->create(times, boolValues);
@@ -356,12 +358,16 @@ std::unique_ptr<Kernel::Property> createTimeSeriesValidityFilter(::NeXus::File &
  * @param run :: handle to the run object containing the end time.
  */
 void appendEndTimeLog(Kernel::Property *prop, const API::Run &run) {
+  // do not modify proton charge
+  if (prop->name() == "proton_charge")
+    return;
+
   try {
     auto tsLog = dynamic_cast<TimeSeriesProperty<double> *>(prop);
     const auto endTime = run.endTime();
 
-    // First check if it is valid to add a additional log entry
-    if (!tsLog || tsLog->size() == 0 || endTime <= tsLog->lastTime() || prop->name() == "proton_charge")
+    // First check if it is valid to append a log entry
+    if (!tsLog || tsLog->size() == 0 || endTime <= tsLog->lastTime())
       return;
 
     tsLog->addValue(endTime, tsLog->lastValue());
@@ -687,6 +693,14 @@ void LoadNexusLogs::loadVetoPulses(::NeXus::File &file, const std::shared_ptr<AP
   file.closeGroup();
 }
 
+/** For ISIS logs containing periods, try to retrieve the total proton charge for each period  if stored in the logs.
+ *
+ * Insert an ArrayProperty<double> in the run object with as many elements as periods. Each item
+ * in the array will hold the total proton charge for that period.
+
+ * @param file :: open nexus file at the DASLogs group
+ * @param workspace :: workspace to add to.
+ */
 void LoadNexusLogs::loadNPeriods(::NeXus::File &file, const std::shared_ptr<API::MatrixWorkspace> &workspace) const {
   int value = 1; // Default to 1-period unless
   try {
@@ -865,11 +879,12 @@ void LoadNexusLogs::loadNXLog(::NeXus::File &file, const std::string &absolute_e
     return;
   }
 
-  // whether or not to overwrite logs on workspace
+  // whether to overwrite logs on workspace
   bool overwritelogs = this->getProperty("OverwriteLogs");
   try {
     if (overwritelogs || !(workspace->run().hasProperty(entry_name))) {
       auto logValue = createTimeSeries(file, entry_name, freqStart, g_log);
+      // Create (possibly) a boolean time series, companion to time series `entry_name`.
       auto validityLogValue = createTimeSeriesValidityFilter(file, *logValue, g_log);
       if (validityLogValue) {
         appendEndTimeLog(validityLogValue.get(), workspace->run());
@@ -932,6 +947,7 @@ void LoadNexusLogs::loadSELog(::NeXus::File &file, const std::string &absolute_e
       }
 
       logValue = createTimeSeries(file, propName, freqStart, g_log);
+      // Create (possibly) a boolean time series, companion to time series `logValue`.
       auto validityLogValue = createTimeSeriesValidityFilter(file, *logValue, g_log);
       if (validityLogValue) {
         appendEndTimeLog(validityLogValue.get(), workspace->run());

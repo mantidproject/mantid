@@ -27,6 +27,7 @@ class DateAndTime;
 namespace Kernel {
 template <class KEYTYPE, class VALUETYPE> class Cache;
 template <typename TYPE> class TimeSeriesProperty;
+template <typename TYPE> class TimeSeriesProperty;
 class SplittingInterval;
 using SplittingIntervalVec = std::vector<SplittingInterval>;
 class PropertyManager;
@@ -194,14 +195,15 @@ public:
   // returns true if the log has a matching invalid values log filter
   bool hasInvalidValuesFilter(const std::string &logName) const;
 
-  // returns the invalid values log if the log has a matching invalid values log
-  // filter
+  // returns the invalid values log if the log has a matching invalid values log filter
   Kernel::TimeSeriesProperty<bool> *getInvalidValuesFilter(const std::string &logName) const;
 
   bool operator==(const LogManager &other) const;
   bool operator!=(const LogManager &other) const;
 
 protected:
+  bool hasStartTime() const;
+  bool hasEndTime() const;
   void loadNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &prefix);
   /// Load the run from a NeXus file with a given group name
   void loadNexus(::NeXus::File *file, const std::map<std::string, std::string> &entries);

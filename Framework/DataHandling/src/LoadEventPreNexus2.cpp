@@ -554,11 +554,11 @@ void LoadEventPreNexus2::addToWorkspaceLog(const std::string &logtitle, size_t m
     property->addValue(abstime, tof);
   } // ENDFOR
 
-  // Add property to workspace
-  localWorkspace->mutableRun().addProperty(property, false);
-
   g_log.information() << "Size of Property " << property->name() << " = " << property->size()
                       << " vs Original Log Size = " << nbins << "\n";
+
+  // Add property to workspace
+  localWorkspace->mutableRun().addProperty(std::move(property), false);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1134,7 +1134,8 @@ void LoadEventPreNexus2::setProtonCharge(DataObjects::EventWorkspace_sptr &works
   log->addValues(this->pulsetimes, this->proton_charge);
 
   /// TODO set the units for the log
-  run.addLogData(log);
+  run.addLogData(std::move(log));
+
   // Force re-integration
   run.integrateProtonCharge();
   double integ = run.getProtonCharge();

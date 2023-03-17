@@ -110,8 +110,9 @@ void ISISRunLogs::applyLogFiltering(Mantid::API::Run &exptRun) {
   }
 
   // Filter logs if we have anything to filter on
-  if (maskProp)
+  if (maskProp) {
     exptRun.filterByLog(*maskProp, ISISRunLogs::getLogNamesExcludedFromFiltering(exptRun));
+  }
 }
 
 /**
