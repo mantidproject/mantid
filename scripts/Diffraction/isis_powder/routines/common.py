@@ -11,6 +11,7 @@ import warnings
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
 from mantid.api import AnalysisDataService
+from mantid.dataobjects import Workspace2D
 from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 from isis_powder.routines.param_map_entry import ParamMapEntry
 
@@ -33,20 +34,24 @@ ADVANCED_CONFIG = {
 }
 
 
-def apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
+def apply_bragg_peaks_masking(workspaces_to_mask, x_values_to_mask_list, ws_indices_to_mask=[0]):
     """
     Mask a series of peaks defined by the lower/upper bounds
     :param workspaces_to_mask: Mask these workspaces
-    :param mask_list: A list of pairs of peak X min/max for masking
+    :param x_values_to_mask_list: A list of lists. For each ws index, a list of pairs of peak X min/max for masking
+    :param ws_indices_to_mask: A list of ws indices to mask in each workspace
     :return: A list of masked workspaces
     """
     output_workspaces = list(workspaces_to_mask)
 
-    for ws_index, (bank_mask_list, workspace) in enumerate(zip(mask_list, output_workspaces)):
-        output_name = "masked_vanadium-" + str(ws_index + 1)
-        for mask_params in bank_mask_list:
+    for ws_index, (ws_index_mask_list, workspace) in enumerate(zip(x_values_to_mask_list, output_workspaces)):
+        for mask_params in ws_index_mask_list:
             output_workspaces[ws_index] = mantid.MaskBins(
-                InputWorkspace=output_workspaces[ws_index], OutputWorkspace=output_name, XMin=mask_params[0], XMax=mask_params[1]
+                InputWorkspace=output_workspaces[ws_index],
+                OutputWorkspace=output_workspaces[ws_index],
+                XMin=mask_params[0],
+                XMax=mask_params[1],
+                InputWorkspaceIndexSet=ws_indices_to_mask,
             )
     return output_workspaces
 
@@ -729,3 +734,35 @@ def save_unsplined_vanadium(vanadium_ws, output_path, keep_unit=False):
     converted_group = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
     mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
     mantid.DeleteWorkspace(converted_group)
+
+
+def _remove_masked_and_monitor_spectra(data_workspace: Workspace2D, correction_workspace: Workspace2D, run_details):
+    cal_workspace = mantid.LoadCalFile(
+        InputWorkspace=data_workspace,
+        CalFileName=run_details.grouping_file_path,
+        WorkspaceName="cal_workspace",
+        MakeOffsetsWorkspace=False,
+        MakeMaskWorkspace=False,
+        MakeGroupingWorkspace=True,
+    )
+
+    detectors_to_mask = []
+    for wsIndex in range(0, cal_workspace.getNumberHistograms()):
+        if cal_workspace.dataY(wsIndex) == 0:
+            detectors_to_mask.append(cal_workspace.getDetectorIDs(wsIndex)[0])
+
+    results_ws = []
+    for ws in [data_workspace, correction_workspace]:
+        # Remove Masked and Monitor spectra
+        ws = mantid.ExtractMonitors(
+            InputWorkspace=ws,
+            DetectorWorkspace=ws,
+            EnableLogging=False,
+        )
+        mantid.MaskDetectors(ws, DetectorList=detectors_to_mask)
+        ws = mantid.RemoveMaskedSpectra(InputWorkspace=ws, OutputWorkspace=ws)
+        ws = mantid.RemoveSpectra(InputWorkspace=ws, OutputWorkspace=ws, RemoveSpectraWithNoDetector=True)
+        ws.clearMonitorWorkspace()
+        results_ws.append(ws)
+
+    return results_ws

@@ -56,12 +56,15 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
             defaultValue="",
             doc="Sample Temperature in Kelvin. Required for 2nd order Placzek correction if not " "using Sample Logs.",
         )
+        self.declareProperty(name="ApplyPerDetector", defaultValue=False, doc="Apply the correction to unfocussed data.")
 
     def PyExec(self):
         raw_ws = self.getProperty("InputWorkspace").value
         sample_geometry = self.getPropertyValue("SampleGeometry")
         sample_material = self.getPropertyValue("SampleMaterial")
         cal_file_name = self.getPropertyValue("CalFileName")
+        apply_per_detector = bool(int(self.getPropertyValue("ApplyPerDetector")))  # False is passed as "0"
+
         SetSample(InputWorkspace=raw_ws, Geometry=sample_geometry, Material=sample_material)
         # find the closest monitor to the sample for incident spectrum
         raw_spec_info = raw_ws.spectrumInfo()
@@ -98,6 +101,14 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
         self_scattering_correction = CalculatePlaczek(**placzek_kwargs)
         # Convert to Q
         self_scattering_correction = ConvertUnits(InputWorkspace=self_scattering_correction, Target="MomentumTransfer", EMode="Elastic")
+        if not apply_per_detector:
+            self_scattering_correction = self.reformat_and_group_detectors(self_scattering_correction, cal_file_name)
+
+        DeleteWorkspace(fit_spectra)
+        DeleteWorkspace(monitor)
+        self.setProperty("OutputWorkspace", self_scattering_correction)
+
+    def reformat_and_group_detectors(self, self_scattering_correction, cal_file_name):
         cal_workspace = LoadCalFile(
             InputWorkspace=self_scattering_correction,
             CalFileName=cal_file_name,
@@ -124,6 +135,11 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
         self_scattering_correction = GroupDetectors(
             InputWorkspace=self_scattering_correction, CopyGroupingFromWorkspace="cal_workspace_group"
         )
+        self.divide_by_number_of_detectors_in_bank(self_scattering_correction, cal_workspace)
+        DeleteWorkspace("cal_workspace_group")
+        return self_scattering_correction
+
+    def divide_by_number_of_detectors_in_bank(self, self_scattering_correction, cal_workspace):
         n_pixel = np.zeros(self_scattering_correction.getNumberHistograms())
         for i in range(cal_workspace.getNumberHistograms()):
             grouping = cal_workspace.dataY(i)
@@ -131,12 +147,8 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
                 n_pixel[int(grouping[0] - 1)] += 1
         correction_ws = CreateWorkspace(DataY=n_pixel, DataX=[0, 1], NSpec=self_scattering_correction.getNumberHistograms())
         self_scattering_correction = Divide(LHSWorkspace=self_scattering_correction, RHSWorkspace=correction_ws)
-        DeleteWorkspace("cal_workspace_group")
         DeleteWorkspace(correction_ws)
-        DeleteWorkspace(fit_spectra)
-        DeleteWorkspace(monitor)
-        DeleteWorkspace(raw_ws)
-        self.setProperty("OutputWorkspace", self_scattering_correction)
+        return self_scattering_correction
 
 
 # Register algorithm with Mantid

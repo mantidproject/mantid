@@ -72,6 +72,7 @@ class Osiris(AbstractInst):
         for drange in self._drange_sets.values():
             run_number_string = drange.get_samples_string()
 
+            self._inst_settings.per_detector_vanadium = None
             processed = self._focus(
                 run_number_string=run_number_string,
                 do_van_normalisation=self._inst_settings.van_norm,

@@ -10,5 +10,5 @@ calibration_mapping_file : 'C:\polaris\calibration\cal_map.yaml'
 # We can also use this configuration to set default options - e.g. always divide by vanadium spline
 do_van_normalisation : True
 
-# Or set a default chopper mode
-chopper_on : False
+# Or set mode to pdf for total scattering reduction
+mode : pdf

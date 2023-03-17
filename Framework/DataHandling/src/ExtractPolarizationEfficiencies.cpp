@@ -98,7 +98,7 @@ void ExtractPolarizationEfficiencies::exec() {
   auto instrument = inputWS->getInstrument();
   auto const method = instrument->getParameterAsString(METHOD_PARAMETER);
   if (method.empty()) {
-    throw std::invalid_argument("Correction method is undefined");
+    throw std::invalid_argument("Polarization Efficiencies method is not provided by the instrument parameter file");
   }
   if (method != METHOD_FREDRIKZE && method != METHOD_WILDES) {
     throw std::invalid_argument("Unknown correction method: " + method);
