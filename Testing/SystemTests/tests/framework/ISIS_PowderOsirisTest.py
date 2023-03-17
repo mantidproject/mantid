@@ -52,8 +52,13 @@ def run_diffraction_focusing(
 
     osiris_inst_obj = setup_inst_object(user_name)
 
+    osiris_inst_obj.create_vanadium(
+        run_number=sample_runs,
+        subtract_empty_can=subtract_empty_can,
+    )
+
     # Run diffraction focusing
-    osiris_inst_obj.run_diffraction_focusing(
+    osiris_inst_obj.focus(
         run_number=sample_runs,
         merge_drange=merge_drange,
         subtract_empty_can=subtract_empty_can,
