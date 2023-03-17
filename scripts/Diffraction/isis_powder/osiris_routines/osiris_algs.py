@@ -258,13 +258,13 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run, drange=No
 
     if not drange:
         empty_can_runs = (
-            _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="empty_run_numbers")
+            _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="empty_can_run_numbers")
             if inst_settings.subtract_empty_can
             else None
         )
         vanadium_runs = _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="vanadium_run_numbers")
     else:
-        empty_can_runs = get_empty_run_for_drange(all_run_numbers, drange) if inst_settings.subtract_empty_can else None
+        empty_can_runs = get_empty_can_run_for_drange(all_run_numbers, drange) if inst_settings.subtract_empty_can else None
         vanadium_runs = get_van_run_for_drange(all_run_numbers, drange)
 
     grouping_file_name = inst_settings.grouping
@@ -298,11 +298,11 @@ def get_empty_runs_for_samples(run_number_string, inst_settings, drange_sets):
     empty_numbers = ""
     for drange_set in drange_sets.values():
         if drange_set.has_sample():
-            empty_numbers += get_empty_run_for_drange(all_run_numbers, drange_set.get_drange()) + ","
+            empty_numbers += get_empty_can_run_for_drange(all_run_numbers, drange_set.get_drange()) + ","
     return empty_numbers[:-1]
 
 
-def get_empty_run_for_drange(all_run_numbers, drange):
+def get_empty_can_run_for_drange(all_run_numbers, drange):
     return _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="empty_" + drange)
 
 
