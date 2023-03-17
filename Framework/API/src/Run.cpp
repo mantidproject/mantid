@@ -167,18 +167,21 @@ void findAndCombineTimeStrProp(const Run *runObjLHS, const Run *runObjRHS, const
 Run &Run::operator+=(const Run &rhs) {
   // combine the two TimeROI if either is non-empty
   if ((!m_timeroi->empty()) || (!rhs.m_timeroi->empty())) {
+    TimeROI combined(*m_timeroi);
     // set this start/end time as the only ROI if it is empty
-    if (m_timeroi->empty()) {
-      m_timeroi->addROI(this->startTime(), this->endTime());
+    if (combined.empty()) {
+      combined.addROI(this->startTime(), this->endTime());
     }
+
     // fixup the timeroi from the other
     TimeROI rightROI(*rhs.m_timeroi);
-    if (rightROI.empty()) {
+    if (rightROI.empty() && rhs.hasStartTime() && rhs.hasEndTime()) {
       rightROI.addROI(rhs.startTime(), rhs.endTime());
     }
 
     // replace the values accordingly
-    m_timeroi->update_union(rightROI);
+    combined.update_union(rightROI);
+    this->m_timeroi->replaceROI(combined);
   }
 
   // determine the new start/end times
