@@ -241,8 +241,7 @@ def create_drange_sets(run_number_string, inst, file_ext):
 
     drange_sets = {}
     for run_number in run_number_list:
-        ws_name = inst._generate_input_file_name(run_number=run_number, file_ext=file_ext if file_ext else "")
-        ws = common.load_file(ws_name)
+        ws = common.load_raw_files(run_number_string=run_number, instrument=inst, file_ext=file_ext)[0]
         drange = get_osiris_d_range(ws)
 
         if drange not in drange_sets:
