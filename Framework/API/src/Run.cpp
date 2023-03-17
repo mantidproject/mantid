@@ -108,8 +108,8 @@ void Run::filterByTime(const Types::Core::DateAndTime start, const Types::Core::
 }
 
 namespace {
-void findAndCombineTimeStrProp(const Run *runObjLHS, const Run *runObjRHS, const std::string &firstSuggestion,
-                               const std::string &secondSuggestion, std::string &propName, std::string &propValue) {
+void findAndConcatenateTimeStrProp(const Run *runObjLHS, const Run *runObjRHS, const std::string &firstSuggestion,
+                                   const std::string &secondSuggestion, std::string &propName, std::string &propValue) {
   // get the name/value from the right-hand-side
   // this should get overwritten below by the left
   std::string rhsValue;
@@ -189,8 +189,8 @@ Run &Run::operator+=(const Run &rhs) {
   std::string startTimePropValue;
   std::string endTimePropName;
   std::string endTimePropValue;
-  findAndCombineTimeStrProp(this, &rhs, "start_time", "start_run", startTimePropName, startTimePropValue);
-  findAndCombineTimeStrProp(this, &rhs, "end_time", "run_end", endTimePropName, endTimePropValue);
+  findAndConcatenateTimeStrProp(this, &rhs, "start_time", "start_run", startTimePropName, startTimePropValue);
+  findAndConcatenateTimeStrProp(this, &rhs, "end_time", "run_end", endTimePropName, endTimePropValue);
 
   // merge and copy properties where there is no risk of corrupting data
   mergeMergables(*m_manager, *rhs.m_manager);
