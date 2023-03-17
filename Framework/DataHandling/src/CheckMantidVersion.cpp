@@ -159,12 +159,12 @@ std::string CheckMantidVersion::cleanVersionTag(const std::string &versionTag) c
  */
 std::vector<int> CheckMantidVersion::splitVersionString(const std::string &versionString) const {
   std::vector<int> versionNumbers;
-  // Discard suffix from release candidiate version numbers.
-  std::string versionStringBeforeRC = versionString.substr(0, versionString.find("rc"));
-  // Discrad suffix from development builds.
-  std::string versionStringBeforeDev = versionStringBeforeRC.substr(0, versionStringBeforeRC.find(".dev"));
+  // Discard suffix from release candidate version numbers.
+  const std::string versionStringBeforeRC = versionString.substr(0, versionString.find("rc"));
+  // Discard suffix from development builds.
+  const std::string versionStringBeforeDev = versionStringBeforeRC.substr(0, versionStringBeforeRC.find(".dev"));
   // Discard suffix from local release versions.
-  std::string versionStringBeforePlus = versionStringBeforeDev.substr(0, versionStringBeforeDev.find("+"));
+  const std::string versionStringBeforePlus = versionStringBeforeDev.substr(0, versionStringBeforeDev.find("+"));
 
   Mantid::Kernel::StringTokenizer tokenizer(versionStringBeforePlus, ".",
                                             Mantid::Kernel::StringTokenizer::TOK_TRIM |

@@ -40,10 +40,10 @@ void export_MantidVersion() {
       .add_property("minor", make_function(&getMinor), "The minor release version")
       .add_property("patch", make_function(&getPatch), "The patch release version")
       .add_property("tweak", make_function(&getTweak), "The tweak release version")
-      .def("__str__", make_function(&getStr), "The version in the standard form: Major.Minor.PatchTweak");
+      .def("__str__", make_function(&getStr), "The version in the standard form: {Major}.{Minor}.{Patch}{Tweak}");
 
   def("version_str", &Mantid::Kernel::MantidVersion::version,
-      "Returns the Mantid version string in the form \"Major.Minor.PatchTweak\"");
+      "Returns the Mantid version string in the form \"{Major}.{Minor}.{Patch}{Tweak}\"");
   def("version", &Mantid::Kernel::MantidVersion::versionInfo,
       "Returns a data structure containing the major, minor, patch, and tweak parts of the version.");
   def("release_notes_url", &Mantid::Kernel::MantidVersion::releaseNotes,
