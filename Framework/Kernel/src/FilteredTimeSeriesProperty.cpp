@@ -422,6 +422,37 @@ std::vector<SplittingInterval> FilteredTimeSeriesProperty<TYPE>::getSplittingInt
   }
 }
 
+template <typename HeldType>
+bool FilteredTimeSeriesProperty<HeldType>::operator==(const TimeSeriesProperty<HeldType> &right) const {
+  const bool time_and_value_compare = TimeSeriesProperty<HeldType>::operator==(right);
+  if (!time_and_value_compare) {
+    // unfiltered doesn't match
+    return false;
+  } else {
+    // only need to compare the filters
+    const auto rhs_ftsp = dynamic_cast<const FilteredTimeSeriesProperty<HeldType> *>(&right);
+    if (m_filter->empty()) {
+      if (!rhs_ftsp) {
+        // simple compare is fine
+        return time_and_value_compare;
+      } else {
+        // can't compare filters
+        return false;
+      }
+    } else {
+      // only need to compare filters
+      return m_filter == rhs_ftsp->m_filter;
+    }
+  }
+}
+
+template <typename HeldType> bool FilteredTimeSeriesProperty<HeldType>::operator==(const Property &right) const {
+  auto rhs_tsp = dynamic_cast<const TimeSeriesProperty<HeldType> *>(&right);
+  if (!rhs_tsp)
+    return false;
+  return this->operator==(*rhs_tsp);
+}
+
 /// @cond
 // -------------------------- Macro to instantiation concrete types
 // --------------------------------
