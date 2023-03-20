@@ -27,10 +27,13 @@ public:
   std::string CurrentVersion;
   std::string GitHubVersion;
 
+  // It's useful to be able to test the output of this helper function, so make it public in our mocked class.
+  using CheckMantidVersion::splitVersionString;
+
 private:
   std::string getVersionsFromGitHub(const std::string &url) override {
-    // the initial assignment of the value to url is just to suppress a compiler
-    // warning
+    // The initial assignment of the value to url is just to suppress a compiler
+    // warning.
     std::string outputString(url);
     outputString = "{\n"
                    "  \"url\": "
@@ -120,13 +123,38 @@ public:
     TS_ASSERT_EQUALS(expectedResult, isNewVersionAvailable);
   }
 
+  void runSplitVersionString(const std::string &version, const std::vector<int> &expectedResult) {
+    MockedCheckMantidVersion alg("dummy", "dummy");
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_EQUALS(alg.splitVersionString(version), expectedResult);
+  }
+
   void test_execLocalNewerRevision() { runTest("3.4.2", "v3.4.0", false); }
   void test_execRemoteNewerRevision() { runTest("3.4.0", "v3.4.1", true); }
-  void test_execLocaldevelopRevision() { runTest("3.4.20150703.1043", "v3.4.0", false); }
-  void test_execLocaldevelopNewerRevision() { runTest("3.4.20150703.1043", "v3.4.1", false); }
+  void test_execLocalNightlyRevision() { runTest("3.4.20150703.1043", "v3.4.0", false); }
+  void test_execLocalNightlyNewerRevision() { runTest("3.4.20150703.1043", "v3.4.1", false); }
 
   void test_execLocalNewerMinor() { runTest("3.5.2", "v3.4.7", false); }
   void test_execRemoteNewerMinor() { runTest("3.3.7", "v3.4.1", true); }
   void test_execLocalNewerMajor() { runTest("2.0.2", "v1.11.7", false); }
   void test_execRemoteNewerMajor() { runTest("2.3.7", "v3.0.0", true); }
+
+  // PEP 440 version scheme for "local" versions with arbitrary alphanumeric characters after a "+"
+  // should work as if they don't have the + and anything afterwards.
+  void test_tweakLocalNewer() { runTest("1.2.4+tweak.morestuff", "v1.2.3", false); }
+  void test_tweakRemoteNewer() { runTest("1.2.3+tweak.morestuff", "v3.0.0", true); }
+
+  void test_devLocalNewer() { runTest("1.2.3.dev55", "v1.2.1", false); }
+  void test_devRemoteNewer() { runTest("1.2.3.dev55", "v1.4.7", true); }
+
+  void test_devUncommittedLocalNewer() { runTest("1.2.3.dev55+uncommitted", "v1.2.1", false); }
+  void test_devUncommittedRemoteNewer() { runTest("1.2.3.dev55+uncommitted", "v1.4.7", true); }
+
+  // Want anyhting other than numbers to be ignored when splitting the version string into numbers.
+  void test_tweakVersionNumber() { runSplitVersionString("1.2.3+tweak.morestuff", {1, 2, 3}); }
+  void test_devVersionNumber() { runSplitVersionString("1.2.3.dev55", {1, 2, 3}); }
+  void test_devUncommittedVersionNumber() { runSplitVersionString("1.2.3.dev55+uncommitted", {1, 2, 3}); }
+  void test_releaseCandidateVersionNumber() { runSplitVersionString("1.2.3rc1", {1, 2, 3}); }
 };
