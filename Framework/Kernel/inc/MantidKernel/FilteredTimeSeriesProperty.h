@@ -81,6 +81,9 @@ public:
 
   const Kernel::TimeROI &getTimeROI() const;
 
+  bool operator==(const TimeSeriesProperty<HeldType> &right) const override;
+  bool operator==(const Property &right) const override;
+
 private:
   /// Apply a filter
   void applyFilter() const;
