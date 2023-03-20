@@ -10,8 +10,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeROI.h"
 
-#include <set>
-
 namespace Mantid {
 using API::EventType;
 using Kernel::TimeROI;
@@ -234,9 +232,9 @@ int TimeSplitter::valueAtTime(const DateAndTime &time) const {
 }
 
 /**
- * Return a sorted vector of the output workspace indices
+ * Return a set of the output workspace indices
  */
-std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
+std::set<int> TimeSplitter::outputWorkspaceIndices() const {
   // sets have unique values and are sorted
   std::set<int> outputSet;
 
@@ -246,8 +244,7 @@ std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
       outputSet.insert(iter.second);
   }
 
-  // return a vector
-  return std::vector<int>(outputSet.begin(), outputSet.end());
+  return outputSet;
 }
 
 /**

@@ -12,6 +12,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
 
+#include <set>
+
 namespace Mantid {
 
 using Types::Core::DateAndTime;
@@ -40,7 +42,7 @@ public:
   void addROI(const DateAndTime &start, const DateAndTime &stop, const int value);
   /// Check if the TimeSplitter is empty
   bool empty() const;
-  std::vector<int> outputWorkspaceIndices() const;
+  std::set<int> outputWorkspaceIndices() const;
   TimeROI getTimeROI(const int workspaceIndex);
   /// this is to aid in testing and not intended for use elsewhere
   std::size_t numRawValues() const;

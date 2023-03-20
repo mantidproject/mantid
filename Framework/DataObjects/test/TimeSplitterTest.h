@@ -96,7 +96,7 @@ private:
    * any time `t` such that times[i] <= t < times[i+1] will be associated to
    * destination index `indexes[i]`
    *
-   * Destination index '-1` is allowed.
+   * Destination index '-1` is allowed and means no destination
    *
    * @param times : vector of times
    * @param indexes : vector of destination indexes
@@ -115,7 +115,7 @@ private:
    *
    * The size of vector `intervals` must be the same as `destinations`.
    *
-   * Destination index '-1` is allowed.
+   * Destination index '-1` is allowed and means no destination
    *
    * @param intervals : time intervals (in seconds) between consecutive DateAndTime boundaries
    * @param destinations : vector of destination indexes
@@ -151,7 +151,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({0}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({0}));
 
     // add ROI for first half to go to 1st output
     splitter.addROI(TWO, THREE, 1);
@@ -161,7 +161,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({0, 1}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({0, 1}));
 
     // add ROI for second half to go to 2nd output
     splitter.addROI(THREE, FOUR, 2);
@@ -171,7 +171,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 2}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({1, 2}));
 
     // have whole thing go to 3rd output
     splitter.addROI(TWO, FOUR, 3);
@@ -181,7 +181,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({3}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({3}));
 
     // prepend a section that goes to 1st output
     splitter.addROI(ONE, TWO, 1);
@@ -191,7 +191,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 3}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({1, 3}));
 
     // append a section that goes to 2nd output
     splitter.addROI(FOUR, FIVE, 2);
@@ -201,7 +201,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), 2);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 4);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 2, 3}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({1, 2, 3}));
 
     // set before the beginning to mask
     splitter.addROI(ONE, TWO, TimeSplitter::NO_TARGET);
@@ -211,7 +211,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), 2);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({2, 3}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({2, 3}));
 
     // set after the end to mask
     splitter.addROI(FOUR, FIVE, TimeSplitter::NO_TARGET);
@@ -221,14 +221,14 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({3}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({3}));
   }
 
   void test_emptySplitter() {
     TimeSplitter splitter;
     TS_ASSERT_EQUALS(splitter.valueAtTime(DateAndTime("2023-01-01T11:00:00")), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 0);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({}));
   }
 
   void test_gap() {

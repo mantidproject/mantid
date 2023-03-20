@@ -240,10 +240,10 @@ void FilterEvents::exec() {
   // Create output workspaces
   m_progress = 0.1;
   progress(m_progress, "Create Output Workspaces.");
-  if (m_useArbTableSplitters)
-    createOutputWorkspacesTableSplitterCase();
-  else if (m_useSplittersWorkspace)
+  if (m_useSplittersWorkspace)
     createOutputWorkspacesSplitters();
+  else if (m_useArbTableSplitters)
+    createOutputWorkspacesTableSplitterCase();
   else
     createOutputWorkspacesMatrixCase();
 
@@ -750,49 +750,28 @@ void FilterEvents::splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp
 
 //----------------------------------------------------------------------------------------------
 /** Purpose:
- *    Convert SplitterWorkspace object to SplittingIntervalVec (sorted vector)
- *    and create a map for all workspace group number
+ *    Convert SplitterWorkspace object to TimeSplitter object
+ *    and create a set of all target workspace indexes
  *  Requirements:
- *  Gaurantees:
+ *  Guarantees:
  *  - Update of m_maxTargetIndex: it can be zero in SplittersWorkspace case
  * @brief FilterEvents::processSplittersWorkspace
  */
 void FilterEvents::processSplittersWorkspace() {
-  // 1. Init data structure
-  size_t numsplitters = m_splittersWorkspace->getNumberSplitters();
-  m_splitters.reserve(numsplitters);
-
-  // 2. Insert all splitters
-  m_maxTargetIndex = 0;
-  bool inorder = true;
-  for (size_t i = 0; i < numsplitters; i++) {
-    // push back the splitter in SplittersWorkspace to list of splitters
-    m_splitters.emplace_back(m_splittersWorkspace->getSplitter(i));
-    // add the target workspace index to target workspace indexes set
-    m_targetWorkspaceIndexSet.insert(m_splitters.back().index());
-    // register for the maximum target index
-    if (m_splitters.back().index() > m_maxTargetIndex)
-      m_maxTargetIndex = m_splitters.back().index();
-    // check whether the splitters are in time order
-    if (inorder && i > 0 && m_splitters[i] < m_splitters[i - 1])
-      inorder = false;
-  }
+  m_timeSplitter = TimeSplitter(m_splittersWorkspace);
+  m_targetWorkspaceIndexSet = m_timeSplitter.outputWorkspaceIndices();
+  m_targetWorkspaceIndexSet.insert(TimeSplitter::NO_TARGET); // add an extra workspace index for unfiltered events
+  m_maxTargetIndex = *m_targetWorkspaceIndexSet.rbegin();
   m_progress = 0.05;
   progress(m_progress);
 
-  // 3. Order if not ordered and add workspace for events excluded
-  if (!inorder) {
-    std::sort(m_splitters.begin(), m_splitters.end());
-  }
-
-  // 4. Add extra workgroup index for unfiltered events
-  m_targetWorkspaceIndexSet.insert(-1);
-
-  // 5. Add information
+  // Check information workspace consistency
   if (m_hasInfoWS) {
-    if (m_targetWorkspaceIndexSet.size() > m_informationWS->rowCount() + 1) {
-      g_log.warning() << "Input Splitters Workspace has different entries (" << m_targetWorkspaceIndexSet.size() - 1
-                      << ") than input information workspaces (" << m_informationWS->rowCount() << "). "
+    if (m_targetWorkspaceIndexSet.size() - 1 != m_informationWS->rowCount()) {
+      g_log.warning() << "Input Splitters Workspace specifies a different number of unique output workspaces ("
+                      << m_targetWorkspaceIndexSet.size() - 1
+                      << ") compared to the number of rows in the input information workspace ("
+                      << m_informationWS->rowCount() << "). "
                       << "  Information may not be accurate. \n";
     }
   }
@@ -1044,6 +1023,11 @@ void FilterEvents::processTableSplittersWorkspace() {
  *  SplittersWorkspace
  */
 void FilterEvents::createOutputWorkspacesSplitters() {
+  if (m_targetWorkspaceIndexSet.size() == 0) { // at least index -1 (i.e. no target specified) has to be present
+    g_log.warning("No output workspaces specified by input Splitters Workspace.");
+    return;
+  }
+
   const auto startTime = std::chrono::high_resolution_clock::now();
 
   // Convert information workspace to map
@@ -1055,28 +1039,15 @@ void FilterEvents::createOutputWorkspacesSplitters() {
     }
   }
 
-  // Determine the minimum group index number
-  const int minwsgroup = *std::min_element(m_targetWorkspaceIndexSet.begin(), m_targetWorkspaceIndexSet.end(),
-                                           [](const int &left, const int &right) {
-                                             if (left >= 0 && right >= 0)
-                                               return left < right;
-                                             if (left >= 0)
-                                               return true;
-                                             else
-                                               return false;
-                                           });
-  g_log.debug() << "Min WS Group = " << minwsgroup << "\n";
+  // Determine the minimum valid target workspace index. Note that the set is sorted and guaranteed to start with -1.
+  const int min_wsindex = m_targetWorkspaceIndexSet.size() == 1 ? -1 : *std::next(m_targetWorkspaceIndexSet.begin(), 1);
+  g_log.debug() << "Minimum target workspace index = " << min_wsindex << "\n";
 
   const bool from1 = getProperty("OutputWorkspaceIndexedFrom1");
-  int delta_wsindex = 0;
-  if (from1) {
-    delta_wsindex = 1 - minwsgroup;
+  int delta_wsindex{0};
+  if (from1 && m_targetWorkspaceIndexSet.size() > 1) {
+    delta_wsindex = 1 - min_wsindex;
   }
-
-  // Set up new workspaces
-  int numoutputws = 0;
-  auto numnewws = static_cast<double>(m_targetWorkspaceIndexSet.size());
-  double wsgindex = 0.;
 
   // Work out how it has been split so the naming can be done
   // if generateEventsFilter has been used the infoWS will contain time or log
@@ -1084,37 +1055,45 @@ void FilterEvents::createOutputWorkspacesSplitters() {
   bool descriptiveNames = getProperty("DescriptiveOutputNames");
   bool splitByTime = true;
   if (descriptiveNames) {
-    if ((m_hasInfoWS && infomap[0].find("Log") != std::string::npos) ||
-        m_targetWorkspaceIndexSet.size() - 1 != m_splitters.size()) {
+    if (m_hasInfoWS && infomap[0].find("Log") != std::string::npos) {
       splitByTime = false;
     }
   }
   std::shared_ptr<EventWorkspace> prototype_ws = create<EventWorkspace>(*m_eventWS);
 
-  for (auto const wsgroup : m_targetWorkspaceIndexSet) {
+  // Set up target workspaces
+  size_t number_of_output_workspaces{0};
+  double progress_step_total =
+      static_cast<double>(m_targetWorkspaceIndexSet.size()); // total number of progress steps expected
+  double progress_step_current{0.};                          // current number of progress steps
+  for (auto const wsindex : m_targetWorkspaceIndexSet) {
     // Generate new workspace name
     bool add2output = true;
     std::stringstream wsname;
     wsname << m_outputWSNameBase << "_";
-    if (wsgroup >= 0) {
+    if (wsindex >= 0) {
       if (descriptiveNames && splitByTime) {
-        auto splitter = m_splitters[wsgroup];
+        TimeROI timeROI = m_timeSplitter.getTimeROI(wsindex);
+        auto timeIntervals = timeROI.toIntervals();
+
         auto startTimeInSeconds =
-            Mantid::Types::Core::DateAndTime::secondsFromDuration(splitter.start() - m_runStartTime);
+            Mantid::Types::Core::DateAndTime::secondsFromDuration(timeIntervals[0].first - m_runStartTime);
+
         auto stopTimeInSeconds =
-            Mantid::Types::Core::DateAndTime::secondsFromDuration(splitter.stop() - m_runStartTime);
+            Mantid::Types::Core::DateAndTime::secondsFromDuration(timeIntervals[0].second - m_runStartTime);
+
         wsname << startTimeInSeconds << "_" << stopTimeInSeconds;
       } else if (descriptiveNames) {
-        auto infoiter = infomap.find(wsgroup);
+        auto infoiter = infomap.find(wsindex);
         if (infoiter != infomap.end()) {
           std::string name = infoiter->second;
           name = Kernel::Strings::removeSpace(name);
           wsname << name;
         } else {
-          wsname << wsgroup + delta_wsindex;
+          wsname << wsindex + delta_wsindex;
         }
       } else {
-        wsname << wsgroup + delta_wsindex;
+        wsname << wsindex + delta_wsindex;
       }
     } else {
       wsname << "unfiltered";
@@ -1125,16 +1104,16 @@ void FilterEvents::createOutputWorkspacesSplitters() {
     std::shared_ptr<EventWorkspace> optws = prototype_ws->clone();
     // Clear Run without copying first.
     optws->setSharedRun(Kernel::make_cow<Run>());
-    m_outputWorkspacesMap.emplace(wsgroup, optws);
+    m_outputWorkspacesMap.emplace(wsindex, optws);
 
     // Add information, including title and comment, to output workspace
     if (m_hasInfoWS) {
       std::string info;
-      if (wsgroup < 0) {
+      if (wsindex < 0) {
         info = "Events that are filtered out. ";
       } else {
         std::map<int, std::string>::iterator infoiter;
-        infoiter = infomap.find(wsgroup);
+        infoiter = infomap.find(wsindex);
         if (infoiter != infomap.end()) {
           info = infoiter->second;
         } else {
@@ -1148,12 +1127,12 @@ void FilterEvents::createOutputWorkspacesSplitters() {
     // Add to output properties.  There shouldn't be any workspace
     // (non-unfiltered) skipped from group index
     if (add2output) {
-      // Generate output property name
-      std::stringstream propertynamess;
-      if (wsgroup == -1) {
-        propertynamess << "OutputWorkspace_unfiltered";
+      // Generate output property names
+      std::stringstream propertynames;
+      if (wsindex == TimeSplitter::NO_TARGET) {
+        propertynames << "OutputWorkspace_unfiltered";
       } else {
-        propertynamess << "OutputWorkspace_" << wsgroup;
+        propertynames << "OutputWorkspace_" << wsindex;
       }
 
       // Inserted this pair to map
@@ -1164,28 +1143,28 @@ void FilterEvents::createOutputWorkspacesSplitters() {
 
       // create these output properties
       if (!this->m_toGroupWS) {
-        if (!this->existsProperty(propertynamess.str())) {
+        if (!this->existsProperty(propertynames.str())) {
           declareProperty(std::make_unique<API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-                              propertynamess.str(), wsname.str(), Direction::Output),
+                              propertynames.str(), wsname.str(), Direction::Output),
                           "Output");
         }
-        setProperty(propertynamess.str(), optws);
+        setProperty(propertynames.str(), optws);
       }
 
-      ++numoutputws;
-      g_log.debug() << "Created output Workspace of group = " << wsgroup << "  Property Name = " << propertynamess.str()
+      ++number_of_output_workspaces;
+      g_log.debug() << "Created output Workspace of group = " << wsindex << "  Property Name = " << propertynames.str()
                     << " Workspace name = " << wsname.str() << " with Number of events = " << optws->getNumberEvents()
                     << "\n";
 
       // Update progress report
-      m_progress = 0.1 + 0.1 * wsgindex / numnewws;
+      m_progress = 0.1 + 0.1 * progress_step_current / progress_step_total;
       progress(m_progress, "Creating output workspace");
-      wsgindex += 1.;
+      progress_step_current += 1.;
     } // If add workspace to output
 
   } // ENDFOR
 
-  setProperty("NumberOutputWS", numoutputws);
+  setProperty("NumberOutputWS", number_of_output_workspaces);
   addTimer("createOutputWorkspacesSplitters", startTime, std::chrono::high_resolution_clock::now());
 
   g_log.information("Output workspaces are created. ");
@@ -1245,11 +1224,11 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     m_outputWorkspacesMap.emplace(wsgroup, optws);
 
     // add to output workspace property
-    std::stringstream propertynamess;
+    std::stringstream propertynames;
     if (wsgroup == 0) {
-      propertynamess << "OutputWorkspace_unfiltered";
+      propertynames << "OutputWorkspace_unfiltered";
     } else {
-      propertynamess << "OutputWorkspace_" << wsgroup;
+      propertynames << "OutputWorkspace_" << wsgroup;
     }
 
     // Inserted this pair to map
@@ -1261,14 +1240,14 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
 
     // Set (property) to output workspace and set to ADS
     if (m_toGroupWS) {
-      if (!this->existsProperty(propertynamess.str())) {
+      if (!this->existsProperty(propertynames.str())) {
         declareProperty(std::make_unique<API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-                            propertynamess.str(), wsname.str(), Direction::Output),
+                            propertynames.str(), wsname.str(), Direction::Output),
                         "Output");
       }
-      setProperty(propertynamess.str(), optws);
+      setProperty(propertynames.str(), optws);
 
-      g_log.debug() << "  Property Name = " << propertynamess.str() << "\n";
+      g_log.debug() << "  Property Name = " << propertynames.str() << "\n";
     } else {
       g_log.debug() << "\n";
     }
@@ -1357,20 +1336,20 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
                   << " with Number of events = " << optws->getNumberEvents() << "\n";
 
     if (this->m_toGroupWS) {
-      std::stringstream propertynamess;
+      std::stringstream propertynames;
       if (wsgroup < 0) {
-        propertynamess << "OutputWorkspace_unfiltered";
+        propertynames << "OutputWorkspace_unfiltered";
       } else {
-        propertynamess << "OutputWorkspace_" << wsgroup;
+        propertynames << "OutputWorkspace_" << wsgroup;
       }
-      if (!this->existsProperty(propertynamess.str())) {
+      if (!this->existsProperty(propertynames.str())) {
         declareProperty(std::make_unique<API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-                            propertynamess.str(), wsname.str(), Direction::Output),
+                            propertynames.str(), wsname.str(), Direction::Output),
                         "Output");
       }
-      setProperty(propertynamess.str(), optws);
+      setProperty(propertynames.str(), optws);
 
-      g_log.debug() << "  Property Name = " << propertynamess.str() << "\n";
+      g_log.debug() << "  Property Name = " << propertynames.str() << "\n";
     } else {
       g_log.debug() << "\n";
     }
