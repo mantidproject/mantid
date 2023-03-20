@@ -65,6 +65,17 @@ public:
     }
   }
 
+  void testFunctionThrowErrorForInvalidSpin() {
+    Meier meier;
+    meier.initialize();
+    TS_ASSERT_THROWS(meier.setAttribute("Spin", Mantid::API::IFunction::Attribute(0.7)),
+                     const Mantid::API::IFunction::ValidationException &);
+    TS_ASSERT_THROWS(meier.setAttribute("Spin", Mantid::API::IFunction::Attribute(-0.2)),
+                     const Mantid::API::IFunction::ValidationException &);
+    TS_ASSERT_THROWS(meier.setAttribute("Spin", Mantid::API::IFunction::Attribute(0.0)),
+                     const Mantid::API::IFunction::ValidationException &);
+  }
+
   void testFunctionGivesExpectedValueForGivenInput() {
     Meier meier;
     meier.initialize();

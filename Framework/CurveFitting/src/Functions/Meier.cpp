@@ -21,9 +21,15 @@ using namespace API;
 DECLARE_FUNCTION(Meier)
 
 namespace {
-std::string isMultipleOf05(double value) {
+std::string isPositiveAndMultipleOf05(double value) {
   double temp = value * 2;
-  return floor(temp) == ceil(temp) ? "" : "Spin value is not a multiple of 0.5";
+  if (temp <= 0.0) {
+    return "Spin value should be greater than zero";
+  }
+  if (floor(temp) != ceil(temp)) {
+    return "Spin value should be a multiple of 0.5";
+  }
+  return "";
 }
 
 double getSinSquared(const double &cosSquared) { return 1 - cosSquared; }
@@ -40,7 +46,8 @@ void Meier::init() {
   declareParameter("Sigma", 0.2, "Gaussian decay rate");
   declareParameter("Lambda", 0.1, "Exponential decay rate");
   // J, Total angular momentum quanutm number
-  declareAttribute("Spin", API::IFunction::Attribute(3.5), Mantid::Kernel::LambdaValidator<double>(isMultipleOf05));
+  declareAttribute("Spin", API::IFunction::Attribute(3.5),
+                   Mantid::Kernel::LambdaValidator<double>(isPositiveAndMultipleOf05));
 }
 
 void Meier::function1D(double *out, const double *xValues, const size_t nData) const {
