@@ -286,8 +286,6 @@ void Q1D2::exec() {
     ws_sumOfNormFactors->setFrequencyVariances(0, normError2);
 
     helper.outputParts(this, ws_sumOfCounts, ws_sumOfNormFactors);
-  } else if (doOutputParts) {
-    helper.outputParts(this, nullptr, nullptr);
   }
 
   progress.report("Normalizing I(Q)");

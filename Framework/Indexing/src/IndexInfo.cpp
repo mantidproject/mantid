@@ -242,8 +242,6 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(const std::vector<size_t> &d
   }
 
   std::vector<GlobalSpectrumIndex> spectrumIndices;
-  int tag = 0;
-
   for (size_t i = 0; i < globalSize(); ++i) {
     const auto spectrumDefinition = spectrumDefinitions[i];
     if (spectrumDefinition.first >= 0) {
