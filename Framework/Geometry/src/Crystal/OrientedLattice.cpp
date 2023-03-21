@@ -150,8 +150,8 @@ V3D OrientedLattice::hklFromQ(const V3D &Q) const {
 }
 
 /** Calculate the direction cosine corresponding to a given direction
- * @param Q :: Q-vector in $AA^-1 in the sample frame
- * @return a V3D with H,K,L
+ * @param dir :: a direction unit-vector in the sample frame
+ * @return a V3D
  */
 V3D OrientedLattice::cosFromDir(const V3D &dir) const {
   DblMatrix T = this->getUB();
