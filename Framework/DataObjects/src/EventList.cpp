@@ -467,23 +467,30 @@ EventList &EventList::operator+=(const std::vector<WeightedEventNoTime> &more_ev
  * @return reference to this
  * */
 EventList &EventList::operator+=(const EventList &more_events) {
-  // We'll let the += operator for the given vector of event lists handle it
-  switch (more_events.getEventType()) {
-  case TOF:
-    this->operator+=(more_events.events);
-    break;
+  if (!more_events.empty()) {
+    // We'll let the += operator for the given vector of event lists handle it
+    switch (more_events.getEventType()) {
+    case TOF:
+      this->operator+=(more_events.events);
+      break;
 
-  case WEIGHTED:
-    this->operator+=(more_events.weightedEvents);
-    break;
+    case WEIGHTED:
+      this->operator+=(more_events.weightedEvents);
+      break;
 
-  case WEIGHTED_NOTIME:
-    this->operator+=(more_events.weightedEventsNoTime);
-    break;
+    case WEIGHTED_NOTIME:
+      this->operator+=(more_events.weightedEventsNoTime);
+      break;
+    }
+
+    // No guaranteed order
+    if (this->empty()) {
+      this->order = more_events.order;
+    } else {
+      this->order = UNSORTED;
+    }
   }
 
-  // No guaranteed order
-  this->order = UNSORTED;
   // Do a union between the detector IDs of both lists
   addDetectorIDs(more_events.getDetectorIDs());
 
