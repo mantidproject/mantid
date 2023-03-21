@@ -267,7 +267,7 @@ class FittingDataModel(object):
         sort_ascending = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "sort_ascending")
         ws_name_list = list(active_ws_dict.keys())
         if primary_log:
-            log_table = ADS.retrieve(primary_log)
+            log_table = ADS.retrieve(primary_log + self._suffix)
             isort = argsort(array(log_table.column("avg")))
             ws_list_tof = [ws_name_list[iws] for iws in isort if iws in tof_ws_inds]
         else:
