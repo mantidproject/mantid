@@ -118,9 +118,9 @@ public:
    */
   void test_FilterNoCorrection() {
     // Create EventWorkspace and SplittersWorkspace
-    int64_t runstart_i64 = 20000000000;
-    int64_t pulsedt = 100 * 1000 * 1000;
-    int64_t tofdt = 10 * 1000 * 1000;
+    int64_t runstart_i64 = 20000000000;  // 20 seconds
+    int64_t pulsedt = 100 * 1000 * 1000; // 100 seconds, time between consecutive pulses
+    int64_t tofdt = 10 * 1000 * 1000;    // 10 seconds
     size_t numpulses = 5;
 
     EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
@@ -1157,65 +1157,82 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace.  This workspace has
-   * @param runstart_i64 : absolute run start time in int64_t format with unit
-   * nanosecond
+   * @param runstart_i64 : absolute run start time in int64_t format with unit of nanoseconds
    * @param pulsedt : pulse length in int64_t format with unit nanosecond
-   * @param todft : time interval between 2 adjacent event in same pulse in
-   * int64_t format of unit nanosecond
+   * @param todft : time interval between 2 adjacent events in same pulse in int64_t format of unit nanosecond
    * @param numpulses : number of pulses in the event workspace
    */
   EventWorkspace_sptr createEventWorkspace(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt, size_t numpulses) {
-    // Create an EventWorkspace with 10 detectors
-    EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1, true);
 
-    Types::Core::DateAndTime runstart(runstart_i64);
+    constexpr int64_t N_EVENTS_IN_PULSE{10};
+    constexpr double nanosecToMilisec{0.001};
+    constexpr double nanosecToSec{1e-9};
+    // Validation: the TOF of the last event cannot exceed pulsedt, lest we incur in frame overlap.
+    if (tofdt * N_EVENTS_IN_PULSE > pulsedt)
+      throw std::invalid_argument("tofdt cannot exceed pulsedt / N_EVENTS_IN_PULSE");
 
+    // Create an EventWorkspace with 10 detectors, one pixel per detector, and no events
+    int detectorBankCount{10};
+    int pixelPerBankcount{1};
+    bool clearEvents{true};
+    EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
+        detectorBankCount, pixelPerBankcount, clearEvents);
+
+    // create a vector with all the epoch pulse times
+    DateAndTime runstart(runstart_i64);
+    std::vector<DateAndTime> pulseTimes;
+    for (int64_t pid = 0; pid < static_cast<int64_t>(numpulses); pid++) {
+      int64_t pulsetime_i64 = pid * pulsedt + runstart.totalNanoseconds();
+      DateAndTime pulsetime(pulsetime_i64);
+      pulseTimes.emplace_back(pulsetime);
+    }
+
+    // create a vector with all events. These will be the same for all detector pixels
+    std::vector<TofEvent> events;
+    for (const auto &pulseTime : pulseTimes)
+      for (int64_t e = 0; e < N_EVENTS_IN_PULSE; e++) {
+        double tof = nanosecToMilisec * static_cast<double>(e * tofdt); // TOF in miliseconds
+        TofEvent event(tof, pulseTime);
+        events.emplace_back(event);
+      }
+
+    // Iterate over all the spectra (detectorBankCount * pixelPerBankcount)
+    // Populate its event list using the previous vector of events
+    for (size_t histIndex = 0; histIndex < eventWS->getNumberHistograms(); histIndex++) {
+      auto &elist = eventWS->getSpectrum(histIndex); // event list
+      for (const auto &event : events)
+        elist.addEventQuickly(event);
+    }
+
+    // Insert a sample log for the start of the run, with one charge count per pulse
     eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(), true);
 
-    // create a pcharge log
+    // Insert a sample log for the proton charge
     auto pchargeLog = std::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
-
-    for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
-      auto &elist = eventWS->getSpectrum(i);
-
-      for (int64_t pid = 0; pid < static_cast<int64_t>(numpulses); pid++) {
-        int64_t pulsetime_i64 = pid * pulsedt + runstart.totalNanoseconds();
-        Types::Core::DateAndTime pulsetime(pulsetime_i64);
-
-        // add pulse time to proton charge log once and only once
-        if (i == 0) {
-          pchargeLog->addValue(pulsetime, 1.);
-          std::cout << "Add proton charge log " << pulsetime.totalNanoseconds() << " (" << pulsetime.toSimpleString()
-                    << ")"
-                    << "\n";
-        }
-
-        for (size_t e = 0; e < 10; e++) {
-          double tof = static_cast<double>(e * tofdt / 1000);
-          TofEvent event(tof, pulsetime);
-          elist.addEventQuickly(event);
-        }
-      } // FOR each pulse
-    }   // For each bank
-
+    for (const auto &pulseTime : pulseTimes)
+      pchargeLog->addValue(pulseTime, 1.);
     eventWS->mutableRun().addLogData(pchargeLog.release());
     eventWS->mutableRun().integrateProtonCharge();
 
-    // add some arbitrary sample log for splitting or not splitting
+    // add single value logs, which won't be need to split
     eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("LogA", "A"));
     eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("LogB", "B"));
     eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("LogC", "C"), true);
     eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("Title", "Testing EventWorkspace"));
-    eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<double>("duration", 1000.));
+    double duration = nanosecToSec * static_cast<double>(pulsedt * numpulses);
+    eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<double>("duration", duration));
 
-    // add an integer slow log
+    // add time series log. The TimeRoi associated to the Run object of each target workspace
+    // will be applied when finding out its conserved values.
     auto int_tsp = std::make_unique<Kernel::TimeSeriesProperty<int>>("slow_int_log");
     int_tsp->setUnits("meter");
-    for (size_t i = 0; i < 10; ++i) {
-      Types::Core::DateAndTime log_time(runstart_i64 + 5 * pulsedt * i);
-      int log_value = static_cast<int>(i + 1) * 20;
-      int_tsp->addValue(log_time, log_value);
-      std::cout << "Add slow int log (" << i << "): " << log_time.toSimpleString() << ", " << log_value << "\n";
+    int entriesCount{10};                           // this log will have 10 entries
+    double probingPeriod = duration / entriesCount; // time in between consecutive log entries
+    DateAndTime logTime = runstart;
+    for (int i = 0; i < entriesCount; ++i) {
+      int logValue = (i + 1) * 20;
+      int_tsp->addValue(logTime, logValue);
+      logTime += probingPeriod;
     }
     eventWS->mutableRun().addLogData(int_tsp.release());
 
