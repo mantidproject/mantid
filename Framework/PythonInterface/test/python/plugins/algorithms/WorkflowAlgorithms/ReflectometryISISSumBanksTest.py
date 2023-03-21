@@ -70,67 +70,45 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         issues = alg.validateInputs()
         self.assertEqual(len(issues), 0)
 
-    def test_execution_with_single_bank(self):
-        test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(1, 5, 5)
-
+    def test_no_summing_done_on_single_bank(self):
+        test_ws = "ws"
+        masked_ws = "masked"
         alg = ReflectometryISISSumBanks()
-        alg.initialize()
-        alg.setProperty("InputWorkspace", test_ws)
-        alg.exec_multi_bank = MagicMock()
-        alg.exec_single_bank = MagicMock()
-        mock_detector = MagicMock()
-        mock_detector.xpixels.return_value = 1
-        alg._get_rectangular_detector_component = MagicMock(return_value=mock_detector)
-
-        alg.PyExec()
-
-        alg.exec_single_bank.assert_called_once()
-        alg.exec_multi_bank.assert_not_called()
-
-    def test_execution_with_multiple_banks(self):
-        test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(1, 5, 5)
-
-        alg = ReflectometryISISSumBanks()
-        alg.initialize()
-        alg.setProperty("InputWorkspace", test_ws)
-        alg.exec_multi_bank = MagicMock()
-        alg.exec_single_bank = MagicMock()
-        mock_detector = MagicMock()
-        mock_detector.xpixels.return_value = 4
-        alg._get_rectangular_detector_component = MagicMock(return_value=mock_detector)
-
-        alg.PyExec()
-
-        alg.exec_single_bank.assert_not_called()
-        alg.exec_multi_bank.assert_called_once()
-
-    def test_exec_single_bank_with_default_roi(self):
-        test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(1, 5, 5)
-
-        alg = ReflectometryISISSumBanks()
-        alg.initialize()
+        alg.getProperty = MagicMock()
+        alg.getProperty.return_value.value = test_ws
+        alg.mask_workspace = MagicMock(return_value=masked_ws)
+        alg._get_rectangular_detector_component = MagicMock(return_value=MagicMock())
+        alg._get_rectangular_detector_component.return_value.xpixels.return_value = 1
         alg.setProperty = MagicMock()
-        alg.exec_single_bank(test_ws)
-        alg.setProperty.assert_called_with(alg._OUTPUT_WS, test_ws)
 
-    def test_exec_single_bank_with_roi_selected(self):
-        test_ws = WorkspaceCreationHelper.createEventWorkspaceWithNonUniformInstrument(2, True)
-        masked_ws = WorkspaceCreationHelper.createEventWorkspaceWithNonUniformInstrument(1, True)
-        roi = 200
+        alg.PyExec()
+
+        alg.mask_workspace.assert_called_with(test_ws)
+        alg.setProperty.assert_called_with("OutputWorkspace", masked_ws)
+
+    def test_mask_workspace_no_roi(self):
+        test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(1, 5, 5)
 
         alg = ReflectometryISISSumBanks()
-        alg.initialize()
+        alg.getProperty = MagicMock()
+        alg.getProperty.return_value.isDefault = True
+
+        self.assertEqual(alg.mask_workspace(test_ws), test_ws)
+
+    def test_mask_workspace_with_roi(self):
+        test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(1, 5, 5)
+        masked_ws = "masked"
+
+        alg = ReflectometryISISSumBanks()
         alg.getProperty = MagicMock()
         alg.getProperty.return_value.isDefault = False
-        alg.getProperty.return_value.value = roi
+        alg.getProperty.return_value.value = "ExampleROI"
         alg.mask_detectors = MagicMock(return_value=masked_ws)
-        alg.setProperty = MagicMock()
-        alg.exec_single_bank(test_ws)
 
-        alg.setProperty.assert_called_with(alg._OUTPUT_WS, masked_ws)
-        alg.mask_detectors.assert_called_with(test_ws, roi)
+        self.assertEqual(alg.mask_workspace(test_ws), masked_ws)
+        alg.mask_detectors.assert_called_with(test_ws, "ExampleROI")
 
-    def test_mask_workspace(self):
+    def test_mask_detectors(self):
         roi_detector_id = 200
         test_ws = CreateSampleWorkspace(StoreInADS=False)
         masked_ws = ReflectometryISISSumBanks().mask_detectors(test_ws, str(roi_detector_id))

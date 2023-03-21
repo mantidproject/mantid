@@ -44,12 +44,24 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
 
     def PyExec(self):
         input_workspace = self.getProperty(self._WORKSPACE).value
-        num_banks = self._get_rectangular_detector_component(input_workspace).xpixels()
 
-        if num_banks > 1:
-            self.exec_multi_bank(input_workspace)
-        else:
-            self.exec_single_bank(input_workspace)
+        masked_workspace = self.mask_workspace(input_workspace)
+
+        num_banks = self._get_rectangular_detector_component(input_workspace).xpixels()
+        if num_banks == 1:
+            self.setProperty(self._OUTPUT_WS, masked_workspace)
+            return
+
+        summed_workspace = self.sum_banks(masked_workspace)
+        result = self._prepend_monitors(input_workspace, summed_workspace)
+        self.setProperty(self._OUTPUT_WS, result)
+
+    def mask_workspace(self, input_workspace):
+        if self.getProperty(self._ROI).isDefault:
+            return input_workspace
+
+        roi_detector_ids = self.getProperty(self._ROI).value
+        return self.mask_detectors(input_workspace, roi_detector_ids)
 
     def validateInputs(self):
         issues = dict()
@@ -59,27 +71,6 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
         except Exception as err:
             issues["InputWorkspace"] = str(err)
         return issues
-
-    def exec_single_bank(self, input_workspace):
-        if not self.getProperty(self._ROI).isDefault:
-            roi_detector_ids = self.getProperty(self._ROI).value
-            masked_workspace = self.mask_detectors(input_workspace, roi_detector_ids)
-            self.setProperty(self._OUTPUT_WS, masked_workspace)
-            return
-
-        self.setProperty(self._OUTPUT_WS, input_workspace)
-
-    def exec_multi_bank(self, input_workspace):
-        if not self.getProperty(self._ROI).isDefault:
-            roi_detector_ids = self.getProperty(self._ROI).value
-            masked_workspace = self.mask_detectors(input_workspace, roi_detector_ids)
-            summed_workspace = self.sum_banks(masked_workspace)
-        else:
-            summed_workspace = self.sum_banks(input_workspace)
-
-        result = self._prepend_monitors(input_workspace, summed_workspace)
-
-        self.setProperty(self._OUTPUT_WS, result)
 
     def mask_detectors(self, workspace: MatrixWorkspace, roi_detector_ids: str) -> MatrixWorkspace:
         # We need to apply the mask to the original workspace so we can extract a MaskWorkspace to use in
