@@ -69,41 +69,90 @@ FilterEvents::FilterEvents()
 /** Declare Inputs
  */
 void FilterEvents::init() {
+
+  //********************
+  // Input Workspaces
+  //********************
+  std::string titleInputWksp("Input Workspaces");
+
   declareProperty(std::make_unique<API::WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input),
                   "An input event workspace");
 
   declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>("SplitterWorkspace", "", Direction::Input),
-                  "An input SpilltersWorskpace for filtering");
+                  "An input SplittersWorskpace for filtering");
+
+  declareProperty("RelativeTime", false,
+                  "Flag to indicate that in the input Matrix splitting workspace, the time indicated "
+                  "by X-vector is relative to either run start time or some indicted time.");
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("InformationWorkspace", "", Direction::Input,
+                                                                      PropertyMode::Optional),
+                  "Optional output for the information of each splitter "
+                  "workspace index.");
+  setPropertyGroup("InputWorkspace", titleInputWksp);
+  setPropertyGroup("SplitterWorkspace", titleInputWksp);
+  setPropertyGroup("RelativeTime", titleInputWksp);
+  setPropertyGroup("InformationWorkspace", titleInputWksp);
+
+  //********************
+  // Output Workspaces
+  //********************
+  std::string titleOutputWksp("Output Workspaces");
 
   declareProperty("OutputWorkspaceBaseName", "OutputWorkspace",
                   "The base name to use for the output workspace. The output "
                   "workspace names are a combination of this and the index in "
                   "splitter.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("InformationWorkspace", "", Direction::Input,
-                                                                      PropertyMode::Optional),
-                  "Optional output for the information of each splitter "
-                  "workspace index.");
+  declareProperty("DescriptiveOutputNames", false,
+                  "If selected, the names of the output workspaces will include information about each slice.");
+
+  declareProperty("GroupWorkspaces", false,
+                  "Option to group all the output workspaces.  Group name will be OutputWorkspaceBaseName.");
+
+  declareProperty("OutputWorkspaceIndexedFrom1", false,
+                  "If selected, the minimum output workspace is indexed from 1 and continuous.");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputTOFCorrectionWorkspace", "TOFCorrectWS",
                                                                        Direction::Output),
                   "Name of output workspace for TOF correction factor. ");
+  setPropertyGroup("OutputWorkspaceBaseName", titleOutputWksp);
+  setPropertyGroup("DescriptiveOutputNames", titleOutputWksp);
+  setPropertyGroup("GroupWorkspaces", titleOutputWksp);
+  setPropertyGroup("OutputWorkspaceIndexedFrom1", titleOutputWksp);
+  setPropertyGroup("OutputTOFCorrectionWorkspace", titleOutputWksp);
+
+  //************************
+  // Sample logs splitting
+  //************************
+  std::string titleLogSplit("Sample Logs Splitting");
+  declareProperty("SplitSampleLogs", true,
+                  "If selected, all sample logs will be split by the event splitters.  It is not recommended "
+                  "for fast event log splitters.");
 
   declareProperty("FilterByPulseTime", false,
-                  "Filter the event by its pulse time only for slow sample "
-                  "environment log.  This option can make execution of "
-                  "algorithm faster.  But it lowers precision.");
+                  "Filter the event by its pulse time only for slow sample environment log.  This option can make "
+                  "execution of the algorithm faster, but lowers its precision.");
 
-  declareProperty("GroupWorkspaces", false,
-                  "Option to group all the output "
-                  "workspaces.  Group name will be "
-                  "OutputWorkspaceBaseName.");
+  declareProperty(std::make_unique<ArrayProperty<std::string>>("TimeSeriesPropertyLogs"),
+                  "List of name of sample logs of TimeSeriesProperty format. "
+                  "They will be either excluded from splitting if ExcludedSpecifiedLogs is specified as True. "
+                  "Alternatively, they will be the only TimeSeriesProperty sample logs that will be split "
+                  "to child workspaces.");
+  declareProperty("ExcludeSpecifiedLogs", true,
+                  "If true, all the TimeSeriesProperty logs listed will be excluded from duplicating. "
+                  "Otherwise, only those specified logs will be split.");
+  setPropertyGroup("SplitSampleLogs", titleLogSplit);
+  setPropertyGroup("FilterByPulseTime", titleLogSplit);
+  setPropertyGroup("TimeSeriesPropertyLogs", titleLogSplit);
+  setPropertyGroup("ExcludeSpecifiedLogs", titleLogSplit);
 
-  declareProperty("OutputWorkspaceIndexedFrom1", false,
-                  "If selected, the minimum output workspace is indexed from 1 "
-                  "and continuous.");
+  //*********************
+  // Additional Options
+  //*********************
+  std::string titleAdditionalOptions("Additional Options");
 
-  // TOF correction
+  declareProperty("FilterStartTime", "", "Start time for splitters that can be parsed to DateAndTime.");
+
   vector<string> corrtypes{"None", "Customized", "Direct", "Elastic", "Indirect"};
   declareProperty("CorrectionToSample", "None", std::make_shared<StringListValidator>(corrtypes),
                   "Type of correction on neutron events to sample time from "
@@ -111,8 +160,7 @@ void FilterEvents::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("DetectorTOFCorrectionWorkspace", "",
                                                                       Direction::Input, PropertyMode::Optional),
-                  "Name of table workspace containing the log "
-                  "time correction factor for each detector. ");
+                  "Name of table workspace containing the log time correction factor for each detector. ");
   setPropertySettings("DetectorTOFCorrectionWorkspace",
                       std::make_unique<VisibleWhenProperty>("CorrectionToSample", IS_EQUAL_TO, "Customized"));
 
@@ -128,40 +176,22 @@ void FilterEvents::init() {
   declareProperty("SpectrumWithoutDetector", "Skip", std::make_shared<StringListValidator>(spec_no_det),
                   "Approach to deal with spectrum without detectors. ");
 
-  declareProperty("SplitSampleLogs", true,
-                  "If selected, all sample logs will be splitted by the  "
-                  "event splitters.  It is not recommended for fast event "
-                  "log splitters. ");
-
-  declareProperty("NumberOutputWS", 0, "Number of output output workspace splitted. ", Direction::Output);
-
   declareProperty("DBSpectrum", EMPTY_INT(), "Spectrum (workspace index) for debug purpose. ");
+
+  setPropertyGroup("FilterStartTime", titleAdditionalOptions);
+  setPropertyGroup("CorrectionToSample", titleAdditionalOptions);
+  setPropertyGroup("DetectorTOFCorrectionWorkspace", titleAdditionalOptions);
+  setPropertyGroup("IncidentEnergy", titleAdditionalOptions);
+  setPropertyGroup("SpectrumWithoutDetector", titleAdditionalOptions);
+  setPropertyGroup("DBSpectrum", titleAdditionalOptions);
+
+  //*********************
+  // Output Properties
+  //*********************
+  declareProperty("NumberOutputWS", 0, "Number of output output workspace splitted. ", Direction::Output);
 
   declareProperty(std::make_unique<ArrayProperty<string>>("OutputWorkspaceNames", Direction::Output),
                   "List of output workspaces names");
-
-  declareProperty("RelativeTime", false,
-                  "Flag to indicate that in the input Matrix splitting workspace,"
-                  "the time indicated by X-vector is relative to either run start time or "
-                  "some indicted time.");
-
-  declareProperty("FilterStartTime", "", "Start time for splitters that can be parsed to DateAndTime.");
-
-  declareProperty(std::make_unique<ArrayProperty<std::string>>("TimeSeriesPropertyLogs"),
-                  "List of name of sample logs of TimeSeriesProperty format. "
-                  "They will be either excluded from splitting if ExcludedSpecifiedLogs is "
-                  "specified as True. Or "
-                  "They will be the only TimeSeriesProperty sample logs that will be split "
-                  "to child workspaces.");
-
-  declareProperty("ExcludeSpecifiedLogs", true,
-                  "If true, all the TimeSeriesProperty logs listed will be "
-                  "excluded from duplicating. "
-                  "Otherwise, only those specified logs will be split.");
-
-  declareProperty("DescriptiveOutputNames", false,
-                  "If selected, the names of the output workspaces will "
-                  "include information about each slice.");
 }
 
 std::map<std::string, std::string> FilterEvents::validateInputs() {
@@ -373,6 +403,13 @@ void FilterEvents::processAlgorithmProperties() {
     throw std::invalid_argument(errss.str());
   }
 
+  //**************************************************************
+  // Find out what type of input workspace encodes the splitters
+  // Valid options are:
+  //   - SplittersWorkspace
+  //   - TableWorkspace
+  //   - MatrixWorkspace
+  //**************************************************************
   // Process splitting workspace (table or data)
   API::Workspace_sptr tempws = this->getProperty("SplitterWorkspace");
 
@@ -392,6 +429,9 @@ void FilterEvents::processAlgorithmProperties() {
     }
   }
 
+  //********************************************************
+  // Find out if an InformationWorkspace has been supplied
+  //********************************************************
   m_informationWS = this->getProperty("InformationWorkspace");
   // Information workspace is specified?
   if (!m_informationWS)
@@ -399,11 +439,15 @@ void FilterEvents::processAlgorithmProperties() {
   else
     m_hasInfoWS = true;
 
-  m_outputWSNameBase = this->getPropertyValue("OutputWorkspaceBaseName");
   m_filterByPulseTime = this->getProperty("FilterByPulseTime");
 
+  //***************************************
+  // Information on the Ouptut Workspaces
+  //   - OutputWorkspaceBaseName
+  //   - GroupWorkspaces
+  //***************************************
+  m_outputWSNameBase = this->getPropertyValue("OutputWorkspaceBaseName");
   m_toGroupWS = this->getProperty("GroupWorkspaces");
-
   if (m_toGroupWS && (m_outputWSNameBase == m_eventWS->getName())) {
     std::stringstream errss;
     errss << "It is not allowed to group output workspaces into the same name "
@@ -761,7 +805,7 @@ void FilterEvents::processSplittersWorkspace() {
   m_timeSplitter = TimeSplitter(m_splittersWorkspace);
   m_targetWorkspaceIndexSet = m_timeSplitter.outputWorkspaceIndices();
   m_targetWorkspaceIndexSet.insert(TimeSplitter::NO_TARGET); // add an extra workspace index for unfiltered events
-  m_maxTargetIndex = *m_targetWorkspaceIndexSet.rbegin();
+  m_maxTargetIndex = *m_targetWorkspaceIndexSet.rbegin();    // m_targetWorkspaceIndexSet is already sorted
   m_progress = 0.05;
   progress(m_progress);
 
@@ -1018,9 +1062,7 @@ void FilterEvents::processTableSplittersWorkspace() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Create a list of EventWorkspace for output in the case that splitters are
- * given by
- *  SplittersWorkspace
+/** Create a list of EventWorkspace for output in the case that splitters are given by SplittersWorkspace
  */
 void FilterEvents::createOutputWorkspacesSplitters() {
   if (m_targetWorkspaceIndexSet.size() == 0) { // at least index -1 (i.e. no target specified) has to be present
@@ -1040,7 +1082,8 @@ void FilterEvents::createOutputWorkspacesSplitters() {
   }
 
   // Determine the minimum valid target workspace index. Note that the set is sorted and guaranteed to start with -1.
-  const int min_wsindex = m_targetWorkspaceIndexSet.size() == 1 ? -1 : *std::next(m_targetWorkspaceIndexSet.begin(), 1);
+  const int min_wsindex = m_targetWorkspaceIndexSet.size() == 1 ? TimeSplitter::NO_TARGET
+                                                                : *std::next(m_targetWorkspaceIndexSet.begin(), 1);
   g_log.debug() << "Minimum target workspace index = " << min_wsindex << "\n";
 
   const bool from1 = getProperty("OutputWorkspaceIndexedFrom1");
