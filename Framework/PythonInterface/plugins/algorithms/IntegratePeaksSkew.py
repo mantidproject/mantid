@@ -15,6 +15,16 @@ from mantid.api import (
     WorkspaceUnitValidator,
     FunctionFactory,
 )
+from mantid.simpleapi import (
+    DiffractionFocussing,
+    CreateGroupingWorkspace,
+    GroupDetectors,
+    DeleteWorkspaces,
+    RebinToWorkspace,
+    CreateSingleValuedWorkspace,
+    Multiply,
+    Subtract,
+)
 from mantid.kernel import Direction, FloatBoundedValidator, IntBoundedValidator, EnabledWhenProperty, PropertyCriterion, logger
 import numpy as np
 from scipy.signal import convolve2d
@@ -225,7 +235,7 @@ class InstrumentArrayConverter:
                 if len(xvals) > signal.shape[-1]:
                     xvals = 0.5 * (xvals[:-1] + xvals[1:])  # convert to bin centers
                 xcens[irow, icol, :] = xvals
-        peak_data = PeakData(xcens, signal, errors, irow_peak, icol_peak, det_edges, detids, peak)
+        peak_data = PeakData(xcens, signal, errors, irow_peak, icol_peak, det_edges, detids, peak, self.ws)
         return peak_data
 
 
@@ -234,8 +244,9 @@ class PeakData:
     This class is used to hold data and integration parameters for single-crystal Bragg peaks
     """
 
-    def __init__(self, xcens, signal, error, irow, icol, det_edges, detids, peak):
+    def __init__(self, xcens, signal, error, irow, icol, det_edges, detids, peak, ws):
         # set data
+        self.ws = ws
         self.xcens = xcens
         self.signal, self.error = signal, error
         self.irow, self.icol = irow, icol
@@ -405,30 +416,46 @@ class PeakData:
     def _calc_snr(signal, error_sq):
         return np.sum(signal) / np.sqrt(np.sum(error_sq))
 
+    def _focus_detids(self, detids):
+        grp_ws, *_ = CreateGroupingWorkspace(
+            InputWorkspace=self.ws,
+            EnableLogging=False,
+            CustomGroupingString="+".join([str(id) for id in detids]),
+            OutputWorkspace="__grp",
+            ComponentName=self.ws.getInstrument().getName(),
+        )  # for some reason this needs to be in ADS to work in GroupDetectors
+        if self.ws.getAxis(0).getUnit().unitID() == "dSpacing":
+            ws_foc = DiffractionFocussing(InputWorkspace=self.ws, GroupingWorkspace=grp_ws, StoreInADS=False, EnableLogging=False)
+        else:
+            ws_foc = GroupDetectors(
+                InputWorkspace=self.ws,
+                CopyGroupingFromWorkspace=grp_ws,
+                StoreInADS=False,
+                EnableLogging=False,
+                OutputWorkspace=f"foc{detids[0]}",
+            )
+        DeleteWorkspaces(
+            [grp_ws],
+            EnableLogging=False,
+        )
+        return ws_foc
+
     def focus_data_in_detector_mask(self):
-        # focus peak in TOF
-        self.ypk = self.signal[self.peak_mask].sum(axis=0)
-        self.epk_sq = np.sum(self.error[self.peak_mask] ** 2, axis=0)
         # get background shell of non peak/feature pixels
         kernel = np.ones((3, 3))
         bg_shell_mask = convolve2d(self.peak_mask, kernel, mode="same")
         norm = convolve2d(np.ones(bg_shell_mask.shape), kernel, mode="same")
         bg_shell_mask = (bg_shell_mask / norm) > 0
         bg_shell_mask = np.logical_and(bg_shell_mask, ~self.non_bg_mask)
-        # focus background shell
-        scale = self.peak_mask.sum() / bg_shell_mask.sum()
-        ybg = scale * self.signal[bg_shell_mask].sum(axis=0)
-        ebg_sq = (scale**2) * np.sum(self.error[bg_shell_mask] ** 2, axis=0)
-        # replace zero errors in epk and ebg_sq  with avg. error in same quarter of spectrum in background data
-        width = len(self.ypk) / 4
-        iquarter = self.ixpk // width
-        ebg_sq_subset = ebg_sq[int(iquarter * width) : int((iquarter + 1) * width)]
-        ebg_sq_avg = np.mean(ebg_sq_subset[ebg_sq_subset > 0])
-        self.epk_sq[self.epk_sq == 0] = ebg_sq_avg
-        ebg_sq[ebg_sq == 0] = ebg_sq_avg
-        # subtract bg from focused peak
-        self.ypk = self.ypk - ybg  # removes background and powder lines (roughly line up in tof)
-        self.epk_sq = self.epk_sq + ebg_sq
+        # focus and subtract background shell
+        ws_foc_bg = self._focus_detids(self.detids[bg_shell_mask])
+        scale = CreateSingleValuedWorkspace(DataValue=self.peak_mask.sum() / bg_shell_mask.sum(), StoreInADS=False, EnableLogging=False)
+        ws_foc_bg = Multiply(LHSWorkspace=ws_foc_bg, RHSWorkspace=scale, StoreInADS=False, EnableLogging=False)
+        ws_pk_foc = self._focus_detids(self.detids[self.peak_mask])
+        ws_foc_bg = RebinToWorkspace(WorkspaceToRebin=ws_foc_bg, WorkspaceToMatch=ws_foc_bg, StoreInADS=False, EnableLogging=False)
+        ws_pk_foc = Subtract(LHSWorkspace=ws_pk_foc, RHSWorkspace=ws_foc_bg, StoreInADS=False, EnableLogging=False)
+        self.ypk = ws_pk_foc.dataY(0)
+        self.epk_sq = ws_pk_foc.dataE(0) ** 2
 
     def scale_intensity_by_bin_width(self):
         # multiply by bin width (as eventually want integrated intensity)
