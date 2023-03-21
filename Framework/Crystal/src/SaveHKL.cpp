@@ -441,34 +441,14 @@ void SaveHKL::exec() {
         if (cosines) {
           out << std::setw(8) << std::fixed << std::setprecision(5) << lambda;
           out << std::setw(8) << std::fixed << std::setprecision(5) << tbar;
-          Kernel::DblMatrix R = p.getGoniometerMatrix();
-
-          R.Transpose();
-
-          DblMatrix T = ol.getUB();
-
-          V3D t1 = V3D(T[0][0], T[1][0], T[2][0]);
-          V3D t2 = V3D(T[0][1], T[1][1], T[2][1]);
-          V3D t3 = V3D(T[0][2], T[1][2], T[2][2]);
-
-          t1.normalize();
-          t2.normalize();
-          t3.normalize();
-
-          T.setRow(0, t1);
-          T.setRow(1, t2);
-          T.setRow(2, t3);
 
           // This is the reverse incident beam
-          V3D reverse_incident_dir = inst->getSource()->getPos() - inst->getSample()->getPos();
-          reverse_incident_dir.normalize();
+          V3D reverse_incident_dir = p.getSourceDirectionSampleFrame();
+          V3D reverse_incident_cos = ol.cosFromDir(reverse_incident_dir);
 
           // This is the scattered beam direction
-          V3D scattered_dir = p.getDetPos() - inst->getSample()->getPos();
-          scattered_dir.normalize();
-
-          V3D reverse_incident_cos = T * R * reverse_incident_dir;
-          V3D scattered_cos = T * R * scattered_dir;
+          V3D scattered_dir = p.getDetectorDirectionSampleFrame();
+          V3D scattered_cos = ol.cosFromDir(scattered_dir);
 
           for (int k = 0; k < 3; ++k) {
             out << std::setw(9) << std::fixed << std::setprecision(5) << reverse_incident_cos[k];

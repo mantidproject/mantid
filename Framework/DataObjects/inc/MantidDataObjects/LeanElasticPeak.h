@@ -56,6 +56,8 @@ public:
 
   std::shared_ptr<const Geometry::ReferenceFrame> getReferenceFrame() const override;
 
+  int getDetectorID() const override;
+
   int getCol() const override;
   int getRow() const override;
 
@@ -81,6 +83,9 @@ public:
 
   double getL1() const override;
   double getL2() const override;
+
+  Mantid::Kernel::V3D getDetectorDirectionSampleFrame() const override;
+  Mantid::Kernel::V3D getSourceDirectionSampleFrame() const override;
 
   /// Assignment
   LeanElasticPeak &operator=(const LeanElasticPeak &other);

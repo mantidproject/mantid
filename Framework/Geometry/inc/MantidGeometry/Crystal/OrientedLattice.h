@@ -42,21 +42,23 @@ public:
   // get u and v vectors for Horace/Mslice
   Kernel::V3D getuVector() const;
   Kernel::V3D getvVector() const;
-  /// Return hkl from the Q-sample coordinates
+  // Return hkl from the Q-sample coordinates
   Kernel::V3D hklFromQ(const Kernel::V3D &Q) const;
-  /// Return Q-sample coordinates from hkl
+  // Return Q-sample coordinates from hkl
   Kernel::V3D qFromHKL(const Kernel::V3D &hkl) const;
-  /// Create the U matrix from two vectors
+  // Return direction cosine from direction vector
+  Kernel::V3D cosFromDir(const Kernel::V3D &dir) const;
+  // Create the U matrix from two vectors
   const Kernel::DblMatrix &setUFromVectors(const Kernel::V3D &u, const Kernel::V3D &v);
-  /// Save the lattice to an open NeXus file
+  // Save the lattice to an open NeXus file
   void saveNexus(::NeXus::File *file, const std::string &group) const;
-  /// Load the lattice to from an open NeXus file
+  // Load the lattice to from an open NeXus file
   void loadNexus(::NeXus::File *file, const std::string &group);
-  /// Get the UB matix corresponding to the real space edge vectors a, b, c
+  // Get the UB matix corresponding to the real space edge vectors a, b, c
   static bool GetUB(Kernel::DblMatrix &UB, const Kernel::V3D &a_dir, const Kernel::V3D &b_dir,
                     const Kernel::V3D &c_dir);
 
-  /// Get the real space edge vectors a, b, c corresponding to the UB matrix
+  // Get the real space edge vectors a, b, c corresponding to the UB matrix
   static bool GetABC(const Kernel::DblMatrix &UB, Kernel::V3D &a_dir, Kernel::V3D &b_dir, Kernel::V3D &c_dir);
 
   bool operator==(const OrientedLattice &other) const;

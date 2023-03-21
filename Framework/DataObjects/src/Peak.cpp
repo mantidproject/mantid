@@ -412,6 +412,22 @@ double Peak::getAzimuthal() const {
 }
 
 // -------------------------------------------------------------------------------------
+/** Calculate the scattered beam direction in the sample frame  */
+Mantid::Kernel::V3D Peak::getDetectorDirectionSampleFrame() const {
+  V3D detDir = detPos - m_samplePos;
+  detDir /= detDir.norm();
+  return getInverseGoniometerMatrix() * detDir;
+}
+
+// -------------------------------------------------------------------------------------
+/** Calculate the reverse incident beam direction in the sample frame  */
+Mantid::Kernel::V3D Peak::getSourceDirectionSampleFrame() const {
+  V3D beamDir = m_samplePos - sourcePos;
+  beamDir /= beamDir.norm();
+  return getInverseGoniometerMatrix() * beamDir * -1.0;
+}
+
+// -------------------------------------------------------------------------------------
 /** Calculate the d-spacing of the peak, in 1/Angstroms  */
 double Peak::getDSpacing() const {
   // The detector is at 2 theta scattering angle

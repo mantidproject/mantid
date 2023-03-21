@@ -165,6 +165,9 @@ void export_IPeak() {
       .def("setGoniometerMatrix", &setGoniometerMatrix, (arg("self"), arg("goniometerMatrix")),
            "Set the :class:`~mantid.geometry.Goniometer` rotation matrix of "
            "this peak.")
+      .def("getDetectorID", &IPeak::getDetectorID, arg("self"),
+           "For :class:`~mantid.geometry.RectangularDetector` s only, returns "
+           "the pixel ID of the detector.")
       .def("getRow", &IPeak::getRow, arg("self"),
            "For :class:`~mantid.geometry.RectangularDetector` s only, returns "
            "the row (y) of the pixel of the "
@@ -185,5 +188,15 @@ void export_IPeak() {
       .def("getReferenceFrame", (std::shared_ptr<const ReferenceFrame>(IPeak::*)()) & IPeak::getReferenceFrame,
            arg("self"), return_value_policy<RemoveConstSharedPtr>(),
            "Returns the :class:`~mantid.geometry.ReferenceFrame` attached that "
-           "defines the instrument axes");
+           "defines the instrument axes")
+      .def("getDetectorDirectionSampleFrame", &IPeak::getDetectorDirectionSampleFrame, arg("self"),
+           "Return the direction of the scattered beam for this peak."
+           "The direction is in the Sample frame: the "
+           ":class:`~mantid.geometry.Goniometer` rotation WAS taken "
+           "out. ")
+      .def("getSourceDirectionSampleFrame", &IPeak::getSourceDirectionSampleFrame, arg("self"),
+           "Return the direction of the reverse incident beam for this peak."
+           "The direction is in the Sample frame: the "
+           ":class:`~mantid.geometry.Goniometer` rotation WAS taken "
+           "out. ");
 }

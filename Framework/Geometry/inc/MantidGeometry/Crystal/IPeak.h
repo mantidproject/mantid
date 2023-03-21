@@ -86,6 +86,8 @@ public:
   virtual Mantid::Kernel::Matrix<double> getGoniometerMatrix() const = 0;
   virtual void setGoniometerMatrix(const Mantid::Kernel::Matrix<double> &m_GoniometerMatrix) = 0;
 
+  virtual int getDetectorID() const = 0;
+
   virtual int getRow() const = 0;
   virtual int getCol() const = 0;
 
@@ -98,6 +100,9 @@ public:
 
   virtual void setAbsorptionWeightedPathLength(double pathLength) = 0;
   virtual double getAbsorptionWeightedPathLength() const = 0;
+
+  virtual Mantid::Kernel::V3D getDetectorDirectionSampleFrame() const = 0;
+  virtual Mantid::Kernel::V3D getSourceDirectionSampleFrame() const = 0;
 };
 
 using IPeak_uptr = std::unique_ptr<IPeak>;
