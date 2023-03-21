@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 """
-Common presenter for DNS acript generators.
+Common presenter for DNS script generators.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver

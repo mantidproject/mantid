@@ -96,7 +96,7 @@ class DNSReductionGUIView(QMainWindow):
         return None
 
     def _help_button_clicked(self):
-        show_interface_help("direct/dns_powder_tof/DNS Powder TOF", QProcess(self))
+        show_interface_help("direct/dns_reduction/DNS Reduction", QProcess(self))
 
     def add_submenu(self, subview):
         for menu in subview.menues:

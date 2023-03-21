@@ -56,7 +56,7 @@
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QLabel" name="I_data_dir_req">
+       <widget class="QLabel" name="l_data_dir_req">
         <property name="palette">
          <palette>
           <active>
