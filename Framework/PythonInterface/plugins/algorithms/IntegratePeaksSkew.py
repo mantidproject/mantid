@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (
+    AlgorithmManager,
     DataProcessorAlgorithm,
     AlgorithmFactory,
     Progress,
@@ -14,16 +15,7 @@ from mantid.api import (
     FileAction,
     WorkspaceUnitValidator,
     FunctionFactory,
-)
-from mantid.simpleapi import (
-    DiffractionFocussing,
-    CreateGroupingWorkspace,
-    GroupDetectors,
-    DeleteWorkspaces,
-    RebinToWorkspace,
-    CreateSingleValuedWorkspace,
-    Multiply,
-    Subtract,
+    AnalysisDataService,
 )
 from mantid.kernel import Direction, FloatBoundedValidator, IntBoundedValidator, EnabledWhenProperty, PropertyCriterion, logger
 import numpy as np
@@ -417,27 +409,21 @@ class PeakData:
         return np.sum(signal) / np.sqrt(np.sum(error_sq))
 
     def _focus_detids(self, detids):
-        grp_ws, *_ = CreateGroupingWorkspace(
+        grp_ws = exec_CreateGroupingWorkspace(
             InputWorkspace=self.ws,
-            EnableLogging=False,
             CustomGroupingString="+".join([str(id) for id in detids]),
             OutputWorkspace="__grp",
             ComponentName=self.ws.getInstrument().getName(),
-        )  # for some reason this needs to be in ADS to work in GroupDetectors
+        )
         if self.ws.getAxis(0).getUnit().unitID() == "dSpacing":
-            ws_foc = DiffractionFocussing(InputWorkspace=self.ws, GroupingWorkspace=grp_ws, StoreInADS=False, EnableLogging=False)
+            ws_foc = exec_DiffractionFocussing(InputWorkspace=self.ws, GroupingWorkspace=grp_ws, OutputWorkspace=f"__foc{detids[0]}")
         else:
-            ws_foc = GroupDetectors(
+            ws_foc = exec_GroupDetectors(
                 InputWorkspace=self.ws,
                 CopyGroupingFromWorkspace=grp_ws,
-                StoreInADS=False,
-                EnableLogging=False,
-                OutputWorkspace=f"foc{detids[0]}",
+                OutputWorkspace=f"__foc{detids[0]}",
             )
-        DeleteWorkspaces(
-            [grp_ws],
-            EnableLogging=False,
-        )
+        exec_DeleteWorkspaces(WorkspaceList=[grp_ws])
         return ws_foc
 
     def focus_data_in_detector_mask(self):
@@ -448,14 +434,16 @@ class PeakData:
         bg_shell_mask = (bg_shell_mask / norm) > 0
         bg_shell_mask = np.logical_and(bg_shell_mask, ~self.non_bg_mask)
         # focus and subtract background shell
-        ws_foc_bg = self._focus_detids(self.detids[bg_shell_mask])
-        scale = CreateSingleValuedWorkspace(DataValue=self.peak_mask.sum() / bg_shell_mask.sum(), StoreInADS=False, EnableLogging=False)
-        ws_foc_bg = Multiply(LHSWorkspace=ws_foc_bg, RHSWorkspace=scale, StoreInADS=False, EnableLogging=False)
+        ws_bg_foc = self._focus_detids(self.detids[bg_shell_mask])
+        scale = exec_CreateSingleValuedWorkspace(DataValue=self.peak_mask.sum() / bg_shell_mask.sum(), OutputWorkspace="__scale")
+        exec_Multiply(LHSWorkspace=ws_bg_foc, RHSWorkspace=scale, OutputWorkspace=ws_bg_foc)
         ws_pk_foc = self._focus_detids(self.detids[self.peak_mask])
-        ws_foc_bg = RebinToWorkspace(WorkspaceToRebin=ws_foc_bg, WorkspaceToMatch=ws_foc_bg, StoreInADS=False, EnableLogging=False)
-        ws_pk_foc = Subtract(LHSWorkspace=ws_pk_foc, RHSWorkspace=ws_foc_bg, StoreInADS=False, EnableLogging=False)
+        exec_RebinToWorkspace(WorkspaceToRebin=ws_bg_foc, WorkspaceToMatch=ws_pk_foc, OutputWorkspace=ws_bg_foc)
+        exec_Subtract(LHSWorkspace=ws_pk_foc, RHSWorkspace=ws_bg_foc, OutputWorkspace=ws_pk_foc)
+        ws_pk_foc = AnalysisDataService.retrieve(ws_pk_foc)
         self.ypk = ws_pk_foc.dataY(0)
         self.epk_sq = ws_pk_foc.dataE(0) ** 2
+        exec_DeleteWorkspaces(WorkspaceList=[ws_bg_foc, ws_pk_foc, scale])
 
     def scale_intensity_by_bin_width(self):
         # multiply by bin width (as eventually want integrated intensity)
@@ -1165,6 +1153,86 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         for prop, value in kwargs.items():
             alg.setProperty(prop, value)
         alg.execute()
+
+
+def exec_CreateGroupingWorkspace(**kwargs):
+    alg = AlgorithmManager.create("CreateGroupingWorkspace")
+    alg.initialize()
+    alg.setLogging(False)
+    alg.setAlwaysStoreInADS(True)  # for some reason this needs to be in ADS to work in GroupDetectors
+    for prop, value in kwargs.items():
+        alg.setProperty(prop, value)
+    alg.execute()
+    return alg.getPropertyValue("OutputWorkspace")
+
+
+def exec_DiffractionFocussing(**kwargs):
+    alg = AlgorithmManager.create("DiffractionFocussing")
+    alg.initialize()
+    alg.setLogging(False)
+    for prop, value in kwargs.items():
+        alg.setProperty(prop, value)
+    alg.execute()
+    return alg.getPropertyValue("OutputWorkspace")
+
+
+def exec_GroupDetectors(**kwargs):
+    alg = AlgorithmManager.create("GroupDetectors")
+    alg.initialize()
+    alg.setLogging(False)
+    for prop, value in kwargs.items():
+        alg.setProperty(prop, value)
+    alg.execute()
+    return alg.getPropertyValue("OutputWorkspace")
+
+
+def exec_CreateSingleValuedWorkspace(**kwargs):
+    alg = AlgorithmManager.create("CreateSingleValuedWorkspace")
+    alg.initialize()
+    alg.setLogging(False)
+    for prop, value in kwargs.items():
+        alg.setProperty(prop, value)
+    alg.execute()
+    return alg.getPropertyValue("OutputWorkspace")
+
+
+def exec_DeleteWorkspaces(**kwargs):
+    alg = AlgorithmManager.create("DeleteWorkspaces")
+    alg.initialize()
+    alg.setLogging(False)
+    for prop, value in kwargs.items():
+        alg.setProperty(prop, value)
+    alg.execute()
+
+
+def exec_RebinToWorkspace(**kwargs):
+    alg = AlgorithmManager.create("RebinToWorkspace")
+    alg.initialize()
+    alg.setLogging(False)
+    for prop, value in kwargs.items():
+        alg.setProperty(prop, value)
+    alg.execute()
+    return alg.getPropertyValue("OutputWorkspace")
+
+
+def exec_Multiply(**kwargs):
+    alg = AlgorithmManager.create("Multiply")
+    alg.initialize()
+    alg.setLogging(False)
+    for prop, value in kwargs.items():
+        alg.setProperty(prop, value)
+    alg.execute()
+    return alg.getPropertyValue("OutputWorkspace")
+
+
+def exec_Subtract(**kwargs):
+    alg = AlgorithmManager.create("Subtract")
+    alg.initialize()
+    alg.setLogging(False)
+    for prop, value in kwargs.items():
+        alg.setProperty(prop, value)
+    alg.execute()
+    return alg.getPropertyValue("OutputWorkspace")
 
 
 # register algorithm with mantid
