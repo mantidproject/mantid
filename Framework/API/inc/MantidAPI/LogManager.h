@@ -156,6 +156,8 @@ public:
 
   /// Get the time averaged standard deviation for a log
   double getTimeAveragedStd(const std::string &name) const;
+  /// Get the time averaged value for a log
+  double getTimeAveragedValue(const std::string &name) const;
 
   /// Returns various statistics computations for a given property.
   Kernel::TimeSeriesPropertyStatistics getStatistics(const std::string &name) const;

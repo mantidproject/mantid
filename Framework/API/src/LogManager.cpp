@@ -337,6 +337,13 @@ double LogManager::getTimeAveragedStd(const std::string &name) const {
 }
 
 /**
+ * Returns the time averaged value
+ * @param name :: The name of the property
+ * @return A single double value
+ */
+double LogManager::getTimeAveragedValue(const std::string &name) const { return getStatistics(name).time_mean; }
+
+/**
  * Returns various statistics computations for a given property. The time filter, if not-empty, is applied when
  * computing.
  * The returned statistics will all be NAN when statistics cannot be computed, such as for a string property.

@@ -428,6 +428,14 @@ public:
     TS_ASSERT_DELTA(run.getTimeAveragedStd(name), 8.0646, 0.001);
   }
 
+  void test_getTimeAveragedValue() {
+    LogManager run;
+    const std::string name = "series";
+    addTestTimeSeries<double>(run, name);
+
+    TS_ASSERT_DELTA(run.getTimeAveragedValue(name), 18.2380, 0.001);
+  }
+
   void test_getStatistics() {
     LogManager run;
 
