@@ -29,14 +29,13 @@ class SXD(BaseSX):
 
     def process_data(self, runs: Sequence[str], *args):
         gonio_angles = args
-        if len(gonio_angles) != len(self.gonio_axes):
-            return
         for irun, run in enumerate(runs):
             wsname = self.load_run(run)
             # set goniometer
             if self.gonio_axes is not None:
-                # gonio_angles are a list of motor strings (same for all runs)
-                if isinstance(gonio_angles[0], str):
+                if len(gonio_angles) != len(self.gonio_axes):
+                    logger.warning("No goniometer will be applied as the number of goniometer angles doesn't match the number of axes set.")
+                elif isinstance(gonio_angles[0], str):
                     self._set_goniometer_on_ws(wsname, gonio_angles)
                 else:
                     # gonio_angles is a list of individual or tuple motor angles for each run

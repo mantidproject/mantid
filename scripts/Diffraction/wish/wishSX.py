@@ -7,6 +7,7 @@
 from typing import Sequence
 import numpy as np
 import mantid.simpleapi as mantid
+from mantid.kernel import logger
 from Diffraction.single_crystal.base_sx import BaseSX
 from mantid.api import AnalysisDataService as ADS
 
@@ -25,14 +26,14 @@ class WishSX(BaseSX):
 
     def process_data(self, runs: Sequence[str], *args):
         gonio_angles = args
-        if len(gonio_angles) != len(self.gonio_axes):
-            return
         for irun, run in enumerate(runs):
             wsname = self.load_run(run)
             # set goniometer
             if self.gonio_axes is not None:
-                # gonio_angles are a list of motor strings (same for all runs)
-                if isinstance(gonio_angles[0], str):
+                if len(gonio_angles) != len(self.gonio_axes):
+                    logger.warning("No goniometer will be applied as the number of goniometer angles doesn't match the number of axes set.")
+                elif isinstance(gonio_angles[0], str):
+                    # gonio_angles are a list of motor strings (same for all runs)
                     self._set_goniometer_on_ws(wsname, gonio_angles)
                 else:
                     # gonio_angles is a list of individual or tuple motor angles for each run
@@ -69,7 +70,7 @@ class WishSX(BaseSX):
     @BaseSX.default_apply_to_all_runs
     def convert_to_MD(self, run=None, frame="Q (lab frame)"):
         WishSX.mask_detector_edges(self.get_ws_name(run), nedge=16, ntubes=2)
-        super().convert_to_MD(run, frame)
+        super().convert_to_MD(run=run, frame=frame)
 
     def process_vanadium(self):
         # vanadium
@@ -86,6 +87,7 @@ class WishSX(BaseSX):
         vanadium_transmission = mantid.SphericalAbsorption(InputWorkspace=self.van_ws, OutputWorkspace="vanadium_transmission")
         self._divide_workspaces(self.van_ws, vanadium_transmission)
         mantid.DeleteWorkspace(vanadium_transmission)
+        mantid.ConvertUnits(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Target="TOF", EnableLogging=False)
 
     @staticmethod
     def load_run(runno):
