@@ -804,6 +804,8 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue(const
     } else {
       const auto &filter = timeRoi->toSplitters();
       retVal = this->averageValueInFilter(filter);
+      g_log.warning("Calls to TimeSeriesProperty::timeAverageValue should be replaced with "
+                    "Run::getTimeAveragedValue");
     }
   } catch (std::exception &) {
     // just return nan
