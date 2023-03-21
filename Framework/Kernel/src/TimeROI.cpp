@@ -493,15 +493,6 @@ const std::vector<Kernel::TimeInterval> TimeROI::toTimeIntervals() const {
 
   return output;
 }
-const std::vector<std::pair<DateAndTime, DateAndTime>> TimeROI::toIntervals() const {
-  std::vector<std::pair<DateAndTime, DateAndTime>> output;
-  // every other value is a start/stop
-  for (std::size_t i = 0; i < m_roi.size(); i += 2) {
-    output.push_back({m_roi[i], m_roi[i + 1]});
-  }
-
-  return output;
-}
 
 /**
  * Time intervals returned where no time is before after. This is used in calculating ranges

@@ -1066,6 +1066,7 @@ void FilterEvents::createOutputWorkspacesSplitters() {
   double progress_step_total =
       static_cast<double>(m_targetWorkspaceIndexSet.size()); // total number of progress steps expected
   double progress_step_current{0.};                          // current number of progress steps
+
   for (auto const wsindex : m_targetWorkspaceIndexSet) {
     // Generate new workspace name
     bool add2output = true;
@@ -1074,13 +1075,14 @@ void FilterEvents::createOutputWorkspacesSplitters() {
     if (wsindex >= 0) {
       if (descriptiveNames && splitByTime) {
         TimeROI timeROI = m_timeSplitter.getTimeROI(wsindex);
-        auto timeIntervals = timeROI.toIntervals();
+
+        auto splittingIntervals = timeROI.toSplitters();
 
         auto startTimeInSeconds =
-            Mantid::Types::Core::DateAndTime::secondsFromDuration(timeIntervals[0].first - m_runStartTime);
+            Mantid::Types::Core::DateAndTime::secondsFromDuration(splittingIntervals[0].start() - m_runStartTime);
 
         auto stopTimeInSeconds =
-            Mantid::Types::Core::DateAndTime::secondsFromDuration(timeIntervals[0].second - m_runStartTime);
+            Mantid::Types::Core::DateAndTime::secondsFromDuration(splittingIntervals[0].stop() - m_runStartTime);
 
         wsname << startTimeInSeconds << "_" << stopTimeInSeconds;
       } else if (descriptiveNames) {
@@ -1164,7 +1166,8 @@ void FilterEvents::createOutputWorkspacesSplitters() {
 
   } // ENDFOR
 
-  setProperty("NumberOutputWS", number_of_output_workspaces);
+  setProperty("NumberOutputWS", static_cast<int>(number_of_output_workspaces));
+
   addTimer("createOutputWorkspacesSplitters", startTime, std::chrono::high_resolution_clock::now());
 
   g_log.information("Output workspaces are created. ");
@@ -1614,11 +1617,14 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
       // Perform the filtering (using the splitting function and just one
       // output)
       if (m_filterByPulseTime) {
-        input_el.splitByPulseTime(m_splitters, outputs);
+        // input_el.splitByPulseTime(m_splitters, outputs);
+        input_el.splitByPulseTime(m_timeSplitter, outputs);
       } else if (m_tofCorrType != NoneCorrect) {
-        input_el.splitByFullTime(m_splitters, outputs, true, m_detTofFactors[iws], m_detTofOffsets[iws]);
+        // input_el.splitByFullTime(m_splitters, outputs, true, m_detTofFactors[iws], m_detTofOffsets[iws]);
+        input_el.splitByFullTime(m_timeSplitter, outputs, true, m_detTofFactors[iws], m_detTofOffsets[iws]);
       } else {
-        input_el.splitByFullTime(m_splitters, outputs, false, 1.0, 0.0);
+        // input_el.splitByFullTime(m_splitters, outputs, false, 1.0, 0.0);
+        input_el.splitByFullTime(m_timeSplitter, outputs, false, 1.0, 0.0);
       }
     }
 
@@ -1817,10 +1823,18 @@ void FilterEvents::generateSplitterTSPalpha(
     split_tsp_vec.emplace_back(std::move(split_tsp));
   }
 
-  for (SplittingInterval splitter : m_splitters) {
+  for (auto const wsindex : m_targetWorkspaceIndexSet) {
+    TimeROI timeROI = m_timeSplitter.getTimeROI(wsindex);
+    SplittingInterval splitter = timeROI.toSplitters()[0];
     int itarget = splitter.index();
     if (itarget >= static_cast<int>(split_tsp_vec.size()))
       throw std::runtime_error("Target workspace index is out of range!");
+
+    std::cout << "wsindex: " << wsindex << ", itarget: " << itarget << ", start: " << splitter.start()
+              << "; stop: " << splitter.stop() << "\n";
+
+    if (wsindex == TimeSplitter::NO_TARGET)
+      continue;
 
     if (splitter.start() == m_runStartTime) {
       // there should be only 1 value in the splitter and clear it.
@@ -1833,7 +1847,21 @@ void FilterEvents::generateSplitterTSPalpha(
     split_tsp_vec[itarget]->addValue(splitter.stop(), 0);
   }
 
-  return;
+  // for (SplittingInterval splitter : m_splitters) {
+  //   int itarget = splitter.index();
+  //   if (itarget >= static_cast<int>(split_tsp_vec.size()))
+  //     throw std::runtime_error("Target workspace index is out of range!");
+
+  //   if (splitter.start() == m_runStartTime) {
+  //     // there should be only 1 value in the splitter and clear it.
+  //     if (split_tsp_vec[itarget]->size() != 1) {
+  //       throw std::runtime_error("Splitter must have 1 value with initialization.");
+  //     }
+  //     split_tsp_vec[itarget]->clear();
+  //   }
+  //   split_tsp_vec[itarget]->addValue(splitter.start(), 1);
+  //   split_tsp_vec[itarget]->addValue(splitter.stop(), 0);
+  // }
 }
 
 /** add the splitter TimeSeriesProperty logs to each workspace

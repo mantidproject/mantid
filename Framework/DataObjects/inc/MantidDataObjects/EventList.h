@@ -11,6 +11,8 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/cow_ptr.h"
+#include "TimeSplitter.h"
+
 #include <iosfwd>
 #include <vector>
 
@@ -279,6 +281,9 @@ public:
   void splitByFullTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs, bool docorrection,
                        double toffactor, double tofshift) const;
 
+  void splitByFullTime(TimeSplitter &splitter, std::map<int, EventList *> outputs, bool docorrection, double toffactor,
+                       double tofshift) const;
+
   /// Split ...
   std::string splitByFullTimeMatrixSplitter(const std::vector<int64_t> &vec_splitters_time,
                                             const std::vector<int> &vecgroups,
@@ -287,6 +292,8 @@ public:
 
   /// Split events by pulse time
   void splitByPulseTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs) const;
+
+  void splitByPulseTime(TimeSplitter &splitter, std::map<int, EventList *> outputs) const;
 
   /// Split events by pulse time with Matrix splitters
   void splitByPulseTimeWithMatrix(const std::vector<int64_t> &vec_times, const std::vector<int> &vec_target,
