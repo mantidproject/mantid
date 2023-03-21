@@ -661,7 +661,7 @@ class MainWindow(QMainWindow):
         self.canvas.draw()
 
         # Load property's statistic and give suggestion on parallel and fast log
-        timeavg = samplelog.timeAverageValue()
+        timeavg = self._dataWS.getRun().getTimeAveragedValue(logname)
         numentries = samplelog.size()
         stat = samplelog.getStatistics()
 

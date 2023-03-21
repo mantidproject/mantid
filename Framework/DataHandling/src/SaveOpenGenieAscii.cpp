@@ -242,8 +242,8 @@ void SaveOpenGenieAscii::getSampleLogs() {
       addToOutputBuffer("effective_time", m_floatType, effectiveTime);
     }
 
-    if (auto *timeSeries = dynamic_cast<ITimeSeriesProperty *>(logEntry)) {
-      outValue = std::to_string(timeSeries->timeAverageValue());
+    if (dynamic_cast<ITimeSeriesProperty *>(logEntry)) {
+      outValue = std::to_string(m_inputWS->run().getTimeAveragedValue(logName));
     } else {
       outValue = logEntry->value();
     }

@@ -16,7 +16,6 @@ import json
 
 
 class USANSReduction(PythonAlgorithm):
-
     wl_list = None
     data_files = None
     total_points = None
@@ -152,7 +151,7 @@ class USANSReduction(PythonAlgorithm):
             if ws.getRun().getProperty("two_theta").type == "number":
                 two_theta = ws.getRun().getProperty("two_theta").value
             else:
-                two_theta = ws.getRun().getProperty("two_theta").timeAverageValue()
+                two_theta = ws.getRun().getTimeAveragedValue("two_theta")
 
             # Loop through the wavelength peaks for this point
             for i_wl in range(len(self.wl_list)):

@@ -549,7 +549,6 @@ class SaveFileName(PropDescriptor):
         return name
 
     def __set__(self, instance, value):
-
         if value is None:
             self._file_name = None
         elif isinstance(value, collections.Callable):
@@ -574,7 +573,6 @@ class InstrumentDependentProp(PropDescriptor):
         self._prop_name = prop_name
 
     def __get__(self, instance, owner=None):
-
         if instance is None:
             return self
         # pylint: disable=protected-access
@@ -1034,7 +1032,6 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
             prop_helpers.ComplexProperty.__init__(self, ["monovan_lo_frac", "monovan_hi_frac"])
 
     def __get__(self, instance, owner=None):
-
         if instance is None:
             return self
 
@@ -1326,7 +1323,6 @@ class SaveFormat(PropDescriptor):
         self._save_format.add(value)
 
     def validate(self, instance, owner):
-
         n_formats = len(self._save_format)
         if n_formats == 0:
             return (False, 1, "No internal save format is defined. Results may be lost")
@@ -1544,7 +1540,6 @@ class MonoCorrectionFactor(PropDescriptor):
         return cash_id
 
     def validate(self, instance, owner=None):
-
         if self._cor_factor is None:
             return (True, 0, "")
         if self._cor_factor <= 0:
@@ -1589,7 +1584,7 @@ class MotorLogName(PropDescriptor):
 
 class MotorOffset(PropDescriptor):
     """Initial value used to identify crystal rotation angle according to the formula:
-    psi=motor_offset+wccr.timeAverageValue() where wccr is the log describing
+    psi=motor_offset+wccr.getTimeAveragedValue() where wccr is the log describing
     crystal rotation. See motor_log_name property for its description.
     """
 
@@ -1615,7 +1610,7 @@ class MotorOffset(PropDescriptor):
 
 class RotationAngle(PropDescriptor):
     """Property used to identify rotation angle
-    psi=motor_offset+wccr.timeAverageValue().
+    psi=motor_offset+wccr.getTimeAveragedValue().
 
     If set to None or not set, the rotation angle
     is calculated from motor_offset and log, containing
@@ -1678,7 +1673,7 @@ class RotationAngle(PropDescriptor):
         log_names = self._motor_log._log_names
         for name in log_names:
             try:
-                value = working_ws.getRun().getLogData(name).timeAverageValue()
+                value = working_ws.getRun().getTimeAveragedValue(name)
                 break
             # pylint: disable=bare-except
             except:
