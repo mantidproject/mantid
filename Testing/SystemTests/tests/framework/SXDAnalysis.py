@@ -127,4 +127,6 @@ class SXDIntegrateData(systemtesting.MantidSystemTest):
         self.integrated_peaks = sxd.get_peaks_name(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS)
 
     def validate(self):
+        self.tolerance = 1e-8
+        self.tolerance_is_rel_err = True
         return self.integrated_peaks, "SXD23767_found_peaks_integrated.nxs"

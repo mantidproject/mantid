@@ -194,6 +194,9 @@ class WISHProcessVanadiumForNormalisationTest(MantidSystemTest):
     def tearDown(cls):
         config.setDataSearchDirs(cls._data_dirs)
 
+    def requiredMemoryMB(self):
+        return 4000
+
     def cleanup(self):
         ADS.clear()
 
