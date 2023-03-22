@@ -19,6 +19,7 @@
 
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 #include "MantidParallel/IO/EventsListsShmemStorage.h"
+#include "MantidParallel/IO/NXEventDataLoader.h"
 
 #include "MantidParallel/DllConfig.h"
 
