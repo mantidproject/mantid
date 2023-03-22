@@ -31,11 +31,11 @@ class DNSFileSelectorPresenter(DNSObserver):
         range specified by start and end.
         """
         if self.param_dict:
-            data_path = self.param_dict['paths']['data_dir']
+            data_path = self.param_dict["paths"]["data_dir"]
             file_number_range = [start, end]
-            number_of_files, loaded, datafiles, file_number_range_filtered = \
-                self.model.set_datafiles_to_load(data_path, file_number_range,
-                                                 filtered, watcher)
+            number_of_files, loaded, datafiles, file_number_range_filtered = self.model.set_datafiles_to_load(
+                data_path, file_number_range, filtered, watcher
+            )
             self.view.open_progress_dialog(number_of_files)
             self.model.read_all(datafiles, data_path, loaded, watcher)
 
@@ -43,8 +43,8 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         Reading of standard files.
         """
-        data_path = self.param_dict['paths']['data_dir']
-        standard_path = self.param_dict['paths']['standards_dir']
+        data_path = self.param_dict["paths"]["data_dir"]
+        standard_path = self.param_dict["paths"]["standards_dir"]
         if standard_path:
             standard_found = self.model.read_standard(standard_path)
             self._filter_standard()
@@ -90,7 +90,7 @@ class DNSFileSelectorPresenter(DNSObserver):
 
     def _check_last_scans(self, sender_name):
         number_of_scans_to_check = self.view.get_number_scans_to_check()
-        complete = 'complete' in sender_name
+        complete = "complete" in sender_name
         not_hidden_rows = self._get_non_hidden_rows()
         self.model.check_last_scans(number_of_scans_to_check, complete, not_hidden_rows)
 
@@ -119,8 +119,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         self._show_all_scans()
         filters = self.view.get_filters().items()
-        hide_scans = self.model.filter_scans_for_boxes(
-            filters, self._is_modus_tof())
+        hide_scans = self.model.filter_scans_for_boxes(filters, self._is_modus_tof())
         for row in hide_scans:
             self.view.hide_scan(row)
 
@@ -173,17 +172,14 @@ class DNSFileSelectorPresenter(DNSObserver):
     def get_option_dict(self):
         if self.view is not None:
             self.own_dict.update(self.view.get_state())
-        self.own_dict['full_data'] = self.model.get_data()
-        self.own_dict['standard_data_tree_model'] = self.model.get_data(
-            standard=True)
-        self.own_dict['selected_file_numbers'] = self.model.get_data(
-            full_info=False)
+        self.own_dict["full_data"] = self.model.get_data()
+        self.own_dict["standard_data_tree_model"] = self.model.get_data(standard=True)
+        self.own_dict["selected_file_numbers"] = self.model.get_data(full_info=False)
         return self.own_dict
 
     def process_request(self):
         own_options = self.get_option_dict()
-        if (own_options['auto_select_standard'] and not
-                own_options['standard_data_tree_model']):
+        if own_options["auto_select_standard"] and not own_options["standard_data_tree_model"]:
             self._auto_select_standard(state=2)
 
     def set_view_from_param(self):
@@ -192,17 +188,14 @@ class DNSFileSelectorPresenter(DNSObserver):
         and checks scans checked in the dict.
         """
         if self.param_dict:
-            file_numbers = self.param_dict[self.name].pop('selected_file_numbers',
-                                                          [])
+            file_numbers = self.param_dict[self.name].pop("selected_file_numbers", [])
             self.view.set_state(self.param_dict.get(self.name, {}))
             not_found = self.model.check_by_file_numbers(file_numbers)
             if not_found:
-                print(f'Of {len(file_numbers)} loaded checked '
-                      f'file numbers {not_found} were not found '
-                      'in list of datafiles')
+                print(f"Of {len(file_numbers)} loaded checked " f"file numbers {not_found} were not found " "in list of datafiles")
 
     def tab_got_focus(self):
-        standard_path = self.param_dict['paths']['standards_dir']
+        standard_path = self.param_dict["paths"]["standards_dir"]
         # The first time that the standard data path is provided
         # and the user clicks on the file selector tab, then the
         # file selector presenter's dictionary needs to be filled
@@ -214,7 +207,7 @@ class DNSFileSelectorPresenter(DNSObserver):
             self._standard_data_clicked()
             self._sample_data_clicked()
             self._standard_data_counter += 1
-        self.view.hide_tof(hidden='_tof' not in self.modus)
+        self.view.hide_tof(hidden="_tof" not in self.modus)
 
     def process_commandline_request(self, command_dict):
         start = int(command_dict["files"][0]["start"])
@@ -244,7 +237,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.model.set_active_model(standard=True)
         self._changed_to_standard()
         own_options = self.get_option_dict()
-        if own_options['auto_select_standard']:
+        if own_options["auto_select_standard"]:
             self._check_all_visible_scans()
         # re-adjust view to column width
         self._format_view()
@@ -260,10 +253,8 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view.sig_right_click.connect(self._right_click)
         self.view.sig_progress_canceled.connect(self._cancel_loading)
         self.view.sig_autoload_new_clicked.connect(self._autoload_new)
-        self.view.sig_auto_select_standard_clicked.connect(
-            self._auto_select_standard)
-        self.view.sig_standard_data_clicked.connect(
-            self._standard_data_clicked)
+        self.view.sig_auto_select_standard_clicked.connect(self._auto_select_standard)
+        self.view.sig_standard_data_clicked.connect(self._standard_data_clicked)
         self.view.sig_sample_data_clicked.connect(self._sample_data_clicked)
 
         self.watcher.sig_files_changed.connect(self._files_changed_by_watcher)

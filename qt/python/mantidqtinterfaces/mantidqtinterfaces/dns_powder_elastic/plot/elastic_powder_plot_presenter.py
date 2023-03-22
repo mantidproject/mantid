@@ -10,12 +10,10 @@
 DNS powder elastic plotting tab presenter.
 """
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import \
-    DNSObserver
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
 
 
 class DNSElasticPowderPlotPresenter(DNSObserver):
-
     def __init__(self, name=None, parent=None, view=None, model=None):
         super().__init__(parent=parent, name=name, view=view, model=model)
         self.view.sig_plot.connect(self._plot)
@@ -30,9 +28,9 @@ class DNSElasticPowderPlotPresenter(DNSObserver):
 
     def _change_log(self, log):
         if log:
-            self.view.set_y_scale('symlog')
+            self.view.set_y_scale("symlog")
         else:
-            self.view.set_y_scale('linear')
+            self.view.set_y_scale("linear")
 
     def _change_line_style(self):
         self._line_style = (self._line_style + 1) % 3
@@ -63,41 +61,36 @@ class DNSElasticPowderPlotPresenter(DNSObserver):
         self.view.create_plot(norm=self.model.get_y_norm_label(norm))
         max_int = self.model.get_max_int_of_workspaces(checked_workspaces)
         for ws in checked_workspaces:
-            x, y, y_err = self.model.get_x_y_yerr(ws, x_axis, max_int,
-                                                  wavelength)
+            x, y, y_err = self.model.get_x_y_yerr(ws, x_axis, max_int, wavelength)
             self._single_plot(ws, x, y, y_err)
         self.view.finish_plot(x_axis_label)
 
     def _single_plot(self, ws, x, y, y_err):
         if self._error_bar:
-            self.view.single_error_plot(x, y, y_err,
-                                        label=f'{ws}'.strip(' _'),
-                                        capsize=(self._error_bar - 1) * 3,
-                                        linestyle=self._line_style)
+            self.view.single_error_plot(
+                x, y, y_err, label=f"{ws}".strip(" _"), capsize=(self._error_bar - 1) * 3, linestyle=self._line_style
+            )
         else:
-            self.view.single_plot(x, y,
-                                  label=f'{ws}'.strip(' _'),
-                                  linestyle=self._line_style)
+            self.view.single_plot(x, y, label=f"{ws}".strip(" _"), linestyle=self._line_style)
 
     def _auto_select_curve(self):
-        if self.param_dict['elastic_powder_options']['separation']:
+        if self.param_dict["elastic_powder_options"]["separation"]:
             self.view.check_separated()
         else:
             self.view.check_first()
 
     # short names for readability
     def _get_wavelength(self):
-        return self.param_dict['elastic_powder_options']['wavelength']
+        return self.param_dict["elastic_powder_options"]["wavelength"]
 
     def _get_norm(self):
-        return self.param_dict['elastic_powder_options']['norm_monitor']
+        return self.param_dict["elastic_powder_options"]["norm_monitor"]
 
     def _get_workspaces(self):
-        return self.param_dict['elastic_powder_script_generator']['subtract']
+        return self.param_dict["elastic_powder_script_generator"]["subtract"]
 
     def _get_script_number(self):
-        return self.param_dict['elastic_powder_script_generator'][
-            'script_number']
+        return self.param_dict["elastic_powder_script_generator"]["script_number"]
 
     def tab_got_focus(self):
         workspaces = self._get_workspaces()

@@ -33,19 +33,15 @@ class DNSElasticPowderScriptGeneratorWidgetTest(unittest.TestCase):
     def setUpClass(cls):
         parent = mock.Mock()
         parent.view = None
-        cls.widget = DNSElasticPowderScriptGeneratorWidget(
-            'elastic_powder_options', parent)
+        cls.widget = DNSElasticPowderScriptGeneratorWidget("elastic_powder_options", parent)
 
     def test___init__(self):
-        self.assertIsInstance(self.widget,
-                              DNSElasticPowderScriptGeneratorWidget)
+        self.assertIsInstance(self.widget, DNSElasticPowderScriptGeneratorWidget)
         self.assertIsInstance(self.widget, DNSWidget)
         self.assertIsInstance(self.widget.view, DNSScriptGeneratorView)
-        self.assertIsInstance(self.widget.model,
-                              DNSElasticPowderScriptGeneratorModel)
-        self.assertIsInstance(self.widget.presenter,
-                              DNSElasticPowderScriptGeneratorPresenter)
+        self.assertIsInstance(self.widget.model, DNSElasticPowderScriptGeneratorModel)
+        self.assertIsInstance(self.widget.presenter, DNSElasticPowderScriptGeneratorPresenter)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

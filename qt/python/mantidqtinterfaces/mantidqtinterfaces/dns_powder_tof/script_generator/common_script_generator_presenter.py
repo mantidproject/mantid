@@ -96,10 +96,8 @@ class DNSScriptGeneratorPresenter(DNSObserver):
         own_options = self.get_option_dict()
         filename = self.model.get_filename(own_options["script_filename"], sample_data, own_options["automatic_filename"])
         if script_dir:
-            filename, script_path = self.model.save_script(
-                script, filename, script_dir)
-            self.view.show_status_message(f'Script Saved to: {script_path}',
-                                          30, clear=True)
+            filename, script_path = self.model.save_script(script, filename, script_dir)
+            self.view.show_status_message(f"Script Saved to: {script_path}", 30, clear=True)
             self._set_script_filename(filename)
         else:
             self.raise_error("No script filepath set, script will not be " "saved.")

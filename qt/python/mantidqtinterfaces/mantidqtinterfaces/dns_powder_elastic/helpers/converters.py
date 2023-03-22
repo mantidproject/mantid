@@ -23,9 +23,9 @@ def elastic_two_theta_to_q(two_theta, wavelength):
 def convert_hkl_string(hkl):
     # catches if user uses brackets or spaces in hkl specification
     hkl = hkl.strip("[]()")
-    hkl = hkl.replace(' ', ',')
+    hkl = hkl.replace(" ", ",")
     return hkl
 
 
 def convert_hkl_string_to_float(hkl):
-    return [float(x) for x in convert_hkl_string(hkl).split(',')]
+    return [float(x) for x in convert_hkl_string(hkl).split(",")]

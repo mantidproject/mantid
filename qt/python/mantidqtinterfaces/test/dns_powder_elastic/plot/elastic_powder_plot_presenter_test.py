@@ -10,14 +10,10 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import \
-    DNSObserver
-from mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_model \
-    import DNSElasticPowderPlotModel
-from mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_presenter \
-    import DNSElasticPowderPlotPresenter
-from mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_view \
-    import DNSElasticPowderPlotView
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSObserver
+from mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_model import DNSElasticPowderPlotModel
+from mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_presenter import DNSElasticPowderPlotPresenter
+from mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_view import DNSElasticPowderPlotView
 
 
 class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
@@ -40,20 +36,11 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
         cls.view.get_data_list.return_value = [3, 4]
         cls.model = mock.create_autospec(DNSElasticPowderPlotModel)
         cls.model.get_x_y_yerr.return_value = [[1, 2], [3, 4], [4, 5]]
-        cls.model.get_updated_ws_list.return_value = [['mat_test'], True]
-        cls.presenter = DNSElasticPowderPlotPresenter(view=cls.view,
-                                                      model=cls.model,
-                                                      parent=cls.parent)
+        cls.model.get_updated_ws_list.return_value = [["mat_test"], True]
+        cls.presenter = DNSElasticPowderPlotPresenter(view=cls.view, model=cls.model, parent=cls.parent)
         cls.param_dict = {
-            'elastic_powder_options': {
-                'separation': True,
-                'wavelength': 4.74,
-                'norm_monitor': True
-            },
-            'elastic_powder_script_generator': {
-                'subtract': [0, 1],
-                'script_number': 0
-            }
+            "elastic_powder_options": {"separation": True, "wavelength": 4.74, "norm_monitor": True},
+            "elastic_powder_script_generator": {"subtract": [0, 1], "script_number": 0},
         }
 
     def setUp(self):
@@ -65,36 +52,27 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
         self.presenter.param_dict = self.param_dict
 
     def test___init__(self):
-        self.presenter = DNSElasticPowderPlotPresenter(view=self.view,
-                                                       model=self.model,
-                                                       parent=self.parent)
+        self.presenter = DNSElasticPowderPlotPresenter(view=self.view, model=self.model, parent=self.parent)
         self.assertIsInstance(self.presenter, DNSElasticPowderPlotPresenter)
         self.assertIsInstance(self.presenter, DNSObserver)
 
-        self.view.sig_plot.connect.assert_called_once_with(
-            self.presenter._plot)
-        self.view.sig_grid_state_change.connect.assert_called_once_with(
-            self.presenter._change_grid_state)
-        self.view.sig_error_bar_change.connect.assert_called_once_with(
-            self.presenter._change_error_bar)
-        self.view.sig_linestyle_change.connect.assert_called_once_with(
-            self.presenter._change_line_style)
-        self.view.sig_log_change.connect.assert_called_once_with(
-            self.presenter._change_log)
+        self.view.sig_plot.connect.assert_called_once_with(self.presenter._plot)
+        self.view.sig_grid_state_change.connect.assert_called_once_with(self.presenter._change_grid_state)
+        self.view.sig_error_bar_change.connect.assert_called_once_with(self.presenter._change_error_bar)
+        self.view.sig_linestyle_change.connect.assert_called_once_with(self.presenter._change_line_style)
+        self.view.sig_log_change.connect.assert_called_once_with(self.presenter._change_log)
         self.assertEqual(self.presenter._error_bar, 2)
         self.assertEqual(self.presenter._grid_state, 0)
         self.assertEqual(self.presenter._line_style, 2)
 
     def test_change_log(self):
         self.presenter._change_log(True)
-        self.view.set_y_scale.assert_called_once_with('symlog')
+        self.view.set_y_scale.assert_called_once_with("symlog")
         self.view.reset_mock()
         self.presenter._change_log(False)
-        self.view.set_y_scale.assert_called_once_with('linear')
+        self.view.set_y_scale.assert_called_once_with("linear")
 
-    @patch('mantidqtinterfaces.dns_powder_elastic.plot.'
-           'elastic_powder_plot_presenter.'
-           'DNSElasticPowderPlotPresenter._plot')
+    @patch("mantidqtinterfaces.dns_powder_elastic.plot." "elastic_powder_plot_presenter." "DNSElasticPowderPlotPresenter._plot")
     def test_change_linestyle(self, mock_plot):
         self.presenter._change_line_style()
         self.assertEqual(self.presenter._line_style, 0)
@@ -104,9 +82,7 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
         self.presenter._change_line_style()
         self.assertEqual(self.presenter._line_style, 2)
 
-    @patch('mantidqtinterfaces.dns_powder_elastic.plot.'
-           'elastic_powder_plot_presenter.'
-           'DNSElasticPowderPlotPresenter._plot')
+    @patch("mantidqtinterfaces.dns_powder_elastic.plot." "elastic_powder_plot_presenter." "DNSElasticPowderPlotPresenter._plot")
     def test_change_errorbar(self, mock_plot):
         self.presenter._change_error_bar()
         self.assertEqual(self.presenter._error_bar, 0)
@@ -145,25 +121,16 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
         self.view.finish_plot.assert_called_once()
 
     def test_single_plot(self):
-        self.presenter._single_plot(' 1_', 2, 3, 4)
-        self.view.single_error_plot.assert_called_once_with(2,
-                                                            3,
-                                                            4,
-                                                            label='1',
-                                                            capsize=3,
-                                                            linestyle=2)
+        self.presenter._single_plot(" 1_", 2, 3, 4)
+        self.view.single_error_plot.assert_called_once_with(2, 3, 4, label="1", capsize=3, linestyle=2)
         self.presenter._error_bar = 0
-        self.presenter._single_plot(' 1_', 2, 3, 4)
-        self.view.single_plot.assert_called_once_with(2,
-                                                      3,
-                                                      label='1',
-                                                      linestyle=2)
+        self.presenter._single_plot(" 1_", 2, 3, 4)
+        self.view.single_plot.assert_called_once_with(2, 3, label="1", linestyle=2)
 
     def test_auto_select_curve(self):
         self.presenter._auto_select_curve()
         self.view.check_separated.assert_called_once()
-        self.presenter.param_dict['elastic_powder_options'][
-            "separation"] = False
+        self.presenter.param_dict["elastic_powder_options"]["separation"] = False
         self.presenter._auto_select_curve()
         self.view.check_first.assert_called_once()
         self.view.check_separated.assert_called_once()
@@ -183,9 +150,8 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
     def test_tab_got_focus(self):
         self.presenter.tab_got_focus()
         self.view.get_data_list.assert_called_once()
-        self.model.get_updated_ws_list.assert_called_once_with([0, 1], [3, 4],
-                                                               0)
-        self.view.set_data_list.assert_called_once_with(['test'])
+        self.model.get_updated_ws_list.assert_called_once_with([0, 1], [3, 4], 0)
+        self.view.set_data_list.assert_called_once_with(["test"])
         self.view.start_timer.assert_called_once()
 
     def test_process_auto_reduction_request(self):
@@ -193,5 +159,5 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
         self.view.clear_plot.assert_called_once()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

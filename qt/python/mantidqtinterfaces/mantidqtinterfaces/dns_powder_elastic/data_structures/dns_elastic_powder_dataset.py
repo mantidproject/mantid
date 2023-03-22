@@ -13,14 +13,10 @@ in a dictionary.
 import os
 import numpy as np
 
-from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_binning import \
-    DNSBinning
-from mantidqtinterfaces.dns_powder_elastic.data_structures.field_names import \
-    field_dict
-from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import \
-    ObjectDict
-from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import \
-    list_to_multirange
+from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_binning import DNSBinning
+from mantidqtinterfaces.dns_powder_elastic.data_structures.field_names import field_dict
+from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
+from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import list_to_multirange
 
 
 class DNSElasticDataset(ObjectDict):
@@ -32,17 +28,17 @@ class DNSElasticDataset(ObjectDict):
     def __init__(self, data, path, is_sample=True, banks=None, fields=None, ignore_van=False):
         super().__init__()
         if data:
-            self['is_sample'] = is_sample
+            self["is_sample"] = is_sample
             if is_sample:
-                self['angle_fields_data'] = get_sample_fields_each_bank(data)
+                self["angle_fields_data"] = get_sample_fields_each_bank(data)
             if not is_sample and banks is not None:
                 data = remove_unnecessary_standard_banks(data, banks)
             if not is_sample and fields is not None:
                 data = remove_unnecessary_standard_fields(data, fields, ignore_van)
-            self['banks'] = get_bank_positions(data)
-            self['fields'] = get_sample_fields(data)
-            self['omega'] = automatic_omega_binning(data)
-            self['data_dic'] = create_dataset(data, path)
+            self["banks"] = get_bank_positions(data)
+            self["fields"] = get_sample_fields(data)
+            self["omega"] = automatic_omega_binning(data)
+            self["data_dic"] = create_dataset(data, path)
 
     def format_dataset(self):
         """
@@ -51,12 +47,12 @@ class DNSElasticDataset(ObjectDict):
         dataset = self.data_dic
         for fields in dataset.values():
             for field, file_numbers in fields.items():
-                if field != 'path':
+                if field != "path":
                     fields[field] = list_to_multirange(file_numbers)
 
         tab_indent = 4
         special_char_indent = 5
-        dataset_string = '{\n'
+        dataset_string = "{\n"
         for sample_name, fields in dataset.items():
             dataset_string += "".rjust(tab_indent)
             dataset_string += _get_sample_string(sample_name)
@@ -71,7 +67,7 @@ class DNSElasticDataset(ObjectDict):
         subtract = []
         for sample, workspace_list in self.data_dic.items():
             for workspace in workspace_list:
-                if workspace != 'path':
+                if workspace != "path":
                     subtract.append(f"{sample}_{workspace}")
         return subtract
 
@@ -105,11 +101,11 @@ def get_omega_step(angles, rounding_limit=0.05):
 
 
 def list_to_set(bank_list, rounding_limit=0.05):
-    '''
+    """
     Finds set of bank positions not further apart than rounding_limit
     group starts with the smallest bank position,
     which is also the returned value, average would not be unique.
-    '''
+    """
     sorted_banks = sorted(bank_list)
     if not sorted_banks:
         return []
@@ -122,24 +118,24 @@ def list_to_set(bank_list, rounding_limit=0.05):
 
 def automatic_omega_binning(sample_data):
     if sample_data:
-        omega = [x['sample_rot'] - x['det_rot'] for x in sample_data]
+        omega = [x["sample_rot"] - x["det_rot"] for x in sample_data]
         omega_max = max(omega)
         omega_min = min(omega)
-        sample_rot = [x['sample_rot'] for x in sample_data]
+        sample_rot = [x["sample_rot"] for x in sample_data]
         omega_step = get_omega_step(sample_rot)
         return DNSBinning(omega_min, omega_max, omega_step)
 
 
 def get_proposal_from_filename(filename, file_number):
-    return filename.replace(f'_{file_number:06d}.d_dat', '')
+    return filename.replace(f"_{file_number:06d}.d_dat", "")
 
 
 def get_sample_fields(sample_data):
     field_list = []
     for entry in sample_data:
-        field = field_dict.get(entry['field'], entry['field'])
+        field = field_dict.get(entry["field"], entry["field"])
         field_list.append(field)
-    field_set =set(field_list)
+    field_set = set(field_list)
     return field_set
 
 
@@ -149,28 +145,27 @@ def create_dataset(data, path):
     """
     dataset = {}
     for entry in data:
-        datatype = get_datatype_from_sample_name(entry['sample_name'])
-        field = field_dict.get(entry['field'], entry['field'])
-        proposal = get_proposal_from_filename(entry['filename'],
-                                              entry['file_number'])
+        datatype = get_datatype_from_sample_name(entry["sample_name"])
+        field = field_dict.get(entry["field"], entry["field"])
+        proposal = get_proposal_from_filename(entry["filename"], entry["file_number"])
         data_path = os.path.join(path, proposal)
         if datatype in dataset:
             if field in dataset[datatype].keys():
-                dataset[datatype][field].append(entry['file_number'])
+                dataset[datatype][field].append(entry["file_number"])
             else:
-                dataset[datatype][field] = [entry['file_number']]
+                dataset[datatype][field] = [entry["file_number"]]
         else:
             dataset[datatype] = {}
-            dataset[datatype][field] = [entry['file_number']]
-            dataset[datatype]['path'] = data_path
+            dataset[datatype][field] = [entry["file_number"]]
+            dataset[datatype]["path"] = data_path
     return dataset
 
 
 def get_datatype_from_sample_name(sample_name):
-    datatype = sample_name.strip('_')
-    datatype = datatype.replace(' ', '')
-    if sample_name == 'leer':  # compatibility with old names
-        datatype = 'empty'
+    datatype = sample_name.strip("_")
+    datatype = datatype.replace(" ", "")
+    if sample_name == "leer":  # compatibility with old names
+        datatype = "empty"
     return datatype
 
 
@@ -178,32 +173,37 @@ def remove_unnecessary_standard_banks(standard_data, sample_banks, rounding_limi
     standard_data_clean = []
     for file_dict in standard_data:
         for sample_bank in sample_banks:
-            if np.isclose(file_dict['det_rot'], sample_bank, atol=rounding_limit):
+            if np.isclose(file_dict["det_rot"], sample_bank, atol=rounding_limit):
                 standard_data_clean.append(file_dict)
     return standard_data_clean
 
 
 def remove_unnecessary_standard_fields(standard_data, sample_fields, ignore_van):
     if ignore_van:
-        vana_data_list = [entry for entry in standard_data if entry['sample_type'] == 'vana']
-        vana_fields = [field_dict.get(entry['field'], entry['field']) for entry in vana_data_list]
-        nicr_fields =  list(sample_fields)
+        vana_data_list = [entry for entry in standard_data if entry["sample_type"] == "vana"]
+        vana_fields = [field_dict.get(entry["field"], entry["field"]) for entry in vana_data_list]
+        nicr_fields = list(sample_fields)
         empty_fields = set(vana_fields + list(sample_fields))
-        nicr_data_list= [entry for entry in standard_data if entry['sample_type']=='nicr'
-                         and field_dict.get(entry['field'], entry['field']) in nicr_fields]
-        empty_data_list = [entry for entry in standard_data if entry['sample_type']=='empty'
-                           and field_dict.get(entry['field'], entry['field']) in empty_fields]
+        nicr_data_list = [
+            entry
+            for entry in standard_data
+            if entry["sample_type"] == "nicr" and field_dict.get(entry["field"], entry["field"]) in nicr_fields
+        ]
+        empty_data_list = [
+            entry
+            for entry in standard_data
+            if entry["sample_type"] == "empty" and field_dict.get(entry["field"], entry["field"]) in empty_fields
+        ]
         standard_data_clean = vana_data_list + nicr_data_list + empty_data_list
     else:
-        standard_data_clean = [entry for entry in standard_data if
-                               field_dict.get(entry['field'], entry['field']) in sample_fields]
+        standard_data_clean = [entry for entry in standard_data if field_dict.get(entry["field"], entry["field"]) in sample_fields]
     return standard_data_clean
 
 
 def get_bank_positions(sample_data, rounding_limit=0.05):
     new_arr = []
     inside = False
-    banks = set(entry['det_rot'] for entry in sample_data)
+    banks = set(entry["det_rot"] for entry in sample_data)
     for bank in banks:
         for compare in new_arr:
             if abs(compare - bank) < rounding_limit:
@@ -221,15 +221,15 @@ def get_sample_fields_each_bank(sample_data):
     for det_bank in det_banks:
         fields = []
         for file_dict in sample_data:
-            if det_bank == file_dict['det_rot']:
-                field = field_dict.get(file_dict['field'], file_dict['field'])
+            if det_bank == file_dict["det_rot"]:
+                field = field_dict.get(file_dict["field"], file_dict["field"])
                 fields.append(field)
         angle_and_fields_data[det_bank] = set(fields)
     return angle_and_fields_data
 
 
 def _get_path_string(dataset, sample_name):
-    path = dataset[sample_name].pop('path')
+    path = dataset[sample_name].pop("path")
     return f"'path': '{path}',\n"
 
 
@@ -240,6 +240,5 @@ def _get_sample_string(sample_name):
 def _get_field_string(fields, line_indent):
     field_items = sorted(fields.items())
     spacer = "".rjust(line_indent)
-    string_list = [(f"{spacer}'{key:s}': {value}")
-                   for key, value in field_items]
+    string_list = [(f"{spacer}'{key:s}': {value}") for key, value in field_items]
     return ",\n".join(string_list)

@@ -89,8 +89,7 @@ class DNSPlotListModel(QStandardItemModel):
         items = self.get_items()
         for item in items:
             text = item.text()
-            if (text.endswith('_magnetic') or text.endswith('_spin_incoh')
-                    or text.endswith('_nuclear_coh')):
+            if text.endswith("_magnetic") or text.endswith("_spin_incoh") or text.endswith("_nuclear_coh"):
                 item.setCheckState(2)
 
     def check_raw(self):
@@ -101,5 +100,5 @@ class DNSPlotListModel(QStandardItemModel):
         items = self.get_items()
         for item in items:
             text = item.text()
-            if text.endswith('_sf') or text.endswith('_nsf'):
+            if text.endswith("_sf") or text.endswith("_nsf"):
                 item.setCheckState(2)
