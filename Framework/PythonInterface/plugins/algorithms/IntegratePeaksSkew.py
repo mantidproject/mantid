@@ -409,21 +409,21 @@ class PeakData:
         return np.sum(signal) / np.sqrt(np.sum(error_sq))
 
     def _focus_detids(self, detids):
-        grp_ws = exec_CreateGroupingWorkspace(
-            InputWorkspace=self.ws,
-            CustomGroupingString="+".join([str(id) for id in detids]),
-            OutputWorkspace="__grp",
-            ComponentName=self.ws.getInstrument().getName(),
-        )
         if self.ws.getAxis(0).getUnit().unitID() == "dSpacing":
+            grp_ws = exec_CreateGroupingWorkspace(
+                InputWorkspace=self.ws,
+                CustomGroupingString="+".join([str(id) for id in detids]),
+                OutputWorkspace="__grp",
+                ComponentName=self.ws.getInstrument().getName(),
+            )
             ws_foc = exec_DiffractionFocussing(InputWorkspace=self.ws, GroupingWorkspace=grp_ws, OutputWorkspace=f"__foc{detids[0]}")
+            exec_DeleteWorkspaces(WorkspaceList=[grp_ws])
         else:
             ws_foc = exec_GroupDetectors(
                 InputWorkspace=self.ws,
-                CopyGroupingFromWorkspace=grp_ws,
+                DetectorList=",".join([str(id) for id in detids]),
                 OutputWorkspace=f"__foc{detids[0]}",
             )
-        exec_DeleteWorkspaces(WorkspaceList=[grp_ws])
         return ws_foc
 
     def focus_data_in_detector_mask(self):
