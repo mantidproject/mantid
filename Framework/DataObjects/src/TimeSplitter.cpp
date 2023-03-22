@@ -8,10 +8,13 @@
 #include "MantidDataObjects/TimeSplitter.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeROI.h"
 
 namespace Mantid {
 using API::EventType;
+using Kernel::SplittingInterval;
+using Kernel::SplittingIntervalVec;
 using Kernel::TimeROI;
 using Types::Core::DateAndTime;
 
@@ -282,6 +285,22 @@ TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
     msg << "No regions exist for workspace index " << workspaceIndex;
   }
 
+  return output;
+}
+
+/**
+ * Cast to a vector of SplittingInterval objects
+ */
+SplittingIntervalVec TimeSplitter::toSplitters() const {
+  std::vector<SplittingInterval> output;
+  if (this->empty())
+    return output;
+  auto startIt = m_roi_map.begin();
+  while (std::next(startIt) != m_roi_map.end()) {
+    /// invoke constructor SplittingInterval(DateAndTime &start, DateAndTime &stop, int index)
+    output.push_back({startIt->first, std::next(startIt)->first, startIt->second});
+    std::advance(startIt, 1);
+  }
   return output;
 }
 

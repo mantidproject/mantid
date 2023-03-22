@@ -21,7 +21,6 @@ using Types::Core::DateAndTime;
 namespace Kernel {
 class TimeROI; // Forward declaration
 }
-using Kernel::TimeROI;
 
 namespace DataObjects {
 
@@ -43,7 +42,9 @@ public:
   /// Check if the TimeSplitter is empty
   bool empty() const;
   std::set<int> outputWorkspaceIndices() const;
-  TimeROI getTimeROI(const int workspaceIndex);
+  Kernel::TimeROI getTimeROI(const int workspaceIndex);
+  /// Cast to to vector of SplittingInterval objects
+  Kernel::SplittingIntervalVec toSplitters() const;
   /// this is to aid in testing and not intended for use elsewhere
   std::size_t numRawValues() const;
   /// Split a list of events according to Pulse time or Pulse + TOF time
