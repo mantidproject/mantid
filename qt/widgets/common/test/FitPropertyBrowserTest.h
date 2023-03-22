@@ -104,6 +104,7 @@ public:
     auto f1Handler = m_fitPropertyBrowser->getPeakHandler(QString("f1"));
     TS_ASSERT(f0Handler->hasTies());
     m_fitPropertyBrowser->removeFunction(f1Handler);
+    f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
     TS_ASSERT(!f0Handler->hasTies());
   }
 
