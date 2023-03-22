@@ -117,15 +117,16 @@ public:
    *  5: 20400000000, 20465000000, 2
    */
   void test_FilterNoCorrection() {
-    // Create EventWorkspace and SplittersWorkspace
-    int64_t runstart_i64 = 20000000000;  // 20 seconds
+    int64_t runstart_i64 = 20000000000;  // 20 seconds, beginning of the fake run
     int64_t pulsedt = 100 * 1000 * 1000; // 100 seconds, time between consecutive pulses
-    int64_t tofdt = 10 * 1000 * 1000;    // 10 seconds
+    int64_t tofdt = 10 * 1000 * 1000;    // 10 seconds, spacing between neutrons events within a pulse
     size_t numpulses = 5;
 
+    // Create EventWorkspace with 10 detector-banks, each bank containing one pixel.
     EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
+    // Create SplittersWorkspace
     SplittersWorkspace_sptr splws = createSplittersWorkspace(runstart_i64, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
 
@@ -1158,7 +1159,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace.  This workspace has
    * @param runstart_i64 : absolute run start time in int64_t format with unit of nanoseconds
-   * @param pulsedt : pulse length in int64_t format with unit nanosecond
+   * @param pulsedt : time between consecutive pulses in int64_t format with unit nanosecond
    * @param todft : time interval between 2 adjacent events in same pulse in int64_t format of unit nanosecond
    * @param numpulses : number of pulses in the event workspace
    */
@@ -1365,17 +1366,20 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Create a  Splitter for output
-   *  Region:
-   * 0: pulse 0: 0 ~ 3+
-   * 1: pulse 0: 3+ ~ pulse 1: 9+
-   * 2: from pulse 2: 0 ~ 6+
-   * -1: from pulse 2: 6+ ~ 9+
-   * @param runstart_i64 : absolute run start time in int64_t format with unit
-   * nanosecond
-   * @param pulsedt : pulse length in int64_t format with unit nanosecond
-   * @param todft : time interval between 2 adjacent event in same pulse in
-   * int64_t format of unit nanosecond
+  /** Create a  SplitterWorkspace containing five splitters and three target-workspace indexes
+   *
+   * List of splitters (all times relative to runstart_i64):
+   *            start-time                 end-time                   target-index
+   * -------------------------------------------------------------------------------
+   *               0                  3*tofdt + tofdt/2                      0
+   *       3*tofdt + tofdt/2       pulsedt + 9*tofdt + tofdt/2               1
+   *          2*pulsedt          2*pulsedt + 6*tofdt + tofdt/2               2
+   *          3*pulsedt          3*pulsedt + 6*tofdt + tofdt/2               2
+   *          4*pulsedt          4*pulsedt + 6*tofdt + tofdt/2               2
+   *
+   * @param runstart_i64 : absolute run start time in int64_t format with unit nanosecond
+   * @param pulsedt : time between consecutive pulses in int64_t format with unit nanosecond
+   * @param todft : time interval between 2 adjacent event in same pulse in int64_t format of unit nanosecond
    * @param numpulses : number of pulses in the event workspace
    */
   SplittersWorkspace_sptr createSplittersWorkspace(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt) {
@@ -1396,6 +1400,7 @@ public:
     // 3. Splitter 2: from 3rd pulse, 0 ~ 6+
     for (size_t i = 2; i < 5; i++) {
       t0 = runstart_i64 + i * pulsedt;
+      TS_ASSERT(t0 >= t1); // validate the previous splitter doesn't overlap with the next one
       t1 = runstart_i64 + i * pulsedt + 6 * tofdt + tofdt / 2;
       Kernel::SplittingInterval interval2(t0, t1, 2);
       splitterws->addSplitter(interval2);

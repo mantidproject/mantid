@@ -377,7 +377,7 @@ void FilterEvents::examineAndSortEventWS() {
                       << " events in those spectra. \nList of these specta is as below:\n"
                       << msgss.str() << "\n";
     } else {
-      g_log.notice("There is no spectrum that does not have detectors.");
+      g_log.notice("All spectra have detectors.");
     }
 
   } // END-IF-ELSE
@@ -385,6 +385,7 @@ void FilterEvents::examineAndSortEventWS() {
   // sort events
   const auto sortType = m_filterByPulseTime ? DataObjects::PULSETIME_SORT : DataObjects::PULSETIMETOF_SORT;
 
+  // TODO: TimeSplitter.splitEventList() sorts the event list. This seems unnecessary
   // This runs the SortEvents algorithm in parallel
   m_eventWS->sortAll(sortType, nullptr);
 
