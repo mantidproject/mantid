@@ -82,8 +82,11 @@ void CompressEvents::exec() {
 
   // Sort the input workspace in-place by TOF. This can be faster if there are
   // few event lists. Compressing with wall clock does the sorting internally
-  if (!compressFat)
+  if (!compressFat) {
+    const auto timerStart = std::chrono::high_resolution_clock::now();
     inputWS->sortAll(TOF_SORT, &prog);
+    addTimer("sortByTOF", timerStart, std::chrono::high_resolution_clock::now());
+  }
 
   // Are we making a copy of the input workspace?
   if (!inplace) {
