@@ -364,17 +364,16 @@ EventList &EventList::operator+=(const std::vector<TofEvent> &more_events) {
     // Add default weights to all the un-weighted incoming events from the list.
     // and append to the list
     this->weightedEvents.reserve(this->weightedEvents.size() + more_events.size());
-    for (const auto &event : more_events) {
-      this->weightedEvents.emplace_back(event);
-    }
+    std::transform(std::cbegin(more_events), std::cend(more_events), std::back_inserter(this->weightedEvents),
+                   [](const TofEvent &event) { return WeightedEvent(event); });
     break;
 
   case WEIGHTED_NOTIME:
     // Add default weights to all the un-weighted incoming events from the list.
     // and append to the list
     this->weightedEventsNoTime.reserve(this->weightedEventsNoTime.size() + more_events.size());
-    for (const auto &more_event : more_events)
-      this->weightedEventsNoTime.emplace_back(more_event);
+    std::transform(std::cbegin(more_events), std::cend(more_events), std::back_inserter(this->weightedEventsNoTime),
+                   [](const TofEvent &event) { return WeightedEventNoTime(event); });
     break;
   }
 
@@ -421,9 +420,8 @@ EventList &EventList::operator+=(const std::vector<WeightedEvent> &more_events) 
     // Add default weights to all the un-weighted incoming events from the list.
     // and append to the list
     this->weightedEventsNoTime.reserve(this->weightedEventsNoTime.size() + more_events.size());
-    for (const auto &event : more_events) {
-      this->weightedEventsNoTime.emplace_back(event);
-    }
+    std::transform(std::cbegin(more_events), std::cend(more_events), std::back_inserter(this->weightedEventsNoTime),
+                   [](const WeightedEvent &event) { return WeightedEventNoTime(event); });
     break;
   }
 
