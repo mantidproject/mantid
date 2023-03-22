@@ -130,7 +130,7 @@ void ALFInstrumentView::setVanadiumRun(std::string const &runNumber) {
 
 void ALFInstrumentView::sampleLoaded() {
   if (!m_sample->getText().isEmpty() && !m_sample->isValid()) {
-    warningBox(m_sample->getFileProblem().toStdString());
+    displayWarning(m_sample->getFileProblem().toStdString());
     return;
   }
   m_presenter->loadSample();
@@ -138,7 +138,7 @@ void ALFInstrumentView::sampleLoaded() {
 
 void ALFInstrumentView::vanadiumLoaded() {
   if (!m_vanadium->isValid()) {
-    warningBox(m_vanadium->getFileProblem().toStdString());
+    displayWarning(m_vanadium->getFileProblem().toStdString());
     return;
   }
   m_presenter->loadVanadium();
@@ -193,7 +193,7 @@ void ALFInstrumentView::drawRectanglesAbove(std::vector<DetectorTube> const &tub
   }
 }
 
-void ALFInstrumentView::warningBox(std::string const &message) {
+void ALFInstrumentView::displayWarning(std::string const &message) {
   QMessageBox::warning(this, "ALFView", QString::fromStdString(message));
 }
 

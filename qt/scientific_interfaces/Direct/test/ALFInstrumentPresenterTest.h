@@ -147,7 +147,7 @@ public:
 
   void test_notifyLoadComplete_opens_a_warning_if_the_data_is_not_ALF_data() {
     EXPECT_CALL(*m_model, isALFData(_)).Times(1).WillOnce(Return(false));
-    EXPECT_CALL(*m_view, warningBox("The loaded data is not from the ALF instrument")).Times(1);
+    EXPECT_CALL(*m_view, displayWarning("The loaded data is not from the ALF instrument")).Times(1);
 
     m_presenter->notifyLoadComplete(nullptr);
   }
@@ -159,8 +159,8 @@ public:
         .WillOnce(Return(ByMove(std::move(m_algProperties))));
     EXPECT_CALL(*m_algorithmManager, normaliseByCurrent(NotNull())).Times(1);
 
-    // Expect no call to warningBox
-    EXPECT_CALL(*m_view, warningBox(_)).Times(0);
+    // Expect no call to displayWarning
+    EXPECT_CALL(*m_view, displayWarning(_)).Times(0);
 
     m_presenter->notifyLoadComplete(nullptr);
   }
@@ -271,6 +271,14 @@ public:
     EXPECT_CALL(*m_analysisPresenter, setExtractedWorkspace(_, twoThetas)).Times(1);
 
     m_presenter->notifyRebunchComplete(nullptr);
+  }
+
+  void test_notifyAlgorithmError_will_display_a_message_in_the_view() {
+    std::string const message("This is a warning message");
+
+    EXPECT_CALL(*m_view, displayWarning(message)).Times(1);
+
+    m_presenter->notifyAlgorithmError(message);
   }
 
 private:

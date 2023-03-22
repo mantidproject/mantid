@@ -23,9 +23,11 @@ bool equalWithinTolerance(double const val1, double const val2, double const tol
 
 namespace MantidQt::CustomInterfaces {
 
-ALFAnalysisPresenter::ALFAnalysisPresenter(IALFAnalysisView *view, std::unique_ptr<IALFAnalysisModel> model)
-    : m_view(view), m_model(std::move(model)) {
+ALFAnalysisPresenter::ALFAnalysisPresenter(IALFAnalysisView *view, std::unique_ptr<IALFAnalysisModel> model,
+                                           std::unique_ptr<IALFAlgorithmManager> algorithmManager)
+    : m_view(view), m_model(std::move(model)), m_algorithmManager(std::move(algorithmManager)) {
   m_view->subscribePresenter(this);
+  m_algorithmManager->subscribe(this);
 }
 
 QWidget *ALFAnalysisPresenter::getView() { return m_view->getView(); }
@@ -34,7 +36,6 @@ void ALFAnalysisPresenter::setExtractedWorkspace(Mantid::API::MatrixWorkspace_sp
                                                  std::vector<double> const &twoThetas) {
   m_model->setExtractedWorkspace(workspace, twoThetas);
   calculateEstimate();
-  updateViewFromModel();
 }
 
 void ALFAnalysisPresenter::notifyPeakPickerChanged() {
@@ -64,12 +65,21 @@ void ALFAnalysisPresenter::notifyFitClicked() {
     return;
   }
 
-  try {
-    auto const fitWorkspace = m_model->doFit(m_view->getRange());
-    m_view->addFitSpectrum(fitWorkspace);
-  } catch (std::exception const &ex) {
-    m_view->displayWarning(ex.what());
-  }
+  m_algorithmManager->fit(m_model->fitProperties(m_view->getRange()));
+}
+
+void ALFAnalysisPresenter::notifyAlgorithmError(std::string const &message) { m_view->displayWarning(message); }
+
+void ALFAnalysisPresenter::notifyCropWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
+  m_model->calculateEstimate(workspace);
+  updateViewFromModel();
+}
+
+void ALFAnalysisPresenter::notifyFitComplete(Mantid::API::MatrixWorkspace_sptr workspace,
+                                             Mantid::API::IFunction_sptr function, std::string fitStatus) {
+  m_model->setFitResult(std::move(workspace), std::move(function), std::move(fitStatus));
+  m_view->addFitSpectrum(m_model->fitWorkspace());
+
   updatePeakCentreInViewFromModel();
   updateRotationAngleInViewFromModel();
 }
@@ -82,11 +92,7 @@ void ALFAnalysisPresenter::notifyExternalPlotClicked() {
   }
 }
 
-void ALFAnalysisPresenter::notifyResetClicked() {
-  calculateEstimate();
-  updatePeakCentreInViewFromModel();
-  updateRotationAngleInViewFromModel();
-}
+void ALFAnalysisPresenter::notifyResetClicked() { calculateEstimate(); }
 
 std::optional<std::string> ALFAnalysisPresenter::validateFitValues() const {
   if (!m_model->isDataExtracted())
@@ -111,7 +117,9 @@ bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
 
 void ALFAnalysisPresenter::calculateEstimate() {
   if (m_model->isDataExtracted()) {
-    m_model->calculateEstimate(m_view->getRange());
+    m_algorithmManager->cropWorkspace(m_model->cropWorkspaceProperties(m_view->getRange()));
+  } else {
+    updatePlotInViewFromModel();
   }
 }
 

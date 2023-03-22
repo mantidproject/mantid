@@ -37,7 +37,7 @@ void ALFInstrumentPresenter::loadSettings() { m_view->loadSettings(); }
 
 void ALFInstrumentPresenter::saveSettings() { m_view->saveSettings(); }
 
-void ALFInstrumentPresenter::notifyAlgorithmError(std::string const &message) { m_view->warningBox(message); }
+void ALFInstrumentPresenter::notifyAlgorithmError(std::string const &message) { m_view->displayWarning(message); }
 
 void ALFInstrumentPresenter::loadSample() {
   m_dataSwitch = ALFData::SAMPLE;
@@ -64,7 +64,7 @@ void ALFInstrumentPresenter::notifyLoadComplete(Mantid::API::MatrixWorkspace_spt
   if (m_model->isALFData(workspace)) {
     m_algorithmManager->normaliseByCurrent(m_model->normaliseByCurrentProperties(workspace));
   } else {
-    m_view->warningBox("The loaded data is not from the ALF instrument");
+    m_view->displayWarning("The loaded data is not from the ALF instrument");
   }
 }
 

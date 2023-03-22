@@ -63,7 +63,7 @@ public:
   MOCK_METHOD0(clearShapes, void());
   MOCK_METHOD1(drawRectanglesAbove, void(std::vector<DetectorTube> const &tubes));
 
-  MOCK_METHOD1(warningBox, void(std::string const &message));
+  MOCK_METHOD1(displayWarning, void(std::string const &message));
 };
 
 class MockALFInstrumentModel : public IALFInstrumentModel {
