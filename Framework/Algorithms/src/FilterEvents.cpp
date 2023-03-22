@@ -805,7 +805,7 @@ void FilterEvents::processSplittersWorkspace() {
   m_timeSplitter = TimeSplitter(m_splittersWorkspace);
   m_targetWorkspaceIndexSet = m_timeSplitter.outputWorkspaceIndices();
   m_targetWorkspaceIndexSet.insert(TimeSplitter::NO_TARGET); // add an extra workspace index for unfiltered events
-  m_maxTargetIndex = *m_targetWorkspaceIndexSet.rbegin();    // m_targetWorkspaceIndexSet is already sorted
+  m_maxTargetIndex = *m_targetWorkspaceIndexSet.rbegin();    // using the fact that std::set is sorted
   m_progress = 0.05;
   progress(m_progress);
 
@@ -1868,26 +1868,33 @@ void FilterEvents::generateSplitterTSPalpha(
 
   for (auto const wsindex : m_targetWorkspaceIndexSet) {
     TimeROI timeROI = m_timeSplitter.getTimeROI(wsindex);
-    SplittingInterval splitter = timeROI.toSplitters()[0];
-    int itarget = splitter.index();
-    if (itarget >= static_cast<int>(split_tsp_vec.size()))
-      throw std::runtime_error("Target workspace index is out of range!");
 
-    std::cout << "wsindex: " << wsindex << ", itarget: " << itarget << ", start: " << splitter.start()
-              << "; stop: " << splitter.stop() << "\n";
+    Kernel::SplittingIntervalVec splittingIntervalVec = timeROI.toSplitters();
+    for (auto const splitter : splittingIntervalVec) {
 
-    if (wsindex == TimeSplitter::NO_TARGET)
-      continue;
+      int itarget = splitter.index(); // this seem to always returns 0
 
-    if (splitter.start() == m_runStartTime) {
-      // there should be only 1 value in the splitter and clear it.
-      if (split_tsp_vec[itarget]->size() != 1) {
-        throw std::runtime_error("Splitter must have 1 value with initialization.");
+      itarget = wsindex;
+
+      if (itarget >= static_cast<int>(split_tsp_vec.size()))
+        throw std::runtime_error("Target workspace index is out of range!");
+
+      std::cout << "wsindex: " << wsindex << ", itarget: " << itarget << ", start: " << splitter.start()
+                << "; stop: " << splitter.stop() << "\n";
+
+      if (wsindex == TimeSplitter::NO_TARGET)
+        continue;
+
+      if (splitter.start() == m_runStartTime) {
+        // there should be only 1 value in the splitter and clear it.
+        if (split_tsp_vec[itarget]->size() != 1) {
+          throw std::runtime_error("Splitter must have 1 value with initialization.");
+        }
+        split_tsp_vec[itarget]->clear();
       }
-      split_tsp_vec[itarget]->clear();
+      split_tsp_vec[itarget]->addValue(splitter.start(), 1);
+      split_tsp_vec[itarget]->addValue(splitter.stop(), 0);
     }
-    split_tsp_vec[itarget]->addValue(splitter.start(), 1);
-    split_tsp_vec[itarget]->addValue(splitter.stop(), 0);
   }
 
   // for (SplittingInterval splitter : m_splitters) {
