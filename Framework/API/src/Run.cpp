@@ -7,6 +7,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeROI.h"
@@ -24,6 +25,7 @@
 namespace Mantid::API {
 
 using namespace Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 /// The number of log entries summed when adding a run
@@ -105,6 +107,57 @@ void Run::filterByTime(const Types::Core::DateAndTime start, const Types::Core::
   this->integrateProtonCharge();
 }
 
+namespace {
+void findAndConcatenateTimeStrProp(const Run *runObjLHS, const Run *runObjRHS, const std::string &firstSuggestion,
+                                   const std::string &secondSuggestion, std::string &propName, std::string &propValue) {
+  // get the name/value from the right-hand-side
+  // this should get overwritten below by the left
+  std::string rhsValue;
+  if (runObjRHS->hasProperty(firstSuggestion)) {
+    propName = firstSuggestion;
+    rhsValue = runObjRHS->getProperty(firstSuggestion)->value();
+  } else if (runObjRHS->hasProperty(secondSuggestion)) {
+    propName = secondSuggestion;
+    rhsValue = runObjRHS->getProperty(secondSuggestion)->value();
+  }
+
+  // get the name from the left-hand-side and update the value
+  std::string lhsValue;
+  if (runObjLHS->hasProperty(firstSuggestion)) {
+    propName = firstSuggestion;
+    lhsValue = runObjLHS->getProperty(firstSuggestion)->value();
+  } else if (runObjLHS->hasProperty(secondSuggestion)) {
+    propName = secondSuggestion;
+    lhsValue = runObjLHS->getProperty(secondSuggestion)->value();
+  }
+
+  if (lhsValue.empty()) {
+    propValue = rhsValue;
+  } else if (rhsValue.empty()) {
+    propValue = lhsValue;
+  } else {
+    if (firstSuggestion == "start_time") {
+      // take the minimum time of the two
+      try {
+        auto value = std::min(DateAndTime(lhsValue), DateAndTime(rhsValue));
+        propValue = value.toISO8601String();
+      } catch (std::invalid_argument &) {
+        propValue = lhsValue + rhsValue; // simply concatenate strings
+      }
+    } else { // assume it is the end time
+      // take the maximum time of the two
+      try {
+        auto value = std::max(DateAndTime(lhsValue), DateAndTime(rhsValue));
+        propValue = value.toISO8601String();
+      } catch (std::invalid_argument &) {
+        propValue = lhsValue + rhsValue; // simply concatenate strings
+      }
+    }
+  }
+}
+
+} // namespace
+
 /**
  * Adds just the properties that are safe to add. All time series are
  * merged together and the list of addable properties are added
@@ -112,6 +165,33 @@ void Run::filterByTime(const Types::Core::DateAndTime start, const Types::Core::
  * @returns A reference to the summed object
  */
 Run &Run::operator+=(const Run &rhs) {
+  // combine the two TimeROI if either is non-empty
+  if ((!m_timeroi->empty()) || (!rhs.m_timeroi->empty())) {
+    TimeROI combined(*m_timeroi);
+    // set this start/end time as the only ROI if it is empty
+    if (combined.empty()) {
+      combined.addROI(this->startTime(), this->endTime());
+    }
+
+    // fixup the timeroi from the other
+    TimeROI rightROI(*rhs.m_timeroi);
+    if (rightROI.empty() && rhs.hasStartTime() && rhs.hasEndTime()) {
+      rightROI.addROI(rhs.startTime(), rhs.endTime());
+    }
+
+    // replace the values accordingly
+    combined.update_union(rightROI);
+    this->m_timeroi->replaceROI(combined);
+  }
+
+  // determine the new start/end times
+  std::string startTimePropName;
+  std::string startTimePropValue;
+  std::string endTimePropName;
+  std::string endTimePropValue;
+  findAndConcatenateTimeStrProp(this, &rhs, "start_time", "start_run", startTimePropName, startTimePropValue);
+  findAndConcatenateTimeStrProp(this, &rhs, "end_time", "run_end", endTimePropName, endTimePropValue);
+
   // merge and copy properties where there is no risk of corrupting data
   mergeMergables(*m_manager, *rhs.m_manager);
 
@@ -131,6 +211,18 @@ Run &Run::operator+=(const Run &rhs) {
         m_manager->declareProperty(std::unique_ptr<Property>(right->clone()), "");
     }
   }
+
+  // update the start/end times - this assumes that if either property was missing from the left, it was added during
+  // the mergeMergables step above
+  if (!startTimePropName.empty()) {
+    Property *prop = m_manager->getProperty(startTimePropName);
+    prop->setValue(startTimePropValue);
+  }
+  if (!endTimePropName.empty()) {
+    Property *prop = m_manager->getProperty(endTimePropName);
+    prop->setValue(endTimePropValue);
+  }
+
   return *this;
 }
 
@@ -229,15 +321,20 @@ void Run::integrateProtonCharge(const std::string &logname) const {
     // start with a clearly nonsense accumulated value
     double total;
 
-    // get a copy of the TimeROI for selecting values
-    const auto timeroi = this->getTimeROI();
+    // get a copy of the run's TimeROI for selecting values
+    Kernel::TimeROI timeroi = this->getTimeROI();
+    // If the proton charge series is filtered, fetch its TimeROI and use it to update `timeRoi`
+    auto filteredLog = dynamic_cast<Kernel::FilteredTimeSeriesProperty<double> *>(this->getProperty(logname));
+    if (filteredLog)
+      timeroi.update_or_replace_intersection(filteredLog->getTimeROI());
+
     if (timeroi.empty()) {
       // simple accumulation
       const std::vector<double> logValues = log->valuesAsVector();
       total = std::accumulate(logValues.begin(), logValues.end(), 0.0);
     } else {
       // get the raw values
-      const std::map<Types::Core::DateAndTime, double> unfilteredValues = log->valueAsMap();
+      const std::map<Types::Core::DateAndTime, double> unfilteredValues = log->valueAsCorrectMap();
 
       using valueType = std::map<Types::Core::DateAndTime, double>::value_type;
 

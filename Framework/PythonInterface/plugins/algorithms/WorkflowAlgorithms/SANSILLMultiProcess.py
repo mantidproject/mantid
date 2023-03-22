@@ -375,8 +375,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             if n_thick > 1 and n_thick != self.n_samples:
                 issues[
                     "SampleThickness"
-                ] = f"SampleThickness has {n_thick} elements \
-                                             which does not match the number of samples {self.n_samples}."
+                ] = f"SampleThickness has {n_thick} elements which does not match the number of samples {self.n_samples}."
         return issues
 
     def _check_sample_names_dimensions(self):
@@ -387,10 +386,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         if read_from == "User":
             n_names = len(user_names)
             if n_names != self.n_samples:
-                issues[
-                    "SampleNames"
-                ] = f"SampleNames has {n_names} elements \
-                                         which does not match the number of samples {self.n_samples}."
+                issues["SampleNames"] = f"SampleNames has {n_names} elements which does not match the number of samples {self.n_samples}."
         return issues
 
     def _check_aux_tr_params_dimensions(self):

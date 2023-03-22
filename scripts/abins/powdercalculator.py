@@ -8,7 +8,7 @@ import numpy as np
 from typing import Dict, Tuple
 
 import abins
-from abins.constants import ACOUSTIC_PHONON_THRESHOLD, CONSTANT, NUM_ZERO
+from abins.constants import ACOUSTIC_PHONON_THRESHOLD, CONSTANT, CM1_2_HARTREE, K_2_HARTREE, NUM_ZERO
 
 
 # noinspection PyMethodMayBeStatic
@@ -17,7 +17,7 @@ class PowderCalculator:
     Class for calculating powder data.
     """
 
-    def __init__(self, *, filename: str, abins_data: abins.AbinsData) -> None:
+    def __init__(self, *, filename: str, abins_data: abins.AbinsData, temperature: float) -> None:
         """
         :param filename:  name of input DFT filename
         :param abins_data: object of type AbinsData with data from input DFT file
@@ -28,6 +28,7 @@ class PowderCalculator:
         k_data: abins.KpointsData = abins_data.get_kpoints_data()
         self._frequencies: Dict[str, np.ndarray] = {}
         self._displacements: Dict[str, np.ndarray] = {}
+        self._temperature = temperature
 
         atoms_data = abins_data.get_atoms_data()
 
@@ -38,8 +39,9 @@ class PowderCalculator:
             self._displacements[k] = k_point_data.atomic_displacements[:, mask]
 
         self._masses = np.asarray([atoms_data[atom]["mass"] for atom in range(len(atoms_data))])
-
-        self._clerk = abins.IO(input_filename=filename, group_name=abins.parameters.hdf_groups["powder_data"])
+        self._clerk = abins.IO(
+            input_filename=filename, group_name=abins.parameters.hdf_groups["powder_data"], temperature=self._temperature
+        )
 
     def _calculate_powder(self) -> abins.PowderData:
         """
@@ -49,14 +51,18 @@ class PowderCalculator:
         k_indices = sorted(self._frequencies.keys())  # make sure dictionary keys are in the same order on each machine
         b_tensors = {}
         a_tensors = {}
+        n_plus_1 = {}
 
         tensors = [self._calculate_powder_k(k=k) for k in k_indices]
 
         for i, k_index in enumerate(k_indices):
             a_tensors[k_index] = tensors[i][0]
             b_tensors[k_index] = tensors[i][1]
+            n_plus_1[k_index] = tensors[i][2]
 
-        powder = abins.PowderData(a_tensors=a_tensors, b_tensors=b_tensors, frequencies=self._frequencies, num_atoms=len(self._masses))
+        powder = abins.PowderData(
+            a_tensors=a_tensors, b_tensors=b_tensors, frequencies=self._frequencies, n_plus_1=n_plus_1, num_atoms=len(self._masses)
+        )
         return powder
 
     def _calculate_powder_k(self, *, k: str) -> Tuple[np.ndarray, np.ndarray]:
@@ -92,10 +98,21 @@ class PowderCalculator:
         indices = temp < NUM_ZERO
         b_tensors[indices] = NUM_ZERO
 
-        # a_tensors[num_atoms, dim, dim]
-        a_tensors = np.sum(a=b_tensors, axis=1)
+        if self._temperature < np.finfo(type(self._temperature)).eps:
+            two_n_plus_1 = 1.0
+            n_plus_1 = 1.0
+            b_tensors_2n_plus_1 = b_tensors_n_plus_1 = b_tensors
 
-        return a_tensors, b_tensors
+        else:
+            two_n_plus_1 = 1.0 / np.tanh(self._frequencies[k] * CM1_2_HARTREE / (2.0 * self._temperature * K_2_HARTREE))
+            n_plus_1 = two_n_plus_1 * 0.5 + 0.5
+            b_tensors_2n_plus_1 = b_tensors * two_n_plus_1[None, :, None, None]
+            b_tensors_n_plus_1 = b_tensors * n_plus_1[None, :, None, None]
+
+        # a_tensors[num_atoms, dim, dim]
+        a_tensors = np.sum(a=b_tensors_2n_plus_1, axis=1)
+
+        return a_tensors, b_tensors_n_plus_1, n_plus_1
 
     def get_formatted_data(self) -> abins.PowderData:
         """
@@ -108,7 +125,6 @@ class PowderCalculator:
             self._report_progress(str(data) + " has been loaded from the HDF file.")
 
         except (IOError, ValueError) as err:
-
             self._report_progress("Warning: " + str(err) + " Data has to be calculated.")
             data = self.calculate_data()
             self._report_progress(str(data) + " has been calculated.")

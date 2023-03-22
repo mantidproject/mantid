@@ -256,6 +256,9 @@ MIN_SIZE = 2  # minimal size of an array
 THRESHOLD = 10e-15
 NUM_ZERO = 10e-15
 
+# difference between temperatures considered equivalent
+T_THRESHOLD = 1e-12
+
 MAX_ORDER = 4  # max quantum order event
 
 ALL_SUPPORTED_AB_INITIO_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN", "VASP"]

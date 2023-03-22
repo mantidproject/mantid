@@ -63,7 +63,9 @@ class MedianBinWidthTest(unittest.TestCase):
         ys = numpy.zeros(len(xs))
         ws = CreateWorkspace(DataX=xs, DataY=ys, Distribution=True)
         params = self._make_algorithm_params(ws)
-        self.assertRaises(ValueError, testhelpers.create_algorithm, "BinWidthAtX", **params)
+        self.assertRaisesRegex(
+            ValueError, "The workspace must contain histogram data", testhelpers.create_algorithm, "BinWidthAtX", **params
+        )
         DeleteWorkspace(ws)
 
     def test_positive_output_even_if_descending_x(self):

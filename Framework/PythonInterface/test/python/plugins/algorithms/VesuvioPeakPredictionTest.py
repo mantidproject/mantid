@@ -40,8 +40,9 @@ class VesuvioPeakPredictionTest(unittest.TestCase):
         """
         Test negative input temperature
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             ValueError,
+            "Selected value -20 is < the lower bound",
             VesuvioPeakPrediction,
             Model="Debye",
             Temperature=[100, 0, 240, -20],
@@ -54,8 +55,9 @@ class VesuvioPeakPredictionTest(unittest.TestCase):
         """
         Test zero frequency
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             ValueError,
+            "Selected value 0 is <= the lower bound",
             VesuvioPeakPrediction,
             Model="Einstein",
             Temperature=[100, 0, 240],
@@ -68,8 +70,9 @@ class VesuvioPeakPredictionTest(unittest.TestCase):
         """
         Test zero debye temp
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             ValueError,
+            "Selected value -540 is <= the lower bound",
             VesuvioPeakPrediction,
             Model="Debye",
             Temperature=[100, 0, 240],

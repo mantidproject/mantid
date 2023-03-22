@@ -121,6 +121,9 @@ ipch/
 *.psess
 *.vsp
 
+# Visual Studio workspace state
+.vs/
+
 # ReSharper is a .NET coding add-in
 _ReSharper*
 

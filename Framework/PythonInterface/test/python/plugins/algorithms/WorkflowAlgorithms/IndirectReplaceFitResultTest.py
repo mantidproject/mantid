@@ -124,20 +124,16 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
         self.assertEqual(self._result_group.getNumberOfEntries(), 1)
 
     def test_that_the_algorithm_will_throw_when_given_a_single_fit_workspace_containing_more_than_one_fit(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "The single fit workspace must contain data from a single fit."):
             execute_algorithm(self._input_workspace, self._input_workspace, self._output_name)
 
     def test_that_the_algorithm_will_throw_when_given_an_input_workspace_containing_data_for_one_fit(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "The input workspace must contain result data from a fit involving 2 or more spectra."):
             execute_algorithm(self._single_fit_workspace, self._single_fit_workspace, self._output_name)
 
     def test_that_the_algorithm_will_throw_when_provided_an_empty_output_workspace_name(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "No OutputWorkspace name was provided."):
             execute_algorithm(self._input_workspace, self._single_fit_workspace, "")
-
-    def test_that_the_algorithm_will_throw_when_provided_an_single_fit_workspace_which_is_a_group(self):
-        with self.assertRaises(RuntimeError):
-            execute_algorithm(self._input_workspace, self._result_group, self._output_name)
 
     def test_that_the_algorithm_produces_a_workspace_containing_the_expected_values(self):
         execute_algorithm(self._input_workspace, self._single_fit_workspace, self._output_name)

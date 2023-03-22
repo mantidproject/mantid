@@ -17,7 +17,11 @@ class MantidVersionTest(unittest.TestCase):
         assertRaisesNothing(self, int, version().minor)
 
     def test_version_info_patch(self):
-        self.assertTrue(version().patch)
+        # Patch can be one or more dot separated integers.
+        self.assertRegex(version().patch, r"^\d+(\.\d+)*$")
+
+    def test_version_info_tweak(self):
+        assertRaisesNothing(self, print, version().tweak)
 
     def test_version_info_string(self):
         self.assertTrue("." in str(version))

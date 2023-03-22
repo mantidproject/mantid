@@ -73,7 +73,7 @@ class FittingDataPresenter(object):
             self.plotted.discard(ws_name)
             self._repopulate_table()
         elif ws_name in self.model.get_log_workspaces_name():
-            self.model.update_log_workspace_group()
+            self.model.update_sample_log_workspace_group()
 
     def rename_workspace(self, old_name, new_name):
         # Note - ws.name() not updated yet so need to rely on new_name parameter
@@ -258,7 +258,6 @@ class FittingDataPresenter(object):
         return True
 
     def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, plotted=False, bgsub=False, niter=50, xwindow=None, SG=True):
-
         words = ws_name.split("_")
         # find xwindow from ws xunit if not specified
         if not xwindow:

@@ -227,7 +227,9 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         hab_range = list(range(5, 14))
         hab_range[6] = np.nan
         hab_range[7] = np.nan
-        self.assertRaises(RuntimeError, self.do_test_scale_both, hab_range)
+        self.assertRaisesRegex(
+            RuntimeError, "Trying to merge the two reduced data sets for HAB and LAB failed.", self.do_test_scale_both, hab_range
+        )
 
     def test_scale_both_with_q_range(self):
         hab_range = list(range(5, 14))

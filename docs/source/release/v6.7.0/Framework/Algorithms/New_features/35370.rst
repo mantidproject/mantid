@@ -1,0 +1,2 @@
+- the beta test warning has been removed from the :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` algorithm
+- the performance of the :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` algorithm has been improved on elastic instruments with large numbers of bins

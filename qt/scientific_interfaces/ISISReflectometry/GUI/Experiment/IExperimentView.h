@@ -70,6 +70,10 @@ public:
   virtual void showAllLookupRowsAsValid() = 0;
   virtual void showStitchParametersValid() = 0;
   virtual void showStitchParametersInvalid() = 0;
+  virtual void showPolCorrFilePathValid() = 0;
+  virtual void showPolCorrFilePathInvalid() = 0;
+  virtual void showFloodCorrFilePathValid() = 0;
+  virtual void showFloodCorrFilePathInvalid() = 0;
 
   virtual bool getSubtractBackground() const = 0;
   virtual void setSubtractBackground(bool enable) = 0;
@@ -105,15 +109,23 @@ public:
   virtual void showTransmissionStitchParamsInvalid() = 0;
   virtual void showTransmissionStitchParamsValid() = 0;
 
-  virtual bool getPolarizationCorrectionOption() const = 0;
-  virtual void setPolarizationCorrectionOption(bool enable) = 0;
+  virtual std::string getPolarizationCorrectionOption() const = 0;
+  virtual void setPolarizationCorrectionOption(std::string const &enable) = 0;
+  virtual void setPolarizationEfficienciesWorkspaceMode() = 0;
+  virtual void setPolarizationEfficienciesFilePathMode() = 0;
   virtual std::string getPolarizationEfficienciesWorkspace() const = 0;
+  virtual std::string getPolarizationEfficienciesFilePath() const = 0;
   virtual void setPolarizationEfficienciesWorkspace(std::string const &workspace) = 0;
+  virtual void setPolarizationEfficienciesFilePath(std::string const &filePath) = 0;
 
   virtual std::string getFloodCorrectionType() const = 0;
   virtual void setFloodCorrectionType(std::string const &correction) = 0;
+  virtual void setFloodCorrectionWorkspaceMode() = 0;
+  virtual void setFloodCorrectionFilePathMode() = 0;
   virtual std::string getFloodWorkspace() const = 0;
+  virtual std::string getFloodFilePath() const = 0;
   virtual void setFloodWorkspace(std::string const &workspace) = 0;
+  virtual void setFloodFilePath(std::string const &filePath) = 0;
 
   virtual std::string getStitchOptions() const = 0;
   virtual void setStitchOptions(std::string const &stitchOptions) = 0;

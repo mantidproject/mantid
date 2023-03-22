@@ -8,20 +8,20 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/LogFilter.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include <ctime>
 
 using namespace Mantid::Kernel;
 
 class LogFilterTest : public CxxTest::TestSuite {
-  TimeSeriesProperty<double> *p;
+  FilteredTimeSeriesProperty<double> *p;
 
 public:
   static LogFilterTest *createSuite() { return new LogFilterTest(); }
   static void destroySuite(LogFilterTest *suite) { delete suite; }
 
-  LogFilterTest() : p(new TimeSeriesProperty<double>("test")) {
+  LogFilterTest() : p(new FilteredTimeSeriesProperty<double>("test")) {
     p->addValue("2007-11-30T16:17:00", 1);
     p->addValue("2007-11-30T16:17:10", 2);
     p->addValue("2007-11-30T16:17:20", 3);
@@ -151,51 +151,49 @@ public:
     if (!finalFilter)
       return;
 
-    TS_ASSERT_EQUALS(6, finalFilter->size());
+    TS_ASSERT_EQUALS(5, finalFilter->size());
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(0).begin_str(), "2007-Nov-30 16:16:50");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(0).end_str(), "2007-Nov-30 16:17:00");
-    TS_ASSERT_EQUALS(finalFilter->nthValue(0), false);
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(0).begin_str(), "2007-Nov-30 16:17:00");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(0).end_str(), "2007-Nov-30 16:17:05");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(0), true);
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(1).begin_str(), "2007-Nov-30 16:17:00");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(1).end_str(), "2007-Nov-30 16:17:05");
-    TS_ASSERT_EQUALS(finalFilter->nthValue(1), true);
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(1).begin_str(), "2007-Nov-30 16:17:05");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(1).end_str(), "2007-Nov-30 16:17:12");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(1), false);
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(2).begin_str(), "2007-Nov-30 16:17:05");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(2).end_str(), "2007-Nov-30 16:17:12");
-    TS_ASSERT_EQUALS(finalFilter->nthValue(2), false);
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(2).begin_str(), "2007-Nov-30 16:17:12");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(2).end_str(), "2007-Nov-30 16:17:25");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(2), true);
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(3).begin_str(), "2007-Nov-30 16:17:12");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(3).end_str(), "2007-Nov-30 16:17:25");
-    TS_ASSERT_EQUALS(finalFilter->nthValue(3), true);
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(3).begin_str(), "2007-Nov-30 16:17:25");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(3).end_str(), "2007-Nov-30 16:17:39");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(3), false);
 
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(4).begin_str(), "2007-Nov-30 16:17:25");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(4).end_str(), "2007-Nov-30 16:17:39");
-    TS_ASSERT_EQUALS(finalFilter->nthValue(4), false);
-
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(5).begin_str(), "2007-Nov-30 16:17:39");
-    TS_ASSERT_EQUALS(finalFilter->nthInterval(5).end_str(), "2007-Nov-30 16:17:53");
-    TS_ASSERT_EQUALS(finalFilter->nthValue(5), true);
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(4).begin_str(), "2007-Nov-30 16:17:39");
+    TS_ASSERT_EQUALS(finalFilter->nthInterval(4).end_str(), "2007-Nov-30 16:17:53");
+    TS_ASSERT_EQUALS(finalFilter->nthValue(4), true);
   }
 
   void test_filtered_size_when_combined_filter_is_invalid() {
-    TimeSeriesProperty<double> *p = new TimeSeriesProperty<double>("doubleProp");
+    FilteredTimeSeriesProperty<double> *p = new FilteredTimeSeriesProperty<double>("doubleProp");
     TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:20:52", -0.00161));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:21:57", -0.00161));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:23:01", -0.00161));
     TS_ASSERT_THROWS_NOTHING(p->addValue("2009-Apr-28 09:25:10", -0.00161));
 
-    TimeSeriesProperty<bool> *running = new TimeSeriesProperty<bool>("running");
+    FilteredTimeSeriesProperty<bool> *running = new FilteredTimeSeriesProperty<bool>("running");
     running->addValue("2009-Apr-28 09:20:30", true);
     running->addValue("2009-Apr-28 09:20:51", false);
 
-    TimeSeriesProperty<bool> *period = new TimeSeriesProperty<bool>("period 1");
-    running->addValue("2009-Apr-28 09:20:29", true);
+    // goes from before the previous one through all time
+    // the intersection of the two is "simply" the previous filter
+    FilteredTimeSeriesProperty<bool> *period = new FilteredTimeSeriesProperty<bool>("period 1");
+    period->addValue("2009-Apr-28 09:20:29", true);
 
     LogFilter filter(p);
     filter.addFilter(*running);
     filter.addFilter(*period);
-    TS_ASSERT_EQUALS(filter.data()->size(), 4);
+    TS_ASSERT_EQUALS(filter.data()->size(), 1);
     delete p;
     delete period;
     delete running;
@@ -208,8 +206,6 @@ public:
     flt.addFilter(*testFilter);
 
     TS_ASSERT_EQUALS(flt.data()->size(), 2);
-
-    return;
 
     TS_ASSERT_EQUALS(flt.data()->nthInterval(0).begin_str(), "2007-Nov-30 16:17:40");
     TS_ASSERT_EQUALS(flt.data()->nthInterval(0).end_str(), "2007-Nov-30 16:17:45");
@@ -224,7 +220,7 @@ public:
 
   void testFilterByPeriod() // Test for Wendou to look at
   {
-    TimeSeriesProperty<double> height_log("height_log");
+    FilteredTimeSeriesProperty<double> height_log("height_log");
     height_log.addValue("2008-Jun-17 11:10:44", -0.86526);
     height_log.addValue("2008-Jun-17 11:10:45", -1.17843);
     height_log.addValue("2008-Jun-17 11:10:47", -1.27995);
@@ -252,7 +248,7 @@ public:
     height_log.addValue("2008-Jun-17 11:21:24", -0.08519);
     height_log.addValue("2008-Jun-17 11:21:25", 0);
 
-    TimeSeriesProperty<bool> period_log("period 7");
+    FilteredTimeSeriesProperty<bool> period_log("period 7");
     period_log.addValue("2008-Jun-17 11:11:13", false);
     period_log.addValue("2008-Jun-17 11:11:13", false);
     period_log.addValue("2008-Jun-17 11:11:18", false);
@@ -261,7 +257,7 @@ public:
     period_log.addValue("2008-Jun-17 11:11:52", false);
     period_log.addValue("2008-Jun-17 11:12:01", false);
     period_log.addValue("2008-Jun-17 11:12:11", false);
-    period_log.addValue("2008-Jun-17 11:12:21", true);
+    period_log.addValue("2008-Jun-17 11:12:21", true); //
     period_log.addValue("2008-Jun-17 11:12:32", false);
     period_log.addValue("2008-Jun-17 11:12:42", false);
     period_log.addValue("2008-Jun-17 11:12:52", false);
@@ -273,7 +269,7 @@ public:
     period_log.addValue("2008-Jun-17 11:17:37", false);
     period_log.addValue("2008-Jun-17 11:17:48", false);
     period_log.addValue("2008-Jun-17 11:17:57", false);
-    period_log.addValue("2008-Jun-17 11:18:07", true);
+    period_log.addValue("2008-Jun-17 11:18:07", true); //
     period_log.addValue("2008-Jun-17 11:18:18", false);
     period_log.addValue("2008-Jun-17 11:18:28", false);
     period_log.addValue("2008-Jun-17 11:18:38", false);
@@ -285,13 +281,13 @@ public:
     period_log.addValue("2008-Jun-17 11:20:46", false);
     period_log.addValue("2008-Jun-17 11:20:58", false);
     period_log.addValue("2008-Jun-17 11:21:08", false);
-    period_log.addValue("2008-Jun-17 11:21:19", true);
+    period_log.addValue("2008-Jun-17 11:21:19", true); //
 
     TS_ASSERT_EQUALS(height_log.size(), 26);
 
     LogFilter filter(&height_log);
     filter.addFilter(period_log);
-    const TimeSeriesProperty<double> *filteredLog = filter.data();
+    const FilteredTimeSeriesProperty<double> *filteredLog = filter.data();
     TS_ASSERT_EQUALS(filteredLog->size(), 6)
   }
 
@@ -299,7 +295,7 @@ private:
   /// Creates a test boolean filter
   /// @param type :: Which variant to create
   std::shared_ptr<TimeSeriesProperty<bool>> createTestFilter(const int type) {
-    std::shared_ptr<TimeSeriesProperty<bool>> filter(new TimeSeriesProperty<bool>("filter"));
+    auto filter = std::make_shared<TimeSeriesProperty<bool>>("filter");
     if (type == 1) {
       filter->addValue("2007-11-30T16:16:50", true);
       filter->addValue("2007-11-30T16:17:25", false);

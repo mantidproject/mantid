@@ -52,7 +52,7 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
         self.view.add_text_line.assert_any_call("Good Frames               : 88540")
         self.view.add_text_line.assert_any_call("Counts per Good Frame     : 226.8")
         self.view.add_text_line.assert_any_call("Counts per Good Frame per det : 3.543")
-        self.view.add_text_line.assert_any_call("Average Temperature (K)   : 19.7")
+        self.view.add_text_line.assert_any_call("Average Temperature (K)   : 2.531")
         self.view.add_text_line.assert_any_call("Sample Temperature (K)    : 1")
         self.view.add_text_line.assert_any_call("Sample Magnetic Field (G) : 100")
         self.view.add_text_line.assert_any_call("Number of DAQ Periods     : 1")

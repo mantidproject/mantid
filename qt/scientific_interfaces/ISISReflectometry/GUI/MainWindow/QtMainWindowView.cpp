@@ -14,6 +14,7 @@
 #include "GUI/Options/OptionsDialogModel.h"
 #include "GUI/Options/OptionsDialogPresenter.h"
 #include "GUI/Options/QtOptionsDialogView.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
@@ -24,6 +25,8 @@
 #include <QToolButton>
 
 #include <fstream>
+
+using Mantid::API::FileFinder;
 
 namespace MantidQt {
 
@@ -90,7 +93,7 @@ void QtMainWindowView::initLayout() {
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();
-  auto makeExperimentPresenter = ExperimentPresenterFactory(thetaTolerance);
+  auto makeExperimentPresenter = ExperimentPresenterFactory(fileHandler, thetaTolerance);
   auto makeInstrumentPresenter = InstrumentPresenterFactory(fileHandler, messageHandler);
   auto makePreviewPresenter = PreviewPresenterFactory();
 
@@ -254,8 +257,11 @@ bool QtMainWindowView::fileExists(std::string const &filepath) const {
   } catch (Poco::PathSyntaxException &) {
     return false;
   }
-
   return true;
+}
+
+std::string QtMainWindowView::getFullFilePath(const std::string &filename) const {
+  return FileFinder::Instance().getFullPath(filename);
 }
 
 } // namespace CustomInterfaces::ISISReflectometry

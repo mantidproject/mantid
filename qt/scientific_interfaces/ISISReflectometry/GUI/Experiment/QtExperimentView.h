@@ -9,6 +9,7 @@
 #include "Common/DllConfig.h"
 #include "IExperimentView.h"
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
+#include "MantidQtWidgets/Common/WorkspaceSelector.h"
 #include "ui_ExperimentWidget.h"
 #include <QCheckBox>
 #include <QShortcut>
@@ -69,16 +70,28 @@ public:
   void showTransmissionRangeValid() override;
   void showTransmissionStitchParamsInvalid() override;
   void showTransmissionStitchParamsValid() override;
+  void showPolCorrFilePathValid() override;
+  void showPolCorrFilePathInvalid() override;
+  void showFloodCorrFilePathValid() override;
+  void showFloodCorrFilePathInvalid() override;
 
-  bool getPolarizationCorrectionOption() const override;
-  void setPolarizationCorrectionOption(bool enable) override;
+  std::string getPolarizationCorrectionOption() const override;
+  void setPolarizationCorrectionOption(std::string const &option) override;
+  void setPolarizationEfficienciesWorkspaceMode() override;
+  void setPolarizationEfficienciesFilePathMode() override;
   std::string getPolarizationEfficienciesWorkspace() const override;
+  std::string getPolarizationEfficienciesFilePath() const override;
   void setPolarizationEfficienciesWorkspace(std::string const &workspace) override;
+  void setPolarizationEfficienciesFilePath(std::string const &filePath) override;
 
   std::string getFloodCorrectionType() const override;
   void setFloodCorrectionType(std::string const &correction) override;
+  void setFloodCorrectionWorkspaceMode() override;
+  void setFloodCorrectionFilePathMode() override;
   std::string getFloodWorkspace() const override;
+  std::string getFloodFilePath() const override;
   void setFloodWorkspace(std::string const &workspace) override;
+  void setFloodFilePath(std::string const &filePath) override;
 
   std::string getStitchOptions() const override;
   void setStitchOptions(std::string const &stitchOptions) override;
@@ -192,6 +205,13 @@ private:
 
   std::unique_ptr<QShortcut> m_deleteShortcut;
   Ui::ExperimentWidget m_ui;
+
+  std::unique_ptr<QLineEdit> m_polCorrEfficienciesLineEdit;
+  std::unique_ptr<MantidWidgets::WorkspaceSelector> m_polCorrEfficienciesWsSelector;
+
+  std::unique_ptr<QLineEdit> m_floodCorrLineEdit;
+  std::unique_ptr<MantidWidgets::WorkspaceSelector> m_floodCorrWsSelector;
+
   ExperimentViewSubscriber *m_notifyee;
   std::array<QString, LookupRow::OPTIONS_TABLE_COLUMN_COUNT> m_columnToolTips;
 

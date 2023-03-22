@@ -207,10 +207,12 @@ public:
     TS_ASSERT(ilog);
     TS_ASSERT_EQUALS(ilog->size(), 172);
 
+    // the filtering is automatically applied which cuts a notching in a log value
+    // this, effectively, creates one extra value
     TimeSeriesProperty<double> *dlog =
         dynamic_cast<TimeSeriesProperty<double> *>(ws->run().getLogData("proton_charge"));
     TS_ASSERT(dlog);
-    TS_ASSERT_EQUALS(dlog->size(), 172);
+    TS_ASSERT_EQUALS(dlog->size(), 173);
 
     TimeSeriesProperty<bool> *blog = dynamic_cast<TimeSeriesProperty<bool> *>(ws->run().getLogData("period 1"));
     TS_ASSERT(blog);
@@ -579,10 +581,12 @@ public:
     TS_ASSERT(ilog);
     TS_ASSERT_EQUALS(ilog->size(), 172);
 
+    // the filtering is automatically applied which cuts a notching in a log value
+    // this, effectively, creates one extra value
     TimeSeriesProperty<double> *dlog =
         dynamic_cast<TimeSeriesProperty<double> *>(ws->run().getLogData("proton_charge"));
     TS_ASSERT(dlog);
-    TS_ASSERT_EQUALS(dlog->size(), 172);
+    TS_ASSERT_EQUALS(dlog->size(), 173);
 
     TimeSeriesProperty<bool> *blog = dynamic_cast<TimeSeriesProperty<bool> *>(ws->run().getLogData("period 1"));
     TS_ASSERT(blog);

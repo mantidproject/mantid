@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>952</width>
+    <width>949</width>
     <height>524</height>
    </rect>
   </property>
@@ -163,13 +163,6 @@
        </item>
       </widget>
      </item>
-     <item row="12" column="1">
-      <widget class="QCheckBox" name="polCorrCheckBox">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
      <item row="11" column="1">
       <widget class="QSpinBox" name="polynomialDegreeSpinBox"/>
      </item>
@@ -181,7 +174,7 @@
       </widget>
      </item>
      <item row="12" column="0">
-      <widget class="QLabel" name="polCorrCheckLabel">
+      <widget class="QLabel" name="polCorrComboLabel">
        <property name="minimumSize">
         <size>
          <width>117</width>
@@ -189,7 +182,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Polarisation Corrections</string>
+        <string>Polarization Corrections</string>
        </property>
       </widget>
      </item>
@@ -489,22 +482,6 @@
        </property>
       </widget>
      </item>
-     <item row="14" column="3">
-      <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="floodWorkspaceWsSelector">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </item>
      <item row="16" column="0">
       <widget class="QLabel" name="stitchLabel">
        <property name="minimumSize">
@@ -591,12 +568,22 @@
        </property>
        <item>
         <property name="text">
-         <string>Workspace</string>
+         <string>None</string>
         </property>
        </item>
        <item>
         <property name="text">
          <string>ParameterFile</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Workspace</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FilePath</string>
         </property>
        </item>
       </widget>
@@ -629,6 +616,12 @@
      </item>
      <item row="11" column="3">
       <widget class="QComboBox" name="costFunctionComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <item>
         <property name="text">
          <string>Least squares</string>
@@ -673,9 +666,6 @@
        </item>
       </widget>
      </item>
-     <item row="12" column="3">
-      <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="polCorrEfficienciesWsSelector"/>
-     </item>
      <item row="12" column="2">
       <widget class="QLabel" name="polCorrEfficienciesLabel">
        <property name="text">
@@ -683,17 +673,34 @@
        </property>
       </widget>
      </item>
+     <item row="12" column="1">
+      <widget class="QComboBox" name="polCorrComboBox">
+       <item>
+        <property name="text">
+         <string>None</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>ParameterFile</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Workspace</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FilePath</string>
+        </property>
+       </item>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::WorkspaceSelector</class>
-   <extends>QComboBox</extends>
-   <header>MantidQtWidgets/Common/WorkspaceSelector.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

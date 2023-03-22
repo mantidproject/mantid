@@ -46,7 +46,7 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
 
         xunit = input_workspace.getAxis(0).getUnit().unitID()
         if xunit != "TOF":
-            issues["InputWorkspace"] = "X axis units must be TOF. "
+            issues["InputWorkspace"] = "X axis units must be TOF."
 
         # check for required properties
         run = input_workspace.getRun()

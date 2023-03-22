@@ -1,0 +1,1 @@
+- the performance of the Show Sample Shape screen has been improved for workspaces with complex CSG shapes for either the sample or container

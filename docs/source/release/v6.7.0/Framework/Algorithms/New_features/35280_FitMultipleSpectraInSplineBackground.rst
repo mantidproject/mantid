@@ -1,0 +1,1 @@
+- The :ref:`SplineBackground <algm-SplineBackground>` algorithm is now able to fit multiple spectra in a workspace instead of a single one

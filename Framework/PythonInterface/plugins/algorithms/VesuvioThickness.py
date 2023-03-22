@@ -12,7 +12,6 @@ import math
 
 
 class VesuvioThickness(PythonAlgorithm):
-
     _masses = None
     _amplitudes = None
     _transmission_guess = None
@@ -62,13 +61,17 @@ class VesuvioThickness(PythonAlgorithm):
 
         num_masses = len(self._masses)
         num_amplitudes = len(self._amplitudes)
+
+        if num_masses != num_amplitudes:
+            issues["Masses"] = "The number of masses: %d, " % num_masses + "is not equal to the number of amplitudes: %d" % num_amplitudes
+            issues["Amplitudes"] = (
+                "The number of masses: %d, " % num_masses + "is not equal to the number of amplitudes: %d" % num_amplitudes
+            )
+
         if num_masses == 0:
             issues["Masses"] = "Must have 1 or more Masses defined"
         if num_amplitudes == 0:
             issues["Amplitudes"] = "Must have 1 or more Amplitudes defined"
-
-        if num_masses != num_amplitudes:
-            issues["Masses"] = "The number of masses: %d, " % num_masses + "is not equal to the number of amplitudes: %d" % num_amplitudes
 
         return issues
 

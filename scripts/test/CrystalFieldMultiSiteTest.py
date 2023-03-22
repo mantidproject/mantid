@@ -188,6 +188,31 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertAlmostEqual(y[0], 0.050130, 6)
         self.assertAlmostEqual(y[1], 0.054428, 6)
 
+    def test_get_spectrum_xrange(self):
+        cfms = CrystalField.CrystalFieldMultiSite(
+            ["Ce"],
+            ["C2v"],
+            B20=0.035,
+            B40=-0.012,
+            B43=-0.027,
+            B60=-0.00012,
+            B63=0.0025,
+            B66=0.0068,
+            Temperatures=[4.0],
+            FWHM=[0.1],
+            ToleranceIntensity=0.001 * c_mbsr,
+        )
+
+        x, y = cfms.getSpectrum(x_range=(0, 3))
+        y = y / c_mbsr
+        self.assertAlmostEqual(y[0], 12.474954833572541, 6)
+        self.assertAlmostEqual(y[1], 11.435723018801308, 6)
+        self.assertAlmostEqual(y[2], 9.14934495705407, 6)
+        self.assertAlmostEqual(y[3], 6.862946934125062, 6)
+        self.assertAlmostEqual(y[4], 5.0846344775777395, 6)
+        self.assertAlmostEqual(y[15], 0.5854829967281244, 6)
+        self.assertAlmostEqual(y[16], 0.5180575611727711, 6)
+
     def test_get_spectrum_from_list_multi_spectra(self):
         cfms = CrystalField.CrystalFieldMultiSite(
             Ions=["Ce"],

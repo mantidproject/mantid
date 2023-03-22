@@ -19,7 +19,7 @@ inline PolarizationCorrectionType polarizationCorrectionTypeFromString(std::stri
     return PolarizationCorrectionType::None;
   if (correctionType == "ParameterFile")
     return PolarizationCorrectionType::ParameterFile;
-  if (correctionType == "Workspace")
+  if (correctionType == "Workspace" || correctionType == "FilePath")
     return PolarizationCorrectionType::Workspace;
 
   throw std::invalid_argument("Unexpected polarization correction type.");

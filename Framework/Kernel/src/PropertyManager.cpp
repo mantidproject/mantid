@@ -38,8 +38,7 @@ const std::string createKey(const std::string &name) {
 } // namespace
 
 const std::string PropertyManager::INVALID_VALUES_SUFFIX = "_invalid_values";
-/// Gets the correct log name for the matching invalid values log for a given
-/// log name
+/// Gets the correct log name for the matching invalid values log for a given log name
 std::string PropertyManager::getInvalidValuesFilterLogName(const std::string &logName) {
   return logName + PropertyManager::INVALID_VALUES_SUFFIX;
 }
@@ -50,6 +49,8 @@ std::string PropertyManager::getLogNameFromInvalidValuesFilter(const std::string
   }
   return retVal;
 }
+
+/// Determine if the log's name has a substring indicating it should not be filtered
 bool PropertyManager::isAnInvalidValuesFilterLog(const std::string &logName) {
   const auto ending = PropertyManager::INVALID_VALUES_SUFFIX;
   if (logName.length() >= ending.length()) {
@@ -186,8 +187,7 @@ void PropertyManager::splitByTime(std::vector<SplittingInterval> &splitter,
 //-----------------------------------------------------------------------------------------------
 /**
  * Filter the managed properties by the given boolean property mask. It replaces
- * all time
- * series properties with filtered time series properties
+ * all time series properties with filtered time series properties
  * @param filter :: A boolean time series to filter each property on
  * @param excludedFromFiltering :: A string list of properties that
  * will be excluded from filtering
@@ -208,6 +208,7 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
         break;
       std::unique_ptr<Property> filtered(nullptr);
       if (this->existsProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()))) {
+
         // add the filter to the passed in filters
         auto logFilter = std::make_unique<LogFilter>(filter);
         auto filterProp = getPointerToProperty(PropertyManager::getInvalidValuesFilterLogName(currentProp->name()));
@@ -217,12 +218,15 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
         logFilter->addFilter(*tspFilterProp);
 
         filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, *logFilter->filter());
-      } else {
+      } else if (filter.size() > 0) {
+        // attach the filter to the TimeSeriesProperty, thus creating  the FilteredTimeSeriesProperty<double>
         filtered = std::make_unique<FilteredTimeSeriesProperty<double>>(doubleSeries, filter);
       }
-      orderedProperty = filtered.get();
-      // Now replace in the map
-      this->m_properties[createKey(currentProp->name())] = std::move(filtered);
+      if (filtered) {
+        // Now replace in the map
+        orderedProperty = filtered.get();
+        this->m_properties[createKey(currentProp->name())] = std::move(filtered);
+      }
     }
   }
 }

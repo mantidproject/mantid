@@ -31,8 +31,8 @@ reported any issues to us. Please keep on reporting any problems you
 have, or crashes that occur on our `forum`_.
 
 Installation packages can be found on our `download page`_
-which now links to sourceforge to mirror our download files around the world. You can also
-access the source code on `GitHub release page`_.
+which now links to the assets on our `GitHub release page`_, where you can also
+access the source code for the release.
 
 Citation
 --------

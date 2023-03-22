@@ -202,7 +202,7 @@ class FindPeaksAutomaticTest(unittest.TestCase):
         y_values += background
 
         raw_ws = CreateWorkspace(DataX=x_values, DataY=y_values, OutputWorkspace="raw_ws", NSpec=2)
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "Spectrum number is not valid"):
             FindPeaksAutomatic(
                 InputWorkspace=raw_ws,
                 SpectrumNumber=3,
@@ -375,17 +375,12 @@ class FindPeaksAutomaticTest(unittest.TestCase):
             mock_fit.return_value = None, None, mock_table
 
             # chi2 cost
-            with self.assertRaises(ValueError) as chi2:
+            with self.assertRaisesRegex(ValueError, "Index = 0"):
                 self.alg_instance.find_good_peaks(self.x_values, [], 0.1, 5, False, self.data_ws, 5)
 
             # poisson cost
-            with self.assertRaises(ValueError) as poisson:
+            with self.assertRaisesRegex(ValueError, "Index = 1"):
                 self.alg_instance.find_good_peaks(self.x_values, [], 0.1, 5, True, self.data_ws, 5)
-
-            self.assertIn("Index = 0", chi2.exception.args)
-            self.assertNotIn("Index = 1", chi2.exception.args)
-            self.assertNotIn("Index = 0", poisson.exception.args)
-            self.assertIn("Index = 1", poisson.exception.args)
 
     def test_find_good_peaks_returns_correct_peaks(self):
         self.alg_instance._min_sigma = 1

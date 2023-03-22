@@ -1,0 +1,1 @@
+- Added a function to print eigenvectors for a CrystalField object in human readable form.

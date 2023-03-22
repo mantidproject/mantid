@@ -14,6 +14,7 @@ our custom window.
 # std imports
 
 import matplotlib
+from mpl_toolkits.axes_grid1.axes_divider import make_axes_area_auto_adjustable
 import numpy as np
 
 # local imports
@@ -250,7 +251,7 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
     # create a subplot of the appropriate number of dimensions
     # extend in number of columns if the number of plottables is not a square number
     workspaces_len = len(workspaces)
-    fig, axes, nrows, ncols = create_subplots(workspaces_len, fig=fig)
+    fig, axes, nrows, ncols, cbar_axis = create_subplots(workspaces_len, fig=fig, add_cbar_axis=True)
 
     plots = []
     row_idx, col_idx = 0, 0
@@ -284,7 +285,7 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
     fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
 
     axes = axes.ravel()
-    colorbar = fig.colorbar(pcm, ax=axes.tolist(), pad=0.06)
+    colorbar = fig.colorbar(pcm, cax=cbar_axis)
     add_colorbar_label(colorbar, axes)
 
     if fig.canvas.manager is not None:
@@ -358,6 +359,9 @@ def plot_surface(workspaces, fig=None):
 
         surface = ax.plot_surface(ws, cmap=ConfigService.getString("plots.images.Colormap"))
         ax.set_title(ws.name())
+        # Stops colour bar colliding with the plot. Also prevents the plot being pushed off the windows when resizing.
+        # "Top" direction is excluded since the title provides a buffer
+        make_axes_area_auto_adjustable(ax, pad=0, adjust_dirs=["left", "right", "bottom"])
         fig.colorbar(surface, ax=[ax])
         fig.show()
 
@@ -375,6 +379,7 @@ def plot_wireframe(workspaces, fig=None):
         else:
             fig, ax = plt.subplots(subplot_kw={"projection": "mantid3d"})
 
+        fig.set_layout_engine(layout="tight")
         ax.plot_wireframe(ws)
         ax.set_title(ws.name())
         fig.show()

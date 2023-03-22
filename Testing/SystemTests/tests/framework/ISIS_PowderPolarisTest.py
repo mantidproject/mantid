@@ -31,6 +31,7 @@ calibration_folder_name = os.path.join("calibration", inst_name.lower())
 calibration_map_rel_path = os.path.join("yaml_files", "polaris_system_test_mapping.yaml")
 spline_rel_path = os.path.join("17_1", "VanSplined_98532_cycle_16_3_silicon_all_spectra.cal.nxs")
 unsplined_van_rel_path = os.path.join("17_1", "Van_98532_cycle_16_3_silicon_all_spectra.cal.nxs")
+summed_empty_rel_path = os.path.join("17_1", "summed_empty_98531.nxs")
 
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
@@ -43,12 +44,13 @@ calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
 unsplined_van_path = os.path.join(calibration_dir, unsplined_van_rel_path)
+summed_empty_path = os.path.join(calibration_dir, summed_empty_rel_path)
 
 total_scattering_input_file = os.path.join(input_dir, "ISIS_Powder-POLARIS98533_TotalScatteringInput.nxs")
+total_scattering_input_file_per_det = os.path.join(input_dir, "ISIS_Powder-POLARIS98533_TotalScatteringInputPerDetector.nxs")
 
 
 class CreateVanadiumTest(systemtesting.MantidSystemTest):
-
     calibration_results = None
     existing_config = config["datasearch.directories"]
 
@@ -57,7 +59,7 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         setup_mantid_paths()
-        self.calibration_results = run_vanadium_calibration()
+        self.calibration_results = run_vanadium_calibration(False)
 
     def validate(self):
         splined_ws, unsplined_ws = self.calibration_results
@@ -74,13 +76,47 @@ class CreateVanadiumTest(systemtesting.MantidSystemTest):
         try:
             _try_delete(output_dir)
             _try_delete(spline_path)
+            _try_delete(unsplined_van_path)
+            _try_delete(summed_empty_path)
+        finally:
+            mantid.mtd.clear()
+            config["datasearch.directories"] = self.existing_config
+
+
+class CreateVanadiumPerDetectorTest(systemtesting.MantidSystemTest):
+    calibration_results = None
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        setup_mantid_paths()
+        self.calibration_results = run_vanadium_calibration(True)
+
+    def validate(self):
+        splined_ws, unsplined_ws = self.calibration_results
+        ws = splined_ws + unsplined_ws
+        self.assertEqual(ws.sample().getMaterial().name(), "V")
+        return (
+            unsplined_ws.name(),
+            "ISIS_Powder-POLARIS00098532_unsplined_per_det.nxs",
+            splined_ws.name(),
+            "ISIS_Powder-POLARIS00098532_splined_per_det.nxs",
+        )
+
+    def cleanup(self):
+        try:
+            _try_delete(output_dir)
+            _try_delete(spline_path)
+            _try_delete(unsplined_van_path)
+            _try_delete(summed_empty_path)
         finally:
             mantid.mtd.clear()
             config["datasearch.directories"] = self.existing_config
 
 
 class FocusTestNoAbsorption(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -124,7 +160,6 @@ class FocusTestNoAbsorption(systemtesting.MantidSystemTest):
 
 
 class FocusTestAbsorptionPaalmanPings(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -168,7 +203,6 @@ class FocusTestAbsorptionPaalmanPings(systemtesting.MantidSystemTest):
 
 
 class FocusTestAbsorptionMayers(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -213,7 +247,6 @@ class FocusTestAbsorptionMayers(systemtesting.MantidSystemTest):
 
 
 class FocusTestChopperMode(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -244,7 +277,6 @@ class FocusTestChopperMode(systemtesting.MantidSystemTest):
 
 
 class FocusTestRunTwice(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -271,8 +303,50 @@ class FocusTestRunTwice(systemtesting.MantidSystemTest):
             config["datasearch.directories"] = self.existing_config
 
 
-class TotalScatteringTest(systemtesting.MantidSystemTest):
+class FocusTestPerDetector(systemtesting.MantidSystemTest):
+    focus_results = None
+    existing_config = config["datasearch.directories"]
 
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        self.focus_results = run_focus_no_absorption(per_detector=True)
+
+    def validate(self):
+        # check output files as expected
+        def generate_error_message(expected_file, output_dir):
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
+
+        def assert_output_file_exists(directory, filename):
+            self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
+
+        user_output = os.path.join(output_dir, "17_1", "Test")
+        assert_output_file_exists(user_output, "POLARIS98533.nxs")
+        assert_output_file_exists(user_output, "POLARIS98533.gsas")
+        output_dat_dir = os.path.join(user_output, "dat_files")
+        for bankno in range(1, 6):
+            assert_output_file_exists(output_dat_dir, "POL98533-b_{}-TOF.dat".format(bankno))
+            assert_output_file_exists(output_dat_dir, "POL98533-b_{}-d.dat".format(bankno))
+
+        for ws in self.focus_results:
+            self.assertEqual(ws.sample().getMaterial().name(), "Si")
+        self.tolerance_is_rel_err = True
+        self.tolerance = 1e-5
+        return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusPerDet.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config["datasearch.directories"] = self.existing_config
+
+
+class TotalScatteringTest(systemtesting.MantidSystemTest):
     pdf_output = None
 
     def runTest(self):
@@ -291,7 +365,6 @@ class TotalScatteringTest(systemtesting.MantidSystemTest):
 
 
 class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
-
     pdf_output = None
 
     def runTest(self):
@@ -308,8 +381,24 @@ class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.5806, places=3)
 
 
-class TotalScatteringPDFRebinTest(systemtesting.MantidSystemTest):
+class TotalScatteringMergedPerDetTest(systemtesting.MantidSystemTest):
+    pdf_output = None
 
+    def runTest(self):
+        setup_mantid_paths()
+        # Load Focused ws
+        mantid.LoadNexus(Filename=total_scattering_input_file_per_det, OutputWorkspace="98533-ResultTOF")
+        q_lims = np.array([2.5, 3, 4, 6, 7, 3.5, 5, 7, 11, 40]).reshape((2, 5))
+        self.pdf_output = run_total_scattering("98533", True, q_lims=q_lims, per_detector=True)
+
+    def validate(self):
+        # Whilst total scattering is in development, the validation will avoid using reference files as they will have
+        # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
+        idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.531, places=3)
+
+
+class TotalScatteringPDFRebinTest(systemtesting.MantidSystemTest):
     pdf_output = None
 
     def runTest(self):
@@ -327,7 +416,6 @@ class TotalScatteringPDFRebinTest(systemtesting.MantidSystemTest):
 
 
 class TotalScatteringMergedRebinTest(systemtesting.MantidSystemTest):
-
     pdf_output = None
 
     def runTest(self):
@@ -345,7 +433,6 @@ class TotalScatteringMergedRebinTest(systemtesting.MantidSystemTest):
 
 
 class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
-
     pdf_output = None
 
     def runTest(self):
@@ -363,7 +450,6 @@ class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
 
 
 class TotalScatteringFourierFilterTest(systemtesting.MantidSystemTest):
-
     pdf_output = None
     r_min = 1.0
 
@@ -387,7 +473,6 @@ class TotalScatteringFourierFilterTest(systemtesting.MantidSystemTest):
 
 
 class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
-
     pdf_output = None
 
     def runTest(self):
@@ -405,7 +490,15 @@ class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
 
 
 def run_total_scattering(
-    run_number, merge_banks, q_lims=None, delta_q=None, delta_r=None, pdf_type="G(r)", freq_params=None, lorch_filter=True
+    run_number,
+    merge_banks,
+    q_lims=None,
+    delta_q=None,
+    delta_r=None,
+    pdf_type="G(r)",
+    freq_params=None,
+    lorch_filter=True,
+    per_detector=False,
 ):
     pdf_inst_obj = setup_inst_object(mode="PDF")
     return pdf_inst_obj.create_total_scattering_pdf(
@@ -417,6 +510,7 @@ def run_total_scattering(
         pdf_type=pdf_type,
         lorch_filter=lorch_filter,
         freq_params=freq_params,
+        per_detector_vanadium=per_detector,
     )
 
 
@@ -430,13 +524,15 @@ def _gen_required_files():
     return input_files
 
 
-def run_vanadium_calibration():
+def run_vanadium_calibration(per_detector):
     vanadium_run = 98532  # Choose arbitrary run in the cycle 17_1
 
     pdf_inst_obj = setup_inst_object(mode="PDF")
 
     # Run create vanadium twice to ensure we get two different output splines / files
-    pdf_inst_obj.create_vanadium(first_cycle_run_no=vanadium_run, do_absorb_corrections=True, multiple_scattering=False)
+    pdf_inst_obj.create_vanadium(
+        first_cycle_run_no=vanadium_run, do_absorb_corrections=True, multiple_scattering=False, per_detector_vanadium=per_detector
+    )
 
     # Check the spline looks good and was saved
     if not os.path.exists(spline_path):
@@ -447,13 +543,16 @@ def run_vanadium_calibration():
     return splined_ws, unsplined_ws
 
 
-def run_focus_no_absorption():
+def run_focus_no_absorption(per_detector=False):
     run_number = 98533
     sample_empty = 98532  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # Set it to 50% scale
 
     # Copy the required splined file into place first (instead of relying on generated one)
-    splined_file_name = "POLARIS00098532_splined.nxs"
+    if per_detector:
+        splined_file_name = "POLARIS00098532_splined_per_det.nxs"
+    else:
+        splined_file_name = "POLARIS00098532_splined.nxs"
 
     original_splined_path = os.path.join(input_dir, splined_file_name)
     shutil.copy(original_splined_path, spline_path)
@@ -467,6 +566,7 @@ def run_focus_no_absorption():
         sample_empty=sample_empty,
         sample_empty_scale=sample_empty_scale,
         van_normalisation_method="Relative",
+        per_detector_vanadium=per_detector,
     )
 
 

@@ -64,7 +64,10 @@ class SampleShapePlot:
     def create_plot(self, workspace_name, figure=None, test=None):
         self.workspace_name = workspace_name
         workspace = ADS.retrieve(workspace_name)
-        if not does_workspace_have_valid_sample_shape(workspace) and not workspace.sample().hasEnvironment():
+        sample_mesh = get_valid_sample_mesh_from_workspace(workspace)
+        container_mesh = get_valid_container_mesh_from_workspace(workspace)
+        component_meshes = get_valid_component_meshes_from_workspace(workspace)
+        if sample_mesh is None and container_mesh is None and not component_meshes:
             raise Exception("Workspace must have attached Sample Shape or Environment")
         if figure:
             axes = figure.gca()
@@ -72,12 +75,14 @@ class SampleShapePlot:
             self.plot_visible = True
             figure, axes = plt.subplots(subplot_kw={"projection": "mantid3d", "proj_type": "ortho"})
 
-        sample_plotted, container_plotted, components_plotted = try_to_plot_all_sample_shapes(workspace, figure)
+        sample_plotted, container_plotted, components_plotted = try_to_plot_all_sample_shapes(
+            figure, sample_mesh, container_mesh, component_meshes
+        )
         if int(sample_plotted) + int(container_plotted) + int(components_plotted) == 0:
             raise Exception("Workspace has no valid Sample, Container or Component Shapes to plot")
 
         add_title(sample_plotted, container_plotted, components_plotted, axes, workspace_name)
-        set_axes_to_largest_mesh(axes, workspace)
+        set_axes_to_largest_mesh(axes, sample_mesh, container_mesh, component_meshes)
         self.beam_direction = set_perspective(axes, workspace=workspace)
         set_axes_labels(axes)
         add_beam_arrow(axes, workspace)
@@ -176,20 +181,14 @@ def plot_sample_container_and_components(workspace_name, test=None):
     return new_plot.create_plot(workspace_name, test=test)
 
 
-def try_to_plot_all_sample_shapes(workspace, figure):
+def try_to_plot_all_sample_shapes(figure, sample_mesh, container_mesh, component_meshes):
     container_plotted = components_plotted = False
-    sample_plotted = plot_sample_only(workspace, figure)
-    if workspace.sample().hasEnvironment():
-        container_plotted = plot_container(workspace, figure)
-        number_of_components = workspace.sample().getEnvironment().nelements()
-        if number_of_components > 1:  # the first component is the container
-            components_plotted = plot_components(workspace, figure)
+    sample_plotted = plot_sample_only(figure, sample_mesh)
+    if container_mesh is not None:
+        container_plotted = plot_container(figure, container_mesh)
+    if component_meshes:
+        components_plotted = plot_components(figure, component_meshes)
     return sample_plotted, container_plotted, components_plotted
-
-
-def is_shape_valid(shape):
-    if is_mesh_not_empty(shape.getMesh()):
-        return True
 
 
 def is_mesh_not_empty(mesh):
@@ -197,18 +196,12 @@ def is_mesh_not_empty(mesh):
         return True
 
 
-def get_valid_sample_shape_from_workspace(workspace):
+def get_valid_sample_mesh_from_workspace(workspace):
     sample_shape = get_sample_shape_from_workspace(workspace)
-    if is_shape_valid(sample_shape):
-        return sample_shape
-
-
-def does_workspace_have_valid_sample_shape(workspace):
-    if not workspace.sample().hasShape():
-        return False
-    sample_shape = get_sample_shape_from_workspace(workspace)
-    if is_shape_valid(sample_shape):
-        return True
+    if sample_shape:
+        mesh = sample_shape.getMesh()
+        if is_mesh_not_empty(mesh):
+            return mesh
 
 
 def get_sample_shape_from_workspace(workspace_with_sample):
@@ -216,10 +209,12 @@ def get_sample_shape_from_workspace(workspace_with_sample):
         return workspace_with_sample.sample().getShape()
 
 
-def get_valid_container_shape_from_workspace(workspace):
-    container_shape = get_container_shape_from_workspace(workspace)
-    if is_shape_valid(container_shape):
-        return container_shape
+def get_valid_container_mesh_from_workspace(workspace):
+    if workspace.sample().hasEnvironment():
+        container_shape = get_container_shape_from_workspace(workspace)
+        mesh = container_shape.getMesh()
+        if is_mesh_not_empty(mesh):
+            return mesh
 
 
 def get_container_shape_from_workspace(workspace_with_container):
@@ -227,10 +222,16 @@ def get_container_shape_from_workspace(workspace_with_container):
         return workspace_with_container.sample().getEnvironment().getContainer().getShape()
 
 
-def get_valid_component_shape_from_workspace(workspace, component_index):
-    component_shape = get_component_shape_from_workspace(workspace, component_index)
-    if is_shape_valid(component_shape):
-        return component_shape
+def get_valid_component_meshes_from_workspace(workspace):
+    component_meshes = []
+    if workspace.sample().hasEnvironment():
+        number_of_components = workspace.sample().getEnvironment().nelements()
+        for component_index in range(1, number_of_components):
+            component_shape = get_component_shape_from_workspace(workspace, component_index)
+            component_mesh = component_shape.getMesh()
+            if is_mesh_not_empty(component_mesh):
+                component_meshes.append(component_mesh)
+    return component_meshes
 
 
 def get_component_shape_from_workspace(workspace_with_components, component_index):
@@ -238,12 +239,9 @@ def get_component_shape_from_workspace(workspace_with_components, component_inde
         return workspace_with_components.sample().getEnvironment().getComponent(component_index)
 
 
-def plot_sample_only(workspace, figure):
+def plot_sample_only(figure, mesh):
     axes = figure.gca()
-    # get shape and mesh vertices
-    shape = get_valid_sample_shape_from_workspace(workspace)
-    if shape:
-        mesh = shape.getMesh()
+    if mesh is not None:
         if len(mesh) < 13:
             face_colors = [
                 "purple",
@@ -269,22 +267,17 @@ def plot_sample_only(workspace, figure):
         return False
 
 
-def plot_container(workspace, figure):
+def plot_container(figure, container_mesh):
     axes = figure.gca()
-    container_shape = get_valid_container_shape_from_workspace(workspace)
-    container_mesh = container_shape.getMesh()
     mesh_polygon = Poly3DCollection(container_mesh, edgecolors="black", alpha=0.1, linewidths=0.05, zorder=0.5)
     mesh_polygon.set_facecolor((0, 1, 0, 0.5))
     axes.add_collection3d(mesh_polygon)
     return True
 
 
-def plot_components(workspace, figure):
+def plot_components(figure, component_meshes):
     axes = figure.gca()
-    number_of_components = workspace.sample().getEnvironment().nelements()
-    for component_index in range(1, number_of_components):
-        component_shape = get_valid_component_shape_from_workspace(workspace, component_index)
-        component_mesh = component_shape.getMesh()
+    for component_mesh in component_meshes:
         mesh_polygon_loop = Poly3DCollection(component_mesh, edgecolors="black", alpha=0.1, linewidths=0.05, zorder=0.5)
         mesh_polygon_loop.set_facecolor((0, 0, 1, 0.5))
         axes.add_collection3d(mesh_polygon_loop)
@@ -361,29 +354,23 @@ def call_set_mesh_axes_equal(axes, mesh):
     axes.set_mesh_axes_equal(mesh)
 
 
-def set_axes_to_largest_mesh(axes, workspace):
-    overall_limits = overall_limits_for_all_meshes(workspace)
+def set_axes_to_largest_mesh(axes, sample_mesh, container_mesh=None, component_meshes=[]):
+    overall_limits = overall_limits_for_all_meshes(sample_mesh, container_mesh, component_meshes)
     call_set_mesh_axes_equal(axes, np.array(overall_limits))
     axes.set_box_aspect((1, 1, 1))  # when upgraded to matplotlib 3.6 use axes.set_aspect('equal')
 
 
-def overall_limits_for_all_meshes(workspace, include_components=True):
+def overall_limits_for_all_meshes(sample_mesh, container_mesh=None, component_meshes=[]):
     overall_limits = None
-    sample_shape = get_valid_sample_shape_from_workspace(workspace)
-    if sample_shape:
-        overall_limits = overall_limits_for_every_axis(sample_shape.getMesh())
-    if workspace.sample():
-        if include_components and workspace.sample().hasEnvironment():
-            environment = workspace.sample().getEnvironment()
-            number_of_components = environment.nelements()
-            for component_index in range(number_of_components):
-                if component_index == 0:  # Container
-                    loop_component_mesh = get_valid_container_shape_from_workspace(workspace).getMesh()
-                else:
-                    loop_component_mesh = get_valid_component_shape_from_workspace(workspace, component_index).getMesh()
-                current_mesh_limits = overall_limits_for_every_axis(loop_component_mesh)
-                overall_limits = greater_limits(current_mesh_limits, overall_limits)
-        return overall_limits
+    if sample_mesh is not None:
+        overall_limits = overall_limits_for_every_axis(sample_mesh)
+    if container_mesh is not None:
+        current_mesh_limits = overall_limits_for_every_axis(container_mesh)
+        overall_limits = greater_limits(current_mesh_limits, overall_limits)
+    for component_mesh in component_meshes:
+        current_mesh_limits = overall_limits_for_every_axis(component_mesh)
+        overall_limits = greater_limits(current_mesh_limits, overall_limits)
+    return overall_limits
 
 
 def overall_limits_for_every_axis(mesh):

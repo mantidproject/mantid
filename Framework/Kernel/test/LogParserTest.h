@@ -54,7 +54,7 @@ public:
     const LogParser lp(icp_log.get());
     const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_good.path(), "good"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    auto *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
     // time 1
@@ -99,7 +99,7 @@ public:
     const LogParser lp(icp_log.get());
     const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_late.path(), "late"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    auto *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
 
@@ -134,7 +134,7 @@ public:
     const LogParser lp(icp_log.get());
     const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_early.path(), "early"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    auto *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
 
@@ -168,7 +168,7 @@ public:
     const LogParser lp(icp_log.get());
     const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_single.path(), "single"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    auto *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
 
@@ -189,7 +189,7 @@ public:
     const LogParser lp(icp_log.get());
     const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_str.path(), "str"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<std::string> *tp1 = dynamic_cast<TimeSeriesProperty<std::string> *>(p1.get());
+    auto *tp1 = dynamic_cast<TimeSeriesProperty<std::string> *>(p1.get());
     std::map<DateAndTime, std::string> vmap = tp1->valueAsMap();
     std::map<DateAndTime, std::string>::iterator v = vmap.begin();
     // time 1
@@ -315,7 +315,7 @@ public:
     const LogParser lp(icp_log.get());
     const auto &p1 = std::unique_ptr<Property>(lp.createLogProperty(log_num_good.path(), "good"));
     TS_ASSERT(p1);
-    TimeSeriesProperty<double> *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
+    auto *tp1 = dynamic_cast<TimeSeriesProperty<double> *>(p1.get());
     std::map<DateAndTime, double> vmap = tp1->valueAsMap();
     std::map<DateAndTime, double>::iterator v = vmap.begin();
 

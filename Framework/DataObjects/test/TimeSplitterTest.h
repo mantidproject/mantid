@@ -6,22 +6,27 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <cxxtest/TestSuite.h>
-
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/TimeSplitter.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeROI.h"
+#include <cxxtest/TestSuite.h>
 
+using Mantid::API::EventType;
+using Mantid::API::IEventList;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::TableRow;
+using Mantid::DataObjects::EventList;
+using Mantid::DataObjects::EventSortType;
 using Mantid::DataObjects::TimeSplitter;
 using Mantid::Kernel::SplittingInterval;
 using Mantid::Kernel::TimeROI;
 using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 const DateAndTime ONE("2023-01-01T11:00:00");
@@ -29,9 +34,108 @@ const DateAndTime TWO("2023-01-01T12:00:00");
 const DateAndTime THREE("2023-01-01T13:00:00");
 const DateAndTime FOUR("2023-01-01T14:00:00");
 const DateAndTime FIVE("2023-01-01T15:00:00");
+const DateAndTime SIX("2023-01-01T16:00:00");
+
 } // namespace
 
 class TimeSplitterTest : public CxxTest::TestSuite {
+private:
+  /**
+   * Helper function to generate a list of events.
+   *
+   * `eventsPerPulse` are spaced equally throughout `pulsePeriod`.
+   *
+   * The starting time is const DateAndTime TWO("2023-01-01T12:00:00")
+   *
+   * @param pulsePeriod : time span of a pulse, in seconds
+   * @param nPulses : number of consecutive pulses
+   * @param eventsPerPulse : number of events
+   * @param eventType : one of enum EventType {TOF, WEIGHTED, WEIGHTED_NOTIME}
+   */
+  EventList generateEvents(const DateAndTime &startTime, double pulsePeriod, size_t nPulses, size_t eventsPerPulse,
+                           EventType eventType = EventType::TOF) {
+    UNUSED_ARG(eventsPerPulse);
+    static constexpr int64_t nanosecInsec{1000000000};
+    static constexpr double microsecInsec{1000000.0};
+    int64_t pulsePeriodInNanosec = static_cast<int64_t>(pulsePeriod * nanosecInsec);
+    // time between consecutive events, in microseconds.
+    double eventPeriod = (pulsePeriod * microsecInsec) / static_cast<double>(eventsPerPulse);
+    // loop over each pulse
+    auto events = EventList();
+    DateAndTime currentPulseTime{startTime};
+    for (size_t iPulse = 0; iPulse < nPulses; iPulse++) {
+      // instantiate each event in the current pulse
+      double tof{0.0};
+      for (size_t iEvent = 0; iEvent < eventsPerPulse; iEvent++) {
+        auto event = TofEvent(tof, currentPulseTime);
+        events.addEventQuickly(event);
+        tof += eventPeriod;
+      }
+      currentPulseTime += pulsePeriodInNanosec;
+    }
+    events.switchTo(eventType);
+    return events;
+  }
+
+  /// Instantiate an EventList for every input destination index
+  std::map<int, EventList *> instantiatePartials(const std::vector<int> &destinations) {
+    std::map<int, EventList *> partials;
+    for (int destination : destinations) {
+      if (partials.find(destination) != partials.cend())
+        throw std::runtime_error("cannot have duplicate destinations");
+      partials[destination] = new EventList();
+    }
+    return partials;
+  }
+
+  /**
+   * Helper function to generate a TimeSplitter object from a vector of times and
+   * destination indexes.
+   *
+   * The size of vector `times` must be one plus the size of vector `indexes`. Thus,
+   * any time `t` such that times[i] <= t < times[i+1] will be associated to
+   * destination index `indexes[i]`
+   *
+   * Destination index '-1` is allowed.
+   *
+   * @param times : vector of times
+   * @param indexes : vector of destination indexes
+   */
+  TimeSplitter generateSplitter(std::vector<DateAndTime> &times, std::vector<int> &indexes) {
+    assert(times.size() == 1 + indexes.size());
+    auto splitter = TimeSplitter();
+    for (size_t i = 0; i < indexes.size(); i++)
+      splitter.addROI(times[i], times[i + 1], indexes[i]);
+    return splitter;
+  }
+
+  /**
+   * Helper function to generate a TimeSplitter object from a vector of interval times,
+   * destination indexes, and a starting DateAndTime.
+   *
+   * The size of vector `intervals` must be the same as `destinations`.
+   *
+   * Destination index '-1` is allowed.
+   *
+   * @param intervals : time intervals (in seconds) between consecutive DateAndTime boundaries
+   * @param destinations : vector of destination indexes
+   * @para startTime: first DateAndTime boundary
+   */
+  TimeSplitter generateSplitter(const DateAndTime &startTime, const std::vector<double> &intervals,
+                                const std::vector<int> &destinations) {
+    TimeSplitter splitter;
+    assert(destinations.size() == intervals.size());
+    DateAndTime start(startTime);
+    DateAndTime stop(startTime);
+    ;
+    for (size_t i = 0; i < intervals.size(); i++) {
+      stop += intervals[i]; // invokes DateAndTime &operator+=(const double sec);
+      splitter.addROI(start, stop, destinations[i]);
+      start = stop;
+    }
+    return splitter;
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -417,5 +521,123 @@ public:
     TS_ASSERT(referenceSplitter.valueAtTime(time4) == workspaceDerivedSplitter.valueAtTime(time4));
     TS_ASSERT(referenceSplitter.valueAtTime(time5) == workspaceDerivedSplitter.valueAtTime(time5));
     TS_ASSERT(referenceSplitter.valueAtTime(time6) == workspaceDerivedSplitter.valueAtTime(time6));
+  }
+  // Verify keys in TimeSplitter::m_roi_map are sorted
+  void test_keysSorted() {
+    TimeSplitter splitter;
+    splitter.addROI(FIVE, SIX, 0);
+    splitter.addROI(THREE, FOUR, 0);
+    splitter.addROI(ONE, TWO, 0);
+    auto iter = splitter.getSplittersMap().begin();
+    TS_ASSERT_EQUALS(iter->first, ONE);
+    TS_ASSERT_EQUALS(iter->second, 0);
+    iter++;
+    TS_ASSERT_EQUALS(iter->first, TWO);
+    TS_ASSERT_EQUALS(iter->second, TimeSplitter::NO_TARGET);
+    iter++;
+    TS_ASSERT_EQUALS(iter->first, THREE);
+    TS_ASSERT_EQUALS(iter->second, 0);
+    iter++;
+    TS_ASSERT_EQUALS(iter->first, FOUR);
+    TS_ASSERT_EQUALS(iter->second, TimeSplitter::NO_TARGET);
+    iter++;
+    TS_ASSERT_EQUALS(iter->first, FIVE);
+    TS_ASSERT_EQUALS(iter->second, 0);
+    iter++;
+    TS_ASSERT_EQUALS(iter->first, SIX);
+    TS_ASSERT_EQUALS(iter->second, TimeSplitter::NO_TARGET);
+    iter++;
+  }
+
+  void test_splitEventList() {
+    DateAndTime startTime{TWO};
+    // return the times associated to each event in the list as a string
+    // factor is a dimensionless quantity, and shift is a time in micro-seconds
+    auto timesToStr = [](const EventList *partial, const EventSortType &timeType, const double &factor = 0.0,
+                         const double &shift = 0.0) {
+      std::vector<DateAndTime> dates;
+      switch (timeType) {
+      case (EventSortType::PULSETIME_SORT):
+        dates = partial->getPulseTimes();
+        break;
+      case (EventSortType::PULSETIMETOF_SORT):
+        dates = partial->getPulseTOFTimes();
+        break;
+      case (EventSortType::TIMEATSAMPLE_SORT):
+        // method getPulseTOFTimesAtSample requires argument `shift` in micro-seconds
+        dates = partial->getPulseTOFTimesAtSample(factor, shift);
+        break;
+      default:
+        throw std::runtime_error("timesToStr: Unhandled event sorting type");
+      }
+      std::vector<std::string> obtained;
+      std::transform(dates.cbegin(), dates.cend(), std::back_inserter(obtained),
+                     [](const DateAndTime &date) { return date.toSimpleString(); });
+      return obtained;
+    };
+    // Generate the events. Six events, the first at "2023-Jan-01 12:00:00" and then every 30 seconds. The last
+    // event happening at "2023-Jan-01 12:02:30".
+    double pulsePeriod{60.}; // time between consecutive pulses, in seconds
+    size_t nPulses{3};
+    size_t eventsPerPulse{2};
+    EventType eventType = EventType::TOF;
+    EventList events = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse, eventType);
+    // Generate a splitter with three intervals:
+    // interval ["2023-Jan-01 12:00:00", "2023-Jan-01 12:02:00") with destination 0
+    // interval ["2023-Jan-01 12:02:00", "2023-Jan-01 12:03:00") with destination 1
+    // interval ["2023-Jan-01 12:03:00", "2023-Jan-01 12:04:00") with destination NO_TARGET
+    std::vector<double> intervals{120.0, 60.0, 60.0};
+    const std::vector<int> destinations{0, 1, TimeSplitter::NO_TARGET};
+    TimeSplitter splitter = this->generateSplitter(startTime, intervals, destinations);
+    // Generate the output partial event lists
+    std::map<int, EventList *> partials = this->instantiatePartials(destinations);
+    //
+    /// Split events according to pulse time
+    splitter.splitEventList(events, partials);
+    // Check the pulse times of the events landing in the partials
+    std::vector<std::string> expected{"2023-Jan-01 12:00:00", "2023-Jan-01 12:00:00", "2023-Jan-01 12:01:00",
+                                      "2023-Jan-01 12:01:00"};
+    TS_ASSERT(timesToStr(partials[0], EventSortType::PULSETIME_SORT) == expected);
+    expected = {"2023-Jan-01 12:02:00", "2023-Jan-01 12:02:00"};
+    TS_ASSERT(timesToStr(partials[1], EventSortType::PULSETIME_SORT) == expected);
+    expected = {};
+    TS_ASSERT(timesToStr(partials[TimeSplitter::NO_TARGET], EventSortType::PULSETIME_SORT) == expected);
+    //
+    /// Split events according to pulse time + TOF
+    bool pulseTof{true};
+    intervals = {90.0, 90.0, 60.0};
+    splitter = this->generateSplitter(startTime, intervals, destinations);
+    splitter.splitEventList(events, partials, pulseTof);
+    expected = {"2023-Jan-01 12:00:00", "2023-Jan-01 12:00:30", "2023-Jan-01 12:01:00"};
+    TS_ASSERT(timesToStr(partials[0], EventSortType::PULSETIMETOF_SORT) == expected);
+    expected = {"2023-Jan-01 12:01:30", "2023-Jan-01 12:02:00", "2023-Jan-01 12:02:30"};
+    TS_ASSERT(timesToStr(partials[1], EventSortType::PULSETIMETOF_SORT) == expected);
+    expected = {};
+    TS_ASSERT(timesToStr(partials[TimeSplitter::NO_TARGET], EventSortType::PULSETIMETOF_SORT) == expected);
+    //
+    /// Split events according to pulse time + shifted TOF
+    bool tofCorrect{true};
+    double factor{1.0};
+    double shift{30.0 * 1.0E6}; // add 30 seconds to each TOF, in units of micro-seconds
+    splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
+    expected = {"2023-Jan-01 12:00:30", "2023-Jan-01 12:01:00"};
+    TS_ASSERT(timesToStr(partials[0], EventSortType::TIMEATSAMPLE_SORT, factor, shift) == expected);
+    expected = {"2023-Jan-01 12:01:30", "2023-Jan-01 12:02:00", "2023-Jan-01 12:02:30"};
+    TS_ASSERT(timesToStr(partials[1], EventSortType::TIMEATSAMPLE_SORT, factor, shift) == expected);
+    expected = {"2023-Jan-01 12:03:00"};
+    TS_ASSERT(timesToStr(partials[TimeSplitter::NO_TARGET], EventSortType::TIMEATSAMPLE_SORT, factor, shift) ==
+              expected);
+    //
+    /// Split events according to pulse time + contracted TOF
+    factor = 0.5; // shrink TOF by half
+    shift = 0.0;
+    splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
+    expected = {"2023-Jan-01 12:00:00", "2023-Jan-01 12:00:15", "2023-Jan-01 12:01:00", "2023-Jan-01 12:01:15"};
+    TS_ASSERT(timesToStr(partials[0], EventSortType::TIMEATSAMPLE_SORT, factor, shift) == expected);
+    expected = {"2023-Jan-01 12:02:00", "2023-Jan-01 12:02:15"};
+    TS_ASSERT(timesToStr(partials[1], EventSortType::TIMEATSAMPLE_SORT, factor, shift) == expected);
+    expected = {};
+    TS_ASSERT(timesToStr(partials[TimeSplitter::NO_TARGET], EventSortType::TIMEATSAMPLE_SORT, factor, shift) ==
+              expected);
   }
 };

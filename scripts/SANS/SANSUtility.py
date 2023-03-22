@@ -476,7 +476,6 @@ def sliceParser(str_to_parser):  # noqa: C901
 
         vallist = []
         while True:
-
             next_value = curr_value + step
 
             if next_value >= stop:
@@ -1276,7 +1275,6 @@ def transfer_special_sample_logs(from_ws, to_ws):
     # Populate the time series
     for time_series_name in time_series_names:
         if run_from.hasProperty(time_series_name) and run_to.hasProperty(time_series_name):
-
             times = run_from.getProperty(time_series_name).times
             values = run_from.getProperty(time_series_name).value
 
@@ -1356,6 +1354,9 @@ class CummulativeTimeSeriesPropertyAdder(object):
                 # Get the values for rhs
                 property_rhs = run_rhs.getProperty(element)
                 self._original_single_valued_rhs[element] = property_rhs.value
+            elif element == "gd_prtn_chrg":
+                self._original_single_valued_lhs[element] = run_lhs.getProtonCharge()
+                self._original_single_valued_rhs[element] = run_rhs.getProtonCharge()
 
         log_name_start_time = "start_time"
         if run_lhs.hasProperty(log_name_start_time) and run_rhs.hasProperty(log_name_start_time):
@@ -1396,7 +1397,9 @@ class CummulativeTimeSeriesPropertyAdder(object):
         for element in self._single_valued:
             if run.hasProperty(element):
                 type_converter = self._type_map[element]
-                new_value = type_converter(self._original_single_valued_lhs[element] + self._original_single_valued_rhs[element])
+                new_value = type_converter(self._original_single_valued_lhs[element]) + type_converter(
+                    self._original_single_valued_rhs[element]
+                )
                 alg_log.setProperty("Workspace", workspace)
                 alg_log.setProperty("LogName", element)
                 alg_log.setProperty("LogText", str(new_value))
@@ -2213,6 +2216,7 @@ def rename_workspace_correctly(instrument_name, reduced_type, final_name, worksp
 ######################### Start of Deprecated Code ############################
 ###############################################################################
 
+
 # Parse a log file containing run information and return the detector positions
 @deprecated
 def parseLogFile(logfile):
@@ -2402,7 +2406,6 @@ def StripEndZeroes(workspace, flag_value=0.0):
 
 @deprecated
 class Orientation(object):
-
     Horizontal = 1
     Vertical = 2
     Rotated = 3

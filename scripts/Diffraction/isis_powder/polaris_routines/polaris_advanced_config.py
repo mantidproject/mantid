@@ -26,10 +26,7 @@ file_names = {
     "grouping_file_name": "Master_copy_of_grouping_file_with_essential_masks.cal",
 }
 
-script_params = {
-    "raw_data_cropping_values": (750, 20000),
-    "spline_coefficient": 100,
-}
+script_params = {"raw_data_cropping_values": (750, 20000), "spline_coefficient": 100, "spline_coeff_per_detector": 10}
 
 pdf_focused_cropping_values = [
     (700, 30000),  # Bank 1
@@ -66,7 +63,7 @@ vanadium_cropping_values = [
 ]
 
 sample_empty_scale = 1.0
-
+# fmt: off
 variable_help = {
     "file_names": {
         "vanadium_peaks_masking_file": "Specifies the name of the of the file containing the positions of the vanadium "
@@ -76,7 +73,9 @@ variable_help = {
     "script_params": {
         "raw_data_cropping_values": "This specifies the valid range in TOF of the raw data. This is applied before any "
         "processing takes place to remove negative counts at very low TOF values",
-        "spline_coefficient": "The coefficient to use when calculating the vanadium splines during the calibration " "step.",
+        "spline_coefficient": "The coefficient to use when calculating the vanadium splines during the calibration step.",
+        "spline_coefficient_per_detector":
+            "The coefficient to use when calculating the vanadium splines during the per detector calibration ",
     },
     "focused_cropping_values": "These values are used to determine the TOF range to crop a focused (not Vanadium Cal.) "
     "workspace to. These are applied on a bank by bank basis. They must be less than "
@@ -86,7 +85,7 @@ variable_help = {
     " the range specified in raw_data_cropping_values and larger than the values specified"
     " in focused_cropping_values.",
 }
-
+# fmt: on
 variables = {
     # Used by the script to find the dictionaries in advanced config.
     "file_names_dict": file_names,

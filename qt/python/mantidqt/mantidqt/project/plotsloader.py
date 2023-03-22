@@ -97,7 +97,7 @@ class PlotsLoader(object):
             for cargs_dict in sublist:
                 if "norm" in cargs_dict and type(cargs_dict["norm"]) is dict:
                     cargs_dict["norm"] = self.restore_normalise_obj_from_dict(cargs_dict["norm"])
-        fig, axes_matrix, _, _ = create_subplots(len(creation_args))
+        fig, axes_matrix, _, _, _ = create_subplots(len(creation_args))
         axes_list = axes_matrix.flatten().tolist()
         for ax, cargs_list in zip(axes_list, creation_args):
             creation_args_copy = copy.deepcopy(cargs_list)
@@ -331,7 +331,7 @@ class PlotsLoader(object):
             self.update_axis(ax.yaxis, properties["yAxisProperties"])
 
         if "spineWidths" in properties:
-            for (spine, width) in properties["spineWidths"].items():
+            for spine, width in properties["spineWidths"].items():
                 ax.spines[spine].set_linewidth(width)
 
     def update_axis(self, axis_, properties):

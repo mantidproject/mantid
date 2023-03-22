@@ -299,8 +299,9 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
         Tests validation for no chemical formula for can when a can WS is provided.
         """
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Must provide a chemical formula or cross sections when providing a can workspace.",
             FlatPlatePaalmanPingsCorrection,
             OutputWorkspace=self._corrections_ws_name,
             SampleWorkspace=self._sample_ws,

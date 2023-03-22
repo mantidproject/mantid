@@ -59,8 +59,9 @@ class Osiris(AbstractInst):
             van_norm=self._inst_settings.van_norm,
             subtract_empty=self._inst_settings.subtract_empty_can,
         )
+
         if self._inst_settings.merge_drange:
-            focussed_runs = [osiris_algs._merge_dspacing_runs(self._inst_settings.run_number, self._drange_sets, focussed_runs)]
+            focussed_runs = osiris_algs.merge_dspacing_runs(focussed_runs, self._drange_sets, self._inst_settings.run_number)
 
         return self._output_focused_ws(focussed_runs, run_details)
 

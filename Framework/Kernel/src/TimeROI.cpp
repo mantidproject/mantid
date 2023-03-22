@@ -378,8 +378,13 @@ void TimeROI::replaceROI(const TimeSeriesProperty<bool> *roi) {
 
     // if last value was use, add a new value at the end that is the full duration of the log out
     if (roi->lastValue() == ROI_USE) {
-      const auto duration = roi->lastTime() - roi->firstTime();
-      m_roi.push_back(roi->lastTime() + duration);
+      if (roi->firstTime() == roi->lastTime()) {
+        throw std::runtime_error(
+            "Cannot guess ending value from a TimeSeriesProperty that contains only a single time");
+      } else {
+        const auto duration = roi->lastTime() - roi->firstTime();
+        m_roi.push_back(roi->lastTime() + duration);
+      }
     }
   }
 
@@ -473,6 +478,7 @@ const std::vector<SplittingInterval> TimeROI::toSplitters() const {
 }
 
 bool TimeROI::operator==(const TimeROI &other) const { return this->m_roi == other.m_roi; }
+bool TimeROI::operator!=(const TimeROI &other) const { return this->m_roi != other.m_roi; }
 
 /**
  * Returns the ROI boundaries to a string.
