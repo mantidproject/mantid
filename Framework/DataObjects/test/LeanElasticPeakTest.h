@@ -121,6 +121,9 @@ public:
 
     LeanElasticPeak p(V3D(1, 2, 3), gon, refFrame);
 
+    TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(1, 2, 3))
+    TS_ASSERT_EQUALS(p.getQLabFrame(), V3D(2, 1, 3))
+
     TS_ASSERT_EQUALS(p.getReferenceFrame()->vecPointingAlongBeam(), V3D(1, 0, 0))
     TS_ASSERT_EQUALS(p.getReferenceFrame()->pointingAlongBeam(), 0)
     TS_ASSERT_DELTA(p.getWavelength(), M_PI * 4 / 7, 1e-9)
