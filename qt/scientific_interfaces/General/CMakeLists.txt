@@ -1,9 +1,9 @@
 set(SRC_FILES FitScriptGenerator.cpp StepScan.cpp)
 
-# Include files aren't required, but this makes them appear in Visual Studio IMPORTANT: Include files are required in
-# the MOC_FILES set. Scroll down to find it.
+# Only include header files which do not contain Qt
 set(INC_FILES DllConfig.h)
 
+# Only include header files which do contain Qt
 set(MOC_FILES FitScriptGenerator.h StepScan.h)
 
 set(UI_FILES StepScan.ui)
