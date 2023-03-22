@@ -98,7 +98,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
     def _find_specular_pixel_index(self, ws, det_info):
         # Determine position of the specular pixel from the workspace:
-        ws_two_theta = ws.run().getProperty("Theta").timeAverageValue() * 2
+        ws_two_theta = ws.run().getTimeAveragedValue("theta") * 2
 
         min_theta_diff = None
         specular_pixel_idx = None

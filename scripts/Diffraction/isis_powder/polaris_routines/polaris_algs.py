@@ -310,7 +310,7 @@ def _load_qlims(q_lims):
 
 def _determine_chopper_mode(ws):
     if ws.getRun().hasProperty("Frequency"):
-        frequency = ws.getRun()["Frequency"].timeAverageValue()
+        frequency = ws.getRun().getTimeAveragedValue("Frequency")
         print("Found chopper frequency of {} in log file.".format(frequency))
         if math.isclose(frequency, 50, abs_tol=1):
             print("Automatically chose Rietveld mode")
