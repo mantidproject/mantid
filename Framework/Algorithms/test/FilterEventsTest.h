@@ -118,8 +118,8 @@ public:
    */
   void test_FilterNoCorrection() {
     int64_t runstart_i64 = 20000000000;  // 20 seconds, beginning of the fake run
-    int64_t pulsedt = 100 * 1000 * 1000; // 100 seconds, time between consecutive pulses
-    int64_t tofdt = 10 * 1000 * 1000;    // 10 seconds, spacing between neutrons events within a pulse
+    int64_t pulsedt = 100 * 1000 * 1000; // 100 miliseconds, time between consecutive pulses
+    int64_t tofdt = 10 * 1000 * 1000;    // 10 miliseconds, spacing between neutrons events within a pulse
     size_t numpulses = 5;
 
     // Create EventWorkspace with 10 detector-banks, each bank containing one pixel.
@@ -127,6 +127,16 @@ public:
     AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
     // Create SplittersWorkspace
+    // index         DateandTime        time-int64_t
+    //   0    1990-Jan-01 00:00:20      20000000000
+    //   1    1990-Jan-01 00:00:20.035  20035000000
+    //  -1    1990-Jan-01 00:00:20.195  20195000000
+    //   2    1990-Jan-01 00:00:20.200  20200000000
+    //  -1    1990-Jan-01 00:00:20.265  20265000000
+    //   2    1990-Jan-01 00:00:20.300  20300000000
+    //  -1    1990-Jan-01 00:00:20.365  20365000000
+    //   2    1990-Jan-01 00:00:20.400  20400000000
+    //  -1    1990-Jan-01 00:00:20.465  20465000000
     SplittersWorkspace_sptr splws = createSplittersWorkspace(runstart_i64, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
 

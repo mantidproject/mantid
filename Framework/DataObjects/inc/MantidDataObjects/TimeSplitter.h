@@ -49,6 +49,8 @@ public:
   /// Split a list of events according to Pulse time or Pulse + TOF time
   void splitEventList(const EventList &events, std::map<int, EventList *> partials, bool pulseTof = false,
                       bool tofCorrect = false, double factor = 1.0, double shift = 0.0) const;
+  /// Print the (destination index | DateAndTime boundary) pairs of this splitter.
+  std::string debugPrint() const;
 
 private:
   void clearAndReplace(const DateAndTime &start, const DateAndTime &stop, const int value);
@@ -56,8 +58,6 @@ private:
   template <typename EVENTTYPE>
   void splitEventVec(const std::vector<DateAndTime> &times, const std::vector<EVENTTYPE> &events,
                      std::map<int, EventList *> partials) const;
-  /// Print the (destination index | DateAndTime boundary) pairs of this splitter.
-  std::string debugPrint() const;
   std::map<DateAndTime, int> m_roi_map;
 };
 } // namespace DataObjects
