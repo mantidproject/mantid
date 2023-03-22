@@ -165,9 +165,7 @@ void export_IPeak() {
       .def("setGoniometerMatrix", &setGoniometerMatrix, (arg("self"), arg("goniometerMatrix")),
            "Set the :class:`~mantid.geometry.Goniometer` rotation matrix of "
            "this peak.")
-      .def("getDetectorID", &IPeak::getDetectorID, arg("self"),
-           "For :class:`~mantid.geometry.RectangularDetector` s only, returns "
-           "the pixel ID of the detector.")
+      .def("getDetectorID", &IPeak::getDetectorID, arg("self"), "Return thhe pixel ID of the detector.")
       .def("getRow", &IPeak::getRow, arg("self"),
            "For :class:`~mantid.geometry.RectangularDetector` s only, returns "
            "the row (y) of the pixel of the "
