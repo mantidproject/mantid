@@ -2,7 +2,7 @@
 include(ExternalProject)
 
 # mslice
-set(_mslice_external_root ${CMAKE_CURRENT_BINARY_DIR}/mslice)
+set(_mslice_external_root ${CMAKE_CURRENT_BINARY_DIR}/src/mslice)
 externalproject_add(
   mslice
   PREFIX ${_mslice_external_root}
