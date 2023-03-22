@@ -231,6 +231,22 @@ public:
     TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({}));
   }
 
+  void test_addAdjacentROI() {
+    // append to ROI with touching boundary
+    TimeSplitter splitter;
+    splitter.addROI(ONE, TWO, 1);
+    splitter.addROI(TWO, THREE, 2);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 2);
+
+    // prepend to ROI with touching boundary
+    TimeSplitter splitter2;
+    splitter2.addROI(TWO, THREE, 2);
+    splitter2.addROI(ONE, TWO, 1);
+    TS_ASSERT_EQUALS(splitter2.numRawValues(), 3);
+    TS_ASSERT_EQUALS(splitter2.valueAtTime(TWO), 2);
+  }
+
   void test_gap() {
     TimeSplitter splitter;
     // create a splitter with a gap
