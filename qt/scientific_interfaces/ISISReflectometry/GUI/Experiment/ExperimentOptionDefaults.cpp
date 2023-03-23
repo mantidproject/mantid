@@ -12,6 +12,7 @@
 #include "LookupTableValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "Reduction/Experiment.h"
+#include "Reduction/ParseReflectometryStrings.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -22,7 +23,8 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 std::string stringValueOrEmpty(boost::optional<double> value) { return value ? std::to_string(*value) : ""; }
 
 Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
-  auto defaults = OptionDefaults(std::move(instrument));
+  // Looks for defaults for use in ReflectometryReductionOneAuto algorithm
+  auto defaults = OptionDefaults(instrument, false);
 
   auto analysisMode =
       analysisModeFromString(defaults.getStringOrDefault("AnalysisMode", "AnalysisMode", "PointDetectorAnalysis"));
@@ -63,8 +65,27 @@ Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
   auto transmissionStitchOptions =
       TransmissionStitchOptions(transmissionRunRange, transmissionStitchParams, transmissionScaleRHS);
 
-  // We currently don't specify stitch parameters in the parameters file
+  // Looks for default Output Stitch Properties for use in Stitch1DMany algorithm
+  auto stitchDefaults = OptionDefaults(std::move(instrument), true);
   auto stitchParameters = std::map<std::string, std::string>();
+  stitchParameters["Params"] = stitchDefaults.getStringOrEmpty("Params", "StitchParams");
+  stitchParameters["StartOverlaps"] = stitchDefaults.getStringOrEmpty("StartOverlaps", "StitchStartOverlaps");
+  stitchParameters["EndOverlaps"] = stitchDefaults.getStringOrEmpty("EndOverlaps", "StitchEndOverlaps");
+  stitchParameters["UseManualScaleFactors"] =
+      stitchDefaults.getStringOrEmpty("UseManualScaleFactors", "StitchUseManualScaleFactors");
+  stitchParameters["ManualScaleFactors"] =
+      stitchDefaults.getStringOrEmpty("ManualScaleFactors", "StitchManualScaleFactors");
+  stitchParameters["OutScaleFactors"] = stitchDefaults.getStringOrEmpty("OutScaleFactors", "StitchOutScaleFactors");
+  stitchParameters["ScaleFactorFromPeriod"] =
+      stitchDefaults.getStringOrEmpty("ScaleFactorFromPeriod", "StitchScaleFactorFromPeriod");
+  stitchParameters["IndexOfReference"] = stitchDefaults.getStringOrEmpty("IndexOfReference", "StitchIndexOfReference");
+
+  // removes any defaults from stitchParameters map if the value is empty
+  for (auto it = stitchParameters.begin(); it != stitchParameters.end();) {
+    if (it->second.size() == 0) {
+      it = stitchParameters.erase(it);
+    }
+  }
 
   // For per-theta defaults, we can only specify defaults for the wildcard row
   // i.e.  where theta is empty. It probably doesn't make sense to specify

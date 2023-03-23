@@ -12,9 +12,14 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-OptionDefaults::OptionDefaults(Mantid::Geometry::Instrument_const_sptr instrument)
-    : m_algorithm(Mantid::API::AlgorithmManager::Instance().createUnmanaged("ReflectometryReductionOneAuto")),
-      m_instrument(std::move(instrument)) {
+OptionDefaults::OptionDefaults(Mantid::Geometry::Instrument_const_sptr instrument, bool stitchDefault)
+    : m_instrument(std::move(instrument)) {
+  if (stitchDefault) {
+    m_algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged("Stitch1DMany");
+    // m_algorithm->initialize();
+  } else {
+    m_algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ReflectometryReductionOneAuto");
+  }
   m_algorithm->initialize();
 }
 
