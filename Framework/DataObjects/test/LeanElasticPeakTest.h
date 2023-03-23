@@ -59,6 +59,20 @@ public:
     TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(1, 2, 3))
     TS_ASSERT_EQUALS(p.getQLabFrame(), V3D(2, 1, 3))
 
+    TS_ASSERT_EQUALS(p.getQSampleFrame(), V3D(1, 2, 3))
+    TS_ASSERT_EQUALS(p.getQLabFrame(), V3D(2, 1, 3))
+
+    V3D ki_hat_rev = p.getSourceDirectionSampleFrame();
+    V3D kf_hat = p.getDetectorDirectionSampleFrame();
+
+    TS_ASSERT_DELTA(ki_hat_rev.X(), 0, 1e-9)
+    TS_ASSERT_DELTA(ki_hat_rev.Y(), 0, 1e-9)
+    TS_ASSERT_DELTA(ki_hat_rev.Z(), -1, 1e-9)
+
+    TS_ASSERT_DELTA(kf_hat.X(), sin(p.getScattering()) * sin(p.getAzimuthal()), 1e-9)
+    TS_ASSERT_DELTA(kf_hat.Y(), sin(p.getScattering()) * cos(p.getAzimuthal()), 1e-9)
+    TS_ASSERT_DELTA(kf_hat.Z(), cos(p.getScattering()), 1e-9)
+
     p.setWavelength(1.);
     TS_ASSERT_DELTA(p.getInitialEnergy(), 81.8042024359, 1e-5)
     TS_ASSERT_DELTA(p.getFinalEnergy(), 81.8042024359, 1e-5)

@@ -13,9 +13,9 @@ SaveHKL outputs the peaks with corrections applied in a format
 that works successfully in GSAS and SHELX. Peaks that have not been
 integrated and also peaks that were not indexed are removed.
 
-hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\\n'%
+`hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\\n'%
 (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM, TRANSMISSION,
-DN, TWOTH, DSP))
+DN, TWOTH, DSP))`
 
 HKL is flipped by -1 due to different q convention in ISAW vs Mantid.
 
@@ -42,6 +42,10 @@ TWOTH = two-theta scattering angle
 DSP = d-Spacing of peak (Angstroms)/TR
 
 Last line must have all 0's
+
+Direction cosines are required for certain absorption and extinction corrections. They are calculated according to [1]_
+and are the dot products of the scattered and reverse incident beam directions with the direction of the reciprocal
+lattice vectors. The components are interleaved starting with the reverse incident part.
 
 Usage
 -----
@@ -150,7 +154,10 @@ Output:
 
     removeFiles(["MyPeaks.hkl"])
 
+References
+----------
 
+.. [1] A. Katrusiak, *Absorption Correction for Crystal-Environment Attachments from Direction Cosines*, Zeitschrift für Kristallographie - Crystalline Materials, **216** (2001) 646–647. doi: `10.1524/zkri.216.12.646.22488 <http://dx.doi.org/10.1524/zkri.216.12.646.22488>`_
 
 
 .. categories::

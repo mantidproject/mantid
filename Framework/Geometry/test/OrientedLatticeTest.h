@@ -51,6 +51,31 @@ public:
                     1e-4); // The d-spacing after a round trip matches the Q we put in
   }
 
+  void test_cosFromDir() {
+    OrientedLattice u(2, 3, 4, 85., 95., 100);
+
+    double omega_star =
+        asin(cos(u.alphastar() * M_PI / 180) - cos(u.betastar() * M_PI / 180) * cos(u.gammastar() * M_PI / 180)) /
+        sin(u.betastar() * M_PI / 180) / sin(u.gammastar() * M_PI / 180);
+
+    // Calculate direction cosines
+    V3D dir_cos_1 = u.cosFromDir(V3D(1.0, 0.0, 0.0));
+    V3D dir_cos_2 = u.cosFromDir(V3D(0.0, 1.0, 0.0));
+    V3D dir_cos_3 = u.cosFromDir(V3D(0.0, 0.0, 1.0));
+
+    TS_ASSERT_DELTA(dir_cos_1.X(), 1, 1e-4);
+    TS_ASSERT_DELTA(dir_cos_2.X(), 0, 1e-4);
+    TS_ASSERT_DELTA(dir_cos_3.X(), 0, 1e-4);
+
+    TS_ASSERT_DELTA(dir_cos_1.Y(), cos(u.gammastar() * M_PI / 180), 1e-4);
+    TS_ASSERT_DELTA(dir_cos_2.Y(), sin(u.gammastar() * M_PI / 180), 1e-4);
+    TS_ASSERT_DELTA(dir_cos_3.Y(), 0, 1e-4);
+
+    TS_ASSERT_DELTA(dir_cos_1.Z(), cos(u.betastar() * M_PI / 180), 1e-4);
+    TS_ASSERT_DELTA(dir_cos_2.Z(), sin(u.betastar() * M_PI / 180) * sin(omega_star), 1e-4);
+    TS_ASSERT_DELTA(dir_cos_3.Z(), sin(u.betastar() * M_PI / 180) * cos(omega_star), 1e-4);
+  }
+
   void test_nexus() {
     NexusTestHelper th(true);
     th.createFile("OrientedLatticeTest.nxs");

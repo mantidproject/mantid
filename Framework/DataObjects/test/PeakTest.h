@@ -354,6 +354,44 @@ public:
     TS_ASSERT_DELTA(q[2], 1, 1e-5);
   }
 
+  void test_getSourceDirectionSampleFrame() {
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+    Peak p(inst, 0, 1.5);
+    p.setQLabFrame(V3D(1, 2, 3));
+
+    Matrix<double> r2(3, 3, false);
+    r2[0][2] = 1;
+    r2[1][1] = 1;
+    r2[2][0] = -1;
+
+    p.setGoniometerMatrix(r2);
+
+    V3D dir = p.getSourceDirectionSampleFrame();
+
+    TS_ASSERT_DELTA(dir[0], 1, 1e-5);
+    TS_ASSERT_DELTA(dir[1], 0, 1e-5);
+    TS_ASSERT_DELTA(dir[2], 0, 1e-5);
+  }
+
+  void test_getDetectorDirectionSampleFrame() {
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+    Peak p(inst, 0, 1.5);
+    p.setQLabFrame(V3D(1, 2, 3));
+
+    Matrix<double> r2(3, 3, false);
+    r2[0][2] = 1;
+    r2[1][1] = 1;
+    r2[2][0] = -1;
+
+    p.setGoniometerMatrix(r2);
+
+    V3D dir = p.getDetectorDirectionSampleFrame();
+
+    TS_ASSERT_DELTA(dir[0], -cos(p.getScattering()), 1e-5);
+    TS_ASSERT_DELTA(dir[1], sin(p.getScattering()) * sin(p.getAzimuthal()), 1e-5);
+    TS_ASSERT_DELTA(dir[2], sin(p.getScattering()) * cos(p.getAzimuthal()), 1e-5);
+  }
+
   //------------------------------------------------------------------------------------
   /** Can't have Q = 0,0,0 or 0 in the Z direction when creating */
   void test_setQLabFrame_ThrowsIfQIsNull() {

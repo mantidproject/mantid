@@ -441,25 +441,18 @@ void SaveHKL::exec() {
         if (cosines) {
           out << std::setw(8) << std::fixed << std::setprecision(5) << lambda;
           out << std::setw(8) << std::fixed << std::setprecision(5) << tbar;
-          Kernel::DblMatrix oriented = p.getGoniometerMatrix();
-
-          auto U = ol.getU();
-          auto RU = oriented * U;
-          RU.Transpose();
 
           // This is the reverse incident beam
-          V3D reverse_incident = inst->getSource()->getPos() - inst->getSample()->getPos();
-          reverse_incident.normalize();
-          // This is the scattered beam direction
-          V3D dir = p.getDetPos() - inst->getSample()->getPos();
-          dir.normalize();
+          V3D reverse_incident_dir = p.getSourceDirectionSampleFrame();
+          V3D reverse_incident_cos = ol.cosFromDir(reverse_incident_dir);
 
-          V3D dir_cos_1 = RU * reverse_incident;
-          V3D dir_cos_2 = RU * dir;
+          // This is the scattered beam direction
+          V3D scattered_dir = p.getDetectorDirectionSampleFrame();
+          V3D scattered_cos = ol.cosFromDir(scattered_dir);
 
           for (int k = 0; k < 3; ++k) {
-            out << std::setw(9) << std::fixed << std::setprecision(5) << dir_cos_1[k];
-            out << std::setw(9) << std::fixed << std::setprecision(5) << dir_cos_2[k];
+            out << std::setw(9) << std::fixed << std::setprecision(5) << reverse_incident_cos[k];
+            out << std::setw(9) << std::fixed << std::setprecision(5) << scattered_cos[k];
           }
 
           out << std::setw(6) << runNumber;
