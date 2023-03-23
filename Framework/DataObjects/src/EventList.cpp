@@ -364,17 +364,16 @@ EventList &EventList::operator+=(const std::vector<TofEvent> &more_events) {
     // Add default weights to all the un-weighted incoming events from the list.
     // and append to the list
     this->weightedEvents.reserve(this->weightedEvents.size() + more_events.size());
-    for (const auto &event : more_events) {
-      this->weightedEvents.emplace_back(event);
-    }
+    std::transform(std::cbegin(more_events), std::cend(more_events), std::back_inserter(this->weightedEvents),
+                   [](const TofEvent &event) { return WeightedEvent(event); });
     break;
 
   case WEIGHTED_NOTIME:
     // Add default weights to all the un-weighted incoming events from the list.
     // and append to the list
     this->weightedEventsNoTime.reserve(this->weightedEventsNoTime.size() + more_events.size());
-    for (const auto &more_event : more_events)
-      this->weightedEventsNoTime.emplace_back(more_event);
+    std::transform(std::cbegin(more_events), std::cend(more_events), std::back_inserter(this->weightedEventsNoTime),
+                   [](const TofEvent &event) { return WeightedEventNoTime(event); });
     break;
   }
 
@@ -421,9 +420,8 @@ EventList &EventList::operator+=(const std::vector<WeightedEvent> &more_events) 
     // Add default weights to all the un-weighted incoming events from the list.
     // and append to the list
     this->weightedEventsNoTime.reserve(this->weightedEventsNoTime.size() + more_events.size());
-    for (const auto &event : more_events) {
-      this->weightedEventsNoTime.emplace_back(event);
-    }
+    std::transform(std::cbegin(more_events), std::cend(more_events), std::back_inserter(this->weightedEventsNoTime),
+                   [](const WeightedEvent &event) { return WeightedEventNoTime(event); });
     break;
   }
 
@@ -467,23 +465,30 @@ EventList &EventList::operator+=(const std::vector<WeightedEventNoTime> &more_ev
  * @return reference to this
  * */
 EventList &EventList::operator+=(const EventList &more_events) {
-  // We'll let the += operator for the given vector of event lists handle it
-  switch (more_events.getEventType()) {
-  case TOF:
-    this->operator+=(more_events.events);
-    break;
+  if (!more_events.empty()) {
+    // We'll let the += operator for the given vector of event lists handle it
+    switch (more_events.getEventType()) {
+    case TOF:
+      this->operator+=(more_events.events);
+      break;
 
-  case WEIGHTED:
-    this->operator+=(more_events.weightedEvents);
-    break;
+    case WEIGHTED:
+      this->operator+=(more_events.weightedEvents);
+      break;
 
-  case WEIGHTED_NOTIME:
-    this->operator+=(more_events.weightedEventsNoTime);
-    break;
+    case WEIGHTED_NOTIME:
+      this->operator+=(more_events.weightedEventsNoTime);
+      break;
+    }
+
+    // No guaranteed order
+    if (this->empty()) {
+      this->order = more_events.order;
+    } else {
+      this->order = UNSORTED;
+    }
   }
 
-  // No guaranteed order
-  this->order = UNSORTED;
   // Do a union between the detector IDs of both lists
   addDetectorIDs(more_events.getDetectorIDs());
 
