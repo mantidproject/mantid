@@ -48,7 +48,7 @@ class AbstractInst(object):
     def user_name(self):
         return self._user_name
 
-    def _create_vanadium(self, run_number_string, do_absorb_corrections, per_detector=False):
+    def _create_vanadium(self, run_number_string, do_absorb_corrections, do_spline=True, per_detector=False):
         """
         Creates a vanadium calibration - should be called by the concrete instrument
         :param run_number_string : The user input string for any run within the cycle
@@ -59,10 +59,16 @@ class AbstractInst(object):
         """
         self._is_vanadium = True
         run_details = self._get_run_details(run_number_string)
+
         if per_detector:
             return calibrate.create_van_per_detector(instrument=self, run_details=run_details, absorb=do_absorb_corrections)
 
-        return calibrate.create_van(instrument=self, run_details=run_details, absorb=do_absorb_corrections)
+        return calibrate.create_van(
+            instrument=self,
+            run_details=run_details,
+            absorb=do_absorb_corrections,
+            spline=do_spline,
+        )
 
     def _focus(
         self,
@@ -80,7 +86,7 @@ class AbstractInst(object):
         :return:
         """
         self._is_vanadium = False
-        return focus.focus(
+        focused_runs = focus.focus(
             run_number_string=run_number_string,
             perform_vanadium_norm=do_van_normalisation,
             instrument=self,
@@ -89,6 +95,18 @@ class AbstractInst(object):
             empty_can_subtraction_method=empty_can_subtraction_method,
             paalman_pings_events_per_point=paalman_pings_events_per_point,
         )
+
+        return self._output_focused_runs(focused_runs, run_number_string)
+
+    def _output_focused_runs(self, focused_runs, run_number_string):
+        run_details = self._get_run_details(run_number_string)
+        for focused_run in focused_runs:
+            d_spacing_group, tof_group = self._output_focused_ws(focused_run, run_details=run_details)
+            common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group, unit_to_keep=self._get_unit_to_keep())
+
+            common.remove_intermediate_workspace(focused_run)
+
+        return d_spacing_group
 
     def mask_prompt_pulses_if_necessary(self, ws_list):
         """
@@ -127,6 +145,25 @@ class AbstractInst(object):
         produce a differential cross section
         """
         return False
+
+    def apply_drange_cropping(self, run_number_string, focused_ws):
+        """
+        Apply dspacing range cropping to a focused workspace. It is now only used with OSIRIS script
+        :param run_number_string: The run number to look up for the drange
+        :param focused_ws: The workspace to be cropped
+        :return: The cropped workspace in its drange
+        """
+
+        return focused_ws
+
+    def get_vanadium_path(self, run_details):
+        """
+        Get the vanadium path from the run details
+        :param run_details: The run details of the run number
+        :return: the vanadium path
+        """
+
+        return run_details.splined_vanadium_file_path
 
     # Mandatory overrides
 

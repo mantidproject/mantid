@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 import mantid.simpleapi as mantid  # noqa: F401 # runs .pth file to add scripts subdirectories
 from isis_powder.pearl import Pearl
 from isis_powder.pearl_routines import pearl_advanced_config
@@ -38,6 +38,7 @@ class ISISPowderPearlTest(unittest.TestCase):
             vanadium_normalisation=False,
             long_mode=True,
         )
+        inst_obj._output_focused_runs = Mock()
         inst_obj.focus(run_number=999)
         mock_focus.assert_called_once()
 
@@ -52,6 +53,7 @@ class ISISPowderPearlTest(unittest.TestCase):
             vanadium_normalisation=False,
             long_mode=False,
         )
+        inst_obj._output_focused_runs = Mock()
         inst_obj.focus(run_number=999, long_mode=True)
         mock_focus.assert_called_once()
 
@@ -67,6 +69,7 @@ class ISISPowderPearlTest(unittest.TestCase):
             vanadium_normalisation=False,
             long_mode=True,
         )
+        inst_obj._output_focused_runs = Mock()
         inst_obj.focus(run_number=999, long_mode=False)
         mock_focus.assert_called_once()
 

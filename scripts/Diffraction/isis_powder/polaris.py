@@ -60,7 +60,7 @@ class Polaris(AbstractInst):
         self.ensure_per_detector_and_vanadium_output_are_in_sync(vanadium_d, per_detector)
 
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
-        polaris_algs.save_unsplined_vanadium(vanadium_ws=vanadium_d, output_path=run_details.unsplined_vanadium_file_path)
+        common.save_unsplined_vanadium(vanadium_ws=vanadium_d, output_path=run_details.unsplined_vanadium_file_path)
         return vanadium_d
 
     def ensure_per_detector_and_vanadium_output_are_in_sync(self, vanadium_d, per_detector):
