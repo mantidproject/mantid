@@ -307,7 +307,7 @@ void FilterEvents::exec() {
   // add a new 'split' tsp to output workspace
   std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> split_tsp_vector;
   if (m_useSplittersWorkspace) {
-    // DEBUG: remove this call, and use filterEventsBySplitters instead
+    // DEBUG: parallelize this function (and rename) once we have debugged all the unit tests
     filterEventsBySplittersSerial(progressamount);
     // filterEventsBySplitters(progressamount);
     generateSplitterTSPalpha(split_tsp_vector);
@@ -315,9 +315,11 @@ void FilterEvents::exec() {
     filterEventsByVectorSplitters(progressamount);
     generateSplitterTSP(split_tsp_vector);
   }
+  // TODO: this method should simply assign the proper TimeROI object to each output workspace
   // assign split_tsp_vector to all the output workspaces!
   mapSplitterTSPtoWorkspaces(split_tsp_vector);
 
+  // TODO: this method is unnecessary and should be removed. Same with method `splitTimeSeriesProperty`
   // split times series property: new way to split events
   splitTimeSeriesLogs(int_tsp_vector, dbl_tsp_vector, bool_tsp_vector, string_tsp_vector);
 

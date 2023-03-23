@@ -402,18 +402,19 @@ void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const st
   while (itEvent != events.cend()) {
     // Check if we need to advance the splitter and therefore select a different partial event list
     if (*itTime >= stop) {
-      // update the partial event list with the destination index of the stopping boundary
-      destination = itSplitter->second;
+      // advance to the new stopping boundary, and find the new destination index
+      while (*itTime >= stop) {
+        destination = itSplitter->second;
+        itSplitter++;
+        if (itSplitter == m_roi_map.cend())
+          stop = DateAndTime::maximum(); // a.k.a stopping boundary at an "infinite" time
+        else
+          stop = itSplitter->first;
+      }
       if (partials.find(destination) == partials.cend())
         partial = nullptr;
       else
         partial = partials[destination];
-      // update the stopping boundary
-      itSplitter++;
-      if (itSplitter == m_roi_map.cend())
-        stop = DateAndTime::maximum(); // a.k.a stopping boundary at an "infinite" time
-      else
-        stop = itSplitter->first;
     }
     if (partial) {
       partial->addEventQuickly(*itEvent); // emplaces a copy of *itEvent in partial
