@@ -30,7 +30,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         AnalysisDataService.addOrReplace("ws_rect", cls.ws)
         axis = cls.ws.getAxis(0)
         axis.setUnit("TOF")
-        # fake peak in spectra in middle bank 1 (centered on detID=37/spec=12 and TOF=3.5)
+        # fake peak in spectra in middle bank 1 (centered on detID=37/spec=12 and TOF=5)
         cls.peak_1D = 2 * array([0, 0, 0, 1, 4, 6, 4, 1, 0, 0, 0])
         cls.ws.setY(12, cls.ws.readY(12) + cls.peak_1D)
         for ispec in [7, 11, 12, 13, 17, 22]:
@@ -45,7 +45,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         # 2) middle bank 2 (no peak)
         cls.peaks = CreatePeaksWorkspace(InstrumentWorkspace=cls.ws, NumberOfPeaks=0, OutputWorkspace="peaks")
         for ipk, detid in enumerate([32, 27, 62]):
-            AddPeak(PeaksWorkspace=cls.peaks, RunWorkspace=cls.ws, TOF=5, DetectorID=detid)
+            AddPeak(PeaksWorkspace=cls.peaks, RunWorkspace=cls.ws, TOF=4, DetectorID=detid)
             cls.peaks.getPeak(ipk).setHKL(ipk, ipk, ipk)
 
         # Load empty WISH with ComponentArray banks
@@ -91,7 +91,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         # check intensity of first peak (only valid peak)
         ipk = 0
         pk = out.getPeak(ipk)
-        self.assertAlmostEqual(pk.getIntensity(), 237051386.2, delta=1)
+        self.assertAlmostEqual(pk.getIntensity(), 578738736.0, delta=1)
         self.assertAlmostEqual(pk.getIntensityOverSigma(), 12.7636, delta=1e-3)
         # check peak pos not moved
         self.assertEqual(out.column("DetID")[ipk], self.peaks.column("DetID")[ipk])
@@ -178,11 +178,11 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         # note intensity will be same now as peak position updated
         for ipk in range(2):
             pk = out.getPeak(ipk)
-            self.assertAlmostEqual(pk.getIntensity(), 259054692.5, delta=1)
+            self.assertAlmostEqual(pk.getIntensity(), 379281975.3, delta=1)
             self.assertAlmostEqual(pk.getIntensityOverSigma(), 12.7636, delta=1e-3)
             # check peak pos moved to maximum
             self.assertEqual(out.column("DetID")[ipk], 37)
-            self.assertAlmostEqual(pk.getTOF(), 5.5, delta=1e-10)
+            self.assertAlmostEqual(pk.getTOF(), 5, delta=1e-10)
             # check that HKL have been stored
             hkl = pk.getHKL()
             for miller_index in hkl:
@@ -304,6 +304,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             PeaksWorkspace=self.peaks,
             ThetaWidth=0,
             BackscatteringTOFResolution=0.3,
+            NTOFBinsMin=2,
             IntegrateIfOnEdge=True,
             UseNearestPeak=False,
             UpdatePeakPosition=False,
@@ -319,6 +320,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             PeaksWorkspace=self.peaks,
             ThetaWidth=0,
             BackscatteringTOFResolution=0.3,
+            NTOFBinsMin=2,
             IntegrateIfOnEdge=True,
             UseNearestPeak=False,
             UpdatePeakPosition=False,
@@ -334,6 +336,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             PeaksWorkspace=self.peaks,
             ThetaWidth=0,
             BackscatteringTOFResolution=0.3,
+            NTOFBinsMin=2,
             IntegrateIfOnEdge=True,
             UseNearestPeak=False,
             UpdatePeakPosition=False,
