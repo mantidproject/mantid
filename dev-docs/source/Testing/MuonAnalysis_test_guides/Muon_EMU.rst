@@ -55,6 +55,7 @@ Ionic Diffusion Test
 
 .. figure:: ../../images/MuonAnalysisTests/MATestingIDF.png
 	:alt: MATestingIDF.png
+
 - Go to the **Fitting** tab
 	- Remove the ``DynamicKuboToyabe`` function
 	- Uncheck the **Simultaneous fit over** checkbox
