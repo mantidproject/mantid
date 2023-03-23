@@ -61,6 +61,22 @@ pipeline {
     GIT_COMMITTER_EMAIL = "${GITHUB_USER_EMAIL}"
   }
   stages {
+    // Fail the pipeline early if any parameters are incorrect.
+    stage('Check parameters') {
+      agent { label 'linux-64' }
+      steps {
+        script {
+          if(env.PUBLISH_PACKAGES == 'true') {
+            if(!env.ANACONDA_CHANNEL_LABEL.trim()) {
+              error("You must specify an Anaconda label to publish packages.")
+            }
+            if(!env.ANACONDA_CHANNEL.trim()) {
+              error("You must specify an Anaconda channel to publish packages.")
+            }
+          }
+        }
+      }
+    }
     // Store the git commit hash in an environment variable so that we can use
     // the same commit for all stages of the pipeline. This is perfomed by using
     // the following step at the start of each subsequent stage:
