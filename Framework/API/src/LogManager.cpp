@@ -191,8 +191,7 @@ bool LogManager::hasEndTime() const { return hasProperty(END_TIME_NAME) || hasPr
  *are kept.
  */
 void LogManager::filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop) {
-  // The propery manager operator will make all timeseriesproperties filter.
-  m_manager->filterByTime(start, stop);
+  this->setTimeROI(TimeROI(start, stop));
 }
 
 //-----------------------------------------------------------------------------------------------

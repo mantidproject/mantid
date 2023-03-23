@@ -128,27 +128,6 @@ PropertyManager &PropertyManager::operator+=(const PropertyManager &rhs) {
 
 //-----------------------------------------------------------------------------------------------
 /**
- * Filter out a run by time. Takes out any TimeSeriesProperty log entries
- *outside of the given
- *  absolute time range.
- *
- * @param start :: Absolute start time. Any log entries at times >= to this time
- *are kept.
- * @param stop :: Absolute stop time. Any log entries at times < than this time
- *are kept.
- */
-void PropertyManager::filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) {
-  // Iterate through all properties
-  PropertyMap::const_iterator it;
-  for (it = this->m_properties.begin(); it != this->m_properties.end(); ++it) {
-    // Filter out the property
-    auto prop = it->second.get();
-    prop->filterByTime(start, stop);
-  }
-}
-
-//-----------------------------------------------------------------------------------------------
-/**
  * Split a run by time (splits the TimeSeriesProperties contained).
  *
  * Total proton charge will get re-integrated after filtering.
