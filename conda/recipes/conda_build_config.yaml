@@ -42,9 +42,9 @@ sphinx_bootstrap_theme:
 pyqt:
   - 5.15
 
-# 5.15.6 causing issues with rendering of tabs on GUIs using the instrument viewer.
+# Pins qt to a specific version to gui rendering problems in certain versions
 qt_main:
-  - 5.15.4
+  - 5.15.8
 
 qscintilla2:
   - 2.13
