@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from isis_powder.routines.param_map_entry import ParamMapEntry
 from isis_powder.routines.common import PARAM_MAPPING
+from isis_powder.routines.common_enums import EMPTY_CAN_SUBTRACTION_METHOD
 
 
 # Maps friendly user name (ext_name) -> script name (int_name)
@@ -26,5 +27,13 @@ attr_mapping = [
     ParamMapEntry(ext_name="sample_empty_scale", int_name="sample_empty_scale", optional=True),
     ParamMapEntry(ext_name="keep_raw_workspace", int_name="keep_raw_workspace", optional=True),
     ParamMapEntry(ext_name="mayers_mult_scat_events", int_name="mayers_mult_scat_events", optional=True),
+    ParamMapEntry(ext_name="absorb_corrections", int_name="absorb_corrections"),
+    ParamMapEntry(
+        ext_name="empty_can_subtraction_method",
+        int_name="empty_can_subtraction_method",
+        enum_class=EMPTY_CAN_SUBTRACTION_METHOD,
+        optional=True,
+    ),
+    ParamMapEntry(ext_name="paalman_pings_events_per_point", int_name="paalman_pings_events_per_point", optional=True),
 ]
 attr_mapping.extend(PARAM_MAPPING)
