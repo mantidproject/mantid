@@ -27,9 +27,6 @@ numpy:
 matplotlib:
   - 3.6.*
 
-openssl:
-  - 1.1.*
-
 setuptools:
   - 47.0
 
@@ -42,7 +39,7 @@ sphinx_bootstrap_theme:
 pyqt:
   - 5.15
 
-# Pins qt to a specific version to gui rendering problems in certain versions
+# Pins qt to a specific version to avoid gui rendering problems in certain versions
 qt_main:
   - 5.15.8
 

@@ -46,7 +46,7 @@ requirements:
     - setuptools {{ setuptools }}
     - tbb-devel {{ tbb }}
     - pip
-    - openssl {{ openssl }}
+    - openssl
     - versioningit
   run:
     - {{ pin_compatible("boost", max_pin="x.x") }}
@@ -61,7 +61,7 @@ requirements:
     - python-dateutil
     - pyyaml
     - scipy
-    - openssl {{ openssl }}
+    - openssl
     - euphonic=0.6.*
     - toml
 
