@@ -79,6 +79,12 @@ The *focus* method allows a user to process a series of runs into a
 focused dSpace workspace. Whilst processing the runs the scripts can apply any corrections
 the user enables.
 
+The available corrections are:
+
+- empty container subtraction which can be enabled using :ref:`subtract_empty_can_osiris_isis-powder-diffraction-ref` parameter.
+
+- vanadium normalization which can be enabled using :ref:`do_van_normalisation_osiris_isis-powder-diffraction-ref` parameter.
+
 On OSIRIS the following parameters are required when executing *focus*:
 
 - :ref:`calibration_mapping_file_osiris_isis-powder-diffraction-ref`
