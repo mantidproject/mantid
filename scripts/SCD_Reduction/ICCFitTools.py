@@ -341,7 +341,7 @@ def getOptimizedGoodIDX(
     maxppl = maxppl_frac * pred_ppl
     pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck > minppl]
     pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck < maxppl]
-    if pp_lambda_toCheck == []:
+    if len(pp_lambda_toCheck) == 0:
         pp_lambda_toCheck = [meanBG * 1.96]
         print("Cannot find suitable background.  Consider adjusting MinpplFrac or MaxpplFrac")
 

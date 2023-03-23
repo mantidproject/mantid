@@ -11,7 +11,7 @@ from mantid.simpleapi import *
 from scipy.interpolate import interp1d
 from scipy.ndimage.filters import convolve
 import ICConvoluted as ICC
-from mantid.simpleapi import BivariateGaussian
+import BivariateGaussian
 
 plt.ion()
 
@@ -368,7 +368,6 @@ def fitTOFCoordinate(
     iccFitDict=None,
     fitPenalty=None,
 ):
-
     # Get info from the peak
     tof = peak.getTOF()  # in us
     wavelength = peak.getWavelength()  # in Angstrom

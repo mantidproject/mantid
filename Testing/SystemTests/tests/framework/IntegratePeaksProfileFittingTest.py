@@ -35,4 +35,4 @@ class IntegratePeaksProfileFittingTest(MantidSystemTest):
 
         table = mtd["peaks_output"]
         # intensities for the first two peaks
-        assert_allclose(table.column("Intens")[0:2], [289.4, 10013.7], atol=1.0)
+        assert_allclose(table.column("Intens")[0:2], [302.9, 10013.7], atol=1.0)
