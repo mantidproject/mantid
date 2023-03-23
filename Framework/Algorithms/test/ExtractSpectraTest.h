@@ -158,6 +158,18 @@ public:
     TS_ASSERT_EQUALS(ws->x(4)[0], 3.0);
   }
 
+  void test_x_data_is_not_coppied() {
+    Parameters params;
+    auto ws = runAlgorithm(params);
+    if (!ws)
+      return;
+
+    const auto x0_address = &ws->x(0);
+    const auto x1_address = &ws->x(1);
+
+    TS_ASSERT_EQUALS(x0_address, x1_address);
+  }
+
   void test_index_range() {
     Parameters params;
     params.setIndexRange();

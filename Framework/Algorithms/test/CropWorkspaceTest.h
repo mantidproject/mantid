@@ -396,10 +396,10 @@ public:
   void testCropDoesNotCopyXData() {
     Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
-    const auto &in_x1 = inputWS->x(0);
-    const auto &in_x2 = inputWS->x(2);
+    const auto in_x0_address = &inputWS->x(0);
+    const auto in_x2_address = &inputWS->x(2);
 
-    TS_ASSERT_EQUALS(in_x1, in_x2);
+    TS_ASSERT_EQUALS(in_x0_address, in_x2_address);
 
     CropWorkspace crop;
     TS_ASSERT_THROWS_NOTHING(crop.initialize());
@@ -412,10 +412,10 @@ public:
     MatrixWorkspace_sptr outputWS;
     TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outputWS"));
 
-    const auto &out_x1 = outputWS->x(0);
-    const auto &out_x2 = outputWS->x(2);
+    const auto out_x0_address = &outputWS->x(0);
+    const auto out_x2_address = &outputWS->x(2);
 
-    TS_ASSERT_EQUALS(out_x1, out_x2);
+    TS_ASSERT_EQUALS(out_x0_address, out_x2_address);
   }
 };
 
