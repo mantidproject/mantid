@@ -375,7 +375,7 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
  *
  * @tparam EVENTTYPE : one of EventType::TOF or EventType::WEIGHTED
  * @param times : times associated to the events, used to find the destination index
- * @param events : list of input times
+ * @param events : list of input events
  * @param partials : target list of partial event lists, associated to the different destination indexes
  * @throws : if the size of times and events are different
  */
@@ -398,7 +398,8 @@ void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const st
   auto itTime = times.cbegin();   // initialize iterator over times
   auto itEvent = events.cbegin(); // initialize iterator over the events
 
-  // iterate over all events. It is assumed events are sorted by either pulse time or tof
+  // iterate over all events. For each event try finding its destination event list, a.k.a. partial.
+  // If the partial is found, append the event to it. It is assumed events are sorted by either pulse time or tof
   while (itEvent != events.cend()) {
     // Check if we need to advance the splitter and therefore select a different partial event list
     if (*itTime >= stop) {

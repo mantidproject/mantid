@@ -260,9 +260,9 @@ void FilterEvents::exec() {
   // Parse splitters
   m_progress = 0.0;
   progress(m_progress, "Processing SplittersWorkspace.");
-  if (m_useSplittersWorkspace)     // SplittersWorkspace the class in nanoseconds
+  if (m_useSplittersWorkspace)     // SplittersWorkspace has time in nanoseconds
     processSplittersWorkspace();   // initialize m_timeSplitter, m_targetWorkspaceIndexSet, m_maxTargetIndex
-  else if (m_useArbTableSplitters) // TableWorkspace in seconds
+  else if (m_useArbTableSplitters) // TableWorkspace has time in seconds
     processTableSplittersWorkspace();
   else
     processMatrixSplitterWorkspace();
@@ -803,7 +803,7 @@ void FilterEvents::splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp
 
 //----------------------------------------------------------------------------------------------
 /** Purpose:
- *    Convert SplitterWorkspace object to TimeSplitter object
+ *    Convert SplittersWorkspace object to TimeSplitter object
  *    and create a set of all target workspace indexes
  *  Requirements:
  *  Guarantees:
@@ -850,7 +850,7 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
 
   // convert TimeSplitter to a vector of sorted splitting intervals with valid targets
   Kernel::SplittingIntervalVec splittingIntervals =
-      m_timeSplitter.toSplitters(false /*do not include no target intervals*/);
+      m_timeSplitter.toSplitters(false /*do not include "no target" intervals*/);
 
   // size_t num_splitters = m_splitters.size();
   size_t num_splitters = splittingIntervals.size();
@@ -1133,16 +1133,16 @@ void FilterEvents::createOutputWorkspacesSplitters() {
     if (wsindex > TimeSplitter::NO_TARGET) {
       if (descriptiveNames && splitByTime) {
         TimeROI timeROI = m_timeSplitter.getTimeROI(wsindex);
-
         auto splittingIntervals = timeROI.toSplitters();
-
-        auto startTimeInSeconds =
-            Mantid::Types::Core::DateAndTime::secondsFromDuration(splittingIntervals[0].start() - m_runStartTime);
-
-        auto stopTimeInSeconds =
-            Mantid::Types::Core::DateAndTime::secondsFromDuration(splittingIntervals[0].stop() - m_runStartTime);
-
-        wsname << startTimeInSeconds << "_" << stopTimeInSeconds;
+        for (size_t ii = 0; ii < splittingIntervals.size(); ii++) {
+          auto startTimeInSeconds =
+              Mantid::Types::Core::DateAndTime::secondsFromDuration(splittingIntervals[ii].start() - m_runStartTime);
+          auto stopTimeInSeconds =
+              Mantid::Types::Core::DateAndTime::secondsFromDuration(splittingIntervals[ii].stop() - m_runStartTime);
+          wsname << startTimeInSeconds << "_" << stopTimeInSeconds;
+          if (ii < splittingIntervals.size() - 1)
+            wsname << "_";
+        }
       } else if (descriptiveNames) {
         auto infoiter = infomap.find(wsindex);
         if (infoiter != infomap.end()) {
@@ -1925,17 +1925,17 @@ void FilterEvents::generateSplitterTSPalpha(
     split_tsp_vec.emplace_back(std::move(split_tsp));
   }
 
-  for (auto const wsindex : m_targetWorkspaceIndexSet) {
-    if (wsindex == TimeSplitter::NO_TARGET)
+  for (auto const itarget : m_targetWorkspaceIndexSet) {
+    if (itarget == TimeSplitter::NO_TARGET)
       continue;
 
     // TODO: use TimeSplitter::toSplitters()
-    TimeROI timeROI = m_timeSplitter.getTimeROI(wsindex);
+    TimeROI timeROI = m_timeSplitter.getTimeROI(itarget);
 
     Kernel::SplittingIntervalVec splittingIntervalVec = timeROI.toSplitters();
     for (auto const splitter : splittingIntervalVec) {
 
-      int itarget = wsindex;
+      // int itarget = wsindex;
 
       if (itarget >= static_cast<int>(split_tsp_vec.size()))
         throw std::runtime_error("Target workspace index is out of range!");
@@ -1951,22 +1951,6 @@ void FilterEvents::generateSplitterTSPalpha(
       split_tsp_vec[itarget]->addValue(splitter.stop(), 0);
     }
   }
-
-  // for (SplittingInterval splitter : m_splitters) {
-  //   int itarget = splitter.index();
-  //   if (itarget >= static_cast<int>(split_tsp_vec.size()))
-  //     throw std::runtime_error("Target workspace index is out of range!");
-
-  //   if (splitter.start() == m_runStartTime) {
-  //     // there should be only 1 value in the splitter and clear it.
-  //     if (split_tsp_vec[itarget]->size() != 1) {
-  //       throw std::runtime_error("Splitter must have 1 value with initialization.");
-  //     }
-  //     split_tsp_vec[itarget]->clear();
-  //   }
-  //   split_tsp_vec[itarget]->addValue(splitter.start(), 1);
-  //   split_tsp_vec[itarget]->addValue(splitter.stop(), 0);
-  // }
 }
 
 /** add the splitter TimeSeriesProperty logs to each workspace

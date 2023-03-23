@@ -95,10 +95,10 @@ public:
   /**  Filter events without any correction
    *  Event workspace:
    * (1) 10 detectors
-   * (2) Run starts @ 20000000000 seconds
-   * (3) Pulse length = 100*1000*1000 seconds
+   * (2) Run starts @ 20000000000 ns
+   * (3) Pulse length = 100*1000*1000 ns
    * (4) Within one pulse, two consecutive events/neutrons is apart for
-   *10*1000*1000 seconds
+   *10*1000*1000 ns
    * (5) "Experiment": 5 pulse times.  10 events in each pulse
    *
    * In this test
