@@ -1,0 +1,1 @@
+- Added a system test for :ref:`IntegratePeaksProfileFittinng <algm-IntegratePeaksProfileFitting>` to help resolve a bug related to BivariateGuassian module
