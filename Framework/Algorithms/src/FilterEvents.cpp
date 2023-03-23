@@ -662,7 +662,7 @@ void FilterEvents::copyNoneSplitLogs(std::vector<TimeSeriesProperty<int> *> &int
 //----------------------------------------------------------------------------------------------
 /** Split ALL the TimeSeriesProperty sample logs to all the output workspace
  * @brief FilterEvents::splitTimeSeriesLogs
- * @param int_tsp_vector :: vector of itneger tps
+ * @param int_tsp_vector :: vector of integer tsp
  * @param dbl_tsp_vector :: vector of double tsp
  * @param bool_tsp_vector :: vector of boolean tsp
  * @param string_tsp_vector :: vector of string tsp
@@ -840,14 +840,18 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
   // define filter-left target index
   int no_filter_index = m_maxTargetIndex + 1;
 
-  // convert SplittersWorkspace to a set of pairs which can be sorted
-  size_t num_splitters = m_splitters.size();
+  // convert TimeSplitter to a vector of sorted splitting intervals with valid targets
+  Kernel::SplittingIntervalVec splittingIntervals =
+      m_timeSplitter.toSplitters(false /*do not include no target intervals*/);
+
+  // size_t num_splitters = m_splitters.size();
+  size_t num_splitters = splittingIntervals.size();
   int64_t last_entry_time(0);
 
   // it is assumed that m_splitters is sorted by time
   for (size_t i_splitter = 0; i_splitter < num_splitters; ++i_splitter) {
     // get splitter
-    Kernel::SplittingInterval splitter = m_splitters[i_splitter];
+    Kernel::SplittingInterval splitter = splittingIntervals[i_splitter];
     int64_t start_time_i64 = splitter.start().totalNanoseconds();
     int64_t stop_time_i64 = splitter.stop().totalNanoseconds();
     if (m_vecSplitterTime.empty()) {
@@ -1868,23 +1872,19 @@ void FilterEvents::generateSplitterTSPalpha(
   }
 
   for (auto const wsindex : m_targetWorkspaceIndexSet) {
+    if (wsindex == TimeSplitter::NO_TARGET)
+      continue;
+
+    // TODO: use TimeSplitter::toSplitters()
     TimeROI timeROI = m_timeSplitter.getTimeROI(wsindex);
 
     Kernel::SplittingIntervalVec splittingIntervalVec = timeROI.toSplitters();
     for (auto const splitter : splittingIntervalVec) {
 
-      int itarget = splitter.index(); // this seem to always returns 0
-
-      itarget = wsindex;
+      int itarget = wsindex;
 
       if (itarget >= static_cast<int>(split_tsp_vec.size()))
         throw std::runtime_error("Target workspace index is out of range!");
-
-      std::cout << "wsindex: " << wsindex << ", itarget: " << itarget << ", start: " << splitter.start()
-                << "; stop: " << splitter.stop() << "\n";
-
-      if (wsindex == TimeSplitter::NO_TARGET)
-        continue;
 
       if (splitter.start() == m_runStartTime) {
         // there should be only 1 value in the splitter and clear it.

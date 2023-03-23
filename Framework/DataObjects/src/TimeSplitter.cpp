@@ -291,14 +291,15 @@ TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
 /**
  * Cast to a vector of SplittingInterval objects
  */
-SplittingIntervalVec TimeSplitter::toSplitters() const {
+SplittingIntervalVec TimeSplitter::toSplitters(const bool includeNoTarget) const {
   std::vector<SplittingInterval> output;
   if (this->empty())
     return output;
   auto startIt = m_roi_map.begin();
   while (std::next(startIt) != m_roi_map.end()) {
     /// invoke constructor SplittingInterval(DateAndTime &start, DateAndTime &stop, int index)
-    output.push_back({startIt->first, std::next(startIt)->first, startIt->second});
+    if (includeNoTarget || (!includeNoTarget && startIt->second != NO_TARGET))
+      output.push_back({startIt->first, std::next(startIt)->first, startIt->second});
     std::advance(startIt, 1);
   }
   return output;

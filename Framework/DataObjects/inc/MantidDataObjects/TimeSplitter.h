@@ -44,7 +44,7 @@ public:
   std::set<int> outputWorkspaceIndices() const;
   Kernel::TimeROI getTimeROI(const int workspaceIndex);
   /// Cast to to vector of SplittingInterval objects
-  Kernel::SplittingIntervalVec toSplitters() const;
+  Kernel::SplittingIntervalVec toSplitters(const bool includeNoTarget = true) const;
   /// this is to aid in testing and not intended for use elsewhere
   std::size_t numRawValues() const;
   /// Split a list of events according to Pulse time or Pulse + TOF time

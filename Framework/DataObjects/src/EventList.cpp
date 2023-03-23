@@ -4157,18 +4157,18 @@ void EventList::splitByFullTime(TimeSplitter &splitter, std::map<int, EventList 
                              "that no longer has time information.");
 
   // 1. Start by sorting the event list by pulse time.
-  // this->sortPulseTimeTOF();
+  this->sortPulseTimeTOF();
 
-  // // 2. Initialize all the outputs
-  // std::map<int, EventList *>::iterator outiter;
-  // for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter) {
-  //   EventList *opeventlist = outiter->second;
-  //   opeventlist->clear();
-  //   opeventlist->setDetectorIDs(this->getDetectorIDs());
-  //   opeventlist->setHistogram(m_histogram);
-  //   // Match the output event type.
-  //   opeventlist->switchTo(eventType);
-  // }
+  // 2. Initialize all the outputs
+  std::map<int, EventList *>::iterator outiter;
+  for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter) {
+    EventList *opeventlist = outiter->second;
+    opeventlist->clear();
+    opeventlist->setDetectorIDs(this->getDetectorIDs());
+    opeventlist->setHistogram(m_histogram);
+    // Match the output event type.
+    opeventlist->switchTo(eventType);
+  }
 
   // Do nothing if there are no entries
   if (splitter.empty()) {
