@@ -69,6 +69,9 @@ public:
   /// proton_charge
   void integrateProtonCharge(const std::string &logname = "proton_charge") const;
 
+  /// update property "duration" with the duration of the Run's TimeROI attribute
+  void setDuration();
+
   /// Store the given values as a set of histogram bin boundaries
   void storeHistogramBinBoundaries(const std::vector<double> &histoBins);
   /// Returns the bin boundaries for a given value

@@ -368,7 +368,27 @@ void Run::integrateProtonCharge(const std::string &logname) const {
 }
 
 //-----------------------------------------------------------------------------------------------
+/**
+ * Update property "duration" with the duration of the Run's TimeROI attribute.
+ *
+ * If the Run's TimeROI is empty, this member function does nothing.
+ */
+void Run::setDuration() {
+  if (m_timeroi->empty())
+    return;
+  double duration{m_timeroi->durationInSeconds()};
+  const std::string NAME("duration");
+  const std::string UNITS("second");
+  if (!hasProperty(NAME))
+    addProperty(NAME, duration, UNITS);
+  else {
+    Kernel::Property *prop = getProperty(NAME);
+    prop->setValue(boost::lexical_cast<std::string>(duration));
+    prop->setUnits(UNITS);
+  }
+}
 
+//-----------------------------------------------------------------------------------------------
 /**
  * Store the given values as a set of energy bin boundaries. Throws
  *    - an invalid_argument if fewer than 2 values are given;
