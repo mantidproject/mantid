@@ -80,13 +80,18 @@ private:
   }
 
   /// Instantiate an EventList for every input destination index
+  /// Insert an EventList for NO_TARGET if not provided in destinations
   std::map<int, EventList *> instantiatePartials(const std::vector<int> &destinations) {
     std::map<int, EventList *> partials;
+
     for (int destination : destinations) {
       if (partials.find(destination) != partials.cend())
-        throw std::runtime_error("cannot have duplicate destinations");
+        continue;
       partials[destination] = new EventList();
     }
+    // insert an EventList for NO_TARGET if not provided in destinations
+    if (partials.find(TimeSplitter::NO_TARGET) == partials.cend())
+      partials[TimeSplitter::NO_TARGET] = new EventList();
     return partials;
   }
 
@@ -137,6 +142,37 @@ private:
     }
     return splitter;
   }
+
+  /**
+   * Helper function to generate the event times associated to each event in the list as a string
+   *
+   * @param partial : the input event list
+   * @param timeType : which time to select for each event (pulse, pulse+TOF, pulse+corrected_TOF)
+   * @param factor : dimensionless quantity to rescale the TOF of each event
+   * @param shift : TOF offset, in micro-seconds, to be applied after rescaling
+   */
+  std::vector<std::string> timesToStr(const EventList *partial, const EventSortType &timeType,
+                                      const double &factor = 0.0, const double &shift = 0.0) {
+    std::vector<DateAndTime> dates;
+    switch (timeType) {
+    case (EventSortType::PULSETIME_SORT):
+      dates = partial->getPulseTimes();
+      break;
+    case (EventSortType::PULSETIMETOF_SORT):
+      dates = partial->getPulseTOFTimes();
+      break;
+    case (EventSortType::TIMEATSAMPLE_SORT):
+      // method getPulseTOFTimesAtSample requires argument `shift` in micro-seconds
+      dates = partial->getPulseTOFTimesAtSample(factor, shift);
+      break;
+    default:
+      throw std::runtime_error("timesToStr: Unhandled event sorting type");
+    }
+    std::vector<std::string> obtained;
+    std::transform(dates.cbegin(), dates.cend(), std::back_inserter(obtained),
+                   [](const DateAndTime &date) { return date.toSimpleString(); });
+    return obtained;
+  };
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -587,30 +623,6 @@ public:
 
   void test_splitEventList() {
     DateAndTime startTime{TWO};
-    // return the times associated to each event in the list as a string
-    // factor is a dimensionless quantity, and shift is a time in micro-seconds
-    auto timesToStr = [](const EventList *partial, const EventSortType &timeType, const double &factor = 0.0,
-                         const double &shift = 0.0) {
-      std::vector<DateAndTime> dates;
-      switch (timeType) {
-      case (EventSortType::PULSETIME_SORT):
-        dates = partial->getPulseTimes();
-        break;
-      case (EventSortType::PULSETIMETOF_SORT):
-        dates = partial->getPulseTOFTimes();
-        break;
-      case (EventSortType::TIMEATSAMPLE_SORT):
-        // method getPulseTOFTimesAtSample requires argument `shift` in micro-seconds
-        dates = partial->getPulseTOFTimesAtSample(factor, shift);
-        break;
-      default:
-        throw std::runtime_error("timesToStr: Unhandled event sorting type");
-      }
-      std::vector<std::string> obtained;
-      std::transform(dates.cbegin(), dates.cend(), std::back_inserter(obtained),
-                     [](const DateAndTime &date) { return date.toSimpleString(); });
-      return obtained;
-    };
     // Generate the events. Six events, the first at "2023-Jan-01 12:00:00" and then every 30 seconds. The last
     // event happening at "2023-Jan-01 12:02:30".
     double pulsePeriod{60.}; // time between consecutive pulses, in seconds
@@ -675,5 +687,44 @@ public:
     expected = {};
     TS_ASSERT(timesToStr(partials[TimeSplitter::NO_TARGET], EventSortType::TIMEATSAMPLE_SORT, factor, shift) ==
               expected);
+  }
+
+  // This test aims to test a TimeSplitter containing a splitter that will end up holding no events
+  void test_splitEventListLeapingTimes() {
+    // Generate the events. Six events, the first at "2023-Jan-01 12:00:00" and then every 30 seconds. The last
+    // event happening at "2023-Jan-01 12:02:30".
+    DateAndTime startTime{TWO};
+    double pulsePeriod{60.}; // time between consecutive pulses, in seconds
+    size_t nPulses{3};
+    size_t eventsPerPulse{2};
+    EventType eventType = EventType::TOF;
+    EventList events = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse, eventType);
+    // Generate a splitter with six intervals:
+    // interval ["2023-Jan-01 12:00:00", "2023-Jan-01 12:00:30") with destination 0
+    // interval ["2023-Jan-01 12:00:30", "2023-Jan-01 12:00:45") with destination 1
+    // interval ["2023-Jan-01 12:00:45", "2023-Jan-01 12:01:00") with destination 2
+    // interval ["2023-Jan-01 12:01:00", "2023-Jan-01 12:02:00") with destination 3
+    // interval ["2023-Jan-01 12:02:00", "2023-Jan-01 12:02:10") with destination 1
+    // interval ["2023-Jan-01 12:02:10", "2023-Jan-01 12:02:20") with destination 2
+    std::vector<double> intervals{30, 15, 15, 60, 10, 10};
+    const std::vector<int> destinations{0, 1, 2, 3, 1, 2};
+    TimeSplitter splitter = this->generateSplitter(startTime, intervals, destinations);
+    // Generate the output partial event lists
+    std::map<int, EventList *> partials = this->instantiatePartials(destinations);
+    /// Split events according to pulse time + TOF
+    bool pulseTof{true};
+    splitter.splitEventList(events, partials, pulseTof);
+    /// Check which event landed on which partial event list
+    std::vector<std::string> expected;
+    expected = {"2023-Jan-01 12:00:00"};
+    TS_ASSERT(timesToStr(partials[0], EventSortType::PULSETIMETOF_SORT) == expected);
+    expected = {"2023-Jan-01 12:00:30", "2023-Jan-01 12:02:00"};
+    TS_ASSERT(timesToStr(partials[1], EventSortType::PULSETIMETOF_SORT) == expected);
+    expected = {}; // no events for this workspace
+    TS_ASSERT(timesToStr(partials[2], EventSortType::PULSETIMETOF_SORT) == expected);
+    expected = {"2023-Jan-01 12:01:00", "2023-Jan-01 12:01:30"};
+    TS_ASSERT(timesToStr(partials[3], EventSortType::PULSETIMETOF_SORT) == expected);
+    expected = {"2023-Jan-01 12:02:30"};
+    TS_ASSERT(timesToStr(partials[TimeSplitter::NO_TARGET], EventSortType::PULSETIMETOF_SORT) == expected);
   }
 };
