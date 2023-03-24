@@ -81,9 +81,9 @@ the user enables.
 
 The available corrections are:
 
-- empty container subtraction which can be enabled using :ref:`subtract_empty_can_osiris_isis-powder-diffraction-ref` parameter.
+- empty container subtraction, which can be enabled using :ref:`subtract_empty_can_osiris_isis-powder-diffraction-ref` parameter.
 
-- vanadium normalization which can be enabled using :ref:`do_van_normalisation_osiris_isis-powder-diffraction-ref` parameter.
+- vanadium normalization, which can be enabled using :ref:`do_van_normalisation_osiris_isis-powder-diffraction-ref` parameter.
 
 On OSIRIS the following parameters are required when executing *focus*:
 
