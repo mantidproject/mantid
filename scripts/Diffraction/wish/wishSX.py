@@ -17,17 +17,24 @@ lambda_min = 0.8
 
 
 class WishSX(BaseSX):
-    def __init__(self, vanadium_runno=None):
+    def __init__(self, vanadium_runno=None, ext=".raw"):
         super().__init__(vanadium_runno)
         self.sphere_shape = """<sphere id="sphere">
                                <centre x="0.0"  y="0.0" z="0.0" />
                                <radius val="0.0025"/>
                                </sphere>"""  # sphere radius 2.5mm  - used for vanadium and NaCl
+        self.ext = ext  # allow to load .nxs for testing purposes
 
     def process_data(self, runs: Sequence[str], *args):
+        """
+        Loads runs, set goniometer (based on positional args), normalises by vanadium and corrects for absorption
+        :param runs: list of run numbers (string or int)
+        :param args: positonal args (require one for each goniometer axis) - can be motor names or lists of angles (one for each run)
+        :return: name of last loaded workspaces
+        """
         gonio_angles = args
         for irun, run in enumerate(runs):
-            wsname = self.load_run(run)
+            wsname = self.load_run(run, self.ext)
             # set goniometer
             if self.gonio_axes is not None:
                 if len(gonio_angles) != len(self.gonio_axes):
@@ -74,7 +81,7 @@ class WishSX(BaseSX):
 
     def process_vanadium(self):
         # vanadium
-        self.van_ws = self.load_run(self.van_runno)
+        self.van_ws = self.load_run(self.van_runno, ext=self.ext)
         mantid.SmoothNeighbours(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Radius=3)
         mantid.SmoothData(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, NPoints=301)
         # correct vanadium for absorption
@@ -90,13 +97,13 @@ class WishSX(BaseSX):
         mantid.ConvertUnits(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Target="TOF", EnableLogging=False)
 
     @staticmethod
-    def load_run(runno):
+    def load_run(runno, ext=".raw"):
         wsname = "WISH000" + str(runno)
-        ws, mon = mantid.LoadRaw(Filename=wsname + ".raw", OutputWorkspace=wsname, LoadMonitors="Separate")
-        mon_name = mon.name()
+        mon_name = wsname + "_monitors"
+        mantid.Load(Filename=wsname + ext, OutputWorkspace=wsname)
+        mantid.ExtractMonitors(InputWorkspace=wsname, DetectorWorkspace=wsname, MonitorWorkspace=mon_name)
         mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=tof_min, XMax=tof_max)
         mantid.CropWorkspace(InputWorkspace=mon_name, OutputWorkspace=mon_name, XMin=tof_min, XMax=tof_max)
-        # replace empty bin errors with 1 count
         mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Wavelength")
         mantid.ConvertUnits(InputWorkspace=mon_name, OutputWorkspace=mon_name, Target="Wavelength")
         mantid.NormaliseToMonitor(InputWorkspace=wsname, OutputWorkspace=wsname, MonitorWorkspaceIndex=3, MonitorWorkspace=mon_name)

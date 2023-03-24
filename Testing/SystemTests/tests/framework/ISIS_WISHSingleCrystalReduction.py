@@ -195,18 +195,16 @@ class WISHProcessVanadiumForNormalisationTest(MantidSystemTest):
         config.setDataSearchDirs(cls._data_dirs)
 
     def requiredMemoryMB(self):
-        return 4000
+        return 6000
 
     def cleanup(self):
         ADS.clear()
 
     def runTest(self):
-        wish = WishSX(vanadium_runno=19612)
+        wish = WishSX(vanadium_runno=19612, ext=".nxs")  # load .nxs that only includes spectra nums 1-19461
         wish.process_vanadium()
         # select subset of spectra for comparision
-        ExtractSpectra(
-            InputWorkspace="WISH00019612", OutputWorkspace="WISH00019612_spec", WorkspaceIndexList="500,2500,10000,25000,50000,75000"
-        )
+        ExtractSpectra(InputWorkspace="WISH00019612", OutputWorkspace="WISH00019612_spec", WorkspaceIndexList="500,2500,10000")
 
     def validate(self):
         return "WISH00019612_spec", "WISH00019612_processed_van_spectra.nxs"
