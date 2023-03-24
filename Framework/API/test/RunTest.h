@@ -576,14 +576,12 @@ public:
 
     // create roi with a duration of three hours
     TimeROI roi(ONE, FOUR);
-    run.setTimeROI(roi);
-    run.setDuration();
+    run.setTimeROI(roi); // calls setDuration()
     TS_ASSERT_EQUALS(run.getLogAsSingleValue("duration"), 3 * 3600.0);
 
     // add one extra hour
     roi.addROI(FIVE, SIX);
-    run.setTimeROI(roi);
-    run.setDuration();
+    run.setTimeROI(roi); // calls setDuration()
     TS_ASSERT_EQUALS(run.getLogAsSingleValue("duration"), 4 * 3600.0);
   }
 

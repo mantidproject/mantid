@@ -254,6 +254,7 @@ void Run::splitByTime(SplittingIntervalVec &splitter, std::vector<LogManager *> 
 void Run::setTimeROI(const Kernel::TimeROI &timeroi) {
   LogManager::setTimeROI(timeroi);
   this->integrateProtonCharge();
+  this->setDuration(); // update log "duration" with the duration of the new timeroi
 }
 
 //-----------------------------------------------------------------------------------------------
