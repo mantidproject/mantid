@@ -344,6 +344,8 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
     properties->setProperty("ROIDetectorIDs", previewRow.getSelectedBanks().get());
   }
   updateProcessingInstructionsProperties(*properties, previewRow);
+
+  properties->setProperty("HideInputWorkspaces", true);
   return properties;
 }
 
