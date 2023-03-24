@@ -281,8 +281,8 @@ public:
   void splitByFullTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs, bool docorrection,
                        double toffactor, double tofshift) const;
 
-  void splitByFullTime(TimeSplitter &splitter, std::map<int, EventList *> outputs, bool docorrection, double toffactor,
-                       double tofshift) const;
+  void splitByFullTime(const TimeSplitter &splitter, std::map<int, EventList *> outputs, bool docorrection,
+                       double toffactor, double tofshift) const;
 
   /// Split ...
   std::string splitByFullTimeMatrixSplitter(const std::vector<int64_t> &vec_splitters_time,
@@ -293,7 +293,7 @@ public:
   /// Split events by pulse time
   void splitByPulseTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs) const;
 
-  void splitByPulseTime(TimeSplitter &splitter, std::map<int, EventList *> outputs) const;
+  void splitByPulseTime(const TimeSplitter &splitter, std::map<int, EventList *> outputs) const;
 
   /// Split events by pulse time with Matrix splitters
   void splitByPulseTimeWithMatrix(const std::vector<int64_t> &vec_times, const std::vector<int> &vec_target,

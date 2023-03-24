@@ -4150,7 +4150,7 @@ void EventList::splitByFullTime(Kernel::SplittingIntervalVec &splitter, std::map
  * @param toffactor:  a correction factor for each TOF to multiply with
  * @param tofshift:  a correction shift for each TOF to add with
  */
-void EventList::splitByFullTime(TimeSplitter &splitter, std::map<int, EventList *> outputs, bool docorrection,
+void EventList::splitByFullTime(const TimeSplitter &splitter, std::map<int, EventList *> outputs, bool docorrection,
                                 double toffactor, double tofshift) const {
   if (eventType == WEIGHTED_NOTIME)
     throw std::runtime_error("EventList::splitByTime() called on an EventList "
@@ -4541,25 +4541,25 @@ void EventList::splitByPulseTime(Kernel::SplittingIntervalVec &splitter, std::ma
 //----------------------------------------------------------------------------------------------
 /** Split the event list by pulse time
  */
-void EventList::splitByPulseTime(TimeSplitter &splitter, std::map<int, EventList *> outputs) const {
+void EventList::splitByPulseTime(const TimeSplitter &splitter, std::map<int, EventList *> outputs) const {
   // Check for supported event type
   if (eventType == WEIGHTED_NOTIME)
     throw std::runtime_error("EventList::splitByTime() called on an EventList "
                              "that no longer has time information.");
 
-  // // Start by sorting the event list by pulse time.
-  // this->sortPulseTimeTOF();
+  // Start by sorting the event list by pulse time.
+  this->sortPulseTimeTOF();
 
-  // // Initialize all the output event lists
-  // std::map<int, EventList *>::iterator outiter;
-  // for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter) {
-  //   EventList *opeventlist = outiter->second;
-  //   opeventlist->clear();
-  //   opeventlist->setDetectorIDs(this->getDetectorIDs());
-  //   opeventlist->setHistogram(m_histogram);
-  //   // Match the output event type.
-  //   opeventlist->switchTo(eventType);
-  // }
+  // Initialize all the output event lists
+  std::map<int, EventList *>::iterator outiter;
+  for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter) {
+    EventList *opeventlist = outiter->second;
+    opeventlist->clear();
+    opeventlist->setDetectorIDs(this->getDetectorIDs());
+    opeventlist->setHistogram(m_histogram);
+    // Match the output event type.
+    opeventlist->switchTo(eventType);
+  }
 
   // Split
   if (splitter.empty()) {
