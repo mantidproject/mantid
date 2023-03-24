@@ -1934,9 +1934,6 @@ void FilterEvents::generateSplitterTSPalpha(
 
     Kernel::SplittingIntervalVec splittingIntervalVec = timeROI.toSplitters();
     for (auto const splitter : splittingIntervalVec) {
-
-      // int itarget = wsindex;
-
       if (itarget >= static_cast<int>(split_tsp_vec.size()))
         throw std::runtime_error("Target workspace index is out of range!");
 
