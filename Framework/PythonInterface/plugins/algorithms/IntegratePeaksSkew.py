@@ -473,8 +473,6 @@ class PeakData:
         exec_Multiply(LHSWorkspace=ws_bg_foc, RHSWorkspace=scale, OutputWorkspace=ws_bg_foc)
         ws_pk_foc = self._focus_detids(self.detids[self.peak_mask])
         exec_RebinToWorkspace(WorkspaceToRebin=ws_bg_foc, WorkspaceToMatch=ws_pk_foc, OutputWorkspace=ws_bg_foc)
-        # import pydevd_pycharm
-        # pydevd_pycharm.settrace(stdoutToServer=True, stderrToServer=True)
         exec_Subtract(LHSWorkspace=ws_pk_foc, RHSWorkspace=ws_bg_foc, OutputWorkspace=ws_pk_foc)
         ws_pk_foc = AnalysisDataService.retrieve(ws_pk_foc)
         self.xpk = ws_pk_foc.readX(0).copy()
@@ -494,6 +492,8 @@ class PeakData:
         return np.argmin(abs(self.xpk - xmin)), np.argmin(abs(self.xpk - xmax)) + 1
 
     def find_peak_limits(self, ixmin, ixmax):
+        # translate window to maximise I/sigma
+        ixmin, ixmax = self.translate_xwindow_to_max_intens_over_sigma(self.ypk, self.epk_sq, ixmin, ixmax)
         # find initial background points in tof window using skew method
         ibg, _ = self.find_bg_pts_seed_skew(self.ypk[ixmin:ixmax])
         # create mask and find largest contiguous region of peak bins
@@ -506,11 +506,25 @@ class PeakData:
             ilabel = np.argmax([np.sum(labels == ilabel) for ilabel in range(1, nlabel + 1)]) + 1
         istart, iend = np.flatnonzero(labels == ilabel)[[0, -1]] + ixmin
         # expand window to maximise I/sig (good for when peak not entirely in window)
-        self.ixmin_opt, self.ixmax_opt = self.optimise_tof_window_intens_over_sig(self.ypk, self.epk_sq, istart, iend + 1)
+        self.ixmin_opt, self.ixmax_opt = self.optimise_xwindow_size_to_max_intens_over_sig(self.ypk, self.epk_sq, istart, iend + 1)
         self.xmin_opt, self.xmax_opt = self.xpk[self.ixmin_opt], self.xpk[self.ixmax_opt - 1]
 
     @staticmethod
-    def optimise_tof_window_intens_over_sig(signal, error_sq, ilo, ihi, ntol=8, nbg=5):
+    def translate_xwindow_to_max_intens_over_sigma(signal, error_sq, ilo, ihi):
+        dx = ihi - ilo
+        kernel = np.ones(dx)
+        istart = max(0, ilo - dx)
+        iend = min(ihi + dx, signal.size + 1)
+        # calc I/sigma using convolution - this assumes data are background subtracted
+        i_over_sig = np.convolve(signal[istart:iend], kernel, mode="valid") / np.sqrt(
+            np.convolve(error_sq[istart:iend] ** 2, kernel, mode="valid")
+        )
+        ilo_opt = np.nanargmax(i_over_sig) + istart
+        ihi_opt = ilo_opt + dx
+        return ilo_opt, ihi_opt
+
+    @staticmethod
+    def optimise_xwindow_size_to_max_intens_over_sig(signal, error_sq, ilo, ihi, ntol=8, nbg=5):
         if ihi == ilo:
             ihi += 1
         # increase window to RHS
