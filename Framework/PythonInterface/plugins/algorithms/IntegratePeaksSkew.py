@@ -305,6 +305,8 @@ class PeakData:
         min_npixels_per_vacancy,
         max_nvacancies,
         min_nbins,
+        optimise_xwindow,
+        threshold_i_over_sig,
     ):
         # get xlimits
         dx = frac_width * self.xpos
@@ -321,7 +323,7 @@ class PeakData:
         self.xmin_opt, self.xmax_opt = self.xmin, self.xmax
         if self.status == PEAK_MASK_STATUS.VALID:
             # find bg and pk bins in focused spectrum by maximising I/sig
-            self.find_peak_limits(self.ixmin, self.ixmax)
+            self.find_peak_limits(self.ixmin, self.ixmax, optimise_xwindow, threshold_i_over_sig)
             if optimise_mask:
                 # update the peak mask
                 opt_xintegrated_data, opt_peak_mask, opt_non_bg_mask, peak_label = self.find_peak_mask(
@@ -347,7 +349,9 @@ class PeakData:
                     self.peak_mask = opt_peak_mask
                     self.non_bg_mask = np.logical_and(self.non_bg_mask, opt_non_bg_mask)
                     self.focus_data_in_detector_mask()
-                    self.find_peak_limits(min(self.ixmin, self.ixmin_opt), max(self.ixmax, self.ixmax_opt))
+                    self.find_peak_limits(
+                        min(self.ixmin, self.ixmin_opt), max(self.ixmax, self.ixmax_opt), optimise_xwindow, threshold_i_over_sig
+                    )
             if self.ixmax_opt - self.ixmin_opt < min_nbins:
                 self.status = PEAK_MASK_STATUS.NBINS_MIN
             else:
@@ -491,22 +495,25 @@ class PeakData:
     def _find_xslice_indices(self, xmin, xmax):
         return np.argmin(abs(self.xpk - xmin)), np.argmin(abs(self.xpk - xmax)) + 1
 
-    def find_peak_limits(self, ixmin, ixmax):
+    def find_peak_limits(self, ixmin, ixmax, optimise_xwindow, threshold_i_over_sig):
         # translate window to maximise I/sigma
-        ixmin, ixmax = self.translate_xwindow_to_max_intens_over_sigma(self.ypk, self.epk_sq, ixmin, ixmax)
-        # find initial background points in tof window using skew method
-        ibg, _ = self.find_bg_pts_seed_skew(self.ypk[ixmin:ixmax])
-        # create mask and find largest contiguous region of peak bins
-        skew_mask = np.ones(ixmax - ixmin, dtype=bool)
-        skew_mask[ibg] = False
-        labels, nlabel = label(skew_mask)
-        if nlabel == 0:
-            ilabel = 0
+        ixmin, ixmax, intens_over_sig = self.translate_xwindow_to_max_intens_over_sigma(self.ypk, self.epk_sq, ixmin, ixmax)
+        if optimise_xwindow and intens_over_sig > threshold_i_over_sig:
+            # find initial background points in tof window using skew method
+            ibg, _ = self.find_bg_pts_seed_skew(self.ypk[ixmin:ixmax])
+            # create mask and find largest contiguous region of peak bins
+            skew_mask = np.ones(ixmax - ixmin, dtype=bool)
+            skew_mask[ibg] = False
+            labels, nlabel = label(skew_mask)
+            if nlabel == 0:
+                ilabel = 0
+            else:
+                ilabel = np.argmax([np.sum(labels == ilabel) for ilabel in range(1, nlabel + 1)]) + 1
+            istart, iend = np.flatnonzero(labels == ilabel)[[0, -1]] + ixmin
+            # expand window to maximise I/sig (good for when peak not entirely in window)
+            self.ixmin_opt, self.ixmax_opt = self.optimise_xwindow_size_to_max_intens_over_sig(self.ypk, self.epk_sq, istart, iend + 1)
         else:
-            ilabel = np.argmax([np.sum(labels == ilabel) for ilabel in range(1, nlabel + 1)]) + 1
-        istart, iend = np.flatnonzero(labels == ilabel)[[0, -1]] + ixmin
-        # expand window to maximise I/sig (good for when peak not entirely in window)
-        self.ixmin_opt, self.ixmax_opt = self.optimise_xwindow_size_to_max_intens_over_sig(self.ypk, self.epk_sq, istart, iend + 1)
+            self.ixmin_opt, self.ixmax_opt = ixmin, ixmax
         self.xmin_opt, self.xmax_opt = self.xpk[self.ixmin_opt], self.xpk[self.ixmax_opt - 1]
 
     @staticmethod
@@ -517,11 +524,12 @@ class PeakData:
         iend = min(ihi + dx, signal.size + 1)
         # calc I/sigma using convolution - this assumes data are background subtracted
         i_over_sig = np.convolve(signal[istart:iend], kernel, mode="valid") / np.sqrt(
-            np.convolve(error_sq[istart:iend] ** 2, kernel, mode="valid")
+            np.convolve(error_sq[istart:iend], kernel, mode="valid")
         )
-        ilo_opt = np.nanargmax(i_over_sig) + istart
+        imax_i_over_sigma = np.nanargmax(i_over_sig)
+        ilo_opt = imax_i_over_sigma + istart
         ihi_opt = ilo_opt + dx
-        return ilo_opt, ihi_opt
+        return ilo_opt, ihi_opt, i_over_sig[imax_i_over_sigma]
 
     @staticmethod
     def optimise_xwindow_size_to_max_intens_over_sig(signal, error_sq, ilo, ihi, ntol=8, nbg=5):
@@ -762,6 +770,21 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         do_use_B2B_exp_params = EnabledWhenProperty("GetTOFWindowFromBackToBackParams", PropertyCriterion.IsNotDefault)
         self.setPropertySettings("NFWHM", do_use_B2B_exp_params)
         self.declareProperty(
+            name="OptimiseXWindowSize",
+            defaultValue=True,
+            direction=Direction.Input,
+            doc="If True the size of the xWindow will be optimised to maximise I/Sigma. If False the xwindow "
+            "will be translated to maximise I/sigma in region +/- 2(initial_xwindow)",
+        )
+        self.declareProperty(
+            name="ThresholdIoverSigma",
+            defaultValue=0.0,
+            direction=Direction.Input,
+            validator=FloatBoundedValidator(lower=0),
+            doc="Threshold I/sigma before optimising x window size.",
+        )
+        self.setPropertySettings("ThresholdIoverSigma", EnabledWhenProperty("OptimiseXWindowSize", PropertyCriterion.IsDefault))
+        self.declareProperty(
             name="OptimiseMask",
             defaultValue=False,
             direction=Direction.Input,
@@ -778,7 +801,10 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.setPropertyGroup("ScaleThetaWidthByWavelength", "Integration Window Parameters")
         self.setPropertyGroup("GetTOFWindowFromBackToBackParams", "Integration Window Parameters")
         self.setPropertyGroup("NFWHM", "Integration Window Parameters")
+        self.setPropertyGroup("OptimiseXWindowSize", "Integration Window Parameters")
+        self.setPropertyGroup("ThresholdIoverSigma", "Integration Window Parameters")
         self.setPropertyGroup("OptimiseMask", "Integration Window Parameters")
+
         # peak validation
         self.declareProperty(
             name="IntegrateIfOnEdge",
@@ -947,6 +973,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         n_b2b_fwhm = self.getProperty("NFWHM").value
         nrows = self.getProperty("NRows").value
         ncols = self.getProperty("NCols").value
+        optimise_xwindow = self.getProperty("OptimiseXWindowSize").value
+        threshold_i_over_sig = self.getProperty("ThresholdIoverSigma").value
         optimise_mask = self.getProperty("OptimiseMask").value
         # peak mask validation
         integrate_on_edge = self.getProperty("IntegrateIfOnEdge").value
@@ -1024,6 +1052,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 min_npixels_per_vacancy,
                 max_nvacancies,
                 min_nbins,
+                optimise_xwindow,
+                threshold_i_over_sig,
             )
             if peak_data.status is PEAK_MASK_STATUS.VALID:
                 if update_peak_pos:
