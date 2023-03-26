@@ -222,21 +222,7 @@ class InstrumentArrayConverter:
         row, col = peak.getRow(), peak.getCol()
         drows, dcols = nrows // 2, ncols // 2
         detids, det_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge)
-        # get signal and error from each spectrum
-        ispecs = np.array(self.ws.getIndicesFromDetectorIDs([int(d) for d in detids.flatten()])).reshape(detids.shape)
-        signal = np.zeros((*ispecs.shape, self.ws.blocksize()))
-        errors = np.zeros(signal.shape)
-        xcens = np.zeros(signal.shape)
-        for irow in range(signal.shape[0]):
-            for icol in range(signal.shape[1]):
-                ispec = int(ispecs[irow, icol])
-                signal[irow, icol, :] = self.ws.readY(ispec)
-                errors[irow, icol, :] = self.ws.readE(ispec)
-                xvals = self.ws.readX(int(ispecs[irow_peak, icol_peak]))
-                if len(xvals) > signal.shape[-1]:
-                    xvals = 0.5 * (xvals[:-1] + xvals[1:])  # convert to bin centers
-                xcens[irow, icol, :] = xvals
-        peak_data = PeakData(xcens, signal, errors, irow_peak, icol_peak, det_edges, detids, peak, self.ws)
+        peak_data = PeakData(irow_peak, icol_peak, det_edges, detids, peak, self.ws)
         return peak_data
 
 
@@ -245,11 +231,9 @@ class PeakData:
     This class is used to hold data and integration parameters for single-crystal Bragg peaks
     """
 
-    def __init__(self, xcens, signal, error, irow, icol, det_edges, detids, peak, ws):
+    def __init__(self, irow, icol, det_edges, detids, peak, ws):
         # set data
         self.ws = ws
-        self.xcens = xcens
-        self.signal, self.error = signal, error
         self.irow, self.icol = irow, icol
         self.det_edges = det_edges
         self.detids = detids
@@ -271,6 +255,23 @@ class PeakData:
         self.status = None
         self.intens, self.sig = 0, 0
         self.tof_integrated_slice = None
+
+    def get_data_arrays(self):
+        # get signal and error from each spectrum
+        ispecs = np.array(self.ws.getIndicesFromDetectorIDs([int(d) for d in self.detids.flatten()])).reshape(self.detids.shape)
+        signal = np.zeros((*ispecs.shape, self.ws.blocksize()))
+        errors = np.zeros(signal.shape)
+        xcens = np.zeros(signal.shape)
+        for irow in range(signal.shape[0]):
+            for icol in range(signal.shape[1]):
+                ispec = int(ispecs[irow, icol])
+                signal[irow, icol, :] = self.ws.readY(ispec)
+                errors[irow, icol, :] = self.ws.readE(ispec)
+                xvals = self.ws.readX(ispec)
+                if len(xvals) > signal.shape[-1]:
+                    xvals = 0.5 * (xvals[:-1] + xvals[1:])  # convert to bin centers
+                xcens[irow, icol, :] = xvals
+        return xcens, signal, errors
 
     def integrate_xrange(self, xmin, xmax):
         # Pass in sorted detid list as ExtractSpectra does partial sorting
