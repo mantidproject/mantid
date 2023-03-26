@@ -1087,7 +1087,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         # estimate TOF resolution params
         thetas = np.array([pk_data.theta for pk_data in peak_data_collection if pk_data.status == PEAK_MASK_STATUS.VALID])
         wavelengths = np.array([pk_data.wl for pk_data in peak_data_collection if pk_data.status == PEAK_MASK_STATUS.VALID])
-        scaled_cot_th_sq = ((wavelengths**2) / np.tan(thetas)) ** 2 if scale_dth else (1 / np.tan(thetas))
+        scaled_cot_th_sq = (wavelengths / np.tan(thetas)) ** 2 if scale_dth else (1 / np.tan(thetas)) ** 2
         frac_tof_widths = np.array(
             [pk_data.get_dTOF_over_TOF() for pk_data in peak_data_collection if pk_data.status == PEAK_MASK_STATUS.VALID]
         )
@@ -1204,7 +1204,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             ax[1].plot(xlim, slope * xlim + intercept, "-k", label="fit")
             xvals = np.linspace(min(thetas), max(thetas))
             if not scale_dth:
-                ax[0].plot(np.degrees(xvals), np.sqrt(intercept * (1 / np.tan(xvals) ** 2) + slope), "-k", label="fit")
+                ax[0].plot(np.degrees(xvals), np.sqrt(slope * (1 / np.tan(xvals) ** 2) + intercept), "-k", label="fit")
             else:
                 ylim = ax[0].get_ylim()
                 colors = line.get_cmap().colors
@@ -1212,7 +1212,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 wls = np.linspace(wavelengths.min(), wavelengths.max(), nwl)
                 icolors = np.linspace(0, len(colors) - 1, nwl, dtype=int)
                 for wl, icolor in zip(wls, icolors):
-                    ax[0].plot(np.degrees(xvals), np.sqrt(intercept * ((wl**2) / np.tan(xvals) ** 2) + slope), "-", color=colors[icolor])
+                    ax[0].plot(np.degrees(xvals), np.sqrt(slope * (wl / np.tan(xvals)) ** 2 + intercept), "-", color=colors[icolor])
                 ax[0].set_ylim(*ylim)  # reset limits so suitable for data point coverage not fit lines
             # add resolution parameters to the plot title
             ax[1].set_title(rf"$d\theta$={np.degrees(estimated_dth):.2f}$^\circ$" + "\n$dT_{bk}/T_{bk}$" + f"={estimated_dt0_over_t0:.2E}")
