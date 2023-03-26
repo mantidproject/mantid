@@ -178,11 +178,11 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         # note intensity will be same now as peak position updated
         for ipk in range(2):
             pk = out.getPeak(ipk)
-            self.assertAlmostEqual(pk.getIntensity(), 379281975.3, delta=1)
+            self.assertAlmostEqual(pk.getIntensity(), 259054692.5, delta=1)
             self.assertAlmostEqual(pk.getIntensityOverSigma(), 12.7636, delta=1e-3)
             # check peak pos moved to maximum
             self.assertEqual(out.column("DetID")[ipk], 37)
-            self.assertAlmostEqual(pk.getTOF(), 5, delta=1e-10)
+            self.assertAlmostEqual(pk.getTOF(), 5.5, delta=1e-10)
             # check that HKL have been stored
             hkl = pk.getHKL()
             for miller_index in hkl:

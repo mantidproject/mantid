@@ -272,9 +272,6 @@ class PeakData:
         self.intens, self.sig = 0, 0
         self.tof_integrated_slice = None
 
-    def get_xcens_at_pos(self):
-        return np.squeeze(self.xcens[self.irow, self.icol, :])
-
     def integrate_xrange(self, xmin, xmax):
         # Pass in sorted detid list as ExtractSpectra does partial sorting
         isort = np.argsort(self.detids.flatten())
@@ -479,14 +476,16 @@ class PeakData:
         exec_RebinToWorkspace(WorkspaceToRebin=ws_bg_foc, WorkspaceToMatch=ws_pk_foc, OutputWorkspace=ws_bg_foc)
         exec_Subtract(LHSWorkspace=ws_pk_foc, RHSWorkspace=ws_bg_foc, OutputWorkspace=ws_pk_foc)
         ws_pk_foc = AnalysisDataService.retrieve(ws_pk_foc)
-        self.xpk = ws_pk_foc.readX(0).copy()
         self.ypk = ws_pk_foc.readY(0).copy()
         self.epk_sq = ws_pk_foc.readE(0).copy() ** 2
+        self.xpk = ws_pk_foc.readX(0).copy()
+        if len(self.xpk) > len(self.ypk):
+            self.xpk = 0.5 * (self.xpk[:-1] + self.xpk[1:])  # convert to bin centers
         exec_DeleteWorkspaces(WorkspaceList=[ws_bg_foc, ws_pk_foc, scale])
 
     def scale_intensity_by_bin_width(self):
         # multiply by bin width (as eventually want integrated intensity)
-        dx = np.diff(self.get_xcens_at_pos())
+        dx = np.diff(self.xpk)
         self.ypk[1:] = self.ypk[1:] * dx
         self.ypk[0] = self.ypk[0] * dx[0]  # assume first has same dx as adjacent bin
         self.epk_sq[1:] = self.epk_sq[1:] * (dx**2)
