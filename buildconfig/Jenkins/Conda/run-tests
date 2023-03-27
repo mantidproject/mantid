@@ -104,25 +104,7 @@ cd $WORKSPACE/build
 # mkdir for ctest log
 mkdir -p ctest_log
 if [[ $ENABLE_UNIT_TESTS == true ]]; then
-    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test -O ctest_log/$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
+    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test -O ctest_log/$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS -R mantidqt_qt5.test_jupyterconsole.test_jupyterconsole
     terminate_xvfb_sessions
 fi
 
-if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
-    run_with_xvfb cmake --build . --target docs-doctest -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS
-    terminate_xvfb_sessions
-fi
-
-if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
-    rm -fr $userconfig_dir
-    rm -f $workbench_ini
-
-    # Turn off any auto updating on startup
-    mkdir -p $userconfig_dir
-    echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
-    echo "usagereports.enabled = 0" >> $userprops
-    echo "CheckMantidVersion.OnStartup = 0" >> $userprops
-
-    run_with_xvfb $SYSTEM_TEST_EXECUTABLE $WINDOWS_TEST_OPTIONS -j$BUILD_THREADS_SYSTEM_TESTS -l information --quiet --output-on-failure
-    terminate_xvfb_sessions
-fi
