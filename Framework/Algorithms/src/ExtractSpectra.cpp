@@ -156,6 +156,19 @@ void ExtractSpectra::execHistogram() {
   }
 }
 
+Mantid::HistogramData::HistogramX ExtractSpectra::getCroppedXHistogram(const API::MatrixWorkspace &workspace) {
+  const auto hist = workspace.histogram(0);
+  auto XBegin = m_minX;
+  auto xEnd = m_maxX - m_histogram;
+
+  auto cropped(hist);
+  cropped.resize(xEnd - XBegin);
+
+  xEnd = hist.xMode() == Histogram::XMode::Points ? xEnd : xEnd + 1;
+  cropped.mutableX().assign(hist.x().begin() + XBegin, hist.x().begin() + xEnd);
+  return cropped.x();
+}
+
 namespace { // anonymous namespace
 
 template <class T> struct eventFilter {
