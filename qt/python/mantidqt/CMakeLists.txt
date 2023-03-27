@@ -161,7 +161,6 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/superplot/test/test_superplot_model.py
     mantidqt/widgets/superplot/test/test_superplot_presenter.py
     mantidqt/widgets/superplot/test/test_superplot_view.py
-    mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/workspacecalculator/test/test_workspacecalculator_view.py
     mantidqt/widgets/workspacecalculator/test/test_workspacecalculator_presenter.py
     mantidqt/widgets/workspacecalculator/test/test_workspacecalculator_model.py
