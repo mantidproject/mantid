@@ -13,6 +13,10 @@ from unittest.mock import patch
 
 # third-party library imports
 
+import faulthandler
+
+faulthandler.enable()
+
 # local package imports
 from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole
 
