@@ -25,8 +25,6 @@
 
 using Mantid::Types::Event::TofEvent;
 
-namespace {
-
 /** Transform event IDs to global spectrum numbers using the bankOffsets stored
  * at object creation.
  *
@@ -41,8 +39,6 @@ void eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count, const i
   for (size_t i = 0; i < count; ++i)
     event_id_start[i] -= bankOffset;
 }
-
-} // namespace
 
 namespace Mantid {
 namespace Parallel {
