@@ -1,1 +1,1 @@
-- Fixed the labelling of the workspaces output by :ref:`PolarizationCorrectionWildes` which were being inverted, while ensuring the output workspace group order continues to match the documentation.
+- The Preview tab now shows the binned output of the reduction on the 1D plot.
