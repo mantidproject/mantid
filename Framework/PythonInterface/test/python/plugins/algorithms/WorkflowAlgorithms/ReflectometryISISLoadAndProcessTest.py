@@ -194,10 +194,10 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
     def test_hide_workspaces_option_hides_input_workspaces(self):
         args = self._default_options
         args["InputRunList"] = "13460"
-        args["FirstTransmissionRunList"] = "13450"
+        args["FirstTransmissionRunList"] = "13460"
         args["ProcessingInstructions"] = "4"
         args["HideInputWorkspaces"] = True
-        outputs = ["IvsQ_13460", "IvsQ_binned_13460", "TRANS_LAM_13450"]
+        outputs = ["IvsQ_13460", "IvsQ_binned_13460", "TRANS_LAM_13460"]
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ["ReflectometryISISPreprocess", "ReflectometryISISPreprocess", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_13460"), history)
