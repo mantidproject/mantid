@@ -346,7 +346,7 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
 
 void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) {
   auto &row = dynamic_cast<PreviewRow &>(item);
-  MatrixWorkspace_sptr outputWs = algorithm->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWs = algorithm->getProperty("OutputWorkspaceBinned");
   row.setReducedWs(outputWs);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction
