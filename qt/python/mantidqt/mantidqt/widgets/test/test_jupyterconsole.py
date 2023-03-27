@@ -8,6 +8,10 @@
 #
 #
 # system imports
+import faulthandler
+
+faulthandler.enable()
+
 # import readline (if available) before QApplication starts to avoid segfault with IPython 5 and Python 3
 try:
     import readline  # noqa
