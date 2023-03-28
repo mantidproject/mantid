@@ -25,21 +25,6 @@
 
 using Mantid::Types::Event::TofEvent;
 
-/** Transform event IDs to global spectrum numbers using the bankOffsets stored
- * at object creation.
- *
- * The transformation is in-place to save memory bandwidth and modifies the
- * range pointed to by `event_id_start`.
- * @param event_id_start Starting position of chunk of data containing event
- * IDs.
- * @param count Number of items in data chunk
- * @param bankOffset Offset to subtract from the array `event_id_start`.
- */
-void eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count, const int32_t bankOffset) {
-  for (size_t i = 0; i < count; ++i)
-    event_id_start[i] -= bankOffset;
-}
-
 namespace Mantid {
 namespace Parallel {
 namespace IO {
@@ -93,6 +78,8 @@ private:
     static void loadFromGroupWrapper(const H5::DataType &type, EventsListsShmemStorage &storage, const H5::Group &group,
                                      const std::vector<std::string> &bankNames, const std::vector<int32_t> &bankOffsets,
                                      std::size_t from, std::size_t to);
+
+    static void eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count, const int32_t bankOffset);
   };
 
   void assembleFromShared(std::vector<std::vector<Mantid::Types::Event::TofEvent> *> &result) const;
@@ -108,6 +95,23 @@ private:
   std::vector<std::string> m_segmentNames;
   std::string m_storageName;
 };
+
+/** Transform event IDs to global spectrum numbers using the bankOffsets stored
+ * at object creation.
+ *
+ * The transformation is in-place to save memory bandwidth and modifies the
+ * range pointed to by `event_id_start`.
+ * @param event_id_start Starting position of chunk of data containing event
+ * IDs.
+ * @param count Number of items in data chunk
+ * @param bankOffset Offset to subtract from the array `event_id_start`.
+ */
+template <typename MultiProcessEventLoader::LoadType LT>
+void MultiProcessEventLoader::GroupLoader<LT>::eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count,
+                                                                            const int32_t bankOffset) {
+  for (size_t i = 0; i < count; ++i)
+    event_id_start[i] -= bankOffset;
+}
 
 /// Wrapper to avoid manual processing of all cases of 2 template arguments
 template <typename MultiProcessEventLoader::LoadType LT>
