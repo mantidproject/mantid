@@ -25,7 +25,6 @@ requirements:
     - {{ cdt('libxxf86vm') }}  # [linux]
     - {{ cdt('libx11-devel') }}  # [linux]
     - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
-    - filelock {{ filelock }} # [linux or osx]
   host:
     - python {{ python }}
     - setuptools {{ setuptools }}
