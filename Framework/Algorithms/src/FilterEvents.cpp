@@ -255,7 +255,7 @@ void FilterEvents::exec() {
   processAlgorithmProperties();
 
   // Examine workspace for detectors
-  examineAndSortEventWS();
+  examineEventWS();
 
   // Parse splitters
   m_progress = 0.0;
@@ -343,11 +343,10 @@ void FilterEvents::exec() {
 }
 
 //----------------------------------------------------------------------------------------------
-/**  Examine whether any spectrum does not have detector
- * Warning message will be written out
+/**
+ * Mark event lists of workspace indexes with no associated detector pixels as not to be split
  */
-void FilterEvents::examineAndSortEventWS() {
-  // get event workspace information
+void FilterEvents::examineEventWS() {
   size_t numhist = m_eventWS->getNumberHistograms();
   m_vecSkip.resize(numhist, false);
 

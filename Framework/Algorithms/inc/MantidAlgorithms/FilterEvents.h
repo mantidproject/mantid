@@ -104,8 +104,8 @@ private:
   /// Filter events by splitters in format of vector
   void filterEventsByVectorSplitters(double progressamount);
 
-  /// Examine workspace
-  void examineAndSortEventWS();
+  /// Mark event lists of workspace indexes with no associated detector pixels as not to be split
+  void examineEventWS();
 
   /// Convert SplittersWorkspace to vector of time and vector of target
   /// (itarget)
