@@ -26,6 +26,7 @@ requirements:
     - {{ cdt('libxxf86vm') }}  # [linux]
     - {{ cdt('libx11-devel') }}  # [linux]
     - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
+    - readline {{ readline }} # [linux or osx]
   host:
     - boost {{ boost }}
     - eigen
