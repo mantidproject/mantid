@@ -307,9 +307,7 @@ void FilterEvents::exec() {
   // add a new 'split' tsp to output workspace
   std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> split_tsp_vector;
   if (m_useSplittersWorkspace) {
-    // DEBUG: parallelize this function (and rename) once we have debugged all the unit tests
-    filterEventsBySplittersSerial(progressamount);
-    // filterEventsBySplitters(progressamount);
+    filterEventsBySplitters(progressamount);
     generateSplitterTSPalpha(split_tsp_vector);
   } else {
     filterEventsByVectorSplitters(progressamount);
@@ -1633,101 +1631,33 @@ void FilterEvents::setupCustomizedTOFCorrection() {
   }
 }
 
-// DEBUG: remove this function
-void FilterEvents::filterEventsBySplittersSerial(double progressamount) {
-  const auto startTime = std::chrono::high_resolution_clock::now();
-  size_t numberOfSpectra = m_eventWS->getNumberHistograms();
-
-  // Loop over the histograms (detector spectra) to do split from 1 event list
-  // to N event list
-  g_log.debug() << "Number of spectra in input/source EventWorkspace = " << numberOfSpectra << ".\n";
-
-  for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws) {
-
-    // Filter the non-skipped
-    if (!m_vecSkip[iws]) {
-      // Get the output event lists (should be empty) to be a map
-      std::map<int, DataObjects::EventList *> partialEvenLists;
-      for (auto &ws : m_outputWorkspacesMap) {
-        int index = ws.first;
-        auto &partialEventList = ws.second->getSpectrum(iws);
-        partialEvenLists.emplace(index, &partialEventList);
-      }
-
-      // Get a holder on input workspace's event list of this spectrum
-      const DataObjects::EventList &inputEventList = m_eventWS->getSpectrum(iws);
-
-      // Perform the filtering (using the splitting function and just one output)
-      const bool pulseTof{!m_filterByPulseTime};           // split by pulse-time + TOF ?
-      const bool tofCorrect{m_tofCorrType != NoneCorrect}; // apply corrections to the TOF values?
-      m_timeSplitter.splitEventList(inputEventList, partialEvenLists, pulseTof, tofCorrect, m_detTofFactors[iws],
-                                    m_detTofOffsets[iws]);
-    }
-  }
-
-  // Split the sample logs in each target workspace.
-  progress(0.1 + progressamount, "Splitting logs");
-
-  // DEBUG: uncomment next statement
-  addTimer("filterEventsBySplitters", startTime, std::chrono::high_resolution_clock::now());
-}
-
-/** Main filtering method
- * Structure: per spectrum --> per workspace
- */
 void FilterEvents::filterEventsBySplitters(double progressamount) {
   const auto startTime = std::chrono::high_resolution_clock::now();
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
-
-  // Loop over the histograms (detector spectra) to do split from 1 event list
-  // to N event list
   g_log.debug() << "Number of spectra in input/source EventWorkspace = " << numberOfSpectra << ".\n";
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws) {
     PARALLEL_START_INTERRUPT_REGION
-
-    // Filter the non-skipped
-    if (!m_vecSkip[iws]) {
-      // Get the output event lists (should be empty) to be a map
-      std::map<int, DataObjects::EventList *> partialEvenLists;
-      // DEBUG: uncomment next statement
+    if (!m_vecSkip[iws]) {                                      // Filter the non-skipped
+      std::map<int, DataObjects::EventList *> partialEvenLists; // event lists receiving the events from input list
       PARALLEL_CRITICAL(build_elist) {
         for (auto &ws : m_outputWorkspacesMap) {
           int index = ws.first;
           auto &partialEventList = ws.second->getSpectrum(iws);
           partialEvenLists.emplace(index, &partialEventList);
         }
-      }
-
-      // Get a holder on input workspace's event list of this spectrum
-      const DataObjects::EventList &inputEventList = m_eventWS->getSpectrum(iws);
-
-      if (m_filterByPulseTime) {
-        // inputEventList.splitByPulseTime(m_splitters, partialEvenLists);
-        inputEventList.splitByPulseTime(m_timeSplitter, partialEvenLists);
-      } else if (m_tofCorrType != NoneCorrect) {
-        // inputEventList.splitByFullTime(m_splitters, partialEvenLists, true, m_detTofFactors[iws],
-        // m_detTofOffsets[iws]);
-        inputEventList.splitByFullTime(m_timeSplitter, partialEvenLists, true, m_detTofFactors[iws],
-                                       m_detTofOffsets[iws]);
-      } else {
-        // inputEventList.splitByFullTime(m_splitters, partialEvenLists, false, 1.0, 0.0);
-        inputEventList.splitByFullTime(m_timeSplitter, partialEvenLists, false, 1.0, 0.0);
+        const DataObjects::EventList &inputEventList = m_eventWS->getSpectrum(iws); // input event list
+        const bool pulseTof{!m_filterByPulseTime};                                  // split by pulse-time + TOF ?
+        const bool tofCorrect{m_tofCorrType != NoneCorrect}; // apply corrections to the TOF values?
+        m_timeSplitter.splitEventList(inputEventList, partialEvenLists, pulseTof, tofCorrect, m_detTofFactors[iws],
+                                      m_detTofOffsets[iws]);
       }
     }
-
-    // DEBUG: uncomment next statement
     PARALLEL_END_INTERRUPT_REGION
-  } // END FOR i = 0
-    // DEBUG: uncomment next statement
+  }
   PARALLEL_CHECK_INTERRUPT_REGION
-
-  // Split the sample logs in each target workspace.
-  // DEBUG: uncomment next statement
   progress(0.1 + progressamount, "Splitting logs");
-
-  // DEBUG: uncomment next statement
   addTimer("filterEventsBySplitters", startTime, std::chrono::high_resolution_clock::now());
 }
 

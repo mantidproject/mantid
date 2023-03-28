@@ -101,10 +101,6 @@ private:
   /// Filter events by splitters in format of Splitter
   void filterEventsBySplitters(double progressamount);
 
-  // DEBUG: remove this function
-  /// Filter events by splitters in format of Splitter
-  void filterEventsBySplittersSerial(double progressamount);
-
   /// Filter events by splitters in format of vector
   void filterEventsByVectorSplitters(double progressamount);
 
