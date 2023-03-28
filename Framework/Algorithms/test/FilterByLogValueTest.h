@@ -113,7 +113,7 @@ public:
 
     TimeSeriesProperty<double> *temp;
     temp = new TimeSeriesProperty<double>("temp"); // Temperature log
-    // 10C at 10 sec up to 50C at 50 seconds
+    // 10C at 10 seconds up to 50C at 50 seconds
     for (double i = 10; i <= 50; i += 10)
       temp->addValue(run_start + i, i);
     ew->mutableRun().addProperty(temp);
