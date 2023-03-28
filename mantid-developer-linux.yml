@@ -55,6 +55,7 @@ dependencies:
   # Linux only
   - gxx_linux-64==10.3.*
   - libglu>=9.0.0
+  - readline<8.2
 
   # Needed for test suite on Linux
   - pciutils-libs-cos7-x86_64>=3.5.1

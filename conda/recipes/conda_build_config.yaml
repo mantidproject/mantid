@@ -64,6 +64,10 @@ gsl:
 ipykernel:
   - <6
 
+# Pinned as per issue 35406
+readline:
+  - <8.2
+
 pin_run_as_build:
     boost:
       max_pin: x.x
