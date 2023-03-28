@@ -29,8 +29,8 @@ class Selector(RectangleSelector):
     }
 
     def __init__(self, region_type: str, color: str, *args):
-        self.kwargs["props"] = dict(facecolor="white", edgecolor=color, alpha=0.2, linewidth=2, fill=True)
-        self.kwargs["handle_props"] = dict(markersize=4)
+        self.kwargs["props"] = dict(facecolor=color, edgecolor=color, alpha=0.4, linewidth=3, fill=True)
+        self.kwargs["handle_props"] = dict(markersize=6)
         self.kwargs["drag_from_anywhere"] = True
         self.kwargs["ignore_event_outside"] = True
 

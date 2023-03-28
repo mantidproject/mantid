@@ -39,11 +39,11 @@ inline std::string roiTypeToString(ROIType roiType) {
 inline std::string roiTypeToColor(ROIType roiType) {
   switch (roiType) {
   case ROIType::Signal:
-    return "green";
+    return "#00FF00";
   case ROIType::Background:
-    return "magenta";
+    return "#FF00FF";
   case ROIType::Transmission:
-    return "blue";
+    return "#0000FF";
   }
   throw std::invalid_argument("Unexpected ROI type");
 }
