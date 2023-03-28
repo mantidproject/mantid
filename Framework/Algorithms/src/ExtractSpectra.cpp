@@ -144,10 +144,12 @@ void ExtractSpectra::exec() {
 /// Execute the algorithm in case of a histogrammed data.
 void ExtractSpectra::execHistogram() {
   auto size = static_cast<int>(m_inputWorkspace->getNumberHistograms());
+  auto croppedCommonXHistogram = getCroppedXHistogram(*m_inputWorkspace);
   Progress prog(this, 0.0, 1.0, size);
   for (int i = 0; i < size; ++i) {
     if (m_commonBoundaries) {
-      m_inputWorkspace->setHistogram(i, slice(m_inputWorkspace->histogram(i), m_minX, m_maxX - m_histogram));
+      // m_inputWorkspace->setHistogram(i, slice(m_inputWorkspace->histogram(i), m_minX, m_maxX - m_histogram));
+      this->cropCommon(*m_inputWorkspace, croppedCommonXHistogram, i);
     } else {
       this->cropRagged(*m_inputWorkspace, i);
     }
@@ -156,7 +158,12 @@ void ExtractSpectra::execHistogram() {
   }
 }
 
-Mantid::HistogramData::HistogramX ExtractSpectra::getCroppedXHistogram(const API::MatrixWorkspace &workspace) {
+/** Returns a pointer to a cropped X Histrogram to be used as the X Histogram
+ *  for each of the spectra in the new cropped workspace
+ *  @param workspace :: The workspace from which to get the cropped X Histogram
+ */
+const Kernel::cow_ptr<Mantid::HistogramData::HistogramX>
+ExtractSpectra::getCroppedXHistogram(const API::MatrixWorkspace &workspace) {
   const auto hist = workspace.histogram(0);
   auto XBegin = m_minX;
   auto xEnd = m_maxX - m_histogram;
@@ -166,7 +173,57 @@ Mantid::HistogramData::HistogramX ExtractSpectra::getCroppedXHistogram(const API
 
   xEnd = hist.xMode() == Histogram::XMode::Points ? xEnd : xEnd + 1;
   cropped.mutableX().assign(hist.x().begin() + XBegin, hist.x().begin() + xEnd);
-  return cropped.x();
+  return cropped.sharedX();
+}
+
+/** Crops the given workspace in accordance with m_minX and m_maxX
+ *  @param workspace :: The output workspace to crop
+ *  @param XHistogram :: Pointer to the cropped X Histogram to be used in the output workspace
+ */
+void ExtractSpectra::cropCommon(API::MatrixWorkspace &workspace,
+                                Kernel::cow_ptr<Mantid::HistogramData::HistogramX> XHistogram, int index) {
+  const auto hist = workspace.histogram(index);
+  auto begin = m_minX;
+  auto end = m_maxX - m_histogram;
+
+  auto cropped(hist);
+  cropped.resize(end - begin);
+
+  // set shared x
+  cropped.setSharedX(XHistogram);
+
+  if (cropped.sharedY())
+    cropped.mutableY().assign(hist.y().begin() + begin, hist.y().begin() + end);
+  if (cropped.sharedE())
+    cropped.mutableE().assign(hist.e().begin() + begin, hist.e().begin() + end);
+  if (cropped.sharedDx())
+    cropped.mutableDx().assign(hist.dx().begin() + begin, hist.dx().begin() + end);
+
+  workspace.setHistogram(index, cropped);
+}
+
+/** Zeroes all data points outside the X values given
+ *  @param workspace :: The output workspace to crop
+ *  @param index ::         The workspace index of the spectrum
+ */
+void ExtractSpectra::cropRagged(MatrixWorkspace &workspace, int index) {
+  auto &Y = workspace.mutableY(index);
+  auto &E = workspace.mutableE(index);
+  const size_t size = Y.size();
+  size_t startX = this->getXMinIndex(index);
+  if (startX > size)
+    startX = size;
+  for (size_t i = 0; i < startX; ++i) {
+    Y[i] = 0.0;
+    E[i] = 0.0;
+  }
+  size_t endX = this->getXMaxIndex(index);
+  if (endX > 0)
+    endX -= m_histogram;
+  for (size_t i = endX; i < size; ++i) {
+    Y[i] = 0.0;
+    E[i] = 0.0;
+  }
 }
 
 namespace { // anonymous namespace
@@ -374,30 +431,6 @@ size_t ExtractSpectra::getXMaxIndex(const size_t wsIndex) {
     xIndex = std::upper_bound(X.begin(), X.end(), maxX_val) - X.begin();
   }
   return xIndex;
-}
-
-/** Zeroes all data points outside the X values given
- *  @param workspace :: The output workspace to crop
- *  @param index ::         The workspace index of the spectrum
- */
-void ExtractSpectra::cropRagged(MatrixWorkspace &workspace, int index) {
-  auto &Y = workspace.mutableY(index);
-  auto &E = workspace.mutableE(index);
-  const size_t size = Y.size();
-  size_t startX = this->getXMinIndex(index);
-  if (startX > size)
-    startX = size;
-  for (size_t i = 0; i < startX; ++i) {
-    Y[i] = 0.0;
-    E[i] = 0.0;
-  }
-  size_t endX = this->getXMaxIndex(index);
-  if (endX > 0)
-    endX -= m_histogram;
-  for (size_t i = endX; i < size; ++i) {
-    Y[i] = 0.0;
-    E[i] = 0.0;
-  }
 }
 
 } // namespace Mantid::Algorithms

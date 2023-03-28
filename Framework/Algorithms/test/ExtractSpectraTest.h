@@ -160,7 +160,11 @@ public:
 
   void test_x_data_is_not_coppied() {
     Parameters params;
-    auto ws = runAlgorithm(params);
+    params.XMin = 1;
+    params.XMax = 5;
+
+    const auto ws = runAlgorithm(params);
+
     if (!ws)
       return;
 
