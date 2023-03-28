@@ -55,6 +55,7 @@ public:
   /** Test initialization
    */
   void test_Initialization() {
+    std::cout << std::endl << "test_Initialization..." << std::endl;
     FilterEvents alg;
     alg.initialize();
 
@@ -72,6 +73,7 @@ public:
    * (5) "Experiment": 5 pulse times.  10 events in each pulse
    */
   void test_CreatedEventWorskpaceAndSplitter() {
+    std::cout << std::endl << "test_CreatedEventWorskpaceAndSplitter..." << std::endl;
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
     int64_t tofdt = 10 * 1000 * 1000;
@@ -117,6 +119,7 @@ public:
    *  5: 20400000000, 20465000000, 2
    */
   void test_FilterNoCorrection() {
+    std::cout << std::endl << "test_FilterNoCorrection..." << std::endl;
     int64_t runstart_i64 = 20000000000;  // 20 seconds, beginning of the fake run
     int64_t pulsedt = 100 * 1000 * 1000; // 100 miliseconds, time between consecutive pulses
     int64_t tofdt = 10 * 1000 * 1000;    // 10 miliseconds, spacing between neutrons events within a pulse
@@ -281,6 +284,7 @@ public:
    *events
    */
   void test_FilterWOCorrection2() {
+    std::cout << std::endl << "test_FilterWOCorrection2..." << std::endl;
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -355,6 +359,7 @@ public:
   /**  Filter test with TOF correction
    */
   void test_FilterWithCustumizedCorrection() {
+    std::cout << std::endl << "test_FilterWithCustumizedCorrection..." << std::endl;
     // 1. Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -430,6 +435,7 @@ public:
   /** Test filtering with correction of direct geometry
    */
   void test_FilterElasticCorrection() {
+    std::cout << std::endl << "test_FilterElasticCorrection..." << std::endl;
     EventWorkspace_sptr ws = createEventWorkspaceElastic(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 10000);
@@ -487,6 +493,7 @@ public:
   /** Test filtering with correction of direct geometry
    */
   void test_FilterDGCorrection() {
+    std::cout << std::endl << "test_FilterDGCorrection..." << std::endl;
     EventWorkspace_sptr ws = createEventWorkspaceDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockDirectEventWS", ws);
 
@@ -537,6 +544,7 @@ public:
   /** Test filtering with correction to indirect geometry inelastic instrument
    */
   void test_FilterIndirectGeometryCorrection() {
+    std::cout << std::endl << "test_FilterIndirectGeometryCorrection..." << std::endl;
     // Create workspaces for filtering
     EventWorkspace_sptr ws = createEventWorkspaceInDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockIndirectEventWS", ws);
@@ -618,6 +626,7 @@ public:
         979: 4: 3.65e+08  -  4.65e+08: 2
    */
   void test_FilterRelativeTime() {
+    std::cout << std::endl << "test_FilterRelativeTime..." << std::endl;
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -783,6 +792,7 @@ public:
    * events
    */
   void test_tableSplitter() {
+    std::cout << std::endl << "test_tableSplitter..." << std::endl;
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -911,6 +921,7 @@ public:
    * @brief Utest_excludeSampleLogs
    */
   void test_excludeSampleLogs() {
+    std::cout << std::endl << "test_excludeSampleLogs..." << std::endl;
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -980,6 +991,7 @@ public:
    * @brief test_ThrowSameName
    */
   void test_ThrowSameName() {
+    std::cout << std::endl << "test_ThrowSameName..." << std::endl;
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -1018,6 +1030,7 @@ public:
    * @brief test_ThrowSameName
    */
   void test_groupWorkspaces() {
+    std::cout << std::endl << "test_groupWorkspaces..." << std::endl;
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -1055,6 +1068,7 @@ public:
    * basename_startTime_stopTime
    */
   void test_descriptiveWorkspaceNamesTime() {
+    std::cout << std::endl << "test_descriptiveWorkspaceNamesTime..." << std::endl;
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -1116,6 +1130,7 @@ public:
    * basename_startTime_stopTime
    */
   void test_descriptiveWorkspaceNamesLog() {
+    std::cout << std::endl << "test_descriptiveWorkspaceNamesLog..." << std::endl;
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
