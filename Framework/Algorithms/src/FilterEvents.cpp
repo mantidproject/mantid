@@ -347,7 +347,6 @@ void FilterEvents::exec() {
 //----------------------------------------------------------------------------------------------
 /**  Examine whether any spectrum does not have detector
  * Warning message will be written out
- * @brief FilterEvents::examineEventWS
  */
 void FilterEvents::examineAndSortEventWS() {
   // get event workspace information
@@ -357,8 +356,7 @@ void FilterEvents::examineAndSortEventWS() {
   // check whether any detector is skipped
   if (m_specSkipType == EventFilterSkipNoDetTOFCorr && m_tofCorrType == NoneCorrect) {
     // No TOF correction and skip spectrum only if TOF correction is required
-    g_log.warning("By user's choice, No spectrum will be skipped even if it has "
-                  "no detector.");
+    g_log.warning("By user's choice, No spectrum will be skipped even if it has no detector.");
   } else {
     // check detectors whether there is any of them that will be skipped
     stringstream msgss;
@@ -391,13 +389,6 @@ void FilterEvents::examineAndSortEventWS() {
     }
 
   } // END-IF-ELSE
-
-  // sort events
-  const auto sortType = m_filterByPulseTime ? DataObjects::PULSETIME_SORT : DataObjects::PULSETIMETOF_SORT;
-
-  // TODO: TimeSplitter.splitEventList() sorts the event list. This seems unnecessary
-  // This runs the SortEvents algorithm in parallel
-  m_eventWS->sortAll(sortType, nullptr);
 
   return;
 }
