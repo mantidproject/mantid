@@ -141,6 +141,16 @@ public:
 
   void testInvalidCorrectionOptionsFromParamsFile() { getDefaultsFromParamsFileThrows("Correction_Invalid"); }
 
+  void testDefaultStitchParamsOptions() {
+    auto result = getDefaults();
+    TS_ASSERT_EQUALS(result.stitchParameters().empty(), true);
+  }
+
+  void testValidStitchParamsOptionsFromParamsFile() {
+    auto result = getDefaultsFromParamsFile("Experiment");
+    TS_ASSERT_EQUALS(result.stitchParameters().size(), 1);
+  }
+
 private:
   Experiment getDefaults() {
     // Provide the mandatory params file so that we don't throw. Other params
