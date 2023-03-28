@@ -19,7 +19,7 @@ namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
 Instrument getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
-  auto defaults = OptionDefaults(std::move(instrument), false);
+  auto defaults = OptionDefaults(std::move(instrument), "ReflectometryReductionOneAuto");
 
   auto wavelengthRange = RangeInLambda(defaults.getValue<double>("WavelengthMin", "LambdaMin"),
                                        defaults.getValue<double>("WavelengthMax", "LambdaMax"));

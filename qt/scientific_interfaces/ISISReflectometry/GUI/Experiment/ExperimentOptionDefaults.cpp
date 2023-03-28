@@ -24,7 +24,7 @@ std::string stringValueOrEmpty(boost::optional<double> value) { return value ? s
 
 Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   // Looks for defaults for use in ReflectometryReductionOneAuto algorithm
-  auto defaults = OptionDefaults(instrument, false);
+  auto defaults = OptionDefaults(instrument, "ReflectometryReductionOneAuto");
 
   auto analysisMode =
       analysisModeFromString(defaults.getStringOrDefault("AnalysisMode", "AnalysisMode", "PointDetectorAnalysis"));
@@ -66,7 +66,7 @@ Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
       TransmissionStitchOptions(transmissionRunRange, transmissionStitchParams, transmissionScaleRHS);
 
   // Looks for default Output Stitch Properties for use in Stitch1DMany algorithm
-  auto stitchDefaults = OptionDefaults(std::move(instrument), true);
+  auto stitchDefaults = OptionDefaults(std::move(instrument), "Stitch1DMany");
   auto stitchParameters = std::map<std::string, std::string>();
   stitchParameters["Params"] = stitchDefaults.getStringOrEmpty("Params", "StitchParams");
   stitchParameters["StartOverlaps"] = stitchDefaults.getStringOrEmpty("StartOverlaps", "StitchStartOverlaps");
