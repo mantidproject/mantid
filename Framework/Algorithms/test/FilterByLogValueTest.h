@@ -134,7 +134,8 @@ public:
     }
 
     // add run duration based on proton charge log
-    ew->mutableRun().addProperty("duration", 100.0, "seconds");
+    bool overwriteValue{true};
+    ew->mutableRun().addProperty("duration", 100.0, "seconds", overwriteValue);
 
     TimeSeriesProperty<double> *single;
 
