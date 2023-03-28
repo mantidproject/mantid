@@ -112,8 +112,8 @@ public:
                                                   // WorkspaceCreationHelper.
 
     TimeSeriesProperty<double> *temp;
-    temp = new TimeSeriesProperty<double>("temp");
-    // 10 C at 10 sec up to 50C at 50 sec
+    temp = new TimeSeriesProperty<double>("temp"); // Temperature log
+    // 10C at 10 sec up to 50C at 50 seconds
     for (double i = 10; i <= 50; i += 10)
       temp->addValue(run_start + i, i);
     ew->mutableRun().addProperty(temp);
@@ -132,6 +132,9 @@ public:
         pc->addValue(run_start + i, 1.0);
       ew->mutableRun().addProperty(pc);
     }
+
+    // add run duration based on proton charge log
+    ew->mutableRun().addProperty("duration", 100.0, "seconds");
 
     TimeSeriesProperty<double> *single;
 
