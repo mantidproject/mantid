@@ -166,7 +166,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self.declareProperty(Prop.RELOAD, True, doc="If true, reload input workspaces if they are of the incorrect type")
         self.declareProperty(Prop.GROUP_TOF, True, doc="If true, group the TOF workspaces")
 
-        self.declareProperty(Prop.HIDE_INPUT, False, doc="If true, hide the output workspaces in the ADS.")
+        self.declareProperty(Prop.HIDE_INPUT, False, doc="If true, make the input workspaces invisible in the ADS.")
 
     def _declarePreprocessProperties(self):
         """Copy properties from the child preprocess algorithm"""
