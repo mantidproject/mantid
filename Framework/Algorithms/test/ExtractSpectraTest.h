@@ -548,11 +548,8 @@ private:
 
   MatrixWorkspace_sptr createInputWorkspaceHisto() const {
     // Set up a small workspace for testing
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nBins + 1, nBins);
+    MatrixWorkspace_sptr space = WorkspaceCreationHelper::create2DWorkspace(nSpec, nBins);
     for (size_t j = 0; j < nSpec; ++j) {
-      for (size_t k = 0; k <= nBins; ++k) {
-        space->mutableX(j)[k] = double(k);
-      }
       space->mutableY(j) = HistogramData::HistogramY(nBins, double(j));
       space->mutableE(j) = HistogramData::HistogramE(nBins, sqrt(double(j)));
     }
@@ -561,11 +558,8 @@ private:
 
   MatrixWorkspace_sptr createInputWorkspacePoints() const {
     // Set up a small workspace for testing
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nBins, nBins);
+    MatrixWorkspace_sptr space = WorkspaceCreationHelper::create2DWorkspacePoints(nSpec, nBins);
     for (size_t j = 0; j < nSpec; ++j) {
-      for (size_t k = 0; k < nBins; ++k) {
-        space->mutableX(j)[k] = double(k);
-      }
       space->mutableY(j) = HistogramData::HistogramY(nBins, double(j));
       space->mutableE(j) = HistogramData::HistogramE(nBins, sqrt(double(j)));
     }
