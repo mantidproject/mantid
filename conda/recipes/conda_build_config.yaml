@@ -68,6 +68,9 @@ ipykernel:
 readline:
   - <8.2
 
+filelock:
+  - <3.10.2
+
 pin_run_as_build:
     boost:
       max_pin: x.x
