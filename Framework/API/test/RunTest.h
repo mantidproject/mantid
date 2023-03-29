@@ -12,10 +12,12 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 #include <cxxtest/TestSuite.h>
 #include <json/value.h>
@@ -23,6 +25,17 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using Mantid::Types::Core::DateAndTime;
+
+namespace {
+const DateAndTime ONE("2023-01-01T11:00:00");
+const DateAndTime TWO("2023-01-01T12:00:00");
+const DateAndTime THREE("2023-01-01T13:00:00");
+const DateAndTime FOUR("2023-01-01T14:00:00");
+const DateAndTime FIVE("2023-01-01T15:00:00");
+const DateAndTime SIX("2023-01-01T16:00:00");
+
+} // namespace
 
 // Helper class
 namespace {
@@ -551,6 +564,25 @@ public:
 
     // check the unfiltered value
     TS_ASSERT_EQUALS(run.getProtonCharge(), 10.);
+  }
+
+  void test_setDuration() {
+    // attach it to a run object
+    Run run;
+
+    // does nothing, since run.m_timeroi is empty
+    run.setDuration();
+    TS_ASSERT(!run.hasProperty("duration"));
+
+    // create roi with a duration of three hours
+    TimeROI roi(ONE, FOUR);
+    run.setTimeROI(roi); // calls setDuration()
+    TS_ASSERT_EQUALS(run.getLogAsSingleValue("duration"), 3 * 3600.0);
+
+    // add one extra hour
+    roi.addROI(FIVE, SIX);
+    run.setTimeROI(roi); // calls setDuration()
+    TS_ASSERT_EQUALS(run.getLogAsSingleValue("duration"), 4 * 3600.0);
   }
 
   /** Save and load to NXS file */
