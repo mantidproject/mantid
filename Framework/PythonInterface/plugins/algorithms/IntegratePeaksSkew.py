@@ -273,20 +273,22 @@ class PeakData:
                 xcens[irow, icol, :] = xvals
         return xcens, signal, errors
 
-    def integrate_xrange(self, xmin, xmax):
-        # Pass in sorted detid list as ExtractSpectra does partial sorting
+    def get_roi_on_detector(self):
         isort = np.argsort(self.detids.flatten())
         ws_roi = exec_simpleapi_alg(
-            "ExtractSpectra",
-            InputWorkspace=self.ws,
-            DetectorList=self.detids.flatten()[isort],
-            OutputWorkspace=f"__roi{self.detids[0,0]}",
-            XMin=xmin,
-            XMax=xmax,
+            "ExtractSpectra", InputWorkspace=self.ws, DetectorList=self.detids.flatten()[isort], OutputWorkspace=f"__roi{self.detids[0, 0]}"
+        )
+        return ws_roi, isort
+
+    def integrate_xrange(self, xmin, xmax):
+        # Pass in sorted detid list as ExtractSpectra does partial sorting
+        ws_roi, isort = self.get_roi_on_detector()
+        ws_roi = exec_simpleapi_alg(
+            "Integration", InputWorkspace=ws_roi, RangeLower=xmin, RangeUpper=xmax, IncludePartialBins=True, OutputWorkspace=ws_roi
         )
         # GroupDetectors sorts the workspace by detector ID so need to get correct order
         x_integrated_data = np.zeros(self.detids.size)
-        x_integrated_data[isort] = AnalysisDataService.retrieve(ws_roi).extractY().sum(axis=1)
+        x_integrated_data[isort] = np.squeeze(AnalysisDataService.retrieve(ws_roi).extractY())
         x_integrated_data = x_integrated_data.reshape(self.detids.shape)
         exec_simpleapi_alg("DeleteWorkspace", Workspace=ws_roi)
         return x_integrated_data
