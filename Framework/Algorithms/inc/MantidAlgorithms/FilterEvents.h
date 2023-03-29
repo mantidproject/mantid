@@ -74,11 +74,12 @@ private:
   /// create event workspace
   std::shared_ptr<DataObjects::EventWorkspace> createEventWorkspaceNoLog();
   /// create output workspaces if the splitters are given in SplittersWorkspace
-  void createOutputWorkspacesSplitters();
+  // void createOutputWorkspacesSplitters();
   /// create output workspaces in the case of using TableWorlspace for splitters
-  void createOutputWorkspacesTableSplitterCase();
+  // void createOutputWorkspacesTableSplitterCase();
   /// create output workspaces in the case of using MatrixWorkspace for
   /// splitters
+  void createOutputWorkspaces();
   void createOutputWorkspacesMatrixCase();
 
   /// Set up detector calibration parameters
@@ -154,8 +155,6 @@ private:
   std::set<int> m_targetWorkspaceIndexSet;
   int m_maxTargetIndex;
 
-  Kernel::SplittingIntervalVec m_splitters;
-
   DataObjects::TimeSplitter m_timeSplitter;
 
   std::map<int, DataObjects::EventWorkspace_sptr> m_outputWorkspacesMap;
@@ -174,10 +173,10 @@ private:
   /// Base of output workspace's name
   std::string m_outputWSNameBase;
 
-  /// TableWorkspace splitters: from target map to vector workspace group-index
-  /// These 2 maps are complimentary to each other
-  std::map<std::string, int> m_targetIndexMap;
-  std::map<int, std::string> m_wsGroupIndexTargetMap;
+  // /// TableWorkspace splitters: from target map to vector workspace group-index
+  // /// These 2 maps are complimentary to each other
+  // std::map<std::string, int> m_targetIndexMap;
+  // std::map<int, std::string> m_wsGroupIndexTargetMap;
 
   /// MatrixWorkspace splitters:
   std::map<int, uint32_t> m_yIndexMap;

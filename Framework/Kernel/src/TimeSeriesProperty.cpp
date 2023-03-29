@@ -346,8 +346,11 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(const std::vector<DateAndTime> 
 
   // check inputs
   if (timeToFilterTo.size() != inputWorkspaceIndicies.size() + 1) {
-    throw std::runtime_error("Input time vector's size does not match(one more larger than) target "
-                             "workspace index vector's size inputWorkspaceIndicies.size() \n");
+    // throw std::runtime_error("Input time vector's size does not match(one more larger than) target "
+    //                         "workspace index vector's size inputWorkspaceIndicies.size() \n");
+    g_log.warning("Input time vector's size does not match(one more larger than) target "
+                  "workspace index vector's size inputWorkspaceIndicies.size() \n");
+    return;
   }
 
   // return if the output vector TimeSeriesProperties is not defined

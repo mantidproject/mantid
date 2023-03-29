@@ -36,6 +36,9 @@ public:
   TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &offset = DateAndTime(0, 0));
   TimeSplitter(const SplittersWorkspace_sptr &sws);
   const std::map<DateAndTime, int> &getSplittersMap() const;
+  const std::map<std::string, int> &getWorkspaceNameIndexMap() const;
+  const std::map<int, std::string> &getWorkspaceIndexNameMap() const;
+  std::string getWorkspaceIndexName(const int workspaceIndex, const int numericalShift = 0);
   /// Find the destination index for an event with a given time
   int valueAtTime(const DateAndTime &time) const;
   void addROI(const DateAndTime &start, const DateAndTime &stop, const int value);
@@ -60,6 +63,9 @@ private:
   void splitEventVec(const std::vector<DateAndTime> &times, const std::vector<EVENTTYPE> &events,
                      std::map<int, EventList *> partials) const;
   std::map<DateAndTime, int> m_roi_map;
+  // These 2 maps are complementary to each other
+  std::map<std::string, int> m_name_index_map;
+  std::map<int, std::string> m_index_name_map;
 };
 } // namespace DataObjects
 } // namespace Mantid

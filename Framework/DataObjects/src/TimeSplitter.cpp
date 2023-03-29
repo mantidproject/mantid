@@ -80,6 +80,11 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
   API::Column_sptr col_stop = tws->getColumn(1);
   API::Column_sptr col_target = tws->getColumn(2);
 
+  int target_index{NO_TARGET};
+  // int max_target_index{0};
+  int max_target_index{1};
+  size_t number_of_noninteger_target_names{0};
+
   for (size_t ii = 0; ii < tws->rowCount(); ii++) {
     // by design, the times in the table must be in seconds
     double timeStart_s{col_start->cell<double>(ii)};
@@ -95,15 +100,40 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
     timeStart += offset_ns;
     timeStop += offset_ns;
 
-    // get the target workspace index
-    int target_ws_index = std::stoi(col_target->cell<std::string>(ii));
+    // get the target name; it may or may not represent an integer
+    std::string target_name = col_target->cell<std::string>(ii);
+    // get the target workspace index. By current design, a valid target index could be >= 0, but the legacy code in
+    // FilterEvents::processTableSplittersWorkspace has it >= 1. Note, this only matters if the targets are input by
+    // non-integer names.
+    try {
+      target_index = std::stoi(target_name);
+      m_name_index_map[target_name] = target_index;
+      m_index_name_map[target_index] = target_name;
+    } catch (std::invalid_argument &e) // a non-integer name
+    {
+      number_of_noninteger_target_names++;
+
+      if (m_name_index_map.count(target_name) == 0) {
+        target_index = max_target_index;
+        m_name_index_map[target_name] = target_index;
+        m_index_name_map[target_index] = target_name;
+        max_target_index++;
+      } else {
+        target_index = m_name_index_map[target_name];
+        assert(m_index_name_map[target_index] == target_name);
+      }
+    }
 
     // if this row's time interval intersects an interval already in the splitter, no separate ROI will be created
-    if ((target_ws_index != NO_TARGET) && (valueAtTime(timeStart) != NO_TARGET || valueAtTime(timeStop) != NO_TARGET)) {
+    if ((target_index != NO_TARGET) && (valueAtTime(timeStart) != NO_TARGET || valueAtTime(timeStop) != NO_TARGET)) {
       g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
     }
 
-    addROI(timeStart, timeStop, target_ws_index);
+    addROI(timeStart, timeStop, target_index);
+  }
+
+  if (number_of_noninteger_target_names != 0 && number_of_noninteger_target_names != tws->rowCount()) {
+    throw std::runtime_error("Either all or none of the target workspace names in the table can represent integers");
   }
 }
 
@@ -117,7 +147,11 @@ TimeSplitter::TimeSplitter(const SplittersWorkspace_sptr &sws) {
       g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
     }
 
-    addROI(interval.start(), interval.stop(), interval.index());
+    int target_index = interval.index();
+    addROI(interval.start(), interval.stop(), target_index);
+    std::string target_name = std::to_string(target_index);
+    m_name_index_map[target_name] = target_index;
+    m_index_name_map[target_index] = target_name;
   }
 }
 
@@ -130,6 +164,29 @@ std::string TimeSplitter::debugPrint() const {
 }
 
 const std::map<DateAndTime, int> &TimeSplitter::getSplittersMap() const { return m_roi_map; }
+const std::map<std::string, int> &TimeSplitter::getWorkspaceNameIndexMap() const { return m_name_index_map; }
+const std::map<int, std::string> &TimeSplitter::getWorkspaceIndexNameMap() const { return m_index_name_map; }
+
+// Get the target name from the target index.
+std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const int numericalShift) {
+  assert(numericalShift >= 0);
+  if (m_index_name_map.count(workspaceIndex) == 0) {
+    std::stringstream msg;
+    msg << "Invalid target index " << workspaceIndex << " when calling TimeSplitter::getWorkspaceIndexName";
+    throw std::runtime_error(msg.str());
+  }
+
+  // If numericalShift > 0, the caller will get back a shifted index.
+  // This is useful for supporting "count from 1" use cases - see FilterEvents property OutputWorkspaceIndexedFrom1.
+  if (numericalShift > 0) {
+    std::stringstream s;
+    std::string name = m_index_name_map[workspaceIndex];
+    s << m_name_index_map[name] + numericalShift;
+    return s.str();
+  }
+
+  return m_index_name_map[workspaceIndex];
+}
 
 void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, const int value) {
   assertIncreasing(start, stop);

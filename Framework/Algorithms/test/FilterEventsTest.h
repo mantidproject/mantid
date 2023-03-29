@@ -881,7 +881,7 @@ public:
     Kernel::TimeSeriesProperty<int> *splitter2 =
         dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws2->run().getProperty("splitter"));
     TS_ASSERT(splitter2);
-    TS_ASSERT_EQUALS(splitter2->size(), 7);
+    TS_ASSERT_EQUALS(splitter2->size(), 3);
 
     TS_ASSERT_EQUALS(splitter2->nthTime(0), Types::Core::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter2->nthValue(0), 0);
@@ -890,7 +890,7 @@ public:
                      Types::Core::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() + runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(1), 1);
     TS_ASSERT_EQUALS(splitter2->nthTime(2).totalNanoseconds(),
-                     Types::Core::DateAndTime(static_cast<int>(2.65e+08)).totalNanoseconds() + runstart_i64);
+                     Types::Core::DateAndTime(static_cast<int>(4.65e+08)).totalNanoseconds() + runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
 
     // Check spectrum 3 of workspace 2
