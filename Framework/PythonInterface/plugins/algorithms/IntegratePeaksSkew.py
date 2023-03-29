@@ -273,16 +273,16 @@ class PeakData:
                 xcens[irow, icol, :] = xvals
         return xcens, signal, errors
 
-    def get_roi_on_detector(self):
-        isort = np.argsort(self.detids.flatten())
+    def get_roi_on_detector(self, detids):
+        isort = np.argsort(detids.flatten())
         ws_roi = exec_simpleapi_alg(
-            "ExtractSpectra", InputWorkspace=self.ws, DetectorList=self.detids.flatten()[isort], OutputWorkspace=f"__roi{self.detids[0, 0]}"
+            "ExtractSpectra", InputWorkspace=self.ws, DetectorList=detids.flat[isort], OutputWorkspace=f"__roi{detids.flat[0]}"
         )
         return ws_roi, isort
 
     def integrate_xrange(self, xmin, xmax):
         # Pass in sorted detid list as ExtractSpectra does partial sorting
-        ws_roi, isort = self.get_roi_on_detector()
+        ws_roi, isort = self.get_roi_on_detector(self.detids)
         ws_roi = exec_simpleapi_alg(
             "Integration", InputWorkspace=ws_roi, RangeLower=xmin, RangeUpper=xmax, IncludePartialBins=True, OutputWorkspace=ws_roi
         )
@@ -448,18 +448,21 @@ class PeakData:
         return np.sum(signal) / np.sqrt(np.sum(error_sq))
 
     def _focus_detids(self, detids):
-        if self.ws.getAxis(0).getUnit().unitID() == "dSpacing":
-            grp_ws = exec_simpleapi_alg(
-                "CreateGroupingWorkspace",
-                InputWorkspace=self.ws,
-                CustomGroupingString="+".join([str(id) for id in detids]),
-                OutputWorkspace="__grp",
-                ComponentName=self.ws.getInstrument().getName(),
+        if not self.ws.isCommonBins():
+            # get ws with just the selected detids
+            ws_roi, _ = self.get_roi_on_detector(detids)
+            # force common binning (same bin edges as first spectrum)
+            ws_roi_spec = exec_simpleapi_alg(
+                "ExtractSingleSpectrum", InputWorkspace=ws_roi, WorkspaceIndex=0, OutputWorkspace=ws_roi + "_spec"
             )
+            exec_simpleapi_alg("RebinToWorkspace", WorkspaceToRebin=ws_roi, WorkspaceToMatch=ws_roi_spec, OutputWorkspace=ws_roi)
             ws_foc = exec_simpleapi_alg(
-                "DiffractionFocussing", InputWorkspace=self.ws, GroupingWorkspace=grp_ws, OutputWorkspace=f"__foc{detids[0]}"
+                "GroupDetectors",
+                InputWorkspace=ws_roi,
+                WorkspaceIndexList=range(0, len(detids)),
+                OutputWorkspace=f"__foc{detids[0]}",
             )
-            exec_simpleapi_alg("DeleteWorkspace", Workspace=grp_ws)
+            exec_simpleapi_alg("DeleteWorkspaces", WorkspaceList=[ws_roi, ws_roi_spec])
         else:
             ws_foc = exec_simpleapi_alg(
                 "GroupDetectors",
