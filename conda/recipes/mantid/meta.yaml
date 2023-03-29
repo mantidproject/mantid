@@ -19,7 +19,7 @@ requirements:
     - llvm-openmp  # [osx]
     - libgomp  # [linux]
     - ninja  # [unix]
-    - cmake
+    - cmake {{ cmake }}  # [linux or osx]
     - git
     - {{ cdt('mesa-libgl-devel') }}  # [linux]
     - {{ cdt('mesa-dri-drivers') }}  # [linux]
@@ -49,6 +49,7 @@ requirements:
     - pip
     - openssl {{ openssl }}
     - versioningit
+    - libcxx {{ libcxx }}  # [osx]
   run:
     - {{ pin_compatible("boost", max_pin="x.x") }}
     - {{ pin_compatible("gsl", max_pin="x.x") }}

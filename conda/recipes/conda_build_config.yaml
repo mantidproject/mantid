@@ -72,9 +72,16 @@ readline:
 filelock:
   - <3.10.2
 
+cmake:
+  - <3.26.1
+
+libcxx:
+  - <16
+
 pin_run_as_build:
     boost:
       max_pin: x.x
+
 
 # Otherwise it will find the wrong sdk, currently working on 10.10 as that is what Anaconda/conda-build does.
 CONDA_BUILD_SYSROOT:
