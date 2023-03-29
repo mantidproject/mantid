@@ -61,6 +61,22 @@ std::map<std::string, std::string> ExtractSpectra::validateInputs() {
       helpMessages["XMax"] = "XMax must be greater than XMin";
     }
   }
+
+  if (!isDefault("StartWorkspaceIndex")) {
+    const int minSpec_i = getProperty("StartWorkspaceIndex");
+    auto minSpec = static_cast<size_t>(minSpec_i);
+    API::MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+    const size_t numberOfSpectra = ws->indexInfo().globalSize();
+    int maxSpec_i = getProperty("EndWorkspaceIndex");
+    auto maxSpec = static_cast<size_t>(maxSpec_i);
+    if (isEmpty(maxSpec_i))
+      maxSpec = numberOfSpectra - 1;
+    if (maxSpec < minSpec) {
+      helpMessages["StartWorkspaceIndex"] = "StartWorkspaceIndex must be less than or equal to EndWorkspaceIndex";
+      helpMessages["EndWorkspaceIndex"] = "EndWorkspaceIndex must be greater than or equal to StartWorkspaceIndex";
+    }
+  }
+
   return helpMessages;
 }
 
@@ -368,12 +384,6 @@ void ExtractSpectra::checkProperties() {
       auto maxSpec = static_cast<size_t>(maxSpec_i);
       if (isEmpty(maxSpec_i))
         maxSpec = numberOfSpectra - 1;
-      if (maxSpec < minSpec) {
-        g_log.error("StartWorkspaceIndex must be less than or equal to "
-                    "EndWorkspaceIndex");
-        throw std::out_of_range("StartWorkspaceIndex must be less than or equal "
-                                "to EndWorkspaceIndex");
-      }
       if (maxSpec - minSpec + 1 != numberOfSpectra) {
         m_workspaceIndexList.reserve(maxSpec - minSpec + 1);
         for (size_t i = minSpec; i <= maxSpec; ++i)

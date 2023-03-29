@@ -226,20 +226,18 @@ public:
     Parameters params;
     params.setInvalidXRange();
 
-    auto ws = runAlgorithm(params, false);
+    auto ws = runAlgorithm(
+        params,
+        "Some invalid Properties found: \n XMax: XMax must be greater than XMin\n XMin: XMin must be less than XMax");
   }
 
   void test_invalid_index_range() {
-    {
-      Parameters params;
-      params.setInvalidIndexRange();
-      auto ws = runAlgorithm(params, false);
-    }
-    {
-      Parameters params;
-      params.setInvalidIndexRange1();
-      auto ws = runAlgorithm(params, false);
-    }
+    Parameters params;
+    params.setInvalidIndexRange();
+    auto ws = runAlgorithm(
+        params, "Some invalid Properties found: \n "
+                "EndWorkspaceIndex: EndWorkspaceIndex must be greater than or equal to StartWorkspaceIndex\n "
+                "StartWorkspaceIndex: StartWorkspaceIndex must be less than or equal to EndWorkspaceIndex");
   }
 
   void test_detector_list() {
@@ -401,20 +399,18 @@ public:
   void test_invalid_x_range_event() {
     Parameters params("event");
     params.setInvalidXRange();
-    auto ws = runAlgorithm(params, false);
+    auto ws = runAlgorithm(
+        params,
+        "Some invalid Properties found: \n XMax: XMax must be greater than XMin\n XMin: XMin must be less than XMax");
   }
 
   void test_invalid_index_range_event() {
-    {
-      Parameters params("event");
-      params.setInvalidIndexRange();
-      auto ws = runAlgorithm(params, false);
-    }
-    {
-      Parameters params("event");
-      params.setInvalidIndexRange1();
-      auto ws = runAlgorithm(params, false);
-    }
+    Parameters params;
+    params.setInvalidIndexRange();
+    auto ws = runAlgorithm(
+        params, "Some invalid Properties found: \n "
+                "EndWorkspaceIndex: EndWorkspaceIndex must be greater than or equal to StartWorkspaceIndex\n "
+                "StartWorkspaceIndex: StartWorkspaceIndex must be less than or equal to EndWorkspaceIndex");
   }
 
   void test_detector_list_event() {
@@ -515,8 +511,9 @@ public:
   void xtest_invalid_x_range_ragged() {
     Parameters params("histo-ragged");
     params.setInvalidXRange();
-
-    auto ws = runAlgorithm(params, false);
+    auto ws = runAlgorithm(
+        params,
+        "Some invalid Properties found: \n XMax: XMax must be greater than XMin\n XMin: XMin must be less than XMax");
   }
 
   void test_parallel_DetectorList_fails() { ParallelTestHelpers::runParallel(run_parallel_DetectorList_fails); }
@@ -762,10 +759,6 @@ private:
       StartWorkspaceIndex = 3;
       EndWorkspaceIndex = 1;
     }
-    void setInvalidIndexRange1() {
-      StartWorkspaceIndex = 1000;
-      EndWorkspaceIndex = 1002;
-    }
 
     // ---- test Dx -------
     void testDx(const MatrixWorkspace &ws) const {
@@ -789,7 +782,7 @@ private:
     }
   };
 
-  MatrixWorkspace_sptr runAlgorithm(const Parameters &params, bool expectExecuteSuccess = true) const {
+  MatrixWorkspace_sptr runAlgorithm(const Parameters &params, const std::string expectedErrorMsg = "") const {
     auto ws = createInputWorkspace(params.wsType);
     ExtractSpectra alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -817,7 +810,7 @@ private:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorList", params.DetectorList));
     }
 
-    if (expectExecuteSuccess) {
+    if (expectedErrorMsg.empty()) {
       TS_ASSERT_THROWS_NOTHING(alg.execute());
       TS_ASSERT(alg.isExecuted());
 
@@ -827,6 +820,7 @@ private:
       TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName));
       return ws;
     } else {
+      TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()), expectedErrorMsg);
       TS_ASSERT(!alg.isExecuted());
     }
 
