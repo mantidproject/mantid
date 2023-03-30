@@ -205,7 +205,6 @@ void ExtractSpectra::cropCommon(API::MatrixWorkspace &workspace,
   auto cropped(hist);
   cropped.resize(end - begin);
 
-  // set shared x
   cropped.setSharedX(XHistogram);
 
   if (cropped.sharedY())
