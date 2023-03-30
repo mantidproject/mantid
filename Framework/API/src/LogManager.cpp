@@ -203,7 +203,7 @@ void LogManager::filterByTime(const Types::Core::DateAndTime start, const Types:
  * @param outputs :: Vector of output runs.
  */
 void LogManager::splitByTime(SplittingIntervalVec &splitter, std::vector<LogManager *> outputs) const {
-  
+
   const size_t n = outputs.size();
 
   // endow each LogManager with the TimeROI constructed from the corresponding splitter
