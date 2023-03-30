@@ -102,6 +102,9 @@ private:
   /// Filter events by splitters in format of Splitter
   void filterEventsBySplitters(double progressamount);
 
+  /// Clone the input workspace but with no events. Also and if necessary, only with selected logs
+  std::shared_ptr<DataObjects::EventWorkspace> createTemplateOutputWorkspace() const;
+
   /// Filter events by splitters in format of vector
   void filterEventsByVectorSplitters(double progressamount);
 
@@ -112,35 +115,47 @@ private:
   /// (itarget)
   void convertSplittersWorkspaceToVectors();
 
+  // DEBUG: mark for deletion
+  /**
   void splitTimeSeriesLogs(const std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_vector,
                            const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
                            const std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_vector,
                            const std::vector<Kernel::TimeSeriesProperty<std::string> *> &string_tsp_vector);
+  */
 
   /// get the names of all the time series properties in the input workspace's
   /// Run object
   std::vector<std::string> getTimeSeriesLogNames();
 
   void generateSplitterTSP(std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec);
-  void generateSplitterTSPalpha(std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec);
 
+  // DEBUG: mark for deletion
+  // void generateSplitterTSPalpha(std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec);
+
+  // DEBUG: mark for deletion mapSplitterTSPtoWorkspaces
   /// Add time series property 'Splitter' to each child workspace
-  void mapSplitterTSPtoWorkspaces(std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec);
+  // void mapSplitterTSPtoWorkspaces(std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec);
 
+  /**
+   * DEBUG: marked for delection
   void copyNoneSplitLogs(std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_name_vector,
                          std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
                          std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector,
                          std::vector<Kernel::TimeSeriesProperty<std::string> *> &string_tsp_vector);
+  */
 
+  // DEBUG: mark for deletion
+  /**
   template <typename TYPE>
   void splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp,
                                std::vector<Types::Core::DateAndTime> &split_datetime_vec, const int max_target_index);
+  */
 
   void groupOutputWorkspace();
 
-  /// calculate split-workspace's duration according to splitter time series
-  /// property
-  double calculate_duration(std::unique_ptr<Kernel::TimeSeriesProperty<int>> &splitter_tsp);
+  /// calculate split-workspace's duration according to splitter time series property
+  // DEBUG: mark for deletion
+  // double calculate_duration(std::unique_ptr<Kernel::TimeSeriesProperty<int>> &splitter_tsp);
 
   DataObjects::EventWorkspace_sptr m_eventWS;
   DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;
