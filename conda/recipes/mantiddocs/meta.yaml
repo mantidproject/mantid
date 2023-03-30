@@ -32,6 +32,7 @@ requirements:
     - sphinx_bootstrap_theme {{ sphinx_bootstrap_theme }}
     - mantidqt {{ version }}
     - versioningit
+    - readline {{ readline }}  # [linux]
 
 # there are no run requirements as it's just pure html
 

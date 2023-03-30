@@ -67,6 +67,9 @@ ipykernel:
 libcxx:
   - <16
 
+readline:
+  - <8.2
+
 pin_run_as_build:
     boost:
       max_pin: x.x
