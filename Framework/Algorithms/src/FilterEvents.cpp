@@ -276,10 +276,10 @@ void FilterEvents::exec() {
     createOutputWorkspacesMatrixCase();
 
   // DEBUG: mark these vectors for deletion
-  std::vector<Kernel::TimeSeriesProperty<int> *> int_tsp_vector;
-  std::vector<Kernel::TimeSeriesProperty<double> *> dbl_tsp_vector;
-  std::vector<Kernel::TimeSeriesProperty<bool> *> bool_tsp_vector;
-  std::vector<Kernel::TimeSeriesProperty<string> *> string_tsp_vector;
+  // std::vector<Kernel::TimeSeriesProperty<int> *> int_tsp_vector;
+  // std::vector<Kernel::TimeSeriesProperty<double> *> dbl_tsp_vector;
+  // std::vector<Kernel::TimeSeriesProperty<bool> *> bool_tsp_vector;
+  // std::vector<Kernel::TimeSeriesProperty<string> *> string_tsp_vector;
   // copyNoneSplitLogs(int_tsp_vector, dbl_tsp_vector, bool_tsp_vector, string_tsp_vector);
 
   // Optional import corrections
@@ -1716,20 +1716,16 @@ std::shared_ptr<DataObjects::EventWorkspace> FilterEvents::createTemplateOutputW
   outputRun.setTimeROI(inputRun.getTimeROI()); // copy the input TimeROI
   // "ExcludeSpecifiedLogs" determines if the relevant logs are to be excluded or are to be kept
   bool excludeRelevantLogs = getProperty("ExcludeSpecifiedLogs");
-  bool keepOnlyRelevantLogs{!excludeRelevantLogs};
   bool overwriteExistingProperty{true};
-  if (relevantLogsCount == 0)
-    for (auto *inputProperty : inputRun.getProperties())
+  for (auto *inputProperty : inputRun.getProperties()) {
+    const std::string name = inputProperty->name();
+    bool logIsRelevant{relevantLogsSet.find(name) != relevantLogsSet.end()};
+    bool keepOnlyRelevantLogs{!excludeRelevantLogs};
+    if ((excludeRelevantLogs && logIsRelevant) || (keepOnlyRelevantLogs && !logIsRelevant))
+      g_log.warning() << "Sample log " << name << "will be absent in the filtered workspace(s)\n";
+    else
       outputRun.addProperty(inputProperty, overwriteExistingProperty);
-  else
-    for (auto *inputProperty : inputRun.getProperties()) {
-      const std::string name = inputProperty->name();
-      bool logIsRelevant{relevantLogsSet.find(name) != relevantLogsSet.end()};
-      if ((excludeRelevantLogs && logIsRelevant) || (keepOnlyRelevantLogs && !logIsRelevant))
-        g_log.warning() << "Sample log " << name << "will be absent in the filtered workspace(s)\n";
-      else
-        outputRun.addProperty(inputProperty, overwriteExistingProperty);
-    }
+  }
   return templateWorkspace;
 }
 
