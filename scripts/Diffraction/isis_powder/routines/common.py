@@ -521,7 +521,7 @@ def generate_summed_runs(empty_ws_string, instrument, scale_factor=None):
     )
 
     empty_ws = empty_ws_list[0]
-    if scale_factor:
+    if scale_factor is not None:
         empty_ws = mantid.Scale(InputWorkspace=empty_ws, OutputWorkspace=empty_ws, Factor=scale_factor, Operation="Multiply")
     return empty_ws
 
