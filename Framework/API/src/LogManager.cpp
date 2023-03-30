@@ -203,14 +203,8 @@ void LogManager::filterByTime(const Types::Core::DateAndTime start, const Types:
  * @param outputs :: Vector of output runs.
  */
 void LogManager::splitByTime(SplittingIntervalVec &splitter, std::vector<LogManager *> outputs) const {
-  // Make a vector of managers for the splitter. Fun!
+  
   const size_t n = outputs.size();
-  std::vector<PropertyManager *> output_managers(outputs.size(), nullptr);
-  for (size_t i = 0; i < n; i++) {
-    if (outputs[i]) {
-      output_managers[i] = outputs[i]->m_manager.get();
-    }
-  }
 
   // endow each LogManager with the TimeROI constructed from the corresponding splitter
   // it is implicit that the running index of vector outputs is the destination index in the splitter
