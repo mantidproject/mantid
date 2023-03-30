@@ -12,7 +12,7 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-OptionDefaults::OptionDefaults(Mantid::Geometry::Instrument_const_sptr instrument, const std::string &algorithmName)
+OptionDefaults::OptionDefaults(Mantid::Geometry::Instrument_const_sptr instrument, std::string const &algorithmName)
     : m_algorithm(Mantid::API::AlgorithmManager::Instance().createUnmanaged(algorithmName)),
       m_instrument(std::move(instrument)) {
   m_algorithm->initialize();

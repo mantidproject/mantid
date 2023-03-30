@@ -148,7 +148,10 @@ public:
 
   void testValidStitchParamsOptionsFromParamsFile() {
     auto result = getDefaultsFromParamsFile("Experiment");
-    TS_ASSERT_EQUALS(result.stitchParameters().size(), 1);
+    auto stitchResults = result.stitchParameters();
+    TS_ASSERT_EQUALS(stitchResults.size(), 1);
+    TS_ASSERT_EQUALS(stitchResults.begin()->first, "ManualScaleFactors");
+    TS_ASSERT_EQUALS(stitchResults.begin()->second, "1");
   }
 
 private:

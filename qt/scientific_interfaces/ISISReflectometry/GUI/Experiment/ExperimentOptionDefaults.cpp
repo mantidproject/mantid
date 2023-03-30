@@ -22,15 +22,15 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
 std::string stringValueOrEmpty(boost::optional<double> value) { return value ? std::to_string(*value) : ""; }
 
-std::map<std::string, std::string> getStitchParams(Mantid::Geometry::Instrument_const_sptr instrument,
-                                                   OptionDefaults &stitchDefaults) {
-  auto initialStitchParameters = std::map<std::string, std::string>();
-  auto alg = Mantid::API::AlgorithmManager::Instance().create("Stitch1DMany");
-  auto params = alg->getProperties();
-  for (auto &prop : params) {
-    std::string stitchName = "Stitch" + (*prop).name();
-    if (!stitchDefaults.getStringOrEmpty((*prop).name(), stitchName).empty()) {
-      initialStitchParameters[(*prop).name()] = stitchDefaults.getStringOrEmpty((*prop).name(), stitchName);
+std::map<std::string, std::string> getStitchParams(OptionDefaults const &stitchDefaults) {
+  std::map<std::string, std::string> initialStitchParameters;
+  auto const &alg = Mantid::API::AlgorithmManager::Instance().create("Stitch1DMany");
+  auto const &propNames = alg->getDeclaredPropertyNames();
+  for (auto const &propName : propNames) {
+    std::string const &stitchName = "Stitch" + propName;
+    auto const &propValue = stitchDefaults.getStringOrEmpty(propName, stitchName);
+    if (!propValue.empty()) {
+      initialStitchParameters[propName] = propValue;
     }
   }
   return initialStitchParameters;
@@ -80,9 +80,8 @@ Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
       TransmissionStitchOptions(transmissionRunRange, transmissionStitchParams, transmissionScaleRHS);
 
   // Looks for default Output Stitch Properties for use in Stitch1DMany algorithm
-  auto stitchDefaults = OptionDefaults(std::move(instrument), "Stitch1DMany");
-  auto stitchParameters = std::map<std::string, std::string>();
-  stitchParameters = getStitchParams(instrument, stitchDefaults);
+  auto const &stitchDefaults = OptionDefaults(std::move(instrument), "Stitch1DMany");
+  auto const &stitchParameters = getStitchParams(stitchDefaults);
 
   // For per-theta defaults, we can only specify defaults for the wildcard row
   // i.e.  where theta is empty. It probably doesn't make sense to specify

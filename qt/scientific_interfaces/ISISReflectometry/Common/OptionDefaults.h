@@ -20,7 +20,7 @@ namespace ISISReflectometry {
 */
 class OptionDefaults {
 public:
-  explicit OptionDefaults(Mantid::Geometry::Instrument_const_sptr instrument, const std::string &algorithmName);
+  explicit OptionDefaults(Mantid::Geometry::Instrument_const_sptr instrument, std::string const &algorithmName);
 
   template <typename T>
   T getValueOrDefault(std::string const &propertyName, std::string const &parameterName, T defaultValue) const;
