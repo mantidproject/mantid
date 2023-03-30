@@ -14,6 +14,10 @@ cmake ^
     -DENABLE_WORKBENCH=OFF ^
     ..
 
+conda list --explicit --prefix %BUILD_PREFIX% > %SRC_DIR%\mantid_build_environment.txt
+
+conda list --explicit --prefix %PREFIX% > %SRC_DIR%\mantid_host_environment.txt
+
 if errorlevel 1 exit 1
 cmake --build . --config Release
 cmake --build . --config Release --target install
