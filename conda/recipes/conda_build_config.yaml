@@ -68,10 +68,6 @@ ipykernel:
 readline:
   - <8.2
 
-# Pinned to prevent a segmentation fault when running doc tests
-filelock:
-  - <3.10.2
-
 pin_run_as_build:
     boost:
       max_pin: x.x
