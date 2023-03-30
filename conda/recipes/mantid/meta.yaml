@@ -63,7 +63,6 @@ requirements:
     - openssl {{ openssl }}
     - euphonic=0.6.*
     - toml
-    - readline {{ readline }} # [linux or osx]
 
 about:
   home: https://github.com/mantidproject/mantid
