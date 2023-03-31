@@ -55,7 +55,7 @@ class SANSTubeCalibration(PythonAlgorithm):
         det_z_logname = "Rear_Det_Z" if self.rear else "Front_Det_Z"
         if not ws.run().hasProperty(det_z_logname):
             raise RuntimeError(
-                f'Run log does not contain an entry for "{det_z_logname}", which is required to calculate the strip edge positions'
+                f'Run log does not contain an entry for "{det_z_logname}". This is required to calculate the strip edge positions.'
             )
         sample_to_detector_dist = ws.run().getProperty(det_z_logname).firstValue()
         half_det_width = self.getProperty("HalfDetectorWidth").value
@@ -204,10 +204,10 @@ class SANSTubeCalibration(PythonAlgorithm):
                     boundaries.append(boundary)
             else:
                 boundaries.append(temp[1] + (start - temp[1]) / 2)
-                edge_pairs_merged.append(tuple(temp))
+                edge_pairs_merged.extend(temp)
                 temp[0] = start
                 temp[1] = end
-        edge_pairs_merged.append(tuple(temp))
+        edge_pairs_merged.extend(temp)
         boundaries.append(INF)
 
         return edge_pairs_merged, boundaries
@@ -295,7 +295,7 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         return issues
 
-    def PyExec(self):  # noqa: C901
+    def PyExec(self):
         # Run the algorithm
         self.BACKGROUND = self.getProperty("Background").value
         self.timebin = self.getProperty("TimeBins").value
@@ -331,148 +331,114 @@ class SANSTubeCalibration(PythonAlgorithm):
         strip_edge_calculation_info = f"Strip edges calculated as: {known_edge_pairs}"
 
         # Scale workspaces
-        i = 0
+        scaled_ws_suffix = "_scaled"
 
-        def charge(ws):
-            proton_charge = mtd[ws].getRun()["proton_charge_by_period"].value
+        def get_proton_charge(workspace):
+            proton_charge = workspace.getRun()["proton_charge_by_period"].value
             return proton_charge[0] if type(proton_charge) is np.ndarray else proton_charge
 
-        uamphr_to_rescale = charge(data_files[0].split(".")[0])
-        for ws in data_files:
-            ws2 = ws.split(".")[0]
-            CropWorkspace(InputWorkspace=ws2, OutputWorkspace=ws2 + "_scaled", StartWorkspaceIndex=index1, EndWorkspaceIndex=index2)
+        uamphr_to_rescale = get_proton_charge(ws_list[0])
+        for ws in ws_list:
+            scaled_ws_name = ws.name() + scaled_ws_suffix
+            CropWorkspace(InputWorkspace=ws, OutputWorkspace=scaled_ws_name, StartWorkspaceIndex=index1, EndWorkspaceIndex=index2)
             Scale(
-                InputWorkspace=ws2 + "_scaled",
-                OutputWorkspace=ws2 + "_scaled",
+                InputWorkspace=scaled_ws_name,
+                OutputWorkspace=scaled_ws_name,
                 Operation="Multiply",
-                Factor=uamphr_to_rescale / charge(ws2),
+                Factor=uamphr_to_rescale / get_proton_charge(ws),
             )
-            i += 1
 
-        known_left_edge_pairs = copy.copy(known_edge_pairs)
+        # Merge scaled workspaces into a single workspace containing all the strips
+        known_edges_left, boundaries = self.get_merged_edge_pairs_and_boundaries(known_edge_pairs)
 
-        _, boundaries = self.get_merged_edge_pairs_and_boundaries(known_edge_pairs)
-        known_left_edges, _ = self.get_merged_edge_pairs_and_boundaries(known_left_edge_pairs)
-
-        # In each calibration dataset, set counts equal to 1 for x values outside the strip position merged boundaries
+        # In each calibration dataset, set counts equal to 1 for x values outside the strip position merged boundaries.
+        # This is so that we can multiply all the shadows together, instead of running merged workspace 5 times.
         for ws, (boundary_start, boundary_end) in zip(ws_list, pairwise(boundaries)):
             self.log().information(f"Isolating shadow in {ws} between boundaries {boundary_start} and {boundary_end}.")
-            # set to 1 so that we can multiply all the shadows together, instead of running merged workspace 5 times.
-            ws2 = str(ws) + "_scaled"
-            self.set_counts_to_one_outside_x_range(mtd[ws2], boundary_start, boundary_end)
+            self.set_counts_to_one_outside_x_range(mtd[ws.name() + scaled_ws_suffix], boundary_start, boundary_end)
 
-        result_ws_name = "result"
+        original_ws_name = "original"
+        self.multiply_ws_list(ws_list, original_ws_name)
+        result = CloneWorkspace(InputWorkspace=original_ws_name)
 
-        self.multiply_ws_list(ws_list, result_ws_name)
-
-        result = mtd[result_ws_name]
-
-        original = CloneWorkspace(InputWorkspace=result_ws_name, OutputWorkspace="original")  # noqa: F841
-
-        # Unpack from a list of tuples to just a list of individual values i.e. [(s0, s1), (s2, s3)] -> [s0, s1, s2, s3]
-        known_edges_left = list(itertools.chain.from_iterable(known_left_edges))
-        pixel_guesses = []  # noqa: F841
+        # Perform the calibration for each tube
         meanCvalue = []
-        tubeList = []
-
-        dx = (522.2 + 519.2) / 511
-        # default size of a pixel in real space in mm
-        # setting caltable to None  will start all over again, comment this line out to add further tubes to existing table
+        # Default size of a pixel in real space in mm
+        default_pixel_size = (522.2 + 519.2) / 511
+        # Setting caltable to None  will start all over again. Set this to True to add further tubes to existing table
         caltable = None
-        # caltable = True
-        diag_output = dict()
+        diagnostic_output = dict()
 
         # Loop through tubes to generate calibration table
         tube_report = Progress(self, start=0.4, end=0.9, nreports=120)
-        tube_calibration_errors = {}
+        tube_calibration_errors = []
+        # When adding to an existing calibration table the script would have been edited to use only the required range of tubes
         for tube_id in range(120):
-            # for tube_id in range(116,120):
-            diag_output[tube_id] = []
-
             tube_name = self.get_tube_name(tube_id, detector_name)
             tube_report.report(f"Calculating tube {tube_name}")
             self.log().information("\n==================================================")
             self.log().debug(f'ID = {tube_id}, Name = "{tube_name}"')
-            known_edges1 = copy.copy(known_edges_left)
-            if TubeSide.getTubeSide(tube_id) == TubeSide.LEFT:
-                # first pixel in mm, as per idf file for rear detector
-                x0 = -519.2
-            else:
-                x0 = -522.2
-
-            np.array(known_edges1)
 
             known_edges = []
-            for index in range(len(known_edges1)):
-                known_edges.append(known_edges1[index] + (tube_id - 119.0) * OFF_VERTICAL / 119.0)
+            for edge in known_edges_left:
+                known_edges.append(edge + (tube_id - 119.0) * OFF_VERTICAL / 119.0)
 
             guessed_pixels = list(self.get_tube_edge_pixels(detector_name, tube_id, result, THRESHOLD, STARTPIXEL, ENDPIXEL))
-
-            # Store the guesses for printing out later, along with the tube id and name.
-            # pixel_guesses.append([tube_name, guessed_pixels])
 
             if len(guessed_pixels) != len(known_edges):
                 error_msg = (
                     f"Cannot calibrate tube {tube_id} - found {len(guessed_pixels)} edges when exactly {len(known_edges)} are required"
                 )
                 if skip_tube_on_error:
-                    tube_calibration_errors[tube_id] = error_msg
+                    tube_calibration_errors.append(error_msg)
                     continue
                 raise RuntimeError(error_msg)
 
-            self.log().debug(f"{len(guessed_pixels)} {guessed_pixels}")
-            self.log().debug(f"{len(known_edges)} {known_edges}")
+            self.log().debug(f"Guessed pixels: {guessed_pixels}")
+            self.log().debug(f"Known edges: {known_edges}")
 
-            # note funcForm==2 fits an edge using error function, (see
-            # SANS2DEndErfc above, and code in tube_calib_RKH.py,)
+            # Note funcForm==2 fits an edge using error function (see SANS2DEndErfc)
             # while any other value fits a Gaussian
             if FITEDGES:
                 funcForm = [2] * len(guessed_pixels)
                 fitPar = TubeCalibFitParams(guessed_pixels, outEdge=10.0, inEdge=10.0)
             else:
-                # average pairs of edges for single peak fit, could in principle do only some tubes or parts of tubes this way!
-                guess = []
-                known = []
+                # Average pairs of edges for single peak fit
+                guessed_avg = []
+                known_avg = []
                 for i in range(0, len(guessed_pixels), 2):
-                    guess.append((guessed_pixels[i] + guessed_pixels[i + 1]) / 2)
-                    known.append((known_edges[i] + known_edges[i + 1]) / 2)
-                funcForm = [3] * len(guess)
-                guessed_pixels = guess
-                known_edges = known
-                fitPar = TubeCalibFitParams(guessed_pixels, height=2000, width=2 * margin, margin=margin, outEdge=10.0, inEdge=10.0)
+                    guessed_avg.append((guessed_pixels[i] + guessed_pixels[i + 1]) / 2)
+                    known_avg.append((known_edges[i] + known_edges[i + 1]) / 2)
+                funcForm = [3] * len(guessed_avg)
+                known_edges = known_avg
+                fitPar = TubeCalibFitParams(guessed_avg, height=2000, width=2 * margin, margin=margin, outEdge=10.0, inEdge=10.0)
                 fitPar.setAutomatic(False)
-                self.log().debug(f"halved guess {len(guessed_pixels)} {guessed_pixels}")
-                self.log().debug(f"halved known {len(known_edges)} {known_edges}")
-
-            module = int(tube_id / 24) + 1
-            tube_num = tube_id - (module - 1) * 24
-            self.log().debug(f"module {module}   tube {tube_num}")
+                self.log().debug(f"Halved guess {guessed_avg}")
+                self.log().debug(f"Halved known {known_avg}")
 
             if caltable:
-                # does this after the first time, it appends to a table
+                # Does this after the first time, it appends to a table
                 caltable, peakTable, meanCTable = self.calibrate(
                     result,
                     tube_name,
                     np.array(known_edges),
                     funcForm,
-                    # outputPeak=peakTable falls over at addrow if number of peaks changes, so can only save one row at a time
-                    outputPeak=True,
-                    outputC=True,
                     rangeList=[0],
                     plotTube=[0],
+                    outputPeak=True,
+                    outputC=True,
                     margin=margin,
                     fitPar=fitPar,
                     calibTable=caltable,
                 )
             else:
-                # do this the FIRST time, starts a new table
+                # Do this the FIRST time, starts a new table
                 self.log().debug("first time, generate calib table")
                 caltable, peakTable, meanCTable = self.calibrate(
                     result,
                     tube_name,
                     np.array(known_edges),
                     funcForm,
-                    # outputPeak=True,
                     rangeList=[0],
                     plotTube=[0],
                     outputPeak=True,
@@ -480,95 +446,63 @@ class SANSTubeCalibration(PythonAlgorithm):
                     margin=margin,
                     fitPar=fitPar,
                 )
-            diag_output[tube_id].append(CloneWorkspace(InputWorkspace="FittedTube0", OutputWorkspace=f"Fit{tube_id}_{module}_{tube_num}"))
-            diag_output[tube_id].append(CloneWorkspace(InputWorkspace="TubePlot0", OutputWorkspace=f"Tube{tube_id}_{module}_{tube_num}"))
-            # 8/7/14 save the fitted positions to see how well the fit does, all in mm
+
+            # Produce diagnostic workspaces for the tube
+            diagnostic_output[tube_id] = []
+
+            if TubeSide.getTubeSide(tube_id) == TubeSide.LEFT:
+                # first pixel in mm, as per idf file for rear detector
+                first_pixel_pos = -519.2
+            else:
+                first_pixel_pos = -522.2
+
+            module = int(tube_id / 24) + 1
+            tube_num = tube_id % 24
+            ws_suffix = f"{tube_id}_{module}_{tube_num}"
+
+            diagnostic_output[tube_id].append(RenameWorkspace(InputWorkspace="FittedTube0", OutputWorkspace=f"Fit{ws_suffix}"))
+            diagnostic_output[tube_id].append(RenameWorkspace(InputWorkspace="TubePlot0", OutputWorkspace=f"Tube{ws_suffix}"))
+
+            # Save the fitted positions to see how well the fit does, all in mm
             x_values = []
             x0_values = []
-            bb = list(mtd["PeakTable"].row(0).values())
-            del bb[0]  # Remove string that can't be sorted
-            bb.sort()
-            # bb still contains a name string at the end
-            # it's just for diagnostics
-            for i in range(len(guessed_pixels)):
-                x0_values.append(bb[i] * dx + x0)
-                x_values.append(known_edges[i] * 1000.0 - bb[i] * dx - x0)
-            cc = CreateWorkspace(DataX=x0_values, DataY=x_values)
-            diag_output[tube_id].append(RenameWorkspace(InputWorkspace=cc, OutputWorkspace=f"Data{tube_id}_{module}_{tube_num}"))
+            # Exclude string in first column that can't be sorted
+            peak_positions = list(peakTable.row(0).values())[1:]
+            peak_positions.sort()
+            for i in range(len(peak_positions)):
+                x0_values.append(peak_positions[i] * default_pixel_size + first_pixel_pos)
+                x_values.append(known_edges[i] * 1000.0 - peak_positions[i] * default_pixel_size - first_pixel_pos)
+            diagnostic_output[tube_id].append(CreateWorkspace(DataX=x0_values, DataY=x_values, OutputWorkspace=f"Data{ws_suffix}"))
 
-            bb = list(mtd["meanCTable"].row(0).values())
-            meanCvalue.append(bb[1])
-            tubeList.append(tube_id)
+            # Interrogate the calibration table to see how much we have shifted pixels for the tube
+            x_values = []
+            x0_values = []
+            ref_pixel_pos = first_pixel_pos
+            for det_pos in caltable.column("Detector Position")[-512:]:
+                x_values.append(det_pos.getX() * 1000.0 - ref_pixel_pos)
+                x0_values.append(ref_pixel_pos)
+                ref_pixel_pos += default_pixel_size
+            diagnostic_output[tube_id].append(CreateWorkspace(DataX=x0_values, DataY=x_values, OutputWorkspace=f"Shift{ws_suffix}"))
+
+            meanCvalue.append(meanCTable.column("meanC")[0])
 
         ApplyCalibration(result, caltable)
-        self.log().debug(str(tubeList))
-        self.log().debug(str(meanCvalue))
-        cvalues = CreateWorkspace(DataX=tubeList, DataY=meanCvalue)
+        cvalues = CreateWorkspace(DataX=list(diagnostic_output.keys()), DataY=meanCvalue)
 
         if self.outputfile:
             SaveNexusProcessed(result, self.outputfile)
-        # you will next need to run merge_calib_files.py to merge the tables for front and rear detectors
 
-        # expts
-        aa = mtd["PeakTable"].row(0)
-        self.log().debug(str(aa))
-        self.log().debug(str(aa.get("Peak10")))
-        bb = list(aa.values())
+        # Group the diagnostic output for each tube
+        # It seems to be faster to do this here rather than as we're calibrating each tube
+        for tube_id, workspaces in diagnostic_output.items():
+            GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=f"Tube_{tube_id:03}")
 
-        bb = list(mtd["PeakTable"].row(0).values())
-        del bb[0]  # Remove string that can't be sorted
-        self.log().debug(str(bb))
-        bb.sort()
-        self.log().debug(str(bb))
-
-        # now interrogate CalibTable to see how much we have shifted pixels by for each tube
-        # 18/3/15 this new version will work when we have skipped tubes as it reads the Detector ID's  from the table itself
-        # All this creates ws to check results, doesn't affect the main code
-        nentries = int(len(mtd["CalibTable"]) / 512)
-        self.log().information(f"nentries in CalibTable = {nentries}")
-        i1 = 0
-        i2 = 512
-        dx = (522.2 + 519.2) / 511
-        calib_report = Progress(self, start=0.9, end=1.0, nreports=120)
-        for i in range(0, 120):
-            if i in tube_calibration_errors.keys():
-                # Don't create diagnostic output for any tubes that have been skipped
-                continue
-            tube_num = mtd["CalibTable"].column("Detector ID")[i1]
-            tube_num /= 1000
-            det = int(tube_num / 1000)
-            tube_num -= det * 1000
-            module = int(tube_num / 100)
-            tube_num = tube_num - module * 100
-            tube_id = (module - 1) * 24 + tube_num
-            self.log().debug(f"{tube_id} {module} {tube_num}")
-            x_values = []
-            x0_values = []
-            # use left tube value here for now, right tube starts at -522.2    WHY THIS HERE ????
-            if TubeSide.getTubeSide(tube_id) == TubeSide.LEFT:
-                x0 = -519.2
-            else:
-                x0 = -522.2
-            for pos in mtd["CalibTable"].column("Detector Position")[i1:i2]:
-                x_values.append(pos.getX() * 1000.0 - x0)
-                x0_values.append(x0)
-                x0 += dx
-            plotN = CreateWorkspace(DataX=x0_values, DataY=x_values)  # noqa: F841
-            diag_output[i].append(RenameWorkspace(InputWorkspace="plotN", OutputWorkspace=f"Shift{tube_id}_{module}_{tube_num}"))
-            i1 = i1 + 512
-            i2 = i2 + 512
-            calib_report.report("Calibrating")
-
-        for tube_id, workspaces in diag_output.items():
-            if workspaces:
-                GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=f"Tube_{tube_id:03}")
-
-        # Notice to self, the result will look wiggly in 3D but looks good in cylindrical Y
+        # Print some final status information
         self.log().notice(strip_edge_calculation_info)
 
         if tube_calibration_errors:
             self.log().warning("There were the following tube calibration errors:")
-            for error in tube_calibration_errors.values():
+            for error in tube_calibration_errors:
                 self.log().warning(error)
 
         self.notify_tube_cvalue_status(cvalues)
