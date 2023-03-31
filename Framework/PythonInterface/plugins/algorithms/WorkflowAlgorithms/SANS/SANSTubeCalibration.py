@@ -421,7 +421,7 @@ class SANSTubeCalibration(PythonAlgorithm):
                 fit_params = TubeCalibFitParams(guessed_avg, height=2000, width=2 * margin, margin=margin, outEdge=10.0, inEdge=10.0)
                 fit_params.setAutomatic(False)
 
-            caltable, peakTable, meanCTable = self._calibrate(
+            caltable, peakTable, meanCTable = self._calibrate_tube(
                 ws=result,
                 tube_name=tube_name,
                 known_positions=known_edges,
@@ -490,7 +490,7 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         self.notify_tube_cvalue_status(cvalues)
 
-    def _calibrate(self, ws, tube_name, known_positions, func_form, fit_params, calib_table):
+    def _calibrate_tube(self, ws, tube_name, known_positions, func_form, fit_params, calib_table):
         """Define the calibrated positions of the detectors inside the given tube.
 
         :param ws: integrated workspace with tube to be calibrated.
@@ -540,7 +540,7 @@ class SANSTubeCalibration(PythonAlgorithm):
         output_c.addColumn(type="str", name="TubeId")
         output_c.addColumn(type="float", name="meanC")
 
-        self.getCalibration_RKH(ws, tube_spec, calib_table, fit_params, ideal_tube, output_peak, output_c, dict(), 0.0, [0], [0], 2)
+        self._perform_calibration_for_tube(ws, tube_spec, calib_table, fit_params, ideal_tube, output_peak, output_c)
 
         return calib_table, output_peak, output_c
 
@@ -634,120 +634,69 @@ class SANSTubeCalibration(PythonAlgorithm):
             loaded_file.append((id_, f_values))
         return loaded_file
 
-    def getCalibration_RKH(
+    def _perform_calibration_for_tube(
         self,
         ws,
-        tubeSet,
-        calibTable,
-        fitPar,
-        iTube,
-        peaksTable,
-        meanCTable,
-        overridePeaks=dict(),
+        tube_spec,
+        calib_table,
+        fit_params,
+        ideal_tube,
+        peaks_table,
+        meanC_table,
         excludeShortTubes=0.0,
-        plotTube=[],
-        rangeList=None,
         polinFit=2,
-        peaksTestMode=False,
     ):
-        """Get the results the calibration and put them in the calibration table provided.
-        RKH added meanCTable to pass back mean of "resolution"
-        :param ws: Integrated Workspace with tubes to be calibrated
-        :param tubeSet: Specification of Set of tubes to be calibrated ( :class:`~tube_spec.TubeSpec` object)
+        """Run the calibration for the tube and put the results in the calibration table provided.
 
-        :param calibTable: Empty calibration table into which the
-        calibration results are placed. It is composed by 'Detector
-        ID' and a V3D column 'Detector Position'. It will be filled
-        with the IDs and calibrated positions of the detectors.
-
-        :param fitPar: A :class:`~tube_calib_fit_params.TubeCalibFitParams` object for fitting the peaks
-
-        :param iTube: The :class:`~ideal_tube.IdealTube` which
-        contains the positions in metres of the shadows of the slits,
-        bars or edges used for calibration.
-
-        :param peaksTable: Peaks table into wich the peaks positions will be put
-        :param meanCTable: RKH added, mean value of "resolution" parameter
-
-        :param overridePeak: dictionary with tube indexes keys and an
-        array of peaks in pixels to override those that would be
-        fitted for one tube
-
-        :param exludeShortTubes: Exlude tubes shorter than specified length from calibration
-        :param plotTube: List of tube indexes that will be ploted
-        :param rangelist: list of the tube indexes that will be calibrated. Default None, means all the tubes in tubeSet
-        :param polinFit: Order of the polinomial to fit against the known positions. Acceptable: 2, 3
-        :param peakTestMode: true if shoving detectors that are reckoned to be at peak away (for test purposes)
-
-
-        This is the main method called from :func:`~tube.calibrate` to perform the calibration.
+        :param ws: integrated workspace with tubes to be calibrated
+        :param tube_spec: specification of the tube to be calibrated ( :class:`~tube_spec.TubeSpec` object)
+        :param calib_table: the calibration table into which the
+        calibrated positions of the detectors will be placed.
+        :param fit_params: a :class:`~tube_calib_fit_params.TubeCalibFitParams` object for fitting the peaks
+        :param ideal_tube: the :class:`~ideal_tube.IdealTube` that contains the positions in metres of the edges used for calibration
+        :param peaks_table: table into which the peak positions will be put
+        :param meanC_table: table into which the mean value of "resolution" parameter will be put
+        :param excludeShortTubes: exclude tubes shorter than specified length from calibration
+        :param polinFit: order of the polynomial to fit against the known positions. Acceptable: 2, 3
 
         """
-        nTubes = tubeSet.getNumTubes()
-        self.log().debug(f"Number of tubes = {nTubes}")
+        # The TubeSpec object will only be for one tube at a time
+        tube_idx = 0
+        tube_name = tube_spec.getTubeName(tube_idx)
 
-        if rangeList is None:
-            rangeList = list(range(nTubes))
+        # Calibrate the tube, if possible
+        if tube_spec.getTubeLength(tube_idx) <= excludeShortTubes:
+            # skip this tube
+            self.log().debug(f"Tube {tube_name} too short to calibrate.")
+            return
 
-        all_skipped = set()
+        ws_ids, skipped = tube_spec.getTube(tube_idx)
+        if len(ws_ids) < 1:
+            # skip this tube
+            self.log().debug(f"Cannot calibrate tube {tube_name} - unable to get any workspace indices (spectra) for it.")
+            return
 
-        for i in rangeList:
-            # Deal with (i+1)st tube specified
-            wht, skipped = tubeSet.getTube(i)
-            all_skipped.update(skipped)
+        # Define peak positions and calculate mean C
+        actual_tube, meanC = self.getPoints(ws, ideal_tube.getFunctionalForms(), fit_params, ws_ids, showPlot=True)
+        RenameWorkspace("FittedData", OutputWorkspace=f"FittedTube{tube_idx}")
+        RenameWorkspace("TubePlot", OutputWorkspace=f"TubePlot{tube_idx}")
 
-            self.log().debug(f"Calibrating tube {i + 1} of {nTubes} {tubeSet.getTubeName(i)}")
-            if len(wht) < 1:
-                self.log().debug(
-                    "Unable to get any workspace indices (spectra) for this tube. " f"Tube {tubeSet.getTubeName(i)} not calibrated."
-                )
-                # skip this tube
-                continue
+        # Add the peak positions and mean C to the tables
+        # Call one tube at a time, as if the number of edges (peaks) varies tube to tube then addRow does not work
+        peaks_table.addRow([tube_name] + list(actual_tube))
+        meanC_table.addRow([tube_name] + list(meanC))
 
-            # Calibribate the tube, if possible
-            if tubeSet.getTubeLength(i) <= excludeShortTubes:
-                # skip this tube
-                continue
+        # Define the correct positions of the detectors
+        det_ids, det_positions = self.getCalibratedPixelPositions_RKH(ws, actual_tube, ideal_tube.getArray(), ws_ids, False, polinFit)
+        # Check if we have corrected positions
+        if len(det_ids) == len(ws_ids):
+            # Save the detector positions to the calibration table
+            column_names = calib_table.getColumnNames()
+            for i in range(len(det_ids)):
+                calib_table.addRow({column_names[0]: det_ids[i], column_names[1]: det_positions[i]})
 
-            ##############################
-            # Define Peak Position session
-            ##############################
-
-            # if this tube is to be override, get the peaks positions for this tube.
-            if i in overridePeaks:
-                actualTube = overridePeaks[i]
-            else:
-                # find the peaks positions
-                plotThisTube = i in plotTube
-                # RKH add meanC
-                actualTube, meanC = self.getPoints(ws, iTube.getFunctionalForms(), fitPar, wht, showPlot=plotThisTube)
-                if plotThisTube:
-                    RenameWorkspace("FittedData", OutputWorkspace="FittedTube%d" % (i))
-                    RenameWorkspace("TubePlot", OutputWorkspace="TubePlot%d" % (i))
-
-            # Set the peak positions at the peakTable
-            #  RKH add meanC to end
-            # note for SANS2d we only call one tube at a time, as the
-            # number of edges (peaks) varies tube to tube and thus addRow does not work!
-            peaksTable.addRow([tubeSet.getTubeName(i)] + list(actualTube))
-            self.log().debug(f"meanC {meanC}")
-            meanCTable.addRow([tubeSet.getTubeName(i)] + list(meanC))
-
-            ##########################################
-            # Define the correct position of detectors
-            ##########################################
-
-            detIDList, detPosList = self.getCalibratedPixelPositions_RKH(ws, actualTube, iTube.getArray(), wht, peaksTestMode, polinFit)
-            # save the detector positions to calibTable
-            if len(detIDList) == len(wht):  # We have corrected positions
-                for j in range(len(wht)):
-                    nextRow = {"Detector ID": detIDList[j], "Detector Position": detPosList[j]}
-                    calibTable.addRow(nextRow)
-
-        if len(all_skipped) > 0:
-            self.log().debug(
-                f"{len(all_skipped)} histogram(s) were excluded from the calibration since they did not have an assigned detector."
-            )
+        if skipped:
+            self.log().debug("Histogram was excluded from the calibration as it did not have an assigned detector.")
 
     def createTubeCalibtationWorkspaceByWorkspaceIndexList(
         self, integratedWorkspace, outputWorkspace, workspaceIndexList, xUnit="Pixel", showPlot=False
