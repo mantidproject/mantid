@@ -159,7 +159,13 @@ void FilterByTime::exec() {
   PARALLEL_CHECK_INTERRUPT_REGION
 
   // Now filter out the run, using the DateAndTime type.
-  outputWS->mutableRun().setTimeROI(TimeROI(start, stop));
+  auto timeroi = outputWS->mutableRun().getTimeROI(); // make a copy
+  if (timeroi.empty()) {
+    outputWS->mutableRun().setTimeROI(TimeROI(start, stop));
+  } else {
+    timeroi.update_intersection(TimeROI(start, stop));
+    outputWS->mutableRun().setTimeROI(timeroi);
+  }
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(outputWS));
 }
 
