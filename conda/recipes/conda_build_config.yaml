@@ -64,9 +64,11 @@ gsl:
 ipykernel:
   - <6
 
+# 16 causing build errors on osx, seems incompatible with our version of boost.
 libcxx:
   - <16
 
+# 8.2 causing segfaults in jupyter unit tests and doc builds.
 readline:
   - <8.2
 
