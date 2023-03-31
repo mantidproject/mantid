@@ -28,8 +28,8 @@ class Selector(RectangleSelector):
         "interactive": True,
     }
 
-    def __init__(self, region_type: str, color: str, *args):
-        self.kwargs["props"] = dict(facecolor=color, edgecolor=color, alpha=0.4, linewidth=3, fill=True)
+    def __init__(self, region_type: str, color: str, hatch: str, *args):
+        self.kwargs["props"] = dict(facecolor=color, edgecolor=color, alpha=0.4, hatch=hatch, linewidth=3, fill=True)
         self.kwargs["handle_props"] = dict(markersize=6)
         self.kwargs["drag_from_anywhere"] = True
         self.kwargs["ignore_event_outside"] = True
@@ -133,7 +133,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
             self._selectors.pop()
             self._drawing_region = False
 
-    def add_rectangular_region(self, region_type, color):
+    def add_rectangular_region(self, region_type: str, color: str, hatch: str):
         """
         Add a rectangular region selection tool.
         """
@@ -143,7 +143,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         if self._drawing_region:
             self._selectors.pop()
 
-        self._selectors.append(Selector(region_type, color, self.view._data_view.ax, self._on_rectangle_selected))
+        self._selectors.append(Selector(region_type, color, hatch, self.view._data_view.ax, self._on_rectangle_selected))
 
         self._drawing_region = True
 
