@@ -14,6 +14,23 @@
     <parameter name="pixel-width">
       <value val="0.7"/>
     </parameter>
+
+    <!-- Effective distances used in the reduction, accounting for emission time -->
+    <parameter name="sample-det-distance">
+      <value val="1.83"/>
+    </parameter>
+
+    <parameter name="source-det-distance">
+      <value val="15.75"/>
+    </parameter>
+
+    <parameter name="xi-reference">
+      <value val="445"/>
+    </parameter>
+
+    <parameter name="s1-sample-distance">
+      <value val="1485"/>
+    </parameter>
   </component-link>
 
 </parameter-file>
