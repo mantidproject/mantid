@@ -1,3 +1,7 @@
+if not exist ..\..\env_logs mkdir ..\..\env_logs
+conda list --explicit --prefix %BUILD_PREFIX% > ..\..\env_logs\mantidworkbench_build_environment.txt
+conda list --explicit --prefix %PREFIX% > ..\..\env_logs\mantidworkbench_host_environment.txt
+
 mkdir build && cd build
 
 cmake ^
