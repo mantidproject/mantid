@@ -520,6 +520,230 @@ public:
   void test_parallel_WorkspaceIndexList() { ParallelTestHelpers::runParallel(run_parallel_WorkspaceIndexList); }
   void test_parallel_WorkspaceIndexRange() { ParallelTestHelpers::runParallel(run_parallel_WorkspaceIndexRange); }
 
+  // ----- Slice tests -----
+  // These tests have been copied from the old SliceTest.h after the Slice function was replaced by
+  // ExtractSpectra::cropCommon() in #35415
+
+  void test_slices_dx() {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 2, 1);
+    Mantid::HistogramData::Histogram histogram(BinEdges{1, 2, 3}, Counts{4, 9});
+    workspace->mutableY(0) = histogram.dataY();
+    workspace->setPointStandardDeviations(0, 2);
+    histogram.setPointStandardDeviations(2);
+
+    Parameters params;
+    params.XMin = 1;
+    params.XMax = 3;
+
+    auto ws = runAlgorithm(params, "", workspace);
+
+    TS_ASSERT_EQUALS(ws->dx(0), histogram.dx());
+  }
+
+  void test_slice_single_bin_at_start() {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1);
+    const Mantid::HistogramData::Histogram histogram(BinEdges{1, 2, 3, 4}, Counts{4, 9, 16});
+    workspace->mutableY(0) = histogram.dataY();
+    workspace->mutableE(0) = histogram.dataE();
+
+    Parameters params;
+    params.XMin = 1;
+    params.XMax = 2;
+
+    auto ws = runAlgorithm(params, "", workspace);
+
+    TS_ASSERT_EQUALS(ws->x(0), HistogramX({1, 2}));
+    TS_ASSERT_EQUALS(ws->y(0), HistogramY({4}));
+    TS_ASSERT_EQUALS(ws->e(0), HistogramE({2}));
+  }
+
+  void test_slice_single_bin() {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1);
+    const Mantid::HistogramData::Histogram histogram(BinEdges{1, 2, 3, 4}, Counts{4, 9, 16});
+    workspace->mutableY(0) = histogram.dataY();
+    workspace->mutableE(0) = histogram.dataE();
+
+    Parameters params;
+    params.XMin = 2;
+    params.XMax = 3;
+
+    auto ws = runAlgorithm(params, "", workspace);
+
+    TS_ASSERT_EQUALS(ws->x(0), HistogramX({2, 3}));
+    TS_ASSERT_EQUALS(ws->y(0), HistogramY({9}));
+    TS_ASSERT_EQUALS(ws->e(0), HistogramE({3}));
+  }
+
+  void test_slice_single_bin_at_end() {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1);
+    const Mantid::HistogramData::Histogram histogram(BinEdges{1, 2, 3, 4}, Counts{4, 9, 16});
+    workspace->mutableY(0) = histogram.dataY();
+    workspace->mutableE(0) = histogram.dataE();
+
+    Parameters params;
+    params.XMin = 3;
+    params.XMax = 4;
+
+    auto ws = runAlgorithm(params, "", workspace);
+
+    TS_ASSERT_EQUALS(ws->x(0), HistogramX({3, 4}));
+    TS_ASSERT_EQUALS(ws->y(0), HistogramY({16}));
+    TS_ASSERT_EQUALS(ws->e(0), HistogramE({4}));
+  }
+
+  void test_points_slice_single_bin_at_start() {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 3, 1);
+    const Mantid::HistogramData::Histogram histogram(Points{1, 2, 3}, Counts{4, 9, 16});
+    workspace->mutableY(0) = histogram.dataY();
+    workspace->mutableE(0) = histogram.dataE();
+
+    Parameters params;
+    params.XMin = 1;
+    params.XMax = 1;
+
+    auto ws = runAlgorithm(params, "", workspace);
+
+    TS_ASSERT_EQUALS(ws->x(0), HistogramX({1}));
+    TS_ASSERT_EQUALS(ws->y(0), HistogramY({4}));
+    TS_ASSERT_EQUALS(ws->e(0), HistogramE({2}));
+  }
+
+  void test_points_slice_single_bin() {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 3, 1);
+    const Mantid::HistogramData::Histogram histogram(Points{1, 2, 3}, Counts{4, 9, 16});
+    workspace->mutableY(0) = histogram.dataY();
+    workspace->mutableE(0) = histogram.dataE();
+
+    Parameters params;
+    params.XMin = 2;
+    params.XMax = 2;
+
+    auto ws = runAlgorithm(params, "", workspace);
+
+    TS_ASSERT_EQUALS(ws->x(0), HistogramX({2}));
+    TS_ASSERT_EQUALS(ws->y(0), HistogramY({9}));
+    TS_ASSERT_EQUALS(ws->e(0), HistogramE({3}));
+  }
+
+  void test_points_slice_single_bin_at_end() {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 3, 1);
+    const Mantid::HistogramData::Histogram histogram(Points{1, 2, 3}, Counts{4, 9, 16});
+    workspace->mutableY(0) = histogram.dataY();
+    workspace->mutableE(0) = histogram.dataE();
+
+    Parameters params;
+    params.XMin = 3;
+    params.XMax = 3;
+
+    auto ws = runAlgorithm(params, "", workspace);
+
+    TS_ASSERT_EQUALS(ws->x(0), HistogramX({3}));
+    TS_ASSERT_EQUALS(ws->y(0), HistogramY({16}));
+    TS_ASSERT_EQUALS(ws->e(0), HistogramE({4}));
+  }
+
+  void test_slice_two_bins_at_start() {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 4, 1);
+    const Mantid::HistogramData::Histogram histogram(BinEdges{1, 2, 3, 4, 5}, Counts{1, 4, 9, 16});
+    workspace->mutableY(0) = histogram.dataY();
+    workspace->mutableE(0) = histogram.dataE();
+
+    Parameters params;
+    params.XMin = 1;
+    params.XMax = 3;
+
+    auto ws = runAlgorithm(params, "", workspace);
+
+    TS_ASSERT_EQUALS(ws->x(0), HistogramX({1, 2, 3}));
+    TS_ASSERT_EQUALS(ws->y(0), HistogramY({1, 4}));
+    TS_ASSERT_EQUALS(ws->e(0), HistogramE({1, 2}));
+  }
+
+  void test_slice_two_bins() {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 4, 1);
+    const Mantid::HistogramData::Histogram histogram(BinEdges{1, 2, 3, 4, 5}, Counts{1, 4, 9, 16});
+    workspace->mutableY(0) = histogram.dataY();
+    workspace->mutableE(0) = histogram.dataE();
+
+    Parameters params;
+    params.XMin = 2;
+    params.XMax = 4;
+
+    auto ws = runAlgorithm(params, "", workspace);
+
+    TS_ASSERT_EQUALS(ws->x(0), HistogramX({2, 3, 4}));
+    TS_ASSERT_EQUALS(ws->y(0), HistogramY({4, 9}));
+    TS_ASSERT_EQUALS(ws->e(0), HistogramE({2, 3}));
+  }
+
+  void test_slice_two_bins_at_end() {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 4, 1);
+    const Mantid::HistogramData::Histogram histogram(BinEdges{1, 2, 3, 4, 5}, Counts{1, 4, 9, 16});
+    workspace->mutableY(0) = histogram.dataY();
+    workspace->mutableE(0) = histogram.dataE();
+
+    Parameters params;
+    params.XMin = 3;
+    params.XMax = 5;
+
+    auto ws = runAlgorithm(params, "", workspace);
+
+    TS_ASSERT_EQUALS(ws->x(0), HistogramX({3, 4, 5}));
+    TS_ASSERT_EQUALS(ws->y(0), HistogramY({9, 16}));
+    TS_ASSERT_EQUALS(ws->e(0), HistogramE({3, 4}));
+  }
+
+  void test_points_slice_two_bins_at_start() {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 4, 1);
+    const Mantid::HistogramData::Histogram histogram(Points{1, 2, 3, 4}, Counts{1, 4, 9, 16});
+    workspace->mutableY(0) = histogram.dataY();
+    workspace->mutableE(0) = histogram.dataE();
+
+    Parameters params;
+    params.XMin = 1;
+    params.XMax = 2;
+
+    auto ws = runAlgorithm(params, "", workspace);
+
+    TS_ASSERT_EQUALS(ws->x(0), HistogramX({1, 2}));
+    TS_ASSERT_EQUALS(ws->y(0), HistogramY({1, 4}));
+    TS_ASSERT_EQUALS(ws->e(0), HistogramE({1, 2}));
+  }
+
+  void test_points_slice_two_bins() {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 4, 1);
+    const Mantid::HistogramData::Histogram histogram(Points{1, 2, 3, 4}, Counts{1, 4, 9, 16});
+    workspace->mutableY(0) = histogram.dataY();
+    workspace->mutableE(0) = histogram.dataE();
+
+    Parameters params;
+    params.XMin = 2;
+    params.XMax = 3;
+
+    auto ws = runAlgorithm(params, "", workspace);
+
+    TS_ASSERT_EQUALS(ws->x(0), HistogramX({2, 3}));
+    TS_ASSERT_EQUALS(ws->y(0), HistogramY({4, 9}));
+    TS_ASSERT_EQUALS(ws->e(0), HistogramE({2, 3}));
+  }
+
+  void test_points_slice_two_bins_at_end() {
+    auto workspace = WorkspaceCreationHelper::create2DWorkspacePoints(1, 4, 1);
+    const Mantid::HistogramData::Histogram histogram(Points{1, 2, 3, 4}, Counts{1, 4, 9, 16});
+    workspace->mutableY(0) = histogram.dataY();
+    workspace->mutableE(0) = histogram.dataE();
+
+    Parameters params;
+    params.XMin = 3;
+    params.XMax = 4;
+
+    auto ws = runAlgorithm(params, "", workspace);
+
+    TS_ASSERT_EQUALS(ws->x(0), HistogramX({3, 4}));
+    TS_ASSERT_EQUALS(ws->y(0), HistogramY({9, 16}));
+    TS_ASSERT_EQUALS(ws->e(0), HistogramE({3, 4}));
+  }
+
 private:
   // -----------------------  helper methods ------------------------
 
@@ -782,8 +1006,9 @@ private:
     }
   };
 
-  MatrixWorkspace_sptr runAlgorithm(const Parameters &params, const std::string expectedErrorMsg = "") const {
-    auto ws = createInputWorkspace(params.wsType);
+  MatrixWorkspace_sptr runAlgorithm(const Parameters &params, const std::string expectedErrorMsg = "",
+                                    MatrixWorkspace_sptr workspace = nullptr) const {
+    auto ws = workspace ? workspace : createInputWorkspace(params.wsType);
     ExtractSpectra alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
