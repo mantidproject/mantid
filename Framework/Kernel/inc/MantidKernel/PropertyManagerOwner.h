@@ -96,9 +96,6 @@ public:
   /// The argument is the property name. Default - do nothing.
   void afterPropertySet(const std::string &) override;
 
-  void filterByTime(const Types::Core::DateAndTime & /*start*/, const Types::Core::DateAndTime & /*stop*/) override {
-    throw(std::runtime_error("Not yet implmented"));
-  }
   void splitByTime(std::vector<SplittingInterval> & /*splitter*/,
                    std::vector<PropertyManager *> /* outputs*/) const override {
     throw(std::runtime_error("Not yet implmented"));

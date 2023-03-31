@@ -118,6 +118,9 @@ def eventRef(run_number, angle, start=0, stop=0, DB="TRANS"):
     print("Duration:", duration)
     # Scale monitors by proton charge and add them to the slice workspace
     Scale(InputWorkspace=run_name + "_monitors", Factor=fraction, OutputWorkspace="mon_slice")
+    # set the duration to be the wrong thing to make comparisons work
+    filter_workspace.getRun()["duration"] = run_workspace.getRun().getLogData("duration").value
+
     Rebin(InputWorkspace="mon_slice", OutputWorkspace="mon_rebin", Params="0, 100, 100000", PreserveEvents=False)
     slice_name = str(run_number) + "_" + str(start) + "_" + str(stop)
     Rebin(InputWorkspace=filter_ws_name, OutputWorkspace=slice_name, Params="0, 100, 100000", PreserveEvents=False)
