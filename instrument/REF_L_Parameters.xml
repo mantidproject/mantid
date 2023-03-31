@@ -16,11 +16,11 @@
       <value val="0.7"/>
     </parameter>
 
-    <!-- Effective distances used in the reduction, accounting for emission time -->
     <parameter name="sample-det-distance">
       <value val="1.83"/>
     </parameter>
 
+    <!-- Effective distances used in the reduction, accounting for emission time -->
     <parameter name="source-det-distance">
       <value val="15.75"/>
     </parameter>
