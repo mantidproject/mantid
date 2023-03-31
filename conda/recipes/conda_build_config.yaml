@@ -64,13 +64,13 @@ gsl:
 ipykernel:
   - <6
 
-# Pinned as per issue 35406
+# 16 causing build errors on osx, seems incompatible with our version of boost.
+libcxx:
+  - <16
+
+# 8.2 causing segfaults in jupyter unit tests and doc builds.
 readline:
   - <8.2
-
-# Pinned to prevent a segmentation fault when running doc tests
-filelock:
-  - <3.10.2
 
 pin_run_as_build:
     boost:
