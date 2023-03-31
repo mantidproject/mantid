@@ -166,101 +166,52 @@ public:
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
-    // BUGFIX: fix the proton charge
-    // TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 2);
-
-    // BUGFIX: replace this test block with a test of FilteredWS01_0's TimeROI attribute
-    // check splitter log
-    // TS_ASSERT(filteredws0->run().hasProperty("splitter"));
-    // Kernel::TimeSeriesProperty<int> *splitter0 =
-    //    dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws0->run().getProperty("splitter"));
-    // TS_ASSERT(splitter0);
-    // TS_ASSERT_EQUALS(splitter0->size(), 2);
-    // TS_ASSERT_EQUALS(splitter0->nthTime(0), Types::Core::DateAndTime(runstart_i64));
-    // TS_ASSERT_EQUALS(splitter0->nthValue(0), 1);
-    // TS_ASSERT_EQUALS(splitter0->nthTime(1), Types::Core::DateAndTime(20035000000));
-    // TS_ASSERT_EQUALS(splitter0->nthValue(1), 0);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 1);
+    TS_ASSERT_EQUALS(filteredws0->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20 to 1990-Jan-01 00:00:20.035000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws0->run().getProperty("duration")->value()), 35000000 * 1.E-9, 1.E-9);
 
     // Check Workspace group 1
     EventWorkspace_sptr filteredws1 =
         std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
-    // BUGFIX: fix the proton charge
-    // TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 3);
-
-    // BUGFIX: replace this test block with a test of FilteredWS01_0's TimeROI attribute
-    // check splitter log
-    // TS_ASSERT(filteredws0->run().hasProperty("splitter"));
-    // Kernel::TimeSeriesProperty<int> *splitter1 =
-    //    dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws1->run().getProperty("splitter"));
-    // TS_ASSERT(splitter1);
-    // TS_ASSERT_EQUALS(splitter1->size(), 3);
-    // TS_ASSERT_EQUALS(splitter1->nthTime(0), Types::Core::DateAndTime(runstart_i64));
-    // TS_ASSERT_EQUALS(splitter1->nthValue(0), 0);
-    // TS_ASSERT_EQUALS(splitter1->nthTime(1), Types::Core::DateAndTime(20035000000));
-    // TS_ASSERT_EQUALS(splitter1->nthValue(1), 1);
-    // TS_ASSERT_EQUALS(splitter1->nthTime(2), Types::Core::DateAndTime(20195000000));
-    // TS_ASSERT_EQUALS(splitter1->nthValue(2), 0);
+    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 1);
+    TS_ASSERT_EQUALS(filteredws1->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.035000000 to 1990-Jan-01 00:00:20.195000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws1->run().getProperty("duration")->value()), 160000000 * 1.E-9, 1.E-9);
 
     // Check Workspace group 2
     EventWorkspace_sptr filteredws2 =
         std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 21);
-    // BUGFIX: fix the proton charge
-    // TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 3);
-
+    TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 3);
+    TS_ASSERT_EQUALS(filteredws2->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.200000000 to 1990-Jan-01 00:00:20.265000000\n"
+                     "1: 1990-Jan-01 00:00:20.300000000 to 1990-Jan-01 00:00:20.365000000\n"
+                     "2: 1990-Jan-01 00:00:20.400000000 to 1990-Jan-01 00:00:20.465000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws2->run().getProperty("duration")->value()), 195000000 * 1.E-9, 1.E-9);
     EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();
-
     TofEvent eventmin = elist3.getEvent(0);
     TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(), runstart_i64 + pulsedt * 2);
     TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
-
     TofEvent eventmax = elist3.getEvent(20);
     TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(), runstart_i64 + pulsedt * 4);
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000), 1.0E-4);
 
-    // BUGFIX: replace this test block with a test of FilteredWS01_0's TimeROI attribute
-    // check splitter log
-    // TS_ASSERT(filteredws2->run().hasProperty("splitter"));
-    // Kernel::TimeSeriesProperty<int> *splitter2 =
-    //    dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws2->run().getProperty("splitter"));
-    // TS_ASSERT(splitter2);
-    // TS_ASSERT_EQUALS(splitter2->size(), 7);
-
-    // TS_ASSERT_EQUALS(splitter2->nthTime(0), Types::Core::DateAndTime(runstart_i64));
-    // TS_ASSERT_EQUALS(splitter2->nthValue(0), 0);
-
-    // TS_ASSERT_EQUALS(splitter2->nthTime(1), Types::Core::DateAndTime(20200000000));
-    // TS_ASSERT_EQUALS(splitter2->nthValue(1), 1);
-    // TS_ASSERT_EQUALS(splitter2->nthTime(2), Types::Core::DateAndTime(20265000000));
-    // TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
-
-    // TS_ASSERT_EQUALS(splitter2->nthTime(3), Types::Core::DateAndTime(20300000000));
-    // TS_ASSERT_EQUALS(splitter2->nthValue(3), 1);
-    // TS_ASSERT_EQUALS(splitter2->nthTime(4), Types::Core::DateAndTime(20365000000));
-    // TS_ASSERT_EQUALS(splitter2->nthValue(4), 0);
-
-    // TS_ASSERT_EQUALS(splitter2->nthTime(5), Types::Core::DateAndTime(20400000000));
-    // TS_ASSERT_EQUALS(splitter2->nthValue(5), 1);
-    // TS_ASSERT_EQUALS(splitter2->nthTime(6), Types::Core::DateAndTime(20465000000));
-    // TS_ASSERT_EQUALS(splitter2->nthValue(6), 0);
-
-    // verify the log: duration
-    std::string duration0str = filteredws0->run().getProperty("duration")->value();
-    double duration0 = std::stod(duration0str);
-    TS_ASSERT_DELTA(duration0, 35000000 * 1.E-9, 1.E-9);
-
-    std::string duration1str = filteredws1->run().getProperty("duration")->value();
-    double duration1 = std::stod(duration1str);
-    TS_ASSERT_DELTA(duration1, (20195000000 - 20035000000) * 1.E-9, 1.E-9);
-
-    std::string duration2str = filteredws2->run().getProperty("duration")->value();
-    double duration2 = std::stod(duration2str);
-    TS_ASSERT_DELTA(duration2,
-                    (20265000000 - 20200000000 + 20365000000 - 20300000000 + 20465000000 - 20400000000) * 1.E-9, 1.E-9);
+    // check unfiltered workspace
+    EventWorkspace_sptr unfilteredws =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_unfiltered"));
+    TS_ASSERT(unfilteredws);
+    TS_ASSERT_EQUALS(unfilteredws->getSpectrum(1).getNumberEvents(), 9);
+    TS_ASSERT_EQUALS(unfilteredws->run().getProtonCharge(), 0);
+    TS_ASSERT_EQUALS(unfilteredws->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.195000000 to 1990-Jan-01 00:00:20.200000000\n"
+                     "1: 1990-Jan-01 00:00:20.265000000 to 1990-Jan-01 00:00:20.300000000\n"
+                     "2: 1990-Jan-01 00:00:20.365000000 to 1990-Jan-01 00:00:20.400000000\n");
+    TS_ASSERT_DELTA(std::stod(unfilteredws->run().getProperty("duration")->value()), 75000000 * 1.E-9, 1.E-9);
 
     // Clean up
     AnalysisDataService::Instance().remove("Test02");
