@@ -325,7 +325,7 @@ public:
     runIntersectionTest(left, right, 5. * ONE_DAY_DURATION);
   }
 
-  void test_intersection_no_overlap() { runIntersectionTest(CHRISTMAS, TimeROI{NEW_YEARS_START, NEW_YEARS_STOP}, 0.); }
+  void test_intersection_no_overlap() { runIntersectionTest(CHRISTMAS, TimeROI{NEW_YEARS_START, NEW_YEARS_STOP}, -1.); }
 
   void test_intersection_one_empty() { runIntersectionTest(CHRISTMAS, TimeROI(), 0.); }
 
@@ -433,6 +433,11 @@ public:
     TS_ASSERT_EQUALS(roi.getEffectiveTime(HANUKKAH_START), HANUKKAH_START);
     TS_ASSERT_EQUALS(roi.getEffectiveTime(CHRISTMAS_START), CHRISTMAS_START);
     TS_ASSERT_THROWS(roi.getEffectiveTime(DECEMBER_STOP), const std::runtime_error &);
+  }
+
+  void test_invalidROI() {
+    TS_ASSERT(!TimeROI::INVALID_ROI.isValid());
+    TS_ASSERT_EQUALS(TimeROI::INVALID_ROI.durationInSeconds(), -1);
   }
 
   void test_debugStrPrint() {

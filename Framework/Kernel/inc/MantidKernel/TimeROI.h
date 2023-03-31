@@ -19,6 +19,7 @@ class MANTID_KERNEL_DLL TimeROI {
 public:
   /// the underlying property needs a name
   static const std::string NAME;
+  static const TimeROI INVALID_ROI;
 
   TimeROI();
   TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
@@ -27,6 +28,7 @@ public:
   double durationInSeconds(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   std::size_t numBoundaries() const;
   bool empty() const;
+  bool isValid() const;
   void clear();
   void addROI(const std::string &startTime, const std::string &stopTime);
   void addROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);

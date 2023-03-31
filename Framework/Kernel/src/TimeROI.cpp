@@ -60,6 +60,7 @@ bool overlaps(const TimeInterval &left, const TimeInterval &right) {
 } // namespace
 
 const std::string TimeROI::NAME = "Kernel_TimeROI";
+const TimeROI TimeROI::INVALID_ROI{DateAndTime::GPS_EPOCH - DateAndTime::ONE_SECOND, DateAndTime::GPS_EPOCH};
 
 TimeROI::TimeROI() {}
 
@@ -444,6 +445,12 @@ void TimeROI::update_intersection(const TimeROI &other) {
     if (m_roi.back() > other.m_roi.back()) {
       this->addMask(other.m_roi.back(), m_roi.back());
     }
+
+    // if the TimeROI became empty it is because there is no overlap
+    // reset the value to INVALID_ROI
+    if (this->empty()) {
+      this->replaceROI(INVALID_ROI);
+    }
   }
 }
 
@@ -514,6 +521,8 @@ double TimeROI::durationInSeconds() const {
   const auto ROI_SIZE = this->numBoundaries();
   if (ROI_SIZE == 0) {
     return 0.;
+  } else if (!this->isValid()) {
+    return -1.;
   } else {
     double total{0.};
     for (std::size_t i = 0; i < ROI_SIZE - 1; i += 2) {
@@ -574,6 +583,8 @@ void TimeROI::validateValues(const std::string &label) {
 std::size_t TimeROI::numBoundaries() const { return static_cast<std::size_t>(m_roi.size()); }
 
 bool TimeROI::empty() const { return bool(this->numBoundaries() == 0); }
+
+bool TimeROI::isValid() const { return *this != INVALID_ROI; }
 
 /// Removes all ROI's, leaving an empty object
 void TimeROI::clear() { m_roi.clear(); }
