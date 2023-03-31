@@ -313,10 +313,10 @@ private:
     }
 
     void addOutputWorkspace(Mantid::API::MatrixWorkspace_sptr &ws) {
-      this->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
+      this->getPointerToProperty("OutputWorkspaceBinned")->createTemporaryValue();
       setProperty(m_propName, ws);
     }
-    const std::string m_propName = "OutputWorkspace";
+    const std::string m_propName = "OutputWorkspaceBinned";
   };
 
   PreviewRow makePreviewRow(double theta = 0.1, const std::string &processingInstructions = "10-11",
