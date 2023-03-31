@@ -11,7 +11,6 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidHistogramData/Slice.h"
 #include "MantidIndexing/Extract.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -164,7 +163,6 @@ void ExtractSpectra::execHistogram() {
   Progress prog(this, 0.0, 1.0, size);
   for (int i = 0; i < size; ++i) {
     if (m_commonBoundaries) {
-      // m_inputWorkspace->setHistogram(i, slice(m_inputWorkspace->histogram(i), m_minX, m_maxX - m_histogram));
       this->cropCommon(*m_inputWorkspace, croppedCommonXHistogram, i);
     } else {
       this->cropRagged(*m_inputWorkspace, i);
