@@ -22,6 +22,7 @@ from qtpy.QtWidgets import (
 )
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot, GridHelperCurveLinear
+from mpl_toolkits.axisartist.grid_finder import ExtremeFinderSimple, MaxNLocator
 
 from mantid.plots import get_normalize_by_bin_width
 from mantid.plots.axesfunctions import _pcolormesh_nonortho as pcolormesh_nonorthogonal
@@ -196,13 +197,22 @@ class SliceViewerDataView(QWidget):
             self.add_line_plots()
 
         self.plot_MDH = self.plot_MDH_orthogonal
+        self.set_integer_axes_ticks()
 
         self.canvas.draw_idle()
 
     def create_axes_nonorthogonal(self, transform):
         self.clear_figure()
         self.set_nonorthogonal_transform(transform)
-        self.ax = CurveLinearSubPlot(self.fig, 1, 1, 1, grid_helper=GridHelperCurveLinear((transform.tr, transform.inv_tr)))
+        extreme_finder = ExtremeFinderSimple(20, 20)
+        grid_locator1 = MaxNLocator(nbins=10)
+        grid_locator2 = MaxNLocator(nbins=10)
+        grid_locator1.set_params(integer=True)
+        grid_locator2.set_params(integer=True)
+        grid_helper = GridHelperCurveLinear(
+            (transform.tr, transform.inv_tr), extreme_finder=extreme_finder, grid_locator1=grid_locator1, grid_locator2=grid_locator2
+        )
+        self.ax = CurveLinearSubPlot(self.fig, 1, 1, 1, grid_helper=grid_helper)
         # don't redraw on zoom as the data is rebinned and has to be redrawn again anyway
         self.enable_zoom_on_mouse_scroll(redraw=False)
         self.set_grid_on()
@@ -295,6 +305,7 @@ class SliceViewerDataView(QWidget):
         # pcolormesh clears any grid that was previously visible
         if self.grid_on:
             self.ax.grid(self.grid_on)
+        self.set_integer_axes_ticks()
         self.draw_plot()
 
     def plot_matrix(self, ws, **kwargs):
@@ -497,6 +508,14 @@ class SliceViewerDataView(QWidget):
         """
         self.ax.set_xlim(xlim)
         self.ax.set_ylim(ylim)
+
+    def set_integer_axes_ticks(self):
+        """
+        Set axis locators at integer positions, if possible
+        """
+        self.ax.minorticks_on()
+        self.ax.xaxis.get_major_locator().set_params(integer=True)
+        self.ax.yaxis.get_major_locator().set_params(integer=True)
 
     def set_grid_on(self):
         """
