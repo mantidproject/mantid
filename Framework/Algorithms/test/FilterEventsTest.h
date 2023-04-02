@@ -359,6 +359,28 @@ public:
     EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("EventData", inpWS);
 
+    // Create SplittersWorkspace with two destination workspaces plus the unfiltered workspace
+    // index         DateandTime        time-int64_t
+    //   0    1990-Jan-01 00:00:20.020  20000000000
+    //  -1    1990-Jan-01 00:00:20.040  20040000000
+    //   1    1990-Jan-01 00:00:20.060  20060000000
+    //  -1    1990-Jan-01 00:00:20.080  20080000000
+    //   0    1990-Jan-01 00:00:20.120  20120000000
+    //  -1    1990-Jan-01 00:00:20.140  20140000000
+    //   1    1990-Jan-01 00:00:20.160  20160000000
+    //  -1    1990-Jan-01 00:00:20.180  20180000000
+    //   0    1990-Jan-01 00:00:20.220  20220000000
+    //  -1    1990-Jan-01 00:00:20.240  20240000000
+    //   1    1990-Jan-01 00:00:20.260  20260000000
+    //  -1    1990-Jan-01 00:00:20.280  20280000000
+    //   0    1990-Jan-01 00:00:20.320  20320000000
+    //  -1    1990-Jan-01 00:00:20.340  20340000000
+    //   1    1990-Jan-01 00:00:20.360  20360000000
+    //  -1    1990-Jan-01 00:00:20.380  20380000000
+    //   0    1990-Jan-01 00:00:20.420  20420000000
+    //  -1    1990-Jan-01 00:00:20.440  20440000000
+    //   1    1990-Jan-01 00:00:20.460  20460000000
+    //  -1    1990-Jan-01 00:00:20.480  20480000000
     SplittersWorkspace_sptr splws = createFastFreqLogSplitter(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("SplitterTableX", splws);
     TS_ASSERT_EQUALS(splws->rowCount(), static_cast<size_t>(numpulses) * 2);
@@ -370,48 +392,49 @@ public:
     FilterEvents filter;
     filter.initialize();
 
-    // 2. Set properties
+    // Set properties
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("InputWorkspace", "EventData"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("OutputWorkspaceBaseName", "SplittedDataX"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("CorrectionToSample", "Customized"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("DetectorTOFCorrectionWorkspace", "TimeCorrectionTableX"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("SplitterWorkspace", splws));
 
-    // 3. Execute
+    // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
     TS_ASSERT(filter.isExecuted());
 
-    // 4. Get output
-    // 4.1 Workspace group 0
+    // Get output
+    // Workspace group 0
     EventWorkspace_sptr filteredws0 =
         std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SplittedDataX_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 15);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(9).getNumberEvents(), 15);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 0);
 
-    // BUGFIX: fix the proton charge
-    // TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 5);
-
-    // 4.2 Workspace group 1
+    // Workspace group 1
     EventWorkspace_sptr filteredws1 =
         std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SplittedDataX_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 10);
-    // BUGFIX: fix the proton charge
-    // TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 5);
-
-    // 4.3 Some individual events
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 0);
+    // Some individual events
     EventList elist3 = filteredws1->getSpectrum(3);
     elist3.sortPulseTimeTOF();
-
     if (elist3.getNumberEvents() > 0) {
       TofEvent eventmin = elist3.getEvent(0);
       TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(), runstart_i64);
       TS_ASSERT_DELTA(eventmin.tof(), 80 * 1000, 1.0E-4);
     }
 
-    // 5. Clean
+    // Unfiltered workspace
+    EventWorkspace_sptr unfilteredws =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SplittedDataX_unfiltered"));
+    TS_ASSERT(unfilteredws);
+    TS_ASSERT_EQUALS(unfilteredws->getSpectrum(1).getNumberEvents(), 25);
+    TS_ASSERT_EQUALS(unfilteredws->run().getProtonCharge(), 4);
+    // Clean
     AnalysisDataService::Instance().remove("EventData");
     AnalysisDataService::Instance().remove("TimeCorrectionTableX");
     AnalysisDataService::Instance().remove("SplitterTableX");
