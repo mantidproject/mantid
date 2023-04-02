@@ -66,6 +66,7 @@ private:
   /// process splitters given by a SplittersWorkspace
   void processSplittersWorkspace();
 
+  /// process splitters given by a TableWorkspace
   void processTableSplittersWorkspace();
 
   /// process splitters given by a MatrixWorkspace
@@ -73,14 +74,9 @@ private:
 
   /// create event workspace
   std::shared_ptr<DataObjects::EventWorkspace> createEventWorkspaceNoLog();
-  /// create output workspaces if the splitters are given in SplittersWorkspace
-  // void createOutputWorkspacesSplitters();
-  /// create output workspaces in the case of using TableWorlspace for splitters
-  // void createOutputWorkspacesTableSplitterCase();
-  /// create output workspaces in the case of using MatrixWorkspace for
-  /// splitters
+
+  /// create output workspaces
   void createOutputWorkspaces();
-  void createOutputWorkspacesMatrixCase();
 
   /// Set up detector calibration parameters
   void setupDetectorTOFCalibration();
@@ -105,15 +101,12 @@ private:
   /// Clone the input workspace but with no events. Also and if necessary, only with selected logs
   std::shared_ptr<DataObjects::EventWorkspace> createTemplateOutputWorkspace() const;
 
-  /// Filter events by splitters in format of vector
-  void filterEventsByVectorSplitters(double progressamount);
-
   /// Mark event lists of workspace indexes with no associated detector pixels as not to be split
   void examineEventWS();
 
-  /// Convert SplittersWorkspace to vector of time and vector of target
-  /// (itarget)
-  void convertSplittersWorkspaceToVectors();
+  // /// Convert SplittersWorkspace to vector of time and vector of target
+  // /// (itarget)
+  // void convertSplittersWorkspaceToVectors();
 
   // DEBUG: mark for deletion
   /**
@@ -160,7 +153,7 @@ private:
   DataObjects::EventWorkspace_sptr m_eventWS;
   DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;
   DataObjects::TableWorkspace_sptr m_splitterTableWorkspace;
-  API::MatrixWorkspace_const_sptr m_matrixSplitterWS;
+  API::MatrixWorkspace_sptr m_matrixSplitterWS;
   DataObjects::TableWorkspace_sptr m_detCorrectWorkspace;
 
   /// Flag to use matrix splitters or table splitters
@@ -187,15 +180,6 @@ private:
 
   /// Base of output workspace's name
   std::string m_outputWSNameBase;
-
-  // /// TableWorkspace splitters: from target map to vector workspace group-index
-  // /// These 2 maps are complimentary to each other
-  // std::map<std::string, int> m_targetIndexMap;
-  // std::map<int, std::string> m_wsGroupIndexTargetMap;
-
-  /// MatrixWorkspace splitters:
-  std::map<int, uint32_t> m_yIndexMap;
-  std::map<uint32_t, int> m_wsGroupdYMap;
 
   /// Flag to group workspace
   bool m_toGroupWS;

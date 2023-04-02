@@ -151,6 +151,7 @@ public:
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS01");
     filter.setProperty("SplitterWorkspace", "Splitter02");
     filter.setProperty("OutputTOFCorrectionWorkspace", "CorrectionWS");
+    filter.setProperty("OutputUnfilteredEvents", true);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
@@ -271,6 +272,7 @@ public:
     filter.setProperty("InputWorkspace", "Test02");
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS01");
     filter.setProperty("SplitterWorkspace", "Splitter02");
+    filter.setProperty("OutputUnfilteredEvents", true);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
@@ -348,8 +350,8 @@ public:
   //----------------------------------------------------------------------------------------------
   /**  Filter test with TOF correction
    */
-  void test_FilterWithCustumizedCorrection() {
-    std::cout << std::endl << "test_FilterWithCustumizedCorrection..." << std::endl;
+  void test_FilterWithCustomizedCorrection() {
+    std::cout << std::endl << "test_FilterWithCustomizedCorrection..." << std::endl;
     // 1. Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -398,6 +400,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("CorrectionToSample", "Customized"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("DetectorTOFCorrectionWorkspace", "TimeCorrectionTableX"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("SplitterWorkspace", splws));
+    TS_ASSERT_THROWS_NOTHING(filter.setProperty("OutputUnfilteredEvents", true));
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
@@ -467,6 +470,7 @@ public:
     filter.setProperty("OutputWorkspaceBaseName", "SplittedDataElastic");
     filter.setProperty("CorrectionToSample", "Elastic");
     filter.setProperty("SplitterWorkspace", "SplitterTableX");
+    filter.setProperty("OutputUnfilteredEvents", true);
 
     TS_ASSERT_THROWS_NOTHING(filter.execute());
     TS_ASSERT(filter.isExecuted());
@@ -1037,7 +1041,6 @@ public:
     filter.setProperty("OutputWorkspaceBaseName", "Test13");
     filter.setProperty("SplitterWorkspace", "TableSplitter2");
     filter.setProperty("RelativeTime", true);
-    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
     filter.setProperty("GroupWorkspaces", true);
 
     // Execute
@@ -1076,7 +1079,6 @@ public:
     filter.setProperty("OutputWorkspaceBaseName", "13");
     filter.setProperty("SplitterWorkspace", "TableSplitter2");
     filter.setProperty("RelativeTime", true);
-    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
     filter.setProperty("GroupWorkspaces", true);
 
     // Execute
@@ -1125,6 +1127,7 @@ public:
     filter.setProperty("InformationWorkspace", "InfoWorkspace");
     filter.setProperty("RelativeTime", true);
     filter.setProperty("DescriptiveOutputNames", true);
+    filter.setProperty("OutputUnfilteredEvents", true);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
@@ -1181,6 +1184,7 @@ public:
     filter.setProperty("InformationWorkspace", "InfoWorkspace");
     filter.setProperty("RelativeTime", true);
     filter.setProperty("DescriptiveOutputNames", true);
+    filter.setProperty("OutputUnfilteredEvents", true);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());

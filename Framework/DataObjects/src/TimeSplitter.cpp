@@ -61,12 +61,15 @@ TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const Da
   for (size_t i = 1; i < X.size(); i++) {
     auto timeStart = Types::Core::DateAndTime(X[i - 1], 0.0) + offset_ns;
     auto timeEnd = Types::Core::DateAndTime(X[i], 0.0) + offset_ns;
-    auto index = static_cast<int>(Y[i - 1]);
-    if ((index != NO_TARGET) && (valueAtTime(timeStart) != NO_TARGET || valueAtTime(timeEnd) != NO_TARGET)) {
+    auto target_index = static_cast<int>(Y[i - 1]);
+    if ((target_index != NO_TARGET) && (valueAtTime(timeStart) != NO_TARGET || valueAtTime(timeEnd) != NO_TARGET)) {
       g_log.warning() << "Values between " << timeStart.second() << "(s) and " << timeEnd.second()
                       << "(s) may be overwritten in conversion to TimeSplitter" << '\n';
     }
-    this->addROI(timeStart, timeEnd, index);
+    this->addROI(timeStart, timeEnd, target_index);
+    std::string target_name = std::to_string(target_index);
+    m_name_index_map[target_name] = target_index;
+    m_index_name_map[target_index] = target_name;
   }
 }
 
