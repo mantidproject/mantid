@@ -225,8 +225,7 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /**  Filter events without any correction and test for user-specified
-   *workspace starting value
+  /**  Filter events without any correction and test for user-specified workspace starting value
    *  Event workspace:
    * (1) 10 detectors
    * (2) Run starts @ 20000000000 seconds
@@ -251,6 +250,17 @@ public:
     EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
+    // Create SplittersWorkspace
+    // index         DateandTime        time-int64_t
+    //   0    1990-Jan-01 00:00:20      20000000000
+    //   1    1990-Jan-01 00:00:20.035  20035000000
+    //  -1    1990-Jan-01 00:00:20.195  20195000000
+    //   2    1990-Jan-01 00:00:20.200  20200000000
+    //  -1    1990-Jan-01 00:00:20.265  20265000000
+    //   2    1990-Jan-01 00:00:20.300  20300000000
+    //  -1    1990-Jan-01 00:00:20.365  20365000000
+    //   2    1990-Jan-01 00:00:20.400  20400000000
+    //  -1    1990-Jan-01 00:00:20.465  20465000000
     SplittersWorkspace_sptr splws = createSplittersWorkspace(runstart_i64, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
 
@@ -261,7 +271,6 @@ public:
     filter.setProperty("InputWorkspace", "Test02");
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS01");
     filter.setProperty("SplitterWorkspace", "Splitter02");
-    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
@@ -269,39 +278,63 @@ public:
 
     // Get output
     int numsplittedws = filter.getProperty("NumberOutputWS");
-    TS_ASSERT_EQUALS(numsplittedws, 3);
+    TS_ASSERT_EQUALS(numsplittedws, 4);
 
-    // 4.1 Workspace group 0
+    // Workspace group 0
     EventWorkspace_sptr filteredws0 =
-        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 1);
+    TS_ASSERT_EQUALS(filteredws0->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20 to 1990-Jan-01 00:00:20.035000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws0->run().getProperty("duration")->value()), 35000000 * 1.E-9, 1.E-9);
 
-    // 4.2 Workspace group 1
+    // Workspace group 1
     EventWorkspace_sptr filteredws1 =
-        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
+    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 1);
+    TS_ASSERT_EQUALS(filteredws1->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.035000000 to 1990-Jan-01 00:00:20.195000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws1->run().getProperty("duration")->value()), 160000000 * 1.E-9, 1.E-9);
 
-    // 4.3 Workspace group 2
+    // Workspace group 2
     EventWorkspace_sptr filteredws2 =
-        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_3"));
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 21);
-
+    TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 3);
+    TS_ASSERT_EQUALS(filteredws2->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.200000000 to 1990-Jan-01 00:00:20.265000000\n"
+                     "1: 1990-Jan-01 00:00:20.300000000 to 1990-Jan-01 00:00:20.365000000\n"
+                     "2: 1990-Jan-01 00:00:20.400000000 to 1990-Jan-01 00:00:20.465000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws2->run().getProperty("duration")->value()), 195000000 * 1.E-9, 1.E-9);
     EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();
-
     TofEvent eventmin = elist3.getEvent(0);
     TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(), runstart_i64 + pulsedt * 2);
     TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
-
     TofEvent eventmax = elist3.getEvent(20);
     TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(), runstart_i64 + pulsedt * 4);
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000), 1.0E-4);
 
-    // 5. Clean up
+    // Workspace Unfiltered
+    // DEBUG: add tests for the unfiltered workspace
+    EventWorkspace_sptr unfilteredws =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_unfiltered"));
+    TS_ASSERT(unfilteredws);
+    TS_ASSERT_EQUALS(unfilteredws->getSpectrum(1).getNumberEvents(), 9);
+    TS_ASSERT_EQUALS(unfilteredws->run().getProtonCharge(), 0);
+    TS_ASSERT_EQUALS(unfilteredws->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.195000000 to 1990-Jan-01 00:00:20.200000000\n"
+                     "1: 1990-Jan-01 00:00:20.265000000 to 1990-Jan-01 00:00:20.300000000\n"
+                     "2: 1990-Jan-01 00:00:20.365000000 to 1990-Jan-01 00:00:20.400000000\n");
+    TS_ASSERT_DELTA(std::stod(unfilteredws->run().getProperty("duration")->value()), 75000000 * 1.E-9, 1.E-9);
+
+    // Clean up
     AnalysisDataService::Instance().remove("Test02");
     AnalysisDataService::Instance().remove("Splitter02");
     std::vector<std::string> outputwsnames = filter.getProperty("OutputWorkspaceNames");
