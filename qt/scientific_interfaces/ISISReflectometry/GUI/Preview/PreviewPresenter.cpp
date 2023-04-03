@@ -210,7 +210,7 @@ void PreviewPresenter::notifyRectangularROIModeRequested() {
   auto const roiType = roiTypeFromString(regionType);
   m_dockedWidgets->setEditROIState(false);
   m_dockedWidgets->setRectangularROIState(true);
-  m_regionSelector->addRectangularRegion(regionType, roiTypeToColor(roiType));
+  m_regionSelector->addRectangularRegion(regionType, roiTypeToColor(roiType), roiTypeToHatch(roiType));
 }
 
 void PreviewPresenter::notifyRegionChanged() {

@@ -303,10 +303,11 @@ public:
     auto mockRegionSelector = mockRegionSelector_uptr.get();
     const std::string regionType = roiTypeToString(ROIType::Signal);
     const std::string color = roiTypeToColor(ROIType::Signal);
+    const std::string hatch = roiTypeToHatch(ROIType::Signal);
 
     EXPECT_CALL(*mockDockedWidgets, getRegionType()).Times(1).WillOnce(Return(regionType));
     expectRectangularROIMode(*mockDockedWidgets);
-    EXPECT_CALL(*mockRegionSelector, addRectangularRegion(regionType, color)).Times(1);
+    EXPECT_CALL(*mockRegionSelector, addRectangularRegion(regionType, color, hatch)).Times(1);
     auto presenter = PreviewPresenter(packDeps(mockView.get(), makeModel(), makeJobManager(), makeInstViewModel(),
                                                std::move(mockDockedWidgets), std::move(mockRegionSelector_uptr)));
 
