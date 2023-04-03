@@ -421,7 +421,7 @@ class SANSTubeCalibration(PythonAlgorithm):
                 fit_params = TubeCalibFitParams(guessed_avg, height=2000, width=2 * margin, margin=margin, outEdge=10.0, inEdge=10.0)
                 fit_params.setAutomatic(False)
 
-            caltable, peakTable, meanCTable = self._calibrate_tube(
+            caltable, peak_positions, meanC = self._calibrate_tube(
                 ws=result,
                 tube_name=tube_name,
                 known_positions=known_edges,
@@ -449,8 +449,6 @@ class SANSTubeCalibration(PythonAlgorithm):
             # Save the fitted positions to see how well the fit does, all in mm
             x_values = []
             x0_values = []
-            # Exclude string in first column that can't be sorted
-            peak_positions = list(peakTable.row(0).values())[1:]
             peak_positions.sort()
             for i in range(len(peak_positions)):
                 x0_values.append(peak_positions[i] * default_pixel_size + first_pixel_pos)
@@ -467,7 +465,7 @@ class SANSTubeCalibration(PythonAlgorithm):
                 ref_pixel_pos += default_pixel_size
             diagnostic_output[tube_id].append(CreateWorkspace(DataX=x0_values, DataY=x_values, OutputWorkspace=f"Shift{ws_suffix}"))
 
-            meanCvalue.append(meanCTable.column("meanC")[0])
+            meanCvalue.append(meanC)
 
         ApplyCalibration(result, caltable)
         cvalues = CreateWorkspace(DataX=list(diagnostic_output.keys()), DataY=meanCvalue)
@@ -528,66 +526,54 @@ class SANSTubeCalibration(PythonAlgorithm):
             calib_table.addColumn(type="int", name="Detector ID")
             calib_table.addColumn(type="V3D", name="Detector Position")
 
-        # TODO: can we do this differently so that we just return the values for the peaks and mean C rather than creating workspaces?
-        # Create the output peak table
-        output_peak = CreateEmptyTableWorkspace(OutputWorkspace="PeakTable")
-        output_peak.addColumn(type="str", name="TubeId")
-        for i in range(len(ideal_tube.getArray())):
-            output_peak.addColumn(type="float", name=f"Peak{i + 1}")
+        peak_positions, meanC = self._perform_calibration_for_tube(ws, tube_spec, calib_table, fit_params, ideal_tube)
 
-        # Create the output mean C table
-        output_c = CreateEmptyTableWorkspace(OutputWorkspace="meanCTable")
-        output_c.addColumn(type="str", name="TubeId")
-        output_c.addColumn(type="float", name="meanC")
+        return calib_table, peak_positions, meanC
 
-        self._perform_calibration_for_tube(ws, tube_spec, calib_table, fit_params, ideal_tube, output_peak, output_c)
-
-        return calib_table, output_peak, output_c
-
-    def savePeak(peakTable, filePath):
-        """Allows to save the peakTable to a text file.
-
-        :param peakTable: peak table as the workspace table provided by calibrated method, as in the example:
-
-        .. code-block:: python
-
-        calibTable, peakTable = calibrate(..., outputPeak=peakTable)
-        savePeak(peakTable, 'myfolder/myfile.txt')
-
-        :param filePath: where to save the file. If the filePath is
-        not given as an absolute path, it will be considered relative
-        to the defaultsave.directory.
-
-        The file will be saved with the following format:
-
-        id_name (parsed space to %20) [peak1, peak2, ..., peakN]
-
-        You may load these peaks using readPeakFile
-
-        ::
-
-        panel1/tube001 [23.4, 212.5, 0.1]
-        ...
-        panel1/tubeN   [56.3, 87.5, 0.1]
-
-        """
-        if not os.path.isabs(filePath):
-            saveDirectory = config["defaultsave.directory"]
-            pFile = open(os.path.join(saveDirectory, filePath), "w")
-        else:
-            pFile = open(filePath, "w")
-        if isinstance(peakTable, str):
-            peakTable = mtd[peakTable]
-        nPeaks = peakTable.columnCount() - 1
-        peaksNames = ["Peak%d" % (i + 1) for i in range(nPeaks)]
-
-        for line in range(peakTable.rowCount()):
-            row = peakTable.row(line)
-            peak_values = [row[k] for k in peaksNames]
-            tube_name = row["TubeId"].replace(" ", "%20")
-            print(tube_name, peak_values, file=pFile)
-
-        pFile.close()
+    # def savePeak(peakTable, filePath):
+    #     """Allows to save the peakTable to a text file.
+    #
+    #     :param peakTable: peak table as the workspace table provided by calibrated method, as in the example:
+    #
+    #     .. code-block:: python
+    #
+    #     calibTable, peakTable = calibrate(..., outputPeak=peakTable)
+    #     savePeak(peakTable, 'myfolder/myfile.txt')
+    #
+    #     :param filePath: where to save the file. If the filePath is
+    #     not given as an absolute path, it will be considered relative
+    #     to the defaultsave.directory.
+    #
+    #     The file will be saved with the following format:
+    #
+    #     id_name (parsed space to %20) [peak1, peak2, ..., peakN]
+    #
+    #     You may load these peaks using readPeakFile
+    #
+    #     ::
+    #
+    #     panel1/tube001 [23.4, 212.5, 0.1]
+    #     ...
+    #     panel1/tubeN   [56.3, 87.5, 0.1]
+    #
+    #     """
+    #     if not os.path.isabs(filePath):
+    #         saveDirectory = config["defaultsave.directory"]
+    #         pFile = open(os.path.join(saveDirectory, filePath), "w")
+    #     else:
+    #         pFile = open(filePath, "w")
+    #     if isinstance(peakTable, str):
+    #         peakTable = mtd[peakTable]
+    #     nPeaks = peakTable.columnCount() - 1
+    #     peaksNames = ["Peak%d" % (i + 1) for i in range(nPeaks)]
+    #
+    #     for line in range(peakTable.rowCount()):
+    #         row = peakTable.row(line)
+    #         peak_values = [row[k] for k in peaksNames]
+    #         tube_name = row["TubeId"].replace(" ", "%20")
+    #         print(tube_name, peak_values, file=pFile)
+    #
+    #     pFile.close()
 
     def readPeakFile(file_name):
         """Load the file calibration
@@ -641,8 +627,6 @@ class SANSTubeCalibration(PythonAlgorithm):
         calib_table,
         fit_params,
         ideal_tube,
-        peaks_table,
-        meanC_table,
         excludeShortTubes=0.0,
         polinFit=2,
     ):
@@ -654,8 +638,6 @@ class SANSTubeCalibration(PythonAlgorithm):
         calibrated positions of the detectors will be placed.
         :param fit_params: a :class:`~tube_calib_fit_params.TubeCalibFitParams` object for fitting the peaks
         :param ideal_tube: the :class:`~ideal_tube.IdealTube` that contains the positions in metres of the edges used for calibration
-        :param peaks_table: table into which the peak positions will be put
-        :param meanC_table: table into which the mean value of "resolution" parameter will be put
         :param excludeShortTubes: exclude tubes shorter than specified length from calibration
         :param polinFit: order of the polynomial to fit against the known positions. Acceptable: 2, 3
 
@@ -677,17 +659,12 @@ class SANSTubeCalibration(PythonAlgorithm):
             return
 
         # Define peak positions and calculate mean C
-        actual_tube, meanC = self.getPoints(ws, ideal_tube.getFunctionalForms(), fit_params, ws_ids, showPlot=True)
+        peak_positions, meanC = self.getPoints(ws, ideal_tube.getFunctionalForms(), fit_params, ws_ids, showPlot=True)
         RenameWorkspace("FittedData", OutputWorkspace=f"FittedTube{tube_idx}")
         RenameWorkspace("TubePlot", OutputWorkspace=f"TubePlot{tube_idx}")
 
-        # Add the peak positions and mean C to the tables
-        # Call one tube at a time, as if the number of edges (peaks) varies tube to tube then addRow does not work
-        peaks_table.addRow([tube_name] + list(actual_tube))
-        meanC_table.addRow([tube_name] + list(meanC))
-
         # Define the correct positions of the detectors
-        det_ids, det_positions = self.getCalibratedPixelPositions_RKH(ws, actual_tube, ideal_tube.getArray(), ws_ids, False, polinFit)
+        det_ids, det_positions = self.getCalibratedPixelPositions_RKH(ws, peak_positions, ideal_tube.getArray(), ws_ids, False, polinFit)
         # Check if we have corrected positions
         if len(det_ids) == len(ws_ids):
             # Save the detector positions to the calibration table
@@ -697,6 +674,7 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         if skipped:
             self.log().debug("Histogram was excluded from the calibration as it did not have an assigned detector.")
+        return peak_positions, meanC[0]
 
     def createTubeCalibtationWorkspaceByWorkspaceIndexList(
         self, integratedWorkspace, outputWorkspace, workspaceIndexList, xUnit="Pixel", showPlot=False
@@ -888,13 +866,8 @@ class SANSTubeCalibration(PythonAlgorithm):
 
     def getPoints(self, IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=False):
         """
-        Get the centres of N slits or edges for calibration
-
-        It does look for the peak position in pixels by fitting the peaks and
-        edges. It is the method responsible for estimating the peak position in each tube.
-
-        .. note::
-        This N slit method is suited for WISH or the five sharp peaks of MERLIN .
+        Get the centres of N slits or edges for calibration. It looks for the peak position in pixels
+        by fitting the peaks and edges. It is the method responsible for estimating the peak position in each tube.
 
         :param IntegratedWorkspace: Workspace of integrated data
         :param funcForms: array of function form 1=slit/bar (Gaussian peak), 2=edge, 3= FlatTopPeak (pair of edges that can partly overlap)
@@ -907,7 +880,7 @@ class SANSTubeCalibration(PythonAlgorithm):
         """
 
         # Create input workspace for fitting
-        ## get all the counts for the integrated workspace inside the tube
+        # get all the counts for the integrated workspace inside the tube
         countsY = np.array([IntegratedWorkspace.dataY(i)[0] for i in whichTube])
         if len(countsY) == 0:
             return
