@@ -97,7 +97,7 @@ template <typename HeldType> FilteredTimeSeriesProperty<HeldType>::~FilteredTime
 template <typename TYPE>
 std::vector<TYPE> FilteredTimeSeriesProperty<TYPE>::filteredValuesAsVector(const Kernel::TimeROI *roi) const {
   // if this is not filtered just return the parent version
-  if (this->m_filter->empty()) {
+  if (this->m_filter->useAll()) {
     return TimeSeriesProperty<TYPE>::filteredValuesAsVector(roi); // no filtering to do
   }
   // if the supplied roi is empty use just this one
@@ -115,7 +115,7 @@ template <typename TYPE> std::vector<TYPE> FilteredTimeSeriesProperty<TYPE>::fil
  */
 template <typename TYPE>
 std::vector<DateAndTime> FilteredTimeSeriesProperty<TYPE>::filteredTimesAsVector(const Kernel::TimeROI *roi) const {
-  if (m_filter->empty()) {
+  if (m_filter->useAll()) {
     return TimeSeriesProperty<TYPE>::filteredTimesAsVector(roi); // no filtering to do
   }
   const auto internalRoi = this->intersectFilterWithOther(roi);
@@ -146,7 +146,7 @@ template <typename TYPE> TimeInterval FilteredTimeSeriesProperty<TYPE>::nthInter
 
   // Calculate time interval
   Kernel::TimeInterval deltaT;
-  if (m_filter->empty()) {
+  if (m_filter->useAll()) {
     // No filter uses the parent class implmentation
     deltaT = TimeSeriesProperty<TYPE>::nthInterval(n);
   } else {
@@ -172,7 +172,7 @@ template <typename TYPE> TYPE FilteredTimeSeriesProperty<TYPE>::nthValue(int n) 
   }
 
   TYPE value;
-  if (m_filter->empty()) {
+  if (m_filter->useAll()) {
     // 3. Situation 1:  No filter
     value = TimeSeriesProperty<TYPE>::nthValue(n);
   } else {
@@ -233,7 +233,7 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::filterWith(const
 }
 
 template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::filterWith(const TimeROI &filter) {
-  if (filter.empty()) {
+  if (filter.useAll()) {
     // if filter is empty, clear the current
     this->clearFilter();
   } else {
@@ -267,7 +267,7 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::clearFilterCache
  * Updates size()
  */
 template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::countSize() const {
-  if (m_filter->empty()) {
+  if (m_filter->useAll()) {
     // 1. Not filter
     this->m_size = int(this->m_values.size());
   } else {
@@ -298,7 +298,7 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::applyFilter() co
   // clear out the previous version
   this->clearFilterCache();
 
-  if (m_filter->empty())
+  if (m_filter->useAll())
     return;
 
   // 2. Apply filter
@@ -394,7 +394,7 @@ template <typename TYPE> std::string FilteredTimeSeriesProperty<TYPE>::setValueF
 template <typename TYPE>
 Kernel::TimeROI *FilteredTimeSeriesProperty<TYPE>::intersectFilterWithOther(const TimeROI *other) const {
   auto roi = new TimeROI(*m_filter.get());
-  if (other && (!other->empty()))
+  if (other && (!other->useAll()))
     roi->update_or_replace_intersection(*other);
   return roi;
 }
@@ -410,7 +410,7 @@ template <typename TYPE> const Kernel::TimeROI &FilteredTimeSeriesProperty<TYPE>
  */
 template <typename TYPE>
 std::vector<SplittingInterval> FilteredTimeSeriesProperty<TYPE>::getSplittingIntervals() const {
-  if (m_filter->empty()) {
+  if (m_filter->useAll()) {
     // Case where there is no filter just use the parent implementation
     return TimeSeriesProperty<TYPE>::getSplittingIntervals();
   } else {
@@ -431,7 +431,7 @@ bool FilteredTimeSeriesProperty<HeldType>::operator==(const TimeSeriesProperty<H
   } else {
     // only need to compare the filters
     const auto rhs_ftsp = dynamic_cast<const FilteredTimeSeriesProperty<HeldType> *>(&right);
-    if (m_filter->empty()) {
+    if (m_filter->useAll()) {
       if (!rhs_ftsp) {
         // simple compare is fine
         return time_and_value_compare;

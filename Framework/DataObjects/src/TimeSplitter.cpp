@@ -280,7 +280,7 @@ TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
 
   // error check that something is there
   // ignore index being empty is ok
-  if ((workspaceIndex >= 0) && (output.empty())) {
+  if ((workspaceIndex >= 0) && (output.useAll())) {
     std::stringstream msg;
     msg << "No regions exist for workspace index " << workspaceIndex;
   }

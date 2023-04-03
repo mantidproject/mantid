@@ -509,7 +509,7 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group, bool k
     }
   }
   // save the timeROI to the nexus file
-  if (!(m_timeroi->empty()))
+  if (!(m_timeroi->useAll()))
     m_timeroi->saveNexus(file);
 
   if (!keepOpen)

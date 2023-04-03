@@ -798,7 +798,7 @@ void TimeSeriesProperty<std::string>::expandFilterToRange(std::vector<SplittingI
 template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue(const TimeROI *timeRoi) const {
   double retVal = 0.0;
   try {
-    if ((timeRoi == nullptr) || (timeRoi->empty())) {
+    if ((timeRoi == nullptr) || (timeRoi->useAll())) {
       const auto &filter = getSplittingIntervals();
       retVal = this->averageValueInFilter(filter);
     } else {
@@ -946,7 +946,7 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(co
 
   // Derive splitting intervals from either the roi or from the first/last entries in the time series
   std::vector<SplittingInterval> filter;
-  if (timeRoi && !timeRoi->empty()) {
+  if (timeRoi && !timeRoi->useAll()) {
     filter = timeRoi->toSplitters();
   } else {
     filter = this->getSplittingIntervals();
@@ -1049,7 +1049,7 @@ template <typename TYPE> std::vector<DateAndTime> TimeSeriesProperty<TYPE>::time
  */
 template <typename TYPE>
 std::vector<DateAndTime> TimeSeriesProperty<TYPE>::filteredTimesAsVector(const Kernel::TimeROI *roi) const {
-  if (!roi || roi->empty()) {
+  if (!roi || roi->useAll()) {
     return this->timesAsVector();
   } else {
     std::vector<DateAndTime> out;
@@ -1243,7 +1243,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
 template <typename TYPE> double TimeSeriesProperty<TYPE>::durationInSeconds(const Kernel::TimeROI *roi) const {
   if (this->size() == 0)
     return std::numeric_limits<double>::quiet_NaN();
-  if (roi && !roi->empty()) {
+  if (roi && !roi->useAll()) {
     Kernel::TimeROI seriesSpan(*roi);
     // remove everything before the start time
     seriesSpan.addMask(DateAndTime::GPS_EPOCH, this->firstTime());
@@ -2105,7 +2105,7 @@ void TimeSeriesProperty<std::string>::histogramData(const Types::Core::DateAndTi
  * @returns :: Vector of included values only.
  */
 template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector(const TimeROI *roi) const {
-  if (roi && !roi->empty()) {
+  if (roi && !roi->useAll()) {
     std::vector<TYPE> filteredValues;
     for (const auto &timeAndValue : this->m_values)
       if (roi->valueAtTime(timeAndValue.time()))

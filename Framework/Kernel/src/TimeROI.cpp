@@ -60,7 +60,8 @@ bool overlaps(const TimeInterval &left, const TimeInterval &right) {
 } // namespace
 
 const std::string TimeROI::NAME = "Kernel_TimeROI";
-const TimeROI TimeROI::INVALID_ROI{DateAndTime::GPS_EPOCH - DateAndTime::ONE_SECOND, DateAndTime::GPS_EPOCH};
+/// Constant for TimeROI where no time is used
+const TimeROI TimeROI::USE_NONE{DateAndTime::GPS_EPOCH - DateAndTime::ONE_SECOND, DateAndTime::GPS_EPOCH};
 
 TimeROI::TimeROI() {}
 
@@ -145,7 +146,7 @@ void TimeROI::addMask(const std::string &startTime, const std::string &stopTime)
 void TimeROI::addMask(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) {
   assert_increasing(startTime, stopTime);
 
-  if (this->empty()) {
+  if (this->useAll()) {
     g_log.debug("TimeROI::addMask to an empty object is ignored");
   } else if (this->isCompletelyInMask(startTime, stopTime)) {
     g_log.debug("TimeROI::addMask to ignored region");
@@ -242,7 +243,7 @@ bool TimeROI::isCompletelyInROI(const Types::Core::DateAndTime &startTime,
  */
 bool TimeROI::isCompletelyInMask(const Types::Core::DateAndTime &startTime,
                                  const Types::Core::DateAndTime &stopTime) const {
-  if (this->empty())
+  if (this->useAll())
     return true;
   if (startTime >= m_roi.back())
     return true;
@@ -266,7 +267,7 @@ bool TimeROI::isCompletelyInMask(const Types::Core::DateAndTime &startTime,
  * The value is, essentially, whatever it was at the last recorded time before or equal to the one requested.
  */
 bool TimeROI::valueAtTime(const Types::Core::DateAndTime &time) const {
-  if (this->empty() || time < m_roi.front() || time >= m_roi.back()) {
+  if (this->useAll() || time < m_roi.front() || time >= m_roi.back()) {
     // ignore everything outside of range
     return ROI_IGNORE;
   } else {
@@ -394,7 +395,7 @@ void TimeROI::replaceROI(const TimeSeriesProperty<bool> *roi) {
 
 void TimeROI::replaceROI(const TimeROI &other) {
   m_roi.clear();
-  if (!other.empty())
+  if (!other.useAll())
     m_roi.assign(other.m_roi.cbegin(), other.m_roi.cend());
 }
 
@@ -426,7 +427,7 @@ void TimeROI::update_intersection(const TimeROI &other) {
   if (*this == other)
     return;
 
-  if (other.empty() || this->empty()) {
+  if (other.useAll() || this->useAll()) {
     // empty out this environment
     m_roi.clear();
   } else {
@@ -449,7 +450,7 @@ void TimeROI::update_intersection(const TimeROI &other) {
     // if the TimeROI became empty it is because there is no overlap
     // reset the value to INVALID_ROI
     if (this->empty()) {
-      this->replaceROI(INVALID_ROI);
+      this->replaceROI(USE_NONE);
     }
   }
 }
@@ -463,9 +464,9 @@ void TimeROI::update_intersection(const TimeROI &other) {
  * @param other :: the replacing or intersecting TimeROI.
  */
 void TimeROI::update_or_replace_intersection(const TimeROI &other) {
-  if (this->empty()) {
+  if (this->useAll()) {
     this->replaceROI(other);
-  } else if (!other.empty()) {
+  } else if (!other.useAll()) {
     this->update_intersection(other);
   }
 }
@@ -521,7 +522,7 @@ double TimeROI::durationInSeconds() const {
   const auto ROI_SIZE = this->numBoundaries();
   if (ROI_SIZE == 0) {
     return 0.;
-  } else if (!this->isValid()) {
+  } else if (this->useNone()) {
     return -1.;
   } else {
     double total{0.};
@@ -541,7 +542,7 @@ double TimeROI::durationInSeconds(const Types::Core::DateAndTime &startTime,
   assert_increasing(startTime, stopTime);
 
   // just return the difference between the supplied other times if this has no regions
-  if (this->empty()) {
+  if (this->useAll()) {
     return DateAndTime::secondsFromDuration(stopTime - startTime);
   }
 
@@ -584,7 +585,9 @@ std::size_t TimeROI::numBoundaries() const { return static_cast<std::size_t>(m_r
 
 bool TimeROI::empty() const { return bool(this->numBoundaries() == 0); }
 
-bool TimeROI::isValid() const { return *this != INVALID_ROI; }
+bool TimeROI::useAll() const { return this->empty(); }
+
+bool TimeROI::useNone() const { return *this == USE_NONE; }
 
 /// Removes all ROI's, leaving an empty object
 void TimeROI::clear() { m_roi.clear(); }

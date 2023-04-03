@@ -49,7 +49,7 @@ public:
   void test_emptyROI() {
     TimeROI value;
     TS_ASSERT_EQUALS(value.durationInSeconds(), 0.);
-    TS_ASSERT(value.empty());
+    TS_ASSERT(value.useAll());
     TS_ASSERT_EQUALS(value.numBoundaries(), 0);
   }
 
@@ -109,7 +109,7 @@ public:
     value.addROI(HANUKKAH_START, HANUKKAH_STOP);
     TS_ASSERT_EQUALS(value.durationInSeconds(), HANUKKAH_DURATION);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
-    TS_ASSERT(!value.empty());
+    TS_ASSERT(!value.useAll());
 
     // add New Year's eve
     value.addROI(NEW_YEARS_START, NEW_YEARS_STOP);
@@ -210,7 +210,7 @@ public:
     // remove the rest
     value.addMask(ONE, FOUR);
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 0.);
-    TS_ASSERT(value.empty());
+    TS_ASSERT(value.useAll());
 
     // add back an ROI then remove parts until nothing is left
     value.addROI(TWO, FIVE); // 2-5
@@ -227,7 +227,7 @@ public:
 
     value.addMask(FOUR, FIVE); // empty
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 0.);
-    TS_ASSERT(value.empty());
+    TS_ASSERT(value.useAll());
   }
 
   void test_redundantValues() {
@@ -255,11 +255,11 @@ public:
     TimeROI value;
     // the result is empty
     value.addMask(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
-    TS_ASSERT(value.empty());
+    TS_ASSERT(value.useAll());
 
     // since it ends with "on" the duration is infinite
     TS_ASSERT_EQUALS(value.durationInSeconds(), 0.);
-    TS_ASSERT(value.empty());
+    TS_ASSERT(value.useAll());
   }
 
   void test_overwrite() {
@@ -268,7 +268,7 @@ public:
     value1.addMask(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
     // since it ends with "on" the duration is infinite
     TS_ASSERT_EQUALS(value1.durationInSeconds(), 0.);
-    TS_ASSERT(value1.empty());
+    TS_ASSERT(value1.useAll());
 
     value1.addROI(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
     TS_ASSERT_EQUALS(value1.durationInSeconds(), ONE_DAY_DURATION);
@@ -436,8 +436,8 @@ public:
   }
 
   void test_invalidROI() {
-    TS_ASSERT(!TimeROI::INVALID_ROI.isValid());
-    TS_ASSERT_EQUALS(TimeROI::INVALID_ROI.durationInSeconds(), -1);
+    TS_ASSERT(TimeROI::USE_NONE.useNone());
+    TS_ASSERT_EQUALS(TimeROI::USE_NONE.durationInSeconds(), -1);
   }
 
   void test_debugStrPrint() {

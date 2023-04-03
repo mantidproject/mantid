@@ -166,16 +166,16 @@ void findAndConcatenateTimeStrProp(const Run *runObjLHS, const Run *runObjRHS, c
  */
 Run &Run::operator+=(const Run &rhs) {
   // combine the two TimeROI if either is non-empty
-  if ((!m_timeroi->empty()) || (!rhs.m_timeroi->empty())) {
+  if ((!m_timeroi->useAll()) || (!rhs.m_timeroi->useAll())) {
     TimeROI combined(*m_timeroi);
     // set this start/end time as the only ROI if it is empty
-    if (combined.empty()) {
+    if (combined.useAll()) {
       combined.addROI(this->startTime(), this->endTime());
     }
 
     // fixup the timeroi from the other
     TimeROI rightROI(*rhs.m_timeroi);
-    if (rightROI.empty() && rhs.hasStartTime() && rhs.hasEndTime()) {
+    if (rightROI.useAll() && rhs.hasStartTime() && rhs.hasEndTime()) {
       rightROI.addROI(rhs.startTime(), rhs.endTime());
     }
 
@@ -329,7 +329,7 @@ void Run::integrateProtonCharge(const std::string &logname) const {
     if (filteredLog)
       timeroi.update_or_replace_intersection(filteredLog->getTimeROI());
 
-    if (timeroi.empty()) {
+    if (timeroi.useAll()) {
       // simple accumulation
       const std::vector<double> logValues = log->valuesAsVector();
       total = std::accumulate(logValues.begin(), logValues.end(), 0.0);
@@ -375,7 +375,7 @@ void Run::integrateProtonCharge(const std::string &logname) const {
  * If the Run's TimeROI is empty, this member function does nothing.
  */
 void Run::setDuration() {
-  if (m_timeroi->empty())
+  if (m_timeroi->useAll())
     return;
   double duration{m_timeroi->durationInSeconds()};
   const std::string NAME("duration");
