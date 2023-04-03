@@ -39,6 +39,8 @@ public:
   void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
   void setEndX(double startX, WorkspaceID workspaceID);
   void setEndX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
+  std::map<int, QModelIndex> getUniqueIndices(const QModelIndexList &selectedIndices);
+
   std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const;
   QStringList getSampleWSSuffices() const;
   QStringList getSampleFBSuffices() const;
@@ -97,7 +99,6 @@ protected:
   QStringList m_fbResolutionSuffixes;
   IIndirectFitDataModel *m_model;
   IIndirectFitDataView *m_view;
-  std::map<int, QModelIndex> getUniqueIndices(const QModelIndexList &selectedIndices);
 
 private slots:
   void addData();
