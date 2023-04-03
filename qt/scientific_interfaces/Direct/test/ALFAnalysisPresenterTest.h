@@ -202,6 +202,7 @@ public:
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
     EXPECT_CALL(*m_view, getRange()).Times(2).WillRepeatedly(Return(m_range));
 
+    EXPECT_CALL(*m_view, disable("Fitting")).Times(1);
     EXPECT_CALL(*m_model, fitProperties(m_range)).Times(1).WillOnce(Return(ByMove(std::move(m_algProperties))));
     EXPECT_CALL(*m_algorithmManager, fit(NotNull())).Times(1);
 
@@ -271,6 +272,8 @@ public:
 
   void test_notifyCropWorkspaceComplete_triggers_the_model_to_calculate_an_estimate_peak() {
     EXPECT_CALL(*m_model, calculateEstimate(_)).Times(1);
+    EXPECT_CALL(*m_view, enable()).Times(1);
+
     m_presenter->notifyCropWorkspaceComplete(nullptr);
   }
 
@@ -282,6 +285,7 @@ public:
     EXPECT_CALL(*m_view, addFitSpectrum(Eq(m_workspace))).Times(1);
     expectUpdatePeakCentreInViewFromModel();
     expectUpdateRotationAngleCalled();
+    EXPECT_CALL(*m_view, enable()).Times(1);
 
     m_presenter->notifyFitComplete(m_workspace, m_function, fitStatus);
   }
@@ -289,6 +293,7 @@ public:
   void test_notifyAlgorithmError_will_display_a_message_in_the_view() {
     std::string const message("This is a warning message");
 
+    EXPECT_CALL(*m_view, enable()).Times(1);
     EXPECT_CALL(*m_view, displayWarning(message)).Times(1);
 
     m_presenter->notifyAlgorithmError(message);
@@ -298,6 +303,7 @@ private:
   void expectCalculateEstimate(MatrixWorkspace_sptr const &workspace) {
     EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(workspace != nullptr));
     if (workspace) {
+      EXPECT_CALL(*m_view, disable("Calculating estimate parameters")).Times(1);
       EXPECT_CALL(*m_view, getRange()).Times(1).WillRepeatedly(Return(m_range));
 
       EXPECT_CALL(*m_model, cropWorkspaceProperties(m_range))

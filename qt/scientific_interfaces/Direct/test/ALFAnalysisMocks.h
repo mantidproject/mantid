@@ -51,6 +51,9 @@ public:
 
   MOCK_METHOD1(subscribePresenter, void(IALFAnalysisPresenter *presenter));
 
+  MOCK_METHOD1(disable, void(std::string const &reason));
+  MOCK_METHOD0(enable, void());
+
   MOCK_METHOD0(replot, void());
 
   MOCK_CONST_METHOD2(openExternalPlot,
@@ -85,7 +88,6 @@ public:
   MOCK_CONST_METHOD0(extractedWorkspace, Mantid::API::MatrixWorkspace_sptr());
   MOCK_CONST_METHOD0(isDataExtracted, bool());
 
-  MOCK_METHOD1(doFit, Mantid::API::MatrixWorkspace_sptr(std::pair<double, double> const &range));
   MOCK_METHOD1(calculateEstimate, void(Mantid::API::MatrixWorkspace_sptr const &workspace));
 
   MOCK_CONST_METHOD0(exportWorkspaceCopyToADS, void());

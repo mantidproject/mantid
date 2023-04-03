@@ -65,14 +65,19 @@ void ALFAnalysisPresenter::notifyFitClicked() {
     return;
   }
 
+  m_view->disable("Fitting");
   m_algorithmManager->fit(m_model->fitProperties(m_view->getRange()));
 }
 
-void ALFAnalysisPresenter::notifyAlgorithmError(std::string const &message) { m_view->displayWarning(message); }
+void ALFAnalysisPresenter::notifyAlgorithmError(std::string const &message) {
+  m_view->enable();
+  m_view->displayWarning(message);
+}
 
 void ALFAnalysisPresenter::notifyCropWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
   m_model->calculateEstimate(workspace);
   updateViewFromModel();
+  m_view->enable();
 }
 
 void ALFAnalysisPresenter::notifyFitComplete(Mantid::API::MatrixWorkspace_sptr workspace,
@@ -82,6 +87,8 @@ void ALFAnalysisPresenter::notifyFitComplete(Mantid::API::MatrixWorkspace_sptr w
 
   updatePeakCentreInViewFromModel();
   updateRotationAngleInViewFromModel();
+
+  m_view->enable();
 }
 
 void ALFAnalysisPresenter::notifyExportWorkspaceToADSClicked() { m_model->exportWorkspaceCopyToADS(); }
@@ -117,6 +124,7 @@ bool ALFAnalysisPresenter::checkPeakCentreIsWithinFitRange() const {
 
 void ALFAnalysisPresenter::calculateEstimate() {
   if (m_model->isDataExtracted()) {
+    m_view->disable("Calculating estimate parameters");
     m_algorithmManager->cropWorkspace(m_model->cropWorkspaceProperties(m_view->getRange()));
   } else {
     updatePlotInViewFromModel();
