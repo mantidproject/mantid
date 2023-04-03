@@ -1,7 +1,10 @@
-set build_prefix=%1
-set prefix=%2
+@echo on
+
+set build_env_prefix=%1
+set host_env_prefix=%2
 set package_name=%3
 
-if not exist ..\..\win-64\env_logs mkdir ..\..\win-64\env_logs
-conda list --explicit --prefix %build_prefix% > ..\..\win-64\env_logs\%package_name%_build_environment.txt
-conda list --explicit --prefix %prefix% > ..\..\win-64\env_logs\%package_name%_host_environment.txt
+if not exist ..\win-64\env_logs mkdir ..\win-64\env_logs
+call conda list --explicit --prefix %host_env_prefix% > ..\win-64\env_logs\%package_name%_host_environment.txt
+call conda list --explicit --prefix %build_env_prefix% > ..\win-64\env_logs\%package_name%_build_environment.txt
+
