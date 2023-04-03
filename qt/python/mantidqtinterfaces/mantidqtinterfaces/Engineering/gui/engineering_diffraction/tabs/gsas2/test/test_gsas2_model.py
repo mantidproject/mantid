@@ -353,6 +353,24 @@ class TestGSAS2Model(unittest.TestCase):
             _try_delete(stem_user_dir)
             _try_delete(save_directory)
 
+    def test_create_reflection_labels_returns_a_primary_format_when_lists_match_size(self):
+        phase_names = ["Fe", "Fe_gamma"]
+        positions = [[1.0, 2.0], [3.0, 4.0]]
+
+        self.model.phase_names_list = phase_names
+        labels = self.model._create_reflection_labels(positions)
+
+        self.assertEqual(["reflections_Fe", "reflections_Fe_gamma"], labels)
+
+    def test_create_reflection_labels_returns_indexed_labels_when_positions_have_a_different_size(self):
+        phase_names = ["Fe", "Fe_gamma"]
+        positions = [[1.0, 2.0]]
+
+        self.model.phase_names_list = phase_names
+        labels = self.model._create_reflection_labels(positions)
+
+        self.assertEqual(["reflections_phase_1"], labels)
+
     def test_load_gsas_histogram(self):
         self.model.x_min = [20000]
         self.model.x_max = [21000]
