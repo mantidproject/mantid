@@ -126,7 +126,7 @@ void ExtractSpectra::init() {
  */
 void ExtractSpectra::exec() {
   m_inputWorkspace = getProperty("InputWorkspace");
-  m_histogram = m_inputWorkspace->isHistogramData();
+  m_isHistogramData = m_inputWorkspace->isHistogramData();
   m_commonBoundaries = m_inputWorkspace->isCommonBins();
   this->checkProperties();
 
@@ -179,14 +179,17 @@ void ExtractSpectra::execHistogram() {
 const Kernel::cow_ptr<Mantid::HistogramData::HistogramX>
 ExtractSpectra::getCroppedXHistogram(const API::MatrixWorkspace &workspace) {
   const auto hist = workspace.histogram(0);
-  auto XBegin = m_minX;
-  auto xEnd = m_maxX - m_histogram;
+  auto begin = m_minXIndex;
+  auto end = m_maxXIndex;
+  if (m_isHistogramData) {
+    end -= 1;
+  }
 
   auto cropped(hist);
-  cropped.resize(xEnd - XBegin);
+  cropped.resize(end - begin);
 
-  xEnd = hist.xMode() == Histogram::XMode::Points ? xEnd : xEnd + 1;
-  cropped.mutableX().assign(hist.x().begin() + XBegin, hist.x().begin() + xEnd);
+  auto xEnd = hist.xMode() == Histogram::XMode::Points ? end : end + 1;
+  cropped.mutableX().assign(hist.x().begin() + begin, hist.x().begin() + xEnd);
   return cropped.sharedX();
 }
 
@@ -197,8 +200,11 @@ ExtractSpectra::getCroppedXHistogram(const API::MatrixWorkspace &workspace) {
 void ExtractSpectra::cropCommon(API::MatrixWorkspace &workspace,
                                 Kernel::cow_ptr<Mantid::HistogramData::HistogramX> XHistogram, int index) {
   const auto hist = workspace.histogram(index);
-  auto begin = m_minX;
-  auto end = m_maxX - m_histogram;
+  auto begin = m_minXIndex;
+  auto end = m_maxXIndex;
+  if (m_isHistogramData) {
+    end -= 1;
+  }
 
   auto cropped(hist);
   cropped.resize(end - begin);
@@ -232,7 +238,7 @@ void ExtractSpectra::cropRagged(MatrixWorkspace &workspace, int index) {
   }
   size_t endX = this->getXMaxIndex(index);
   if (endX > 0)
-    endX -= m_histogram;
+    endX -= m_isHistogramData;
   for (size_t i = endX; i < size; ++i) {
     Y[i] = 0.0;
     E[i] = 0.0;
@@ -273,9 +279,9 @@ void ExtractSpectra::execEvent() {
   BinEdges binEdges(2);
   if (m_commonBoundaries) {
     auto &oldX = m_inputWorkspace->x(0);
-    binEdges = BinEdges(oldX.begin() + m_minX, oldX.begin() + m_maxX);
+    binEdges = BinEdges(oldX.begin() + m_minXIndex, oldX.begin() + m_maxXIndex);
   }
-  if (m_maxX - m_minX < 2) {
+  if (m_maxXIndex - m_minXIndex < 2) {
     // create new output X axis
     binEdges = {minX_val, maxX_val};
   }
@@ -309,7 +315,7 @@ void ExtractSpectra::execEvent() {
       const auto oldDx = el.pointStandardDeviations();
       el.setHistogram(binEdges);
       if (oldDx) {
-        el.setPointStandardDeviations(oldDx.begin() + m_minX, oldDx.begin() + (m_maxX - m_histogram));
+        el.setPointStandardDeviations(oldDx.begin() + m_minXIndex, oldDx.begin() + (m_maxXIndex - m_isHistogramData));
       }
     }
     propagateBinMasking(*eventW, i);
@@ -325,8 +331,8 @@ void ExtractSpectra::propagateBinMasking(MatrixWorkspace &workspace, const int i
     MatrixWorkspace::MaskList filteredMask;
     for (const auto &mask : workspace.maskedBins(i)) {
       const size_t maskIndex = mask.first;
-      if (maskIndex >= m_minX && maskIndex < m_maxX - m_histogram)
-        filteredMask[maskIndex - m_minX] = mask.second;
+      if (maskIndex >= m_minXIndex && maskIndex < m_maxXIndex - m_isHistogramData)
+        filteredMask[maskIndex - m_minXIndex] = mask.second;
     }
     if (filteredMask.size() > 0)
       workspace.setMaskedBins(i, filteredMask);
@@ -344,23 +350,23 @@ void ExtractSpectra::propagateBinMasking(MatrixWorkspace &workspace, const int i
  * input workspace
  */
 void ExtractSpectra::checkProperties() {
-  m_minX = this->getXMinIndex();
-  m_maxX = this->getXMaxIndex();
+  m_minXIndex = this->getXMinIndex();
+  m_maxXIndex = this->getXMaxIndex();
   const size_t xSize = m_inputWorkspace->x(0).size();
-  if (m_minX > 0 || m_maxX < xSize) {
-    if (m_minX > m_maxX) {
+  if (m_minXIndex > 0 || m_maxXIndex < xSize) {
+    if (m_minXIndex > m_maxXIndex) {
       throw std::out_of_range("XMin must be less than XMax");
     }
     m_croppingInX = true;
     if (m_commonBoundaries && !std::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace) &&
-        (m_minX == m_maxX || (m_histogram && m_maxX == m_minX + 1))) {
-      m_minX--;
-      m_maxX = m_minX + 1 + m_histogram;
+        (m_minXIndex == m_maxXIndex || (m_isHistogramData && m_maxXIndex == m_minXIndex + 1))) {
+      m_minXIndex--;
+      m_maxXIndex = m_minXIndex + 1 + m_isHistogramData;
     }
   }
   if (!m_commonBoundaries) {
-    m_minX = 0;
-    m_maxX = static_cast<int>(m_inputWorkspace->x(0).size());
+    m_minXIndex = 0;
+    m_maxXIndex = static_cast<int>(m_inputWorkspace->x(0).size());
   }
 
   // The hierarchy of inputs is (one is being selected):

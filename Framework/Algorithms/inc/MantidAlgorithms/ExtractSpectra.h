@@ -46,13 +46,13 @@ private:
   API::MatrixWorkspace_sptr m_inputWorkspace;
   DataObjects::EventWorkspace_sptr eventW;
   /// The bin index to start the cropped workspace from
-  std::size_t m_minX = 0;
+  std::size_t m_minXIndex = 0;
   /// The bin index to end the cropped workspace at
-  std::size_t m_maxX = 0;
+  std::size_t m_maxXIndex = 0;
   /// Flag indicating whether the input workspace has common boundaries
   bool m_commonBoundaries = false;
   /// Flag indicating whether we're dealing with histogram data
-  bool m_histogram = false;
+  bool m_isHistogramData = false;
   /// Flag indicating whether XMin and/or XMax has been set
   bool m_croppingInX = false;
   /// The list of workspaces to extract.
