@@ -35,5 +35,6 @@ attr_mapping = [
         optional=True,
     ),
     ParamMapEntry(ext_name="paalman_pings_events_per_point", int_name="paalman_pings_events_per_point", optional=True),
+    ParamMapEntry(ext_name="vanadium_big_threshold", int_name="van_big_threshold", optional=True),
 ]
 attr_mapping.extend(PARAM_MAPPING)

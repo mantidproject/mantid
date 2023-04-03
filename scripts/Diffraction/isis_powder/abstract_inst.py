@@ -165,6 +165,13 @@ class AbstractInst(object):
 
         return run_details.splined_vanadium_file_path
 
+    def get_vanadium_big_threshold(self):
+        """
+        Get the big number threshold that is used to limit big values after applying the vanadium normalization
+        """
+
+        return None
+
     # Mandatory overrides
 
     def _get_run_details(self, run_number_string):

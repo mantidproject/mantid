@@ -209,7 +209,9 @@ class Osiris(AbstractInst):
                 Target=ws_units.wavelength,
             )
 
-        ws_to_correct = mantid.MonteCarloAbsorption(InputWorkspace=ws_to_correct, EventsPerPoint=events_per_point)
+        corrections = mantid.MonteCarloAbsorption(InputWorkspace=ws_to_correct, EventsPerPoint=events_per_point)
+
+        ws_to_correct = ws_to_correct / corrections
 
         if previous_units != ws_units.wavelength:
             ws_to_correct = mantid.ConvertUnits(
@@ -217,6 +219,8 @@ class Osiris(AbstractInst):
                 Target=previous_units,
                 OutputWorkspace=ws_to_correct,
             )
+
+        common.remove_intermediate_workspace(corrections)
 
         return ws_to_correct
 
@@ -254,6 +258,13 @@ class Osiris(AbstractInst):
         """
 
         return run_details.unsplined_vanadium_file_path
+
+    def get_vanadium_big_threshold(self):
+        """
+        Get the big number threshold that is used to limit big values after applying the vanadium normalization
+        """
+
+        return self._inst_settings.van_big_threshold
 
     def _output_focused_ws(self, processed_spectra, run_details):
         """

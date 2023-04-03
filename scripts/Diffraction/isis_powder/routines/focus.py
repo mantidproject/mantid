@@ -345,7 +345,13 @@ def _normalize_one_spectrum(single_spectrum_ws, vanadium_ws, instrument):
         # crop based off max between 1000 and 2000 tof as the vanadium peak on Gem will always occur here
         complete = _crop_vanadium_to_percent_of_max(rebinned_vanadium, values_replaced, single_spectrum_ws, 1000, 2000)
     else:
-        complete = mantid.ReplaceSpecialValues(InputWorkspace=divided, NaNValue=0, InfinityValue=0.0, OutputWorkspace=single_spectrum_ws)
+        complete = mantid.ReplaceSpecialValues(
+            InputWorkspace=divided,
+            NaNValue=0,
+            InfinityValue=0.0,
+            BigNumberThreshold=instrument.get_vanadium_big_threshold(),
+            OutputWorkspace=single_spectrum_ws,
+        )
 
     if instrument.perform_abs_vanadium_norm():
         complete = _perform_absolute_normalization(rebinned_vanadium, complete)
