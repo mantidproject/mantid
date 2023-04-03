@@ -1,0 +1,1 @@
+- It is now possible to mask out detectors in the absorption and multiple scattering calculation :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>`, :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>`, :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>`
