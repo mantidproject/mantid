@@ -288,7 +288,7 @@ class RegionSelectorTest(unittest.TestCase):
         self.assertEqual(1, len(region_selector._selectors))
 
         # When
-        region_selector.add_rectangular_region("test", "black", "O")
+        region_selector.add_rectangular_region("test2", "green", "O")
 
         # Then
         self.assertEqual(1, len(region_selector._selectors))
