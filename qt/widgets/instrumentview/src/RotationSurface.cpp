@@ -122,14 +122,11 @@ void RotationSurface::createUnwrappedDetectors() {
         if (detectorInfo.isMonitor(i) || detIds[i] < 0) {
           m_unwrappedDetectors[i] = UnwrappedDetector();
         } else {
-          // A real detector.
-          // Position, relative to origin
-          auto rpos = detectorInfo.position(i) - m_pos;
           // Create the unwrapped shape
           UnwrappedDetector udet(m_instrActor->getColor(i), i);
           // Calculate its position/size in UV
           // coordinates
-          this->calcUV(udet, rpos);
+          this->calcUV(udet);
 
           m_unwrappedDetectors[i] = udet;
         } // is a real detector

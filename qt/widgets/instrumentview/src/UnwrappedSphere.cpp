@@ -19,16 +19,17 @@ UnwrappedSphere::UnwrappedSphere(const InstrumentActor *rootActor, const Mantid:
 }
 
 //------------------------------------------------------------------------------
-/** Convert physical position to UV projection
+/** Convert detector (physical position) to UV projection
  *
- * @param pos :: position in 3D
+ * @param detIndex :: detector index in DetectorInfo or ComponentInfo
  * @param u :: set to U
  * @param v :: set to V
  * @param uscale :: scaling for u direction
  * @param vscale :: scaling for v direction
  */
-void UnwrappedSphere::project(const Mantid::Kernel::V3D &pos, double &u, double &v, double &uscale,
-                              double &vscale) const {
+void UnwrappedSphere::project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) const {
+  const auto &componentInfo = m_instrActor->componentInfo();
+  auto pos = componentInfo.position(detIndex) - m_pos;
   // projection to cylinder axis
   v = pos.scalar_prod(m_zaxis);
   double x = pos.scalar_prod(m_xaxis);
