@@ -19,6 +19,7 @@ class MANTID_KERNEL_DLL TimeROI {
 public:
   /// the underlying property needs a name
   static const std::string NAME;
+  static const TimeROI USE_NONE;
 
   TimeROI();
   TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
@@ -26,7 +27,10 @@ public:
   double durationInSeconds() const;
   double durationInSeconds(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   std::size_t numBoundaries() const;
-  bool empty() const;
+  /// TimeROI selects all time to be used
+  bool useAll() const;
+  /// TimeROI selects no time to be used as all is invalid
+  bool useNone() const;
   void clear();
   void addROI(const std::string &startTime, const std::string &stopTime);
   void addROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
@@ -56,6 +60,7 @@ public:
 private:
   std::vector<Types::Core::DateAndTime> getAllTimes(const TimeROI &other);
   void validateValues(const std::string &label);
+  bool empty() const;
   bool isCompletelyInROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   bool isCompletelyInMask(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   bool valueAtTime(const std::vector<Types::Core::DateAndTime>::iterator &time);

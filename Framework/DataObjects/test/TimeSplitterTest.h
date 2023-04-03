@@ -266,30 +266,30 @@ public:
 
     // start with empty TimeSplitter
     TimeSplitter splitter;
-    TS_ASSERT(splitter.getTimeROI(TimeSplitter::NO_TARGET).empty());
-    TS_ASSERT(splitter.getTimeROI(0).empty());
+    TS_ASSERT(splitter.getTimeROI(TimeSplitter::NO_TARGET).useAll());
+    TS_ASSERT(splitter.getTimeROI(0).useAll());
 
     // place to put the output
     TimeROI roi;
 
     // add a single TimeROI
     splitter.addROI(ONE, THREE, 1);
-    TS_ASSERT(splitter.getTimeROI(TimeSplitter::NO_TARGET).empty());
-    TS_ASSERT(splitter.getTimeROI(0).empty());
-    TS_ASSERT(splitter.getTimeROI(0).empty());
+    TS_ASSERT(splitter.getTimeROI(TimeSplitter::NO_TARGET).useAll());
+    TS_ASSERT(splitter.getTimeROI(0).useAll());
+    TS_ASSERT(splitter.getTimeROI(0).useAll());
     roi = splitter.getTimeROI(1);
-    TS_ASSERT(!roi.empty());
+    TS_ASSERT(!roi.useAll());
     TS_ASSERT_EQUALS(roi.numBoundaries(), 2);
 
     // add the same output index, but with a gap from the previous
     splitter.addROI(FOUR, FIVE, 1);
     roi = splitter.getTimeROI(TimeSplitter::NO_TARGET - 1); // intentionally trying a "big" negative for ignore filter
-    TS_ASSERT(!roi.empty());
+    TS_ASSERT(!roi.useAll());
     TS_ASSERT_EQUALS(roi.numBoundaries(), 2);
-    TS_ASSERT(splitter.getTimeROI(0).empty());
-    TS_ASSERT(splitter.getTimeROI(0).empty());
+    TS_ASSERT(splitter.getTimeROI(0).useAll());
+    TS_ASSERT(splitter.getTimeROI(0).useAll());
     roi = splitter.getTimeROI(1);
-    TS_ASSERT(!roi.empty());
+    TS_ASSERT(!roi.useAll());
     TS_ASSERT_EQUALS(roi.numBoundaries(), 4);
   }
 

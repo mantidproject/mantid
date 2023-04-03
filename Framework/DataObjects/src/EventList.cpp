@@ -3821,8 +3821,8 @@ void EventList::filterByPulseTime(Kernel::TimeROI *timeRoi, EventList &output) c
   output.setHistogram(m_histogram);
   output.setSortOrder(this->order);
 
-  if ((timeRoi == nullptr) || (timeRoi->empty())) {
-    throw std::invalid_argument("TimeROI can not be empty");
+  if ((timeRoi == nullptr) || (timeRoi->useAll())) {
+    throw std::invalid_argument("TimeROI can not use all time");
   }
   const auto &intervals = timeRoi->toSplitters();
 
