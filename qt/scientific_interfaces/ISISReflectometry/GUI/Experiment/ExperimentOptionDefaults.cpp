@@ -25,12 +25,12 @@ std::string stringValueOrEmpty(boost::optional<double> value) { return value ? s
 std::map<std::string, std::string> getStitchParams(OptionDefaults const &stitchDefaults) {
   std::map<std::string, std::string> initialStitchParameters;
   auto const &alg = Mantid::API::AlgorithmManager::Instance().create("Stitch1DMany");
-  auto const &propNames = alg->getDeclaredPropertyNames();
-  for (auto const &propName : propNames) {
-    std::string const &stitchName = "Stitch" + propName;
-    auto const &propValue = stitchDefaults.getStringOrEmpty(propName, stitchName);
+  auto const &algPropNames = alg->getDeclaredPropertyNames();
+  for (auto const &algPropName : algPropNames) {
+    std::string const &defaultPropName = "Stitch" + algPropName;
+    auto const &propValue = stitchDefaults.getStringOrEmpty(algPropName, defaultPropName);
     if (!propValue.empty()) {
-      initialStitchParameters[propName] = propValue;
+      initialStitchParameters[algPropName] = propValue;
     }
   }
   return initialStitchParameters;
