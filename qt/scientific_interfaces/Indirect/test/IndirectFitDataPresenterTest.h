@@ -254,6 +254,18 @@ public:
     TS_ASSERT_EQUALS(m_presenter->getQValuesForData(), qValues)
   }
 
+  void test_getUniqueIndices() {
+    QModelIndexList data;
+    QModelIndex indexA = QModelIndex(); // 1, 1);
+    indexA.index(1, 1);
+    data.append(indexA);
+    data.append(QModelIndex().index(1, 2));
+    data.append(QModelIndex().index(2, 1));
+
+    auto results = m_presenter->getUniqueIndices(data);
+    TS_ASSERT_EQUALS(results.size(), 2);
+  }
+
 private:
   void deleteSetup() {
     m_presenter.reset();

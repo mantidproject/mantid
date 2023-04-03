@@ -97,6 +97,7 @@ protected:
   QStringList m_fbResolutionSuffixes;
   IIndirectFitDataModel *m_model;
   IIndirectFitDataView *m_view;
+  std::map<int, QModelIndex> getUniqueIndices(const QModelIndexList &selectedIndices);
 
 private slots:
   void addData();
@@ -109,7 +110,6 @@ private:
   void setModelStartXAndEmit(double startX, FitDomainIndex row);
   void setModelEndXAndEmit(double endX, FitDomainIndex row);
   void setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row);
-
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   bool m_emitCellChanged = true;
 };
