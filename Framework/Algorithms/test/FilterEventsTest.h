@@ -656,8 +656,16 @@ public:
     EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("Test10", inpWS);
 
+    // Create SplittersWorkspace with two destination workspaces plus the unfiltered workspace
+    // index    Relative DateandTime     time-int64_t
+    //   0    1990-Jan-01 00:00:00.000
+    //   1    1990-Jan-01 00:00:00.035
+    //   2    1990-Jan-01 00:00:00.195
+    //  -1    1990-Jan-01 00:00:00.465
     API::MatrixWorkspace_sptr splws = createMatrixSplitter(0, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter10", splws);
+    TimeSplitter timeSplitter = TimeSplitter(splws);
+    std::string printout{timeSplitter.debugPrint()};
 
     FilterEvents filter;
     filter.initialize();

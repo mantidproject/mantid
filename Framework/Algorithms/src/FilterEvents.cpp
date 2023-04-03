@@ -415,8 +415,7 @@ void FilterEvents::processAlgorithmProperties() {
     if (m_matrixSplitterWS) {
       m_useSplittersWorkspace = false;
     } else {
-      throw runtime_error("Invalid type of input workspace, neither "
-                          "SplittersWorkspace nor MatrixWorkspace.");
+      throw runtime_error("Invalid type of input workspace, neither SplittersWorkspace nor MatrixWorkspace.");
     }
   }
 
@@ -867,7 +866,6 @@ void FilterEvents::processMatrixSplitterWorkspace() {
   assert(m_matrixSplitterWS);
 
   m_timeSplitter = TimeSplitter(m_matrixSplitterWS, m_isSplittersRelativeTime ? m_runStartTime : DateAndTime(0));
-
   m_targetWorkspaceIndexSet = m_timeSplitter.outputWorkspaceIndices();
   m_targetWorkspaceIndexSet.insert(TimeSplitter::NO_TARGET); // add an extra workspace index for unfiltered events
   m_maxTargetIndex = *m_targetWorkspaceIndexSet.rbegin();    // using the fact that std::set is sorted
@@ -967,6 +965,7 @@ void FilterEvents::createOutputWorkspaces() {
   double progress_step_total =
       static_cast<double>(m_targetWorkspaceIndexSet.size()); // total number of progress steps expected
   double progress_step_current{0.};                          // current number of progress steps
+  const auto originalROI = m_eventWS->run().getTimeROI();
 
   for (auto const wsindex : m_targetWorkspaceIndexSet) {
 
@@ -1011,10 +1010,10 @@ void FilterEvents::createOutputWorkspaces() {
     std::shared_ptr<EventWorkspace> optws = templateWorkspace->clone();
 
     //
-    // Find the TimeROI associated to the current destination-workspace index
-    // setting the TimeROI of optws will replace the TimeROI that optws inherited from templateWorkspace
-    // setting the TimeROI of optws also updates its integrated proton charge and the duration of the run
-    optws->mutableRun().setTimeROI(m_timeSplitter.getTimeROI(wsindex));
+    // Find the TimeROI associated to the current destination-workspace index.
+    TimeROI roi{m_timeSplitter.getTimeROI(wsindex)};
+    roi.update_or_replace_intersection(originalROI);
+    optws->mutableRun().setTimeROI(roi);
 
     m_outputWorkspacesMap.emplace(wsindex, optws);
 
