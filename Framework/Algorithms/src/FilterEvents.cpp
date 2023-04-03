@@ -639,7 +639,7 @@ void FilterEvents::copyNoneSplitLogs(std::vector<TimeSeriesProperty<int> *> &int
 //  * @param bool_tsp_vector :: vector of boolean tsp
 //  * @param string_tsp_vector :: vector of string tsp
 //  */
-/**
+/*
 void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int> *> &int_tsp_vector,
                                        const std::vector<TimeSeriesProperty<double> *> &dbl_tsp_vector,
                                        const std::vector<TimeSeriesProperty<bool> *> &bool_tsp_vector,
@@ -719,7 +719,7 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
 //  * @param split_datetime_vec :: splitter
 //  * @param max_target_index :: maximum number of separated time series
 //  */
-/**
+/*
 template <typename TYPE>
 void FilterEvents::splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp,
                                            std::vector<Types::Core::DateAndTime> &split_datetime_vec,
@@ -906,7 +906,7 @@ void FilterEvents::createOutputWorkspaces() {
 
   // Clone the input workspace but without any events. Will serve as blueprint for the output workspaces
   std::shared_ptr<EventWorkspace> templateWorkspace = this->createTemplateOutputWorkspace();
-  /**
+  /*
   // DEBUG: block for comparison between properties of the input workspace and the template workspace
   const auto &run = templateWorkspace->run();
   for (const auto &prop : run.getProperties()){
@@ -1412,7 +1412,7 @@ std::shared_ptr<DataObjects::EventWorkspace> FilterEvents::createTemplateOutputW
 //  * @brief FilterEvents::generateSplitterTSPalpha
 //  * @param split_tsp_vec
 //  */
-/**
+/*
 void FilterEvents::generateSplitterTSPalpha(
     std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec) {
   // clear vector to set up
@@ -1462,7 +1462,7 @@ void FilterEvents::generateSplitterTSPalpha(
 //  * @brief FilterEvents::mapSplitterTSPtoWorkspaces
 //  * @param split_tsp_vec
 //  */
-/**
+/*
 void FilterEvents::mapSplitterTSPtoWorkspaces(
     std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec) {
   g_log.debug() << "There are " << split_tsp_vec.size() << " TimeSeriesPropeties.\n"
@@ -1510,7 +1510,7 @@ void FilterEvents::mapSplitterTSPtoWorkspaces(
 //  * @param splitter_tsp :: TimeSeriesProperty for splitter
 //  * @return
 //  */
-/**
+/*
 double FilterEvents::calculate_duration(std::unique_ptr<Kernel::TimeSeriesProperty<int>> &splitter_tsp) {
   // Get the times and values
   std::vector<int> split_values = splitter_tsp->valuesAsVector();
