@@ -201,9 +201,7 @@ class SliceViewerDataView(QWidget):
 
         self.canvas.draw_idle()
 
-    def create_axes_nonorthogonal(self, transform):
-        self.clear_figure()
-        self.set_nonorthogonal_transform(transform)
+    def grid_helper(self, transform):
         extreme_finder = ExtremeFinderSimple(20, 20)
         xint, yint = self.presenter.is_integer_frame()
         grid_locator1, grid_locator2 = None, None
@@ -216,6 +214,12 @@ class SliceViewerDataView(QWidget):
         grid_helper = GridHelperCurveLinear(
             (transform.tr, transform.inv_tr), extreme_finder=extreme_finder, grid_locator1=grid_locator1, grid_locator2=grid_locator2
         )
+        return grid_helper
+
+    def create_axes_nonorthogonal(self, transform):
+        self.clear_figure()
+        self.set_nonorthogonal_transform(transform)
+        grid_helper = self.grid_helper(transform)
         self.ax = CurveLinearSubPlot(self.fig, 1, 1, 1, grid_helper=grid_helper)
         # don't redraw on zoom as the data is rebinned and has to be redrawn again anyway
         self.enable_zoom_on_mouse_scroll(redraw=False)

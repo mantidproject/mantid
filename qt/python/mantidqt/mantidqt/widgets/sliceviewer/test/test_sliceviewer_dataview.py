@@ -92,6 +92,8 @@ class SliceviewerDataViewTest(unittest.TestCase):
         self.view.canvas = mock.Mock()
         self.view.clear_figure = mock.Mock()
 
+        self.view.grid_helper = mock.Mock()
+
         self.view.create_axes_nonorthogonal(mock.NonCallableMock())
 
         self.view.clear_figure.assert_called_once()
@@ -107,6 +109,8 @@ class SliceviewerDataViewTest(unittest.TestCase):
         self.view.clear_figure = mock.Mock()
         self.view._grid_on = mock.NonCallableMock()
 
+        self.view.set_integer_axes_ticks = mock.Mock()
+
         self.view.create_axes_orthogonal()
 
         self.view.clear_figure.assert_called_once()
@@ -117,6 +121,7 @@ class SliceviewerDataViewTest(unittest.TestCase):
     def test_create_axes_orthogonal_redraws_on_zoom(self):
         for redraw in [True, False]:
             self.view.canvas = mock.Mock()
+            self.view.set_integer_axes_ticks = mock.Mock()
             self.view.create_axes_orthogonal(redraw_on_zoom=redraw)
             self.view.canvas.enable_zoom_on_scroll.assert_called_once_with(mock.ANY, redraw=redraw, toolbar=mock.ANY, callback=mock.ANY)
 
