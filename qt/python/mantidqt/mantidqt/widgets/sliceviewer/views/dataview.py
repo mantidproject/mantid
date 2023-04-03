@@ -205,10 +205,14 @@ class SliceViewerDataView(QWidget):
         self.clear_figure()
         self.set_nonorthogonal_transform(transform)
         extreme_finder = ExtremeFinderSimple(20, 20)
-        grid_locator1 = MaxNLocator(nbins=10)
-        grid_locator2 = MaxNLocator(nbins=10)
-        grid_locator1.set_params(integer=True)
-        grid_locator2.set_params(integer=True)
+        xint, yint = self.presenter.is_integer_frame()
+        grid_locator1, grid_locator2 = None, None
+        if xint:
+            grid_locator1 = MaxNLocator(nbins=10)
+            grid_locator1.set_params(integer=True)
+        if yint:
+            grid_locator2 = MaxNLocator(nbins=10)
+            grid_locator2.set_params(integer=True)
         grid_helper = GridHelperCurveLinear(
             (transform.tr, transform.inv_tr), extreme_finder=extreme_finder, grid_locator1=grid_locator1, grid_locator2=grid_locator2
         )
@@ -289,6 +293,7 @@ class SliceViewerDataView(QWidget):
         self._orig_lims = self.get_data_limits_to_fill_current_axes()
 
         self.on_track_cursor_state_change(self.track_cursor_checked())
+        self.set_integer_axes_ticks()
 
         self.draw_plot()
 
@@ -305,7 +310,6 @@ class SliceViewerDataView(QWidget):
         # pcolormesh clears any grid that was previously visible
         if self.grid_on:
             self.ax.grid(self.grid_on)
-        self.set_integer_axes_ticks()
         self.draw_plot()
 
     def plot_matrix(self, ws, **kwargs):
@@ -513,9 +517,9 @@ class SliceViewerDataView(QWidget):
         """
         Set axis locators at integer positions, if possible
         """
-        self.ax.minorticks_on()
-        self.ax.xaxis.get_major_locator().set_params(integer=True)
-        self.ax.yaxis.get_major_locator().set_params(integer=True)
+        xint, yint = self.presenter.is_integer_frame()
+        self.ax.xaxis.get_major_locator().set_params(integer=xint)
+        self.ax.yaxis.get_major_locator().set_params(integer=yint)
 
     def set_grid_on(self):
         """

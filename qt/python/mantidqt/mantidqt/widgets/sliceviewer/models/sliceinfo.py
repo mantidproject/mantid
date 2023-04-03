@@ -165,3 +165,10 @@ class SliceInfo:
         :return: index of q dim ignoring non q dims - i.e. index in range(0,3)
         """
         return int(display_index - np.sum(self.i_non_q < display_index))  # cast to int from numpy int32 type
+
+    def is_xy_q_frame(self) -> tuple:
+        """
+        Determine if the display x- and y-axis are part of a q-frame
+        :return: 2-tuple of bool whether the x- and y-axis are in a q-frame
+        """
+        return (self._display_x not in self.i_non_q, self._display_y not in self.i_non_q)
