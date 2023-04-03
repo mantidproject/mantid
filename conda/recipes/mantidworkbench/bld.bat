@@ -1,6 +1,5 @@
-if not exist ..\..\env_logs mkdir ..\..\env_logs
-conda list --explicit --prefix %BUILD_PREFIX% > ..\..\env_logs\mantidworkbench_build_environment.txt
-conda list --explicit --prefix %PREFIX% > ..\..\env_logs\mantidworkbench_host_environment.txt
+set "parent_dir=%RECIPE_DIR%\.."
+CALL "%parent_dir%\archive_env_logs.bat" %BUILD_PREFIX% %PREFIX% 'mantid'
 
 mkdir build && cd build
 
