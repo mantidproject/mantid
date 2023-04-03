@@ -84,8 +84,7 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
   API::Column_sptr col_target = tws->getColumn(2);
 
   int target_index{NO_TARGET};
-  // int max_target_index{0};
-  int max_target_index{1};
+  int max_target_index{0};
   size_t number_of_noninteger_target_names{0};
 
   for (size_t ii = 0; ii < tws->rowCount(); ii++) {
@@ -180,7 +179,7 @@ std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const 
   }
 
   // If numericalShift > 0, the caller will get back a shifted index.
-  // This is useful for supporting "count from 1" use cases - see FilterEvents property OutputWorkspaceIndexedFrom1.
+  // This is needed for supporting FilterEvents property OutputWorkspaceIndexedFrom1.
   if (numericalShift > 0) {
     std::stringstream s;
     std::string name = m_index_name_map[workspaceIndex];

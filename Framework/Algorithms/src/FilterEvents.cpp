@@ -93,8 +93,7 @@ void FilterEvents::init() {
 
   declareProperty("OutputWorkspaceBaseName", "OutputWorkspace",
                   "The base name to use for the output workspace. The output "
-                  "workspace names are a combination of this and the index in "
-                  "splitter.");
+                  "workspace names are a combination of this and a numerical index.");
 
   declareProperty("DescriptiveOutputNames", false,
                   "If selected, the names of the output workspaces will include information about each slice.");
@@ -103,7 +102,7 @@ void FilterEvents::init() {
                   "Option to group all the output workspaces.  Group name will be OutputWorkspaceBaseName.");
 
   declareProperty("OutputWorkspaceIndexedFrom1", false,
-                  "If selected, the minimum output workspace is indexed from 1 and continuous.");
+                  "If selected, the names of the output workspaces will have indexes starting from 1.");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputTOFCorrectionWorkspace", "TOFCorrectWS",
                                                                        Direction::Output),
@@ -255,13 +254,10 @@ void FilterEvents::exec() {
 
   // Parse splitters
   m_progress = 0.0;
-  progress(m_progress, "Processing SplittersWorkspace.");
-  if (m_useSplittersWorkspace) // SplittersWorkspace has time in nanoseconds
-    processSplittersWorkspace();
-  else if (m_useArbTableSplitters) // TableWorkspace has time in seconds
-    processTableSplittersWorkspace();
-  else
-    processMatrixSplitterWorkspace();
+  progress(m_progress, "Processing input splitters.");
+  parseInputSplitters();
+  // m_progress = 0.05;
+  // progress(m_progress);
 
   // Create output workspaces
   m_progress = 0.1;
@@ -771,30 +767,24 @@ void FilterEvents::splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp
 }
 */
 
-//----------------------------------------------------------------------------------------------
-/** Convert SplittersWorkspace object to TimeSplitter object
- *  Create a set of all target workspace indexes
- *  Set m_maxTargetIndex
- * @brief FilterEvents::processSplittersWorkspace
+//-------------------------------------------------------------------
+/** Convert splitters specified by an input workspace to TimeSplitter
+ *  Cache a set of all target workspace indexes
+ * @brief FilterEvents::parseInputSplitters
  */
-void FilterEvents::processSplittersWorkspace() {
-  m_timeSplitter = TimeSplitter(m_splittersWorkspace);
-  m_targetWorkspaceIndexSet = m_timeSplitter.outputWorkspaceIndices();
-  m_targetWorkspaceIndexSet.insert(TimeSplitter::NO_TARGET); // add an extra workspace index for unfiltered events
-  m_maxTargetIndex = *m_targetWorkspaceIndexSet.rbegin();    // using the fact that std::set is sorted
-  m_progress = 0.05;
-  progress(m_progress);
+void FilterEvents::parseInputSplitters() {
+  if (m_useSplittersWorkspace)
+    m_timeSplitter = TimeSplitter(m_splittersWorkspace);
+  else if (m_useArbTableSplitters)
+    m_timeSplitter =
+        TimeSplitter(m_splitterTableWorkspace, m_isSplittersRelativeTime ? m_runStartTime : DateAndTime(0));
+  else
+    m_timeSplitter = TimeSplitter(m_matrixSplitterWS, m_isSplittersRelativeTime ? m_runStartTime : DateAndTime(0));
 
-  // Check information workspace consistency
-  if (m_hasInfoWS) {
-    if (m_targetWorkspaceIndexSet.size() - 1 != m_informationWS->rowCount()) {
-      g_log.warning() << "Input Splitters Workspace specifies a different number of unique output workspaces ("
-                      << m_targetWorkspaceIndexSet.size() - 1
-                      << ") compared to the number of rows in the input information workspace ("
-                      << m_informationWS->rowCount() << "). "
-                      << "  Information may not be accurate. \n";
-    }
-  }
+  m_targetWorkspaceIndexSet = m_timeSplitter.outputWorkspaceIndices();
+
+  // For completeness, make sure we have a special workspace index for unfiltered events
+  m_targetWorkspaceIndexSet.insert(TimeSplitter::NO_TARGET);
 }
 
 // //----------------------------------------------------------------------------------------------
@@ -855,43 +845,6 @@ void FilterEvents::processSplittersWorkspace() {
 //   } // END-FOR (add all splitters)
 // }
 
-//----------------------------------------------------------------------------------------------
-/** Convert MatrixWorkspace object to TimeSplitter object
- *  Create a set of all target workspace indexes
- *  Set m_maxTargetIndex
- * @brief FilterEvents::processMatrixSplitterWorkspace
- */
-void FilterEvents::processMatrixSplitterWorkspace() {
-  // Check input workspace validity
-  assert(m_matrixSplitterWS);
-
-  m_timeSplitter = TimeSplitter(m_matrixSplitterWS, m_isSplittersRelativeTime ? m_runStartTime : DateAndTime(0));
-  m_targetWorkspaceIndexSet = m_timeSplitter.outputWorkspaceIndices();
-  m_targetWorkspaceIndexSet.insert(TimeSplitter::NO_TARGET); // add an extra workspace index for unfiltered events
-  m_maxTargetIndex = *m_targetWorkspaceIndexSet.rbegin();    // using the fact that std::set is sorted
-  m_progress = 0.05;
-  progress(m_progress);
-}
-
-//----------------------------------------------------------------------------------------------
-/** Convert TableWorkspace object to TimeSplitter object
- *  Create a set of all target workspace indexes
- *  Set m_maxTargetIndex
- * @brief FilterEvents::processTableSplittersWorkspace
- */
-void FilterEvents::processTableSplittersWorkspace() {
-  // check input workspace's validity
-  assert(m_splitterTableWorkspace);
-  if (m_splitterTableWorkspace->columnCount() != 3) {
-    throw std::runtime_error("Splitters given in TableWorkspace must have 3 columns.");
-  }
-
-  m_timeSplitter = TimeSplitter(m_splitterTableWorkspace, m_isSplittersRelativeTime ? m_runStartTime : DateAndTime(0));
-  m_targetWorkspaceIndexSet = m_timeSplitter.outputWorkspaceIndices();
-  m_targetWorkspaceIndexSet.insert(TimeSplitter::NO_TARGET); // add an extra workspace index for unfiltered events
-  m_maxTargetIndex = *m_targetWorkspaceIndexSet.rbegin();    // using the fact that std::set is sorted
-}
-
 //-------------------------------------------------------------------------
 /** Create a list of EventWorkspace objects to be used as event filtering output.
  * Currently this method is used with SplittersWorkspace and TableWorkspace input splitters.
@@ -911,6 +864,15 @@ void FilterEvents::createOutputWorkspaces() {
   // Convert information workspace to map
   std::map<int, std::string> infomap;
   if (m_hasInfoWS) {
+    // Check information workspace consistency
+    if (m_targetWorkspaceIndexSet.size() - 1 != m_informationWS->rowCount()) {
+      g_log.warning() << "Input Splitters Workspace specifies a different number of unique output workspaces ("
+                      << m_targetWorkspaceIndexSet.size() - 1
+                      << ") compared to the number of rows in the input information workspace ("
+                      << m_informationWS->rowCount() << "). "
+                      << "  Information may not be accurate. \n";
+    }
+
     for (size_t ir = 0; ir < m_informationWS->rowCount(); ++ir) {
       API::TableRow row = m_informationWS->getRow(ir);
       infomap.emplace(row.Int(0), row.String(1));

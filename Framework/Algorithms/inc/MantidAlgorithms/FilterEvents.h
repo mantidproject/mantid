@@ -63,14 +63,8 @@ private:
   /// Process user input properties
   void processAlgorithmProperties();
 
-  /// process splitters given by a SplittersWorkspace
-  void processSplittersWorkspace();
-
-  /// process splitters given by a TableWorkspace
-  void processTableSplittersWorkspace();
-
-  /// process splitters given by a MatrixWorkspace
-  void processMatrixSplitterWorkspace();
+  /// process splitters specified by an input workspace
+  void parseInputSplitters();
 
   /// create event workspace
   std::shared_ptr<DataObjects::EventWorkspace> createEventWorkspaceNoLog();
@@ -160,10 +154,8 @@ private:
   bool m_useSplittersWorkspace;
   bool m_useArbTableSplitters;
 
-  std::set<int> m_targetWorkspaceIndexSet;
-  int m_maxTargetIndex;
-
   DataObjects::TimeSplitter m_timeSplitter;
+  std::set<int> m_targetWorkspaceIndexSet;
 
   std::map<int, DataObjects::EventWorkspace_sptr> m_outputWorkspacesMap;
   std::vector<std::string> m_wsNames;
