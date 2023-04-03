@@ -85,7 +85,8 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
 
   int target_index{NO_TARGET};
   int max_target_index{0};
-  size_t number_of_noninteger_target_names{0};
+  size_t noninteger_target_names_count{0};
+  size_t notarget_names_count{0}; // count "-1" targets
 
   for (size_t ii = 0; ii < tws->rowCount(); ii++) {
     // by design, the times in the table must be in seconds
@@ -104,16 +105,17 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
 
     // get the target name; it may or may not represent an integer
     std::string target_name = col_target->cell<std::string>(ii);
-    // get the target workspace index. By current design, a valid target index could be >= 0, but the legacy code in
-    // FilterEvents::processTableSplittersWorkspace has it >= 1. Note, this only matters if the targets are input by
-    // non-integer names.
+    // get the target workspace index. If target name represents an integer, that integer automatically becomes the
+    // workspace index. If target name is a non-numeric string, we will assign a unique index to it.
     try {
       target_index = std::stoi(target_name);
       m_name_index_map[target_name] = target_index;
       m_index_name_map[target_index] = target_name;
-    } catch (std::invalid_argument &e) // a non-integer name
+      if (target_index == NO_TARGET)
+        notarget_names_count++;
+    } catch (std::invalid_argument &e) // a non-integer string
     {
-      number_of_noninteger_target_names++;
+      noninteger_target_names_count++;
 
       if (m_name_index_map.count(target_name) == 0) {
         target_index = max_target_index;
@@ -134,8 +136,10 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
     addROI(timeStart, timeStop, target_index);
   }
 
-  if (number_of_noninteger_target_names != 0 && number_of_noninteger_target_names != tws->rowCount()) {
-    throw std::runtime_error("Either all or none of the target workspace names in the table can represent integers");
+  // Verify that the input target names are either all numeric or all non-numeric. The exception is a name "-1", i.e. no
+  // target specified. That name is ok to mix with non-numeric names.
+  if (noninteger_target_names_count != 0 && noninteger_target_names_count != tws->rowCount() - notarget_names_count) {
+    throw std::runtime_error("Valid splitter targets cannot mix numeric and non-numeric names.");
   }
 }
 

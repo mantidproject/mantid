@@ -443,7 +443,7 @@ public:
     // by design, a table workspace used for event filtering must have 3 columns
     tws->addColumn("double", "start");
     tws->addColumn("double", "stop");
-    tws->addColumn("str", "target"); // index of a workspace where the filtered time events will be output
+    tws->addColumn("str", "target"); // to be used as a suffix of the output workspace name
 
     // by design, all times in the table must be in seconds
     const double time1_s{1.0e-5};
@@ -499,7 +499,7 @@ public:
     // by design, a table workspace used for event filtering must have 3 columns
     tws->addColumn("double", "start");
     tws->addColumn("double", "stop");
-    tws->addColumn("str", "target"); // index of a workspace where the filtered time events will be output
+    tws->addColumn("str", "target"); // to be used as a suffix of the output workspace name
 
     // by design, all times in the table must be in seconds
     const double time1_s{1.0e-5};
@@ -553,6 +553,82 @@ public:
     TS_ASSERT(referenceSplitter.valueAtTime(time4_abs) == workspaceDerivedSplitter.valueAtTime(time4_abs));
     TS_ASSERT(referenceSplitter.valueAtTime(time5_abs) == workspaceDerivedSplitter.valueAtTime(time5_abs));
     TS_ASSERT(referenceSplitter.valueAtTime(time6_abs) == workspaceDerivedSplitter.valueAtTime(time6_abs));
+  }
+
+  /** Test that a TimeSplitter object constructed from a TableWorkspace object
+   * containing non-numeric targets is equivalent to a TimeSplitter object built by
+   * successively adding time ROIs. Also check that the TimeSplitter internal mapping
+   * of the target names is correct.
+   * @brief test_timeSplitterFromTableWorkspaceRelativeTimes
+   */
+  void test_timeSplitterFromTableWorkspaceWithNonNumericTargets() {
+    auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
+
+    // by design, a table workspace used for event filtering must have 3 columns
+    tws->addColumn("double", "start");
+    tws->addColumn("double", "stop");
+    tws->addColumn("str", "target"); // to be used as a suffix of the output workspace name
+
+    // by design, all times in the table must be in seconds
+    const double time1_s{1.0e-5};
+    const double time2_s{1.5e-5};
+    const double time3_s{2.0e-5};
+    const double time4_s{3.0e-5};
+    const double time5_s{4.0e-5};
+    const double time6_s{5.0e-5};
+
+    TableRow row = tws->getFirstRow();
+    row << time1_s << time2_s << "A";
+    row.next();
+    row << time3_s << time4_s << std::to_string(TimeSplitter::NO_TARGET);
+    row.next();
+    row << time5_s << time6_s << "B";
+
+    // create a TimeSplitter object from the table. By design, the table user must know whether
+    // the table holds absolute or relative times. In the latter case the user must have
+    // a time offset to be used with the table.
+    DateAndTime offset(THREE);
+    TimeSplitter workspaceDerivedSplitter(tws, offset);
+
+    // build a reference time splitter
+
+    // create all time objects and offset them
+    DateAndTime time1_abs(time1_s, 0.0);
+    DateAndTime time2_abs(time2_s, 0.0);
+    DateAndTime time3_abs(time3_s, 0.0);
+    DateAndTime time4_abs(time4_s, 0.0);
+    DateAndTime time5_abs(time5_s, 0.0);
+    DateAndTime time6_abs(time6_s, 0.0);
+
+    int64_t offset_ns = offset.totalNanoseconds();
+    time1_abs += offset_ns;
+    time2_abs += offset_ns;
+    time3_abs += offset_ns;
+    time4_abs += offset_ns;
+    time5_abs += offset_ns;
+    time6_abs += offset_ns;
+
+    // build the reference splitter by adding ROIs
+    TimeSplitter referenceSplitter;
+    referenceSplitter.addROI(time1_abs, time2_abs, 0);
+    referenceSplitter.addROI(time3_abs, time4_abs, TimeSplitter::NO_TARGET);
+    referenceSplitter.addROI(time5_abs, time6_abs, 1);
+
+    // check that the two time splitters are the same internally
+    TS_ASSERT_EQUALS(referenceSplitter.numRawValues(), workspaceDerivedSplitter.numRawValues());
+    TS_ASSERT(referenceSplitter.valueAtTime(time1_abs) == workspaceDerivedSplitter.valueAtTime(time1_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time2_abs) == workspaceDerivedSplitter.valueAtTime(time2_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time3_abs) == workspaceDerivedSplitter.valueAtTime(time3_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time4_abs) == workspaceDerivedSplitter.valueAtTime(time4_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time5_abs) == workspaceDerivedSplitter.valueAtTime(time5_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time6_abs) == workspaceDerivedSplitter.valueAtTime(time6_abs));
+
+    // check that non-numeric target names are internally mapped to consecutive indexes starting from 0
+    TS_ASSERT(workspaceDerivedSplitter.getWorkspaceIndexName(0) == "A");
+    TS_ASSERT(workspaceDerivedSplitter.getWorkspaceIndexName(1) == "B");
+    // check that "no target" index name is mapped to the correct value
+    TS_ASSERT(workspaceDerivedSplitter.getWorkspaceIndexName(TimeSplitter::NO_TARGET) ==
+              std::to_string(TimeSplitter::NO_TARGET));
   }
 
   /** Test that a TimeSplitter object constructed from a SplittersWorkspace object

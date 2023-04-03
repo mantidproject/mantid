@@ -92,8 +92,9 @@ void FilterEvents::init() {
   std::string titleOutputWksp("Output Workspaces");
 
   declareProperty("OutputWorkspaceBaseName", "OutputWorkspace",
-                  "The base name to use for the output workspace. The output "
-                  "workspace names are a combination of this and a numerical index.");
+                  "The base name to use for the output workspaces. An output "
+                  "workspace name is the base name plus a suffix separated by an underscore. "
+                  "The suffix is either a target name (numeric or non-numeric) or \"unfiltered\".");
 
   declareProperty("DescriptiveOutputNames", false,
                   "If selected, the names of the output workspaces will include information about each slice.");
@@ -102,7 +103,8 @@ void FilterEvents::init() {
                   "Option to group all the output workspaces.  Group name will be OutputWorkspaceBaseName.");
 
   declareProperty("OutputWorkspaceIndexedFrom1", false,
-                  "If selected, the names of the output workspaces will have indexes starting from 1.");
+                  "If selected, the names of the output workspaces will have suffix indexes starting from 1. "
+                  "This applies to numeric target names only.");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputTOFCorrectionWorkspace", "TOFCorrectWS",
                                                                        Direction::Output),
@@ -552,14 +554,14 @@ void FilterEvents::groupOutputWorkspace() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Clone the sample logs that will not be split, including single-value and add
- * all the TimeSeriesProperty sample logs  to vectors by their type
- * @brief FilterEvents::copyNoneSplitLogs
- * @param int_tsp_name_vector :: output
- * @param dbl_tsp_name_vector :: output
- * @param bool_tsp_name_vector :: output
- * @param string_tsp_vector :: output
- */
+// /** Clone the sample logs that will not be split, including single-value and add
+//  * all the TimeSeriesProperty sample logs  to vectors by their type
+//  * @brief FilterEvents::copyNoneSplitLogs
+//  * @param int_tsp_name_vector :: output
+//  * @param dbl_tsp_name_vector :: output
+//  * @param bool_tsp_name_vector :: output
+//  * @param string_tsp_vector :: output
+//  */
 /**
 void FilterEvents::copyNoneSplitLogs(std::vector<TimeSeriesProperty<int> *> &int_tsp_name_vector,
                                      std::vector<TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
@@ -630,13 +632,13 @@ void FilterEvents::copyNoneSplitLogs(std::vector<TimeSeriesProperty<int> *> &int
 */
 
 // DEBUG: mark for deletion
-/** Split ALL the TimeSeriesProperty sample logs to all the output workspace
- * @brief FilterEvents::splitTimeSeriesLogs
- * @param int_tsp_vector :: vector of integer tsp
- * @param dbl_tsp_vector :: vector of double tsp
- * @param bool_tsp_vector :: vector of boolean tsp
- * @param string_tsp_vector :: vector of string tsp
- */
+// /** Split ALL the TimeSeriesProperty sample logs to all the output workspace
+//  * @brief FilterEvents::splitTimeSeriesLogs
+//  * @param int_tsp_vector :: vector of integer tsp
+//  * @param dbl_tsp_vector :: vector of double tsp
+//  * @param bool_tsp_vector :: vector of boolean tsp
+//  * @param string_tsp_vector :: vector of string tsp
+//  */
 /**
 void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int> *> &int_tsp_vector,
                                        const std::vector<TimeSeriesProperty<double> *> &dbl_tsp_vector,
@@ -711,12 +713,12 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
 */
 
 // DEBUG: mark for deletion
-/** split one single time-series property (template)
- * @brief FilterEvents::splitTimeSeriesProperty
- * @param tsp :: a time series property instance
- * @param split_datetime_vec :: splitter
- * @param max_target_index :: maximum number of separated time series
- */
+// /** split one single time-series property (template)
+//  * @brief FilterEvents::splitTimeSeriesProperty
+//  * @param tsp :: a time series property instance
+//  * @param split_datetime_vec :: splitter
+//  * @param max_target_index :: maximum number of separated time series
+//  */
 /**
 template <typename TYPE>
 void FilterEvents::splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp,
@@ -1406,10 +1408,10 @@ std::shared_ptr<DataObjects::EventWorkspace> FilterEvents::createTemplateOutputW
 // }
 
 // DEBUG: mark this member function for deletion
-/** Generate the splitter's time series property (log) the splitters workspace
- * @brief FilterEvents::generateSplitterTSPalpha
- * @param split_tsp_vec
- */
+// /** Generate the splitter's time series property (log) the splitters workspace
+//  * @brief FilterEvents::generateSplitterTSPalpha
+//  * @param split_tsp_vec
+//  */
 /**
 void FilterEvents::generateSplitterTSPalpha(
     std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec) {
@@ -1456,10 +1458,10 @@ void FilterEvents::generateSplitterTSPalpha(
 */
 
 // DEBUG: mark for deletion FilterEvents::mapSplitterTSPtoWorkspaces
-/** add the splitter TimeSeriesProperty logs to each workspace
- * @brief FilterEvents::mapSplitterTSPtoWorkspaces
- * @param split_tsp_vec
- */
+// /** add the splitter TimeSeriesProperty logs to each workspace
+//  * @brief FilterEvents::mapSplitterTSPtoWorkspaces
+//  * @param split_tsp_vec
+//  */
 /**
 void FilterEvents::mapSplitterTSPtoWorkspaces(
     std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec) {
@@ -1502,12 +1504,12 @@ void FilterEvents::mapSplitterTSPtoWorkspaces(
 */
 
 // DEBUG: mark for deletion FilterEvents::calculate_duration
-/** Calculate split-workspace's duration according to splitter time series
- * property
- * @brief calculate the duration from TSP "splitter"
- * @param splitter_tsp :: TimeSeriesProperty for splitter
- * @return
- */
+// /** Calculate split-workspace's duration according to splitter time series
+//  * property
+//  * @brief calculate the duration from TSP "splitter"
+//  * @param splitter_tsp :: TimeSeriesProperty for splitter
+//  * @return
+//  */
 /**
 double FilterEvents::calculate_duration(std::unique_ptr<Kernel::TimeSeriesProperty<int>> &splitter_tsp) {
   // Get the times and values
