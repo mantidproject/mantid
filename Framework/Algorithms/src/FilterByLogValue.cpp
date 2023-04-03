@@ -173,7 +173,18 @@ void FilterByLogValue::exec() {
 
   // Initialise the progress reporting object
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
-
+  TimeROI *roi = new TimeROI();
+  for (auto split : splitter) {
+    try {
+      roi->addROI(split.start(), split.stop());
+    } catch (const std::runtime_error &) {
+      // If values are not unique or not in ascending order
+      // values will be skipped
+    }
+  }
+  if (roi->empty()) {
+    roi->replaceROI(TimeROI::INVALID_ROI);
+  }
   EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (inputWS == outputWS) {
     // Filtering in place!
@@ -193,14 +204,10 @@ void FilterByLogValue::exec() {
     }
     PARALLEL_CHECK_INTERRUPT_REGION
 
-    // To split/filter the runs, first you make a vector with just the one
-    // output run
     auto newRun = Kernel::make_cow<Run>(inputWS->run());
-    std::vector<LogManager *> splitRuns = {&newRun.access()};
-    inputWS->run().splitByTime(splitter, splitRuns);
+    newRun.access().setTimeROI(*roi);
     // Set the output back in the input
     inputWS->setSharedRun(newRun);
-    inputWS->mutableRun().integrateProtonCharge();
 
     // Cast the outputWS to the matrixOutputWS and save it
     this->setProperty("OutputWorkspace", inputWS);
@@ -228,12 +235,7 @@ void FilterByLogValue::exec() {
     }
     PARALLEL_CHECK_INTERRUPT_REGION
 
-    // To split/filter the runs, first you make a vector with just the one
-    // output run
-    std::vector<LogManager *> output_runs;
-    output_runs.emplace_back(&outputWS->mutableRun());
-    inputWS->run().splitByTime(splitter, output_runs);
-
+    outputWS->mutableRun().setTimeROI(*roi);
     // Cast the outputWS to the matrixOutputWS and save it
     this->setProperty("OutputWorkspace", outputWS);
   }
