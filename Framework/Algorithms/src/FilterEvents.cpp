@@ -632,7 +632,7 @@ void FilterEvents::copyNoneSplitLogs(std::vector<TimeSeriesProperty<int> *> &int
 */
 
 // DEBUG: mark for deletion
-// /** Split ALL the TimeSeriesProperty sample logs to all the output workspace
+// /* Split ALL the TimeSeriesProperty sample logs to all the output workspace
 //  * @brief FilterEvents::splitTimeSeriesLogs
 //  * @param int_tsp_vector :: vector of integer tsp
 //  * @param dbl_tsp_vector :: vector of double tsp
@@ -713,7 +713,7 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
 */
 
 // DEBUG: mark for deletion
-// /** split one single time-series property (template)
+// /* split one single time-series property (template)
 //  * @brief FilterEvents::splitTimeSeriesProperty
 //  * @param tsp :: a time series property instance
 //  * @param split_datetime_vec :: splitter
@@ -1408,7 +1408,7 @@ std::shared_ptr<DataObjects::EventWorkspace> FilterEvents::createTemplateOutputW
 // }
 
 // DEBUG: mark this member function for deletion
-// /** Generate the splitter's time series property (log) the splitters workspace
+// /* Generate the splitter's time series property (log) the splitters workspace
 //  * @brief FilterEvents::generateSplitterTSPalpha
 //  * @param split_tsp_vec
 //  */
@@ -1458,7 +1458,7 @@ void FilterEvents::generateSplitterTSPalpha(
 */
 
 // DEBUG: mark for deletion FilterEvents::mapSplitterTSPtoWorkspaces
-// /** add the splitter TimeSeriesProperty logs to each workspace
+// /* add the splitter TimeSeriesProperty logs to each workspace
 //  * @brief FilterEvents::mapSplitterTSPtoWorkspaces
 //  * @param split_tsp_vec
 //  */
@@ -1504,7 +1504,7 @@ void FilterEvents::mapSplitterTSPtoWorkspaces(
 */
 
 // DEBUG: mark for deletion FilterEvents::calculate_duration
-// /** Calculate split-workspace's duration according to splitter time series
+// /* Calculate split-workspace's duration according to splitter time series
 //  * property
 //  * @brief calculate the duration from TSP "splitter"
 //  * @param splitter_tsp :: TimeSeriesProperty for splitter
