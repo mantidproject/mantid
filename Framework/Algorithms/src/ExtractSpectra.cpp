@@ -196,6 +196,7 @@ ExtractSpectra::getCroppedXHistogram(const API::MatrixWorkspace &workspace) {
 /** Crops the given workspace in accordance with m_minX and m_maxX
  *  @param workspace :: The output workspace to crop
  *  @param XHistogram :: Pointer to the cropped X Histogram to be used in the output workspace
+ *  @param index :: The workspace index of the spectrum
  */
 void ExtractSpectra::cropCommon(API::MatrixWorkspace &workspace,
                                 Kernel::cow_ptr<Mantid::HistogramData::HistogramX> XHistogram, int index) {
@@ -223,7 +224,7 @@ void ExtractSpectra::cropCommon(API::MatrixWorkspace &workspace,
 
 /** Zeroes all data points outside the X values given
  *  @param workspace :: The output workspace to crop
- *  @param index ::         The workspace index of the spectrum
+ *  @param index :: The workspace index of the spectrum
  */
 void ExtractSpectra::cropRagged(MatrixWorkspace &workspace, int index) {
   auto &Y = workspace.mutableY(index);
