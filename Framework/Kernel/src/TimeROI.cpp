@@ -97,7 +97,7 @@ void TimeROI::addROI(const Types::Core::DateAndTime &startTime, const Types::Cor
     TimeInterval roi_to_add(startTime, stopTime);
     std::vector<TimeInterval> output;
     bool union_added = false;
-    for (const auto interval : this->toSplitters()) {
+    for (const auto &interval : this->toSplitters()) {
       if (overlaps(roi_to_add, interval)) {
         // the roi absorbs this interval
         // this check must be first
