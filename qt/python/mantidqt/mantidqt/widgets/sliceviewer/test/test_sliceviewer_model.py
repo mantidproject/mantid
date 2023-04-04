@@ -507,7 +507,7 @@ class SliceViewerModelTest(unittest.TestCase):
         ws.getExperimentInfo().run().get().value = [0, 1, 1, 0, 0, 1, 1, 0, 0]
         model = SliceViewerModel(ws)
 
-        # should revert to orthogonal
+        # should NOT revert to orthogonal
         axes_angles = model.get_axes_angles()
         self.assertAlmostEqual(axes_angles[1, 2], np.pi / 4, delta=1e-10)
         for iy in range(1, 3):
