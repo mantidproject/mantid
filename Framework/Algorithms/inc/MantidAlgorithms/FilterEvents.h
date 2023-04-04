@@ -182,9 +182,6 @@ private:
   /// Vector for splitting group
   std::vector<int> m_vecSplitterGroup;
 
-  /// Flag to split sample logs
-  bool m_splitSampleLogs;
-
   /// Debug
   bool m_useDBSpectrum;
   int m_dbWSIndex;

@@ -30,6 +30,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include <MantidKernel/InvisibleProperty.h>
 
 #include <memory>
 #include <sstream>
@@ -55,9 +56,8 @@ FilterEvents::FilterEvents()
       m_useSplittersWorkspace(false), m_useArbTableSplitters(false), m_targetWorkspaceIndexSet(),
       m_outputWorkspacesMap(), m_wsNames(), m_detTofOffsets(), m_detTofFactors(), m_filterByPulseTime(false),
       m_informationWS(), m_hasInfoWS(), m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false), m_vecSplitterTime(),
-      m_vecSplitterGroup(), m_splitSampleLogs(false), m_useDBSpectrum(false), m_dbWSIndex(-1),
-      m_tofCorrType(NoneCorrect), m_specSkipType(), m_vecSkip(), m_isSplittersRelativeTime(false), m_filterStartTime(0),
-      m_runStartTime(0) {}
+      m_vecSplitterGroup(), m_useDBSpectrum(false), m_dbWSIndex(-1), m_tofCorrType(NoneCorrect), m_specSkipType(),
+      m_vecSkip(), m_isSplittersRelativeTime(false), m_filterStartTime(0), m_runStartTime(0) {}
 
 /** Declare Inputs
  */
@@ -119,9 +119,12 @@ void FilterEvents::init() {
   // Sample logs splitting
   //************************
   std::string titleLogSplit("Sample Logs Splitting");
+
+  // deprecated property kept for backwards compatibility but will not show up in the algorithm's dialog
   declareProperty("SplitSampleLogs", true,
                   "If selected, all sample logs will be split by the event splitters.  It is not recommended "
                   "for fast event log splitters.");
+  setPropertySettings("SplitSampleLogs", std::make_unique<InvisibleProperty>());
 
   declareProperty("FilterByPulseTime", false,
                   "Filter the event by its pulse time only for slow sample environment log.  This option can make "
@@ -472,7 +475,6 @@ void FilterEvents::processAlgorithmProperties() {
     m_specSkipType = EventFilterSkipNoDetTOFCorr;
   else
     throw runtime_error("An unrecognized option for SpectrumWithoutDetector");
-  m_splitSampleLogs = getProperty("SplitSampleLogs");
 
   // Debug spectrum
   m_dbWSIndex = getProperty("DBSpectrum");
@@ -788,7 +790,7 @@ void FilterEvents::parseInputSplitters() {
   m_targetWorkspaceIndexSet.insert(TimeSplitter::NO_TARGET);
 }
 
-// //----------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------
 // /** Convert SplittersWorkspace to vector of time and vector of target (itarget)
 //  * NOTE: This is designed to use a single vector/vector splitters for all types
 //  * of inputs
