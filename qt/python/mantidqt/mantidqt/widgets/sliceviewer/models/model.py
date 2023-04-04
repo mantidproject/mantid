@@ -526,9 +526,12 @@ class SliceViewerModel(SliceViewerBaseModel):
             if ws_type == WS_TYPE.MDH:
                 # get basis vectors from workspace
                 ndims = ws.getNumDims()
-                basis_matrix = np.zeros((ndims, ndims))
+                basis_matrix = np.eye(ndims)
                 for idim in range(ndims):
-                    basis_matrix[:, idim] = list(ws.getBasisVector(idim))
+                    vec = list(ws.getBasisVector(idim))
+                    # if basis vetor is valid, overwrite the column vector
+                    if len(vec) == ndims:
+                        basis_matrix[:, idim] = vec
                 # exclude non-Q dim elements from basis vectors
                 qflags = [ws.getDimension(idim).getMDFrame().isQ() for idim in range(ndims)]
                 i_nonq = np.flatnonzero(np.invert(qflags))
