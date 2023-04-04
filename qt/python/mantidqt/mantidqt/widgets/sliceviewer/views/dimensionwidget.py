@@ -22,6 +22,7 @@ class State(IntEnum):
 class DimensionWidget(QWidget):
     dimensionsChanged = Signal()
     valueChanged = Signal()
+    extentsChanged = Signal()
     """
     Hold all the individual dimensions
 
@@ -54,6 +55,10 @@ class DimensionWidget(QWidget):
         for widget in self.dims:
             widget.stateChanged.connect(self.change_dims)
             widget.valueChanged.connect(self.valueChanged)
+            if hasattr(widget, "minChanged"):
+                widget.minChanged.connect(self.extentsChanged)
+            if hasattr(widget, "maxChanged"):
+                widget.maxChanged.connect(self.extentsChanged)
             if hasattr(widget, "binningChanged"):
                 widget.binningChanged.connect(self.dimensionsChanged)
             layout.addWidget(widget)
@@ -135,6 +140,18 @@ class DimensionWidget(QWidget):
         except AttributeError:
             return None
 
+    def get_extents(self):
+        return [(d.get_min(), d.get_max()) for d in self.dims for state in (State.X, State.Y) if d.get_state() == state]
+
+    def set_extents(self, xlim, ylim):
+        for d in self.dims:
+            if d.get_state() == State.X:
+                d.set_min(xlim[0])
+                d.set_max(xlim[1])
+            elif d.get_state() == State.Y:
+                d.set_min(ylim[0])
+                d.set_max(ylim[1])
+
     def set_slicepoint(self, point):
         """
         Set the value of the slice point
@@ -165,6 +182,8 @@ class DimensionWidget(QWidget):
 class Dimension(QWidget):
     stateChanged = Signal(int)
     valueChanged = Signal()
+    minChanged = Signal()
+    maxChanged = Signal()
     """
     pass in dimension
 
@@ -184,6 +203,7 @@ class Dimension(QWidget):
         super().__init__(parent)
 
         self.minimum = dim_info["minimum"]
+        self.maximum = dim_info["maximum"]
         self.nbins = dim_info["number_of_bins"]
         self.width = dim_info["width"]
         self.number = number
@@ -221,6 +241,32 @@ class Dimension(QWidget):
         self.update_spinbox()  # not updated with set_value unless instance of DimensionNonIntegrated
         self.spinbox.editingFinished.connect(self.spinbox_changed)
 
+        self.spinMin = QDoubleSpinBox()
+        self.spinMax = QDoubleSpinBox()
+        self.labelMin = QLabel("min")
+        self.labelMax = QLabel("max")
+
+        self.spinMin.setDecimals(3)
+        self.spinMax.setDecimals(3)
+
+        self.spinMin.setRange(self.minimum, self.maximum)
+        self.spinMax.setRange(self.minimum, self.maximum)
+
+        self.spinMin.setSingleStep(self.width)
+        self.spinMax.setSingleStep(self.width)
+
+        self.set_min(self.minimum)
+        self.set_max(self.maximum)
+
+        self.update_min()
+        self.update_max()
+
+        self.spinMin.editingFinished.connect(self.spinMin_changed)
+        self.spinMax.editingFinished.connect(self.spinMax_changed)
+
+        self.spinMin.valueChanged.connect(self.minChanged)
+        self.spinMax.valueChanged.connect(self.maxChanged)
+
         self.layout.addWidget(self.name)
         self.button_layout = QHBoxLayout()
         self.button_layout.setContentsMargins(0, 0, 0, 0)
@@ -229,6 +275,10 @@ class Dimension(QWidget):
         self.button_layout.addWidget(self.y)
         self.layout.addLayout(self.button_layout)
         self.layout.addWidget(self.slider, stretch=1)
+        self.layout.addWidget(self.spinMin)
+        self.layout.addWidget(self.labelMin)
+        self.layout.addWidget(self.spinMax)
+        self.layout.addWidget(self.labelMax)
         self.layout.addStretch(0)
         self.layout.addWidget(self.spinbox)
         self.layout.addWidget(self.units)
@@ -245,19 +295,31 @@ class Dimension(QWidget):
             self.y.setChecked(False)
             self.slider.hide()
             self.spinbox.hide()
-            self.units.hide()
+            self.units.show()
+            self.spinMin.show()
+            self.labelMin.show()
+            self.spinMax.show()
+            self.labelMax.show()
         elif self.state == State.Y:
             self.x.setChecked(False)
             self.y.setChecked(True)
             self.slider.hide()
             self.spinbox.hide()
-            self.units.hide()
+            self.units.show()
+            self.spinMin.show()
+            self.labelMin.show()
+            self.spinMax.show()
+            self.labelMax.show()
         elif self.state == State.NONE:
             self.x.setChecked(False)
             self.y.setChecked(False)
             self.slider.show()
             self.spinbox.show()
             self.units.show()
+            self.spinMin.hide()
+            self.labelMin.hide()
+            self.spinMax.hide()
+            self.labelMax.hide()
         else:
             self.x.setChecked(False)
             self.x.setDisabled(True)
@@ -267,6 +329,10 @@ class Dimension(QWidget):
             self.spinbox.show()
             self.spinbox.setDisabled(True)
             self.units.show()
+            self.spinMin.hide()
+            self.labelMin.hide()
+            self.spinMax.hide()
+            self.labelMax.hide()
 
     def get_state(self):
         return self.state
@@ -310,6 +376,34 @@ class Dimension(QWidget):
 
     def get_value(self):
         return self.value
+
+    def update_min(self):
+        self.spinMin.setValue(self.minimum)
+
+    def set_min(self, minimum):
+        self.minimum = minimum
+        self.update_min()
+
+    def get_min(self):
+        return self.minimum
+
+    def update_max(self):
+        self.spinMax.setValue(self.maximum)
+
+    def set_max(self, maximum):
+        self.maximum = maximum
+        self.update_max()
+
+    def get_max(self):
+        return self.maximum
+
+    def spinMin_changed(self):
+        self.set_min(self.spinMin.value())
+        self.minChanged.emit()
+
+    def spinMax_changed(self):
+        self.set_max(self.spinMax.value())
+        self.maxChanged.emit()
 
 
 class DimensionNonIntegrated(Dimension):

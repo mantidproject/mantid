@@ -166,6 +166,7 @@ class SliceViewerDataView(QWidget):
         self.dimensions = DimensionWidget(dims_info, parent=self)
         self.dimensions.dimensionsChanged.connect(self.presenter.dimensions_changed)
         self.dimensions.valueChanged.connect(self.presenter.slicepoint_changed)
+        self.dimensions.extentsChanged.connect(self.presenter.extents_changed)
         self.dimensions_layout.addWidget(self.track_cursor, 0, 1, Qt.AlignRight)
         if not custom_image_info:
             self.dimensions_layout.addWidget(self.dimensions, 1, 0, 1, 1)
@@ -202,6 +203,9 @@ class SliceViewerDataView(QWidget):
         self.canvas.draw_idle()
 
     def grid_helper(self, transform):
+        """
+        Grid helper for CurveLinearSubplot
+        """
         extreme_finder = ExtremeFinderSimple(20, 20)
         xint, yint = self.presenter.is_integer_frame()
         grid_locator1, grid_locator2 = None, None
