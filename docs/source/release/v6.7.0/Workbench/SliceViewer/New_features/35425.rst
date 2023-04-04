@@ -1,0 +1,2 @@
+- Integer tick marks are now used for axes in HKL-frame
+- Dimension widget now supports the ability to change the min/max extents
