@@ -101,8 +101,10 @@ std::vector<TYPE> FilteredTimeSeriesProperty<TYPE>::filteredValuesAsVector(const
     return TimeSeriesProperty<TYPE>::filteredValuesAsVector(roi); // no filtering to do
   }
   // if the supplied roi is empty use just this one
-  const auto internalRoi = this->intersectFilterWithOther(roi);
-  return TimeSeriesProperty<TYPE>::filteredValuesAsVector(internalRoi);
+  const auto internalRoi = this->intersectFilterWithOther(roi); // allocates memory
+  const auto result = TimeSeriesProperty<TYPE>::filteredValuesAsVector(internalRoi);
+  delete internalRoi;
+  return result;
 }
 
 template <typename TYPE> std::vector<TYPE> FilteredTimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
@@ -307,7 +309,7 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::applyFilter() co
   // the index into the m_values array of the time, or -1 (before) or m_values.size() (after)
   std::size_t index_current_log{0};
 
-  for (const auto splitter : m_filter->toSplitters()) {
+  for (const auto &splitter : m_filter->toSplitters()) {
     const auto endTime = splitter.stop();
 
     // check if the splitter starts too early
@@ -389,14 +391,15 @@ template <typename TYPE> std::string FilteredTimeSeriesProperty<TYPE>::setValueF
 }
 
 /**
- * Combines the currently held filter with the supplied one as an intersection.
+ * Combines the currently held filter with the supplied one as an intersection. This assumes caller is responsible for
+ * memory.
  */
 template <typename TYPE>
 Kernel::TimeROI *FilteredTimeSeriesProperty<TYPE>::intersectFilterWithOther(const TimeROI *other) const {
   auto roi = new TimeROI(*m_filter.get());
   if (other && (!other->useAll()))
     roi->update_or_replace_intersection(*other);
-  return roi;
+  return std::move(roi);
 }
 
 template <typename TYPE> const Kernel::TimeROI &FilteredTimeSeriesProperty<TYPE>::getTimeROI() const {
