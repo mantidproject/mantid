@@ -733,67 +733,51 @@ class SANSTubeCalibration(PythonAlgorithm):
         center_y /= center_high_pixel - center_low_pixel
         return center_y
 
-    def fitGaussianParams(self, height, centre, sigma):  # Compose string argument for fit
-        # print "name=Gaussian, Height="+str(height)+", PeakCentre="+str(centre)+", Sigma="+str(sigma)
-        return "name=Gaussian, Height=" + str(height) + ", PeakCentre=" + str(centre) + ", Sigma=" + str(sigma)
+    def _fit_flat_top_peak(self, fit_params, point_index, ws, output_ws):
+        # Find the edge position
+        centre = fit_params.getPeaks()[point_index]
+        outedge, inedge, endGrad = fit_params.getEdgeParameters()
+        margin = fit_params.getMargin()
 
-    def fitEndErfcParams(self, B, C):  # Compose string argument for fit
-        # print "name=EndErfc, B="+str(B)+", C="+str(C)
-        return "name=EndErfc, B=" + str(B) + ", C=" + str(C)
-
-    # RKH 11/11/19
-    def fitFlatTopPeakParams(self, centre, endGrad, width):  # Compose string argument for fit
-        # print "name=EndErfc, B="+str(B)+", C="+str(C)
-        return "name=FlatTopPeak, Centre=" + str(centre) + ", endGrad=" + str(endGrad) + ", Width=" + str(width)
-
-    #
-    # definition of the functions to fit
-    #
-    # RKH 11/11/19, getting the starting parameters correct here is a MESS!
-    def fitFlatTopPeak(self, fitPar, index, ws, outputWs):
-        # find the edge position
-        centre = fitPar.getPeaks()[index]
-        outedge, inedge, endGrad = fitPar.getEdgeParameters()
-        margin = fitPar.getMargin()
-        # get values around the expected center
-        all_values = ws.dataY(0)
-        RIGHTLIMIT = len(all_values)
-        # RKH 18/9/19, add int()
-        # values = all_values[max(int(centre-margin),0):min(int(centre+margin),len(all_values))]
-
+        # Get values around the expected center
+        right_limit = len(ws.dataY(0))
         start = max(int(centre - outedge - margin), 0)
-        end = min(int(centre + inedge + margin), RIGHTLIMIT)
+        end = min(int(centre + inedge + margin), right_limit)
         width = (end - start) / 3.0
-        Fit(
-            InputWorkspace=ws, Function=self.fitFlatTopPeakParams(centre, endGrad, width), StartX=str(start), EndX=str(end), Output=outputWs
-        )
-        return 1  # peakIndex (center) is in position 1 of parameter list -> parameter B of fitFlatTopPeak
 
-    def fitEdges(self, fitPar, index, ws, outputWs):
-        # find the edge position
-        centre = fitPar.getPeaks()[index]
-        outedge, inedge, endGrad = fitPar.getEdgeParameters()
-        margin = fitPar.getMargin()
-        # get values around the expected center
+        function = f"name=FlatTopPeak, Centre={centre}, endGrad={endGrad}, Width={width}"
+        Fit(InputWorkspace=ws, Function=function, StartX=str(start), EndX=str(end), Output=output_ws)
+
+        # peakIndex (center) is in position 1 of the parameter list -> parameter Centre of fitFlatTopPeak
+        return 1
+
+    def _fit_edges(self, fit_params, point_index, ws, output_ws):
+        # Find the edge position
+        centre = fit_params.getPeaks()[point_index]
+        outedge, inedge, endGrad = fit_params.getEdgeParameters()
+        margin = fit_params.getMargin()
+
+        # Get values around the expected center
         all_values = ws.dataY(0)
-        RIGHTLIMIT = len(all_values)
-        # RKH 18/9/19, add int()
-        values = all_values[max(int(centre - margin), 0) : min(int(centre + margin), len(all_values))]
+        right_limit = len(all_values)
+        values = all_values[max(int(centre - margin), 0) : min(int(centre + margin), right_limit)]
 
-        # identify if the edge is a sloping edge or descent edge
-        descentMode = values[0] > values[-1]
-        if descentMode:
+        # Identify if the edge is a sloping edge or descent edge
+        descent_mode = values[0] > values[-1]
+        if descent_mode:
             start = max(centre - outedge, 0)
-            end = min(centre + inedge, RIGHTLIMIT)
-            edgeMode = -1
+            end = min(centre + inedge, right_limit)
+            edge_mode = -1
         else:
             start = max(centre - inedge, 0)
-            end = min(centre + outedge, RIGHTLIMIT)
-            edgeMode = 1
-        Fit(
-            InputWorkspace=ws, Function=self.fitEndErfcParams(centre, endGrad * edgeMode), StartX=str(start), EndX=str(end), Output=outputWs
-        )
-        return 1  # peakIndex (center) is in position 1 of parameter list -> parameter B of EndERFC
+            end = min(centre + outedge, right_limit)
+            edge_mode = 1
+
+        function = f"name=EndErfc, B={centre}, C={endGrad * edge_mode}"
+        Fit(InputWorkspace=ws, Function=function, StartX=str(start), EndX=str(end), Output=output_ws)
+
+        # peakIndex (center) is in position 1 of parameter list -> parameter B of EndERFC
+        return 1
 
     def fitGaussian(self, fitPar, index, ws, outputWs):
         # find the peak position
@@ -905,17 +889,17 @@ class SANSTubeCalibration(PythonAlgorithm):
         for i in range(len(func_forms)):
             if func_forms[i] == FuncForm.FLAT_TOP_PEAK:
                 # Find the FlatTopPeak position and save the fit resolution param to get avg resolution
-                peak_index = self.fitFlatTopPeak(fit_params, i, tube_y_data, calibPointWs)
+                centre_param_index = self._fit_flat_top_peak(fit_params, i, tube_y_data, calibPointWs)
                 get_resolution_param()
             elif func_forms[i] == FuncForm.EDGES:
                 # Find the edge position and save the fit resolution param to get avg resolution
-                peak_index = self.fitEdges(fit_params, i, tube_y_data, calibPointWs)
+                centre_param_index = self._fit_edges(fit_params, i, tube_y_data, calibPointWs)
                 get_resolution_param()
             else:
-                peak_index = self.fitGaussian(fit_params, i, tube_y_data, calibPointWs)
+                centre_param_index = self.fitGaussian(fit_params, i, tube_y_data, calibPointWs)
 
             # Get the peak centre
-            peak_centre = mtd[calibPointWs + "_Parameters"].column("Value")[peak_index]
+            peak_centre = mtd[calibPointWs + "_Parameters"].column("Value")[centre_param_index]
             peak_positions.append(peak_centre)
 
             if showPlot:
