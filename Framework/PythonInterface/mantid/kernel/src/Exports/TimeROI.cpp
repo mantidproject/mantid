@@ -10,6 +10,7 @@
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/tuple.hpp>
 
 using Mantid::Kernel::TimeROI;
 using Mantid::Types::Core::DateAndTime;
@@ -18,8 +19,7 @@ using namespace boost::python;
 boost::python::list getSplittingIntervals(const TimeROI &self) {
   boost::python::list times;
   for (const auto &splitter : self.toSplitters()) {
-    times.append(splitter.start());
-    times.append(splitter.stop());
+    times.append(make_tuple(splitter.start(), splitter.stop()));
   }
   return times;
 }
