@@ -47,9 +47,16 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
             xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
 
         self._data_view.set_axes_limits(xlim, ylim)
-        self.data_limits_changed()
+        self.update_data_limits()
 
     def data_limits_changed(self):
+        """Notify data limits on image axes have changed"""
+        limits = self._data_view.get_data_limits_to_fill_current_axes()
+        if limits is not None:
+            self._data_view.dimensions.set_extents(*limits)
+        self.update_data_limits()
+
+    def update_data_limits(self):
         """Notify data limits on image axes have changed"""
         if WorkspaceInfo.can_support_dynamic_rebinning(self.model.ws):
             self.new_plot()  # automatically uses current display limits

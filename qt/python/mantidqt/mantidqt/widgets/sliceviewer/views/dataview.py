@@ -490,14 +490,15 @@ class SliceViewerDataView(QWidget):
         if self.image is None:
             return None
         else:
-            xlim, ylim = self.ax.get_xlim(), self.ax.get_ylim()
+            xlim, ylim = self.get_axes_limits()
             if self.nonorthogonal_mode:
                 inv_tr = self.nonortho_transform.inv_tr
                 # viewing axis y not aligned with plot axis
                 # transform top left and bottom right corner so data fills the initial or zoomed rectangle
-                xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
-                xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
-
+                # xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
+                # xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
+                xmin_p, ymin_p = inv_tr(xlim[0], ylim[0])
+                xmax_p, ymax_p = inv_tr(xlim[1], ylim[1])
                 xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
             return xlim, ylim
 
@@ -520,6 +521,15 @@ class SliceViewerDataView(QWidget):
         """
         self.ax.set_xlim(xlim)
         self.ax.set_ylim(ylim)
+
+    def get_axes_limits(self):
+        """
+        Get the view limits on the image axes. Assume the
+        limits are in the orthogonal frame.
+        """
+        xlim = self.ax.get_xlim()
+        ylim = self.ax.get_ylim()
+        return xlim, ylim
 
     def set_integer_axes_ticks(self):
         """

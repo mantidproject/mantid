@@ -264,9 +264,6 @@ class Dimension(QWidget):
         self.spinMin.editingFinished.connect(self.spinMin_changed)
         self.spinMax.editingFinished.connect(self.spinMax_changed)
 
-        self.spinMin.valueChanged.connect(self.minChanged)
-        self.spinMax.valueChanged.connect(self.maxChanged)
-
         self.layout.addWidget(self.name)
         self.button_layout = QHBoxLayout()
         self.button_layout.setContentsMargins(0, 0, 0, 0)
