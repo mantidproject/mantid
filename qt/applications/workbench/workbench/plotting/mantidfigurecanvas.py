@@ -9,7 +9,7 @@
 Qt-based matplotlib canvas
 """
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QPen, QColor
+from qtpy.QtGui import QPen, QColor, QPaintEvent
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, draw_if_interactive, show  # noqa: F401
 from mantid.plots.mantidimage import MantidImage, ImageIntensity
 
@@ -36,6 +36,15 @@ class MantidFigureCanvas(FigureCanvasQTAgg):
     @pen_thickness.setter
     def pen_thickness(self, thickness):
         self._pen_thickness = thickness
+
+    def enterEvent(self, event):
+        """
+        Override of matplotlib function in backend_qt. With qt >= 5.15.6, sometimes a QPaintEvent is passed to this
+        function, which will cause an attribute error. It only seems to happen when the fit browser is open in a plot
+        window and the Window is resized and moved.
+        """
+        if not isinstance(event, QPaintEvent):
+            super(MantidFigureCanvas, self).enterEvent(event)
 
     # Method used by the zoom box tool on the matplotlib toolbar
     def drawRectangle(self, rect):
