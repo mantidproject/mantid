@@ -160,7 +160,14 @@ void FilterByTime::exec() {
 
   // Now filter out the run, using the DateAndTime type.
   auto timeroi = outputWS->mutableRun().getTimeROI(); // make a copy
-  timeroi.update_or_replace_intersection(TimeROI(start, stop));
+  if (timeroi.useAll()) {
+    // trim in for where it should be used
+    timeroi.addROI(start, stop);
+  } else {
+    // only use the overlap region
+    timeroi.update_intersection(TimeROI(start, stop));
+  }
+  outputWS->mutableRun().setTimeROI(timeroi);
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(outputWS));
 }
 
