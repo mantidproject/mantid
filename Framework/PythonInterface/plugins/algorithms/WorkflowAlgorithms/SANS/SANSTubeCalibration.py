@@ -52,6 +52,9 @@ def pairwise(iterable):
 
 
 class SANSTubeCalibration(PythonAlgorithm):
+    _TUBE_PLOT_WS = "TubePlot"
+    _FIT_DATA_WS = "FittedData"
+
     def category(self):
         return "SANS\\Calibration"
 
@@ -443,8 +446,8 @@ class SANSTubeCalibration(PythonAlgorithm):
             tube_num = tube_id % 24
             ws_suffix = f"{tube_id}_{module}_{tube_num}"
 
-            diagnostic_output[tube_id].append(RenameWorkspace(InputWorkspace="FittedTube0", OutputWorkspace=f"Fit{ws_suffix}"))
-            diagnostic_output[tube_id].append(RenameWorkspace(InputWorkspace="TubePlot0", OutputWorkspace=f"Tube{ws_suffix}"))
+            diagnostic_output[tube_id].append(RenameWorkspace(InputWorkspace=self._FIT_DATA_WS, OutputWorkspace=f"Fit{ws_suffix}"))
+            diagnostic_output[tube_id].append(RenameWorkspace(InputWorkspace=self._TUBE_PLOT_WS, OutputWorkspace=f"Tube{ws_suffix}"))
 
             # Save the fitted positions to see how well the fit does, all in mm
             x_values = []
@@ -509,7 +512,7 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         ideal_tube = IdealTube()
         ideal_tube.setArray(known_positions)
-        ideal_tube.setForm([func_form.value] * len(ideal_tube.getArray()))
+        ideal_tube.setForm([func_form] * len(ideal_tube.getArray()))
 
         if calib_table:
             # check that the calibration table has the expected form
@@ -658,10 +661,10 @@ class SANSTubeCalibration(PythonAlgorithm):
             self.log().debug(f"Cannot calibrate tube {tube_name} - unable to get any workspace indices (spectra) for it.")
             return
 
-        # Define peak positions and calculate mean C
-        peak_positions, meanC = self.getPoints(ws, ideal_tube.getFunctionalForms(), fit_params, ws_ids, showPlot=True)
-        RenameWorkspace("FittedData", OutputWorkspace=f"FittedTube{tube_idx}")
-        RenameWorkspace("TubePlot", OutputWorkspace=f"TubePlot{tube_idx}")
+        # Define peak positions and calculate average of the resolution fit parameter
+        peak_positions, avg_resolution = self._fit_peak_positions_for_tube(
+            ws, ideal_tube.getFunctionalForms(), fit_params, ws_ids, showPlot=True
+        )
 
         # Define the correct positions of the detectors
         det_ids, det_positions = self.getCalibratedPixelPositions_RKH(ws, peak_positions, ideal_tube.getArray(), ws_ids, False, polinFit)
@@ -674,7 +677,7 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         if skipped:
             self.log().debug("Histogram was excluded from the calibration as it did not have an assigned detector.")
-        return peak_positions, meanC[0]
+        return peak_positions, avg_resolution
 
     def createTubeCalibtationWorkspaceByWorkspaceIndexList(
         self, integratedWorkspace, outputWorkspace, workspaceIndexList, xUnit="Pixel", showPlot=False
@@ -864,84 +867,70 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         return peakIndex
 
-    def getPoints(self, IntegratedWorkspace, funcForms, fitParams, whichTube, showPlot=False):
+    def _fit_peak_positions_for_tube(self, ws, func_forms, fit_params, ws_ids, showPlot=False):
         """
         Get the centres of N slits or edges for calibration. It looks for the peak position in pixels
         by fitting the peaks and edges. It is the method responsible for estimating the peak position in each tube.
 
-        :param IntegratedWorkspace: Workspace of integrated data
-        :param funcForms: array of function form 1=slit/bar (Gaussian peak), 2=edge, 3= FlatTopPeak (pair of edges that can partly overlap)
-        :param fitParams: a TubeCalibFitParams object contain the fit parameters
-        :param whichTube:  a list of workspace indices for one tube (define a single tube)
+        :param ws: workspace of integrated data
+        :param func_forms: array of function form 1=slit/bar (Gaussian peak), 2=edge (pair of edges that can partly overlap), 3= FlatTopPeak
+        :param fit_params: a TubeCalibFitParams object contain the fit parameters
+        :param ws_ids: a list of workspace indices defining one tube
         :param showPlot: show plot for this tube
 
-        :rtype: array of the slit/edge positions (-1.0 indicates failed to find position)
+        :rtype: array of the fitted positions and average of the fit resolution parameters
 
         """
 
-        # Create input workspace for fitting
-        # get all the counts for the integrated workspace inside the tube
-        countsY = np.array([IntegratedWorkspace.dataY(i)[0] for i in whichTube])
-        if len(countsY) == 0:
+        # Create input workspace for fitting - get all the counts for the tube from the integrated workspace
+        y_data = [ws.dataY(i)[0] for i in ws_ids]
+        if len(y_data) == 0:
             return
-        getPointsWs = CreateWorkspace(list(range(len(countsY))), countsY, OutputWorkspace="TubePlot")
+        tube_y_data = CreateWorkspace(list(range(len(y_data))), y_data, OutputWorkspace=self._TUBE_PLOT_WS)
+
         calibPointWs = "CalibPoint"
-        results = []
+        peak_positions = []
         fitt_y_values = []
         fitt_x_values = []
 
-        # RKH added funcForms 2, 3 (11/11/19)
-        mean = 0.0
-        meanC = []
-        j = 0
+        avg_resolution = 0.0
+        resolution_params = []
+
+        def get_resolution_param():
+            resolution = np.fabs(mtd[calibPointWs + "_Parameters"].column("Value")[2])
+            if resolution > 1e-06:
+                resolution_params.append(resolution)
+
         # Loop over the points
-        temp = []
-        for i in range(len(funcForms)):
-            if funcForms[i] == 3:
-                # find the FlatTopPeak position
-                # RKH try save the fit params to get avg resolution
-                peakIndex = self.fitFlatTopPeak(fitParams, i, getPointsWs, calibPointWs)
-
-                cc = list(mtd[calibPointWs + "_Parameters"].row(2).items())[1][1]
-                temp.append(cc)
-                cc = np.fabs(cc)
-                if cc > 1e-06:
-                    j += 1
-                    mean += cc
-            elif funcForms[i] == 2:
-                # find the edge position
-                # RKH try save the fit params to get avg resolution
-                peakIndex = self.fitEdges(fitParams, i, getPointsWs, calibPointWs)
-
-                cc = list(mtd[calibPointWs + "_Parameters"].row(2).items())[1][1]
-                temp.append(cc)
-                cc = np.fabs(cc)
-                if cc > 1e-06:
-                    j += 1
-                    mean += cc
+        for i in range(len(func_forms)):
+            if func_forms[i] == FuncForm.FLAT_TOP_PEAK:
+                # Find the FlatTopPeak position and save the fit resolution param to get avg resolution
+                peak_index = self.fitFlatTopPeak(fit_params, i, tube_y_data, calibPointWs)
+                get_resolution_param()
+            elif func_forms[i] == FuncForm.EDGES:
+                # Find the edge position and save the fit resolution param to get avg resolution
+                peak_index = self.fitEdges(fit_params, i, tube_y_data, calibPointWs)
+                get_resolution_param()
             else:
-                peakIndex = self.fitGaussian(fitParams, i, getPointsWs, calibPointWs)
-            # get the peak centre
-            peakCentre = list(mtd[calibPointWs + "_Parameters"].row(peakIndex).items())[1][1]
-            results.append(peakCentre)
-            #
+                peak_index = self.fitGaussian(fit_params, i, tube_y_data, calibPointWs)
+
+            # Get the peak centre
+            peak_centre = mtd[calibPointWs + "_Parameters"].column("Value")[peak_index]
+            peak_positions.append(peak_centre)
+
             if showPlot:
                 ws = mtd[calibPointWs + "_Workspace"]
                 fitt_y_values.append(copy.copy(ws.dataY(1)))
                 fitt_x_values.append(copy.copy(ws.dataX(1)))
 
-        # RKH
-        if j > 0:
-            mean = mean / float(j)
-        #  meanC = CreateSingleValuedWorkspace(Datavalue=mean)  this did not work
-        meanC.append(mean)
-        # RKH
-        self.log().debug(f"C values = {temp}")
-        #
+        # Calculate the average resolution
+        if resolution_params:
+            avg_resolution = sum(resolution_params) / float(len(resolution_params))
+
         if showPlot:
-            FittedData = CreateWorkspace(np.hstack(fitt_x_values), np.hstack(fitt_y_values))  # noqa: F841
-        # RKH return meanC also
-        return results, meanC
+            CreateWorkspace(np.hstack(fitt_x_values), np.hstack(fitt_y_values), OutputWorkspace=self._FIT_DATA_WS)
+
+        return peak_positions, avg_resolution
 
     def getIdealTubeFromNSlits(self, IntegratedWorkspace, slits):
         """
