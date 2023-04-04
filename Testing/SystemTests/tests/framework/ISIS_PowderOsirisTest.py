@@ -63,6 +63,7 @@ def run_diffraction_focusing(
         merge_drange=merge_drange,
         subtract_empty_can=subtract_empty_can,
         vanadium_normalisation=vanadium_normalisation,
+        absorb_corrections=False,
     )
 
     focussed_rel_path = os.path.join("1_1", user_name, output_file)
