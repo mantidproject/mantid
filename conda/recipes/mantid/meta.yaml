@@ -42,7 +42,7 @@ requirements:
     - numpy {{ numpy }}
     - occt {{ occt }}
     - python {{ python }}
-    - poco
+    - poco {{ poco }}
     - setuptools {{ setuptools }}
     - tbb-devel {{ tbb }}
     - pip
