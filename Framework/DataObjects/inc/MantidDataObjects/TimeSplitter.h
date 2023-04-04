@@ -53,8 +53,6 @@ public:
                       bool tofCorrect = false, double factor = 1.0, double shift = 0.0) const;
   /// Print the (destination index | DateAndTime boundary) pairs of this splitter.
   std::string debugPrint() const;
-  // Add the run end
-  void addLastTime(const DateAndTime &lastTime);
 
 private:
   void clearAndReplace(const DateAndTime &start, const DateAndTime &stop, const int value);

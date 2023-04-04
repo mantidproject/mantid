@@ -554,6 +554,38 @@ void FilterEvents::groupOutputWorkspace() {
   return;
 }
 
+/**
+ * Find the TimeROI associated to the current destination-workspace index.
+ *
+ * Caveat: when the destination workspace is the unfiltered workspace, we have the unfortunate coincidence that
+ * its index, TimeSplitter::NO_TARGET, is the same as the value denoting the end of a splitting.
+ * Illuminating example:
+ * TimeSplitter(0.0, 1.0, 1) results in TimeSplitter::m_roi_map = {(0.0, 1), (1.0, NO_TARGET)}, but
+ * TimeSplitter(0.0, 1.0, NO_TARGET) is ill-defined, as {(0.0, NO_TARGET), (1.0, NO_TARGET)} is meaningless.
+ */
+TimeROI FilterEvents::partialROI(const int &index) {
+  TimeROI roi{m_timeSplitter.getTimeROI(index)};
+
+  if (index == TimeSplitter::NO_TARGET) {
+    const auto splittingBoundaries = m_timeSplitter.getSplittersMap();
+
+    const auto firstSplitter = splittingBoundaries.begin();
+    // add leading mask as ROI of the unfiltered workspace
+    if (firstSplitter->first > m_eventWS->run().startTime())
+      roi.addROI(m_eventWS->run().startTime(), firstSplitter->first);
+
+    const auto lastSplitter = std::prev(splittingBoundaries.end());
+    // sanity check
+    if (lastSplitter->second != TimeSplitter::NO_TARGET)
+      throw std::runtime_error("FilterEvents::partialROI: the last splitter boundary must be TimeSplitter::NO_TARGET");
+    // add trailing mask as ROI of the unfiltered workspace
+    if (lastSplitter->first < m_eventWS->run().endTime())
+      roi.addROI(lastSplitter->first, m_eventWS->run().endTime());
+  }
+
+  return roi;
+}
+
 //----------------------------------------------------------------------------------------------
 // /* Clone the sample logs that will not be split, including single-value and add
 //  * all the TimeSeriesProperty sample logs  to vectors by their type
@@ -976,9 +1008,8 @@ void FilterEvents::createOutputWorkspaces() {
     // instantiate one of the output filtered workspaces
     std::shared_ptr<EventWorkspace> optws = templateWorkspace->clone();
 
-    //
-    // Find the TimeROI associated to the current destination-workspace index.
-    TimeROI roi{m_timeSplitter.getTimeROI(wsindex)};
+    // Endow the output workspace with a TimeROI
+    TimeROI roi = this->partialROI(wsindex);
     roi.update_or_replace_intersection(originalROI);
     optws->mutableRun().setTimeROI(roi);
 

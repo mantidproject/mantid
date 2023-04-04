@@ -254,14 +254,6 @@ void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, con
   }
 }
 
-// Pad "time stops" with the end-of-the-run time
-void TimeSplitter::addLastTime(const DateAndTime &lastTime) {
-  if (empty())
-    return;
-
-  addROI(m_roi_map.rbegin()->first, lastTime, NO_TARGET);
-}
-
 /// Check if the TimeSplitter is empty
 bool TimeSplitter::empty() const { return m_roi_map.empty(); }
 

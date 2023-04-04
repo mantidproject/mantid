@@ -18,6 +18,9 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
+namespace Kernel {
+class TimeROI; // forward declaration
+}
 namespace Algorithms {
 
 class TimeAtSampleStrategy;
@@ -139,6 +142,9 @@ private:
   */
 
   void groupOutputWorkspace();
+
+  /// Find the TimeROI associated to a particular destination-workspace index
+  Kernel::TimeROI partialROI(const int &index);
 
   /// calculate split-workspace's duration according to splitter time series property
   // DEBUG: mark for deletion

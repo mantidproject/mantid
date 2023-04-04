@@ -170,7 +170,7 @@ public:
     TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 1);
     TS_ASSERT_EQUALS(filteredws0->run().getTimeROI().debugStrPrint(),
                      "0: 1990-Jan-01 00:00:20 to 1990-Jan-01 00:00:20.035000000\n");
-    TS_ASSERT_DELTA(std::stod(filteredws0->run().getProperty("duration")->value()), 35000000 * 1.E-9, 1.E-9);
+    TS_ASSERT_DELTA(std::stod(filteredws0->run().getProperty("duration")->value()), 0.035, 1.E-9);
 
     // Check Workspace group 1
     EventWorkspace_sptr filteredws1 =
@@ -180,7 +180,7 @@ public:
     TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 1);
     TS_ASSERT_EQUALS(filteredws1->run().getTimeROI().debugStrPrint(),
                      "0: 1990-Jan-01 00:00:20.035000000 to 1990-Jan-01 00:00:20.195000000\n");
-    TS_ASSERT_DELTA(std::stod(filteredws1->run().getProperty("duration")->value()), 160000000 * 1.E-9, 1.E-9);
+    TS_ASSERT_DELTA(std::stod(filteredws1->run().getProperty("duration")->value()), 0.160, 1.E-9);
 
     // Check Workspace group 2
     EventWorkspace_sptr filteredws2 =
@@ -192,7 +192,7 @@ public:
                      "0: 1990-Jan-01 00:00:20.200000000 to 1990-Jan-01 00:00:20.265000000\n"
                      "1: 1990-Jan-01 00:00:20.300000000 to 1990-Jan-01 00:00:20.365000000\n"
                      "2: 1990-Jan-01 00:00:20.400000000 to 1990-Jan-01 00:00:20.465000000\n");
-    TS_ASSERT_DELTA(std::stod(filteredws2->run().getProperty("duration")->value()), 195000000 * 1.E-9, 1.E-9);
+    TS_ASSERT_DELTA(std::stod(filteredws2->run().getProperty("duration")->value()), 0.195, 1.E-9);
     EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();
     TofEvent eventmin = elist3.getEvent(0);
@@ -211,8 +211,9 @@ public:
     TS_ASSERT_EQUALS(unfilteredws->run().getTimeROI().debugStrPrint(),
                      "0: 1990-Jan-01 00:00:20.195000000 to 1990-Jan-01 00:00:20.200000000\n"
                      "1: 1990-Jan-01 00:00:20.265000000 to 1990-Jan-01 00:00:20.300000000\n"
-                     "2: 1990-Jan-01 00:00:20.365000000 to 1990-Jan-01 00:00:20.400000000\n");
-    TS_ASSERT_DELTA(std::stod(unfilteredws->run().getProperty("duration")->value()), 75000000 * 1.E-9, 1.E-9);
+                     "2: 1990-Jan-01 00:00:20.365000000 to 1990-Jan-01 00:00:20.400000000\n"
+                     "3: 1990-Jan-01 00:00:20.465000000 to 1990-Jan-01 00:00:20.500000000\n");
+    TS_ASSERT_DELTA(std::stod(unfilteredws->run().getProperty("duration")->value()), 0.110, 1.E-9);
 
     // Clean up
     AnalysisDataService::Instance().remove("Test02");
@@ -1267,8 +1268,11 @@ public:
         elist.addEventQuickly(event);
     }
 
-    // Insert a sample log for the start of the run, with one charge count per pulse
+    // Insert a sample log for the start and end of the run, with one charge count per pulse
     eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(), true);
+    double duration = nanosecToSec * static_cast<double>(pulsedt * numpulses);
+    DateAndTime runEnd = runstart + duration;
+    eventWS->mutableRun().addProperty("run_end", runEnd.toISO8601String(), true);
 
     // Insert a sample log for the proton charge
     auto pchargeLog = std::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
@@ -1282,7 +1286,6 @@ public:
     eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("LogB", "B"));
     eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("LogC", "C"), true);
     eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("Title", "Testing EventWorkspace"));
-    double duration = nanosecToSec * static_cast<double>(pulsedt * numpulses);
     eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<double>("duration", duration));
 
     // add time series log. The TimeRoi associated to the Run object of each target workspace
