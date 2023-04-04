@@ -53,14 +53,12 @@ namespace MantidQt::MantidWidgets {
  * @param watchADS If true then ADS observers are added
  */
 PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
-    : QWidget(parent), m_canvas{new FigureCanvasQt(111, MANTID_PROJECTION, parent)}, m_panZoomTool(m_canvas),
-      m_wsRemovedObserver(*this, &PreviewPlot::onWorkspaceRemoved),
+    : QWidget(parent), m_canvas{new FigureCanvasQt(111, MANTID_PROJECTION, parent)}, m_selectorActive(false),
+      m_panZoomTool(m_canvas), m_wsRemovedObserver(*this, &PreviewPlot::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced), m_axis("both"), m_style("sci"), m_useOffset(true),
       m_xAxisScale("linear"), m_yAxisScale("linear"), m_redrawOnPaint(false) {
   createLayout();
   createActions();
-
-  m_selectorActive = false;
 
   m_canvas->installEventFilterToMplCanvas(this);
   watchADS(observeADS);
@@ -98,6 +96,26 @@ Widgets::MplCpp::FigureCanvasQt *PreviewPlot::canvas() const { return m_canvas; 
  * @return The axes coordinates of the QPoint
  */
 QPointF PreviewPlot::toDataCoords(const QPoint &point) const { return m_canvas->toDataCoords(point); }
+
+/**
+ * Replace lines with a list of workspaces and associated spectra.
+ * @param workspaces Workspaces to add lines from
+ * @param workspaceIndices Index of each above workspace to add
+ * @param plotErrorBars Whether to plot the error bars on each line
+ */
+void PreviewPlot::addAllSpectra(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
+                                const std::vector<int> &workspaceIndices, const bool plotErrorBars) {
+  clear();
+  for (size_t i = 0; i < workspaces.size(); ++i) {
+    addSpectrum(QString::fromStdString(workspaces[i]->getName() + " "), workspaces[i], workspaceIndices[i]);
+  }
+  showLegend(false);
+  if (plotErrorBars) {
+    setLinesWithErrors(m_lines.keys());
+    return;
+  }
+  setLinesWithoutErrors(m_lines.keys());
+}
 
 /**
  * Add a line for a given spectrum to the plot
@@ -675,6 +693,18 @@ void PreviewPlot::switchPlotTool(QAction *selected) {
     g_log.warning("Unknown plot tool selected.");
   }
 }
+
+/**
+ * Set the scale to linear on a given axis
+ * @param axisID Axis to set to linear
+ */
+void PreviewPlot::setScaleLinear(const AxisID axisID) { setScaleType(axisID, "linear"); }
+
+/**
+ * Set the scale to log on a given axis
+ * @param axisID Axis to set to log
+ */
+void PreviewPlot::setScaleLog(const AxisID axisID) { setScaleType(axisID, "log"); }
 
 /**
  * Set the X scale based on the given QAction

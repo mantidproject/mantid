@@ -30,6 +30,6 @@ void PlotPresenter::setScaleLog(const AxisID axisID) { m_view->setScaleLog(axisI
 void PlotPresenter::setPlotErrorBars(const bool plotErrorBars) { m_model->setPlotErrorBars(plotErrorBars); }
 
 void PlotPresenter::plot() {
-  m_view->plot(m_model->getWorkspaces(), m_model->getWorkspaceIndices(), m_model->getPlotErrorBars());
+  m_view->addAllSpectra(m_model->getWorkspaces(), m_model->getWorkspaceIndices(), m_model->getPlotErrorBars());
 }
 } // namespace MantidQt::MantidWidgets

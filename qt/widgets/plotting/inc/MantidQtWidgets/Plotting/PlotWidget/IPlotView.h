@@ -16,7 +16,7 @@ class EXPORT_OPT_MANTIDQT_PLOTTING IPlotView {
 public:
   virtual void setScaleLinear(const AxisID axisID) = 0;
   virtual void setScaleLog(const AxisID axisID) = 0;
-  virtual void plot(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
-                    const std::vector<int> &workspaceIndices, const bool plotErrorBars) = 0;
+  virtual void addAllSpectra(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
+                             const std::vector<int> &workspaceIndices, const bool plotErrorBars) = 0;
 };
 } // namespace MantidQt::MantidWidgets

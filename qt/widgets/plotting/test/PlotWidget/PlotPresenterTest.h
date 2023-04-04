@@ -55,7 +55,7 @@ public:
     EXPECT_CALL(*model, getWorkspaces()).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(*model, getWorkspaceIndices()).Times(1).WillOnce(Return(wsIndices));
     EXPECT_CALL(*model, getPlotErrorBars()).Times(1).WillOnce(Return(plotErrors));
-    EXPECT_CALL(view, plot(workspaces, wsIndices, plotErrors)).Times(1);
+    EXPECT_CALL(view, addAllSpectra(workspaces, wsIndices, plotErrors)).Times(1);
 
     auto presenter = PlotPresenter(&view, std::move(model));
 

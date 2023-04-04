@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/MplCpp/PanZoomTool.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
+#include "MantidQtWidgets/Plotting/PlotWidget/IPlotView.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 #include "MantidQtWidgets/Plotting/SingleSelector.h"
 
@@ -36,9 +37,9 @@ class FigureCanvasQt;
 namespace MantidWidgets {
 
 /**
- * Displays several workpaces on a matplotlib figure
+ * Displays several workspaces on a matplotlib figure
  */
-class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public QWidget {
+class EXPORT_OPT_MANTIDQT_PLOTTING PreviewPlot : public QWidget, public IPlotView {
   Q_OBJECT
 
   Q_PROPERTY(QColor canvasColour READ canvasColour WRITE setCanvasColour)
@@ -55,6 +56,11 @@ public:
   QPointF toDataCoords(const QPoint &point) const;
 
   void setTightLayout(QHash<QString, QVariant> const &args);
+
+  void addAllSpectra(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces,
+                     const std::vector<int> &workspaceIndices, const bool plotErrorBars) override;
+  void setScaleLinear(const AxisID axisID) override;
+  void setScaleLog(const AxisID axisID) override;
 
   void addSpectrum(const QString &lineLabel, const Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex = 0,
                    const QColor &lineColour = QColor(),

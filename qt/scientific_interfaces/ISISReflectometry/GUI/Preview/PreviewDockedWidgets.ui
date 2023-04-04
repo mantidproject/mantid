@@ -170,8 +170,8 @@
   <widget class="QDockWidget" name="lp_dock">
    <property name="minimumSize">
     <size>
-     <width>0</width>
-     <height>0</height>
+     <width>216</width>
+     <height>69</height>
     </size>
    </property>
    <property name="features">
@@ -198,7 +198,7 @@
         </widget>
        </item>
        <item>
-        <widget class="MantidQt::MantidWidgets::QtPlotView" name="line_plot" native="true">
+        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="line_plot" native="true">
          <property name="toolTip">
           <string>Reduced data. Use right-click for plot options</string>
          </property>
@@ -215,9 +215,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::QtPlotView</class>
+   <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Plotting/PlotWidget/QtPlotView.h</header>
+   <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
