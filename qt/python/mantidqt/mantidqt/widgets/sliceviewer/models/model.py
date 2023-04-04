@@ -517,6 +517,31 @@ class SliceViewerModel(SliceViewerBaseModel):
 
     def check_for_removed_original_workspace(self):
         return self.num_original_workspaces_at_init != self.number_of_active_original_workspaces()
+    def projection_matrix_from_log(self, ws):
+        try:
+            expt_info = ws.getExperimentInfo(0)
+            proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float).reshape(3, 3)
+        except (AttributeError, KeyError, ValueError):  # run can be None so no .get()
+            # assume orthogonal projection if no log exists (i.e. proj_matrix is identity)
+            # needs to be 3x3 even if 2D ws as columns passed to recAngle when calc axes angles
+            proj_matrix = np.eye(3)
+        return proj_matrix
+
+    def projection_matrix_from_basis(self, ws):
+        proj_matrix = np.zeros((3, 3))
+        ndims = ws.getNumDims()
+        basis_matrix = np.zeros((ndims, ndims))
+        if len(list(ws.getBasisVector(0))) == ndims:  # basis vectors valid
+            for idim in range(ndims):
+                basis_matrix[:, idim] = list(ws.getBasisVector(idim))
+            # exclude non-Q dim elements from basis vectors
+            qflags = [ws.getDimension(idim).getMDFrame().isQ() for idim in range(ndims)]
+            i_nonq = np.flatnonzero(np.invert(qflags))
+            qmask = np.invert(basis_matrix[i_nonq, :].astype(bool).sum(axis=0).astype(bool))
+            # extract proj matrix from basis vectors of q dimension
+            # note for 2D the last col/row of proj_matrix is 0,0,1 - i.e. L
+            proj_matrix[: qmask.sum(), : qmask.sum()] = basis_matrix[qmask, :][:, qflags]
+        return proj_matrix
 
     def projection_matrix_from_log(self, ws):
         try:
