@@ -519,7 +519,6 @@ void FilterEvents::groupOutputWorkspace() {
   // return if there is no such need
   if (!m_toGroupWS)
     return;
-
   // set progress
   m_progress = 0.95;
   progress(m_progress, "Group workspaces");
@@ -554,7 +553,7 @@ void FilterEvents::groupOutputWorkspace() {
 }
 
 //----------------------------------------------------------------------------------------------
-// /** Clone the sample logs that will not be split, including single-value and add
+// /* Clone the sample logs that will not be split, including single-value and add
 //  * all the TimeSeriesProperty sample logs  to vectors by their type
 //  * @brief FilterEvents::copyNoneSplitLogs
 //  * @param int_tsp_name_vector :: output
@@ -1337,7 +1336,7 @@ std::shared_ptr<DataObjects::EventWorkspace> FilterEvents::createTemplateOutputW
 }
 
 // //----------------------------------------------------------------------------------------------
-// /** Generate a vector of integer time series property for each splitter
+// /* Generate a vector of integer time series property for each splitter
 //  * corresponding to each target (in integer)
 //  * in each splitter-time-series-property, 1 stands for include and 0 stands
 //  * for time for neutrons to be discarded. If there is no UN-DEFINED

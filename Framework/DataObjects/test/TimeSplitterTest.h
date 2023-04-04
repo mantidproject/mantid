@@ -365,9 +365,16 @@ public:
     TS_ASSERT(splitVecNoTarget[2] == SplittingInterval(FOUR, FIVE, 3));
   }
 
+  /** Test that a TimeSplitter object constructed from a MatrixWorkspace object
+   * containing absolute times is equivalent to a TimeSplitter object built by
+   * successively adding time ROIs. Also test that TimeSplitter supports
+   * "OutputWorkspaceIndexedFrom1" property of FilterEvents class: optionally shift
+   * all target indexes (just for the output naming purposes) so they start from 1.
+   * @brief test_timeSplitterFromMatrixWorkspaceAbsoluteTimes
+   */
   void test_timeSplitterFromMatrixWorkspaceAbsoluteTimes() {
     TimeSplitter splitter;
-    splitter.addROI(DateAndTime(0, 0), DateAndTime(10, 0), 1);
+    splitter.addROI(DateAndTime(0, 0), DateAndTime(10, 0), 0);
     splitter.addROI(DateAndTime(10, 0), DateAndTime(15, 0), 3);
     splitter.addROI(DateAndTime(15, 0), DateAndTime(20, 0), 2);
 
@@ -380,20 +387,30 @@ public:
     X[2] = 15.0;
     X[3] = 20.0;
 
-    Y[0] = 1.0;
+    Y[0] = 0.0;
     Y[1] = 3.0;
     Y[2] = 2.0;
     auto convertedSplitter = new TimeSplitter(ws);
 
     TS_ASSERT(splitter.numRawValues() == convertedSplitter->numRawValues() && convertedSplitter->numRawValues() == 4);
     TS_ASSERT(splitter.valueAtTime(DateAndTime(0, 0)) == convertedSplitter->valueAtTime(DateAndTime(0, 0)) &&
-              convertedSplitter->valueAtTime(DateAndTime(0, 0)) == 1);
+              convertedSplitter->valueAtTime(DateAndTime(0, 0)) == 0);
     TS_ASSERT(splitter.valueAtTime(DateAndTime(12, 0)) == convertedSplitter->valueAtTime(DateAndTime(12, 0)) &&
               convertedSplitter->valueAtTime(DateAndTime(12, 0)) == 3);
     TS_ASSERT(splitter.valueAtTime(DateAndTime(20, 0)) == convertedSplitter->valueAtTime(DateAndTime(20, 0)) &&
               convertedSplitter->valueAtTime(DateAndTime(20, 0)) == TimeSplitter::NO_TARGET);
+
+    // test shifing all input indexes by 1
+    TS_ASSERT(convertedSplitter->getWorkspaceIndexName(0, 1) == "1"); // 0 becomes 1
+    TS_ASSERT(convertedSplitter->getWorkspaceIndexName(3, 1) == "4"); // 3 becomes 4
+    TS_ASSERT(convertedSplitter->getWorkspaceIndexName(2, 1) == "3"); // 2 becomes 3
   }
 
+  /** Test that a TimeSplitter object constructed from a MatrixWorkspace object
+   * containing relative times is equivalent to a TimeSplitter object built by
+   * successively adding time ROIs.
+   * @brief test_timeSplitterFromMatrixWorkspaceRelativeTimes
+   */
   void test_timeSplitterFromMatrixWorkspaceRelativeTimes() {
     TimeSplitter splitter;
     int64_t offset_ns{TWO.totalNanoseconds()};
