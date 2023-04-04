@@ -155,24 +155,13 @@ void FilterByLogValue::exec() {
       }
     } // (filter by value)
   }
-  TimeROI *roi = new TimeROI();
-  for (auto split : splitter) {
-    try {
-      roi->addROI(split.start(), split.stop());
-    } catch (const std::runtime_error &) {
-      // If values are not unique or not in ascending order
-      // values will be skipped
-    }
-  }
-  if (roi->empty()) {
-    roi->replaceROI(TimeROI::USE_NONE);
-  }
 
   g_log.information() << splitter.size() << " entries in the filter.\n";
   size_t numberOfSpectra = inputWS->getNumberHistograms();
 
   // Initialise the progress reporting object
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
+
   TimeROI *roi = new TimeROI();
   for (auto split : splitter) {
     try {
@@ -182,8 +171,8 @@ void FilterByLogValue::exec() {
       // values will be skipped
     }
   }
-  if (roi->empty()) {
-    roi->replaceROI(TimeROI::INVALID_ROI);
+  if (roi->useAll()) {
+    roi->replaceROI(TimeROI::USE_NONE);
   }
   EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (inputWS == outputWS) {

@@ -8,7 +8,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/SumEventsByLogValue.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -129,6 +131,63 @@ public:
     TS_ASSERT_EQUALS(outWS->Double(0, 4), 90.0E7);
     TS_ASSERT_EQUALS(outWS->Double(1, 4), 10.0E7);
     // Save more complex tests for a system test
+  }
+
+  void test_loadNexus() {
+    EventWorkspace_sptr WS;
+    auto loader = AlgorithmManager::Instance().create("LoadEventNexus");
+    loader->initialize();
+    loader->setPropertyValue("Filename", "HYSA_2934.nxs.h5");
+    loader->setPropertyValue("LoadMonitors", "1");
+    loader->setPropertyValue("OutputWorkspace", "testInput");
+    loader->execute();
+    TS_ASSERT(loader->isExecuted());
+
+    WS = AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::EventWorkspace>("testInput");
+    TS_ASSERT(WS); // workspace is loaded
+    auto monWS = std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(WS->monitorWorkspace());
+    IAlgorithm_sptr alg = std::make_shared<SumEventsByLogValue>();
+    alg->initialize();
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", WS));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outws"));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", monWS));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("LogName", "scan_index"));
+    alg->setChild(true);
+    TS_ASSERT(alg->execute());
+
+    Workspace_sptr out = alg->getProperty("OutputWorkspace");
+    auto outWS = std::dynamic_pointer_cast<ITableWorkspace>(out);
+    TS_ASSERT_EQUALS(outWS->rowCount(), 15);
+    TS_ASSERT_EQUALS(outWS->Double(0, 3), 52.53912528699999);
+    TS_ASSERT_EQUALS(outWS->Double(0, 4), 47161646710.0);
+    TS_ASSERT_EQUALS(outWS->Double(1, 3), 6.44623244);
+    TS_ASSERT_EQUALS(outWS->Double(1, 4), 5793533550.0);
+    TS_ASSERT_EQUALS(outWS->Double(2, 3), 6.498204369);
+    TS_ASSERT_EQUALS(outWS->Double(2, 4), 5837280140.0);
+    TS_ASSERT_EQUALS(outWS->Double(3, 3), 6.684533796);
+    TS_ASSERT_EQUALS(outWS->Double(3, 4), 6007716450.0);
+    TS_ASSERT_EQUALS(outWS->Double(4, 3), 6.437640537);
+    TS_ASSERT_EQUALS(outWS->Double(4, 4), 5784639810.0);
+    TS_ASSERT_EQUALS(outWS->Double(5, 3), 6.724165215);
+    TS_ASSERT_EQUALS(outWS->Double(5, 4), 6038131490.0);
+    TS_ASSERT_EQUALS(outWS->Double(6, 3), 6.691884511);
+    TS_ASSERT_EQUALS(outWS->Double(6, 4), 6028468300.0);
+    TS_ASSERT_EQUALS(outWS->Double(7, 3), 6.744685377);
+    TS_ASSERT_EQUALS(outWS->Double(7, 4), 6076178440.0);
+    TS_ASSERT_EQUALS(outWS->Double(8, 3), 6.446148924);
+    TS_ASSERT_EQUALS(outWS->Double(8, 4), 5806852510.0);
+    TS_ASSERT_EQUALS(outWS->Double(9, 3), 15.521905456);
+    TS_ASSERT_EQUALS(outWS->Double(9, 4), 5389996420.0);
+    TS_ASSERT_EQUALS(outWS->Double(10, 3), 6.520652694);
+    TS_ASSERT_EQUALS(outWS->Double(10, 4), 5870629140.0);
+    TS_ASSERT_EQUALS(outWS->Double(11, 3), 6.687109917);
+    TS_ASSERT_EQUALS(outWS->Double(11, 4), 6009915210.0);
+    TS_ASSERT_EQUALS(outWS->Double(12, 3), 6.732920325);
+    TS_ASSERT_EQUALS(outWS->Double(12, 4), 5936084950.0);
+    TS_ASSERT_EQUALS(outWS->Double(13, 3), 6.475679524);
+    TS_ASSERT_EQUALS(outWS->Double(13, 4), 5805181920.0);
+    TS_ASSERT_EQUALS(outWS->Double(14, 3), 3.196203628);
+    TS_ASSERT_EQUALS(outWS->Double(14, 4), 2889833200.0);
   }
 
 private:

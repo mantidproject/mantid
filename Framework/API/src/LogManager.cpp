@@ -212,7 +212,7 @@ void LogManager::splitByTime(SplittingIntervalVec &splitter, std::vector<LogMana
   for (size_t i = 0; i < n; i++) {
     if (outputs[i]) {
       if (roiMap.empty()) {
-        outputs[i]->setTimeROI(TimeROI::INVALID_ROI);
+        outputs[i]->setTimeROI(TimeROI::USE_NONE);
       } else {
         int destinationIndex = static_cast<int>(i);
         const Kernel::TimeROI &roi = roiMap.at(destinationIndex);

@@ -12,6 +12,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -27,6 +28,9 @@ DECLARE_ALGORITHM(SumEventsByLogValue)
 
 using namespace Kernel;
 using namespace API;
+using DataObjects::EventWorkspace;
+using DataObjects::EventWorkspace_const_sptr;
+using DataObjects::EventWorkspace_sptr;
 
 void SumEventsByLogValue::init() {
   declareProperty(
@@ -181,6 +185,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   const TimeSeriesProperty<double> *protonChargeLog = nullptr;
   try {
     protonChargeLog = m_inputWorkspace->run().getTimeSeriesProperty<double>("proton_charge");
+    //    g_log.debug() << protonChargeLog->g
     // Set back to NULL if the log is empty or bad things will happen later
     if (protonChargeLog->realSize() == 0)
       protonChargeLog = nullptr;
@@ -211,25 +216,27 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
       TimeInterval timeAfterLastLogValue(log->lastTime(), m_inputWorkspace->getLastPulseTime());
       log->expandFilterToRange(filter, value, value, timeAfterLastLogValue);
     }
-
-    // convert to the actual time filter
-    TimeROI timeROI; // TODO remove this conversion
-    for (const auto &interval : filter) {
-      if (interval.start() < interval.stop())
-        timeROI.addROI(interval.start(), interval.stop());
-    }
-
+    Kernel::TimeROI *roi = new TimeROI;
     // Calculate the time covered by this log value and add it to the table
     double duration = 0.0;
     for (auto &time : filter) {
       duration += time.duration();
+      try {
+        roi->addROI(time.start(), time.stop());
+      } catch (const std::runtime_error &) {
+        // If values are not unique or not in ascending order
+        // values will be skipped
+      }
     }
     timeCol->cell<double>(row) = duration;
 
     interruption_point();
     // Sum up the proton charge for this log value
-    if (protonChargeLog)
-      protonChgCol->cell<double>(row) = sumProtonCharge(protonChargeLog, timeROI);
+    if (protonChargeLog) {
+      EventWorkspace_sptr outputWS = Mantid::DataObjects::create<EventWorkspace>(*m_inputWorkspace);
+      outputWS->mutableRun().setTimeROI(*roi);
+      protonChgCol->cell<double>(row) = (outputWS->mutableRun().getProtonCharge());
+    }
     interruption_point();
 
     // filter the logs
