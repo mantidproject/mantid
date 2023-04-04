@@ -771,7 +771,7 @@ void FilterEvents::splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp
 */
 
 //-------------------------------------------------------------------
-/** Convert splitters specified by an input workspace to TimeSplitter
+/** Convert splitters specified by the input workspace to TimeSplitter
  *  Cache a set of all target workspace indexes
  * @brief FilterEvents::parseInputSplitters
  */
@@ -783,6 +783,8 @@ void FilterEvents::parseInputSplitters() {
         TimeSplitter(m_splitterTableWorkspace, m_isSplittersRelativeTime ? m_runStartTime : DateAndTime(0));
   else
     m_timeSplitter = TimeSplitter(m_matrixSplitterWS, m_isSplittersRelativeTime ? m_runStartTime : DateAndTime(0));
+
+  // m_timeSplitter.addLastTime(m_eventWS->run().endTime());
 
   m_targetWorkspaceIndexSet = m_timeSplitter.outputWorkspaceIndices();
 

@@ -170,12 +170,11 @@ std::string TimeSplitter::debugPrint() const {
 }
 
 const std::map<DateAndTime, int> &TimeSplitter::getSplittersMap() const { return m_roi_map; }
-const std::map<std::string, int> &TimeSplitter::getWorkspaceNameIndexMap() const { return m_name_index_map; }
-const std::map<int, std::string> &TimeSplitter::getWorkspaceIndexNameMap() const { return m_index_name_map; }
 
 // Get the target name from the target index.
 std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const int numericalShift) {
   assert(numericalShift >= 0);
+
   if (m_index_name_map.count(workspaceIndex) == 0) {
     std::stringstream msg;
     msg << "Invalid target index " << workspaceIndex << " when calling TimeSplitter::getWorkspaceIndexName";
@@ -253,6 +252,14 @@ void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, con
       throw std::runtime_error("Something went wrong in TimeSplitter::addROI");
     }
   }
+}
+
+// Pad "time stops" with the end-of-the-run time
+void TimeSplitter::addLastTime(const DateAndTime &lastTime) {
+  if (empty())
+    return;
+
+  addROI(m_roi_map.rbegin()->first, lastTime, NO_TARGET);
 }
 
 /// Check if the TimeSplitter is empty

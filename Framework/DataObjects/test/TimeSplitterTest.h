@@ -534,7 +534,7 @@ public:
     row << time5_s << time6_s << std::to_string(TimeSplitter::NO_TARGET);
 
     // create a TimeSplitter object from the table. By design, the table user must know whether
-    // the table holds absolute or relative times. In the latter case the user must have
+    // the table holds absolute or relative times. In the latter case the user must specify
     // a time offset to be used with the table.
     DateAndTime offset(THREE);
     TimeSplitter workspaceDerivedSplitter(tws, offset);
@@ -602,7 +602,7 @@ public:
     row << time5_s << time6_s << "B";
 
     // create a TimeSplitter object from the table. By design, the table user must know whether
-    // the table holds absolute or relative times. In the latter case the user must have
+    // the table holds absolute or relative times. In the latter case the user must specify
     // a time offset to be used with the table.
     DateAndTime offset(THREE);
     TimeSplitter workspaceDerivedSplitter(tws, offset);

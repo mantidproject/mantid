@@ -36,8 +36,6 @@ public:
   TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &offset = DateAndTime(0, 0));
   TimeSplitter(const SplittersWorkspace_sptr &sws);
   const std::map<DateAndTime, int> &getSplittersMap() const;
-  const std::map<std::string, int> &getWorkspaceNameIndexMap() const;
-  const std::map<int, std::string> &getWorkspaceIndexNameMap() const;
   std::string getWorkspaceIndexName(const int workspaceIndex, const int numericalShift = 0);
   /// Find the destination index for an event with a given time
   int valueAtTime(const DateAndTime &time) const;
@@ -55,6 +53,8 @@ public:
                       bool tofCorrect = false, double factor = 1.0, double shift = 0.0) const;
   /// Print the (destination index | DateAndTime boundary) pairs of this splitter.
   std::string debugPrint() const;
+  // Add the run end
+  void addLastTime(const DateAndTime &lastTime);
 
 private:
   void clearAndReplace(const DateAndTime &start, const DateAndTime &stop, const int value);
