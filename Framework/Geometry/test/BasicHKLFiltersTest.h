@@ -16,8 +16,6 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 
-#include <strstream>
-
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 

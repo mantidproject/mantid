@@ -13,8 +13,6 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidGeometry/DllConfig.h"
 
-#include <strstream>
-
 namespace Mantid {
 namespace Geometry {
 
