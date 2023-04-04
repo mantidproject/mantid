@@ -470,7 +470,7 @@ We are now ready to create the release candidates for Smoke testing.
   * tick the ``PUBLISH_PACKAGES`` checkbox
   * set the ``ANACONDA_CHANNEL`` to ``mantid``
   * set the ``ANACONDA_CHANNEL_LABEL`` to ``vX.Y.ZrcN`` where ``X.Y.Z`` is the release number,
-    and ``N`` is an incremental build number for release candidates, starting at ``1``
+    and ``N`` is an incremental build number for release candidates, starting at ``1`` (e.g. ``v6.7.0rc1``)
   * set ``GITHUB_RELEASES_REPO`` to ``mantidproject/mantid``
   * set ``GITHUB_RELEASES_TAG`` to ``vX.Y.ZrcN``, where ``X.Y.Z`` is the release number,
     and ``N`` is an incremental build number for release candidates, starting at ``1``.
