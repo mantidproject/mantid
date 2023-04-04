@@ -329,11 +329,10 @@ public:
     ----------------------------------
 
     Args:
-      index: valid option including [0, 1, 2, 3] where
+      index: valid option including [0, 1, 2] where
           0: Linear
-          1: Logarithmic
-          2: SymmetricLog10
-          3: Power
+          1: SymmetricLog10
+          2: Power
 %End
 
   // set Axis at Full 3D
