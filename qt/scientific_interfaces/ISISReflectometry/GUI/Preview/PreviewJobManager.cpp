@@ -20,7 +20,7 @@ Mantid::Kernel::Logger g_log("Reflectometry Preview Job Manager");
 
 constexpr auto PREPROCESS_ALG_NAME = "ReflectometryISISPreprocess";
 constexpr auto SUM_BANKS_ALG_NAME = "ReflectometryISISSumBanks";
-constexpr auto REDUCTION_ALG_NAME = "ReflectometryReductionOneAuto";
+constexpr auto REDUCTION_ALG_NAME = "ReflectometryISISLoadAndProcess";
 
 enum class AlgorithmType { PREPROCESS, SUM_BANKS, REDUCTION };
 

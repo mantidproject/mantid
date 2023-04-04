@@ -304,7 +304,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
                                                     Mantid::API::IAlgorithm_sptr alg) {
   // Create the algorithm
   if (!alg) {
-    alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+    alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryISISLoadAndProcess");
   }
   alg->setRethrows(true);
   alg->setAlwaysStoreInADS(false);
@@ -338,9 +338,14 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
     updateLookupRowProperties(*properties, *lookupRow);
   }
   // Update properties from the preview tab
-  properties->setProperty("InputWorkspace", previewRow.getSummedWs());
+  properties->setProperty("InputRunList", previewRow.runNumbers());
   properties->setProperty("ThetaIn", previewRow.theta());
+  if (previewRow.getSelectedBanks().has_value()) {
+    properties->setProperty("ROIDetectorIDs", previewRow.getSelectedBanks().get());
+  }
   updateProcessingInstructionsProperties(*properties, previewRow);
+
+  properties->setProperty("HideInputWorkspaces", true);
   return properties;
 }
 

@@ -198,6 +198,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
             "ROIDetectorIDs",
             "ThetaIn",
             "ThetaLogName",
+            "HideInputWorkspaces",
             "OutputWorkspaceTransmission",
             "OutputWorkspaceFirstTransmission",
             "OutputWorkspaceSecondTransmission",

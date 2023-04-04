@@ -35,6 +35,7 @@ class Prop:
     GROUP_TOF = "GroupTOFWorkspaces"
     RELOAD = "ReloadInvalidWorkspaces"
     DEBUG = "Debug"
+    HIDE_INPUT = "HideInputWorkspaces"
     OUTPUT_WS = "OutputWorkspace"
     OUTPUT_WS_BINNED = "OutputWorkspaceBinned"
     OUTPUT_WS_LAM = "OutputWorkspaceWavelength"
@@ -85,6 +86,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Execute the algorithm."""
+        if self.getProperty(Prop.HIDE_INPUT).value:
+            self._tofPrefix = "__" + self._tofPrefix
+            self._transPrefix = "__" + self._transPrefix
         self._reload = self.getProperty(Prop.RELOAD).value
         # Convert run numbers to real workspaces
         inputRuns = self.getProperty(Prop.RUNS).value
@@ -125,7 +129,10 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             if AnalysisDataService.doesExist(summed_seg_name):
                 tofWorkspaces.add(summed_seg_name)
         # Create the group
-        self._group_workspaces(tofWorkspaces, "TOF")
+        if self.getProperty(Prop.HIDE_INPUT).value:
+            self._group_workspaces(tofWorkspaces, "__TOF")
+        else:
+            self._group_workspaces(tofWorkspaces, "TOF")
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -158,6 +165,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Add properties for settings to apply to input runs
         self.declareProperty(Prop.RELOAD, True, doc="If true, reload input workspaces if they are of the incorrect type")
         self.declareProperty(Prop.GROUP_TOF, True, doc="If true, group the TOF workspaces")
+
+        self.declareProperty(Prop.HIDE_INPUT, False, doc="If true, make the input workspaces invisible in the ADS.")
 
     def _declarePreprocessProperties(self):
         """Copy properties from the child preprocess algorithm"""
