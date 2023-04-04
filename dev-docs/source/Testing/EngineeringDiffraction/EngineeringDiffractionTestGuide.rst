@@ -131,6 +131,7 @@ Test 4
 ^^^^^^
 
 This test covers the loading and plotting focused data in the fitting tab.
+
 0. Create a new calibration, untick ``Crop calibration`` enter calibration sample # ``305738`` and click Calibrate.
    On the ``Focus`` tab, set ``Sample Run #`` to ``305793-305795`` and ``Vanadium #`` to ``307521`` and click ``Focus``. These sample runs have different stress and strain log values.
 
