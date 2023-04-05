@@ -349,7 +349,7 @@ def _normalize_one_spectrum(single_spectrum_ws, vanadium_ws, instrument):
             InputWorkspace=divided,
             NaNValue=0,
             InfinityValue=0.0,
-            BigNumberThreshold=instrument.get_vanadium_big_threshold(),
+            BigNumberThreshold=instrument.get_vanadium_normalization_cutoff(),
             OutputWorkspace=single_spectrum_ws,
         )
 

@@ -127,10 +127,14 @@ class Osiris(AbstractInst):
         paalman_pings_events_per_point=None,
     ):
         """
-        Override parent _focus function, used to focus samples in a specific drange
-        :param run_number_string: The run number(s) of the drange
-        :param do_van_normalisation: True to divide by the vanadium run, false to not.
-        :return:
+        Focuses the user specified run(s) - should be called by the concrete instrument.
+        :param run_number_string: The run number(s) to be processed.
+        :param do_van_normalisation: Whether to divide by the vanadium run or not.
+        :param do_absorb_corrections: Whether to apply absorption correction or not.
+        :param sample_details: Sample details for the run number(s).
+        :param empty_can_subtraction_method: The method for absorption correction. Can be 'Simple' or 'PaalmanPings'.
+        :param paalman_pings_events_per_point: The number of events used in Paalman Pings Monte Carlo absorption correction.
+        :return: the focussed run(s).
         """
         self._is_vanadium = False
         return focus.focus(
@@ -175,9 +179,10 @@ class Osiris(AbstractInst):
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         """
-        Generates absorption corrections
-        :param ws_to_correct: workspace that needs to be corrected
-        :return: A workspace containing the corrections
+        Generates absorption corrections using monte carlo absorption.
+        :param ws_to_correct: workspace that needs to be corrected.
+        :param run_details: the run details of the workspace. Unused parameter added for API compatibility.
+        :return: A workspace containing the corrections.
         """
         events_per_point = 1000
 
@@ -225,6 +230,16 @@ class Osiris(AbstractInst):
         return ws_to_correct
 
     def _apply_paalmanpings_absorb_and_subtract_empty(self, workspace, summed_empty, sample_details, paalman_pings_events_per_point=None):
+        """
+        Applies the Paalman Pings Monte Carlo absorption to the workspace.
+
+        :param workspace: The input workspace containing the data to be corrected.
+        :param summed_empty:The workspace containing empty container run data.
+        :param sample_details: The details of the sample being corrected.
+        :param paalman_pings_events_per_point: The number of events per point for the Paalman-Pings correction.
+
+        :return: The corrected workspace.
+        """
         mantid.SetInstrumentParameter(Workspace=workspace, ParameterName="deltaE-mode", Value="Elastic")
         return absorb_corrections.apply_paalmanpings_absorb_and_subtract_empty(
             workspace=workspace,
@@ -235,7 +250,7 @@ class Osiris(AbstractInst):
 
     def apply_drange_cropping(self, run_number_string, focused_ws):
         """
-        Apply dspacing range cropping to a focused workspace.
+        Applies dspacing range cropping to a focused workspace.
         :param run_number_string: The run number to look up for the drange
         :param focused_ws: The workspace to be cropped
         :return: The cropped workspace in its drange
@@ -252,19 +267,21 @@ class Osiris(AbstractInst):
 
     def get_vanadium_path(self, run_details):
         """
-        Get the vanadium path from the run details
+        Returns the vanadium path from the run details
         :param run_details: The run details of the run number
         :return: the vanadium path
         """
 
         return run_details.unsplined_vanadium_file_path
 
-    def get_vanadium_big_threshold(self):
+    def get_vanadium_normalization_cutoff(self):
         """
-        Get the big number threshold that is used to limit big values after applying the vanadium normalization
-        """
+        Returns the cutoff value used to limit large values that can result from the vanadium normalization process.
+        It is used by ReplaceSpecialValues algorithm to replace values that exceed the cutoff with zero.
 
-        return self._inst_settings.van_big_threshold
+        :return: The cutoff value used in the vanadium normalization process.
+        """
+        return self._inst_settings.van_norm_cutoff
 
     def _output_focused_ws(self, processed_spectra, run_details):
         """
