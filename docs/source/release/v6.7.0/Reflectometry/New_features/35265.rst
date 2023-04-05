@@ -1,0 +1,1 @@
+- Panning, zooming, gridlines, and scale adjustment are now available on the Preview Tab's 1D plot.
