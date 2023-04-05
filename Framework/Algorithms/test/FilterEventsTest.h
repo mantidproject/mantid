@@ -768,26 +768,25 @@ public:
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000), 1.0E-4);
 
     std::vector<std::string> outputwsnames = filter.getProperty("OutputWorkspaceNames");
-    // BUGFIX: logs are not being saved to the output workspaces
+
     //  Test the sample logs
-    // for (const auto &outputwsname : outputwsnames) {
-    //  EventWorkspace_sptr filtered_ws = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-    //      AnalysisDataService::Instance().retrieve(outputwsname));
+    for (const auto &outputwsname : outputwsnames) {
+      EventWorkspace_sptr filtered_ws = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+          AnalysisDataService::Instance().retrieve(outputwsname));
 
-    //  TS_ASSERT(filtered_ws->run().hasProperty("LogA"));
-    //  TS_ASSERT(filtered_ws->run().hasProperty("LogB"));
-    //  TS_ASSERT(filtered_ws->run().hasProperty("LogC"));
-    //  bool b{filtered_ws->run().hasProperty("LogA")};
-    //  Kernel::Property *logA = filtered_ws->run().getProperty("LogA");
-    //  std::string valueA = logA->value();
-    //  TS_ASSERT_EQUALS(valueA.compare("A"), 0);
+      TS_ASSERT(filtered_ws->run().hasProperty("LogA"));
+      TS_ASSERT(filtered_ws->run().hasProperty("LogB"));
+      TS_ASSERT(filtered_ws->run().hasProperty("LogC"));
+      Kernel::Property *logA = filtered_ws->run().getProperty("LogA");
+      std::string valueA = logA->value();
+      TS_ASSERT_EQUALS(valueA.compare("A"), 0);
 
-    //  TS_ASSERT(filtered_ws->run().hasProperty("slow_int_log"));
-    //  Kernel::TimeSeriesProperty<int> *intlog =
-    //      dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filtered_ws->run().getProperty("slow_int_log"));
-    //  TS_ASSERT(intlog);
-    //  TS_ASSERT_EQUALS(intlog->units(), "meter");
-    //}
+      TS_ASSERT(filtered_ws->run().hasProperty("slow_int_log"));
+      Kernel::TimeSeriesProperty<int> *intlog =
+          dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filtered_ws->run().getProperty("slow_int_log"));
+      TS_ASSERT(intlog);
+      TS_ASSERT_EQUALS(intlog->units(), "meter");
+    }
 
     // clean up all the workspaces generated
     AnalysisDataService::Instance().remove("Test10");
