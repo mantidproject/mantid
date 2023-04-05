@@ -816,8 +816,6 @@ void FilterEvents::parseInputSplitters() {
   else
     m_timeSplitter = TimeSplitter(m_matrixSplitterWS, m_isSplittersRelativeTime ? m_runStartTime : DateAndTime(0));
 
-  // m_timeSplitter.addLastTime(m_eventWS->run().endTime());
-
   m_targetWorkspaceIndexSet = m_timeSplitter.outputWorkspaceIndices();
 
   // For completeness, make sure we have a special workspace index for unfiltered events

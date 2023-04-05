@@ -139,7 +139,7 @@ Usage
             OutputWorkspaceBaseName='tempsplitws',  GroupWorkspaces=True,
             FilterByPulseTime = False, OutputWorkspaceIndexedFrom1 = False,
             CorrectionToSample = "None", SpectrumWithoutDetector = "Skip", SplitSampleLogs = False,
-            OutputTOFCorrectionWorkspace='mock')
+            OutputTOFCorrectionWorkspace='mock', OutputUnfilteredEvents = True)
 
     # Print result
     wsgroup = mtd["tempsplitws"]
@@ -185,7 +185,7 @@ Output:
             FilterByPulseTime = False, OutputWorkspaceIndexedFrom1 = False,
             CorrectionToSample = "None", SpectrumWithoutDetector = "Skip", SplitSampleLogs = False,
             OutputTOFCorrectionWorkspace='mock',
-            RelativeTime=True)
+            RelativeTime=True, OutputUnfilteredEvents = True)
 
     # Print result
     wsgroup = mtd["tempsplitws3"]
@@ -270,7 +270,8 @@ Output:
         IncidentEnergy=3,
         SpectrumWithoutDetector = "Skip",
         SplitSampleLogs = False,
-        OutputTOFCorrectionWorkspace='mock')
+        OutputTOFCorrectionWorkspace='mock',
+        OutputUnfilteredEvents = True)
 
     # Print result
     wsgroup = mtd["tempsplitws"]
