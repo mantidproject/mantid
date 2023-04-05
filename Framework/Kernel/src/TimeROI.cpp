@@ -492,7 +492,7 @@ const std::vector<SplittingInterval> TimeROI::toSplitters() const {
 }
 
 /// This method is to lend itself to helping with transition
-const std::vector<Kernel::TimeInterval> TimeROI::toIntervals() const {
+const std::vector<Kernel::TimeInterval> TimeROI::toTimeIntervals() const {
   const auto NUM_VAL = m_roi.size();
   std::vector<TimeInterval> output;
   // every other value is a start/stop

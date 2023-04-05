@@ -197,7 +197,7 @@ void LogFilter::setFilter(const TimeROI &roi, const bool filterOpenEnded) {
   // put the results into the TimeSeriesProperty
   std::vector<bool> values;
   std::vector<DateAndTime> times;
-  for (const auto &splitter : roi.toSplitters()) {
+  for (const auto &splitter : roi.toTimeIntervals()) {
     values.emplace_back(true);
     values.emplace_back(false);
     times.emplace_back(splitter.start());

@@ -309,7 +309,7 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::applyFilter() co
   // the index into the m_values array of the time, or -1 (before) or m_values.size() (after)
   std::size_t index_current_log{0};
 
-  for (const auto &splitter : m_filter->toSplitters()) {
+  for (const auto &splitter : m_filter->toTimeIntervals()) {
     const auto endTime = splitter.stop();
 
     // check if the splitter starts too early

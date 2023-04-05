@@ -329,7 +329,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::filterByTimes(const Time
   g_log.debug() << "DB541  mp_copy Size = " << mp_copy.size() << "  Original MP Size = " << m_values.size() << "\n";
 
   // 4. Create new
-  for (const auto &splitter : timeroi.toIntervals()) {
+  for (const auto &splitter : timeroi.toTimeIntervals()) {
     Types::Core::DateAndTime t_start = splitter.start();
     Types::Core::DateAndTime t_stop = splitter.stop();
 
