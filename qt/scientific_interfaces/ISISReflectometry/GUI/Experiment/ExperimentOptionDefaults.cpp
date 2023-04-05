@@ -12,7 +12,6 @@
 #include "LookupTableValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "Reduction/Experiment.h"
-#include "Reduction/ParseReflectometryStrings.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
