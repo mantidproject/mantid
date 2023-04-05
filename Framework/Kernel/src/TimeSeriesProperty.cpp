@@ -813,6 +813,10 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue(const
   return retVal;
 }
 
+template <> double TimeSeriesProperty<std::string>::timeAverageValue(const TimeROI * /*timeRoi*/) const {
+  throw Exception::NotImplementedError("TimeSeriesProperty::timeAverageValue is not implemented for string properties");
+}
+
 /** Calculates the time-weighted average of a property in a filtered range.
  *  This is written for that case of logs whose values start at the times given.
  *  @param filter The splitter/filter restricting the range of values included
@@ -958,9 +962,10 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(co
  *  @return pair (Nan, Nan) always.
  */
 template <>
-std::pair<double, double> TimeSeriesProperty<std::string>::timeAverageValueAndStdDev(const Kernel::TimeROI *roi) const {
-  UNUSED_ARG(roi);
-  return std::pair<double, double>(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
+std::pair<double, double>
+TimeSeriesProperty<std::string>::timeAverageValueAndStdDev(const Kernel::TimeROI * /*roi*/) const {
+  throw Exception::NotImplementedError(
+      "TimeSeriesProperty::timeAverageValueAndStdDev is not implemented for string properties");
 }
 
 // Re-enable the warnings disabled before makeFilterByValue

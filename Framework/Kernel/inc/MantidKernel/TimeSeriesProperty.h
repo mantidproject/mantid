@@ -199,14 +199,10 @@ public:
   /// Make sure an existing filter covers the full time range given
   void expandFilterToRange(std::vector<SplittingInterval> &split, double min, double max,
                            const TimeInterval &range) const override;
-  /// Calculate the time-weighted average of a property in a filtered range
-  double averageValueInFilter(const std::vector<SplittingInterval> &filter) const override;
-  /// @copydoc Mantid::Kernel::ITimeSeriesProperty::averageAndStdDevInFilter()
-  std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &intervals) const override;
   /** Returns the calculated time weighted mean and standard deviation values.
    * @param timeRoi  Object that holds information about when the time measurement was active.
    */
-  std::pair<double, double> timeAverageValueAndStdDev(const Kernel::TimeROI *timeRoi = nullptr) const;
+  std::pair<double, double> timeAverageValueAndStdDev(const Kernel::TimeROI *timeRoi = nullptr) const override;
   /// Returns the calculated time weighted average value.
   double timeAverageValue(const TimeROI *timeRoi = nullptr) const override;
   /// generate constant time-step histogram from the property values
@@ -350,6 +346,12 @@ public:
 
   /// If filtering by log, get the time intervals for splitting
   virtual std::vector<Mantid::Kernel::SplittingInterval> getSplittingIntervals() const;
+
+private:
+  /// Calculate the time-weighted average of a property in a filtered range
+  double averageValueInFilter(const std::vector<SplittingInterval> &filter) const;
+  /// @copydoc Mantid::Kernel::ITimeSeriesProperty::averageAndStdDevInFilter()
+  std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &intervals) const;
 
 protected:
   //----------------------------------------------------------------------------------------------

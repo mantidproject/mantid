@@ -588,7 +588,7 @@ public:
 
     // Test that the other time-average mean code is correct
     const auto roi = log->getTimeROI();
-    TS_ASSERT_DELTA(log->averageValueInFilter(roi.toSplitters()), exp_time_mean, 1.e-3);
+    TS_ASSERT_DELTA(log->timeAverageValue(&roi), exp_time_mean, 1.e-3);
   }
 
   /// Test that timeAverageValue respects the filter

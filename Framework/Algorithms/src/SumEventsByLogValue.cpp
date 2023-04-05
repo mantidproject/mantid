@@ -131,7 +131,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   // given and has a data point per log value
   const int minVal = log->minValue();
   const int maxVal = log->maxValue();
-  const int xLength = maxVal - minVal + 1;
+  const auto xLength = std::size_t(maxVal - minVal + 1);
 
   if (xLength > 10000) {
     g_log.warning() << "Did you really want to create a " << xLength << " row table? This will take some time!\n";
@@ -140,11 +140,11 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   // Accumulate things in a local vector before transferring to the table
   std::vector<int> Y(xLength);
   const auto numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
-  Progress prog(this, 0.0, 1.0, numSpec + xLength);
+  Progress prog(this, 0.0, 1.0, std::size_t(numSpec) + xLength);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {
     PARALLEL_START_INTERRUPT_REGION
-    const IEventList &eventList = m_inputWorkspace->getSpectrum(spec);
+    const IEventList &eventList = m_inputWorkspace->getSpectrum(std::size_t(spec));
     filterEventList(eventList, minVal, maxVal, log, Y);
     prog.report();
     PARALLEL_END_INTERRUPT_REGION
@@ -163,8 +163,8 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   errors->setPlotType(5);    // E
 
   // Transfer the results to the table
-  for (int i = 0; i < xLength; ++i) {
-    logValues->cell<int>(i) = minVal + i;
+  for (std::size_t i = 0; i < xLength; ++i) {
+    logValues->cell<int>(i) = minVal + int(i);
     counts->cell<int>(i) = Y[i];
     errors->cell<double>(i) = std::sqrt(Y[i]);
   }
@@ -201,7 +201,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   // Now to get the average value of other time-varying logs
   // Loop through the values of the 'main' log
   for (int value = minVal; value <= maxVal; ++value) {
-    const int row = value - minVal;
+    const auto row = std::size_t(value - minVal);
     // Create a filter giving the times when this log has the current value
     SplittingIntervalVec filter;
     log->makeFilterByValue(filter, value,
@@ -226,13 +226,15 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
       protonChgCol->cell<double>(row) = sumProtonCharge(protonChargeLog, filter);
     interruption_point();
 
+    auto timeROI = new TimeROI(filter);
     for (auto &otherLog : otherLogs) {
       // Calculate the average value of each 'other' log for the current value
       // of the main log
       // Have to (maybe inefficiently) fetch back column by name - move outside
       // loop if too slow
-      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) = otherLog.second->averageValueInFilter(filter);
+      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) = otherLog.second->timeAverageValue(timeROI);
     }
+    delete timeROI;
     prog.report();
   }
 
@@ -290,7 +292,7 @@ void SumEventsByLogValue::addMonitorCounts(const ITableWorkspace_sptr &outputWor
 
   const auto &spectrumInfo = monitorWorkspace->spectrumInfo();
 
-  const int xLength = maxVal - minVal + 1;
+  const auto xLength = std::size_t(maxVal - minVal + 1);
   // Loop over the spectra - there will be one per monitor
   for (std::size_t spec = 0; spec < monitorWorkspace->getNumberHistograms(); ++spec) {
     try {
@@ -303,7 +305,7 @@ void SumEventsByLogValue::addMonitorCounts(const ITableWorkspace_sptr &outputWor
       std::vector<int> Y(xLength);
       filterEventList(eventList, minVal, maxVal, log, Y);
       // Transfer the results to the table
-      for (int i = 0; i < xLength; ++i) {
+      for (std::size_t i = 0; i < xLength; ++i) {
         monitorCounts->cell<int>(i) = Y[i];
       }
     } catch (Exception::NotFoundError &) {
