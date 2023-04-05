@@ -65,8 +65,7 @@ public:
     alg.setPropertyValue("InputWorkspace", "eventWS");
     alg.setPropertyValue("OutputWorkspace", "out");
     alg.setPropertyValue("StopTime", "120");
-    alg.setPropertyValue("AbsoluteStartTime", "2010");
-    alg.execute();
+    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("AbsoluteStartTime", "2010"));
     TS_ASSERT(!alg.isExecuted());
 
     FilterByTime alg2;
@@ -75,8 +74,8 @@ public:
     alg2.setPropertyValue("OutputWorkspace", "out");
     alg2.setPropertyValue("StartTime", "60");
     alg2.setPropertyValue("StopTime", "120");
-    alg2.setPropertyValue("AbsoluteStartTime", "2010");
-    alg2.execute();
+    alg2.setPropertyValue("AbsoluteStartTime", "2010-03-17 12:00");
+    TS_ASSERT_THROWS_ANYTHING(alg2.execute());
     TS_ASSERT(!alg2.isExecuted());
 
     FilterByTime alg3;
@@ -84,9 +83,9 @@ public:
     alg3.setPropertyValue("InputWorkspace", "eventWS");
     alg3.setPropertyValue("OutputWorkspace", "out");
     alg3.setPropertyValue("StopTime", "120");
-    alg3.setPropertyValue("AbsoluteStartTime", "2010");
-    alg3.setPropertyValue("AbsoluteStopTime", "2010-03");
-    alg3.execute();
+    alg3.setPropertyValue("AbsoluteStartTime", "2010-03-17 12:00");
+    alg3.setPropertyValue("AbsoluteStopTime", "2010-03-17 23:59");
+    TS_ASSERT_THROWS_ANYTHING(alg3.execute());
     TS_ASSERT(!alg3.isExecuted());
   }
 
@@ -175,8 +174,53 @@ public:
     TS_ASSERT_LESS_THAN(0, outWS->getNumberEvents());
   }
 
+  void test_proton_charge_for_filter_before_time_series() {
+    FilterByTime alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    const std::string outWS("filter_before");
+    alg.setProperty("OutputWorkspace", outWS);
+    alg.setPropertyValue("AbsoluteStartTime", "2009-12-01T00:00:00");
+    alg.setPropertyValue("AbsoluteStopTime", "2009-12-31T00:00:00");
+    TS_ASSERT(alg.execute());
+
+    assertZeroProtonCharge(outWS);
+  }
+
+  void test_proton_charge_for_filter_after_time_series() {
+    FilterByTime alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    const std::string outWS("filter_after");
+    alg.setProperty("OutputWorkspace", outWS);
+    alg.setProperty("StartTime", 150.0);
+    alg.setProperty("StopTime", 200.0);
+    TS_ASSERT(alg.execute());
+
+    assertZeroProtonCharge(outWS);
+  }
+
+  void test_proton_charge_for_filter_between_times_in_series() {
+    FilterByTime alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    const std::string outWS("filter_between");
+    alg.setProperty("OutputWorkspace", outWS);
+    alg.setProperty("StartTime", 0.5);
+    alg.setProperty("StopTime", 0.8);
+    TS_ASSERT(alg.execute());
+
+    assertZeroProtonCharge(outWS);
+  }
+
 private:
   std::string inWS;
+
+  void assertZeroProtonCharge(const std::string &outWS) {
+    EventWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWS);
+    // Proton charge is zero
+    TS_ASSERT_DELTA(output->run().getProtonCharge(), 0.0, 1e-10);
+  }
 };
 
 //------------------------------------------------------------------------------

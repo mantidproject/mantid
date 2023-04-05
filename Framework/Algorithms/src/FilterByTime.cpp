@@ -10,6 +10,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -25,81 +26,112 @@ using DataObjects::EventWorkspace_const_sptr;
 using DataObjects::EventWorkspace_sptr;
 using Types::Core::DateAndTime;
 
+namespace {
+namespace PropertyNames {
+const std::string INPUT_WKSP("InputWorkspace");
+const std::string OUTPUT_WKSP("OutputWorkspace");
+const std::string START_TIME("StartTime");
+const std::string STOP_TIME("StopTime");
+const std::string ABS_START("AbsoluteStartTime");
+const std::string ABS_STOP("AbsoluteStopTime");
+} // namespace PropertyNames
+} // namespace
+
 void FilterByTime::init() {
   std::string commonHelp("\nYou can only specify the relative or absolute "
                          "start/stop times, not both.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>(PropertyNames::INPUT_WKSP, "", Direction::Input),
                   "An input event workspace");
 
-  declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace", "", Direction::Output),
-                  "The name to use for the output workspace");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<EventWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
+      "The name to use for the output workspace");
 
   auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(0.0);
-  declareProperty("StartTime", 0.0, min,
+  declareProperty(PropertyNames::START_TIME, 0.0, min,
                   "The start time, in seconds, since the start of the run. "
                   "Events before this time are filtered out. \nThe time of the "
                   "first pulse (i.e. the first entry in the ProtonCharge "
                   "sample log) is used as the zero. " +
                       commonHelp);
 
-  declareProperty("StopTime", 0.0, min,
+  declareProperty(PropertyNames::STOP_TIME, 0.0, min,
                   "The stop time, in seconds, since the start of the run. "
                   "Events at or after this time are filtered out. \nThe time "
                   "of the first pulse (i.e. the first entry in the "
                   "ProtonCharge sample log) is used as the zero. " +
                       commonHelp);
 
+  auto dateTime = std::make_shared<DateTimeValidator>();
+  dateTime->allowEmpty(true);
   std::string absoluteHelp("Specify date and UTC time in ISO8601 format, e.g. 2010-09-14T04:20:12." + commonHelp);
-  declareProperty("AbsoluteStartTime", "",
+  declareProperty(PropertyNames::ABS_START, "", dateTime,
                   "Absolute start time; events before this time are filtered out. " + absoluteHelp);
 
-  declareProperty("AbsoluteStopTime", "",
+  declareProperty(PropertyNames::ABS_STOP, "", dateTime,
                   "Absolute stop time; events at of after this time are filtered out. " + absoluteHelp);
+}
+
+std::map<std::string, std::string> FilterByTime::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  const std::string msg_double_spec("You need to specify either the relative or absolute parameter, but not both");
+
+  if ((!isDefault(PropertyNames::START_TIME)) && (!isDefault(PropertyNames::ABS_START))) {
+    errors[PropertyNames::START_TIME] = msg_double_spec;
+    errors[PropertyNames::ABS_START] = msg_double_spec;
+  }
+
+  if ((!isDefault(PropertyNames::STOP_TIME)) && (!isDefault(PropertyNames::ABS_STOP))) {
+    errors[PropertyNames::STOP_TIME] = msg_double_spec;
+    errors[PropertyNames::ABS_STOP] = msg_double_spec;
+  }
+
+  return errors;
 }
 
 /** Executes the algorithm
  */
 void FilterByTime::exec() {
-  EventWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
+  EventWorkspace_const_sptr inputWS = this->getProperty(PropertyNames::INPUT_WKSP);
 
-  // ---- Find the start/end times ----
-  DateAndTime start, stop;
-
-  double start_dbl, stop_dbl;
-  start_dbl = getProperty("StartTime");
-  stop_dbl = getProperty("StopTime");
-
-  std::string start_str, stop_str;
-  start_str = getPropertyValue("AbsoluteStartTime");
-  stop_str = getPropertyValue("AbsoluteStopTime");
-
-  if ((start_str != "") && (stop_str != "") && (start_dbl <= 0.0) && (stop_dbl <= 0.0)) {
-    // Use the absolute string
-    start = DateAndTime(start_str);
-    stop = DateAndTime(stop_str);
-  } else if ((start_str == "") && (stop_str == "") && ((start_dbl > 0.0) || (stop_dbl > 0.0))) {
-    // Use the relative times in seconds.
-    DateAndTime first = inputWS->getFirstPulseTime();
-    DateAndTime last = inputWS->getLastPulseTime();
-    start = first + start_dbl;
-    if (stop_dbl > 0.0) {
-      stop = first + stop_dbl;
-    } else {
-      this->getLogger().debug() << "No end filter time specified - assuming last pulse\n";
-      stop = last + 10000.0; // so we get all events - needs to be past last pulse
-    }
+  // find the start time
+  DateAndTime start;
+  if (isDefault(PropertyNames::ABS_START)) {
+    // time relative to first pulse - this defaults with start of run
+    const auto startOfRun = inputWS->getFirstPulseTime();
+    const double startRelative = getProperty(PropertyNames::START_TIME);
+    start = startOfRun + startRelative;
   } else {
-    // Either both or none were specified
-    throw std::invalid_argument("You need to specify either the StartTime or "
-                                "StopTime parameters; or both the "
-                                "AbsoluteStartTime and AbsoluteStopTime "
-                                "parameters; but not other combinations.");
+    std::cout << PropertyNames::ABS_START << "=" << getPropertyValue(PropertyNames::ABS_START) << "\n";
+    // absolute time
+    start = DateAndTime(getPropertyValue(PropertyNames::ABS_START));
   }
 
-  if (stop <= start)
-    throw std::invalid_argument("The stop time should be larger than the start time.");
+  // find the stop time
+  DateAndTime stop;
+  if (!isDefault(PropertyNames::ABS_STOP)) {
+    // absolute time
+    stop = DateAndTime(getPropertyValue(PropertyNames::ABS_STOP));
+  } else if (!isDefault(PropertyNames::STOP_TIME)) {
+    // time relative to first pulse
+    const auto startOfRun = inputWS->getFirstPulseTime();
+    const double stopRelative = getProperty(PropertyNames::STOP_TIME);
+    stop = startOfRun + stopRelative;
+  } else {
+    this->getLogger().debug("No end filter time specified - assuming last pulse");
+    const DateAndTime lastPulse = inputWS->getLastPulseTime();
+    stop = lastPulse + 10000.0; // so we get all events - needs to be past last pulse
+  }
+
+  // verify that stop is after start
+  if (stop <= start) {
+    std::stringstream msg;
+    msg << "The stop time (" << stop << ") should be larger than the start time (" << start << ")";
+    throw std::invalid_argument(msg.str());
+  }
 
   auto outputWS = DataObjects::create<EventWorkspace>(*inputWS);
 
@@ -127,8 +159,16 @@ void FilterByTime::exec() {
   PARALLEL_CHECK_INTERRUPT_REGION
 
   // Now filter out the run, using the DateAndTime type.
-  outputWS->mutableRun().filterByTime(start, stop);
-  setProperty("OutputWorkspace", std::move(outputWS));
+  auto timeroi = outputWS->mutableRun().getTimeROI(); // make a copy
+  if (timeroi.useAll()) {
+    // trim in for where it should be used
+    timeroi.addROI(start, stop);
+  } else {
+    // only use the overlap region
+    timeroi.update_intersection(TimeROI(start, stop));
+  }
+  outputWS->mutableRun().setTimeROI(timeroi);
+  setProperty(PropertyNames::OUTPUT_WKSP, std::move(outputWS));
 }
 
 } // namespace Mantid::Algorithms

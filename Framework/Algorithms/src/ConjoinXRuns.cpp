@@ -246,6 +246,7 @@ std::vector<double> ConjoinXRuns::getXAxis(const MatrixWorkspace_sptr &ws, doubl
     // get the time filtering from the Run object
     const TimeROI &timeroi = run.getTimeROI();
 
+    // try time series first
     auto timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(m_logEntry));
     if (timeSeriesDouble) {
       // try double series
