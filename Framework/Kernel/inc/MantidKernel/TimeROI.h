@@ -24,6 +24,8 @@ public:
   TimeROI();
   TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
   TimeROI(const Kernel::TimeSeriesProperty<bool> *filter);
+  /// Constructor ignores the index of the splitter
+  TimeROI(const Kernel::SplittingIntervalVec &splitter);
   double durationInSeconds() const;
   double durationInSeconds(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   std::size_t numBoundaries() const;
@@ -48,6 +50,7 @@ public:
   void update_intersection(const TimeROI &other);
   void update_or_replace_intersection(const TimeROI &other);
   const Kernel::SplittingIntervalVec toSplitters() const;
+  const std::vector<Kernel::TimeInterval> toIntervals() const;
   bool operator==(const TimeROI &other) const;
   bool operator!=(const TimeROI &other) const;
   /// print the ROI boundaries to a string

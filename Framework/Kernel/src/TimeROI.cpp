@@ -71,6 +71,12 @@ TimeROI::TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::D
 
 TimeROI::TimeROI(const Kernel::TimeSeriesProperty<bool> *filter) { this->replaceROI(filter); }
 
+TimeROI::TimeROI(const SplittingIntervalVec &splitter) {
+  for (const auto &split : splitter) {
+    this->addROI(split.start(), split.stop());
+  }
+}
+
 void TimeROI::addROI(const std::string &startTime, const std::string &stopTime) {
   this->addROI(DateAndTime(startTime), DateAndTime(stopTime));
 }
@@ -479,7 +485,19 @@ const std::vector<SplittingInterval> TimeROI::toSplitters() const {
   std::vector<SplittingInterval> output;
   // every other value is a start/stop
   for (std::size_t i = 0; i < NUM_VAL; i += 2) {
-    output.push_back({m_roi[i], m_roi[i + 1]});
+    output.emplace_back(m_roi[i], m_roi[i + 1]);
+  }
+
+  return output;
+}
+
+/// This method is to lend itself to helping with transition
+const std::vector<Kernel::TimeInterval> TimeROI::toIntervals() const {
+  const auto NUM_VAL = m_roi.size();
+  std::vector<TimeInterval> output;
+  // every other value is a start/stop
+  for (std::size_t i = 0; i < NUM_VAL; i += 2) {
+    output.emplace_back(m_roi[i], m_roi[i + 1]);
   }
 
   return output;
