@@ -375,14 +375,12 @@ class SANSTubeCalibration(PythonAlgorithm):
         meanCvalue = []
         # Default size of a pixel in real space in mm
         default_pixel_size = (522.2 + 519.2) / 511
-        # Setting caltable to None  will start all over again. Set this to True to add further tubes to existing table
         caltable = None
         diagnostic_output = dict()
 
         # Loop through tubes to generate calibration table
         tube_report = Progress(self, start=0.4, end=0.9, nreports=120)
         tube_calibration_errors = []
-        # When adding to an existing calibration table the script would have been edited to use only the required range of tubes
         for tube_id in range(120):
             tube_name = self.get_tube_name(tube_id, detector_name)
             tube_report.report(f"Calculating tube {tube_name}")
@@ -489,18 +487,18 @@ class SANSTubeCalibration(PythonAlgorithm):
             for error in tube_calibration_errors:
                 self.log().warning(error)
 
-        self.notify_tube_cvalue_status(cvalues)
+        self._notify_tube_cvalue_status(cvalues)
 
     def _calibrate_tube(self, ws, tube_name, known_positions, func_form, fit_params, calib_table):
         """Define the calibrated positions of the detectors inside the given tube.
 
         :param ws: integrated workspace with tube to be calibrated.
         :param tube_name: the name of the tube to be calibrated.
-        :param known_positions: The defined position for the peaks/edges, taking the center as the origin and having the
+        :param known_positions: the defined position for the peaks/edges, taking the center as the origin and having the
         same units as the tube length in the 3D space.
         :param func_form: defines the format of the peaks/edge (Gaussian, Edges, Flat Top Peak).
         :param fit_params: define the parameters to be used in the fit as a TubeCalibFitParams object.
-        :param calib_table: a TableWorkspace with two columns DetectorID(int) and DetectorPositions(V3D) to append the output values to.
+        :param calib_table: a TableWorkspace with two columns Detector ID (int) and Detector Position (V3D) to append the output values to.
         If none is provided then a new table is created.
 
         :rtype: the output calibration, peak and mean C table workspaces.
@@ -532,96 +530,6 @@ class SANSTubeCalibration(PythonAlgorithm):
         peak_positions, meanC = self._perform_calibration_for_tube(ws, tube_spec, calib_table, fit_params, ideal_tube)
 
         return calib_table, peak_positions, meanC
-
-    # def savePeak(peakTable, filePath):
-    #     """Allows to save the peakTable to a text file.
-    #
-    #     :param peakTable: peak table as the workspace table provided by calibrated method, as in the example:
-    #
-    #     .. code-block:: python
-    #
-    #     calibTable, peakTable = calibrate(..., outputPeak=peakTable)
-    #     savePeak(peakTable, 'myfolder/myfile.txt')
-    #
-    #     :param filePath: where to save the file. If the filePath is
-    #     not given as an absolute path, it will be considered relative
-    #     to the defaultsave.directory.
-    #
-    #     The file will be saved with the following format:
-    #
-    #     id_name (parsed space to %20) [peak1, peak2, ..., peakN]
-    #
-    #     You may load these peaks using readPeakFile
-    #
-    #     ::
-    #
-    #     panel1/tube001 [23.4, 212.5, 0.1]
-    #     ...
-    #     panel1/tubeN   [56.3, 87.5, 0.1]
-    #
-    #     """
-    #     if not os.path.isabs(filePath):
-    #         saveDirectory = config["defaultsave.directory"]
-    #         pFile = open(os.path.join(saveDirectory, filePath), "w")
-    #     else:
-    #         pFile = open(filePath, "w")
-    #     if isinstance(peakTable, str):
-    #         peakTable = mtd[peakTable]
-    #     nPeaks = peakTable.columnCount() - 1
-    #     peaksNames = ["Peak%d" % (i + 1) for i in range(nPeaks)]
-    #
-    #     for line in range(peakTable.rowCount()):
-    #         row = peakTable.row(line)
-    #         peak_values = [row[k] for k in peaksNames]
-    #         tube_name = row["TubeId"].replace(" ", "%20")
-    #         print(tube_name, peak_values, file=pFile)
-    #
-    #     pFile.close()
-
-    def readPeakFile(file_name):
-        """Load the file calibration
-
-        It returns a list of tuples, where the first value is the detector identification
-        and the second value is its calibration values.
-
-        Example of usage:
-
-        .. code-block:: python
-
-        for (det_code, cal_values) in readPeakFile('pathname/TubeDemo'):
-            print det_code
-            print cal_values
-
-        :param file_name: Path for the file
-        :rtype: list of tuples(det_code, peaks_values)
-
-        """
-        loaded_file = []
-        # split the entries to the main values:
-        # For example:
-        # MERLIN/door1/tube_1_1 [34.199347724575574, 525.5864438725401, 1001.7456248836971]
-        # Will be splited as:
-        # ['MERLIN/door1/tube_1_1', '', '34.199347724575574', '', '525.5864438725401', '', '1001.7456248836971', '', '', '']
-        pattern = re.compile(r"[\[\],\s\r]")
-        saveDirectory = config["defaultsave.directory"]
-        pfile = os.path.join(saveDirectory, file_name)
-        for line in open(pfile, "r"):
-            # check if the entry is a comment line
-            if line.startswith("#"):
-                continue
-                # split all values
-            line_vals = re.split(pattern, line)
-            id_ = str(line_vals[0]).replace("%20", " ")
-            if id_ == "":
-                continue
-            try:
-                f_values = [float(v) for v in line_vals[1:] if v != ""]
-            except ValueError:
-                # print 'Wrong format: we expected only numbers, but receive this line ',str(line_vals[1:])
-                continue
-
-            loaded_file.append((id_, f_values))
-        return loaded_file
 
     def _perform_calibration_for_tube(
         self,
@@ -678,60 +586,6 @@ class SANSTubeCalibration(PythonAlgorithm):
         if skipped:
             self.log().debug("Histogram was excluded from the calibration as it did not have an assigned detector.")
         return peak_positions, avg_resolution
-
-    def createTubeCalibtationWorkspaceByWorkspaceIndexList(
-        self, integratedWorkspace, outputWorkspace, workspaceIndexList, xUnit="Pixel", showPlot=False
-    ):
-        """
-        Creates workspace with integrated data for one tube against distance along tube
-        The tube is specified by a list of workspace indices of its spectra
-
-        @param IntegratedWorkspace: Workspace of integrated data
-        @param workspaceIndexList:  list of workspace indices for the tube
-        @param xUnit: unit of distance ( Pixel)
-        @param showPlot: True = show plot of workspace created, False = just make the workspace.
-
-        Return Value: Workspace created
-
-        """
-
-        nSpectra = len(workspaceIndexList)
-        if nSpectra < 1:
-            return
-        pixelNumbers = []
-        integratedPixelCounts = []
-        pixel = 1
-        # integratedWorkspace.
-        for i in workspaceIndexList:
-            pixelNumbers.append(pixel)
-            pixel = pixel + 1
-            integratedPixelCounts.append(integratedWorkspace.dataY(i)[0])
-
-        CreateWorkspace(dataX=pixelNumbers, dataY=integratedPixelCounts, OutputWorkspace=outputWorkspace)
-        # if (showPlot):
-        # plotSpectrum(outputWorkspace,0)
-        # For some reason plotSpectrum is not recognised, but instead we can plot this worspace afterwards.
-
-    # Return the udet number and [x,y,z] position of the detector (or virtual detector) corresponding to spectra spectra_number
-    # Thanks to Pascal Manuel for this function
-    def get_detector_pos(self, work_handle, spectra_number):
-        udet = work_handle.getDetector(spectra_number)
-        return udet.getID(), udet.getPos()
-
-    # Given the center of a slit in pixels return the interpolated y
-    #  Converts from pixel coords to Y.
-    #     If a pixel coord is not integer
-    #     it is effectively rounded to half integer before conversion, rather than interpolated.
-    #     It allows the pixel widths to vary (unlike correctTube).
-    # Thanks to Pascal Manuel for this function
-    def get_ypos(self, work_handle, pixel_float):
-        center_low_pixel = int(math.floor(pixel_float))
-        center_high_pixel = int(math.ceil(pixel_float))
-        idlow, low = self.get_detector_pos(work_handle, center_low_pixel)  # Get the detector position of the nearest lower pixel
-        idhigh, high = self.get_detector_pos(work_handle, center_high_pixel)  # Get the detector position of the nearest higher pixel
-        center_y = (center_high_pixel - pixel_float) * low.getY() + (pixel_float - center_low_pixel) * high.getY()
-        center_y /= center_high_pixel - center_low_pixel
-        return center_y
 
     def _fit_flat_top_peak(self, fit_params, point_index, ws, output_ws):
         # Find the edge position
@@ -916,59 +770,7 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         return peak_positions, avg_resolution
 
-    # def getIdealTubeFromNSlits(self, IntegratedWorkspace, slits):
-    #     """
-    #     Given N slits for calibration on an ideal tube
-    #     convert to Y values to form a ideal tube for correctTubeToIdealTube()
-    #
-    #     @param IntegratedWorkspace: Workspace of integrated data
-    #     @param eP: positions of slits for ideal tube (in pixels)
-    #
-    #     Return Value: Ideal tube in Y-coords for use by correctTubeToIdealTube()
-    #
-    #     """
-    #     ideal = []
-    #     # print "slits for ideal tube", slits
-    #     for i in range(len(slits)):
-    #         # print slits[i]
-    #         ideal.append(self.get_ypos(IntegratedWorkspace, slits[i]))  # Use Pascal Manuel's Y conversion.
-    #
-    #     # print "Ideal Tube",ideal
-    #     return ideal
-
-    def correctTube(self, AP, BP, CP, nDets):
-        """
-        Corrects position errors in a tube in the same manner as is done for MERLIN
-        according to an algorithm used by Rob Bewley in his MATLAB code.
-
-        @param AP: Fit position of left (in pixels)
-        @param BP: Fit position of right (in pixels)
-        @param CP: Fit position of centre (in pixels)
-        @param nDets: Number of pixel detectors in tube
-
-        Return Value: Array of corrected Xs  (in pixels)
-        """
-
-        AO = AP / (nDets - AP)
-        BO = (nDets - BP) / BP
-        # First correct centre point for offsets
-        CPN = CP - (AO * (nDets - CP)) + BO * CP
-        x = []
-        for i in range(nDets):
-            xi = i + 1.0
-            x.append(xi - ((nDets - xi) * AO) + (xi * BO))  # this is x corrected for offsets
-
-        # Now calculate the gain error
-        GainError = ((nDets + 1) / 2.0 - CPN) / (CPN * (nDets - CPN))
-        xBinNew = []
-        for i in range(nDets):
-            xo = x[i]
-            xBinNew.append(xo + (xo * (nDets - xo) * GainError))  # Final bin position values corrected for offsets and gain
-
-        # print xBinNew
-        return xBinNew
-
-    def get_corrected_pixel_positions(self, tube_positions, known_positions, num_detectors, polinFit=2):
+    def _get_corrected_pixel_positions(self, tube_positions, known_positions, num_detectors, polinFit=2):
         """
         Corrects position errors in a tube given an array of points and their known positions.
 
@@ -1045,7 +847,7 @@ class SANSTubeCalibration(PythonAlgorithm):
             return calibrated_detectors
 
         # Correct positions of detectors in tube by quadratic fit
-        corrected_pixels = self.get_corrected_pixel_positions(fit_positions, known_positions, num_detectors, polinFit=polinFit)
+        corrected_pixels = self._get_corrected_pixel_positions(fit_positions, known_positions, num_detectors, polinFit=polinFit)
 
         if len(corrected_pixels) != num_detectors:
             self.log().debug("Tube correction failed.")
@@ -1078,7 +880,7 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         return calibrated_detectors
 
-    def notify_tube_cvalue_status(self, cvalues):
+    def _notify_tube_cvalue_status(self, cvalues):
         all_cvalues_ok = True
         threshold = self.getProperty("CValueThreshold").value
         for i in range(len(cvalues.dataY(0))):
