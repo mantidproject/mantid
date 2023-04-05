@@ -667,7 +667,7 @@ class SANSTubeCalibration(PythonAlgorithm):
         )
 
         # Define the correct positions of the detectors
-        calibrated_positions = self._get_calibrated_pixel_positions(ws, peak_positions, ideal_tube.getArray(), ws_ids, False, polinFit)
+        calibrated_positions = self._get_calibrated_pixel_positions(ws, peak_positions, ideal_tube.getArray(), ws_ids, polinFit)
         # Check if we have corrected positions
         if len(calibrated_positions.keys()) == len(ws_ids):
             # Save the detector positions to the calibration table
@@ -916,25 +916,25 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         return peak_positions, avg_resolution
 
-    def getIdealTubeFromNSlits(self, IntegratedWorkspace, slits):
-        """
-        Given N slits for calibration on an ideal tube
-        convert to Y values to form a ideal tube for correctTubeToIdealTube()
-
-        @param IntegratedWorkspace: Workspace of integrated data
-        @param eP: positions of slits for ideal tube (in pixels)
-
-        Return Value: Ideal tube in Y-coords for use by correctTubeToIdealTube()
-
-        """
-        ideal = []
-        # print "slits for ideal tube", slits
-        for i in range(len(slits)):
-            # print slits[i]
-            ideal.append(self.get_ypos(IntegratedWorkspace, slits[i]))  # Use Pascal Manuel's Y conversion.
-
-        # print "Ideal Tube",ideal
-        return ideal
+    # def getIdealTubeFromNSlits(self, IntegratedWorkspace, slits):
+    #     """
+    #     Given N slits for calibration on an ideal tube
+    #     convert to Y values to form a ideal tube for correctTubeToIdealTube()
+    #
+    #     @param IntegratedWorkspace: Workspace of integrated data
+    #     @param eP: positions of slits for ideal tube (in pixels)
+    #
+    #     Return Value: Ideal tube in Y-coords for use by correctTubeToIdealTube()
+    #
+    #     """
+    #     ideal = []
+    #     # print "slits for ideal tube", slits
+    #     for i in range(len(slits)):
+    #         # print slits[i]
+    #         ideal.append(self.get_ypos(IntegratedWorkspace, slits[i]))  # Use Pascal Manuel's Y conversion.
+    #
+    #     # print "Ideal Tube",ideal
+    #     return ideal
 
     def correctTube(self, AP, BP, CP, nDets):
         """
@@ -968,84 +968,61 @@ class SANSTubeCalibration(PythonAlgorithm):
         # print xBinNew
         return xBinNew
 
-    def correctTubeToIdealTube(self, tubePoints, idealTubePoints, nDets, TestMode=False, polinFit=2):
+    def get_corrected_pixel_positions(self, tube_positions, known_positions, num_detectors, polinFit=2):
         """
-        Corrects position errors in a tube given an array of points and their ideal positions.
+        Corrects position errors in a tube given an array of points and their known positions.
 
-        :param tubePoints: Array of Slit Points along tube to be fitted (in pixels)
-        :param idealTubePoints: The corresponding points in an ideal tube (Y-coords advised)
-        :param nDets: Number of pixel detectors in tube
-        :param Testmode: If true, detectors at the position of a slit will be moved out of the way
-                            to show the reckoned slit positions when the instrument is displayed.
-        :param polinFit: Order of the polinomial to fit for the ideal positions
+        :param tube_positions: positions along the tube to be fitted (in pixels)
+        :param known_positions: the corresponding known positions in the tube (Y-coords advised)
+        :param num_detectors: number of pixel detectors in tube
+        :param polinFit: order of the polynomial to fit for the ideal positions
 
-        Return Value: Array of corrected Xs  (in same units as ideal tube points)
+        Return Value: array of corrected Xs (in same units as known positions)
 
-        Note that any element of tubePoints not between 0.0 and nDets is considered a rogue point and so is ignored.
+        Note that any element of tube_positions not between 0.0 and num_detectors is ignored.
         """
 
-        # print "correctTubeToIdealTube"
-
-        # Check the arguments
-        if len(tubePoints) != len(idealTubePoints):
-            self.log().debug(f"Number of points in tube {len(tubePoints)} must equal number of points in ideal tube {len(idealTubePoints)}")
-            return xResult
-
-        # Filter out rogue slit points
-        usedTubePoints = []
-        usedIdealTubePoints = []
-        missedTubePoints = []  # Used for diagnostic print only
-        for i in range(len(tubePoints)):
-            if tubePoints[i] > 0.0 and tubePoints[i] < nDets:
-                usedTubePoints.append(tubePoints[i])
-                usedIdealTubePoints.append(idealTubePoints[i])
-            else:
-                missedTubePoints.append(i + 1)
-
-        # State number of rogue slit points, if any
-        if len(tubePoints) != len(usedTubePoints):
-            self.log().debug(f"Only {len(usedTubePoints)} out of {len(tubePoints)} slit points used. Missed {missedTubePoints}")
-
-        # Check number of usable points
-        if len(usedTubePoints) < 3:
-            self.log().debug(f"Too few usable points in tube {len(usedTubePoints)}")
+        if len(tube_positions) != len(known_positions):
+            self.log().debug(
+                f"Number of points in tube {len(tube_positions)} must equal number of known positions in ideal tube {len(known_positions)}"
+            )
             return []
 
-        # Fit quadratic to ideal tube points
-        CreateWorkspace(dataX=usedTubePoints, dataY=usedIdealTubePoints, OutputWorkspace="PolyFittingWorkspace")
+        # Filter out any invalid tube positions
+        valid_tube_positions = []
+        relevant_known_positions = []
+        for i in range(len(tube_positions)):
+            tube_pos = tube_positions[i]
+            if 0.0 < tube_pos < num_detectors:
+                valid_tube_positions.append(tube_pos)
+                relevant_known_positions.append(known_positions[i])
+
+        # Check number of usable points
+        if len(valid_tube_positions) < 3:
+            self.log().debug("Too few usable points in tube")
+            return []
+
+        # Fit quadratic to known positions
+        PolyFittingWorkspace = CreateWorkspace(dataX=valid_tube_positions, dataY=relevant_known_positions)
         try:
             Fit(
-                InputWorkspace="PolyFittingWorkspace",
-                Function="name=Polynomial,n=%d" % (polinFit),
+                InputWorkspace=PolyFittingWorkspace,
+                Function=f"name=Polynomial,n={polinFit}",
                 StartX=str(0.0),
-                EndX=str(nDets),
+                EndX=str(num_detectors),
                 Output="QF",
             )
         except:
             self.log().debug("Fit failed")
             return []
 
-        paramQF = mtd["QF_Parameters"]
+        # Get the fitted coefficients, excluding the last row in the parameters table because it is the error value
+        coefficients = [row["Value"] for row in mtd["QF_Parameters"]][:-1]
 
-        # get the coeficients, get the Value from every row, and exclude the last one because it is the error
-        # rowErr is the last one, it could be used to check accuracy of fit
-        c = [r["Value"] for r in paramQF][:-1]
+        # Evaluate the fitted quadratic against the number of detectors
+        return np.polynomial.polynomial.polyval(list(range(num_detectors)), coefficients)
 
-        # Modify the output array by the fitted quadratic
-        xResult = np.polynomial.polynomial.polyval(list(range(nDets)), c)
-
-        # In test mode, shove the pixels that are closest to the reckoned peaks
-        # to the position of the first detector so that the resulting gaps can be seen.
-        if TestMode:
-            self.log().debug("TestMode code")
-            for i in range(len(usedTubePoints)):
-                # print "used point",i,"shoving pixel",int(usedTubePoints[i])
-                xResult[int(usedTubePoints[i])] = xResult[0]
-
-        # print xResult
-        return xResult
-
-    def _get_calibrated_pixel_positions(self, ws, fit_positions, known_positions, ws_ids, peakTestMode=False, polinFit=2):
+    def _get_calibrated_pixel_positions(self, ws, fit_positions, known_positions, ws_ids, polinFit=2):
         """
         Get the calibrated detector positions for one tube
         The tube is specified by a list of workspace indices of its spectra
@@ -1055,7 +1032,6 @@ class SANSTubeCalibration(PythonAlgorithm):
         :param fit_positions: array of calibration positions (in pixels)
         :param known_positions: where these calibration positions should be (in Y coords)
         :param ws_ids: a list of workspace indices for the tube
-        :param PeakTestMode: true if shoving detectors that are reckoned to be at peak away (for test purposes)
         :param polinFit: Order of the polinominal to fit for the ideal positions
 
         Return dictionary containing the pixel detector IDs and their calibrated positions
@@ -1069,9 +1045,7 @@ class SANSTubeCalibration(PythonAlgorithm):
             return calibrated_detectors
 
         # Correct positions of detectors in tube by quadratic fit
-        corrected_pixels = self.correctTubeToIdealTube(
-            fit_positions, known_positions, num_detectors, TestMode=peakTestMode, polinFit=polinFit
-        )
+        corrected_pixels = self.get_corrected_pixel_positions(fit_positions, known_positions, num_detectors, polinFit=polinFit)
 
         if len(corrected_pixels) != num_detectors:
             self.log().debug("Tube correction failed.")
