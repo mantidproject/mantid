@@ -586,11 +586,13 @@ public:
    */
   void test_FilterIndirectGeometryCorrection() {
     std::cout << std::endl << "test_FilterIndirectGeometryCorrection..." << std::endl;
-    // Create workspaces for filtering
-    EventWorkspace_sptr ws = createEventWorkspaceInDirect(0, 1000000);
+    int64_t runstart{20000000000}; // start run date from Mantid's Epoch, in nanoseconds
+    int64_t pulsedt{1000000};      // time between consecutive pulses, in nanoseconds
+
+    EventWorkspace_sptr ws = createEventWorkspaceInDirect(runstart, pulsedt);
     AnalysisDataService::Instance().addOrReplace("MockIndirectEventWS", ws);
 
-    MatrixWorkspace_sptr splws = createMatrixSplittersDG();
+    MatrixWorkspace_sptr splws = createMatrixSplittersDG(runstart);
     AnalysisDataService::Instance().addOrReplace("SplitterTableX", splws);
 
     // Run the filtering
@@ -1280,7 +1282,7 @@ public:
    * @param pulseCount : number of pulses
    */
   EventWorkspace_sptr createEventWorkspaceDirect(int64_t runstart_i64, int64_t pulsedt, int64_t pulseCount = 1000) {
-    // Create an EventWorkspace with 10 banks with 1 detector each.  No events is generated
+    // Create an EventWorkspace with 10 banks with 1 detector each.  No events are generated
     EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1, true);
 
     // L1 = 10
@@ -1320,17 +1322,21 @@ public:
     return eventWS;
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Create an EventWorkspace to mimic direct inelastic scattering insturment.
-   * This workspace has
-   * @param runstart_i64 : absolute run start time in int64_t format with unit
-   * nanosecond
-   * @param pulsedt : pulse length in int64_t format with unit nanosecond
+  /** Create an EventWorkspace to mimic direct inelastic scattering instrument
+   * @param runstart_i64 : start run date from Mantid's Epoch time, in nanoseconds
+   * @param pulsedt : time between consecutive pulses, in nanoseconds
+   * @param pulseCount : number of pulses
    */
-  EventWorkspace_sptr createEventWorkspaceInDirect(int64_t runstart_i64, int64_t pulsedt) {
-    // Create an EventWorkspace with 10 banks with 1 detector each.  No events
-    // is generated
+  EventWorkspace_sptr createEventWorkspaceInDirect(int64_t runstart_i64, int64_t pulsedt, int64_t pulseCount = 1000) {
+    // Create an EventWorkspace with 10 banks with 1 detector each.  No events are generated
     EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1, true);
+
+    // Properties for the start and end of the run
+    Types::Core::DateAndTime runstart(runstart_i64);
+    Types::Core::DateAndTime runend(runstart + pulseCount * pulsedt);
+    eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(), true);
+    eventWS->mutableRun().addProperty("run_end", runend.toISO8601String(), true);
+
     // Add EFixed to each detector
     const ParameterMap &pmap = eventWS->constInstrumentParameters();
 
@@ -1350,8 +1356,8 @@ public:
       }
     }
 
-    // Add neutrons
-    EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt);
+    // Create `pulseCount` pulses with one event per pulse
+    EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt, pulseCount);
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
       auto &elist = eventWS->getSpectrum(i);
 
