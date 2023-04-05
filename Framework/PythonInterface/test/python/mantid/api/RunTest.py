@@ -7,7 +7,7 @@
 import unittest
 import copy
 from mantid.geometry import Goniometer
-from mantid.kernel import DateAndTime, FloatTimeSeriesProperty
+from mantid.kernel import DateAndTime, FloatTimeSeriesProperty, TimeROI
 from mantid.api import Run
 import numpy as np
 
@@ -37,6 +37,17 @@ class RunTest(unittest.TestCase):
         charge = run.getProtonCharge()
         self.assertEqual(type(charge), float)
         self.assertAlmostEqual(charge, 10.05)
+
+    def test_get_time_roi(self):
+        # there is intentionally no way create a TimeROI from python
+        run = Run()
+        roi = run.getTimeROI()
+        self.assertTrue(isinstance(roi, TimeROI))
+        self.assertTrue(roi.useAll())
+        self.assertFalse(roi.useNone())
+        values = roi.toSplitters()
+        self.assertTrue(isinstance(values, list))
+        self.assertEqual(len(values), 0)
 
     def test_run_hasProperty(self):
         self.assertTrue(self._run.hasProperty("start_time"))
