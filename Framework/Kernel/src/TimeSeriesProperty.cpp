@@ -312,7 +312,7 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Types::Core::DateAndTime &star
 /**
  * Filter by a range of times. If current property has a single value it remains
  * unaffected
- * @param splittervec :: A list of intervals to split filter on
+ * @param timeroi :: A list of intervals to split filter on
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::filterByTimes(const TimeROI &timeroi) {
   // 1. Sort
