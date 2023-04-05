@@ -73,6 +73,7 @@ public:
   void autoscale(bool enable);
   void autoscaleView(bool scaleX = true, bool scaleY = true);
   void autoscaleView(bool tight, bool scaleX, bool scaleY);
+  void grid(bool const &visible);
   /// @}
 
   ///@name Transformations

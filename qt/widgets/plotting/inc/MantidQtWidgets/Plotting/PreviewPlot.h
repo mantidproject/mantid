@@ -134,12 +134,15 @@ private:
   void regenerateLegend();
   void removeLegend();
 
+  void setGridlinesVisible(bool const &visible);
+
   void switchPlotTool(QAction *selected);
   void setXScaleType(QAction *selected);
   void setYScaleType(QAction *selected);
   void setErrorBars(QAction *selected);
   void setScaleType(AxisID id, const QString &actionName);
   void toggleLegend(const bool checked);
+  void toggleGridlines(const bool &checked);
 
   boost::optional<char const *> overrideAxisLabel(AxisID const &axisID);
   void setAxisLabel(AxisID const &axisID, char const *const label);
@@ -201,6 +204,7 @@ private:
   QAction *m_contextResetView;
   QActionGroup *m_contextXScale, *m_contextYScale;
   QAction *m_contextLegend;
+  QAction *m_contextGridlines;
   QActionGroup *m_contextErrorBars;
 };
 

@@ -158,6 +158,7 @@ void PreviewPlot::addSpectrum(const QString &lineName, const Mantid::API::Matrix
     setAxisLabel(AxisID::YLeft, yLabel.get());
 
   regenerateLegend();
+  toggleGridlines(m_contextGridlines->isChecked());
   axes.relim();
 
   replot();
@@ -185,6 +186,7 @@ void PreviewPlot::removeSpectrum(const QString &lineName) {
   auto axes = m_canvas->gca();
   axes.removeArtists("lines", lineName);
   m_lines.remove(lineName);
+  toggleGridlines(m_contextGridlines->isChecked());
   regenerateLegend();
 }
 
@@ -531,6 +533,9 @@ void PreviewPlot::showContextMenu(QMouseEvent *evt) {
   contextMenu.addSeparator();
   contextMenu.addAction(m_contextLegend);
 
+  contextMenu.addSeparator();
+  contextMenu.addAction(m_contextGridlines);
+
   contextMenu.exec(evt->globalPos());
 }
 
@@ -583,6 +588,12 @@ void PreviewPlot::createActions() {
   m_contextLegend->setCheckable(true);
   m_contextLegend->setChecked(true);
   connect(m_contextLegend, &QAction::toggled, this, &PreviewPlot::toggleLegend);
+
+  // gridlines
+  m_contextGridlines = new QAction("Gridlines", this);
+  m_contextGridlines->setCheckable(true);
+  m_contextGridlines->setChecked(false);
+  connect(m_contextGridlines, &QAction::toggled, this, &PreviewPlot::toggleGridlines);
 }
 
 /**
@@ -669,6 +680,13 @@ void PreviewPlot::removeLegend() {
   if (!legend.pyobj().is_none()) {
     m_canvas->gca().legendInstance().remove();
   }
+}
+
+void PreviewPlot::setGridlinesVisible(bool const &visible) {
+  if (m_lines.isEmpty()) {
+    return;
+  }
+  m_canvas->gca().grid(visible);
 }
 
 /**
@@ -765,6 +783,11 @@ void PreviewPlot::toggleLegend(const bool checked) {
   } else {
     removeLegend();
   }
+  this->replot();
+}
+
+void PreviewPlot::toggleGridlines(const bool &checked) {
+  setGridlinesVisible(checked);
   this->replot();
 }
 

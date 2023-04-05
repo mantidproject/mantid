@@ -357,6 +357,11 @@ void Axes::autoscaleView(bool tight, bool scaleX, bool scaleY) {
   callMethodNoCheck<void, bool, bool, bool>(pyobj(), "autoscale_view", tight, scaleX, scaleY);
 }
 
+void Axes::grid(bool const &grid) {
+  GlobalInterpreterLock lock;
+  pyobj().attr("grid")(grid);
+}
+
 /**
  * Returns the blended transform that treats X in data coordinates and Y in axes coordinates
  * https://matplotlib.org/stable/tutorials/advanced/transforms_tutorial.html#blended-transformations
