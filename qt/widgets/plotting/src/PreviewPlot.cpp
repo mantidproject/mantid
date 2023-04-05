@@ -716,13 +716,25 @@ void PreviewPlot::switchPlotTool(QAction *selected) {
  * Set the scale to linear on a given axis
  * @param axisID Axis to set to linear
  */
-void PreviewPlot::setScaleLinear(const AxisID axisID) { setScaleType(axisID, "linear"); }
+void PreviewPlot::setScaleLinear(const AxisID axisID) {
+  if (axisID == AxisID::XBottom)
+    m_contextXScale->actions()[0]->setChecked(true);
+  if (axisID == AxisID::YLeft)
+    m_contextYScale->actions()[0]->setChecked(true);
+  setScaleType(axisID, "linear");
+}
 
 /**
  * Set the scale to log on a given axis
  * @param axisID Axis to set to log
  */
-void PreviewPlot::setScaleLog(const AxisID axisID) { setScaleType(axisID, "log"); }
+void PreviewPlot::setScaleLog(const AxisID axisID) {
+  if (axisID == AxisID::XBottom)
+    m_contextXScale->actions()[1]->setChecked(true);
+  if (axisID == AxisID::YLeft)
+    m_contextYScale->actions()[1]->setChecked(true);
+  setScaleType(axisID, "log");
+}
 
 /**
  * Set the X scale based on the given QAction
