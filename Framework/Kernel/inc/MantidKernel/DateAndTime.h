@@ -38,7 +38,9 @@ public:
   bool isValid() const { return m_stop > m_start; }
 
   /// Interval length (in seconds?)
-  Types::Core::time_duration length() const { return m_stop - m_start; }
+  Types::Core::time_duration length() const;
+  /// in seconds
+  double duration() const;
 
   /// True if the interval contains \a t.
   bool contains(const Types::Core::DateAndTime &t) const { return t >= start() && t < stop(); }
