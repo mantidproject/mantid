@@ -513,6 +513,18 @@ void FilterEvents::processAlgorithmProperties() {
       }
     }
   } // END-IF: m_isSplitterRelativeTime
+
+  //-------------------------------------------------------------------------
+  // Deprecated properties
+  //-------------------------------------------------------------------------
+  bool splitSampleLogs = getProperty("SplitSampleLogs");
+  if (splitSampleLogs == false)
+    g_log.warning() << "Option SplitSampleLogs is deprecated. Logs will be split\n";
+
+  std::vector<std::string> timeSeriesPropertyLogs = getProperty("TimeSeriesPropertyLogs");
+  if (!timeSeriesPropertyLogs.empty())
+    g_log.warning() << "Options TimeSeriesPropertyLogs and ExcludeSpecifiedLogs are deprecated. "
+                       "All logs are included\n";
 }
 
 //----------------------------------------------------------------------------------------------
