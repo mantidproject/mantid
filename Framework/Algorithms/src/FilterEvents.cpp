@@ -135,9 +135,11 @@ void FilterEvents::init() {
                   "They will be either excluded from splitting if ExcludedSpecifiedLogs is specified as True. "
                   "Alternatively, they will be the only TimeSeriesProperty sample logs that will be split "
                   "to child workspaces.");
+  setPropertySettings("TimeSeriesPropertyLogs", std::make_unique<InvisibleProperty>());
   declareProperty("ExcludeSpecifiedLogs", true,
                   "If true, all the TimeSeriesProperty logs listed will be excluded from duplicating. "
                   "Otherwise, only those specified logs will be split.");
+  setPropertySettings("ExcludeSpecifiedLogs", std::make_unique<InvisibleProperty>());
   setPropertyGroup("SplitSampleLogs", titleLogSplit);
   setPropertyGroup("FilterByPulseTime", titleLogSplit);
   setPropertyGroup("TimeSeriesPropertyLogs", titleLogSplit);
