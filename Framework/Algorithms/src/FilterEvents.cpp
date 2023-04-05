@@ -938,24 +938,10 @@ void FilterEvents::createOutputWorkspaces() {
   }
 
   // Clone the input workspace but without any events. Will serve as blueprint for the output workspaces
-  std::shared_ptr<EventWorkspace> templateWorkspace = this->createTemplateOutputWorkspace();
-  /*
-  // DEBUG: block for comparison between properties of the input workspace and the template workspace
-  const auto &run = templateWorkspace->run();
-  for (const auto &prop : run.getProperties()){
-    const std::string &name = prop->name();
-    const auto &prop_original = m_eventWS->run().getProperty(name);
-    std::cout << "name = " << name << std::endl;
-    if (name == "duration"){
-      prop->setValue("42.0");
-    }
-    if (name == "slow_int_log"){
-      auto *log = dynamic_cast<TimeSeriesProperty<int> *>(prop);
-      log->addValue("1990-Jan-01 00:00:20.500", 42);
-      std::cout << "name = " << name << std::endl;
-    }
-  }
-  */
+  std::shared_ptr<EventWorkspace> templateWorkspace = create<EventWorkspace>(*m_eventWS);
+  // Up to this point, the run of templateWorkspace is just a reference to the run of m_eventWS. We
+  // overwrite the refence with a copy of the run of m_eventWS.
+  templateWorkspace->mutableRun() = m_eventWS->run();
 
   // Set up target workspaces
   size_t number_of_output_workspaces{0};
@@ -1325,47 +1311,6 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
   PARALLEL_CHECK_INTERRUPT_REGION
   progress(0.1 + progressamount, "Splitting logs");
   addTimer("filterEventsBySplitters", startTime, std::chrono::high_resolution_clock::now());
-}
-
-/**
- * Clone the input workspace but with no events. Also and if necessary, only with selected logs
- *
- * @return a workspace to be cloned for each of the destination workspaces
- */
-std::shared_ptr<DataObjects::EventWorkspace> FilterEvents::createTemplateOutputWorkspace() const {
-  // the workspace to be returned
-  std::shared_ptr<EventWorkspace> templateWorkspace = create<EventWorkspace>(*m_eventWS);
-
-  // In not empty, "TimeSeriesPropertyLogs" specifies which logs will either be excluded or kept
-  std::vector<std::string> relevantLogsList = getProperty("TimeSeriesPropertyLogs");
-  // cast the list into a set
-  std::set<std::string> relevantLogsSet(relevantLogsList.begin(), relevantLogsList.end());
-  const size_t relevantLogsCount{relevantLogsSet.size()};
-
-  // just clone the input outputRun if we want all the logs
-  if (relevantLogsCount == 0) {
-    templateWorkspace->mutableRun() = m_eventWS->run();
-    return templateWorkspace;
-  }
-
-  // Exclude or only copy the relevant logs
-  templateWorkspace->setSharedRun(Kernel::make_cow<Run>()); // clean-slate for the outputRun object
-  auto &outputRun = templateWorkspace->mutableRun();
-  const auto &inputRun = m_eventWS->run();
-  outputRun.setTimeROI(inputRun.getTimeROI()); // copy the input TimeROI
-  // "ExcludeSpecifiedLogs" determines if the relevant logs are to be excluded or are to be kept
-  bool excludeRelevantLogs = getProperty("ExcludeSpecifiedLogs");
-  bool overwriteExistingProperty{true};
-  for (auto *inputProperty : inputRun.getProperties()) {
-    const std::string name = inputProperty->name();
-    bool logIsRelevant{relevantLogsSet.find(name) != relevantLogsSet.end()};
-    bool keepOnlyRelevantLogs{!excludeRelevantLogs};
-    if ((excludeRelevantLogs && logIsRelevant) || (keepOnlyRelevantLogs && !logIsRelevant))
-      g_log.warning() << "Sample log " << name << "will be absent in the filtered workspace(s)\n";
-    else
-      outputRun.addProperty(inputProperty, overwriteExistingProperty);
-  }
-  return templateWorkspace;
 }
 
 // //----------------------------------------------------------------------------------------------

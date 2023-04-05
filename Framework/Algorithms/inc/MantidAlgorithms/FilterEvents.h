@@ -95,9 +95,6 @@ private:
   /// Filter events by splitters in format of Splitter
   void filterEventsBySplitters(double progressamount);
 
-  /// Clone the input workspace but with no events. Also and if necessary, only with selected logs
-  std::shared_ptr<DataObjects::EventWorkspace> createTemplateOutputWorkspace() const;
-
   /// Mark event lists of workspace indexes with no associated detector pixels as not to be split
   void examineEventWS();
 
