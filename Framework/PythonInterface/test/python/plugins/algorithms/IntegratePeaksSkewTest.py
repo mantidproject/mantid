@@ -350,6 +350,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         out = IntegratePeaksSkew(
             InputWorkspace=self.ws,
             PeaksWorkspace=self.peaks,
+            NTOFBinsMin=1,
             ThetaWidth=0,
             BackscatteringTOFResolution=0.3,
             NRows=5,
@@ -366,6 +367,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         out = IntegratePeaksSkew(
             InputWorkspace=self.ws,
             PeaksWorkspace=self.peaks,
+            NTOFBinsMin=1,
             ThetaWidth=0,
             BackscatteringTOFResolution=0.3,
             NRows=3,

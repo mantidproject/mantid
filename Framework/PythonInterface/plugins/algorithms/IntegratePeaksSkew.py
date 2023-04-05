@@ -44,7 +44,7 @@ class PEAK_MASK_STATUS(Enum):
     DENSITY_MIN = "Peak mask density is below limit"
     VACANCY_MAX = "Peak mask has too many vacancies"
     ON_EDGE = "Peak mask is on the detector edge"
-    NBINS_MIN = "Peak does not have enough TOF bins"
+    NBINS_MIN = "Peak does not have enough non-zero bins"
     NO_PEAK = "No peak detected."
 
 
@@ -350,10 +350,8 @@ class PeakData:
                     self.peak_mask = opt_peak_mask
                     self.non_bg_mask = np.logical_and(self.non_bg_mask, opt_non_bg_mask)
                     self.focus_data_in_detector_mask()
-                    self.find_peak_limits(
-                        min(self.ixmin, self.ixmin_opt), max(self.ixmax, self.ixmax_opt), optimise_xwindow, threshold_i_over_sig
-                    )
-            if self.ixmax_opt - self.ixmin_opt < min_nbins:
+                    self.find_peak_limits(self.ixmin_opt, self.ixmax_opt, optimise_xwindow, threshold_i_over_sig)
+            if np.sum(self.ypk[self.ixmin_opt : self.ixmax_opt] / np.sqrt(self.epk_sq[self.ixmin_opt : self.ixmax_opt]) > 1) < min_nbins:
                 self.status = PEAK_MASK_STATUS.NBINS_MIN
             else:
                 # do integration
@@ -608,7 +606,7 @@ class PeakData:
             vmin, vmax = 1, 1
         norm = norm_func(vmin=vmin, vmax=vmax)
         # limits for 1D plot
-        ipad = int((self.ixmax - self.ixmin) / 2)  # extra portion of data shown outside the 1D window
+        ipad = (self.ixmax - self.ixmin) // 2  # extra portion of data shown outside the 1D window
         istart = max(min(self.ixmin, self.ixmin_opt) - ipad, 0)
         iend = min(max(self.ixmax, self.ixmax_opt) + ipad, len(self.xpk) - 1)
         # 2D plot - data integrated over optimal TOF range (not range for which mask determined)
