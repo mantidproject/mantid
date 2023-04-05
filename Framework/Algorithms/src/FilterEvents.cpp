@@ -56,8 +56,8 @@ FilterEvents::FilterEvents()
       m_useSplittersWorkspace(false), m_useArbTableSplitters(false), m_targetWorkspaceIndexSet(),
       m_outputWorkspacesMap(), m_wsNames(), m_detTofOffsets(), m_detTofFactors(), m_filterByPulseTime(false),
       m_informationWS(), m_hasInfoWS(), m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false), m_vecSplitterTime(),
-      m_vecSplitterGroup(), m_useDBSpectrum(false), m_dbWSIndex(-1), m_tofCorrType(NoneCorrect), m_specSkipType(),
-      m_vecSkip(), m_isSplittersRelativeTime(false), m_filterStartTime(0), m_runStartTime(0) {}
+      m_vecSplitterGroup(), m_tofCorrType(NoneCorrect), m_specSkipType(), m_vecSkip(), m_isSplittersRelativeTime(false),
+      m_filterStartTime(0), m_runStartTime(0) {}
 
 /** Declare Inputs
  */
@@ -263,20 +263,11 @@ void FilterEvents::exec() {
   m_progress = 0.0;
   progress(m_progress, "Processing input splitters.");
   parseInputSplitters();
-  // m_progress = 0.05;
-  // progress(m_progress);
 
   // Create output workspaces
   m_progress = 0.1;
   progress(m_progress, "Create Output Workspaces.");
   createOutputWorkspaces();
-
-  // DEBUG: mark these vectors for deletion
-  // std::vector<Kernel::TimeSeriesProperty<int> *> int_tsp_vector;
-  // std::vector<Kernel::TimeSeriesProperty<double> *> dbl_tsp_vector;
-  // std::vector<Kernel::TimeSeriesProperty<bool> *> bool_tsp_vector;
-  // std::vector<Kernel::TimeSeriesProperty<string> *> string_tsp_vector;
-  // copyNoneSplitLogs(int_tsp_vector, dbl_tsp_vector, bool_tsp_vector, string_tsp_vector);
 
   // Optional import corrections
   m_progress = 0.20;
@@ -295,20 +286,7 @@ void FilterEvents::exec() {
   else
     progressamount = 0.7;
 
-  // add a new 'split' tsp to output workspace
-  // DEBUG: mark for deletion
-  std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> split_tsp_vector;
   filterEventsBySplitters(progressamount);
-  // DEBUG: mark for deletion
-  // generateSplitterTSPalpha(split_tsp_vector);
-
-  // DEBUG: mark for deletion
-  // assign split_tsp_vector to all the output workspaces!
-  // mapSplitterTSPtoWorkspaces(split_tsp_vector);
-
-  // DEBUG: mark for deletion
-  // split times series property: new way to split events
-  // splitTimeSeriesLogs(int_tsp_vector, dbl_tsp_vector, bool_tsp_vector, string_tsp_vector);
 
   // Optional to group detector
   groupOutputWorkspace();
@@ -478,13 +456,6 @@ void FilterEvents::processAlgorithmProperties() {
   else
     throw runtime_error("An unrecognized option for SpectrumWithoutDetector");
 
-  // Debug spectrum
-  m_dbWSIndex = getProperty("DBSpectrum");
-  if (isEmpty(m_dbWSIndex))
-    m_useDBSpectrum = false;
-  else
-    m_useDBSpectrum = true;
-
   bool start_time_set = false;
   // Get run start time
   try {
@@ -529,7 +500,6 @@ void FilterEvents::processAlgorithmProperties() {
 
 //----------------------------------------------------------------------------------------------
 /** group output workspaces
- * @brief FilterEvents::groupOutputWorkspace
  */
 void FilterEvents::groupOutputWorkspace() {
   // return if there is no such need
@@ -600,223 +570,6 @@ TimeROI FilterEvents::partialROI(const int &index) {
   return roi;
 }
 
-//----------------------------------------------------------------------------------------------
-// /* Clone the sample logs that will not be split, including single-value and add
-//  * all the TimeSeriesProperty sample logs  to vectors by their type
-//  * @brief FilterEvents::copyNoneSplitLogs
-//  * @param int_tsp_name_vector :: output
-//  * @param dbl_tsp_name_vector :: output
-//  * @param bool_tsp_name_vector :: output
-//  * @param string_tsp_vector :: output
-//  */
-/**
-void FilterEvents::copyNoneSplitLogs(std::vector<TimeSeriesProperty<int> *> &int_tsp_name_vector,
-                                     std::vector<TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
-                                     std::vector<TimeSeriesProperty<bool> *> &bool_tsp_name_vector,
-                                     std::vector<Kernel::TimeSeriesProperty<string> *> &string_tsp_vector) {
-  // In not empty, this property specifies which logs will either be excluded or kept
-  std::vector<std::string> tsp_logs = getProperty("TimeSeriesPropertyLogs");
-  // cast the list into a set of relevant logs
-  std::set<std::string> tsp_logs_set(tsp_logs.begin(), tsp_logs.end());
-
-  // this property determines if the relevant logs are to be excluded or are to be kept
-  bool excludeRelevantLogs = getProperty("ExcludeSpecifiedLogs");
-  bool keepOnlyRelevantLogs{!excludeRelevantLogs};
-
-  // initialize
-  int_tsp_name_vector.clear();
-  dbl_tsp_name_vector.clear();
-  bool_tsp_name_vector.clear();
-
-  std::vector<Property *> prop_vector = m_eventWS->run().getProperties();
-  for (auto *prop_i : prop_vector) {
-    // get property
-    std::string name_i = prop_i->name();
-
-    // cast to different type of TimeSeriesProperties to check it the property is a TimeSeriesProperty
-    auto *dbl_prop = dynamic_cast<TimeSeriesProperty<double> *>(prop_i);
-    auto *int_prop = dynamic_cast<TimeSeriesProperty<int> *>(prop_i);
-    auto *bool_prop = dynamic_cast<TimeSeriesProperty<bool> *>(prop_i);
-    auto *string_prop = dynamic_cast<TimeSeriesProperty<string> *>(prop_i);
-
-    if (dbl_prop || int_prop || bool_prop || string_prop) {
-      bool logIsRelevant{tsp_logs_set.find(name_i) != tsp_logs_set.end()};
-      if (excludeRelevantLogs && logIsRelevant) {
-        g_log.warning() << "Skip splitting sample log " << name_i << "\n";
-        continue;
-      } else if (keepOnlyRelevantLogs && !logIsRelevant) {
-        g_log.warning() << "Skip splitting sample log " << name_i << "\n";
-        continue;
-      }
-      // insert the time series property into the corresponding target vector of properties
-      if (dbl_prop)
-        dbl_tsp_name_vector.emplace_back(dbl_prop);
-      else if (int_prop)
-        int_tsp_name_vector.emplace_back(int_prop);
-      else if (bool_prop)
-        bool_tsp_name_vector.emplace_back(bool_prop);
-      else if (string_prop)
-        string_tsp_vector.emplace_back(string_prop);
-    }
-    else { // non time series properties
-      // single value property: copy to the new workspace
-      std::map<int, DataObjects::EventWorkspace_sptr>::iterator ws_iter;
-      for (ws_iter = m_outputWorkspacesMap.begin(); ws_iter != m_outputWorkspacesMap.end(); ++ws_iter) {
-        std::string value_i = prop_i->value();
-        double double_v;
-        int int_v;
-        if (Strings::convert(value_i, double_v) != 0) // double value
-          ws_iter->second->mutableRun().addProperty(name_i, double_v, true);
-        else if (Strings::convert(value_i, int_v) != 0)
-          ws_iter->second->mutableRun().addProperty(name_i, int_v, true);
-        else
-          ws_iter->second->mutableRun().addProperty(name_i, value_i, true);
-      }
-    }
-  } // end for
-  return;
-}
-*/
-
-// DEBUG: mark for deletion
-// /* Split ALL the TimeSeriesProperty sample logs to all the output workspace
-//  * @brief FilterEvents::splitTimeSeriesLogs
-//  * @param int_tsp_vector :: vector of integer tsp
-//  * @param dbl_tsp_vector :: vector of double tsp
-//  * @param bool_tsp_vector :: vector of boolean tsp
-//  * @param string_tsp_vector :: vector of string tsp
-//  */
-/*
-void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int> *> &int_tsp_vector,
-                                       const std::vector<TimeSeriesProperty<double> *> &dbl_tsp_vector,
-                                       const std::vector<TimeSeriesProperty<bool> *> &bool_tsp_vector,
-                                       const std::vector<TimeSeriesProperty<string> *> &string_tsp_vector) {
-  // get split times by converting vector of int64 to Time
-  std::vector<Types::Core::DateAndTime> split_datetime_vec;
-
-  // convert splitters workspace to vectors used by TableWorkspace and
-  // MatrixWorkspace splitters
-  if (m_useSplittersWorkspace) {
-    convertSplittersWorkspaceToVectors();
-  }
-
-  // convert splitter time vector to DateAndTime format
-  split_datetime_vec.resize(m_vecSplitterTime.size());
-  for (size_t i = 0; i < m_vecSplitterTime.size(); ++i) {
-    DateAndTime split_time(m_vecSplitterTime[i]);
-    split_datetime_vec[i] = split_time;
-  }
-
-  // find the maximum index of the outputs' index
-  std::set<int>::iterator target_iter;
-  int max_target_index = 0;
-  for (target_iter = m_targetWorkspaceIndexSet.begin(); target_iter != m_targetWorkspaceIndexSet.end(); ++target_iter) {
-    if (*target_iter > max_target_index)
-      max_target_index = *target_iter;
-  }
-  g_log.information() << "Maximum target index = " << max_target_index << "\n";
-
-  // splitters workspace need to have 1 more for left-over events
-  if (m_useSplittersWorkspace)
-    ++max_target_index;
-
-  // deal with integer time series property
-  for (const auto &int_tsp : int_tsp_vector) {
-    splitTimeSeriesProperty(int_tsp, split_datetime_vec, max_target_index);
-  }
-
-  // split double time series property
-  for (const auto &dbl_tsp : dbl_tsp_vector) {
-    splitTimeSeriesProperty(dbl_tsp, split_datetime_vec, max_target_index);
-  }
-
-  // deal with bool time series property
-  for (const auto &bool_tsp : bool_tsp_vector) {
-    splitTimeSeriesProperty(bool_tsp, split_datetime_vec, max_target_index);
-  }
-
-  // deal with string time series property
-  for (const auto &string_tsp : string_tsp_vector) {
-    splitTimeSeriesProperty(string_tsp, split_datetime_vec, max_target_index);
-  }
-
-  // integrate proton charge
-  for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-    // find output workspace
-    std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
-    wsiter = m_outputWorkspacesMap.find(tindex);
-    if (wsiter == m_outputWorkspacesMap.end()) {
-      g_log.information() << "Workspace target (indexed as " << tindex << ") does not have workspace associated.\n";
-    } else {
-      DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
-      if (ws_i->run().hasProperty("proton_charge")) {
-        ws_i->mutableRun().integrateProtonCharge();
-      }
-    }
-  }
-
-  return;
-}
-*/
-
-// DEBUG: mark for deletion
-// /* split one single time-series property (template)
-//  * @brief FilterEvents::splitTimeSeriesProperty
-//  * @param tsp :: a time series property instance
-//  * @param split_datetime_vec :: splitter
-//  * @param max_target_index :: maximum number of separated time series
-//  */
-/*
-template <typename TYPE>
-void FilterEvents::splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp,
-                                           std::vector<Types::Core::DateAndTime> &split_datetime_vec,
-                                           const int max_target_index) {
-  // skip the sample logs if they are specified
-  // get property name and etc
-  const std::string &property_name = tsp->name();
-  // generate new propertys for the source to split to
-  std::vector<std::unique_ptr<TimeSeriesProperty<TYPE>>> output_vector;
-  for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-    auto new_property = std::make_unique<TimeSeriesProperty<TYPE>>(property_name);
-    new_property->setUnits(tsp->units());
-    output_vector.emplace_back(std::move(new_property));
-  }
-
-  // duplicate the time series property if the size is just one
-  if (tsp->size() == 1) {
-    // duplicate
-    for (size_t i_out = 0; i_out < output_vector.size(); ++i_out) {
-      output_vector[i_out]->addValue(tsp->firstTime(), tsp->firstValue());
-    }
-  } else {
-    // split log
-    std::vector<TimeSeriesProperty<TYPE> *> split_properties(output_vector.size());
-    // use vector of raw pointers for splitting
-    std::transform(output_vector.begin(), output_vector.end(), split_properties.begin(),
-                   [](const std::unique_ptr<TimeSeriesProperty<TYPE>> &x) { return x.get(); });
-    tsp->splitByTimeVector(split_datetime_vec, m_vecSplitterGroup, split_properties);
-  }
-
-  // assign to output workspaces
-  for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-    // find output workspace
-    auto wsiter = m_outputWorkspacesMap.find(tindex);
-    if (wsiter == m_outputWorkspacesMap.end()) {
-      // unable to find workspace associated with target index
-      g_log.information() << "Workspace target (" << tindex << ") does not have workspace associated."
-                          << "\n";
-    } else {
-      // add property to the associated workspace
-      DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
-      ws_i->mutableRun().addProperty(std::move(output_vector[tindex]), true);
-    }
-  }
-
-  return;
-}
-*/
-
-//-------------------------------------------------------------------
 /** Convert splitters specified by the input workspace to TimeSplitter
  *  Cache a set of all target workspace indexes
  * @brief FilterEvents::parseInputSplitters
@@ -835,64 +588,6 @@ void FilterEvents::parseInputSplitters() {
   // For completeness, make sure we have a special workspace index for unfiltered events
   m_targetWorkspaceIndexSet.insert(TimeSplitter::NO_TARGET);
 }
-
-//----------------------------------------------------------------------------------------------
-// /** Convert SplittersWorkspace to vector of time and vector of target (itarget)
-//  * NOTE: This is designed to use a single vector/vector splitters for all types
-//  * of inputs
-//  *       It is not used before vast experiment on speed comparison!
-//  * @brief FilterEvents::convertSplittersWorkspaceToVectors
-//  */
-// void FilterEvents::convertSplittersWorkspaceToVectors() {
-//   // check: only applied for splitters given by SplittersWorkspace
-//   assert(m_useSplittersWorkspace);
-
-//   // clear and get ready
-//   m_vecSplitterGroup.clear();
-//   m_vecSplitterTime.clear();
-
-//   // define filter-left target index
-//   int no_filter_index = m_maxTargetIndex + 1;
-
-//   // convert TimeSplitter to a vector of sorted splitting intervals with valid targets
-//   Kernel::SplittingIntervalVec splittingIntervals =
-//       m_timeSplitter.toSplitters(false /*do not include "no target" intervals*/);
-
-//   size_t num_splitters = splittingIntervals.size();
-//   int64_t last_entry_time(0);
-
-//   // it is assumed that splittingIntervals is sorted by time
-//   for (size_t i_splitter = 0; i_splitter < num_splitters; ++i_splitter) {
-//     // get splitter
-//     Kernel::SplittingInterval splitter = splittingIntervals[i_splitter];
-//     int64_t start_time_i64 = splitter.start().totalNanoseconds();
-//     int64_t stop_time_i64 = splitter.stop().totalNanoseconds();
-//     if (m_vecSplitterTime.empty()) {
-//       // first entry: add
-//       m_vecSplitterTime.emplace_back(start_time_i64);
-//       m_vecSplitterTime.emplace_back(stop_time_i64);
-//       m_vecSplitterGroup.emplace_back(splitter.index());
-//     } else if (abs(last_entry_time - start_time_i64) < TOLERANCE) {
-//       // start time is SAME as last entry
-//       m_vecSplitterTime.emplace_back(stop_time_i64);
-//       m_vecSplitterGroup.emplace_back(splitter.index());
-//     } else if (start_time_i64 > last_entry_time + TOLERANCE) {
-//       // start time is way behind. then add an empty one
-//       m_vecSplitterTime.emplace_back(start_time_i64);
-//       m_vecSplitterTime.emplace_back(stop_time_i64);
-//       m_vecSplitterGroup.emplace_back(no_filter_index);
-//       m_vecSplitterGroup.emplace_back(splitter.index());
-//     } else {
-//       // some impossible situation
-//       std::stringstream errorss;
-//       errorss << "New start time " << start_time_i64 << " is before last entry's time " << last_entry_time;
-//       throw std::runtime_error(errorss.str());
-//     }
-
-//     // update
-//     last_entry_time = m_vecSplitterTime.back();
-//   } // END-FOR (add all splitters)
-// }
 
 //-------------------------------------------------------------------------
 /** Create a list of EventWorkspace objects to be used as event filtering output.
@@ -1325,226 +1020,6 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
   PARALLEL_CHECK_INTERRUPT_REGION
   progress(0.1 + progressamount, "Splitting logs");
   addTimer("filterEventsBySplitters", startTime, std::chrono::high_resolution_clock::now());
-}
-
-// //----------------------------------------------------------------------------------------------
-// /* Generate a vector of integer time series property for each splitter
-//  * corresponding to each target (in integer)
-//  * in each splitter-time-series-property, 1 stands for include and 0 stands
-//  * for time for neutrons to be discarded. If there is no UN-DEFINED
-//  * @brief FilterEvents::generateSplitterTSP
-//  * @param split_tsp_vec
-//  */
-// void FilterEvents::generateSplitterTSP(std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec)
-// {
-//   // clear vector to set up
-//   split_tsp_vec.clear();
-
-//   // initialize m_maxTargetIndex + 1 time series properties in integer
-
-//   for (int itarget = 0; itarget <= m_maxTargetIndex; ++itarget) {
-//     auto split_tsp = std::make_unique<Kernel::TimeSeriesProperty<int>>("splitter");
-//     // add initial value if the first splitter time is after the run start
-//     // time
-//     split_tsp->addValue(Types::Core::DateAndTime(m_runStartTime), 0);
-//     split_tsp_vec.emplace_back(std::move(split_tsp));
-//   }
-
-//   // start to go through  m_vecSplitterTime (int64) and m_vecSplitterGroup add
-//   // each entry to corresponding splitter TSP
-//   for (size_t igrp = 0; igrp < m_vecSplitterGroup.size(); ++igrp) {
-//     // get the target workspace's index and the starting
-//     int itarget = m_vecSplitterGroup[igrp];
-//     // start time of the entry with value 1
-//     DateAndTime start_time(m_vecSplitterTime[igrp]);
-//     // identify by case
-//     if (start_time < m_runStartTime) {
-//       // too early, ignore
-//       continue;
-//     }
-
-//     // get the current TSP
-//     Kernel::TimeSeriesProperty<int> *curr_tsp = split_tsp_vec[itarget].get();
-
-//     if (start_time == m_runStartTime) {
-//       // just same as the run start time: there must be one and only 1 entry
-//       // with value 0
-//       if (curr_tsp->size() != 1) {
-//         std::stringstream error;
-//         error << "Splitter TSP for target workspace " << itarget << " must have 1 and only 1 entry "
-//               << "if there is a splitter right at its run start time.";
-//         throw std::runtime_error(error.str());
-//       }
-//       // the first entry should have an entry with value 0
-//       if (curr_tsp->firstValue() != 0) {
-//         std::stringstream error;
-//         error << "Splitter TSP for target workspace " << itarget << " must have 1 and only 1 entry "
-//               << "with value as 0 but not " << curr_tsp->firstValue() << " if there is a splitter "
-//               << "right at its run start time.";
-//         throw std::runtime_error(error.str());
-//       }
-//       // replace the value with '1' by clearing the original one first
-//       curr_tsp->clear();
-//     }
-
-//     // later than the run start time, then add a new entry
-//     curr_tsp->addValue(start_time, 1);
-
-//     // add run stop time as a new entry
-//     DateAndTime stop_time(m_vecSplitterTime[igrp + 1]);
-//     curr_tsp->addValue(stop_time, 0);
-//   }
-
-//   return;
-// }
-
-// DEBUG: mark this member function for deletion
-// /* Generate the splitter's time series property (log) the splitters workspace
-//  * @brief FilterEvents::generateSplitterTSPalpha
-//  * @param split_tsp_vec
-//  */
-/*
-void FilterEvents::generateSplitterTSPalpha(
-    std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec) {
-  // clear vector to set up
-  split_tsp_vec.clear();
-
-  // initialize m_maxTargetIndex + 1 time series properties in integer
-  // TODO:FIXME - shall not use m_maxTargetIndex, because it is not set for
-  // SplittersWorkspace-type splitters
-  g_log.debug() << "Maximum target index = " << m_maxTargetIndex << "\n";
-  if (m_maxTargetIndex < 0)
-    throw std::runtime_error("Maximum target index cannot be negative.");
-
-  // initialize the target index
-  for (int itarget = 0; itarget <= m_maxTargetIndex; ++itarget) {
-    auto split_tsp = std::make_unique<Kernel::TimeSeriesProperty<int>>("splitter");
-    split_tsp->addValue(m_runStartTime, 0);
-    split_tsp_vec.emplace_back(std::move(split_tsp));
-  }
-
-  for (auto const itarget : m_targetWorkspaceIndexSet) {
-    if (itarget == TimeSplitter::NO_TARGET)
-      continue;
-
-    TimeROI timeROI = m_timeSplitter.getTimeROI(itarget);
-
-    Kernel::SplittingIntervalVec splittingIntervalVec = timeROI.toSplitters();
-    for (auto const splitter : splittingIntervalVec) {
-      if (itarget >= static_cast<int>(split_tsp_vec.size()))
-        throw std::runtime_error("Target workspace index is out of range!");
-
-      if (splitter.start() == m_runStartTime) {
-        // there should be only 1 value in the splitter and clear it.
-        if (split_tsp_vec[itarget]->size() != 1) {
-          throw std::runtime_error("Splitter must have 1 value with initialization.");
-        }
-        split_tsp_vec[itarget]->clear();
-      }
-      split_tsp_vec[itarget]->addValue(splitter.start(), 1);
-      split_tsp_vec[itarget]->addValue(splitter.stop(), 0);
-    }
-  }
-}
-*/
-
-// DEBUG: mark for deletion FilterEvents::mapSplitterTSPtoWorkspaces
-// /* add the splitter TimeSeriesProperty logs to each workspace
-//  * @brief FilterEvents::mapSplitterTSPtoWorkspaces
-//  * @param split_tsp_vec
-//  */
-/*
-void FilterEvents::mapSplitterTSPtoWorkspaces(
-    std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec) {
-  g_log.debug() << "There are " << split_tsp_vec.size() << " TimeSeriesPropeties.\n"
-                << "There are " << m_outputWorkspacesMap.size() << " Output worskpaces.\n";
-
-  if (split_tsp_vec.size() != m_outputWorkspacesMap.size() - 1) {
-    g_log.warning() << "Number of Splitter vector (" << split_tsp_vec.size()
-                    << ") does not match number of filtered output workspaces (" << m_outputWorkspacesMap.size() - 1
-                    << ")\n";
-  }
-
-  for (int itarget = 0; itarget < static_cast<int>(split_tsp_vec.size()); ++itarget) {
-    // use itarget to find the workspace that is mapped
-    std::map<int, DataObjects::EventWorkspace_sptr>::iterator ws_iter;
-    ws_iter = m_outputWorkspacesMap.find(itarget);
-
-    // skip if an itarget does not have matched workspace
-    if (ws_iter == m_outputWorkspacesMap.end()) {
-      g_log.warning() << "iTarget " << itarget << " does not have any workspace associated.\n";
-      continue;
-    }
-
-    // get the workspace
-    DataObjects::EventWorkspace_sptr outws = ws_iter->second;
-
-    // calculate the duration
-    double duration = calculate_duration(split_tsp_vec[itarget]);
-
-    // add property
-    PropertyWithValue<double> *duration_property = new PropertyWithValue<double>("duration", duration);
-    outws->mutableRun().addProperty(duration_property, true);
-    // note: split_tps_vec[i], the shared pointer, will be destroyed by
-    // std::move()
-    outws->mutableRun().addProperty(std::move(split_tsp_vec[itarget]), true);
-  }
-
-  return;
-}
-*/
-
-// DEBUG: mark for deletion FilterEvents::calculate_duration
-// /* Calculate split-workspace's duration according to splitter time series
-//  * property
-//  * @brief calculate the duration from TSP "splitter"
-//  * @param splitter_tsp :: TimeSeriesProperty for splitter
-//  * @return
-//  */
-/*
-double FilterEvents::calculate_duration(std::unique_ptr<Kernel::TimeSeriesProperty<int>> &splitter_tsp) {
-  // Get the times and values
-  std::vector<int> split_values = splitter_tsp->valuesAsVector();
-  std::vector<DateAndTime> split_time = splitter_tsp->timesAsVector();
-
-  double duration = 0.;
-  for (size_t i = 0; i < split_values.size() - 1; ++i) {
-    // for splitter's value == 1 (from this till 0 will be counted in the
-    // duration)
-    if (split_values[i] == 1) {
-      // difference in nanosecond and then converted to second
-      double sub_duration =
-          1.E-9 * static_cast<double>(split_time[i + 1].totalNanoseconds() - split_time[i].totalNanoseconds());
-      // increment
-      duration += sub_duration;
-    }
-  }
-
-  return duration;
-}
-*/
-
-/** Get all filterable logs' names (double and integer)
- * @returns Vector of names of logs
- */
-std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
-  std::vector<std::string> lognames;
-
-  const std::vector<Kernel::Property *> allprop = m_eventWS->mutableRun().getProperties();
-  for (auto ip : allprop) {
-    // cast to double log and integer log
-    auto *dbltimeprop = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(ip);
-    auto *inttimeprop = dynamic_cast<Kernel::TimeSeriesProperty<int> *>(ip);
-    auto *booltimeprop = dynamic_cast<Kernel::TimeSeriesProperty<bool> *>(ip);
-
-    // append to vector if it is either double TimeSeries or int TimeSeries
-    if (dbltimeprop || inttimeprop || booltimeprop) {
-      const std::string &pname = ip->name();
-      lognames.emplace_back(pname);
-    }
-  }
-
-  return lognames;
 }
 
 } // namespace Mantid::Algorithms

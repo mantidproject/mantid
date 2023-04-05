@@ -33,7 +33,6 @@ class TimeAtSampleStrategy;
 class MANTID_ALGORITHMS_DLL FilterEvents final : public API::Algorithm {
 
   enum TOFCorrectionType { NoneCorrect, CustomizedCorrect, DirectCorrect, ElasticCorrect, IndirectCorrect };
-  enum TOFCorrectionOp { MultiplyOp, ShiftOp };
   enum EVENTFILTERSKIP { EventFilterSkipNoDet, EventFilterSkipNoDetTOFCorr };
 
 public:
@@ -98,54 +97,10 @@ private:
   /// Mark event lists of workspace indexes with no associated detector pixels as not to be split
   void examineEventWS();
 
-  // /// Convert SplittersWorkspace to vector of time and vector of target
-  // /// (itarget)
-  // void convertSplittersWorkspaceToVectors();
-
-  // DEBUG: mark for deletion
-  /**
-  void splitTimeSeriesLogs(const std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_vector,
-                           const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
-                           const std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_vector,
-                           const std::vector<Kernel::TimeSeriesProperty<std::string> *> &string_tsp_vector);
-  */
-
-  /// get the names of all the time series properties in the input workspace's
-  /// Run object
-  std::vector<std::string> getTimeSeriesLogNames();
-
-  void generateSplitterTSP(std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec);
-
-  // DEBUG: mark for deletion
-  // void generateSplitterTSPalpha(std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec);
-
-  // DEBUG: mark for deletion mapSplitterTSPtoWorkspaces
-  /// Add time series property 'Splitter' to each child workspace
-  // void mapSplitterTSPtoWorkspaces(std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>> &split_tsp_vec);
-
-  /**
-   * DEBUG: marked for delection
-  void copyNoneSplitLogs(std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_name_vector,
-                         std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
-                         std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector,
-                         std::vector<Kernel::TimeSeriesProperty<std::string> *> &string_tsp_vector);
-  */
-
-  // DEBUG: mark for deletion
-  /**
-  template <typename TYPE>
-  void splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp,
-                               std::vector<Types::Core::DateAndTime> &split_datetime_vec, const int max_target_index);
-  */
-
   void groupOutputWorkspace();
 
   /// Find the TimeROI associated to a particular destination-workspace index
   Kernel::TimeROI partialROI(const int &index);
-
-  /// calculate split-workspace's duration according to splitter time series property
-  // DEBUG: mark for deletion
-  // double calculate_duration(std::unique_ptr<Kernel::TimeSeriesProperty<int>> &splitter_tsp);
 
   DataObjects::EventWorkspace_sptr m_eventWS;
   DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;
@@ -184,10 +139,6 @@ private:
   std::vector<int64_t> m_vecSplitterTime;
   /// Vector for splitting group
   std::vector<int> m_vecSplitterGroup;
-
-  /// Debug
-  bool m_useDBSpectrum;
-  int m_dbWSIndex;
 
   /// TOF detector/sample correction type
   TOFCorrectionType m_tofCorrType;
