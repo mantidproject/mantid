@@ -459,6 +459,7 @@ public:
     std::cout << std::endl << "test_FilterElasticCorrection..." << std::endl;
     int64_t runstart{20000000000}; // start run date from Mantid's Epoch, in nanoseconds
     int64_t pulsedt{1000000};      // time between consecutive pulses, in nanoseconds
+
     EventWorkspace_sptr ws = createEventWorkspaceElastic(runstart, pulsedt);
     AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 10000);
@@ -531,10 +532,13 @@ public:
    */
   void test_FilterDGCorrection() {
     std::cout << std::endl << "test_FilterDGCorrection..." << std::endl;
-    EventWorkspace_sptr ws = createEventWorkspaceDirect(0, 1000000);
+    int64_t runstart{20000000000}; // start run date from Mantid's Epoch, in nanoseconds
+    int64_t pulsedt{1000000};      // time between consecutive pulses, in nanoseconds
+
+    EventWorkspace_sptr ws = createEventWorkspaceDirect(runstart, pulsedt);
     AnalysisDataService::Instance().addOrReplace("MockDirectEventWS", ws);
 
-    MatrixWorkspace_sptr splws = createMatrixSplittersDG();
+    MatrixWorkspace_sptr splws = createMatrixSplittersDG(runstart);
     AnalysisDataService::Instance().addOrReplace("SplitterTableX", splws);
 
     // Run the filtering
@@ -1270,16 +1274,13 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace to mimic direct inelastic scattering insturment.
-   * This workspace will have the same neutron events as the test case in
-   *EventList
-   *
-   * @param runstart_i64 : absolute run start time in int64_t format with unit
-   *nanosecond
-   * @param pulsedt : pulse length in int64_t format with unit nanosecond
+   * This workspace will have the same neutron events as the test case in EventList.
+   * @param runstart_i64 : start run date from Mantid's Epoch time, in nanoseconds
+   * @param pulsedt : time between consecutive pulses, in nanoseconds
+   * @param pulseCount : number of pulses
    */
-  EventWorkspace_sptr createEventWorkspaceDirect(int64_t runstart_i64, int64_t pulsedt) {
-    // Create an EventWorkspace with 10 banks with 1 detector each.  No events
-    // is generated
+  EventWorkspace_sptr createEventWorkspaceDirect(int64_t runstart_i64, int64_t pulsedt, int64_t pulseCount = 1000) {
+    // Create an EventWorkspace with 10 banks with 1 detector each.  No events is generated
     EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1, true);
 
     // L1 = 10
@@ -1288,10 +1289,13 @@ public:
 
     Types::Core::DateAndTime runstart(runstart_i64);
 
-    EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt);
+    // Create `pulseCount` pulses with one event per pulse
+    EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt, pulseCount);
+    Types::Core::DateAndTime runend(runstart + pulseCount * pulsedt);
 
     // Set properties: (1) run_start time; (2) Ei
     eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(), true);
+    eventWS->mutableRun().addProperty("run_end", runend.toISO8601String(), true);
 
     double shift = 2.E-4;
     double ei = (l1 * l1 * PhysicalConstants::NeutronMass) / (shift * shift * 2. * PhysicalConstants::meV);
@@ -1362,7 +1366,6 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace as diffractometer
-   * @brief createEventWorkspaceElastic
    * @param runstart_i64 : start run date from Mantid's Epoch time, in nanoseconds
    * @param pulsedt : time between consecutive pulses, in nanoseconds
    * @param pulseCount : number of pulses
@@ -1375,7 +1378,7 @@ public:
 
     Types::Core::DateAndTime runstart(runstart_i64);
 
-    // Create 1000 pulses and one event per pulse
+    // Create `pulseCount` pulses with one event per pulse
     EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt, pulseCount);
     Types::Core::DateAndTime runend(runstart + pulseCount * pulsedt);
 
@@ -1678,7 +1681,6 @@ public:
 
   /** Create a matrix splitters workspace for elastic correction
    * @param runstart_i64 : start run date from Mantid's Epoch time, in nanoseconds
-   * @return
    */
   API::MatrixWorkspace_sptr createMatrixSplittersElastic(int64_t runstart) {
     MatrixWorkspace_sptr spws =
@@ -1703,7 +1705,7 @@ public:
     // add runstart and convert the splitters' time to second
     constexpr double nanosecondToSecond{1.E-9};
     for (size_t i = 0; i < vec_splitTimes.size(); ++i) {
-      vec_splitTimes[i] += runstart;
+      vec_splitTimes[i] += static_cast<double>(runstart);
       vec_splitTimes[i] *= nanosecondToSecond;
     }
 
@@ -1721,7 +1723,10 @@ public:
     return spws;
   }
 
-  API::MatrixWorkspace_sptr createMatrixSplittersDG() {
+  /** Create a matrix splitters workspace for direct geometry correction
+   * @param runstart_i64 : start run date from Mantid's Epoch time, in nanoseconds
+   */
+  API::MatrixWorkspace_sptr createMatrixSplittersDG(int64_t runstart = 0) {
     MatrixWorkspace_sptr spws =
         std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 10));
 
@@ -1741,9 +1746,12 @@ public:
     vec_splitTimes[9] = 9000000;
     vec_splitTimes[10] = 10000000;
 
-    // convert the splitters' time to second
-    for (size_t i = 0; i < vec_splitTimes.size(); ++i)
-      vec_splitTimes[i] *= 1.E-9;
+    // add runstart and convert the splitters' time to second
+    constexpr double nanosecondToSecond{1.E-9};
+    for (size_t i = 0; i < vec_splitTimes.size(); ++i) {
+      vec_splitTimes[i] += static_cast<double>(runstart);
+      vec_splitTimes[i] *= nanosecondToSecond;
+    }
 
     vec_splitGroup[0] = 2;
     vec_splitGroup[1] = 5;
