@@ -196,9 +196,7 @@ class CRYSTALLoader(AbInitioLoader):
             all_coord = []
             # parse all k-points
             for k in range(num_k):
-
                 line = self._parser.find_first(file_obj=file_obj, msg="DISPERSION K POINT NUMBER")
-
                 partial_freq = []
                 xdisp = []
                 ydisp = []
@@ -214,7 +212,6 @@ class CRYSTALLoader(AbInitioLoader):
                 if k_point_type == b"R":
 
                     while not self._parser.file_end(file_obj=file_obj):
-
                         self._read_freq_block(file_obj=file_obj, freq=partial_freq)
                         self._read_coord_block(file_obj=file_obj, xdisp=xdisp, ydisp=ydisp, zdisp=zdisp)
 
@@ -240,7 +237,7 @@ class CRYSTALLoader(AbInitioLoader):
                         self._read_coord_block(
                             file_obj=file_obj, xdisp=real_partial_xdisp, ydisp=real_partial_ydisp, zdisp=real_partial_zdisp, part="real"
                         )
-                        if self._parser.block_end(file_obj=file_obj, msg=["IMAGINARY"]):
+                        if self._parser.block_end(file_obj=file_obj, msg=["IMAGINARY", "MODES IN ANTI-PHASE"]):
                             break
 
                     while not self._parser.file_end(file_obj=file_obj):
@@ -261,6 +258,7 @@ class CRYSTALLoader(AbInitioLoader):
 
                     # reconstruct complex atomic displacements
                     for el in range(len(real_partial_xdisp)):
+
                         xdisp.append(real_partial_xdisp[el] + complex_partial_xdisp[el])
                         ydisp.append(real_partial_ydisp[el] + complex_partial_ydisp[el])
                         zdisp.append(real_partial_zdisp[el] + complex_partial_zdisp[el])
