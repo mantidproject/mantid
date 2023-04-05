@@ -18,6 +18,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
@@ -530,7 +531,7 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
 
   peakPos = peaks[0];
   if (nHills > 2) {
-    size_t peakIndex = Kernel::VectorHelper::getBinIndex(hillsPos, peaks[0]);
+    auto peakIndex = std::size_t(Kernel::VectorHelper::getBinIndex(hillsPos, peaks[0]));
     peakTwoSigma = hillsPos[peakIndex + 1] - hillsPos[peakIndex];
   } else {
     if (hillsPos.size() == 2) {
@@ -685,13 +686,13 @@ void getBinRange(const HistogramData::HistogramX &eBins, double eMin, double eMa
   if (eMin <= bins[0]) {
     index_min = 0;
   } else {
-    index_min = Kernel::VectorHelper::getBinIndex(bins, eMin);
+    index_min = std::size_t(Kernel::VectorHelper::getBinIndex(bins, eMin));
   }
 
   if (eMax >= eBins[nBins - 1]) {
     index_max = nBins - 1;
   } else {
-    index_max = Kernel::VectorHelper::getBinIndex(bins, eMax) + 1;
+    index_max = std::size_t(Kernel::VectorHelper::getBinIndex(bins, eMax)) + 1;
     if (index_max >= nBins)
       index_max = nBins - 1; // last bin range anyway. Should not happen
   }
@@ -920,7 +921,7 @@ double GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const
     auto TimeEnd = inputWS->run().endTime();
     pTimeSeries->filterByTime(TimeStart, TimeEnd);
   } else {
-    pTimeSeries->filterByTimes(splitter);
+    pTimeSeries->filterByTimes(Kernel::TimeROI(splitter));
   }
   if (pTimeSeries->size() == 0) {
     throw std::runtime_error("Can not find average value for log defined by property" + propertyName +

@@ -16,6 +16,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <numeric>
@@ -357,7 +358,7 @@ double SumEventsByLogValue::sumProtonCharge(const Kernel::TimeSeriesProperty<dou
                                             const Kernel::SplittingIntervalVec &filter) {
   // Clone the proton charge log and filter the clone on this log value
   std::unique_ptr<Kernel::TimeSeriesProperty<double>> protonChargeLogClone(protonChargeLog->clone());
-  protonChargeLogClone->filterByTimes(filter);
+  protonChargeLogClone->filterByTimes(TimeROI(filter));
   // Seems like the only way to sum this is to yank out the values
   const std::vector<double> pcValues = protonChargeLogClone->valuesAsVector();
   return std::accumulate(pcValues.begin(), pcValues.end(), 0.0);

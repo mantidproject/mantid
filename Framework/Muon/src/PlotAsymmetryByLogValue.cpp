@@ -900,7 +900,9 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
   if (!property) {
     throw std::invalid_argument("Log " + m_logName + " does not exist.");
   }
-  property->filterByTime(start, end);
+  if (auto timeSeriesProperty = dynamic_cast<ITimeSeriesProperty *>(property)) {
+    timeSeriesProperty->filterByTime(start, end);
+  }
 
   double value = 0;
   // try different property types

@@ -314,8 +314,7 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Types::Core::DateAndTime &star
  * unaffected
  * @param splittervec :: A list of intervals to split filter on
  */
-template <typename TYPE>
-void TimeSeriesProperty<TYPE>::filterByTimes(const std::vector<SplittingInterval> &splittervec) {
+template <typename TYPE> void TimeSeriesProperty<TYPE>::filterByTimes(const TimeROI &timeroi) {
   // 1. Sort
   sortIfNecessary();
 
@@ -330,7 +329,7 @@ void TimeSeriesProperty<TYPE>::filterByTimes(const std::vector<SplittingInterval
   g_log.debug() << "DB541  mp_copy Size = " << mp_copy.size() << "  Original MP Size = " << m_values.size() << "\n";
 
   // 4. Create new
-  for (const auto &splitter : splittervec) {
+  for (const auto &splitter : timeroi.toIntervals()) {
     Types::Core::DateAndTime t_start = splitter.start();
     Types::Core::DateAndTime t_stop = splitter.stop();
 
@@ -397,8 +396,8 @@ void TimeSeriesProperty<TYPE>::filterByTimes(const std::vector<SplittingInterval
  *                    proton-charge is periodic log.
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
-                                           bool isPeriodic) const {
+void TimeSeriesProperty<TYPE>::splitByTime(const std::vector<SplittingInterval> &splitter,
+                                           std::vector<Property *> outputs, bool isPeriodic) const {
   // 0. Sort if necessary
   sortIfNecessary();
 
