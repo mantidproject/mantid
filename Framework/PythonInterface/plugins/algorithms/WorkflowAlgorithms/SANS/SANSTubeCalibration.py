@@ -667,13 +667,13 @@ class SANSTubeCalibration(PythonAlgorithm):
         )
 
         # Define the correct positions of the detectors
-        det_ids, det_positions = self.getCalibratedPixelPositions_RKH(ws, peak_positions, ideal_tube.getArray(), ws_ids, False, polinFit)
+        calibrated_positions = self._get_calibrated_pixel_positions(ws, peak_positions, ideal_tube.getArray(), ws_ids, False, polinFit)
         # Check if we have corrected positions
-        if len(det_ids) == len(ws_ids):
+        if len(calibrated_positions.keys()) == len(ws_ids):
             # Save the detector positions to the calibration table
             column_names = calib_table.getColumnNames()
-            for i in range(len(det_ids)):
-                calib_table.addRow({column_names[0]: det_ids[i], column_names[1]: det_positions[i]})
+            for det_id, new_pos in calibrated_positions.items():
+                calib_table.addRow({column_names[0]: det_id, column_names[1]: new_pos})
 
         if skipped:
             self.log().debug("Histogram was excluded from the calibration as it did not have an assigned detector.")
@@ -1045,74 +1045,64 @@ class SANSTubeCalibration(PythonAlgorithm):
         # print xResult
         return xResult
 
-    def getCalibratedPixelPositions_RKH(self, ws, tubePts, idealTubePts, whichTube, peakTestMode=False, polinFit=2):
+    def _get_calibrated_pixel_positions(self, ws, fit_positions, known_positions, ws_ids, peakTestMode=False, polinFit=2):
         """
         Get the calibrated detector positions for one tube
         The tube is specified by a list of workspace indices of its spectra
         Calibration is assumed to be done parallel to the Y-axis
 
-        :param ws: Workspace with tubes to be calibrated - may be integrated or raw
-        :param tubePts: Array of calibration positions (in pixels)
-        :param idealTubePts: Where these calibration positions should be (in Y coords)
-        :param whichtube:  a list of workspace indices for the tube
+        :param ws: workspace with tubes to be calibrated - may be integrated or raw
+        :param fit_positions: array of calibration positions (in pixels)
+        :param known_positions: where these calibration positions should be (in Y coords)
+        :param ws_ids: a list of workspace indices for the tube
         :param PeakTestMode: true if shoving detectors that are reckoned to be at peak away (for test purposes)
         :param polinFit: Order of the polinominal to fit for the ideal positions
 
-        Return  Array of pixel detector IDs and array of their calibrated positions
+        Return dictionary containing the pixel detector IDs and their calibrated positions
         """
 
-        # Arrays to be returned
-        detIDs = []
-        detPositions = []
+        calibrated_detectors = {}
+
         # Get position of first and last pixel of tube
-        nDets = len(whichTube)
-        if nDets < 1:
-            return detIDs, detPositions
+        num_detectors = len(ws_ids)
+        if num_detectors < 1:
+            return calibrated_detectors
 
-            # Correct positions of detectors in tube by quadratic fit
-        pixels = self.correctTubeToIdealTube(tubePts, idealTubePts, nDets, TestMode=peakTestMode, polinFit=polinFit)
-        # print pixels
-        if len(pixels) != nDets:
+        # Correct positions of detectors in tube by quadratic fit
+        corrected_pixels = self.correctTubeToIdealTube(
+            fit_positions, known_positions, num_detectors, TestMode=peakTestMode, polinFit=polinFit
+        )
+
+        if len(corrected_pixels) != num_detectors:
             self.log().debug("Tube correction failed.")
-            return detIDs, detPositions
-        baseInstrument = ws.getInstrument().getBaseInstrument()
-        # Get tube unit vector
-        # get the detector from the baseInstrument, in order to get the positions
-        # before any calibration being loaded.
-        det0 = baseInstrument.getDetector(ws.getDetector(whichTube[0]).getID())
-        detN = baseInstrument.getDetector(ws.getDetector(whichTube[-1]).getID())
-        d0pos, dNpos = det0.getPos(), detN.getPos()
-        ## identical to norm of vector: |dNpos - d0pos|
-        tubeLength = det0.getDistance(detN)
-        if tubeLength <= 0.0:
+            return calibrated_detectors
+
+        # Get the detector from the base instrument, in order to get the positions before calibration
+        base_instrument = ws.getInstrument().getBaseInstrument()
+        first_det = base_instrument.getDetector(ws.getDetector(ws_ids[0]).getID())
+        last_det = base_instrument.getDetector(ws.getDetector(ws_ids[-1]).getID())
+        first_det_pos = first_det.getPos()
+        last_det_pos = last_det.getPos()
+        tube_length = first_det.getDistance(last_det)
+        if tube_length <= 0.0:
             self.log().error("Zero length tube cannot be calibrated, calibration failed.")
-            return detIDs, detPositions
-        # unfortunatelly, the operation '/' is not defined in V3D object, so
-        # I have to use the multiplication.
-        # unit_vectors are defined as u = (v2-v1)/|v2-v1| = (dn-d0)/length
-        unit_vector = (dNpos - d0pos) * (1.0 / tubeLength)
+            return calibrated_detectors
 
-        # Get Centre (really want to get if from IDF to allow calibration a multiple number of times)
-        center = (dNpos + d0pos) * 0.5  # (1.0/2)
-        # RKH 9/7/14 his does not work for our gas tubes that are not centred on X=0.0, so set the X coord to zero
-        kill = V3D(0.0, 1.0, 1.0)
-        center = center * kill
-        # RKH added print 9/7/14
-        self.log().debug(f"center={center},  unit vector= {unit_vector}")
+        # Get tube unit vector
+        unit_vector = (last_det_pos - first_det_pos) * (1.0 / tube_length)
+
+        # Get Centre (really want to get it from IDF to allow calibration a multiple number of times)
+        center = (last_det_pos + first_det_pos) * 0.5
+        # SANS2D gas tubes are not centred on X=0.0, so set the X co-ordinate to zero
+        center = center * V3D(0.0, 1.0, 1.0)
+
         # Move the pixel detectors (might not work for sloping tubes)
-        for i in range(nDets):
-            deti = ws.getDetector(whichTube[i])
-            det_pos = deti.getPos()  # noqa: F841
-            pNew = pixels[i]
-            # again, the opeartion float * v3d is not defined, but v3d * float is,
-            # so, I wrote the new pos as center + unit_vector * (float)
-            newPos = center + unit_vector * pNew
+        for i in range(num_detectors):
+            det_id = ws.getDetector(ws_ids[i]).getID()
+            new_pos = center + unit_vector * corrected_pixels[i]
+            calibrated_detectors[det_id] = new_pos
 
-            detIDs.append(deti.getID())
-            detPositions.append(newPos)
-            # print i, detIDs[i], detPositions[i]
-
-        return detIDs, detPositions
+        return calibrated_detectors
 
     def notify_tube_cvalue_status(self, cvalues):
         all_cvalues_ok = True
