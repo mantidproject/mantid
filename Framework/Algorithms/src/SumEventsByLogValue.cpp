@@ -212,6 +212,13 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
       log->expandFilterToRange(filter, value, value, timeAfterLastLogValue);
     }
 
+    // convert to the actual time filter
+    TimeROI timeROI; // TODO remove this conversion
+    for (const auto &interval : filter) {
+      if (interval.start() < interval.stop())
+        timeROI.addROI(interval.start(), interval.stop());
+    }
+
     // Calculate the time covered by this log value and add it to the table
     double duration = 0.0;
     for (auto &time : filter) {
@@ -222,11 +229,10 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
     interruption_point();
     // Sum up the proton charge for this log value
     if (protonChargeLog)
-      protonChgCol->cell<double>(row) = sumProtonCharge(protonChargeLog, filter);
+      protonChgCol->cell<double>(row) = sumProtonCharge(protonChargeLog, timeROI);
     interruption_point();
 
     // filter the logs
-    TimeROI timeROI(filter, true);
     for (auto &otherLog : otherLogs) {
       // Calculate the average value of each 'other' log for the current value
       // of the main log
@@ -357,10 +363,10 @@ std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>> SumEven
  *  @returns The summed proton charge
  */
 double SumEventsByLogValue::sumProtonCharge(const Kernel::TimeSeriesProperty<double> *protonChargeLog,
-                                            const Kernel::SplittingIntervalVec &filter) {
+                                            const Kernel::TimeROI &filter) {
   // Clone the proton charge log and filter the clone on this log value
   std::unique_ptr<Kernel::TimeSeriesProperty<double>> protonChargeLogClone(protonChargeLog->clone());
-  protonChargeLogClone->filterByTimes(TimeROI(filter));
+  protonChargeLogClone->filterByTimes(filter);
   // Seems like the only way to sum this is to yank out the values
   const std::vector<double> pcValues = protonChargeLogClone->valuesAsVector();
   return std::accumulate(pcValues.begin(), pcValues.end(), 0.0);

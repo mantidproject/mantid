@@ -18,7 +18,6 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
@@ -904,7 +903,7 @@ Kernel::Property *GetAllEi::getPLogForProperty(const API::MatrixWorkspace_sptr &
  *                        experiment start/end times.
  */
 double GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const std::string &propertyName,
-                                 std::vector<Kernel::SplittingInterval> &splitter) {
+                                 Kernel::TimeROI &timeroi) {
 
   auto pIProperty = getPLogForProperty(inputWS, propertyName);
 
@@ -916,12 +915,12 @@ double GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const
     throw std::runtime_error("Could not retrieve a time series property for the property name " + propertyName);
   }
 
-  if (splitter.empty()) {
+  if (timeroi.useAll()) {
     auto TimeStart = inputWS->run().startTime();
     auto TimeEnd = inputWS->run().endTime();
     pTimeSeries->filterByTime(TimeStart, TimeEnd);
   } else {
-    pTimeSeries->filterByTimes(Kernel::TimeROI(splitter));
+    pTimeSeries->filterByTimes(timeroi);
   }
   if (pTimeSeries->size() == 0) {
     throw std::runtime_error("Can not find average value for log defined by property" + propertyName +
@@ -974,7 +973,7 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS, d
 
   // TODO: Make it dependent on inputWS time range
 
-  std::vector<Kernel::SplittingInterval> splitter;
+  Kernel::TimeROI timeroi;
   if (m_pFilterLog) {
     std::unique_ptr<Kernel::TimeSeriesProperty<double>> pDerivative;
 
@@ -1002,8 +1001,7 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS, d
       if (inSelection) {
         startTime = inputWS->run().startTime();
         endTime = inputWS->run().endTime();
-        Kernel::SplittingInterval interval(startTime, endTime, 0);
-        splitter.emplace_back(interval);
+        timeroi.addROI(startTime, endTime);
       } else {
         throw std::runtime_error("filtered all data points. Nothing to do");
       }
@@ -1016,24 +1014,22 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS, d
     // and derivative assumed in a center of an interval
     for (; next != dateAndTimes.end(); ++next, ++itder) {
       if (SelectInterval(it->first, next->first, itder->second, inSelection, startTime, endTime)) {
-        Kernel::SplittingInterval interval(startTime, endTime, 0);
-        splitter.emplace_back(interval);
+        timeroi.addROI(startTime, endTime);
       }
       it = next;
     }
     // final interval
     if (inSelection && (endTime > startTime)) {
-      Kernel::SplittingInterval interval(startTime, endTime, 0);
-      splitter.emplace_back(interval);
+      timeroi.addROI(startTime, endTime);
     }
   } // End of USE filter log.
 
-  chop_speed = this->getAvrgLogValue(inputWS, "ChopperSpeedLog", splitter);
+  chop_speed = this->getAvrgLogValue(inputWS, "ChopperSpeedLog", timeroi);
   chop_speed = std::fabs(chop_speed);
   if (chop_speed < 1.e-7) {
     throw std::runtime_error("Chopper speed can not be zero ");
   }
-  chop_delay = std::fabs(this->getAvrgLogValue(inputWS, "ChopperDelayLog", splitter));
+  chop_delay = std::fabs(this->getAvrgLogValue(inputWS, "ChopperDelayLog", timeroi));
 
   // process chopper delay in the units of degree (phase)
   auto pProperty = getPLogForProperty(inputWS, "ChopperDelayLog");

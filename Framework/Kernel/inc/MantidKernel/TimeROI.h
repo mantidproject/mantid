@@ -24,8 +24,6 @@ public:
   TimeROI();
   TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
   TimeROI(const Kernel::TimeSeriesProperty<bool> *filter);
-  /// Constructor ignores the index of the splitter
-  TimeROI(const Kernel::SplittingIntervalVec &splitter, const bool skipEmpty = false);
   double durationInSeconds() const;
   double durationInSeconds(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   std::size_t numBoundaries() const;
