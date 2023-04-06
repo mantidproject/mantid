@@ -350,7 +350,7 @@ public:
 private:
   /// Calculate the time-weighted average of a property in a filtered range
   double averageValueInFilter(const std::vector<SplittingInterval> &filter) const;
-  /// @copydoc Mantid::Kernel::ITimeSeriesProperty::averageAndStdDevInFilter()
+  /// Calculate the time-weighted average and std-deviation of a property in a filtered range
   std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &intervals) const;
 
 protected:
