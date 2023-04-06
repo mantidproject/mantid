@@ -599,14 +599,14 @@ class PeakData:
         if np.any(self.x_integrated_data > 0):
             inonzero = self.x_integrated_data > 0
             vmin = self.x_integrated_data[inonzero].min()
-            vmax = self.x_integrated_data[inonzero].mean()
+            vmax = self.x_integrated_data[self.peak_mask].mean()
             if vmax <= vmin:
                 vmax = self.x_integrated_data.max()
         else:
             vmin, vmax = 1, 1
         norm = norm_func(vmin=vmin, vmax=vmax)
         # limits for 1D plot
-        ipad = (self.ixmax - self.ixmin) // 2  # extra portion of data shown outside the 1D window
+        ipad = (self.ixmax - self.ixmin) // 4  # extra portion of data shown outside the 1D window
         istart = max(min(self.ixmin, self.ixmin_opt) - ipad, 0)
         iend = min(max(self.ixmax, self.ixmax_opt) + ipad, len(self.xpk) - 1)
         # 2D plot - data integrated over optimal TOF range (not range for which mask determined)
@@ -632,11 +632,13 @@ class PeakData:
                 color="k",
                 label="data",
             )
-            ax[1].axvline(self.xpos, ls="--", color="k", label="Centre")
+            ax[1].axvline(self.xpos, ls="--", color=3 * [0.5], alpha=0.5, label="Centre")
             ax[1].axvline(self.xmin, ls=":", color="r", label="Initial window")
             ax[1].axvline(self.xmax, ls=":", color="r")
-            ax[1].axhline(0, ls=":", color="k")
-            ax[1].legend(fontsize=7, loc=1, ncol=2)
+            ax[1].axhline(0, ls=":", color=3 * [0.5], alpha=0.5)
+            ax[1].legend(fontsize=7, ncol=2, bbox_to_anchor=(0.75, 0), loc="lower center", bbox_transform=fig.transFigure)
+            box = ax[1].get_position()
+            ax[1].set_position([box.x0, box.y0 + 0.1, box.width, box.height - 0.1])
             ax[1].set_xlabel(r"TOF ($\mu$s)")
             ax[1].set_ylabel("Intensity")
         else:
