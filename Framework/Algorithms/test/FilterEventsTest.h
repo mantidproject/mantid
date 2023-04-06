@@ -93,7 +93,87 @@ public:
     return;
   }
 
-  //----------------------------------------------------------------------------------------------
+  /**
+   * Proton Charge Test
+   * To address defect [Defect] Distribute proton charge correctly using FilterEvents mantid algorithm the
+   * following test should be  implemented:
+   * - Workspace with:
+    + a duration of 12 pulse periods. The pulse period can be taken to be any time, for instance SNS's 1/60 seconds.
+    + a proton charge log, just a constant charge happening every pulse.
+    + a log to be used to split the workspace with entries every pulse on the pulse. Could be a periodic log with
+        the sequence {0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2}. The values could be taken as workspace destination
+        indexes so that we split the original workspace into three workspaces. Thus, the total charge for each
+        workspace should be 1/3 the total charge.
+    + a second log to be used o split the workspace with entries every pulse in between pulses. Again, the values
+        could be the same sequence as before and the the total charge for each workspace should be again 1/3 the
+        total charge.
+   */
+  void test_protonCharge() {
+    std::cout << std::endl << "test_protonCharge..." << std::endl;
+    int64_t runstart_i64 = 10000000000; // 10 seconds, beginning of the fake run
+    int64_t pulsedt = 10000000;         // 1/100 seconds in nanoseconds, time between consecutive pulses
+    int64_t tofdt = 1000000;            // 1 milisecond in nanoseconds, spacing between neutrons events within a pulse
+    size_t numpulses = 1000;
+
+    // Create EventWorkspace with 10 detector-banks, each bank containing one pixel.
+    // the total proton charge is 1000
+    EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+    AnalysisDataService::Instance().addOrReplace("TestProtonCharge", inpWS);
+
+    // Create SplittersWorkspace with 999 intervals and three output workspaces cycling every three pulses
+    // Notice below that the proton charge of the first pulse goes to the unfiltered workspace
+    // index   DateAndTime
+    //   0     1990-Jan-01 00:00:10.005000000
+    //   1     1990-Jan-01 00:00:10.015000000
+    //   2     1990-Jan-01 00:00:10.025000000
+    //   0     1990-Jan-01 00:00:10.035000000
+    //   1     1990-Jan-01 00:00:10.045000000
+    //   2     1990-Jan-01 00:00:10.055000000
+    //   0     1990-Jan-01 00:00:10.065000000
+    //...
+    //   2     1990-Jan-01 00:00:19.985000000
+    //  -1     1990-Jan-01 00:00:19.995000000
+    std::string name{"splitterPeriodic"};
+    int64_t start{runstart_i64 + 5000 * 1000}; // an offset of 5 miliseconds, in nanoseconds
+    int64_t end{runstart_i64 + pulsedt * static_cast<int64_t>(numpulses)};
+    int64_t splitInterval{pulsedt};
+    int splitterCount{3}; // number of destination workspaces
+    SplittersWorkspace_sptr splittersWorkspace = createPeriodSplitters(start, end, splitInterval, splitterCount);
+    AnalysisDataService::Instance().addOrReplace("SplitterPeriodic", splittersWorkspace);
+
+    FilterEvents filter;
+    filter.initialize();
+
+    // Set properties
+    filter.setProperty("InputWorkspace", "TestProtonCharge");
+    filter.setProperty("OutputWorkspaceBaseName", "PChargeSplit");
+    filter.setProperty("SplitterWorkspace", "SplitterPeriodic");
+    filter.setProperty("OutputTOFCorrectionWorkspace", "PChargeCorrection");
+    filter.setProperty("OutputUnfilteredEvents", true);
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(filter.execute());
+    TS_ASSERT(filter.isExecuted());
+
+    // Get output
+    int numsplittedws = filter.getProperty("NumberOutputWS");
+    TS_ASSERT_EQUALS(numsplittedws, 4);
+
+    std::vector<std::string> suffixes{"0", "1", "2", "unfiltered"};
+    std::vector<double> protonCharges;
+    for (const std::string suffix : suffixes) {
+      EventWorkspace_sptr filteredws =
+          std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("PChargeSplit_" + suffix));
+      TS_ASSERT(filteredws);
+      protonCharges.emplace_back(filteredws->run().getProtonCharge());
+    }
+
+    // the first proton charge at 1990-Jan-01 00:00:10.000 goes to the unfiltered workspace because the first interval
+    // begins at 1990-Jan-01 00:00:10.005
+    std::vector<double> expectedProtonCharges{333.0, 333.0, 333.0, 1.0};
+    TS_ASSERT_EQUALS(protonCharges, expectedProtonCharges);
+  }
+
   /**  Filter events without any correction
    *  Event workspace:
    * (1) 10 detectors
@@ -1302,7 +1382,6 @@ public:
     return eventWS;
   }
 
-  //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace as diffractometer
    * @param runstart_i64 : start run date from Mantid's Epoch time, in nanoseconds
    * @param pulsedt : time between consecutive pulses, in nanoseconds
@@ -1337,7 +1416,32 @@ public:
     return eventWS;
   }
 
-  //----------------------------------------------------------------------------------------------
+  /**
+   * SplitterWorkspace with alternating splitters of same time span
+   *
+   * intervals [t_00, t_01], [t_10, t_11], ..[t_n0, t_n1] such that t_00==start and t_n1<=end
+   *
+   * @param start : start time of the first splitter
+   * @param end : upper time boundary to the splitters
+   * @param span : time interval between two splitters
+   * @param count : number of splitters
+   * @return
+   */
+  SplittersWorkspace_sptr createPeriodSplitters(int64_t start, int64_t end, int64_t span, int count) {
+    SplittersWorkspace_sptr splitters = std::make_shared<SplittersWorkspace>();
+    int64_t intervalBegin{start};
+    int intervalIndex{0};
+    while (intervalBegin + span <= end) {
+      Kernel::SplittingInterval interval(intervalBegin, intervalBegin + span, intervalIndex);
+      splitters->addSplitter(interval);
+      intervalBegin += span;
+      intervalIndex++;
+      if (intervalIndex == count)
+        intervalIndex = 0;
+    }
+    return splitters;
+  }
+
   /** Create a  SplitterWorkspace containing five splitters and three target-workspace indexes
    *
    * List of splitters (all times relative to runstart_i64):
