@@ -669,14 +669,14 @@ void FilterEvents::createOutputWorkspaces() {
     if (wsindex > TimeSplitter::NO_TARGET) {
       if (descriptiveNames && splitByTime) {
         TimeROI timeROI = m_timeSplitter.getTimeROI(wsindex);
-        auto splittingIntervals = timeROI.toSplitters();
-        for (size_t ii = 0; ii < splittingIntervals.size(); ii++) {
+        auto timeIntervals = timeROI.toTimeIntervals();
+        for (size_t ii = 0; ii < timeIntervals.size(); ii++) {
           auto startTimeInSeconds =
-              Mantid::Types::Core::DateAndTime::secondsFromDuration(splittingIntervals[ii].start() - m_runStartTime);
+              Mantid::Types::Core::DateAndTime::secondsFromDuration(timeIntervals[ii].start() - m_runStartTime);
           auto stopTimeInSeconds =
-              Mantid::Types::Core::DateAndTime::secondsFromDuration(splittingIntervals[ii].stop() - m_runStartTime);
+              Mantid::Types::Core::DateAndTime::secondsFromDuration(timeIntervals[ii].stop() - m_runStartTime);
           wsname << startTimeInSeconds << "_" << stopTimeInSeconds;
-          if (ii < splittingIntervals.size() - 1)
+          if (ii < timeIntervals.size() - 1)
             wsname << "_";
         }
       } else if (descriptiveNames) {
