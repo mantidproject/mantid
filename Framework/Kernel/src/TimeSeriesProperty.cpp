@@ -737,7 +737,8 @@ void TimeSeriesProperty<std::string>::makeFilterByValue(std::vector<SplittingInt
  * @param TimeTolerance :: offset added to times in seconds (default: 0)
  * @param centre :: Whether the log value time is considered centred or at the
  *beginning (the default).
- * @param timeRoi :: Optional TimeROI to be intersected with created TimeROI
+ * @param existingROI :: Optional TimeROI to be intersected with created TimeROI
+ * @return The effective TimeROI
  */
 template <typename TYPE>
 TimeROI TimeSeriesProperty<TYPE>::makeFilterByValue(double min, double max, bool expand,
