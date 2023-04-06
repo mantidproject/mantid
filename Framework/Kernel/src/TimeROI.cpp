@@ -71,8 +71,10 @@ TimeROI::TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::D
 
 TimeROI::TimeROI(const Kernel::TimeSeriesProperty<bool> *filter) { this->replaceROI(filter); }
 
-TimeROI::TimeROI(const SplittingIntervalVec &splitter) {
+TimeROI::TimeROI(const SplittingIntervalVec &splitter, const bool skipEmpty) {
   for (const auto &split : splitter) {
+    if (skipEmpty && split.start() == split.stop())
+      continue;
     this->addROI(split.start(), split.stop());
   }
 }
