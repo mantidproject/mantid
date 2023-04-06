@@ -10,7 +10,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeROI.h"
-#include <iostream>
+
 #include <json/value.h>
 #include <nexus/NeXusFile.hpp>
 
@@ -787,11 +787,8 @@ TimeROI TimeSeriesProperty<TYPE>::makeFilterByValue(double min, double max, bool
       }
     } else if (isGood) {
       stop = centre ? stop_t + tol : m_values[i].time();
-      try {
+      if (start < stop)
         newROI.addROI(start, stop);
-      } catch (std::runtime_error &) {
-        // If values are not ascending or unique they will be skipped
-      }
       isGood = false;
     }
   }
@@ -811,9 +808,10 @@ TimeROI TimeSeriesProperty<TYPE>::makeFilterByValue(double min, double max, bool
     }
   }
 
+  // If the TimeROI is empty there are no values inside the filter
+  // so we should return USE_NONE
   if (newROI.useAll()) {
-    newROI.replaceROI(TimeROI::USE_NONE);
-    return newROI;
+    return TimeROI::USE_NONE;
   }
 
   if (existingROI != nullptr && !existingROI->useAll()) {
