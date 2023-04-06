@@ -10,9 +10,11 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import CreateCacheFilename
 
-# from testhelpers import run_algorithm
+import datetime, os, sys, hashlib, tempfile, glob, shutil
 
-import os, sys, hashlib, tempfile, glob, shutil, time
+# A fixed time used for testing - 3:00pm today
+now = datetime.datetime.now()
+TIME_3PM = int(datetime.datetime(now.year, now.month, now.day, 15, 0, 0).timestamp())
 
 
 class CleanFileCache(unittest.TestCase):
@@ -108,7 +110,6 @@ class CleanFileCache(unittest.TestCase):
             CacheDir=cache_root,
             OtherProperties=["C=old"],
         )
-        print(f"Time before creating files: {time.time()}", flush=True)
         print(f"cache1={cache1}", flush=True)
         createFile(cache1, age - 1, display=True)
         print(f"cache2={cache2}", flush=True)
@@ -128,7 +129,6 @@ class CleanFileCache(unittest.TestCase):
             touch(p)
         print("Cache files:", flush=True)
         print(glob.glob(os.path.join(cache_root, "*")), flush=True)
-        print(f"Time before running CleanFileCache algorithm: {time.time()}", flush=True)
 
         # Execute
         code = "CleanFileCache(CacheDir = %r, AgeInDays = %s)" % (cache_root, age)
@@ -149,19 +149,18 @@ class CleanFileCache(unittest.TestCase):
 
 
 def createFile(f, daysbefore, display=False):
-    "create a file and set modify time at n=daysbefore days before today"
+    "create a file and set modify time at n=daysbefore days before TIME_3PM"
     touch(f)
     t = computeTime(daysbefore)
     if display:
         print(f"  Computed modification time: {t}")
     os.utime(f, (t, t))
-    # print time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime(os.stat(f).st_mtime))
     return
 
 
 def computeTime(daysbefore):
     "compute time as float of the time at n=daysbefore days before today"
-    return time.time() - daysbefore * 24 * 60 * 60
+    return TIME_3PM - daysbefore * 24 * 60 * 60
 
 
 def touch(f):
