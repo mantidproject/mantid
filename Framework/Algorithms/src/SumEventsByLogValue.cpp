@@ -204,8 +204,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
     const auto row = std::size_t(value - minVal);
     // Create a filter giving the times when this log has the current value
     SplittingIntervalVec filter;
-    log->makeFilterByValue(filter, value,
-                           value); // min & max are the same of course
+    log->makeFilterByValue(filter, value, value); // min & max are the same of course
 
     // This section ensures that the filter goes to the end of the run
     if (value == log->lastValue() && protonChargeLog) {
@@ -226,15 +225,16 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
       protonChgCol->cell<double>(row) = sumProtonCharge(protonChargeLog, filter);
     interruption_point();
 
-    auto timeROI = new TimeROI(filter);
+    // filter the logs
+    TimeROI timeROI(filter, true);
     for (auto &otherLog : otherLogs) {
       // Calculate the average value of each 'other' log for the current value
       // of the main log
       // Have to (maybe inefficiently) fetch back column by name - move outside
       // loop if too slow
-      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) = otherLog.second->timeAverageValue(timeROI);
+      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) = otherLog.second->timeAverageValue(&timeROI);
     }
-    delete timeROI;
+
     prog.report();
   }
 
