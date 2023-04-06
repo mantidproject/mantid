@@ -800,6 +800,11 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue(const
     if ((timeRoi == nullptr) || (timeRoi->useAll())) {
       const auto &filter = getSplittingIntervals();
       retVal = this->averageValueInFilter(filter);
+    } else if (timeRoi->useNone()) {
+      // if TimeROI bans everything, use the simple mean
+      const auto stats =
+          Mantid::Kernel::getStatistics(this->valuesAsVector(), Mantid::Kernel::Math::StatisticType::Mean);
+      return stats.mean;
     } else {
       const auto &filter = timeRoi->toSplitters();
       retVal = this->averageValueInFilter(filter);
