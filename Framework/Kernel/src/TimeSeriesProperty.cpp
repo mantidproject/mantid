@@ -10,7 +10,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeROI.h"
-
+#include <iostream>
 #include <json/value.h>
 #include <nexus/NeXusFile.hpp>
 
@@ -719,6 +719,117 @@ template <>
 void TimeSeriesProperty<std::string>::makeFilterByValue(std::vector<SplittingInterval> & /*split*/, double /*min*/,
                                                         double /*max*/, double /*TimeTolerance*/,
                                                         bool /*centre*/) const {
+  throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue "
+                                       "is not implemented for string "
+                                       "properties");
+}
+
+/**
+ * Fill a TimeROI that will filter the events by matching
+ * log values >= min and <= max. Creates TimeROI where
+ * times match the log values
+ * This method is only used by FilterByLogValue and SumEventsByLogValue
+ *
+ * @param min :: min value
+ * @param max :: max value
+ * @param TimeTolerance :: offset added to times in seconds (default: 0)
+ * @param centre :: Whether the log value time is considered centred or at the
+ *beginning (the default).
+ * @param timeRoi :: Optional TimeROI to be intersected with created TimeROI
+ */
+template <typename TYPE>
+TimeROI TimeSeriesProperty<TYPE>::makeFilterByValue(double min, double max, bool expand,
+                                                    const TimeInterval &expandRange, double TimeTolerance, bool centre,
+                                                    TimeROI *existingROI) const {
+  const bool emptyMin = (min == EMPTY_DBL());
+  const bool emptyMax = (max == EMPTY_DBL());
+
+  if (!emptyMin && !emptyMax && max < min) {
+    std::stringstream ss;
+    ss << "TimeSeriesProperty::makeFilterByValue: 'max' argument must be "
+          "greater than 'min' "
+       << "(got min=" << min << " max=" << max << ")";
+    throw std::invalid_argument(ss.str());
+  }
+
+  // If min or max were unset ("empty") in the algorithm, set to the min or max
+  // value of the log
+  if (emptyMin)
+    min = static_cast<double>(minValue());
+  if (emptyMax)
+    max = static_cast<double>(maxValue());
+
+  TimeROI newROI;
+
+  // Do nothing if the log is empty.
+  if (m_values.empty())
+    return newROI;
+
+  // 1. Sort
+  sortIfNecessary();
+
+  // 2. Do the rest
+  const time_duration tol = DateAndTime::durationFromSeconds(TimeTolerance);
+  DateAndTime stop_t;
+  DateAndTime start, stop;
+
+  bool isGood = false;
+  for (size_t i = 0; i < m_values.size(); ++i) {
+    TYPE val = m_values[i].value();
+
+    if ((val >= min) && (val <= max)) {
+      if (isGood) {
+        stop_t = m_values[i].time();
+      } else {
+        isGood = true;
+        stop_t = m_values[i].time();
+        start = centre ? m_values[i].time() - tol : m_values[i].time();
+      }
+    } else if (isGood) {
+      stop = centre ? stop_t + tol : m_values[i].time();
+      try {
+        newROI.addROI(start, stop);
+      } catch (std::runtime_error &) {
+        // If values are not ascending or unique they will be skipped
+      }
+      isGood = false;
+    }
+  }
+
+  if (expand) {
+    if (expandRange.start() < firstTime()) {
+      auto val = static_cast<double>(firstValue());
+      if ((val >= min) && (val <= max)) {
+        newROI.addROI(expandRange.start(), firstTime());
+      }
+    }
+    if (expandRange.stop() > lastTime()) {
+      auto val = static_cast<double>(lastValue());
+      if ((val >= min) && (val <= max)) {
+        newROI.addROI(lastTime(), expandRange.stop());
+      }
+    }
+  }
+
+  if (newROI.useAll()) {
+    newROI.replaceROI(TimeROI::USE_NONE);
+    return newROI;
+  }
+
+  if (existingROI != nullptr && !existingROI->useAll()) {
+    newROI.update_intersection(*existingROI);
+  }
+  return newROI;
+}
+
+/** Function specialization for TimeSeriesProperty<std::string>
+ *  @throws Kernel::Exception::NotImplementedError always
+ */
+template <>
+TimeROI TimeSeriesProperty<std::string>::makeFilterByValue(double /*min*/, double /*max*/, bool /*expand*/,
+                                                           const TimeInterval & /*expandRange*/,
+                                                           double /*TimeTolerance*/, bool /*centre*/,
+                                                           TimeROI * /*existingROI*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue "
                                        "is not implemented for string "
                                        "properties");

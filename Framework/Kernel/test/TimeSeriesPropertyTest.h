@@ -548,6 +548,87 @@ public:
     delete log;
   }
 
+  //----------------------------------------------------------------------------
+  void test_makeFilterByValueWithROI() {
+    TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("MyIntLog");
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:00", 1));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:10", 2));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:20", 3));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:30", 2.0));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:40", 2.01));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:50", 6));
+
+    TS_ASSERT_EQUALS(log->realSize(), 6);
+    TimeInterval expandedTime(DateAndTime(0), DateAndTime(1));
+
+    // Test centred log value boundaries
+    TimeROI roi = log->makeFilterByValue(1.8, 2.2, false, expandedTime, 1.0, true);
+
+    TS_ASSERT_EQUALS(roi.numBoundaries(), 4);
+    DateAndTime expected;
+
+    expected = DateAndTime("2007-11-30T16:17:09");
+    TS_ASSERT_DELTA(roi.timeAtIndex(0), expected, 1e-3);
+    expected = DateAndTime("2007-11-30T16:17:11");
+    TS_ASSERT_DELTA(roi.timeAtIndex(1), expected, 1e-3);
+
+    expected = DateAndTime("2007-11-30T16:17:29");
+    TS_ASSERT_DELTA(roi.timeAtIndex(2), expected, 1e-3);
+    expected = DateAndTime("2007-11-30T16:17:41");
+    TS_ASSERT_DELTA(roi.timeAtIndex(3), expected, 1e-3);
+
+    // Now test with left-aligned log value boundaries
+    roi = log->makeFilterByValue(1.8, 2.2, false, expandedTime, 1.0);
+    TS_ASSERT_EQUALS(roi.numBoundaries(), 4);
+
+    expected = DateAndTime("2007-11-30T16:17:10");
+    TS_ASSERT_DELTA(roi.timeAtIndex(0), expected, 1e-3);
+    expected = DateAndTime("2007-11-30T16:17:20");
+    TS_ASSERT_DELTA(roi.timeAtIndex(1), expected, 1e-3);
+
+    expected = DateAndTime("2007-11-30T16:17:30");
+    TS_ASSERT_DELTA(roi.timeAtIndex(2), expected, 1e-3);
+    expected = DateAndTime("2007-11-30T16:17:50");
+    TS_ASSERT_DELTA(roi.timeAtIndex(3), expected, 1e-3);
+
+    auto start = DateAndTime("2007-11-30T16:17:40");
+    auto stop = DateAndTime("2007-11-30T16:18:00");
+    TimeROI *existing = new TimeROI(start, stop);
+
+    roi = log->makeFilterByValue(0.8, 2.2, false, expandedTime, 0.0, false, existing);
+    TS_ASSERT_EQUALS(roi.numBoundaries(), 2);
+
+    expected = DateAndTime("2007-11-30T16:17:40");
+    TS_ASSERT_DELTA(roi.timeAtIndex(0), expected, 1e-3);
+    expected = DateAndTime("2007-11-30T16:17:50");
+    TS_ASSERT_DELTA(roi.timeAtIndex(1), expected, 1e-3);
+
+    expandedTime = TimeInterval(DateAndTime("2007-11-30T16:16:00"), DateAndTime("2007-11-30T16:18:30"));
+
+    start = DateAndTime("2007-11-30T16:16:50");
+    stop = DateAndTime("2007-11-30T16:17:40");
+    existing->clear();
+    existing->addROI(start, stop);
+
+    roi = log->makeFilterByValue(0.8, 2.2, true, expandedTime, 1.0, true, existing);
+    TS_ASSERT_EQUALS(roi.numBoundaries(), 4);
+
+    expected = DateAndTime("2007-11-30T16:16:50");
+    TS_ASSERT_DELTA(roi.timeAtIndex(0), expected, 1e-3);
+    expected = DateAndTime("2007-11-30T16:17:11");
+    TS_ASSERT_DELTA(roi.timeAtIndex(1), expected, 1e-3);
+
+    expected = DateAndTime("2007-11-30T16:17:29");
+    TS_ASSERT_DELTA(roi.timeAtIndex(2), expected, 1e-3);
+    expected = DateAndTime("2007-11-30T16:17:40");
+    TS_ASSERT_DELTA(roi.timeAtIndex(3), expected, 1e-3);
+
+    // Check throws if min > max
+    TS_ASSERT_THROWS(log->makeFilterByValue(2.0, 1.0, true, expandedTime, 0.0, true), const std::invalid_argument &);
+
+    delete log;
+  }
+
   void test_makeFilterByValue_throws_for_string_property() {
     TimeSeriesProperty<std::string> log("StringTSP");
     SplittingIntervalVec splitter;

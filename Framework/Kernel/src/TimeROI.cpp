@@ -331,6 +331,10 @@ Types::Core::DateAndTime TimeROI::lastTime() const {
   return m_roi.back();
 }
 
+Types::Core::DateAndTime TimeROI::timeAtIndex(unsigned long index) const {
+  return (index < m_roi.size()) ? m_roi[index] : DateAndTime::GPS_EPOCH;
+}
+
 /// get a list of all unique times. order is not guaranteed
 std::vector<DateAndTime> TimeROI::getAllTimes(const TimeROI &other) {
 
