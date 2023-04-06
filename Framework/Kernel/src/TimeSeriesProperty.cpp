@@ -1747,6 +1747,15 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeR
   return out;
 }
 
+template <>
+TimeSeriesPropertyStatistics TimeSeriesProperty<std::string>::getStatistics(const TimeROI * /* roi*/) const {
+  // statistics of a string property doesn't make sense
+  TimeSeriesPropertyStatistics out;
+  out.setAllToNan();
+
+  return out;
+}
+
 /** Calculate a particular statistical quantity from the values of the time series.
  *  @param selection : Enum indicating the selected statistical quantity.
  *  @param roi : optional pointer to TimeROI object for filtering the time series values.
