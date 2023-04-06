@@ -239,8 +239,8 @@ void ExtractSpectra::cropRagged(MatrixWorkspace &workspace, int index) {
     E[i] = 0.0;
   }
   size_t endX = this->getXMaxIndex(index);
-  if (endX > 0)
-    endX -= m_isHistogramData;
+  if (endX > 0 && m_isHistogramData)
+    endX -= 1;
   for (size_t i = endX; i < size; ++i) {
     Y[i] = 0.0;
     E[i] = 0.0;
@@ -317,7 +317,11 @@ void ExtractSpectra::execEvent() {
       const auto oldDx = el.pointStandardDeviations();
       el.setHistogram(binEdges);
       if (oldDx) {
-        el.setPointStandardDeviations(oldDx.begin() + m_minXIndex, oldDx.begin() + (m_maxXIndex - m_isHistogramData));
+        auto end = m_maxXIndex;
+        if (m_isHistogramData) {
+          end -= 1;
+        }
+        el.setPointStandardDeviations(oldDx.begin() + m_minXIndex, oldDx.begin() + end);
       }
     }
     propagateBinMasking(*eventW, i);
@@ -329,11 +333,15 @@ void ExtractSpectra::execEvent() {
 
 /// Propagate bin masking if there is any.
 void ExtractSpectra::propagateBinMasking(MatrixWorkspace &workspace, const int i) const {
+  auto end = m_maxXIndex;
+  if (m_isHistogramData) {
+    end -= 1;
+  }
   if (workspace.hasMaskedBins(i)) {
     MatrixWorkspace::MaskList filteredMask;
     for (const auto &mask : workspace.maskedBins(i)) {
       const size_t maskIndex = mask.first;
-      if (maskIndex >= m_minXIndex && maskIndex < m_maxXIndex - m_isHistogramData)
+      if (maskIndex >= m_minXIndex && maskIndex < end)
         filteredMask[maskIndex - m_minXIndex] = mask.second;
     }
     if (filteredMask.size() > 0)
@@ -363,7 +371,10 @@ void ExtractSpectra::checkProperties() {
     if (m_commonBoundaries && !std::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace) &&
         (m_minXIndex == m_maxXIndex || (m_isHistogramData && m_maxXIndex == m_minXIndex + 1))) {
       m_minXIndex--;
-      m_maxXIndex = m_minXIndex + 1 + m_isHistogramData;
+      m_maxXIndex = m_minXIndex + 1;
+      if (m_isHistogramData) {
+        m_maxXIndex += 1;
+      }
     }
   }
   if (!m_commonBoundaries) {
