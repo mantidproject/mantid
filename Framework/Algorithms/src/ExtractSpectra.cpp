@@ -175,6 +175,7 @@ void ExtractSpectra::execHistogram() {
 /** Returns a pointer to a cropped X Histrogram to be used as the X Histogram
  *  for each of the spectra in the new cropped workspace
  *  @param workspace :: The workspace from which to get the cropped X Histogram
+ *  @return XHistogram :: Pointer to cropped X Histrogram from the workspace
  */
 const Kernel::cow_ptr<Mantid::HistogramData::HistogramX>
 ExtractSpectra::getCroppedXHistogram(const API::MatrixWorkspace &workspace) {
