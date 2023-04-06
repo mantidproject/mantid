@@ -113,7 +113,7 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
       m_index_name_map[target_index] = target_name;
       if (target_index == NO_TARGET)
         notarget_names_count++;
-    } catch (std::invalid_argument &e) // a non-integer string
+    } catch (std::invalid_argument &) // a non-integer string
     {
       noninteger_target_names_count++;
 
