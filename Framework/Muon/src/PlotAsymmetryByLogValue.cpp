@@ -895,7 +895,7 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
   double value = 0.;
   if (auto timeSeriesProperty = dynamic_cast<ITimeSeriesProperty *>(property)) {
     timeSeriesProperty->filterByTime(start, end);
-    if (m_logFunc == "Mean" || m_logFunc == "Min" || m_logFunc == "Min") {
+    if (m_logFunc == "Mean" || m_logFunc == "Min" || m_logFunc == "Max") {
       const auto stats = timeSeriesProperty->getStatistics();
       if (m_logFunc == "Mean")
         return stats.time_mean;
