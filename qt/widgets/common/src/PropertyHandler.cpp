@@ -658,6 +658,14 @@ bool PropertyHandler::setParameter(QtProperty *prop) {
     std::string parName = prop->propertyName().toStdString();
     double parValue = m_browser->m_parameterManager->value(prop);
     m_fun->setParameter(parName, parValue);
+
+    foreach (QtProperty *subProp, prop->subProperties()) {
+      if (subProp->propertyName() == "Fix") {
+        fix(prop->propertyName());
+        break;
+      }
+    }
+
     m_browser->sendParameterChanged(m_fun.get());
     m_browser->sendParameterChanged(functionPrefix());
     return true;
@@ -1153,7 +1161,7 @@ void PropertyHandler::fix(const QString &parName) {
     m_browser->m_changeSlotsEnabled = false;
     QtProperty *tieProp = m_ties[parName];
     if (!tieProp) {
-      tieProp = m_browser->m_stringManager->addProperty("Tie");
+      tieProp = m_browser->m_stringManager->addProperty("Fix");
       m_ties[parName] = tieProp;
     }
     m_browser->m_stringManager->setValue(tieProp, parValue);
