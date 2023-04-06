@@ -732,6 +732,8 @@ void TimeSeriesProperty<std::string>::makeFilterByValue(std::vector<SplittingInt
  *
  * @param min :: min value
  * @param max :: max value
+ * @param expand :: bool to expand ROI to the expanded Range
+ * @param expandRange :: TimeInterval for the expanded ROI
  * @param TimeTolerance :: offset added to times in seconds (default: 0)
  * @param centre :: Whether the log value time is considered centred or at the
  *beginning (the default).
