@@ -48,6 +48,7 @@ class HYSPECReductionTest(systemtesting.MantidSystemTest):
         FilterEvents(
             InputWorkspace="sum1",
             OutputWorkspaceBaseName="split",
+            OutputUnfilteredEvents=True,
             InformationWorkspace="info",
             SplitterWorkspace="splboth",
             FilterByPulseTime="1",
