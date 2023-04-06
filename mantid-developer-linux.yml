@@ -37,6 +37,7 @@ dependencies:
   - qt=5.15.8 # Avoid unexpected qt upgrades
   - qtconsole>=5.0.3,<6
   - qtpy>=1.9.0
+  - qt-gtk-platformtheme
   - requests>=2.25.1
   - scipy>=1.6.2
   - setuptools=47.0.0 # Pinned purposefully due to incompatibility with later versions

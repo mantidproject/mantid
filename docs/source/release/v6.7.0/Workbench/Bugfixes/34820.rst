@@ -1,0 +1,1 @@
+- Restore native file browser dialogs on Linux. This will fix problems with the file browser freezing and crashing on IDAaaS.
