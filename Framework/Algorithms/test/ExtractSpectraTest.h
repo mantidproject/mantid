@@ -99,8 +99,7 @@ public:
   void test_defaults() {
     Parameters params;
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
 
@@ -120,8 +119,7 @@ public:
     params.setXRange();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
     params.testXRange(*ws);
@@ -165,8 +163,7 @@ public:
 
     const auto ws = runAlgorithm(params);
 
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     const auto x0_address = &ws->x(0);
     const auto x1_address = &ws->x(1);
@@ -179,8 +176,7 @@ public:
     params.setIndexRange();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testIndexRange(*ws);
@@ -191,8 +187,7 @@ public:
     params.setWorkspaceIndexList();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testWorkspaceIndexList(*ws);
@@ -203,8 +198,7 @@ public:
     params.setWorkspaceIndexList().setIndexRange();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testWorkspaceIndexList(*ws);
@@ -215,8 +209,7 @@ public:
     params.setWorkspaceIndexList().setXRange();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     params.testXRange(*ws);
     params.testWorkspaceIndexList(*ws);
@@ -245,8 +238,7 @@ public:
     params.setDetectorList();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testDetectorList(*ws);
@@ -257,8 +249,7 @@ public:
     params.setDetectorList().setIndexRange();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testDetectorList(*ws);
@@ -269,8 +260,7 @@ public:
     params.setDetectorList().setXRange();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     params.testXRange(*ws);
     params.testDetectorList(*ws);
@@ -281,8 +271,7 @@ public:
     params.setWorkspaceIndexList().setDetectorList();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testDetectorList(*ws);
@@ -294,8 +283,7 @@ public:
 
     // Act
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     // Assert
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
@@ -341,8 +329,7 @@ public:
     params.setXRange();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
     params.testXRange(*ws);
@@ -353,8 +340,7 @@ public:
     params.setIndexRange();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testIndexRange(*ws);
@@ -365,8 +351,7 @@ public:
     params.setWorkspaceIndexList();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testWorkspaceIndexList(*ws);
@@ -377,8 +362,7 @@ public:
     params.setWorkspaceIndexList().setIndexRange();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testWorkspaceIndexList(*ws);
@@ -389,8 +373,7 @@ public:
     params.setWorkspaceIndexList().setXRange();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     params.testXRange(*ws);
     params.testWorkspaceIndexList(*ws);
@@ -418,8 +401,7 @@ public:
     params.setDetectorList();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testDetectorList(*ws);
@@ -430,8 +412,7 @@ public:
     params.setDetectorList().setIndexRange();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testDetectorList(*ws);
@@ -442,8 +423,7 @@ public:
     params.setDetectorList().setXRange();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     params.testXRange(*ws);
     params.testDetectorList(*ws);
@@ -454,8 +434,7 @@ public:
     params.setWorkspaceIndexList().setDetectorList();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testDetectorList(*ws);
@@ -465,8 +444,7 @@ public:
     Parameters params("event-dx");
     auto ws = runAlgorithm(params);
 
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
     params.testDx(*ws);
   }
 
@@ -477,8 +455,7 @@ public:
     params.setXRange();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
     params.testXRange(*ws);
@@ -489,8 +466,7 @@ public:
     params.setIndexRange();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testIndexRange(*ws);
@@ -501,8 +477,7 @@ public:
     params.setWorkspaceIndexList();
 
     auto ws = runAlgorithm(params);
-    if (!ws)
-      return;
+    TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
     params.testWorkspaceIndexList(*ws);
