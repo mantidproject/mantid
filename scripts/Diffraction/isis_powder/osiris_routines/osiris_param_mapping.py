@@ -36,5 +36,7 @@ attr_mapping = [
     ),
     ParamMapEntry(ext_name="paalman_pings_events_per_point", int_name="paalman_pings_events_per_point", optional=True),
     ParamMapEntry(ext_name="simple_events_per_point", int_name="simple_events_per_point", optional=True),
+    ParamMapEntry(ext_name="multiple_scattering", int_name="multiple_scattering", optional=True),
+    ParamMapEntry(ext_name="vanadium_normalization_cutoff", int_name="van_norm_cutoff", optional=True),
 ]
 attr_mapping.extend(PARAM_MAPPING)
