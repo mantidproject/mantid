@@ -93,21 +93,6 @@ public:
     return;
   }
 
-  /**
-   * Proton Charge Test
-   * To address defect [Defect] Distribute proton charge correctly using FilterEvents mantid algorithm the
-   * following test should be  implemented:
-   * - Workspace with:
-    + a duration of 12 pulse periods. The pulse period can be taken to be any time, for instance SNS's 1/60 seconds.
-    + a proton charge log, just a constant charge happening every pulse.
-    + a log to be used to split the workspace with entries every pulse on the pulse. Could be a periodic log with
-        the sequence {0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2}. The values could be taken as workspace destination
-        indexes so that we split the original workspace into three workspaces. Thus, the total charge for each
-        workspace should be 1/3 the total charge.
-    + a second log to be used o split the workspace with entries every pulse in between pulses. Again, the values
-        could be the same sequence as before and the the total charge for each workspace should be again 1/3 the
-        total charge.
-   */
   void test_protonCharge() {
     std::cout << std::endl << "test_protonCharge..." << std::endl;
     int64_t runstart_i64 = 10000000000; // 10 seconds, beginning of the fake run
