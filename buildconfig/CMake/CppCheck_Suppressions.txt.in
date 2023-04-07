@@ -44,7 +44,7 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IFunction.h:211
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IFunction.h:213
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IFunction.h:215
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CorelliCalibrationDatabase.cpp:460
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetAllEi.cpp:759
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetAllEi.cpp:758
 constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionWildes.cpp:96
 constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionWildes.cpp:101
 constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionWildes.cpp:105
