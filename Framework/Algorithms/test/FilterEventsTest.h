@@ -984,12 +984,6 @@ public:
     return;
   }
 
-  /** Test the feature to exclude some sample logs to be split and add to child
-   * workspaces
-   * @brief test_excludeSampleLogs
-   */
-  // BUGFIX: excluding logs leads to Segmentation Fault! (rename "excludeSampleLogs" to "test_excludeSampleLogs")
-
   /** test for the case that the input workspace name is same as output base
    * workspace name
    * @brief test_ThrowSameName
