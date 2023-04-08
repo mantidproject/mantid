@@ -420,16 +420,12 @@ public:
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
     TS_ASSERT_EQUALS(log->realSize(), 6);
 
-    Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"),
-                                                0);
-
-    Mantid::Kernel::SplittingIntervalVec splitters;
-    splitters.emplace_back(interval0);
+    TimeROI roi(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"));
 
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
 
-    log->filterByTimes(splitters);
+    log->filterByTimes(roi);
 
     TS_ASSERT_EQUALS(log->realSize(), 3);
 
@@ -440,20 +436,14 @@ public:
     TimeSeriesProperty<int> *log = createIntegerTSP(10);
     TS_ASSERT_EQUALS(log->realSize(), 10);
 
-    Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"),
-                                                0);
-
-    Mantid::Kernel::SplittingInterval interval1(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"),
-                                                0);
-
-    Mantid::Kernel::SplittingIntervalVec splitters;
-    splitters.emplace_back(interval0);
-    splitters.emplace_back(interval1);
+    TimeROI roi;
+    roi.addROI(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"));
+    roi.addROI(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"));
 
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
 
-    log->filterByTimes(splitters);
+    log->filterByTimes(roi);
 
     TS_ASSERT_EQUALS(log->realSize(), 6);
 
