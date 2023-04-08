@@ -30,8 +30,8 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         else:
             # otherwise query data model based on slice info and transpose
             limits = self.get_data_limits()
-        self.set_axes_limits(*limits)
         self._data_view.dimensions.set_extents(*limits)
+        self.set_axes_limits(*limits)
 
     def set_axes_limits(self, xlim, ylim, auto_transform=True):
         """Set the axes limits on the view.

@@ -141,7 +141,24 @@ class DimensionWidget(QWidget):
             return None
 
     def get_extents(self):
-        return [(d.get_min(), d.get_max()) for d in self.dims for state in (State.X, State.Y) if d.get_state() == state]
+        for d in self.dims:
+            if d.get_state() == State.X:
+                xlim = d.get_min(), d.get_max()
+            elif d.get_state() == State.Y:
+                ylim = d.get_min(), d.get_max()
+        return xlim, ylim
+
+    def set_x_extents(self, xlim):
+        for d in self.dims:
+            if d.get_state() == State.X:
+                d.set_min(xlim[0])
+                d.set_max(xlim[1])
+
+    def set_y_extents(self, ylim):
+        for d in self.dims:
+            if d.get_state() == State.Y:
+                d.set_min(ylim[0])
+                d.set_max(ylim[1])
 
     def set_extents(self, xlim, ylim):
         for d in self.dims:

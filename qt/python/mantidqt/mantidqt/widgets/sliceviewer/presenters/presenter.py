@@ -145,7 +145,8 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         """
         Update the view to display an updated MDHistoWorkspace slice/cut
         """
-        self.view.data_view.update_plot_data(self.model.get_data(self.get_slicepoint(), transpose=self.view.data_view.dimensions.transpose))
+        data_view = self.view.data_view
+        data_view.update_plot_data(self.model.get_data(self.get_slicepoint(), transpose=self.view.data_view.dimensions.transpose))
 
     def update_plot_data_MDE(self):
         """
@@ -459,11 +460,15 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 self.view.data_view.canvas.draw_idle()
         elif event.dblclick and event.button == data_view.canvas.buttond.get(Qt.LeftButton) and not data_view.nonorthogonal_mode:
             if data_view.ax.xaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in data_view.ax.get_xticklabels()):
-                editor = SliceViewXAxisEditor(data_view.canvas, data_view.ax, self.dimensions_changed)
+                editor = SliceViewXAxisEditor(
+                    data_view.canvas, data_view.ax, self.dimensions_changed, self.view.data_view.dimensions.set_x_extents
+                )
                 editor.move(QCursor.pos())
                 editor.exec_()
             elif data_view.ax.yaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in data_view.ax.get_yticklabels()):
-                editor = SliceViewYAxisEditor(data_view.canvas, data_view.ax, self.dimensions_changed)
+                editor = SliceViewYAxisEditor(
+                    data_view.canvas, data_view.ax, self.dimensions_changed, self.view.data_view.dimensions.set_y_extents
+                )
                 editor.move(QCursor.pos())
                 editor.exec_()
 
@@ -581,24 +586,28 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
 
 class SliceViewXAxisEditor(XAxisEditor):
-    def __init__(self, canvas, axes, dimensions_changed):
+    def __init__(self, canvas, axes, dimensions_changed, update_view_extents):
         super(SliceViewXAxisEditor, self).__init__(canvas, axes)
         self.dimensions_changed = dimensions_changed
+        self.update_view_extents = update_view_extents
         self.ui.logBox.hide()
         self.ui.gridBox.hide()
 
     def on_ok(self):
         super(SliceViewXAxisEditor, self).on_ok()
+        self.update_view_extents([self.limit_min, self.limit_max])
         self.dimensions_changed()
 
 
 class SliceViewYAxisEditor(YAxisEditor):
-    def __init__(self, canvas, axes, dimensions_changed):
+    def __init__(self, canvas, axes, dimensions_changed, update_view_extents):
         super(SliceViewYAxisEditor, self).__init__(canvas, axes)
         self.dimensions_changed = dimensions_changed
+        self.update_view_extents = update_view_extents
         self.ui.logBox.hide()
         self.ui.gridBox.hide()
 
     def on_ok(self):
         super(SliceViewYAxisEditor, self).on_ok()
+        self.update_view_extents([self.limit_min, self.limit_max])
         self.dimensions_changed()

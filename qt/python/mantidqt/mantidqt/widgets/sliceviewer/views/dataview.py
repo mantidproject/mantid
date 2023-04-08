@@ -293,9 +293,9 @@ class SliceViewerDataView(QWidget):
         # image. For example if the axes were zoomed and the
         # swap dimensions was clicked we need to restore the
         # appropriate extents to see the image in the correct place
-        extent = self.image.get_extent()
-        self.ax.set_xlim(extent[0], extent[1])
-        self.ax.set_ylim(extent[2], extent[3])
+        xlim, ylim = self.dimensions.get_extents()
+        self.ax.set_xlim(xlim[0], xlim[1])
+        self.ax.set_ylim(ylim[0], ylim[1])
         # Set the original data limits which get passed to the ImageInfoWidget so that
         # the mouse projection to data space is correct for MDH workspaces when zoomed/changing slices
         self._orig_lims = self.get_data_limits_to_fill_current_axes()
@@ -310,11 +310,15 @@ class SliceViewerDataView(QWidget):
         self.image = pcolormesh_nonorthogonal(
             self.ax, ws, self.nonortho_transform.tr, transpose=self.dimensions.transpose, norm=self.colorbar.get_norm(), **kwargs
         )
-        self.on_track_cursor_state_change(self.track_cursor_checked())
+        xlim, ylim = self.dimensions.get_extents()
+        tr = self.nonortho_transform.tr
+        xmin_p, ymin_p = tr(xlim[0], ylim[0])
+        xmax_p, ymax_p = tr(xlim[1], ylim[1])
+        xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
+        self.ax.set_xlim(xlim[0], xlim[1])
+        self.ax.set_ylim(ylim[0], ylim[1])
 
-        # swapping dimensions in nonorthogonal mode currently resets back to the
-        # full data limits as the whole axes has been recreated so we don't have
-        # access to the original limits
+        self.on_track_cursor_state_change(self.track_cursor_checked())
         # pcolormesh clears any grid that was previously visible
         if self.grid_on:
             self.ax.grid(self.grid_on)
@@ -494,9 +498,7 @@ class SliceViewerDataView(QWidget):
             if self.nonorthogonal_mode:
                 inv_tr = self.nonortho_transform.inv_tr
                 # viewing axis y not aligned with plot axis
-                # transform top left and bottom right corner so data fills the initial or zoomed rectangle
-                # xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
-                # xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
+                # transform lower left and upper right corner so data fills the initial or zoomed rectangle
                 xmin_p, ymin_p = inv_tr(xlim[0], ylim[0])
                 xmax_p, ymax_p = inv_tr(xlim[1], ylim[1])
                 xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
