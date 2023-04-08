@@ -153,12 +153,14 @@ class DimensionWidget(QWidget):
             if d.get_state() == State.X:
                 d.set_min(xlim[0])
                 d.set_max(xlim[1])
+        self.previous_dimensions_state = self.dimensions_state
 
     def set_y_extents(self, ylim):
         for d in self.dims:
             if d.get_state() == State.Y:
                 d.set_min(ylim[0])
                 d.set_max(ylim[1])
+        self.previous_dimensions_state = self.dimensions_state
 
     def set_extents(self, xlim, ylim):
         for d in self.dims:
