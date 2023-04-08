@@ -898,8 +898,7 @@ Kernel::Property *GetAllEi::getPLogForProperty(const API::MatrixWorkspace_sptr &
  * @param inputWS      -- shared pointer to the input workspace containing
  *                        the log to process
  * @param propertyName -- log name
- * @param splitter     -- array of Kernel::splittingInterval data, used to
- *                        filter input events or empty array to use
+ * @param timeroi      -- used to filter input events or empty to use
  *                        experiment start/end times.
  */
 double GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const std::string &propertyName,
