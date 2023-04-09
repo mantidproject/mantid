@@ -774,7 +774,7 @@ class SliceViewerTest(unittest.TestCase):
         presenter.view.data_view.dimensions.set_y_extents = mock.MagicMock()
 
         mock_axes = mock.MagicMock()
-        mock_axes.get_xlim = mock.MagicMock(return_value=[0, 1])
+        mock_axes.get_ylim = mock.MagicMock(return_value=[0, 1])
         yaxes_edit = SliceViewYAxisEditor(
             mock.MagicMock(), mock_axes, presenter.dimensions_changed, presenter.view.data_view.dimensions.set_y_extents
         )
