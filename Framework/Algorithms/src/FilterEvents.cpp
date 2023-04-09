@@ -591,15 +591,13 @@ void FilterEvents::parseInputSplitters() {
 
 //-------------------------------------------------------------------------
 /** Create a list of EventWorkspace objects to be used as event filtering output.
- * Currently this method is used with SplittersWorkspace and TableWorkspace input splitters.
  * Sets the TimeROI for each destination workspace
  */
 void FilterEvents::createOutputWorkspaces() {
   const auto startTime = std::chrono::high_resolution_clock::now();
 
-  // When input is SplittersWorkspace or MatrixWorkspace, index -1 (i.e. no target specified) is present
-  // When input is TableWorkspace, index -1 is not present
-  size_t min_expected_number_of_indexes = (m_useSplittersWorkspace || !m_useArbTableSplitters) ? 2 : 1;
+  size_t min_expected_number_of_indexes =
+      2; // "no target" index, which must be always present in the set, plus at least one "valid target" index
   if (m_targetWorkspaceIndexSet.size() < min_expected_number_of_indexes) {
     g_log.warning("No output workspaces specified by input workspace.");
     return;

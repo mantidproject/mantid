@@ -90,8 +90,8 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
 
   for (size_t ii = 0; ii < tws->rowCount(); ii++) {
     // by design, the times in the table must be in seconds
-    double timeStart_s{col_start->cell<double>(ii)};
-    double timeStop_s{col_stop->cell<double>(ii)};
+    double timeStart_s{col_start->toDouble(ii)};
+    double timeStop_s{col_stop->toDouble(ii)};
     if (timeStart_s < 0 || timeStop_s < 0) {
       throw std::runtime_error("All times in TableWorkspace must be >= 0 to construct TimeSplitter.");
     }
