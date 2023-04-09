@@ -756,10 +756,13 @@ class SliceViewerTest(unittest.TestCase):
     def test_x_axes_editor_calls_dimensions_changed(self):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         presenter.dimensions_changed = mock.MagicMock()
+        presenter.view.data_view.dimensions.set_x_extents = mock.MagicMock()
 
         mock_axes = mock.MagicMock()
         mock_axes.get_xlim = mock.MagicMock(return_value=[0, 1])
-        xaxes_edit = SliceViewXAxisEditor(canvas=mock.MagicMock(), axes=mock_axes, dimensions_changed=presenter.dimensions_changed)
+        xaxes_edit = SliceViewXAxisEditor(
+            mock.MagicMock(), mock_axes, presenter.dimensions_changed, presenter.view.data_view.dimensions.set_x_extents
+        )
 
         xaxes_edit.on_ok()
 
@@ -768,10 +771,13 @@ class SliceViewerTest(unittest.TestCase):
     def test_y_axes_editor_calls_dimensions_changed(self):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         presenter.dimensions_changed = mock.MagicMock()
+        presenter.view.data_view.dimensions.set_y_extents = mock.MagicMock()
 
         mock_axes = mock.MagicMock()
-        mock_axes.get_ylim = mock.MagicMock(return_value=[0, 1])
-        yaxes_edit = SliceViewYAxisEditor(canvas=mock.MagicMock(), axes=mock_axes, dimensions_changed=presenter.dimensions_changed)
+        mock_axes.get_xlim = mock.MagicMock(return_value=[0, 1])
+        yaxes_edit = SliceViewYAxisEditor(
+            mock.MagicMock(), mock_axes, presenter.dimensions_changed, presenter.view.data_view.dimensions.set_y_extents
+        )
 
         yaxes_edit.on_ok()
 
