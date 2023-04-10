@@ -196,6 +196,10 @@ public:
   /// Fill a SplittingIntervalVec that will filter the events by matching
   void makeFilterByValue(std::vector<SplittingInterval> &split, double min, double max, double TimeTolerance = 0.0,
                          bool centre = false) const override;
+  /// Fill a SplittingIntervalVec that will filter the events by matching
+  TimeROI makeFilterByValue(double min, double max, bool expand = false,
+                            const TimeInterval &expandRange = TimeInterval(0, 1), double TimeTolerance = 0.0,
+                            bool centre = false, TimeROI *existingROI = nullptr) const override;
   /// Make sure an existing filter covers the full time range given
   void expandFilterToRange(std::vector<SplittingInterval> &split, double min, double max,
                            const TimeInterval &range) const override;

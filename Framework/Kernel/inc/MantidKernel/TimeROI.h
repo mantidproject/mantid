@@ -53,6 +53,7 @@ public:
   /// print the ROI boundaries to a string
   std::string debugStrPrint(const std::size_t type = 0) const;
   size_t getMemorySize() const;
+  Types::Core::DateAndTime timeAtIndex(unsigned long index) const;
 
   // nexus items
   void saveNexus(::NeXus::File *file) const;

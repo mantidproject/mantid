@@ -31,6 +31,10 @@ class TimeROI;
 class ITimeSeriesProperty {
 public:
   /// Fill a SplittingIntervalVec that will filter the events by matching
+  virtual TimeROI makeFilterByValue(double min, double max, bool expand = false,
+                                    const TimeInterval &expandRange = TimeInterval(0, 1), double TimeTolerance = 0.,
+                                    bool centre = true, TimeROI *existingROI = nullptr) const = 0;
+  /// Fill a SplittingIntervalVec that will filter the events by matching
   virtual void makeFilterByValue(std::vector<SplittingInterval> &split, double min, double max, double TimeTolerance,
                                  bool centre = true) const = 0;
   /// Make sure an existing filter covers the full time range given
