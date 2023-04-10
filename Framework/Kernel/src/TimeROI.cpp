@@ -99,7 +99,7 @@ void TimeROI::addROI(const Types::Core::DateAndTime &startTime, const Types::Cor
     TimeInterval roi_to_add(startTime, stopTime);
     std::vector<TimeInterval> output;
     bool union_added = false;
-    for (const auto &interval : this->toSplitters()) {
+    for (const auto &interval : this->toTimeIntervals()) {
       if (overlaps(roi_to_add, interval)) {
         // the roi absorbs this interval
         // this check must be first
@@ -191,7 +191,7 @@ void TimeROI::addMask(const Types::Core::DateAndTime &startTime, const Types::Co
     // loop through all current splitters and get new intersections
     std::vector<TimeInterval> output;
     TimeInterval intersection;
-    for (const auto &interval : this->toSplitters()) {
+    for (const auto &interval : this->toTimeIntervals()) {
       intersection = use_before.intersection(interval);
       if (intersection.isValid()) {
         output.push_back(intersection);
@@ -411,7 +411,7 @@ void TimeROI::update_union(const TimeROI &other) {
     return;
 
   // add all the intervals from the other
-  for (const auto &interval : other.toSplitters()) {
+  for (const auto &interval : other.toTimeIntervals()) {
     this->addROI(interval.start(), interval.stop());
   }
 }
@@ -469,20 +469,6 @@ void TimeROI::update_or_replace_intersection(const TimeROI &other) {
   } else if (!other.useAll()) {
     this->update_intersection(other);
   }
-}
-
-/**
- * This method is to lend itself to be compatible with existing implementation
- */
-const std::vector<SplittingInterval> TimeROI::toSplitters() const {
-  const auto NUM_VAL = m_roi.size();
-  std::vector<SplittingInterval> output;
-  // every other value is a start/stop
-  for (std::size_t i = 0; i < NUM_VAL; i += 2) {
-    output.emplace_back(m_roi[i], m_roi[i + 1]);
-  }
-
-  return output;
 }
 
 /// This method is to lend itself to helping with transition
@@ -608,7 +594,7 @@ void TimeROI::clear() { m_roi.clear(); }
 void TimeROI::saveNexus(::NeXus::File *file) const {
   // create a local TimeSeriesProperty which will do the actual work
   TimeSeriesProperty<bool> tsp(NAME);
-  for (const auto &interval : this->toSplitters()) {
+  for (const auto &interval : this->toTimeIntervals()) {
     tsp.addValue(interval.start(), ROI_USE);
     tsp.addValue(interval.stop(), ROI_IGNORE);
   }

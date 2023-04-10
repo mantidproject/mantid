@@ -1969,7 +1969,7 @@ public:
 
   void test_getSplittingIntervals_noFilter() {
     const auto &log = getTestLog(); // no filter
-    const auto &intervals = log->getSplittingIntervals();
+    const auto &intervals = log->getTimeIntervals();
     TS_ASSERT_EQUALS(intervals.size(), 1);
     const auto &range = intervals.front();
     TS_ASSERT_EQUALS(range.start(), log->firstTime());

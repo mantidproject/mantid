@@ -411,17 +411,16 @@ template <typename TYPE> const Kernel::TimeROI &FilteredTimeSeriesProperty<TYPE>
  * Otherwise the interval is just first time - last time.
  * @returns :: Vector of splitting intervals
  */
-template <typename TYPE>
-std::vector<SplittingInterval> FilteredTimeSeriesProperty<TYPE>::getSplittingIntervals() const {
+template <typename TYPE> std::vector<TimeInterval> FilteredTimeSeriesProperty<TYPE>::getTimeIntervals() const {
   if (m_filter->useAll()) {
     // Case where there is no filter just use the parent implementation
-    return TimeSeriesProperty<TYPE>::getSplittingIntervals();
+    return TimeSeriesProperty<TYPE>::getTimeIntervals();
   } else {
     if (!m_filterApplied) {
       applyFilter();
     }
 
-    return m_filter->toSplitters();
+    return m_filter->toTimeIntervals();
   }
 }
 

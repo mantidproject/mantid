@@ -345,13 +345,13 @@ public:
   void reserve(size_t size) { m_values.reserve(size); };
 
   /// If filtering by log, get the time intervals for splitting
-  virtual std::vector<Mantid::Kernel::SplittingInterval> getSplittingIntervals() const;
+  virtual std::vector<Mantid::Kernel::TimeInterval> getTimeIntervals() const;
 
 private:
   /// Calculate the time-weighted average of a property in a filtered range
-  double averageValueInFilter(const std::vector<SplittingInterval> &filter) const;
+  double averageValueInFilter(const std::vector<TimeInterval> &filter) const;
   /// Calculate the time-weighted average and std-deviation of a property in a filtered range
-  std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &intervals) const;
+  std::pair<double, double> averageAndStdDevInFilter(const std::vector<TimeInterval> &intervals) const;
 
 protected:
   //----------------------------------------------------------------------------------------------

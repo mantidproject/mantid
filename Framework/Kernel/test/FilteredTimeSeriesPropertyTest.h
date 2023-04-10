@@ -628,7 +628,7 @@ public:
     filter->addValue("2007-11-30T16:18:38", true);
     filter->addValue(secondEnd.toISO8601String(), false);
     log->filterWith(filter.get());
-    const auto &intervals = log->getSplittingIntervals();
+    const auto &intervals = log->getTimeIntervals();
     TS_ASSERT_EQUALS(intervals.size(), 2);
     if (intervals.size() == 2) {
       const auto &firstRange = intervals.front(), &secondRange = intervals.back();
@@ -651,7 +651,7 @@ public:
     filter->addValue(secondEnd.toISO8601String(), false);
     filter->addValue(thirdStart.toISO8601String(), true);
     log->filterWith(filter.get());
-    const auto &intervals = log->getSplittingIntervals();
+    const auto &intervals = log->getTimeIntervals();
     TS_ASSERT_EQUALS(intervals.size(), 3);
     if (intervals.size() == 3) {
       TS_ASSERT_EQUALS(intervals[0].start(), log->firstTime());
