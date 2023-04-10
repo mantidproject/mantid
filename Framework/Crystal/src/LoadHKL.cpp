@@ -42,6 +42,7 @@ void LoadHKL::exec() {
   std::string filename = getPropertyValue("Filename");
   PeaksWorkspace_sptr ws(new PeaksWorkspace());
   bool cosines = false;
+  bool modvec = false;
 
   std::fstream in;
   in.open(filename.c_str(), std::ios::in);
@@ -74,13 +75,20 @@ void LoadHKL::exec() {
   double mu1 = 0.0, mu2 = 0.0, wl1 = 0.0, wl2 = 0.0, sc1 = 0.0, astar1 = 0.0;
   do {
     getline(in, line);
+    double h = 0.0, k = 0.0, l = 0.0, m = 0.0, n = 0.0, p = 0.0;
     if (line.length() > 125)
       cosines = true;
-    double h = std::stod(line.substr(0, 4));
-    double k = std::stod(line.substr(4, 4));
-    double l = std::stod(line.substr(8, 4));
-    if (h == 0.0 && k == 0 && l == 0)
+    h = std::stod(line.substr(0, 4));
+    k = std::stod(line.substr(4, 4));
+    l = std::stod(line.substr(8, 4));
+    if (h == 0.0 && k == 0.0 && l == 0.0) {
       break;
+    }
+    if (modvec) {
+      m = std::stod(line.substr(0, 4));
+      n = std::stod(line.substr(4, 4));
+      p = std::stod(line.substr(8, 4));
+    }
     double Inti = std::stod(line.substr(12, 8));
     double SigI = std::stod(line.substr(20, 8));
     double wl = std::stod(line.substr(32, 8));
@@ -116,6 +124,8 @@ void LoadHKL::exec() {
 
     Peak peak(inst, scattering, wl);
     peak.setHKL(qSign * h, qSign * k, qSign * l);
+    peak.setIntHKL(qSign * h, qSign * k, qSign * l);
+    peak.setIntMNP(qSign * m, qSign * n, qSign * p);
     peak.setIntensity(Inti);
     peak.setSigmaIntensity(SigI);
     peak.setRunNumber(run);

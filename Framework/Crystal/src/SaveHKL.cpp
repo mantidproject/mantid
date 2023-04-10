@@ -114,7 +114,7 @@ void SaveHKL::exec() {
   OrientedLattice ol;
   if (cosines) {
     if (peaksW->sample().hasOrientedLattice()) {
-      ol = peaksW->sample().getOrientedLattice();
+      ol = peaksW->cz.getOrientedLattice();
     } else {
       // Find OrientedLattice
       std::string fileUB = getProperty("UBFilename");
@@ -275,7 +275,10 @@ void SaveHKL::exec() {
   // =================== Save all Peaks ======================================
   std::set<size_t> banned;
   // Go through each peak at this run / bank
-
+  int maxOrder = 0;
+  if (peaksW->sample().hasOrientedLattice()) {
+    maxOrder = peaksW->sample().getOrientedLattice().getMaxOrder();
+  }
   // Go in order of run numbers
   runMap_t::iterator runMap_it;
   for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it) {
@@ -351,12 +354,17 @@ void SaveHKL::exec() {
           continue;
         }
         if (decimalHKL == EMPTY_INT())
-          out << std::setw(4) << Utils::round(qSign * p.getH()) << std::setw(4) << Utils::round(qSign * p.getK())
-              << std::setw(4) << Utils::round(qSign * p.getL());
-        else
-          out << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getH()
-              << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getK()
-              << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getL();
+          V3D HKL = p.getIntHKL();
+        out << std::setw(4) << Utils::round(qSign * HKL[0]) << std::setw(4) << Utils::round(qSign * HKL[1])
+            << std::setw(4) << Utils::round(qSign * HKL[2]);
+        if (maxOrder > 0) {
+          V3D MNP = p.getIntMNP();
+          out << std::setw(4) << Utils::round(qSign * MNP[0]) << std::setw(4) << Utils::round(qSign * MNP[1])
+              << std::setw(4) << Utils::round(qSign * MNP[2]);
+        } else
+          out << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << qSign * p.getH()
+              << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << qSign * p.getK()
+              << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << qSign * p.getL();
         double correc = scaleFactor;
         double instBkg = 0;
         double relSigSpect = 0.0;
@@ -492,7 +500,9 @@ void SaveHKL::exec() {
   }
   if (decimalHKL == EMPTY_INT())
     out << std::setw(4) << 0 << std::setw(4) << 0 << std::setw(4) << 0;
-  else
+  if (maxOrder > 0) {
+    out << std::setw(4) << 0 << std::setw(4) << 0 << std::setw(4) << 0;
+  } else
     out << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0 << std::setw(5 + decimalHKL)
         << std::fixed << std::setprecision(decimalHKL) << 0.0 << std::setw(5 + decimalHKL) << std::fixed
         << std::setprecision(decimalHKL) << 0.0;
