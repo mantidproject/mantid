@@ -22,7 +22,6 @@ from mantid.simpleapi import (
     CreateMDWorkspace,
     CreateSampleWorkspace,
     DeleteWorkspace,
-    DeleteWorkspaces,
     FakeMDEventData,
     ConvertToDistribution,
     Scale,
@@ -115,10 +114,6 @@ class HelperTestingClass(QtWidgetFinder):
         self.assert_no_toplevel_widgets()
         self._qapp = None
 
-        names = self.workspaces_to_delete()
-        if names is not None:
-            DeleteWorkspaces(names)
-
     def requiredMemoryMB(self):
         return 5000
 
@@ -158,8 +153,8 @@ class SliceViewerTestDeleteOnClose(systemtesting.MantidSystemTest, HelperTesting
         self.assert_no_toplevel_widgets()
         self.assertEqual(pres.ads_observer, None)
 
-    def workspaces_to_delete(self):
-        return "ws_MD_2d"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestNonorthogonalViewDisablesLineplots(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -184,8 +179,8 @@ class SliceViewerTestNonorthogonalViewDisablesLineplots(systemtesting.MantidSyst
 
         pres.view.close()
 
-    def workspaces_to_delete(self):
-        return "hkl_ws,expt_info"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestNonorthogonalViewDisabledWhenEaxisViewed(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -209,8 +204,8 @@ class SliceViewerTestNonorthogonalViewDisabledWhenEaxisViewed(systemtesting.Mant
 
         pres.view.close()
 
-    def workspaces_to_delete(self):
-        return "ws_4D,expt_info_4D"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestRegionSelectorDisabledWithLineplots(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -231,8 +226,8 @@ class SliceViewerTestRegionSelectorDisabledWithLineplots(systemtesting.MantidSys
 
         pres.view.close()
 
-    def workspaces_to_delete(self):
-        return "hkl_ws,expt_info"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestClimPreventsNegativeValuesIfLognorm(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -254,8 +249,8 @@ class SliceViewerTestClimPreventsNegativeValuesIfLognorm(systemtesting.MantidSys
 
         pres.view.close()
 
-    def workspaces_to_delete(self):
-        return "ws_MD_2d"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestNormSwitchesIfContainsNonPositiveData(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -268,8 +263,8 @@ class SliceViewerTestNormSwitchesIfContainsNonPositiveData(systemtesting.MantidS
         self.assertTrue(isinstance(colorbar.get_norm(), Normalize))
         pres.view.close()
 
-    def workspaces_to_delete(self):
-        return "ws_MD_2d"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestChangingNormUpdatesClimValidators(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -288,8 +283,8 @@ class SliceViewerTestChangingNormUpdatesClimValidators(systemtesting.MantidSyste
 
         pres.view.close()
 
-    def workspaces_to_delete(self):
-        return "ws_MD_2d_pos"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestUpdatePlotDataUpdatesAxesLimits(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -316,8 +311,8 @@ class SliceViewerTestUpdatePlotDataUpdatesAxesLimits(systemtesting.MantidSystemT
 
         pres.view.close()
 
-    def workspaces_to_delete(self):
-        return "hkl_ws"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestViewClosedOnWorkspaceDeleted(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -331,6 +326,9 @@ class SliceViewerTestViewClosedOnWorkspaceDeleted(systemtesting.MantidSystemTest
 
         self.assert_no_toplevel_widgets()
         self.assertEqual(pres.ads_observer, None)
+
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestViewNotClosedOnOtherWorkspaceDeleted(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -349,10 +347,8 @@ class SliceViewerTestViewNotClosedOnOtherWorkspaceDeleted(systemtesting.MantidSy
         self.assertTrue(pres.view in self.find_widgets_of_type(str(type(pres.view))))
         self.assertNotEqual(pres.ads_observer, None)
 
-        pres.view.close()
-
-    def workspaces_to_delete(self):
-        return "ws"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestViewClosedOnReplaceWhenModelPropertiesChange(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -367,8 +363,8 @@ class SliceViewerTestViewClosedOnReplaceWhenModelPropertiesChange(systemtesting.
         self.assert_no_toplevel_widgets()
         self.assertEqual(pres.ads_observer, None)
 
-    def workspaces_to_delete(self):
-        return "ws"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestViewUpdatedOnReplaceWhenModelPropertiesNotChangedMatrixWs(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -389,8 +385,8 @@ class SliceViewerTestViewUpdatedOnReplaceWhenModelPropertiesNotChangedMatrixWs(s
 
         pres.view.close()
 
-    def workspaces_to_delete(self):
-        return "ws"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestViewUpdatedOnReplaceWhenModelPropertiesNotChangedMDEventWs(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -403,7 +399,7 @@ class SliceViewerTestViewUpdatedOnReplaceWhenModelPropertiesNotChangedMDEventWs(
         ws = CreateMDWorkspace(
             Dimensions="3", EventType="MDEvent", Extents="-10,10,-5,5,-1,1", Names="Q_lab_x,Q_lab_y,Q_lab_z", Units="1\\A,1\\A,1\\A"
         )
-        FakeMDEventData(ws, UniformParams="1000000")
+        FakeMDEventData(ws, UniformParams="100000")
         pres = SliceViewer(ws)
         self._assertNoErrorInADSHandlerFromSeparateThread(partial(scale_ws, ws))
 
@@ -414,8 +410,8 @@ class SliceViewerTestViewUpdatedOnReplaceWhenModelPropertiesNotChangedMDEventWs(
 
         pres.view.close()
 
-    def workspaces_to_delete(self):
-        return "ws"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestViewTitleOnWorkspaceRename(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -439,8 +435,8 @@ class SliceViewerTestViewTitleOnWorkspaceRename(systemtesting.MantidSystemTest, 
 
         pres.view.close()
 
-    def workspaces_to_delete(self):
-        return "ws,renamed"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestViewTitleNotChangedOnOtherWorkspaceRename(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -455,8 +451,10 @@ class SliceViewerTestViewTitleNotChangedOnOtherWorkspaceRename(systemtesting.Man
         self.assertEqual(pres.model.get_title(), title)
         self.assertEqual(pres.view.windowTitle(), pres.model.get_title())
 
-    def workspaces_to_delete(self):
-        return "ws"
+        pres.view.close()
+
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestViewClosedOnADSCleared(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -470,8 +468,8 @@ class SliceViewerTestViewClosedOnADSCleared(systemtesting.MantidSystemTest, Help
 
         self.assert_no_toplevel_widgets()
 
-    def workspaces_to_delete(self):
-        return "ws"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestClosedOnReplaceWhenChangedNonorthogonalTransformSupport(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -497,8 +495,8 @@ class SliceViewerTestClosedOnReplaceWhenChangedNonorthogonalTransformSupport(sys
         self.assert_no_toplevel_widgets()
         self.assertEqual(pres.ads_observer, None)
 
-    def workspaces_to_delete(self):
-        return "ws_non_ortho,expt_info_nonortho"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestPlotMatrixXlimitsIgnoresMonitors(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -514,8 +512,10 @@ class SliceViewerTestPlotMatrixXlimitsIgnoresMonitors(systemtesting.MantidSystem
 
         self.assertEqual(pres.view.data_view.get_data_limits_to_fill_current_axes()[0], (xmin, xmax))
 
-    def workspaces_to_delete(self):
-        return "ws"
+        pres.view.close()
+
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestPlotMatrixXlimitsIgnoresNans(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -533,8 +533,10 @@ class SliceViewerTestPlotMatrixXlimitsIgnoresNans(systemtesting.MantidSystemTest
 
         self.assertEqual(pres.view.data_view.get_data_limits_to_fill_current_axes()[0], (xmin, xmax))
 
-    def workspaces_to_delete(self):
-        return "ws"
+        pres.view.close()
+
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestCloseEvent(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -550,8 +552,8 @@ class SliceViewerTestCloseEvent(systemtesting.MantidSystemTest, HelperTestingCla
 
         self.assert_no_toplevel_widgets()
 
-    def workspaces_to_delete(self):
-        return "ws"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestAxesLimitsRespectNonorthogonalTransform(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -584,8 +586,8 @@ class SliceViewerTestAxesLimitsRespectNonorthogonalTransform(systemtesting.Manti
 
         pres.view.close()
 
-    def workspaces_to_delete(self):
-        return "ws_nonortho,expt_info_nonortho"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 class SliceViewerTestLoadMD(systemtesting.MantidSystemTest, HelperTestingClass):
@@ -596,8 +598,8 @@ class SliceViewerTestLoadMD(systemtesting.MantidSystemTest, HelperTestingClass):
         self.assertAlmostEqual(pres.get_proj_matrix().flatten().tolist(), [1, 0, 0, 0, 1, 0, 0, 0, 1])
         pres.view.close()
 
-    def workspaces_to_delete(self):
-        return "ws"
+    def cleanup(self):
+        HelperTestingClass.cleanup(self)
 
 
 # private helper functions
