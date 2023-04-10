@@ -596,8 +596,8 @@ void FilterEvents::parseInputSplitters() {
 void FilterEvents::createOutputWorkspaces() {
   const auto startTime = std::chrono::high_resolution_clock::now();
 
-  size_t min_expected_number_of_indexes =
-      2; // "no target" index, which must be always present in the set, plus at least one "valid target" index
+  // we have index NO_TARGET, which is always present in the set, plus at least one "valid target" index
+  constexpr size_t min_expected_number_of_indexes = 2;
   if (m_targetWorkspaceIndexSet.size() < min_expected_number_of_indexes) {
     g_log.warning("No output workspaces specified by input workspace.");
     return;
