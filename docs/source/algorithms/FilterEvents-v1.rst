@@ -186,7 +186,7 @@ Output:
         tmpws = mtd[name]
         print("workspace %s has %d events" % (name, tmpws.getNumberEvents()))
         time_roi = tmpws.run().getTimeROI()
-        splitters = time_roi.toSplitters()
+        splitters = time_roi.toTimeIntervals()
         for index, splitter in enumerate(splitters, 1):
             times = np.array(splitter, dtype=np.int64) * np.timedelta64(1, 'ns') + np.datetime64('1990-01-01T00:00')
             print("event splitter " + str(index) + ": from " + np.datetime_as_string(times[0], timezone='UTC') + " to " + np.datetime_as_string(times[1], timezone='UTC'))
@@ -233,7 +233,7 @@ Output:
         tmpws = mtd[name]
         print("workspace %s has %d events" % (name, tmpws.getNumberEvents()))
         time_roi = tmpws.run().getTimeROI()
-        splitters = time_roi.toSplitters()
+        splitters = time_roi.toTimeIntervals()
         for index, splitter in enumerate(splitters, 1):
             times = np.array(splitter, dtype=np.int64) * np.timedelta64(1, 'ns') + np.datetime64('1990-01-01T00:00')
             print("event splitter " + str(index) + ": from " + np.datetime_as_string(times[0], timezone='UTC') + " to " + np.datetime_as_string(times[1], timezone='UTC'))
