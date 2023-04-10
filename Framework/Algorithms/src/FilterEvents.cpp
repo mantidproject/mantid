@@ -53,11 +53,10 @@ DECLARE_ALGORITHM(FilterEvents)
  */
 FilterEvents::FilterEvents()
     : m_eventWS(), m_splittersWorkspace(), m_splitterTableWorkspace(), m_matrixSplitterWS(), m_detCorrectWorkspace(),
-      m_useSplittersWorkspace(false), m_useArbTableSplitters(false), m_targetWorkspaceIndexSet(),
-      m_outputWorkspacesMap(), m_wsNames(), m_detTofOffsets(), m_detTofFactors(), m_filterByPulseTime(false),
-      m_informationWS(), m_hasInfoWS(), m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false), m_vecSplitterTime(),
-      m_vecSplitterGroup(), m_tofCorrType(NoneCorrect), m_specSkipType(), m_vecSkip(), m_isSplittersRelativeTime(false),
-      m_filterStartTime(0), m_runStartTime(0) {}
+      m_targetWorkspaceIndexSet(), m_outputWorkspacesMap(), m_wsNames(), m_detTofOffsets(), m_detTofFactors(),
+      m_filterByPulseTime(false), m_informationWS(), m_hasInfoWS(), m_progress(0.), m_outputWSNameBase(),
+      m_toGroupWS(false), m_vecSplitterTime(), m_vecSplitterGroup(), m_tofCorrType(NoneCorrect), m_specSkipType(),
+      m_vecSkip(), m_isSplittersRelativeTime(false), m_filterStartTime(0), m_runStartTime(0) {}
 
 /** Declare Inputs
  */
@@ -387,18 +386,10 @@ void FilterEvents::processAlgorithmProperties() {
 
   m_splittersWorkspace = std::dynamic_pointer_cast<SplittersWorkspace>(tempws);
   m_splitterTableWorkspace = std::dynamic_pointer_cast<TableWorkspace>(tempws);
-  if (m_splittersWorkspace) {
-    m_useSplittersWorkspace = true;
-  } else if (m_splitterTableWorkspace)
-    m_useArbTableSplitters = true;
-  else {
-    m_matrixSplitterWS = std::dynamic_pointer_cast<MatrixWorkspace>(tempws);
-    if (m_matrixSplitterWS) {
-      m_useSplittersWorkspace = false;
-    } else {
-      throw runtime_error("Input \"SplitterWorkspace\" has invalid workspace type.");
-    }
-  }
+  m_matrixSplitterWS = std::dynamic_pointer_cast<MatrixWorkspace>(tempws);
+
+  if (!m_splittersWorkspace && !m_splitterTableWorkspace && !m_matrixSplitterWS)
+    throw runtime_error("Input \"SplitterWorkspace\" has invalid workspace type.");
 
   //********************************************************
   // Find out if an InformationWorkspace has been supplied
@@ -575,9 +566,9 @@ TimeROI FilterEvents::partialROI(const int &index) {
  * @brief FilterEvents::parseInputSplitters
  */
 void FilterEvents::parseInputSplitters() {
-  if (m_useSplittersWorkspace)
+  if (m_splittersWorkspace)
     m_timeSplitter = TimeSplitter(m_splittersWorkspace);
-  else if (m_useArbTableSplitters)
+  else if (m_splitterTableWorkspace)
     m_timeSplitter =
         TimeSplitter(m_splitterTableWorkspace, m_isSplittersRelativeTime ? m_runStartTime : DateAndTime(0));
   else
@@ -621,12 +612,10 @@ void FilterEvents::createOutputWorkspaces() {
     }
   }
 
-  int delta_wsindex{0};
-  const bool from1 = getProperty("OutputWorkspaceIndexedFrom1");
-  const bool outputUnfiltered = getProperty("OutputUnfilteredEvents");
-
-  if (m_useSplittersWorkspace && from1) {
-    // Determine the minimum valid target workspace index. Note that the set is sorted and guaranteed to start with -1.
+  // See if we need to count valid target indexes from 1. That will only affect the names of the output workspaces.
+  int delta_wsindex{0}; // an index shift
+  if (getProperty("OutputWorkspaceIndexedFrom1")) {
+    // Determine the minimum valid target index. Note that the set is sorted and guaranteed to start with -1.
     const int min_wsindex = m_targetWorkspaceIndexSet.size() == 1 ? *m_targetWorkspaceIndexSet.begin()
                                                                   : *std::next(m_targetWorkspaceIndexSet.begin(), 1);
     g_log.debug() << "Minimum target workspace index = " << min_wsindex << "\n";
@@ -656,10 +645,8 @@ void FilterEvents::createOutputWorkspaces() {
       static_cast<double>(m_targetWorkspaceIndexSet.size()); // total number of progress steps expected
   double progress_step_current{0.};                          // current number of progress steps
   const auto originalROI = m_eventWS->run().getTimeROI();
-
+  const bool outputUnfiltered = getProperty("OutputUnfilteredEvents");
   for (auto const wsindex : m_targetWorkspaceIndexSet) {
-
-    //
     // Generate new workspace name
     bool add2output = true;
     std::stringstream wsname;

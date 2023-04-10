@@ -146,7 +146,7 @@ public:
 
     std::vector<std::string> suffixes{"0", "1", "2", "unfiltered"};
     std::vector<double> protonCharges;
-    for (const std::string suffix : suffixes) {
+    for (const std::string &suffix : suffixes) {
       EventWorkspace_sptr filteredws =
           std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("PChargeSplit_" + suffix));
       TS_ASSERT(filteredws);
@@ -906,7 +906,6 @@ public:
     filter.setProperty("SplitterWorkspace", "TableSplitter1");
     filter.setProperty("RelativeTime", true);
     filter.setProperty("OutputUnfilteredEvents", true);
-    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());

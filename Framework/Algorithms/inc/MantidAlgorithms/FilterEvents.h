@@ -108,10 +108,6 @@ private:
   API::MatrixWorkspace_sptr m_matrixSplitterWS;
   DataObjects::TableWorkspace_sptr m_detCorrectWorkspace;
 
-  /// Flag to use matrix splitters or table splitters
-  bool m_useSplittersWorkspace;
-  bool m_useArbTableSplitters;
-
   DataObjects::TimeSplitter m_timeSplitter;
   std::set<int> m_targetWorkspaceIndexSet;
 
