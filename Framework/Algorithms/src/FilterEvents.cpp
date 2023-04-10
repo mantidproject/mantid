@@ -396,7 +396,7 @@ void FilterEvents::processAlgorithmProperties() {
     if (m_matrixSplitterWS) {
       m_useSplittersWorkspace = false;
     } else {
-      throw runtime_error("Invalid type of input workspace, neither SplittersWorkspace nor MatrixWorkspace.");
+      throw runtime_error("Input \"SplitterWorkspace\" has invalid workspace type.");
     }
   }
 
@@ -596,7 +596,7 @@ void FilterEvents::parseInputSplitters() {
 void FilterEvents::createOutputWorkspaces() {
   const auto startTime = std::chrono::high_resolution_clock::now();
 
-  // we have index NO_TARGET, which is always present in the set, plus at least one "valid target" index
+  // There is always NO_TARGET index included in the set, plus we need at least one "valid target" index
   constexpr size_t min_expected_number_of_indexes = 2;
   if (m_targetWorkspaceIndexSet.size() < min_expected_number_of_indexes) {
     g_log.warning("No output workspaces specified by input workspace.");
