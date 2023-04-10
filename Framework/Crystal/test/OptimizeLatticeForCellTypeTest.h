@@ -179,6 +179,7 @@ public:
     lattice->setModVec3(mod_vec_2);
     lattice->setModHKL(modHKL);
     lattice->setModUB(modUB);
+    lattice->setMaxOrder(1);
 
     ws->mutableSample().setOrientedLattice(std::move(lattice));
     ws->addPeak(V3D(1, 0, 0), SpecialCoordinateSystem::HKL);
@@ -193,7 +194,8 @@ public:
     for (int i = 0; i < n_peaks; i++) {
       IPeak &peak = ws->getPeak(i);
       V3D hkl = peak.getHKL();
-      peak.setHKL(hkl + modHKL * mnp);
+      // intentionally incorrect so it is handled by algorithm
+      // peak.setHKL(hkl + modHKL * mnp);
       peak.setIntHKL(hkl);
       peak.setIntMNP(mnp);
       peak.setQSampleFrame(peak.getQSampleFrame() + modUB * mnp * 2 * M_PI, boost::none);
@@ -213,6 +215,11 @@ public:
     OrientedLattice lat = ws->mutableSample().getOrientedLattice();
 
     TS_ASSERT_DELTA(lat.a(), a, 1e-4);
+    TS_ASSERT_DELTA(lat.b(), b, 1e-4);
+    TS_ASSERT_DELTA(lat.c(), c, 1e-4);
+    TS_ASSERT_DELTA(lat.alpha(), alpha, 1e-4);
+    TS_ASSERT_DELTA(lat.beta(), beta, 1e-4);
+    TS_ASSERT_DELTA(lat.gamma(), gamma, 1e-4);
 
     AnalysisDataService::Instance().remove("ws");
   }

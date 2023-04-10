@@ -92,6 +92,16 @@ void OptimizeLatticeForCellType::exec() {
     }
   runWS.emplace_back(ws);
 
+  int maxOrder = ws->mutableSample().getOrientedLattice().getMaxOrder();
+  if (maxOrder > 0) {
+    Matrix<double> modHKL = ws->mutableSample().getOrientedLattice().getModHKL();
+    for (int i = 0; i < ws->getNumberPeaks(); i++) {
+      IPeak &peak = ws->getPeak(i);
+      V3D HKL = peak.getIntHKL() + modHKL * peak.getIntMNP();
+      peak.setHKL(HKL);
+    }
+  }
+
   if (perRun) {
     std::vector<std::pair<std::string, bool>> criteria;
     // Sort by run number
