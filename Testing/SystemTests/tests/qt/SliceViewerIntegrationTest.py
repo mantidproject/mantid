@@ -28,6 +28,7 @@ from mantid.simpleapi import (
     SetUB,
     RenameWorkspace,
     ClearUB,
+    LoadMD,
 )
 from mantid.api import AnalysisDataService
 from mantidqt.utils.qt.testing import get_application
@@ -109,6 +110,12 @@ class HelperTestingClass(QtWidgetFinder):
         self._qapp.sendPostedEvents()
         self.assert_no_toplevel_widgets()
         self._qapp = None
+
+    def requiredMemoryMB(self):
+        return 5000
+
+    def requiredFiles(self):
+        return ["MDNormHYSPEC.nxs"]
 
     # private methods
     def _assertNoErrorInADSHandlerFromSeparateThread(self, operation):
@@ -510,6 +517,15 @@ class SliceViewerTestAxesLimitsRespectNonorthogonalTransform(systemtesting.Manti
         self.assertAlmostEqual(limits_nonorthog[0][1], 10, delta=1e-5)
         self.assertEqual(limits_nonorthog[1], limits[2:])
 
+        pres.view.close()
+
+
+class SliceViewerTestLoadMD(systemtesting.MantidSystemTest, HelperTestingClass):
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+        ws = LoadMD("MDNormHYSPEC.nxs")
+        pres = SliceViewer(ws)
+        self.assertAlmostEqual(pres.get_proj_matrix().flatten().tolist(), [1, 0, 0, 0, 1, 0, 0, 0, 1])
         pres.view.close()
 
 
