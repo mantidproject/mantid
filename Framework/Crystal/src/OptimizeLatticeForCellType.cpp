@@ -94,7 +94,7 @@ void OptimizeLatticeForCellType::exec() {
 
   int maxOrder = ws->mutableSample().getOrientedLattice().getMaxOrder();
   if (maxOrder > 0) {
-    Matrix<double> modHKL = ws->mutableSample().getOrientedLattice().getModHKL();
+    DblMatrix modHKL = ws->mutableSample().getOrientedLattice().getModHKL();
     for (int i = 0; i < ws->getNumberPeaks(); i++) {
       IPeak &peak = ws->getPeak(i);
       V3D HKL = peak.getIntHKL() + modHKL * peak.getIntMNP();
@@ -133,6 +133,7 @@ void OptimizeLatticeForCellType::exec() {
     DblMatrix modUB = peakWS->mutableSample().getOrientedLattice().getModUB();
     int maxOrder = peakWS->mutableSample().getOrientedLattice().getMaxOrder();
     bool crossTerms = peakWS->mutableSample().getOrientedLattice().getCrossTerm();
+    DblMatrix modHKL = ws->mutableSample().getOrientedLattice().getModHKL();
     std::vector<double> lat(6);
     IndexingUtils::GetLatticeParameters(UB, lat);
 
@@ -179,6 +180,7 @@ void OptimizeLatticeForCellType::exec() {
       o_lattice->setModUB(modUB);
       o_lattice->setMaxOrder(maxOrder);
       o_lattice->setCrossTerm(crossTerms);
+      o_lattice->setModHKL(modHKL);
     }
     o_lattice->set(refinedCell.a(), refinedCell.b(), refinedCell.c(), refinedCell.alpha(), refinedCell.beta(),
                    refinedCell.gamma());
