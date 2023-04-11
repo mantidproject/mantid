@@ -310,75 +310,119 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Types::Core::DateAndTime &star
 }
 
 /**
- * Filter by a range of times. If current property has a single value it remains
- * unaffected
- * @param timeroi :: A list of intervals to split filter on
+ * Split this time series property by time intervals to multiple time series
+ * property according to number of distinct splitters' indexes, such as 0 and 1
+ *
+ * NOTE: If the input TSP has a single value, it is assumed to be a constant
+ *  and so is not split, but simply copied to all output.
+ *
+ * @param splitter :: a SplittingIntervalVec object containing the list of intervals
+ *                     and destinations.
+ * @param outputs  :: A vector of output TimeSeriesProperty
+ * pointers of the same type.
+ * @param isPeriodic :: whether the log (this TSP) is periodic. For example
+ *                    proton-charge is periodic log.
  */
-template <typename TYPE> void TimeSeriesProperty<TYPE>::filterByTimes(const TimeROI &timeroi) {
-  // 1. Sort
+template <typename TYPE>
+void TimeSeriesProperty<TYPE>::splitByTime(const std::vector<SplittingInterval> &splitter,
+                                           std::vector<Property *> outputs, bool isPeriodic) const {
+  // 0. Sort if necessary
   sortIfNecessary();
 
-  // 2. Return for single value
-  if (m_values.size() <= 1) {
+  if (outputs.empty())
     return;
+
+  std::vector<TimeSeriesProperty<TYPE> *> outputs_tsp;
+
+  size_t numOutputs = outputs.size();
+  // 1. Clear the outputs before you start
+  for (size_t i = 0; i < numOutputs; i++) {
+    auto *myOutput = dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
+    if (myOutput) {
+      outputs_tsp.emplace_back(myOutput);
+      if (this->m_values.size() == 1) {
+        // Special case for TSP with a single entry = just copy.
+        myOutput->m_values = this->m_values;
+        myOutput->m_size = 1;
+      } else {
+        myOutput->m_values.clear();
+        myOutput->m_size = 0;
+      }
+    } else {
+      outputs_tsp.emplace_back(nullptr);
+    }
   }
 
-  // 3. Prepare a copy
-  std::vector<TimeValueUnit<TYPE>> mp_copy;
+  // 2. Special case for TSP with a single entry = just copy.
+  if (this->m_values.size() == 1)
+    return;
 
-  g_log.debug() << "DB541  mp_copy Size = " << mp_copy.size() << "  Original MP Size = " << m_values.size() << "\n";
+  // 3. We will be iterating through all the entries in the the map/vector
+  size_t i_property = 0;
 
-  // 4. Create new
-  for (const auto &splitter : timeroi.toTimeIntervals()) {
-    Types::Core::DateAndTime t_start = splitter.start();
-    Types::Core::DateAndTime t_stop = splitter.stop();
+  //    And at the same time, iterate through the splitter
+  auto itspl = splitter.begin();
 
-    int tstartindex = findIndex(t_start);
-    if (tstartindex < 0) {
-      // The splitter is not well defined, and use the first
-      tstartindex = 0;
-    } else if (tstartindex >= int(m_values.size())) {
-      // The splitter is not well defined, adn use the last
-      tstartindex = int(m_values.size()) - 1;
+  size_t counter = 0;
+  g_log.debug() << "[DB] Number of time series entries = " << m_values.size()
+                << ", Number of splitters = " << splitter.size() << "\n";
+  while (itspl != splitter.end() && i_property < m_values.size()) {
+    // Get the splitting interval times and destination
+    DateAndTime start = itspl->start();
+    DateAndTime stop = itspl->stop();
+
+    int output_index = itspl->index();
+    // output workspace index is out of range. go to the next splitter
+    if (output_index < 0 || output_index >= static_cast<int>(numOutputs))
+      continue;
+
+    TimeSeriesProperty<TYPE> *myOutput = outputs_tsp[output_index];
+    // skip if the input property is of wrong type
+    if (!myOutput) {
+      ++itspl;
+      ++counter;
+      continue;
     }
 
-    int tstopindex = findIndex(t_stop);
+    // Skip the events before the start of the time
+    while (i_property < m_values.size() && m_values[i_property].time() < start)
+      ++i_property;
 
-    if (tstopindex < 0) {
-      tstopindex = 0;
-    } else if (tstopindex >= int(m_values.size())) {
-      tstopindex = int(m_values.size()) - 1;
-    } else {
-      if (t_stop == m_values[size_t(tstopindex)].time() && size_t(tstopindex) > 0) {
-        tstopindex--;
-      }
+    if (i_property == m_values.size()) {
+      // i_property is out of the range. Then use the last entry
+      myOutput->addValue(m_values[i_property - 1].time(), m_values[i_property - 1].value());
+      break;
     }
 
-    /* Check */
-    if (tstartindex < 0 || tstopindex >= int(m_values.size())) {
-      g_log.warning() << "Memory Leak In FilterByTimes!\n";
+    // The current entry is within an interval. Record them until out
+    if (m_values[i_property].time() > start && i_property > 0 && !isPeriodic) {
+      // Record the previous oneif this property is not exactly on start time
+      //   and this entry is not recorded
+      size_t i_prev = i_property - 1;
+      if (myOutput->size() == 0 || m_values[i_prev].time() != myOutput->lastTime())
+        myOutput->addValue(m_values[i_prev].time(), m_values[i_prev].value());
     }
 
-    if (tstartindex == tstopindex) {
-      TimeValueUnit<TYPE> temp(t_start, m_values[tstartindex].value());
-      mp_copy.emplace_back(temp);
-    } else {
-      mp_copy.emplace_back(t_start, m_values[tstartindex].value());
-      for (auto im = size_t(tstartindex + 1); im <= size_t(tstopindex); ++im) {
-        mp_copy.emplace_back(m_values[im].time(), m_values[im].value());
-      }
+    // Loop through all the entries until out.
+    while (i_property < m_values.size() && m_values[i_property].time() < stop) {
+
+      // Copy the log out to the output
+      myOutput->addValue(m_values[i_property].time(), m_values[i_property].value());
+      ++i_property;
     }
-  } // ENDFOR
 
-  g_log.debug() << "DB530  Filtered Log Size = " << mp_copy.size() << "  Original Log Size = " << m_values.size()
-                << "\n";
+    // Go to the next interval
+    ++itspl;
+    ++counter;
+  } // Looping through entries in the splitter vector
 
-  // 5. Clear
-  m_values.clear();
-  m_values = mp_copy;
-  mp_copy.clear();
-
-  m_size = static_cast<int>(m_values.size());
+  // Make sure all entries have the correct size recorded in m_size.
+  for (std::size_t i = 0; i < numOutputs; i++) {
+    auto *myOutput = dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
+    if (myOutput) {
+      myOutput->m_size = myOutput->realSize();
+    }
+  }
 }
 
 /// Split this TimeSeriresProperty by a vector of time with N entries,

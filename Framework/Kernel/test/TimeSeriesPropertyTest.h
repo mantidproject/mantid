@@ -424,10 +424,8 @@ public:
 
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
-
-    log->filterByTimes(roi);
-
-    TS_ASSERT_EQUALS(log->realSize(), 3);
+    // values are 2, 3, 4
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 3);
 
     delete log;
   }
@@ -440,12 +438,8 @@ public:
     roi.addROI(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"));
     roi.addROI(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"));
 
-    // Since the filter is < stop, the last one is not counted, so there are  3
-    // taken out.
-
-    log->filterByTimes(roi);
-
-    TS_ASSERT_EQUALS(log->realSize(), 6);
+    // values are 2, 3, 4, 8, 9
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 5);
 
     delete log;
   }

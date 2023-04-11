@@ -182,8 +182,6 @@ public:
 
   /// Filter out a run by time.
   void filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) override;
-  /// Filter by a range of times
-  void filterByTimes(const TimeROI &timeroi);
 
   /// New split method
   void splitByTimeVector(const std::vector<Types::Core::DateAndTime> &splitter_time_vec,
