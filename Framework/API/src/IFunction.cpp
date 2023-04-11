@@ -283,12 +283,26 @@ void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
   auto iPar = getParameterIndex(*tie);
   auto it =
       std::find_if(m_ties.begin(), m_ties.end(), [&](const auto &m_tie) { return getParameterIndex(*m_tie) == iPar; });
+  const auto oldTie = getTie(iPar);
 
   if (it != m_ties.end()) {
     *it = std::move(tie);
   } else {
     m_ties.emplace_back(std::move(tie));
     setParameterStatus(iPar, Tied);
+  }
+
+  try {
+    sortTies();
+  } catch (const std::runtime_error &error) {
+    if (oldTie) {
+      const auto oldTieStr = oldTie->asString();
+      const auto oldExp = oldTieStr.substr(oldTieStr.find("=") + 1);
+      *it = std::make_unique<ParameterTie>(this, parameterName(iPar), oldExp);
+    } else {
+      removeTie(m_ties.size() - 1);
+    }
+    throw error;
   }
 }
 

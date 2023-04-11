@@ -1133,6 +1133,7 @@ void PropertyHandler::addTie(const QString &tieStr) {
   try {
     auto &cfun = *m_browser->compositeFunction();
     cfun.tie(name, expr);
+    cfun.applyTies();
     const bool recursive = true;
     QString parName = QString::fromStdString(cfun.parameterLocalName(cfun.parameterIndex(name), recursive));
     foreach (QtProperty *parProp, m_parameters) {
@@ -1146,7 +1147,6 @@ void PropertyHandler::addTie(const QString &tieStr) {
         m_browser->m_stringManager->setValue(tieProp, QString::fromStdString(expr));
         m_browser->m_changeSlotsEnabled = true;
         parProp->addSubProperty(tieProp);
-        cfun.applyTies();
         updateParameters();
         return;
       }
