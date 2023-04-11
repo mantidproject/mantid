@@ -324,6 +324,13 @@ Types::Core::DateAndTime TimeROI::getEffectiveTime(const Types::Core::DateAndTim
   }
 }
 
+// returns the first time in the TimeROI
+Types::Core::DateAndTime TimeROI::firstTime() const {
+  if (m_roi.empty())
+    throw std::runtime_error("cannot return time from empty TimeROI");
+  return m_roi.front();
+}
+
 // returns the last time in the TimeROI
 Types::Core::DateAndTime TimeROI::lastTime() const {
   if (m_roi.empty())

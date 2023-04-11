@@ -41,6 +41,7 @@ public:
   void addMask(const std::time_t &startTime, const std::time_t &stopTime);
   bool valueAtTime(const Types::Core::DateAndTime &time) const;
   Types::Core::DateAndTime getEffectiveTime(const Types::Core::DateAndTime &time) const;
+  Types::Core::DateAndTime firstTime() const;
   Types::Core::DateAndTime lastTime() const;
 
   void replaceROI(const TimeSeriesProperty<bool> *roi);
