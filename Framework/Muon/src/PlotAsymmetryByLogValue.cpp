@@ -28,12 +28,19 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMuon/PlotAsymmetryByLogValue.h"
 #include "Poco/File.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
+
+namespace Mantid::Algorithms {
+
+using namespace Kernel;
+using namespace API;
+using namespace DataObjects;
 namespace // anonymous
 {
 
@@ -45,12 +52,13 @@ namespace // anonymous
  * @return :: True if successful
  */
 template <typename T>
-bool convertLogToDouble(const Mantid::Kernel::Property *property, double &value, const std::string &function) {
+bool convertLogToDouble(const Mantid::Kernel::ITimeSeriesProperty *property, double &value, const std::string &function,
+                        const TimeROI &roi) {
   if (const auto *log = dynamic_cast<const Mantid::Kernel::TimeSeriesProperty<T> *>(property)) {
     if (function == "First") {
-      value = static_cast<double>(log->firstValue());
+      value = static_cast<double>(log->filteredValuesAsVector(&roi).front());
     } else if (function == "Last") { // Default
-      value = static_cast<double>(log->lastValue());
+      value = static_cast<double>(log->filteredValuesAsVector(&roi).back());
     } else {
       return false;
     }
@@ -61,12 +69,6 @@ bool convertLogToDouble(const Mantid::Kernel::Property *property, double &value,
 }
 
 } // namespace
-
-namespace Mantid::Algorithms {
-
-using namespace Kernel;
-using namespace API;
-using namespace DataObjects;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(PlotAsymmetryByLogValue)
@@ -894,9 +896,9 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
   auto *property = run.getLogData(m_logName);
   double value = 0.;
   if (auto timeSeriesProperty = dynamic_cast<ITimeSeriesProperty *>(property)) {
-    timeSeriesProperty->filterByTime(start, end);
+    TimeROI roi(start, end);
     if (m_logFunc == "Mean" || m_logFunc == "Min" || m_logFunc == "Max") {
-      const auto stats = timeSeriesProperty->getStatistics();
+      const auto stats = timeSeriesProperty->getStatistics(&roi);
       if (m_logFunc == "Mean")
         return stats.time_mean;
       else if (m_logFunc == "Min")
@@ -905,17 +907,17 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
         return stats.maximum;
     } else {
       // try different property to get first or last value
-      if (convertLogToDouble<double>(property, value, m_logFunc))
+      if (convertLogToDouble<double>(timeSeriesProperty, value, m_logFunc, roi))
         return value;
-      if (convertLogToDouble<float>(property, value, m_logFunc))
+      if (convertLogToDouble<float>(timeSeriesProperty, value, m_logFunc, roi))
         return value;
-      if (convertLogToDouble<int32_t>(property, value, m_logFunc))
+      if (convertLogToDouble<int32_t>(timeSeriesProperty, value, m_logFunc, roi))
         return value;
-      if (convertLogToDouble<int64_t>(property, value, m_logFunc))
+      if (convertLogToDouble<int64_t>(timeSeriesProperty, value, m_logFunc, roi))
         return value;
-      if (convertLogToDouble<uint32_t>(property, value, m_logFunc))
+      if (convertLogToDouble<uint32_t>(timeSeriesProperty, value, m_logFunc, roi))
         return value;
-      if (convertLogToDouble<uint64_t>(property, value, m_logFunc))
+      if (convertLogToDouble<uint64_t>(timeSeriesProperty, value, m_logFunc, roi))
         return value;
     }
   } else if (const auto *slog = dynamic_cast<const Mantid::Kernel::PropertyWithValue<std::string> *>(property)) {
@@ -928,7 +930,9 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
     }
   }
 
-  return run.getPropertyAsSingleValue(m_logName); // time average but only simple property with value come in
+  // time average but only simple property with value come in
+  // this is expected to throw exceptions when the value cannot be converted
+  return run.getPropertyAsSingleValue(m_logName);
 }
 
 } // namespace Mantid::Algorithms
