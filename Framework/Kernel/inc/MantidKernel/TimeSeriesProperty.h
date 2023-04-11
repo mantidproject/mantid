@@ -180,8 +180,9 @@ public:
   /// Set name of property
   void setName(const std::string &name);
 
-  /// Filter out a run by time.
-  void filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) override;
+  /// Split out a time series property by time intervals.
+  void splitByTime(const std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
+                   bool isPeriodic) const override;
 
   /// New split method
   void splitByTimeVector(const std::vector<Types::Core::DateAndTime> &splitter_time_vec,

@@ -408,9 +408,8 @@ public:
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
 
-    log->filterByTime(start, stop);
-
-    TS_ASSERT_EQUALS(log->realSize(), 3);
+    TimeROI roi(start, stop);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 3);
 
     delete log;
   }
@@ -445,23 +444,29 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  /// Ticket #2591
+  /**
+   * Ticket #2591 - since the values are unchanged, specifying a TimeROI that does
+   * not include the actual value, with return no values
+   */
   void test_filterByTime_ifOnlyOneValue_assumes_constant_instead() {
     TimeSeriesProperty<int> *log = createIntegerTSP(1);
     TS_ASSERT_EQUALS(log->realSize(), 1);
 
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
     DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
-    log->filterByTime(start, stop);
+    TimeROI roi(start, stop);
 
     // Still there!
-    TS_ASSERT_EQUALS(log->realSize(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 0);
 
     delete log;
   }
 
   //----------------------------------------------------------------------------
-  /// Ticket #2591
+  /**
+   * Ticket #2591 - since the values are unchanged, specifying a TimeROI that does
+   * not include the actual value, with return no values
+   */
   void test_filterByTime_ifOnlyOneValue_assumes_constant_instead_2() {
     TimeSeriesProperty<int> *log = new TimeSeriesProperty<int>("MyIntLog");
     TS_ASSERT_THROWS_NOTHING(log->addValue("1990-01-01T00:00:00", 1));
@@ -469,10 +474,10 @@ public:
 
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
     DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
-    log->filterByTime(start, stop);
+    TimeROI roi(start, stop);
 
     // Still there!
-    TS_ASSERT_EQUALS(log->realSize(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 0);
 
     delete log;
   }
@@ -1960,9 +1965,9 @@ public:
     DateAndTime start = DateAndTime("2007-11-30T15:00:00"); // Much earlier than first time series value
     DateAndTime stop = DateAndTime("2007-11-30T17:00:00");  // Much later than last time series value
 
-    log->filterByTime(start, stop);
+    TimeROI roi(start, stop);
 
-    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->realSize());
+    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->filteredValuesAsVector(&roi).size());
 
     delete log;
   }
