@@ -183,10 +183,10 @@ public:
   /// Filter out a run by time.
   void filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) override;
   /// Filter by a range of times
-  void filterByTimes(const std::vector<SplittingInterval> &splittervec);
+  void filterByTimes(const TimeROI &timeroi);
 
   /// Split out a time series property by time intervals.
-  void splitByTime(std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
+  void splitByTime(const std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
                    bool isPeriodic) const override;
 
   /// New split method
@@ -203,14 +203,10 @@ public:
   /// Make sure an existing filter covers the full time range given
   void expandFilterToRange(std::vector<SplittingInterval> &split, double min, double max,
                            const TimeInterval &range) const override;
-  /// Calculate the time-weighted average of a property in a filtered range
-  double averageValueInFilter(const std::vector<SplittingInterval> &filter) const override;
-  /// @copydoc Mantid::Kernel::ITimeSeriesProperty::averageAndStdDevInFilter()
-  std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &intervals) const override;
   /** Returns the calculated time weighted mean and standard deviation values.
    * @param timeRoi  Object that holds information about when the time measurement was active.
    */
-  std::pair<double, double> timeAverageValueAndStdDev(const Kernel::TimeROI *timeRoi = nullptr) const;
+  std::pair<double, double> timeAverageValueAndStdDev(const Kernel::TimeROI *timeRoi = nullptr) const override;
   /// Returns the calculated time weighted average value.
   double timeAverageValue(const TimeROI *timeRoi = nullptr) const override;
   /// generate constant time-step histogram from the property values
@@ -353,7 +349,13 @@ public:
   void reserve(size_t size) { m_values.reserve(size); };
 
   /// If filtering by log, get the time intervals for splitting
-  virtual std::vector<Mantid::Kernel::SplittingInterval> getSplittingIntervals() const;
+  virtual std::vector<Mantid::Kernel::TimeInterval> getTimeIntervals() const;
+
+private:
+  /// Calculate the time-weighted average of a property in a filtered range
+  double averageValueInFilter(const std::vector<TimeInterval> &filter) const;
+  /// Calculate the time-weighted average and std-deviation of a property in a filtered range
+  std::pair<double, double> averageAndStdDevInFilter(const std::vector<TimeInterval> &intervals) const;
 
 protected:
   //----------------------------------------------------------------------------------------------

@@ -312,10 +312,9 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Types::Core::DateAndTime &star
 /**
  * Filter by a range of times. If current property has a single value it remains
  * unaffected
- * @param splittervec :: A list of intervals to split filter on
+ * @param timeroi :: A list of intervals to split filter on
  */
-template <typename TYPE>
-void TimeSeriesProperty<TYPE>::filterByTimes(const std::vector<SplittingInterval> &splittervec) {
+template <typename TYPE> void TimeSeriesProperty<TYPE>::filterByTimes(const TimeROI &timeroi) {
   // 1. Sort
   sortIfNecessary();
 
@@ -330,7 +329,7 @@ void TimeSeriesProperty<TYPE>::filterByTimes(const std::vector<SplittingInterval
   g_log.debug() << "DB541  mp_copy Size = " << mp_copy.size() << "  Original MP Size = " << m_values.size() << "\n";
 
   // 4. Create new
-  for (const auto &splitter : splittervec) {
+  for (const auto &splitter : timeroi.toTimeIntervals()) {
     Types::Core::DateAndTime t_start = splitter.start();
     Types::Core::DateAndTime t_stop = splitter.stop();
 
@@ -397,8 +396,8 @@ void TimeSeriesProperty<TYPE>::filterByTimes(const std::vector<SplittingInterval
  *                    proton-charge is periodic log.
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
-                                           bool isPeriodic) const {
+void TimeSeriesProperty<TYPE>::splitByTime(const std::vector<SplittingInterval> &splitter,
+                                           std::vector<Property *> outputs, bool isPeriodic) const {
   // 0. Sort if necessary
   sortIfNecessary();
 
@@ -911,10 +910,15 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue(const
   double retVal = 0.0;
   try {
     if ((timeRoi == nullptr) || (timeRoi->useAll())) {
-      const auto &filter = getSplittingIntervals();
-      retVal = this->averageValueInFilter(filter);
+      const auto &intervals = getTimeIntervals();
+      retVal = this->averageValueInFilter(intervals);
+    } else if (timeRoi->useNone()) {
+      // if TimeROI bans everything, use the simple mean
+      const auto stats =
+          Mantid::Kernel::getStatistics(this->valuesAsVector(), Mantid::Kernel::Math::StatisticType::Mean);
+      return stats.mean;
     } else {
-      const auto &filter = timeRoi->toSplitters();
+      const auto &filter = timeRoi->toTimeIntervals();
       retVal = this->averageValueInFilter(filter);
       g_log.warning("Calls to TimeSeriesProperty::timeAverageValue should be replaced with "
                     "Run::getTimeAveragedValue");
@@ -926,6 +930,10 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue(const
   return retVal;
 }
 
+template <> double TimeSeriesProperty<std::string>::timeAverageValue(const TimeROI * /*timeRoi*/) const {
+  throw Exception::NotImplementedError("TimeSeriesProperty::timeAverageValue is not implemented for string properties");
+}
+
 /** Calculates the time-weighted average of a property in a filtered range.
  *  This is written for that case of logs whose values start at the times given.
  *  @param filter The splitter/filter restricting the range of values included
@@ -933,7 +941,7 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue(const
  * filter.
  */
 template <typename TYPE>
-double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<SplittingInterval> &filter) const {
+double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<TimeInterval> &filter) const {
   // TODO: Consider logs that aren't giving starting values.
 
   // If there's just a single value in the log, return that.
@@ -984,7 +992,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<Splittin
  *  @throws Kernel::Exception::NotImplementedError always
  */
 template <>
-double TimeSeriesProperty<std::string>::averageValueInFilter(const SplittingIntervalVec & /*filter*/) const {
+double TimeSeriesProperty<std::string>::averageValueInFilter(const std::vector<TimeInterval> & /*filter*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageValueInFilter is not "
                                        "implemented for string properties");
@@ -992,7 +1000,7 @@ double TimeSeriesProperty<std::string>::averageValueInFilter(const SplittingInte
 
 template <typename TYPE>
 std::pair<double, double>
-TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingInterval> &intervals) const {
+TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<TimeInterval> &intervals) const {
   double mean_prev, mean_current(0.0), s(0.0), variance, duration, weighted_sum(0.0);
 
   // First of all, if the log or the intervals are empty or is a single value,
@@ -1040,7 +1048,7 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingIn
  */
 template <>
 std::pair<double, double>
-TimeSeriesProperty<std::string>::averageAndStdDevInFilter(const SplittingIntervalVec & /*filter*/) const {
+TimeSeriesProperty<std::string>::averageAndStdDevInFilter(const std::vector<TimeInterval> & /*filter*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageAndStdDevInFilter is not "
                                        "implemented for string properties");
@@ -1057,23 +1065,24 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(co
     return std::pair<double, double>(static_cast<double>(this->firstValue()), 0.0);
 
   // Derive splitting intervals from either the roi or from the first/last entries in the time series
-  std::vector<SplittingInterval> filter;
+  std::vector<TimeInterval> intervals;
   if (timeRoi && !timeRoi->useAll()) {
-    filter = timeRoi->toSplitters();
+    intervals = timeRoi->toTimeIntervals();
   } else {
-    filter = this->getSplittingIntervals();
+    intervals = this->getTimeIntervals();
   }
 
-  return this->averageAndStdDevInFilter(filter);
+  return this->averageAndStdDevInFilter(intervals);
 }
 
 /** Function specialization for timeAverageValueAndStdDev<std::string>
  *  @return pair (Nan, Nan) always.
  */
 template <>
-std::pair<double, double> TimeSeriesProperty<std::string>::timeAverageValueAndStdDev(const Kernel::TimeROI *roi) const {
-  UNUSED_ARG(roi);
-  return std::pair<double, double>(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
+std::pair<double, double>
+TimeSeriesProperty<std::string>::timeAverageValueAndStdDev(const Kernel::TimeROI * /*roi*/) const {
+  throw Exception::NotImplementedError(
+      "TimeSeriesProperty::timeAverageValueAndStdDev is not implemented for string properties");
 }
 
 // Re-enable the warnings disabled before makeFilterByValue
@@ -1361,7 +1370,7 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::durationInSeconds(cons
     seriesSpan.addMask(DateAndTime::GPS_EPOCH, this->firstTime());
     return seriesSpan.durationInSeconds();
   } else {
-    const auto &intervals = this->getSplittingIntervals();
+    const auto &intervals = this->getTimeIntervals();
     const double duration_sec =
         std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
                         [](double sum, const auto &interval) { return sum + interval.duration(); });
@@ -1855,6 +1864,15 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeR
   return out;
 }
 
+template <>
+TimeSeriesPropertyStatistics TimeSeriesProperty<std::string>::getStatistics(const TimeROI * /* roi*/) const {
+  // statistics of a string property doesn't make sense
+  TimeSeriesPropertyStatistics out;
+  out.setAllToNan();
+
+  return out;
+}
+
 /** Calculate a particular statistical quantity from the values of the time series.
  *  @param selection : Enum indicating the selected statistical quantity.
  *  @param roi : optional pointer to TimeROI object for filtering the time series values.
@@ -2240,8 +2258,8 @@ template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredVal
  * containing log entries equally spaced in time.
  * @returns :: Vector containing a single splitting interval.
  */
-template <typename TYPE> std::vector<SplittingInterval> TimeSeriesProperty<TYPE>::getSplittingIntervals() const {
-  std::vector<SplittingInterval> intervals;
+template <typename TYPE> std::vector<TimeInterval> TimeSeriesProperty<TYPE>::getTimeIntervals() const {
+  std::vector<TimeInterval> intervals;
   auto lastInterval = this->nthInterval(this->size() - 1);
   intervals.emplace_back(firstTime(), lastInterval.stop());
   return intervals;

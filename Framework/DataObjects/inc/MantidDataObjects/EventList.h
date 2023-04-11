@@ -432,7 +432,7 @@ private:
                                          Types::Core::DateAndTime stop, double tofFactor, double tofOffset,
                                          std::vector<T> &output);
   template <class T>
-  static void filterByTimeROIHelper(std::vector<T> &events, const Kernel::SplittingIntervalVec &intervals,
+  static void filterByTimeROIHelper(std::vector<T> &events, const std::vector<Kernel::TimeInterval> &intervals,
                                     std::vector<T> &output);
 
   template <class T> void filterInPlaceHelper(Kernel::SplittingIntervalVec &splitter, typename std::vector<T> &events);

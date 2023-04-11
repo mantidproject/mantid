@@ -17,6 +17,7 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <QCheckBox>
@@ -184,13 +185,11 @@ void printRunInfo(const MatrixWorkspace_sptr &runWs, std::ostringstream &out) {
   out << "\nAverage Temperature: ";
   if (run.hasProperty("Temp_Sample")) {
     // Filter the temperatures by the start and end times for the run.
-    Mantid::Kernel::SplittingInterval time_split(start, end);
-    std::vector<Mantid::Kernel::SplittingInterval> splitVector = {time_split};
+    Mantid::Kernel::TimeROI timeroi(start, end);
     auto tempSample = run.getProperty("Temp_Sample");
-    const auto *tempSampleTimeSeries = dynamic_cast<const TimeSeriesProperty<double> *>(tempSample);
 
-    if (tempSampleTimeSeries) {
-      out << tempSampleTimeSeries->averageValueInFilter(splitVector);
+    if (const auto *tempSampleTimeSeries = dynamic_cast<const ITimeSeriesProperty *>(tempSample)) {
+      out << tempSampleTimeSeries->timeAverageValue(&timeroi);
     } else {
       out << "Not set";
     }

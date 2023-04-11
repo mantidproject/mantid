@@ -309,7 +309,7 @@ template <typename TYPE> void FilteredTimeSeriesProperty<TYPE>::applyFilter() co
   // the index into the m_values array of the time, or -1 (before) or m_values.size() (after)
   std::size_t index_current_log{0};
 
-  for (const auto &splitter : m_filter->toSplitters()) {
+  for (const auto &splitter : m_filter->toTimeIntervals()) {
     const auto endTime = splitter.stop();
 
     // check if the splitter starts too early
@@ -411,17 +411,16 @@ template <typename TYPE> const Kernel::TimeROI &FilteredTimeSeriesProperty<TYPE>
  * Otherwise the interval is just first time - last time.
  * @returns :: Vector of splitting intervals
  */
-template <typename TYPE>
-std::vector<SplittingInterval> FilteredTimeSeriesProperty<TYPE>::getSplittingIntervals() const {
+template <typename TYPE> std::vector<TimeInterval> FilteredTimeSeriesProperty<TYPE>::getTimeIntervals() const {
   if (m_filter->useAll()) {
     // Case where there is no filter just use the parent implementation
-    return TimeSeriesProperty<TYPE>::getSplittingIntervals();
+    return TimeSeriesProperty<TYPE>::getTimeIntervals();
   } else {
     if (!m_filterApplied) {
       applyFilter();
     }
 
-    return m_filter->toSplitters();
+    return m_filter->toTimeIntervals();
   }
 }
 

@@ -158,7 +158,9 @@ void PropertyManager::splitByTime(std::vector<SplittingInterval> &splitter,
 
     // Now the property does the splitting.
     bool isProtonCharge = prop->name() == "proton_charge";
-    prop->splitByTime(splitter, output_properties, isProtonCharge);
+    if (auto timeSeriesProperty = dynamic_cast<ITimeSeriesProperty *>(prop)) {
+      timeSeriesProperty->splitByTime(splitter, output_properties, isProtonCharge);
+    }
 
   } // for each property
 }

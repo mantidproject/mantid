@@ -3713,7 +3713,7 @@ void EventList::filterByTimeAtSampleHelper(std::vector<T> &events, DateAndTime s
  * @param output :: reference to an event list that will be output.
  */
 template <class T>
-void EventList::filterByTimeROIHelper(std::vector<T> &events, const Kernel::SplittingIntervalVec &intervals,
+void EventList::filterByTimeROIHelper(std::vector<T> &events, const std::vector<Kernel::TimeInterval> &intervals,
                                       std::vector<T> &output) {
   for (const auto &time : intervals) {
     const DateAndTime start = time.start();
@@ -3824,7 +3824,7 @@ void EventList::filterByPulseTime(Kernel::TimeROI *timeRoi, EventList &output) c
   if ((timeRoi == nullptr) || (timeRoi->useAll())) {
     throw std::invalid_argument("TimeROI can not use all time");
   }
-  const auto &intervals = timeRoi->toSplitters();
+  const auto &intervals = timeRoi->toTimeIntervals();
 
   switch (eventType) {
   case TOF:

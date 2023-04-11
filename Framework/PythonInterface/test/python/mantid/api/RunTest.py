@@ -45,7 +45,7 @@ class RunTest(unittest.TestCase):
         self.assertTrue(isinstance(roi, TimeROI))
         self.assertTrue(roi.useAll())
         self.assertFalse(roi.useNone())
-        values = roi.toSplitters()
+        values = roi.toTimeIntervals()
         self.assertTrue(isinstance(values, list))
         self.assertEqual(len(values), 0)
 

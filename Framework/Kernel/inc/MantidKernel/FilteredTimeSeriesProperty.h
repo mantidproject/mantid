@@ -77,7 +77,7 @@ public:
   const TimeSeriesProperty<HeldType> *unfiltered() const;
 
   /// If filtering by log, get the time intervals for splitting
-  std::vector<Mantid::Kernel::SplittingInterval> getSplittingIntervals() const override;
+  std::vector<Mantid::Kernel::TimeInterval> getTimeIntervals() const override;
 
   const Kernel::TimeROI &getTimeROI() const;
 

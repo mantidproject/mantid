@@ -46,27 +46,18 @@ namespace // anonymous
  */
 template <typename T>
 bool convertLogToDouble(const Mantid::Kernel::Property *property, double &value, const std::string &function) {
-  const auto *log = dynamic_cast<const Mantid::Kernel::TimeSeriesProperty<T> *>(property);
-  if (log) {
-    if (function == "Mean") {
-      value = static_cast<double>(log->timeAverageValue());
-    } else if (function == "First") {
+  if (const auto *log = dynamic_cast<const Mantid::Kernel::TimeSeriesProperty<T> *>(property)) {
+    if (function == "First") {
       value = static_cast<double>(log->firstValue());
-    } else if (function == "Min") {
-      value = static_cast<double>(log->minValue());
-    } else if (function == "Max") {
-      value = static_cast<double>(log->maxValue());
-    } else { // Default
+    } else if (function == "Last") { // Default
       value = static_cast<double>(log->lastValue());
+    } else {
+      return false;
     }
     return true;
+  } else {
+    return false;
   }
-  auto tlog = dynamic_cast<const Mantid::Kernel::PropertyWithValue<T> *>(property);
-  if (tlog) {
-    value = static_cast<double>(*tlog);
-    return true;
-  }
-  return false;
 }
 
 } // namespace
@@ -895,30 +886,40 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
     return static_cast<double>(end.totalNanoseconds() - m_firstStart_ns) * nanosec_to_sec;
   }
 
-  // Otherwise, try converting the log value to a double
-  auto *property = run.getLogData(m_logName);
-  if (!property) {
+  if (!run.hasProperty(m_logName)) {
     throw std::invalid_argument("Log " + m_logName + " does not exist.");
   }
-  property->filterByTime(start, end);
 
-  double value = 0;
-  // try different property types
-  if (convertLogToDouble<double>(property, value, m_logFunc))
-    return value;
-  if (convertLogToDouble<float>(property, value, m_logFunc))
-    return value;
-  if (convertLogToDouble<int32_t>(property, value, m_logFunc))
-    return value;
-  if (convertLogToDouble<int64_t>(property, value, m_logFunc))
-    return value;
-  if (convertLogToDouble<uint32_t>(property, value, m_logFunc))
-    return value;
-  if (convertLogToDouble<uint64_t>(property, value, m_logFunc))
-    return value;
-  // try if it's a string and can be lexically cast to double
-  auto slog = dynamic_cast<const Mantid::Kernel::PropertyWithValue<std::string> *>(property);
-  if (slog) {
+  // Otherwise, try converting the log value to a double
+  auto *property = run.getLogData(m_logName);
+  double value = 0.;
+  if (auto timeSeriesProperty = dynamic_cast<ITimeSeriesProperty *>(property)) {
+    timeSeriesProperty->filterByTime(start, end);
+    if (m_logFunc == "Mean" || m_logFunc == "Min" || m_logFunc == "Max") {
+      const auto stats = timeSeriesProperty->getStatistics();
+      if (m_logFunc == "Mean")
+        return stats.time_mean;
+      else if (m_logFunc == "Min")
+        return stats.minimum;
+      else // maximum
+        return stats.maximum;
+    } else {
+      // try different property to get first or last value
+      if (convertLogToDouble<double>(property, value, m_logFunc))
+        return value;
+      if (convertLogToDouble<float>(property, value, m_logFunc))
+        return value;
+      if (convertLogToDouble<int32_t>(property, value, m_logFunc))
+        return value;
+      if (convertLogToDouble<int64_t>(property, value, m_logFunc))
+        return value;
+      if (convertLogToDouble<uint32_t>(property, value, m_logFunc))
+        return value;
+      if (convertLogToDouble<uint64_t>(property, value, m_logFunc))
+        return value;
+    }
+  } else if (const auto *slog = dynamic_cast<const Mantid::Kernel::PropertyWithValue<std::string> *>(property)) {
+    // try if it's a string and can be lexically cast to double
     try {
       value = boost::lexical_cast<double>(slog->value());
       return value;
@@ -927,7 +928,7 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
     }
   }
 
-  throw std::invalid_argument("Log " + m_logName + " cannot be converted to a double type.");
+  return run.getPropertyAsSingleValue(m_logName); // time average but only simple property with value come in
 }
 
 } // namespace Mantid::Algorithms

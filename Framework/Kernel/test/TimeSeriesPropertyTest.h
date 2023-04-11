@@ -420,16 +420,12 @@ public:
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
     TS_ASSERT_EQUALS(log->realSize(), 6);
 
-    Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"),
-                                                0);
-
-    Mantid::Kernel::SplittingIntervalVec splitters;
-    splitters.emplace_back(interval0);
+    TimeROI roi(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"));
 
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
 
-    log->filterByTimes(splitters);
+    log->filterByTimes(roi);
 
     TS_ASSERT_EQUALS(log->realSize(), 3);
 
@@ -440,20 +436,14 @@ public:
     TimeSeriesProperty<int> *log = createIntegerTSP(10);
     TS_ASSERT_EQUALS(log->realSize(), 10);
 
-    Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"),
-                                                0);
-
-    Mantid::Kernel::SplittingInterval interval1(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"),
-                                                0);
-
-    Mantid::Kernel::SplittingIntervalVec splitters;
-    splitters.emplace_back(interval0);
-    splitters.emplace_back(interval1);
+    TimeROI roi;
+    roi.addROI(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"));
+    roi.addROI(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"));
 
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
 
-    log->filterByTimes(splitters);
+    log->filterByTimes(roi);
 
     TS_ASSERT_EQUALS(log->realSize(), 6);
 
@@ -685,47 +675,51 @@ public:
     auto intLog = createIntegerTSP(5);
 
     // Test a filter that's fully within the range of both properties
-    SplittingIntervalVec filter;
-    filter.emplace_back(SplittingInterval(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:29")));
-    TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 7.308, 0.001);
-    TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 2.167, 0.001);
+    TimeROI filter(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:29"));
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(&filter), 7.308, 0.001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(&filter), 2.167, 0.001);
 
     // Test a filter that starts before the log start time
-    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:16:30"), DateAndTime("2007-11-30T16:17:13"));
-    TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 9.820, 0.001);
-    TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 1.070, 0.001);
+    filter.clear();
+    filter.addROI(DateAndTime("2007-11-30T16:16:30"), DateAndTime("2007-11-30T16:17:13"));
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(&filter), 9.820, 0.001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(&filter), 1.070, 0.001);
 
     // How about one that's entirely outside the log range (should just take the
     // last value)
-    filter[0] = SplittingInterval(DateAndTime("2013-01-01T00:00:00"), DateAndTime("2013-01-01T01:00:00"));
-    TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 10.55, 0.001);
-    TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 5.0, 0.001);
+    filter.clear();
+    filter.addROI(DateAndTime("2013-01-01T00:00:00"), DateAndTime("2013-01-01T01:00:00"));
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(&filter), 10.55, 0.001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(&filter), 5.0, 0.001);
 
     // Test a filter with two separate ranges, one of which goes past the end of
     // the log
-    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
-    filter.emplace_back(SplittingInterval(DateAndTime("2007-11-30T16:17:25"), DateAndTime("2007-11-30T16:17:45")));
-    TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 9.123, 0.001);
-    TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 3.167, 0.001);
+    filter.clear();
+    filter.addROI(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
+    filter.addROI(DateAndTime("2007-11-30T16:17:25"), DateAndTime("2007-11-30T16:17:45"));
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(&filter), 9.123, 0.001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(&filter), 3.167, 0.001);
 
     // Test a filter with two out of order ranges (the second one coming before
     // the first)
     // It should work fine.
-    filter[0] = filter[1];
-    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
-    TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 9.123, 0.001);
-    TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 3.167, 0.001);
+    filter.clear();
+    filter.addROI(DateAndTime("2007-11-30T16:17:25"), DateAndTime("2007-11-30T16:17:45"));
+    filter.addROI(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(&filter), 9.123, 0.001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(&filter), 3.167, 0.001);
 
     // What about an overlap between the filters? It's odd, but it's allowed.
-    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
-    filter[1] = SplittingInterval(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:20"));
-    TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 8.16, 0.001);
-    TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 1.75, 0.001);
+    filter.clear();
+    filter.addROI(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
+    filter.addROI(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(&filter), (9.99 * 5. + 7.55 * 10.) / 15., 0.001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(&filter), (1. * 5. + 2. * 10.) / 15., 0.001);
 
     // Check the correct behaviour of empty of single value logs.
-    TS_ASSERT(std::isnan(dProp->averageValueInFilter(filter)));
+    TS_ASSERT(std::isnan(dProp->timeAverageValue(&filter)));
     iProp->addValue(DateAndTime("2010-11-30T16:17:25"), 99);
-    TS_ASSERT_EQUALS(iProp->averageValueInFilter(filter), 99.0);
+    TS_ASSERT_EQUALS(iProp->timeAverageValue(&filter), 99.0);
 
     // Clean up
     delete dblLog;
@@ -757,9 +751,8 @@ public:
   }
 
   void test_averageValueInFilter_throws_for_string_property() {
-    SplittingIntervalVec splitter;
-    TS_ASSERT_THROWS(sProp->averageValueInFilter(splitter), const Exception::NotImplementedError &);
-    TS_ASSERT_THROWS(sProp->averageAndStdDevInFilter(splitter), const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(sProp->timeAverageValue(), const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(sProp->timeAverageValueAndStdDev(), const Exception::NotImplementedError &);
   }
 
   //----------------------------------------------------------------------------
@@ -2038,7 +2031,7 @@ public:
 
   void test_getSplittingIntervals_noFilter() {
     const auto &log = getTestLog(); // no filter
-    const auto &intervals = log->getSplittingIntervals();
+    const auto &intervals = log->getTimeIntervals();
     TS_ASSERT_EQUALS(intervals.size(), 1);
     const auto &range = intervals.front();
     TS_ASSERT_EQUALS(range.start(), log->firstTime());

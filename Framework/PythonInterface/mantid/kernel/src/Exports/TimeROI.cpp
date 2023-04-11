@@ -16,9 +16,9 @@ using Mantid::Kernel::TimeROI;
 using Mantid::Types::Core::DateAndTime;
 using namespace boost::python;
 
-boost::python::list getSplittingIntervals(const TimeROI &self) {
+boost::python::list getTimeIntervals(const TimeROI &self) {
   boost::python::list times;
-  for (const auto &splitter : self.toSplitters()) {
+  for (const auto &splitter : self.toTimeIntervals()) {
     times.append(make_tuple(splitter.start(), splitter.stop()));
   }
   return times;
@@ -43,6 +43,6 @@ void export_TimeROI() {
            "See https://en.wikipedia.org/wiki/Intersection for more details")
       .def("useAll", &TimeROI::useAll, "True if all times are use")
       .def("useNone", &TimeROI::useNone, "True if all times are ignore")
-      .def("toSplitters", &getSplittingIntervals, arg("self"),
-           "Returns a list of start and stop times for all splitting intervals");
+      .def("toTimeIntervals", &getTimeIntervals, arg("self"),
+           "Returns a list of start and stop times for all time intervals");
 }
