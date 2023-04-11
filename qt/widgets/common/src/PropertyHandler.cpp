@@ -673,8 +673,11 @@ bool PropertyHandler::setParameter(QtProperty *prop) {
   if (m_cf) {
     for (size_t i = 0; i < m_cf->nFunctions(); i++) {
       bool res = getHandler(i)->setParameter(prop);
-      if (res)
+      if (res) {
+        m_cf->applyTies();
+        updateParameters();
         return true;
+      }
     }
   }
   return false;
