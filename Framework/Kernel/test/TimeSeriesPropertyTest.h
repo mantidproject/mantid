@@ -445,27 +445,31 @@ public:
 
   //----------------------------------------------------------------------------
   /**
-   * Ticket #2591 - since the values are unchanged, specifying a TimeROI that does
-   * not include the actual value, with return no values
+   * Ticket #2591 - since the values are unchanged, specifying a TimeROI after all
+   * the actual values, will return the last value
    */
   void test_filterByTime_ifOnlyOneValue_assumes_constant_instead() {
     TimeSeriesProperty<int> *log = createIntegerTSP(1);
     TS_ASSERT_EQUALS(log->realSize(), 1);
 
+    // original time is "2007-11-30T16:17:00"
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
     DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
     TimeROI roi(start, stop);
 
     // Still there!
-    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 0);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).front(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).front(), DateAndTime("2007-11-30T16:17:00"));
 
     delete log;
   }
 
   //----------------------------------------------------------------------------
   /**
-   * Ticket #2591 - since the values are unchanged, specifying a TimeROI that does
-   * not include the actual value, with return no values
+   * Ticket #2591 - since the values are unchanged, specifying a TimeROI after all
+   * the actual values, will return the last value
    */
   void test_filterByTime_ifOnlyOneValue_assumes_constant_instead_2() {
     TimeSeriesProperty<int> *log = new TimeSeriesProperty<int>("MyIntLog");
@@ -477,7 +481,10 @@ public:
     TimeROI roi(start, stop);
 
     // Still there!
-    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 0);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).front(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).front(), DateAndTime("1990-01-01T00:00:00"));
 
     delete log;
   }
