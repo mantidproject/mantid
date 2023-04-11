@@ -226,8 +226,8 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
     interruption_point();
     // Sum up the proton charge for this log value
     if (protonChargeLog) {
-
-      protonChgCol->cell<double>(row) = run.getProtonCharge();
+      const double currentConversion = 1.e-6 / 3600.;
+      protonChgCol->cell<double>(row) = run.getProtonCharge() / currentConversion;
     }
     interruption_point();
 
@@ -355,21 +355,6 @@ std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>> SumEven
   }
 
   return numberSeriesProps;
-}
-
-/** Integrates the proton charge between specified times.
- *  @param protonChargeLog The proton charge log
- *  @param filter          The times between which to integrate
- *  @returns The summed proton charge
- */
-double SumEventsByLogValue::sumProtonCharge(const Kernel::TimeSeriesProperty<double> *protonChargeLog,
-                                            const Kernel::TimeROI &filter) {
-  // Clone the proton charge log and filter the clone on this log value
-  std::unique_ptr<Kernel::TimeSeriesProperty<double>> protonChargeLogClone(protonChargeLog->clone());
-  protonChargeLogClone->filterByTimes(filter);
-  // Seems like the only way to sum this is to yank out the values
-  const std::vector<double> pcValues = protonChargeLogClone->valuesAsVector();
-  return std::accumulate(pcValues.begin(), pcValues.end(), 0.0);
 }
 
 /** Create a single-spectrum Workspace2D containing the integrated counts versus

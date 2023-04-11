@@ -794,6 +794,11 @@ TimeROI TimeSeriesProperty<TYPE>::makeFilterByValue(double min, double max, bool
       isGood = false;
     }
   }
+  if (isGood) {
+    stop = centre ? stop_t + tol : stop_t;
+    if (start < stop)
+      newROI.addROI(start, stop);
+  }
 
   if (expand) {
     if (expandRange.start() < firstTime()) {

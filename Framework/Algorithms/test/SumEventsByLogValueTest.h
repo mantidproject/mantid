@@ -222,6 +222,7 @@ private:
     run.addProperty(intTSP);
 
     auto proton_charge = new TimeSeriesProperty<double>("proton_charge");
+    proton_charge->setUnits("picoCoulombs");
     for (int i = 0; i < 100; ++i) {
       proton_charge->addValue(run_start + static_cast<double>(i), 1.0E7);
     }
