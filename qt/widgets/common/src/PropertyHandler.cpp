@@ -1146,6 +1146,8 @@ void PropertyHandler::addTie(const QString &tieStr) {
         m_browser->m_stringManager->setValue(tieProp, QString::fromStdString(expr));
         m_browser->m_changeSlotsEnabled = true;
         parProp->addSubProperty(tieProp);
+        cfun.applyTies();
+        updateParameters();
         return;
       }
     }
