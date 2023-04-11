@@ -31,7 +31,7 @@ class MANTID_DATAOBJECTS_DLL TimeSplitter {
 public:
   static constexpr int NO_TARGET{-1}; // no target (a.k.a. destination) workspace for filtered out events
   TimeSplitter() = default;
-  TimeSplitter(const DateAndTime &start, const DateAndTime &stop);
+  TimeSplitter(const DateAndTime &start, const DateAndTime &stop, const int value = DEFAULT_TARGET);
   TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const DateAndTime &offset = DateAndTime(0, 0));
   TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &offset = DateAndTime(0, 0));
   TimeSplitter(const SplittersWorkspace_sptr &sws);
@@ -55,6 +55,7 @@ public:
   std::string debugPrint() const;
 
 private:
+  static constexpr int DEFAULT_TARGET{0};
   void clearAndReplace(const DateAndTime &start, const DateAndTime &stop, const int value);
   /// Distribute a list of events by comparing a vector of times against the splitter boundaries.
   template <typename EVENTTYPE>

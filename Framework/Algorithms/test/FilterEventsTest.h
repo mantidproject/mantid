@@ -35,7 +35,7 @@ using namespace std;
 
 namespace {
 /// static Logger definition
-Logger g_log("TimeSeriesProperty");
+Logger g_log("FilterEventsTest");
 } // namespace
 
 /* TODO LIST

@@ -612,7 +612,7 @@ void FilterEvents::createOutputWorkspaces() {
     }
   }
 
-  // See if we need to count valid target indexes from 1. That will only affect the names of the output workspaces.
+  // See if we need to count the valid target indexes from 1. That will only affect the names of the output workspaces.
   int delta_wsindex{0}; // an index shift
   if (getProperty("OutputWorkspaceIndexedFrom1")) {
     // Determine the minimum valid target index. Note that the set is sorted and guaranteed to start with -1.
@@ -740,8 +740,6 @@ void FilterEvents::createOutputWorkspaces() {
         setProperty(outputWorkspacePropertyName.str(), optws);
         g_log.debug() << "Created output property " << outputWorkspacePropertyName.str()
                       << " for workspace with target index " << wsindex << std::endl;
-        cout << "Created output property " << outputWorkspacePropertyName.str() << " for workspace with target index "
-             << wsindex << std::endl;
       }
 
       ++number_of_output_workspaces;

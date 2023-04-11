@@ -21,8 +21,6 @@ using Types::Core::DateAndTime;
 namespace DataObjects {
 
 namespace {
-// default value for the output is zero
-constexpr int DEFAULT_TARGET{0};
 
 void assertIncreasing(const DateAndTime &start, const DateAndTime &stop) {
   if (start > stop)
@@ -34,8 +32,8 @@ Kernel::Logger g_log("TimeSplitter");
 
 } // namespace
 
-TimeSplitter::TimeSplitter(const DateAndTime &start, const DateAndTime &stop) {
-  clearAndReplace(start, stop, DEFAULT_TARGET);
+TimeSplitter::TimeSplitter(const DateAndTime &start, const DateAndTime &stop, const int value) {
+  clearAndReplace(start, stop, value);
 }
 
 /**
@@ -139,7 +137,7 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
   // Verify that the input target names are either all numeric or all non-numeric. The exception is a name "-1", i.e. no
   // target specified. That name is ok to mix with non-numeric names.
   if (noninteger_target_names_count != 0 && noninteger_target_names_count != tws->rowCount() - notarget_names_count) {
-    throw std::runtime_error("Valid splitter targets cannot be a mix numeric and non-numeric names.");
+    throw std::runtime_error("Valid splitter targets cannot be a mix of numeric and non-numeric names.");
   }
 }
 
