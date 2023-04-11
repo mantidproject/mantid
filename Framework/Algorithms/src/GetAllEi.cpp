@@ -914,19 +914,26 @@ double GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const
     throw std::runtime_error("Could not retrieve a time series property for the property name " + propertyName);
   }
 
+  double value;
   if (timeroi.useAll()) {
-    auto TimeStart = inputWS->run().startTime();
-    auto TimeEnd = inputWS->run().endTime();
-    pTimeSeries->filterByTime(TimeStart, TimeEnd);
+    const auto timeStart = inputWS->run().startTime();
+    const auto timeStop = inputWS->run().endTime();
+    if (timeStart < timeStop) {
+      Kernel::TimeROI localROI(timeStart, timeStop);
+      value = pTimeSeries->getStatistics(&localROI).mean;
+    } else {
+      value = pTimeSeries->getStatistics().mean;
+    }
   } else {
-    pTimeSeries->filterByTimes(timeroi);
+    value = pTimeSeries->getStatistics(&timeroi).mean;
   }
-  if (pTimeSeries->size() == 0) {
+  // statistics returns nan as mean of empty vector
+  if (std::isnan(value)) {
     throw std::runtime_error("Can not find average value for log defined by property" + propertyName +
                              " As no valid log values are found.");
   }
 
-  return pTimeSeries->getStatistics().mean;
+  return value;
 }
 namespace { // former lambda function for findChopSpeedAndDelay
 
