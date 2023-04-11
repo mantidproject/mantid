@@ -208,34 +208,26 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   for (int value = minVal; value <= maxVal; ++value) {
     const auto row = std::size_t(value - minVal);
     // Create a filter giving the times when this log has the current value
-    SplittingIntervalVec filter;
-    log->makeFilterByValue(filter, value, value); // min & max are the same of course
-
+    TimeROI timeRoi;
+    const TimeROI *temp = &m_inputWorkspace->run().getTimeROI();
     // This section ensures that the filter goes to the end of the run
     if (value == log->lastValue() && protonChargeLog) {
-      TimeInterval timeAfterLastLogValue(log->lastTime(), m_inputWorkspace->getLastPulseTime());
-      log->expandFilterToRange(filter, value, value, timeAfterLastLogValue);
+      const TimeInterval timeAfterLastLogValue(log->lastTime(), m_inputWorkspace->getLastPulseTime());
+      timeRoi = log->makeFilterByValue(value, value, true, timeAfterLastLogValue, 0.0, false, temp);
+    } else {
+      timeRoi = log->makeFilterByValue(value, value, false, TimeInterval(0, 1), 0., false, temp);
     }
-    Kernel::TimeROI *roi = new TimeROI;
+
     // Calculate the time covered by this log value and add it to the table
-    double duration = 0.0;
-    for (auto &time : filter) {
-      duration += time.duration();
-      try {
-        roi->addROI(time.start(), time.stop());
-      } catch (const std::runtime_error &) {
-        // If values are not unique or not in ascending order
-        // values will be skipped
-      }
-    }
-    timeCol->cell<double>(row) = duration;
+    Run run(m_inputWorkspace->run());
+    run.setTimeROI(timeRoi);
+    timeCol->cell<double>(row) = run.getTimeROI().durationInSeconds();
 
     interruption_point();
     // Sum up the proton charge for this log value
     if (protonChargeLog) {
-      EventWorkspace_sptr outputWS = Mantid::DataObjects::create<EventWorkspace>(*m_inputWorkspace);
-      outputWS->mutableRun().setTimeROI(*roi);
-      protonChgCol->cell<double>(row) = (outputWS->mutableRun().getProtonCharge());
+
+      protonChgCol->cell<double>(row) = run.getProtonCharge();
     }
     interruption_point();
 
@@ -245,7 +237,8 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
       // of the main log
       // Have to (maybe inefficiently) fetch back column by name - move outside
       // loop if too slow
-      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) = otherLog.second->timeAverageValue(&timeROI);
+      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) =
+          otherLog.second->averageValueInFilter(timeRoi.toSplitters());
     }
 
     prog.report();

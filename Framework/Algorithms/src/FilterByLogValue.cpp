@@ -23,6 +23,7 @@ using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_const_sptr;
 using DataObjects::EventWorkspace_sptr;
+using Mantid::Kernel::TimeROI;
 using Types::Core::DateAndTime;
 
 std::string CENTRE("Centre");
@@ -124,7 +125,8 @@ void FilterByLogValue::exec() {
   }
 
   // Now make the splitter vector
-  SplittingIntervalVec splitter;
+  TimeROI *roi = new TimeROI();
+  //  SplittingIntervalVec splitter;
   // This'll throw an exception if the log doesn't exist. That is good.
   auto *log = dynamic_cast<ITimeSeriesProperty *>(inputWS->run().getLogData(logname));
   if (log) {
@@ -134,46 +136,37 @@ void FilterByLogValue::exec() {
       std::vector<DateAndTime> times = log->timesAsVector();
       std::vector<DateAndTime>::iterator it;
       for (it = times.begin(); it != times.end(); ++it) {
-        SplittingInterval interval(lastTime, *it - tolerance, 0);
+        if (lastTime < *it - tolerance)
+          roi->addROI(lastTime, (*it - tolerance));
         // Leave a gap +- tolerance
         lastTime = (*it + tolerance);
-        splitter.emplace_back(interval);
       }
       // And the last one
-      splitter.emplace_back(lastTime, run_stop, 0);
+      if (lastTime < run_stop)
+        roi->addROI(lastTime, run_stop);
 
     } else {
       // ----- Filter by value ------
 
       // This function creates the splitter vector we will use to filter out
       // stuff.
-      const std::string logBoundary(this->getPropertyValue("LogBoundary"));
-      log->makeFilterByValue(splitter, min, max, tolerance, (logBoundary == CENTRE));
-
-      if (log->realSize() >= 1 && handle_edge_values) {
-        log->expandFilterToRange(splitter, min, max, TimeInterval(run_start, run_stop));
+      const TimeROI *tempTimeROI = &inputWS->run().getTimeROI();
+      bool centre = this->getPropertyValue("LogBoundary") == CENTRE;
+      if (log->realSize() > 0 && handle_edge_values) {
+        *roi =
+            log->makeFilterByValue(min, max, true, TimeInterval(run_start, run_stop), tolerance, centre, tempTimeROI);
+      } else {
+        *roi = log->makeFilterByValue(min, max, false, TimeInterval(0, 1), tolerance, centre, tempTimeROI);
       }
     } // (filter by value)
   }
 
-  g_log.information() << splitter.size() << " entries in the filter.\n";
+  g_log.information() << roi->numBoundaries() / 2 << " entries in the filter.\n";
   size_t numberOfSpectra = inputWS->getNumberHistograms();
 
   // Initialise the progress reporting object
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
-
-  TimeROI *roi = new TimeROI();
-  for (auto split : splitter) {
-    try {
-      roi->addROI(split.start(), split.stop());
-    } catch (const std::runtime_error &) {
-      // If values are not unique or not in ascending order
-      // values will be skipped
-    }
-  }
-  if (roi->useAll()) {
-    roi->replaceROI(TimeROI::USE_NONE);
-  }
+  SplittingIntervalVec splitter = roi->toSplitters();
   EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (inputWS == outputWS) {
     // Filtering in place!
