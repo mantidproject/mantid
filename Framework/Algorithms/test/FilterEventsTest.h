@@ -18,6 +18,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -28,9 +29,14 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::Logger;
 using Types::Event::TofEvent;
-
 using namespace std;
+
+namespace {
+/// static Logger definition
+Logger g_log("TimeSeriesProperty");
+} // namespace
 
 /* TODO LIST
  *  1. Remove all Ptest
@@ -55,7 +61,7 @@ public:
   /** Test initialization
    */
   void test_Initialization() {
-    std::cout << std::endl << "test_Initialization..." << std::endl;
+    g_log.notice("\ntest_Initialization...");
     FilterEvents alg;
     alg.initialize();
 
@@ -73,7 +79,7 @@ public:
    * (5) "Experiment": 5 pulse times.  10 events in each pulse
    */
   void test_CreatedEventWorskpaceAndSplitter() {
-    std::cout << std::endl << "test_CreatedEventWorskpaceAndSplitter..." << std::endl;
+    g_log.notice("\ntest_CreatedEventWorskpaceAndSplitter...");
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
     int64_t tofdt = 10 * 1000 * 1000;
@@ -94,7 +100,7 @@ public:
   }
 
   void test_protonCharge() {
-    std::cout << std::endl << "test_protonCharge..." << std::endl;
+    g_log.notice("\ntest_protonCharge...");
     int64_t runstart_i64 = 10000000000; // 10 seconds, beginning of the fake run
     int64_t pulsedt = 10000000;         // 1/100 seconds in nanoseconds, time between consecutive pulses
     int64_t tofdt = 1000000;            // 1 milisecond in nanoseconds, spacing between neutrons events within a pulse
@@ -184,7 +190,7 @@ public:
    *  5: 20400000000, 20465000000, 2
    */
   void test_FilterNoCorrection() {
-    std::cout << std::endl << "test_FilterNoCorrection..." << std::endl;
+    g_log.notice("\ntest_FilterNoCorrection...");
     int64_t runstart_i64 = 20000000000;  // 20 seconds, beginning of the fake run
     int64_t pulsedt = 100 * 1000 * 1000; // 100 miliseconds, time between consecutive pulses
     int64_t tofdt = 10 * 1000 * 1000;    // 10 miliseconds, spacing between neutrons events within a pulse
@@ -307,7 +313,7 @@ public:
    *events
    */
   void test_FilterWOCorrection2() {
-    std::cout << std::endl << "test_FilterWOCorrection2..." << std::endl;
+    g_log.notice("\ntest_FilterWOCorrection2...");
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -418,7 +424,7 @@ public:
   /**  Filter test with TOF correction
    */
   void test_FilterWithCustomizedCorrection() {
-    std::cout << std::endl << "test_FilterWithCustomizedCorrection..." << std::endl;
+    g_log.notice("\ntest_FilterWithCustomizedCorrection...");
     // 1. Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -521,7 +527,7 @@ public:
   /** Test filtering with correction of direct geometry
    */
   void test_FilterElasticCorrection() {
-    std::cout << std::endl << "test_FilterElasticCorrection..." << std::endl;
+    g_log.notice("\ntest_FilterElasticCorrection...");
     int64_t runstart{20000000000}; // start run date from Mantid's Epoch, in nanoseconds
     int64_t pulsedt{1000000};      // time between consecutive pulses, in nanoseconds
 
@@ -596,7 +602,7 @@ public:
   /** Test filtering with correction of direct geometry
    */
   void test_FilterDGCorrection() {
-    std::cout << std::endl << "test_FilterDGCorrection..." << std::endl;
+    g_log.notice("\ntest_FilterDGCorrection...");
     int64_t runstart{20000000000}; // start run date from Mantid's Epoch, in nanoseconds
     int64_t pulsedt{1000000};      // time between consecutive pulses, in nanoseconds
 
@@ -650,7 +656,7 @@ public:
   /** Test filtering with correction to indirect geometry inelastic instrument
    */
   void test_FilterIndirectGeometryCorrection() {
-    std::cout << std::endl << "test_FilterIndirectGeometryCorrection..." << std::endl;
+    g_log.notice("\ntest_FilterIndirectGeometryCorrection...");
     int64_t runstart{20000000000}; // start run date from Mantid's Epoch, in nanoseconds
     int64_t pulsedt{1000000};      // time between consecutive pulses, in nanoseconds
 
@@ -734,7 +740,7 @@ public:
         979: 4: 3.65e+08  -  4.65e+08: 2
    */
   void test_FilterRelativeTime() {
-    std::cout << std::endl << "test_FilterRelativeTime..." << std::endl;
+    g_log.notice("\ntest_FilterRelativeTime...");
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -884,7 +890,7 @@ public:
    * events
    */
   void test_tableSplitter() {
-    std::cout << std::endl << "test_tableSplitter..." << std::endl;
+    g_log.notice("\ntest_tableSplitter...");
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -988,7 +994,7 @@ public:
    * @brief test_ThrowSameName
    */
   void test_ThrowSameName() {
-    std::cout << std::endl << "test_ThrowSameName..." << std::endl;
+    g_log.notice("\ntest_ThrowSameName...");
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -1026,7 +1032,7 @@ public:
    * @brief test_ThrowSameName
    */
   void test_groupWorkspaces() {
-    std::cout << std::endl << "test_groupWorkspaces..." << std::endl;
+    g_log.notice("\ntest_groupWorkspaces...");
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -1063,7 +1069,8 @@ public:
    * basename_startTime_stopTime
    */
   void test_descriptiveWorkspaceNamesTime() {
-    std::cout << std::endl << "test_descriptiveWorkspaceNamesTime..." << std::endl;
+    g_log.notice("\ntest_descriptiveWorkspaceNamesTime...");
+
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -1126,7 +1133,8 @@ public:
    * basename_startTime_stopTime
    */
   void test_descriptiveWorkspaceNamesLog() {
-    std::cout << std::endl << "test_descriptiveWorkspaceNamesLog..." << std::endl;
+    g_log.notice("\ntest_descriptiveWorkspaceNamesLog...");
+
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
