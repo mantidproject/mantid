@@ -1113,6 +1113,29 @@ public:
     delete val;
   }
 
+  void test_LogAtStartOfTime() {
+    TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("doubleLog");
+    TS_ASSERT_THROWS_NOTHING(log->addValue("1990-Jan-01 00:00:00", 1));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("1990-Jan-01 00:00:10", 2));
+
+    const auto rawstats = log->getStatistics();
+    TS_ASSERT_DELTA(rawstats.minimum, 1.0, 1e-3);
+    TS_ASSERT_DELTA(rawstats.maximum, 2.0, 1e-3);
+    TS_ASSERT_DELTA(rawstats.median, 1.5, 1e-3);
+    TS_ASSERT_DELTA(rawstats.mean, 1.5, 1e-3);
+    TS_ASSERT_DELTA(rawstats.duration, 20.0, 1e-3);
+    TS_ASSERT_DELTA(rawstats.time_mean, 1.5, 1e-3);
+
+    TimeROI roi(DateAndTime("1990-Jan-01 00:00:00"), DateAndTime("1990-Jan-01 00:00:20"));
+    const auto filteredstats = log->getStatistics(&roi);
+    TS_ASSERT_DELTA(filteredstats.minimum, 1.0, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.maximum, 2.0, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.median, 1.5, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.mean, 1.5, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.duration, 20.0, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.time_mean, 1.5, 1e-3);
+  }
+
   void test_PlusEqualsOperator_() {
     TimeSeriesProperty<double> *lhs = new TimeSeriesProperty<double>("doubleLog");
     TS_ASSERT_THROWS_NOTHING(lhs->addValue("2007-11-30T16:17:00", 1));

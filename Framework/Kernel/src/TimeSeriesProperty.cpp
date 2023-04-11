@@ -945,7 +945,6 @@ TimeSeriesProperty<std::string>::averageAndStdDevInFilter(const std::vector<Time
 
 template <typename TYPE>
 std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(const Kernel::TimeROI *timeRoi) const {
-
   // time series with less than two entries are conner cases
   if (this->realSize() == 0)
     return std::pair<double, double>{std::numeric_limits<double>::quiet_NaN(),
@@ -1255,8 +1254,11 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::durationInSeconds(cons
     return std::numeric_limits<double>::quiet_NaN();
   if (roi && !roi->useAll()) {
     Kernel::TimeROI seriesSpan(*roi);
+    const auto firstTime = this->firstTime();
     // remove everything before the start time
-    seriesSpan.addMask(DateAndTime::GPS_EPOCH, this->firstTime());
+    if (firstTime > DateAndTime::GPS_EPOCH) {
+      seriesSpan.addMask(DateAndTime::GPS_EPOCH, firstTime);
+    }
     return seriesSpan.durationInSeconds();
   } else {
     const auto &intervals = this->getTimeIntervals();
