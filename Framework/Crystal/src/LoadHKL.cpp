@@ -41,8 +41,6 @@ void LoadHKL::exec() {
 
   std::string filename = getPropertyValue("Filename");
   PeaksWorkspace_sptr ws(new PeaksWorkspace());
-  bool cosines = false;
-  bool modvec = false;
 
   std::fstream in;
   in.open(filename.c_str(), std::ios::in);
@@ -76,6 +74,8 @@ void LoadHKL::exec() {
   do {
     getline(in, line);
     double h = 0.0, k = 0.0, l = 0.0, m = 0.0, n = 0.0, p = 0.0;
+    bool cosines;
+    bool modvec;
     if (line.length() == 89) {
       cosines = false;
       modvec = false;
