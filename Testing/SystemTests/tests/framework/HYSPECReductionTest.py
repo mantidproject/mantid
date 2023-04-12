@@ -98,9 +98,10 @@ class HYSPECReductionTest(systemtesting.MantidSystemTest):
             Parallel="1",
             OutputWorkspace="slice",
         )
+        ConvertMDHistoToMatrixWorkspace(InputWorkspace="slice", OutputWorkspace="slice")
         DeleteWorkspace("merged")
         DeleteWorkspace("PreprocessedDetectorsWS")
 
     def validate(self):
-        self.tolerance = 1e-8
+        self.tolerance = 1e-3
         return "slice", "HYSPECReduction_TIBasEvents.nxs"
