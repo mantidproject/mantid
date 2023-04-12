@@ -1,0 +1,4 @@
+- Updated the CRYSTAL parser for Abins to accept files with complex
+  eigenvectors expressed as "ANTI-PHASE". This seems to be the
+  notation used for calculations on a regular q-point mesh, such as
+  when performing Fourier interpolation to obtain a dense DOS.
