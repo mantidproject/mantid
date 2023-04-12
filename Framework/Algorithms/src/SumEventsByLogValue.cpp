@@ -208,6 +208,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   for (int value = minVal; value <= maxVal; ++value) {
     const auto row = std::size_t(value - minVal);
     // Create a filter giving the times when this log has the current value
+
     TimeROI timeRoi;
     const TimeROI *temp = &m_inputWorkspace->run().getTimeROI();
     // This section ensures that the filter goes to the end of the run
@@ -237,8 +238,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
       // of the main log
       // Have to (maybe inefficiently) fetch back column by name - move outside
       // loop if too slow
-      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) =
-          otherLog.second->averageValueInFilter(timeRoi.toSplitters());
+      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) = otherLog.second->timeAverageValue(&timeRoi);
     }
 
     prog.report();

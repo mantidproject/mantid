@@ -3872,7 +3872,8 @@ void EventList::filterByPulseTime(Kernel::TimeROI *timeRoi, EventList &output) c
  *  Also, a future version using TimeROI will automatically sort the intervals.
  */
 template <class T>
-void EventList::filterInPlaceHelper(Kernel::SplittingIntervalVec &splitter, typename std::vector<T> &events) {
+void EventList::filterInPlaceHelper(const std::vector<Kernel::TimeInterval> &splitter,
+                                    typename std::vector<T> &events) {
   // Iterate through the splitter at the same time
   auto itspl = splitter.begin();
   auto itspl_end = splitter.end();
@@ -3891,8 +3892,7 @@ void EventList::filterInPlaceHelper(Kernel::SplittingIntervalVec &splitter, type
     // Get the splitting interval times and destination
     start = itspl->start();
     stop = itspl->stop();
-    const int index = itspl->index();
-
+    const auto index = 0;
     // Skip the events before the start of the time
     while ((itev != itev_end) && (itev->m_pulsetime < start))
       itev++;
@@ -3943,7 +3943,7 @@ void EventList::filterInPlaceHelper(Kernel::SplittingIntervalVec &splitter, type
  *indicate events
  *     that will be kept. Any other events will be deleted.
  */
-void EventList::filterInPlace(Kernel::SplittingIntervalVec &splitter) {
+void EventList::filterInPlace(const std::vector<Kernel::TimeInterval> &splitter) {
   // Start by sorting the event list by pulse time.
   this->sortPulseTime();
 
@@ -3999,9 +3999,9 @@ void EventList::initializePartials(std::map<int, EventList *> partials) const {
  * @param events :: either this->events or this->weightedEvents.
  */
 template <class T>
-void EventList::splitByTimeHelper(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs,
+void EventList::splitByTimeHelper(const std::vector<Kernel::TimeInterval> &splitter, std::vector<EventList *> outputs,
                                   typename std::vector<T> &events) const {
-  size_t numOutputs = outputs.size();
+  auto numOutputs = outputs.size();
 
   // Iterate through the splitter at the same time
   auto itspl = splitter.begin();
@@ -4017,7 +4017,7 @@ void EventList::splitByTimeHelper(Kernel::SplittingIntervalVec &splitter, std::v
     // Get the splitting interval times and destination
     start = itspl->start();
     stop = itspl->stop();
-    const size_t index = itspl->index();
+    const auto index = 0;
 
     // Skip the events before the start of the time
     while ((itev != itev_end) && (itev->m_pulsetime < start))
@@ -4056,7 +4056,7 @@ void EventList::splitByTimeHelper(Kernel::SplittingIntervalVec &splitter, std::v
  *entries in there should
  *        be big enough to accommodate the indices.
  */
-void EventList::splitByTime(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs) const {
+void EventList::splitByTime(const std::vector<Kernel::TimeInterval> &splitter, std::vector<EventList *> outputs) const {
   if (eventType == WEIGHTED_NOTIME)
     throw std::runtime_error("EventList::splitByTime() called on an EventList "
                              "that no longer has time information.");

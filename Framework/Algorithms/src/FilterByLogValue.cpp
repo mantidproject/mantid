@@ -166,7 +166,7 @@ void FilterByLogValue::exec() {
 
   // Initialise the progress reporting object
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
-  SplittingIntervalVec splitter = roi->toSplitters();
+  const auto splitter = roi->toTimeIntervals();
   EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (inputWS == outputWS) {
     // Filtering in place!

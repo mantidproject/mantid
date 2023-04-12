@@ -128,7 +128,7 @@ public:
     // Check the times & the proton charge
     TS_ASSERT_EQUALS(outWS->Double(0, 3), 89.0);
     TS_ASSERT_EQUALS(outWS->Double(1, 3), 10.0);
-    TS_ASSERT_EQUALS(outWS->Double(0, 4), 90.0E7);
+    TS_ASSERT_EQUALS(outWS->Double(0, 4), 89.0E7);
     TS_ASSERT_EQUALS(outWS->Double(1, 4), 10.0E7);
     // Save more complex tests for a system test
   }
