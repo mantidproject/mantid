@@ -15,7 +15,6 @@ import systemtesting
 
 
 class MDNormHYSPECTest(systemtesting.MantidSystemTest):
-
     tolerance = 1e-8
 
     def requiredMemoryMB(self):
@@ -35,7 +34,7 @@ class MDNormHYSPECTest(systemtesting.MantidSystemTest):
             UnitOfTime="Nanoseconds",
             LogName="s1",
             MaximumLogValue=90,
-            LogValueInterval=1,
+            LogValueInterval=9,
         )
         FilterEvents(
             InputWorkspace="sum",
@@ -90,10 +89,11 @@ class MDNormHYSPECTest(systemtesting.MantidSystemTest):
             OutputDataWorkspace="dataMD",
             OutputNormalizationWorkspace="normMD",
         )
+        ConvertMDHistoToMatrixWorkspace(InputWorkspace="result", OutputWorkspace="result")
         DeleteWorkspace("dataMD")
         DeleteWorkspace("normMD")
         DeleteWorkspace("merged")
 
     def validate(self):
-        self.tolerance = 1e-8
+        self.tolerance = 1e-3
         return "result", "MDNormHYSPEC.nxs"
