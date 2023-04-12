@@ -110,10 +110,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(timeAverageValue_Overloads, timeAverageVa
       .def("clear", &TimeSeriesProperty<TYPE>::clear, arg("self"))                                                     \
       .def("valueAsString", &TimeSeriesProperty<TYPE>::value, arg("self"))                                             \
       .def("size", &TimeSeriesProperty<TYPE>::size, arg("self"))                                                       \
-      .def("filterByTime",                                                                                             \
-           (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &, const DateAndTime &)) &                            \
-               TimeSeriesProperty<TYPE>::filterByTime,                                                                 \
-           (arg("self"), arg("start"), arg("stop")))                                                                   \
       .def("firstTime", &TimeSeriesProperty<TYPE>::firstTime, arg("self"),                                             \
            "returns :class:`mantid.kernel.DateAndTime`")                                                               \
       .def("firstValue", &TimeSeriesProperty<TYPE>::firstValue, arg("self"))                                           \
