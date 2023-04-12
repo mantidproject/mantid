@@ -226,30 +226,6 @@ Run &Run::operator+=(const Run &rhs) {
   return *this;
 }
 
-//-----------------------------------------------------------------------------------------------
-/**
- * Split a run by time (splits the TimeSeriesProperties contained).
- *
- * Total proton charge will get re-integrated after filtering.
- *
- * @param splitter :: SplittingIntervalVec with the intervals and destinations.
- * @param outputs :: Vector of output runs.
- */
-void Run::splitByTime(SplittingIntervalVec &splitter, std::vector<LogManager *> outputs) const {
-
-  // std::vector<LogManager *> outputsBase(outputs.begin(),outputs.end());
-  LogManager::splitByTime(splitter, outputs);
-
-  // Re-integrate proton charge of all outputs
-  for (auto output : outputs) {
-    if (output) {
-      auto run = dynamic_cast<Run *>(output);
-      if (run)
-        run->integrateProtonCharge();
-    }
-  }
-}
-
 // this overrides the one from LogManager so the proton charge can be recalculated
 void Run::setTimeROI(const Kernel::TimeROI &timeroi) {
   LogManager::setTimeROI(timeroi);

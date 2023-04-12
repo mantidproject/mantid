@@ -330,9 +330,6 @@ public:
   /// Get the list of managed properties in a given group.
   std::vector<Property *> getPropertiesInGroup(const std::string &group) const;
 
-  virtual void splitByTime(std::vector<SplittingInterval> & /*splitter*/,
-                           std::vector<PropertyManager *> /* outputs*/) const = 0;
-
   virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filter*/, const std::vector<std::string> &
                                 /* excludedFromFiltering */) = 0;
 

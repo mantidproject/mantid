@@ -128,45 +128,6 @@ PropertyManager &PropertyManager::operator+=(const PropertyManager &rhs) {
 
 //-----------------------------------------------------------------------------------------------
 /**
- * Split a run by time (splits the TimeSeriesProperties contained).
- *
- * Total proton charge will get re-integrated after filtering.
- *
- * @param splitter :: SplittingIntervalVec with the intervals and destinations.
- * @param outputs :: Vector of output runs.
- */
-void PropertyManager::splitByTime(std::vector<SplittingInterval> &splitter,
-                                  std::vector<PropertyManager *> outputs) const {
-  size_t n = outputs.size();
-
-  // Iterate through all properties
-  PropertyMap::const_iterator it;
-  for (it = this->m_properties.begin(); it != this->m_properties.end(); ++it) {
-    // Filter out the property
-    Property *prop = it->second.get();
-
-    // Make a vector of the output properties contained in the other property
-    // managers.
-    //  NULL if it was not found.
-    std::vector<Property *> output_properties;
-    for (size_t i = 0; i < n; i++) {
-      if (outputs[i])
-        output_properties.emplace_back(outputs[i]->getPointerToPropertyOrNull(prop->name()));
-      else
-        output_properties.emplace_back(nullptr);
-    }
-
-    // Now the property does the splitting.
-    bool isProtonCharge = prop->name() == "proton_charge";
-    if (auto timeSeriesProperty = dynamic_cast<ITimeSeriesProperty *>(prop)) {
-      timeSeriesProperty->splitByTime(splitter, output_properties, isProtonCharge);
-    }
-
-  } // for each property
-}
-
-//-----------------------------------------------------------------------------------------------
-/**
  * Filter the managed properties by the given boolean property mask. It replaces
  * all time series properties with filtered time series properties
  * @param filter :: A boolean time series to filter each property on
