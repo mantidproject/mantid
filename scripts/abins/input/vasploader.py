@@ -236,7 +236,7 @@ class VASPLoader(AbInitioLoader):
         root = ElementTree.parse(filename).getroot()
 
         incar_block = _find_or_error(root, "incar")
-        ibrion = int(_find_or_error(incar_block, "i", name="IBRION"))
+        ibrion = int(_to_text(_find_or_error(incar_block, "i", name="IBRION")))
 
         structure_block = _find_or_error(root, "structure", name="finalpos")
         varray = _find_or_error(_find_or_error(structure_block, "crystal"), "varray", name="basis")
