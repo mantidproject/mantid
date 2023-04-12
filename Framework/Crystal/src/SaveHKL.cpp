@@ -114,7 +114,7 @@ void SaveHKL::exec() {
   OrientedLattice ol;
   if (cosines) {
     if (peaksW->sample().hasOrientedLattice()) {
-      ol = peaksW->cz.getOrientedLattice();
+      ol = peaksW->sample().getOrientedLattice();
     } else {
       // Find OrientedLattice
       std::string fileUB = getProperty("UBFilename");
@@ -147,8 +147,9 @@ void SaveHKL::exec() {
   // Default for kf-ki has -q
   double qSign = -1.0;
   std::string convention = ConfigService::Instance().getString("Q.convention");
-  if (convention == "Crystallography")
+  if (convention == "Crystallography") {
     qSign = 1.0;
+  }
 
   std::fstream out;
   out.open(filename.c_str(), std::ios::out);
@@ -346,25 +347,24 @@ void SaveHKL::exec() {
         }
 
         // Anvred write from Art Schultz/
-        // hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n'
-        //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM,
-        //    TRANSMISSION, DN, TWOTH, DSP))
         if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0) {
           banned.insert(wi);
           continue;
         }
-        if (decimalHKL == EMPTY_INT())
-          V3D HKL = p.getIntHKL();
-        out << std::setw(4) << Utils::round(qSign * HKL[0]) << std::setw(4) << Utils::round(qSign * HKL[1])
-            << std::setw(4) << Utils::round(qSign * HKL[2]);
-        if (maxOrder > 0) {
-          V3D MNP = p.getIntMNP();
-          out << std::setw(4) << Utils::round(qSign * MNP[0]) << std::setw(4) << Utils::round(qSign * MNP[1])
-              << std::setw(4) << Utils::round(qSign * MNP[2]);
-        } else
+        if (decimalHKL == EMPTY_INT()) {
+          V3D HKL = (maxOrder == 0) ? p.getHKL() : p.getIntHKL();
+          out << std::setw(4) << Utils::round(qSign * HKL[0]) << std::setw(4) << Utils::round(qSign * HKL[1])
+              << std::setw(4) << Utils::round(qSign * HKL[2]);
+          if (maxOrder > 0) {
+            V3D MNP = p.getIntMNP();
+            out << std::setw(4) << Utils::round(qSign * MNP[0]) << std::setw(4) << Utils::round(qSign * MNP[1])
+                << std::setw(4) << Utils::round(qSign * MNP[2]);
+          }
+        } else {
           out << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << qSign * p.getH()
               << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << qSign * p.getK()
               << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << qSign * p.getL();
+        }
         double correc = scaleFactor;
         double instBkg = 0;
         double relSigSpect = 0.0;
@@ -394,8 +394,9 @@ void SaveHKL::exec() {
           double sinsqt = std::pow(lambda / (2.0 * dsp), 2);
           double wl4 = std::pow(lambda, m_power_th);
           double cmonx = 1.0;
-          if (p.getMonitorCount() > 0)
+          if (p.getMonitorCount() > 0) {
             cmonx = 100e6 / p.getMonitorCount();
+          }
           double spect = spectrumCalc(p.getTOF(), iSpec, time, spectra, bank);
           // Find spectra at wavelength of 1 for normalization
           std::vector<double> xdata(1, 1.0); // wl = 1
@@ -415,8 +416,9 @@ void SaveHKL::exec() {
           }
           correc = scaleFactor * sinsqt * cmonx * sp_ratio / (wl4 * spect * transmission);
 
-          if (inst->hasParameter("detScale" + bankName))
+          if (inst->hasParameter("detScale" + bankName)) {
             correc *= static_cast<double>(inst->getNumberParameter("detScale" + bankName)[0]);
+          }
 
           // instrument background constant for sigma
           instBkg = 0. * 12.28 / cmonx * scaleFactor;
@@ -446,10 +448,10 @@ void SaveHKL::exec() {
         else
           out << std::setw(4) << runSequence + 1;
 
-        if (cosines) {
-          out << std::setw(8) << std::fixed << std::setprecision(5) << lambda;
-          out << std::setw(8) << std::fixed << std::setprecision(5) << tbar;
+        out << std::setw(8) << std::fixed << std::setprecision(5) << lambda;
+        out << std::setw(8) << std::fixed << std::setprecision(5) << tbar;
 
+        if (cosines) {
           // This is the reverse incident beam
           V3D reverse_incident_dir = p.getSourceDirectionSampleFrame();
           V3D reverse_incident_cos = ol.cosFromDir(reverse_incident_dir);
@@ -462,57 +464,51 @@ void SaveHKL::exec() {
             out << std::setw(9) << std::fixed << std::setprecision(5) << reverse_incident_cos[k];
             out << std::setw(9) << std::fixed << std::setprecision(5) << scattered_cos[k];
           }
+        }
 
-          out << std::setw(6) << runNumber;
+        out << std::setw(6) << runNumber;
 
-          out << std::setw(6) << seqNum;
+        if (cosines) {
+          out << std::setw(7) << seqNum;
+        } else {
+          out << std::setw(7) << wi + 1;
+        }
 
-          out << std::setw(7) << std::fixed << std::setprecision(4) << transmission;
+        out << std::setw(7) << std::fixed << std::setprecision(4) << transmission;
 
-          out << std::setw(4) << std::right << bank;
+        out << std::setw(4) << std::right << bank;
 
-          out << std::setw(9) << std::fixed << std::setprecision(5) << scattering; // two-theta scattering
+        out << std::setw(9) << std::fixed << std::setprecision(5) << scattering; // two-theta scattering
 
-          out << std::setw(8) << std::fixed << std::setprecision(4) << dsp;
+        out << std::setw(8) << std::fixed << std::setprecision(4) << dsp;
+
+        if (cosines) {
           out << std::setw(7) << std::fixed << std::setprecision(2) << static_cast<double>(p.getCol());
           out << std::setw(7) << std::fixed << std::setprecision(2) << static_cast<double>(p.getRow());
-        } else {
-          out << std::setw(8) << std::fixed << std::setprecision(4) << lambda;
-
-          out << std::setw(7) << std::fixed << std::setprecision(4) << tbar;
-
-          out << std::setw(7) << runNumber;
-
-          out << std::setw(7) << wi + 1;
-
-          out << std::setw(7) << std::fixed << std::setprecision(4) << transmission;
-
-          out << std::setw(4) << std::right << bank;
-
-          out << std::setw(9) << std::fixed << std::setprecision(5) << scattering; // two-theta scattering
-
-          out << std::setw(9) << std::fixed << std::setprecision(4) << dsp;
         }
 
         out << '\n';
       }
     }
   }
-  if (decimalHKL == EMPTY_INT())
+  if (decimalHKL == EMPTY_INT()) {
     out << std::setw(4) << 0 << std::setw(4) << 0 << std::setw(4) << 0;
-  if (maxOrder > 0) {
-    out << std::setw(4) << 0 << std::setw(4) << 0 << std::setw(4) << 0;
-  } else
+    if (maxOrder > 0) {
+      out << std::setw(4) << 0 << std::setw(4) << 0 << std::setw(4) << 0;
+    }
+  } else {
+    //
     out << std::setw(5 + decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0 << std::setw(5 + decimalHKL)
         << std::fixed << std::setprecision(decimalHKL) << 0.0 << std::setw(5 + decimalHKL) << std::fixed
         << std::setprecision(decimalHKL) << 0.0;
+  }
   if (cosines) {
-    out << "    0.00    0.00   0 0.00000 0.00000  0.00000  0.00000  0.00000"
-           "  0.00000  0.00000  0.00000     0     0 0.0000   0  0.00000  "
-           "0.0000   0.00   0.00";
+    out << "    0.00    0.00   0 0.00000 0.00000"
+           "  0.00000  0.00000  0.00000  0.00000  0.00000  0.00000"
+           "      0      0 0.0000   0  0.00000  0.0000   0.00   0.00";
   } else {
-    out << "    0.00    0.00   0  0.0000 0.0000      0      0 0.0000 "
-           "  0  0.00000   0.0000";
+    out << "    0.00    0.00   0 0.00000 0.00000"
+           "      0      0 0.0000   0  0.00000  0.0000";
   }
   out << '\n';
   out.flush();
