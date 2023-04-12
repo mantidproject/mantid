@@ -226,6 +226,8 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
     interruption_point();
     // Sum up the proton charge for this log value
     if (protonChargeLog) {
+      /// Conversion factor between microAmpere-hours and picoCoulombs
+      /// this is required to correctly represent the proton charge
       const double currentConversion = 1.e-6 / 3600.;
       protonChgCol->cell<double>(row) = run.getProtonCharge() / currentConversion;
     }

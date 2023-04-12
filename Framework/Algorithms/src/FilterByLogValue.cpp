@@ -161,12 +161,11 @@ void FilterByLogValue::exec() {
     } // (filter by value)
   }
 
-  g_log.information() << roi->numBoundaries() / 2 << " entries in the filter.\n";
+  g_log.information() << roi->numBoundaries() << " boundaries in TimeROI.\n";
   size_t numberOfSpectra = inputWS->getNumberHistograms();
 
   // Initialise the progress reporting object
   Progress prog(this, 0.0, 1.0, numberOfSpectra);
-  const auto splitter = roi->toTimeIntervals();
   EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (inputWS == outputWS) {
     // Filtering in place!

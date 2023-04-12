@@ -3868,9 +3868,7 @@ void EventList::filterByPulseTime(Kernel::TimeROI *timeRoi, EventList &output) c
  *  caller.
  */
 template <class T> void EventList::filterInPlaceHelper(Kernel::TimeROI *timeRoi, typename std::vector<T> &events) {
-  if (timeRoi == nullptr) {
-    throw std::runtime_error("TimeROI can not be a nullptr\n");
-  }
+
   const auto splitter = timeRoi->toTimeIntervals();
   // Iterate through the splitter at the same time
   auto itspl = splitter.begin();
@@ -3932,6 +3930,12 @@ template <class T> void EventList::filterInPlaceHelper(Kernel::TimeROI *timeRoi,
  * @param timeRoi :: a TimeROI that will be used to filter events
  */
 void EventList::filterInPlace(Kernel::TimeROI *timeRoi) {
+  if (timeRoi == nullptr) {
+    throw std::runtime_error("TimeROI can not be a nullptr\n");
+  }
+  if (timeRoi->useAll()) {
+    throw std::invalid_argument("TimeROI can not be empty\n");
+  }
   // Start by sorting the event list by pulse time.
   this->sortPulseTime();
 
