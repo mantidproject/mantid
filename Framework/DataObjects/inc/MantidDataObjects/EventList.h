@@ -266,7 +266,7 @@ public:
 
   void filterByPulseTime(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, EventList &output) const;
 
-  void filterByPulseTime(Kernel::TimeROI *timeRoi, EventList &output) const;
+  void filterByPulseTime(Kernel::TimeROI *timeRoi, EventList *output) const;
 
   void filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, double tofFactor,
                             double tofOffset, EventList &output) const;
@@ -431,7 +431,7 @@ private:
                                          std::vector<T> &output);
   template <class T>
   static void filterByTimeROIHelper(std::vector<T> &events, const std::vector<Kernel::TimeInterval> &intervals,
-                                    std::vector<T> &output);
+                                    EventList *output);
 
   template <class T> void filterInPlaceHelper(Kernel::TimeROI *timeRoi, typename std::vector<T> &events);
 

@@ -3714,13 +3714,42 @@ void EventList::filterByTimeAtSampleHelper(std::vector<T> &events, DateAndTime s
  */
 template <class T>
 void EventList::filterByTimeROIHelper(std::vector<T> &events, const std::vector<Kernel::TimeInterval> &intervals,
-                                      std::vector<T> &output) {
-  for (const auto &time : intervals) {
-    const DateAndTime start = time.start();
-    const DateAndTime stop = time.stop();
-    std::copy_if(events.begin(), events.end(), std::back_inserter(output),
-                 [start, stop](const T &t) { return (t.m_pulsetime >= start) && (t.m_pulsetime < stop); });
+                                      EventList *output) {
+  // Iterate through the splitter at the same time
+  auto itspl = intervals.begin();
+  auto itspl_end = intervals.end();
+  // Iterate through all events (sorted by tof)
+  auto itev = events.begin();
+  auto itev_end = events.end();
+
+  // This is the time of the first section. Anything before is thrown out.
+  while (itspl != itspl_end) {
+    // Get the splitting interval times and destination
+    DateAndTime start = itspl->start();
+    DateAndTime stop = itspl->stop();
+    // Skip the events before the start of the time
+    while ((itev != itev_end) && (itev->m_pulsetime < start))
+      itev++;
+
+    // Go through all the events that are in the interval (if any)
+    while ((itev != itev_end) && (itev->m_pulsetime < stop)) {
+      // Copy the event into another
+      const T eventCopy(*itev);
+      output->addEventQuickly(eventCopy);
+      ++itev;
+    }
+
+    // Go to the next interval
+    ++itspl;
+    // But if we reached the end, then we are done.
+    if (itspl == itspl_end)
+      break;
+
+    // No need to keep looping through the filter if we are out of events
+    if (itev == itev_end)
+      break;
   }
+  // Done!
 }
 
 //------------------------------------------------------------------------------------------------
@@ -3808,33 +3837,33 @@ void EventList::filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core
  * @param output :: reference to an event list that will be output.
  * @throws std::invalid_argument If output is a reference to this EventList
  */
-void EventList::filterByPulseTime(Kernel::TimeROI *timeRoi, EventList &output) const {
-  if (this == &output) {
-    throw std::invalid_argument("In-place filtering is not allowed");
-  }
+void EventList::filterByPulseTime(Kernel::TimeROI *timeRoi, EventList *output) const {
 
+  this->sortPulseTime();
   // Clear the output
-  output.clear();
+
+  output->clear();
+  output->setDetectorIDs(this->getDetectorIDs());
+  output->setHistogram(m_histogram);
   // Has to match the given type
-  output.switchTo(eventType);
-  output.setDetectorIDs(this->getDetectorIDs());
-  output.setHistogram(m_histogram);
-  output.setSortOrder(this->order);
+  output->switchTo(eventType);
 
   if ((timeRoi == nullptr) || (timeRoi->useAll())) {
     throw std::invalid_argument("TimeROI can not use all time");
   }
   const auto &intervals = timeRoi->toTimeIntervals();
+  if (intervals.empty())
+    return;
 
   switch (eventType) {
   case TOF:
-    filterByTimeROIHelper(this->events, intervals, output.events);
+    filterByTimeROIHelper(this->events, intervals, output);
     break;
   case WEIGHTED:
-    filterByTimeROIHelper(this->weightedEvents, intervals, output.weightedEvents);
+    filterByTimeROIHelper(this->weightedEvents, intervals, output);
     break;
   case WEIGHTED_NOTIME:
-    throw std::runtime_error("EventList::filterByTimeROI() called on an "
+    throw std::runtime_error("EventList::filterByPulseTime() called on an "
                              "EventList that no longer has time information.");
     break;
   }

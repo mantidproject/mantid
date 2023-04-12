@@ -1833,9 +1833,9 @@ public:
       el.switchTo(curType);
 
       // Filter into this
-      EventList out;
-      // Manually set a sort mode to verify that is it is switched afterward
-      out.setSortOrder(Mantid::DataObjects::TOF_SORT);
+      EventList *out = new EventList();
+      // Manually set a sort mode to verify it has switched
+      out->setSortOrder(Mantid::DataObjects::TOF_SORT);
       Kernel::TimeROI *timeRoi = nullptr;
       TS_ASSERT_THROWS(el.filterByPulseTime(timeRoi, out), const std::invalid_argument &);
       timeRoi = new Kernel::TimeROI();
@@ -1853,13 +1853,13 @@ public:
             numGood++;
 
         // Good # of events.
-        TS_ASSERT_EQUALS(numGood, out.getNumberEvents());
-        TS_ASSERT_EQUALS(curType, out.getEventType());
+        TS_ASSERT_EQUALS(numGood, out->getNumberEvents());
+        TS_ASSERT_EQUALS(curType, out->getEventType());
 
-        for (std::size_t i = 0; i < out.getNumberEvents(); i++) {
+        for (std::size_t i = 0; i < out->getNumberEvents(); i++) {
           // Check that the times are within the given limits.
-          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100), out.getEvent(i).pulseTime());
-          TS_ASSERT_LESS_THAN(out.getEvent(i).pulseTime(), DateAndTime(300));
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100), out->getEvent(i).pulseTime());
+          TS_ASSERT_LESS_THAN(out->getEvent(i).pulseTime(), DateAndTime(300));
         }
       }
     }
