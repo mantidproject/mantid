@@ -5,8 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import json
+from numbers import Real
 import numpy as np
 from numpy.testing import assert_allclose
+from typing import Union
 
 import abins
 from abins.input import AbInitioLoader
@@ -27,58 +29,78 @@ class Tester(object):
     }
 
     @staticmethod
-    def _prepare_data(seedname):
+    def _prepare_data(seedname: str, max_displacement_kpt: Real = float("Inf")):
         """Reads reference values from ASCII files
 
-        :param seedname: Reference data will read from the file {seedname}_data.txt, except for the atomic displacements
-            which are read from files {seedname}_atomic_displacements_data_{I}.txt, where {I} are k-point indices.
-        :type seedname: str
+        Args:
+
+            seedname:
+                Reference data will read from the file {seedname}_data.txt,
+                except for the atomic displacements which are read from files
+                {seedname}_atomic_displacements_data_{I}.txt, where {I} are
+                k-point indices.
+
+            max_displacement_kpt:
+                Highest kpt index for which displacements data is read
         """
 
         with open(abins.test_helpers.find_file(seedname + "_data.txt")) as data_file:
             correct_data = json.loads(data_file.read().replace("\n", " "))
 
         num_k = len(correct_data["datasets"]["k_points_data"]["weights"])
+
         atoms = len(correct_data["datasets"]["atoms_data"])
         array = {}
-        for k in range(num_k):
-            temp = (
-                np.loadtxt(abins.test_helpers.find_file("{seedname}_atomic_displacements_data_{k}.txt".format(seedname=seedname, k=k)))
-                .view(complex)
-                .reshape(-1)
-            )
-            total_size = temp.size
-            num_freq = int(total_size / (atoms * 3))
-            array[str(k)] = temp.reshape(atoms, num_freq, 3)
 
+        for k in range(num_k):
             freq = correct_data["datasets"]["k_points_data"]["frequencies"][str(k)]
             correct_data["datasets"]["k_points_data"]["frequencies"][str(k)] = np.asarray(freq)
+
+            if k <= max_displacement_kpt:
+                try:
+                    disp_file = f"{seedname}_atomic_displacements_data_{k}.txt"
+                    temp = np.loadtxt(abins.test_helpers.find_file(disp_file)).view(complex).reshape(-1)
+                except FileNotFoundError:
+                    raise FileNotFoundError(disp_file)
+
+                total_size = temp.size
+                num_freq = int(total_size / (atoms * 3))
+                array[str(k)] = temp.reshape(atoms, num_freq, 3)
 
         correct_data["datasets"]["k_points_data"].update({"atomic_displacements": array})
 
         return correct_data
 
     @staticmethod
-    def _cull_imaginary_modes(frequencies, displacements):
+    def _cull_imaginary_modes(frequencies: np.ndarray, displacements: Union[np.ndarray, None]):
         from abins.constants import ACOUSTIC_PHONON_THRESHOLD
 
         finite_mode_indices = frequencies > ACOUSTIC_PHONON_THRESHOLD
-        return (frequencies[finite_mode_indices], displacements[:, finite_mode_indices])
 
-    def _check_reader_data(self, correct_data=None, data=None, filename=None, extension=None):
+        if displacements is None:
+            return (frequencies[finite_mode_indices], None)
+        else:
+            return (frequencies[finite_mode_indices], displacements[:, finite_mode_indices])
+
+    def _check_reader_data(self, correct_data=None, data=None, filename=None, extension=None, max_displacement_kpt=float("Inf")):
         # check data
         correct_k_points = correct_data["datasets"]["k_points_data"]
         items = data["datasets"]["k_points_data"]
 
         for k in correct_k_points["frequencies"]:
             correct_frequencies, correct_displacements = self._cull_imaginary_modes(
-                correct_k_points["frequencies"][k], correct_k_points["atomic_displacements"][k]
+                correct_k_points["frequencies"][k], correct_k_points["atomic_displacements"].get(k, None)
             )
-            calc_frequencies, calc_displacements = self._cull_imaginary_modes(items["frequencies"][k], items["atomic_displacements"][k])
+            calc_frequencies, calc_displacements = self._cull_imaginary_modes(
+                items["frequencies"][k], items["atomic_displacements"].get(k, None)
+            )
+
             assert_allclose(correct_frequencies, calc_frequencies)
-            assert_allclose(correct_displacements, calc_displacements)
             assert_allclose(correct_k_points["k_vectors"][k], items["k_vectors"][k])
             self.assertEqual(correct_k_points["weights"][k], items["weights"][k])
+
+            if int(k) <= max_displacement_kpt:
+                assert_allclose(correct_displacements, calc_displacements)
 
         correct_atoms = correct_data["datasets"]["atoms_data"]
         atoms = data["datasets"]["atoms_data"]
@@ -101,7 +123,9 @@ class Tester(object):
         # check datasets
         assert_allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"])
 
-    def _check_loader_data(self, correct_data=None, input_ab_initio_filename=None, extension=None, loader=None):
+    def _check_loader_data(
+        self, correct_data=None, input_ab_initio_filename=None, extension=None, loader=None, max_displacement_kpt: Real = float("Inf")
+    ):
         try:
             read_filename = abins.test_helpers.find_file(input_ab_initio_filename + "." + extension)
             ab_initio_loader = loader(input_ab_initio_filename=read_filename)
@@ -120,14 +144,18 @@ class Tester(object):
 
         for k in correct_items["frequencies"]:
             correct_frequencies, correct_displacements = self._cull_imaginary_modes(
-                correct_items["frequencies"][k], correct_items["atomic_displacements"][k]
+                correct_items["frequencies"][k], correct_items["atomic_displacements"].get(k, None)
             )
-            calc_frequencies, calc_displacements = self._cull_imaginary_modes(items["frequencies"][k], items["atomic_displacements"][k])
+            calc_frequencies, calc_displacements = self._cull_imaginary_modes(
+                items["frequencies"][k], items["atomic_displacements"].get(k, None)
+            )
 
             assert_allclose(correct_frequencies, calc_frequencies)
-            assert_allclose(correct_displacements, calc_displacements)
             assert_allclose(correct_items["k_vectors"][k], items["k_vectors"][k])
             assert_allclose(correct_items["weights"][k], items["weights"][k])
+
+            if int(k) <= max_displacement_kpt:
+                assert_allclose(correct_displacements, calc_displacements)
 
         # atoms
         correct_atoms = correct_data["datasets"]["atoms_data"]
@@ -139,11 +167,14 @@ class Tester(object):
             self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
             assert_allclose(np.array(correct_atoms["atom_%s" % item]["coord"]), atoms["atom_%s" % item]["coord"])
 
-    def check(self, *, name: str, loader: AbInitioLoader, extension: str = None):
+    def check(self, *, name: str, loader: AbInitioLoader, extension: str = None, max_displacement_kpt: Real = float("Inf")):
         """Run loader and compare output with reference files
 
         Args:
             name: prefix for test files (e.g. 'ethane_LoadVASP')
+            loader: loader class under test
+            extension: file extension if not the default for given loader
+            max_displacement_kpt: highest kpt index for which displacement data is checked
 
         """
         if extension is None:
@@ -153,13 +184,21 @@ class Tester(object):
         data = self._read_ab_initio(loader=loader, filename=name, extension=extension)
 
         # get correct data
-        correct_data = self._prepare_data(name)
+        correct_data = self._prepare_data(name, max_displacement_kpt=max_displacement_kpt)
 
         # check read data
-        self._check_reader_data(correct_data=correct_data, data=data, filename=name, extension=extension)
+        self._check_reader_data(
+            correct_data=correct_data, data=data, filename=name, extension=extension, max_displacement_kpt=max_displacement_kpt
+        )
 
         # check loaded data
-        self._check_loader_data(correct_data=correct_data, input_ab_initio_filename=name, extension=extension, loader=loader)
+        self._check_loader_data(
+            correct_data=correct_data,
+            input_ab_initio_filename=name,
+            extension=extension,
+            loader=loader,
+            max_displacement_kpt=max_displacement_kpt,
+        )
 
     def _read_ab_initio(self, loader=None, filename=None, extension=None):
         """
