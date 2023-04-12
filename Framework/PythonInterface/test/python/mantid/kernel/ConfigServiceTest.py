@@ -14,9 +14,9 @@ from mantid.kernel import ConfigService, ConfigServiceImpl, config, std_vector_s
 
 
 class ConfigServiceTest(unittest.TestCase):
-
     __dirs_to_rm = []
     __init_dir_list = ""
+    _oringinal_appdata_path = os.environ["APPDATA"]
 
     def test_singleton_returns_instance_of_ConfigService(self):
         self.assertTrue(isinstance(config, ConfigServiceImpl))
@@ -217,6 +217,17 @@ class ConfigServiceTest(unittest.TestCase):
         # verify check for converting checked value to string
         self.assertFalse(1 in ConfigService)
 
+    def test_get_app_data_dir(self):
+        self.assertEqual(
+            os.path.join(self._oringinal_appdata_path, "mantidproject", "mantid"), os.path.abspath(ConfigService.getAppDataDirectory())
+        )
+
+        unicode_string = "Ťėst μДنא"
+        unicode_path = os.path.join(self._oringinal_appdata_path, unicode_string)
+        os.environ["APPDATA"] = unicode_path
+
+        self.assertEqual(os.path.join(unicode_path, "mantidproject", "mantid"), os.path.abspath(ConfigService.getAppDataDirectory()))
+
     def _setup_test_areas(self):
         """Create a new data search path string"""
         self.__init_dir_list = config["datasearch.directories"]
@@ -239,6 +250,7 @@ class ConfigServiceTest(unittest.TestCase):
 
     def _clean_up_test_areas(self):
         config["datasearch.directories"] = self.__init_dir_list
+        os.environ["APPDATA"] = self._oringinal_appdata_path
 
         # Remove temp directories
         for p in self.__dirs_to_rm:
