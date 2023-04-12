@@ -1018,7 +1018,7 @@ void EventList::sortTimeAtSample(const double &tofFactor, const double &tofShift
 // --------------------------------------------------------------------------
 /** Sort events by Frame */
 void EventList::sortPulseTime() const {
-  if (this->order == PULSETIME_SORT)
+  if (this->order == PULSETIME_SORT || this->order == PULSETIMETOF_SORT)
     return; // nothing to do
 
   // Avoid sorting from multiple threads
