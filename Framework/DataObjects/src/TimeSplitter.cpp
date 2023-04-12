@@ -187,15 +187,15 @@ std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const 
 
     // If this TimeSplitter was built off of a TableWorkspace, targets could be non-numeric, in which case a numeric
     // shift wouldn't make sense.
-    int temp;
     try {
+      int temp;
       temp = std::stoi(name);
+      assert(temp == m_name_index_map[name]);
     } catch (std::invalid_argument &) // a non-integer string
     {
       throw std::runtime_error(
           "FilterEvents property \"OutputWorkspaceIndexedFrom1\" is not compatible with non-numeric targets.");
     }
-    assert(temp == m_name_index_map[name]);
 
     s << m_name_index_map[name] + numericalShift;
     return s.str();
