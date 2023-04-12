@@ -2101,6 +2101,7 @@ void TimeSeriesProperty<std::string>::histogramData(const Types::Core::DateAndTi
  */
 template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector(const TimeROI *roi) const {
   if (roi && !roi->useAll()) {
+    this->sortIfNecessary();
     std::vector<TYPE> filteredValues;
     if (roi->firstTime() > this->m_values.back().time()) {
       // Since the ROI starts after everything, just return the last value in the log
