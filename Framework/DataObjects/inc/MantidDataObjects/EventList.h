@@ -271,12 +271,10 @@ public:
   void filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, double tofFactor,
                             double tofOffset, EventList &output) const;
 
-  void filterInPlace(const std::vector<Kernel::TimeInterval> &splitter);
+  void filterInPlace(Kernel::TimeROI *timeRoi);
 
   /// Initialize the detector ID's and event type of the destination event lists when splitting this list
   void initializePartials(std::map<int, EventList *> partials) const;
-
-  void splitByTime(const std::vector<Kernel::TimeInterval> &splitter, std::vector<EventList *> outputs) const;
 
   void splitByFullTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs, bool docorrection,
                        double toffactor, double tofshift) const;
@@ -435,11 +433,8 @@ private:
   static void filterByTimeROIHelper(std::vector<T> &events, const std::vector<Kernel::TimeInterval> &intervals,
                                     std::vector<T> &output);
 
-  template <class T>
-  void filterInPlaceHelper(const std::vector<Kernel::TimeInterval> &splitter, typename std::vector<T> &events);
-  template <class T>
-  void splitByTimeHelper(const std::vector<Kernel::TimeInterval> &splitter, std::vector<EventList *> outputs,
-                         typename std::vector<T> &events) const;
+  template <class T> void filterInPlaceHelper(Kernel::TimeROI *timeRoi, typename std::vector<T> &events);
+
   template <class T>
   void splitByFullTimeHelper(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
                              typename std::vector<T> &events, bool docorrection, double toffactor,

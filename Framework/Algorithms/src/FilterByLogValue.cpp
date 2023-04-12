@@ -179,7 +179,7 @@ void FilterByLogValue::exec() {
       EventList &input_el = inputWS->getSpectrum(i);
 
       // Perform the filtering in place.
-      input_el.filterInPlace(splitter);
+      input_el.filterInPlace(roi);
 
       prog.report();
       PARALLEL_END_INTERRUPT_REGION
@@ -203,14 +203,14 @@ void FilterByLogValue::exec() {
       PARALLEL_START_INTERRUPT_REGION
 
       // Get the output event list (should be empty)
-      std::vector<EventList *> outputs{&outputWS->getSpectrum(i)};
+      EventList *outputs = &outputWS->getSpectrum(i);
 
       // and this is the input event list
       const EventList &input_el = inputWS->getSpectrum(i);
 
       // Perform the filtering (using the splitting function and just one
       // output)
-      input_el.splitByTime(splitter, outputs);
+      input_el.filterByPulseTime(roi, *outputs);
 
       prog.report();
       PARALLEL_END_INTERRUPT_REGION

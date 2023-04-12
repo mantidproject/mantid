@@ -12,6 +12,7 @@
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 
@@ -2005,79 +2006,18 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
-  void test_splitByTime_allTypes() {
-    // Go through each possible EventType as the input
-    for (int this_type = 0; this_type < 3; this_type++) {
-      EventType curType = static_cast<EventType>(this_type);
-      this->fake_data_only_two_times(150, 850);
-      el.switchTo(curType);
-
-      std::vector<EventList *> outputs;
-      for (size_t i = 0; i < 10; i++)
-        outputs.emplace_back(new EventList());
-
-      std::vector<Kernel::TimeInterval> split;
-      // Slices of 100
-      for (int i = 0; i < 10; i++)
-        split.emplace_back(Kernel::TimeInterval(i * 100, (i + 1) * 100));
-
-      if (curType == WEIGHTED_NOTIME) {
-        // Error cause no time
-        TS_ASSERT_THROWS(el.splitByTime(split, outputs), const std::runtime_error &);
-      } else {
-        // Do the splitting
-        TS_ASSERT_THROWS_NOTHING(el.splitByTime(split, outputs););
-
-        // TS_ASSERT_EQUALS(outputs[0]->getNumberEvents(), 0);
-        // TS_ASSERT_EQUALS(outputs[1]->getNumberEvents(), 1);
-        // TS_ASSERT_EQUALS(outputs[2]->getNumberEvents(), 0);
-        // TS_ASSERT_EQUALS(outputs[3]->getNumberEvents(), 0);
-        // TS_ASSERT_EQUALS(outputs[4]->getNumberEvents(), 0);
-        // TS_ASSERT_EQUALS(outputs[5]->getNumberEvents(), 0);
-        // TS_ASSERT_EQUALS(outputs[6]->getNumberEvents(), 0);
-        // TS_ASSERT_EQUALS(outputs[7]->getNumberEvents(), 0);
-        // TS_ASSERT_EQUALS(outputs[8]->getNumberEvents(), 1);
-        // TS_ASSERT_EQUALS(outputs[9]->getNumberEvents(), 0);
-
-        TS_ASSERT_EQUALS(outputs[0]->getEventType(), curType);
-      }
-
-      for (size_t i = 0; i < 10; i++)
-        delete outputs[i];
-    }
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  void test_splitByTime_FilterWithOverlap() {
-    this->fake_uniform_time_data();
-
-    std::vector<EventList *> outputs(1, new EventList());
-
-    std::vector<Kernel::TimeInterval> split;
-    split.emplace_back(TimeInterval(100, 200));
-    split.emplace_back(TimeInterval(150, 250));
-
-    // Do the splitting
-    el.splitByTime(split, outputs);
-
-    // No events in the first ouput 0-99
-    TS_ASSERT_EQUALS(outputs.front()->getNumberEvents(), 150);
-    delete outputs.front();
-  }
-
-  //-----------------------------------------------------------------------------------------------
   void do_testSplit_FilterInPlace(bool weighted) {
     this->fake_uniform_time_data();
     if (weighted)
       el *= 3.0;
 
-    std::vector<Kernel::TimeInterval> split;
-    split.emplace_back(TimeInterval(100, 200));
-    split.emplace_back(TimeInterval(150, 250));
-    split.emplace_back(TimeInterval(300, 350));
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(100, 200);
+    timeRoi->addROI(150, 250);
+    timeRoi->addROI(300, 350);
 
     // Do the splitting
-    el.filterInPlace(split);
+    el.filterInPlace(timeRoi);
 
     // 100-249; 300-349 are in the output, everything else is gone.
     TS_ASSERT_EQUALS(el.getNumberEvents(), 200);
@@ -2103,11 +2043,11 @@ public:
     if (weighted)
       el.switchTo(WEIGHTED);
 
-    std::vector<Kernel::TimeInterval> split;
-    split.emplace_back(TimeInterval(1500, 1700));
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(1500, 1700);
 
     // Do the splitting
-    el.filterInPlace(split);
+    el.filterInPlace(timeRoi);
 
     // Nothing left
     TS_ASSERT_EQUALS(el.getNumberEvents(), 0);
@@ -2119,11 +2059,11 @@ public:
     if (weighted)
       el *= 3.0;
 
-    std::vector<Kernel::TimeInterval> split;
-    split.emplace_back(TimeInterval(-10, 1700));
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(-10, 1700);
 
     // Do the splitting
-    el.filterInPlace(split);
+    el.filterInPlace(timeRoi);
 
     // Nothing left
     TS_ASSERT_EQUALS(el.getNumberEvents(), 1000);
@@ -2144,8 +2084,8 @@ public:
   void test_filterInPlace_notime_throws() {
     this->fake_uniform_time_data();
     el.switchTo(WEIGHTED_NOTIME);
-    std::vector<Kernel::TimeInterval> split;
-    TS_ASSERT_THROWS(el.filterInPlace(split), const std::runtime_error &)
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    TS_ASSERT_THROWS(el.filterInPlace(timeRoi), const std::runtime_error &)
   }
 
   //----------------------------------------------------------------------------------------------

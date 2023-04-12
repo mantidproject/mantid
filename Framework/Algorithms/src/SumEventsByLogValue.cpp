@@ -185,7 +185,6 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   const TimeSeriesProperty<double> *protonChargeLog = nullptr;
   try {
     protonChargeLog = m_inputWorkspace->run().getTimeSeriesProperty<double>("proton_charge");
-    //    g_log.debug() << protonChargeLog->g
     // Set back to NULL if the log is empty or bad things will happen later
     if (protonChargeLog->realSize() == 0)
       protonChargeLog = nullptr;
