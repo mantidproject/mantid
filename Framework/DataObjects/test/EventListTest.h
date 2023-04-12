@@ -2085,6 +2085,19 @@ public:
     this->fake_uniform_time_data();
     el.switchTo(WEIGHTED_NOTIME);
     Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(0, 100);
+    TS_ASSERT_THROWS(el.filterInPlace(timeRoi), const std::runtime_error &)
+  }
+
+  void test_filterInPlace_emptyROI_throws() {
+    this->fake_uniform_time_data();
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    TS_ASSERT_THROWS(el.filterInPlace(timeRoi), const std::invalid_argument &)
+  }
+
+  void test_filterInPlace_nullptr_throws() {
+    this->fake_uniform_time_data();
+    Kernel::TimeROI *timeRoi = nullptr;
     TS_ASSERT_THROWS(el.filterInPlace(timeRoi), const std::runtime_error &)
   }
 
