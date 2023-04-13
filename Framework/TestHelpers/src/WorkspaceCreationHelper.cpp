@@ -190,7 +190,7 @@ Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins) {
  * @param xVal :: bin edge or point
  * @param yVal :: y value
  * @param eVal :: error values
- * @param hasDx :: wether workspace has dx values defined (default is false)
+ * @param hasDx :: whether workspace has dx values defined (default is false)
  * @return A workspace filled with nBins bins or points and nHist spectra of the
  * values yVal and the error eVal as well as Dx values which are copies of the y
  * values
