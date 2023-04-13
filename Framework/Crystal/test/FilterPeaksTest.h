@@ -16,6 +16,7 @@
 
 using Mantid::Crystal::FilterPeaks;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
 //-------------------------------------------------------------
@@ -30,6 +31,8 @@ private:
                                            const double sigIntensity = 0) {
     auto ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
     ws->getPeak(0).setHKL(h, k, l); // First peak is already indexed now.
+    ws->getPeak(0).setIntHKL(V3D(h, k, l));
+    ws->getPeak(0).setIntMNP(V3D(h, k, l));
     ws->getPeak(0).setIntensity(intensity);
     ws->getPeak(0).setSigmaIntensity(sigIntensity);
     ws->getPeak(0).setBankName("bank1");
@@ -178,6 +181,35 @@ public:
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
     outWS = runAlgorithm(inWS, "h^2+k^2+l^2", h * h + k * k + l * l, "<=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
+  }
+
+  void test_filter_by_mnp_sq_sum() {
+    const double h = 1;
+    const double k = 1;
+    const double l = 1;
+
+    auto inWS = createInputWorkspace(h, k, l);
+
+    auto outWS = runAlgorithm(inWS, "m^2+n^2+p^2", h * h + k * k + l * l, "<");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "m^2+n^2+p", h * h + k * k + l * l, ">");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "m^2+n^2+p", h * h + k * k + l * l, "!=");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "m^2+n^2+p", h * h + k * k + l * l, "=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "m^2+n^2+p", h * h + k * k + l * l, ">=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "m^2+n^2+p", h * h + k * k + l * l, "<=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
     AnalysisDataService::Instance().remove(outWS->getName());
