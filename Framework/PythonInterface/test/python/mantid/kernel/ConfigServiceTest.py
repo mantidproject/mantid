@@ -7,6 +7,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import inspect
 import os
+import sys
 import testhelpers
 import unittest
 
@@ -217,6 +218,7 @@ class ConfigServiceTest(unittest.TestCase):
         # verify check for converting checked value to string
         self.assertFalse(1 in ConfigService)
 
+    @unittest.skipIf(sys.platform != "win32", "Windows only test, uses APPDATA")
     def test_get_app_data_dir(self):
         self.assertEqual(
             os.path.join(self._oringinal_appdata_path, "mantidproject", "mantid"), os.path.abspath(ConfigService.getAppDataDirectory())
