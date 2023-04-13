@@ -797,10 +797,10 @@ void IndirectDiffractionReduction::runFilesFound() {
 void IndirectDiffractionReduction::manualGroupingToggled(int state) {
   switch (state) {
   case Qt::Unchecked:
-    m_plotOptionsPresenter->setPlotType(PlotWidget::Spectra);
+    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraUnit);
     break;
   case Qt::Checked:
-    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraContour);
+    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraContourUnit);
     break;
   default:
     return;
