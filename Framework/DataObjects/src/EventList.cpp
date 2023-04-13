@@ -164,7 +164,7 @@ EventList::EventList(const EventList &rhs) : IEventList(rhs), m_histogram(rhs.m_
 EventList::EventList(const std::vector<TofEvent> &events)
     : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts), eventType(TOF),
       mru(nullptr) {
-  this->events.assign(events.begin(), events.end());
+  this->events.assign(events.cbegin(), events.cend());
   this->eventType = TOF;
   this->order = UNSORTED;
 }
@@ -173,7 +173,7 @@ EventList::EventList(const std::vector<TofEvent> &events)
  * @param events :: Vector of WeightedEvent's */
 EventList::EventList(const std::vector<WeightedEvent> &events)
     : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts), mru(nullptr) {
-  this->weightedEvents.assign(events.begin(), events.end());
+  this->weightedEvents.assign(events.cbegin(), events.cend());
   this->eventType = WEIGHTED;
   this->order = UNSORTED;
 }
@@ -182,7 +182,7 @@ EventList::EventList(const std::vector<WeightedEvent> &events)
  * @param events :: Vector of WeightedEventNoTime's */
 EventList::EventList(const std::vector<WeightedEventNoTime> &events)
     : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts), mru(nullptr) {
-  this->weightedEventsNoTime.assign(events.begin(), events.end());
+  this->weightedEventsNoTime.assign(events.cbegin(), events.cend());
   this->eventType = WEIGHTED_NOTIME;
   this->order = UNSORTED;
 }
@@ -357,7 +357,7 @@ EventList &EventList::operator+=(const std::vector<TofEvent> &more_events) {
   switch (this->eventType) {
   case TOF:
     // Simply push the events
-    this->events.insert(this->events.end(), more_events.begin(), more_events.end());
+    this->events.insert(this->events.end(), more_events.cbegin(), more_events.cend());
     break;
 
   case WEIGHTED:
@@ -413,7 +413,7 @@ EventList &EventList::operator+=(const std::vector<WeightedEvent> &more_events) 
 
   case WEIGHTED:
     // Append the two lists
-    this->weightedEvents.insert(weightedEvents.end(), more_events.begin(), more_events.end());
+    this->weightedEvents.insert(weightedEvents.end(), more_events.cbegin(), more_events.cend());
     break;
 
   case WEIGHTED_NOTIME:
@@ -447,7 +447,7 @@ EventList &EventList::operator+=(const std::vector<WeightedEventNoTime> &more_ev
 
   case WEIGHTED_NOTIME:
     // Simple appending of the two lists
-    this->weightedEventsNoTime.insert(weightedEventsNoTime.end(), more_events.begin(), more_events.end());
+    this->weightedEventsNoTime.insert(weightedEventsNoTime.end(), more_events.cbegin(), more_events.cend());
     break;
   }
 
@@ -1519,8 +1519,8 @@ void EventList::compressEventsParallelHelper(const std::vector<T> &events, std::
     double normalization = 0.;
 
     // Separate the
-    typename std::vector<T>::const_iterator it = events.begin() + thread * numPerBlock;
-    typename std::vector<T>::const_iterator it_end = events.begin() + (thread + 1) * numPerBlock; // cache for speed
+    typename std::vector<T>::const_iterator it = events.cbegin() + thread * numPerBlock;
+    typename std::vector<T>::const_iterator it_end = events.cbegin() + (thread + 1) * numPerBlock; // cache for speed
     if (thread == numThreads - 1)
       it_end = events.end();
     for (; it != it_end; ++it) {
@@ -1568,7 +1568,7 @@ void EventList::compressEventsParallelHelper(const std::vector<T> &events, std::
 
   // Re-join all the outputs
   for (int thread = 0; thread < numThreads; thread++)
-    out.insert(out.end(), outputs[thread].begin(), outputs[thread].end());
+    out.insert(out.end(), outputs[thread].cbegin(), outputs[thread].cend());
 }
 
 template <class T>
@@ -1795,8 +1795,8 @@ typename std::vector<T>::const_iterator static findFirstEvent(const std::vector<
 template <class T>
 typename std::vector<T>::const_iterator EventList::findFirstPulseEvent(const std::vector<T> &events,
                                                                        const double seek_pulsetime) {
-  auto itev = events.begin();
-  auto itev_end = events.end(); // cache for speed
+  auto itev = events.cbegin();
+  auto itev_end = events.cend(); // cache for speed
 
   // if tof < X[0], that means that you need to skip some events
   while ((itev != itev_end) && (static_cast<double>(itev->pulseTime().totalNanoseconds()) < seek_pulsetime))
@@ -1939,7 +1939,7 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const Ma
   } // end if (there are any events to histogram)
 
   // Now do the sqrt of all errors
-  std::transform(E.begin(), E.end(), E.begin(), static_cast<double (*)(double)>(sqrt));
+  std::transform(E.cbegin(), E.cend(), E.begin(), static_cast<double (*)(double)>(sqrt));
 }
 
 // --------------------------------------------------------------------------
@@ -2268,7 +2268,7 @@ void EventList::generateErrorsHistogram(const MantidVec &Y, MantidVec &E) const 
   E.resize(Y.size(), 0);
 
   // windows can get confused about std::sqrt
-  std::transform(Y.begin(), Y.end(), E.begin(), static_cast<double (*)(double)>(sqrt));
+  std::transform(Y.cbegin(), Y.cend(), E.begin(), static_cast<double (*)(double)>(sqrt));
 
 } //----------------------------------------------------------------------------------
 /** Integrate the events between a range of X values, or all events.
@@ -2308,9 +2308,8 @@ void EventList::integrateHelper(std::vector<T> &events, const double minX, const
     return;
 
   // Iterators for limits - whole range by default
-  typename std::vector<T>::iterator lowit, highit;
-  lowit = events.begin();
-  highit = events.end();
+  auto lowit = events.cbegin();
+  auto highit = events.cend();
 
   // But maybe we don't want the entire range?
   if (!entireRange) {
@@ -2320,10 +2319,10 @@ void EventList::integrateHelper(std::vector<T> &events, const double minX, const
 
     // If the first element is lower that the xmin then search for new lowit
     if (lowit->tof() < minX)
-      lowit = std::lower_bound(events.begin(), events.end(), minX);
+      lowit = std::lower_bound(events.cbegin(), events.cend(), minX);
     // If the last element is higher that the xmax then search for new lowit
     if ((highit - 1)->tof() > maxX) {
-      highit = std::upper_bound(lowit, events.end(), T(maxX));
+      highit = std::upper_bound(lowit, events.cend(), T(maxX));
     }
   }
 
@@ -2399,7 +2398,7 @@ void EventList::integrate(const double minX, const double maxX, const bool entir
 void EventList::convertTof(std::function<double(double)> func, const int sorting) {
   // fix the histogram parameter
   MantidVec &x = dataX();
-  transform(x.begin(), x.end(), x.begin(), func);
+  transform(x.cbegin(), x.cend(), x.begin(), func);
 
   // do nothing if sorting > 0
   if (sorting == 0) {
@@ -2590,9 +2589,9 @@ void EventList::addPulsetimes(const std::vector<double> &seconds) {
 template <class T>
 std::size_t EventList::maskTofHelper(std::vector<T> &events, const double tofMin, const double tofMax) {
   // quick checks to make sure that the masking range is even in the data
-  if (tofMin > events.rbegin()->tof())
+  if (tofMin > events.crbegin()->tof())
     return 0;
-  if (tofMax < events.begin()->tof())
+  if (tofMax < events.cbegin()->tof())
     return 0;
 
   // Find the index of the first tofMin
@@ -2606,16 +2605,15 @@ std::size_t EventList::maskTofHelper(std::vector<T> &events, const double tofMin
       throw std::runtime_error("Event filter is all messed up"); // TODO
     }
 
-    size_t tmp = (it_last - it_first);
+    size_t tmp = std::size_t(std::distance(it_first, it_last));
     // it_last will either be at the end (if not found) or before it.
     // Erase this range from the vector
     events.erase(it_first, it_last);
 
     // Done! Sorting is still valid, no need to redo.
     return tmp; //(it_last - it_first); the iterators get invalid after erase
-                //(on my machine)
   }
-  return 0;
+  return 0; // didn't remove any events
 }
 
 // --------------------------------------------------------------------------
@@ -3716,11 +3714,11 @@ template <class T>
 void EventList::filterByTimeROIHelper(std::vector<T> &events, const std::vector<Kernel::TimeInterval> &intervals,
                                       EventList *output) {
   // Iterate through the splitter at the same time
-  auto itspl = intervals.begin();
-  auto itspl_end = intervals.end();
+  auto itspl = intervals.cbegin();
+  auto itspl_end = intervals.cend();
   // Iterate through all events (sorted by tof)
-  auto itev = events.begin();
-  auto itev_end = events.end();
+  auto itev = events.cbegin();
+  auto itev_end = events.cend();
 
   // This is the time of the first section. Anything before is thrown out.
   while (itspl != itspl_end) {
@@ -3900,8 +3898,8 @@ template <class T> void EventList::filterInPlaceHelper(Kernel::TimeROI *timeRoi,
 
   const auto splitter = timeRoi->toTimeIntervals();
   // Iterate through the splitter at the same time
-  auto itspl = splitter.begin();
-  auto itspl_end = splitter.end();
+  auto itspl = splitter.cbegin();
+  auto itspl_end = splitter.cend();
   DateAndTime start, stop;
 
   // Iterate for the input
@@ -3950,7 +3948,7 @@ template <class T> void EventList::filterInPlaceHelper(Kernel::TimeROI *timeRoi,
   } // Looping through entries in the splitter vector
 
   // Ok, now resize the event list to reflect the fact that it (probably) shrank
-  events.resize((itOut - events.begin()));
+  events.resize(std::size_t(std::distance(events.begin(), itOut)));
 }
 
 //------------------------------------------------------------------------------------------------
@@ -4028,12 +4026,12 @@ void EventList::splitByFullTimeHelper(Kernel::SplittingIntervalVec &splitter, st
                                       typename std::vector<T> &events, bool docorrection, double toffactor,
                                       double tofshift) const {
   // 1. Prepare to Iterate through the splitter at the same time
-  auto itspl = splitter.begin();
-  auto itspl_end = splitter.end();
+  auto itspl = splitter.cbegin();
+  auto itspl_end = splitter.cend();
 
   // 2. Prepare to Iterate through all events (sorted by tof)
-  auto itev = events.begin();
-  auto itev_end = events.end();
+  auto itev = events.cbegin();
+  auto itev_end = events.cend();
 
   // 3. This is the time of the first section. Anything before is thrown out.
   while (itspl != itspl_end) {
@@ -4112,9 +4110,8 @@ void EventList::splitByFullTime(Kernel::SplittingIntervalVec &splitter, std::map
   this->sortPulseTimeTOF();
 
   // 2. Initialize all the outputs
-  std::map<int, EventList *>::iterator outiter;
-  for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter) {
-    EventList *opeventlist = outiter->second;
+  for (auto &outiter : outputs) {
+    EventList *opeventlist = outiter.second;
     opeventlist->clear();
     opeventlist->setDetectorIDs(this->getDetectorIDs());
     opeventlist->setHistogram(m_histogram);
@@ -4169,21 +4166,20 @@ EventList::splitByFullTimeVectorSplitterHelper(const std::vector<int64_t> &vecti
                                                bool docorrection, double toffactor, double tofshift) const {
   // Define variables for events
   // size_t numevents = events.size();
-  typename std::vector<T>::iterator eviter;
   std::stringstream msgss;
 
   // Loop through events
-  for (eviter = vecEvents.begin(); eviter != vecEvents.end(); ++eviter) {
+  for (auto &eviter : vecEvents) {
     // Obtain time of event
     int64_t evabstimens;
     if (docorrection)
-      evabstimens = eviter->m_pulsetime.totalNanoseconds() +
-                    static_cast<int64_t>(toffactor * eviter->m_tof * 1000 + tofshift * 1.0E9);
+      evabstimens = eviter.m_pulsetime.totalNanoseconds() +
+                    static_cast<int64_t>(toffactor * eviter.m_tof * 1000 + tofshift * 1.0E9);
     else
-      evabstimens = eviter->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(eviter->m_tof * 1000);
+      evabstimens = eviter.m_pulsetime.totalNanoseconds() + static_cast<int64_t>(eviter.m_tof * 1000);
 
     // Search in vector
-    int index = static_cast<int>(lower_bound(vectimes.begin(), vectimes.end(), evabstimens) - vectimes.begin());
+    int index = static_cast<int>(lower_bound(vectimes.cbegin(), vectimes.cend(), evabstimens) - vectimes.cbegin());
     int group;
     // FIXME - whether lower_bound() equal to vectimes.size()-1 should be
     // filtered out?
@@ -4202,7 +4198,7 @@ EventList::splitByFullTimeVectorSplitterHelper(const std::vector<int64_t> &vecti
             << "\n";
       msgss << errss.str();
     } else {
-      const T eventCopy(*eviter);
+      const T eventCopy(eviter);
       myOutput->addEventQuickly(eventCopy);
     }
   }
@@ -4243,8 +4239,8 @@ std::string EventList::splitByFullTimeSparseVectorSplitterHelper(const std::vect
 
   size_t num_splitters = vecgroups.size();
   // prepare to Iterate through all events (sorted by tof)
-  auto iter_events = vecEvents.begin();
-  auto iter_events_end = vecEvents.end();
+  auto iter_events = vecEvents.cbegin();
+  auto iter_events_end = vecEvents.cend();
 
   // std::stringstream debug_ss;
   // debug_ss << "\nFilter events...:\n";
@@ -4266,7 +4262,7 @@ std::string EventList::splitByFullTimeSparseVectorSplitterHelper(const std::vect
       else
         absolute_time = iter_events->m_pulsetime.totalNanoseconds() + static_cast<int64_t>(iter_events->m_tof * 1000);
 
-      // debug_ss << "  event " << iter_events - vecEvents.begin() << " abs.time
+      // debug_ss << "  event " << iter_events - vecEvents.cbegin() << " abs.time
       // = " << absolute_time << "\n";
 
       if (absolute_time < start_i64) {
@@ -4336,9 +4332,8 @@ std::string EventList::splitByFullTimeMatrixSplitter(const std::vector<int64_t> 
   sortPulseTimeTOF();
 
   // Initialize all the output event list
-  std::map<int, EventList *>::iterator outiter;
-  for (outiter = vec_outputEventList.begin(); outiter != vec_outputEventList.end(); ++outiter) {
-    EventList *opeventlist = outiter->second;
+  for (auto &outiter : vec_outputEventList) {
+    EventList *opeventlist = outiter.second;
     opeventlist->clear();
     opeventlist->setDetectorIDs(this->getDetectorIDs());
     opeventlist->setHistogram(m_histogram);
@@ -4395,13 +4390,13 @@ template <class T>
 void EventList::splitByPulseTimeHelper(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
                                        typename std::vector<T> &events) const {
   // Prepare to TimeSplitter Iterate through the splitter at the same time
-  auto itspl = splitter.begin();
-  auto itspl_end = splitter.end();
+  auto itspl = splitter.cbegin();
+  auto itspl_end = splitter.cend();
   Types::Core::DateAndTime start, stop;
 
   // Prepare to Events Iterate through all events (sorted by tof)
-  auto itev = events.begin();
-  auto itev_end = events.end();
+  auto itev = events.cbegin();
+  auto itev_end = events.cend();
 
   // Iterate (loop) on all splitters
   while (itspl != itspl_end) {
@@ -4462,9 +4457,8 @@ void EventList::splitByPulseTime(Kernel::SplittingIntervalVec &splitter, std::ma
   this->sortPulseTimeTOF();
 
   // Initialize all the output event lists
-  std::map<int, EventList *>::iterator outiter;
-  for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter) {
-    EventList *opeventlist = outiter->second;
+  for (auto &outiter : outputs) {
+    EventList *opeventlist = outiter.second;
     opeventlist->clear();
     opeventlist->setDetectorIDs(this->getDetectorIDs());
     opeventlist->setHistogram(m_histogram);
@@ -4506,9 +4500,8 @@ void EventList::splitByPulseTimeWithMatrix(const std::vector<int64_t> &vec_times
   this->sortPulseTimeTOF();
 
   // Initialize all the output event lists
-  std::map<int, EventList *>::iterator outiter;
-  for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter) {
-    EventList *opeventlist = outiter->second;
+  for (auto &outiter : outputs) {
+    EventList *opeventlist = outiter.second;
     opeventlist->clear();
     opeventlist->setDetectorIDs(this->getDetectorIDs());
     opeventlist->setHistogram(m_histogram);
@@ -4546,8 +4539,8 @@ void EventList::splitByPulseTimeWithMatrixHelper(const std::vector<int64_t> &vec
                              "vector size are not correct.");
 
   // Prepare to Events Iterate through all events (sorted by tof)
-  auto itev = events.begin();
-  auto itev_end = events.end();
+  auto itev = events.cbegin();
+  auto itev_end = events.cend();
 
   // Iterate (loop) on all splitters
   for (size_t i_target = 0; i_target < vec_split_target.size(); ++i_target) {
@@ -4641,13 +4634,11 @@ void getEventsFrom(const EventList &el, std::vector<WeightedEventNoTime> const *
 template <class T>
 void EventList::convertUnitsViaTofHelper(typename std::vector<T> &events, Mantid::Kernel::Unit *fromUnit,
                                          Mantid::Kernel::Unit *toUnit) {
-  auto itev = events.begin();
-  auto itev_end = events.end();
-  for (; itev != itev_end; itev++) {
+  for (auto &itev : events) {
     // Conver to TOF
-    double tof = fromUnit->singleToTOF(itev->m_tof);
+    const double tof = fromUnit->singleToTOF(itev.m_tof);
     // And back from TOF to whatever
-    itev->m_tof = toUnit->singleFromTOF(tof);
+    itev.m_tof = toUnit->singleFromTOF(tof);
   }
 }
 
