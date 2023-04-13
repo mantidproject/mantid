@@ -68,6 +68,9 @@ void IndirectPlotOptionsView::setupView() {
   connect(m_plotOptions->cbWorkspace, SIGNAL(currentIndexChanged(QString const &)), this,
           SLOT(emitSelectedWorkspaceChanged(QString const &)));
 
+  connect(m_plotOptions->cbPlotUnit, SIGNAL(currentIndexChanged(QString const &)), this,
+          SLOT(emitSelectedUnitChanged(QString const &)));
+
   connect(m_plotOptions->leIndices, SIGNAL(editingFinished()), this, SLOT(emitSelectedIndicesChanged()));
   connect(m_plotOptions->leIndices, SIGNAL(textEdited(QString const &)), this,
           SLOT(emitSelectedIndicesChanged(QString const &)));
@@ -84,6 +87,10 @@ void IndirectPlotOptionsView::setupView() {
 
 void IndirectPlotOptionsView::emitSelectedWorkspaceChanged(QString const &workspaceName) {
   emit selectedWorkspaceChanged(workspaceName.toStdString());
+}
+
+void IndirectPlotOptionsView::emitSelectedUnitChanged(QString const &unit) {
+  emit selectedUnitChanged(unit.toStdString());
 }
 
 void IndirectPlotOptionsView::emitSelectedIndicesChanged() {
@@ -157,17 +164,36 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
     plotMenu->addAction(plotSpectraAction);
     plotMenu->addAction(plotTiledAction);
     break;
+  case PlotWidget::SpectraUnit:
+    m_plotOptions->tbPlot->setVisible(false);
+    m_plotOptions->cbPlotUnit->setVisible(true);
+    break;
+  case PlotWidget::SpectraContourUnit:
+    m_plotOptions->pbPlotSpectra->setVisible(false);
+    m_plotOptions->cbPlotUnit->setVisible(true);
+    plotMenu->addAction(plotSpectraAction);
+    plotMenu->addAction(plotContourAction);
+    break;
   default:
     std::runtime_error("Plot option not found. Plot types are Spectra, "
                        "SpectraContour or SpectraTiled.");
   }
   m_plotOptions->tbPlot->setMenu(plotMenu);
   m_plotOptions->tbPlot->setDefaultAction(plotSpectraAction);
+
+  m_plotOptions->cbPlotUnit->clear();
+  m_plotOptions->cbPlotUnit->addItem(QString::fromStdString("D-spacing"));
+  m_plotOptions->cbPlotUnit->addItem(QString::fromStdString("Q-spacing"));
 }
 
 void IndirectPlotOptionsView::setWorkspaceComboBoxEnabled(bool enable) {
   QSignalBlocker blocker(m_plotOptions->cbWorkspace);
   m_plotOptions->cbWorkspace->setEnabled(enable);
+}
+
+void IndirectPlotOptionsView::setUnitComboBoxEnabled(bool enable) {
+  QSignalBlocker blocker(m_plotOptions->cbPlotUnit);
+  m_plotOptions->cbPlotUnit->setEnabled(enable);
 }
 
 void IndirectPlotOptionsView::setIndicesLineEditEnabled(bool enable) {
