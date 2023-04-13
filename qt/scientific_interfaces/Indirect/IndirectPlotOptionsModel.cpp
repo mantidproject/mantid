@@ -7,6 +7,7 @@
 #include "IndirectPlotOptionsModel.h"
 #include "IndirectSettingsHelper.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -142,6 +143,10 @@ IndirectPlotOptionsModel::getAllWorkspaceNames(std::vector<std::string> const &w
   return allNames;
 }
 
+void IndirectPlotOptionsModel::setUnit(std::string const &unit) { m_unit = unit; }
+
+boost::optional<std::string> IndirectPlotOptionsModel::unit() { return m_unit; }
+
 std::string IndirectPlotOptionsModel::formatIndices(std::string const &indices) const {
   return formatIndicesString(indices);
 }
@@ -193,6 +198,19 @@ bool IndirectPlotOptionsModel::validateBins(const MatrixWorkspace_sptr &workspac
 void IndirectPlotOptionsModel::plotSpectra() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
+  auto const unitName = unit();
+
+  if (unitName) {
+    const std::string target = (unitName.get() == "D-spacing") ? "dSpacing" : "QSquared";
+
+    IAlgorithm_sptr convertUnits = AlgorithmManager::Instance().create("ConvertUnits");
+    convertUnits->initialize();
+    convertUnits->setProperty("InputWorkspace", workspaceName.get());
+    convertUnits->setProperty("OutputWorkspace", workspaceName.get());
+    convertUnits->setProperty("Target", target);
+    convertUnits->execute();
+  }
+
   if (workspaceName && indicesString)
     m_plotter->plotSpectra(workspaceName.get(), indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
 }
