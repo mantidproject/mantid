@@ -742,7 +742,7 @@ void TimeSeriesProperty<std::string>::makeFilterByValue(std::vector<SplittingInt
 template <typename TYPE>
 TimeROI TimeSeriesProperty<TYPE>::makeFilterByValue(double min, double max, bool expand,
                                                     const TimeInterval &expandRange, double TimeTolerance, bool centre,
-                                                    TimeROI *existingROI) const {
+                                                    const TimeROI *existingROI) const {
   const bool emptyMin = (min == EMPTY_DBL());
   const bool emptyMax = (max == EMPTY_DBL());
 
@@ -794,6 +794,11 @@ TimeROI TimeSeriesProperty<TYPE>::makeFilterByValue(double min, double max, bool
       isGood = false;
     }
   }
+  if (isGood) {
+    stop = centre ? stop_t + tol : stop_t;
+    if (start < stop)
+      newROI.addROI(start, stop);
+  }
 
   if (expand) {
     if (expandRange.start() < firstTime()) {
@@ -829,7 +834,7 @@ template <>
 TimeROI TimeSeriesProperty<std::string>::makeFilterByValue(double /*min*/, double /*max*/, bool /*expand*/,
                                                            const TimeInterval & /*expandRange*/,
                                                            double /*TimeTolerance*/, bool /*centre*/,
-                                                           TimeROI * /*existingROI*/) const {
+                                                           const TimeROI * /*existingROI*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue "
                                        "is not implemented for string "
                                        "properties");
