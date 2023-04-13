@@ -197,19 +197,19 @@ public:
     auto outWS = runAlgorithm(inWS, "m^2+n^2+p^2", h * h + k * k + l * l, "<");
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
-    outWS = runAlgorithm(inWS, "m^2+n^2+p", h * h + k * k + l * l, ">");
+    outWS = runAlgorithm(inWS, "m^2+n^2+p^2", h * h + k * k + l * l, ">");
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
-    outWS = runAlgorithm(inWS, "m^2+n^2+p", h * h + k * k + l * l, "!=");
+    outWS = runAlgorithm(inWS, "m^2+n^2+p^2", h * h + k * k + l * l, "!=");
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
-    outWS = runAlgorithm(inWS, "m^2+n^2+p", h * h + k * k + l * l, "=");
+    outWS = runAlgorithm(inWS, "m^2+n^2+p^2", h * h + k * k + l * l, "=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
-    outWS = runAlgorithm(inWS, "m^2+n^2+p", h * h + k * k + l * l, ">=");
+    outWS = runAlgorithm(inWS, "m^2+n^2+p^2", h * h + k * k + l * l, ">=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
-    outWS = runAlgorithm(inWS, "m^2+n^2+p", h * h + k * k + l * l, "<=");
+    outWS = runAlgorithm(inWS, "m^2+n^2+p^2", h * h + k * k + l * l, "<=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
     AnalysisDataService::Instance().remove(outWS->getName());
