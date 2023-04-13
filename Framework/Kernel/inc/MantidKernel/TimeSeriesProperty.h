@@ -180,10 +180,6 @@ public:
   /// Set name of property
   void setName(const std::string &name);
 
-  /// Split out a time series property by time intervals.
-  void splitByTime(const std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
-                   bool isPeriodic) const override;
-
   /// New split method
   void splitByTimeVector(const std::vector<Types::Core::DateAndTime> &splitter_time_vec,
                          const std::vector<int> &target_vec, const std::vector<TimeSeriesProperty *> &outputs);

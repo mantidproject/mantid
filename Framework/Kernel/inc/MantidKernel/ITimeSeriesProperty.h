@@ -45,8 +45,6 @@ public:
   // Using property seemed to be the most straightforward solution.
   virtual Property *cloneWithTimeShift(const double timeShift) const = 0;
 
-  virtual void splitByTime(const std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
-                           bool isProtonCharge = true) const = 0;
   /// Return the time series's times as a vector<DateAndTime>
   virtual std::vector<Types::Core::DateAndTime> timesAsVector() const = 0;
   /** Returns the calculated time weighted average value.
