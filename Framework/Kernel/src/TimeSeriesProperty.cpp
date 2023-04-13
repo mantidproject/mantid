@@ -924,7 +924,7 @@ std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(co
   // Derive splitting intervals from either the roi or from the first/last entries in the time series
   std::vector<TimeInterval> intervals;
   if (timeRoi && !timeRoi->useAll()) {
-    intervals = timeRoi->toTimeIntervals();
+    intervals = timeRoi->toTimeIntervals(this->firstTime());
   } else {
     intervals = this->getTimeIntervals();
   }
