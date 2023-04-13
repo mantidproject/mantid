@@ -163,6 +163,7 @@ pipeline {
               // Build the base set of packages (ones not required for mantidworkbench)
               // in parallel
               package_conda("${PLATFORM}", "base")
+              archive_env_logs("${PLATFORM}")
               archive_conda_packages("${PLATFORM}", false)
               archive_conda_packages("noarch", true)
             }
@@ -208,6 +209,7 @@ pipeline {
                 target: './',
                 flatten: false
               package_conda("${PLATFORM}", "workbench")
+              archive_env_logs("${PLATFORM}")
               archive_conda_packages("${PLATFORM}", false)
               package_standalone()
               archive_standalone_package("${PLATFORM}")
@@ -451,4 +453,12 @@ def archive_standalone_package(platform) {
 
 def archive_ctest_log(){
   archiveArtifacts artifacts: "${CHECKOUT_DIR}/build/ctest_log/*.log", fingerprint: true
+}
+
+def archive_env_logs(platform) {
+  env_log_dir = "**/conda-bld/${platform}/env_logs"
+  archiveArtifacts artifacts: env_log_dir += "/**/*.*",
+    allowEmptyArchive: false,
+    fingerprint: true,
+    onlyIfSuccessful: false
 }
