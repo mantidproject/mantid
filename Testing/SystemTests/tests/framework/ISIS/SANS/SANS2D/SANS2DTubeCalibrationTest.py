@@ -16,13 +16,10 @@ from collections import Counter
 
 
 class SANS2DTubeCalibrationTest:
-    _REFERENCE_FILE = ""
-    _OUTPUT_WORKSPACE_NAME = "result"
+    _OUTPUT_WS_NAME = "result"
+    _CVALUES_WS_NAME = "cvalues"
     _DATA_FILES = ["SANS2D00069117.nxs", "SANS2D00069118.nxs", "SANS2D00069119.nxs", "SANS2D00069120.nxs", "SANS2D00069116.nxs"]
     _NUM_TUBES = 120
-
-    def requiredFile(self):
-        return self._DATA_FILES + [self._REFERENCE_FILE]
 
     def _run_calibration_algorithm(self, side_offset, encoder_at_beam_centre, is_rear_det, threshold, skip_tubes_on_error):
         SANSTubeCalibration(
@@ -49,12 +46,19 @@ class SANS2DTubeCalibrationTest:
         )
 
     @staticmethod
-    def _required_workspaces_exist():
-        required_workspaces = {"original", "result", "cvalues"}
-        return required_workspaces.issubset(set(AnalysisDataService.getObjectNames()))
+    def _merged_workspace_exists():
+        """
+        Check that the workspace created after merging the scaled workspaces exists in the ADS.
+        Outputting this workspace can be useful for diagnostic purposes.
+        """
+        return "original" in AnalysisDataService.getObjectNames()
 
     @staticmethod
     def _tube_diagnostic_workspaces_exist(tube_id):
+        """
+        Check that the diagnostic workspaces for each tube have been created in the ADS.
+        These give useful visibility of the calibration of each tube and can help with diagnosing any issues.
+        """
         diagnostic_ws_grp = AnalysisDataService.retrieve(f"Tube_{tube_id:03}")
         num_tubes_per_group = 24
         module = int(tube_id / num_tubes_per_group) + 1
@@ -68,12 +72,16 @@ class SANS2DTubeCalibrationTest:
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DTubeCalibrationRearDetectorTest(systemtesting.MantidSystemTest, SANS2DTubeCalibrationTest):
     _REFERENCE_FILE = "SANS2DTubeMerge_rear.nxs"
+    _CVALUES_REF_FILE = "SANS2DTubeCalibration_cvalues_rear.nxs"
+
+    def requiredFile(self):
+        return self._DATA_FILES + [self._REFERENCE_FILE, self._CVALUES_REF_FILE]
 
     def runTest(self):
         self._run_calibration_algorithm(
             side_offset=0.0, encoder_at_beam_centre=270.0, is_rear_det=True, threshold=500, skip_tubes_on_error=False
         )
-        self.assertTrue(self._required_workspaces_exist())
+        self.assertTrue(self._merged_workspace_exists())
         for tube_id in range(self._NUM_TUBES):
             self.assertTrue(self._tube_diagnostic_workspaces_exist(tube_id))
 
@@ -81,18 +89,22 @@ class SANS2DTubeCalibrationRearDetectorTest(systemtesting.MantidSystemTest, SANS
         self.disableChecking.append("SpectraMap")
         self.disableChecking.append("Axes")
 
-        return self._OUTPUT_WORKSPACE_NAME, self._REFERENCE_FILE
+        return self._OUTPUT_WS_NAME, self._REFERENCE_FILE, self._CVALUES_WS_NAME, self._CVALUES_REF_FILE
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DTubeCalibrationFrontDetectorTest(systemtesting.MantidSystemTest, SANS2DTubeCalibrationTest):
     _REFERENCE_FILE = "SANS2DTubeMerge_front.nxs"
+    _CVALUES_REF_FILE = "SANS2DTubeCalibration_cvalues_front.nxs"
+
+    def requiredFile(self):
+        return self._DATA_FILES + [self._REFERENCE_FILE, self._CVALUES_REF_FILE]
 
     def runTest(self):
         self._run_calibration_algorithm(
             side_offset=1.1, encoder_at_beam_centre=474.2, is_rear_det=False, threshold=1000, skip_tubes_on_error=True
         )
-        self.assertTrue(self._required_workspaces_exist())
+        self.assertTrue(self._merged_workspace_exists())
         for tube_id in range(self._NUM_TUBES):
             try:
                 self.assertTrue(self._tube_diagnostic_workspaces_exist(tube_id))
@@ -104,4 +116,4 @@ class SANS2DTubeCalibrationFrontDetectorTest(systemtesting.MantidSystemTest, SAN
         self.disableChecking.append("SpectraMap")
         self.disableChecking.append("Axes")
 
-        return self._OUTPUT_WORKSPACE_NAME, self._REFERENCE_FILE
+        return self._OUTPUT_WS_NAME, self._REFERENCE_FILE, self._CVALUES_WS_NAME, self._CVALUES_REF_FILE
