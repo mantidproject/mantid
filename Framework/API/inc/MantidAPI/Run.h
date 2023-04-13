@@ -53,9 +53,6 @@ public:
 
   /// Filter the logs by time
   void filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop) override;
-  /// Split the logs based on the given intervals
-  void splitByTime(Kernel::SplittingIntervalVec &splitter, std::vector<LogManager *> outputs) const override;
-
   void setTimeROI(const Kernel::TimeROI &timeroi) override;
 
   /// Return an approximate memory size for the object in bytes
