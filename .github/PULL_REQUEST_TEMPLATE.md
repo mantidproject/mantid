@@ -1,8 +1,21 @@
-**Description of work.**
+**Description of work**
+
+**Purpose of work**
+<!-- Why has this work been done? If there is no linked issue please provide appropriate context for this work.
+-->
 
 <!-- If the original issue was raised by a user they should be named here. Do not leak email addresses
 **Report to:** [user name]
 -->
+
+**Summary of work**
+<!-- Please provide a short, high level description of the work that was done.
+-->
+
+**Further detail of work**
+<!-- Please provide a more detailed description of the work that has been undertaken.
+-->
+
 
 **To test:**
 
