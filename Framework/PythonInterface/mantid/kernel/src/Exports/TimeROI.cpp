@@ -43,6 +43,7 @@ void export_TimeROI() {
            "See https://en.wikipedia.org/wiki/Intersection for more details")
       .def("useAll", &TimeROI::useAll, "True if all times are use")
       .def("useNone", &TimeROI::useNone, "True if all times are ignore")
+      .def("numberOfRegions", &TimeROI::numberOfRegions, arg("self"), "Number of regions of interest")
       .def("toTimeIntervals", &getTimeIntervals, arg("self"),
            "Returns a list of start and stop times for all time intervals");
 }

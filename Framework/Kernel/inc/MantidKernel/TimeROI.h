@@ -27,6 +27,7 @@ public:
   double durationInSeconds() const;
   double durationInSeconds(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   std::size_t numBoundaries() const;
+  std::size_t numberOfRegions() const;
   /// TimeROI selects all time to be used
   bool useAll() const;
   /// TimeROI selects no time to be used as all is invalid
