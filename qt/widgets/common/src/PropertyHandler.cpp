@@ -659,10 +659,13 @@ bool PropertyHandler::setParameter(QtProperty *prop) {
     double parValue = m_browser->m_parameterManager->value(prop);
     m_fun->setParameter(parName, parValue);
 
-    foreach (QtProperty *subProp, prop->subProperties()) {
-      if (subProp->propertyName() == "Fix") {
-        fix(prop->propertyName());
-        break;
+    // If the parameter is fixed, re-fix to update the subproperty.
+    if (m_fun->isFixed(m_fun->parameterIndex(parName))) {
+      foreach (QtProperty *subProp, prop->subProperties()) {
+        if (subProp->propertyName() == "Fix") {
+          fix(prop->propertyName());
+          break;
+        }
       }
     }
 

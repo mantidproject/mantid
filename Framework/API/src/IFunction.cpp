@@ -293,8 +293,10 @@ void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
   }
 
   try {
+    // sortTies checks for circular and self ties
     sortTies();
-  } catch (const std::runtime_error &error) {
+  } catch (std::runtime_error &) {
+    // revert / remove tie if invalid
     if (oldTie) {
       const auto oldTieStr = oldTie->asString();
       const auto oldExp = oldTieStr.substr(oldTieStr.find("=") + 1);
@@ -302,7 +304,7 @@ void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
     } else {
       removeTie(m_ties.size() - 1);
     }
-    throw error;
+    throw;
   }
 }
 
