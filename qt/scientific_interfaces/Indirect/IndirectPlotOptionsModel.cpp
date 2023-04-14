@@ -200,19 +200,23 @@ void IndirectPlotOptionsModel::plotSpectra() {
   auto const indicesString = indices();
   auto const unitName = unit();
 
-  if (unitName) {
-    const std::string target = (unitName.get() == "D-spacing") ? "dSpacing" : "QSquared";
+  if (workspaceName && indicesString) {
+    std::string workspaceNameString = workspaceName.get();
 
-    IAlgorithm_sptr convertUnits = AlgorithmManager::Instance().create("ConvertUnits");
-    convertUnits->initialize();
-    convertUnits->setProperty("InputWorkspace", workspaceName.get());
-    convertUnits->setProperty("OutputWorkspace", workspaceName.get());
-    convertUnits->setProperty("Target", target);
-    convertUnits->execute();
+    if (unitName) {
+      const std::string target = (unitName.get() == "D-spacing") ? "dSpacing" : "QSquared";
+      workspaceNameString = workspaceNameString + "_" + target;
+
+      IAlgorithm_sptr convertUnits = AlgorithmManager::Instance().create("ConvertUnits");
+      convertUnits->initialize();
+      convertUnits->setProperty("InputWorkspace", workspaceName.get());
+      convertUnits->setProperty("OutputWorkspace", workspaceNameString);
+      convertUnits->setProperty("Target", target);
+      convertUnits->execute();
+    }
+
+    m_plotter->plotSpectra(workspaceNameString, indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
   }
-
-  if (workspaceName && indicesString)
-    m_plotter->plotSpectra(workspaceName.get(), indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
 }
 
 void IndirectPlotOptionsModel::plotBins(std::string const &binIndices) {
