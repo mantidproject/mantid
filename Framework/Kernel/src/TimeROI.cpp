@@ -585,6 +585,8 @@ void TimeROI::validateValues(const std::string &label) {
 
 std::size_t TimeROI::numBoundaries() const { return static_cast<std::size_t>(m_roi.size()); }
 
+std::size_t TimeROI::numberOfRegions() const { return this->numBoundaries() / 2; }
+
 bool TimeROI::empty() const { return bool(this->numBoundaries() == 0); }
 
 bool TimeROI::useAll() const { return this->empty(); }

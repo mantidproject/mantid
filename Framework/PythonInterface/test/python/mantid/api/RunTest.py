@@ -48,6 +48,7 @@ class RunTest(unittest.TestCase):
         values = roi.toTimeIntervals()
         self.assertTrue(isinstance(values, list))
         self.assertEqual(len(values), 0)
+        self.assertEqual(roi.numberOfRegions(), 0)
 
     def test_run_hasProperty(self):
         self.assertTrue(self._run.hasProperty("start_time"))
