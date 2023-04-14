@@ -10,16 +10,16 @@ Description
 -----------
 
 This algorithm filters events from a single :ref:`EventWorkspace` to
-one or multiple :ref:`EventWorkspaces <EventWorkspace>` according to
-the ``SplittersWorkspace`` property. The :ref:`EventFiltering` concept
+one or multiple target event workspaces according to
+the ``SplitterWorkspace`` property. The :ref:`EventFiltering` concept
 page has a detailed introduction to event filtering.
 
 Specifying the splitting strategy
----------------------------------
+#################################
 
-The ``SplittersWorkspace`` describes much of the information for
-splitting the ``InputWorkspace`` into the various output
-workspaces. It can have one of three types
+The ``SplitterWorkspace`` provides information for
+splitting the ``InputWorkspace`` into target output
+workspaces. It can have one of three types:
 
 +--------------------------------------------------------------+-------------+----------+
 | workspace class                                              | units       | rel/abs  |
@@ -31,49 +31,31 @@ workspaces. It can have one of three types
 | :ref:`TableWorkspace <Table Workspaces>`                     | seconds     | either   |
 +--------------------------------------------------------------+-------------+----------+
 
-Whether the values in :ref:`MatrixWorkspace <MatrixWorkspace>` and
-:ref:`TableWorkspace <Table Workspaces>` is treated as relative or
-absolute time is dependent on the value of ``RelativeTime``. In the
-case of ``RelativeTime=True``, the time is relative to the start of
+Whether the times in ``SplitterWorkspace`` are treated as relative or
+absolute is dependent on the value of ``RelativeTime``. In the
+case of ``RelativeTime=True``, the times are relative to the start of
 the run (in the ``ws.run()['run_start']``) or, if specified, the
 ``FilterStartTime``. In the case of ``RelativeTime=False``, the times
 are relative to the :class:`GPS epoch <mantid.kernel.DateAndTime>`.
 
 Both :ref:`TableWorkspace <Table Workspaces>` and
 :class:`SplittersWorkspace <mantid.api.ISplittersWorkspace>` have 3
-columns, ``start``, ``stop``, and ``target`` which should be a float,
-float, and string. The :ref:`event filtering <EventFiltering>` concept
-page has details on creating the :ref:`TableWorkspace <Table
-Workspaces>` by hand.
-
-If the ``SplittersWorkspace`` is a :ref:`MatrixWorkspace
-<MatrixWorkspace>`, it must have a single spectrum with the x-value is
-the time boundaries and the y-value is the workspace group index.
+columns, ``start``, ``stop``, and ``target``. :ref:`MatrixWorkspace
+<MatrixWorkspace>` has a single spectrum where X-values
+represent the time boundaries and Y-values represent the target workspace indexes.
+The :ref:`filter-events-usage-label` examples and :ref:`Event Filtering <EventFiltering>` concept
+page have details on creating the ``SplitterWorkspace`` by hand.
+Note that event filtering treats all time intervals as [inclusive,exclusive).
 
 The optional ``InformationWorkspace`` is a :ref:`TableWorkspace <Table
-Workspaces>` for information of splitters.
+Workspaces>` for information on splitters.
 
 Unfiltered Events
------------------
+#################
 
-Some events are not inside any splitters. They are put to a workspace
-name ended with ``_unfiltered``. If
-``OutputUnfilteredEvents=False``, then this workspace will not be
-created.
-
-Using FilterEvents with fast-changing logs
-------------------------------------------
-
-There are a few parameters to consider when the log filtering is
-expected to produce a large splitter table. An example of such a case
-would be a data file for which the events need to be split according
-to a log with two or more states changing in the kHz range. To reduce
-the filtering time, one may do the following:
-
-- Make sure the ``SplitterWorkspace`` input is a :ref:`MatrixWorkspace
-  <MatrixWorkspace>`. Such a workspace can be produced by using the
-  ``FastLog = True`` option when calling :ref:`GenerateEventsFilter
-  <algm-GenerateEventsFilter>`.
+Some events do not fall into any time-splitting intervals. They are put into a workspace
+with the name ending with ``_unfiltered``. If ``OutputUnfilteredEvents=False``,
+this workspace will not be created.
 
 Correcting time neutron was at the sample
 #########################################
@@ -106,16 +88,15 @@ and stored in the ``OutputTOFCorrectionWorkspace``.
   in the ``DetectorTOFCorrectionWorkspace``.
 
 
-Difference from FilterByLogValue
---------------------------------
+Filter by pulse time vs. full time
+##################################
 
-In :ref:`FilterByLogValue <algm-FilterByLogValue>`,
-``EventList.splitByTime()`` is used. In FilterEvents, it only uses
-this when ``FilterByPulse=True``. Otherwise,
-``EventList.splitByFullTime()`` is used. The difference between
-``splitByTime`` and ``splitByFullTime`` is that ``splitByTime``
-filters events by pulse time, and ``splitByFullTime`` considers both
-pulse time and TOF.
+In the case of ``FilterByPulseTime=True``, events will be filtered by pulse time.
+This is recommended for slow sample environment logs. The algorithm
+will run faster, but with lower precision. In the case of ``FilterByPulseTime=False``,
+events will be filtered by full time, i.e. pulse time plus TOF.
+
+.. _filter-events-usage-label:
 
 Usage
 -----
@@ -213,7 +194,7 @@ Output:
     import numpy as np
     ws = Load(Filename='CNCS_7860_event.nxs')
 
-    # create MatrixWorkspace
+    # create MatrixWorkspace. Use -1 as a target for unfiltered events.
     times = [0, 100, 200, 300, 400, 600, 650]
     targets = [0, -1, 1, -1, 2, 1]
     split_matrix_ws = CreateWorkspace(DataX=times, DataY=targets, NSpec=1)

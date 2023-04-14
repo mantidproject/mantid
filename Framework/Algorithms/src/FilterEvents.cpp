@@ -23,6 +23,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -56,7 +57,7 @@ FilterEvents::FilterEvents()
       m_targetWorkspaceIndexSet(), m_outputWorkspacesMap(), m_wsNames(), m_detTofOffsets(), m_detTofFactors(),
       m_filterByPulseTime(false), m_informationWS(), m_hasInfoWS(), m_progress(0.), m_outputWSNameBase(),
       m_toGroupWS(false), m_vecSplitterTime(), m_vecSplitterGroup(), m_tofCorrType(NoneCorrect), m_specSkipType(),
-      m_vecSkip(), m_isSplittersRelativeTime(false), m_filterStartTime(0), m_runStartTime(0) {}
+      m_vecSkip(), m_isSplittersRelativeTime(false), m_filterStartTime(0) {}
 
 /** Declare Inputs
  */
@@ -68,18 +69,19 @@ void FilterEvents::init() {
   std::string titleInputWksp("Input Workspaces");
 
   declareProperty(std::make_unique<API::WorkspaceProperty<EventWorkspace>>("InputWorkspace", "", Direction::Input),
-                  "An input event workspace");
+                  "Input event workspace.");
 
-  declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>("SplitterWorkspace", "", Direction::Input),
-                  "An input SplittersWorskpace for filtering");
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::Workspace>>("SplitterWorkspace", "", Direction::Input),
+      "Input workspace specifying \"splitters\", i.e. time intervals and targets for InputWorkspace filtering.");
 
-  declareProperty("RelativeTime", false,
-                  "Flag to indicate that in the input Matrix splitting workspace, the time indicated "
-                  "by X-vector is relative to either run start time or some indicted time.");
+  declareProperty(
+      "RelativeTime", false,
+      "Flag indicating whether in SplitterWorkspace the times are absolute or "
+      "relative. If true, they are relative to either the run start time or, if specified, FilterStartTime.");
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("InformationWorkspace", "", Direction::Input,
                                                                       PropertyMode::Optional),
-                  "Optional output for the information of each splitter "
-                  "workspace index.");
+                  "Optional information on each filtering target workspace.");
   setPropertyGroup("InputWorkspace", titleInputWksp);
   setPropertyGroup("SplitterWorkspace", titleInputWksp);
   setPropertyGroup("RelativeTime", titleInputWksp);
@@ -91,23 +93,22 @@ void FilterEvents::init() {
   std::string titleOutputWksp("Output Workspaces");
 
   declareProperty("OutputWorkspaceBaseName", "OutputWorkspace",
-                  "The base name to use for the output workspaces. An output "
-                  "workspace name is the base name plus a suffix separated by an underscore. "
-                  "The suffix is either a target name (numeric or non-numeric) or \"unfiltered\".");
+                  "The base name to use for the output workspaces. An output workspace "
+                  "name is a combination of this and the target specified in SplitterWorkspace. "
+                  "For unfiltered events the workspace name will end with \"_unfiltered\".");
 
   declareProperty("DescriptiveOutputNames", false,
-                  "If selected, the names of the output workspaces will include information about each slice.");
+                  "If selected, the names of the output workspaces will include their time intervals.");
 
   declareProperty("GroupWorkspaces", false,
-                  "Option to group all the output workspaces.  Group name will be OutputWorkspaceBaseName.");
+                  "An option to group all the output workspaces. The group name will be OutputWorkspaceBaseName.");
 
   declareProperty("OutputWorkspaceIndexedFrom1", false,
-                  "If selected, the names of the output workspaces will have suffix indexes starting from 1. "
-                  "This applies to numeric target names only.");
+                  "If selected, the target index included in the output workspace name will be 1-based.");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputTOFCorrectionWorkspace", "TOFCorrectWS",
                                                                        Direction::Output),
-                  "Name of output workspace for TOF correction factor. ");
+                  "Name of the output workspace for TOF correction factor.");
   setPropertyGroup("OutputWorkspaceBaseName", titleOutputWksp);
   setPropertyGroup("DescriptiveOutputNames", titleOutputWksp);
   setPropertyGroup("GroupWorkspaces", titleOutputWksp);
@@ -120,25 +121,19 @@ void FilterEvents::init() {
   std::string titleLogSplit("Sample Logs Splitting");
 
   // deprecated property kept for backwards compatibility but will not show up in the algorithm's dialog
-  declareProperty("SplitSampleLogs", true,
-                  "If selected, all sample logs will be split by the event splitters.  It is not recommended "
-                  "for fast event log splitters.");
+  declareProperty("SplitSampleLogs", true, "DEPRECATED. All logs will be split.");
   setPropertySettings("SplitSampleLogs", std::make_unique<InvisibleProperty>());
 
   declareProperty("FilterByPulseTime", false,
-                  "Filter the event by its pulse time only for slow sample environment log.  This option can make "
-                  "execution of the algorithm faster, but lowers its precision.");
+                  "If selected, events will be filtered by their pulse time as opposed to full time.");
 
   declareProperty(std::make_unique<ArrayProperty<std::string>>("TimeSeriesPropertyLogs"),
-                  "List of name of sample logs of TimeSeriesProperty format. "
-                  "They will be either excluded from splitting if ExcludedSpecifiedLogs is specified as True. "
-                  "Alternatively, they will be the only TimeSeriesProperty sample logs that will be split "
-                  "to child workspaces.");
+                  "DEPRECATED. All logs will be split.");
   setPropertySettings("TimeSeriesPropertyLogs", std::make_unique<InvisibleProperty>());
-  declareProperty("ExcludeSpecifiedLogs", true,
-                  "If true, all the TimeSeriesProperty logs listed will be excluded from duplicating. "
-                  "Otherwise, only those specified logs will be split.");
+
+  declareProperty("ExcludeSpecifiedLogs", true, "DEPRECATED. All logs will be split.");
   setPropertySettings("ExcludeSpecifiedLogs", std::make_unique<InvisibleProperty>());
+
   setPropertyGroup("SplitSampleLogs", titleLogSplit);
   setPropertyGroup("FilterByPulseTime", titleLogSplit);
   setPropertyGroup("TimeSeriesPropertyLogs", titleLogSplit);
@@ -149,7 +144,11 @@ void FilterEvents::init() {
   //*********************
   std::string titleAdditionalOptions("Additional Options");
 
-  declareProperty("FilterStartTime", "", "Start time for splitters that can be parsed to DateAndTime.");
+  auto dateTime = std::make_shared<DateTimeValidator>();
+  dateTime->allowEmpty(true);
+  std::string absoluteHelp("Specify date and UTC time in ISO8601 format, e.g. 2010-09-14T04:20:12.");
+  declareProperty("FilterStartTime", "", dateTime,
+                  "Absolute start time; events before this time are filtered out. " + absoluteHelp);
 
   vector<string> corrtypes{"None", "Customized", "Direct", "Elastic", "Indirect"};
   declareProperty("CorrectionToSample", "None", std::make_shared<StringListValidator>(corrtypes),
@@ -158,7 +157,7 @@ void FilterEvents::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>("DetectorTOFCorrectionWorkspace", "",
                                                                       Direction::Input, PropertyMode::Optional),
-                  "Name of table workspace containing the log time correction factor for each detector. ");
+                  "Workspace containing the log time correction factor for each detector. ");
   setPropertySettings("DetectorTOFCorrectionWorkspace",
                       std::make_unique<VisibleWhenProperty>("CorrectionToSample", IS_EQUAL_TO, "Customized"));
 
@@ -186,10 +185,11 @@ void FilterEvents::init() {
   //*********************
   // Output Properties
   //*********************
-  declareProperty("NumberOutputWS", 0, "Number of output output workspace splitted. ", Direction::Output);
+  declareProperty("NumberOutputWS", 0, "Number of output workspaces after splitting InputWorkspace. ",
+                  Direction::Output);
 
   declareProperty(std::make_unique<ArrayProperty<string>>("OutputWorkspaceNames", Direction::Output),
-                  "List of output workspaces names");
+                  "List of output workspace names.");
 
   declareProperty("OutputUnfilteredEvents", false, "If selected, unfiltered events will be output.");
   setPropertyGroup("OutputUnfilteredEvents", titleOutputWksp);
@@ -305,6 +305,8 @@ void FilterEvents::exec() {
   std::vector<std::string> outputwsnames;
   for (auto &it : m_outputWorkspacesMap) {
     std::string ws_name = it.second->getName();
+    // If OutputUnfilteredEvents is false, the workspace created for unfiltered events has no name.
+    // Do not include an empty name into the list of output workspace names.
     if (!ws_name.empty())
       outputwsnames.emplace_back(ws_name);
   }
@@ -447,46 +449,36 @@ void FilterEvents::processAlgorithmProperties() {
   else
     throw runtime_error("An unrecognized option for SpectrumWithoutDetector");
 
-  bool start_time_set = false;
-  // Get run start time
-  try {
-    m_runStartTime = m_eventWS->run().startTime();
-    start_time_set = true;
-  } catch (std::runtime_error &) {
-  }
-
-  // Splitters are given relative time
+  // Splitters may be specified in relative time
   m_isSplittersRelativeTime = getProperty("RelativeTime");
   if (m_isSplittersRelativeTime) {
     // Using relative time
-    std::string start_time_str = getProperty("FilterStartTime");
-    if (!start_time_str.empty()) {
-      // User specifies the filter starting time
-      Types::Core::DateAndTime temp_shift_time(start_time_str);
-      m_filterStartTime = temp_shift_time;
+    if (!isDefault("FilterStartTime")) {
+      std::string filter_start_time_str =
+          getProperty("FilterStartTime"); // User specified the filter starting, or base, time
+      m_filterStartTime = Types::Core::DateAndTime(filter_start_time_str);
     } else {
       // Retrieve filter starting time from property run_start as default
-      if (start_time_set) {
-        m_filterStartTime = m_runStartTime;
-      } else {
-        throw std::runtime_error("Input event workspace does not have property run_start. "
-                                 "User does not specifiy filter start time."
-                                 "Splitters cannot be in reltive time.");
+      try {
+        m_filterStartTime = m_eventWS->run().startTime();
+      } catch (std::runtime_error &) {
+        throw std::runtime_error("InputWorkspace does not have property run_start. "
+                                 "Since RelativeTime is set to true, FilterStartTime must be specified.");
       }
     }
-  } // END-IF: m_isSplitterRelativeTime
+  }
 
   //-------------------------------------------------------------------------
   // Deprecated properties
   //-------------------------------------------------------------------------
   bool splitSampleLogs = getProperty("SplitSampleLogs");
   if (splitSampleLogs == false)
-    g_log.warning() << "Option SplitSampleLogs is deprecated. Logs will be split\n";
+    g_log.warning() << "Option SplitSampleLogs is deprecated. All logs will be split.\n";
 
   std::vector<std::string> timeSeriesPropertyLogs = getProperty("TimeSeriesPropertyLogs");
   if (!timeSeriesPropertyLogs.empty())
-    g_log.warning() << "Options TimeSeriesPropertyLogs and ExcludeSpecifiedLogs are deprecated. "
-                       "All logs are included\n";
+    g_log.warning()
+        << "Options TimeSeriesPropertyLogs and ExcludeSpecifiedLogs are deprecated. All logs will be split.\n";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -570,9 +562,9 @@ void FilterEvents::parseInputSplitters() {
     m_timeSplitter = TimeSplitter(m_splittersWorkspace);
   else if (m_splitterTableWorkspace)
     m_timeSplitter =
-        TimeSplitter(m_splitterTableWorkspace, m_isSplittersRelativeTime ? m_runStartTime : DateAndTime(0));
+        TimeSplitter(m_splitterTableWorkspace, m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime(0));
   else
-    m_timeSplitter = TimeSplitter(m_matrixSplitterWS, m_isSplittersRelativeTime ? m_runStartTime : DateAndTime(0));
+    m_timeSplitter = TimeSplitter(m_matrixSplitterWS, m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime(0));
 
   m_targetWorkspaceIndexSet = m_timeSplitter.outputWorkspaceIndices();
 
@@ -657,9 +649,9 @@ void FilterEvents::createOutputWorkspaces() {
         auto timeIntervals = timeROI.toTimeIntervals();
         for (size_t ii = 0; ii < timeIntervals.size(); ii++) {
           auto startTimeInSeconds =
-              Mantid::Types::Core::DateAndTime::secondsFromDuration(timeIntervals[ii].start() - m_runStartTime);
+              Mantid::Types::Core::DateAndTime::secondsFromDuration(timeIntervals[ii].start() - m_filterStartTime);
           auto stopTimeInSeconds =
-              Mantid::Types::Core::DateAndTime::secondsFromDuration(timeIntervals[ii].stop() - m_runStartTime);
+              Mantid::Types::Core::DateAndTime::secondsFromDuration(timeIntervals[ii].stop() - m_filterStartTime);
           wsname << startTimeInSeconds << "_" << stopTimeInSeconds;
           if (ii < timeIntervals.size() - 1)
             wsname << "_";

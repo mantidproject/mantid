@@ -171,37 +171,36 @@ const std::map<DateAndTime, int> &TimeSplitter::getSplittersMap() const { return
 
 // Get the target name from the target index.
 std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const int numericalShift) {
-  assert(numericalShift >= 0);
-
   if (m_index_name_map.count(workspaceIndex) == 0) {
     std::stringstream msg;
     msg << "Invalid target index " << workspaceIndex << " when calling TimeSplitter::getWorkspaceIndexName";
     throw std::runtime_error(msg.str());
   }
 
+  std::string target_name = m_index_name_map[workspaceIndex];
+
   // If numericalShift > 0, the caller will get back a shifted index.
   // This is needed for supporting FilterEvents property OutputWorkspaceIndexedFrom1.
+  assert(numericalShift >= 0);
   if (numericalShift > 0) {
-    std::stringstream s;
-    std::string name = m_index_name_map[workspaceIndex];
-
-    // If this TimeSplitter was built off of a TableWorkspace, targets could be non-numeric, in which case a numeric
+    // If this TimeSplitter was built from a TableWorkspace, targets could be non-numeric, in which case a numeric
     // shift wouldn't make sense.
+    int target_index;
     try {
-      int temp;
-      temp = std::stoi(name);
-      assert(temp == m_name_index_map[name]);
+      target_index = std::stoi(target_name);
     } catch (std::invalid_argument &) // a non-integer string
     {
       throw std::runtime_error(
           "FilterEvents property \"OutputWorkspaceIndexedFrom1\" is not compatible with non-numeric targets.");
     }
 
-    s << m_name_index_map[name] + numericalShift;
+    assert(target_index == m_name_index_map[target_name]);
+    std::stringstream s;
+    s << target_index + numericalShift;
     return s.str();
   }
 
-  return m_index_name_map[workspaceIndex];
+  return target_name;
 }
 
 void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, const int value) {

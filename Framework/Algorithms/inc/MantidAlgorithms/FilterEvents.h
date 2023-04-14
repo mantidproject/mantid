@@ -42,8 +42,8 @@ public:
   const std::string name() const override { return "FilterEvents"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Filter events from an EventWorkspace to one or multiple "
-           "EventWorkspaces according to a series of splitters.";
+    return "Filter events from an EventWorkspace to one or multiple target "
+           "event workspaces according to a series of splitters.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
@@ -146,10 +146,8 @@ private:
 
   // Flag to have relative time in splitters workspace
   bool m_isSplittersRelativeTime;
-  // Starting time for starting time of event filters
+  // Base time for relative time in splitters workspace
   Types::Core::DateAndTime m_filterStartTime;
-  // EventWorkspace (aka. run)'s starting time
-  Types::Core::DateAndTime m_runStartTime;
 };
 
 } // namespace Algorithms
