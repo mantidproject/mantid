@@ -299,7 +299,7 @@ public:
   /// Returns n-th value of n-th interval in an incredibly inefficient way.
   virtual TYPE nthValue(int n) const;
   /// Returns n-th time. NOTE: Complexity is order(n)! regardless of filter
-  Types::Core::DateAndTime nthTime(int n) const;
+  virtual Types::Core::DateAndTime nthTime(int n) const;
 
   // Returns whether the time series has been filtered
   bool isFiltered() const override { return false; }
