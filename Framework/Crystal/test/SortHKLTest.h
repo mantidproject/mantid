@@ -66,6 +66,7 @@ public:
           V3D hkl(static_cast<double>(i), static_cast<double>(i), static_cast<double>(i));
           DblMatrix gon(3, 3, true);
           Peak p(inst, static_cast<detid_t>(b * 100 + i + 1 + i * 10), static_cast<double>(i) * 1.0 + 0.5, hkl, gon);
+          p.setIntHKL(hkl);
           p.setRunNumber(run);
           p.setBankName("bank1");
           p.setIntensity(static_cast<double>(i) + 0.1);

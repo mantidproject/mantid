@@ -26,9 +26,7 @@ double tof(const Mantid::Geometry::IPeak &p) { return p.getTOF(); }
 
 double HKLSum(const Mantid::Geometry::IPeak &p) { return p.getH() + p.getK() + p.getL(); }
 
-double HKL2(const Mantid::Geometry::IPeak &p) {
-  return p.getH() * p.getH() + p.getK() * p.getK() + p.getL() * p.getL();
-}
+double HKL2(const Mantid::Geometry::IPeak &p) { return p.getIntHKL().norm2(); }
 
 double MNP2(const Mantid::Geometry::IPeak &p) { return p.getIntMNP().norm2(); }
 

@@ -390,12 +390,14 @@ public:
     LeanElasticPeak peak(Mantid::Kernel::V3D(1, 1, 0), 1.0);
     peak.setIntensity(100.0);
     peak.setHKL(1, 1, 0);
+    peak.setIntHKL(V3D(1, 1, 0));
     TS_ASSERT_DELTA(peak.getDSpacing(), M_PI * M_SQRT2, 1e-9)
     inWS->addPeak(peak);
 
     LeanElasticPeak peak2(Mantid::Kernel::V3D(1, 0, 0), 2.0);
     peak2.setIntensity(10.0);
     peak2.setHKL(1, 0, 0);
+    peak2.setIntHKL(V3D(1, 0, 0));
     TS_ASSERT_DELTA(peak2.getDSpacing(), 2 * M_PI, 1e-9)
     inWS->addPeak(peak2);
 
