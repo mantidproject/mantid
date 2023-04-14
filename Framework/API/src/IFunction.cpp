@@ -294,7 +294,7 @@ void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
 
   try {
     // sortTies checks for circular and self ties
-    sortTies();
+    sortTies(true);
   } catch (std::runtime_error &) {
     // revert / remove tie if invalid
     if (oldTie) {
@@ -1597,8 +1597,13 @@ std::vector<IFunction_sptr> IFunction::createEquivalentFunctions() const {
 }
 
 /// Put all ties in order in which they will be applied correctly.
-void IFunction::sortTies() {
-  m_orderedTies.clear();
+/// @param checkOnly :: If true then do not clear or write to m_orderedTies, only check for circular and self ties.
+/// @throws std::runtime_error :: On finding a circular or self tie
+void IFunction::sortTies(const bool checkOnly) {
+  if (!checkOnly) {
+    m_orderedTies.clear();
+  }
+
   std::list<TieNode> orderedTieNodes;
   for (size_t i = 0; i < nParams(); ++i) {
     auto const tie = getTie(i);
@@ -1642,9 +1647,11 @@ void IFunction::sortTies() {
       orderedTieNodes.emplace_back(newNode);
     }
   }
-  for (auto &&node : orderedTieNodes) {
-    auto const tie = getTie(node.left);
-    m_orderedTies.emplace_back(tie);
+  if (!checkOnly) {
+    for (auto &&node : orderedTieNodes) {
+      auto const tie = getTie(node.left);
+      m_orderedTies.emplace_back(tie);
+    }
   }
 }
 
