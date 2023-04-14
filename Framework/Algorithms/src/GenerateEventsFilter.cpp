@@ -64,14 +64,14 @@ void GenerateEventsFilter::init() {
                   "(1) relative time to run start time in unit as specified property 'UnitOfTime'\n"
                   "(2) absolute time\n"
                   "Absolute time takes a string in format as 1990-01-01T00:00:00, while the relative time takes "
-                  "a string representing an integer or a float number.");
+                  "a string representing an integer or a floating-point number.");
 
   declareProperty("StopTime", "",
                   "The stop time, such that all events after this time are filtered out: it could be \n"
                   "(1) relative time to run start time in unit as specified property 'UnitOfTime'\n"
                   "(2) absolute time\n"
                   "Absolute time takes a string in format as 1990-01-01T00:00:00, while the relative time takes "
-                  "a string representing an integer or a float number.");
+                  "a string representing an integer or a floating-point number.");
 
   // Split by time (only) in steps
   declareProperty(
