@@ -367,6 +367,8 @@ void LeanElasticPeaksWorkspace::initColumns() {
   addPeakColumn("QLab");
   addPeakColumn("QSample");
   addPeakColumn("PeakNumber");
+  addPeakColumn("IntHKL");
+  addPeakColumn("IntMNP");
 }
 
 //---------------------------------------------------------------------------------------------
@@ -424,6 +426,8 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
   std::vector<int> runNumber(np);
   std::vector<int> peakNumber(np);
   std::vector<double> tbar(np);
+  std::vector<double> intHKL(3 * np);
+  std::vector<double> intMNP(3 * np);
   std::vector<double> goniometerMatrix(9 * np);
   std::vector<std::string> shapes(np);
   std::vector<double> qlabs(3 * np);
@@ -445,8 +449,16 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
     peakNumber[i] = p.getPeakNumber();
     tbar[i] = p.getAbsorptionWeightedPathLength();
     {
+      V3D hkl = p.getIntHKL();
+      intHKL[3 * i + 0] = hkl[0];
+      intHKL[3 * i + 1] = hkl[1];
+      intHKL[3 * i + 2] = hkl[2];
+      V3D mnp = p.getIntMNP();
+      intMNP[3 * i + 0] = mnp[0];
+      intMNP[3 * i + 1] = mnp[1];
+      intMNP[3 * i + 2] = mnp[2];
       Matrix<double> gm = p.getGoniometerMatrix();
-      goniometerMatrix[9 * i] = gm[0][0];
+      goniometerMatrix[9 * i + 0] = gm[0][0];
       goniometerMatrix[9 * i + 1] = gm[1][0];
       goniometerMatrix[9 * i + 2] = gm[2][0];
       goniometerMatrix[9 * i + 3] = gm[0][1];
@@ -618,12 +630,28 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
   // Qlab
   std::vector<int> qlab_dims;
   qlab_dims.emplace_back(static_cast<int>(m_peaks.size()));
-  qlab_dims.emplace_back(9);
+  qlab_dims.emplace_back(3);
   file->writeData("column_15", qlabs, qlab_dims);
   file->openData("column_15");
   file->putAttr("name", "Q LabFrame");
   file->putAttr("interpret_as", "A vector of 3 doubles");
   file->putAttr("units", "angstrom^-1");
+  file->closeData();
+
+  // Integer HKL column
+  file->writeData("column_16", intHKL, qlab_dims);
+  file->openData("column_16");
+  file->putAttr("name", "IntHKL");
+  file->putAttr("interpret_as", "A vector of 3 doubles");
+  file->putAttr("units", "r.l.u.");
+  file->closeData();
+
+  // Integer HKL column
+  file->writeData("column_17", intMNP, qlab_dims);
+  file->openData("column_17");
+  file->putAttr("name", "IntMNP");
+  file->putAttr("interpret_as", "A vector of 3 doubles");
+  file->putAttr("units", "r.l.u.");
   file->closeData();
 
   file->closeGroup(); // end of peaks workpace

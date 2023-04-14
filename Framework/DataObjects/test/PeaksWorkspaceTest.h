@@ -65,7 +65,7 @@ public:
 
   /** Check that the PeaksWorkspace build by buildPW() is correct */
   void checkPW(const PeaksWorkspace &pw) {
-    TS_ASSERT_EQUALS(pw.columnCount(), 20);
+    TS_ASSERT_EQUALS(pw.columnCount(), 22);
     TS_ASSERT_EQUALS(pw.rowCount(), 1);
     TS_ASSERT_EQUALS(pw.getNumberPeaks(), 1);
     if (pw.getNumberPeaks() != 1)
@@ -101,6 +101,8 @@ public:
     const double h(1.), k(-1.), l(2.), lambda(3.5), energy(6.67789), tof(9733.13), dspacing(2.51539), intensity(2.3),
         sigInt(0.1), binCount(100), tbar(0.4);
     const V3D q(-1.79284, 0.0717138, 1.73782);
+    const V3D hkl(0, 0, 0);
+    const V3D mnp(0, 0, 0);
     const std::string bankName("bank1");
 
     peak0.setRunNumber(runNo);
@@ -130,14 +132,15 @@ public:
     };
     using std::to_string;
     // clang-format off
-    const std::array<std::string, 20> expected = {\
+    const std::array<std::string, 22> expected = {\
       to_string(runNo), to_string(detID),  floatToStr(h, 2), floatToStr(k, 2),
       floatToStr(l, 2), floatToStr(lambda), floatToStr(energy), floatToStr(tof, 2), floatToStr(dspacing),
       floatToStr(intensity), floatToStr(sigInt), floatToStr(intensity/sigInt), floatToStr(binCount), bankName,
       to_string(row), to_string(col),
       v3dToStr(q), v3dToStr(q),
       to_string(peakNumber),
-      floatToStr(tbar)
+      floatToStr(tbar),
+      v3dToStr(hkl), v3dToStr(mnp),
     };
     // clang-format on
 
