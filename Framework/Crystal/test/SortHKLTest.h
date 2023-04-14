@@ -74,6 +74,18 @@ public:
           p.setBinCount(static_cast<double>(i));
           ws->addPeak(p);
         }
+    V3D hkl(1, 2, 3);
+    V3D mnp(1, 2, 3);
+    DblMatrix gon(3, 3, true);
+    Peak mod_p(inst, static_cast<detid_t>(1 * 100 + 0 + 1 + 0 * 10), 0 * 1.0 + 0.5, hkl, gon);
+    mod_p.setIntHKL(hkl);
+    mod_p.setIntMNP(mnp);
+    mod_p.setRunNumber(1000);
+    mod_p.setBankName("bank1");
+    mod_p.setIntensity(1.1);
+    mod_p.setSigmaIntensity(sqrt(1.1));
+    mod_p.setBinCount(1.1);
+    ws->addPeak(mod_p);
     AnalysisDataService::Instance().addOrReplace("TOPAZ_peaks", ws);
 
     SortHKL alg;
