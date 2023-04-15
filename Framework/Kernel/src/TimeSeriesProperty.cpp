@@ -1120,9 +1120,9 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue(const Kernel::
   const auto stopTime = roi.lastTime();
   const auto times = this->timesAsVector();
   if (stopTime <= times.front()) {
-    this->firstValue();
+    return this->firstValue();
   } else if (stopTime >= times.back()) {
-    this->lastValue();
+    return this->lastValue();
   } else {
     auto iter = std::lower_bound(times.cbegin(), times.cend(), stopTime);
     const auto index = std::size_t(std::distance(times.cbegin(), iter));
