@@ -1067,6 +1067,24 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::firstValue() const {
   return m_values[0].value();
 }
 
+template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::firstValue(const Kernel::TimeROI &roi) const {
+  const auto startTime = roi.firstTime();
+  if (startTime <= this->firstTime()) {
+    return this->firstValue();
+  } else if (startTime >= this->lastTime()) {
+    return this->lastValue();
+  } else {
+    const auto times = this->timesAsVector();
+    auto iter = std::lower_bound(times.cbegin(), times.cend(), startTime);
+    if (*iter > startTime)
+      iter--;
+    const auto index = std::size_t(std::distance(times.cbegin(), iter));
+
+    const auto values = this->valuesAsVector();
+    return values[index];
+  }
+}
+
 /** Returns the first time regardless of filter
  *  @return Value
  */
@@ -1096,6 +1114,22 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
   sortIfNecessary();
 
   return m_values.rbegin()->value();
+}
+
+template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue(const Kernel::TimeROI &roi) const {
+  const auto stopTime = roi.lastTime();
+  const auto times = this->timesAsVector();
+  if (stopTime <= times.front()) {
+    this->firstValue();
+  } else if (stopTime >= times.back()) {
+    this->lastValue();
+  } else {
+    auto iter = std::lower_bound(times.cbegin(), times.cend(), stopTime);
+    const auto index = std::size_t(std::distance(times.cbegin(), iter));
+
+    const auto values = this->valuesAsVector();
+    return values[index];
+  }
 }
 
 /**

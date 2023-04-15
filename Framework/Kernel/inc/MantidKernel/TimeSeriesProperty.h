@@ -243,10 +243,14 @@ public:
   Types::Core::DateAndTime lastTime() const;
   /// Returns the first value regardless of filter
   TYPE firstValue() const;
+  /// Returns the first value in the TimeROI
+  TYPE firstValue(const Kernel::TimeROI &roi) const;
   /// Returns the first time regardless of filter
   Types::Core::DateAndTime firstTime() const;
-  /// Returns the last value
+  /// Returns the last value regardless of filter
   TYPE lastValue() const;
+  /// Returns the last value in the TimeROI
+  TYPE lastValue(const Kernel::TimeROI &roi) const;
   /// Returns the duration of the time series, possibly restricted by a TimeROI object
   double durationInSeconds(const Kernel::TimeROI *roi = nullptr) const;
 
