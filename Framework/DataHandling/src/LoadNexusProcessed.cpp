@@ -1442,14 +1442,13 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         peakWS->getPeak(r).setIntMNP(mnp);
       }
     }
-
-    // After all columns read set IntHKL if not set
-    for (int r = 0; r < numberPeaks; r++) {
-      V3D intHKL = peakWS->getPeak(r).getIntHKL();
-      if (intHKL.norm2() == 0) {
-        intHKL = V3D(peakWS->getPeak(r).getH(), peakWS->getPeak(r).getK(), peakWS->getPeak(r).getL());
-        peakWS->getPeak(r).setIntHKL(intHKL);
-      }
+  }
+  // After all columns read set IntHKL if not set
+  for (int r = 0; r < numberPeaks; r++) {
+    V3D intHKL = peakWS->getPeak(r).getIntHKL();
+    if (intHKL.norm2() == 0) {
+      intHKL = V3D(peakWS->getPeak(r).getH(), peakWS->getPeak(r).getK(), peakWS->getPeak(r).getL());
+      peakWS->getPeak(r).setIntHKL(intHKL);
     }
   }
 
