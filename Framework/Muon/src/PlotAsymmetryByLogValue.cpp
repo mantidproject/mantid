@@ -56,10 +56,11 @@ bool convertLogToDouble(const Mantid::Kernel::ITimeSeriesProperty *property, dou
                         const TimeROI &roi) {
   if (const auto *log = dynamic_cast<const Mantid::Kernel::TimeSeriesProperty<T> *>(property)) {
     if (function == "First") {
-      value = static_cast<double>(log->filteredValuesAsVector(&roi).front());
+      value = double(log->firstValue(roi));
     } else if (function == "Last") { // Default
-      value = static_cast<double>(log->filteredValuesAsVector(&roi).back());
+      value = double(log->lastValue(roi));
     } else {
+      // it should not be possible to be here
       return false;
     }
     return true;
@@ -864,8 +865,8 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(const MatrixWorkspace_sptr &ws_re
  *doesn't exist.
  */
 double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
-
   const Run &run = ws.run();
+  const auto &runROI = run.getTimeROI();
 
   // Get the start & end time for the run
   Mantid::Types::Core::DateAndTime start, end;
@@ -897,6 +898,9 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
   double value = 0.;
   if (auto timeSeriesProperty = dynamic_cast<ITimeSeriesProperty *>(property)) {
     TimeROI roi(start, end);
+    if (!runROI.useAll()) {
+      roi.update_intersection(runROI);
+    }
     if (m_logFunc == "Mean" || m_logFunc == "Min" || m_logFunc == "Max") {
       const auto stats = timeSeriesProperty->getStatistics(&roi);
       if (m_logFunc == "Mean")
