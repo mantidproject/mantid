@@ -28,6 +28,7 @@ std::vector<Peak> getPeaksWithIandSigma(const std::vector<double> &intensity, co
                    peak.setIntensity(intensity);
                    peak.setSigmaIntensity(sigma);
                    peak.setHKL(hkl);
+                   peak.setIntHKL(hkl);
                    return peak;
                  });
 
