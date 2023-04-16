@@ -37,7 +37,7 @@ constexpr const char *FIGURE_FACECOLOR = "w";
 // The order defines the order in the combo box. The index
 // values is used as an integer representation. See the setScaleType
 // method if this is changed.
-QStringList NORM_OPTS = {"Linear", "SymmetricLog10", "Power"};
+QStringList NORM_OPTS = {"Linear", "Log", "SymmetricLog10", "Power"};
 
 } // namespace
 
@@ -140,13 +140,13 @@ int ColorbarWidget::getScaleType() const { return m_ui.normTypeOpt->currentIndex
 
 /**
  * @brief Set the scale type from an integer representation
- * Linear=0, Log=1, Power=2, which is backwards compatible
+ * Linear=0, Log=1, SymLog=2, Power=3, which is backwards compatible
  * with the original Qwt version
  * @param index The scale type as an integer
  */
 void ColorbarWidget::setScaleType(int index) {
   // Protection against a bad index.
-  if (index < 0 || index > 2)
+  if (index < 0 || index > 3)
     return;
   // Some ranges will be invalid for some scale types, e.g. x < 0 for PowerNorm.
   // Compute a valid range and reset user-specified range if necessary
@@ -162,9 +162,12 @@ void ColorbarWidget::setScaleType(int index) {
     validRange = autoscaleAndSetNorm(Normalize());
     break;
   case 1:
-    validRange = autoscaleAndSetNorm(SymLogNorm(SymLogNorm::DefaultLinearThreshold, SymLogNorm::DefaultLinearScale));
+    validRange = autoscaleAndSetNorm(LogNorm());
     break;
   case 2:
+    validRange = autoscaleAndSetNorm(SymLogNorm(SymLogNorm::DefaultLinearThreshold, SymLogNorm::DefaultLinearScale));
+    break;
+  case 3:
     validRange = autoscaleAndSetNorm(PowerNorm(getNthPower().toDouble()));
     break;
   }
@@ -213,7 +216,7 @@ void ColorbarWidget::scaleMaximumEdited() {
  * Called when a new selection in the scale type box is made
  */
 void ColorbarWidget::scaleTypeSelectionChanged(int index) {
-  if (index == 2) { // Power
+  if (index == 3) { // Power
     m_ui.powerEdit->show();
   } else {
     m_ui.powerEdit->hide();

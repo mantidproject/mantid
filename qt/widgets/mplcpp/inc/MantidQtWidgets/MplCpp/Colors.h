@@ -55,6 +55,20 @@ public:
 };
 
 /**
+ * @brief Map data values [vmin, vmax] onto a log scale.
+ * See
+ * https://matplotlib.org/2.2.3/api/_as_gen/matplotlib.colors.LogNorm.html#matplotlib.colors.LogNorm
+ */
+class MANTID_MPLCPP_DLL LogNorm : public NormalizeBase {
+public:
+  LogNorm();
+  LogNorm(double vmin, double vmax);
+  virtual std::tuple<double, double> autoscale(std::tuple<double, double> clim) override;
+  Common::Python::Object tickLocator() const override;
+  Common::Python::Object labelFormatter() const override;
+};
+
+/**
  * @brief Map data values [vmin, vmax] onto a symmetrical log scale.
  * See
  * https://matplotlib.org/2.2.3/api/_as_gen/matplotlib.colors.SymLogNorm.html#matplotlib.colors.SymLogNorm

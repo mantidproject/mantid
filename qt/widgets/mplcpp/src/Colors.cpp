@@ -44,6 +44,17 @@ Python::Object createNormalize(OptionalTupleDouble clim = none) {
     return colorsModule().attr("Normalize")();
 }
 
+// Factory function for creating a LogNorm instance
+// Holds the GIL
+Python::Object createLog(OptionalTupleDouble clim = none) {
+  GlobalInterpreterLock lock;
+  if (clim.is_initialized()) {
+    const auto &range = clim.get();
+    return colorsModule().attr("LogNorm")(std::get<0>(range), std::get<1>(range));
+  } else
+    return colorsModule().attr("LogNorm")();
+}
+
 // Factory function for creating a SymLogNorm instance
 // Holds the GIL
 Python::Object createSymLog(double linthresh, double linscale, OptionalTupleDouble clim = none) {
@@ -55,7 +66,7 @@ Python::Object createSymLog(double linthresh, double linscale, OptionalTupleDoub
     return colorsModule().attr("SymLogNorm")(linthresh, linscale);
 }
 
-// Factory function for creating a SymLogNorm instance
+// Factory function for creating a PowerNorm instance
 // Holds the GIL
 Python::Object createPowerNorm(double gamma, OptionalTupleDouble clim = none) {
   GlobalInterpreterLock lock;
@@ -94,7 +105,11 @@ Python::Object scaleModule() {
  */
 std::tuple<double, double> NormalizeBase::autoscale(std::tuple<double, double> clim) {
   GlobalInterpreterLock lock;
-  pyobj().attr("autoscale")(Python::NewRef(Py_BuildValue("(ff)", std::get<0>(clim), std::get<1>(clim))));
+  // pyobj().attr("autoscale")(Python::NewRef(Py_BuildValue("(ff)", std::get<0>(clim), std::get<1>(clim))));
+  // Don't call the autoscale since log requires NumPy array object
+  // Setting vmin/vmax attributes by hand since the real autoscale function works on data ndarrays
+  PyObject_SetAttr(pyobj().ptr(), Py_BuildValue("s", "vmin"), Py_BuildValue("f", std::get<0>(clim)));
+  PyObject_SetAttr(pyobj().ptr(), Py_BuildValue("s", "vmax"), Py_BuildValue("f", std::get<1>(clim)));
   Python::Object scaleMin(pyobj().attr("vmin")), scaleMax(pyobj().attr("vmax"));
   return std::make_tuple(PyFloat_AsDouble(scaleMin.ptr()), PyFloat_AsDouble(scaleMax.ptr()));
 }
@@ -120,6 +135,65 @@ Normalize::Normalize() : NormalizeBase(createNormalize()) {}
  * @param vmin Minimum value of the data interval
  * @param vmax Maximum value of the data interval */
 Normalize::Normalize(double vmin, double vmax) : NormalizeBase(createNormalize(std::make_tuple(vmin, vmax))) {}
+
+// ------------------------ LogNorm --------------------------------------------
+
+/**
+ * @brief Construct a LogNorm object mapping data from [vmin, vmax]
+ * to a logarithm scale. Default limits are None so autoscale
+ * will need to be called
+ * See
+ * https://matplotlib.org/2.2.3/api/_as_gen/matplotlib.colors.LogNorm.html#matplotlib.colors.LogNorm
+ */
+LogNorm::LogNorm() : NormalizeBase(createLog()) {}
+
+/**
+ * @brief Construct a LogNorm object mapping data from [vmin, vmax]
+ * to a logarithm scale. Default limits are None so autoscale
+ * will need to be called
+ * See
+ * https://matplotlib.org/2.2.3/api/_as_gen/matplotlib.colors.LogNorm.html#matplotlib.colors.LogNorm
+ * @param vmin Minimum value of the data interval
+ * @param vmax Maximum value of the data interval
+ */
+LogNorm::LogNorm(double vmin, double vmax) : NormalizeBase(createLog(std::make_tuple(vmin, vmax))) {}
+
+std::tuple<double, double> LogNorm::autoscale(std::tuple<double, double> clim) {
+  if (std::get<1>(clim) <= 0.0) {
+    std::get<1>(clim) = 1.0;
+  }
+  if (std::get<0>(clim) <= 0.0) {
+    std::get<0>(clim) = 1e-4 * std::get<1>(clim);
+  }
+  return NormalizeBase::autoscale(clim);
+}
+
+/**
+ * @return An instance of the LogLocator
+ */
+Python::Object LogNorm::tickLocator() const {
+  GlobalInterpreterLock lock;
+  // Create log transform with base=10
+  auto transform = scaleModule().attr("LogLocator")(10);
+
+  // Sets the subs parameter to be [1,2,...,10]. The parameter determines where
+  // the ticks on the colorbar are placed and setting it to this ensures that
+  // any range of values will have ticks.
+  std::vector<float> subsVector(10);
+  std::iota(subsVector.begin(), subsVector.end(), 1.f);
+  auto subs = Converters::ToPyList<float>()(subsVector);
+
+  return Python::Object(tickerModule().attr("LogLocator")(transform, subs));
+}
+
+/**
+ * @brief LogNorm::labelFormatter
+ * @return
+ */
+Python::Object LogNorm::labelFormatter() const {
+  GlobalInterpreterLock lock;
+  return Python::Object(tickerModule().attr("LogFormatterSciNotation")());
+}
 
 // ------------------------ SymLogNorm -----------------------------------------
 /// The threshold below which the scale becomes linear

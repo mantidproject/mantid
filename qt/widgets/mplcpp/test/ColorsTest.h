@@ -10,6 +10,7 @@
 
 #include "MantidQtWidgets/MplCpp/Colors.h"
 
+using MantidQt::Widgets::MplCpp::LogNorm;
 using MantidQt::Widgets::MplCpp::Normalize;
 using MantidQt::Widgets::MplCpp::NormalizeBase;
 using MantidQt::Widgets::MplCpp::PowerNorm;
@@ -31,9 +32,20 @@ public:
     assertColorLimits(norm, vmin, vmax);
   }
 
-  void testNormalizeWithLimits() {
+  void testDefaultLogNormAndAutoscale() {
+    LogNorm norm(0.001, 2);
+    const double vmin(-1), vmax(1), validMin(0.0001);
+    auto range = norm.autoscale(std::make_tuple(vmin, vmax));
+
+    TS_ASSERT_EQUALS(validMin, std::get<0>(range));
+    TS_ASSERT_EQUALS(vmax, std::get<1>(range));
+    assertColorLimits(norm, validMin, vmax);
+  }
+
+  void testDefaultLogNorm() {
     const double vmin(-1), vmax(1);
-    Normalize norm(vmin, vmax);
+    LogNorm norm(vmin, vmax);
+
     assertColorLimits(norm, vmin, vmax);
   }
 
