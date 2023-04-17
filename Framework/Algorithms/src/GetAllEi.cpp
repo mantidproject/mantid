@@ -922,6 +922,7 @@ double GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const
       Kernel::TimeROI localROI(timeStart, timeStop);
       value = pTimeSeries->getStatistics(&localROI).mean;
     } else {
+      // all values in pTimeSeries will be used
       value = pTimeSeries->getStatistics().mean;
     }
   } else {

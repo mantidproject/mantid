@@ -497,6 +497,7 @@ const std::vector<Kernel::TimeInterval> TimeROI::toTimeIntervals() const {
 /**
  * Time intervals returned where no time is before after. This is used in calculating ranges
  * in TimeSeriesProperty.
+ * @param after Only give TimeIntervals after this time
  */
 const std::vector<Kernel::TimeInterval> TimeROI::toTimeIntervals(const Types::Core::DateAndTime &after) const {
   const auto NUM_VAL = m_roi.size();

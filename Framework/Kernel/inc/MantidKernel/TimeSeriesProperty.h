@@ -247,7 +247,7 @@ public:
   TYPE firstValue(const Kernel::TimeROI &roi) const;
   /// Returns the first time regardless of filter
   Types::Core::DateAndTime firstTime() const;
-  /// Returns the last value regardless of filter
+  /// Returns the last value
   TYPE lastValue() const;
   /// Returns the last value in the TimeROI
   TYPE lastValue(const Kernel::TimeROI &roi) const;
