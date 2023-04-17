@@ -408,9 +408,8 @@ public:
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
 
-    log->filterByTime(start, stop);
-
-    TS_ASSERT_EQUALS(log->realSize(), 3);
+    TimeROI roi(start, stop);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 3);
 
     delete log;
   }
@@ -424,10 +423,8 @@ public:
 
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
-
-    log->filterByTimes(roi);
-
-    TS_ASSERT_EQUALS(log->realSize(), 3);
+    // values are 2, 3, 4
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 3);
 
     delete log;
   }
@@ -440,34 +437,40 @@ public:
     roi.addROI(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"));
     roi.addROI(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"));
 
-    // Since the filter is < stop, the last one is not counted, so there are  3
-    // taken out.
-
-    log->filterByTimes(roi);
-
-    TS_ASSERT_EQUALS(log->realSize(), 6);
+    // values are 2, 3, 4, 8, 9
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 5);
 
     delete log;
   }
 
   //----------------------------------------------------------------------------
-  /// Ticket #2591
+  /**
+   * Ticket #2591 - since the values are unchanged, specifying a TimeROI after all
+   * the actual values, will return the last value
+   */
   void test_filterByTime_ifOnlyOneValue_assumes_constant_instead() {
     TimeSeriesProperty<int> *log = createIntegerTSP(1);
     TS_ASSERT_EQUALS(log->realSize(), 1);
 
+    // original time is "2007-11-30T16:17:00"
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
     DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
-    log->filterByTime(start, stop);
+    TimeROI roi(start, stop);
 
     // Still there!
-    TS_ASSERT_EQUALS(log->realSize(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).front(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).front(), DateAndTime("2007-11-30T16:17:00"));
 
     delete log;
   }
 
   //----------------------------------------------------------------------------
-  /// Ticket #2591
+  /**
+   * Ticket #2591 - since the values are unchanged, specifying a TimeROI after all
+   * the actual values, will return the last value
+   */
   void test_filterByTime_ifOnlyOneValue_assumes_constant_instead_2() {
     TimeSeriesProperty<int> *log = new TimeSeriesProperty<int>("MyIntLog");
     TS_ASSERT_THROWS_NOTHING(log->addValue("1990-01-01T00:00:00", 1));
@@ -475,10 +478,13 @@ public:
 
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
     DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
-    log->filterByTime(start, stop);
+    TimeROI roi(start, stop);
 
     // Still there!
-    TS_ASSERT_EQUALS(log->realSize(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).front(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).front(), DateAndTime("1990-01-01T00:00:00"));
 
     delete log;
   }
@@ -1079,6 +1085,44 @@ public:
     delete log;
   }
 
+  // this test is taken from PlotAsymmetryByLogValueTest::test_LogValueFunction
+  void test_statistics_excessiveROI() {
+    TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("MydoubleLog");
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T17:12:34", 178.3));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T17:13:08", 179.4));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T17:13:42", 180.2));
+
+    constexpr double MIN{178.3};
+    constexpr double MAX{180.2};
+    constexpr double MEDIAN{179.4};
+    constexpr double MEAN{(178.3 + 179.4 + 180.2) / 3.};
+
+    // bare stats
+    const auto stats_no_roi = log->getStatistics();
+    TS_ASSERT_DELTA(stats_no_roi.minimum, MIN, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.maximum, MAX, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.median, MEDIAN, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.mean, MEAN, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.duration, (136 - 34),
+                    1e-3); // last interval is guessed to be same as penultimate interval
+    TS_ASSERT_DELTA(log->timeAverageValue(), stats_no_roi.mean, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.time_mean, 179.3, 1e-3); // calculated by hand
+
+    // this starts 4 seconds before the log does to force checking the durations are done correctly
+    // roi duration is 100, but the first 4 seconds should be skipped
+    TimeROI roi(DateAndTime("2007-11-30T17:12:30"), DateAndTime("2007-11-30T17:14:10"));
+
+    // bare stats with the wacky TimROI
+    const auto stats_roi = log->getStatistics(&roi);
+    TS_ASSERT_DELTA(stats_roi.minimum, MIN, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.maximum, MAX, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.median, MEDIAN, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.mean, MEAN, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.duration, (130 - 34), 1e-3);
+    TS_ASSERT_DELTA(log->timeAverageValue(), stats_roi.mean, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.time_mean, 179.24375, 1e-3); // calculated by hand
+  }
+
   void test_empty_statistics() {
     TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("MydoubleLog");
     TimeSeriesPropertyStatistics stats = log->getStatistics();
@@ -1111,6 +1155,29 @@ public:
     delete log;
     delete logi;
     delete val;
+  }
+
+  void test_LogAtStartOfTime() {
+    TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("doubleLog");
+    TS_ASSERT_THROWS_NOTHING(log->addValue("1990-Jan-01 00:00:00", 1));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("1990-Jan-01 00:00:10", 2));
+
+    const auto rawstats = log->getStatistics();
+    TS_ASSERT_DELTA(rawstats.minimum, 1.0, 1e-3);
+    TS_ASSERT_DELTA(rawstats.maximum, 2.0, 1e-3);
+    TS_ASSERT_DELTA(rawstats.median, 1.5, 1e-3);
+    TS_ASSERT_DELTA(rawstats.mean, 1.5, 1e-3);
+    TS_ASSERT_DELTA(rawstats.duration, 20.0, 1e-3);
+    TS_ASSERT_DELTA(rawstats.time_mean, 1.5, 1e-3);
+
+    TimeROI roi(DateAndTime("1990-Jan-01 00:00:00"), DateAndTime("1990-Jan-01 00:00:20"));
+    const auto filteredstats = log->getStatistics(&roi);
+    TS_ASSERT_DELTA(filteredstats.minimum, 1.0, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.maximum, 2.0, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.median, 1.5, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.mean, 1.5, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.duration, 20.0, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.time_mean, 1.5, 1e-3);
   }
 
   void test_PlusEqualsOperator_() {
@@ -1943,9 +2010,9 @@ public:
     DateAndTime start = DateAndTime("2007-11-30T15:00:00"); // Much earlier than first time series value
     DateAndTime stop = DateAndTime("2007-11-30T17:00:00");  // Much later than last time series value
 
-    log->filterByTime(start, stop);
+    TimeROI roi(start, stop);
 
-    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->realSize());
+    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->filteredValuesAsVector(&roi).size());
 
     delete log;
   }

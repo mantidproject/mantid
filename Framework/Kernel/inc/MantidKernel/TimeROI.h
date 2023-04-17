@@ -41,6 +41,7 @@ public:
   void addMask(const std::time_t &startTime, const std::time_t &stopTime);
   bool valueAtTime(const Types::Core::DateAndTime &time) const;
   Types::Core::DateAndTime getEffectiveTime(const Types::Core::DateAndTime &time) const;
+  Types::Core::DateAndTime firstTime() const;
   Types::Core::DateAndTime lastTime() const;
 
   void replaceROI(const TimeSeriesProperty<bool> *roi);
@@ -49,6 +50,7 @@ public:
   void update_intersection(const TimeROI &other);
   void update_or_replace_intersection(const TimeROI &other);
   const std::vector<Kernel::TimeInterval> toTimeIntervals() const;
+  const std::vector<Kernel::TimeInterval> toTimeIntervals(const Types::Core::DateAndTime &after) const;
   bool operator==(const TimeROI &other) const;
   bool operator!=(const TimeROI &other) const;
   /// print the ROI boundaries to a string

@@ -12,6 +12,7 @@
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Kernel::FilteredTimeSeriesProperty;
+using Mantid::Kernel::TimeROI;
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
 
@@ -524,10 +525,9 @@ public:
 
     DateAndTime start = DateAndTime("2007-11-30T15:00:00"); // Much earlier than first time series value
     DateAndTime stop = DateAndTime("2007-11-30T17:00:00");  // Much later than last time series value
+    TimeROI roi(start, stop);
 
-    log->filterByTime(start, stop);
-
-    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->realSize());
+    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->filteredValuesAsVector(&roi).size());
 
     delete log;
   }
