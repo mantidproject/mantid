@@ -42,7 +42,8 @@ Finally, don't forget to add the appropriate labels, milestones, etc.!  -->
 
 #### Reviewer ####
 
-Please comment on the following ([full description](http://developer.mantidproject.org/ReviewingAPullRequest.html)):
+Please comment on the points listed below ([full description](http://developer.mantidproject.org/ReviewingAPullRequest.html)).
+**Your comments will be used as part of the gatekeeper process, so please comment clearly on what you have checked during your review.** If changes are made to the PR during the review process then your final comment will be the most important for gatekeepers. In this comment you should make it clear why any earlier review is still valid, or confirm that all requested changes have been addressed.
 
 ##### Code Review #####
 
@@ -60,3 +61,7 @@ Please comment on the following ([full description](http://developer.mantidproje
 - Has the relevant (user and developer) documentation been added/updated?
 
 Does everything look good? Mark the review as **Approve**. A member of `@mantidproject/gatekeepers` will take care of it.
+
+#### Gatekeeper ####
+
+If you need to request changes to a PR then please add a comment and set the review status to "Request changes". This will stop the PR from showing up in the list for other gatekeepers.
