@@ -530,7 +530,7 @@ void FilterEvents::groupOutputWorkspace() {
  * TimeSplitter(0.0, 1.0, 1) results in TimeSplitter::m_roi_map = {(0.0, 1), (1.0, NO_TARGET)}, but
  * TimeSplitter(0.0, 1.0, NO_TARGET) is ill-defined, as {(0.0, NO_TARGET), (1.0, NO_TARGET)} is meaningless.
  */
-TimeROI FilterEvents::partialROI(const int &index, const DateAndTime &filterStartTime) {
+TimeROI FilterEvents::partialROI(const int &index) {
   TimeROI roi{m_timeSplitter.getTimeROI(index)};
 
   if (index == TimeSplitter::NO_TARGET) {
@@ -538,15 +538,7 @@ TimeROI FilterEvents::partialROI(const int &index, const DateAndTime &filterStar
 
     const auto firstSplitter = splittingBoundaries.begin();
     // add leading mask as ROI of the unfiltered workspace
-    DateAndTime startTime(DateAndTime::GPS_EPOCH);
-    if (filterStartTime != DateAndTime::GPS_EPOCH)
-      startTime = filterStartTime;
-    else {
-      try {
-        startTime = m_eventWS->run().startTime();
-      } catch (const std::exception &) {
-      }
-    }
+    DateAndTime startTime = m_isSplittersRelativeTime ? m_filterStartTime : m_eventWS->run().startTime();
     if (firstSplitter->first > startTime)
       roi.addROI(startTime, firstSplitter->first);
 
@@ -689,7 +681,7 @@ void FilterEvents::createOutputWorkspaces() {
     std::shared_ptr<EventWorkspace> optws = templateWorkspace->clone();
 
     // Endow the output workspace with a TimeROI
-    TimeROI roi = this->partialROI(wsindex, m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime::GPS_EPOCH);
+    TimeROI roi = this->partialROI(wsindex);
     roi.update_or_replace_intersection(originalROI);
     optws->mutableRun().setTimeROI(roi);
 
