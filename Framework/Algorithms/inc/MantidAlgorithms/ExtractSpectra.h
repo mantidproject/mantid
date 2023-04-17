@@ -37,6 +37,7 @@ private:
   void checkProperties();
   std::size_t getXMinIndex(const size_t wsIndex = 0);
   std::size_t getXMaxIndex(const size_t wsIndex = 0);
+  std::size_t histXMaxIndex() const;
   const Kernel::cow_ptr<Mantid::HistogramData::HistogramX> getCroppedXHistogram(const API::MatrixWorkspace &workspace);
   void cropCommon(API::MatrixWorkspace &workspace, Kernel::cow_ptr<Mantid::HistogramData::HistogramX> XHistogram,
                   int index);

@@ -181,10 +181,7 @@ const Kernel::cow_ptr<Mantid::HistogramData::HistogramX>
 ExtractSpectra::getCroppedXHistogram(const API::MatrixWorkspace &workspace) {
   const auto hist = workspace.histogram(0);
   auto begin = m_minXIndex;
-  auto end = m_maxXIndex;
-  if (m_isHistogramData) {
-    end -= 1;
-  }
+  auto end = histXMaxIndex();
 
   auto cropped(hist);
   cropped.resize(end - begin);
@@ -203,10 +200,7 @@ void ExtractSpectra::cropCommon(API::MatrixWorkspace &workspace,
                                 Kernel::cow_ptr<Mantid::HistogramData::HistogramX> XHistogram, int index) {
   const auto hist = workspace.histogram(index);
   auto begin = m_minXIndex;
-  auto end = m_maxXIndex;
-  if (m_isHistogramData) {
-    end -= 1;
-  }
+  auto end = histXMaxIndex();
 
   auto cropped(hist);
   cropped.resize(end - begin);
@@ -317,10 +311,7 @@ void ExtractSpectra::execEvent() {
       const auto oldDx = el.pointStandardDeviations();
       el.setHistogram(binEdges);
       if (oldDx) {
-        auto end = m_maxXIndex;
-        if (m_isHistogramData) {
-          end -= 1;
-        }
+        auto end = histXMaxIndex();
         el.setPointStandardDeviations(oldDx.begin() + m_minXIndex, oldDx.begin() + end);
       }
     }
@@ -333,10 +324,7 @@ void ExtractSpectra::execEvent() {
 
 /// Propagate bin masking if there is any.
 void ExtractSpectra::propagateBinMasking(MatrixWorkspace &workspace, const int i) const {
-  auto end = m_maxXIndex;
-  if (m_isHistogramData) {
-    end -= 1;
-  }
+  auto end = histXMaxIndex();
   if (workspace.hasMaskedBins(i)) {
     MatrixWorkspace::MaskList filteredMask;
     for (const auto &mask : workspace.maskedBins(i)) {
@@ -457,6 +445,13 @@ size_t ExtractSpectra::getXMaxIndex(const size_t wsIndex) {
     xIndex = std::upper_bound(X.begin(), X.end(), maxX_val) - X.begin();
   }
   return xIndex;
+}
+
+size_t ExtractSpectra::histXMaxIndex() const {
+  if (m_isHistogramData) {
+    return m_maxXIndex - 1;
+  }
+  return m_maxXIndex;
 }
 
 } // namespace Mantid::Algorithms
