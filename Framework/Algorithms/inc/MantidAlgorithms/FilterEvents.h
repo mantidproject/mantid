@@ -100,7 +100,7 @@ private:
   void groupOutputWorkspace();
 
   /// Find the TimeROI associated to a particular destination-workspace index
-  Kernel::TimeROI partialROI(const int &index);
+  Kernel::TimeROI partialROI(const int &index, const DateAndTime &filterStartTime);
 
   DataObjects::EventWorkspace_sptr m_eventWS;
   DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;
@@ -146,7 +146,7 @@ private:
 
   // Flag to have relative time in splitters workspace
   bool m_isSplittersRelativeTime;
-  // Base time for relative time in splitters workspace
+  // Absolute base time for relative times in splitters workspace
   Types::Core::DateAndTime m_filterStartTime;
 };
 

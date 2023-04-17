@@ -32,8 +32,8 @@ public:
   static constexpr int NO_TARGET{-1}; // no target (a.k.a. destination) workspace for filtered out events
   TimeSplitter() = default;
   TimeSplitter(const DateAndTime &start, const DateAndTime &stop, const int value = DEFAULT_TARGET);
-  TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const DateAndTime &offset = DateAndTime(0, 0));
-  TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &offset = DateAndTime(0, 0));
+  TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const DateAndTime &offset = DateAndTime::GPS_EPOCH);
+  TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &offset = DateAndTime::GPS_EPOCH);
   TimeSplitter(const SplittersWorkspace_sptr &sws);
   const std::map<DateAndTime, int> &getSplittersMap() const;
   std::string getWorkspaceIndexName(const int workspaceIndex, const int numericalShift = 0);

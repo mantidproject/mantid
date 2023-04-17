@@ -148,7 +148,7 @@ void FilterEvents::init() {
   dateTime->allowEmpty(true);
   std::string absoluteHelp("Specify date and UTC time in ISO8601 format, e.g. 2010-09-14T04:20:12.");
   declareProperty("FilterStartTime", "", dateTime,
-                  "Absolute start time; events before this time are filtered out. " + absoluteHelp);
+                  "Absolute base time for relative times in SplitterWorkspace. " + absoluteHelp);
 
   vector<string> corrtypes{"None", "Customized", "Direct", "Elastic", "Indirect"};
   declareProperty("CorrectionToSample", "None", std::make_shared<StringListValidator>(corrtypes),
@@ -455,15 +455,15 @@ void FilterEvents::processAlgorithmProperties() {
     // Using relative time
     if (!isDefault("FilterStartTime")) {
       std::string filter_start_time_str =
-          getProperty("FilterStartTime"); // User specified the filter starting, or base, time
+          getProperty("FilterStartTime"); // User-specified absolute base time for relative times
       m_filterStartTime = Types::Core::DateAndTime(filter_start_time_str);
     } else {
       // Retrieve filter starting time from property run_start as default
       try {
         m_filterStartTime = m_eventWS->run().startTime();
       } catch (std::runtime_error &) {
-        throw std::runtime_error("InputWorkspace does not have property run_start. "
-                                 "Since RelativeTime is set to true, FilterStartTime must be specified.");
+        throw std::runtime_error("RelativeTime is true, but InputWorkspace does not have property run_start and "
+                                 "FilterStartTime is not specified either.");
       }
     }
   }
@@ -530,7 +530,7 @@ void FilterEvents::groupOutputWorkspace() {
  * TimeSplitter(0.0, 1.0, 1) results in TimeSplitter::m_roi_map = {(0.0, 1), (1.0, NO_TARGET)}, but
  * TimeSplitter(0.0, 1.0, NO_TARGET) is ill-defined, as {(0.0, NO_TARGET), (1.0, NO_TARGET)} is meaningless.
  */
-TimeROI FilterEvents::partialROI(const int &index) {
+TimeROI FilterEvents::partialROI(const int &index, const DateAndTime &filterStartTime) {
   TimeROI roi{m_timeSplitter.getTimeROI(index)};
 
   if (index == TimeSplitter::NO_TARGET) {
@@ -538,8 +538,17 @@ TimeROI FilterEvents::partialROI(const int &index) {
 
     const auto firstSplitter = splittingBoundaries.begin();
     // add leading mask as ROI of the unfiltered workspace
-    if (firstSplitter->first > m_eventWS->run().startTime())
-      roi.addROI(m_eventWS->run().startTime(), firstSplitter->first);
+    DateAndTime startTime(DateAndTime::GPS_EPOCH);
+    if (filterStartTime != DateAndTime::GPS_EPOCH)
+      startTime = filterStartTime;
+    else {
+      try {
+        startTime = m_eventWS->run().startTime();
+      } catch (const std::exception &) {
+      }
+    }
+    if (firstSplitter->first > startTime)
+      roi.addROI(startTime, firstSplitter->first);
 
     const auto lastSplitter = std::prev(splittingBoundaries.end());
     // sanity check
@@ -562,9 +571,10 @@ void FilterEvents::parseInputSplitters() {
     m_timeSplitter = TimeSplitter(m_splittersWorkspace);
   else if (m_splitterTableWorkspace)
     m_timeSplitter =
-        TimeSplitter(m_splitterTableWorkspace, m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime(0));
+        TimeSplitter(m_splitterTableWorkspace, m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime::GPS_EPOCH);
   else
-    m_timeSplitter = TimeSplitter(m_matrixSplitterWS, m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime(0));
+    m_timeSplitter =
+        TimeSplitter(m_matrixSplitterWS, m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime::GPS_EPOCH);
 
   m_targetWorkspaceIndexSet = m_timeSplitter.outputWorkspaceIndices();
 
@@ -648,10 +658,10 @@ void FilterEvents::createOutputWorkspaces() {
         TimeROI timeROI = m_timeSplitter.getTimeROI(wsindex);
         auto timeIntervals = timeROI.toTimeIntervals();
         for (size_t ii = 0; ii < timeIntervals.size(); ii++) {
-          auto startTimeInSeconds =
-              Mantid::Types::Core::DateAndTime::secondsFromDuration(timeIntervals[ii].start() - m_filterStartTime);
-          auto stopTimeInSeconds =
-              Mantid::Types::Core::DateAndTime::secondsFromDuration(timeIntervals[ii].stop() - m_filterStartTime);
+          auto startTimeInSeconds = Mantid::Types::Core::DateAndTime::secondsFromDuration(
+              timeIntervals[ii].start() - (m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime::GPS_EPOCH));
+          auto stopTimeInSeconds = Mantid::Types::Core::DateAndTime::secondsFromDuration(
+              timeIntervals[ii].stop() - (m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime::GPS_EPOCH));
           wsname << startTimeInSeconds << "_" << stopTimeInSeconds;
           if (ii < timeIntervals.size() - 1)
             wsname << "_";
@@ -679,7 +689,7 @@ void FilterEvents::createOutputWorkspaces() {
     std::shared_ptr<EventWorkspace> optws = templateWorkspace->clone();
 
     // Endow the output workspace with a TimeROI
-    TimeROI roi = this->partialROI(wsindex);
+    TimeROI roi = this->partialROI(wsindex, m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime::GPS_EPOCH);
     roi.update_or_replace_intersection(originalROI);
     optws->mutableRun().setTimeROI(roi);
 
