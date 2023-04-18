@@ -14,7 +14,6 @@ set(SRC_FILES
     src/Interpolate.cpp
     src/Points.cpp
     src/Rebin.cpp
-    src/Slice.cpp
 )
 
 set(INC_FILES
@@ -51,7 +50,6 @@ set(INC_FILES
     inc/MantidHistogramData/QuadraticGenerator.h
     inc/MantidHistogramData/Rebin.h
     inc/MantidHistogramData/Scalable.h
-    inc/MantidHistogramData/Slice.h
     inc/MantidHistogramData/StandardDeviationVectorOf.h
     inc/MantidHistogramData/Validation.h
     inc/MantidHistogramData/VarianceVectorOf.h
@@ -92,7 +90,6 @@ set(TEST_FILES
     QuadraticGeneratorTest.h
     RebinTest.h
     ScalableTest.h
-    SliceTest.h
     StandardDeviationVectorOfTest.h
     VarianceVectorOfTest.h
     VectorOfTest.h
