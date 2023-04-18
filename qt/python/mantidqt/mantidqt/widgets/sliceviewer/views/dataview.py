@@ -294,8 +294,7 @@ class SliceViewerDataView(QWidget):
         # swap dimensions was clicked we need to restore the
         # appropriate extents to see the image in the correct place
         xlim, ylim = self.dimensions.get_extents()
-        self.ax.set_xlim(xlim[0], xlim[1])
-        self.ax.set_ylim(ylim[0], ylim[1])
+        self.set_axes_limits(xlim, ylim)
         # Set the original data limits which get passed to the ImageInfoWidget so that
         # the mouse projection to data space is correct for MDH workspaces when zoomed/changing slices
         self._orig_lims = self.get_data_limits_to_fill_current_axes()
@@ -311,12 +310,8 @@ class SliceViewerDataView(QWidget):
             self.ax, ws, self.nonortho_transform.tr, transpose=self.dimensions.transpose, norm=self.colorbar.get_norm(), **kwargs
         )
         xlim, ylim = self.dimensions.get_extents()
-        tr = self.nonortho_transform.tr
-        xmin_p, ymin_p = tr(xlim[0], ylim[0])
-        xmax_p, ymax_p = tr(xlim[1], ylim[1])
-        xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
-        self.ax.set_xlim(xlim[0], xlim[1])
-        self.ax.set_ylim(ylim[0], ylim[1])
+        xlim, ylim = self.transform_limits_to_extents(xlim, ylim)
+        self.set_axes_limits(xlim, ylim)
 
         self.on_track_cursor_state_change(self.track_cursor_checked())
         # pcolormesh clears any grid that was previously visible
@@ -496,13 +491,29 @@ class SliceViewerDataView(QWidget):
         else:
             xlim, ylim = self.get_axes_limits()
             if self.nonorthogonal_mode:
-                inv_tr = self.nonortho_transform.inv_tr
-                # viewing axis y not aligned with plot axis
-                # transform lower left and upper right corner so data fills the initial or zoomed rectangle
-                xmin_p, ymin_p = inv_tr(xlim[0], ylim[0])
-                xmax_p, ymax_p = inv_tr(xlim[1], ylim[1])
-                xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
+                xlim, ylim = self.transform_extents_to_limits_inv(xlim, ylim)
             return xlim, ylim
+
+    def transform_limits_to_extents(self, xlim, ylim):
+        # viewing axis y not aligned with plot axis
+        # transform bottom left and top right corner so data fills the initial or zoomed rectangle
+        xmin_p, ymin_p = self.nonortho_transform.tr(xlim[0], ylim[0])
+        xmax_p, ymax_p = self.nonortho_transform.tr(xlim[1], ylim[1])
+        return (xmin_p, xmax_p), (ymin_p, ymax_p)
+
+    def transform_extents_to_limits_inv(self, xlim, ylim):
+        # viewing axis y not aligned with plot axis
+        # inverse transform top left and bottom right corner so data fills the initial or zoomed rectangle
+        xmin_p, ymax_p = self.nonortho_transform.inv_tr(xlim[0], ylim[1])
+        xmax_p, ymin_p = self.nonortho_transform.inv_tr(xlim[1], ylim[0])
+        return (xmin_p, xmax_p), (ymin_p, ymax_p)
+
+    def transform_limits_to_extents_inv(self, xlim, ylim):
+        # viewing axis y not aligned with plot axis
+        # inverse transform bottom left and top right corner so data fills the initial or zoomed rectangle
+        xmin_p, ymin_p = self.nonortho_transform.inv_tr(xlim[0], ylim[0])
+        xmax_p, ymax_p = self.nonortho_transform.inv_tr(xlim[1], ylim[1])
+        return (xmin_p, xmax_p), (ymin_p, ymax_p)
 
     def get_full_extent(self):
         """

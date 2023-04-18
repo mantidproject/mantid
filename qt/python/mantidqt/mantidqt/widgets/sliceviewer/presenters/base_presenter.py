@@ -41,18 +41,16 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         coordinate before passing to the view
         """
         if auto_transform and self._data_view.nonorthogonal_mode:
-            to_display = self._data_view.nonortho_transform.tr
-            xmin_p, ymin_p = to_display(xlim[0], ylim[0])
-            xmax_p, ymax_p = to_display(xlim[1], ylim[1])
-            xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
-
+            xlim, ylim = self._data_view.transform_limits_to_extents(xlim, ylim)
         self._data_view.set_axes_limits(xlim, ylim)
         self.update_data_limits()
 
     def data_limits_changed(self):
         """Notify data limits on image axes have changed"""
-        limits = self._data_view.get_data_limits_to_fill_current_axes()
+        limits = self._data_view.get_axes_limits()
         if limits is not None:
+            if self._data_view.nonorthogonal_mode:
+                limits = self._data_view.transform_limits_to_extents_inv(*limits)
             self._data_view.dimensions.set_extents(*limits)
         self.update_data_limits()
 

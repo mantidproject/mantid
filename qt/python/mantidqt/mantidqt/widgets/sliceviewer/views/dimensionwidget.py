@@ -268,9 +268,6 @@ class Dimension(QWidget):
         self.spinMin.setDecimals(3)
         self.spinMax.setDecimals(3)
 
-        self.spinMin.setRange(self.minimum, self.maximum)
-        self.spinMax.setRange(self.minimum, self.maximum)
-
         self.spinMin.setSingleStep(self.width)
         self.spinMax.setSingleStep(self.width)
 
