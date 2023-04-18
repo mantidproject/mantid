@@ -11,6 +11,7 @@ from qtpy.QtWidgets import QMessageBox
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
+from mantid.simpleapi import CheckMantidVersion
 
 from .details import MoreDetailsDialog
 
@@ -25,6 +26,7 @@ Thank you!"""
 
 PLAIN_TEXT_MAX_LENGTH = 3200
 MAX_STACK_TRACE_LENGTH = 10000
+MANTID_DOWNLOAD_LINK = "http://download.mantidproject.org"
 
 ErrorReportUIBase, ErrorReportUI = load_ui(__file__, "errorreport.ui")
 
@@ -37,6 +39,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     CONTACT_INFO = "ContactInfo"
     NAME = "Name"
     EMAIL = "Email"
+    _, _, newer_version_available = CheckMantidVersion()
 
     def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
@@ -60,6 +63,13 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.icon.setPixmap(QtGui.QPixmap(":/images/crying_mantid.png"))
 
         self.requestTextBrowser.anchorClicked.connect(self.interface_manager.showWebPage)
+        if self.newer_version_available:
+            msg = (
+                "<span style=\" font-family:'.SF NS Text'; font-size:12pt; color:#000000;\">"
+                "Warning: your version of MantidWorkbench is out of date.<br>"
+                f'<a href="{MANTID_DOWNLOAD_LINK}">Get the latest version here</a><br><br></span>'
+            )
+            self.requestTextBrowser.insertHtml(msg)
 
         self.input_name_line_edit.textChanged.connect(self.set_button_status)
         self.input_email_line_edit.textChanged.connect(self.set_button_status)
