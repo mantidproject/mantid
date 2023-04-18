@@ -46,6 +46,10 @@ pyqt:
 qt_main:
   - 5.15.4
 
+# 5.4.2 crashes the jupyter console.
+qtconsole:
+  - 5.4.1
+
 qscintilla2:
   - 2.13
 
