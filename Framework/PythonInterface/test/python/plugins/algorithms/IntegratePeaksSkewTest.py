@@ -16,6 +16,7 @@ from mantid.simpleapi import (
     CloneWorkspace,
     LoadEmptyInstrument,
     SetInstrumentParameter,
+    ConvertUnits,
 )
 from IntegratePeaksSkew import InstrumentArrayConverter
 from testhelpers import WorkspaceCreationHelper
@@ -164,31 +165,34 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         self.assertEqual(out.getPeak(out.getNumberPeaks() - 1).getIntensity(), 0)
 
     def test_integrate_use_nearest_peak_true_update_peak_position_true(self):
-        out = IntegratePeaksSkew(
-            InputWorkspace=self.ws,
-            PeaksWorkspace=self.peaks,
-            ThetaWidth=0,
-            BackscatteringTOFResolution=0.3,
-            IntegrateIfOnEdge=True,
-            UseNearestPeak=True,
-            UpdatePeakPosition=True,
-            OutputWorkspace="out3",
-        )
-        # check intensity/sigma of first two peaks equal (same peak integrated)
-        # note intensity will be same now as peak position updated
-        for ipk in range(2):
-            pk = out.getPeak(ipk)
-            self.assertAlmostEqual(pk.getIntensity(), 259054692.5, delta=1)
-            self.assertAlmostEqual(pk.getIntensityOverSigma(), 12.7636, delta=1e-3)
-            # check peak pos moved to maximum
-            self.assertEqual(out.column("DetID")[ipk], 37)
-            self.assertAlmostEqual(pk.getTOF(), 5.5, delta=1e-10)
-            # check that HKL have been stored
-            hkl = pk.getHKL()
-            for miller_index in hkl:
-                self.assertEqual(miller_index, ipk)
-        # check other peaks not integrated
-        self.assertEqual(out.getPeak(out.getNumberPeaks() - 1).getIntensity(), 0)
+        ws_dspac = "ws_dSpac"
+        ConvertUnits(InputWorkspace=self.ws, OutputWorkspace=ws_dspac, Target="dSpacing")
+        for ws in [self.ws, ws_dspac]:
+            out = IntegratePeaksSkew(
+                InputWorkspace=self.ws,
+                PeaksWorkspace=self.peaks,
+                ThetaWidth=0,
+                BackscatteringTOFResolution=0.3,
+                IntegrateIfOnEdge=True,
+                UseNearestPeak=True,
+                UpdatePeakPosition=True,
+                OutputWorkspace="out3",
+            )
+            # check intensity/sigma of first two peaks equal (same peak integrated)
+            # note intensity will be same now as peak position updated
+            for ipk in range(2):
+                pk = out.getPeak(ipk)
+                self.assertAlmostEqual(pk.getIntensity(), 259054692.5, delta=1)
+                self.assertAlmostEqual(pk.getIntensityOverSigma(), 12.7636, delta=1e-3)
+                # check peak pos moved to maximum
+                self.assertEqual(out.column("DetID")[ipk], 37)
+                self.assertAlmostEqual(pk.getTOF(), 5.5, delta=1e-10)
+                # check that HKL have been stored
+                hkl = pk.getHKL()
+                for miller_index in hkl:
+                    self.assertEqual(miller_index, ipk)
+            # check other peaks not integrated
+            self.assertEqual(out.getPeak(out.getNumberPeaks() - 1).getIntensity(), 0)
 
     def test_print_output_file(self):
         out_file = path.join(self._test_dir, "out.pdf")
