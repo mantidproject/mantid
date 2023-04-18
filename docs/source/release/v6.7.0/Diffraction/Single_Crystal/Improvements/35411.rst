@@ -1,0 +1,2 @@
+- Improved formatting of plots in pdf output of :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`
+- Parameter ``NTOFBinsMin`` in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` now refers to the number of non-zero bins in the integration window with y/error > 1

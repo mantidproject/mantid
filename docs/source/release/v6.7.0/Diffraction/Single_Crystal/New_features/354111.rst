@@ -1,0 +1,3 @@
+- Support workspaces with d-spacing xunit in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`
+- Add option ``OptimiseXWindowSize`` to fix TOF (or d-sapcing) window extent below a threshold intensity/sigma (``ThresholdIoverSigma``) in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`
+
