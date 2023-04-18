@@ -254,7 +254,7 @@ class PeakData:
         self.peak_mask, self.non_bg_mask = None, None
         self.status = None
         self.intens, self.sig = 0, 0
-        self.tof_integrated_slice = None
+        self.x_integrated_data = None
 
     def get_data_arrays(self):
         # get signal and error from each spectrum
@@ -509,7 +509,7 @@ class PeakData:
         # translate window to maximise I/sigma
         ixmin, ixmax, intens_over_sig = self.translate_xwindow_to_max_intens_over_sigma(self.ypk, self.epk_sq, ixmin, ixmax)
         if optimise_xwindow and intens_over_sig > threshold_i_over_sig:
-            # find initial background points in tof window using skew method
+            # find initial background points in tof/d-spacing window using skew method
             ibg, _ = self.find_bg_pts_seed_skew(self.ypk[ixmin:ixmax])
             # create mask and find largest contiguous region of peak bins
             skew_mask = np.ones(ixmax - ixmin, dtype=bool)
@@ -586,12 +586,13 @@ class PeakData:
         idet = np.argmax(self.x_integrated_data[self.peak_mask])
         det = self.detids[self.peak_mask][idet]
         self.irow, self.icol = np.where(self.detids == det)
-        # update tof
+        # update tof/d-spacing
         imax = np.argmax(self.ypk[self.ixmin_opt : self.ixmax_opt]) + self.ixmin_opt
         self.xpos = self.xpk[imax]
         return det, self.xpos
 
     def get_dTOF_over_TOF(self):
+        # note dDSpacing/DSpacing = dTOF/TOF as TOF/dSpacing = const (for difa=tzero=0)
         return (self.xmax_opt - self.xmin_opt) / self.xpos
 
     def plot_integrated_peak(self, fig, ax, ipk, norm_func):
@@ -1071,10 +1072,11 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 if update_peak_pos:
                     hkl = pk.getHKL()
                     mnp = pk.getIntMNP()
-                    det, tof = peak_data.update_peak_position()
+                    det, xpos = peak_data.update_peak_position()
                     # replace last added peak
                     irows_delete.append(pk_ws_int.getNumberPeaks() - 1)
-                    self.child_AddPeak(PeaksWorkspace=pk_ws_int, RunWorkspace=ws, TOF=tof, DetectorID=int(det))
+                    # Note TOF in AddPeak is interpreted as the x-unit of the workspace (i.e. this works for d-spacing)
+                    self.child_AddPeak(PeaksWorkspace=pk_ws_int, RunWorkspace=ws, TOF=xpos, DetectorID=int(det))
                     pk_new = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)
                     pk_new.setHKL(*hkl)
                     pk_new.setIntMNP(mnp)

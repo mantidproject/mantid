@@ -19,13 +19,13 @@ data [2]_, however it has been noted that skew methods typically underestimate t
 (due to premature termination of the seed growth) - a systematic effect that is expected to be worse for 3D Bragg peaks.
 
 In order to improve the performance and more accurately integrate weak reflections a different approach is used here:
-data are integrated over an initial TOF window in order to maximise the signal-to-noise and then a 2D peak mask is
-determined to find the detectors contributing to the peak; data in these detectors are then focused (and a
+data are integrated over an initial TOF (or d-spacing) window in order to maximise the signal-to-noise and then a 2D
+peak mask is determined to find the detectors contributing to the peak; data in these detectors are then focused (and a
 background subtracted) before applying the same method to identify the bins that contribute to the peak in the focused
-spectrum. The full TOF extent of the peak is determined by maximising :math:`I/\sigma` (similar to integration methods
-for step-scans with monochromatic x-rays [3]_) starting from a seed of bins identified using the skew method.
-The user can then optionally use the optimal TOF extent to repeat the procedure to find the detectors contributing to
-the peak.
+spectrum. The full TOF (or d-spacing) extent of the peak is determined by maximising :math:`I/\sigma` (similar to
+integration methods for step-scans with monochromatic x-rays [3]_) starting from a seed of bins identified using the
+skew method. The user can then optionally use the optimal TOF  (or d-spacing)  extent to repeat the procedure to find
+the detectors contributing to the peak.
 
 Technically this algorithm does not use the seed-skew algorithm to grow an initial seed, rather non-background points
 are found by minimising the skew of the background, subsequently nearest-neighbour connected regions are found in the
@@ -35,7 +35,9 @@ Note this algorithm can apply the Lorentz correction to the integrated intensity
 
 For each peak the algorithm proceeds as follows:
 
-1.  Calculates an initial TOF window evaluating a resolution function of the form
+1.  Calculates an initial TOF (or d-spacing) window evaluating a resolution function for the fractional width
+    (which is the same for TOF and d-spacing) of the form
+
 
         .. math::
 
@@ -189,7 +191,7 @@ Useage
     IntegratePeaksSkew(InputWorkspace='SXD23767', PeaksWorkspace='SingleCrystalPeakTable',
         OutputWorkspace='out', OutputFile="out.pdf",
         UseNearestPeak=True, IntegrateIfOnEdge=True, NVacanciesMax=0, NPixPerVacancyMin=2,
-        BackScatteringTOFResolution=0.04, ThetaWidth=0.02, UpdatePeakPosition=True)
+        BackScatteringTOFResolution=0.04, ThetaWidth=1, UpdatePeakPosition=True)
 
 
 References
