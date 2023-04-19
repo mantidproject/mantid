@@ -12,7 +12,9 @@
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h"
+#include <QApplication>
 #include <QString>
+#include <QTimer>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -150,6 +152,9 @@ public:
                                                   "ties=(f0.Height=f1.Height)");
 
     auto f1Handler = m_fitPropertyBrowser->getPeakHandler(QString("f1"));
+
+    expect_and_close_message_box();
+
     // bad circualr tie
     f1Handler->addTie("f1.Height=f0.Height");
     TS_ASSERT(!f1Handler->hasTies());
@@ -160,6 +165,9 @@ public:
     m_fitPropertyBrowser->createCompositeFunction("name=Gaussian,Height=10.0,PeakCentre=-0.145,Sigma=0.135");
 
     auto f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
+
+    expect_and_close_message_box();
+
     // bad self tie
     f0Handler->addTie("f0.Height=f0.Height");
     TS_ASSERT(!f0Handler->hasTies());
@@ -196,4 +204,15 @@ public:
 
 private:
   std::unique_ptr<MantidQt::MantidWidgets::FitPropertyBrowser> m_fitPropertyBrowser;
+
+  void expect_and_close_message_box() {
+    QTimer::singleShot(0, [=]() {
+      auto msgBox = QApplication::activeModalWidget();
+      if (msgBox) {
+        msgBox->close();
+      } else {
+        TS_FAIL("Expected critical error message box to be shown");
+      }
+    });
+  }
 };
