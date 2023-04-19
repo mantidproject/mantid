@@ -36,7 +36,7 @@ dependencies:
   - pyyaml>=5.4.1
   - qscintilla2
   - qt=5.15.4  # 5.15.6 causing issues with rendering of tabs on GUIs using the instrument viewer.
-  - qtconsole>=5.0.3,<6
+  - qtconsole=5.4.1 # 5.4.2 crashes the jupyter console
   - qtpy>=1.9.0
   - requests>=2.25.1
   - scipy>=1.6.2
