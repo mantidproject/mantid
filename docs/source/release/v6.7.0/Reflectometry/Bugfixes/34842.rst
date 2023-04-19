@@ -1,0 +1,1 @@
+- The child workspaces of a stitched group now have shorter names with a simple suffix.

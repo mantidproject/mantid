@@ -236,7 +236,6 @@ void Stitch1DMany::exec() {
         outName = groupName;
         std::vector<double> scaleFactors;
         doStitch1DMany(i, m_useManualScaleFactors, outName, scaleFactors, m_indexOfReference);
-
         // Add the resulting workspace to the list to be grouped together
         toGroup.emplace_back(outName);
 
@@ -352,12 +351,15 @@ void Stitch1DMany::doStitch1DMany(const size_t period, const bool useManualScale
 
   // List of workspaces to stitch
   std::vector<std::string> toProcess;
+  auto groupName = outName;
 
   for (const auto &ws : m_inputWSMatrix) {
     const std::string &wsName = ws[period]->getName();
     toProcess.emplace_back(wsName);
-    outName += "_" + wsName;
   }
+
+  // Needed to ensure child workspace name simpler
+  outName += "_" + std::to_string(period + 1);
 
   auto alg = createChildAlgorithm("Stitch1DMany");
   alg->initialize();
