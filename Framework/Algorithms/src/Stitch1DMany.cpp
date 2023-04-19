@@ -351,7 +351,6 @@ void Stitch1DMany::doStitch1DMany(const size_t period, const bool useManualScale
 
   // List of workspaces to stitch
   std::vector<std::string> toProcess;
-  auto groupName = outName;
 
   for (const auto &ws : m_inputWSMatrix) {
     const std::string &wsName = ws[period]->getName();
