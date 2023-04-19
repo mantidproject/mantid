@@ -271,8 +271,8 @@ class Dimension(QWidget):
         self.spinMin.setSingleStep(self.width)
         self.spinMax.setSingleStep(self.width)
 
-        self.spinMin.setRange(-float("inf"), float("inf"))
-        self.spinMax.setRange(-float("inf"), float("inf"))
+        self.spinMin.setRange(-float("inf"), self.maximum)
+        self.spinMax.setRange(self.minimum, float("inf"))
 
         self.set_min(self.minimum)
         self.set_max(self.maximum)
