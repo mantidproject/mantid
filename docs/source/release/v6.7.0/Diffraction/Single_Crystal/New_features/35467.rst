@@ -1,0 +1,1 @@
+- Add new instrument definition for SXD post bank 1 detector upgrade
