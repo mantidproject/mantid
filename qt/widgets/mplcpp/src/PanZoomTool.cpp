@@ -34,6 +34,7 @@ constexpr auto TOOLBAR_PAN_METHOD = "pan";
 /// Return the matplotlib NavigationToolbar type appropriate
 /// for our backend. It is returned hidden
 Python::Object mplNavigationToolbar(FigureCanvasQt *canvas) {
+  GlobalInterpreterLock lock;
   const auto backend = backendModule();
   bool showCoordinates(false);
   auto obj = Python::Object(backend.attr(TOOLBAR_CLS)(canvas->pyobj(), canvas->pyobj(), showCoordinates));
