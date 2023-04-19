@@ -4,8 +4,7 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="SXD" valid-from   ="2011-01-01 00:00:01"
-            valid-to     ="2019-05-24 23:59:59"
+ name="SXD" valid-from   ="2019-05-25 00:00:01"
 		    last-modified="2023-04-19 16:00:00">
 
   <!--DEFAULTS-->
@@ -42,11 +41,12 @@
       <location z="-1.3" name="monitor1"/>
     </component>
   </type>
+  
 
-<component type="panel1346" idstart="1" idfillbyfirst="y" idstepbyrow="64">
+<component type="panel" idstart="1" idfillbyfirst="y" idstepbyrow="64">
 <location x="0.1369713215" y="0.000" z="-0.1785045016" name="bank1" >
   <rot val="142.50000" axis-x="0" axis-y="1" axis-z="0">
-    <rot val="0.00000" axis-x="1" axis-y="0" axis-z="0" />
+    <rot val="-90.00000" axis-x="0" axis-y="0" axis-z="1" />
   </rot>
 </location>
 <side-by-side-view-location x="0.1" y="0.7"/>
