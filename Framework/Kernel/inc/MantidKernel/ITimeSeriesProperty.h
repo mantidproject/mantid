@@ -45,6 +45,9 @@ public:
   // Using property seemed to be the most straightforward solution.
   virtual Property *cloneWithTimeShift(const double timeShift) const = 0;
 
+  /// Create a partial copy according to TimeROI
+  virtual Property *cloneInTimeROI(const TimeROI &timeROI) const = 0;
+
   /// Return the time series's times as a vector<DateAndTime>
   virtual std::vector<Types::Core::DateAndTime> timesAsVector() const = 0;
   /** Returns the calculated time weighted average value.
@@ -69,6 +72,9 @@ public:
 
   // Returns whether the time series has been filtered
   virtual bool isFiltered() const = 0;
+
+  // Remove time series datapoints with times outside of TimeROI
+  virtual void removeDataOutsideTimeROI(const TimeROI &timeRoi) = 0;
 
   /// Virtual destructor
   virtual ~ITimeSeriesProperty() = default;

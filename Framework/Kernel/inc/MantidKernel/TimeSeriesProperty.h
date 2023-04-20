@@ -150,6 +150,9 @@ public:
   ~TimeSeriesProperty() override;
   /// "Virtual" copy constructor
   TimeSeriesProperty<TYPE> *clone() const override;
+
+  /// Create a partial copy according to TimeROI
+  Property *cloneInTimeROI(const TimeROI &timeROI) const override;
   //
   /// Return time series property, containing time derivative of current
   /// property
@@ -179,6 +182,9 @@ public:
 
   /// Set name of property
   void setName(const std::string &name);
+
+  // Remove time series datapoints with times outside of TimeROI
+  void removeDataOutsideTimeROI(const TimeROI &timeRoi) override;
 
   /// New split method
   void splitByTimeVector(const std::vector<Types::Core::DateAndTime> &splitter_time_vec,
@@ -351,6 +357,7 @@ private:
   double averageValueInFilter(const std::vector<TimeInterval> &filter) const;
   /// Calculate the time-weighted average and std-deviation of a property in a filtered range
   std::pair<double, double> averageAndStdDevInFilter(const std::vector<TimeInterval> &intervals) const;
+  void createFilteredData(const TimeROI &timeROI, std::vector<TimeValueUnit<TYPE>> &filteredData) const;
 
 protected:
   //----------------------------------------------------------------------------------------------
