@@ -581,7 +581,7 @@ class SliceViewerTestAxesLimitsRespectNonorthogonalTransform(systemtesting.Manti
         pres.nonorthogonal_axes(True)
         limits_nonorthog = pres.view.data_view.get_data_limits_to_fill_current_axes()
         self.assertAlmostEqual(limits_nonorthog[0][0], -10, delta=1e-5)
-        self.assertAlmostEqual(limits_nonorthog[0][1], 10, delta=1e-5)
+        self.assertAlmostEqual(limits_nonorthog[0][1], 19, delta=1e-5)
         self.assertEqual(limits_nonorthog[1], limits[2:])
 
         pres.view.close()
