@@ -259,6 +259,7 @@ class SliceViewerModelTest(unittest.TestCase):
         mock_ws.name = Mock(return_value="")
         mock_ws.isMDHistoWorkspace = Mock(return_value=True)
         mock_ws.getNumNonIntegratedDims = Mock(return_value=700)
+        mock_ws.numOriginalWorkspaces = Mock(return_value=0)
 
         with patch.object(SliceViewerModel, "_calculate_axes_angles"):
             self.assertIsNotNone(SliceViewerModel(mock_ws))
@@ -268,6 +269,7 @@ class SliceViewerModelTest(unittest.TestCase):
         mock_ws.name = Mock(return_value="")
         mock_ws.isMDHistoWorkspace = Mock(return_value=False)
         mock_ws.getNumDims = Mock(return_value=4)
+        mock_ws.numOriginalWorkspaces = Mock(return_value=0)
 
         with patch.object(SliceViewerModel, "_calculate_axes_angles"):
             self.assertIsNotNone(SliceViewerModel(mock_ws))
