@@ -44,11 +44,13 @@
   
 
 <component type="panel" idstart="1" idfillbyfirst="y" idstepbyrow="64">
-<location x="0.1369713215" y="-0.0125" z="-0.1785045016" name="bank1" >
-  <rot val="142.50000" axis-x="0" axis-y="1" axis-z="0">
-    <rot val="-90.00000" axis-x="0" axis-y="0" axis-z="1" />
-  </rot>
-</location>
+  <location x="0.132736" y="-0.011329" z="-0.177596" name="bank1">
+	<rot axis-x="0" axis-y="1" axis-z="0" val="-36.49921051292514">
+	  <rot axis-x="0" axis-y="0" axis-z="1" val="89.92043334138435">
+		<rot axis-x="0" axis-y="1" axis-z="0" val="179.42437620226553"/>
+	  </rot>
+	</rot>
+  </location>
 <side-by-side-view-location x="0.1" y="0.7"/>
 </component> 
 
@@ -137,41 +139,6 @@
 </location>
 <side-by-side-view-location x="0.675" y="0.3"/>
 </component> 
-
-<!--
-<component type="panel" idstart="24601" idfillbyfirst="y" idstepbyrow="64">
-<location r="0.270" t="-90.00000" p="45.0000" name="bank7" rot="-90.0" axis-x="0" axis-y="1" axis-z="0">
-  <rot val="0.00000">
-    <rot val="45.00000" axis-x="1" axis-y="0" axis-z="0" />
-  </rot>
-</location>
-</component> 
-
-<component type="panel" idstart="28701" idfillbyfirst="y" idstepbyrow="64">
-<location r="0.270" t="180.000" p="45.0000" name="bank8" rot="180.0" axis-x="0" axis-y="1" axis-z="0">
-  <rot val="0.00000">
-    <rot val="0.00000" axis-x="1" axis-y="0" axis-z="0" />
-  </rot>
-</location>
-</component> 
-
-<component type="panel" idstart="32801" idfillbyfirst="y" idstepbyrow="64">
-<location r="0.270" t="90.00000" p="-45.0000" name="bank7" rot="-90.0" axis-x="0" axis-y="1" axis-z="0">
-  <rot val="0.00000">
-    <rot val="-45.00000" axis-x="1" axis-y="0" axis-z="0" />
-  </rot>
-</location>
-</component> 
-
-<component type="panel" idstart="36901" idfillbyfirst="y" idstepbyrow="64">
-<location r="0.270" t="0.00000" p="0.0000" name="bank7" rot="0.0" axis-x="0" axis-y="1" axis-z="0">
-  <rot val="0.00000">
-    <rot val="45.00000" axis-x="1" axis-y="0" axis-z="0" />
-  </rot>
-</location>
-</component> 
-
--->
 
 <!-- List of all the bank names:
 bank1,bank2,bank3,bank4,bank5,bank6,bank7,bank8,bank9,bank10,bank11
