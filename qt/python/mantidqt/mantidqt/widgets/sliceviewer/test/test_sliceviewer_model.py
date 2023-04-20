@@ -901,6 +901,19 @@ class SliceViewerModelTest(unittest.TestCase):
 
         self.assertEqual([4.0, -3.0, 12.0], list(hkl))
 
+    @patch("mantidqt.widgets.sliceviewer.models.model.SliceViewerModel.number_of_active_original_workspaces")
+    def test_check_for_removed_original_workspace(self, mock_num_original_workspaces):
+        self.ws_MDE_4D.hasOriginalWorkspace.side_effect = lambda index: True
+        mock_num_original_workspaces.return_value = 1
+
+        model = SliceViewerModel(self.ws_MDE_4D)
+
+        self.assertEqual(model.num_original_workspaces_at_init, 1)
+        self.assertFalse(model.check_for_removed_original_workspace())
+        # original workspace has been deleted
+        mock_num_original_workspaces.return_value = 0
+        self.assertTrue(model.check_for_removed_original_workspace())
+
     # private
     def _assert_supports_non_orthogonal_axes(self, expectation, ws_type, coords, has_oriented_lattice):
         model = SliceViewerModel(_create_mock_workspace(ws_type, coords, has_oriented_lattice))
