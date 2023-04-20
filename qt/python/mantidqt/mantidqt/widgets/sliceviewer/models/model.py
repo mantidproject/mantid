@@ -51,6 +51,8 @@ class SliceViewerModel(SliceViewerBaseModel):
         else:
             raise ValueError("only works for MatrixWorkspace and MDWorkspace")
 
+        self.num_original_workspaces_at_init = self.number_of_active_original_workspaces()
+
         wsname = self.get_ws_name()
         self._rebinned_name = wsname + "_svrebinned"
         self._xcut_name, self._ycut_name = wsname + "_cut_x", wsname + "_cut_y"
@@ -500,6 +502,21 @@ class SliceViewerModel(SliceViewerBaseModel):
 
     def workspace_equals(self, ws_name):
         return self._ws_name == ws_name
+
+    def number_of_active_original_workspaces(self):
+        total = 0
+        workspace = self._get_ws()
+        for i in range(workspace.numOriginalWorkspaces()):
+            # When an original workspace is removed, the pointer to it in main workspace's geometry's
+            # list of original workspaces is reset. This does not decrease the number of items in the
+            # original workspaces list but calling hasOriginalWorkspace will show if the pointer is now empty.
+            if workspace.hasOriginalWorkspace(i):
+                total += 1
+
+        return total
+
+    def check_for_removed_original_workspace(self):
+        return self.num_original_workspaces_at_init != self.number_of_active_original_workspaces()
 
     def get_proj_matrix(self):
         ws = self._get_ws()

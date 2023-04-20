@@ -387,7 +387,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         try:
             candidate_model = SliceViewerModel(workspace)
             candidate_model_properties = candidate_model.get_properties()
-            for (property, value) in candidate_model_properties.items():
+            for property, value in candidate_model_properties.items():
                 if self.initial_model_properties[property] != value:
                     raise ValueError(f"The property {property} is different on the new workspace.")
 
@@ -424,6 +424,8 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
     def delete_workspace(self, ws_name):
         if self.model.workspace_equals(ws_name):
+            self.view.emit_close()
+        elif self.model.check_for_removed_original_workspace():
             self.view.emit_close()
 
     def ADS_cleared(self):
