@@ -46,6 +46,16 @@ ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter
 
 ALFView::~ALFView() { m_instrumentPresenter->saveSettings(); }
 
+void ALFView::disable(std::string const &reason) {
+  this->setEnabled(false);
+  this->setWindowTitle("ALFView - " + QString::fromStdString(reason) + "...");
+}
+
+void ALFView::enable() {
+  this->setEnabled(true);
+  this->setWindowTitle("ALFView");
+}
+
 void ALFView::initLayout() {
   auto *splitter = new QSplitter(Qt::Horizontal);
   splitter->addWidget(m_instrumentPresenter->getInstrumentView());

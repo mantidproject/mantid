@@ -124,8 +124,7 @@ def export_refinement_to_csv(temp_save_directory, name_of_project, project):
 def export_reflections(temp_save_directory, name_of_project, project):
     for histogram_index, loop_histogram in enumerate(project.histograms()):
         loop_histogram_name = loop_histogram.name.replace(".gss", "").replace(" ", "_")
-        phase_names = [list(loop_histogram.reflections().keys())[0]]
-        for phase_name in phase_names:
+        for phase_name in loop_histogram.reflections().keys():
             reflection_positions = loop_histogram.reflections()[phase_name]["RefList"][:, 5]
             reflection_file_path = os.path.join(temp_save_directory, name_of_project + f"_reflections_{histogram_index+1}_{phase_name}.txt")
             with open(reflection_file_path, "wt", encoding="utf-8") as file:

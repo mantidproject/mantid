@@ -30,6 +30,9 @@ public:
   static std::string name() { return "ALFView"; }
   static QString categoryInfo() { return "Direct"; }
 
+  void disable(std::string const &reason);
+  void enable();
+
 protected:
   void initLayout() override;
 

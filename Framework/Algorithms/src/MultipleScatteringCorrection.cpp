@@ -302,6 +302,9 @@ void MultipleScatteringCorrection::calculateSingleComponent(const API::MatrixWor
       g_log.information() << "Spectrum " << workspaceIndex << " does not have a detector defined for it\n";
       continue;
     }
+    if (spectrumInfo.isMasked(workspaceIndex)) {
+      continue;
+    }
     const auto &det = spectrumInfo.detector(workspaceIndex);
 
     // compute L2D
@@ -476,6 +479,9 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
     // locate the spectrum and its detector
     if (!spectrumInfo.hasDetectors(workspaceIndex)) {
       g_log.information() << "Spectrum " << workspaceIndex << " does not have a detector defined for it\n";
+      continue;
+    }
+    if (spectrumInfo.isMasked(workspaceIndex)) {
       continue;
     }
     const auto &det = spectrumInfo.detector(workspaceIndex);

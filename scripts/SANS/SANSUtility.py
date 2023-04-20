@@ -1067,20 +1067,27 @@ def _clean_logs(ws, estimate_logs):
     """
     run = ws.getRun()
     if run.hasProperty("proton_charge"):
-        epoch_start_time = DateAndTime(0, 0)
+        GPS_EPOCH = DateAndTime(0, 0).to_datetime64()
         pc = run.getProperty("proton_charge")
-        np_epoch_datetime = np.datetime64(str(epoch_start_time))
-        first_valid_index = next((index for index, time in enumerate(pc.times) if time > np_epoch_datetime), None)
-
-        if first_valid_index != 0:
+        first_valid_index = next((index for index, time in enumerate(pc.times) if time > GPS_EPOCH), None)
+        if first_valid_index > 0:
             # Bug caused bad proton charges in 1700s. 1990 is start of epoch.
-            start = pc.nthTime(first_valid_index)
-            end = pc.lastTime()
-            pc.filterByTime(start, end)
-            sanslog.notice("{} Invalid pulsetimes from before {} removed.".format(first_valid_index, epoch_start_time))
+            start_time = pc.nthTime(first_valid_index)
+            # stop time is number of removed intervals + 1 so time averages work out
+            stop_time = pc.lastTime() + int(_get_average_time_difference(pc, first_valid_index) * (first_valid_index))
+            if estimate_logs:  # add one more if adding in at the end
+                stop_time += int(_get_average_time_difference(pc, first_valid_index))
+            ws = FilterByTime(InputWorkspace=ws, OutputWorkspace=ws, AbsoluteStartTime=str(start_time), AbsoluteStopTime=str(stop_time))
+            # update references that were invalidated
+            run = ws.getRun()
+            pc = run.getProperty("proton_charge")  # new version of the log
+            sanslog.notice("{} Invalid pulsetimes from before {} removed.".format(first_valid_index, start_time))
+
             if estimate_logs:
+                pc = run.getProperty("proton_charge")  # new version of the log
                 # Estimate what the data should have been
                 _estimate_good_log(pc, first_valid_index)
+    return ws  # the reference has been updated
 
 
 def _estimate_good_log(pc, num):
@@ -1093,28 +1100,24 @@ def _estimate_good_log(pc, num):
     :param pc: FloatTimeSeriesProperty. The proton charge logs.
     :param num: Number of logs to append
     """
-    average_time_diff = _get_average_time_difference(pc)
+    average_time_diff = _get_average_time_difference(pc, num)
     estimated_charge = pc.lastValue()
     for _ in range(num):
-        estimated_time = pc.lastTime().totalNanoseconds() + average_time_diff
+        estimated_time = pc.lastTime().to_datetime64() + average_time_diff
         pc.addValue(estimated_time, estimated_charge)
         sanslog.notice("A corrected pulsetime of {} has been estimated.".format(estimated_time))
 
 
-def _get_average_time_difference(
-    pc,
-):
+def _get_average_time_difference(pc, num):
     """
     Get the average difference between consecutive values,
     in nanoseconds
     :param pc: The proton charge logs
+    :param num: The number of log values that were skipped. This is needed because the log itself doesn't necessarily know what happened
     :return: the average different between times in ns
     """
-    diffs = []
-    for i in range(pc.size() - 1):
-        first = pc.nthTime(i)
-        second = pc.nthTime(i + 1)
-        diffs.append(second.totalNanoseconds() - first.totalNanoseconds())
+    # TODO if the log ever has values actually removed, then this needs to be changed
+    diffs = pc.filtered_times[num + 1 :] - pc.filtered_times[num:-1]
     return np.mean(diffs)
 
 
@@ -1138,8 +1141,8 @@ class PlusWorkspaces(object):
         rhs_ws = self._get_workspace(RHS_workspace)
 
         # Remove bad proton charges from logs
-        _clean_logs(lhs_ws, estimate_logs)
-        _clean_logs(rhs_ws, estimate_logs)
+        lhs_ws = _clean_logs(lhs_ws, estimate_logs)
+        rhs_ws = _clean_logs(rhs_ws, estimate_logs)
 
         # Apply shift to RHS sample logs where necessary. This is a hack because Plus cannot handle
         # cumulative time series correctly at this point
@@ -1179,8 +1182,8 @@ class OverlayWorkspaces(object):
         lhs_ws = self._get_workspace(LHS_workspace)
 
         # Remove bad proton charges from logs
-        _clean_logs(lhs_ws, estimate_logs)
-        _clean_logs(rhs_ws, estimate_logs)
+        lhs_ws = _clean_logs(lhs_ws, estimate_logs)
+        rhs_ws = _clean_logs(rhs_ws, estimate_logs)
 
         # Find the time difference between LHS and RHS workspaces and add optional time shift
         time_difference = self._extract_time_difference_in_seconds(lhs_ws, rhs_ws)

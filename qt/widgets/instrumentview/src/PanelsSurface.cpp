@@ -279,9 +279,36 @@ void PanelsSurface::init() {
   m_v_max = m_viewRect.y1();
 }
 
-void PanelsSurface::project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/, double & /*v*/, double & /*uscale*/,
-                            double & /*vscale*/) const {
-  throw std::runtime_error("Cannot project an arbitrary point to this surface.");
+//------------------------------------------------------------------------------
+/** Convert detector (physical position) to UV projection
+ *
+ * @param detIndex :: detector index in DetectorInfo or ComponentInfo
+ * @param u :: set to U
+ * @param v :: set to V
+ * @param uscale :: scaling for u direction
+ * @param vscale :: scaling for v direction
+ */
+void PanelsSurface::project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) const {
+  const auto &detectorInfo = m_instrActor->detectorInfo();
+  auto pos = detectorInfo.position(detIndex);
+  const int bankIndex = m_detector2bankMap[detIndex];
+  const FlatBankInfo &info = *m_flatBanks[bankIndex];
+  auto refPos = info.refPos;
+  auto rotation = info.rotation;
+  pos -= refPos;
+  rotation.rotate(pos);
+  pos += refPos;
+  // present banks as if looking away from origin towards the bank
+  if (m_zaxis.scalar_prod(pos) > 0)
+    u = -m_xaxis.scalar_prod(pos);
+  else
+    u = m_xaxis.scalar_prod(pos);
+  v = m_yaxis.scalar_prod(pos);
+  if (info.bankCentreOffset) {
+    u += info.bankCentreOffset->X();
+    v += info.bankCentreOffset->Y();
+  }
+  uscale = vscale = 1.0;
 }
 
 void PanelsSurface::rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const {
@@ -311,6 +338,7 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   auto *info = new FlatBankInfo(this);
   m_flatBanks << info;
   auto ref = corners[0];
+  info->refPos = ref;
   // find the rotation to put the bank on the plane
   info->rotation = calcBankRotation(ref, normal);
   const auto &columns = componentInfo.children(rootIndex);
@@ -333,7 +361,7 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   for (auto column : columns) {
     const auto &row = componentInfo.children(column);
     for (auto j : row) {
-      addDetector(j, ref, index, info->rotation);
+      addDetector(j, index);
     }
   }
 
@@ -411,14 +439,18 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   auto *info = new FlatBankInfo(this);
   m_flatBanks << info;
   // record the first detector index of the bank
-  info->startDetectorIndex = componentInfo.children(tubes.front()).front();
-  info->endDetectorIndex = componentInfo.children(tubes.back()).back();
+  auto corner1Index = componentInfo.children(tubes.front()).front();
+  auto corner2Index = componentInfo.children(tubes.front()).back();
+  auto corner3Index = componentInfo.children(tubes.back()).front();
+  auto corner4Index = componentInfo.children(tubes.back()).back();
+  info->startDetectorIndex = std::min(corner1Index, std::min(corner2Index, std::min(corner3Index, corner4Index)));
+  info->endDetectorIndex = std::max(corner1Index, std::max(corner2Index, std::max(corner3Index, corner4Index)));
 
-  // Now go over all detectors in the tubes and put them onto the unwrapped
-  // surfeace.
+  // Now go over all detectors in the tubes and put them onto the unwrapped surface.
   auto pos0 = componentInfo.position(componentInfo.children(tubes.front()).front());
   auto pos1 = componentInfo.position(componentInfo.children(tubes.front()).back());
 
+  info->refPos = pos0;
   info->rotation = calcBankRotation(pos0, normal);
   pos1 -= pos0;
   info->rotation.rotate(pos1);
@@ -436,7 +468,7 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
     const auto &children = componentInfo.children(tube);
 #pragma omp parallel for
     for (int j = 0; j < static_cast<int>(children.size()); ++j) { // NOLINT
-      addDetector(children[j], pos0, index, info->rotation);
+      addDetector(children[j], index);
     }
 
     auto &udet0 = m_unwrappedDetectors[children.front()];
@@ -510,6 +542,7 @@ void PanelsSurface::processUnstructured(size_t rootIndex, std::vector<bool> &vis
     // save bank info
     auto *info = new FlatBankInfo(this);
     m_flatBanks << info;
+    info->refPos = pos0;
     // record the first detector index of the bank
     info->startDetectorIndex = detectors.front();
     info->endDetectorIndex = detectors.back();
@@ -533,7 +566,7 @@ void PanelsSurface::processUnstructured(size_t rootIndex, std::vector<bool> &vis
 #pragma omp parallel for ordered
     for (int i = 0; i < static_cast<int>(detectors.size()); ++i) { // NOLINT
       auto detector = detectors[i];
-      addDetector(detector, pos0, index, info->rotation);
+      addDetector(detector, index);
       UnwrappedDetector &udet = m_unwrappedDetectors[detector];
 #pragma omp ordered
       info->polygon << QPointF(udet.u, udet.v);
@@ -643,26 +676,11 @@ Mantid::Kernel::Quat PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &
   return requiredRotation;
 }
 
-void PanelsSurface::addDetector(size_t detIndex, const Mantid::Kernel::V3D &refPos, int bankIndex,
-                                const Mantid::Kernel::Quat &rotation) {
-  const auto &detectorInfo = m_instrActor->detectorInfo();
-
-  auto pos = detectorInfo.position(detIndex);
+void PanelsSurface::addDetector(size_t detIndex, int bankIndex) {
   m_detector2bankMap[detIndex] = bankIndex;
   // get the colour
   UnwrappedDetector udet(m_instrActor->getColor(detIndex), detIndex);
-  // apply bank's rotation
-  pos -= refPos;
-  rotation.rotate(pos);
-  pos += refPos;
-  // present banks as if looking away from origin towards the bank
-  if (m_zaxis.scalar_prod(pos) > 0)
-    udet.u = -m_xaxis.scalar_prod(pos);
-  else
-    udet.u = m_xaxis.scalar_prod(pos);
-  udet.v = m_yaxis.scalar_prod(pos);
-  udet.uscale = udet.vscale = 1.0;
-  this->calcSize(udet);
+  calcUV(udet);
   m_unwrappedDetectors[detIndex] = udet;
 }
 
@@ -700,6 +718,7 @@ void PanelsSurface::ApplyBankCentreOverrides() {
     if (info->bankCentreOverride) {
       auto overrideBankCentre = *info->bankCentreOverride;
       auto offset = overrideBankCentre - currentBankCentre;
+      info->bankCentreOffset = offset;
       info->polygon.translate(offset.X(), offset.Y());
       for (size_t iDet = info->startDetectorIndex; iDet <= info->endDetectorIndex; ++iDet) {
         UnwrappedDetector &udet = m_unwrappedDetectors[iDet];
@@ -742,7 +761,9 @@ void PanelsSurface::spreadBanks() {
       poly.translate(dir);
     }
     // move all detectors of the bank
-    info->translate(poly.boundingRect().center() - centre);
+    auto offset = poly.boundingRect().center() - centre;
+    info->translate(offset);
+    info->bankCentreOffset = Mantid::Kernel::V2D{offset.x(), offset.y()};
   }
 }
 

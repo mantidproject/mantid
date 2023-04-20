@@ -48,7 +48,7 @@ class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
         print(f"Running the AlgorithmDialog{self._workspace_type}StartupTest with a {self._workspace_type} in the ADS")
 
         for algorithm_name in self._unique_algorithm_names:
-            # print(algorithm_name)  # Useful for debugging when an algorithm dialog crashes
+            print(algorithm_name)  # Useful for debugging when an algorithm dialog crashes
             self._attempt_to_open_algorithm_dialog(self._workspace_type, algorithm_name)
 
     def _attempt_to_open_algorithm_dialog(self, workspace_type: str, algorithm_name: str) -> None:

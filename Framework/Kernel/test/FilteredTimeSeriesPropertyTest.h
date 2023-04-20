@@ -12,6 +12,7 @@
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Kernel::FilteredTimeSeriesProperty;
+using Mantid::Kernel::TimeROI;
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
 
@@ -524,10 +525,9 @@ public:
 
     DateAndTime start = DateAndTime("2007-11-30T15:00:00"); // Much earlier than first time series value
     DateAndTime stop = DateAndTime("2007-11-30T17:00:00");  // Much later than last time series value
+    TimeROI roi(start, stop);
 
-    log->filterByTime(start, stop);
-
-    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->realSize());
+    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->filteredValuesAsVector(&roi).size());
 
     delete log;
   }
@@ -588,7 +588,7 @@ public:
 
     // Test that the other time-average mean code is correct
     const auto roi = log->getTimeROI();
-    TS_ASSERT_DELTA(log->averageValueInFilter(roi.toSplitters()), exp_time_mean, 1.e-3);
+    TS_ASSERT_DELTA(log->timeAverageValue(&roi), exp_time_mean, 1.e-3);
   }
 
   /// Test that timeAverageValue respects the filter
@@ -628,7 +628,7 @@ public:
     filter->addValue("2007-11-30T16:18:38", true);
     filter->addValue(secondEnd.toISO8601String(), false);
     log->filterWith(filter.get());
-    const auto &intervals = log->getSplittingIntervals();
+    const auto &intervals = log->getTimeIntervals();
     TS_ASSERT_EQUALS(intervals.size(), 2);
     if (intervals.size() == 2) {
       const auto &firstRange = intervals.front(), &secondRange = intervals.back();
@@ -651,7 +651,7 @@ public:
     filter->addValue(secondEnd.toISO8601String(), false);
     filter->addValue(thirdStart.toISO8601String(), true);
     log->filterWith(filter.get());
-    const auto &intervals = log->getSplittingIntervals();
+    const auto &intervals = log->getTimeIntervals();
     TS_ASSERT_EQUALS(intervals.size(), 3);
     if (intervals.size() == 3) {
       TS_ASSERT_EQUALS(intervals[0].start(), log->firstTime());

@@ -83,6 +83,10 @@ bool TimeInterval::operator>(const TimeInterval &ti) const {
     return false;
 }
 
+Types::Core::time_duration TimeInterval::length() const { return m_stop - m_start; }
+
+double TimeInterval::duration() const { return Types::Core::DateAndTime::secondsFromDuration(this->length()); }
+
 bool TimeInterval::operator==(const TimeInterval &ti) const { return (start() == ti.start()) && (stop() == ti.stop()); }
 
 /// String representation of the begin time

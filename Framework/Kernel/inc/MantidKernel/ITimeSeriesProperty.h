@@ -31,6 +31,10 @@ class TimeROI;
 class ITimeSeriesProperty {
 public:
   /// Fill a SplittingIntervalVec that will filter the events by matching
+  virtual TimeROI makeFilterByValue(double min, double max, bool expand = false,
+                                    const TimeInterval &expandRange = TimeInterval(0, 1), double TimeTolerance = 0.,
+                                    bool centre = true, const TimeROI *existingROI = nullptr) const = 0;
+  /// Fill a SplittingIntervalVec that will filter the events by matching
   virtual void makeFilterByValue(std::vector<SplittingInterval> &split, double min, double max, double TimeTolerance,
                                  bool centre = true) const = 0;
   /// Make sure an existing filter covers the full time range given
@@ -40,11 +44,7 @@ public:
   // After trying to use return type covariance, but that showed Error C2908
   // Using property seemed to be the most straightforward solution.
   virtual Property *cloneWithTimeShift(const double timeShift) const = 0;
-  /// Calculate the time-weighted average of a property in a filtered range
-  virtual double averageValueInFilter(const std::vector<SplittingInterval> &filter) const = 0;
-  /// Calculate the time-weighted average and standard deviation of a property
-  /// in a filtered range
-  virtual std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const = 0;
+
   /// Return the time series's times as a vector<DateAndTime>
   virtual std::vector<Types::Core::DateAndTime> timesAsVector() const = 0;
   /** Returns the calculated time weighted average value.
@@ -52,6 +52,10 @@ public:
    * @return The time-weighted average value of the log when the time measurement was active.
    */
   virtual double timeAverageValue(const TimeROI *timeRoi = nullptr) const = 0;
+  /** Returns the calculated time weighted mean and standard deviation values.
+   * @param timeRoi  Object that holds information about when the time measurement was active.
+   */
+  virtual std::pair<double, double> timeAverageValueAndStdDev(const Kernel::TimeROI *timeRoi = nullptr) const = 0;
   /// Return a TimeSeriesPropertyStatistics object
   virtual TimeSeriesPropertyStatistics getStatistics(const TimeROI *roi = nullptr) const = 0;
   /// Filtering the series according to the selected statistical measure

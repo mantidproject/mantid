@@ -185,33 +185,6 @@ const std::string &Property::units() const { return m_units; }
  */
 void Property::setUnits(const std::string &unit) { m_units = unit; }
 
-//-------------------------------------------------------------------------------------------------
-/** Filter out a property by time. Will be overridden by TimeSeriesProperty
- * (only)
- * @param start :: the beginning time to filter from
- * @param stop :: the ending time to filter to
- * */
-void Property::filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) {
-  UNUSED_ARG(start);
-  UNUSED_ARG(stop);
-  // Do nothing in general
-}
-
-//-----------------------------------------------------------------------------------------------
-/** Split a property by time. Will be overridden by TimeSeriesProperty (only)
- * For any other property type, this does nothing.
- * @param splitter :: time splitter
- * @param outputs :: holder for splitter output
- * @param isProtonCharge :: a flag to tell whether the property is periodic or
- * not
- */
-void Property::splitByTime(std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
-                           bool isProtonCharge) const {
-  UNUSED_ARG(splitter);
-  UNUSED_ARG(outputs);
-  UNUSED_ARG(isProtonCharge);
-}
-
 } // namespace Kernel
 
 //-------------------------- Utility function for class name lookup

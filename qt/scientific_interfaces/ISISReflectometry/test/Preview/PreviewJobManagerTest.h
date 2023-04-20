@@ -261,7 +261,7 @@ private:
 
   class StubAlgReduction : public StubAlgorithm {
   public:
-    const std::string name() const override { return "ReflectometryReductionOneAuto"; }
+    const std::string name() const override { return "ReflectometryISISLoadAndProcess"; }
   };
 
   std::unique_ptr<MockJobRunner> makeJobRunner() { return std::make_unique<MockJobRunner>(); }

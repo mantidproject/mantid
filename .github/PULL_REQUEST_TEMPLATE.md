@@ -1,12 +1,29 @@
-**Description of work.**
+**Description of work**
+
+**Purpose of work**
+<!-- Why has this work been done? If there is no linked issue please provide appropriate context for this work.
+-->
 
 <!-- If the original issue was raised by a user they should be named here. Do not leak email addresses
 **Report to:** [user name]
 -->
 
+**Summary of work**
+<!-- Please provide a short, high level description of the work that was done.
+-->
+
+**Further detail of work**
+<!-- Please provide a more detailed description of the work that has been undertaken.
+-->
+
+
 **To test:**
 
-<!-- Instructions for testing. -->
+<!-- Instructions for testing.
+There should be sufficient instructions for someone unfamiliar with the application to test - unless a specific
+reviewer is requested.
+If instructions for replicating the fault are contained in the linked issue then it is OK to refer back to these.
+-->
 
 Fixes #xxxx. <!-- and fix #xxxx or close #xxxx xor resolves #xxxx -->
 <!-- alternative
@@ -25,7 +42,8 @@ Finally, don't forget to add the appropriate labels, milestones, etc.!  -->
 
 #### Reviewer ####
 
-Please comment on the following ([full description](http://developer.mantidproject.org/ReviewingAPullRequest.html)):
+Please comment on the points listed below ([full description](http://developer.mantidproject.org/ReviewingAPullRequest.html)).
+**Your comments will be used as part of the gatekeeper process, so please comment clearly on what you have checked during your review.** If changes are made to the PR during the review process then your final comment will be the most important for gatekeepers. In this comment you should make it clear why any earlier review is still valid, or confirm that all requested changes have been addressed.
 
 ##### Code Review #####
 
@@ -43,3 +61,7 @@ Please comment on the following ([full description](http://developer.mantidproje
 - Has the relevant (user and developer) documentation been added/updated?
 
 Does everything look good? Mark the review as **Approve**. A member of `@mantidproject/gatekeepers` will take care of it.
+
+#### Gatekeeper ####
+
+If you need to request changes to a PR then please add a comment and set the review status to "Request changes". This will stop the PR from showing up in the list for other gatekeepers.

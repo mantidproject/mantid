@@ -1,0 +1,1 @@
+- The Spin parameter in the Meier function is now an attribute

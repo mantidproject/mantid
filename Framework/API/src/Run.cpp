@@ -166,16 +166,16 @@ void findAndConcatenateTimeStrProp(const Run *runObjLHS, const Run *runObjRHS, c
  */
 Run &Run::operator+=(const Run &rhs) {
   // combine the two TimeROI if either is non-empty
-  if ((!m_timeroi->empty()) || (!rhs.m_timeroi->empty())) {
+  if ((!m_timeroi->useAll()) || (!rhs.m_timeroi->useAll())) {
     TimeROI combined(*m_timeroi);
     // set this start/end time as the only ROI if it is empty
-    if (combined.empty()) {
+    if (combined.useAll()) {
       combined.addROI(this->startTime(), this->endTime());
     }
 
     // fixup the timeroi from the other
     TimeROI rightROI(*rhs.m_timeroi);
-    if (rightROI.empty() && rhs.hasStartTime() && rhs.hasEndTime()) {
+    if (rightROI.useAll() && rhs.hasStartTime() && rhs.hasEndTime()) {
       rightROI.addROI(rhs.startTime(), rhs.endTime());
     }
 
@@ -224,30 +224,6 @@ Run &Run::operator+=(const Run &rhs) {
   }
 
   return *this;
-}
-
-//-----------------------------------------------------------------------------------------------
-/**
- * Split a run by time (splits the TimeSeriesProperties contained).
- *
- * Total proton charge will get re-integrated after filtering.
- *
- * @param splitter :: SplittingIntervalVec with the intervals and destinations.
- * @param outputs :: Vector of output runs.
- */
-void Run::splitByTime(SplittingIntervalVec &splitter, std::vector<LogManager *> outputs) const {
-
-  // std::vector<LogManager *> outputsBase(outputs.begin(),outputs.end());
-  LogManager::splitByTime(splitter, outputs);
-
-  // Re-integrate proton charge of all outputs
-  for (auto output : outputs) {
-    if (output) {
-      auto run = dynamic_cast<Run *>(output);
-      if (run)
-        run->integrateProtonCharge();
-    }
-  }
 }
 
 // this overrides the one from LogManager so the proton charge can be recalculated
@@ -329,7 +305,7 @@ void Run::integrateProtonCharge(const std::string &logname) const {
     if (filteredLog)
       timeroi.update_or_replace_intersection(filteredLog->getTimeROI());
 
-    if (timeroi.empty()) {
+    if (timeroi.useAll()) {
       // simple accumulation
       const std::vector<double> logValues = log->valuesAsVector();
       total = std::accumulate(logValues.begin(), logValues.end(), 0.0);
@@ -375,7 +351,7 @@ void Run::integrateProtonCharge(const std::string &logname) const {
  * If the Run's TimeROI is empty, this member function does nothing.
  */
 void Run::setDuration() {
-  if (m_timeroi->empty())
+  if (m_timeroi->useAll())
     return;
   double duration{m_timeroi->durationInSeconds()};
   const std::string NAME("duration");

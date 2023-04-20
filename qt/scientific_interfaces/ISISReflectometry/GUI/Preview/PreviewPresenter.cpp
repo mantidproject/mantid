@@ -116,21 +116,17 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
     m_view->setAngle(*theta);
   }
 
-  if (hasLinearDetector(ws)) {
-    m_dockedWidgets->resetInstView();
-    m_dockedWidgets->setInstViewToolbarEnabled(false);
-    m_model->setSummedWs(ws);
-    notifySumBanksCompleted();
-  } else {
-    // Notify the instrument view model that the workspace has changed before we get the surface
-    m_instViewModel->updateWorkspace(ws);
-    plotInstView();
-    // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
-    m_dockedWidgets->setInstViewToolbarEnabled(true);
-    notifyInstViewZoomRequested();
-    // Perform summing banks to update the next plot, if possible
-    runSumBanks();
-  }
+  // Clear the region selector to ensure all spectra are shown.
+  m_regionSelector->clearWorkspace();
+
+  // Notify the instrument view model that the workspace has changed before we get the surface
+  m_instViewModel->updateWorkspace(ws);
+  plotInstView();
+  // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
+  m_dockedWidgets->setInstViewToolbarEnabled(true);
+  notifyInstViewZoomRequested();
+  // Perform summing banks to update the next plot, if possible
+  runSumBanks();
 }
 
 void PreviewPresenter::notifyUpdateAngle() { runReduction(); }
@@ -210,7 +206,7 @@ void PreviewPresenter::notifyRectangularROIModeRequested() {
   auto const roiType = roiTypeFromString(regionType);
   m_dockedWidgets->setEditROIState(false);
   m_dockedWidgets->setRectangularROIState(true);
-  m_regionSelector->addRectangularRegion(regionType, roiTypeToColor(roiType));
+  m_regionSelector->addRectangularRegion(regionType, roiTypeToColor(roiType), roiTypeToHatch(roiType));
 }
 
 void PreviewPresenter::notifyRegionChanged() {

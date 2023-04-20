@@ -266,17 +266,15 @@ public:
 
   void filterByPulseTime(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, EventList &output) const;
 
-  void filterByPulseTime(Kernel::TimeROI *timeRoi, EventList &output) const;
+  void filterByPulseTime(Kernel::TimeROI *timeRoi, EventList *output) const;
 
   void filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, double tofFactor,
                             double tofOffset, EventList &output) const;
 
-  void filterInPlace(Kernel::SplittingIntervalVec &splitter);
+  void filterInPlace(Kernel::TimeROI *timeRoi);
 
   /// Initialize the detector ID's and event type of the destination event lists when splitting this list
   void initializePartials(std::map<int, EventList *> partials) const;
-
-  void splitByTime(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs) const;
 
   void splitByFullTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs, bool docorrection,
                        double toffactor, double tofshift) const;
@@ -432,13 +430,11 @@ private:
                                          Types::Core::DateAndTime stop, double tofFactor, double tofOffset,
                                          std::vector<T> &output);
   template <class T>
-  static void filterByTimeROIHelper(std::vector<T> &events, const Kernel::SplittingIntervalVec &intervals,
-                                    std::vector<T> &output);
+  static void filterByTimeROIHelper(std::vector<T> &events, const std::vector<Kernel::TimeInterval> &intervals,
+                                    EventList *output);
 
-  template <class T> void filterInPlaceHelper(Kernel::SplittingIntervalVec &splitter, typename std::vector<T> &events);
-  template <class T>
-  void splitByTimeHelper(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs,
-                         typename std::vector<T> &events) const;
+  template <class T> void filterInPlaceHelper(Kernel::TimeROI *timeRoi, typename std::vector<T> &events);
+
   template <class T>
   void splitByFullTimeHelper(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
                              typename std::vector<T> &events, bool docorrection, double toffactor,

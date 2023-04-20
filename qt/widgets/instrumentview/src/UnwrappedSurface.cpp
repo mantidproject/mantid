@@ -666,8 +666,8 @@ void UnwrappedSurface::zoom() {
  * @param udet :: detector to unwrap.
  * @param pos :: detector position relative to the sample origin
  */
-void UnwrappedSurface::calcUV(UnwrappedDetector &udet, Mantid::Kernel::V3D &pos) {
-  this->project(pos, udet.u, udet.v, udet.uscale, udet.vscale);
+void UnwrappedSurface::calcUV(UnwrappedDetector &udet) {
+  this->project(udet.detIndex, udet.u, udet.v, udet.uscale, udet.vscale);
   calcSize(udet);
 }
 

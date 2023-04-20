@@ -54,7 +54,6 @@ public:
   PropertyManager &operator=(const PropertyManager &);
   PropertyManager &operator+=(const PropertyManager &rhs);
 
-  void splitByTime(std::vector<SplittingInterval> &splitter, std::vector<PropertyManager *> outputs) const override;
   void filterByProperty(const TimeSeriesProperty<bool> &filter,
                         const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>()) override;
 

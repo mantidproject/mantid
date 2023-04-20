@@ -49,6 +49,9 @@ public:
   virtual void loadSettings() = 0;
   virtual void saveSettings() = 0;
 
+  virtual void disable(std::string const &reason) = 0;
+  virtual void enable() = 0;
+
   virtual std::optional<std::string> getSampleFile() const = 0;
   virtual std::optional<std::string> getVanadiumFile() const = 0;
 
@@ -81,6 +84,9 @@ public:
 
   void loadSettings() override;
   void saveSettings() override;
+
+  void disable(std::string const &reason) override;
+  void enable() override;
 
   std::optional<std::string> getSampleFile() const override;
   std::optional<std::string> getVanadiumFile() const override;

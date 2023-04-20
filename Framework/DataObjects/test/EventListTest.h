@@ -11,6 +11,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 
@@ -1831,9 +1833,9 @@ public:
       el.switchTo(curType);
 
       // Filter into this
-      EventList out;
-      // Manually set a sort mode to verify that is it is switched afterward
-      out.setSortOrder(Mantid::DataObjects::TOF_SORT);
+      EventList *out = new EventList();
+      // Manually set a sort mode to verify it has switched
+      out->setSortOrder(Mantid::DataObjects::TOF_SORT);
       Kernel::TimeROI *timeRoi = nullptr;
       TS_ASSERT_THROWS(el.filterByPulseTime(timeRoi, out), const std::invalid_argument &);
       timeRoi = new Kernel::TimeROI();
@@ -1851,13 +1853,13 @@ public:
             numGood++;
 
         // Good # of events.
-        TS_ASSERT_EQUALS(numGood, out.getNumberEvents());
-        TS_ASSERT_EQUALS(curType, out.getEventType());
+        TS_ASSERT_EQUALS(numGood, out->getNumberEvents());
+        TS_ASSERT_EQUALS(curType, out->getEventType());
 
-        for (std::size_t i = 0; i < out.getNumberEvents(); i++) {
+        for (std::size_t i = 0; i < out->getNumberEvents(); i++) {
           // Check that the times are within the given limits.
-          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100), out.getEvent(i).pulseTime());
-          TS_ASSERT_LESS_THAN(out.getEvent(i).pulseTime(), DateAndTime(300));
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100), out->getEvent(i).pulseTime());
+          TS_ASSERT_LESS_THAN(out->getEvent(i).pulseTime(), DateAndTime(300));
         }
       }
     }
@@ -2004,79 +2006,18 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
-  void test_splitByTime_allTypes() {
-    // Go through each possible EventType as the input
-    for (int this_type = 0; this_type < 3; this_type++) {
-      EventType curType = static_cast<EventType>(this_type);
-      this->fake_data_only_two_times(150, 850);
-      el.switchTo(curType);
-
-      std::vector<EventList *> outputs;
-      for (size_t i = 0; i < 10; i++)
-        outputs.emplace_back(new EventList());
-
-      SplittingIntervalVec split;
-      // Slices of 100
-      for (int i = 0; i < 10; i++)
-        split.emplace_back(SplittingInterval(i * 100, (i + 1) * 100, i));
-
-      if (curType == WEIGHTED_NOTIME) {
-        // Error cause no time
-        TS_ASSERT_THROWS(el.splitByTime(split, outputs), const std::runtime_error &);
-      } else {
-        // Do the splitting
-        TS_ASSERT_THROWS_NOTHING(el.splitByTime(split, outputs););
-
-        TS_ASSERT_EQUALS(outputs[0]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[1]->getNumberEvents(), 1);
-        TS_ASSERT_EQUALS(outputs[2]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[3]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[4]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[5]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[6]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[7]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[8]->getNumberEvents(), 1);
-        TS_ASSERT_EQUALS(outputs[9]->getNumberEvents(), 0);
-
-        TS_ASSERT_EQUALS(outputs[0]->getEventType(), curType);
-      }
-
-      for (size_t i = 0; i < 10; i++)
-        delete outputs[i];
-    }
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  void test_splitByTime_FilterWithOverlap() {
-    this->fake_uniform_time_data();
-
-    std::vector<EventList *> outputs(1, new EventList());
-
-    SplittingIntervalVec split;
-    split.emplace_back(SplittingInterval(100, 200, 0));
-    split.emplace_back(SplittingInterval(150, 250, 0));
-
-    // Do the splitting
-    el.splitByTime(split, outputs);
-
-    // No events in the first ouput 0-99
-    TS_ASSERT_EQUALS(outputs.front()->getNumberEvents(), 150);
-    delete outputs.front();
-  }
-
-  //-----------------------------------------------------------------------------------------------
   void do_testSplit_FilterInPlace(bool weighted) {
     this->fake_uniform_time_data();
     if (weighted)
       el *= 3.0;
 
-    SplittingIntervalVec split;
-    split.emplace_back(SplittingInterval(100, 200, 0));
-    split.emplace_back(SplittingInterval(150, 250, 0));
-    split.emplace_back(SplittingInterval(300, 350, 0));
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(100, 200);
+    timeRoi->addROI(150, 250);
+    timeRoi->addROI(300, 350);
 
     // Do the splitting
-    el.filterInPlace(split);
+    el.filterInPlace(timeRoi);
 
     // 100-249; 300-349 are in the output, everything else is gone.
     TS_ASSERT_EQUALS(el.getNumberEvents(), 200);
@@ -2102,11 +2043,11 @@ public:
     if (weighted)
       el.switchTo(WEIGHTED);
 
-    SplittingIntervalVec split;
-    split.emplace_back(SplittingInterval(1500, 1700, 0));
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(1500, 1700);
 
     // Do the splitting
-    el.filterInPlace(split);
+    el.filterInPlace(timeRoi);
 
     // Nothing left
     TS_ASSERT_EQUALS(el.getNumberEvents(), 0);
@@ -2118,11 +2059,11 @@ public:
     if (weighted)
       el *= 3.0;
 
-    SplittingIntervalVec split;
-    split.emplace_back(SplittingInterval(-10, 1700, 0));
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(-10, 1700);
 
     // Do the splitting
-    el.filterInPlace(split);
+    el.filterInPlace(timeRoi);
 
     // Nothing left
     TS_ASSERT_EQUALS(el.getNumberEvents(), 1000);
@@ -2143,8 +2084,21 @@ public:
   void test_filterInPlace_notime_throws() {
     this->fake_uniform_time_data();
     el.switchTo(WEIGHTED_NOTIME);
-    SplittingIntervalVec split;
-    TS_ASSERT_THROWS(el.filterInPlace(split), const std::runtime_error &)
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(0, 100);
+    TS_ASSERT_THROWS(el.filterInPlace(timeRoi), const std::runtime_error &)
+  }
+
+  void test_filterInPlace_emptyROI_throws() {
+    this->fake_uniform_time_data();
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    TS_ASSERT_THROWS(el.filterInPlace(timeRoi), const std::invalid_argument &)
+  }
+
+  void test_filterInPlace_nullptr_throws() {
+    this->fake_uniform_time_data();
+    Kernel::TimeROI *timeRoi = nullptr;
+    TS_ASSERT_THROWS(el.filterInPlace(timeRoi), const std::runtime_error &)
   }
 
   //----------------------------------------------------------------------------------------------

@@ -408,9 +408,8 @@ public:
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
 
-    log->filterByTime(start, stop);
-
-    TS_ASSERT_EQUALS(log->realSize(), 3);
+    TimeROI roi(start, stop);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 3);
 
     delete log;
   }
@@ -420,18 +419,12 @@ public:
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
     TS_ASSERT_EQUALS(log->realSize(), 6);
 
-    Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"),
-                                                0);
-
-    Mantid::Kernel::SplittingIntervalVec splitters;
-    splitters.emplace_back(interval0);
+    TimeROI roi(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"));
 
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
-
-    log->filterByTimes(splitters);
-
-    TS_ASSERT_EQUALS(log->realSize(), 3);
+    // values are 2, 3, 4
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 3);
 
     delete log;
   }
@@ -440,44 +433,44 @@ public:
     TimeSeriesProperty<int> *log = createIntegerTSP(10);
     TS_ASSERT_EQUALS(log->realSize(), 10);
 
-    Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"),
-                                                0);
+    TimeROI roi;
+    roi.addROI(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"));
+    roi.addROI(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"));
 
-    Mantid::Kernel::SplittingInterval interval1(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"),
-                                                0);
-
-    Mantid::Kernel::SplittingIntervalVec splitters;
-    splitters.emplace_back(interval0);
-    splitters.emplace_back(interval1);
-
-    // Since the filter is < stop, the last one is not counted, so there are  3
-    // taken out.
-
-    log->filterByTimes(splitters);
-
-    TS_ASSERT_EQUALS(log->realSize(), 6);
+    // values are 2, 3, 4, 8, 9
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 5);
 
     delete log;
   }
 
   //----------------------------------------------------------------------------
-  /// Ticket #2591
+  /**
+   * Ticket #2591 - since the values are unchanged, specifying a TimeROI after all
+   * the actual values, will return the last value
+   */
   void test_filterByTime_ifOnlyOneValue_assumes_constant_instead() {
     TimeSeriesProperty<int> *log = createIntegerTSP(1);
     TS_ASSERT_EQUALS(log->realSize(), 1);
 
+    // original time is "2007-11-30T16:17:00"
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
     DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
-    log->filterByTime(start, stop);
+    TimeROI roi(start, stop);
 
     // Still there!
-    TS_ASSERT_EQUALS(log->realSize(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).front(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).front(), DateAndTime("2007-11-30T16:17:00"));
 
     delete log;
   }
 
   //----------------------------------------------------------------------------
-  /// Ticket #2591
+  /**
+   * Ticket #2591 - since the values are unchanged, specifying a TimeROI after all
+   * the actual values, will return the last value
+   */
   void test_filterByTime_ifOnlyOneValue_assumes_constant_instead_2() {
     TimeSeriesProperty<int> *log = new TimeSeriesProperty<int>("MyIntLog");
     TS_ASSERT_THROWS_NOTHING(log->addValue("1990-01-01T00:00:00", 1));
@@ -485,10 +478,13 @@ public:
 
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
     DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
-    log->filterByTime(start, stop);
+    TimeROI roi(start, stop);
 
     // Still there!
-    TS_ASSERT_EQUALS(log->realSize(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).front(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).front(), DateAndTime("1990-01-01T00:00:00"));
 
     delete log;
   }
@@ -544,6 +540,68 @@ public:
 
     // Check throws if min > max
     TS_ASSERT_THROWS(log->makeFilterByValue(splitter, 2.0, 1.0, 0.0, true), const std::invalid_argument &);
+
+    delete log;
+  }
+
+  //----------------------------------------------------------------------------
+  void test_makeFilterByValueWithROI() {
+    TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("doubleTestLog");
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:00", 1));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:10", 2));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:20", 3));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:30", 2.0));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:40", 2.01));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:50", 6));
+
+    TS_ASSERT_EQUALS(log->realSize(), 6);
+    TimeInterval expandedTime(DateAndTime(0), DateAndTime(1));
+
+    // Test centred log value boundaries
+    TimeROI roi = log->makeFilterByValue(1.8, 2.2, false, expandedTime, 1.0, true);
+
+    TS_ASSERT_EQUALS(roi.numBoundaries(), 4);
+
+    TS_ASSERT_DELTA(roi.timeAtIndex(0), DateAndTime("2007-11-30T16:17:09"), 1e-3);
+    TS_ASSERT_DELTA(roi.timeAtIndex(1), DateAndTime("2007-11-30T16:17:11"), 1e-3);
+
+    TS_ASSERT_DELTA(roi.timeAtIndex(2), DateAndTime("2007-11-30T16:17:29"), 1e-3);
+    TS_ASSERT_DELTA(roi.timeAtIndex(3), DateAndTime("2007-11-30T16:17:41"), 1e-3);
+
+    // Now test with left-aligned log value boundaries
+    roi = log->makeFilterByValue(1.8, 2.2, false, expandedTime, 1.0);
+    TS_ASSERT_EQUALS(roi.numBoundaries(), 4);
+
+    TS_ASSERT_DELTA(roi.timeAtIndex(0), DateAndTime("2007-11-30T16:17:10"), 1e-3);
+    TS_ASSERT_DELTA(roi.timeAtIndex(1), DateAndTime("2007-11-30T16:17:20"), 1e-3);
+
+    TS_ASSERT_DELTA(roi.timeAtIndex(2), DateAndTime("2007-11-30T16:17:30"), 1e-3);
+    TS_ASSERT_DELTA(roi.timeAtIndex(3), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+
+    TimeROI *existing = new TimeROI(DateAndTime("2007-11-30T16:17:40"), DateAndTime("2007-11-30T16:18:00"));
+
+    roi = log->makeFilterByValue(0.8, 2.2, false, expandedTime, 0.0, false, existing);
+    TS_ASSERT_EQUALS(roi.numBoundaries(), 2);
+
+    TS_ASSERT_DELTA(roi.timeAtIndex(0), DateAndTime("2007-11-30T16:17:40"), 1e-3);
+    TS_ASSERT_DELTA(roi.timeAtIndex(1), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+
+    expandedTime = TimeInterval(DateAndTime("2007-11-30T16:16:00"), DateAndTime("2007-11-30T16:18:30"));
+
+    existing->clear();
+    existing->addROI(DateAndTime("2007-11-30T16:16:50"), DateAndTime("2007-11-30T16:17:40"));
+
+    roi = log->makeFilterByValue(0.8, 2.2, true, expandedTime, 1.0, true, existing);
+    TS_ASSERT_EQUALS(roi.numBoundaries(), 4);
+
+    TS_ASSERT_DELTA(roi.timeAtIndex(0), DateAndTime("2007-11-30T16:16:50"), 1e-3);
+    TS_ASSERT_DELTA(roi.timeAtIndex(1), DateAndTime("2007-11-30T16:17:11"), 1e-3);
+
+    TS_ASSERT_DELTA(roi.timeAtIndex(2), DateAndTime("2007-11-30T16:17:29"), 1e-3);
+    TS_ASSERT_DELTA(roi.timeAtIndex(3), DateAndTime("2007-11-30T16:17:40"), 1e-3);
+
+    // Check throws if min > max
+    TS_ASSERT_THROWS(log->makeFilterByValue(2.0, 1.0, true, expandedTime, 0.0, true), const std::invalid_argument &);
 
     delete log;
   }
@@ -623,47 +681,51 @@ public:
     auto intLog = createIntegerTSP(5);
 
     // Test a filter that's fully within the range of both properties
-    SplittingIntervalVec filter;
-    filter.emplace_back(SplittingInterval(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:29")));
-    TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 7.308, 0.001);
-    TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 2.167, 0.001);
+    TimeROI filter(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:29"));
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(&filter), 7.308, 0.001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(&filter), 2.167, 0.001);
 
     // Test a filter that starts before the log start time
-    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:16:30"), DateAndTime("2007-11-30T16:17:13"));
-    TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 9.820, 0.001);
-    TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 1.070, 0.001);
+    filter.clear();
+    filter.addROI(DateAndTime("2007-11-30T16:16:30"), DateAndTime("2007-11-30T16:17:13"));
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(&filter), 9.820, 0.001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(&filter), 1.070, 0.001);
 
     // How about one that's entirely outside the log range (should just take the
     // last value)
-    filter[0] = SplittingInterval(DateAndTime("2013-01-01T00:00:00"), DateAndTime("2013-01-01T01:00:00"));
-    TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 10.55, 0.001);
-    TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 5.0, 0.001);
+    filter.clear();
+    filter.addROI(DateAndTime("2013-01-01T00:00:00"), DateAndTime("2013-01-01T01:00:00"));
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(&filter), 10.55, 0.001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(&filter), 5.0, 0.001);
 
     // Test a filter with two separate ranges, one of which goes past the end of
     // the log
-    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
-    filter.emplace_back(SplittingInterval(DateAndTime("2007-11-30T16:17:25"), DateAndTime("2007-11-30T16:17:45")));
-    TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 9.123, 0.001);
-    TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 3.167, 0.001);
+    filter.clear();
+    filter.addROI(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
+    filter.addROI(DateAndTime("2007-11-30T16:17:25"), DateAndTime("2007-11-30T16:17:45"));
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(&filter), 9.123, 0.001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(&filter), 3.167, 0.001);
 
     // Test a filter with two out of order ranges (the second one coming before
     // the first)
     // It should work fine.
-    filter[0] = filter[1];
-    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
-    TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 9.123, 0.001);
-    TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 3.167, 0.001);
+    filter.clear();
+    filter.addROI(DateAndTime("2007-11-30T16:17:25"), DateAndTime("2007-11-30T16:17:45"));
+    filter.addROI(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(&filter), 9.123, 0.001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(&filter), 3.167, 0.001);
 
     // What about an overlap between the filters? It's odd, but it's allowed.
-    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
-    filter[1] = SplittingInterval(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:20"));
-    TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 8.16, 0.001);
-    TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 1.75, 0.001);
+    filter.clear();
+    filter.addROI(DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:17:15"));
+    filter.addROI(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(&filter), (9.99 * 5. + 7.55 * 10.) / 15., 0.001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(&filter), (1. * 5. + 2. * 10.) / 15., 0.001);
 
     // Check the correct behaviour of empty of single value logs.
-    TS_ASSERT(std::isnan(dProp->averageValueInFilter(filter)));
+    TS_ASSERT(std::isnan(dProp->timeAverageValue(&filter)));
     iProp->addValue(DateAndTime("2010-11-30T16:17:25"), 99);
-    TS_ASSERT_EQUALS(iProp->averageValueInFilter(filter), 99.0);
+    TS_ASSERT_EQUALS(iProp->timeAverageValue(&filter), 99.0);
 
     // Clean up
     delete dblLog;
@@ -695,88 +757,8 @@ public:
   }
 
   void test_averageValueInFilter_throws_for_string_property() {
-    SplittingIntervalVec splitter;
-    TS_ASSERT_THROWS(sProp->averageValueInFilter(splitter), const Exception::NotImplementedError &);
-    TS_ASSERT_THROWS(sProp->averageAndStdDevInFilter(splitter), const Exception::NotImplementedError &);
-  }
-
-  //----------------------------------------------------------------------------
-  void test_splitByTime_and_getTotalValue() {
-    TimeSeriesProperty<int> *log = createIntegerTSP(12);
-    // Make the outputs
-    std::vector<Property *> outputs;
-    for (std::size_t i = 0; i < 5; i++) {
-      TimeSeriesProperty<int> *newlog = new TimeSeriesProperty<int>("MyIntLog");
-      outputs.emplace_back(newlog);
-    }
-
-    // Make a splitter
-    DateAndTime start, stop;
-    SplittingIntervalVec splitter;
-    start = DateAndTime("2007-11-30T16:17:10");
-    stop = DateAndTime("2007-11-30T16:17:40");
-    splitter.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:17:55");
-    stop = DateAndTime("2007-11-30T16:17:56");
-    splitter.emplace_back(SplittingInterval(start, stop, 1));
-
-    start = DateAndTime("2007-11-30T16:17:56");
-    stop = DateAndTime("2007-11-30T16:18:01");
-    splitter.emplace_back(SplittingInterval(start, stop, 2)); // just one entry
-
-    start = DateAndTime("2007-11-30T16:18:09");
-    stop = DateAndTime("2007-11-30T16:18:21");
-    splitter.emplace_back(SplittingInterval(start, stop, 3));
-
-    start = DateAndTime("2007-11-30T16:18:45");
-    stop = DateAndTime("2007-11-30T16:22:50");
-    splitter.emplace_back(SplittingInterval(start, stop, 4));
-
-    log->splitByTime(splitter, outputs, false);
-
-    TS_ASSERT_EQUALS(dynamic_cast<TimeSeriesProperty<int> *>(outputs[0])->realSize(), 3);
-    TS_ASSERT_EQUALS(dynamic_cast<TimeSeriesProperty<int> *>(outputs[1])->realSize(), 1);
-    TS_ASSERT_EQUALS(dynamic_cast<TimeSeriesProperty<int> *>(outputs[2])->realSize(), 2);
-    TS_ASSERT_EQUALS(dynamic_cast<TimeSeriesProperty<int> *>(outputs[3])->realSize(), 3);
-    TS_ASSERT_EQUALS(dynamic_cast<TimeSeriesProperty<int> *>(outputs[4])->realSize(), 2);
-
-    delete log;
-    delete outputs[0];
-    delete outputs[1];
-    delete outputs[2];
-    delete outputs[3];
-    delete outputs[4];
-  }
-
-  //----------------------------------------------------------------------------
-  void test_splitByTime_withOverlap() {
-    TimeSeriesProperty<int> *log = createIntegerTSP(12);
-
-    // Make the outputs
-    std::vector<Property *> outputs;
-    for (std::size_t i = 0; i < 1; i++) {
-      TimeSeriesProperty<int> *newlog = new TimeSeriesProperty<int>("MyIntLog");
-      outputs.emplace_back(newlog);
-    }
-
-    // Make a splitter
-    DateAndTime start, stop;
-    SplittingIntervalVec splitter;
-    start = DateAndTime("2007-11-30T16:17:10");
-    stop = DateAndTime("2007-11-30T16:17:40");
-    splitter.emplace_back(SplittingInterval(start, stop, 0));
-
-    start = DateAndTime("2007-11-30T16:17:35");
-    stop = DateAndTime("2007-11-30T16:17:59");
-    splitter.emplace_back(SplittingInterval(start, stop, 0));
-
-    log->splitByTime(splitter, outputs, false);
-
-    TS_ASSERT_EQUALS(dynamic_cast<TimeSeriesProperty<int> *>(outputs[0])->realSize(), 5);
-
-    delete log;
-    delete outputs[0];
+    TS_ASSERT_THROWS(sProp->timeAverageValue(), const Exception::NotImplementedError &);
+    TS_ASSERT_THROWS(sProp->timeAverageValueAndStdDev(), const Exception::NotImplementedError &);
   }
 
   //----------------------------------------------------------------------------
@@ -1103,6 +1085,44 @@ public:
     delete log;
   }
 
+  // this test is taken from PlotAsymmetryByLogValueTest::test_LogValueFunction
+  void test_statistics_excessiveROI() {
+    TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("MydoubleLog");
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T17:12:34", 178.3));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T17:13:08", 179.4));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T17:13:42", 180.2));
+
+    constexpr double MIN{178.3};
+    constexpr double MAX{180.2};
+    constexpr double MEDIAN{179.4};
+    constexpr double MEAN{(178.3 + 179.4 + 180.2) / 3.};
+
+    // bare stats
+    const auto stats_no_roi = log->getStatistics();
+    TS_ASSERT_DELTA(stats_no_roi.minimum, MIN, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.maximum, MAX, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.median, MEDIAN, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.mean, MEAN, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.duration, (136 - 34),
+                    1e-3); // last interval is guessed to be same as penultimate interval
+    TS_ASSERT_DELTA(log->timeAverageValue(), stats_no_roi.mean, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.time_mean, 179.3, 1e-3); // calculated by hand
+
+    // this starts 4 seconds before the log does to force checking the durations are done correctly
+    // roi duration is 100, but the first 4 seconds should be skipped
+    TimeROI roi(DateAndTime("2007-11-30T17:12:30"), DateAndTime("2007-11-30T17:14:10"));
+
+    // bare stats with the wacky TimROI
+    const auto stats_roi = log->getStatistics(&roi);
+    TS_ASSERT_DELTA(stats_roi.minimum, MIN, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.maximum, MAX, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.median, MEDIAN, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.mean, MEAN, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.duration, (130 - 34), 1e-3);
+    TS_ASSERT_DELTA(log->timeAverageValue(), stats_roi.mean, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.time_mean, 179.24375, 1e-3); // calculated by hand
+  }
+
   void test_empty_statistics() {
     TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("MydoubleLog");
     TimeSeriesPropertyStatistics stats = log->getStatistics();
@@ -1135,6 +1155,29 @@ public:
     delete log;
     delete logi;
     delete val;
+  }
+
+  void test_LogAtStartOfTime() {
+    TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("doubleLog");
+    TS_ASSERT_THROWS_NOTHING(log->addValue("1990-Jan-01 00:00:00", 1));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("1990-Jan-01 00:00:10", 2));
+
+    const auto rawstats = log->getStatistics();
+    TS_ASSERT_DELTA(rawstats.minimum, 1.0, 1e-3);
+    TS_ASSERT_DELTA(rawstats.maximum, 2.0, 1e-3);
+    TS_ASSERT_DELTA(rawstats.median, 1.5, 1e-3);
+    TS_ASSERT_DELTA(rawstats.mean, 1.5, 1e-3);
+    TS_ASSERT_DELTA(rawstats.duration, 20.0, 1e-3);
+    TS_ASSERT_DELTA(rawstats.time_mean, 1.5, 1e-3);
+
+    TimeROI roi(DateAndTime("1990-Jan-01 00:00:00"), DateAndTime("1990-Jan-01 00:00:20"));
+    const auto filteredstats = log->getStatistics(&roi);
+    TS_ASSERT_DELTA(filteredstats.minimum, 1.0, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.maximum, 2.0, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.median, 1.5, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.mean, 1.5, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.duration, 20.0, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.time_mean, 1.5, 1e-3);
   }
 
   void test_PlusEqualsOperator_() {
@@ -1967,16 +2010,16 @@ public:
     DateAndTime start = DateAndTime("2007-11-30T15:00:00"); // Much earlier than first time series value
     DateAndTime stop = DateAndTime("2007-11-30T17:00:00");  // Much later than last time series value
 
-    log->filterByTime(start, stop);
+    TimeROI roi(start, stop);
 
-    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->realSize());
+    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->filteredValuesAsVector(&roi).size());
 
     delete log;
   }
 
   void test_getSplittingIntervals_noFilter() {
     const auto &log = getTestLog(); // no filter
-    const auto &intervals = log->getSplittingIntervals();
+    const auto &intervals = log->getTimeIntervals();
     TS_ASSERT_EQUALS(intervals.size(), 1);
     const auto &range = intervals.front();
     TS_ASSERT_EQUALS(range.start(), log->firstTime());

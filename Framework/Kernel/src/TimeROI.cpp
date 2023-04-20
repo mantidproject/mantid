@@ -60,6 +60,8 @@ bool overlaps(const TimeInterval &left, const TimeInterval &right) {
 } // namespace
 
 const std::string TimeROI::NAME = "Kernel_TimeROI";
+/// Constant for TimeROI where no time is used
+const TimeROI TimeROI::USE_NONE{DateAndTime::GPS_EPOCH - DateAndTime::ONE_SECOND, DateAndTime::GPS_EPOCH};
 
 TimeROI::TimeROI() {}
 
@@ -97,7 +99,7 @@ void TimeROI::addROI(const Types::Core::DateAndTime &startTime, const Types::Cor
     TimeInterval roi_to_add(startTime, stopTime);
     std::vector<TimeInterval> output;
     bool union_added = false;
-    for (const auto interval : this->toSplitters()) {
+    for (const auto &interval : this->toTimeIntervals()) {
       if (overlaps(roi_to_add, interval)) {
         // the roi absorbs this interval
         // this check must be first
@@ -144,7 +146,7 @@ void TimeROI::addMask(const std::string &startTime, const std::string &stopTime)
 void TimeROI::addMask(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) {
   assert_increasing(startTime, stopTime);
 
-  if (this->empty()) {
+  if (this->useAll()) {
     g_log.debug("TimeROI::addMask to an empty object is ignored");
   } else if (this->isCompletelyInMask(startTime, stopTime)) {
     g_log.debug("TimeROI::addMask to ignored region");
@@ -189,7 +191,7 @@ void TimeROI::addMask(const Types::Core::DateAndTime &startTime, const Types::Co
     // loop through all current splitters and get new intersections
     std::vector<TimeInterval> output;
     TimeInterval intersection;
-    for (const auto &interval : this->toSplitters()) {
+    for (const auto &interval : this->toTimeIntervals()) {
       intersection = use_before.intersection(interval);
       if (intersection.isValid()) {
         output.push_back(intersection);
@@ -241,7 +243,7 @@ bool TimeROI::isCompletelyInROI(const Types::Core::DateAndTime &startTime,
  */
 bool TimeROI::isCompletelyInMask(const Types::Core::DateAndTime &startTime,
                                  const Types::Core::DateAndTime &stopTime) const {
-  if (this->empty())
+  if (this->useAll())
     return true;
   if (startTime >= m_roi.back())
     return true;
@@ -265,7 +267,7 @@ bool TimeROI::isCompletelyInMask(const Types::Core::DateAndTime &startTime,
  * The value is, essentially, whatever it was at the last recorded time before or equal to the one requested.
  */
 bool TimeROI::valueAtTime(const Types::Core::DateAndTime &time) const {
-  if (this->empty() || time < m_roi.front() || time >= m_roi.back()) {
+  if (this->useAll() || time < m_roi.front() || time >= m_roi.back()) {
     // ignore everything outside of range
     return ROI_IGNORE;
   } else {
@@ -322,11 +324,22 @@ Types::Core::DateAndTime TimeROI::getEffectiveTime(const Types::Core::DateAndTim
   }
 }
 
+// returns the first time in the TimeROI
+Types::Core::DateAndTime TimeROI::firstTime() const {
+  if (m_roi.empty())
+    throw std::runtime_error("cannot return time from empty TimeROI");
+  return m_roi.front();
+}
+
 // returns the last time in the TimeROI
 Types::Core::DateAndTime TimeROI::lastTime() const {
   if (m_roi.empty())
     throw std::runtime_error("cannot return time from empty TimeROI");
   return m_roi.back();
+}
+
+Types::Core::DateAndTime TimeROI::timeAtIndex(unsigned long index) const {
+  return (index < m_roi.size()) ? m_roi[index] : DateAndTime::GPS_EPOCH;
 }
 
 /// get a list of all unique times. order is not guaranteed
@@ -393,7 +406,7 @@ void TimeROI::replaceROI(const TimeSeriesProperty<bool> *roi) {
 
 void TimeROI::replaceROI(const TimeROI &other) {
   m_roi.clear();
-  if (!other.empty())
+  if (!other.useAll())
     m_roi.assign(other.m_roi.cbegin(), other.m_roi.cend());
 }
 
@@ -409,7 +422,7 @@ void TimeROI::update_union(const TimeROI &other) {
     return;
 
   // add all the intervals from the other
-  for (const auto &interval : other.toSplitters()) {
+  for (const auto &interval : other.toTimeIntervals()) {
     this->addROI(interval.start(), interval.stop());
   }
 }
@@ -425,7 +438,7 @@ void TimeROI::update_intersection(const TimeROI &other) {
   if (*this == other)
     return;
 
-  if (other.empty() || this->empty()) {
+  if (other.useAll() || this->useAll()) {
     // empty out this environment
     m_roi.clear();
   } else {
@@ -444,6 +457,12 @@ void TimeROI::update_intersection(const TimeROI &other) {
     if (m_roi.back() > other.m_roi.back()) {
       this->addMask(other.m_roi.back(), m_roi.back());
     }
+
+    // if the TimeROI became empty it is because there is no overlap
+    // reset the value to INVALID_ROI
+    if (this->empty()) {
+      this->replaceROI(USE_NONE);
+    }
   }
 }
 
@@ -456,22 +475,42 @@ void TimeROI::update_intersection(const TimeROI &other) {
  * @param other :: the replacing or intersecting TimeROI.
  */
 void TimeROI::update_or_replace_intersection(const TimeROI &other) {
-  if (this->empty()) {
+  if (this->useAll()) {
     this->replaceROI(other);
-  } else if (!other.empty()) {
+  } else if (!other.useAll()) {
     this->update_intersection(other);
   }
 }
 
-/**
- * This method is to lend itself to be compatible with existing implementation
- */
-const std::vector<SplittingInterval> TimeROI::toSplitters() const {
+/// This method is to lend itself to helping with transition
+const std::vector<Kernel::TimeInterval> TimeROI::toTimeIntervals() const {
   const auto NUM_VAL = m_roi.size();
-  std::vector<SplittingInterval> output;
+  std::vector<TimeInterval> output;
   // every other value is a start/stop
   for (std::size_t i = 0; i < NUM_VAL; i += 2) {
-    output.push_back({m_roi[i], m_roi[i + 1]});
+    output.emplace_back(m_roi[i], m_roi[i + 1]);
+  }
+
+  return output;
+}
+
+/**
+ * Time intervals returned where no time is before after. This is used in calculating ranges
+ * in TimeSeriesProperty.
+ * @param after Only give TimeIntervals after this time
+ */
+const std::vector<Kernel::TimeInterval> TimeROI::toTimeIntervals(const Types::Core::DateAndTime &after) const {
+  const auto NUM_VAL = m_roi.size();
+  std::vector<TimeInterval> output;
+  // every other value is a start/stop
+  for (std::size_t i = 0; i < NUM_VAL; i += 2) {
+    if (m_roi[i + 1] > after) { // make sure end is after the first time requested
+      if (m_roi[i] > after) {   // full region should be used
+        output.emplace_back(m_roi[i], m_roi[i + 1]);
+      } else {
+        output.emplace_back(after, m_roi[i + 1]);
+      }
+    }
   }
 
   return output;
@@ -514,6 +553,8 @@ double TimeROI::durationInSeconds() const {
   const auto ROI_SIZE = this->numBoundaries();
   if (ROI_SIZE == 0) {
     return 0.;
+  } else if (this->useNone()) {
+    return -1.;
   } else {
     double total{0.};
     for (std::size_t i = 0; i < ROI_SIZE - 1; i += 2) {
@@ -532,7 +573,7 @@ double TimeROI::durationInSeconds(const Types::Core::DateAndTime &startTime,
   assert_increasing(startTime, stopTime);
 
   // just return the difference between the supplied other times if this has no regions
-  if (this->empty()) {
+  if (this->useAll()) {
     return DateAndTime::secondsFromDuration(stopTime - startTime);
   }
 
@@ -573,7 +614,13 @@ void TimeROI::validateValues(const std::string &label) {
 
 std::size_t TimeROI::numBoundaries() const { return static_cast<std::size_t>(m_roi.size()); }
 
+std::size_t TimeROI::numberOfRegions() const { return this->numBoundaries() / 2; }
+
 bool TimeROI::empty() const { return bool(this->numBoundaries() == 0); }
+
+bool TimeROI::useAll() const { return this->empty(); }
+
+bool TimeROI::useNone() const { return *this == USE_NONE; }
 
 /// Removes all ROI's, leaving an empty object
 void TimeROI::clear() { m_roi.clear(); }
@@ -582,7 +629,7 @@ void TimeROI::clear() { m_roi.clear(); }
 void TimeROI::saveNexus(::NeXus::File *file) const {
   // create a local TimeSeriesProperty which will do the actual work
   TimeSeriesProperty<bool> tsp(NAME);
-  for (const auto &interval : this->toSplitters()) {
+  for (const auto &interval : this->toTimeIntervals()) {
     tsp.addValue(interval.start(), ROI_USE);
     tsp.addValue(interval.stop(), ROI_IGNORE);
   }

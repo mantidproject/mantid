@@ -58,7 +58,7 @@ double getMedian(const API::Run &run, const std::string &name) {
   if (!log)
     return Mantid::EMPTY_DBL();
 
-  Kernel::TimeSeriesPropertyStatistics stats = log->getStatistics();
+  Kernel::TimeSeriesPropertyStatistics stats = run.getStatistics(name);
   return stats.median;
 }
 

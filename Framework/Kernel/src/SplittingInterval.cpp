@@ -20,9 +20,6 @@ SplittingInterval::SplittingInterval(const Types::Core::DateAndTime &start, cons
                                      const int index)
     : TimeInterval(start, stop), m_index(index) {}
 
-/// Returns the duration in seconds
-double SplittingInterval::duration() const { return DateAndTime::secondsFromDuration(this->length()); }
-
 /// Return the index (destination of this split time block)
 int SplittingInterval::index() const { return m_index; }
 

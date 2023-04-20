@@ -207,6 +207,9 @@ void AbsorptionCorrection::exec() {
       g_log.information() << "Spectrum " << i << " does not have a detector defined for it\n";
       continue;
     }
+    if (spectrumInfo.isMasked(i)) {
+      continue;
+    }
     const auto &det = spectrumInfo.detector(i);
 
     std::vector<double> L2s(m_numVolumeElements);
