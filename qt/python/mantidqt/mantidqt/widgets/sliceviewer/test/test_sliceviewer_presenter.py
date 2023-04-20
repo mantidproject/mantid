@@ -67,6 +67,7 @@ def create_mdhistoworkspace_mock():
     workspace.getDimension = lambda: mock.MagicMock()
     workspace.getNumDims = lambda: 2
     workspace.getNumNonIntegratedDims = lambda: 2
+    workspace.numOriginalWorkspaces = lambda: 0
     workspace.name = lambda: "workspace"
     workspace.readLock = mock.MagicMock()
     workspace.unlock = mock.MagicMock()
@@ -523,6 +524,7 @@ class SliceViewerTest(unittest.TestCase):
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
         mock_model.workspace_equals.return_value = True
+        mock_model.check_for_removed_original_workspace.return_value = False
         pres.delete_workspace("test_name")
         mock_view.emit_close.assert_called_once()
 
@@ -531,6 +533,7 @@ class SliceViewerTest(unittest.TestCase):
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
         mock_model.workspace_equals.return_value = False
+        mock_model.check_for_removed_original_workspace.return_value = False
         pres.delete_workspace("different_name")
         mock_view.emit_close.assert_not_called()
 
