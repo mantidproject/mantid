@@ -64,6 +64,7 @@ private:
   QLayout *m_layout;
   PreviewDockedWidgetsSubscriber *m_notifyee{nullptr};
   std::unique_ptr<MantidQt::MantidWidgets::InstrumentDisplay> m_instDisplay{nullptr};
+  MantidQt::MantidWidgets::PreviewPlot *m_previewPlot{nullptr};
 
   void connectSignals() const;
   void loadToolbarIcons();

@@ -29,6 +29,9 @@ QtPreviewDockedWidgets::QtPreviewDockedWidgets(QWidget *parent, QLayout *layout)
   m_ui.setupUi(this);
   m_layout->addWidget(this);
 
+  m_previewPlot = new MantidQt::MantidWidgets::PreviewPlot(this);
+  m_ui.lp_layout->addWidget(m_previewPlot);
+
   resetInstView();
   loadToolbarIcons();
   setupSelectRegionTypes();
@@ -128,7 +131,7 @@ void QtPreviewDockedWidgets::plotInstView(MantidWidgets::InstrumentActor *instAc
 
 QLayout *QtPreviewDockedWidgets::getRegionSelectorLayout() const { return m_ui.rs_plot_layout; }
 
-IPlotView *QtPreviewDockedWidgets::getLinePlotView() const { return m_ui.line_plot; }
+IPlotView *QtPreviewDockedWidgets::getLinePlotView() const { return m_previewPlot; }
 
 void QtPreviewDockedWidgets::setInstViewZoomState(bool isChecked) { m_ui.iv_zoom_button->setDown(isChecked); }
 void QtPreviewDockedWidgets::setInstViewEditState(bool isChecked) { m_ui.iv_edit_button->setDown(isChecked); }
