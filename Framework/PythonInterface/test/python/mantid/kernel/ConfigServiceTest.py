@@ -7,6 +7,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import inspect
 import os
+import sys
 import testhelpers
 import unittest
 
@@ -14,9 +15,11 @@ from mantid.kernel import ConfigService, ConfigServiceImpl, config, std_vector_s
 
 
 class ConfigServiceTest(unittest.TestCase):
-
     __dirs_to_rm = []
     __init_dir_list = ""
+    _on_windows = sys.platform == "win32"
+    if _on_windows:
+        _original_appdata_path = os.environ["APPDATA"]
 
     def test_singleton_returns_instance_of_ConfigService(self):
         self.assertTrue(isinstance(config, ConfigServiceImpl))
@@ -217,6 +220,18 @@ class ConfigServiceTest(unittest.TestCase):
         # verify check for converting checked value to string
         self.assertFalse(1 in ConfigService)
 
+    @unittest.skipIf(not _on_windows, "Windows only test, uses APPDATA")
+    def test_get_app_data_dir(self):
+        self.assertEqual(
+            os.path.join(self._original_appdata_path, "mantidproject", "mantid"), os.path.abspath(ConfigService.getAppDataDirectory())
+        )
+
+        unicode_string = "Ťėst μДنא"
+        unicode_path = os.path.join(self._original_appdata_path, unicode_string)
+        os.environ["APPDATA"] = unicode_path
+
+        self.assertEqual(os.path.join(unicode_path, "mantidproject", "mantid"), os.path.abspath(ConfigService.getAppDataDirectory()))
+
     def _setup_test_areas(self):
         """Create a new data search path string"""
         self.__init_dir_list = config["datasearch.directories"]
@@ -239,6 +254,8 @@ class ConfigServiceTest(unittest.TestCase):
 
     def _clean_up_test_areas(self):
         config["datasearch.directories"] = self.__init_dir_list
+        if self._on_windows:
+            os.environ["APPDATA"] = self._original_appdata_path
 
         # Remove temp directories
         for p in self.__dirs_to_rm:

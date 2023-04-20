@@ -54,10 +54,12 @@
 
 #include <algorithm>
 #include <cctype>
+#include <codecvt>
 #include <exception>
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <locale>
 #include <stdexcept>
 #include <utility>
 
@@ -1206,7 +1208,9 @@ std::string ConfigServiceImpl::getAppDataDir() {
   const std::string applicationName = "mantid";
 #if POCO_OS == POCO_OS_WINDOWS_NT
   const std::string vendorName = "mantidproject";
-  std::string appdata = std::getenv("APPDATA");
+  wchar_t *w_appdata = _wgetenv(L"APPDATA");
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+  std::string appdata = converter.to_bytes(w_appdata);
   Poco::Path path(appdata);
   path.makeDirectory();
   path.pushDirectory(vendorName);
