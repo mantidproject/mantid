@@ -56,7 +56,7 @@ class SliceViewerBasePresenterTest(unittest.TestCase):
         self.patched_deps["WorkspaceInfo"].can_support_dynamic_rebinning.return_value = True
         new_plot_mock = mock.MagicMock()
         presenter.new_plot = new_plot_mock
-        presenter._data_view.get_data_limits_to_fill_current_axes = mock.MagicMock(return_value=None)
+        presenter._data_view.get_axes_limits = mock.MagicMock(return_value=None)
 
         presenter.data_limits_changed()
 
@@ -67,7 +67,7 @@ class SliceViewerBasePresenterTest(unittest.TestCase):
         self.patched_deps["WorkspaceInfo"].can_support_dynamic_rebinning.return_value = False
         new_plot_mock = mock.MagicMock()
         presenter.new_plot = new_plot_mock
-        presenter._data_view.get_data_limits_to_fill_current_axes = mock.MagicMock(return_value=None)
+        presenter._data_view.get_axes_limits = mock.MagicMock(return_value=None)
 
         presenter.data_limits_changed()
 
