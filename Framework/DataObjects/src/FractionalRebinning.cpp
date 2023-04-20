@@ -626,6 +626,12 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ, const MatrixWorkspace_
     }
   }
 
+  // Calculate the sum of the weights, and check if it is unity (1.0)
+  const auto sumOfWeights =
+      std::accumulate(areaInfos.cbegin(), areaInfos.cend(), 0.0,
+                      [&inputQArea](double total, const auto &ai) { return total + ai.weight / inputQArea; });
+  const auto isUnity = fabs(1.0 - sumOfWeights) < POS_TOLERANCE;
+
   auto sqrdError = (inputRB && inputRB->hasSqrdErrors());
   const double variance = (sqrdError ? error : error * error);
   for (const auto &ai : areaInfos) {
@@ -637,9 +643,15 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ, const MatrixWorkspace_
       // The mutable calls must be in the critical section
       // so that any calls from omp sections can write to the
       // output workspace safely
-      outputWS.mutableY(ai.wsIndex)[ai.binIndex] += signal * weight;
-      outputWS.mutableE(ai.wsIndex)[ai.binIndex] += variance * weight;
-      outputWS.dataF(ai.wsIndex)[ai.binIndex] += weight * inputWeight;
+      if (isUnity) {
+        outputWS.mutableY(ai.wsIndex)[ai.binIndex] += signal * weight;
+        outputWS.mutableE(ai.wsIndex)[ai.binIndex] += variance * weight;
+        outputWS.dataF(ai.wsIndex)[ai.binIndex] += weight * inputWeight;
+      } else {
+        outputWS.mutableY(ai.wsIndex)[ai.binIndex] = std::numeric_limits<double>::quiet_NaN();
+        outputWS.mutableE(ai.wsIndex)[ai.binIndex] = std::numeric_limits<double>::quiet_NaN();
+        outputWS.dataF(ai.wsIndex)[ai.binIndex] = std::numeric_limits<double>::quiet_NaN();
+      }
     }
   }
 }
