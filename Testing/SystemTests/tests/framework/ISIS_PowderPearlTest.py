@@ -39,6 +39,10 @@ working_dir = os.path.join(DIRS[0], working_folder_name)
 
 input_dir = os.path.join(working_dir, input_folder_name)
 output_dir = os.path.join(working_dir, output_folder_name)
+user_dir = os.path.join(output_dir, cycle, user_name)
+xye_tof_outdir = os.path.join(user_dir, "ToF")
+xye_dSpac_outdir = os.path.join(user_dir, "dSpacing")
+gss_outdir = os.path.join(user_dir, "GSAS")
 
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
@@ -47,7 +51,6 @@ summed_empty_path = os.path.join(calibration_dir, summed_empty_rel_path)
 
 
 class _CreateVanadiumTest(systemtesting.MantidSystemTest):
-
     existing_config = config["datasearch.directories"]
     focus_mode = None
 
@@ -114,7 +117,6 @@ class CreateVanadiumModsTest(_CreateVanadiumTest):
 
 
 class FocusTest(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -138,11 +140,10 @@ class FocusTest(systemtesting.MantidSystemTest):
         def assert_output_file_exists(directory, filename):
             self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
 
-        user_output = os.path.join(output_dir, cycle, user_name)
-        assert_output_file_exists(user_output, "PRL98507_tt70.nxs")
-        assert_output_file_exists(user_output, "PRL98507_tt70.gsas")
-        assert_output_file_exists(user_output, "PRL98507_tt70_tof-0.xye")
-        assert_output_file_exists(user_output, "PRL98507_tt70_d-0.xye")
+        assert_output_file_exists(user_dir, "PRL98507_tt70.nxs")
+        assert_output_file_exists(gss_outdir, "PRL98507_tt70.gsas")
+        assert_output_file_exists(xye_tof_outdir, "PRL98507_tt70_tof.xye")
+        assert_output_file_exists(xye_dSpac_outdir, "PRL98507_tt70_d.xye")
 
         self.tolerance = 1e-8  # Required for difference in spline data between operating systems
         return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
@@ -157,7 +158,6 @@ class FocusTest(systemtesting.MantidSystemTest):
 
 
 class FocusLongThenShortTest(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -190,15 +190,14 @@ class FocusLongThenShortTest(systemtesting.MantidSystemTest):
         def assert_output_file_exists(directory, filename):
             self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
 
-        user_output = os.path.join(output_dir, cycle, user_name)
-        assert_output_file_exists(user_output, "PRL98507_tt70.nxs")
-        assert_output_file_exists(user_output, "PRL98507_tt70_long.nxs")
-        assert_output_file_exists(user_output, "PRL98507_tt70.gsas")
-        assert_output_file_exists(user_output, "PRL98507_tt70_long.gsas")
-        assert_output_file_exists(user_output, "PRL98507_tt70_tof-0.xye")
-        assert_output_file_exists(user_output, "PRL98507_tt70_d-0.xye")
-        assert_output_file_exists(user_output, "PRL98507_tt70_long_tof-0.xye")
-        assert_output_file_exists(user_output, "PRL98507_tt70_long_d-0.xye")
+        assert_output_file_exists(user_dir, "PRL98507_tt70.nxs")
+        assert_output_file_exists(user_dir, "PRL98507_tt70_long.nxs")
+        assert_output_file_exists(gss_outdir, "PRL98507_tt70.gsas")
+        assert_output_file_exists(gss_outdir, "PRL98507_tt70_long.gsas")
+        assert_output_file_exists(xye_tof_outdir, "PRL98507_tt70_tof.xye")
+        assert_output_file_exists(xye_dSpac_outdir, "PRL98507_tt70_d.xye")
+        assert_output_file_exists(xye_tof_outdir, "PRL98507_tt70_long_tof.xye")
+        assert_output_file_exists(xye_dSpac_outdir, "PRL98507_tt70_long_d.xye")
 
         self.tolerance = 1e-8  # Required for difference in spline data between operating systems
         return (
@@ -218,7 +217,6 @@ class FocusLongThenShortTest(systemtesting.MantidSystemTest):
 
 
 class FocusWithAbsorbCorrectionsTest(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -241,7 +239,6 @@ class FocusWithAbsorbCorrectionsTest(systemtesting.MantidSystemTest):
 
 
 class FocusWithoutEmptySubtractionTest(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -266,7 +263,6 @@ class FocusWithoutEmptySubtractionTest(systemtesting.MantidSystemTest):
 
 
 class CreateCalTest(systemtesting.MantidSystemTest):
-
     calibration_results = None
     existing_config = config["datasearch.directories"]
     run_number = 98494
@@ -298,7 +294,6 @@ class CreateCalTest(systemtesting.MantidSystemTest):
 
 
 class CreateVanadiumAndFocusCustomMode(systemtesting.MantidSystemTest):
-
     existing_config = config["datasearch.directories"]
 
     def runTest(self):
