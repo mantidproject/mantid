@@ -79,7 +79,10 @@ template <typename TYPE> TimeSeriesProperty<TYPE> *TimeSeriesProperty<TYPE>::clo
 }
 
 /**
- * Create a partial copy according to TimeROI
+ * Create a partial copy of this object according to a TimeROI. The partially cloned object
+ * should include all time values enclosed by the ROI regions each defined as [roi_start,roi_end),
+ * plus the values immediately before and after an ROI region, if available.
+ * @param timeROI :: a series of time regions used to determine which values should be included in the copy
  */
 template <typename TYPE> Property *TimeSeriesProperty<TYPE>::cloneInTimeROI(const TimeROI &timeROI) const {
   TimeSeriesProperty<TYPE> *filteredTS = new TimeSeriesProperty<TYPE>(this->name());
@@ -266,7 +269,12 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::operator!=(const Propert
 template <typename TYPE> void TimeSeriesProperty<TYPE>::setName(const std::string &name) { m_name = name; }
 
 /**
- * Fill in the supplied vector of time series data according to the input TimeROI.
+ * Fill in the supplied vector of time series data according to the input TimeROI. Include all time values
+ * within ROI regions defined as [roi_start,roi_end), plus the values immediately before and after an ROI region,
+ * if available.
+ * @param timeROI :: a series of time regions used to determine which values should be included in the filtered data
+ * vector
+ * @param filteredData :: (output) a vector of TimeValueUnit pairs to be filled in
  */
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
@@ -287,16 +295,16 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
 
     // by design, we need to keep the last datapoint before a use region and the first datapoint after a use region, if
     // any of those datapoints are available. Since the index interval for the use region is obtained using
-    // std::lower_bound() and std::upper_bound(), index_stop must be already correct, as long as we treat it
-    // inclusively. Now we need to adjust index_start, if possible.
+    // std::lower_bound() and std::upper_bound(), index_stop must already be correct, as long as we treat it
+    // inclusively, but index_start needs to be adjusted if possible.
     if (index_start > 0)
       index_start--;
 
-    // handle potential overlaps between successive index intervals, so we don't end up copying the same datapoint twice
+    // handle potential overlaps between successive index intervals, so we don't copy the same datapoints twice
     if (!filteredData.empty()) {
       index_start = std::max(index_start, lastIndexCopied + 1);
       if (index_start > index_stop)
-        break;
+        continue;
     }
 
     // copy datapoints within the ROI index interval
@@ -308,13 +316,11 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
 }
 
 /**
- * Remove time series datapoints with time values outside of TimeROI, except for the first before each roi and the first
- * after each roi.
+ * Remove time values outside of TimeROI regions each defined as [roi_start,roi_stop).
+ * However, keep the values immediately before and after each ROI region, if available.
+ * @param timeROI :: a series of time regions used to determine which values to remove or to keep
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::removeDataOutsideTimeROI(const TimeROI &timeROI) {
-  if (m_values.size() <= 1)
-    return;
-
   std::vector<TimeValueUnit<TYPE>> mp_copy;
   createFilteredData(timeROI, mp_copy);
 

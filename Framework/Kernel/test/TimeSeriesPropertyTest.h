@@ -561,7 +561,7 @@ public:
     roi.addROI(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"));
     roi.addROI(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"));
 
-    // Test a case where TimeROI includes the first time value only. The filtered data should be the last two
+    // Test a case where TimeROI includes the first time value only. The filtered data should be the first two
     // datapoints.
     std::vector<DateAndTime> times{DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T16:18:30"),
                                    DateAndTime("2007-11-30T16:18:45")};

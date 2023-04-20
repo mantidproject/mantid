@@ -183,7 +183,7 @@ public:
   /// Set name of property
   void setName(const std::string &name);
 
-  // Remove time series datapoints with times outside of TimeROI
+  // Remove time series values according to TimeROI
   void removeDataOutsideTimeROI(const TimeROI &timeRoi) override;
 
   /// New split method

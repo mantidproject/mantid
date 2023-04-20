@@ -45,7 +45,9 @@ public:
   // Using property seemed to be the most straightforward solution.
   virtual Property *cloneWithTimeShift(const double timeShift) const = 0;
 
-  /// Create a partial copy according to TimeROI
+  // Create a partial copy of this ITimeSeriesProperty-derived object according to a TimeROI. The partially cloned
+  // object will include all time values enclosed by the ROI regions defined as [roi_start,roi_end), plus the values
+  // immediately before and after an ROI region, if available.
   virtual Property *cloneInTimeROI(const TimeROI &timeROI) const = 0;
 
   /// Return the time series's times as a vector<DateAndTime>
@@ -73,7 +75,8 @@ public:
   // Returns whether the time series has been filtered
   virtual bool isFiltered() const = 0;
 
-  // Remove time series datapoints with times outside of TimeROI
+  // Remove time values outside of TimeROI regions defined as [roi_start,roi_stop).
+  // However, keep the values immediately before and after each ROI region, if available.
   virtual void removeDataOutsideTimeROI(const TimeROI &timeRoi) = 0;
 
   /// Virtual destructor
