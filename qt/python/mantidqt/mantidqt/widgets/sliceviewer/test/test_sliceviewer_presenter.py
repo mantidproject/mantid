@@ -534,6 +534,24 @@ class SliceViewerTest(unittest.TestCase):
         pres.delete_workspace("different_name")
         mock_view.emit_close.assert_not_called()
 
+    def test_delete_original_workspace(self):
+        mock_model = mock.MagicMock()
+        mock_view = mock.MagicMock()
+        pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
+        mock_model.workspace_equals.return_value = False
+        mock_model.check_for_removed_original_workspace.return_value = True
+        pres.delete_workspace("original_name")
+        mock_view.emit_close.assert_called_once()
+
+    def test_delete_not_original_workspace(self):
+        mock_model = mock.MagicMock()
+        mock_view = mock.MagicMock()
+        pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
+        mock_model.workspace_equals.return_value = False
+        mock_model.check_for_removed_original_workspace.return_value = False
+        pres.delete_workspace("not_original_name")
+        mock_view.emit_close.assert_not_called()
+
     def test_replace_workspace_does_nothing_if_workspace_is_unchanged(self):
         mock_model = mock.MagicMock()
         mock_view = mock.MagicMock()
