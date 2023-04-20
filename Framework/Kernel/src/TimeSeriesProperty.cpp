@@ -280,6 +280,10 @@ template <typename TYPE>
 void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
                                                   std::vector<TimeValueUnit<TYPE>> &filteredData) const {
   filteredData.clear();
+
+  if (m_values.empty())
+    return;
+
   size_t lastIndexCopied{0};
   for (const auto &splitter : timeROI.toTimeIntervals()) {
 
