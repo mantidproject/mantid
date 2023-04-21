@@ -38,16 +38,7 @@ public:
     instrument.reset(new Instrument);
     wsName = "tst";
 
-    CompAssembly *bank = new CompAssembly("bank");
-    bank->setPos(1., 0, 1.);
-    Quat q(0.9, 0, 0, 0.2);
-    q.normalize();
-    bank->setRot(q);
-    instrument->add(bank);
-
-    det1 = new Detector("det1", 1, nullptr);
-    det1->setPos(1.0, 0.0, 0.0);
-    bank->add(det1);
+    instrument->add(createBankWithDetector());
     instrument->markAsDetector(det1);
 
     WS.reset(new Workspace2D());
@@ -58,84 +49,118 @@ public:
     MoveInstrumentComponent mover;
     mover.initialize();
     mover.setPropertyValue("Workspace", wsName);
-    mover.setPropertyValue("DetectorID", "1");
+    mover.setPropertyValue("DetectorID", std::to_string(det_id));
     mover.setPropertyValue("X", "10");
     mover.setPropertyValue("Y", "20");
     mover.setPropertyValue("Z", "30");
     mover.execute();
 
-    Instrument_const_sptr inst = WS->getInstrument();
-    // get pointer to the first detector in the bank
-    std::shared_ptr<const IComponent> comp = (*std::dynamic_pointer_cast<const ICompAssembly>(
-        (*std::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
-
-    V3D pos = comp->getPos();
-    TS_ASSERT_EQUALS(pos, det1->getPos() + V3D(10, 20, 30))
+    V3D expectedPos = det1->getPos() + V3D(10, 20, 30);
+    checkExpectedDetectorPosition(expectedPos);
   }
 
   void testAbsolute() {
     MoveInstrumentComponent mover;
     mover.initialize();
     mover.setPropertyValue("Workspace", wsName);
-    mover.setPropertyValue("DetectorID", "1");
+    mover.setPropertyValue("DetectorID", std::to_string(det_id));
     mover.setPropertyValue("X", "10");
     mover.setPropertyValue("Y", "20");
     mover.setPropertyValue("Z", "30");
     mover.setPropertyValue("RelativePosition", "0");
     mover.execute();
 
-    Instrument_const_sptr inst = WS->getInstrument();
-    // get pointer to the first detector in the bank
-    std::shared_ptr<const IComponent> comp = (*std::dynamic_pointer_cast<const ICompAssembly>(
-        (*std::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
-
-    V3D pos = comp->getPos();
-    TS_ASSERT_EQUALS(pos, V3D(10, 20, 30))
+    V3D expectedPos = V3D(10, 20, 30);
+    checkExpectedDetectorPosition(expectedPos);
   }
 
   void testMoveByName() {
     MoveInstrumentComponent mover;
     mover.initialize();
     mover.setPropertyValue("Workspace", wsName);
-    mover.setPropertyValue("ComponentName", "det1");
+    mover.setPropertyValue("ComponentName", det_name);
     mover.setPropertyValue("X", "10");
     mover.setPropertyValue("Y", "20");
     mover.setPropertyValue("Z", "30");
     mover.setPropertyValue("RelativePosition", "0");
     mover.execute();
 
-    Instrument_const_sptr inst = WS->getInstrument();
-    // get pointer to the first detector in the bank
-    std::shared_ptr<const IComponent> comp = (*std::dynamic_pointer_cast<const ICompAssembly>(
-        (*std::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
-
-    V3D pos = comp->getPos();
-    TS_ASSERT_EQUALS(pos, V3D(10, 20, 30))
+    V3D expectedPos = V3D(10, 20, 30);
+    checkExpectedDetectorPosition(expectedPos);
   }
 
   void testMoveByFullName() {
     MoveInstrumentComponent mover;
     mover.initialize();
     mover.setPropertyValue("Workspace", wsName);
-    mover.setPropertyValue("ComponentName", "bank/det1");
+    mover.setPropertyValue("ComponentName", (bank_name + det_name));
     mover.setPropertyValue("X", "10");
     mover.setPropertyValue("Y", "20");
     mover.setPropertyValue("Z", "30");
     mover.setPropertyValue("RelativePosition", "0");
     mover.execute();
 
-    Instrument_const_sptr inst = WS->getInstrument();
-    // get pointer to the first detector in the bank
-    std::shared_ptr<const IComponent> comp = (*std::dynamic_pointer_cast<const ICompAssembly>(
-        (*std::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
+    V3D expectedPos = V3D(10, 20, 30);
+    checkExpectedDetectorPosition(expectedPos);
+  }
 
-    V3D pos = comp->getPos();
-    TS_ASSERT_EQUALS(pos, V3D(10, 20, 30))
+  void testMoveIgnoredForDetectorInStructuredBank() {
+    setupInstrumentWithRectangularDetector();
+
+    MoveInstrumentComponent mover;
+    mover.initialize();
+    mover.setPropertyValue("Workspace", wsName);
+    mover.setPropertyValue("DetectorID", std::to_string(det_id));
+    mover.setPropertyValue("X", "10");
+    mover.setPropertyValue("Y", "20");
+    mover.setPropertyValue("Z", "30");
+    mover.execute();
+
+    V3D expectedPos = det1->getPos();
+    checkExpectedDetectorPosition(expectedPos);
   }
 
 private:
   std::string wsName;
   Detector *det1;
+  const int det_id = 1;
+  const std::string det_name = "det1";
+  const std::string bank_name = "bank";
   std::shared_ptr<Instrument> instrument;
   MatrixWorkspace_sptr WS;
+
+  void setupInstrumentWithRectangularDetector() {
+    instrument.reset(new Instrument);
+
+    RectangularDetector *rect_det = new RectangularDetector("rectangular_detector");
+    rect_det->setPos(1., 0, 1.);
+    Quat rect_q(0.9, 0, 0, 0.2);
+    rect_q.normalize();
+    rect_det->setRot(rect_q);
+    rect_det->add(createBankWithDetector());
+
+    instrument->add(rect_det);
+    instrument->markAsDetector(det1);
+
+    WS->setInstrument(instrument);
+  }
+
+  CompAssembly *createBankWithDetector() {
+    CompAssembly *bank = new CompAssembly(bank_name);
+    bank->setPos(1., 0, 1.);
+    Quat q(0.9, 0, 0, 0.2);
+    q.normalize();
+    bank->setRot(q);
+
+    det1 = new Detector(det_name, det_id, nullptr);
+    det1->setPos(1.0, 0.0, 0.0);
+    bank->add(det1);
+
+    return bank;
+  }
+
+  void checkExpectedDetectorPosition(const V3D &expectedPos) {
+    IComponent_const_sptr det = WS->getInstrument()->getDetector(det_id);
+    TS_ASSERT_EQUALS(det->getPos(), expectedPos)
+  }
 };
