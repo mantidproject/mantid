@@ -393,6 +393,9 @@ void FilterEvents::processAlgorithmProperties() {
   if (!m_splittersWorkspace && !m_splitterTableWorkspace && !m_matrixSplitterWS)
     throw runtime_error("Input \"SplitterWorkspace\" has invalid workspace type.");
 
+  // Does the splitter workspace contains absolute or relative times?
+  m_isSplittersRelativeTime = this->getProperty("RelativeTime");
+
   //********************************************************
   // Find out if an InformationWorkspace has been supplied
   //********************************************************

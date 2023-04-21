@@ -742,23 +742,24 @@ public:
   void test_FilterRelativeTime() {
     g_log.notice("\ntest_FilterRelativeTime...");
     // Create EventWorkspace and SplittersWorkspace
-    int64_t runstart_i64 = 20000000000;
-    int64_t pulsedt = 100 * 1000 * 1000;
-    int64_t tofdt = 10 * 1000 * 1000;
+    int64_t runstart_i64 = 20000000000;  // 20 seconds, beginning of the fake run
+    int64_t pulsedt = 100 * 1000 * 1000; // 100 miliseconds, time between consecutive pulses
+    int64_t tofdt = 10 * 1000 * 1000;    // 10 miliseconds, spacing between neutrons events within a pulse
     size_t numpulses = 5;
 
+    // Create EventWorkspace with 10 detector-banks, each bank containing one pixel.
     EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("Test10", inpWS);
 
     // Create SplittersWorkspace with two destination workspaces plus the unfiltered workspace
-    // index    Relative DateandTime     time-int64_t
-    //   0    1990-Jan-01 00:00:00.000
-    //   1    1990-Jan-01 00:00:00.035
-    //   2    1990-Jan-01 00:00:00.195
-    //  -1    1990-Jan-01 00:00:00.465
+    // index    Relative time-int64_t  Absolute DateAndTime
+    //   0            000000000        1990-Jan-01 00:00:20.000
+    //   1            035000000        1990-Jan-01 00:00:20.035
+    //   2            195000000        1990-Jan-01 00:00:20.195
+    //  -1            465000000        1990-Jan-01 00:00:20.465
     API::MatrixWorkspace_sptr splws = createMatrixSplitter(0, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter10", splws);
-    TimeSplitter timeSplitter = TimeSplitter(splws);
+    TimeSplitter timeSplitter = TimeSplitter(splws, DateAndTime(runstart_i64));
     std::string printout{timeSplitter.debugPrint()};
 
     FilterEvents filter;
