@@ -1185,7 +1185,8 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::firstValue(const Kernel:
     const auto index = std::size_t(std::distance(times.cbegin(), iter));
 
     const auto values = this->valuesAsVector();
-    return values[index];
+    const TYPE ret = values[index];
+    return ret;
   }
 }
 
@@ -1232,7 +1233,8 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue(const Kernel::
     const auto index = std::size_t(std::distance(times.cbegin(), iter));
 
     const auto values = this->valuesAsVector();
-    return values[index];
+    const TYPE ret = values[index];
+    return ret;
   }
 }
 
