@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Sequence, Optional
+from typing import Sequence
 import numpy as np
 from enum import Enum
 import mantid.simpleapi as mantid
@@ -187,8 +187,8 @@ class BaseSX(ABC):
         self.set_md(run, md_name)
 
     @default_apply_to_all_runs
-    def load_isaw_ub(self, isaw_file: str, run: Optional[Sequence[str]] = None, tol=0.15):
-        ws = self.get_ws(run)
+    def load_isaw_ub(self, isaw_file: str, run=None, tol=0.15):
+        ws = self.get_ws_name(run)
         try:
             mantid.LoadIsawUB(InputWorkspace=ws, Filename=isaw_file)
             peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
@@ -196,7 +196,7 @@ class BaseSX(ABC):
                 mantid.LoadIsawUB(InputWorkspace=peaks, Filename=isaw_file)
                 mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
         except:
-            print("LoadIsawUB failed for run " + run)
+            print(f"LoadIsawUB failed for run {run}")
 
     def find_ub_using_lattice_params(self, global_B, tol=0.15, **kwargs):
         if global_B:
