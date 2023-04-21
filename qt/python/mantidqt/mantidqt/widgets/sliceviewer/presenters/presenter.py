@@ -226,6 +226,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         else:
             self.new_plot()
         self._call_cutviewer_presenter_if_created("on_dimension_changed")
+        self.extents_changed()
 
     def extents_changed(self):
         xlim, ylim = self.view.data_view.dimensions.get_extents()
