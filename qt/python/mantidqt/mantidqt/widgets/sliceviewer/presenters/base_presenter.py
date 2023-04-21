@@ -50,7 +50,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         limits = self._data_view.get_axes_limits()
         if limits is not None:
             if self._data_view.nonorthogonal_mode:
-                limits = self._data_view.transform_limits_to_extents_inv(*limits)
+                limits = self._data_view.inverse_transform_limits_to_extents(*limits)
             self._data_view.dimensions.set_extents(*limits)
         self.update_data_limits()
 

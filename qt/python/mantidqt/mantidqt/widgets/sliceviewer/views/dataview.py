@@ -491,26 +491,29 @@ class SliceViewerDataView(QWidget):
         else:
             xlim, ylim = self.get_axes_limits()
             if self.nonorthogonal_mode:
-                xlim, ylim = self.transform_extents_to_limits_inv(xlim, ylim)
+                xlim, ylim = self.inverse_transform_extents_to_limits(xlim, ylim)
             return xlim, ylim
 
     def transform_limits_to_extents(self, xlim, ylim):
         # viewing axis y not aligned with plot axis
-        # transform bottom left and top right corner so data fills the initial or zoomed rectangle
+        # transform bottom left and top right corner
+        # of the data limits needed to fill the initial or zoomed rectangle extents
         xmin_p, ymin_p = self.nonortho_transform.tr(xlim[0], ylim[0])
         xmax_p, ymax_p = self.nonortho_transform.tr(xlim[1], ylim[1])
         return (xmin_p, xmax_p), (ymin_p, ymax_p)
 
-    def transform_extents_to_limits_inv(self, xlim, ylim):
+    def inverse_transform_extents_to_limits(self, xlim, ylim):
         # viewing axis y not aligned with plot axis
-        # inverse transform top left and bottom right corner so data fills the initial or zoomed rectangle
+        # inverse transform top left and bottom right corner
+        # of the zoomed rectangle extents needed to cover the data limits
         xmin_p, ymax_p = self.nonortho_transform.inv_tr(xlim[0], ylim[1])
         xmax_p, ymin_p = self.nonortho_transform.inv_tr(xlim[1], ylim[0])
         return (xmin_p, xmax_p), (ymin_p, ymax_p)
 
-    def transform_limits_to_extents_inv(self, xlim, ylim):
+    def inverse_transform_limits_to_extents(self, xlim, ylim):
         # viewing axis y not aligned with plot axis
-        # inverse transform bottom left and top right corner so data fills the initial or zoomed rectangle
+        # inverse transform bottom left and top right corner
+        # of the data limits needed to fill the initial or zoomed rectangle extents
         xmin_p, ymin_p = self.nonortho_transform.inv_tr(xlim[0], ylim[0])
         xmax_p, ymax_p = self.nonortho_transform.inv_tr(xlim[1], ylim[1])
         return (xmin_p, xmax_p), (ymin_p, ymax_p)
