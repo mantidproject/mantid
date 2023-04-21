@@ -48,6 +48,10 @@ void MoveInstrumentComponent::init() {
                   "interpreted. If true it is a vector relative to the initial "
                   "component's position. Otherwise it is a new position in the "
                   "absolute co-ordinates.");
+  declareProperty("MoveFixedDetectors", false,
+                  "Whether to allow moving of individual detector pixels located within a structured bank. "
+                  "If set to false then a request to move a detector pixel within a structured bank will be ignored. "
+                  "The default value for this property is set to false to maintain backwards compatibility.");
 }
 
 /** Executes the algorithm.
@@ -85,6 +89,7 @@ void MoveInstrumentComponent::exec() {
   const double Y = getProperty("Y");
   const double Z = getProperty("Z");
   const bool relativePosition = getProperty("RelativePosition");
+  const bool moveFixedDetectors = getProperty("MoveFixedDetectors");
 
   IComponent_const_sptr comp;
   // Find the component to move
@@ -111,7 +116,7 @@ void MoveInstrumentComponent::exec() {
 
   auto &componentInfo = inputW ? inputW->mutableComponentInfo() : inputP->mutableComponentInfo();
   auto compIndex = componentInfo.indexOf(comp->getComponentID());
-  if (ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo, compIndex)) {
+  if (!moveFixedDetectors && ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo, compIndex)) {
     // DetectorInfo makes changing positions possible but we keep the old
     // behavior of ignoring position changes for Structured banks.
     g_log.warning("Component is fixed within a structured bank, moving is not "
