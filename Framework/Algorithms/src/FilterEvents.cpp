@@ -449,22 +449,16 @@ void FilterEvents::processAlgorithmProperties() {
   else
     throw runtime_error("An unrecognized option for SpectrumWithoutDetector");
 
-  // Splitters may be specified in relative time
-  m_isSplittersRelativeTime = getProperty("RelativeTime");
-  if (m_isSplittersRelativeTime) {
-    // Using relative time
-    if (!isDefault("FilterStartTime")) {
-      std::string filter_start_time_str =
-          getProperty("FilterStartTime"); // User-specified absolute base time for relative times
-      m_filterStartTime = Types::Core::DateAndTime(filter_start_time_str);
-    } else {
-      // Retrieve filter starting time from property run_start as default
-      try {
-        m_filterStartTime = m_eventWS->run().startTime();
-      } catch (std::runtime_error &) {
-        throw std::runtime_error("RelativeTime is true, but InputWorkspace does not have property run_start and "
-                                 "FilterStartTime is not specified either.");
-      }
+  if (!isDefault("FilterStartTime")) {
+    std::string filter_start_time_str =
+        getProperty("FilterStartTime"); // User-specified absolute base time for relative times
+    m_filterStartTime = Types::Core::DateAndTime(filter_start_time_str);
+  } else {
+    // Retrieve filter starting time from property run_start as default
+    try {
+      m_filterStartTime = m_eventWS->run().startTime();
+    } catch (std::runtime_error &) {
+      throw std::runtime_error("InputWorkspace doesn't have property run_start and FilterStartTime is not specified.");
     }
   }
 
@@ -538,9 +532,8 @@ TimeROI FilterEvents::partialROI(const int &index) {
 
     const auto firstSplitter = splittingBoundaries.begin();
     // add leading mask as ROI of the unfiltered workspace
-    DateAndTime startTime = m_isSplittersRelativeTime ? m_filterStartTime : m_eventWS->run().startTime();
-    if (firstSplitter->first > startTime)
-      roi.addROI(startTime, firstSplitter->first);
+    if (firstSplitter->first > m_filterStartTime)
+      roi.addROI(m_filterStartTime, firstSplitter->first);
 
     const auto lastSplitter = std::prev(splittingBoundaries.end());
     // sanity check
@@ -650,10 +643,10 @@ void FilterEvents::createOutputWorkspaces() {
         TimeROI timeROI = m_timeSplitter.getTimeROI(wsindex);
         auto timeIntervals = timeROI.toTimeIntervals();
         for (size_t ii = 0; ii < timeIntervals.size(); ii++) {
-          auto startTimeInSeconds = Mantid::Types::Core::DateAndTime::secondsFromDuration(
-              timeIntervals[ii].start() - (m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime::GPS_EPOCH));
-          auto stopTimeInSeconds = Mantid::Types::Core::DateAndTime::secondsFromDuration(
-              timeIntervals[ii].stop() - (m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime::GPS_EPOCH));
+          auto startTimeInSeconds =
+              Mantid::Types::Core::DateAndTime::secondsFromDuration(timeIntervals[ii].start() - m_filterStartTime);
+          auto stopTimeInSeconds =
+              Mantid::Types::Core::DateAndTime::secondsFromDuration(timeIntervals[ii].stop() - m_filterStartTime);
           wsname << startTimeInSeconds << "_" << stopTimeInSeconds;
           if (ii < timeIntervals.size() - 1)
             wsname << "_";
