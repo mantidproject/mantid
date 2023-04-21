@@ -93,7 +93,7 @@ public:
     MoveInstrumentComponent mover;
     mover.initialize();
     mover.setPropertyValue("Workspace", wsName);
-    mover.setPropertyValue("ComponentName", (bank_name + det_name));
+    mover.setPropertyValue("ComponentName", (bank_name + "/" + det_name));
     mover.setPropertyValue("X", "10");
     mover.setPropertyValue("Y", "20");
     mover.setPropertyValue("Z", "30");
@@ -104,7 +104,7 @@ public:
     checkExpectedDetectorPosition(expectedPos);
   }
 
-  void testMoveIgnoredForDetectorInStructuredBank() {
+  void testMoveDetectorInStructuredBankIgnoredByDefault() {
     setupInstrumentWithRectangularDetector();
 
     MoveInstrumentComponent mover;
@@ -117,6 +117,24 @@ public:
     mover.execute();
 
     V3D expectedPos = det1->getPos();
+    checkExpectedDetectorPosition(expectedPos);
+  }
+
+  void testMoveDetectorInStructuredBank() {
+    setupInstrumentWithRectangularDetector();
+
+    MoveInstrumentComponent mover;
+    mover.initialize();
+    mover.setPropertyValue("Workspace", wsName);
+    mover.setPropertyValue("DetectorID", std::to_string(det_id));
+    mover.setPropertyValue("X", "10");
+    mover.setPropertyValue("Y", "20");
+    mover.setPropertyValue("Z", "30");
+    mover.setPropertyValue("RelativePosition", "0");
+    mover.setPropertyValue("MoveFixedDetectors", "1");
+    mover.execute();
+
+    V3D expectedPos = V3D(10, 20, 30);
     checkExpectedDetectorPosition(expectedPos);
   }
 
