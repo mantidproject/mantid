@@ -361,6 +361,7 @@ class SliceViewerTest(unittest.TestCase):
         mock_sliceinfo_cls.slicepoint = [None, None]  # no slicepoint as 2D ws
         data_view_mock.dimensions.get_previous_states.return_value = [0, 1]  # no None that indicates integrated dim
 
+        presenter.update_axes_limits_to_extents = mock.Mock(return_value=None)
         presenter.dimensions_changed()
 
         mock_new_plot.assert_called_with(dimensions_transposing=True)
@@ -372,6 +373,7 @@ class SliceViewerTest(unittest.TestCase):
         )
         self.model.get_number_dimensions.return_value = 2
 
+        presenter.update_axes_limits_to_extents = mock.Mock(return_value=None)
         presenter.dimensions_changed()
 
         data_view_mock.disable_tool_button.assert_called_once_with(ToolItemText.NONORTHOGONAL_AXES)
@@ -387,6 +389,7 @@ class SliceViewerTest(unittest.TestCase):
         self.patched_deps["WorkspaceInfo"].is_ragged_matrix_workspace.return_value = False
         self.model.get_number_dimensions.return_value = 2
 
+        presenter.update_axes_limits_to_extents = mock.Mock(return_value=None)
         presenter.dimensions_changed()
 
         data_view_mock.create_axes_nonorthogonal.assert_called_once()
@@ -400,6 +403,7 @@ class SliceViewerTest(unittest.TestCase):
         )
         self.model.get_number_dimensions.return_value = 2
 
+        presenter.update_axes_limits_to_extents = mock.Mock(return_value=None)
         presenter.dimensions_changed()
 
         data_view_mock.disable_tool_button.assert_called_once_with(ToolItemText.NONORTHOGONAL_AXES)
@@ -411,6 +415,7 @@ class SliceViewerTest(unittest.TestCase):
         )
         self.model.get_number_dimensions.return_value = 2
 
+        presenter.update_axes_limits_to_extents = mock.Mock(return_value=None)
         presenter.dimensions_changed()
 
         data_view_mock.enable_tool_button.assert_called_once_with(ToolItemText.NONORTHOGONAL_AXES)
