@@ -1912,57 +1912,6 @@ public:
   //-----------------------------------------------------------------------------------------------
   /** Test method to split events by full time (pulse + tof) withtout correction
    * on TOF
-   */
-  void test_splitByFullTime() {
-    // Create 1000 random events close to SNS's frequency
-    fake_uniform_time_sns_data();
-
-    // Output will be 10 event lists
-    std::map<int, EventList *> outputs;
-    for (int i = 0; i < 10; i++)
-      outputs.emplace(i, new EventList());
-    outputs.emplace(-1, new EventList());
-
-    // Generate time splitters
-    SplittingIntervalVec split;
-
-    // Start only at 100
-    for (int i = 1; i < 10; i++) {
-      // Reject the odd hundreds pulse times (100-199, 300-399, etc).
-      if ((i % 2) == 0)
-        split.emplace_back(SplittingInterval(i * 1000000, (i + 1) * 1000000, i));
-      else
-        split.emplace_back(SplittingInterval(i * 1000000, (i + 1) * 1000000, -1));
-    }
-
-    // Do the splitting
-    el.splitByFullTime(split, outputs, false, 1.0, 0.0);
-
-    // No events in the first ouput 0-99
-    TS_ASSERT_EQUALS(outputs[0]->getNumberEvents(), 0);
-
-    for (int i = 1; i < 10; i++) {
-      EventList *myOut = outputs[i];
-      if ((i % 2) == 0) {
-        // Even
-        TS_ASSERT_EQUALS(myOut->getNumberEvents(), 1);
-      } else {
-        // Odd
-        TS_ASSERT_EQUALS(myOut->getNumberEvents(), 0);
-      }
-    }
-
-    // Clean the pointers
-    for (auto &output : outputs) {
-      delete output.second;
-    }
-
-    return;
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  /** Test method to split events by full time (pulse + tof) withtout correction
-   * on TOF
    * and with vector splitter
    */
   void test_splitByFullTimeVectorSplitter() {

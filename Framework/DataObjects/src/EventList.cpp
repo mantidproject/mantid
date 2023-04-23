@@ -3982,57 +3982,6 @@ void EventList::splitByFullTimeHelper(Kernel::SplittingIntervalVec &splitter, st
 }
 
 //------------------------------------------------------------------------------------------------
-/** Split the event list into n outputs by event's full time (tof + pulse time)
- *
- * @param splitter :: a SplittingIntervalVec giving where to split
- * @param outputs :: a map of where the split events will end up. The # of
- *entries in there should
- *        be big enough to accommodate the indices.
- * @param docorrection :: a boolean to indiciate whether it is need to do
- *correction
- * @param toffactor:  a correction factor for each TOF to multiply with
- * @param tofshift:  a correction shift for each TOF to add with
- */
-void EventList::splitByFullTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
-                                bool docorrection, double toffactor, double tofshift) const {
-  if (eventType == WEIGHTED_NOTIME)
-    throw std::runtime_error("EventList::splitByTime() called on an EventList "
-                             "that no longer has time information.");
-
-  // 1. Start by sorting the event list by pulse time.
-  this->sortPulseTimeTOF();
-
-  // 2. Initialize all the outputs
-  for (auto &outiter : outputs) {
-    EventList *opeventlist = outiter.second;
-    opeventlist->clear();
-    opeventlist->setDetectorIDs(this->getDetectorIDs());
-    opeventlist->setHistogram(m_histogram);
-    // Match the output event type.
-    opeventlist->switchTo(eventType);
-  }
-
-  // Do nothing if there are no entries
-  if (splitter.empty()) {
-    // 3A. Copy all events to group workspace = -1
-    (*outputs[-1]) = (*this);
-    // this->duplicate(outputs[-1]);
-  } else {
-    // 3B. Split
-    switch (eventType) {
-    case TOF:
-      splitByFullTimeHelper(splitter, outputs, this->events, docorrection, toffactor, tofshift);
-      break;
-    case WEIGHTED:
-      splitByFullTimeHelper(splitter, outputs, this->weightedEvents, docorrection, toffactor, tofshift);
-      break;
-    case WEIGHTED_NOTIME:
-      break;
-    }
-  }
-}
-
-//------------------------------------------------------------------------------------------------
 /** Split the event list into n outputs, operating on a vector of either
  *TofEvent's or WeightedEvent's
  *  The comparison between neutron event and splitter is based on neutron

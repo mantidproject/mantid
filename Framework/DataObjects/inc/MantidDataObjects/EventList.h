@@ -278,9 +278,6 @@ public:
   /// Initialize the detector ID's and event type of the destination event lists when splitting this list
   void initializePartials(std::map<int, EventList *> partials) const;
 
-  void splitByFullTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs, bool docorrection,
-                       double toffactor, double tofshift) const;
-
   /// Split ...
   std::string splitByFullTimeMatrixSplitter(const std::vector<int64_t> &vec_splitters_time,
                                             const std::vector<int> &vecgroups,
@@ -396,7 +393,6 @@ private:
   template <class T>
   static void integrateHelper(std::vector<T> &events, const double minX, const double maxX, const bool entireRange,
                               double &sum, double &error);
-
   template <class T> void convertTofHelper(std::vector<T> &events, const std::function<double(double)> &func);
 
   template <class T> void convertTofHelper(std::vector<T> &events, const double factor, const double offset);
