@@ -434,10 +434,6 @@ private:
   void splitByFullTimeHelper(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
                              typename std::vector<T> &events, bool docorrection, double toffactor,
                              double tofshift) const;
-  /// Split events by pulse time
-  template <class T>
-  void splitByPulseTimeHelper(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
-                              typename std::vector<T> &events) const;
 
   template <class T>
   std::string splitByFullTimeVectorSplitterHelper(const std::vector<int64_t> &vectimes,

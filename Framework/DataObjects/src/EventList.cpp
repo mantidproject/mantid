@@ -4382,68 +4382,6 @@ std::string EventList::splitByFullTimeMatrixSplitter(const std::vector<int64_t> 
   return debugmessage;
 }
 
-//-------------------------------------------
-//--------------------------------------------------
-/** Split the event list into n outputs by each event's pulse time only
- */
-template <class T>
-void EventList::splitByPulseTimeHelper(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
-                                       typename std::vector<T> &events) const {
-  // Prepare to TimeSplitter Iterate through the splitter at the same time
-  auto itspl = splitter.cbegin();
-  auto itspl_end = splitter.cend();
-  Types::Core::DateAndTime start, stop;
-
-  // Prepare to Events Iterate through all events (sorted by tof)
-  auto itev = events.cbegin();
-  auto itev_end = events.cend();
-
-  // Iterate (loop) on all splitters
-  while (itspl != itspl_end) {
-    // Get the splitting interval times and destination group
-    start = itspl->start().totalNanoseconds();
-    stop = itspl->stop().totalNanoseconds();
-    const int index = itspl->index();
-
-    // Skip the events before the start of the time and put to 'unfiltered'
-    // EventList
-    EventList *myOutput = outputs[-1];
-    while (itev != itev_end) {
-      if (itev->m_pulsetime < start) {
-        // Record to index = -1 space
-        const T eventCopy(*itev);
-        myOutput->addEventQuickly(eventCopy);
-        ++itev;
-      } else {
-        // Event within a splitter interval
-        break;
-      }
-    }
-
-    // Go through all the events that are in the interval (if any)
-    while (itev != itev_end) {
-
-      if (itev->m_pulsetime < stop) {
-        outputs[index]->addEventQuickly(*itev);
-        ++itev;
-      } else {
-        // Out of interval
-        break;
-      }
-    }
-
-    // Go to the next interval
-    ++itspl;
-    // But if we reached the end, then we are done.
-    if (itspl == itspl_end)
-      break;
-
-    // No need to keep looping through the filter if we are out of events
-    if (itev == itev_end)
-      break;
-  } // END-WHILE Splitter
-}
-
 //--------------------------------------------------------------------------
 /** Get the vector of events contained in an EventList;
  * this is overloaded by event type.
