@@ -287,8 +287,6 @@ public:
                                             std::map<int, EventList *> vec_outputEventList, bool docorrection,
                                             double toffactor, double tofshift) const;
 
-  void splitByPulseTime(const TimeSplitter &splitter, std::map<int, EventList *> outputs) const;
-
   void multiply(const double value, const double error = 0.0) override;
   EventList &operator*=(const double value);
 

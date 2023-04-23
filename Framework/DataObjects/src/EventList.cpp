@@ -4444,50 +4444,6 @@ void EventList::splitByPulseTimeHelper(Kernel::SplittingIntervalVec &splitter, s
   } // END-WHILE Splitter
 }
 
-//----------------------------------------------------------------------------------------------
-/** Split the event list by pulse time
- */
-void EventList::splitByPulseTime(const TimeSplitter &splitter, std::map<int, EventList *> outputs) const {
-  // Check for supported event type
-  if (eventType == WEIGHTED_NOTIME)
-    throw std::runtime_error("EventList::splitByTime() called on an EventList "
-                             "that no longer has time information.");
-
-  // Start by sorting the event list by pulse time.
-  this->sortPulseTimeTOF();
-
-  // Initialize all the output event lists
-  std::map<int, EventList *>::iterator outiter;
-  for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter) {
-    EventList *opeventlist = outiter->second;
-    opeventlist->clear();
-    opeventlist->setDetectorIDs(this->getDetectorIDs());
-    opeventlist->setHistogram(m_histogram);
-    // Match the output event type.
-    opeventlist->switchTo(eventType);
-  }
-
-  // Split
-  if (splitter.empty()) {
-    // No splitter: copy all events to group workspace = -1
-    (*outputs[-1]) = (*this);
-  } else {
-    // Split
-    switch (eventType) {
-    case TOF:
-      // splitByPulseTimeHelper(splitter, outputs, this->events);
-      splitter.splitEventList(this->events, outputs, true /*bool pulseTof*/);
-      break;
-    case WEIGHTED:
-      // splitByPulseTimeHelper(splitter, outputs, this->weightedEvents);
-      splitter.splitEventList(this->weightedEvents, outputs, true /*bool pulseTof*/);
-      break;
-    case WEIGHTED_NOTIME:
-      break;
-    }
-  }
-}
-
 //--------------------------------------------------------------------------
 /** Get the vector of events contained in an EventList;
  * this is overloaded by event type.
