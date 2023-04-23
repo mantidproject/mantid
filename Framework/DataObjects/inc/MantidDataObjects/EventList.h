@@ -385,9 +385,7 @@ private:
   template <class T>
   static void compressEventsHelper(const std::vector<T> &events, std::vector<WeightedEventNoTime> &out,
                                    double tolerance);
-  template <class T>
-  void compressEventsParallelHelper(const std::vector<T> &events, std::vector<WeightedEventNoTime> &out,
-                                    double tolerance);
+
   template <class T>
   static void compressFatEventsHelper(const std::vector<T> &events, std::vector<WeightedEvent> &out,
                                       const double tolerance, const Mantid::Types::Core::DateAndTime &timeStart,
