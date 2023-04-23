@@ -2180,22 +2180,6 @@ void EventList::generateErrorsHistogram(const MantidVec &Y, MantidVec &E) const 
   std::transform(Y.cbegin(), Y.cend(), E.begin(), static_cast<double (*)(double)>(sqrt));
 
 } //----------------------------------------------------------------------------------
-/** Integrate the events between a range of X values, or all events.
- *
- * @param events :: reference to a vector of events to change.
- * @param minX :: minimum X bin to use in integrating.
- * @param maxX :: maximum X bin to use in integrating.
- * @param entireRange :: set to true to use the entire range. minX and maxX are
- *then ignored!
- * @return the integrated number of events.
- */
-template <class T>
-double EventList::integrateHelper(std::vector<T> &events, const double minX, const double maxX,
-                                  const bool entireRange) {
-  double sum(0), error(0);
-  integrateHelper(events, minX, maxX, entireRange, sum, error);
-  return sum;
-}
 
 /** Integrate the events between a range of X values, or all events.
  *
