@@ -287,9 +287,6 @@ public:
                                             std::map<int, EventList *> vec_outputEventList, bool docorrection,
                                             double toffactor, double tofshift) const;
 
-  /// Split events by pulse time
-  void splitByPulseTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs) const;
-
   void splitByPulseTime(const TimeSplitter &splitter, std::map<int, EventList *> outputs) const;
 
   void multiply(const double value, const double error = 0.0) override;
