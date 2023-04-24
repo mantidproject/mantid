@@ -11,7 +11,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidReflectometry/SpecularReflectionPositionCorrect2.h"
 #include <cxxtest/TestSuite.h>
@@ -109,10 +109,9 @@ private:
     TS_ASSERT_DELTA(lineTwoTheta * radToDeg, twoTheta, 1e-10)
   }
 
-  static const double getTwoTheta(const ComponentID compId, const ComponentInfo &compInfo,
-                                  const SpectrumInfo &spectrumInfo) {
-    auto compIdx = compInfo.indexOf(compId);
-    return spectrumInfo.twoTheta(compIdx);
+  static const double getTwoTheta(const int detID, const DetectorInfo &detInfo, const SpectrumInfo &spectrumInfo) {
+    auto detIdx = detInfo.indexOf(detID);
+    return spectrumInfo.twoTheta(detIdx);
   }
 
 public:
@@ -212,8 +211,7 @@ public:
     auto posOut = detOut->getPos();
     TS_ASSERT_DIFFERS(posIn, posOut);
     // TwoTheta for the detector should have been changed
-    auto componentIdOut = detOut->getComponentID();
-    auto thetaOut = getTwoTheta(componentIdOut, outWS->componentInfo(), outWS->spectrumInfo());
+    auto thetaOut = getTwoTheta(detID, outWS->detectorInfo(), outWS->spectrumInfo());
     TS_ASSERT_DELTA(newTwoTheta, thetaOut * radToDeg, 1e-10);
   }
 
@@ -238,10 +236,8 @@ public:
     auto posOut = detOut->getPos();
     TS_ASSERT_EQUALS(posIn, posOut);
     // TwoTheta for the detector should be unchanged
-    auto componentIdIn = detIn->getComponentID();
-    auto thetaIn = getTwoTheta(componentIdIn, m_interWS->componentInfo(), m_interWS->spectrumInfo());
-    auto componentIdOut = detOut->getComponentID();
-    auto thetaOut = getTwoTheta(componentIdOut, outWS->componentInfo(), outWS->spectrumInfo());
+    auto thetaIn = getTwoTheta(detID, m_interWS->detectorInfo(), m_interWS->spectrumInfo());
+    auto thetaOut = getTwoTheta(detID, outWS->detectorInfo(), outWS->spectrumInfo());
     TS_ASSERT_EQUALS(thetaIn, thetaOut);
   }
 
