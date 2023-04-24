@@ -186,10 +186,6 @@ public:
   // Remove time series values according to TimeROI
   void removeDataOutsideTimeROI(const TimeROI &timeRoi) override;
 
-  /// New split method
-  void splitByTimeVector(const std::vector<Types::Core::DateAndTime> &splitter_time_vec,
-                         const std::vector<int> &target_vec, const std::vector<TimeSeriesProperty *> &outputs);
-
   /// Fill a SplittingIntervalVec that will filter the events by matching
   void makeFilterByValue(std::vector<SplittingInterval> &split, double min, double max, double TimeTolerance = 0.0,
                          bool centre = false) const override;
