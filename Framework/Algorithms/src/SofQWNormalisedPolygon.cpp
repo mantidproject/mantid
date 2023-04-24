@@ -271,7 +271,11 @@ const std::string SofQWNormalisedPolygon::category() const { return "Inelastic\\
 /**
  * Initialize the algorithm
  */
-void SofQWNormalisedPolygon::init() { SofQW::createCommonInputProperties(*this); }
+void SofQWNormalisedPolygon::init() {
+  SofQW::createCommonInputProperties(*this);
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("IgnorePartialOverlaps", false),
+                  "If true, all output bins where the sum of all weights is not unity (1.0) will be replaced by NaNs.");
+}
 
 /** Checks that the input workspace and table have compatible dimensions
  * @return a map with the corresponding error messages
@@ -387,7 +391,8 @@ void SofQWNormalisedPolygon::exec() {
       }
 
       using FractionalRebinning::rebinToFractionalOutput;
-      rebinToFractionalOutput(Quadrilateral(ll, lr, ur, ul), inputWS, i, j, *outputWS, m_Qout);
+      rebinToFractionalOutput(Quadrilateral(ll, lr, ur, ul), inputWS, i, j, *outputWS, m_Qout, nullptr,
+                              this->getProperty("IgnorePartialOverlaps"));
 
       // Find which q bin this point lies in
       const MantidVec::difference_type qIndex = std::upper_bound(m_Qout.begin(), m_Qout.end(), lrQ) - m_Qout.begin();

@@ -55,7 +55,8 @@ MANTID_DATAOBJECTS_DLL void rebinToFractionalOutput(const Geometry::Quadrilatera
                                                     const API::MatrixWorkspace_const_sptr &inputWS, const size_t i,
                                                     const size_t j, DataObjects::RebinnedOutput &outputWS,
                                                     const std::vector<double> &verticalAxis,
-                                                    const DataObjects::RebinnedOutput_const_sptr &inputRB = nullptr);
+                                                    const DataObjects::RebinnedOutput_const_sptr &inputRB = nullptr,
+                                                    const bool ignorePartialOverlaps = false);
 
 /// Set finalize flag after fractional rebinning loop
 MANTID_DATAOBJECTS_DLL void finalizeFractionalRebin(DataObjects::RebinnedOutput &outputWS);
