@@ -205,6 +205,8 @@ public:
   void setFacility(const std::string &facilityName);
   /// Sets the log level priority for all log channels
   void setLogLevel(int logLevel, bool quiet = false);
+  /// Sets the log level priority for all log channels
+  void setLogLevel(std::string logLevel, bool quiet = false);
 
   /// Look for an instrument
   const InstrumentInfo &getInstrument(const std::string &instrumentName = "") const;
