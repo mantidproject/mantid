@@ -72,7 +72,7 @@ class DNSElasticSCPlotView(DNSView):
         # connecting signals
         self._attach_signal_slots()
 
-        # setting up custom menu for sc plot options and views
+        # setting up custom menu for single crystal plot options and views
         self.views_menu = DNSElasticSCPlotViewMenu()
         options_menu = DNSElasticSCPlotOptionsMenu(self)
         self.menus = []
@@ -80,11 +80,11 @@ class DNSElasticSCPlotView(DNSView):
         self.menus.append(options_menu)
         self.views_menu.sig_replot.connect(self._plot)
         canvas = FigureCanvas(Figure())
+        canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         toolbar = NavigationToolbar(canvas, self)
         toolbar.actions()[0].triggered.connect(self._home_button_clicked)
         _content.plot_head_layout.insertWidget(5, toolbar)
         _content.plot_layout.insertWidget(2, canvas)
-        canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.canvas = canvas
         self.single_crystal_plot = DNSScPlot(self, self.canvas.figure, None)
         self.initial_values = None
