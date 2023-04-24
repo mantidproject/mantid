@@ -18,12 +18,43 @@ namespace Mantid::Kernel {
 namespace {
 // We only need a single NullStream object
 Poco::NullOutputStream NULL_STREAM;
-} // namespace
 
-static const std::string PriorityNames_data[] = {"NOT_USED",         "PRIO_FATAL",   "PRIO_CRITICAL",
-                                                 "PRIO_ERROR",       "PRIO_WARNING", "PRIO_NOTICE",
-                                                 "PRIO_INFORMATION", "PRIO_DEBUG",   "PRIO_TRACE"};
-const std::string *Logger::PriorityNames = PriorityNames_data;
+int fixLevel(const int level) {
+  if (level < 0)
+    return 0;
+  else if (level >= int(Logger::PriorityNames.size()))
+    return int(Logger::PriorityNames.size()) - 1;
+  else
+    return level;
+}
+
+int toLevel(const std::string &level) {
+  // convert the string to uppercase
+  std::string lowercase(level); // make sure space is allocated
+  std::transform(level.cbegin(), level.cend(), lowercase.begin(), [](unsigned char c) { return std::tolower(c); });
+
+  // see if it is an alias for "none"
+  if (lowercase == "not_used") {
+    lowercase = "none";
+  }
+
+  // look for it in the list already
+  const auto iter = std::find(Logger::PriorityNames.cbegin(), Logger::PriorityNames.cend(), lowercase);
+  if (iter != Logger::PriorityNames.cend()) {
+    return int(std::distance(Logger::PriorityNames.cbegin(), iter));
+  }
+
+  // didn't find it so error out
+  std::stringstream msg;
+  msg << "Do not know how to convert \"" << level << "\" to an integer level";
+  throw std::runtime_error(msg.str());
+}
+
+} // anonymous namespace
+
+// "none" effectively turns off logging
+const std::array<std::string, 9> Logger::PriorityNames{"none",   "fatal",       "critical", "error", "warning",
+                                                       "notice", "information", "debug",    "trace"};
 
 /** Constructor
  * @param name :: The class name invoking this logger
@@ -157,29 +188,36 @@ bool Logger::is(int level) const {
 
 void Logger::setLevel(int level) {
   try {
-    m_log->setLevel(level);
+    const int levelActual = fixLevel(level);
+    m_log->setLevel(levelActual);
   } catch (std::exception &e) {
     // failures in logging are not allowed to throw exceptions out of the
     // logging class
-    std::cerr << e.what();
+    std::cerr << e.what() << "\n";
   }
 }
 
 /// Sets the Logger's log level using a symbolic value.
 ///
 /// @param level :: Valid values are: fatal, critical, error, warning, notice,
-/// information, debug
+/// information, debug, trace
 void Logger::setLevel(const std::string &level) {
   try {
-    m_log->setLevel(level);
+    const int int_level = toLevel(level);
+    m_log->setLevel(int_level);
   } catch (std::exception &e) {
     // failures in logging are not allowed to throw exceptions out of the
     // logging class
-    std::cerr << e.what();
+    std::cerr << e.what() << "\n";
   }
 }
 
 int Logger::getLevel() const { return m_log->getLevel(); }
+
+std::string Logger::getLevelName() const {
+  const auto level = std::size_t(this->getLevel());
+  return Logger::PriorityNames[level];
+}
 
 /** This class implements an ostream interface to the Logger for fatal messages.
  *
@@ -295,8 +333,21 @@ void Logger::shutdown() {
  * @param level :: the priority level to set for the loggers
  */
 void Logger::setLevelForAll(const int level) {
-  // "" is the root logger
-  Poco::Logger::setLevel("", level);
+  const int levelActual = fixLevel(level);
+
+  try {
+    // "" is the root logger
+    Poco::Logger::setLevel("", levelActual);
+  } catch (std::exception &e) {
+    // failures in logging are not allowed to throw exceptions out of the
+    // logging class
+    std::cerr << e.what();
+  }
+}
+
+void Logger::setLevelForAll(const std::string &level) {
+  int intLevel = toLevel(level);
+  setLevelForAll(intLevel);
 }
 
 /**
