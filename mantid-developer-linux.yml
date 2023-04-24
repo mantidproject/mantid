@@ -73,3 +73,8 @@ dependencies:
   - pygments==2.11.2 # Had to pin back to 2.11 due to cppcheck error which is only fixed in cppcheck>=2.8
   - gcovr>=4.2
   - pre-commit>=2.12.0
+
+  # pip installs
+  - pip:
+    - quickBayes==1.0.0b5
+

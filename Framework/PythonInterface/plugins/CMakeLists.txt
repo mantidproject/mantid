@@ -208,6 +208,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/AddSampleLogMultiple.py
     algorithms/WorkflowAlgorithms/ApplyPaalmanPingsCorrection.py
     algorithms/WorkflowAlgorithms/BayesQuasi.py
+    algorithms/WorkflowAlgorithms/BayesQuasi2.py
     algorithms/WorkflowAlgorithms/BayesStretch.py
     algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/ConvertMultipleRunsToSingleCrystalMD.py
