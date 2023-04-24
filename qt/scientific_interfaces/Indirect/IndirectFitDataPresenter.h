@@ -39,7 +39,6 @@ public:
   void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
   void setEndX(double startX, WorkspaceID workspaceID);
   void setEndX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
-  std::map<int, QModelIndex> getUniqueIndices(const QModelIndexList &selectedIndices);
 
   std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const;
   QStringList getSampleWSSuffices() const;
@@ -112,6 +111,7 @@ private:
   void setModelEndXAndEmit(double endX, FitDomainIndex row);
   void setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row);
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
+  std::map<int, QModelIndex> getUniqueIndices(const QModelIndexList &selectedIndices);
   bool m_emitCellChanged = true;
 };
 
