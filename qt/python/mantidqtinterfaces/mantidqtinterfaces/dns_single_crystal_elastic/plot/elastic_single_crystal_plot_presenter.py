@@ -90,6 +90,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self._manual_lim_changed()
         self._set_initial_omega_offset_dx_dy()
         self.view.single_crystal_plot.connect_ylim_change()
+        self.view.canvas.figure.tight_layout()
         self.view.draw()
 
     def _set_initial_omega_offset_dx_dy(self):
