@@ -119,6 +119,12 @@ void SpecularReflectionPositionCorrect2::init() {
   auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   nonNegativeDouble->setLowerExclusive(0.);
   declareProperty("PixelSize", EMPTY_DBL(), positiveDouble, "Size of a detector pixel, in metres.");
+
+  declareProperty("MoveFixedDetectors", false,
+                  "Whether to change the position of individual detector pixels located within a structured bank. "
+                  "If set to false then a request to change the position of a detector pixel within a structured bank "
+                  "will be ignored. "
+                  "The default value for this property is set to false to maintain backwards compatibility.");
 }
 
 /// Validate the algorithm's inputs.
@@ -229,6 +235,8 @@ void SpecularReflectionPositionCorrect2::correctDetectorPosition(
     moveAlg->setProperty(horizontalAxis, perpendicularOffset);
     moveAlg->setProperty(upAxis, 0.0);
   }
+  const bool moveFixedDetectors = getProperty("MoveFixedDetectors");
+  moveAlg->setProperty("MoveFixedDetectors", moveFixedDetectors);
   moveAlg->execute();
 
   const bool rotateFace = getProperty("DetectorFacesSample");

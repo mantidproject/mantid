@@ -11,6 +11,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidReflectometry/SpecularReflectionPositionCorrect2.h"
 #include <cxxtest/TestSuite.h>
@@ -26,9 +27,13 @@ private:
   MatrixWorkspace_sptr m_figaroWS;
   MatrixWorkspace_sptr m_interWS;
 
+  static constexpr double radToDeg = 180. / M_PI;
+  static constexpr double degToRad = M_PI / 180.;
+
   // Initialise the algorithm and set the properties
   static void setupAlgorithm(SpecularReflectionPositionCorrect2 &alg, MatrixWorkspace_sptr &inWS, const double twoTheta,
-                             const std::string &correctionType, const std::string &detectorName, int detectorID = 0) {
+                             const std::string &correctionType, const std::string &detectorName, int detectorID = 0,
+                             std::optional<bool> moveFixedDetectors = std::nullopt) {
     if (!alg.isInitialized())
       alg.initialize();
     alg.setChild(true);
@@ -41,6 +46,8 @@ private:
       alg.setProperty("DetectorComponentName", detectorName);
     if (detectorID > 0)
       alg.setProperty("DetectorID", detectorID);
+    if (moveFixedDetectors.has_value())
+      alg.setProperty("MoveFixedDetectors", moveFixedDetectors.value() ? "1" : "0");
     alg.setPropertyValue("OutputWorkspace", "test_out");
   }
 
@@ -70,10 +77,10 @@ private:
     TS_ASSERT_DELTA(posOut.norm(), l2, 1e-10)
     const auto thetaSignDir = instrIn->getReferenceFrame()->vecThetaSign();
     const auto horizontal = thetaSignDir.X() != 0. ? true : false;
-    const auto a = l2 * std::sin(twoTheta * M_PI / 180);
+    const auto a = l2 * std::sin(twoTheta * degToRad);
     const auto x = horizontal ? a : 0.;
     const auto y = horizontal ? 0. : a;
-    const auto z = l2 * std::cos(twoTheta * M_PI / 180);
+    const auto z = l2 * std::cos(twoTheta * degToRad);
     TS_ASSERT_DELTA(posOut.X(), x, 1e-10)
     TS_ASSERT_DELTA(posOut.Y(), y, 1e-10)
     TS_ASSERT_DELTA(posOut.Z(), z, 1e-10)
@@ -99,7 +106,13 @@ private:
     const auto posOut = detOut->getPos();
     TS_ASSERT_DELTA(posOut.norm(), l2, 1e-10)
     const auto lineTwoTheta = spectrumInfoOut.twoTheta(static_cast<size_t>(linePos));
-    TS_ASSERT_DELTA(lineTwoTheta * 180. / M_PI, twoTheta, 1e-10)
+    TS_ASSERT_DELTA(lineTwoTheta * radToDeg, twoTheta, 1e-10)
+  }
+
+  static const double getTwoTheta(const ComponentID compId, const ComponentInfo &compInfo,
+                                  const SpectrumInfo &spectrumInfo) {
+    auto compIdx = compInfo.indexOf(compId);
+    return spectrumInfo.twoTheta(compIdx);
   }
 
 public:
@@ -175,6 +188,61 @@ public:
     alg.setProperty("TwoTheta", 1.4);
     alg.setPropertyValue("OutputWorkspace", "test_out");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
+  }
+
+  void test_pixel_correction_for_rectangular_detector() {
+    SpecularReflectionPositionCorrect2 alg;
+    const int detID = 2001;
+    const double newTwoTheta = 1.4;
+    setupAlgorithm(alg, m_interWS, newTwoTheta, "", "", detID, true);
+    MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
+
+    auto instrIn = m_interWS->getInstrument();
+    auto instrOut = outWS->getInstrument();
+
+    // Sample should not have moved
+    auto sampleIn = instrIn->getSample()->getPos();
+    auto sampleOut = instrOut->getSample()->getPos();
+    TS_ASSERT_EQUALS(sampleIn, sampleOut);
+
+    auto detIn = instrIn->getDetector(detID);
+    auto detOut = instrOut->getDetector(detID);
+    // The pixels should have been moved
+    auto posIn = detIn->getPos();
+    auto posOut = detOut->getPos();
+    TS_ASSERT_DIFFERS(posIn, posOut);
+    // TwoTheta for the detector should have been changed
+    auto componentIdOut = detOut->getComponentID();
+    auto thetaOut = getTwoTheta(componentIdOut, outWS->componentInfo(), outWS->spectrumInfo());
+    TS_ASSERT_DELTA(newTwoTheta, thetaOut * radToDeg, 1e-10);
+  }
+
+  void test_pixel_correction_for_rectangular_detector_ignored_by_default() {
+    SpecularReflectionPositionCorrect2 alg;
+    const int detID = 2001;
+    setupAlgorithm(alg, m_interWS, 1.4, "", "", detID);
+    MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
+
+    auto instrIn = m_interWS->getInstrument();
+    auto instrOut = outWS->getInstrument();
+
+    // Sample should not have moved
+    auto sampleIn = instrIn->getSample()->getPos();
+    auto sampleOut = instrOut->getSample()->getPos();
+    TS_ASSERT_EQUALS(sampleIn, sampleOut);
+
+    auto detIn = instrIn->getDetector(detID);
+    auto detOut = instrOut->getDetector(detID);
+    // The pixel should not have been moved
+    auto posIn = detIn->getPos();
+    auto posOut = detOut->getPos();
+    TS_ASSERT_EQUALS(posIn, posOut);
+    // TwoTheta for the detector should be unchanged
+    auto componentIdIn = detIn->getComponentID();
+    auto thetaIn = getTwoTheta(componentIdIn, m_interWS->componentInfo(), m_interWS->spectrumInfo());
+    auto componentIdOut = detOut->getComponentID();
+    auto thetaOut = getTwoTheta(componentIdOut, outWS->componentInfo(), outWS->spectrumInfo());
+    TS_ASSERT_EQUALS(thetaIn, thetaOut);
   }
 
   void test_correct_point_detector_vertical_shift_default() {
