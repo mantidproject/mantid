@@ -65,10 +65,10 @@ IndirectPlotOptionsView::IndirectPlotOptionsView(QWidget *parent)
 IndirectPlotOptionsView::~IndirectPlotOptionsView() = default;
 
 void IndirectPlotOptionsView::setupView() {
-  connect(m_plotOptions->cbWorkspace, SIGNAL(currentIndexChanged(QString const &)), this,
+  connect(m_plotOptions->cbWorkspace, SIGNAL(currentTextChanged(QString const &)), this,
           SLOT(emitSelectedWorkspaceChanged(QString const &)));
 
-  connect(m_plotOptions->cbPlotUnit, SIGNAL(currentIndexChanged(QString const &)), this,
+  connect(m_plotOptions->cbPlotUnit, SIGNAL(currentTextChanged(QString const &)), this,
           SLOT(emitSelectedUnitChanged(QString const &)));
 
   connect(m_plotOptions->leIndices, SIGNAL(editingFinished()), this, SLOT(emitSelectedIndicesChanged()));
