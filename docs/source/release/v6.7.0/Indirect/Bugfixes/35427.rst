@@ -1,0 +1,1 @@
+- Fixed a hard crash caused by highlighting more cells than rows in the data input table and then pressing Remove.
