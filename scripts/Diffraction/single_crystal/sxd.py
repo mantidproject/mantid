@@ -132,7 +132,7 @@ class SXD(BaseSX):
         )
 
     @staticmethod
-    def calibrate_sxd_panels(ws, peaks, save_dir, tol=0.15, maxShiftInMeters=0.01):
+    def calibrate_sxd_panels(ws, peaks, save_dir, tol=0.15, **kwargs):
         """
         Calibrate SXD panels panels and apply the calibration to the workspace and peaks workspace.
         This is an iterative process in which the global translation of the detectors with respect to the sample
@@ -142,9 +142,21 @@ class SXD(BaseSX):
         :param peaks: peak table with a UB
         :param save_dir: for xml file containing calibration
         :param tol: for indexing (good to pick a relatively large tol as lots of peaks are required in each bank)
-        :param maxShiftInMeters: for panel optimisation
+        :param **kwargs: key word arguments for SCDCalibratePanels
         :return: xml_path: path to detector calibration xml file which can be applied using apply_calibration_xml or in the class init
         """
+        # overwrite default kwargs for SCDCalibrate panels
+        default_kwargs = {
+            "RecalculateUB": False,
+            "CalibrateL1": False,
+            "CalibrateBanks": True,
+            "TuneSamplePosition": False,
+            "SearchRadiusTransBank": 0.015,
+            "SearchradiusRotXBank": 2,
+            "SearchradiusRotYBank": 2,
+            "SearchradiusRotZBank": 2,
+        }
+        kwargs = {**default_kwargs, **kwargs}
         tol_to_report = np.round(tol / 2, 3)  # use smaller tolerance to track improvement in calibration
         npeaks = SXD.retrieve(peaks).getNumberPeaks()
         if ws is not None:
@@ -166,7 +178,7 @@ class SXD(BaseSX):
             AdjustSampleOffsets=True,
             OptimizeGoniometerTilt=True,
             MaxIndexingError=tol,
-            MaxSamplePositionChangeMeters=maxShiftInMeters,
+            MaxSamplePositionChangeMeters=kwargs["SearchRadiusTransBank"],
             EnableLogging=False,
         )
         x, y, z = pos_table.cell(0, 1), pos_table.cell(1, 1), pos_table.cell(2, 1)
@@ -184,7 +196,6 @@ class SXD(BaseSX):
         nindexed, *_ = mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol_to_report, CommonUBForAll=False, EnableLogging=False)
         logger.notice(f"Indexed after global instrument translation and rotation = {nindexed}/{npeaks} peaks within {tol_to_report}")
         mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol, CommonUBForAll=False, EnableLogging=False)
-
         # optimize position of each bank independently
         for ibank in range(1, 12):
             logger.notice(f"Optimizing bank position {ibank}")
@@ -207,7 +218,7 @@ class SXD(BaseSX):
                 AdjustSampleOffsets=True,
                 OptimizeGoniometerTilt=False,
                 MaxIndexingError=tol,
-                MaxSamplePositionChangeMeters=maxShiftInMeters,
+                MaxSamplePositionChangeMeters=kwargs["SearchRadiusTransBank"],
                 EnableLogging=False,
             )
             nindexed, *_ = mantid.IndexPeaks(
@@ -236,22 +247,13 @@ class SXD(BaseSX):
         mantid.SCDCalibratePanels(
             PeakWorkspace=peaks_name,
             OutputWorkspace="sxd_calibration_ws",
-            RecalculateUB=False,
-            CalibrateL1=False,
-            CalibrateBanks=True,
-            TuneSamplePosition=False,
-            SearchRadiusTransBank=maxShiftInMeters / 2,  # should be much reduced
-            SearchradiusRotXBank=2,
-            SearchradiusRotYBank=2,
-            SearchradiusRotZBank=2,
             DetCalFilename=detcal_path + ".detcal",
             XmlFilename=xml_path,
             CSVFilename=detcal_path + ".csv",
             EnableLogging=False,
+            **kwargs,
         )
-        mantid.LoadInstrument(
-            Workspace=wsname, InstrumentName="SXD", RewriteSpectraMap=False, EnableLogging=False
-        )  # reset instrument if already calibrated
+        SXD.undo_calibration(wsname)
         mantid.LoadParameterFile(Workspace=wsname, Filename=xml_path, EnableLogging=False)
         mantid.ApplyInstrumentToPeaks(
             InputWorkspace=peaks_name, InstrumentWorkspace=wsname, OutputWorkspace=peaks_name, EnableLogging=False
@@ -281,9 +283,7 @@ class SXD(BaseSX):
             mantid.LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace=ws, EnableLogging=False)
             use_empty = True
         else:
-            mantid.LoadInstrument(
-                Workspace=ws, InstrumentName="SXD", RewriteSpectraMap=False, EnableLogging=False
-            )  # reset instrument if already calibrated
+            SXD.undo_calibration(ws)
         mantid.LoadParameterFile(Workspace=ws, Filename=xml_path, EnableLogging=False)
         for pk_type in PEAK_TYPE:
             pks = self.get_peaks_name(run, peak_type=pk_type, integration_type=None)
@@ -297,6 +297,11 @@ class SXD(BaseSX):
                         )
         if use_empty:
             mantid.DeleteWorkspace(ws)
+
+    @staticmethod
+    def undo_calibration(ws):
+        mantid.ClearInstrumentParameters(Workspace=ws)  # reset workspace calibration
+        mantid.LoadParameterFile(Workspace=ws, Filename="SXD_Parameters.xml", EnableLogging=False)
 
     @staticmethod
     def remove_peaks_on_detector_edge(peaks, nedge):
