@@ -1,0 +1,1 @@
+* Add the ability to take strings to ``ConfigService.setLogLevel()``
