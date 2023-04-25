@@ -3563,66 +3563,6 @@ void EventList::divide(const double value, const double error) {
 // ==============================================================================================
 // ----------- SPLITTING AND FILTERING ---------------------------------------
 // ==============================================================================================
-/** Filter a vector of events into another based on pulse time.
- * TODO: Make this more efficient using STL-fu.
- * @param events :: input events
- * @param start :: start time (absolute)
- * @param stop :: end time (absolute)
- * @param output :: reference to an event list that will be output.
- */
-template <class T>
-void EventList::filterByPulseTimeHelper(std::vector<T> &events, DateAndTime start, DateAndTime stop,
-                                        std::vector<T> &output) {
-  std::copy_if(events.begin(), events.end(), std::back_inserter(output),
-               [start, stop](const T &t) { return (t.m_pulsetime >= start) && (t.m_pulsetime < stop); });
-}
-
-/** Filter a vector of events into another based on TimeROI.
- * TODO: Make this more efficient using STL-fu.
- * @param events :: input events
- * @param intervals :: Interval vec of start and stop times
- * @param output :: reference to an event list that will be output.
- */
-template <class T>
-void EventList::filterByTimeROIHelper(std::vector<T> &events, const std::vector<Kernel::TimeInterval> &intervals,
-                                      EventList *output) {
-  // Iterate through the splitter at the same time
-  auto itspl = intervals.cbegin();
-  auto itspl_end = intervals.cend();
-  // Iterate through all events (sorted by tof)
-  auto itev = events.cbegin();
-  auto itev_end = events.cend();
-
-  // This is the time of the first section. Anything before is thrown out.
-  while (itspl != itspl_end) {
-    // Get the splitting interval times and destination
-    DateAndTime start = itspl->start();
-    DateAndTime stop = itspl->stop();
-    // Skip the events before the start of the time
-    while ((itev != itev_end) && (itev->m_pulsetime < start))
-      itev++;
-
-    // Go through all the events that are in the interval (if any)
-    while ((itev != itev_end) && (itev->m_pulsetime < stop)) {
-      // Copy the event into another
-      const T eventCopy(*itev);
-      output->addEventQuickly(eventCopy);
-      ++itev;
-    }
-
-    // Go to the next interval
-    ++itspl;
-    // But if we reached the end, then we are done.
-    if (itspl == itspl_end)
-      break;
-
-    // No need to keep looping through the filter if we are out of events
-    if (itev == itev_end)
-      break;
-  }
-  // Done!
-}
-
 //------------------------------------------------------------------------------------------------
 /** Filter this EventList into an output EventList, using
  * keeping only events within the >= start and < end pulse times.
@@ -3708,7 +3648,95 @@ void EventList::filterByPulseTime(Kernel::TimeROI *timeRoi, EventList *output) c
   }
 }
 
-//------------------------------------------------------------------------------------------------
+/** Filter a vector of events into another based on pulse time.
+ * TODO: Make this more efficient using STL-fu.
+ * @param events :: input events
+ * @param start :: start time (absolute)
+ * @param stop :: end time (absolute)
+ * @param output :: reference to an event list that will be output.
+ */
+template <class T>
+void EventList::filterByPulseTimeHelper(std::vector<T> &events, DateAndTime start, DateAndTime stop,
+                                        std::vector<T> &output) {
+  std::copy_if(events.begin(), events.end(), std::back_inserter(output),
+               [start, stop](const T &t) { return (t.m_pulsetime >= start) && (t.m_pulsetime < stop); });
+}
+
+/** Filter a vector of events into another based on TimeROI.
+ * TODO: Make this more efficient using STL-fu.
+ * @param events :: input events
+ * @param intervals :: Interval vec of start and stop times
+ * @param output :: reference to an event list that will be output.
+ */
+template <class T>
+void EventList::filterByTimeROIHelper(std::vector<T> &events, const std::vector<Kernel::TimeInterval> &intervals,
+                                      EventList *output) {
+  // Iterate through the splitter at the same time
+  auto itspl = intervals.cbegin();
+  auto itspl_end = intervals.cend();
+  // Iterate through all events (sorted by tof)
+  auto itev = events.cbegin();
+  auto itev_end = events.cend();
+
+  // This is the time of the first section. Anything before is thrown out.
+  while (itspl != itspl_end) {
+    // Get the splitting interval times and destination
+    DateAndTime start = itspl->start();
+    DateAndTime stop = itspl->stop();
+    // Skip the events before the start of the time
+    while ((itev != itev_end) && (itev->m_pulsetime < start))
+      itev++;
+
+    // Go through all the events that are in the interval (if any)
+    while ((itev != itev_end) && (itev->m_pulsetime < stop)) {
+      // Copy the event into another
+      const T eventCopy(*itev);
+      output->addEventQuickly(eventCopy);
+      ++itev;
+    }
+
+    // Go to the next interval
+    ++itspl;
+    // But if we reached the end, then we are done.
+    if (itspl == itspl_end)
+      break;
+
+    // No need to keep looping through the filter if we are out of events
+    if (itev == itev_end)
+      break;
+  }
+  // Done!
+}
+
+/** Use a SplittingIntervalVec to filter the event list in place.
+ *
+ * @param timeRoi :: a TimeROI that will be used to filter events
+ */
+void EventList::filterInPlace(Kernel::TimeROI *timeRoi) {
+  if (timeRoi == nullptr) {
+    throw std::runtime_error("TimeROI can not be a nullptr\n");
+  }
+  if (timeRoi->useAll()) {
+    throw std::invalid_argument("TimeROI can not be empty\n");
+  }
+  // Start by sorting the event list by pulse time.
+  this->sortPulseTime();
+
+  // Iterate through all events (sorted by pulse time)
+  switch (eventType) {
+  case TOF:
+    filterInPlaceHelper(timeRoi, this->events);
+    break;
+  case WEIGHTED:
+    filterInPlaceHelper(timeRoi, this->weightedEvents);
+    break;
+  case WEIGHTED_NOTIME:
+    throw std::runtime_error("EventList::filterInPlace() called on an "
+                             "EventList that no longer has time information.");
+    break;
+  }
+}
+
 /** @brief Perform an in-place filtering on a vector of either TofEvent's or
  *WeightedEvent's.
  *
@@ -3792,36 +3820,6 @@ template <class T> void EventList::filterInPlaceHelper(Kernel::TimeROI *timeRoi,
   events.resize(std::size_t(std::distance(events.begin(), itOut)));
 }
 
-//------------------------------------------------------------------------------------------------
-/** Use a SplittingIntervalVec to filter the event list in place.
- *
- * @param timeRoi :: a TimeROI that will be used to filter events
- */
-void EventList::filterInPlace(Kernel::TimeROI *timeRoi) {
-  if (timeRoi == nullptr) {
-    throw std::runtime_error("TimeROI can not be a nullptr\n");
-  }
-  if (timeRoi->useAll()) {
-    throw std::invalid_argument("TimeROI can not be empty\n");
-  }
-  // Start by sorting the event list by pulse time.
-  this->sortPulseTime();
-
-  // Iterate through all events (sorted by pulse time)
-  switch (eventType) {
-  case TOF:
-    filterInPlaceHelper(timeRoi, this->events);
-    break;
-  case WEIGHTED:
-    filterInPlaceHelper(timeRoi, this->weightedEvents);
-    break;
-  case WEIGHTED_NOTIME:
-    throw std::runtime_error("EventList::filterInPlace() called on an "
-                             "EventList that no longer has time information.");
-    break;
-  }
-}
-
 /**
  * Initialize the detector ID's and event type of the destination event lists when splitting this list.
  * @param partials : resulting partial lists of events after splitting's done
@@ -3846,7 +3844,6 @@ void EventList::initializePartials(std::map<int, EventList *> partials) const {
                 [&](const std::pair<int, EventList *> &pair) { initPartial(pair.second); });
 }
 
-//--------------------------------------------------------------------------
 /** Get the vector of events contained in an EventList;
  * this is overloaded by event type.
  *
@@ -3859,7 +3856,6 @@ void EventList::initializePartials(std::map<int, EventList *> partials) const {
 void getEventsFrom(EventList &el, std::vector<TofEvent> *&events) { events = &el.getEvents(); }
 void getEventsFrom(const EventList &el, std::vector<TofEvent> const *&events) { events = &el.getEvents(); }
 
-//--------------------------------------------------------------------------
 /** Get the vector of events contained in an EventList;
  * this is overloaded by event type.
  *
@@ -3872,7 +3868,6 @@ void getEventsFrom(const EventList &el, std::vector<TofEvent> const *&events) { 
 void getEventsFrom(EventList &el, std::vector<WeightedEvent> *&events) { events = &el.getWeightedEvents(); }
 void getEventsFrom(const EventList &el, std::vector<WeightedEvent> const *&events) { events = &el.getWeightedEvents(); }
 
-//--------------------------------------------------------------------------
 /** Get the vector of events contained in an EventList;
  * this is overloaded by event type.
  *
@@ -3887,7 +3882,6 @@ void getEventsFrom(const EventList &el, std::vector<WeightedEventNoTime> const *
   events = &el.getWeightedEventsNoTime();
 }
 
-//--------------------------------------------------------------------------
 /** Helper function for the conversion to TOF. This handles the different
  *  event types.
  *
