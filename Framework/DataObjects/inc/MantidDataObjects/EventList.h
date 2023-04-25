@@ -417,12 +417,6 @@ private:
 
   template <class T> void filterInPlaceHelper(Kernel::TimeROI *timeRoi, typename std::vector<T> &events);
 
-  template <class T>
-  std::string
-  splitByFullTimeSparseVectorSplitterHelper(const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,
-                                            std::map<int, EventList *> outputs, typename std::vector<T> &vecEvents,
-                                            bool docorrection, double toffactor, double tofshift) const;
-
   template <class T> static void multiplyHelper(std::vector<T> &events, const double value, const double error = 0.0);
   template <class T>
   static void multiplyHistogramHelper(std::vector<T> &events, const MantidVec &X, const MantidVec &Y,
