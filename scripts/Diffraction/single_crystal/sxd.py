@@ -132,7 +132,7 @@ class SXD(BaseSX):
         )
 
     @staticmethod
-    def calibrate_sxd_panels(ws, peaks, save_dir, tol=0.15, **kwargs):
+    def calibrate_sxd_panels(ws, peaks, save_dir, tol=0.15, idf_filename="SXD_Definition_19_1.xml", **kwargs):
         """
         Calibrate SXD panels panels and apply the calibration to the workspace and peaks workspace.
         This is an iterative process in which the global translation of the detectors with respect to the sample
@@ -142,6 +142,7 @@ class SXD(BaseSX):
         :param peaks: peak table with a UB
         :param save_dir: for xml file containing calibration
         :param tol: for indexing (good to pick a relatively large tol as lots of peaks are required in each bank)
+        :param idf_filename: name of .xml for SXD instrument defintion (used if workspace not loaded for a given run)
         :param **kwargs: key word arguments for SCDCalibratePanels
         :return: xml_path: path to detector calibration xml file which can be applied using apply_calibration_xml or in the class init
         """
@@ -163,7 +164,7 @@ class SXD(BaseSX):
             wsname = SXD.retrieve(ws).name()
         else:
             wsname = "empty"
-            mantid.LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace=wsname, EnableLogging=False)
+            mantid.LoadEmptyInstrument(Filename=idf_filename, OutputWorkspace=ws, EnableLogging=False)
         peaks_name = SXD.retrieve(peaks).name()
         # report inital indexing
         nindexed, *_ = mantid.IndexPeaks(PeaksWorkspace=peaks_name, Tolerance=tol_to_report, CommonUBForAll=False, EnableLogging=False)
@@ -269,18 +270,19 @@ class SXD(BaseSX):
         return xml_path
 
     @BaseSX.default_apply_to_all_runs
-    def apply_calibration_xml(self, xml_path, run=None):
+    def apply_calibration_xml(self, xml_path, idf_filename="SXD_Definition_19_1.xml", run=None):
         """
         Apply .xml calibration file to workspaces loaded (and peak workspaces if present) - subsequent runs loaded
         will automatically have the new calibration
         :param xml_path: path to xml cal file
+        :param idf_filename:  name of .xml for SXD instrument defintion (used if workspace not loaded for a given run)
         """
         use_empty = False
         ws = self.get_ws_name(run)
         if ws is None:
             # need instrument ws to apply to peaks
             ws = "empty"
-            mantid.LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace=ws, EnableLogging=False)
+            mantid.LoadEmptyInstrument(Filename=idf_filename, OutputWorkspace=ws, EnableLogging=False)
             use_empty = True
         else:
             SXD.undo_calibration(ws)
