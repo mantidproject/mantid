@@ -444,10 +444,10 @@ public:
     times_expected = times;
     values = {1.};
     values_expected = values;
-    auto log_input = std::make_shared<TimeSeriesProperty<double>>("one_value", times, values);
-    auto log_expected = std::make_shared<TimeSeriesProperty<double>>("one_value", times_expected, values_expected);
-    log_input->removeDataOutsideTimeROI(roi);
-    TS_ASSERT_EQUALS(*log_input, *log_expected);
+    auto tsp_input = std::make_unique<TimeSeriesProperty<double>>("one_value", times, values);
+    auto tsp_expected = std::make_unique<TimeSeriesProperty<double>>("one_value", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // 2. TimeSeriesProperty with two values
     values = {1., 2.};
@@ -455,62 +455,62 @@ public:
     // a. TimeROI entirely between those values - no changes
     times = {DateAndTime("2007-11-30T16:00:00"), DateAndTime("2007-11-30T20:00:00")};
     times_expected = times;
-    log_input = std::make_shared<TimeSeriesProperty<double>>("two_values_a", times, values);
-    log_expected = std::make_shared<TimeSeriesProperty<double>>("two_values_a", times_expected, values_expected);
-    log_input->removeDataOutsideTimeROI(roi);
-    TS_ASSERT_EQUALS(*log_input, *log_expected);
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_a", times, values);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_a", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // b. TimeROI entirely includes the values - no changes
 
     // b1. First roi entirely includes the values
     times = {DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T16:17:35")};
     times_expected = times;
-    log_input = std::make_shared<TimeSeriesProperty<double>>("two_values_b1", times, values);
-    log_expected = std::make_shared<TimeSeriesProperty<double>>("two_values_b1", times_expected, values_expected);
-    log_input->removeDataOutsideTimeROI(roi);
-    TS_ASSERT_EQUALS(*log_input, *log_expected);
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_b1", times, values);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_b1", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // b2. First roi includes first value, second roi includes second value
     times = {DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T18:15:00")};
     times_expected = times;
-    log_input = std::make_shared<TimeSeriesProperty<double>>("two_values_b2", times, values);
-    log_expected = std::make_shared<TimeSeriesProperty<double>>("two_values_b2", times_expected, values_expected);
-    log_input->removeDataOutsideTimeROI(roi);
-    TS_ASSERT_EQUALS(*log_input, *log_expected);
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_b2", times, values);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_b2", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // c. TimeROI includes first value and not second - no changes
     times = {DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T16:18:25")};
     times_expected = times;
-    log_input = std::make_shared<TimeSeriesProperty<double>>("two_values_c", times, values);
-    log_expected = std::make_shared<TimeSeriesProperty<double>>("two_values_c", times_expected, values_expected);
-    log_input->removeDataOutsideTimeROI(roi);
-    TS_ASSERT_EQUALS(*log_input, *log_expected);
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_c", times, values);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_c", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // d. TimeROI includes second value and not first - no changes
     times = {DateAndTime("2007-11-30T16:17:00"), DateAndTime("2007-11-30T16:18:10")};
     times_expected = times;
-    log_input = std::make_shared<TimeSeriesProperty<double>>("two_values_d", times, values);
-    log_expected = std::make_shared<TimeSeriesProperty<double>>("two_values_d", times_expected, values_expected);
-    log_input->removeDataOutsideTimeROI(roi);
-    TS_ASSERT_EQUALS(*log_input, *log_expected);
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_d", times, values);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_d", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // e. TimeROI is before both values - keep first
     times = {DateAndTime("2007-11-30T16:18:35"), DateAndTime("2007-11-30T16:18:45")};
-    log_input = std::make_shared<TimeSeriesProperty<double>>("two_values_e", times, values);
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_e", times, values);
     times_expected = {times[0]};
     values_expected = {values[0]};
-    log_expected = std::make_shared<TimeSeriesProperty<double>>("two_values_e", times_expected, values_expected);
-    log_input->removeDataOutsideTimeROI(roi);
-    TS_ASSERT_EQUALS(*log_input, *log_expected);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_e", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // f. TimeROI is after both values - keep second
     times = {DateAndTime("2007-11-30T16:16:10"), DateAndTime("2007-11-30T16:16:45")};
-    log_input = std::make_shared<TimeSeriesProperty<double>>("two_values_f", times, values);
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_f", times, values);
     times_expected = {times[1]};   // second time
     values_expected = {values[1]}; // second value
-    log_expected = std::make_shared<TimeSeriesProperty<double>>("two_values_f", times_expected, values_expected);
-    log_input->removeDataOutsideTimeROI(roi);
-    TS_ASSERT_EQUALS(*log_input, *log_expected);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_f", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // 3. TimeSeriesProperty with three values
     values = {1., 2., 3.};
@@ -518,42 +518,42 @@ public:
     // a0 TimeROI entirely between the values - no changes
     times = {DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:18:00"),
              DateAndTime("2007-11-30T16:18:45")};
-    log_input = std::make_shared<TimeSeriesProperty<double>>("three_values_a0", times, values);
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("three_values_a0", times, values);
     times_expected = times;
     values_expected = values;
-    log_expected = std::make_shared<TimeSeriesProperty<double>>("three_values_a0", times_expected, values_expected);
-    log_input->removeDataOutsideTimeROI(roi);
-    TS_ASSERT_EQUALS(*log_input, *log_expected);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("three_values_a0", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // a. TimeROI includes first value only - keep the first two
     times = {DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T16:18:30"),
              DateAndTime("2007-11-30T16:18:45")};
-    log_input = std::make_shared<TimeSeriesProperty<double>>("three_values_a", times, values);
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("three_values_a", times, values);
     times_expected = {times[0], times[1]};
     values_expected = {values[0], values[1]};
-    log_expected = std::make_shared<TimeSeriesProperty<double>>("three_values_a", times_expected, values_expected);
-    log_input->removeDataOutsideTimeROI(roi);
-    TS_ASSERT_EQUALS(*log_input, *log_expected);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("three_values_a", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // b. TimeROI includes second value only - no changes
     times = {DateAndTime("2007-11-30T16:17:00"), DateAndTime("2007-11-30T16:17:15"),
              DateAndTime("2007-11-30T16:18:30")};
-    log_input = std::make_shared<TimeSeriesProperty<double>>("three_values_b", times, values);
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("three_values_b", times, values);
     times_expected = times;
     values_expected = values;
-    log_expected = std::make_shared<TimeSeriesProperty<double>>("three_values_b", times_expected, values_expected);
-    log_input->removeDataOutsideTimeROI(roi);
-    TS_ASSERT_EQUALS(*log_input, *log_expected);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("three_values_b", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // c. TimeROI includes third value only - keep the last two
     times = {DateAndTime("2007-11-30T16:17:00"), DateAndTime("2007-11-30T16:17:05"),
              DateAndTime("2007-11-30T16:18:20")};
-    log_input = std::make_shared<TimeSeriesProperty<double>>("three_values_c", times, values);
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("three_values_c", times, values);
     times_expected = {times[1], times[2]}; // last two
     values_expected = {values[1], values[2]};
-    log_expected = std::make_shared<TimeSeriesProperty<double>>("three_values_c", times_expected, values_expected);
-    log_input->removeDataOutsideTimeROI(roi);
-    TS_ASSERT_EQUALS(*log_input, *log_expected);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("three_values_c", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
   }
 
   void test_cloneInTimeROI() {
@@ -569,11 +569,11 @@ public:
     std::vector<double> values{1., 2., 3.};
     std::vector<double> values_expected{values[0], values[1]};
 
-    auto log_input = std::make_shared<TimeSeriesProperty<double>>("three_values", times, values);
-    auto log_expected = std::make_shared<TimeSeriesProperty<double>>("three_values", times_expected, values_expected);
-    auto log_result_base = std::shared_ptr<Property>(log_input->cloneInTimeROI(roi));
-    auto log_result = std::static_pointer_cast<TimeSeriesProperty<double>>(log_result_base);
-    TS_ASSERT_EQUALS(*log_result, *log_expected);
+    auto tsp_input = std::make_unique<TimeSeriesProperty<double>>("three_values", times, values);
+    auto tsp_expected = std::make_unique<TimeSeriesProperty<double>>("three_values", times_expected, values_expected);
+    auto tsp_result_base = std::shared_ptr<Property>(tsp_input->cloneInTimeROI(roi));
+    auto tsp_result = std::static_pointer_cast<TimeSeriesProperty<double>>(tsp_result_base);
+    TS_ASSERT_EQUALS(*tsp_result, *tsp_expected);
   }
 
   void test_filterByTimesN() {
