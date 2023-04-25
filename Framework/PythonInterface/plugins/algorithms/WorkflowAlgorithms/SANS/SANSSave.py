@@ -134,6 +134,8 @@ class SANSSave(DataProcessorAlgorithm):
         file_name = self.getProperty("Filename").value
         workspace = self.getProperty("InputWorkspace").value
 
+        thickness = workspace.sample().getThickness()
+
         transmission = self.getProperty("Transmission").value
         transmission_can = self.getProperty("TransmissionCan").value
 
@@ -143,7 +145,7 @@ class SANSSave(DataProcessorAlgorithm):
                 transmission = get_zero_error_free_workspace(transmission)
             if transmission_can:
                 transmission_can = get_zero_error_free_workspace(transmission_can)
-        transmission_workspaces = {"Transmission": transmission, "TransmissionCan": transmission_can}
+        additional_properties = {"Transmission": transmission, "TransmissionCan": transmission_can, "SampleThickness": thickness}
 
         additional_run_numbers = {
             "SampleTransmissionRunNumber": self.getProperty("SampleTransmissionRunNumber").value,
@@ -158,7 +160,7 @@ class SANSSave(DataProcessorAlgorithm):
             progress.report(progress_message)
             progress.report(progress_message)
             try:
-                save_to_file(workspace, file_format, file_name, transmission_workspaces, additional_run_numbers)
+                save_to_file(workspace, file_format, file_name, additional_properties, additional_run_numbers)
             except (RuntimeError, ValueError) as e:
                 logger.warning(
                     "Cannot save workspace using SANSSave. "
@@ -182,6 +184,7 @@ class SANSSave(DataProcessorAlgorithm):
         file_formats = self._get_file_formats()
         if not file_formats:
             errors.update({"Nexus": "At least one data format needs to be specified."})
+            errors.update({"CanSAS": "At least one data format needs to be specified."})
             errors.update({"CanSAS": "At least one data format needs to be specified."})
             errors.update({"NXcanSAS": "At least one data format needs to be specified."})
             errors.update({"NistQxy": "At least one data format needs to be specified."})
