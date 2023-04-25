@@ -80,9 +80,9 @@ template <typename TYPE> TimeSeriesProperty<TYPE> *TimeSeriesProperty<TYPE>::clo
 
 /**
  * Create a partial copy of this object according to a TimeROI. The partially cloned object
- * should include all time values enclosed by the ROI regions each defined as [roi_start,roi_end),
+ * should include all time values enclosed by the ROI regions, each defined as [roi_start,roi_end),
  * plus the values immediately before and after an ROI region, if available.
- * @param timeROI :: a series of time regions used to determine which values should be included in the copy
+ * @param timeROI :: a series of time regions used to determine which values should be included in the copy.
  */
 template <typename TYPE> Property *TimeSeriesProperty<TYPE>::cloneInTimeROI(const TimeROI &timeROI) const {
   TimeSeriesProperty<TYPE> *filteredTS = new TimeSeriesProperty<TYPE>(this->name());

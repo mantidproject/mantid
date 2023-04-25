@@ -14,6 +14,7 @@
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PropertyWithValueJSON.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/TimeROI.h"
 
 #include <json/json.h>
 
@@ -170,6 +171,42 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
         this->m_properties[createKey(currentProp->name())] = std::move(filtered);
       }
     }
+  }
+}
+
+/**
+ * Create a partial copy of this object such that every time series property is cloned according to the input TimeROI.
+ * A partially cloned time series property should include all time values enclosed by the ROI regions,
+ * each defined as [roi_start,roi_end), plus the values immediately before and after an ROI region, if available.
+ * Properties that are not time series will be cloned with no changes.
+ * @param timeROI :: a series of time regions used to determine which time series values should be included in the copy.
+ */
+PropertyManager *PropertyManager::cloneInTimeROI(const Kernel::TimeROI &timeROI) {
+  PropertyManager *newMgr = new PropertyManager();
+  newMgr->m_orderedProperties.reserve(m_orderedProperties.size());
+  // We need to do a deep copy of the property pointers here
+  for (auto prop : m_orderedProperties) {
+    auto tsp = dynamic_cast<ITimeSeriesProperty *>(prop);
+    std::unique_ptr<Property> newProp;
+    if (tsp)
+      newProp = std::unique_ptr<Property>(tsp->cloneInTimeROI(timeROI));
+    else
+      newProp = std::unique_ptr<Property>(prop->clone());
+    newMgr->m_orderedProperties.emplace_back(newProp.get());
+    newMgr->m_properties[createKey(newProp->name())] = std::move(newProp);
+  }
+  return newMgr;
+}
+
+/**
+ * For time series properties, remove time values outside of TimeROI regions, each defined as [roi_start,roi_stop).
+ * However, keep the values immediately before and after each ROI region, if available.
+ * @param timeROI :: a series of time regions used to determine which values to remove or to keep
+ */
+void PropertyManager::removeDataOutsideTimeROI(const Kernel::TimeROI &timeROI) {
+  for (auto prop : m_orderedProperties) {
+    if (auto tsp = dynamic_cast<ITimeSeriesProperty *>(prop))
+      tsp->removeDataOutsideTimeROI(timeROI);
   }
 }
 
