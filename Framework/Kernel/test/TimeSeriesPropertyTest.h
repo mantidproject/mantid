@@ -573,6 +573,11 @@ public:
     auto tsp_expected = std::make_unique<TimeSeriesProperty<double>>("three_values", times_expected, values_expected);
     auto tsp_result_base = std::shared_ptr<Property>(tsp_input->cloneInTimeROI(roi));
     auto tsp_result = std::static_pointer_cast<TimeSeriesProperty<double>>(tsp_result_base);
+
+    // Make sure the cloned-in-roi time series copy is different from the original, i.e. the roi really filters out some
+    // data
+    TS_ASSERT(*tsp_result != *tsp_input);
+    // Test that the cloned copy is the same as expected
     TS_ASSERT_EQUALS(*tsp_result, *tsp_expected);
   }
 

@@ -735,8 +735,11 @@ public:
     auto tsp = run_input.getTimeSeriesProperty<double>("time_series");
     run_expect.addProperty(tsp->cloneInTimeROI(roi), true);
 
-    // Test that a clone-in-roi copy of the original run info object is the same as expected
+    // Create a cloned-in-roi copy of the orginal run info object
     LogManager *run_result_ptr = run_input.cloneInTimeROI(roi);
+    // Make sure the copy is different from the original, i.e. the roi really filters out some data
+    TS_ASSERT(*run_result_ptr != run_input);
+    // Test that the copy is the same as expected
     TS_ASSERT_EQUALS(*run_result_ptr, run_expect);
     delete run_result_ptr;
   }

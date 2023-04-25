@@ -205,8 +205,7 @@ PropertyManager *PropertyManager::cloneInTimeROI(const Kernel::TimeROI &timeROI)
  */
 void PropertyManager::removeDataOutsideTimeROI(const Kernel::TimeROI &timeROI) {
   for (auto prop : m_orderedProperties) {
-    auto tsp = dynamic_cast<ITimeSeriesProperty *>(prop);
-    if (tsp)
+    if (auto tsp = dynamic_cast<ITimeSeriesProperty *>(prop))
       tsp->removeDataOutsideTimeROI(timeROI);
   }
 }
