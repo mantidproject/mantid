@@ -278,12 +278,6 @@ public:
   /// Initialize the detector ID's and event type of the destination event lists when splitting this list
   void initializePartials(std::map<int, EventList *> partials) const;
 
-  /// Split ...
-  std::string splitByFullTimeMatrixSplitter(const std::vector<int64_t> &vec_splitters_time,
-                                            const std::vector<int> &vecgroups,
-                                            std::map<int, EventList *> vec_outputEventList, bool docorrection,
-                                            double toffactor, double tofshift) const;
-
   void multiply(const double value, const double error = 0.0) override;
   EventList &operator*=(const double value);
 
