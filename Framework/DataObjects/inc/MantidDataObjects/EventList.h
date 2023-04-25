@@ -11,7 +11,6 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/cow_ptr.h"
-#include "TimeSplitter.h"
 
 #include <iosfwd>
 #include <vector>
@@ -23,8 +22,6 @@ class DateAndTime;
 }
 } // namespace Types
 namespace Kernel {
-class SplittingInterval;
-using SplittingIntervalVec = std::vector<SplittingInterval>;
 class Unit;
 } // namespace Kernel
 namespace DataObjects {
