@@ -3577,25 +3577,6 @@ void EventList::filterByPulseTimeHelper(std::vector<T> &events, DateAndTime star
                [start, stop](const T &t) { return (t.m_pulsetime >= start) && (t.m_pulsetime < stop); });
 }
 
-/** Filter a vector of events into another based on time at sample.
- * TODO: Make this more efficient using STL-fu.
- * @param events :: input events
- * @param start :: start time (absolute)
- * @param stop :: end time (absolute)
- * @param tofFactor :: scaling factor for tof
- * @param tofOffset :: offset for tof
- * @param output :: reference to an event list that will be output.
- */
-template <class T>
-void EventList::filterByTimeAtSampleHelper(std::vector<T> &events, DateAndTime start, DateAndTime stop,
-                                           double tofFactor, double tofOffset, std::vector<T> &output) {
-  std::copy_if(events.begin(), events.end(), std::back_inserter(output),
-               [start, stop, tofFactor, tofOffset](const T &t) {
-                 return (calculateCorrectedFullTime(t, tofFactor, tofOffset) >= start.totalNanoseconds()) &&
-                        (calculateCorrectedFullTime(t, tofFactor, tofOffset) < stop.totalNanoseconds());
-               });
-}
-
 /** Filter a vector of events into another based on TimeROI.
  * TODO: Make this more efficient using STL-fu.
  * @param events :: input events
@@ -3679,38 +3660,6 @@ void EventList::filterByPulseTime(Types::Core::DateAndTime start, Types::Core::D
   case WEIGHTED_NOTIME:
     throw std::runtime_error("EventList::filterByPulseTime() called on an "
                              "EventList that no longer has time information.");
-    break;
-  }
-}
-
-void EventList::filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, double tofFactor,
-                                     double tofOffset, EventList &output) const {
-  if (this == &output) {
-    throw std::invalid_argument("In-place filtering is not allowed");
-  }
-
-  // Start by sorting
-  this->sortTimeAtSample(tofFactor, tofOffset);
-  // Clear the output
-  output.clear();
-  // Has to match the given type
-  output.switchTo(eventType);
-  output.setDetectorIDs(this->getDetectorIDs());
-  output.setHistogram(m_histogram);
-  output.setSortOrder(this->order);
-
-  // Iterate through all events (sorted by pulse time)
-  switch (eventType) {
-  case TOF:
-    filterByTimeAtSampleHelper(this->events, start, stop, tofFactor, tofOffset, output.events);
-    break;
-  case WEIGHTED:
-    filterByTimeAtSampleHelper(this->weightedEvents, start, stop, tofFactor, tofOffset, output.weightedEvents);
-    break;
-  case WEIGHTED_NOTIME:
-    throw std::runtime_error("EventList::filterByTimeAtSample() called on an "
-                             "EventList that no longer has full time "
-                             "information.");
     break;
   }
 }
