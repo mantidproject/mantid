@@ -32,6 +32,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
             limits = self.get_data_limits()
         self._data_view.dimensions.set_extents(*limits)
         self.set_axes_limits(*limits)
+        self.update_data_limits()
 
     def set_axes_limits(self, xlim, ylim, auto_transform=True):
         """Set the axes limits on the view.
@@ -43,7 +44,6 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
         if auto_transform and self._data_view.nonorthogonal_mode:
             xlim, ylim = self._data_view.transform_limits_to_extents(xlim, ylim)
         self._data_view.set_axes_limits(xlim, ylim)
-        self.update_data_limits()
 
     def data_limits_changed(self):
         """Notify data limits on image axes have changed"""
