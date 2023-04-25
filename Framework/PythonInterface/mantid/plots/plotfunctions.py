@@ -16,7 +16,6 @@ from collections.abc import Sequence
 from matplotlib.gridspec import GridSpec
 from matplotlib.legend import Legend
 import matplotlib as mpl
-from mpl_toolkits.axes_grid1.axes_divider import make_axes_area_auto_adjustable
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
@@ -302,7 +301,7 @@ def _update_show_figure(fig):
     return fig
 
 
-def create_subplots(nplots, fig=None, add_cbar_axis=False):
+def create_subplots(nplots, fig=None, layout_engine="tight"):
     """
     Create a set of subplots suitable for a given number of plots. A stripped down
     version of plt.subplots that can accept an existing figure instance.
@@ -310,8 +309,8 @@ def create_subplots(nplots, fig=None, add_cbar_axis=False):
 
     :param nplots: The number of plots required
     :param fig: An optional figure. It is cleared before plotting the new contents
-    :param add_cbar_axis: Boolean for whether to add and return an axis for a colour bar on the right of the figure
-    :return: fig, axes, ncrows, ncols, cbar_axis
+    :param layout_engine: The string name of the layout engine to be used for the plot
+    :return: fig, axes, ncrows, ncols
     """
     import matplotlib.pyplot as plt
 
@@ -328,46 +327,21 @@ def create_subplots(nplots, fig=None, add_cbar_axis=False):
         fig = plt.figure()
     else:
         fig.clf()
+
+    fig.set_layout_engine(layout=layout_engine)
+
     # annoyling this repl
     nplots = nrows * ncols
     axes = np.empty(nplots, dtype=object)
-    cbar_axis = None
-    fig.set_layout_engine(layout="tight")
 
-    if add_cbar_axis:
-        # The right most column of the GridSpec is made a SubGridSpec to facilitate both the colour bar
-        # and the plots in the rightmost column.
-        # This is done (instead of adding another column for the colour bar) so that the colour bar can have a narrow
-        # spacing to the right most plots, without effecting the other column spacings.
-        # Keeping the colour bar in the GridSpec rather than alongside it means it behaves much nicer
-        # when within a resizing QT window
-        # The relative width of 11.55 for the right most column ensures that all plots remain an equal size (**)
-        gs = GridSpec(nrows, ncols, width_ratios=[10.0] * (ncols - 1) + [11.55])
-        gs_and_cbar = gs[:, -1].subgridspec(nrows, 2, width_ratios=[10, 1], wspace=0.1)
-        if ncols > 1:
-            ax0 = fig.add_subplot(gs[0, 0], projection=PROJECTION)
-        else:
-            ax0 = fig.add_subplot(gs_and_cbar[0, 0], projection=PROJECTION)
-        axes[0] = ax0
-        for i in range(1, nplots):
-            if (i + 1) % ncols:
-                axes[i] = fig.add_subplot(gs[i // ncols, i % ncols], projection=PROJECTION)
-            else:  # last column so add to colour bar grid spec
-                axes[i] = fig.add_subplot(gs_and_cbar[i // ncols, 0], projection=PROJECTION)
-                # avoid possible collision between x axis tick labels and colour bar
-                # (**) this may also cause plots in the right most column to be slightly narrower than the others
-                make_axes_area_auto_adjustable(axes[i], pad=0, adjust_dirs=["right"])
-        cbar_axis = fig.add_subplot(gs_and_cbar[:, 1])
-        fig.sca(axes[-1])
-    else:
-        gs = GridSpec(nrows, ncols)
-        ax0 = fig.add_subplot(gs[0, 0], projection=PROJECTION)
-        axes[0] = ax0
-        for i in range(1, nplots):
-            axes[i] = fig.add_subplot(gs[i // ncols, i % ncols], projection=PROJECTION)
+    gs = GridSpec(nrows, ncols, fig)
+    ax0 = fig.add_subplot(gs[0, 0], projection=PROJECTION)
+    axes[0] = ax0
+    for i in range(1, nplots):
+        axes[i] = fig.add_subplot(gs[i // ncols, i % ncols], projection=PROJECTION)
 
     axes = axes.reshape(nrows, ncols)
-    return fig, axes, nrows, ncols, cbar_axis
+    return fig, axes, nrows, ncols
 
 
 def raise_if_not_sequence(value, seq_name, element_type=None):
@@ -410,7 +384,7 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     if fig and overplot:
         fig = fig
     elif fig:
-        fig, _, _, _, _ = create_subplots(axes_num, fig)
+        fig, _, _, _ = create_subplots(axes_num, fig)
     elif overplot:
         # The create subplot below assumes no figure was passed in, this is ensured by the elif above
         # but add an assert which prevents a future refactoring from breaking this assumption
@@ -419,9 +393,9 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
         if not fig.axes:
             plt.close(fig)
             # The user is likely trying to overplot on a non-existent plot, create one for them
-            fig, _, _, _, _ = create_subplots(axes_num)
+            fig, _, _, _ = create_subplots(axes_num)
     else:
-        fig, _, _, _, _ = create_subplots(axes_num)
+        fig, _, _, _ = create_subplots(axes_num)
 
     if not ax_properties and not overplot:
         ax_properties = {}

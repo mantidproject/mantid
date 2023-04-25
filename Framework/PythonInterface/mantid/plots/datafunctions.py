@@ -1260,8 +1260,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
                 mantid.kernel.logger.warning(
                     "Minor ticks on colorbar scale cannot be shown " "as the range between min value and max value is too large"
                 )
-        figure.subplots_adjust(wspace=0.5, hspace=0.5)
-        colorbar = figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
+        colorbar = figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.05)
         colorbar.set_label(label)
 
 
