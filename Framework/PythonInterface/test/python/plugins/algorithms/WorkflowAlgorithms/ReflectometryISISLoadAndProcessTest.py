@@ -666,7 +666,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         history = ["ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_38415"), history)
 
-    def test_algorithm_passes_calibration_filepath_to_preprocessing_step(self):
+    def test_calibration_file_is_applied_when_provided(self):
         args = self._default_options
         args["InputRunList"] = "INTER45455"
         del args["ProcessingInstructions"]
@@ -674,16 +674,16 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args["AnalysisMode"] = "MultiDetectorAnalysis"
         outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "TOF_45455_summed_segment"]
         self._assert_run_algorithm_succeeds(args, outputs)
+        self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=True)
 
-    def test_algorithm_passes_calibration_filepath_to_preprocessing_step_in_debug_mode(self):
+    def test_calibration_is_skipped_if_file_not_provided(self):
         args = self._default_options
         args["InputRunList"] = "INTER45455"
         del args["ProcessingInstructions"]
-        args["CalibrationFile"] = self._CALIBRATION_TEST_DATA
-        args["Debug"] = True
         args["AnalysisMode"] = "MultiDetectorAnalysis"
-        outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "Calib_Table_45455", "TOF_45455_summed_segment", "IvsLam_45455"]
+        outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "TOF_45455_summed_segment"]
         self._assert_run_algorithm_succeeds(args, outputs)
+        self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=False)
 
     def test_invalid_polarization_efficiency_file_name_raises_error(self):
         args = self._default_options
@@ -774,6 +774,15 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         else:
             algNames = [alg.name() for alg in history]
         self.assertEqual(algNames, expected)
+
+    def _check_calibration(self, ws, is_calibrated):
+        """Check whether the calibration algorithm has run by checking the workspace history"""
+        history = ws.getHistory()
+        reductionHistory = history.getAlgorithmHistory(history.size() - 1)
+        preprocessingHistory = reductionHistory.getChildHistories()[0]
+        preprocessingAlgs = preprocessingHistory.getChildHistories()
+        algNames = [alg.name() for alg in preprocessingAlgs]
+        self.assertEqual("ReflectometryISISCalibration" in algNames, is_calibrated)
 
     def _check_history_algorithm_properties(self, ws, toplevel_idx, child_idx, property_values):
         parent_hist = ws.getHistory().getAlgorithmHistory(toplevel_idx)
