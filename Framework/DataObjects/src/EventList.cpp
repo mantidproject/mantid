@@ -10,7 +10,6 @@
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/Unit.h"
