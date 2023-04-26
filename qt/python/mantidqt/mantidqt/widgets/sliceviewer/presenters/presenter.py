@@ -380,6 +380,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         @param workspace_name: the name of the workspace that has changed
         @param workspace: the workspace that has changed
         """
+        if self.model.check_for_removed_original_workspace():
+            self._close_view_with_message("Original workspace has been replaced: Closing Slice Viewer")
+
         if not self.model.workspace_equals(workspace_name):
             # TODO this is a dead branch, since the ADS observer will call this if the
             # names are the same, but the model "workspace_equals" simply checks for the same name
@@ -426,7 +429,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         if self.model.workspace_equals(ws_name):
             self.view.emit_close()
         elif self.model.check_for_removed_original_workspace():
-            self.view.emit_close()
+            self._close_view_with_message("Original workspace has been deleted: Closing Slice Viewer")
 
     def ADS_cleared(self):
         if self.view:

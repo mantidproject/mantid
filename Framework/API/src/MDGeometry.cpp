@@ -25,12 +25,16 @@ namespace Mantid::API {
 class MDGeometryNotificationHelper {
 public:
   explicit MDGeometryNotificationHelper(MDGeometry &parent)
-      : m_parent(parent), m_delete_observer(*this, &MDGeometryNotificationHelper::deleteNotificationReceived) {}
+      : m_parent(parent), m_delete_observer(*this, &MDGeometryNotificationHelper::deleteNotificationReceived),
+        m_replace_observer(*this, &MDGeometryNotificationHelper::replaceNotificationReceived) {}
 
   ~MDGeometryNotificationHelper() {
     if (m_observingDelete) {
       // Stop watching once object is deleted
       API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
+    }
+    if (m_observingReplace) {
+      API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replace_observer);
     }
   }
 
@@ -41,8 +45,19 @@ public:
     }
   }
 
+  void watchForWorkspaceReplace() {
+    if (!m_observingReplace) {
+      API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replace_observer);
+      m_observingReplace = true;
+    }
+  }
+
   void deleteNotificationReceived(Mantid::API::WorkspacePreDeleteNotification_ptr notice) {
     m_parent.deleteNotificationReceived(notice->object());
+  }
+
+  void replaceNotificationReceived(Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice) {
+    m_parent.replaceNotificationReceived(notice->object());
   }
 
 private:
@@ -50,9 +65,11 @@ private:
 
   /// Poco delete notification observer object
   Poco::NObserver<MDGeometryNotificationHelper, WorkspacePreDeleteNotification> m_delete_observer;
+  Poco::NObserver<MDGeometryNotificationHelper, WorkspaceBeforeReplaceNotification> m_replace_observer;
 
   /// Set to True when the m_delete_observer is observing workspace deletions.
   bool m_observingDelete{false};
+  bool m_observingReplace{false};
 };
 
 //----------------------------------------------------------------------------------------------
@@ -359,6 +376,7 @@ void MDGeometry::setOriginalWorkspace(std::shared_ptr<Workspace> ws, size_t inde
     m_originalWorkspaces.resize(index + 1);
   m_originalWorkspaces[index] = std::move(ws);
   m_notificationHelper->watchForWorkspaceDeletions();
+  m_notificationHelper->watchForWorkspaceReplace();
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -412,6 +430,27 @@ void MDGeometry::deleteNotificationReceived(const std::shared_ptr<const Workspac
     if (original) {
       // Compare the pointer being deleted to the one stored as the original.
       if (original == deleted) {
+        // Clear the reference
+        original.reset();
+      }
+    }
+  }
+}
+
+//---------------------------------------------------------------------------------------------------
+/** Function called when observer objects receives a notification that
+ * a workspace has been replaced.
+ *
+ * This checks if the "original workspace" in this object is being replaced,
+ * and removes the reference to it to allow it to be destructed properly.
+ *
+ * @param deleted :: The replaced workspace
+ */
+void MDGeometry::replaceNotificationReceived(const std::shared_ptr<const Workspace> &replaced) {
+  for (auto &original : m_originalWorkspaces) {
+    if (original) {
+      // Compare the pointer being replaced to the one stored as the original.
+      if (original == replaced) {
         // Clear the reference
         original.reset();
       }
