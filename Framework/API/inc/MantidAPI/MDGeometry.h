@@ -117,7 +117,7 @@ public:
 
 protected:
   /// Function called when observer objects recieves a notification
-  void deleteNotificationReceived(const std::shared_ptr<const Workspace> &deleted);
+  void deleteNotificationReceived(const std::shared_ptr<const Workspace> &replaced);
 
   /// Function called when observer detects a workspace is replaced
   void replaceNotificationReceived(const std::shared_ptr<const Workspace> &deleted);

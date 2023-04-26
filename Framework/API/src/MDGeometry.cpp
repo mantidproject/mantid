@@ -444,7 +444,7 @@ void MDGeometry::deleteNotificationReceived(const std::shared_ptr<const Workspac
  * This checks if the "original workspace" in this object is being replaced,
  * and removes the reference to it to allow it to be destructed properly.
  *
- * @param deleted :: The replaced workspace
+ * @param replaced :: The replaced workspace
  */
 void MDGeometry::replaceNotificationReceived(const std::shared_ptr<const Workspace> &replaced) {
   for (auto &original : m_originalWorkspaces) {
