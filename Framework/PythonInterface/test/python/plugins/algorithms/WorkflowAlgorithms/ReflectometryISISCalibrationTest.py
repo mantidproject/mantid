@@ -28,6 +28,9 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
             with open(cls._CALIBRATION_TEST_DATA, "r") as file:
                 reader = csv.reader(file)
                 for row in reader:
+                    if len(row) == 0:
+                        continue
+
                     entries = row[0].split()
 
                     first_character = entries[0][0].lower()
