@@ -27,7 +27,7 @@ dependencies:
   - occt>=7.4.0
   - conda-wrappers
   - pip>=21.0.1
-  - poco=1.10.*
+  - poco=1.12.1|>=1.12.5 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning. It's resolved on their devel branch so should be fine after 1.12.4
   - psutil>=5.8.0
   - pycifrw==4.4.1 # Force to 4.4.1 as later versions cause issues with loading CIF files
   - pyqt>=5.15,<6
@@ -35,7 +35,7 @@ dependencies:
   - python=3.8.*
   - pyyaml>=5.4.1
   - qscintilla2
-  - qt=5.15.4  # 5.15.6 causing issues with rendering of tabs on GUIs using the instrument viewer.
+  - qt=5.15.8 # Avoid unexpected qt upgrades
   - qtconsole=5.4.1 # 5.4.2 crashes the jupyter console
   - qtpy>=1.9.0
   - requests>=2.25.1
