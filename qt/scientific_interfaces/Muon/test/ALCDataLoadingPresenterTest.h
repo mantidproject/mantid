@@ -93,8 +93,22 @@ public:
   void requestLoading() { emit loadRequested(); }
 };
 
-MATCHER_P4(WorkspaceX, i, j, value, delta, "") { return fabs(arg->x(i)[j] - value) < delta; }
-MATCHER_P4(WorkspaceY, i, j, value, delta, "") { return fabs(arg->y(i)[j] - value) < delta; }
+MATCHER_P4(WorkspaceX, i, j, value, delta, "") {
+  if (fabs(arg->x(i)[j] - value) < delta) {
+    return true;
+  } else {
+    std::cout << "WorkspaceX(" << i << ", " << j << ") = " << arg->x(i)[j] << " exp = " << value << "\n";
+    return false;
+  }
+}
+MATCHER_P4(WorkspaceY, i, j, value, delta, "") {
+  if (fabs(arg->y(i)[j] - value) < delta) {
+    return true;
+  } else {
+    std::cout << "WorkspaceY(" << i << ", " << j << ") = " << arg->y(i)[j] << " exp = " << value << "\n";
+    return false;
+  }
+}
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 

@@ -566,33 +566,43 @@ class AddOperationTest(unittest.TestCase):
     def test_that_bad_proton_charges_are_estimated_correctly(self):
         ws = self._create_workspace_with_bad_logs()
 
-        # Clean the logs and estimate values
-        su._clean_logs(ws, True)
+        # Clean the logs and estimate values - has a single bad value at the start
+        pc = ws.getRun().getProperty("proton_charge")
+        self.assertEqual(len(pc.times), 3)
+        ws = su._clean_logs(ws, True)
 
         # Get proton charge logs after operation
-        new_pc = ws.getRun().getProperty("proton_charge")
-
-        # Bad pulsetime should have been removed, cleaned, and re-added as the last log
-        self.assertEqual(new_pc.firstTime().toISO8601String(), "2019-01-01T00:00:00")
-        #  Estimated time is last time + av difference
-        self.assertEqual(new_pc.lastTime().toISO8601String(), "2019-01-01T02:00:00")
-        self.assertEqual(new_pc.value[-1], 12.0)
+        pc = ws.getRun().getProperty("proton_charge")
+        # one value got added to the end
+        self.assertEqual(len(pc.times), 4)
+        # duration should not be hours rather than years
+        stats = ws.getRun().getStatistics("proton_charge")
+        self.assertEqual(stats.duration / 3600, 3.0)  # hours
+        self.assertEqual(stats.time_mean, (10 + 12 + 12) / 3.0)
+        roi = ws.getRun().getTimeROI().toTimeIntervals()[0]
+        self.assertEqual((roi[1] - roi[0]).total_seconds() / 3600.0, 3)
 
     def test_that_bad_proton_charges_can_be_removed_without_estimating_good_values(self):
         # If we pass a False boolean to _clean_logs, we should remove the bad proton charges
         # but not re-estimate good values
         ws = self._create_workspace_with_bad_logs()
 
+        pc = ws.getRun().getProperty("proton_charge")
+        self.assertEqual(len(pc.times), 3)
+
         # Clean the logs, but do not estimate new values
-        su._clean_logs(ws, False)
+        ws = su._clean_logs(ws, False)
 
         # Get proton charge logs after operation
-        new_pc = ws.getRun().getProperty("proton_charge")
+        pc = ws.getRun().getProperty("proton_charge")
+        self.assertEqual(len(pc.times), 3)  # no extra values
 
-        # Bad pulsetime should have been removed, cleaned, and re-added as the last log
-        self.assertEqual(new_pc.firstTime().toISO8601String(), "2019-01-01T00:00:00")
-        self.assertEqual(new_pc.lastTime().toISO8601String(), "2019-01-01T01:00:00")
-        self.assertEqual(new_pc.size(), 2)
+        # duration should not be hours rather than years
+        stats = ws.getRun().getStatistics("proton_charge")
+        self.assertEqual(stats.duration / 3600, 2.0)  # hours
+        self.assertEqual(stats.time_mean, (10 + 12) / 2.0)
+        roi = ws.getRun().getTimeROI().toTimeIntervals()[0]
+        self.assertEqual((roi[1] - roi[0]).total_seconds() / 3600.0, 2)
 
     def _create_workspace_with_bad_logs(self):
         ws = CreateSampleWorkspace(WorkspaceType="Event", NumEvents=0, OutputWorkspace="ws")

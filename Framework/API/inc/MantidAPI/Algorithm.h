@@ -362,11 +362,6 @@ public:
   /// The argument is the property name. Default - do nothing.
   void afterPropertySet(const std::string &) override;
 
-  void splitByTime(std::vector<Kernel::SplittingInterval> & /*splitter*/,
-                   std::vector<Kernel::PropertyManager *> /* outputs*/) const override {
-    throw(std::runtime_error("Not yet implmented"));
-  }
-
   void filterByProperty(const Kernel::TimeSeriesProperty<bool> & /*filter*/, const std::vector<std::string> &
                         /* excludedFromFiltering */) override {
     throw(std::runtime_error("Not yet implmented"));

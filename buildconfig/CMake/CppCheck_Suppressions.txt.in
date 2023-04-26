@@ -130,7 +130,6 @@ funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataOb
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1227
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:310
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:961
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1027
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1057
 redundantPointerOp:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDGridBox.tcc:755
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:686

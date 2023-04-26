@@ -68,8 +68,13 @@ public:
 
   /// Filter the logs by time
   virtual void filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop);
-  /// Split the logs based on the given intervals
-  virtual void splitByTime(Kernel::SplittingIntervalVec &splitter, std::vector<LogManager *> outputs) const;
+
+  /// For the time series properties, remove values according to TimeROI
+  virtual void removeDataOutsideTimeROI(const Kernel::TimeROI &timeROI);
+
+  /// Create a new LogManager with a partial copy of its time series properties according to TimeROI
+  LogManager *cloneInTimeROI(const Kernel::TimeROI &timeROI);
+
   /// Filter the run by the given boolean log
   void filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
                    const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>());

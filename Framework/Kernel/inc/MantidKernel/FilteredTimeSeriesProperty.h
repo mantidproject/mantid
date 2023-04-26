@@ -59,6 +59,7 @@ public:
   TimeInterval nthInterval(int n) const override;
   /// Returns n-th value of n-th interval in an incredibly inefficient way.
   HeldType nthValue(int n) const override;
+  Types::Core::DateAndTime nthTime(int n) const override;
 
   /// Divide the property into  allowed and disallowed time intervals according
   /// to a filter.

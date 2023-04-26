@@ -11,10 +11,12 @@ Description
 
 Time dependence of the polarization function for a static muon interacting with nuclear spin [1].
 
-.. math:: A(t)=\frac13(2P_x+P_z)
+.. math:: A(t)=\frac{A_0*G(t)*L(t)}{3}(2P_x+P_z)
 
-,where
+where:
 
+.. math:: G(t) = e^{-0.5(\sigma t)^2},
+.. math:: L(t) = e^{-\Lambda t},
 .. math:: P_z(t) = \frac{1}{2J+1}\left\{1+\sum^J_{m=-J+1}[\cos^2(2\alpha_m)+\sin^2(2\alpha_m)\cos(\lambda^+_m-\lambda^-_m)t]\right\},
 
 .. math:: P_x(t) = \frac{1}{2J+1}\sum^J_{m=-J} \{ \cos^2\alpha_{m+1}\sin^2\alpha_m\cos(\lambda_{m+1}^+-\lambda_m^+)t +\cos^2\alpha_{m+1}\cos^2\alpha_m\cos(\lambda_{m+1}^+-\lambda_m^-)t +\sin^2\alpha_{m+1}\sin^2\alpha_m\cos(\lambda_{m+1}^--\lambda_m^+)t +\sin^2\alpha_{m+1}\cos^2\alpha_m\cos(\lambda_{m+1}^--\lambda_m^-)t\},
@@ -25,11 +27,17 @@ Time dependence of the polarization function for a static muon interacting with 
 
 .. math:: \tan(2\alpha_m)=\frac{\omega_D[J(J+1)-m(m-1)]^\frac{1}{2}}{(1-2m)(\omega_D+\omega_Q)},
 
-:math:`\omega_D` is the angular frequency due to dipolar coupling,
+:math:`A_0` is the amplitude
 
-:math:`\omega_Q` is the angular frequency due to quadrupole interaction of the nuclear spin :math:`J` due to a field gradient exerted by the presence of the muon,
+:math:`\omega_D` is the angular frequency due to dipolar coupling
 
-:math:`J` is the total angular momentum quantum number,
+:math:`\omega_Q` is the angular frequency due to quadrupole interaction of the nuclear spin :math:`J` due to a field gradient exerted by the presence of the muon
+
+:math:`J` is the total angular momentum quantum number
+
+:math:`\sigma` is the gaussian decay rate
+
+:math:`\Lambda` is the exponential decay rate
 
 and :math:`m` is the z-component of the total orbital quantum number.
 

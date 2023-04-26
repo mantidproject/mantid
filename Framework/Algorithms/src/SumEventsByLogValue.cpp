@@ -12,6 +12,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -27,6 +28,9 @@ DECLARE_ALGORITHM(SumEventsByLogValue)
 
 using namespace Kernel;
 using namespace API;
+using DataObjects::EventWorkspace;
+using DataObjects::EventWorkspace_const_sptr;
+using DataObjects::EventWorkspace_sptr;
 
 void SumEventsByLogValue::init() {
   declareProperty(
@@ -203,33 +207,30 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   for (int value = minVal; value <= maxVal; ++value) {
     const auto row = std::size_t(value - minVal);
     // Create a filter giving the times when this log has the current value
-    SplittingIntervalVec filter;
-    log->makeFilterByValue(filter, value, value); // min & max are the same of course
 
+    TimeROI timeRoi;
+    const TimeROI *temp = &m_inputWorkspace->run().getTimeROI();
     // This section ensures that the filter goes to the end of the run
     if (value == log->lastValue() && protonChargeLog) {
-      TimeInterval timeAfterLastLogValue(log->lastTime(), m_inputWorkspace->getLastPulseTime());
-      log->expandFilterToRange(filter, value, value, timeAfterLastLogValue);
-    }
-
-    // convert to the actual time filter
-    TimeROI timeROI; // TODO remove this conversion
-    for (const auto &interval : filter) {
-      if (interval.start() < interval.stop())
-        timeROI.addROI(interval.start(), interval.stop());
+      const TimeInterval timeAfterLastLogValue(log->lastTime(), m_inputWorkspace->getLastPulseTime());
+      timeRoi = log->makeFilterByValue(value, value, true, timeAfterLastLogValue, 0.0, false, temp);
+    } else {
+      timeRoi = log->makeFilterByValue(value, value, false, TimeInterval(0, 1), 0., false, temp);
     }
 
     // Calculate the time covered by this log value and add it to the table
-    double duration = 0.0;
-    for (auto &time : filter) {
-      duration += time.duration();
-    }
-    timeCol->cell<double>(row) = duration;
+    Run run(m_inputWorkspace->run());
+    run.setTimeROI(timeRoi);
+    timeCol->cell<double>(row) = run.getTimeROI().durationInSeconds();
 
     interruption_point();
     // Sum up the proton charge for this log value
-    if (protonChargeLog)
-      protonChgCol->cell<double>(row) = sumProtonCharge(protonChargeLog, timeROI);
+    if (protonChargeLog) {
+      /// Conversion factor between microAmpere-hours and picoCoulombs
+      /// this is required to correctly represent the proton charge
+      const double currentConversion = 1.e-6 / 3600.;
+      protonChgCol->cell<double>(row) = run.getProtonCharge() / currentConversion;
+    }
     interruption_point();
 
     // filter the logs
@@ -238,7 +239,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
       // of the main log
       // Have to (maybe inefficiently) fetch back column by name - move outside
       // loop if too slow
-      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) = otherLog.second->timeAverageValue(&timeROI);
+      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) = otherLog.second->timeAverageValue(&timeRoi);
     }
 
     prog.report();
@@ -355,21 +356,6 @@ std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>> SumEven
   }
 
   return numberSeriesProps;
-}
-
-/** Integrates the proton charge between specified times.
- *  @param protonChargeLog The proton charge log
- *  @param filter          The times between which to integrate
- *  @returns The summed proton charge
- */
-double SumEventsByLogValue::sumProtonCharge(const Kernel::TimeSeriesProperty<double> *protonChargeLog,
-                                            const Kernel::TimeROI &filter) {
-  // Clone the proton charge log and filter the clone on this log value
-  std::unique_ptr<Kernel::TimeSeriesProperty<double>> protonChargeLogClone(protonChargeLog->clone());
-  protonChargeLogClone->filterByTimes(filter);
-  // Seems like the only way to sum this is to yank out the values
-  const std::vector<double> pcValues = protonChargeLogClone->valuesAsVector();
-  return std::accumulate(pcValues.begin(), pcValues.end(), 0.0);
 }
 
 /** Create a single-spectrum Workspace2D containing the integrated counts versus

@@ -1,7 +1,7 @@
 .. _interface-inelastic-data-manipulation:
 
 Inelastic Data Manipulation
-==========================
+===========================
 
 .. contents:: Table of Contents
   :local:

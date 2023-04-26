@@ -72,6 +72,35 @@ public:
    */
   void test_basics() { log.information() << "Information Message\n"; }
 
+  void test_setLevel() {
+    TS_ASSERT_EQUALS(log.getLevel(), 5);
+    TS_ASSERT_EQUALS(log.getLevelName(), "notice");
+
+    log.setLevel(1);
+    TS_ASSERT_EQUALS(log.getLevel(), 1);
+    TS_ASSERT_EQUALS(log.getLevelName(), "fatal");
+
+    log.setLevel("NoTiCe"); // wacky case to make sure set is case insensitive
+    TS_ASSERT_EQUALS(log.getLevel(), 5);
+    TS_ASSERT_EQUALS(log.getLevelName(), "notice");
+
+    log.setLevel("dEbUg"); // wacky case to make sure set is case insensitive
+    TS_ASSERT_EQUALS(log.getLevel(), 7);
+    TS_ASSERT_EQUALS(log.getLevelName(), "debug");
+
+    log.setLevel(-1); // value too low
+    TS_ASSERT_EQUALS(log.getLevel(), 0);
+
+    log.setLevel(42); // value too high
+    TS_ASSERT_EQUALS(log.getLevel(), 8);
+
+    log.setLevelForAll(4);
+    TS_ASSERT_EQUALS(log.getLevel(), 4);
+
+    // put the log back in it's nominal state
+    log.setLevel(5);
+    log.flush();
+  }
   //---------------------------------------------------------------------------
   /** Log very quickly from a lot of OpenMP threads*/
   void test_OpenMP_ParallelLogging() {

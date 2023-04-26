@@ -324,6 +324,13 @@ Types::Core::DateAndTime TimeROI::getEffectiveTime(const Types::Core::DateAndTim
   }
 }
 
+// returns the first time in the TimeROI
+Types::Core::DateAndTime TimeROI::firstTime() const {
+  if (m_roi.empty())
+    throw std::runtime_error("cannot return time from empty TimeROI");
+  return m_roi.front();
+}
+
 // returns the last time in the TimeROI
 Types::Core::DateAndTime TimeROI::lastTime() const {
   if (m_roi.empty())
@@ -487,6 +494,28 @@ const std::vector<Kernel::TimeInterval> TimeROI::toTimeIntervals() const {
   return output;
 }
 
+/**
+ * Time intervals returned where no time is before after. This is used in calculating ranges
+ * in TimeSeriesProperty.
+ * @param after Only give TimeIntervals after this time
+ */
+const std::vector<Kernel::TimeInterval> TimeROI::toTimeIntervals(const Types::Core::DateAndTime &after) const {
+  const auto NUM_VAL = m_roi.size();
+  std::vector<TimeInterval> output;
+  // every other value is a start/stop
+  for (std::size_t i = 0; i < NUM_VAL; i += 2) {
+    if (m_roi[i + 1] > after) { // make sure end is after the first time requested
+      if (m_roi[i] > after) {   // full region should be used
+        output.emplace_back(m_roi[i], m_roi[i + 1]);
+      } else {
+        output.emplace_back(after, m_roi[i + 1]);
+      }
+    }
+  }
+
+  return output;
+}
+
 bool TimeROI::operator==(const TimeROI &other) const { return this->m_roi == other.m_roi; }
 bool TimeROI::operator!=(const TimeROI &other) const { return this->m_roi != other.m_roi; }
 
@@ -584,6 +613,8 @@ void TimeROI::validateValues(const std::string &label) {
 }
 
 std::size_t TimeROI::numBoundaries() const { return static_cast<std::size_t>(m_roi.size()); }
+
+std::size_t TimeROI::numberOfRegions() const { return this->numBoundaries() / 2; }
 
 bool TimeROI::empty() const { return bool(this->numBoundaries() == 0); }
 

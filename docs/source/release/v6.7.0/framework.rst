@@ -11,11 +11,12 @@ Event Filtering
 During the v6.7 development cycle, there were major changes to the code underlying event filtering that was originally designed `here <https://github.com/mantidproject/mantid/issues/34794>`_.
 The main changes to mantid are as follows:
 
-1. A ``TimeROI`` object that contains a list of use and ignore regions in time. The times are ``[inclusive, exclusive)``.
-2. When filtering/splitting logs in the ``Run`` object, the logs are copied as is and a new ``TimeROI`` object is set on the ``Run``. The main change is that logs no longer have fake values to mimic the filtering/splitting.
-3. Code should change from asking a ``TimeSeriesProperty`` for its statistics to asking the ``Run`` object for the statistics of a log because the ``Run`` is the only place that knows the information about the ``TimeROI``.
-4. When filtering/splitting logs, the filters are now ``[inclusive, exclusive)`` where previous behavior was ``[inclusive, inclusive]``. The previous behavior was inconsistent with how events are filtered. This change, fixes issues observed with the integrated proton charge.
-5. When workspaces are added, the resulting ``TimeROI`` is the union of the individual ``TimeROI``s. If either workspace had a ``TimeROI`` with ``TimeROI.useAll()==True``, it is assumed to be from that workspace's start-time to end-time.
+* A ``TimeROI`` object that contains a list of use and ignore regions in time. The times are ``[inclusive, exclusive)``.
+* When filtering/splitting logs in the ``Run`` object, the logs are copied as is and a new ``TimeROI`` object is set on the ``Run``. Values that are active during a ROI are kept as are one before/after each ROI. The main change is that logs no longer have fake values to mimic the filtering/splitting.
+* Code should change from asking a ``TimeSeriesProperty`` for its statistics to asking the ``Run`` object for the statistics of a log because the ``Run`` is the only place that knows the information about the ``TimeROI``.
+* When filtering/splitting logs, the filters are now ``[inclusive, exclusive)`` where previous behavior was ``[inclusive, inclusive]``. The previous behavior was inconsistent with how events are filtered. This change, fixes issues observed with the integrated proton charge.
+* When workspaces are added, the resulting ``TimeROI`` is the union of the individual ``TimeROI``s. If either workspace had a ``TimeROI`` with ``TimeROI.useAll()==True``, it is assumed to be from that workspace's start-time to end-time.
+* Arithmetic statistics (e.g. simple mean rather than time weighted) will be largely unchanged and are not necesarily correct
 
 
 The algorithms modified as part of this are :ref:`FilterByLogValue <algm-FilterByLogValue>`, :ref:`FilterByTime <algm-FilterByTime>`, and :ref:`FilterEvents <algm-FilterEvents>`.

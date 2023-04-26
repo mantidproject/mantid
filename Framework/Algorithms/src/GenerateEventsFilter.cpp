@@ -64,14 +64,14 @@ void GenerateEventsFilter::init() {
                   "(1) relative time to run start time in unit as specified property 'UnitOfTime'\n"
                   "(2) absolute time\n"
                   "Absolute time takes a string in format as 1990-01-01T00:00:00, while the relative time takes "
-                  "integer or float.");
+                  "a string representing an integer or a floating-point number.");
 
   declareProperty("StopTime", "",
                   "The stop time, such that all events after this time are filtered out: it could be \n"
                   "(1) relative time to run start time in unit as specified property 'UnitOfTime'\n"
                   "(2) absolute time\n"
                   "Absolute time takes a string in format as 1990-01-01T00:00:00, while the relative time takes "
-                  "integer or float.");
+                  "a string representing an integer or a floating-point number.");
 
   // Split by time (only) in steps
   declareProperty(
@@ -85,8 +85,9 @@ void GenerateEventsFilter::init() {
 
   std::vector<std::string> timeoptions{"Seconds", "Nanoseconds", "Percent"};
   declareProperty("UnitOfTime", "Seconds", std::make_shared<Kernel::StringListValidator>(timeoptions),
-                  "StartTime, StopTime and DeltaTime can be given in various unit; the unit can be 'Seconds' or "
-                  "'Nanoseconds' from run start time or can also be defined as 'Percentage' of total run time.");
+                  "This option determines the units of options 'StartTime', 'StopTime' and 'DeltaTime'. "
+                  "Allowed units are 'Seconds' or 'Nanoseconds', counting from the run start time, "
+                  "or a 'Percentage' of the total run time.");
 
   // Split by log value (only) in steps
   declareProperty(

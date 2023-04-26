@@ -33,7 +33,7 @@ public:
   /// Fill a SplittingIntervalVec that will filter the events by matching
   virtual TimeROI makeFilterByValue(double min, double max, bool expand = false,
                                     const TimeInterval &expandRange = TimeInterval(0, 1), double TimeTolerance = 0.,
-                                    bool centre = true, TimeROI *existingROI = nullptr) const = 0;
+                                    bool centre = true, const TimeROI *existingROI = nullptr) const = 0;
   /// Fill a SplittingIntervalVec that will filter the events by matching
   virtual void makeFilterByValue(std::vector<SplittingInterval> &split, double min, double max, double TimeTolerance,
                                  bool centre = true) const = 0;
@@ -45,9 +45,11 @@ public:
   // Using property seemed to be the most straightforward solution.
   virtual Property *cloneWithTimeShift(const double timeShift) const = 0;
 
-  virtual void filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) = 0;
-  virtual void splitByTime(const std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
-                           bool isProtonCharge = true) const = 0;
+  // Create a partial copy of this ITimeSeriesProperty-derived object according to a TimeROI. The partially cloned
+  // object will include all time values enclosed by the ROI regions defined as [roi_start,roi_end), plus the values
+  // immediately before and after an ROI region, if available.
+  virtual Property *cloneInTimeROI(const TimeROI &timeROI) const = 0;
+
   /// Return the time series's times as a vector<DateAndTime>
   virtual std::vector<Types::Core::DateAndTime> timesAsVector() const = 0;
   /** Returns the calculated time weighted average value.
@@ -72,6 +74,10 @@ public:
 
   // Returns whether the time series has been filtered
   virtual bool isFiltered() const = 0;
+
+  // Remove time values outside of TimeROI regions defined as [roi_start,roi_stop).
+  // However, keep the values immediately before and after each ROI region, if available.
+  virtual void removeDataOutsideTimeROI(const TimeROI &timeRoi) = 0;
 
   /// Virtual destructor
   virtual ~ITimeSeriesProperty() = default;

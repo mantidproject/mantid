@@ -310,7 +310,7 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
                                   bool tofCorrect, double factor, double shift) const {
 
   if (events.getEventType() == EventType::WEIGHTED_NOTIME)
-    throw std::invalid_argument("EventList::splitByTime() called on an EventList "
+    throw std::invalid_argument("EventList::splitEventList() called on an EventList "
                                 "that no longer has time information.");
 
   // Initialize the detector ID's and event type of the destination event lists
