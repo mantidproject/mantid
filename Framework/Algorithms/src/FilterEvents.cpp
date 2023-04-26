@@ -457,11 +457,12 @@ void FilterEvents::processAlgorithmProperties() {
         getProperty("FilterStartTime"); // User-specified absolute base time for relative times
     m_filterStartTime = Types::Core::DateAndTime(filter_start_time_str);
   } else {
-    // Retrieve filter starting time from property run_start as default
+    // Default filter starting time to the run start time
     try {
       m_filterStartTime = m_eventWS->run().startTime();
     } catch (std::runtime_error &) {
-      throw std::runtime_error("InputWorkspace doesn't have property run_start and FilterStartTime is not specified.");
+      throw std::runtime_error(
+          "InputWorkspace doesn't have valid run start time set, and FilterStartTime is not specified.");
     }
   }
 
