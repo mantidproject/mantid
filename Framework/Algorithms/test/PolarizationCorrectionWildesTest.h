@@ -602,6 +602,30 @@ public:
     TS_ASSERT(!alg.isExecuted())
   }
 
+  void test_flippers_any_order_correct() {
+    PolarizationCorrectionWildes alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "1"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "1, 0"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "01, 00, 11"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "01, 00, 10, 11"))
+  }
+
+  void test_flippers_reject_incorrect_values() {
+    PolarizationCorrectionWildes alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("Flippers", "2"))
+    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("Flippers", "04, 17"))
+    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("Flippers", "03, 00, 11"))
+    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("Flippers", "01, 00, 10, 11, 00"))
+  }
+
   void test_FailureWhenAnInputWorkspaceIsMissing() {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
