@@ -11,6 +11,7 @@
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, FileProperty, FileAction, Progress
 from mantid.kernel import Direction, logger
 from sans.algorithm_detail.save_workspace import save_to_file, get_zero_error_free_workspace, file_format_with_append
+from sans.common.file_information import convert_to_shape
 from sans.common.enums import SaveType
 
 
@@ -134,7 +135,11 @@ class SANSSave(DataProcessorAlgorithm):
         file_name = self.getProperty("Filename").value
         workspace = self.getProperty("InputWorkspace").value
 
-        thickness = workspace.sample().getThickness()
+        sample = workspace.sample()
+        geometry = convert_to_shape(sample.getGeometryFlag()).value
+        height = sample.getHeight()
+        width = sample.getWidth()
+        thickness = sample.getThickness()
 
         transmission = self.getProperty("Transmission").value
         transmission_can = self.getProperty("TransmissionCan").value
@@ -145,7 +150,14 @@ class SANSSave(DataProcessorAlgorithm):
                 transmission = get_zero_error_free_workspace(transmission)
             if transmission_can:
                 transmission_can = get_zero_error_free_workspace(transmission_can)
-        additional_properties = {"Transmission": transmission, "TransmissionCan": transmission_can, "SampleThickness": thickness}
+        additional_properties = {
+            "Transmission": transmission,
+            "TransmissionCan": transmission_can,
+            "Geometry": geometry,
+            "SampleHeight": height,
+            "SampleWidth": width,
+            "SampleThickness": thickness,
+        }
 
         additional_run_numbers = {
             "SampleTransmissionRunNumber": self.getProperty("SampleTransmissionRunNumber").value,
