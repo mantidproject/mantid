@@ -102,6 +102,10 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
             file_reader = csv.reader(file)
             for row in file_reader:
+                if len(row) == 0:
+                    # Ignore any blank lines
+                    continue
+
                 entries = row[0].split()
 
                 if entries[0][0] == "#":
