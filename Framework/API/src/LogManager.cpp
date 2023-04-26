@@ -182,8 +182,8 @@ bool LogManager::hasEndTime() const { return hasProperty(END_TIME_NAME) || hasPr
 //-----------------------------------------------------------------------------------------------
 /**
  * Filter out a run by time range. Takes out any TimeSeriesProperty log entries
- * outside of the given absolute time range [start,stop), plus the entries immediately
- * before and after the time range, if available.
+ * outside of the given absolute time range [start,stop), except for the entries immediately
+ * before and after the time range.
  *
  * @param start :: Absolute start time.
  * @param stop :: Absolute stop time.

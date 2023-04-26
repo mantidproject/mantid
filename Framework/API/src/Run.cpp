@@ -90,16 +90,14 @@ std::shared_ptr<Run> Run::clone() {
 
 //-----------------------------------------------------------------------------------------------
 /**
- * Filter out a run by time. Takes out any TimeSeriesProperty log entries
- *outside of the given
- *  absolute time range.
+ * Filter out a run by time range. Takes out any TimeSeriesProperty log entries
+ * outside of the given absolute time range [start,stop), except for the entries immediately
+ * before and after the time range.
  *
  * Total proton charge will get re-integrated after filtering.
  *
- * @param start :: Absolute start time. Any log entries at times >= to this time
- *are kept.
- * @param stop :: Absolute stop time. Any log entries at times < than this time
- *are kept.
+ * @param start :: Absolute start time.
+ * @param stop :: Absolute stop time.
  */
 void Run::filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop) {
   LogManager::filterByTime(start, stop);
