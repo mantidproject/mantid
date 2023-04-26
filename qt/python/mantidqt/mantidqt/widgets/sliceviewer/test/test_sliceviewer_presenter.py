@@ -134,6 +134,7 @@ class SliceViewerTest(unittest.TestCase):
             "supports_dynamic_rebinning": False,
             "supports_peaks_overlays": True,
         }
+        self.model.check_for_removed_original_workspace.return_value = False
 
         self._ws_info_patcher = mock.patch.multiple(
             "mantidqt.widgets.sliceviewer.presenters.presenter", Dimensions=mock.DEFAULT, WorkspaceInfo=mock.DEFAULT
@@ -555,6 +556,16 @@ class SliceViewerTest(unittest.TestCase):
         pres.delete_workspace("not_original_name")
         mock_view.emit_close.assert_not_called()
 
+    def test_replace_original_workspace(self):
+        mock_model = mock.MagicMock()
+        mock_view = mock.MagicMock()
+        pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
+        mock_model.check_for_removed_original_workspace.return_value = True
+
+        pres._close_view_with_message = mock.Mock()
+        pres.replace_workspace("test1", "test2")
+        pres._close_view_with_message.assert_called_once()
+
     def test_replace_workspace_does_nothing_if_workspace_is_unchanged(self):
         mock_model = mock.MagicMock()
         mock_view = mock.MagicMock()
@@ -562,6 +573,7 @@ class SliceViewerTest(unittest.TestCase):
         # TODO The return value here should be True but there is a bug in the
         # presenter where the condition is always incorrect (see the TODO on
         # replace_workspace in the presenter)
+        mock_model.check_for_removed_original_workspace.return_value = False
         mock_model.workspace_equals.return_value = False
         pres._close_view_with_message = mock.Mock()
 
@@ -574,6 +586,7 @@ class SliceViewerTest(unittest.TestCase):
         mock_model = mock.MagicMock()
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
+        mock_model.check_for_removed_original_workspace.return_value = False
         mock_model.workspace_equals.return_value = True
         with mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewerModel") as mock_model_class:
             pres.replace_workspace(mock.NonCallableMock(), mock.NonCallableMock())

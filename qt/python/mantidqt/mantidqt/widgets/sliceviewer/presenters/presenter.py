@@ -382,6 +382,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         """
         if self.model.check_for_removed_original_workspace():
             self._close_view_with_message("Original workspace has been replaced: Closing Slice Viewer")
+            return
 
         if not self.model.workspace_equals(workspace_name):
             # TODO this is a dead branch, since the ADS observer will call this if the
