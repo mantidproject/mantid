@@ -203,9 +203,7 @@ void LogManager::filterByTime(const Types::Core::DateAndTime start, const Types:
 LogManager *LogManager::cloneInTimeROI(const Kernel::TimeROI &timeROI) {
   LogManager *logMgr = new LogManager();
   logMgr->m_manager = std::make_unique<Kernel::PropertyManager>(*m_manager->cloneInTimeROI(timeROI));
-  logMgr->m_timeroi = std::make_unique<Kernel::TimeROI>(*m_timeroi),
-  logMgr->m_singleValueCache =
-      std::make_unique<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>>(*m_singleValueCache);
+  logMgr->m_timeroi = std::make_unique<Kernel::TimeROI>(*m_timeroi);
   return logMgr;
 }
 
@@ -228,6 +226,7 @@ void copyProperties(const LogManager &other, bool filterByTimeROI) {}
  */
 void LogManager::removeDataOutsideTimeROI(const Kernel::TimeROI &timeROI) {
   m_manager->removeDataOutsideTimeROI(timeROI);
+  this->clearSingleValueCache();
 }
 
 //----------------------------------------------------------------------------------------------
