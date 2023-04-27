@@ -144,7 +144,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
     def _correct_detector_positions(self, ws, calibration_data):
         calibration_ws = self._clone_workspace(ws)
-        det_info = calibration_ws.detectorInfo()
+        spec_info = calibration_ws.spectrumInfo()
 
         correction_alg = self.createChildAlgorithm("SpecularReflectionPositionCorrect")
         # Passing the same workspace as both input and output means all the detector moves are applied to it
@@ -156,21 +156,21 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             if theta_offset == 0:
                 # Detector position does not need to be changed
                 continue
-            new_two_theta = self._calculate_calibrated_two_theta(det_info, det_id, theta_offset)
+            new_two_theta = self._calculate_calibrated_two_theta(ws, spec_info, det_id, theta_offset)
             correction_alg.setProperty("TwoTheta", new_two_theta)
             correction_alg.setProperty("DetectorID", det_id)
             correction_alg.execute()
 
         return calibration_ws
 
-    def _calculate_calibrated_two_theta(self, det_info, det_id, theta_offset):
+    def _calculate_calibrated_two_theta(self, ws, spec_info, det_id, theta_offset):
         """Calculates the new twoTheta value for a detector from a given offset, in degrees"""
         try:
-            det_idx = det_info.indexOf(det_id)
+            ws_idx = ws.getIndicesFromDetectorIDs([det_id])[0]
         except IndexError:
             raise RuntimeError(f"Detector id {det_id} from calibration file cannot be found in input workspace")
 
-        current_two_theta = det_info.twoTheta(det_idx)
+        current_two_theta = spec_info.signedTwoTheta(ws_idx)
         return (current_two_theta * self._RAD_TO_DEG) + theta_offset
 
 

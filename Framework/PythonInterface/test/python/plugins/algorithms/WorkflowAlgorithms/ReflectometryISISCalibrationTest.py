@@ -99,14 +99,14 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         self._assert_run_algorithm_raises_exception(args, "Calibration file path cannot be found")
 
     def _check_final_theta_values(self, input_ws, output_ws):
-        info_in = input_ws.detectorInfo()
-        info_out = output_ws.detectorInfo()
+        info_in = input_ws.spectrumInfo()
+        info_out = output_ws.spectrumInfo()
 
         for i in range(input_ws.getNumberHistograms()):
             det_id = input_ws.getDetector(i).getID()
 
-            two_theta_in = info_in.twoTheta(info_in.indexOf(det_id))
-            two_theta_out = info_out.twoTheta(info_out.indexOf(det_id))
+            two_theta_in = info_in.signedTwoTheta(i)
+            two_theta_out = info_out.signedTwoTheta(i)
 
             theta_offset = self.calibration_data.get(det_id)
             expected_two_theta = ((two_theta_in * self._RAD_TO_DEG) + theta_offset) * self._DEG_TO_RAD if theta_offset else two_theta_in
