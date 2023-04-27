@@ -11,9 +11,11 @@ from mantid.kernel import StringListValidator, Direction
 import mantid.simpleapi as s_api
 from mantid import logger
 from IndirectCommon import GetThetaQ, CheckHistZero, CheckHistSame
-#from quickBayesHelper import make_fit_ws, make_results, add_sample_logs
+
+# from quickBayesHelper import make_fit_ws, make_results, add_sample_logs
 from typing import Dict
 from numpy import ndarray
+
 try:
     from quickBayes.fitting.fit_engine import FitEngine
 except (Exception, Warning):
@@ -21,7 +23,7 @@ except (Exception, Warning):
 
     print(
         subprocess.Popen(
-            "python -m pip install -U --no-deps quickBayes==1.0.0b6",
+            "python -m pip install -U quickBayes==1.0.0b6",
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -33,7 +35,6 @@ from quickBayes.functions.qldata_function import QlDataFunction
 from quickBayes.utils.general import get_background_function
 from quickBayes.workflow.QlData import QLData
 import numpy as np
-
 
 
 class BayesQuasi2(PythonAlgorithm):
@@ -74,17 +75,17 @@ class BayesQuasi2(PythonAlgorithm):
             validator=StringListValidator(["Linear", "Flat", "None"]),
             doc="Fit option for the type of background",
         )
-       
+
         self.declareProperty(
-            WorkspaceGroupProperty('OutputWorkspaceFit', '', direction=Direction.Output), doc='The name of the fit output workspaces'
+            WorkspaceGroupProperty("OutputWorkspaceFit", "", direction=Direction.Output), doc="The name of the fit output workspaces"
         )
         self.declareProperty(
-            MatrixWorkspaceProperty('OutputWorkspaceResult', '', direction=Direction.Output), doc='The name of the result output workspaces'
+            MatrixWorkspaceProperty("OutputWorkspaceResult", "", direction=Direction.Output), doc="The name of the result output workspaces"
         )
 
         self.declareProperty(
-            MatrixWorkspaceProperty('OutputWorkspaceProb', '', optional=PropertyMode.Optional, direction=Direction.Output),
-            doc='The name of the probability output workspaces',
+            MatrixWorkspaceProperty("OutputWorkspaceProb", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The name of the probability output workspaces",
         )
 
     def validateInputs(self):
@@ -100,7 +101,7 @@ class BayesQuasi2(PythonAlgorithm):
 
     def point_data(self, name):
         workspace = self.getPropertyValue(name)
-        alg =self.createChildAlgorithm("ConvertToPointData", enableLogging=True)
+        alg = self.createChildAlgorithm("ConvertToPointData", enableLogging=True)
         alg.initialize()
         alg.setProperty("InputWorkspace", workspace)
         alg.setProperty("OutputWorkspace", workspace)
@@ -119,27 +120,25 @@ class BayesQuasi2(PythonAlgorithm):
             res_list.append({"x": res_ws.readX(j), "y": res_ws.readY(j)})
         return res_list
 
-
-    def create_ws(self, OutputWorkspace, DataX, DataY, NSpec,
-                    UnitX, YUnitLabel, VerticalAxisUnit, VerticalAxisValues, DataE=None):
-        alg =self.createChildAlgorithm("CreateWorkspace")
-        #alg.initialize()
+    def create_ws(self, OutputWorkspace, DataX, DataY, NSpec, UnitX, YUnitLabel, VerticalAxisUnit, VerticalAxisValues, DataE=None):
+        alg = self.createChildAlgorithm("CreateWorkspace")
+        # alg.initialize()
         alg.setAlwaysStoreInADS(True)
-        alg.setProperty('OutputWorkspace', OutputWorkspace)
-        alg.setProperty('DataX', DataX)
-        alg.setProperty('DataY', DataY)
-        alg.setProperty('NSpec', NSpec)
-        #alg.setProperty('UnitX', UnitX)
-        #alg.setProperty('YUnitLabel', YUnitLabel)
-        #alg.setProperty('VerticalAxisUnit', VerticalAxisUnit)
-        #alg.setProperty('VerticalAxisValues', VerticalAxisValues)
-        #if DataE is not None:
+        alg.setProperty("OutputWorkspace", OutputWorkspace)
+        alg.setProperty("DataX", DataX)
+        alg.setProperty("DataY", DataY)
+        alg.setProperty("NSpec", NSpec)
+        # alg.setProperty('UnitX', UnitX)
+        # alg.setProperty('YUnitLabel', YUnitLabel)
+        # alg.setProperty('VerticalAxisUnit', VerticalAxisUnit)
+        # alg.setProperty('VerticalAxisValues', VerticalAxisValues)
+        # if DataE is not None:
         #    alg.setProperty('DataE', DataE)
 
         alg.execute()
         return alg.getPropertyValue("OutputWorkspace")
 
-    def make_fit_ws(self, engine, max_features, ws_list, x_unit,  name):
+    def make_fit_ws(self, engine, max_features, ws_list, x_unit, name):
         """
         Simple function for creating a fit ws
         :param engine: the quickBayes fit engine used
@@ -158,23 +157,31 @@ class BayesQuasi2(PythonAlgorithm):
 
             y += list(fit[:1901]) + list(df[:1901])
             x += list(x_data[:1901]) + list(x_data[:1901])
-            axis_names.append(f'fit {j+1}')
-            axis_names.append(f'diff {j+1}')
+            axis_names.append(f"fit {j+1}")
+            axis_names.append(f"diff {j+1}")
             ws = self.create_ws(
-                OutputWorkspace=f'{name}_workspace',
+                OutputWorkspace=f"{name}_workspace",
                 DataX=np.array(x),
                 DataY=np.array(y),
                 NSpec=len(axis_names),
                 UnitX=x_unit,
                 YUnitLabel="",
                 VerticalAxisUnit="Text",
-                VerticalAxisValues=axis_names)
+                VerticalAxisValues=axis_names,
+            )
         ws_list.append(ws)
-        #print(ws_list)
+        # print(ws_list)
         return ws_list
 
-    def make_results(self, results: Dict['str', ndarray], results_errors: Dict['str', ndarray],
-                     x_data: ndarray, x_unit: str, max_features: int, name: str):
+    def make_results(
+        self,
+        results: Dict["str", ndarray],
+        results_errors: Dict["str", ndarray],
+        x_data: ndarray,
+        x_unit: str,
+        max_features: int,
+        name: str,
+    ):
         """
         Takes the output of quickBayes and makes Mantid workspaces
         :param results: dict of quickBayes parameter results
@@ -207,7 +214,7 @@ class BayesQuasi2(PythonAlgorithm):
             UnitX=x_unit,
             YUnitLabel="",
             VerticalAxisUnit="Text",
-            VerticalAxisValues=axis_names
+            VerticalAxisValues=axis_names,
         )
 
         prob_ws = self.create_ws(
@@ -218,7 +225,7 @@ class BayesQuasi2(PythonAlgorithm):
             UnitX=x_unit,
             YUnitLabel="",
             VerticalAxisUnit="Text",
-            VerticalAxisValues=[f"{k + 1} feature(s)" for k in range(max_features)]
+            VerticalAxisValues=[f"{k + 1} feature(s)" for k in range(max_features)],
         )
         return f"{name}_results", f"{name}_prob"
 
@@ -228,14 +235,14 @@ class BayesQuasi2(PythonAlgorithm):
 
         name = self.getPropertyValue("SampleWorkspace")
 
-        alg =self.createChildAlgorithm("ConvertToPointData")
+        alg = self.createChildAlgorithm("ConvertToPointData")
         alg.setProperty("InputWorkspace", name)
         alg.setProperty("OutputWorkspace", name)
         alg.execute()
         sample_ws = alg.getProperty("OutputWorkspace").value
 
         res_name = self.getPropertyValue("ResolutionWorkspace")
-        #alg2 =self.createChildAlgorithm("ConvertToPointData")
+        # alg2 =self.createChildAlgorithm("ConvertToPointData")
         alg.setProperty("InputWorkspace", res_name)
         alg.setProperty("OutputWorkspace", res_name)
         alg.execute()
@@ -255,7 +262,7 @@ class BayesQuasi2(PythonAlgorithm):
         N = sample_ws.getNumberHistograms()
         report_progress = Progress(self, start=0.0, end=1.0, nreports=N)
         self.log().notice(res_ws.name())
-        N_res_hist = res_ws.getNumberHistograms() 
+        N_res_hist = res_ws.getNumberHistograms()
         prog = None
         res_list = None
         if program == "QL":
@@ -292,7 +299,7 @@ class BayesQuasi2(PythonAlgorithm):
             ("background", BG_str),
             ("elastic_peak", elastic),
             ("energy_min", start_x),
-            ("energy_max", end_x)
+            ("energy_max", end_x),
         ]
 
         for spec in range(N):
@@ -324,23 +331,22 @@ class BayesQuasi2(PythonAlgorithm):
 
             ws_list = self.make_fit_ws(engine, max_num_peaks, ws_list, "DeltaE", f"{name}_{spec}_")
 
-        
-        alg3 =self.createChildAlgorithm("GroupWorkspaces")
+        alg3 = self.createChildAlgorithm("GroupWorkspaces")
         alg3.setAlwaysStoreInADS(True)
         alg3.setProperty("InputWorkspaces", ws_list)
         alg3.setProperty("OutputWorkspace", f"{name}_workspaces")
         alg3.execute()
-        
+
         fits = alg3.getPropertyValue("OutputWorkspace")
         self.setProperty("OutputWorkspaceFit", fits)
-        #add_sample_logs(fits, sample_logs, sample_ws)
-        
+        # add_sample_logs(fits, sample_logs, sample_ws)
+
         params, prob = self.make_results(results, results_errors, Q[1], "MomentumTransfer", max_num_peaks, name)
-        #add_sample_logs(params, sample_logs, sample_ws)
+        # add_sample_logs(params, sample_logs, sample_ws)
 
         self.setProperty("OutputWorkspaceResult", params)
         self.setProperty("OutputWorkspaceProb", prob)
-        
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(BayesQuasi2)
