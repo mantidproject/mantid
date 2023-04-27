@@ -32,6 +32,8 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override;
 
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   /// Implement abstract Algorithm methods
   void init() override;
@@ -45,7 +47,7 @@ private:
   void processAlgProperties();
 
   ///
-  void retrieveInstrumentParameters();
+  void calcCentreVelocity();
 
   /// Calculate detector resolution
   void estimateDetectorResolution();
@@ -73,6 +75,8 @@ private:
 
   /// Delta T
   double m_deltaT = 0.0;
+  /// DeltaT/T is an optional constant
+  double m_deltaTOverTOF = 0.0;
 };
 
 } // namespace Algorithms

@@ -49,6 +49,7 @@ const std::string PARTIALS_WKSP_GRP("PartialResolutionWorkspaces");
 const std::string DIVERGENCE_WKSP("DivergenceWorkspace");
 const std::string WAVELENGTH("Wavelength");
 const std::string DELTA_T("DeltaTOF");
+const std::string DELTA_T_OVER_T("DeltaTOFOverTOF");
 } // namespace PropertyNames
 } // namespace
 
@@ -79,8 +80,11 @@ void EstimateResolutionDiffraction::init() {
   auto positiveDeltaTOF = std::make_shared<BoundedValidator<double>>();
   positiveDeltaTOF->setLower(0.);
   positiveDeltaTOF->setLowerExclusive(true);
-  declareProperty(PropertyNames::DELTA_T, 0., positiveDeltaTOF,
-                  "DeltaT as the resolution of TOF with unit microsecond");
+  declareProperty(
+      std::make_unique<PropertyWithValue<double>>(PropertyNames::DELTA_T, 0., positiveDeltaTOF, PropertyMode::Optional),
+      "DeltaT as the resolution of TOF with unit microsecond");
+  declareProperty(PropertyNames::DELTA_T_OVER_T, EMPTY_DBL(), positiveDeltaTOF,
+                  "DeltaT/T as the full term in the equation");
 
   auto positiveWavelength = std::make_shared<BoundedValidator<double>>();
   positiveWavelength->setLower(0.);
@@ -94,10 +98,29 @@ void EstimateResolutionDiffraction::init() {
       "Workspaces created showing the various resolution terms");
 }
 
+std::map<std::string, std::string> EstimateResolutionDiffraction::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  // cannot specify both deltaTOF AND deltaTOF/TOF
+  const double deltaT = getProperty(PropertyNames::DELTA_T);
+  const bool hasDeltaT = (deltaT > 0.);
+  const bool hasDeltaTOverT = (!isDefault(PropertyNames::DELTA_T_OVER_T));
+  std::string msg;
+  if (hasDeltaT && hasDeltaTOverT) {
+    msg = "Cannot specify both " + PropertyNames::DELTA_T + " and " + PropertyNames::DELTA_T_OVER_T;
+  } else if ((!hasDeltaT) && (!hasDeltaTOverT)) {
+    msg = "Must specify either " + PropertyNames::DELTA_T + " or " + PropertyNames::DELTA_T_OVER_T;
+  }
+  if (!msg.empty()) {
+    errors[PropertyNames::DELTA_T] = msg;
+    errors[PropertyNames::DELTA_T_OVER_T] = msg;
+  }
+
+  return errors;
+}
+
 void EstimateResolutionDiffraction::exec() {
   processAlgProperties();
-
-  retrieveInstrumentParameters();
 
   // create all of the output workspaces
   std::string partials_prefix = getPropertyValue(PropertyNames::PARTIALS_WKSP_GRP);
@@ -125,8 +148,14 @@ void EstimateResolutionDiffraction::processAlgProperties() {
   m_inputWS = getProperty(PropertyNames::INPUT_WKSP);
   m_divergenceWS = getProperty(PropertyNames::DIVERGENCE_WKSP);
 
-  m_deltaT = getProperty(PropertyNames::DELTA_T);
-  m_deltaT *= MICROSEC_TO_SEC; // convert to seconds
+  if (isDefault(PropertyNames::DELTA_T_OVER_T)) {
+    m_deltaT = getProperty(PropertyNames::DELTA_T);
+    m_deltaT *= MICROSEC_TO_SEC; // convert to seconds
+
+    calcCentreVelocity();
+  } else {
+    m_deltaTOverTOF = getProperty(PropertyNames::DELTA_T_OVER_T);
+  }
 }
 
 double EstimateResolutionDiffraction::getWavelength() {
@@ -152,7 +181,7 @@ double EstimateResolutionDiffraction::getWavelength() {
   return m_inputWS->run().getTimeAveragedValue("LambdaRequest");
 }
 
-void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
+void EstimateResolutionDiffraction::calcCentreVelocity() {
   double centrewavelength = getWavelength();
   g_log.notice() << "Centre wavelength = " << centrewavelength << " Angstrom\n";
   if (centrewavelength > WAVELENGTH_MAX) {
@@ -184,6 +213,19 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
 
   for (size_t i = 0; i < numspec; ++i) {
     const auto &det = spectrumInfo.detector(i);
+
+    // Get the distance from detector to source
+    const double l2 = spectrumInfo.l2(i);
+
+    // resolution in time
+    double t1 = m_deltaTOverTOF;
+    if (t1 == 0.) { // calculate per pixel
+      // Calculate T
+      const double centraltof = (l1 + l2) / m_centreVelocity;
+      t1 = m_deltaT / centraltof;
+    }
+
+    // resolution in length
     double detdim;
     const auto realdet = dynamic_cast<const Detector *>(&det);
     if (realdet) {
@@ -195,14 +237,9 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
       detdim = 0;
       ++count_nodetsize;
     }
+    const double t2 = detdim / (l1 + l2);
 
-    // Get the distance from detector to source
-    const double l2 = spectrumInfo.l2(i);
-
-    // Calculate T
-    const double centraltof = (l1 + l2) / m_centreVelocity;
-
-    // Angle
+    // resolution in angle
     const double twotheta = spectrumInfo.isMonitor(i) ? 0.0 : spectrumInfo.twoTheta(i);
     const double theta = 0.5 * twotheta;
 
@@ -222,10 +259,6 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
                           });
       deltatheta = sqrt(solidangle);
     }
-
-    // Resolution
-    const double t1 = m_deltaT / centraltof;
-    const double t2 = detdim / (l1 + l2);
     const double t3 = deltatheta / tan(theta);
 
     if (spectrumInfo.isMonitor(i)) {
