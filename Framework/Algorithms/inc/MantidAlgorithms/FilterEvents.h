@@ -18,9 +18,11 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
+
 namespace Kernel {
 class TimeROI; // forward declaration
 }
+
 namespace Algorithms {
 
 class TimeAtSampleStrategy;
@@ -67,9 +69,6 @@ private:
 
   /// process splitters specified by an input workspace
   void parseInputSplitters();
-
-  /// create event workspace
-  std::shared_ptr<DataObjects::EventWorkspace> createEventWorkspaceNoLog();
 
   /// create output workspaces
   void createOutputWorkspaces();

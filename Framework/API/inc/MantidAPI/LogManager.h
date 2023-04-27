@@ -75,6 +75,9 @@ public:
   /// Create a new LogManager with a partial copy of its time series properties according to TimeROI
   LogManager *cloneInTimeROI(const Kernel::TimeROI &timeROI);
 
+  /// copy properties from another LogManager, but filter them according to TimeROI
+  void copyAndFilterProperties(const LogManager &other, const Kernel::TimeROI &timeROI);
+
   /// Filter the run by the given boolean log
   void filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
                    const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>());
@@ -196,7 +199,7 @@ public:
   /// Clear the logs
   void clearLogs();
 
-  /// Clear ou the cache of calculated statistics
+  /// Clear the cache of calculated statistics
   void clearSingleValueCache();
 
   // returns true if the log has a matching invalid values log filter

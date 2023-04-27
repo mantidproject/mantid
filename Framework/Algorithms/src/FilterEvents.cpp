@@ -626,9 +626,7 @@ void FilterEvents::createOutputWorkspaces() {
 
   // Clone the input workspace but without any events. Will serve as blueprint for the output workspaces
   std::shared_ptr<EventWorkspace> templateWorkspace = create<EventWorkspace>(*m_eventWS);
-  // Up to this point, the run of templateWorkspace is just a reference to the run of m_eventWS. We
-  // overwrite the refence with a copy of the run of m_eventWS.
-  templateWorkspace->mutableRun() = m_eventWS->run();
+  templateWorkspace->setSharedRun(Kernel::make_cow<Run>()); // clear the run object
 
   // Set up target workspaces
   size_t number_of_output_workspaces{0};
@@ -680,6 +678,9 @@ void FilterEvents::createOutputWorkspaces() {
     // Endow the output workspace with a TimeROI
     TimeROI roi = this->partialROI(wsindex);
     roi.update_or_replace_intersection(originalROI);
+
+    // discard log entries outside the ROI
+    optws->mutableRun().copyAndFilterProperties(m_eventWS->run(), roi);
     optws->mutableRun().setTimeROI(roi);
 
     m_outputWorkspacesMap.emplace(wsindex, optws);

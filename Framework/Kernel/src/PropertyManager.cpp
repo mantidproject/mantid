@@ -192,6 +192,7 @@ PropertyManager *PropertyManager::cloneInTimeROI(const Kernel::TimeROI &timeROI)
       newProp = std::unique_ptr<Property>(tsp->cloneInTimeROI(timeROI));
     else
       newProp = std::unique_ptr<Property>(prop->clone());
+    newProp->setUnits(prop->units());
     newMgr->m_orderedProperties.emplace_back(newProp.get());
     newMgr->m_properties[createKey(newProp->name())] = std::move(newProp);
   }

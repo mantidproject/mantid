@@ -209,6 +209,18 @@ LogManager *LogManager::cloneInTimeROI(const Kernel::TimeROI &timeROI) {
   return logMgr;
 }
 
+void LogManager::copyAndFilterProperties(const LogManager &other, const Kernel::TimeROI &timeROI) {
+  PropertyManager *new_manager = other.m_manager->cloneInTimeROI(timeROI);
+  this->m_manager = std::make_unique<Kernel::PropertyManager>(*new_manager);
+}
+
+/**
+ * Copy the properties from another LogManager object.
+ * @param other
+ * @param filterByTimeROI
+ */
+void copyProperties(const LogManager &other, bool filterByTimeROI) {}
+
 /**
  * For time series properties, remove time values outside of TimeROI regions, each defined as [roi_start,roi_stop).
  * However, keep the values immediately before and after each ROI region, if available.
