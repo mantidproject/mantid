@@ -50,7 +50,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         )
         self.declareProperty(
             FileProperty(self._CALIBRATION_FILE, "", action=FileAction.OptionalLoad, direction=Direction.Input, extensions=["dat"]),
-            doc=f"Calibration data file containing a list of detector IDs and twoTheta offsets (in degrees)."
+            doc="Calibration data file containing a list of detector IDs and twoTheta offsets (in degrees)."
             f"These should be provided as two spaced-delimited columns, labelled {self._DET_ID_LABEL} and {self._THETA_LABEL}.",
         )
         self.declareProperty(
@@ -58,8 +58,12 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
+        # Set the expected order of the columns in the calibration file
+        self._det_id_col_idx = 0
+        self._theta_offset_col_idx = 1
+
         try:
-            calibration_data = self._parse_calibration_file(self.calibration_filepath)
+            calibration_data = self._parse_calibration_file(self._calibration_filepath)
         except FileNotFoundError:
             raise FileNotFoundError("Calibration file path cannot be found")
 
@@ -72,8 +76,8 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         """Return a dictionary containing issues found in properties."""
         issues = dict()
 
-        self.calibration_filepath = self.getPropertyValue(self._CALIBRATION_FILE)
-        if not self.calibration_filepath:
+        self._calibration_filepath = self.getPropertyValue(self._CALIBRATION_FILE)
+        if not self._calibration_filepath:
             issues[self._CALIBRATION_FILE] = "Calibration file path must be provided"
         return issues
 
@@ -82,8 +86,6 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         scanned_theta_offsets = {}
         with open(filepath, "r") as file:
             labels_checked = False
-            det_id_idx = 0
-            theta_offset_idx = 1
 
             file_reader = csv.reader(file)
             for row in file_reader:
@@ -100,28 +102,18 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
                 if len(entries) != 2:
                     raise RuntimeError(
-                        f"Calibration file should contain two columns, labelled as {self._DET_ID_LABEL} and {self._THETA_LABEL}"
+                        "Calibration file should contain two space de-limited columns, "
+                        f"labelled as {self._DET_ID_LABEL} and {self._THETA_LABEL}"
                     )
 
                 if not labels_checked:
                     # The labels should be the first row in the file that doesn't begin with a #
-                    valid_labels = collections.Counter([self._DET_ID_LABEL, self._THETA_LABEL])
-                    first_label = entries[det_id_idx].lower()
-                    second_label = entries[theta_offset_idx].lower()
-                    if collections.Counter([first_label, second_label]) == valid_labels:
-                        if first_label == self._THETA_LABEL:
-                            # Allow the columns to be specified in any order
-                            det_id_idx = 1
-                            theta_offset_idx = 0
-                        labels_checked = True
-                        continue
-                    else:
-                        raise ValueError(
-                            f"Incorrect column labels in calibration file - should be {self._DET_ID_LABEL} and {self._THETA_LABEL}"
-                        )
+                    self._check_file_column_labels(entries)
+                    labels_checked = True
+                    continue
 
                 try:
-                    scanned_theta_offsets[int(entries[det_id_idx])] = float(entries[theta_offset_idx])
+                    scanned_theta_offsets[int(entries[self._det_id_col_idx])] = float(entries[self._theta_offset_col_idx])
                 except ValueError:
                     raise ValueError(
                         "Invalid data in calibration file - detector ids should be integers and theta offsets should be floats"
@@ -130,6 +122,20 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             if len(scanned_theta_offsets) == 0:
                 raise RuntimeError("Calibration file provided contains no data")
         return scanned_theta_offsets
+
+    def _check_file_column_labels(self, row_entries):
+        valid_labels = collections.Counter([self._DET_ID_LABEL, self._THETA_LABEL])
+
+        first_label = row_entries[self._det_id_col_idx].lower()
+        second_label = row_entries[self._theta_offset_col_idx].lower()
+
+        if collections.Counter([first_label, second_label]) == valid_labels:
+            if first_label == self._THETA_LABEL:
+                # Allow the columns to be specified in any order
+                self._theta_offset_col_idx = 0
+                self._det_id_col_idx = 1
+        else:
+            raise ValueError(f"Incorrect column labels in calibration file - should be {self._DET_ID_LABEL} and {self._THETA_LABEL}")
 
     def _clone_workspace(self, ws):
         clone_alg = self.createChildAlgorithm("CloneWorkspace", InputWorkspace=ws)
