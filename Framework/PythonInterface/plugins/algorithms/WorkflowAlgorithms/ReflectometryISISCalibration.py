@@ -147,6 +147,9 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         correction_alg.setProperty("OutputWorkspace", calibration_ws)
 
         for det_id, theta_offset in calibration_data.items():
+            if theta_offset == 0:
+                # Detector position does not need to be changed
+                continue
             new_two_theta = self._calculate_calibrated_two_theta(det_info, det_id, theta_offset)
             correction_alg.setProperty("TwoTheta", new_two_theta)
             correction_alg.setProperty("DetectorID", det_id)
