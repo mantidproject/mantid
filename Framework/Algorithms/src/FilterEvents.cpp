@@ -471,12 +471,12 @@ void FilterEvents::processAlgorithmProperties() {
   //-------------------------------------------------------------------------
   bool splitSampleLogs = getProperty("SplitSampleLogs");
   if (splitSampleLogs == false)
-    g_log.warning() << "Option SplitSampleLogs is deprecated. All logs will be split.\n";
+    g_log.warning() << "Option SplitSampleLogs is deprecated and ignored. All logs will be split.\n";
 
   std::vector<std::string> timeSeriesPropertyLogs = getProperty("TimeSeriesPropertyLogs");
   if (!timeSeriesPropertyLogs.empty())
-    g_log.warning()
-        << "Options TimeSeriesPropertyLogs and ExcludeSpecifiedLogs are deprecated. All logs will be split.\n";
+    g_log.warning() << "Options TimeSeriesPropertyLogs and ExcludeSpecifiedLogs are deprecated and ignored. "
+                       "All logs will be split.\n";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -708,7 +708,8 @@ void FilterEvents::createOutputWorkspaces() {
     // Declare the filtered workspace as an output property.
     // There shouldn't be any non-unfiltered workspace skipped from group index
     if (add2output) {
-      // Generate the name of the output property
+      // Generate the name of the output property. Only workspaces that are
+      // set as output properties get history added to them
       std::stringstream outputWorkspacePropertyName;
       if (wsindex == TimeSplitter::NO_TARGET) {
         outputWorkspacePropertyName << "OutputWorkspace_unfiltered";
