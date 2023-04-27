@@ -4,10 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import CloneWorkspace, SpecularReflectionPositionCorrect
 from mantid.api import (
     AlgorithmFactory,
-    AnalysisDataService,
     DataProcessorAlgorithm,
     WorkspaceProperty,
     FileAction,
@@ -66,22 +64,9 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             raise FileNotFoundError("Calibration file path cannot be found")
 
         ws = self.getProperty(self._WORKSPACE).value
-        det_info = ws.detectorInfo()
-        calibrated_ws = CloneWorkspace(InputWorkspace=ws)
-
-        for det_id, theta_offset in calibration_data.items():
-            new_two_theta = self._calculate_calibrated_two_theta(det_info, det_id, theta_offset)
-            # Passing calibrated_ws as both input and output means all the detector moves are applied to this workspace
-            SpecularReflectionPositionCorrect(
-                InputWorkspace=calibrated_ws,
-                TwoTheta=new_two_theta,
-                DetectorID=det_id,
-                MoveFixedDetectors=True,
-                OutputWorkspace=calibrated_ws,
-            )
+        calibrated_ws = self._correct_detector_positions(ws, calibration_data)
 
         self.setProperty(self._OUTPUT_WORKSPACE, calibrated_ws)
-        AnalysisDataService.remove(calibrated_ws.name())
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -145,6 +130,29 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
             if len(scanned_theta_offsets) == 0:
                 raise RuntimeError("Calibration file provided contains no data")
         return scanned_theta_offsets
+
+    def _clone_workspace(self, ws):
+        clone_alg = self.createChildAlgorithm("CloneWorkspace", InputWorkspace=ws)
+        clone_alg.execute()
+        return clone_alg.getProperty("OutputWorkspace").value
+
+    def _correct_detector_positions(self, ws, calibration_data):
+        calibration_ws = self._clone_workspace(ws)
+        det_info = calibration_ws.detectorInfo()
+
+        correction_alg = self.createChildAlgorithm("SpecularReflectionPositionCorrect")
+        # Passing the same workspace as both input and output means all the detector moves are applied to it
+        correction_alg.setProperty("InputWorkspace", calibration_ws)
+        correction_alg.setProperty("MoveFixedDetectors", True)
+        correction_alg.setProperty("OutputWorkspace", calibration_ws)
+
+        for det_id, theta_offset in calibration_data.items():
+            new_two_theta = self._calculate_calibrated_two_theta(det_info, det_id, theta_offset)
+            correction_alg.setProperty("TwoTheta", new_two_theta)
+            correction_alg.setProperty("DetectorID", det_id)
+            correction_alg.execute()
+
+        return calibration_ws
 
     def _calculate_calibrated_two_theta(self, det_info, det_id, theta_offset):
         """Calculates the new twoTheta value for a detector from a given offset, in degrees"""
