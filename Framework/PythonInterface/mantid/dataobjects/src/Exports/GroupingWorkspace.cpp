@@ -17,7 +17,10 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(GroupingWorkspace)
 
 void export_GroupingWorkspace() {
-  class_<GroupingWorkspace, bases<SpecialWorkspace2D>, boost::noncopyable>("GroupingWorkspace", no_init);
+  class_<GroupingWorkspace, bases<SpecialWorkspace2D>, boost::noncopyable>("GroupingWorkspace", no_init)
+      .def("getTotalGroups", &GroupingWorkspace::getTotalGroups, (arg("self")))
+      .def("getGroupPixelIndexes", &GroupingWorkspace::getGroupPixelIndexes, (arg("self,"), arg("groupIndex")))
+      .def("getEachGroupsPixelIndexes", &GroupingWorkspace::getEachGroupsPixelIndexes, (arg("self")));
 
   // register pointers
   RegisterWorkspacePtrToPython<GroupingWorkspace>();
