@@ -89,6 +89,42 @@ void GroupingWorkspace::makeDetectorIDToGroupVector(std::vector<int> &detIDToGro
   }
 }
 
+int GroupingWorkspace::getTotalGroups() const {
+  // count distinct group numbers
+  std::set<int> groups;
+  for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
+    // Convert the Y value to a group number
+    auto group = static_cast<int>(this->y(wi).front());
+    if (group == 0)
+      group = -1;
+    groups.insert(group);
+  }
+  return static_cast<int>(groups.size());
+}
+
+std::vector<std::size_t> GroupingWorkspace::getGroupPixelIndexes(const std::size_t groupIndex) const {
+  // collect all the pixel indexes for the given group
+  std::vector<std::size_t> pixelIndexes;
+  for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
+    // Convert the Y value to a group number
+    auto group = static_cast<int>(this->y(wi).front());
+    if (group == static_cast<int>(groupIndex)) {
+      pixelIndexes.push_back(wi);
+    }
+  }
+  return pixelIndexes;
+}
+
+std::vector<std::vector<std::size_t>> GroupingWorkspace::getEachGroupsPixelIndexes() const {
+  // collect all the pixel indexes for each group
+  std::vector<std::vector<std::size_t>> pixelIndexesPerGroup;
+  int totalGroups = getTotalGroups();
+  for (int groupIndex = 0; groupIndex < totalGroups; ++groupIndex) {
+    pixelIndexesPerGroup.push_back(getGroupPixelIndexes(groupIndex));
+  }
+  return pixelIndexesPerGroup;
+}
+
 } // namespace Mantid::DataObjects
 
 ///\cond TEMPLATE

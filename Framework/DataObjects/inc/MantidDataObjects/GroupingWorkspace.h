@@ -41,6 +41,9 @@ public:
 
   void makeDetectorIDToGroupMap(std::map<detid_t, int> &detIDToGroup, int64_t &ngroups) const;
   void makeDetectorIDToGroupVector(std::vector<int> &detIDToGroup, int64_t &ngroups) const;
+  int getTotalGroups() const;
+  std::vector<std::size_t> getGroupPixelIndexes(const std::size_t groupIndex) const;
+  std::vector<std::vector<std::size_t>> getEachGroupsPixelIndexes() const;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
