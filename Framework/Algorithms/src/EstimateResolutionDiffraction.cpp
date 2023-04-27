@@ -41,6 +41,15 @@ const double MICROSEC_TO_SEC = 1.0E-6;
 const double WAVELENGTH_TO_VELOCITY = 1.0E10 * PhysicalConstants::h / PhysicalConstants::NeutronMass;
 /// This is an absurd number for even ultra cold neutrons
 const double WAVELENGTH_MAX = 1000.;
+
+namespace PropertyNames {
+const std::string INPUT_WKSP("InputWorkspace");
+const std::string OUTPUT_WKSP("OutputWorkspace");
+const std::string PARTIALS_WKSP_GRP("PartialResolutionWorkspaces");
+const std::string DIVERGENCE_WKSP("DivergenceWorkspace");
+const std::string WAVELENGTH("Wavelength");
+const std::string DELTA_T("DeltaTOF");
+} // namespace PropertyNames
 } // namespace
 
 const std::string EstimateResolutionDiffraction::name() const { return "EstimateResolutionDiffraction"; }
@@ -57,29 +66,31 @@ int EstimateResolutionDiffraction::version() const { return 1; }
 const std::string EstimateResolutionDiffraction::category() const { return "Diffraction\\Utility"; }
 
 void EstimateResolutionDiffraction::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::INPUT_WKSP, "", Direction::Input),
                   "Name of the workspace to have detector resolution calculated");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("DivergenceWorkspace", "", Direction::Input,
-                                                                       PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::DIVERGENCE_WKSP, "",
+                                                                       Direction::Input, PropertyMode::Optional),
                   "Workspace containing the divergence");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
-                  "Name of the output workspace containing delta(d)/d of each "
-                  "detector/spectrum");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
+      "Name of the output workspace containing delta(d)/d of each "
+      "detector/spectrum");
 
   auto positiveDeltaTOF = std::make_shared<BoundedValidator<double>>();
   positiveDeltaTOF->setLower(0.);
   positiveDeltaTOF->setLowerExclusive(true);
-  declareProperty("DeltaTOF", 0., positiveDeltaTOF, "DeltaT as the resolution of TOF with unit microsecond");
+  declareProperty(PropertyNames::DELTA_T, 0., positiveDeltaTOF,
+                  "DeltaT as the resolution of TOF with unit microsecond");
 
   auto positiveWavelength = std::make_shared<BoundedValidator<double>>();
   positiveWavelength->setLower(0.);
   positiveWavelength->setLowerExclusive(true);
-  declareProperty("Wavelength", EMPTY_DBL(), positiveWavelength,
+  declareProperty(PropertyNames::WAVELENGTH, EMPTY_DBL(), positiveWavelength,
                   "Wavelength setting in Angstroms. This overrides what is in "
                   "the dataset.");
 
   declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceGroup>>("PartialResolutionWorkspaces", "", Direction::Output),
+      std::make_unique<WorkspaceProperty<WorkspaceGroup>>(PropertyNames::PARTIALS_WKSP_GRP, "", Direction::Output),
       "Workspaces created showing the various resolution terms");
 }
 
@@ -89,7 +100,7 @@ void EstimateResolutionDiffraction::exec() {
   retrieveInstrumentParameters();
 
   // create all of the output workspaces
-  std::string partials_prefix = getPropertyValue("PartialResolutionWorkspaces");
+  std::string partials_prefix = getPropertyValue(PropertyNames::PARTIALS_WKSP_GRP);
   m_resTof = DataObjects::create<DataObjects::Workspace2D>(*m_inputWS, HistogramData::Points(1));
   m_resPathLength = DataObjects::create<DataObjects::Workspace2D>(*m_inputWS, HistogramData::Points(1));
   m_resAngle = DataObjects::create<DataObjects::Workspace2D>(*m_inputWS, HistogramData::Points(1));
@@ -97,7 +108,7 @@ void EstimateResolutionDiffraction::exec() {
 
   estimateDetectorResolution();
 
-  setProperty("OutputWorkspace", m_outputWS);
+  setProperty(PropertyNames::OUTPUT_WKSP, m_outputWS);
 
   // put together the output group
   auto partialsGroup = std::make_shared<WorkspaceGroup>();
@@ -107,19 +118,19 @@ void EstimateResolutionDiffraction::exec() {
   partialsGroup->addWorkspace(m_resTof);
   partialsGroup->addWorkspace(m_resPathLength);
   partialsGroup->addWorkspace(m_resAngle);
-  setProperty("PartialResolutionWorkspaces", partialsGroup);
+  setProperty(PropertyNames::PARTIALS_WKSP_GRP, partialsGroup);
 }
 
 void EstimateResolutionDiffraction::processAlgProperties() {
-  m_inputWS = getProperty("InputWorkspace");
-  m_divergenceWS = getProperty("DivergenceWorkspace");
+  m_inputWS = getProperty(PropertyNames::INPUT_WKSP);
+  m_divergenceWS = getProperty(PropertyNames::DIVERGENCE_WKSP);
 
-  m_deltaT = getProperty("DeltaTOF");
-  m_deltaT *= MICROSEC_TO_SEC; // convert to meter
+  m_deltaT = getProperty(PropertyNames::DELTA_T);
+  m_deltaT *= MICROSEC_TO_SEC; // convert to seconds
 }
 
 double EstimateResolutionDiffraction::getWavelength() {
-  double wavelength = getProperty("Wavelength");
+  double wavelength = getProperty(PropertyNames::WAVELENGTH);
   if (!isEmpty(wavelength)) {
     return wavelength;
   }
