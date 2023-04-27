@@ -307,8 +307,9 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
  * @return reference to this
  * */
 EventList &EventList::operator=(const EventList &rhs) {
+  // cppcheck-suppress operatorEqVarError
   // Note that we are NOT copying the MRU pointer
-  // the EventWorkspace that posseses the EventList has already configured the mru
+  // the EventWorkspace that possesses the EventList has already configured the mru
   IEventList::operator=(rhs);
   m_histogram = rhs.m_histogram;
   events = rhs.events;
@@ -957,6 +958,7 @@ void EventList::sortTof() const {
   // Avoid sorting from multiple threads
   std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
+  // cppcheck-suppress identicalConditionAfterEarlyExit
   if (this->order == TOF_SORT)
     return;
 
@@ -1054,6 +1056,7 @@ void EventList::sortPulseTimeTOF() const {
   std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
   if (this->order == PULSETIMETOF_SORT)
+    // cppcheck-suppress identicalConditionAfterEarlyExit
     return;
 
   switch (eventType) {
