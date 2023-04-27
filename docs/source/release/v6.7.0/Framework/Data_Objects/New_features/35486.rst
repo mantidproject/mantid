@@ -1,0 +1,4 @@
+* added the following getter methods to ``GroupingWorkspace``:
+  * ``getTotalGroups()``
+  * ``getGroupPixelIndexes()``
+  * ``getEachGroupsPixelIndexes()``
