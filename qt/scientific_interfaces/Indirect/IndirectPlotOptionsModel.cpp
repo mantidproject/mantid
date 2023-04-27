@@ -195,27 +195,27 @@ bool IndirectPlotOptionsModel::validateBins(const MatrixWorkspace_sptr &workspac
   return lastIndex < numberOfBins;
 }
 
+std::string IndirectPlotOptionsModel::convertUnit(const std::string &workspaceName, const std::string &unit) {
+  const std::string convertedWorkspaceName = workspaceName + "_" + unit;
+
+  IAlgorithm_sptr convertUnits = AlgorithmManager::Instance().create("ConvertUnits");
+  convertUnits->initialize();
+  convertUnits->setProperty("InputWorkspace", workspaceName);
+  convertUnits->setProperty("OutputWorkspace", convertedWorkspaceName);
+  convertUnits->setProperty("Target", unit);
+  convertUnits->execute();
+
+  return convertedWorkspaceName;
+}
+
 void IndirectPlotOptionsModel::plotSpectra() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
   auto const unitName = unit();
 
   if (workspaceName && indicesString) {
-    std::string workspaceNameString = workspaceName.get();
-
-    if (unitName) {
-      const std::string target = (unitName.get() == "D-spacing") ? "dSpacing" : "QSquared";
-      workspaceNameString = workspaceNameString + "_" + target;
-
-      IAlgorithm_sptr convertUnits = AlgorithmManager::Instance().create("ConvertUnits");
-      convertUnits->initialize();
-      convertUnits->setProperty("InputWorkspace", workspaceName.get());
-      convertUnits->setProperty("OutputWorkspace", workspaceNameString);
-      convertUnits->setProperty("Target", target);
-      convertUnits->execute();
-    }
-
-    m_plotter->plotSpectra(workspaceNameString, indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
+    std::string plotWorkspaceName = unitName ? convertUnit(workspaceName.get(), unitName.get()) : workspaceName.get();
+    m_plotter->plotSpectra(plotWorkspaceName, indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
   }
 }
 
@@ -225,8 +225,13 @@ void IndirectPlotOptionsModel::plotBins(std::string const &binIndices) {
 }
 
 void IndirectPlotOptionsModel::plotContour() {
-  if (auto const workspaceName = workspace())
-    m_plotter->plotContour(workspaceName.get());
+  auto const workspaceName = workspace();
+  auto const unitName = unit();
+
+  if (workspaceName) {
+    std::string plotWorkspaceName = unitName ? convertUnit(workspaceName.get(), unitName.get()) : workspaceName.get();
+    m_plotter->plotContour(plotWorkspaceName);
+  }
 }
 
 void IndirectPlotOptionsModel::plotTiled() {

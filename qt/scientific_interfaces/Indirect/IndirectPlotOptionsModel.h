@@ -58,6 +58,7 @@ public:
 private:
   bool validateSpectra(const Mantid::API::MatrixWorkspace_sptr &workspace, std::string const &spectra) const;
   bool validateBins(const Mantid::API::MatrixWorkspace_sptr &workspace, std::string const &bins) const;
+  std::string convertUnit(const std::string &workspaceName, const std::string &unit);
 
   boost::optional<std::string> checkWorkspaceSize(std::string const &workspaceName, MantidAxis const &axisType) const;
 

@@ -21,6 +21,13 @@ auto constexpr SETTINGS_GROUP = "Indices suggestions";
 auto constexpr SETTING_NAME = "Suggestions";
 auto constexpr NUMBER_OF_SUGGESTIONS = 5;
 
+// make sure the unit id is a valid unit factory id
+// (https://docs.mantidproject.org/nightly/concepts/UnitFactory.html#id2)
+const std::map<std::string, std::string> displayStrToUnitId = {
+    {"D-Spacing", "dSpacing"},
+    {"Q-Squared", "QSquared"},
+};
+
 void saveIndicesSuggestions(QStringList const &suggestions) {
   QSettings settings;
   settings.beginGroup(SETTINGS_GROUP);
@@ -90,7 +97,9 @@ void IndirectPlotOptionsView::emitSelectedWorkspaceChanged(QString const &worksp
 }
 
 void IndirectPlotOptionsView::emitSelectedUnitChanged(QString const &unit) {
-  emit selectedUnitChanged(unit.toStdString());
+  if (unit.toStdString() != "") {
+    emit selectedUnitChanged(displayStrToUnitId.at(unit.toStdString()));
+  }
 }
 
 void IndirectPlotOptionsView::emitSelectedIndicesChanged() {
@@ -182,8 +191,9 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
   m_plotOptions->tbPlot->setDefaultAction(plotSpectraAction);
 
   m_plotOptions->cbPlotUnit->clear();
-  m_plotOptions->cbPlotUnit->addItem(QString::fromStdString("D-spacing"));
-  m_plotOptions->cbPlotUnit->addItem(QString::fromStdString("Q-spacing"));
+  for (const auto &item : displayStrToUnitId) {
+    m_plotOptions->cbPlotUnit->addItem(QString::fromStdString(item.first));
+  }
 }
 
 void IndirectPlotOptionsView::setWorkspaceComboBoxEnabled(bool enable) {
