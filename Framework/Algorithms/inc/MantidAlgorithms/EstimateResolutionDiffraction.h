@@ -77,6 +77,8 @@ private:
   double m_deltaT = 0.0;
   /// DeltaT/T is an optional constant
   double m_deltaTOverTOF = 0.0;
+  double m_sourceDeltaLMetersSq = 0.;
+  double m_sourceDeltaThetaRadiansSq = 0.;
 };
 
 } // namespace Algorithms

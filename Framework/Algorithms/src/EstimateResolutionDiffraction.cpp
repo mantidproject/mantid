@@ -50,6 +50,8 @@ const std::string DIVERGENCE_WKSP("DivergenceWorkspace");
 const std::string WAVELENGTH("Wavelength");
 const std::string DELTA_T("DeltaTOF");
 const std::string DELTA_T_OVER_T("DeltaTOFOverTOF");
+const std::string SOURCE_DELTA_L("SourceDeltaL");
+const std::string SOURCE_DELTA_THETA("SourceDeltaTheta");
 } // namespace PropertyNames
 } // namespace
 
@@ -77,14 +79,20 @@ void EstimateResolutionDiffraction::init() {
       "Name of the output workspace containing delta(d)/d of each "
       "detector/spectrum");
 
-  auto positiveDeltaTOF = std::make_shared<BoundedValidator<double>>();
-  positiveDeltaTOF->setLower(0.);
-  positiveDeltaTOF->setLowerExclusive(true);
+  auto positiveOrZero = std::make_shared<BoundedValidator<double>>();
+  positiveOrZero->setLower(0.);
+  positiveOrZero->setLowerExclusive(false);
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>(PropertyNames::DELTA_T, 0., positiveDeltaTOF, PropertyMode::Optional),
+      std::make_unique<PropertyWithValue<double>>(PropertyNames::DELTA_T, 0., positiveOrZero, PropertyMode::Optional),
       "DeltaT as the resolution of TOF with unit microsecond");
-  declareProperty(PropertyNames::DELTA_T_OVER_T, EMPTY_DBL(), positiveDeltaTOF,
+
+  declareProperty(PropertyNames::DELTA_T_OVER_T, EMPTY_DBL(), positiveOrZero,
                   "DeltaT/T as the full term in the equation");
+
+  declareProperty(PropertyNames::SOURCE_DELTA_L, 0., positiveOrZero,
+                  "Uncertainty in the path length due to the source in unit of meters");
+  declareProperty(PropertyNames::SOURCE_DELTA_THETA, 0., positiveOrZero,
+                  "Uncertainty in angle due to the source in unit of radians");
 
   auto positiveWavelength = std::make_shared<BoundedValidator<double>>();
   positiveWavelength->setLower(0.);
@@ -148,6 +156,14 @@ void EstimateResolutionDiffraction::processAlgProperties() {
   m_inputWS = getProperty(PropertyNames::INPUT_WKSP);
   m_divergenceWS = getProperty(PropertyNames::DIVERGENCE_WKSP);
 
+  // get source delta-L value and square it
+  m_sourceDeltaLMetersSq = getProperty(PropertyNames::SOURCE_DELTA_L);
+  m_sourceDeltaLMetersSq = m_sourceDeltaLMetersSq * m_sourceDeltaLMetersSq;
+
+  // get source delta-theta value and square it
+  m_sourceDeltaThetaRadiansSq = getProperty(PropertyNames::SOURCE_DELTA_THETA);
+  m_sourceDeltaThetaRadiansSq = m_sourceDeltaThetaRadiansSq * m_sourceDeltaThetaRadiansSq;
+
   if (isDefault(PropertyNames::DELTA_T_OVER_T)) {
     m_deltaT = getProperty(PropertyNames::DELTA_T);
     m_deltaT *= MICROSEC_TO_SEC; // convert to seconds
@@ -206,10 +222,13 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
   double mintwotheta = 2. * M_PI; // a bit more than 2*pi
   double maxtwotheta = 0.;
 
-  double mint3 = 1.;
-  double maxt3 = 0.;
+  double mint3Sq = 1.;
+  double maxt3Sq = 0.;
 
   size_t count_nodetsize = 0;
+
+  g_log.information() << "Source terms: deltaL=" << sqrt(m_sourceDeltaLMetersSq)
+                      << " deltaTheta=" << sqrt(m_sourceDeltaThetaRadiansSq) << "\n";
 
   for (size_t i = 0; i < numspec; ++i) {
     const auto &det = spectrumInfo.detector(i);
@@ -218,34 +237,37 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     const double l2 = spectrumInfo.l2(i);
 
     // resolution in time
-    double t1 = m_deltaTOverTOF;
-    if (t1 == 0.) { // calculate per pixel
+    double t1Sq = m_deltaTOverTOF * m_deltaTOverTOF;
+    if (t1Sq == 0.) { // calculate per pixel
       // Calculate T
       const double centraltof = (l1 + l2) / m_centreVelocity;
-      t1 = m_deltaT / centraltof;
+      t1Sq = m_deltaT / centraltof; // this is term1 before squaring
+      t1Sq = t1Sq * t1Sq;
     }
 
     // resolution in length
-    double detdim;
+    double detdimSq;
     const auto realdet = dynamic_cast<const Detector *>(&det);
     if (realdet) {
       const double dy = realdet->getHeight();
       const double dx = realdet->getWidth();
-      detdim = sqrt(dx * dx + dy * dy) * 0.5;
+      detdimSq = (dx * dx + dy * dy) * (0.5 * 0.5);
     } else {
       // Use detector dimension as 0 as no-information
-      detdim = 0;
+      detdimSq = 0;
       ++count_nodetsize;
     }
-    const double t2 = detdim / (l1 + l2);
+    const double l_total = (l1 + l2);
+    const double t2Sq = (detdimSq + m_sourceDeltaLMetersSq) / (l_total * l_total);
 
     // resolution in angle
     const double twotheta = spectrumInfo.isMonitor(i) ? 0.0 : spectrumInfo.twoTheta(i);
     const double theta = 0.5 * twotheta;
 
-    double deltatheta = 0.;
+    double deltathetaSq = 0.; // this is in radians
     if (m_divergenceWS) {
-      deltatheta = m_divergenceWS->y(i)[0];
+      deltathetaSq = m_divergenceWS->y(i)[0];
+      deltathetaSq = deltathetaSq * deltathetaSq;
     } else {
       auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
       const double solidangle =
@@ -257,9 +279,10 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
                               return sum;
                             }
                           });
-      deltatheta = sqrt(solidangle);
+      deltathetaSq = solidangle;
     }
-    const double t3 = deltatheta / tan(theta);
+    const double tan_theta = tan(theta);
+    const double t3Sq = (deltathetaSq + m_sourceDeltaThetaRadiansSq) / (tan_theta * tan_theta);
 
     if (spectrumInfo.isMonitor(i)) {
       m_resTof->mutableY(i) = 0.;
@@ -267,10 +290,10 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
       m_resAngle->mutableY(i) = 0.;
       m_outputWS->mutableY(i) = 0.;
     } else { // not a monitor
-      const double resolution = sqrt(t1 * t1 + t2 * t2 + t3 * t3);
-      m_resTof->mutableY(i) = t1;
-      m_resPathLength->mutableY(i) = t2;
-      m_resAngle->mutableY(i) = t3;
+      const double resolution = sqrt(t1Sq + t2Sq + t3Sq);
+      m_resTof->mutableY(i) = sqrt(t1Sq);
+      m_resPathLength->mutableY(i) = sqrt(t2Sq);
+      m_resAngle->mutableY(i) = sqrt(t3Sq);
       m_outputWS->mutableY(i) = resolution;
     }
 
@@ -282,17 +305,20 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     maxtwotheta = std::max(twotheta, maxtwotheta);
     mintwotheta = std::min(twotheta, mintwotheta);
 
-    if (fabs(t3) < mint3)
-      mint3 = fabs(t3);
-    else if (fabs(t3) > maxt3)
-      maxt3 = fabs(t3);
+    if (fabs(t3Sq) < mint3Sq)
+      mint3Sq = fabs(t3Sq);
+    else if (fabs(t3Sq) > maxt3Sq)
+      maxt3Sq = fabs(t3Sq);
 
-    g_log.debug() << det.type() << " " << i << "\t\t" << twotheta << "\t\tdT/T = " << t1 * t1 << "\t\tdL/L = " << t2
-                  << "\t\tdTheta*cotTheta = " << t3 << "\n";
+    // log extra information if level is debug (7) or greater - converting to strings is expensive
+    if (g_log.getLevelOffset() > 6) {
+      g_log.debug() << det.type() << " " << i << "\t\t" << twotheta << "\t\tdT/T = " << sqrt(t1Sq)
+                    << "\t\tdL/L = " << sqrt(t2Sq) << "\t\tdTheta*cotTheta = " << sqrt(t3Sq) << "\n";
+    }
   }
 
   g_log.notice() << "2theta range: " << mintwotheta << ", " << maxtwotheta << "\n";
-  g_log.notice() << "t3 range: " << mint3 << ", " << maxt3 << "\n";
+  g_log.notice() << "t3 range: " << sqrt(mint3Sq) << ", " << sqrt(maxt3Sq) << "\n";
   g_log.notice() << "Number of detector having NO size information = " << count_nodetsize << "\n";
 }
 
