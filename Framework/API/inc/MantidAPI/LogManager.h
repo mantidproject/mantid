@@ -75,8 +75,11 @@ public:
   /// Create a new LogManager with a partial copy of its time series properties according to TimeROI
   LogManager *cloneInTimeROI(const Kernel::TimeROI &timeROI);
 
-  /// copy properties from another LogManager, but filter them according to TimeROI
+  /// Copy properties from another LogManager; filter copied time series properties according to TimeROI
   void copyAndFilterProperties(const LogManager &other, const Kernel::TimeROI &timeROI);
+
+  /// Copy properties from another LogManager; optionally filter copied time series properties according to this TimeROI
+  void copyProperties(const LogManager &other, const bool filterByTimeROI = false);
 
   /// Filter the run by the given boolean log
   void filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
