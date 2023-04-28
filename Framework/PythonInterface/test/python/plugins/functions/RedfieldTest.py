@@ -27,7 +27,7 @@ class RedfieldTest(unittest.TestCase):
             self.fail(msg.format(*[str(i) for i in (output, input, expected)]))
 
     def test_do_fit(self):
-        do_a_fit(np.arange(16, 0.2), "Redfield", guess=dict(Hloc=0.1, Tau=0.1), target=dict(Hloc=0.1, Tau=0.1), atol=0.01)
+        do_a_fit(np.arange(0.1, 16, 0.2), "Redfield", guess=dict(Hloc=0.1, Tau=0.1), target=dict(Hloc=0.1, Tau=0.1), atol=0.01)
 
 
 if __name__ == "__main__":
