@@ -222,8 +222,8 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
   double mintwotheta = 2. * M_PI; // a bit more than 2*pi
   double maxtwotheta = 0.;
 
-  double mint3Sq = 1.;
-  double maxt3Sq = 0.;
+  double minTerm3Sq = 1.;
+  double maxTerm3Sq = 0.;
 
   size_t count_nodetsize = 0;
 
@@ -237,12 +237,12 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     const double l2 = spectrumInfo.l2(i);
 
     // resolution in time
-    double t1Sq = m_deltaTOverTOF * m_deltaTOverTOF;
-    if (t1Sq == 0.) { // calculate per pixel
+    double term1Sq = m_deltaTOverTOF * m_deltaTOverTOF;
+    if (term1Sq == 0.) { // calculate per pixel
       // Calculate T
       const double centraltof = (l1 + l2) / m_centreVelocity;
-      t1Sq = m_deltaT / centraltof; // this is term1 before squaring
-      t1Sq = t1Sq * t1Sq;
+      term1Sq = m_deltaT / centraltof; // this is term1 before squaring
+      term1Sq = term1Sq * term1Sq;
     }
 
     // resolution in length
@@ -258,7 +258,7 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
       ++count_nodetsize;
     }
     const double l_total = (l1 + l2);
-    const double t2Sq = (detdimSq + m_sourceDeltaLMetersSq) / (l_total * l_total);
+    const double term2Sq = (detdimSq + m_sourceDeltaLMetersSq) / (l_total * l_total);
 
     // resolution in angle
     const double twotheta = spectrumInfo.isMonitor(i) ? 0.0 : spectrumInfo.twoTheta(i);
@@ -282,7 +282,7 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
       deltathetaSq = solidangle;
     }
     const double tan_theta = tan(theta);
-    const double t3Sq = (deltathetaSq + m_sourceDeltaThetaRadiansSq) / (tan_theta * tan_theta);
+    const double term3Sq = (deltathetaSq + m_sourceDeltaThetaRadiansSq) / (tan_theta * tan_theta);
 
     if (spectrumInfo.isMonitor(i)) {
       m_resTof->mutableY(i) = 0.;
@@ -290,10 +290,10 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
       m_resAngle->mutableY(i) = 0.;
       m_outputWS->mutableY(i) = 0.;
     } else { // not a monitor
-      const double resolution = sqrt(t1Sq + t2Sq + t3Sq);
-      m_resTof->mutableY(i) = sqrt(t1Sq);
-      m_resPathLength->mutableY(i) = sqrt(t2Sq);
-      m_resAngle->mutableY(i) = sqrt(t3Sq);
+      const double resolution = sqrt(term1Sq + term2Sq + term3Sq);
+      m_resTof->mutableY(i) = sqrt(term1Sq);
+      m_resPathLength->mutableY(i) = sqrt(term2Sq);
+      m_resAngle->mutableY(i) = sqrt(term3Sq);
       m_outputWS->mutableY(i) = resolution;
     }
 
@@ -302,23 +302,22 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     m_resAngle->mutableX(i) = static_cast<double>(i);
     m_outputWS->mutableX(i) = static_cast<double>(i);
 
+    // update overall range for two-theta and term3
     maxtwotheta = std::max(twotheta, maxtwotheta);
     mintwotheta = std::min(twotheta, mintwotheta);
 
-    if (fabs(t3Sq) < mint3Sq)
-      mint3Sq = fabs(t3Sq);
-    else if (fabs(t3Sq) > maxt3Sq)
-      maxt3Sq = fabs(t3Sq);
+    minTerm3Sq = std::min(fabs(term3Sq), minTerm3Sq);
+    maxTerm3Sq = std::max(fabs(term3Sq), maxTerm3Sq);
 
     // log extra information if level is debug (7) or greater - converting to strings is expensive
     if (g_log.getLevelOffset() > 6) {
-      g_log.debug() << det.type() << " " << i << "\t\t" << twotheta << "\t\tdT/T = " << sqrt(t1Sq)
-                    << "\t\tdL/L = " << sqrt(t2Sq) << "\t\tdTheta*cotTheta = " << sqrt(t3Sq) << "\n";
+      g_log.debug() << det.type() << " " << i << "\t\t" << twotheta << "\t\tdT/T = " << sqrt(term1Sq)
+                    << "\t\tdL/L = " << sqrt(term2Sq) << "\t\tdTheta*cotTheta = " << sqrt(term3Sq) << "\n";
     }
   }
 
   g_log.notice() << "2theta range: " << mintwotheta << ", " << maxtwotheta << "\n";
-  g_log.notice() << "t3 range: " << sqrt(mint3Sq) << ", " << sqrt(maxt3Sq) << "\n";
+  g_log.notice() << "t3 range: " << sqrt(minTerm3Sq) << ", " << sqrt(maxTerm3Sq) << "\n";
   g_log.notice() << "Number of detector having NO size information = " << count_nodetsize << "\n";
 }
 
