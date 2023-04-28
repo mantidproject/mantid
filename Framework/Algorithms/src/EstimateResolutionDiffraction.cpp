@@ -306,8 +306,8 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     maxtwotheta = std::max(twotheta, maxtwotheta);
     mintwotheta = std::min(twotheta, mintwotheta);
 
-    minTerm3Sq = std::min(fabs(term3Sq), minTerm3Sq);
-    maxTerm3Sq = std::max(fabs(term3Sq), maxTerm3Sq);
+    minTerm3Sq = std::min(term3Sq, minTerm3Sq);
+    maxTerm3Sq = std::max(term3Sq, maxTerm3Sq);
 
     // log extra information if level is debug (7) or greater - converting to strings is expensive
     if (g_log.getLevelOffset() > 6) {
