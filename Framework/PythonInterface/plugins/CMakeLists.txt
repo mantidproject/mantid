@@ -210,6 +210,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/BayesQuasi.py
     algorithms/WorkflowAlgorithms/BayesQuasi2.py
     algorithms/WorkflowAlgorithms/BayesStretch.py
+    algorithms/WorkflowAlgorithms/BayesStretch2.py
     algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/ConvertMultipleRunsToSingleCrystalMD.py
     algorithms/WorkflowAlgorithms/CorelliPowderCalibrationCreate.py
