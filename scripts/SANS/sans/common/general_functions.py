@@ -271,6 +271,28 @@ def get_ads_workspace_references():
         yield AnalysisDataService.retrieve(workspace_name)
 
 
+def get_detector_types_from_instrument(instrument: SANSInstrument = None) -> list:
+    """
+    :param instrument Instrument to get the detector types for.
+    :return list of detector types on the given instrument
+    """
+    if instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.LOQ:
+        return [DetectorType.HAB, DetectorType.LAB]
+    # Larmor and Zoom only need LAB
+    elif instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.ZOOM:
+        return [DetectorType.LAB]
+
+    else:
+        return []
+
+
+def get_detector_names_from_instrument(instrument: SANSInstrument = None) -> list:
+    return [
+        convert_instrument_and_detector_type_to_bank_name(instrument, detector_type)
+        for detector_type in get_detector_types_from_instrument(instrument)
+    ]
+
+
 def convert_bank_name_to_detector_type_isis(detector_name):
     """
     Converts a detector name of an isis detector to a detector type.

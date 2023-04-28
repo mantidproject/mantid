@@ -12,6 +12,8 @@ from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, Algorith
 from mantid.kernel import Direction, logger
 from sans.algorithm_detail.save_workspace import save_to_file, get_zero_error_free_workspace, file_format_with_append
 from sans.common.file_information import convert_to_shape
+from sans.common.general_functions import get_detector_names_from_instrument
+from sans.common.constant_containers import SANSInstrument_string_as_key_NoInstrument
 from sans.common.enums import SaveType
 
 
@@ -141,6 +143,10 @@ class SANSSave(DataProcessorAlgorithm):
         width = sample.getWidth()
         thickness = sample.getThickness()
 
+        instrument = SANSInstrument_string_as_key_NoInstrument[workspace.getInstrument().getName()]
+
+        detectors = ",".join(get_detector_names_from_instrument(instrument))
+
         transmission = self.getProperty("Transmission").value
         transmission_can = self.getProperty("TransmissionCan").value
 
@@ -153,6 +159,7 @@ class SANSSave(DataProcessorAlgorithm):
         additional_properties = {
             "Transmission": transmission,
             "TransmissionCan": transmission_can,
+            "DetectorNames": detectors,
             "Geometry": geometry,
             "SampleHeight": height,
             "SampleWidth": width,
