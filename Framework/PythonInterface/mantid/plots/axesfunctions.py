@@ -159,7 +159,7 @@ def _plot_impl(axes, workspace, args, kwargs):
     argument details
     """
     if "LogName" in kwargs:
-        (x, y, FullTime, LogName, units, kwargs) = get_sample_log(workspace, **kwargs)
+        (x, y, roi, FullTime, LogName, units, kwargs) = get_sample_log(workspace, **kwargs)
         axes.set_ylabel("{0} ({1})".format(LogName, units))
         axes.set_xlabel("Time (s)")
         if FullTime:
@@ -177,7 +177,7 @@ def _plot_impl(axes, workspace, args, kwargs):
         if kwargs.pop("update_axes_labels", True):
             _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width, axis=axis)
     kwargs.pop("normalize_by_bin_width", None)
-    return x, y, args, kwargs
+    return x, y, roi, args, kwargs
 
 
 def plot(axes, workspace, *args, **kwargs):
@@ -229,8 +229,11 @@ def plot(axes, workspace, *args, **kwargs):
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
     dimension
     """
-    x, y, args, kwargs = _plot_impl(axes, workspace, args, kwargs)
-    return axes.plot(x, y, *args, **kwargs)
+    x, y, roi, args, kwargs = _plot_impl(axes, workspace, args, kwargs)
+    axes.plot(x, y, *args, **kwargs)
+    if roi.size > 0:
+        axes.fill_between(x, min(y), max(y), where=roi, color="grey", alpha=0.5)
+    return axes
 
 
 def errorbar(axes, workspace, *args, **kwargs):

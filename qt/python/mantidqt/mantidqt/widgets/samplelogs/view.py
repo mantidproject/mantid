@@ -102,6 +102,11 @@ class SampleLogsView(QSplitter):
         self.show_filtered.setChecked(True)
         self.show_filtered.stateChanged.connect(self.presenter.filtered_changed)
         layout_options.addWidget(self.show_filtered)
+        self.show_timeROI = QCheckBox("Time ROI")
+        self.show_timeROI.setToolTip("Toggle shaded regions that indicate values outside TimeROI regions")
+        self.show_timeROI.setChecked(True)
+        self.show_timeROI.stateChanged.connect(self.presenter.show_timeroi_changed)
+        layout_options.addWidget(self.show_timeROI)
         self.spaceItem = QSpacerItem(10, 10, QSizePolicy.Expanding)
         layout_options.addSpacerItem(self.spaceItem)
         layout_right.addLayout(layout_options)
@@ -202,6 +207,7 @@ class SampleLogsView(QSplitter):
                 label=log_text,
                 FullTime=not self.full_time.isChecked(),
                 Filtered=self.show_filtered.isChecked(),
+                ShowTimeROI=self.show_timeROI.isChecked(),
                 ExperimentInfo=exp,
             )
 

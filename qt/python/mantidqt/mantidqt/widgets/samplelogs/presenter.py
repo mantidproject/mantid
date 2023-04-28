@@ -25,6 +25,7 @@ class SampleLogs(object):
             else SampleLogsView(self, parent, window_flags, self.model.get_name(), self.model.isMD(), self.model.getNumExperimentInfo())
         )
         self.filtered = True
+        self.show_timeROI = True
         self.setup_table()
 
     def update(self):
@@ -112,6 +113,11 @@ class SampleLogs(object):
 
     def filtered_changed(self, state):
         self.filtered = state
+        self.plot_logs()
+        self.update_stats()
+
+    def show_timeroi_changed(self, state):
+        self.show_timeROI = state
         self.plot_logs()
         self.update_stats()
 
