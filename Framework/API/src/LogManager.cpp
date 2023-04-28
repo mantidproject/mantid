@@ -495,7 +495,7 @@ const Kernel::TimeROI &LogManager::getTimeROI() const { return *(m_timeroi.get()
 
 void LogManager::setTimeROI(const Kernel::TimeROI &timeroi) {
   m_timeroi->replaceROI(timeroi);
-  clearSingleValueCache();
+  removeDataOutsideTimeROI(*m_timeroi);
 }
 
 //--------------------------------------------------------------------------------------------
