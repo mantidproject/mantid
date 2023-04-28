@@ -19,6 +19,7 @@ import sys
 import mantid.api
 import mantid.kernel
 import mantid.plots.modest_image
+import numpy as np
 from mantid.plots.resampling_image import samplingimage
 from mantid.plots.datafunctions import (
     get_axes_labels,
@@ -162,6 +163,7 @@ def _plot_impl(axes, workspace, args, kwargs):
         (x, y, roi, FullTime, LogName, units, kwargs) = get_sample_log(workspace, **kwargs)
         axes.set_ylabel("{0} ({1})".format(LogName, units))
         axes.set_xlabel("Time (s)")
+        kwargs["roi"] = roi
         if FullTime:
             axes.xaxis_date()
             axes.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S\n%b-%d"))
@@ -177,7 +179,7 @@ def _plot_impl(axes, workspace, args, kwargs):
         if kwargs.pop("update_axes_labels", True):
             _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width, axis=axis)
     kwargs.pop("normalize_by_bin_width", None)
-    return x, y, roi, args, kwargs
+    return x, y, args, kwargs
 
 
 def plot(axes, workspace, *args, **kwargs):
@@ -229,7 +231,8 @@ def plot(axes, workspace, *args, **kwargs):
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
     dimension
     """
-    x, y, roi, args, kwargs = _plot_impl(axes, workspace, args, kwargs)
+    x, y, args, kwargs = _plot_impl(axes, workspace, args, kwargs)
+    roi = kwargs.pop("roi", np.zeros(0, dtype=bool))
     axes.plot(x, y, *args, **kwargs)
     if roi.size > 0:
         axes.fill_between(x, min(y), max(y), where=roi, color="grey", alpha=0.5)
