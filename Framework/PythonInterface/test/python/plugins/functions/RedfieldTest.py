@@ -18,7 +18,7 @@ class RedfieldTest(unittest.TestCase):
 
     def test_function_output(self):
         input = np.linspace(0, 1000, 4)  # Between 0-1000 Gauss
-        expected = [0.91847597, 0.76278678, 0.5056509, 0.3237545]
+        expected = [0.091847597, 0.076278678, 0.05056509, 0.03237545]
         tolerance = 1.0e-05
         function_params = {"Hloc": 50, "Tau": 0.1}
         status, output = check_output("Redfield", input, expected, tolerance, **function_params)
