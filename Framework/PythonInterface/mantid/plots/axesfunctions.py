@@ -160,10 +160,9 @@ def _plot_impl(axes, workspace, args, kwargs):
     argument details
     """
     if "LogName" in kwargs:
-        (x, y, roi, FullTime, LogName, units, kwargs) = get_sample_log(workspace, **kwargs)
+        (x, y, FullTime, LogName, units, kwargs) = get_sample_log(workspace, **kwargs)
         axes.set_ylabel("{0} ({1})".format(LogName, units))
         axes.set_xlabel("Time (s)")
-        kwargs["roi"] = roi
         if FullTime:
             axes.xaxis_date()
             axes.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S\n%b-%d"))

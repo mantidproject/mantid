@@ -639,9 +639,9 @@ class MantidAxes(Axes):
                 # It's only possible to plot 1 line at a time from a workspace
                 try:
                     if new_kwargs:
-                        x, y, _, _, _ = axesfunctions._plot_impl(self, workspace, args, new_kwargs)
+                        x, y, _, _ = axesfunctions._plot_impl(self, workspace, args, new_kwargs)
                     else:
-                        x, y, _, _, _ = axesfunctions._plot_impl(self, workspace, args, kwargs)
+                        x, y, _, _ = axesfunctions._plot_impl(self, workspace, args, kwargs)
                     artists[0].set_data(x, y)
                 except RuntimeError as ex:
                     # if curve couldn't be plotted then remove it - can happen if the workspace doesn't contain the

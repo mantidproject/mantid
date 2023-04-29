@@ -853,7 +853,8 @@ def get_sample_log(workspace, **kwargs):
         else:
             roi = np.zeros(0, dtype=bool)
         x = (times - t0).astype(float) * 1e-6
-    return x, y, roi, FullTime, LogName, units, kwargs
+    kwargs["roi"] = roi
+    return x, y, FullTime, LogName, units, kwargs
 
 
 # ====================================================
