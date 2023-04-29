@@ -233,10 +233,9 @@ def plot(axes, workspace, *args, **kwargs):
     """
     x, y, args, kwargs = _plot_impl(axes, workspace, args, kwargs)
     roi = kwargs.pop("roi", np.zeros(0, dtype=bool))
-    axes.plot(x, y, *args, **kwargs)
     if roi.size > 0:
         axes.fill_between(x, min(y), max(y), where=roi, color="grey", alpha=0.5)
-    return axes
+    return axes.plot(x, y, *args, **kwargs)
 
 
 def errorbar(axes, workspace, *args, **kwargs):
