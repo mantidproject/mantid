@@ -823,9 +823,7 @@ def get_sample_log(workspace, **kwargs):
                 start = np.timedelta64(interval[0].totalNanoseconds(), "ns") + np.datetime64("1990-01-01T00:00")
                 stop = np.timedelta64(interval[1].totalNanoseconds(), "ns") + np.datetime64("1990-01-01T00:00")
                 roi &= (x.astype("datetime64[ns]") < start) | (x.astype("datetime64[ns]") > stop)
-        else:
-            roi = np.zeros(0, dtype=bool)
-
+            kwargs["roi"] = roi
     else:
         # Compute relative time, preserving t=0 at run start. Logs can record before
         # run start and will have negative time offset
@@ -850,10 +848,8 @@ def get_sample_log(workspace, **kwargs):
                 stop = np.timedelta64(interval[1].totalNanoseconds(), "ns") + np.datetime64("1990-01-01T00:00")
                 stop = (stop - t0).astype("datetime64[ns]")
                 roi &= (x.astype("datetime64[ns]") < start) | (x.astype("datetime64[ns]") > stop)
-        else:
-            roi = np.zeros(0, dtype=bool)
+            kwargs["roi"] = roi
         x = (times - t0).astype(float) * 1e-6
-    kwargs["roi"] = roi
     return x, y, FullTime, LogName, units, kwargs
 
 
