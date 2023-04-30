@@ -179,7 +179,7 @@ public:
   void clearOutdatedTimeSeriesLogValues();
 
   const Kernel::TimeROI &getTimeROI() const;
-  virtual void setTimeROI(const Kernel::TimeROI &timeroi);
+  virtual void setTimeROI(const Kernel::TimeROI &timeroi, const bool applyFilter = true);
 
   /// Save the run to a NeXus file with a given group name
   virtual void saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) const;

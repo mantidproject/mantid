@@ -681,7 +681,6 @@ void FilterEvents::createOutputWorkspaces() {
 
     // discard log entries outside the ROI
     optws->mutableRun().copyAndFilterProperties(m_eventWS->run(), roi);
-    optws->mutableRun().setTimeROI(roi);
 
     m_outputWorkspacesMap.emplace(wsindex, optws);
 

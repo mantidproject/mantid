@@ -53,7 +53,7 @@ public:
 
   /// Filter the logs by time
   void filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop) override;
-  void setTimeROI(const Kernel::TimeROI &timeroi) override;
+  void setTimeROI(const Kernel::TimeROI &timeroi, const bool applyFilter = true) override;
 
   /// Return an approximate memory size for the object in bytes
   size_t getMemorySize() const override;

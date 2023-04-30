@@ -734,6 +734,7 @@ public:
     // Use a filtered time series property instead of original
     auto tsp = run_input.getTimeSeriesProperty<double>("time_series");
     run_expect.addProperty(tsp->cloneInTimeROI(roi), true);
+    run_expect.setTimeROI(roi, false);
 
     // Create a cloned-in-roi copy of the orginal run info object
     LogManager *run_result_ptr = run_input.cloneInTimeROI(roi);

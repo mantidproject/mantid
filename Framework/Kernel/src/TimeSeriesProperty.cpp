@@ -86,6 +86,18 @@ template <typename TYPE> TimeSeriesProperty<TYPE> *TimeSeriesProperty<TYPE>::clo
  */
 template <typename TYPE> Property *TimeSeriesProperty<TYPE>::cloneInTimeROI(const TimeROI &timeROI) const {
   TimeSeriesProperty<TYPE> *filteredTS = new TimeSeriesProperty<TYPE>(this->name());
+  filteredTS->setDocumentation(this->documentation());
+  filteredTS->setUnits(this->units());
+  filteredTS->setRemember(this->remember());
+  filteredTS->setAutoTrim(this->autoTrim());
+
+  // TODO: copy these class members
+  // filteredTS->m_typeinfo = this->m_typeInfo;
+  // filteredTS->setDirection(this->direction());
+  // filteredTS->setGroup(this->getGroup());
+  // if (this->m_settings)
+  //   filteredTS->m_settings.reset(this->m_settings->clone);
+
   createFilteredData(timeROI, filteredTS->m_values);
   filteredTS->m_size = static_cast<int>(filteredTS->m_values.size());
   return filteredTS;

@@ -202,8 +202,8 @@ void LogManager::filterByTime(const Types::Core::DateAndTime start, const Types:
  */
 LogManager *LogManager::cloneInTimeROI(const Kernel::TimeROI &timeROI) {
   LogManager *logMgr = new LogManager();
-  logMgr->m_manager = std::make_unique<Kernel::PropertyManager>(*m_manager->cloneInTimeROI(timeROI));
-  logMgr->m_timeroi = std::make_unique<Kernel::TimeROI>(*m_timeroi);
+  logMgr->m_manager = std::unique_ptr<PropertyManager>(m_manager->cloneInTimeROI(timeROI));
+  logMgr->m_timeroi = std::make_unique<Kernel::TimeROI>(timeROI);
   return logMgr;
 }
 
@@ -213,8 +213,9 @@ LogManager *LogManager::cloneInTimeROI(const Kernel::TimeROI &timeROI) {
  * @param timeROI :: a series of time regions used to determine which time series values should be included in the copy.
  */
 void LogManager::copyAndFilterProperties(const LogManager &other, const Kernel::TimeROI &timeROI) {
-  PropertyManager *new_manager = other.m_manager->cloneInTimeROI(timeROI);
-  this->m_manager = std::make_unique<Kernel::PropertyManager>(*new_manager);
+  this->m_manager = std::unique_ptr<PropertyManager>(other.m_manager->cloneInTimeROI(timeROI));
+  this->setTimeROI(timeROI, false);
+  this->clearSingleValueCache();
 }
 
 /**
@@ -223,9 +224,10 @@ void LogManager::copyAndFilterProperties(const LogManager &other, const Kernel::
  * @param filterByTimeROI :: a flag indicating whether to filter copied time series properties by TimeROI.
  */
 void LogManager::copyProperties(const LogManager &other, const bool filterByTimeROI) {
-  if (filterByTimeROI)
-    copyAndFilterProperties(other, *m_timeroi);
-  else
+  if (filterByTimeROI) {
+    this->m_manager = std::unique_ptr<PropertyManager>(other.m_manager->cloneInTimeROI(*m_timeroi));
+    this->clearSingleValueCache();
+  } else
     this->operator=(other);
 }
 
@@ -493,9 +495,10 @@ void LogManager::clearOutdatedTimeSeriesLogValues() {
 
 const Kernel::TimeROI &LogManager::getTimeROI() const { return *(m_timeroi.get()); }
 
-void LogManager::setTimeROI(const Kernel::TimeROI &timeroi) {
+void LogManager::setTimeROI(const Kernel::TimeROI &timeroi, const bool applyFilter) {
   m_timeroi->replaceROI(timeroi);
-  removeDataOutsideTimeROI(*m_timeroi);
+  if (applyFilter)
+    removeDataOutsideTimeROI(*m_timeroi);
 }
 
 //--------------------------------------------------------------------------------------------
