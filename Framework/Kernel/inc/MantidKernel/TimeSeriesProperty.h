@@ -148,6 +148,12 @@ public:
 
   /// Virtual destructor
   ~TimeSeriesProperty() override;
+
+private:
+  /// Construct a TimeSeriesProperty object with the base class data only
+  TimeSeriesProperty(const Property *const p);
+
+public:
   /// "Virtual" copy constructor
   TimeSeriesProperty<TYPE> *clone() const override;
 

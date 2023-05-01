@@ -79,25 +79,21 @@ template <typename TYPE> TimeSeriesProperty<TYPE> *TimeSeriesProperty<TYPE>::clo
 }
 
 /**
+ * Construct a TimeSeriesProperty object with the base class data only, no time series data.
+ * @param p :: a pointer to a base class object.
+ */
+template <typename TYPE>
+TimeSeriesProperty<TYPE>::TimeSeriesProperty(const Property *const p)
+    : Property(*p), m_values(), m_size(), m_propSortedFlag() {}
+
+/**
  * Create a partial copy of this object according to a TimeROI. The partially cloned object
  * should include all time values enclosed by the ROI regions, each defined as [roi_start,roi_end),
  * plus the values immediately before and after an ROI region, if available.
  * @param timeROI :: a series of time regions used to determine which values should be included in the copy.
  */
 template <typename TYPE> Property *TimeSeriesProperty<TYPE>::cloneInTimeROI(const TimeROI &timeROI) const {
-  TimeSeriesProperty<TYPE> *filteredTS = new TimeSeriesProperty<TYPE>(this->name());
-  filteredTS->setDocumentation(this->documentation());
-  filteredTS->setUnits(this->units());
-  filteredTS->setRemember(this->remember());
-  filteredTS->setAutoTrim(this->autoTrim());
-
-  // TODO: copy these class members
-  // filteredTS->m_typeinfo = this->m_typeInfo;
-  // filteredTS->setDirection(this->direction());
-  // filteredTS->setGroup(this->getGroup());
-  // if (this->m_settings)
-  //   filteredTS->m_settings.reset(this->m_settings->clone);
-
+  auto filteredTS = new TimeSeriesProperty<TYPE>(this);
   createFilteredData(timeROI, filteredTS->m_values);
   filteredTS->m_size = static_cast<int>(filteredTS->m_values.size());
   return filteredTS;

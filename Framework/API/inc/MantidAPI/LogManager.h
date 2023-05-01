@@ -78,9 +78,6 @@ public:
   /// Copy properties from another LogManager; filter copied time series properties according to TimeROI
   void copyAndFilterProperties(const LogManager &other, const Kernel::TimeROI &timeROI);
 
-  /// Copy properties from another LogManager; optionally filter copied time series properties according to this TimeROI
-  void copyProperties(const LogManager &other, const bool filterByTimeROI = false);
-
   /// Filter the run by the given boolean log
   void filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
                    const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>());

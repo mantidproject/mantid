@@ -201,10 +201,16 @@ void LogManager::filterByTime(const Types::Core::DateAndTime start, const Types:
  * @param timeROI :: a series of time regions used to determine which time series values should be included in the copy.
  */
 LogManager *LogManager::cloneInTimeROI(const Kernel::TimeROI &timeROI) {
-  LogManager *logMgr = new LogManager();
-  logMgr->m_manager = std::unique_ptr<PropertyManager>(m_manager->cloneInTimeROI(timeROI));
-  logMgr->m_timeroi = std::make_unique<Kernel::TimeROI>(timeROI);
-  return logMgr;
+  LogManager *newMgr = new LogManager();
+  newMgr->m_manager = std::unique_ptr<PropertyManager>(m_manager->cloneInTimeROI(timeROI));
+
+  // This LogManager object may have filtered some data previously, in which case it would be holding the TimeROI used.
+  // Therefore, the cloned object's TimeROI should be an intersection of the input TimeROI with the one being held.
+  TimeROI outputTimeROI(timeROI);
+  outputTimeROI.update_or_replace_intersection(*m_timeroi);
+  newMgr->m_timeroi = std::make_unique<Kernel::TimeROI>(outputTimeROI);
+
+  return newMgr;
 }
 
 /**
@@ -216,19 +222,6 @@ void LogManager::copyAndFilterProperties(const LogManager &other, const Kernel::
   this->m_manager = std::unique_ptr<PropertyManager>(other.m_manager->cloneInTimeROI(timeROI));
   this->setTimeROI(timeROI, false);
   this->clearSingleValueCache();
-}
-
-/**
- * Copy properties from another LogManager object. Optionally filter time series properties by this object's TimeROI.
- * @param other :: another LogManager object.
- * @param filterByTimeROI :: a flag indicating whether to filter copied time series properties by TimeROI.
- */
-void LogManager::copyProperties(const LogManager &other, const bool filterByTimeROI) {
-  if (filterByTimeROI) {
-    this->m_manager = std::unique_ptr<PropertyManager>(other.m_manager->cloneInTimeROI(*m_timeroi));
-    this->clearSingleValueCache();
-  } else
-    this->operator=(other);
 }
 
 /**
