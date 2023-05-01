@@ -89,19 +89,6 @@ void GroupingWorkspace::makeDetectorIDToGroupVector(std::vector<int> &detIDToGro
   }
 }
 
-int GroupingWorkspace::getTotalGroups() const {
-  // count distinct group numbers
-  std::set<int> groups;
-  for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
-    // Convert the Y value to a group number
-    auto group = static_cast<int>(this->y(wi).front());
-    if (group == 0)
-      group = -1;
-    groups.insert(group);
-  }
-  return static_cast<int>(groups.size());
-}
-
 std::vector<int> GroupingWorkspace::getGroupIDs() const {
   // collect all the group numbers
   std::set<int> groupIDs;
@@ -114,6 +101,12 @@ std::vector<int> GroupingWorkspace::getGroupIDs() const {
   }
   std::vector<int> output(groupIDs.begin(), groupIDs.end());
   return output;
+}
+
+int GroupingWorkspace::getTotalGroups() const {
+  // count distinct group numbers
+  std::vector<int> groups = GroupingWorkspace::getGroupIDs();
+  return static_cast<int>(groups.size());
 }
 
 std::vector<int> GroupingWorkspace::getGroupSpetraIDs(const int groupID) const {
