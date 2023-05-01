@@ -239,10 +239,12 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
   const std::string workspaceID = inputWorkspace->id();
   if ((workspaceID.find("Workspace2D") == std::string::npos) &&
       (workspaceID.find("RebinnedOutput") == std::string::npos) &&
-      (workspaceID.find("WorkspaceSingleValue") == std::string::npos) && !m_eventWorkspace && !tableWorkspace &&
+      (workspaceID.find("WorkspaceSingleValue") == std::string::npos) &&
+      (workspaceID.find("GroupingWorkspace") == std::string::npos) && !m_eventWorkspace && !tableWorkspace &&
       !offsetsWorkspace && !maskWorkspace)
     throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, "
-                                         "EventWorkspace, ITableWorkspace, OffsetsWorkspace or MaskWorkspace.");
+                                         "EventWorkspace, ITableWorkspace, OffsetsWorkspace, "
+                                         "GroupingWorkspace, or MaskWorkspace.");
 
   // Create progress object for initial part - depends on whether events are
   // processed
