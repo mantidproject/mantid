@@ -102,27 +102,29 @@ int GroupingWorkspace::getTotalGroups() const {
   return static_cast<int>(groups.size());
 }
 
-std::vector<std::size_t> GroupingWorkspace::getGroupPixelIndexes(const std::size_t groupIndex) const {
-  // collect all the pixel indexes for the given group
-  std::vector<std::size_t> pixelIndexes;
+std::vector<int> GroupingWorkspace::getGroupIDs() const {
+  // collect all the group numbers
+  std::set<int> groupIDs;
   for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
     auto group = static_cast<int>(this->y(wi).front());
-    if (group == static_cast<int>(groupIndex)) {
-      pixelIndexes.push_back(wi);
-    }
+    if (group == 0)
+      group = -1;
+    groupIDs.insert(group);
   }
-  return pixelIndexes;
+  std::vector<int> output(groupIDs.begin(), groupIDs.end());
+  return output;
 }
 
-std::vector<std::vector<std::size_t>> GroupingWorkspace::getEachGroupsPixelIndexes() const {
-  // collect all the pixel indexes for each group
-  std::vector<std::vector<std::size_t>> pixelIndexesPerGroup;
-  int totalGroups = getTotalGroups();
-  for (int groupIndex = 0; groupIndex < totalGroups; ++groupIndex) {
-    pixelIndexesPerGroup.push_back(getGroupPixelIndexes(groupIndex));
+std::vector<int> GroupingWorkspace::getGroupSpetraIDs(const int groupID) const {
+  std::vector<int> spectraIDs;
+  for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
+    // Convert the Y value to a group number
+    auto group = static_cast<int>(this->y(wi).front());
+    if (group == groupID)
+      spectraIDs.push_back(static_cast<int>(wi));
   }
-  return pixelIndexesPerGroup;
+  return spectraIDs;
 }
 
 } // namespace Mantid::DataObjects

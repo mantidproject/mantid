@@ -134,26 +134,26 @@ public:
     TS_ASSERT_EQUALS(ws->getTotalGroups(), 3);
   }
 
-  void testGetGroupPixelIndexes() {
+  void testGetGroupIDs() {
     GroupingWorkspace_sptr ws(new GroupingWorkspace());
     // create a groupingworkspace with 2 groups
     ws->initialize(100, 1, 1);
     ws->dataY(0)[0] = 1;
     ws->dataY(1)[0] = 2;
-    TS_ASSERT_EQUALS(ws->getGroupPixelIndexes(0).size(), 98);
-    TS_ASSERT_EQUALS(ws->getGroupPixelIndexes(1).size(), 1);
-    TS_ASSERT_EQUALS(ws->getGroupPixelIndexes(2).size(), 1);
+    TS_ASSERT_EQUALS(ws->getGroupIDs().size(), 3);
+    TS_ASSERT_EQUALS(ws->getGroupIDs()[0], -1);
+    TS_ASSERT_EQUALS(ws->getGroupIDs()[1], 1);
+    TS_ASSERT_EQUALS(ws->getGroupIDs()[2], 2);
   }
 
-  void testGetEachGroupsPixelIndexes() {
+  void testGetGroupSpetraIDs() {
     GroupingWorkspace_sptr ws(new GroupingWorkspace());
     // create a groupingworkspace with 2 groups
     ws->initialize(100, 1, 1);
     ws->dataY(0)[0] = 1;
     ws->dataY(1)[0] = 2;
-    TS_ASSERT_EQUALS(ws->getEachGroupsPixelIndexes().size(), 3);
-    TS_ASSERT_EQUALS(ws->getEachGroupsPixelIndexes()[0].size(), 98);
-    TS_ASSERT_EQUALS(ws->getEachGroupsPixelIndexes()[1].size(), 1);
-    TS_ASSERT_EQUALS(ws->getEachGroupsPixelIndexes()[2].size(), 1);
+    TS_ASSERT_EQUALS(ws->getGroupSpetraIDs(0).size(), 98);
+    TS_ASSERT_EQUALS(ws->getGroupSpetraIDs(1).size(), 1);
+    TS_ASSERT_EQUALS(ws->getGroupSpetraIDs(2).size(), 1);
   }
 };

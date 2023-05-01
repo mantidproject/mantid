@@ -107,11 +107,9 @@ def cc_calibrate_groups(
 
     data_d = ConvertUnits(data_ws, Target="dSpacing", OutputWorkspace="data_d")
 
-    group_list = np.unique(group_ws.extractY())
-
     _accum_cc = None
     to_skip = []
-    for group in group_list:
+    for group in group_ws.getGroupIDs():
         # Figure out input parameters for CrossCorrelate and GetDetectorOffset, specifically
         # for those parameters for which both a single value and a list is accepted. If a
         # list is given, that means different parameter setup will be used for different groups.
@@ -124,8 +122,7 @@ def cc_calibrate_groups(
         snpts_group = SmoothNPoints[int(group) - 1] if type(SmoothNPoints) == list else SmoothNPoints
         cycling = OT_group < 1.0
 
-        indexes = np.where(group_ws.extractY().flatten() == group)[0]
-        sn = np.array(group_ws.getSpectrumNumbers())[indexes]
+        sn = group_ws.getGroupSpetraIDs(group)
         try:
             ws_indexes = [data_d.getIndexFromSpectrumNumber(int(i)) for i in sn]
         except RuntimeError:
