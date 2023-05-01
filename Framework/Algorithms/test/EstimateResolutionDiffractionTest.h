@@ -69,6 +69,40 @@ public:
 
     for (size_t i = 0; i < numspec; ++i)
       TS_ASSERT(outputws->y(i)[0] < 0.03);
+
+    TS_ASSERT_DELTA(outputws->y(numspec / 2)[0], 0.0057154, 1e-7); // copied value from test)
+  }
+
+  void test_SourceTerms() {
+    // Create an empty PG3 workspace
+    MatrixWorkspace_sptr ws = createInstrument();
+
+    // Set up and run
+    EstimateResolutionDiffraction alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", ws->getName()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "PG3_Resolution"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PartialResolutionWorkspaces", "PG3_partial"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaTOF", 40.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaTheta", .002));
+
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outputws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PG3_Resolution"));
+    TS_ASSERT(outputws);
+    if (!outputws)
+      return;
+
+    size_t numspec = outputws->getNumberHistograms();
+    TS_ASSERT_EQUALS(numspec, 25873);
+
+    for (size_t i = 0; i < numspec; ++i)
+      TS_ASSERT(outputws->y(i)[0] < 0.04);
+
+    TS_ASSERT_DELTA(outputws->y(numspec / 2)[0], 0.0061078, 1e-7); // copied value from test)
   }
 
   /** Create an instrument

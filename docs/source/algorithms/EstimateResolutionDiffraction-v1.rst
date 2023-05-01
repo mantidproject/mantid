@@ -30,11 +30,16 @@ and thus
 
 where,
 
--  :math:`\Delta T` is the time resolution from moderator
--  :math:`\Delta\theta` is the coverage of the detector, and can be
-   approximated from the square root of the solid angle of the detector
-   to sample
--  :math:`L` is the flight path of the neutron from source to detector
+-  :math:`\Delta T` is the time resolution, or pulse width, generally from moderator dimensions.
+   If supplied through ``DeltaTOF`` parameter, the center wavelength is used to calculate the center time-of-flight.
+   Alternatively, one can specify ``DeltaTOFOverTOF``.
+-  :math:`\Delta\theta` is the uncertainty in angle due to the source size and coverage of the detector.
+   The former is supplied through the ``SourceDeltaTheta`` parameter.
+   The latter can be approximated from the square root of the solid angle of the detector to sample or is taken from the ``DivergenceWorkspace``
+-  :math:`\Delta L` is the uncertainty in the flight path due to the source position and detector position.
+   The former can be supplied through the ``SourceDeltaL`` parameter.
+   The latter is calculated from the detector pixel dimensions.
+-  :math:`L` is the total flight path of the neutron from source-to-sample (L1) and sample to detector (L2)
 -  :math:`\theta` is half the Bragg angle :math:`2 \theta`, or half of the angle from the downstream beam
 
 The optional ``DivergenceWorkspace`` specifies the values of
