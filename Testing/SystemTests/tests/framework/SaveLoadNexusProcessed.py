@@ -94,9 +94,6 @@ class SaveLoadNexusProcessedEmptySampleNameTest(SaveLoadNexusProcessedTestBase):
     def savedFilename(self):
         return "tmp_saveload_nexusprocessed_emptysamplename"
 
-    def validate(self):
-        return self.compareWorkspaces()
-
 
 class SaveLoadNexusProcessedNoDetectorsSpectraNumbersTest(SaveLoadNexusProcessedTestBase):
     def createTestWorkspace(self):
@@ -106,9 +103,6 @@ class SaveLoadNexusProcessedNoDetectorsSpectraNumbersTest(SaveLoadNexusProcessed
     def savedFilename(self):
         return "tmp_saveload_nexusprocessed_nodetectorsspectranumbers"
 
-    def validate(self):
-        return self.compareWorkspaces()
-
 
 class SaveLoadNexusProcessedGroupingWorkspaceTest(SaveLoadNexusProcessedTestBase):
     def createTestWorkspace(self):
@@ -117,6 +111,3 @@ class SaveLoadNexusProcessedGroupingWorkspaceTest(SaveLoadNexusProcessedTestBase
 
     def savedFilename(self):
         return "tmp_saveload_nexusprocessed_emptygroup"
-
-    def validate(self):
-        return self.compareWorkspaces()
