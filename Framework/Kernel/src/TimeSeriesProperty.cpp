@@ -1182,7 +1182,8 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::firstValue(const Kernel:
     const auto index = std::size_t(std::distance(times.cbegin(), iter));
 
     const auto values = this->valuesAsVector();
-    return values[index];
+    const TYPE ret = values[index];
+    return ret;
   }
 }
 
@@ -1226,10 +1227,13 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue(const Kernel::
     return this->lastValue();
   } else {
     auto iter = std::lower_bound(times.cbegin(), times.cend(), stopTime);
+    if ((iter != times.cbegin()) && (*iter > stopTime))
+      --iter;
     const auto index = std::size_t(std::distance(times.cbegin(), iter));
 
     const auto values = this->valuesAsVector();
-    return values[index];
+    const TYPE ret = values[index];
+    return ret;
   }
 }
 
@@ -1768,10 +1772,16 @@ double TimeSeriesProperty<TYPE>::extractStatistic(Math::StatisticType selection,
   double singleValue = 0;
   switch (selection) {
   case FirstValue:
-    singleValue = static_cast<double>(this->nthValue(0));
+    if (roi)
+      singleValue = double(this->firstValue(*roi));
+    else
+      singleValue = double(this->nthValue(0));
     break;
   case LastValue:
-    singleValue = static_cast<double>(this->nthValue(this->size() - 1));
+    if (roi)
+      singleValue = double(this->lastValue(*roi));
+    else
+      singleValue = double(this->nthValue(this->size() - 1));
     break;
   case Minimum:
     singleValue = static_cast<double>(this->getStatistics(roi).minimum);
