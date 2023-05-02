@@ -1,0 +1,1 @@
+- :ref:`SaveNexusProcessed` will now save `Groupingworkspace`s.

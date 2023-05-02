@@ -106,8 +106,13 @@ class SaveLoadNexusProcessedNoDetectorsSpectraNumbersTest(SaveLoadNexusProcessed
 
 class SaveLoadNexusProcessedGroupingWorkspaceTest(SaveLoadNexusProcessedTestBase):
     def createTestWorkspace(self):
-        LoadEmptyInstrument(InstrumentName="SNAP", OutputWorkspace="test_in")
-        CreateGroupingWorkspace(InputWorkspace="test_in", GroupDetectorsBy="Column", OutputWorkspace=self.test_ws_name)
+        CreateWorkspace(OutputWorkspace="idf", DataX="1", DataY="1", WorkspaceTitle="SNAP")
+
+        LoadInstrument(Workspace="idf", InstrumentName="SNAP", MonitorList="-2--1", RewriteSpectraMap="False")
+
+        CreateGroupingWorkspace(InputWorkspace="idf", GroupDetectorsBy="Column", OutputWorkspace=self.test_ws_name)
+        # title must be manually added for logs to match
+        mtd[self.test_ws_name].setTitle("empty grouping workspace")
 
     def savedFilename(self):
         return "tmp_saveload_nexusprocessed_emptygroup"
