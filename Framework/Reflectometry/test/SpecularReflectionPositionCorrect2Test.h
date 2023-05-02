@@ -109,7 +109,7 @@ private:
     TS_ASSERT_DELTA(lineTwoTheta * radToDeg, twoTheta, 1e-10)
   }
 
-  static const double getTwoTheta(const int detID, const DetectorInfo &detInfo, const SpectrumInfo &spectrumInfo) {
+  static double getTwoTheta(const int detID, const DetectorInfo &detInfo, const SpectrumInfo &spectrumInfo) {
     auto detIdx = detInfo.indexOf(detID);
     return spectrumInfo.twoTheta(detIdx);
   }
