@@ -1070,7 +1070,7 @@ std::vector<DateAndTime> TimeSeriesProperty<TYPE>::filteredTimesAsVector(const K
 
     return filteredTimes;
   } else {
-    return this->filteredTimesAsVector();
+    return this->timesAsVector();
   }
 }
 
@@ -2228,7 +2228,7 @@ template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredVal
     }
     return filteredValues;
   } else {
-    return this->filteredValuesAsVector();
+    return this->valuesAsVector();
   }
 }
 
