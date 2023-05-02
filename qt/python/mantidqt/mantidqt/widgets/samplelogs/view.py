@@ -219,6 +219,10 @@ class SampleLogsView(QSplitter):
         """Sets log specific settings based on the log clicked on"""
         self.show_filtered.setEnabled(are_logs_filtered)
 
+    def enable_timeROI(self, time_roi_has_effect):
+        self.show_timeROI.setEnabled(time_roi_has_effect)
+        self.show_timeROI.setChecked(time_roi_has_effect)
+
     def get_row_log_name(self, i):
         """Returns the log name of particular row"""
         return str(self.model.item(i, 0).text())
