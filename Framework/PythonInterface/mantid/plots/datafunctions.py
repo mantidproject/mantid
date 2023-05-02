@@ -813,7 +813,7 @@ def get_sample_log(workspace, **kwargs):
         y = tsp.filtered_value
     FullTime = kwargs.pop("FullTime", False)
     StartFromLog = kwargs.pop("StartFromLog", False)
-    ShowTimeROI = kwargs.pop("ShowTimeROI", False)
+    ShowTimeROI = kwargs.pop("ShowTimeROI", not run.getTimeROI().useAll())  # default is not bother when useAll
     if FullTime:
         x = times.astype(datetime.datetime)
         if ShowTimeROI:
