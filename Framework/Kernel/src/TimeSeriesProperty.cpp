@@ -1013,7 +1013,7 @@ template <typename TYPE> std::vector<DateAndTime> TimeSeriesProperty<TYPE>::time
 template <typename TYPE>
 std::vector<DateAndTime> TimeSeriesProperty<TYPE>::filteredTimesAsVector(const Kernel::TimeROI *roi) const {
   if (!roi || roi->useAll()) {
-    return this->timesAsVector();
+    return this->filteredTimesAsVector();
   } else {
     std::vector<DateAndTime> out;
     if (roi->firstTime() > this->m_values.back().time()) {
@@ -2135,14 +2135,57 @@ template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredVal
     if (roi->firstTime() > this->m_values.back().time()) {
       // Since the ROI starts after everything, just return the last value in the log
       filteredValues.emplace_back(this->m_values.back().value());
-    } else { // only use the values in the filter
-      for (const auto &timeAndValue : this->m_values)
-        if (roi->valueAtTime(timeAndValue.time()))
-          filteredValues.emplace_back(timeAndValue.value());
+    } else { // only use the values in the filter - this is very similar to FilteredTimeSeriesProperty::applyFilter
+      // the index into the m_values array of the time, or -1 (before) or m_values.size() (after)
+      std::size_t index_current_log{0};
+      for (const auto &splitter : roi->toTimeIntervals()) {
+        const auto endTime = splitter.stop();
+
+        // check if the splitter starts too early
+        if (endTime < this->m_values[index_current_log].time()) {
+          continue; // skip to the next splitter
+        }
+
+        // cache values to reduce number of method calls
+        const auto beginTime = splitter.start();
+
+        // find the first log that should be added
+        if (this->m_values.back().time() < beginTime) {
+          // skip directly to the end if the filter starts after the last log
+          index_current_log = this->m_values.size() - 1;
+        } else {
+          // search for the right starting point
+          while ((this->m_values[index_current_log].time() <= beginTime)) {
+            if (index_current_log + 1 > this->m_values.size())
+              break;
+            index_current_log++;
+          }
+          // need to back up by one
+          if (index_current_log > 0)
+            index_current_log--;
+          // go backwards more while times are equal to the one being started at
+          while (index_current_log > 0 &&
+                 this->m_values[index_current_log].time() == this->m_values[index_current_log - 1].time()) {
+            index_current_log--;
+          }
+        }
+
+        // add everything up to the end time
+        for (; index_current_log < this->m_values.size(); ++index_current_log) {
+          if (this->m_values[index_current_log].time() >= endTime)
+            break;
+
+          // the current value goes into the filter
+          filteredValues.emplace_back(this->m_values[index_current_log].value());
+        }
+        // go back one so the next splitter can add a value
+        if (index_current_log > 0)
+          index_current_log--;
+      }
     }
     return filteredValues;
   } else {
-    return this->valuesAsVector();
+    return this->filteredValuesAsVector();
   }
 }
 
