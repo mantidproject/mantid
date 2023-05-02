@@ -119,7 +119,7 @@ class BayesQuasi2(PythonAlgorithm):
         alg.setProperty("InputWorkspaces", ws_list)
         alg.setProperty("OutputWorkspace", f"{name}_workspaces")
         alg.execute()
-        return alg.getPropertyValue("OutputWorkspace") 
+        return alg.getPropertyValue("OutputWorkspace")
 
     def add_sample_logs(self, workspace, sample_logs: List, data_ws):
         """
@@ -133,7 +133,7 @@ class BayesQuasi2(PythonAlgorithm):
         alg.setProperty("OutputWorkspace", workspace)
         alg.execute()
         ws = alg.getPropertyValue("OutputWorkspace")
-        
+
         alg2 = self.createChildAlgorithm("AddSampleLogMultiple", enableLogging=False)
         alg2.setProperty("Workspace", ws)
         alg2.setProperty("LogNames", [log[0] for log in sample_logs])
@@ -150,12 +150,12 @@ class BayesQuasi2(PythonAlgorithm):
         alg.setProperty("DataX", DataX)
         alg.setProperty("DataY", DataY)
         alg.setProperty("NSpec", NSpec)
-        alg.setProperty('UnitX', UnitX)
-        alg.setProperty('YUnitLabel', YUnitLabel)
-        alg.setProperty('VerticalAxisUnit', VerticalAxisUnit)
-        alg.setProperty('VerticalAxisValues', VerticalAxisValues)
+        alg.setProperty("UnitX", UnitX)
+        alg.setProperty("YUnitLabel", YUnitLabel)
+        alg.setProperty("VerticalAxisUnit", VerticalAxisUnit)
+        alg.setProperty("VerticalAxisValues", VerticalAxisValues)
         if DataE is not None:
-            alg.setProperty('DataE', DataE)
+            alg.setProperty("DataE", DataE)
 
         alg.execute()
         return alg.getPropertyValue("OutputWorkspace")
@@ -251,7 +251,6 @@ class BayesQuasi2(PythonAlgorithm):
         return f"{name}_results", f"{name}_prob"
 
     def calculate(self, sample_ws, report_progress, res_list, N, max_num_peaks, method, function):
-
         name = self.getPropertyValue("SampleWorkspace")
         # get inputs
         elastic = self.getProperty("Elastic").value
@@ -303,12 +302,8 @@ class BayesQuasi2(PythonAlgorithm):
             engine = workflow.fit_engine
 
             ws_list = self.make_fit_ws(engine, max_num_peaks, ws_list, "DeltaE", f"{name}_{spec}_")
-        
-        sample_logs = [
-            ("background", BG_str),
-            ("elastic_peak", elastic),
-            ("energy_min", start_x),
-            ("energy_max", end_x)]
+
+        sample_logs = [("background", BG_str), ("elastic_peak", elastic), ("energy_min", start_x), ("energy_max", end_x)]
 
         return ws_list, results, results_errors, sample_logs
 
@@ -364,7 +359,9 @@ class BayesQuasi2(PythonAlgorithm):
                 res_list = self.unique_res(res_ws, N)
             else:
                 raise ValueError("RES file needs to have either 1 or the same number of histograms as sample.")
-            ws_list, results, results_errors, sample_logs = self.calculate(sample_ws, report_progress, res_list, N, max_num_peaks, QLData, QlDataFunction)
+            ws_list, results, results_errors, sample_logs = self.calculate(
+                sample_ws, report_progress, res_list, N, max_num_peaks, QLData, QlDataFunction
+            )
 
         elif program == "QSe":
             max_num_peaks = 1
@@ -373,7 +370,9 @@ class BayesQuasi2(PythonAlgorithm):
                 res_list = self.duplicate_res(res_ws, N)
             else:
                 raise ValueError("Stretched Exp ONLY works with RES file")
-            ws_list, results, results_errors, sample_logs = self.calculate(sample_ws, report_progress, res_list, N, max_num_peaks, QlStretchedExp, QSEFunction)
+            ws_list, results, results_errors, sample_logs = self.calculate(
+                sample_ws, report_progress, res_list, N, max_num_peaks, QlStretchedExp, QSEFunction
+            )
 
         sample_logs.append(("res_workspace", res_name))
         sample_logs.append(("fit_program", prog))
