@@ -187,7 +187,6 @@ SpectrumIndexSet IndexInfo::makeIndexSet(const std::vector<GlobalSpectrumIndex> 
   return m_spectrumNumberTranslator->makeIndexSet(globalIndices);
 }
 
-// this function
 /** Map a vector of detector indices to a vector of global spectrum indices. *
  * The mapping is based on the held spectrum definitions.
  * Throws if any spectrum maps to more than one detectors.
