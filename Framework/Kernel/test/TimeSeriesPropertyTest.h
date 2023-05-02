@@ -1162,7 +1162,7 @@ public:
     log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
 
     // check
-    for (int i = 0; i < 4; ++i) {
+    for (std::size_t i = 0; i < 4; ++i) {
       TimeSeriesProperty<int> *out_i = outputs[i];
       TS_ASSERT_EQUALS(out_i->size(), 0);
       delete out_i;
@@ -1217,7 +1217,7 @@ public:
     log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
 
     // check
-    for (int i = 0; i < 4; ++i) {
+    for (std::size_t i = 0; i < 4; ++i) {
       TimeSeriesProperty<int> *out_i = outputs[i];
       TS_ASSERT_EQUALS(out_i->size(), 1);
       delete out_i;
@@ -1321,7 +1321,7 @@ public:
     int_log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
 
     // check
-    for (int i = 0; i < 2; ++i) {
+    for (std::size_t i = 0; i < 2; ++i) {
       TimeSeriesProperty<int> *out_i = outputs[i];
       TS_ASSERT_EQUALS(out_i->size(), 1);
       delete out_i;
