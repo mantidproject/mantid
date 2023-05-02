@@ -1815,13 +1815,13 @@ double TimeSeriesProperty<TYPE>::extractStatistic(Math::StatisticType selection,
   double singleValue = 0;
   switch (selection) {
   case FirstValue:
-    if (roi)
+    if (roi && !roi->useAll())
       singleValue = double(this->firstValue(*roi));
     else
       singleValue = double(this->nthValue(0));
     break;
   case LastValue:
-    if (roi)
+    if (roi && !roi->useAll())
       singleValue = double(this->lastValue(*roi));
     else
       singleValue = double(this->nthValue(this->size() - 1));
