@@ -82,7 +82,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         return issues
 
     def _parse_calibration_file(self, filepath):
-        # Create dictionary of detector ID and theta offset from scan
+        """Create a dictionary of detector IDs and theta offsets from the calibration file"""
         scanned_theta_offsets = {}
         with open(filepath, "r") as file:
             labels_checked = False
@@ -124,6 +124,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         return scanned_theta_offsets
 
     def _check_file_column_labels(self, row_entries):
+        """Check that the file contains the required column labels"""
         valid_labels = collections.Counter([self._DET_ID_LABEL, self._THETA_LABEL])
 
         first_label = row_entries[self._det_id_col_idx].lower()
@@ -165,12 +166,11 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
     def _calculate_calibrated_two_theta(self, ws, spec_info, det_id, theta_offset):
         """Calculates the new twoTheta value for a detector from a given offset, in degrees"""
-        try:
-            ws_idx = ws.getIndicesFromDetectorIDs([det_id])[0]
-        except IndexError:
+        ws_idx = ws.getIndicesFromDetectorIDs([det_id])
+        if len(ws_idx) == 0:
             raise RuntimeError(f"Detector id {det_id} from calibration file cannot be found in input workspace")
 
-        current_two_theta = spec_info.signedTwoTheta(ws_idx)
+        current_two_theta = spec_info.signedTwoTheta(ws_idx[0])
         return (current_two_theta * self._RAD_TO_DEG) + theta_offset
 
 
