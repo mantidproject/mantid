@@ -21,7 +21,6 @@ def create_file_path(base_name):
 
 
 class SaveLoadNexusProcessedTestBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
-
     filename = None
     test_ws_name = "input_ws"
     loaded_ws_name = "loaded"
@@ -95,9 +94,6 @@ class SaveLoadNexusProcessedEmptySampleNameTest(SaveLoadNexusProcessedTestBase):
     def savedFilename(self):
         return "tmp_saveload_nexusprocessed_emptysamplename"
 
-    def validate(self):
-        return self.compareWorkspaces()
-
 
 class SaveLoadNexusProcessedNoDetectorsSpectraNumbersTest(SaveLoadNexusProcessedTestBase):
     def createTestWorkspace(self):
@@ -107,5 +103,16 @@ class SaveLoadNexusProcessedNoDetectorsSpectraNumbersTest(SaveLoadNexusProcessed
     def savedFilename(self):
         return "tmp_saveload_nexusprocessed_nodetectorsspectranumbers"
 
-    def validate(self):
-        return self.compareWorkspaces()
+
+class SaveLoadNexusProcessedGroupingWorkspaceTest(SaveLoadNexusProcessedTestBase):
+    def createTestWorkspace(self):
+        CreateWorkspace(OutputWorkspace="idf", DataX="1", DataY="1", WorkspaceTitle="SNAP")
+
+        LoadInstrument(Workspace="idf", InstrumentName="SNAP", MonitorList="-2--1", RewriteSpectraMap="False")
+
+        CreateGroupingWorkspace(InputWorkspace="idf", GroupDetectorsBy="Column", OutputWorkspace=self.test_ws_name)
+        # title must be manually added for logs to match
+        mtd[self.test_ws_name].setTitle("empty grouping workspace")
+
+    def savedFilename(self):
+        return "tmp_saveload_nexusprocessed_emptygroup"
