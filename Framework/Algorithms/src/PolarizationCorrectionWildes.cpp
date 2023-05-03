@@ -431,14 +431,14 @@ std::string PolarizationCorrectionWildes::validateFlippers() {
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
 
   // Checks that the intial string is made up of single or pairs of digits made up of 0 or 1 with a maximum of 4 pairs.
-  boost::regex flipper_pattern("([0-1]){1,2}(,\s*([0-1]){1,2}){0,3}");
+  boost::regex flipper_pattern("([0-1]){1,2}(,\\s*([0-1]){1,2}){0,3}");
   if (!boost::regex_match(flipperProperty, flipper_pattern)) {
     return "The flipper configuration provided includes invalid characters. Please ensure you are using a maximum of 4 "
            "pairs of digits created using 0 and/or 1 and separated by a comma";
   }
 
   // Checks that only unique flipper configurations have been provided
-  const auto flippers = parseFlipperSetup(flipperProperty);
+  auto flippers = parseFlipperSetup(flipperProperty);
   std::set<std::string> uniqueFlipperConfig(flippers.begin(), flippers.end());
   if (flippers.size() > uniqueFlipperConfig.size()) {
     return "A duplicate flipper configuration has been provided.";
@@ -449,6 +449,21 @@ std::string PolarizationCorrectionWildes::validateFlippers() {
   if (inputs.size() != flippers.size()) {
     return "The number of flipper configurations (" + std::to_string(flippers.size()) +
            ") does not match the number of input workspaces (" + std::to_string(inputs.size()) + ")";
+  }
+
+  // Check that the configuration provided can be used by the algorithm
+  std::sort(flippers.begin(), flippers.end());
+  std::vector<std::vector<std::string>> acceptableFlipperConfigs = {
+      {"0"}, {"0", "1"}, {"00", "11"}, {"00", "01", "11"}, {"00", "10", "11"}, {"00", "01", "10", "11"}};
+  bool matchFound = false;
+  for (std::vector<std::string> &acceptConfig : acceptableFlipperConfigs) {
+    if (flippers == acceptConfig) {
+      matchFound = true;
+      break;
+    }
+  }
+  if (!matchFound) {
+    return "This is not a valid flipper configuration.";
   }
   return "";
 }
