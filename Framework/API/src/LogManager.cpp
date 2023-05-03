@@ -225,9 +225,9 @@ void LogManager::copyAndFilterProperties(const LogManager &other, const Kernel::
 }
 
 /**
- * For time series properties, remove time values outside of TimeROI regions, each defined as [roi_start,roi_stop).
- * However, keep the values immediately before and after each ROI region, if available.
- * @param timeROI :: a series of time regions used to determine which values to remove or to keep
+ * For time series properties, remove time values outside of this object's TimeROI.
+ * Each TimeROI region is defined as [roi_start,roi_stop). However, keep the values
+ * immediately before and after each timeROI region, if available.
  */
 void LogManager::removeDataOutsideTimeROI() {
   m_manager->removeDataOutsideTimeROI(*m_timeroi);
