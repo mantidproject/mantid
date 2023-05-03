@@ -168,6 +168,7 @@ void FilterByTime::exec() {
     timeroi.update_intersection(TimeROI(start, stop));
   }
   outputWS->mutableRun().setTimeROI(timeroi);
+  outputWS->mutableRun().removeDataOutsideTimeROI();
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(outputWS));
 }
 

@@ -488,7 +488,10 @@ void LogManager::clearOutdatedTimeSeriesLogValues() {
 
 const Kernel::TimeROI &LogManager::getTimeROI() const { return *(m_timeroi.get()); }
 
-void LogManager::setTimeROI(const Kernel::TimeROI &timeroi) { m_timeroi->replaceROI(timeroi); }
+void LogManager::setTimeROI(const Kernel::TimeROI &timeroi) {
+  m_timeroi->replaceROI(timeroi);
+  this->clearSingleValueCache();
+}
 
 //--------------------------------------------------------------------------------------------
 /** Save the object to an open NeXus file.

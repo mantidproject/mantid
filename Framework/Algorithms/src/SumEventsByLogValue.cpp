@@ -221,6 +221,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
     // Calculate the time covered by this log value and add it to the table
     Run run(m_inputWorkspace->run());
     run.setTimeROI(timeRoi);
+    run.removeDataOutsideTimeROI();
     timeCol->cell<double>(row) = run.getTimeROI().durationInSeconds();
 
     interruption_point();
