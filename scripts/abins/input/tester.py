@@ -29,7 +29,12 @@ class Tester(object):
     }
 
     @staticmethod
-    def _prepare_data(seedname: str, max_displacement_kpt: Real = float("Inf")):
+    def _to_array_inplace(data: dict, key: str) -> None:
+        """Replace a dict item with equivalent numpy array"""
+        data[key] = np.asarray(data[key])
+
+    @classmethod
+    def _prepare_data(cls, seedname: str, max_displacement_kpt: Real = float("Inf")):
         """Reads reference values from ASCII files
 
         Args:
@@ -53,8 +58,7 @@ class Tester(object):
         array = {}
 
         for k in range(num_k):
-            freq = correct_data["datasets"]["k_points_data"]["frequencies"][str(k)]
-            correct_data["datasets"]["k_points_data"]["frequencies"][str(k)] = np.asarray(freq)
+            cls._to_array_inplace(correct_data["datasets"]["k_points_data"]["frequencies"], str(k))
 
             if k <= max_displacement_kpt:
                 try:
@@ -100,7 +104,9 @@ class Tester(object):
             self.assertEqual(correct_k_points["weights"][k], items["weights"][k])
 
             if int(k) <= max_displacement_kpt:
-                assert_allclose(correct_displacements, calc_displacements)
+                assert_allclose(
+                    correct_displacements, calc_displacements, err_msg="Atomic displacements do not match values from reference file"
+                )
 
         correct_atoms = correct_data["datasets"]["atoms_data"]
         atoms = data["datasets"]["atoms_data"]
