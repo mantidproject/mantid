@@ -204,7 +204,6 @@ class SANSSave(DataProcessorAlgorithm):
         if not file_formats:
             errors.update({"Nexus": "At least one data format needs to be specified."})
             errors.update({"CanSAS": "At least one data format needs to be specified."})
-            errors.update({"CanSAS": "At least one data format needs to be specified."})
             errors.update({"NXcanSAS": "At least one data format needs to be specified."})
             errors.update({"NistQxy": "At least one data format needs to be specified."})
             errors.update({"RKH": "At least one data format needs to be specified."})
