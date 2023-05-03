@@ -262,7 +262,9 @@ Component Overviews
    EventWorkspaceDev
    HandlingXML
    IndexProperty
+   IndirectDataAnalysisAddingFitType
    IndirectDataAnalysisFileStructure
+   InelasticDataManipulationFileStructure
    InstrumentViewer
    ISISReflectometryInterface
    ISISSANSReductionBackend
