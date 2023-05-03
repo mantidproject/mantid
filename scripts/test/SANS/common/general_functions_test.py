@@ -18,6 +18,7 @@ from sans.common.general_functions import (
     get_standard_output_workspace_name,
     sanitise_instrument_name,
     get_detector_types_from_instrument,
+    get_detector_names_from_instrument,
     get_reduced_can_workspace_from_ads,
     write_hash_into_reduced_can_workspace,
     convert_instrument_and_detector_type_to_bank_name,
@@ -658,6 +659,12 @@ class SANSEventSliceParsing(unittest.TestCase):
 
     def test_get_detector_types_from_instrument_none(self):
         self.assertEqual([], get_detector_types_from_instrument(SANSInstrument.NO_INSTRUMENT))
+
+    def test_get_detector_names_from_instrument(self):
+        self.assertEqual(["HAB", "main-detector-bank"], get_detector_names_from_instrument(SANSInstrument.LOQ))
+        self.assertEqual(["front-detector", "rear-detector"], get_detector_names_from_instrument(SANSInstrument.SANS2D))
+        self.assertEqual(["rear-detector"], get_detector_names_from_instrument(SANSInstrument.ZOOM))
+        self.assertEqual(["DetectorBench"], get_detector_names_from_instrument(SANSInstrument.LARMOR))
 
 
 if __name__ == "__main__":
