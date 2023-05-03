@@ -152,7 +152,8 @@ public:
     ws->initialize(100, 1, 1);
     ws->dataY(0)[0] = 1;
     ws->dataY(1)[0] = 2;
-    TS_ASSERT_EQUALS(ws->getGroupSpetraIDs(0).size(), 98);
+    // 0 is not a valid id, -1 is null
+    TS_ASSERT_EQUALS(ws->getGroupSpetraIDs(-1).size(), 98);
     TS_ASSERT_EQUALS(ws->getGroupSpetraIDs(1).size(), 1);
     TS_ASSERT_EQUALS(ws->getGroupSpetraIDs(2).size(), 1);
   }
