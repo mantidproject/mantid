@@ -7,8 +7,8 @@ function(find_qscintilla qt_version)
     message(FATAL_ERROR "find_package ( Qt5 ...) must be called first")
   endif()
   set(_qsci_lib_names
-      qscintilla2-qt5
       qscintilla2_qt5
+      qscintilla2-qt5
       libqt5scintilla2
       libqscintilla2-qt5
       qt5scintilla2
