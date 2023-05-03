@@ -70,7 +70,7 @@ public:
   virtual void filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop);
 
   /// For the time series properties, remove values according to TimeROI
-  virtual void removeDataOutsideTimeROI(const Kernel::TimeROI &timeROI);
+  virtual void removeDataOutsideTimeROI();
 
   /// Create a new LogManager with a partial copy of its time series properties according to TimeROI
   LogManager *cloneInTimeROI(const Kernel::TimeROI &timeROI);
@@ -176,7 +176,7 @@ public:
   void clearOutdatedTimeSeriesLogValues();
 
   const Kernel::TimeROI &getTimeROI() const;
-  virtual void setTimeROI(const Kernel::TimeROI &timeroi, const bool applyFilter = true);
+  virtual void setTimeROI(const Kernel::TimeROI &timeroi);
 
   /// Save the run to a NeXus file with a given group name
   virtual void saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) const;

@@ -225,8 +225,8 @@ Run &Run::operator+=(const Run &rhs) {
 }
 
 // this overrides the one from LogManager so the proton charge can be recalculated
-void Run::setTimeROI(const Kernel::TimeROI &timeroi, const bool applyFilter) {
-  LogManager::setTimeROI(timeroi, applyFilter);
+void Run::setTimeROI(const Kernel::TimeROI &timeroi) {
+  LogManager::setTimeROI(timeroi);
   this->integrateProtonCharge();
   this->setDuration(); // update log "duration" with the duration of the new timeroi
 }

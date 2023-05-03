@@ -190,7 +190,7 @@ bool LogManager::hasEndTime() const { return hasProperty(END_TIME_NAME) || hasPr
  */
 void LogManager::filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop) {
   this->setTimeROI(TimeROI(start, stop));
-  this->removeDataOutsideTimeROI(*m_timeroi);
+  this->removeDataOutsideTimeROI();
 }
 
 /**
@@ -220,7 +220,7 @@ LogManager *LogManager::cloneInTimeROI(const Kernel::TimeROI &timeROI) {
  */
 void LogManager::copyAndFilterProperties(const LogManager &other, const Kernel::TimeROI &timeROI) {
   this->m_manager = std::unique_ptr<PropertyManager>(other.m_manager->cloneInTimeROI(timeROI));
-  this->setTimeROI(timeROI, false);
+  this->setTimeROI(timeROI);
   this->clearSingleValueCache();
 }
 
@@ -229,8 +229,8 @@ void LogManager::copyAndFilterProperties(const LogManager &other, const Kernel::
  * However, keep the values immediately before and after each ROI region, if available.
  * @param timeROI :: a series of time regions used to determine which values to remove or to keep
  */
-void LogManager::removeDataOutsideTimeROI(const Kernel::TimeROI &timeROI) {
-  m_manager->removeDataOutsideTimeROI(timeROI);
+void LogManager::removeDataOutsideTimeROI() {
+  m_manager->removeDataOutsideTimeROI(*m_timeroi);
   this->clearSingleValueCache();
 }
 
@@ -488,11 +488,7 @@ void LogManager::clearOutdatedTimeSeriesLogValues() {
 
 const Kernel::TimeROI &LogManager::getTimeROI() const { return *(m_timeroi.get()); }
 
-void LogManager::setTimeROI(const Kernel::TimeROI &timeroi, const bool applyFilter) {
-  m_timeroi->replaceROI(timeroi);
-  if (applyFilter)
-    removeDataOutsideTimeROI(*m_timeroi);
-}
+void LogManager::setTimeROI(const Kernel::TimeROI &timeroi) { m_timeroi->replaceROI(timeroi); }
 
 //--------------------------------------------------------------------------------------------
 /** Save the object to an open NeXus file.

@@ -711,7 +711,8 @@ public:
     run_expect.addProperty(tsp->cloneInTimeROI(roi), true);
 
     // Test that after the input run info is filtered with the same TimeROI, the result is as expected
-    run_input.removeDataOutsideTimeROI(roi);
+    run_input.setTimeROI(roi);
+    run_input.removeDataOutsideTimeROI();
     TS_ASSERT_EQUALS(run_input, run_expect);
   }
 
@@ -734,7 +735,7 @@ public:
     // Use a filtered time series property instead of original
     auto tsp = run_input.getTimeSeriesProperty<double>("time_series");
     run_expect.addProperty(tsp->cloneInTimeROI(roi), true);
-    run_expect.setTimeROI(roi, false);
+    run_expect.setTimeROI(roi);
 
     // Create a cloned-in-roi copy of the orginal run info object
     LogManager *run_result_ptr = run_input.cloneInTimeROI(roi);
