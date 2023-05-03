@@ -19,6 +19,7 @@ import sys
 import mantid.api
 import mantid.kernel
 import mantid.plots.modest_image
+import numpy as np
 from mantid.plots.resampling_image import samplingimage
 from mantid.plots.datafunctions import (
     get_axes_labels,
@@ -230,6 +231,9 @@ def plot(axes, workspace, *args, **kwargs):
     dimension
     """
     x, y, args, kwargs = _plot_impl(axes, workspace, args, kwargs)
+    roi = kwargs.pop("roi", np.zeros(0, dtype=bool))
+    if roi.size > 0:
+        axes.fill_between(x, min(y), max(y), where=roi, color="grey", alpha=0.5)
     return axes.plot(x, y, *args, **kwargs)
 
 
