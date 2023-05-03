@@ -229,7 +229,7 @@ class Tester(object):
         try:
             read_filename = abins.test_helpers.find_file(filename=filename + "." + extension)
         except ValueError:
-            read_filename = ''
+            read_filename = ""
         if not read_filename:
             read_filename = abins.test_helpers.find_file(filename=filename + "." + extension.upper())
         if not read_filename:

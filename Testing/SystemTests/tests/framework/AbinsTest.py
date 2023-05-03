@@ -20,7 +20,6 @@ from abins.constants import (
 
 class HelperTestingClass(object):
     def __init__(self):
-
         self._temperature = 10  # K
         self._sample_form = "Powder"
         self._instrument_name = "TOSCA"
@@ -43,28 +42,24 @@ class HelperTestingClass(object):
         self._bin_width = width
 
     def set_instrument_name(self, instrument_name=None):
-
         if instrument_name in ALL_INSTRUMENTS:
             self._instrument_name = instrument_name
         else:
             raise ValueError("Wrong instrument.")
 
     def set_scale(self, scale=None):
-
         if isinstance(scale, float) and scale > 0.0:
             self._scale = scale
         else:
             raise ValueError("Wrong scale.")
 
     def set_ab_initio_program(self, ab_initio_program=None):
-
         if ab_initio_program in ALL_SUPPORTED_AB_INITIO_PROGRAMS:
             self._ab_initio_program = ab_initio_program
         else:
             raise RuntimeError("Unsupported ab initio program: %s " % ab_initio_program)
 
     def set_order(self, order=None):
-
         orders = [QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO, QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR]
 
         if order in orders:
@@ -425,7 +420,6 @@ class AbinsCASTEP1DDispersion(systemtesting.MantidSystemTest, HelperTestingClass
         self._wrk_1 = self._output_name
 
     def validate(self):
-
         self.tolerance = 1e-1
         return self._output_name, self.ref_result
 
@@ -505,7 +499,8 @@ class AbinsBinWidth(systemtesting.MantidSystemTest, HelperTestingClass):
         # Two Castep backends are known to have slightly different results
         try:
             from euphonic import QpointPhononModes  # noqa: F401
-            self.ref_result = name + 'Euphonic.nxs'
+
+            self.ref_result = name + "Euphonic.nxs"
         except ModuleNotFoundError:
             self.ref_result = name + ".nxs"
 

@@ -195,7 +195,6 @@ class CASTEPLoader(AbInitioLoader):
         vectors = np.zeros((self._num_atoms, self._num_phonons, dim), dtype=COMPLEX_TYPE)
         for freq in range(self._num_phonons):
             for atom in range(self._num_atoms):
-
                 line = f_handle.readline()
 
                 if not line:
@@ -285,10 +284,12 @@ class CASTEPLoader(AbInitioLoader):
 
         # Sanity check, sometimes files with non-analytic correction are not handled correctly
         if len(k_vectors) < self._num_k:
-            raise IndexError("The .phonon file was not read correctly; some k-points were lost. "
-                             "Please try using the new Euphonic loader instead. "
-                             "Windows and Conda users should have this included; Linux or Mac users "
-                             "can run user/AdamJackson/install_euphonic.py from the Script Repository.")
+            raise IndexError(
+                "The .phonon file was not read correctly; some k-points were lost. "
+                "Please try using the new Euphonic loader instead. "
+                "Windows and Conda users should have this included; Linux or Mac users "
+                "can run user/AdamJackson/install_euphonic.py from the Script Repository."
+            )
 
         # normalise eigenvectors:
 
