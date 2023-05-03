@@ -23,6 +23,8 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
     _CALIBRATION_FILE = "CalibrationFile"
     _OUTPUT_WORKSPACE = "OutputWorkspace"
 
+    _COMMENT_PREFIX = "#"
+    _NUM_COLUMNS_REQUIRED = 2
     _DET_ID_LABEL = "detectorid"
     _THETA_LABEL = "theta_offset"
     _RAD_TO_DEG = 180.0 / math.pi
@@ -95,12 +97,12 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
                 entries = row[0].split()
 
-                if entries[0][0] == "#":
+                if entries[0][0] == self._COMMENT_PREFIX:
                     # Ignore any lines that begin with a #
                     # This allows the user to add any metadata they would like
                     continue
 
-                if len(entries) != 2:
+                if len(entries) != self._NUM_COLUMNS_REQUIRED:
                     raise RuntimeError(
                         "Calibration file should contain two space de-limited columns, "
                         f"labelled as {self._DET_ID_LABEL} and {self._THETA_LABEL}"
@@ -116,7 +118,8 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
                     scanned_theta_offsets[int(entries[self._det_id_col_idx])] = float(entries[self._theta_offset_col_idx])
                 except ValueError:
                     raise ValueError(
-                        "Invalid data in calibration file - detector ids should be integers and theta offsets should be floats"
+                        f"Invalid data in calibration file entry {entries} "
+                        "- detector ids should be integers and theta offsets should be floats"
                     )
 
             if len(scanned_theta_offsets) == 0:
