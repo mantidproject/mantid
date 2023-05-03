@@ -19,8 +19,11 @@
 
 #include <Eigen/Dense>
 #include <boost/math/special_functions/pow.hpp>
+#include <boost/regex.hpp>
 
 namespace {
+
+static const int MAX_NO_OF_FLIPPERS = 4;
 /// Property names.
 namespace Prop {
 static const std::string FLIPPERS{"Flippers"};
@@ -342,14 +345,13 @@ void PolarizationCorrectionWildes::init() {
       std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>(Prop::OUTPUT_WS, "", Kernel::Direction::Output),
       "A group of polarization efficiency corrected workspaces.");
   const std::string full = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
-  const std::string missing01 = Flippers::OffOff + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
-  const std::string missing10 = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOn;
-  const std::string missing0110 = Flippers::OffOff + ", " + Flippers::OnOn;
-  const std::string noAnalyzer = Flippers::Off + ", " + Flippers::On;
-  const std::string directBeam = Flippers::Off;
-  const std::vector<std::string> setups{{full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
-  declareProperty(Prop::FLIPPERS, full, std::make_shared<Kernel::ListValidator<std::string>>(setups),
-                  "Flipper configurations of the input workspaces.");
+  // const std::string missing01 = Flippers::OffOff + ", " + Flippers::OnOff + ", " + Flippers::OnOn;
+  // const std::string missing10 = Flippers::OffOff + ", " + Flippers::OffOn + ", " + Flippers::OnOn;
+  // const std::string missing0110 = Flippers::OffOff + ", " + Flippers::OnOn;
+  // const std::string noAnalyzer = Flippers::Off + ", " + Flippers::On;
+  // const std::string directBeam = Flippers::Off;
+  // const std::vector<std::string> setups{{full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
+  declareProperty(Prop::FLIPPERS, full, "Flipper configurations of the input workspaces.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
       "A workspace containing the efficiency factors P1, P2, F1 and F2 as "
@@ -418,14 +420,37 @@ std::map<std::string, std::string> PolarizationCorrectionWildes::validateInputs(
       }
     }
   }
-  const std::vector<std::string> inputs = getProperty(Prop::INPUT_WS);
-  const std::string flipperProperty = getProperty(Prop::FLIPPERS);
-  const auto flippers = parseFlipperSetup(flipperProperty);
-  if (inputs.size() != flippers.size()) {
-    issues[Prop::FLIPPERS] = "The number of flipper configurations (" + std::to_string(flippers.size()) +
-                             ") does not match the number of input workspaces (" + std::to_string(inputs.size()) + ")";
+  std::string flipperIssues = validateFlippers();
+  if (!flipperIssues.empty()) {
+    issues[Prop::FLIPPERS] = flipperIssues;
   }
   return issues;
+}
+
+std::string PolarizationCorrectionWildes::validateFlippers() {
+  const std::string flipperProperty = getProperty(Prop::FLIPPERS);
+
+  // Checks that the intial string is made up of single or pairs of digits made up of 0 or 1 with a maximum of 4 pairs.
+  boost::regex flipper_pattern("([0-1]){1,2}(,\s*([0-1]){1,2}){0,3}");
+  if (!boost::regex_match(flipperProperty, flipper_pattern)) {
+    return "The flipper configuration provided includes invalid characters. Please ensure you are using a maximum of 4 "
+           "pairs of digits created using 0 and/or 1 and separated by a comma";
+  }
+
+  // Checks that only unique flipper configurations have been provided
+  const auto flippers = parseFlipperSetup(flipperProperty);
+  std::set<std::string> uniqueFlipperConfig(flippers.begin(), flippers.end());
+  if (flippers.size() > uniqueFlipperConfig.size()) {
+    return "A duplicate flipper configuration has been provided.";
+  }
+
+  // Checks that the number of workspaces is equal to the number of flipper configurations provided
+  const std::vector<std::string> inputs = getProperty(Prop::INPUT_WS);
+  if (inputs.size() != flippers.size()) {
+    return "The number of flipper configurations (" + std::to_string(flippers.size()) +
+           ") does not match the number of input workspaces (" + std::to_string(inputs.size()) + ")";
+  }
+  return "";
 }
 
 /**

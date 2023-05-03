@@ -63,6 +63,7 @@ private:
   void threeInputsSolve01(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   void threeInputsSolve10(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   void twoInputsSolve01And10(WorkspaceMap &fullInputs, const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  std::string validateFlippers();
 };
 } // namespace Algorithms
 } // namespace Mantid
