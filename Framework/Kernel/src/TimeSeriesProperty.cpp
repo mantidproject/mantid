@@ -1007,7 +1007,12 @@ template <typename TYPE> std::vector<DateAndTime> TimeSeriesProperty<TYPE>::time
 }
 
 /**
- * Return the time series's filtered times as a vector<DateAndTime>
+ * A view of the times as seen within a the TimeROI's regions.
+ * A values will be excluded if its times lie outside the ROI's regions or coincides with the upper boundary
+ * of a ROI region. For instance, time "2007-11-30T16:17:30" is excluded in the ROI
+ * ["2007-11-30T16:17:00", "2007-11-30T16:17:30"). However, a value at time "2007-11-30T16:16:00" will be included
+ * with a time of "2007-11-30T16:17:00" because that is when the ROI starts.
+ * @param roi :: ROI regions validating any query time.
  * @return A vector of DateAndTime objects
  */
 template <typename TYPE>
@@ -2164,10 +2169,11 @@ void TimeSeriesProperty<std::string>::histogramData(const Types::Core::DateAndTi
 }
 
 /**
- * Series values within the ROI's regions.
+ * A view of the times as seen within a the TimeROI's regions.
  * A values will be excluded if its times lie outside the ROI's regions or coincides with the upper boundary
  * of a ROI region. For instance, time "2007-11-30T16:17:30" is excluded in the ROI
- * [2007-11-30T16:17:00", 2007-11-30T16:17:30").
+ * ["2007-11-30T16:17:00", "2007-11-30T16:17:30"). However, a value at time "2007-11-30T16:16:00" will be included
+ * because it is valid at the beginning of the TimeROI.
  * @param roi :: ROI regions validating any query time.
  * @returns :: Vector of included values only.
  */
