@@ -122,7 +122,7 @@ def cc_calibrate_groups(
         snpts_group = SmoothNPoints[int(group) - 1] if type(SmoothNPoints) == list else SmoothNPoints
         cycling = OT_group < 1.0
 
-        sn = group_ws.getGroupSpetraIDs(group)
+        sn = group_ws.getGroupSpetraIDs(group.item())
         try:
             ws_indexes = [data_d.getIndexFromSpectrumNumber(int(i)) for i in sn]
         except RuntimeError:

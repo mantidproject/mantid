@@ -114,8 +114,10 @@ std::vector<int> GroupingWorkspace::getGroupSpetraIDs(const int groupID) const {
   for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
     auto group = static_cast<int>(this->y(wi).front());
+    if (group == 0)
+      group = -1;
     if (group == groupID)
-      spectraIDs.push_back(static_cast<int>(wi));
+      spectraIDs.push_back(static_cast<int>(wi) + 1);
   }
   return spectraIDs;
 }
