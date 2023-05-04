@@ -50,6 +50,7 @@ protected:
   GroupingWorkspace(const GroupingWorkspace &) = default;
 
 private:
+  int translateToGroupID(const int n) const;
   GroupingWorkspace *doClone() const override { return new GroupingWorkspace(*this); }
   GroupingWorkspace *doCloneEmpty() const override { return new GroupingWorkspace(); }
 };
