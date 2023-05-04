@@ -237,8 +237,8 @@ void addDetectors(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wor
  * @param detectorNames: the names of the detectors to store
  */
 void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
-                   const std::string &radiationSource, const std::string &geometry,
-                   const std::vector<std::string> &detectorNames) {
+                   const std::string &radiationSource, const std::string &geometry, const std::string beamHeight,
+                   const std::string beamWidth, const std::vector<std::string> &detectorNames) {
   // Setup instrument
   const std::string sasInstrumentNameForGroup = sasInstrumentGroupName;
   auto instrument = Mantid::DataHandling::H5Util::createGroupCanSAS(group, sasInstrumentNameForGroup,
@@ -256,6 +256,11 @@ void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wo
   Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceRadiation, radiationSource);
   Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceBeamShape, geometry);
 
+  if (stod(beamHeight) != 0)
+    Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceBeamHeight, beamHeight);
+  if (stod(beamWidth) != 0)
+    Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceBeamWidth, beamWidth);
+
   // Add IDF information
   auto idf = getIDF(workspace);
   Mantid::DataHandling::H5Util::write(instrument, sasInstrumentIDF, idf);
@@ -264,6 +269,9 @@ void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wo
 //------- SASsample
 
 void addSample(H5::Group &group, std::string sampleThickness) {
+  if (stod(sampleThickness) == 0) {
+    return;
+  }
   std::string const sasSampleNameForGroup = sasInstrumentSampleGroupAttr;
 
   auto sample = Mantid::DataHandling::H5Util::createGroupCanSAS(
@@ -750,6 +758,10 @@ void SaveNXcanSAS::init() {
   std::vector<std::string> geometry{"Cylinder", "Flat plate", "Disc"};
   declareProperty("Geometry", "Disc", std::make_shared<Kernel::StringListValidator>(geometry),
                   "The geometry type of the collimation.");
+  declareProperty("SampleHeight", 0.0,
+                  "The height of the collimation element in mm. If specified as 0 it will not be recorded.");
+  declareProperty("SampleWidth", 0.0,
+                  "The width of the collimation element in mm. If specified as 0 it will not be recorded.");
   declareProperty("DetectorNames", "",
                   "Specify in a comma separated list, which detectors to store "
                   "information about; \nwhere each name must match a name "
@@ -757,7 +769,7 @@ void SaveNXcanSAS::init() {
                   "file (IDF)]]. \nIDFs are located in the instrument "
                   "sub-directory of the Mantid install directory.");
 
-  declareProperty("SampleThickness", 0,
+  declareProperty("SampleThickness", 0.0,
                   "The thickness of the sample in mm. If specified as 0 it will not be recorded.");
 
   declareProperty(
@@ -813,6 +825,8 @@ void SaveNXcanSAS::exec() {
 
   std::string radiationSource = getPropertyValue("RadiationSource");
   std::string geometry = getPropertyValue("Geometry");
+  std::string beamHeight = getPropertyValue("SampleHeight");
+  std::string beamWidth = getPropertyValue("SampleWidth");
   std::string detectorNames = getPropertyValue("DetectorNames");
   std::string sampleThickness = getPropertyValue("SampleThickness");
 
@@ -847,7 +861,7 @@ void SaveNXcanSAS::exec() {
   // Add the instrument information
   progress.report("Adding instrument information.");
   const auto detectors = splitDetectorNames(detectorNames);
-  addInstrument(sasEntry, workspace, radiationSource, geometry, detectors);
+  addInstrument(sasEntry, workspace, radiationSource, geometry, beamHeight, beamWidth, detectors);
 
   // Add the sample information
   progress.report("Adding sample information.");

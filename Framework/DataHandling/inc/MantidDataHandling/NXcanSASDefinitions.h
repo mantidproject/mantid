@@ -80,6 +80,8 @@ const std::string nxInstrumentSourceClassAttr = "NXsource";
 const std::string sasInstrumentSourceGroupName = "sassource";
 const std::string sasInstrumentSourceRadiation = "type";
 const std::string sasInstrumentSourceBeamShape = "beam_shape";
+const std::string sasInstrumentSourceBeamHeight = "beam_size_y";
+const std::string sasInstrumentSourceBeamWidth = "beam_size_x";
 
 const std::string sasInstrumentCollimationClassAttr = "SAScollimation";
 const std::string nxInstrumentCollimationClassAttr = "NXcollimator";

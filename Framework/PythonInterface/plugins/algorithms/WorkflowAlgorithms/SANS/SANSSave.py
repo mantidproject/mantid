@@ -139,7 +139,7 @@ class SANSSave(DataProcessorAlgorithm):
 
         sample = workspace.sample()
         maybe_geometry = convert_to_shape(sample.getGeometryFlag())
-        geometry = maybe_geometry.value if maybe_geometry is not None else None
+        geometry = maybe_geometry.value if maybe_geometry is not None else "Disc"
         height = sample.getHeight()
         width = sample.getWidth()
         thickness = sample.getThickness()
