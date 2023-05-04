@@ -138,6 +138,9 @@ target_link_libraries(
 )
 
 # Installation settings
+message(EXT_INSTALL_RPATH="${EXT_INSTALL_RPATH}")
+message(Python_SITELIB_RELPATH="${Python_SITELIB_RELPATH}")
+
 set_target_properties(PythonKernelModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH}")
 mtd_install_shared_library(TARGETS PythonKernelModule DESTINATION ${Python_SITELIB_RELPATH}/mantid/kernel)
 # packagesetup.py that will overwrite the ones from the built target
