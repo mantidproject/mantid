@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 
 import unittest
+import numpy as np
 from matplotlib import use as mpl_use
 
 mpl_use("Agg")  # noqa
@@ -120,3 +121,17 @@ class CurvePropertiesTest(unittest.TestCase):
         # Now hide connecting line
         container[0].set_visible(False)
         self.assertTrue(funcs.curve_hidden(container))
+
+    def test_error_bars_with_no_creation_args_are_handled(self):
+        fig = figure()
+        x = np.arange(10)
+        y = 2.5 * np.sin(x / 20 * np.pi)
+        yerr = np.linspace(0.05, 0.2, 10)
+        ax = fig.add_subplot()
+        ax.errorbar(x, y, yerr=yerr)
+
+        try:
+            CurveProperties.from_curve(ax.get_lines()[0])
+            CurveProperties.from_curve(ax.containers[0])
+        except RuntimeError:
+            self.fail()
