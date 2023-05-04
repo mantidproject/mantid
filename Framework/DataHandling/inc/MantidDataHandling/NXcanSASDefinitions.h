@@ -103,6 +103,8 @@ const std::string sasInstrumentSampleGroupAttr = "sassample";
 const std::string sasInstrumentSampleId = "ID";
 const std::string sasInstrumentSampleThickness = "thickness";
 
+const std::string sasBeamAndSampleSizeUnitAttrValue = "mm";
+
 const std::string sasInstrumentIDF = "idf";
 
 // SASprocess

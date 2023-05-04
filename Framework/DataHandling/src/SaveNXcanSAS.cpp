@@ -237,8 +237,8 @@ void addDetectors(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wor
  * @param detectorNames: the names of the detectors to store
  */
 void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
-                   const std::string &radiationSource, const std::string &geometry, const std::string beamHeight,
-                   const std::string beamWidth, const std::vector<std::string> &detectorNames) {
+                   const std::string &radiationSource, const std::string &geometry, double beamHeight, double beamWidth,
+                   const std::vector<std::string> &detectorNames) {
   // Setup instrument
   const std::string sasInstrumentNameForGroup = sasInstrumentGroupName;
   auto instrument = Mantid::DataHandling::H5Util::createGroupCanSAS(group, sasInstrumentNameForGroup,
@@ -256,10 +256,16 @@ void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wo
   Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceRadiation, radiationSource);
   Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceBeamShape, geometry);
 
-  if (stod(beamHeight) != 0)
-    Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceBeamHeight, beamHeight);
-  if (stod(beamWidth) != 0)
-    Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceBeamWidth, beamWidth);
+  std::map<std::string, std::string> beamSizeAttrs;
+  beamSizeAttrs.insert(std::make_pair(sasUnitAttr, sasBeamAndSampleSizeUnitAttrValue));
+  if (beamHeight != 0) {
+    Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(source, sasInstrumentSourceBeamHeight, beamHeight,
+                                                                      beamSizeAttrs);
+  }
+  if (beamWidth != 0) {
+    Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(source, sasInstrumentSourceBeamWidth, beamWidth,
+                                                                      beamSizeAttrs);
+  }
 
   // Add IDF information
   auto idf = getIDF(workspace);
@@ -268,15 +274,19 @@ void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wo
 
 //------- SASsample
 
-void addSample(H5::Group &group, std::string sampleThickness) {
-  if (stod(sampleThickness) == 0) {
+void addSample(H5::Group &group, const double &sampleThickness) {
+  if (sampleThickness == 0) {
     return;
   }
   std::string const sasSampleNameForGroup = sasInstrumentSampleGroupAttr;
 
   auto sample = Mantid::DataHandling::H5Util::createGroupCanSAS(
       group, sasSampleNameForGroup, nxInstrumentSampleClassAttr, sasInstrumentSampleClassAttr);
-  Mantid::DataHandling::H5Util::write(sample, sasInstrumentSampleThickness, sampleThickness);
+
+  std::map<std::string, std::string> sampleThicknessAttrs;
+  sampleThicknessAttrs.insert(std::make_pair(sasUnitAttr, sasBeamAndSampleSizeUnitAttrValue));
+  Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(sample, sasInstrumentSampleThickness,
+                                                                    sampleThickness, sampleThicknessAttrs);
 }
 
 //------- SASprocess
@@ -825,10 +835,10 @@ void SaveNXcanSAS::exec() {
 
   std::string radiationSource = getPropertyValue("RadiationSource");
   std::string geometry = getPropertyValue("Geometry");
-  std::string beamHeight = getPropertyValue("SampleHeight");
-  std::string beamWidth = getPropertyValue("SampleWidth");
+  double beamHeight = getProperty("SampleHeight");
+  double beamWidth = getProperty("SampleWidth");
   std::string detectorNames = getPropertyValue("DetectorNames");
-  std::string sampleThickness = getPropertyValue("SampleThickness");
+  double sampleThickness = getProperty("SampleThickness");
 
   Mantid::API::MatrixWorkspace_sptr transmissionSample = getProperty("Transmission");
   Mantid::API::MatrixWorkspace_sptr transmissionCan = getProperty("TransmissionCan");

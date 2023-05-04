@@ -34,7 +34,11 @@ struct NXcanSASTestParameters {
   std::string workspaceTitle{"sample_workspace"};
   std::string instrumentName{"SANS2D"};
   std::string radiationSource{"Spallation Neutron Source"};
+  std::string geometry{"Cylinder"};
+  double beamHeight{1.0};
+  double beamWidth{1.0};
   std::vector<std::string> detectors;
+  double sampleThickness{1.0};
   bool invalidDetectors{false};
   bool is2dData{false};
   std::string idf;
