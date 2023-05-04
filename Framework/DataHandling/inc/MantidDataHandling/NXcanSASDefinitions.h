@@ -98,6 +98,7 @@ const std::string nxInstrumentSampleClassAttr = "NXsample";
 
 const std::string sasInstrumentSampleGroupAttr = "sassample";
 const std::string sasInstrumentSampleId = "ID";
+const std::string sasInstrumentSampleThickness = "thickness";
 
 const std::string sasInstrumentIDF = "idf";
 

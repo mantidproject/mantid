@@ -259,6 +259,16 @@ void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wo
   Mantid::DataHandling::H5Util::write(instrument, sasInstrumentIDF, idf);
 }
 
+//------- SASsample
+
+void addSample(H5::Group &group, std::string sampleThickness) {
+  std::string const sasSampleNameForGroup = sasInstrumentSampleGroupAttr;
+
+  auto sample = Mantid::DataHandling::H5Util::createGroupCanSAS(
+      group, sasSampleNameForGroup, nxInstrumentSampleClassAttr, sasInstrumentSampleClassAttr);
+  Mantid::DataHandling::H5Util::write(sample, sasInstrumentSampleThickness, sampleThickness);
+}
+
 //------- SASprocess
 
 std::string getDate() {
@@ -742,6 +752,9 @@ void SaveNXcanSAS::init() {
                   "file (IDF)]]. \nIDFs are located in the instrument "
                   "sub-directory of the Mantid install directory.");
 
+  declareProperty("SampleThickness", 0,
+                  "The thickness of the sample in mm. If specified as 0 it will not be recorded.");
+
   declareProperty(
       std::make_unique<API::WorkspaceProperty<>>("Transmission", "", Kernel::Direction::Input, PropertyMode::Optional,
                                                  std::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
@@ -795,6 +808,7 @@ void SaveNXcanSAS::exec() {
 
   std::string radiationSource = getPropertyValue("RadiationSource");
   std::string detectorNames = getPropertyValue("DetectorNames");
+  std::string sampleThickness = getPropertyValue("SampleThickness");
 
   Mantid::API::MatrixWorkspace_sptr transmissionSample = getProperty("Transmission");
   Mantid::API::MatrixWorkspace_sptr transmissionCan = getProperty("TransmissionCan");
@@ -828,6 +842,10 @@ void SaveNXcanSAS::exec() {
   progress.report("Adding instrument information.");
   const auto detectors = splitDetectorNames(detectorNames);
   addInstrument(sasEntry, workspace, radiationSource, detectors);
+
+  // Add the sample information
+  progress.report("Adding sample information.");
+  addSample(sasEntry, sampleThickness);
 
   // Get additional run numbers
   const auto sampleTransmissionRun = getPropertyValue("SampleTransmissionRunNumber");
