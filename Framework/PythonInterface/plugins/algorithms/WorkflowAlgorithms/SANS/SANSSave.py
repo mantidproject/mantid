@@ -138,7 +138,8 @@ class SANSSave(DataProcessorAlgorithm):
         workspace = self.getProperty("InputWorkspace").value
 
         sample = workspace.sample()
-        geometry = convert_to_shape(sample.getGeometryFlag()).value
+        maybe_geometry = convert_to_shape(sample.getGeometryFlag())
+        geometry = maybe_geometry.value if maybe_geometry is not None else None
         height = sample.getHeight()
         width = sample.getWidth()
         thickness = sample.getThickness()
