@@ -395,7 +395,7 @@ std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
  * @param shift : shift the TOF values after rescaling, in units of microseconds.
  * @throws invalid_argument : the event list is of type Mantid::API::EventType::WEIGHTED_NOTIME
  */
-void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventList *> partials, bool pulseTof,
+void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventList *> &partials, bool pulseTof,
                                   bool tofCorrect, double factor, double shift) const {
 
   if (events.getEventType() == EventType::WEIGHTED_NOTIME)
@@ -453,7 +453,7 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
  */
 template <typename EVENTTYPE>
 void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const std::vector<EVENTTYPE> &events,
-                                 std::map<int, EventList *> partials) const {
+                                 std::map<int, EventList *> &partials) const {
   if (times.size() != events.size())
     throw std::invalid_argument("Vector of event times and vector of events have different size");
   // initialize the iterator over the splitter

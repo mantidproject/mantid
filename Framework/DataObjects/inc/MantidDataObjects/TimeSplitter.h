@@ -49,7 +49,7 @@ public:
   /// this is to aid in testing and not intended for use elsewhere
   std::size_t numRawValues() const;
   /// Split a list of events according to Pulse time or Pulse + TOF time
-  void splitEventList(const EventList &events, std::map<int, EventList *> partials, bool pulseTof = false,
+  void splitEventList(const EventList &events, std::map<int, EventList *> &partials, bool pulseTof = false,
                       bool tofCorrect = false, double factor = 1.0, double shift = 0.0) const;
   /// Print the (destination index | DateAndTime boundary) pairs of this splitter.
   std::string debugPrint() const;
@@ -60,7 +60,7 @@ private:
   /// Distribute a list of events by comparing a vector of times against the splitter boundaries.
   template <typename EVENTTYPE>
   void splitEventVec(const std::vector<DateAndTime> &times, const std::vector<EVENTTYPE> &events,
-                     std::map<int, EventList *> partials) const;
+                     std::map<int, EventList *> &partials) const;
   std::map<DateAndTime, int> m_roi_map;
   // These 2 maps are complementary to each other
   std::map<std::string, int> m_name_index_map;
