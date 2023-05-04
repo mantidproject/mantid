@@ -60,7 +60,7 @@ class PowderCalculatorTest(unittest.TestCase):
                 try:
                     assert_allclose(ref_data["powder"][key][i], calculated_data[key][i])
                 except AssertionError as e:
-                    raise AssertionError(f"Difference in field '{key}'") from e
+                    raise AssertionError(f"Difference in field '{key}' for case {name}") from e
 
         # check if loading powder data is correct
         new_tester = abins.PowderCalculator(filename=abins_data_filename, abins_data=ref_data["DFT"], temperature=300.0)
