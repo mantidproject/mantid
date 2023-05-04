@@ -40,7 +40,7 @@ requirements:
     - muparser
     - nexus
     - numpy {{ numpy }}
-    - occt {{ occt }}
+    - occt
     - python {{ python }}
     - poco {{ poco }}
     - setuptools {{ setuptools }}
