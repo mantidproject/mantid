@@ -237,7 +237,8 @@ void addDetectors(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wor
  * @param detectorNames: the names of the detectors to store
  */
 void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
-                   const std::string &radiationSource, const std::vector<std::string> &detectorNames) {
+                   const std::string &radiationSource, const std::string &geometry,
+                   const std::vector<std::string> &detectorNames) {
   // Setup instrument
   const std::string sasInstrumentNameForGroup = sasInstrumentGroupName;
   auto instrument = Mantid::DataHandling::H5Util::createGroupCanSAS(group, sasInstrumentNameForGroup,
@@ -253,6 +254,7 @@ void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wo
   auto source = Mantid::DataHandling::H5Util::createGroupCanSAS(instrument, sasSourceName, nxInstrumentSourceClassAttr,
                                                                 sasInstrumentSourceClassAttr);
   Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceRadiation, radiationSource);
+  Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceBeamShape, geometry);
 
   // Add IDF information
   auto idf = getIDF(workspace);
@@ -745,6 +747,9 @@ void SaveNXcanSAS::init() {
                                             "electron"};
   declareProperty("RadiationSource", "Spallation Neutron Source",
                   std::make_shared<Kernel::StringListValidator>(radiation_source), "The type of radiation used.");
+  std::vector<std::string> geometry{"Cylinder", "Flat plate", "Disc"};
+  declareProperty("Geometry", "Disc", std::make_shared<Kernel::StringListValidator>(geometry),
+                  "The geometry type of the collimation.");
   declareProperty("DetectorNames", "",
                   "Specify in a comma separated list, which detectors to store "
                   "information about; \nwhere each name must match a name "
@@ -807,6 +812,7 @@ void SaveNXcanSAS::exec() {
   std::string filename = getPropertyValue("Filename");
 
   std::string radiationSource = getPropertyValue("RadiationSource");
+  std::string geometry = getPropertyValue("Geometry");
   std::string detectorNames = getPropertyValue("DetectorNames");
   std::string sampleThickness = getPropertyValue("SampleThickness");
 
@@ -841,7 +847,7 @@ void SaveNXcanSAS::exec() {
   // Add the instrument information
   progress.report("Adding instrument information.");
   const auto detectors = splitDetectorNames(detectorNames);
-  addInstrument(sasEntry, workspace, radiationSource, detectors);
+  addInstrument(sasEntry, workspace, radiationSource, geometry, detectors);
 
   // Add the sample information
   progress.report("Adding sample information.");
