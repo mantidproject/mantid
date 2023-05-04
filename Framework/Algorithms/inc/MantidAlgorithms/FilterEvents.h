@@ -91,7 +91,7 @@ private:
   void setupCustomizedTOFCorrection();
 
   /// Filter events by splitters in format of Splitter
-  void filterEventsBySplitters(double progressamount);
+  void filterEvents(double progressamount);
 
   /// Mark event lists of workspace indexes with no associated detector pixels as not to be split
   void examineEventWS();

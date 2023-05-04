@@ -285,7 +285,7 @@ void FilterEvents::exec() {
   else
     progressamount = 0.7;
 
-  filterEventsBySplitters(progressamount);
+  filterEvents(progressamount);
 
   // Optional to group detector
   groupOutputWorkspace();
@@ -745,9 +745,12 @@ void FilterEvents::createOutputWorkspaces() {
 
   } // end of the loop iterating over the elements of m_targetWorkspaceIndexSet
 
+  // drop shared pointer for template
+  templateWorkspace.reset();
+
   setProperty("NumberOutputWS", static_cast<int>(number_of_output_workspaces));
 
-  addTimer("createOutputWorkspacesSplitters", startTime, std::chrono::high_resolution_clock::now());
+  addTimer("createOutputWorkspaces", startTime, std::chrono::high_resolution_clock::now());
 
   g_log.information("Output workspaces are created. ");
 
@@ -967,7 +970,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
   }
 }
 
-void FilterEvents::filterEventsBySplitters(double progressamount) {
+void FilterEvents::filterEvents(double progressamount) {
   const auto startTime = std::chrono::high_resolution_clock::now();
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
   g_log.debug() << "Number of spectra in input/source EventWorkspace = " << numberOfSpectra << ".\n";
@@ -994,7 +997,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
   }
   PARALLEL_CHECK_INTERRUPT_REGION
   progress(0.1 + progressamount, "Splitting logs");
-  addTimer("filterEventsBySplitters", startTime, std::chrono::high_resolution_clock::now());
+  addTimer("filterEventsMethod", startTime, std::chrono::high_resolution_clock::now());
 }
 
 } // namespace Mantid::Algorithms
