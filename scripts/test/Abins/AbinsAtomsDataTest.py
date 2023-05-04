@@ -75,7 +75,7 @@ class AtomsDataTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             AtomsData._check_item(wrong_data)
 
-        wrong_data["coord"] = np.asarray([[1, 2], [4]])
+        wrong_data["coord"] = np.asarray([[1, 2], [4]], dtype=object)
         with self.assertRaises(ValueError):
             AtomsData._check_item(wrong_data)
 

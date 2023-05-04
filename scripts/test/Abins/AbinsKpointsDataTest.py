@@ -120,7 +120,8 @@ class KpointsDataTest(unittest.TestCase):
                 ],
                 wrong_items["atomic_displacements"][0, 0],
                 wrong_items["atomic_displacements"][0, 1],
-            ]
+            ],
+            dtype=object,
         )
 
         with self.assertRaises(ValueError):
