@@ -223,7 +223,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
                 self.new_plot(dimensions_changing=True)
             else:
                 self.new_plot(dimensions_transposing=True)
-                self.update_axes_limits_to_extents()
+                self.extents_changed()
         else:
             self.new_plot()
         self._call_cutviewer_presenter_if_created("on_dimension_changed")
@@ -234,7 +234,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
     def extents_changed(self):
         self.update_axes_limits_to_extents()
-        self.update_plot_data()
+        self.new_plot()
 
     def slicepoint_changed(self):
         """Indicates the slicepoint has been updated"""

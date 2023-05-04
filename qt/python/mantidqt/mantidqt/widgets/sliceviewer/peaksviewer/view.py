@@ -142,6 +142,7 @@ class PeaksViewerView(QWidget):
                                by the sliceinfo
         """
         self._sliceinfo_provider.set_axes_limits(xlim, ylim, auto_transform)
+        self._sliceinfo_provider.data_limits_changed()
 
     def set_peak_color(self, peak_color):
         """
