@@ -364,7 +364,7 @@ class SliceViewerTest(unittest.TestCase):
         presenter.update_axes_limits_to_extents = mock.Mock(return_value=None)
         presenter.dimensions_changed()
 
-        mock_new_plot.assert_called_with(dimensions_transposing=True)
+        mock_new_plot.assert_called_with(dimensions_transposing=False)
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
     def test_changing_dimensions_in_nonortho_mode_switches_to_ortho_when_dim_not_Q(self, mock_sliceinfo_cls):

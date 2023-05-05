@@ -313,7 +313,10 @@ class SliceViewerDataView(QWidget):
         xlim, ylim = self.transform_limits_to_extents(xlim, ylim)
         self.set_axes_limits(xlim, ylim)
 
+        self._orig_lims = self.get_data_limits_to_fill_current_axes()
+
         self.on_track_cursor_state_change(self.track_cursor_checked())
+        self.set_integer_axes_ticks()
         # pcolormesh clears any grid that was previously visible
         if self.grid_on:
             self.ax.grid(self.grid_on)
@@ -493,6 +496,14 @@ class SliceViewerDataView(QWidget):
             if self.nonorthogonal_mode:
                 xlim, ylim = self.inverse_transform_extents_to_limits(xlim, ylim)
             return xlim, ylim
+
+    def transform_extents_to_limits(self, xlim, ylim):
+        # viewing axis y not aligned with plot axis
+        # transform top left and bottom right corner
+        # of the zoomed rectangle extents needed to cover the data limits
+        xmin_p, ymax_p = self.nonortho_transform.tr(xlim[0], ylim[1])
+        xmax_p, ymin_p = self.nonortho_transform.tr(xlim[1], ylim[0])
+        return (xmin_p, xmax_p), (ymin_p, ymax_p)
 
     def transform_limits_to_extents(self, xlim, ylim):
         # viewing axis y not aligned with plot axis
