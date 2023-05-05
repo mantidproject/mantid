@@ -79,13 +79,21 @@ template <typename TYPE> TimeSeriesProperty<TYPE> *TimeSeriesProperty<TYPE>::clo
 }
 
 /**
+ * Construct a TimeSeriesProperty object with the base class data only, no time series data.
+ * @param p :: a pointer to a base class object.
+ */
+template <typename TYPE>
+TimeSeriesProperty<TYPE>::TimeSeriesProperty(const Property *const p)
+    : Property(*p), m_values(), m_size(), m_propSortedFlag() {}
+
+/**
  * Create a partial copy of this object according to a TimeROI. The partially cloned object
  * should include all time values enclosed by the ROI regions, each defined as [roi_start,roi_end),
  * plus the values immediately before and after an ROI region, if available.
  * @param timeROI :: a series of time regions used to determine which values should be included in the copy.
  */
 template <typename TYPE> Property *TimeSeriesProperty<TYPE>::cloneInTimeROI(const TimeROI &timeROI) const {
-  TimeSeriesProperty<TYPE> *filteredTS = new TimeSeriesProperty<TYPE>(this->name());
+  auto filteredTS = new TimeSeriesProperty<TYPE>(this);
   createFilteredData(timeROI, filteredTS->m_values);
   filteredTS->m_size = static_cast<int>(filteredTS->m_values.size());
   return filteredTS;
@@ -333,114 +341,6 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::removeDataOutsideTimeROI
   mp_copy.clear();
 
   m_size = static_cast<int>(m_values.size());
-}
-
-/// Split this TimeSeriresProperty by a vector of time with N entries,
-/// and by the wsIndex workspace index defined by inputWorkspaceIndicies
-/// Requirements:
-/// vector output must be defined before this method is called
-template <typename TYPE>
-void TimeSeriesProperty<TYPE>::splitByTimeVector(const std::vector<DateAndTime> &timeToFilterTo,
-                                                 const std::vector<int> &inputWorkspaceIndicies,
-                                                 const std::vector<TimeSeriesProperty *> &output) {
-
-  // check inputs
-  if (timeToFilterTo.size() != inputWorkspaceIndicies.size() + 1) {
-    throw std::runtime_error("Input time vector's size does not match(one more larger than) target "
-                             "workspace index vector's size inputWorkspaceIndicies.size() \n");
-  }
-
-  // return if the output vector TimeSeriesProperties is not defined
-  if (output.empty())
-    return;
-
-  sortIfNecessary();
-
-  // work on m_values, m_size, and m_time
-  auto const currentTimes = timesAsVector();
-  auto const currentValues = valuesAsVector();
-  size_t index_splitter = 0;
-
-  // move splitter index such that the first entry of TSP is before the stop
-  // time of a splitter
-  DateAndTime firstPropTime = currentTimes[0];
-  auto firstFilterTime = std::lower_bound(timeToFilterTo.begin(), timeToFilterTo.end(), firstPropTime);
-  if (firstFilterTime == timeToFilterTo.end()) {
-    // do nothing as the first TimeSeriesProperty entry's time is before any
-    // splitters
-    return;
-  } else if (firstFilterTime != timeToFilterTo.begin()) {
-    // calculate the splitter's index (now we check the stop time)
-    index_splitter = firstFilterTime - timeToFilterTo.begin() - 1;
-  }
-
-  DateAndTime filterStartTime = timeToFilterTo[index_splitter];
-  DateAndTime filterEndTime;
-
-  // move along the entries to find the entry inside the current splitter
-  auto firstEntryInSplitter = std::lower_bound(currentTimes.begin(), currentTimes.end(), filterStartTime);
-  if (firstEntryInSplitter == currentTimes.end()) {
-    // the first splitter's start time is LATER than the last TSP entry, then
-    // there won't be any
-    // TSP entry to be split into any wsIndex splitter.
-    DateAndTime last_entry_time = this->lastTime();
-    TYPE last_entry_value = this->lastValue();
-    for (auto &i : output) {
-      i->addValue(last_entry_time, last_entry_value);
-    }
-    return;
-  }
-
-  // first splitter start time is between firstEntryInSplitter and the one
-  // before it. so the index for firstEntryInSplitter is the first TSP entry
-  // in the splitter
-  size_t timeIndex = firstEntryInSplitter - currentTimes.begin();
-  firstPropTime = *firstEntryInSplitter;
-
-  for (; index_splitter < timeToFilterTo.size() - 1; ++index_splitter) {
-    int wsIndex = inputWorkspaceIndicies[index_splitter];
-
-    filterStartTime = timeToFilterTo[index_splitter];
-    filterEndTime = timeToFilterTo[index_splitter + 1];
-
-    // get the first entry index (overlap)
-    if (timeIndex > 0)
-      --timeIndex;
-
-    // add the continuous entries to same wsIndex time series property
-    const size_t numEntries = currentTimes.size();
-
-    // Add properties to the current wsIndex.
-    if (timeIndex >= numEntries) {
-      // We have run out of TSP entries, so use the last TSP value
-      // for all remaining outputs
-      auto currentTime = currentTimes.back();
-      if (output[wsIndex]->size() == 0 || output[wsIndex]->lastTime() != currentTime) {
-        output[wsIndex]->addValue(currentTime, currentValues.back());
-      }
-    } else {
-      // Add TSP values until we run out or go past the current filter
-      // end time.
-      for (; timeIndex < numEntries; ++timeIndex) {
-        auto currentTime = currentTimes[timeIndex];
-        if (output[wsIndex]->size() == 0 || output[wsIndex]->lastTime() < currentTime) {
-          // avoid to add duplicate entry
-          output[wsIndex]->addValue(currentTime, currentValues[timeIndex]);
-        }
-        if (currentTime > filterEndTime)
-          break;
-      }
-    }
-  }
-
-  // Add a debugging check such that there won't be any time entry with zero log
-  for (size_t i = 0; i < output.size(); ++i) {
-    if (output[i]->size() == 0) {
-      std::stringstream errss;
-      errss << "entry " << m_name << " has 0 size, whose first entry is at " << this->firstTime().toSimpleString();
-      g_log.warning(errss.str());
-    }
-  }
 }
 
 // The makeFilterByValue & expandFilterToRange methods generate a bunch of

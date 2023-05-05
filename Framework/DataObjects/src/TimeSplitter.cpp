@@ -8,20 +8,19 @@
 #include "MantidDataObjects/TimeSplitter.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeROI.h"
-
-#include <set>
 
 namespace Mantid {
 using API::EventType;
+using Kernel::SplittingInterval;
+using Kernel::SplittingIntervalVec;
 using Kernel::TimeROI;
 using Types::Core::DateAndTime;
 
 namespace DataObjects {
 
 namespace {
-// default value for the output is zero
-constexpr int DEFAULT_TARGET{0};
 
 void assertIncreasing(const DateAndTime &start, const DateAndTime &stop) {
   if (start > stop)
@@ -33,8 +32,8 @@ Kernel::Logger g_log("TimeSplitter");
 
 } // namespace
 
-TimeSplitter::TimeSplitter(const DateAndTime &start, const DateAndTime &stop) {
-  clearAndReplace(start, stop, DEFAULT_TARGET);
+TimeSplitter::TimeSplitter(const DateAndTime &start, const DateAndTime &stop, const int value) {
+  clearAndReplace(start, stop, value);
 }
 
 /**
@@ -60,12 +59,15 @@ TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const Da
   for (size_t i = 1; i < X.size(); i++) {
     auto timeStart = Types::Core::DateAndTime(X[i - 1], 0.0) + offset_ns;
     auto timeEnd = Types::Core::DateAndTime(X[i], 0.0) + offset_ns;
-    auto index = static_cast<int>(Y[i - 1]);
-    if ((index != NO_TARGET) && (valueAtTime(timeStart) != NO_TARGET || valueAtTime(timeEnd) != NO_TARGET)) {
+    auto target_index = static_cast<int>(Y[i - 1]);
+    if ((target_index != NO_TARGET) && (valueAtTime(timeStart) != NO_TARGET || valueAtTime(timeEnd) != NO_TARGET)) {
       g_log.warning() << "Values between " << timeStart.second() << "(s) and " << timeEnd.second()
                       << "(s) may be overwritten in conversion to TimeSplitter" << '\n';
     }
-    this->addROI(timeStart, timeEnd, index);
+    this->addROI(timeStart, timeEnd, target_index);
+    std::string target_name = std::to_string(target_index);
+    m_name_index_map[target_name] = target_index;
+    m_index_name_map[target_index] = target_name;
   }
 }
 
@@ -79,10 +81,15 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
   API::Column_sptr col_stop = tws->getColumn(1);
   API::Column_sptr col_target = tws->getColumn(2);
 
+  int target_index{NO_TARGET};
+  int max_target_index{0};
+  size_t noninteger_target_names_count{0};
+  size_t notarget_names_count{0}; // count "-1" targets
+
   for (size_t ii = 0; ii < tws->rowCount(); ii++) {
     // by design, the times in the table must be in seconds
-    double timeStart_s{col_start->cell<double>(ii)};
-    double timeStop_s{col_stop->cell<double>(ii)};
+    double timeStart_s{col_start->toDouble(ii)};
+    double timeStop_s{col_stop->toDouble(ii)};
     if (timeStart_s < 0 || timeStop_s < 0) {
       throw std::runtime_error("All times in TableWorkspace must be >= 0 to construct TimeSplitter.");
     }
@@ -94,15 +101,43 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
     timeStart += offset_ns;
     timeStop += offset_ns;
 
-    // get the target workspace index
-    int target_ws_index = std::stoi(col_target->cell<std::string>(ii));
+    // get the target name; it may or may not represent an integer
+    std::string target_name = col_target->cell<std::string>(ii);
+    // get the target workspace index. If target name represents an integer, that integer automatically becomes the
+    // workspace index. If target name is a non-numeric string, we will assign a unique index to it.
+    try {
+      target_index = std::stoi(target_name);
+      m_name_index_map[target_name] = target_index;
+      m_index_name_map[target_index] = target_name;
+      if (target_index == NO_TARGET)
+        notarget_names_count++;
+    } catch (std::invalid_argument &) // a non-integer string
+    {
+      noninteger_target_names_count++;
+
+      if (m_name_index_map.count(target_name) == 0) {
+        target_index = max_target_index;
+        m_name_index_map[target_name] = target_index;
+        m_index_name_map[target_index] = target_name;
+        max_target_index++;
+      } else {
+        target_index = m_name_index_map[target_name];
+        assert(m_index_name_map[target_index] == target_name);
+      }
+    }
 
     // if this row's time interval intersects an interval already in the splitter, no separate ROI will be created
-    if ((target_ws_index != NO_TARGET) && (valueAtTime(timeStart) != NO_TARGET || valueAtTime(timeStop) != NO_TARGET)) {
+    if ((target_index != NO_TARGET) && (valueAtTime(timeStart) != NO_TARGET || valueAtTime(timeStop) != NO_TARGET)) {
       g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
     }
 
-    addROI(timeStart, timeStop, target_ws_index);
+    addROI(timeStart, timeStop, target_index);
+  }
+
+  // Verify that the input target names are either all numeric or all non-numeric. The exception is a name "-1", i.e. no
+  // target specified. That name is ok to mix with non-numeric names.
+  if (noninteger_target_names_count != 0 && noninteger_target_names_count != tws->rowCount() - notarget_names_count) {
+    throw std::runtime_error("Valid splitter targets cannot be a mix of numeric and non-numeric names.");
   }
 }
 
@@ -116,7 +151,11 @@ TimeSplitter::TimeSplitter(const SplittersWorkspace_sptr &sws) {
       g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
     }
 
-    addROI(interval.start(), interval.stop(), interval.index());
+    int target_index = interval.index();
+    addROI(interval.start(), interval.stop(), target_index);
+    std::string target_name = std::to_string(target_index);
+    m_name_index_map[target_name] = target_index;
+    m_index_name_map[target_index] = target_name;
   }
 }
 
@@ -129,6 +168,40 @@ std::string TimeSplitter::debugPrint() const {
 }
 
 const std::map<DateAndTime, int> &TimeSplitter::getSplittersMap() const { return m_roi_map; }
+
+// Get the target name from the target index.
+std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const int numericalShift) {
+  if (m_index_name_map.count(workspaceIndex) == 0) {
+    std::stringstream msg;
+    msg << "Invalid target index " << workspaceIndex << " when calling TimeSplitter::getWorkspaceIndexName";
+    throw std::runtime_error(msg.str());
+  }
+
+  std::string target_name = m_index_name_map[workspaceIndex];
+
+  // If numericalShift > 0, the caller will get back a shifted index.
+  // This is needed for supporting FilterEvents property OutputWorkspaceIndexedFrom1.
+  assert(numericalShift >= 0);
+  if (numericalShift > 0) {
+    // If this TimeSplitter was built from a TableWorkspace, targets could be non-numeric, in which case a numeric
+    // shift wouldn't make sense.
+    int target_index;
+    try {
+      target_index = std::stoi(target_name);
+    } catch (std::invalid_argument &) // a non-integer string
+    {
+      throw std::runtime_error(
+          "FilterEvents property \"OutputWorkspaceIndexedFrom1\" is not compatible with non-numeric targets.");
+    }
+
+    assert(target_index == m_name_index_map[target_name]);
+    std::stringstream s;
+    s << target_index + numericalShift;
+    return s.str();
+  }
+
+  return target_name;
+}
 
 void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, const int value) {
   assertIncreasing(start, stop);
@@ -234,9 +307,9 @@ int TimeSplitter::valueAtTime(const DateAndTime &time) const {
 }
 
 /**
- * Return a sorted vector of the output workspace indices
+ * Return a set of the output workspace indices
  */
-std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
+std::set<int> TimeSplitter::outputWorkspaceIndices() const {
   // sets have unique values and are sorted
   std::set<int> outputSet;
 
@@ -246,8 +319,7 @@ std::vector<int> TimeSplitter::outputWorkspaceIndices() const {
       outputSet.insert(iter.second);
   }
 
-  // return a vector
-  return std::vector<int>(outputSet.begin(), outputSet.end());
+  return outputSet;
 }
 
 /**
@@ -288,6 +360,23 @@ TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
   return output;
 }
 
+/**
+ * Cast to a vector of SplittingInterval objects
+ */
+SplittingIntervalVec TimeSplitter::toSplitters(const bool includeNoTarget) const {
+  std::vector<SplittingInterval> output;
+  if (this->empty())
+    return output;
+  auto startIt = m_roi_map.begin();
+  while (std::next(startIt) != m_roi_map.end()) {
+    /// invoke constructor SplittingInterval(DateAndTime &start, DateAndTime &stop, int index)
+    if (includeNoTarget || startIt->second != NO_TARGET)
+      output.push_back({startIt->first, std::next(startIt)->first, startIt->second});
+    std::advance(startIt, 1);
+  }
+  return output;
+}
+
 std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
 
 // ------------------------------------------------------------------------
@@ -306,7 +395,7 @@ std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
  * @param shift : shift the TOF values after rescaling, in units of microseconds.
  * @throws invalid_argument : the event list is of type Mantid::API::EventType::WEIGHTED_NOTIME
  */
-void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventList *> partials, bool pulseTof,
+void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventList *> &partials, bool pulseTof,
                                   bool tofCorrect, double factor, double shift) const {
 
   if (events.getEventType() == EventType::WEIGHTED_NOTIME)
@@ -358,13 +447,13 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
  *
  * @tparam EVENTTYPE : one of EventType::TOF or EventType::WEIGHTED
  * @param times : times associated to the events, used to find the destination index
- * @param events : list of input times
+ * @param events : list of input events
  * @param partials : target list of partial event lists, associated to the different destination indexes
  * @throws : if the size of times and events are different
  */
 template <typename EVENTTYPE>
 void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const std::vector<EVENTTYPE> &events,
-                                 std::map<int, EventList *> partials) const {
+                                 std::map<int, EventList *> &partials) const {
   if (times.size() != events.size())
     throw std::invalid_argument("Vector of event times and vector of events have different size");
   // initialize the iterator over the splitter
@@ -381,22 +470,24 @@ void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const st
   auto itTime = times.cbegin();   // initialize iterator over times
   auto itEvent = events.cbegin(); // initialize iterator over the events
 
-  // iterate over all events. It is assumed events are sorted by either pulse time or tof
+  // iterate over all events. For each event try finding its destination event list, a.k.a. partial.
+  // If the partial is found, append the event to it. It is assumed events are sorted by either pulse time or tof
   while (itEvent != events.cend()) {
     // Check if we need to advance the splitter and therefore select a different partial event list
     if (*itTime >= stop) {
-      // update the partial event list with the destination index of the stopping boundary
-      destination = itSplitter->second;
+      // advance to the new stopping boundary, and find the new destination index
+      while (*itTime >= stop) {
+        destination = itSplitter->second;
+        itSplitter++;
+        if (itSplitter == m_roi_map.cend())
+          stop = DateAndTime::maximum(); // a.k.a stopping boundary at an "infinite" time
+        else
+          stop = itSplitter->first;
+      }
       if (partials.find(destination) == partials.cend())
         partial = nullptr;
       else
         partial = partials[destination];
-      // update the stopping boundary
-      itSplitter++;
-      if (itSplitter == m_roi_map.cend())
-        stop = DateAndTime::maximum(); // a.k.a stopping boundary at an "infinite" time
-      else
-        stop = itSplitter->first;
     }
     if (partial) {
       partial->addEventQuickly(*itEvent); // emplaces a copy of *itEvent in partial

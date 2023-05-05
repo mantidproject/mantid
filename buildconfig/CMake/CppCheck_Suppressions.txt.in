@@ -128,9 +128,9 @@ funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataOb
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1209
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1218
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/WideIntImpl.h:1227
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:310
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:961
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1057
+operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:309
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:960
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1056
 redundantPointerOp:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDGridBox.tcc:755
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:686
 invalidContainer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/Acomp.cpp:495

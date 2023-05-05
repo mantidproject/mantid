@@ -190,7 +190,7 @@ bool LogManager::hasEndTime() const { return hasProperty(END_TIME_NAME) || hasPr
  */
 void LogManager::filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop) {
   this->setTimeROI(TimeROI(start, stop));
-  this->removeDataOutsideTimeROI(*m_timeroi);
+  this->removeDataOutsideTimeROI();
 }
 
 /**
@@ -201,21 +201,37 @@ void LogManager::filterByTime(const Types::Core::DateAndTime start, const Types:
  * @param timeROI :: a series of time regions used to determine which time series values should be included in the copy.
  */
 LogManager *LogManager::cloneInTimeROI(const Kernel::TimeROI &timeROI) {
-  LogManager *logMgr = new LogManager();
-  logMgr->m_manager = std::make_unique<Kernel::PropertyManager>(*m_manager->cloneInTimeROI(timeROI));
-  logMgr->m_timeroi = std::make_unique<Kernel::TimeROI>(*m_timeroi),
-  logMgr->m_singleValueCache =
-      std::make_unique<Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>, double>>(*m_singleValueCache);
-  return logMgr;
+  LogManager *newMgr = new LogManager();
+  newMgr->m_manager = std::unique_ptr<PropertyManager>(m_manager->cloneInTimeROI(timeROI));
+
+  // This LogManager object may have filtered some data previously, in which case it would be holding the TimeROI used.
+  // Therefore, the cloned object's TimeROI should be an intersection of the input TimeROI with the one being held.
+  TimeROI outputTimeROI(timeROI);
+  outputTimeROI.update_or_replace_intersection(*m_timeroi);
+  newMgr->m_timeroi = std::make_unique<Kernel::TimeROI>(outputTimeROI);
+
+  return newMgr;
 }
 
 /**
- * For time series properties, remove time values outside of TimeROI regions, each defined as [roi_start,roi_stop).
- * However, keep the values immediately before and after each ROI region, if available.
- * @param timeROI :: a series of time regions used to determine which values to remove or to keep
+ * Copy properties from another LogManager object. Filter copied time series properties according to the input TimeROI.
+ * @param other :: another LogManager object.
+ * @param timeROI :: a series of time regions used to determine which time series values should be included in the copy.
  */
-void LogManager::removeDataOutsideTimeROI(const Kernel::TimeROI &timeROI) {
-  m_manager->removeDataOutsideTimeROI(timeROI);
+void LogManager::copyAndFilterProperties(const LogManager &other, const Kernel::TimeROI &timeROI) {
+  this->m_manager = std::unique_ptr<PropertyManager>(other.m_manager->cloneInTimeROI(timeROI));
+  this->setTimeROI(timeROI);
+  this->clearSingleValueCache();
+}
+
+/**
+ * For time series properties, remove time values outside of this object's TimeROI.
+ * Each TimeROI region is defined as [roi_start,roi_stop). However, keep the values
+ * immediately before and after each timeROI region, if available.
+ */
+void LogManager::removeDataOutsideTimeROI() {
+  m_manager->removeDataOutsideTimeROI(*m_timeroi);
+  this->clearSingleValueCache();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -474,7 +490,7 @@ const Kernel::TimeROI &LogManager::getTimeROI() const { return *(m_timeroi.get()
 
 void LogManager::setTimeROI(const Kernel::TimeROI &timeroi) {
   m_timeroi->replaceROI(timeroi);
-  clearSingleValueCache();
+  this->clearSingleValueCache();
 }
 
 //--------------------------------------------------------------------------------------------
