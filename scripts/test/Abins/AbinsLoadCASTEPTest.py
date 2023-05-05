@@ -13,15 +13,10 @@ from abins.input import CASTEPLoader
 
 
 class LoadCastepUsingEuphonicTest(unittest.TestCase):
-    try:
-        from euphonic import QpointPhononModes
+    from euphonic import QpointPhononModes
 
-        from_castep = Mock(wraps=QpointPhononModes.from_castep)
-        euphonic_available = True
-    except ModuleNotFoundError:
-        euphonic_available = False
+    from_castep = Mock(wraps=QpointPhononModes.from_castep)
 
-    @unittest.skipUnless(euphonic_available, "Euphonic library could not be imported")
     @patch("euphonic.QpointPhononModes.from_castep")
     def test_euphonic_castep_call(self, from_castep):
         # We mostly trust Euphonic to read the file, so just check the right
@@ -59,7 +54,7 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
     _gamma_sum = "squaricn_sum_LoadCASTEP"
 
     def test_gamma_sum_correction(self):
-        self.check(name=self._gamma_sum, loader=CASTEPLoader, use_euphonic=False)
+        self.check(name=self._gamma_sum, loader=CASTEPLoader)
 
     # ===================================================================================
     # |     Use case: Gamma point calculation and no sum correction for Gamma point     |
@@ -67,7 +62,7 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
     _gamma_no_sum = "squaricn_no_sum_LoadCASTEP"
 
     def test_gamma_no_sum_correction(self):
-        self.check(name=self._gamma_no_sum, loader=CASTEPLoader, use_euphonic=False)
+        self.check(name=self._gamma_no_sum, loader=CASTEPLoader)
 
     # ===================================================================================
     # | Use case: more than one k-point and sum correction                              |
@@ -75,7 +70,7 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
     _many_k_sum = "Si2-phonon_LoadCASTEP"
 
     def test_sum_correction_single_crystal(self):
-        self.check(name=self._many_k_sum, loader=CASTEPLoader, use_euphonic=False)
+        self.check(name=self._many_k_sum, loader=CASTEPLoader)
 
     # ===================================================================================
     # |   Use case: more than one k-point without sum correction                        |
@@ -84,7 +79,7 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
     _many_k_no_sum = "Si2-sc_LoadCASTEP"
 
     def test_no_sum_correction_single_crystal(self):
-        self.check(name=self._many_k_no_sum, loader=CASTEPLoader, use_euphonic=False)
+        self.check(name=self._many_k_no_sum, loader=CASTEPLoader)
 
     # ===================================================================================
     # |   Use case: system with isotope Li7 and D                                       |
@@ -93,7 +88,7 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
     _li7_d2 = "LiOH_H2O_7Li_2D2O_LoadCASTEP"
 
     def test_isotopes(self):
-        self.check(name=self._li7_d2, loader=CASTEPLoader, use_euphonic=False)
+        self.check(name=self._li7_d2, loader=CASTEPLoader)
 
 
 if __name__ == "__main__":
