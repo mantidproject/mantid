@@ -14,6 +14,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -126,6 +127,26 @@ void loadLogs(H5::Group &entry, const Mantid::API::MatrixWorkspace_sptr &workspa
   if (!title.empty()) {
     workspace->setTitle(title);
   }
+}
+
+// ----- SAMPLE
+
+void loadSample(H5::Group &entry, const Mantid::API::MatrixWorkspace_sptr &workspace) {
+  auto &&sample = workspace->mutableSample();
+
+  // Load UserFile and BatchFile (optional)
+  auto &&sourceGroup = entry.openGroup(sasInstrumentSourceGroupName);
+  auto &&height = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(sourceGroup, sasInstrumentSourceBeamHeight);
+  auto &&width = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(sourceGroup, sasInstrumentSourceBeamWidth);
+  auto &&geometry = Mantid::DataHandling::H5Util::readArray1DCoerce<int>(sourceGroup, sasInstrumentSourceBeamShape);
+
+  auto &&sampleGroup = entry.openGroup(sasInstrumentSampleClassAttr);
+  auto &&thickness = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(sampleGroup, sasInstrumentSampleThickness);
+
+  sample.setHeight(height.front());
+  sample.setWidth(width.front());
+  sample.setGeometryFlag(geometry.front());
+  sample.setThickness(thickness.front());
 }
 
 // ----- INSTRUMENT
@@ -509,6 +530,10 @@ void LoadNXcanSAS::exec() {
   // Load the logs
   progress.report("Loading logs.");
   loadLogs(entry, ws);
+
+  // Load sample info
+  progress.report("Loading sample.");
+  loadSample(entry, ws);
 
   // Load instrument
   progress.report("Loading instrument.");

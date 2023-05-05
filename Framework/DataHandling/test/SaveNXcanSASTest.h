@@ -422,7 +422,7 @@ private:
     TSM_ASSERT_EQUALS("The title should have been stored as the workspace name.", titleValue, title);
   }
 
-  void do_assert_source(H5::Group &source, const std::string &radiationSource, const std::string &beamShape,
+  void do_assert_source(H5::Group &source, const std::string &radiationSource, const int &beamShape,
                         const double &beamHeight, const double &beamWidth) {
 
     auto numAttributes = source.getNumAttrs();
@@ -441,8 +441,8 @@ private:
 
     // beam_shape data set
     auto beamShapeDataSet = source.openDataSet(sasInstrumentSourceBeamShape);
-    auto beamShapeValue = Mantid::DataHandling::H5Util::readString(beamShapeDataSet);
-    TSM_ASSERT_EQUALS("Beam Shapes should match.", beamShapeValue, beamShape);
+    auto beamShapeValue = Mantid::DataHandling::H5Util::readArray1DCoerce<int>(beamShapeDataSet);
+    TSM_ASSERT_EQUALS("Beam Shapes should match.", beamShapeValue[0], beamShape);
 
     // beam_height data set
     auto beamHeightDataSet = source.openDataSet(sasInstrumentSourceBeamHeight);
@@ -497,7 +497,7 @@ private:
   }
 
   void do_assert_instrument(H5::Group &instrument, const std::string &instrumentName, const std::string &idf,
-                            const std::string &radiationSource, const std::string &geometry, const double &beamHeight,
+                            const std::string &radiationSource, const int &geometry, const double &beamHeight,
                             const double &beamWidth, const std::vector<std::string> &detectors, bool invalidDetectors) {
     auto numAttributes = instrument.getNumAttrs();
     TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);

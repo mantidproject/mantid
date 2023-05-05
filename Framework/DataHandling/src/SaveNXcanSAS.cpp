@@ -18,6 +18,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MDUnit.h"
@@ -237,7 +238,7 @@ void addDetectors(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wor
  * @param detectorNames: the names of the detectors to store
  */
 void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
-                   const std::string &radiationSource, const std::string &geometry, double beamHeight, double beamWidth,
+                   const std::string &radiationSource, const int &geometry, double beamHeight, double beamWidth,
                    const std::vector<std::string> &detectorNames) {
   // Setup instrument
   const std::string sasInstrumentNameForGroup = sasInstrumentGroupName;
@@ -254,7 +255,8 @@ void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wo
   auto source = Mantid::DataHandling::H5Util::createGroupCanSAS(instrument, sasSourceName, nxInstrumentSourceClassAttr,
                                                                 sasInstrumentSourceClassAttr);
   Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceRadiation, radiationSource);
-  Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceBeamShape, geometry);
+  Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(source, sasInstrumentSourceBeamShape, geometry,
+                                                                    std::map<std::string, std::string>());
 
   std::map<std::string, std::string> beamSizeAttrs;
   beamSizeAttrs.insert(std::make_pair(sasUnitAttr, sasBeamAndSampleSizeUnitAttrValue));
@@ -765,8 +767,7 @@ void SaveNXcanSAS::init() {
                                             "electron"};
   declareProperty("RadiationSource", "Spallation Neutron Source",
                   std::make_shared<Kernel::StringListValidator>(radiation_source), "The type of radiation used.");
-  std::vector<std::string> geometry{"Cylinder", "Flat plate", "Disc"};
-  declareProperty("Geometry", "Disc", std::make_shared<Kernel::StringListValidator>(geometry),
+  declareProperty("Geometry", 0, std::make_shared<Kernel::BoundedValidator<int>>(0, 3),
                   "The geometry type of the collimation.");
   declareProperty("SampleHeight", 0.0,
                   "The height of the collimation element in mm. If specified as 0 it will not be recorded.");
@@ -834,7 +835,7 @@ void SaveNXcanSAS::exec() {
   std::string filename = getPropertyValue("Filename");
 
   std::string radiationSource = getPropertyValue("RadiationSource");
-  std::string geometry = getPropertyValue("Geometry");
+  int geometry = getProperty("Geometry");
   double beamHeight = getProperty("SampleHeight");
   double beamWidth = getProperty("SampleWidth");
   std::string detectorNames = getPropertyValue("DetectorNames");
