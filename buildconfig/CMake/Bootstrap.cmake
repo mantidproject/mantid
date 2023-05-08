@@ -81,7 +81,11 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 if(_result EQUAL 0)
-  set(Python_SITELIB_RELPATH ${_output})
+  if(WIN32)
+    set(Python_SITELIB_RELPATH "..\\${_output}")
+  else()
+    set(Python_SITELIB_RELPATH ${_output})
+  endif()
   include(CMakePrintHelpers)
   message("### Python_SITELIB_RELPATH:")
   cmake_print_variables(Python_SITELIB_RELPATH)
