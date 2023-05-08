@@ -16,6 +16,7 @@
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -118,16 +119,17 @@ public:
    */
   void test_focusedInstrument() {
     const std::string WS_IN("SNAP_Scratch");
+    const std::string IDF_FILE("SNAP_Definition.xml");
 
     // Create empty instrument
-    LoadEmptyInstrument loader;
-    loader.initialize();
+    LoadEmptyInstrument loadEmptyInstr;
+    loadEmptyInstr.initialize();
     // Use instrument valid starting 2018-05-01
-    loader.setProperty("Filename", "SNAP_Definition.xml");
-    loader.setProperty("OutputWorkspace", WS_IN);
+    loadEmptyInstr.setProperty("Filename", IDF_FILE);
+    loadEmptyInstr.setProperty("OutputWorkspace", WS_IN);
 
-    loader.execute();
-    if (!loader.isExecuted())
+    loadEmptyInstr.execute();
+    if (!loadEmptyInstr.isExecuted())
       throw std::runtime_error("Failed to execute LoadEmptyInstrument");
 
     // add logs - values taken from SNAP_57514
@@ -143,11 +145,22 @@ public:
       len2->addValue(DateAndTime(0), 0.043);
 
       MatrixWorkspace_sptr wsIn =
-          std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_Scratch"));
+          std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(WS_IN));
       wsIn->mutableRun().addProperty(ang1);
       wsIn->mutableRun().addProperty(ang2);
       wsIn->mutableRun().addProperty(len1);
       wsIn->mutableRun().addProperty(len2);
+
+      // reload instrument so the logs are used
+      LoadInstrument loadInstr;
+      loadInstr.initialize();
+      loadInstr.setProperty("Workspace", WS_IN);
+      loadInstr.setProperty("Filename", IDF_FILE);
+      loadInstr.setProperty("MonitorList", "-2--1");
+      loadInstr.setProperty("RewriteSpectraMap", "False");
+      loadInstr.execute();
+      if (!loadInstr.isExecuted())
+        throw std::runtime_error("Failed to execute LoadInstrument");
 
       // set the units so DiffractionFocussing will do its job
       auto xAxis = wsIn->getAxis(0);
@@ -193,12 +206,12 @@ public:
 
     // observed values as observed by Guthrie fitting gaussians and dividing observed width by position
     TS_ASSERT_EQUALS(wsOut->getNumberHistograms(), 6);
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 0.0026, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(1)[0], 0.0032, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(2)[0], 0.0039, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(3)[0], 0.0041, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(4)[0], 0.0054, 0.0001);
-    TS_ASSERT_DELTA(wsOut->readY(5)[0], 0.0071, 0.0001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 0.0026, 0.0001); // 0.0027
+    TS_ASSERT_DELTA(wsOut->readY(1)[0], 0.0032, 0.0001); // 0.0032
+    TS_ASSERT_DELTA(wsOut->readY(2)[0], 0.0039, 0.0001); // 0.0030
+    TS_ASSERT_DELTA(wsOut->readY(3)[0], 0.0041, 0.0001); // 0.0042
+    TS_ASSERT_DELTA(wsOut->readY(4)[0], 0.0054, 0.0001); // 0.0053
+    TS_ASSERT_DELTA(wsOut->readY(5)[0], 0.0071, 0.0001); // 0.0072
   }
 
   /** Create an instrument
