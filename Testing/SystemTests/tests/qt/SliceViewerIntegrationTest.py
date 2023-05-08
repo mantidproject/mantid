@@ -28,7 +28,7 @@ from mantid.simpleapi import (
     SetUB,
     RenameWorkspace,
     ClearUB,
-    LoadMD,
+    Load,
 )
 from mantid.api import AnalysisDataService
 from mantidqt.utils.qt.testing import get_application
@@ -593,7 +593,7 @@ class SliceViewerTestAxesLimitsRespectNonorthogonalTransform(systemtesting.Manti
 class SliceViewerTestLoadMD(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-        ws = LoadMD("MDNormHYSPEC.nxs")
+        ws = Load("MDNormHYSPEC.nxs")
         pres = SliceViewer(ws)
         self.assertAlmostEqual(pres.get_proj_matrix().flatten().tolist(), [1, 0, 0, 0, 1, 0, 0, 0, 1])
         pres.view.close()
