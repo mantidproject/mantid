@@ -81,7 +81,11 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 if(_result EQUAL 0)
-  set(Python_SITELIB_RELPATH ${_output})
+  if(WIN32)
+    set(Python_SITELIB_RELPATH "..\\${_output}")
+  else()
+    set(Python_SITELIB_RELPATH ${_output})
+  endif()
 else()
   message(FATAL_ERROR "Error determining Python site packages location: ${_error}")
 endif()
