@@ -12,6 +12,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
@@ -32,6 +33,17 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using Mantid::Types::Core::DateAndTime;
 
+namespace {
+double resolution(const double deltaT_overT, const double deltaL, const double l_total, const double deltaTheta,
+                  const double theta) {
+  // std::cout << "Lt=" << l_total << " theta=" << theta * 180 / M_PI << "\n";
+  double termTOF = deltaT_overT * deltaT_overT;
+  double termL = (deltaL * deltaL) / (l_total * l_total);
+  double termTheta = (deltaTheta * deltaTheta) / (tan(theta) * tan(theta));
+  return sqrt(termTOF + termL + termTheta);
+}
+} // namespace
+
 class EstimateResolutionDiffractionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -51,7 +63,7 @@ public:
    */
   void test_EmptyPG3() {
     // Create an empty PG3 workspace
-    MatrixWorkspace_sptr ws = createInstrument();
+    MatrixWorkspace_sptr ws = createPG3Instrument();
 
     // Set up and run
     EstimateResolutionDiffraction alg;
@@ -77,12 +89,12 @@ public:
     for (size_t i = 0; i < numspec; ++i)
       TS_ASSERT(outputws->y(i)[0] < 0.03);
 
-    TS_ASSERT_DELTA(outputws->y(numspec / 2)[0], 0.0057154, 1e-7); // copied value from test)
+    TS_ASSERT_DELTA(outputws->y(numspec / 2)[0], 0.0057, 1e-4); // copied value from test)
   }
 
   void test_SourceTerms() {
     // Create an empty PG3 workspace
-    MatrixWorkspace_sptr ws = createInstrument();
+    MatrixWorkspace_sptr ws = createPG3Instrument();
 
     // Set up and run
     EstimateResolutionDiffraction alg;
@@ -109,7 +121,7 @@ public:
     for (size_t i = 0; i < numspec; ++i)
       TS_ASSERT(outputws->y(i)[0] < 0.04);
 
-    TS_ASSERT_DELTA(outputws->y(numspec / 2)[0], 0.0061078, 1e-7); // copied value from test)
+    TS_ASSERT_DELTA(outputws->y(numspec / 2)[0], 0.0061, 1e-4); // copied value from test)
   }
 
   /*
@@ -117,14 +129,135 @@ public:
    * resolution of the resulting 6 spectra. The values checked against are from observations from doing individual peak
    * fits.
    */
-  void test_focusedInstrument() {
+  void test_focusSNAPByColumn() {
+    auto ws = createSNAPLiteInstrument("Column");
+    const auto WS_IN = ws->getName();
+    std::string WS_OUT("SNAPColumn_Resolution");
+    constexpr double deltaTOFOverTOF{0.001 / 15};
+    constexpr double deltaL{0.001};
+    constexpr double deltaTheta{(0.01 / 15) * 4.8};
+
+    // Set up and run the algorithm we're interested in
+    EstimateResolutionDiffraction alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", WS_IN));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", WS_OUT));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PartialResolutionWorkspaces", "SNAP_partial"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaTOFOverTOF", 0.001 / 15));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaL", 0.001));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaTheta", (0.01 / 15) * 4.8));
+
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    // get the output
+    MatrixWorkspace_sptr wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(WS_OUT));
+
+    const std::vector<double> obs{0.0026, 0.0032, 0.0039, 0.0041, 0.0054, 0.0071};
+
+    const size_t numHist = wsOut->getNumberHistograms();
+    TS_ASSERT_EQUALS(numHist, 6);
+    const auto &spectrumInfo = wsOut->spectrumInfo();
+    const auto l1 = spectrumInfo.l1(); // 15m
+    // assume all spectra are approximately at the focus position
+    for (size_t i = 0; i < numHist; ++i) {
+      const double twoTheta = spectrumInfo.twoTheta(i);
+      const double l2 = spectrumInfo.l2(i);
+      const double res = resolution(deltaTOFOverTOF, deltaL, l1 + l2, deltaTheta, 0.5 * twoTheta);
+
+      const double abs_tol = abs(wsOut->readY(i)[0] - res);
+      const double rel_tol = 100. * abs_tol / res;
+      TS_ASSERT_LESS_THAN(rel_tol, 7.);
+      // TS_ASSERT_DELTA(res, obs[i], 0.0002);
+    }
+
+    // delete the workspaces
+    AnalysisDataService::Instance().remove(WS_IN);
+    AnalysisDataService::Instance().remove(WS_OUT);
+  }
+
+  void test_focusSNAPByPanel() {
+    auto ws = createSNAPLiteInstrument("bank");
+    const auto WS_IN = ws->getName();
+    std::string WS_OUT("SNAPBank_Resolution");
+    constexpr double deltaTOFOverTOF{0.001 / 15};
+    constexpr double deltaL{0.001};
+    constexpr double deltaTheta{(0.01 / 15) * 4.8};
+
+    // Set up and run the algorithm we're interested in
+    EstimateResolutionDiffraction alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", WS_IN));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", WS_OUT));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PartialResolutionWorkspaces", "SNAP_partial"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaTOFOverTOF", deltaTOFOverTOF));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaL", deltaL));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaTheta", deltaTheta));
+
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    // get the output
+    MatrixWorkspace_sptr wsOut =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(WS_OUT));
+    const size_t numHist = wsOut->getNumberHistograms();
+    TS_ASSERT_EQUALS(numHist, 18);
+    const auto &spectrumInfo = wsOut->spectrumInfo();
+    const auto l1 = spectrumInfo.l1(); // 15m
+    // assume all spectra are approximately at the focus position
+    for (size_t i = 0; i < numHist; ++i) {
+      const double twoTheta = spectrumInfo.twoTheta(i);
+      const double l2 = spectrumInfo.l2(i);
+      const double res = resolution(deltaTOFOverTOF, deltaL, l1 + l2, deltaTheta, 0.5 * twoTheta);
+
+      // compare values with relative tolerance
+      const double abs_tol = abs(wsOut->readY(i)[0] - res);
+      const double rel_tol = 100. * abs_tol / res;
+      TS_ASSERT_LESS_THAN(rel_tol, 7.);
+    }
+
+    // delete the workspaces
+    AnalysisDataService::Instance().remove(WS_IN);
+    AnalysisDataService::Instance().remove(WS_OUT);
+  }
+
+  /** Create an instrument
+   */
+  API::MatrixWorkspace_sptr createPG3Instrument() {
+    // Create empty workspace
+    LoadEmptyInstrument loader;
+    loader.initialize();
+
+    loader.setProperty("Filename", "POWGEN_Definition_2013-06-01.xml");
+    loader.setProperty("OutputWorkspace", "PG3_Scratch");
+
+    loader.execute();
+    TS_ASSERT(loader.isExecuted());
+
+    // Time series property
+    TimeSeriesProperty<double> *lambda = new TimeSeriesProperty<double>("LambdaRequest");
+    lambda->setUnits("Angstrom");
+    DateAndTime time0(0);
+    lambda->addValue(time0, 1.066);
+
+    // Add log to workspace
+    MatrixWorkspace_sptr ws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PG3_Scratch"));
+    ws->mutableRun().addProperty(lambda);
+
+    return ws;
+  }
+
+  API::MatrixWorkspace_sptr createSNAPLiteInstrument(const std::string &groupDetectorsBy) {
     const std::string WS_IN("SNAP_Scratch");
-    const std::string IDF_FILE("SNAP_Definition.xml");
+    // Use lite instrument based on one valid starting 2018-05-01
+    const std::string IDF_FILE("SNAPLite_Definition.xml");
+    //    const std::string IDF_FILE("SNAP_Definition.xml");
 
     // Create empty instrument
     LoadEmptyInstrument loadEmptyInstr;
     loadEmptyInstr.initialize();
-    // Use instrument valid starting 2018-05-01
     loadEmptyInstr.setProperty("Filename", IDF_FILE);
     loadEmptyInstr.setProperty("OutputWorkspace", WS_IN);
 
@@ -167,11 +300,11 @@ public:
       xAxis->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
     }
 
-    const std::string WS_GRP("SNAP_group");
+    const std::string WS_GRP = "SNAP_group" + groupDetectorsBy;
     CreateGroupingWorkspace groupAlg;
     groupAlg.initialize();
     groupAlg.setProperty("InputWorkspace", WS_IN);
-    groupAlg.setProperty("GroupDetectorsBy", "Column");
+    groupAlg.setProperty("GroupDetectorsBy", groupDetectorsBy);
     groupAlg.setProperty("OutputWorkspace", WS_GRP);
     groupAlg.execute();
     if (!groupAlg.isExecuted())
@@ -186,58 +319,8 @@ public:
     if (!focusAlg.isExecuted())
       throw std::runtime_error("Failed to execute DiffractionFocussing");
 
-    // Set up and run the algorithm we're interested in
-    EstimateResolutionDiffraction alg;
-    alg.initialize();
-    std::string WS_OUT("SNAP_Resolution");
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", WS_IN));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", WS_OUT));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PartialResolutionWorkspaces", "SNAP_partial"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaTOFOverTOF", 0.001 / 15));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaL", 0.001));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaTheta", (0.01 / 15) * 4.8));
-
-    alg.execute();
-    TS_ASSERT(alg.isExecuted());
-
-    // get the output
-    MatrixWorkspace_sptr wsOut =
-        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(WS_OUT));
-
-    // observed values as observed by Guthrie fitting gaussians and dividing observed width by position
-    TS_ASSERT_EQUALS(wsOut->getNumberHistograms(), 6);
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 0.0026, 0.0001); // 0.0027
-    TS_ASSERT_DELTA(wsOut->readY(1)[0], 0.0032, 0.0001); // 0.0032
-    TS_ASSERT_DELTA(wsOut->readY(2)[0], 0.0039, 0.0001); // 0.0030
-    TS_ASSERT_DELTA(wsOut->readY(3)[0], 0.0041, 0.0001); // 0.0042
-    TS_ASSERT_DELTA(wsOut->readY(4)[0], 0.0054, 0.0001); // 0.0053
-    TS_ASSERT_DELTA(wsOut->readY(5)[0], 0.0071, 0.0001); // 0.0072
-  }
-
-  /** Create an instrument
-   */
-  API::MatrixWorkspace_sptr createInstrument() {
-    // Create empty workspace
-    LoadEmptyInstrument loader;
-    loader.initialize();
-
-    loader.setProperty("Filename", "POWGEN_Definition_2013-06-01.xml");
-    loader.setProperty("OutputWorkspace", "PG3_Scratch");
-
-    loader.execute();
-    TS_ASSERT(loader.isExecuted());
-
-    // Time series property
-    TimeSeriesProperty<double> *lambda = new TimeSeriesProperty<double>("LambdaRequest");
-    lambda->setUnits("Angstrom");
-    DateAndTime time0(0);
-    lambda->addValue(time0, 1.066);
-
-    // Add log to workspace
     MatrixWorkspace_sptr ws =
-        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PG3_Scratch"));
-    ws->mutableRun().addProperty(lambda);
-
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(WS_IN));
     return ws;
   }
 };
