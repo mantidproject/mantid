@@ -12,6 +12,7 @@ import mantid.simpleapi as mantid
 from mantid import config
 
 from isis_powder.osiris import Osiris
+from isis_powder.routines.sample_details import SampleDetails
 
 DIRS = config["datasearch.directories"].split(";")
 
@@ -47,6 +48,13 @@ def run_diffraction_focusing(
     merge_drange=False,
     subtract_empty_can=False,
     vanadium_normalisation=False,
+    sample_empty_scale=None,
+    absorb_corrections=False,
+    empty_can_subtraction_method="Simple",
+    sample_details=None,
+    vanadium_normalization_cutoff=None,
+    paalman_pings_events_per_point=None,
+    simple_events_per_point=None,
 ):
     sample_runs = sample_runs  # Choose full drange set in the cycle 1_1
 
@@ -57,13 +65,21 @@ def run_diffraction_focusing(
         subtract_empty_can=subtract_empty_can,
     )
 
+    if sample_details:
+        osiris_inst_obj.set_sample_details(sample=sample_details)
+
     # Run diffraction focusing
     osiris_inst_obj.focus(
         run_number=sample_runs,
         merge_drange=merge_drange,
         subtract_empty_can=subtract_empty_can,
         vanadium_normalisation=vanadium_normalisation,
-        absorb_corrections=False,
+        sample_empty_scale=sample_empty_scale,
+        absorb_corrections=absorb_corrections,
+        empty_can_subtraction_method=empty_can_subtraction_method,
+        vanadium_normalization_cutoff=vanadium_normalization_cutoff,
+        paalman_pings_events_per_point=paalman_pings_events_per_point,
+        simple_events_per_point=simple_events_per_point,
     )
 
     focussed_rel_path = os.path.join("1_1", user_name, output_file)
@@ -101,7 +117,6 @@ def _try_delete(path):
 
 
 class OSIRISDiffractionFocusingWithSubtractionTest(systemtesting.MantidSystemTest):
-    calibration_results = None
     existing_config = config["datasearch.directories"]
 
     def requiredFiles(self):
@@ -109,7 +124,7 @@ class OSIRISDiffractionFocusingWithSubtractionTest(systemtesting.MantidSystemTes
 
     def runTest(self):
         setup_mantid_paths()
-        self.calibration_results = run_diffraction_focusing(
+        self.results = run_diffraction_focusing(
             "119977",
             "Test",
             "OSI119977_d_spacing.nxs",
@@ -117,7 +132,7 @@ class OSIRISDiffractionFocusingWithSubtractionTest(systemtesting.MantidSystemTes
         )
 
     def validate(self):
-        foccussed_ws = self.calibration_results
+        foccussed_ws = self.results
         return (foccussed_ws.name(), "OSI119977_d_spacing.nxs")
 
     def cleanup(self):
@@ -146,7 +161,7 @@ class OSIRISDiffractionFocusingWithMergingTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         setup_mantid_paths()
-        self.calibration_results = run_diffraction_focusing(
+        self.results = run_diffraction_focusing(
             "119977-119978",
             "Test_Merge",
             "OSI119977-119978_d_spacing.nxs",
@@ -154,7 +169,7 @@ class OSIRISDiffractionFocusingWithMergingTest(systemtesting.MantidSystemTest):
         )
 
     def validate(self):
-        foccussed_ws = self.calibration_results
+        foccussed_ws = self.results
         return (foccussed_ws.name(), "OSI119977-119978_d_spacing.nxs")
 
     def cleanup(self):
@@ -172,6 +187,100 @@ class OSIRISDiffractionFocusingWithMergingTest(systemtesting.MantidSystemTest):
             "OSIRIS00119964.nxs",  # van
             "OSIRIS00119977.nxs",
             "OSIRIS00119978.nxs",
+        ]  # sample
+        input_files = [os.path.join(input_dir, file) for file in required_run_files]
+        input_files.append(calibration_map_path)
+        return input_files
+
+
+class OSIRISDiffractionFocusingWithSimpleAbsorptionCorrection(systemtesting.MantidSystemTest):
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return self._gen_required_files()
+
+    def runTest(self):
+        setup_mantid_paths()
+        sample_details = SampleDetails(radius=1.1, height=8, center=[0, 0, 0], shape="cylinder")
+        sample_details.set_material(chemical_formula="Cr2-Ga-N", number_density=10.0)
+        sample_details.set_container(chemical_formula="Al", number_density=2.7, radius=1.2)
+
+        self.results = run_diffraction_focusing(
+            "120032",
+            "Test_Simple_Absorb",
+            "OSI120032_d_spacing.nxs",
+            absorb_corrections=True,
+            empty_can_subtraction_method="Simple",
+            sample_details=sample_details,
+            simple_events_per_point=100,
+            vanadium_normalization_cutoff=100000000,
+        )
+
+    def validate(self):
+        foccussed_ws = self.results
+        return (foccussed_ws.name(), "OSI120032_d_spacing_simple_corrected.nxs")
+
+    def cleanup(self):
+        try:
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config["datasearch.directories"] = self.existing_config
+
+    def _gen_required_files(self):
+        required_run_files = [
+            "OSI82717.nxs",
+            "OSI82718.nxs",  # empty can
+            "OSIRIS00119963.nxs",
+            "OSIRIS00119964.nxs",  # van
+            "OSIRIS00120032.nxs",
+        ]  # sample
+        input_files = [os.path.join(input_dir, file) for file in required_run_files]
+        input_files.append(calibration_map_path)
+        return input_files
+
+
+class OSIRISDiffractionFocusingWithPaalmanPingsAbsorptionCorrection(systemtesting.MantidSystemTest):
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return self._gen_required_files()
+
+    def runTest(self):
+        setup_mantid_paths()
+        sample_details = SampleDetails(radius=1.1, height=8, center=[0, 0, 0], shape="cylinder")
+        sample_details.set_material(chemical_formula="Cr2-Ga-N", number_density=10.0)
+        sample_details.set_container(chemical_formula="Al", number_density=2.7, radius=1.2)
+
+        self.results = run_diffraction_focusing(
+            "120032",
+            "Test_PaalmanPings_Absorb",
+            "OSI120032_d_spacing.nxs",
+            absorb_corrections=True,
+            empty_can_subtraction_method="PaalmanPings",
+            sample_details=sample_details,
+            paalman_pings_events_per_point=100,
+            vanadium_normalization_cutoff=100000000,
+        )
+
+    def validate(self):
+        foccussed_ws = self.results
+        return (foccussed_ws.name(), "OSI120032_d_spacing_paalman_corrected.nxs")
+
+    def cleanup(self):
+        try:
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config["datasearch.directories"] = self.existing_config
+
+    def _gen_required_files(self):
+        required_run_files = [
+            "OSI82717.nxs",
+            "OSI82718.nxs",  # empty can
+            "OSIRIS00119963.nxs",
+            "OSIRIS00119964.nxs",  # van
+            "OSIRIS00120032.nxs",
         ]  # sample
         input_files = [os.path.join(input_dir, file) for file in required_run_files]
         input_files.append(calibration_map_path)
