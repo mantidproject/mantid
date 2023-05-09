@@ -16,6 +16,7 @@
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
+#include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidKernel/DateAndTime.h"
@@ -42,6 +43,10 @@ double resolution(const double deltaT_overT, const double deltaL, const double l
   double termTheta = (deltaTheta * deltaTheta) / (tan(theta) * tan(theta));
   return sqrt(termTOF + termL + termTheta);
 }
+
+constexpr double SNAP_deltaTOFOverTOF{0.002};
+constexpr double SNAP_deltaL{0.001};
+constexpr double SNAP_deltaTheta{(0.01 / 15) * 4.8};
 } // namespace
 
 class EstimateResolutionDiffractionTest : public CxxTest::TestSuite {
@@ -133,9 +138,6 @@ public:
     auto ws = createSNAPLiteInstrument("Column");
     const auto WS_IN = ws->getName();
     std::string WS_OUT("SNAPColumn_Resolution");
-    constexpr double deltaTOFOverTOF{0.001 / 15};
-    constexpr double deltaL{0.001};
-    constexpr double deltaTheta{(0.01 / 15) * 4.8};
 
     // Set up and run the algorithm we're interested in
     EstimateResolutionDiffraction alg;
@@ -143,9 +145,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", WS_IN));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", WS_OUT));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PartialResolutionWorkspaces", "SNAP_partial"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaTOFOverTOF", 0.001 / 15));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaL", 0.001));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaTheta", (0.01 / 15) * 4.8));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaTOFOverTOF", SNAP_deltaTOFOverTOF));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaL", SNAP_deltaL));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaTheta", SNAP_deltaTheta));
 
     alg.execute();
     TS_ASSERT(alg.isExecuted());
@@ -154,22 +156,22 @@ public:
     MatrixWorkspace_sptr wsOut =
         std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(WS_OUT));
 
-    const std::vector<double> obs{0.0026, 0.0032, 0.0039, 0.0041, 0.0054, 0.0071};
+    // these are the relative toleraces that work
+    const std::vector<double> tolerances{3., 2., 4., 4., 2., 6.};
 
     const size_t numHist = wsOut->getNumberHistograms();
-    TS_ASSERT_EQUALS(numHist, 6);
+    TS_ASSERT_EQUALS(numHist, tolerances.size());
     const auto &spectrumInfo = wsOut->spectrumInfo();
     const auto l1 = spectrumInfo.l1(); // 15m
     // assume all spectra are approximately at the focus position
     for (size_t i = 0; i < numHist; ++i) {
       const double twoTheta = spectrumInfo.twoTheta(i);
       const double l2 = spectrumInfo.l2(i);
-      const double res = resolution(deltaTOFOverTOF, deltaL, l1 + l2, deltaTheta, 0.5 * twoTheta);
+      const double res = resolution(SNAP_deltaTOFOverTOF, SNAP_deltaL, l1 + l2, SNAP_deltaTheta, 0.5 * twoTheta);
 
       const double abs_tol = abs(wsOut->readY(i)[0] - res);
       const double rel_tol = 100. * abs_tol / res;
-      TS_ASSERT_LESS_THAN(rel_tol, 7.);
-      // TS_ASSERT_DELTA(res, obs[i], 0.0002);
+      TS_ASSERT_LESS_THAN(rel_tol, tolerances[i]);
     }
 
     // delete the workspaces
@@ -181,9 +183,6 @@ public:
     auto ws = createSNAPLiteInstrument("bank");
     const auto WS_IN = ws->getName();
     std::string WS_OUT("SNAPBank_Resolution");
-    constexpr double deltaTOFOverTOF{0.001 / 15};
-    constexpr double deltaL{0.001};
-    constexpr double deltaTheta{(0.01 / 15) * 4.8};
 
     // Set up and run the algorithm we're interested in
     EstimateResolutionDiffraction alg;
@@ -191,30 +190,33 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", WS_IN));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", WS_OUT));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PartialResolutionWorkspaces", "SNAP_partial"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaTOFOverTOF", deltaTOFOverTOF));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaL", deltaL));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaTheta", deltaTheta));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaTOFOverTOF", SNAP_deltaTOFOverTOF));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaL", SNAP_deltaL));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaTheta", SNAP_deltaTheta));
 
     alg.execute();
     TS_ASSERT(alg.isExecuted());
+
+    // these are the relative toleraces that work
+    const std::vector<double> tolerances{3., 3., 3., 2., 2., 2., 4., 4., 4., 5., 6., 5., 2., 3., 2., 4., 4., 4.};
 
     // get the output
     MatrixWorkspace_sptr wsOut =
         std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(WS_OUT));
     const size_t numHist = wsOut->getNumberHistograms();
-    TS_ASSERT_EQUALS(numHist, 18);
+    TS_ASSERT_EQUALS(numHist, tolerances.size());
     const auto &spectrumInfo = wsOut->spectrumInfo();
     const auto l1 = spectrumInfo.l1(); // 15m
     // assume all spectra are approximately at the focus position
     for (size_t i = 0; i < numHist; ++i) {
       const double twoTheta = spectrumInfo.twoTheta(i);
       const double l2 = spectrumInfo.l2(i);
-      const double res = resolution(deltaTOFOverTOF, deltaL, l1 + l2, deltaTheta, 0.5 * twoTheta);
+      const double res = resolution(SNAP_deltaTOFOverTOF, SNAP_deltaL, l1 + l2, SNAP_deltaTheta, 0.5 * twoTheta);
 
       // compare values with relative tolerance
       const double abs_tol = abs(wsOut->readY(i)[0] - res);
       const double rel_tol = 100. * abs_tol / res;
-      TS_ASSERT_LESS_THAN(rel_tol, 7.);
+      TS_ASSERT_LESS_THAN(rel_tol, tolerances[i]);
     }
 
     // delete the workspaces
@@ -301,14 +303,26 @@ public:
     }
 
     const std::string WS_GRP = "SNAP_group" + groupDetectorsBy;
-    CreateGroupingWorkspace groupAlg;
-    groupAlg.initialize();
-    groupAlg.setProperty("InputWorkspace", WS_IN);
-    groupAlg.setProperty("GroupDetectorsBy", groupDetectorsBy);
-    groupAlg.setProperty("OutputWorkspace", WS_GRP);
-    groupAlg.execute();
-    if (!groupAlg.isExecuted())
-      throw std::runtime_error("Failed to execute CreateGroupingWorkspace");
+    if (groupDetectorsBy == "bank" || groupDetectorsBy == "Column") {
+      CreateGroupingWorkspace groupAlg;
+      groupAlg.initialize();
+      groupAlg.setProperty("InputWorkspace", WS_IN);
+      groupAlg.setProperty("GroupDetectorsBy", groupDetectorsBy);
+      groupAlg.setProperty("OutputWorkspace", WS_GRP);
+      groupAlg.execute();
+      if (!groupAlg.isExecuted())
+        throw std::runtime_error("Failed to execute CreateGroupingWorkspace");
+    } else {
+      // assume groupDetectorsBy is a grouping filename
+      LoadDetectorsGroupingFile groupAlg;
+      groupAlg.initialize();
+      groupAlg.setProperty("InputWorkspace", WS_IN);
+      groupAlg.setProperty("InputFile", groupDetectorsBy);
+      groupAlg.setProperty("OutputWorkspace", WS_GRP);
+      groupAlg.execute();
+      if (!groupAlg.isExecuted())
+        throw std::runtime_error("Failed to execute CreateGroupingWorkspace");
+    }
 
     DiffractionFocussing2 focusAlg;
     focusAlg.initialize();
