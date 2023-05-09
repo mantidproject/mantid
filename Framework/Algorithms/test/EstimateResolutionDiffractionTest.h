@@ -43,10 +43,6 @@ double resolution(const double deltaT_overT, const double deltaL, const double l
   double termTheta = (deltaTheta * deltaTheta) / (tan(theta) * tan(theta));
   return sqrt(termTOF + termL + termTheta);
 }
-
-constexpr double SNAP_deltaTOFOverTOF{0.002};
-constexpr double SNAP_deltaL{0.001};
-constexpr double SNAP_deltaTheta{(0.01 / 15) * 4.8};
 } // namespace
 
 class EstimateResolutionDiffractionTest : public CxxTest::TestSuite {
@@ -130,14 +126,18 @@ public:
   }
 
   /*
-   * This test is meant to duplicate a workflow where data from SNAP_57514 is time focussed before calculating the
-   * resolution of the resulting 6 spectra. The values checked against are from observations from doing individual peak
-   * fits.
+   * The tests using this are meant to duplicate a workflow where data from SNAP_57514 is time focussed before
+   * calculating the resolution of the resulting focussed spectra. The values checked against are from observations from
+   * doing individual peak fits.
    */
-  void test_focusSNAPByColumn() {
-    auto ws = createSNAPLiteInstrument("Column");
+  void run_focusSNAPtest(const std::string &groupBy, const std::vector<double> &tolerances) {
+    auto ws = createSNAPLiteInstrument(groupBy);
     const auto WS_IN = ws->getName();
-    std::string WS_OUT("SNAPColumn_Resolution");
+    std::string WS_OUT = "SNAP" + groupBy + "Bank_Resolution";
+    // source resolution dominates the calculation for SNAP
+    constexpr double SNAP_deltaTOFOverTOF{0.002};
+    constexpr double SNAP_deltaL{0.001};
+    constexpr double SNAP_deltaTheta{(0.01 / 15) * 4.8};
 
     // Set up and run the algorithm we're interested in
     EstimateResolutionDiffraction alg;
@@ -151,54 +151,6 @@ public:
 
     alg.execute();
     TS_ASSERT(alg.isExecuted());
-
-    // get the output
-    MatrixWorkspace_sptr wsOut =
-        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(WS_OUT));
-
-    // these are the relative toleraces that work
-    const std::vector<double> tolerances{3., 2., 4., 4., 2., 6.};
-
-    const size_t numHist = wsOut->getNumberHistograms();
-    TS_ASSERT_EQUALS(numHist, tolerances.size());
-    const auto &spectrumInfo = wsOut->spectrumInfo();
-    const auto l1 = spectrumInfo.l1(); // 15m
-    // assume all spectra are approximately at the focus position
-    for (size_t i = 0; i < numHist; ++i) {
-      const double twoTheta = spectrumInfo.twoTheta(i);
-      const double l2 = spectrumInfo.l2(i);
-      const double res = resolution(SNAP_deltaTOFOverTOF, SNAP_deltaL, l1 + l2, SNAP_deltaTheta, 0.5 * twoTheta);
-
-      const double abs_tol = abs(wsOut->readY(i)[0] - res);
-      const double rel_tol = 100. * abs_tol / res;
-      TS_ASSERT_LESS_THAN(rel_tol, tolerances[i]);
-    }
-
-    // delete the workspaces
-    AnalysisDataService::Instance().remove(WS_IN);
-    AnalysisDataService::Instance().remove(WS_OUT);
-  }
-
-  void test_focusSNAPByPanel() {
-    auto ws = createSNAPLiteInstrument("bank");
-    const auto WS_IN = ws->getName();
-    std::string WS_OUT("SNAPBank_Resolution");
-
-    // Set up and run the algorithm we're interested in
-    EstimateResolutionDiffraction alg;
-    alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", WS_IN));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", WS_OUT));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PartialResolutionWorkspaces", "SNAP_partial"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaTOFOverTOF", SNAP_deltaTOFOverTOF));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaL", SNAP_deltaL));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SourceDeltaTheta", SNAP_deltaTheta));
-
-    alg.execute();
-    TS_ASSERT(alg.isExecuted());
-
-    // these are the relative toleraces that work
-    const std::vector<double> tolerances{3., 3., 3., 2., 2., 2., 4., 4., 4., 5., 6., 5., 2., 3., 2., 4., 4., 4.};
 
     // get the output
     MatrixWorkspace_sptr wsOut =
@@ -222,6 +174,18 @@ public:
     // delete the workspaces
     AnalysisDataService::Instance().remove(WS_IN);
     AnalysisDataService::Instance().remove(WS_OUT);
+  }
+
+  void test_focusSNAPByColumn() {
+    // these are the relative toleraces that work
+    const std::vector<double> tolerances{3., 2., 4., 4., 2., 6.};
+    run_focusSNAPtest("Column", tolerances);
+  }
+
+  void test_focusSNAPByPanel() {
+    // these are the relative toleraces that work
+    const std::vector<double> tolerances{3., 3., 3., 2., 2., 2., 4., 4., 4., 5., 6., 5., 2., 3., 2., 4., 4., 4.};
+    run_focusSNAPtest("bank", tolerances);
   }
 
   /** Create an instrument
