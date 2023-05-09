@@ -255,18 +255,24 @@ void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wo
   auto source = Mantid::DataHandling::H5Util::createGroupCanSAS(instrument, sasSourceName, nxInstrumentSourceClassAttr,
                                                                 sasInstrumentSourceClassAttr);
   Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceRadiation, radiationSource);
-  Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(source, sasInstrumentSourceBeamShape, geometry,
+
+  // Setup Aperture
+  const std::string sasApertureName = sasInstrumentApertureGroupName;
+  auto &&aperture = Mantid::DataHandling::H5Util::createGroupCanSAS(
+      instrument, sasApertureName, nxInstrumentApertureClassAttr, sasInstrumentApertureClassAttr);
+
+  Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(aperture, sasInstrumentApertureShape, geometry,
                                                                     std::map<std::string, std::string>());
 
   std::map<std::string, std::string> beamSizeAttrs;
   beamSizeAttrs.insert(std::make_pair(sasUnitAttr, sasBeamAndSampleSizeUnitAttrValue));
   if (beamHeight != 0) {
-    Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(source, sasInstrumentSourceBeamHeight, beamHeight,
-                                                                      beamSizeAttrs);
+    Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(aperture, sasInstrumentApertureGapHeight,
+                                                                      beamHeight, beamSizeAttrs);
   }
   if (beamWidth != 0) {
-    Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(source, sasInstrumentSourceBeamWidth, beamWidth,
-                                                                      beamSizeAttrs);
+    Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(aperture, sasInstrumentApertureGapWidth,
+                                                                      beamWidth, beamSizeAttrs);
   }
 
   // Add IDF information

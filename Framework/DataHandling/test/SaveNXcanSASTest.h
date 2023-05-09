@@ -422,8 +422,7 @@ private:
     TSM_ASSERT_EQUALS("The title should have been stored as the workspace name.", titleValue, title);
   }
 
-  void do_assert_source(H5::Group &source, const std::string &radiationSource, const int &beamShape,
-                        const double &beamHeight, const double &beamWidth) {
+  void do_assert_source(H5::Group &source, const std::string &radiationSource) {
 
     auto numAttributes = source.getNumAttrs();
     TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);
@@ -438,19 +437,32 @@ private:
     auto radiationDataSet = source.openDataSet(sasInstrumentSourceRadiation);
     auto radiationValue = Mantid::DataHandling::H5Util::readString(radiationDataSet);
     TSM_ASSERT_EQUALS("Radiation sources should match.", radiationValue, radiationSource);
+  }
+
+  void do_assert_aperture(H5::Group &aperture, const int &beamShape, const double &beamHeight,
+                          const double &beamWidth) {
+
+    auto numAttributes = aperture.getNumAttrs();
+    TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);
+
+    // canSAS_class and NX_class attribute
+    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(aperture, sasclass);
+    TSM_ASSERT_EQUALS("Should be SASaperture class", classAttribute, sasInstrumentApertureClassAttr);
+    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(aperture, nxclass);
+    TSM_ASSERT_EQUALS("Should be NXaperture class", classAttribute, nxInstrumentApertureClassAttr);
 
     // beam_shape data set
-    auto beamShapeDataSet = source.openDataSet(sasInstrumentSourceBeamShape);
+    auto beamShapeDataSet = aperture.openDataSet(sasInstrumentApertureShape);
     auto beamShapeValue = Mantid::DataHandling::H5Util::readArray1DCoerce<int>(beamShapeDataSet);
     TSM_ASSERT_EQUALS("Beam Shapes should match.", beamShapeValue[0], beamShape);
 
     // beam_height data set
-    auto beamHeightDataSet = source.openDataSet(sasInstrumentSourceBeamHeight);
+    auto beamHeightDataSet = aperture.openDataSet(sasInstrumentApertureGapHeight);
     auto beamHeightValue = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(beamHeightDataSet);
     TSM_ASSERT_EQUALS("Beam height should match.", beamHeightValue[0], beamHeight);
 
     // beam_width data set
-    auto beamWidthDataSet = source.openDataSet(sasInstrumentSourceBeamWidth);
+    auto beamWidthDataSet = aperture.openDataSet(sasInstrumentApertureGapWidth);
     auto beamWidthValue = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(beamWidthDataSet);
     TSM_ASSERT_EQUALS("Beam width should match.", beamWidthValue[0], beamWidth);
   }
@@ -520,7 +532,11 @@ private:
 
     // Check source
     auto source = instrument.openGroup(sasInstrumentSourceGroupName);
-    do_assert_source(source, radiationSource, geometry, beamHeight, beamWidth);
+    do_assert_source(source, radiationSource);
+
+    // Check aperture
+    auto aperture = instrument.openGroup(sasInstrumentApertureGroupName);
+    do_assert_aperture(aperture, geometry, beamHeight, beamWidth);
 
     // Check detectors
     if (!invalidDetectors) {

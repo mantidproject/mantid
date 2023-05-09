@@ -83,6 +83,14 @@ const std::string sasInstrumentSourceBeamShape = "beam_shape";
 const std::string sasInstrumentSourceBeamHeight = "beam_size_y";
 const std::string sasInstrumentSourceBeamWidth = "beam_size_x";
 
+const std::string sasInstrumentApertureClassAttr = "SASaperture";
+const std::string nxInstrumentApertureClassAttr = "NXaperture";
+
+const std::string sasInstrumentApertureGroupName = "sasaperture";
+const std::string sasInstrumentApertureShape = "shape";
+const std::string sasInstrumentApertureGapWidth = "x_gap";
+const std::string sasInstrumentApertureGapHeight = "y_gap";
+
 const std::string sasInstrumentCollimationClassAttr = "SAScollimation";
 const std::string nxInstrumentCollimationClassAttr = "NXcollimator";
 

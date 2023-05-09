@@ -135,10 +135,11 @@ void loadSample(H5::Group &entry, const Mantid::API::MatrixWorkspace_sptr &works
   auto &&sample = workspace->mutableSample();
 
   // Load UserFile and BatchFile (optional)
-  auto &&sourceGroup = entry.openGroup(sasInstrumentSourceGroupName);
-  auto &&height = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(sourceGroup, sasInstrumentSourceBeamHeight);
-  auto &&width = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(sourceGroup, sasInstrumentSourceBeamWidth);
-  auto &&geometry = Mantid::DataHandling::H5Util::readArray1DCoerce<int>(sourceGroup, sasInstrumentSourceBeamShape);
+  auto &&apertureGroup = entry.openGroup(sasInstrumentApertureGroupName);
+  auto &&height =
+      Mantid::DataHandling::H5Util::readArray1DCoerce<double>(apertureGroup, sasInstrumentApertureGapHeight);
+  auto &&width = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(apertureGroup, sasInstrumentApertureGapWidth);
+  auto &&geometry = Mantid::DataHandling::H5Util::readArray1DCoerce<int>(apertureGroup, sasInstrumentApertureShape);
 
   auto &&sampleGroup = entry.openGroup(sasInstrumentSampleClassAttr);
   auto &&thickness = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(sampleGroup, sasInstrumentSampleThickness);
