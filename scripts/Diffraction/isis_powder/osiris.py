@@ -184,7 +184,10 @@ class Osiris(AbstractInst):
         :param run_details: the run details of the workspace. Unused parameter added for API compatibility.
         :return: A workspace containing the corrections.
         """
-        events_per_point = 1000
+        if self._inst_settings.simple_events_per_point:
+            events_per_point = int(self._inst_settings.simple_events_per_point)
+        else:
+            events_per_point = 1000
 
         container_geometry = self._sample_details.generate_container_geometry()
         container_material = self._sample_details.generate_container_material()

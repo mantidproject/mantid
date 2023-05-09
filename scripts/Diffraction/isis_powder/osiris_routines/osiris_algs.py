@@ -153,7 +153,11 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run, drange=No
         )
         vanadium_runs = _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="vanadium_run_numbers")
     else:
-        empty_can_runs = get_empty_can_run_for_drange(all_run_numbers, drange) if inst_settings.subtract_empty_can else None
+        empty_can_runs = (
+            get_empty_can_run_for_drange(all_run_numbers, drange)
+            if (inst_settings.subtract_empty_can or inst_settings.empty_can_subtraction_method == "PaalmanPings")
+            else None
+        )
         vanadium_runs = get_van_run_for_drange(all_run_numbers, drange)
 
     grouping_file_name = inst_settings.grouping
