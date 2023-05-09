@@ -226,14 +226,15 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
   double minTerm3Sq = 1.;
   double maxTerm3Sq = 0.;
 
-  size_t count_nodetsize = 0;
-
   g_log.information() << "Source terms: deltaL=" << sqrt(m_sourceDeltaLMetersSq)
                       << " deltaTheta=" << sqrt(m_sourceDeltaThetaRadiansSq) << "\n";
 
   // if a spectrum has multiple pixels, add them up in quadrature
   for (size_t specNum = 0; specNum < numspec; ++specNum) {
+    // which of the detectors are part of this spectrum
     const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(specNum);
+    // number of spectra as a double
+    const double numDet = double(spectrumDefinition.size());
 
     // resolution in time
     double term1Sq = m_deltaTOverTOF * m_deltaTOverTOF;
@@ -252,7 +253,7 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
                                     return sum + (term * term);
                                   }
                                 });
-      term1Sq = term1Sq / double(spectrumDefinition.size());
+      term1Sq = term1Sq / numDet;
     }
 
     // resolution in length
@@ -269,16 +270,19 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
                                     if (realdet) {
                                       const auto l2 = detectorInfo.l2(index.first);
                                       const auto l_total = (l1 + l2);
-                                      const double dy = realdet->getHeight();
+                                      realdet->shape();
                                       const double dx = realdet->getWidth();
-                                      const double detdimSq = (dx * dx + dy * dy) * (0.5 * 0.5);
-                                      return sum + (sourceTerm + detdimSq) / (l_total * l_total);
+                                      const double dy = realdet->getHeight();
+                                      const double dz = realdet->getDepth();
+                                      const double detdimSq = (dx * dx + dy * dy + dz * dz) * (0.5 * 0.5);
+                                      const double term = (detdimSq + sourceTerm) / (l_total * l_total);
+                                      return sum + term;
                                     } else {
                                       return sum;
                                     }
                                   }
                                 });
-      term2Sq = term2Sq / double(spectrumDefinition.size());
+      term2Sq = term2Sq / numDet;
     }
 
     // resolution in angle - everything is in radians
@@ -303,7 +307,7 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
               return sum + ((componentInfo.solidAngle(index.first, samplepos) + sourceTerm) * cot_theta * cot_theta);
             }
           });
-      term3Sq = solidAngle / double(spectrumDefinition.size());
+      term3Sq = solidAngle / numDet;
     }
 
     // add information to outputs
@@ -346,7 +350,6 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
   g_log.notice() << "2theta range: " << (mintwotheta * Geometry::rad2deg) << ", " << (maxtwotheta * Geometry::rad2deg)
                  << "\n";
   g_log.notice() << "t3 range: " << sqrt(minTerm3Sq) << ", " << sqrt(maxTerm3Sq) << "\n";
-  g_log.notice() << "Number of detector having NO size information = " << count_nodetsize << "\n";
 }
 
 } // namespace Mantid::Algorithms
