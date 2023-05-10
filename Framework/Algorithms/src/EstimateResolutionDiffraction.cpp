@@ -222,6 +222,14 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
 
   double mintwotheta = 2. * M_PI; // a bit more than 2*pi
   double maxtwotheta = 0.;
+  for (std::size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (!(detectorInfo.isMasked(i) || detectorInfo.isMonitor(i))) {
+      // update overall range for two-theta and term3
+      const auto twotheta = detectorInfo.twoTheta(i);
+      mintwotheta = std::min(twotheta, mintwotheta);
+      maxtwotheta = std::max(twotheta, maxtwotheta);
+    }
+  }
 
   double minTerm3Sq = 1.;
   double maxTerm3Sq = 0.;
@@ -274,7 +282,8 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
                                       const double dx = realdet->getWidth();
                                       const double dy = realdet->getHeight();
                                       const double dz = realdet->getDepth();
-                                      const double detdimSq = (dx * dx + dy * dy + dz * dz) * (0.5 * 0.5);
+                                      // not sure why divide by 4, but it has always been there
+                                      const double detdimSq = (dx * dx + dy * dy + dz * dz) * 0.25;
                                       const double term = (detdimSq + sourceTerm) / (l_total * l_total);
                                       return sum + term;
                                     } else {
@@ -286,12 +295,12 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     }
 
     // resolution in angle - everything is in radians
-    const double theta = spectrumInfo.isMonitor(specNum) ? 0.0 : 0.5 * spectrumInfo.twoTheta(specNum);
-
     double term3Sq;
     if (m_divergenceWS) {
       double deltathetaSq = m_divergenceWS->y(specNum)[0];
       deltathetaSq = deltathetaSq * deltathetaSq;
+      // use the average angle for the spectrum - not right for focussed data
+      const double theta = spectrumInfo.isMonitor(specNum) ? 0.0 : 0.5 * spectrumInfo.twoTheta(specNum);
       const double tan_theta = tan(theta);
       term3Sq = (deltathetaSq + m_sourceDeltaThetaRadiansSq) / (tan_theta * tan_theta);
     } else {
@@ -329,10 +338,7 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     m_resAngle->mutableX(specNum) = static_cast<double>(specNum);
     m_outputWS->mutableX(specNum) = static_cast<double>(specNum);
 
-    // update overall range for two-theta and term3
-    maxtwotheta = std::max(2. * theta, maxtwotheta);
-    mintwotheta = std::min(2. * theta, mintwotheta);
-
+    // update overall range for term3
     minTerm3Sq = std::min(term3Sq, minTerm3Sq);
     maxTerm3Sq = std::max(term3Sq, maxTerm3Sq);
 
