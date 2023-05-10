@@ -39,7 +39,7 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
     def summary(self):
         """Return a summary of the algorithm."""
-        return "Corrects the positions of detector pixels by applying TwoTheta offsets provided in a calibration file"
+        return "Corrects the positions of detector pixels by applying TwoTheta offsets provided in a calibration file."
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
