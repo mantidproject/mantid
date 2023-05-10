@@ -241,7 +241,9 @@ class BaseSX(ABC):
             if peak_type == PEAK_TYPE.PREDICT:
                 mantid.PredictPeaks(InputWorkspace=input_ws, OutputWorkspace=out_peaks_name, EnableLogging=False, **kwargs)
             else:
-                mantid.PredictFractionalPeaks(InputWorkspace=input_ws, OutputWorkspace=out_peaks_name, EnableLogging=False, **kwargs)
+                pred_peaks = self.get_peaks(run, PEAK_TYPE.PREDICT)
+                if pred_peaks is not None and pred_peaks.sample().hasOrientedLattice():
+                    mantid.PredictFractionalPeaks(Peaks=pred_peaks, FracPeaks=out_peaks_name, EnableLogging=False, **kwargs)
             self.set_peaks(run, out_peaks_name, peak_type)
 
     @staticmethod

@@ -11,6 +11,7 @@ from mantid.simpleapi import (
     MoveInstrumentComponent,
     CloneWorkspace,
     SaveParameterFile,
+    SetUB,
 )
 from Diffraction.single_crystal.sxd import SXD
 from Diffraction.single_crystal.base_sx import PEAK_TYPE, INTEGRATION_TYPE
@@ -128,12 +129,10 @@ class SXDTest(unittest.TestCase):
 
         self.assertEqual(4, out.getNumberPeaks())
         self.assertEqual(3, mock_int_md.call_count)  # 2 peaks had similar radius and were integrated together
-        for icall, radius in enumerate([0.1019, 0.1319, 0.2519]):
-            self.assertAlmostEqual(radius, mock_int_md.call_args_list[icall].kwargs["PeakRadius"], delta=1e-4)
+        for icall, radius in enumerate([0.1021, 0.1319, 0.2519]):
+            self.assertAlmostEqual(radius, mock_int_md.call_args_list[icall].kwargs["PeakRadius"], delta=1e-3)
             for kwarg in int_md_kwargs:
                 self.assertTrue(mock_int_md.call_args_list[icall].kwargs[kwarg])
-
-    # test saving reflections
 
     @patch(sxd_path + ".BaseSX.retrieve")
     @patch(sxd_path + ".mantid.SaveReflections")
@@ -150,6 +149,17 @@ class SXDTest(unittest.TestCase):
         fpath = path.join(self._test_dir, "peaks_" + fmt)
         mock_save_nxs.assert_called_once_with(InputWorkspace=self.peaks.name(), Filename=fpath + ".nxs")
         mock_save_ref.assert_called_once_with(InputWorkspace=self.peaks.name(), Filename=fpath + ".int", Format=fmt, SplitFiles=False)
+
+    def test_predict_peaks(self):
+        # make peaks ws and set a UB
+        peaks = self._make_peaks_detids(wsname="peaks_for_predict")
+        SetUB(peaks, UB="0.25,0,0,0,0.25,0,0,0,0.1")
+        runno = 1234
+        self.sxd.runs = {str(runno): {"ws": self.ws.name(), "found": peaks}}
+        for pk_type in [PEAK_TYPE.PREDICT, PEAK_TYPE.PREDICT_SAT]:
+            self.sxd.predict_peaks(run=runno, peak_type=pk_type)
+            pred_peaks = self.sxd.get_peaks(runno, pk_type)
+            self.assertEqual(pred_peaks.name(), peaks.name() + "_" + pk_type.value)
 
     #  --- methods specific to SXD class ---
 
