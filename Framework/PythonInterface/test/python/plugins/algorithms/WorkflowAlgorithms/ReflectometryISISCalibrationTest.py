@@ -156,17 +156,26 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         self._assert_run_algorithm_raises_exception(args, "Invalid data in calibration file entry")
 
     def test_calibration_successful_with_columns_reversed_in_file(self):
+        det_id = 11
+        theta_offset = 0.05
         self.temp_calibration_file = TemporaryFileHelper(
-            fileContent=f"{self._THETA_LABEL} {self._DET_ID_LABEL}\n0.05 11\n", extension=".dat"
+            fileContent=f"{self._THETA_LABEL} {self._DET_ID_LABEL}\n{theta_offset} {det_id}\n", extension=".dat"
         )
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
+
         output_ws_name = "test_calibrated"
         args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": output_ws_name}
         outputs = [input_ws_name, output_ws_name]
         self._assert_run_algorithm_succeeds(args, outputs)
 
-    def _check_final_theta_values(self, input_ws, output_ws):
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_final_theta_values(ws, output_ws, calibration_data={det_id: theta_offset})
+
+    def _check_final_theta_values(self, input_ws, output_ws, calibration_data=None):
+        if not calibration_data:
+            calibration_data = self.calibration_data
+
         info_in = input_ws.spectrumInfo()
         info_out = output_ws.spectrumInfo()
 
@@ -176,7 +185,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
             two_theta_in = info_in.signedTwoTheta(i)
             two_theta_out = info_out.signedTwoTheta(i)
 
-            theta_offset = self.calibration_data.get(det_id)
+            theta_offset = calibration_data.get(det_id)
             expected_two_theta = ((two_theta_in * self._RAD_TO_DEG) + theta_offset) * self._DEG_TO_RAD if theta_offset else two_theta_in
 
             self.assertAlmostEqual(two_theta_out, expected_two_theta, msg=f"Unexpected theta value for detector {det_id}")
