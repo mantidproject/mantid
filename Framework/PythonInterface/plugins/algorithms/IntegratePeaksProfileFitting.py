@@ -13,6 +13,7 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 import numpy as np
+import warnings
 
 
 class IntegratePeaksProfileFitting(PythonAlgorithm):
@@ -281,7 +282,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
         # And we're off!
         peaks_ws_out = peaks_ws.clone()
-        np.warnings.filterwarnings("ignore")  # There can be a lot of warnings for bad solutions that get rejected.
+        warnings.filterwarnings("ignore")  # There can be a lot of warnings for bad solutions that get rejected.
         progress = Progress(self, 0.0, 1.0, len(peaksToFit))
         sigX0Params, sigY0, sigP0Params = self.getBVGInitialGuesses(peaks_ws, strongPeakParams_ws)
 
