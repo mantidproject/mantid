@@ -11,6 +11,7 @@ import unittest
 from mantid import FileFinder
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
+from mantid.kernel import V3D
 from testhelpers import assertRaisesNothing, create_algorithm, WorkspaceCreationHelper
 from testhelpers.tempfile_wrapper import TemporaryFileHelper
 
@@ -60,6 +61,18 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
     def test_calibration_successful(self):
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
+
+        output_ws_name = "test_calibrated"
+        args = {"InputWorkspace": ws, "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": output_ws_name}
+        outputs = [input_ws_name, output_ws_name]
+        self._assert_run_algorithm_succeeds(args, outputs)
+
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_final_theta_values(ws, output_ws)
+
+    def test_calibration_successful_for_detectors_with_negative_two_theta(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace_with_negative_two_theta(input_ws_name)
 
         output_ws_name = "test_calibrated"
         args = {"InputWorkspace": ws, "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": output_ws_name}
@@ -205,9 +218,20 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         return GroupWorkspaces(InputWorkspaces=",".join(child_names), OutputWorkspace=group_name)
 
     def _create_sample_workspace_with_missing_detectors(self):
-        """Creates a workspace with 11 detectors. Only detector ID 11 will have calibration data.
-        The calibration data will have entries for detectors that are not present in the workspace"""
+        """Creates a workspace with 11 detectors. The calibration data will have entries for detectors that are not present in the workspace"""
         ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(11, 20, False)
+        return ws
+
+    def _create_sample_workspace_with_negative_two_theta(self, name):
+        """Creates a workspace with 9 detectors. Only detector IDs 11 to 14 will have calibration data.
+        Detector ID 11 is re-positioned so that its initial two theta value is negative.
+        """
+        ws = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=1, NumMonitors=0, BankPixelWidth=3, XMin=200, OutputWorkspace=name)
+        det_info = ws.detectorInfo()
+        comp_info = ws.componentInfo()
+        det_idx = det_info.indexOf(11)
+        comp_info.setPosition(det_idx, V3D(0, -0.00436332, 5))
+        self.assertTrue(det_info.signedTwoTheta(det_idx) < 0)
         return ws
 
     def _assert_run_algorithm_succeeds(self, args, expected=None):
