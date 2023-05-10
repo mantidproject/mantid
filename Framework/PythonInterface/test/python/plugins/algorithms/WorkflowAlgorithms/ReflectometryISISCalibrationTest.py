@@ -12,12 +12,18 @@ from mantid import FileFinder
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
 from testhelpers import assertRaisesNothing, create_algorithm, WorkspaceCreationHelper
+from testhelpers.tempfile_wrapper import TemporaryFileHelper
 
 
 class ReflectometryISISCalibrationTest(unittest.TestCase):
     _CALIBRATION_TEST_DATA = FileFinder.getFullPath("ISISReflectometry/calibration_test_data.dat")
     _RAD_TO_DEG = 180.0 / math.pi
     _DEG_TO_RAD = math.pi / 180.0
+
+    _DET_ID_LABEL = "detectorid"
+    _THETA_LABEL = "theta_offset"
+    _COLUMN_NUM_ERROR = "Calibration file should contain two space de-limited columns"
+    _COLUMN_LABELS_ERROR = "Incorrect column labels in calibration file"
 
     @classmethod
     def setUpClass(cls):
@@ -43,8 +49,13 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
 
         cls.calibration_data = _create_calibration_data_dictionary()
 
+    def setUp(self):
+        self.temp_calibration_file = None
+
     def tearDown(self):
         AnalysisDataService.clear()
+        if self.temp_calibration_file:
+            del self.temp_calibration_file
 
     def test_calibration_successful(self):
         input_ws_name = "test_1234"
@@ -97,6 +108,63 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         ws = self._create_sample_workspace(input_ws_name)
         args = {"InputWorkspace": ws, "CalibrationFile": "invalid/file_path.dat", "OutputWorkspace": "test_calibrated"}
         self._assert_run_algorithm_raises_exception(args, "Calibration file path cannot be found")
+
+    def test_exception_raised_if_too_many_columns_in_file(self):
+        self.temp_calibration_file = TemporaryFileHelper(
+            fileContent=f"{self._DET_ID_LABEL} {self._THETA_LABEL} extra_column\n1 0.05 0.03\n", extension=".dat"
+        )
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": "test_calibrated"}
+        self._assert_run_algorithm_raises_exception(args, self._COLUMN_NUM_ERROR)
+
+    def test_exception_raised_if_too_few_columns_in_file(self):
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=f"{self._DET_ID_LABEL}\n1\n", extension=".dat")
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": "test_calibrated"}
+        self._assert_run_algorithm_raises_exception(args, self._COLUMN_NUM_ERROR)
+
+    def test_exception_raised_if_invalid_column_labels_in_file(self):
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=f"{self._DET_ID_LABEL} invalid_label\n1 0.05\n", extension=".dat")
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": "test_calibrated"}
+        self._assert_run_algorithm_raises_exception(args, self._COLUMN_LABELS_ERROR)
+
+    def test_exception_raised_if_no_column_labels_in_file(self):
+        self.temp_calibration_file = TemporaryFileHelper(fileContent="1 0.05\n", extension=".dat")
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": "test_calibrated"}
+        self._assert_run_algorithm_raises_exception(args, self._COLUMN_LABELS_ERROR)
+
+    def test_exception_raised_if_no_data_in_file(self):
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=f"{self._DET_ID_LABEL} {self._THETA_LABEL}\n", extension=".dat")
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": "test_calibrated"}
+        self._assert_run_algorithm_raises_exception(args, "Calibration file provided contains no data")
+
+    def test_exception_raised_if_column_data_types_incorrect(self):
+        self.temp_calibration_file = TemporaryFileHelper(
+            fileContent=f"{self._DET_ID_LABEL} {self._THETA_LABEL}\n0.05 1\n", extension=".dat"
+        )
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": "test_calibrated"}
+        self._assert_run_algorithm_raises_exception(args, "Invalid data in calibration file entry")
+
+    def test_calibration_successful_with_columns_reversed_in_file(self):
+        self.temp_calibration_file = TemporaryFileHelper(
+            fileContent=f"{self._THETA_LABEL} {self._DET_ID_LABEL}\n0.05 11\n", extension=".dat"
+        )
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        output_ws_name = "test_calibrated"
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": output_ws_name}
+        outputs = [input_ws_name, output_ws_name]
+        self._assert_run_algorithm_succeeds(args, outputs)
 
     def _check_final_theta_values(self, input_ws, output_ws):
         info_in = input_ws.spectrumInfo()
