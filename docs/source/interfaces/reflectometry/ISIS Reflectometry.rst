@@ -750,19 +750,10 @@ The four slicing options are described in more detail below:
   slice duration, then the last slice will be shorter than the others. For example, given a run
   of duration 100 seconds, specifying slices of duration 30 seconds will produce slices with
   ranges of ``0 - 30``, ``30 - 60``, ``60 - 90`` and ``90 - 100`` seconds respectively.
-- **Custom** - This takes a list if comma-separated numbers that indicate the start and end of
-  each time slice. There are different possibilities:
-
-  * If a single number is provided, e.g. ``100``, the interface will extract a single slice
-    starting at the start of the run, and ending at ``100`` seconds.
-  * If two numbers are provided, e.g. ``100, 200``, the interface will extract a single slice
-    starting ``100`` seconds after the start of the run and stopping at 200 seconds after the
-    start of the run.
-  * If more than two numbers are provided, e.g. ``100, 200, 300``, the interface will extract two
-    slices, the first one starting at ``100`` seconds after the start of the run and ending at
-    ``200`` seconds after the start of the run, and the second one starting at ``200`` seconds
-    and ending at ``300`` seconds.
-
+- **Custom** - This takes a list of comma-separated numbers, giving a sequence of intervals
+  that is applied repeatedly to slice the entire run. For example, given a run of duration 100
+  seconds, specifying custom slicing of ``10, 20, 30`` will produce slices with ranges of
+  ``0 - 10``, ``10 - 30``, ``30 - 60``, ``60 - 70``, ``70 - 90`` and ``90 - 100`` seconds.
 - **LogValue** - This takes a single value which is the log value interval, and also the log name
   which is the name of the log we wish to filter the run for. For example, given a run and entries
   of ``100`` and ``proton_charge`` for slicing values and log name respectively, we would
