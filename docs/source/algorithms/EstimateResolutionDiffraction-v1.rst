@@ -15,6 +15,7 @@ Instrument resolution
 Resolution of a detector in d-spacing is defined as
 :math:`\frac{\Delta d}{d}`, which is constant for an individual
 detector.
+If the input workspace has summed detectors, the resolution of the individual pixels with be added in quadrature.
 
 Starting from the Bragg equation for T.O.F. diffractometer,
 
