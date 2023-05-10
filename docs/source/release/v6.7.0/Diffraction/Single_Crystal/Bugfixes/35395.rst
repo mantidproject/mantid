@@ -1,0 +1,1 @@
+- Added a system test with new test data for :ref:`IntegratePeaksProfileFittinng <algm-IntegratePeaksProfileFitting>` to help resolve a bug related to BivariateGuassian module. The test compares to Mantid v6.4

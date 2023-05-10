@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Copyable.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -189,7 +190,10 @@ void export_Run() {
 
       .def("getTimeAveragedStd", &Run::getTimeAveragedStd, (arg("self"), arg("name")),
            "Returns the time averaged standard deviation")
-
+      .def("getTimeAveragedValue", &Run::getTimeAveragedValue, (arg("self"), arg("name")),
+           "Returns the time averaged value of a log")
+      .def("getStatistics", &Run::getStatistics, (arg("self"), arg("name")),
+           "Returns the all of the statistics about the obect")
       .def("getProperties", &Run::getProperties, arg("self"), return_internal_reference<>(),
            "Return the list of run properties managed by this object.")
 
@@ -227,6 +231,9 @@ void export_Run() {
       .def("startTime", &Run::startTime, arg("self"), "Return the total starting time of the run.")
 
       .def("endTime", &Run::endTime, arg("self"), "Return the total ending time of the run.")
+
+      .def("getTimeROI", &Run::getTimeROI, arg("self"), return_value_policy<reference_existing_object>(),
+           "Return the time regoin of interest")
 
       //-------------------- Dictionary access----------------------------
       .def("get", &getWithDefault, (arg("self"), arg("key"), arg("default")),

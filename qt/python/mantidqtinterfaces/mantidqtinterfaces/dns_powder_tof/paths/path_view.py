@@ -28,6 +28,7 @@ class DNSPathView(DNSView):
 
         self._map = {
             "data_dir": self._ui.lE_data_dir,
+            "data_dir_asterisk": self._ui.l_data_dir_req,
             "psd_dir": self._ui.lE_psd_dir,
             "user": self._ui.lE_user,
             "prop_nb": self._ui.lE_prop_nb,
@@ -39,7 +40,6 @@ class DNSPathView(DNSView):
             "export": self._ui.gB_export,
             "auto_set_other_dir": self._ui.cB_auto_set_other_dir,
         }
-
         # connect signals
         self._attach_signal_slots()
 
@@ -96,6 +96,12 @@ class DNSPathView(DNSView):
     def set_user(self, user):
         self._map["user"].setText(user)
         self._map["user"].setCursorPosition(0)
+
+    def set_asterisk(self, hide):
+        if hide:
+            self._map["data_dir_asterisk"].setText(" ")
+        else:
+            self._map["data_dir_asterisk"].setText("*")
 
     def hide_save(self, hide=True):
         self._map["nexus"].setVisible(not hide)

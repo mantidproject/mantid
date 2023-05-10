@@ -9,6 +9,7 @@
 #include "MantidAPI/IEventList.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/cow_ptr.h"
 #include <iosfwd>
 #include <vector>
@@ -251,7 +252,13 @@ public:
   /// Return the list of event weight error values
   void getWeightErrors(std::vector<double> &weightErrors) const override;
 
-  std::vector<Mantid::Types::Core::DateAndTime> getPulseTimes() const override;
+  std::vector<Types::Core::DateAndTime> getPulseTimes() const override;
+
+  /// Get the Pulse-time + TOF for each event in this EventList
+  std::vector<Types::Core::DateAndTime> getPulseTOFTimes() const;
+
+  /// Get the Pulse-time + time-of-flight of the neutron up to the sample, for each event in this EventList
+  std::vector<Types::Core::DateAndTime> getPulseTOFTimesAtSample(const double &factor, const double &shift) const;
 
   void setTofs(const MantidVec &tofs) override;
 
@@ -259,12 +266,15 @@ public:
 
   void filterByPulseTime(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, EventList &output) const;
 
+  void filterByPulseTime(Kernel::TimeROI *timeRoi, EventList *output) const;
+
   void filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, double tofFactor,
                             double tofOffset, EventList &output) const;
 
-  void filterInPlace(Kernel::SplittingIntervalVec &splitter);
+  void filterInPlace(Kernel::TimeROI *timeRoi);
 
-  void splitByTime(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs) const;
+  /// Initialize the detector ID's and event type of the destination event lists when splitting this list
+  void initializePartials(std::map<int, EventList *> partials) const;
 
   void splitByFullTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs, bool docorrection,
                        double toffactor, double tofshift) const;
@@ -295,6 +305,8 @@ public:
   void convertUnitsViaTof(Mantid::Kernel::Unit *fromUnit, Mantid::Kernel::Unit *toUnit);
   void convertUnitsQuickly(const double &factor, const double &power);
 
+  /// Returns a copy of the Histogram associated with this spectrum.
+  HistogramData::Histogram getHistogram() const;
   /// Returns the Histogram associated with this spectrum. Y and E data is
   /// computed from the event list.
   HistogramData::Histogram histogram() const override;
@@ -404,8 +416,11 @@ private:
   template <class T> static void getTofsHelper(const std::vector<T> &events, std::vector<double> &tofs);
   template <class T> static void getWeightsHelper(const std::vector<T> &events, std::vector<double> &weights);
   template <class T> static void getWeightErrorsHelper(const std::vector<T> &events, std::vector<double> &weightErrors);
-  template <class T>
-  static void getPulseTimesHelper(const std::vector<T> &events, std::vector<Mantid::Types::Core::DateAndTime> &times);
+
+  /// Compute a time (for instance, pulse-time plus TOF) associated to each event in the list
+  template <typename UnaryOperation>
+  std::vector<Types::Core::DateAndTime> eventTimesCalculator(const UnaryOperation &timesCalc) const;
+
   template <class T> static void setTofsHelper(std::vector<T> &events, const std::vector<double> &tofs);
   template <class T>
   static void filterByPulseTimeHelper(std::vector<T> &events, Types::Core::DateAndTime start,
@@ -414,10 +429,12 @@ private:
   static void filterByTimeAtSampleHelper(std::vector<T> &events, Types::Core::DateAndTime start,
                                          Types::Core::DateAndTime stop, double tofFactor, double tofOffset,
                                          std::vector<T> &output);
-  template <class T> void filterInPlaceHelper(Kernel::SplittingIntervalVec &splitter, typename std::vector<T> &events);
   template <class T>
-  void splitByTimeHelper(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs,
-                         typename std::vector<T> &events) const;
+  static void filterByTimeROIHelper(std::vector<T> &events, const std::vector<Kernel::TimeInterval> &intervals,
+                                    EventList *output);
+
+  template <class T> void filterInPlaceHelper(Kernel::TimeROI *timeRoi, typename std::vector<T> &events);
+
   template <class T>
   void splitByFullTimeHelper(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
                              typename std::vector<T> &events, bool docorrection, double toffactor,

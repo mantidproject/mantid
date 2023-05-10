@@ -145,28 +145,42 @@ std::string CheckMantidVersion::cleanVersionTag(const std::string &versionTag) c
   return retVal;
 }
 
-/** splits a . separated version string into a vector of integers
+/** Splits a . separated version string into a vector of integers.
+ * It will ignore extra characters in special version numbers that we use in line with the PEP440 versioning scheme:
+ * https://peps.python.org/pep-0440
+ * Here are examples of the special cases that are considered:
+ * - Local version numbers, e.g. "v1.2.3+somestring" (ignore the "+" and anything after)
+ *   (see https://peps.python.org/pep-0440/#local-version-identifiers)
+ * - Development builds, e.g. "v1.2.3.devXYZ" (ignore ".dev" and anything after)
+ * - Release candidate builds, e.g. "v1.2.3rc1" (ignore the "rc" and anything after)
+ *
  * @param versionString Something like "2.3.4"
  * @returns a vector of [2,3,4]
  */
 std::vector<int> CheckMantidVersion::splitVersionString(const std::string &versionString) const {
-  std::vector<int> retVal;
-  Mantid::Kernel::StringTokenizer tokenizer(versionString, ".",
+  std::vector<int> versionNumbers;
+  // Discard suffix from release candidate version numbers.
+  const std::string versionStringBeforeRC = versionString.substr(0, versionString.find("rc"));
+  // Discard suffix from development builds.
+  const std::string versionStringBeforeDev = versionStringBeforeRC.substr(0, versionStringBeforeRC.find(".dev"));
+  // Discard suffix from local release versions.
+  const std::string versionStringBeforePlus = versionStringBeforeDev.substr(0, versionStringBeforeDev.find("+"));
+
+  Mantid::Kernel::StringTokenizer tokenizer(versionStringBeforePlus, ".",
                                             Mantid::Kernel::StringTokenizer::TOK_TRIM |
                                                 Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-  auto h = tokenizer.begin();
 
-  for (; h != tokenizer.end(); ++h) {
+  for (auto h = tokenizer.begin(); h != tokenizer.end(); ++h) {
     try {
       auto part = boost::lexical_cast<int>(*h);
-      retVal.emplace_back(part);
+      versionNumbers.emplace_back(part);
     } catch (const boost::bad_lexical_cast &) {
       g_log.error("Failed to convert the following string to an integer '" + *h +
                   "' as part of CheckMantidVersion::splitVersionString");
-      retVal.emplace_back(0);
+      versionNumbers.emplace_back(0);
     }
   }
-  return retVal;
+  return versionNumbers;
 }
 
 /** Compare two version strings, tests if the gitHubVersion is more recent

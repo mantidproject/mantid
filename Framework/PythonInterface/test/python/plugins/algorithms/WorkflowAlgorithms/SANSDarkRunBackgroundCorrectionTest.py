@@ -380,7 +380,14 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
 
         AnalysisDataService.add(scatter_name, scatter_ws)
         AnalysisDataService.add(dark_name, dark_run)
-        self.assertRaises(RuntimeError, run_algorithm, "SANSDarkRunBackgroundCorrection", rethrow=True, **kwds)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "The selected monitors are not part of the workspace.",
+            run_algorithm,
+            "SANSDarkRunBackgroundCorrection",
+            rethrow=True,
+            **kwds
+        )
 
         # Clean up
         ws_to_clean = [scatter_name, dark_name]
@@ -423,7 +430,14 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
 
         AnalysisDataService.add(scatter_name, scatter_ws)
         AnalysisDataService.add(dark_name, dark_run)
-        self.assertRaises(RuntimeError, run_algorithm, "SANSDarkRunBackgroundCorrection", rethrow=True, **kwds)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Must provide either ApplyToDetectors or ApplyToMonitors or both",
+            run_algorithm,
+            "SANSDarkRunBackgroundCorrection",
+            rethrow=True,
+            **kwds
+        )
 
         # Clean up
         ws_to_clean = [scatter_name, dark_name]
@@ -700,7 +714,9 @@ class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
 
         # Act+ Assert
         args = [ws, monitor_selection]
-        dark_run_corrected = self.assertRaises(RuntimeError, remover.set_pure_monitor_dark_run, *args)
+        dark_run_corrected = self.assertRaisesRegex(
+            RuntimeError, "The selected monitors are not part of the workspace.", remover.set_pure_monitor_dark_run, *args
+        )
 
         # Clean up
         ws_to_clean = [test_ws]

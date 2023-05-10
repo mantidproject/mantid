@@ -26,7 +26,10 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
             os.remove(output_path)
 
     def test_algorithm_with_no_input_workspace_raises_exception(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "Either a list of file names containing YIG scan or the workspace with the loaded scan is required for calibration.",
+        ):
             D7YIGPositionCalibration()
 
     def test_no_fitting(self):

@@ -14,7 +14,6 @@ from testhelpers import run_algorithm
 
 
 class RetrieveRunInfoTest(unittest.TestCase):
-
     class_has_been_set_up = False
 
     def setUp(self):
@@ -40,20 +39,33 @@ class RetrieveRunInfoTest(unittest.TestCase):
     def test_wrong_facility_throws(self):
         """Dont expect to be able to support non-ISIS runs."""
         config["default.facility"] = "SNS"
-        self.assertRaises(
-            RuntimeError, run_algorithm, "RetrieveRunInfo", Runs=self.__existing_range_of_run_files, OutputWorkspace="test", rethrow=True
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Only ISIS runs are supported by this alg.",
+            run_algorithm,
+            "RetrieveRunInfo",
+            Runs=self.__existing_range_of_run_files,
+            OutputWorkspace="test",
+            rethrow=True,
         )
 
     def test_missing_run_file_throws(self):
         """Check that ALL files are present before proceeding."""
-        self.assertRaises(
-            RuntimeError, run_algorithm, "RetrieveRunInfo", Runs=self.__nonexistant_run_file, OutputWorkspace="test", rethrow=True
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Unable to find file: search object 99999",
+            run_algorithm,
+            "RetrieveRunInfo",
+            Runs=self.__nonexistant_run_file,
+            OutputWorkspace="test",
+            rethrow=True,
         )
 
     def test_pre_existing_non_table_workspace_throws(self):
         """Only allow TableWorkspaces."""
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            'Workspace "matrix_ws" already exists. Either delete it, or choose another workspace name.',
             run_algorithm,
             "RetrieveRunInfo",
             Runs=self.__existing_range_of_run_files,
@@ -63,8 +75,9 @@ class RetrieveRunInfoTest(unittest.TestCase):
 
     def test_existing_table_workspace_throws(self):
         """Dont bother trying to append.  If it exists already, we throw."""
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            'Workspace "__empty_table" already exists. Either delete it, or choose another workspace name.',
             run_algorithm,
             "RetrieveRunInfo",
             Runs=self.__existing_range_of_run_files,

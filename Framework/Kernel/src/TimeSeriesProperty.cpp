@@ -25,14 +25,34 @@ namespace {
 Logger g_log("TimeSeriesProperty");
 } // namespace
 
+namespace {
+//----------------------------------------------------------------------------------------------
+/** Convert time range boundaries to vector index boundaries
+ * @param elems :: vector of time series data
+ * @param range_left :: time range left boundary
+ * @param range_right :: time range right boundary
+ * @param left_index :: (output) left index boundary
+ * @param right_index :: (output) right index boundary
+ */
+template <typename TYPE>
+void timeRangeToIndexBounds(std::vector<TimeValueUnit<TYPE>> &elems, const TimeValueUnit<TYPE> range_left,
+                            const TimeValueUnit<TYPE> range_right, size_t &left_index, size_t &right_index) {
+  const auto left_iter = std::lower_bound(elems.cbegin(), elems.cend(), range_left);
+  const auto right_iter = std::upper_bound(elems.cbegin(), elems.cend(), range_right);
+
+  left_index = std::distance(elems.cbegin(), left_iter);
+  right_index = std::distance(elems.cbegin(), right_iter);
+  right_index = std::min(right_index, elems.size() - 1);
+}
+} // namespace
+
 /**
  * Constructor
  *  @param name :: The name to assign to the property
  */
 template <typename TYPE>
 TimeSeriesProperty<TYPE>::TimeSeriesProperty(const std::string &name)
-    : Property(name, typeid(std::vector<TimeValueUnit<TYPE>>)), m_values(), m_size(), m_propSortedFlag(),
-      m_filterApplied() {}
+    : Property(name, typeid(std::vector<TimeValueUnit<TYPE>>)), m_values(), m_size(), m_propSortedFlag() {}
 
 /**
  * Constructor
@@ -56,6 +76,19 @@ template <typename TYPE> TimeSeriesProperty<TYPE>::~TimeSeriesProperty() = defau
  */
 template <typename TYPE> TimeSeriesProperty<TYPE> *TimeSeriesProperty<TYPE>::clone() const {
   return new TimeSeriesProperty<TYPE>(*this);
+}
+
+/**
+ * Create a partial copy of this object according to a TimeROI. The partially cloned object
+ * should include all time values enclosed by the ROI regions each defined as [roi_start,roi_end),
+ * plus the values immediately before and after an ROI region, if available.
+ * @param timeROI :: a series of time regions used to determine which values should be included in the copy
+ */
+template <typename TYPE> Property *TimeSeriesProperty<TYPE>::cloneInTimeROI(const TimeROI &timeROI) const {
+  TimeSeriesProperty<TYPE> *filteredTS = new TimeSeriesProperty<TYPE>(this->name());
+  createFilteredData(timeROI, filteredTS->m_values);
+  filteredTS->m_size = static_cast<int>(filteredTS->m_values.size());
+  return filteredTS;
 }
 
 /**
@@ -235,268 +268,71 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::operator!=(const Propert
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::setName(const std::string &name) { m_name = name; }
 
-/** Filter out a run by time. Takes out any TimeSeriesProperty log entries
- *outside of the given
- *  absolute time range.
- *  Be noticed that this operation is not reversible.
- *
- *  Use case 1: if start time of the filter fstart is in between t1 and t2 of
- *the TimeSeriesProperty,
- *              then, the new start time is fstart and the value of the log is
- *the log value @ t1
- *
- *  Use case 2: if the start time of the filter in on t1 or before log start
- *time t0, then
- *              the new start time is t1/t0/filter start time.
- *
- * EXCEPTION: If there is only one entry in the list, it is considered to mean
- * "constant" so the value is kept even if the time is outside the range.
- *
- * @param start :: Absolute start time. Any log entries at times >= to this time
- *are kept.
- * @param stop  :: Absolute stop time. Any log entries at times < than this time
- *are kept.
+/**
+ * Fill in the supplied vector of time series data according to the input TimeROI. Include all time values
+ * within ROI regions defined as [roi_start,roi_end), plus the values immediately before and after an ROI region,
+ * if available.
+ * @param timeROI :: a series of time regions used to determine which values should be included in the filtered data
+ * vector
+ * @param filteredData :: (output) a vector of TimeValueUnit pairs to be filled in
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::filterByTime(const Types::Core::DateAndTime &start,
-                                            const Types::Core::DateAndTime &stop) {
-  // 0. Sort
-  sortIfNecessary();
+void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
+                                                  std::vector<TimeValueUnit<TYPE>> &filteredData) const {
+  filteredData.clear();
 
-  // 1. Do nothing for single (constant) value
-  if (m_values.size() <= 1)
+  if (m_values.empty())
     return;
 
-  typename std::vector<TimeValueUnit<TYPE>>::iterator iterhead, iterend;
+  size_t lastIndexCopied{0};
+  for (const auto &splitter : timeROI.toTimeIntervals()) {
 
-  // 2. Determine index for start and remove  Note erase is [...)
-  int istart = this->findIndex(start);
-  if (istart >= 0 && static_cast<size_t>(istart) < m_values.size()) {
-    // "start time" is behind time-series's starting time
-    iterhead = m_values.begin() + istart;
+    // Since the default comparison operators in the TimeValueUnit class work with the times and ignore the values,
+    // it doesn't matter which value we will use below, so we can just use the first value.
+    TimeValueUnit<TYPE> tvu_start(splitter.start(), m_values[0].value());
+    TimeValueUnit<TYPE> tvu_stop(splitter.stop(), m_values[0].value());
 
-    // False - The filter time is on the mark.  Erase [begin(),  istart)
-    // True - The filter time is larger than T[istart]. Erase[begin(), istart)
-    // ...
-    //       filter start(time) and move istart to filter startime
-    bool useprefiltertime = !(m_values[istart].time() == start);
+    // convert ROI time interval to indexes wrt m_values
+    size_t index_start{0};
+    size_t index_stop{0};
+    timeRangeToIndexBounds(m_values, tvu_start, tvu_stop, index_start, index_stop);
 
-    // Remove the series
-    m_values.erase(m_values.begin(), iterhead);
+    // by design, we need to keep the last datapoint before a use region and the first datapoint after a use region, if
+    // any of those datapoints are available. Since the index interval for the use region is obtained using
+    // std::lower_bound() and std::upper_bound(), index_stop must already be correct, as long as we treat it
+    // inclusively, but index_start needs to be adjusted if possible.
+    if (index_start > 0)
+      index_start--;
 
-    if (useprefiltertime) {
-      m_values[0].setTime(start);
+    // handle potential overlaps between successive index intervals, so we don't copy the same datapoints twice
+    if (!filteredData.empty()) {
+      index_start = std::max(index_start, lastIndexCopied + 1);
+      if (index_start > index_stop)
+        continue;
     }
-  } else {
-    // "start time" is before/after time-series's starting time: do nothing
-    ;
-  }
 
-  // 3. Determine index for end and remove  Note erase is [...)
-  int iend = this->findIndex(stop);
-  if (static_cast<size_t>(iend) < m_values.size()) {
-    if (m_values[iend].time() == stop) {
-      // Filter stop is on a log.  Delete that log
-      iterend = m_values.begin() + iend;
-    } else {
-      // Filter stop is behind iend. Keep iend
-      iterend = m_values.begin() + iend + 1;
-    }
-    // Delete from [iend to mp.end)
-    m_values.erase(iterend, m_values.end());
-  }
+    // copy datapoints within the ROI index interval
+    for (size_t index = index_start; index <= index_stop; index++)
+      filteredData.emplace_back(m_values[index].time(), m_values[index].value());
 
-  // 4. Make size consistent
-  m_size = static_cast<int>(m_values.size());
+    lastIndexCopied = index_stop;
+  }
 }
 
 /**
- * Filter by a range of times. If current property has a single value it remains
- * unaffected
- * @param splittervec :: A list of intervals to split filter on
+ * Remove time values outside of TimeROI regions each defined as [roi_start,roi_stop).
+ * However, keep the values immediately before and after each ROI region, if available.
+ * @param timeROI :: a series of time regions used to determine which values to remove or to keep
  */
-template <typename TYPE>
-void TimeSeriesProperty<TYPE>::filterByTimes(const std::vector<SplittingInterval> &splittervec) {
-  // 1. Sort
-  sortIfNecessary();
-
-  // 2. Return for single value
-  if (m_values.size() <= 1) {
-    return;
-  }
-
-  // 3. Prepare a copy
+template <typename TYPE> void TimeSeriesProperty<TYPE>::removeDataOutsideTimeROI(const TimeROI &timeROI) {
   std::vector<TimeValueUnit<TYPE>> mp_copy;
+  createFilteredData(timeROI, mp_copy);
 
-  g_log.debug() << "DB541  mp_copy Size = " << mp_copy.size() << "  Original MP Size = " << m_values.size() << "\n";
-
-  // 4. Create new
-  for (const auto &splitter : splittervec) {
-    Types::Core::DateAndTime t_start = splitter.begin();
-    Types::Core::DateAndTime t_stop = splitter.end();
-
-    int tstartindex = findIndex(t_start);
-    if (tstartindex < 0) {
-      // The splitter is not well defined, and use the first
-      tstartindex = 0;
-    } else if (tstartindex >= int(m_values.size())) {
-      // The splitter is not well defined, adn use the last
-      tstartindex = int(m_values.size()) - 1;
-    }
-
-    int tstopindex = findIndex(t_stop);
-
-    if (tstopindex < 0) {
-      tstopindex = 0;
-    } else if (tstopindex >= int(m_values.size())) {
-      tstopindex = int(m_values.size()) - 1;
-    } else {
-      if (t_stop == m_values[size_t(tstopindex)].time() && size_t(tstopindex) > 0) {
-        tstopindex--;
-      }
-    }
-
-    /* Check */
-    if (tstartindex < 0 || tstopindex >= int(m_values.size())) {
-      g_log.warning() << "Memory Leak In SplitbyTime!\n";
-    }
-
-    if (tstartindex == tstopindex) {
-      TimeValueUnit<TYPE> temp(t_start, m_values[tstartindex].value());
-      mp_copy.emplace_back(temp);
-    } else {
-      mp_copy.emplace_back(t_start, m_values[tstartindex].value());
-      for (auto im = size_t(tstartindex + 1); im <= size_t(tstopindex); ++im) {
-        mp_copy.emplace_back(m_values[im].time(), m_values[im].value());
-      }
-    }
-  } // ENDFOR
-
-  g_log.debug() << "DB530  Filtered Log Size = " << mp_copy.size() << "  Original Log Size = " << m_values.size()
-                << "\n";
-
-  // 5. Clear
   m_values.clear();
   m_values = mp_copy;
   mp_copy.clear();
 
   m_size = static_cast<int>(m_values.size());
-}
-
-/**
- * Split this time series property by time intervals to multiple time series
- * property according to number of distinct splitters' indexes, such as 0 and 1
- *
- * NOTE: If the input TSP has a single value, it is assumed to be a constant
- *  and so is not split, but simply copied to all output.
- *
- * @param splitter :: a SplittingIntervalVec object containing the list of intervals
- *                     and destinations.
- * @param outputs  :: A vector of output TimeSeriesProperty
- * pointers of the same type.
- * @param isPeriodic :: whether the log (this TSP) is periodic. For example
- *                    proton-charge is periodic log.
- */
-template <typename TYPE>
-void TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
-                                           bool isPeriodic) const {
-  // 0. Sort if necessary
-  sortIfNecessary();
-
-  if (outputs.empty())
-    return;
-
-  std::vector<TimeSeriesProperty<TYPE> *> outputs_tsp;
-
-  size_t numOutputs = outputs.size();
-  // 1. Clear the outputs before you start
-  for (size_t i = 0; i < numOutputs; i++) {
-    auto *myOutput = dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
-    if (myOutput) {
-      outputs_tsp.emplace_back(myOutput);
-      if (this->m_values.size() == 1) {
-        // Special case for TSP with a single entry = just copy.
-        myOutput->m_values = this->m_values;
-        myOutput->m_size = 1;
-      } else {
-        myOutput->m_values.clear();
-        myOutput->m_size = 0;
-      }
-    } else {
-      outputs_tsp.emplace_back(nullptr);
-    }
-  }
-
-  // 2. Special case for TSP with a single entry = just copy.
-  if (this->m_values.size() == 1)
-    return;
-
-  // 3. We will be iterating through all the entries in the the map/vector
-  size_t i_property = 0;
-
-  //    And at the same time, iterate through the splitter
-  auto itspl = splitter.begin();
-
-  size_t counter = 0;
-  g_log.debug() << "[DB] Number of time series entries = " << m_values.size()
-                << ", Number of splitters = " << splitter.size() << "\n";
-  while (itspl != splitter.end() && i_property < m_values.size()) {
-    // Get the splitting interval times and destination
-    DateAndTime start = itspl->begin();
-    DateAndTime stop = itspl->end();
-
-    int output_index = itspl->index();
-    // output workspace index is out of range. go to the next splitter
-    if (output_index < 0 || output_index >= static_cast<int>(numOutputs))
-      continue;
-
-    TimeSeriesProperty<TYPE> *myOutput = outputs_tsp[output_index];
-    // skip if the input property is of wrong type
-    if (!myOutput) {
-      ++itspl;
-      ++counter;
-      continue;
-    }
-
-    // Skip the events before the start of the time
-    while (i_property < m_values.size() && m_values[i_property].time() < start)
-      ++i_property;
-
-    if (i_property == m_values.size()) {
-      // i_property is out of the range. Then use the last entry
-      myOutput->addValue(m_values[i_property - 1].time(), m_values[i_property - 1].value());
-      break;
-    }
-
-    // The current entry is within an interval. Record them until out
-    if (m_values[i_property].time() > start && i_property > 0 && !isPeriodic) {
-      // Record the previous oneif this property is not exactly on start time
-      //   and this entry is not recorded
-      size_t i_prev = i_property - 1;
-      if (myOutput->size() == 0 || m_values[i_prev].time() != myOutput->lastTime())
-        myOutput->addValue(m_values[i_prev].time(), m_values[i_prev].value());
-    }
-
-    // Loop through all the entries until out.
-    while (i_property < m_values.size() && m_values[i_property].time() < stop) {
-
-      // Copy the log out to the output
-      myOutput->addValue(m_values[i_property].time(), m_values[i_property].value());
-      ++i_property;
-    }
-
-    // Go to the next interval
-    ++itspl;
-    ++counter;
-  } // Looping through entries in the splitter vector
-
-  // Make sure all entries have the correct size recorded in m_size.
-  for (std::size_t i = 0; i < numOutputs; i++) {
-    auto *myOutput = dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
-    if (myOutput) {
-      myOutput->m_size = myOutput->realSize();
-    }
-  }
 }
 
 /// Split this TimeSeriresProperty by a vector of time with N entries,
@@ -725,6 +561,123 @@ void TimeSeriesProperty<std::string>::makeFilterByValue(std::vector<SplittingInt
                                        "properties");
 }
 
+/**
+ * Fill a TimeROI that will filter the events by matching
+ * log values >= min and <= max. Creates TimeROI where
+ * times match the log values
+ * This method is only used by FilterByLogValue and SumEventsByLogValue
+ *
+ * @param min :: min value
+ * @param max :: max value
+ * @param expand :: bool to expand ROI to the expanded Range
+ * @param expandRange :: TimeInterval for the expanded ROI
+ * @param TimeTolerance :: offset added to times in seconds (default: 0)
+ * @param centre :: Whether the log value time is considered centred or at the
+ *beginning (the default).
+ * @param existingROI :: Optional TimeROI to be intersected with created TimeROI
+ * @return The effective TimeROI
+ */
+template <typename TYPE>
+TimeROI TimeSeriesProperty<TYPE>::makeFilterByValue(double min, double max, bool expand,
+                                                    const TimeInterval &expandRange, double TimeTolerance, bool centre,
+                                                    const TimeROI *existingROI) const {
+  const bool emptyMin = (min == EMPTY_DBL());
+  const bool emptyMax = (max == EMPTY_DBL());
+
+  if (!emptyMin && !emptyMax && max < min) {
+    std::stringstream ss;
+    ss << "TimeSeriesProperty::makeFilterByValue: 'max' argument must be "
+          "greater than 'min' "
+       << "(got min=" << min << " max=" << max << ")";
+    throw std::invalid_argument(ss.str());
+  }
+
+  // If min or max were unset ("empty") in the algorithm, set to the min or max
+  // value of the log
+  if (emptyMin)
+    min = static_cast<double>(minValue());
+  if (emptyMax)
+    max = static_cast<double>(maxValue());
+
+  TimeROI newROI;
+
+  // Do nothing if the log is empty.
+  if (m_values.empty())
+    return newROI;
+
+  // 1. Sort
+  sortIfNecessary();
+
+  // 2. Do the rest
+  const time_duration tol = DateAndTime::durationFromSeconds(TimeTolerance);
+  DateAndTime stop_t;
+  DateAndTime start, stop;
+
+  bool isGood = false;
+  for (size_t i = 0; i < m_values.size(); ++i) {
+    TYPE val = m_values[i].value();
+
+    if ((val >= min) && (val <= max)) {
+      if (isGood) {
+        stop_t = m_values[i].time();
+      } else {
+        isGood = true;
+        stop_t = m_values[i].time();
+        start = centre ? m_values[i].time() - tol : m_values[i].time();
+      }
+    } else if (isGood) {
+      stop = centre ? stop_t + tol : m_values[i].time();
+      if (start < stop)
+        newROI.addROI(start, stop);
+      isGood = false;
+    }
+  }
+  if (isGood) {
+    stop = centre ? stop_t + tol : stop_t;
+    if (start < stop)
+      newROI.addROI(start, stop);
+  }
+
+  if (expand) {
+    if (expandRange.start() < firstTime()) {
+      auto val = static_cast<double>(firstValue());
+      if ((val >= min) && (val <= max)) {
+        newROI.addROI(expandRange.start(), firstTime());
+      }
+    }
+    if (expandRange.stop() > lastTime()) {
+      auto val = static_cast<double>(lastValue());
+      if ((val >= min) && (val <= max)) {
+        newROI.addROI(lastTime(), expandRange.stop());
+      }
+    }
+  }
+
+  // If the TimeROI is empty there are no values inside the filter
+  // so we should return USE_NONE
+  if (newROI.useAll()) {
+    return TimeROI::USE_NONE;
+  }
+
+  if (existingROI != nullptr && !existingROI->useAll()) {
+    newROI.update_intersection(*existingROI);
+  }
+  return newROI;
+}
+
+/** Function specialization for TimeSeriesProperty<std::string>
+ *  @throws Kernel::Exception::NotImplementedError always
+ */
+template <>
+TimeROI TimeSeriesProperty<std::string>::makeFilterByValue(double /*min*/, double /*max*/, bool /*expand*/,
+                                                           const TimeInterval & /*expandRange*/,
+                                                           double /*TimeTolerance*/, bool /*centre*/,
+                                                           const TimeROI * /*existingROI*/) const {
+  throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue "
+                                       "is not implemented for string "
+                                       "properties");
+}
+
 /** If the first and/or last values in a log are between min & max, expand and
  * existing TimeSplitter
  *  (created by makeFilterByValue) if necessary to cover the full TimeInterval
@@ -756,24 +709,28 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(std::vector<SplittingInterval
   if (emptyMax)
     max = static_cast<double>(maxValue());
 
-  // Assume everything before the 1st value is constant
-  double val = static_cast<double>(firstValue());
-  if ((val >= min) && (val <= max)) {
-    SplittingIntervalVec extraFilter;
-    extraFilter.emplace_back(range.begin(), firstTime(), 0);
-    // Include everything from the start of the run to the first time measured
-    // (which may be a null time interval; this'll be ignored)
-    split = split | extraFilter;
+  if (range.start() < firstTime()) {
+    // Assume everything before the 1st value is constant
+    double val = static_cast<double>(firstValue());
+    if ((val >= min) && (val <= max)) {
+      SplittingIntervalVec extraFilter;
+      extraFilter.emplace_back(range.start(), firstTime(), 0);
+      // Include everything from the start of the run to the first time measured
+      // (which may be a null time interval; this'll be ignored)
+      split = split | extraFilter;
+    }
   }
 
-  // Assume everything after the LAST value is constant
-  val = static_cast<double>(lastValue());
-  if ((val >= min) && (val <= max)) {
-    SplittingIntervalVec extraFilter;
-    extraFilter.emplace_back(lastTime(), range.end(), 0);
-    // Include everything from the start of the run to the first time measured
-    // (which may be a null time interval; this'll be ignored)
-    split = split | extraFilter;
+  if (lastTime() < range.stop()) {
+    // Assume everything after the LAST value is constant
+    double val = static_cast<double>(lastValue());
+    if ((val >= min) && (val <= max)) {
+      SplittingIntervalVec extraFilter;
+      extraFilter.emplace_back(lastTime(), range.stop(), 0);
+      // Include everything from the start of the run to the first time measured
+      // (which may be a null time interval; this'll be ignored)
+      split = split | extraFilter;
+    }
   }
 }
 
@@ -795,18 +752,29 @@ void TimeSeriesProperty<std::string>::expandFilterToRange(std::vector<SplittingI
 template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue(const TimeROI *timeRoi) const {
   double retVal = 0.0;
   try {
-    if ((timeRoi == nullptr) || (timeRoi->empty())) {
-      const auto &filter = getSplittingIntervals();
-      retVal = this->averageValueInFilter(filter);
+    if ((timeRoi == nullptr) || (timeRoi->useAll())) {
+      const auto &intervals = getTimeIntervals();
+      retVal = this->averageValueInFilter(intervals);
+    } else if (timeRoi->useNone()) {
+      // if TimeROI bans everything, use the simple mean
+      const auto stats =
+          Mantid::Kernel::getStatistics(this->valuesAsVector(), Mantid::Kernel::Math::StatisticType::Mean);
+      return stats.mean;
     } else {
-      const auto &filter = timeRoi->toSplitters();
+      const auto &filter = timeRoi->toTimeIntervals();
       retVal = this->averageValueInFilter(filter);
+      g_log.warning("Calls to TimeSeriesProperty::timeAverageValue should be replaced with "
+                    "Run::getTimeAveragedValue");
     }
   } catch (std::exception &) {
     // just return nan
     retVal = std::numeric_limits<double>::quiet_NaN();
   }
   return retVal;
+}
+
+template <> double TimeSeriesProperty<std::string>::timeAverageValue(const TimeROI * /*timeRoi*/) const {
+  throw Exception::NotImplementedError("TimeSeriesProperty::timeAverageValue is not implemented for string properties");
 }
 
 /** Calculates the time-weighted average of a property in a filtered range.
@@ -816,7 +784,7 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::timeAverageValue(const
  * filter.
  */
 template <typename TYPE>
-double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<SplittingInterval> &filter) const {
+double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<TimeInterval> &filter) const {
   // TODO: Consider logs that aren't giving starting values.
 
   // If there's just a single value in the log, return that.
@@ -839,10 +807,10 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<Splittin
 
     // Get the log value and index at the start time of the filter
     int index;
-    double value = static_cast<double>(getSingleValue(time.begin(), index));
-    DateAndTime startTime = time.begin();
+    double value = static_cast<double>(getSingleValue(time.start(), index));
+    DateAndTime startTime = time.start();
 
-    while (index < realSize() - 1 && m_values[index + 1].time() < time.end()) {
+    while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
       ++index;
       numerator += DateAndTime::secondsFromDuration(m_values[index].time() - startTime) * value;
       startTime = m_values[index].time();
@@ -850,7 +818,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<Splittin
     }
 
     // Now close off with the end of the current filter range
-    numerator += DateAndTime::secondsFromDuration(time.end() - startTime) * value;
+    numerator += DateAndTime::secondsFromDuration(time.stop() - startTime) * value;
   }
 
   if (totalTime > 0) {
@@ -867,7 +835,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<Splittin
  *  @throws Kernel::Exception::NotImplementedError always
  */
 template <>
-double TimeSeriesProperty<std::string>::averageValueInFilter(const SplittingIntervalVec & /*filter*/) const {
+double TimeSeriesProperty<std::string>::averageValueInFilter(const std::vector<TimeInterval> & /*filter*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageValueInFilter is not "
                                        "implemented for string properties");
@@ -875,56 +843,47 @@ double TimeSeriesProperty<std::string>::averageValueInFilter(const SplittingInte
 
 template <typename TYPE>
 std::pair<double, double>
-TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const {
-  // the mean to calculate the standard deviation about
-  // this will sort the log as necessary as well
-  const double mean = this->averageValueInFilter(filter);
+TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<TimeInterval> &intervals) const {
+  double mean_prev, mean_current(0.0), s(0.0), variance, duration, weighted_sum(0.0);
 
-  // First of all, if the log or the filter is empty or is a single value,
+  // First of all, if the log or the intervals are empty or is a single value,
   // return NaN for the uncertainty
-  if (realSize() <= 1 || filter.empty()) {
-    return std::pair<double, double>{mean, std::numeric_limits<double>::quiet_NaN()};
+  if (realSize() <= 1 || intervals.empty()) {
+    return std::pair<double, double>{this->averageValueInFilter(intervals), std::numeric_limits<double>::quiet_NaN()};
   }
-
-  double numerator(0.0), totalTime(0.0);
-  // Loop through the filter ranges
-  for (const auto &time : filter) {
-    // Calculate the total time duration (in seconds) within by the filter
-    totalTime += time.duration();
-
-    // Get the log value and index at the start time of the filter
+  auto real_size = realSize();
+  for (const auto &time : intervals) {
     int index;
-    double value = static_cast<double>(getSingleValue(time.begin(), index));
-    double valuestddev = (value - mean) * (value - mean);
-    DateAndTime startTime = time.begin();
+    auto value = static_cast<double>(getSingleValue(time.start(), index));
+    DateAndTime startTime = time.start();
+    while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
+      index++;
+      if (index == real_size) {
+        duration = DateAndTime::secondsFromDuration(time.stop() - startTime);
+      } else {
+        duration = DateAndTime::secondsFromDuration(m_values[index].time() - startTime);
+        startTime = m_values[index].time();
+      }
+      weighted_sum += duration;
+      mean_prev = mean_current;
 
-    while (index < realSize() - 1 && m_values[index + 1].time() < time.end()) {
-      ++index;
+      mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
+      s += duration * (value - mean_prev) * (value - mean_current);
 
-      numerator += DateAndTime::secondsFromDuration(m_values[index].time() - startTime) * valuestddev;
-      startTime = m_values[index].time();
       value = static_cast<double>(m_values[index].value());
-      valuestddev = (value - mean) * (value - mean);
     }
 
     // Now close off with the end of the current filter range
-    numerator += DateAndTime::secondsFromDuration(time.end() - startTime) * valuestddev;
-  }
+    duration = DateAndTime::secondsFromDuration(time.stop() - startTime);
+    weighted_sum += duration;
+    mean_prev = mean_current;
 
+    mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
+    s += duration * (value - mean_prev) * (value - mean_current);
+  }
+  variance = s / weighted_sum;
   // Normalise by the total time
-  return std::pair<double, double>{mean, std::sqrt(numerator / totalTime)};
-}
-
-template <typename TYPE> std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev() const {
-  std::pair<double, double> retVal{0., 0.}; // mean and stddev
-  try {
-    const auto &filter = getSplittingIntervals();
-    retVal = this->averageAndStdDevInFilter(filter);
-  } catch (std::exception &) {
-    retVal.first = std::numeric_limits<double>::quiet_NaN();
-    retVal.second = std::numeric_limits<double>::quiet_NaN();
-  }
-  return retVal;
+  return std::pair<double, double>{mean_current, std::sqrt(variance)};
 }
 
 /** Function specialization for TimeSeriesProperty<std::string>
@@ -932,10 +891,40 @@ template <typename TYPE> std::pair<double, double> TimeSeriesProperty<TYPE>::tim
  */
 template <>
 std::pair<double, double>
-TimeSeriesProperty<std::string>::averageAndStdDevInFilter(const SplittingIntervalVec & /*filter*/) const {
+TimeSeriesProperty<std::string>::averageAndStdDevInFilter(const std::vector<TimeInterval> & /*filter*/) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageAndStdDevInFilter is not "
                                        "implemented for string properties");
+}
+
+template <typename TYPE>
+std::pair<double, double> TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev(const Kernel::TimeROI *timeRoi) const {
+  // time series with less than two entries are conner cases
+  if (this->realSize() == 0)
+    return std::pair<double, double>{std::numeric_limits<double>::quiet_NaN(),
+                                     std::numeric_limits<double>::quiet_NaN()};
+  else if (this->realSize() == 1)
+    return std::pair<double, double>(static_cast<double>(this->firstValue()), 0.0);
+
+  // Derive splitting intervals from either the roi or from the first/last entries in the time series
+  std::vector<TimeInterval> intervals;
+  if (timeRoi && !timeRoi->useAll()) {
+    intervals = timeRoi->toTimeIntervals(this->firstTime());
+  } else {
+    intervals = this->getTimeIntervals();
+  }
+
+  return this->averageAndStdDevInFilter(intervals);
+}
+
+/** Function specialization for timeAverageValueAndStdDev<std::string>
+ *  @return pair (Nan, Nan) always.
+ */
+template <>
+std::pair<double, double>
+TimeSeriesProperty<std::string>::timeAverageValueAndStdDev(const Kernel::TimeROI * /*roi*/) const {
+  throw Exception::NotImplementedError(
+      "TimeSeriesProperty::timeAverageValueAndStdDev is not implemented for string properties");
 }
 
 // Re-enable the warnings disabled before makeFilterByValue
@@ -1021,24 +1010,29 @@ template <typename TYPE> std::vector<DateAndTime> TimeSeriesProperty<TYPE>::time
  * Return the time series's filtered times as a vector<DateAndTime>
  * @return A vector of DateAndTime objects
  */
-template <typename TYPE> std::vector<DateAndTime> TimeSeriesProperty<TYPE>::filteredTimesAsVector() const {
-  if (m_filter.empty()) {
-    return this->timesAsVector(); // no filtering to do
-  }
-  if (!m_filterApplied) {
-    applyFilter();
-  }
-  sortIfNecessary();
-
-  std::vector<DateAndTime> out;
-
-  for (const auto &value : m_values) {
-    if (isTimeFiltered(value.time())) {
-      out.emplace_back(value.time());
+template <typename TYPE>
+std::vector<DateAndTime> TimeSeriesProperty<TYPE>::filteredTimesAsVector(const Kernel::TimeROI *roi) const {
+  if (!roi || roi->useAll()) {
+    return this->timesAsVector();
+  } else {
+    std::vector<DateAndTime> out;
+    if (roi->firstTime() > this->m_values.back().time()) {
+      // Since the ROI starts after everything, just return the last time in the log
+      out.emplace_back(this->m_values.back().time());
+    } else { // only use the values in the filter
+      for (const auto &timeAndValue : this->m_values) {
+        if (roi->valueAtTime(timeAndValue.time())) {
+          out.emplace_back(timeAndValue.time());
+        }
+      }
     }
-  }
 
-  return out;
+    return out;
+  }
+}
+
+template <typename TYPE> std::vector<DateAndTime> TimeSeriesProperty<TYPE>::filteredTimesAsVector() const {
+  return this->timesAsVector();
 }
 
 /**
@@ -1088,7 +1082,7 @@ void TimeSeriesProperty<TYPE>::addValue(const Types::Core::DateAndTime &time, co
     m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
   }
 
-  m_filterApplied = false;
+  // m_filterApplied = false;
 }
 
 /** Add a value to the map
@@ -1174,6 +1168,24 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::firstValue() const {
   return m_values[0].value();
 }
 
+template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::firstValue(const Kernel::TimeROI &roi) const {
+  const auto startTime = roi.firstTime();
+  if (startTime <= this->firstTime()) {
+    return this->firstValue();
+  } else if (startTime >= this->lastTime()) {
+    return this->lastValue();
+  } else {
+    const auto times = this->timesAsVector();
+    auto iter = std::lower_bound(times.cbegin(), times.cend(), startTime);
+    if (*iter > startTime)
+      iter--;
+    const auto index = std::size_t(std::distance(times.cbegin(), iter));
+
+    const auto values = this->valuesAsVector();
+    return values[index];
+  }
+}
+
 /** Returns the first time regardless of filter
  *  @return Value
  */
@@ -1203,6 +1215,51 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
   sortIfNecessary();
 
   return m_values.rbegin()->value();
+}
+
+template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue(const Kernel::TimeROI &roi) const {
+  const auto stopTime = roi.lastTime();
+  const auto times = this->timesAsVector();
+  if (stopTime <= times.front()) {
+    return this->firstValue();
+  } else if (stopTime >= times.back()) {
+    return this->lastValue();
+  } else {
+    auto iter = std::lower_bound(times.cbegin(), times.cend(), stopTime);
+    const auto index = std::size_t(std::distance(times.cbegin(), iter));
+
+    const auto values = this->valuesAsVector();
+    return values[index];
+  }
+}
+
+/**
+ * Returns duration of the time series, possibly restricted by a TimeROI object.
+ * If no TimeROI is provided or the TimeROI is empty, the whole span of the time series plus
+ * and additional extra time is returned. This extra time is the time span between the last two log entries.
+ * The extra time ensures that the mean and the time-weighted mean are the same for time series
+ * containing log entries equally spaced in time.
+ * @param roi :: TimeROI object defining the time segments to consider.
+ * @return duration, in seconds.
+ */
+template <typename TYPE> double TimeSeriesProperty<TYPE>::durationInSeconds(const Kernel::TimeROI *roi) const {
+  if (this->size() == 0)
+    return std::numeric_limits<double>::quiet_NaN();
+  if (roi && !roi->useAll()) {
+    Kernel::TimeROI seriesSpan(*roi);
+    const auto firstTime = this->firstTime();
+    // remove everything before the start time
+    if (firstTime > DateAndTime::GPS_EPOCH) {
+      seriesSpan.addMask(DateAndTime::GPS_EPOCH, firstTime);
+    }
+    return seriesSpan.durationInSeconds();
+  } else {
+    const auto &intervals = this->getTimeIntervals();
+    const double duration_sec =
+        std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
+                        [](double sum, const auto &interval) { return sum + interval.duration(); });
+    return duration_sec;
+  }
 }
 
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::minValue() const {
@@ -1341,7 +1398,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::clear() {
   m_values.clear();
 
   m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
-  m_filterApplied = false;
+  // m_filterApplied = false;
 }
 
 /** Clears out all but the last value in the property.
@@ -1539,103 +1596,43 @@ template <typename TYPE> TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int 
 
   Kernel::TimeInterval deltaT;
 
-  if (m_filter.empty()) {
-    // I. No filter
-    if (n >= static_cast<int>(m_values.size()) ||
-        (n == static_cast<int>(m_values.size()) - 1 && m_values.size() == 1)) {
-      // 1. Out of bound
-      ;
-    } else if (n == static_cast<int>(m_values.size()) - 1) {
-      // 2. Last one by making up an end time.
-      // the last time is the last thing known
-      const auto ultimate = m_values.rbegin()->time();
-      // go backwards from the time before it that is different
-      int counter = 0;
-      while (DateAndTime::secondsFromDuration(ultimate - (m_values.rbegin() + counter)->time()) == 0.) {
-        counter += 1;
-      }
-      // get the last time that is different
-      time_duration lastDuration = m_values.rbegin()->time() - (m_values.rbegin() + counter)->time();
-      // the last duration is equal to the previous, non-zero, duration
-      DateAndTime endTime = m_values.rbegin()->time() + lastDuration;
+  // No filter
+  if (n >= static_cast<int>(m_values.size()) || (n == static_cast<int>(m_values.size()) - 1 && m_values.size() == 1)) {
+    // Out of bound
+    ;
+  } else if (n == static_cast<int>(m_values.size()) - 1) {
+    // Last one by making up an end time.
+    DateAndTime endTime = getFakeEndTime();
 
-      deltaT = Kernel::TimeInterval(m_values.rbegin()->time(), endTime);
-    } else {
-      // 3. Regular
-      DateAndTime startT = m_values[static_cast<std::size_t>(n)].time();
-      DateAndTime endT = m_values[static_cast<std::size_t>(n) + 1].time();
-      TimeInterval dt(startT, endT);
-      deltaT = dt;
-    }
+    deltaT = Kernel::TimeInterval(m_values.rbegin()->time(), endTime);
   } else {
-    // II. Filter
-    // II.0 apply Filter
-    this->applyFilter();
-
-    if (static_cast<size_t>(n) > m_filterQuickRef.back().second + 1) {
-      // 1. n > size of the allowed region, do nothing to dt
-      ;
-    } else if (static_cast<size_t>(n) == m_filterQuickRef.back().second + 1) {
-      // 2. n = size of the allowed region, duplicate the last one
-      auto ind_t1 = static_cast<long>(m_filterQuickRef.back().first);
-      long ind_t2 = ind_t1 - 1;
-      Types::Core::DateAndTime t1 = (m_values.begin() + ind_t1)->time();
-      Types::Core::DateAndTime t2 = (m_values.begin() + ind_t2)->time();
-      time_duration d = t1 - t2;
-      Types::Core::DateAndTime t3 = t1 + d;
-      Kernel::TimeInterval dt(t1, t3);
-      deltaT = dt;
-    } else {
-      // 3. n < size
-      Types::Core::DateAndTime t0;
-      Types::Core::DateAndTime tf;
-
-      size_t refindex = this->findNthIndexFromQuickRef(n);
-      if (refindex + 3 >= m_filterQuickRef.size())
-        throw std::logic_error("nthInterval:  Haven't considered this case.");
-
-      int diff = n - static_cast<int>(m_filterQuickRef[refindex].second);
-      if (diff < 0)
-        throw std::logic_error("nthInterval:  diff cannot be less than 0.");
-
-      // i) start time
-      Types::Core::DateAndTime ftime0 = m_filter[m_filterQuickRef[refindex].first].first;
-      size_t iStartIndex = m_filterQuickRef[refindex + 1].first + static_cast<size_t>(diff);
-      Types::Core::DateAndTime ltime0 = m_values[iStartIndex].time();
-      if (iStartIndex == 0 && ftime0 < ltime0) {
-        // a) Special case that True-filter time starts before log time
-        t0 = ltime0;
-      } else if (diff == 0) {
-        // b) First entry... usually start from filter time
-        t0 = ftime0;
-      } else {
-        // c) Not the first entry.. usually in the middle of TRUE filter period.
-        // use log time
-        t0 = ltime0;
-      }
-
-      // ii) end time
-      size_t iStopIndex = iStartIndex + 1;
-      if (iStopIndex >= m_values.size()) {
-        // a) Last log entry is for the start
-        Types::Core::DateAndTime ftimef = m_filter[m_filterQuickRef[refindex + 3].first].first;
-        tf = ftimef;
-      } else {
-        // b) Using the earlier value of next log entry and next filter entry
-        Types::Core::DateAndTime ltimef = m_values[iStopIndex].time();
-        Types::Core::DateAndTime ftimef = m_filter[m_filterQuickRef[refindex + 3].first].first;
-        if (ltimef < ftimef)
-          tf = ltimef;
-        else
-          tf = ftimef;
-      }
-
-      Kernel::TimeInterval dt(t0, tf);
-      deltaT = dt;
-    } // END-IF-ELSE Cases
+    // Regular
+    DateAndTime startT = m_values[static_cast<std::size_t>(n)].time();
+    DateAndTime endT = m_values[static_cast<std::size_t>(n) + 1].time();
+    TimeInterval dt(startT, endT);
+    deltaT = dt;
   }
 
   return deltaT;
+}
+
+template <typename TYPE> Types::Core::DateAndTime TimeSeriesProperty<TYPE>::getFakeEndTime() const {
+  sortIfNecessary();
+
+  // the last time is the last thing known
+  const auto ultimate = m_values.rbegin()->time();
+
+  // go backwards from the time before it that is different
+  int counter = 0;
+  while (DateAndTime::secondsFromDuration(ultimate - (m_values.rbegin() + counter)->time()) == 0.) {
+    counter += 1;
+  }
+
+  // get the last time that is different
+  time_duration lastDuration = m_values.rbegin()->time() - (m_values.rbegin() + counter)->time();
+
+  // the last duration is equal to the previous, non-zero, duration
+  return m_values.rbegin()->time() + lastDuration;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -1645,7 +1642,6 @@ template <typename TYPE> TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int 
  *  @return Value
  */
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
-  TYPE value;
 
   // 1. Throw error if property is empty
   if (m_values.empty()) {
@@ -1657,36 +1653,15 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
   // 2. Sort and apply filter
   sortIfNecessary();
 
-  if (m_filter.empty()) {
-    // 3. Situation 1:  No filter
-    if (static_cast<size_t>(n) < m_values.size()) {
-      TimeValueUnit<TYPE> entry = m_values[static_cast<std::size_t>(n)];
-      value = entry.value();
-    } else {
-      TimeValueUnit<TYPE> entry = m_values[static_cast<std::size_t>(m_size) - 1];
-      value = entry.value();
-    }
+  TYPE value;
+
+  // 3. Situation 1:  No filter
+  if (static_cast<size_t>(n) < m_values.size()) {
+    const auto entry = m_values[static_cast<std::size_t>(n)];
+    value = entry.value();
   } else {
-    // 4. Situation 2: There is filter
-    this->applyFilter();
-
-    if (static_cast<size_t>(n) > m_filterQuickRef.back().second + 1) {
-      // 1. n >= size of the allowed region
-      size_t ilog = (m_filterQuickRef.rbegin() + 1)->first;
-      value = m_values[ilog].value();
-    } else {
-      // 2. n < size
-      Types::Core::DateAndTime t0;
-      Types::Core::DateAndTime tf;
-
-      size_t refindex = findNthIndexFromQuickRef(n);
-      if (refindex + 3 >= m_filterQuickRef.size()) {
-        throw std::logic_error("Not consider out of boundary case here. ");
-      }
-      size_t ilog =
-          m_filterQuickRef[refindex + 1].first + (static_cast<std::size_t>(n) - m_filterQuickRef[refindex].second);
-      value = m_values[ilog].value();
-    } // END-IF-ELSE Cases
+    const auto entry = m_values[static_cast<std::size_t>(m_size) - 1];
+    value = entry.value();
   }
 
   return value;
@@ -1712,120 +1687,12 @@ template <typename TYPE> Types::Core::DateAndTime TimeSeriesProperty<TYPE>::nthT
   return m_values[static_cast<size_t>(n)].time();
 }
 
-/* Divide the property into  allowed and disallowed time intervals according to
- \a filter.
- * (Repeated time-value pairs (two same time and value entries) mark the start
- of a gap in the values.)
- * If any time-value pair is repeated, it means that this entry is in disallowed
- region.
- * The gap ends and an allowed time interval starts when a single time-value is
- met.
-   The disallowed region will be hidden for countSize() and nthInterval()
-   Boundary condition
-   ?. If filter[0].time > log[0].time, then all log before filter[0] are
- considered TRUE
-   2. If filter[-1].time < log[-1].time, then all log after filter[-1] will be
- considered same as filter[-1]
-
-   @param filter :: The filter mask to apply
- */
-template <typename TYPE> void TimeSeriesProperty<TYPE>::filterWith(const TimeSeriesProperty<bool> *filter) {
-  // 1. Clear the current
-  m_filter.clear();
-  m_filterQuickRef.clear();
-
-  if (filter->size() == 0) {
-    // if filter is empty, return
-    return;
-  }
-
-  // 2. Construct mFilter
-  std::vector<Types::Core::DateAndTime> filtertimes = filter->timesAsVector();
-  std::vector<bool> filtervalues = filter->valuesAsVector();
-  assert(filtertimes.size() == filtervalues.size());
-  const size_t nFilterTimes(filtertimes.size());
-  m_filter.reserve(nFilterTimes + 1);
-
-  bool lastIsTrue = false;
-  auto fend = filtertimes.end();
-  auto vit = filtervalues.begin();
-  for (auto fit = filtertimes.begin(); fit != fend; ++fit) {
-    if (*vit && !lastIsTrue) {
-      // Get a true in filter but last recorded value is for false
-      m_filter.emplace_back(*fit, true);
-      lastIsTrue = true;
-    } else if (!(*vit) && lastIsTrue) {
-      // Get a False in filter but last recorded value is for TRUE
-      m_filter.emplace_back(*fit, false);
-      lastIsTrue = false;
-    }
-    ++vit; // move to next value
-  }
-
-  // 2b) Get a clean finish
-  if (filtervalues.back()) {
-    DateAndTime lastTime, nextLastT;
-    if (m_values.back().time() > filtertimes.back()) {
-      const size_t nvalues(m_values.size());
-      // Last log time is later than last filter time
-      lastTime = m_values.back().time();
-      if (nvalues > 1 && m_values[nvalues - 2].time() > filtertimes.back())
-        nextLastT = m_values[nvalues - 2].time();
-      else
-        nextLastT = filtertimes.back();
-    } else {
-      // Last log time is no later than last filter time
-      lastTime = filtertimes.back();
-      const size_t nfilterValues(filtervalues.size());
-      // If last-but-one filter time is still later than value then previous is
-      // this
-      // else it is the last value time
-      if (nfilterValues > 1 && m_values.back().time() > filtertimes[nfilterValues - 2])
-        nextLastT = filtertimes[nfilterValues - 2];
-      else
-        nextLastT = m_values.back().time();
-    }
-
-    time_duration dtime = lastTime - nextLastT;
-    m_filter.emplace_back(lastTime + dtime, false);
-  }
-
-  // 3. Reset flag and do filter
-  m_filterApplied = false;
-  applyFilter();
-}
-
-/**
- * Restores the property to the unsorted & unfiltered state
- */
-template <typename TYPE> void TimeSeriesProperty<TYPE>::clearFilter() {
-  m_filter.clear();
-  m_filterQuickRef.clear();
-}
-
 /**
  * Updates size()
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::countSize() const {
-  if (m_filter.empty()) {
-    // 1. Not filter
-    m_size = int(m_values.size());
-  } else {
-    // 2. With Filter
-    if (!m_filterApplied) {
-      this->applyFilter();
-    }
-    size_t nvalues = m_filterQuickRef.empty() ? m_values.size() : m_filterQuickRef.back().second;
-    // The filter logic can end up with the quick ref having a duplicate of the
-    // last time and value at the end if the last filter time is past the log
-    // time See "If it is out of upper boundary, still record it.  but make the
-    // log entry to mP.size()+1" in applyFilter
-    // Make the log seem the full size
-    if (nvalues == m_values.size() + 1) {
-      --nvalues;
-    }
-    m_size = static_cast<int>(nvalues);
-  }
+  // 1. Not filter
+  m_size = int(m_values.size());
 }
 
 /**  Check if str has the right time format
@@ -1865,25 +1732,84 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const { retu
  */
 template <typename TYPE>
 TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics(const TimeROI *roi) const {
-  TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector()));
-
-  if (this->size() > 0) {
-    const auto &intervals = this->getSplittingIntervals();
-    const double duration_sec =
-        std::accumulate(intervals.cbegin(), intervals.cend(), 0.,
-                        [](double sum, const auto &interval) { return sum + interval.duration(); });
-    out.duration = duration_sec;
-    const auto time_weighted = this->timeAverageValueAndStdDev();
-    out.time_mean = time_weighted.first;
-    out.time_standard_deviation = time_weighted.second;
+  // Start with statistics that are not time-weighted
+  TimeSeriesPropertyStatistics out(Mantid::Kernel::getStatistics(this->filteredValuesAsVector(roi)));
+  out.duration = this->durationInSeconds(roi);
+  if (out.standard_deviation == 0.) {
+    // if the simple std-dev is zero, just copy the simple mean
+    out.time_mean = out.mean;
+    out.time_standard_deviation = 0.;
   } else {
-    out.time_mean = std::numeric_limits<double>::quiet_NaN();
-    out.time_standard_deviation = std::numeric_limits<double>::quiet_NaN();
-    out.duration = std::numeric_limits<double>::quiet_NaN();
+    // follow with time-weighted statistics
+    auto avAndDev = this->timeAverageValueAndStdDev(roi);
+    out.time_mean = avAndDev.first;
+    out.time_standard_deviation = avAndDev.second;
   }
-  if (roi == nullptr)
-    void(0);
   return out;
+}
+
+template <>
+TimeSeriesPropertyStatistics TimeSeriesProperty<std::string>::getStatistics(const TimeROI * /* roi*/) const {
+  // statistics of a string property doesn't make sense
+  TimeSeriesPropertyStatistics out;
+  out.setAllToNan();
+
+  return out;
+}
+
+/** Calculate a particular statistical quantity from the values of the time series.
+ *  @param selection : Enum indicating the selected statistical quantity.
+ *  @param roi : optional pointer to TimeROI object for filtering the time series values.
+ *  @return The value of the computed statistical quantity.
+ */
+template <typename TYPE>
+double TimeSeriesProperty<TYPE>::extractStatistic(Math::StatisticType selection, const TimeROI *roi) const {
+  using namespace Kernel::Math;
+  double singleValue = 0;
+  switch (selection) {
+  case FirstValue:
+    singleValue = static_cast<double>(this->nthValue(0));
+    break;
+  case LastValue:
+    singleValue = static_cast<double>(this->nthValue(this->size() - 1));
+    break;
+  case Minimum:
+    singleValue = static_cast<double>(this->getStatistics(roi).minimum);
+    break;
+  case Maximum:
+    singleValue = static_cast<double>(this->getStatistics(roi).maximum);
+    break;
+  case Mean:
+    singleValue = this->getStatistics(roi).mean;
+    break;
+  case Median:
+    singleValue = this->getStatistics(roi).median;
+    break;
+  case TimeAveragedMean:
+    singleValue = this->getStatistics(roi).time_mean;
+    break;
+  case StdDev:
+    singleValue = this->getStatistics(roi).standard_deviation;
+    break;
+  case TimeAverageStdDev:
+    singleValue = this->getStatistics(roi).time_standard_deviation;
+    break;
+  default:
+    throw std::invalid_argument("extractStatistic - Unknown statistic type: " + boost::lexical_cast<std::string>(this));
+  };
+  return singleValue;
+}
+
+/** Function specialization for TimeSeriesProperty<std::string>
+ *  @throws Kernel::Exception::NotImplementedError always
+ */
+template <>
+double TimeSeriesProperty<std::string>::extractStatistic(Math::StatisticType selection, const TimeROI *roi) const {
+  UNUSED_ARG(selection);
+  UNUSED_ARG(roi);
+  throw Exception::NotImplementedError("TimeSeriesProperty::"
+                                       "extractStatistic is not "
+                                       "implemented for string properties");
 }
 
 /*
@@ -1965,7 +1891,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::sortIfNecessary() const 
 
 /** Find the index of the entry of time t in the mP vector (sorted)
  *  Return @ if t is within log.begin and log.end, then the index of the log
- * equal or just smaller than t
+ *  equal or just smaller than t
  *           if t is earlier (less) than the starting time, return -1
  *           if t is later (larger) than the ending time, return m_value.size
  */
@@ -2027,159 +1953,15 @@ int TimeSeriesProperty<TYPE>::upperBound(Types::Core::DateAndTime t, int istart,
   sortIfNecessary();
 
   // 3. Construct the pair for comparison and do lower_bound()
-  TimeValueUnit<TYPE> temppair(t, m_values[0].value());
-  typename std::vector<TimeValueUnit<TYPE>>::iterator fid;
-  fid = std::lower_bound((m_values.begin() + istart), (m_values.begin() + iend + 1), temppair);
-  if (fid == m_values.end())
-    throw std::runtime_error("Cannot find data");
+  const TimeValueUnit<TYPE> temppair(t, m_values[0].value());
+  const auto first = m_values.cbegin() + istart;
+  const auto last = m_values.cbegin() + iend + 1;
+  const auto iter = std::lower_bound(first, last, temppair);
 
   // 4. Calculate return value
-  size_t index = size_t(fid - m_values.begin());
-
-  return int(index);
-}
-
-/*
- * Apply filter
- * Requirement: There is no 2 consecutive 'second' values that are same in
- *mFilter
- *
- * It only works with filter starting from TRUE AND having TRUE and FALSE
- *altered
- */
-template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
-  // 1. Check and reset
-  if (m_filterApplied)
-    return;
-  if (m_filter.empty())
-    return;
-
-  m_filterQuickRef.clear();
-
-  // 2. Apply filter
-  int icurlog = 0;
-  for (size_t ift = 0; ift < m_filter.size(); ift++) {
-    if (m_filter[ift].second) {
-      // a) Filter == True: indicating the start of a quick reference region
-      int istart = 0;
-      if (icurlog > 0)
-        istart = icurlog - 1;
-
-      if (icurlog < static_cast<int>(m_values.size()))
-        icurlog = this->upperBound(m_filter[ift].first, istart, static_cast<int>(m_values.size()) - 1);
-
-      if (icurlog < 0) {
-        // i. If it is out of lower boundary, add filter time, add 0 time
-        if (!m_filterQuickRef.empty())
-          throw std::logic_error("return log index < 0 only occurs with the first log entry");
-
-        m_filterQuickRef.emplace_back(ift, 0);
-        m_filterQuickRef.emplace_back(0, 0);
-
-        icurlog = 0;
-      } else if (icurlog >= static_cast<int>(m_values.size())) {
-        // ii.  If it is out of upper boundary, still record it.  but make the
-        // log entry to mP.size()+1
-        size_t ip = 0;
-        if (m_filterQuickRef.size() >= 4)
-          ip = m_filterQuickRef.back().second;
-        m_filterQuickRef.emplace_back(ift, ip);
-        m_filterQuickRef.emplace_back(m_values.size() + 1, ip);
-      } else {
-        // iii. The returned value is in the boundary.
-        size_t numintervals = 0;
-        if (!m_filterQuickRef.empty()) {
-          numintervals = m_filterQuickRef.back().second;
-        }
-        if (m_filter[ift].first < m_values[static_cast<std::size_t>(icurlog)].time()) {
-          if (icurlog == 0) {
-            throw std::logic_error("In this case, icurlog won't be zero! ");
-          }
-          icurlog--;
-        }
-        m_filterQuickRef.emplace_back(ift, numintervals);
-        // Note: numintervals inherits from last filter
-        m_filterQuickRef.emplace_back(icurlog, numintervals);
-      }
-    } // Filter value is True
-    else if (m_filterQuickRef.size() % 4 == 2) {
-      // b) Filter == False: indicating the end of a quick reference region
-      int ilastlog = icurlog;
-
-      if (ilastlog < static_cast<int>(m_values.size())) {
-        // B1: Last TRUE entry is still within log
-        icurlog = this->upperBound(m_filter[ift].first, icurlog, static_cast<int>(m_values.size()) - 1);
-
-        if (icurlog < 0) {
-          // i.   Some false filter is before the first log entry.  The previous
-          // filter does not make sense
-          if (m_filterQuickRef.size() != 2)
-            throw std::logic_error("False filter is before first log entry.  "
-                                   "QuickRef size must be 2.");
-          m_filterQuickRef.pop_back();
-          m_filterQuickRef.clear();
-        } else {
-          // ii.  Register the end of a valid log
-          if (ilastlog < 0)
-            throw std::logic_error(" LastLog is not expected to be less than 0");
-
-          int delta_numintervals = icurlog - ilastlog;
-          if (delta_numintervals < 0)
-            throw std::logic_error("Havn't considered delta numinterval can be less than 0.");
-
-          size_t new_numintervals = m_filterQuickRef.back().second + static_cast<size_t>(delta_numintervals);
-
-          m_filterQuickRef.emplace_back(icurlog, new_numintervals);
-          m_filterQuickRef.emplace_back(ift, new_numintervals);
-        }
-      } else {
-        // B2. Last TRUE filter's time is already out side of log.
-        size_t new_numintervals = m_filterQuickRef.back().second + 1;
-        m_filterQuickRef.emplace_back(icurlog - 1, new_numintervals);
-        m_filterQuickRef.emplace_back(ift, new_numintervals);
-      }
-    } // Filter value is FALSE
-
-  } // ENDFOR
-
-  // 5. Change flag
-  m_filterApplied = true;
-
-  // 6. Re-count size
-  countSize();
-}
-
-/*
- * A new algorithm sto find Nth index.  It is simple and leave a lot work to the
- *callers
- *
- * Return: the index of the quick reference vector
- */
-template <typename TYPE> size_t TimeSeriesProperty<TYPE>::findNthIndexFromQuickRef(int n) const {
-  size_t index = 0;
-
-  // 1. Do check
-  if (n < 0)
-    throw std::invalid_argument("Unable to take into account negative index. ");
-  else if (m_filterQuickRef.empty())
-    throw std::runtime_error("Quick reference is not established. ");
-
-  // 2. Return...
-  if (static_cast<size_t>(n) >= m_filterQuickRef.back().second) {
-    // 2A.  Out side of boundary
-    index = m_filterQuickRef.size();
-  } else {
-    // 2B. Inside
-    for (size_t i = 0; i < m_filterQuickRef.size(); i += 4) {
-      if (static_cast<size_t>(n) >= m_filterQuickRef[i].second &&
-          static_cast<size_t>(n) < m_filterQuickRef[i + 3].second) {
-        index = i;
-        break;
-      }
-    }
-  }
-
-  return index;
+  if (iter == last)
+    throw std::runtime_error("Cannot find data");
+  return static_cast<int>(std::distance(m_values.cbegin(), iter));
 }
 
 /**
@@ -2197,9 +1979,9 @@ template <typename TYPE> std::string TimeSeriesProperty<TYPE>::setValueFromPrope
   m_values = prop->m_values;
   m_size = prop->m_size;
   m_propSortedFlag = prop->m_propSortedFlag;
-  m_filter = prop->m_filter;
-  m_filterQuickRef = prop->m_filterQuickRef;
-  m_filterApplied = prop->m_filterApplied;
+  // m_filter = prop->m_filter;
+  // m_filterQuickRef = prop->m_filterQuickRef;
+  // m_filterApplied = prop->m_filterApplied;
   return "";
 }
 
@@ -2329,119 +2111,47 @@ void TimeSeriesProperty<std::string>::histogramData(const Types::Core::DateAndTi
 }
 
 /**
- * Get a vector of values taking the filter into account.
- * Values will be excluded if their times lie in a region where the filter is
- * false.
- * @returns :: Vector of included values only
+ * Series values within the ROI's regions.
+ * A values will be excluded if its times lie outside the ROI's regions or coincides with the upper boundary
+ * of a ROI region. For instance, time "2007-11-30T16:17:30" is excluded in the ROI
+ * [2007-11-30T16:17:00", 2007-11-30T16:17:30").
+ * @param roi :: ROI regions validating any query time.
+ * @returns :: Vector of included values only.
  */
-template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
-  if (m_filter.empty()) {
-    return this->valuesAsVector(); // no filtering to do
-  }
-  if (!m_filterApplied) {
-    applyFilter();
-  }
-  sortIfNecessary();
-
-  std::vector<TYPE> filteredValues;
-  for (const auto &value : m_values) {
-    if (isTimeFiltered(value.time())) {
-      filteredValues.emplace_back(value.value());
+template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector(const TimeROI *roi) const {
+  if (roi && !roi->useAll()) {
+    this->sortIfNecessary();
+    std::vector<TYPE> filteredValues;
+    if (roi->firstTime() > this->m_values.back().time()) {
+      // Since the ROI starts after everything, just return the last value in the log
+      filteredValues.emplace_back(this->m_values.back().value());
+    } else { // only use the values in the filter
+      for (const auto &timeAndValue : this->m_values)
+        if (roi->valueAtTime(timeAndValue.time()))
+          filteredValues.emplace_back(timeAndValue.value());
     }
-  }
-
-  return filteredValues;
-}
-
-/**
- * Find out if the given time is included in the filtered data
- * i.e. it does not lie in an excluded region. This function assumes
- * the filter is not empty, it has been applied and the values are
- * sorted by time.
- * @param time :: [input] Time to check
- * @returns :: True if time is in an included region, false if the filter
- * excludes it.
- */
-template <typename TYPE> bool TimeSeriesProperty<TYPE>::isTimeFiltered(const Types::Core::DateAndTime &time) const {
-  // Each time/value pair in the filter defines a point where the region defined
-  // after that time is either included/excluded depending on the boolean value.
-  // By definition of the filter construction the region before a given filter
-  // time must have the opposite value. For times outside the filter region:
-  //   1. time < first filter time: inverse of the first filter value
-  //   2. time > last filter time: value of the last filter value
-  // If time == a filter time then the value is taken to belong to that filter
-  // region and not the previous
-
-  // Find first fitler time strictly greater than time
-  auto filterEntry = std::lower_bound(m_filter.begin(), m_filter.end(), time,
-                                      [](const std::pair<Types::Core::DateAndTime, bool> &filterEntry,
-                                         const Types::Core::DateAndTime &t) { return filterEntry.first <= t; });
-
-  if (filterEntry == m_filter.begin()) {
-    return !filterEntry->second;
+    return filteredValues;
   } else {
-    // iterator points to filter greater than time and but we want the previous
-    // region
-    --filterEntry;
-    return filterEntry->second;
+    return this->valuesAsVector();
   }
 }
 
+template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
+  return this->valuesAsVector();
+}
+
 /**
- * Get a list of the splitting intervals, if filtering is enabled.
- * Otherwise the interval is just first time - last time.
- * @returns :: Vector of splitting intervals
+ * Splitting interval for the whole time series.
+ * The interval's starting time is that of the first log entry. The interval's ending time is that of the last log
+ * entry plus an additional extra time. This extra time is the time span between the last two log entries.
+ * The extra time ensures that the mean and the time-weighted mean are the same for time series
+ * containing log entries equally spaced in time.
+ * @returns :: Vector containing a single splitting interval.
  */
-template <typename TYPE> std::vector<SplittingInterval> TimeSeriesProperty<TYPE>::getSplittingIntervals() const {
-  std::vector<SplittingInterval> intervals;
-  // Case where there is no filter
-  if (m_filter.empty()) {
-    // interval calculates what a reasonable place to put the end point for the last log entry is
-    // this *should* be a reasonable estimate and *is* better than always, effectively, ignoring
-    // the last log value. The value is different than that from lastTime()
-    auto lastInterval = this->nthInterval(this->size() - 1);
-
-    intervals.emplace_back(firstTime(), lastInterval.end());
-
-    return intervals;
-  }
-
-  if (!m_filterApplied) {
-    applyFilter();
-  }
-
-  // (local reference to use in lambda)
-  const auto &localFilter = m_filter;
-  /// Count along to find the next time in the filter for which value is 'val'
-  const auto findNext = [&localFilter](size_t &index, const bool val) {
-    for (; index < localFilter.size(); ++index) {
-      const auto &entry = localFilter[index];
-      if (entry.second == val) {
-        return entry.first;
-      }
-    }
-    return localFilter.back().first;
-  };
-
-  // Look through filter to find start/stop pairs
-  size_t index = 0;
-  while (index < m_filter.size()) {
-    DateAndTime start, stop;
-    if (index == 0) {
-      if (m_filter[0].second) {
-        start = m_filter[0].first;
-      } else {
-        start = firstTime();
-      }
-    } else {
-      start = findNext(index, true);
-    }
-    stop = findNext(index, false);
-    if (stop != start) { // avoid empty ranges
-      intervals.emplace_back(start, stop);
-    }
-  }
-
+template <typename TYPE> std::vector<TimeInterval> TimeSeriesProperty<TYPE>::getTimeIntervals() const {
+  std::vector<TimeInterval> intervals;
+  auto lastInterval = this->nthInterval(this->size() - 1);
+  intervals.emplace_back(firstTime(), lastInterval.stop());
   return intervals;
 }
 
@@ -2465,43 +2175,3 @@ INSTANTIATE(bool)
 
 } // namespace Kernel
 } // namespace Mantid
-
-namespace Mantid::Kernel {
-//================================================================================================
-/** Function filtering double TimeSeriesProperties according to the requested
- * statistics.
- *  @param propertyToFilter : Property to filter the statistics on.
- *  @param statisticType : Enum indicating the type of statistics to use.
- *  @param roi : optional pointer to TimeROI object for active time.
- *  @return The TimeSeriesProperty filtered by the requested statistics.
- */
-double filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
-                         Kernel::Math::StatisticType statisticType, const TimeROI *roi) {
-  using namespace Kernel::Math;
-  double singleValue = 0;
-  switch (statisticType) {
-  case FirstValue:
-    singleValue = propertyToFilter->nthValue(0);
-    break;
-  case LastValue:
-    singleValue = propertyToFilter->nthValue(propertyToFilter->size() - 1);
-    break;
-  case Minimum:
-    singleValue = propertyToFilter->getStatistics(roi).minimum;
-    break;
-  case Maximum:
-    singleValue = propertyToFilter->getStatistics(roi).maximum;
-    break;
-  case Mean:
-    singleValue = propertyToFilter->getStatistics(roi).mean;
-    break;
-  case Median:
-    singleValue = propertyToFilter->getStatistics(roi).median;
-    break;
-  default:
-    throw std::invalid_argument("filterByStatistic - Unknown statistic type: " +
-                                boost::lexical_cast<std::string>(propertyToFilter));
-  };
-  return singleValue;
-}
-} // namespace Mantid::Kernel

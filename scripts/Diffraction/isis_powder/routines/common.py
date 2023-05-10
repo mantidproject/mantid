@@ -10,7 +10,8 @@ import warnings
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, WorkspaceGroup, MatrixWorkspace
+from mantid.dataobjects import Workspace2D
 from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 from isis_powder.routines.param_map_entry import ParamMapEntry
 
@@ -33,20 +34,24 @@ ADVANCED_CONFIG = {
 }
 
 
-def apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
+def apply_bragg_peaks_masking(workspaces_to_mask, x_values_to_mask_list, ws_indices_to_mask=[0]):
     """
     Mask a series of peaks defined by the lower/upper bounds
     :param workspaces_to_mask: Mask these workspaces
-    :param mask_list: A list of pairs of peak X min/max for masking
+    :param x_values_to_mask_list: A list of lists. For each ws index, a list of pairs of peak X min/max for masking
+    :param ws_indices_to_mask: A list of ws indices to mask in each workspace
     :return: A list of masked workspaces
     """
     output_workspaces = list(workspaces_to_mask)
 
-    for ws_index, (bank_mask_list, workspace) in enumerate(zip(mask_list, output_workspaces)):
-        output_name = "masked_vanadium-" + str(ws_index + 1)
-        for mask_params in bank_mask_list:
+    for ws_index, (ws_index_mask_list, workspace) in enumerate(zip(x_values_to_mask_list, output_workspaces)):
+        for mask_params in ws_index_mask_list:
             output_workspaces[ws_index] = mantid.MaskBins(
-                InputWorkspace=output_workspaces[ws_index], OutputWorkspace=output_name, XMin=mask_params[0], XMax=mask_params[1]
+                InputWorkspace=output_workspaces[ws_index],
+                OutputWorkspace=output_workspaces[ws_index],
+                XMin=mask_params[0],
+                XMax=mask_params[1],
+                InputWorkspaceIndexSet=ws_indices_to_mask,
             )
     return output_workspaces
 
@@ -461,7 +466,10 @@ def runs_overlap(run_string1, run_string2):
     Get whether two runs, specified using the usual run string format (eg 123-125 referring to 123, 124 and 125)
     contain any individual runs in common
     """
-    return len(set(generate_run_numbers(run_string1)).intersection(generate_run_numbers(run_string2))) > 0
+    if run_string1 and run_string2:
+        return len(set(generate_run_numbers(run_string1)).intersection(generate_run_numbers(run_string2))) > 0
+    else:
+        return False
 
 
 def spline_vanadium_workspaces(focused_vanadium_spectra, spline_coefficient):
@@ -511,8 +519,9 @@ def generate_summed_runs(empty_ws_string, instrument, scale_factor=None):
     empty_ws_list = load_current_normalised_ws_list(
         run_number_string=empty_ws_string, instrument=instrument, input_batching=INPUT_BATCHING.Summed
     )
+
     empty_ws = empty_ws_list[0]
-    if scale_factor:
+    if scale_factor is not None:
         empty_ws = mantid.Scale(InputWorkspace=empty_ws, OutputWorkspace=empty_ws, Factor=scale_factor, Operation="Multiply")
     return empty_ws
 
@@ -528,6 +537,7 @@ def subtract_summed_runs(ws_to_correct, empty_ws):
     # would give us negative counts
     if workspace_has_current(ws_to_correct):
         try:
+            mantid.RebinToWorkspace(WorkspaceToRebin=empty_ws, WorkspaceToMatch=ws_to_correct, OutputWorkspace=empty_ws)
             mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_ws, OutputWorkspace=ws_to_correct)
         except ValueError:
             raise ValueError(
@@ -707,3 +717,60 @@ def workspace_has_current(ws):
     """
     charge = ws.run().getProtonCharge()
     return charge is not None and charge > 0
+
+
+def save_unsplined_vanadium(vanadium_ws, output_path, keep_unit=False):
+    if isinstance(vanadium_ws, MatrixWorkspace):
+        converted_output = vanadium_ws
+        current_units = converted_output.getAxis(0).getUnit().unitID()
+        if current_units != WORKSPACE_UNITS.tof:
+            converted_output = mantid.ConvertUnits(InputWorkspace=converted_output, Target=WORKSPACE_UNITS.tof)
+
+    if isinstance(vanadium_ws, WorkspaceGroup):
+        converted_workspaces = []
+        for ws_index in range(vanadium_ws.getNumberOfEntries()):
+            ws = vanadium_ws.getItem(ws_index)
+            previous_units = ws.getAxis(0).getUnit().unitID()
+
+            if not keep_unit and previous_units != WORKSPACE_UNITS.tof:
+                ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
+
+            ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
+            converted_workspaces.append(ws)
+
+        converted_output = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
+
+    mantid.SaveNexus(InputWorkspace=converted_output, Filename=output_path, Append=False)
+    mantid.DeleteWorkspace(converted_output)
+
+
+def _remove_masked_and_monitor_spectra(data_workspace: Workspace2D, correction_workspace: Workspace2D, run_details):
+    cal_workspace = mantid.LoadCalFile(
+        InputWorkspace=data_workspace,
+        CalFileName=run_details.grouping_file_path,
+        WorkspaceName="cal_workspace",
+        MakeOffsetsWorkspace=False,
+        MakeMaskWorkspace=False,
+        MakeGroupingWorkspace=True,
+    )
+
+    detectors_to_mask = []
+    for wsIndex in range(0, cal_workspace.getNumberHistograms()):
+        if cal_workspace.dataY(wsIndex) == 0:
+            detectors_to_mask.append(cal_workspace.getDetectorIDs(wsIndex)[0])
+
+    results_ws = []
+    for ws in [data_workspace, correction_workspace]:
+        # Remove Masked and Monitor spectra
+        ws = mantid.ExtractMonitors(
+            InputWorkspace=ws,
+            DetectorWorkspace=ws,
+            EnableLogging=False,
+        )
+        mantid.MaskDetectors(ws, DetectorList=detectors_to_mask)
+        ws = mantid.RemoveMaskedSpectra(InputWorkspace=ws, OutputWorkspace=ws)
+        ws = mantid.RemoveSpectra(InputWorkspace=ws, OutputWorkspace=ws, RemoveSpectraWithNoDetector=True)
+        ws.clearMonitorWorkspace()
+        results_ws.append(ws)
+
+    return results_ws

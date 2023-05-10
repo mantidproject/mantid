@@ -59,19 +59,26 @@ public:
     return name;
   }
 
-  void testName() { TS_ASSERT_EQUALS(crop.name(), "CropWorkspace"); }
+  void testName() {
+    CropWorkspace crop;
+    TS_ASSERT_EQUALS(crop.name(), "CropWorkspace");
+  }
 
-  void testVersion() { TS_ASSERT_EQUALS(crop.version(), 1); }
+  void testVersion() {
+    CropWorkspace crop;
+    TS_ASSERT_EQUALS(crop.version(), 1);
+  }
 
   void testInit() {
+    CropWorkspace crop;
     TS_ASSERT_THROWS_NOTHING(crop.initialize());
     TS_ASSERT(crop.isInitialized());
   }
 
   void testInvalidInputs() {
     std::string inputName = createInputWorkspace();
-    if (!crop.isInitialized())
-      crop.initialize();
+    CropWorkspace crop;
+    crop.initialize();
 
     TS_ASSERT_THROWS(crop.execute(), const std::runtime_error &);
     TS_ASSERT(!crop.isExecuted());
@@ -104,7 +111,7 @@ public:
     AnalysisDataService::Instance().add(wsName, test_in);
   }
 
-  void test_CropWorkspaceEventsInplace() {
+  void testCropWorkspaceEventsInplace() {
     // setup
     std::string eventname("TestEvents");
     this->makeFakeEventWorkspace(eventname);
@@ -139,6 +146,7 @@ public:
 
   void testExec() {
     std::string inputName = createInputWorkspace();
+    CropWorkspace crop;
     if (!crop.isInitialized())
       crop.initialize();
 
@@ -383,9 +391,32 @@ public:
     AnalysisDataService::Instance().remove(wsName);
     delete alg;
   }
+  // Test that a non-ragged 2DWorkspace will keep the property where all XHistograms share a pointer
+  // after CropWorkspace
+  void testCropDoesNotCopyXData() {
+    Workspace2D_sptr inputWS = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
-private:
-  CropWorkspace crop;
+    const auto in_x0_address = &inputWS->x(0);
+    const auto in_x2_address = &inputWS->x(2);
+
+    TS_ASSERT_EQUALS(in_x0_address, in_x2_address);
+
+    CropWorkspace crop;
+    TS_ASSERT_THROWS_NOTHING(crop.initialize());
+    TS_ASSERT_THROWS_NOTHING(crop.setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(crop.setPropertyValue("OutputWorkspace", "outputWS"));
+    TS_ASSERT_THROWS_NOTHING(crop.setPropertyValue("XMin", "2"));
+    TS_ASSERT_THROWS_NOTHING(crop.setPropertyValue("XMax", "6"));
+    TS_ASSERT(crop.execute());
+
+    MatrixWorkspace_sptr outputWS;
+    TS_ASSERT_THROWS_NOTHING(outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outputWS"));
+
+    const auto out_x0_address = &outputWS->x(0);
+    const auto out_x2_address = &outputWS->x(2);
+
+    TS_ASSERT_EQUALS(out_x0_address, out_x2_address);
+  }
 };
 
 class CropWorkspaceTestPerformance : public CxxTest::TestSuite {

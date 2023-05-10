@@ -40,7 +40,7 @@ from mantid.simpleapi import (
     logger,
 )
 
-from ansto_common import (
+from ANSTO.ansto_common import (
     ScratchFolder,
     FilterPixelsTubes,
     IniParameters,
@@ -94,7 +94,6 @@ class PelicanReduction(PythonAlgorithm):
         return "PelicanReduction"
 
     def PyInit(self) -> None:
-
         mandatoryInputRuns = CompositeValidator()
         mandatoryInputRuns.add(StringArrayMandatoryValidator())
         self.declareProperty(
@@ -174,7 +173,6 @@ class PelicanReduction(PythonAlgorithm):
         )
 
     def PyExec(self) -> None:
-
         # add the following to where it should break
         # debugpy.wait_for_client()
         # debugpy.breakpoint()
@@ -314,7 +312,6 @@ class PelicanReduction(PythonAlgorithm):
         self.setProperty("OutputWorkspace", output_ws)
 
     def _integrated_calibration(self, calibration_ws: str, empty_calib_ws: str, output_ws: str) -> None:
-
         scale_and_remove_background(
             calibration_ws, self._calibration_scale, empty_calib_ws, self._cal_background_scale, output_ws, self._reset_negatives
         )
@@ -373,7 +370,6 @@ class PelicanReduction(PythonAlgorithm):
         return options
 
     def setUp(self) -> None:
-
         self._pixels_per_tube = 64
         self._detector_spectra = 12800  # 200 * 64
         self._file_prefix = "PLN"
@@ -482,7 +478,6 @@ class PelicanReduction(PythonAlgorithm):
             Integration(InputWorkspace=input_ws, OutputWorkspace=output_ws, RangeLowerList=lo_vals, RangeUpperList=hi_vals)
 
     def _average_over_tube(self, input_ws: str, output_ws: str) -> None:
-
         # build the vector of tube averaged spectra weighting but ignore the
         # monitors
         ws = mtd[input_ws]
@@ -513,7 +508,6 @@ class PelicanReduction(PythonAlgorithm):
         return min_tof * 1e6
 
     def _adjust_frame_overlap(self, eventlist: EventList, gate_period: float, min_tof: float) -> None:
-
         tofs, pulsetimes = eventlist.getTofs(), eventlist.getPulseTimes()
 
         # shift the fast event to the end of the frame
@@ -526,7 +520,6 @@ class PelicanReduction(PythonAlgorithm):
             eventlist.addEventQuickly(tof, pt)
 
     def _load_and_reduce(self, output_ws: str, analyse_runs: List[str], convert_dE: bool = True, energy_bins: str = "") -> str:
-
         # check if no runs or already loaded
         if not analyse_runs:
             return ""
@@ -577,7 +570,6 @@ class PelicanReduction(PythonAlgorithm):
         return output_ws
 
     def _load_merge(self, runs: List[str], output_ws: str, lopts: LoaderOptions):
-
         params = [("LambdaOnTwoMode", "LambdaOnTwoMode", 0), ("SelectDataset", "SelectDataset", 0.1)]
         if lopts["CalibrateTOFBias"]:
             params.append(("CalibrateTOFBias", "CalibrateTOF", 0.1))

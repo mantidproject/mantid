@@ -214,7 +214,7 @@ public:
     auto presenter = makePresenter();
     expectPolarizationAnalysisOn();
     presenter.notifySettingsChanged();
-    assertPolarizationAnalysisParameterFile(presenter);
+    assertPolarizationAnalysisWorkspace(presenter);
     verifyAndClear();
   }
 
@@ -226,21 +226,116 @@ public:
 
   void testSettingPolarizationCorrectionWorkspaceUpdatesModel() { runTestThatPolarizationCorrectionsUsesWorkspace(); }
 
+  void testSettingPolarizationCorrectionFilePathUpdatesModel() { runTestThatPolarizationCorrectionsUsesFilePath(); }
+
+  void testValidPolarizationPathShowsAsValid() {
+    auto const &testPath = "test/path.nxs";
+    auto const &fullTestPath = "/full/pol/test/path.nxs";
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("FilePath"));
+    EXPECT_CALL(m_view, getPolarizationEfficienciesFilePath()).WillRepeatedly(Return(testPath));
+    EXPECT_CALL(m_fileHandler, getFullFilePath(testPath)).WillOnce(Return(fullTestPath));
+    EXPECT_CALL(m_fileHandler, fileExists(fullTestPath)).WillOnce(Return(true));
+    EXPECT_CALL(m_view, showPolCorrFilePathValid()).Times(1);
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testInvalidPolarizationPathShowsAsInvalid() {
+    auto const testPath = "test/path.nxs";
+    auto const &fullTestPath = "/full/test/path.nxs";
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("FilePath"));
+    EXPECT_CALL(m_view, getPolarizationEfficienciesFilePath()).WillRepeatedly(Return(testPath));
+    EXPECT_CALL(m_fileHandler, getFullFilePath(testPath)).WillOnce(Return(fullTestPath));
+    EXPECT_CALL(m_fileHandler, fileExists(fullTestPath)).WillOnce(Return(false));
+    EXPECT_CALL(m_view, showPolCorrFilePathInvalid()).Times(1);
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
   void testSetFloodCorrectionsUpdatesModel() {
     auto presenter = makePresenter();
     FloodCorrections floodCorr(FloodCorrectionType::Workspace, std::string{"testWS"});
-
-    EXPECT_CALL(m_view, getFloodCorrectionType()).WillOnce(Return("Workspace"));
+    EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("Workspace"));
     EXPECT_CALL(m_view, getFloodWorkspace()).WillOnce(Return(floodCorr.workspace().get()));
+    EXPECT_CALL(m_view, setFloodCorrectionWorkspaceMode()).Times(1);
     presenter.notifySettingsChanged();
 
     TS_ASSERT_EQUALS(presenter.experiment().floodCorrections(), floodCorr);
     verifyAndClear();
   }
 
-  void testSetFloodCorrectionsToWorkspaceEnablesInputs() { runWithFloodCorrectionInputsEnabled("Workspace"); }
+  void testSetFloodCorrectionsUpdatesModelForFilePath() {
+    auto presenter = makePresenter();
+    FloodCorrections floodCorr(FloodCorrectionType::Workspace, std::string{"path/to/testWS"});
+
+    EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("FilePath"));
+    EXPECT_CALL(m_fileHandler, getFullFilePath(floodCorr.workspace().get()))
+        .WillOnce(Return(floodCorr.workspace().get()));
+    EXPECT_CALL(m_fileHandler, fileExists(floodCorr.workspace().get())).WillOnce(Return(true));
+    EXPECT_CALL(m_view, getFloodFilePath()).WillOnce(Return(floodCorr.workspace().get()));
+    EXPECT_CALL(m_view, setFloodCorrectionFilePathMode()).Times(1);
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.experiment().floodCorrections(), floodCorr);
+    verifyAndClear();
+  }
+
+  void testSetFloodCorrectionsUpdatesModelForNoCorrections() {
+    auto presenter = makePresenter();
+    FloodCorrections floodCorr(FloodCorrectionType::None);
+
+    EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("None"));
+    EXPECT_CALL(m_view, getFloodWorkspace()).Times(0);
+    presenter.notifySettingsChanged();
+
+    TS_ASSERT_EQUALS(presenter.experiment().floodCorrections(), floodCorr);
+    verifyAndClear();
+  }
+
+  void testSetFloodCorrectionsToWorkspaceEnablesInputs() {
+    EXPECT_CALL(m_view, getFloodWorkspace()).Times(1);
+    runWithFloodCorrectionInputsEnabled("Workspace");
+  }
+
+  void testSetFloodCorrectionsToFilePathEnablesInputs() {
+    EXPECT_CALL(m_view, getFloodFilePath()).WillOnce(Return(""));
+    EXPECT_CALL(m_fileHandler, getFullFilePath("")).WillOnce(Return(""));
+    EXPECT_CALL(m_fileHandler, fileExists("")).Times(1);
+    runWithFloodCorrectionInputsEnabled("FilePath");
+  }
 
   void testSetFloodCorrectionsToParameterFileDisablesInputs() { runWithFloodCorrectionInputsDisabled("ParameterFile"); }
+
+  void testSetFloodCorrectionsToNoneDisablesInputs() { runWithFloodCorrectionInputsDisabled("None"); }
+
+  void testValidFloodPathShowsAsValid() {
+    auto const &testPath = "test/flood/path.nxs";
+    auto const &fullTestPath = "/full/test/flood/path.nxs";
+
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("FilePath"));
+    EXPECT_CALL(m_view, getFloodFilePath()).WillRepeatedly(Return(testPath));
+    EXPECT_CALL(m_fileHandler, getFullFilePath(testPath)).WillOnce(Return(fullTestPath));
+    EXPECT_CALL(m_fileHandler, fileExists(fullTestPath)).WillOnce(Return(true));
+    EXPECT_CALL(m_view, showFloodCorrFilePathValid()).Times(1);
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testInvalidFloodPathShowsAsInvalid() {
+    auto const &testPath = "test/flood/path.nxs";
+    auto const &fullTestPath = "/full/test/flood/path.nxs";
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("FilePath"));
+    EXPECT_CALL(m_view, getFloodFilePath()).WillRepeatedly(Return(testPath));
+    EXPECT_CALL(m_fileHandler, getFullFilePath(testPath)).WillOnce(Return(fullTestPath));
+    EXPECT_CALL(m_fileHandler, fileExists(fullTestPath)).WillOnce(Return(false));
+    EXPECT_CALL(m_view, showFloodCorrFilePathInvalid()).Times(1);
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
 
   void testSetValidTransmissionRunRange() {
     RangeInLambda range(7.2, 10);
@@ -663,7 +758,7 @@ public:
                                  FloodCorrections(FloodCorrectionType::ParameterFile), makeBackgroundSubtraction());
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
-    EXPECT_CALL(m_view, setPolarizationCorrectionOption(true)).Times(1);
+    EXPECT_CALL(m_view, setPolarizationCorrectionOption("ParameterFile")).Times(1);
     EXPECT_CALL(m_view, setFloodCorrectionType("ParameterFile")).Times(1);
     EXPECT_CALL(m_view, setSubtractBackground(true));
     EXPECT_CALL(m_view, setBackgroundSubtractionMethod("Polynomial"));
@@ -776,6 +871,7 @@ public:
 private:
   NiceMock<MockExperimentView> m_view;
   NiceMock<MockBatchPresenter> m_mainPresenter;
+  NiceMock<MockFileHandler> m_fileHandler;
   double m_thetaTolerance{0.01};
 
   Experiment makeModelWithAnalysisMode(AnalysisMode analysisMode) {
@@ -824,7 +920,8 @@ private:
       Experiment experiment = makeEmptyExperiment()) {
     // The presenter gets values from the view on construction so the view must
     // return something sensible
-    auto presenter = ExperimentPresenter(&m_view, std::move(experiment), m_thetaTolerance, std::move(defaultOptions));
+    auto presenter = ExperimentPresenter(&m_view, std::move(experiment), m_thetaTolerance, &m_fileHandler,
+                                         std::move(defaultOptions));
     presenter.acceptMainPresenter(&m_mainPresenter);
     return presenter;
   }
@@ -869,7 +966,7 @@ private:
   }
 
   void expectPolarizationAnalysisOn() {
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(AtLeast(1)).WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(AtLeast(1)).WillRepeatedly(Return("Workspace"));
   }
 
   void assertPolarizationAnalysisNone(ExperimentPresenter const &presenter) {
@@ -913,7 +1010,7 @@ private:
     auto presenter = makePresenter();
 
     EXPECT_CALL(m_mainPresenter, instrumentName()).Times(1).WillOnce(Return(instrument));
-    EXPECT_CALL(m_view, setPolarizationCorrectionOption(false)).Times(1);
+    EXPECT_CALL(m_view, setPolarizationCorrectionOption("None")).Times(1);
     EXPECT_CALL(m_view, disablePolarizationCorrections()).Times(1);
     presenter.notifySettingsChanged();
 
@@ -923,8 +1020,8 @@ private:
   void runTestThatPolarizationCorrectionsDisabled() {
     auto presenter = makePresenter();
 
-    // Called twice, once for getting it for the model, once for checking if the efficiencies selector needs disabling.
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return(false));
+    // Called thrice, once for getting it for the model, twice for choosing the efficiencies selector.
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("None"));
     EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(0);
     EXPECT_CALL(m_view, disablePolarizationEfficiencies()).Times(1);
 
@@ -937,9 +1034,9 @@ private:
   void runTestThatPolarizationCorrectionsUsesParameterFile() {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return(true));
-    EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(m_view, enablePolarizationEfficiencies()).Times(1);
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("ParameterFile"));
+    EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(0);
+    EXPECT_CALL(m_view, disablePolarizationEfficiencies()).Times(1);
 
     presenter.notifySettingsChanged();
 
@@ -950,8 +1047,23 @@ private:
   void runTestThatPolarizationCorrectionsUsesWorkspace() {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return(true));
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("Workspace"));
     EXPECT_CALL(m_view, getPolarizationEfficienciesWorkspace()).Times(1).WillOnce(Return("test_ws"));
+    EXPECT_CALL(m_view, setPolarizationEfficienciesWorkspaceMode()).Times(1);
+    EXPECT_CALL(m_view, enablePolarizationEfficiencies()).Times(1);
+
+    presenter.notifySettingsChanged();
+
+    assertPolarizationAnalysisWorkspace(presenter);
+    verifyAndClear();
+  }
+
+  void runTestThatPolarizationCorrectionsUsesFilePath() {
+    auto presenter = makePresenter();
+
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption()).Times(2).WillRepeatedly(Return("FilePath"));
+    EXPECT_CALL(m_view, getPolarizationEfficienciesFilePath()).Times(1).WillOnce(Return("path/to/test_ws.nxs"));
+    EXPECT_CALL(m_view, setPolarizationEfficienciesFilePathMode()).Times(1);
     EXPECT_CALL(m_view, enablePolarizationEfficiencies()).Times(1);
 
     presenter.notifySettingsChanged();
@@ -963,7 +1075,7 @@ private:
   void runWithFloodCorrectionInputsDisabled(std::string const &type) {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getFloodCorrectionType()).WillOnce(Return(type));
+    EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return(type));
     EXPECT_CALL(m_view, disableFloodCorrectionInputs()).Times(1);
     EXPECT_CALL(m_view, getFloodWorkspace()).Times(0);
     presenter.notifySettingsChanged();
@@ -974,9 +1086,8 @@ private:
   void runWithFloodCorrectionInputsEnabled(std::string const &type) {
     auto presenter = makePresenter();
 
-    EXPECT_CALL(m_view, getFloodCorrectionType()).WillOnce(Return(type));
+    EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return(type));
     EXPECT_CALL(m_view, enableFloodCorrectionInputs()).Times(1);
-    EXPECT_CALL(m_view, getFloodWorkspace()).Times(1);
     presenter.notifySettingsChanged();
 
     verifyAndClear();

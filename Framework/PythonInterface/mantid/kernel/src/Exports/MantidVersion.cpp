@@ -25,7 +25,11 @@ std::string getMinor(const MantidVersion::VersionInfo &self) { return self.minor
 
 std::string getPatch(const MantidVersion::VersionInfo &self) { return self.patch; }
 
-std::string getStr(const MantidVersion::VersionInfo &self) { return self.major + "." + self.minor + "." + self.patch; }
+std::string getTweak(const MantidVersion::VersionInfo &self) { return self.tweak; }
+
+std::string getStr(const MantidVersion::VersionInfo &self) {
+  return self.major + "." + self.minor + "." + self.patch + self.tweak;
+}
 
 } // namespace
 
@@ -35,12 +39,13 @@ void export_MantidVersion() {
       .add_property("major", make_function(&getMajor), "The major release version")
       .add_property("minor", make_function(&getMinor), "The minor release version")
       .add_property("patch", make_function(&getPatch), "The patch release version")
-      .def("__str__", make_function(&getStr), "The version in the standard form: Maj.Min.Pat");
+      .add_property("tweak", make_function(&getTweak), "The tweak release version")
+      .def("__str__", make_function(&getStr), "The version in the standard form: {Major}.{Minor}.{Patch}{Tweak}");
 
   def("version_str", &Mantid::Kernel::MantidVersion::version,
-      "Returns the Mantid version string in the form \"major.minor.patch\"");
+      "Returns the Mantid version string in the form \"{Major}.{Minor}.{Patch}{Tweak}\"");
   def("version", &Mantid::Kernel::MantidVersion::versionInfo,
-      "Returns a data structure containing the major, minor, and patch parts of the version.");
+      "Returns a data structure containing the major, minor, patch, and tweak parts of the version.");
   def("release_notes_url", &Mantid::Kernel::MantidVersion::releaseNotes,
       "Returns the url to the most applicable release notes");
   def("revision", &Mantid::Kernel::MantidVersion::revision, "Returns the abbreviated SHA-1 of the last commit");

@@ -8,18 +8,18 @@
 #include "../../GUI/Preview/ROIType.h"
 #include "../../Reduction/Batch.h"
 #include "../../Reduction/PreviewRow.h"
-#include "AlgorithmProperties.h"
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using Mantid::API::AlgorithmRuntimeProps;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
-using MantidQt::API::AlgorithmRuntimeProps;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
@@ -27,6 +27,8 @@ Mantid::Kernel::Logger g_log("Reflectometry RowProcessingAlgorithm");
 } // namespace
 
 namespace { // unnamed namespace
+using namespace Mantid::API;
+
 // These functions update properties in an AlgorithmRuntimeProps for specific
 // properties for the row reduction algorithm
 void updateInputWorkspacesProperties(AlgorithmRuntimeProps &properties,
@@ -96,10 +98,15 @@ void updateBackgroundSubtractionProperties(AlgorithmRuntimeProps &properties,
 
 void updatePolarizationCorrectionProperties(AlgorithmRuntimeProps &properties,
                                             PolarizationCorrections const &corrections) {
-  if (corrections.correctionType() == PolarizationCorrectionType::None)
+  // None or set to workspace or filepath with no workspace or path given.
+  if (corrections.correctionType() == PolarizationCorrectionType::None ||
+      (corrections.correctionType() == PolarizationCorrectionType::Workspace && corrections.workspace()->empty()))
     return;
 
+  // Use the parameter file.
   AlgorithmProperties::update("PolarizationAnalysis", true, properties);
+
+  // Use the supplied workspace.
   if (corrections.correctionType() == PolarizationCorrectionType::Workspace) {
     AlgorithmProperties::update("PolarizationEfficiencies", corrections.workspace(), properties);
   }
@@ -297,7 +304,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
                                                     Mantid::API::IAlgorithm_sptr alg) {
   // Create the algorithm
   if (!alg) {
-    alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+    alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryISISLoadAndProcess");
   }
   alg->setRethrows(true);
   alg->setAlwaysStoreInADS(false);
@@ -321,9 +328,9 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
  * @param row : optional run details from the Runs table
  * @returns : a custom PropertyManager class with all of the algorithm properties set
  */
-std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
-                                                                                   PreviewRow const &previewRow) {
-  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
+                                                                                 PreviewRow const &previewRow) {
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   updatePreviewPropertiesFromBatchModel(*properties, model);
   // Look up properties for this run on the lookup table
   auto lookupRow = model.findLookupRow(previewRow);
@@ -331,15 +338,20 @@ std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimePro
     updateLookupRowProperties(*properties, *lookupRow);
   }
   // Update properties from the preview tab
-  properties->setProperty("InputWorkspace", previewRow.getSummedWs());
+  properties->setProperty("InputRunList", previewRow.runNumbers());
   properties->setProperty("ThetaIn", previewRow.theta());
+  if (previewRow.getSelectedBanks().has_value()) {
+    properties->setProperty("ROIDetectorIDs", previewRow.getSelectedBanks().get());
+  }
   updateProcessingInstructionsProperties(*properties, previewRow);
+
+  properties->setProperty("HideInputWorkspaces", true);
   return properties;
 }
 
 void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) {
   auto &row = dynamic_cast<PreviewRow &>(item);
-  MatrixWorkspace_sptr outputWs = algorithm->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWs = algorithm->getProperty("OutputWorkspaceBinned");
   row.setReducedWs(outputWs);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction
@@ -374,9 +386,9 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Row &ro
  * @param row : optional run details from the Runs table
  * @returns : a custom PropertyManager class with all of the algorithm properties set
  */
-std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
-                                                                                   boost::optional<Row const &> row) {
-  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(IBatch const &model,
+                                                                                 boost::optional<Row const &> row) {
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   // Update properties from settings in the event, experiment and instrument tabs
   updatePropertiesFromBatchModel(*properties, model);
   // Look up properties for this run on the lookup table (or use wildcard defaults if no run is given)

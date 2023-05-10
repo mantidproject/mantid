@@ -1,0 +1,1 @@
+- :ref:`LoadAndMerge <algm-LoadAndMerge>` now cleans up intermediate loaded workspaces if the OutputBehaviour was set to Concatenate these inputs.

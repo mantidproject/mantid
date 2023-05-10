@@ -26,13 +26,13 @@ public:
 protected:
   virtual std::string getVersionsFromGitHub(const std::string &url);
   virtual std::string getCurrentVersion() const;
+  std::vector<int> splitVersionString(const std::string &versionString) const;
 
 private:
   void init() override;
   void exec() override;
 
   std::string cleanVersionTag(const std::string &versionTag) const;
-  std::vector<int> splitVersionString(const std::string &versionString) const;
   bool isVersionMoreRecent(const std::string &localVersion, const std::string &gitHubVersion) const;
 };
 

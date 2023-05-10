@@ -94,7 +94,14 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         """
         Using an invalid peak width function should raise RuntimeError.
         """
-        self.assertRaises(RuntimeError, SimulatedDensityOfStates, PHONONFile=self._phonon_file, PeakWidth="10*")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Invalid peak width function",
+            SimulatedDensityOfStates,
+            PHONONFile=self._phonon_file,
+            PeakWidth="10*",
+            OutputWorkspace="wks",
+        )
 
     def test_temperature(self):
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file, Temperature=50)
@@ -183,7 +190,14 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         Creating an ion table from a castep file is not possible and should fail
         validation.
         """
-        self.assertRaises(RuntimeError, SimulatedDensityOfStates, CASTEPFile=self._castep_file, SpectrumType="IonTable")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Cannot produce ion table when only .castep file is provided",
+            SimulatedDensityOfStates,
+            CASTEPFile=self._castep_file,
+            SpectrumType="IonTable",
+            OutputWorkspace="wks",
+        )
 
     def test_bond_table(self):
         wks = SimulatedDensityOfStates(CASTEPFile=self._castep_file, SpectrumType="BondTable")
@@ -197,7 +211,14 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         Creating a bond table from a phonon file is not possible and should
         fail validation.
         """
-        self.assertRaises(RuntimeError, SimulatedDensityOfStates, PHONONFile=self._phonon_file, SpectrumType="IonTable")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Require a .castep file for bond table output",
+            SimulatedDensityOfStates,
+            PHONONFile=self._phonon_file,
+            SpectrumType="BondTable",
+            OutputWorkspace="wks",
+        )
 
     def test_bin_ranges_are_correct(self):
         """

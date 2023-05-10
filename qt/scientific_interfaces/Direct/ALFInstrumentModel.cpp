@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -28,13 +29,9 @@ using namespace Mantid::API;
 namespace {
 auto &ADS = AnalysisDataService::Instance();
 
+std::string const D_SPACING_UNIT = "dSpacing";
+std::string const INSTRUMENT_NAME = "ALF";
 std::string const NOT_IN_ADS = "not_stored_in_ads";
-
-bool isALFData(MatrixWorkspace_const_sptr const &workspace) { return workspace->getInstrument()->getName() == "ALF"; }
-
-bool isAxisDSpacing(MatrixWorkspace_const_sptr const &workspace) {
-  return workspace->getAxis(0)->unit()->unitID() == "dSpacing";
-}
 
 std::optional<double> getTwoTheta(Mantid::Geometry::Instrument_const_sptr instrument,
                                   Mantid::Geometry::IDetector_const_sptr detector) {
@@ -82,174 +79,75 @@ double calculateOutOfPlaneAngle(Mantid::Kernel::V3D const &pos, Mantid::Kernel::
   return asin(vec.scalar_prod(normal));
 }
 
-void loadEmptyInstrument(std::string const &instrumentName, std::string const &outputName) {
+void loadEmptyInstrument(std::string const &outputName) {
   auto alg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   alg->initialize();
-  alg->setProperty("InstrumentName", instrumentName);
+  alg->setProperty("InstrumentName", INSTRUMENT_NAME);
   alg->setProperty("OutputWorkspace", outputName);
   alg->execute();
-}
-
-MatrixWorkspace_sptr load(std::string const &filename) {
-  auto alg = AlgorithmManager::Instance().create("Load");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("Filename", filename);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  Workspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return std::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace);
-}
-
-MatrixWorkspace_sptr createWorkspace(std::string const &parentName, std::vector<double> const &x,
-                                     std::vector<double> const &y, std::vector<double> const &e,
-                                     std::size_t const numberOfSpectra, std::string const &unitX) {
-  auto alg = AlgorithmManager::Instance().create("CreateWorkspace");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("ParentWorkspace", parentName);
-  alg->setProperty("DataX", x);
-  alg->setProperty("DataY", y);
-  alg->setProperty("DataE", e);
-  alg->setProperty("NSpec", static_cast<int>(numberOfSpectra));
-  alg->setProperty("UnitX", unitX);
-  alg->setPropertyValue("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
-MatrixWorkspace_sptr rebunch(MatrixWorkspace_sptr const &inputWorkspace, std::size_t const nBunch) {
-  auto alg = Mantid::API::AlgorithmManager::Instance().create("Rebunch");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("NBunch", static_cast<int>(nBunch));
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
-MatrixWorkspace_sptr normaliseByCurrent(MatrixWorkspace_sptr const &inputWorkspace) {
-  auto alg = AlgorithmManager::Instance().create("NormaliseByCurrent");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
-MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr const &inputWorkspace, std::string const &target) {
-  auto alg = AlgorithmManager::Instance().create("ConvertUnits");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("Target", target);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
-MatrixWorkspace_sptr rebinToWorkspace(MatrixWorkspace_sptr const &workspaceToRebin,
-                                      MatrixWorkspace_sptr const &workspaceToMatch) {
-  auto alg = AlgorithmManager::Instance().create("RebinToWorkspace");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("WorkspaceToRebin", workspaceToRebin);
-  alg->setProperty("WorkspaceToMatch", workspaceToMatch);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
-MatrixWorkspace_sptr scaleX(MatrixWorkspace_sptr const &inputWorkspace, double const factor) {
-  auto alg = AlgorithmManager::Instance().create("ScaleX");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("Factor", factor);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
-MatrixWorkspace_sptr replaceSpecialValues(MatrixWorkspace_sptr const &inputWorkspace) {
-  auto alg = AlgorithmManager::Instance().create("ReplaceSpecialValues");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("InfinityValue", 0.0);
-  alg->setProperty("NaNValue", 1.0);
-  alg->setProperty("CheckErrorAxis", true);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
 }
 
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentModel::ALFInstrumentModel() : m_sample(), m_vanadium(), m_tubes() {
-  loadEmptyInstrument("ALF", loadedWsName());
+ALFInstrumentModel::ALFInstrumentModel() : m_sample(), m_vanadium(), m_tubes(), m_twoThetasClosestToZero() {
+  loadEmptyInstrument(loadedWsName());
 }
 
-/*
- * Loads the provided ALF file and normalises it by current.
- * @param filename:: The filepath to the ALF data
- * @return The loaded and normalised workspace
- */
-MatrixWorkspace_sptr ALFInstrumentModel::loadAndNormalise(std::string const &filename) {
-  auto loadedWorkspace = load(filename);
-
-  if (!isALFData(loadedWorkspace)) {
-    throw std::invalid_argument("The loaded data is not from the ALF instrument");
+void ALFInstrumentModel::setData(ALFData const &dataType, MatrixWorkspace_sptr const &workspace) {
+  switch (dataType) {
+  case ALFData::SAMPLE:
+    setSample(workspace);
+    break;
+  case ALFData::VANADIUM:
+    setVanadium(workspace);
+    break;
+  default:
+    throw std::invalid_argument("ALFData must be one of { SAMPLE, VANADIUM }");
   }
-
-  return normaliseByCurrent(loadedWorkspace);
 }
 
-/*
- * Normalises the sample by the vanadium if a vanadium has been loaded. Converts the result to dSpacing if it is not
- * already in these units. Adds the resulting workspace to the ADS.
- */
-void ALFInstrumentModel::generateLoadedWorkspace() {
-  if (!m_sample) {
-    return;
-  }
+void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) {
+  m_twoThetasClosestToZero.clear();
 
-  // Rebin the vanadium to match the sample binning if the bins do not match
-  if (m_vanadium && !WorkspaceHelpers::matchingBins(*m_sample, *m_vanadium)) {
-    m_vanadium = rebinToWorkspace(m_vanadium, m_sample);
+  auto const sampleRemoved = m_sample && !sample;
+  m_sample = sample;
+  if (sampleRemoved) {
+    loadEmptyInstrument(loadedWsName());
   }
-
-  // Normalise the sample using the vanadium if it is provided
-  auto const normalised = m_vanadium ? replaceSpecialValues(m_sample / m_vanadium) : m_sample;
-  // Convert the normalisation result to dSpacing, and add it to the ADS
-  auto const normalisedDSpacing = !isAxisDSpacing(normalised) ? convertUnits(normalised, "dSpacing") : normalised;
-  ADS.addOrReplace(loadedWsName(), normalisedDSpacing);
 }
 
-void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) { m_sample = sample; }
+void ALFInstrumentModel::setVanadium(MatrixWorkspace_sptr const &vanadium) {
+  m_twoThetasClosestToZero.clear();
+  m_vanadium = vanadium;
+}
 
-void ALFInstrumentModel::setVanadium(MatrixWorkspace_sptr const &vanadium) { m_vanadium = vanadium; }
+bool ALFInstrumentModel::hasData(ALFData const &dataType) const { return bool(data(dataType)); }
 
-/*
- * Retrieves the sample run number from the currently loaded sample workspace.
- */
-std::size_t ALFInstrumentModel::sampleRun() const { return runNumber(m_sample); }
+Mantid::API::MatrixWorkspace_sptr ALFInstrumentModel::data(ALFData const &dataType) const {
+  switch (dataType) {
+  case ALFData::SAMPLE:
+    return m_sample;
+  case ALFData::VANADIUM:
+    return m_vanadium;
+  }
+  throw std::invalid_argument("ALFData must be one of { SAMPLE, VANADIUM }");
+}
 
-/*
- * Retrieves the vanadium run number from the currently loaded vanadium workspace.
- */
-std::size_t ALFInstrumentModel::vanadiumRun() const { return runNumber(m_vanadium); }
+void ALFInstrumentModel::replaceSampleWorkspaceInADS(Mantid::API::MatrixWorkspace_sptr const &workspace) const {
+  ADS.addOrReplace(loadedWsName(), workspace);
+}
+
+std::size_t ALFInstrumentModel::run(ALFData const &dataType) const {
+  switch (dataType) {
+  case ALFData::SAMPLE:
+    return runNumber(m_sample);
+  case ALFData::VANADIUM:
+    return runNumber(m_vanadium);
+  }
+  throw std::invalid_argument("ALFData must be one of { SAMPLE, VANADIUM }");
+}
 
 std::size_t ALFInstrumentModel::runNumber(Mantid::API::MatrixWorkspace_sptr const &workspace) const {
   if (!workspace) {
@@ -257,6 +155,16 @@ std::size_t ALFInstrumentModel::runNumber(Mantid::API::MatrixWorkspace_sptr cons
   }
   return static_cast<std::size_t>(workspace->getRunNumber());
 }
+
+bool ALFInstrumentModel::isALFData(MatrixWorkspace_const_sptr const &workspace) const {
+  return workspace->getInstrument()->getName() == INSTRUMENT_NAME;
+}
+
+bool ALFInstrumentModel::binningMismatch() const {
+  return m_vanadium && !WorkspaceHelpers::matchingBins(*m_sample, *m_vanadium);
+}
+
+bool ALFInstrumentModel::axisIsDSpacing() const { return m_sample->getAxis(0)->unit()->unitID() == D_SPACING_UNIT; }
 
 bool ALFInstrumentModel::setSelectedTubes(std::vector<DetectorTube> tubes) {
   // If the number of tubes is different then we definitely need to update the stored tubes
@@ -283,32 +191,101 @@ bool ALFInstrumentModel::addSelectedTube(DetectorTube const &tube) {
   return isNewTube;
 }
 
+bool ALFInstrumentModel::hasSelectedTubes() const { return !m_tubes.empty(); }
+
 bool ALFInstrumentModel::tubeExists(DetectorTube const &tube) const {
   return std::find(m_tubes.cbegin(), m_tubes.cend(), tube) != m_tubes.cend();
 }
 
-std::tuple<MatrixWorkspace_sptr, std::vector<double>>
-ALFInstrumentModel::generateOutOfPlaneAngleWorkspace(MantidQt::MantidWidgets::IInstrumentActor const &actor) const {
-  std::vector<double> twoThetas;
-  if (m_tubes.empty()) {
-    return {nullptr, twoThetas};
-  }
+std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+ALFInstrumentModel::loadProperties(std::string const &filename) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("Filename", filename, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return properties;
+}
 
+std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+ALFInstrumentModel::normaliseByCurrentProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return properties;
+}
+
+std::unique_ptr<AlgorithmRuntimeProps> ALFInstrumentModel::rebinToWorkspaceProperties() const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("WorkspaceToRebin", m_vanadium, *properties);
+  AlgorithmProperties::update("WorkspaceToMatch", m_sample, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return properties;
+}
+
+std::unique_ptr<AlgorithmRuntimeProps> ALFInstrumentModel::divideProperties() const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("LHSWorkspace", m_sample, *properties);
+  AlgorithmProperties::update("RHSWorkspace", m_vanadium, *properties);
+  AlgorithmProperties::update("AllowDifferentNumberSpectra", true, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return properties;
+}
+
+std::unique_ptr<AlgorithmRuntimeProps>
+ALFInstrumentModel::replaceSpecialValuesProperties(Mantid::API::MatrixWorkspace_sptr const &inputWorkspace) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
+  AlgorithmProperties::update("InfinityValue", 0.0, *properties);
+  AlgorithmProperties::update("NaNValue", 1.0, *properties);
+  AlgorithmProperties::update("CheckErrorAxis", true, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return properties;
+}
+
+std::unique_ptr<AlgorithmRuntimeProps>
+ALFInstrumentModel::convertUnitsProperties(MatrixWorkspace_sptr const &inputWorkspace) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
+  AlgorithmProperties::update("Target", D_SPACING_UNIT, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return properties;
+}
+
+std::unique_ptr<AlgorithmRuntimeProps>
+ALFInstrumentModel::createWorkspaceAlgorithmProperties(MantidQt::MantidWidgets::IInstrumentActor const &actor) {
   std::vector<double> x, y, e;
-  collectXAndYData(actor, x, y, e, twoThetas);
+  collectXAndYData(actor, x, y, e);
 
-  // Create workspace containing the out of plane angle data in one spectrum
-  auto workspace = createWorkspace(actor.getWorkspace()->getName(), x, y, e, 1u, "Out of plane angle");
-  // Convert x axis from radians to degrees
-  workspace = scaleX(workspace, 180.0 / M_PI);
-  // Rebin and average the workspace based on the number of tubes that are selected
-  workspace = rebunch(workspace, numberOfTubes());
-  return {workspace, twoThetas};
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("ParentWorkspace", actor.getWorkspace()->getName(), *properties);
+  AlgorithmProperties::update("DataX", x, *properties, false);
+  AlgorithmProperties::update("DataY", y, *properties, false);
+  AlgorithmProperties::update("DataE", e, *properties, false);
+  AlgorithmProperties::update("NSpec", 1, *properties);
+  AlgorithmProperties::update("UnitX", std::string("Out of plane angle"), *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return properties;
+}
+
+std::unique_ptr<AlgorithmRuntimeProps>
+ALFInstrumentModel::scaleXProperties(MatrixWorkspace_sptr const &inputWorkspace) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
+  AlgorithmProperties::update("Factor", 180.0 / M_PI, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return properties;
+}
+
+std::unique_ptr<AlgorithmRuntimeProps>
+ALFInstrumentModel::rebunchProperties(MatrixWorkspace_sptr const &inputWorkspace) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
+  AlgorithmProperties::update("NBunch", static_cast<int>(numberOfTubes()), *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return properties;
 }
 
 void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::IInstrumentActor const &actor,
-                                          std::vector<double> &x, std::vector<double> &y, std::vector<double> &e,
-                                          std::vector<double> &twoThetas) const {
+                                          std::vector<double> &x, std::vector<double> &y, std::vector<double> &e) {
   auto const &componentInfo = actor.componentInfo();
   auto const &detectorInfo = actor.detectorInfo();
 
@@ -316,7 +293,7 @@ void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::IInstrumentAc
 
   // Collect and sort Y and E values by X
   std::map<double, double> xymap, xemap;
-  collectAndSortYByX(xymap, xemap, twoThetas, actor, workspace, componentInfo, detectorInfo);
+  collectAndSortYByX(xymap, xemap, actor, workspace, componentInfo, detectorInfo);
 
   x.reserve(xymap.size());
   y.reserve(xymap.size());
@@ -327,11 +304,12 @@ void ALFInstrumentModel::collectXAndYData(MantidQt::MantidWidgets::IInstrumentAc
 }
 
 void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::map<double, double> &xe,
-                                            std::vector<double> &twoThetas,
                                             MantidQt::MantidWidgets::IInstrumentActor const &actor,
                                             MatrixWorkspace_const_sptr const &workspace,
                                             Mantid::Geometry::ComponentInfo const &componentInfo,
-                                            Mantid::Geometry::DetectorInfo const &detectorInfo) const {
+                                            Mantid::Geometry::DetectorInfo const &detectorInfo) {
+  m_twoThetasClosestToZero.clear();
+
   auto const nDetectorsPerTube = m_tubes.front().size();
   auto const samplePosition = componentInfo.samplePosition();
   auto const instrument = actor.getInstrument();
@@ -347,7 +325,7 @@ void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::m
       if (i % nDetectorsPerTube == 0) {
         normal = normalize(componentInfo.position(tubeDetectorIndices[i + 1]) - componentInfo.position(detectorIndex));
         actor.getBinMinMaxIndex(workspaceIndex, imin, imax);
-        appendTwoThetaClosestToZero(twoThetas, workspaceIndexClosestToZeroX, workspace, instrument);
+        appendTwoThetaClosestToZero(m_twoThetasClosestToZero, workspaceIndexClosestToZeroX, workspace, instrument);
       }
 
       if (workspaceIndex != MantidQt::MantidWidgets::InstrumentActor::INVALID_INDEX &&
@@ -364,7 +342,7 @@ void ALFInstrumentModel::collectAndSortYByX(std::map<double, double> &xy, std::m
       }
     }
   }
-  appendTwoThetaClosestToZero(twoThetas, workspaceIndexClosestToZeroX, workspace, instrument);
+  appendTwoThetaClosestToZero(m_twoThetasClosestToZero, workspaceIndexClosestToZeroX, workspace, instrument);
 }
 
 } // namespace MantidQt::CustomInterfaces

@@ -1,0 +1,1 @@
+- It is now possible to overwrite or add a new sample log from either :ref:`LoadILLReflectometry`,  :ref:`ReflectometryILLPreprocess` or :ref:`ReflectometryILLAutoProcess`.

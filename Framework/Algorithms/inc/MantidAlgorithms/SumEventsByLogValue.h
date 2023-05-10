@@ -53,8 +53,7 @@ private:
   void addMonitorCounts(const API::ITableWorkspace_sptr &outputWorkspace, const Kernel::TimeSeriesProperty<int> *log,
                         const int minVal, const int maxVal);
   std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>> getNumberSeriesLogs();
-  double sumProtonCharge(const Kernel::TimeSeriesProperty<double> *protonChargeLog,
-                         const Kernel::SplittingIntervalVec &filter);
+  double sumProtonCharge(const Kernel::TimeSeriesProperty<double> *protonChargeLog, const Kernel::TimeROI &filter);
 
   DataObjects::EventWorkspace_const_sptr m_inputWorkspace; ///< The input workspace
   std::string m_logName;                                   ///< The name of the log to sum against

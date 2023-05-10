@@ -112,7 +112,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         try:
             temperature = run.getProperty(temperatureLogName)
             if isinstance(temperature, FloatTimeSeriesProperty):
-                temperature = temperature.timeAverageValue()
+                temperature = run.getTimeAveragedValue(temperatureLogName)
             else:
                 temperature = float(temperature.value)
             return temperature

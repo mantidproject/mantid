@@ -11,7 +11,6 @@ from mantid.api import AnalysisDataService
 
 
 class TOFTOFCropWorkspaceTest(unittest.TestCase):
-
     _input_ws = None
     _cropped_ws = None
 
@@ -48,7 +47,13 @@ class TOFTOFCropWorkspaceTest(unittest.TestCase):
     def test_invalid_xunits(self):
         self._input_ws.getAxis(0).setUnit("Wavelength")
         OutputWorkspaceName = "cropped_ws"
-        self.assertRaises(RuntimeError, TOFTOFCropWorkspace, InputWorkspace=self._input_ws, OutputWorkspace=OutputWorkspaceName)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "X axis units must be TOF.",
+            TOFTOFCropWorkspace,
+            InputWorkspace=self._input_ws,
+            OutputWorkspace=OutputWorkspaceName,
+        )
 
     def cleanUp(self):
         if AnalysisDataService.doesExist(self._input_ws):

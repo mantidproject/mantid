@@ -116,7 +116,15 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         values = ["one", "two", "three"]
         units = ["unit_a", "unit_b"]
 
-        self.assertRaises(RuntimeError, AddSampleLogMultiple, Workspace=self._workspace, LogNames=names, LogValues=values, LogUnits=units)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Number of log units must be 0 or match the number of log names",
+            AddSampleLogMultiple,
+            Workspace=self._workspace,
+            LogNames=names,
+            LogValues=values,
+            LogUnits=units,
+        )
 
     def test_validation_no_names(self):
         """
@@ -125,7 +133,14 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         names = []
         values = ["one", "two", "three"]
 
-        self.assertRaises(RuntimeError, AddSampleLogMultiple, Workspace=self._workspace, LogNames=names, LogValues=values)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Must have at least one log name",
+            AddSampleLogMultiple,
+            Workspace=self._workspace,
+            LogNames=names,
+            LogValues=values,
+        )
 
     def test_validation_no_values(self):
         """
@@ -134,7 +149,14 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         names = ["a", "b", "c"]
         values = []
 
-        self.assertRaises(RuntimeError, AddSampleLogMultiple, Workspace=self._workspace, LogNames=names, LogValues=values)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Must have at least one log value",
+            AddSampleLogMultiple,
+            Workspace=self._workspace,
+            LogNames=names,
+            LogValues=values,
+        )
 
     def test_validation_differing_counts(self):
         """
@@ -143,7 +165,14 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         names = ["a", "b", "c"]
         values = ["one", "two"]
 
-        self.assertRaises(RuntimeError, AddSampleLogMultiple, Workspace=self._workspace, LogNames=names, LogValues=values)
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Number of log values must match number of log names",
+            AddSampleLogMultiple,
+            Workspace=self._workspace,
+            LogNames=names,
+            LogValues=values,
+        )
 
     def test_validation_differing_types(self):
         """
@@ -152,8 +181,15 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         names = ["a", "b", "c"]
         values = ["one", "two", "three"]
         types = ["String", "String", "String"]
-        self.assertRaises(
-            RuntimeError, AddSampleLogMultiple, Workspace=self._workspace, LogNames=names, LogValues=values, ParseType=True, LogTypes=types
+        self.assertRaisesRegex(
+            RuntimeError,
+            "LogTypes array not used when ParseType=True",
+            AddSampleLogMultiple,
+            Workspace=self._workspace,
+            LogNames=names,
+            LogValues=values,
+            ParseType=True,
+            LogTypes=types,
         )
 
     def test_validation_differing_types(self):
@@ -164,8 +200,15 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         values = ["one", "two", "three"]
         types = ["String", "String"]
 
-        self.assertRaises(
-            RuntimeError, AddSampleLogMultiple, Workspace=self._workspace, LogNames=names, LogValues=values, ParseType=False, LogTypes=types
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Number of log types must be 0 or match the number of log names",
+            AddSampleLogMultiple,
+            Workspace=self._workspace,
+            LogNames=names,
+            LogValues=values,
+            ParseType=False,
+            LogTypes=types,
         )
 
     def test_validation_invalid_types(self):
@@ -176,8 +219,15 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         values = ["one", "two", "three"]
         types = ["String", "String", "String Series"]
 
-        self.assertRaises(
-            RuntimeError, AddSampleLogMultiple, Workspace=self._workspace, LogNames=names, LogValues=values, ParseType=False, LogTypes=types
+        self.assertRaisesRegex(
+            RuntimeError,
+            "String Series is not an allowed log type",
+            AddSampleLogMultiple,
+            Workspace=self._workspace,
+            LogNames=names,
+            LogValues=values,
+            ParseType=False,
+            LogTypes=types,
         )
 
 

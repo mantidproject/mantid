@@ -1,3 +1,6 @@
+set "parent_dir=%RECIPE_DIR%\.."
+CALL "%parent_dir%\archive_env_logs.bat" %BUILD_PREFIX% %PREFIX% mantidworkbench
+
 mkdir build && cd build
 
 cmake ^
@@ -11,7 +14,6 @@ cmake ^
     -DMANTID_FRAMEWORK_LIB=SYSTEM ^
     -DMANTID_QT_LIB=SYSTEM ^
     -DENABLE_WORKBENCH=ON ^
-    -DCPACK_PACKAGE_SUFFIX="" ^
     -DWORKBENCH_SITE_PACKAGES=%SP_DIR% ^
     -DUSE_PRECOMPILED_HEADERS=OFF ^
     ..

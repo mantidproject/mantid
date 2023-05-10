@@ -4,7 +4,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from distutils.version import LooseVersion
 from typing import Callable
 
 from .view import RegionSelectorView
@@ -15,7 +14,6 @@ from ..sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
 from mantid.api import RegionSelectorObserver
 
 # 3rd party imports
-import matplotlib
 from matplotlib.widgets import RectangleSelector
 
 
@@ -30,12 +28,11 @@ class Selector(RectangleSelector):
         "interactive": True,
     }
 
-    def __init__(self, region_type: str, color: str, *args):
-        if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
-            self.kwargs["props"] = dict(facecolor="white", edgecolor=color, alpha=0.2, linewidth=2, fill=True)
-            self.kwargs["handle_props"] = dict(markersize=4)
-            self.kwargs["drag_from_anywhere"] = True
-            self.kwargs["ignore_event_outside"] = True
+    def __init__(self, region_type: str, color: str, hatch: str, *args):
+        self.kwargs["props"] = dict(facecolor=color, edgecolor=color, alpha=0.4, hatch=hatch, linewidth=3, fill=True)
+        self.kwargs["handle_props"] = dict(markersize=6)
+        self.kwargs["drag_from_anywhere"] = True
+        self.kwargs["ignore_event_outside"] = True
 
         super().__init__(*args, **self.kwargs)
         self._region_type = region_type
@@ -45,8 +42,7 @@ class Selector(RectangleSelector):
 
     def set_active(self, active: bool) -> None:
         """Hide the handles of a selector if it is not active."""
-        if LooseVersion(matplotlib.__version__) >= LooseVersion("3.5.0"):
-            self.set_handle_props(alpha=self.active_handle_alpha if active else 0)
+        self.set_handle_props(alpha=self.active_handle_alpha if active else 0)
         super().set_active(active)
 
 
@@ -137,7 +133,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
             self._selectors.pop()
             self._drawing_region = False
 
-    def add_rectangular_region(self, region_type, color):
+    def add_rectangular_region(self, region_type: str, color: str, hatch: str):
         """
         Add a rectangular region selection tool.
         """
@@ -147,7 +143,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         if self._drawing_region:
             self._selectors.pop()
 
-        self._selectors.append(Selector(region_type, color, self.view._data_view.ax, self._on_rectangle_selected))
+        self._selectors.append(Selector(region_type, color, hatch, self.view._data_view.ax, self._on_rectangle_selected))
 
         self._drawing_region = True
 

@@ -62,20 +62,44 @@ class SANSILLMultiProcessTest(unittest.TestCase):
         self.assertTrue(iq.getHistory())
 
     def test_fail_d2_before_d1_samples(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD2="010569")
+        self.assertRaisesRegex(
+            RuntimeError, "Samples have to be filled from D1 onwards", SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD2="010569"
+        )
 
     def test_fail_d2_skipped_samples(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD1="010569", SampleRunsD3="010455")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Samples have to be filled from D1 onwards:",
+            SANSILLMultiProcess,
+            OutputWorkspace="out",
+            SampleRunsD1="010569",
+            SampleRunsD3="010455",
+        )
 
     def test_fail_different_number_of_samples(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD1="010569", SampleRunsD2="010455,010460")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "SampleRunsD2 has 2 elements instead of 1",
+            SANSILLMultiProcess,
+            OutputWorkspace="out",
+            SampleRunsD1="010569",
+            SampleRunsD2="010455,010460",
+        )
 
     def test_fail_transmission_wo_empty_beam(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD1="010569", SampleTrRunsW1="010585")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Empty beam flux input workspace is mandatory for transmission calculation.",
+            SANSILLMultiProcess,
+            OutputWorkspace="out",
+            SampleRunsD1="010569",
+            SampleTrRunsW1="010585",
+        )
 
     def test_fail_different_number_of_tr_runs(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Input and transmission workspaces have a different number of wavelength bins",
             SANSILLMultiProcess,
             OutputWorkspace="out",
             SampleRunsD1="010569,010460",
@@ -84,8 +108,9 @@ class SANSILLMultiProcessTest(unittest.TestCase):
         )
 
     def test_fail_w2_before_w1_tr_runs(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "If there is one wavelength, transmissions must be filled in W1.",
             SANSILLMultiProcess,
             OutputWorkspace="out",
             SampleRunsD1="010569",
@@ -94,19 +119,39 @@ class SANSILLMultiProcessTest(unittest.TestCase):
         )
 
     def test_fail_output_name_not_alphanumeric(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="7out", SampleRunsD1="010569")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Output workspace name must be alphanumeric, it should start with a letter.",
+            SANSILLMultiProcess,
+            OutputWorkspace="7out",
+            SampleRunsD1="010569",
+        )
 
     def test_fail_wedges_and_panels(self):
-        self.assertRaises(
-            RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD1="010569", OutputPanels=True, NumberOfWedges=2
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Panels cannot be calculated together with the wedges, please choose one or the other.",
+            SANSILLMultiProcess,
+            OutputWorkspace="out",
+            SampleRunsD1="010569",
+            OutputPanels=True,
+            NumberOfWedges=2,
         )
 
     def test_fail_wrong_q_range(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD1="010569", OutputBinning="0.05,0.3:")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Number of Q binning parameter sets must be equal to the number of distances.",
+            SANSILLMultiProcess,
+            OutputWorkspace="out",
+            SampleRunsD1="010569",
+            OutputBinning="0.05,0.3:",
+        )
 
     def test_fail_wrong_tr_beam_radius_dimension(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "TrBeamRadius has 2 elements which does not match the number of distances 1",
             SANSILLMultiProcess,
             OutputWorkspace="out",
             SampleRunsD1="010569",
@@ -116,8 +161,9 @@ class SANSILLMultiProcessTest(unittest.TestCase):
         )
 
     def test_fail_wrong_sample_names_dimension(self):
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "SampleNames has 2 elements which does not match the number of samples 1.",
             SANSILLMultiProcess,
             OutputWorkspace="out",
             SampleRunsD1="010569",
@@ -126,10 +172,24 @@ class SANSILLMultiProcessTest(unittest.TestCase):
         )
 
     def test_fail_wrong_sample_thickness_dimension(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD1="010569", SampleThickness=[0.1, 0.11])
+        self.assertRaisesRegex(
+            RuntimeError,
+            "SampleThickness has 2 elements which does not match the number of samples 1.",
+            SANSILLMultiProcess,
+            OutputWorkspace="out",
+            SampleRunsD1="010569",
+            SampleThickness=[0.1, 0.11],
+        )
 
     def test_fail_wrong_beam_radius_dimension(self):
-        self.assertRaises(RuntimeError, SANSILLMultiProcess, OutputWorkspace="out", SampleRunsD1="010569", BeamRadius=[0.1, 0.11])
+        self.assertRaisesRegex(
+            RuntimeError,
+            "BeamRadius has 2 elements which does not match the number of distances 1",
+            SANSILLMultiProcess,
+            OutputWorkspace="out",
+            SampleRunsD1="010569",
+            BeamRadius=[0.1, 0.11],
+        )
 
 
 if __name__ == "__main__":

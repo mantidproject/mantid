@@ -31,8 +31,8 @@ SplittersWorkspace::SplittersWorkspace() {
  */
 void SplittersWorkspace::addSplitter(const Mantid::Kernel::SplittingInterval &splitter) {
   Mantid::API::TableRow row = this->appendRow();
-  row << splitter.begin().totalNanoseconds();
-  row << splitter.end().totalNanoseconds();
+  row << splitter.start().totalNanoseconds();
+  row << splitter.stop().totalNanoseconds();
   row << splitter.index();
 }
 
@@ -63,24 +63,6 @@ bool SplittersWorkspace::removeSplitter(size_t index) {
 
   return removed;
 }
-
-/**
- * Converts a SplitterWorkSpace to a TimeSplitter. Note: if any rows overlap, then
- * later rows will overwrite earlier rows.
- */
-Kernel::TimeSplitter SplittersWorkspace::convertToTimeSplitter() {
-  Kernel::TimeSplitter splitter;
-  for (size_t i = 0; i < this->rowCount(); i++) {
-    Kernel::SplittingInterval interval = this->getSplitter(i);
-    if (splitter.valueAtTime(interval.begin()) > 0 || splitter.valueAtTime(interval.end()) > 0) {
-      g_log.warning() << "SplitterWorkspace row may be overwritten in conversion to TimeSplitter: " << i << '\n';
-    }
-    splitter.addROI(interval.begin(), interval.end(), interval.index());
-  }
-
-  return splitter;
-}
-
 } // namespace Mantid::DataObjects
 
 ///\cond TEMPLATE

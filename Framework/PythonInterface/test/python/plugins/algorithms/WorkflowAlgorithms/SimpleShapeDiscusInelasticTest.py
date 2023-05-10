@@ -86,7 +86,6 @@ class SimpleShapeDiscusInelasticTest(unittest.TestCase):
         self._test_corrections_workspace(results)
 
     def test_annulus_with_container(self):
-
         kwargs = self._annulus_arguments
         results = SimpleShapeDiscusInelastic(
             ReducedWorkspace=self._red_ws,
@@ -95,7 +94,7 @@ class SimpleShapeDiscusInelasticTest(unittest.TestCase):
             CanInnerRadius=0.9,
             CanOuterRadius=2.1,
             Container=True,
-            **kwargs
+            **kwargs,
         )
 
         self._test_corrections_workspace(results)
@@ -115,25 +114,28 @@ class SimpleShapeDiscusInelasticTest(unittest.TestCase):
             "Thickness": 2.1,
         }
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "Please enter a chemical formula."):
             SimpleShapeDiscusInelastic(**kwargs)
 
     def test_flat_plate_no_params(self):
         # If the shape is flat plate but the relevant parameters haven't been entered this should throw
         # relevant params are Height, Width, Thickness
+        params = ["Height", "Width", "Thickness"]
 
-        kwargs = {
-            "ReducedWorkspace": self._red_ws,
-            "SqwWorkspace": self._sqw_ws,
-            "ChemicalFormula": "H2-O",
-            "SampleMassDensity": 1.0,
-            "NeutronPathsSingle": 50,
-            "NeutronPathsMultiple": 50,
-            "Shape": "FlatPlate",
-        }
+        for param in params:
+            kwargs = {
+                "ReducedWorkspace": self._red_ws,
+                "SqwWorkspace": self._sqw_ws,
+                "SampleChemicalFormula": "H2-O",
+                "SampleMassDensity": 1.0,
+                "NeutronPathsSingle": 50,
+                "NeutronPathsMultiple": 50,
+                param: 0,
+                "Shape": "FlatPlate",
+            }
 
-        with self.assertRaises(RuntimeError):
-            SimpleShapeDiscusInelastic(**kwargs)
+            with self.assertRaisesRegex(RuntimeError, f"Please enter a non-zero number for {param.lower()}"):
+                SimpleShapeDiscusInelastic(**kwargs)
 
     def test_not_in_deltaE(self):
         red_ws_not_deltaE = Load("irs26176_graphite002_red.nxs")
@@ -143,7 +145,7 @@ class SimpleShapeDiscusInelasticTest(unittest.TestCase):
         kwargs = {
             "ReducedWorkspace": red_ws_not_deltaE,
             "SqwWorkspace": self._sqw_ws,
-            "ChemicalFormula": "H2-O",
+            "SampleChemicalFormula": "H2-O",
             "SampleMassDensity": 1.0,
             "NeutronPathsSingle": 50,
             "NeutronPathsMultiple": 50,
@@ -153,7 +155,7 @@ class SimpleShapeDiscusInelasticTest(unittest.TestCase):
             "Thickness": 2.1,
         }
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "Input workspace must have units of DeltaE for inelastic instrument"):
             SimpleShapeDiscusInelastic(**kwargs)
 
         DeleteWorkspace(red_ws_not_deltaE)

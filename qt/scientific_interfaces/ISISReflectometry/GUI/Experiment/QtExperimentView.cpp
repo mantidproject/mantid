@@ -55,6 +55,11 @@ void showAsValid(QLineEdit &lineEdit) {
   palette.setColor(QPalette::Base, Qt::transparent);
   lineEdit.setPalette(palette);
 }
+constexpr auto POL_CORR_SELECTOR_ROW = 12;
+constexpr auto POL_CORR_SELECTOR_COL = 3;
+
+constexpr auto FLOOD_SELECTOR_ROW = 14;
+constexpr auto FLOOD_SELECTOR_COL = 3;
 } // namespace
 
 /** Constructor
@@ -86,6 +91,14 @@ void QtExperimentView::showAllLookupRowsAsValid() {
 void QtExperimentView::showStitchParametersValid() { showAsValid(stitchOptionsLineEdit()); }
 
 void QtExperimentView::showStitchParametersInvalid() { showAsInvalid(stitchOptionsLineEdit()); }
+
+void QtExperimentView::showPolCorrFilePathValid() { showAsValid(*m_polCorrEfficienciesLineEdit); }
+
+void QtExperimentView::showPolCorrFilePathInvalid() { showAsInvalid(*m_polCorrEfficienciesLineEdit); }
+
+void QtExperimentView::showFloodCorrFilePathValid() { showAsValid(*m_floodCorrLineEdit); }
+
+void QtExperimentView::showFloodCorrFilePathInvalid() { showAsInvalid(*m_floodCorrLineEdit); }
 
 void QtExperimentView::subscribe(ExperimentViewSubscriber *notifyee) { m_notifyee = notifyee; }
 
@@ -211,13 +224,20 @@ void QtExperimentView::initOptionsTable(const Mantid::API::IAlgorithm_sptr &algo
 }
 
 void QtExperimentView::initPolCorrEfficienciesControls() {
-  m_ui.polCorrEfficienciesWsSelector->setOptional(true);
-  m_ui.polCorrEfficienciesWsSelector->setWorkspaceTypes({"Workspace2D"});
+  m_polCorrEfficienciesWsSelector =
+      std::make_unique<MantidWidgets::WorkspaceSelector>(new MantidWidgets::WorkspaceSelector);
+  m_polCorrEfficienciesLineEdit = std::make_unique<QLineEdit>(new QLineEdit());
+  m_ui.expSettingsGrid->addWidget(m_polCorrEfficienciesWsSelector.get(), POL_CORR_SELECTOR_ROW, POL_CORR_SELECTOR_COL);
+  m_polCorrEfficienciesWsSelector->setOptional(true);
+  m_polCorrEfficienciesWsSelector->setWorkspaceTypes({"Workspace2D"});
 }
 
 void QtExperimentView::initFloodControls() {
-  m_ui.floodWorkspaceWsSelector->setOptional(true);
-  m_ui.floodWorkspaceWsSelector->setWorkspaceTypes({"Workspace2D"});
+  m_floodCorrWsSelector = std::make_unique<MantidWidgets::WorkspaceSelector>(new MantidWidgets::WorkspaceSelector);
+  m_floodCorrLineEdit = std::make_unique<QLineEdit>(new QLineEdit());
+  m_ui.expSettingsGrid->addWidget(m_floodCorrWsSelector.get(), FLOOD_SELECTOR_ROW, FLOOD_SELECTOR_COL);
+  m_floodCorrWsSelector->setOptional(true);
+  m_floodCorrWsSelector->setWorkspaceTypes({"Workspace2D"});
 }
 
 void QtExperimentView::connectSettingsChange(QLineEdit &edit) {
@@ -275,14 +295,15 @@ void QtExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.endOverlapEdit->setEnabled(enabled);
   m_ui.transStitchParamsEdit->setEnabled(enabled);
   m_ui.transScaleRHSCheckBox->setEnabled(enabled);
-  m_ui.polCorrCheckBox->setEnabled(enabled);
-  m_ui.polCorrEfficienciesWsSelector->setEnabled(enabled);
+  m_polCorrEfficienciesWsSelector->setEnabled(enabled);
+  m_polCorrEfficienciesLineEdit->setEnabled(enabled);
   stitchOptionsLineEdit().setEnabled(enabled);
   m_ui.reductionTypeComboBox->setEnabled(enabled);
   m_ui.summationTypeComboBox->setEnabled(enabled);
   m_ui.includePartialBinsCheckBox->setEnabled(enabled);
   m_ui.floodCorComboBox->setEnabled(enabled);
-  m_ui.floodWorkspaceWsSelector->setEnabled(enabled);
+  m_floodCorrWsSelector->setEnabled(enabled);
+  m_floodCorrLineEdit->setEnabled(enabled);
   m_ui.debugCheckBox->setEnabled(enabled);
   m_ui.subtractBackgroundCheckBox->setEnabled(enabled);
   m_ui.backgroundMethodComboBox->setEnabled(enabled);
@@ -306,13 +327,15 @@ void QtExperimentView::registerExperimentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_ui.endOverlapEdit, "EndOverlap", alg);
   registerSettingWidget(*m_ui.transStitchParamsEdit, "Params", alg);
   registerSettingWidget(*m_ui.transScaleRHSCheckBox, "ScaleRHSWorkspace", alg);
-  registerSettingWidget(*m_ui.polCorrCheckBox, "PolarizationAnalysis", alg);
-  registerSettingWidget(*m_ui.polCorrEfficienciesWsSelector, "PolarizationEfficiencies", alg);
+  registerSettingWidget(*m_ui.polCorrComboBox, "PolarizationAnalysis", alg);
+  registerSettingWidget(*m_polCorrEfficienciesWsSelector, "PolarizationEfficiencies", alg);
+  registerSettingWidget(*m_polCorrEfficienciesLineEdit, "PolarizationEfficiencies", alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
   registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins", alg);
   registerSettingWidget(*m_ui.floodCorComboBox, "FloodCorrection", alg);
-  registerSettingWidget(*m_ui.floodWorkspaceWsSelector, "FloodWorkspace", alg);
+  registerSettingWidget(*m_floodCorrWsSelector, "FloodWorkspace", alg);
+  registerSettingWidget(*m_floodCorrLineEdit, "FloodWorkspace", alg);
   registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
   registerSettingWidget(*m_ui.subtractBackgroundCheckBox, "SubtractBackground", alg);
   registerSettingWidget(*m_ui.backgroundMethodComboBox, "BackgroundCalculationMethod", alg);
@@ -333,13 +356,15 @@ void QtExperimentView::connectExperimentSettingsWidgets() {
   connectSettingsChange(*m_ui.endOverlapEdit);
   connectSettingsChange(*m_ui.transStitchParamsEdit);
   connectSettingsChange(*m_ui.transScaleRHSCheckBox);
-  connectSettingsChange(*m_ui.polCorrCheckBox);
-  connectSettingsChange(*m_ui.polCorrEfficienciesWsSelector);
+  connectSettingsChange(*m_ui.polCorrComboBox);
+  connectSettingsChange(*m_polCorrEfficienciesWsSelector);
+  connectSettingsChange(*m_polCorrEfficienciesLineEdit);
   connectSettingsChange(stitchOptionsLineEdit());
   connectSettingsChange(*m_ui.reductionTypeComboBox);
   connectSettingsChange(*m_ui.includePartialBinsCheckBox);
   connectSettingsChange(*m_ui.floodCorComboBox);
-  connectSettingsChange(*m_ui.floodWorkspaceWsSelector);
+  connectSettingsChange(*m_floodCorrWsSelector);
+  connectSettingsChange(*m_floodCorrLineEdit);
   connectSettingsChange(*m_ui.debugCheckBox);
   connectSettingsChange(*m_ui.subtractBackgroundCheckBox);
   connectSettingsChange(*m_ui.backgroundMethodComboBox);
@@ -355,13 +380,15 @@ void QtExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.endOverlapEdit);
   disconnectSettingsChange(*m_ui.transStitchParamsEdit);
   disconnectSettingsChange(*m_ui.transScaleRHSCheckBox);
-  disconnectSettingsChange(*m_ui.polCorrCheckBox);
-  disconnectSettingsChange(*m_ui.polCorrEfficienciesWsSelector);
+  disconnectSettingsChange(*m_ui.polCorrComboBox);
+  disconnectSettingsChange(*m_polCorrEfficienciesWsSelector);
+  disconnectSettingsChange(*m_polCorrEfficienciesLineEdit);
   disconnectSettingsChange(stitchOptionsLineEdit());
   disconnectSettingsChange(*m_ui.reductionTypeComboBox);
   disconnectSettingsChange(*m_ui.includePartialBinsCheckBox);
   disconnectSettingsChange(*m_ui.floodCorComboBox);
-  disconnectSettingsChange(*m_ui.floodWorkspaceWsSelector);
+  disconnectSettingsChange(*m_floodCorrWsSelector);
+  disconnectSettingsChange(*m_floodCorrLineEdit);
   disconnectSettingsChange(*m_ui.debugCheckBox);
   disconnectSettingsChange(*m_ui.subtractBackgroundCheckBox);
   disconnectSettingsChange(*m_ui.backgroundMethodComboBox);
@@ -530,32 +557,36 @@ void QtExperimentView::enableCostFunction() { m_ui.costFunctionComboBox->setEnab
 void QtExperimentView::disableCostFunction() { m_ui.costFunctionComboBox->setEnabled(false); }
 
 void QtExperimentView::enablePolarizationCorrections() {
-  m_ui.polCorrCheckBox->setEnabled(true);
-  m_ui.polCorrCheckLabel->setEnabled(true);
+  m_ui.polCorrComboBox->setEnabled(true);
+  m_ui.polCorrComboLabel->setEnabled(true);
 }
 
 void QtExperimentView::disablePolarizationCorrections() {
-  m_ui.polCorrCheckBox->setEnabled(false);
-  m_ui.polCorrCheckLabel->setEnabled(false);
+  m_ui.polCorrComboBox->setEnabled(false);
+  m_ui.polCorrComboLabel->setEnabled(false);
 }
 
 void QtExperimentView::enablePolarizationEfficiencies() {
-  m_ui.polCorrEfficienciesWsSelector->setEnabled(true);
+  m_polCorrEfficienciesWsSelector->setEnabled(true);
+  m_polCorrEfficienciesLineEdit->setEnabled(true);
   m_ui.polCorrEfficienciesLabel->setEnabled(true);
 }
 
 void QtExperimentView::disablePolarizationEfficiencies() {
-  m_ui.polCorrEfficienciesWsSelector->setEnabled(false);
+  m_polCorrEfficienciesWsSelector->setEnabled(false);
+  m_polCorrEfficienciesLineEdit->setEnabled(false);
   m_ui.polCorrEfficienciesLabel->setEnabled(false);
 }
 
 void QtExperimentView::disableFloodCorrectionInputs() {
-  m_ui.floodWorkspaceWsSelector->setEnabled(false);
+  m_floodCorrWsSelector->setEnabled(false);
+  m_floodCorrLineEdit->setEnabled(false);
   m_ui.floodWorkspaceWsSelectorLabel->setEnabled(false);
 }
 
 void QtExperimentView::enableFloodCorrectionInputs() {
-  m_ui.floodWorkspaceWsSelector->setEnabled(true);
+  m_floodCorrWsSelector->setEnabled(true);
+  m_floodCorrLineEdit->setEnabled(true);
   m_ui.floodWorkspaceWsSelectorLabel->setEnabled(true);
 }
 
@@ -625,11 +656,28 @@ std::string QtExperimentView::getFloodCorrectionType() const { return getText(*m
 
 void QtExperimentView::setFloodCorrectionType(std::string const &type) { setSelected(*m_ui.floodCorComboBox, type); }
 
-std::string QtExperimentView::getFloodWorkspace() const { return getText(*m_ui.floodWorkspaceWsSelector); }
+void QtExperimentView::setFloodCorrectionWorkspaceMode() {
+  m_ui.expSettingsGrid->removeItem(m_ui.expSettingsGrid->itemAtPosition(FLOOD_SELECTOR_ROW, FLOOD_SELECTOR_COL));
+  m_floodCorrWsSelector->show();
+  m_floodCorrLineEdit->hide();
+  m_ui.expSettingsGrid->addWidget(m_floodCorrWsSelector.get(), FLOOD_SELECTOR_ROW, FLOOD_SELECTOR_COL);
+}
+
+void QtExperimentView::setFloodCorrectionFilePathMode() {
+  m_ui.expSettingsGrid->removeItem(m_ui.expSettingsGrid->itemAtPosition(FLOOD_SELECTOR_ROW, FLOOD_SELECTOR_COL));
+  m_floodCorrWsSelector->hide();
+  m_floodCorrLineEdit->show();
+  m_ui.expSettingsGrid->addWidget(m_floodCorrLineEdit.get(), FLOOD_SELECTOR_ROW, FLOOD_SELECTOR_COL);
+}
+std::string QtExperimentView::getFloodWorkspace() const { return getText(*m_floodCorrWsSelector); }
+
+std::string QtExperimentView::getFloodFilePath() const { return getText(*m_floodCorrLineEdit); }
 
 void QtExperimentView::setFloodWorkspace(std::string const &workspace) {
-  setSelected(*m_ui.floodWorkspaceWsSelector, workspace);
+  setSelected(*m_floodCorrWsSelector, workspace);
 }
+
+void QtExperimentView::setFloodFilePath(std::string const &filePath) { setText(*m_floodCorrLineEdit, filePath); }
 
 std::string QtExperimentView::getAnalysisMode() const { return getText(*m_ui.analysisModeComboBox); }
 
@@ -743,16 +791,40 @@ void QtExperimentView::showTransmissionStitchParamsValid() { showAsValid(*m_ui.t
 
 void QtExperimentView::showTransmissionStitchParamsInvalid() { showAsInvalid(*m_ui.transStitchParamsEdit); }
 
-void QtExperimentView::setPolarizationCorrectionOption(bool enable) { setChecked(*m_ui.polCorrCheckBox, enable); }
+void QtExperimentView::setPolarizationCorrectionOption(std::string const &option) {
+  setSelected(*m_ui.polCorrComboBox, option);
+}
 
-bool QtExperimentView::getPolarizationCorrectionOption() const { return m_ui.polCorrCheckBox->isChecked(); }
+std::string QtExperimentView::getPolarizationCorrectionOption() const { return getText(*m_ui.polCorrComboBox); }
+
+void QtExperimentView::setPolarizationEfficienciesWorkspaceMode() {
+  m_ui.expSettingsGrid->removeItem(m_ui.expSettingsGrid->itemAtPosition(POL_CORR_SELECTOR_ROW, POL_CORR_SELECTOR_COL));
+  m_polCorrEfficienciesWsSelector->show();
+  m_polCorrEfficienciesLineEdit->hide();
+  m_ui.expSettingsGrid->addWidget(m_polCorrEfficienciesWsSelector.get(), POL_CORR_SELECTOR_ROW, POL_CORR_SELECTOR_COL);
+}
+
+void QtExperimentView::setPolarizationEfficienciesFilePathMode() {
+  m_ui.expSettingsGrid->removeItem(m_ui.expSettingsGrid->itemAtPosition(POL_CORR_SELECTOR_ROW, POL_CORR_SELECTOR_COL));
+  m_polCorrEfficienciesWsSelector->hide();
+  m_polCorrEfficienciesLineEdit->show();
+  m_ui.expSettingsGrid->addWidget(m_polCorrEfficienciesLineEdit.get(), POL_CORR_SELECTOR_ROW, POL_CORR_SELECTOR_COL);
+}
 
 std::string QtExperimentView::getPolarizationEfficienciesWorkspace() const {
-  return getText(*m_ui.polCorrEfficienciesWsSelector);
+  return getText(*m_polCorrEfficienciesWsSelector);
+}
+
+std::string QtExperimentView::getPolarizationEfficienciesFilePath() const {
+  return getText(*m_polCorrEfficienciesLineEdit);
 }
 
 void QtExperimentView::setPolarizationEfficienciesWorkspace(std::string const &workspace) {
-  setSelected(*m_ui.polCorrEfficienciesWsSelector, workspace);
+  setSelected(*m_polCorrEfficienciesWsSelector, workspace);
+}
+
+void QtExperimentView::setPolarizationEfficienciesFilePath(std::string const &filePath) {
+  setText(*m_polCorrEfficienciesLineEdit, filePath);
 }
 
 std::string QtExperimentView::getStitchOptions() const { return getText(stitchOptionsLineEdit()); }

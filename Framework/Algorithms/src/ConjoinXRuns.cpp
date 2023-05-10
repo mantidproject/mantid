@@ -26,6 +26,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -242,18 +243,20 @@ std::vector<double> ConjoinXRuns::getXAxis(const MatrixWorkspace_sptr &ws, doubl
     }
     xstart += double(s);
   } else {
+    // get the time filtering from the Run object
+    const TimeROI &timeroi = run.getTimeROI();
+
     // try time series first
-    TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
-    timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(m_logEntry));
+    auto timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(m_logEntry));
     if (timeSeriesDouble) {
       // try double series
-      axis = timeSeriesDouble->filteredValuesAsVector();
+      axis = timeSeriesDouble->filteredValuesAsVector(&timeroi);
     } else {
       // try int series next
-      TimeSeriesProperty<int> *timeSeriesInt(nullptr);
-      timeSeriesInt = dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData(m_logEntry));
+
+      auto timeSeriesInt = dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData(m_logEntry));
       if (timeSeriesInt) {
-        std::vector<int> intAxis = timeSeriesInt->filteredValuesAsVector();
+        std::vector<int> intAxis = timeSeriesInt->filteredValuesAsVector(&timeroi);
         axis = std::vector<double>(intAxis.begin(), intAxis.end());
       } else {
         // then scalar

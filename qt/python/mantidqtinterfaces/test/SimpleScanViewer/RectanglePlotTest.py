@@ -368,7 +368,7 @@ class RectanglePlotTest(unittest.TestCase):
         self.rectangle_plot._manager.add_rectangle(rect1)
         self.rectangle_plot._manager.add_rectangle(rect2)
 
-        peaks = {rect1: (5, 5), rect2: (40, 40)}
+        peaks = {rect1: (5, 5, 5, 5), rect2: (40, 40, 10, 10)}
 
         self.rectangle_plot._find_peak = mock.Mock()
         self.rectangle_plot._find_peak.side_effect = lambda x: peaks[x] if x in peaks else None
@@ -378,10 +378,12 @@ class RectanglePlotTest(unittest.TestCase):
         self.assertTrue(mtd.doesExist("peaks"))
         peak_ws = mtd["peaks"]
         self.assertEqual(peak_ws.rowCount(), 2)
-        self.assertEqual(peak_ws.columnCount(), 3)
+        self.assertEqual(peak_ws.columnCount(), 5)
         self.assertEqual(peak_ws.cell(0, 0), 0)
         self.assertEqual(peak_ws.cell(1, 1), 40)
         self.assertEqual(peak_ws.cell(0, 2), 5)
+        self.assertEqual(peak_ws.cell(0, 3), 5)
+        self.assertEqual(peak_ws.cell(0, 4), 5)
 
     def test_find_peaks(self):
         extent = (0, 500, 0, 500)
@@ -402,47 +404,41 @@ class RectanglePlotTest(unittest.TestCase):
         # a couple of pixels
         rect = Rectangle((69, 69), 3, 3)
         peak = self.rectangle_plot._find_peak(rect)
-        self.assertAlmostEqual(peak[0], 70.0, 5)
-        self.assertAlmostEqual(peak[1], 70.0, 5)
+        self.assertAlmostEqual(peak[0], 70.5, 5)
+        self.assertAlmostEqual(peak[1], 70.5, 5)
 
         # a wider rectangle
         rect = Rectangle((50, 50), 40, 40)
         peak = self.rectangle_plot._find_peak(rect)
-        self.assertAlmostEqual(peak[0], 70.0, 5)
-        self.assertAlmostEqual(peak[1], 70.0, 5)
+        self.assertAlmostEqual(peak[0], 71.567, 2)
+        self.assertAlmostEqual(peak[1], 71.567, 2)
 
         # off centered rectangle - this time the peak is not just in the middle of the rectangle
         rect = Rectangle((205, 205), 290, 290)
         peak = self.rectangle_plot._find_peak(rect)
-
-        # less precise result because it is just a center of mass
-        self.assertAlmostEqual(peak[0], 210.13, 2)
-        self.assertAlmostEqual(peak[1], 210.13, 2)
+        self.assertAlmostEqual(peak[0], (205 + 290 / 2), 3)
+        self.assertAlmostEqual(peak[1], (205 + 290 / 2), 3)
 
         rect = Rectangle((40, 50), 40, 30)
         peak = self.rectangle_plot._find_peak(rect)
-
-        # less precise result because it is just a center of mass
-        self.assertAlmostEqual(peak[0], 70.0, 2)
-        self.assertAlmostEqual(peak[1], 70.0, 2)
+        self.assertAlmostEqual(peak[0], 71.71, 2)
+        self.assertAlmostEqual(peak[1], 71.44, 2)
 
         # far enough from the peak that there is no interference from them, so it is an empty rectangle
         rect = Rectangle((450, 450), 10, 10)
         peak = self.rectangle_plot._find_peak(rect)
-
         self.assertAlmostEqual(peak[0], 455.0, 5)
         self.assertAlmostEqual(peak[1], 455.0, 5)
 
         # two peaks at once, finds the middle
         rect = Rectangle((150, 150), 100, 100)
         peak = self.rectangle_plot._find_peak(rect)
-        self.assertAlmostEqual(peak[0], 205.0, 5)
-        self.assertAlmostEqual(peak[1], 205.0, 5)
+        self.assertAlmostEqual(peak[0], 203.94, 2)
+        self.assertAlmostEqual(peak[1], 203.94, 2)
 
         # rectangle completely off screen
         rect = Rectangle((-200, -200), 10, 10)
         peak = self.rectangle_plot._find_peak(rect)
-
         self.assertAlmostEqual(peak[0], 0.0, 5)
         self.assertAlmostEqual(peak[1], 0.0, 5)
 

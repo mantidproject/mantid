@@ -6,12 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFView.h"
 
+#include "ALFAlgorithmManager.h"
 #include "ALFAnalysisModel.h"
 #include "ALFAnalysisView.h"
 #include "ALFInstrumentModel.h"
 #include "ALFInstrumentView.h"
 #include "ALFInstrumentWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/QtJobRunner.h"
 
 #include <QSplitter>
 #include <QString>
@@ -24,16 +26,35 @@ DECLARE_SUBWINDOW(ALFView)
 ALFView::ALFView(QWidget *parent) : UserSubWindow(parent), m_instrumentPresenter(), m_analysisPresenter() {
   this->setWindowTitle("ALFView");
 
-  m_instrumentPresenter =
-      std::make_unique<ALFInstrumentPresenter>(new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>());
+  // Algorithm manager for the instrument presenter
+  auto jobRunnerInst = std::make_unique<MantidQt::API::QtJobRunner>();
+  auto algorithmManagerInst = std::make_unique<ALFAlgorithmManager>(std::move(jobRunnerInst));
 
-  m_analysisPresenter = std::make_unique<ALFAnalysisPresenter>(new ALFAnalysisView(-15.0, 15.0, this),
-                                                               std::make_unique<ALFAnalysisModel>());
+  m_instrumentPresenter = std::make_unique<ALFInstrumentPresenter>(
+      new ALFInstrumentView(this), std::make_unique<ALFInstrumentModel>(), std::move(algorithmManagerInst));
+
+  // Algorithm manager for the analysis presenter
+  auto jobRunnerAnalysis = std::make_unique<MantidQt::API::QtJobRunner>();
+  auto algorithmManagerAnalysis = std::make_unique<ALFAlgorithmManager>(std::move(jobRunnerAnalysis));
+
+  m_analysisPresenter =
+      std::make_unique<ALFAnalysisPresenter>(new ALFAnalysisView(-15.0, 15.0, this),
+                                             std::make_unique<ALFAnalysisModel>(), std::move(algorithmManagerAnalysis));
 
   m_instrumentPresenter->subscribeAnalysisPresenter(m_analysisPresenter.get());
 }
 
 ALFView::~ALFView() { m_instrumentPresenter->saveSettings(); }
+
+void ALFView::disable(std::string const &reason) {
+  this->setEnabled(false);
+  this->setWindowTitle("ALFView - " + QString::fromStdString(reason) + "...");
+}
+
+void ALFView::enable() {
+  this->setEnabled(true);
+  this->setWindowTitle("ALFView");
+}
 
 void ALFView::initLayout() {
   auto *splitter = new QSplitter(Qt::Horizontal);

@@ -25,6 +25,7 @@ public:
   virtual QMap<QString, QVariant> loadJSONFromFile(std::string const &filename) = 0;
   virtual void saveCSVToFile(std::string const &filename, std::string const &content) const = 0;
   virtual bool fileExists(std::string const &filepath) const = 0;
+  virtual std::string getFullFilePath(std::string const &filename) const = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

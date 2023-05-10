@@ -218,14 +218,14 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
 
   if (inputWS->sample().getShape().hasValidShape())
     if (inputWS->sample().getMaterial().numberDensity() == 0)
-      issues["InputWorkspace"] = "Sample must have a material set up with a non-zero number density";
+      issues["InputWorkspace"] = "Sample must have a material set up with a non-zero number density\n";
   if (inputWS->sample().hasEnvironment()) {
     auto env = &inputWS->sample().getEnvironment();
     for (size_t i = 0; i < env->nelements(); i++)
       if (env->getComponent(i).hasValidShape())
         if (env->getComponent(i).material().numberDensity() == 0)
           issues["InputWorkspace"] = "Sample environment component " + std::to_string(i) +
-                                     " must have a material set up with a non-zero number density ";
+                                     " must have a material set up with a non-zero number density\n";
   }
 
   std::vector<MatrixWorkspace_sptr> SQWSs;
@@ -487,9 +487,6 @@ void DiscusMultipleScatteringCorrection::convertWsBothAxesToPoints(MatrixWorkspa
  * Execution code
  */
 void DiscusMultipleScatteringCorrection::exec() {
-  g_log.warning(
-      "DiscusMultipleScatteringCorrection is in the beta stage of development. Its name, properties and behaviour "
-      "may change without warning.");
   if (!getAlwaysStoreInADS())
     throw std::runtime_error("This algorithm explicitly stores named output workspaces in the ADS so must be run with "
                              "AlwaysStoreInADS set to true");
@@ -569,7 +566,8 @@ void DiscusMultipleScatteringCorrection::exec() {
 
   m_importanceSampling = getProperty("ImportanceSampling");
 
-  Progress prog(this, 0.0, 1.0, nhists * nSimulationPoints);
+  // add one extra progress step per hist for the wavelength interpolation
+  Progress prog(this, 0.0, 1.0, nhists * (nSimulationPoints + 1));
   prog.setNotifyStep(0.1);
   const std::string reportMsg = "Computing corrections";
 
@@ -682,6 +680,7 @@ void DiscusMultipleScatteringCorrection::exec() {
           outputWSs[ne]->setHistogram(i, histnew);
         }
       }
+      prog.report(reportMsg);
     }
 
     PARALLEL_END_INTERRUPT_REGION
@@ -983,40 +982,63 @@ void DiscusMultipleScatteringCorrection::convertToLogWorkspace(const std::shared
  * meant that the k value going into the scatter was always fixed and equal to the overall kinc
  * The approach here will cope with multiple scatters by calculating a sumQSS at multiple
  * kinc values. These will be interpolated as required later on
+ * @param matWSs List of workspaces related to the structure factor for each sample/env component
+ * @param specialKs A list of special k values that the QSQ integral will be calculated for to reduce amount of
+ * interpolation required later on
  */
 void DiscusMultipleScatteringCorrection::calculateQSQIntegralAsFunctionOfK(ComponentWorkspaceMappings &matWSs,
                                                                            const std::vector<double> &specialKs) {
   for (auto &SQWSMapping : matWSs) {
-    std::set<double> kValues(specialKs.begin(), specialKs.end());
-    // Calculate the integral for a range of k values. Not massively important which k values but choose them here
-    // based on the q points in the S(Q) profile and the initial k values incident on the sample
-    const std::vector<double> qValues = SQWSMapping.SQ->histogram(0).X;
-    for (auto q : qValues) {
-      if (q > 0)
-        kValues.insert(q / 2);
-    }
+    std::vector<double> finalkValues, QSQIntegrals;
+    if (m_EMode == DeltaEMode::Elastic) {
+      // Optimize performance by doing cumulative integral first at each q in S(Q) and then calculate integral for each
+      // k by topping up those results
+      double kMax = specialKs.back();
+      std::vector<double> IOfQYFull, qValuesFull;
+      std::tie(IOfQYFull, qValuesFull, std::ignore) = integrateQSQ(SQWSMapping.QSQ, kMax, true);
+      for (auto k : specialKs) {
+        auto qUpperLimit = 2 * k;
+        auto iterPrevIntegral = std::upper_bound(qValuesFull.begin(), qValuesFull.end(), qUpperLimit) - 1;
+        auto idxPrevIntegral = static_cast<size_t>(std::distance(qValuesFull.begin(), iterPrevIntegral));
+        std::vector<double> ignoreVector, topUpIntegral;
+        integrateCumulative(SQWSMapping.QSQ->histogram(0), *iterPrevIntegral, qUpperLimit, ignoreVector, topUpIntegral,
+                            false);
+        double IOfQY = IOfQYFull[idxPrevIntegral] + topUpIntegral[0];
+        if (IOfQY > 0) {
+          double normalisedIntegral = IOfQY / (2 * k * k);
+          finalkValues.push_back(k);
+          QSQIntegrals.push_back(normalisedIntegral);
+        }
+      }
+    } else {
+      // Calculate the integral for a range of k values. Not massively important which k values but choose them here
+      // based on the q points in the S(Q) profile and the initial k values incident on the sample
+      std::set<double> kValues(specialKs.begin(), specialKs.end());
+      const std::vector<double> qValues = SQWSMapping.SQ->histogram(0).X;
+      for (auto q : qValues) {
+        if (q > 0)
+          kValues.insert(q / 2);
+      }
 
-    // add a few extra points beyond supplied q range to ensure capture asymptotic value of integral/2*k*k.
-    // Useful when doing a flat interpolation on m_QSQIntegral during inelastic calculation where k not known up front
-    if (m_EMode != DeltaEMode::Elastic) {
+      // add a few extra points beyond supplied q range to ensure capture asymptotic value of integral/2*k*k.
+      // Useful when doing a flat interpolation on m_QSQIntegral during inelastic calculation where k not known up front
       double maxSuppliedQ = qValues.back();
       if (maxSuppliedQ > 0.) {
         kValues.insert(maxSuppliedQ);
         kValues.insert(2 * maxSuppliedQ);
       }
-    }
 
-    std::vector<double> finalkValues, QSQIntegrals;
-    for (auto k : kValues) {
-      std::vector<double> IOfQYFull;
-      std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(SQWSMapping.QSQ, k, false);
-      auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
-      // going to divide by this so storing zero results not useful - and don't want to interpolate a zero value
-      // into a k region where the integral is actually non-zero
-      if (IOfQYAtQMax > 0) {
-        double normalisedIntegral = IOfQYAtQMax / (2 * k * k);
-        finalkValues.push_back(k);
-        QSQIntegrals.push_back(normalisedIntegral);
+      for (auto k : kValues) {
+        std::vector<double> IOfQYFull;
+        std::tie(IOfQYFull, std::ignore, std::ignore) = integrateQSQ(SQWSMapping.QSQ, k, false);
+        auto IOfQYAtQMax = IOfQYFull.empty() ? 0. : IOfQYFull.back();
+        // going to divide by this so storing zero results not useful - and don't want to interpolate a zero value
+        // into a k region where the integral is actually non-zero
+        if (IOfQYAtQMax > 0) {
+          double normalisedIntegral = IOfQYAtQMax / (2 * k * k);
+          finalkValues.push_back(k);
+          QSQIntegrals.push_back(normalisedIntegral);
+        }
       }
     }
     auto QSQScaleFactor = std::make_shared<DiscusData1D>(DiscusData1D{finalkValues, QSQIntegrals});

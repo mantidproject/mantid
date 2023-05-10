@@ -6,14 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFAnalysisModel.h"
 
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
 
 #include <algorithm>
 #include <numeric>
@@ -22,18 +22,8 @@ using namespace Mantid::API;
 
 namespace {
 
+std::string const NOT_IN_ADS = "not_stored_in_ads";
 std::string const WS_EXPORT_NAME("ALFView_exported");
-
-MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr const &workspace, double const startX, double const endX) {
-  auto cropper = AlgorithmManager::Instance().create("CropWorkspace");
-  cropper->setAlwaysStoreInADS(false);
-  cropper->setProperty("InputWorkspace", workspace);
-  cropper->setProperty("OutputWorkspace", "__cropped");
-  cropper->setProperty("XMin", startX);
-  cropper->setProperty("XMax", endX);
-  cropper->execute();
-  return cropper->getProperty("OutputWorkspace");
-}
 
 IFunction_sptr createFlatBackground(double const height = 0.0) {
   auto flatBackground = FunctionFactory::Instance().createFunction("FlatBackground");
@@ -106,28 +96,9 @@ Mantid::API::MatrixWorkspace_sptr ALFAnalysisModel::extractedWorkspace() const {
 
 bool ALFAnalysisModel::isDataExtracted() const { return m_extractedWorkspace != nullptr; }
 
-MatrixWorkspace_sptr ALFAnalysisModel::doFit(std::pair<double, double> const &range) {
-
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("Function", m_function);
-  alg->setProperty("InputWorkspace", m_extractedWorkspace);
-  alg->setProperty("CreateOutput", true);
-  alg->setProperty("StartX", range.first);
-  alg->setProperty("EndX", range.second);
-  alg->execute();
-
-  m_function = alg->getProperty("Function");
-  m_fitStatus = alg->getPropertyValue("OutputStatus");
-  m_fitWorkspace = alg->getProperty("OutputWorkspace");
-
-  return m_fitWorkspace;
-}
-
-void ALFAnalysisModel::calculateEstimate(std::pair<double, double> const &range) {
-  if (m_extractedWorkspace) {
-    m_function = calculateEstimate(m_extractedWorkspace, range);
+void ALFAnalysisModel::calculateEstimate(MatrixWorkspace_sptr const &workspace) {
+  if (workspace) {
+    m_function = calculateEstimateImpl(workspace);
   } else {
     m_function = createCompositeFunction(createFlatBackground(), createGaussian());
   }
@@ -135,17 +106,13 @@ void ALFAnalysisModel::calculateEstimate(std::pair<double, double> const &range)
   m_fitWorkspace = nullptr;
 }
 
-IFunction_sptr ALFAnalysisModel::calculateEstimate(MatrixWorkspace_sptr &workspace,
-                                                   std::pair<double, double> const &range) {
-  if (auto alteredWorkspace = cropWorkspace(workspace, range.first, range.second)) {
-    auto const xData = alteredWorkspace->readX(0);
-    auto const yData = alteredWorkspace->readY(0);
+IFunction_sptr ALFAnalysisModel::calculateEstimateImpl(MatrixWorkspace_sptr const &workspace) {
+  auto const xData = workspace->readX(0);
+  auto const yData = workspace->readY(0);
 
-    auto const background = std::accumulate(yData.begin(), yData.end(), 0.0) / static_cast<double>(yData.size());
+  auto const background = std::accumulate(yData.begin(), yData.end(), 0.0) / static_cast<double>(yData.size());
 
-    return createCompositeFunction(createFlatBackground(background), createGaussian(xData, yData, background));
-  }
-  return createCompositeFunction(createFlatBackground(), createGaussian());
+  return createCompositeFunction(createFlatBackground(background), createGaussian(xData, yData, background));
 }
 
 void ALFAnalysisModel::exportWorkspaceCopyToADS() const {
@@ -191,6 +158,37 @@ double ALFAnalysisModel::background() const { return m_function->getParameter("f
 Mantid::API::IPeakFunction_const_sptr ALFAnalysisModel::getPeakCopy() const {
   auto const gaussian = m_function->getFunction(1)->clone();
   return std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(gaussian);
+}
+
+std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+ALFAnalysisModel::cropWorkspaceProperties(std::pair<double, double> const &range) const {
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("InputWorkspace", m_extractedWorkspace, *properties);
+  AlgorithmProperties::update("XMin", range.first, *properties);
+  AlgorithmProperties::update("XMax", range.second, *properties);
+  AlgorithmProperties::update("OutputWorkspace", NOT_IN_ADS, *properties);
+  return properties;
+}
+
+std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+ALFAnalysisModel::fitProperties(std::pair<double, double> const &range) const {
+  // Cast to the workspace type accepted by the Fit algorithm. Failure to do this will cause an exception.
+  Mantid::API::Workspace_sptr workspace = m_extractedWorkspace;
+
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("Function", m_function, *properties);
+  AlgorithmProperties::update("InputWorkspace", workspace, *properties);
+  AlgorithmProperties::update("CreateOutput", true, *properties);
+  AlgorithmProperties::update("StartX", range.first, *properties);
+  AlgorithmProperties::update("EndX", range.second, *properties);
+  return properties;
+}
+
+void ALFAnalysisModel::setFitResult(Mantid::API::MatrixWorkspace_sptr workspace, Mantid::API::IFunction_sptr function,
+                                    std::string fitStatus) {
+  m_fitWorkspace = std::move(workspace);
+  m_function = std::move(function);
+  m_fitStatus = std::move(fitStatus);
 }
 
 std::string ALFAnalysisModel::fitStatus() const { return m_fitStatus; }

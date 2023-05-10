@@ -57,7 +57,7 @@ Output:
 
 .. testoutput:: ExFitPeak
 
-   the fitted peak: centre=2.05, sigma=0.70
+   the fitted peak: centre=..., sigma=...
 
 .. categories::
 

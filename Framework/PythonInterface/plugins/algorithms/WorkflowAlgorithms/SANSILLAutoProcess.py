@@ -159,7 +159,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         if sens_dim != sample_dim and sens_dim > 1:
             result["SensitivityMaps"] = message.format("Sensitivity", sens_dim, sample_dim)
         if flux_dim != sample_dim and flux_dim > 1:
-            result["FluxRuns"] = message.format("Flux")
+            result["FluxRuns"] = message.format("Flux", flux_dim, sample_dim)
         if maxqxy_dim != sample_dim and maxqxy_dim > 1:
             result["MaxQxy"] = message_value.format("MaxQxy", maxqxy_dim, sample_dim)
         if deltaq_dim != sample_dim and deltaq_dim > 1:
@@ -243,7 +243,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.stitch_reference_index = self.getProperty("StitchReferenceIndex").value
 
     def PyInit(self):
-
         self.declareProperty(
             WorkspaceGroupProperty("OutputWorkspace", "", direction=Direction.Output),
             doc="The output workspace group containing reduced data.",

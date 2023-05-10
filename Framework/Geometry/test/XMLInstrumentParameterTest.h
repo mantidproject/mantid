@@ -155,7 +155,6 @@ public:
   void test_filter_by_median_value() {
     TimeSeriesProperty<double> series("doubleProperty");
 
-    const double firstExpectedValue = 2;
     // const double secondExpectedValue = 4;
     series.addValue("2000-11-30T01:01:01", 0);
     series.addValue("2000-11-30T01:01:02", 1);
@@ -167,13 +166,9 @@ public:
 
     Kernel::TimeROI *roi = new Kernel::TimeROI;
     roi->addROI("2000-11-30T01:01:01", "2000-11-30T01:02:00");
-    const double firstActualValue = logFile->createParamValue(&series, roi);
-    TSM_ASSERT_EQUALS("Filtering by Median is not performed correctly", firstExpectedValue, firstActualValue);
-
-    // Kernel::TimeROI *secondRoi = new Kernel::TimeROI;
-    // roi->addROI("2000-11-30T01:01:03", "2000-11-30T01:02:00");
-    // const double secondActualValue = logFile->createParamValue(&series, secondRoi);
-    // TSM_ASSERT_EQUALS("Filtering by Median is not performed correctly", secondExpectedValue, secondActualValue);
+    const double median = logFile->createParamValue(&series, roi);
+    const double expected = 1.5; // middle of sequence 0, 1, 2, 4. Value 5 is excluded by the ROI
+    TSM_ASSERT_DELTA("Filtering by Median is not performed correctly", median, expected, 0.1);
   }
 
   // This functionality will soon be legacy, since filtering by nth-position is

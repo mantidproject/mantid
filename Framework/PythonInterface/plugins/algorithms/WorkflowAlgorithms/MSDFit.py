@@ -77,7 +77,7 @@ class MSDFit(DataProcessorAlgorithm):
             issues["InputWorkspace"] = "The InputWorkspace must be a MatrixWorkspace."
 
         if x_min > x_max:
-            msg = "XStart must be less then XEnd"
+            msg = "XStart must be less than XEnd"
             issues["XStart"] = msg
             issues["XEnd"] = msg
 
@@ -85,7 +85,7 @@ class MSDFit(DataProcessorAlgorithm):
             issues["SpecMin"] = "Minimum spectrum number must be greater than or equal to 0"
 
         if spec_min > spec_max:
-            msg = "SpecMin must be less then SpecMax"
+            msg = "SpecMin must be less than SpecMax"
             issues["SpecMin"] = msg
             issues["SpecMax"] = msg
 

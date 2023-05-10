@@ -199,7 +199,6 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
         return merged_q
 
     def _crop_out_special_values(self, ws):
-
         if ws.getNumberHistograms() != 1:
             # Strip zeros is only possible on 1D workspaces
             return ws

@@ -46,6 +46,10 @@ pyqt:
 qt_main:
   - 5.15.4
 
+# 5.4.2 crashes the jupyter console.
+qtconsole:
+  - 5.4.1
+
 qscintilla2:
   - 2.13
 
@@ -63,6 +67,14 @@ gsl:
 
 ipykernel:
   - <6
+
+# 16 causing build errors on osx, seems incompatible with our version of boost.
+libcxx:
+  - <16
+
+# 8.2 causing segfaults in jupyter unit tests and doc builds.
+readline:
+  - <8.2
 
 pin_run_as_build:
     boost:

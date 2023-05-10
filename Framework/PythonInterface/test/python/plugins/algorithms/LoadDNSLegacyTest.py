@@ -77,8 +77,13 @@ class LoadDNSLegacyTest(unittest.TestCase):
         outputWorkspaceName = "LoadDNSLegacyTest_Test2"
         filename = "dns-incomplete.d_dat"
         self._createIncompleteFile(filename)
-        self.assertRaises(
-            RuntimeError, LoadDNSLegacy, Filename=filename, OutputWorkspace=outputWorkspaceName, CoilCurrentsTable=self.curtable
+        self.assertRaisesRegex(
+            RuntimeError,
+            "File dns-incomplete.d_dat does not contain any data!",
+            LoadDNSLegacy,
+            Filename=filename,
+            OutputWorkspace=outputWorkspaceName,
+            CoilCurrentsTable=self.curtable,
         )
         os.remove(filename)
 

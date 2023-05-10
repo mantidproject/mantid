@@ -60,11 +60,15 @@ struct MANTID_KERNEL_DLL TimeSeriesPropertyStatistics {
    * @param stats :: a reference to a Statistics object.
    */
   TimeSeriesPropertyStatistics(const Statistics &stats) {
+    constexpr double nan{std::numeric_limits<double>::quiet_NaN()};
     minimum = stats.minimum;
     maximum = stats.maximum;
     median = stats.median;
     mean = stats.mean;
     standard_deviation = stats.standard_deviation;
+    time_mean = nan;
+    time_standard_deviation = nan;
+    duration = nan;
   }
 
   /**
@@ -84,7 +88,7 @@ struct MANTID_KERNEL_DLL TimeSeriesPropertyStatistics {
   }
 
   void setAllToNan() {
-    double nan = std::numeric_limits<double>::quiet_NaN();
+    constexpr double nan{std::numeric_limits<double>::quiet_NaN()};
     minimum = nan;
     maximum = nan;
     mean = nan;
@@ -146,6 +150,9 @@ public:
   ~TimeSeriesProperty() override;
   /// "Virtual" copy constructor
   TimeSeriesProperty<TYPE> *clone() const override;
+
+  /// Create a partial copy according to TimeROI
+  Property *cloneInTimeROI(const TimeROI &timeROI) const override;
   //
   /// Return time series property, containing time derivative of current
   /// property
@@ -176,14 +183,8 @@ public:
   /// Set name of property
   void setName(const std::string &name);
 
-  /// Filter out a run by time.
-  void filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) override;
-  /// Filter by a range of times
-  void filterByTimes(const std::vector<SplittingInterval> &splittervec);
-
-  /// Split out a time series property by time intervals.
-  void splitByTime(std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
-                   bool isPeriodic) const override;
+  // Remove time series values according to TimeROI
+  void removeDataOutsideTimeROI(const TimeROI &timeRoi) override;
 
   /// New split method
   void splitByTimeVector(const std::vector<Types::Core::DateAndTime> &splitter_time_vec,
@@ -192,21 +193,18 @@ public:
   /// Fill a SplittingIntervalVec that will filter the events by matching
   void makeFilterByValue(std::vector<SplittingInterval> &split, double min, double max, double TimeTolerance = 0.0,
                          bool centre = false) const override;
+  /// Fill a SplittingIntervalVec that will filter the events by matching
+  TimeROI makeFilterByValue(double min, double max, bool expand = false,
+                            const TimeInterval &expandRange = TimeInterval(0, 1), double TimeTolerance = 0.0,
+                            bool centre = false, const TimeROI *existingROI = nullptr) const override;
   /// Make sure an existing filter covers the full time range given
   void expandFilterToRange(std::vector<SplittingInterval> &split, double min, double max,
                            const TimeInterval &range) const override;
-  /// Calculate the time-weighted average of a property in a filtered range
-  double averageValueInFilter(const std::vector<SplittingInterval> &filter) const override;
-  /// @copydoc Mantid::Kernel::ITimeSeriesProperty::averageAndStdDevInFilter()
-  std::pair<double, double> averageAndStdDevInFilter(const std::vector<SplittingInterval> &filter) const override;
   /** Returns the calculated time weighted mean and standard deviation values.
-   * @return The time-weighted average value of the log when the time measurement was active.
-   */
-  std::pair<double, double> timeAverageValueAndStdDev() const;
-  /** Returns the calculated time weighted average value.
    * @param timeRoi  Object that holds information about when the time measurement was active.
-   * @return The time-weighted average value of the log when the time measurement was active.
    */
+  std::pair<double, double> timeAverageValueAndStdDev(const Kernel::TimeROI *timeRoi = nullptr) const override;
+  /// Returns the calculated time weighted average value.
   double timeAverageValue(const TimeROI *timeRoi = nullptr) const override;
   /// generate constant time-step histogram from the property values
   void histogramData(const Types::Core::DateAndTime &tMin, const Types::Core::DateAndTime &tMax,
@@ -221,16 +219,20 @@ public:
   ///  values
   std::multimap<Types::Core::DateAndTime, TYPE> valueAsMultiMap() const;
   /// Get filtered values as a vector
-  std::vector<TYPE> filteredValuesAsVector() const;
+  virtual std::vector<TYPE> filteredValuesAsVector(const Kernel::TimeROI *roi) const;
+  // overload method rather than default value so python bindings work
+  virtual std::vector<TYPE> filteredValuesAsVector() const;
 
   /// Return the time series's times as a vector<DateAndTime>
   std::vector<Types::Core::DateAndTime> timesAsVector() const override;
-  /// Get filtered times as a vector
-  std::vector<Types::Core::DateAndTime> filteredTimesAsVector() const;
+
   /// Return the series as list of times, where the time is the number of
   /// seconds since the start.
   std::vector<double> timesAsVectorSeconds() const;
-
+  /// Get filtered times as a vector
+  virtual std::vector<Types::Core::DateAndTime> filteredTimesAsVector(const Kernel::TimeROI *roi) const;
+  // overload method rather than default value so python bindings work
+  virtual std::vector<Types::Core::DateAndTime> filteredTimesAsVector() const;
   /// Add a value to the map using a DateAndTime object
   void addValue(const Types::Core::DateAndTime &time, const TYPE &value);
   /// Add a value to the map using a string time
@@ -247,10 +249,16 @@ public:
   Types::Core::DateAndTime lastTime() const;
   /// Returns the first value regardless of filter
   TYPE firstValue() const;
+  /// Returns the first value in the TimeROI
+  TYPE firstValue(const Kernel::TimeROI &roi) const;
   /// Returns the first time regardless of filter
   Types::Core::DateAndTime firstTime() const;
   /// Returns the last value
   TYPE lastValue() const;
+  /// Returns the last value in the TimeROI
+  TYPE lastValue(const Kernel::TimeROI &roi) const;
+  /// Returns the duration of the time series, possibly restricted by a TimeROI object
+  double durationInSeconds(const Kernel::TimeROI *roi = nullptr) const;
 
   /// Returns the minimum value found in the series
   TYPE minValue() const;
@@ -297,19 +305,14 @@ public:
   TYPE getSingleValue(const Types::Core::DateAndTime &t, int &index) const;
 
   /// Returns n-th valid time interval, in a very inefficient way.
-  TimeInterval nthInterval(int n) const;
+  virtual TimeInterval nthInterval(int n) const;
   /// Returns n-th value of n-th interval in an incredibly inefficient way.
-  TYPE nthValue(int n) const;
+  virtual TYPE nthValue(int n) const;
   /// Returns n-th time. NOTE: Complexity is order(n)! regardless of filter
-  Types::Core::DateAndTime nthTime(int n) const;
+  virtual Types::Core::DateAndTime nthTime(int n) const;
 
-  /// Divide the property into  allowed and disallowed time intervals according
-  /// to \a filter.
-  void filterWith(const TimeSeriesProperty<bool> *filter);
-  /// Restores the property to the unsorted state
-  void clearFilter();
   // Returns whether the time series has been filtered
-  bool isFiltered() const { return m_filterApplied; }
+  bool isFiltered() const override { return false; }
 
   /// Updates size()
   void countSize() const;
@@ -327,6 +330,13 @@ public:
   /// Return a TimeSeriesPropertyStatistics object
   TimeSeriesPropertyStatistics getStatistics(const Kernel::TimeROI *roi = nullptr) const override;
 
+  /** Calculate a particular statistical quantity from the values of the time series.
+   *  @param selection : Enum indicating the selected statistical quantity.
+   *  @param roi : optional pointer to TimeROI object for filtering the time series values.
+   *  @return The value of the computed statistical quantity.
+   */
+  double extractStatistic(Math::StatisticType selection, const TimeROI *roi = nullptr) const override;
+
   /// Detects whether there are duplicated entries (of time) in property &
   /// eliminates them
   void eliminateDuplicates();
@@ -340,9 +350,16 @@ public:
   void reserve(size_t size) { m_values.reserve(size); };
 
   /// If filtering by log, get the time intervals for splitting
-  std::vector<Mantid::Kernel::SplittingInterval> getSplittingIntervals() const;
+  virtual std::vector<Mantid::Kernel::TimeInterval> getTimeIntervals() const;
 
 private:
+  /// Calculate the time-weighted average of a property in a filtered range
+  double averageValueInFilter(const std::vector<TimeInterval> &filter) const;
+  /// Calculate the time-weighted average and std-deviation of a property in a filtered range
+  std::pair<double, double> averageAndStdDevInFilter(const std::vector<TimeInterval> &intervals) const;
+  void createFilteredData(const TimeROI &timeROI, std::vector<TimeValueUnit<TYPE>> &filteredData) const;
+
+protected:
   //----------------------------------------------------------------------------------------------
   /// Saves the time vector has time + start attribute
   void saveTimeVector(::NeXus::File *file);
@@ -352,15 +369,14 @@ private:
   int findIndex(Types::Core::DateAndTime t) const;
   ///  Find the upper_bound of time t in container.
   int upperBound(Types::Core::DateAndTime t, int istart, int iend) const;
-  /// Apply a filter
-  void applyFilter() const;
-  /// A new algorithm to find Nth index.  It is simple and leave a lot work to
-  /// the callers
-  size_t findNthIndexFromQuickRef(int n) const;
+  /**
+   * Returns an end time that will have the same spacing to the right of the last value
+   * as the last non-zero time does to the left
+   */
+  Types::Core::DateAndTime getFakeEndTime() const;
+
   /// Set a value from another property
   std::string setValueFromProperty(const Property &right) override;
-  /// Find if time lies in a filtered region
-  bool isTimeFiltered(const Types::Core::DateAndTime &time) const;
 
   /// Holds the time series data
   mutable std::vector<TimeValueUnit<TYPE>> m_values;
@@ -371,19 +387,7 @@ private:
 
   /// Flag to state whether mP is sorted or not
   mutable TimeSeriesSortStatus m_propSortedFlag;
-
-  /// The filter
-  mutable std::vector<std::pair<Types::Core::DateAndTime, bool>> m_filter;
-  /// Quick reference regions for filter
-  mutable std::vector<std::pair<size_t, size_t>> m_filterQuickRef;
-  /// True if a filter has been applied
-  mutable bool m_filterApplied;
 };
-
-/// Function filtering double TimeSeriesProperties according to the requested
-/// statistics.
-double DLLExport filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
-                                   Kernel::Math::StatisticType statisticType, const Kernel::TimeROI * = nullptr);
 
 } // namespace Kernel
 } // namespace Mantid

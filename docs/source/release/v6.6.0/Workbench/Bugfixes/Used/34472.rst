@@ -1,1 +1,0 @@
-- The tooltips of properties in an algorithm dialog will now provide the full description of a property.

@@ -5,9 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from distutils.version import LooseVersion
 
-import matplotlib
 from matplotlib import rcParams
 from numpy import isclose
 
@@ -39,12 +37,8 @@ def get_subplots_command_kwargs(fig):
         "num": fig.get_label(),
         "subplot_kw": {"projection": "mantid"},
     }
-    if LooseVersion("3.1.3") < LooseVersion(matplotlib.__version__):
-        kwargs["ncols"] = ax.get_gridspec().ncols
-        kwargs["nrows"] = ax.get_gridspec().nrows
-    else:
-        kwargs["ncols"] = ax.numCols
-        kwargs["nrows"] = ax.numRows
+    kwargs["ncols"] = ax.get_gridspec().ncols
+    kwargs["nrows"] = ax.get_gridspec().nrows
     return kwargs
 
 

@@ -35,6 +35,7 @@ class Prop:
     GROUP_TOF = "GroupTOFWorkspaces"
     RELOAD = "ReloadInvalidWorkspaces"
     DEBUG = "Debug"
+    HIDE_INPUT = "HideInputWorkspaces"
     OUTPUT_WS = "OutputWorkspace"
     OUTPUT_WS_BINNED = "OutputWorkspaceBinned"
     OUTPUT_WS_LAM = "OutputWorkspaceWavelength"
@@ -80,10 +81,14 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._declareReductionProperties()
         self._declareTransmissionProperties()
         self._declareOutputProperties()
+        self._declareFloodCorrectionProperties()
         self._declarePolarizationEfficiencyProperties()
 
     def PyExec(self):
         """Execute the algorithm."""
+        if self.getProperty(Prop.HIDE_INPUT).value:
+            self._tofPrefix = "__" + self._tofPrefix
+            self._transPrefix = "__" + self._transPrefix
         self._reload = self.getProperty(Prop.RELOAD).value
         # Convert run numbers to real workspaces
         inputRuns = self.getProperty(Prop.RUNS).value
@@ -124,7 +129,10 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             if AnalysisDataService.doesExist(summed_seg_name):
                 tofWorkspaces.add(summed_seg_name)
         # Create the group
-        self._group_workspaces(tofWorkspaces, "TOF")
+        if self.getProperty(Prop.HIDE_INPUT).value:
+            self._group_workspaces(tofWorkspaces, "__TOF")
+        else:
+            self._group_workspaces(tofWorkspaces, "TOF")
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -157,6 +165,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Add properties for settings to apply to input runs
         self.declareProperty(Prop.RELOAD, True, doc="If true, reload input workspaces if they are of the incorrect type")
         self.declareProperty(Prop.GROUP_TOF, True, doc="If true, group the TOF workspaces")
+
+        self.declareProperty(Prop.HIDE_INPUT, False, doc="If true, make the input workspaces invisible in the ADS.")
 
     def _declarePreprocessProperties(self):
         """Copy properties from the child preprocess algorithm"""
@@ -213,9 +223,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             "DegreeOfPolynomial",
             "CostFunction",
             "NormalizeByIntegratedMonitors",
-            "PolarizationAnalysis",
-            "FloodCorrection",
-            "FloodWorkspace",
             "CorrectionAlgorithm",
             "Polynomial",
             "C0",
@@ -257,7 +264,17 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         ]
         self._copy_properties_from_reduction_algorithm(properties)
 
+    def _declareFloodCorrectionProperties(self):
+        self._copy_properties_from_reduction_algorithm(["FloodCorrection"])
+        self.declareProperty(
+            "FloodWorkspace",
+            "",
+            "A flood workspace or filename to apply. If empty and FloodCorrection is 'Workspace' then no correction is applied.",
+            Direction.Input,
+        )
+
     def _declarePolarizationEfficiencyProperties(self):
+        self._copy_properties_from_reduction_algorithm(["PolarizationAnalysis"])
         self.declareProperty(
             "PolarizationEfficiencies",
             "",
@@ -278,6 +295,27 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 raise RuntimeError("Error loading run " + run)
             workspaces.append(ws)
         return workspaces
+
+    def _loadFloodCorrectionWorkspace(self):
+        flood_workspace = self.getPropertyValue("FloodWorkspace")
+        if not flood_workspace:
+            return None
+
+        if AnalysisDataService.doesExist(flood_workspace):
+            self.log().information(f'Loading flood correction information from workspace "{flood_workspace}"')
+            return AnalysisDataService.retrieve(flood_workspace)
+
+        alg = self.createChildAlgorithm("LoadNexus")
+        try:
+            alg.setRethrows(True)
+            alg.setProperty("Filename", flood_workspace)
+            alg.execute()
+        except:
+            raise RuntimeError(f'Could not load flood correction information from file "{flood_workspace}"')
+
+        ws = alg.getProperty("OutputWorkspace").value
+        self.log().information(f'Loaded flood correction information from file "{flood_workspace}"')
+        return ws
 
     def _loadPolarizationCorrectionWorkspace(self):
         efficiencies_ws = self.getPropertyValue("PolarizationEfficiencies")
@@ -580,6 +618,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         alg.setProperty("InputWorkspace", input_workspace)
         alg.setProperty("FirstTransmissionRun", first_trans_workspace)
         alg.setProperty("SecondTransmissionRun", second_trans_workspace)
+        flood_workspace = self._loadFloodCorrectionWorkspace()
+        if flood_workspace:
+            alg.setProperty("FloodWorkspace", flood_workspace)
         efficiencies_ws = self._loadPolarizationCorrectionWorkspace()
         if efficiencies_ws:
             alg.setProperty("PolarizationEfficiencies", efficiencies_ws)

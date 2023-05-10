@@ -15,7 +15,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class PanelsSurface;
 
-struct FlatBankInfo {
+struct EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW FlatBankInfo {
   explicit FlatBankInfo(PanelsSurface *s);
   /// Bank's rotation
   Mantid::Kernel::Quat rotation;
@@ -28,6 +28,11 @@ struct FlatBankInfo {
   QPolygonF polygon;
   /// optional override u, v for the bank
   std::optional<Mantid::Kernel::V2D> bankCentreOverride;
+  /// further offset that is applied to bank following projection calculation as
+  /// a result of bank arrangement logic
+  std::optional<Mantid::Kernel::V2D> bankCentreOffset;
+  /// the point on the bank about which rotation occurs during projection
+  Mantid::Kernel::V3D refPos;
   // translate the bank by a vector
   void translate(const QPointF &shift);
 
@@ -48,14 +53,15 @@ private:
  *       cannot lie on the same line (being parallel is alright)
  *  - CompAssembly with detectors lying in the same plane
  */
-class PanelsSurface : public UnwrappedSurface {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PanelsSurface : public UnwrappedSurface {
 public:
-  PanelsSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis,
+  PanelsSurface(const IInstrumentActor *rootActor, const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis,
                 const QSize &widgetSize, const bool maintainAspectRatio);
+  PanelsSurface() : m_zaxis({0., 0., 1.0}){};
   ~PanelsSurface() override;
   void init() override;
-  void project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/, double & /*v*/, double & /*uscale*/,
-               double & /*vscale*/) const override;
+  void project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) const override;
+  void resetInstrumentActor(const IInstrumentActor *rootActor) override;
 
 protected:
   void findFlatPanels(size_t rootIndex, std::vector<bool> &visited);
@@ -75,8 +81,7 @@ protected:
   void constructFromComponentInfo();
   Mantid::Kernel::Quat calcBankRotation(const Mantid::Kernel::V3D &detPos, Mantid::Kernel::V3D normal) const;
   // Add a detector from an assembly
-  void addDetector(size_t detIndex, const Mantid::Kernel::V3D &refPos, int bankIndex,
-                   const Mantid::Kernel::Quat &rotation);
+  void addDetector(size_t detIndex, int bankIndex);
   // Arrange the banks on the projection plane
   void arrangeBanks();
   // Spread the banks over the projection plane

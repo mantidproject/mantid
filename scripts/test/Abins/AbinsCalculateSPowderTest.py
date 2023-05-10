@@ -40,7 +40,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
         self._instruments_defaults = deepcopy(abins.parameters.instruments)
 
     def tearDown(self):
-        abins.test_helpers.remove_output_files(list_of_names=["CalculateSPowder"])
+        abins.test_helpers.remove_output_files(list_of_names=["_CalculateSPowder"])
         abins.parameters.performance["threads"] = self.default_threads
         abins.parameters.instruments.update(self._instruments_defaults)
 
@@ -184,10 +184,10 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
 
     @staticmethod
     def _write_data(*, data, filename):
-        from abins.input.tester import Tester
+        from abins.test_helpers import dict_arrays_to_lists
 
         with open(filename, "w") as fd:
-            json.dump(Tester._arrays_to_lists(data), fd, indent=4, sort_keys=True)
+            json.dump(dict_arrays_to_lists(data), fd, indent=4, sort_keys=True)
 
     # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):
@@ -216,7 +216,6 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
         return correct_data
 
     def _check_data(self, good_data=None, data=None):
-
         for array_key in ("frequencies", "q_bins"):
             if good_data.get(array_key) is not None:
                 assert_almost_equal(good_data[array_key], data[array_key])

@@ -1,0 +1,2 @@
+- New loader has been added to handle Lagrange NeXus files: :ref:`LoadILLLagrange <algm-LoadILLLagrange>`.
+- :ref:`LagrangeILLReduction <algm-LagrangeILLReduction>` can now accept NeXus data as input for both sample and container runs.

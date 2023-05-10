@@ -12,7 +12,7 @@ import numpy as np
 from scipy.special import factorial
 
 from abins import AbinsData, FrequencyPowderGenerator, SData, SDataByAngle
-from abins.constants import CM1_2_HARTREE, K_2_HARTREE, FLOAT_TYPE, INT_TYPE, MIN_SIZE
+from abins.constants import FLOAT_TYPE, INT_TYPE, MIN_SIZE
 from abins.instruments import Instrument
 import abins.parameters
 from mantid.api import Progress
@@ -176,7 +176,6 @@ class SPowderSemiEmpiricalCalculator:
                 "than in the previous calculations. S cannot be loaded from the hdf file."
             )
         if self._quantum_order_num < data["attributes"]["order_of_quantum_events"]:
-
             self._report_progress(
                 """
                          User requested a smaller number of quantum events than in the previous calculations.
@@ -191,7 +190,6 @@ class SPowderSemiEmpiricalCalculator:
             for i in range(n_atom):
                 atoms_s[f"atom_{i}"] = {"s": dict()}
                 for j in range(1, self._quantum_order_num + 1):
-
                     temp_val = data["datasets"]["data"][f"atom_{i}"]["s"][f"order_{j}"]
                     atoms_s[f"atom_{i}"]["s"].update({f"order_{j}": temp_val})
 
@@ -200,7 +198,8 @@ class SPowderSemiEmpiricalCalculator:
 
         else:
             atoms_s = {key: value for key, value in data["datasets"]["data"].items() if key not in ("frequencies", "q_bins")}
-            q_bins = data["datasets"]["data"].get("q_bins", None)
+
+        q_bins = data["datasets"]["data"].get("q_bins", None)
 
         s_data = abins.SData(
             temperature=self._temperature, sample_form=self._sample_form, data=atoms_s, frequencies=frequencies, q_bins=q_bins
@@ -275,7 +274,9 @@ class SPowderSemiEmpiricalCalculator:
         from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS
 
         # Compute tensors and traces, write to cache for access during atomic s calculations
-        powder_calculator = abins.PowderCalculator(filename=self._input_filename, abins_data=self._abins_data)
+        powder_calculator = abins.PowderCalculator(
+            filename=self._input_filename, abins_data=self._abins_data, temperature=self._temperature
+        )
         self._powder_data = powder_calculator.get_formatted_data()
 
         # Dispatch to appropriate routine
@@ -495,9 +496,7 @@ class SPowderSemiEmpiricalCalculator:
             [self._powder_data.get_a_traces(k_index) * kpoint.weight for k_index, kpoint in enumerate(self._abins_data.get_kpoints_data())],
             axis=0,
         )
-        iso_dw = self._isotropic_dw(
-            frequencies=self._bin_centres, q2=q2, a_trace=average_a_traces[:, np.newaxis], temperature=self._temperature
-        )
+        iso_dw = self._isotropic_dw(q2=q2, a_trace=average_a_traces[:, None])
 
         # For 2-D case we need to reshuffle axes after numpy broadcasting
         if len(iso_dw.shape) == 3:
@@ -507,14 +506,9 @@ class SPowderSemiEmpiricalCalculator:
         return iso_dw
 
     @staticmethod
-    def _isotropic_dw(*, frequencies, q2, a_trace, temperature):
+    def _isotropic_dw(*, q2, a_trace):
         """Compute Debye-Waller factor in isotropic approximation"""
-        if temperature < np.finfo(type(temperature)).eps:
-            coth = 1.0
-        else:
-            coth = 1.0 / np.tanh(frequencies * CM1_2_HARTREE / (2.0 * temperature * K_2_HARTREE))
-
-        return np.exp(-q2 * a_trace / 3.0 * coth * coth)
+        return np.exp(-q2 * a_trace / 3)
 
     def _get_empty_sdata(self, use_fine_bins: bool = False, max_order: Optional[int] = None, shape=None) -> SData:
         """
@@ -718,13 +712,7 @@ class SPowderSemiEmpiricalCalculator:
             )
 
             scattering_intensities = calculate_order[order](
-                q2=q2,
-                frequencies=frequencies,
-                indices=coefficients,
-                a_tensor=a_tensor,
-                a_trace=a_trace,
-                b_tensor=b_tensor,
-                b_trace=b_trace,
+                q2=q2, frequencies=frequencies, indices=coefficients, a_tensor=a_tensor, a_trace=a_trace, b_tensor=b_tensor, b_trace=b_trace
             )
             rebinned_spectrum, _ = np.histogram(frequencies, bins=bins, weights=(scattering_intensities * kpoint_weight), density=False)
             sdata.add_dict({f"atom_{atom_index}": {"s": {f"order_{order}": rebinned_spectrum}}})
@@ -756,7 +744,16 @@ class SPowderSemiEmpiricalCalculator:
 
         return freq, coeff
 
-    def _calculate_order_one_dw(self, *, q2: np.ndarray, frequencies: np.ndarray, a_tensor=None, a_trace=None, b_tensor=None, b_trace=None):
+    def _calculate_order_one_dw(
+        self,
+        *,
+        q2: np.ndarray,
+        frequencies: np.ndarray,
+        a_tensor=None,
+        a_trace=None,
+        b_tensor=None,
+        b_trace=None,
+    ):
         """
         Calculate mode-dependent Debye-Waller factor for the first order quantum event for one atom.
         :param q2: squared values of momentum transfer vectors
@@ -768,11 +765,8 @@ class SPowderSemiEmpiricalCalculator:
         :returns: s for the first quantum order event for the given atom
         """
         trace_ba = np.einsum("kli, il->k", b_tensor, a_tensor)
-        if self._temperature < np.finfo(type(self._temperature)).eps:
-            coth = 1.0
-        else:
-            coth = 1.0 / np.tanh(frequencies * CM1_2_HARTREE / (2.0 * self._temperature * K_2_HARTREE))
-        dw = np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0 * coth * coth)
+
+        dw = np.exp(-q2 * (a_trace + 2.0 * trace_ba / b_trace) / 5.0)
 
         return dw
 
@@ -791,6 +785,7 @@ class SPowderSemiEmpiricalCalculator:
         :param include_dw: Include (mode-dependent) Debye-Waller temperature effect
         :returns: s for the first quantum order event for the given atom
         """
+
         return q2 * b_trace / 3.0
 
     def _calculate_order_two(self, q2=None, frequencies=None, indices=None, a_tensor=None, a_trace=None, b_tensor=None, b_trace=None):
@@ -830,17 +825,14 @@ class SPowderSemiEmpiricalCalculator:
         # np.einsum('kli, kil->k', np.take(b_tensor, indices=indices[:, 1], axis=0),
         # np.take(b_tensor, indices=indices[:, 0], axis=0)))
 
-        s = (
-            q4
-            * (
-                np.prod(np.take(b_trace, indices=indices), axis=1)
-                + np.einsum(
-                    "kli, kil->k", np.take(b_tensor, indices=indices[:, 0], axis=0), np.take(b_tensor, indices=indices[:, 1], axis=0)
-                )
-                + np.einsum(
-                    "kli, kil->k", np.take(b_tensor, indices=indices[:, 1], axis=0), np.take(b_tensor, indices=indices[:, 0], axis=0)
-                )
-            )
-            / (30.0 * factor)
-        )
+        # fmt: off
+        s = q4 * (np.prod(np.take(b_trace, indices=indices), axis=1)
+                  + np.einsum('kli, kil->k',
+                              np.take(b_tensor, indices=indices[:, 0], axis=0),
+                              np.take(b_tensor, indices=indices[:, 1], axis=0))
+                  + np.einsum('kli, kil->k',
+                              np.take(b_tensor, indices=indices[:, 1], axis=0),
+                              np.take(b_tensor, indices=indices[:, 0], axis=0))
+                  ) / (30.0 * factor)
+        # fmt: on
         return s

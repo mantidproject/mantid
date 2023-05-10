@@ -67,7 +67,7 @@ class SANSSliceEventTest(unittest.TestCase):
 
     def test_that_event_workspace_of_isis_instrument_is_sliced(self):
         workspace, monitor_workspace = self._provide_workspaces(is_event=True)
-        state = self._get_state(start_time=[1.0], end_time=[3.0])
+        state = self._get_state(start_time=[1.0], end_time=[3.0])  # slice from 1-3 seconds of the full ten
 
         returned = slice_sans_event(state_slice=state.slice, input_ws=workspace, input_ws_monitor=monitor_workspace)
 

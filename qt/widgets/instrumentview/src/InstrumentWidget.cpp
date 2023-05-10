@@ -190,9 +190,6 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
                                  Q_ARG(bool, resetGeometry), Q_ARG(bool, setDefaultView));
   }
 
-  // Background colour
-  setBackgroundColor(settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>());
-
   // Create the b=tabs
   createTabs(settings, customizations);
 
@@ -581,19 +578,21 @@ void InstrumentWidget::setSurfaceType(int type) {
     bool showPeakRow = true;
     bool showPeakLabels = true;
     bool showPeakRelativeIntensity = true;
+    QColor backgroundColor;
     if (surface) {
       peakLabelPrecision = surface->getPeakLabelPrecision();
       showPeakRow = surface->getShowPeakRowsFlag();
       showPeakLabels = surface->getShowPeakLabelsFlag();
+      backgroundColor = surface->getBackgroundColor();
     } else {
       QSettings settings;
       settings.beginGroup(InstrumentWidgetSettingsGroup);
       peakLabelPrecision = settings.value("PeakLabelPrecision", 2).toInt();
       showPeakRow = settings.value("ShowPeakRows", true).toBool();
       showPeakLabels = settings.value("ShowPeakLabels", true).toBool();
-
       // By default this is should be off for now.
       showPeakRelativeIntensity = settings.value("ShowPeakRelativeIntensities", false).toBool();
+      backgroundColor = settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>();
       settings.endGroup();
     }
 
@@ -655,6 +654,7 @@ void InstrumentWidget::setSurfaceType(int type) {
     surface->setShowPeakRowsFlag(showPeakRow);
     surface->setShowPeakLabelsFlag(showPeakLabels);
     surface->setShowPeakRelativeIntensityFlag(showPeakRelativeIntensity);
+    surface->setBackgroundColor(backgroundColor);
     // set new surface
     setSurface(surface);
 

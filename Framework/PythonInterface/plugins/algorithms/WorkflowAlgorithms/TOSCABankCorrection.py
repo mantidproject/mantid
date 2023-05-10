@@ -11,7 +11,6 @@ from mantid.simpleapi import *
 
 
 class TOSCABankCorrection(DataProcessorAlgorithm):
-
     _input_ws = None
     _output_ws = None
     _search_range = None
@@ -90,10 +89,7 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
 
         # Ensure there is at least one peak found
         if peak is None:
-            raise RuntimeError(
-                "Could not find any peaks. Try increasing \
-                                width of SearchRange and/or ClosePeakTolerance"
-            )
+            raise RuntimeError("Could not find any peaks. Try increasing width of SearchRange and/or ClosePeakTolerance")
 
         target_centre = (peak[0] + peak[1]) / 2.0
         bank_1_scale_factor = target_centre / peak[0]

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllOption.h"
 #include <iosfwd>
 
 namespace MantidQt {
@@ -22,7 +23,7 @@ GLColor class handles the OpenGL color for an object based on the type of the
 rendering selected. eg. MATERIAL by specifying color as glMaterial rather than
 glColor.
 */
-class GLColor {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW GLColor {
 public:
   /// Default Constructor
   GLColor(float red = 0, float green = 0, float blue = 0, float alpha = 1.0f);
@@ -50,6 +51,6 @@ private:
   unsigned char m_rgba[4];
 };
 
-std::ostream &operator<<(std::ostream &ostr, const GLColor &c);
+EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW std::ostream &operator<<(std::ostream &ostr, const GLColor &c);
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -47,8 +47,7 @@ Features
 --------
 
 When a ROI is defined, the X and Y axis projections are plotted in the side plots attached to their respective axis.
-A small red cross is also drawn in the ROI, showing the position of the center of mass of this ROI (assumed to be a good
-enough approximation of the peak position).
+A small red cross is also drawn in the ROI, showing the position of the centre of the fitted Gaussian peak in this ROI.
 
 A number of keyboard shortcuts are provided to interact with the data and the ROIs defined.
 
@@ -61,9 +60,9 @@ A number of keyboard shortcuts are provided to interact with the data and the RO
     and "c" along both of them. A different workspace is created for every ROI on each axis, in addition to a workspace
     containing the side plot itself (which is just the sum of all the other workspaces based on that axis).
 'p'
-    Exports the peaks to a table workspace. For each ROI, the detected peak is the center of mass of the ROI. The values
-    exported are the index of the rectangle, the coordinates of the peak in :math:`2\theta, \Omega`, the data integrated
-    over the ROI, and, if a background has been provided, the integration corrected by the background (i.e. integration
+    Exports the peaks to a table workspace. For each ROI, the detected peak is the fitted centre of a Gaussian in the ROI. The values
+    exported are the index of the rectangle, the coordinates of the peak in :math:`2\theta, \Omega`, the peak width (:math:`\sigma` of the Gaussian),
+    the data integrated over the ROI, and, if a background has been provided, the integration corrected by the background (i.e. integration
     of the sample data minus the background data with minimal reduction). NB : this last value will not make sense if
     the data shown in the data viewer has already been reduced through the `Advanced` button.
 'f'

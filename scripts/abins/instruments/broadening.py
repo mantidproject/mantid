@@ -8,6 +8,8 @@ import numpy as np
 from scipy.special import erf
 from scipy.signal import convolve
 
+import abins.parameters
+
 prebin_required_schemes = ["interpolate", "interpolate_coarse"]
 
 
@@ -109,10 +111,11 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme="gaussian_truncated
             points=freq_points,
             bins=bins,
             center=frequencies[:, np.newaxis],
-            limit=3,
+            limit=abins.parameters.sampling["broadening_range"],
             weights=s_dft[:, np.newaxis],
             method="auto",
         )
+
         # Normalize the Gaussian kernel such that sum of points matches input
         bin_width = bins[1] - bins[0]
         return points, spectrum * bin_width
@@ -121,6 +124,7 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme="gaussian_truncated
         # Normal distribution on the full grid (sum over all peaks, Gaussian range limited to 3 sigma)
         # All peaks use the same number of points; if the center is located close to the low- or high-freq limit,
         # the frequency point set is "justified" to lie inside the range
+
         return trunc_and_sum_inplace(
             function=normal,
             function_uses="bins",
@@ -128,7 +132,7 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme="gaussian_truncated
             points=freq_points,
             bins=bins,
             center=frequencies[:, np.newaxis],
-            limit=3,
+            limit=abins.parameters.sampling["broadening_range"],
             weights=s_dft[:, np.newaxis],
             method="auto",
         )
@@ -141,7 +145,7 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme="gaussian_truncated
             center=frequencies,
             weights=s_dft,
             is_hist=True,
-            limit=3,
+            limit=abins.parameters.sampling["broadening_range"],
             function="gaussian",
             spacing="sqrt2",
         )
@@ -154,7 +158,7 @@ def broaden_spectrum(frequencies, bins, s_dft, sigma, scheme="gaussian_truncated
             center=frequencies,
             weights=s_dft,
             is_hist=True,
-            limit=3,
+            limit=abins.parameters.sampling["broadening_range"],
             function="gaussian",
             spacing="2",
         )
@@ -554,7 +558,7 @@ def interpolated_broadening(
         hist = weights
     else:
         hist, _ = np.histogram(center, bins=bins, weights=weights, density=False)
-    freq_range = 3 * max(sigma)
+    freq_range = limit * max(sigma)
     kernel_npts_oneside = np.ceil(freq_range / bin_width)
 
     if function == "gaussian":

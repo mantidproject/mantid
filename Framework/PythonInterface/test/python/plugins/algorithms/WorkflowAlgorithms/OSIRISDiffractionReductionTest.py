@@ -142,8 +142,9 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         """
         Test error handling when there is no overlap between the sample and container d-ranges
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "D-Ranges found in runs have no overlap",
             OSIRISDiffractionReduction,
             Sample=["OSI89813.raw"],
             CalFile="osiris_041_RES10.cal",
@@ -151,6 +152,7 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
             Container=["OSI10241.raw"],
             SpectraMin=3,
             SpectraMax=361,
+            OutputWorkspace="wks",
         )
 
     def test_spectra_with_bad_detectors(self):
@@ -158,8 +160,9 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         Tests reduction with a spectra range that includes no selected Detectors from the Cal file
         """
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "No selected Detectors found in .cal file for input range.",
             OSIRISDiffractionReduction,
             Sample=["OSI10203.raw"],
             CalFile="osiris_041_RES10.cal",
@@ -167,20 +170,23 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
             Container=["OSI10241.raw"],
             SpectraMin=16,
             SpectraMax=17,
+            OutputWorkspace="wks",
         )
 
     def test_failure_no_vanadium(self):
         """
         Tests error handling when failed to obtain a vanadium run.
         """
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "D-Ranges found in runs have no overlap",
             OSIRISDiffractionReduction,
             Sample=["OSI89813.raw"],
             CalFile="osiris_041_RES10.cal",
             Vanadium=["OSI10156.raw"],
             SpectraMin=3,
             SpectraMax=361,
+            OutputWorkspace="wks",
         )
 
 

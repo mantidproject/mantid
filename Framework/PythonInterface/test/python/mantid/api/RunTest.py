@@ -7,13 +7,12 @@
 import unittest
 import copy
 from mantid.geometry import Goniometer
-from mantid.kernel import DateAndTime, FloatTimeSeriesProperty
+from mantid.kernel import DateAndTime, FloatTimeSeriesProperty, TimeROI
 from mantid.api import Run
 import numpy as np
 
 
 class RunTest(unittest.TestCase):
-
     _expt_ws = None
     _nspec = 1
 
@@ -38,6 +37,18 @@ class RunTest(unittest.TestCase):
         charge = run.getProtonCharge()
         self.assertEqual(type(charge), float)
         self.assertAlmostEqual(charge, 10.05)
+
+    def test_get_time_roi(self):
+        # there is intentionally no way create a TimeROI from python
+        run = Run()
+        roi = run.getTimeROI()
+        self.assertTrue(isinstance(roi, TimeROI))
+        self.assertTrue(roi.useAll())
+        self.assertFalse(roi.useNone())
+        values = roi.toTimeIntervals()
+        self.assertTrue(isinstance(values, list))
+        self.assertEqual(len(values), 0)
+        self.assertEqual(roi.numberOfRegions(), 0)
 
     def test_run_hasProperty(self):
         self.assertTrue(self._run.hasProperty("start_time"))
@@ -132,6 +143,21 @@ class RunTest(unittest.TestCase):
         # ignore the last value
         expected = vals.std()
         self.assertEqual(run.getTimeAveragedStd("TEMP1"), expected)
+
+    def test_timeavgvalue(self):
+        """Test exported function getTimeAveragedValue"""
+        run = Run()
+        start_time = DateAndTime("2008-12-18T17:58:38")
+        nanosec = 1000000000
+        # === Float type ===
+        temp1 = FloatTimeSeriesProperty("TEMP1")
+        vals = np.arange(10) * 2.0
+        for i in range(10):
+            temp1.addValue(start_time + i * nanosec, vals[i])
+        run.addProperty(temp1.name, temp1, True)
+        # ignore the last value
+        expected = np.average(vals)
+        self.assertEqual(run.getTimeAveragedValue("TEMP1"), expected)
 
     def do_test_copyable(self, copy_op):
         original = self._run

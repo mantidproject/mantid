@@ -1,0 +1,2 @@
+- It is now possible to provide more than one detector height range in :ref:`algm-ILLPowderDetectorScan`
+- InitialMask and FinalMask properties of :ref:`algm-ILLPowderDetectorScan` have been removed

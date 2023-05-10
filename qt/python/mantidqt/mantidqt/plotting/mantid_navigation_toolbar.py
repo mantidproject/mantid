@@ -16,7 +16,6 @@ from matplotlib.backend_bases import NavigationToolbar2
 from matplotlib.backends.backend_qt5 import SubplotToolQt
 from matplotlib import backend_tools
 
-from distutils.version import LooseVersion
 import os
 
 
@@ -179,13 +178,12 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
                 QMessageBox.critical(self, "Error saving file", str(e), QMessageBox.Ok, QMessageBox.NoButton)
 
     def set_history_buttons(self):
-        if LooseVersion(matplotlib.__version__) >= LooseVersion("2.1.1"):
-            can_backward = self._nav_stack._pos > 0
-            can_forward = self._nav_stack._pos < len(self._nav_stack._elements) - 1
-            if "back" in self._actions:
-                self._actions["back"].setEnabled(can_backward)
-            if "forward" in self._actions:
-                self._actions["forward"].setEnabled(can_forward)
+        can_backward = self._nav_stack._pos > 0
+        can_forward = self._nav_stack._pos < len(self._nav_stack._elements) - 1
+        if "back" in self._actions:
+            self._actions["back"].setEnabled(can_backward)
+        if "forward" in self._actions:
+            self._actions["forward"].setEnabled(can_forward)
 
     def _get_mode(self):
         if hasattr(self, "name"):

@@ -41,8 +41,10 @@ class DNSPathPresenter(DNSObserver):
         if prop_nb or user:
             self.view.set_prop_number(prop_nb)
             self.view.set_user(user)
+            self.view.set_asterisk(hide=True)
         else:
-            self.view.show_status_message("No DNS .d_dat file found in data" "directory", 30)
+            self.view.set_asterisk(hide=False)
+            self.view.show_status_message("No DNS .d_dat file found in Data Directory", 30)
 
     def _clear_cache(self):
         path = self.own_dict.get("data_dir", False)

@@ -13,9 +13,9 @@
 #include "../RunsTable/MockRunsTablePresenter.h"
 #include "../RunsTable/MockRunsTableView.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MantidQtWidgets/Common/MockAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/MockProgressableView.h"
@@ -743,8 +743,8 @@ public:
     auto options = defaultLiveMonitorReductionOptions();
     options->setPropertyValue("Prop1", "val1");
     options->setPropertyValue("Prop2", "val2");
-    expectGetLiveDataOptions(std::make_unique<MantidQt::API::AlgorithmRuntimeProps>(
-        dynamic_cast<const MantidQt::API::AlgorithmRuntimeProps &>(*options)));
+    expectGetLiveDataOptions(std::make_unique<Mantid::API::AlgorithmRuntimeProps>(
+        dynamic_cast<const Mantid::API::AlgorithmRuntimeProps &>(*options)));
     auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
     assertPostProcessingPropertiesContainOptions(*options, algRunner);
@@ -945,11 +945,11 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
   }
 
-  std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>
+  std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>
   defaultLiveMonitorAlgorithmOptions(const std::string &instrument = std::string("OFFSPEC"),
                                      const int &updateInterval = 15) {
     const std::string updateIntervalString = std::to_string(updateInterval);
-    auto props = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+    auto props = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     props->setPropertyValue("Instrument", instrument);
     props->setPropertyValue("OutputWorkspace", "IvsQ_binned_live");
@@ -961,9 +961,9 @@ private:
     return props;
   }
 
-  std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>
+  std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps>
   defaultLiveMonitorReductionOptions(const std::string &instrument = std::string("OFFSPEC")) {
-    auto props = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+    auto props = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
     props->setPropertyValue("GetLiveValueAlgorithm", "GetLiveInstrumentValue");
     props->setPropertyValue("InputWorkspace", "TOF_live");
     props->setPropertyValue("Instrument", instrument);

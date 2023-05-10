@@ -138,7 +138,7 @@ double EstimateResolutionDiffraction::getWavelength() {
     throw runtime_error("Unit is not recognized: " + unit);
   }
 
-  return cwltimeseries->timeAverageValue();
+  return m_inputWS->run().getTimeAveragedValue("LambdaRequest");
 }
 
 void EstimateResolutionDiffraction::retrieveInstrumentParameters() {

@@ -14,7 +14,6 @@ from IndirectImport import is_supported_f2py_platform
 if is_supported_f2py_platform():
 
     class BayesStretchTest(unittest.TestCase):
-
         _res_ws = None
         _sample_ws = None
         _resnorm_ws = None
@@ -49,8 +48,9 @@ if is_supported_f2py_platform():
             """
             Test that an EMin of less than the data range is invalid
             """
-            self.assertRaises(
+            self.assertRaisesRegex(
                 RuntimeError,
+                "EMin must be more than the minimum x range of the data.",
                 BayesStretch,
                 OutputWorkspaceFit="fit_group",
                 OutputWorkspaceContour="contour",
@@ -61,10 +61,11 @@ if is_supported_f2py_platform():
 
         def test_invalid_e_max(self):
             """
-            Test that an EMin of less than the data range is invalid
+            Test that an EMax of more than the data range is invalid
             """
-            self.assertRaises(
+            self.assertRaisesRegex(
                 RuntimeError,
+                "EMax must be less than the maximum x range of the data",
                 BayesStretch,
                 OutputWorkspaceFit="fit_group",
                 OutputWorkspaceContour="contour",

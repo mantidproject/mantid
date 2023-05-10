@@ -42,6 +42,7 @@ public:
 private:
   // Implement abstract Algorithm methods
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
   /// Pointer for an event workspace

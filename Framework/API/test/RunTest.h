@@ -12,10 +12,12 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 #include <cxxtest/TestSuite.h>
 #include <json/value.h>
@@ -23,6 +25,17 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using Mantid::Types::Core::DateAndTime;
+
+namespace {
+const DateAndTime ONE("2023-01-01T11:00:00");
+const DateAndTime TWO("2023-01-01T12:00:00");
+const DateAndTime THREE("2023-01-01T13:00:00");
+const DateAndTime FOUR("2023-01-01T14:00:00");
+const DateAndTime FIVE("2023-01-01T15:00:00");
+const DateAndTime SIX("2023-01-01T16:00:00");
+
+} // namespace
 
 // Helper class
 namespace {
@@ -527,30 +540,90 @@ public:
     TS_ASSERT_EQUALS(rot, V3D(0, -sqrt(0.5), sqrt(0.5)));
   }
 
+  void compareStats(const TimeSeriesPropertyStatistics &left, const TimeSeriesPropertyStatistics &right) {
+    TS_ASSERT_EQUALS(left.minimum, right.minimum);
+    TS_ASSERT_EQUALS(left.maximum, right.maximum);
+    TS_ASSERT_EQUALS(left.mean, right.mean);
+    TS_ASSERT_EQUALS(left.median, right.median);
+    TS_ASSERT_EQUALS(left.standard_deviation, right.standard_deviation);
+    TS_ASSERT_EQUALS(left.time_mean, right.time_mean);
+    TS_ASSERT_EQUALS(left.time_standard_deviation, right.time_standard_deviation);
+    TS_ASSERT_EQUALS(left.duration, right.duration);
+  }
+
   void test_integratePCharge() {
+    const std::string PCHARGE_NAME("proton_charge");
+    const std::string OTHER_NAME("something_else");
+
+    const DateAndTime filterStart("2011-05-24T00:00:00");
+    const DateAndTime filterStop("2011-05-24T04:00:00");
+
     // create a p-charge log
-    TimeSeriesProperty<double> *pcharge = new TimeSeriesProperty<double>("proton_charge");
+    TimeSeriesProperty<double> *pcharge = new TimeSeriesProperty<double>(PCHARGE_NAME);
     pcharge->setUnits("uAh"); // use native units
-    pcharge->addValue("2011-05-24T00:00:00", 1);
+    pcharge->addValue(filterStart, 1);
     pcharge->addValue("2011-05-24T01:00:00", 2);
     pcharge->addValue("2011-05-24T02:00:00", 3);
     pcharge->addValue("2011-05-24T03:00:00", 4);
-    pcharge->addValue("2011-05-24T04:00:00", 5);
+    pcharge->addValue(filterStop, 5); // value to be ignored because end is exclusive
 
-    // attach it to a run object
-    Run run;
-    run.addProperty(pcharge);
+    // create another log that can't have idosyncrasies of proton-charge that may be lurking
+    TimeSeriesProperty<double> *notpcharge = pcharge->clone();
+    notpcharge->setName(OTHER_NAME);
+
+    // attach them to a run object
+    Run run1;
+    run1.addProperty(pcharge->clone());
+    run1.addProperty(notpcharge->clone());
 
     // check the unfiltered value
-    TS_ASSERT_EQUALS(run.getProtonCharge(), 15.);
+    TS_ASSERT_EQUALS(run1.getProtonCharge(), 15.);
 
     // create roi that excludes the last value
-    TimeROI roi;
-    roi.addROI("2011-05-24T00:00:00", "2011-05-24T04:00:00");
-    run.setTimeROI(roi);
+    TimeROI roi(filterStart, filterStop);
+    run1.setTimeROI(roi);
 
-    // check the unfiltered value
-    TS_ASSERT_EQUALS(run.getProtonCharge(), 10.);
+    // check the filtered value
+    TS_ASSERT_EQUALS(run1.getProtonCharge(), 10.);
+
+    auto pcharge1Stats = run1.getStatistics(PCHARGE_NAME);
+    auto other1Stats = run1.getStatistics(OTHER_NAME);
+    compareStats(pcharge1Stats, other1Stats);
+
+    // try with changing the logs themselves
+    Run run2;
+    run2.addProperty(pcharge->clone());
+    run2.addProperty(notpcharge->clone());
+    run2.filterByTime(filterStart, filterStop);
+    // check the filtered value
+    TS_ASSERT_EQUALS(run2.getProtonCharge(), 10.);
+
+    auto pcharge2Stats = run2.getStatistics(PCHARGE_NAME);
+    auto other2Stats = run2.getStatistics(OTHER_NAME);
+    compareStats(pcharge2Stats, other2Stats);
+
+    // compare the two methods
+    compareStats(pcharge1Stats, pcharge2Stats);
+    compareStats(other1Stats, other2Stats);
+  }
+
+  void test_setDuration() {
+    // attach it to a run object
+    Run run;
+
+    // does nothing, since run.m_timeroi is empty
+    run.setDuration();
+    TS_ASSERT(!run.hasProperty("duration"));
+
+    // create roi with a duration of three hours
+    TimeROI roi(ONE, FOUR);
+    run.setTimeROI(roi); // calls setDuration()
+    TS_ASSERT_EQUALS(run.getLogAsSingleValue("duration"), 3 * 3600.0);
+
+    // add one extra hour
+    roi.addROI(FIVE, SIX);
+    run.setTimeROI(roi); // calls setDuration()
+    TS_ASSERT_EQUALS(run.getLogAsSingleValue("duration"), 4 * 3600.0);
   }
 
   /** Save and load to NXS file */

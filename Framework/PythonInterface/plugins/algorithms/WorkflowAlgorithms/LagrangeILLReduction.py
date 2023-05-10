@@ -14,7 +14,6 @@ from typing import List, Tuple
 
 
 class LagrangeILLReduction(DataProcessorAlgorithm):
-
     progress = None
     output_ws_name = None
     empty_cell_ws = None
@@ -26,6 +25,8 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
     use_incident_energy = False
     convert_to_wavenumber = False
+    _empty_cell_nexus = None
+    _sample_nexus = None
 
     # max difference between two identical points, two points closer than that will be merged in the merge algorithm
     EPSILON = 1e-2
@@ -67,14 +68,18 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         self.convert_to_wavenumber = self.getProperty("ConvertToWaveNumber").value
         self.normalise_by = self.getPropertyValue("NormaliseBy")
 
+        self._empty_cell_nexus = ".nxs" in self.getPropertyValue("ContainerRuns")
+        self._sample_nexus = ".nxs" in self.getPropertyValue("SampleRuns")
+
         # the list of all the intermediate workspaces to group at the end
         self.intermediate_workspaces = []
 
     def PyInit(self):
-        self.declareProperty(MultipleFileProperty("SampleRuns", action=FileAction.Load, extensions=[""]), doc="Sample run(s).")
+        self.declareProperty(MultipleFileProperty("SampleRuns", action=FileAction.Load, extensions=["", ".nxs"]), doc="Sample run(s).")
 
         self.declareProperty(
-            MultipleFileProperty("ContainerRuns", action=FileAction.OptionalLoad, extensions=[""]), doc="Container run(s) (empty cell)"
+            MultipleFileProperty("ContainerRuns", action=FileAction.OptionalLoad, extensions=["", ".nxs"]),
+            doc="Container run(s) (empty cell)",
         )
 
         self.declareProperty(
@@ -97,6 +102,18 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
         self.declareProperty(name="ConvertToWaveNumber", defaultValue=False, doc="Convert axis unit to energy in wave number (cm-1)")
 
+        self.declareProperty(name="NexusInput", defaultValue=True, doc="Whether the input data contains NeXus files.")
+
+    def validateInputs(self):
+        issues = dict()
+        if self.getProperty("NexusInput").value:
+            nexus_err_msg = "Data is expected to be NeXus but extension not found in the provided data path."
+            if ".nxs" not in self.getPropertyValue("SampleRuns"):
+                issues["SampleRuns"] = nexus_err_msg
+            if not self.getProperty("ContainerRuns").isDefault and ".nxs" not in self.getPropertyValue("ContainerRuns"):
+                issues["ContainerRuns"] = nexus_err_msg
+        return issues
+
     def PyExec(self):
         self.setup()
 
@@ -108,30 +125,29 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             self.water_correction = self.get_water_correction(correction_file)
 
         empty_cell_files = self.getPropertyValue("ContainerRuns").split(",")
-
         # empty cell treatment, if there is any
         if empty_cell_files[0] != str():
             self.process_empty_cell(empty_cell_files)
 
         # sample load and formatting
         sample_files = self.getPropertyValue("SampleRuns").split(",")
-        sample_data = self.load_and_concatenate(sample_files)
-        sample_data = self.merge_adjacent_points(sample_data)
-        energy, detector_counts, errors, time, temperature = self.get_counts_errors_metadata(sample_data)
-
         raw_sample_ws = "__" + self.output_ws_name + "_rawS"
-        CreateWorkspace(outputWorkspace=raw_sample_ws, DataX=energy, DataY=detector_counts, DataE=errors, UnitX="Energy")
+        if self._sample_nexus:
+            self.preprocess_nexus(sample_files, raw_sample_ws)
+        else:
+            sample_data = self.load_and_concatenate(sample_files)
+            sample_data = self.merge_adjacent_points(sample_data)
+            energy, detector_counts, errors, time, temperature = self.get_counts_errors_metadata(sample_data)
 
-        self.add_metadata(raw_sample_ws, time, temperature)
+            CreateWorkspace(outputWorkspace=raw_sample_ws, DataX=energy, DataY=detector_counts, DataE=errors, UnitX="Energy")
+            self.add_metadata(raw_sample_ws, time, temperature)
 
         self.intermediate_workspaces.append(raw_sample_ws)
 
         # sample correction by water
         if self.water_correction is not None:
-
             water_corrected_ws = "{}_Calibrated".format(raw_sample_ws)
             self.correct_data(raw_sample_ws, water_corrected_ws)
-
             self.intermediate_workspaces.append(water_corrected_ws)
 
         # clone the last workspace - either the raw or water corrected data - to the destination name
@@ -153,9 +169,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         Adds metadata from provided loaded lists of values.
 
         Args:
-        ws: workspace name where the metadata is to be added
-        time: list of time values to be added
-        temperature: list of temperature values to be added
+            ws (str): workspace name where the metadata is to be added
+            time (list(float)): list of time values to be added
+            temperature (list(float)): list of temperature values to be added
         """
         run = mtd[ws].getRun()
         run.addProperty("time", time, True)
@@ -164,10 +180,13 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
     def load_and_concatenate(self, files: List[str]) -> np.ndarray:
         """
-        Taking Lagrange data files as input, load the interesting data from it and concatenate them into one numpy array
-        @param files the ascii data files to load and concatenate together
-        @return the values concatenated, as a (nb of points, 3)-shaped numpy array,
-        with values (incident energy, monitor counts, detector counts)
+        Loads ASCII Lagrange data files as input, loads the interesting data from it and concatenates them into one numpy array
+
+        Args:
+            files (list(str)): the ascii data files to load and concatenate together
+        Return:
+            Loaded values concatenated, as a (nb of points, 3)-shaped numpy array, with values (incident energy, monitor counts,
+        detector counts)
         """
         loaded_data = None
         for file in files:
@@ -247,14 +266,46 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             loaded_data = np.reshape(loaded_data, (1, loaded_data.shape[0]))
         return loaded_data
 
+    def preprocess_nexus(self, file_name: List[str], output_name: str):
+        """
+        Loads, merges adjacent bins and puts the detector counts workspace in the ADS. The method interfaces to the LoadAndMerge
+        algorithm to load NeXus Lagrange data, then processes the loaded workspace to remove all bins that have a smaller
+        bin width than EPSILON, uses the ExtractMonitors to separate detector counts from monitors, and finally,
+        if requested, normalizes detector counts to monitor.
+
+        Args:
+            file_name (list(str)): string containing name(s) of file(s) to be loaded
+            output_name (str): name for the output workspace containing detector counts
+        """
+        # if the user wants to see transfer energy, we subtract by the constant offset
+        offset = 0 if self.use_incident_energy else self.INCIDENT_ENERGY_OFFSET
+        LoadAndMerge(
+            Filename=",".join(file_name),
+            LoaderName="LoadILLLagrange",
+            LoaderOptions={"InitialEnergyOffset": offset},
+            OutputWorkspace=output_name,
+            OutputBehaviour="Concatenate",
+            SampleLogAsXAxis="Ei",
+        )
+        if len(file_name) > 1:  # corrects X axis unit if multiple files were concatenated
+            mtd[output_name].getAxis(0).setUnit("Energy")
+            SortXAxis(InputWorkspace=output_name, OutputWorkspace=output_name, Ordering="Ascending")
+        self.merge_adjacent_bins(output_name)
+        monitor_name = output_name + "_mon"
+        ExtractMonitors(InputWorkspace=output_name, DetectorWorkspace=output_name, MonitorWorkspace=monitor_name)
+        if self.normalise_by == "Monitor":
+            Divide(LHSWorkspace=output_name, RHSWorkspace=monitor_name, OutputWorkspace=output_name)
+        DeleteWorkspace(Workspace=monitor_name)
+
     def get_counts_errors_metadata(self, data: np.ndarray) -> Tuple[List[float], List[int], List[float], List[float], List[float]]:
         """
         Processes loaded data and metadata, computes and returns correct energy, (optionally) normalized detector counts
         and errors.
 
         Args:
-        @param data: the data to format
-        @return 5 arrays, with the values being incident energy, normalized detector counts, errors, times, and temperatures
+            data (ndarray): the data to format
+        Return:
+             5 arrays, with the values being incident energy, normalized detector counts, errors, times, and temperatures
         """
 
         energy = [0] * len(data)
@@ -287,8 +338,9 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
         Loads the provided water correction and passes these values.
 
         Args:
-        @param correction_file: path to the file with water correction
-        @return Numpy array with loaded correction data
+            correction_file (str): path to the file with water correction
+        Return:
+            Numpy array with loaded correction data
         """
         try:
             correction = np.loadtxt(correction_file)
@@ -308,13 +360,69 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
             self.intermediate_workspaces.append(self.water_corr_ws)
         return correction
 
+    def merge_adjacent_bins(self, ws: str) -> str:
+        """
+        Searches the x axis for bin centres closer than EPSILON and if true, uses error-weighted average of
+        counts and monitors to create a new bin value, and removes the right hand bin that was too close.
+
+        Args:
+            ws (str): name of the input workspace
+        Return:
+            Name of the workspace, either original one, if unchanged, or new workspace with bins merged
+        """
+        xAxis = mtd[ws].readX(0)
+        maskedX = np.ma.array(xAxis, mask=False)
+        yAxis = mtd[ws].extractY()
+        maskedY = np.ma.array(yAxis, mask=False)
+        eAxis = mtd[ws].extractE()
+        maskedE = np.ma.array(eAxis, mask=False)
+        index = 0
+        n_masked = 0
+        while index < mtd[ws].blocksize() - 1:
+            if abs(xAxis[index + 1] - xAxis[index]) < self.EPSILON:
+                # average counts for both data and monitors using error as weights:
+                # first data spectrum
+                yAxis[0][index] = (yAxis[0][index] * eAxis[0][index] + yAxis[0][index + 1] * eAxis[0][index + 1]) / (
+                    eAxis[0][index] + eAxis[0][index + 1]
+                )
+                eAxis[0][index] = 0.5 * (eAxis[0][index] + eAxis[0][index + 1])
+                # then monitor spectrum
+                yAxis[1][index] = (yAxis[1][index] * eAxis[1][index] + yAxis[1][index + 1] * eAxis[1][index + 1]) / (
+                    eAxis[1][index] + eAxis[1][index + 1]
+                )
+                eAxis[1][index] = 0.5 * (eAxis[1][index] + eAxis[1][index + 1])
+                # mask indices to be removed
+                maskedX.mask[index + 1] = True
+                maskedY.mask[0][index + 1] = True
+                maskedY.mask[1][index + 1] = True
+                maskedE.mask[0][index + 1] = True
+                maskedE.mask[1][index + 1] = True
+                n_masked += 1
+                index += 1  # skip the next bin
+            index += 1
+
+        if n_masked > 0:
+            # Mantid does not allow to change number of bins using the setX, setY, and setE methods
+            # A simple alternative is to create a new workspace containing the same metadata but new axes
+            CreateWorkspace(
+                OutputWorkspace=ws,
+                DataX=maskedX.compressed(),
+                DataY=maskedY.compressed().reshape(np.shape(yAxis)[0], np.shape(yAxis)[1] - n_masked),
+                DataE=maskedE.compressed().reshape(np.shape(eAxis)[0], np.shape(eAxis)[1] - n_masked),
+                NSpec=2,
+                ParentWorkspace=ws,
+                UnitX="Energy",
+            )
+        return ws
+
     def merge_adjacent_points(self, data: np.ndarray) -> np.ndarray:
         """
         Merge points that are close to one another together, summing their values
 
         Args:
-        @param data: a (nb of points, 3)-shaped numpy array, with values (incident energy, monitor counts, detector counts)
-        @return a (nb of points, 3)-shaped numpy array, with data sorted and merged by their incident energy.
+            data (ndarray): a (nb of points, 3)-shaped numpy array, with values (incident energy, monitor counts, detector counts)
+        Return:
+             A (nb of points, 3)-shaped numpy array, with data sorted and merged by their incident energy.
         """
         # create masked array sorted by incident energy
         data_mask = np.ma.masked_array(data[data[:, 0].argsort()], mask=False)
@@ -338,8 +446,10 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
     def correct_data(self, ws_to_correct: str, corrected_ws: str):
         """
         Apply water correction to the provided data
-        @param ws_to_correct the name of the workspace holding the data to be corrected
-        @param corrected_ws the name of the workspace that should hold the corrected value. It will be created.
+
+        Args:
+            ws_to_correct (str): the name of the workspace holding the data to be corrected
+            corrected_ws (str): the name of the workspace that should hold the corrected value. It will be created.
         """
 
         # we need to get the data and interpolate it with numpy because Mantid only have spline interpolation and the
@@ -358,19 +468,22 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
     def process_empty_cell(self, empty_cell_files: List[str]):
         """
-        Process empty cell files
-        @param empty_cell_files list with paths to empty cell data
+        Process empty cell files by loading the raw data, adding metadata, normalising to monitor (if requested) and
+        performing water correction.
+
+        Args:
+            empty_cell_files (list(str)): list with paths to empty cell data
         """
         # load and format empty cell
-        empty_cell_data = self.load_and_concatenate(empty_cell_files)
-        empty_cell_data = self.merge_adjacent_points(empty_cell_data)
-        energy, detector_counts, errors, time, temperature = self.get_counts_errors_metadata(empty_cell_data)
-
         self.empty_cell_ws = "__" + self.output_ws_name + "_rawEC"
-
-        CreateWorkspace(OutputWorkspace=self.empty_cell_ws, DataX=energy, DataY=detector_counts, DataE=errors, UnitX="Energy")
-
-        self.add_metadata(self.empty_cell_ws, time, temperature)
+        if self._empty_cell_nexus:
+            self.preprocess_nexus(empty_cell_files, self.empty_cell_ws)
+        else:
+            empty_cell_data = self.load_and_concatenate(empty_cell_files)
+            empty_cell_data = self.merge_adjacent_points(empty_cell_data)
+            energy, detector_counts, errors, time, temperature = self.get_counts_errors_metadata(empty_cell_data)
+            CreateWorkspace(OutputWorkspace=self.empty_cell_ws, DataX=energy, DataY=detector_counts, DataE=errors, UnitX="Energy")
+            self.add_metadata(self.empty_cell_ws, time, temperature)
 
         self.intermediate_workspaces.append(self.empty_cell_ws)
 

@@ -277,7 +277,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
     @classmethod
     def _is_colorbar(cls, ax):
         """Determine whether an axes object is a colorbar"""
-        return not hasattr(ax, "get_subplotspec")
+        return not hasattr(ax, "get_subplotspec") or hasattr(ax, "_colorbar")
 
     def set_up_color_selector_toolbar_button(self, fig):
         # check if the action is already in the toolbar

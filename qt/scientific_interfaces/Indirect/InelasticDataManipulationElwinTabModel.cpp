@@ -8,9 +8,9 @@
 #include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QDoubleValidator>
@@ -42,7 +42,7 @@ void InelasticDataManipulationElwinTabModel::setupGroupAlgorithm(MantidQt::API::
                                                                  std::string const &inputGroupWsName) {
   auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
   groupWsAlg->initialize();
-  auto runtimeProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto runtimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   runtimeProps->setPropertyValue("InputWorkspaces", inputWorkspacesString);
   groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
   batchAlgoRunner->addAlgorithm(groupWsAlg, std::move(runtimeProps));
@@ -82,7 +82,7 @@ void InelasticDataManipulationElwinTabModel::setupElasticWindowMultiple(
   if (m_normalise) {
     elwinMultAlg->setProperty("OutputELT", eltWorkspace);
   }
-  auto runtimeProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto runtimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   runtimeProps->setPropertyValue("InputWorkspaces", inputGroupWsName);
   batchAlgoRunner->addAlgorithm(elwinMultAlg, std::move(runtimeProps));
 }

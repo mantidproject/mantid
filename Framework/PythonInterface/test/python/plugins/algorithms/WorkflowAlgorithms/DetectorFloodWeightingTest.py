@@ -51,7 +51,7 @@ class DetectorFloodWeightingTest(unittest.TestCase):
         bands = [1, 3, 2, 4]  # Overlap!
         alg.setProperty("Bands", bands)  # One band
         alg.setPropertyValue("OutputWorkspace", "dummy")
-        self.assertRaises(RuntimeError, alg.execute)
+        self.assertRaisesRegex(RuntimeError, "Bands must not intersect", alg.execute)
 
     def test_execute_single_no_solid_angle(self):
         alg = AlgorithmManager.create("DetectorFloodWeighting")

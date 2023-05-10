@@ -110,6 +110,7 @@ public:
   MOCK_METHOD1(setBinCount, void(double m_BinCount));
   MOCK_CONST_METHOD0(getGoniometerMatrix, Mantid::Kernel::Matrix<double>());
   MOCK_METHOD1(setGoniometerMatrix, void(const Mantid::Kernel::Matrix<double> &m_GoniometerMatrix));
+  MOCK_CONST_METHOD0(getDetectorID, int());
   MOCK_CONST_METHOD0(getRow, int());
   MOCK_CONST_METHOD0(getCol, int());
   MOCK_CONST_METHOD0(getL1, double());
@@ -117,6 +118,8 @@ public:
   MOCK_CONST_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape &());
   MOCK_METHOD1(setPeakShape, void(Mantid::Geometry::PeakShape *shape));
   MOCK_METHOD1(setPeakShape, void(Mantid::Geometry::PeakShape_const_sptr shape));
+  MOCK_CONST_METHOD0(getSourceDirectionSampleFrame, Mantid::Kernel::V3D());
+  MOCK_CONST_METHOD0(getDetectorDirectionSampleFrame, Mantid::Kernel::V3D());
 };
 } // namespace
 GNU_DIAG_ON_SUGGEST_OVERRIDE

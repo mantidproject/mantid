@@ -78,7 +78,6 @@ class SANSILLReduction(DataProcessorAlgorithm):
         return issues
 
     def PyInit(self):
-
         # ================================MAIN PARAMETERS================================#
         can_runs = EnabledWhenProperty("SampleWorkspace", PropertyCriterion.IsEqualTo, "")
 
@@ -318,7 +317,9 @@ class SANSILLReduction(DataProcessorAlgorithm):
         AddSampleLog(Workspace=ws, LogName="AcqMode", LogType="Number", NumberType="Int", LogText=str(int(self.mode)))
         self.log().notice(f"Set the acquisition mode to {self.mode}")
         if self.mode == AcqMode.KINETIC:
-            if self.process != "Sample" and self.process != "Transmission":
+            if self.process == "EmptyContainer":
+                SortXAxis(InputWorkspace=ws, OutputWorkspace=ws)
+            elif self.process != "Sample" and self.process != "Transmission":
                 raise RuntimeError("Only the sample and transmission can be kinetic measurements, the calibration measurements cannot.")
 
     def check_zero_monitor(self, mon_ws):
@@ -328,13 +329,11 @@ class SANSILLReduction(DataProcessorAlgorithm):
         """
         if np.sum(mtd[mon_ws].readY(0)) <= 0:
             raise RuntimeError(
-                "Normalise by monitor requested, \
-                                but the monitor spectrum has no positive counts, please switch to time normalization."
+                "Normalise by monitor requested, but the monitor spectrum has no positive counts, please switch to time normalization."
             )
         if np.any(mtd[mon_ws].readY(0) <= 0):
             self.log().error(
-                "Some bins in the monitor spectra have no positive counts, \
-                              please check the monitor data, or switch to time normalization."
+                "Some bins in the monitor spectra have no positive counts, please check the monitor data, or switch to time normalization."
             )
 
     # ==============================METHODS TO APPLY CORRECTIONS==============================#
@@ -500,6 +499,19 @@ class SANSILLReduction(DataProcessorAlgorithm):
                 DeleteWorkspace(can_ws_rebin)
             else:
                 check_wavelengths_match(mtd[can_ws], mtd[ws])
+                if mtd[can_ws].blocksize() > 1:  # kinetic/scan mode
+                    # if axes are widely inconsistent, then a warning is raised:
+                    check_axis_match(mtd[can_ws], mtd[ws])
+                    # whether they match or not, the X axis of the empty container is replaced by sample's one
+                    CreateWorkspace(
+                        DataX=mtd[ws].extractX(),
+                        DataY=mtd[can_ws].extractY(),
+                        DataE=mtd[can_ws].extractE(),
+                        ParentWorkspace=can_ws,
+                        OutputWorkspace=can_ws,
+                        NSpec=mtd[can_ws].getNumberHistograms(),
+                        UnitX=mtd[can_ws].getAxis(0).getUnit().unitID(),
+                    )
                 Minus(LHSWorkspace=ws, RHSWorkspace=can_ws, OutputWorkspace=ws)
 
     def apply_water(self, ws):
@@ -634,17 +646,30 @@ class SANSILLReduction(DataProcessorAlgorithm):
         run_ref = mtd[flat_ws].getRun()
         has_log = run.hasProperty("NormalisedByFlux")
         has_log_ref = run_ref.hasProperty("NormalisedByFlux")
-        if has_log != has_log_ref:
+
+        # Case where the "NormalisedByFlux" has been set to only in one of the flat field or the data
+        # Raise an error
+        if has_log ^ has_log_ref:
             raise RuntimeError(message)
-        if has_log and has_log_ref:
-            log_val = run["NormalisedByFlux"].value
-            log_val_ref = run_ref["NormalisedByFlux"].value
-            if log_val != log_val_ref:
+        # Case where the "NormalisedByFlux" property has been set to both flat field and data
+        # Check now the actual value of the property to decide whether or not to perform the rescaling
+        elif has_log and has_log_ref:
+            # Fetch the values of "NormalisedByFlux" property for both the data and flat field
+            log_val = run["NormalisedByFlux"].value == "True"
+            log_val_ref = run_ref["NormalisedByFlux"].value == "True"
+            # If those values are different raise an error
+            if log_val ^ log_val_ref:
                 raise RuntimeError(message)
-            elif not log_val:
+            # If both values are True, both flat field and data have been normalised then do nothing
+            elif log_val and log_val_ref:
+                return
+            # Otherwise do the rescaling
+            else:
                 self.do_rescale_flux(ws, flat_ws)
+        # Case where the "NormalisedByFlux" property has not been set to both flat field and data
+        # Do the rescaling
         else:
-            raise RuntimeError(message)
+            self.do_rescale_flux(ws, flat_ws)
 
     def do_rescale_flux(self, ws, flat_ws):
         """

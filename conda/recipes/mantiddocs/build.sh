@@ -29,6 +29,9 @@ function terminate_xvfb_sessions {
     fi
 }
 
+parent_dir="$(dirname "$RECIPE_DIR")"
+bash "${parent_dir}"/archive_env_logs.sh "$BUILD_PREFIX" "$PREFIX" 'mantiddocs'
+
 mkdir build
 cd build
 
@@ -50,8 +53,6 @@ cmake \
   -DCONDA_BUILD=True \
   -DCONDA_ENV=True \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
-  -DQt5_DIR=$BUILD_PREFIX/lib/cmake/qt5 \
-  -DCPACK_PACKAGE_SUFFIX="" \
   -GNinja \
   ../
 

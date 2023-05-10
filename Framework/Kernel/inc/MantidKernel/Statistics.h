@@ -15,7 +15,7 @@ namespace Math {
 /**
  * Maps a "statistic" to a number
  */
-enum StatisticType {
+enum StatisticType : int {
   FirstValue,
   LastValue,
   Minimum,

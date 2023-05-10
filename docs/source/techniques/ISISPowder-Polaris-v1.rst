@@ -77,6 +77,7 @@ The following may optionally be set.
 
 - :ref:`mode_polaris_isis-powder-diffraction-ref`
 - :ref:`multiple_scattering_polaris_isis-powder-diffraction-ref`
+- :ref:`per_detector_vanadium_polaris_isis_powder-diffraction-ref`
 
 Example
 =======
@@ -115,6 +116,7 @@ The following parameters may also be optionally set:
 - :ref:`suffix_polaris_isis-powder-diffraction-ref`
 - :ref:`empty_can_subtraction_method_isis-powder-diffraction-ref`
 - :ref:`paalman_pings_events_per_point_isis-powder-diffraction-ref`
+- :ref:`per_detector_vanadium_polaris_isis_powder-diffraction-ref`
 - :ref:`van_normalisation_method_isis-powder-diffraction-ref`
 
 
@@ -595,6 +597,26 @@ Example Input:
 
   polaris_example.focus(paalman_pings_events_per_point=10, ...)
 
+.. _per_detector_vanadium_polaris_isis_powder-diffraction-ref:
+
+per_detector_vanadium
+^^^^^^^^^^^^^^^^^^^^^
+
+Determines whether the Vanadium normalisation is performed at the detector level or the bank level. The default value is False (bank level).
+The parameter should be supplied to both the :ref:`create_vanadium_polaris_isis-powder-diffraction-ref` and :ref:`focus_polaris_isis-powder-diffraction-ref` methods (or supplied in the parameter list when creating the POLARIS object) if a reduction based on a per detector Vanadium normalisation is required.
+
+..  code-block:: python
+
+  from isis_powder import Polaris
+
+  calibration_dir = r"C:\path\to\calibration_dir"
+  output_dir = r"C:\path\to\output_dir"
+
+  polaris_example = Polaris(calibration_directory=calibration_dir,
+                            output_directory=output_dir,
+                            user_name="Mantid",
+                            per_detector_vanadium=True)
+
 .. _run_number_polaris_isis_powder-diffraction-ref:
 
 run_number
@@ -829,7 +851,7 @@ On POLARIS this is set to the following:
 
 spline_coefficient
 ^^^^^^^^^^^^^^^^^^
-Determines the spline coefficient to use after processing
+Determines the spline coefficient to use when processing
 the vanadium in :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
 method. For more details see :ref:`SplineBackground <algm-SplineBackground>`
 
@@ -841,6 +863,25 @@ On POLARIS this is set to the following:
 ..  code-block:: python
 
   spline_coefficient: 100
+
+.. _spline_coeff_per_detector_polaris_isis_powder-diffraction-ref:
+
+spline_coeff_per_detector
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Determines the spline coefficient to use when processing
+the vanadium in :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
+method. For more details see :ref:`SplineBackground <algm-SplineBackground>`.
+This parameter is used if a detector level Vanadium normalisation has been requested
+and is typically lower than :ref:`spline_coefficient_polaris_isis_powder-diffraction-ref`
+
+*Note that if this value is changed 'create_vanadium'
+will need to be called again.*
+
+On POLARIS this is set to the following:
+
+..  code-block:: python
+
+  spline_coeff_per_detector: 10
 
 
 .. _vanadium_cropping_values_polaris_isis-powder-diffraction-ref:

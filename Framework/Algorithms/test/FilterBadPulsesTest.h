@@ -11,6 +11,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAlgorithms/FilterBadPulses.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -45,6 +46,16 @@ public:
     this->setUp_Event();
     WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWS);
     TS_ASSERT(WS); // workspace is loaded
+
+    // DEBUG: remove these lines
+    auto l0 = WS->run().getProperty("proton_charge");
+    std::string s0 = l0->units();
+    auto tempWS = Mantid::DataObjects::create<EventWorkspace>(*WS);
+    auto l1 = tempWS->run().getProperty("proton_charge");
+    std::string s1 = l1->units();
+    auto l2 = tempWS->mutableRun().getProperty("proton_charge");
+    std::string s2 = l2->units();
+
     size_t start_num_events = WS->getNumberEvents();
     double start_proton_charge = WS->run().getProtonCharge();
     size_t num_sample_logs = WS->run().getProperties().size();

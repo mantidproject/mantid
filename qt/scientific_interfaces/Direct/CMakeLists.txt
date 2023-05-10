@@ -1,4 +1,5 @@
 set(SRC_FILES
+    ALFAlgorithmManager.cpp
     ALFAnalysisModel.cpp
     ALFAnalysisPresenter.cpp
     ALFAnalysisView.cpp
@@ -11,8 +12,16 @@ set(SRC_FILES
 
 set(MOC_FILES ALFAnalysisView.h ALFInstrumentView.h ALFInstrumentWidget.h ALFView.h)
 
-set(INC_FILES ALFAnalysisModel.h ALFAnalysisPresenter.h ALFInstrumentModel.h ALFInstrumentPresenter.h DetectorTube.h
-              DllConfig.h
+set(INC_FILES
+    ALFAlgorithmManager.h
+    ALFAnalysisModel.h
+    ALFAnalysisPresenter.h
+    ALFData.h
+    ALFInstrumentModel.h
+    ALFInstrumentPresenter.h
+    DetectorTube.h
+    DllConfig.h
+    IALFAlgorithmManagerSubscriber.h
 )
 
 # Target

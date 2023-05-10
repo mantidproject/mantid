@@ -37,43 +37,133 @@ class SANSILLAutoProcessTest(unittest.TestCase):
         self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462")
 
     def test_wrongAbsorberDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462", AbsorberRuns="010462,010462", OutputWorkspace="ws")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Wrong number of Absorber runs: 2. Provide one or as many as sample runs: 1.",
+            SANSILLAutoProcess,
+            SampleRuns="010462",
+            AbsorberRuns="010462,010462",
+            OutputWorkspace="ws",
+        )
 
     def test_wrongBeamDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462", BeamRuns="010462,010462", OutputWorkspace="ws")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Wrong number of Beam runs: 2. Provide one or as many as sample runs: 1.",
+            SANSILLAutoProcess,
+            SampleRuns="010462",
+            BeamRuns="010462,010462",
+            OutputWorkspace="ws",
+        )
 
     def test_wrongContainerDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462", ContainerRuns="010462,010462", OutputWorkspace="ws")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Wrong number of Container runs: 2. Provide one or as many as sample runs: 1.",
+            SANSILLAutoProcess,
+            SampleRuns="010462",
+            ContainerRuns="010462,010462",
+            OutputWorkspace="ws",
+        )
 
     def test_wrongMaskDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462", MaskFiles="010462,010462", OutputWorkspace="ws")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Wrong number of Mask runs: 2. Provide one or as many as sample runs: 1.",
+            SANSILLAutoProcess,
+            SampleRuns="010462",
+            MaskFiles="010462,010462",
+            OutputWorkspace="ws",
+        )
 
     def test_wrongReferenceDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462", ReferenceFiles="010462,010462", OutputWorkspace="ws")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Wrong number of Reference runs: 2. Provide one or as many as sample runs: 1.",
+            SANSILLAutoProcess,
+            SampleRuns="010462",
+            ReferenceFiles="010462,010462",
+            OutputWorkspace="ws",
+        )
 
-    def test_wrongSensivityDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462", SensitivityMaps="010462,010462", OutputWorkspace="ws")
+    def test_wrongSensitivityDim(self):
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Wrong number of Sensitivity runs: 2. Provide one or as many as sample runs: 1.",
+            SANSILLAutoProcess,
+            SampleRuns="010462",
+            SensitivityMaps="010462,010462",
+            OutputWorkspace="ws",
+        )
 
     def test_wrongFluxDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462", FluxRuns="010462,010462", OutputWorkspace="ws")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Wrong number of Flux runs: 2. Provide one or as many as sample runs: 1.",
+            SANSILLAutoProcess,
+            SampleRuns="010462",
+            FluxRuns="010462,010462",
+            OutputWorkspace="ws",
+        )
 
     def test_wrongParametersDim(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462", MaxQxy="1,1", OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462", DeltaQ="1,1", OutputWorkspace="ws")
-        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462", BeamRadius="1,1", OutputWorkspace="ws")
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Wrong number of MaxQxy values: 2. Provide one or as many as sample runs: 1.",
+            SANSILLAutoProcess,
+            SampleRuns="010462",
+            MaxQxy="1,1",
+            OutputWorkspace="ws",
+        )
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Wrong number of DeltaQ values: 2. Provide one or as many as sample runs: 1.",
+            SANSILLAutoProcess,
+            SampleRuns="010462",
+            DeltaQ="1,1",
+            OutputWorkspace="ws",
+        )
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Wrong number of BeamRadius values: 2. Provide one or as many as sample runs: 1.",
+            SANSILLAutoProcess,
+            SampleRuns="010462",
+            BeamRadius="1,1",
+            OutputWorkspace="ws",
+        )
 
     def test_wrongTransmissionDim(self):
-        self.assertRaises(
-            RuntimeError, SANSILLAutoProcess, SampleRuns="010462,010462", SampleTransmissionRuns="010462,010462", OutputWorkspace="ws"
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Wrong number of SampleTransmission runs: 2. Provide one or as many as sample runs: 1.",
+            SANSILLAutoProcess,
+            SampleRuns="010462",
+            SampleTransmissionRuns="010462,010462",
+            OutputWorkspace="ws",
         )
-        self.assertRaises(
-            RuntimeError, SANSILLAutoProcess, SampleRuns="010462,010462", ContainerTransmissionRuns="010462,010462", OutputWorkspace="ws"
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Wrong number of ContainerTransmission runs: 2. Provide one or as many as sample runs: 1.",
+            SANSILLAutoProcess,
+            SampleRuns="010462",
+            ContainerTransmissionRuns="010462,010462",
+            OutputWorkspace="ws",
         )
-        self.assertRaises(
-            RuntimeError, SANSILLAutoProcess, SampleRuns="010462,010462", TransmissionBeamRuns="010462,010462", OutputWorkspace="ws"
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Wrong number of TransmissionBeam runs: 2. Provide one or as many as sample runs: 1.",
+            SANSILLAutoProcess,
+            SampleRuns="010462",
+            TransmissionBeamRuns="010462,010462",
+            OutputWorkspace="ws",
         )
-        self.assertRaises(
-            RuntimeError, SANSILLAutoProcess, SampleRuns="010462,010462", TransmissionAbsorberRuns="010462,010462", OutputWorkspace="ws"
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Wrong number of TransmissionAbsorber runs: 2. Provide one or as many as sample runs: 1.",
+            SANSILLAutoProcess,
+            SampleRuns="010462",
+            TransmissionAbsorberRuns="010462,010462",
+            OutputWorkspace="ws",
         )
 
     def test_flux(self):

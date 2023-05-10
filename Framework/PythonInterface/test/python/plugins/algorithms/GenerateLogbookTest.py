@@ -12,7 +12,6 @@ from tempfile import gettempdir
 
 
 class GenerateLogbookTest(unittest.TestCase):
-
     _data_directory = None
 
     def setUp(self):
@@ -34,7 +33,7 @@ class GenerateLogbookTest(unittest.TestCase):
 
     def test_instrument_does_not_exist(self):
         self.assertTrue(os.path.exists(self._data_directory))
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "There is no parameter file for nonexistent instrument."):
             GenerateLogbook(Directory=self._data_directory, OutputWorkspace="__unused", Facility="ISIS", Instrument="nonexistent")
 
     def test_d7_default(self):

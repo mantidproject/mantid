@@ -8,6 +8,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/LogManager.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/SplittingInterval.h"
 
 #include <vector>
@@ -52,9 +53,6 @@ public:
 
   /// Filter the logs by time
   void filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop) override;
-  /// Split the logs based on the given intervals
-  void splitByTime(Kernel::SplittingIntervalVec &splitter, std::vector<LogManager *> outputs) const override;
-
   void setTimeROI(const Kernel::TimeROI &timeroi) override;
 
   /// Return an approximate memory size for the object in bytes
@@ -67,6 +65,9 @@ public:
   /// Integrate the proton charge over the whole run time - default log
   /// proton_charge
   void integrateProtonCharge(const std::string &logname = "proton_charge") const;
+
+  /// update property "duration" with the duration of the Run's TimeROI attribute
+  void setDuration();
 
   /// Store the given values as a set of histogram bin boundaries
   void storeHistogramBinBoundaries(const std::vector<double> &histoBins);

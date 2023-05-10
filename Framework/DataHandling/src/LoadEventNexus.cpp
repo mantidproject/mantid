@@ -415,6 +415,7 @@ void LoadEventNexus::execLoader() {
   // Load the detector events
   m_ws = std::make_shared<EventWorkspaceCollection>(); // Algorithm currently
                                                        // relies on an
+
   // object-level workspace ptr
   loadEvents(&prog, false); // Do not load monitor blocks
 
@@ -846,8 +847,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   setTimeFilters(monitors);
 
   // Get the log filter if provided
-  std::vector<std::string> allow_list = getProperty("AllowList");
-  std::vector<std::string> block_list = getProperty("BlockList");
+  std::vector<std::string> allow_list = getProperty("AllowList"); // if not empty, only these logs will be loaded
+  std::vector<std::string> block_list = getProperty("BlockList"); // if not empty, these logs won't be loaded
 
   // The run_start will be loaded from the pulse times.
   DateAndTime run_start(0, 0);
@@ -857,7 +858,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   int nPeriods = 1;
   auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
 
-  bool loadAllLogs = getProperty("LoadAllLogs");
+  bool loadAllLogs = getProperty("LoadAllLogs"); // load all logs, not just DAS logs.
 
   if (loadlogs) {
     if (!loadAllLogs) {

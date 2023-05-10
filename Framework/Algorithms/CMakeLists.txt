@@ -141,7 +141,6 @@ set(SRC_FILES
     src/FilterBadPulses.cpp
     src/FilterByLogValue.cpp
     src/FilterByTime.cpp
-    src/FilterByTime2.cpp
     src/FilterByXValue.cpp
     src/FilterEvents.cpp
     src/FindCenterOfMassPosition.cpp
@@ -486,7 +485,6 @@ set(INC_FILES
     inc/MantidAlgorithms/FilterBadPulses.h
     inc/MantidAlgorithms/FilterByLogValue.h
     inc/MantidAlgorithms/FilterByTime.h
-    inc/MantidAlgorithms/FilterByTime2.h
     inc/MantidAlgorithms/FilterByXValue.h
     inc/MantidAlgorithms/FilterEvents.h
     inc/MantidAlgorithms/FindCenterOfMassPosition.h
@@ -843,7 +841,6 @@ set(TEST_FILES
     FFTTest.h
     FilterBadPulsesTest.h
     FilterByLogValueTest.h
-    FilterByTime2Test.h
     FilterByTimeTest.h
     FilterByXValueTest.h
     FilterEventsTest.h

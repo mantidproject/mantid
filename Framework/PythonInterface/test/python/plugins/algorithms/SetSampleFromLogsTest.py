@@ -74,7 +74,7 @@ class SetSampleFromLogsTest(unittest.TestCase):
         environment = {"Name": "InAir"}
         geometry = {}
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "Resulting sample shape has volume of 0"):
             SetSampleFromLogs(InputWorkspace=wksp, Environment=environment, Material=material, Geometry=geometry)
 
         del wksp  # remove from the ADS

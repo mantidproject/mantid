@@ -32,7 +32,6 @@ class IPeaksWorkspace;
 }
 } // namespace Mantid
 
-class GLColor;
 class QGLWidget;
 class GL3DWidget;
 
@@ -62,8 +61,11 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW UnwrappedSurface : public ProjectionSurface {
   Q_OBJECT
 public:
-  explicit UnwrappedSurface(const InstrumentActor *rootActor, const QSize &widgetSize,
+  explicit UnwrappedSurface(const IInstrumentActor *rootActor, const QSize &widgetSize,
                             const bool maintainAspectRatio = true);
+  UnwrappedSurface()
+      : m_u_min(DBL_MAX), m_u_max(-DBL_MAX), m_v_min(DBL_MAX), m_v_max(-DBL_MAX), m_height_max(0), m_width_max(0),
+        m_flippedView(false), m_startPeakShapes(false), m_maintainAspectRatio(true){};
 
   /** @name Implemented public virtual methods */
   //@{
@@ -87,13 +89,13 @@ public:
    *object onto the tagent plane to the
    * surface at point (uv) and scaled along u and v by the corresponding factor.
    *
-   * @param pos :: A position of a 3D point.
+   * @param detIndex :: The index of a detector in detectorInfo\componentInfo
    * @param u (output) :: u-coordinate of the projection.
    * @param v (output) :: v-coordinate of the projection.
    * @param uscale (output) :: The scaling factor along the u-coordinate.
    * @param vscale (output) :: The scaling factor along the v-coordinate.
    */
-  virtual void project(const Mantid::Kernel::V3D &pos, double &u, double &v, double &uscale, double &vscale) const = 0;
+  virtual void project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) const = 0;
   //@}
 
   /** @name Public methods */
@@ -146,7 +148,7 @@ protected:
    * @param R :: The result rotaion.
    */
   virtual void rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const = 0;
-  virtual void calcUV(UnwrappedDetector &udet, Mantid::Kernel::V3D &pos);
+  virtual void calcUV(UnwrappedDetector &udet);
   virtual void calcSize(UnwrappedDetector &udet);
   virtual QString getDimInfo() const;
   /// Called in non-picking drawSimpleToImage to draw something other than

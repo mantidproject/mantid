@@ -1,1 +1,0 @@
-- Users can now double click on the SliceViewer plot axis to edit their limits more accurately.

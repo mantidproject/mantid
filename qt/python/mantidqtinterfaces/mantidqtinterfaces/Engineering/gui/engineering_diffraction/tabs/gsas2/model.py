@@ -14,12 +14,19 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 
+from typing import List
+
 from mantid.geometry import CrystalStructure, ReflectionGenerator, ReflectionConditionFilter
-from mantid.simpleapi import CreateWorkspace, LoadGSS, DeleteWorkspace, CreateEmptyTableWorkspace, logger
+from mantid.simpleapi import CreateWorkspace, LoadGSS, DeleteWorkspace, CreateEmptyTableWorkspace, Load, logger
 from mantid.api import AnalysisDataService as ADS
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2 import parse_inputs
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs import (
+    SampleLogsGroupWorkspace,
+    _generate_workspace_name,
+)
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.workspace_record import FittingWorkspaceRecordContainer
 
 
 class GSAS2Model(object):
@@ -53,6 +60,9 @@ class GSAS2Model(object):
         self.chosen_cell_lengths = None
         self.out_call_gsas2 = None
         self.err_call_gsas2 = None
+        self._data_workspaces = FittingWorkspaceRecordContainer()
+        self._suffix = "_GSASII"
+        self._sample_logs_workspace_group = SampleLogsGroupWorkspace(self._suffix)
         self.phase_names_list = None
 
     def clear_input_components(self):
@@ -174,6 +184,9 @@ class GSAS2Model(object):
         if self.refinement_method == "Pawley" and not self.mantid_pawley_reflections:
             logger.error("No Pawley Reflections were generated for the phases provided. Not calling GSAS-II.")
             return None
+        if not self.path_to_gsas2:
+            logger.error("The Path to GSAS2 setting is empty. " "Please provide a valid path in Engineering Diffraction Settings")
+            return None
         return True
 
     # ===============
@@ -267,6 +280,12 @@ class GSAS2Model(object):
                 f"GSAS-II call did not complete after {self.timeout} seconds, so it was"
                 f" aborted. Check the inputs, such as Refinement Method are correct. The"
                 f" timeout interval can be increased in the Engineering Diffraction Settings."
+            )
+            return None
+        except Exception as exc:
+            logger.error(
+                f"GSAS-II call failed with error: {str(exc)}. "
+                "Please check the Path to GSASII in the Engineering Diffraction Settings is valid"
             )
             return None
 
@@ -456,6 +475,7 @@ class GSAS2Model(object):
         found_basis = self.read_basis(phase_filepath)
         if not found_basis:
             return None
+        mantid_pawley_reflections = None
         try:
             mantid_pawley_reflections = self.create_pawley_reflections(cell_lengths, space_group, found_basis)
         except ValueError:
@@ -798,40 +818,151 @@ class GSAS2Model(object):
         if test:
             return table
 
+    # ===========
+    # Sample Logs
+    # ===========
+
+    def load_focused_nxs_for_logs(self, filenames):
+        if len(filenames) == 1 and "all_banks" in filenames[0]:
+            filenames = [filenames[0].replace("all_banks", "bank_1"), filenames[0].replace("all_banks", "bank_2")]
+        for filename in filenames:
+            filename = filename.replace(".gss", ".nxs")
+            ws_name = _generate_workspace_name(filename, self._suffix)
+            if ws_name not in self._data_workspaces.get_loaded_workpace_names():
+                try:
+                    ws = Load(filename, OutputWorkspace=ws_name)
+                    if ws.getNumberHistograms() == 1:
+                        self._data_workspaces.add(ws_name, loaded_ws=ws)
+                    else:
+                        logger.warning(f"Invalid number of spectra in workspace {ws_name}. Skipping loading of file.")
+                except RuntimeError as e:
+                    logger.error(f"Failed to load file: {filename}. Error: {e}. \n Continuing loading of other files.")
+            else:
+                logger.warning(f"File {ws_name} has already been loaded")
+        self._sample_logs_workspace_group.update_log_workspace_group(self._data_workspaces)
+
+    def update_sample_log_workspace_group(self):
+        self._sample_logs_workspace_group.update_log_workspace_group(self._data_workspaces)
+
+    def get_all_workspace_names(self):
+        return self._data_workspaces.get_loaded_workpace_names() + self._data_workspaces.get_bgsub_workpace_names()
+
+    def get_log_workspaces_name(self):
+        current_log_workspaces = self._sample_logs_workspace_group.get_log_workspaces()
+        return [ws.name() for ws in current_log_workspaces] if current_log_workspaces else ""
+
+    def set_log_workspaces_none(self):
+        # to be used in the event of Ads clear, as trying to reference the deleted grp ws results in an error
+        self._sample_logs_workspace_group.clear_log_workspaces()
+
+    # handle ADS remove. name workspace has already been deleted
+    def remove_workspace(self, name):
+        ws_loaded = self._data_workspaces.get(name, None)
+        if ws_loaded:
+            bgsub_ws_name = self._data_workspaces[name].bgsub_ws_name
+            removed = self._data_workspaces.pop(name).loaded_ws
+            # deleting bg sub workspace will generate further remove_workspace event so ensure this is done after
+            # removing record from _data_workspaces to avoid circular call
+            if bgsub_ws_name:
+                DeleteWorkspace(bgsub_ws_name)
+            self.update_sample_log_workspace_group()
+            return removed
+        else:
+            ws_loaded_name = self._data_workspaces.get_loaded_workspace_name_from_bgsub(name)
+            if ws_loaded_name:
+                removed = self._data_workspaces[ws_loaded_name].bgsub_ws
+                self._data_workspaces[ws_loaded_name].bgsub_ws = None
+                self._data_workspaces[ws_loaded_name].bgsub_ws_name = None
+                self._data_workspaces[ws_loaded_name].bg_params = []
+                return removed
+
+    def replace_workspace(self, name, workspace):
+        self._data_workspaces.replace_workspace(name, workspace)
+
+    def update_workspace_name(self, old_name, new_name):
+        if new_name not in self.get_all_workspace_names():
+            self._data_workspaces.rename(old_name, new_name)
+            current_log_values = self._sample_logs_workspace_group.get_log_values()
+            if old_name in current_log_values:
+                self._sample_logs_workspace_group.update_log_value(new_key=new_name, old_key=old_name)
+        else:
+            logger.warning(f"There already exists a workspace with name {new_name}.")
+            self.update_sample_log_workspace_group()
+
+    # handle ADS clear
+    def clear_workspaces(self):
+        self._data_workspaces.clear()
+        self.set_log_workspaces_none()
+
+    def delete_workspaces(self):
+        current_log_workspaces = self._sample_logs_workspace_group.get_log_workspaces()
+        if current_log_workspaces:
+            ws_name = current_log_workspaces.name()
+            self._sample_logs_workspace_group.clear_log_workspaces()
+            DeleteWorkspace(ws_name)
+        removed_ws_list = []
+        for ws_name in self._data_workspaces.get_loaded_workpace_names():
+            removed_ws_list.extend(self.delete_workspace(ws_name))
+        return removed_ws_list
+
+    def delete_workspace(self, loaded_ws_name):
+        removed = self._data_workspaces.pop(loaded_ws_name)
+        removed_ws_list = [removed.loaded_ws]
+        DeleteWorkspace(removed.loaded_ws)
+        if removed.bgsub_ws:
+            DeleteWorkspace(removed.bgsub_ws)
+            removed_ws_list.append(removed.bgsub_ws)
+            self.update_sample_log_workspace_group()
+        return removed_ws_list
+
     # =========
     # Plotting
     # =========
 
     def plot_result(self, index_histograms, axis):
         gsas_histogram_workspace, reflections = self.load_result_for_plot(index_histograms)
-        plot_window_title = self.plot_gsas_histogram(axis, gsas_histogram_workspace, reflections, index_histograms, self.data_files)
+        plot_window_title = self.plot_gsas_histogram(axis, gsas_histogram_workspace, reflections, index_histograms)
         return plot_window_title
 
-    def plot_gsas_histogram(self, axis, gsas_histogram, reflection_positions, histogram_index, data_file_list):
+    def plot_gsas_histogram(self, axis, gsas_histogram, reflection_positions, histogram_index):
         axis.plot(gsas_histogram, color="#1105f0", label="observed", linestyle="None", marker="+", wkspIndex=0)
         axis.plot(gsas_histogram, color="#246b01", label="calculated", wkspIndex=1)
         axis.plot(gsas_histogram, color="#09acb8", label="difference", wkspIndex=2)
         axis.plot(gsas_histogram, color="#ff0000", label="background", wkspIndex=3)
         _, y_max = axis.get_ylim()
-        if reflection_positions:
-            axis.plot(
-                reflection_positions,
-                [-0.10 * y_max] * len(reflection_positions),
-                color="#1105f0",
-                label="reflections",
-                linestyle="None",
-                marker="|",
-                mew=1.5,
-                ms=8,
-            )
+
+        reflection_labels = self._create_reflection_labels(reflection_positions)
+
+        for i_phase, positions in enumerate(reflection_positions):
+            if len(positions) > 0:
+                y_offset_positions = [(i_phase + 1) * -0.05 * y_max] * len(positions)
+                axis.plot(
+                    positions,
+                    y_offset_positions,
+                    label=reflection_labels[i_phase],
+                    linestyle="None",
+                    marker="|",
+                    mew=1.5,
+                    ms=8,
+                )
         axis.set_xlabel("Time-of-flight ($\\mu s$)")
         axis.set_ylabel("Normalized Intensity")
         plt.show()
 
         input_file_name = ""
-        if data_file_list:
-            if len(data_file_list) == 1:
-                input_file_name = os.path.basename(data_file_list[0])
+        if self.data_files:
+            if len(self.data_files) == 1:
+                input_file_name = os.path.basename(self.data_files[0])
             else:
-                input_file_name = os.path.basename(data_file_list[histogram_index - 1])
+                input_file_name = os.path.basename(self.data_files[histogram_index - 1])
         return "GSAS-II Refinement " + input_file_name
+
+    def _create_reflection_labels(self, reflection_positions: List[np.array]) -> List[str]:
+        """Create the labels used to identify different phase reflection lists
+        The primary format, if the number of phase names equals the number of positions, is 'reflections_{phase_name}'
+        The fallback format is 'reflections_phase_{index}' where index starts at 1
+        """
+        reflection_labels = [f"reflections_{phase_name}" for phase_name in self.phase_names_list]
+        if len(reflection_labels) != len(reflection_positions):
+            return [f"reflections_phase_{i}" for i in range(1, len(reflection_positions) + 1)]
+        return reflection_labels

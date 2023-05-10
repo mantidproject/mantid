@@ -11,6 +11,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 
@@ -39,6 +41,43 @@ private:
   int NUMBINS;
   int BIN_DELTA;
   int MAX_PULSE_TIME;
+
+  /**
+   * Helper function to generate a list of events.
+   *
+   * `eventsPerPulse` are spaced equally throughout `pulsePeriod`.
+   *
+   * The starting time is const DateAndTime TWO("2023-01-01T12:00:00")
+   *
+   * @param pulsePeriod : time span of a pulse, in seconds
+   * @param nPulses : number of consecutive pulses
+   * @param eventsPerPulse : number of events
+   * @param eventType : one of enum EventType {TOF, WEIGHTED, WEIGHTED_NOTIME}
+   */
+  EventList generateEvents(const DateAndTime &startTime, double pulsePeriod, size_t nPulses, size_t eventsPerPulse,
+                           EventType eventType = EventType::TOF) {
+    UNUSED_ARG(eventsPerPulse);
+    static constexpr int64_t nanosecInsec{1000000000};
+    static constexpr double microsecInsec{1000000.0};
+    int64_t pulsePeriodInNanosec = static_cast<int64_t>(pulsePeriod * nanosecInsec);
+    // time between consecutive events, in microseconds.
+    double eventPeriod = (pulsePeriod * microsecInsec) / static_cast<double>(eventsPerPulse);
+    // loop over each pulse
+    auto events = EventList();
+    DateAndTime currentPulseTime{startTime};
+    for (size_t iPulse = 0; iPulse < nPulses; iPulse++) {
+      // instantiate each event in the current pulse
+      double tof{0.0};
+      for (size_t iEvent = 0; iEvent < eventsPerPulse; iEvent++) {
+        auto event = TofEvent(tof, currentPulseTime);
+        events.addEventQuickly(event);
+        tof += eventPeriod;
+      }
+      currentPulseTime += pulsePeriodInNanosec;
+    }
+    events.switchTo(eventType);
+    return events;
+  }
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -1344,6 +1383,50 @@ public:
     TS_ASSERT_EQUALS(times[2].totalNanoseconds(), 2);
   }
 
+  void test_getPulseTOFTimes() {
+    const DateAndTime startTime{"2023-01-01T12:00:00"};
+    const double pulsePeriod{60.0}; // in seconds
+    const size_t nPulses{2};
+    const size_t eventsPerPulse{3};
+    // event list with two pulses, each pulse containing three equally spaced events.
+    EventList el = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse);
+    std::vector<DateAndTime> times = el.getPulseTOFTimes();
+    std::vector<std::string> dates;
+    std::transform(times.cbegin(), times.cend(), std::back_inserter(dates),
+                   [](const DateAndTime &time) { return time.toSimpleString(); });
+    TS_ASSERT_EQUALS(dates[0], "2023-Jan-01 12:00:00");
+    TS_ASSERT_EQUALS(dates[1], "2023-Jan-01 12:00:20");
+    TS_ASSERT_EQUALS(dates[2], "2023-Jan-01 12:00:40");
+    TS_ASSERT_EQUALS(dates[3], "2023-Jan-01 12:01:00");
+    TS_ASSERT_EQUALS(dates[4], "2023-Jan-01 12:01:20");
+    TS_ASSERT_EQUALS(dates[5], "2023-Jan-01 12:01:40");
+  }
+
+  /**
+   *
+   * @param factor
+   * @param shift
+   */
+  void test_getPulseTOFTimesAtSample() {
+    const DateAndTime startTime{"2023-01-01T12:00:00"};
+    const double pulsePeriod{60.0}; // in seconds
+    const size_t nPulses{2};
+    const size_t eventsPerPulse{3};
+    // event list with two pulses, each pulse containing three equally spaced events.
+    EventList el = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse);
+    const double factor{0.5};
+    const double shift{3000000}; // three seconds in units of microseconds
+    std::vector<DateAndTime> times = el.getPulseTOFTimesAtSample(factor, shift);
+    std::vector<std::string> dates;
+    std::transform(times.cbegin(), times.cend(), std::back_inserter(dates),
+                   [](const DateAndTime &time) { return time.toSimpleString(); });
+    TS_ASSERT_EQUALS(dates[0], "2023-Jan-01 12:00:03");
+    TS_ASSERT_EQUALS(dates[1], "2023-Jan-01 12:00:13");
+    TS_ASSERT_EQUALS(dates[2], "2023-Jan-01 12:00:23");
+    TS_ASSERT_EQUALS(dates[3], "2023-Jan-01 12:01:03");
+    TS_ASSERT_EQUALS(dates[4], "2023-Jan-01 12:01:13");
+    TS_ASSERT_EQUALS(dates[5], "2023-Jan-01 12:01:23");
+  }
   //-----------------------------------------------------------------------------------------------
   void test_convertTof_allTypes() {
     // Go through each possible EventType as the input
@@ -1742,6 +1825,46 @@ public:
     }
   }
 
+  void test_filterByPulseTime_withTimeROI() {
+    // Go through each possible EventType (except the no-time one) as the input
+    for (int this_type = 0; this_type < 3; this_type++) {
+      EventType curType = static_cast<EventType>(this_type);
+      this->fake_data();
+      el.switchTo(curType);
+
+      // Filter into this
+      EventList *out = new EventList();
+      // Manually set a sort mode to verify it has switched
+      out->setSortOrder(Mantid::DataObjects::TOF_SORT);
+      Kernel::TimeROI *timeRoi = nullptr;
+      TS_ASSERT_THROWS(el.filterByPulseTime(timeRoi, out), const std::invalid_argument &);
+      timeRoi = new Kernel::TimeROI();
+      timeRoi->addROI(100, 200);
+      timeRoi->addROI(250, 300);
+      if (curType == WEIGHTED_NOTIME) {
+        TS_ASSERT_THROWS(el.filterByPulseTime(timeRoi, out), const std::runtime_error &);
+      } else {
+        TS_ASSERT_THROWS_NOTHING(el.filterByPulseTime(timeRoi, out));
+
+        int numGood = 0;
+        for (std::size_t i = 0; i < el.getNumberEvents(); i++)
+          if (((el.getEvent(i).pulseTime() >= 100) && (el.getEvent(i).pulseTime() < 200)) ||
+              ((el.getEvent(i).pulseTime() >= 250) && (el.getEvent(i).pulseTime() < 300)))
+            numGood++;
+
+        // Good # of events.
+        TS_ASSERT_EQUALS(numGood, out->getNumberEvents());
+        TS_ASSERT_EQUALS(curType, out->getEventType());
+
+        for (std::size_t i = 0; i < out->getNumberEvents(); i++) {
+          // Check that the times are within the given limits.
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100), out->getEvent(i).pulseTime());
+          TS_ASSERT_LESS_THAN(out->getEvent(i).pulseTime(), DateAndTime(300));
+        }
+      }
+    }
+  }
+
   /**
    * Helper method to calculate the epoch time in nanoseconds of the event at
    * the sample. Assuming elastic scattering.
@@ -1883,79 +2006,18 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
-  void test_splitByTime_allTypes() {
-    // Go through each possible EventType as the input
-    for (int this_type = 0; this_type < 3; this_type++) {
-      EventType curType = static_cast<EventType>(this_type);
-      this->fake_data_only_two_times(150, 850);
-      el.switchTo(curType);
-
-      std::vector<EventList *> outputs;
-      for (size_t i = 0; i < 10; i++)
-        outputs.emplace_back(new EventList());
-
-      SplittingIntervalVec split;
-      // Slices of 100
-      for (int i = 0; i < 10; i++)
-        split.emplace_back(SplittingInterval(i * 100, (i + 1) * 100, i));
-
-      if (curType == WEIGHTED_NOTIME) {
-        // Error cause no time
-        TS_ASSERT_THROWS(el.splitByTime(split, outputs), const std::runtime_error &);
-      } else {
-        // Do the splitting
-        TS_ASSERT_THROWS_NOTHING(el.splitByTime(split, outputs););
-
-        TS_ASSERT_EQUALS(outputs[0]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[1]->getNumberEvents(), 1);
-        TS_ASSERT_EQUALS(outputs[2]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[3]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[4]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[5]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[6]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[7]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[8]->getNumberEvents(), 1);
-        TS_ASSERT_EQUALS(outputs[9]->getNumberEvents(), 0);
-
-        TS_ASSERT_EQUALS(outputs[0]->getEventType(), curType);
-      }
-
-      for (size_t i = 0; i < 10; i++)
-        delete outputs[i];
-    }
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  void test_splitByTime_FilterWithOverlap() {
-    this->fake_uniform_time_data();
-
-    std::vector<EventList *> outputs(1, new EventList());
-
-    SplittingIntervalVec split;
-    split.emplace_back(SplittingInterval(100, 200, 0));
-    split.emplace_back(SplittingInterval(150, 250, 0));
-
-    // Do the splitting
-    el.splitByTime(split, outputs);
-
-    // No events in the first ouput 0-99
-    TS_ASSERT_EQUALS(outputs.front()->getNumberEvents(), 150);
-    delete outputs.front();
-  }
-
-  //-----------------------------------------------------------------------------------------------
   void do_testSplit_FilterInPlace(bool weighted) {
     this->fake_uniform_time_data();
     if (weighted)
       el *= 3.0;
 
-    SplittingIntervalVec split;
-    split.emplace_back(SplittingInterval(100, 200, 0));
-    split.emplace_back(SplittingInterval(150, 250, 0));
-    split.emplace_back(SplittingInterval(300, 350, 0));
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(100, 200);
+    timeRoi->addROI(150, 250);
+    timeRoi->addROI(300, 350);
 
     // Do the splitting
-    el.filterInPlace(split);
+    el.filterInPlace(timeRoi);
 
     // 100-249; 300-349 are in the output, everything else is gone.
     TS_ASSERT_EQUALS(el.getNumberEvents(), 200);
@@ -1981,11 +2043,11 @@ public:
     if (weighted)
       el.switchTo(WEIGHTED);
 
-    SplittingIntervalVec split;
-    split.emplace_back(SplittingInterval(1500, 1700, 0));
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(1500, 1700);
 
     // Do the splitting
-    el.filterInPlace(split);
+    el.filterInPlace(timeRoi);
 
     // Nothing left
     TS_ASSERT_EQUALS(el.getNumberEvents(), 0);
@@ -1997,11 +2059,11 @@ public:
     if (weighted)
       el *= 3.0;
 
-    SplittingIntervalVec split;
-    split.emplace_back(SplittingInterval(-10, 1700, 0));
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(-10, 1700);
 
     // Do the splitting
-    el.filterInPlace(split);
+    el.filterInPlace(timeRoi);
 
     // Nothing left
     TS_ASSERT_EQUALS(el.getNumberEvents(), 1000);
@@ -2022,8 +2084,21 @@ public:
   void test_filterInPlace_notime_throws() {
     this->fake_uniform_time_data();
     el.switchTo(WEIGHTED_NOTIME);
-    SplittingIntervalVec split;
-    TS_ASSERT_THROWS(el.filterInPlace(split), const std::runtime_error &)
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(0, 100);
+    TS_ASSERT_THROWS(el.filterInPlace(timeRoi), const std::runtime_error &)
+  }
+
+  void test_filterInPlace_emptyROI_throws() {
+    this->fake_uniform_time_data();
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    TS_ASSERT_THROWS(el.filterInPlace(timeRoi), const std::invalid_argument &)
+  }
+
+  void test_filterInPlace_nullptr_throws() {
+    this->fake_uniform_time_data();
+    Kernel::TimeROI *timeRoi = nullptr;
+    TS_ASSERT_THROWS(el.filterInPlace(timeRoi), const std::runtime_error &)
   }
 
   //----------------------------------------------------------------------------------------------

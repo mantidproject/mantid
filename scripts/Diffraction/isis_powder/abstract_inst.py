@@ -48,17 +48,27 @@ class AbstractInst(object):
     def user_name(self):
         return self._user_name
 
-    def _create_vanadium(self, run_number_string, do_absorb_corrections):
+    def _create_vanadium(self, run_number_string, do_absorb_corrections, do_spline=True, per_detector=False):
         """
         Creates a vanadium calibration - should be called by the concrete instrument
         :param run_number_string : The user input string for any run within the cycle
         to help us determine the correct vanadium to create later
         :param do_absorb_corrections: Set to true if absorption corrections should be applied
+        :param per_detector: Whether the Vanadium correction will be done per detector or per bank
         :return: d_spacing focused vanadium group
         """
         self._is_vanadium = True
         run_details = self._get_run_details(run_number_string)
-        return calibrate.create_van(instrument=self, run_details=run_details, absorb=do_absorb_corrections)
+
+        if per_detector:
+            return calibrate.create_van_per_detector(instrument=self, run_details=run_details, absorb=do_absorb_corrections)
+
+        return calibrate.create_van(
+            instrument=self,
+            run_details=run_details,
+            absorb=do_absorb_corrections,
+            spline=do_spline,
+        )
 
     def _focus(
         self,
@@ -76,7 +86,7 @@ class AbstractInst(object):
         :return:
         """
         self._is_vanadium = False
-        return focus.focus(
+        focused_runs = focus.focus(
             run_number_string=run_number_string,
             perform_vanadium_norm=do_van_normalisation,
             instrument=self,
@@ -85,6 +95,18 @@ class AbstractInst(object):
             empty_can_subtraction_method=empty_can_subtraction_method,
             paalman_pings_events_per_point=paalman_pings_events_per_point,
         )
+
+        return self._output_focused_runs(focused_runs, run_number_string)
+
+    def _output_focused_runs(self, focused_runs, run_number_string):
+        run_details = self._get_run_details(run_number_string)
+        for focused_run in focused_runs:
+            d_spacing_group, tof_group = self._output_focused_ws(focused_run, run_details=run_details)
+            common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group, unit_to_keep=self._get_unit_to_keep())
+
+            common.remove_intermediate_workspace(focused_run)
+
+        return d_spacing_group
 
     def mask_prompt_pulses_if_necessary(self, ws_list):
         """
@@ -123,6 +145,25 @@ class AbstractInst(object):
         produce a differential cross section
         """
         return False
+
+    def apply_drange_cropping(self, run_number_string, focused_ws):
+        """
+        Apply dspacing range cropping to a focused workspace. It is now only used with OSIRIS script
+        :param run_number_string: The run number to look up for the drange
+        :param focused_ws: The workspace to be cropped
+        :return: The cropped workspace in its drange
+        """
+
+        return focused_ws
+
+    def get_vanadium_path(self, run_details):
+        """
+        Get the vanadium path from the run details
+        :param run_details: The run details of the run number
+        :return: the vanadium path
+        """
+
+        return run_details.splined_vanadium_file_path
 
     # Mandatory overrides
 
@@ -181,9 +222,57 @@ class AbstractInst(object):
         if self._inst_settings.masking_file_name is not None:
             masking_file_path = os.path.join(self.calibration_dir, self._inst_settings.masking_file_name)
             bragg_mask_list = common.read_masking_file(masking_file_path)
-            focused_vanadium_banks = common.apply_bragg_peaks_masking(focused_vanadium_banks, mask_list=bragg_mask_list)
+            focused_vanadium_banks = common.apply_bragg_peaks_masking(focused_vanadium_banks, x_values_to_mask_list=bragg_mask_list)
         output = common.spline_workspaces(focused_vanadium_spectra=focused_vanadium_banks, num_splines=self._inst_settings.spline_coeff)
         return output
+
+    def _spline_vanadium_ws_per_detector(self, vanadium_ws, grouping_file_path):
+        """
+        Fits a spline to each of the spectra in the supplied vanadium workspace. Used for per detector V corrections
+        :param vanadium_ws: workspace that splines will be fitted to
+        :param grouping_file_path: path to the grouping file
+        :return: The splined vanadium workspace
+        """
+        if self._inst_settings.masking_file_name is not None:
+            masking_file_path = os.path.join(self.calibration_dir, self._inst_settings.masking_file_name)
+            cal_workspace = mantid.LoadCalFile(
+                InputWorkspace=vanadium_ws,
+                CalFileName=grouping_file_path,
+                Workspacename="cal_workspace",
+                MakeOffsetsWorkspace=False,
+                MakeMaskWorkspace=False,
+                MakeGroupingWorkspace=True,
+            )
+            det_ids_on_bank_to_mask = {}
+            for ws_index in range(cal_workspace.getNumberHistograms()):
+                grouping = cal_workspace.dataY(ws_index)[0]
+                if grouping > 0:
+                    det_id = cal_workspace.getDetectorIDs(ws_index)[0]
+                    if grouping in det_ids_on_bank_to_mask:
+                        det_ids_on_bank_to_mask[grouping].append(det_id)
+                    else:
+                        det_ids_on_bank_to_mask[grouping] = [det_id]
+            bragg_mask_list = common.read_masking_file(masking_file_path)
+            for bank_number, peaks_on_bank in enumerate(bragg_mask_list, 1):
+                ws_indices_on_bank_to_mask = []
+                for workspace_index in range(vanadium_ws.getNumberHistograms()):
+                    det_id = vanadium_ws.getSpectrum(workspace_index).getDetectorIDs()[0]
+                    if bank_number in det_ids_on_bank_to_mask:
+                        if det_id in det_ids_on_bank_to_mask[bank_number]:
+                            ws_indices_on_bank_to_mask.append(workspace_index)
+                common.apply_bragg_peaks_masking([vanadium_ws], [peaks_on_bank], ws_indices_on_bank_to_mask)
+            common.remove_intermediate_workspace(cal_workspace)
+
+        vanadium_ws = mantid.ConvertUnits(InputWorkspace=vanadium_ws, Target="TOF", OutputWorkspace=vanadium_ws)
+        vanadium_ws = mantid.SplineBackground(
+            InputWorkspace=vanadium_ws,
+            WorkspaceIndex=0,
+            EndWorkspaceIndex=vanadium_ws.getNumberHistograms() - 1,
+            NCoeff=self._inst_settings.spline_coeff_per_detector,
+            OutputWorkspace=vanadium_ws,
+            EnableLogging=False,
+        )
+        return vanadium_ws
 
     def _crop_banks_to_user_tof(self, focused_banks):
         """
@@ -317,9 +406,9 @@ class AbstractInst(object):
         """
         output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
         output_directory = os.path.abspath(os.path.expanduser(output_directory))
-        dat_files_directory = output_directory
+        xye_files_directory = output_directory
         if self._inst_settings.dat_files_directory:
-            dat_files_directory = os.path.join(output_directory, self._inst_settings.dat_files_directory)
+            xye_files_directory = os.path.join(output_directory, self._inst_settings.dat_files_directory)
 
         file_type = "" if run_details.file_extension is None else run_details.file_extension.lstrip(".")
         out_file_names = {"output_folder": output_directory}
@@ -334,18 +423,21 @@ class AbstractInst(object):
         }
         format_options = self._add_formatting_options(format_options)
 
-        output_formats = {
-            "nxs_filename": output_directory,
-            "gss_filename": output_directory,
-            "tof_xye_filename": dat_files_directory,
-            "dspacing_xye_filename": dat_files_directory,
-        }
+        output_formats = self._get_output_formats(output_directory, xye_files_directory)
         for key, output_dir in output_formats.items():
             filepath = os.path.join(output_dir, getattr(self._inst_settings, key).format(**format_options))
             out_file_names[key] = filepath
 
         out_file_names["output_name"] = os.path.splitext(os.path.basename(out_file_names["nxs_filename"]))[0]
         return out_file_names
+
+    def _get_output_formats(self, output_directory, xye_files_directory):
+        return {
+            "nxs_filename": output_directory,
+            "gss_filename": output_directory,
+            "tof_xye_filename": xye_files_directory,
+            "dspacing_xye_filename": xye_files_directory,
+        }
 
     def _generate_inst_filename(self, run_number, file_ext):
         if isinstance(run_number, list):
@@ -363,3 +455,6 @@ class AbstractInst(object):
         :return: format_options as it is passed in
         """
         return format_options
+
+    def apply_additional_per_detector_corrections(self, input_workspace, sample_details, run_details):
+        return input_workspace

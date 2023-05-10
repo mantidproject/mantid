@@ -49,7 +49,7 @@ QRectF getArea(const UnwrappedDetector &udet, double maxWidth, double maxHeight)
  * Constructor.
  * @param rootActor :: The instrument actor.
  */
-UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor, const QSize &widgetSize,
+UnwrappedSurface::UnwrappedSurface(const IInstrumentActor *rootActor, const QSize &widgetSize,
                                    const bool maintainAspectRatio)
     : ProjectionSurface(rootActor), m_u_min(DBL_MAX), m_u_max(-DBL_MAX), m_v_min(DBL_MAX), m_v_max(-DBL_MAX),
       m_height_max(0), m_width_max(0), m_flippedView(false), m_startPeakShapes(false), m_widgetSize(widgetSize),
@@ -495,19 +495,21 @@ QRect UnwrappedSurface::detectorQRectInPixels(const std::size_t detectorIndex) c
     return QRect();
   }
 
+  const auto expandedViewRect = correctForAspectRatioAndZoom(m_viewImage->width(), m_viewImage->height());
+
   const QSizeF viewSizeLogical(m_viewImage->width() / m_viewImage->devicePixelRatio(),
                                m_viewImage->height() / m_viewImage->devicePixelRatio());
   const double vwidth = viewSizeLogical.width();
   const double vheight = viewSizeLogical.height();
-  const double dw = fabs(m_viewRect.width() / vwidth);
-  const double dh = fabs(m_viewRect.height() / vheight);
+  const double dw = fabs(expandedViewRect.width() / vwidth);
+  const double dh = fabs(expandedViewRect.height() / vheight);
 
   const auto detRect = detIter->toQRectF();
 
   // Calculate the centre position of the QRect. The x position will be different depending on if the view is flipped
-  const auto xCentre =
-      m_flippedView ? (m_viewRect.x0() - detRect.center().x()) / dw : (detRect.center().x() - m_viewRect.x0()) / dw;
-  const auto yCentre = (detRect.center().y() - m_viewRect.y0()) / dh;
+  const auto xCentre = m_flippedView ? (expandedViewRect.x0() - detRect.center().x()) / dw
+                                     : (detRect.center().x() - expandedViewRect.x0()) / dw;
+  const auto yCentre = (detRect.center().y() - expandedViewRect.y0()) / dh;
 
   // Calculate the width and height of the QRect
   const auto size = QSize(static_cast<int>(detRect.width() / dw), static_cast<int>(detRect.height() / dh));
@@ -664,8 +666,8 @@ void UnwrappedSurface::zoom() {
  * @param udet :: detector to unwrap.
  * @param pos :: detector position relative to the sample origin
  */
-void UnwrappedSurface::calcUV(UnwrappedDetector &udet, Mantid::Kernel::V3D &pos) {
-  this->project(pos, udet.u, udet.v, udet.uscale, udet.vscale);
+void UnwrappedSurface::calcUV(UnwrappedDetector &udet) {
+  this->project(udet.detIndex, udet.u, udet.v, udet.uscale, udet.vscale);
   calcSize(udet);
 }
 

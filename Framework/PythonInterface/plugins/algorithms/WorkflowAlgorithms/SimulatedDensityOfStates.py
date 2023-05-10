@@ -26,7 +26,6 @@ PEAK_WIDTH_ENERGY_FLAG = "energy"
 
 
 class SimulatedDensityOfStates(PythonAlgorithm):
-
     _spec_type = None
     _peak_func = None
     _out_ws_name = None
@@ -439,7 +438,10 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             peak_widths = np.abs(peak_widths)
             logger.debug("Peak widths: %s" % (str(peak_widths)))
         else:
-            single_val = np.array([float(self._peak_width)])
+            try:
+                single_val = np.array([float(self._peak_width)])
+            except ValueError:
+                raise ValueError('Invalid peak width function (must be either a decimal or function containing "energy")')
             peak_widths = np.repeat(single_val, len(peaks))
 
         if self._peak_func == "Gaussian":

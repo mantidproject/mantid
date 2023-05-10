@@ -44,7 +44,7 @@ class FitGaussianTest(unittest.TestCase):
     def test_errors(self):
         """Conditions that raise RuntimeError."""
         self._linearWorkspace(0)
-        self.assertRaises(RuntimeError, FitGaussian, Workspace=self.ws, Index=1)
+        self.assertRaisesRegex(RuntimeError, "Index 1 is out of range", FitGaussian, Workspace=self.ws, Index=1)
 
     def test_noFit(self):
         """Cases where fit is not possible."""

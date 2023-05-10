@@ -114,7 +114,6 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
         CompareWorkspaces(self._corrected_flat_plate, corrected, Tolerance=1e-6)
 
     def test_ILL_reduced(self):
-
         ill_red_ws = Load("ILL/IN16B/091515_red.nxs")
 
         ill_red_ws = ConvertUnits(ill_red_ws, Target="Wavelength", EMode="Indirect", EFixed=1.845)
@@ -190,9 +189,10 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
             "Shape": "FlatPlate",
             "Width": 1.4,
             "Thickness": 2.1,
+            "OutputWorkspace": "wks",
         }
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "The cross section must be specified when no ChemicalFormula or AtomicNumber is given."):
             SimpleShapeMonteCarloAbsorption(**kwargs)
 
     def test_flat_plate_no_params(self):
@@ -208,9 +208,10 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
             "BeamHeight": 3.5,
             "BeamWidth": 4.0,
             "Shape": "FlatPlate",
+            "OutputWorkspace": "wks",
         }
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "Please enter a non-zero number for width"):
             SimpleShapeMonteCarloAbsorption(**kwargs)
 
     def test_not_in_wavelength(self):
@@ -228,9 +229,10 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
             "Shape": "FlatPlate",
             "Width": 1.4,
             "Thickness": 2.1,
+            "OutputWorkspace": "wks",
         }
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "The workspace must have units of Wavelength"):
             SimpleShapeMonteCarloAbsorption(**kwargs)
 
         DeleteWorkspace(red_ws_not_wavelength)
@@ -244,6 +246,7 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
         kwargs = self._annulus_arguments
         kwargs["InnerRadius"] = 1.0
         kwargs["MaxScatterPtAttempts"] = 0
+        kwargs["OutputWorkspace"] = "wks"
 
         with self.assertRaises(RuntimeError):
             SimpleShapeMonteCarloAbsorption(**kwargs)
@@ -257,6 +260,7 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
         kwargs = self._annulus_arguments
         kwargs["InnerRadius"] = 1.99999
         kwargs["MaxScatterPtAttempts"] = 1
+        kwargs["OutputWorkspace"] = "wks"
 
         with self.assertRaises(RuntimeError):
             SimpleShapeMonteCarloAbsorption(**kwargs)

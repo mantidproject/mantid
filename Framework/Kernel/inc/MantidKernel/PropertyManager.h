@@ -46,6 +46,7 @@ public:
   // log name
   static std::string getInvalidValuesFilterLogName(const std::string &logName);
   static std::string getLogNameFromInvalidValuesFilter(const std::string &logName);
+  /// Determine if the log's name has a substring indicating it should not be filtered
   static bool isAnInvalidValuesFilterLog(const std::string &logName);
 
   PropertyManager();
@@ -53,8 +54,6 @@ public:
   PropertyManager &operator=(const PropertyManager &);
   PropertyManager &operator+=(const PropertyManager &rhs);
 
-  void filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) override;
-  void splitByTime(std::vector<SplittingInterval> &splitter, std::vector<PropertyManager *> outputs) const override;
   void filterByProperty(const TimeSeriesProperty<bool> &filter,
                         const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>()) override;
 

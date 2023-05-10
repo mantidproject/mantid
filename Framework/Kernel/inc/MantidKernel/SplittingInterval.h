@@ -11,6 +11,11 @@
 namespace Mantid {
 namespace Kernel {
 
+//-----------------------------------------------------------------------------
+// Forward declarations
+//-----------------------------------------------------------------------------
+class TimeROI;
+
 /**
  * Class holding a start/end time and a destination for splitting
  * event lists and logs.
@@ -26,8 +31,6 @@ public:
   SplittingInterval();
 
   SplittingInterval(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop, const int index = 0);
-
-  double duration() const;
 
   int index() const;
 
@@ -55,6 +58,10 @@ MANTID_KERNEL_DLL SplittingIntervalVec operator+(const SplittingIntervalVec &a, 
 MANTID_KERNEL_DLL SplittingIntervalVec operator&(const SplittingIntervalVec &a, const SplittingIntervalVec &b);
 MANTID_KERNEL_DLL SplittingIntervalVec operator|(const SplittingIntervalVec &a, const SplittingIntervalVec &b);
 MANTID_KERNEL_DLL SplittingIntervalVec operator~(const SplittingIntervalVec &a);
+
+// -------------- Helper Functions ---------------------
+// for every workspace index, create a TimeROI out of its associated spliting intervals
+MANTID_KERNEL_DLL std::map<int, TimeROI> timeROIsFromSplitters(const SplittingIntervalVec &splitters);
 
 } // Namespace Kernel
 } // Namespace Mantid

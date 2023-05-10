@@ -53,6 +53,7 @@ Instrument Reference
 - :ref:`isis-powder-diffraction-hrpd-ref`
 - :ref:`isis-powder-diffraction-pearl-ref`
 - :ref:`isis-powder-diffraction-polaris-ref`
+- :ref:`isis-powder-diffraction-osiris-ref`
 
 Workflow Diagrams
 -----------------

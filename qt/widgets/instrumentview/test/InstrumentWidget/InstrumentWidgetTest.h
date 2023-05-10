@@ -372,8 +372,6 @@ private:
     ON_CALL(*displayMock, getGLDisplay()).WillByDefault(Return(glMock));
     ON_CALL(*displayMock, getQtDisplay()).WillByDefault(Return(qtMock));
 
-    EXPECT_CALL(*glMock, setBackgroundColor(_)).Times(1);
-
     auto surfaceMock = std::make_shared<MockProjectionSurface>();
     EXPECT_CALL(*glMock, currentBackgroundColor()).Times(1);
 

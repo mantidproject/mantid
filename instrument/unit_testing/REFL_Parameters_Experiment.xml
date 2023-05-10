@@ -105,6 +105,12 @@
     <value val="17.0"/>
   </parameter>
 
+  <!-- Stitch Parameters used by Stitch1DMany -->
+
+  <parameter name="StitchManualScaleFactors" type="string">
+    <value val="1"/>
+  </parameter>
+
 </component-link>
 
 </parameter-file>

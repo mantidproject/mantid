@@ -301,6 +301,12 @@ void Viewport::setViewToZNegative() {
   adjustProjection();
 }
 
+/**
+ * Adjusts the current projection coordinates based on a any prevoius calls
+ * to change the view. Note that this does not issue any drawing commands
+ * it sets up the internal matrices for the next call to applyProjection
+ * by the view code.
+ */
 void Viewport::adjustProjection() {
   // reset the projection bounds to the original values
   m_left = m_leftOrig;
@@ -312,9 +318,6 @@ void Viewport::adjustProjection() {
 
   // rotate the original projection based on the new quaternion
   m_quaternion.rotateBB(m_left, m_bottom, m_zmin, m_right, m_top, m_zmax);
-
-  // update the GL projection with the new bounds
-  applyProjection();
 }
 
 /**

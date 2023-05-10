@@ -108,8 +108,8 @@ public:
   }
   bool filterLogProvided() const { return (m_pFilterLog != nullptr); }
   double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const std::string &propertyName) {
-    std::vector<Kernel::SplittingInterval> splitter;
-    return GetAllEi::getAvrgLogValue(inputWS, propertyName, splitter);
+    Kernel::TimeROI timeroi;
+    return GetAllEi::getAvrgLogValue(inputWS, propertyName, timeroi);
   }
   API::MatrixWorkspace_sptr buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS, size_t &wsIndex0) {
     return GetAllEi::buildWorkspaceToFit(inputWS, wsIndex0);

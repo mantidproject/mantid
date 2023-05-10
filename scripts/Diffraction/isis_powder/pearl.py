@@ -89,9 +89,16 @@ class Pearl(AbstractInst):
     def should_subtract_empty_inst(self):
         return self._inst_settings.subtract_empty_inst
 
+    def _get_output_formats(self, output_directory, xye_files_directory):
+        return {
+            "nxs_filename": output_directory,
+            "gss_filename": os.path.join(output_directory, "GSAS"),
+            "tof_xye_filename": os.path.join(xye_files_directory, "ToF"),
+            "dspacing_xye_filename": os.path.join(xye_files_directory, "dSpacing"),
+        }
+
     @contextmanager
     def _apply_temporary_inst_settings(self, kwargs, run):
-
         self._inst_settings.update_attributes(kwargs=kwargs)
         self._switch_long_mode_inst_settings(self._inst_settings.long_mode)
 

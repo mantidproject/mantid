@@ -50,6 +50,9 @@ public:
   MOCK_METHOD0(loadSettings, void());
   MOCK_METHOD0(saveSettings, void());
 
+  MOCK_METHOD1(disable, void(std::string const &reason));
+  MOCK_METHOD0(enable, void());
+
   MOCK_CONST_METHOD0(getSampleFile, std::optional<std::string>());
   MOCK_CONST_METHOD0(getVanadiumFile, std::optional<std::string>());
 
@@ -63,29 +66,48 @@ public:
   MOCK_METHOD0(clearShapes, void());
   MOCK_METHOD1(drawRectanglesAbove, void(std::vector<DetectorTube> const &tubes));
 
-  MOCK_METHOD1(warningBox, void(std::string const &message));
+  MOCK_METHOD1(displayWarning, void(std::string const &message));
 };
 
 class MockALFInstrumentModel : public IALFInstrumentModel {
 public:
-  MOCK_METHOD1(loadAndNormalise, Mantid::API::MatrixWorkspace_sptr(std::string const &filename));
-  MOCK_METHOD0(generateLoadedWorkspace, void());
-
-  MOCK_METHOD1(setSample, void(Mantid::API::MatrixWorkspace_sptr const &sample));
-  MOCK_METHOD1(setVanadium, void(Mantid::API::MatrixWorkspace_sptr const &vanadium));
-
   MOCK_CONST_METHOD0(loadedWsName, std::string());
 
-  MOCK_CONST_METHOD0(sampleRun, std::size_t());
-  MOCK_CONST_METHOD0(vanadiumRun, std::size_t());
+  MOCK_METHOD2(setData, void(ALFData const &dataType, Mantid::API::MatrixWorkspace_sptr const &sample));
+  MOCK_CONST_METHOD1(hasData, bool(ALFData const &dataType));
+  MOCK_CONST_METHOD1(data, Mantid::API::MatrixWorkspace_sptr(ALFData const &dataType));
+
+  MOCK_CONST_METHOD1(replaceSampleWorkspaceInADS, void(Mantid::API::MatrixWorkspace_sptr const &workspace));
+
+  MOCK_CONST_METHOD1(run, std::size_t(ALFData const &dataType));
+
+  MOCK_CONST_METHOD1(isALFData, bool(Mantid::API::MatrixWorkspace_const_sptr const &workspace));
+  MOCK_CONST_METHOD0(binningMismatch, bool());
+  MOCK_CONST_METHOD0(axisIsDSpacing, bool());
 
   MOCK_METHOD1(setSelectedTubes, bool(std::vector<DetectorTube> tubes));
   MOCK_METHOD1(addSelectedTube, bool(DetectorTube const &tube));
+  MOCK_CONST_METHOD0(hasSelectedTubes, bool());
   MOCK_CONST_METHOD0(selectedTubes, std::vector<DetectorTube>());
 
-  MOCK_CONST_METHOD1(generateOutOfPlaneAngleWorkspace,
-                     std::tuple<Mantid::API::MatrixWorkspace_sptr, std::vector<double>>(
-                         MantidQt::MantidWidgets::IInstrumentActor const &actor));
+  MOCK_CONST_METHOD0(twoThetasClosestToZero, std::vector<double>());
+
+  MOCK_CONST_METHOD1(loadProperties, std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>(std::string const &filename));
+  MOCK_CONST_METHOD1(normaliseByCurrentProperties, std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>(
+                                                       Mantid::API::MatrixWorkspace_sptr const &inputWorkspace));
+  MOCK_CONST_METHOD0(rebinToWorkspaceProperties, std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>());
+  MOCK_CONST_METHOD0(divideProperties, std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>());
+  MOCK_CONST_METHOD1(replaceSpecialValuesProperties, std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>(
+                                                         Mantid::API::MatrixWorkspace_sptr const &inputWorkspace));
+  MOCK_CONST_METHOD1(convertUnitsProperties, std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>(
+                                                 Mantid::API::MatrixWorkspace_sptr const &inputWorkspace));
+
+  MOCK_METHOD1(createWorkspaceAlgorithmProperties, std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>(
+                                                       MantidQt::MantidWidgets::IInstrumentActor const &actor));
+  MOCK_CONST_METHOD1(scaleXProperties, std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>(
+                                           Mantid::API::MatrixWorkspace_sptr const &inputWorkspace));
+  MOCK_CONST_METHOD1(rebunchProperties, std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>(
+                                            Mantid::API::MatrixWorkspace_sptr const &inputWorkspace));
 };
 
 class MockALFInstrumentPresenter : public IALFInstrumentPresenter {
@@ -95,6 +117,9 @@ public:
   MOCK_METHOD0(getInstrumentView, ALFInstrumentWidget *());
 
   MOCK_METHOD1(subscribeAnalysisPresenter, void(IALFAnalysisPresenter *presenter));
+
+  MOCK_METHOD0(loadSettings, void());
+  MOCK_METHOD0(saveSettings, void());
 
   MOCK_METHOD0(loadSample, void());
   MOCK_METHOD0(loadVanadium, void());

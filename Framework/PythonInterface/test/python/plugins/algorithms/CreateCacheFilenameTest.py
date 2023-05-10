@@ -52,7 +52,7 @@ class CreateCacheFilename(unittest.TestCase):
     def test_wronginput(self):
         """CreateCacheFilename: wrong input"""
         # Execute
-        with self.assertRaises(RuntimeError):
+        with self.assertRaisesRegex(RuntimeError, "Either PropertyManager or OtherProperties should be supplied"):
             run_algorithm(
                 "CreateCacheFilename",
             )

@@ -49,16 +49,19 @@ public:
   void test_emptyROI() {
     TimeROI value;
     TS_ASSERT_EQUALS(value.durationInSeconds(), 0.);
-    TS_ASSERT(value.empty());
+    TS_ASSERT(value.useAll());
     TS_ASSERT_EQUALS(value.numBoundaries(), 0);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 0);
   }
 
   void test_badRegions() {
     TimeROI value;
     TS_ASSERT_THROWS(value.addROI(NEW_YEARS_STOP, NEW_YEARS_START), const std::runtime_error &);
     TS_ASSERT_EQUALS(value.numBoundaries(), 0);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 0);
     TS_ASSERT_THROWS(value.addMask(NEW_YEARS_STOP, NEW_YEARS_START), const std::runtime_error &);
     TS_ASSERT_EQUALS(value.numBoundaries(), 0);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 0);
   }
 
   void test_durations() {
@@ -109,20 +112,24 @@ public:
     value.addROI(HANUKKAH_START, HANUKKAH_STOP);
     TS_ASSERT_EQUALS(value.durationInSeconds(), HANUKKAH_DURATION);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
-    TS_ASSERT(!value.empty());
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 1);
+    TS_ASSERT(!value.useAll());
 
     // add New Year's eve
     value.addROI(NEW_YEARS_START, NEW_YEARS_STOP);
     TS_ASSERT_EQUALS(value.durationInSeconds(), HANUKKAH_DURATION + ONE_DAY_DURATION);
     TS_ASSERT_EQUALS(value.numBoundaries(), 4);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 2);
 
     // add Christmas - fully contained in existing TimeROI
     value.addROI(CHRISTMAS_START, CHRISTMAS_STOP);
     TS_ASSERT_EQUALS(value.durationInSeconds(), HANUKKAH_DURATION + ONE_DAY_DURATION);
     TS_ASSERT_EQUALS(value.numBoundaries(), 4);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 2);
 
     // get rid of entries that have no effect
     TS_ASSERT_EQUALS(value.numBoundaries(), 4);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 2);
   }
 
   void test_addROI() {
@@ -145,63 +152,108 @@ public:
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 0.);
   }
 
+  void test_addROI2() {
+    TimeROI value{TWO, THREE};
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 1.);
+    value.addROI(ONE, TWO);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
+    value.addROI(THREE, FOUR);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
+    value.addROI(TWO, FIVE);
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 4.);
+  }
+
+  void test_addMask() {
+    TimeROI value{ONE, TWO}; // 1-2
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 1.);
+    value.addROI(THREE, FIVE); // 1-2,3-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
+    value.addMask(THREE, FOUR); // 1-2,4-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
+
+    value.addROI(THREE, FIVE); // 1-2,3-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
+    value.addMask(FOUR, SIX); // 1-2,3-4
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
+
+    value.addROI(TWO, FIVE); // 1-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 4.);
+    value.addMask(ONE, TWO); // 2-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
+    value.addMask(THREE, FOUR); // 1-3,4-5
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
+    value.addMask(THREE, FOUR); // 1-3,4-5 still
+    TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
+  }
+
   void test_addOverlapping() {
     TimeROI value{ONE, FOUR}; // 1-4
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 1);
 
     // extend one day past the end is 1-5
     value.addROI(THREE, FIVE);
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 4.);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 1);
 
     // add in time from the middle is still 1-5
     value.addROI(TWO, THREE);
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 4.);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 1);
 
     // now remove regions
     value.addMask(TWO, THREE); // 1-2, 3-5 is left
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
     TS_ASSERT_EQUALS(value.numBoundaries(), 4);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 2);
 
     value.addMask(TWO, FOUR); // 1-2, 4-5 is left
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
     TS_ASSERT_EQUALS(value.numBoundaries(), 4);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 2);
 
     value.addMask(THREE, FIVE); // 1-2 is left
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 1.);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 1);
 
     // remove the rest
     value.addMask(ONE, FOUR);
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 0.);
-    TS_ASSERT(value.empty());
+    TS_ASSERT(value.useAll());
 
     // add back an ROI then remove parts until nothing is left
     value.addROI(TWO, FIVE); // 2-5
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 3.);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 1);
 
     value.addMask(ONE, THREE); // 3-5
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 2.);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 1);
 
     value.addMask(ONE, FOUR); // 4-5
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 1.);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 1);
 
     value.addMask(FOUR, FIVE); // empty
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 0.);
-    TS_ASSERT(value.empty());
+    TS_ASSERT(value.useAll());
   }
 
   void test_redundantValues() {
     TimeROI value;
     value.addROI(CHRISTMAS_START, CHRISTMAS_STOP);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 1);
     value.addROI(CHRISTMAS_START, CHRISTMAS_STOP);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 1);
   }
 
   void test_reversesortedROI() {
@@ -210,22 +262,24 @@ public:
     value.addROI(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
     TS_ASSERT_EQUALS(value.durationInSeconds() / ONE_DAY_DURATION, 1.);
     TS_ASSERT_EQUALS(value.numBoundaries(), 2);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 1);
 
     // add Hanukkah
     value.addROI(HANUKKAH_START, HANUKKAH_STOP);
     TS_ASSERT_EQUALS(value.durationInSeconds(), ONE_DAY_DURATION + HANUKKAH_DURATION);
     TS_ASSERT_EQUALS(value.numBoundaries(), 4);
+    TS_ASSERT_EQUALS(value.numberOfRegions(), 2);
   }
 
   void test_onlyMask() {
     TimeROI value;
     // the result is empty
     value.addMask(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
-    TS_ASSERT(value.empty());
+    TS_ASSERT(value.useAll());
 
     // since it ends with "on" the duration is infinite
     TS_ASSERT_EQUALS(value.durationInSeconds(), 0.);
-    TS_ASSERT(value.empty());
+    TS_ASSERT(value.useAll());
   }
 
   void test_overwrite() {
@@ -234,21 +288,24 @@ public:
     value1.addMask(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
     // since it ends with "on" the duration is infinite
     TS_ASSERT_EQUALS(value1.durationInSeconds(), 0.);
-    TS_ASSERT(value1.empty());
+    TS_ASSERT(value1.useAll());
 
     value1.addROI(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
     TS_ASSERT_EQUALS(value1.durationInSeconds(), ONE_DAY_DURATION);
     TS_ASSERT_EQUALS(value1.numBoundaries(), 2);
+    TS_ASSERT_EQUALS(value1.numberOfRegions(), 1);
 
     // roi first
     TimeROI value2;
     value2.addROI(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
     TS_ASSERT_EQUALS(value2.durationInSeconds(), ONE_DAY_DURATION);
     TS_ASSERT_EQUALS(value2.numBoundaries(), 2);
+    TS_ASSERT_EQUALS(value2.numberOfRegions(), 1);
 
     value2.addMask(DateAndTime(NEW_YEARS_START), DateAndTime(NEW_YEARS_STOP));
     TS_ASSERT_EQUALS(value2.durationInSeconds(), 0.);
     TS_ASSERT_EQUALS(value2.numBoundaries(), 0);
+    TS_ASSERT_EQUALS(value2.numberOfRegions(), 0);
   }
 
   void test_valueAtTime() {
@@ -291,9 +348,36 @@ public:
     runIntersectionTest(left, right, 5. * ONE_DAY_DURATION);
   }
 
-  void test_intersection_no_overlap() { runIntersectionTest(CHRISTMAS, TimeROI{NEW_YEARS_START, NEW_YEARS_STOP}, 0.); }
+  void test_intersection_no_overlap() { runIntersectionTest(CHRISTMAS, TimeROI{NEW_YEARS_START, NEW_YEARS_STOP}, -1.); }
 
   void test_intersection_one_empty() { runIntersectionTest(CHRISTMAS, TimeROI(), 0.); }
+
+  // this is a test lifted from a situation that arrises in DataHandlingTest and FilterLog
+  void test_intersection_ISISRunLogs() {
+    TimeROI left;
+    left.addROI("2008-Jun-17 11:20:09", "2008-Jun-17 11:20:11");
+    left.addROI("2008-Jun-17 11:20:21", "2008-Jun-17 11:20:23");
+    left.addROI("2008-Jun-17 11:20:32", "2008-Jun-17 11:20:33");
+    left.addROI("2008-Jun-17 11:20:41", "2008-Jun-17 11:20:45");
+    left.addROI("2008-Jun-17 11:20:53", "2008-Jun-17 11:20:57");
+    left.addROI("2008-Jun-17 11:21:06", "2008-Jun-17 11:21:07");
+    left.addROI("2008-Jun-17 11:21:16", "2008-Jun-17 11:21:18");
+    left.addROI("2008-Jun-17 11:21:19", "2008-Jun-17 11:22:29");
+
+    TimeROI right;
+    right.addROI("2008-Jun-17 11:12:11", "2008-Jun-17 11:12:21");
+    right.addROI("2008-Jun-17 11:17:57", "2008-Jun-17 11:18:07");
+    right.addROI("2008-Jun-17 11:21:08", "2008-Jun-17 11:21:19");
+
+    // this is the hand calculated answer
+    TimeROI intersection;
+    intersection.addROI("2008-Jun-17 11:21:16", "2008-Jun-17 11:21:18");
+
+    // intersection with the right answer should yeild the right answer
+    runIntersectionTest(left, intersection, intersection.durationInSeconds());
+    runIntersectionTest(right, intersection, intersection.durationInSeconds());
+    runIntersectionTest(left, right, intersection.durationInSeconds());
+  }
 
   /*
    * This test is similar to test_intersection_one_empty, except the function that is called will replace the TimeROI
@@ -339,4 +423,54 @@ public:
   }
 
   void test_union_one_empty() { runUnionTest(CHRISTMAS, TimeROI(), CHRISTMAS.durationInSeconds()); }
+
+  /**
+   * This copies the TimeSeriesProperty<bool> used in Kernel::LogFilterTest which ends in "use"
+   */
+  void test_badTimeSeriesPropertyTest() {
+    DateAndTime one("2007-11-30T16:16:50");
+    DateAndTime two("2007-11-30T16:17:25");
+    DateAndTime three("2007-11-30T16:17:39");
+
+    TimeSeriesProperty<bool> tsp("filter");
+    tsp.addValue(one, true);
+    tsp.addValue(two, false);
+    tsp.addValue(three, true);
+
+    TimeROI roi(&tsp);
+    // should be two roi with the specified values being consistent
+    TS_ASSERT_EQUALS(roi.numBoundaries(), 4);
+    TS_ASSERT_EQUALS(roi.numberOfRegions(), 2);
+    TS_ASSERT_EQUALS(roi.valueAtTime(one), true);
+    TS_ASSERT_EQUALS(roi.valueAtTime(two), false);
+    TS_ASSERT_EQUALS(roi.valueAtTime(three), true);
+
+    // a full duration past the end is false
+    const auto duration = three - one;
+    DateAndTime four = three + duration;
+    TS_ASSERT_EQUALS(roi.valueAtTime(four), false);
+  }
+
+  void test_getEffectiveTime() {
+    TimeROI roi{HANUKKAH_START, HANUKKAH_STOP};
+    TS_ASSERT_EQUALS(roi.getEffectiveTime(DECEMBER_START), HANUKKAH_START);
+    TS_ASSERT_EQUALS(roi.getEffectiveTime(HANUKKAH_START), HANUKKAH_START);
+    TS_ASSERT_EQUALS(roi.getEffectiveTime(CHRISTMAS_START), CHRISTMAS_START);
+    TS_ASSERT_THROWS(roi.getEffectiveTime(DECEMBER_STOP), const std::runtime_error &);
+  }
+
+  void test_invalidROI() {
+    TS_ASSERT(TimeROI::USE_NONE.useNone());
+    TS_ASSERT_EQUALS(TimeROI::USE_NONE.durationInSeconds(), -1);
+  }
+
+  void test_debugStrPrint() {
+    TimeROI roi{HANUKKAH_START, HANUKKAH_STOP};
+    roi.addROI(NEW_YEARS_START, NEW_YEARS_STOP);
+    TS_ASSERT_EQUALS(
+        roi.debugStrPrint(0),
+        "0: 2022-Dec-19 00:01:00 to 2022-Dec-26 00:01:00\n1: 2022-Dec-31 00:01:00 to 2023-Jan-01 00:01:00\n");
+    TS_ASSERT_EQUALS(roi.debugStrPrint(1),
+                     "2022-Dec-19 00:01:00 2022-Dec-26 00:01:00 2022-Dec-31 00:01:00 2023-Jan-01 00:01:00 \n");
+  }
 };

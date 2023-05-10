@@ -24,6 +24,7 @@ from qtpy.QtWidgets import (
     QSpinBox,
     QToolButton,
     QWidget,
+    QLabel,
 )
 
 
@@ -53,7 +54,7 @@ class DNSView(QWidget):
         """
         Setting widget value independent of type.
         """
-        if value is None:
+        if value is None and not isinstance(target_object, QLabel):
             return
         if isinstance(target_object, QDoubleSpinBox):
             target_object.setValue(float(value))
@@ -76,6 +77,8 @@ class DNSView(QWidget):
         elif isinstance(target_object, QGroupBox):
             if target_object.isCheckable():
                 target_object.setChecked(value)
+        elif isinstance(target_object, QLabel):
+            target_object.setText(str(value))
 
     @staticmethod
     def _get_single_state(target_object):
@@ -102,6 +105,8 @@ class DNSView(QWidget):
         if isinstance(target_object, QGroupBox):
             if target_object.isCheckable():
                 return target_object.isChecked()
+        if isinstance(target_object, QLabel):
+            return target_object.text()
         return None
 
     def get_state(self):

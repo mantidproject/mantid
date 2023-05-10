@@ -61,6 +61,22 @@ pipeline {
     GIT_COMMITTER_EMAIL = "${GITHUB_USER_EMAIL}"
   }
   stages {
+    // Fail the pipeline early if any parameters are incorrect.
+    stage('Check parameters') {
+      agent { label 'linux-64' }
+      steps {
+        script {
+          if(env.PUBLISH_PACKAGES == 'true') {
+            if(!env.ANACONDA_CHANNEL_LABEL.trim()) {
+              error("You must specify an Anaconda label to publish packages.")
+            }
+            if(!env.ANACONDA_CHANNEL.trim()) {
+              error("You must specify an Anaconda channel to publish packages.")
+            }
+          }
+        }
+      }
+    }
     // Store the git commit hash in an environment variable so that we can use
     // the same commit for all stages of the pipeline. This is perfomed by using
     // the following step at the start of each subsequent stage:
@@ -147,6 +163,7 @@ pipeline {
               // Build the base set of packages (ones not required for mantidworkbench)
               // in parallel
               package_conda("${PLATFORM}", "base")
+              archive_env_logs("${PLATFORM}")
               archive_conda_packages("${PLATFORM}", false)
               archive_conda_packages("noarch", true)
             }
@@ -192,6 +209,7 @@ pipeline {
                 target: './',
                 flatten: false
               package_conda("${PLATFORM}", "workbench")
+              archive_env_logs("${PLATFORM}")
               archive_conda_packages("${PLATFORM}", false)
               package_standalone()
               archive_standalone_package("${PLATFORM}")
@@ -289,13 +307,16 @@ pipeline {
 
 def git_branch_name() {
   name = scm.branches[0].name
-  if (name.contains("*/")) {
+  if(name.contains("*/")) {
     name = name.split("\\*/")[1]
   }
   return name
 }
 
 def toUnixStylePath(path) {
+  if(!path.startsWith("C:")) {
+    path = "C:" + path
+  }
   return path.replaceAll("\\\\", "/")
 }
 
@@ -432,4 +453,12 @@ def archive_standalone_package(platform) {
 
 def archive_ctest_log(){
   archiveArtifacts artifacts: "${CHECKOUT_DIR}/build/ctest_log/*.log", fingerprint: true
+}
+
+def archive_env_logs(platform) {
+  env_log_dir = "**/conda-bld/${platform}/env_logs"
+  archiveArtifacts artifacts: env_log_dir += "/**/*.*",
+    allowEmptyArchive: false,
+    fingerprint: true,
+    onlyIfSuccessful: false
 }

@@ -143,6 +143,8 @@ Smoke Testing
    `here <https://github.com/mantidproject/documents/tree/main/Project-Management/Tools/RoadmapUpdate/SmokeTesting>`__.
 *  Liaise with the Technical Release Manager and together announce the creation of the
    Smoke testing issues and Release Candidates in the *\#general* slack channel.
+*  During smoke testing it may be easier if at least one QA Manager acts as facilitator during the session. They will answer questions, co-ordinate testing
+   (especially when an arising issue needs testing on other OS) and ensure all testing is covered.
 
 
 .. _release-editor-checklist:
@@ -213,7 +215,7 @@ is to reiterate the timeline and be the collection point for information between
 all of the Local Project Managers.
 
 2-3 weeks before Feature Freeze
-############################
+###############################
 
 * Schedule a release showcase meeting for all facilities to present work that
   is intended to be part of the upcoming release.
@@ -259,7 +261,7 @@ Manual Testing
 
 *  Ensure that PR testing has been completed for PRs from before the feature freeze.
 
-**Clearing the project board**
+**Clearing the Project Board**
 
 Go through the issues for the release milestone (not the sprint milestone), ensuring that:
 
@@ -377,7 +379,7 @@ tags, configuring build servers, and ensuring problems on the Release Pipeline g
 Code Freeze
 ###########
 
-**Create the Release Branch (once most PR's are merged)**
+**Create the Release Branch (once most PRs are merged)**
 
 * Ensure the latest `main nightly deployment pipeline
   <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment_prototype/>`__
@@ -389,7 +391,6 @@ Code Freeze
 
   * Create or update the ``release-next`` branch.
   * Enable the job to periodically merge ``release-next`` into ``main``.
-  * Enable the ``release-next_nightly_deployment`` pipeline.
   * Set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``release-next``.
     This will turn off publishing for the ``main`` branch pipeline and switch it on for the
     ``release-next`` pipeline.
@@ -442,40 +443,36 @@ have been fixed. Then:
 * Liaise with the release editor to ensure that they have completed all of their tasks.
 * Check the release notes and verify that the "Under Construction" paragraph on the main
   index page has been removed. Remove the paragraph if it still exists.
+* Ensure that all changes, including release notes, have been merged into the ``release-next`` branch.
+* On the ``release-next`` branch, check whether the `git SHA
+  <https://github.com/mantidproject/mantid/blob/343037c685c0aca9151523d6a3e105504f8cf218/scripts/ExternalInterfaces/CMakeLists.txt#L11>`__
+  for MSlice is up to date. If not, create a PR to update it and ask a gatekeeper to merge it.
+* Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually trigger the `Jenkins job
+  <https://builds.mantidproject.org/job/merge_release-next_into_main/>`__ to merge the changes.
 * Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__
   job, which will do the following:
 
   * Disable the job that periodically merges ``release-next`` into ``main``.
-  * Disable the ``release-next_nightly_deployment`` pipeline.
   * Set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``. This will re-enable
     package publishing for the ``main`` nightly pipeline.
 
-**Create the Release Candidates**
+**Create the Release Candidates For Smoke Testing**
 
 We are now ready to create the release candidates for Smoke testing.
 
-* On the ``release-next`` branch, check whether the `git SHA
-  <https://github.com/mantidproject/mantid/blob/343037c685c0aca9151523d6a3e105504f8cf218/scripts/ExternalInterfaces/CMakeLists.txt#L11>`__
-  for MSlice is up to date. If not, create a PR to update it and ask a gatekeeper to merge it.
-* On the ``release-next`` branch, create a PR to update the `major & minor
-  <https://github.com/mantidproject/mantid/blob/release-next/buildconfig/CMake/VersionNumber.cmake>`__
-  versions accordingly. Also, uncomment ``VERSION_PATCH`` and set it to ``0``. Ask a gatekeeper to merge the PR.
-* Ask a gatekeeper to merge the ``release-next`` branch back to ``main`` locally, and then comment
-  out the ``VERSION_PATCH`` on the ``main`` branch. They should then commit and push these changes
-  directly to the remote ``main`` without making a PR.
-* Build the `release-next_nightly_deployment Jenkins pipeline <https://builds.mantidproject.org/view/Release%20Pipeline/>`__
+* Build the `release-next_nightly_deployment Jenkins pipeline
+  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly_deployment/>`__
   with the following parameters (most are already defaulted to the correct values):
 
   * set ``BUILD_DEVEL`` to ``all``
   * set ``BUILD_PACKAGE`` to ``all``
-  * set ``CONDA_RECIPES_BRANCH_NAME`` to ``main``
   * set ``PACKAGE_SUFFIX`` to an **empty string**
   * tick the ``PUBLISH_PACKAGES`` checkbox
   * set the ``ANACONDA_CHANNEL`` to ``mantid``
-  * set the ``ANACONDA_CHANNEL_LABEL`` to ``rcN`` where ``N`` is an incremental build number for release
-    candidates, starting at ``1``
+  * set the ``ANACONDA_CHANNEL_LABEL`` to ``vX.Y.ZrcN`` where ``X.Y.Z`` is the release number,
+    and ``N`` is an incremental build number for release candidates, starting at ``1`` (e.g. ``v6.7.0rc1``)
   * set ``GITHUB_RELEASES_REPO`` to ``mantidproject/mantid``
-  * set ``GITHUB_RELEASES_TAG`` to ``vX.Y.Z-rcN``, where ``X.Y.Z`` is the release number,
+  * set ``GITHUB_RELEASES_TAG`` to ``vX.Y.ZrcN``, where ``X.Y.Z`` is the release number,
     and ``N`` is an incremental build number for release candidates, starting at ``1``.
 
 * Once the packages have been published to GitHub and Anaconda, ask someone in the ISIS core or DevOps
@@ -484,19 +481,40 @@ We are now ready to create the release candidates for Smoke testing.
 * Liaise with the Quality Assurance Manager and together announce the creation of the smoke testing
   issues and Release Candidates in the *\#general* slack channel.
 
+**Create the Release Candidates For Release**
+
+Check with the Quality Assurance Manager that the Smoke testing has been completed, and any issues
+have been fixed. The release candidates must now be recreated with their final version numbers. To do this, build the
+`release-next_nightly_deployment Jenkins pipeline
+<https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly_deployment/>`__
+with the following parameters (most are already defaulted to the correct values):
+
+* set ``BUILD_DEVEL`` to ``all``
+* set ``BUILD_PACKAGE`` to ``all``
+* set ``PACKAGE_SUFFIX`` to an **empty string**
+* tick the ``PUBLISH_PACKAGES`` checkbox
+* set the ``ANACONDA_CHANNEL`` to ``mantid``
+* set the ``ANACONDA_CHANNEL_LABEL`` to ``draft-vX.Y.Z`` where ``X.Y.Z`` is the release number
+* set ``GITHUB_RELEASES_REPO`` to ``mantidproject/mantid``
+* set ``GITHUB_RELEASES_TAG`` to ``vX.Y.Z``, where ``X.Y.Z`` is the release number.
+
+
 Release Day
 ###########
 
-Check with the Quality Assurance Manager that the Smoke testing has been completed, and any issues
-have been fixed.
+Once the final release candidate pipeline has succeeded, the draft release will be available on GitHub and our
+Anaconda channel.
 
 *  Edit the `draft release <https://github.com/mantidproject/mantid/releases>`__ on
-   GitHub. A new tag should be created based off the release branch in the form ``vX.Y.Z``. The
-   description of the new release can be copied from the release notes ``index.rst`` file, and
+   GitHub. The description of the new release can be copied from the release notes ``index.rst`` file, and
    edited appropriately. See previous release descriptions for inspiration.
-*  Publish the GitHub release. This will create the tag required to generate the DOI.
+*  Ask someone in the ISIS core or DevOps team to manually sign the Windows binary and re-upload it to the draft
+   release.
+*  Publish the GitHub release. This will publish the tag required to generate the DOI.
+*  Remove the smoke testing release from the GitHub releases page (the one tagged with ``vX.Y.ZrcN``).
 *  Change the labels for the release candidates on our `Anaconda site <https://anaconda.org/mantid/mantid/files>`__
-   from ``rcN`` to ``main``. You may need to ask a member of the ISIS core or DevOps team to do this.
+   from ``draft-vX.Y.Z`` to ``main``. You may need to ask a member of the ISIS core or DevOps team to do this.
+*  Remove the smoke testing release candidates from our Anaconda channel (those with the ``vX.Y.ZrcN`` label).
 *  Update the `download page <https://download.mantidproject.org>`__ by running the `Update latest release links
    <https://github.com/mantidproject/www/actions/workflows/update-latest-release.yml>`__ workflow in the
    `mantidproject/www repository <https://github.com/mantidproject/www>`__.
@@ -522,12 +540,6 @@ publish a new `release <https://github.com/mantidproject/mantid/releases>`__ on 
 .. code-block:: bash
 
     python tools/DOI/doi.py --username=[username] [X.Y.Z]
-
-for example
-
-.. code-block:: bash
-
-    python tools/DOI/doi.py --username="doi.username" 6.1.0
 
 *  The script will prompt you for the password. Ask a senior developer to share the username and
    password with you if you do not already have access to it.

@@ -1,1 +1,0 @@
-- In the fitting widget, if a tie is edited to an invalid value Workbench will display an error and revert the tie to its previous value.

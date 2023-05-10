@@ -17,10 +17,13 @@
 namespace Mantid {
 namespace Kernel {
 
+class TimeROI;
+
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
 class Property;
+template <class TYPE> class FilteredTimeSeriesProperty;
 template <class TYPE> class TimeSeriesProperty;
 
 /**
@@ -47,7 +50,7 @@ public:
   /// Adds a filter using boolean AND
   void addFilter(const TimeSeriesProperty<bool> &filter);
   ///  Returns reference to the filtered property
-  inline TimeSeriesProperty<double> *data() const { return m_prop.get(); }
+  inline FilteredTimeSeriesProperty<double> *data() const { return m_prop.get(); }
   /// Returns a reference to the filter
   inline const TimeSeriesProperty<bool> *filter() const { return m_filter.get(); }
   /// Clears filters
@@ -56,10 +59,11 @@ public:
 private:
   /// Converts the given property to a TimeSeriesProperty<double>, throws if
   /// invalid.
-  TimeSeriesProperty<double> *convertToTimeSeriesOfDouble(const Property *prop);
+  FilteredTimeSeriesProperty<double> *convertToTimeSeriesOfDouble(const Property *prop);
+  void setFilter(const TimeROI &roi, const bool filterOpenEnded);
 
   /// Owned pointer to the filtered property
-  std::unique_ptr<TimeSeriesProperty<double>> m_prop;
+  std::unique_ptr<FilteredTimeSeriesProperty<double>> m_prop;
   /// Owned pointer to the filter mask
   std::unique_ptr<TimeSeriesProperty<bool>> m_filter;
 };

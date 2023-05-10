@@ -14,7 +14,6 @@ from copy import deepcopy
 import json
 from typing import Tuple, Optional, List
 
-import numpy as np
 from mantid.api import AlgorithmManager, AnalysisDataService, isSameWorkspaceObject
 from sans.common.constant_containers import SANSInstrument_enum_list, SANSInstrument_string_list, SANSInstrument_string_as_key_NoInstrument
 from sans.common.constants import SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAME, REDUCED_CAN_TAG
@@ -241,10 +240,11 @@ def get_charge_and_time(workspace):
     :return: the charge, the time
     """
     run = workspace.getRun()
-    charges = run.getLogData("proton_charge")
-    total_charge = sum(charges.value)
-    time_passed = int((charges.times[-1] - charges.times[0]) / np.timedelta64(1, "us"))  # microseconds
-    time_passed = float(time_passed) / 1e6
+    # integrated proton charge
+    total_charge = run.getProtonCharge()
+    # total unfilterd time
+    time_passed = run.getStatistics("proton_charge").duration
+
     return total_charge, time_passed
 
 
@@ -604,7 +604,6 @@ def get_bins_for_rebin_setting(min_value, max_value, step_value, step_type):
     lower_bound = min_value
     bins = []
     while lower_bound < max_value:
-
         bins.append(lower_bound)
         # We can either have linear or logarithmic steps. The logarithmic step depends on the lower bound.
         if step_type is RangeStepType.LIN:

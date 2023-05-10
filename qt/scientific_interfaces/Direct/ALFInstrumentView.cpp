@@ -8,6 +8,7 @@
 
 #include "ALFInstrumentPresenter.h"
 #include "ALFInstrumentWidget.h"
+#include "ALFView.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/InputController.h"
@@ -77,6 +78,7 @@ void ALFInstrumentView::loadSettings() {
   settings.endGroup();
 
   if (!vanadiumRun.toString().isEmpty()) {
+    disable("Loading vanadium");
     m_vanadium->setUserInput(vanadiumRun);
   }
 }
@@ -86,6 +88,18 @@ void ALFInstrumentView::saveSettings() {
   settings.beginGroup(m_settingsGroup);
   settings.setValue("vanadium-run", m_vanadium->getText());
   settings.endGroup();
+}
+
+void ALFInstrumentView::disable(std::string const &reason) {
+  if (auto parent = static_cast<ALFView *>(parentWidget())) {
+    parent->disable(reason);
+  }
+}
+
+void ALFInstrumentView::enable() {
+  if (auto parent = static_cast<ALFView *>(parentWidget())) {
+    parent->enable();
+  }
 }
 
 void ALFInstrumentView::reconnectInstrumentActor() {
@@ -129,12 +143,8 @@ void ALFInstrumentView::setVanadiumRun(std::string const &runNumber) {
 }
 
 void ALFInstrumentView::sampleLoaded() {
-  if (m_sample->getText().isEmpty()) {
-    return;
-  }
-
-  if (!m_sample->isValid()) {
-    warningBox(m_sample->getFileProblem().toStdString());
+  if (!m_sample->getText().isEmpty() && !m_sample->isValid()) {
+    displayWarning(m_sample->getFileProblem().toStdString());
     return;
   }
   m_presenter->loadSample();
@@ -142,7 +152,7 @@ void ALFInstrumentView::sampleLoaded() {
 
 void ALFInstrumentView::vanadiumLoaded() {
   if (!m_vanadium->isValid()) {
-    warningBox(m_vanadium->getFileProblem().toStdString());
+    displayWarning(m_vanadium->getFileProblem().toStdString());
     return;
   }
   m_presenter->loadVanadium();
@@ -157,12 +167,16 @@ MantidWidgets::IInstrumentActor const &ALFInstrumentView::getInstrumentActor() c
 }
 
 std::vector<DetectorTube> ALFInstrumentView::getSelectedDetectors() const {
-  auto const surface = std::dynamic_pointer_cast<MantidQt::MantidWidgets::UnwrappedSurface>(
-      m_instrumentWidget->getInstrumentDisplay()->getSurface());
+  auto const surface = m_instrumentWidget->getInstrumentDisplay()->getSurface();
+  auto const unwrappedSurface = std::dynamic_pointer_cast<MantidQt::MantidWidgets::UnwrappedSurface>(surface);
+
+  if (!unwrappedSurface) {
+    return {};
+  }
 
   std::vector<size_t> detectorIndices;
   // Find the detectors which are being intersected by the "masked" shapes.
-  surface->getIntersectingDetectors(detectorIndices);
+  unwrappedSurface->getIntersectingDetectors(detectorIndices);
   // Find all the detector indices in the entirety of the selected tubes
   return m_instrumentWidget->findWholeTubeDetectorIndices(detectorIndices);
 }
@@ -174,7 +188,10 @@ void ALFInstrumentView::selectWholeTube() {
 }
 
 void ALFInstrumentView::notifyWholeTubeSelected(std::size_t pickID) {
-  m_presenter->notifyTubesSelected(m_instrumentWidget->findWholeTubeDetectorIndices({pickID}));
+  auto const pickTab = m_instrumentWidget->getPickTab();
+  if (pickTab->getSelectTubeButton()->isChecked()) {
+    m_presenter->notifyTubesSelected(m_instrumentWidget->findWholeTubeDetectorIndices({pickID}));
+  }
 }
 
 void ALFInstrumentView::clearShapes() {
@@ -190,7 +207,7 @@ void ALFInstrumentView::drawRectanglesAbove(std::vector<DetectorTube> const &tub
   }
 }
 
-void ALFInstrumentView::warningBox(std::string const &message) {
+void ALFInstrumentView::displayWarning(std::string const &message) {
   QMessageBox::warning(this, "ALFView", QString::fromStdString(message));
 }
 

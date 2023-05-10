@@ -276,8 +276,9 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         fail.
         """
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Invalid instrument configuration",
             ISISIndirectEnergyTransfer,
             OutputWorkspace="__ISISIndirectEnergyTransferTest_ws",
             InputFiles=["IRS26176.RAW"],
@@ -293,8 +294,9 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         GroupingMethod but no workspace is provided.
         """
 
-        self.assertRaises(
+        self.assertRaisesRegex(
             RuntimeError,
+            "Must select a grouping workspace for current GroupingWorkspace",
             ISISIndirectEnergyTransfer,
             OutputWorkspace="__ISISIndirectEnergyTransferTest_ws",
             InputFiles=["IRS26176.RAW"],

@@ -234,7 +234,7 @@ double PDDetermineCharacterizations::getLogValue(const API::Run &run, const std:
       const std::string units = run.getProperty(name)->units();
 
       if (validUnits.find(units) != validUnits.end()) {
-        double value = run.getLogAsSingleValue(name, Kernel::Math::TimeAveragedMean);
+        const double value = run.getLogAsSingleValue(name, Kernel::Math::TimeAveragedMean);
         if (value == 0.) {
           std::stringstream msg;
           msg << "'" << name << "' has a mean value of zero " << units;

@@ -9,11 +9,11 @@
 #include "IndirectSettingsHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
-#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -510,7 +510,7 @@ void ISISEnergyTransfer::run() {
                       getAnalyserName().toStdString() + getReflectionName().toStdString() + "_Reduced";
   reductionAlg->setProperty("OutputWorkspace", m_outputGroupName);
 
-  m_batchAlgoRunner->addAlgorithm(reductionAlg, std::make_unique<MantidQt::API::AlgorithmRuntimeProps>());
+  m_batchAlgoRunner->addAlgorithm(reductionAlg, std::make_unique<Mantid::API::AlgorithmRuntimeProps>());
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
@@ -817,7 +817,7 @@ void ISISEnergyTransfer::plotRaw() {
   }
 
   // Rebin the workspace to its self to ensure constant binning
-  auto inputToRebin = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto inputToRebin = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   inputToRebin->setPropertyValue("WorkspaceToMatch", name);
   inputToRebin->setPropertyValue("WorkspaceToRebin", name);
   inputToRebin->setPropertyValue("OutputWorkspace", name);
@@ -826,7 +826,7 @@ void ISISEnergyTransfer::plotRaw() {
   rebinAlg->initialize();
   m_batchAlgoRunner->addAlgorithm(rebinAlg, std::move(inputToRebin));
 
-  auto inputFromRebin = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto inputFromRebin = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   inputFromRebin->setPropertyValue("InputWorkspace", name);
 
   std::vector<specnum_t> detectorList;
@@ -844,10 +844,9 @@ void ISISEnergyTransfer::plotRaw() {
     calcBackAlg->setProperty("Mode", "Mean");
     calcBackAlg->setProperty("StartX", range[0]);
     calcBackAlg->setProperty("EndX", range[1]);
-    m_batchAlgoRunner->addAlgorithm(calcBackAlg,
-                                    std::make_unique<MantidQt::API::AlgorithmRuntimeProps>(*inputFromRebin));
+    m_batchAlgoRunner->addAlgorithm(calcBackAlg, std::make_unique<Mantid::API::AlgorithmRuntimeProps>(*inputFromRebin));
 
-    auto inputFromCalcBG = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+    auto inputFromCalcBG = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
     inputFromCalcBG->setPropertyValue("InputWorkspace", name + "_bg");
 
     IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().create("GroupDetectors");

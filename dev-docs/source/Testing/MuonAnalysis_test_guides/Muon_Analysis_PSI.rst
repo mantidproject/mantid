@@ -65,7 +65,7 @@ Flat Background Corrections Test
 - The plots will now show a large peak, prior to this is only background
 - Using the options at the bottom of the plot, set the x range from ``0.0`` to ``1.0``
 - Go to the **Corrections** tab
-- Change the ``Start X`` to ``0.0``, it will automatically change to ``0.007``
+- Change the ``Start X`` to ``0.0``, it will automatically change to ``0.006``
 - Change the ``End X`` to just before the peak in the plot
 - This will fit a flat background to the data before the peak
 - The results should be similar to before

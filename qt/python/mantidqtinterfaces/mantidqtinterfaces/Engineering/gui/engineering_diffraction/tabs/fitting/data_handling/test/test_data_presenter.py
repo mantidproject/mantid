@@ -160,6 +160,19 @@ class FittingDataPresenterTest(unittest.TestCase):
 
         self.assertEqual({"name1": self.ws1, "name2": self.ws2}, model_dict)
         self.assertEqual({"name1": 0, "name2": 1}, self.presenter.row_numbers)
+        self.model.update_sample_log_workspace_group.assert_not_called()
+
+    def test_remove_workspace_not_tracked_but_is_log_workspaces_group(self):
+        self.model.get_all_workspace_names.return_value = ["name2"]
+        self.model.get_log_workspaces_name.return_value = ["name1", "name2"]
+        self.presenter.row_numbers = {"name1": 0, "name2": 1}
+        self.presenter.plot_removed_notifier = mock.MagicMock()
+        self.presenter.all_plots_removed_notifier = mock.MagicMock()
+
+        self.presenter.remove_workspace("name1")
+
+        self.model.remove_workspace.assert_not_called()
+        self.model.update_sample_log_workspace_group.assert_called_once()
 
     def test_rename_workspace_tracked(self):
         model_dict = {"name1": self.ws1, "name2": self.ws2}
@@ -196,7 +209,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.assertEqual({"name1": self.ws1, "name2": self.ws2}, model_dict)
         self.assertEqual({"name1": 0, "name2": 1}, self.presenter.row_numbers)
         self.assertEqual(0, self.presenter.all_plots_removed_notifier.notify_subscribers.call_count)
-        self.model.update_log_workspace_group.assert_not_called()
+        self.model.update_sample_log_workspace_group.assert_not_called()
 
     def test_remove_all_tracked_workspaces(self):
         self.presenter.row_numbers = {"name1": 0, "name2": 1}

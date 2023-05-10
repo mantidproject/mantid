@@ -11,7 +11,6 @@ from mantid.simpleapi import *
 # A dummy test class to subclass from.
 # Sets up the facility and data search directories.
 class _DiffReductionTest(systemtesting.MantidSystemTest):
-
     _facility = ""
     _directories = ""
     _instrument = ""
@@ -78,7 +77,6 @@ class D20_NoMask_ReductionTest(_DiffReductionTest):
             Run="967076",
             NormaliseTo="None",
             CropNegativeScatteringAngles=False,
-            InitialMask=0,
             OutputWorkspace="out",
         )
 
@@ -104,8 +102,6 @@ class D2B_Component_ReductionTest(_DiffReductionTest):
             Output1D=False,
             CropNegativeScatteringAngles=False,
             OutputWorkspace="alltubes",
-            InitialMask="0",
-            FinalMask="0",
         )
         PowderILLDetectorScan(
             Run="508093",
@@ -113,8 +109,6 @@ class D2B_Component_ReductionTest(_DiffReductionTest):
             Output1D=False,
             CropNegativeScatteringAngles=False,
             OutputWorkspace="tube128",
-            InitialMask="0",
-            FinalMask="0",
             ComponentsToReduce="tube_128",
         )
         CropWorkspace(InputWorkspace="alltubes_2DTubes", OutputWorkspace="alltubes_tube128", XMin=147.471)
@@ -128,8 +122,6 @@ class D2B_HeightRange_ReductionTest(_DiffReductionTest):
             Run="508093:508095",
             Output2D=True,
             Output1D=False,
-            InitialMask=0,
-            FinalMask=0,
             NormaliseTo="None",
             OutputWorkspace="out",
         )
@@ -137,14 +129,16 @@ class D2B_HeightRange_ReductionTest(_DiffReductionTest):
             Run="508093:508095",
             Output2D=True,
             Output1D=False,
-            InitialMask=0,
-            FinalMask=0,
             NormaliseTo="None",
             OutputWorkspace="out_height",
             HeightRange="-0.05,0.05",
         )
         ExtractSpectra(InputWorkspace="out_2D", StartWorkspaceIndex=43, EndWorkspaceIndex=84, OutputWorkspace="cropped")
-        match = CompareWorkspaces(Workspace1="cropped", Workspace2="out_height_2D", CheckSpectraMap=False, Tolerance=self._tolerance)
+        match = CompareWorkspaces(
+            Workspace1="cropped", Workspace2="out_height_2D_-0.05, 0.05", CheckSpectraMap=False, Tolerance=self._tolerance
+        )
+        self.assertTrue(match[0])
+        match = CompareWorkspaces(Workspace1="out_2D", Workspace2="out_height_2D", CheckSpectraMap=False, Tolerance=self._tolerance)
         self.assertTrue(match[0])
 
 

@@ -47,20 +47,45 @@ Methods
 --------
 The following methods can be executed on a OSIRIS object:
 
-- :ref:`run_diffraction_focusing_osiris_isis-powder-diffraction-ref`
+- :ref:`focus_osiris_isis-powder-diffraction-ref`
+- :ref:`create_vanadium_osiris_isis-powder-diffraction-ref`
 
 For information on creating a OSIRIS object see:
 :ref:`creating_osiris_object_isis-powder-diffraction-ref`
 
-.. _run_diffraction_focusing_osiris_isis-powder-diffraction-ref:
+.. _create_vanadium_osiris_isis-powder-diffraction-ref:
 
-run_diffraction_focusing
+create_vanadium
+^^^^^^^^^^^^^^^
+The *create_vanadium* method allows a user to process a vanadium run.
+
+On OSIRIS the following parameters are required when executing *create_vanadium*:
+
+- :ref:`run_number_osiris_isis-powder-diffraction-ref`
+- :ref:`subtract_empty_can_osiris_isis-powder-diffraction-ref`
+
+Example
+=======
+
+..  code-block:: python
+
+  osiris_example.create_vanadium(run_number="119977", subtract_empty_can=False)
+
+.. _focus_osiris_isis-powder-diffraction-ref:
+
+focus
 ^^^^^^^^^^^^^^^^^^^^^^^^
-The *diffraction_focusing* method allows a user to process a series of runs into a
+The *focus* method allows a user to process a series of runs into a
 focused dSpace workspace. Whilst processing the runs the scripts can apply any corrections
 the user enables.
 
-On OSIRIS the following parameters are required when executing *create_vanadium*:
+The available corrections are:
+
+- empty container subtraction, which can be enabled using :ref:`subtract_empty_can_osiris_isis-powder-diffraction-ref` parameter.
+
+- vanadium normalization, which can be enabled using :ref:`do_van_normalisation_osiris_isis-powder-diffraction-ref` parameter.
+
+On OSIRIS the following parameters are required when executing *focus*:
 
 - :ref:`calibration_mapping_file_osiris_isis-powder-diffraction-ref`
 - :ref:`do_van_normalisation_osiris_isis-powder-diffraction-ref`
@@ -84,7 +109,7 @@ Example
 Calibration Mapping File
 -------------------------
 The calibration mapping file holds the mapping between
-run numbers, current label, offset filename, empty run numbers,
+run numbers, current label, offset filename, empty can run numbers,
 and vanadium run numbers.
 
 For more details on the calibration mapping file see:
@@ -123,9 +148,9 @@ The layout on OSIRIS should look as follows for each block:
     empty_drange10 : "10"
     empty_drange11 : "11"
     empty_drange12 : "12"
-    empty_run_numbers : "1-12"
+    empty_can_run_numbers : "1-12"
 
-For each drange, any empty canisters and vanadium runs must be listed with the associated drange.
+For each drange, any empty containers and vanadium runs must be listed with the associated drange.
 
 
 Parameters
@@ -191,7 +216,7 @@ Example Input:
 do_van_normalisation
 ^^^^^^^^^^^^^^^^^^^^
 Indicates whether to divide the focused workspace within
-:ref:`run_diffraction_focusing_osiris_isis-powder-diffraction-ref` mode with an
+:ref:`focus_osiris_isis-powder-diffraction-ref` mode with an
 associated vanadium run.
 
 Accepted values are: **True** or **False**
@@ -209,7 +234,7 @@ file_ext
 *Optional*
 
 Specifies a file extension to use for the
-:ref:`run_diffraction_focusing_osiris_isis-powder-diffraction-ref` method.
+:ref:`focus_osiris_isis-powder-diffraction-ref` method.
 
 This should be used to process partial runs. When
 processing full runs (i.e. completed runs) it should not
@@ -230,7 +255,7 @@ Example Input:
 merge_drange
 ^^^^^^^^^^^^
 Indicates whether to merge summed workspaces of different dranges after running the
-:ref:`run_diffraction_focusing_osiris_isis-powder-diffraction-ref` method.
+:ref:`focus_osiris_isis-powder-diffraction-ref` method.
 
 Accepted values are: **True** or **False**
 
@@ -265,7 +290,7 @@ Example Input:
 run_number
 ^^^^^^^^^^
 Specifies the run number(s) to process when calling the
-:ref:`run_diffraction_focusing_osiris_isis-powder-diffraction-ref` method.
+:ref:`focus_osiris_isis-powder-diffraction-ref` method.
 
 This parameter accepts a single value or a range
 of values with the following syntax:
