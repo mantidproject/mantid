@@ -211,12 +211,7 @@ class InstrumentArrayConverter:
         :param detid: detector id of peak (from peak table)
         :param bank_name: bank name on which detector resides (from peak table)
         :param dpixel: width of detector window in pixels (along row and columns)
-        :return signal: 3D numpy array containing signal/intensities (row x cols x bins)
-        :return errors: 3D numpy array containing errors (row x cols x bins)
-        :return irow_peak: index of peak position along first dim (row)
-        :return icol_peak: index of peak position along second dim (col)
-        :return ispec: spectrum index corresponding to detid of peak
-        :return edges: bool mask True for pixels on the edge of a detector bank/panel
+        :return peak_data: PeakData object storing detids in peak region
         """
         bank = self.inst.getComponentByName(bank_name)
         row, col = peak.getRow(), peak.getCol()
