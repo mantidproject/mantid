@@ -1,3 +1,5 @@
 - Support workspaces with d-spacing xunit in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`
 - Add option ``OptimiseXWindowSize`` to fix TOF (or d-sapcing) window extent below a threshold intensity/sigma (``ThresholdIoverSigma``) in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`
+- Improved formatting of plots in pdf output of :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`
+- Parameter ``NTOFBinsMin`` in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` now refers to the number of non-zero bins in the integration window with y/error > 1
 
