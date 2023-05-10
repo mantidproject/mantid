@@ -117,7 +117,10 @@ public:
 
 protected:
   /// Function called when observer objects recieves a notification
-  void deleteNotificationReceived(const std::shared_ptr<const Workspace> &deleted);
+  void deleteNotificationReceived(const std::shared_ptr<const Workspace> &replaced);
+
+  /// Function called when observer detects a workspace is replaced
+  void replaceNotificationReceived(const std::shared_ptr<const Workspace> &deleted);
 
   /// Vector of the dimensions used, in the order X Y Z t, etc.
   std::vector<std::shared_ptr<Geometry::IMDDimension>> m_dimensions;
