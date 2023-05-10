@@ -38,10 +38,9 @@ namespace {
 double resolution(const double deltaT_overT, const double deltaL, const double l_total, const double deltaTheta,
                   const double theta) {
   // std::cout << "Lt=" << l_total << " theta=" << theta * 180 / M_PI << "\n";
-  double termTOF = deltaT_overT * deltaT_overT;
-  double termL = (deltaL * deltaL) / (l_total * l_total);
-  double termTheta = (deltaTheta * deltaTheta) / (tan(theta) * tan(theta));
-  return sqrt(termTOF + termL + termTheta);
+  const double termL = deltaL / l_total;
+  const double termTheta = deltaTheta / tan(theta);
+  return sqrt(deltaT_overT * deltaT_overT + termL * termL + termTheta * termTheta);
 }
 } // namespace
 
