@@ -392,7 +392,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                         sigX0Params, sigY0, sigP0Params = self.getBVGInitialGuesses(peaks_ws, strongPeakParams_ws)
 
             except KeyboardInterrupt:
-                np.warnings.filterwarnings("default")  # Re-enable on exit
+                warnings.filterwarnings("default")  # Re-enable on exit
                 raise
 
             except:
@@ -405,7 +405,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         for wsName in mtd.getObjectNames():
             if "fit_" in wsName or "bvgWS" in wsName or "tofWS" in wsName or "scaleWS" in wsName:
                 mtd.remove(wsName)
-        np.warnings.filterwarnings("default")  # Re-enable on exit
+        warnings.filterwarnings("default")  # Re-enable on exit
         # Set the output
         self.setProperty("OutputPeaksWorkspace", peaks_ws_out)
         self.setProperty("OutputParamsWorkspace", params_ws)
