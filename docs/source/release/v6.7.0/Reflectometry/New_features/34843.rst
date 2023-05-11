@@ -1,0 +1,1 @@
+- In the Reflectometry GUI experiments for POLREF will have the default parameters ``UseManualScaleFactors=True`` and ``ScaleFactorFromPeriod=1`` in the Output Stitch Properties field of the :ref:`Experiment tab<refl_exp_instrument_settings>`. These can be edited or removed as required.

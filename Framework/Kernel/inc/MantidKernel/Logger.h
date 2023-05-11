@@ -13,9 +13,8 @@
 #include "MantidKernel/ThreadSafeLogStream.h"
 
 #include <Poco/Message.h>
-
+#include <array>
 #include <iosfwd>
-
 #include <memory>
 #include <string>
 
@@ -54,7 +53,7 @@ public:
   // Our logger's priority types are the same as POCO's Message's types.
   using Priority = Poco::Message::Priority;
 
-  static const std::string *PriorityNames;
+  static const std::array<std::string, 9> PriorityNames;
 
   /// Constructor giving the logger name
   Logger(const std::string &name);
@@ -121,6 +120,8 @@ public:
   /// Returns the Logger's log level.
   int getLevel() const;
 
+  std::string getLevelName() const;
+
   /// Sets the Logger's log level using a symbolic value.
   void setLevel(const std::string &level);
 
@@ -136,6 +137,7 @@ public:
   /// Sets the log level for all Loggers created so far, including the root
   /// logger.
   static void setLevelForAll(const int level);
+  static void setLevelForAll(const std::string &level);
 
   /// Shuts down the logging framework and releases all Loggers.
   static void shutdown();

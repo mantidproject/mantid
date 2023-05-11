@@ -109,6 +109,8 @@ std::vector<std::string> splitPath(const std::string &path) {
   return splitted;
 }
 
+const std::string LOG_LEVEL_KEY("logging.loggers.root.level");
+
 } // end of anonymous namespace
 
 //-------------------------------
@@ -916,6 +918,8 @@ void ConfigServiceImpl::setString(const std::string &key, const std::string &val
   } else if (key == "logging.channels.consoleChannel.class") {
     // this key requires reloading logging for it to take effect
     configureLogging();
+  } else if (key == LOG_LEVEL_KEY) {
+    this->setLogLevel(value);
   }
 
   m_notificationCenter.postNotification(new ValueChanged(key, value, old));
@@ -1890,9 +1894,22 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename, const bo
  */
 void ConfigServiceImpl::setLogLevel(int logLevel, bool quiet) {
   Mantid::Kernel::Logger::setLevelForAll(logLevel);
+  // update the internal value to keep strings in sync
+  m_pConf->setString(LOG_LEVEL_KEY, g_log.getLevelName());
+
   if (!quiet) {
-    g_log.log("logging set to " + Logger::PriorityNames[logLevel] + " priority",
+    g_log.log("logging set to " + Logger::PriorityNames[std::size_t(logLevel)] + " priority",
               static_cast<Logger::Priority>(logLevel));
+  }
+}
+
+void ConfigServiceImpl::setLogLevel(std::string logLevel, bool quiet) {
+  Mantid::Kernel::Logger::setLevelForAll(logLevel);
+  // update the internal value to keep strings in sync
+  m_pConf->setString(LOG_LEVEL_KEY, g_log.getLevelName());
+
+  if (!quiet) {
+    g_log.log("logging set to " + logLevel + " priority", static_cast<Logger::Priority>(g_log.getLevel()));
   }
 }
 

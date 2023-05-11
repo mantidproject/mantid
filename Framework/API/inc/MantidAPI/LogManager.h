@@ -68,6 +68,16 @@ public:
 
   /// Filter the logs by time
   virtual void filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop);
+
+  /// For the time series properties, remove values according to TimeROI
+  virtual void removeDataOutsideTimeROI();
+
+  /// Create a new LogManager with a partial copy of its time series properties according to TimeROI
+  LogManager *cloneInTimeROI(const Kernel::TimeROI &timeROI);
+
+  /// Copy properties from another LogManager; filter copied time series properties according to TimeROI
+  void copyAndFilterProperties(const LogManager &other, const Kernel::TimeROI &timeROI);
+
   /// Filter the run by the given boolean log
   void filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
                    const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>());
@@ -189,7 +199,7 @@ public:
   /// Clear the logs
   void clearLogs();
 
-  /// Clear ou the cache of calculated statistics
+  /// Clear the cache of calculated statistics
   void clearSingleValueCache();
 
   // returns true if the log has a matching invalid values log filter

@@ -132,6 +132,7 @@ class ConfigServiceTest(unittest.TestCase):
 
     def test_setting_log_channel_levels(self):
         testhelpers.assertRaisesNothing(self, config.setLogLevel, 4, True)
+        testhelpers.assertRaisesNothing(self, config.setLogLevel, "warning", True)
 
     def test_properties_documented(self):
         # location of the rst file relative to this file this will break if either moves

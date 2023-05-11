@@ -68,16 +68,15 @@ bool isPhysicalView() {
  * detector colours. Ignored if autoscaling == true.
  */
 InstrumentActor::InstrumentActor(const std::string &wsName, MantidWidgets::IMessageHandler &messageHandler,
-                                 bool autoscaling, double scaleMin, double scaleMax)
+                                 bool autoscaling, double scaleMin, double scaleMax, QString settingsGroup)
     : InstrumentActor(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName), messageHandler, autoscaling,
-                      scaleMin, scaleMax) {}
+                      scaleMin, scaleMax, settingsGroup) {}
 
 InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, MantidWidgets::IMessageHandler &messageHandler,
-                                 bool autoscaling, double scaleMin, double scaleMax)
-    : m_workspace(workspace), m_ragged(true), m_autoscaling(autoscaling), m_defaultPos(), m_initialized(false),
-      m_isPhysicalInstrument(false), m_messageHandler(messageHandler) {
+                                 bool autoscaling, double scaleMin, double scaleMax, QString settingsGroup)
+    : m_workspace(workspace), m_settingsGroup(std::move(settingsGroup)), m_ragged(true), m_autoscaling(autoscaling),
+      m_defaultPos(), m_initialized(false), m_isPhysicalInstrument(false), m_messageHandler(messageHandler) {
 
-  // settings
   loadSettings();
 
   m_scaleMin = scaleMin;
@@ -88,6 +87,8 @@ InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, MantidWidgets::
   m_renderer.reset(new InstrumentRenderer(*this));
   m_renderer->changeScaleType(m_scaleType);
 }
+
+InstrumentActor::~InstrumentActor() {}
 
 void InstrumentActor::initialize(bool resetGeometry, bool setDefaultView) {
   auto sharedWorkspace = m_workspace;
@@ -136,11 +137,6 @@ void InstrumentActor::initialize(bool resetGeometry, bool setDefaultView) {
   emit initWidget(resetGeometry, setDefaultView);
   emit refreshView();
 }
-
-/**
- * Destructor
- */
-InstrumentActor::~InstrumentActor() { saveSettings(); }
 
 void InstrumentActor::cancel() {
   blockSignals(true);
@@ -695,7 +691,7 @@ void InstrumentActor::changeNthPower(double nth_power) {
 
 void InstrumentActor::loadSettings() {
   QSettings settings;
-  settings.beginGroup("Mantid/InstrumentWidget");
+  settings.beginGroup(m_settingsGroup);
   m_scaleType = ColorMap::ScaleType(settings.value("ScaleType", 0).toInt());
   // Load Colormap. If the file is invalid the default stored colour map is used
   m_currentCMap.first = settings.value("ColormapFile", ColorMap::defaultColorMap()).toString();
@@ -705,9 +701,9 @@ void InstrumentActor::loadSettings() {
   settings.endGroup();
 }
 
-void InstrumentActor::saveSettings() {
+void InstrumentActor::saveSettings() const {
   QSettings settings;
-  settings.beginGroup("Mantid/InstrumentWidget");
+  settings.beginGroup(m_settingsGroup);
   settings.setValue("ColormapFile", m_currentCMap.first);
   settings.setValue("ColormapFileHighlightZeros", m_currentCMap.second);
   settings.setValue("ScaleType", static_cast<int>(m_renderer->getColorMap().getScaleType()));

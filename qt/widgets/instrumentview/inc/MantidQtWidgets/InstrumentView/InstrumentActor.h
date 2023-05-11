@@ -19,6 +19,7 @@
 #include "MaskBinsData.h"
 
 #include <QObject>
+#include <QString>
 
 #include <limits>
 #include <memory>
@@ -98,10 +99,10 @@ public:
 
   /// Constructor
   InstrumentActor(const std::string &wsName, MantidWidgets::IMessageHandler &messageHandler, bool autoscaling = true,
-                  double scaleMin = 0.0, double scaleMax = 0.0);
+                  double scaleMin = 0.0, double scaleMax = 0.0, QString settingsGroup = "Mantid/InstrumentWidget");
   InstrumentActor(Mantid::API::MatrixWorkspace_sptr workspace, MantidWidgets::IMessageHandler &messageHandler,
-                  bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0);
-  ///< Destructor
+                  bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
+                  QString settingsGroup = "Mantid/InstrumentWidget");
   ~InstrumentActor();
 
   /// Draw the instrument in 3D
@@ -251,6 +252,8 @@ public:
   void setGridLayer(bool isUsingLayer, int layer) const;
   const InstrumentRenderer &getInstrumentRenderer() const override;
 
+  void saveSettings() const;
+
 public slots:
   void initialize(bool resetGeometry, bool setDefaultView);
   void cancel();
@@ -261,9 +264,8 @@ private:
   void setUpWorkspace(const std::shared_ptr<const Mantid::API::MatrixWorkspace> &sharedWorkspace, double scaleMin,
                       double scaleMax);
   void setupPhysicalInstrumentIfExists();
-  void resetColors();
   void loadSettings();
-  void saveSettings();
+  void resetColors();
   void setDataMinMaxRange(double vmin, double vmax);
   void setDataIntegrationRange(const double &xmin, const double &xmax);
   void calculateIntegratedSpectra(const Mantid::API::MatrixWorkspace &workspace);
@@ -276,6 +278,8 @@ private:
 
   /// The workspace whose data are shown
   std::shared_ptr<Mantid::API::MatrixWorkspace> m_workspace;
+  /// The name of the settings group to store settings in
+  QString m_settingsGroup;
   /// The helper masking workspace keeping the mask build in the mask tab but
   /// not applied to the data workspace.
   mutable std::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;

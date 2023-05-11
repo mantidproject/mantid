@@ -37,6 +37,11 @@ class AbinsLoadCRYSTALTest(unittest.TestCase, abins.input.Tester):
     _phonon_dispersion_v1 = "mgo-GX_LoadCRYSTAL"
     _phonon_dispersion_v2 = "MgO-222-DISP_LoadCRYSTAL"
 
+    # ===================================================================================
+    # | Use cases: Interpolated phonon DOS                                              |
+    # ===================================================================================
+    _phonon_dos = "crystal23_diamond"
+
     def test_gamma_crystal(self):
         self.check(name=self._gamma_crystal, loader=CRYSTALLoader)
         self.check(name=self._set_crystal, loader=CRYSTALLoader)
@@ -50,6 +55,9 @@ class AbinsLoadCRYSTALTest(unittest.TestCase, abins.input.Tester):
     def test_phonon_dispersion_crystal(self):
         self.check(name=self._phonon_dispersion_v1, loader=CRYSTALLoader)
         self.check(name=self._phonon_dispersion_v2, loader=CRYSTALLoader)
+
+    def test_phonon_dos_crystal(self):
+        self.check(name=self._phonon_dos, loader=CRYSTALLoader, max_displacement_kpt=3)
 
 
 if __name__ == "__main__":

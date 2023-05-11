@@ -1,0 +1,5 @@
+- Fixed a bug when loading certain vasprun.xml files in Abins. If the
+  VASP user enables "selective dynamics" and IBRION=6, VASP will
+  ignore the frozen atoms when calculation vibrational
+  frequencies. This created an unexpected number of degrees of
+  freedom.

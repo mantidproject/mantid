@@ -1,0 +1,1 @@
+- Fixed a bug in the fitting window where tied parameters would not update graphically. Additionally, the user can no longer add circular ties which would cause the fit to send back an error.

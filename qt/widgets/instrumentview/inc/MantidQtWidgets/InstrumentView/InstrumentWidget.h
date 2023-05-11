@@ -128,6 +128,7 @@ public:
   explicit InstrumentWidget(QString wsName, QWidget *parent = nullptr, bool resetGeometry = true,
                             bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
                             bool setDefaultView = true, bool useThread = false, Dependencies deps = Dependencies(),
+                            QString settingsGroup = "Mantid/InstrumentWidget",
                             TabCustomizations customizations = TabCustomizations());
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
@@ -177,7 +178,7 @@ public:
   /// Get a filename for saving
   QString getSaveFileName(const QString &title, const QString &filters, QString *selectedFilter = nullptr);
   /// Get a name for settings group
-  QString getSettingsGroupName() const;
+  inline QString getSettingsGroupName() const noexcept { return m_settingsGroup; }
   /// Get a name for a instrument-specific settings group
   QString getInstrumentSettingsGroupName() const;
 
@@ -333,6 +334,8 @@ protected:
   /// The name of workspace that this window is associated with. The
   /// InstrumentActor holds a pointer to the workspace itself.
   QString m_workspaceName;
+  /// The name of the settings group to store settings in
+  QString m_settingsGroup;
   /// Instrument actor is an interface to the instrument
   std::unique_ptr<InstrumentActor> m_instrumentActor;
   /// Option to use or not OpenGL display for "unwrapped" view, 3D is always in

@@ -122,6 +122,9 @@ class SampleLogsModel:
         """Return number of experiment info's in workspace"""
         return self._ws.getNumExperimentInfo() if self.isMD() else 0
 
+    def get_timeroi(self):
+        return self.run.getTimeROI()
+
     def get_log(self, LogName):
         """Return log of given LogName"""
         return self.run.getLogData(LogName)

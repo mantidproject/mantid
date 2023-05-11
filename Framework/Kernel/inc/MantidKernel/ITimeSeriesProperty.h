@@ -75,7 +75,7 @@ public:
   // Returns whether the time series has been filtered
   virtual bool isFiltered() const = 0;
 
-  // Remove time values outside of TimeROI regions defined as [roi_start,roi_stop).
+  // Remove time values outside the TimeROI regions defined as [roi_start,roi_stop).
   // However, keep the values immediately before and after each ROI region, if available.
   virtual void removeDataOutsideTimeROI(const TimeROI &timeRoi) = 0;
 

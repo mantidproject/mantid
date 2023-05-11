@@ -1,0 +1,1 @@
+- The settings loaded into the ALFView interface are now separate from those loaded into the InstrumentView.

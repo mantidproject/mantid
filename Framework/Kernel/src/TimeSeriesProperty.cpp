@@ -79,13 +79,21 @@ template <typename TYPE> TimeSeriesProperty<TYPE> *TimeSeriesProperty<TYPE>::clo
 }
 
 /**
+ * Construct a TimeSeriesProperty object with the base class data only, no time series data.
+ * @param p :: a pointer to a base class object.
+ */
+template <typename TYPE>
+TimeSeriesProperty<TYPE>::TimeSeriesProperty(const Property *const p)
+    : Property(*p), m_values(), m_size(), m_propSortedFlag() {}
+
+/**
  * Create a partial copy of this object according to a TimeROI. The partially cloned object
- * should include all time values enclosed by the ROI regions each defined as [roi_start,roi_end),
+ * should include all time values enclosed by the ROI regions, each defined as [roi_start,roi_end),
  * plus the values immediately before and after an ROI region, if available.
- * @param timeROI :: a series of time regions used to determine which values should be included in the copy
+ * @param timeROI :: a series of time regions used to determine which values should be included in the copy.
  */
 template <typename TYPE> Property *TimeSeriesProperty<TYPE>::cloneInTimeROI(const TimeROI &timeROI) const {
-  TimeSeriesProperty<TYPE> *filteredTS = new TimeSeriesProperty<TYPE>(this->name());
+  auto filteredTS = new TimeSeriesProperty<TYPE>(this);
   createFilteredData(timeROI, filteredTS->m_values);
   filteredTS->m_size = static_cast<int>(filteredTS->m_values.size());
   return filteredTS;
@@ -333,114 +341,6 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::removeDataOutsideTimeROI
   mp_copy.clear();
 
   m_size = static_cast<int>(m_values.size());
-}
-
-/// Split this TimeSeriresProperty by a vector of time with N entries,
-/// and by the wsIndex workspace index defined by inputWorkspaceIndicies
-/// Requirements:
-/// vector output must be defined before this method is called
-template <typename TYPE>
-void TimeSeriesProperty<TYPE>::splitByTimeVector(const std::vector<DateAndTime> &timeToFilterTo,
-                                                 const std::vector<int> &inputWorkspaceIndicies,
-                                                 const std::vector<TimeSeriesProperty *> &output) {
-
-  // check inputs
-  if (timeToFilterTo.size() != inputWorkspaceIndicies.size() + 1) {
-    throw std::runtime_error("Input time vector's size does not match(one more larger than) target "
-                             "workspace index vector's size inputWorkspaceIndicies.size() \n");
-  }
-
-  // return if the output vector TimeSeriesProperties is not defined
-  if (output.empty())
-    return;
-
-  sortIfNecessary();
-
-  // work on m_values, m_size, and m_time
-  auto const currentTimes = timesAsVector();
-  auto const currentValues = valuesAsVector();
-  size_t index_splitter = 0;
-
-  // move splitter index such that the first entry of TSP is before the stop
-  // time of a splitter
-  DateAndTime firstPropTime = currentTimes[0];
-  auto firstFilterTime = std::lower_bound(timeToFilterTo.begin(), timeToFilterTo.end(), firstPropTime);
-  if (firstFilterTime == timeToFilterTo.end()) {
-    // do nothing as the first TimeSeriesProperty entry's time is before any
-    // splitters
-    return;
-  } else if (firstFilterTime != timeToFilterTo.begin()) {
-    // calculate the splitter's index (now we check the stop time)
-    index_splitter = firstFilterTime - timeToFilterTo.begin() - 1;
-  }
-
-  DateAndTime filterStartTime = timeToFilterTo[index_splitter];
-  DateAndTime filterEndTime;
-
-  // move along the entries to find the entry inside the current splitter
-  auto firstEntryInSplitter = std::lower_bound(currentTimes.begin(), currentTimes.end(), filterStartTime);
-  if (firstEntryInSplitter == currentTimes.end()) {
-    // the first splitter's start time is LATER than the last TSP entry, then
-    // there won't be any
-    // TSP entry to be split into any wsIndex splitter.
-    DateAndTime last_entry_time = this->lastTime();
-    TYPE last_entry_value = this->lastValue();
-    for (auto &i : output) {
-      i->addValue(last_entry_time, last_entry_value);
-    }
-    return;
-  }
-
-  // first splitter start time is between firstEntryInSplitter and the one
-  // before it. so the index for firstEntryInSplitter is the first TSP entry
-  // in the splitter
-  size_t timeIndex = firstEntryInSplitter - currentTimes.begin();
-  firstPropTime = *firstEntryInSplitter;
-
-  for (; index_splitter < timeToFilterTo.size() - 1; ++index_splitter) {
-    int wsIndex = inputWorkspaceIndicies[index_splitter];
-
-    filterStartTime = timeToFilterTo[index_splitter];
-    filterEndTime = timeToFilterTo[index_splitter + 1];
-
-    // get the first entry index (overlap)
-    if (timeIndex > 0)
-      --timeIndex;
-
-    // add the continuous entries to same wsIndex time series property
-    const size_t numEntries = currentTimes.size();
-
-    // Add properties to the current wsIndex.
-    if (timeIndex >= numEntries) {
-      // We have run out of TSP entries, so use the last TSP value
-      // for all remaining outputs
-      auto currentTime = currentTimes.back();
-      if (output[wsIndex]->size() == 0 || output[wsIndex]->lastTime() != currentTime) {
-        output[wsIndex]->addValue(currentTime, currentValues.back());
-      }
-    } else {
-      // Add TSP values until we run out or go past the current filter
-      // end time.
-      for (; timeIndex < numEntries; ++timeIndex) {
-        auto currentTime = currentTimes[timeIndex];
-        if (output[wsIndex]->size() == 0 || output[wsIndex]->lastTime() < currentTime) {
-          // avoid to add duplicate entry
-          output[wsIndex]->addValue(currentTime, currentValues[timeIndex]);
-        }
-        if (currentTime > filterEndTime)
-          break;
-      }
-    }
-  }
-
-  // Add a debugging check such that there won't be any time entry with zero log
-  for (size_t i = 0; i < output.size(); ++i) {
-    if (output[i]->size() == 0) {
-      std::stringstream errss;
-      errss << "entry " << m_name << " has 0 size, whose first entry is at " << this->firstTime().toSimpleString();
-      g_log.warning(errss.str());
-    }
-  }
 }
 
 // The makeFilterByValue & expandFilterToRange methods generate a bunch of
@@ -1007,27 +907,75 @@ template <typename TYPE> std::vector<DateAndTime> TimeSeriesProperty<TYPE>::time
 }
 
 /**
- * Return the time series's filtered times as a vector<DateAndTime>
+ * A view of the times as seen within a the TimeROI's regions.
+ * A values will be excluded if its times lie outside the ROI's regions or coincides with the upper boundary
+ * of a ROI region. For instance, time "2007-11-30T16:17:30" is excluded in the ROI
+ * ["2007-11-30T16:17:00", "2007-11-30T16:17:30"). However, a value at time "2007-11-30T16:16:00" will be included
+ * with a time of "2007-11-30T16:17:00" because that is when the ROI starts.
+ * @param roi :: ROI regions validating any query time.
  * @return A vector of DateAndTime objects
  */
 template <typename TYPE>
 std::vector<DateAndTime> TimeSeriesProperty<TYPE>::filteredTimesAsVector(const Kernel::TimeROI *roi) const {
-  if (!roi || roi->useAll()) {
-    return this->timesAsVector();
-  } else {
-    std::vector<DateAndTime> out;
+  if (roi && !roi->useAll()) {
+    this->sortIfNecessary();
+    std::vector<DateAndTime> filteredTimes;
     if (roi->firstTime() > this->m_values.back().time()) {
       // Since the ROI starts after everything, just return the last time in the log
-      out.emplace_back(this->m_values.back().time());
-    } else { // only use the values in the filter
-      for (const auto &timeAndValue : this->m_values) {
-        if (roi->valueAtTime(timeAndValue.time())) {
-          out.emplace_back(timeAndValue.time());
+      filteredTimes.emplace_back(roi->firstTime());
+    } else { // only use the times in the filter - this is very similar to FilteredTimeSeriesProperty::applyFilter
+      // the index into the m_values array of the time, or -1 (before) or m_values.size() (after)
+      std::size_t index_current_log{0};
+
+      for (const auto &splitter : roi->toTimeIntervals()) {
+        const auto endTime = splitter.stop();
+
+        // check if the splitter starts too early
+        if (endTime < this->m_values[index_current_log].time()) {
+          continue; // skip to the next splitter
         }
+
+        // cache values to reduce number of method calls
+        const auto beginTime = splitter.start();
+
+        // find the first log that should be added
+        if (this->m_values.back().time() < beginTime) {
+          // skip directly to the end if the filter starts after the last log
+          index_current_log = this->m_values.size() - 1;
+        } else {
+          // search for the right starting point
+          while ((this->m_values[index_current_log].time() <= beginTime)) {
+            if (index_current_log + 1 > this->m_values.size())
+              break;
+            index_current_log++;
+          }
+          // need to back up by one
+          if (index_current_log > 0)
+            index_current_log--;
+          // go backwards more while times are equal to the one being started at
+          while (index_current_log > 0 &&
+                 this->m_values[index_current_log].time() == this->m_values[index_current_log - 1].time()) {
+            index_current_log--;
+          }
+        }
+
+        // add everything up to the end time
+        for (; index_current_log < this->m_values.size(); ++index_current_log) {
+          if (this->m_values[index_current_log].time() >= endTime)
+            break;
+
+          // start time is when this value was created or when the filter started
+          filteredTimes.emplace_back(std::max(beginTime, this->m_values[index_current_log].time()));
+        }
+        // go back one so the next splitter can add a value
+        if (index_current_log > 0)
+          index_current_log--;
       }
     }
 
-    return out;
+    return filteredTimes;
+  } else {
+    return this->timesAsVector();
   }
 }
 
@@ -1182,7 +1130,8 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::firstValue(const Kernel:
     const auto index = std::size_t(std::distance(times.cbegin(), iter));
 
     const auto values = this->valuesAsVector();
-    return values[index];
+    const TYPE ret = values[index];
+    return ret;
   }
 }
 
@@ -1226,10 +1175,13 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue(const Kernel::
     return this->lastValue();
   } else {
     auto iter = std::lower_bound(times.cbegin(), times.cend(), stopTime);
+    if ((iter != times.cbegin()) && (*iter > stopTime))
+      --iter;
     const auto index = std::size_t(std::distance(times.cbegin(), iter));
 
     const auto values = this->valuesAsVector();
-    return values[index];
+    const TYPE ret = values[index];
+    return ret;
   }
 }
 
@@ -1768,10 +1720,16 @@ double TimeSeriesProperty<TYPE>::extractStatistic(Math::StatisticType selection,
   double singleValue = 0;
   switch (selection) {
   case FirstValue:
-    singleValue = static_cast<double>(this->nthValue(0));
+    if (roi && !roi->useAll())
+      singleValue = double(this->firstValue(*roi));
+    else
+      singleValue = double(this->nthValue(0));
     break;
   case LastValue:
-    singleValue = static_cast<double>(this->nthValue(this->size() - 1));
+    if (roi && !roi->useAll())
+      singleValue = double(this->lastValue(*roi));
+    else
+      singleValue = double(this->nthValue(this->size() - 1));
     break;
   case Minimum:
     singleValue = static_cast<double>(this->getStatistics(roi).minimum);
@@ -2111,10 +2069,11 @@ void TimeSeriesProperty<std::string>::histogramData(const Types::Core::DateAndTi
 }
 
 /**
- * Series values within the ROI's regions.
+ * A view of the times as seen within a the TimeROI's regions.
  * A values will be excluded if its times lie outside the ROI's regions or coincides with the upper boundary
  * of a ROI region. For instance, time "2007-11-30T16:17:30" is excluded in the ROI
- * [2007-11-30T16:17:00", 2007-11-30T16:17:30").
+ * ["2007-11-30T16:17:00", "2007-11-30T16:17:30"). However, a value at time "2007-11-30T16:16:00" will be included
+ * because it is valid at the beginning of the TimeROI.
  * @param roi :: ROI regions validating any query time.
  * @returns :: Vector of included values only.
  */
@@ -2125,10 +2084,53 @@ template <typename TYPE> std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredVal
     if (roi->firstTime() > this->m_values.back().time()) {
       // Since the ROI starts after everything, just return the last value in the log
       filteredValues.emplace_back(this->m_values.back().value());
-    } else { // only use the values in the filter
-      for (const auto &timeAndValue : this->m_values)
-        if (roi->valueAtTime(timeAndValue.time()))
-          filteredValues.emplace_back(timeAndValue.value());
+    } else { // only use the values in the filter - this is very similar to FilteredTimeSeriesProperty::applyFilter
+      // the index into the m_values array of the time, or -1 (before) or m_values.size() (after)
+      std::size_t index_current_log{0};
+      for (const auto &splitter : roi->toTimeIntervals()) {
+        const auto endTime = splitter.stop();
+
+        // check if the splitter starts too early
+        if (endTime < this->m_values[index_current_log].time()) {
+          continue; // skip to the next splitter
+        }
+
+        // cache values to reduce number of method calls
+        const auto beginTime = splitter.start();
+
+        // find the first log that should be added
+        if (this->m_values.back().time() < beginTime) {
+          // skip directly to the end if the filter starts after the last log
+          index_current_log = this->m_values.size() - 1;
+        } else {
+          // search for the right starting point
+          while ((this->m_values[index_current_log].time() <= beginTime)) {
+            if (index_current_log + 1 > this->m_values.size())
+              break;
+            index_current_log++;
+          }
+          // need to back up by one
+          if (index_current_log > 0)
+            index_current_log--;
+          // go backwards more while times are equal to the one being started at
+          while (index_current_log > 0 &&
+                 this->m_values[index_current_log].time() == this->m_values[index_current_log - 1].time()) {
+            index_current_log--;
+          }
+        }
+
+        // add everything up to the end time
+        for (; index_current_log < this->m_values.size(); ++index_current_log) {
+          if (this->m_values[index_current_log].time() >= endTime)
+            break;
+
+          // the current value goes into the filter
+          filteredValues.emplace_back(this->m_values[index_current_log].value());
+        }
+        // go back one so the next splitter can add a value
+        if (index_current_log > 0)
+          index_current_log--;
+      }
     }
     return filteredValues;
   } else {
