@@ -97,7 +97,9 @@ class FittingPresenterTest(unittest.TestCase):
                     "status": "success",
                 }
             )
-        self.presenter.data_widget.presenter.fit_all_started_notifier.notify_subscribers((ws_list, True))
+        self.presenter.data_widget.presenter.model = mock.MagicMock()
+        self.presenter.data_widget.presenter.model.get_active_ws_sorted_by_primary_log.return_value = ws_list
+        self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers(True)
         self.presenter.plot_widget.fitprop_list = fitprop_list
         self.assertEqual(1, mock_fit_all_done.call_count)
 
@@ -108,10 +110,12 @@ class FittingPresenterTest(unittest.TestCase):
         self.assertEqual(1, self.presenter.plot_widget.fit_all_done_notifier.notify_subscribers.call_count)
 
     def test_fit_all_done(self):
+        log_ws_name = "bleh"
         self.presenter.plot_widget.update_browser = mock.MagicMock()
         self.presenter.plot_widget.set_final_state_progress_bar = mock.MagicMock()
         self.presenter.enable_view = mock.MagicMock()
-        self.presenter.data_widget.presenter.fit_completed = mock.MagicMock()
+        self.presenter.data_widget.presenter.model.get_log_workspace_group_name = mock.MagicMock(return_value=log_ws_name)
+        self.presenter.plot_widget.fit_completed = mock.MagicMock()
 
         self.presenter.plot_widget.fitprop_list = fitprop_list
         self.presenter.plot_widget._finished()
@@ -119,14 +123,15 @@ class FittingPresenterTest(unittest.TestCase):
         self.presenter.plot_widget.update_browser.assert_called_once()
         self.presenter.plot_widget.set_final_state_progress_bar.assert_called_once_with(output_list=fitprop_list)
         self.presenter.enable_view.assert_called_once_with(fit_all=True)
-        self.presenter.data_widget.presenter.fit_completed.assert_called_once_with(fit_props=fitprop_list)
+        self.presenter.plot_widget.fit_completed.assert_called_once_with(fitprop_list, [], [], log_ws_name)
 
     def test_fit_all_done_calls_set_final_state_indirectly(self):
+        self.presenter.data_widget.presenter.model.get_all_log_workspaces_names = mock.MagicMock(return_value=[])
         self.presenter.plot_widget.update_browser = mock.MagicMock()
         self.presenter.plot_widget.update_progress_bar = mock.MagicMock()
         self.presenter.plot_widget.set_final_state_progress_bar = mock.MagicMock()
         self.presenter.enable_view = mock.MagicMock()
-        self.presenter.data_widget.presenter.fit_completed = mock.MagicMock()
+        self.presenter.plot_widget.fit_completed = mock.MagicMock()
 
         self.presenter.plot_widget.fitprop_list = fitprop_list
         self.presenter.plot_widget._finished()
@@ -136,16 +141,14 @@ class FittingPresenterTest(unittest.TestCase):
         # blocked by mocking out update_progress_bar which uses fit_props saved to the plot_presenter class
 
     def test_fit_all_started_notified_sequential(self):
-        self.presenter.data_widget.model.get_active_ws_sorted_by_primary_log = mock.MagicMock(return_value=ws_list)
-        self.presenter.data_widget.presenter.fit_all_started_notifier.notify_subscribers = mock.MagicMock()
-        self.presenter.data_widget.presenter._start_seq_fit()
-        self.presenter.data_widget.presenter.fit_all_started_notifier.notify_subscribers.assert_called_once_with((ws_list, True))
+        self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers = mock.MagicMock()
+        self.presenter.plot_widget.do_seq_fit()
+        self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers.assert_called_once_with((True))
 
     def test_fit_all_started_notified_serial(self):
-        self.presenter.data_widget.model.get_active_ws_name_list = mock.MagicMock(return_value=ws_list)
-        self.presenter.data_widget.presenter.fit_all_started_notifier.notify_subscribers = mock.MagicMock()
-        self.presenter.data_widget.presenter._start_serial_fit()
-        self.presenter.data_widget.presenter.fit_all_started_notifier.notify_subscribers.assert_called_once_with((ws_list, False))
+        self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers = mock.MagicMock()
+        self.presenter.plot_widget.do_serial_fit()
+        self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers.assert_called_once_with((False))
 
     def test_fit_all_started_sequential(self):
         self.presenter.data_widget.model.get_active_ws_sorted_by_primary_log = mock.MagicMock(return_value=ws_list)
@@ -154,7 +157,7 @@ class FittingPresenterTest(unittest.TestCase):
         self.presenter.plot_widget.do_fit_all_async = mock.MagicMock()
 
         self.presenter.plot_widget.fitprop_list = fitprop_list
-        self.presenter.data_widget.presenter._start_seq_fit()
+        self.presenter.plot_widget.do_seq_fit()
 
         self.presenter.plot_widget.set_progress_bar_to_in_progress(output_list=fitprop_list)
         self.presenter.disable_view.assert_called_once_with(fit_all=True)
@@ -167,7 +170,7 @@ class FittingPresenterTest(unittest.TestCase):
         self.presenter.plot_widget.do_fit_all_async = mock.MagicMock()
 
         self.presenter.plot_widget.fitprop_list = fitprop_list
-        self.presenter.data_widget.presenter._start_serial_fit()
+        self.presenter.plot_widget.do_serial_fit()
 
         self.presenter.plot_widget.set_progress_bar_to_in_progress(output_list=fitprop_list)
         self.presenter.disable_view.assert_called_once_with(fit_all=True)
@@ -187,19 +190,20 @@ class FittingPresenterTest(unittest.TestCase):
         mock_manager.assert_has_calls([mock.call.progress_bar(), mock.call.disable()])
 
     def test_fit_done_call_order(self):
+        self.presenter.data_widget.presenter.model.get_all_log_workspaces_names = mock.MagicMock(return_value=[])
         mock_manager = mock.Mock()
         self.presenter.enable_view = mock.MagicMock()
         self.presenter.plot_widget.set_final_state_progress_bar = mock.MagicMock()
-        self.presenter.data_widget.presenter.fit_completed = mock.MagicMock()
+        self.presenter.plot_widget.fit_completed = mock.MagicMock()
         mock_manager.enable, mock_manager.progress_bar, mock_manager.fit_completed = (
             self.presenter.enable_view,
             self.presenter.plot_widget.set_final_state_progress_bar,
-            self.presenter.data_widget.presenter.fit_completed,
+            self.presenter.plot_widget.fit_completed,
         )
 
         self.presenter.fit_done(fitprop_list)
         mock_manager.assert_has_calls(
-            [mock.call.enable(), mock.call.progress_bar(fitprop_list), mock.call.fit_completed(fit_props=fitprop_list)]
+            [mock.call.enable(), mock.call.progress_bar(fitprop_list), mock.call.fit_completed(fitprop_list, [], [], "")]
         )
 
     def test_enable_view_not_fit_all(self):

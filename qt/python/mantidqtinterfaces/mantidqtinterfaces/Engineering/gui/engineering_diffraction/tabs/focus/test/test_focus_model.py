@@ -88,7 +88,6 @@ class FocusModelTest(unittest.TestCase):
     @patch(enggutils_path + ".focus_run")
     @patch(file_path + ".load_full_instrument_calibration")
     def test_first_time_focus_uses_correct_default_save_directory(self, mock_load_cal, mock_enggutils_focus_run, mock_get_output_path):
-
         default_save_location = path.join(path.expanduser("~"), "Engineering_Mantid")
         QCoreApplication.setApplicationName("Engineering_Diffraction_test_calib_model")
         presenter = settings_presenter.SettingsPresenter(

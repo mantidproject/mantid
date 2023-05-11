@@ -246,6 +246,16 @@ QGroupBox:title {
         <property name="topMargin">
          <number>0</number>
         </property>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="button_plotBG">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Inspect Background</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="1">
          <widget class="QPushButton" name="button_removeAll">
           <property name="sizePolicy">
@@ -266,36 +276,6 @@ QGroupBox:title {
          <widget class="QPushButton" name="button_removeSelected">
           <property name="text">
            <string>Remove Selected</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QPushButton" name="button_plotBG">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>Inspect Background</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <widget class="QPushButton" name="button_SeqFit">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>Sequential Fit</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="4">
-         <widget class="QPushButton" name="button_SerialFit">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>Serial Fit</string>
           </property>
          </widget>
         </item>
@@ -322,8 +302,6 @@ QGroupBox:title {
   <tabstop>button_removeSelected</tabstop>
   <tabstop>button_removeAll</tabstop>
   <tabstop>button_plotBG</tabstop>
-  <tabstop>button_SeqFit</tabstop>
-  <tabstop>button_SerialFit</tabstop>
   <tabstop>table_selection</tabstop>
  </tabstops>
  <resources/>

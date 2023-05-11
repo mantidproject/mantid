@@ -4,9 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model import FittingDataModel
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_view import FittingDataView
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_presenter import FittingDataPresenter
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_model import FittingDataModel
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_view import FittingDataView
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_presenter import FittingDataPresenter
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.fitting_ads_observer import FittingADSObserver
 
@@ -23,8 +23,11 @@ class FittingDataWidget(object):
 
         self.ads_observer = FittingADSObserver(self.remove_workspace, self.clear_workspaces, self.replace_workspace, self.rename_workspace)
 
-    def get_loaded_workspaces(self):
-        return self.presenter.get_loaded_workspaces()
+    def get_active_ws_list(self):
+        return self.presenter.get_active_ws_list()
+
+    def get_sorted_active_ws_list(self):
+        return self.presenter.get_sorted_active_ws_list()
 
     def remove_workspace(self, workspace):
         self.presenter.remove_workspace(workspace)

@@ -5,19 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
 from unittest import mock
 from unittest.mock import patch
-from numpy import isnan, nan
-from mantid.kernel import UnitParams, UnitParametersMap
+from numpy import isnan
+
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_model import FittingDataModel
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs import (
     write_table_row,
     _generate_workspace_name,
 )
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model import FittingDataModel
 from testhelpers import assertRaisesNothing
 
-data_model_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model"
+data_model_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_model"
 output_sample_log_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs"
 
 
@@ -387,180 +386,6 @@ class TestFittingDataModel(unittest.TestCase):
         table_ws.setRowCount.assert_called_with(4)  # row added
         table_ws.setCell.assert_any_call(3, 0, 1)
         table_ws.setCell.assert_any_call(3, 1, 2)
-
-    @patch(data_model_path + ".FittingDataModel._get_diff_constants")
-    @patch(data_model_path + ".FittingDataModel.create_fit_tables")
-    @patch(data_model_path + ".ADS")
-    def test_update_fit(self, mock_ads, mock_create_fit_tables, mock_get_diffs):
-        mock_table = mock.MagicMock()
-        mock_table.toDict.return_value = {
-            "Name": ["f0.Height", "f0.PeakCentre", "f0.Sigma", "f1.Height", "f1.PeakCentre", "f1.Sigma", "Cost function value"],
-            "Value": [11.0, 40000.0, 54.0, 10.0, 30000.0, 51.0, 1.0],
-            "Error": [1.0, 10.0, 2.0, 1.0, 10.0, 2.0, 0.0],
-        }
-        mock_ads.retrieve.return_value = mock_table
-        difc = 10000
-        params = UnitParametersMap()
-        params[UnitParams.difc] = difc
-        mock_get_diffs.return_value = params
-        func_str = "name=Gaussian,Height=11,PeakCentre=40000,Sigma=54;name=Gaussian,Height=10,PeakCentre=30000,Sigma=51"
-        fitprop = {
-            "name": "Fit",
-            "properties": {
-                "ConvolveMembers": True,
-                "EndX": 52000,
-                "Function": func_str,
-                "InputWorkspace": "name1",
-                "Output": "name1",
-                "OutputCompositeMembers": True,
-                "StartX": 50000,
-            },
-            "status": "success",
-            "peak_centre_params": ["Gaussian_PeakCentre"],
-            "version": 1,
-        }
-        self.model.update_fit([fitprop])
-
-        self.assertEqual(self.model._fit_results["name1"]["model"], func_str)
-        self.assertEqual(
-            self.model._fit_results["name1"]["results"],
-            {
-                "Gaussian_Height": [[11.0, 1.0], [10.0, 1.0]],
-                "Gaussian_PeakCentre": [[40000.0, 10.0], [30000.0, 10.0]],
-                "Gaussian_PeakCentre_dSpacing": [[4.0, 1.0e-3], [3.0, 1.0e-3]],
-                "Gaussian_Sigma": [[54.0, 2.0], [51.0, 2.0]],
-            },
-        )
-        mock_create_fit_tables.assert_called_once()
-        self.assertEqual(mock_get_diffs.call_count, 4)  # twice for each peak
-
-    def setup_test_create_fit_tables(self, mock_create_ws, mock_create_table, mock_groupws):
-        mock_ws_list = [mock.MagicMock(), mock.MagicMock(), mock.MagicMock(), mock.MagicMock()]
-        mock_create_ws.side_effect = mock_ws_list
-        mock_create_table.return_value = mock.MagicMock()
-        mock_groupws.side_effect = lambda wslist, OutputWorkspace: wslist
-        # setup fit results
-        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws)
-        self.model._data_workspaces.add(
-            "name2", loaded_ws=self.mock_ws, bgsub_ws=self.mock_ws, bgsub_ws_name="name2_bgsub", bg_params=[True]
-        )
-        self.model._sample_logs_workspace_group._log_workspaces = mock.MagicMock()
-        self.model._sample_logs_workspace_group._log_workspaces.name.return_value = "some_log"
-        func_str = "name=Gaussian,Height=11,PeakCentre=40000,Sigma=54;name=Gaussian,Height=10,PeakCentre=30000,Sigma=51"
-        self.model._fit_results = dict()
-        self.model._fit_results["name1"] = {
-            "model": func_str,
-            "status": "success",
-            "results": {
-                "Gaussian_Height": [[11.0, 1.0], [10.0, 1.0]],
-                "Gaussian_PeakCentre": [[40000.0, 10.0], [30000.0, 10.0]],
-                "Gaussian_PeakCentre_dSpacing": [[4.0, 1.0e-3], [3.0, 1.0e-3]],
-                "Gaussian_Sigma": [[54.0, 2.0], [51.0, 2.0]],
-            },
-            "costFunction": 1.0,
-        }
-        return mock_ws_list, mock_create_table, mock_create_ws
-
-    @patch(data_model_path + ".write_table_row")
-    @patch(data_model_path + ".GroupWorkspaces")
-    @patch(data_model_path + ".CreateEmptyTableWorkspace")
-    @patch(data_model_path + ".CreateWorkspace")
-    def test_create_fit_tables(self, mock_create_ws, mock_create_table, mock_groupws, mock_writerow):
-        mock_ws_list, mock_create_table, mock_create_ws = self.setup_test_create_fit_tables(mock_create_ws, mock_create_table, mock_groupws)
-        self.model.create_fit_tables()
-
-        # test the workspaces were created and added to fit_workspaces (and the model table workspace)
-        self.assertEqual(self.model._fit_workspaces, (mock_ws_list + [mock_create_table.return_value]))
-        # test the table stores the correct function strings (empty string if no function present)
-        mock_writerow.assert_any_call(
-            mock_create_table.return_value,
-            [
-                "name1",
-                self.model._fit_results["name1"]["costFunction"],
-                self.model._fit_results["name1"]["status"],
-                self.model._fit_results["name1"]["model"],
-            ],
-            0,
-        )
-        mock_writerow.assert_any_call(mock_create_table.return_value, ["", nan, ""], 1)  # name2 has no entry
-        # check the matrix workspaces corresponding to the fit parameters
-        # Gaussian has 3 params plus centre converted to dSpacing
-        ws_names = [mock_create_ws.mock_calls[iws][2]["OutputWorkspace"] for iws in range(0, 4)]
-        self.assertEqual(sorted(ws_names), sorted(self.model._fit_results["name1"]["results"].keys()))
-        # check the first call to setY and setE for one of the parameters
-        for im, m in enumerate(self.model._fit_workspaces[:-2]):
-            for iws, ws in enumerate(self.model._data_workspaces.get_loaded_workpace_names()):
-                _, argsY, _ = m.setY.mock_calls[iws]
-                _, argsE, _ = m.setE.mock_calls[iws]
-                self.assertEqual([argsY[0], argsE[0]], [iws, iws])
-                if ws in self.model._fit_results:
-                    self.assertTrue(all(argsY[1] == [x[0] for x in self.model._fit_results["name1"]["results"][ws_names[im]]]))
-                    self.assertTrue(all(argsE[1] == [x[1] for x in self.model._fit_results["name1"]["results"][ws_names[im]]]))
-                else:
-                    self.assertTrue(all(isnan(argsY[1])))
-                    self.assertTrue(all(isnan(argsE[1])))
-
-    @patch(data_model_path + ".write_table_row")
-    @patch(data_model_path + ".GroupWorkspaces")
-    @patch(data_model_path + ".CreateEmptyTableWorkspace")
-    @patch(data_model_path + ".CreateWorkspace")
-    def test_create_fit_tables_different_funcs(self, mock_create_ws, mock_create_table, mock_groupws, mock_writerow):
-        mock_ws_list, mock_create_table, mock_create_ws = self.setup_test_create_fit_tables(mock_create_ws, mock_create_table, mock_groupws)
-        mock_ws_list.append(mock.MagicMock())  # adding an additional parameter into model for name2
-        func_str2 = self.model._fit_results["name1"]["model"] + ";name=FlatBackground,A0=1"
-        self.model._fit_results["name2_bgsub"] = {
-            "model": func_str2,
-            "status": "success",
-            "results": dict(self.model._fit_results["name1"]["results"], FlatBackground_A0=[[1.0, 0.1]]),
-            "costFunction": 2.0,
-        }
-        self.model.create_fit_tables()
-
-        # test the workspaces were created and added to fit_workspaces
-        self.assertEqual(self.model._fit_workspaces, mock_ws_list + [mock_create_table.return_value])
-        # test the table stores the correct function strings (empty string if no function present)
-        mock_writerow.assert_any_call(
-            mock_create_table.return_value,
-            [
-                "name1",
-                self.model._fit_results["name1"]["costFunction"],
-                self.model._fit_results["name1"]["status"],
-                self.model._fit_results["name1"]["model"],
-            ],
-            0,
-        )
-        mock_writerow.assert_any_call(
-            mock_create_table.return_value,
-            [
-                "name2_bgsub",
-                self.model._fit_results["name2_bgsub"]["costFunction"],
-                self.model._fit_results["name1"]["status"],
-                self.model._fit_results["name2_bgsub"]["model"],
-            ],
-            1,
-        )
-        # check the matrix workspaces corresponding to the fit parameters
-        # 4 unique params plus the peak centre converted to dSpacing
-        ws_names = [mock_create_ws.mock_calls[iws][2]["OutputWorkspace"] for iws in range(0, 5)]
-        # get list of all unique params across both models
-        param_names = list(
-            set(list(self.model._fit_results["name1"]["results"].keys()) + list(self.model._fit_results["name2_bgsub"]["results"].keys()))
-        )
-        # test only table for unique parameter
-        self.assertEqual(sorted(ws_names), sorted(param_names))
-
-    @patch(data_model_path + ".FittingDataModel._get_diff_constants")
-    def test_convert_centres_and_error_from_TOF_to_d(self, mock_get_diffs):
-        params = UnitParametersMap()
-        params[UnitParams.difc] = 18000
-        mock_get_diffs.return_value = params
-        tof = 40000
-        tof_error = 5
-        d = self.model._convert_TOF_to_d(tof, "ws_name")
-        d_error = self.model._convert_TOFerror_to_derror(tof_error, d, "ws_name")
-
-        self.assertAlmostEqual(tof / d, 18000, delta=1e-10)
-        self.assertAlmostEqual(d_error / d, tof_error / tof, delta=1e-10)
 
     @patch(data_model_path + ".get_setting")
     @patch(data_model_path + ".ADS")
