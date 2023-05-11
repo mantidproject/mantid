@@ -1,0 +1,1 @@
+- added PyCIFRW as a runtime dependency of the mantid conda package so users no longer have to install it themselves to run the :ref:`LoadCIF <algm-LoadCIF>` algorithm

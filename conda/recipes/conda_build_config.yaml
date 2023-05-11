@@ -31,6 +31,10 @@ matplotlib:
 poco:
   - 1.12.1|>=1.12.5
 
+# Force to 4.4.1 as later versions cause issues with loading CIF files
+pycifrw:
+  - 4.4.1
+
 setuptools:
   - 47.0
 
