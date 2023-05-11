@@ -146,15 +146,15 @@ public:
     TS_ASSERT_EQUALS(ws->getGroupIDs()[2], 2);
   }
 
-  void testGetGroupSpetraIDs() {
+  void testGetGroupSpectraIDs() {
     GroupingWorkspace_sptr ws(new GroupingWorkspace());
     // create a groupingworkspace with 2 groups
     ws->initialize(100, 1, 1);
     ws->dataY(0)[0] = 1;
     ws->dataY(1)[0] = 2;
     // 0 is not a valid id, -1 is null
-    TS_ASSERT_EQUALS(ws->getGroupSpetraIDs(-1).size(), 98);
-    TS_ASSERT_EQUALS(ws->getGroupSpetraIDs(1).size(), 1);
-    TS_ASSERT_EQUALS(ws->getGroupSpetraIDs(2).size(), 1);
+    TS_ASSERT_EQUALS(ws->getGroupSpectraIDs(-1).size(), 98);
+    TS_ASSERT_EQUALS(ws->getGroupSpectraIDs(1).size(), 1);
+    TS_ASSERT_EQUALS(ws->getGroupSpectraIDs(2).size(), 1);
   }
 };

@@ -114,7 +114,7 @@ int GroupingWorkspace::getTotalGroups() const {
   return static_cast<int>(groups.size());
 }
 
-std::vector<int> GroupingWorkspace::getGroupSpetraIDs(const int groupID) const {
+std::vector<int> GroupingWorkspace::getGroupSpectraIDs(const int groupID) const {
   std::vector<int> spectraIDs;
   for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number

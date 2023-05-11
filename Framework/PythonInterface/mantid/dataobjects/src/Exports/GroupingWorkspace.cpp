@@ -35,7 +35,7 @@ void export_GroupingWorkspace() {
       .def("getTotalGroups", &GroupingWorkspace::getTotalGroups, (arg("self")))
       .def("getGroupIDs", &GroupingWorkspace::getGroupIDs, return_value_policy<Policies::VectorToNumpy>(),
            (arg("self")))
-      .def("getGroupSpetraIDs", &GroupingWorkspace::getGroupSpetraIDs, return_value_policy<Policies::VectorToNumpy>(),
+      .def("getGroupSpectraIDs", &GroupingWorkspace::getGroupSpectraIDs, return_value_policy<Policies::VectorToNumpy>(),
            (arg("self,"), arg("groupID")));
 
   // register pointers

@@ -122,7 +122,7 @@ def cc_calibrate_groups(
         snpts_group = SmoothNPoints[int(group) - 1] if type(SmoothNPoints) == list else SmoothNPoints
         cycling = OT_group < 1.0
 
-        sn = group_ws.getGroupSpetraIDs(group.item())
+        sn = group_ws.getGroupSpectraIDs(group.item())
         try:
             ws_indexes = [data_d.getIndexFromSpectrumNumber(int(i)) for i in sn]
         except RuntimeError:
@@ -227,6 +227,7 @@ def cc_calibrate_groups(
     DeleteWorkspace("_accum_cc")
     DeleteWorkspace("_tmp_group_cc")
     DeleteWorkspace("_tmp_group_cc_raw")
+    DeleteWorkspace("_tmp_group_intg")
     if cycling and "_tmp_group_cc_diffcal" in mtd:
         DeleteWorkspace("_tmp_group_cc_diffcal")
 
