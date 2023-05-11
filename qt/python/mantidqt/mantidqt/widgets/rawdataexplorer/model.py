@@ -205,7 +205,7 @@ class RawDataExplorerModel(QObject):
         is_group = workspace.isGroup()
         if is_group:
             if workspace.size() == 0:
-                error_reporting("No data found in group workspace.")
+                logger.warning("No data found in group workspace.")
                 return None
 
             # we are judging from the first workspace and hoping it is representative
@@ -219,7 +219,7 @@ class RawDataExplorerModel(QObject):
             if "dataobject" in ws_type:
                 ws_type = ws_type[21:-2]
 
-            error_reporting("Cannot open this data: invalid workspace type {0}.".format(ws_type))
+            logger.warning("Cannot open this data: invalid workspace type {0}.".format(ws_type))
             return None
 
         instrument_name = workspace.getInstrument().getName()
@@ -236,8 +236,7 @@ class RawDataExplorerModel(QObject):
         if preview == PreviewType.IVIEW and not (
             workspace.getInstrument() and workspace.getInstrument().getName() and workspace.getAxis(1).isSpectra()
         ):
-            message = "Cannot open the instrument viewer for the provided data."
-            error_reporting(message)
+            logger.warning("Cannot open the instrument viewer for the {} data.".format(ws_name))
             return None
         return preview
 
