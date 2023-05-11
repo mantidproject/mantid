@@ -34,6 +34,7 @@ mamba install --yes sphinx sphinx_bootstrap_theme
 ###############################################################################
 # Build the developer site
 ###############################################################################
+export LC_ALL=C
 python -m sphinx $WORKSPACE/dev-docs/source $BUILD_DIR
 
 ###############################################################################
