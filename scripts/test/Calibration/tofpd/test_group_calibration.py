@@ -34,6 +34,7 @@ def create_test_ws_and_group():
         MoveInstrumentComponent(ws, ComponentName=f"bank{n}", X=1 + n / 10, Y=0, Z=1 + n / 10, RelativePosition=False)
         MoveInstrumentComponent(ws, ComponentName=f"bank{n+4}", X=2 + n / 10, Y=0, Z=2 + n / 10, RelativePosition=False)
 
+    # masked spectra should not get calibrated
     MaskDetectors(ws, WorkspaceIndexList=[3, 7])
 
     ws = ScaleX(ws, Factor=1.05, IndexMin=1, IndexMax=1)
@@ -44,14 +45,22 @@ def create_test_ws_and_group():
     ws = Rebin(ws, "0,0.001,5")
     ws = ConvertUnits(ws, Target="TOF")
 
+    # detector ids are supplied here
     groups, _, _ = CreateGroupingWorkspace(InputWorkspace=ws, ComponentName="basic_rect", CustomGroupingString="1-4,5-8")
 
     return ws, groups
 
 
 class TestGroupCalibration(unittest.TestCase):
-    def test_from_eng(self):
+    def test_spec_to_det_map(self):
+        ws, _ = create_test_ws_and_group()
+        mapping = group_calibration._createDetToWkspIndexMap(ws)
+        assert mapping
+        assert len(mapping) == 8
+        for i in range(1, 9):  # detids started at one
+            assert mapping[i] == i - 1
 
+    def test_from_eng(self):
         ws, groups = create_test_ws_and_group()
 
         output_workspace_basename = "test_from_eng"

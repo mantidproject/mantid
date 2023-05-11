@@ -26,7 +26,6 @@ from mantid.simpleapi import (
     logger,
     RenameWorkspace,
     Integration,
-    CloneWorkspace,
     CreateGroupingWorkspace,
     CreateDetectorTable,
     CreateEmptyTableWorkspace,
@@ -55,6 +54,15 @@ DIAMOND = (
     1.2615,
     2.0599,
 )
+
+
+def _createDetToWkspIndexMap(wksp):
+    mapping = {}
+    for wksp_index in range(wksp.getNumberHistograms()):
+        detids = wksp.getSpectrum(wksp_index).getDetectorIDs()
+        for detid in detids:  # add each detector id in separately
+            mapping[detid] = wksp_index
+    return mapping
 
 
 def cc_calibrate_groups(
@@ -107,8 +115,24 @@ def cc_calibrate_groups(
 
     data_d = ConvertUnits(data_ws, Target="dSpacing", OutputWorkspace="data_d")
 
+    """
+    [x] Move the call to the Integration algorithm outside of the loop over groups.
+      The code that finds the brightest spectrum will need to be a little smarter to only look at the spectra in the group
+    [ ] No longer run ExtractSpectra to make a partial workspace for CrossCorrelate,
+      but a copy of the input workspace will still need to be made to iterate over for optimizing the calibration
+    [ ] Modify call to CrossCorrelate to use the new parameters
+    """
+
+    # The brightest spectrum will be used as the reference
+    # TODO trim the range to be the range requested by the user
+    intg = Integration(InputWorkspace=str(data_d), OutputWorkspace="_tmp_group_intg")  # RangeLower=1.22, RangeUpper=1.30, )
+    det2WkspIndex = _createDetToWkspIndexMap(data_d)
+    spectrumInfo = data_d.spectrumInfo()
+
     _accum_cc = None
     to_skip = []
+    print("start loop over groups", "=" * 40)
+    print("group ids=", group_ws.getGroupIDs())
     for group in group_ws.getGroupIDs():
         # Figure out input parameters for CrossCorrelate and GetDetectorOffset, specifically
         # for those parameters for which both a single value and a list is accepted. If a
@@ -122,33 +146,38 @@ def cc_calibrate_groups(
         snpts_group = SmoothNPoints[int(group) - 1] if type(SmoothNPoints) == list else SmoothNPoints
         cycling = OT_group < 1.0
 
-        sn = group_ws.getGroupSpectraIDs(group.item())
         try:
-            ws_indexes = [data_d.getIndexFromSpectrumNumber(int(i)) for i in sn]
+            # detector ids that get focussed together
+            detids = group_ws.getGroupSpectraIDs(int(group))  # TODO current is detector ids
+            # convert to workspace indices in the input data
+            ws_indices = [det2WkspIndex[detid] for detid in detids]
+            # remove masked spectra
+            ws_indices = [index for index in ws_indices if not spectrumInfo.isMasked(index)]
         except RuntimeError:
             # data does not contain spectrum in group
             continue
 
         if group in SkipCrossCorrelation:
-            to_skip.extend(ws_indexes)
+            to_skip.extend(ws_indices)
 
-        ExtractSpectra(data_d, WorkspaceIndexList=ws_indexes, OutputWorkspace="_tmp_group_cc")
-        ExtractUnmaskedSpectra("_tmp_group_cc", OutputWorkspace="_tmp_group_cc")
-        ExtractSpectra(data_ws, WorkspaceIndexList=ws_indexes, OutputWorkspace="_tmp_group_cc_raw")
-        ExtractUnmaskedSpectra("_tmp_group_cc_raw", OutputWorkspace="_tmp_group_cc_raw")
+        # grab out the spectra in d-space
+
+        ExtractSpectra(data_d, WorkspaceIndexList=ws_indices, OutputWorkspace="_tmp_group_cc")
+        # grab out the spectra in time-of-flight
+        ExtractSpectra(data_ws, WorkspaceIndexList=ws_indices, OutputWorkspace="_tmp_group_cc_raw")
         num_spectra = mtd["_tmp_group_cc"].getNumberHistograms()
         if num_spectra < 2:
-            continue
+            DeleteWorkspace("_tmp_group_cc")
+            DeleteWorkspace("_tmp_group_cc_raw")
+            continue  # go to next group
         Rebin("_tmp_group_cc", Params=f"{Xmin_group},{Step},{Xmax_group}", OutputWorkspace="_tmp_group_cc")
         if snpts_group >= 3:
             SmoothData("_tmp_group_cc", NPoints=snpts_group, OutputWorkspace="_tmp_group_cc")
 
         # Figure out brightest spectra to be used as the reference for cross correlation.
-        CloneWorkspace("_tmp_group_cc_raw", OutputWorkspace="_tmp_group_cc_raw_tmp")
-        intg = Integration(
-            "_tmp_group_cc_raw_tmp", StartWorkspaceIndex=0, EndWorkspaceIndex=num_spectra - 1, OutputWorkspace="_tmp_group_intg"
-        )
-        brightest_spec_index = int(np.argmax(np.array([intg.readY(i)[0] for i in range(num_spectra)])))
+        brightest_spec_index = int(np.argmax(intg.extractY()[ws_indices]))
+        # TODO cheating b/c spectra are extracted, in full workspace the answer is
+        # brightest_spec_index = ws_indices[brightest_spec_index]
 
         # Cycling cross correlation. At each step, we will use the obtained offsets and DIFC's from
         # previous step to obtain new DIFC's. In this way, spectra in group will come closer and closer
@@ -183,7 +212,7 @@ def cc_calibrate_groups(
 
             if group not in SkipCrossCorrelation:
                 offsets_tmp = []
-                for item in ws_indexes:
+                for item in ws_indices:
                     if abs(mtd["_tmp_group_cc"].readY(item)) != 0:
                         offsets_tmp.append(abs(mtd["_tmp_group_cc"].readY(item)))
                 offsets_tmp = np.array(offsets_tmp)
@@ -193,7 +222,7 @@ def cc_calibrate_groups(
                 logger.notice(f"Median offset (no sign) = {np.median(offsets_tmp)}")
                 converged = np.median(offsets_tmp) < OT_group
             else:
-                for item in ws_indexes:
+                for item in ws_indices:
                     mtd["_tmp_group_cc"].dataY(item)[0] = 0.0
                 logger.notice(f"Cross correlation skipped for group-{group}.")
                 converged = True
