@@ -1862,8 +1862,7 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
   if (norunendset)
     throw runtime_error("Run end time cannot be determined. ");
 
-  // Add 1 second to make sure that no event left behind either last pulse time
-  // or last event time
+  // Add last pulse time or 0.1 seconds to make sure that no event left behind
   runendtime = DateAndTime(runendtime.totalNanoseconds() + extended_ns);
 
   return runendtime;

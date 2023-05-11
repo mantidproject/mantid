@@ -1221,7 +1221,7 @@ public:
   void test_endRunTimeFromRun() {
     // 1. Create input Workspace
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
-    // eventWS->mutableRun().removeProperty("run_end");
+    eventWS->mutableRun().removeProperty("proton_charge");
     AnalysisDataService::Instance().addOrReplace("TestWorkspace", eventWS);
 
     // 2. Init and set property
@@ -1248,7 +1248,7 @@ public:
     Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
     Types::Core::DateAndTime runstart(3000000000);
     TS_ASSERT_EQUALS(splitter0.start().totalNanoseconds(), runstart.totalNanoseconds());
-    TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), runstart.totalNanoseconds() + 1100000);
+    TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), runstart.totalNanoseconds() + 101000000);
     TS_ASSERT_EQUALS(splitter0.index(), 0);
 
     TS_ASSERT_EQUALS(splittersws->rowCount(), 1);
