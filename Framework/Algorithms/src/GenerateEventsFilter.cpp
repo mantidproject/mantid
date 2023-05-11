@@ -1785,6 +1785,7 @@ void GenerateEventsFilter::generateSplittersInSplitterWS() {
 DateAndTime GenerateEventsFilter::findRunEnd() {
   // Try to get the run end from Run object
   DateAndTime runendtime(0);
+  DateAndTime tmpendtime(0);
   bool norunendset = false;
   try {
     runendtime = m_dataWS->run().endTime();
@@ -1808,18 +1809,12 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
     }
 
     if (protonchargelog->size() > 1) {
-      Types::Core::DateAndTime tmpendtime = protonchargelog->lastTime();
       extended_ns = protonchargelog->nthTime(1).totalNanoseconds() - protonchargelog->nthTime(0).totalNanoseconds();
-      if (tmpendtime > runendtime) {
-        // Use the last proton charge time
-        runendtime = tmpendtime;
-        g_log.debug() << "Check point 1B: "
-                      << "Use last proton charge time = " << tmpendtime.totalNanoseconds() << " as run end. "
-                      << "\n";
-      }
+    }
+    if (norunendset) {
+      runendtime = protonchargelog->lastTime();
       norunendset = false;
     }
-
     g_log.debug() << "Check point 2A "
                   << " run end time = " << runendtime << "\n";
   } else if (norunendset) {
