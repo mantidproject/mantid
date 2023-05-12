@@ -169,12 +169,12 @@ def cc_calibrate_groups(
 
         # grab out the spectra in d-space
 
-        ExtractSpectra(data_d, WorkspaceIndexList=ws_indices, OutputWorkspace="_tmp_group_cc_d")
+        ExtractSpectra(data_d, WorkspaceIndexList=ws_indices, OutputWorkspace="_tmp_group_cc_main")
         # grab out the spectra in time-of-flight
         ExtractSpectra(data_ws, WorkspaceIndexList=ws_indices, OutputWorkspace="_tmp_group_cc_raw")
-        Rebin("_tmp_group_cc_d", Params=f"{Xmin_group},{Step},{Xmax_group}", OutputWorkspace="_tmp_group_cc_d")
+        Rebin("_tmp_group_cc_main", Params=f"{Xmin_group},{Step},{Xmax_group}", OutputWorkspace="_tmp_group_cc_main")
         if snpts_group >= 3:
-            SmoothData("_tmp_group_cc_d", NPoints=snpts_group, OutputWorkspace="_tmp_group_cc_d")
+            SmoothData("_tmp_group_cc_main", NPoints=snpts_group, OutputWorkspace="_tmp_group_cc_main")
 
         # Figure out brightest spectra to be used as the reference for cross correlation.
         brightest_spec_index = int(np.argmax(intg.extractY()[ws_indices]))
@@ -190,44 +190,44 @@ def cc_calibrate_groups(
         num_cycle = 1
         while True:
             CrossCorrelate(
-                "_tmp_group_cc_d",
+                "_tmp_group_cc_main",
                 Xmin=Xmin_group,
                 XMax=Xmax_group,
                 MaxDSpaceShift=MDS_group,
                 ReferenceSpectra=brightest_spec_index,
                 WorkspaceIndexMin=0,
                 WorkspaceIndexMax=num_spectra - 1,
-                OutputWorkspace="_tmp_group_cc_d",
+                OutputWorkspace="_tmp_group_cc_main",
             )
 
             bin_range = (Xmax_group - Xmin_group) / Step
             GetDetectorOffsets(
-                InputWorkspace="_tmp_group_cc_d",
+                InputWorkspace="_tmp_group_cc_main",
                 Step=Step,
                 Xmin=-bin_range,
                 XMax=bin_range,
                 DReference=DRef_group,
                 MaxOffset=1,
                 PeakFunction=pf_group,
-                OutputWorkspace="_tmp_group_cc_d",
+                OutputWorkspace="_tmp_group_cc_main",
             )
 
-            if group not in SkipCrossCorrelation:
+            if group in SkipCrossCorrelation:
+                for item in ws_indices:
+                    mtd["_tmp_group_cc_main"].dataY(item)[0] = 0.0
+                logger.notice(f"Cross correlation skipped for group-{group}.")
+                converged = True
+            else:
                 offsets_tmp = []
                 for item in ws_indices:
-                    if abs(mtd["_tmp_group_cc_d"].readY(item)) != 0:
-                        offsets_tmp.append(abs(mtd["_tmp_group_cc_d"].readY(item)))
+                    if abs(mtd["_tmp_group_cc_main"].readY(item)) != 0:
+                        offsets_tmp.append(abs(mtd["_tmp_group_cc_main"].readY(item)))
                 offsets_tmp = np.array(offsets_tmp)
                 logger.notice(f"Running group-{group}, cycle-{num_cycle}.")
                 logger.notice(f"Median offset (no sign) = {np.median(offsets_tmp)}")
                 logger.notice(f"Running group-{group}, cycle-{num_cycle}.")
                 logger.notice(f"Median offset (no sign) = {np.median(offsets_tmp)}")
                 converged = np.median(offsets_tmp) < OT_group
-            else:
-                for item in ws_indices:
-                    mtd["_tmp_group_cc_d"].dataY(item)[0] = 0.0
-                logger.notice(f"Cross correlation skipped for group-{group}.")
-                converged = True
 
             if not cycling or converged:
                 if cycling and converged:
@@ -237,18 +237,18 @@ def cc_calibrate_groups(
                 break
             else:
                 previous_calibration = ConvertDiffCal(
-                    "_tmp_group_cc_d", PreviousCalibration=previous_calibration, OutputWorkspace="_tmp_group_cc_diffcal"
+                    "_tmp_group_cc_main", PreviousCalibration=previous_calibration, OutputWorkspace="_tmp_group_cc_diffcal"
                 )
                 ApplyDiffCal("_tmp_group_cc_raw", CalibrationWorkspace="_tmp_group_cc_diffcal")
-                ConvertUnits("_tmp_group_cc_raw", Target="dSpacing", OutputWorkspace="_tmp_group_cc_d")
-                Rebin("_tmp_group_cc_d", Params=f"{Xmin_group},{Step},{Xmax_group}", OutputWorkspace="_tmp_group_cc_d")
+                ConvertUnits("_tmp_group_cc_raw", Target="dSpacing", OutputWorkspace="_tmp_group_cc_main")
+                Rebin("_tmp_group_cc_main", Params=f"{Xmin_group},{Step},{Xmax_group}", OutputWorkspace="_tmp_group_cc_main")
 
             num_cycle += 1
 
         if not _accum_cc:
-            _accum_cc = RenameWorkspace("_tmp_group_cc_d")
+            _accum_cc = RenameWorkspace("_tmp_group_cc_main")
         else:
-            _accum_cc += mtd["_tmp_group_cc_d"]
+            _accum_cc += mtd["_tmp_group_cc_main"]
             # DeleteWorkspace('_tmp_group_cc')
 
     previous_calibration = ConvertDiffCal(
@@ -256,7 +256,7 @@ def cc_calibrate_groups(
     )
 
     DeleteWorkspace("_accum_cc")
-    DeleteWorkspace("_tmp_group_cc_d")
+    DeleteWorkspace("_tmp_group_cc_main")
     DeleteWorkspace("_tmp_group_cc_raw")
     DeleteWorkspace("_tmp_group_intg")
     if cycling and "_tmp_group_cc_diffcal" in mtd:
