@@ -4,6 +4,7 @@
 - :ref:`FilterPeaks <algm-FilterPeaks>` can now filter out modulation vectors by `m^2+n^2+p^2`
 - :ref:`SortHKL <algm-SortHKL>` skips modulation vectors
 - :ref:`StatisticsOfPeaksWorkspace <algm-StatisticsOfPeaksWorkspace>` skips modulation vectors
-- :ref:`SaveNexus <algm-SaveNexus` now supports modulation vectors
-- :ref:`LoadNexus <algm-LoadNexus` now supports modulation vectors
+- :ref:`SaveNexus <algm-SaveNexus>` now supports modulation vectors
+- :ref:`LoadNexus <algm-LoadNexus>` now supports modulation vectors
+- :ref:`CompareWorkspaces <algm-CompareWorkspaces>` now supports modulation vectors
 - Peaks workspaces now display `IntHKL` and `IntMNP` columns
