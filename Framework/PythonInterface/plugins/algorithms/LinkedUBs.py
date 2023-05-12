@@ -326,6 +326,7 @@ class LinkedUBs(DataProcessorAlgorithm):
                     ):
                         h, k, l = HKL_ordered[j]
                         p_obs.setHKL(h, k, l)
+                        p_obs.setIntHKL(p_obs.getHKL())
                         linked_peaks.addPeak(p_obs)
 
             # Clean up peaks where H == K == L == 0

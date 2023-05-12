@@ -1,0 +1,1 @@
+- :ref:`IndexPeaks <algm-IndexPeaks>` now properly accountes for fractional offsets when `RoundHKLs=True`

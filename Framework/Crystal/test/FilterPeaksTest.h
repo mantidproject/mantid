@@ -16,6 +16,7 @@
 
 using Mantid::Crystal::FilterPeaks;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
 //-------------------------------------------------------------
@@ -30,6 +31,8 @@ private:
                                            const double sigIntensity = 0) {
     auto ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
     ws->getPeak(0).setHKL(h, k, l); // First peak is already indexed now.
+    ws->getPeak(0).setIntHKL(V3D(h, k, l));
+    ws->getPeak(0).setIntMNP(V3D(h, k, l));
     ws->getPeak(0).setIntensity(intensity);
     ws->getPeak(0).setSigmaIntensity(sigIntensity);
     ws->getPeak(0).setBankName("bank1");
@@ -178,6 +181,35 @@ public:
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
     outWS = runAlgorithm(inWS, "h^2+k^2+l^2", h * h + k * k + l * l, "<=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
+  }
+
+  void test_filter_by_mnp_sq_sum() {
+    const double h = 1;
+    const double k = 1;
+    const double l = 1;
+
+    auto inWS = createInputWorkspace(h, k, l);
+
+    auto outWS = runAlgorithm(inWS, "m^2+n^2+p^2", h * h + k * k + l * l, "<");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "m^2+n^2+p^2", h * h + k * k + l * l, ">");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "m^2+n^2+p^2", h * h + k * k + l * l, "!=");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "m^2+n^2+p^2", h * h + k * k + l * l, "=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "m^2+n^2+p^2", h * h + k * k + l * l, ">=");
+    TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "m^2+n^2+p^2", h * h + k * k + l * l, "<=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
     AnalysisDataService::Instance().remove(outWS->getName());
@@ -358,12 +390,14 @@ public:
     LeanElasticPeak peak(Mantid::Kernel::V3D(1, 1, 0), 1.0);
     peak.setIntensity(100.0);
     peak.setHKL(1, 1, 0);
+    peak.setIntHKL(V3D(1, 1, 0));
     TS_ASSERT_DELTA(peak.getDSpacing(), M_PI * M_SQRT2, 1e-9)
     inWS->addPeak(peak);
 
     LeanElasticPeak peak2(Mantid::Kernel::V3D(1, 0, 0), 2.0);
     peak2.setIntensity(10.0);
     peak2.setHKL(1, 0, 0);
+    peak2.setIntHKL(V3D(1, 0, 0));
     TS_ASSERT_DELTA(peak2.getDSpacing(), 2 * M_PI, 1e-9)
     inWS->addPeak(peak2);
 

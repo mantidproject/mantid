@@ -1022,6 +1022,8 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
       std::string name = col->name();
       double s1 = 0.0;
       double s2 = 0.0;
+      V3D v1(0, 0, 0);
+      V3D v2(0, 0, 0);
       if (name == "RunNumber") {
         s1 = double(peak1.getRunNumber());
         s2 = double(peak2.getRunNumber());
@@ -1064,6 +1066,12 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
       } else if (name == "Col") {
         s1 = peak1.getCol();
         s2 = peak2.getCol();
+      } else if (name == "IntHKL") {
+        v1 = peak1.getIntHKL();
+        v2 = peak2.getIntHKL();
+      } else if (name == "IntMNP") {
+        v1 = peak1.getIntMNP();
+        v2 = peak2.getIntMNP();
       } else {
         g_log.information() << "Column " << name << " is not compared\n";
       }
@@ -1073,6 +1081,12 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
           mismatch = true;
         }
       } else if (std::fabs(s1 - s2) > tolerance) {
+        mismatch = true;
+      } else if (std::fabs(v1[0] - v2[0]) > tolerance) {
+        mismatch = true;
+      } else if (std::fabs(v1[1] - v2[1]) > tolerance) {
+        mismatch = true;
+      } else if (std::fabs(v1[2] - v2[2]) > tolerance) {
         mismatch = true;
       }
       if (mismatch) {

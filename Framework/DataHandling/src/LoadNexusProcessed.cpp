@@ -1141,12 +1141,31 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry
         qlab = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
         peakWS->getPeak(r).setQLabFrame(qlab, 0.0);
       }
+    } else if (str == "column_16") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+      V3D hkl;
+      for (int r = 0; r < numberPeaks; ++r) {
+        hkl = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
+        peakWS->getPeak(r).setIntHKL(hkl);
+      }
+    } else if (str == "column_17") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+      V3D mnp;
+      for (int r = 0; r < numberPeaks; ++r) {
+        mnp = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
+        peakWS->getPeak(r).setIntMNP(mnp);
+      }
     }
 
-    // After all columns read set IntHKL
+    // After all columns read set IntHKL if not set
     for (int r = 0; r < numberPeaks; r++) {
-      V3D intHKL = V3D(peakWS->getPeak(r).getH(), peakWS->getPeak(r).getK(), peakWS->getPeak(r).getL());
-      peakWS->getPeak(r).setIntHKL(intHKL);
+      V3D intHKL = peakWS->getPeak(r).getIntHKL();
+      if (intHKL.norm2() == 0) {
+        intHKL = V3D(peakWS->getPeak(r).getH(), peakWS->getPeak(r).getK(), peakWS->getPeak(r).getL());
+        peakWS->getPeak(r).setIntHKL(intHKL);
+      }
     }
   }
 
@@ -1406,10 +1425,29 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
         // Set the shape
         peakWS->getPeak(i).setPeakShape(peakShape);
       }
+    } else if (str == "column_19") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+      V3D hkl;
+      for (int r = 0; r < numberPeaks; ++r) {
+        hkl = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
+        peakWS->getPeak(r).setIntHKL(hkl);
+      }
+    } else if (str == "column_20") {
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
+      nxDouble.load();
+      V3D mnp;
+      for (int r = 0; r < numberPeaks; ++r) {
+        mnp = V3D(nxDouble[r * 3], nxDouble[r * 3 + 1], nxDouble[r * 3 + 2]);
+        peakWS->getPeak(r).setIntMNP(mnp);
+      }
     }
-    // After all columns read set IntHKL
-    for (int r = 0; r < numberPeaks; r++) {
-      V3D intHKL = V3D(peakWS->getPeak(r).getH(), peakWS->getPeak(r).getK(), peakWS->getPeak(r).getL());
+  }
+  // After all columns read set IntHKL if not set
+  for (int r = 0; r < numberPeaks; r++) {
+    V3D intHKL = peakWS->getPeak(r).getIntHKL();
+    if (intHKL.norm2() == 0) {
+      intHKL = V3D(peakWS->getPeak(r).getH(), peakWS->getPeak(r).getK(), peakWS->getPeak(r).getL());
       peakWS->getPeak(r).setIntHKL(intHKL);
     }
   }

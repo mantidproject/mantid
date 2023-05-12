@@ -316,7 +316,8 @@ public:
     const auto alg = indexPeaks(peaksWS, {{"CommonUBForAll", "1"}, {"ToleranceForSatellite", sateTolerance}});
 
     assertNumberPeaksIndexed(*alg, 5, 2, 3);
-    const std::vector<V3D> expectedHKL{V3D(-1, 2, -9), V3D(-0, 1, -3), V3D(-1, 1, -10), V3D(1, 1, -1), V3D(-0, 1, -5)};
+    const std::vector<V3D> expectedHKL{V3D(-1, 2, -9), V3D(-0.667, 0.333, -2.667), V3D(-1, 1, -10),
+                                       V3D(0.333, 0.333, -0.667), V3D(-0.333, 0.667, -4.667)};
     const std::vector<V3D> expectedIntHKL{V3D(-1, 2, -9), V3D(-1, 1, -3), V3D(-1, 1, -10), V3D(0, 1, -1),
                                           V3D(-1, 1, -5)};
 

@@ -42,18 +42,18 @@ public:
     LeanElasticPeak p(V3D(1, 0, 0), 3.0);
     pw->addPeak(p);
 
-    TS_ASSERT_EQUALS(pw->columnCount(), 14);
+    TS_ASSERT_EQUALS(pw->columnCount(), 16);
     TS_ASSERT_EQUALS(pw->rowCount(), 1);
     TS_ASSERT_EQUALS(pw->getNumberPeaks(), 1);
     TS_ASSERT_DELTA(pw->getPeak(0).getWavelength(), 3.0, 1e-9);
 
     // check column printing
     std::ostringstream s;
-    for (int n = 0; n < 14; n++) {
+    for (int n = 0; n < 16; n++) {
       pw->getColumn(n)->print(0, s);
       s << " ";
     }
-    TS_ASSERT_EQUALS(s.str(), "0 0.00 0.00 0.00 3 9.1 6.3 0 0 0 0 [1,0,0] [1,0,0] 0 ");
+    TS_ASSERT_EQUALS(s.str(), "0 0.00 0.00 0.00 3 9.1 6.3 0 0 0 0 [1,0,0] [1,0,0] 0 [0,0,0] [0,0,0] ");
 
     // check some cell values
     TS_ASSERT_EQUALS(pw->cell<int>(0, 0), 0);

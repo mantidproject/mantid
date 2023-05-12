@@ -26,9 +26,9 @@ double tof(const Mantid::Geometry::IPeak &p) { return p.getTOF(); }
 
 double HKLSum(const Mantid::Geometry::IPeak &p) { return p.getH() + p.getK() + p.getL(); }
 
-double HKL2(const Mantid::Geometry::IPeak &p) {
-  return p.getH() * p.getH() + p.getK() * p.getK() + p.getL() * p.getL();
-}
+double HKL2(const Mantid::Geometry::IPeak &p) { return p.getIntHKL().norm2(); }
+
+double MNP2(const Mantid::Geometry::IPeak &p) { return p.getIntMNP().norm2(); }
 
 double QMOD(const Mantid::Geometry::IPeak &p) { return p.getQSampleFrame().norm(); }
 
@@ -71,8 +71,8 @@ void FilterPeaks::init() {
 
   // filter by property
   const std::string FILTER("Filter Options");
-  std::vector<std::string> filters{"h+k+l",      "h^2+k^2+l^2", "Intensity", "Signal/Noise", "QMod",
-                                   "Wavelength", "DSpacing",    "TOF",       "RunNumber"};
+  std::vector<std::string> filters{"h+k+l", "h^2+k^2+l^2", "m^2+n^2+p^2", "Intensity", "Signal/Noise",
+                                   "QMod",  "Wavelength",  "DSpacing",    "TOF",       "RunNumber"};
   declareProperty("FilterVariable", "h+k+l", std::make_shared<StringListValidator>(filters),
                   "The variable on which to filter the peaks");
 
@@ -163,6 +163,8 @@ FilterPeaks::FilterFunction FilterPeaks::getFilterVariableFunction(const std::st
     filterFunction = &HKLSum;
   else if (filterVariable == "h^2+k^2+l^2")
     filterFunction = &HKL2;
+  else if (filterVariable == "m^2+n^2+p^2")
+    filterFunction = &MNP2;
   else if (filterVariable == "Intensity")
     filterFunction = &intensity;
   else if (filterVariable == "Wavelength")
