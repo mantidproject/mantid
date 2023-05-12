@@ -181,15 +181,15 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
                         table_ws.setCell(j, 0, ws.getAxis(1).getValue(j))
                     else:
                         table_ws.setCell(j, 0, j)
-                _set_cell_if_exists(table_ws, data_e, col_e, col, j)
-                _set_cell_if_exists(table_ws, data_y, col_y, col, j)
+                _set_cell_if_exists(table_ws, j, col_e, data_e, col)
+                _set_cell_if_exists(table_ws, j, col_y, data_y, col)
 
             if self.hasDx:
                 table_ws.addColumn("double", "XE" + str(col))
                 col_dx = num_cols * i + 3
                 for j in range(num_rows):
                     data_dx = ws.readDx(j)
-                    _set_cell_if_exists(table_ws, data_dx, col_dx, col, j)
+                    _set_cell_if_exists(table_ws, j, col_dx, data_dx, col)
 
     def action_copy_cells(self, table):
         self.copy_cells(table)
@@ -287,12 +287,12 @@ def _create_empty_table_workspace(name: str, num_rows: int) -> ITableWorkspace:
 
 
 def _set_cell_if_exists(
-    table,
-    data,
-    col,
-    col_n,
-    row_n,
+    target_table_ws,
+    target_row_index,
+    target_col_index,
+    data_col,
+    data_col_index,
 ):
     # ragged workspaces could have data rows shorter than the number of columns
-    if col_n < len(data):
-        table.setCell(row_n, col, data[col_n])
+    if data_col_index < len(data_col):
+        target_table_ws.setCell(target_row_index, target_col_index, data_col[data_col_index])
