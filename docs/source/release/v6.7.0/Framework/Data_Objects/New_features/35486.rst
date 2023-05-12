@@ -1,4 +1,4 @@
 * added the following getter methods to ``GroupingWorkspace``:
   * ``getGroupIDs()``
   * ``getTotalGroups()``
-  * ``getGroupSpectraIDs()``
+  * ``getDetectorIDsOfGroup()``

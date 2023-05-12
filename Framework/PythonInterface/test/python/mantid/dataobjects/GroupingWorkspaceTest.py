@@ -34,7 +34,7 @@ class GroupingWorkspaceTest(unittest.TestCase):
         self.assertEqual(2, len(ids))
 
     def test_get_group_spectra_IDs(self):
-        self.assertEqual(0, len(self.groupingWorkspace.getGroupSpectraIDs(-1)))  # default sws2d values are all 0
+        self.assertEqual(0, len(self.groupingWorkspace.getDetectorIDsOfGroup(-1)))  # default sws2d values are all 0
 
     def test_get_group_IDs_values(self):
         expected = np.sort(np.unique(self.groupingWorkspace.extractY()))
@@ -47,7 +47,7 @@ class GroupingWorkspaceTest(unittest.TestCase):
         for group in group_list:
             indexes = np.where(self.groupingWorkspace.extractY().flatten() == group)[0]
             expected = np.sort(np.array(self.groupingWorkspace.getSpectrumNumbers())[indexes])
-            actual = np.sort(self.groupingWorkspace.getGroupSpectraIDs(group.item()))
+            actual = np.sort(self.groupingWorkspace.getDetectorIDsOfGroup(group.item()))
             np.testing.assert_allclose(actual, expected)
 
 

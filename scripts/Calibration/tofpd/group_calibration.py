@@ -150,7 +150,7 @@ def cc_calibrate_groups(
 
         try:
             # detector ids that get focussed together
-            detids = group_ws.getDetIDsOfGroup(int(group))
+            detids = group_ws.getDetectorIDsOfGroup(int(group))
             # convert to workspace indices in the input data
             ws_indices = [det2WkspIndex[detid] for detid in detids]
             # remove masked spectra
@@ -162,16 +162,16 @@ def cc_calibrate_groups(
         if group in SkipCrossCorrelation:
             to_skip.extend(ws_indices)
 
+        num_spectra = len(ws_indices)  # takes masking into account
+        if num_spectra < 2:
+            to_skip.extend(ws_indices)
+            continue  # go to next group
+
         # grab out the spectra in d-space
 
         ExtractSpectra(data_d, WorkspaceIndexList=ws_indices, OutputWorkspace="_tmp_group_cc_d")
         # grab out the spectra in time-of-flight
         ExtractSpectra(data_ws, WorkspaceIndexList=ws_indices, OutputWorkspace="_tmp_group_cc_raw")
-        num_spectra = mtd["_tmp_group_cc_d"].getNumberHistograms()
-        if num_spectra < 2:
-            DeleteWorkspace("_tmp_group_cc_d")
-            DeleteWorkspace("_tmp_group_cc_raw")
-            continue  # go to next group
         Rebin("_tmp_group_cc_d", Params=f"{Xmin_group},{Step},{Xmax_group}", OutputWorkspace="_tmp_group_cc_d")
         if snpts_group >= 3:
             SmoothData("_tmp_group_cc_d", NPoints=snpts_group, OutputWorkspace="_tmp_group_cc_d")
