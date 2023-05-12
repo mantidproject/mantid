@@ -119,7 +119,7 @@ Usage
 Output:
 
 .. image:: /images/Stitch1D1.png
-   :scale: 65 %
+   :scale: 50 %
    :alt: Stitch1D output
    :align: center
 
@@ -162,7 +162,7 @@ Output:
 Output:
 
 .. image:: /images/Stitch1D2.png
-   :scale: 65 %
+   :scale: 50 %
    :alt: Stitch1D output
    :align: center
 
