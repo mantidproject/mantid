@@ -58,10 +58,14 @@ DIAMOND = (
 
 def _createDetToWkspIndexMap(wksp):
     mapping = {}
+    spectrumInfo = wksp.spectrumInfo()
     for wksp_index in range(wksp.getNumberHistograms()):
         detids = wksp.getSpectrum(wksp_index).getDetectorIDs()
         for detid in detids:  # add each detector id in separately
-            mapping[detid] = wksp_index
+            if spectrumInfo.isMasked(wksp_index):
+                mapping[detid] = -1
+            else:
+                mapping[detid] = wksp_index
     return mapping
 
 
@@ -126,8 +130,7 @@ def cc_calibrate_groups(
     # The brightest spectrum will be used as the reference
     # TODO trim the range to be the range requested by the user
     intg = Integration(InputWorkspace=str(data_d), OutputWorkspace="_tmp_group_intg")  # RangeLower=1.22, RangeUpper=1.30, )
-    det2WkspIndex = _createDetToWkspIndexMap(data_d)
-    spectrumInfo = data_d.spectrumInfo()
+    det2WkspIndex = _createDetToWkspIndexMap(data_ws)
 
     _accum_cc = None
     to_skip = []
@@ -152,9 +155,9 @@ def cc_calibrate_groups(
             # detector ids that get focussed together
             detids = group_ws.getDetectorIDsOfGroup(int(group))
             # convert to workspace indices in the input data
-            ws_indices = [det2WkspIndex[detid] for detid in detids]
+            ws_indices = np.asarray([det2WkspIndex[detid] for detid in detids])
             # remove masked spectra
-            ws_indices = [index for index in ws_indices if not spectrumInfo.isMasked(index)]
+            ws_indices = ws_indices[ws_indices != -1]
         except RuntimeError:
             # data does not contain spectrum in group
             continue
@@ -167,10 +170,8 @@ def cc_calibrate_groups(
             to_skip.extend(ws_indices)
             continue  # go to next group
 
-        # grab out the spectra in d-space
-
+        # grab out the spectra in d-space and time-of-flight
         ExtractSpectra(data_d, WorkspaceIndexList=ws_indices, OutputWorkspace="_tmp_group_cc_main")
-        # grab out the spectra in time-of-flight
         ExtractSpectra(data_ws, WorkspaceIndexList=ws_indices, OutputWorkspace="_tmp_group_cc_raw")
         Rebin("_tmp_group_cc_main", Params=f"{Xmin_group},{Step},{Xmax_group}", OutputWorkspace="_tmp_group_cc_main")
         if snpts_group >= 3:
@@ -189,8 +190,10 @@ def cc_calibrate_groups(
         # relative offset).
         num_cycle = 1
         while True:
+            # take the data in d-space and perform cross correlation on a subset of spectra
+            # the output workspace is the cross correlation data for only the requested spectra
             CrossCorrelate(
-                "_tmp_group_cc_main",
+                InputWorkspace="_tmp_group_cc_main",
                 Xmin=Xmin_group,
                 XMax=Xmax_group,
                 MaxDSpaceShift=MDS_group,
@@ -213,20 +216,20 @@ def cc_calibrate_groups(
             )
 
             if group in SkipCrossCorrelation:
+                # set the detector offsets to zero
                 for item in ws_indices:
                     mtd["_tmp_group_cc_main"].dataY(item)[0] = 0.0
                 logger.notice(f"Cross correlation skipped for group-{group}.")
                 converged = True
             else:
-                offsets_tmp = []
-                for item in ws_indices:
-                    if abs(mtd["_tmp_group_cc_main"].readY(item)) != 0:
-                        offsets_tmp.append(abs(mtd["_tmp_group_cc_main"].readY(item)))
-                offsets_tmp = np.array(offsets_tmp)
+                # collect the non-zero offsets for determining convergence
+                offsets_tmp = np.abs(mtd["_tmp_group_cc_main"].extractY())
+                offsets_tmp = offsets_tmp[offsets_tmp != 0.0]
                 logger.notice(f"Running group-{group}, cycle-{num_cycle}.")
                 logger.notice(f"Median offset (no sign) = {np.median(offsets_tmp)}")
                 logger.notice(f"Running group-{group}, cycle-{num_cycle}.")
                 logger.notice(f"Median offset (no sign) = {np.median(offsets_tmp)}")
+                # it has converged if the median is less than offset-threshold for the group
                 converged = np.median(offsets_tmp) < OT_group
 
             if not cycling or converged:
@@ -236,6 +239,7 @@ def cc_calibrate_groups(
                         logger.notice(f"with offset threshold {OT_group}.")
                 break
             else:
+                # create the input data for the next loop by applying the calibration
                 previous_calibration = ConvertDiffCal(
                     "_tmp_group_cc_main", PreviousCalibration=previous_calibration, OutputWorkspace="_tmp_group_cc_diffcal"
                 )
@@ -249,7 +253,6 @@ def cc_calibrate_groups(
             _accum_cc = RenameWorkspace("_tmp_group_cc_main")
         else:
             _accum_cc += mtd["_tmp_group_cc_main"]
-            # DeleteWorkspace('_tmp_group_cc')
 
     previous_calibration = ConvertDiffCal(
         "_accum_cc", PreviousCalibration=previous_calibration, OutputWorkspace=f"{output_basename}_cc_diffcal"

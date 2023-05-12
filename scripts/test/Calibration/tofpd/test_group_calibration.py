@@ -58,7 +58,10 @@ class TestGroupCalibration(unittest.TestCase):
         assert mapping
         assert len(mapping) == 8
         for i in range(1, 9):  # detids started at one
-            assert mapping[i] == i - 1
+            if i not in [4, 8]:
+                assert mapping[i] == i - 1
+            else:  # masked detectors get mapped to spectrum -1
+                assert mapping[i] == -1
 
     def test_from_eng(self):
         ws, groups = create_test_ws_and_group()
@@ -132,7 +135,6 @@ class TestGroupCalibration(unittest.TestCase):
         assert_equal(mtd[f"{output_workspace_basename}_pd_diffcal_mask"].extractY(), [[0], [0], [0], [1], [0], [0], [0], [1]])
 
     def test_from_prev_cal(self):
-
         ws, groups = create_test_ws_and_group()
 
         output_workspace_basename = "test_from_eng_prev_cal"
