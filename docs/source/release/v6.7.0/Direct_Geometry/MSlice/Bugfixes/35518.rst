@@ -1,0 +1,9 @@
+- Warning now omitted if a cut is taken with a higher resolution than the parent slice. This causes the appearance of missing lines between adjacent datapoints.
+- When taking a cut, if a intensity range is provided it is now applied to the plot y limits.
+- When changing intensity of a slice plot the axis limits now get reset to their original values. This solves a bug where zooming out after an intensity change was not possible.
+- Bragg peaks are now sized more appropriately on an interactive cut.
+- MSlice now correctly preserves metadata when saving NXPSE files.
+- Fixed a bug relating to intensity correction on some datasets where arrays used to transform data during correction had incorrect dimensions.
+- Fixed a bug causing a crash when cancelling an intensity correction from the temperature input pop-up.
+- When inputting waterfall limits an error is no longer caused by the invalid use of E to apply an exponent.
+- You can now save slices and cuts in an ASCII format from the MSlice command line.
