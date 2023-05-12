@@ -71,7 +71,7 @@ void FilterByTime::init() {
                   "Absolute start time; events before this time are filtered out. " + absoluteHelp);
 
   declareProperty(PropertyNames::ABS_STOP, "", dateTime,
-                  "Absolute stop time; events at of after this time are filtered out. " + absoluteHelp);
+                  "Absolute stop time; events at or after this time are filtered out. " + absoluteHelp);
 }
 
 std::map<std::string, std::string> FilterByTime::validateInputs() {
@@ -100,30 +100,44 @@ void FilterByTime::exec() {
   // find the start time
   DateAndTime start;
   if (isDefault(PropertyNames::ABS_START)) {
-    // time relative to first pulse - this defaults with start of run
-    const auto startOfRun = inputWS->getFirstPulseTime();
+    // absolute start time is not specified. Use either run start or first pulse time.
+    DateAndTime startOfRun{DateAndTime::GPS_EPOCH};
+    try {
+      startOfRun = inputWS->run().startTime();
+    } catch (...) {
+    }
+    if (startOfRun == DateAndTime::GPS_EPOCH)
+      startOfRun = inputWS->getFirstPulseTime();
+    // offset the start time if relative start time is specified
     const double startRelative = getProperty(PropertyNames::START_TIME);
     start = startOfRun + startRelative;
   } else {
-    std::cout << PropertyNames::ABS_START << "=" << getPropertyValue(PropertyNames::ABS_START) << "\n";
-    // absolute time
+    // absolute start time is specified
     start = DateAndTime(getPropertyValue(PropertyNames::ABS_START));
   }
 
   // find the stop time
   DateAndTime stop;
   if (!isDefault(PropertyNames::ABS_STOP)) {
-    // absolute time
+    // absolute stop time is specified
     stop = DateAndTime(getPropertyValue(PropertyNames::ABS_STOP));
   } else if (!isDefault(PropertyNames::STOP_TIME)) {
-    // time relative to first pulse
-    const auto startOfRun = inputWS->getFirstPulseTime();
+    // time relative to start time
     const double stopRelative = getProperty(PropertyNames::STOP_TIME);
-    stop = startOfRun + stopRelative;
-  } else {
-    this->getLogger().debug("No end filter time specified - assuming last pulse");
-    const DateAndTime lastPulse = inputWS->getLastPulseTime();
-    stop = lastPulse + 10000.0; // so we get all events - needs to be past last pulse
+    stop = start + stopRelative;
+  } else { // neither absolute nor relative stop time is specified. Use either run end or last pulse time.
+    DateAndTime endOfRun{DateAndTime::GPS_EPOCH};
+    try {
+      endOfRun = inputWS->run().endTime();
+    } catch (...) {
+    }
+    if (endOfRun != DateAndTime::GPS_EPOCH)
+      stop = endOfRun;
+    else {
+      this->getLogger().debug("No end filter time specified - assuming last pulse");
+      const DateAndTime lastPulse = inputWS->getLastPulseTime();
+      stop = lastPulse + 10000.0; // so we get all events - needs to be past last pulse
+    }
   }
 
   // verify that stop is after start
@@ -167,6 +181,7 @@ void FilterByTime::exec() {
     // only use the overlap region
     timeroi.update_intersection(TimeROI(start, stop));
   }
+
   outputWS->mutableRun().setTimeROI(timeroi);
   outputWS->mutableRun().removeDataOutsideTimeROI();
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(outputWS));
