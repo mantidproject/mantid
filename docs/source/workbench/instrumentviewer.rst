@@ -44,6 +44,7 @@ The side by side view identifies flat banks of detectors in the instrument defin
 - ``StructuredDetector``
 - any component with a set of children or grandchildren having the ``outline`` attribute set to ``yes``. This is interpreted as a bank of tubes
 - any component with detector children arranged in a flat surface
+
 Each flat bank is then rotated about one of its corners until the bank surface is parallel to the xy plane and a parallel projection is then made of all the banks onto the xy plane. Finally the banks are spread out to remove any overlap between their projected positions.
 The spread is applied by fixing the largest bank and moving all other banks away from it until there are no overlaps.
 The bank centres in the side by side view can be overridden using the <side-by-side-view-location> tag in the :ref:`instrument definition file <Side by side view location>`.
