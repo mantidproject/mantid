@@ -146,15 +146,34 @@ public:
     TS_ASSERT_EQUALS(ws->getGroupIDs()[2], 2);
   }
 
-  void testGetGroupSpectraIDs() {
-    GroupingWorkspace_sptr ws(new GroupingWorkspace());
-    // create a groupingworkspace with 2 groups
-    ws->initialize(100, 1, 1);
-    ws->dataY(0)[0] = 1;
-    ws->dataY(1)[0] = 2;
-    // 0 is not a valid id, -1 is null
-    TS_ASSERT_EQUALS(ws->getGroupSpectraIDs(-1).size(), 98);
-    TS_ASSERT_EQUALS(ws->getGroupSpectraIDs(1).size(), 1);
-    TS_ASSERT_EQUALS(ws->getGroupSpectraIDs(2).size(), 1);
+  void testDetIDsOfGroup() {
+    const std::size_t NUM_BANKS = 3;
+    const std::size_t PIXELS_PER_BANK = 9;
+    // As test_constructor_from_Instrument(), set on ws, get on clone.
+    // Fake instrument with 3*9 pixels with ID starting at 1
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(NUM_BANKS);
+    GroupingWorkspace_sptr ws(new GroupingWorkspace(inst));
+    // verify that the correct thing was made
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), NUM_BANKS * PIXELS_PER_BANK);
+
+    // create a groupingworkspace with 1/3 in group 1, 1/3 in group 2, and 1/3 unassigned
+    for (detid_t detid = 1; detid < detid_t(NUM_BANKS * PIXELS_PER_BANK + 1); ++detid) {
+      if (detid % 3 == 0)
+        ws->setValue(detid, 1);
+      else if ((detid + 1) % 3 == 0)
+        ws->setValue(detid, 2);
+      // leave the others going to group -1
+    }
+
+    // verify that the group ids to check exist
+    TS_ASSERT_EQUALS(ws->getGroupIDs(), std::vector({-1, 1, 2}));
+
+    // 0 is not a valid id, -1 is not set
+    TS_ASSERT_EQUALS(ws->getDetIDsOfGroup(-1).size(), PIXELS_PER_BANK);
+    TS_ASSERT_EQUALS(ws->getDetIDsOfGroup(-1), std::vector({1, 4, 7, 10, 13, 16, 19, 22, 25}));
+    TS_ASSERT_EQUALS(ws->getDetIDsOfGroup(1).size(), PIXELS_PER_BANK);
+    TS_ASSERT_EQUALS(ws->getDetIDsOfGroup(1), std::vector({3, 6, 9, 12, 15, 18, 21, 24, 27}));
+    TS_ASSERT_EQUALS(ws->getDetIDsOfGroup(2).size(), PIXELS_PER_BANK);
+    TS_ASSERT_EQUALS(ws->getDetIDsOfGroup(2), std::vector({2, 5, 8, 11, 14, 17, 20, 23, 26}));
   }
 };

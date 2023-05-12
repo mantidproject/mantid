@@ -43,7 +43,7 @@ public:
   void makeDetectorIDToGroupVector(std::vector<int> &detIDToGroup, int64_t &ngroups) const;
   int getTotalGroups() const;
   std::vector<int> getGroupIDs() const;
-  std::vector<int> getGroupSpectraIDs(const int groupID) const;
+  std::vector<int> getDetIDsOfGroup(const int groupID) const;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

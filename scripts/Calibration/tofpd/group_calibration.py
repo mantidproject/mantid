@@ -134,6 +134,8 @@ def cc_calibrate_groups(
     print("start loop over groups", "=" * 40)
     print("group ids=", group_ws.getGroupIDs())
     for group in group_ws.getGroupIDs():
+        if group == -1:
+            continue  # this is a group of unset pixels
         # Figure out input parameters for CrossCorrelate and GetDetectorOffset, specifically
         # for those parameters for which both a single value and a list is accepted. If a
         # list is given, that means different parameter setup will be used for different groups.
@@ -148,7 +150,7 @@ def cc_calibrate_groups(
 
         try:
             # detector ids that get focussed together
-            detids = group_ws.getGroupSpectraIDs(int(group))  # TODO current is detector ids
+            detids = group_ws.getDetIDsOfGroup(int(group))
             # convert to workspace indices in the input data
             ws_indices = [det2WkspIndex[detid] for detid in detids]
             # remove masked spectra
