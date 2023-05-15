@@ -310,8 +310,8 @@ def pdcalibration_groups(
     ApplyDiffCal(data_ws, CalibrationWorkspace=cc_diffcal)
     ConvertUnits(data_ws, Target="dSpacing", OutputWorkspace="_tmp_data_aligned")
     DiffractionFocussing("_tmp_data_aligned", GroupingWorkspace=group_ws, OutputWorkspace="_tmp_data_aligned")
-
     ConvertUnits("_tmp_data_aligned", Target="TOF", OutputWorkspace="_tmp_data_aligned")
+    Rebin(InputWorkspace="_tmp_data_aligned", OutputWorkspace="_tmp_data_aligned", Params=TofBinning, PreserveEvents=False)
 
     instrument = data_ws.getInstrument().getName()
 
