@@ -33,8 +33,8 @@ def create_test_ws_and_group():
 
     # make the first spectra in each group brighter
     # this forces an issue with np.argmax and all values being the same
-    ws.getEventList(0).multiply(1.1, 0.0)
-    ws.getEventList(4).multiply(1.1, 0.0)
+    ws.getEventList(0).multiply(1.10, 0.0)
+    ws.getEventList(4).multiply(1.05, 0.0)
 
     # move some of the components
     for n in range(1, 5):
@@ -69,6 +69,10 @@ class TestGroupCalibration(unittest.TestCase):
                 assert mapping[i] == i - 1
             else:  # masked detectors get mapped to spectrum -1
                 assert mapping[i] == -1
+
+    def test_get_brightest(self):
+        ws, _ = create_test_ws_and_group()
+        assert group_calibration._getBrightestWorkspaceIndex(ws) == 1
 
     def test_from_eng(self):
         ws, groups = create_test_ws_and_group()

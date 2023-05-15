@@ -56,6 +56,16 @@ DIAMOND = (
 )
 
 
+def _getBrightestWorkspaceIndex(wksp):
+    """Figure out brightest spectra to be used as the reference for cross correlation.
+    The brightest spectrum will be used as the reference
+    """
+    intg = Integration(InputWorkspace=wksp, OutputWorkspace="_tmp_group_intg")  # RangeLower=1.22, RangeUpper=1.30, )
+    brightest_spec_index = int(np.argmax(intg.extractY()))
+    DeleteWorkspace("_tmp_group_intg")
+    return brightest_spec_index
+
+
 def _createDetToWkspIndexMap(wksp):
     mapping = {}
     spectrumInfo = wksp.spectrumInfo()
@@ -117,19 +127,9 @@ def cc_calibrate_groups(
     if previous_calibration:
         ApplyDiffCal(data_ws, CalibrationWorkspace=previous_calibration)
 
+    # TODO remove this workspace
     data_d = ConvertUnits(data_ws, Target="dSpacing", OutputWorkspace="data_d")
 
-    """
-    [x] Move the call to the Integration algorithm outside of the loop over groups.
-      The code that finds the brightest spectrum will need to be a little smarter to only look at the spectra in the group
-    [ ] No longer run ExtractSpectra to make a partial workspace for CrossCorrelate,
-      but a copy of the input workspace will still need to be made to iterate over for optimizing the calibration
-    [ ] Modify call to CrossCorrelate to use the new parameters
-    """
-
-    # The brightest spectrum will be used as the reference
-    # TODO trim the range to be the range requested by the user
-    intg = Integration(InputWorkspace=str(data_d), OutputWorkspace="_tmp_group_intg")  # RangeLower=1.22, RangeUpper=1.30, )
     det2WkspIndex = _createDetToWkspIndexMap(data_ws)
 
     _accum_cc = None
@@ -178,9 +178,7 @@ def cc_calibrate_groups(
             SmoothData("_tmp_group_cc_main", NPoints=snpts_group, OutputWorkspace="_tmp_group_cc_main")
 
         # Figure out brightest spectra to be used as the reference for cross correlation.
-        brightest_spec_index = int(np.argmax(intg.extractY()[ws_indices]))
-        # TODO cheating b/c spectra are extracted, in full workspace the answer is
-        # brightest_spec_index = ws_indices[brightest_spec_index]
+        brightest_spec_index = _getBrightestWorkspaceIndex("_tmp_group_cc_main")
 
         # Cycling cross correlation. At each step, we will use the obtained offsets and DIFC's from
         # previous step to obtain new DIFC's. In this way, spectra in group will come closer and closer
