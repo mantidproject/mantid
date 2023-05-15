@@ -115,8 +115,8 @@ def cc_calibrate_groups(
     :param previous_calibration: Optional previous diffcal workspace
     :param Step: step size for binning of data and input for GetDetectorOffsets, default 0.001
     :param DReference: Derefernce parameter for GetDetectorOffsets, default 1.2615
-    :param Xmin: Xmin parameter for CrossCorrelate, default 1.22
-    :param Xmax: Xmax parameter for CrossCorrelate, default 1.30
+    :param Xmin: Minimum d-spacing for CrossCorrelate, default 1.22
+    :param Xmax: Maximum d-spacing for CrossCorrelate, default 1.30
     :param MaxDSpaceShift: MaxDSpaceShift paramter for CrossCorrelate, default None
     :param OffsetThreshold: Convergence threshold for cycling cross correlation, default 1E-4
     :param SkipCrossCorrelation: Skip cross correlation for specified groups
@@ -126,9 +126,6 @@ def cc_calibrate_groups(
     """
     if previous_calibration:
         ApplyDiffCal(data_ws, CalibrationWorkspace=previous_calibration)
-
-    # TODO remove this workspace
-    data_d = ConvertUnits(data_ws, Target="dSpacing", OutputWorkspace="data_d")
 
     det2WkspIndex = _createDetToWkspIndexMap(data_ws)
 
@@ -171,9 +168,9 @@ def cc_calibrate_groups(
             continue  # go to next group
 
         # grab out the spectra in d-space and time-of-flight
-        ExtractSpectra(data_d, WorkspaceIndexList=ws_indices, OutputWorkspace="_tmp_group_cc_main")
         ExtractSpectra(data_ws, WorkspaceIndexList=ws_indices, OutputWorkspace="_tmp_group_cc_raw")
-        Rebin("_tmp_group_cc_main", Params=f"{Xmin_group},{Step},{Xmax_group}", OutputWorkspace="_tmp_group_cc_main")
+        ConvertUnits("_tmp_group_cc_raw", Target="dSpacing", OutputWorkspace="_tmp_group_cc_main")
+        Rebin("_tmp_group_cc_main", Params=(Xmin_group, Step, Xmax_group), OutputWorkspace="_tmp_group_cc_main")
         if snpts_group >= 3:
             SmoothData("_tmp_group_cc_main", NPoints=snpts_group, OutputWorkspace="_tmp_group_cc_main")
 
@@ -259,7 +256,6 @@ def cc_calibrate_groups(
     DeleteWorkspace("_accum_cc")
     DeleteWorkspace("_tmp_group_cc_main")
     DeleteWorkspace("_tmp_group_cc_raw")
-    DeleteWorkspace("_tmp_group_intg")
     if cycling and "_tmp_group_cc_diffcal" in mtd:
         DeleteWorkspace("_tmp_group_cc_diffcal")
 
