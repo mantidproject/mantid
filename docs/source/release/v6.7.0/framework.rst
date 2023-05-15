@@ -33,6 +33,19 @@ Bugfixes
 ############
 .. amalgamate:: Framework/Algorithms/Bugfixes
 
+
+Beanline
+--------
+
+New features
+############
+.. amalgamate:: Framework/Beamline/New_features
+
+Bugfixes
+########
+.. amalgamate:: Framework/Beamline/Bugfixes
+
+
 Fit Functions
 -------------
 
@@ -53,8 +66,20 @@ New features
 .. amalgamate:: Framework/Data_Objects/New_features
 
 Bugfixes
-############
+########
 .. amalgamate:: Framework/Data_Objects/Bugfixes
+
+
+Geometry
+--------
+
+New features
+############
+.. amalgamate:: Framework/Geometry/New_features
+
+Bugfixes
+############
+.. amalgamate:: Framework/Geometry/Bugfixes
 
 
 Python
