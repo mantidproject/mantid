@@ -100,15 +100,8 @@ void FilterByTime::exec() {
   // find the start time
   DateAndTime start;
   if (isDefault(PropertyNames::ABS_START)) {
-    // absolute start time is not specified. Use either run start or first pulse time.
-    DateAndTime startOfRun{DateAndTime::GPS_EPOCH};
-    try {
-      startOfRun = inputWS->run().startTime();
-    } catch (...) {
-    }
-    if (startOfRun == DateAndTime::GPS_EPOCH)
-      startOfRun = inputWS->getFirstPulseTime();
-    // offset the start time if relative start time is specified
+    // time relative to first pulse - this defaults with start of run
+    const auto startOfRun = inputWS->getFirstPulseTime();
     const double startRelative = getProperty(PropertyNames::START_TIME);
     start = startOfRun + startRelative;
   } else {
@@ -125,19 +118,10 @@ void FilterByTime::exec() {
     // time relative to start time
     const double stopRelative = getProperty(PropertyNames::STOP_TIME);
     stop = start + stopRelative;
-  } else { // neither absolute nor relative stop time is specified. Use either run end or last pulse time.
-    DateAndTime endOfRun{DateAndTime::GPS_EPOCH};
-    try {
-      endOfRun = inputWS->run().endTime();
-    } catch (...) {
-    }
-    if (endOfRun != DateAndTime::GPS_EPOCH)
-      stop = endOfRun;
-    else {
-      this->getLogger().debug("No end filter time specified - assuming last pulse");
-      const DateAndTime lastPulse = inputWS->getLastPulseTime();
-      stop = lastPulse + 10000.0; // so we get all events - needs to be past last pulse
-    }
+  } else {
+    this->getLogger().debug("No end filter time specified - assuming last pulse");
+    const DateAndTime lastPulse = inputWS->getLastPulseTime();
+    stop = lastPulse + 10000.0; // so we get all events - needs to be past last pulse
   }
 
   // verify that stop is after start
