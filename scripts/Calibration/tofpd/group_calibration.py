@@ -315,33 +315,7 @@ def pdcalibration_groups(
 
     instrument = data_ws.getInstrument().getName()
 
-    if instrument != "POWGEN":
-        PDCalibration(
-            InputWorkspace="_tmp_data_aligned",
-            TofBinning=TofBinning,
-            PreviousCalibrationTable=previous_calibration,
-            PeakFunction=PeakFunction,
-            PeakPositions=PeakPositions,
-            PeakWindow=PeakWindow,
-            PeakWidthPercent=PeakWidthPercent,
-            OutputCalibrationTable=f"{output_basename}_pd_diffcal",
-            DiagnosticWorkspaces=f"{output_basename}_pd_diag",
-        )
-        if to_skip:
-            ExtractSpectra(data_ws, WorkspaceIndexList=to_skip, OutputWorkspace="_tmp_group_to_skip")
-            ExtractUnmaskedSpectra("_tmp_group_to_skip", OutputWorkspace="_tmp_group_to_skip")
-            PDCalibration(
-                InputWorkspace="_tmp_group_to_skip",
-                TofBinning=TofBinning,
-                PreviousCalibrationTable=previous_calibration,
-                PeakFunction=PeakFunction,
-                PeakPositions=PeakPositions,
-                PeakWindow=PeakWindow,
-                PeakWidthPercent=PeakWidthPercent,
-                OutputCalibrationTable=f"{output_basename}_pd_diffcal_skip",
-                DiagnosticWorkspaces=f"{output_basename}_pd_diag_skip",
-            )
-    else:
+    if instrument == "POWGEN":
         pdcalib_for_powgen(
             mtd["_tmp_data_aligned"],
             TofBinning,
@@ -366,6 +340,32 @@ def pdcalibration_groups(
                 PeakWidthPercent,
                 f"{output_basename}_pd_diffcal_skip",
                 f"{output_basename}_pd_diag_skip",
+            )
+    else:
+        PDCalibration(
+            InputWorkspace="_tmp_data_aligned",
+            TofBinning=TofBinning,
+            PreviousCalibrationTable=previous_calibration,
+            PeakFunction=PeakFunction,
+            PeakPositions=PeakPositions,
+            PeakWindow=PeakWindow,
+            PeakWidthPercent=PeakWidthPercent,
+            OutputCalibrationTable=f"{output_basename}_pd_diffcal",
+            DiagnosticWorkspaces=f"{output_basename}_pd_diag",
+        )
+        if to_skip:
+            ExtractSpectra(data_ws, WorkspaceIndexList=to_skip, OutputWorkspace="_tmp_group_to_skip")
+            ExtractUnmaskedSpectra("_tmp_group_to_skip", OutputWorkspace="_tmp_group_to_skip")
+            PDCalibration(
+                InputWorkspace="_tmp_group_to_skip",
+                TofBinning=TofBinning,
+                PreviousCalibrationTable=previous_calibration,
+                PeakFunction=PeakFunction,
+                PeakPositions=PeakPositions,
+                PeakWindow=PeakWindow,
+                PeakWidthPercent=PeakWidthPercent,
+                OutputCalibrationTable=f"{output_basename}_pd_diffcal_skip",
+                DiagnosticWorkspaces=f"{output_basename}_pd_diag_skip",
             )
 
     CombineDiffCal(
