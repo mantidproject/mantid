@@ -30,6 +30,13 @@ def create_test_ws_and_group():
     ws = CreateSampleWorkspace(
         "Event", "User Defined", myFunc, BankPixelWidth=1, XUnit="dSpacing", XMax=5, BinWidth=0.001, NumEvents=100000, NumBanks=8
     )
+
+    # make the first spectra in each group brighter
+    # this forces an issue with np.argmax and all values being the same
+    ws.getEventList(0).multiply(1.1, 0.0)
+    ws.getEventList(4).multiply(1.1, 0.0)
+
+    # move some of the components
     for n in range(1, 5):
         MoveInstrumentComponent(ws, ComponentName=f"bank{n}", X=1 + n / 10, Y=0, Z=1 + n / 10, RelativePosition=False)
         MoveInstrumentComponent(ws, ComponentName=f"bank{n+4}", X=2 + n / 10, Y=0, Z=2 + n / 10, RelativePosition=False)
