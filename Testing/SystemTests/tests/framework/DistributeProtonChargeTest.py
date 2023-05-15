@@ -97,13 +97,20 @@ class DistributeProtonChargeTest(systemtesting.MantidSystemTest):
         self.assertDelta(sumPartsProtonCharge, wholeProtonCharge, self.tolerance)
 
         # filter original workspace by time and get the proton charge
-        FilterByTime(InputWorkspace="w", OutputWorkspace="w_short", StopTime=0.29999999999999999)
+        FilterByTime(
+            InputWorkspace="w", OutputWorkspace="w_short", AbsoluteStartTime="2022-01-10T08:16:50.753504667", StopTime=0.29999999999999999
+        )
         wholeShortProtonCharge = mtd["w_short"].run().getProtonCharge()
         print("Whole (short) proton charge: " + str(wholeShortProtonCharge))
         self.assertDelta(wholeShortProtonCharge, 0.116766472, self.tolerance)
 
         # filter all partial workspaces by time and tally up their proton charges
-        FilterByTime(InputWorkspace="part", OutputWorkspace="part_short", StopTime=0.29999999999999999)
+        FilterByTime(
+            InputWorkspace="part",
+            OutputWorkspace="part_short",
+            AbsoluteStartTime="2022-01-10T08:16:50.753504667",
+            StopTime=0.29999999999999999,
+        )
         sumShortPartsProtonCharge = 0.0
         for ip in range(0, 9):
             partial_short_ws_name = "part_short_" + str(ip + 1)
