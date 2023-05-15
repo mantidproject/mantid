@@ -1,0 +1,1 @@
+- Fixed a bug where copying a column with blank values from a ragged workspace data table could crash Mantid Workbench.
