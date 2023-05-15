@@ -16,6 +16,7 @@ from mantid.simpleapi import (
     CloneWorkspace,
     LoadEmptyInstrument,
     SetInstrumentParameter,
+    ConvertUnits,
 )
 from IntegratePeaksSkew import InstrumentArrayConverter
 from testhelpers import WorkspaceCreationHelper
@@ -30,7 +31,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         AnalysisDataService.addOrReplace("ws_rect", cls.ws)
         axis = cls.ws.getAxis(0)
         axis.setUnit("TOF")
-        # fake peak in spectra in middle bank 1 (centered on detID=37/spec=12 and TOF=3.5)
+        # fake peak in spectra in middle bank 1 (centered on detID=37/spec=12 and TOF=5)
         cls.peak_1D = 2 * array([0, 0, 0, 1, 4, 6, 4, 1, 0, 0, 0])
         cls.ws.setY(12, cls.ws.readY(12) + cls.peak_1D)
         for ispec in [7, 11, 12, 13, 17, 22]:
@@ -45,7 +46,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         # 2) middle bank 2 (no peak)
         cls.peaks = CreatePeaksWorkspace(InstrumentWorkspace=cls.ws, NumberOfPeaks=0, OutputWorkspace="peaks")
         for ipk, detid in enumerate([32, 27, 62]):
-            AddPeak(PeaksWorkspace=cls.peaks, RunWorkspace=cls.ws, TOF=5, DetectorID=detid)
+            AddPeak(PeaksWorkspace=cls.peaks, RunWorkspace=cls.ws, TOF=4, DetectorID=detid)
             cls.peaks.getPeak(ipk).setHKL(ipk, ipk, ipk)
 
         # Load empty WISH with ComponentArray banks
@@ -91,7 +92,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         # check intensity of first peak (only valid peak)
         ipk = 0
         pk = out.getPeak(ipk)
-        self.assertAlmostEqual(pk.getIntensity(), 237051386.2, delta=1)
+        self.assertAlmostEqual(pk.getIntensity(), 578738736.0, delta=1)
         self.assertAlmostEqual(pk.getIntensityOverSigma(), 12.7636, delta=1e-3)
         # check peak pos not moved
         self.assertEqual(out.column("DetID")[ipk], self.peaks.column("DetID")[ipk])
@@ -101,7 +102,6 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             self.assertEqual(out.getPeak(ipk).getIntensity(), 0)
 
     def test_integrate_use_nearest_peak_false_update_peak_position_false_with_resolution_params(self):
-
         out = IntegratePeaksSkew(
             InputWorkspace=self.ws,
             PeaksWorkspace=self.peaks,
@@ -129,7 +129,6 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             self.assertAlmostEqual(pk_ws.getPeak(0).getIntensityOverSigma(), 12.7636, delta=1e-3)
 
     def test_integrate_use_nearest_peak_false_update_peak_position_false_with_back_to_back_params(self):
-
         out = IntegratePeaksSkew(
             InputWorkspace=self.ws,
             PeaksWorkspace=self.peaks,
@@ -166,31 +165,34 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         self.assertEqual(out.getPeak(out.getNumberPeaks() - 1).getIntensity(), 0)
 
     def test_integrate_use_nearest_peak_true_update_peak_position_true(self):
-        out = IntegratePeaksSkew(
-            InputWorkspace=self.ws,
-            PeaksWorkspace=self.peaks,
-            ThetaWidth=0,
-            BackscatteringTOFResolution=0.3,
-            IntegrateIfOnEdge=True,
-            UseNearestPeak=True,
-            UpdatePeakPosition=True,
-            OutputWorkspace="out3",
-        )
-        # check intensity/sigma of first two peaks equal (same peak integrated)
-        # note intensity will be same now as peak position updated
-        for ipk in range(2):
-            pk = out.getPeak(ipk)
-            self.assertAlmostEqual(pk.getIntensity(), 259054692.5, delta=1)
-            self.assertAlmostEqual(pk.getIntensityOverSigma(), 12.7636, delta=1e-3)
-            # check peak pos moved to maximum
-            self.assertEqual(out.column("DetID")[ipk], 37)
-            self.assertAlmostEqual(pk.getTOF(), 5.5, delta=1e-10)
-            # check that HKL have been stored
-            hkl = pk.getHKL()
-            for miller_index in hkl:
-                self.assertEqual(miller_index, ipk)
-        # check other peaks not integrated
-        self.assertEqual(out.getPeak(out.getNumberPeaks() - 1).getIntensity(), 0)
+        ws_dspac = "ws_dSpac"
+        ConvertUnits(InputWorkspace=self.ws, OutputWorkspace=ws_dspac, Target="dSpacing")
+        for ws in [self.ws, ws_dspac]:
+            out = IntegratePeaksSkew(
+                InputWorkspace=self.ws,
+                PeaksWorkspace=self.peaks,
+                ThetaWidth=0,
+                BackscatteringTOFResolution=0.3,
+                IntegrateIfOnEdge=True,
+                UseNearestPeak=True,
+                UpdatePeakPosition=True,
+                OutputWorkspace="out3",
+            )
+            # check intensity/sigma of first two peaks equal (same peak integrated)
+            # note intensity will be same now as peak position updated
+            for ipk in range(2):
+                pk = out.getPeak(ipk)
+                self.assertAlmostEqual(pk.getIntensity(), 259054692.5, delta=1)
+                self.assertAlmostEqual(pk.getIntensityOverSigma(), 12.7636, delta=1e-3)
+                # check peak pos moved to maximum
+                self.assertEqual(out.column("DetID")[ipk], 37)
+                self.assertAlmostEqual(pk.getTOF(), 5.5, delta=1e-10)
+                # check that HKL have been stored
+                hkl = pk.getHKL()
+                for miller_index in hkl:
+                    self.assertEqual(miller_index, ipk)
+            # check other peaks not integrated
+            self.assertEqual(out.getPeak(out.getNumberPeaks() - 1).getIntensity(), 0)
 
     def test_print_output_file(self):
         out_file = path.join(self._test_dir, "out.pdf")
@@ -306,6 +308,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             PeaksWorkspace=self.peaks,
             ThetaWidth=0,
             BackscatteringTOFResolution=0.3,
+            NTOFBinsMin=2,
             IntegrateIfOnEdge=True,
             UseNearestPeak=False,
             UpdatePeakPosition=False,
@@ -321,6 +324,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             PeaksWorkspace=self.peaks,
             ThetaWidth=0,
             BackscatteringTOFResolution=0.3,
+            NTOFBinsMin=2,
             IntegrateIfOnEdge=True,
             UseNearestPeak=False,
             UpdatePeakPosition=False,
@@ -336,6 +340,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             PeaksWorkspace=self.peaks,
             ThetaWidth=0,
             BackscatteringTOFResolution=0.3,
+            NTOFBinsMin=2,
             IntegrateIfOnEdge=True,
             UseNearestPeak=False,
             UpdatePeakPosition=False,
@@ -349,6 +354,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         out = IntegratePeaksSkew(
             InputWorkspace=self.ws,
             PeaksWorkspace=self.peaks,
+            NTOFBinsMin=1,
             ThetaWidth=0,
             BackscatteringTOFResolution=0.3,
             NRows=5,
@@ -365,6 +371,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         out = IntegratePeaksSkew(
             InputWorkspace=self.ws,
             PeaksWorkspace=self.peaks,
+            NTOFBinsMin=1,
             ThetaWidth=0,
             BackscatteringTOFResolution=0.3,
             NRows=3,
@@ -404,13 +411,11 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         bank = self.peaks.column("BankName")[ipk]
         for nrows_edge in range(1, 3):
             for ncols_edge in range(1, 3):
-                *_, det_edges, dets = array_converter.get_peak_region_array(
-                    pk, detid, bank, nrows=7, ncols=7, nrows_edge=nrows_edge, ncols_edge=ncols_edge
-                )
-                self.assertTrue(det_edges[:nrows_edge, :].all())
-                self.assertTrue(det_edges[-nrows_edge:, :].all())
-                self.assertFalse(det_edges[nrows_edge:-nrows_edge:, ncols_edge:-ncols_edge].any())
-        self.assertTrue((dets == arange(25, 50).reshape(5, 5).T).all())
+                peak_data = array_converter.get_peak_data(pk, detid, bank, nrows=7, ncols=7, nrows_edge=nrows_edge, ncols_edge=ncols_edge)
+                self.assertTrue(peak_data.det_edges[:nrows_edge, :].all())
+                self.assertTrue(peak_data.det_edges[-nrows_edge:, :].all())
+                self.assertFalse(peak_data.det_edges[nrows_edge:-nrows_edge:, ncols_edge:-ncols_edge].any())
+        self.assertTrue((peak_data.detids == arange(25, 50).reshape(5, 5).T).all())
 
     def test_array_converter_finds_adjacent_banks_to_left_for_component_array_detectors(self):
         array_converter = InstrumentArrayConverter(self.ws_comp_arr)
@@ -418,13 +423,11 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         pk = self.peaks_comp_arr.getPeak(ipk)
         detid = self.peaks_comp_arr.column("DetID")[ipk]
         bank = self.peaks_comp_arr.column("BankName")[ipk]
-        *_, irow, icol, det_edges, dets = array_converter.get_peak_region_array(
-            pk, detid, bank, nrows=5, ncols=5, nrows_edge=1, ncols_edge=1
-        )
-        self.assertFalse(det_edges.any())  # no detector edges as found tubes in adjacent bank
+        peak_data = array_converter.get_peak_data(pk, detid, bank, nrows=5, ncols=5, nrows_edge=1, ncols_edge=1)
+        self.assertFalse(peak_data.det_edges.any())  # no detector edges as found tubes in adjacent bank
         self.assertTrue(
             (
-                dets
+                peak_data.detids
                 == array(
                     [
                         [10101253, 10100253, 9707253, 9706253, 9705253],
@@ -436,8 +439,8 @@ class IntegratePeaksSkewTest(unittest.TestCase):
                 )
             ).all()
         )
-        self.assertEqual(irow, 2)
-        self.assertEqual(icol, 2)
+        self.assertEqual(peak_data.irow, 2)
+        self.assertEqual(peak_data.icol, 2)
 
     def test_array_converter_finds_adjacent_banks_to_right_for_component_array_detectors(self):
         array_converter = InstrumentArrayConverter(self.ws_comp_arr)
@@ -445,13 +448,11 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         pk = self.peaks_comp_arr.getPeak(ipk)
         detid = self.peaks_comp_arr.column("DetID")[ipk]
         bank = self.peaks_comp_arr.column("BankName")[ipk]
-        *_, irow, icol, det_edges, dets = array_converter.get_peak_region_array(
-            pk, detid, bank, nrows=5, ncols=5, nrows_edge=1, ncols_edge=1
-        )
-        self.assertFalse(det_edges.any())  # no detector edges as found tubes in adjacent bank
+        peak_data = array_converter.get_peak_data(pk, detid, bank, nrows=5, ncols=5, nrows_edge=1, ncols_edge=1)
+        self.assertFalse(peak_data.det_edges.any())  # no detector edges as found tubes in adjacent bank
         self.assertTrue(
             (
-                dets
+                peak_data.detids
                 == array(
                     [
                         [10102253, 10101253, 10100253, 9707253, 9706253],
@@ -463,8 +464,8 @@ class IntegratePeaksSkewTest(unittest.TestCase):
                 )
             ).all()
         )
-        self.assertEqual(irow, 2)
-        self.assertEqual(icol, 2)
+        self.assertEqual(peak_data.irow, 2)
+        self.assertEqual(peak_data.icol, 2)
 
     def test_nrows_edge_ncols_edge_in_array_converter_component_array(self):
         array_converter = InstrumentArrayConverter(self.ws_comp_arr)
@@ -473,29 +474,27 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             pk = self.peaks_comp_arr.getPeak(ipk)
             detid = self.peaks_comp_arr.column("DetID")[ipk]
             bank = self.peaks_comp_arr.column("BankName")[ipk]
-            *_, irow, icol, det_edges, _ = array_converter.get_peak_region_array(
-                pk, detid, bank, nrows=7, ncols=5, nrows_edge=3, ncols_edge=2
-            )
+            peak_data = array_converter.get_peak_data(pk, detid, bank, nrows=7, ncols=5, nrows_edge=3, ncols_edge=2)
             irow_expected, icol_expected = (0, 0) if ipk == 0 else (3, 0)
-            self.assertEqual(irow, irow_expected)
-            self.assertEqual(icol, icol_expected)
+            self.assertEqual(peak_data.irow, irow_expected)
+            self.assertEqual(peak_data.icol, icol_expected)
             det_edges_expected = ones((4, 3), dtype=bool)
             if ipk == 0:
                 det_edges_expected[-1, -1] = False
             else:
                 det_edges_expected[0, -1] = False
-            self.assertTrue((det_edges == det_edges_expected).all())
+            self.assertTrue((peak_data.det_edges == det_edges_expected).all())
         # middle of 5th tube from end of bank 5 (no adjacent bank on RHS)
         ipk = 4
         pk = self.peaks_comp_arr.getPeak(ipk)
         detid = self.peaks_comp_arr.column("DetID")[ipk]
         bank = self.peaks_comp_arr.column("BankName")[ipk]
-        *_, irow, icol, det_edges, _ = array_converter.get_peak_region_array(pk, detid, bank, nrows=5, ncols=7, nrows_edge=1, ncols_edge=2)
-        self.assertEqual(irow, 2)
-        self.assertEqual(icol, 3)
+        peak_data = array_converter.get_peak_data(pk, detid, bank, nrows=5, ncols=7, nrows_edge=1, ncols_edge=2)
+        self.assertEqual(peak_data.irow, 2)
+        self.assertEqual(peak_data.icol, 3)
         det_edges_expected = zeros((5, 7), dtype=bool)
         det_edges_expected[:, -1] = True  # last tube in window is second from end of bank and ncols_edge=2
-        self.assertTrue((det_edges == det_edges_expected).all())
+        self.assertTrue((peak_data.det_edges == det_edges_expected).all())
 
 
 if __name__ == "__main__":
