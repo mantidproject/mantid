@@ -109,7 +109,7 @@ class SANSTubeCalibration(PythonAlgorithm):
             "FitEdges", False, direction=Direction.Input, doc="FIXME: Fit the full edge of a shadow, instead of just the top and bottom."
         )
         self.declareProperty("Timebins", "5000,93000,98000", direction=Direction.Input, doc="Time of flight bins to use")
-        self.declareProperty("Background", 10, direction=Direction.Input, doc="Baseline detector background")
+        self.declareProperty("Background", 2500.0, direction=Direction.Input, doc="The baseline below the mesa for FlatTopPeak fitting")
         self.declareProperty(
             "VerticalOffset",
             -0.005,
@@ -149,7 +149,7 @@ class SANSTubeCalibration(PythonAlgorithm):
 
     def PyExec(self):  # noqa:C901
         # Run the algorithm
-        self.BACKGROUND = self.getProperty("Background").value
+        self._background = self.getProperty("Background").value
         self.timebin = self.getProperty("TimeBins").value
         margin = self.getProperty("Margin").value
         OFF_VERTICAL = self.getProperty("VerticalOffset").value
@@ -592,7 +592,7 @@ class SANSTubeCalibration(PythonAlgorithm):
         end = min(int(peak_centre + inedge + margin), right_limit)
         width = (end - start) / 3.0
 
-        function = f"name=FlatTopPeak, Centre={peak_centre}, endGrad={endGrad}, Width={width}"
+        function = f"name=FlatTopPeak, Centre={peak_centre}, endGrad={endGrad}, Width={width}, Background={self._background}"
         Fit(InputWorkspace=ws, Function=function, StartX=str(start), EndX=str(end), Output=output_ws)
 
         # peakIndex (center) is in position 1 of the parameter list -> parameter Centre of fitFlatTopPeak
