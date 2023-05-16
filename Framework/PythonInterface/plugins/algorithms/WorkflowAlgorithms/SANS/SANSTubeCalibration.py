@@ -37,8 +37,8 @@ INF = sys.float_info.max  # Convenient approximation for infinity
 
 
 class FuncForm(Enum):
-    EDGES = 2
-    FLAT_TOP_PEAK = 3
+    EDGES = 1
+    FLAT_TOP_PEAK = 2
 
 
 def pairwise(iterable):
@@ -54,6 +54,8 @@ class SANSTubeCalibration(PythonAlgorithm):
     _TUBE_PLOT_WS = "TubePlot"
     _FIT_DATA_WS = "FittedData"
     _SCALED_WS_SUFFIX = "_scaled"
+    _CAL_TABLE_ID_COL = "Detector ID"
+    _CAL_TABLE_POS_COL = "Detector Position"
 
     def category(self):
         return "SANS\\Calibration"
@@ -522,24 +524,14 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         ideal_tube = IdealTube()
         ideal_tube.setArray(known_positions)
-        ideal_tube.setForm([func_form] * len(ideal_tube.getArray()))
 
-        if calib_table:
-            # check that the calibration table has the expected form
-            if not isinstance(calib_table, ITableWorkspace):
-                raise RuntimeError(
-                    "Invalid type for calibTable. Expected an ITableWorkspace with 2 columns (Detector ID and Detector Position)"
-                )
-
-            if calib_table.getColumnNames() != ["Detector ID", "Detector Position"]:
-                raise RuntimeError("Invalid columns for calibTable. Expected 2 columns named Detector ID and Detector Position")
-        else:
+        if not calib_table:
             # Create the calibration table and add columns required by ApplyCalibration
             calib_table = CreateEmptyTableWorkspace(OutputWorkspace="CalibTable")
-            calib_table.addColumn(type="int", name="Detector ID")
-            calib_table.addColumn(type="V3D", name="Detector Position")
+            calib_table.addColumn(type="int", name=self._CAL_TABLE_ID_COL)
+            calib_table.addColumn(type="V3D", name=self._CAL_TABLE_POS_COL)
 
-        peak_positions, meanC = self._perform_calibration_for_tube(ws, tube_spec, calib_table, fit_params, ideal_tube)
+        peak_positions, meanC = self._perform_calibration_for_tube(ws, tube_spec, calib_table, func_form, fit_params, ideal_tube)
 
         return calib_table, peak_positions, meanC
 
@@ -548,21 +540,18 @@ class SANSTubeCalibration(PythonAlgorithm):
         ws,
         tube_spec,
         calib_table,
+        func_form,
         fit_params,
         ideal_tube,
-        excludeShortTubes=0.0,
-        polinFit=2,
     ):
         """Run the calibration for the tube and put the results in the calibration table provided.
 
         :param ws: integrated workspace with tubes to be calibrated
         :param tube_spec: specification of the tube to be calibrated ( :class:`~tube_spec.TubeSpec` object)
-        :param calib_table: the calibration table into which the
-        calibrated positions of the detectors will be placed.
+        :param calib_table: the calibration table into which the calibrated positions of the detectors will be placed.
+        :param func_form: which function form to use for fitting
         :param fit_params: a :class:`~tube_calib_fit_params.TubeCalibFitParams` object for fitting the peaks
         :param ideal_tube: the :class:`~ideal_tube.IdealTube` that contains the positions in metres of the edges used for calibration
-        :param excludeShortTubes: exclude tubes shorter than specified length from calibration
-        :param polinFit: order of the polynomial to fit against the known positions. Acceptable: 2, 3
 
         """
         # The TubeSpec object will only be for one tube at a time
@@ -570,7 +559,7 @@ class SANSTubeCalibration(PythonAlgorithm):
         tube_name = tube_spec.getTubeName(tube_idx)
 
         # Calibrate the tube, if possible
-        if tube_spec.getTubeLength(tube_idx) <= excludeShortTubes:
+        if tube_spec.getTubeLength(tube_idx) <= 0.0:
             raise RuntimeError(f"Tube {tube_name} too short to calibrate.")
 
         ws_ids, skipped = tube_spec.getTube(tube_idx)
@@ -578,79 +567,75 @@ class SANSTubeCalibration(PythonAlgorithm):
             raise RuntimeError("Unable to get any workspace indices (spectra) for tube.")
 
         # Define peak positions and calculate average of the resolution fit parameter
-        peak_positions, avg_resolution = self._fit_peak_positions_for_tube(
-            ws, ideal_tube.getFunctionalForms(), fit_params, ws_ids, showPlot=True
-        )
+        peak_positions, avg_resolution = self._fit_peak_positions_for_tube(ws, func_form, fit_params, ws_ids)
 
         # Define the correct positions of the detectors
-        calibrated_positions = self._get_calibrated_pixel_positions(ws, peak_positions, ideal_tube.getArray(), ws_ids, polinFit)
+        calibrated_positions = self._get_calibrated_pixel_positions(ws, peak_positions, ideal_tube.getArray(), ws_ids)
         # Check if we have corrected positions
         if len(calibrated_positions.keys()) == len(ws_ids):
             # Save the detector positions to the calibration table
-            column_names = calib_table.getColumnNames()
             for det_id, new_pos in calibrated_positions.items():
-                calib_table.addRow({column_names[0]: det_id, column_names[1]: new_pos})
+                calib_table.addRow({self._CAL_TABLE_ID_COL: det_id, self._CAL_TABLE_POS_COL: new_pos})
 
         if skipped:
             self.log().debug("Histogram was excluded from the calibration as it did not have an assigned detector.")
         return peak_positions, avg_resolution
 
-    def _fit_flat_top_peak(self, fit_params, point_index, ws, output_ws):
-        # Find the edge position
-        centre = fit_params.getPeaks()[point_index]
+    def _fit_flat_top_peak(self, peak_centre, fit_params, ws, output_ws):
+        # Find the position
         outedge, inedge, endGrad = fit_params.getEdgeParameters()
         margin = fit_params.getMargin()
 
         # Get values around the expected center
         right_limit = len(ws.dataY(0))
-        start = max(int(centre - outedge - margin), 0)
-        end = min(int(centre + inedge + margin), right_limit)
+        start = max(int(peak_centre - outedge - margin), 0)
+        end = min(int(peak_centre + inedge + margin), right_limit)
         width = (end - start) / 3.0
 
-        function = f"name=FlatTopPeak, Centre={centre}, endGrad={endGrad}, Width={width}"
+        function = f"name=FlatTopPeak, Centre={peak_centre}, endGrad={endGrad}, Width={width}"
         Fit(InputWorkspace=ws, Function=function, StartX=str(start), EndX=str(end), Output=output_ws)
 
         # peakIndex (center) is in position 1 of the parameter list -> parameter Centre of fitFlatTopPeak
-        return 1
+        # resolutionIndex is in position 2 of the parameter list
+        return 1, 2
 
-    def _fit_edges(self, fit_params, point_index, ws, output_ws):
+    def _fit_edges(self, peak_centre, fit_params, ws, output_ws):
         # Find the edge position
-        centre = fit_params.getPeaks()[point_index]
         outedge, inedge, endGrad = fit_params.getEdgeParameters()
         margin = fit_params.getMargin()
 
         # Get values around the expected center
         all_values = ws.dataY(0)
         right_limit = len(all_values)
-        values = all_values[max(int(centre - margin), 0) : min(int(centre + margin), right_limit)]
+        values = all_values[max(int(peak_centre - margin), 0) : min(int(peak_centre + margin), right_limit)]
 
         # Identify if the edge is a sloping edge or descent edge
         descent_mode = values[0] > values[-1]
         if descent_mode:
-            start = max(centre - outedge, 0)
-            end = min(centre + inedge, right_limit)
+            start = max(peak_centre - outedge, 0)
+            end = min(peak_centre + inedge, right_limit)
             edge_mode = -1
         else:
-            start = max(centre - inedge, 0)
-            end = min(centre + outedge, right_limit)
+            start = max(peak_centre - inedge, 0)
+            end = min(peak_centre + outedge, right_limit)
             edge_mode = 1
 
-        function = f"name=EndErfc, B={centre}, C={endGrad * edge_mode}"
+        function = f"name=EndErfc, B={peak_centre}, C={endGrad * edge_mode}"
         Fit(InputWorkspace=ws, Function=function, StartX=str(start), EndX=str(end), Output=output_ws)
 
         # peakIndex (center) is in position 1 of parameter list -> parameter B of EndERFC
-        return 1
+        # resolutionIndex is in position 2 of the parameter list
+        return 1, 2
 
-    def _fit_peak_positions_for_tube(self, ws, func_forms, fit_params, ws_ids, showPlot=False):
+    def _fit_peak_positions_for_tube(self, ws, func_form, fit_params, ws_ids):
         """
         Get the centres of N slits or edges for calibration. It looks for the peak position in pixels
         by fitting the peaks and edges. It is the method responsible for estimating the peak position in each tube.
 
         :param ws: workspace of integrated data
-        :param func_forms: array of function form, Edges or FlatTopPeak
+        :param func_form: which function form to use for fitting
         :param fit_params: a TubeCalibFitParams object contain the fit parameters
         :param ws_ids: a list of workspace indices defining one tube
-        :param showPlot: show plot for this tube
 
         :rtype: array of the fitted positions and average of the fit resolution parameters
 
@@ -671,48 +656,45 @@ class SANSTubeCalibration(PythonAlgorithm):
         avg_resolution = 0.0
         resolution_params = []
 
-        def get_resolution_param():
-            resolution = np.fabs(mtd[calibPointWs + "_Parameters"].column("Value")[2])
+        # Loop over the points
+        for peak in fit_params.getPeaks():
+            if func_form == FuncForm.FLAT_TOP_PEAK:
+                # Find the FlatTopPeak position
+                centre_param_idx, resolution_param_idx = self._fit_flat_top_peak(peak, fit_params, tube_y_data, calibPointWs)
+            else:
+                # Find the edge position
+                centre_param_idx, resolution_param_idx = self._fit_edges(peak, fit_params, tube_y_data, calibPointWs)
+
+            # Save the fit resolution parameter to get avg resolution
+            resolution = np.fabs(mtd[calibPointWs + "_Parameters"].column("Value")[resolution_param_idx])
             if resolution > 1e-06:
                 resolution_params.append(resolution)
 
-        # Loop over the points
-        for i in range(len(func_forms)):
-            if func_forms[i] == FuncForm.FLAT_TOP_PEAK:
-                # Find the FlatTopPeak position and save the fit resolution param to get avg resolution
-                centre_param_index = self._fit_flat_top_peak(fit_params, i, tube_y_data, calibPointWs)
-                get_resolution_param()
-            else:
-                # Find the edge position and save the fit resolution param to get avg resolution
-                centre_param_index = self._fit_edges(fit_params, i, tube_y_data, calibPointWs)
-                get_resolution_param()
-
             # Get the peak centre
-            peak_centre = mtd[calibPointWs + "_Parameters"].column("Value")[centre_param_index]
+            peak_centre = mtd[calibPointWs + "_Parameters"].column("Value")[centre_param_idx]
             peak_positions.append(peak_centre)
 
-            if showPlot:
-                ws = mtd[calibPointWs + "_Workspace"]
-                fitt_y_values.append(copy.copy(ws.dataY(1)))
-                fitt_x_values.append(copy.copy(ws.dataX(1)))
+            # Calculate the values for the diagnostic workspace of fitted values
+            ws = mtd[calibPointWs + "_Workspace"]
+            fitt_y_values.append(copy.copy(ws.dataY(1)))
+            fitt_x_values.append(copy.copy(ws.dataX(1)))
 
         # Calculate the average resolution
         if resolution_params:
             avg_resolution = sum(resolution_params) / float(len(resolution_params))
 
-        if showPlot:
-            CreateWorkspace(np.hstack(fitt_x_values), np.hstack(fitt_y_values), OutputWorkspace=self._FIT_DATA_WS)
+        # Create the diagnostic workspace of fitted values
+        CreateWorkspace(np.hstack(fitt_x_values), np.hstack(fitt_y_values), OutputWorkspace=self._FIT_DATA_WS)
 
         return peak_positions, avg_resolution
 
-    def _get_corrected_pixel_positions(self, tube_positions, known_positions, num_detectors, polinFit=2):
+    def _get_corrected_pixel_positions(self, tube_positions, known_positions, num_detectors):
         """
         Corrects position errors in a tube given an array of points and their known positions.
 
         :param tube_positions: positions along the tube to be fitted (in pixels)
         :param known_positions: the corresponding known positions in the tube (Y-coords advised)
         :param num_detectors: number of pixel detectors in tube
-        :param polinFit: order of the polynomial to fit for the ideal positions
 
         Return Value: array of corrected Xs (in same units as known positions)
 
@@ -740,7 +722,7 @@ class SANSTubeCalibration(PythonAlgorithm):
         try:
             Fit(
                 InputWorkspace=PolyFittingWorkspace,
-                Function=f"name=Polynomial,n={polinFit}",
+                Function="name=Polynomial,n=2",
                 StartX=str(0.0),
                 EndX=str(num_detectors),
                 Output="QF",
@@ -754,7 +736,7 @@ class SANSTubeCalibration(PythonAlgorithm):
         # Evaluate the fitted quadratic against the number of detectors
         return np.polynomial.polynomial.polyval(list(range(num_detectors)), coefficients)
 
-    def _get_calibrated_pixel_positions(self, ws, fit_positions, known_positions, ws_ids, polinFit=2):
+    def _get_calibrated_pixel_positions(self, ws, fit_positions, known_positions, ws_ids):
         """
         Get the calibrated detector positions for one tube
         The tube is specified by a list of workspace indices of its spectra
@@ -764,7 +746,6 @@ class SANSTubeCalibration(PythonAlgorithm):
         :param fit_positions: array of calibration positions (in pixels)
         :param known_positions: where these calibration positions should be (in Y coords)
         :param ws_ids: a list of workspace indices for the tube
-        :param polinFit: Order of the polinominal to fit for the ideal positions
 
         Return dictionary containing the pixel detector IDs and their calibrated positions
         """
@@ -777,7 +758,7 @@ class SANSTubeCalibration(PythonAlgorithm):
             raise RuntimeError("No detectors to calibrate for tube")
 
         # Correct positions of detectors in tube by quadratic fit
-        corrected_pixels = self._get_corrected_pixel_positions(fit_positions, known_positions, num_detectors, polinFit=polinFit)
+        corrected_pixels = self._get_corrected_pixel_positions(fit_positions, known_positions, num_detectors)
 
         if len(corrected_pixels) != num_detectors:
             raise RuntimeError("Number of corrected pixels for tube did not match the number of detectors.")
