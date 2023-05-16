@@ -37,7 +37,6 @@ INF = sys.float_info.max  # Convenient approximation for infinity
 
 
 class FuncForm(Enum):
-    GAUSSIAN = 1
     EDGES = 2
     FLAT_TOP_PEAK = 3
 
@@ -509,7 +508,7 @@ class SANSTubeCalibration(PythonAlgorithm):
         :param tube_name: the name of the tube to be calibrated.
         :param known_positions: the defined position for the peaks/edges, taking the center as the origin and having the
         same units as the tube length in the 3D space.
-        :param func_form: defines the format of the peaks/edge (Gaussian, Edges, Flat Top Peak).
+        :param func_form: defines the format of the peaks/edge (Edges, Flat Top Peak).
         :param fit_params: define the parameters to be used in the fit as a TubeCalibFitParams object.
         :param calib_table: a TableWorkspace with two columns Detector ID (int) and Detector Position (V3D) to append the output values to.
         If none is provided then a new table is created.
@@ -642,85 +641,13 @@ class SANSTubeCalibration(PythonAlgorithm):
         # peakIndex (center) is in position 1 of parameter list -> parameter B of EndERFC
         return 1
 
-    def fitGaussian(self, fitPar, index, ws, outputWs):
-        # find the peak position
-        centre = fitPar.getPeaks()[index]
-        margin = fitPar.getMargin()
-
-        # get values around the expected center
-        all_values = ws.dataY(0)
-
-        RIGHTLIMIT = len(all_values)
-
-        # RKH 18/9/19, add int()
-        min_index = max(int(centre - margin), 0)
-        max_index = min(int(centre + margin), RIGHTLIMIT)
-        values = all_values[min_index:max_index]
-
-        # find the peak position
-        # RKH expt 7/11/19
-        if fitPar.getAutomatic():
-            #    Automatic=True
-            #    if Automatic:
-            # find the parameters for fit dynamically
-            max_value = np.max(values)
-            min_value = np.min(values)
-            half = (max_value - min_value) * 2 / 3 + min_value
-            above_half_line = len(np.where(values > half)[0])
-            beyond_half_line = len(values) - above_half_line
-            if above_half_line < beyond_half_line:
-                # means that there are few values above the midle, so it is a peak
-                centre = np.argmax(values) + min_index
-                background = min_value
-                height = max_value - background
-                width = len(np.where(values > height / 2 + background))
-            else:
-                # means that there are many values above the midle, so it is a trough
-                centre = np.argmin(values) + min_index
-                background = max_value
-                height = min_value - max_value  # negative value
-                width = len(np.where(values < min_value + height / 2))
-
-            start = max(centre - margin, 0)
-            end = min(centre + margin, RIGHTLIMIT)
-
-            fit_msg = "name=LinearBackground,A0=%f;name=Gaussian,Height=%f,PeakCentre=%f,Sigma=%f" % (background, height, centre, width)
-
-            Fit(InputWorkspace=ws, Function=fit_msg, StartX=str(start), EndX=str(end), Output=outputWs)
-
-            peakIndex = 3
-
-        else:
-            # get the parameters from fitParams
-            background = 100
-            height, width = fitPar.getHeightAndWidth()
-            start = max(centre - margin, 0)
-            end = min(centre + margin, RIGHTLIMIT)
-
-            # fit the input data as a linear background + gaussian fit
-            # it was seen that the best result for static general fitParamters,
-            # is to divide the values in two fitting steps
-            Fit(InputWorkspace=ws, Function="name=LinearBackground,A0=%f" % (background), StartX=str(start), EndX=str(end), Output="Z1")
-            Fit(
-                InputWorkspace="Z1_Workspace",
-                Function="name=Gaussian,Height=%f,PeakCentre=%f,Sigma=%f" % (height, centre, width),
-                WorkspaceIndex=2,
-                StartX=str(start),
-                EndX=str(end),
-                Output=outputWs,
-            )
-            CloneWorkspace(outputWs + "_Workspace", OutputWorkspace="gauss_" + str(index))
-            peakIndex = 1
-
-        return peakIndex
-
     def _fit_peak_positions_for_tube(self, ws, func_forms, fit_params, ws_ids, showPlot=False):
         """
         Get the centres of N slits or edges for calibration. It looks for the peak position in pixels
         by fitting the peaks and edges. It is the method responsible for estimating the peak position in each tube.
 
         :param ws: workspace of integrated data
-        :param func_forms: array of function form 1=slit/bar (Gaussian peak), 2=edge (pair of edges that can partly overlap), 3= FlatTopPeak
+        :param func_forms: array of function form, Edges or FlatTopPeak
         :param fit_params: a TubeCalibFitParams object contain the fit parameters
         :param ws_ids: a list of workspace indices defining one tube
         :param showPlot: show plot for this tube
@@ -755,12 +682,10 @@ class SANSTubeCalibration(PythonAlgorithm):
                 # Find the FlatTopPeak position and save the fit resolution param to get avg resolution
                 centre_param_index = self._fit_flat_top_peak(fit_params, i, tube_y_data, calibPointWs)
                 get_resolution_param()
-            elif func_forms[i] == FuncForm.EDGES:
+            else:
                 # Find the edge position and save the fit resolution param to get avg resolution
                 centre_param_index = self._fit_edges(fit_params, i, tube_y_data, calibPointWs)
                 get_resolution_param()
-            else:
-                centre_param_index = self.fitGaussian(fit_params, i, tube_y_data, calibPointWs)
 
             # Get the peak centre
             peak_centre = mtd[calibPointWs + "_Parameters"].column("Value")[centre_param_index]
