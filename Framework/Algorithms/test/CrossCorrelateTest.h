@@ -193,8 +193,8 @@ public:
     alg.setProperty("XMax", 2.0);
     auto errorMap = alg.validateInputs();
     TS_ASSERT_EQUALS(errorMap.size(), 2);
-    TS_ASSERT_EQUALS(errorMap.begin()->first, "XMax");
-    TS_ASSERT_EQUALS(errorMap.rbegin()->first, "XMin");
+    TS_ASSERT_EQUALS(errorMap.count("XMin"), 1);
+    TS_ASSERT_EQUALS(errorMap.count("XMax"), 1);
   }
 
   void testValidateInputsXMinGreaterThanXMax() {
@@ -207,8 +207,8 @@ public:
     alg.setProperty("XMax", 2.0);
     auto errorMap = alg.validateInputs();
     TS_ASSERT_EQUALS(errorMap.size(), 2);
-    TS_ASSERT_EQUALS(errorMap.begin()->first, "XMax");
-    TS_ASSERT_EQUALS(errorMap.rbegin()->first, "XMin");
+    TS_ASSERT_EQUALS(errorMap.count("XMin"), 1);
+    TS_ASSERT_EQUALS(errorMap.count("XMax"), 1);
   }
 
   void testValidateInputsWSIndexMinEqualsWSIndexMax() {
@@ -221,8 +221,8 @@ public:
     alg.setProperty("XMax", 3.0);
     auto errorMap = alg.validateInputs();
     TS_ASSERT_EQUALS(errorMap.size(), 2);
-    TS_ASSERT_EQUALS(errorMap.begin()->first, "WorkspaceIndexMax");
-    TS_ASSERT_EQUALS(errorMap.rbegin()->first, "WorkspaceIndexMin");
+    TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMin"), 1);
+    TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMax"), 1);
   }
 
   void testValidateInputsWSIndexMinGreaterThanWSIndexMax() {
@@ -235,8 +235,8 @@ public:
     alg.setProperty("XMax", 3.0);
     auto errorMap = alg.validateInputs();
     TS_ASSERT_EQUALS(errorMap.size(), 2);
-    TS_ASSERT_EQUALS(errorMap.begin()->first, "WorkspaceIndexMax");
-    TS_ASSERT_EQUALS(errorMap.rbegin()->first, "WorkspaceIndexMin");
+    TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMin"), 1);
+    TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMax"), 1);
   }
 
   void testValidateInputsWSIndexListAndWSIndexMinMaxGiven() {
@@ -250,8 +250,9 @@ public:
     alg.setProperty("WorkspaceIndexList", "1,2,3");
     auto errorMap = alg.validateInputs();
     TS_ASSERT_EQUALS(errorMap.size(), 3);
-    TS_ASSERT_EQUALS(errorMap.begin()->first, "WorkspaceIndexList");
-    TS_ASSERT_EQUALS(errorMap.rbegin()->first, "WorkspaceIndexMin");
+    TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMin"), 1);
+    TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMax"), 1);
+    TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexList"), 1);
   }
 
 private:
