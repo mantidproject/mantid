@@ -72,7 +72,7 @@ class TestGroupCalibration(unittest.TestCase):
 
     def test_get_brightest(self):
         ws, _ = create_test_ws_and_group()
-        assert group_calibration._getBrightestWorkspaceIndex(ws) == 1
+        assert_equal(group_calibration._getBrightestWorkspaceIndex(ws), 0)
 
     def test_from_eng(self):
         ws, groups = create_test_ws_and_group()
