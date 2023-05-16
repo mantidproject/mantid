@@ -184,7 +184,7 @@ import_path = None
 try:
     import_path = os.path.join(path_to_gsas2, "GSASII")
     sys.path.insert(0, import_path)
-    import GSASIIscriptable as G2sc  # noqa: E402
+    import GSASIIscriptable as G2sc
 except ModuleNotFoundError:
     raise ImportError(f"GSAS-II was not found at {import_path}")
 

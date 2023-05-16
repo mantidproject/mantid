@@ -47,7 +47,7 @@ class DrillRundexIO:
         """
         return self._filename
 
-    def load(self):  # noqa
+    def load(self):
         """
         Import data and set the associated model.
         """

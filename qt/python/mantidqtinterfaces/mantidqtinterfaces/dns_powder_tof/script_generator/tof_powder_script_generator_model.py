@@ -251,7 +251,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             self._nb_vana_banks = 0
             self._nb_empty_banks = 0
 
-    def script_maker(self, options, paths, file_selector=None):  # noqa: C901
+    def script_maker(self, options, paths, file_selector=None):
         self._tof_opt = options
         self._script = []
 

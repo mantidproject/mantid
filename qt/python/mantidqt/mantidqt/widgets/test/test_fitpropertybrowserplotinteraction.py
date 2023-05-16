@@ -17,7 +17,7 @@ from mantid.api import AnalysisDataService, FunctionFactory, WorkspaceFactory
 
 import matplotlib
 
-matplotlib.use("AGG")  # noqa
+matplotlib.use("AGG")
 
 X_COLUMN_LABEL = "x_column"
 Y_COLUMN_LABEL = "y_column"

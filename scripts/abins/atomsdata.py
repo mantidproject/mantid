@@ -145,7 +145,7 @@ class AtomsData(collections.abc.Sequence):
     def __getitem__(self, item: slice) -> List[_AtomData]:  # noqa F811
         ...
 
-    def __getitem__(self, item):  # noqa F811
+    def __getitem__(self, item):  # F811
         return self._data[item]
 
     def extract(self):

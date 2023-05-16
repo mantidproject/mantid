@@ -10,7 +10,7 @@ import unittest
 
 import matplotlib as mpl
 
-mpl.use("Agg")  # noqa
+mpl.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.ticker import LogFormatterSciNotation, ScalarFormatter
 

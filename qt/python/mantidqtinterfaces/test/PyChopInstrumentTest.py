@@ -195,67 +195,67 @@ class PyChopGuiTests(unittest.TestCase):
                 self.setCentralWidget = mock.MagicMock()
                 self.setWindowTitle = mock.MagicMock()
 
-            def setWindowFlags(self, *args, **kwargs):  # noqa: E306
+            def setWindowFlags(self, *args, **kwargs):
                 pass
 
-            def show(self):  # noqa: E306
+            def show(self):
                 pass
 
-        class fake_QCombo(mock.MagicMock):  # noqa: E306
+        class fake_QCombo(mock.MagicMock):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.clear()
 
-            def clear(self):  # noqa: E306
+            def clear(self):
                 self.items = []
                 self.currentIndex = 0
 
-            def addItem(self, item):  # noqa: E306
+            def addItem(self, item):
                 self.items.append(item)
 
-            def currentText(self):  # noqa: E306
+            def currentText(self):
                 return self.items[self.currentIndex]
 
-            def count(self):  # noqa: E306
+            def count(self):
                 return len(self.items)
 
-            def itemText(self, idx):  # noqa: E306
+            def itemText(self, idx):
                 return self.items[idx]
 
-            def setCurrentIndex(self, idx):  # noqa: E306
+            def setCurrentIndex(self, idx):
                 self.currentIndex = idx
 
-            def __getattr__(self, attribute):  # noqa: E306
+            def __getattr__(self, attribute):
                 if attribute not in self.__dict__:
                     self.__dict__[attribute] = mock.MagicMock()
                 return self.__dict__[attribute]
 
-        class fake_Line(mock.MagicMock):  # noqa: E306
+        class fake_Line(mock.MagicMock):
             def __init__(self, parent, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.parent = parent
 
-            def set_label(self, label):  # noqa: E306
+            def set_label(self, label):
                 self.parent.legends[self] = label
 
-        class fake_Axes(mock.MagicMock):  # noqa: E306
+        class fake_Axes(mock.MagicMock):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.legends = {}
 
-            def plot(self, *args, **kwargs):  # noqa: E306
+            def plot(self, *args, **kwargs):
                 self.lines.append(fake_Line(self))
                 return (self.lines[-1],)
 
-            def get_legend_handles_labels(self):  # noqa: E306
+            def get_legend_handles_labels(self):
                 labels = [self.legends[line] for line in self.lines]
                 return self.lines, labels
 
-        class fake_Figure(mock.MagicMock):  # noqa: E306
+        class fake_Figure(mock.MagicMock):
             def add_subplot(self, *args, **kwargs):
                 return fake_Axes()
 
-        class fake_Slider(mock.MagicMock):  # noqa: E306
+        class fake_Slider(mock.MagicMock):
             def __init__(self, parent, label, valmin, valmax, **kwargs):
                 super().__init__(parent, label, valmin, valmax, **kwargs)
                 self.parent, self.label, self.valmin, self.valmax = parent, label, valmin, valmax

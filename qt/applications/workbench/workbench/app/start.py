@@ -23,16 +23,16 @@ import mantidqt.utils.qt as qtutils
 # Find Qt plugins for development builds on some platforms
 plugins.setup_library_paths()
 
-from qtpy.QtGui import QIcon, QSurfaceFormat  # noqa
-from qtpy.QtWidgets import QApplication  # noqa
-from qtpy.QtCore import QCoreApplication, Qt  # noqa
+from qtpy.QtGui import QIcon, QSurfaceFormat
+from qtpy.QtWidgets import QApplication
+from qtpy.QtCore import QCoreApplication, Qt
 
 # Importing resources loads the data in. This must be imported before the
 # QApplication is created or paths to Qt's resources will not be set up correctly
-from workbench.app.resources import qCleanupResources  # noqa
-from workbench.config import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa
-from workbench.plugins.exception_handler import exception_logger  # noqa
-from workbench.widgets.about.presenter import AboutPresenter  # noqa
+from workbench.app.resources import qCleanupResources
+from workbench.config import APPNAME, ORG_DOMAIN, ORGANIZATION
+from workbench.plugins.exception_handler import exception_logger
+from workbench.widgets.about.presenter import AboutPresenter
 
 # Constants
 SYSCHECK_INTERVAL = 50
@@ -174,7 +174,7 @@ def create_and_launch_workbench(app, command_line_options):
         # Load matplotlib as early as possible and set our defaults
         # Setup our custom backend and monkey patch in custom current figure manager
         main_window.set_splash("Preloading matplotlib")
-        from workbench.plotting.config import initialize_matplotlib  # noqa
+        from workbench.plotting.config import initialize_matplotlib
 
         initialize_matplotlib()
 

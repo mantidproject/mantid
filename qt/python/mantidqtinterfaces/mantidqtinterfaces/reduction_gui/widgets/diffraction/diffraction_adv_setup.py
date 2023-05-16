@@ -8,8 +8,8 @@
 ################################################################################
 # Advanced Setup Widget
 ################################################################################
-from qtpy.QtWidgets import QDialog, QFrame  # noqa
-from qtpy.QtGui import QDoubleValidator, QIntValidator  # noqa
+from qtpy.QtWidgets import QDialog, QFrame
+from qtpy.QtGui import QDoubleValidator, QIntValidator
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.diffraction.diffraction_adv_setup_script import AdvancedSetupScript
 from mantid.kernel import MaterialBuilder

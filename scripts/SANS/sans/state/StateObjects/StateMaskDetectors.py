@@ -240,7 +240,7 @@ class StateMask(metaclass=JsonSerializable):
         # Radius Mask
         # --------------------
         # Radius mask rule: the min radius must be less or equal to the max radius
-        if self.radius_max is not None and self.radius_min is not None and self.radius_max != -1 and self.radius_min != -1:  # noqa
+        if self.radius_max is not None and self.radius_min is not None and self.radius_max != -1 and self.radius_min != -1:
             if self.radius_min > 0 and self.radius_max > 0 and (self.radius_min > self.radius_max):
                 entry = validation_message(
                     "Incorrect radius bounds.",

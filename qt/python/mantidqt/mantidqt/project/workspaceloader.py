@@ -23,7 +23,7 @@ class WorkspaceLoader(object):
         if workspaces_to_load is None:
             return
 
-        from mantid.simpleapi import Load  # noqa
+        from mantid.simpleapi import Load
 
         for workspace in workspaces_to_load:
             try:

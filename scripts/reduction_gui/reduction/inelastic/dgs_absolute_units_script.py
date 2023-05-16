@@ -143,7 +143,7 @@ class AbsoluteUnitsScript(BaseScriptElement):
             )
             self.absunits_median_test_out_high = BaseScriptElement.getFloatElement(
                 instrument_dom, "median_test_out_high", default=AbsoluteUnitsScript.absunits_median_test_out_high
-            )  # noqa
+            )
             self.absunits_median_test_low = BaseScriptElement.getFloatElement(
                 instrument_dom, "median_test_low", default=AbsoluteUnitsScript.absunits_median_test_low
             )

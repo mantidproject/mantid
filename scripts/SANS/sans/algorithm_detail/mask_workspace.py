@@ -431,7 +431,7 @@ def create_masker(state, detector_type):
         or instrument is SANSInstrument.LOQ
         or instrument is SANSInstrument.SANS2D
         or instrument is SANSInstrument.ZOOM
-    ):  # noqa
+    ):
         run_number = data_info.sample_scatter_run_number
         file_name = data_info.sample_scatter
         _, ipf_path = get_instrument_paths_for_sans_file(file_name)

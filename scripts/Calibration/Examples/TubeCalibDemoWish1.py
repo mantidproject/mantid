@@ -14,7 +14,7 @@
 
 import tube
 
-reload(tube)  # noqa
+reload(tube)
 from tube_spec import TubeSpec
 import tube_calib  # from tube_calib import constructIdealTubeFromRealTube
 from tube_calib_fit_params import TubeCalibFitParams

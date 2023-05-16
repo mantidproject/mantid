@@ -91,7 +91,7 @@ except ImportError:
     __gui__ = False
 
 # Set deprecation warnings back to default (they are ignored in 2.7)
-import warnings as _warnings  # noqa: E402
+import warnings as _warnings
 
 # Default we see everything
 _warnings.filterwarnings("default", category=DeprecationWarning, module="mantid.*")
@@ -103,17 +103,17 @@ _warnings.filterwarnings("ignore", category=DeprecationWarning, module="numpy.ol
 # Load all non-plugin subpackages that contain a C-extension. The boost.python
 # registry will be missing entries if all are not loaded.
 ###############################################################################
-from mantid import kernel as _kernel  # noqa: F401, E402
-from mantid import api as _api  # noqa: F401, E402
-from mantid import geometry as _geometry  # noqa: F401, E402
-from mantid import dataobjects as _dataobjects  # noqa: F401, E402
+from mantid import kernel as _kernel  # noqa: F401
+from mantid import api as _api  # noqa: F401
+from mantid import geometry as _geometry  # noqa: F401
+from mantid import dataobjects as _dataobjects  # noqa: F401
 
 # Make the aliases from each module accessible in the mantid namespace
-from mantid.kernel._aliases import *  # noqa: F401, E402
-from mantid.api._aliases import *  # noqa: F401, E402
+from mantid.kernel._aliases import *
+from mantid.api._aliases import *
 
 # Make the version string and info accessible in the standard way
-from mantid.kernel import version_str as _version_str  # noqa: E402
-from mantid.kernel import version  # noqa: F401, E402
+from mantid.kernel import version_str as _version_str
+from mantid.kernel import version  # noqa: F401
 
 __version__ = _version_str()

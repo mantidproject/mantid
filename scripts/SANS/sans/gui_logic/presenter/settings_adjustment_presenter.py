@@ -133,7 +133,7 @@ class SettingsAdjustmentPresenter(PresenterCommon):
         self._view.transmission_sample_use_fit = use_fit
 
         # Set the polynomial order for sample
-        polynomial_order = self._model.transmission_sample_polynomial_order if fit_type is FitType.POLYNOMIAL else 2  # noqa
+        polynomial_order = self._model.transmission_sample_polynomial_order if fit_type is FitType.POLYNOMIAL else 2
         self._view.transmission_sample_polynomial_order = polynomial_order
 
         # Set the fit type for the sample
@@ -164,7 +164,7 @@ class SettingsAdjustmentPresenter(PresenterCommon):
             self._view.transmission_can_use_fit = use_can_fit
 
             # Set the polynomial order for can
-            polynomial_order_can = self._model.transmission_can_polynomial_order if fit_type_can is FitType.POLYNOMIAL else 2  # noqa
+            polynomial_order_can = self._model.transmission_can_polynomial_order if fit_type_can is FitType.POLYNOMIAL else 2
             self._view.transmission_can_polynomial_order = polynomial_order_can
 
             # Set the fit type for the can

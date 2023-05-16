@@ -29,7 +29,7 @@ from workbench.plugins.workspacewidget import WorkspaceWidget
 
 from mantid.plots.utility import MantidAxType
 
-mpl.use("Agg")  # noqa
+mpl.use("Agg")
 
 ALGORITHM_HISTORY_WINDOW_TYPE = "AlgorithmHistoryWindow"
 ALGORITHM_HISTORY_WINDOW = "mantidqt.widgets.workspacewidget." "algorithmhistorywindow." + ALGORITHM_HISTORY_WINDOW_TYPE

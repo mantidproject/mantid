@@ -6,22 +6,22 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-import unittest  # noqa
-from unittest import mock  # noqa
+import unittest
+from unittest import mock
 
 import matplotlib
 import matplotlib.axis
-import matplotlib.pyplot as plt  # noqa
-import matplotlib.figure  # noqa
-import matplotlib.text  # noqa
+import matplotlib.pyplot as plt
+import matplotlib.figure
+import matplotlib.text
 from matplotlib.ticker import LogFormatterSciNotation, ScalarFormatter, NullFormatter
 
 matplotlib.use("AGG")
 
-from mantidqt.project.plotsloader import PlotsLoader  # noqa
-import mantid.plots.axesfunctions  # noqa
-from mantid.api import AnalysisDataService as ADS  # noqa
-from mantid.dataobjects import Workspace2D  # noqa
+from mantidqt.project.plotsloader import PlotsLoader
+import mantid.plots.axesfunctions
+from mantid.api import AnalysisDataService as ADS
+from mantid.dataobjects import Workspace2D
 
 
 def pass_func():
@@ -234,7 +234,7 @@ class PlotsLoaderTest(unittest.TestCase):
             ]
         )
 
-        for (spine_name, mock_spine) in mock_ax.spines.items():
+        for spine_name, mock_spine in mock_ax.spines.items():
             mock_spine.set_linewidth.assert_called_with(dic["spineWidths"][spine_name])
 
     def test_create_text_from_dict(self):

@@ -9,7 +9,7 @@ import numpy
 import sys
 from mantidqtinterfaces.HFIR_4Circle_Reduction import fourcircle_utility
 from mantidqtinterfaces.HFIR_4Circle_Reduction import guiutility
-from qtpy import QtCore  # noqa
+from qtpy import QtCore
 import math
 import mantidqtinterfaces.HFIR_4Circle_Reduction.NTableWidget as tableBase
 import os

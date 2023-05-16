@@ -272,7 +272,7 @@ def correct_q_resolution_for_can(sample_workspace, can_workspace, subtracted_wor
     would be very small any way). The Q resolution functionality only exists currently
     for 1D, ie when only one spectrum is present.
     """
-    _ = can_workspace  # noqa
+    _ = can_workspace
     if sample_workspace.getNumberHistograms() == 1 and sample_workspace.hasDx(0):
         subtracted_workspace.setDx(0, sample_workspace.dataDx(0))
 

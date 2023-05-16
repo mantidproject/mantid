@@ -21,7 +21,7 @@ import matplotlib
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid.api import FrameworkManager
 from qtpy.QtWidgets import QMessageBox, QAction, QMenu
-from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu  # noqa
+from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu
 from io import StringIO
 
 
@@ -266,7 +266,11 @@ class MainWindowTest(unittest.TestCase):
     def test_main_window_does_not_close_if_project_not_saved_and_user_cancels_project_save(self):
         mock_event = Mock()
         mock_project = Mock()
-        mock_project.is_saving, mock_project.is_loading, mock_project.saved, = (
+        (
+            mock_project.is_saving,
+            mock_project.is_loading,
+            mock_project.saved,
+        ) = (
             False,
             False,
             False,

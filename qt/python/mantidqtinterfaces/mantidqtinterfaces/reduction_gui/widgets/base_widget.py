@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from qtpy.QtCore import QFileInfo  # noqa
-from qtpy.QtWidgets import QFileDialog, QHBoxLayout, QMessageBox, QWidget  # noqa
+from qtpy.QtCore import QFileInfo
+from qtpy.QtWidgets import QFileDialog, QHBoxLayout, QMessageBox, QWidget
 import os
 import types
 from mantidqtinterfaces.reduction_gui.settings.application_settings import GeneralSettings
@@ -194,7 +194,6 @@ class BaseWidget(QWidget):
             # Do nothing if the instrument view is already displayed
             # FIXME: this doesn't seem to work 100% yet
             if False and self._instrument_view is not None and self._data_set_viewed == file_name and self._instrument_view.isVisible():
-
                 # If we want a reload, close the instrument window currently shown
                 if reload:
                     self._instrument_view.close()

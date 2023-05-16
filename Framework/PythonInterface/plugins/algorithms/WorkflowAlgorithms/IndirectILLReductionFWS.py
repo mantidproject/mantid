@@ -9,11 +9,10 @@ import time
 from mantid import mtd
 from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator
 from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, FileAction, WorkspaceGroupProperty, Progress
-from mantid.simpleapi import *  # noqa
+from mantid.simpleapi import *
 
 
 class IndirectILLReductionFWS(PythonAlgorithm):
-
     _SAMPLE = "sample"
     _BACKGROUND = "background"
     _CALIBRATION = "calibration"
@@ -54,7 +53,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         return "IndirectILLReductionFWS"
 
     def PyInit(self):
-
         self.declareProperty(MultipleFileProperty("Run", extensions=["nxs"]), doc="Run number(s) of sample run(s).")
 
         self.declareProperty(
@@ -164,7 +162,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         )
 
     def validateInputs(self):
-
         issues = dict()
 
         if self.getPropertyValue("CalibrationBackgroundRun") and not self.getPropertyValue("CalibrationRun"):
@@ -182,7 +179,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         return issues
 
     def setUp(self):
-
         self._sample_files = self.getPropertyValue("Run")
         self._background_files = self.getPropertyValue("BackgroundRun")
         self._calibration_files = self.getPropertyValue("CalibrationRun")
@@ -339,7 +335,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             RenameWorkspace(InputWorkspace=mtd[groupws].getItem(0), OutputWorkspace=groupws)
 
     def PyExec(self):
-
         self.setUp()
 
         # total number of (unsummed) runs
@@ -350,7 +345,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         self._reduce_multiple_runs(self._sample_files, self._SAMPLE)
 
         if self._background_files:
-
             self._reduce_multiple_runs(self._background_files, self._BACKGROUND)
 
             back_ws = self._red_ws + "_" + self._BACKGROUND
@@ -367,7 +361,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             DeleteWorkspace(back_ws)
 
         if self._calibration_files:
-
             self._reduce_multiple_runs(self._calibration_files, self._CALIBRATION)
 
             if self._background_calib_files:
@@ -496,7 +489,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         for energy in self._all_runs[reference]:
             if energy in self._all_runs[label]:
-
                 ws = self._insert_energy_value(self._red_ws + "_" + label, energy, label)
 
                 if reference == self._SAMPLE:
@@ -516,7 +508,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         for energy in self._all_runs[reference]:
             if energy in self._all_runs[background]:
-
                 if reference == self._SAMPLE:
                     lhs = self._insert_energy_value(self._red_ws, energy, reference)
                 else:
@@ -581,7 +572,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         pattern = "%Y-%m-%dT%H:%M:%S"
 
         for i, ws in enumerate(ws_list):
-
             log = mtd[ws].getRun().getLogData(self._observable)
             value = log.value
 
@@ -620,7 +610,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             groupname += "_" + label
 
         for energy in sorted(self._all_runs[label]):
-
             ws_list = self._all_runs[label][energy]
 
             wsname = self._insert_energy_value(groupname, energy, label)
@@ -646,7 +635,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             AddSampleLog(Workspace=wsname, LogName="ReducedRunsList", LogText=run_list.rstrip(","))
 
             for spectrum in range(nspectra):
-
                 mtd[wsname].setX(spectrum, np.array(observable_array))
 
             if self._sortX:

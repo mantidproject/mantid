@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 
-from qtpy.QtWidgets import QDialog, QFileDialog  # noqa
+from qtpy.QtWidgets import QDialog, QFileDialog
 from mantid.kernel import Logger
 
 try:

@@ -9,7 +9,7 @@ import systemtesting
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.utils.qt.testing import get_application
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder  # noqa: E402
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqt.widgets.fitscriptgenerator import FittingMode, FitScriptGeneratorModel, FitScriptGeneratorPresenter, FitScriptGeneratorView
 

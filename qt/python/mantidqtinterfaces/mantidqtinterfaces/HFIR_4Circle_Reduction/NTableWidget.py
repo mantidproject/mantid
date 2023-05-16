@@ -7,8 +7,8 @@
 # pylint: disable=C0103,R0904
 # N(DAV)TableWidget
 import csv
-from qtpy.QtWidgets import QCheckBox, QTableWidget, QTableWidgetItem  # noqa
-from qtpy import QtCore  # noqa
+from qtpy.QtWidgets import QCheckBox, QTableWidget, QTableWidgetItem
+from qtpy import QtCore
 import qtpy  # noqa
 
 

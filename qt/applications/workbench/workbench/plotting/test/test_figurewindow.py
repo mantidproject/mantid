@@ -16,7 +16,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figurewindow import FigureWindow
 
 matplotlib.use("Qt5Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
 
 
 @start_qapplication

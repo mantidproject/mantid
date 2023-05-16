@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import QFrame  # noqa
+from qtpy.QtWidgets import QFrame
 from reduction_gui.reduction.output_script import Output
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 
