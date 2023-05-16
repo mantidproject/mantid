@@ -186,7 +186,6 @@ def process_sip(filename):
 
 
 if __name__ == "__main__":
-
     parser = OptionParser(
         description="""Automatically adds Docstring directives to an input .sip file.
 REQUIREMENTS:
@@ -212,13 +211,13 @@ REQUIREMENTS:
     print("---- Reading from %s ---- " % options.sipfile)
     (out, dirtext) = process_sip(options.sipfile)
 
-    if not (options.outputfile is None):
+    if options.outputfile is not None:
         print("---- Writing to %s ---- " % options.outputfile)
         f = open(options.outputfile, "w")
         f.write("\n".join(out))
         f.close()
 
-    if not (options.dirfile is None):
+    if options.dirfile is not None:
         print("---- Writing to %s ---- " % options.dirfile)
         f = open(options.dirfile, "w")
         f.write(dirtext)

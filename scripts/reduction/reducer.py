@@ -42,8 +42,8 @@ from reduction.find_data import find_data
 __version__ = "1.0"
 
 
-def validate_loader(func):  # noqa
-    def validated_f(reducer, algorithm, *args, **kwargs):
+def validate_loader(func):  # noqa: C901
+    def validated_f(reducer, algorithm, *args, **kwargs):  # noqa: C901
         if issubclass(algorithm.__class__, ReductionStep) or algorithm is None:
             # If we have a ReductionStep object, just use it.
             # "None" is allowed as an algorithm (usually tells the reducer to skip a step)
@@ -95,7 +95,7 @@ def validate_loader(func):  # noqa
                     propertyOrder = alg.orderedProperties()
 
                     # add the args to the kw list so everything can be set in a single way
-                    for (key, arg) in zip(propertyOrder[: len(args)], args):
+                    for key, arg in zip(propertyOrder[: len(args)], args):
                         kwargs[key] = arg
 
                     # Override input and output workspaces
@@ -196,7 +196,7 @@ def validate_step(func):  # noqa
     if they are to be overwritten by the Reducer.
     """
 
-    def validated_f(reducer, algorithm, *args, **kwargs):
+    def validated_f(reducer, algorithm, *args, **kwargs):  # noqa: C901
         """
         Wrapper function around the function func.
         The function ensures that the algorithm parameter
@@ -244,7 +244,7 @@ def validate_step(func):  # noqa
                     propertyOrder = alg.orderedProperties()
 
                     # add the args to the kw list so everything can be set in a single way
-                    for (key, arg) in zip(propertyOrder[: len(args)], args):
+                    for key, arg in zip(propertyOrder[: len(args)], args):
                         kwargs[key] = arg
 
                     # Override input and output workspaces

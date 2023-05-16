@@ -559,7 +559,7 @@ def RenameWorkspace(*args, **kwargs):
     _set_logging_option(algm, arguments)
     algm.setAlwaysStoreInADS(True)
     # does not make sense otherwise, this overwrites even the __STORE_ADS_DEFAULT__
-    if __STORE_KEYWORD__ in arguments and not (arguments[__STORE_KEYWORD__] is True):
+    if __STORE_KEYWORD__ in arguments and arguments[__STORE_KEYWORD__] is not True:
         raise KeyError("RenameWorkspace operates only on named workspaces in ADS.")
 
     for key, val in arguments.items():
@@ -690,7 +690,7 @@ def _check_mandatory_args(algorithm, _algm_object, error, *args, **kwargs):
     # Returns all user defined properties
     props = _algm_object.mandatoryProperties()
     # Add given positional arguments to keyword arguments
-    for (key, arg) in zip(props[: len(args)], args):
+    for key, arg in zip(props[: len(args)], args):
         kwargs[key] = arg
     for p in props:
         prop = _algm_object.getProperty(p)
@@ -945,7 +945,7 @@ def set_properties(alg_object, *args, **kwargs):
         mandatory_props = []
 
     postponed = []
-    for (key, value) in kwargs.items():
+    for key, value in kwargs.items():
         if key in mandatory_props:
             mandatory_props.remove(key)
         if "IndexSet" in key:
@@ -954,11 +954,11 @@ def set_properties(alg_object, *args, **kwargs):
             postponed.append((key, value))
             continue
         do_set_property(key, value)
-    for (key, value) in postponed:
+    for key, value in postponed:
         do_set_property(key, value)
 
     # zip stops at the length of the shorter list
-    for (key, value) in zip(mandatory_props, args):
+    for key, value in zip(mandatory_props, args):
         do_set_property(key, value)
 
 
@@ -971,7 +971,7 @@ def _create_algorithm_function(name, version, algm_object):  # noqa: C901
     :param algm_object: the created algorithm object.
     """
 
-    def algorithm_wrapper(alias=None):
+    def algorithm_wrapper(alias=None):  # noqa: C901
         r"""
         @brief Creates a wrapper object around the algorithm functions.
         @param str alias: Non-empty when the algorithm is to be invoked with this alias instead of its name.
@@ -979,7 +979,6 @@ def _create_algorithm_function(name, version, algm_object):  # noqa: C901
         """
 
         class Wrapper:
-
             __slots__ = ["__name__", "__signature__", "_alias"]
 
             @staticmethod

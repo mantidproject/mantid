@@ -17,7 +17,6 @@ from pychop.Instruments import Instrument
 
 
 class PyChopInstrumentTests(unittest.TestCase):
-
     # Tests the Fermi chopper instruments
     def test_pychop_fermi(self):
         instnames = ["maps", "mari", "merlin"]
@@ -170,7 +169,6 @@ class MockImports:
                 self.loaded_from[mods] = mock_object
 
     def import_func(self, name, globals=None, locals=None, fromlist=(), level=0):
-        prf = f"name:{name}, from:{fromlist}, level:{level}"
         if self.include:
             if self.is_module_included(name):
                 return self.get_mock(name, fromlist)

@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 #
 #
-import __future__
+import __future__  # noqa: F404
 import ast
 import warnings
 
