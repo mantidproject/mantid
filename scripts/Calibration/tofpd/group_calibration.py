@@ -4,6 +4,7 @@ import json
 import datetime
 import numpy as np
 from mantid.simpleapi import (
+    CompressEvents,
     ConvertUnits,
     ExtractSpectra,
     Rebin,
@@ -131,8 +132,6 @@ def cc_calibrate_groups(
 
     _accum_cc = None
     to_skip = []
-    print("start loop over groups", "=" * 40)
-    print("group ids=", group_ws.getGroupIDs())
     for group in group_ws.getGroupIDs():
         if group == -1:
             continue  # this is a group of unset pixels
@@ -307,11 +306,18 @@ def pdcalibration_groups(
 
     CreateDetectorTable(data_ws, DetectorTableWorkspace="calib_table_bak")
 
+    # time-focus the data into the requested number of groups
     ApplyDiffCal(data_ws, CalibrationWorkspace=cc_diffcal)
-    ConvertUnits(data_ws, Target="dSpacing", OutputWorkspace="_tmp_data_aligned")
-    DiffractionFocussing("_tmp_data_aligned", GroupingWorkspace=group_ws, OutputWorkspace="_tmp_data_aligned")
+    ConvertUnits(data_ws, Target="dSpacing", OutputWorkspace=data_ws)
+    DiffractionFocussing(data_ws, GroupingWorkspace=group_ws, OutputWorkspace="_tmp_data_aligned")
+    if mtd["_tmp_data_aligned"].id() == "EventWorkspace":
+        CompressEvents(InputWorkspace="_tmp_data_aligned", OutputWorkspace="_tmp_data_aligned")
     ConvertUnits("_tmp_data_aligned", Target="TOF", OutputWorkspace="_tmp_data_aligned")
+    # rebin the data and drop events even if they were present before
     Rebin(InputWorkspace="_tmp_data_aligned", OutputWorkspace="_tmp_data_aligned", Params=TofBinning, PreserveEvents=False)
+
+    # put the input data back into time-of-flight
+    ConvertUnits(data_ws, Target="dSpacing", OutputWorkspace=data_ws)
 
     instrument = data_ws.getInstrument().getName()
 
