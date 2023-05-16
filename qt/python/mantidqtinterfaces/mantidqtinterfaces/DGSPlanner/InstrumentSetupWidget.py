@@ -13,9 +13,9 @@ import numpy
 
 sys.path.append("..")
 # the following matplotlib imports cannot be placed before the setting of the backend, so we ignore flake8 warnings
-from mantidqt.MPLwidgets import *  # noqa
-from matplotlib.figure import Figure  # noqa
-from mpl_toolkits.mplot3d import Axes3D  # noqa
+from mantidqt.MPLwidgets import *
+from matplotlib.figure import Figure
+from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot  # noqa
 
 try:

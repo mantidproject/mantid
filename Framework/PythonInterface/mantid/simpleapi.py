@@ -796,7 +796,7 @@ def _merge_keywords_with_lhs(keywords, lhs_args):
     return final_keywords
 
 
-def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):  # noqa: C901
+def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
     """Gather the return values and ensure they are in the
     correct order as defined by the output properties and
     return them as a tuple. If their is a single return

@@ -16,7 +16,7 @@ from mantid.kernel import SpecialCoordinateSystem
 from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerModel
 from mantidqt.widgets.sliceviewer.peaksviewer.presenter import PeaksViewerPresenter, PeaksWorkspaceDataPresenter
 from mantidqt.widgets.sliceviewer.peaksviewer.view import PeaksViewerView, _PeaksWorkspaceTableView
-from mantidqt.widgets.sliceviewer.peaksviewer.test.modeltesthelpers import create_peaks_viewer_model, create_slice_info  # noqa
+from mantidqt.widgets.sliceviewer.peaksviewer.test.modeltesthelpers import create_peaks_viewer_model, create_slice_info
 
 
 def create_test_model(name):

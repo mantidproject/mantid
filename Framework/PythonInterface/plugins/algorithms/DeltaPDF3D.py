@@ -241,7 +241,7 @@ class DeltaPDF3D(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", outWS)
 
-    def _punch_and_fill(self, signal, dimX, dimY, dimZ):  # noqa
+    def _punch_and_fill(self, signal, dimX, dimY, dimZ):
         Xmin, Xmax, _, Xwidth = self._get_dim_params(dimX)
         Ymin, Ymax, _, Ywidth = self._get_dim_params(dimY)
         Zmin, Zmax, _, Zwidth = self._get_dim_params(dimZ)

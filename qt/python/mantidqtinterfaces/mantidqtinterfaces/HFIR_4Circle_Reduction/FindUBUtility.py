@@ -9,7 +9,7 @@ Containing a set of classes used for finding (calculating and refining) UB matri
 """
 import os
 from . import guiutility
-from qtpy.QtWidgets import QDialog, QFileDialog  # noqa
+from qtpy.QtWidgets import QDialog, QFileDialog
 from mantid.kernel import Logger
 
 try:

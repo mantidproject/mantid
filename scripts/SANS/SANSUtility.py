@@ -791,7 +791,7 @@ def is_nexus_file(file_name):
             keys = list(h5_file.keys())
             nexus_test = "raw_data_1" in keys or "mantid_workspace_1" in keys
             is_nexus = True if nexus_test else False
-    except:  # noqa
+    except:
         is_nexus = False
     return is_nexus
 

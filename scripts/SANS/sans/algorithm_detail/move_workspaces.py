@@ -535,8 +535,8 @@ class SANSMoveSANS2D(SANSMove):
     def do_move_initial(self, workspace, coordinates, component, is_transmission_workspace):
         # For LOQ we only have to coordinates
         assert len(coordinates) == 2
-        _component = component  # noqa
-        _is_transmission_workspace = is_transmission_workspace  # noqa
+        _component = component
+        _is_transmission_workspace = is_transmission_workspace
 
         # Move the high angle bank
         self._move_high_angle_bank(workspace, coordinates)
@@ -621,7 +621,7 @@ class SANSMoveLARMOROldStyle(SANSMove):
         super(SANSMoveLARMOROldStyle, self).__init__(state)
 
     def do_move_initial(self, workspace, coordinates, component, is_transmission_workspace):
-        _is_transmission_workspace = is_transmission_workspace  # noqa
+        _is_transmission_workspace = is_transmission_workspace
 
         # For LARMOR we only have to coordinates
         assert len(coordinates) == 2
@@ -680,7 +680,7 @@ class SANSMoveLARMORNewStyle(SANSMove):
         rotate_component(workspace, total_angle, direction, detector_name)
 
     def do_move_initial(self, workspace, coordinates, component, is_transmission_workspace):
-        _is_transmission_workspace = is_transmission_workspace  # noqa
+        _is_transmission_workspace = is_transmission_workspace
 
         # For LARMOR we only have to coordinates
         assert len(coordinates) == 2
@@ -754,8 +754,8 @@ class SANSMoveZOOM(SANSMove):
         # For ZOOM we only have to coordinates
         assert len(coordinates) == 2
 
-        _component = component  # noqa
-        _is_transmission_workspace = is_transmission_workspace  # noqa
+        _component = component
+        _is_transmission_workspace = is_transmission_workspace
 
         # Move the low angle bank
         self._move_low_angle_bank(workspace, coordinates)

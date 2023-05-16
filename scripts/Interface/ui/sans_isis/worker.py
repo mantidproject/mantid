@@ -38,7 +38,7 @@ class Worker(QRunnable):
         """
         try:
             self.result = self.func(*self.args, **self.kwargs)
-        except:  # noqa
+        except:
             traceback.print_exc()
             exception_type, value = sys.exc_info()[:2]
             self.signals.error.emit((exception_type, value, traceback.format_exc()))

@@ -14,7 +14,7 @@ from unittest import TestCase, main, mock
 import matplotlib
 from matplotlib import colormaps
 
-matplotlib.use("AGG")  # noqa
+matplotlib.use("AGG")
 import matplotlib.pyplot as plt
 import numpy as np
 

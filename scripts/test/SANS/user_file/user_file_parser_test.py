@@ -166,7 +166,6 @@ class DetParserTest(unittest.TestCase):
     def test_that_detector_setting_is_parsed_correctly(self):
         valid_settings = {
             "Det/CORR/REAR/X 123": {DetectorId.CORRECTION_X: single_entry_with_detector(entry=123, detector_type=DetectorType.LAB)},
-            # noqa
             "DEt/CORR/ frOnt/X +95.7": {DetectorId.CORRECTION_X: single_entry_with_detector(entry=95.7, detector_type=DetectorType.HAB)},
             "DeT/ CORR / ReAR/ y 12.3": {DetectorId.CORRECTION_Y: single_entry_with_detector(entry=12.3, detector_type=DetectorType.LAB)},
             " DET/CoRR/fROnt/Y -957": {DetectorId.CORRECTION_Y: single_entry_with_detector(entry=-957, detector_type=DetectorType.HAB)},
@@ -300,7 +299,6 @@ class LimitParserTest(unittest.TestCase):
             "L/Q -12 34.6 2.7/LOG": {LimitsId.Q: q_rebin_values(min=-12.0, max=34.6, rebin_string="-12.0,-2.7,34.6")},
             "L/q -12 3.6 2 /LIN": {LimitsId.Q: q_rebin_values(min=-12.0, max=3.6, rebin_string="-12.0,2.0,3.6")},
             "L/q -12   0.41  23 -34.8 3.6": {LimitsId.Q: q_rebin_values(min=-12.0, max=3.6, rebin_string="-12.0,0.41,23.0," "-34.8,3.6")},
-            # noqa
             "L/q -12   0.42  23 -34.8 3.6 /LIn": {
                 LimitsId.Q: q_rebin_values(min=-12.0, max=3.6, rebin_string="-12.0,0.42," "23.0,34.8," "3.6")
             },
@@ -828,15 +826,15 @@ class FitParserTest(unittest.TestCase):
             },
             "FIT/ tranS/LoG 123  3556.6 ": {
                 FitId.GENERAL: fit_general(start=123, stop=3556.6, fit_type=FitType.LOGARITHMIC, data_type=None, polynomial_order=0)
-            },  # noqa
+            },
             "FIT/TRANS/  YlOG 123   3556": {
                 FitId.GENERAL: fit_general(start=123, stop=3556, fit_type=FitType.LOGARITHMIC, data_type=None, polynomial_order=0)
-            },  # noqa
+            },
             "FIT/Trans/Lin": {
                 FitId.GENERAL: fit_general(start=None, stop=None, fit_type=FitType.LINEAR, data_type=None, polynomial_order=0)
             },
             "FIT/Trans/ Log": {
-                FitId.GENERAL: fit_general(start=None, stop=None, fit_type=FitType.LOGARITHMIC, data_type=None, polynomial_order=0)  # noqa
+                FitId.GENERAL: fit_general(start=None, stop=None, fit_type=FitType.LOGARITHMIC, data_type=None, polynomial_order=0)
             },
             "FIT/Trans/ polYnomial": {
                 FitId.GENERAL: fit_general(start=None, stop=None, fit_type=FitType.POLYNOMIAL, data_type=None, polynomial_order=2)

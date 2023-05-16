@@ -10,8 +10,8 @@
 import math
 import numpy
 import os
-from qtpy.QtWidgets import QDialog, QLineEdit, QVBoxLayout, QDialogButtonBox, QLabel, QPlainTextEdit  # noqa
-from qtpy import QtCore  # noqa
+from qtpy.QtWidgets import QDialog, QLineEdit, QVBoxLayout, QDialogButtonBox, QLabel, QPlainTextEdit
+from qtpy import QtCore
 
 
 def convert_str_to_matrix(matrix_str, matrix_shape):
@@ -496,7 +496,6 @@ class DisplayDialog(QDialog):
         return
 
     def set_name(self, new_name):
-
         self.name = new_name
 
     def show_message(self, message):

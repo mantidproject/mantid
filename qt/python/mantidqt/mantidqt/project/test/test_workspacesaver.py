@@ -14,7 +14,7 @@ from os.path import isdir
 from shutil import rmtree
 import tempfile
 
-from mantid.api import AnalysisDataService as ADS, IMDEventWorkspace  # noqa: F401
+from mantid.api import AnalysisDataService as ADS, IMDEventWorkspace
 from mantid.dataobjects import MDHistoWorkspace, MaskWorkspace  # noqa: F401
 from mantidqt.project import workspacesaver
 from unittest import mock

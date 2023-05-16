@@ -18,8 +18,8 @@ import sys
 __requires_compat = False if sys.version_info[0:2] > (3, 6) else True
 
 if __requires_compat:
-    from ._dataclasses.dataclasses import dataclass, field  # noqa: E402,F401
+    from ._dataclasses.dataclasses import dataclass, field
 else:
-    from dataclasses import dataclass, field  # noqa: E402,F401
+    from dataclasses import dataclass, field  # noqa: F401
 
 __all__ = "dataclass, field"

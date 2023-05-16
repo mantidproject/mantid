@@ -290,7 +290,7 @@ class MaskingTablePresenter(object):
         masks = []
 
         mask_info_lab = mask_info.detectors[DetectorType.LAB.value]
-        mask_info_hab = mask_info.detectors[DetectorType.HAB.value] if DetectorType.HAB.value in mask_info.detectors else None  # noqa
+        mask_info_hab = mask_info.detectors[DetectorType.HAB.value] if DetectorType.HAB.value in mask_info.detectors else None
 
         # Add the radius mask
         radius_mask = self._get_radius(mask_info)

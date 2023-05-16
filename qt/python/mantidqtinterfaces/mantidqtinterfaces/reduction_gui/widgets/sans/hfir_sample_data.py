@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name,protected-access
 import os
 from qtpy.QtWidgets import QFrame, QGroupBox, QMessageBox  # noqa
-from qtpy.QtGui import QDoubleValidator  # noqa
+from qtpy.QtGui import QDoubleValidator
 import mantidqtinterfaces.reduction_gui.widgets.util as util
 from reduction_gui.reduction.sans.hfir_sample_script import SampleData
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget

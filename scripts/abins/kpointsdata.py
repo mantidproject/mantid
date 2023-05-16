@@ -139,15 +139,15 @@ class KpointsData(collections.abc.Sequence):
     def __len__(self):
         return self._weights.size
 
-    @overload  # noqa F811
+    @overload  # F811
     def __getitem__(self, item: int) -> KpointData:
         ...
 
-    @overload  # noqa F811
-    def __getitem__(self, item: slice) -> List[KpointData]:  # noqa F811
+    @overload  # F811
+    def __getitem__(self, item: slice) -> List[KpointData]:  # F811
         ...
 
-    def __getitem__(self, item):  # noqa F811
+    def __getitem__(self, item):  # F811
         if isinstance(item, int):
             return KpointData(self._k_vectors[item], self._weights[item], self._frequencies[item], self._atomic_displacements[item])
         elif isinstance(item, slice):

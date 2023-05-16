@@ -43,7 +43,7 @@ def create_mock_diagnostics_tab():
 
 
 def get_cell_mock(row, column, convert_to=None, user_file_path=""):
-    _ = convert_to  # noqa
+    _ = convert_to
     if row == 0:
         # For the first row we return the
         # all of the sample data
@@ -252,7 +252,7 @@ def get_state_for_row_mock(row_index, file_lookup=True, suppress_warnings=False)
 
 
 def get_state_for_row_mock_with_real_state(row_index, file_lookup=True, suppress_warnings=False):
-    _ = row_index  # noqa
+    _ = row_index
     test_director = TestDirector()
     return test_director.construct()
 
