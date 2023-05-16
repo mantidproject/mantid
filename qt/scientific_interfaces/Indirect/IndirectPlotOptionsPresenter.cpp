@@ -59,6 +59,7 @@ void IndirectPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, st
 
   connect(m_view, SIGNAL(selectedWorkspaceChanged(std::string const &)), this,
           SLOT(workspaceChanged(std::string const &)));
+  connect(m_view, SIGNAL(selectedUnitChanged(std::string const &)), this, SLOT(unitChanged(std::string const &)));
   connect(m_view, SIGNAL(selectedIndicesChanged(std::string const &)), this, SLOT(indicesChanged(std::string const &)));
 
   connect(m_view, SIGNAL(plotSpectraClicked()), this, SLOT(plotSpectra()));
@@ -99,6 +100,7 @@ void IndirectPlotOptionsPresenter::setOptionsEnabled(bool enable) {
   m_view->setWorkspaceComboBoxEnabled(m_view->numberOfWorkspaces() > 1 ? enable : false);
   m_view->setIndicesLineEditEnabled(!m_model->indicesFixed() ? enable : false);
   m_view->setPlotButtonEnabled(enable);
+  m_view->setUnitComboBoxEnabled(enable);
 }
 
 void IndirectPlotOptionsPresenter::onWorkspaceRemoved(WorkspacePreDeleteNotification_ptr nf) {
@@ -139,6 +141,8 @@ void IndirectPlotOptionsPresenter::clearWorkspaces() {
   setOptionsEnabled(false);
 }
 
+void IndirectPlotOptionsPresenter::setUnit(std::string const &unit) { m_model->setUnit(unit); }
+
 void IndirectPlotOptionsPresenter::setIndices() {
   auto const selectedIndices = m_view->selectedIndices().toStdString();
   if (auto const indices = m_model->indices())
@@ -150,6 +154,8 @@ void IndirectPlotOptionsPresenter::setIndices() {
 }
 
 void IndirectPlotOptionsPresenter::workspaceChanged(std::string const &workspaceName) { setWorkspace(workspaceName); }
+
+void IndirectPlotOptionsPresenter::unitChanged(std::string const &unit) { setUnit(unit); }
 
 void IndirectPlotOptionsPresenter::indicesChanged(std::string const &indices) {
   auto const formattedIndices = m_model->formatIndices(indices);

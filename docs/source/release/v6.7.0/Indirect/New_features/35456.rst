@@ -1,0 +1,1 @@
+- Add unit option to Indirection Diffraction UI output plot options. Users can now choose from "D-spacing" or "Q-spacing" unit options.

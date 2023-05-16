@@ -7,6 +7,7 @@
 #include "IndirectPlotOptionsModel.h"
 #include "IndirectSettingsHelper.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -142,6 +143,10 @@ IndirectPlotOptionsModel::getAllWorkspaceNames(std::vector<std::string> const &w
   return allNames;
 }
 
+void IndirectPlotOptionsModel::setUnit(std::string const &unit) { m_unit = unit; }
+
+boost::optional<std::string> IndirectPlotOptionsModel::unit() { return m_unit; }
+
 std::string IndirectPlotOptionsModel::formatIndices(std::string const &indices) const {
   return formatIndicesString(indices);
 }
@@ -190,11 +195,28 @@ bool IndirectPlotOptionsModel::validateBins(const MatrixWorkspace_sptr &workspac
   return lastIndex < numberOfBins;
 }
 
+std::string IndirectPlotOptionsModel::convertUnit(const std::string &workspaceName, const std::string &unit) {
+  const std::string convertedWorkspaceName = workspaceName + "_" + unit;
+
+  IAlgorithm_sptr convertUnits = AlgorithmManager::Instance().create("ConvertUnits");
+  convertUnits->initialize();
+  convertUnits->setProperty("InputWorkspace", workspaceName);
+  convertUnits->setProperty("OutputWorkspace", convertedWorkspaceName);
+  convertUnits->setProperty("Target", unit);
+  convertUnits->execute();
+
+  return convertedWorkspaceName;
+}
+
 void IndirectPlotOptionsModel::plotSpectra() {
   auto const workspaceName = workspace();
   auto const indicesString = indices();
-  if (workspaceName && indicesString)
-    m_plotter->plotSpectra(workspaceName.get(), indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
+  auto const unitName = unit();
+
+  if (workspaceName && indicesString) {
+    std::string plotWorkspaceName = unitName ? convertUnit(workspaceName.get(), unitName.get()) : workspaceName.get();
+    m_plotter->plotSpectra(plotWorkspaceName, indicesString.get(), IndirectSettingsHelper::externalPlotErrorBars());
+  }
 }
 
 void IndirectPlotOptionsModel::plotBins(std::string const &binIndices) {
@@ -203,8 +225,13 @@ void IndirectPlotOptionsModel::plotBins(std::string const &binIndices) {
 }
 
 void IndirectPlotOptionsModel::plotContour() {
-  if (auto const workspaceName = workspace())
-    m_plotter->plotContour(workspaceName.get());
+  auto const workspaceName = workspace();
+  auto const unitName = unit();
+
+  if (workspaceName) {
+    std::string plotWorkspaceName = unitName ? convertUnit(workspaceName.get(), unitName.get()) : workspaceName.get();
+    m_plotter->plotContour(plotWorkspaceName);
+  }
 }
 
 void IndirectPlotOptionsModel::plotTiled() {
