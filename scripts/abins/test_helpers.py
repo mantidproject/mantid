@@ -59,7 +59,11 @@ def dict_arrays_to_lists(mydict: Dict[str, Any]) -> Dict[str, Any]:
     clean_dict = {}
     for key, value in mydict.items():
         if isinstance(value, np.ndarray):
-            clean_dict[key] = value.tolist()
+            if hasattr(value, "imag"):
+                # Treat imaginary components as alternating columns in array
+                clean_dict[key] = value.view(dtype=float).tolist()
+            else:
+                clean_dict[key] = value.tolist()
         elif isinstance(value, dict):
             clean_dict[key] = dict_arrays_to_lists(value)
         else:
