@@ -780,23 +780,27 @@ void LoadNexusLogs::loadLogs(::NeXus::File &file, const std::string &absolute_en
     auto itPrefixBegin = logsSet.lower_bound(absolute_entry_name);
 
     if (allow_list.empty()) {
+      // convert the blocklist into a bunch of objects to handle globbing
+      std::vector<std::unique_ptr<Poco::Glob>> globblock_list;
+      for (const auto &block : block_list)
+        globblock_list.push_back(std::make_unique<Poco::Glob>(block));
+
       for (auto it = itPrefixBegin;
            it != logsSet.end() && it->compare(0, absolute_entry_name.size(), absolute_entry_name) == 0; ++it) {
         // must be third level entry
         if (std::count(it->begin(), it->end(), '/') == 3) {
           if (!block_list.empty()) {
             bool skip = false;
-            for (const auto &block : block_list) {
-              Poco::Glob glob(block);
-              if (glob.match((*it).substr((*it).find_last_of("/") + 1))) {
+            for (auto &block : globblock_list) {
+              if (block->match((*it).substr((*it).find_last_of("/") + 1))) {
                 skip = true;
-                break;
+                break; // from the loop of block items
               }
             }
             if (skip) {
-              continue;
+              continue; // go to next log
             }
-          }
+          } // end of looping over block_list
 
           if (isNxLog) {
             loadNXLog(file, *it, logClass, workspace);
