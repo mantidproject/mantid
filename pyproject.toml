@@ -4,16 +4,13 @@ line-length = 140
 [tool.ruff]
 line-length = 140
 # https://beta.ruff.rs/docs/rules/
-select = ["C90", "E", "F"]  # TODO turn on "RUF100"
+select = ["C90", "E", "F", "W"]  # TODO turn on "RUF100"
 ignore = ["E402", # module level import not at top of file
           "E722", # bare except
 	  "E741", "E743", # ambiguous function name, generally 'l'
           "F403", # wild imports
           "F405", "F821", # unknown names from probably from wild imports
 ]
-# flake8
-# ignore = E114,E115,E116,E121,E123,E126,E133,E2,E704,W503,F999
-# ['--extend-ignore=E127']
 exclude = [
    "Framework/PythonInterface/test",
    "qt/applications/workbench/workbench/app/resources.py",
