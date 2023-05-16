@@ -557,7 +557,7 @@ public:
   /// Ignore a tie
   virtual bool ignoreTie(const ParameterTie &) const { return false; }
   /// Put all ties in order in which they will be applied correctly.
-  void sortTies();
+  void sortTies(const bool checkOnly = false);
   /// Write a parameter tie to a string
   [[nodiscard]] std::string writeTies() const;
   //@}

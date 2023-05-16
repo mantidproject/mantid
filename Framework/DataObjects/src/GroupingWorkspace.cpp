@@ -16,6 +16,9 @@ using std::size_t;
 using namespace Mantid::API;
 
 namespace Mantid::DataObjects {
+namespace {
+const int UNSET_GROUP{-1};
+}
 // Register the workspace
 DECLARE_WORKSPACE(GroupingWorkspace)
 
@@ -35,6 +38,14 @@ GroupingWorkspace::GroupingWorkspace(size_t numvectors) { this->init(numvectors,
 GroupingWorkspace::GroupingWorkspace(const Geometry::Instrument_const_sptr &inst) : SpecialWorkspace2D(inst) {}
 
 //----------------------------------------------------------------------------------------------
+
+int GroupingWorkspace::translateToGroupID(const int n) const {
+  if (n == 0)
+    return UNSET_GROUP;
+  else
+    return n;
+}
+
 /** Fill a map with key = detector ID, value = group number
  * by using the values in Y.
  * Group values of 0 are converted to -1.
@@ -47,9 +58,7 @@ void GroupingWorkspace::makeDetectorIDToGroupMap(std::map<detid_t, int> &detIDTo
   ngroups = 0;
   for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
-    auto group = static_cast<int>(this->readY(wi)[0]);
-    if (group == 0)
-      group = -1;
+    auto group = this->translateToGroupID(static_cast<int>(this->readY(wi)[0]));
     auto detIDs = this->getDetectorIDs(wi);
     for (auto detID : detIDs) {
       detIDToGroup[detID] = group;
@@ -72,9 +81,7 @@ void GroupingWorkspace::makeDetectorIDToGroupVector(std::vector<int> &detIDToGro
   ngroups = 0;
   for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
-    auto group = static_cast<int>(this->y(wi).front());
-    if (group == 0)
-      group = -1;
+    auto group = this->translateToGroupID(static_cast<int>(this->y(wi).front()));
     auto detIDs = this->getDetectorIDs(wi);
     for (auto detID : detIDs) {
       // if you need negative detector ids, use the other function
@@ -87,6 +94,35 @@ void GroupingWorkspace::makeDetectorIDToGroupVector(std::vector<int> &detIDToGro
         ngroups = group;
     }
   }
+}
+
+std::vector<int> GroupingWorkspace::getGroupIDs() const {
+  // collect all the group numbers
+  std::set<int> groupIDs;
+  for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
+    // Convert the Y value to a group number
+    auto group = this->translateToGroupID(static_cast<int>(this->y(wi).front()));
+    groupIDs.insert(group);
+  }
+  std::vector<int> output(groupIDs.begin(), groupIDs.end());
+  return output;
+}
+
+int GroupingWorkspace::getTotalGroups() const {
+  // count distinct group numbers
+  std::vector<int> groups = this->getGroupIDs();
+  return static_cast<int>(groups.size());
+}
+
+std::vector<int> GroupingWorkspace::getGroupSpetraIDs(const int groupID) const {
+  std::vector<int> spectraIDs;
+  for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
+    // Convert the Y value to a group number
+    auto group = this->translateToGroupID(static_cast<int>(this->y(wi).front()));
+    if (group == groupID)
+      spectraIDs.push_back(static_cast<int>(wi) + 1);
+  }
+  return spectraIDs;
 }
 
 } // namespace Mantid::DataObjects

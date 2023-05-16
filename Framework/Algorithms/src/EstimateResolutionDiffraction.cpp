@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -221,104 +222,140 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
 
   double mintwotheta = 2. * M_PI; // a bit more than 2*pi
   double maxtwotheta = 0.;
+  for (std::size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (!(detectorInfo.isMasked(i) || detectorInfo.isMonitor(i))) {
+      // update overall range for two-theta and term3
+      const auto twotheta = detectorInfo.twoTheta(i);
+      mintwotheta = std::min(twotheta, mintwotheta);
+      maxtwotheta = std::max(twotheta, maxtwotheta);
+    }
+  }
 
   double minTerm3Sq = 1.;
   double maxTerm3Sq = 0.;
 
-  size_t count_nodetsize = 0;
-
   g_log.information() << "Source terms: deltaL=" << sqrt(m_sourceDeltaLMetersSq)
                       << " deltaTheta=" << sqrt(m_sourceDeltaThetaRadiansSq) << "\n";
 
-  for (size_t i = 0; i < numspec; ++i) {
-    const auto &det = spectrumInfo.detector(i);
-
-    // Get the distance from detector to source
-    const double l2 = spectrumInfo.l2(i);
+  // if a spectrum has multiple pixels, add them up in quadrature
+  for (size_t specNum = 0; specNum < numspec; ++specNum) {
+    // which of the detectors are part of this spectrum
+    const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(specNum);
+    // number of spectra as a double
+    const double numDet = double(spectrumDefinition.size());
 
     // resolution in time
     double term1Sq = m_deltaTOverTOF * m_deltaTOverTOF;
     if (term1Sq == 0.) { // calculate per pixel
-      // Calculate T
-      const double centraltof = (l1 + l2) / m_centreVelocity;
-      term1Sq = m_deltaT / centraltof; // this is term1 before squaring
-      term1Sq = term1Sq * term1Sq;
+      const auto centreVel = m_centreVelocity;
+      const auto deltaT = m_deltaT;
+      term1Sq = std::accumulate(spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.,
+                                [&detectorInfo, &centreVel, &l1, &deltaT](const auto sum, const auto &index) {
+                                  if (detectorInfo.isMasked(index.first) || detectorInfo.isMonitor(index.first)) {
+                                    return sum;
+                                  } else {
+                                    // Get the distance from detector to source
+                                    const double l2 = detectorInfo.l2(index.first);
+                                    const double centraltof = (l1 + l2) / centreVel;
+                                    const double term = deltaT / centraltof;
+                                    return sum + (term * term);
+                                  }
+                                });
+      term1Sq = term1Sq / numDet;
     }
 
     // resolution in length
-    double detdimSq;
-    const auto realdet = dynamic_cast<const Detector *>(&det);
-    if (realdet) {
-      const double dy = realdet->getHeight();
-      const double dx = realdet->getWidth();
-      detdimSq = (dx * dx + dy * dy) * (0.5 * 0.5);
-    } else {
-      // Use detector dimension as 0 as no-information
-      detdimSq = 0;
-      ++count_nodetsize;
+    double term2Sq;
+    { // reduce scope
+      const double sourceTerm = m_sourceDeltaLMetersSq;
+      term2Sq = std::accumulate(spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.,
+                                [&detectorInfo, &sourceTerm, &l1](const auto sum, const auto &index) {
+                                  if (detectorInfo.isMasked(index.first) || detectorInfo.isMonitor(index.first)) {
+                                    return sum;
+                                  } else {
+                                    const auto &detector = detectorInfo.detector(index.first);
+                                    const auto realdet = dynamic_cast<const Detector *>(&detector);
+                                    if (realdet) {
+                                      const auto l2 = detectorInfo.l2(index.first);
+                                      const auto l_total = (l1 + l2);
+                                      realdet->shape();
+                                      const double dx = realdet->getWidth();
+                                      const double dy = realdet->getHeight();
+                                      const double dz = realdet->getDepth();
+                                      // not sure why divide by 4, but it has always been there
+                                      const double detdimSq = (dx * dx + dy * dy + dz * dz) * 0.25;
+                                      const double term = (detdimSq + sourceTerm) / (l_total * l_total);
+                                      return sum + term;
+                                    } else {
+                                      return sum;
+                                    }
+                                  }
+                                });
+      term2Sq = term2Sq / numDet;
     }
-    const double l_total = (l1 + l2);
-    const double term2Sq = (detdimSq + m_sourceDeltaLMetersSq) / (l_total * l_total);
 
-    // resolution in angle
-    const double twotheta = spectrumInfo.isMonitor(i) ? 0.0 : spectrumInfo.twoTheta(i);
-    const double theta = 0.5 * twotheta;
-
-    double deltathetaSq = 0.; // this is in radians
+    // resolution in angle - everything is in radians
+    double term3Sq;
     if (m_divergenceWS) {
-      deltathetaSq = m_divergenceWS->y(i)[0];
+      double deltathetaSq = m_divergenceWS->y(specNum)[0];
       deltathetaSq = deltathetaSq * deltathetaSq;
+      // use the average angle for the spectrum - not right for focussed data
+      const double theta = spectrumInfo.isMonitor(specNum) ? 0.0 : 0.5 * spectrumInfo.twoTheta(specNum);
+      const double tan_theta = tan(theta);
+      term3Sq = (deltathetaSq + m_sourceDeltaThetaRadiansSq) / (tan_theta * tan_theta);
     } else {
-      auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
-      const double solidangle =
-          std::accumulate(spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.,
-                          [&componentInfo, &detectorInfo, &samplepos](const auto sum, const auto &index) {
-                            if (!detectorInfo.isMasked(index.first)) {
-                              return sum + componentInfo.solidAngle(index.first, samplepos);
-                            } else {
-                              return sum;
-                            }
-                          });
-      deltathetaSq = solidangle;
+      const double sourceTerm = m_sourceDeltaThetaRadiansSq;
+      const double solidAngle = std::accumulate(
+          spectrumDefinition.cbegin(), spectrumDefinition.cend(), 0.,
+          [&componentInfo, &samplepos, &detectorInfo, &sourceTerm](const auto sum, const auto &index) {
+            if (detectorInfo.isMasked(index.first) || detectorInfo.isMonitor(index.first)) {
+              return sum;
+            } else {
+              const double theta = 0.5 * detectorInfo.twoTheta(index.first); // angle of the pixel
+              const double cot_theta = 1. / tan(theta);
+              return sum + ((componentInfo.solidAngle(index.first, samplepos) + sourceTerm) * cot_theta * cot_theta);
+            }
+          });
+      term3Sq = solidAngle / numDet;
     }
-    const double tan_theta = tan(theta);
-    const double term3Sq = (deltathetaSq + m_sourceDeltaThetaRadiansSq) / (tan_theta * tan_theta);
 
-    if (spectrumInfo.isMonitor(i)) {
-      m_resTof->mutableY(i) = 0.;
-      m_resPathLength->mutableY(i) = 0.;
-      m_resAngle->mutableY(i) = 0.;
-      m_outputWS->mutableY(i) = 0.;
+    // add information to outputs
+    if (spectrumInfo.isMonitor(specNum)) {
+      m_resTof->mutableY(specNum) = 0.;
+      m_resPathLength->mutableY(specNum) = 0.;
+      m_resAngle->mutableY(specNum) = 0.;
+      m_outputWS->mutableY(specNum) = 0.;
     } else { // not a monitor
       const double resolution = sqrt(term1Sq + term2Sq + term3Sq);
-      m_resTof->mutableY(i) = sqrt(term1Sq);
-      m_resPathLength->mutableY(i) = sqrt(term2Sq);
-      m_resAngle->mutableY(i) = sqrt(term3Sq);
-      m_outputWS->mutableY(i) = resolution;
+      m_resTof->mutableY(specNum) = sqrt(term1Sq);
+      m_resPathLength->mutableY(specNum) = sqrt(term2Sq);
+      m_resAngle->mutableY(specNum) = sqrt(term3Sq);
+      m_outputWS->mutableY(specNum) = resolution;
     }
 
-    m_resTof->mutableX(i) = static_cast<double>(i);
-    m_resPathLength->mutableX(i) = static_cast<double>(i);
-    m_resAngle->mutableX(i) = static_cast<double>(i);
-    m_outputWS->mutableX(i) = static_cast<double>(i);
+    m_resTof->mutableX(specNum) = static_cast<double>(specNum);
+    m_resPathLength->mutableX(specNum) = static_cast<double>(specNum);
+    m_resAngle->mutableX(specNum) = static_cast<double>(specNum);
+    m_outputWS->mutableX(specNum) = static_cast<double>(specNum);
 
-    // update overall range for two-theta and term3
-    maxtwotheta = std::max(twotheta, maxtwotheta);
-    mintwotheta = std::min(twotheta, mintwotheta);
-
+    // update overall range for term3
     minTerm3Sq = std::min(term3Sq, minTerm3Sq);
     maxTerm3Sq = std::max(term3Sq, maxTerm3Sq);
 
     // log extra information if level is debug (7) or greater - converting to strings is expensive
     if (g_log.getLevelOffset() > 6) {
-      g_log.debug() << det.type() << " " << i << "\t\t" << twotheta << "\t\tdT/T = " << sqrt(term1Sq)
+      // central two-theta
+      const double twotheta = spectrumInfo.isMonitor(specNum) ? 0.0 : spectrumInfo.twoTheta(specNum);
+      const auto &det = spectrumInfo.detector(specNum);
+
+      g_log.debug() << det.type() << " " << specNum << "\t\t" << twotheta << "\t\tdT/T = " << sqrt(term1Sq)
                     << "\t\tdL/L = " << sqrt(term2Sq) << "\t\tdTheta*cotTheta = " << sqrt(term3Sq) << "\n";
     }
   }
 
-  g_log.notice() << "2theta range: " << mintwotheta << ", " << maxtwotheta << "\n";
+  g_log.notice() << "2theta range: " << (mintwotheta * Geometry::rad2deg) << ", " << (maxtwotheta * Geometry::rad2deg)
+                 << "\n";
   g_log.notice() << "t3 range: " << sqrt(minTerm3Sq) << ", " << sqrt(maxTerm3Sq) << "\n";
-  g_log.notice() << "Number of detector having NO size information = " << count_nodetsize << "\n";
 }
 
 } // namespace Mantid::Algorithms

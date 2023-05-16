@@ -10,6 +10,7 @@ from mantid.api import IFunction1D, FunctionFactory
 from mantid.kernel import PhysicalConstants
 
 import numpy as np
+from math import pi
 
 
 class Redfield(IFunction1D):
@@ -17,16 +18,15 @@ class Redfield(IFunction1D):
         return "Muon\\MuonModelling"
 
     def init(self):
-        self.declareParameter("A0", 1)
         self.declareParameter("Hloc", 0.1, "Local magnetic field (G)")
         self.declareParameter("Tau", 0.1, "Correlation time of muon spins (microsec)")
 
     def function1D(self, x):
-        A0 = self.getParameterValue("A0")
         Hloc = self.getParameterValue("Hloc")
         tau = self.getParameterValue("Tau")
         gmu = PhysicalConstants.MuonGyromagneticRatio
-        return A0 * 2 * np.power((gmu * Hloc), 2) * tau / (1 + np.power((gmu * x * tau), 2))
+        gama = 2 * pi * gmu
+        return 2 * np.power((gama * Hloc), 2) * tau / (1 + np.power((gama * x * tau), 2))
 
 
 FunctionFactory.subscribe(Redfield)

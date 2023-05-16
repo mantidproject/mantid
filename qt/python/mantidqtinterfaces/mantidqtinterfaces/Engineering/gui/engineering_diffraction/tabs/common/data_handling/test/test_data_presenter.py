@@ -8,9 +8,9 @@ import unittest
 
 from unittest import mock
 from unittest.mock import patch
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling import data_model, data_presenter, data_view
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling import data_model, data_presenter, data_view
 
-dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling"
+dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling"
 
 
 def _get_item_checked_mock(_, arg):
@@ -164,7 +164,7 @@ class FittingDataPresenterTest(unittest.TestCase):
 
     def test_remove_workspace_not_tracked_but_is_log_workspaces_group(self):
         self.model.get_all_workspace_names.return_value = ["name2"]
-        self.model.get_log_workspaces_name.return_value = ["name1", "name2"]
+        self.model.get_all_log_workspaces_names.return_value = ["name1", "name2"]
         self.presenter.row_numbers = {"name1": 0, "name2": 1}
         self.presenter.plot_removed_notifier = mock.MagicMock()
         self.presenter.all_plots_removed_notifier = mock.MagicMock()

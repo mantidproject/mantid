@@ -205,8 +205,8 @@ DblMatrix optimizeUBMatrix(const DblMatrix &ubOrig, const std::vector<V3D> &qSam
   return optimizedUB;
 }
 
-/// <IntHKL, IntMNP, error>
-using IndexedSatelliteInfo = std::tuple<V3D, V3D, double>;
+/// <HKL, IntHKL, IntMNP, error>
+using IndexedSatelliteInfo = std::tuple<V3D, V3D, V3D, double>;
 
 /**
  * @brief Attempt to index a satellite reflection given a HKL from a failed
@@ -236,20 +236,21 @@ boost::optional<IndexedSatelliteInfo> indexSatellite(const V3D &mainHKL, const i
                                                      const bool crossTerms) {
   const auto offsets = generateOffsetVectors(modVectors, maxOrder, crossTerms);
   bool foundSatellite{false};
-  V3D indexedIntHKL, indexedMNP;
+  V3D indexedIntHKL, indexedMNP, fractionalOffset;
   for (const auto &mnpOffset : offsets) {
     const auto candidateIntHKL = mainHKL - std::get<3>(mnpOffset);
     const V3D candidateMNP{std::get<0>(mnpOffset), std::get<1>(mnpOffset), std::get<2>(mnpOffset)};
     if (IndexingUtils::ValidIndex(candidateIntHKL, tolerance)) {
       indexedIntHKL = candidateIntHKL;
       indexedMNP = candidateMNP;
+      fractionalOffset = std::get<3>(mnpOffset);
       foundSatellite = true;
       // we deliberately don't break and use the last valid
       // reflection we find.
     }
   }
   if (foundSatellite)
-    return std::make_tuple(indexedIntHKL, indexedMNP, indexedIntHKL.hklError());
+    return std::make_tuple(fractionalOffset, indexedIntHKL, indexedMNP, indexedIntHKL.hklError());
   else
     return boost::none;
 }
@@ -295,13 +296,20 @@ CombinedIndexingStats indexPeaks(const std::vector<IPeak *> &peaks, DblMatrix ub
                                    satelliteArgs.tolerance, satelliteArgs.crossTerms);
       if (result) {
         const auto &satelliteInfo = result.get();
-        if (roundHKLs)
-          IndexingUtils::RoundHKL(nominalHKL);
-        peak->setHKL(nominalHKL);
-        peak->setIntHKL(std::get<0>(satelliteInfo));
-        peak->setIntMNP(std::get<1>(satelliteInfo));
+        V3D hkl;
+        ;
+        if (roundHKLs) {
+          hkl = std::get<1>(satelliteInfo);
+          IndexingUtils::RoundHKL(hkl);
+          hkl += std::get<0>(satelliteInfo);
+        } else {
+          hkl = nominalHKL;
+        }
+        peak->setHKL(hkl);
+        peak->setIntHKL(std::get<1>(satelliteInfo));
+        peak->setIntMNP(std::get<2>(satelliteInfo));
         stats.satellites.numIndexed++;
-        stats.satellites.error += std::get<2>(satelliteInfo) / 3.;
+        stats.satellites.error += std::get<3>(satelliteInfo) / 3.;
       } else {
         // clear these to make sure leftover values from previous index peaks
         // run are not used

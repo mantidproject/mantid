@@ -128,6 +128,12 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     def set_slot_for_display_all(self):
         self.toolbar.sig_home_clicked.connect(self.display_all)
 
+    def set_slot_for_serial_fit(self, presenter_func):
+        self.toolbar.sig_serial_fit_clicked.connect(presenter_func)
+
+    def set_slot_for_seq_fit(self, presenter_func):
+        self.toolbar.sig_seq_fit_clicked.connect(presenter_func)
+
     def show_cancel_button(self, show: bool):
         self.cancel_button.setVisible(show)
         self.cancel_button.setEnabled(show)

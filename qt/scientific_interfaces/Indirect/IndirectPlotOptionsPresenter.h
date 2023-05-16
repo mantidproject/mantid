@@ -40,6 +40,7 @@ public:
 
 private slots:
   void workspaceChanged(std::string const &workspaceName);
+  void unitChanged(std::string const &unit);
   void indicesChanged(std::string const &indices);
   void plotSpectra();
   void plotBins();
@@ -57,6 +58,7 @@ private:
   void onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
 
   void setWorkspace(std::string const &plotWorkspace);
+  void setUnit(std::string const &unit);
   void setIndices();
 
   bool validateWorkspaceSize(MantidAxis const &axisType);

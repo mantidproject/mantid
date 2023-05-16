@@ -187,7 +187,6 @@ class CRYSTALLoader(AbInitioLoader):
         """
         # case of more than one k-point
         if phonon_dispersion:
-
             num_k = self._get_num_kpoints(file_obj=file_obj)
             weights = []
             k_coordinates = []
@@ -196,9 +195,7 @@ class CRYSTALLoader(AbInitioLoader):
             all_coord = []
             # parse all k-points
             for k in range(num_k):
-
                 line = self._parser.find_first(file_obj=file_obj, msg="DISPERSION K POINT NUMBER")
-
                 partial_freq = []
                 xdisp = []
                 ydisp = []
@@ -212,9 +209,7 @@ class CRYSTALLoader(AbInitioLoader):
 
                 # parse k-points for which atomic displacements are real
                 if k_point_type == b"R":
-
                     while not self._parser.file_end(file_obj=file_obj):
-
                         self._read_freq_block(file_obj=file_obj, freq=partial_freq)
                         self._read_coord_block(file_obj=file_obj, xdisp=xdisp, ydisp=ydisp, zdisp=zdisp)
 
@@ -225,7 +220,6 @@ class CRYSTALLoader(AbInitioLoader):
 
                 # parse k-points for which atomic displacements are complex
                 elif k_point_type == b"C":
-
                     real_partial_xdisp = []
                     real_partial_ydisp = []
                     real_partial_zdisp = []
@@ -235,16 +229,14 @@ class CRYSTALLoader(AbInitioLoader):
                     complex_partial_zdisp = []
 
                     while not self._parser.file_end(file_obj=file_obj):
-
                         self._read_freq_block(file_obj=file_obj, freq=partial_freq)
                         self._read_coord_block(
                             file_obj=file_obj, xdisp=real_partial_xdisp, ydisp=real_partial_ydisp, zdisp=real_partial_zdisp, part="real"
                         )
-                        if self._parser.block_end(file_obj=file_obj, msg=["IMAGINARY"]):
+                        if self._parser.block_end(file_obj=file_obj, msg=["IMAGINARY", "MODES IN ANTI-PHASE"]):
                             break
 
                     while not self._parser.file_end(file_obj=file_obj):
-
                         self._read_freq_block(file_obj=file_obj, freq=partial_freq, append=False)
                         self._read_coord_block(
                             file_obj=file_obj,
@@ -273,7 +265,6 @@ class CRYSTALLoader(AbInitioLoader):
 
         # only one k-point
         else:
-
             end_msgs = ["******", "ACLIMAX"]
             inside_block = True
             freq = []
@@ -283,7 +274,6 @@ class CRYSTALLoader(AbInitioLoader):
 
             # parse block with frequencies and atomic displacements
             while not self._parser.file_end(file_obj=file_obj) and inside_block:
-
                 self._read_freq_block(file_obj=file_obj, freq=freq)
                 self._read_coord_block(file_obj=file_obj, xdisp=xdisp, ydisp=ydisp, zdisp=zdisp)
 
@@ -559,7 +549,6 @@ class CRYSTALLoader(AbInitioLoader):
             end_message[i] = bytes(item, "utf8")
 
         while not self._parser.file_end(file_obj=file_obj):
-
             line = file_obj.readline()
             if any([word in line for word in end_message]):
                 break
