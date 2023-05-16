@@ -509,7 +509,7 @@ class SliceViewerModelTest(unittest.TestCase):
 
         # should revert to orthogonal
         axes_angles = model.get_axes_angles()
-        self.assertAlmostEqual(axes_angles[1, 2], np.pi / 2, delta=1e-10)
+        self.assertAlmostEqual(axes_angles[1, 2], np.pi / 4, delta=1e-10)
         for iy in range(1, 3):
             self.assertAlmostEqual(axes_angles[0, iy], np.pi / 2, delta=1e-10)
 

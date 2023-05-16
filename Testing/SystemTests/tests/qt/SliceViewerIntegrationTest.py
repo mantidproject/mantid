@@ -8,7 +8,10 @@
 from functools import partial
 import io
 import systemtesting
+import os
 import sys
+import shutil
+import tempfile
 from threading import Thread
 from unittest.mock import patch
 
@@ -28,6 +31,10 @@ from mantid.simpleapi import (
     SetUB,
     RenameWorkspace,
     ClearUB,
+    LoadMD,
+    SaveMD,
+    AddSampleLog,
+    SetMDFrame,
 )
 from mantid.api import AnalysisDataService
 from mantidqt.utils.qt.testing import get_application
@@ -511,6 +518,37 @@ class SliceViewerTestAxesLimitsRespectNonorthogonalTransform(systemtesting.Manti
         self.assertEqual(limits_nonorthog[1], limits[2:])
 
         pres.view.close()
+
+
+class SliceViewerTestLoadMD(systemtesting.MantidSystemTest, HelperTestingClass):
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        test_dir = tempfile.mkdtemp()
+
+        ws = CreateMDHistoWorkspace(
+            Dimensionality=4,
+            Extents="-3,3,-10,10,-5,5,0,2",
+            SignalInput=[1] * 11**4,
+            ErrorInput=[1] * 11**4,
+            NumberOfBins="11,11,11,11",
+            Names="values,[H,0,0],[0,K,0],[0,0,L]",
+            Units="a.b.u.,r.l.u.,r.l.u.,r.l.u.",
+            Frames="General Frame,HKL,HKL,HKL",
+        )
+
+        SetMDFrame("ws", MDFrame="HKL", Axes=[1, 2, 3])
+        AddSampleLog("ws", LogName="sample")
+        ws.getExperimentInfo(0).run().addProperty("W_MATRIX", [1, 0, 0, 0, 1, 0, 0, 0, 1], True)
+        SaveMD("ws", Filename=os.path.join(test_dir, "mdhist_4d.nxs"))
+        DeleteWorkspace("ws")
+
+        ws = LoadMD(os.path.join(test_dir, "mdhist_4d.nxs"))
+        pres = SliceViewer(ws)
+        self.assertAlmostEqual(pres.get_proj_matrix().flatten().tolist(), [1, 0, 0, 0, 1, 0, 0, 0, 1])
+        pres.view.close()
+
+        shutil.rmtree(test_dir)
 
 
 # private helper functions
