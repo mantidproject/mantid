@@ -4,17 +4,21 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from copy import deepcopy
 import collections.abc
 import numbers
 from typing import Any, Dict, List, Optional, overload, Union
+from typing import TypedDict
 import re
 import numpy as np
+
 import abins
+from abins.constants import FLOAT_ID, FLOAT_TYPE
+from abins.test_helpers import dict_arrays_to_lists
 
 
 class AtomsData(collections.abc.Sequence):
     def __init__(self, atoms_data: Dict[str, Dict[str, Any]]) -> None:
-
         # Make a map matching int indices to atoms_data keys
         test = re.compile(r"^atom_(\d+)$")
 
@@ -76,7 +80,7 @@ class AtomsData(collections.abc.Sequence):
             raise ValueError("Coordinates should have a form of 1D numpy array.")
         if coord.shape[0] != 3:
             raise ValueError("Coordinates should have a form of numpy array with three elements.")
-        if coord.dtype.num != abins.constants.FLOAT_ID:
+        if coord.dtype.num != FLOAT_ID:
             raise ValueError("Coordinates array should have real float dtype.")
 
         # "sort"
@@ -117,6 +121,24 @@ class AtomsData(collections.abc.Sequence):
     def extract(self):
         # For compatibility, regenerate the dict format on-the-fly
         return {f"atom_{i}": item for i, item in enumerate(self._data)}
+
+    class JSONableAtomData(TypedDict):
+        """JSON-friendly representation of an AtomsData entry"""
+
+        coord: List[float]
+        mass: float
+        sort: int
+        symbol: str
+
+    def to_jsonable_dict(self) -> Dict[str, JSONableAtomData]:
+        return {f"atom_{i}": dict_arrays_to_lists(item) for i, item in enumerate(self._data)}
+
+    @staticmethod
+    def from_dict(data: Dict[str, JSONableAtomData]) -> "AtomsData":
+        atoms_data = deepcopy(data)
+        for key, value in atoms_data.items():
+            atoms_data[key]["coord"] = np.asarray(value["coord"], dtype=FLOAT_TYPE)
+        return AtomsData(atoms_data)
 
     def __str__(self):
         return "Atoms data"
