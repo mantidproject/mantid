@@ -221,7 +221,7 @@ class SettingsPresenter(object):
             if key not in DEFAULT_SETTINGS.keys():
                 del self.settings[key]
         self.check_and_populate_with_default("default_peak")
-        if not self.settings["default_peak"] in ALL_PEAKS:
+        if self.settings["default_peak"] not in ALL_PEAKS:
             self.settings["default_peak"] = DEFAULT_SETTINGS["default_peak"]
         self.check_and_populate_with_default("full_calibration")
         if not path.isfile(self.settings["full_calibration"]):

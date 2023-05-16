@@ -320,7 +320,7 @@ class anAbsorptionShape(object):
         if "Axis" in shape_dict:
             self._axis_is_default = False
         for ik in range(0, len(opt_prop_list)):
-            if not opt_prop_list[ik] in shape_dict:
+            if opt_prop_list[ik] not in shape_dict:
                 opt_val = opt_val_list[ik]
                 if isinstance(opt_val, types.FunctionType):
                     shape_dict[opt_prop_list[ik]] = opt_val(shape_dict)
@@ -373,7 +373,6 @@ class Cylinder(anAbsorptionShape):
     """
 
     def __init__(self, Material=None, CylinderParams=None):
-
         anAbsorptionShape.__init__(self, Material)
         self.shape = CylinderParams
         self._shape_has_axis = True
@@ -456,7 +455,6 @@ class FlatPlate(anAbsorptionShape):
     """
 
     def __init__(self, Material=None, PlateParams=None):
-
         anAbsorptionShape.__init__(self, Material)
         self.shape = PlateParams
 
@@ -523,7 +521,6 @@ class HollowCylinder(anAbsorptionShape):
     """
 
     def __init__(self, Material=None, CylinderParams=None):
-
         anAbsorptionShape.__init__(self, Material)
         self.shape = CylinderParams
         self._CanSetSample = False
@@ -638,7 +635,6 @@ class Sphere(anAbsorptionShape):
     """
 
     def __init__(self, Material=None, SphereParams=None):
-
         anAbsorptionShape.__init__(self, Material)
         self.shape = SphereParams
         self._CanSetSample = False

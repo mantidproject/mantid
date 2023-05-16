@@ -157,7 +157,6 @@ _translations = {
     "krzych": "Dymkowski, Krzysztof",
     "Gemma Guest": "Guest, Gemma",
     "Anthony Lim": "Lim, Anthony",
-    "Anthony Lim": "Lim, Anthony",
     "AnthonyLim23": "Lim, Anthony",
     "Anthony": "Lim, Anthony",
     "CipPruteanu": "Ciprian Pruteanu",
