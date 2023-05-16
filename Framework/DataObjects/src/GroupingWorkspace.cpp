@@ -122,9 +122,8 @@ std::vector<int> GroupingWorkspace::getDetectorIDsOfGroup(const int groupID) con
     if (group == groupID) {
       // if the instrument isn't set no detector ids exist
       const auto detIDs = this->getDetectorIDs(wi);
-      for (const auto detID : detIDs) {
-        detectorIDs.push_back(static_cast<int>(detID));
-      }
+      std::transform(detIDs.cbegin(), detIDs.cend(), std::back_inserter(detectorIDs),
+                     [](const auto &detID) { return static_cast<int>(detID); });
     }
   }
   return detectorIDs;
