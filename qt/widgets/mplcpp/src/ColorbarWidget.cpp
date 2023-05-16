@@ -182,8 +182,9 @@ void ColorbarWidget::setScaleType(int index) {
  */
 void ColorbarWidget::setNthPower(double gamma) {
   if (gamma == 0) {
-    // A power can not be 0.
+    // A power cannot be 0.
     throw std::runtime_error("Power can not be 0");
+    gamma = 1;
   }
   m_ui.powerEdit->setText(QString::number(gamma));
   auto range = clim();
@@ -197,7 +198,15 @@ void ColorbarWidget::setNthPower(double gamma) {
  */
 void ColorbarWidget::scaleMinimumEdited() {
   // The validator ensures the text is a double
-  const double value = m_ui.scaleMinEdit->text().toDouble();
+  double value = m_ui.scaleMinEdit->text().toDouble();
+  if (m_ui.normTypeOpt->currentIndex() == 1) {
+    if (value <= 0) {
+      throw std::runtime_error("Minimum cannot be less than zero for logarithmic scale");
+      auto range = clim();
+      value = std::get<0>(range);
+      m_ui.scaleMinEdit->setText(QString::number(value));
+    }
+  }
   emit minValueEdited(value);
   setClim(value, boost::none);
 }
@@ -207,7 +216,15 @@ void ColorbarWidget::scaleMinimumEdited() {
  */
 void ColorbarWidget::scaleMaximumEdited() {
   // The validator ensures the text is a double
-  const double value = m_ui.scaleMaxEdit->text().toDouble();
+  double value = m_ui.scaleMaxEdit->text().toDouble();
+  if (m_ui.normTypeOpt->currentIndex() == 1) {
+    if (value <= 0) {
+      throw std::runtime_error("Maximum cannot be less than or equal to zero for logarithmic scale");
+      auto range = clim();
+      value = std::get<1>(range);
+      m_ui.scaleMaxEdit->setText(QString::number(value));
+    }
+  }
   emit maxValueEdited(value);
   setClim(boost::none, value);
 }
@@ -230,9 +247,15 @@ void ColorbarWidget::scaleTypeSelectionChanged(int index) {
  * Called when the power exponent input has been edited
  */
 void ColorbarWidget::powerExponentEdited() {
-  setScaleType(2);
+  setScaleType(3);
   // power edit has double validator so this should always be valid
-  emit nthPowerChanged(m_ui.powerEdit->text().toDouble());
+  double gamma = m_ui.powerEdit->text().toDouble();
+  if (gamma == 0) {
+    // A power can not be 0.
+    throw std::runtime_error("Power cannot be 0");
+    gamma = 1;
+  }
+  emit nthPowerChanged(gamma);
 }
 
 // --------------------------- Private methods --------------------------------

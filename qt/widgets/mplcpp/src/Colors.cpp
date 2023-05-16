@@ -173,9 +173,6 @@ std::tuple<double, double> LogNorm::autoscale(std::tuple<double, double> clim) {
  */
 Python::Object LogNorm::tickLocator() const {
   GlobalInterpreterLock lock;
-  // Create log transform with base=10
-  auto transform = scaleModule().attr("LogLocator")(10);
-
   // Sets the subs parameter to be [1,2,...,10]. The parameter determines where
   // the ticks on the colorbar are placed and setting it to this ensures that
   // any range of values will have ticks.
@@ -183,7 +180,7 @@ Python::Object LogNorm::tickLocator() const {
   std::iota(subsVector.begin(), subsVector.end(), 1.f);
   auto subs = Converters::ToPyList<float>()(subsVector);
 
-  return Python::Object(tickerModule().attr("LogLocator")(transform, subs));
+  return Python::Object(tickerModule().attr("LogLocator")(10, subs));
 }
 
 /**
