@@ -153,8 +153,12 @@ const Types::Core::DateAndTime LogManager::startTime() const {
 /** Return the run end time as given by the 'end_time' or 'run_end' property.
  *  'end_time' is tried first, falling back to 'run_end' if the former isn't
  * found.
+ * Find run end time as determined by the following prioritys
+ * 1. 'end_time'
+ * 2. 'run_end'
+ * 3. last log time in 'proton_charge'
  *  @returns The end time of the run
- *  @throws std::runtime_error if neither property is defined
+ *  @throws std::runtime_error if end time cannot be determined
  */
 const Types::Core::DateAndTime LogManager::endTime() const {
   if (hasProperty(END_TIME_NAME)) {
@@ -168,6 +172,15 @@ const Types::Core::DateAndTime LogManager::endTime() const {
   if (hasProperty(run_end_prop)) {
     try {
       return DateAndTime(getProperty(run_end_prop)->value());
+    } catch (std::invalid_argument &) { /*Swallow and move on*/
+    }
+  }
+
+  if (hasProperty("proton_charge")) {
+    try {
+      Kernel::TimeSeriesProperty<double> *protonchargelog =
+          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(getProperty("proton_charge"));
+      return DateAndTime(protonchargelog->lastTime());
     } catch (std::invalid_argument &) { /*Swallow and move on*/
     }
   }

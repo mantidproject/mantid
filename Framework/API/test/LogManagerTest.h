@@ -167,6 +167,13 @@ public:
     LogManager runInfo;
     // Nothing there yet
     TS_ASSERT_THROWS(runInfo.endTime(), const std::runtime_error &);
+    // Proton Charge log with only one entry
+    addTimeSeriesEntry(runInfo, "proton_charge", 78.9);
+    TS_ASSERT_EQUALS(runInfo.endTime(), DateAndTime("2011-05-24T00:00:00"));
+    runInfo.removeProperty("proton_charge");
+    // Proton Charge log with multiple entries
+    addTestTimeSeries<double>(runInfo, "proton_charge");
+    TS_ASSERT_EQUALS(runInfo.endTime(), DateAndTime("2012-07-19T16:19:20"));
     // Add run_end and see that get picked up
     const std::string run_end("2013-12-19T13:38:00");
     auto run_end_prop = new PropertyWithValue<std::string>("run_end", run_end);
@@ -178,6 +185,8 @@ public:
     runInfo.addProperty(end_time_prop);
     TS_ASSERT_EQUALS(runInfo.endTime(), DateAndTime(end_time));
 
+    // Remove proton charge log to make sure endTime() throws correct exceptions
+    runInfo.removeProperty("proton_charge");
     // Set run_end back to valid value and make end_time contain nonsense
     run_end_prop->setValue(run_end);
     end_time_prop->setValue("__");
