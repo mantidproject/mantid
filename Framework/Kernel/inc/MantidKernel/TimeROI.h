@@ -67,7 +67,6 @@ private:
   bool empty() const;
   bool isCompletelyInROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   bool isCompletelyInMask(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
-  bool valueAtTime(const std::vector<Types::Core::DateAndTime>::iterator &time);
   std::vector<Types::Core::DateAndTime> m_roi;
 };
 

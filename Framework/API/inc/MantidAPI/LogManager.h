@@ -64,6 +64,10 @@ public:
   const Types::Core::DateAndTime startTime() const;
   /// Return the run end time
   const Types::Core::DateAndTime endTime() const;
+  /// Return the first pulse time from sample logs
+  const Types::Core::DateAndTime getFirstPulseTime() const;
+  /// Return the last pulse time from sample logs
+  const Types::Core::DateAndTime getLastPulseTime() const;
   //-------------------------------------------------------------
 
   /// Filter the logs by time

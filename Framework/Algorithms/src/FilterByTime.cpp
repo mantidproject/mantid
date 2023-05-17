@@ -99,15 +99,14 @@ void FilterByTime::exec() {
 
   // find the start time
   DateAndTime start;
-  if (isDefault(PropertyNames::ABS_START)) {
-    // time relative to first pulse - this defaults with start of run
-    const auto startOfRun = inputWS->getFirstPulseTime();
-    const double startRelative = getProperty(PropertyNames::START_TIME);
-    start = startOfRun + startRelative;
-  } else {
-    std::cout << PropertyNames::ABS_START << "=" << getPropertyValue(PropertyNames::ABS_START) << "\n";
-    // absolute time
+  const double startRelative = getProperty(PropertyNames::START_TIME);
+  if (!isDefault(PropertyNames::ABS_START)) {
+    // absolute start time is specified
     start = DateAndTime(getPropertyValue(PropertyNames::ABS_START));
+  } else {
+    // get run start from the log manager
+    const auto startOfRun = inputWS->run().startTime();
+    start = startOfRun + startRelative;
   }
 
   // find the stop time
@@ -116,14 +115,15 @@ void FilterByTime::exec() {
     // absolute time
     stop = DateAndTime(getPropertyValue(PropertyNames::ABS_STOP));
   } else if (!isDefault(PropertyNames::STOP_TIME)) {
-    // time relative to first pulse
-    const auto startOfRun = inputWS->getFirstPulseTime();
+    // stop time is relative to start time
     const double stopRelative = getProperty(PropertyNames::STOP_TIME);
-    stop = startOfRun + stopRelative;
+    stop = start - startRelative + stopRelative;
   } else {
-    this->getLogger().debug("No end filter time specified - assuming last pulse");
-    const DateAndTime lastPulse = inputWS->getLastPulseTime();
-    stop = lastPulse + 10000.0; // so we get all events - needs to be past last pulse
+    try {
+      stop = inputWS->run().endTime();
+      stop += 10000.0; // so we get all events - needs to be past last pulse
+    } catch (...) {
+    }
   }
 
   // verify that stop is after start
