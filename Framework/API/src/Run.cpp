@@ -308,20 +308,15 @@ void Run::integrateProtonCharge(const std::string &logname) const {
       const std::vector<double> logValues = log->valuesAsVector();
       total = std::accumulate(logValues.begin(), logValues.end(), 0.0);
     } else {
-      // get the raw values
-      const std::map<Types::Core::DateAndTime, double> unfilteredValues = log->valueAsCorrectMap();
+      const auto &values = log->valuesAsVector();
+      const auto &times = log->timesAsVector();
+      const auto NUM_VALUES = values.size();
 
-      using valueType = std::map<Types::Core::DateAndTime, double>::value_type;
-
-      // accumulate the values that are "keep"
-      total = std::accumulate(unfilteredValues.cbegin(), unfilteredValues.cend(), 0.0,
-                              [timeroi](const double &previous, const valueType &value) {
-                                if (timeroi.valueAtTime(value.first)) {
-                                  return std::move(previous) + value.second;
-                                } else {
-                                  return std::move(previous);
-                                }
-                              });
+      total = 0.;
+      for (std::size_t i = 0; i < NUM_VALUES; ++i) {
+        if (timeroi.valueAtTime(times[i]))
+          total += values[i];
+      }
     }
 
     const std::string &unit = log->units();
