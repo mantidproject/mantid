@@ -38,7 +38,7 @@ template <typename TYPE>
 void timeRangeToIndexBounds(std::vector<TimeValueUnit<TYPE>> &elems, const TimeValueUnit<TYPE> range_left,
                             const TimeValueUnit<TYPE> range_right, size_t &left_index, size_t &right_index) {
   const auto left_iter = std::lower_bound(elems.cbegin(), elems.cend(), range_left);
-  const auto right_iter = std::upper_bound(elems.cbegin(), elems.cend(), range_right);
+  const auto right_iter = std::upper_bound(left_iter, elems.cend(), range_right);
 
   left_index = std::distance(elems.cbegin(), left_iter);
   right_index = std::distance(elems.cbegin(), right_iter);
