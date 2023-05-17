@@ -9,28 +9,17 @@
 Description
 -----------
 
-This algorithm is able to generate event splitters according to user's
-requirement for filtering events. The generated time splitters are
-stored either in a :ref:`SplittersWorkspace` or a
-:ref:`MatrixWorkspace <MatrixWorkspace>`. Both of them will be used by
-algorithm :ref:`FilterEvents <algm-FilterEvents>`
-to filter events from an
-:ref:`EventWorkspace <EventWorkspace>`.
+This algorithm is able to generate event splitting according to user's requirements.
+The generated time splitters are stored either in a :ref:`SplittersWorkspace` or a :ref:`MatrixWorkspace <MatrixWorkspace>`.
+Either can be used by algorithm :ref:`FilterEvents <algm-FilterEvents>`
+to filter an :ref:`EventWorkspace <EventWorkspace>`.
 
-This algorithm is designed as a general-purposed event splitter
-generator. Combined with :ref:`FilterEvents <algm-FilterEvents>`,
-it will replace
-
--  :ref:`FilterByTime <algm-FilterByTime>`
--  :ref:`FilterByLogValue <algm-FilterByLogValue>`
-
-Moreover, the time resolution of these two algorithms is microseconds,
-i.e., the wall time of an (neutron) event. While the original
-:ref:`FilterByTime <algm-FilterByTime>`
-and
-:ref:`FilterByLogValue <algm-FilterByLogValue>`
-are of the resolution of pulse time. It is also enhanced to process the fast
-frequency sample logs, which can be even faster than chopper frequencies.
+This algorithm is designed as a general-purposed method for generating event splitting.
+The time resolution of this two algorithms is microseconds,
+i.e., the absolute time of the (neutron) event including time-of-flight.
+In contrast, :ref:`FilterByTime <algm-FilterByTime>` and
+:ref:`FilterByLogValue <algm-FilterByLogValue>` only consider the pulse time.
+The extra time resolution is necessary to process the fast frequency sample logs, which can be faster than chopper frequencies.
 
 Input Workspace
 ###############

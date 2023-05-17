@@ -1,0 +1,1 @@
+- `CrossCorrelate` now accepts either a list of spectrum IDs as input, or min and max spectrum IDs
