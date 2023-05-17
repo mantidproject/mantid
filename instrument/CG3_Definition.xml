@@ -429,6 +429,7 @@
         <logfile id="sample_detector_distance" eq="value"/>
       </parameter>
     </location>
+    <side-by-side-view-location x="0.0" y="0.0"/>
   </component>
   <!---->
   <!--LIST OF PIXEL IDs in DETECTOR-->
@@ -565,6 +566,7 @@
         <logfile id="ww_rot_Readback" eq="-22.18-value"/>
       </parameter>
     </location>
+    <side-by-side-view-location x="0.96" y="0.0"/>
   </component>
   <!---->
   <!--LIST OF PIXEL IDs in DETECTOR-->
@@ -669,6 +671,7 @@
         <logfile id="midrange_rot_Readback" eq="2.48-value"/>
       </parameter>
     </location>
+    <side-by-side-view-location x="-0.71" y="0.0"/>
   </component>
   <!---->
   <!--LIST OF PIXEL IDs in DETECTOR-->
