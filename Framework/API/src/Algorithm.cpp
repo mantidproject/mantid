@@ -688,11 +688,11 @@ bool Algorithm::executeInternal() {
       m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
           (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
       setResultState(ResultState::Failed);
-      notificationCenter().postNotification(new ErrorNotification(this, ex.what()));
       this->unlockWorkspaces();
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
+        notificationCenter().postNotification(new ErrorNotification(this, ex.what()));
         getLogger().error() << "Error in execution of algorithm " << this->name() << '\n' << ex.what() << '\n';
       }
 
