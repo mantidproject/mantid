@@ -4,10 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from copy import deepcopy
 import collections.abc
 import numbers
-from typing import Any, Dict, List, Optional, overload, Union
+from typing import Dict, List, Optional, overload, Union
 from typing import TypedDict
 import re
 import numpy as np
@@ -17,8 +16,17 @@ from abins.constants import FLOAT_ID, FLOAT_TYPE
 from abins.test_helpers import dict_arrays_to_lists
 
 
+class _AtomData(TypedDict):
+    """Item within AtomsData"""
+
+    coord: np.ndarray
+    mass: float
+    sort: int
+    symbol: str
+
+
 class AtomsData(collections.abc.Sequence):
-    def __init__(self, atoms_data: Dict[str, Dict[str, Any]]) -> None:
+    def __init__(self, atoms_data: Dict[str, _AtomData]) -> None:
         # Make a map matching int indices to atoms_data keys
         test = re.compile(r"^atom_(\d+)$")
 
@@ -49,7 +57,7 @@ class AtomsData(collections.abc.Sequence):
         self._data = [self._check_item(atoms_data[key], n_atoms=n_atoms) for key in sorted_atom_keys]
 
     @staticmethod
-    def _check_item(item: Dict[str, Any], n_atoms: Optional[int] = None) -> Dict[str, Any]:
+    def _check_item(item: _AtomData, n_atoms: Optional[int] = None) -> _AtomData:
         """
         Raise an error if Atoms data item is unsuitable
 
@@ -64,11 +72,13 @@ class AtomsData(collections.abc.Sequence):
             raise ValueError("Invalid structure of the dictionary to be added.")
 
         # "symbol"
-        if not item["symbol"] in abins.constants.ALL_SYMBOLS:
+        if not (symbol := item["symbol"]) in abins.constants.ALL_SYMBOLS:
             # Check is symbol was loaded as type bytes
-            utf8_symbol = item["symbol"].decode("utf-8")
-            if utf8_symbol in abins.constants.ALL_SYMBOLS:
-                item["symbol"] = utf8_symbol
+            if isinstance(symbol, bytes):
+                utf8_symbol = symbol.decode("utf-8")
+
+                if utf8_symbol in abins.constants.ALL_SYMBOLS:
+                    item["symbol"] = utf8_symbol
             else:
                 raise ValueError("Invalid value of symbol.")
 
@@ -108,11 +118,11 @@ class AtomsData(collections.abc.Sequence):
         return len(self._data)
 
     @overload  # noqa F811
-    def __getitem__(self, item: int) -> Dict[str, Any]:
+    def __getitem__(self, item: int) -> _AtomData:
         ...
 
     @overload  # noqa F811
-    def __getitem__(self, item: slice) -> List[Dict[str, Any]]:  # noqa F811
+    def __getitem__(self, item: slice) -> List[_AtomData]:  # noqa F811
         ...
 
     def __getitem__(self, item):  # noqa F811
@@ -130,14 +140,21 @@ class AtomsData(collections.abc.Sequence):
         sort: int
         symbol: str
 
-    def to_jsonable_dict(self) -> Dict[str, JSONableAtomData]:
+    def to_jsonable_dict(self) -> Dict[str, "AtomsData.JSONableAtomData"]:
         return {f"atom_{i}": dict_arrays_to_lists(item) for i, item in enumerate(self._data)}
 
     @staticmethod
-    def from_dict(data: Dict[str, JSONableAtomData]) -> "AtomsData":
-        atoms_data = deepcopy(data)
-        for key, value in atoms_data.items():
-            atoms_data[key]["coord"] = np.asarray(value["coord"], dtype=FLOAT_TYPE)
+    def from_dict(data: Dict[str, "AtomsData.JSONableAtomData"]) -> "AtomsData":
+        atoms_data = {}  # type: Dict[str, _AtomData]
+
+        for atom_key, atom_data in data.items():
+            atoms_data[atom_key] = {
+                "coord": np.asarray(atom_data["coord"], dtype=FLOAT_TYPE),
+                "mass": atom_data["mass"],
+                "sort": atom_data["sort"],
+                "symbol": atom_data["symbol"],
+            }
+
         return AtomsData(atoms_data)
 
     def __str__(self):
