@@ -289,8 +289,14 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
                                                   std::vector<TimeValueUnit<TYPE>> &filteredData) const {
   filteredData.clear();
 
-  if (m_values.empty())
+  if (m_values.empty()) {
+    // nothing to copy
     return;
+  } else if (m_values.size() == 1) {
+    // copy everything
+    filteredData.emplace_back(m_values[0].time(), m_values[0].value());
+    return;
+  }
 
   size_t lastIndexCopied{0};
   for (const auto &splitter : timeROI.toTimeIntervals()) {
