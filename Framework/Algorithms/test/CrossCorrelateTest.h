@@ -69,6 +69,44 @@ public:
     TS_ASSERT_DELTA(outY1[2], 0.456851, 1e-6);
   }
 
+  void testWorkspaceIndexListValidInput() {
+    CrossCorrelate alg;
+
+    // Create the workspace
+    const MatrixWorkspace_sptr inWS = makeFakeWorkspace();
+
+    // Set up the algorithm
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("XMin", 2.0);
+    alg.setProperty("XMax", 4.0);
+    alg.setProperty("WorkspaceIndexList", "0,1,2,3,4");
+
+    // Run the algorithm
+    const MatrixWorkspace_const_sptr outWS = runAlgorithm(alg, inWS);
+
+    // Specific checks
+    const MantidVec &outX = outWS->readX(0);
+    TS_ASSERT_EQUALS(outX.size(), 3);
+    TS_ASSERT_DELTA(outX[0], -1.0, 1e-6);
+    TS_ASSERT_DELTA(outX[1], 0.0, 1e-6);
+    TS_ASSERT_DELTA(outX[2], 1.0, 1e-6);
+
+    const MantidVec &outY0 = outWS->readY(0);
+    TS_ASSERT_EQUALS(outY0.size(), 3);
+    TS_ASSERT_DELTA(outY0[0], -0.018902, 1e-6);
+    TS_ASSERT_DELTA(outY0[1], 1.0, 1e-6);
+    TS_ASSERT_DELTA(outY0[2], -0.018902, 1e-6);
+
+    const MantidVec &outY1 = outWS->readY(1);
+    TS_ASSERT_EQUALS(outY1.size(), 3);
+    TS_ASSERT_DELTA(outY1[0], -0.681363, 1e-6);
+    TS_ASSERT_DELTA(outY1[1], 0.168384, 1e-6);
+    TS_ASSERT_DELTA(outY1[2], 0.456851, 1e-6);
+  }
+
   // This tests an input X length of 3, which is the minimum the algorithm can
   // handle
   void testMinimumInputXLength() {
@@ -145,18 +183,76 @@ public:
     runAlgorithmThrows(alg);
   }
 
-  void testXMinEqualsXMax() {
-    // this throws because XMin should be > XMax
+  void testValidateInputsXMinEqualsXMax() {
+    // Input validation returns a message because XMin should be < XMax
     CrossCorrelate alg;
-    setupAlgorithm(alg, 2.0, 2.0);
-    runAlgorithmThrows(alg);
+    alg.initialize();
+    alg.setProperty("WorkspaceIndexMin", 0);
+    alg.setProperty("WorkspaceIndexMax", 1);
+    alg.setProperty("XMin", 2.0);
+    alg.setProperty("XMax", 2.0);
+    auto errorMap = alg.validateInputs();
+    TS_ASSERT_EQUALS(errorMap.size(), 2);
+    TS_ASSERT_EQUALS(errorMap.count("XMin"), 1);
+    TS_ASSERT_EQUALS(errorMap.count("XMax"), 1);
   }
 
-  void testXMinGreaterThanXMax() {
-    // this throws because XMin should be < XMax
+  void testValidateInputsXMinGreaterThanXMax() {
+    // Input validation returns a message because XMin should be < XMax
     CrossCorrelate alg;
-    setupAlgorithm(alg, 3.0, 2.0);
-    runAlgorithmThrows(alg);
+    alg.initialize();
+    alg.setProperty("WorkspaceIndexMin", 0);
+    alg.setProperty("WorkspaceIndexMax", 1);
+    alg.setProperty("XMin", 3.0);
+    alg.setProperty("XMax", 2.0);
+    auto errorMap = alg.validateInputs();
+    TS_ASSERT_EQUALS(errorMap.size(), 2);
+    TS_ASSERT_EQUALS(errorMap.count("XMin"), 1);
+    TS_ASSERT_EQUALS(errorMap.count("XMax"), 1);
+  }
+
+  void testValidateInputsWSIndexMinEqualsWSIndexMax() {
+    // Input validation returns a message because WorkspaceIndexMin should be < WorkspaceIndexMax
+    CrossCorrelate alg;
+    alg.initialize();
+    alg.setProperty("WorkspaceIndexMin", 1);
+    alg.setProperty("WorkspaceIndexMax", 1);
+    alg.setProperty("XMin", 2.0);
+    alg.setProperty("XMax", 3.0);
+    auto errorMap = alg.validateInputs();
+    TS_ASSERT_EQUALS(errorMap.size(), 2);
+    TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMin"), 1);
+    TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMax"), 1);
+  }
+
+  void testValidateInputsWSIndexMinGreaterThanWSIndexMax() {
+    // Input validation returns a message because WorkspaceIndexMin should be < WorkspaceIndexMax
+    CrossCorrelate alg;
+    alg.initialize();
+    alg.setProperty("WorkspaceIndexMin", 2);
+    alg.setProperty("WorkspaceIndexMax", 1);
+    alg.setProperty("XMin", 2.0);
+    alg.setProperty("XMax", 3.0);
+    auto errorMap = alg.validateInputs();
+    TS_ASSERT_EQUALS(errorMap.size(), 2);
+    TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMin"), 1);
+    TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMax"), 1);
+  }
+
+  void testValidateInputsWSIndexListAndWSIndexMinMaxGiven() {
+    // Input validation returns a message if both WS index list AND WS index min and max are set
+    CrossCorrelate alg;
+    alg.initialize();
+    alg.setProperty("XMin", 2.0);
+    alg.setProperty("XMax", 3.0);
+    alg.setProperty("WorkspaceIndexMin", 1);
+    alg.setProperty("WorkspaceIndexMax", 2);
+    alg.setProperty("WorkspaceIndexList", "1,2,3");
+    auto errorMap = alg.validateInputs();
+    TS_ASSERT_EQUALS(errorMap.size(), 3);
+    TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMin"), 1);
+    TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexMax"), 1);
+    TS_ASSERT_EQUALS(errorMap.count("WorkspaceIndexList"), 1);
   }
 
 private:
