@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='ASCII'?>
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            name="CG3"
-            valid-from="2023-10-01 00:00:00"
-            valid-to="2100-12-31 23:59:59"
-            last-modified="2023-05-12 14:50:59.829504"
-            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+	    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	    name="CG3"
+	    valid-from="2019-10-01 00:00:00"
+	    valid-to="2023-09-30 23:59:59"
+	    last-modified="2019-11-04 17:18:14.663174"
+	    xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
   <!--Created by Jose Borregero, borreguerojm@ornl.gov-->
   <defaults>
     <length unit="metre"/>
@@ -429,7 +429,6 @@
         <logfile id="sample_detector_distance" eq="value"/>
       </parameter>
     </location>
-    <side-by-side-view-location x="0.0" y="0.0"/>
   </component>
   <!---->
   <!--LIST OF PIXEL IDs in DETECTOR-->
@@ -544,7 +543,7 @@
   <!--TYPE: DOUBLE CURVED PANEL-->
   <!--Panel is positioned 1.129538 meters downstream-->
   <!---->
-  <type name="double-wing-panel">
+  <type name="double-curved-panel">
     <properties/>
     <component type="front-wing-panel">
       <location x="0.0" y="0.0" z="0.0"/>
@@ -556,17 +555,16 @@
   <!---->
   <!--COMPONENT: DOUBLE CURVED PANEL-->
   <!---->
-  <component type="double-wing-panel" idlist="curved_panel_ids" name="wing_detector">
+  <component type="double-curved-panel" idlist="curved_panel_ids" name="wing_detector">
     <location x="0.0" y="0.0" z="0">
-      <rot val="-22.18" axis-x="0" axis-y="1" axis-z="0"/>
+      <rot val="-22.18118506742357" axis-x="0" axis-y="1" axis-z="0"/>
       <parameter name="t-position">
-        <logfile id="ww_rot_Readback" eq="-22.18-value"/>
+        <logfile id="ww_rot_Readback" eq="-22.18118506742357-value"/>
       </parameter>
       <parameter name="roty">
-        <logfile id="ww_rot_Readback" eq="-22.18-value"/>
+        <logfile id="ww_rot_Readback" eq="-22.18118506742357-value"/>
       </parameter>
     </location>
-    <side-by-side-view-location x="0.96" y="0.0"/>
   </component>
   <!---->
   <!--LIST OF PIXEL IDs in DETECTOR-->
@@ -612,86 +610,5 @@
     <id start="84992" end="86015"/>
     <id start="87040" end="88063"/>
     <id start="89088" end="90111"/>
-  </idlist>
-  <!---->
-  <!--TYPE: CURVED PANEL-->
-  <!---->
-  <type name="front-midrange-panel">
-    <properties/>
-    <component type="fourpack">
-      <location name="bank89" x="0.15511" y="0.00000" z="3.95906" rot="2.24362" axis-x="0" axis-y="1" axis-z="0"/>
-      <location name="bank90" x="0.11159" y="0.00000" z="3.96053" rot="1.61396" axis-x="0" axis-y="1" axis-z="0"/>
-      <location name="bank91" x="0.06806" y="0.00000" z="3.96151" rot="0.98430" axis-x="0" axis-y="1" axis-z="0"/>
-      <location name="bank92" x="0.02452" y="0.00000" z="3.96202" rot="0.35463" axis-x="0" axis-y="1" axis-z="0"/>
-      <location name="bank93" x="-0.01902" y="0.00000" z="3.96205" rot="-0.27503" axis-x="0" axis-y="1" axis-z="0"/>
-      <location name="bank94" x="-0.06256" y="0.00000" z="3.96160" rot="-0.90469" axis-x="0" axis-y="1" axis-z="0"/>
-      <location name="bank95" x="-0.10609" y="0.00000" z="3.96068" rot="-1.53436" axis-x="0" axis-y="1" axis-z="0"/>
-      <location name="bank96" x="-0.14961" y="0.00000" z="3.95927" rot="-2.16402" axis-x="0" axis-y="1" axis-z="0"/>
-    </component>
-  </type>
-  <!---->
-  <!--TYPE: CURVED PANEL-->
-  <!---->
-  <type name="back-midrange-panel">
-    <properties/>
-    <component type="fourpack">
-      <location name="bank97" x="0.14992" y="0.00000" z="3.96747" rot="2.16402" axis-x="0" axis-y="1" axis-z="0"/>
-      <location name="bank98" x="0.10631" y="0.00000" z="3.96888" rot="1.53436" axis-x="0" axis-y="1" axis-z="0"/>
-      <location name="bank99" x="0.06269" y="0.00000" z="3.96981" rot="0.90469" axis-x="0" axis-y="1" axis-z="0"/>
-      <location name="bank100" x="0.01906" y="0.00000" z="3.97026" rot="0.27503" axis-x="0" axis-y="1" axis-z="0"/>
-      <location name="bank101" x="-0.02457" y="0.00000" z="3.97023" rot="-0.35463" axis-x="0" axis-y="1" axis-z="0"/>
-      <location name="bank102" x="-0.06820" y="0.00000" z="3.96972" rot="-0.98430" axis-x="0" axis-y="1" axis-z="0"/>
-      <location name="bank103" x="-0.11182" y="0.00000" z="3.96873" rot="-1.61396" axis-x="0" axis-y="1" axis-z="0"/>
-      <location name="bank104" x="-0.15543" y="0.00000" z="3.96726" rot="-2.24362" axis-x="0" axis-y="1" axis-z="0"/>
-    </component>
-  </type>
-  <!---->
-  <!--TYPE: DOUBLE CURVED PANEL-->
-  <!--Panel is positioned 3.9662 meters downstream-->
-  <!---->
-  <type name="double-midrange-panel">
-    <properties/>
-    <component type="front-midrange-panel">
-      <location x="0.0" y="0.0" z="0.0"/>
-    </component>
-    <component type="back-midrange-panel">
-      <location x="0.0" y="0.0" z="0.0"/>
-    </component>
-  </type>
-  <!---->
-  <!--COMPONENT: DOUBLE CURVED PANEL-->
-  <!---->
-  <component type="double-midrange-panel" idlist="midrange_panel_ids" name="midrange_detector">
-    <location x="0.0" y="0.0" z="0">
-      <rot val="2.48" axis-x="0" axis-y="1" axis-z="0"/>
-      <parameter name="t-position">
-        <logfile id="midrange_rot_Readback" eq="2.48-value"/>
-      </parameter>
-      <parameter name="roty">
-        <logfile id="midrange_rot_Readback" eq="2.48-value"/>
-      </parameter>
-    </location>
-    <side-by-side-view-location x="-0.71" y="0.0"/>
-  </component>
-  <!---->
-  <!--LIST OF PIXEL IDs in DETECTOR-->
-  <!---->
-  <idlist idname="midrange_panel_ids">
-    <id start="90112" end="91135"/>
-    <id start="92160" end="93183"/>
-    <id start="94208" end="95231"/>
-    <id start="96256" end="97279"/>
-    <id start="98304" end="99327"/>
-    <id start="100352" end="101375"/>
-    <id start="102400" end="103423"/>
-    <id start="104448" end="105471"/>
-    <id start="91136" end="92159"/>
-    <id start="93184" end="94207"/>
-    <id start="95232" end="96255"/>
-    <id start="97280" end="98303"/>
-    <id start="99328" end="100351"/>
-    <id start="101376" end="102399"/>
-    <id start="103424" end="104447"/>
-    <id start="105472" end="106495"/>
   </idlist>
 </instrument>
