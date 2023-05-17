@@ -22,8 +22,6 @@ The CalibrationTable must have the column *Detector ID* (integer) and one or mor
 
 Notice: The use of property "PositionTable" has been deprecated. Use property "CalibrationTable" instead.
 
-This algorithm is not appropriate for rectangular detectors and won't move them.
-
 Usage
 -----
 **Example - move three detectors to specified positions that would be got from calibration**
