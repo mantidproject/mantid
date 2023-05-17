@@ -7,6 +7,7 @@
 import unittest
 
 import numpy as np
+from numpy.testing import assert_allclose
 from abins.kpointsdata import KpointsData, KpointData
 
 
@@ -173,6 +174,18 @@ class KpointsDataTest(unittest.TestCase):
 
             with self.assertRaises(IndexError):
                 kpd[3]
+
+    def test_json_roundtrip(self):
+        ref_data = KpointsData(**self._good_data_2)
+        roundtrip_data = KpointsData.from_dict(ref_data.to_jsonable_dict())
+
+        assert_allclose(ref_data.unit_cell, roundtrip_data.unit_cell)
+
+        for ref_kpt, roundtrip_kpt in zip(ref_data, roundtrip_data):
+            assert_allclose(ref_kpt.frequencies, roundtrip_kpt.frequencies)
+            assert_allclose(ref_kpt.k, roundtrip_kpt.k)
+            assert_allclose(ref_kpt.weight, roundtrip_kpt.weight)
+            assert_allclose(ref_kpt.atomic_displacements, roundtrip_kpt.atomic_displacements)
 
 
 if __name__ == "__main__":
