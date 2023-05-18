@@ -105,7 +105,7 @@ void FilterByTime::exec() {
     start = DateAndTime(getPropertyValue(PropertyNames::ABS_START));
   } else {
     // get run start from the log manager
-    const auto startOfRun = inputWS->run().startTime();
+    const auto startOfRun = inputWS->run().getFirstPulseTime();
     start = startOfRun + startRelative;
   }
 
@@ -119,11 +119,9 @@ void FilterByTime::exec() {
     const double stopRelative = getProperty(PropertyNames::STOP_TIME);
     stop = start - startRelative + stopRelative;
   } else {
-    try {
-      stop = inputWS->run().endTime();
-      stop += 10000.0; // so we get all events - needs to be past last pulse
-    } catch (...) {
-    }
+    this->getLogger().debug("No end filter time specified - assuming last pulse");
+    stop = inputWS->run().getLastPulseTime();
+    stop += 10000.0; // so we get all events - needs to be past last pulse
   }
 
   // verify that stop is after start

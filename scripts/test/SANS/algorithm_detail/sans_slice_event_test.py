@@ -25,9 +25,6 @@ def provide_workspace_with_proton_charge(output_name, is_event=True):
     for index in range(0, 10):
         time += 1000000000
         AddTimeSeriesLog(Workspace=dummy_ws, Name="proton_charge", Type="double", Time=str(time), Value=value)
-    # For this test we want time filtering to use the first pulse time, rather than the workspace start properties, as the filter start
-    dummy_ws.run().removeProperty("run_start", True)
-    dummy_ws.run().removeProperty("start_time", True)
     return dummy_ws
 
 
