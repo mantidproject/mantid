@@ -91,6 +91,7 @@ class SliceviewerDataViewTest(unittest.TestCase):
         self.view.fig = mock.Mock()
         self.view.canvas = mock.Mock()
         self.view.clear_figure = mock.Mock()
+        self.view.grid_helper = mock.Mock()
 
         self.view.create_axes_nonorthogonal(mock.NonCallableMock())
 
