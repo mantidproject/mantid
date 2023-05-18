@@ -1377,7 +1377,8 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::clearOutdated() {
 
 //--------------------------------------------------------------------------------------------
 /**
- * Clears and creates a TimeSeriesProperty from these parameters:
+ * Clears and creates a TimeSeriesProperty from the parameters. It is extremely similar to the other TSP::create with
+ * specialized conversion.
  *  @param start_time :: The reference time as a boost::posix_time::ptime value
  *  @param time_sec :: A vector of time offset (from start_time) in seconds.
  *  @param new_values :: A vector of values, each corresponding to the time
@@ -1397,12 +1398,12 @@ void TimeSeriesProperty<TYPE>::create(const Types::Core::DateAndTime &start_time
   // Make the times(as seconds) into a vector of DateAndTime in one go.
   std::vector<DateAndTime> times;
   DateAndTime::createVector(start_time, time_sec, times);
-
   this->create(times, new_values);
 }
 
 //--------------------------------------------------------------------------------------------
-/** Clears and creates a TimeSeriesProperty from these parameters:
+/** Clears and creates a TimeSeriesProperty from the parameters. It is extremely similar to the other TSP::create with
+ *specialized conversion.
  *
  * @param new_times :: A vector of DateAndTime.
  * @param new_values :: A vector of values, each corresponding to the time off
@@ -1417,15 +1418,21 @@ void TimeSeriesProperty<TYPE>::create(const std::vector<Types::Core::DateAndTime
                                 "for the time and values vectors.");
 
   clear();
-  m_values.reserve(new_times.size());
+  // nothing to do without values
+  if (new_times.empty()) {
+    m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
+    return;
+  }
 
-  std::size_t num = new_values.size();
+  const std::size_t num = new_values.size();
+  m_values.reserve(num);
 
   m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
-  for (std::size_t i = 0; i < num; i++) {
-    TimeValueUnit<TYPE> newentry(new_times[i], new_values[i]);
-    m_values.emplace_back(newentry);
-    if (m_propSortedFlag == TimeSeriesSortStatus::TSSORTED && i > 0 && new_times[i - 1] > new_times[i]) {
+  // add the 0th value to simplify logic inside of the loop
+  m_values.emplace_back(new_times[0], new_values[0]);
+  for (std::size_t i = 1; i < num; i++) {
+    m_values.emplace_back(new_times[i], new_values[i]);
+    if (m_propSortedFlag == TimeSeriesSortStatus::TSSORTED && new_times[i - 1] > new_times[i]) {
       // Status gets to unsorted
       m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
     }
@@ -1847,7 +1854,8 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::sortIfNecessary() const 
   }
 
   if (m_propSortedFlag == TimeSeriesSortStatus::TSUNSORTED) {
-    g_log.information("TimeSeriesProperty is not sorted.  Sorting is operated on it. ");
+    g_log.information() << "TimeSeriesProperty \"" << this->name()
+                        << "\" is not sorted.  Sorting is operated on it. \n";
     std::stable_sort(m_values.begin(), m_values.end());
     m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
   }
