@@ -42,33 +42,31 @@ Loading Data Test
 - If you are on Windows, click the ``Load Current Run`` button
 - A plot should appear, the details are not important
 - In the loading bar enter ``62250-1``
-- Some new data will appear in the plot
-- To see all of the data press the ``select plot data`` button and select all of the rows in the pop-up
-- Keep the pop-up open
+- Two lines will appear on the plot
 - Tick the ``Co-Add`` option in the loading area
-- The number of options in the pop-up will be reduced from two to one
+- There will now be one line on the plot
 - Go to the **grouping tab**
 	- You will see three tables, they are the groups, pairs and differences
 	- Underneath the group table press the ``+`` button to create a group called "one"
 	- A new group will appear in the table
 	- Right click in the table and select ``Add Group``, call this one "two"
-	- In the table, tick the ``Analyse`` option for groups "one" and "two"
-	- Using the data loading pop up, select the "one" and "two" groups
-	- They should be identical
+	- In the table, tick the ``Analyse`` option for groups "one" and "two", 2 lines will appear on the plot
+	- In the pair table below, untick the ``Analyse``  option
+	- The two remaining lines should be identical
 	- In the ``Detector IDs`` column change the value for "two" to be ``2`` and the two groups will now look different
 	- Select the groups "one" and "two", then right click and select ``Add Pair``
 	- Call the pair "short", it will then appear in the pair table
 	- Tick the ``Analyse`` option for the "short" pair
-	- In the plot selector pop-up make sure only the "short" pair is selected
+	- In the group table, untick the ``Analyse`` option for groups "one" and "two"
 	- Change the value of ``Group 1`` to be "two", this will change the data and ``Group 2`` should update to be "one"
 	- Click the ``+`` button on the difference table and create a pair called "pairDiff"
 	- Tick the ``Analyse`` option for the "pairDiff" difference
-	- In the plot selector pop-up make sure only the "pairDiff" difference (this is still technically a pair) is selected
+	- Untick the ``Analyse`` option for the "short" pair
 	- Changing the options for ``Pair 1`` and ``Pair 2`` will alter the data
 	- Above the difference table, select the ``Groups`` radio button
 	- Right click in the difference table and select ``Add diff``, call it "delta"
-	- Tick the ``Analyse`` option for the "delta" difference
-	- In the plot selector pop-up make sure only the "delta" difference (this is still technically a group) is selected
+	- Tick the ``Analyse`` option for the "delta" difference (this is still technically a group)
+	- Untick the ``Analyse`` option for the "pairDiff" difference
 	- Press the ``Save`` button at the top of the tab and save the grouping as "MUSR_test"
 	- Remove groups, pairs and differences by using either by selecting the row and pressing the ``-`` button or by right clicking the row and selecting ``Remove``
 	- The GUI will not let you delete a group/pair that is in use elsewhere
