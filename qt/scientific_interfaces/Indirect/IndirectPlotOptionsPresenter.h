@@ -69,6 +69,7 @@ private:
 
   IndirectPlotOptionsView *m_view;
   std::unique_ptr<IndirectPlotOptionsModel> m_model;
+  PlotWidget m_plotType;
 };
 
 } // namespace CustomInterfaces
