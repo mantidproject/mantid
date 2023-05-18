@@ -724,7 +724,7 @@ public:
     createUniformWorkspace(0.8, 0.1, 1.6, 2.6, "ws4");
     doGroupWorkspaces("ws3, ws4", "group2");
 
-    // will produce a group outws containing outws_ws1_ws3, outws_ws2_ws4
+    // will produce a group outws containing two child workspaces
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -814,7 +814,7 @@ public:
     createUniformWorkspace(0.8, 0.1, 1.6, 2.6, "ws4");
     doGroupWorkspaces("ws3, ws4", "group2");
 
-    // Will produce a group outws containing outws_ws1_ws3, outws_ws2_ws4
+    // Will produce a group outws containing two child workspaces
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -914,8 +914,7 @@ public:
     createUniformWorkspace(1.6, 0.1, 1.6, 3.0, "ws6");
     doGroupWorkspaces("ws5, ws6", "group3");
 
-    // Will produce a group outws containing outws_ws1_ws3_ws5,
-    // outws_ws2_ws4_ws6
+    // Will produce a group outws containing two child workspaces
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -1024,8 +1023,7 @@ public:
     createUniformWorkspace(1.6, 0.1, 1.6, 3.0, "ws6");
     doGroupWorkspaces("ws5, ws6", "group3");
 
-    // Will produce a group outws containing outws_ws1_ws3_ws5 and
-    // outws_ws2_ws4_ws6
+    // Will produce a group outws containing two child workspaces
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -1110,7 +1108,6 @@ public:
     TS_ASSERT_DELTA(scales[3], 0.6249, 0.0001);
     // Check workspaces in ADS
     auto wsInADS = AnalysisDataService::Instance().getObjectNames();
-    // In ADS: group1, group2, grou3, ws1, ws2, ws3, ws4, ws5, ws6 and
     TS_ASSERT_EQUALS(wsInADS.size(), 12)
     TS_ASSERT_EQUALS(wsInADS[3], "outws")
     TS_ASSERT_EQUALS(wsInADS[4], "outws_1")
@@ -1149,8 +1146,7 @@ public:
     TS_ASSERT_THROWS(alg0.execute(), const std::runtime_error &);
     TS_ASSERT(!alg0.isExecuted())
 
-    // Will produce a group outws containing a single workspace named
-    // outws_ws1_ws3_ws5
+    // Will produce a group outws containing a single workspace
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
@@ -1296,7 +1292,6 @@ public:
 
     // Check workspaces in ADS
     auto wsInADS = AnalysisDataService::Instance().getObjectNames();
-    // In ADS: group1, group2, outws_ws1_ws3, outws_ws2_ws4, ws1, ws2, ws3, ws4
     TS_ASSERT_EQUALS(wsInADS.size(), 9)
     // Remove workspaces from ADS
     AnalysisDataService::Instance().clear();
@@ -1387,8 +1382,7 @@ public:
     createUniformWorkspace(1.6, 0.1, 1.6, 3.0, "ws6");
     doGroupWorkspaces("ws5, ws6", "group3");
 
-    // Will produce a group outws containing outws_ws1_ws3_ws5 and
-    // outws_ws2_ws4_ws6
+    // Will produce a group outws containing two child workspaces
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
