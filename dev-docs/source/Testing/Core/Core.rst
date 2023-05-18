@@ -65,7 +65,7 @@ This was last updated for Release 6.2. Check if the organiser has considered if 
     Script Editor / Interpreter,:r:`Y`,,,:o:`Y`,"Check basic functionality, such as checking the buttons/options at the top of SE, running algorithms, accessing workspace properties in both environments. Does autocompletion work for mantid algorithms/numpy/matplotlib? :ref:`02_scripts`"
     Access mantid framework in Python and Jupyter Notebook,:r:`Y`,:b:`Y`,:g:`Y`,,"Follow the instructions on :ref:`PythonNotebook` and check you can import mantid.simpleapi and run a script/notebook."
     Memory Widget,:r:`Y`,:b:`Y`,:g:`Y`,:o:`Y`,"Check that the System Memory Usage widget updates at a frequency of no more than once every two seconds, ideally on a system with limited resourses. Check that the default position of the widget is in the top right, in the same column as the Messages widget."
-    Script Repository,,:b:`Y`,:g:`Y`,:o:`Y`,"Test downloading and uploading scripts to the Script Repository. Try to move the Script Repository to another folder. Check out `this <WorkbenchScriptRepository>`__ page for more information."
+    Script Repository,,:b:`Y`,:g:`Y`,:o:`Y`,"Test downloading and uploading scripts to the Script Repository. Try to move the Script Repository to another folder. Check out :ref:`this <WorkbenchScriptRepository>` page for more information."
 
 .. csv-table:: Larger tasks
     :widths: 10 20 5 5 5 5 50
@@ -75,7 +75,7 @@ This was last updated for Release 6.2. Check if the organiser has considered if 
     ,Data Loading,:r:`Y`,,:g:`Y`,, "Load different data types from different facilities"
     ,Save Nexus/Ascii,:r:`Y`,,:g:`Y`,,"Save a few appropriate workspaces (both the algorithm and from the Save button at top of Workspaces Toolbox)"
     ,Show Data,:r:`Y`,,:g:`Y`,, "Display the Data for different workspaces: Workspace2D (Histogram), EventWorkspace, TableWorkspace AND plotBin and plotSpectrum from the Data table"
-    ,Instrument Viewer,:r:`Y`,,:g:`Y`,, "Open Instrument viewer for instruments in different facilities. Link to MBC docs"
+    ,Instrument Viewer,:r:`Y`,,:g:`Y`,, "Open Instrument viewer for instruments in different facilities."
     ,SliceViewer,:r:`Y`,,:g:`Y`,, "Open and make some small changes (full test is separate)"
     ,Show Detectors,:r:`Y`,,:g:`Y`,,
     ,Sample Logs,:r:`Y`,,:g:`Y`,,
