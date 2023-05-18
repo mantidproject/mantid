@@ -45,6 +45,8 @@ private:
   bool checkGroups() override { return false; }
   /// Overwrites Algorithm method.
   void exec() override;
+  /// Creates a correctly formatted name for a stitched child workspace in a workspace group
+  std::string createChildWorkspaceName(const std::string &groupName, const size_t periodIndex);
 
   // A 2D matrix holding workspaces obtained from each workspace list/group
   std::vector<std::vector<API::MatrixWorkspace_sptr>> m_inputWSMatrix;

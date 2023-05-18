@@ -262,6 +262,7 @@ void Stitch1DMany::exec() {
         Workspace_sptr outStitchedWS;
         doStitch1D(inMatrix, periodScaleFactors, outStitchedWS, outName);
         // Add name of stitched workspaces to group list and ADS
+        outName = createChildWorkspaceName(groupName, i);
         toGroup.emplace_back(outName);
         AnalysisDataService::Instance().addOrReplace(outName, outStitchedWS);
       }
@@ -357,8 +358,7 @@ void Stitch1DMany::doStitch1DMany(const size_t period, const bool useManualScale
     toProcess.emplace_back(wsName);
   }
 
-  // Needed to ensure child workspace name simpler
-  outName += "_" + std::to_string(period + 1);
+  outName = createChildWorkspaceName(outName, period);
 
   auto alg = createChildAlgorithm("Stitch1DMany");
   alg->initialize();
@@ -376,6 +376,14 @@ void Stitch1DMany::doStitch1DMany(const size_t period, const bool useManualScale
   alg->execute();
 
   outScaleFactors = alg->getProperty("OutScaleFactors");
+}
+
+/** Creates a correctly formatted name for a stitched child workspace in a workspace group
+ * @param groupName :: The name of the workspace group
+ * @param periodIndex :: The period index for the child workspace
+ */
+std::string Stitch1DMany::createChildWorkspaceName(const std::string &groupName, const size_t periodIndex) {
+  return groupName + "_" + std::to_string(periodIndex + 1);
 }
 
 } // namespace Mantid::Algorithms
