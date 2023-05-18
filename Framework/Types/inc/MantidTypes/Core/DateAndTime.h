@@ -144,7 +144,7 @@ inline DateAndTime::DateAndTime() : _nanoseconds(0) {}
  * @param total_nanoseconds :: nanoseconds since Jan 1, 1990 (our epoch).
  */
 inline DateAndTime::DateAndTime(const int64_t total_nanoseconds)
-    : _nanoseconds{std::clamp(total_nanoseconds, MIN_NANOSECONDS, MAX_NANOSECONDS)} {
+    : _nanoseconds{std::clamp(std::move(total_nanoseconds), MIN_NANOSECONDS, MAX_NANOSECONDS)} {
   // Make sure that you cannot construct a date that is beyond the limits...
 }
 
