@@ -235,6 +235,9 @@ void export_Run() {
       .def("getTimeROI", &Run::getTimeROI, arg("self"), return_value_policy<reference_existing_object>(),
            "Return the time regoin of interest")
 
+      .def("removeProperty", &Run::removeProperty, (arg("self"), arg("name"), arg("delproperty")),
+           "Deletes a named property")
+
       //-------------------- Dictionary access----------------------------
       .def("get", &getWithDefault, (arg("self"), arg("key"), arg("default")),
            "Returns the value pointed to by the key or the default value "
