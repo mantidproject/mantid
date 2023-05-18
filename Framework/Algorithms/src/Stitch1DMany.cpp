@@ -258,9 +258,8 @@ void Stitch1DMany::exec() {
         std::transform(m_inputWSMatrix.begin(), m_inputWSMatrix.end(), std::back_inserter(inMatrix),
                        [i](const auto &ws) { return ws[i]; });
 
-        outName = groupName;
         Workspace_sptr outStitchedWS;
-        doStitch1D(inMatrix, periodScaleFactors, outStitchedWS, outName);
+        doStitch1D(inMatrix, periodScaleFactors, outStitchedWS);
         // Add name of stitched workspaces to group list and ADS
         outName = createChildWorkspaceName(groupName, i);
         toGroup.emplace_back(outName);
@@ -277,8 +276,7 @@ void Stitch1DMany::exec() {
 
     m_outputWorkspace = AnalysisDataService::Instance().retrieveWS<Workspace>(groupName);
   } else {
-    std::string tempOutName;
-    doStitch1D(m_inputWSMatrix.front(), m_manualScaleFactors, m_outputWorkspace, tempOutName);
+    doStitch1D(m_inputWSMatrix.front(), m_manualScaleFactors, m_outputWorkspace);
   }
   // Save output
   this->setProperty("OutputWorkspace", m_outputWorkspace);
@@ -289,20 +287,16 @@ void Stitch1DMany::exec() {
  * @param toStitch :: Vector of workspaces to be stitched
  * @param manualScaleFactors :: Provided values for scaling factors
  * @param outWS :: Output stitched workspace
- * @param outName :: Output stitched workspace name
  */
 void Stitch1DMany::doStitch1D(std::vector<MatrixWorkspace_sptr> &toStitch,
-                              const std::vector<double> &manualScaleFactors, Workspace_sptr &outWS,
-                              std::string &outName) {
+                              const std::vector<double> &manualScaleFactors, Workspace_sptr &outWS) {
 
   auto lhsWS = toStitch.front();
-  outName += "_" + lhsWS->getName();
   // Support Python list syntax for selecting the last element in the list
   auto indexOfReference = m_indexOfReference == -1 ? toStitch.size() - 1 : m_indexOfReference;
 
   for (size_t i = 1; i < toStitch.size(); i++) {
     auto rhsWS = toStitch[i];
-    outName += "_" + rhsWS->getName();
     // Scale the LHS ws until we have scaled to the reference ws. After that we scale the RHS ws to keep the scaling.
     auto scaleRHSWorkspace = i > indexOfReference;
 
