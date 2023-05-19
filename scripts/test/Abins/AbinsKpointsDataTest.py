@@ -8,7 +8,9 @@ import unittest
 
 import numpy as np
 from numpy.testing import assert_allclose
+
 from abins.kpointsdata import KpointsData, KpointData
+from abins.test_helpers import assert_kpoint_almost_equal
 
 
 class KpointsDataTest(unittest.TestCase):
@@ -182,10 +184,7 @@ class KpointsDataTest(unittest.TestCase):
         assert_allclose(ref_data.unit_cell, roundtrip_data.unit_cell)
 
         for ref_kpt, roundtrip_kpt in zip(ref_data, roundtrip_data):
-            assert_allclose(ref_kpt.frequencies, roundtrip_kpt.frequencies)
-            assert_allclose(ref_kpt.k, roundtrip_kpt.k)
-            assert_allclose(ref_kpt.weight, roundtrip_kpt.weight)
-            assert_allclose(ref_kpt.atomic_displacements, roundtrip_kpt.atomic_displacements)
+            assert_kpoint_almost_equal(ref_kpt, roundtrip_kpt)
 
 
 if __name__ == "__main__":

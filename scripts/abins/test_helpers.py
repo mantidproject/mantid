@@ -9,8 +9,10 @@ from typing import Any, Dict, Mapping
 from unittest import TestCase
 
 import numpy as np
+from numpy.testing import assert_allclose
 
 from abins.atomsdata import _AtomData
+from abins.kpointsdata import KpointData
 
 
 # Module with helper functions used to create tests.
@@ -80,7 +82,16 @@ def assert_atom_almost_equal(ref_atom: _AtomData, atom: _AtomData, tester: TestC
     if tester is None:
         tester = TestCase()
 
-        tester.assertAlmostEqual(ref_atom["mass"], atom["mass"])
-        tester.assertEqual(ref_atom["sort"], atom["sort"])
-        tester.assertEqual(ref_atom["symbol"], atom["symbol"])
-        assert_allclose(ref_atom["coord"], atom["coord"])
+    tester.assertAlmostEqual(ref_atom["mass"], atom["mass"])
+    tester.assertEqual(ref_atom["sort"], atom["sort"])
+    tester.assertEqual(ref_atom["symbol"], atom["symbol"])
+    assert_allclose(ref_atom["coord"], atom["coord"])
+
+
+def assert_kpoint_almost_equal(ref_kpt: KpointData, test_kpt: KpointData) -> None:
+    """Compare two items from KpointsData, raise AssertionError if different"""
+
+    assert_allclose(ref_kpt.frequencies, test_kpt.frequencies)
+    assert_allclose(ref_kpt.k, test_kpt.k)
+    assert_allclose(ref_kpt.weight, test_kpt.weight)
+    assert_allclose(ref_kpt.atomic_displacements, test_kpt.atomic_displacements)

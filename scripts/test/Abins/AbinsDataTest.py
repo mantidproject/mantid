@@ -4,12 +4,19 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+import json
+from pathlib import Path
 import unittest
 from unittest.mock import MagicMock
+from tempfile import TemporaryDirectory
+
+from numpy.testing import assert_allclose
 
 import abins
 from abins.abinsdata import AbinsData
 from abins.input import all_loaders
+from abins.test_helpers import assert_atom_almost_equal
+from abins.test_helpers import assert_kpoint_almost_equal
 
 
 class TestAbinsData(unittest.TestCase):
@@ -54,6 +61,35 @@ class TestAbinsDataFromCalculation(unittest.TestCase):
     def test_with_dummy_loader(self):
         data = AbinsData.from_calculation_data("dummy_file.ext", "DummyLoader")
         self.assertEqual(data, "FORMATTED DATA")
+
+
+class TestAbinsDataJSON(unittest.TestCase):
+    def test_json_roundtrip(self):
+        ref_data_file = abins.test_helpers.find_file("mgo-abinsdata-dump.json")
+        with open(ref_data_file, "r") as fp:
+            abins_data = AbinsData.from_dict(json.load(fp))
+
+        # Check eigenvectors contain complex numbers where expected
+        self.assertTrue(abins_data.get_kpoints_data()[1].atomic_displacements.imag.any())
+
+        with TemporaryDirectory() as td:
+            tmp_file = Path(td) / "temp.json"
+            with open(tmp_file, "w") as fp:
+                json.dump(abins_data.to_jsonable_dict(), fp)
+
+            with open(tmp_file, "r") as fp:
+                roundtrip_data = AbinsData.from_dict(json.load(fp))
+
+        for ref_atom, roundtrip_atom in zip(abins_data.get_atoms_data(), roundtrip_data.get_atoms_data()):
+            assert_atom_almost_equal(ref_atom, roundtrip_atom, tester=self)
+
+        ref_kpoints_data = abins_data.get_kpoints_data()
+        roundtrip_kpoints_data = roundtrip_data.get_kpoints_data()
+
+        assert_allclose(ref_kpoints_data.unit_cell, roundtrip_kpoints_data.unit_cell)
+
+        for ref_kpt, roundtrip_kpt in zip(ref_kpoints_data, roundtrip_kpoints_data):
+            assert_kpoint_almost_equal(ref_kpt, roundtrip_kpt)
 
 
 if __name__ == "__main__":
