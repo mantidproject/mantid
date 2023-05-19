@@ -13,6 +13,7 @@ import numpy as np
 from numpy.testing import assert_almost_equal
 
 import abins
+from abins import AbinsData
 import abins.input
 from abins.constants import FUNDAMENTALS
 import abins.instruments
@@ -46,10 +47,9 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
 
     #     test input
     def test_wrong_input(self):
-        full_path_filename = abins.test_helpers.find_file(filename=self._si2 + ".phonon")
-
-        castep_reader = abins.input.CASTEPLoader(input_ab_initio_filename=full_path_filename)
-        good_data = castep_reader.read_vibrational_or_phonon_data()
+        full_path_filename = abins.test_helpers.find_file(filename=self._si2 + ".json")
+        with open(full_path_filename, "r") as fp:
+            good_data = AbinsData.from_dict(json.load(fp))
 
         # wrong filename
         with self.assertRaises(ValueError):
@@ -111,56 +111,56 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
         self._good_case()
 
     def test_1d_order2(self):
-        self._good_case(name=self._si2 + "_1d_o2", castep_name=self._si2, quantum_order_num=2)
+        self._good_case(name=self._si2 + "_1d_o2", abinsdata_name=self._si2, quantum_order_num=2)
 
     def test_1d_order10(self):
-        self._good_case(name=self._si2 + "_1d_o10", castep_name=self._si2, quantum_order_num=2, autoconvolution=True)
+        self._good_case(name=self._si2 + "_1d_o10", abinsdata_name=self._si2, quantum_order_num=2, autoconvolution=True)
 
     def test_2d_order1_mari(self):
         abins.parameters.instruments["MARI"].update({"q_size": 10, "n_energy_bins": 100})
         mari = abins.instruments.get_instrument("MARI")
         mari.set_incident_energy(1000.0)
 
-        self._good_case(name=self._si2 + "_2d_o1_mari", castep_name=self._si2, instrument=mari)
+        self._good_case(name=self._si2 + "_2d_o1_mari", abinsdata_name=self._si2, instrument=mari)
 
     def test_2d_order2_panther(self):
         abins.parameters.instruments["PANTHER"].update({"q_size": 8, "n_energy_bins": 60})
         panther = abins.instruments.get_instrument("PANTHER")
         panther.set_incident_energy(1000.0)
 
-        self._good_case(name=self._si2 + "_2d_o2_panther", quantum_order_num=2, castep_name=self._si2, instrument=panther)
+        self._good_case(name=self._si2 + "_2d_o2_panther", quantum_order_num=2, abinsdata_name=self._si2, instrument=panther)
 
     # helper functions
-    def _good_case(self, name=_si2, castep_name=None, **calculator_kwargs):
+    def _good_case(self, name=_si2, abinsdata_name=None, **calculator_kwargs):
         from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
 
-        if castep_name is None:
-            castep_name = name
+        if abinsdata_name is None:
+            abinsdata_name = name
 
         calc_kwargs = self.default_calculator_kwargs.copy()
         calc_kwargs.update(calculator_kwargs)
 
         # calculation of powder data
         good_tester = abins.SCalculatorFactory.init(
-            filename=abins.test_helpers.find_file(filename=castep_name + ".phonon"),
-            abins_data=self._get_abins_data(castep_name),
+            filename=abins.test_helpers.find_file(filename=abinsdata_name + ".json"),
+            abins_data=self._get_abins_data(abinsdata_name),
             **calc_kwargs,
         )
         calculated_data = good_tester.get_formatted_data()
 
         ### Uncomment to generate new data ###
         # from pathlib import Path
-        # data_path = Path(abins.test_helpers.find_file(filename=castep_name + ".phonon")).parent
+        # data_path = Path(abins.test_helpers.find_file(filename=abinsdata_name + ".json")).parent
         # self._write_data(data=calculated_data.extract(),
         #                  filename=(data_path / f"{name}_S.txt"))
 
-        good_data = self._get_good_data(filename=name, castep_filename=castep_name)
+        good_data = self._get_good_data(filename=name, abinsdata_filename=abinsdata_name)
         self._check_data(good_data=good_data["S"], data=calculated_data.extract())
 
-        # check if loading powder data is correct
+        # This time the data should be loaded from cache. Check this is consistent with calculation
         if calc_kwargs["instrument"].get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
             new_tester = abins.SCalculatorFactory.init(
-                filename=abins.test_helpers.find_file(filename=castep_name + ".phonon"), abins_data=good_data["DFT"], **calc_kwargs
+                filename=abins.test_helpers.find_file(filename=abinsdata_name + ".json"), abins_data=good_data["DFT"], **calc_kwargs
             )
             loaded_data = new_tester.load_formatted_data()
 
@@ -168,19 +168,18 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
 
     @staticmethod
     @functools.lru_cache(maxsize=4)
-    def _get_abins_data(castep_filename):
-        castep_reader = abins.input.CASTEPLoader(
-            input_ab_initio_filename=abins.test_helpers.find_file(filename=castep_filename + ".phonon")
-        )
-        return castep_reader.read_vibrational_or_phonon_data()
+    def _get_abins_data(ref_name):
+        filename = abins.test_helpers.find_file(filename=ref_name + ".json")
+        with open(filename, "r") as fp:
+            return AbinsData.from_dict(json.load(fp))
 
-    def _get_good_data(self, filename=None, castep_filename=None):
-        if castep_filename is None:
-            castep_filename = filename
+    def _get_good_data(self, filename=None, abinsdata_filename=None):
+        if abinsdata_filename is None:
+            abinsdata_filename = filename
 
         s_data = self._prepare_data(filename=abins.test_helpers.find_file(filename=(filename + "_S.txt")))
 
-        return {"DFT": self._get_abins_data(castep_filename), "S": s_data}
+        return {"DFT": self._get_abins_data(abinsdata_filename), "S": s_data}
 
     @staticmethod
     def _write_data(*, data, filename):
