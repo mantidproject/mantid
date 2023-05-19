@@ -1788,39 +1788,26 @@ double TimeSeriesProperty<std::string>::extractStatistic(Math::StatisticType sel
  * If there is any, keep one of them
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
-  // 1. Sort if necessary
+  // ensure that the values are sorted
   sortIfNecessary();
 
-  // 2. Detect and Remove Duplicated
-  size_t numremoved = 0;
+  // cache the original size so the number removed can be reported
+  const auto origSize = this->size();
 
-  typename std::vector<TimeValueUnit<TYPE>>::iterator vit;
-  vit = m_values.begin() + 1;
-  Types::Core::DateAndTime prevtime = m_values.begin()->time();
-  while (vit != m_values.end()) {
-    Types::Core::DateAndTime currtime = vit->time();
-    if (prevtime == currtime) {
-      // Print out warning
-      g_log.debug() << "Entry @ Time = " << prevtime
-                    << "has duplicate time stamp.  Remove entry with Value = " << (vit - 1)->value() << "\n";
-
-      // A duplicated entry!
-      vit = m_values.erase(vit - 1);
-
-      numremoved++;
-    }
-
-    // b) progress
-    prevtime = currtime;
-    ++vit;
-  }
+  // remove the first n-repeats
+  // taken from
+  // https://stackoverflow.com/questions/21060636/using-stdunique-and-vector-erase-to-remove-all-but-last-occurrence-of-duplicat
+  auto it = std::unique(m_values.rbegin(), m_values.rend(),
+                        [](const auto &a, const auto &b) { return a.time() == b.time(); });
+  m_values.erase(m_values.begin(), it.base());
 
   // update m_size
   countSize();
 
-  // 3. Finish
+  // log how many values were removed
+  const auto numremoved = origSize - this->size();
   if (numremoved > 0)
-    g_log.notice() << "Log " << this->name() << " has " << numremoved << " entries removed due to duplicated time. "
+    g_log.notice() << "Log \"" << this->name() << "\" has " << numremoved << " entries removed due to duplicated time. "
                    << "\n";
 }
 

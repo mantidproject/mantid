@@ -1880,6 +1880,81 @@ public:
     return;
   }
 
+  void test_duplicateTimes() {
+    // emulate duplicates from the MDNorm test(s) with HYS_13656-13658
+    const DateAndTime time_first("2013-Jan-13 19:36:16.837000000");
+    const DateAndTime time_last("2013-Jan-13 19:36:21.900000202");
+    TimeSeriesProperty<double> prop("s1");
+    prop.addValue(time_first, -0.001722);
+    prop.addValue("2013-Jan-13 19:36:17.290000009", 0.004401);
+    prop.addValue("2013-Jan-13 19:36:17.400000023", 0.010716);
+    prop.addValue("2013-Jan-13 19:36:17.508999990", 0.016265);
+    prop.addValue("2013-Jan-13 19:36:17.727999972", 0.021814);
+    prop.addValue("2013-Jan-13 19:36:17.727999972", 0.027172);
+    prop.addValue("2013-Jan-13 19:36:17.947000014", 0.032721);
+    prop.addValue("2013-Jan-13 19:36:17.947000014", 0.037887);
+    prop.addValue("2013-Jan-13 19:36:18.180999981", 0.043437);
+    prop.addValue("2013-Jan-13 19:36:18.353000032", 0.052813);
+    prop.addValue("2013-Jan-13 19:36:18.353000032", 0.058171);
+    prop.addValue("2013-Jan-13 19:36:18.509000050", 0.063911);
+    prop.addValue("2013-Jan-13 19:36:18.680999981", 0.069269);
+    prop.addValue("2013-Jan-13 19:36:18.680999981", 0.074627);
+    prop.addValue("2013-Jan-13 19:36:18.915000068", 0.080367);
+    prop.addValue("2013-Jan-13 19:36:18.915000068", 0.085917);
+    prop.addValue("2013-Jan-13 19:36:19.165000068", 0.092231);
+    prop.addValue("2013-Jan-13 19:36:19.306000101", 0.100459);
+    prop.addValue("2013-Jan-13 19:36:19.306000101", 0.1062);
+    prop.addValue("2013-Jan-13 19:36:19.524999963", 0.111749);
+    prop.addValue("2013-Jan-13 19:36:19.524999963", 0.117107);
+    prop.addValue("2013-Jan-13 19:36:19.744000064", 0.122847);
+    prop.addValue("2013-Jan-13 19:36:19.744000064", 0.128205);
+    prop.addValue("2013-Jan-13 19:36:19.962000000", 0.133754);
+    prop.addValue("2013-Jan-13 19:36:19.962000000", 0.139112);
+    prop.addValue("2013-Jan-13 19:36:20.149999963", 0.144661);
+    prop.addValue("2013-Jan-13 19:36:20.353000032", 0.153081);
+    prop.addValue("2013-Jan-13 19:36:20.353000032", 0.158821);
+    prop.addValue("2013-Jan-13 19:36:20.571999895", 0.16437);
+    prop.addValue("2013-Jan-13 19:36:20.571999895", 0.169537);
+    prop.addValue("2013-Jan-13 19:36:20.696999895", 0.175086);
+    prop.addValue("2013-Jan-13 19:36:20.900000202", 0.180827);
+    prop.addValue("2013-Jan-13 19:36:20.900000202", 0.186376);
+    prop.addValue("2013-Jan-13 19:36:21.197000133", 0.191925);
+    prop.addValue("2013-Jan-13 19:36:21.197000133", 0.20111);
+    prop.addValue("2013-Jan-13 19:36:21.430999862", 0.20685);
+    prop.addValue("2013-Jan-13 19:36:21.430999862", 0.213165);
+    prop.addValue("2013-Jan-13 19:36:21.572000133", 0.218714);
+    prop.addValue("2013-Jan-13 19:36:21.775000202", 0.224072);
+    prop.addValue("2013-Jan-13 19:36:21.775000202", 0.229621);
+    prop.addValue(time_last, 0.235936);
+
+    // the log is built as a constant ramp up
+    const double MIN_VALUE = prop.valuesAsVector().front();
+    const double MAX_VALUE = prop.valuesAsVector().back();
+    constexpr std::size_t SIZE_ORIG = 1928 - 1888 + 1;   // difference in line numbers above
+    constexpr std::size_t SIZE_REDUCED = SIZE_ORIG - 15; // repeats counted by hand
+    // there is a fake duration tacked on which is the last non-zero duration beore it
+    const double DURATION = DateAndTime::secondsFromDuration(time_last - time_first) + (21.900000202 - 21.775000202);
+
+    const auto statsOrig = prop.getStatistics();
+    TS_ASSERT_EQUALS(statsOrig.minimum, MIN_VALUE);
+    TS_ASSERT_EQUALS(statsOrig.maximum, MAX_VALUE);
+    TS_ASSERT_EQUALS(statsOrig.duration, DURATION);
+    TS_ASSERT_EQUALS(prop.size(), SIZE_ORIG);
+    TS_ASSERT_EQUALS(prop.valuesAsVector().size(), SIZE_ORIG);
+
+    // remove duplicates
+    prop.eliminateDuplicates();
+    const auto statsReduced = prop.getStatistics();
+    TS_ASSERT_EQUALS(statsReduced.minimum, MIN_VALUE);
+    TS_ASSERT_EQUALS(statsReduced.maximum, MAX_VALUE);
+    TS_ASSERT_EQUALS(statsReduced.duration, DURATION);
+    TS_ASSERT_EQUALS(prop.size(), SIZE_REDUCED);
+    TS_ASSERT_EQUALS(prop.valuesAsVector().size(), SIZE_REDUCED);
+
+    // time average mean should be unchanged
+    TS_ASSERT_EQUALS(statsReduced.time_mean, statsOrig.time_mean);
+  }
+
   /*
    * Test getMemorySize()
    * Note that this will be same with new container
