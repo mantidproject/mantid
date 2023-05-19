@@ -51,17 +51,21 @@ void FilterByTime::init() {
   auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(0.0);
   declareProperty(PropertyNames::START_TIME, 0.0, min,
-                  "The start time, in seconds, since the start of the run. "
+                  "The start time since the start of the run. "
+                  "Use an integer value for time in nanoseconds. "
+                  "Use a floating-point value for time in seconds. "
                   "Events before this time are filtered out. \nThe time of the "
-                  "first pulse (i.e. the first entry in the ProtonCharge "
+                  "first pulse (i.e. the first entry in the \"proton_charge\" "
                   "sample log) is used as the zero. " +
                       commonHelp);
 
   declareProperty(PropertyNames::STOP_TIME, 0.0, min,
-                  "The stop time, in seconds, since the start of the run. "
-                  "Events at or after this time are filtered out. \nThe time "
-                  "of the first pulse (i.e. the first entry in the "
-                  "ProtonCharge sample log) is used as the zero. " +
+                  "The stop time since the start of the run. "
+                  "Use an integer value for time in nanoseconds. "
+                  "Use a floating-point value for time in seconds. "
+                  "Events at or after this time are filtered out. \nThe AbsoluteStartTime "
+                  "or the time of the first pulse (i.e. the first entry in the "
+                  "\"proton_charge\" sample log) is used as the zero. " +
                       commonHelp);
 
   auto dateTime = std::make_shared<DateTimeValidator>();
