@@ -164,7 +164,7 @@ class KpointsData(collections.abc.Sequence):
         k_vectors: List[List[float]]
         unit_cell: List[List[float]]
 
-    def to_jsonable_dict(self) -> "KpointsData.JSONableData":
+    def to_dict(self) -> "KpointsData.JSONableData":
         """Get a JSON-compatible representation of the data"""
         return self.JSONableData(
             frequencies=self._frequencies.tolist(),

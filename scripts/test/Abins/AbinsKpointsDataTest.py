@@ -179,7 +179,7 @@ class KpointsDataTest(unittest.TestCase):
 
     def test_json_roundtrip(self):
         ref_data = KpointsData(**self._good_data_2)
-        roundtrip_data = KpointsData.from_dict(ref_data.to_jsonable_dict())
+        roundtrip_data = KpointsData.from_dict(ref_data.to_dict())
 
         assert_allclose(ref_data.unit_cell, roundtrip_data.unit_cell)
 

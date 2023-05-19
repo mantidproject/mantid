@@ -140,7 +140,7 @@ class AtomsData(collections.abc.Sequence):
 
     JSONableData = Dict[str, "AtomsData.JSONableAtomData"]
 
-    def to_jsonable_dict(self) -> "AtomsData.JSONableData":
+    def to_dict(self) -> "AtomsData.JSONableData":
         """Get a JSON-compatible representation of the data"""
         data: "AtomsData.JSONableData"
         data = {

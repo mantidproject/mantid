@@ -152,7 +152,7 @@ class AtomsDataTest(unittest.TestCase):
         with TemporaryDirectory() as td:
             json_file = Path(td) / "atoms.json"
             with open(json_file, "w") as fp:
-                json.dump(atoms_data.to_jsonable_dict(), fp)
+                json.dump(atoms_data.to_dict(), fp)
 
             with open(json_file, "r") as fp:
                 atoms_roundtrip = AtomsData.from_dict(json.load(fp))

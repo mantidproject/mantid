@@ -84,11 +84,11 @@ class AbinsData:
         atoms_data: AtomsData.JSONableData
         k_points_data: KpointsData.JSONableData
 
-    def to_jsonable_dict(self) -> "AbinsData.JSONableData":
+    def to_dict(self) -> "AbinsData.JSONableData":
         """Get a JSON-compatible representation of the data"""
         return self.JSONableData(
-            atoms_data=self.get_atoms_data().to_jsonable_dict(),
-            k_points_data=self.get_kpoints_data().to_jsonable_dict(),
+            atoms_data=self.get_atoms_data().to_dict(),
+            k_points_data=self.get_kpoints_data().to_dict(),
             __abins_class__="AbinsData",
             __mantid_version__=mantid.__version__,
         )

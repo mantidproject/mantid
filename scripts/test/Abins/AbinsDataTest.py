@@ -75,7 +75,7 @@ class TestAbinsDataJSON(unittest.TestCase):
         with TemporaryDirectory() as td:
             tmp_file = Path(td) / "temp.json"
             with open(tmp_file, "w") as fp:
-                json.dump(abins_data.to_jsonable_dict(), fp)
+                json.dump(abins_data.to_dict(), fp)
 
             with open(tmp_file, "r") as fp:
                 roundtrip_data = AbinsData.from_dict(json.load(fp))
