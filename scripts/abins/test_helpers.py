@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
-from typing import Any, Dict
+from typing import Any, Dict, Mapping
 
 import numpy as np
 
@@ -52,7 +52,7 @@ def remove_output_files(list_of_names=None):
                 break
 
 
-def dict_arrays_to_lists(mydict: Dict[str, Any]) -> Dict[str, Any]:
+def dict_arrays_to_lists(mydict: Mapping[str, Any]) -> Dict[str, Any]:
     """Recursively convert numpy arrays in a nested dict to lists (i.e. valid JSON)
 
     Returns a processed *copy* of the input dictionary: in-place values will not be altered."""

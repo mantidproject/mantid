@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
 import numbers
-from typing import Dict, List, Optional, overload, Union
-from typing import TypedDict
+from typing import cast, Dict, List, Optional, overload, Union, TypedDict
 import re
 import numpy as np
 
@@ -140,11 +139,16 @@ class AtomsData(collections.abc.Sequence):
         sort: int
         symbol: str
 
-    def to_jsonable_dict(self) -> Dict[str, "AtomsData.JSONableAtomData"]:
-        return {f"atom_{i}": dict_arrays_to_lists(item) for i, item in enumerate(self._data)}
+    JSONableData = Dict[str, "AtomsData.JSONableAtomData"]
+
+    def to_jsonable_dict(self) -> "AtomsData.JSONableData":
+        """Get a JSON-compatible representation of the data"""
+        data = {f"atom_{i}": cast("AtomsData.JSONableAtomData", dict_arrays_to_lists(item)) for i, item in enumerate(self._data)}
+        return data
 
     @staticmethod
-    def from_dict(data: Dict[str, "AtomsData.JSONableAtomData"]) -> "AtomsData":
+    def from_dict(data: "AtomsData.JSONableData") -> "AtomsData":
+        """Construct from JSON-compatible dictionary"""
         atoms_data = {}  # type: Dict[str, _AtomData]
 
         for atom_key, atom_data in data.items():
