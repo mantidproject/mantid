@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import Any, Dict, Type, TypedDict, TypeVar
 
+import mantid
 from abins.kpointsdata import KpointsData
 from abins.atomsdata import AtomsData
 
@@ -78,13 +79,18 @@ class AbinsData:
     class JSONableData(TypedDict):
         """JSON-friendly representation of AbinsData"""
 
+        __abins__class__: str
+        __mantid_version__: str
         atoms_data: AtomsData.JSONableData
         k_points_data: KpointsData.JSONableData
 
     def to_jsonable_dict(self) -> "AbinsData.JSONableData":
         """Get a JSON-compatible representation of the data"""
         return self.JSONableData(
-            atoms_data=self.get_atoms_data().to_jsonable_dict(), k_points_data=self.get_kpoints_data().to_jsonable_dict()
+            atoms_data=self.get_atoms_data().to_jsonable_dict(),
+            k_points_data=self.get_kpoints_data().to_jsonable_dict(),
+            __abins_class__="AbinsData",
+            __mantid_version__=mantid.__version__,
         )
 
     @classmethod
