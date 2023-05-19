@@ -147,6 +147,11 @@ const Types::Core::DateAndTime LogManager::startTime() const {
     } catch (std::invalid_argument &) { /*Swallow and move on*/
     }
   }
+  try {
+    return getFirstPulseTime();
+  } catch (Exception::NotFoundError &) { /*Swallow and move on*/
+  } catch (std::invalid_argument &) {    /*Swallow and move on*/
+  }
 
   throw std::runtime_error("No valid start time has been set for this run.");
 }
