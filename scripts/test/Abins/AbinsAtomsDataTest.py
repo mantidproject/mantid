@@ -7,11 +7,11 @@
 import json
 import unittest
 import numpy as np
-from numpy.testing import assert_allclose
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from abins import AtomsData
+from abins.test_helpers import assert_atom_almost_equal
 
 
 class AtomsDataTest(unittest.TestCase):
@@ -159,11 +159,7 @@ class AtomsDataTest(unittest.TestCase):
 
         for i, atom_data in enumerate(atoms_data):
             atom_roundtrip = atoms_roundtrip[i]
-
-            self.assertAlmostEqual(atom_data["mass"], atom_roundtrip["mass"])
-            self.assertEqual(atom_data["sort"], atom_roundtrip["sort"])
-            self.assertEqual(atom_data["symbol"], atom_roundtrip["symbol"])
-            assert_allclose(atom_data["coord"], atom_roundtrip["coord"])
+            assert_atom_almost_equal(atom_data, atom_roundtrip, tester=self)
 
 
 if __name__ == "__main__":

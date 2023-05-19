@@ -6,8 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 from typing import Any, Dict, Mapping
+from unittest import TestCase
 
 import numpy as np
+
+from abins.atomsdata import _AtomData
 
 
 # Module with helper functions used to create tests.
@@ -69,3 +72,15 @@ def dict_arrays_to_lists(mydict: Mapping[str, Any]) -> Dict[str, Any]:
         else:
             clean_dict[key] = value
     return clean_dict
+
+
+def assert_atom_almost_equal(ref_atom: _AtomData, atom: _AtomData, tester: TestCase = None) -> None:
+    """Compare two items from AtomsData, raise AssertionError if different"""
+
+    if tester is None:
+        tester = TestCase()
+
+        tester.assertAlmostEqual(ref_atom["mass"], atom["mass"])
+        tester.assertEqual(ref_atom["sort"], atom["sort"])
+        tester.assertEqual(ref_atom["symbol"], atom["symbol"])
+        assert_allclose(ref_atom["coord"], atom["coord"])

@@ -6,13 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
 import numbers
-from typing import cast, Dict, List, Optional, overload, Union, TypedDict
+from typing import Dict, List, Optional, overload, Union, TypedDict
 import re
 import numpy as np
 
 import abins
 from abins.constants import FLOAT_ID, FLOAT_TYPE
-from abins.test_helpers import dict_arrays_to_lists
 
 
 class _AtomData(TypedDict):
@@ -143,7 +142,16 @@ class AtomsData(collections.abc.Sequence):
 
     def to_jsonable_dict(self) -> "AtomsData.JSONableData":
         """Get a JSON-compatible representation of the data"""
-        data = {f"atom_{i}": cast("AtomsData.JSONableAtomData", dict_arrays_to_lists(item)) for i, item in enumerate(self._data)}
+        data: "AtomsData.JSONableData"
+        data = {
+            f"atom_{i}": {
+                "coord": item["coord"].tolist(),
+                "mass": float(item["mass"]),
+                "sort": int(item["sort"]),
+                "symbol": str(item["symbol"]),
+            }
+            for i, item in enumerate(self._data)
+        }
         return data
 
     @staticmethod
