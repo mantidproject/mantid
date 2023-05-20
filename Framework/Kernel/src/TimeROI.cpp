@@ -267,8 +267,7 @@ bool TimeROI::isCompletelyInMask(const Types::Core::DateAndTime &startTime,
  * The value is, essentially, whatever it was at the last recorded time before or equal to the one requested.
  */
 bool TimeROI::valueAtTime(const Types::Core::DateAndTime &time) const {
-  // ignore any time, if ROI is empty
-  if (this->useAll())
+  if (useNone() || empty())
     return ROI_IGNORE;
 
   // ignore a time if it's outside ROI
