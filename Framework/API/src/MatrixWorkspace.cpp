@@ -1291,43 +1291,22 @@ size_t MatrixWorkspace::getMemorySizeForXAxes() const {
 /** Return the time of the first pulse received, by accessing the run's
  * sample logs to find the proton_charge.
  *
- * NOTE, JZ: Pulse times before 1991 (up to 100) are skipped. This is to avoid
- * a DAS bug at SNS around Mar 2011 where the first pulse time is Jan 1, 1990.
- *
  * @return the time of the first pulse
  * @throw Exception::NotFoundError if the log is not found; or if it is empty.
  * @throw invalid_argument if the log is not a double TimeSeriesProperty (should
- *be impossible)
+ * be impossible)
  */
-Types::Core::DateAndTime MatrixWorkspace::getFirstPulseTime() const {
-  TimeSeriesProperty<double> *log = this->run().getTimeSeriesProperty<double>("proton_charge");
-
-  DateAndTime startDate = log->firstTime();
-  DateAndTime reference("1991-01-01T00:00:00");
-
-  int i = 0;
-  // Find the first pulse after 1991
-  while (startDate < reference && i < 100) {
-    i++;
-    startDate = log->nthTime(i);
-  }
-
-  // Return as DateAndTime.
-  return startDate;
-}
+Types::Core::DateAndTime MatrixWorkspace::getFirstPulseTime() const { return this->run().getFirstPulseTime(); }
 
 /** Return the time of the last pulse received, by accessing the run's
  * sample logs to find the proton_charge
  *
- * @return the time of the first pulse
+ * @return the time of the last pulse
  * @throw runtime_error if the log is not found; or if it is empty.
  * @throw invalid_argument if the log is not a double TimeSeriesProperty (should
- *be impossible)
+ * be impossible)
  */
-Types::Core::DateAndTime MatrixWorkspace::getLastPulseTime() const {
-  TimeSeriesProperty<double> *log = this->run().getTimeSeriesProperty<double>("proton_charge");
-  return log->lastTime();
-}
+Types::Core::DateAndTime MatrixWorkspace::getLastPulseTime() const { return this->run().getLastPulseTime(); }
 
 /**
  * Returns the y index which corresponds to the X Value provided

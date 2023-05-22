@@ -887,6 +887,7 @@ public:
 
     // For this test EventWorkspace won't have run start specified
     inpWS->mutableRun().removeProperty("run_start");
+    inpWS->mutableRun().removeProperty("proton_charge");
 
     AnalysisDataService::Instance().addOrReplace("Test14", inpWS);
 
@@ -934,6 +935,7 @@ public:
 
     // For this test EventWorkspace won't have run start specified
     inpWS->mutableRun().removeProperty("run_start");
+    inpWS->mutableRun().removeProperty("proton_charge");
 
     AnalysisDataService::Instance().addOrReplace("Test15", inpWS);
 

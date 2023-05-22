@@ -118,12 +118,13 @@ void LogManager::setStartAndEndTime(const Types::Core::DateAndTime &start, const
   this->addProperty<std::string>(END_TIME_NAME, end.toISO8601String(), true);
 }
 
-/** Return the run start time as given by the 'start_time' or 'run_start'
- * property.
- *  'start_time' is tried first, falling back to 'run_start' if the former isn't
- * found.
+/**
+ * Find run end time as determined by the following priorities:
+ * 1. "start_time" property
+ * 2. "run_start" property
+ * 3. first valid log time in "proton_charge" property
  *  @returns The start time of the run
- *  @throws std::runtime_error if neither property is defined
+ *  @throws std::runtime_error if start time cannot be determined
  */
 const Types::Core::DateAndTime LogManager::startTime() const {
   if (hasProperty(START_TIME_NAME)) {
@@ -147,16 +148,17 @@ const Types::Core::DateAndTime LogManager::startTime() const {
     }
   }
 
-  throw std::runtime_error("No valid start time has been set for this run.");
+  std::string errorMsg{"No valid start time has been set for this run."};
+  if (hasValidProtonChargeLog(errorMsg))
+    return getFirstPulseTime();
+
+  throw std::runtime_error(errorMsg);
 }
 
-/** Return the run end time as given by the 'end_time' or 'run_end' property.
- *  'end_time' is tried first, falling back to 'run_end' if the former isn't
- * found.
- * Find run end time as determined by the following prioritys
- * 1. 'end_time'
- * 2. 'run_end'
- * 3. last log time in 'proton_charge'
+/** Find run end time as determined by the following priorities:
+ * 1. "end_time" property
+ * 2. "run_end" property
+ * 3. last log time in "proton_charge" property
  *  @returns The end time of the run
  *  @throws std::runtime_error if end time cannot be determined
  */
@@ -176,27 +178,98 @@ const Types::Core::DateAndTime LogManager::endTime() const {
     }
   }
 
-  if (hasProperty("proton_charge")) {
-    try {
-      Kernel::TimeSeriesProperty<double> *protonchargelog =
-          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(getProperty("proton_charge"));
-      return DateAndTime(protonchargelog->lastTime());
-    } catch (std::invalid_argument &) { /*Swallow and move on*/
-    }
-  }
+  std::string errorMsg{"No valid end time has been set for this run."};
+  if (hasValidProtonChargeLog(errorMsg))
+    return getLastPulseTime();
 
-  throw std::runtime_error("No valid end time has been set for this run.");
+  throw std::runtime_error(errorMsg);
 }
 
-bool LogManager::hasStartTime() const { return hasProperty(START_TIME_NAME) || hasProperty("run_start"); }
+bool LogManager::hasStartTime() const {
+  std::string temp;
+  return hasProperty(START_TIME_NAME) || hasProperty("run_start") || hasValidProtonChargeLog(temp);
+}
 
-bool LogManager::hasEndTime() const { return hasProperty(END_TIME_NAME) || hasProperty("run_end"); }
+bool LogManager::hasEndTime() const {
+  std::string temp;
+  return hasProperty(END_TIME_NAME) || hasProperty("run_end") || hasValidProtonChargeLog(temp);
+}
+
+/** Return the time of the first pulse received, by accessing the run's
+ * sample logs to find the proton_charge.
+ *
+ * @return the time of the first valid pulse.
+ * @throw runtime_error if the time of the first pulse is not available.
+ */
+const DateAndTime LogManager::getFirstPulseTime() const {
+  TimeSeriesProperty<double> *log =
+      getTimeSeriesProperty<double>("proton_charge"); // guaranteed to be a valid pointer, if the call succeeds
+  if (log->realSize() == 0)
+    throw std::runtime_error("First pulse time is not available. Log \"proton_charge\" is empty.");
+
+  // NOTE, this method has been migrated from MatrixWorkspace class, where it had a comment:
+  // "Pulse times before 1991 (up to 100) are skipped. This is to avoid
+  // a DAS bug at SNS around Mar 2011 where the first pulse time is Jan 1, 1990."
+  // There was no explanation why 100 was picked as the maximum number of times to skip.
+  // In the refactored algorithm below we keep 100 as is.
+  const size_t maxSkip{100};
+  const DateAndTime reference("1991-01-01T00:00:00");
+  const std::vector<DateAndTime> &times = log->timesAsVector();
+  size_t index;
+  const size_t maxIndex = std::min(static_cast<size_t>(log->realSize()), maxSkip);
+  for (index = 0; index < maxIndex; index++) {
+    if (times[index] >= reference)
+      break;
+  }
+
+  return times[index];
+}
+
+/** Return the time of the last pulse received, by accessing the run's
+ * sample logs to find the proton_charge
+ *
+ * @return the time of the last pulse.
+ * @throw runtime_error if the time of the last pulse is not available.
+ */
+const DateAndTime LogManager::getLastPulseTime() const {
+  TimeSeriesProperty<double> *log =
+      getTimeSeriesProperty<double>("proton_charge"); // guaranteed to be a valid pointer, if the call succeeds
+  if (log->realSize() == 0)
+    throw std::runtime_error("Last pulse time is not available. Log \"proton_charge\" is empty.");
+  return log->lastTime();
+}
+
+/** Check if the proton_charge log exists, is of valid type, and is not empty.
+ *
+ * @param error :: extended error message in case the check fails
+ * @return true if a valid proton_charge log exists, false otherwise.
+ */
+bool LogManager::hasValidProtonChargeLog(std::string &error) const {
+  const std::string log_name{"proton_charge"};
+  if (!hasProperty(log_name)) {
+    error += " Log " + log_name + " is not found.";
+    return false;
+  }
+
+  Kernel::Property *prop = getProperty(log_name);
+  TimeSeriesProperty<double> *log;
+  if (!(log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(prop))) {
+    error += " Log " + log_name + " is not a time series of floating-point values.";
+    return false;
+  }
+
+  if (log->realSize() == 0) {
+    error += " Log " + log_name + " is empty.";
+    return false;
+  }
+
+  return true;
+}
 
 //-----------------------------------------------------------------------------------------------
 /**
- * Filter out a run by time range. Takes out any TimeSeriesProperty log entries
- * outside of the given absolute time range [start,stop), except for the entries immediately
- * before and after the time range.
+ * Filter out all TimeSeriesProperty log entries outside of the given absolute time range [start,stop),
+ * except for the entries immediately before and after the time range.
  *
  * @param start :: Absolute start time.
  * @param stop :: Absolute stop time.
@@ -217,8 +290,9 @@ LogManager *LogManager::cloneInTimeROI(const Kernel::TimeROI &timeROI) {
   LogManager *newMgr = new LogManager();
   newMgr->m_manager = std::unique_ptr<PropertyManager>(m_manager->cloneInTimeROI(timeROI));
 
-  // This LogManager object may have filtered some data previously, in which case it would be holding the TimeROI used.
-  // Therefore, the cloned object's TimeROI should be an intersection of the input TimeROI with the one being held.
+  // This LogManager object may have filtered out some data previously, in which case it would be holding the TimeROI
+  // used. Therefore, the cloned object's TimeROI should be an intersection of the input TimeROI with the one being
+  // held.
   TimeROI outputTimeROI(timeROI);
   outputTimeROI.update_or_replace_intersection(*m_timeroi);
   newMgr->m_timeroi = std::make_unique<Kernel::TimeROI>(outputTimeROI);
@@ -273,7 +347,7 @@ void LogManager::filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
  */
 void LogManager::addProperty(std::unique_ptr<Kernel::Property> prop, bool overwrite) {
   // Make an exception for the proton charge
-  // and overwrite it's value as we don't want to store the proton charge in two
+  // and overwrite its value as we don't want to store the proton charge in two
   // separate locations
   // Similar we don't want more than one run_title
   std::string name = prop->name();
@@ -334,13 +408,14 @@ size_t LogManager::getMemorySize() const {
  * valid or the property does not exist
  * @param name The name of a time-series property
  * @return A pointer to the time-series property
+ * @throw invalid_argument if the named property is not a time-series property
  */
 template <typename T> Kernel::TimeSeriesProperty<T> *LogManager::getTimeSeriesProperty(const std::string &name) const {
   Kernel::Property *prop = getProperty(name);
   if (auto *tsp = dynamic_cast<Kernel::TimeSeriesProperty<T> *>(prop)) {
     return tsp;
   } else {
-    throw std::invalid_argument("Run::getTimeSeriesProperty - '" + name + "' is not a TimeSeriesProperty");
+    throw std::invalid_argument("LogManager::getTimeSeriesProperty - '" + name + "' is not a TimeSeriesProperty");
   }
 }
 
