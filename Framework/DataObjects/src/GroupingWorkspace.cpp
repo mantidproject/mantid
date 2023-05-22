@@ -114,15 +114,19 @@ int GroupingWorkspace::getTotalGroups() const {
   return static_cast<int>(groups.size());
 }
 
-std::vector<int> GroupingWorkspace::getGroupSpetraIDs(const int groupID) const {
-  std::vector<int> spectraIDs;
+std::vector<int> GroupingWorkspace::getDetectorIDsOfGroup(const int groupID) const {
+  std::vector<int> detectorIDs;
   for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
-    auto group = this->translateToGroupID(static_cast<int>(this->y(wi).front()));
-    if (group == groupID)
-      spectraIDs.push_back(static_cast<int>(wi) + 1);
+    const auto group = this->translateToGroupID(static_cast<int>(this->y(wi).front()));
+    if (group == groupID) {
+      // if the instrument isn't set no detector ids exist
+      const auto detIDs = this->getDetectorIDs(wi);
+      std::transform(detIDs.cbegin(), detIDs.cend(), std::back_inserter(detectorIDs),
+                     [](const auto &detID) { return static_cast<int>(detID); });
+    }
   }
-  return spectraIDs;
+  return detectorIDs;
 }
 
 } // namespace Mantid::DataObjects

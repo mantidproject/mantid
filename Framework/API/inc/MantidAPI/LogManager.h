@@ -64,6 +64,10 @@ public:
   const Types::Core::DateAndTime startTime() const;
   /// Return the run end time
   const Types::Core::DateAndTime endTime() const;
+  /// Return the first pulse time from sample logs
+  const Types::Core::DateAndTime getFirstPulseTime() const;
+  /// Return the last pulse time from sample logs
+  const Types::Core::DateAndTime getLastPulseTime() const;
   //-------------------------------------------------------------
 
   /// Filter the logs by time
@@ -214,6 +218,8 @@ public:
 protected:
   bool hasStartTime() const;
   bool hasEndTime() const;
+  bool hasValidProtonChargeLog(std::string &error) const;
+
   void loadNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &prefix);
   /// Load the run from a NeXus file with a given group name
   void loadNexus(::NeXus::File *file, const std::map<std::string, std::string> &entries);
