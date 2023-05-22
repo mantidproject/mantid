@@ -635,11 +635,7 @@ void FilterEvents::createOutputWorkspaces() {
   double progress_step_current{0.};                          // current number of progress steps
   const auto originalROI = m_eventWS->run().getTimeROI();
   const bool outputUnfiltered = getProperty("OutputUnfilteredEvents");
-  // make a copy of the mapping to a vector so openmp can be used to parallelize making outputs
-  std::vector<int> targetWorkspaceIndexVec(m_targetWorkspaceIndexSet.cbegin(), m_targetWorkspaceIndexSet.cend());
-  PARALLEL_FOR_NO_WSP_CHECK()
-  for (std::size_t i = 0; i < targetWorkspaceIndexVec.size(); ++i) {
-    const auto wsindex = targetWorkspaceIndexVec[i];
+  for (auto const wsindex : m_targetWorkspaceIndexSet) {
     // Generate new workspace name
     bool add2output = true;
     std::stringstream wsname;
