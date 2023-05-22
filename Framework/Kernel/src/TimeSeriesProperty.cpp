@@ -35,10 +35,12 @@ namespace {
  * @param right_index :: (output) right index boundary
  */
 template <typename TYPE>
-void timeRangeToIndexBounds(std::vector<TimeValueUnit<TYPE>> &elems, const TimeValueUnit<TYPE> range_left,
-                            const TimeValueUnit<TYPE> range_right, size_t &left_index, size_t &right_index) {
-  const auto left_iter = std::lower_bound(elems.cbegin(), elems.cend(), range_left);
-  const auto right_iter = std::upper_bound(left_iter, elems.cend(), range_right);
+void timeRangeToIndexBounds(std::vector<TimeValueUnit<TYPE>> &elems, const DateAndTime &left, const DateAndTime right,
+                            std::size_t &left_index, std::size_t &right_index) {
+  const auto left_iter = std::lower_bound(elems.cbegin() + left_index, elems.cend(), left,
+                                          [](const auto &left, const auto &right) { return left.time() < right; });
+  const auto right_iter = std::upper_bound(left_iter, elems.cend(), right,
+                                           [](const auto &left, const auto &right) { return left < right.time(); });
 
   left_index = std::distance(elems.cbegin(), left_iter);
   right_index = std::distance(elems.cbegin(), right_iter);
@@ -297,19 +299,23 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
     filteredData.emplace_back(m_values[0].time(), m_values[0].value());
     return;
   }
+  // some shortcuts
+  if (timeROI.useAll()) {
+    // copy everything
+    std::copy(m_values.cbegin(), m_values.cend(), std::back_inserter(filteredData));
+    return;
+  } else if (timeROI.useNone()) {
+    // copy the first value only
+    filteredData.emplace_back(m_values[0].time(), m_values[0].value());
+    return;
+  }
 
-  size_t lastIndexCopied{0};
+  std::size_t lastIndexCopied{0};
   for (const auto &splitter : timeROI.toTimeIntervals()) {
-
-    // Since the default comparison operators in the TimeValueUnit class work with the times and ignore the values,
-    // it doesn't matter which value we will use below, so we can just use the first value.
-    TimeValueUnit<TYPE> tvu_start(splitter.start(), m_values[0].value());
-    TimeValueUnit<TYPE> tvu_stop(splitter.stop(), m_values[0].value());
-
     // convert ROI time interval to indexes wrt m_values
-    size_t index_start{0};
-    size_t index_stop{0};
-    timeRangeToIndexBounds(m_values, tvu_start, tvu_stop, index_start, index_stop);
+    std::size_t index_start{lastIndexCopied};
+    std::size_t index_stop{0};
+    timeRangeToIndexBounds(m_values, splitter.start(), splitter.stop(), index_start, index_stop);
 
     // by design, we need to keep the last datapoint before a use region and the first datapoint after a use region, if
     // any of those datapoints are available. Since the index interval for the use region is obtained using
@@ -326,11 +332,21 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
     }
 
     // copy datapoints within the ROI index interval
-    for (size_t index = index_start; index <= index_stop; index++)
-      filteredData.emplace_back(m_values[index].time(), m_values[index].value());
+    if (index_stop + 1 == m_values.size()) {
+      std::copy(m_values.cbegin() + index_start, m_values.cend(), std::back_inserter(filteredData));
+    } else {
+      std::copy(m_values.cbegin() + index_start, m_values.cbegin() + index_stop + 1, std::back_inserter(filteredData));
+    }
 
     lastIndexCopied = index_stop;
   }
+}
+
+template <>
+void TimeSeriesProperty<std::string>::createFilteredData(
+    const TimeROI & /*timeROI*/, std::vector<TimeValueUnit<std::string>> & /* filteredData */) const {
+  throw Exception::NotImplementedError(
+      "TimeSeriesProperty::createFilteredData is not implemented for string properties");
 }
 
 /**
