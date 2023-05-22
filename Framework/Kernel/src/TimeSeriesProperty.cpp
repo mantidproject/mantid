@@ -291,22 +291,21 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
                                                   std::vector<TimeValueUnit<TYPE>> &filteredData) const {
   filteredData.clear();
 
+  // these special cases can skip the complicated logic
   if (m_values.empty()) {
     // nothing to copy
     return;
   } else if (m_values.size() == 1) {
     // copy everything
-    filteredData.emplace_back(m_values[0].time(), m_values[0].value());
+    filteredData.push_back(m_values.front());
     return;
-  }
-  // some shortcuts
-  if (timeROI.useAll()) {
+  } else if (timeROI.useAll()) {
     // copy everything
     std::copy(m_values.cbegin(), m_values.cend(), std::back_inserter(filteredData));
     return;
   } else if (timeROI.useNone()) {
     // copy the first value only
-    filteredData.emplace_back(m_values[0].time(), m_values[0].value());
+    filteredData.push_back(m_values.front());
     return;
   }
 
@@ -340,13 +339,6 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
 
     lastIndexCopied = index_stop;
   }
-}
-
-template <>
-void TimeSeriesProperty<std::string>::createFilteredData(
-    const TimeROI & /*timeROI*/, std::vector<TimeValueUnit<std::string>> & /* filteredData */) const {
-  throw Exception::NotImplementedError(
-      "TimeSeriesProperty::createFilteredData is not implemented for string properties");
 }
 
 /**
