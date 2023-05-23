@@ -1435,15 +1435,14 @@ void TimeSeriesProperty<TYPE>::create(const std::vector<Types::Core::DateAndTime
   const std::size_t num = new_values.size();
   m_values.reserve(num);
 
-  m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
-  // add the 0th value to simplify logic inside of the loop
-  m_values.emplace_back(new_times[0], new_values[0]);
-  for (std::size_t i = 1; i < num; i++) {
+  // set the sorted flag
+  if (std::is_sorted(new_times.cbegin(), new_times.cend()))
+    m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
+  else
+    m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
+  // add the values
+  for (std::size_t i = 0; i < num; i++) {
     m_values.emplace_back(new_times[i], new_values[i]);
-    if (m_propSortedFlag == TimeSeriesSortStatus::TSSORTED && new_times[i - 1] > new_times[i]) {
-      // Status gets to unsorted
-      m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
-    }
   }
 
   // reset the size
