@@ -35,10 +35,12 @@ namespace {
  * @param right_index :: (output) right index boundary
  */
 template <typename TYPE>
-void timeRangeToIndexBounds(std::vector<TimeValueUnit<TYPE>> &elems, const TimeValueUnit<TYPE> range_left,
-                            const TimeValueUnit<TYPE> range_right, size_t &left_index, size_t &right_index) {
-  const auto left_iter = std::lower_bound(elems.cbegin(), elems.cend(), range_left);
-  const auto right_iter = std::upper_bound(elems.cbegin(), elems.cend(), range_right);
+void timeRangeToIndexBounds(std::vector<TimeValueUnit<TYPE>> &elems, const DateAndTime &left, const DateAndTime right,
+                            std::size_t &left_index, std::size_t &right_index) {
+  const auto left_iter = std::lower_bound(elems.cbegin() + left_index, elems.cend(), left,
+                                          [](const auto &left, const auto &right) { return left.time() < right; });
+  const auto right_iter = std::upper_bound(left_iter, elems.cend(), right,
+                                           [](const auto &left, const auto &right) { return left < right.time(); });
 
   left_index = std::distance(elems.cbegin(), left_iter);
   right_index = std::distance(elems.cbegin(), right_iter);
@@ -289,21 +291,30 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
                                                   std::vector<TimeValueUnit<TYPE>> &filteredData) const {
   filteredData.clear();
 
-  if (m_values.empty())
+  // these special cases can skip the complicated logic
+  if (m_values.empty()) {
+    // nothing to copy
     return;
+  } else if (m_values.size() == 1) {
+    // copy everything
+    filteredData.push_back(m_values.front());
+    return;
+  } else if (timeROI.useAll()) {
+    // copy everything
+    std::copy(m_values.cbegin(), m_values.cend(), std::back_inserter(filteredData));
+    return;
+  } else if (timeROI.useNone()) {
+    // copy the first value only
+    filteredData.push_back(m_values.front());
+    return;
+  }
 
-  size_t lastIndexCopied{0};
+  std::size_t lastIndexCopied{0};
   for (const auto &splitter : timeROI.toTimeIntervals()) {
-
-    // Since the default comparison operators in the TimeValueUnit class work with the times and ignore the values,
-    // it doesn't matter which value we will use below, so we can just use the first value.
-    TimeValueUnit<TYPE> tvu_start(splitter.start(), m_values[0].value());
-    TimeValueUnit<TYPE> tvu_stop(splitter.stop(), m_values[0].value());
-
     // convert ROI time interval to indexes wrt m_values
-    size_t index_start{0};
-    size_t index_stop{0};
-    timeRangeToIndexBounds(m_values, tvu_start, tvu_stop, index_start, index_stop);
+    std::size_t index_start{lastIndexCopied};
+    std::size_t index_stop{0};
+    timeRangeToIndexBounds(m_values, splitter.start(), splitter.stop(), index_start, index_stop);
 
     // by design, we need to keep the last datapoint before a use region and the first datapoint after a use region, if
     // any of those datapoints are available. Since the index interval for the use region is obtained using
@@ -320,8 +331,11 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
     }
 
     // copy datapoints within the ROI index interval
-    for (size_t index = index_start; index <= index_stop; index++)
-      filteredData.emplace_back(m_values[index].time(), m_values[index].value());
+    if (index_stop + 1 == m_values.size()) {
+      std::copy(m_values.cbegin() + index_start, m_values.cend(), std::back_inserter(filteredData));
+    } else {
+      std::copy(m_values.cbegin() + index_start, m_values.cbegin() + index_stop + 1, std::back_inserter(filteredData));
+    }
 
     lastIndexCopied = index_stop;
   }
@@ -1371,7 +1385,8 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::clearOutdated() {
 
 //--------------------------------------------------------------------------------------------
 /**
- * Clears and creates a TimeSeriesProperty from these parameters:
+ * Clears and creates a TimeSeriesProperty from the parameters. It is extremely similar to the other TSP::create with
+ * specialized conversion.
  *  @param start_time :: The reference time as a boost::posix_time::ptime value
  *  @param time_sec :: A vector of time offset (from start_time) in seconds.
  *  @param new_values :: A vector of values, each corresponding to the time
@@ -1391,12 +1406,12 @@ void TimeSeriesProperty<TYPE>::create(const Types::Core::DateAndTime &start_time
   // Make the times(as seconds) into a vector of DateAndTime in one go.
   std::vector<DateAndTime> times;
   DateAndTime::createVector(start_time, time_sec, times);
-
   this->create(times, new_values);
 }
 
 //--------------------------------------------------------------------------------------------
-/** Clears and creates a TimeSeriesProperty from these parameters:
+/** Clears and creates a TimeSeriesProperty from the parameters. It is extremely similar to the other TSP::create with
+ *specialized conversion.
  *
  * @param new_times :: A vector of DateAndTime.
  * @param new_values :: A vector of values, each corresponding to the time off
@@ -1411,18 +1426,23 @@ void TimeSeriesProperty<TYPE>::create(const std::vector<Types::Core::DateAndTime
                                 "for the time and values vectors.");
 
   clear();
-  m_values.reserve(new_times.size());
+  // nothing to do without values
+  if (new_times.empty()) {
+    m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
+    return;
+  }
 
-  std::size_t num = new_values.size();
+  const std::size_t num = new_values.size();
+  m_values.reserve(num);
 
-  m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
+  // set the sorted flag
+  if (std::is_sorted(new_times.cbegin(), new_times.cend()))
+    m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
+  else
+    m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
+  // add the values
   for (std::size_t i = 0; i < num; i++) {
-    TimeValueUnit<TYPE> newentry(new_times[i], new_values[i]);
-    m_values.emplace_back(newentry);
-    if (m_propSortedFlag == TimeSeriesSortStatus::TSSORTED && i > 0 && new_times[i - 1] > new_times[i]) {
-      // Status gets to unsorted
-      m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
-    }
+    m_values.emplace_back(new_times[i], new_values[i]);
   }
 
   // reset the size
@@ -1775,39 +1795,26 @@ double TimeSeriesProperty<std::string>::extractStatistic(Math::StatisticType sel
  * If there is any, keep one of them
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
-  // 1. Sort if necessary
+  // ensure that the values are sorted
   sortIfNecessary();
 
-  // 2. Detect and Remove Duplicated
-  size_t numremoved = 0;
+  // cache the original size so the number removed can be reported
+  const auto origSize = this->size();
 
-  typename std::vector<TimeValueUnit<TYPE>>::iterator vit;
-  vit = m_values.begin() + 1;
-  Types::Core::DateAndTime prevtime = m_values.begin()->time();
-  while (vit != m_values.end()) {
-    Types::Core::DateAndTime currtime = vit->time();
-    if (prevtime == currtime) {
-      // Print out warning
-      g_log.debug() << "Entry @ Time = " << prevtime
-                    << "has duplicate time stamp.  Remove entry with Value = " << (vit - 1)->value() << "\n";
-
-      // A duplicated entry!
-      vit = m_values.erase(vit - 1);
-
-      numremoved++;
-    }
-
-    // b) progress
-    prevtime = currtime;
-    ++vit;
-  }
+  // remove the first n-repeats
+  // taken from
+  // https://stackoverflow.com/questions/21060636/using-stdunique-and-vector-erase-to-remove-all-but-last-occurrence-of-duplicat
+  auto it = std::unique(m_values.rbegin(), m_values.rend(),
+                        [](const auto &a, const auto &b) { return a.time() == b.time(); });
+  m_values.erase(m_values.begin(), it.base());
 
   // update m_size
   countSize();
 
-  // 3. Finish
+  // log how many values were removed
+  const auto numremoved = origSize - this->size();
   if (numremoved > 0)
-    g_log.notice() << "Log " << this->name() << " has " << numremoved << " entries removed due to duplicated time. "
+    g_log.notice() << "Log \"" << this->name() << "\" has " << numremoved << " entries removed due to duplicated time. "
                    << "\n";
 }
 
@@ -1841,7 +1848,8 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::sortIfNecessary() const 
   }
 
   if (m_propSortedFlag == TimeSeriesSortStatus::TSUNSORTED) {
-    g_log.information("TimeSeriesProperty is not sorted.  Sorting is operated on it. ");
+    g_log.information() << "TimeSeriesProperty \"" << this->name()
+                        << "\" is not sorted.  Sorting is operated on it. \n";
     std::stable_sort(m_values.begin(), m_values.end());
     m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
   }
