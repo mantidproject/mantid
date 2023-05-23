@@ -32,8 +32,7 @@ Custom git setup for inside the ORNL firewall:
 
 Due to security configuration at ORNL one needs to do additional configuration to access github from within the lab.
 One option is to use the ``https`` protocol listed above
-The alternative is to "corkscrew the snowman" which allows for using the ``git`` protocol by modifying the ssh configuration.
-Corkscrew can be installed from your package manager, or it is a single ``c`` file found on github.
+The alternative is to access github through ssh.github.com.
 Add the following lines to ``~/.ssh/config``:
 
 .. code:: bash
@@ -43,7 +42,7 @@ Add the following lines to ``~/.ssh/config``:
         Port 443
         PreferredAuthentications publickey
 
-If you need further help, ask another developer at the facility how to configure the corkscrew option.
+If you need further help, ask another developer at the facility how to configure ssh.
 
 
 Setting up GitHub
