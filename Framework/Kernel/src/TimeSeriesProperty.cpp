@@ -764,22 +764,25 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<TimeInterva
         duration = DateAndTime::secondsFromDuration(m_values[index].time() - startTime);
         startTime = m_values[index].time();
       }
-      weighted_sum += duration;
       mean_prev = mean_current;
+      if (duration > 0.) {
+        weighted_sum += duration;
 
-      mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
-      s += duration * (value - mean_prev) * (value - mean_current);
-
+        mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
+        s += duration * (value - mean_prev) * (value - mean_current);
+      }
       value = static_cast<double>(m_values[index].value());
     }
 
     // Now close off with the end of the current filter range
     duration = DateAndTime::secondsFromDuration(time.stop() - startTime);
-    weighted_sum += duration;
-    mean_prev = mean_current;
+    if (duration > 0.) {
+      weighted_sum += duration;
+      mean_prev = mean_current;
 
-    mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
-    s += duration * (value - mean_prev) * (value - mean_current);
+      mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
+      s += duration * (value - mean_prev) * (value - mean_current);
+    }
   }
   variance = s / weighted_sum;
   // Normalise by the total time

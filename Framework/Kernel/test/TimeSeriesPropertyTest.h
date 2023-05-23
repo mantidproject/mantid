@@ -19,6 +19,7 @@
 #include <cmath>
 #include <json/value.h>
 #include <memory>
+#include <numeric>
 #include <vector>
 
 using namespace Mantid::Kernel;
@@ -1128,6 +1129,49 @@ public:
     TS_ASSERT(std::isnan(stats.duration));
 
     delete log;
+  }
+
+  void test_EMU00081100() {
+    std::cout << "==============================>\n";
+    // this is taken from a log that was showing incorrect behavior
+    TimeSeriesProperty<double> log("field_danfysik");
+    log.addValue("2018-06-12T23:18:37.000000000", 2289.4013671875);
+    log.addValue("2018-06-12T23:18:37.000000000", 2289.4013671875);
+    log.addValue("2018-06-12T23:19:07.000000000", 2289.456298828125);
+    log.addValue("2018-06-12T23:19:37.000000000", 2289.4013671875);
+    log.addValue("2018-06-12T23:20:07.000000000", 2289.4013671875);
+    log.addValue("2018-06-12T23:20:38.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:21:08.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:21:39.000000000", 2289.4013671875);
+    log.addValue("2018-06-12T23:22:09.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:22:39.000000000", 2289.4013671875);
+    log.addValue("2018-06-12T23:23:10.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:23:40.000000000", 2289.456298828125);
+    log.addValue("2018-06-12T23:24:11.000000000", 2289.456298828125);
+    log.addValue("2018-06-12T23:24:42.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:25:12.000000000", 2289.346435546875);
+    log.addValue("2018-06-12T23:25:43.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:26:13.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:26:43.000000000", 2289.456298828125);
+    log.addValue("2018-06-12T23:27:14.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:27:47.000000000", 2289.456298828125);
+    constexpr std::size_t NUM_VALS{20};
+    TS_ASSERT_EQUALS(log.size(), NUM_VALS);
+
+    // expected value calculated with a parallel implementation in python
+    constexpr double TIME_MEAN_EXP{2289.459125}; // previous was 2289.459295};
+    // the last duration is faked to be the same as the previous one (46-14)
+    constexpr double DURATION_EXP{(27 - 18) * 60. + (47 - 37) + (47 - 14)};
+    const auto &values = log.valuesAsVector();
+    TS_ASSERT_EQUALS(values.size(), NUM_VALS);
+    const double mean = std::accumulate(values.cbegin(), values.cend(), 0.) / double(NUM_VALS);
+
+    // test the statistics against what is expected
+    const auto statistics = log.getStatistics();
+    TS_ASSERT_DELTA(statistics.mean, mean, 1e-5);
+    TS_ASSERT_DELTA(statistics.time_mean, TIME_MEAN_EXP, 1e-5);
+    TS_ASSERT_EQUALS(statistics.duration, DURATION_EXP);
+    TS_ASSERT_DELTA(log.timeAverageValue(), TIME_MEAN_EXP, 1e-5);
   }
 
   void test_PlusEqualsOperator_Incompatible_Types_dontThrow() {
