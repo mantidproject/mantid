@@ -38,9 +38,10 @@ Add the following lines to ``~/.ssh/config``:
 
 .. code:: bash
 
-    ProxyCommand corkscrew snowman.ornl.gov 3128 %h %p
     Host github.com
-
+        Hostname ssh.github.com
+        Port 443
+        PreferredAuthentications publickey
 
 If you need further help, ask another developer at the facility how to configure the corkscrew option.
 
