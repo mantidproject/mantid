@@ -9,8 +9,7 @@
 # conda-doxygen pull_requests-doxygen $WORKSPACE
 #
 # Expected args:
-#   1. JOB_NAME: If the name of the job contains 'pull_requests', the script installs creates and activates
-                 an environment, and installs doxygen.
+#   1. JOB_NAME: If the name of the job contains 'pull_requests', cd into the source code directory.
 #   2. WORKSPACE: path to the workspace/source code that this should run inside, Windows Caveat: Only use / for
 #                 this argument do not use \\ or \ in the path.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -34,9 +33,6 @@ fi
 # Mamba
 setup_mamba $WORKSPACE/mambaforge "" true
 create_and_activate_mantid_developer_env
-
-# Ideally the doxygen dependency should be specified elsewhere
-mamba install -y doxygen=1.8.13
 
 # Run
 $SCRIPT_DIR/doxygen.sh
