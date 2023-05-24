@@ -47,7 +47,7 @@ void IndirectDiffractionReduction::initLayout() {
   m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
   m_plotOptionsPresenter =
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra, "0");
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraUnit, "0");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));

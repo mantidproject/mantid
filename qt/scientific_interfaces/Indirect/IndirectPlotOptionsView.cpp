@@ -97,7 +97,7 @@ void IndirectPlotOptionsView::emitSelectedWorkspaceChanged(QString const &worksp
 }
 
 void IndirectPlotOptionsView::emitSelectedUnitChanged(QString const &unit) {
-  if (unit.toStdString() != "") {
+  if (!unit.isEmpty()) {
     emit selectedUnitChanged(displayStrToUnitId.at(unit.toStdString()));
   }
 }
@@ -153,6 +153,7 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
   m_plotOptions->tbPlot->setVisible(true);
   m_plotOptions->pbPlotSpectra->setVisible(true);
   m_plotOptions->pbPlotSpectra->setText(getAction(availableActions, "Plot Spectra"));
+  m_plotOptions->cbPlotUnit->setVisible(false);
 
   switch (plotType) {
   case PlotWidget::Spectra:
