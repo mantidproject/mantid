@@ -713,13 +713,11 @@ time_duration DateAndTime::durationFromNanoseconds(int64_t dur) {
  */
 void DateAndTime::createVector(const DateAndTime start, const std::vector<double> &seconds,
                                std::vector<DateAndTime> &out) {
-  int64_t startnano = start._nanoseconds;
-  size_t num = seconds.size();
+  const int64_t startnano = start._nanoseconds;
+  const size_t num = seconds.size();
   out.resize(num);
-  size_t i = 0;
-  for (double second : seconds) {
-    out[i]._nanoseconds = startnano + static_cast<int64_t>(second * 1000000000.0);
-    i++;
+  for (std::size_t i = 0; i < num; ++i) {
+    out[i]._nanoseconds = startnano + static_cast<int64_t>(seconds[i] * 1000000000.0);
   }
 }
 

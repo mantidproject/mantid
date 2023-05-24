@@ -1184,6 +1184,8 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
     bool createsplitter = false;
 
     currTime = m_dblLog->nthTime(i);
+    if ((i + 1 < iend) && (currTime == m_dblLog->nthTime(i + 1)))
+      continue; // skip to the next value
     double currValue = m_dblLog->nthValue(i);
 
     // Filter out by time and direction (optional)

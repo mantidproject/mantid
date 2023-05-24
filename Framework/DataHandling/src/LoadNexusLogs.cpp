@@ -862,8 +862,10 @@ void LoadNexusLogs::loadNXLog(::NeXus::File &file, const std::string &absolute_e
   // Just verify that time and value entries exist
   const std::string timeEntry = absolute_entry_name + "/time";
   const std::string valueEntry = absolute_entry_name + "/value";
+  const std::string validatorEntry = absolute_entry_name + "/value_valid";
   bool foundValue = false;
   bool foundTime = false;
+  bool foundValidator = false;
 
   const std::map<std::string, std::set<std::string>> &allEntries = getFileInfo()->getAllEntries();
   // reverse search to take advantage of the fact that these are located in SDS
@@ -875,7 +877,10 @@ void LoadNexusLogs::loadNXLog(::NeXus::File &file, const std::string &absolute_e
     if (entriesSet.count(valueEntry) == 1) {
       foundValue = true;
     }
-    if (foundTime && foundValue) {
+    if (entriesSet.count(validatorEntry) == 1) {
+      foundValidator = true;
+    }
+    if (foundTime && foundValue && foundValidator) {
       break;
     }
   }
@@ -891,12 +896,14 @@ void LoadNexusLogs::loadNXLog(::NeXus::File &file, const std::string &absolute_e
   try {
     if (overwritelogs || !(workspace->run().hasProperty(entry_name))) {
       auto logValue = createTimeSeries(file, entry_name, freqStart, g_log);
-      // Create (possibly) a boolean time series, companion to time series `entry_name`.
-      auto validityLogValue = createTimeSeriesValidityFilter(file, *logValue, g_log);
-      if (validityLogValue) {
-        appendEndTimeLog(validityLogValue.get(), workspace->run());
-        workspace->mutableRun().addProperty(std::move(validityLogValue), overwritelogs);
-        m_logsWithInvalidValues.emplace_back(entry_name);
+      // Create (possibly) a boolean time series, companion to time series `entry_name`
+      if (foundValidator) {
+        auto validityLogValue = createTimeSeriesValidityFilter(file, *logValue, g_log);
+        if (validityLogValue) {
+          appendEndTimeLog(validityLogValue.get(), workspace->run());
+          workspace->mutableRun().addProperty(std::move(validityLogValue), overwritelogs);
+          m_logsWithInvalidValues.emplace_back(entry_name);
+        }
       }
       appendEndTimeLog(logValue.get(), workspace->run());
       workspace->mutableRun().addProperty(std::move(logValue), overwritelogs);
