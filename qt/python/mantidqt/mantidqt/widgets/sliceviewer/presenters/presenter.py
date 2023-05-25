@@ -542,6 +542,12 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
     def action_open_help_window(self):
         InterfaceManager().showHelpPage("qthelp://org.mantidproject/doc/workbench/sliceviewer.html")
 
+    def is_integer_frame(self):
+        if self.get_frame() != SpecialCoordinateSystem.HKL:
+            return (False, False)
+        else:
+            return self.get_sliceinfo().is_xy_q_frame()
+
     def get_extra_image_info_columns(self, xdata, ydata):
         qdims = [i for i, v in enumerate(self.view.data_view.dimensions.qflags) if v]
 

@@ -22,6 +22,7 @@ from qtpy.QtWidgets import (
 )
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot, GridHelperCurveLinear
+from mpl_toolkits.axisartist.grid_finder import ExtremeFinderSimple, MaxNLocator
 
 from mantid.plots import get_normalize_by_bin_width
 from mantid.plots.axesfunctions import _pcolormesh_nonortho as pcolormesh_nonorthogonal
@@ -196,13 +197,33 @@ class SliceViewerDataView(QWidget):
             self.add_line_plots()
 
         self.plot_MDH = self.plot_MDH_orthogonal
+        self.set_integer_axes_ticks()
 
         self.canvas.draw_idle()
+
+    def grid_helper(self, transform):
+        """
+        Grid helper for CurveLinearSubplot
+        """
+        extreme_finder = ExtremeFinderSimple(20, 20)
+        xint, yint = self.presenter.is_integer_frame()
+        grid_locator1, grid_locator2 = None, None
+        if xint:
+            grid_locator1 = MaxNLocator(nbins=10)
+            grid_locator1.set_params(integer=True)
+        if yint:
+            grid_locator2 = MaxNLocator(nbins=10)
+            grid_locator2.set_params(integer=True)
+        grid_helper = GridHelperCurveLinear(
+            (transform.tr, transform.inv_tr), extreme_finder=extreme_finder, grid_locator1=grid_locator1, grid_locator2=grid_locator2
+        )
+        return grid_helper
 
     def create_axes_nonorthogonal(self, transform):
         self.clear_figure()
         self.set_nonorthogonal_transform(transform)
-        self.ax = CurveLinearSubPlot(self.fig, 1, 1, 1, grid_helper=GridHelperCurveLinear((transform.tr, transform.inv_tr)))
+        grid_helper = self.grid_helper(transform)
+        self.ax = CurveLinearSubPlot(self.fig, 1, 1, 1, grid_helper=grid_helper)
         # don't redraw on zoom as the data is rebinned and has to be redrawn again anyway
         self.enable_zoom_on_mouse_scroll(redraw=False)
         self.set_grid_on()
@@ -279,6 +300,7 @@ class SliceViewerDataView(QWidget):
         self._orig_lims = self.get_data_limits_to_fill_current_axes()
 
         self.on_track_cursor_state_change(self.track_cursor_checked())
+        self.set_integer_axes_ticks()
 
         self.draw_plot()
 
@@ -497,6 +519,14 @@ class SliceViewerDataView(QWidget):
         """
         self.ax.set_xlim(xlim)
         self.ax.set_ylim(ylim)
+
+    def set_integer_axes_ticks(self):
+        """
+        Set axis locators at integer positions, if possible
+        """
+        xint, yint = self.presenter.is_integer_frame()
+        self.ax.xaxis.get_major_locator().set_params(integer=xint)
+        self.ax.yaxis.get_major_locator().set_params(integer=yint)
 
     def set_grid_on(self):
         """
