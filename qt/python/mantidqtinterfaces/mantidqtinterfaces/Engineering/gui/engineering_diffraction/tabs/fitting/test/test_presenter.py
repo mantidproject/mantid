@@ -142,11 +142,17 @@ class FittingPresenterTest(unittest.TestCase):
 
     def test_fit_all_started_notified_sequential(self):
         self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers = mock.MagicMock()
+        self.presenter.plot_widget.model.get_plotted_workspaces = mock.MagicMock(return_value=1)
+        self.presenter.plot_widget.view.read_fitprop_from_browser = mock.MagicMock(return_value={"test": "dict"})
+
         self.presenter.plot_widget.do_seq_fit()
         self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers.assert_called_once_with((True))
 
     def test_fit_all_started_notified_serial(self):
         self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers = mock.MagicMock()
+        self.presenter.plot_widget.model.get_plotted_workspaces = mock.MagicMock(return_value=1)
+        self.presenter.plot_widget.view.read_fitprop_from_browser = mock.MagicMock(return_value={"test": "dict"})
+
         self.presenter.plot_widget.do_serial_fit()
         self.presenter.plot_widget.fit_all_started_notifier.notify_subscribers.assert_called_once_with((False))
 
