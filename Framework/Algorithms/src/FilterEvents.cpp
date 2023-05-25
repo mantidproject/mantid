@@ -576,7 +576,7 @@ void FilterEvents::parseInputSplitters() {
  * Sets the TimeROI for each destination workspace
  */
 void FilterEvents::createOutputWorkspaces() {
-  const auto startTime = std::chrono::high_resolution_clock::now();
+  const auto startTimeCreateWS = std::chrono::high_resolution_clock::now();
 
   // There is always NO_TARGET index included in the set, plus we need at least one "valid target" index
   constexpr size_t min_expected_number_of_indexes = 2;
@@ -675,13 +675,6 @@ void FilterEvents::createOutputWorkspaces() {
     // instantiate one of the output filtered workspaces
     std::shared_ptr<EventWorkspace> optws = templateWorkspace->clone();
 
-    // Endow the output workspace with a TimeROI
-    TimeROI roi = this->partialROI(wsindex);
-    roi.update_or_replace_intersection(originalROI);
-
-    // discard log entries outside the ROI
-    optws->mutableRun().copyAndFilterProperties(m_eventWS->run(), roi);
-
     m_outputWorkspacesMap.emplace(wsindex, optws);
 
     //
@@ -744,13 +737,24 @@ void FilterEvents::createOutputWorkspaces() {
     }
 
   } // end of the loop iterating over the elements of m_targetWorkspaceIndexSet
+  addTimer("createOutputWorkspaces", startTimeCreateWS, std::chrono::high_resolution_clock::now());
 
   // drop shared pointer for template
   templateWorkspace.reset();
 
-  setProperty("NumberOutputWS", static_cast<int>(number_of_output_workspaces));
+  // copy the logs over
+  const auto startTimeLogs = std::chrono::high_resolution_clock::now();
+  for (auto &outputIter : m_outputWorkspacesMap) {
+    // Endow the output workspace with a TimeROI
+    TimeROI roi = this->partialROI(outputIter.first);
+    roi.update_or_replace_intersection(originalROI);
 
-  addTimer("createOutputWorkspaces", startTime, std::chrono::high_resolution_clock::now());
+    // discard log entries outside the ROI
+    outputIter.second->mutableRun().copyAndFilterProperties(m_eventWS->run(), roi);
+  }
+  addTimer("copyLogs", startTimeLogs, std::chrono::high_resolution_clock::now());
+
+  setProperty("NumberOutputWS", static_cast<int>(number_of_output_workspaces));
 
   g_log.information("Output workspaces are created. ");
 
