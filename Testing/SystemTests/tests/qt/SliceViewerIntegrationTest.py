@@ -551,7 +551,7 @@ class SliceViewerTestLoadMD(systemtesting.MantidSystemTest, HelperTestingClass):
         shutil.rmtree(test_dir)
 
 
-class SliceViewerTestIntegerXAxes(systemtesting.MantidSystemTest, HelperTestingClass):
+class SliceViewerTestIntegerXAxis(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
 
@@ -578,7 +578,7 @@ class SliceViewerTestIntegerXAxes(systemtesting.MantidSystemTest, HelperTestingC
         pres.view.close()
 
 
-class SliceViewerTestIntegerYAxes(systemtesting.MantidSystemTest, HelperTestingClass):
+class SliceViewerTestIntegerYAxis(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
 
