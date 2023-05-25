@@ -310,7 +310,6 @@ class SliceViewerDataView(QWidget):
             self.ax, ws, self.nonortho_transform.tr, transpose=self.dimensions.transpose, norm=self.colorbar.get_norm(), **kwargs
         )
         self.on_track_cursor_state_change(self.track_cursor_checked())
-        self.set_integer_axes_ticks()
 
         # swapping dimensions in nonorthogonal mode currently resets back to the
         # full data limits as the whole axes has been recreated so we don't have
