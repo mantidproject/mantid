@@ -551,6 +551,60 @@ class SliceViewerTestLoadMD(systemtesting.MantidSystemTest, HelperTestingClass):
         shutil.rmtree(test_dir)
 
 
+class SliceViewerTestIntegerXAxes(systemtesting.MantidSystemTest, HelperTestingClass):
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        ws = CreateMDHistoWorkspace(
+            Dimensionality=4,
+            Extents="-2,2,-2,2,-2,2,-2,2",
+            SignalInput=[1] * 11**4,
+            ErrorInput=[1] * 11**4,
+            NumberOfBins="11,11,11,11",
+            Names="[H,0,0],values,[0,K,0],[0,0,L]",
+            Units="r.l.u.,a.b.u.,r.l.u.,r.l.u.",
+            Frames="HKL,General Frame,HKL,HKL",
+        )
+
+        SetMDFrame("ws", MDFrame="HKL", Axes=[0, 2, 3])
+        AddSampleLog("ws", LogName="sample")
+        ws.getExperimentInfo(0).run().addProperty("W_MATRIX", [1, 0, 0, 0, 1, 0, 0, 0, 1], True)
+
+        pres = SliceViewer(ws)
+        xticklocs = pres.view.data_view.ax.get_xticks()
+        yticklocs = pres.view.data_view.ax.get_yticks()
+        self.assertTrue((xticklocs % 1 == 0).all())
+        self.assertFalse((yticklocs % 1 == 0).all())
+        pres.view.close()
+
+
+class SliceViewerTestIntegerYAxes(systemtesting.MantidSystemTest, HelperTestingClass):
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        ws = CreateMDHistoWorkspace(
+            Dimensionality=4,
+            Extents="-2,2,-2,2,-2,2,-2,2",
+            SignalInput=[1] * 11**4,
+            ErrorInput=[1] * 11**4,
+            NumberOfBins="11,11,11,11",
+            Names="values,[H,0,0],[0,K,0],[0,0,L]",
+            Units="a.b.u.,r.l.u.,r.l.u.,r.l.u.",
+            Frames="General Frame,HKL,HKL,HKL",
+        )
+
+        SetMDFrame("ws", MDFrame="HKL", Axes=[1, 2, 3])
+        AddSampleLog("ws", LogName="sample")
+        ws.getExperimentInfo(0).run().addProperty("W_MATRIX", [1, 0, 0, 0, 1, 0, 0, 0, 1], True)
+
+        pres = SliceViewer(ws)
+        xticklocs = pres.view.data_view.ax.get_xticks()
+        yticklocs = pres.view.data_view.ax.get_yticks()
+        self.assertFalse((xticklocs % 1 == 0).all())
+        self.assertTrue((yticklocs % 1 == 0).all())
+        pres.view.close()
+
+
 # private helper functions
 def toolbar_actions(presenter, text_labels):
     """
