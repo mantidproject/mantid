@@ -97,10 +97,16 @@ class FittingPlotPresenter(object):
         self.view.update_browser(status=status, func_str=function_string, setup_name=ws_name)
 
     def do_serial_fit(self):
-        self.fit_all_started_notifier.notify_subscribers(False)
+        if self.model.get_plotted_workspaces():
+            self.fit_all_started_notifier.notify_subscribers(False)
+        else:
+            logger.warning("No plotted data to fit to")
 
     def do_seq_fit(self):
-        self.fit_all_started_notifier.notify_subscribers(True)
+        if self.model.get_plotted_workspaces():
+            self.fit_all_started_notifier.notify_subscribers(True)
+        else:
+            logger.warning("No plotted data to fit to")
 
     def do_fit_all_async(self, ws_names_list, do_sequential=True):
         previous_fit_browser = self.view.read_fitprop_from_browser()
