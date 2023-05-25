@@ -72,6 +72,7 @@ void IndirectPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, st
   m_view->setIndices(QString::fromStdString(fixedIndices));
   m_model->setFixedIndices(fixedIndices);
 
+  m_plotType = plotType;
   setOptionsEnabled(false);
 }
 
@@ -87,6 +88,7 @@ void IndirectPlotOptionsPresenter::watchADS(bool on) {
 }
 
 void IndirectPlotOptionsPresenter::setPlotType(PlotWidget const &plotType) {
+  m_plotType = plotType;
   m_view->setPlotType(plotType, m_model->availableActions());
 }
 
@@ -141,7 +143,11 @@ void IndirectPlotOptionsPresenter::clearWorkspaces() {
   setOptionsEnabled(false);
 }
 
-void IndirectPlotOptionsPresenter::setUnit(std::string const &unit) { m_model->setUnit(unit); }
+void IndirectPlotOptionsPresenter::setUnit(std::string const &unit) {
+  if (m_plotType == PlotWidget::SpectraUnit || m_plotType == PlotWidget::SpectraContourUnit) {
+    m_model->setUnit(unit);
+  }
+}
 
 void IndirectPlotOptionsPresenter::setIndices() {
   auto const selectedIndices = m_view->selectedIndices().toStdString();
