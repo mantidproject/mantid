@@ -185,10 +185,9 @@ PropertyManager *PropertyManager::cloneInTimeROI(const Kernel::TimeROI &timeROI)
   PropertyManager *newMgr = new PropertyManager();
   newMgr->m_orderedProperties.reserve(m_orderedProperties.size());
   // We need to do a deep copy of the property pointers here
-  for (auto prop : m_orderedProperties) {
-    auto tsp = dynamic_cast<ITimeSeriesProperty *>(prop);
+  for (const auto &prop : m_orderedProperties) {
     std::unique_ptr<Property> newProp;
-    if (tsp)
+    if (const auto tsp = dynamic_cast<const ITimeSeriesProperty *>(prop))
       newProp = std::unique_ptr<Property>(tsp->cloneInTimeROI(timeROI));
     else
       newProp = std::unique_ptr<Property>(prop->clone());
