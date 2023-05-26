@@ -392,9 +392,8 @@ class SPowderSemiEmpiricalCalculator:
             sdata.add_autoconvolution_spectra()
             sdata = sdata.rebin(self._bins)  # Don't need fine bins any more, so reduce cost of remaining steps
 
-            # Compute appropriate q-dependence for each order, along with 1/(n!) term
+            # # Compute appropriate q-dependence for each order, along with 1/(n!) term
             factorials = factorial(range(1, max_dw_order + 1))[order_expansion_slice]
-            factorials[: min_order + 1] = 1.0  # Remove 1/n! for orders that were explicitly calculated
 
             q2_order_corrections = q2 ** np.arange(1, max_dw_order + 1)[order_expansion_slice] / factorials
         else:
@@ -833,6 +832,6 @@ class SPowderSemiEmpiricalCalculator:
                   + np.einsum('kli, kil->k',
                               np.take(b_tensor, indices=indices[:, 1], axis=0),
                               np.take(b_tensor, indices=indices[:, 0], axis=0))
-                  ) / (30.0 * factor)
+                  ) / (15. * factor)
         # fmt: on
         return s
