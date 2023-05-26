@@ -1406,10 +1406,24 @@ void TimeSeriesProperty<TYPE>::create(const Types::Core::DateAndTime &start_time
     throw std::invalid_argument(msg.str());
   }
 
-  // Make the times(as seconds) into a vector of DateAndTime in one go.
-  std::vector<DateAndTime> times;
-  DateAndTime::createVector(start_time, time_sec, times);
-  this->create(times, new_values);
+  clear();
+  const std::size_t num = new_values.size();
+  m_values.reserve(num);
+
+  // set the sorted flag
+  if (std::is_sorted(time_sec.cbegin(), time_sec.cend()))
+    m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
+  else
+    m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
+  // set the values
+  constexpr double SEC_TO_NANO{1000000000.0};
+  const uint64_t start_time_ns = static_cast<uint64_t>(start_time.totalNanoseconds());
+  for (std::size_t i = 0; i < num; i++) {
+    m_values.emplace_back(start_time_ns + static_cast<uint64_t>(time_sec[i] * SEC_TO_NANO), new_values[i]);
+  }
+
+  // reset the size
+  m_size = static_cast<int>(m_values.size());
 }
 
 //--------------------------------------------------------------------------------------------
