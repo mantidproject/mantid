@@ -26,7 +26,7 @@ through numpy to provide matching values.
 
 Note that for simplicity reasons, this algorithm is taking care of the loading and formatting of the ASCII data itself,
 and no separate loader exists for ASCII Lagrange data. Raw data can be checked by not filling any reduction parameter in this
-algorithm. There exist a loader for NeXus Lagrange data: :ref:`LoadILLLagrange`, which allows to inspect the raw data.
+algorithm. There exist a loader for NeXus Lagrange data: LoadILLLagrange, which allows to inspect the raw data.
 
 The reduction can be performed when the input contains only ASCII or only NeXus files, mixing is not supported. The workflow
 will automatically choose which way to load the input data. The reduction with either type of input gives the same result.
