@@ -182,9 +182,8 @@ void ColorbarWidget::setScaleType(int index) {
  */
 void ColorbarWidget::setNthPower(double gamma) {
   if (gamma == 0) {
-    // A power cannot be 0.
+    // A power can not be 0.
     throw std::runtime_error("Power can not be 0");
-    gamma = 1;
   }
   m_ui.powerEdit->setText(QString::number(gamma));
   auto range = clim();
@@ -198,15 +197,7 @@ void ColorbarWidget::setNthPower(double gamma) {
  */
 void ColorbarWidget::scaleMinimumEdited() {
   // The validator ensures the text is a double
-  double value = m_ui.scaleMinEdit->text().toDouble();
-  if (m_ui.normTypeOpt->currentIndex() == 1) {
-    if (value <= 0) {
-      throw std::runtime_error("Minimum cannot be less than zero for logarithmic scale");
-      auto range = clim();
-      value = std::get<0>(range);
-      m_ui.scaleMinEdit->setText(QString::number(value));
-    }
-  }
+  const double value = m_ui.scaleMinEdit->text().toDouble();
   emit minValueEdited(value);
   setClim(value, boost::none);
 }
@@ -216,15 +207,7 @@ void ColorbarWidget::scaleMinimumEdited() {
  */
 void ColorbarWidget::scaleMaximumEdited() {
   // The validator ensures the text is a double
-  double value = m_ui.scaleMaxEdit->text().toDouble();
-  if (m_ui.normTypeOpt->currentIndex() == 1) {
-    if (value <= 0) {
-      throw std::runtime_error("Maximum cannot be less than or equal to zero for logarithmic scale");
-      auto range = clim();
-      value = std::get<1>(range);
-      m_ui.scaleMaxEdit->setText(QString::number(value));
-    }
-  }
+  const double value = m_ui.scaleMaxEdit->text().toDouble();
   emit maxValueEdited(value);
   setClim(boost::none, value);
 }
@@ -254,6 +237,7 @@ void ColorbarWidget::powerExponentEdited() {
     // A power can not be 0.
     throw std::runtime_error("Power cannot be 0");
     gamma = 1;
+    m_ui.powerEdit->setText(QString::number(gamma));
   }
   emit nthPowerChanged(gamma);
 }
@@ -278,7 +262,10 @@ void ColorbarWidget::initLayout() {
   // Set validators on the scale inputs
   m_ui.scaleMinEdit->setValidator(new QDoubleValidator());
   m_ui.scaleMaxEdit->setValidator(new QDoubleValidator());
-  m_ui.powerEdit->setValidator(new QDoubleValidator());
+
+  QRegExp rx("^-?(0\\.\\d*[1-9]|[1-9]\\d*(\\.\\d+)?)$"); // non-zero floats or integers
+  m_ui.powerEdit->setValidator(new QRegExpValidator(rx));
+
   // Setup normalization options
   m_ui.normTypeOpt->addItems(NORM_OPTS);
   scaleTypeSelectionChanged(0);
