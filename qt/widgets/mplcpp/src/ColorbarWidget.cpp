@@ -231,15 +231,8 @@ void ColorbarWidget::scaleTypeSelectionChanged(int index) {
  */
 void ColorbarWidget::powerExponentEdited() {
   setScaleType(3);
-  // power edit has double validator so this should always be valid
-  double gamma = m_ui.powerEdit->text().toDouble();
-  if (gamma == 0) {
-    // A power can not be 0.
-    throw std::runtime_error("Power cannot be 0");
-    gamma = 1;
-    m_ui.powerEdit->setText(QString::number(gamma));
-  }
-  emit nthPowerChanged(gamma);
+  // power edit has regexp validator so this should always be valid
+  emit nthPowerChanged(m_ui.powerEdit->text().toDouble());
 }
 
 // --------------------------- Private methods --------------------------------
