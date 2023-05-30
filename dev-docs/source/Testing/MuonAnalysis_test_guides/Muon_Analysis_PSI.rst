@@ -25,9 +25,7 @@ Loading Data Test
 - The load current run button should be greyed out
 - Load **dolly 1529** using the **Browse** button
 - Set `Rebin` to `Fixed` and enter a value of `5`
-- You will get data that curves upwards
-- In the **Grouping** tab there will be 4 groups defined
-- To see all of the data press the ``select plot data`` button and select all of the rows in the pop-up
+- You will get 4 lines that all curve upwards
 - If you tick the `Plot raw` option the data will change
 
 ------------------------------------

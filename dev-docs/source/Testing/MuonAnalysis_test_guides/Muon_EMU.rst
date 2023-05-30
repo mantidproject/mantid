@@ -14,6 +14,8 @@ This section will show some advance fitting and plotting features of the GUI.
 It would be worth closing the muon GUI and clearing the ADS before doing the second test.
 This is to give a clean state so it is easier to find the correct results table.
 
+To use the **Model Analysis** see the :ref:`Muon_Feature_Flags-ref` documentation.
+
 -------------------------
 
 .. _emu_ionic_diffusion_test:
@@ -42,6 +44,7 @@ Ionic Diffusion Test
 	- Change the log to be **field_danfysik**
 	- Click a row in the table
 	- Click the **Set** drop down menu and choose **Set all to log**
+	- The values should be roughly 0, 5 and 10.5
 	- Do the same but this time choose **Fix all**, then click **Ok**
 	- Click Fit
 - Expected Values are (similar to within 50%):
