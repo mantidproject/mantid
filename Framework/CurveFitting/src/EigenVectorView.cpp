@@ -79,7 +79,6 @@ EigenVector_View::EigenVector_View(const EigenVector_View &v) : m_view({}, 0, dy
 
 // copy constructor
 /// @param v :: EigenVector_View to copy.
-/// @returns a EigenVector_View which is a copy of v.
 EigenVector_View::EigenVector_View(EigenVector_View &v)
     : m_view(v.vector_mutator().data(), v.size(), dynamic_stride(0, 1)), m_isConst(false) {}
 

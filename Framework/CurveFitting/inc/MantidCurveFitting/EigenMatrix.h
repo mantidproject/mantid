@@ -105,8 +105,6 @@ public:
 
   /// Solve system of linear equations M*x == rhs, M is this matrix
   /// This matrix is destroyed.
-  /// @param rhs :: The right-hand-side vector
-  /// @param x :: The solution vector
   void solve(const EigenVector &rhs, EigenVector &x);
   /// Invert this matrix
   void invert();
