@@ -484,7 +484,6 @@ int CSGObject::setObject(const int objName, const std::string &lineStr) {
 /**
  * Returns just the cell string object
  * @param MList :: List of indexable Hulls
- * @return Cell String (from m_topRule)
  * @todo Break infinite recursion
  */
 void CSGObject::convertComplement(const std::map<int, CSGObject> &MList)

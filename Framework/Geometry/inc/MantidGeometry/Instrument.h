@@ -172,7 +172,6 @@ public:
   Types::Core::DateAndTime getValidToDate() const { return m_ValidTo; }
 
   /// Set the date from which the instrument definition begins to be valid.
-  /// @param val :: date
   void setValidFromDate(const Types::Core::DateAndTime &val);
 
   /// Set the date at which the instrument definition is no longer valid.

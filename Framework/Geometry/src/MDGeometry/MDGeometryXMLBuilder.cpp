@@ -79,7 +79,6 @@ MDGeometryBuilderXML<CheckDimensionPolicy>::operator=(const MDGeometryBuilderXML
 /**
  Check that the addition of dimensions conforms to the defined policy.
  @param dimensionToAdd :: The dimension to add to the geometry.
- @return nothing. Throws on failure.
  */
 template <typename CheckDimensionPolicy>
 void MDGeometryBuilderXML<CheckDimensionPolicy>::applyPolicyChecking(const IMDDimension &dimensionToAdd) const {
