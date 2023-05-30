@@ -275,8 +275,6 @@ void SaveOpenGenieAscii::inputValidation() {
  * Attempts to open the file at the user specified path. If this
  * fails an exception is thrown else it returns the handle as a
  * std stream.
- *
- * @return:: The opened file as an file stream
  */
 void SaveOpenGenieAscii::openFileStream(std::ofstream &stream) {
   // Retrieve the filename from the properties

@@ -465,6 +465,7 @@ void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace, const s
  *geometry
  *  @param top_entry_name :: entry name at the top of the NXS file
  *  @param alg :: Handle of the algorithm
+ *  @param descriptor :: The Nexus HDF5 file descriptor
  *  @return true if successful
  */
 template <typename T>
@@ -728,6 +729,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
  *instrument geometry
  *  @param top_entry_name :: entry name at the top of the Nexus file
  *  @param alg :: Handle of the algorithm
+ *  @param descriptor :: The Nexus HDF5 file descriptor
  *  @return true if successful
  */
 template <typename T>
