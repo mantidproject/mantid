@@ -27,11 +27,17 @@ Algorithms
 
 New features
 ############
-.. amalgamate:: Framework/Algorithms/New_features
+- The :ref:`SplineBackground <algm-SplineBackground>` algorithm is now able to fit multiple spectra in a workspace instead of a single one
+- the beta test warning has been removed from the :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` algorithm
+- the performance of the :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` algorithm has been improved on elastic instruments with large numbers of bins
+- added PyCIFRW as a runtime dependency of the mantid conda package so users no longer have to install it themselves to run the :ref:`LoadCIF <algm-LoadCIF>` algorithm
+- `CrossCorrelate` now accepts either a list of spectrum IDs as input, or min and max spectrum IDs
 
 Bugfixes
 ############
-.. amalgamate:: Framework/Algorithms/Bugfixes
+- :ref:`LoadAndMerge <algm-LoadAndMerge>` now cleans up intermediate loaded workspaces if the OutputBehaviour was set to Concatenate these inputs.
+- :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` corrected issue where run end time was being determined incorrectly.
+- :ref:`FilterByTime <algm-FilterByTime>` corrected issue where filter stop time was being determined incorrectly.
 
 
 Beanline
@@ -39,11 +45,11 @@ Beanline
 
 New features
 ############
-.. amalgamate:: Framework/Beamline/New_features
+
 
 Bugfixes
 ########
-.. amalgamate:: Framework/Beamline/Bugfixes
+- Added throw statement in case of index overflow in isMonitor methods
 
 
 Fit Functions
@@ -51,11 +57,13 @@ Fit Functions
 
 New features
 ############
-.. amalgamate:: Framework/Fit_Functions/New_features
+- The Spin parameter in the Meier function is now an attribute
+- The A0 paramter in the Redfield function has been removed
 
 Bugfixes
 ############
-.. amalgamate:: Framework/Fit_Functions/Bugfixes
+- Fixed a bug that meant when the workspace attribute of a function was changed (e.g. resolution or tabulated function) in a GUI the function was not updated.
+This would lead to a crash as Mantid believed that the option was invalid.
 
 
 Data Objects
@@ -63,11 +71,17 @@ Data Objects
 
 New features
 ############
-.. amalgamate:: Framework/Data_Objects/New_features
+- :ref:`LoadISISNexus <algm-LoadISISNexus>` will now load the notes from the ``.nxs`` file as a comment.
+- `EventList` can now be filtered by `TimeROI`
+* added the following getter methods to ``GroupingWorkspace``:
+  * ``getGroupIDs()``
+  * ``getTotalGroups()``
+  * ``getDetectorIDsOfGroup()``
+- :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` will now save ``Groupingworkspace``s.
 
 Bugfixes
 ########
-.. amalgamate:: Framework/Data_Objects/Bugfixes
+
 
 
 Geometry
@@ -75,11 +89,11 @@ Geometry
 
 New features
 ############
-.. amalgamate:: Framework/Geometry/New_features
+- `XMLInstrumentParameter` now includes TimeROI in the calculation of instrument parameters.
 
 Bugfixes
 ############
-.. amalgamate:: Framework/Geometry/Bugfixes
+
 
 
 Python
@@ -87,11 +101,16 @@ Python
 
 New features
 ############
-.. amalgamate:: Framework/Python/New_features
+* Add the ability to take strings to ``ConfigService.setLogLevel()``
+* exposed the following getter methods to ``GroupingWorkspace``:
+  * ``getGroupIDs()``
+  * ``getTotalGroups()``
+  * ``getDetectorIDsOfGroup()``
 
 Bugfixes
 ############
-.. amalgamate:: Framework/Python/Bugfixes
+* Updated the value returned by ``TimeSeriesProperty`` for time average mean and standard deviation. This now accounts for the last point in a log which was previously, in v6.5.0, being ignored.
+- Fixed and refactored the rescale_flux method in both versions of SANSILLReduction algorithms
 
 
 MantidWorkbench
