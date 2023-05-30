@@ -336,8 +336,6 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids, const std
   setCalWSProperty(this, m_workspaceName, wksp);
 }
 
-/// @return true if the grouping information should be taken from the
-/// calibration file
 void LoadDiffCal::loadGroupingFromAlternateFile() {
   bool makeWS = getProperty(PropertyNames::MAKE_GRP);
   if (!makeWS)

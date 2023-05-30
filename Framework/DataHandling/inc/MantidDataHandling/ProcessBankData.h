@@ -41,7 +41,6 @@ public:
    * @param event_weight :: array with weights for events
    * @param min_event_id ;: minimum detector ID to load
    * @param max_event_id :: maximum detector ID to load
-   * @return
    */ // API::IFileLoader<Kernel::NexusDescriptor>
   ProcessBankData(DefaultEventLoader &loader, std::string entry_name, API::Progress *prog,
                   std::shared_ptr<std::vector<uint32_t>> event_id,
