@@ -15,5 +15,5 @@ else
 fi
 
 mkdir -p ../../$platform_dir/env_logs
-conda list --explicit --prefix "$build_prefix" > ../../$platform_dir/env_logs/"${package_name}"_build_environment.txt
-conda list --explicit --prefix "$prefix" > ../../$platform_dir/env_logs/"${package_name}"_host_environment.txt
+conda list --explicit --prefix "$build_prefix" 2>&1 ../../$platform_dir/env_logs/"${package_name}"_build_environment.txt || echo "Failed to write build conda list output to file"
+conda list --explicit --prefix "$prefix" 2>&1 ../../$platform_dir/env_logs/"${package_name}"_host_environment.txt || echo "Failed to write host conda list output to file"
