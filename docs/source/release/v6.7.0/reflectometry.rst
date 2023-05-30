@@ -7,7 +7,7 @@ Reflectometry Changes
 
 New Features
 ------------
-- ``Polarization Efficiencies`` and ``Flood Workspace``s can now be selected using a file path in the GUI.
+- ``Polarization Efficiencies`` and ``Flood Workspaces`` can now be selected using a file path in the GUI.
 - In the Reflectometry GUI experiments for POLREF will have the default parameters ``UseManualScaleFactors=True`` and ``ScaleFactorFromPeriod=1`` in the Output Stitch Properties field of the :ref:`Experiment tab<refl_exp_instrument_settings>`. These can be edited or removed as required.
 - 1D Detectors can now be loaded into and cropped in the preview tab.
 - It is now possible to overwrite or add a new sample log from either :ref:`algm-LoadILLReflectometry`,  :ref:`algm-ReflectometryILLPreProcess` or :ref:`algm-ReflectometryILLAutoProcess`.

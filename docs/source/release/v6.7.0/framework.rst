@@ -76,7 +76,7 @@ New features
   - ``getGroupIDs()``
   - ``getTotalGroups()``
   - ``getDetectorIDsOfGroup()``
-- :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` will now save ``Groupingworkspace``s.
+- :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` will now save ``Groupingworkspaces``.
 
 Bugfixes
 ########
