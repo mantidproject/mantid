@@ -11,12 +11,12 @@ Event Filtering
 During the v6.7 development cycle, there were major changes to the code underlying event filtering that was originally designed `here <https://github.com/mantidproject/mantid/issues/34794>`_.
 The main changes to mantid are as follows:
 
-* A ``TimeROI`` object that contains a list of use and ignore regions in time. The times are ``[inclusive, exclusive)``.
-* When filtering/splitting logs in the ``Run`` object, the logs are copied as is and a new ``TimeROI`` object is set on the ``Run``. Values that are active during a ROI are kept as are one before/after each ROI. The main change is that logs no longer have fake values to mimic the filtering/splitting.
-* Code should change from asking a ``TimeSeriesProperty`` for its statistics to asking the ``Run`` object for the statistics of a log because the ``Run`` is the only place that knows the information about the ``TimeROI``.
-* When filtering/splitting logs, the filters are now ``[inclusive, exclusive)`` where previous behavior was ``[inclusive, inclusive]``. The previous behavior was inconsistent with how events are filtered. This change, fixes issues observed with the integrated proton charge.
-* When workspaces are added, the resulting ``TimeROI`` is the union of the individual ``TimeROI``s. If either workspace had a ``TimeROI`` with ``TimeROI.useAll()==True``, it is assumed to be from that workspace's start-time to end-time.
-* Arithmetic statistics (e.g. simple mean rather than time weighted) will be largely unchanged and are not necesarily correct
+- A ``TimeROI`` object that contains a list of use and ignore regions in time. The times are ``[inclusive, exclusive)``.
+- When filtering/splitting logs in the ``Run`` object, the logs are copied as is and a new ``TimeROI`` object is set on the ``Run``. Values that are active during a ROI are kept as are one before/after each ROI. The main change is that logs no longer have fake values to mimic the filtering/splitting.
+- Code should change from asking a ``TimeSeriesProperty`` for its statistics to asking the ``Run`` object for the statistics of a log because the ``Run`` is the only place that knows the information about the ``TimeROI``.
+- When filtering/splitting logs, the filters are now ``[inclusive, exclusive)`` where previous behavior was ``[inclusive, inclusive]``. The previous behavior was inconsistent with how events are filtered. This change, fixes issues observed with the integrated proton charge.
+- When workspaces are added, the resulting ``TimeROI`` is the union of the individual ``TimeROI``s. If either workspace had a ``TimeROI`` with ``TimeROI.useAll()==True``, it is assumed to be from that workspace's start-time to end-time.
+- Arithmetic statistics (e.g. simple mean rather than time weighted) will be largely unchanged and are not necesarily correct
 
 
 The algorithms modified as part of this are :ref:`FilterByLogValue <algm-FilterByLogValue>`, :ref:`FilterByTime <algm-FilterByTime>`, and :ref:`FilterEvents <algm-FilterEvents>`.
@@ -62,8 +62,7 @@ New features
 
 Bugfixes
 ############
-- Fixed a bug that meant when the workspace attribute of a function was changed (e.g. resolution or tabulated function) in a GUI the function was not updated.
-This would lead to a crash as Mantid believed that the option was invalid.
+- Fixed a bug that meant when the workspace attribute of a function was changed (e.g. resolution or tabulated function) in a GUI the function was not updated. This would lead to a crash as Mantid believed that the option was invalid.
 
 
 Data Objects
@@ -73,10 +72,10 @@ New features
 ############
 - :ref:`LoadISISNexus <algm-LoadISISNexus>` will now load the notes from the ``.nxs`` file as a comment.
 - `EventList` can now be filtered by `TimeROI`
-* added the following getter methods to ``GroupingWorkspace``:
-  * ``getGroupIDs()``
-  * ``getTotalGroups()``
-  * ``getDetectorIDsOfGroup()``
+- added the following getter methods to ``GroupingWorkspace``:
+  - ``getGroupIDs()``
+  - ``getTotalGroups()``
+  - ``getDetectorIDsOfGroup()``
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` will now save ``Groupingworkspace``s.
 
 Bugfixes
@@ -101,15 +100,15 @@ Python
 
 New features
 ############
-* Add the ability to take strings to ``ConfigService.setLogLevel()``
-* exposed the following getter methods to ``GroupingWorkspace``:
-  * ``getGroupIDs()``
-  * ``getTotalGroups()``
-  * ``getDetectorIDsOfGroup()``
+- Add the ability to take strings to ``ConfigService.setLogLevel()``
+- exposed the following getter methods to ``GroupingWorkspace``:
+  - ``getGroupIDs()``
+  - ``getTotalGroups()``
+  - ``getDetectorIDsOfGroup()``
 
 Bugfixes
 ############
-* Updated the value returned by ``TimeSeriesProperty`` for time average mean and standard deviation. This now accounts for the last point in a log which was previously, in v6.5.0, being ignored.
+- Updated the value returned by ``TimeSeriesProperty`` for time average mean and standard deviation. This now accounts for the last point in a log which was previously, in v6.5.0, being ignored.
 - Fixed and refactored the rescale_flux method in both versions of SANSILLReduction algorithms
 
 

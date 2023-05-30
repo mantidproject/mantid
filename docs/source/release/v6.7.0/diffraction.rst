@@ -31,8 +31,7 @@ Engineering Diffraction
 
 New features
 ############
-- The GSASII tab outputs the sample logs attached to the relevant focused data, as specified in the Engineering
-  Diffraction settings. This behaves in the same way as before for the fitting tab.
+- The GSASII tab outputs the sample logs attached to the relevant focused data, as specified in the Engineering Diffraction settings. This behaves in the same way as before for the fitting tab.
 - Check peak-window signal-to-noise ratio before attempting to fit a diffraction peak in :ref:`FitPeaks <algm-FitPeaks>`
 - It is now possible to load and plot multiple phases in the GSASII tab.
 

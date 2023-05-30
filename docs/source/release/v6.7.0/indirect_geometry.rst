@@ -16,8 +16,7 @@ Bugfixes
 --------
 - A bug has been fixed that caused the Elwin tab to not run specific spectra when using the workspace input method
 - Fixed a hard crash caused by attempted loading of empty list of enabled SD detectors of IN16B data in :ref:`LoadILLIndirect <algm-LoadILLIndirect>`.
-- Fixed a bug that meant when the workspace attribute of a function was changed (e.g. resolution or tabulated function) the function was not updated.
-This would lead to a crash as Mantid believed that the option was invalid.
+- Fixed a bug that meant when the workspace attribute of a function was changed (e.g. resolution or tabulated function) the function was not updated. This would lead to a crash as Mantid believed that the option was invalid.
 - Fixed a hard crash caused by highlighting more cells than rows in the data input table and then pressing Remove.
 
 
@@ -31,14 +30,7 @@ New features
 
 Bugfixes
 ############
-- Updated the CRYSTAL parser for Abins to accept files with complex
-  eigenvectors expressed as "ANTI-PHASE". This seems to be the
-  notation used for calculations on a regular q-point mesh, such as
-  when performing Fourier interpolation to obtain a dense DOS.
-- Fixed a bug when loading certain vasprun.xml files in Abins. If the
-  VASP user enables "selective dynamics" and IBRION=6, VASP will
-  ignore the frozen atoms when calculation vibrational
-  frequencies. This created an unexpected number of degrees of
-  freedom.
+- Updated the CRYSTAL parser for Abins to accept files with complex eigenvectors expressed as "ANTI-PHASE". This seems to be the notation used for calculations on a regular q-point mesh, such as when performing Fourier interpolation to obtain a dense DOS.
+- Fixed a bug when loading certain vasprun.xml files in Abins. If the VASP user enables "selective dynamics" and IBRION=6, VASP will ignore the frozen atoms when calculation vibrational frequencies. This created an unexpected number of degrees of freedom.
 
 :ref:`Release 6.7.0 <v6.7.0>`
