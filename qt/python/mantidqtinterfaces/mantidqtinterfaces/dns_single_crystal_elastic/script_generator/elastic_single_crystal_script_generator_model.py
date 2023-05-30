@@ -311,15 +311,15 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
             return not banks_match
 
     def _get_sample_data_omega_binning_array(self, options):
-        min = options["omega_min"]
-        max = options["omega_max"]
+        min = round(options["omega_min"], 1)
+        max = round(options["omega_max"], 1)
         bin_size = options["omega_bin_size"]
         binning_array = np.arange(min, max + bin_size, bin_size)
         return binning_array
 
     def _get_sample_data_two_theta_binning_array(self, options):
-        min = options["two_theta_min"]
-        max = options["two_theta_max"]
+        min = round(options["two_theta_min"], 1)
+        max = round(options["two_theta_max"], 1)
         bin_size = options["two_theta_bin_size"]
         binning_array = np.arange(min, max + bin_size, bin_size)
         return binning_array
