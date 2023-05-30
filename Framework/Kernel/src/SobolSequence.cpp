@@ -25,9 +25,7 @@ SobolSequence::SobolSequence(const unsigned int ndims)
 SobolSequence::~SobolSequence() { deleteCurrentGenerator(); }
 
 /**
- * Returns the next number in the sequence
- * @returns A double giving the next number in the Sobol sequence for the
- * current dimension
+ * Generates the next point in the sequence
  */
 void SobolSequence::generateNextPoint() {
   std::vector<double> &point = getNextPointCache();

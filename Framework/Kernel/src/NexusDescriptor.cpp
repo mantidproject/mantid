@@ -103,6 +103,7 @@ bool NexusDescriptor::isReadable(const std::string &filename, const Version vers
 /**
  * Constructs the wrapper
  * @param filename A string pointing to an existing file
+ * @param init Whether or not to initialize the file
  * @throws std::invalid_argument if the file is not identified to be
  * hierarchical. This currently
  * involves simply checking for the signature if a HDF file at the start of the

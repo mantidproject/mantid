@@ -27,7 +27,6 @@ DiskBuffer::DiskBuffer()
  *
  * @param m_writeBufferSize :: Amount of memory to accumulate in the write
  *buffer before writing.
- * @return
  */
 DiskBuffer::DiskBuffer(uint64_t m_writeBufferSize)
     : m_writeBufferSize(m_writeBufferSize), m_writeBufferUsed(0), m_nObjectsToWrite(0), m_free(),

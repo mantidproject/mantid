@@ -1037,7 +1037,6 @@ void TimeSeriesProperty<TYPE>::addValue(const Types::Core::DateAndTime &time, co
  *  @param time :: The time as a string in the format: (ISO 8601)
  * yyyy-mm-ddThh:mm:ss
  *  @param value :: The associated value
- *  @return True if insertion successful (i.e. identical time not already in map
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::addValue(const std::string &time, const TYPE &value) {
   return addValue(Types::Core::DateAndTime(time), value);
@@ -1047,7 +1046,6 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::addValue(const std::stri
  * Add a value to the map using a time_t
  *  @param time :: The time as a time_t value
  *  @param value :: The associated value
- *  @return True if insertion successful (i.e. identical time not already in map
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::addValue(const std::time_t &time, const TYPE &value) {
   Types::Core::DateAndTime dt;
