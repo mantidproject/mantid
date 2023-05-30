@@ -38,6 +38,7 @@ New features
 Bugfixes
 ############
 - extra validation has been added to the "Path to GSASII" setting so that Workbench no longer crashes if a GSAS refinement is run with an invalid GSASII path in settings
+- Loading or creating a calibration now fills the GSAS II tab with the currently loaded calibration's ``.prm`` file.
 
 
 Single Crystal Diffraction
