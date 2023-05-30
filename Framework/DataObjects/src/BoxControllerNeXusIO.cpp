@@ -96,9 +96,9 @@ void BoxControllerNeXusIO::setDataType(const size_t blockSize, const std::string
  *  and the size of the data type in bytes (e.g. the  class dependent physical
  *meaning of the blockSize and blockPosition used
  *  by save/load operations
- *@return CoordSize -- size (in bytes) of the blockPosition and blockSize used
+ *@param CoordSize -- size (in bytes) of the blockPosition and blockSize used
  *in save/load operations
- *@return typeName  -- the name of the event used in the operations. The name
+ *@param typeName  -- the name of the event used in the operations. The name
  *itself defines the size and the format of the event
  */
 
@@ -530,13 +530,10 @@ template <typename FROM, typename TO> void convertFormats(const std::vector<FROM
   }
 }
 /** Load float  data block from the opened NeXus file.
-  *@param Block         -- the storage vector to place data into
-  *@param blockPosition -- The starting place to read data from
-  *@param nPoints       -- number of data points (events) to read
-
-  *@returns Block -- resized block of data containing serialized events
-  representation.
-*/
+ *@param Block         -- the storage vector to place data into
+ *@param blockPosition -- The starting place to read data from
+ *@param nPoints       -- number of data points (events) to read
+ */
 void BoxControllerNeXusIO::loadBlock(std::vector<float> &Block, const uint64_t blockPosition,
                                      const size_t nPoints) const {
   std::vector<double> tmp;
@@ -553,13 +550,10 @@ void BoxControllerNeXusIO::loadBlock(std::vector<float> &Block, const uint64_t b
   }
 }
 /** Load double  data block from the opened NeXus file.
-  *@param Block         -- the storage vector to place data into
-  *@param blockPosition -- The starting place to read data from
-  *@param nPoints       -- number of data points (events) to read
-
-  *@returns Block -- resized block of data containing serialized events
-  representation.
-*/
+ *@param Block         -- the storage vector to place data into
+ *@param blockPosition -- The starting place to read data from
+ *@param nPoints       -- number of data points (events) to read
+ */
 void BoxControllerNeXusIO::loadBlock(std::vector<double> &Block, const uint64_t blockPosition,
                                      const size_t nPoints) const {
   std::vector<float> tmp;

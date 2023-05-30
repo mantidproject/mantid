@@ -502,8 +502,7 @@ EventList &EventList::operator+=(const EventList &more_events) {
  * @tparam T1, T2 :: TofEvent, WeightedEvent or WeightedEventNoTime
  * @param events :: The event vector being changed.
  * @param more_events :: Another event vector being subtracted from this.
- * @return reference to this
- * */
+ */
 template <class T1, class T2> void EventList::minusHelper(std::vector<T1> &events, const std::vector<T2> &more_events) {
   // Make the end vector big enough in one go (avoids repeated re-allocations).
   events.reserve(events.size() + more_events.size());
@@ -2249,7 +2248,6 @@ double EventList::integrate(const double minX, const double maxX, const bool ent
  *then ignored!
  * @param sum :: place holder for the resulting sum
  * @param error :: place holder for the resulting sum of errors
- * @return the integrated number of events.
  */
 void EventList::integrate(const double minX, const double maxX, const bool entireRange, double &sum,
                           double &error) const {

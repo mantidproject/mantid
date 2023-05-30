@@ -25,7 +25,6 @@ DECLARE_WORKSPACE(GroupingWorkspace)
 /** Constructor, buiding with give dimensions
  * @param numvectors: input size of the vector/histogram number for this
  * workspace
- * @return created GroupingWorkspace
  */
 GroupingWorkspace::GroupingWorkspace(size_t numvectors) { this->init(numvectors, 1, 1); }
 
@@ -33,7 +32,6 @@ GroupingWorkspace::GroupingWorkspace(size_t numvectors) { this->init(numvectors,
 /** Constructor, building from an instrument
  *
  * @param inst :: input instrument that is the base for this workspace
- * @return created GroupingWorkspace
  */
 GroupingWorkspace::GroupingWorkspace(const Geometry::Instrument_const_sptr &inst) : SpecialWorkspace2D(inst) {}
 
