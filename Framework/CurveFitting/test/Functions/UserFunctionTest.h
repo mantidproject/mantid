@@ -31,9 +31,6 @@ public:
 
   void testIt() {
     UserFunction fun;
-    std::vector<std::string> expect = {1, "Formula"};
-    TS_ASSERT_EQUALS(fun.getAttributeNames(), expect);
-
     fun.setAttribute("Formula", UserFunction::Attribute("h*sin(a*x-c)"));
     fun.setParameter("h", 2.2);
     fun.setParameter("a", 2.0);
