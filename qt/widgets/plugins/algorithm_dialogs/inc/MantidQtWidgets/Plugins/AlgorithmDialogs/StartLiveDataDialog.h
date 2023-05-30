@@ -38,7 +38,7 @@ private slots:
   void setDefaultAccumulationMethod(const QString & /*listener*/);
   void updateUiElements(const QString & /*inst*/);
   void accept() override;
-  void initListenerPropLayout();
+  void initListenerPropLayout(const QString &listener);
   void updateConnectionChoices(const QString &inst_name);
   void updateConnectionDetails(const QString &connection);
 
