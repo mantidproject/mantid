@@ -493,9 +493,9 @@ void MuonFitPropertyBrowser::doubleChanged(QtProperty *prop) {
 }
 
 void MuonFitPropertyBrowser::setNormalization() { setNormalization(workspaceName()); }
+
 /**
  * @param name :: the ws name to get normalization for
- * @returns the normalization
  */
 void MuonFitPropertyBrowser::setNormalization(const std::string &name) {
   m_normalizationValue.clear();
