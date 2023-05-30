@@ -101,8 +101,6 @@ void BaseConvertToDiffractionMDWorkspace::init() {
  *in the form acepted by convertToMD
  * @param  ScalingName    -- default coordinate scaling name accepted by
  *convertToMD;
- *
- *@return TargFrameName and ScalingName
  */
 void BaseConvertToDiffractionMDWorkspace::convertFramePropertyNames(const std::string &TargFrame,
                                                                     std::string &TargFrameName,

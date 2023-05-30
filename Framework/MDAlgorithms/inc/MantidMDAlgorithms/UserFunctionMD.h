@@ -39,10 +39,7 @@ public:
   void initDimensions() override;
 
 protected:
-  /**
-   * Calculate the function value at a point r in the MD workspace
-   * @param r :: MD workspace iterator with a reference to the current point
-   */
+  /// Calculate the function value at a point r in the MD workspace
   double functionMD(const API::IMDIterator &r) const override;
   /** Static callback function used by MuParser to initialize variables
   implicitly
