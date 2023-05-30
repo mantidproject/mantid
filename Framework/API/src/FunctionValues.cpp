@@ -127,7 +127,6 @@ FunctionValues &FunctionValues::operator*=(const FunctionValues &values) {
  * @param values :: An instance of FunctionValues to be added to this. The size
  * mustn't exceed the number of
  *   values in this from start to the end.
- * @return A reference to this values.
  */
 void FunctionValues::addToCalculated(size_t start, const FunctionValues &values) {
   if (start + size() < values.size()) {
