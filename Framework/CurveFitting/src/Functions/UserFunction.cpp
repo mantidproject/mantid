@@ -25,7 +25,10 @@ using namespace Kernel;
 using namespace API;
 
 /// Constructor
-UserFunction::UserFunction() : m_parser(new mu::Parser()), m_x(0.), m_x_set(false) { extraOneVarFunctions(*m_parser); }
+UserFunction::UserFunction() : m_parser(new mu::Parser()), m_x(0.), m_x_set(false) {
+  extraOneVarFunctions(*m_parser);
+  declareAttribute("Formula", Attribute(""));
+}
 
 /// Destructor
 UserFunction::~UserFunction() { delete m_parser; }
