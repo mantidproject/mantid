@@ -281,8 +281,6 @@ void CreateSampleWorkspace::exec() {
 /** Add chopper to the existing matrix workspace
 @param ws  -- shared pointer to existing matrix workspace which has instrument
 and chopper
-
-@returns workspace modified to have Fermi chopper added to it.
 */
 void CreateSampleWorkspace::addChopperParameters(API::MatrixWorkspace_sptr &ws) {
 

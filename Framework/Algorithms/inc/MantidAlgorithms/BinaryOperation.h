@@ -127,14 +127,8 @@ protected:
    */
   virtual void performEventBinaryOperation(DataObjects::EventList &lhs, const DataObjects::EventList &rhs);
 
-  /** Carries out the binary operation IN-PLACE on a single EventList,
-   * with another (histogrammed) spectrum as the right-hand operand.
-   *
-   *  @param lhs :: Reference to the EventList that will be modified in place.
-   *  @param rhsX :: Rhs X bin boundaries
-   *  @param rhsY :: Rhs data values
-   *  @param rhsE :: Rhs error values
-   */
+  /// Carries out the binary operation IN-PLACE on a single EventList, with another (histogrammed) spectrum as the
+  /// right-hand operand.
   virtual void performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX, const MantidVec &rhsY,
                                            const MantidVec &rhsE);
 
