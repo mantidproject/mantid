@@ -24,25 +24,33 @@ from qtpy.QtWidgets import (
     QFrame,
     QSpacerItem,
 )
-from qtpy.QtCore import QItemSelectionModel, Qt
+from qtpy.QtCore import QItemSelectionModel, Qt, Signal
+from mantidqt.widgets.observers.observing_view import ObservingView
 from mantidqt.MPLwidgets import FigureCanvas
+from mantid.api import Workspace
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 
-class SampleLogsView(QSplitter):
+class SampleLogsView(QSplitter, ObservingView):
     """Sample Logs View
 
     This contains a table of the logs, a plot of the currently
     selected logs, and the statistics of the selected log.
     """
 
+    close_signal = Signal()
+    rename_signal = Signal(str)
+    replace_signal = Signal(str, Workspace)
+
     def __init__(self, presenter, parent=None, window_flags=Qt.Window, name="", isMD=False, noExp=0):
-        super(SampleLogsView, self).__init__(parent)
+        super().__init__(parent)
 
         self.presenter = presenter
 
         self.setWindowTitle("{} sample logs".format(name))
+        self.TITLE_STRING = "{} sample logs"
+
         self.setWindowFlags(window_flags)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
@@ -137,12 +145,11 @@ class SampleLogsView(QSplitter):
         self.addWidget(self.frame_right)
         self.setStretchFactor(0, 1)
 
+        self.close_signal.connect(self.close)
+        self.rename_signal.connect(self._rename)
+
         self.resize(1200, 800)
         self.show()
-
-    def closeEvent(self, event):
-        self.deleteLater()
-        super(SampleLogsView, self).closeEvent(event)
 
     def tableMenu(self, event):
         """Right click menu for table, can plot or print selected logs"""

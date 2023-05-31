@@ -90,9 +90,14 @@ class SampleLogsModel:
         """Stores three thing:, the workspace, which experiment info number
         to use, and the run object.
         """
+        self.set_ws(ws)
+
+    def set_ws(self, ws):
+        """Set the workspace"""
         self._ws = ws
         self._exp = 0
         self._set_run()
+        self._workspace_name = self.get_name()
 
     def _set_run(self):
         """Set run depending on workspace type and experiment info number"""
@@ -113,6 +118,13 @@ class SampleLogsModel:
     def get_ws(self):
         """Return the workspace"""
         return self._ws
+
+    def set_name(self, workspace_name):
+        """Set the workspace name to compare on ADS changes"""
+        self._workspace_name = workspace_name
+
+    def workspace_equals(self, workspace_name):
+        return workspace_name == self._workspace_name
 
     def get_name(self):
         """Return the workspace name"""
