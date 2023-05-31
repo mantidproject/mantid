@@ -32,7 +32,7 @@ requirements:
     - python {{ python }}
     - versioningit
   run:
-    - ipykernel {{ ipykernel }}
+    - ipykernel
     - psutil
     - {{ pin_compatible("python", max_pin="x.x") }}
     - matplotlib {{ matplotlib }}
