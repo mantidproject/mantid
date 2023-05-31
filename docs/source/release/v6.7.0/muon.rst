@@ -11,7 +11,7 @@ Frequency Domain Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/FDA/Bugfixes
+
 
 
 Muon Analysis
@@ -19,7 +19,7 @@ Muon Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/Muon_Analysis/Bugfixes
+
 
 
 Muon Analysis and Frequency Domain Analysis
@@ -27,7 +27,7 @@ Muon Analysis and Frequency Domain Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/MA_FDA/Bugfixes
+- The comments are no longer empty when loading the newest version of the nxs file.
 
 
 ALC
@@ -35,7 +35,7 @@ ALC
 
 Bugfixes
 ############
-.. amalgamate:: Muon/ALC/Bugfixes
+
 
 
 Elemental Analysis
@@ -43,7 +43,7 @@ Elemental Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/Elemental_Analysis/Bugfixes
+
 
 
 Algorithms
@@ -51,6 +51,7 @@ Algorithms
 
 Bugfixes
 ############
-.. amalgamate:: Muon/Algorithms/Bugfixes
+- The comments are no longer empty when loading the newest version of the nxs file.
+
 
 :ref:`Release 6.7.0 <v6.7.0>`
