@@ -740,5 +740,3 @@ IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_const_sptr>(const
   }
 }
 } // namespace Mantid::Kernel
-
-///\endcond TEMPLATE

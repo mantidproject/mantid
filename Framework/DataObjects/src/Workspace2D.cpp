@@ -380,5 +380,3 @@ IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_const_sptr>(const st
   }
 }
 } // namespace Mantid::Kernel
-
-///\endcond TEMPLATE
