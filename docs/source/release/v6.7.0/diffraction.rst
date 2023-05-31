@@ -10,13 +10,13 @@ Powder Diffraction
 
 New features
 ############
-- For ILL/D2B instrument, only calibrated data are loaded from the nexus file.
-- The ISIS powder diffraction scripts are now able to support per detector Vanadium normalisation. This has been enabled on the POLARIS instrument only so far.
+- For the ILL/D2B instrument, only calibrated data are loaded from the nexus file.
+- The ISIS powder diffraction scripts now support per detector Vanadium normalisation. So far this has only been enabled on the POLARIS instrument.
 - It is now possible to provide more than one detector height range in :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>`.
 - The ``InitialMask`` and ``FinalMask`` properties of :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` have been removed.
 - Improvements to :ref:`PEARL powder <isis-powder-diffraction-pearl-ref>` reduction output file and directory naming; ``.gss`` files and TOF and d-spacing ``.xye`` files are now in separate directories.
-- :ref:`OSIRIS scripts <focus_osiris_isis-powder-diffraction-ref>` now use focus function instead of ``run_diffraction_focusing`` function to perform the focusing.
-- :ref:`create_vanadium <create_vanadium_osiris_isis-powder-diffraction-ref>` function is added to the OSIRIS object which should be called before the focus function to create the vanadium runs.
+- OSIRIS scripts now use a new ``focus`` :ref:`function <focus_osiris_isis-powder-diffraction-ref>` instead of the ``run_diffraction_focusing`` function to perform the focusing. Results should be the same.
+- The :ref:`create_vanadium <create_vanadium_osiris_isis-powder-diffraction-ref>` function has been added to the OSIRIS object which should be called before the ``focus`` function to create the vanadium runs.
 - It is now possible to mask out detectors in the absorption and multiple scattering calculations :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>`, :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>`, and :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>`.
 - Additional, optional, source terms added to the :ref:`EstimateResolutionDiffraction <algm-EstimateResolutionDiffraction>`. For instruments with small detector pixels (e.g. SNAP), the size of the source is the overwhelming contributor to the resolution calculation.
 - :ref:`EstimateResolutionDiffraction <algm-EstimateResolutionDiffraction>` will average the resolution from summed pixels.
@@ -32,7 +32,7 @@ Engineering Diffraction
 New features
 ############
 - The GSASII tab outputs the sample logs attached to the relevant focused data, as specified in the Engineering Diffraction settings. This behaves in the same way as before for the fitting tab.
-- Add check for `peak-window`:`signal-to-noise` ratio before attempting to fit a diffraction peak in :ref:`FitPeaks <algm-FitPeaks>`.
+- Add check for ``peak-window``:``signal-to-noise`` ratio before attempting to fit a diffraction peak in :ref:`FitPeaks <algm-FitPeaks>`.
 - It is now possible to load and plot multiple phases in the GSASII tab.
 
 Bugfixes
