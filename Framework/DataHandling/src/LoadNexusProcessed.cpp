@@ -1737,6 +1737,9 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
   } else if (mtd_entry.containsGroup("mask_workspace")) {
     workspaceType = "MaskWorkspace";
     group_name = "mask_workspace";
+  } else if (mtd_entry.containsGroup("grouping_workspace")) {
+    workspaceType = "GroupingWorkspace";
+    group_name = "grouping_workspace";
   }
 
   // Get workspace characteristics

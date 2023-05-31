@@ -13,6 +13,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -300,6 +301,8 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
         workspaceTypeGroupName = "offsets_workspace";
       else if (maskWorkspace)
         workspaceTypeGroupName = "mask_workspace";
+      else if (std::dynamic_pointer_cast<const GroupingWorkspace>(inputWorkspace))
+        workspaceTypeGroupName = "grouping_workspace";
       else
         workspaceTypeGroupName = "workspace";
 

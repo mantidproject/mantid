@@ -382,6 +382,11 @@ void CompareWorkspaces::doComparison() {
     if ((ews1 && !ews2) || (!ews1 && ews2)) {
       recordMismatch("One workspace is an EventWorkspace and the other is not.");
       return;
+    } else if (w1 && w2 && (w1->id() != w2->id())) {
+      std::stringstream msg;
+      msg << "Workspace ids do not match: \"" << w1->id() << "\" != \"" << w2->id() << "\"";
+      recordMismatch(msg.str());
+      return;
     }
   }
 
