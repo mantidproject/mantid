@@ -67,9 +67,6 @@ hdf5:
 gsl:
   - 2.7
 
-ipykernel:
-  - <6
-
 # 16 causing build errors on osx, seems incompatible with our version of boost.
 libcxx:
   - <16
