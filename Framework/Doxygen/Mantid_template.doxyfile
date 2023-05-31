@@ -283,6 +283,8 @@ MAX_DOT_GRAPH_DEPTH    = 2
 DOT_MULTI_TARGETS      = NO
 GENERATE_LEGEND        = YES
 DOT_CLEANUP            = YES
+# Use mathjax over generating images. It's faster and we don't view the output here.
+USE_MATHJAX            = YES
 #---------------------------------------------------------------------------
 # Configuration::additions related to the search engine
 #---------------------------------------------------------------------------
