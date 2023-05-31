@@ -10,7 +10,7 @@ General
 
 New features
 ############
-- The :ref:`ALFView <ALFView-ref>` interface now executes any algorithms on a background thread to provide a smoother user experience.
+- The :ref:`ALFView <ALFView-ref>` interface now executes all algorithms on a background thread to provide a smoother user experience.
 - The :ref:`ALFView <ALFView-ref>` interface is now disabled when running an algorithm, and re-enabled when it has finished. The title of the ALFView window is changed to indicate why the interface is disabled.
 - A new loader has been added to handle Lagrange NeXus files: LoadILLLagrange.
 - :ref:`LagrangeILLReduction <algm-LagrangeILLReduction>` can now accept NeXus data as input for both sample and container runs.
@@ -22,7 +22,7 @@ Bugfixes
 - The :ref:`ALFView <ALFView-ref>` peak picker tool is now set as activate by default.
 - The settings loaded into the :ref:`ALFView <ALFView-ref>` interface are now separate from those loaded into the InstrumentView.
 - Removing the sample on the :ref:`ALFView <ALFView-ref>` interface will now clear the InstrumentWidget plot.
-- The ``Reset View`` button on the ``Render`` tab of :ref:`ALFView <ALFView-ref>` will no longer prevent the ``Pick`` tab tools from working.
+- The ``Reset View`` button on the Render tab of :ref:`ALFView <ALFView-ref>` will no longer prevent the Pick tab tools from working.
 - :ref:`LagrangeILLReduction <algm-LagrangeILLReduction>` can now process ASCII data even if they contain only one scan step.
 
 
@@ -31,7 +31,7 @@ CrystalField
 
 New features
 ############
-- Allow specifying of the range for the x values in ``getSpectrum`` in the :ref:`Crystal Field Python interface`.
+- ``getSpectrum``, from the :ref:`Crystal Field Python interface`, now allows specification of the range for x values.
 - Added a function to print eigenvectors for a :ref:`CrystalField <Crystal Field Python Interface>` object in human readable form.
 
 Bugfixes
