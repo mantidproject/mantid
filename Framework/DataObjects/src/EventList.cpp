@@ -160,7 +160,7 @@ EventList::EventList(const EventList &rhs) : IEventList(rhs), m_histogram(rhs.m_
 
 /** Constructor, taking a vector of events.
  * @param events :: Vector of TofEvent's */
-EventList::EventList(const std::vector<TofEvent> &events)
+EventList::EventList(const std::vector<Types::Event::TofEvent> &events)
     : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts), eventType(TOF),
       mru(nullptr) {
   this->events.assign(events.cbegin(), events.cend());
@@ -324,7 +324,7 @@ EventList &EventList::operator=(const EventList &rhs) {
  * @param event :: TofEvent to add at the end of the list.
  * @return reference to this
  * */
-EventList &EventList::operator+=(const TofEvent &event) {
+EventList &EventList::operator+=(const Types::Event::TofEvent &event) {
 
   switch (this->eventType) {
   case TOF:
@@ -352,7 +352,7 @@ EventList &EventList::operator+=(const TofEvent &event) {
  * @param more_events :: A vector of events to append.
  * @return reference to this
  * */
-EventList &EventList::operator+=(const std::vector<TofEvent> &more_events) {
+EventList &EventList::operator+=(const std::vector<Types::Event::TofEvent> &more_events) {
   switch (this->eventType) {
   case TOF:
     // Simply push the events
