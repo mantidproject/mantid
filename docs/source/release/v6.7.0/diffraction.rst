@@ -69,7 +69,6 @@ Bugfixes
 - Increased the number of nearest neighbor detector pixels to search for in :ref:`PredictPeaks <algm-PredictPeaks>` that caused some obvious peaks on detector to be missed.
 - Fixed the calculation of direction cosines in :ref:`SaveHKL <algm-SaveHKL>` and :ref:`SaveHKLCW <algm-SaveHKLCW>`
 - Added back in ``Peak`` method ``getDetectorID()`` that was removed in previous release associated with ``LeanElasticPeak``.
-- Added a system test with new test data for :ref:`IntegratePeaksProfileFittinng <algm-IntegratePeaksProfileFitting>` to help resolve a bug related to the ``BivariateGuassian`` module. The test compares to Mantid v6.4.
 - Fixed a bug in estimating TOF window parameters in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`.
 - :ref:`IndexPeaks <algm-IndexPeaks>` now properly accounts for fractional offsets when ``RoundHKLs=True``.
 
