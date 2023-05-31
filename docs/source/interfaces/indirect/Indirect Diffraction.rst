@@ -1,3 +1,5 @@
+.. _interface-indirect-diffraction:
+
 Indirect Diffraction
 ====================
 
