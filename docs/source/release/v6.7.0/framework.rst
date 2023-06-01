@@ -40,7 +40,7 @@ Bugfixes
 - Corrected issue in :ref:`FilterByTime <algm-FilterByTime>` where filter stop time was being determined incorrectly.
 
 
-Beanline
+Beamline
 --------
 
 New features
