@@ -49,7 +49,7 @@ New features
 
 Bugfixes
 ########
-- Added throw statement in case of index overflow in ``isMonitor`` methods to avoid unintentional behaviour.
+- ``isMonitor`` methods will now produce an error if an index overflow occurs, to avoid unintentional behaviour.
 
 
 Fit Functions
