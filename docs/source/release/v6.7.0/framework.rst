@@ -12,7 +12,7 @@ During the v6.7.0 development cycle, there were major changes to the code underl
 The main changes to mantid are as follows:
 
 - A ``TimeROI`` object that contains a list of use and ignore regions in time. The times are ``[inclusive, exclusive)``.
-- When filtering/splitting logs in the ``Run`` object, the logs are copied as is and a new ``TimeROI`` object is set on the ``Run``. Values that are active during a ROI are kept as are ones before/after each ROI. The main change is that logs no longer have fake values to mimic the filtering/splitting.
+- When filtering/splitting logs in the ``Run`` object, the logs are copied as is and a new ``TimeROI`` object is set on the ``Run``. Values that are active during an ROI are kept, as are ones before/after each ROI. The main change is that logs no longer have fake values to mimic the filtering/splitting.
 - Code should change from asking a ``TimeSeriesProperty`` for its statistics to asking the ``Run`` object for the statistics of a log because the ``Run`` is the only place that knows the information about the ``TimeROI``.
 - When filtering/splitting logs, the filters are now ``[inclusive, exclusive)`` where previous behavior was ``[inclusive, inclusive]``. The previous behavior was inconsistent with how events are filtered. This change, fixes issues observed with the integrated proton charge.
 - When workspaces are added, the resulting ``TimeROI`` is the union of the individual ``TimeROI`` objects. If either workspace had a ``TimeROI`` with ``TimeROI.useAll()==True``, it is assumed to be from that workspace's start-time to end-time.
