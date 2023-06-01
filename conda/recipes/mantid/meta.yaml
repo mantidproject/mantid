@@ -48,6 +48,7 @@ requirements:
     - pip
     - openssl
     - versioningit
+    - libglu # [linux]
   run:
     - {{ pin_compatible("boost", max_pin="x.x") }}
     - {{ pin_compatible("gsl", max_pin="x.x") }}
