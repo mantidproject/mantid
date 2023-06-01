@@ -48,6 +48,7 @@ requirements:
     - pip
     - openssl
     - versioningit
+    - libglu  # [linux]
   run:
     - {{ pin_compatible("boost", max_pin="x.x") }}
     - {{ pin_compatible("gsl", max_pin="x.x") }}
@@ -65,6 +66,7 @@ requirements:
     - openssl
     - euphonic=0.6.*
     - toml
+    - libglu  # [linux]
 
 about:
   home: https://github.com/mantidproject/mantid
