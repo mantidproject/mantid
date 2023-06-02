@@ -16,7 +16,7 @@ Bugfixes
 --------
 - A bug has been fixed that caused the :ref:`Elwin <elwin>` tab to not run specific spectra when using the workspace input method.
 - Fixed a hard crash caused by attempting to load an empty list of enabled SD detectors of IN16B data in :ref:`LoadILLIndirect <algm-LoadILLIndirect>`.
-- Fixed a bug that meant when the workspace attribute of a function was changed, (e.g. resolution or tabulated function) the function was not updated. This would lead to a crash as Mantid believed that the option was invalid.
+- Fixed a bug that caused the function to not be updated when the workspace attribute was changed (e.g. resolution or tabulated function). This would lead to a crash as Mantid believed that the option was invalid.
 - Fixed a hard crash caused by highlighting more cells than rows in the data input table and then pressing ``Remove``.
 
 
