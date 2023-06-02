@@ -209,7 +209,6 @@ void IFunction::unfix(size_t i) {
  * @param expr :: A math expression
  * @param isDefault :: Flag to mark as default the value of an object associated
  * with this reference: a tie or a constraint.
- * @return newly ties parameters
  */
 void IFunction::tie(const std::string &parName, const std::string &expr, bool isDefault) {
   auto ti = std::make_unique<ParameterTie>(this, parName, expr, isDefault);

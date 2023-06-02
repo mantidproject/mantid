@@ -57,9 +57,6 @@ void ConvertToDiffractionMDWorkspace3::init() {
  *  @param  Extents  -- the vector of extents consititing of 2 or 6 elements
  *  @param minVal   -- 3-vector of minimal values for 3 processed dimensions
  *  @param maxVal   -- 3-vector of maximal values for 3 processed dimensions
- *
- * @return minVal and maxVal -- two vectors with minimal and maximal values of
- *the momentums in the target workspace.
  */
 void ConvertToDiffractionMDWorkspace3::convertExtents(const std::vector<double> &Extents, std::vector<double> &minVal,
                                                       std::vector<double> &maxVal) {

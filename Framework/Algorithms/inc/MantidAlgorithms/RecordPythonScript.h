@@ -52,10 +52,7 @@ private:
   /// Run the algorithm
   void exec() override;
   const std::string alias() const override;
-  /** Handler of the start notifications. Must be overriden in inherited
-  classes.
-  @param alg :: Shared Pointer to the algorithm sending the notification.
-  */
+  /// Handler of the start notifications. Must be overriden in inherited classes.
   void startingHandle(API::IAlgorithm_sptr alg) override;
   /// buffer for the script
   std::string m_generatedScript;

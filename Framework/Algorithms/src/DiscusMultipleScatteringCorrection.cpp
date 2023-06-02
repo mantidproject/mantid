@@ -822,7 +822,6 @@ DiscusMultipleScatteringCorrection::generateInputKOutputWList(const double efixe
  * Prepare a profile of Q*S(Q) that will later be used to calculate a cumulative probability distribution
  * for use in importance sampling
  * @param qmax The maxmimum q value required based on the data in the InputWorkspace
- * @return A pointer to a histogram containing the Q*S(Q) profile
  */
 void DiscusMultipleScatteringCorrection::prepareQSQ(double qmax) {
   for (auto &SQWSMapping : m_SQWSs) {

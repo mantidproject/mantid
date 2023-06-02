@@ -167,7 +167,6 @@ void Cylinder::setNormVec()
 /**
  Find if the normal vector allows it to be a special
  type of cylinder on the x,y or z axis
- @return 1,2,3 :: corresponding to a x,y,z alignment
  */
 {
   m_normVec = 0;

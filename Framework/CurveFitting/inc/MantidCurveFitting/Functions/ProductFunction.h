@@ -29,9 +29,6 @@ public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "ProductFunction"; }
   /// Function you want to fit to.
-  /// @param domain :: The space on which the function acts
-  /// @param values :: The buffer for writing the calculated values. Must be big
-  /// enough to accept dataSize() values
   void function(const API::FunctionDomain &domain, API::FunctionValues &values) const override;
   /// Calculate the derivatives
   void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;

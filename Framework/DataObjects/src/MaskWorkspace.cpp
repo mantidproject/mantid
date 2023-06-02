@@ -40,7 +40,6 @@ const double ERROR_VALUE = 0.;
 /**
  * Constructor - with a given dimension.
  * @param[in] numvectors Number of vectors/histograms for this workspace.
- * @return MaskWorkspace
  */
 MaskWorkspace::MaskWorkspace(std::size_t numvectors) {
   this->init(numvectors, 1, 1);
@@ -52,7 +51,6 @@ MaskWorkspace::MaskWorkspace(std::size_t numvectors) {
  * @param[in] instrument : Instrument that is the base for this workspace.
  * @param[in] includeMonitors: option for including the monitors at the
  * workspace.
- * @return MaskWorkspace
  */
 MaskWorkspace::MaskWorkspace(const Mantid::Geometry::Instrument_const_sptr &instrument, const bool includeMonitors)
     : SpecialWorkspace2D(instrument, includeMonitors) {
@@ -63,7 +61,6 @@ MaskWorkspace::MaskWorkspace(const Mantid::Geometry::Instrument_const_sptr &inst
  * Constructor - using a MatrixWorkspace.
  * @param[in] parent:  A matrix workspace that is the base for this workspace.
  * It must have an instrument.
- * @return MaskWorkspace
  */
 MaskWorkspace::MaskWorkspace(const API::MatrixWorkspace_const_sptr &parent) : SpecialWorkspace2D(parent) {
   this->clearMask();

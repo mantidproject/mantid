@@ -370,7 +370,6 @@ bool LogManager::hasProperty(const std::string &name) const { return m_manager->
  * Remove a named property
  * @param name :: The name of the property
  * @param delProperty :: If true the property is deleted (default=true)
- * @return True if the property exists, false otherwise
  */
 
 void LogManager::removeProperty(const std::string &name, bool delProperty) {
@@ -614,6 +613,8 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group, bool k
  * @param file :: open NeXus file
  * @param group :: name of the group to open. Pass an empty string to NOT open a
  * group
+ * @param fileInfo :: The corresponding Nexus HDF5 file descriptor
+ * @param prefix :: The prefix of the provided file
  * @param keepOpen :: do not close group on exit to allow overloading and child
  * classes reading from the same group
  * load any NXlog in the current open group.

@@ -793,8 +793,6 @@ std::vector<std::string> ConfigServiceImpl::getKeys(const std::string &keyName) 
 
 /**
  * Recursively gets a list of all config options from a given root node.
- *
- * @return Vector containing all config options
  */
 void ConfigServiceImpl::getKeysRecursive(const std::string &root, std::vector<std::string> &allKeys) const {
   std::vector<std::string> rootKeys = getKeys(root);

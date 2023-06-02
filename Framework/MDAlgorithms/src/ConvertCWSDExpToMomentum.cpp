@@ -132,7 +132,6 @@ void ConvertCWSDExpToMomentum::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Create virtual instrument
- * @return
  */
 void ConvertCWSDExpToMomentum::createVirtualInstrument() {
   // Get detector list from input table workspace

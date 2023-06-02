@@ -148,7 +148,6 @@ template <class T> const T &Parameter::value() {
 
 /** Sets the value of the parameter
  * @tparam T The concrete type
- * @param t :: value of the parameter
  */
 template <class T> void Parameter::set(const T &t) {
   ParameterType<T> *p = dynamic_cast<ParameterType<T> *>(this);

@@ -280,7 +280,6 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector &det, const Kernel::V3D 
 
 /** Method processes accumulated averages and return them in preexistent avrgDet
 class
-@returns avrgDet -- the detector with averaged parameters
  */
 void AvrgDetector::returnAvrgDetPar(DetParameters &avrgDet) {
 

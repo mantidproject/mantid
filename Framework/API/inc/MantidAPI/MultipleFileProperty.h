@@ -39,39 +39,28 @@ namespace API {
       For [runs], users specify lists and ranges of runs using comma, plus,
   minus and colon.  Some examples:
 
-      "TSC0001,0002"       = Runs 1 and 2 of the TOSCA instrument are to be
-  loaded.
-      "0003+0004"          = Runs 3 and 4 of the default instrument are to be
-  loaded and added together.
-      "0005:0009.raw"      = The raw files containing runs 5 to 9 of the default
-  instrument are to be loaded.
-      "c:/data/0010-0014"  = The files in "c:/data/" containing runs 10 to 14 of
-  the default instrument are
-                             to be loaded and added together.
-      "IRS0020:0028:2.nxs" = The nexus files containing runs 20, 22, 24, 26 and
-  28 for IRIS are to be loaded.
-      "INST_0030-0038:3"   = Runs 30, 33, and 36 of INST are to be loaded and
-  added together.
+      - "TSC0001,0002"       = Runs 1 and 2 of the TOSCA instrument are to be loaded.
+      - "0003+0004"          = Runs 3 and 4 of the default instrument are to be loaded and added together.
+      - "0005:0009.raw"      = The raw files containing runs 5 to 9 of the default instrument are to be loaded.
+      - "c:/data/0010-0014"  = The files in "c:/data/" containing runs 10 to 14 of the default instrument are
+                               to be loaded and added together.
+      - "IRS0020:0028:2.nxs" = The nexus files containing runs 20, 22, 24, 26 and 28 for IRIS are to be loaded.
+      - "INST_0030-0038:3"   = Runs 30, 33, and 36 of INST are to be loaded and added together.
 
   ------------------------------------------------------------------------------------------------------
   [B] Long Form
 
-      These strings are of the format "[[short_form][operator]]...[short_form]"
-  where:
+      These strings are of the format "[[short_form][operator]]...[short_form]" where:
 
-      [short_form] = [dir][inst][under][runs][ext], which is the "Short Form"
-  outlined above.
+      [short_form] = [dir][inst][under][runs][ext], which is the "Short Form" outlined above.
       [operator]   = Either a comma or a plus.
 
       Some examples:
 
-      "TSC0001,TSC0002+0003"        = Runs 1, 2 and 3 of the TOSCA instrument
-  should be loaded, but 2 and 3
-                                      are added together.
-      "TSC0005+TSC0006,TSC0007.raw" = Runs 5 and 6 as well as the raw file
-  containing run 7 of the TOSCA
-                                      instrument should be loaded, but 5 and 6
-  are added together.
+      - "TSC0001,TSC0002+0003"        = Runs 1, 2 and 3 of the TOSCA instrument should be loaded, but 2 and 3
+                                        are added together.
+      - "TSC0005+TSC0006,TSC0007.raw" = Runs 5 and 6 as well as the raw file containing run 7 of the TOSCA
+                                        instrument should be loaded, but 5 and 6 are added together.
 
   ------------------------------------------------------------------------------------------------------
   NOTES:

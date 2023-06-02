@@ -33,8 +33,6 @@ Mantid::Kernel::Logger g_log("PeaksWorkspace");
 
 //---------------------------------------------------------------------------------------------
 /** Constructor. Create a table with all the required columns.
- *
- * @return PeaksWorkspace object
  */
 PeaksWorkspace::PeaksWorkspace() : IPeaksWorkspace(), m_peaks(), m_columns(), m_columnNames(), m_coordSystem(None) {
   initColumns();

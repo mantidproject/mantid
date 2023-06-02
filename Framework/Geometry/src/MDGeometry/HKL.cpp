@@ -40,7 +40,6 @@ HKL::HKL(Kernel::MDUnit *unit) : m_unit(unit) { checkUnitCompatibility(unit); }
 /**
  * Assignment
  * @param other : Other unit
- * @return assigned unit.
  */
 HKL::HKL(const HKL &other) : m_unit(other.getMDUnit().clone()) {}
 

@@ -65,12 +65,9 @@ void BoxControllerDummyIO::setDataType(const size_t blockSize, const std::string
  *  and the size of the data type in bytes (e.g. the  class dependant physical
  *meaning of the blockSize and blockPosition used
  *  by save/load operations
- *@return CoordSize -- size (in bytes) of the blockPosition and blockSize used
- *in save/load operations
- *@return typeName  -- the name of the event used in the operations. The name
- *itself defines the size and the format of the event
+ * @param CoordSize -- size (in bytes) of the blockPosition and blockSize used in save/load operations
+ * @param typeName -- The box controller type name
  */
-
 void BoxControllerDummyIO::getDataType(size_t &CoordSize, std::string &typeName) const {
   CoordSize = m_CoordSize;
   typeName = m_TypeName;

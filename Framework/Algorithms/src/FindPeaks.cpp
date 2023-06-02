@@ -1285,7 +1285,6 @@ void FindPeaks::estimatePeakRange(const HistogramX &vecX, size_t i_centre, size_
  * @param peakfunction :: peak function
  * @param bkgdfunction :: background function
  * @param isoutputraw :: flag to output raw function parameters
- * @param mincost Chi2 value for this set of parameters
  * @param mincost :: minimum/best cost function value
  */
 void FindPeaks::addInfoRow(const size_t spectrum, const API::IPeakFunction_const_sptr &peakfunction,

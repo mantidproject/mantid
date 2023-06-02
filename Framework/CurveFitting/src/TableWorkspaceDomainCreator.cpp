@@ -393,8 +393,6 @@ void TableWorkspaceDomainCreator::appendCompositeFunctionMembers(std::list<API::
  *   and members of the model.
  * @param function A Convolution function which model may or may not be a
  * composite function.
- * @return True if all conditions are fulfilled and it is possible to produce
- * the output.
  */
 void TableWorkspaceDomainCreator::appendConvolvedCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList,
                                                                           const API::IFunction_sptr &function) const {
@@ -692,8 +690,6 @@ void TableWorkspaceDomainCreator::setParameters() const {
  * there will only be 2 entries in the vector. Gets the name from arguments if
  * specified otherwise it check if any columns have been set as plot type X, Y
  * or Yerror. If none found it will return an error
- * @returns :: a vector containing the X and Y column names and the error column
- * if it has been set
  * @throws std::invalid_argument if no X or Y value can be found or are of the
  * wrong type.
  */

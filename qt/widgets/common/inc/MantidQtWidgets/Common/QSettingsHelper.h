@@ -69,8 +69,6 @@ template <typename T> std::map<std::string, T> getSettingsAsMap(std::string cons
  * @param settingGroup The name of the setting group
  * @param settingName The name of the setting
  * @param value The value of the named setting
- * @return void
- *
  */
 template <typename T> void setSetting(std::string const &settingGroup, std::string const &settingName, T const &value) {
   QSettings settings;

@@ -397,8 +397,6 @@ void SaveGSS::generateGSASBuffer(size_t numOutFiles, size_t numOutSpectra) {
  *
  * @param out :: The stringstream to write the header to
  * @param l1 :: Value for the moderator to sample distance
- * @return :: A string stream containing the bank header details to be
- * written to the start of the file
  */
 void SaveGSS::generateInstrumentHeader(std::stringstream &out, double l1) const {
 

@@ -29,7 +29,6 @@ namespace Mantid::DataObjects {
  * @param outD :: # of output dimensions
  * @param eigenvects :: eigenvectors of an ellipsoid (if used)
  * @param eigenvals :: variances along each eigenvector (if used)
- * @return
  */
 CoordTransformDistance::CoordTransformDistance(const size_t inD, const coord_t *center, const bool *dimensionsUsed,
                                                const size_t outD, const std::vector<Kernel::V3D> &eigenvects,

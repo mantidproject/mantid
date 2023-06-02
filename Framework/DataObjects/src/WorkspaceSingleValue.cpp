@@ -103,5 +103,3 @@ IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_const_sptr>
 }
 
 } // namespace Mantid::Kernel
-
-///\endcond TEMPLATE

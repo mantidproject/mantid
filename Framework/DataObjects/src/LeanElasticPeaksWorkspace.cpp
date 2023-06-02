@@ -31,8 +31,6 @@ DECLARE_WORKSPACE(LeanElasticPeaksWorkspace)
 
 //---------------------------------------------------------------------------------------------
 /** Constructor. Create a table with all the required columns.
- *
- * @return LeanElasticPeaksWorkspace object
  */
 LeanElasticPeaksWorkspace::LeanElasticPeaksWorkspace()
     : IPeaksWorkspace(), m_peaks(), m_columns(), m_columnNames(), m_coordSystem(None) {

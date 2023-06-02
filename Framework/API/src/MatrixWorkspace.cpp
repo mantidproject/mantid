@@ -991,7 +991,6 @@ bool MatrixWorkspace::isDistribution() const {
 }
 
 /** Set the flag for whether the Y-values are dimensioned
- *  @return whether workspace is now a distribution
  */
 void MatrixWorkspace::setDistribution(bool newValue) {
   if (isDistribution() == newValue)

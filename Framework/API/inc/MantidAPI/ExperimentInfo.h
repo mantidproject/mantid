@@ -137,14 +137,8 @@ public:
   /// found there
   void loadInstrumentParametersNexus(::NeXus::File *file, std::string &parameterStr);
 
-  /**
-   * @brief Load the sample and log info from an open NeXus file. Overload that uses NexusHDF5Descriptor for faster
-   * metadata lookup
-   *
-   * @param file currently opened NeXus file
-   * @param fileInfo descriptor with in-memory index with all entries
-   * @param prefix indicates current group location in file (absolute name)
-   */
+  /// Load the sample and log info from an open NeXus file. Overload that uses NexusHDF5Descriptor for faster metadata
+  /// lookup
   void loadSampleAndLogInfoNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
                                  const std::string &prefix);
   /// Load the sample and log info from an open NeXus file.

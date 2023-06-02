@@ -29,7 +29,6 @@ DECLARE_WORKSPACE(SpecialWorkspace2D)
  *
  * @param inst :: input instrument that is the base for this workspace
  * @param includeMonitors :: If false the monitors are not included
- * @return created SpecialWorkspace2D
  */
 SpecialWorkspace2D::SpecialWorkspace2D(const Geometry::Instrument_const_sptr &inst, const bool includeMonitors) {
   // Init the Workspace2D with one spectrum per detector, in the same order.
@@ -55,7 +54,6 @@ SpecialWorkspace2D::SpecialWorkspace2D(const Geometry::Instrument_const_sptr &in
 /** Constructor, building from a MatrixWorkspace
  *
  * @param parent :: input workspace that is the base for this workspace
- * @return created SpecialWorkspace2D
  */
 SpecialWorkspace2D::SpecialWorkspace2D(const API::MatrixWorkspace_const_sptr &parent) {
   this->initialize(parent->getNumberHistograms(), 1, 1);

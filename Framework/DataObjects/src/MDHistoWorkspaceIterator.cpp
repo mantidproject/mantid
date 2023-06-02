@@ -70,15 +70,6 @@ Mantid::coord_t getDExact(Mantid::coord_t location, Mantid::coord_t origin, Mant
 namespace Mantid::DataObjects {
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- *
- * @param workspace :: MDHistoWorkspace_sptr being iterated
- * @param function :: The implicit function to use. Becomes owned by this
- *object.
- * @return
- */
-
-//----------------------------------------------------------------------------------------------
 /**
  * Constructor
  * @param workspace :: MDHistoWorkspace_sptr being iterated
@@ -135,7 +126,6 @@ MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace_const_
  * @param skippingPolicy :: The skipping policy to use
  * @param beginPos :: Start position
  * @param endPos :: End position
- * @return
  */
 MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(const MDHistoWorkspace *workspace, SkippingPolicy *skippingPolicy,
                                                    Mantid::Geometry::MDImplicitFunction *function, size_t beginPos,

@@ -96,6 +96,18 @@
       }
     },
     {
+      "name": "doxygen-ci",
+      "description": "Build options for Doxygen CI build",
+      "inherits": [
+        "ci-default",
+        "conda"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "USE_DOT": "FALSE"
+      }
+    },
+    {
       "name": "osx",
       "description": "Default build options for a developer OSX build",
       "inherits": [

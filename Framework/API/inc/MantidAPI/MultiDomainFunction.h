@@ -33,9 +33,6 @@ public:
   /// Returns the function's name
   std::string name() const override { return "MultiDomainFunction"; }
   /// Function you want to fit to.
-  /// @param domain :: The input domain over which the function is to be
-  /// calculated
-  /// @param values :: A storage object for the calculated values
   void function(const FunctionDomain &domain, FunctionValues &values) const override;
   /// Derivatives of function with respect to active parameters
   void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;
