@@ -6,10 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/GenerateGroupingPowder.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -22,6 +25,7 @@
 #include <Poco/File.h>
 #include <Poco/SAX/InputSource.h>
 #include <cxxtest/TestSuite.h>
+#include <exception>
 #include <fstream>
 
 using namespace Mantid;
@@ -47,10 +51,10 @@ public:
     m_emptyInstrument = lei.getProperty("OutputWorkspace");
   }
 
-  void test_Init() {
+  void test_init() {
     GenerateGroupingPowder alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
   }
 
   void test_exec() {
@@ -59,9 +63,10 @@ public:
     const std::string xmlFile("PowderGrouping.xml");
     constexpr double step = 10;
 
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_emptyInstrument));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileFormat", "xml"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFile));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -82,7 +87,7 @@ public:
       pf >> r >> th >> phi >> dx >> dy >> detID;
       TS_ASSERT_DELTA(r, 3.5, 0.2);
       TS_ASSERT_DELTA(th, step * (static_cast<double>(i) + 0.5), 0.5 * step);
-      TS_ASSERT_EQUALS(phi, 0);
+      TS_ASSERT_EQUALS(phi, 0.00);
       TS_ASSERT_DELTA(dx, r * step * Geometry::deg2rad, 0.01);
       TS_ASSERT_EQUALS(dy, 0.01);
       tth = detectorInfo.twoTheta(detectorInfo.indexOf(detID)) * Geometry::rad2deg;
@@ -165,6 +170,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
+
     Poco::File xmlFile{xmlFilename};
     const bool xmlExists = xmlFile.exists();
     TS_ASSERT(xmlExists)
@@ -191,6 +197,66 @@ public:
     }
   }
 
+  // save as nexus, reload, and compare
+  void test_save_nexus_processed() {
+
+    GenerateGroupingPowder alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+
+    const std::string nxsFile("PowderGrouping.nxs");
+    constexpr double step = 10;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_emptyInstrument));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileFormat", "nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", nxsFile));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    GroupingWorkspace_sptr gws = alg.getProperty("GroupingWorkspace");
+    TS_ASSERT(gws);
+
+    LoadNexusProcessed load;
+    TS_ASSERT_THROWS_NOTHING(load.initialize());
+    TS_ASSERT(load.isInitialized());
+    load.setPropertyValue("Filename", nxsFile);
+    load.setPropertyValue("OutputWorkspace", "GroupPowder");
+
+    TS_ASSERT_THROWS_NOTHING(load.execute());
+
+    // Test some aspects of the file
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve("GroupPowder"));
+    TS_ASSERT(workspace);
+    TS_ASSERT(workspace.get());
+
+    MatrixWorkspace_sptr ows = std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    TS_ASSERT(ows);
+    if (!ows)
+      return;
+
+    auto alg2 = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+    alg2->initialize();
+    alg2->setProperty<MatrixWorkspace_sptr>("Workspace1", gws);
+    alg2->setProperty<MatrixWorkspace_sptr>("Workspace2", ows);
+    alg2->setProperty<double>("Tolerance", 0.0);
+    alg2->setProperty<bool>("CheckAxes", false);
+    alg2->execute();
+    if (alg2->isExecuted()) {
+      TS_ASSERT(alg2->getProperty("Result"));
+    } else {
+      TS_ASSERT(false);
+    }
+
+    Poco::File nxs{nxsFile};
+    if (nxs.exists()) {
+      nxs.remove();
+    }
+  }
+
 private:
   struct ShowDetIDsOnly : Poco::XML::NodeFilter {
     short acceptNode(Poco::XML::Node *node) override {
@@ -204,7 +270,10 @@ private:
 
   MatrixWorkspace_sptr m_emptyInstrument;
   static std::string parFilename(std::string filename) {
-    filename.replace(filename.end() - 3, filename.end(), "par");
+    size_t back = 0;
+    for (auto i = filename.rbegin(); *i != '.' && i != filename.rend(); i++)
+      back++;
+    filename.replace(filename.end() - back, filename.end(), "par");
     return filename;
   }
 };

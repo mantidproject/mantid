@@ -28,6 +28,10 @@ public:
   const std::vector<std::string> seeAlso() const override { return {"LoadDetectorsGroupingFile", "GroupDetectors"}; }
 
 private:
+  void saveAsXML();
+  void saveAsNexus();
+  void saveAsPAR();
+
   void init() override;
   void exec() override;
 };
