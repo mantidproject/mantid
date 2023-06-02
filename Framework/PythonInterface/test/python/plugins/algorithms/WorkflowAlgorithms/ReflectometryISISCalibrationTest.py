@@ -11,13 +11,20 @@ import unittest
 from mantid import FileFinder
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
+from mantid.kernel import V3D
 from testhelpers import assertRaisesNothing, create_algorithm, WorkspaceCreationHelper
+from testhelpers.tempfile_wrapper import TemporaryFileHelper
 
 
 class ReflectometryISISCalibrationTest(unittest.TestCase):
     _CALIBRATION_TEST_DATA = FileFinder.getFullPath("ISISReflectometry/calibration_test_data.dat")
     _RAD_TO_DEG = 180.0 / math.pi
     _DEG_TO_RAD = math.pi / 180.0
+
+    _DET_ID_LABEL = "detectorid"
+    _THETA_LABEL = "theta_offset"
+    _COLUMN_NUM_ERROR = "Calibration file should contain two space de-limited columns"
+    _COLUMN_LABELS_ERROR = "Incorrect column labels in calibration file"
 
     @classmethod
     def setUpClass(cls):
@@ -43,12 +50,29 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
 
         cls.calibration_data = _create_calibration_data_dictionary()
 
+    def setUp(self):
+        self.temp_calibration_file = None
+
     def tearDown(self):
         AnalysisDataService.clear()
+        if self.temp_calibration_file:
+            del self.temp_calibration_file
 
     def test_calibration_successful(self):
         input_ws_name = "test_1234"
         ws = self._create_sample_workspace(input_ws_name)
+
+        output_ws_name = "test_calibrated"
+        args = {"InputWorkspace": ws, "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": output_ws_name}
+        outputs = [input_ws_name, output_ws_name]
+        self._assert_run_algorithm_succeeds(args, outputs)
+
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_final_theta_values(ws, output_ws)
+
+    def test_calibration_successful_for_detectors_with_negative_two_theta(self):
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace_with_negative_two_theta(input_ws_name)
 
         output_ws_name = "test_calibrated"
         args = {"InputWorkspace": ws, "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": output_ws_name}
@@ -98,7 +122,73 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         args = {"InputWorkspace": ws, "CalibrationFile": "invalid/file_path.dat", "OutputWorkspace": "test_calibrated"}
         self._assert_run_algorithm_raises_exception(args, "Calibration file path cannot be found")
 
-    def _check_final_theta_values(self, input_ws, output_ws):
+    def test_exception_raised_if_too_many_columns_in_file(self):
+        self.temp_calibration_file = TemporaryFileHelper(
+            fileContent=f"{self._DET_ID_LABEL} {self._THETA_LABEL} extra_column\n1 0.05 0.03\n", extension=".dat"
+        )
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": "test_calibrated"}
+        self._assert_run_algorithm_raises_exception(args, self._COLUMN_NUM_ERROR)
+
+    def test_exception_raised_if_too_few_columns_in_file(self):
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=f"{self._DET_ID_LABEL}\n1\n", extension=".dat")
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": "test_calibrated"}
+        self._assert_run_algorithm_raises_exception(args, self._COLUMN_NUM_ERROR)
+
+    def test_exception_raised_if_invalid_column_labels_in_file(self):
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=f"{self._DET_ID_LABEL} invalid_label\n1 0.05\n", extension=".dat")
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": "test_calibrated"}
+        self._assert_run_algorithm_raises_exception(args, self._COLUMN_LABELS_ERROR)
+
+    def test_exception_raised_if_no_column_labels_in_file(self):
+        self.temp_calibration_file = TemporaryFileHelper(fileContent="1 0.05\n", extension=".dat")
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": "test_calibrated"}
+        self._assert_run_algorithm_raises_exception(args, self._COLUMN_LABELS_ERROR)
+
+    def test_exception_raised_if_no_data_in_file(self):
+        self.temp_calibration_file = TemporaryFileHelper(fileContent=f"{self._DET_ID_LABEL} {self._THETA_LABEL}\n", extension=".dat")
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": "test_calibrated"}
+        self._assert_run_algorithm_raises_exception(args, "Calibration file provided contains no data")
+
+    def test_exception_raised_if_column_data_types_incorrect(self):
+        self.temp_calibration_file = TemporaryFileHelper(
+            fileContent=f"{self._DET_ID_LABEL} {self._THETA_LABEL}\n0.05 1\n", extension=".dat"
+        )
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": "test_calibrated"}
+        self._assert_run_algorithm_raises_exception(args, "Invalid data in calibration file entry")
+
+    def test_calibration_successful_with_columns_reversed_in_file(self):
+        det_id = 11
+        theta_offset = 0.05
+        self.temp_calibration_file = TemporaryFileHelper(
+            fileContent=f"{self._THETA_LABEL} {self._DET_ID_LABEL}\n{theta_offset} {det_id}\n", extension=".dat"
+        )
+        input_ws_name = "test_1234"
+        ws = self._create_sample_workspace(input_ws_name)
+
+        output_ws_name = "test_calibrated"
+        args = {"InputWorkspace": ws, "CalibrationFile": self.temp_calibration_file.getName(), "OutputWorkspace": output_ws_name}
+        outputs = [input_ws_name, output_ws_name]
+        self._assert_run_algorithm_succeeds(args, outputs)
+
+        output_ws = AnalysisDataService.retrieve(output_ws_name)
+        self._check_final_theta_values(ws, output_ws, calibration_data={det_id: theta_offset})
+
+    def _check_final_theta_values(self, input_ws, output_ws, calibration_data=None):
+        if not calibration_data:
+            calibration_data = self.calibration_data
+
         info_in = input_ws.spectrumInfo()
         info_out = output_ws.spectrumInfo()
 
@@ -108,7 +198,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
             two_theta_in = info_in.signedTwoTheta(i)
             two_theta_out = info_out.signedTwoTheta(i)
 
-            theta_offset = self.calibration_data.get(det_id)
+            theta_offset = calibration_data.get(det_id)
             expected_two_theta = ((two_theta_in * self._RAD_TO_DEG) + theta_offset) * self._DEG_TO_RAD if theta_offset else two_theta_in
 
             self.assertAlmostEqual(two_theta_out, expected_two_theta, msg=f"Unexpected theta value for detector {det_id}")
@@ -128,9 +218,20 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
         return GroupWorkspaces(InputWorkspaces=",".join(child_names), OutputWorkspace=group_name)
 
     def _create_sample_workspace_with_missing_detectors(self):
-        """Creates a workspace with 11 detectors. Only detector ID 11 will have calibration data.
-        The calibration data will have entries for detectors that are not present in the workspace"""
+        """Creates a workspace with 11 detectors. The calibration data will have entries for detectors that are not present in the workspace"""
         ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(11, 20, False)
+        return ws
+
+    def _create_sample_workspace_with_negative_two_theta(self, name):
+        """Creates a workspace with 9 detectors. Only detector IDs 11 to 14 will have calibration data.
+        Detector ID 11 is re-positioned so that its initial two theta value is negative.
+        """
+        ws = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=1, NumMonitors=0, BankPixelWidth=3, XMin=200, OutputWorkspace=name)
+        det_info = ws.detectorInfo()
+        comp_info = ws.componentInfo()
+        det_idx = det_info.indexOf(11)
+        comp_info.setPosition(det_idx, V3D(0, -0.00436332, 5))
+        self.assertTrue(det_info.signedTwoTheta(det_idx) < 0)
         return ws
 
     def _assert_run_algorithm_succeeds(self, args, expected=None):
