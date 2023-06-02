@@ -25,7 +25,7 @@ Algorithms
 
 New features
 ############
-- Major changes have been made to the treatment of temperature in :ref:`Abins <algm-Abins>` and :ref:`Abins2D <algm-Abins2D>`. This gives slightly different results at low temperature (i.e. the 10K default) and significantly different results at higher temperatures. The new methodology is in clearer agreement with the published literature, and gives close results to other implementations. The :ref:`supporting documentation <DynamicalStructureFactorFromAbInitio>` has been updated to reflect the mathematics behind recent versions of Abins/2D.
+- Major changes have been made to the treatment of temperature in :ref:`Abins <algm-Abins>` and :ref:`Abins2D <algm-Abins2D>`. This gives slightly different results at low temperatures (i.e. the 10K default) and significantly different results at higher temperatures. The new methodology is in clearer agreement with the published literature, and gives close results to other implementations. The :ref:`supporting documentation <DynamicalStructureFactorFromAbInitio>` has been updated to reflect the mathematics behind recent versions of Abins/2D.
 - Added algorithms for the ANSTO EMU instrument to support :ref:`elastic <algm-ElasticEMUauReduction>` and :ref:`inelastic <algm-InelasticEMUauReduction>` reduction processing.
 
 Bugfixes
