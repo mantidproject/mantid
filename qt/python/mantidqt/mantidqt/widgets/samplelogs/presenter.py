@@ -9,11 +9,13 @@
 #
 from qtpy.QtCore import Qt
 
+from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
+from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
 from .model import SampleLogsModel
 from .view import SampleLogsView
 
 
-class SampleLogs(object):
+class SampleLogs(ObservingPresenter):
     """ """
 
     def __init__(self, ws, parent=None, window_flags=Qt.Window, model=None, view=None):
@@ -24,9 +26,16 @@ class SampleLogs(object):
             if view
             else SampleLogsView(self, parent, window_flags, self.model.get_name(), self.model.isMD(), self.model.getNumExperimentInfo())
         )
+        self.container = self.view  # needed for the ObservingPresenter
         self.filtered = True
         self.show_timeROI = True
         self.setup_table()
+
+        self.ads_observer = WorkspaceDisplayADSObserver(self)
+
+        # connect to replace_signal signal to handle replacement of the workspace
+        self.container.replace_signal.connect(self.action_replace_workspace)
+        self.container.rename_signal.connect(self.action_rename_workspace)
 
     def update(self):
         """Update stats with selected log and replot the
@@ -132,3 +141,12 @@ class SampleLogs(object):
     def update_table_with_matching_logs(self):
         """Updates the table with logs matching the search key."""
         self.setup_table(self.view.line_edit.text())
+
+    def action_replace_workspace(self, workspace_name, workspace):
+        if self.model.workspace_equals(workspace_name):
+            self.model.set_ws(workspace)
+            self.setup_table()
+            self.update()
+
+    def action_rename_workspace(self, workspace_name):
+        self.model.set_name(workspace_name)
