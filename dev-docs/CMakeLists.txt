@@ -15,9 +15,23 @@ add_custom_target(
   COMMENT "Building html developer documentation"
 )
 
+set(BUILDER linkcheck)
+add_custom_target(
+  dev-docs-${BUILDER}
+  COMMAND ${Python_EXECUTABLE} -m ${SPHINX_MAIN} ${SPHINX_NO_COLOR} -w dev_docs_warnings.txt ${SPHINX_KEEPGOING} -b
+          ${BUILDER} -d ${DOCTREE_DIR} ${CMAKE_CURRENT_LIST_DIR}/source ${OUT_DIR}
+  COMMENT "Checking external links in developer documentation"
+)
+
 # Group within VS and exclude from whole build
 set_target_properties(
   dev-docs-html
+  PROPERTIES FOLDER "Documentation"
+             EXCLUDE_FROM_DEFAULT_BUILD 1
+             EXCLUDE_FROM_ALL 1
+)
+set_target_properties(
+  dev-docs-linkcheck
   PROPERTIES FOLDER "Documentation"
              EXCLUDE_FROM_DEFAULT_BUILD 1
              EXCLUDE_FROM_ALL 1
