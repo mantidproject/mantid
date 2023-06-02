@@ -31,6 +31,6 @@ New features
 Bugfixes
 ############
 - Updated the CRYSTAL parser for Abins to accept files with complex eigenvectors expressed as "ANTI-PHASE". This seems to be the notation used for calculations on a regular q-point mesh, such as when performing Fourier interpolation to obtain a dense DOS.
-- Fixed a bug when loading certain ``vasprun.xml`` files in Abins. If the VASP user enables ``selective dynamics`` and ``IBRION=6``, VASP will ignore the frozen atoms when calculation vibrational frequencies. This created an unexpected number of degrees of freedom.
+- Fixed a bug when loading certain ``vasprun.xml`` files in Abins. If the VASP user enables ``selective dynamics`` and ``IBRION=6``, VASP will ignore the frozen atoms when calculating vibrational frequencies. This created an unexpected number of degrees of freedom.
 
 :ref:`Release 6.7.0 <v6.7.0>`
