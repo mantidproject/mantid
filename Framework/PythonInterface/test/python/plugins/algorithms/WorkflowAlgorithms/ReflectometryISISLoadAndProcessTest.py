@@ -650,12 +650,20 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
 
     def test_sum_banks_is_run_for_2D_detector_workspace(self):
         self._create_2D_detector_workspace(38415, "TOF_")
+
+        def _check_num_histograms_and_first_y_value(ws_name, expected_num_histograms, expected_y_value):
+            ws = AnalysisDataService.retrieve(ws_name)
+            self.assertTrue(ws.getNumberHistograms(), expected_num_histograms)
+            self._assert_delta(ws.readY(2)[0], expected_y_value)
+
+        _check_num_histograms_and_first_y_value("TOF_38415", 6, 0.3)
         args = self._default_options
         args["InputRunList"] = "38415"
         outputs = ["IvsQ_38415", "IvsQ_binned_38415", "TOF", "TOF_38415", "TOF_38415_summed_segment"]
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ["ReflectometryISISSumBanks", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_38415"), history)
+        _check_num_histograms_and_first_y_value("TOF_38415_summed_segment", 4, 0.6)
 
     def test_sum_banks_is_not_run_for_linear_detector_workspace(self):
         self._create_workspace(38415, "TOF_")
