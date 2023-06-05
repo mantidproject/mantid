@@ -25,7 +25,7 @@ shift 1
 
 cd $WORKSPACE
 
-if $SCRIPT_DIR/check_for_changes cpp; then
+if $SCRIPT_DIR/../check_for_changes cpp; then
     echo "No C++ files have changed. Skipping check."
     exit 0
 fi
