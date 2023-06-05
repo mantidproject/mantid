@@ -25,7 +25,7 @@ Bugfixes
 - A crash caused by closing the Load dialog while it is attempting to load a file has been fixed.
 - Fixed a bug where Mantid would not open on Windows when a user has non-ascii characters in their username.
 - Fixed an issue in :ref:`DrILL <DrILL-ref>` with loading rundexes related to an issue in processing the export algorithm name and the extension simultaneously.
-- The performance of the ``Show Sample Shape`` window has been improved for workspaces with complex CSG shapes for either the sample or container.
+- The performance of the ``Show Sample Shape`` window has been improved for workspaces with complex CSG shapes for either the sample or the container.
 - Fixed a bug where opening the plot options for a script-created plot with error bars, would crash Workbench.
 
 
