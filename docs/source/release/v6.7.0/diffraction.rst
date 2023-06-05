@@ -20,6 +20,7 @@ New features
 - It is now possible to mask out detectors in the absorption and multiple scattering calculations :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>`, :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>`, and :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>`.
 - Additional, optional, source terms added to the :ref:`EstimateResolutionDiffraction <algm-EstimateResolutionDiffraction>`. For instruments with small detector pixels (e.g. SNAP), the size of the source is the overwhelming contributor to the resolution calculation.
 - :ref:`EstimateResolutionDiffraction <algm-EstimateResolutionDiffraction>` will average the resolution from summed pixels.
+- New parameter ``MinimumSignalToNoiseRatio`` has been added to the :ref:`FitPeaks <algm-FitPeaks>` and :ref:`PDCalibration <algm-PDCalibration>` algorithms. This will exclude peaks from automated fitting below a threshold signal-to-noise ratio estimated from the data in the fitting window.
 
 Bugfixes
 ############
@@ -32,7 +33,6 @@ Engineering Diffraction
 New features
 ############
 - The GSASII tab outputs the sample logs attached to the relevant focused data, as specified in the Engineering Diffraction settings. This behaves in the same way as before for the fitting tab.
-- Add check for ``peak-window``:``signal-to-noise`` ratio before attempting to fit a diffraction peak in :ref:`FitPeaks <algm-FitPeaks>`.
 - It is now possible to load and plot multiple phases in the GSASII tab.
 
 Bugfixes
