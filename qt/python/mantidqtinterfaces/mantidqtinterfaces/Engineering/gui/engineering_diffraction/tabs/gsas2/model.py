@@ -728,8 +728,11 @@ class GSAS2Model(object):
             result_reflections_txt = os.path.join(
                 self.user_save_directory, self.project_name + f"_reflections_{histogram_index}_{phase_name}.txt"
             )
-            loaded_reflections.append(np.genfromtxt(result_reflections_txt)[2:])
-            # first 2 lines iin file are histogram and phase name
+            if os.path.exists(result_reflections_txt):
+                # omit first 2 lines in file (which are histogram and phase name)
+                loaded_reflections.append(np.genfromtxt(result_reflections_txt)[2:])
+            else:
+                logger.warning(f"No reflections found for phase {phase_name} within x-limits of the fit.")
         return loaded_reflections
 
     def load_gsas_reflections_all_histograms_for_table(self):
