@@ -19,7 +19,7 @@ New features
 Bugfixes
 ############
 - The :ref:`ALFView <ALFView-ref>` peak picker tool is now offset on the y axis by the background amount.
-- The :ref:`ALFView <ALFView-ref>` peak picker tool is now set as activate by default.
+- The :ref:`ALFView <ALFView-ref>` peak picker tool is now activated by default.
 - The settings loaded into the :ref:`ALFView <ALFView-ref>` interface are now separate from those loaded into the InstrumentView.
 - Removing the sample on the :ref:`ALFView <ALFView-ref>` interface will now clear the InstrumentWidget plot.
 - The ``Reset View`` button on the Render tab of :ref:`ALFView <ALFView-ref>` will no longer prevent the Pick tab tools from working.
