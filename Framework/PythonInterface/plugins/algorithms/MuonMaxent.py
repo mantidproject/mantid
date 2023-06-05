@@ -148,16 +148,16 @@ class MuonMaxent(PythonAlgorithm):
             gwdets = gwsp.getNumberHistograms()
             if gwdets != POINTS_nhists:
                 raise Exception("Grouping workspace has a different number of spectra")
-            GROUPING_group = np.zeros([nhisto], dtype=np.int)
+            GROUPING_group = np.zeros([nhisto], dtype=int)
             for hh in range(POINTS_nhists):
                 GROUPING_group[hh] = int(gwsp.dataY(hh)[0] - 1)
             POINTS_ngroups = np.amax(GROUPING_group) + 1
         elif self.getProperty("GroupTable").isDefault:
             # no table provided, map 1:1 and use all spectra
             POINTS_ngroups = POINTS_nhists
-            GROUPING_group = np.arange(POINTS_ngroups, dtype=np.int)
+            GROUPING_group = np.arange(POINTS_ngroups, dtype=int)
         else:
-            GROUPING_group = np.zeros([nhisto], dtype=np.int)
+            GROUPING_group = np.zeros([nhisto], dtype=int)
             GROUPING_group[:] = -1  # for unused histograms in no group
             POINTS_ngroups = len(self.getProperty("GroupTable").value)
             for g, row in enumerate(self.getProperty("GroupTable").value):
