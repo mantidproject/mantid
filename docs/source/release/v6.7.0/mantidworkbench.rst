@@ -36,7 +36,7 @@ New features
 ############
 - The display position of detector banks in the :ref:`Instrument Viewer <InstrumentViewer>` side-by-side view can now be specified in the instrument definition file. Positions have been set up for the SXD instrument using the new feature.
 - Prevent a yaw rotation being applied to a bank during side-by-side view generation. This applies to all instruments regardless of whether they use the new bank centre override feature in their instrument definition file. For instruments where this has an effect, it could also result in the bank positions in the side-by-side view changing. This is because the algorithm used to project the banks onto the XY plane cares about which is the largest bank. With the yaw rotation removed, the bounding rectangle (which is the measure used for the bank size) could be smaller for some banks.
-- A new option has been added to the ``Display Settings`` drop-down on the Instrument Viewer :ref:`Render tab <instrumentviewer_render_tab>` to control whether the aspect ratio of detector banks are preserved in the 2D views (cylindrical, spherical, side by side), regardless of the dimensions of the plot area.
+- A new option has been added to the ``Display Settings`` drop-down on the Instrument Viewer :ref:`Render tab <instrumentviewer_render_tab>` to control whether the aspect ratios of detector banks are preserved in the 2D views (cylindrical, spherical, side by side), regardless of the dimensions of the plot area.
 - The peak overlay feature in the :ref:`Instrument Viewer <InstrumentViewer>` now works in the side-by-side view.
 
 Bugfixes
