@@ -388,6 +388,13 @@ class TestGSAS2Model(unittest.TestCase):
         # check all values in two numpy arrays are the same
         self.assertTrue((reflections[0] - expected_reflections[0]).all())
 
+    @patch(model_path + ".os.path.exists")
+    def test_load_gsas2_reflections_file_not_exist(self, mock_path_exists):
+        mock_path_exists.return_value = False
+        self.model.phase_names_list = ["Fe_gamma"]
+        reflections = self.model.load_gsas_reflections_per_histogram_for_plot(1)
+        self.assertTrue(len(reflections) == 0)
+
     def test_create_lattice_parameter_table(self):
         self.model.phase_names_list = ["Fe_gamma"]
         table_ws = self.model.create_lattice_parameter_table(test=True)
