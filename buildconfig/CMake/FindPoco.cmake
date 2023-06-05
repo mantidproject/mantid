@@ -18,19 +18,11 @@ find_library(POCO_LIB_CRYPTO_DEBUG NAMES PocoCryptod)
 find_library(POCO_LIB_NETSSL_DEBUG NAMES PocoNetSSLd)
 
 function(add_poco_lib POCO_COMPONENT POCO_LIB_MODULE POCO_DEBUG_LIB_MODULE)
-  # Add poco library to list and also the corresponding debug library if it is available
-
-  if(EXISTS "${POCO_DEBUG_LIB_MODULE}" AND NOT ${CONDA_ENV})
-    set(POCO_LIBRARIES
-        ${POCO_LIBRARIES} optimized ${POCO_LIB_MODULE} debug ${POCO_DEBUG_LIB_MODULE}
-        PARENT_SCOPE
-    )
-  else()
-    set(POCO_LIBRARIES
-        ${POCO_LIBRARIES} ${POCO_LIB_MODULE}
-        PARENT_SCOPE
-    )
-  endif()
+  # Add poco library to list
+  set(POCO_LIBRARIES
+      ${POCO_LIBRARIES} ${POCO_LIB_MODULE}
+      PARENT_SCOPE
+  )
 
   if(NOT TARGET Poco::${POCO_COMPONENT})
     add_library(Poco::${POCO_COMPONENT} UNKNOWN IMPORTED)
@@ -38,10 +30,6 @@ function(add_poco_lib POCO_COMPONENT POCO_LIB_MODULE POCO_DEBUG_LIB_MODULE)
       Poco::${POCO_COMPONENT} PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${POCO_INCLUDE_DIR} IMPORTED_LOCATION
                                                                                            ${POCO_LIB_MODULE}
     )
-    if(EXISTS "${POCO_DEBUG_LIB_MODULE}" AND NOT ${CONDA_ENV})
-      set_target_properties(Poco::${POCO_COMPONENT} PROPERTIES IMPORTED_LOCATION_DEBUG ${POCO_DEBUG_LIB_MODULE})
-    endif()
-
   endif()
 
 endfunction(add_poco_lib)

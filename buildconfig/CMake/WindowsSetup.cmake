@@ -45,45 +45,43 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}")
 endif()
 
-if(CONDA_ENV)
-  # Define a new configuration for debugging with Conda. Crucially it must link to the MSVC release runtime but we
-  # switch off all optimzations
-  set(_conda_debug_cfg_name DebugWithRelRuntime)
-  string(TOUPPER ${_conda_debug_cfg_name} _conda_debug_cfg_name_upper)
-  include(CCacheSetup)
-  if(USE_CCACHE AND CCACHE_FOUND)
-    # For a single-config generator like Ninja, aim to use CCache to speed up builds. The Zi flag is not supported by
-    # CCache so we need to use Z7 to allow debugging.
-    set(_language_flags "/Z7 /Ob0 /Od /RTC1")
-  else()
-    # For a multi-config generator like MSVC, CCache is not used, so the Zi flag can be used for debugging.
-    set(_language_flags "/Zi /Ob0 /Od /RTC1")
-  endif()
-  # C/CXX flags
-  foreach(lang C CXX)
-    set(CMAKE_${lang}_FLAGS_${_conda_debug_cfg_name_upper}
-        ${_language_flags}
-        CACHE STRING "" FORCE
-    )
-  endforeach()
-  # Linker
-  foreach(t EXE SHARED MODULE)
-    set(CMAKE_${t}_LINKER_FLAGS_${_conda_debug_cfg_name_upper}
-        ${CMAKE_${t}_LINKER_FLAGS_RELWITHDEBINFO}
-        CACHE STRING "" FORCE
-    )
-  endforeach()
-
-  # Set configurations. We also dump MinSizeRel & Debug as the former is not used and the latter will not work
-  set(CMAKE_CONFIGURATION_TYPES
-      "${_conda_debug_cfg_name};Release;RelWithDebInfo"
+# Define a new configuration for debugging with Conda. Crucially it must link to the MSVC release runtime but we switch
+# off all optimzations
+set(_conda_debug_cfg_name DebugWithRelRuntime)
+string(TOUPPER ${_conda_debug_cfg_name} _conda_debug_cfg_name_upper)
+include(CCacheSetup)
+if(USE_CCACHE AND CCACHE_FOUND)
+  # For a single-config generator like Ninja, aim to use CCache to speed up builds. The Zi flag is not supported by
+  # CCache so we need to use Z7 to allow debugging.
+  set(_language_flags "/Z7 /Ob0 /Od /RTC1")
+else()
+  # For a multi-config generator like MSVC, CCache is not used, so the Zi flag can be used for debugging.
+  set(_language_flags "/Zi /Ob0 /Od /RTC1")
+endif()
+# C/CXX flags
+foreach(lang C CXX)
+  set(CMAKE_${lang}_FLAGS_${_conda_debug_cfg_name_upper}
+      ${_language_flags}
       CACHE STRING "" FORCE
   )
-  message(
-    STATUS
-      "Detected a build with Conda on Windows. Resetting available build configurations to ${CMAKE_CONFIGURATION_TYPES}"
+endforeach()
+# Linker
+foreach(t EXE SHARED MODULE)
+  set(CMAKE_${t}_LINKER_FLAGS_${_conda_debug_cfg_name_upper}
+      ${CMAKE_${t}_LINKER_FLAGS_RELWITHDEBINFO}
+      CACHE STRING "" FORCE
   )
-endif()
+endforeach()
+
+# Set configurations. We also dump MinSizeRel & Debug as the former is not used and the latter will not work
+set(CMAKE_CONFIGURATION_TYPES
+    "${_conda_debug_cfg_name};Release;RelWithDebInfo"
+    CACHE STRING "" FORCE
+)
+message(
+  STATUS
+    "Detected a build with Conda on Windows. Resetting available build configurations to ${CMAKE_CONFIGURATION_TYPES}"
+)
 
 # HDF5 uses threads::threads target
 find_package(Threads)
@@ -99,10 +97,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 # Configure IDE/commandline startup scripts
 # ######################################################################################################################
 set(WINDOWS_BUILDCONFIG ${PROJECT_SOURCE_DIR}/buildconfig/windows)
-if(CONDA_ENV)
-  set(CONDA_BASE_DIR $ENV{CONDA_PREFIX})
-  configure_file(${WINDOWS_BUILDCONFIG}/thirdpartypaths_conda.bat.in ${PROJECT_BINARY_DIR}/thirdpartypaths.bat @ONLY)
-endif()
+set(CONDA_BASE_DIR $ENV{CONDA_PREFIX})
+configure_file(${WINDOWS_BUILDCONFIG}/thirdpartypaths_conda.bat.in ${PROJECT_BINARY_DIR}/thirdpartypaths.bat @ONLY)
 
 if(MSVC_VERSION LESS 1911)
   get_filename_component(MSVC_VAR_LOCATION "$ENV{VS140COMNTOOLS}/../../VC/" ABSOLUTE)
@@ -115,9 +111,7 @@ else()
 endif()
 
 # Setup debugger environment to launch in VS without setting paths
-if(CONDA_ENV)
-  set(MSVC_PATHS "$ENV{CONDA_PREFIX}/Library/bin$<SEMICOLON>$ENV{CONDA_PREFIX}/Library/lib$<SEMICOLON>%PATH%")
-endif()
+set(MSVC_PATHS "$ENV{CONDA_PREFIX}/Library/bin$<SEMICOLON>$ENV{CONDA_PREFIX}/Library/lib$<SEMICOLON>%PATH%")
 
 file(TO_CMAKE_PATH ${MSVC_PATHS} MSVC_PATHS)
 
@@ -139,12 +133,10 @@ configure_file(${WINDOWS_BUILDCONFIG}/command-prompt.bat.in ${PROJECT_BINARY_DIR
 
 # The IDE may not be installed as we could be just using the build tools
 if(EXISTS ${MSVC_IDE_LOCATION}/devenv.exe)
-  if(CONDA_ENV)
-    configure_file(${WINDOWS_BUILDCONFIG}/visual-studio_conda.bat.in ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY)
-    configure_file(
-      ${WINDOWS_BUILDCONFIG}/visual-studio_conda_ninja.bat.in ${PROJECT_BINARY_DIR}/visual-studio_ninja.bat @ONLY
-    )
-  endif()
+  configure_file(${WINDOWS_BUILDCONFIG}/visual-studio_conda.bat.in ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY)
+  configure_file(
+    ${WINDOWS_BUILDCONFIG}/visual-studio_conda_ninja.bat.in ${PROJECT_BINARY_DIR}/visual-studio_ninja.bat @ONLY
+  )
 endif()
 
 # ######################################################################################################################
