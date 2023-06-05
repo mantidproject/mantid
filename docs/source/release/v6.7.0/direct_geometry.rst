@@ -50,7 +50,7 @@ Bugfixes
 ############
 - Fixed GDOS intensity correction so that the correction is applied in the same way regardless of the rotation of the slice plot.
 - Fix for an error when saving a slice plot as a matlab file.
-- Warning now omitted if a cut is taken with a higher resolution than the parent slice. This causes the appearance of missing lines between adjacent datapoints.
+- Warning is now omitted if a cut is taken with a higher resolution than the parent slice. This causes the appearance of missing lines between adjacent datapoints.
 - When taking a cut, if an intensity range is provided it is now applied to the plot y limits.
 - When changing intensity of a slice plot the axis limits now get reset to their original values. This solves a bug where zooming out after an intensity change was not possible.
 - Bragg peaks are now sized more appropriately on an interactive cut.
