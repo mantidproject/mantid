@@ -89,6 +89,11 @@ class Pearl(AbstractInst):
     def should_subtract_empty_inst(self):
         return self._inst_settings.subtract_empty_inst
 
+    def _generate_out_file_paths(self, run_details):
+        output_file_paths = super()._generate_out_file_paths(run_details)
+        output_file_paths["output_name"] = output_file_paths["output_name"] + run_details.file_extension.replace(".", "_")
+        return output_file_paths
+
     def _get_output_formats(self, output_directory, xye_files_directory):
         return {
             "nxs_filename": output_directory,
