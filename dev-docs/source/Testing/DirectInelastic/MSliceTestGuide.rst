@@ -1,4 +1,7 @@
 .. _mslice_testing:
+.. only:: html
+
+  :math:`\renewcommand\AA{\mathring{A}}`
 
 MSlice Testing
 ===================
