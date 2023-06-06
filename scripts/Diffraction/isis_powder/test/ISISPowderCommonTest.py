@@ -641,6 +641,7 @@ class ISISPowderMockInst(object):
     def __init__(self, file_ext=None):
         self._file_ext = file_ext
         self._inst_prefix = "MOCK"
+        self._inst_settings = ISISPowderMockInstrumentSettings()
 
     @staticmethod
     def _get_input_batching_mode(**_):
@@ -666,6 +667,11 @@ class ISISPowderMockInst(object):
 class ISISPowderMockRunDetails(object):
     def __init__(self, file_ext):
         self.file_extension = file_ext
+
+
+class ISISPowderMockInstrumentSettings(object):
+    def __init__(self, keep_raw_workspace=None):
+        self.keep_raw_workspace = keep_raw_workspace
 
 
 if __name__ == "__main__":
