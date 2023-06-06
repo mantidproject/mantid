@@ -107,14 +107,14 @@ void GenerateGroupingPowder::exec() {
     }
     const auto &det = spectrumInfo.detector(i);
     const double tt = spectrumInfo.twoTheta(i) * Geometry::rad2deg;
-    const auto where = static_cast<size_t>(tt / step);
+    const double groupId = std::floor(tt / step); // round down
     if (spectrumInfo.hasUniqueDetector(i)) {
-      groupWS->setValue(det.getID(), static_cast<double>(where));
+      groupWS->setValue(det.getID(), groupId);
     } else {
       const auto &group = dynamic_cast<const DetectorGroup &>(det);
       const auto idv = group.getDetectorIDs();
       const auto ids = std::set<int>(idv.begin(), idv.end());
-      groupWS->setValue(ids, static_cast<double>(where));
+      groupWS->setValue(ids, groupId);
     }
   }
 
