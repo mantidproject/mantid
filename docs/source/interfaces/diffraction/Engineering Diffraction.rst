@@ -17,6 +17,8 @@ Functionality for performing single peak fitting on focused run files is current
 
 This interface is under active development.
 
+.. _Engineering_Diffraction_options-ref:
+
 General Options
 ^^^^^^^^^^^^^^^
 RB Number
