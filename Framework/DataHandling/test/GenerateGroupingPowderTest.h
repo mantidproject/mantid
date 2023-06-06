@@ -59,7 +59,7 @@ public:
 
   void test_exec() {
     const std::string XML_OUT_FILE("PowderGrouping_fulltest.xml");
-    const std::string PAR_OUT_FILE{parFilenameFromXmlFilename(XML_OUT_FILE)};
+    const std::string PAR_OUT_FILE{GenerateGroupingPowder::parFilenameFromXmlFilename(XML_OUT_FILE)};
     const std::string GROUP_WS("plainExecTestWS");
     constexpr double step = 10;
 
@@ -154,7 +154,7 @@ public:
       TS_FAIL("xml file " + XML_OUT_FILE + " was not created");
     }
     // make sure the parfile does not exist and cleanup
-    const std::string parFilename(parFilenameFromXmlFilename(XML_OUT_FILE));
+    const std::string parFilename(GenerateGroupingPowder::parFilenameFromXmlFilename(XML_OUT_FILE));
     if (fileExists(parFilename)) {
       remove(parFilename.c_str());
       TS_FAIL("par file " + parFilename + "exists and shouldn't");
@@ -204,7 +204,7 @@ public:
     remove(XML_OUT_FILE.c_str());
 
     // Just in case something went wrong.
-    std::string parFilename = parFilenameFromXmlFilename(XML_OUT_FILE);
+    std::string parFilename = GenerateGroupingPowder::parFilenameFromXmlFilename(XML_OUT_FILE);
     if (fileExists(parFilename)) {
       remove(parFilename.c_str());
       TS_FAIL("par file " + parFilename + "exists and shouldn't");
@@ -292,15 +292,6 @@ private:
   };
 
   MatrixWorkspace_sptr m_emptyInstrument;
-
-  static std::string parFilenameFromXmlFilename(const std::string &filename) {
-    std::string result(filename);
-    size_t back = 0;
-    for (auto i = result.rbegin(); *i != '.' && i != result.rend(); i++)
-      back++;
-    result.replace(result.end() - back, result.end(), "par");
-    return result;
-  }
 
   bool fileExists(const std::string &filename) {
     Poco::File handle{filename};

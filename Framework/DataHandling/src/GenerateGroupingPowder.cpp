@@ -198,9 +198,10 @@ void GenerateGroupingPowder::saveAsNexus() {
 
 // PAR file
 void GenerateGroupingPowder::saveAsPAR() {
-  std::string PARfilename = getProperty("GroupingFilename");
+  std::string PARfilename = getPropertyValue("GroupingFilename");
   std::string ext = getProperty("FileFormat");
-  PARfilename.replace(PARfilename.end() - ext.size(), PARfilename.end(), "par");
+  PARfilename = parFilenameFromXmlFilename(PARfilename);
+
   std::ofstream outPAR_file(PARfilename.c_str());
   if (!outPAR_file) {
     g_log.error("Unable to create file: " + PARfilename);
@@ -268,6 +269,16 @@ void GenerateGroupingPowder::saveAsPAR() {
 
   // Close the file
   outPAR_file.close();
+}
+
+// static function to convert output filename to parameter filename
+// this assumes the file has a 3-letter extension so it works for
+// nexus files as well
+std::string GenerateGroupingPowder::parFilenameFromXmlFilename(const std::string &filename) {
+  const std::size_t EXT_SIZE{3};
+  std::string result(filename);
+  result.replace(result.end() - EXT_SIZE, result.end(), "par");
+  return result;
 }
 
 } // namespace Mantid::DataHandling
