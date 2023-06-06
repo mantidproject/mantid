@@ -113,6 +113,9 @@ if(DOCS_QTHELP)
   add_dependencies(docs-qthelp docs-qtassistant)
 endif()
 
+# add target for checking external links
+add_sphinx_build_target(linkcheck ${DOCS_MATH_EXT})
+
 # Installation settings
 option(PACKAGE_DOCS "If true the qthelp documentation is bundled with the package" OFF)
 if(PACKAGE_DOCS)

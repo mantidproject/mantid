@@ -1,0 +1,1 @@
+* Two new build targets ``docs-linkcheck`` and ``dev-docs-linkcheck`` run `sphinx linkcheckbuilder <https://www.sphinx-doc.org/en/master/usage/builders/index.html#sphinx.builders.linkcheck.CheckExternalLinksBuilder>`_
