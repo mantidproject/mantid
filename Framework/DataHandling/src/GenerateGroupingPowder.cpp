@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/GenerateGroupingPowder.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/SaveDetectorsGrouping.h"
@@ -53,7 +54,8 @@ const std::string GenerateGroupingPowder::category() const {
 /** Initialize the algorithm's properties.
  */
 void GenerateGroupingPowder::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                                        std::make_shared<InstrumentValidator>()),
                   "A workspace from which to generate the grouping.");
 
   // allow saving as either xml or hdf5 formats
@@ -74,9 +76,8 @@ void GenerateGroupingPowder::init() {
                   "If true, a par file with a corresponding name to the "
                   "grouping file will be generated.");
 
-  declareProperty(
-      std::make_unique<WorkspaceProperty<GroupingWorkspace>>("GroupingWorkspace", "InputWorkspace", Direction::Output),
-      "The grouping.");
+  declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("GroupingWorkspace", "", Direction::Output),
+                  "The grouping workspace created");
 }
 
 /** Execute the algorithm.
@@ -90,7 +91,7 @@ void GenerateGroupingPowder::exec() {
     throw std::invalid_argument("Workspace contains no detectors.");
 
   const auto inst = input_ws->getInstrument();
-  if (!inst) {
+  if (!inst) { // validator should make this impossible
     throw std::invalid_argument("Input Workspace has invalid Instrument\n");
   }
 

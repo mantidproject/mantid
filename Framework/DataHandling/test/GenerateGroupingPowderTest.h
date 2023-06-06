@@ -58,25 +58,28 @@ public:
   }
 
   void test_exec() {
-    GenerateGroupingPowder alg;
-    alg.setRethrows(true);
-    const std::string xmlFile("PowderGrouping.xml");
+    const std::string XML_OUT_FILE("PowderGrouping_fulltest.xml");
+    const std::string PAR_OUT_FILE{parFilenameFromXmlFilename(XML_OUT_FILE)};
+    const std::string GROUP_WS("plainExecTestWS");
     constexpr double step = 10;
 
+    GenerateGroupingPowder alg;
+    alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_emptyInstrument));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileFormat", "xml"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFile));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", XML_OUT_FILE));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", GROUP_WS));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    const std::string parFile{parFilename(xmlFile)};
-
-    // Check the results
-    // par file
-    std::ifstream pf(parFile);
+    // Check the par file results
+    if (!fileExists(PAR_OUT_FILE)) {
+      throw std::runtime_error("par file was not created: " + PAR_OUT_FILE);
+    }
+    std::ifstream pf(PAR_OUT_FILE);
     std::size_t nDet;
     pf >> nDet;
     TS_ASSERT_EQUALS(nDet, 14);
@@ -96,10 +99,13 @@ public:
     }
     pf.close();
 
+    // check the xml grouping file
+    if (!fileExists(XML_OUT_FILE))
+      throw std::runtime_error("xml file was not created: " + XML_OUT_FILE);
     LoadDetectorsGroupingFile load2;
     load2.initialize();
 
-    TS_ASSERT(load2.setProperty("InputFile", xmlFile));
+    TS_ASSERT(load2.setProperty("InputFile", XML_OUT_FILE));
     TS_ASSERT(load2.setProperty("OutputWorkspace", "GroupPowder"));
 
     load2.execute();
@@ -116,65 +122,73 @@ public:
     TS_ASSERT_DELTA(gws2->dataY(50000)[0], 4.0, 1.0E-5); // 49.7 degrees
 
     // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove("GroupPowder");
+    AnalysisDataService::Instance().remove(GROUP_WS);
     // Delete files
-    remove(xmlFile.c_str());
-    remove(parFile.c_str());
+    remove(XML_OUT_FILE.c_str());
+    remove(PAR_OUT_FILE.c_str());
   }
 
   void test_turning_off_par_file_generation() {
+    const std::string XML_OUT_FILE("PowderGrouping_nopar.xml");
+    const std::string GROUP_WS("noParFileWS");
+    constexpr double step = 10;
+
     GenerateGroupingPowder alg;
     alg.setChild(true);
     alg.setRethrows(true);
-    const std::string xmlFilename("PowderGrouping.xml");
-    constexpr double step = 10;
 
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_emptyInstrument))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFilename))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
-    Poco::File parFile{parFilename(xmlFilename)};
-    Poco::File xmlFile{xmlFilename};
-    const bool xmlExists = xmlFile.exists();
-    TS_ASSERT(xmlExists)
-    const bool parExists = parFile.exists();
-    TS_ASSERT(!parExists)
-    if (xmlExists) {
-      xmlFile.remove();
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_emptyInstrument));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", XML_OUT_FILE));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", GROUP_WS));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // make sure the xml exists and cleanup
+    if (fileExists(XML_OUT_FILE)) {
+      remove(XML_OUT_FILE.c_str());
+    } else {
+      TS_FAIL("xml file " + XML_OUT_FILE + " was not created");
     }
-    if (parExists) {
-      // Just in case something went wrong.
-      parFile.remove();
+    // make sure the parfile does not exist and cleanup
+    const std::string parFilename(parFilenameFromXmlFilename(XML_OUT_FILE));
+    if (fileExists(parFilename)) {
+      remove(parFilename.c_str());
+      TS_FAIL("par file " + parFilename + "exists and shouldn't");
     }
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(GROUP_WS);
   }
 
   void test_ignore_detectors_without_spectra() {
+    const std::string XML_OUT_FILE("PowderGrouping_det_wo_spectra.xml");
+    const std::string GROUP_WS("noDetNoSpecWS");
+
     auto histogram = m_emptyInstrument->histogram(0);
     MatrixWorkspace_sptr ws = create<Workspace2D>(*m_emptyInstrument, 1, histogram);
     ws->getSpectrum(0).copyInfoFrom(m_emptyInstrument->getSpectrum(8));
     GenerateGroupingPowder alg;
     alg.setChild(true);
     alg.setRethrows(true);
-    const std::string xmlFilename("PowderGrouping.xml");
     constexpr double step = 10;
 
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", xmlFilename))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", XML_OUT_FILE));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", GROUP_WS));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
 
-    Poco::File xmlFile{xmlFilename};
-    const bool xmlExists = xmlFile.exists();
-    TS_ASSERT(xmlExists)
-    std::ifstream in(xmlFilename);
+    if (!fileExists(XML_OUT_FILE))
+      throw std::runtime_error("xml file was not created: " + XML_OUT_FILE);
+    std::ifstream in(XML_OUT_FILE);
     Poco::XML::InputSource source{in};
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> doc{parser.parse(&source)};
@@ -182,47 +196,55 @@ public:
     Poco::XML::NodeIterator nodeIter{doc, Poco::XML::NodeFilter::SHOW_ELEMENT, &filter};
     auto node = nodeIter.nextNode();
     TS_ASSERT(node)
-    TS_ASSERT_EQUALS(node->nodeName(), "detids")
-    TS_ASSERT_EQUALS(node->innerText(), "4")
+    TS_ASSERT_EQUALS(node->nodeName(), "detids");
+    TS_ASSERT_EQUALS(node->innerText(), "4");
     node = nodeIter.nextNode();
     in.close();
-    TS_ASSERT(!node)
-    if (xmlExists) {
-      xmlFile.remove();
-    }
+    TS_ASSERT(!node);
+    remove(XML_OUT_FILE.c_str());
+
     // Just in case something went wrong.
-    Poco::File parFile{parFilename(xmlFilename)};
-    if (parFile.exists()) {
-      parFile.remove();
+    std::string parFilename = parFilenameFromXmlFilename(XML_OUT_FILE);
+    if (fileExists(parFilename)) {
+      remove(parFilename.c_str());
+      TS_FAIL("par file " + parFilename + "exists and shouldn't");
     }
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(GROUP_WS);
   }
 
   // save as nexus, reload, and compare
   void test_save_nexus_processed() {
+    const std::string NXS_OUT_FILE("PowderGrouping.nxs");
+    const std::string GROUP_WS("saveNXSWS");
+    constexpr double step = 10;
 
     GenerateGroupingPowder alg;
     alg.setChild(true);
     alg.setRethrows(true);
 
-    const std::string nxsFile("PowderGrouping.nxs");
-    constexpr double step = 10;
-
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_emptyInstrument));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileFormat", "nxs"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", nxsFile));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", NXS_OUT_FILE));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", GROUP_WS));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     GroupingWorkspace_sptr gws = alg.getProperty("GroupingWorkspace");
     TS_ASSERT(gws);
 
+    if (!fileExists(NXS_OUT_FILE)) {
+      throw std::runtime_error("nexus file was not created: " + NXS_OUT_FILE);
+    }
+
     LoadNexusProcessed load;
     TS_ASSERT_THROWS_NOTHING(load.initialize());
     TS_ASSERT(load.isInitialized());
-    load.setPropertyValue("Filename", nxsFile);
+    load.setPropertyValue("Filename", NXS_OUT_FILE);
     load.setPropertyValue("OutputWorkspace", "GroupPowder");
 
     TS_ASSERT_THROWS_NOTHING(load.execute());
@@ -251,10 +273,11 @@ public:
       TS_ASSERT(false);
     }
 
-    Poco::File nxs{nxsFile};
-    if (nxs.exists()) {
-      nxs.remove();
-    }
+    // remove the output file
+    remove(NXS_OUT_FILE.c_str());
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(GROUP_WS);
   }
 
 private:
@@ -269,11 +292,18 @@ private:
   };
 
   MatrixWorkspace_sptr m_emptyInstrument;
-  static std::string parFilename(std::string filename) {
+
+  static std::string parFilenameFromXmlFilename(const std::string &filename) {
+    std::string result(filename);
     size_t back = 0;
-    for (auto i = filename.rbegin(); *i != '.' && i != filename.rend(); i++)
+    for (auto i = result.rbegin(); *i != '.' && i != result.rend(); i++)
       back++;
-    filename.replace(filename.end() - back, filename.end(), "par");
-    return filename;
+    result.replace(result.end() - back, result.end(), "par");
+    return result;
+  }
+
+  bool fileExists(const std::string &filename) {
+    Poco::File handle{filename};
+    return handle.exists();
   }
 };
