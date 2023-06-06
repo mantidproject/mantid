@@ -327,12 +327,23 @@ void ReflectometryReductionOneAuto3::init() {
                                                                        PropertyMode::Optional),
                   "A workspace to be used for polarization analysis that contains the efficiency factors as "
                   "histograms: P1, P2, F1 and F2 in the Wildes method and Pp, Ap, Rho and Alpha for Fredrikze.");
+
+  // Sum banks
+  declareProperty(
+      std::make_unique<PropertyWithValue<bool>>("SumAcrossDetectorBanks", false, Direction::Input),
+      "When set to True, the algorithm will attempt to sum counts across each row of a RectangularDetector before "
+      "performing the reduction. This will only work correctly when the instrument definition file (IDF) contains a "
+      "single RectangularDetector panel.");
+
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>("ROIDetectorIDs", "", Direction::Input),
+                  "List of detector IDs to include. This will only be used if SumAcrossDetectorBanks is set to True.");
 }
 
 /** Execute the algorithm.
  */
 void ReflectometryReductionOneAuto3::exec() {
   applyFloodCorrections();
+  sumBanks();
   setDefaultOutputWorkspaceNames();
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
@@ -1168,6 +1179,47 @@ void ReflectometryReductionOneAuto3::applyFloodCorrections() {
     }
     if (!isDefault("SecondTransmissionRun")) {
       applyFloodCorrection(flood, "SecondTransmissionRun");
+    }
+  }
+}
+
+/**
+ * Sum banks for a single data workspace.
+ * @param roiDetectorIDs :: The detector IDs to be summed. All are included if an empty string is passed.
+ * @param propertyName :: Name of an input property containing a workspace
+ *   that should be summed. The summed workspace replaces the old
+ *   value of this property.
+ */
+void ReflectometryReductionOneAuto3::sumBanksForWorkspace(const std::string &roiDetectorIDs,
+                                                          const std::string &wsPropertyName) {
+  MatrixWorkspace_sptr ws = getProperty(wsPropertyName);
+  auto output_ws_name = ws->getName() + "_summed_segment";
+  auto alg = createChildAlgorithm("ReflectometryISISSumBanks");
+  alg->initialize();
+  alg->setAlwaysStoreInADS(true);
+  alg->setProperty("InputWorkspace", ws);
+  alg->setProperty("ROIDetectorIDs", roiDetectorIDs);
+  alg->setProperty("OutputWorkspace", output_ws_name);
+  alg->execute();
+  MatrixWorkspace_sptr out =
+      std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output_ws_name));
+  setProperty(wsPropertyName, out);
+}
+
+/**
+ * Sum banks for all workspaces that need to be summed:
+ * the input data and the transmission runs.
+ */
+void ReflectometryReductionOneAuto3::sumBanks() {
+  const bool performSum = getProperty("SumAcrossDetectorBanks");
+  if (performSum) {
+    const auto roiDetectorIDs = getPropertyValue("ROIDetectorIDs");
+    sumBanksForWorkspace(roiDetectorIDs, "InputWorkspace");
+    if (!isDefault("FirstTransmissionRun")) {
+      sumBanksForWorkspace(roiDetectorIDs, "FirstTransmissionRun");
+    }
+    if (!isDefault("SecondTransmissionRun")) {
+      sumBanksForWorkspace(roiDetectorIDs, "SecondTransmissionRun");
     }
   }
 }
