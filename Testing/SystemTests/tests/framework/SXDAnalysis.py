@@ -6,62 +6,128 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 import systemtesting
+import tempfile
+import shutil
+import os
+from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import *
+from Diffraction.single_crystal.sxd import SXD
+from Diffraction.single_crystal.base_sx import PEAK_TYPE, INTEGRATION_TYPE
 
 
-class SXDAnalysis(systemtesting.MantidSystemTest):
-    """
-    Start of a system test for SXD data analyiss
-    """
+class SXDPeakSearchAndFindUBUsingFFT(systemtesting.MantidSystemTest):
+    def cleanup(self):
+        ADS.clear()
 
     def runTest(self):
-
         ws = Load(Filename="SXD23767.raw", LoadMonitors="Exclude")
+        self.peaks = SXD.find_sx_peaks(ws, nstd=6)
+        FindUBUsingFFT(PeaksWorkspace=self.peaks, MinD=1, MaxD=10, Tolerance=0.15)
+        SelectCellOfType(PeaksWorkspace=self.peaks, CellType="Cubic", Centering="F", Apply=True)
+        OptimizeLatticeForCellType(PeaksWorkspace=self.peaks, CellType="Cubic", Apply=True)
+        self.nindexed, *_ = IndexPeaks(PeaksWorkspace=self.peaks, Tolerance=0.1, CommonUBForAll=True)
 
-        # A lower SplitThreshold, with a reasonable bound on the recursion depth, helps find weaker peaks at higher Q.
-        QLab = ConvertToDiffractionMDWorkspace(
-            InputWorkspace=ws,
-            OutputDimensions="Q (lab frame)",
-            SplitThreshold=50,
-            LorentzCorrection="1",
-            MaxRecursionDepth="13",
-            Extents="-15,15,-15,15,-15,15",
-            OneEventPerBin="0",
-        )
+    def validate(self):
+        self.assertEqual(214, self.nindexed)
+        latt = SXD.retrieve(self.peaks).sample().getOrientedLattice()
+        a, alpha = 5.6541, 90  # published value for NaCl is a=6.6402 but the detector positions haven't been calibrated
+        self.assertAlmostEqual(a, latt.a(), delta=1e-5)
+        self.assertAlmostEqual(a, latt.b(), delta=1e-5)
+        self.assertAlmostEqual(a, latt.c(), delta=1e-5)
+        self.assertAlmostEqual(alpha, latt.alpha(), delta=1e-10)
+        self.assertAlmostEqual(alpha, latt.beta(), delta=1e-10)
+        self.assertAlmostEqual(alpha, latt.gamma(), delta=1e-10)
+        return self.peaks, "SXD23767_found_peaks.nxs"
 
-        #  NaCl has a relatively small unit cell, so the distance between peaks is relatively large.  Setting the PeakDistanceThreshold
-        #  higher avoids finding high count regions on the sides of strong peaks as separate peaks.
-        peaks_qLab = FindPeaksMD(InputWorkspace=QLab, MaxPeaks=300, DensityThresholdFactor=10, PeakDistanceThreshold=1.0)
 
-        FindUBUsingFFT(PeaksWorkspace=peaks_qLab, MinD="3", MaxD="5", Tolerance=0.08)
+class SXDDetectorCalibration(systemtesting.MantidSystemTest):
+    def setUp(self):
+        self._temp_dir = tempfile.mkdtemp()
 
-        out_params = IndexPeaks(PeaksWorkspace=peaks_qLab, Tolerance=0.12, RoundHKLs=1)
-        number_peaks_indexed = out_params[0]
-        ratio_indexed = float(number_peaks_indexed) / peaks_qLab.getNumberPeaks()
-        self.assertTrue(ratio_indexed >= 0.8, "Not enough peaks indexed. Ratio indexed : " + str(ratio_indexed))
+    def cleanup(self):
+        ADS.clear()
+        shutil.rmtree(self._temp_dir)
 
-        ShowPossibleCells(PeaksWorkspace=peaks_qLab, MaxScalarError="0.5")
-        SelectCellOfType(PeaksWorkspace=peaks_qLab, CellType="Cubic", Centering="F", Apply=True)
+    def runTest(self):
+        self.peaks = LoadNexus(Filename="SXD23767_found_peaks.nxs", OutputWorkspace="peaks")
+        SXD.remove_peaks_on_detector_edge(self.peaks, 2)
 
-        unitcell_length = 5.64  # Angstroms
-        unitcell_angle = 90
-        length_tolerance = 0.1
-        #
-        angle_tolerance = 0.25  # Actual tolerance seems is 0.17
-        #
-        # Check results.
-        latt = peaks_qLab.sample().getOrientedLattice()
-        self.assertDelta(latt.a(), unitcell_length, length_tolerance, "a length is different from expected")
-        self.assertDelta(latt.b(), unitcell_length, length_tolerance, "b length is different from expected")
-        self.assertDelta(latt.c(), unitcell_length, length_tolerance, "c length is different from expected")
-        self.assertDelta(latt.alpha(), unitcell_angle, angle_tolerance, "alpha angle is different from expected")
-        self.assertDelta(latt.beta(), unitcell_angle, angle_tolerance, "beta angle is different from expected")
-        self.assertDelta(latt.gamma(), unitcell_angle, angle_tolerance, "gamma angle length is different from expected")
+        # force lattice parameters to equal published values
+        a, alpha = 5.6402, 90
+        CalculateUMatrix(PeaksWorkspace=self.peaks, a=a, b=a, c=a, alpha=alpha, beta=alpha, gamma=alpha)
+        # load an empty workspace as MoveCOmpoennt etc. only work on Matrix workspaces
+        self.ws = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="empty")
 
-    def doValidation(self):
-        # If we reach here, no validation failed
+        self.xml_path = SXD.calibrate_sxd_panels(self.ws, self.peaks, self._temp_dir, tol=0.25, SearchRadiusTransBank=0.025)
+
+        self.nindexed, *_ = IndexPeaks(PeaksWorkspace=self.peaks, Tolerance=0.1, CommonUBForAll=True)
+
+    def validate(self):
+        # test seems to vary on OS - so just check more peaks indexed and components have been moved
+        self.assertGreaterThan(self.nindexed, 232)
+        # check xml file exists
+        self.assertTrue(os.path.exists(self.xml_path))
+        # check calibration has been applied to both MatrixWorkspace and peaks
+        for ws in [self.peaks, self.ws]:
+            self.assertNotEqual(ws.getInstrument().getComponentByName("bank1").getPos()[1], 0)
+            self.assertNotEqual(ws.getInstrument().getComponentByName("bank2").getPos()[2], 0)
         return True
 
-    def requiredMemoryMB(self):
-        """Far too slow for managed workspaces. They're tested in other places. Requires 2Gb"""
-        return 1000
+
+class SXDProcessVanadium(systemtesting.MantidSystemTest):
+    def cleanup(self):
+        ADS.clear()
+
+    def runTest(self):
+        sxd = SXD(vanadium_runno=23779, empty_runno=23768)
+        sxd.process_vanadium()
+        self.van = sxd.van_ws
+
+    def validate(self):
+        return self.van, "SXD23779_processed_vanadium.nxs"
+
+
+class SXDProcessSampleData(systemtesting.MantidSystemTest):
+    def cleanup(self):
+        ADS.clear()
+
+    def runTest(self):
+        sxd = SXD(vanadium_runno=23769, empty_runno=23768)
+        sxd.van_ws = LoadNexus(Filename="SXD23779_processed_vanadium.nxs", OutputWorkspace="SXD23779_vanadium")
+        sxd.set_sample(
+            Geometry={"Shape": "CSG", "Value": sxd.sphere_shape}, Material={"ChemicalFormula": "Na Cl", "SampleNumberDensity": 0.0223}
+        )
+        sxd.set_goniometer_axes([0, 1, 0, 1])  # ccw rotation around vertical
+        runno = 23767
+        sxd.process_data([runno], [0])
+        self.ws = sxd.get_ws_name(runno)
+
+    def validate(self):
+        return self.ws, "SXD23767_processed.nxs"
+
+
+class SXDIntegrateData(systemtesting.MantidSystemTest):
+    def cleanup(self):
+        ADS.clear()
+
+    def runTest(self):
+        sxd = SXD(vanadium_runno=23769, empty_runno=23768)
+        # load data and convert to Qlab
+        ws = LoadNexus(Filename="SXD23767_processed.nxs", OutputWorkspace="SXD23767_processed")
+        runno = 23767
+        sxd.set_ws(runno, ws)
+        sxd.convert_to_MD(run=runno)
+        # load peaks to integrate
+        peaks = LoadNexus(Filename="SXD23767_found_peaks.nxs", OutputWorkspace="SXD23767_found")
+        sxd.set_peaks(runno, peaks, PEAK_TYPE.FOUND)
+        sxd.set_sample(
+            Geometry={"Shape": "CSG", "Value": sxd.sphere_shape}, Material={"ChemicalFormula": "Na Cl", "SampleNumberDensity": 0.0223}
+        )
+        sxd.set_goniometer_axes([0, 1, 0, 1])  # ccw rotation around vertical
+        sxd.integrate_data(INTEGRATION_TYPE.MD_OPTIMAL_RADIUS, PEAK_TYPE.FOUND, scale=12)
+        self.integrated_peaks = sxd.get_peaks_name(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS)
+
+    def validate(self):
+        self.tolerance = 1e-8
+        self.tolerance_is_rel_err = True
+        return self.integrated_peaks, "SXD23767_found_peaks_integrated.nxs"
