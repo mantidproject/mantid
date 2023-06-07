@@ -15,13 +15,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MockInstrumentActor.h"
 
 #include <memory>
@@ -67,29 +62,6 @@ MatrixWorkspace_sptr loadFile(std::string const &filename) {
   return std::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace);
 }
 
-MatrixWorkspace_sptr normaliseByCurrent(MatrixWorkspace_sptr const &inputWorkspace) {
-  auto alg = AlgorithmManager::Instance().create("NormaliseByCurrent");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
-MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr const &inputWorkspace, std::string const &target) {
-  auto alg = AlgorithmManager::Instance().create("ConvertUnits");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("Target", target);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
 } // namespace
 
 class ALFInstrumentModelTest : public CxxTest::TestSuite {
@@ -102,7 +74,7 @@ public:
     m_model = std::make_unique<ALFInstrumentModel>();
 
     m_nonALFLoadedWs = loadFile("IRIS00072464.raw");
-    m_loadedWs = convertUnits(normaliseByCurrent(loadFile(m_ALFData)), "dSpacing");
+    m_loadedWs = loadFile("ALF82301_preprocessed.nxs");
   }
 
   static ALFInstrumentModelTest *createSuite() { return new ALFInstrumentModelTest(); }
