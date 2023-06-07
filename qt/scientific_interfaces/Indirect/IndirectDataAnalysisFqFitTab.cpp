@@ -32,9 +32,9 @@ namespace {
 constexpr double HBAR = Mantid::PhysicalConstants::h / Mantid::PhysicalConstants::meV * 1e12 / (2 * M_PI);
 }
 
-std::vector<std::string> FQFIT_HIDDEN_PROPS = std::vector<std::string>(
-    {"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers", "OutputCompositeMembers",
-     "OutputWorkspace", "IgnoreInvalidData", "Output", "PeakRadius", "PlotParameter"});
+std::vector<std::string> FQFIT_HIDDEN_PROPS =
+    std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
+                              "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
 IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
     : IndirectFitAnalysisTab(new FqFitModel, parent), m_uiForm(new Ui::IndirectFitTab) {
