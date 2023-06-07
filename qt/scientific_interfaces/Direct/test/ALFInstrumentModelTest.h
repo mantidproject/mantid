@@ -61,7 +61,7 @@ MatrixWorkspace_sptr loadFile(std::string const &filename) {
   alg->initialize();
   alg->setAlwaysStoreInADS(false);
   alg->setProperty("Filename", filename);
-  alg->setProperty("OutputWorkspace", "__not_in_ads");
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
   Workspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
   return std::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace);

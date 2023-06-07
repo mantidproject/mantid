@@ -142,6 +142,7 @@ private:
 
   inline std::size_t numberOfTubes() const noexcept { return m_tubes.size(); }
 
+  Mantid::API::MatrixWorkspace_sptr m_emptyInstrument;
   Mantid::API::MatrixWorkspace_sptr m_sample;
   Mantid::API::MatrixWorkspace_sptr m_vanadium;
   std::vector<DetectorTube> m_tubes;
