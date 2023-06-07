@@ -196,7 +196,7 @@ void GenerateGroupingPowder::init() {
  */
 std::map<std::string, std::string> GenerateGroupingPowder::validateInputs() {
   std::map<std::string, std::string> issues;
-  const bool useAzimuthal = (getProperty("AzimuthalStep") < 360.0);
+  const bool useAzimuthal = (double(getProperty("AzimuthalStep")) < 360.0);
   const bool generateParFile = getProperty("GenerateParFile");
   if (useAzimuthal && generateParFile) {
     std::string noAzimuthInPar = "Cannot save a PAR file while using azimuthal grouping.";
