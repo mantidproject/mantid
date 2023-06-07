@@ -312,15 +312,22 @@ public:
     AnalysisDataService::Instance().remove(GROUP_WS);
   }
 
-  // make sure that the "old" behavior of numbering based on angle is still in place
-  void test_SNAPlite_no_azimuth_angle_numbering() {
+  /*
+   The angular range of the in-plane component of an in-plane detector is rougly 15 degrees. The angular step size is
+   chosen to be slightly larger than that to reduce the overall number of groups that will be generated. The
+   out-of-plane detector bank centers are roughly at the same two-theta angle as the in-plane, but your mileage may
+   vary.
+   */
+  void run_SNAPliteTest(const std::string &groupWSName, const double ang1, const double ang2, const bool numberByAngle,
+                        const bool splitSides, const std::vector<int> &groups_exp,
+                        const std::vector<double> &pixel_groups_exp) {
     const std::string NXS_OUT_FILE("PowderGrouping.nxs");
-    const std::string GROUP_WS("PowderGrouping_no_azimuth_angle_numbering");
     constexpr double TWO_THETA_STEP{18};
-    const std::string INPUT_WS("no_azimuth_angle_numberingIn");
+    const std::string INPUT_WS("SNAPlite");
+    const detid_t PIXELS_PER_BANK{32 * 32};
 
     // create snap lite with default detector positions
-    WorkspaceCreationHelper::createSNAPLiteInstrument(INPUT_WS);
+    WorkspaceCreationHelper::createSNAPLiteInstrument(INPUT_WS, ang1, ang2);
 
     GenerateGroupingPowder alg;
     alg.setChild(true);
@@ -333,7 +340,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", NXS_OUT_FILE));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", TWO_THETA_STEP));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", GROUP_WS));
+    if (splitSides) {
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("AzimuthalStep", 180.));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("AzimuthalStart", -90.));
+    }
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberByAngle", numberByAngle));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", groupWSName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -347,18 +359,15 @@ public:
     // get the GroupingWorkspace
     GroupingWorkspace_const_sptr outputws = alg.getProperty("GroupingWorkspace");
     if (!outputws) {
-      throw std::runtime_error("Cannot get grouping workspace: " + GROUP_WS);
+      throw std::runtime_error("Cannot get grouping workspace: " + groupWSName);
     }
 
     // verify the groups that were created
-    const std::vector<int> groups_exp{2, 3, 4, 5, 6, 7}; // empty part of the instrument gets number 1
     const auto groups_obs = outputws->getGroupIDs();
     TS_ASSERT_EQUALS(groups_obs.size(), groups_exp.size());
     TS_ASSERT_EQUALS(groups_obs, groups_exp);
 
     // verify the group assigned to particular pixels in the center of each of the 18 banks
-    const detid_t PIXELS_PER_BANK{32 * 32};
-    const std::vector<double> pixel_groups_exp{6, 6, 6, 5, 5, 5, 4, 4, 4, 2, 2, 2, 3, 3, 3, 4, 4, 4};
     const double TOL{0.01}; // getValue returns a double
     for (std::size_t i = 0; i < pixel_groups_exp.size(); ++i) {
       const detid_t detID = static_cast<detid_t>((0.5 + double(i)) * PIXELS_PER_BANK);
@@ -367,7 +376,93 @@ public:
 
     // this will succeed if workspace doesn't exist
     AnalysisDataService::Instance().remove(INPUT_WS);
-    AnalysisDataService::Instance().remove(GROUP_WS);
+    AnalysisDataService::Instance().remove(groupWSName);
+  }
+
+  // make sure that the "old" behavior of numbering based on angle is still in place
+  void test_SNAPlite_no_azimuth_angle_numbering() {
+    // angles taken from SNAP_57514
+    /*
+     bank 12 approx 114-128 - center is group 6
+     bank 22 approx 97-113 - center is group 5
+     bank 32 approx 81-96 - center is group 4 or 5
+     bank 42 approx 41-55 - center is group 2
+     bank 52 approx 57-73 - center is group 3
+     bank 62 approx 75-89 - center is group 4
+     some pixels will make it into group 7
+     */
+    const double ang1 = -65.3;
+    const double ang2 = 104.95;
+    const bool numberByAngle{true};
+    const bool splitSides{false};
+    const std::vector<int> groups_exp{2, 3, 4, 5, 6, 7}; // empty part of the instrument gets number 1
+    const std::vector<double> pixel_groups_exp{6, 6, 6, 5, 5, 5, 4, 4, 4, 2, 2, 2, 3, 3, 3, 4, 4, 4};
+    run_SNAPliteTest("PowderGrouping_no_azimuth_angle_numbering", ang1, ang2, numberByAngle, splitSides, groups_exp,
+                     pixel_groups_exp);
+  }
+
+  // detectors centered at -65 and 105
+  void test_SNAPlite_no_azimuth() {
+    // angles taken from SNAP_57514
+    /*
+     bank 12 approx 114-128 - center is group 1
+     bank 22 approx 97-113 - center is group 2
+     bank 32 approx 81-96 - center is group 3
+     bank 42 approx 41-55 - center is group 5
+     bank 52 approx 57-73 - center is group 4
+     bank 62 approx 75-89 - center is group 3
+     */
+    const double ang1 = -65.3;
+    const double ang2 = 104.95;
+    const bool numberByAngle{false};
+    const bool splitSides{false};
+    const std::vector<int> groups_exp{1, 2, 3, 4, 5};
+    const std::vector<double> pixel_groups_exp{1, 1, 1, 2, 2, 2, 3, 3, 3,
+                                               3, 3, 3, 4, 4, 4, 5, 5, 5}; // TODO needs more checking on values
+    run_SNAPliteTest("PowderGrouping_no_azimuth", ang1, ang2, numberByAngle, splitSides, groups_exp, pixel_groups_exp);
+  }
+
+  // detectors centered at -65 and 105
+  void test_SNAPlite_with_azimuth() {
+    // angles taken from SNAP_57514
+    /*
+     bank 12 approx 114-128 - center is group 1
+     bank 22 approx 97-113 - center is group 2
+     bank 32 approx 81-96 - center is group 3 or 4 depending on side TODO
+     bank 42 approx 41-55 - center is group 6
+     bank 52 approx 57-73 - center is group 5
+     bank 62 approx 75-89 - center is group 3 or 4 depending on side TODO
+     */
+    const double ang1 = -65.3;
+    const double ang2 = 104.95;
+    const bool numberByAngle{false};
+    const bool splitSides{true};
+    const std::vector<int> groups_exp{1, 2, 3, 4, 5, 6};
+    const std::vector<double> pixel_groups_exp{1, 1, 1, 2, 2, 2, 3, 3, 3,
+                                               4, 4, 4, 5, 5, 5, 6, 6, 6}; // TODO needs more checking on values
+    run_SNAPliteTest("PowderGrouping_no_azimuth", ang1, ang2, numberByAngle, splitSides, groups_exp, pixel_groups_exp);
+  }
+
+  // detectors centered at -40 and 140 - strange numbers but no overlap
+  void test_SNAPlite_no_azimuth_gaps() {
+    // angles invented so there is space in the middle of the range that is not covered
+    /*
+     bank 12 - center is group 1
+     bank 22 - center is group 2
+     bank 32 - center is group 3
+     bank 42 - center is group 6
+     bank 52 - center is group 5
+     bank 62 -  center is group 4
+     */
+    const double ang1 = -65.3;
+    const double ang2 = 104.95;
+    const bool numberByAngle{false};
+    const bool splitSides{false};
+    const std::vector<int> groups_exp{1, 2, 3, 4, 5, 6};
+    const std::vector<double> pixel_groups_exp{1, 1, 1, 2, 2, 2, 3, 3, 3,
+                                               4, 4, 4, 5, 5, 5, 6, 6, 6}; // TODO needs more checking on values
+    run_SNAPliteTest("PowderGrouping_no_azimuth_gaps", ang1, ang2, numberByAngle, splitSides, groups_exp,
+                     pixel_groups_exp);
   }
 
 private:
