@@ -147,9 +147,6 @@ if(EXISTS ${MSVC_IDE_LOCATION}/devenv.exe)
     )
   endif()
 endif()
-if(CONDA_ENV)
-  configure_file(${WINDOWS_BUILDCONFIG}/pycharm_conda.bat.in ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY)
-endif()
 
 # ######################################################################################################################
 # Custom targets to fix-up and run Python entry point code
