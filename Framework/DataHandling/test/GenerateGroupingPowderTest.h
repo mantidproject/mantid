@@ -14,6 +14,7 @@
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/System.h"
@@ -245,13 +246,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(load.initialize());
     TS_ASSERT(load.isInitialized());
     load.setPropertyValue("Filename", NXS_OUT_FILE);
-    load.setPropertyValue("OutputWorkspace", "GroupPowder");
+    load.setPropertyValue("OutputWorkspace", GROUP_WS);
 
     TS_ASSERT_THROWS_NOTHING(load.execute());
 
     // Test some aspects of the file
     Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve("GroupPowder"));
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(GROUP_WS));
     TS_ASSERT(workspace);
     TS_ASSERT(workspace.get());
 
@@ -277,6 +278,95 @@ public:
     remove(NXS_OUT_FILE.c_str());
 
     // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(GROUP_WS);
+  }
+
+  // azimuthal grouping with a par file isn't currently supported
+  void xtest_azimuth_with_par_fail() { // TODO re-enable
+    const std::string XML_OUT_FILE("PowderGrouping_azi_with_par.xml");
+    const std::string PAR_OUT_FILE{GenerateGroupingPowder::parFilenameFromXmlFilename(XML_OUT_FILE)};
+    const std::string GROUP_WS("aziWithParTestWS");
+    constexpr double step = 10;
+
+    GenerateGroupingPowder alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", m_emptyInstrument));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileFormat", "xml"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", XML_OUT_FILE));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", step));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", GROUP_WS));
+    // these next two cannot coexist
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AzimuthalStep", 180.));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", true));
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error &); // TODO type may be something else
+    TS_ASSERT(!alg.isExecuted());
+
+    // cleanup in case things were created
+    if (fileExists(XML_OUT_FILE)) {
+      remove(XML_OUT_FILE.c_str());
+      TS_FAIL("The file " + XML_OUT_FILE + " should not exist");
+    }
+    // this will succeed if workspace doesn't exist
+    AnalysisDataService::Instance().remove(GROUP_WS);
+  }
+
+  // make sure that the "old" behavior of numbering based on angle is still in place
+  void test_SNAPlite_no_azimuth_angle_numbering() {
+    const std::string NXS_OUT_FILE("PowderGrouping.nxs");
+    const std::string GROUP_WS("PowderGrouping_no_azimuth_angle_numbering");
+    constexpr double TWO_THETA_STEP{18};
+    const std::string INPUT_WS("no_azimuth_angle_numberingIn");
+
+    // create snap lite with default detector positions
+    WorkspaceCreationHelper::createSNAPLiteInstrument(INPUT_WS);
+
+    GenerateGroupingPowder alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", INPUT_WS));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileFormat", "nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GenerateParFile", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", NXS_OUT_FILE));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", TWO_THETA_STEP));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", GROUP_WS));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // make sure the output file exists
+    if (fileExists(NXS_OUT_FILE)) {
+      remove(NXS_OUT_FILE.c_str());
+    } else {
+      TS_FAIL("Output file does not exist: " + NXS_OUT_FILE);
+    }
+
+    // get the GroupingWorkspace
+    GroupingWorkspace_const_sptr outputws = alg.getProperty("GroupingWorkspace");
+    if (!outputws) {
+      throw std::runtime_error("Cannot get grouping workspace: " + GROUP_WS);
+    }
+
+    // verify the groups that were created
+    const std::vector<int> groups_exp{2, 3, 4, 5, 6, 7}; // empty part of the instrument gets number 1
+    const auto groups_obs = outputws->getGroupIDs();
+    TS_ASSERT_EQUALS(groups_obs.size(), groups_exp.size());
+    TS_ASSERT_EQUALS(groups_obs, groups_exp);
+
+    // verify the group assigned to particular pixels in the center of each of the 18 banks
+    const detid_t PIXELS_PER_BANK{32 * 32};
+    const std::vector<double> pixel_groups_exp{6, 6, 6, 5, 5, 5, 4, 4, 4, 2, 2, 2, 3, 3, 3, 4, 4, 4};
+    const double TOL{0.01}; // getValue returns a double
+    for (std::size_t i = 0; i < pixel_groups_exp.size(); ++i) {
+      const detid_t detID = static_cast<detid_t>((0.5 + i) * PIXELS_PER_BANK);
+      TS_ASSERT_DELTA(outputws->getValue(detID), pixel_groups_exp[i], TOL);
+    }
+
+    // this will succeed if workspace doesn't exist
+    AnalysisDataService::Instance().remove(INPUT_WS);
     AnalysisDataService::Instance().remove(GROUP_WS);
   }
 
