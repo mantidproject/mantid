@@ -57,15 +57,14 @@ class OldLabelor : public Labelor {
 
 public:
   OldLabelor(double tt_step) : Labelor(tt_step){};
-
   int operator()(SpectrumInfo const &spectrumInfo, int i) override {
     return static_cast<int>(spectrumInfo.twoTheta(i) * inv_tt_step);
   };
 };
 
 class PolarLabelor : public Labelor {
-  // uses twoTheta, won't label groups not covered
-
+  /* uses twoTheta to label groups in order, with no empty groups
+   */
   // a vector of the end points (in 2theta) for each group
   std::vector<std::pair<double, double>> group_tt;
 
@@ -85,7 +84,40 @@ public:
       // if not close to existing group, make group starting here
       if (ix == group_tt.end())
         group_tt.push_back({tt, tt + tt_step});
-      // if close to an existing group, make group further back so no overlaps
+      // if too close to an existing group, make group further back so no overlaps
+      else
+        group_tt.push_back({tt - tt_step, tt});
+      index = group_tt.end() - 1;
+    }
+    return std::distance(group_tt.begin(), index) + 1;
+  };
+};
+
+class PolarAzimuthalLabelor : public Labelor {
+  /* uses twoTheta to label groups in order, with no empty groups
+   */
+  // a vector of the end points (in 2theta) for each group
+  std::vector<std::pair<double, double>> group_tt;
+  std::vector<std::pair<double, double>> group_aa;
+
+public:
+  PolarAzimuthalLabelor(double tt_step, double aa_step, double aa_start)
+      : Labelor(tt_step, aa_step, aa_start), group_tt({}), group_aa({}){};
+
+  int operator()(SpectrumInfo const &spectrumInfo, int i) override {
+    // find the group so that 2theta is inside its end points
+    double tt = spectrumInfo.twoTheta(i);
+    auto index = std::find_if(group_tt.begin(), group_tt.end(),
+                              [tt](std::pair<double, double> x) { return x.first <= tt && tt < x.second; });
+    // if no such group, make a new one
+    if (index == group_tt.end()) {
+      // check if 2theta is very close to an existing group
+      auto ix = std::find_if(group_tt.begin(), group_tt.end(),
+                             [tt, this](std::pair<double, double> x) { return x.first < tt + this->tt_step; });
+      // if not close to existing group, make group starting here
+      if (ix == group_tt.end())
+        group_tt.push_back({tt, tt + tt_step});
+      // if too close to an existing group, make group further back so no overlaps
       else
         group_tt.push_back({tt - tt_step, tt});
       index = group_tt.end() - 1;
@@ -154,6 +186,24 @@ void GenerateGroupingPowder::init() {
   declareProperty("NumberByAngle", true,
                   "If true, divide sphere into groups by angle and step, number according to band."
                   "Empty parts of the instrument will effectively have group numbers that do not exist in the output.");
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ * @brief validate inputs
+ *
+ * @return std::map<std::string, std::string>
+ */
+std::map<std::string, std::string> GenerateGroupingPowder::validateInputs() {
+  std::map<std::string, std::string> issues;
+  const bool useAzimuthal = (getProperty("AzimuthalStep") < 360.0);
+  const bool generateParFile = getProperty("GenerateParFile");
+  if (useAzimuthal && generateParFile) {
+    std::string noAzimuthInPar =
+        "It is impossibleto save a PAR file while using azimuthal grouping." issues["EnergyMin"] = noAzimuthInPar;
+    issues["EnergyMax"] = noAzimuthInPar;
+  }
+  return issues;
 }
 
 /** Execute the algorithm.
