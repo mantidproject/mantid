@@ -26,7 +26,7 @@ def create_workspace():
     return inputData
 
 
-def genDataWithDeadDetectors():
+def create_workspace_with_dead_detectors():
     inputData = CreateSimulationWorkspace("MUSR", "0,1,32")
     xData = (inputData.dataX(0)[1:] + inputData.dataX(0)[:-1]) / 2.0
     for j in range(inputData.getNumberHistograms()):
@@ -44,7 +44,7 @@ class MuonMaxEntTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls._workspace = create_workspace()
-        cls._gen_data_with_dead_detectors = genDataWithDeadDetectors()
+        cls._workspace_with_dead_detectors = create_workspace_with_dead_detectors()
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -71,13 +71,13 @@ class MuonMaxEntTest(unittest.TestCase):
 
     def test_deadDetectors(self):
         # check input data has 2 dead detectors
-        for k in range(self._gen_data_with_dead_detectors.getNumberHistograms()):
+        for k in range(self._workspace_with_dead_detectors.getNumberHistograms()):
             if k == 24 or k == 42:
-                self.assertEqual(np.count_nonzero(self._gen_data_with_dead_detectors.readY(k)), 0)
+                self.assertEqual(np.count_nonzero(self._workspace_with_dead_detectors.readY(k)), 0)
             else:
-                self.assertNotEqual(np.count_nonzero(self._gen_data_with_dead_detectors.readY(k)), 0)
+                self.assertNotEqual(np.count_nonzero(self._workspace_with_dead_detectors.readY(k)), 0)
         MuonMaxent(
-            InputWorkspace=self._gen_data_with_dead_detectors,
+            InputWorkspace=self._workspace_with_dead_detectors,
             Npts=32768,
             FitDeaDTime=False,
             FixPhases=False,
