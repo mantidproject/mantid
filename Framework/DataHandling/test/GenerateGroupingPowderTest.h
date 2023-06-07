@@ -282,7 +282,7 @@ public:
   }
 
   // azimuthal grouping with a par file isn't currently supported
-  void xtest_azimuth_with_par_fail() { // TODO re-enable
+  void test_azimuth_with_par_fail() { // TODO re-enable
     const std::string XML_OUT_FILE("PowderGrouping_azi_with_par.xml");
     const std::string PAR_OUT_FILE{GenerateGroupingPowder::parFilenameFromXmlFilename(XML_OUT_FILE)};
     const std::string GROUP_WS("aziWithParTestWS");
@@ -361,7 +361,7 @@ public:
     const std::vector<double> pixel_groups_exp{6, 6, 6, 5, 5, 5, 4, 4, 4, 2, 2, 2, 3, 3, 3, 4, 4, 4};
     const double TOL{0.01}; // getValue returns a double
     for (std::size_t i = 0; i < pixel_groups_exp.size(); ++i) {
-      const detid_t detID = static_cast<detid_t>((0.5 + i) * PIXELS_PER_BANK);
+      const detid_t detID = static_cast<detid_t>((0.5 + double(i)) * PIXELS_PER_BANK);
       TS_ASSERT_DELTA(outputws->getValue(detID), pixel_groups_exp[i], TOL);
     }
 
