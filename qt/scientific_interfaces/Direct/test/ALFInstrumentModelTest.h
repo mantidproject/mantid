@@ -99,9 +99,6 @@ public:
 
     m_ALFData = "ALF82301.raw";
 
-    m_singleTubeDetectorIDs = std::vector<DetectorTube>{{2500u, 2501u, 2502u}};
-    m_multiTubeDetectorIDs = std::vector<DetectorTube>{{2500u, 2501u, 2502u}, {3500u, 3501u, 3502u}};
-
     m_model = std::make_unique<ALFInstrumentModel>();
 
     m_nonALFLoadedWs = loadFile("IRIS00072464.raw");
@@ -457,18 +454,19 @@ private:
     m_model->setData(ALFData::SAMPLE, m_loadedWs);
     m_model->replaceSampleWorkspaceInADS(m_loadedWs);
 
-    m_singleTubeDetectorIDs = findWholeTubes(m_loadedWs->componentInfo(), {2500u, 2501u, 2502u});
+    auto const singleTubeDetectorIDs = findWholeTubes(m_loadedWs->componentInfo(), {2500u, 2501u, 2502u});
 
-    TS_ASSERT(m_model->setSelectedTubes(m_singleTubeDetectorIDs));
+    TS_ASSERT(m_model->setSelectedTubes(singleTubeDetectorIDs));
   }
 
   void setMultipleTubesSelected() {
     m_model->setData(ALFData::SAMPLE, m_loadedWs);
     m_model->replaceSampleWorkspaceInADS(m_loadedWs);
 
-    m_multiTubeDetectorIDs = findWholeTubes(m_loadedWs->componentInfo(), {2500u, 2501u, 2502u, 3500u, 3501u, 3502u});
+    auto const multiTubeDetectorIDs =
+        findWholeTubes(m_loadedWs->componentInfo(), {2500u, 2501u, 2502u, 3500u, 3501u, 3502u});
 
-    TS_ASSERT(m_model->setSelectedTubes(m_multiTubeDetectorIDs));
+    TS_ASSERT(m_model->setSelectedTubes(multiTubeDetectorIDs));
   }
 
   void expectInstrumentActorCalls(std::size_t const workspaceIndex = 0u) {
@@ -485,9 +483,6 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr m_nonALFLoadedWs;
   Mantid::API::MatrixWorkspace_sptr m_loadedWs;
-
-  std::vector<DetectorTube> m_singleTubeDetectorIDs;
-  std::vector<DetectorTube> m_multiTubeDetectorIDs;
 
   std::unique_ptr<NiceMock<MockInstrumentActor>> m_instrumentActor;
   std::unique_ptr<ALFInstrumentModel> m_model;
