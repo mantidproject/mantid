@@ -130,8 +130,18 @@ void GenerateGroupingPowder::init() {
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
   declareProperty("AngleStep", -1.0, positiveDouble, "The angle step for grouping, in degrees.");
-  declareProperty("AzimuthalStep", -1.0, positiveDouble, "The azimuthal angle step for grouping, in degrees.");
-  declareProperty("AzimuthalStart", -1.0, positiveDouble, "The aimuthal angle start location, in degrees.");
+
+  auto withinCircle = std::make_shared<BoundedValidator<double>>();
+  withinCircle->setLower(0.0);
+  withinCircle->setUpper(360.0);
+  withinCircle->setLowerExclusive(true);
+  declareProperty("AzimuthalStep", 360.0, withinCircle, "The azimuthal angle step for grouping, in degrees.");
+  auto withinDoubleCircle = std::make_shared<BoundedValidator<double>>();
+  withinDoubleCircle->setLower(-360.0);
+  withinDoubleCircle->setUpper(360.0);
+  withinDoubleCircle->setExclusive(true);
+  declareProperty("AzimuthalStart", 0.0, withinDoubleCircle, "The aimuthal angle start location, in degrees.");
+
   declareProperty(std::make_unique<FileProperty>("GroupingFilename", "", FileProperty::Save, "xml"),
                   "A grouping file that will be created.");
   declareProperty("GenerateParFile", true,
@@ -142,7 +152,8 @@ void GenerateGroupingPowder::init() {
                   "The grouping workspace created");
 
   declareProperty("NumberByAngle", true,
-                  "If true, divide sphere into groups by angle and step, number according to band.");
+                  "If true, divide sphere into groups by angle and step, number according to band."
+                  "Empty parts of the instrument will effectively have group numbers that do not exist in the output.");
 }
 
 /** Execute the algorithm.
@@ -191,7 +202,8 @@ void GenerateGroupingPowder::exec() {
 
     const double groupId = (*label)(spectrumInfo, i);
     if (i % 1000 == 0)
-      printf("LABEL %d\t%lf\t%lf\n", i, tt, groupId);
+      // compare to printf("LABEL %d %lf %lf\n", i, tt, groupId);
+      std::cout << "LABEL " << i << '\t' << tt << '\t' << groupId << std::endl;
     fflush(stdout);
 
     if (spectrumInfo.hasUniqueDetector(i)) {
@@ -216,7 +228,7 @@ void GenerateGroupingPowder::exec() {
   if (getProperty("GenerateParFile")) {
     this->saveAsPAR();
   }
-  printf("------DONE-----\n");
+  std::cout << "------DONE-----\n";
 }
 
 // XML file
