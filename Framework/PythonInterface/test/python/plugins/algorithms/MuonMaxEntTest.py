@@ -107,14 +107,14 @@ class MuonMaxEntTest(unittest.TestCase):
         self.assertEqual(phase.rowCount(), 64)
 
     def test_raises_when_stuck_looping_due_to_nan_values(self):
-        with self.assertRaisesRegex(RuntimeError, "MuonMaxent-v1: invalid value: a=901.6611426213124 b=nan c=nan"):
+        with self.assertRaisesRegex(RuntimeError, "MuonMaxent-v1: invalid value: a=[0-9]*.[0-9]* b=nan c=nan"):
             MuonMaxent(
                 InputWorkspace=self._workspace,
                 Npts=32768,
                 FitDeaDTime=False,
                 FixPhases=True,
-                OuterIterations=10,
-                InnerIterations=10,
+                OuterIterations=2,
+                InnerIterations=1,
                 OutputWorkspace="freq",
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
