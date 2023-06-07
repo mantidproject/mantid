@@ -18,6 +18,7 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
@@ -1308,4 +1309,56 @@ Mantid::DataObjects::Workspace2D_sptr create2DWorkspace123WithMaskedBin(int numH
   ws->flagMasked(maskedWorkspaceIndex, maskedBinIndex);
   return ws;
 }
+
+MatrixWorkspace_sptr createSNAPLiteInstrument(const std::string &wkspName, const double ang1, const double ang2) {
+  // Use lite instrument based on one valid starting 2018-05-01
+  const std::string IDF_FILE("SNAPLite_Definition.xml");
+
+  // Create empty instrument
+  auto loadEmptyInstr = AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument");
+  loadEmptyInstr->initialize();
+  loadEmptyInstr->setProperty("Filename", IDF_FILE);
+  loadEmptyInstr->setProperty("OutputWorkspace", wkspName);
+
+  loadEmptyInstr->execute();
+  if (!loadEmptyInstr->isExecuted())
+    throw std::runtime_error("Failed to execute LoadEmptyInstrument");
+
+  // add logs
+  // for some reason, the units aren't in the logs
+  TimeSeriesProperty<double> *ang1Prop = new TimeSeriesProperty<double>("det_arc1");
+  ang1Prop->addValue(DateAndTime(0), ang1);
+  TimeSeriesProperty<double> *ang2Prop = new TimeSeriesProperty<double>("det_arc2");
+  ang2Prop->addValue(DateAndTime(0), ang2);
+  TimeSeriesProperty<double> *len1Prop = new TimeSeriesProperty<double>("det_lin1");
+  len1Prop->addValue(DateAndTime(0), 0.045);
+  TimeSeriesProperty<double> *len2Prop = new TimeSeriesProperty<double>("det_lin2");
+  len2Prop->addValue(DateAndTime(0), 0.043);
+
+  MatrixWorkspace_sptr wsIn =
+      std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wkspName));
+  wsIn->mutableRun().addProperty(ang1Prop);
+  wsIn->mutableRun().addProperty(ang2Prop);
+  wsIn->mutableRun().addProperty(len1Prop);
+  wsIn->mutableRun().addProperty(len2Prop);
+
+  // reload instrument so the logs are used
+  auto loadInstr = AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
+  loadInstr->initialize();
+  loadInstr->setProperty("Workspace", wkspName);
+  loadInstr->setProperty("Filename", IDF_FILE);
+  loadInstr->setProperty("MonitorList", "-2--1");
+  loadInstr->setProperty("RewriteSpectraMap", "False");
+  loadInstr->execute();
+  if (!loadInstr->isExecuted())
+    throw std::runtime_error("Failed to execute LoadInstrument");
+
+  // set the units so DiffractionFocussing will do its job
+  auto xAxis = wsIn->getAxis(0);
+  xAxis->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+
+  wsIn = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wkspName));
+  return wsIn;
+}
+
 } // namespace WorkspaceCreationHelper
