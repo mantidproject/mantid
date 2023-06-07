@@ -35,6 +35,67 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Poco::XML;
 
+namespace {
+class Labelor {
+protected:
+  const double tt_step;
+  const double aa_step;
+  const double aa_start;
+
+public:
+  Labelor(double tt_step, double aa_step = 0.0, double aa_start = 0.0)
+      : tt_step(tt_step), aa_step(aa_step), aa_start(aa_start){};
+  virtual int operator()(SpectrumInfo spectrumInfo, int i) { return -1; };
+};
+
+class OldLabelor : public Labelor {
+  /* Divides sphere into bands of size tt_step,
+  which are then numbered sequentially, in order, with increasing twoTheta
+  */
+  // reduce flops by saving as mult. constant
+  double inv_tt_step = Mantid::Geometry::rad2deg / tt_step;
+
+public:
+  OldLabelor(double tt_step) : Labelor(tt_step){};
+
+  int operator()(SpectrumInfo spectrumInfo, int i) override {
+    return static_cast<int>(spectrumInfo.twoTheta(i) * inv_tt_step);
+  };
+};
+
+class PolarLabelor : public Labelor {
+  // uses twoTheta, won't label groups not covered
+
+  // a vector of the end points (in 2theta) for each group
+  std::vector<std::pair<double, double>> group_tt;
+
+public:
+  PolarLabelor(double tt_step) : Labelor(tt_step), group_tt({}){};
+
+  int operator()(SpectrumInfo spectrumInfo, int i) override {
+    // find the group so that 2theta is inside its end points
+    double tt = spectrumInfo.twoTheta(i);
+    auto index = std::find_if(group_tt.begin(), group_tt.end(),
+                              [tt](std::pair<double, double> x) { return x.first <= tt && tt < x.second; });
+    // if no such group, make a new one
+    if (index == group_tt.end()) {
+      // check if 2theta is very close to an existing group
+      auto i = std::find_if(group_tt.begin(), group_tt.end(),
+                            [tt, this](std::pair<double, double> x) { return x.first < tt + this->tt_step; });
+      // if not close to existing group, make group starting here
+      if (i == group_tt.end())
+        group_tt.push_back({tt, tt + tt_step});
+      // if close to an existing group, make group further back so no overlaps
+      else
+        group_tt.push_back({tt - tt_step, tt});
+      index = group_tt.end() - 1;
+    }
+    return std::distance(group_tt.begin(), index) + 1;
+  };
+};
+
+} // anonymous namespace
+
 namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
@@ -69,8 +130,9 @@ void GenerateGroupingPowder::init() {
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
   declareProperty("AngleStep", -1.0, positiveDouble, "The angle step for grouping, in degrees.");
-  declareProperty(std::make_unique<FileProperty>("GroupingFilename", "", FileProperty::Save,
-                                                 "." + std::string(getProperty("FileFormat"))),
+  declareProperty("AzimuthalStep", -1.0, positiveDouble, "The azimuthal angle step for grouping, in degrees.");
+  declareProperty("AzimuthalStart", -1.0, positiveDouble, "The aimuthal angle start location, in degrees.");
+  declareProperty(std::make_unique<FileProperty>("GroupingFilename", "", FileProperty::Save, "xml"),
                   "A grouping file that will be created.");
   declareProperty("GenerateParFile", true,
                   "If true, a par file with a corresponding name to the "
@@ -78,6 +140,9 @@ void GenerateGroupingPowder::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("GroupingWorkspace", "", Direction::Output),
                   "The grouping workspace created");
+
+  declareProperty("NumberByAngle", true,
+                  "If true, divide sphere into groups by angle and step, number according to band.");
 }
 
 /** Execute the algorithm.
@@ -99,15 +164,36 @@ void GenerateGroupingPowder::exec() {
   this->setProperty("GroupingWorkspace", groupWS);
 
   const double step = getProperty("AngleStep");
+
+  Labelor *label;
+  OldLabelor oldlabel(step);
+  PolarLabelor polarlabel(step);
+  bool numberByAngle = getProperty("NumberByAngle");
+  if (numberByAngle) {
+    label = &oldlabel;
+  } else {
+    label = &polarlabel;
+  }
+
   // const auto numSteps = static_cast<size_t>(180. / step + 1);
 
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
+
     const auto &det = spectrumInfo.detector(i);
     const double tt = spectrumInfo.twoTheta(i) * Geometry::rad2deg;
-    const double groupId = std::floor(tt / step); // round down
+    // const double groupId = std::floor(tt / step); // round down
+
+    // auto x = spectrumInfo.cbegin()+i;
+    // auto testme = x->twoTheta();
+
+    const double groupId = (*label)(spectrumInfo, i);
+    if (i % 1000 == 0)
+      printf("LABEL %d\t%lf\t%lf\n", i, tt, groupId);
+    fflush(stdout);
+
     if (spectrumInfo.hasUniqueDetector(i)) {
       groupWS->setValue(det.getID(), groupId);
     } else {
@@ -130,6 +216,7 @@ void GenerateGroupingPowder::exec() {
   if (getProperty("GenerateParFile")) {
     this->saveAsPAR();
   }
+  printf("------DONE-----\n");
 }
 
 // XML file
