@@ -98,12 +98,9 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
     def tearDown(self) -> None:
         AnalysisDataService.remove(self._output_name)
 
-    def test_that_the_result_group_contains_the_correct_number_of_workspaces(self):
+    def test_that_the_result_group_contains_a_single_workspace(self):
         self.assertTrue(isinstance(self._result_group, WorkspaceGroup))
         self.assertEqual(self._result_group.getNumberOfEntries(), 1)
-
-    def test_that_the_group_workspace_contains_the_workspace_with_the_correct_name(self):
-        self.assertEqual(len(self._result_group.getNames()), 1)
         self.assertEqual(self._result_group.getNames()[0], self._input_name)
 
     def test_that_the_algorithm_does_not_throw_when_given_valid_properties(self):
