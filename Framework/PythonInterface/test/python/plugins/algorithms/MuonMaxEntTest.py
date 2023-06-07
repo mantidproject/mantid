@@ -115,8 +115,8 @@ class MuonMaxEntTest(unittest.TestCase):
 
         self.assertEqual(phase.rowCount(), 64)
 
-    def test_exitOnNAN(self):
-        try:
+    def test_raises_when_stuck_looping_due_to_nan_values(self):
+        with self.assertRaisesRegex(RuntimeError, "MuonMaxent-v1: invalid value: a=418.1113271717654 b=nan c=nan"):
             MuonMaxent(
                 InputWorkspace=self._gen_data,
                 Npts=32768,
@@ -128,10 +128,6 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except RuntimeError:
-            pass
-        else:
-            self.fail("should throw an error as it will get stuck in a loop due to NAN values")
 
     def test_multipleSpec(self):
         MuonMaxent(
@@ -152,12 +148,12 @@ class MuonMaxEntTest(unittest.TestCase):
         self.assertEqual(time.getNumberHistograms(), 2)
         self.assertEqual(phase.rowCount(), 2)
 
-    def test_badRange(self):
-        try:
+    def test_raises_when_start_is_greater_than_end(self):
+        with self.assertRaisesRegex(RuntimeError, "Some invalid Properties found"):
             MuonMaxent(
                 InputWorkspace=self._gen_data2,
-                FirstGoodData=10.0,
-                LastGoodData=1.0,
+                FirstGoodTime=10.0,
+                LastGoodTime=1.0,
                 Npts=32768,
                 FitDeaDTime=False,
                 FixPhases=True,
@@ -167,16 +163,12 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except:
-            pass
-        else:
-            self.fail("should have failed as start > end")
 
-    def test_badStart(self):
-        try:
+    def test_raises_when_start_is_less_than_zero(self):
+        with self.assertRaisesRegex(RuntimeError, "Some invalid Properties found"):
             MuonMaxent(
                 InputWorkspace=self._gen_data2,
-                FirstGoodData=-10.0,
+                FirstGoodTime=-10.0,
                 Npts=32768,
                 FitDeaDTime=False,
                 FixPhases=True,
@@ -186,13 +178,9 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except:
-            pass
-        else:
-            self.fail("should have failed as start < 0.0")
 
-    def test_badInner(self):
-        try:
+    def test_raises_when_inner_iterations_is_less_than_zero(self):
+        with self.assertRaisesRegex(RuntimeError, "Some invalid Properties found"):
             MuonMaxent(
                 InputWorkspace=self._gen_data2,
                 Npts=32768,
@@ -204,13 +192,9 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except:
-            pass
-        else:
-            self.fail("should have failed as InnerIterations <= 0.0")
 
-    def test_badOuter(self):
-        try:
+    def test_raises_when_outer_iterations_is_less_than_zero(self):
+        with self.assertRaisesRegex(RuntimeError, "Some invalid Properties found"):
             MuonMaxent(
                 InputWorkspace=self._gen_data2,
                 Npts=32768,
@@ -222,13 +206,9 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except:
-            pass
-        else:
-            self.fail("should have failed as OuterIterations <= 0.0")
 
-    def test_badField(self):
-        try:
+    def test_raises_when_maxfield_is_less_than_zero(self):
+        with self.assertRaisesRegex(RuntimeError, "Some invalid Properties found"):
             MuonMaxent(
                 InputWorkspace=self._gen_data2,
                 Npts=32768,
@@ -241,13 +221,9 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except:
-            pass
-        else:
-            self.fail("should have failed as MaxField <= 0.0")
 
-    def test_badFactor(self):
-        try:
+    def test_raises_when_factor_is_less_than_zero(self):
+        with self.assertRaisesRegex(RuntimeError, "Some invalid Properties found"):
             MuonMaxent(
                 InputWorkspace=self._gen_data2,
                 Npts=32768,
@@ -260,13 +236,9 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except:
-            pass
-        else:
-            self.fail("should have failed as Factor <= 0.0")
 
-    def test_badDefault(self):
-        try:
+    def test_raises_when_defaultlevel_is_less_than_zero(self):
+        with self.assertRaisesRegex(RuntimeError, "Some invalid Properties found"):
             MuonMaxent(
                 InputWorkspace=self._gen_data2,
                 Npts=32768,
@@ -279,10 +251,6 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except:
-            pass
-        else:
-            self.fail("should have failed as DefaultLevel <= 0.0")
 
 
 if __name__ == "__main__":
