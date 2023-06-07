@@ -97,15 +97,14 @@ public:
   ALFInstrumentModelTest() {
     FrameworkManager::Instance();
 
-    m_nonALFData = "IRIS00072464.raw";
     m_ALFData = "ALF82301.raw";
-    m_ALFEdgeCaseData = "ALF83743.raw";
 
     m_singleTubeDetectorIDs = std::vector<DetectorTube>{{2500u, 2501u, 2502u}};
     m_multiTubeDetectorIDs = std::vector<DetectorTube>{{2500u, 2501u, 2502u}, {3500u, 3501u, 3502u}};
 
     m_model = std::make_unique<ALFInstrumentModel>();
 
+    m_nonALFLoadedWs = loadFile("IRIS00072464.raw");
     m_loadedWs = convertUnits(normaliseByCurrent(loadFile(m_ALFData)), "dSpacing");
   }
 
@@ -189,7 +188,7 @@ public:
   }
 
   void test_isALFData_returns_false_when_the_workspace_is_ALF_data() {
-    TS_ASSERT(!m_model->isALFData(loadFile(m_nonALFData)));
+    TS_ASSERT(!m_model->isALFData(m_nonALFLoadedWs));
   }
 
   void test_isALFData_returns_true_when_the_workspace_is_ALF_data() { TS_ASSERT(m_model->isALFData(m_loadedWs)); }
@@ -208,13 +207,13 @@ public:
 
   void test_binningMismatch_returns_true_if_the_sample_and_vanadium_have_different_binning() {
     m_model->setData(ALFData::SAMPLE, m_loadedWs);
-    m_model->setData(ALFData::VANADIUM, loadFile(m_nonALFData));
+    m_model->setData(ALFData::VANADIUM, m_nonALFLoadedWs);
 
     TS_ASSERT(m_model->binningMismatch());
   }
 
   void test_axisIsDSpacing_returns_false_if_the_axis_is_not_dSpacing() {
-    m_model->setData(ALFData::SAMPLE, loadFile(m_nonALFData));
+    m_model->setData(ALFData::SAMPLE, m_nonALFLoadedWs);
     TS_ASSERT(!m_model->axisIsDSpacing());
   }
 
@@ -482,10 +481,9 @@ private:
         .WillRepeatedly(DoAll(SetArgReferee<1>(0u), SetArgReferee<2>(50u)));
   }
 
-  std::string m_nonALFData;
   std::string m_ALFData;
-  std::string m_ALFEdgeCaseData;
 
+  Mantid::API::MatrixWorkspace_sptr m_nonALFLoadedWs;
   Mantid::API::MatrixWorkspace_sptr m_loadedWs;
 
   std::vector<DetectorTube> m_singleTubeDetectorIDs;
