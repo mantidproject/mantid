@@ -199,9 +199,9 @@ std::map<std::string, std::string> GenerateGroupingPowder::validateInputs() {
   const bool useAzimuthal = (getProperty("AzimuthalStep") < 360.0);
   const bool generateParFile = getProperty("GenerateParFile");
   if (useAzimuthal && generateParFile) {
-    std::string noAzimuthInPar =
-        "It is impossibleto save a PAR file while using azimuthal grouping." issues["EnergyMin"] = noAzimuthInPar;
-    issues["EnergyMax"] = noAzimuthInPar;
+    std::string noAzimuthInPar = "Cannot save a PAR file while using azimuthal grouping.";
+    issues["AzimuthalStep"] = noAzimuthInPar;
+    issues["GenerateParFile"] = noAzimuthInPar;
   }
   return issues;
 }
