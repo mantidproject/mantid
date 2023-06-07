@@ -136,7 +136,6 @@ PATH=${MSVC_PATHS}"
 )
 
 configure_file(${WINDOWS_BUILDCONFIG}/command-prompt.bat.in ${PROJECT_BINARY_DIR}/command-prompt.bat @ONLY)
-configure_file(${WINDOWS_BUILDCONFIG}/pycharm.env.in ${PROJECT_BINARY_DIR}/pycharm.env @ONLY)
 
 # The IDE may not be installed as we could be just using the build tools
 if(EXISTS ${MSVC_IDE_LOCATION}/devenv.exe)
