@@ -45,7 +45,7 @@ protected:
 public:
   Labelor(double tt_step, double aa_step = 0.0, double aa_start = 0.0)
       : tt_step(tt_step), aa_step(aa_step), aa_start(aa_start){};
-  virtual int operator()(SpectrumInfo spectrumInfo, int i) { return -1; };
+  virtual int operator()(SpectrumInfo const &spectrumInfo, int i) { return -1; };
 };
 
 class OldLabelor : public Labelor {
@@ -58,7 +58,7 @@ class OldLabelor : public Labelor {
 public:
   OldLabelor(double tt_step) : Labelor(tt_step){};
 
-  int operator()(SpectrumInfo spectrumInfo, int i) override {
+  int operator()(SpectrumInfo const &spectrumInfo, int i) override {
     return static_cast<int>(spectrumInfo.twoTheta(i) * inv_tt_step);
   };
 };
@@ -72,7 +72,7 @@ class PolarLabelor : public Labelor {
 public:
   PolarLabelor(double tt_step) : Labelor(tt_step), group_tt({}){};
 
-  int operator()(SpectrumInfo spectrumInfo, int i) override {
+  int operator()(SpectrumInfo const &spectrumInfo, int i) override {
     // find the group so that 2theta is inside its end points
     double tt = spectrumInfo.twoTheta(i);
     auto index = std::find_if(group_tt.begin(), group_tt.end(),
@@ -80,10 +80,10 @@ public:
     // if no such group, make a new one
     if (index == group_tt.end()) {
       // check if 2theta is very close to an existing group
-      auto i = std::find_if(group_tt.begin(), group_tt.end(),
-                            [tt, this](std::pair<double, double> x) { return x.first < tt + this->tt_step; });
+      auto ix = std::find_if(group_tt.begin(), group_tt.end(),
+                             [tt, this](std::pair<double, double> x) { return x.first < tt + this->tt_step; });
       // if not close to existing group, make group starting here
-      if (i == group_tt.end())
+      if (ix == group_tt.end())
         group_tt.push_back({tt, tt + tt_step});
       // if close to an existing group, make group further back so no overlaps
       else
@@ -194,17 +194,8 @@ void GenerateGroupingPowder::exec() {
     }
 
     const auto &det = spectrumInfo.detector(i);
-    const double tt = spectrumInfo.twoTheta(i) * Geometry::rad2deg;
-    // const double groupId = std::floor(tt / step); // round down
-
-    // auto x = spectrumInfo.cbegin()+i;
-    // auto testme = x->twoTheta();
-
+    // const double tt = spectrumInfo.twoTheta(i) * Geometry::rad2deg;
     const double groupId = (*label)(spectrumInfo, i);
-    if (i % 1000 == 0)
-      // compare to printf("LABEL %d %lf %lf\n", i, tt, groupId);
-      std::cout << "LABEL " << i << '\t' << tt << '\t' << groupId << std::endl;
-    fflush(stdout);
 
     if (spectrumInfo.hasUniqueDetector(i)) {
       groupWS->setValue(det.getID(), groupId);
@@ -228,7 +219,6 @@ void GenerateGroupingPowder::exec() {
   if (getProperty("GenerateParFile")) {
     this->saveAsPAR();
   }
-  std::cout << "------DONE-----\n";
 }
 
 // XML file
