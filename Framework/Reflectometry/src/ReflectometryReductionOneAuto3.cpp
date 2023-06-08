@@ -1205,7 +1205,7 @@ std::string ReflectometryReductionOneAuto3::getSummedWorkspaceName(const std::st
     runNumber = getRunNumberForWorkspaceGroup(getPropertyValue(wsPropertyName));
   }
 
-  auto &ws_prefix = isTransWs ? TRANS_WORKSPACE_PREFIX : TOF_WORKSPACE_PREFIX;
+  const auto &ws_prefix = isTransWs ? TRANS_WORKSPACE_PREFIX : TOF_WORKSPACE_PREFIX;
   const std::string hide_prefix = getProperty("HideSummedWorkspaces") ? "__" : "";
 
   return hide_prefix + ws_prefix + runNumber + SUMMED_WORKSPACE_SUFFIX;
