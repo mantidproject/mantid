@@ -127,7 +127,7 @@ class FocusTest(systemtesting.MantidSystemTest):
         # Gen vanadium calibration first
         setup_mantid_paths()
         inst_object = setup_inst_object(tt_mode="tt88", focus_mode="Trans")
-        self.focus_results = run_focus(inst_object, tt_mode="tt70", file_ext=".nxs", subtract_empty=True, spline_path=spline_path)
+        self.focus_results = run_focus(inst_object, tt_mode="tt70", subtract_empty=True, spline_path=spline_path)
 
         # Make sure that inst settings reverted to the default after focus
         self.assertEqual(inst_object._inst_settings.tt_mode, "tt88")
@@ -147,6 +147,35 @@ class FocusTest(systemtesting.MantidSystemTest):
 
         self.tolerance = 1e-8  # Required for difference in spline data between operating systems
         return "PRL98507_tt70-d", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            config["datasearch.directories"] = self.existing_config
+            mantid.mtd.clear()
+
+
+class FocusTestIncludingFileExtWorkspaceName(systemtesting.MantidSystemTest):
+    # same as FocusTest but with added argument incl_file_ext_in_wsname=True
+    focus_results = None
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        inst_object = setup_inst_object(tt_mode="tt88", focus_mode="Trans")
+        self.focus_results = run_focus(
+            inst_object, tt_mode="tt70", file_ext=".nxs", incl_file_ext_in_wsname=True, subtract_empty=True, spline_path=spline_path
+        )
+
+    def validate(self):
+        # just check file extension (nxs) in workspace name
+        return "PRL98507_tt70_nxs-d", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
 
     def cleanup(self):
         try:
