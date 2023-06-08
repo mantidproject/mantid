@@ -42,12 +42,13 @@ def current_os_has_gslv2():
 
 
 class IndirectReplaceFitResultTest(unittest.TestCase):
-    def setUp(self):
-        self._input_name = "iris26176_graphite002_conv_1L_s0_to_17__Result"
-        self._single_fit_name = "iris26176_graphite002_red_conv_1L_1__Result"
-        self._result_group_name = "iris26176_graphite002_conv_1L_s0_to_17_Results"
-        self._single_fit_group_name = "iris26176_graphite002_red_conv_1L_1_Results"
-        self._output_name = "iris26176_graphite002_conv_1L_s0_to_17_Result_Edit"
+    @classmethod
+    def setUpClass(cls):
+        cls._input_name = "iris26176_graphite002_conv_1L_s0_to_17__Result"
+        cls._single_fit_name = "iris26176_graphite002_red_conv_1L_1__Result"
+        cls._result_group_name = "iris26176_graphite002_conv_1L_s0_to_17_Results"
+        cls._single_fit_group_name = "iris26176_graphite002_red_conv_1L_1_Results"
+        cls._output_name = "iris26176_graphite002_conv_1L_s0_to_17_Result_Edit"
 
         red_name = "iris26176_graphite002_red"
         res_name = "iris26173_graphite002_res"
@@ -72,7 +73,7 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
             PassWSIndexToFunction="1",
             StartX=start_x,
             EndX=end_x,
-            OutputWorkspace=self._result_group_name,
+            OutputWorkspace=cls._result_group_name,
             OutputParameterWorkspace="iris26176_graphite002_conv_1L_s0_to_17_Parameters",
             OutputWorkspaceGroup="iris26176_graphite002_conv_1L_s0_to_17_Workspaces",
         )
@@ -84,30 +85,23 @@ class IndirectReplaceFitResultTest(unittest.TestCase):
             WorkspaceIndex="1",
             StartX=start_x,
             EndX=end_x,
-            OutputWorkspace=self._single_fit_group_name,
+            OutputWorkspace=cls._single_fit_group_name,
             OutputParameterWorkspace="iris26176_graphite002_conv_1L_s1_Parameters",
             OutputWorkspaceGroup="iris26176_graphite002_conv_1L_s1_Workspaces",
         )
 
-        # RenameWorkspace(InputWorkspace=self._input_name, OutputWorkspace=self._input_name)
-        # RenameWorkspace(InputWorkspace=self._single_fit_name, OutputWorkspace=self._single_fit_name)
-
+    def setUp(self):
         self._input_workspace = get_ads_workspace(self._input_name)
         self._single_fit_workspace = get_ads_workspace(self._single_fit_name)
         self._result_group = get_ads_workspace(self._result_group_name)
 
-    def test_that_the_result_group_contains_the_correct_number_of_workspaces(self):
+    def tearDown(self) -> None:
+        AnalysisDataService.remove(self._output_name)
+
+    def test_that_the_result_group_contains_a_single_workspace(self):
         self.assertTrue(isinstance(self._result_group, WorkspaceGroup))
         self.assertEqual(self._result_group.getNumberOfEntries(), 1)
-
-    def test_that_the_group_workspace_contains_the_workspace_with_the_correct_name(self):
-        self.assertEqual(len(self._result_group.getNames()), 1)
         self.assertEqual(self._result_group.getNames()[0], self._input_name)
-
-    def test_that_the_workspaces_set_up_have_the_correct_names(self):
-        self.assertEqual(self._input_workspace.name(), self._input_name)
-        self.assertEqual(self._single_fit_workspace.name(), self._single_fit_name)
-        self.assertEqual(self._result_group.name(), self._result_group_name)
 
     def test_that_the_algorithm_does_not_throw_when_given_valid_properties(self):
         execute_algorithm(self._input_workspace, self._single_fit_workspace, self._output_name)
