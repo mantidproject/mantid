@@ -92,7 +92,7 @@ class Pearl(AbstractInst):
     def _generate_out_file_paths(self, run_details):
         output_file_paths = super()._generate_out_file_paths(run_details)
         file_ext = run_details.file_extension
-        if file_ext:
+        if file_ext and self._inst_settings.incl_file_ext_in_wsname:
             output_file_paths["output_name"] = output_file_paths["output_name"] + file_ext.replace(".", "_")
         return output_file_paths
 
