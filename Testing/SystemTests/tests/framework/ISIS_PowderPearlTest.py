@@ -127,7 +127,7 @@ class FocusTest(systemtesting.MantidSystemTest):
         # Gen vanadium calibration first
         setup_mantid_paths()
         inst_object = setup_inst_object(tt_mode="tt88", focus_mode="Trans")
-        self.focus_results = run_focus(inst_object, tt_mode="tt70", subtract_empty=True, spline_path=spline_path)
+        self.focus_results = run_focus(inst_object, tt_mode="tt70", file_ext=".nxs", subtract_empty=True, spline_path=spline_path)
 
         # Make sure that inst settings reverted to the default after focus
         self.assertEqual(inst_object._inst_settings.tt_mode, "tt88")
@@ -357,7 +357,7 @@ def run_vanadium_calibration(inst_object, **kwargs):
     inst_object.create_vanadium(run_in_cycle=vanadium_run, do_absorb_corrections=True, **kwargs)
 
 
-def run_focus(inst_object, tt_mode, subtract_empty, spline_path=None, custom_grouping_filename=None):
+def run_focus(inst_object, tt_mode, subtract_empty, spline_path=None, custom_grouping_filename=None, **kwargs):
     run_number = 98507
     attenuation_file_name = "PRL112_DC25_10MM_FF.OUT"
 
@@ -369,16 +369,21 @@ def run_focus(inst_object, tt_mode, subtract_empty, spline_path=None, custom_gro
         original_splined_path = os.path.join(input_dir, splined_file_name)
         shutil.copy(original_splined_path, spline_path)
 
+    default_kwargs = {
+        "vanadium_normalisation": True,
+        "do_absorb_corrections": False,
+        "perform_attenuation": True,
+        "attenuation_file": "ZTA",
+        "attenuation_files": [{"name": "ZTA", "path": attenuation_path}],
+    }
+    kwargs = {**default_kwargs, **kwargs}  # overwrite defaults with kwargs passed
+
     return inst_object.focus(
         run_number=run_number,
-        vanadium_normalisation=True,
-        do_absorb_corrections=False,
-        perform_attenuation=True,
-        attenuation_file="ZTA",
-        attenuation_files=[{"name": "ZTA", "path": attenuation_path}],
         tt_mode=tt_mode,
         subtract_empty_instrument=subtract_empty,
         custom_grouping_filename=custom_grouping_filename,
+        **kwargs,
     )
 
 
@@ -401,7 +406,7 @@ def setup_inst_object(**kwargs):
         long_mode=False,
         calibration_directory=calibration_dir,
         output_directory=output_dir,
-        **kwargs
+        **kwargs,
     )
     return inst_obj
 
