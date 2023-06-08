@@ -94,7 +94,9 @@ private:
   API::MatrixWorkspace_sptr getFloodWorkspace();
   void applyFloodCorrection(const API::MatrixWorkspace_sptr &flood, const std::string &propertyName);
   void applyFloodCorrections();
-  void sumBanksForWorkspace(const std::string &roiDetectorIDs, const std::string &wsPropertyName);
+  std::string getSummedWorkspaceName(const std::string &wsPropertyName, const bool isTransWs = false);
+  void sumBanksForWorkspace(const std::string &roiDetectorIDs, const std::string &wsPropertyName,
+                            const bool isTransWs = false);
   void sumBanks();
   double getPropertyOrDefault(const std::string &propertyName, const double defaultValue, bool &isDefault);
   void setTransmissionProperties(const Algorithm_sptr &alg, std::string const &propertyName);
