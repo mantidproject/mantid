@@ -9,6 +9,7 @@ import unittest
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import CreateCacheFilename
+from typing import List
 
 import datetime, os, tempfile, glob, shutil
 
@@ -40,11 +41,8 @@ class CleanFileCache(unittest.TestCase):
 
     def test2(self):
         """CleanFileCache: 'normal' files with 39 and 41-character filenames etc"""
-        cache1, _ = CreateCacheFilename(CacheDir=self._cache_root, OtherProperties=["A=1"])
-        cache2, _ = CreateCacheFilename(
-            CacheDir=self._cache_root,
-            OtherProperties=["B='silly'"],
-        )
+        self._create_file_in_cache(["A=1"])
+        self._create_file_in_cache(["B='silly'"])
 
         execute_clean_cache(self._cache_root, 0)
 
@@ -56,23 +54,23 @@ class CleanFileCache(unittest.TestCase):
         """CleanFileCache: "age" parameter"""
         age = 10
 
-        cache1, _ = CreateCacheFilename(CacheDir=self._cache_root, OtherProperties=["A=newer"])
-        cache2, _ = CreateCacheFilename(
-            CacheDir=self._cache_root,
-            OtherProperties=["B=rightonedge"],
-        )
-        cache3, _ = CreateCacheFilename(
-            CacheDir=self._cache_root,
-            OtherProperties=["C=old"],
-        )
-        createFile(cache1, age - 1)
-        createFile(cache2, age)
-        createFile(cache3, age + 1)
+        cache1 = self._create_file_in_cache(["A=newer"], age - 1)
+        self._create_file_in_cache(["B=rightonedge"], age)
+        self._create_file_in_cache(["C=old"], age + 1)
 
         execute_clean_cache(self._cache_root, age)
 
         files_remained = glob.glob(os.path.join(self._cache_root, "*"))
         self.assertEqual(set(files_remained), set(self._non_cache_filepaths + [cache1]))
+
+    def _create_file_in_cache(self, properties: List[str], days_before=None):
+        filepath, _ = CreateCacheFilename(CacheDir=self._cache_root, OtherProperties=properties)
+        touch(filepath)
+
+        if days_before is not None:
+            t = computeTime(days_before)
+            os.utime(filepath, (t, t))
+        return filepath
 
 
 def execute_clean_cache(cache_root: str, age: int):
@@ -81,17 +79,9 @@ def execute_clean_cache(cache_root: str, age: int):
     CleanFileCache(CacheDir=cache_root, AgeInDays=age)
 
 
-def createFile(f, daysbefore):
-    "create a file and set modify time at n=daysbefore days before TIME_3PM"
-    touch(f)
-    t = computeTime(daysbefore)
-    os.utime(f, (t, t))
-    return
-
-
-def computeTime(daysbefore):
+def computeTime(days_before: int):
     "compute time as float of the time at n=daysbefore days before today"
-    return TIME_3PM - daysbefore * 24 * 60 * 60
+    return TIME_3PM - days_before * 24 * 60 * 60
 
 
 def touch(f):
