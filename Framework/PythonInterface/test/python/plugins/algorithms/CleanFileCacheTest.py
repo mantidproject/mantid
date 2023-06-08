@@ -10,7 +10,7 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import CreateCacheFilename
 
-import datetime, os, sys, hashlib, tempfile, glob, shutil
+import datetime, os, sys, tempfile, glob, shutil
 
 # A fixed time used for testing - 3:00pm today
 now = datetime.datetime.now()
@@ -21,6 +21,18 @@ class CleanFileCache(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls._cache_root = tempfile.mkdtemp()
+
+        cls._non_cache_filepaths = [
+            os.path.join(cls._cache_root, f)
+            for f in [
+                "a" * 39 + ".nxs",
+                "0" * 41 + ".nxs",
+                "alpha_" + "b" * 39 + ".nxs",
+                "beta_" + "e" * 41 + ".nxs",
+            ]
+        ]
+        for filepath in cls._non_cache_filepaths:
+            touch(filepath)
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -33,21 +45,7 @@ class CleanFileCache(unittest.TestCase):
             CacheDir=self._cache_root,
             OtherProperties=["B='silly'"],
         )
-        touch(cache1)
-        touch(cache2)
-        non_cache = [
-            os.path.join(self._cache_root, f)
-            for f in [
-                "a" * 39 + ".nxs",
-                "0" * 41 + ".nxs",
-                "alpha_" + "b" * 39 + ".nxs",
-                "beta_" + "e" * 41 + ".nxs",
-            ]
-        ]
-        for p in non_cache:
-            touch(p)
-        # print glob.glob(os.path.join(cache_root, '*'))
-        # Execute
+
         code = "CleanFileCache(CacheDir = %r, AgeInDays = 0)" % self._cache_root
         code = "from mantid.simpleapi import CleanFileCache; %s" % code
         cmd = '%s -c "%s"' % (sys.executable, code)
@@ -56,7 +54,7 @@ class CleanFileCache(unittest.TestCase):
 
         files_remained = glob.glob(os.path.join(self._cache_root, "*"))
 
-        self.assertEqual(set(files_remained), set(non_cache))
+        self.assertEqual(set(files_remained), set(self._non_cache_filepaths))
 
     def test3(self):
         """CleanFileCache: "age" parameter"""
@@ -77,17 +75,6 @@ class CleanFileCache(unittest.TestCase):
         createFile(cache2, age, display=True)
         print(f"cache3={cache3}", flush=True)
         createFile(cache3, age + 1, display=True)
-        non_cache = [
-            os.path.join(self._cache_root, f)
-            for f in [
-                "a" * 39 + ".nxs",
-                "0" * 41 + ".nxs",
-                "alpha_" + "b" * 39 + ".nxs",
-                "beta_" + "e" * 41 + ".nxs",
-            ]
-        ]
-        for p in non_cache:
-            touch(p)
         print("Cache files:", flush=True)
         print(glob.glob(os.path.join(self._cache_root, "*")), flush=True)
 
@@ -99,7 +86,7 @@ class CleanFileCache(unittest.TestCase):
             raise RuntimeError("Failed to excute %s" % cmd)
 
         files_remained = glob.glob(os.path.join(self._cache_root, "*"))
-        self.assertEqual(set(files_remained), set(non_cache + [cache1]))
+        self.assertEqual(set(files_remained), set(self._non_cache_filepaths + [cache1]))
 
 
 def createFile(f, daysbefore, display=False):
