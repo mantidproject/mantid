@@ -10,7 +10,7 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import CreateCacheFilename
 
-import datetime, os, sys, tempfile, glob, shutil
+import datetime, os, tempfile, glob, shutil
 
 # A fixed time used for testing - 3:00pm today
 now = datetime.datetime.now()
@@ -46,11 +46,7 @@ class CleanFileCache(unittest.TestCase):
             OtherProperties=["B='silly'"],
         )
 
-        code = "CleanFileCache(CacheDir = %r, AgeInDays = 0)" % self._cache_root
-        code = "from mantid.simpleapi import CleanFileCache; %s" % code
-        cmd = '%s -c "%s"' % (sys.executable, code)
-        if os.system(cmd):
-            raise RuntimeError("Failed to excute %s" % cmd)
+        execute_clean_cache(self._cache_root, 0)
 
         files_remained = glob.glob(os.path.join(self._cache_root, "*"))
 
@@ -78,15 +74,16 @@ class CleanFileCache(unittest.TestCase):
         print("Cache files:", flush=True)
         print(glob.glob(os.path.join(self._cache_root, "*")), flush=True)
 
-        # Execute
-        code = "CleanFileCache(CacheDir = %r, AgeInDays = %s)" % (self._cache_root, age)
-        code = "from mantid.simpleapi import CleanFileCache; %s" % code
-        cmd = '%s -c "%s"' % (sys.executable, code)
-        if os.system(cmd):
-            raise RuntimeError("Failed to excute %s" % cmd)
+        execute_clean_cache(self._cache_root, age)
 
         files_remained = glob.glob(os.path.join(self._cache_root, "*"))
         self.assertEqual(set(files_remained), set(self._non_cache_filepaths + [cache1]))
+
+
+def execute_clean_cache(cache_root: str, age: int):
+    from mantid.simpleapi import CleanFileCache
+
+    CleanFileCache(CacheDir=cache_root, AgeInDays=age)
 
 
 def createFile(f, daysbefore, display=False):
