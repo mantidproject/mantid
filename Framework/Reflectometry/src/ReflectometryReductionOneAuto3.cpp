@@ -340,6 +340,9 @@ void ReflectometryReductionOneAuto3::init() {
 
   declareProperty(std::make_unique<PropertyWithValue<std::string>>("ROIDetectorIDs", "", Direction::Input),
                   "List of detector IDs to include. This will only be used if SumAcrossDetectorBanks is set to True.");
+
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("HideSummedWorkspaces", false, Direction::Input),
+                  "Whether to hide the workspaces created from the sum banks step, if performed.");
 }
 
 /** Execute the algorithm.
@@ -1202,9 +1205,10 @@ std::string ReflectometryReductionOneAuto3::getSummedWorkspaceName(const std::st
     runNumber = getRunNumberForWorkspaceGroup(getPropertyValue(wsPropertyName));
   }
 
-  auto &prefix = isTransWs ? TRANS_WORKSPACE_PREFIX : TOF_WORKSPACE_PREFIX;
+  auto &ws_prefix = isTransWs ? TRANS_WORKSPACE_PREFIX : TOF_WORKSPACE_PREFIX;
+  const std::string hide_prefix = getProperty("HideSummedWorkspaces") ? "__" : "";
 
-  return prefix + runNumber + SUMMED_WORKSPACE_SUFFIX;
+  return hide_prefix + ws_prefix + runNumber + SUMMED_WORKSPACE_SUFFIX;
 }
 
 /**

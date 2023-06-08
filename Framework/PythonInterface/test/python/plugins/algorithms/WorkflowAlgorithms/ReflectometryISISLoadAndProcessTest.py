@@ -692,6 +692,19 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._check_history(reduced_ws, history)
         self._check_sum_banks(reduced_ws, is_summed=False)
 
+    def test_summed_workspaces_hidden_when_selected(self):
+        self._create_2D_detector_workspace(38415, "__TOF_")
+        self._create_2D_detector_workspace(38416, "__TRANS_")
+        self._create_2D_detector_workspace(38417, "__TRANS_")
+        args = self._default_options
+        args["InputRunList"] = "38415"
+        args["FirstTransmissionRunList"] = "38416"
+        args["SecondTransmissionRunList"] = "38417"
+        args["HideInputWorkspaces"] = True
+        outputs = ["IvsQ_38415", "IvsQ_binned_38415", "TRANS_LAM_38416_38417"]
+        self._assert_run_algorithm_succeeds(args, outputs)
+        self._check_sum_banks(AnalysisDataService.retrieve("IvsQ_binned_38415"), is_summed=True)
+
     def test_calibration_file_is_applied_when_provided(self):
         args = self._default_options
         args["InputRunList"] = "INTER45455"

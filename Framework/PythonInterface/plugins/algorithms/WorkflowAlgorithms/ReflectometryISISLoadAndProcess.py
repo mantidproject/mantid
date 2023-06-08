@@ -624,7 +624,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         flood_workspace = self._loadFloodCorrectionWorkspace()
         if flood_workspace:
             alg.setProperty("FloodWorkspace", flood_workspace)
-        alg.setProperty("SumAcrossDetectorBanks", sum_banks)
+        if sum_banks:
+            alg.setProperty("SumAcrossDetectorBanks", True)
+            alg.setProperty("HideSummedWorkspaces", self.getProperty(Prop.HIDE_INPUT).value)
         efficiencies_ws = self._loadPolarizationCorrectionWorkspace()
         if efficiencies_ws:
             alg.setProperty("PolarizationEfficiencies", efficiencies_ws)
