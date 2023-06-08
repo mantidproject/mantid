@@ -65,14 +65,9 @@ class CleanFileCache(unittest.TestCase):
             CacheDir=self._cache_root,
             OtherProperties=["C=old"],
         )
-        print(f"cache1={cache1}", flush=True)
-        createFile(cache1, age - 1, display=True)
-        print(f"cache2={cache2}", flush=True)
-        createFile(cache2, age, display=True)
-        print(f"cache3={cache3}", flush=True)
-        createFile(cache3, age + 1, display=True)
-        print("Cache files:", flush=True)
-        print(glob.glob(os.path.join(self._cache_root, "*")), flush=True)
+        createFile(cache1, age - 1)
+        createFile(cache2, age)
+        createFile(cache3, age + 1)
 
         execute_clean_cache(self._cache_root, age)
 
@@ -86,12 +81,10 @@ def execute_clean_cache(cache_root: str, age: int):
     CleanFileCache(CacheDir=cache_root, AgeInDays=age)
 
 
-def createFile(f, daysbefore, display=False):
+def createFile(f, daysbefore):
     "create a file and set modify time at n=daysbefore days before TIME_3PM"
     touch(f)
     t = computeTime(daysbefore)
-    if display:
-        print(f"  Computed modification time: {t}")
     os.utime(f, (t, t))
     return
 
