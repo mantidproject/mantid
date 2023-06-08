@@ -41,16 +41,10 @@ class CleanFileCache(unittest.TestCase):
         cmd = '%s -c "%s"' % (sys.executable, code)
         if os.system(cmd):
             raise RuntimeError("Failed to excute %s" % cmd)
-        # executed?
-        # self.assertTrue(alg_test.isExecuted())
-        # Verify ....
+
         files_remained = glob.glob(os.path.join(cache_root, "*"))
-        try:
-            self.assertEqual(set(files_remained), set(non_cache))
-        finally:
-            # remove the temporary directory
-            shutil.rmtree(cache_root)
-        return
+
+        self.assertEqual(set(files_remained), set(non_cache))
 
     def test2(self):
         """CleanFileCache: 'normal' files with 39 and 41-character filenames etc"""
@@ -83,16 +77,10 @@ class CleanFileCache(unittest.TestCase):
         cmd = '%s -c "%s"' % (sys.executable, code)
         if os.system(cmd):
             raise RuntimeError("Failed to excute %s" % cmd)
-        # executed?
-        # self.assertTrue(alg_test.isExecuted())
-        # Verify ....
+
         files_remained = glob.glob(os.path.join(cache_root, "*"))
-        try:
-            self.assertEqual(set(files_remained), set(non_cache))
-        finally:
-            # remove the temporary directory
-            shutil.rmtree(cache_root)
-        return
+
+        self.assertEqual(set(files_remained), set(non_cache))
 
     def test3(self):
         """CleanFileCache: "age" parameter"""
@@ -136,16 +124,9 @@ class CleanFileCache(unittest.TestCase):
         cmd = '%s -c "%s"' % (sys.executable, code)
         if os.system(cmd):
             raise RuntimeError("Failed to excute %s" % cmd)
-        # executed?
-        # self.assertTrue(alg_test.isExecuted())
-        # Verify ....
+
         files_remained = glob.glob(os.path.join(cache_root, "*"))
-        try:
-            self.assertEqual(set(files_remained), set(non_cache + [cache1]))
-        finally:
-            # remove the temporary directory
-            shutil.rmtree(cache_root)
-        return
+        self.assertEqual(set(files_remained), set(non_cache + [cache1]))
 
 
 def createFile(f, daysbefore, display=False):
