@@ -72,7 +72,7 @@ class _CreateVanadiumTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 0.05  # Required for difference in spline data between operating systems
         return (
-            "PEARL98472_tt70-Results-D-Grp",
+            "PRL98472_tt70-d",
             "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode),
             "Van_spline_data_tt70",
             "ISIS_Powder-PEARL00098472_splined.nxs",
@@ -146,7 +146,7 @@ class FocusTest(systemtesting.MantidSystemTest):
         assert_output_file_exists(xye_dSpac_outdir, "PRL98507_tt70_d.xye")
 
         self.tolerance = 1e-8  # Required for difference in spline data between operating systems
-        return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
+        return "PRL98507_tt70-d", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
 
     def cleanup(self):
         try:
@@ -201,9 +201,9 @@ class FocusLongThenShortTest(systemtesting.MantidSystemTest):
 
         self.tolerance = 1e-8  # Required for difference in spline data between operating systems
         return (
-            "PEARL98507_tt70-Results-D-Grp",
+            "PRL98507_tt70-d",
             "ISIS_Powder-PEARL00098507_tt70Atten.nxs",
-            "PEARL98507_tt70_long-Results-D-Grp",
+            "PRL98507_tt70_long-d",
             "ISIS_Powder-PEARL00098507_tt70Long.nxs",
         )
 
@@ -228,7 +228,7 @@ class FocusWithAbsorbCorrectionsTest(systemtesting.MantidSystemTest):
         self.focus_results = run_focus_with_absorb_corrections()
 
     def validate(self):
-        return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70_absorb.nxs"
+        return "PRL98507_tt70-d", "ISIS_Powder-PEARL00098507_tt70_absorb.nxs"
 
     def cleanup(self):
         try:
@@ -251,7 +251,7 @@ class FocusWithoutEmptySubtractionTest(systemtesting.MantidSystemTest):
         self.focus_results = run_focus(inst_object, tt_mode="tt70", subtract_empty=False, spline_path=spline_path)
 
     def validate(self):
-        return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70NoEmptySub.nxs"
+        return "PRL98507_tt70-d", "ISIS_Powder-PEARL00098507_tt70NoEmptySub.nxs"
 
     def cleanup(self):
         try:
