@@ -349,6 +349,20 @@ class ISISPowderCommonTest(unittest.TestCase):
         self.assertAlmostEqual(summed_ws[0].readY(0)[bin_index], (first_run_bin_value + second_run_bin_value))
         mantid.DeleteWorkspace(summed_ws[0])
 
+    def test_load_raw_files_respects_keep_raw_workspace_setting(self):
+        run_num_str = "100"
+        file_ext = ".nxs"
+        mock_inst = ISISPowderMockInst()
+        ws_raw_name = f"POL{run_num_str}{file_ext}"
+        for keep_raw in [True, False]:
+            mock_inst._inst_settings.keep_raw_workspace = keep_raw
+            ws_raw_list = common.load_raw_files(run_number_string=run_num_str, instrument=mock_inst, file_ext=file_ext)
+            # check raw workspace exists
+            self.assertTrue(mantid.AnalysisDataService.doesExist(ws_raw_name))
+            # check clone of raw workspace is output in ws_raw_list is keep_raw = True
+            ws_name = ws_raw_name + "_red" if keep_raw else ws_raw_name
+            self.assertEqual(ws_raw_list[0].name(), ws_name)
+
     def test_load_current_normalised_ws_respects_ext(self):
         run_number = "102"
         file_ext_one = ".s1"
