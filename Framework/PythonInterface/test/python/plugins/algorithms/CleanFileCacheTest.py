@@ -18,49 +18,25 @@ TIME_3PM = int(datetime.datetime(now.year, now.month, now.day, 15, 0, 0).timesta
 
 
 class CleanFileCache(unittest.TestCase):
-    def test1(self):
-        """CleanFileCache: simple test with two cache files and two normal files"""
-        # create a temporary directory with fake cache files
-        # and other files
-        cache_root = tempfile.mkdtemp()
-        _hash = lambda s: hashlib.sha1(s).hexdigest()
-        cache1, _ = CreateCacheFilename(CacheDir=cache_root, OtherProperties=["A=1", "B=2"])
-        cache2, _ = CreateCacheFilename(
-            CacheDir=cache_root,
-            OtherProperties=["C=3"],
-        )
-        touch(cache1)
-        touch(cache2)
-        non_cache = [os.path.join(cache_root, f) for f in ["normal1.txt", "normal2.dat"]]
-        for p in non_cache:
-            touch(p)
-        # print glob.glob(os.path.join(cache_root, '*'))
-        # Execute
-        code = "CleanFileCache(CacheDir = %r, AgeInDays = 0)" % cache_root
-        code = "from mantid.simpleapi import CleanFileCache; %s" % code
-        cmd = '%s -c "%s"' % (sys.executable, code)
-        if os.system(cmd):
-            raise RuntimeError("Failed to excute %s" % cmd)
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls._cache_root = tempfile.mkdtemp()
 
-        files_remained = glob.glob(os.path.join(cache_root, "*"))
-
-        self.assertEqual(set(files_remained), set(non_cache))
+    @classmethod
+    def tearDownClass(cls) -> None:
+        shutil.rmtree(cls._cache_root)
 
     def test2(self):
         """CleanFileCache: 'normal' files with 39 and 41-character filenames etc"""
-        # create a temporary directory with fake cache files
-        # and other files
-        cache_root = tempfile.mkdtemp()
-        _hash = lambda s: hashlib.sha1(s).hexdigest()
-        cache1, _ = CreateCacheFilename(CacheDir=cache_root, OtherProperties=["A=1"])
+        cache1, _ = CreateCacheFilename(CacheDir=self._cache_root, OtherProperties=["A=1"])
         cache2, _ = CreateCacheFilename(
-            CacheDir=cache_root,
+            CacheDir=self._cache_root,
             OtherProperties=["B='silly'"],
         )
         touch(cache1)
         touch(cache2)
         non_cache = [
-            os.path.join(cache_root, f)
+            os.path.join(self._cache_root, f)
             for f in [
                 "a" * 39 + ".nxs",
                 "0" * 41 + ".nxs",
@@ -72,30 +48,27 @@ class CleanFileCache(unittest.TestCase):
             touch(p)
         # print glob.glob(os.path.join(cache_root, '*'))
         # Execute
-        code = "CleanFileCache(CacheDir = %r, AgeInDays = 0)" % cache_root
+        code = "CleanFileCache(CacheDir = %r, AgeInDays = 0)" % self._cache_root
         code = "from mantid.simpleapi import CleanFileCache; %s" % code
         cmd = '%s -c "%s"' % (sys.executable, code)
         if os.system(cmd):
             raise RuntimeError("Failed to excute %s" % cmd)
 
-        files_remained = glob.glob(os.path.join(cache_root, "*"))
+        files_remained = glob.glob(os.path.join(self._cache_root, "*"))
 
         self.assertEqual(set(files_remained), set(non_cache))
 
     def test3(self):
         """CleanFileCache: "age" parameter"""
         age = 10
-        # create a temporary directory with fake cache files
-        # and other files
-        cache_root = tempfile.mkdtemp()
-        _hash = lambda s: hashlib.sha1(s).hexdigest()
-        cache1, _ = CreateCacheFilename(CacheDir=cache_root, OtherProperties=["A=newer"])
+
+        cache1, _ = CreateCacheFilename(CacheDir=self._cache_root, OtherProperties=["A=newer"])
         cache2, _ = CreateCacheFilename(
-            CacheDir=cache_root,
+            CacheDir=self._cache_root,
             OtherProperties=["B=rightonedge"],
         )
         cache3, _ = CreateCacheFilename(
-            CacheDir=cache_root,
+            CacheDir=self._cache_root,
             OtherProperties=["C=old"],
         )
         print(f"cache1={cache1}", flush=True)
@@ -105,7 +78,7 @@ class CleanFileCache(unittest.TestCase):
         print(f"cache3={cache3}", flush=True)
         createFile(cache3, age + 1, display=True)
         non_cache = [
-            os.path.join(cache_root, f)
+            os.path.join(self._cache_root, f)
             for f in [
                 "a" * 39 + ".nxs",
                 "0" * 41 + ".nxs",
@@ -116,16 +89,16 @@ class CleanFileCache(unittest.TestCase):
         for p in non_cache:
             touch(p)
         print("Cache files:", flush=True)
-        print(glob.glob(os.path.join(cache_root, "*")), flush=True)
+        print(glob.glob(os.path.join(self._cache_root, "*")), flush=True)
 
         # Execute
-        code = "CleanFileCache(CacheDir = %r, AgeInDays = %s)" % (cache_root, age)
+        code = "CleanFileCache(CacheDir = %r, AgeInDays = %s)" % (self._cache_root, age)
         code = "from mantid.simpleapi import CleanFileCache; %s" % code
         cmd = '%s -c "%s"' % (sys.executable, code)
         if os.system(cmd):
             raise RuntimeError("Failed to excute %s" % cmd)
 
-        files_remained = glob.glob(os.path.join(cache_root, "*"))
+        files_remained = glob.glob(os.path.join(self._cache_root, "*"))
         self.assertEqual(set(files_remained), set(non_cache + [cache1]))
 
 
