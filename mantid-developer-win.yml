@@ -25,6 +25,7 @@ dependencies:
   - numpy<=1.23
   - occt
   - conda-wrappers
+  - pint!=0.22 # version 0.22 is broken for python 3.8. pint is a euphonic dependency
   - pip>=21.0.1
   - poco=1.12.1|>=1.12.5 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning. It's resolved on their devel branch so should be fine after 1.12.4
   - psutil>=5.8.0
