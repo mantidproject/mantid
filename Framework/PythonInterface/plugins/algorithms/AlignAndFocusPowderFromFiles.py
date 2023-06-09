@@ -260,8 +260,12 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 tempname = "__%s_temp" % wkspname
                 # set the loader for this file
                 try:
+                    # put together list of logs that matter, all the others will be skipped
+                    allowedLogs = []
+                    allowedLogs.extend(this.getProperty("FrequencyLogNames"))
+                    allowedLogs.extend(this.getProperty("WaveLengthLogNames"))
                     # MetaDataOnly=True is only supported by LoadEventNexus
-                    loader = self.__createLoader(filename, tempname, MetaDataOnly=True)
+                    loader = self.__createLoader(filename, tempname, MetaDataOnly=True, AllowList=allowedLogs)
                     loader.execute()
 
                     # get the underlying loader name if we used the generic one
@@ -377,7 +381,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         # inner loop is over chunks
         haveAccumulationForFile = False
-        for (j, chunk) in enumerate(chunks):
+        for j, chunk in enumerate(chunks):
             prog_start = file_prog_start + float(j) * float(numSteps - 1) * prog_per_chunk_step
 
             # if reading all at once, put the data into the final name directly
@@ -752,7 +756,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             grain_size = int(math.sqrt(numberFilesToProcess))  # grain size
         else:
             grain_size = numberFilesToProcess
-        for (i, filename) in enumerate(files):
+        for i, filename in enumerate(files):
             self.__loaderName = "Load"  # reset to generic load with each file
             wkspname, unfocusname = self.__processFile(filename, self.prog_per_file * float(i), not self.useCaching, bool(finalunfocusname))
             # accumulate into partial sum
