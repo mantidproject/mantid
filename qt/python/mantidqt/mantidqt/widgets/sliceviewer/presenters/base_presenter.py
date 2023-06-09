@@ -121,3 +121,7 @@ class SliceViewerBasePresenter(IDataViewSubscriber, ABC):
     @abc.abstractmethod
     def get_extra_image_info_columns(self, xdata, ydata):
         pass
+
+    @abc.abstractmethod
+    def is_integer_frame(self):
+        pass

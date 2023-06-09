@@ -40,6 +40,9 @@ class SliceViewerBasePresenterShim(SliceViewerBasePresenter):
     def get_extra_image_info_columns(self):
         return {}
 
+    def is_integer_frame(self):
+        return False, False
+
 
 class SliceViewerBasePresenterTest(unittest.TestCase):
     def setUp(self):
