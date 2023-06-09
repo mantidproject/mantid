@@ -221,9 +221,9 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             # i.e. LoadNexusProcessed doesn't have these properties
             try:
                 if not self.getProperty("LogAllowList").isDefault:
-                    loader.setPropertyValue("AllowList", self.getPropertyValue("LogAllowList"))
+                    loader.setProperty("AllowList", self.getProperty("LogAllowList").value)
                 if not self.getProperty("LogBlockList").isDefault:
-                    loader.setPropertyValue("BlockList", self.getPropertyValue("LogBlockList"))
+                    loader.setProperty("BlockList", self.getProperty("LogBlockList").value)
             except RuntimeError:
                 pass  # let it drop on the floor
         for key, value in kwargs.items():
