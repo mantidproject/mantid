@@ -64,8 +64,8 @@ requirements:
     - pyyaml
     - scipy
     - openssl
-    - euphonic=0.6.*
-    - pint<0.22  # version 0.22 introduces a breaking change to euphonic 0.6.*
+    - euphonic {{ euphonic }}
+    - pint {{ pint }}
     - toml
     - libglu  # [linux]
 
