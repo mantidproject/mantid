@@ -13,7 +13,7 @@ from mantid.api import (
     MultipleFileProperty,
     PropertyMode,
 )
-from mantid.kernel import Direction, PropertyManagerDataService
+from mantid.kernel import Direction, PropertyManagerDataService, StringArrayProperty
 from mantid.simpleapi import (
     AlignAndFocusPowder,
     CompressEvents,
@@ -161,6 +161,14 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         self.declareProperty(
             ITableWorkspaceProperty("Characterizations", "", Direction.Input, PropertyMode.Optional), "Characterizations table"
         )
+        self.declareProperty(
+            StringArrayProperty(name="LogAllowList"),
+            "If specified, only these logs will be loaded from the file. This is passed to LoadEventNexus",
+        )
+        self.declareProperty(
+            StringArrayProperty(name="LogBlockList"),
+            "If specified, these logs will not be loaded from the file. This is passed to LoadEventNexus",
+        )
 
         self.copyProperties("AlignAndFocusPowder", PROPS_FOR_ALIGN)
         self.copyProperties("PDDetermineCharacterizations", PROPS_FOR_PD_CHARACTER)
@@ -174,6 +182,9 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if unfocusname == finalname:
                 errors["OutputWorkspace"] = "Cannot be the same as UnfocussedWorkspace"
                 errors["UnfocussedWorkspace"] = "Cannot be the same as OutputWorkspace"
+        if (not self.getProperty("LogAllowList").isDefault) and (not self.getProperty("LogBlockList").isDefault):
+            errors["LogAllowList"] = "Cannot specify with LogBlockList"
+            errors["LogBlockList"] = "Cannot specify with LogAllowList"
 
         return errors
 
@@ -200,10 +211,21 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         loader.initialize()
         loader.setPropertyValue("Filename", filename)
         loader.setPropertyValue("OutputWorkspace", wkspname)
+
         if skipLoadingLogs:
             if self.__loaderName != "LoadEventNexus":
                 raise RuntimeError("Cannot set LoadLogs=False in {}".format(self.__loaderName))
             loader.setProperty("LoadLogs", False)
+        elif "AllowList" not in kwargs:
+            # this only works for LoadEventNexus
+            # i.e. LoadNexusProcessed doesn't have these properties
+            try:
+                if not self.getProperty("LogAllowList").isDefault:
+                    loader.setPropertyValue("AllowList", self.getPropertyValue("LogAllowList"))
+                if not self.getProperty("LogBlockList").isDefault:
+                    loader.setPropertyValue("BlockList", self.getPropertyValue("LogBlockList"))
+            except RuntimeError:
+                pass  # let it drop on the floor
         for key, value in kwargs.items():
             if isinstance(value, str):
                 loader.setPropertyValue(key, value)
