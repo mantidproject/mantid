@@ -40,20 +40,20 @@ double WorkspaceBoundingBox::yValue(const int index) const {
 }
 
 void WorkspaceBoundingBox::setPosition(double x, double y) {
-  this->x = x;
-  this->y = y;
+  this->m_xPos = x;
+  this->m_yPos = y;
 }
 
 void WorkspaceBoundingBox::setCenter(double x, double y) {
-  this->centerX = x;
-  this->centerY = y;
+  this->m_centerXPos = x;
+  this->m_centerYPos = y;
 }
 
 void WorkspaceBoundingBox::setBounds(double xMin, double xMax, double yMin, double yMax) {
-  this->xMin = xMin;
-  this->xMax = xMax;
-  this->yMin = yMin;
-  this->yMax = yMax;
+  this->m_xPosMin = xMin;
+  this->m_xPosMax = xMax;
+  this->m_yPosMin = yMin;
+  this->m_yPosMax = yMax;
 }
 
 /** Performs checks on the spectrum located at index to determine if
@@ -105,8 +105,8 @@ double WorkspaceBoundingBox::updatePositionAndReturnCount(int index) {
   const auto YIn = this->yValue(index);
   const auto &position = this->position(index);
 
-  this->x += YIn * position.X();
-  this->y += YIn * position.Y();
+  this->m_xPos += YIn * position.X();
+  this->m_yPos += YIn * position.Y();
 
   return YIn;
 }
@@ -121,10 +121,10 @@ void WorkspaceBoundingBox::updateMinMax(int index) {
   const double x = position.X();
   const double y = position.Y();
 
-  this->xMin = std::min(x, this->xMin);
-  this->xMax = std::max(x, this->xMax);
-  this->yMin = std::min(y, this->yMin);
-  this->yMax = std::max(y, this->yMax);
+  this->m_xPosMin = std::min(x, this->m_xPosMin);
+  this->m_xPosMax = std::max(x, this->m_xPosMax);
+  this->m_yPosMin = std::min(y, this->m_yPosMin);
+  this->m_yPosMax = std::max(y, this->m_yPosMax);
 }
 
 /** Checks to see if spectrum at index is within the diameter of the given beamRadius
@@ -137,8 +137,8 @@ void WorkspaceBoundingBox::updateMinMax(int index) {
 bool WorkspaceBoundingBox::isOutOfBoundsOfNonDirectBeam(const double beamRadius, int index, const bool directBeam) {
   if (!directBeam) {
     const auto &position = this->position(index);
-    const double dx = position.X() - this->centerX;
-    const double dy = position.Y() - this->centerY;
+    const double dx = position.X() - this->m_centerXPos;
+    const double dy = position.Y() - this->m_centerYPos;
     if (dx * dx + dy * dy < beamRadius * beamRadius)
       return false;
   }
@@ -146,14 +146,14 @@ bool WorkspaceBoundingBox::isOutOfBoundsOfNonDirectBeam(const double beamRadius,
 }
 
 double WorkspaceBoundingBox::calculateDistance() const {
-  const auto xExtent = (centerX - x);
-  const auto yExtent = (centerY - y);
+  const auto xExtent = (m_centerXPos - m_xPos);
+  const auto yExtent = (m_centerYPos - m_yPos);
   return sqrt(xExtent * xExtent + yExtent * yExtent);
 }
 
-double WorkspaceBoundingBox::calculateRadiusX() const { return std::min((x - xMin), (xMax - x)); }
+double WorkspaceBoundingBox::calculateRadiusX() const { return std::min((m_xPos - m_xPosMin), (m_xPosMax - m_xPos)); }
 
-double WorkspaceBoundingBox::calculateRadiusY() const { return std::min((y - yMin), (yMax - y)); }
+double WorkspaceBoundingBox::calculateRadiusY() const { return std::min((m_yPos - m_yPosMin), (m_yPosMax - m_yPos)); }
 
 /** Perform normalization on x/y coords over given values
  *
@@ -161,8 +161,8 @@ double WorkspaceBoundingBox::calculateRadiusY() const { return std::min((y - yMi
  *  @param y :: value to normalize member y over
  */
 void WorkspaceBoundingBox::normalizePosition(double x, double y) {
-  this->x /= std::fabs(x);
-  this->y /= std::fabs(y);
+  this->m_xPos /= std::fabs(x);
+  this->m_yPos /= std::fabs(y);
 }
 
 /** Checks if a given x/y coord is within the bounding box
@@ -172,7 +172,7 @@ void WorkspaceBoundingBox::normalizePosition(double x, double y) {
  *  @return true/false if it is within the mins/maxs of the box
  */
 bool WorkspaceBoundingBox::containsPoint(double x, double y) {
-  return (x <= this->xMax && x >= this->xMin && y <= yMax && y >= yMin);
+  return (x <= this->m_xPosMax && x >= this->m_xPosMin && y <= m_yPosMax && y >= m_yPosMin);
 }
 
 } // namespace Mantid::Algorithms

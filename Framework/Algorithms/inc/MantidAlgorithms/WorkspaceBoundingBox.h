@@ -29,14 +29,14 @@ public:
   ~WorkspaceBoundingBox();
 
   API::MatrixWorkspace_const_sptr getWorkspace() { return m_workspace; }
-  double getX() const { return x; }
-  double getY() const { return y; }
-  double getCenterX() const { return centerX; }
-  double getCenterY() const { return centerY; }
-  double getXMin() const { return xMin; }
-  double getXMax() const { return xMax; }
-  double getYMin() const { return yMin; }
-  double getYMax() const { return yMax; }
+  double getX() const { return m_xPos; }
+  double getY() const { return m_yPos; }
+  double getCenterX() const { return m_centerXPos; }
+  double getCenterY() const { return m_centerYPos; }
+  double getXMin() const { return m_xPosMin; }
+  double getXMax() const { return m_xPosMax; }
+  double getYMin() const { return m_yPosMin; }
+  double getYMax() const { return m_yPosMax; }
 
   void setPosition(double x, double y);
   void setCenter(double x, double y);
@@ -59,14 +59,14 @@ private:
   double yValue(const int index) const;
   API::MatrixWorkspace_const_sptr m_workspace;
   const API::SpectrumInfo *m_spectrumInfo;
-  double x{0};
-  double y{0};
-  double centerX{0};
-  double centerY{0};
-  double xMin{0};
-  double xMax{0};
-  double yMin{0};
-  double yMax{0};
+  double m_xPos{0};
+  double m_yPos{0};
+  double m_centerXPos{0};
+  double m_centerYPos{0};
+  double m_xPosMin{0};
+  double m_xPosMax{0};
+  double m_yPosMin{0};
+  double m_yPosMax{0};
   // cache information
   mutable int m_cachedPositionIndex{-1};
   mutable Kernel::V3D m_cachedPosition;
