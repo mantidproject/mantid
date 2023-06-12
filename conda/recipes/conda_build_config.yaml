@@ -78,10 +78,6 @@ readline:
 euphonic:
   - 0.6.*
 
-# v0.22 for python 3.8 is broken. It causes an error in euphonic
-pint:
-  - '!=0.22'
-
 pin_run_as_build:
     boost:
       max_pin: x.x
