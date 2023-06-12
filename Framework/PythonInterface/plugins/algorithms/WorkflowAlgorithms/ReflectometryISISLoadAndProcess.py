@@ -102,11 +102,11 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True)
         secondTransWorkspace = self._sumWorkspaces(secondTransWorkspaces, True)
         # Check if we will need to sum banks as part of the reduction
-        sum_banks = self._should_sum_banks(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
+        self._should_sum_banks(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
         # Slice the input workspace, if required
         inputWorkspace = self._sliceWorkspace(inputWorkspace)
         # Perform the reduction
-        alg = self._reduce(inputWorkspace, firstTransWorkspace, secondTransWorkspace, sum_banks)
+        alg = self._reduce(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
         # Set outputs and tidy TOF workspaces into a group
         self._finalize(alg)
         self._groupTOFWorkspaces(inputWorkspaces)
@@ -337,10 +337,10 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return ws
 
     def _should_sum_banks(self, inputWorkspace, firstTransWorkspace, secondTransWorkspace):
-        """Returns true if we should perform a sum banks step as part of the reduction"""
+        """Checks if we should perform a sum banks step as part of the reduction and sets the ROIDetectorIDs property accordingly"""
         if self.getProperty(Prop.ROI_DETECTOR_IDS).isDefault:
             # Only sum banks when a region of detector IDs to sum has been passed in
-            return False
+            return
 
         perform_sum = []
         for workspace_name in [inputWorkspace, firstTransWorkspace, secondTransWorkspace]:
@@ -348,11 +348,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 workspace = AnalysisDataService.retrieve(workspace_name)
                 perform_sum.append(self._has_single_2D_rectangular_detector(workspace))
 
-        result = perform_sum[0]
-        if not all(sum_ws == result for sum_ws in perform_sum):
+        should_sum = perform_sum[0]
+        if not all(sum_ws == should_sum for sum_ws in perform_sum):
             raise RuntimeError("Not implemented when some but not all input and transmission workspaces require summing across banks")
 
-        return result
+        if not should_sum:
+            # Setting the property to its default will prevent summing taking place
+            self.setProperty(Prop.ROI_DETECTOR_IDS, "")
 
     def _has_single_2D_rectangular_detector(self, workspace) -> bool:
         """Returns true if workspace has a single 2D rectangular detector, and is not a group workspace."""
@@ -619,7 +621,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _getSlicedWorkspaceGroupName(self, workspace):
         return workspace + "_sliced"
 
-    def _reduce(self, input_workspace, first_trans_workspace, second_trans_workspace, sum_banks):
+    def _reduce(self, input_workspace, first_trans_workspace, second_trans_workspace):
         """Run the child algorithm to do the reduction. Return the child algorithm."""
         self.log().information("Running ReflectometryReductionOneAuto on " + input_workspace)
         alg = self.createChildAlgorithm("ReflectometryReductionOneAuto")
@@ -633,9 +635,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         flood_workspace = self._loadFloodCorrectionWorkspace()
         if flood_workspace:
             alg.setProperty("FloodWorkspace", flood_workspace)
-        if sum_banks:
-            alg.setProperty("SumAcrossDetectorBanks", True)
-            alg.setProperty("HideSummedWorkspaces", self.getProperty(Prop.HIDE_INPUT).value)
+        alg.setProperty("HideSummedWorkspaces", self.getProperty(Prop.HIDE_INPUT).value)
         efficiencies_ws = self._loadPolarizationCorrectionWorkspace()
         if efficiencies_ws:
             alg.setProperty("PolarizationEfficiencies", efficiencies_ws)

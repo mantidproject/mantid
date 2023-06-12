@@ -332,14 +332,12 @@ void ReflectometryReductionOneAuto3::init() {
                   "histograms: P1, P2, F1 and F2 in the Wildes method and Pp, Ap, Rho and Alpha for Fredrikze.");
 
   // Sum banks
-  declareProperty(
-      std::make_unique<PropertyWithValue<bool>>("SumAcrossDetectorBanks", false, Direction::Input),
-      "When set to True, the algorithm will attempt to sum counts across each row of a RectangularDetector before "
-      "performing the reduction. This will only work correctly when the instrument definition file (IDF) contains a "
-      "single RectangularDetector panel.");
-
   declareProperty(std::make_unique<PropertyWithValue<std::string>>("ROIDetectorIDs", "", Direction::Input),
-                  "List of detector IDs to include. This will only be used if SumAcrossDetectorBanks is set to True.");
+                  "When detector IDs are provided, the algorithm will attempt to sum counts across each row of a "
+                  "RectangularDetector after the flood correction step. "
+                  "Detectors not included in the given range will be masked before summing. "
+                  "This will only work correctly when the instrument definition file(IDF) contains a single "
+                  "RectangularDetector panel.");
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>("HideSummedWorkspaces", false, Direction::Input),
                   "Whether to hide the workspaces created from the sum banks step, if performed.");
@@ -1240,8 +1238,7 @@ void ReflectometryReductionOneAuto3::sumBanksForWorkspace(const std::string &roi
  * the input data and the transmission runs.
  */
 void ReflectometryReductionOneAuto3::sumBanks() {
-  const bool performSum = getProperty("SumAcrossDetectorBanks");
-  if (performSum) {
+  if (!isDefault("ROIDetectorIDs")) {
     const auto roiDetectorIDs = getPropertyValue("ROIDetectorIDs");
     sumBanksForWorkspace(roiDetectorIDs, "InputWorkspace");
     if (!isDefault("FirstTransmissionRun")) {
