@@ -91,11 +91,10 @@ class PolarLabelor : public Labelor {
   /**
    * Labels using unsigned twoTheta, with no gaps in labeld groups
    * Groups are labeled in order of twoTheta
-   * First, angles are sorted, minimum is found
-   * Then sphere is divided into bands of width step starting at min.
+   * First, angles are sorted then sphere is divided into bands of width tt_step.
    * Within each band, at most two possibilities for label
-   * The map groups maps from the band to the options for group label
-   * The map divs maps from band to the value in the band dividing groups
+   * The map `groups` assigns to each band the options for group label
+   * The map `divs` assigns to each band the value that splits the groups in that band
    * These maps are pre-populated when the labelor is created.
    */
   std::unordered_map<size_t, double> divs;
@@ -114,19 +113,18 @@ public:
     std::transform(spectrumInfo.cbegin(), spectrumInfo.cend(), tt.begin(), [](auto x) {
       return (x.isMonitor() || x.isMasked() || !x.hasDetectors() ? -1.0 : M_PI - x.twoTheta());
     });
-    std::remove(tt.begin(), tt.end(), -1.0);
+    auto stopit = std::remove(tt.begin(), tt.end(), -1.0);
+    tt.erase(stopit, tt.end());
     std::sort(tt.begin(), tt.end());
 
-    size_t band;
-    double next;
     auto it = tt.begin();
     while (it != tt.end()) {
-      band = getBand(*it);
+      size_t band = getBand(*it);
       divs[band] = *it;
       groups[band].push_back(++currentGroup);
       groups[band + 1].push_back(currentGroup);
-      next = *it + tt_step;
-      while ((*it) <= next && it != tt.end())
+      double next = *it + tt_step;
+      while ((*it) <= next && it != tt.end() - 1)
         it++;
     }
   };
@@ -160,20 +158,19 @@ public:
     std::transform(spectrumInfo.cbegin(), spectrumInfo.cend(), xx.begin(), [](auto x) {
       return (x.isMonitor() || x.isMasked() || !x.hasDetectors() ? -1.0 : M_PI - x.signedTwoTheta());
     });
-    std::remove(xx.begin(), xx.end(), -1.0);
+    auto stopit = std::remove(xx.begin(), xx.end(), -1.0);
+    xx.erase(stopit, xx.end());
     std::transform(xx.cbegin(), xx.cend(), xx.begin(), [](double x) { return (x <= M_PI ? x : 3. * M_PI - x); });
     std::sort(xx.begin(), xx.end());
 
-    size_t band;
     auto it = xx.begin();
-    double next;
     while (it != xx.end()) {
-      band = getBand(*it);
+      size_t band = getBand(*it);
       divs[band] = *it;
       groups[band].push_back(++currentGroup);
       groups[band + 1].push_back(currentGroup);
-      next = (*it) + tt_step;
-      while ((*it) <= next && it != xx.end())
+      double next = (*it) + tt_step;
+      while ((*it) <= next && it != xx.end() - 1)
         it++;
     }
   };
