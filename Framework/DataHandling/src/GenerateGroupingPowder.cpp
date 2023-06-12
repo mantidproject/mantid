@@ -43,87 +43,150 @@ protected:
   const double aa_start;
 
 public:
-  Labelor(double tt_step, double aa_step = 0.0, double aa_start = 0.0)
-      : tt_step(tt_step), aa_step(aa_step), aa_start(aa_start){};
-  virtual int operator()(SpectrumInfo const &spectrumInfo, int i) { return -1; };
+  Labelor(double t_step, double a_step = 0.0, double a_start = 0.0)
+      : tt_step(t_step * Mantid::Geometry::deg2rad), aa_step(a_step * Mantid::Geometry::deg2rad),
+        aa_start(a_start * Mantid::Geometry::deg2rad){};
+  virtual ~Labelor(){};
+  virtual size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) = 0;
 };
 
 class OldLabelor : public Labelor {
   /* Divides sphere into bands of size tt_step,
   which are then numbered sequentially, in order, with increasing twoTheta
   */
+
   // reduce flops by saving as mult. constant
-  double inv_tt_step = Mantid::Geometry::rad2deg / tt_step;
+  const double inv_tt_step;
 
 public:
-  OldLabelor(double tt_step) : Labelor(tt_step){};
-  int operator()(SpectrumInfo const &spectrumInfo, int i) override {
+  OldLabelor(double t_step) : Labelor(t_step), inv_tt_step(1.0 / tt_step){};
+  size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) override {
     return static_cast<int>(spectrumInfo.twoTheta(i) * inv_tt_step);
   };
 };
 
-class PolarLabelor : public Labelor {
-  /* uses twoTheta to label groups in order, with no empty groups
+class SectorLabelor : public Labelor {
+  /**
+   * Divides sphere into spherical sectors in 2theta and phi
+   * Ordering goes by increasing 2theta, then by increasing phi
+   * Able to distinguish left/right
    */
-  // a vector of the end points (in 2theta) for each group
-  std::vector<std::pair<double, double>> group_tt;
+
+  // reduce flops by saving as mult. constant
+  const double inv_tt_step;
+  const double inv_aa_step;
+  const int num_aa_step;
 
 public:
-  PolarLabelor(double tt_step) : Labelor(tt_step), group_tt({}){};
-
-  int operator()(SpectrumInfo const &spectrumInfo, int i) override {
-    // find the group so that 2theta is inside its end points
-    double tt = spectrumInfo.twoTheta(i);
-    auto index = std::find_if(group_tt.begin(), group_tt.end(),
-                              [tt](std::pair<double, double> x) { return x.first <= tt && tt < x.second; });
-    // if no such group, make a new one
-    if (index == group_tt.end()) {
-      // check if 2theta is very close to an existing group
-      auto ix = std::find_if(group_tt.begin(), group_tt.end(),
-                             [tt, this](std::pair<double, double> x) { return x.first < tt + this->tt_step; });
-      // if not close to existing group, make group starting here
-      if (ix == group_tt.end())
-        group_tt.push_back({tt, tt + tt_step});
-      // if too close to an existing group, make group further back so no overlaps
-      else
-        group_tt.push_back({tt - tt_step, tt});
-      index = group_tt.end() - 1;
-    }
-    return std::distance(group_tt.begin(), index) + 1;
+  SectorLabelor(double t_step, double a_step, double a_start)
+      : Labelor(t_step, a_step, a_start), inv_tt_step(1.0 / tt_step), inv_aa_step(1.0 / aa_step),
+        num_aa_step(int(std::ceil(360.0 / a_step))){};
+  size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) override {
+    return static_cast<size_t>(spectrumInfo.twoTheta(i) * inv_tt_step) * num_aa_step +
+           static_cast<size_t>(std::floor((spectrumInfo.azimuthal(i) - aa_start) * inv_aa_step)) % num_aa_step;
   };
 };
 
-class PolarAzimuthalLabelor : public Labelor {
-  /* uses twoTheta to label groups in order, with no empty groups
+class PolarLabelor : public Labelor {
+  /**
+   * Labels using unsigned twoTheta, with no gaps in labeld groups
+   * Groups are labeled in order of twoTheta
+   * First, angles are sorted, minimum is found
+   * Then sphere is divided into bands of width step starting at min.
+   * Within each band, at most two possibilities for label
+   * The map groups maps from the band to the options for group label
+   * The map divs maps from band to the value in the band dividing groups
+   * These maps are pre-populated when the labelor is created.
    */
-  // a vector of the end points (in 2theta) for each group
-  std::vector<std::pair<double, double>> group_tt;
-  std::vector<std::pair<double, double>> group_aa;
+  std::unordered_map<size_t, double> divs;
+  std::unordered_map<size_t, std::vector<size_t>> groups;
+
+  const double inv_tt_step;
+  size_t currentGroup;
+
+  inline size_t getBand(const double x) { return static_cast<int>(x * inv_tt_step); };
 
 public:
-  PolarAzimuthalLabelor(double tt_step, double aa_step, double aa_start)
-      : Labelor(tt_step, aa_step, aa_start), group_tt({}), group_aa({}){};
+  PolarLabelor(double t_step, SpectrumInfo const &spectrumInfo)
+      : Labelor(t_step), inv_tt_step(1.0 / tt_step), currentGroup(0) {
 
-  int operator()(SpectrumInfo const &spectrumInfo, int i) override {
-    // find the group so that 2theta is inside its end points
-    double tt = spectrumInfo.twoTheta(i);
-    auto index = std::find_if(group_tt.begin(), group_tt.end(),
-                              [tt](std::pair<double, double> x) { return x.first <= tt && tt < x.second; });
-    // if no such group, make a new one
-    if (index == group_tt.end()) {
-      // check if 2theta is very close to an existing group
-      auto ix = std::find_if(group_tt.begin(), group_tt.end(),
-                             [tt, this](std::pair<double, double> x) { return x.first < tt + this->tt_step; });
-      // if not close to existing group, make group starting here
-      if (ix == group_tt.end())
-        group_tt.push_back({tt, tt + tt_step});
-      // if too close to an existing group, make group further back so no overlaps
-      else
-        group_tt.push_back({tt - tt_step, tt});
-      index = group_tt.end() - 1;
+    std::vector<double> tt(spectrumInfo.size());
+    std::transform(spectrumInfo.cbegin(), spectrumInfo.cend(), tt.begin(), [](auto x) {
+      return (x.isMonitor() || x.isMasked() || !x.hasDetectors() ? -1.0 : M_PI - x.twoTheta());
+    });
+    std::remove(tt.begin(), tt.end(), -1.0);
+    std::sort(tt.begin(), tt.end());
+
+    size_t band;
+    double next;
+    auto it = tt.begin();
+    while (it != tt.end()) {
+      band = getBand(*it);
+      divs[band] = *it;
+      groups[band].push_back(++currentGroup);
+      groups[band + 1].push_back(currentGroup);
+      next = *it + tt_step;
+      while ((*it) <= next && it != tt.end())
+        it++;
     }
-    return std::distance(group_tt.begin(), index) + 1;
   };
+
+  size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) override {
+    double tt = M_PI - spectrumInfo.twoTheta(i);
+    size_t band = getBand(tt);
+    size_t index = groups[band].back();
+    if (tt < divs[band])
+      index = groups[band].front();
+    return index;
+  }
+};
+
+class SplitPolarLabelor : public Labelor {
+  /**
+   * As PolarLabelor but splitting left/right
+   */
+  const double inv_tt_step;
+
+  std::unordered_map<size_t, double> divs;
+  std::unordered_map<size_t, std::vector<size_t>> groups;
+  size_t currentGroup;
+
+  inline size_t getBand(const double tt) { return static_cast<size_t>(tt * inv_tt_step); };
+
+public:
+  SplitPolarLabelor(double t_step, SpectrumInfo const &spectrumInfo)
+      : Labelor(t_step), inv_tt_step(1.0 / tt_step), currentGroup(0) {
+    std::vector<double> xx(spectrumInfo.size());
+    std::transform(spectrumInfo.cbegin(), spectrumInfo.cend(), xx.begin(), [](auto x) {
+      return (x.isMonitor() || x.isMasked() || !x.hasDetectors() ? -1.0 : M_PI - x.signedTwoTheta());
+    });
+    std::remove(xx.begin(), xx.end(), -1.0);
+    std::transform(xx.cbegin(), xx.cend(), xx.begin(), [](double x) { return (x <= M_PI ? x : 3. * M_PI - x); });
+    std::sort(xx.begin(), xx.end());
+
+    size_t band;
+    auto it = xx.begin();
+    double next;
+    while (it != xx.end()) {
+      band = getBand(*it);
+      divs[band] = *it;
+      groups[band].push_back(++currentGroup);
+      groups[band + 1].push_back(currentGroup);
+      next = (*it) + tt_step;
+      while ((*it) <= next && it != xx.end())
+        it++;
+    }
+  };
+
+  size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) override {
+    double tt = spectrumInfo.signedTwoTheta(i);
+    tt = (tt < 0 ? 2. * M_PI + tt : M_PI - tt);
+    size_t band = getBand(tt);
+    size_t index = groups[band].back();
+    if (tt < divs[band])
+      index = groups[band].front();
+    return (index);
+  }
 };
 
 } // anonymous namespace
@@ -227,16 +290,20 @@ void GenerateGroupingPowder::exec() {
   const double step = getProperty("AngleStep");
 
   Labelor *label;
-  OldLabelor oldlabel(step);
-  PolarLabelor polarlabel(step);
   bool numberByAngle = getProperty("NumberByAngle");
+  double azimuthalStep = getProperty("AzimuthalStep");
+  double azimuthalStart = getProperty("AzimuthalStart");
   if (numberByAngle) {
-    label = &oldlabel;
+    if (azimuthalStep == 360.0)
+      label = new OldLabelor(step);
+    else
+      label = new SectorLabelor(step, azimuthalStep, azimuthalStart);
   } else {
-    label = &polarlabel;
+    if (azimuthalStep == 360.0)
+      label = new PolarLabelor(step, spectrumInfo);
+    else
+      label = new SplitPolarLabelor(step, spectrumInfo);
   }
-
-  // const auto numSteps = static_cast<size_t>(180. / step + 1);
 
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
@@ -244,8 +311,7 @@ void GenerateGroupingPowder::exec() {
     }
 
     const auto &det = spectrumInfo.detector(i);
-    // const double tt = spectrumInfo.twoTheta(i) * Geometry::rad2deg;
-    const double groupId = (*label)(spectrumInfo, i);
+    const double groupId = (double)(*label)(spectrumInfo, i);
 
     if (spectrumInfo.hasUniqueDetector(i)) {
       groupWS->setValue(det.getID(), groupId);
@@ -269,6 +335,9 @@ void GenerateGroupingPowder::exec() {
   if (getProperty("GenerateParFile")) {
     this->saveAsPAR();
   }
+
+  // clean up the dynamically allocated labelor
+  delete label;
 }
 
 // XML file
