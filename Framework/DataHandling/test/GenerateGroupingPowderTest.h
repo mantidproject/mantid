@@ -283,7 +283,7 @@ public:
   }
 
   // azimuthal grouping with a par file isn't currently supported
-  void test_azimuth_with_par_fail() { // TODO re-enable
+  void test_azimuth_with_par_fail() {
     const std::string XML_OUT_FILE("PowderGrouping_azi_with_par.xml");
     const std::string PAR_OUT_FILE{GenerateGroupingPowder::parFilenameFromXmlFilename(XML_OUT_FILE)};
     const std::string GROUP_WS("aziWithParTestWS");
@@ -435,8 +435,7 @@ public:
     const bool numberByAngle{false};
     const bool splitSides{false};
     const std::vector<int> groups_exp{1, 2, 3, 4, 5};
-    const std::vector<double> pixel_groups_exp{1, 1, 1, 2, 2, 2, 3, 3, 3,
-                                               5, 5, 5, 4, 4, 4, 3, 3, 3}; // TODO needs more checking on values
+    const std::vector<double> pixel_groups_exp{1, 1, 1, 2, 2, 2, 3, 3, 3, 5, 5, 5, 4, 4, 4, 3, 3, 3};
     run_SNAPliteTest("PowderGrouping_no_azimuth", ang1, ang2, numberByAngle, splitSides, groups_exp, pixel_groups_exp);
   }
 
@@ -456,8 +455,7 @@ public:
     const bool numberByAngle{false};
     const bool splitSides{false};
     const std::vector<int> groups_exp{1, 2, 3, 4, 5, 6};
-    const std::vector<double> pixel_groups_exp{1, 1, 1, 2, 2, 2, 3, 3, 3,
-                                               5, 6, 6, 5, 5, 5, 4, 4, 4}; // TODO needs more checking on values
+    const std::vector<double> pixel_groups_exp{1, 1, 1, 2, 2, 2, 3, 3, 3, 5, 6, 6, 5, 5, 5, 4, 4, 4};
     run_SNAPliteTest("PowderGrouping_no_azimuth_gaps", ang1, ang2, numberByAngle, splitSides, groups_exp,
                      pixel_groups_exp);
   }
@@ -478,8 +476,7 @@ public:
     const bool numberByAngle{false};
     const bool splitSides{true};
     const std::vector<int> groups_exp{1, 2, 3, 4, 5, 6};
-    const std::vector<double> pixel_groups_exp{1, 1, 1, 2, 2, 2, 3, 3, 3,
-                                               6, 6, 6, 5, 5, 5, 4, 4, 4}; // TODO needs more checking on values
+    const std::vector<double> pixel_groups_exp{1, 1, 1, 2, 2, 2, 3, 3, 3, 6, 6, 6, 5, 5, 5, 4, 4, 4};
     run_SNAPliteTest("PowderGrouping_no_azimuth", ang1, ang2, numberByAngle, splitSides, groups_exp, pixel_groups_exp);
   }
 
