@@ -274,7 +274,15 @@ void PreviewPresenter::plotLinePlot() {
   m_plotPresenter->plot();
 }
 
-void PreviewPresenter::runSumBanks() { m_model->sumBanksAsync(*m_jobManager); }
+void PreviewPresenter::runSumBanks() {
+  if (m_model->getSelectedBanks().get_value_or("").empty()) {
+    // Do not sum the workspace if no detector IDs have been selected
+    m_model->setSummedWs(m_model->getLoadedWs());
+    notifySumBanksCompleted();
+  } else {
+    m_model->sumBanksAsync(*m_jobManager);
+  }
+}
 
 void PreviewPresenter::runReduction() {
   m_view->disableMainWidget();
