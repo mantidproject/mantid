@@ -132,7 +132,8 @@ public:
 
   size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) override {
     double tt = M_PI - spectrumInfo.twoTheta(i);
-    size_t band = getBand(tt);
+    size_t a = 0;
+    size_t band = getBand(tt) + a;
     size_t index = groups[band].back();
     if (tt < divs[band])
       index = groups[band].front();
