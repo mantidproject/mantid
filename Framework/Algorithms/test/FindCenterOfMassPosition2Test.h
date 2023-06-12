@@ -157,7 +157,7 @@ public:
     // load the data
     auto loader = center.createChildAlgorithm("LoadNexusProcessed");
     loader->initialize();
-    loader->setPropertyValue("Filename", "/HFIR/CG3/shared/tmp/flat_ws.nxs");
+    loader->setPropertyValue("Filename", "CG3_beamcenter_input.nxs");
     loader->setPropertyValue("OutputWorkspace", "testCG3DataInputWorkspace");
     loader->setAlwaysStoreInADS(true); // required to retrieve later the workspace by its name
     loader->execute();
@@ -178,11 +178,11 @@ public:
 
     TableRow row = table->getFirstRow();
     TS_ASSERT_EQUALS(row.String(0), "X (m)");
-    TS_ASSERT_DELTA(row.Double(1), -0.07713, 0.0001);
+    TS_ASSERT_DELTA(row.Double(1), -0.0078, 0.0001);
 
     row = table->getRow(1);
     TS_ASSERT_EQUALS(row.String(0), "Y (m)");
-    TS_ASSERT_DELTA(row.Double(1), -0.00146, 0.0001);
+    TS_ASSERT_DELTA(row.Double(1), -0.0143, 0.0001);
   }
 
   /*
