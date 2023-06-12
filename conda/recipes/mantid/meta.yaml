@@ -65,7 +65,6 @@ requirements:
     - scipy
     - openssl
     - euphonic {{ euphonic }}
-    - pint {{ pint }}
     - toml
     - libglu  # [linux]
 
