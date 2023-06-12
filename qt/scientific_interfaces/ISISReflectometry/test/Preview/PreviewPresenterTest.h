@@ -132,7 +132,7 @@ public:
     auto mockRegionSelector = makeRegionSelector();
     auto mockInstViewModel = makeInstViewModel();
 
-    expectLoadWorkspaceCompletedForLinearDetector(*mockModel, *mockJobManager, *mockDockedWidgets, *mockInstViewModel);
+    expectLoadWorkspaceCompletedForLinearDetector(*mockModel, *mockDockedWidgets, *mockInstViewModel);
 
     EXPECT_CALL(*mockRegionSelector, clearWorkspace()).Times(1);
 
@@ -607,7 +607,7 @@ private:
     EXPECT_CALL(linePlot, setPlotErrorBars(true)).Times(1);
   }
 
-  void expectLoadWorkspaceCompletedForLinearDetector(MockPreviewModel &mockModel, MockJobManager &mockJobManager,
+  void expectLoadWorkspaceCompletedForLinearDetector(MockPreviewModel &mockModel,
                                                      MockPreviewDockedWidgets &mockDockedWidgets,
                                                      MockInstViewModel &mockInstViewModel) {
     auto ws = createLinearDetectorWorkspace();
