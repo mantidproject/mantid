@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/FindCenterOfMassPosition2.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -147,6 +148,41 @@ public:
     TS_ASSERT_EQUALS(list.size(), 2);
     TS_ASSERT_DELTA(list[0], center_x * pixel_size, 0.0001);
     TS_ASSERT_DELTA(list[1], center_y * pixel_size, 0.0001);
+  }
+
+  void testCG3Data() {
+    Mantid::Algorithms::FindCenterOfMassPosition2 center;
+    center.initialize();
+
+    // load the data
+    auto loader = center.createChildAlgorithm("LoadNexusProcessed");
+    loader->initialize();
+    loader->setPropertyValue("Filename", "/HFIR/CG3/shared/tmp/flat_ws.nxs");
+    loader->setPropertyValue("OutputWorkspace", "testCG3DataInputWorkspace");
+    loader->setAlwaysStoreInADS(true); // required to retrieve later the workspace by its name
+    loader->execute();
+
+    center.setPropertyValue("InputWorkspace", "testCG3DataInputWorkspace");
+    const std::string outputWSname("testCG3DataOutputWorkspace");
+    center.setPropertyValue("Output", outputWSname);
+    center.setPropertyValue("CenterX", "0");
+    center.setPropertyValue("CenterY", "0");
+    center.setPropertyValue("BeamRadius", "0.0155"); // meters
+
+    TS_ASSERT_THROWS_NOTHING(center.execute())
+    TS_ASSERT(center.isExecuted())
+
+    // Get the resulting table workspace
+    Mantid::DataObjects::TableWorkspace_sptr table =
+        AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>(outputWSname);
+
+    TableRow row = table->getFirstRow();
+    TS_ASSERT_EQUALS(row.String(0), "X (m)");
+    TS_ASSERT_DELTA(row.Double(1), -0.07713, 0.0001);
+
+    row = table->getRow(1);
+    TS_ASSERT_EQUALS(row.String(0), "Y (m)");
+    TS_ASSERT_DELTA(row.Double(1), -0.00146, 0.0001);
   }
 
   /*
