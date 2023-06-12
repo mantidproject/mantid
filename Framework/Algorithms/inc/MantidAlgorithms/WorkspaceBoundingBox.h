@@ -38,25 +38,25 @@ public:
   double getYMin() const { return m_yPosMin; }
   double getYMax() const { return m_yPosMax; }
 
-  void setPosition(double x, double y);
-  void setCenter(double x, double y);
-  void setBounds(double xMin, double xMax, double yMin, double yMax);
+  void setPosition(const double x, const double y);
+  void setCenter(const double x, const double y);
+  void setBounds(const double xMin, const double xMax, const double yMin, const double yMax);
 
   double calculateDistance() const;
   double calculateRadiusX() const;
   double calculateRadiusY() const;
 
-  double updatePositionAndReturnCount(int index);
-  int findFirstValidWs(const int numSpec) const;
-  bool isValidWs(int index) const;
-  bool isOutOfBoundsOfNonDirectBeam(const double beamRadius, int index, const bool directBeam);
+  double updatePositionAndReturnCount(const std::size_t index);
+  std::size_t findFirstValidWs(const std::size_t numSpec) const;
+  bool isValidIndex(const std::size_t index) const;
+  bool isOutOfBoundsOfNonDirectBeam(const double beamRadius, const std::size_t index, const bool directBeam);
   bool containsPoint(double x, double y);
   void normalizePosition(double x, double y);
-  void updateMinMax(int index);
+  void updateMinMax(const std::size_t index);
 
 private:
-  Kernel::V3D &position(int index) const;
-  double yValue(const int index) const;
+  Kernel::V3D &position(const std::size_t index) const;
+  double countsValue(const std::size_t index) const;
   API::MatrixWorkspace_const_sptr m_workspace;
   const API::SpectrumInfo *m_spectrumInfo;
   double m_xPos{0};
@@ -68,9 +68,9 @@ private:
   double m_yPosMin{0};
   double m_yPosMax{0};
   // cache information
-  mutable int m_cachedPositionIndex{-1};
+  mutable std::size_t m_cachedPositionIndex{std::numeric_limits<std::size_t>::max()};
   mutable Kernel::V3D m_cachedPosition;
-  mutable int m_cachedHistogramYIndex{-1};
+  mutable std::size_t m_cachedHistogramYIndex{std::numeric_limits<std::size_t>::max()};
   mutable double m_cachedYValue;
 };
 

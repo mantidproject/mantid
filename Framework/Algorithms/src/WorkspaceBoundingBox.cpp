@@ -20,7 +20,7 @@ WorkspaceBoundingBox::WorkspaceBoundingBox() {
 
 WorkspaceBoundingBox::~WorkspaceBoundingBox() = default;
 
-Kernel::V3D &WorkspaceBoundingBox::position(int index) const {
+Kernel::V3D &WorkspaceBoundingBox::position(const std::size_t index) const {
   if (m_cachedPositionIndex != index) {
     if (!m_spectrumInfo)
       throw std::runtime_error("SpectrumInfo object is not initialized");
@@ -31,7 +31,7 @@ Kernel::V3D &WorkspaceBoundingBox::position(int index) const {
   return m_cachedPosition;
 }
 
-double WorkspaceBoundingBox::yValue(const int index) const {
+double WorkspaceBoundingBox::countsValue(const std::size_t index) const {
   if (m_cachedHistogramYIndex != index) {
     m_cachedYValue = m_workspace->y(index)[HISTOGRAM_INDEX];
     m_cachedHistogramYIndex = index;
@@ -39,17 +39,17 @@ double WorkspaceBoundingBox::yValue(const int index) const {
   return m_cachedYValue;
 }
 
-void WorkspaceBoundingBox::setPosition(double x, double y) {
+void WorkspaceBoundingBox::setPosition(const double x, const double y) {
   this->m_xPos = x;
   this->m_yPos = y;
 }
 
-void WorkspaceBoundingBox::setCenter(double x, double y) {
+void WorkspaceBoundingBox::setCenter(const double x, const double y) {
   this->m_centerXPos = x;
   this->m_centerYPos = y;
 }
 
-void WorkspaceBoundingBox::setBounds(double xMin, double xMax, double yMin, double yMax) {
+void WorkspaceBoundingBox::setBounds(const double xMin, const double xMax, const double yMin, const double yMax) {
   this->m_xPosMin = xMin;
   this->m_xPosMax = xMax;
   this->m_yPosMin = yMin;
@@ -62,7 +62,7 @@ void WorkspaceBoundingBox::setBounds(double xMin, double xMax, double yMin, doub
  *  @param index :: index of spectrum data
  *  @return true/false if its valid
  */
-bool WorkspaceBoundingBox::isValidWs(int index) const {
+bool WorkspaceBoundingBox::isValidIndex(const std::size_t index) const {
   if (!m_spectrumInfo)
     throw std::runtime_error("SpectrumInfo object is not initialized");
   if (!m_spectrumInfo->hasDetectors(index)) {
@@ -74,7 +74,7 @@ bool WorkspaceBoundingBox::isValidWs(int index) const {
     return false;
 
   // Get the current spectrum
-  const auto YIn = this->yValue(index);
+  const auto YIn = this->countsValue(index);
   // Skip if NaN of inf
   if (std::isnan(YIn) || std::isinf(YIn))
     return false;
@@ -86,10 +86,10 @@ bool WorkspaceBoundingBox::isValidWs(int index) const {
  *  @param numSpec :: the number of spectrum in the workspace to search through
  *  @return index of first valid spectrum
  */
-int WorkspaceBoundingBox::findFirstValidWs(const int numSpec) const {
-  int i;
+std::size_t WorkspaceBoundingBox::findFirstValidWs(const std::size_t numSpec) const {
+  std::size_t i;
   for (i = 0; i < numSpec; ++i) {
-    if (isValidWs(i))
+    if (isValidIndex(i))
       break;
   }
   return i;
@@ -101,14 +101,14 @@ int WorkspaceBoundingBox::findFirstValidWs(const int numSpec) const {
  *  @param index :: index of spectrum data
  *  @return number of points of histogram data at index
  */
-double WorkspaceBoundingBox::updatePositionAndReturnCount(int index) {
-  const auto YIn = this->yValue(index);
+double WorkspaceBoundingBox::updatePositionAndReturnCount(const std::size_t index) {
+  const auto counts = this->countsValue(index);
   const auto &position = this->position(index);
 
-  this->m_xPos += YIn * position.X();
-  this->m_yPos += YIn * position.Y();
+  this->m_xPos += counts * position.X();
+  this->m_yPos += counts * position.Y();
 
-  return YIn;
+  return counts;
 }
 
 /** Compare current mins and maxs to the coordinates of the spectrum at index
@@ -116,7 +116,7 @@ double WorkspaceBoundingBox::updatePositionAndReturnCount(int index) {
  *
  *  @param index :: index of spectrum data
  */
-void WorkspaceBoundingBox::updateMinMax(int index) {
+void WorkspaceBoundingBox::updateMinMax(const std::size_t index) {
   const auto &position = this->position(index);
   const double x = position.X();
   const double y = position.Y();
@@ -134,7 +134,8 @@ void WorkspaceBoundingBox::updateMinMax(int index) {
  *  @param directBeam :: whether or not the spectrum is subject to the beam
  *  @return number of points of histogram data at index
  */
-bool WorkspaceBoundingBox::isOutOfBoundsOfNonDirectBeam(const double beamRadius, int index, const bool directBeam) {
+bool WorkspaceBoundingBox::isOutOfBoundsOfNonDirectBeam(const double beamRadius, const std::size_t index,
+                                                        const bool directBeam) {
   if (!directBeam) {
     const auto &position = this->position(index);
     const double dx = position.X() - this->m_centerXPos;

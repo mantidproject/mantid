@@ -68,7 +68,7 @@ double initBoundingBox(WorkspaceBoundingBox &boundingBox, const int numSpec, con
                        const bool directBeam) {
   double totalCount = 0;
   for (int i = 0; i < numSpec; i++) {
-    if (!boundingBox.isValidWs(i))
+    if (!boundingBox.isValidIndex(i))
       continue;
 
     boundingBox.updateMinMax(i);
@@ -88,7 +88,7 @@ double updateBoundingBox(WorkspaceBoundingBox &boundingBox, WorkspaceBoundingBox
   double totalCount = 0;
   const auto &spectrumInfo = boundingBox.getWorkspace()->spectrumInfo();
   for (int i = 0; i < numSpec; i++) {
-    if (!boundingBox.isValidWs(i))
+    if (!boundingBox.isValidIndex(i))
       continue;
 
     const V3D position = spectrumInfo.position(i);
