@@ -338,12 +338,21 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _should_sum_banks(self, inputWorkspace, firstTransWorkspace, secondTransWorkspace):
         """Returns true if we should perform a sum banks step as part of the reduction"""
+        if self.getProperty(Prop.ROI_DETECTOR_IDS).isDefault:
+            # Only sum banks when a region of detector IDs to sum has been passed in
+            return False
+
+        perform_sum = []
         for workspace_name in [inputWorkspace, firstTransWorkspace, secondTransWorkspace]:
             if workspace_name is not None:
                 workspace = AnalysisDataService.retrieve(workspace_name)
-                if not self._has_single_2D_rectangular_detector(workspace):
-                    return False
-        return True
+                perform_sum.append(self._has_single_2D_rectangular_detector(workspace))
+
+        result = perform_sum[0]
+        if not all(sum_ws == result for sum_ws in perform_sum):
+            raise RuntimeError("Not implemented when some but not all input and transmission workspaces require summing across banks")
+
+        return result
 
     def _has_single_2D_rectangular_detector(self, workspace) -> bool:
         """Returns true if workspace has a single 2D rectangular detector, and is not a group workspace."""

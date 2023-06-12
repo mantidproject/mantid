@@ -14,6 +14,8 @@ from testhelpers import assertRaisesNothing, create_algorithm
 
 class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
     _CALIBRATION_TEST_DATA = FileFinder.getFullPath("ISISReflectometry/calibration_test_data_INTER45455.dat")
+    _INTER45455_DETECTOR_ROI = "6-62"
+    _TEST_2D_WS_DETECTOR_ROI = "4-7"
 
     def setUp(self):
         self._oldFacility = config["default.facility"]
@@ -648,7 +650,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ["no_TOF_group", "TOF_12345+67890", "12345", "67890"]
         self._assert_run_algorithm_succeeds(args, outputs)
 
-    def test_sum_banks_is_run_for_2D_detector_workspace(self):
+    def test_sum_banks_runs_for_2D_detector_workspace_when_detector_ROI_specified(self):
         self._create_2D_detector_workspace(38415, "TOF_")
 
         def _check_num_histograms_and_first_y_value(ws_name, expected_num_histograms, expected_y_value):
@@ -659,15 +661,25 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         _check_num_histograms_and_first_y_value("TOF_38415", 6, 0.3)
         args = self._default_options
         args["InputRunList"] = "38415"
+        args["ROIDetectorIDs"] = self._TEST_2D_WS_DETECTOR_ROI
         outputs = ["IvsQ_38415", "IvsQ_binned_38415", "TOF", "TOF_38415", "TOF_38415_summed_segment"]
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_sum_banks(AnalysisDataService.retrieve("IvsQ_binned_38415"), is_summed=True)
         _check_num_histograms_and_first_y_value("TOF_38415_summed_segment", 4, 0.6)
 
+    def test_sum_banks_not_run_for_2D_detector_workspace_when_no_detector_ROI(self):
+        self._create_2D_detector_workspace(38415, "TOF_")
+        args = self._default_options
+        args["InputRunList"] = "38415"
+        outputs = ["IvsQ_38415", "IvsQ_binned_38415", "TOF", "TOF_38415"]
+        self._assert_run_algorithm_succeeds(args, outputs)
+        self._check_sum_banks(AnalysisDataService.retrieve("IvsQ_binned_38415"), is_summed=False)
+
     def test_sum_banks_is_not_run_for_linear_detector_workspace(self):
         self._create_workspace(38415, "TOF_")
         args = self._default_options
         args["InputRunList"] = "38415"
+        args["ROIDetectorIDs"] = "1"
         outputs = ["IvsQ_38415", "IvsQ_binned_38415", "TOF", "TOF_38415"]
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_sum_banks(AnalysisDataService.retrieve("IvsQ_binned_38415"), is_summed=False)
@@ -678,19 +690,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args["InputRunList"] = "13460"
         args["FirstTransmissionRunList"] = "13463"
-        outputs = [
-            "IvsQ_13460",
-            "IvsQ_binned_13460",
-            "TOF_13460",
-            "TRANS_13463",
-            "TRANS_LAM_13463",
-            "TOF",
-        ]
-        self._assert_run_algorithm_succeeds(args, outputs)
-        history = ["ReflectometryReductionOneAuto", "GroupWorkspaces"]
-        reduced_ws = AnalysisDataService.retrieve("IvsQ_binned_13460")
-        self._check_history(reduced_ws, history)
-        self._check_sum_banks(reduced_ws, is_summed=False)
+        args["ROIDetectorIDs"] = self._TEST_2D_WS_DETECTOR_ROI
+        self._assert_run_algorithm_throws_with_correct_msg(args, "some but not all input and transmission workspaces require summing")
 
     def test_summed_workspaces_hidden_when_selected(self):
         self._create_2D_detector_workspace(38415, "__TOF_")
@@ -701,6 +702,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args["FirstTransmissionRunList"] = "38416"
         args["SecondTransmissionRunList"] = "38417"
         args["HideInputWorkspaces"] = True
+        args["ROIDetectorIDs"] = self._TEST_2D_WS_DETECTOR_ROI
         outputs = ["IvsQ_38415", "IvsQ_binned_38415", "TRANS_LAM_38416_38417"]
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_sum_banks(AnalysisDataService.retrieve("IvsQ_binned_38415"), is_summed=True)
@@ -711,6 +713,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         del args["ProcessingInstructions"]
         args["CalibrationFile"] = self._CALIBRATION_TEST_DATA
         args["AnalysisMode"] = "MultiDetectorAnalysis"
+        args["ROIDetectorIDs"] = self._INTER45455_DETECTOR_ROI
         outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "TOF_45455_summed_segment"]
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=True)
@@ -720,6 +723,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args["InputRunList"] = "INTER45455"
         del args["ProcessingInstructions"]
         args["AnalysisMode"] = "MultiDetectorAnalysis"
+        args["ROIDetectorIDs"] = self._INTER45455_DETECTOR_ROI
         outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "TOF_45455_summed_segment"]
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=False)
