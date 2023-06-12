@@ -50,7 +50,7 @@ public:
   virtual size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) = 0;
 };
 
-class OldLabelor : public Labelor {
+class CircularSectorLabelor : public Labelor {
   /* Divides sphere into bands of size tt_step,
   which are then numbered sequentially, in order, with increasing twoTheta
   */
@@ -59,13 +59,13 @@ class OldLabelor : public Labelor {
   const double inv_tt_step;
 
 public:
-  OldLabelor(double t_step) : Labelor(t_step), inv_tt_step(1.0 / tt_step){};
+  CircularSectorLabelor(double t_step) : Labelor(t_step), inv_tt_step(1.0 / tt_step){};
   size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) override {
     return static_cast<int>(spectrumInfo.twoTheta(i) * inv_tt_step);
   };
 };
 
-class SectorLabelor : public Labelor {
+class SphericalSectorLabelor : public Labelor {
   /**
    * Divides sphere into spherical sectors in 2theta and phi
    * Ordering goes by increasing 2theta, then by increasing phi
@@ -78,7 +78,7 @@ class SectorLabelor : public Labelor {
   const int num_aa_step;
 
 public:
-  SectorLabelor(double t_step, double a_step, double a_start)
+  SphericalSectorLabelor(double t_step, double a_step, double a_start)
       : Labelor(t_step, a_step, a_start), inv_tt_step(1.0 / tt_step), inv_aa_step(1.0 / aa_step),
         num_aa_step(int(std::ceil(360.0 / a_step))){};
   size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) override {
@@ -87,7 +87,7 @@ public:
   };
 };
 
-class PolarLabelor : public Labelor {
+class CircularOrderedLabelor : public Labelor {
   /**
    * Labels using unsigned twoTheta, with no gaps in labeld groups
    * Groups are labeled in order of twoTheta
@@ -106,7 +106,7 @@ class PolarLabelor : public Labelor {
   inline size_t getBand(const double x) { return static_cast<int>(x * inv_tt_step); };
 
 public:
-  PolarLabelor(double t_step, SpectrumInfo const &spectrumInfo)
+  CircularOrderedLabelor(double t_step, SpectrumInfo const &spectrumInfo)
       : Labelor(t_step), inv_tt_step(1.0 / tt_step), currentGroup(0) {
 
     std::vector<double> tt(spectrumInfo.size());
@@ -124,6 +124,7 @@ public:
       groups[band].push_back(++currentGroup);
       groups[band + 1].push_back(currentGroup);
       double next = *it + tt_step;
+      // cppcheck-suppress derefInvalidIterator
       while ((*it) <= next && it != tt.end() - 1)
         it++;
     }
@@ -139,9 +140,9 @@ public:
   }
 };
 
-class SplitPolarLabelor : public Labelor {
+class SplitCircularOrderedLabelor : public Labelor {
   /**
-   * As PolarLabelor but splitting left/right
+   * As CircularOrderedLabelor but splitting left/right
    */
   const double inv_tt_step;
 
@@ -152,7 +153,7 @@ class SplitPolarLabelor : public Labelor {
   inline size_t getBand(const double tt) { return static_cast<size_t>(tt * inv_tt_step); };
 
 public:
-  SplitPolarLabelor(double t_step, SpectrumInfo const &spectrumInfo)
+  SplitCircularOrderedLabelor(double t_step, SpectrumInfo const &spectrumInfo)
       : Labelor(t_step), inv_tt_step(1.0 / tt_step), currentGroup(0) {
     std::vector<double> xx(spectrumInfo.size());
     std::transform(spectrumInfo.cbegin(), spectrumInfo.cend(), xx.begin(), [](auto x) {
@@ -170,6 +171,7 @@ public:
       groups[band].push_back(++currentGroup);
       groups[band + 1].push_back(currentGroup);
       double next = (*it) + tt_step;
+      // cppcheck-suppress derefInvalidIterator
       while ((*it) <= next && it != xx.end() - 1)
         it++;
     }
@@ -292,14 +294,14 @@ void GenerateGroupingPowder::exec() {
   double azimuthalStart = getProperty("AzimuthalStart");
   if (numberByAngle) {
     if (azimuthalStep == 360.0)
-      label = new OldLabelor(step);
+      label = new CircularSectorLabelor(step);
     else
-      label = new SectorLabelor(step, azimuthalStep, azimuthalStart);
+      label = new SphericalSectorLabelor(step, azimuthalStep, azimuthalStart);
   } else {
     if (azimuthalStep == 360.0)
-      label = new PolarLabelor(step, spectrumInfo);
+      label = new CircularOrderedLabelor(step, spectrumInfo);
     else
-      label = new SplitPolarLabelor(step, spectrumInfo);
+      label = new SplitCircularOrderedLabelor(step, spectrumInfo);
   }
 
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
