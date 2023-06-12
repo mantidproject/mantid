@@ -125,15 +125,14 @@ public:
       groups[band + 1].push_back(currentGroup);
       double next = *it + tt_step;
       // cppcheck-suppress derefInvalidIterator
-      while ((*it) <= next && it != tt.end() - 1)
+      while ((*it) <= next && it != tt.end())
         it++;
     }
   };
 
   size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) override {
     double tt = M_PI - spectrumInfo.twoTheta(i);
-    size_t a = 0;
-    size_t band = getBand(tt) + a;
+    size_t band = getBand(tt);
     size_t index = groups[band].back();
     if (tt < divs[band])
       index = groups[band].front();
@@ -173,7 +172,7 @@ public:
       groups[band + 1].push_back(currentGroup);
       double next = (*it) + tt_step;
       // cppcheck-suppress derefInvalidIterator
-      while ((*it) <= next && it != xx.end() - 1)
+      while ((*it) <= next && it != xx.end())
         it++;
     }
   };
@@ -338,6 +337,7 @@ void GenerateGroupingPowder::exec() {
 
   // clean up the dynamically allocated labelor
   delete label;
+  fflush(stdout);
 }
 
 // XML file
