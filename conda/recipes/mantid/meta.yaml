@@ -64,6 +64,7 @@ requirements:
     - {{ pin_compatible("numpy", upper_bound="1.25") }}
     - {{ pin_compatible("occt", max_pin="x.x.x") }}
     - pycifrw {{ pycifrw }}
+    - pystog {{ pystog }}
     - python
     - python-dateutil
     - pyyaml
