@@ -25,4 +25,8 @@ Bugfixes
 - Fixed the labelling of the workspaces output by :ref:`algm-PolarizationCorrectionWildes` which were being inverted, while ensuring the output workspace group order continues to match the documentation.
 - The ``Signal``, ``Transmission``, and ``Background`` ROI selectors on the :ref:`Preview tab <refl_preview>` have been made more visible.
 
+.. image:: ../../images/6_7_release/Reflectometry/refl_preview_ROI_selectors.png
+    :align: center
+    :width: 700
+
 :ref:`Release 6.7.0 <v6.7.0>`
