@@ -213,3 +213,6 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
     def get_extra_image_info_columns(self, xdata, ydata):
         return {}
+
+    def is_integer_frame(self):
+        return False, False
