@@ -13,7 +13,7 @@ from mantid.api import (
     MultipleFileProperty,
     PropertyMode,
 )
-from mantid.kernel import Direction, PropertyManagerDataService
+from mantid.kernel import Direction, PropertyManagerDataService, StringArrayProperty
 from mantid.simpleapi import (
     AlignAndFocusPowder,
     CompressEvents,
@@ -161,6 +161,14 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         self.declareProperty(
             ITableWorkspaceProperty("Characterizations", "", Direction.Input, PropertyMode.Optional), "Characterizations table"
         )
+        self.declareProperty(
+            StringArrayProperty(name="LogAllowList"),
+            "If specified, only these logs will be loaded from the file. This is passed to LoadEventNexus",
+        )
+        self.declareProperty(
+            StringArrayProperty(name="LogBlockList"),
+            "If specified, these logs will not be loaded from the file. This is passed to LoadEventNexus",
+        )
 
         self.copyProperties("AlignAndFocusPowder", PROPS_FOR_ALIGN)
         self.copyProperties("PDDetermineCharacterizations", PROPS_FOR_PD_CHARACTER)
@@ -174,6 +182,9 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if unfocusname == finalname:
                 errors["OutputWorkspace"] = "Cannot be the same as UnfocussedWorkspace"
                 errors["UnfocussedWorkspace"] = "Cannot be the same as OutputWorkspace"
+        if (not self.getProperty("LogAllowList").isDefault) and (not self.getProperty("LogBlockList").isDefault):
+            errors["LogAllowList"] = "Cannot specify with LogBlockList"
+            errors["LogBlockList"] = "Cannot specify with LogAllowList"
 
         return errors
 
@@ -200,10 +211,21 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         loader.initialize()
         loader.setPropertyValue("Filename", filename)
         loader.setPropertyValue("OutputWorkspace", wkspname)
+
         if skipLoadingLogs:
             if self.__loaderName != "LoadEventNexus":
                 raise RuntimeError("Cannot set LoadLogs=False in {}".format(self.__loaderName))
             loader.setProperty("LoadLogs", False)
+        elif "AllowList" not in kwargs:
+            # this only works for LoadEventNexus
+            # i.e. LoadNexusProcessed doesn't have these properties
+            try:
+                if not self.getProperty("LogAllowList").isDefault:
+                    loader.setProperty("AllowList", self.getProperty("LogAllowList").value)
+                if not self.getProperty("LogBlockList").isDefault:
+                    loader.setProperty("BlockList", self.getProperty("LogBlockList").value)
+            except RuntimeError:
+                pass  # let it drop on the floor
         for key, value in kwargs.items():
             if isinstance(value, str):
                 loader.setPropertyValue(key, value)
@@ -260,8 +282,12 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 tempname = "__%s_temp" % wkspname
                 # set the loader for this file
                 try:
+                    # put together list of logs that matter, all the others will be skipped
+                    allowedLogs = []
+                    allowedLogs.extend(this.getProperty("FrequencyLogNames"))
+                    allowedLogs.extend(this.getProperty("WaveLengthLogNames"))
                     # MetaDataOnly=True is only supported by LoadEventNexus
-                    loader = self.__createLoader(filename, tempname, MetaDataOnly=True)
+                    loader = self.__createLoader(filename, tempname, MetaDataOnly=True, AllowList=allowedLogs)
                     loader.execute()
 
                     # get the underlying loader name if we used the generic one
@@ -377,7 +403,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         # inner loop is over chunks
         haveAccumulationForFile = False
-        for (j, chunk) in enumerate(chunks):
+        for j, chunk in enumerate(chunks):
             prog_start = file_prog_start + float(j) * float(numSteps - 1) * prog_per_chunk_step
 
             # if reading all at once, put the data into the final name directly
@@ -752,7 +778,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             grain_size = int(math.sqrt(numberFilesToProcess))  # grain size
         else:
             grain_size = numberFilesToProcess
-        for (i, filename) in enumerate(files):
+        for i, filename in enumerate(files):
             self.__loaderName = "Load"  # reset to generic load with each file
             wkspname, unfocusname = self.__processFile(filename, self.prog_per_file * float(i), not self.useCaching, bool(finalunfocusname))
             # accumulate into partial sum

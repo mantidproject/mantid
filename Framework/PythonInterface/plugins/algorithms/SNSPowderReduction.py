@@ -34,6 +34,7 @@ from mantid.kernel import (
     Property,
     PropertyCriterion,
     PropertyManagerDataService,
+    StringArrayProperty,
     StringListValidator,
     StringTimeSeriesProperty,
 )
@@ -335,9 +336,17 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         self.declareProperty("CompressTOFTolerance", 0.01, "Tolerance to compress events in TOF.")
 
-        self.copyProperties("AlignAndFocusPowderFromFiles", ["FrequencyLogNames", "WaveLengthLogNames"])
+        # reduce logs being loaded
+        self.declareProperty(
+            StringArrayProperty(name="LogAllowList"),
+            "If specified, only these logs will be loaded from the file. This is passed to LoadEventNexus",
+        )
+        self.declareProperty(
+            StringArrayProperty(name="LogBlockList", values="Phase*,Speed*,BL*:Chop:*,chopper*TDC"),
+            "If specified, these logs will not be loaded from the file. This is passed to LoadEventNexus",
+        )
 
-        return
+        self.copyProperties("AlignAndFocusPowderFromFiles", ["FrequencyLogNames", "WaveLengthLogNames"])
 
     def validateInputs(self):
         issues = dict()
@@ -353,7 +362,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         # The provided cache directory does not exist
         cache_dir_string = self.getProperty("CacheDir").value  # comma-delimited string representation of list
         if bool(cache_dir_string):
-
             cache_dirs = [candidate.strip() for candidate in cache_dir_string.split(",")]
 
             for cache_dir in cache_dirs:
@@ -559,7 +567,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             # END-FOR
         # ENDIF (Sum data or not)
 
-        for (samRunIndex, sam_ws_name) in enumerate(samwksplist):
+        for samRunIndex, sam_ws_name in enumerate(samwksplist):
             assert isinstance(sam_ws_name, str), "Assuming that samRun is a string. But it is %s" % str(type(sam_ws_name))
             if is_event_workspace(sam_ws_name):
                 self.log().information(
@@ -911,6 +919,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
             WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value,
             ReductionProperties="__snspowderreduction",
+            LogAllowList=self.getPropertyValue("LogAllowList").strip(),
+            LogBlockList=self.getPropertyValue("LogBlockList").strip(),
             **otherArgs,
         )
 
