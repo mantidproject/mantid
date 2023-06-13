@@ -50,6 +50,7 @@ void MultiDomainCreator::createDomain(std::shared_ptr<API::FunctionDomain> &doma
       throw std::runtime_error("Missing domain creator");
     }
     API::FunctionDomain_sptr dom;
+    creator->ignoreInvalidData(m_ignoreInvalidData);
     creator->createDomain(dom, values, i0);
     creator->separateCompositeMembersInOutput(m_outputCompositeMembers, m_convolutionCompositeMembers);
     jointDomain->addDomain(dom);
