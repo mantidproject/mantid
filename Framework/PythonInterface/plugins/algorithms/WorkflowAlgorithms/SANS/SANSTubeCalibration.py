@@ -33,9 +33,6 @@ class TubeSide:
             return TubeSide.RIGHT
 
 
-INF = sys.float_info.max  # Convenient approximation for infinity
-
-
 class FuncForm(Enum):
     EDGES = 1
     FLAT_TOP_PEAK = 2
@@ -56,6 +53,7 @@ class SANSTubeCalibration(PythonAlgorithm):
     _SCALED_WS_SUFFIX = "_scaled"
     _CAL_TABLE_ID_COL = "Detector ID"
     _CAL_TABLE_POS_COL = "Detector Position"
+    _INF = sys.float_info.max  # Acceptable approximation for infinity
 
     def category(self):
         return "SANS\\Calibration"
@@ -315,6 +313,10 @@ class SANSTubeCalibration(PythonAlgorithm):
 
             meanCvalue.append(meanC)
 
+        if not caltable:
+            self._log_tube_calibration_issues(tube_calibration_errors)
+            raise RuntimeError("Calibration failed - unable to generate calibration table")
+
         ApplyCalibration(result, caltable)
         cvalues = CreateWorkspace(DataX=list(diagnostic_output.keys()), DataY=meanCvalue)
 
@@ -328,12 +330,7 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         # Print some final status information
         self.log().notice(strip_edge_calculation_info)
-
-        if tube_calibration_errors:
-            self.log().warning("There were the following tube calibration errors:")
-            for error in tube_calibration_errors:
-                self.log().warning(error)
-
+        self._log_tube_calibration_issues(tube_calibration_errors)
         self._notify_tube_cvalue_status(cvalues)
 
     def find_known_strip_edges(self, ws):
@@ -442,8 +439,8 @@ class SANSTubeCalibration(PythonAlgorithm):
         """"""
         if x_1 > x_2:
             x_1, x_2 = x_2, x_1
-        self.set_counts_to_one_between_x_range(ws, -INF, x_1)
-        self.set_counts_to_one_between_x_range(ws, x_2, INF)
+        self.set_counts_to_one_between_x_range(ws, -self._INF, x_1)
+        self.set_counts_to_one_between_x_range(ws, x_2, self._INF)
 
     def get_integrated_workspace(self, data_file, prog):
         """Load a rebin a tube calibration run.  Searched multiple levels of cache to ensure faster loading."""
@@ -478,16 +475,15 @@ class SANSTubeCalibration(PythonAlgorithm):
         prog.report(f"Loading {ws_name}")
         return ws
 
-    @staticmethod
-    def get_merged_edge_pairs_and_boundaries(edge_pairs):
+    def get_merged_edge_pairs_and_boundaries(self, known_edge_pairs):
         """Merge overlapping edge pairs, then return the merged edges and the midpoint of each edge pair."""
         # FIXME: There's probably a cleaner way to do this. ALW 2022
-        boundaries = [-INF]
+        boundaries = [-self._INF]
         edge_pairs_merged = []
 
-        temp = edge_pairs[0]
+        temp = known_edge_pairs[0]
 
-        for start, end in sorted([sorted(edge_pair) for edge_pair in edge_pairs]):
+        for start, end in sorted([sorted(edge_pair) for edge_pair in known_edge_pairs]):
             if start <= temp[1]:
                 boundary = start + (temp[1] - start) / 2
                 temp[1] = max(temp[1], end)
@@ -499,7 +495,7 @@ class SANSTubeCalibration(PythonAlgorithm):
                 temp[0] = start
                 temp[1] = end
         edge_pairs_merged.extend(temp)
-        boundaries.append(INF)
+        boundaries.append(self._INF)
 
         return edge_pairs_merged, boundaries
 
@@ -800,6 +796,12 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         if all_cvalues_ok:
             self.log().notice(f"CValues for all tubes were below threshold {threshold}")
+
+    def _log_tube_calibration_issues(self, tube_calibration_issues):
+        if tube_calibration_issues:
+            self.log().warning("There were the following tube calibration errors:")
+            for msg in tube_calibration_issues:
+                self.log().warning(msg)
 
 
 # Register algorithm with Mantid
