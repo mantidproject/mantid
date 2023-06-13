@@ -376,7 +376,7 @@ class MantidSystemTest(unittest.TestCase):
             else:
                 mismatchName = self.__class__.__name__ + "-mismatch.nxs"
             print(f'Saving mismatch to "{mismatchName}"')
-            SaveNexus(InputWorkspace=valNames[0], Filename=self.__class__.__name__ + mismatchName + "-mismatch.nxs")
+            SaveNexus(InputWorkspace=valNames[0], Filename=mismatchName)
             return False
 
         return True
