@@ -210,6 +210,13 @@ void FitOptionsBrowser::createCommonProperties() {
     m_browser->addProperty(m_peakRadius);
     addProperty("PeakRadius", m_peakRadius, &FitOptionsBrowser::getIntProperty, &FitOptionsBrowser::setIntProperty);
   }
+
+  m_ignoreInvalidData = m_boolManager->addProperty("Ignore Invalid Data");
+  {
+    m_browser->addProperty(m_ignoreInvalidData);
+    addProperty("IgnoreInvalidData", m_ignoreInvalidData, &FitOptionsBrowser::getBoolProperty,
+                &FitOptionsBrowser::setBoolProperty);
+  }
 }
 
 void FitOptionsBrowser::createSimultaneousFitProperties() {
@@ -219,15 +226,6 @@ void FitOptionsBrowser::createSimultaneousFitProperties() {
     m_browser->addProperty(m_output);
     addProperty("Output", m_output, &FitOptionsBrowser::getStringProperty, &FitOptionsBrowser::setStringProperty);
     m_simultaneousProperties << m_output;
-  }
-
-  // Create Ignore property
-  m_ignoreInvalidData = m_boolManager->addProperty("Ignore Invalid Data");
-  {
-    m_browser->addProperty(m_ignoreInvalidData);
-    addProperty("IgnoreInvalidData", m_ignoreInvalidData, &FitOptionsBrowser::getBoolProperty,
-                &FitOptionsBrowser::setBoolProperty);
-    m_simultaneousProperties << m_ignoreInvalidData;
   }
 }
 
