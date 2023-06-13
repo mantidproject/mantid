@@ -613,7 +613,12 @@ class AbinsAlgorithm:
         num_workspaces = mtd[ws_name].getNumberOfEntries()
         for wrk_num in range(num_workspaces):
             wrk = mtd[ws_name].getItem(wrk_num)
-            SaveAscii(InputWorkspace=Scale(wrk, scale, "Multiply"), Filename=wrk.name() + ".dat", Separator="Space", WriteSpectrumID=False)
+            SaveAscii(
+                InputWorkspace=Scale(wrk, scale, "Multiply", StoreInADS=False),
+                Filename=wrk.name() + ".dat",
+                Separator="Space",
+                WriteSpectrumID=False,
+            )
 
     @staticmethod
     def get_cross_section(scattering: str = "Total", nucleons_number: Optional[int] = None, *, protons_number: int) -> float:
