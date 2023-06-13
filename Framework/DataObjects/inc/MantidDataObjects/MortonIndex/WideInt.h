@@ -28,6 +28,7 @@
 #include <iomanip>
 #include <limits>
 #include <ostream>
+#include <random>
 #include <sstream>
 #include <stdexcept>
 #include <stdint.h>
