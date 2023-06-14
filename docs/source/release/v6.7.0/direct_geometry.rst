@@ -16,6 +16,9 @@ New features
 - :ref:`LagrangeILLReduction <algm-LagrangeILLReduction>` can now accept NeXus data as input for both sample and container runs.
 - `Shiver <https://github.com/neutrons/Shiver>`_ has been added as a menu item for Direct interfaces.
 
+.. image:: ../../images/6_7_release/Direct/shiver_interface.png
+    :align: center
+
 Bugfixes
 ############
 - The :ref:`ALFView <ALFView-ref>` peak picker tool is now offset on the y axis by the background amount.
