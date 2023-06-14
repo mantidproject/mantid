@@ -139,6 +139,7 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
   EigenMatrix m_tr = m.tr();
   std::copy(&m_tr.mutator().data()[0], &m_tr.mutator().data()[J_tr->size1 * J_tr->size2], &J->data[0]);
+  gsl_matrix_free(J_tr);
 
   for (size_t iY = 0; iY < p->n; iY++)
     for (size_t iP = 0; iP < p->p; iP++) {
