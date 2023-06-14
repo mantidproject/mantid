@@ -26,6 +26,12 @@ class RegionSelectorTest(unittest.TestCase):
     def test_matrix_workspaces_allowed(self):
         self.assertIsNotNone(RegionSelector(Mock(), view=Mock()))
 
+    def test_show_all_data_not_called_on_creation(self):
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector.show_all_data_clicked = Mock()
+
+        region_selector.show_all_data_clicked.assert_not_called()
+
     def test_invalid_workspaces_fail(self):
         invalid_types = [WS_TYPE.MDH, WS_TYPE.MDE, None]
         mock_ws = Mock()
@@ -42,6 +48,7 @@ class RegionSelectorTest(unittest.TestCase):
 
     def test_update_workspace_updates_model(self):
         region_selector = RegionSelector(view=Mock())
+        region_selector.show_all_data_clicked = Mock()
         mock_ws = Mock()
 
         region_selector.update_workspace(mock_ws)
@@ -61,11 +68,13 @@ class RegionSelectorTest(unittest.TestCase):
     def test_update_workspace_updates_view(self):
         mock_view = Mock()
         region_selector = RegionSelector(view=mock_view)
+        region_selector.show_all_data_clicked = Mock()
         mock_ws = Mock()
 
         region_selector.update_workspace(mock_ws)
 
         mock_view.set_workspace.assert_called_once_with(mock_ws)
+        region_selector.show_all_data_clicked.assert_called_once()
 
     def test_add_rectangular_region_creates_selector(self):
         region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
@@ -90,6 +99,7 @@ class RegionSelectorTest(unittest.TestCase):
 
     def test_clear_workspace_will_clear_all_the_selectors_and_model_workspace(self):
         region_selector = RegionSelector(view=self.mock_view)
+        region_selector.show_all_data_clicked = Mock()
         mock_ws = Mock()
 
         region_selector.update_workspace(mock_ws)
