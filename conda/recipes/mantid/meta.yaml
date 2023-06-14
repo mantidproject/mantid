@@ -37,6 +37,7 @@ requirements:
     - jsoncpp
     - librdkafka
     - lib3mf  # [win]
+    - llvm-openmp  # [osx]
     - muparser
     - nexus
     - numpy {{ numpy }}

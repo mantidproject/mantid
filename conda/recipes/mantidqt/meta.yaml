@@ -31,6 +31,7 @@ requirements:
   host:
     - eigen
     - jemalloc  # [unix]
+    - llvm-openmp  # [osx]
     - mantid {{ version }}
     - python {{ python }}
     - pyqt {{ pyqt }}

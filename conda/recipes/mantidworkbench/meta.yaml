@@ -28,6 +28,7 @@ requirements:
     - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
   host:
     - setuptools {{ setuptools }}
+    - llvm-openmp  # [osx]
     - mantidqt {{ version }}
     - python {{ python }}
     - versioningit
