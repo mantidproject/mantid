@@ -188,6 +188,7 @@ API::MatrixWorkspace_sptr SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_s
     tempPath /= boost::filesystem::unique_path("detector-grouping-%%%%-%%%%-%%%%-%%%%.xml");
     filename = tempPath.string();
     generateGrouping->setProperty("GenerateParFile", false);
+    // cppcheck-suppress unmatchedSuppression
     // Make sure the file gets deleted at scope exit.
     // cppcheck-suppress unreadVariable
     deleteThisLater.name = filename;
