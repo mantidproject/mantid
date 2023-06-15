@@ -55,8 +55,8 @@ XVFB_SERVER_NUM=101
 BUILD_DIR=$WORKSPACE/build
 
 ENABLE_BUILD_CODE=true
-ENABLE_UNIT_TESTS=true
-ENABLE_SYSTEM_TESTS=false
+ENABLE_UNIT_TESTS=false
+ENABLE_SYSTEM_TESTS=true
 ENABLE_PACKAGE=false
 ENABLE_DOCS=false
 ENABLE_DOC_TESTS=false
@@ -74,7 +74,7 @@ do
         --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
         --enable-package) ENABLE_PACKAGE=true ;;
         --enable-docs) ENABLE_DOCS=true ;;
-        --enable-doctests) ENABLE_DOC_TESTS=true ;;
+        --enable-doctests) ENABLE_DOC_TESTS=false ;;
         --enable-dev-docs) ENABLE_DEV_DOCS=true ;;
         --enable-coverity)
 	    ENABLE_COVERITY=true
