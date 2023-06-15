@@ -175,6 +175,9 @@ void export_IPropertyManager() {
       .def("setPropertyGroup", &IPropertyManager::setPropertyGroup, (arg("self"), arg("name"), arg("group")),
            "Set the group for a given property")
 
+      .def("validateProperties", &IPropertyManager::validateProperties, (arg("self")),
+           "Returns true if all properties have a valid value")
+
       .def("existsProperty", &IPropertyManager::existsProperty, (arg("self"), arg("name")),
            "Returns whether a property exists")
 
