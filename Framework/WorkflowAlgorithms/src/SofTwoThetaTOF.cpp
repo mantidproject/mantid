@@ -189,7 +189,7 @@ API::MatrixWorkspace_sptr SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_s
     filename = tempPath.string();
     generateGrouping->setProperty("GenerateParFile", false);
     // Make sure the file gets deleted at scope exit.
-    // enable cppcheck-suppress unreadVariable if needed
+    // cppcheck-suppress unreadVariable
     deleteThisLater.name = filename;
   } else {
     filename = static_cast<std::string>(getProperty(Prop::FILENAME));
