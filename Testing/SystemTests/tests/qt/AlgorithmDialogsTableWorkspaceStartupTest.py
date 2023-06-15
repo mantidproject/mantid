@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CreateEmptyTableWorkspace
 
-from AlgorithmDialogsStartupTestBase import AlgorithmDialogsStartupTestBase
+from AlgorithmDialogsStartupTestBase import AlgorithmDialogsStartupTestBase, INPUT_WS_NAME
 
 
 class AlgorithmDialogsTableWorkspaceStartupTest(AlgorithmDialogsStartupTestBase):
@@ -17,4 +17,4 @@ class AlgorithmDialogsTableWorkspaceStartupTest(AlgorithmDialogsStartupTestBase)
     def _setup_test(self) -> None:
         self._workspace_type = "TableWorkspace"
 
-        CreateEmptyTableWorkspace(OutputWorkspace="ws")
+        CreateEmptyTableWorkspace(OutputWorkspace=INPUT_WS_NAME)

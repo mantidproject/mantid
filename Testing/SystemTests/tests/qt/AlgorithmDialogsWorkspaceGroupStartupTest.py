@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
 
-from AlgorithmDialogsStartupTestBase import AlgorithmDialogsStartupTestBase
+from AlgorithmDialogsStartupTestBase import AlgorithmDialogsStartupTestBase, INPUT_WS_NAME
 
 
 class AlgorithmDialogsWorkspaceGroupStartupTest(AlgorithmDialogsStartupTestBase):
@@ -19,4 +19,4 @@ class AlgorithmDialogsWorkspaceGroupStartupTest(AlgorithmDialogsStartupTestBase)
 
         ws1 = CreateSampleWorkspace()
         ws2 = CreateSampleWorkspace()
-        GroupWorkspaces(InputWorkspaces=[ws1, ws2], OutputWorkspace="group")
+        GroupWorkspaces(InputWorkspaces=[ws1, ws2], OutputWorkspace=INPUT_WS_NAME)

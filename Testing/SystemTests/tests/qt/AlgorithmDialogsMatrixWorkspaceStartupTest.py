@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CreateSampleWorkspace
 
-from AlgorithmDialogsStartupTestBase import AlgorithmDialogsStartupTestBase
+from AlgorithmDialogsStartupTestBase import AlgorithmDialogsStartupTestBase, INPUT_WS_NAME
 
 
 class AlgorithmDialogsMatrixWorkspaceStartupTest(AlgorithmDialogsStartupTestBase):
@@ -17,4 +17,4 @@ class AlgorithmDialogsMatrixWorkspaceStartupTest(AlgorithmDialogsStartupTestBase
     def _setup_test(self) -> None:
         self._workspace_type = "MatrixWorkspace"
 
-        CreateSampleWorkspace(OutputWorkspace="ws")
+        CreateSampleWorkspace(OutputWorkspace=INPUT_WS_NAME)

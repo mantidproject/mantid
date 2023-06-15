@@ -8,15 +8,11 @@ from abc import ABCMeta, abstractmethod
 from systemtesting import MantidSystemTest
 
 from mantid.api import AlgorithmFactory, AlgorithmManager
-from mantidqt.interfacemanager import InterfaceManager
-from mantidqt.utils.qt.testing import get_application
+from mantid.simpleapi import CreateSampleWorkspace
 
-from qtpy.QtCore import Qt
-
-# Import sip after Qt. Modern versions of PyQt ship an internal sip module
-# located at PyQt5X.sip. Importing PyQt first sets a shim sip module to point
-# to the correct place
-import sip
+INPUT_WS_NAME = "input_ws"
+OUTPUT_WS_NAME = "test_output"
+OUTPUT_WS_NAME_IN_ADS = f"{OUTPUT_WS_NAME}_ads"
 
 
 class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
@@ -27,12 +23,13 @@ class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
 
     def __init__(self):
         super(AlgorithmDialogsStartupTestBase, self).__init__()
-        self._app = get_application()
-        self._interface_manager = InterfaceManager()
 
         algorithm_names = [algorithm.name for algorithm in AlgorithmFactory.Instance().getDescriptors(True, True)]
         # Remove duplicate algorithm names as we will only test the most recent versions
         self._unique_algorithm_names = list(dict.fromkeys(algorithm_names))
+
+        # Create an OutputWorkspace stored in the ADS
+        CreateSampleWorkspace(OutputWorkspace=OUTPUT_WS_NAME_IN_ADS)
 
         self._setup_test()
 
@@ -49,29 +46,38 @@ class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
 
         for algorithm_name in self._unique_algorithm_names:
             print(algorithm_name)  # Useful for debugging when an algorithm dialog crashes
-            self._attempt_to_open_algorithm_dialog(self._workspace_type, algorithm_name)
+            self._attempt_validate_inputs(algorithm_name)
 
-    def _attempt_to_open_algorithm_dialog(self, workspace_type: str, algorithm_name: str) -> None:
+    def _attempt_validate_inputs(self, algorithm_name: str) -> None:
         """Attempt to open the most recent version of the algorithm provided."""
-        try:
-            dialog = self._interface_manager.createDialogFromName(
-                algorithm_name, -1, None, False, self._get_algorithm_preset_values(algorithm_name)
-            )
-            dialog.setAttribute(Qt.WA_DeleteOnClose, True)
-            dialog.show()
-            dialog.close()
+        algorithm = AlgorithmManager.create(algorithm_name)
+        # Set the 'OutputWorkspace' property if it exists
+        self._set_output_workspace(algorithm)
 
-            # Ensure the dialog has been deleted
-            sip.delete(dialog)
-            self.assertTrue(sip.isdeleted(dialog))
-        except Exception as ex:
-            self.fail(
-                f"Exception thrown when attempting to open the '{algorithm_name}' algorithm dialog with a "
-                f"'{workspace_type}' in the ADS: {ex}."
-            )
+        # Attempt to set the workspace properties in this list if they exist.
+        for property in ["InputWorkspace"]:
+            if not self._set_property_value(algorithm, property, INPUT_WS_NAME):
+                return
+
+        # If all required properties have been provided, then try validate the inputs
+        if algorithm.validateProperties():
+            algorithm.validateInputs()
+
+    def _set_output_workspace(self, algorithm) -> None:
+        """If the 'OutputWorkspace' property exists, set it because it is usually a required property."""
+        # Try to set the OutputWorkspace to an arbitrary string
+        if not self._set_property_value(algorithm, "OutputWorkspace", OUTPUT_WS_NAME):
+            # If there is an exception, then it might be an InOut property, and so the workspace must exist in the ADS
+            algorithm.setPropertyValue("OutputWorkspace", OUTPUT_WS_NAME_IN_ADS)
 
     @staticmethod
-    def _get_algorithm_preset_values(algorithm_name: str) -> dict:
-        """We want to set the OutputWorkspace on algorithms when possible so that validateInputs gets triggered."""
-        algorithm = AlgorithmManager.create(algorithm_name)
-        return {"OutputWorkspace": "test_output"} if algorithm.existsProperty("OutputWorkspace") else {}
+    def _set_property_value(algorithm, property_name, value) -> bool:
+        """Attempt to set the value of a property. If there is an exception setting the value, return False."""
+        if not algorithm.existsProperty(property_name):
+            return True
+
+        try:
+            algorithm.setPropertyValue(property_name, value)
+        except Exception:
+            return False
+        return True

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CreateMDWorkspace
 
-from AlgorithmDialogsStartupTestBase import AlgorithmDialogsStartupTestBase
+from AlgorithmDialogsStartupTestBase import AlgorithmDialogsStartupTestBase, INPUT_WS_NAME
 
 
 class AlgorithmDialogsMDWorkspaceStartupTest(AlgorithmDialogsStartupTestBase):
@@ -23,5 +23,5 @@ class AlgorithmDialogsMDWorkspaceStartupTest(AlgorithmDialogsStartupTestBase):
             Extents="-10,10,-5,5,-1,1",
             Names="Q_lab_x,Q_lab_y,Q_lab_z",
             Units="1\\A,1\\A,1\\A",
-            OutputWorkspace="ws",
+            OutputWorkspace=INPUT_WS_NAME,
         )
