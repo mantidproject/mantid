@@ -15,6 +15,9 @@ cxx_compiler_version:          # [unix]
 llvm_openmp:                   # [osx]
   - 14                         # [osx]
 
+libssh2:
+  - 1.10.0                     # [osx]
+
 python:
   - 3.8
 

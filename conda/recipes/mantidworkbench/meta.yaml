@@ -21,6 +21,7 @@ requirements:
     - ninja  # [unix]
     - cmake
     - git
+    - libssh2  # [osx]
     - {{ cdt('mesa-libgl-devel') }}  # [linux]
     - {{ cdt('mesa-dri-drivers') }}  # [linux]
     - {{ cdt('libxxf86vm') }}  # [linux]
