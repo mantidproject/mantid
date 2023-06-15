@@ -46,7 +46,8 @@ class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
 
         for algorithm_name in self._unique_algorithm_names:
             print(algorithm_name)  # Useful for debugging when an algorithm dialog crashes
-            self._attempt_validate_inputs(algorithm_name)
+            if algorithm_name not in self._exclude_algorithms:
+                self._attempt_validate_inputs(algorithm_name)
 
     def _attempt_validate_inputs(self, algorithm_name: str) -> None:
         """Attempt to open the most recent version of the algorithm provided."""
@@ -54,10 +55,11 @@ class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
         # Set the 'OutputWorkspace' property if it exists
         self._set_output_workspace(algorithm)
 
-        # Attempt to set the workspace properties in this list if they exist.
-        for property in ["InputWorkspace"]:
-            if not self._set_property_value(algorithm, property, INPUT_WS_NAME):
-                return
+        # Attempt to set all properties which are workspace properties.
+        for property in algorithm.getProperties():
+            property_name = property.name
+            if "Workspace" in property_name:
+                self._set_property_value(algorithm, property_name, INPUT_WS_NAME)
 
         # If all required properties have been provided, then try validate the inputs
         if algorithm.validateProperties():

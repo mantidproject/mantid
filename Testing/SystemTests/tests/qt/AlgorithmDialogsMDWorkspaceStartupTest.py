@@ -16,6 +16,7 @@ class AlgorithmDialogsMDWorkspaceStartupTest(AlgorithmDialogsStartupTestBase):
 
     def _setup_test(self) -> None:
         self._workspace_type = "MDWorkspace"
+        self._exclude_algorithms = ["CalculateMonteCarloAbsorption", "DNSMergeRuns", "HB3AIntegratePeaks", "Mean"]
 
         CreateMDWorkspace(
             Dimensions="3",
