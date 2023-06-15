@@ -51,9 +51,11 @@ public:
 };
 
 class CircularSectorLabelor : public Labelor {
-  /* Divides sphere into bands of size tt_step,
-  which are then numbered sequentially, in order, with increasing twoTheta
-  */
+  /** Divides sphere into bands of size tt_step,
+   * which are then numbered sequentially, in order, with increasing twoTheta.
+   * The label must be increased by 1 from original so that there are no zero labels, to be
+   * consistent with GroupingWorkspace's use of 0 to signal an invalid or unused detector.
+   */
 
   // reduce flops by saving as mult. constant
   const double inv_tt_step;
@@ -61,13 +63,13 @@ class CircularSectorLabelor : public Labelor {
 public:
   CircularSectorLabelor(double t_step) : Labelor(t_step), inv_tt_step(1.0 / tt_step){};
   size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) override {
-    return static_cast<int>(spectrumInfo.twoTheta(i) * inv_tt_step);
+    return static_cast<size_t>(spectrumInfo.twoTheta(i) * inv_tt_step) + 1;
   };
 };
 
 class SphericalSectorLabelor : public Labelor {
   /**
-   * Divides sphere into spherical sectors in 2theta and phi
+   * Divides sphere into spherical sectors in 2theta and phi, similarly to above.
    * Ordering goes by increasing 2theta, then by increasing phi
    * Able to distinguish left/right
    */
@@ -83,7 +85,7 @@ public:
         num_aa_step(int(std::ceil(360.0 / a_step))){};
   size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) override {
     return static_cast<size_t>(spectrumInfo.twoTheta(i) * inv_tt_step) * num_aa_step +
-           static_cast<size_t>(std::floor((spectrumInfo.azimuthal(i) - aa_start) * inv_aa_step)) % num_aa_step;
+           static_cast<size_t>(std::floor((spectrumInfo.azimuthal(i) - aa_start) * inv_aa_step)) % num_aa_step + 1;
   };
 };
 
@@ -288,20 +290,20 @@ void GenerateGroupingPowder::exec() {
 
   const double step = getProperty("AngleStep");
 
-  Labelor *label;
+  std::unique_ptr<Labelor> label;
   bool numberByAngle = getProperty("NumberByAngle");
   double azimuthalStep = getProperty("AzimuthalStep");
   double azimuthalStart = getProperty("AzimuthalStart");
   if (numberByAngle) {
     if (azimuthalStep == 360.0)
-      label = new CircularSectorLabelor(step);
+      label = std::make_unique<CircularSectorLabelor>(step);
     else
-      label = new SphericalSectorLabelor(step, azimuthalStep, azimuthalStart);
+      label = std::make_unique<SphericalSectorLabelor>(step, azimuthalStep, azimuthalStart);
   } else {
     if (azimuthalStep == 360.0)
-      label = new CircularOrderedLabelor(step, spectrumInfo);
+      label = std::make_unique<CircularOrderedLabelor>(step, spectrumInfo);
     else
-      label = new SplitCircularOrderedLabelor(step, spectrumInfo);
+      label = std::make_unique<SplitCircularOrderedLabelor>(step, spectrumInfo);
   }
 
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
@@ -317,7 +319,7 @@ void GenerateGroupingPowder::exec() {
     } else {
       const auto &group = dynamic_cast<const DetectorGroup &>(det);
       const auto idv = group.getDetectorIDs();
-      const auto ids = std::set<int>(idv.begin(), idv.end());
+      const auto ids = std::set<detid_t>(idv.begin(), idv.end());
       groupWS->setValue(ids, groupId);
     }
   }
@@ -334,10 +336,6 @@ void GenerateGroupingPowder::exec() {
   if (getProperty("GenerateParFile")) {
     this->saveAsPAR();
   }
-
-  // clean up the dynamically allocated labelor
-  delete label;
-  fflush(stdout);
 }
 
 // XML file
@@ -355,16 +353,20 @@ void GenerateGroupingPowder::saveAsXML() {
 
   for (int i = 0; i < numSteps; ++i) {
     std::vector<detid_t> group = groupWS->getDetectorIDsOfGroup(i);
-    size_t gSize = group.size(); // groups.at(i).size();
+    size_t gSize = group.size();
     if (gSize > 0) {
       std::stringstream spID, textvalue;
-      spID << i;
+      // try to preserve original behavior of previous method, labeling starting at 0
+      bool numberByAngle = this->getProperty("NumberByAngle");
+      if (numberByAngle)
+        spID << i - 1;
+      else
+        spID << i;
 
       AutoPtr<Element> pChildGroup = pDoc->createElement("group");
       pChildGroup->setAttribute("ID", spID.str());
       pRoot->appendChild(pChildGroup);
 
-      // std::copy(groups.at(i).begin(), groups.at(i).end(), std::ostream_iterator<size_t>(textvalue, ","));
       std::copy(group.begin(), group.end(), std::ostream_iterator<size_t>(textvalue, ","));
       std::string text = textvalue.str();
       const size_t found = text.rfind(',');

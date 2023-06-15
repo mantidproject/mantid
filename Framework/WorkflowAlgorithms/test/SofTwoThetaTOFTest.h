@@ -55,19 +55,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", angleStep));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+
     API::MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     auto const &spectrumInfo = outputWS->spectrumInfo();
     auto const nHist = spectrumInfo.size();
-    TS_ASSERT_LESS_THAN(1, nHist);
+    TS_ASSERT_EQUALS(nHist, 7);
     double angleStepRad = angleStep * deg2rad;
-    double angleBinEdge = std::floor(spectrumInfo.twoTheta(0) / (angleStepRad)) * angleStepRad;
-
+    double angleBinEdge = static_cast<int>(spectrumInfo.twoTheta(0) / angleStepRad) * angleStepRad;
+    // ensure each pixel angle is inside the range correspondng to its group ID
     for (size_t i = 0; i < nHist; ++i) {
       auto const twoTheta = spectrumInfo.twoTheta(i);
-      printf("%ld %lf < %lf < %lf\n", i, angleBinEdge, twoTheta, angleBinEdge + (deg2rad * angleStep));
-      TS_ASSERT_LESS_THAN(angleBinEdge, twoTheta);
-      angleBinEdge += angleStep * deg2rad;
+      TS_ASSERT_LESS_THAN_EQUALS(angleBinEdge, twoTheta);
+      angleBinEdge += angleStepRad;
       TS_ASSERT_LESS_THAN(twoTheta, angleBinEdge);
     }
   }
@@ -130,16 +130,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", angleStep));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+
     API::MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     size_t nHist = outputWS->getNumberHistograms();
-    TS_ASSERT_LESS_THAN(1, nHist);
+    TS_ASSERT_EQUALS(nHist, 7);
     for (size_t i = 0; i < nHist; ++i) {
       auto const &Ys = outputWS->y(i);
       auto const &Es = outputWS->e(i);
       for (size_t j = 0; j < Ys.size(); ++j) {
-        if (Ys[j] == 0.)
-          std::cout << "i: " << i << " j: " << j << '\n';
         if (j == 0 && i != nHist - 1) {
           // These bins are known to be zero.
           TS_ASSERT_EQUALS(Ys[j], 0.);
@@ -147,7 +146,7 @@ public:
         } else {
           TS_ASSERT_DELTA(Ys[j], 2., 1e-12);
           TS_ASSERT_LESS_THAN(0., Es[j]);
-          TS_ASSERT_LESS_THAN_EQUALS(Es[j], std::sqrt(2));
+          TS_ASSERT_LESS_THAN_EQUALS(Es[j], M_SQRT2);
         }
       }
     }

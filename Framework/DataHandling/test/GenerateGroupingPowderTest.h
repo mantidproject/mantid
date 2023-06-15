@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/GenerateGroupingPowder.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
@@ -203,6 +204,7 @@ public:
     node = nodeIter.nextNode();
     in.close();
     TS_ASSERT(!node);
+
     remove(XML_OUT_FILE.c_str());
 
     // Just in case something went wrong.
@@ -313,6 +315,53 @@ public:
     AnalysisDataService::Instance().remove(GROUP_WS);
   }
 
+  void test_grouping_rectangular_instrument() {
+    const std::string XML_OUT_FILE("PowderGrouping_rectangular.xml");
+    const std::string GROUP_WS("_unused_for_child");
+    constexpr int numBanks{1};
+    constexpr int bankSize{6};
+    constexpr int numBins{13};
+    constexpr double angleStep{0.1};
+    API::MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(numBanks, bankSize, numBins);
+
+    inputWS->getAxis(0)->setUnit("TOF");
+    inputWS->mutableRun().addProperty("wavelength", 1.0);
+    auto &paramMap = inputWS->instrumentParameters();
+    paramMap.addString(inputWS->getInstrument().get(), "l2", std::to_string(5.));
+
+    GenerateGroupingPowder alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", GROUP_WS));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileFormat", "xml"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("GroupingFilename", XML_OUT_FILE));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", angleStep));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    GroupingWorkspace_sptr outputWS = alg.getProperty("GroupingWorkspace");
+    TS_ASSERT(outputWS);
+    auto const &spectrumInfo = outputWS->spectrumInfo();
+    auto const nHist = spectrumInfo.size();
+    TS_ASSERT_EQUALS(nHist, numBanks * bankSize * bankSize);
+    double angleStepRad = angleStep * Mantid::Geometry::deg2rad;
+    // ensure each pixel angle is inside the range correspondng to its group ID
+    for (size_t i = 0; i < nHist; ++i) {
+      auto const twoTheta = spectrumInfo.twoTheta(i);
+      auto const groupID = outputWS->dataY(i)[0];
+      TS_ASSERT_LESS_THAN_EQUALS(angleStepRad * (groupID - 1), twoTheta);
+      TS_ASSERT_LESS_THAN(twoTheta, angleStepRad * (groupID));
+    }
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(GROUP_WS);
+    // Delete files
+    remove(XML_OUT_FILE.c_str());
+  }
+
   /*
    The angular range of the in-plane component of an in-plane detector is rougly 15 degrees. The angular step size is
    chosen to be slightly larger than that to reduce the overall number of groups that will be generated. The
@@ -372,17 +421,24 @@ public:
     const double TOL{0.01}; // getValue returns a double
     for (std::size_t i = 0; i < pixel_groups_exp.size(); ++i) {
       const detid_t detID = static_cast<detid_t>((0.5 + double(i)) * PIXELS_PER_BANK);
-      auto det = outputws->getDetector(detID);
-      const auto &spectrumInfo = outputws->spectrumInfo();
-      printf("DETECTOR %d at [%lf, %lf] --> GROUP=%lf : %lf\n", detID,
-             spectrumInfo.signedTwoTheta(detID) * Mantid::Geometry::rad2deg,
-             spectrumInfo.azimuthal(detID) * Mantid::Geometry::rad2deg, outputws->getValue(detID), pixel_groups_exp[i]);
       TS_ASSERT_DELTA(outputws->getValue(detID), pixel_groups_exp[i], TOL);
     }
 
     // this will succeed if workspace doesn't exist
     AnalysisDataService::Instance().remove(INPUT_WS);
     AnalysisDataService::Instance().remove(groupWSName);
+  }
+
+  void test_SNAPlite_angle_numbering_at_zero() {
+    const double ang1 = 0.0;
+    const double ang2 = 0.0;
+    const bool numberByAngle{true};
+    const bool splitSides{false};
+    const std::vector<int> groups_exp{1, 2};
+    const std::vector<double> pixel_groups_exp{2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 2, 2};
+
+    run_SNAPliteTest("PowderGrouping_no_azimuth_angle_numbering", ang1, ang2, numberByAngle, splitSides, groups_exp,
+                     pixel_groups_exp);
   }
 
   // make sure that the "old" behavior of numbering based on angle is still in place
@@ -396,13 +452,14 @@ public:
      bank 52 approx 57-73 - center is group 3
      bank 62 approx 75-89 - center is group 4
      some pixels will make it into group 7
+     ** Must relabel the groups +1 to accound for change
      */
     const double ang1 = -65.3;
     const double ang2 = 104.95;
     const bool numberByAngle{true};
     const bool splitSides{false};
-    const std::vector<int> groups_exp{2, 3, 4, 5, 6, 7}; // empty part of the instrument gets number 1
-    const std::vector<double> pixel_groups_exp{6, 6, 6, 5, 5, 5, 4, 4, 4, 2, 2, 2, 3, 3, 3, 4, 4, 4};
+    const std::vector<int> groups_exp{3, 4, 5, 6, 7, 8}; // empty part of the instrument gets number 1,2
+    const std::vector<double> pixel_groups_exp{7, 7, 7, 6, 6, 6, 5, 5, 5, 3, 3, 3, 4, 4, 4, 5, 5, 5};
     run_SNAPliteTest("PowderGrouping_no_azimuth_angle_numbering", ang1, ang2, numberByAngle, splitSides, groups_exp,
                      pixel_groups_exp);
   }
@@ -413,8 +470,8 @@ public:
     const double ang2 = 90.0;
     const bool numberByAngle{true};
     const bool splitSides{true};
-    const std::vector<int> groups_exp{6, 7, 8, 9, 10, 11, 12, 13}; // empty part of the instrument gets number 1
-    const std::vector<double> pixel_groups_exp{10, 10, 10, 8, 8, 8, 8, 8, 8, 9, 9, 9, 11, 11, 11, 11, 11, 11};
+    const std::vector<int> groups_exp{7, 8, 9, 10, 11, 12, 13, 14};
+    const std::vector<double> pixel_groups_exp{11, 11, 11, 9, 9, 9, 9, 9, 9, 10, 10, 10, 12, 12, 12, 12, 12, 12};
     run_SNAPliteTest("PowderGrouping_no_azimuth_angle_numbering", ang1, ang2, numberByAngle, splitSides, groups_exp,
                      pixel_groups_exp);
   }

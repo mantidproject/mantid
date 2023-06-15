@@ -176,9 +176,11 @@ API::MatrixWorkspace_sptr SofTwoThetaTOF::convertToTwoTheta(API::MatrixWorkspace
 }
 
 API::MatrixWorkspace_sptr SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_sptr &ws, double const twoThetaStep) {
+  const std::string GROUP_WS("softwothetatof_groupWS");
   auto generateGrouping = createChildAlgorithm("GenerateGroupingPowder", 0.2, 0.5);
   generateGrouping->setProperty("InputWorkspace", ws);
   generateGrouping->setProperty("AngleStep", twoThetaStep);
+  generateGrouping->setProperty("GroupingWorkspace", GROUP_WS);
   std::string filename;
   RemoveFileAtScopeExit deleteThisLater;
   if (isDefault(Prop::FILENAME)) {
@@ -195,9 +197,13 @@ API::MatrixWorkspace_sptr SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_s
   }
   generateGrouping->setProperty("GroupingFilename", filename);
   generateGrouping->execute();
+
   auto groupDetectors = createChildAlgorithm("GroupDetectors", 0.7, 0.9);
   groupDetectors->setProperty("InputWorkspace", ws);
   groupDetectors->setProperty("OutputWorkspace", "out");
+  // TODO make this algo work with the GroupingWorkspace from GenerateGroupingPowder
+  // Mantid::DataObjects::GroupingWorkspace_sptr gws = generateGrouping->getProperty("GroupingWorkspace");
+  // groupDetectors->setProperty("CopyGroupingFromWorkspace", gws);
   groupDetectors->setProperty("MapFile", filename);
   groupDetectors->setProperty("Behaviour", "Average");
   groupDetectors->execute();
