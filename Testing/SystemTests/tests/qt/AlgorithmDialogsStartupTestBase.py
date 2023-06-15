@@ -8,17 +8,14 @@ from abc import ABCMeta, abstractmethod
 from systemtesting import MantidSystemTest
 
 from mantid.api import AlgorithmFactory, AlgorithmManager
-from mantid.simpleapi import CreateSampleWorkspace
 
 INPUT_WS_NAME = "input_ws"
-OUTPUT_WS_NAME = "test_output"
-OUTPUT_WS_NAME_IN_ADS = f"{OUTPUT_WS_NAME}_ads"
 
 
 class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
     """
-    The base class for a system tests that test the Algorithm Dialogs open ok with different workspaces in the ADS.
-    The test will only open the most recent version of an algorithm.
+    The base class for a system test which tests the Algorithm validateInputs method for a given workspace in the ADS.
+    The test will only validateInputs for the most recent version of an algorithm.
     """
 
     def __init__(self):
@@ -28,9 +25,6 @@ class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
         # Remove duplicate algorithm names as we will only test the most recent versions
         self._unique_algorithm_names = list(dict.fromkeys(algorithm_names))
 
-        # Create an OutputWorkspace stored in the ADS
-        CreateSampleWorkspace(OutputWorkspace=OUTPUT_WS_NAME_IN_ADS)
-
         self._setup_test()
 
     @abstractmethod
@@ -38,48 +32,39 @@ class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
         raise NotImplementedError("This method needs implementing in a subclass of this class.")
 
     def runTest(self) -> None:
-        """Run the test for a random workspace type as a speed-up measure whilst still having a degree of coverage"""
+        """Run the test for the provided workspace type in the ADS."""
         if len(self._unique_algorithm_names) == 0:
             self.fail("Failed to find any of the Algorithms.")
 
-        print(f"Running the AlgorithmDialog{self._workspace_type}StartupTest with a {self._workspace_type} in the ADS")
+        print(f"Running the Algorithm{self._workspace_type}ValidateInputsTest with a {self._workspace_type} in the ADS")
 
         for algorithm_name in self._unique_algorithm_names:
-            print(algorithm_name)  # Useful for debugging when an algorithm dialog crashes
             if algorithm_name not in self._exclude_algorithms:
+                print(algorithm_name)  # Useful for debugging
                 self._attempt_validate_inputs(algorithm_name)
 
     def _attempt_validate_inputs(self, algorithm_name: str) -> None:
-        """Attempt to open the most recent version of the algorithm provided."""
+        """Attempt to validate the inputs for the most recent version of the algorithm provided."""
         algorithm = AlgorithmManager.create(algorithm_name)
-        # Set the 'OutputWorkspace' property if it exists
-        self._set_output_workspace(algorithm)
 
-        # Attempt to set all properties which are workspace properties.
+        self._set_all_workspace_properties(algorithm)
+
+        # If at least one of the property validators returns false, don't try to validateInputs
+        if not algorithm.validateProperties():
+            return
+
+        # This is the real test - does the validateInputs function run successfully
+        algorithm.validateInputs()
+
+    def _set_all_workspace_properties(self, algorithm) -> None:
+        """
+        Attempt to set all algorithm properties which have the word "Workspace" in their name. They are set to
+        the name of the workspace stored in the ADS. If setting the property fails, then ignore the property.
+        """
         for property in algorithm.getProperties():
             property_name = property.name
             if "Workspace" in property_name:
-                self._set_property_value(algorithm, property_name, INPUT_WS_NAME)
-
-        # If all required properties have been provided, then try validate the inputs
-        if algorithm.validateProperties():
-            algorithm.validateInputs()
-
-    def _set_output_workspace(self, algorithm) -> None:
-        """If the 'OutputWorkspace' property exists, set it because it is usually a required property."""
-        # Try to set the OutputWorkspace to an arbitrary string
-        if not self._set_property_value(algorithm, "OutputWorkspace", OUTPUT_WS_NAME):
-            # If there is an exception, then it might be an InOut property, and so the workspace must exist in the ADS
-            algorithm.setPropertyValue("OutputWorkspace", OUTPUT_WS_NAME_IN_ADS)
-
-    @staticmethod
-    def _set_property_value(algorithm, property_name, value) -> bool:
-        """Attempt to set the value of a property. If there is an exception setting the value, return False."""
-        if not algorithm.existsProperty(property_name):
-            return True
-
-        try:
-            algorithm.setPropertyValue(property_name, value)
-        except Exception:
-            return False
-        return True
+                try:
+                    algorithm.setPropertyValue(property_name, INPUT_WS_NAME)
+                except Exception:
+                    pass
