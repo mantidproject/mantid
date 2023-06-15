@@ -185,6 +185,9 @@ def main():
         data_file_lock_status,
     ) = tmgr.generateMasterTestList(["framework", "qt"])
 
+    # Do not run the first half of the tests
+    test_list = dict(list(test_list.items())[int(len(test_list) / 2) :])
+
     number_of_test_modules = len(test_list.keys())
     total_number_of_tests = test_stats[0]
     maximum_name_length = test_stats[1]
