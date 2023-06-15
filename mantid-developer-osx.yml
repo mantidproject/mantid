@@ -17,8 +17,10 @@ dependencies:
   - jemalloc>=5.2.1
   - jsoncpp>=1.9.4,<2
   - librdkafka>=1.6.0
+  - libssh2=1.10.0
   - muparser>=2.3.2
   - matplotlib=3.6.*
+  - ncurses=6.3
   - nexus=4.4.*
   - ninja>=1.10.2
   - numpy<=1.23
