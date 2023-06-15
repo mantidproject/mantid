@@ -48,6 +48,7 @@ def pairwise(iterable):
 
 
 class SANSTubeCalibration(PythonAlgorithm):
+    _SAVED_INPUT_DATA_PREFIX = "saved_"
     _TUBE_PLOT_WS = "TubePlot"
     _FIT_DATA_WS = "FittedData"
     _SCALED_WS_SUFFIX = "_scaled"
@@ -150,7 +151,7 @@ class SANSTubeCalibration(PythonAlgorithm):
     def PyExec(self):  # noqa:C901
         # Run the algorithm
         self._background = self.getProperty("Background").value
-        self.timebin = self.getProperty("TimeBins").value
+        self._time_bins = self.getProperty("TimeBins").value
         margin = self.getProperty("Margin").value
         OFF_VERTICAL = self.getProperty("VerticalOffset").value
         THRESHOLD = self.getProperty("Threshold").value
@@ -174,7 +175,8 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         # Load calibration data
         load_report = Progress(self, start=0, end=0.4, nreports=len(data_files))
-        ws_list = [self.get_integrated_workspace(data_file, load_report) for data_file in data_files]
+        ws_list = [self._get_integrated_workspace(data_file, load_report) for data_file in data_files]
+        load_report.report()
 
         # Scale workspaces
         def get_proton_charge(workspace):
@@ -456,37 +458,35 @@ class SANSTubeCalibration(PythonAlgorithm):
         self.set_counts_to_one_between_x_range(ws, -self._INF, x_1)
         self.set_counts_to_one_between_x_range(ws, x_2, self._INF)
 
-    def get_integrated_workspace(self, data_file, prog):
-        """Load a rebin a tube calibration run.  Searched multiple levels of cache to ensure faster loading."""
-        # check to see if have this file already loaded
+    def _get_integrated_workspace(self, data_file, progress):
+        """Load a tube calibration run.  Search multiple places to ensure faster loading."""
         ws_name = os.path.splitext(data_file)[0]
-        self.log().debug(f"look for: {ws_name}")
+        progress.report(f"Loading {ws_name}")
+        self.log().debug(f"looking for: {ws_name}")
+
         try:
             ws = mtd[ws_name]
-            self.log().information(f"Using existing {ws_name} workspace")
-            prog.report(f"Loading {ws_name}")
+            self.log().notice(f"Using existing {ws_name} workspace")
             return ws
-        except:
+        except KeyError:
             pass
+
+        saved_file_name = self._SAVED_INPUT_DATA_PREFIX + data_file
         try:
-            ws = Load(Filename="saved_" + data_file, OutputWorkspace=ws_name)
-            self.log().information(f"Loaded saved file from saved_{data_file}.")
-            prog.report(f"Loading {ws_name}")
+            ws = Load(Filename=saved_file_name, OutputWorkspace=ws_name)
+            self.log().notice(f"Loaded saved file from {saved_file_name}.")
             return ws
-        except:
+        except (ValueError, RuntimeError):
             pass
 
+        self.log().notice(f"Loading and integrating data from {data_file}.")
         ws = Load(Filename=data_file, OutputWorkspace=ws_name)
-        self.log().information(f"Loaded and integrating data from {data_file}.")
-        # turn event mode into histogram with a single bin
-        ws = Rebin(ws, self.timebin, PreserveEvents=False)
-        # else for histogram data use integration or sumpsectra
-        # ws = Integration(ws, OutputWorkspace=ws_name)
-        if self.getProperty("SaveIntegratedWorkspaces").value:
-            SaveNexusProcessed(ws, "saved_" + data_file)
-        RenameWorkspace(ws, ws_name)
+        # Turn event mode into histogram with given bins
+        ws = Rebin(ws, self._time_bins, PreserveEvents=False, OutputWorkspace=ws)
 
-        prog.report(f"Loading {ws_name}")
+        if self.getProperty("SaveIntegratedWorkspaces").value:
+            SaveNexusProcessed(ws, saved_file_name)
+
         return ws
 
     def _get_boundaries_for_each_strip(self, ws_to_known_edges):
