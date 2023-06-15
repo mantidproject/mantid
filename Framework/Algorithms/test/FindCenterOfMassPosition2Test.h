@@ -151,6 +151,11 @@ public:
   }
 
   void testCG3Data() {
+    const double CENTER_TOL{0.00125}; // algorithm default
+    // values estimated by eye
+    const double X_EXP{-0.0078};
+    const double Y_EXP{-0.0143};
+
     Mantid::Algorithms::FindCenterOfMassPosition2 center;
     center.initialize();
 
@@ -165,9 +170,10 @@ public:
     center.setPropertyValue("InputWorkspace", "testCG3DataInputWorkspace");
     const std::string outputWSname("testCG3DataOutputWorkspace");
     center.setPropertyValue("Output", outputWSname);
-    center.setPropertyValue("CenterX", "0");
-    center.setPropertyValue("CenterY", "0");
-    center.setPropertyValue("BeamRadius", "0.0155"); // meters
+    center.setProperty("CenterX", 0.);
+    center.setProperty("CenterY", 0.);
+    center.setProperty("Tolerance", CENTER_TOL);
+    center.setProperty("BeamRadius", 0.0155); // meters
 
     TS_ASSERT_THROWS_NOTHING(center.execute())
     TS_ASSERT(center.isExecuted())
@@ -178,11 +184,11 @@ public:
 
     TableRow row = table->getFirstRow();
     TS_ASSERT_EQUALS(row.String(0), "X (m)");
-    TS_ASSERT_DELTA(row.Double(1), -0.0078, 0.0001);
+    TS_ASSERT_DELTA(row.Double(1), X_EXP, CENTER_TOL);
 
     row = table->getRow(1);
     TS_ASSERT_EQUALS(row.String(0), "Y (m)");
-    TS_ASSERT_DELTA(row.Double(1), -0.0143, 0.0001);
+    TS_ASSERT_DELTA(row.Double(1), Y_EXP, CENTER_TOL);
   }
 
   /*
