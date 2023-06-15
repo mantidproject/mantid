@@ -217,40 +217,13 @@ public:
 
   API::MatrixWorkspace_sptr createSNAPLiteInstrument(const std::string &groupDetectorsBy) {
     const std::string WS_IN("SNAP_Scratch");
-    // the helper gives the starting instrument
-    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::createSNAPLiteInstrument(WS_IN);
-
-    const std::string WS_GRP = "SNAP_group" + groupDetectorsBy;
     if (groupDetectorsBy == "bank" || groupDetectorsBy == "Column") {
-      CreateGroupingWorkspace groupAlg;
-      groupAlg.initialize();
-      groupAlg.setProperty("InputWorkspace", WS_IN);
-      groupAlg.setProperty("GroupDetectorsBy", groupDetectorsBy);
-      groupAlg.setProperty("OutputWorkspace", WS_GRP);
-      groupAlg.execute();
-      if (!groupAlg.isExecuted())
-        throw std::runtime_error("Failed to execute CreateGroupingWorkspace");
+      return WorkspaceCreationHelper::createFocusedSNAPLiteInstrument(WS_IN, "CreateGroupingWorkspace",
+                                                                      groupDetectorsBy);
     } else {
       // assume groupDetectorsBy is a grouping filename
-      LoadDetectorsGroupingFile groupAlg;
-      groupAlg.initialize();
-      groupAlg.setProperty("InputWorkspace", WS_IN);
-      groupAlg.setProperty("InputFile", groupDetectorsBy);
-      groupAlg.setProperty("OutputWorkspace", WS_GRP);
-      groupAlg.execute();
-      if (!groupAlg.isExecuted())
-        throw std::runtime_error("Failed to execute CreateGroupingWorkspace");
+      return WorkspaceCreationHelper::createFocusedSNAPLiteInstrument(WS_IN, "LoadDetectorsGroupingFile",
+                                                                      groupDetectorsBy);
     }
-
-    DiffractionFocussing2 focusAlg;
-    focusAlg.initialize();
-    focusAlg.setProperty("InputWorkspace", WS_IN);
-    focusAlg.setProperty("OutputWorkspace", WS_IN);
-    focusAlg.setProperty("GroupingWorkspace", WS_GRP);
-    focusAlg.execute();
-    if (!focusAlg.isExecuted())
-      throw std::runtime_error("Failed to execute DiffractionFocussing");
-
-    return std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(WS_IN));
   }
 };

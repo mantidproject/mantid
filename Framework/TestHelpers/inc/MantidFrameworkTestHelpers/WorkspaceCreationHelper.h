@@ -410,5 +410,9 @@ Mantid::API::ITableWorkspace_sptr createEPPTableWorkspace(const std::vector<EPPT
  */
 Mantid::API::MatrixWorkspace_sptr createSNAPLiteInstrument(const std::string &wkspName, const double ang1 = -65.3,
                                                            const double ang2 = 104.95);
-
+Mantid::API::MatrixWorkspace_sptr createFocusedSNAPLiteInstrument(const std::string &wkspName,
+                                                                  const std::string &groupingAlg,
+                                                                  const std::string &groupingDescr,
+                                                                  const double ang1 = -65.3,
+                                                                  const double ang2 = 104.95);
 } // namespace WorkspaceCreationHelper
