@@ -12,14 +12,14 @@ from mantid.api import AlgorithmFactory, AlgorithmManager
 INPUT_WS_NAME = "input_ws"
 
 
-class AlgorithmDialogsStartupTestBase(MantidSystemTest, metaclass=ABCMeta):
+class AlgorithmValidateInputsTestBase(MantidSystemTest, metaclass=ABCMeta):
     """
     The base class for a system test which tests the Algorithm validateInputs method for a given workspace in the ADS.
     The test will only validateInputs for the most recent version of an algorithm.
     """
 
     def __init__(self):
-        super(AlgorithmDialogsStartupTestBase, self).__init__()
+        super(AlgorithmValidateInputsTestBase, self).__init__()
 
         algorithm_names = [algorithm.name for algorithm in AlgorithmFactory.Instance().getDescriptors(True, True)]
         # Remove duplicate algorithm names as we will only test the most recent versions
