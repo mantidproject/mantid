@@ -271,7 +271,7 @@ class DPDFreduction(api.PythonAlgorithm):
         # Group detectors according to theta angle for the sample runs
         group_file_os_handle, group_file_name = mkstemp(suffix=".xml")
         group_file_handle = os.fdopen(group_file_os_handle, "w")
-        sapi.GenerateGroupingPowder(InputWorkspace=wn_reduced, GroupingWorksapce="gws", AngleStep=dtheta, GroupingFilename=group_file_name)
+        sapi.GenerateGroupingPowder(InputWorkspace=wn_reduced, GroupingWorkspace="gws", AngleStep=dtheta, GroupingFilename=group_file_name)
         group_file_handle.close()
         sapi.GroupDetectors(InputWorkspace=wn_reduced, MapFile=group_file_name, OutputWorkspace=wn_ste)
         # Group detectors according to theta angle for the emtpy can run
