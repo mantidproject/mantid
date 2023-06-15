@@ -1356,8 +1356,6 @@ MatrixWorkspace_sptr createSNAPLiteInstrument(const std::string &wkspName, const
   // set the units so DiffractionFocussing will do its job
   auto xAxis = wsIn->getAxis(0);
   xAxis->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-
-  wsIn = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wkspName));
   return wsIn;
 }
 
