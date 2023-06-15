@@ -38,7 +38,7 @@ Bugfixes
 - :ref:`LoadAndMerge <algm-LoadAndMerge>` now cleans up intermediate loaded workspaces if the ``OutputBehaviour`` was set to 'Concatenate' these inputs.
 - Corrected issue in :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` where run end time was being determined incorrectly.
 - Corrected issue in :ref:`FilterByTime <algm-FilterByTime>` where filter stop time was being determined incorrectly.
-
+- Default to monospace font on non-ubuntu linuxes
 
 Beamline
 --------
