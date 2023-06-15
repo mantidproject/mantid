@@ -74,6 +74,9 @@ gsl:
 libcxx:
   - <16
 
+ncurses:
+  - 6.3
+
 # 8.2 causing segfaults in jupyter unit tests and doc builds.
 readline:
   - <8.2

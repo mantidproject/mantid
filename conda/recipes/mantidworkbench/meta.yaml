@@ -22,6 +22,7 @@ requirements:
     - cmake
     - git
     - libssh2  # [osx]
+    - ncurses  # [osx]
     - {{ cdt('mesa-libgl-devel') }}  # [linux]
     - {{ cdt('mesa-dri-drivers') }}  # [linux]
     - {{ cdt('libxxf86vm') }}  # [linux]
