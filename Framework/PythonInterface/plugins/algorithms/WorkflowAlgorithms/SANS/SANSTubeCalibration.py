@@ -55,6 +55,7 @@ class SANSTubeCalibration(PythonAlgorithm):
     _CAL_TABLE_ID_COL = "Detector ID"
     _CAL_TABLE_POS_COL = "Detector Position"
     _INF = sys.float_info.max  # Acceptable approximation for infinity
+    _MERGED_WS_NAME = "original"
 
     def category(self):
         return "SANS\\Calibration"
@@ -194,27 +195,29 @@ class SANSTubeCalibration(PythonAlgorithm):
                 Factor=uamphr_to_rescale / get_proton_charge(ws),
             )
 
-        # Find the known strip edge values for the strip positions we're using for the calibration
+        # Find the known strip edge positions for each calibration dataset
         ws_to_known_edges = self._find_known_strip_edges(ws_list)
         # We want to print this information when the algorithm completes to make it easier to spot, however we capture
         # the output of the calculation here to ensure it's accurate
         strip_edge_calculation_info = f"Strip edges calculated as: {list(ws_to_known_edges.values())}"
 
-        # Merge scaled workspaces into a single workspace containing all the strips
-        ws_to_boundaries = self._get_boundaries_for_each_strip(ws_to_known_edges)
+        # Find the set of known edge values that we will have after the data is merged into a single workspace
         known_edges_after_merge = self._get_strip_edges_after_merge(list(ws_to_known_edges.values()))
 
-        # In each calibration dataset, set counts equal to 1 for x values outside the strip position merged boundaries.
-        # This is so that we can multiply all the shadows together, instead of running merged workspace 5 times.
-        for ws, (boundary_start, boundary_end) in ws_to_boundaries.items():
-            self.log().information(f"Isolating shadow in {ws} between boundaries {boundary_start} and {boundary_end}.")
-            self.set_counts_to_one_outside_x_range(mtd[ws.name() + self._SCALED_WS_SUFFIX], boundary_start, boundary_end)
+        # Find the boundaries that isolate the strips in each calibration dataset
+        ws_to_boundaries = self._get_boundaries_for_each_strip(ws_to_known_edges)
 
-        merged_ws_name = "original"
-        self._merge_ws_list(list(ws_to_boundaries.keys()), merged_ws_name)
-        result = CloneWorkspace(InputWorkspace=merged_ws_name)
+        # Set counts equal to 1 for x values outside the strip position boundaries in each calibration dataset.
+        # This allows us to simply multiply all the workspaces together in order to merge them into a single dataset.
+        for ws, boundaries in ws_to_boundaries.items():
+            self.log().debug(f"Isolating shadow in {ws} between boundaries {boundaries[0]} and {boundaries[1]}.")
+            self._set_counts_to_one_outside_strip_boundaries(mtd[ws.name() + self._SCALED_WS_SUFFIX], boundaries)
+
+        # Perform the merge to get a single workspace containing all the strips
+        result = self._merge_ws_list(list(ws_to_boundaries.keys()))
 
         # Perform the calibration for each tube
+        result = CloneWorkspace(InputWorkspace=result)
         meanCvalue = []
         # Default size of a pixel in real space in mm
         default_pixel_size = (522.2 + 519.2) / 511
@@ -379,20 +382,21 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         return ws_to_known_edges
 
-    def _merge_ws_list(self, ws_list, merged_ws_name):
-        self.log().information("Multiplying workspaces together...")
-
+    def _merge_ws_list(self, ws_list):
+        self.log().debug("Multiplying workspaces together...")
         rhs_ws = f"{ws_list[0]}{self._SCALED_WS_SUFFIX}"
 
         if len(ws_list) == 1:
             # If there is only one workspace in the list then there is nothing to multiply together.
             # We re-name the workspace because we still need a workspace matching the output ws name but
             # there is no need to also keep the scaled workspace in this situation.
-            RenameWorkspace(InputWorkspace=rhs_ws, OutputWorkspace=merged_ws_name)
-            return
+            ws = RenameWorkspace(InputWorkspace=rhs_ws, OutputWorkspace=self._MERGED_WS_NAME)
+            return ws
 
         for ws_name in ws_list[1:]:
-            rhs_ws = Multiply(RHSWorkspace=rhs_ws, LHSWorkspace=f"{ws_name}{self._SCALED_WS_SUFFIX}", OutputWorkspace=merged_ws_name)
+            rhs_ws = Multiply(RHSWorkspace=rhs_ws, LHSWorkspace=f"{ws_name}{self._SCALED_WS_SUFFIX}", OutputWorkspace=self._MERGED_WS_NAME)
+
+        return rhs_ws
 
     @staticmethod
     def get_tube_name(tube_id, detector_name):
@@ -437,26 +441,16 @@ class SANSTubeCalibration(PythonAlgorithm):
                     up_edge = True
                     yield pixel
 
-    @staticmethod
-    def set_counts_to_one_between_x_range(ws, x_1, x_2):
-        """"""
-        if x_1 > x_2:
-            x_1, x_2 = x_2, x_1
-
-        for wsIndex in range(ws.getNumberHistograms()):
+    def _set_counts_to_one_outside_strip_boundaries(self, ws, boundaries):
+        """Set counts equal to 1 for x values outside the strip position boundaries."""
+        for ws_idx in range(ws.getNumberHistograms()):
             try:
-                if x_1 < ws.getDetector(wsIndex).getPos().getX() < x_2:
-                    ws.dataY(wsIndex)[0] = 1
+                det_x = ws.getDetector(ws_idx).getPos().getX()
+                if det_x < boundaries[0] or det_x > boundaries[1]:
+                    ws.dataY(ws_idx)[0] = 1
             except RuntimeError:
-                break
-                # pass # Ignore "Detector with ID _____ not found" errors.
-
-    def set_counts_to_one_outside_x_range(self, ws, x_1, x_2):
-        """"""
-        if x_1 > x_2:
-            x_1, x_2 = x_2, x_1
-        self.set_counts_to_one_between_x_range(ws, -self._INF, x_1)
-        self.set_counts_to_one_between_x_range(ws, x_2, self._INF)
+                # Ignore detectors that can't be found in the IDF
+                continue
 
     def _get_integrated_workspace(self, data_file, progress):
         """Load a tube calibration run.  Search multiple places to ensure faster loading."""
@@ -506,10 +500,11 @@ class SANSTubeCalibration(PythonAlgorithm):
         for left_edge, right_edge in list(ws_to_known_edges_sorted.values())[1:]:
             if left_edge <= last_strip_right_edge:
                 # The next strip overlaps or is right next to the last strip
-                boundary_points.append(find_midpoint(left_edge, last_strip_right_edge))
+                midpoint = find_midpoint(left_edge, last_strip_right_edge)
             else:
                 # There is a gap between the last and next strip
-                boundary_points.append(find_midpoint(last_strip_right_edge, left_edge))
+                midpoint = find_midpoint(last_strip_right_edge, left_edge)
+            boundary_points.append(midpoint)
             last_strip_right_edge = max(last_strip_right_edge, right_edge)
 
         boundary_points.append(self._INF)
