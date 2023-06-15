@@ -132,13 +132,15 @@ class SANSTubeCalibration(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        files = len(self.getProperty("DataFiles").value)
-        positions = len(self.getProperty("StripPositions").value)
+        num_files = len(self.getProperty("DataFiles").value)
+        num_positions = len(self.getProperty("StripPositions").value)
 
-        if positions > files:
+        if num_positions != len(set(self.getProperty("StripPositions").value)):
+            issues["StripPositions"] = "Duplicate strip positions are not permitted."
+        if num_positions > num_files:
             # This algorithm currently expects there to be only one strip per data file
             issues["DataFiles"] = "There must be a measurement for each strip position."
-        if files > positions:
+        if num_files > num_positions:
             issues["StripPositions"] = "There must be a strip position for each measurement."
         if self.getProperty("EndingPixel").value <= self.getProperty("StartingPixel").value:
             issues["EndingPixel"] = "The ending pixel must have a greater index than the starting pixel."
@@ -174,12 +176,6 @@ class SANSTubeCalibration(PythonAlgorithm):
         load_report = Progress(self, start=0, end=0.4, nreports=len(data_files))
         ws_list = [self.get_integrated_workspace(data_file, load_report) for data_file in data_files]
 
-        # Create an array of the known strip edge values for the strip positions we're using for the calibration
-        known_edge_pairs = self.find_known_strip_edges(ws_list[0])
-        # We want to print this information when the algorithm completes to make it easier to spot, however we capture
-        # the output of the calculation here as the array may be changed later
-        strip_edge_calculation_info = f"Strip edges calculated as: {known_edge_pairs}"
-
         # Scale workspaces
         def get_proton_charge(workspace):
             proton_charge = workspace.getRun()["proton_charge_by_period"].value
@@ -196,17 +192,24 @@ class SANSTubeCalibration(PythonAlgorithm):
                 Factor=uamphr_to_rescale / get_proton_charge(ws),
             )
 
+        # Find the known strip edge values for the strip positions we're using for the calibration
+        ws_to_known_edges = self._find_known_strip_edges(ws_list)
+        # We want to print this information when the algorithm completes to make it easier to spot, however we capture
+        # the output of the calculation here to ensure it's accurate
+        strip_edge_calculation_info = f"Strip edges calculated as: {list(ws_to_known_edges.values())}"
+
         # Merge scaled workspaces into a single workspace containing all the strips
-        known_edges_left, boundaries = self.get_merged_edge_pairs_and_boundaries(known_edge_pairs)
+        ws_to_boundaries = self._get_boundaries_for_each_strip(ws_to_known_edges)
+        known_edges_after_merge = self._get_strip_edges_after_merge(list(ws_to_known_edges.values()))
 
         # In each calibration dataset, set counts equal to 1 for x values outside the strip position merged boundaries.
         # This is so that we can multiply all the shadows together, instead of running merged workspace 5 times.
-        for ws, (boundary_start, boundary_end) in zip(ws_list, pairwise(boundaries)):
+        for ws, (boundary_start, boundary_end) in ws_to_boundaries.items():
             self.log().information(f"Isolating shadow in {ws} between boundaries {boundary_start} and {boundary_end}.")
             self.set_counts_to_one_outside_x_range(mtd[ws.name() + self._SCALED_WS_SUFFIX], boundary_start, boundary_end)
 
         merged_ws_name = "original"
-        self._merge_ws_list(ws_list, merged_ws_name)
+        self._merge_ws_list(list(ws_to_boundaries.keys()), merged_ws_name)
         result = CloneWorkspace(InputWorkspace=merged_ws_name)
 
         # Perform the calibration for each tube
@@ -226,7 +229,7 @@ class SANSTubeCalibration(PythonAlgorithm):
             self.log().debug(f'ID = {tube_id}, Name = "{tube_name}"')
 
             known_edges = []
-            for edge in known_edges_left:
+            for edge in known_edges_after_merge:
                 known_edges.append(edge + (tube_id - 119.0) * OFF_VERTICAL / 119.0)
 
             guessed_pixels = list(self.get_tube_edge_pixels(detector_name, tube_id, result, THRESHOLD, STARTPIXEL, ENDPIXEL))
@@ -333,8 +336,18 @@ class SANSTubeCalibration(PythonAlgorithm):
         self._log_tube_calibration_issues(tube_calibration_errors)
         self._notify_tube_cvalue_status(cvalues)
 
-    def find_known_strip_edges(self, ws):
+    def _match_workspaces_to_strip_positions(self, ws_list):
+        """Match the strip positions to the workspaces"""
+        strip_pos_to_ws = dict()
+        for i, position in enumerate(self.getProperty("StripPositions").value):
+            strip_pos_to_ws[position] = ws_list[i]
+
+        return strip_pos_to_ws
+
+    def _find_known_strip_edges(self, ws_list):
         det_z_logname = "Rear_Det_Z" if self.rear else "Front_Det_Z"
+        ws = ws_list[0]
+
         if not ws.run().hasProperty(det_z_logname):
             raise RuntimeError(
                 f'Run log does not contain an entry for "{det_z_logname}". This is required to calculate the strip edge positions.'
@@ -351,17 +364,18 @@ class SANSTubeCalibration(PythonAlgorithm):
             parallax_shift = dist_from_beam * strip_to_tube_centre / (strip_to_tube_centre - sample_to_detector_dist)
             return -(encoder + parallax_shift - half_det_width) / 1000 + side_offset
 
-        known_edge_pairs = []
-        for pos in self.getProperty("StripPositions").value:
+        strip_pos_to_ws = self._match_workspaces_to_strip_positions(ws_list)
+        ws_to_known_edges = dict()
+        for pos, ws in strip_pos_to_ws.items():
             if self.rear and pos == 260:
                 encoder_at_beam_centre = self.getProperty("EncoderAtBeamCentreForRear260Strip").value
             else:
                 encoder_at_beam_centre = encoder_at_beam_centre_main
             left_edge = calculate_edge(pos + strip_width)
             right_edge = calculate_edge(pos)
-            known_edge_pairs.append([left_edge, right_edge])
+            ws_to_known_edges[ws] = [left_edge, right_edge]
 
-        return np.array(known_edge_pairs)
+        return ws_to_known_edges
 
     def _merge_ws_list(self, ws_list, merged_ws_name):
         self.log().information("Multiplying workspaces together...")
@@ -475,29 +489,66 @@ class SANSTubeCalibration(PythonAlgorithm):
         prog.report(f"Loading {ws_name}")
         return ws
 
-    def get_merged_edge_pairs_and_boundaries(self, known_edge_pairs):
-        """Merge overlapping edge pairs, then return the merged edges and the midpoint of each edge pair."""
-        # FIXME: There's probably a cleaner way to do this. ALW 2022
-        boundaries = [-self._INF]
-        edge_pairs_merged = []
+    def _get_boundaries_for_each_strip(self, ws_to_known_edges):
+        """Identifies the boundaries that isolate each strip by finding the mid-point between each pair of strip edges.
+        Where strips overlap, we find the mid-point of the overlapped region"""
+        # Sort the strip edge positions into ascending order
+        ws_to_known_edges_sorted = dict(sorted(ws_to_known_edges.items(), key=lambda entry: entry[1]))
 
-        temp = known_edge_pairs[0]
+        boundary_points = [-self._INF]
+        # The right edge of the first strip is the initial reference point
+        last_strip_right_edge = list(ws_to_known_edges_sorted.values())[0][1]
 
-        for start, end in sorted([sorted(edge_pair) for edge_pair in known_edge_pairs]):
-            if start <= temp[1]:
-                boundary = start + (temp[1] - start) / 2
-                temp[1] = max(temp[1], end)
-                if start != temp[0]:
-                    boundaries.append(boundary)
+        def find_midpoint(first_edge, second_edge):
+            return first_edge + (second_edge - first_edge) / 2
+
+        # Loop through the rest of the strips to find the boundary points between strips
+        for left_edge, right_edge in list(ws_to_known_edges_sorted.values())[1:]:
+            if left_edge <= last_strip_right_edge:
+                # The next strip overlaps or is right next to the last strip
+                boundary_points.append(find_midpoint(left_edge, last_strip_right_edge))
             else:
-                boundaries.append(temp[1] + (start - temp[1]) / 2)
-                edge_pairs_merged.extend(temp)
-                temp[0] = start
-                temp[1] = end
-        edge_pairs_merged.extend(temp)
-        boundaries.append(self._INF)
+                # There is a gap between the last and next strip
+                boundary_points.append(find_midpoint(last_strip_right_edge, left_edge))
+            last_strip_right_edge = max(last_strip_right_edge, right_edge)
 
-        return edge_pairs_merged, boundaries
+        boundary_points.append(self._INF)
+
+        # Convert the list of boundary points into pairs of boundaries around the strips
+        boundaries = pairwise(boundary_points)
+
+        # Associate the boundaries with the relevant workspace
+        ws_to_boundaries = dict()
+        for i, ws in enumerate(ws_to_known_edges_sorted.keys()):
+            ws_to_boundaries[ws] = boundaries[i]
+
+        return ws_to_boundaries
+
+    def _get_strip_edges_after_merge(self, known_edges):
+        """Find the known edge pairs that will exist after the input workspaces have been merged."""
+        merged_edge_pairs = []
+
+        # Sort the strip edge positions into ascending order
+        known_edges_sorted = sorted(known_edges)
+
+        # The first strip is the initial reference point
+        current_strip_left_edge = known_edges_sorted[0][0]
+        current_strip_right_edge = known_edges_sorted[0][1]
+
+        # Loop through the rest of the strips to find edges that will exist after merging
+        for next_left_edge, next_right_edge in known_edges_sorted[1:]:
+            if next_left_edge <= current_strip_right_edge:
+                # The next strip overlaps or is right next to the last strip
+                current_strip_right_edge = max(current_strip_right_edge, next_right_edge)
+            else:
+                # There is a gap between the last and next strip
+                merged_edge_pairs.extend([current_strip_left_edge, current_strip_right_edge])
+                current_strip_left_edge = next_left_edge
+                current_strip_right_edge = next_right_edge
+
+        merged_edge_pairs.extend([current_strip_left_edge, current_strip_right_edge])
+
+        return merged_edge_pairs
 
     def _calibrate_tube(self, ws, tube_name, known_positions, func_form, fit_params, calib_table):
         """Define the calibrated positions of the detectors inside the given tube.

@@ -39,7 +39,13 @@ class SANSTubeCalibrationTest(unittest.TestCase):
         alg = self._setup_front_detector_calibration(args)
         self._assert_raises_error("There must be a strip position for each measurement.", alg)
 
-    def test_end_pixel_greater_than_start_pixel_throws_error(self):
+    def test_duplicate_strip_positions_throws_error(self):
+        data_ws_name = "test_SANS_calibration_ws"
+        args = {self._STRIP_POSITIONS_PARAM: [920, 920, 475], self._DATA_FILES_PARAM: [data_ws_name, data_ws_name, data_ws_name]}
+        alg = self._setup_front_detector_calibration(args)
+        self._assert_raises_error("Duplicate strip positions are not permitted.", alg)
+
+    def test_end_pixel_not_greater_than_start_pixel_throws_error(self):
         data_ws_name = "test_SANS_calibration_ws"
         expected_error = "The ending pixel must have a greater index than the starting pixel."
 
