@@ -78,6 +78,7 @@ Usage
 .. testcleanup:: GenerateGroupingPowder
 
    DeleteWorkspace(ws)
+   DeleteWorkspace(gws)
    DeleteWorkspace(wsg)
    import os,mantid
    filename=mantid.config.getString("defaultsave.directory")+"powder.xml"
