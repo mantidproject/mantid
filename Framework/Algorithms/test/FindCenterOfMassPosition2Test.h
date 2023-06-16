@@ -196,8 +196,8 @@ public:
    * calculation. This test takes a longer time to execute so we won't include
    * it in the set of unit tests.
    */
-  void validate() {
-    Mantid::Algorithms::FindCenterOfMassPosition2 center;
+  void test_biosans_empty_cell() {
+    // load in the data
     Mantid::DataHandling::LoadSpice2D loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "BioSANS_empty_cell.xml");
@@ -205,15 +205,16 @@ public:
     loader.setPropertyValue("OutputWorkspace", inputWS);
     loader.execute();
 
-    if (!center.isInitialized())
-      center.initialize();
+    // run the centering algorithm
+    Mantid::Algorithms::FindCenterOfMassPosition2 center;
+    center.initialize();
 
     TS_ASSERT_THROWS_NOTHING(center.setPropertyValue("InputWorkspace", inputWS))
     const std::string outputWS("result");
     TS_ASSERT_THROWS_NOTHING(center.setPropertyValue("Output", outputWS))
-    center.setPropertyValue("CenterX", "0");
-    center.setPropertyValue("CenterY", "0");
-    center.setPropertyValue("Tolerance", "0.0012875");
+    center.setProperty("CenterX", 0.);
+    center.setProperty("CenterY", 0.);
+    center.setProperty("Tolerance", 0.0012875);
 
     TS_ASSERT_THROWS_NOTHING(center.execute())
     TS_ASSERT(center.isExecuted())
