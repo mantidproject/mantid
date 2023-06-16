@@ -23,6 +23,7 @@ class SANSTubeCalibrationTest(unittest.TestCase):
     _IS_REAR_PARAM = "RearDetector"
     _ENCODER_BEAM_CENTRE_PARAM = "EncoderAtBeamCentre"
     _SIDE_OFFSET_PARAM = "SideOffset"
+    _NUM_PIXELS_IN_TUBE = 512
 
     def tearDown(self):
         AnalysisDataService.clear()
@@ -66,6 +67,17 @@ class SANSTubeCalibrationTest(unittest.TestCase):
         }
         alg = self._setup_front_detector_calibration(args)
         self._assert_raises_error(expected_error, alg)
+
+    def test_end_pixel_larger_then_pixels_in_tube_throws_error(self):
+        data_ws_name = "test_SANS_calibration_ws"
+        args = {
+            self._STRIP_POSITIONS_PARAM: [920],
+            self._DATA_FILES_PARAM: [data_ws_name],
+            self._START_PIXEL_PARAM: 10,
+            self._END_PIXEL_PARAM: self._NUM_PIXELS_IN_TUBE + 100,
+        }
+        alg = self._setup_front_detector_calibration(args)
+        self._assert_raises_error("The ending pixel must be less than or equal to", alg)
 
     def test_missing_det_Z_log_entry_for_workspace_throws_error(self):
         data_ws_name = "test_SANS_calibration_ws"

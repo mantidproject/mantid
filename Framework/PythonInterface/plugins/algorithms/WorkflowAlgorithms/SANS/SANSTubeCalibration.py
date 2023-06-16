@@ -26,11 +26,13 @@ class TubeSide:
     RIGHT = "right"
 
     @classmethod
-    def getTubeSide(cls, tube_id):
-        if tube_id % 2 == 0:
-            return TubeSide.LEFT
-        else:
-            return TubeSide.RIGHT
+    def get_tube_side(cls, tube_id):
+        return cls.LEFT if tube_id % 2 == 0 else cls.RIGHT
+
+
+class DetectorInfo:
+    # TODO: look these values up from the IDF
+    NUM_PIXELS_IN_TUBE = 512
 
 
 class FuncForm(Enum):
@@ -146,6 +148,8 @@ class SANSTubeCalibration(PythonAlgorithm):
             issues["StripPositions"] = "There must be a strip position for each measurement."
         if self.getProperty("EndingPixel").value <= self.getProperty("StartingPixel").value:
             issues["EndingPixel"] = "The ending pixel must have a greater index than the starting pixel."
+        if self.getProperty("EndingPixel").value > DetectorInfo.NUM_PIXELS_IN_TUBE:
+            issues["EndingPixel"] = f"The ending pixel must be less than or equal to {DetectorInfo.NUM_PIXELS_IN_TUBE}"
 
         return issues
 
@@ -168,11 +172,11 @@ class SANSTubeCalibration(PythonAlgorithm):
         if self.rear:
             index1 = 0
             index2 = 120 * 512 - 1
-            detector_name = "rear"
+            self._detector_name = "rear"
         else:
             index1 = 120 * 512
             index2 = 2 * 120 * 512 - 1
-            detector_name = "front"
+            self._detector_name = "front"
 
         # Load calibration data
         load_report = Progress(self, start=0, end=0.4, nreports=len(data_files))
@@ -228,7 +232,7 @@ class SANSTubeCalibration(PythonAlgorithm):
         tube_report = Progress(self, start=0.4, end=0.9, nreports=120)
         tube_calibration_errors = []
         for tube_id in range(120):
-            tube_name = self.get_tube_name(tube_id, detector_name)
+            tube_name = self._get_tube_name(tube_id)
             tube_report.report(f"Calculating tube {tube_name}")
             self.log().information("\n==================================================")
             self.log().debug(f'ID = {tube_id}, Name = "{tube_name}"')
@@ -237,7 +241,7 @@ class SANSTubeCalibration(PythonAlgorithm):
             for edge in known_edges_after_merge:
                 known_edges.append(edge + (tube_id - 119.0) * OFF_VERTICAL / 119.0)
 
-            guessed_pixels = list(self.get_tube_edge_pixels(detector_name, tube_id, result, THRESHOLD, STARTPIXEL, ENDPIXEL))
+            guessed_pixels = self._find_strip_edge_pixels_for_tube(tube_id, result, THRESHOLD, STARTPIXEL, ENDPIXEL)
 
             if len(guessed_pixels) != len(known_edges):
                 error_msg = (
@@ -287,7 +291,7 @@ class SANSTubeCalibration(PythonAlgorithm):
             # Produce diagnostic workspaces for the tube
             diagnostic_output[tube_id] = []
 
-            if TubeSide.getTubeSide(tube_id) == TubeSide.LEFT:
+            if TubeSide.get_tube_side(tube_id) == TubeSide.LEFT:
                 # first pixel in mm, as per idf file for rear detector
                 first_pixel_pos = -519.2
             else:
@@ -398,48 +402,62 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         return rhs_ws
 
-    @staticmethod
-    def get_tube_name(tube_id, detector_name):
-        # Construct the name of the tube based on the id (0-119) given.
-        side = TubeSide.getTubeSide(tube_id)
-        tube_side_num = tube_id // 2  # Need int name, not float appended
-        return detector_name + "-detector/" + side + str(tube_side_num)
+    def _get_tube_name(self, tube_id):
+        """Construct the name of the tube based on the id given"""
+        side = TubeSide.get_tube_side(tube_id)
+        tube_side_num = tube_id // 2  # Round down to get integer name for tube
+        return self._detector_name + "-detector/" + side + str(tube_side_num)
 
-    def get_tube_data(self, tube_id, ws, detector_name):
-        tube_name = self.get_tube_name(tube_id, detector_name)
+    def _get_tube_data(self, tube_id, ws):
+        """Return an array of all counts for the given tube"""
+        tube_name = self._get_tube_name(tube_id)
 
-        # Piggy-back the TubeSpec class from Karl's Calibration code
-        # so that dealing with tubes is easier than interrogating the
-        # IDF ourselves.
+        # The TubeSpec class has been used to make this easier than interrogating the IDF
         tube_spec = TubeSpec(ws)
         tube_spec.setTubeSpecByString(tube_name)
-        assert tube_spec.getNumTubes() == 1
+        if not tube_spec.getNumTubes() == 1:
+            raise RuntimeError(f"Found more than one tube for tube id {tube_id}")
         tube_ws_index_list = tube_spec.getTube(0)[0]
-        assert len(tube_ws_index_list) == 512
+        if not len(tube_ws_index_list) == 512:
+            raise RuntimeError(f"Found incorrect number of counts for tube id {tube_id}")
 
-        # Return an array of all counts for the tube.
-        return np.array([ws.dataY(ws_index)[0] for ws_index in tube_ws_index_list])
+        return [ws.dataY(ws_index)[0] for ws_index in tube_ws_index_list]
 
-    def get_tube_edge_pixels(self, detector_name, tube_id, ws, cutoff, first_pixel=0, last_pixel=sys.maxsize):
-        count_data = self.get_tube_data(tube_id, ws, detector_name)
+    def _find_strip_edge_pixels_for_tube(self, tube_id, ws, threshold, first_pixel, last_pixel):
+        """Finds the pixel numbers that correspond to the edges of the strips in each tube.
+        The tube counts should be very low at the locations where the strips are and should be much higher outside them.
+        The counts should change from high to low at the left edge of each strip, and from low to high at the right edge
+        of each strip.
 
-        if count_data[first_pixel] < cutoff:
-            up_edge = True
-        else:
-            up_edge = False
+        :param tube_id: the ID of the tube that we want to find the strip edge pixels for.
+        :param ws: the workspace containing the data.
+        :param threshold: the count value that we assume distinguishes between a strip and non-strip region in the data.
+        Counts above the threshold are assumed to be non-strip regions and vice versa.
+        :param first_pixel: the number of the pixel at the start of the region of interest in the data.
+        :param last_pixel: the number of the pixel at the end of the region of interest in the data.
 
-        for i, count in enumerate(count_data[first_pixel : last_pixel + 1]):
-            pixel = first_pixel + i
-            if pixel > last_pixel:
-                break
-            if up_edge:
-                if count >= cutoff:
-                    up_edge = False
-                    yield pixel
+        :rtype: an array of the pixel numbers that correspond to the edges of the strips in the data for the given tube.
+        """
+
+        edge_pixels = []
+        count_data = self._get_tube_data(tube_id, ws)
+        in_strip_region = count_data[first_pixel] < threshold
+
+        pixel_idx = first_pixel
+        for count in count_data[first_pixel:last_pixel]:
+            if in_strip_region:
+                if count >= threshold:
+                    # Found the right edge of a strip
+                    edge_pixels.append(pixel_idx)
+                    in_strip_region = False
             else:
-                if count < cutoff:
-                    up_edge = True
-                    yield pixel
+                if count < threshold:
+                    # Found the left edge of a strip
+                    edge_pixels.append(pixel_idx)
+                    in_strip_region = True
+            pixel_idx += 1
+
+        return edge_pixels
 
     def _set_counts_to_one_outside_strip_boundaries(self, ws, boundaries):
         """Set counts equal to 1 for x values outside the strip position boundaries."""
