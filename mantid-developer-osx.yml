@@ -17,6 +17,7 @@ dependencies:
   - jemalloc>=5.2.1
   - jsoncpp>=1.9.4,<2
   - librdkafka>=1.6.0
+  - libopenblas==0.3.21
   - muparser>=2.3.2
   - matplotlib=3.6.*
   - nexus=4.4.*
