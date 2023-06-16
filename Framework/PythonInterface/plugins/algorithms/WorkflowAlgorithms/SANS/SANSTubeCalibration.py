@@ -156,15 +156,14 @@ class SANSTubeCalibration(PythonAlgorithm):
         self._background = self.getProperty("Background").value
         self._time_bins = self.getProperty("TimeBins").value
         margin = self.getProperty("Margin").value
-        OFF_VERTICAL = self.getProperty("VerticalOffset").value
-        THRESHOLD = self.getProperty("Threshold").value
-        STARTPIXEL = self.getProperty("StartingPixel").value
-        ENDPIXEL = self.getProperty("EndingPixel").value
-        FITEDGES = self.getProperty("FitEdges").value
+        vertical_offset = self.getProperty("VerticalOffset").value
+        threshold = self.getProperty("Threshold").value
+        start_pixel = self.getProperty("StartingPixel").value
+        end_pixel = self.getProperty("EndingPixel").value
+        fit_edges = self.getProperty("FitEdges").value
         self._rear = self.getProperty("RearDetector").value
         data_files = self.getProperty("DataFiles").value
         skip_tube_on_error = self.getProperty("SkipTubesOnEdgeFindingError").value
-        self.outputfile = self.getProperty("OutputFile").value
         self._detector_name = "rear" if self._rear else "front"
 
         load_report = Progress(self, start=0, end=0.4, nreports=len(data_files))
@@ -200,40 +199,20 @@ class SANSTubeCalibration(PythonAlgorithm):
             self.log().notice("\n==================================================")
             self.log().debug(f'ID = {tube_id}, Name = "{tube_name}"')
 
-            known_edges = []
-            for edge in known_edges_after_merge:
-                known_edges.append(edge + (tube_id - 119.0) * OFF_VERTICAL / 119.0)
+            guessed_pixels = self._find_strip_edge_pixels_for_tube(tube_id, result, threshold, start_pixel, end_pixel)
 
-            guessed_pixels = self._find_strip_edge_pixels_for_tube(tube_id, result, THRESHOLD, STARTPIXEL, ENDPIXEL)
-
-            if len(guessed_pixels) != len(known_edges):
+            if len(guessed_pixels) != len(known_edges_after_merge):
                 error_msg = (
-                    f"Cannot calibrate tube {tube_id} - found {len(guessed_pixels)} edges when exactly {len(known_edges)} are required"
+                    f"Cannot calibrate tube {tube_id} - "
+                    f"found {len(guessed_pixels)} edges when exactly {len(known_edges_after_merge)} are required"
                 )
                 if skip_tube_on_error:
                     tube_calibration_errors.append(error_msg)
                     continue
                 raise RuntimeError(error_msg)
 
-            self.log().debug(f"Guessed pixels: {guessed_pixels}")
-            self.log().debug(f"Known edges: {known_edges}")
-
-            if FITEDGES:
-                func_form = FuncForm.EDGES
-                fit_params = TubeCalibFitParams(guessed_pixels, margin=margin, outEdge=10.0, inEdge=10.0)
-            else:
-                # Average pairs of edges for single peak fit
-                guessed_avg = []
-                known_avg = []
-                for i in range(0, len(guessed_pixels), 2):
-                    guessed_avg.append((guessed_pixels[i] + guessed_pixels[i + 1]) / 2)
-                    known_avg.append((known_edges[i] + known_edges[i + 1]) / 2)
-                known_edges = known_avg
-                self.log().debug(f"Halved guess {guessed_avg}")
-                self.log().debug(f"Halved known {known_avg}")
-                func_form = FuncForm.FLAT_TOP_PEAK
-                fit_params = TubeCalibFitParams(guessed_avg, height=2000, width=2 * margin, margin=margin, outEdge=10.0, inEdge=10.0)
-                fit_params.setAutomatic(False)
+            known_edges = self._get_known_positions_for_fitting(tube_id, known_edges_after_merge, fit_edges, vertical_offset)
+            func_form = FuncForm.EDGES if fit_edges else FuncForm.FLAT_TOP_PEAK
 
             try:
                 caltable, peak_positions, meanC = self._calibrate_tube(
@@ -241,7 +220,7 @@ class SANSTubeCalibration(PythonAlgorithm):
                     tube_name=tube_name,
                     known_positions=known_edges,
                     func_form=func_form,
-                    fit_params=fit_params,
+                    fit_params=self._get_fit_params(guessed_pixels, fit_edges, margin),
                     calib_table=caltable,
                 )
             except RuntimeError as error:
@@ -262,8 +241,7 @@ class SANSTubeCalibration(PythonAlgorithm):
         ApplyCalibration(result, caltable)
         cvalues = CreateWorkspace(DataX=list(diagnostic_output.keys()), DataY=meanCvalue)
 
-        if self.outputfile:
-            SaveNexusProcessed(result, self.outputfile)
+        self._save_calibrated_ws_as_nexus(result)
 
         # Group the diagnostic output for each tube
         # It seems to be faster to do this here rather than as we're calibrating each tube
@@ -554,6 +532,35 @@ class SANSTubeCalibration(PythonAlgorithm):
         merged_edge_pairs.extend([current_strip_left_edge, current_strip_right_edge])
 
         return merged_edge_pairs
+
+    @staticmethod
+    def _get_known_positions_for_fitting(tube_id, known_edges, fit_edges, vertical_offset):
+        final_tube_id = float(DetectorInfo.NUM_TUBES - 1)
+
+        def get_corrected_edge(edge_pos):
+            return edge_pos + (tube_id - final_tube_id) * vertical_offset / final_tube_id
+
+        if fit_edges:
+            known_positions = [get_corrected_edge(edge) for edge in known_edges]
+        else:
+            # Average the pairs of edges for a single peak fit
+            known_positions = []
+            for i in range(0, len(known_edges), 2):
+                known_positions.append((get_corrected_edge(known_edges[i]) + get_corrected_edge(known_edges[i + 1])) / 2)
+        return known_positions
+
+    @staticmethod
+    def _get_fit_params(guessed_pixels, fit_edges, margin):
+        if fit_edges:
+            return TubeCalibFitParams(guessed_pixels, margin=margin, outEdge=10.0, inEdge=10.0)
+        else:
+            # Average the pairs of edges for a single peak fit
+            guessed_avg = []
+            for i in range(0, len(guessed_pixels), 2):
+                guessed_avg.append((guessed_pixels[i] + guessed_pixels[i + 1]) / 2)
+            fit_params = TubeCalibFitParams(guessed_avg, height=2000, width=2 * margin, margin=margin, outEdge=10.0, inEdge=10.0)
+            fit_params.setAutomatic(False)
+            return fit_params
 
     def _calibrate_tube(self, ws, tube_name, known_positions, func_form, fit_params, calib_table):
         """Define the calibrated positions of the detectors inside the given tube.
@@ -873,6 +880,11 @@ class SANSTubeCalibration(PythonAlgorithm):
         diagnostic_workspaces.append(CreateWorkspace(DataX=ref_positions, DataY=calibrated_shift, OutputWorkspace=f"Shift{ws_suffix}"))
 
         return diagnostic_workspaces
+
+    def _save_calibrated_ws_as_nexus(self, calibrated_ws):
+        output_file = self.getProperty("OutputFile").value
+        if output_file:
+            SaveNexusProcessed(calibrated_ws, output_file)
 
     def _notify_tube_cvalue_status(self, cvalues):
         all_cvalues_ok = True
