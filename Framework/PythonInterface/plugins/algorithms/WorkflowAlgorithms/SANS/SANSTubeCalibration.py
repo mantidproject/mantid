@@ -33,6 +33,8 @@ class TubeSide:
 class DetectorInfo:
     # TODO: look these values up from the IDF
     NUM_PIXELS_IN_TUBE = 512
+    NUM_TUBES = 120
+    TOTAL_PIXELS = NUM_TUBES * NUM_PIXELS_IN_TUBE
 
 
 class FuncForm(Enum):
@@ -144,7 +146,7 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         return issues
 
-    def PyExec(self):  # noqa:C901
+    def PyExec(self):
         # Run the algorithm
         self._background = self.getProperty("Background").value
         self._time_bins = self.getProperty("TimeBins").value
@@ -154,65 +156,32 @@ class SANSTubeCalibration(PythonAlgorithm):
         STARTPIXEL = self.getProperty("StartingPixel").value
         ENDPIXEL = self.getProperty("EndingPixel").value
         FITEDGES = self.getProperty("FitEdges").value
-        self.rear = self.getProperty("RearDetector").value
+        self._rear = self.getProperty("RearDetector").value
         data_files = self.getProperty("DataFiles").value
         skip_tube_on_error = self.getProperty("SkipTubesOnEdgeFindingError").value
         self.outputfile = self.getProperty("OutputFile").value
+        self._detector_name = "rear" if self._rear else "front"
 
-        # Define the indices for the detector that we're calibrating
-        if self.rear:
-            index1 = 0
-            index2 = 120 * 512 - 1
-            self._detector_name = "rear"
-        else:
-            index1 = 120 * 512
-            index2 = 2 * 120 * 512 - 1
-            self._detector_name = "front"
-
-        # Load calibration data
         load_report = Progress(self, start=0, end=0.4, nreports=len(data_files))
-        ws_list = [self._get_integrated_workspace(data_file, load_report) for data_file in data_files]
-        load_report.report()
+        ws_list = self._load_calibration_data(data_files, load_report)
 
-        # Scale workspaces
-        def get_proton_charge(workspace):
-            proton_charge = workspace.getRun()["proton_charge_by_period"].value
-            return proton_charge[0] if type(proton_charge) is np.ndarray else proton_charge
+        load_report.report("Merging the datasets")
 
-        uamphr_to_rescale = get_proton_charge(ws_list[0])
-        for ws in ws_list:
-            scaled_ws_name = ws.name() + self._SCALED_WS_SUFFIX
-            CropWorkspace(InputWorkspace=ws, OutputWorkspace=scaled_ws_name, StartWorkspaceIndex=index1, EndWorkspaceIndex=index2)
-            Scale(
-                InputWorkspace=scaled_ws_name,
-                OutputWorkspace=scaled_ws_name,
-                Operation="Multiply",
-                Factor=uamphr_to_rescale / get_proton_charge(ws),
-            )
+        # Calculate the known strip edge positions for each calibration dataset
+        ws_to_known_edges = self._calculate_known_strip_edges(ws_list)
 
-        # Find the known strip edge positions for each calibration dataset
-        ws_to_known_edges = self._find_known_strip_edges(ws_list)
-        # We want to print this information when the algorithm completes to make it easier to spot, however we capture
+        # We want to print this information when the algorithm completes to make it easier to spot, but we capture
         # the output of the calculation here to ensure it's accurate
         strip_edge_calculation_info = f"Strip edges calculated as: {list(ws_to_known_edges.values())}"
 
-        # Find the set of known edge values that we will have after the data is merged into a single workspace
+        # Merge the individual datasets to get a single workspace containing all the strips
         known_edges_after_merge = self._get_strip_edges_after_merge(list(ws_to_known_edges.values()))
+        self._merge_workspaces(ws_to_known_edges)
 
-        # Find the boundaries that isolate the strips in each calibration dataset
-        ws_to_boundaries = self._get_boundaries_for_each_strip(ws_to_known_edges)
-
-        # Set counts equal to 1 for x values outside the strip position boundaries in each calibration dataset.
-        # This allows us to simply multiply all the workspaces together in order to merge them into a single dataset.
-        for ws, boundaries in ws_to_boundaries.items():
-            self.log().debug(f"Isolating shadow in {ws} between boundaries {boundaries[0]} and {boundaries[1]}.")
-            self._set_counts_to_one_outside_strip_boundaries(mtd[ws.name() + self._SCALED_WS_SUFFIX], boundaries)
-
-        # Perform the merge to get a single workspace containing all the strips
-        result = self._merge_ws_list(list(ws_to_boundaries.keys()))
+        load_report.report()
 
         # Perform the calibration for each tube
-        result = CloneWorkspace(InputWorkspace=result)
+        result = CloneWorkspace(InputWorkspace=self._MERGED_WS_NAME)
         meanCvalue = []
         # Default size of a pixel in real space in mm
         default_pixel_size = (522.2 + 519.2) / 511
@@ -344,8 +313,8 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         return strip_pos_to_ws
 
-    def _find_known_strip_edges(self, ws_list):
-        det_z_logname = "Rear_Det_Z" if self.rear else "Front_Det_Z"
+    def _calculate_known_strip_edges(self, ws_list):
+        det_z_logname = "Rear_Det_Z" if self._rear else "Front_Det_Z"
         ws = ws_list[0]
 
         if not ws.run().hasProperty(det_z_logname):
@@ -367,7 +336,7 @@ class SANSTubeCalibration(PythonAlgorithm):
         strip_pos_to_ws = self._match_workspaces_to_strip_positions(ws_list)
         ws_to_known_edges = dict()
         for pos, ws in strip_pos_to_ws.items():
-            if self.rear and pos == 260:
+            if self._rear and pos == 260:
                 encoder_at_beam_centre = self.getProperty("EncoderAtBeamCentreForRear260Strip").value
             else:
                 encoder_at_beam_centre = encoder_at_beam_centre_main
@@ -377,21 +346,75 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         return ws_to_known_edges
 
-    def _merge_ws_list(self, ws_list):
+    def _load_calibration_data(self, data_files, progress):
+        ws_list = []
+
+        # Define the indices for the detector that we're calibrating
+        if self._rear:
+            start_pixel = 0
+            end_pixel = DetectorInfo.TOTAL_PIXELS - 1
+        else:
+            start_pixel = DetectorInfo.TOTAL_PIXELS
+            end_pixel = 2 * DetectorInfo.TOTAL_PIXELS - 1
+
+        uamphr_to_rescale = None
+
+        for data_file in data_files:
+            ws = self._get_integrated_workspace(data_file, progress)
+
+            progress.report(f"Scaling {ws}")
+            if uamphr_to_rescale is None:
+                uamphr_to_rescale = self._get_proton_charge(ws)
+            ws_list.append(self._crop_and_scale_workspace(ws, start_pixel, end_pixel, uamphr_to_rescale))
+
+        return ws_list
+
+    @staticmethod
+    def _get_proton_charge(ws):
+        proton_charge = ws.getRun()["proton_charge_by_period"].value
+        return proton_charge[0] if type(proton_charge) is np.ndarray else proton_charge
+
+    def _crop_and_scale_workspace(self, ws, start_pixel, end_pixel, uamphr_to_rescale):
+        scaled_ws_name = ws.name() + self._SCALED_WS_SUFFIX
+        CropWorkspace(InputWorkspace=ws, OutputWorkspace=scaled_ws_name, StartWorkspaceIndex=start_pixel, EndWorkspaceIndex=end_pixel)
+        scaled_ws = Scale(
+            InputWorkspace=scaled_ws_name,
+            OutputWorkspace=scaled_ws_name,
+            Operation="Multiply",
+            Factor=uamphr_to_rescale / self._get_proton_charge(ws),
+        )
+        return scaled_ws
+
+    def _merge_workspaces(self, ws_to_known_edges):
+        """
+        Merge the workspaces containing the individual strips into a single workspace containing all the strips.
+
+        :param ws_to_known_edges: a dictionary of workspaces paired with their known strip edge locations.
+        """
+
+        # Find the boundaries that isolate the strips in each calibration dataset
+        ws_to_boundaries = self._get_boundaries_for_each_strip(ws_to_known_edges)
+
+        # This step allows us to multiply all the workspaces together in order to merge them into a single dataset.
+        for ws, boundaries in ws_to_boundaries.items():
+            self.log().debug(f"Isolating shadow in {ws} between boundaries {boundaries[0]} and {boundaries[1]}.")
+            self._set_counts_to_one_outside_strip_boundaries(ws, boundaries)
+
+        # Perform the merge to get a single workspace containing all the strips
+        self._multiply_ws_list(list(ws_to_boundaries.keys()))
+
+    def _multiply_ws_list(self, ws_list):
         self.log().debug("Multiplying workspaces together...")
-        rhs_ws = f"{ws_list[0]}{self._SCALED_WS_SUFFIX}"
+        rhs_ws = ws_list[0]
 
         if len(ws_list) == 1:
             # If there is only one workspace in the list then there is nothing to multiply together.
             # We re-name the workspace because we still need a workspace matching the output ws name but
             # there is no need to also keep the scaled workspace in this situation.
-            ws = RenameWorkspace(InputWorkspace=rhs_ws, OutputWorkspace=self._MERGED_WS_NAME)
-            return ws
+            RenameWorkspace(InputWorkspace=rhs_ws, OutputWorkspace=self._MERGED_WS_NAME)
 
-        for ws_name in ws_list[1:]:
-            rhs_ws = Multiply(RHSWorkspace=rhs_ws, LHSWorkspace=f"{ws_name}{self._SCALED_WS_SUFFIX}", OutputWorkspace=self._MERGED_WS_NAME)
-
-        return rhs_ws
+        for ws in ws_list[1:]:
+            rhs_ws = Multiply(RHSWorkspace=rhs_ws, LHSWorkspace=ws, OutputWorkspace=self._MERGED_WS_NAME)
 
     def _get_tube_name(self, tube_id):
         """Construct the name of the tube based on the id given"""
@@ -462,7 +485,7 @@ class SANSTubeCalibration(PythonAlgorithm):
                 continue
 
     def _get_integrated_workspace(self, data_file, progress):
-        """Load a tube calibration run.  Search multiple places to ensure faster loading."""
+        """Load a tube calibration run. Search multiple places to ensure faster loading."""
         ws_name = os.path.splitext(data_file)[0]
         progress.report(f"Loading {ws_name}")
         self.log().debug(f"looking for: {ws_name}")
