@@ -16,6 +16,7 @@ dependencies:
   - hdf5>=1.12,<1.13
   - jemalloc>=5.2.1
   - jsoncpp>=1.9.4,<2
+  - libopenblas!=0.3.23 # v0.3.23 causes a hang for the system tests on OSX
   - librdkafka>=1.6.0
   - muparser>=2.3.2
   - matplotlib=3.6.*
