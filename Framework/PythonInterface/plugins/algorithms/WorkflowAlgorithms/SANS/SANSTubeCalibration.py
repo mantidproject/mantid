@@ -29,12 +29,19 @@ class TubeSide:
     def get_tube_side(cls, tube_id):
         return cls.LEFT if tube_id % 2 == 0 else cls.RIGHT
 
+    @classmethod
+    def get_first_pixel_position(cls, tube_id):
+        # First pixel in mm, as per IDF for rear detector
+        return -519.2 if cls.get_tube_side(tube_id) == cls.LEFT else -522.2
+
 
 class DetectorInfo:
     # TODO: look these values up from the IDF
     NUM_PIXELS_IN_TUBE = 512
     NUM_TUBES = 120
     TOTAL_PIXELS = NUM_TUBES * NUM_PIXELS_IN_TUBE
+    DEFAULT_PIXEL_SIZE = (522.2 + 519.2) / 511  # Default size of a pixel in real space in mm
+    NUM_TUBES_PER_MODULE = 24
 
 
 class FuncForm(Enum):
@@ -59,7 +66,6 @@ class SANSTubeCalibration(PythonAlgorithm):
         return "Calibrates the tubes on the ISIS Sans2d Detector."
 
     def PyInit(self):
-        # Declare properties
         self.declareProperty(
             "StripPositions", [1040, 920, 755, 590, 425, 260, 95, 5], direction=Direction.Input, doc="Which strip positions were used"
         )
@@ -147,7 +153,6 @@ class SANSTubeCalibration(PythonAlgorithm):
         return issues
 
     def PyExec(self):
-        # Run the algorithm
         self._background = self.getProperty("Background").value
         self._time_bins = self.getProperty("TimeBins").value
         margin = self.getProperty("Margin").value
@@ -183,18 +188,16 @@ class SANSTubeCalibration(PythonAlgorithm):
         # Perform the calibration for each tube
         result = CloneWorkspace(InputWorkspace=self._MERGED_WS_NAME)
         meanCvalue = []
-        # Default size of a pixel in real space in mm
-        default_pixel_size = (522.2 + 519.2) / 511
         caltable = None
         diagnostic_output = dict()
 
-        # Loop through tubes to generate calibration table
+        # Loop through tubes to generate a calibration table
         tube_report = Progress(self, start=0.4, end=0.9, nreports=120)
         tube_calibration_errors = []
         for tube_id in range(120):
             tube_name = self._get_tube_name(tube_id)
             tube_report.report(f"Calculating tube {tube_name}")
-            self.log().information("\n==================================================")
+            self.log().notice("\n==================================================")
             self.log().debug(f'ID = {tube_id}, Name = "{tube_name}"')
 
             known_edges = []
@@ -248,43 +251,10 @@ class SANSTubeCalibration(PythonAlgorithm):
                     continue
                 raise RuntimeError(error_msg)
 
-            # Produce diagnostic workspaces for the tube
-            diagnostic_output[tube_id] = []
-
-            if TubeSide.get_tube_side(tube_id) == TubeSide.LEFT:
-                # first pixel in mm, as per idf file for rear detector
-                first_pixel_pos = -519.2
-            else:
-                first_pixel_pos = -522.2
-
-            module = int(tube_id / 24) + 1
-            tube_num = tube_id % 24
-            ws_suffix = f"{tube_id}_{module}_{tube_num}"
-
-            diagnostic_output[tube_id].append(RenameWorkspace(InputWorkspace=self._FIT_DATA_WS, OutputWorkspace=f"Fit{ws_suffix}"))
-            diagnostic_output[tube_id].append(RenameWorkspace(InputWorkspace=self._TUBE_PLOT_WS, OutputWorkspace=f"Tube{ws_suffix}"))
-
-            # Save the fitted positions to see how well the fit does, all in mm
-            x_values = []
-            x0_values = []
-            peak_positions.sort()
-            for i in range(len(peak_positions)):
-                x0_values.append(peak_positions[i] * default_pixel_size + first_pixel_pos)
-                x_values.append(known_edges[i] * 1000.0 - peak_positions[i] * default_pixel_size - first_pixel_pos)
-            diagnostic_output[tube_id].append(CreateWorkspace(DataX=x0_values, DataY=x_values, OutputWorkspace=f"Data{ws_suffix}"))
-
-            # Interrogate the calibration table to see how much we have shifted pixels for the tube
-            x_values = []
-            x0_values = []
-            ref_pixel_pos = first_pixel_pos
-            for det_pos in caltable.column("Detector Position")[-512:]:
-                x_values.append(det_pos.getX() * 1000.0 - ref_pixel_pos)
-                x0_values.append(ref_pixel_pos)
-                ref_pixel_pos += default_pixel_size
-            diagnostic_output[tube_id].append(CreateWorkspace(DataX=x0_values, DataY=x_values, OutputWorkspace=f"Shift{ws_suffix}"))
-
+            diagnostic_output[tube_id] = self._create_diagnostic_workspaces(tube_id, peak_positions, known_edges, caltable)
             meanCvalue.append(meanC)
 
+        # Apply the generated calibration table
         if not caltable:
             self._log_tube_calibration_issues(tube_calibration_errors)
             raise RuntimeError("Calibration failed - unable to generate calibration table")
@@ -870,6 +840,39 @@ class SANSTubeCalibration(PythonAlgorithm):
             calibrated_detectors[det_id] = new_pos
 
         return calibrated_detectors
+
+    def _create_diagnostic_workspaces(self, tube_id, peak_positions, known_edges, caltable):
+        """Produce diagnostic workspaces for the tube"""
+        diagnostic_workspaces = []
+
+        first_pixel_pos = TubeSide.get_first_pixel_position(tube_id)
+        module = int(tube_id / DetectorInfo.NUM_TUBES_PER_MODULE) + 1
+        tube_num = tube_id % DetectorInfo.NUM_TUBES_PER_MODULE
+        ws_suffix = f"{tube_id}_{module}_{tube_num}"
+
+        diagnostic_workspaces.append(RenameWorkspace(InputWorkspace=self._FIT_DATA_WS, OutputWorkspace=f"Fit{ws_suffix}"))
+        diagnostic_workspaces.append(RenameWorkspace(InputWorkspace=self._TUBE_PLOT_WS, OutputWorkspace=f"Tube{ws_suffix}"))
+
+        # Save the fitted positions to see how well the fit does, all in mm
+        known_positions = []
+        fitted_positions = []
+        peak_positions.sort()
+        for i in range(len(peak_positions)):
+            fitted_positions.append(peak_positions[i] * DetectorInfo.DEFAULT_PIXEL_SIZE + first_pixel_pos)
+            known_positions.append(known_edges[i] * 1000.0 - peak_positions[i] * DetectorInfo.DEFAULT_PIXEL_SIZE - first_pixel_pos)
+        diagnostic_workspaces.append(CreateWorkspace(DataX=fitted_positions, DataY=known_positions, OutputWorkspace=f"Data{ws_suffix}"))
+
+        # Interrogate the calibration table to see how much we have shifted pixels for the tube
+        calibrated_shift = []
+        ref_positions = []
+        ref_pixel_pos = first_pixel_pos
+        for det_pos in caltable.column(self._CAL_TABLE_POS_COL)[-DetectorInfo.NUM_PIXELS_IN_TUBE :]:
+            calibrated_shift.append(det_pos.getX() * 1000.0 - ref_pixel_pos)
+            ref_positions.append(ref_pixel_pos)
+            ref_pixel_pos += DetectorInfo.DEFAULT_PIXEL_SIZE
+        diagnostic_workspaces.append(CreateWorkspace(DataX=ref_positions, DataY=calibrated_shift, OutputWorkspace=f"Shift{ws_suffix}"))
+
+        return diagnostic_workspaces
 
     def _notify_tube_cvalue_status(self, cvalues):
         all_cvalues_ok = True
