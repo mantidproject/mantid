@@ -46,9 +46,9 @@ public:
   double calculateRadiusX() const;
   double calculateRadiusY() const;
 
-  double initBoundingBox(const std::size_t numSpec, const double beamRadius, const bool directBeam);
-  double updateBoundingBox(WorkspaceBoundingBox &previousBoundingBox, const std::size_t numSpec,
-                           const double beamRadius, const bool directBeam);
+  void initBoundingBox(const std::size_t numSpec, const double beamRadius, const bool directBeam);
+  void updateBoundingBox(WorkspaceBoundingBox &previousBoundingBox, const std::size_t numSpec, const double beamRadius,
+                         const bool directBeam);
   double updatePositionAndReturnCount(const std::size_t index);
   std::size_t findFirstValidWs(const std::size_t numSpec) const;
   bool isValidIndex(const std::size_t index) const;

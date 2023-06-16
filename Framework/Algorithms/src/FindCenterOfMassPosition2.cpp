@@ -90,18 +90,18 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
   previousBoundingBox.setBounds(0., 0., 0., 0.);
 
   // Initialize book-keeping
-  double distance = -1;
-  double distanceCheck = 0;
-  double totalCount = boundingBox.initBoundingBox(numSpec, beamRadius, directBeam);
+  double distance = std::numeric_limits<double>::max();
+  double distanceCheck = std::numeric_limits<double>::max();
+  boundingBox.initBoundingBox(numSpec, beamRadius, directBeam);
 
   int totalLocalMinima = 0;
   int totalIterations = 0;
+  constexpr int LOCAL_MINIMA_MAX{5};
 
   // Find center of mass and iterate until we converge
   // to within the tolerance specified in meters
-  while (distance > tolerance || distance < 0) {
+  while (distance > tolerance) {
     // Normalize output to find center of mass position
-    boundingBox.normalizePosition(totalCount, totalCount);
     // Compute the distance to the previous iteration
     distance = boundingBox.calculateDistance();
     // Recenter around new mass position
@@ -129,9 +129,10 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
     }
 
     // Quit if we found the exact same distance five times in a row.
-    if (totalLocalMinima > 5) {
+    if (totalLocalMinima > LOCAL_MINIMA_MAX) {
       g_log.warning() << "Found the same or equivalent center of mass locations "
-                         "more than 5 times in a row: stopping here\n";
+                         "more than "
+                      << LOCAL_MINIMA_MAX << " times in a row: stopping here\n";
       break;
     }
 
@@ -145,7 +146,7 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
 
     // Count histogram for normalization
     boundingBox.setPosition(0, 0);
-    totalCount = boundingBox.updateBoundingBox(previousBoundingBox, numSpec, beamRadius, directBeam);
+    boundingBox.updateBoundingBox(previousBoundingBox, numSpec, beamRadius, directBeam);
 
     progress.report("Find Beam Center");
   }
