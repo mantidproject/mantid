@@ -1386,7 +1386,6 @@ MatrixWorkspace_sptr createFocusedSNAPLiteInstrument(const std::string &wkspName
   createGroupingAlg->execute();
   if (!createGroupingAlg->isExecuted())
     throw std::runtime_error("Failed to execute CreateGroupingWorkspace");
-  GroupingWorkspace_sptr groupingWs = createGroupingAlg->getProperty("OutputWorkspace");
 
   // focus the data
   auto focusAlg = AlgorithmManager::Instance().createUnmanaged("DiffractionFocussing");
