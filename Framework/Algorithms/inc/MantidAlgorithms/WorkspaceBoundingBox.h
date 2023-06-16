@@ -24,7 +24,8 @@ Kernel::Logger g_log("WorkspaceBoundingBox");
  */
 class WorkspaceBoundingBox {
 public:
-  WorkspaceBoundingBox(const API::MatrixWorkspace_const_sptr &workspace);
+  WorkspaceBoundingBox(const API::MatrixWorkspace_const_sptr &workspace, const double beamRadius,
+                       const bool ignoreDirectBeam);
   WorkspaceBoundingBox();
   ~WorkspaceBoundingBox();
 
@@ -46,13 +47,10 @@ public:
   double calculateRadiusX() const;
   double calculateRadiusY() const;
 
-  void initBoundingBox(const std::size_t numSpec, const double beamRadius, const bool directBeam);
-  void updateBoundingBox(WorkspaceBoundingBox &previousBoundingBox, const std::size_t numSpec, const double beamRadius,
-                         const bool directBeam);
+  void initBoundingBox();
+  void updateBoundingBox(WorkspaceBoundingBox &previousBoundingBox);
   double updatePositionAndReturnCount(const std::size_t index);
   std::size_t findFirstValidWs(const std::size_t numSpec) const;
-  bool isValidIndex(const std::size_t index) const;
-  bool isOutOfBoundsOfNonDirectBeam(const double beamRadius, const std::size_t index, const bool directBeam);
   bool containsPoint(double x, double y);
   void normalizePosition(double x, double y);
   void updateMinMax(const std::size_t index);
@@ -60,8 +58,14 @@ public:
 private:
   Kernel::V3D position(const std::size_t index) const;
   double countsValue(const std::size_t index) const;
+  bool includeInIntegration(const std::size_t index);
+  bool includeInIntegration(const Kernel::V3D &position);
+  bool isValidIndex(const std::size_t index) const;
   API::MatrixWorkspace_const_sptr m_workspace;
   const API::SpectrumInfo *m_spectrumInfo;
+  std::size_t m_numSpectra;
+  double m_beamRadiusSq;
+  bool m_ignoreDirectBeam;
   double m_xPos{0};
   double m_yPos{0};
   double m_centerXPos{0};

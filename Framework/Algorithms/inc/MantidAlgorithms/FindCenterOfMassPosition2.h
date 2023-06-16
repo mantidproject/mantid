@@ -67,7 +67,7 @@ private:
   void exec() override;
   /// Helper functions
   void findCenterOfMass(const API::MatrixWorkspace_sptr &inputWS, double &centerX, double &centerY,
-                        const std::size_t numSpec, API::Progress &progress);
+                        API::Progress &progress);
   void storeOutputWorkspace(double centerX, double centerY);
   // Iteration cutoff
   const int m_maxIteration = 200;

@@ -67,21 +67,21 @@ void FindCenterOfMassPosition2::init() {
  *  @param inputWS  :: workspace to find the center of mass of
  *  @param centerX  :: save the real center of mass x coord here
  *  @param centerY  :: save the real center of mass y coord here
- *  @param numSpec  :: number of spectrum in the workspace to iterate through
  *  @param progress :: object for reporting progress of the operation
  */
 void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr &inputWS, double &centerX,
-                                                 double &centerY, const std::size_t numSpec, Progress &progress) {
+                                                 double &centerY, Progress &progress) {
   const double tolerance = getProperty("Tolerance");
-  const bool directBeam = getProperty("DirectBeam");
+  const bool includeDirectBeam = getProperty("DirectBeam");
   const double beamRadius = getProperty("BeamRadius");
 
   // Define box around center of mass so that only pixels in an area
   // _centered_ on the latest center position are considered. At each
   // iteration we will recompute the bounding box, and we will make
   // it as large as possible. The largest box is defined in:
-  WorkspaceBoundingBox boundingBox(inputWS);
+  WorkspaceBoundingBox boundingBox(inputWS, beamRadius, !includeDirectBeam);
   boundingBox.setCenter(centerX, centerY);
+  boundingBox.initBoundingBox();
 
   // Starting values for the bounding box and the center
   WorkspaceBoundingBox previousBoundingBox;
@@ -90,7 +90,6 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
   // Initialize book-keeping
   double distance = std::numeric_limits<double>::max();
   double distanceCheck = std::numeric_limits<double>::max();
-  boundingBox.initBoundingBox(numSpec, beamRadius, directBeam);
 
   int totalLocalMinima = 0;
   int totalIterations = 0;
@@ -106,7 +105,7 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
     double radiusX = boundingBox.calculateRadiusX();
     double radiusY = boundingBox.calculateRadiusY();
 
-    if (!directBeam && (radiusX <= beamRadius || radiusY <= beamRadius)) {
+    if (!includeDirectBeam && (radiusX <= beamRadius || radiusY <= beamRadius)) {
       g_log.error() << "Center of mass falls within the beam center area: "
                        "stopping here\n";
       break;
@@ -144,7 +143,7 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
 
     // Count histogram for normalization
     boundingBox.setPosition(0, 0);
-    boundingBox.updateBoundingBox(previousBoundingBox, numSpec, beamRadius, directBeam);
+    boundingBox.updateBoundingBox(previousBoundingBox);
 
     progress.report("Find Beam Center");
   }
@@ -209,14 +208,10 @@ void FindCenterOfMassPosition2::exec() {
   childAlg->executeAsChildAlg();
   inputWS = childAlg->getProperty("OutputWorkspace");
 
-  // Get the number of monitors. We assume that all monitors are stored in the
-  // first spectra
-  const auto numSpec = inputWSWvl->getNumberHistograms();
-
   // Set up the progress reporting object
   Progress progress(this, 0.5, 1.0, m_maxIteration);
 
-  findCenterOfMass(inputWS, centerX, centerY, numSpec, progress);
+  findCenterOfMass(inputWS, centerX, centerY, progress);
   storeOutputWorkspace(centerX, centerY);
 }
 
