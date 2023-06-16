@@ -183,10 +183,10 @@ def main():
         test_stats,
         files_required_by_test_module,
         data_file_lock_status,
-    ) = tmgr.generateMasterTestList(["framework", "qt"])
+    ) = tmgr.generateMasterTestList(["missing"])
 
     # Do not run the first half of the tests
-    test_list = dict(list(test_list.items())[int(len(test_list) / 2) :])
+    # test_list = dict(list(test_list.items())[int(len(test_list) * 3 / 4) :])
 
     number_of_test_modules = len(test_list.keys())
     total_number_of_tests = test_stats[0]
