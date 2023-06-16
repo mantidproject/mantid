@@ -123,6 +123,6 @@ if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     echo "usagereports.enabled = 0" >> $userprops
     echo "CheckMantidVersion.OnStartup = 0" >> $userprops
 
-    run_with_xvfb $SYSTEM_TEST_EXECUTABLE $WINDOWS_TEST_OPTIONS -j$BUILD_THREADS_SYSTEM_TESTS -l information --quiet --showskipped --output-on-failure
+    run_with_xvfb $SYSTEM_TEST_EXECUTABLE $WINDOWS_TEST_OPTIONS -j$BUILD_THREADS_SYSTEM_TESTS -l debug --quiet --showskipped --output-on-failure
     terminate_xvfb_sessions
 fi
