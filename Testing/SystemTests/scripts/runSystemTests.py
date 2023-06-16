@@ -183,10 +183,7 @@ def main():
         test_stats,
         files_required_by_test_module,
         data_file_lock_status,
-    ) = tmgr.generateMasterTestList(["missing"])
-
-    # Do not run the first half of the tests
-    # test_list = dict(list(test_list.items())[int(len(test_list) * 3 / 4) :])
+    ) = tmgr.generateMasterTestList(["framework"])
 
     number_of_test_modules = len(test_list.keys())
     total_number_of_tests = test_stats[0]
@@ -197,7 +194,6 @@ def main():
     skipped_tests, failed_tests, total_tests, success = None, None, None, None
 
     if options.ncores == 1:
-        print("Using one core")
         #####################################################################
         # Run the tests sequentially within the current Python process
         #####################################################################
@@ -210,14 +206,11 @@ def main():
                 print(f"Test module {modname} has {mod_test_counts} test{test_suffix}:")
                 for suite in suite_list:
                     print(f"    - {suite._fqtestname}")
-            print("Before execute")
             mod_status_dict = tmgr.executeTestsListUnderCurrentProcess(suite_list)
-            print("After execute")
             status_dict.update(mod_status_dict)
         skipped_tests, failed_tests, total_tests = tmgr.getTestResultStats()
         success = failed_tests == 0
     else:
-        print("Using many cores")
         #####################################################################
         # Run the tests with a task scheduler
         #####################################################################
