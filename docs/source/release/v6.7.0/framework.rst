@@ -63,7 +63,8 @@ New features
 Bugfixes
 ############
 - Fixed a bug that meant that when the workspace attribute of a function was changed (e.g. resolution or tabulated function) in a GUI, the function was not updated. This would lead to a crash as Mantid believed that the option was invalid.
-
+- Fixed a bug that prevented the :ref:`UserFunction <func-UserFunction>` from being added to a composite function within custom interfaces.
+- Fixed a memory leak in the wrapper for gsl derivative calculations.
 
 Data Objects
 ------------

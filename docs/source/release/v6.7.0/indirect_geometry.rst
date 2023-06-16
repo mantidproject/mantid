@@ -30,7 +30,9 @@ New features
 
 Bugfixes
 ############
-- Updated the CRYSTAL parser for Abins to accept files with complex eigenvectors expressed as "ANTI-PHASE". This seems to be the notation used for calculations on a regular q-point mesh, such as when performing Fourier interpolation to obtain a dense DOS.
-- Fixed a bug when loading certain ``vasprun.xml`` files in Abins. If the VASP user enables ``selective dynamics`` and ``IBRION=6``, VASP will ignore the frozen atoms when calculating vibrational frequencies. This created an unexpected number of degrees of freedom.
+- Updated the CRYSTAL parser for :ref:`Abins <algm-Abins>` to accept files with complex eigenvectors expressed as "ANTI-PHASE". This seems to be the notation used for calculations on a regular q-point mesh, such as when performing Fourier interpolation to obtain a dense DOS.
+- Fixed a bug when loading certain ``vasprun.xml`` files in :ref:`Abins <algm-Abins>`. If the VASP user enables ``selective dynamics`` and ``IBRION=6``, VASP will ignore the frozen atoms when calculating vibrational frequencies. This created an unexpected number of degrees of freedom.
+- The weighting of quantum orders in :ref:`Abins <algm-Abins>` and :ref:`Abins2D <algm-Abins2D>` has been corrected. The previous behaviour led to underestimation of orders 3+ (generally comprising the "phonon wing") when using ``Autoconvolution`` with ``QuantumOrderEvents=2``, and exaggeration of order 2 (but with correct orders 3+) when using ``Autoconvolution`` with ``QuantumOrderEvents=1``. With this bugfix in place the magnitude of order 2 is very similar whether calculated analytically or by convolution.
+- :ref:`Abins <algm-Abins>` no longer creates persistent hidden workspaces when using ``SaveAscii``.
 
 :ref:`Release 6.7.0 <v6.7.0>`

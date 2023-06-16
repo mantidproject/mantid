@@ -44,6 +44,8 @@ Bugfixes
 ############
 - Extra validation has been added to the ``Path to GSASII`` setting so that Workbench no longer crashes if a GSAS refinement is run with an invalid GSASII path in settings.
 - Loading or creating a calibration now fills the GSASII tab with the currently loaded calibration's ``.prm`` file.
+- Check GSASII reflection file output exists before loading results in GSASII tab (this can happen if no reflections are within the TOF limits specified).
+- Prevent TOF limits having min > max in GSASII tab.
 
 
 Single Crystal Diffraction
