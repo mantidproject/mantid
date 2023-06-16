@@ -20,23 +20,15 @@ WorkspaceBoundingBox::WorkspaceBoundingBox() {
 
 WorkspaceBoundingBox::~WorkspaceBoundingBox() = default;
 
-Kernel::V3D &WorkspaceBoundingBox::position(const std::size_t index) const {
-  if (m_cachedPositionIndex != index) {
-    if (!m_spectrumInfo)
-      throw std::runtime_error("SpectrumInfo object is not initialized");
+Kernel::V3D WorkspaceBoundingBox::position(const std::size_t index) const {
+  if (!m_spectrumInfo)
+    throw std::runtime_error("SpectrumInfo object is not initialized");
 
-    m_cachedPosition = m_spectrumInfo->position(index);
-    m_cachedPositionIndex = index;
-  }
-  return m_cachedPosition;
+  return m_spectrumInfo->position(index);
 }
 
 double WorkspaceBoundingBox::countsValue(const std::size_t index) const {
-  if (m_cachedHistogramYIndex != index) {
-    m_cachedYValue = m_workspace->y(index)[HISTOGRAM_INDEX];
-    m_cachedHistogramYIndex = index;
-  }
-  return m_cachedYValue;
+  return m_workspace->y(index)[HISTOGRAM_INDEX];
 }
 
 void WorkspaceBoundingBox::setPosition(const double x, const double y) {

@@ -55,7 +55,7 @@ public:
   void updateMinMax(const std::size_t index);
 
 private:
-  Kernel::V3D &position(const std::size_t index) const;
+  Kernel::V3D position(const std::size_t index) const;
   double countsValue(const std::size_t index) const;
   API::MatrixWorkspace_const_sptr m_workspace;
   const API::SpectrumInfo *m_spectrumInfo;
@@ -67,11 +67,6 @@ private:
   double m_xPosMax{0};
   double m_yPosMin{0};
   double m_yPosMax{0};
-  // cache information
-  mutable std::size_t m_cachedPositionIndex{std::numeric_limits<std::size_t>::max()};
-  mutable Kernel::V3D m_cachedPosition;
-  mutable std::size_t m_cachedHistogramYIndex{std::numeric_limits<std::size_t>::max()};
-  mutable double m_cachedYValue;
 };
 
 } // namespace Algorithms
