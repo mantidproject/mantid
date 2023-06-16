@@ -40,15 +40,6 @@ class FuncForm(Enum):
     FLAT_TOP_PEAK = 2
 
 
-def pairwise(iterable):
-    """Helper function from: http://docs.python.org/2/library/itertools.html:
-    s -> (s0,s1), (s1,s2), (s2, s3), ...
-    i.e. passing a list [s0, s1, s2, s3] to this function would return [(s0,s1), (s1,s2), (s2, s3)]"""
-    a, b = itertools.tee(iterable)
-    next(b, None)
-    return list(zip(a, b))
-
-
 class SANSTubeCalibration(PythonAlgorithm):
     _SAVED_INPUT_DATA_PREFIX = "saved_"
     _TUBE_PLOT_WS = "TubePlot"
@@ -528,7 +519,7 @@ class SANSTubeCalibration(PythonAlgorithm):
         boundary_points.append(self._INF)
 
         # Convert the list of boundary points into pairs of boundaries around the strips
-        boundaries = pairwise(boundary_points)
+        boundaries = self._pairwise(boundary_points)
 
         # Associate the boundaries with the relevant workspace
         ws_to_boundaries = dict()
@@ -536,6 +527,14 @@ class SANSTubeCalibration(PythonAlgorithm):
             ws_to_boundaries[ws] = boundaries[i]
 
         return ws_to_boundaries
+
+    @staticmethod
+    def _pairwise(iterable):
+        """Helper function from: http://docs.python.org/2/library/itertools.html:
+        Passing a list [s0, s1, s2, s3] to this function returns [(s0,s1), (s1,s2), (s2, s3)]"""
+        a, b = itertools.tee(iterable)
+        next(b, None)
+        return list(zip(a, b))
 
     def _get_strip_edges_after_merge(self, known_edges):
         """Find the known edge pairs that will exist after the input workspaces have been merged."""
