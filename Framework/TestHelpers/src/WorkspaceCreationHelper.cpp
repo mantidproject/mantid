@@ -1348,7 +1348,6 @@ MatrixWorkspace_sptr createSNAPLiteInstrument(const std::string &wkspName, const
   loadInstr->initialize();
   loadInstr->setProperty("Workspace", wkspName);
   loadInstr->setProperty("Filename", IDF_FILE);
-  loadInstr->setProperty("MonitorList", "-2--1");
   loadInstr->setProperty("RewriteSpectraMap", "False");
   loadInstr->execute();
   if (!loadInstr->isExecuted())
