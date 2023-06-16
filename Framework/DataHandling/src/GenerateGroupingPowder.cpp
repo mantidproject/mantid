@@ -214,18 +214,12 @@ void GenerateGroupingPowder::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
                                                         std::make_shared<InstrumentValidator>()),
                   "A workspace from which to generate the grouping.");
-
-  // allow saving as either xml or hdf5 formats
-  auto fileExtensionXMLorHDF5 = std::make_shared<ListValidator<std::string>>();
-  fileExtensionXMLorHDF5->addAllowedValue(std::string("xml"));
-  fileExtensionXMLorHDF5->addAllowedValue(std::string("nxs"));
-  fileExtensionXMLorHDF5->addAllowedValue(std::string("nx5"));
-  declareProperty("FileFormat", std::string("xml"), fileExtensionXMLorHDF5,
-                  "File extension/format for saving output: either xml (default) or nxs/nx5.");
+  declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("GroupingWorkspace", "", Direction::Output),
+                  "The grouping workspace created");
 
   auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
-  declareProperty("AngleStep", -1.0, positiveDouble, "The angle step for grouping, in degrees.");
+  declareProperty("AngleStep", -1.0, positiveDouble, "The polar angle step for grouping, in degrees.");
 
   auto withinCircle = std::make_shared<BoundedValidator<double>>();
   withinCircle->setLower(0.0);
@@ -236,20 +230,26 @@ void GenerateGroupingPowder::init() {
   withinDoubleCircle->setLower(-360.0);
   withinDoubleCircle->setUpper(360.0);
   withinDoubleCircle->setExclusive(true);
-  declareProperty("AzimuthalStart", 0.0, withinDoubleCircle, "The aimuthal angle start location, in degrees.");
+  declareProperty("AzimuthalStart", 0.0, withinDoubleCircle, "The azimuthal angle start location, in degrees.");
 
-  declareProperty(std::make_unique<FileProperty>("GroupingFilename", "", FileProperty::Save, "xml"),
+  declareProperty("NumberByAngle", true,
+                  "If true, divide sphere into groups labeled by angular sector."
+                  "Empty parts of the instrument will effectively have group numbers that do not exist in the output."
+                  "If false, labels will be assigned in order of highest angle.");
+
+  // allow saving as either xml or hdf5 formats
+  auto fileExtensionXMLorHDF5 = std::make_shared<ListValidator<std::string>>();
+  fileExtensionXMLorHDF5->addAllowedValue(std::string("xml"));
+  fileExtensionXMLorHDF5->addAllowedValue(std::string("nxs"));
+  fileExtensionXMLorHDF5->addAllowedValue(std::string("nx5"));
+  declareProperty("FileFormat", std::string("xml"), fileExtensionXMLorHDF5,
+                  "File extension/format for saving output: either xml (default) or nxs/nx5.");
+  declareProperty(std::make_unique<FileProperty>("GroupingFilename", "", FileProperty::Save,
+                                                 std::vector<std::string>{"xml", "nxs", "nx5"}),
                   "A grouping file that will be created.");
   declareProperty("GenerateParFile", true,
                   "If true, a par file with a corresponding name to the "
                   "grouping file will be generated.");
-
-  declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("GroupingWorkspace", "", Direction::Output),
-                  "The grouping workspace created");
-
-  declareProperty("NumberByAngle", true,
-                  "If true, divide sphere into groups by angle and step, number according to band."
-                  "Empty parts of the instrument will effectively have group numbers that do not exist in the output.");
 }
 
 //----------------------------------------------------------------------------------------------
