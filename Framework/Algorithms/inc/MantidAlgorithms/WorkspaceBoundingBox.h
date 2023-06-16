@@ -49,8 +49,6 @@ public:
 
   void initBoundingBox();
   void updateBoundingBox(WorkspaceBoundingBox &previousBoundingBox);
-  double updatePositionAndReturnCount(const std::size_t index);
-  std::size_t findFirstValidWs(const std::size_t numSpec) const;
   bool containsPoint(double x, double y);
   void normalizePosition(double x, double y);
   void updateMinMax(const std::size_t index);
@@ -58,9 +56,10 @@ public:
 private:
   Kernel::V3D position(const std::size_t index) const;
   double countsValue(const std::size_t index) const;
+  bool isValidIndex(const std::size_t index) const;
   bool includeInIntegration(const std::size_t index);
   bool includeInIntegration(const Kernel::V3D &position);
-  bool isValidIndex(const std::size_t index) const;
+  double updatePositionAndReturnCount(const std::size_t index);
   API::MatrixWorkspace_const_sptr m_workspace;
   const API::SpectrumInfo *m_spectrumInfo;
   std::size_t m_numSpectra;

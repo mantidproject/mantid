@@ -109,20 +109,6 @@ bool WorkspaceBoundingBox::isValidIndex(const std::size_t index) const {
   return true;
 }
 
-/** Searches for the first valid spectrum info in member variable `workspace`
- *
- *  @param numSpec :: the number of spectrum in the workspace to search through
- *  @return index of first valid spectrum
- */
-std::size_t WorkspaceBoundingBox::findFirstValidWs(const std::size_t numSpec) const {
-  std::size_t i;
-  for (i = 0; i < numSpec; ++i) {
-    if (isValidIndex(i))
-      break;
-  }
-  return i;
-}
-
 /** Sets member variables x/y to new x/y based on
  *  spectrum info and historgram data at the given index
  *
