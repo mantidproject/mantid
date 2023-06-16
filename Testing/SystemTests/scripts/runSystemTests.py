@@ -197,6 +197,7 @@ def main():
     skipped_tests, failed_tests, total_tests, success = None, None, None, None
 
     if options.ncores == 1:
+        print("Using one core")
         #####################################################################
         # Run the tests sequentially within the current Python process
         #####################################################################
@@ -209,11 +210,14 @@ def main():
                 print(f"Test module {modname} has {mod_test_counts} test{test_suffix}:")
                 for suite in suite_list:
                     print(f"    - {suite._fqtestname}")
+            print("Before execute")
             mod_status_dict = tmgr.executeTestsListUnderCurrentProcess(suite_list)
+            print("After execute")
             status_dict.update(mod_status_dict)
         skipped_tests, failed_tests, total_tests = tmgr.getTestResultStats()
         success = failed_tests == 0
     else:
+        print("Using many cores")
         #####################################################################
         # Run the tests with a task scheduler
         #####################################################################
