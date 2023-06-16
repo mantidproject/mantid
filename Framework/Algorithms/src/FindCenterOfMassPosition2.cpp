@@ -41,26 +41,24 @@ void FindCenterOfMassPosition2::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, wsValidator));
   declareProperty("Output", "",
-                  "If not empty, a table workspace of that "
-                  "name will contain the center of mass position.");
+                  "TableWorkspace will contain the center of mass position. "
+                  "When empty, a CenterOfMass output parameter with two elements (x,y) is created.");
 
-  declareProperty("CenterX", 0.0, "Estimate for the beam center in X [m]. Default: 0");
-  declareProperty("CenterY", 0.0, "Estimate for the beam center in Y [m]. Default: 0");
+  declareProperty("CenterX", 0.0, "Initial estimate for the beam center in X in meters");
+  declareProperty("CenterY", 0.0, "Initial estimate for the beam center in Y in meters");
   declareProperty("Tolerance", 0.00125,
-                  "Tolerance on the center of mass "
-                  "position between each iteration [m]. "
-                  "Default: 0.00125");
+                  "Tolerance on the center of mass position between each iteration in meters. "
+                  "Suggested value is the size of a quarter of a pixel.");
 
   declareProperty("DirectBeam", true,
-                  "If true, a direct beam calculation will be performed. Otherwise, the "
-                  "center of mass "
-                  "of the scattering data will be computed by excluding the beam area.");
+                  "When true, the calculation will include the pixels within BeamRadius from the beam center. "
+                  "Since the process is iterative, the pixels masked by DirectBeam=False will move.");
 
   positiveDouble->setLower(0);
   declareProperty("BeamRadius", 0.0155, positiveDouble,
-                  "Radius of the beam area, in meters, used the exclude the "
-                  "beam when calculating "
-                  "the center of mass of the scattering pattern.");
+                  "Radius of the direct beam area, in meters, used the exclude the beam when calculating "
+                  "the center of mass of the scattering pattern. "
+                  "This is ignored when DirectBeam=True");
 }
 
 /** Iterates through spectrum in the input workspace finding the center of mass until
