@@ -183,7 +183,7 @@ def main():
         test_stats,
         files_required_by_test_module,
         data_file_lock_status,
-    ) = tmgr.generateMasterTestList(["framework"])
+    ) = tmgr.generateMasterTestList(["hanging_tests"])
 
     number_of_test_modules = len(test_list.keys())
     total_number_of_tests = test_stats[0]
