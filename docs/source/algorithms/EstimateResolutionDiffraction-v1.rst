@@ -89,9 +89,9 @@ Usage
   resws = mtd["PG3_Resolution"]
 
   print("Size of workspace 'PG3_Resolution' =  {}".format(resws.getNumberHistograms()))
-  print("Estimated resolution of detector of spectrum 0 =  {:.14f}".format(resws.readY(0)[0]))
-  print("Estimated resolution of detector of spectrum 100 =  {:.14f}".format(resws.readY(100)[0]))
-  print("Estimated resolution of detector of spectrum 999 =  {:.14f}".format(resws.readY(999)[0]))
+  print("Estimated resolution of detector of spectrum 0 =  {:.6f}".format(resws.readY(0)[0]))
+  print("Estimated resolution of detector of spectrum 100 =  {:.6f}".format(resws.readY(100)[0]))
+  print("Estimated resolution of detector of spectrum 999 =  {:.6f}".format(resws.readY(999)[0]))
 
 .. testcleanup:: ExHistSimple
 
@@ -102,9 +102,9 @@ Output:
 .. testoutput:: ExHistSimple
 
   Size of workspace 'PG3_Resolution' =  1000
-  Estimated resolution of detector of spectrum 0 =  0.00323913137315
-  Estimated resolution of detector of spectrum 100 =  0.00323608260137
-  Estimated resolution of detector of spectrum 999 =  0.00354849176520
+  Estimated resolution of detector of spectrum 0 =  0.003239
+  Estimated resolution of detector of spectrum 100 =  0.003236
+  Estimated resolution of detector of spectrum 999 =  0.003548
 
 .. seealso :: Algorithms :ref:`algm-EstimateDivergence`.
 
