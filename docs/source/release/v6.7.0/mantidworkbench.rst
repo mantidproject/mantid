@@ -27,7 +27,7 @@ Bugfixes
 - Fixed an issue in :ref:`DrILL <DrILL-ref>` with loading rundexes related to an issue in processing the export algorithm name and the extension simultaneously.
 - The performance of the ``Show Sample Shape`` window has been improved for workspaces with complex CSG shapes for either the sample or the container.
 - Fixed a bug where opening the plot options for a script-created plot with error bars, would crash Workbench.
-- Default to monospace font on non-ubuntu linuxes
+- Default to monospace font on non-ubuntu linuxes.
 
 
 InstrumentViewer
