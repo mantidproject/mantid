@@ -50,7 +50,7 @@ public:
   void initBoundingBox();
   void updateBoundingBox(WorkspaceBoundingBox &previousBoundingBox);
   bool containsPoint(double x, double y);
-  void normalizePosition(double x, double y);
+  void normalizePosition(const double totalCounts);
   void updateMinMax(const std::size_t index);
 
 private:

@@ -29,11 +29,10 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
-namespace {
-bool equals(const double a, const double b) { // anonymous namespace
-  return fabs(a - b) < std::numeric_limits<double>::min();
+namespace { // anonymous namespace
+/// Equal within machine tolerance
+bool almost_equals(const double a, const double b) { return fabs(a - b) < std::numeric_limits<double>::min(); }
 } // anonymous namespace
-} // namespace
 
 void FindCenterOfMassPosition2::init() {
   const auto wsValidator = std::make_shared<CompositeValidator>();
@@ -88,8 +87,10 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
   previousBoundingBox.setBounds(0., 0., 0., 0.);
 
   // Initialize book-keeping
+  // distance between previous and current beam center
   double distance = std::numeric_limits<double>::max();
-  double distanceCheck = std::numeric_limits<double>::max();
+  // previous distance between previous and current beam center
+  double distancePrevious = std::numeric_limits<double>::max();
 
   int totalLocalMinima = 0;
   int totalIterations = 0;
@@ -102,24 +103,23 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
     // Compute the distance to the previous iteration
     distance = boundingBox.calculateDistance();
     // Recenter around new mass position
-    double radiusX = boundingBox.calculateRadiusX();
-    double radiusY = boundingBox.calculateRadiusY();
+    const double radiusX = boundingBox.calculateRadiusX();
+    const double radiusY = boundingBox.calculateRadiusY();
 
     if (!includeDirectBeam && (radiusX <= beamRadius || radiusY <= beamRadius)) {
-      g_log.error() << "Center of mass falls within the beam center area: "
-                       "stopping here\n";
+      g_log.error("Center of mass falls within the beam center area: stopping here");
       break;
     }
 
-    boundingBox.setCenter(boundingBox.getX(), boundingBox.getY());
-    const auto oldCenterX = boundingBox.getCenterX();
-    const auto oldCenterY = boundingBox.getCenterY();
+    const auto oldCenterX = boundingBox.getX();
+    const auto oldCenterY = boundingBox.getY();
+    boundingBox.setCenter(oldCenterX, oldCenterY);
     previousBoundingBox.setBounds(oldCenterX - radiusX, oldCenterX + radiusX, oldCenterY - radiusY,
                                   oldCenterY + radiusY);
 
     // Check to see if we have the same result
     // as the previous iteration
-    if (equals(distance, distanceCheck)) {
+    if (almost_equals(distance, distancePrevious)) {
       totalLocalMinima++;
     } else {
       totalLocalMinima = 0;
@@ -127,9 +127,8 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
 
     // Quit if we found the exact same distance five times in a row.
     if (totalLocalMinima > LOCAL_MINIMA_MAX) {
-      g_log.warning() << "Found the same or equivalent center of mass locations "
-                         "more than "
-                      << LOCAL_MINIMA_MAX << " times in a row: stopping here\n";
+      g_log.warning() << "Found the same or equivalent center of mass locations more than " << LOCAL_MINIMA_MAX
+                      << " times in a row: stopping here\n";
       break;
     }
 
@@ -139,7 +138,7 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
       break;
     }
 
-    distanceCheck = distance;
+    distancePrevious = distance;
 
     // Count histogram for normalization
     boundingBox.setPosition(0, 0);
