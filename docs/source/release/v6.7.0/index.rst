@@ -4,9 +4,9 @@
 Mantid 6.7.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/6_7_release/indexCollage.png
    :class: screenshot
-   :width: 385px
+   :width: 500px
    :align: right
 
 .. contents:: Table of Contents
@@ -17,6 +17,11 @@ Mantid 6.7.0 Release Notes
 We are proud to announce version 6.7.0 of Mantid.
 
 **TODO: Add paragraph summarizing big changes**
+
+- Major changes and improvements have been made to event filtering. Detailed in the :doc:`Framework release notes<framework>`.
+- Further refinements have been made to the :ref:`ALFView <ALFView-ref>` interface, new in v6.6.0.
+- The peak overlay feature in the :ref:`Instrument Viewer <InstrumentViewer>` now works in the side-by-side view.
+
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
