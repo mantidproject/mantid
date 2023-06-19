@@ -72,7 +72,7 @@ Output:
 .. testcleanup:: ExSaveHKLSimple
 
     import os
-    os.remove(os.path.join(os.path.expanduser("~"), "MyPeaks.hkl"))
+    os.remove(path)
 
 **Example - an example of running SaveHKL with sorting and filtering options.**
 
@@ -100,7 +100,7 @@ Output:
 .. testcleanup:: ExSaveHKLOptions
 
     import os
-    os.remove(os.path.join(os.path.expanduser("~"), "MyPeaks.hkl"))
+    os.remove(path)
 
 
 **Example - SaveHKL with shape from SetSample**
@@ -129,7 +129,7 @@ Output:
 .. testcleanup:: ExSaveHKLSimple
 
     import os
-    os.remove(os.path.join(os.path.expanduser("~"), "MyPeaks.hkl"))
+    os.remove(path)
 
 
 References

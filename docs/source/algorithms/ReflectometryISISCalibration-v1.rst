@@ -78,6 +78,11 @@ Output:
     Detector ID 2 two theta: 2.869708715207532
     Detector ID 3 two theta: 2.847673279376101
 
+.. testcleanup:: ExCalibration
+
+    import os
+    os.remove(file_name)
+
 .. seealso :: Algorithm :ref:`algm-ReflectometryISISLoadAndProcess`, :ref:`algm-SpecularReflectionPositionCorrect`.
 
 .. categories::

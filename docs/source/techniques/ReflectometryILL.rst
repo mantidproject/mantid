@@ -388,6 +388,9 @@ The example below shows a silicon oxide reduction with coherent summation at two
 .. testcleanup:: D17DetectorAngleCoherent
 
     mtd.clear()
+    import os
+    for i in range(2):
+        os.remove(f"{name}_{i}.out")
 
 D17 user angle, incoherent summation
 ------------------------------------
@@ -445,6 +448,9 @@ The example below shows a quartz reduction with incoherent summation at four dif
 .. testcleanup:: D17UserAngleQuartz
 
     mtd.clear()
+    import os
+    for i in range(4):
+        os.remove(f"{name}_{i}.out")
 
 FIGARO detector angle, gravity correction
 -----------------------------------------
@@ -508,6 +514,9 @@ This reduction includes the gravity correction, which is set explicitly via `Cor
 .. testcleanup:: FIGARODetectorAngleGravityCorrection
 
     mtd.clear()
+    import os
+    for i in range(2):
+        os.remove(f"{name}_{i}.out")
 
 References
 ----------

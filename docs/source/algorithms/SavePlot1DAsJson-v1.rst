@@ -37,6 +37,9 @@ Usage
   # run algorithm
   SavePlot1DAsJson(InputWorkspace=dataws, JsonFilename=out_json, PlotName="myplot")
 
+.. testcleanup:: ExSave1DPlottableJson
+
+    os.remove(out_json)
 
 .. categories::
 
