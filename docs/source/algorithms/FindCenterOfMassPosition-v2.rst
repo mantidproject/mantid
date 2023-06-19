@@ -12,27 +12,30 @@ Description
 Finds the beam center using the direct beam method.
 This algorithm is used by the EQSANS and HFIR SANS reduction.
 
-The position of the beam center *p* is given by
+The position of the beam center :math:`\vec{p}` is given by
 
-:math:`\vec{p}=\frac{\sum_iI_i\vec{d}_i}{\sum_iI_i}`
+.. math::
+
+   \vec{p}=\frac{\sum_iI_i\vec{d}_i}{\sum_iI_i}
 
 
-where i runs over all pixels within the largest square detector area centered on the
-initial guess for the beam center position. The initial guess is the center of the detector.
-:math:`I_i` is the detector count for pixel i, and :math:`\vec{d}_i` is the pixel coordinates. The calculation above
-is repeated iteratively by replacing the initial guess with the position found with the
-previous iteration. The process stops when the difference between the positions found
-with two consecutive iterations is smaller than 0.25 pixel.
+where :math:`i` runs over all pixels within the largest square detector area centered on the initial guess for the beam center position.
+The initial guess is the center of the detector.
+:math:`I_i` is the detector count for pixel :math:`i`, and :math:`\vec{d}_i` is the pixel coordinates.
+The calculation above is repeated iteratively by replacing the initial guess with the position found with the previous iteration.
+The process stops when the difference between the positions found with two consecutive iterations is smaller than ``Tolerance`` in meters.
 
-If *DirectBeam* is set to False, the beam center will be found using the
-scattered beam method. The process is identical to the direct beam method, with the
-only difference being that the pixels within a distance R (the beam radius) of the
-beam center guess are excluded from the calculation. The direct beam is thus
-excluded and only the scattered data is used.
+If ``DirectBeam=False``, the beam center will be found using the scattered beam method.
+The process is identical to the direct beam method, with the only difference being that the pixels within a distance :math:`R` (the beam radius) of the beam center guess are excluded from the calculation.
+The direct beam is thus excluded and only the scattered data is used.
+As an equation, this means that ``DirectBeam=False`` ignores pixels in the region
 
-If the *Output* property is set, the beam centre will be placed in a
-table workspace. Otherwise, the result is placed in an ArrayProperty
-named *CenterOfMass*.
+.. math::
+
+   |\vec{d}_i - \vec{p}| < BeamRadius
+
+If the ``Output`` property is set, the beam centre will be placed in a table workspace.
+Otherwise, the result is placed in an ArrayProperty named ``CenterOfMass``.
 
 Usage
 -----
