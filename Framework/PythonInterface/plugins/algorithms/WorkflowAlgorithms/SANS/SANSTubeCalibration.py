@@ -49,10 +49,10 @@ class FuncForm(Enum):
     FLAT_TOP_PEAK = 2
 
 
-class SANSTubeCalibration(PythonAlgorithm):
+class SANSTubeCalibration(DataProcessorAlgorithm):
     _SAVED_INPUT_DATA_PREFIX = "saved_"
-    _TUBE_PLOT_WS = "TubePlot"
-    _FIT_DATA_WS = "FittedData"
+    _TUBE_PLOT_WS = "__TubePlot"
+    _FIT_DATA_WS = "__FittedData"
     _SCALED_WS_SUFFIX = "_scaled"
     _CAL_TABLE_ID_COL = "Detector ID"
     _CAL_TABLE_POS_COL = "Detector Position"
@@ -641,7 +641,20 @@ class SANSTubeCalibration(PythonAlgorithm):
             self.log().debug("Histogram was excluded from the calibration as it did not have an assigned detector.")
         return peak_positions, avg_resolution
 
-    def _fit_flat_top_peak(self, peak_centre, fit_params, ws, output_ws):
+    def _run_fitting_function(self, function, input_ws, start_x, end_x):
+        alg = self.createChildAlgorithm("Fit")
+        alg.setProperty("Function", function)
+        alg.setProperty("InputWorkspace", input_ws)
+        alg.setProperty("StartX", str(start_x))
+        alg.setProperty("EndX", str(end_x))
+        alg.setProperty("CreateOutput", True)
+        alg.execute()
+        params_ws = alg.getProperty("OutputParameters").value
+        fit_ws = alg.getProperty("OutputWorkspace").value
+
+        return params_ws, fit_ws
+
+    def _fit_flat_top_peak(self, peak_centre, fit_params, ws):
         # Find the position
         outedge, inedge, endGrad = fit_params.getEdgeParameters()
         margin = fit_params.getMargin()
@@ -653,13 +666,17 @@ class SANSTubeCalibration(PythonAlgorithm):
         width = (end - start) / 3.0
 
         function = f"name=FlatTopPeak, Centre={peak_centre}, endGrad={endGrad}, Width={width}, Background={self._background}"
-        Fit(InputWorkspace=ws, Function=function, StartX=str(start), EndX=str(end), Output=output_ws)
+        params_ws, fit_ws = self._run_fitting_function(function, ws, start, end)
 
-        # peakIndex (center) is in position 1 of the parameter list -> parameter Centre of fitFlatTopPeak
-        # resolutionIndex is in position 2 of the parameter list
-        return 1, 2
+        # peak center is in position 1 of the parameter list -> parameter Centre of fitFlatTopPeak
+        peak_centre = params_ws.column("Value")[1]
 
-    def _fit_edges(self, peak_centre, fit_params, ws, output_ws):
+        # resolution is in position 2 of the parameter list
+        resolution = np.fabs(params_ws.column("Value")[2])
+
+        return peak_centre, resolution, fit_ws
+
+    def _fit_edges(self, peak_centre, fit_params, ws):
         # Find the edge position
         outedge, inedge, endGrad = fit_params.getEdgeParameters()
         margin = fit_params.getMargin()
@@ -681,11 +698,15 @@ class SANSTubeCalibration(PythonAlgorithm):
             edge_mode = 1
 
         function = f"name=EndErfc, B={peak_centre}, C={endGrad * edge_mode}"
-        Fit(InputWorkspace=ws, Function=function, StartX=str(start), EndX=str(end), Output=output_ws)
+        params_ws, fit_ws = self._run_fitting_function(function, ws, start, end)
 
-        # peakIndex (center) is in position 1 of parameter list -> parameter B of EndERFC
-        # resolutionIndex is in position 2 of the parameter list
-        return 1, 2
+        # peak center is in position 1 of parameter list -> parameter B of EndERFC
+        peak_centre = params_ws.column("Value")[1]
+
+        # resolution is in position 2 of the parameter list
+        resolution = np.fabs(params_ws.column("Value")[2])
+
+        return peak_centre, resolution, fit_ws
 
     def _fit_peak_positions_for_tube(self, ws, func_form, fit_params, ws_ids):
         """
@@ -708,7 +729,6 @@ class SANSTubeCalibration(PythonAlgorithm):
 
         tube_y_data = CreateWorkspace(list(range(len(y_data))), y_data, OutputWorkspace=self._TUBE_PLOT_WS)
 
-        calibPointWs = "CalibPoint"
         peak_positions = []
         fitt_y_values = []
         fitt_x_values = []
@@ -720,24 +740,20 @@ class SANSTubeCalibration(PythonAlgorithm):
         for peak in fit_params.getPeaks():
             if func_form == FuncForm.FLAT_TOP_PEAK:
                 # Find the FlatTopPeak position
-                centre_param_idx, resolution_param_idx = self._fit_flat_top_peak(peak, fit_params, tube_y_data, calibPointWs)
+                peak_centre, resolution, fit_ws = self._fit_flat_top_peak(peak, fit_params, tube_y_data)
             else:
                 # Find the edge position
-                centre_param_idx, resolution_param_idx = self._fit_edges(peak, fit_params, tube_y_data, calibPointWs)
+                peak_centre, resolution, fit_ws = self._fit_edges(peak, fit_params, tube_y_data)
 
             # Save the fit resolution parameter to get avg resolution
-            resolution = np.fabs(mtd[calibPointWs + "_Parameters"].column("Value")[resolution_param_idx])
             if resolution > 1e-06:
                 resolution_params.append(resolution)
 
-            # Get the peak centre
-            peak_centre = mtd[calibPointWs + "_Parameters"].column("Value")[centre_param_idx]
             peak_positions.append(peak_centre)
 
             # Calculate the values for the diagnostic workspace of fitted values
-            ws = mtd[calibPointWs + "_Workspace"]
-            fitt_y_values.append(copy.copy(ws.dataY(1)))
-            fitt_x_values.append(copy.copy(ws.dataX(1)))
+            fitt_y_values.append(copy.copy(fit_ws.dataY(1)))
+            fitt_x_values.append(copy.copy(fit_ws.dataX(1)))
 
         # Calculate the average resolution
         if resolution_params:
