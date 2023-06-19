@@ -58,6 +58,7 @@ class SANSTubeCalibration(PythonAlgorithm):
     _CAL_TABLE_POS_COL = "Detector Position"
     _INF = sys.float_info.max  # Acceptable approximation for infinity
     _MERGED_WS_NAME = "original"
+    _NEXUS_SUFFIX = ".nxs"
 
     def category(self):
         return "SANS\\Calibration"
@@ -884,7 +885,8 @@ class SANSTubeCalibration(PythonAlgorithm):
     def _save_calibrated_ws_as_nexus(self, calibrated_ws):
         output_file = self.getProperty("OutputFile").value
         if output_file:
-            SaveNexusProcessed(calibrated_ws, output_file)
+            save_filepath = output_file if output_file.endswith(self._NEXUS_SUFFIX) else f"{output_file}{self._NEXUS_SUFFIX}"
+            SaveNexusProcessed(calibrated_ws, save_filepath)
 
     def _notify_tube_cvalue_status(self, cvalues):
         all_cvalues_ok = True
