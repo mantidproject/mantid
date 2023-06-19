@@ -136,7 +136,6 @@ PATH=${MSVC_PATHS}"
 )
 
 configure_file(${WINDOWS_BUILDCONFIG}/command-prompt.bat.in ${PROJECT_BINARY_DIR}/command-prompt.bat @ONLY)
-configure_file(${WINDOWS_BUILDCONFIG}/pycharm.env.in ${PROJECT_BINARY_DIR}/pycharm.env @ONLY)
 
 # The IDE may not be installed as we could be just using the build tools
 if(EXISTS ${MSVC_IDE_LOCATION}/devenv.exe)
@@ -146,9 +145,6 @@ if(EXISTS ${MSVC_IDE_LOCATION}/devenv.exe)
       ${WINDOWS_BUILDCONFIG}/visual-studio_conda_ninja.bat.in ${PROJECT_BINARY_DIR}/visual-studio_ninja.bat @ONLY
     )
   endif()
-endif()
-if(CONDA_ENV)
-  configure_file(${WINDOWS_BUILDCONFIG}/pycharm_conda.bat.in ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY)
 endif()
 
 # ######################################################################################################################
