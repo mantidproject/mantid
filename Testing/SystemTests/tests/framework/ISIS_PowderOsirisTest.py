@@ -116,14 +116,48 @@ def _try_delete(path):
         print("Could not delete output file at: ", path)
 
 
-class OSIRISDiffractionFocusingWithSubtractionTest(systemtesting.MantidSystemTest):
+class _OSIRISDiffractionFocusingTest(systemtesting.MantidSystemTest):
     existing_config = config["datasearch.directories"]
+    refrence_ws_name = None
+    required_run_files = []
+
+    def skipTests(self):
+        # Don't actually run this test, as it is a common interface for other tests tests
+        return True
+
+    def runPreTest(self):
+        setup_mantid_paths()
 
     def requiredFiles(self):
         return self._gen_required_files()
 
+    def validate(self):
+        foccussed_ws = self.results
+        return (foccussed_ws.name(), self.refrence_ws_name)
+
+    def cleanup(self):
+        try:
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config["datasearch.directories"] = self.existing_config
+
+    def _gen_required_files(self):
+        input_files = [os.path.join(input_dir, file) for file in self.required_run_files]
+        input_files.append(calibration_map_path)
+        return input_files
+
+
+class OSIRISDiffractionFocusingWithSubtractionTest(_OSIRISDiffractionFocusingTest):
+    refrence_ws_name = "OSI119977_d_spacing.nxs"
+    required_run_files = [
+        "OSI82717.nxs",  # empty can
+        "OSIRIS00119963.nxs",  # van
+        "OSIRIS00119977.nxs",
+    ]
+
     def runTest(self):
-        setup_mantid_paths()
+        super().runPreTest()
         self.results = run_diffraction_focusing(
             "119977",
             "Test",
@@ -131,36 +165,23 @@ class OSIRISDiffractionFocusingWithSubtractionTest(systemtesting.MantidSystemTes
             subtract_empty_can=True,
         )
 
-    def validate(self):
-        foccussed_ws = self.results
-        return (foccussed_ws.name(), "OSI119977_d_spacing.nxs")
-
-    def cleanup(self):
-        try:
-            _try_delete(output_dir)
-        finally:
-            mantid.mtd.clear()
-            config["datasearch.directories"] = self.existing_config
-
-    def _gen_required_files(self):
-        required_run_files = [
-            "OSI82717.nxs",  # empty can
-            "OSIRIS00119963.nxs",  # van
-            "OSIRIS00119977.nxs",
-        ]  # sample
-        input_files = [os.path.join(input_dir, file) for file in required_run_files]
-        input_files.append(calibration_map_path)
-        return input_files
+    def skipTests(self):
+        return False
 
 
-class OSIRISDiffractionFocusingWithMergingTest(systemtesting.MantidSystemTest):
-    existing_config = config["datasearch.directories"]
-
-    def requiredFiles(self):
-        return self._gen_required_files()
+class OSIRISDiffractionFocusingWithMergingTest(_OSIRISDiffractionFocusingTest):
+    refrence_ws_name = "OSI119977-119978_d_spacing.nxs"
+    required_run_files = [
+        "OSI82717.nxs",
+        "OSI82718.nxs",  # empty can
+        "OSIRIS00119963.nxs",
+        "OSIRIS00119964.nxs",  # van
+        "OSIRIS00119977.nxs",
+        "OSIRIS00119978.nxs",
+    ]
 
     def runTest(self):
-        setup_mantid_paths()
+        super().runPreTest()
         self.results = run_diffraction_focusing(
             "119977-119978",
             "Test_Merge",
@@ -168,39 +189,22 @@ class OSIRISDiffractionFocusingWithMergingTest(systemtesting.MantidSystemTest):
             merge_drange=True,
         )
 
-    def validate(self):
-        foccussed_ws = self.results
-        return (foccussed_ws.name(), "OSI119977-119978_d_spacing.nxs")
-
-    def cleanup(self):
-        try:
-            _try_delete(output_dir)
-        finally:
-            mantid.mtd.clear()
-            config["datasearch.directories"] = self.existing_config
-
-    def _gen_required_files(self):
-        required_run_files = [
-            "OSI82717.nxs",
-            "OSI82718.nxs",  # empty can
-            "OSIRIS00119963.nxs",
-            "OSIRIS00119964.nxs",  # van
-            "OSIRIS00119977.nxs",
-            "OSIRIS00119978.nxs",
-        ]  # sample
-        input_files = [os.path.join(input_dir, file) for file in required_run_files]
-        input_files.append(calibration_map_path)
-        return input_files
+    def skipTests(self):
+        return False
 
 
-class OSIRISDiffractionFocusingWithSimpleAbsorptionCorrection(systemtesting.MantidSystemTest):
-    existing_config = config["datasearch.directories"]
-
-    def requiredFiles(self):
-        return self._gen_required_files()
+class OSIRISDiffractionFocusingWithSimpleAbsorptionCorrection(_OSIRISDiffractionFocusingTest):
+    refrence_ws_name = "OSI120032_d_spacing_simple_corrected.nxs"
+    required_run_files = [
+        "OSI82717.nxs",
+        "OSI82718.nxs",  # empty can
+        "OSIRIS00119963.nxs",
+        "OSIRIS00119964.nxs",  # van
+        "OSIRIS00120032.nxs",
+    ]
 
     def runTest(self):
-        setup_mantid_paths()
+        super().runPreTest()
         sample_details = SampleDetails(radius=1.1, height=8, center=[0, 0, 0], shape="cylinder")
         sample_details.set_material(chemical_formula="Cr2-Ga-N", number_density=10.0)
         sample_details.set_container(chemical_formula="Al", number_density=2.7, radius=1.2)
@@ -216,38 +220,22 @@ class OSIRISDiffractionFocusingWithSimpleAbsorptionCorrection(systemtesting.Mant
             vanadium_normalization_cutoff=100000000,
         )
 
-    def validate(self):
-        foccussed_ws = self.results
-        return (foccussed_ws.name(), "OSI120032_d_spacing_simple_corrected.nxs")
-
-    def cleanup(self):
-        try:
-            _try_delete(output_dir)
-        finally:
-            mantid.mtd.clear()
-            config["datasearch.directories"] = self.existing_config
-
-    def _gen_required_files(self):
-        required_run_files = [
-            "OSI82717.nxs",
-            "OSI82718.nxs",  # empty can
-            "OSIRIS00119963.nxs",
-            "OSIRIS00119964.nxs",  # van
-            "OSIRIS00120032.nxs",
-        ]  # sample
-        input_files = [os.path.join(input_dir, file) for file in required_run_files]
-        input_files.append(calibration_map_path)
-        return input_files
+    def skipTests(self):
+        return False
 
 
-class OSIRISDiffractionFocusingWithPaalmanPingsAbsorptionCorrection(systemtesting.MantidSystemTest):
-    existing_config = config["datasearch.directories"]
-
-    def requiredFiles(self):
-        return self._gen_required_files()
+class OSIRISDiffractionFocusingWithPaalmanPingsAbsorptionCorrection(_OSIRISDiffractionFocusingTest):
+    refrence_ws_name = "OSI120032_d_spacing_paalman_corrected.nxs"
+    required_run_files = [
+        "OSI82717.nxs",
+        "OSI82718.nxs",  # empty can
+        "OSIRIS00119963.nxs",
+        "OSIRIS00119964.nxs",  # van
+        "OSIRIS00120032.nxs",
+    ]
 
     def runTest(self):
-        setup_mantid_paths()
+        super().runPreTest()
         sample_details = SampleDetails(radius=1.1, height=8, center=[0, 0, 0], shape="cylinder")
         sample_details.set_material(chemical_formula="Cr2-Ga-N", number_density=10.0)
         sample_details.set_container(chemical_formula="Al", number_density=2.7, radius=1.2)
@@ -263,25 +251,5 @@ class OSIRISDiffractionFocusingWithPaalmanPingsAbsorptionCorrection(systemtestin
             vanadium_normalization_cutoff=100000000,
         )
 
-    def validate(self):
-        foccussed_ws = self.results
-        return (foccussed_ws.name(), "OSI120032_d_spacing_paalman_corrected.nxs")
-
-    def cleanup(self):
-        try:
-            _try_delete(output_dir)
-        finally:
-            mantid.mtd.clear()
-            config["datasearch.directories"] = self.existing_config
-
-    def _gen_required_files(self):
-        required_run_files = [
-            "OSI82717.nxs",
-            "OSI82718.nxs",  # empty can
-            "OSIRIS00119963.nxs",
-            "OSIRIS00119964.nxs",  # van
-            "OSIRIS00120032.nxs",
-        ]  # sample
-        input_files = [os.path.join(input_dir, file) for file in required_run_files]
-        input_files.append(calibration_map_path)
-        return input_files
+    def skipTests(self):
+        return False
