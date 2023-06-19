@@ -404,4 +404,15 @@ void createInstrumentForWorkspaceWithDistances(const Mantid::API::MatrixWorkspac
 /// Create a table workspace corresponding to what the FindEPP algorithm gives.
 Mantid::API::ITableWorkspace_sptr createEPPTableWorkspace(const std::vector<EPPTableRow> &rows);
 
+/**
+ * Create a copy of the SNAP "lite" instrument. This is the normal instrument with the 8x8 pixels added together. The
+ * default values for the detector positions are taken from SNAP_57514.
+ */
+Mantid::API::MatrixWorkspace_sptr createSNAPLiteInstrument(const std::string &wkspName, const double ang1 = -65.3,
+                                                           const double ang2 = 104.95);
+Mantid::API::MatrixWorkspace_sptr createFocusedSNAPLiteInstrument(const std::string &wkspName,
+                                                                  const std::string &groupingAlg,
+                                                                  const std::string &groupingDescr,
+                                                                  const double ang1 = -65.3,
+                                                                  const double ang2 = 104.95);
 } // namespace WorkspaceCreationHelper

@@ -19,6 +19,7 @@
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -216,88 +217,13 @@ public:
 
   API::MatrixWorkspace_sptr createSNAPLiteInstrument(const std::string &groupDetectorsBy) {
     const std::string WS_IN("SNAP_Scratch");
-    // Use lite instrument based on one valid starting 2018-05-01
-    const std::string IDF_FILE("SNAPLite_Definition.xml");
-    //    const std::string IDF_FILE("SNAP_Definition.xml");
-
-    // Create empty instrument
-    LoadEmptyInstrument loadEmptyInstr;
-    loadEmptyInstr.initialize();
-    loadEmptyInstr.setProperty("Filename", IDF_FILE);
-    loadEmptyInstr.setProperty("OutputWorkspace", WS_IN);
-
-    loadEmptyInstr.execute();
-    if (!loadEmptyInstr.isExecuted())
-      throw std::runtime_error("Failed to execute LoadEmptyInstrument");
-
-    // add logs - values taken from SNAP_57514
-    // for some reason, the units aren't in the logs
-    { // reduce variable scope
-      TimeSeriesProperty<double> *ang1 = new TimeSeriesProperty<double>("det_arc1");
-      ang1->addValue(DateAndTime(0), -65.3);
-      TimeSeriesProperty<double> *ang2 = new TimeSeriesProperty<double>("det_arc2");
-      ang2->addValue(DateAndTime(0), 104.95);
-      TimeSeriesProperty<double> *len1 = new TimeSeriesProperty<double>("det_lin1");
-      len1->addValue(DateAndTime(0), 0.045);
-      TimeSeriesProperty<double> *len2 = new TimeSeriesProperty<double>("det_lin2");
-      len2->addValue(DateAndTime(0), 0.043);
-
-      MatrixWorkspace_sptr wsIn =
-          std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(WS_IN));
-      wsIn->mutableRun().addProperty(ang1);
-      wsIn->mutableRun().addProperty(ang2);
-      wsIn->mutableRun().addProperty(len1);
-      wsIn->mutableRun().addProperty(len2);
-
-      // reload instrument so the logs are used
-      LoadInstrument loadInstr;
-      loadInstr.initialize();
-      loadInstr.setProperty("Workspace", WS_IN);
-      loadInstr.setProperty("Filename", IDF_FILE);
-      loadInstr.setProperty("MonitorList", "-2--1");
-      loadInstr.setProperty("RewriteSpectraMap", "False");
-      loadInstr.execute();
-      if (!loadInstr.isExecuted())
-        throw std::runtime_error("Failed to execute LoadInstrument");
-
-      // set the units so DiffractionFocussing will do its job
-      auto xAxis = wsIn->getAxis(0);
-      xAxis->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    }
-
-    const std::string WS_GRP = "SNAP_group" + groupDetectorsBy;
     if (groupDetectorsBy == "bank" || groupDetectorsBy == "Column") {
-      CreateGroupingWorkspace groupAlg;
-      groupAlg.initialize();
-      groupAlg.setProperty("InputWorkspace", WS_IN);
-      groupAlg.setProperty("GroupDetectorsBy", groupDetectorsBy);
-      groupAlg.setProperty("OutputWorkspace", WS_GRP);
-      groupAlg.execute();
-      if (!groupAlg.isExecuted())
-        throw std::runtime_error("Failed to execute CreateGroupingWorkspace");
+      return WorkspaceCreationHelper::createFocusedSNAPLiteInstrument(WS_IN, "CreateGroupingWorkspace",
+                                                                      groupDetectorsBy);
     } else {
       // assume groupDetectorsBy is a grouping filename
-      LoadDetectorsGroupingFile groupAlg;
-      groupAlg.initialize();
-      groupAlg.setProperty("InputWorkspace", WS_IN);
-      groupAlg.setProperty("InputFile", groupDetectorsBy);
-      groupAlg.setProperty("OutputWorkspace", WS_GRP);
-      groupAlg.execute();
-      if (!groupAlg.isExecuted())
-        throw std::runtime_error("Failed to execute CreateGroupingWorkspace");
+      return WorkspaceCreationHelper::createFocusedSNAPLiteInstrument(WS_IN, "LoadDetectorsGroupingFile",
+                                                                      groupDetectorsBy);
     }
-
-    DiffractionFocussing2 focusAlg;
-    focusAlg.initialize();
-    focusAlg.setProperty("InputWorkspace", WS_IN);
-    focusAlg.setProperty("OutputWorkspace", WS_IN);
-    focusAlg.setProperty("GroupingWorkspace", WS_GRP);
-    focusAlg.execute();
-    if (!focusAlg.isExecuted())
-      throw std::runtime_error("Failed to execute DiffractionFocussing");
-
-    MatrixWorkspace_sptr ws =
-        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(WS_IN));
-    return ws;
   }
 };

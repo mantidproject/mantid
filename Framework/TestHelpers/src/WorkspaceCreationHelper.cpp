@@ -18,12 +18,14 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -1308,4 +1310,94 @@ Mantid::DataObjects::Workspace2D_sptr create2DWorkspace123WithMaskedBin(int numH
   ws->flagMasked(maskedWorkspaceIndex, maskedBinIndex);
   return ws;
 }
+
+MatrixWorkspace_sptr createSNAPLiteInstrument(const std::string &wkspName, const double ang1, const double ang2) {
+  // Use lite instrument based on one valid starting 2018-05-01
+  const std::string IDF_FILE("SNAPLite_Definition.xml");
+
+  // Create empty instrument
+  auto loadEmptyInstr = AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument");
+  loadEmptyInstr->initialize();
+  loadEmptyInstr->setProperty("Filename", IDF_FILE);
+  loadEmptyInstr->setProperty("OutputWorkspace", wkspName);
+
+  loadEmptyInstr->execute();
+  if (!loadEmptyInstr->isExecuted())
+    throw std::runtime_error("Failed to execute LoadEmptyInstrument");
+
+  // add logs
+  // for some reason, the units aren't in the logs
+  TimeSeriesProperty<double> *ang1Prop = new TimeSeriesProperty<double>("det_arc1");
+  ang1Prop->addValue(DateAndTime(0), ang1);
+  TimeSeriesProperty<double> *ang2Prop = new TimeSeriesProperty<double>("det_arc2");
+  ang2Prop->addValue(DateAndTime(0), ang2);
+  TimeSeriesProperty<double> *len1Prop = new TimeSeriesProperty<double>("det_lin1");
+  len1Prop->addValue(DateAndTime(0), 0.045);
+  TimeSeriesProperty<double> *len2Prop = new TimeSeriesProperty<double>("det_lin2");
+  len2Prop->addValue(DateAndTime(0), 0.043);
+
+  MatrixWorkspace_sptr wsIn =
+      std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wkspName));
+  wsIn->mutableRun().addProperty(ang1Prop);
+  wsIn->mutableRun().addProperty(ang2Prop);
+  wsIn->mutableRun().addProperty(len1Prop);
+  wsIn->mutableRun().addProperty(len2Prop);
+
+  // reload instrument so the logs are used
+  auto loadInstr = AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
+  loadInstr->initialize();
+  loadInstr->setProperty("Workspace", wkspName);
+  loadInstr->setProperty("Filename", IDF_FILE);
+  loadInstr->setProperty("RewriteSpectraMap", "False");
+  loadInstr->execute();
+  if (!loadInstr->isExecuted())
+    throw std::runtime_error("Failed to execute LoadInstrument");
+
+  // set the units so DiffractionFocussing will do its job
+  auto xAxis = wsIn->getAxis(0);
+  xAxis->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+
+  wsIn = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wkspName));
+  return wsIn;
+}
+
+MatrixWorkspace_sptr createFocusedSNAPLiteInstrument(const std::string &wkspName, const std::string &groupingAlg,
+                                                     const std::string &groupingDescr, const double ang1,
+                                                     const double ang2) {
+  const std::string GROUP_WS_NAME = "tmpGroupingWorkspace_" + groupingAlg + "_" + groupingDescr;
+
+  // create the full instrument
+  MatrixWorkspace_sptr ws = WorkspaceCreationHelper::createSNAPLiteInstrument(wkspName, ang1, ang2);
+
+  // create the groupingworkspace
+  auto createGroupingAlg = AlgorithmManager::Instance().createUnmanaged(groupingAlg);
+  createGroupingAlg->initialize();
+  createGroupingAlg->setProperty("OutputWorkspace", GROUP_WS_NAME);
+  if (groupingAlg == "CreateGroupingWorkspace") {
+    createGroupingAlg->setProperty("InputWorkspace", ws);
+    createGroupingAlg->setProperty("GroupDetectorsBy", groupingDescr);
+  } else if (groupingAlg == "LoadDetectorsGroupingFile") {
+    createGroupingAlg->setProperty("InputWorkspace", ws);
+    createGroupingAlg->setProperty("InputFile", groupingDescr);
+  } else {
+    throw std::runtime_error("Do not know how to create grouping using \"" + groupingAlg + "\" algorithm");
+  }
+  createGroupingAlg->execute();
+  if (!createGroupingAlg->isExecuted())
+    throw std::runtime_error("Failed to execute CreateGroupingWorkspace");
+
+  // focus the data
+  auto focusAlg = AlgorithmManager::Instance().createUnmanaged("DiffractionFocussing");
+  focusAlg->initialize();
+  focusAlg->setProperty("InputWorkspace", wkspName);
+  focusAlg->setProperty("OutputWorkspace", wkspName);
+  focusAlg->setProperty("GroupingWorkspace", GROUP_WS_NAME);
+  focusAlg->execute();
+  AnalysisDataService::Instance().remove(GROUP_WS_NAME); // delete the grouping workspace no matter what happened
+  if (!focusAlg->isExecuted())
+    throw std::runtime_error("Failed to execute DiffractionFocussing");
+
+  return std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wkspName));
+}
+
 } // namespace WorkspaceCreationHelper
