@@ -39,7 +39,6 @@ public:
   double getYMin() const { return m_yPosMin; }
   double getYMax() const { return m_yPosMax; }
 
-  void setPosition(const double x, const double y);
   void setCenter(const double x, const double y);
   void setBounds(const double xMin, const double xMax, const double yMin, const double yMax);
 
@@ -48,15 +47,16 @@ public:
   double calculateRadiusY() const;
 
   void initBoundingBox();
-  void updateBoundingBox(WorkspaceBoundingBox &previousBoundingBox);
-  bool containsPoint(double x, double y);
+  void updateBoundingBox();
+  bool symmetricRegionContainsPoint(double x, double y);
   void normalizePosition(const double totalCounts);
-  void updateMinMax(const std::size_t index);
 
 private:
   Kernel::V3D position(const std::size_t index) const;
+  void resetIntermediatePosition();
   double countsValue(const std::size_t index) const;
   bool isValidIndex(const std::size_t index) const;
+  void updateMinMax(const std::size_t index);
   bool includeInIntegration(const std::size_t index);
   bool includeInIntegration(const Kernel::V3D &position);
   double updatePositionAndReturnCount(const std::size_t index);
@@ -65,14 +65,20 @@ private:
   std::size_t m_numSpectra;
   double m_beamRadiusSq;
   bool m_ignoreDirectBeam;
-  double m_xPos{0};
-  double m_yPos{0};
+  double m_xPos{0}; // intermediate value
+  double m_yPos{0}; // intermediate value
   double m_centerXPos{0};
   double m_centerYPos{0};
+  // overall range to consider
   double m_xPosMin{0};
   double m_xPosMax{0};
   double m_yPosMin{0};
   double m_yPosMax{0};
+  // range for current search
+  double m_xBoxMin{0};
+  double m_xBoxMax{0};
+  double m_yBoxMin{0};
+  double m_yBoxMax{0};
 };
 
 } // namespace Algorithms

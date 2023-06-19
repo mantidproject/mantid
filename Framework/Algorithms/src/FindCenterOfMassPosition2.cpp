@@ -82,10 +82,6 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
   boundingBox.setCenter(centerX, centerY);
   boundingBox.initBoundingBox();
 
-  // Starting values for the bounding box and the center
-  WorkspaceBoundingBox previousBoundingBox;
-  previousBoundingBox.setBounds(0., 0., 0., 0.);
-
   // Initialize book-keeping
   // distance between previous and current beam center
   double distance = std::numeric_limits<double>::max();
@@ -114,8 +110,7 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
     const auto oldCenterX = boundingBox.getX();
     const auto oldCenterY = boundingBox.getY();
     boundingBox.setCenter(oldCenterX, oldCenterY);
-    previousBoundingBox.setBounds(oldCenterX - radiusX, oldCenterX + radiusX, oldCenterY - radiusY,
-                                  oldCenterY + radiusY);
+    boundingBox.setBounds(oldCenterX - radiusX, oldCenterX + radiusX, oldCenterY - radiusY, oldCenterY + radiusY);
 
     // Check to see if we have the same result
     // as the previous iteration
@@ -141,11 +136,12 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
     distancePrevious = distance;
 
     // Count histogram for normalization
-    boundingBox.setPosition(0, 0);
-    boundingBox.updateBoundingBox(previousBoundingBox);
+    boundingBox.updateBoundingBox();
 
     progress.report("Find Beam Center");
   }
+
+  // get the final result
   centerX = boundingBox.getCenterX();
   centerY = boundingBox.getCenterY();
 }
