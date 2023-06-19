@@ -71,6 +71,10 @@ gsl:
 libcxx:
   - <16
 
+# v0.3.23 causes a hang on osx for some systemtests
+libopenblas:
+  - '!=0.3.23'
+
 # 8.2 causing segfaults in jupyter unit tests and doc builds.
 readline:
   - <8.2
