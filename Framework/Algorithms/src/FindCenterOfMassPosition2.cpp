@@ -78,15 +78,13 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
   // _centered_ on the latest center position are considered. At each
   // iteration we will recompute the bounding box, and we will make
   // it as large as possible. The largest box is defined in:
-  WorkspaceBoundingBox boundingBox(inputWS, beamRadius, !includeDirectBeam);
-  boundingBox.setCenterPrev(centerX, centerY);
-  boundingBox.initBoundingBox();
+  WorkspaceBoundingBox boundingBox(inputWS, beamRadius, !includeDirectBeam, centerX, centerY);
 
   // Initialize book-keeping
   // distance between previous and current beam center
-  double distance = std::numeric_limits<double>::max();
+  double distanceFromPrevious = std::numeric_limits<double>::max();
   // previous distance between previous and current beam center
-  double distancePrevious = std::numeric_limits<double>::max();
+  double distanceFromPreviousPrevious = std::numeric_limits<double>::max();
 
   int totalLocalMinima = 0;
   int totalIterations = 0;
@@ -94,10 +92,10 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
 
   // Find center of mass and iterate until we converge
   // to within the tolerance specified in meters
-  while (distance > tolerance) {
+  while (distanceFromPrevious > tolerance) {
     // Normalize output to find center of mass position
     // Compute the distance to the previous iteration
-    distance = boundingBox.calculateDistance();
+    distanceFromPrevious = boundingBox.distanceFromPrevious();
 
     // skip out early if the center found is within the ignore region
     if (boundingBox.centerOfMassWithinBeamCenter()) {
@@ -110,7 +108,7 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
 
     // Check to see if we have the same result
     // as the previous iteration
-    if (almost_equals(distance, distancePrevious)) {
+    if (almost_equals(distanceFromPrevious, distanceFromPreviousPrevious)) {
       totalLocalMinima++;
     } else {
       totalLocalMinima = 0;
@@ -129,10 +127,10 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
       break;
     }
 
-    distancePrevious = distance;
+    distanceFromPreviousPrevious = distanceFromPrevious;
 
     // Count histogram for normalization
-    boundingBox.updateBoundingBox();
+    boundingBox.findNewCenterPosition();
 
     progress.report("Find Beam Center");
   }

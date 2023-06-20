@@ -25,24 +25,22 @@ Kernel::Logger g_log("WorkspaceBoundingBox");
 class WorkspaceBoundingBox {
 public:
   WorkspaceBoundingBox(const API::MatrixWorkspace_const_sptr &workspace, const double beamRadius,
-                       const bool ignoreDirectBeam);
+                       const bool ignoreDirectBeam, const double cenX, const double cenY);
   WorkspaceBoundingBox();
   ~WorkspaceBoundingBox();
 
   double getCenterX() const { return m_centerXPosPrev; }
   double getCenterY() const { return m_centerYPosPrev; }
 
-  void setCenterPrev(const double x, const double y);
-
   bool centerOfMassWithinBeamCenter();
   void prepareCenterCalculation();
 
-  double calculateDistance() const;
+  double distanceFromPrevious() const;
 
-  void initBoundingBox();
-  void updateBoundingBox();
+  void findNewCenterPosition();
 
 private:
+  void initOverallRangeAndFindFirstCenter();
   Kernel::V3D position(const std::size_t index) const;
   void resetIntermediatePosition();
   double countsValue(const std::size_t index) const;
@@ -51,6 +49,7 @@ private:
   bool includeInIntegration(const std::size_t index);
   bool includeInIntegration(const Kernel::V3D &position);
   bool symmetricRegionContainsPoint(double x, double y);
+  void setCenterPrev(const double x, const double y);
   void setBounds(const double xMin, const double xMax, const double yMin, const double yMax);
   void normalizePosition(const double totalCounts);
   double updatePositionAndReturnCount(const std::size_t index);
@@ -61,8 +60,8 @@ private:
   std::size_t m_numSpectra;
   double m_beamRadiusSq;
   bool m_ignoreDirectBeam;
-  double m_centerXPosCurr{0}; // intermediate value
-  double m_centerYPosCurr{0}; // intermediate value
+  double m_centerXPosCurr{0};
+  double m_centerYPosCurr{0};
   double m_centerXPosPrev{0};
   double m_centerYPosPrev{0};
   // overall range to consider
