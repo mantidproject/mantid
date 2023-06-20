@@ -29,27 +29,18 @@ public:
   WorkspaceBoundingBox();
   ~WorkspaceBoundingBox();
 
-  API::MatrixWorkspace_const_sptr getWorkspace() { return m_workspace; }
-  double getX() const { return m_centerXPosCurr; }
-  double getY() const { return m_centerYPosCurr; }
   double getCenterX() const { return m_centerXPosPrev; }
   double getCenterY() const { return m_centerYPosPrev; }
-  double getXMin() const { return m_xPosMin; }
-  double getXMax() const { return m_xPosMax; }
-  double getYMin() const { return m_yPosMin; }
-  double getYMax() const { return m_yPosMax; }
 
-  void setCenter(const double x, const double y);
-  void setBounds(const double xMin, const double xMax, const double yMin, const double yMax);
+  void setCenterPrev(const double x, const double y);
+
+  bool centerOfMassWithinBeamCenter();
+  void prepareCenterCalculation();
 
   double calculateDistance() const;
-  double calculateRadiusX() const;
-  double calculateRadiusY() const;
 
   void initBoundingBox();
   void updateBoundingBox();
-  bool symmetricRegionContainsPoint(double x, double y);
-  void normalizePosition(const double totalCounts);
 
 private:
   Kernel::V3D position(const std::size_t index) const;
@@ -59,7 +50,12 @@ private:
   void updateMinMax(const std::size_t index);
   bool includeInIntegration(const std::size_t index);
   bool includeInIntegration(const Kernel::V3D &position);
+  bool symmetricRegionContainsPoint(double x, double y);
+  void setBounds(const double xMin, const double xMax, const double yMin, const double yMax);
+  void normalizePosition(const double totalCounts);
   double updatePositionAndReturnCount(const std::size_t index);
+  double calculateRadiusX() const;
+  double calculateRadiusY() const;
   API::MatrixWorkspace_const_sptr m_workspace;
   const API::SpectrumInfo *m_spectrumInfo;
   std::size_t m_numSpectra;

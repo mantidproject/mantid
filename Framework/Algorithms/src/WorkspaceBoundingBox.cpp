@@ -55,7 +55,7 @@ void WorkspaceBoundingBox::updateBoundingBox() {
   this->resetIntermediatePosition();
   double totalCount = 0;
 
-  const auto &spectrumInfo = getWorkspace()->spectrumInfo();
+  const auto &spectrumInfo = m_workspace->spectrumInfo();
   for (std::size_t i = 0; i < m_numSpectra; i++) {
     if (!isValidIndex(i))
       continue;
@@ -78,7 +78,7 @@ void WorkspaceBoundingBox::resetIntermediatePosition() {
   this->m_centerYPosCurr = 0.;
 }
 
-void WorkspaceBoundingBox::setCenter(const double x, const double y) {
+void WorkspaceBoundingBox::setCenterPrev(const double x, const double y) {
   this->m_centerXPosPrev = x;
   this->m_centerYPosPrev = y;
 }
@@ -172,6 +172,32 @@ double WorkspaceBoundingBox::calculateDistance() const {
   const auto xExtent = (m_centerXPosPrev - m_centerXPosCurr);
   const auto yExtent = (m_centerYPosPrev - m_centerYPosCurr);
   return sqrt(xExtent * xExtent + yExtent * yExtent);
+}
+
+/**
+ * This only has effect if the integral is ignoring the beam center as a whole
+ */
+bool WorkspaceBoundingBox::centerOfMassWithinBeamCenter() {
+  if (m_ignoreDirectBeam) {
+    const double radiusX = this->calculateRadiusX();
+    const double radiusY = this->calculateRadiusY();
+    if (radiusX * radiusX <= m_beamRadiusSq || radiusY * radiusY <= m_beamRadiusSq) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Copy the current center to the previous and update the x/y range for overall integration
+ */
+void WorkspaceBoundingBox::prepareCenterCalculation() {
+  this->setCenterPrev(m_centerXPosCurr, m_centerYPosCurr);
+
+  const double radiusX = this->calculateRadiusX();
+  const double radiusY = this->calculateRadiusY();
+  this->setBounds(m_centerXPosCurr - radiusX, m_centerXPosCurr + radiusX, m_centerYPosCurr - radiusY,
+                  m_centerYPosCurr + radiusY);
 }
 
 double WorkspaceBoundingBox::calculateRadiusX() const {

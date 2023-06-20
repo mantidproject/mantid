@@ -79,7 +79,7 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
   // iteration we will recompute the bounding box, and we will make
   // it as large as possible. The largest box is defined in:
   WorkspaceBoundingBox boundingBox(inputWS, beamRadius, !includeDirectBeam);
-  boundingBox.setCenter(centerX, centerY);
+  boundingBox.setCenterPrev(centerX, centerY);
   boundingBox.initBoundingBox();
 
   // Initialize book-keeping
@@ -98,19 +98,15 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
     // Normalize output to find center of mass position
     // Compute the distance to the previous iteration
     distance = boundingBox.calculateDistance();
-    // Recenter around new mass position
-    const double radiusX = boundingBox.calculateRadiusX();
-    const double radiusY = boundingBox.calculateRadiusY();
 
-    if (!includeDirectBeam && (radiusX <= beamRadius || radiusY <= beamRadius)) {
+    // skip out early if the center found is within the ignore region
+    if (boundingBox.centerOfMassWithinBeamCenter()) {
       g_log.error("Center of mass falls within the beam center area: stopping here");
       break;
     }
 
-    const auto oldCenterX = boundingBox.getX();
-    const auto oldCenterY = boundingBox.getY();
-    boundingBox.setCenter(oldCenterX, oldCenterY);
-    boundingBox.setBounds(oldCenterX - radiusX, oldCenterX + radiusX, oldCenterY - radiusY, oldCenterY + radiusY);
+    // Recenter around new mass position
+    boundingBox.prepareCenterCalculation();
 
     // Check to see if we have the same result
     // as the previous iteration
