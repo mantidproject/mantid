@@ -1,1 +1,0 @@
-- The comments are no longer empty when loading the newest version of the nxs file.

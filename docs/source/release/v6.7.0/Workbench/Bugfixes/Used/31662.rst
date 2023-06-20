@@ -1,1 +1,0 @@
-- Removing a function from the fitting widget will now remove any ties involving that function and update ties, as function names may change. Before, this was happening behind the scenes but now the GUI updates to reflect that.

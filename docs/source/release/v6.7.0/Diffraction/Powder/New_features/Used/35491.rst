@@ -1,1 +1,0 @@
-- Additional, optional, source terms added to the :ref:`EstimateResolutionDiffraction <algm-EstimateResolutionDiffraction>`. For instruments with small detector pixels (e.g. SNAP), the size of the source is the overwhelming contributor to the resolution calculation.

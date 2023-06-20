@@ -1,9 +1,0 @@
-- The weighting of quantum orders in Abins and Abins2D has been
-  corrected. The previous behaviour led to:
-  - underestimation of orders 3+ (generally comprising the "phonon
-    wing") when using autoconvolution with QuantumOrderEvents=2
-  - exaggeration of order 2 (but with correct orders 3+) when using
-    autoconvolution with QuantumOrderEvents=1
-
-  With this bugfix in place the magnitude of order 2 is very similar whether
-  calculated analytically or by convolution.

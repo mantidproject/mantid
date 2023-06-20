@@ -1,1 +1,0 @@
-- :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` corrected issue where run end time was being determined incorrectly.

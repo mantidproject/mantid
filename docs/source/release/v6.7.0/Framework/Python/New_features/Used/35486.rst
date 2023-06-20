@@ -1,4 +1,0 @@
-* exposed the following getter methods to ``GroupingWorkspace``:
-  * ``getGroupIDs()``
-  * ``getTotalGroups()``
-  * ``getDetectorIDsOfGroup()``

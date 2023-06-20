@@ -1,1 +1,0 @@
-- The slice viewer will now close if the original workspace of the workspace it is showing is deleted.

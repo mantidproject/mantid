@@ -9,7 +9,7 @@ Event Filtering
 ---------------
 
 During the v6.7.0 development cycle, there were major changes to the code underlying event filtering that was originally designed `here <https://github.com/mantidproject/mantid/issues/34794>`_.
-The main changes to mantid are as follows:
+The main changes to Mantid are as follows:
 
 - A ``TimeROI`` object that contains a list of use and ignore regions in time. The times are ``[inclusive, exclusive)``.
 - When filtering/splitting logs in the ``Run`` object, the logs are copied as is and a new ``TimeROI`` object is set on the ``Run``. Values that are active during an ROI are kept, as are ones before/after each ROI. The main change is that logs no longer have fake values to mimic the filtering/splitting.
@@ -30,7 +30,7 @@ New features
 - The :ref:`SplineBackground <algm-SplineBackground>` algorithm is now able to fit multiple spectra in a workspace instead of a single one.
 - The beta test warning has been removed from the :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` algorithm.
 - The performance of the :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` algorithm has been improved on elastic instruments with large numbers of bins.
-- ``PyCIFRW`` has been added as a runtime dependency of the mantid conda package so users no longer have to install it themselves to run the :ref:`LoadCIF <algm-LoadCIF>` algorithm.
+- ``PyCIFRW`` has been added as a runtime dependency of the Mantid conda package so users no longer have to install it themselves to run the :ref:`LoadCIF <algm-LoadCIF>` algorithm.
 - :ref:`CrossCorrelate <algm-CrossCorrelate>` now accepts either a list of spectrum IDs as input, or min and max spectrum IDs.
 
 Bugfixes
@@ -42,9 +42,6 @@ Bugfixes
 
 Beamline
 --------
-
-New features
-############
 
 
 Bugfixes
@@ -63,7 +60,8 @@ New features
 Bugfixes
 ############
 - Fixed a bug that meant that when the workspace attribute of a function was changed (e.g. resolution or tabulated function) in a GUI, the function was not updated. This would lead to a crash as Mantid believed that the option was invalid.
-
+- Fixed a bug that prevented the :ref:`UserFunction <func-UserFunction>` from being added to a composite function within custom interfaces.
+- Fixed a memory leak in the wrapper for gsl derivative calculations.
 
 Data Objects
 ------------
@@ -80,10 +78,6 @@ New features
 
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` will now save ``GroupingWorkspace`` objects.
 
-Bugfixes
-########
-
-
 
 Geometry
 --------
@@ -91,9 +85,6 @@ Geometry
 New features
 ############
 - ``XMLInstrumentParameter`` now includes ``TimeROI`` in the calculation of instrument parameters.
-
-Bugfixes
-############
 
 
 

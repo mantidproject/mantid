@@ -27,7 +27,7 @@ Bugfixes
 - Fixed an issue in :ref:`DrILL <DrILL-ref>` with loading rundexes related to an issue in processing the export algorithm name and the extension simultaneously.
 - The performance of the ``Show Sample Shape`` window has been improved for workspaces with complex CSG shapes for either the sample or the container.
 - Fixed a bug where opening the plot options for a script-created plot with error bars, would crash Workbench.
-- Default to monospace font on non-ubuntu linuxes
+- Default to monospace font on non-ubuntu linuxes.
 
 
 InstrumentViewer
@@ -40,6 +40,11 @@ New features
 - A new option has been added to the ``Display Settings`` drop-down on the Instrument Viewer :ref:`Render tab <instrumentviewer_render_tab>` to control whether the aspect ratios of detector banks are preserved in the 2D views (cylindrical, spherical, side by side), regardless of the dimensions of the plot area.
 - The peak overlay feature in the :ref:`Instrument Viewer <InstrumentViewer>` now works in the side-by-side view.
 
+.. image:: ../../images/6_7_release/MantidWorkbench/ImprovedSideBySideInstrumentViewSXD.png
+    :align: center
+    :width: 700
+    :alt: Side-by-side view of SXD instrument as ISIS with peaks overlaid.
+
 Bugfixes
 ############
 - Fixed bug with the :ref:`Instrument Viewer <InstrumentViewer>` on retina screens where the image would only fill a quarter of the available space.
@@ -47,9 +52,6 @@ Bugfixes
 
 SliceViewer
 -----------
-
-New features
-############
 
 
 Bugfixes

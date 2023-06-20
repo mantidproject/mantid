@@ -1,2 +1,0 @@
-- Fixed a bug that meant when the workspace attribute of a function was changed (e.g. resolution or tabulated function) the function was not updated.
-This would lead to a crash as Mantid believed that the option was invalid.

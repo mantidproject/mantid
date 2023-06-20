@@ -1,1 +1,0 @@
-- It is now possible to load and plot multiple phases in the GSASII tab.

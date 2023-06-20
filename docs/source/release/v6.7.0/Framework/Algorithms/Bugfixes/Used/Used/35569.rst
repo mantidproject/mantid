@@ -1,1 +1,0 @@
-- :ref:`FilterByTime <algm-FilterByTime>` corrected issue where filter stop time was being determined incorrectly.
