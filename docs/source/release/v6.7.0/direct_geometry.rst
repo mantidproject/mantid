@@ -37,16 +37,10 @@ New features
 - ``getSpectrum``, from the :ref:`Crystal Field Python interface`, now allows specification of the range for x values.
 - Added a function to print eigenvectors for a :ref:`CrystalField <Crystal Field Python Interface>` object in human readable form.
 
-Bugfixes
-############
-
 
 
 MSlice
 ------
-
-New features
-############
 
 
 Bugfixes
@@ -73,8 +67,6 @@ New features
 - ``Read All`` button is removed.
 - Functionality of the red asterisk next to the ``Data Directory`` edit box is improved.
 
-Bugfixes
-############
 
 
 :ref:`Release 6.7.0 <v6.7.0>`

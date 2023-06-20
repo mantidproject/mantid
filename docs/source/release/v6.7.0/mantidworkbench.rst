@@ -53,9 +53,6 @@ Bugfixes
 SliceViewer
 -----------
 
-New features
-############
-
 
 Bugfixes
 ############

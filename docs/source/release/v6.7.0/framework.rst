@@ -43,9 +43,6 @@ Bugfixes
 Beamline
 --------
 
-New features
-############
-
 
 Bugfixes
 ########
@@ -81,10 +78,6 @@ New features
 
 - :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` will now save ``GroupingWorkspace`` objects.
 
-Bugfixes
-########
-
-
 
 Geometry
 --------
@@ -92,9 +85,6 @@ Geometry
 New features
 ############
 - ``XMLInstrumentParameter`` now includes ``TimeROI`` in the calculation of instrument parameters.
-
-Bugfixes
-############
 
 
 
