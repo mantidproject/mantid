@@ -142,10 +142,9 @@ public:
   }
 
   void testCG3Data() {
-    const double CENTER_TOL{0.00125}; // algorithm default
-    // values estimated by eye
-    const double X_EXP{-0.0078};
-    const double Y_EXP{-0.0143};
+    // expected center is approximately equal to a gauss that represents the data summed in x or y
+    const double X_EXP{-0.01326};
+    const double Y_EXP{-0.01330};
     const std::string IN_WKSP_NAME("testCG3DataInputWorkspace");
 
     Mantid::Algorithms::FindCenterOfMassPosition2 center;
@@ -164,13 +163,12 @@ public:
     center.setPropertyValue("Output", outputWSname);
     center.setProperty("CenterX", 0.);
     center.setProperty("CenterY", 0.);
-    center.setProperty("Tolerance", CENTER_TOL);
-    center.setProperty("BeamRadius", 0.0155); // meters
+    center.setProperty("IntegrationRadius", 0.010); // meters
 
     TS_ASSERT_THROWS_NOTHING(center.execute())
     TS_ASSERT(center.isExecuted())
 
-    validateCenterAndRemoveTableWS(outputWSname, X_EXP, Y_EXP, 0.5 * CENTER_TOL);
+    validateCenterAndRemoveTableWS(outputWSname, X_EXP, Y_EXP, 0.0001);
 
     AnalysisDataService::Instance().remove(IN_WKSP_NAME);
   }
@@ -205,7 +203,7 @@ public:
     TS_ASSERT(center.isExecuted())
 
     // Check that the position is the same as obtained with the HFIR code
-    validateCenterAndRemoveTableWS(outputWS, -0.40658, 0.0090835, 0.0001);
+    validateCenterAndRemoveTableWS(outputWS, -0.00658, 0.0090835, 0.0001);
 
     // NOTE: Version 1 (from original IGOR HFIR code) computes everything in
     // pixels, where

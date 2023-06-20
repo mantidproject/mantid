@@ -7,9 +7,11 @@ namespace {
 constexpr int HISTOGRAM_INDEX{0};
 }
 
-WorkspaceBoundingBox::WorkspaceBoundingBox(const API::MatrixWorkspace_const_sptr &workspace, const double beamRadius,
+WorkspaceBoundingBox::WorkspaceBoundingBox(const API::MatrixWorkspace_const_sptr &workspace,
+                                           const double integrationRadius, const double beamRadius,
                                            const bool ignoreDirectBeam, const double cenX, const double cenY)
-    : m_workspace(workspace), m_beamRadiusSq(beamRadius * beamRadius), m_ignoreDirectBeam(ignoreDirectBeam) {
+    : m_workspace(workspace), m_integrationRadiusSq(integrationRadius * integrationRadius),
+      m_beamRadiusSq(beamRadius * beamRadius), m_ignoreDirectBeam(ignoreDirectBeam) {
   if (m_workspace->y(0).size() != 1)
     throw std::runtime_error("This object only works with integrated workspaces");
 
@@ -18,10 +20,6 @@ WorkspaceBoundingBox::WorkspaceBoundingBox(const API::MatrixWorkspace_const_sptr
 
   this->setCenterPrev(cenX, cenY);
   this->initOverallRangeAndFindFirstCenter();
-}
-
-WorkspaceBoundingBox::WorkspaceBoundingBox() {
-  m_spectrumInfo = nullptr; // certain functionality is not available
 }
 
 WorkspaceBoundingBox::~WorkspaceBoundingBox() = default;
@@ -162,13 +160,16 @@ bool WorkspaceBoundingBox::includeInIntegration(const std::size_t index) {
 }
 
 bool WorkspaceBoundingBox::includeInIntegration(const Kernel::V3D &position) {
-  if (m_ignoreDirectBeam) {
-    const double dx = position.X() - this->m_centerXPosPrev;
-    const double dy = position.Y() - this->m_centerYPosPrev;
+  const double dx = position.X() - this->m_centerXPosPrev;
+  const double dy = position.Y() - this->m_centerYPosPrev;
+  const double distanceFromCenterSq = dx * dx + dy * dy;
 
-    return bool(dx * dx + dy * dy >= m_beamRadiusSq);
+  if (m_ignoreDirectBeam) {
+    if (distanceFromCenterSq < m_beamRadiusSq)
+      return false;
   }
-  return true;
+
+  return bool(distanceFromCenterSq < m_integrationRadiusSq);
 }
 
 double WorkspaceBoundingBox::distanceFromPrevious() const {

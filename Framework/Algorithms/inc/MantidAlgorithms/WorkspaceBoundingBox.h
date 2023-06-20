@@ -24,9 +24,8 @@ Kernel::Logger g_log("WorkspaceBoundingBox");
  */
 class WorkspaceBoundingBox {
 public:
-  WorkspaceBoundingBox(const API::MatrixWorkspace_const_sptr &workspace, const double beamRadius,
-                       const bool ignoreDirectBeam, const double cenX, const double cenY);
-  WorkspaceBoundingBox();
+  WorkspaceBoundingBox(const API::MatrixWorkspace_const_sptr &workspace, const double integrationRadius,
+                       const double beamRadius, const bool ignoreDirectBeam, const double cenX, const double cenY);
   ~WorkspaceBoundingBox();
 
   double getCenterX() const { return m_centerXPosPrev; }
@@ -58,6 +57,7 @@ private:
   API::MatrixWorkspace_const_sptr m_workspace;
   const API::SpectrumInfo *m_spectrumInfo;
   std::size_t m_numSpectra;
+  double m_integrationRadiusSq;
   double m_beamRadiusSq;
   bool m_ignoreDirectBeam;
   double m_centerXPosCurr{0};

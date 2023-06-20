@@ -58,6 +58,9 @@ void FindCenterOfMassPosition2::init() {
                   "Radius of the direct beam area, in meters, used the exclude the beam when calculating "
                   "the center of mass of the scattering pattern. "
                   "This is ignored when DirectBeam=True");
+  declareProperty("IntegrationRadius", EMPTY_DBL(), positiveDouble,
+                  "Integration radius, in meters, used to include when calculating "
+                  "the center of mass of the scattering pattern.");
 }
 
 /** Iterates through spectrum in the input workspace finding the center of mass until
@@ -73,12 +76,14 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
   const double tolerance = getProperty("Tolerance");
   const bool includeDirectBeam = getProperty("DirectBeam");
   const double beamRadius = getProperty("BeamRadius");
+  // when the integration radius isn't set, put the integration radius to 100m which is effectively infinity
+  const double integrationRadius = isDefault("IntegrationRadius") ? 100. : getProperty("IntegrationRadius");
 
   // Define box around center of mass so that only pixels in an area
   // _centered_ on the latest center position are considered. At each
   // iteration we will recompute the bounding box, and we will make
   // it as large as possible. The largest box is defined in:
-  WorkspaceBoundingBox boundingBox(inputWS, beamRadius, !includeDirectBeam, centerX, centerY);
+  WorkspaceBoundingBox boundingBox(inputWS, integrationRadius, beamRadius, !includeDirectBeam, centerX, centerY);
 
   // Initialize book-keeping
   // distance between previous and current beam center
