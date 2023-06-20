@@ -1,1 +1,0 @@
-- Fix bug in estimating TOF window parameters in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`

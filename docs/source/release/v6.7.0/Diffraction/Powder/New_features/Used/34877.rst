@@ -1,1 +1,0 @@
-- For ILL/D2B instrument, only calibrated data are loaded from the nexus file.

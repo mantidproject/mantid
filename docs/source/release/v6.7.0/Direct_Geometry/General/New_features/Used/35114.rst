@@ -1,2 +1,0 @@
-- The ALFView interface executes any algorithms on a background thread to provide a smoother user experience.
-- The ALFView interface is disabled when running an algorithm, and re-enabled when it has finished. The title of the ALFView window is changed to indicate why the interface is disabled.

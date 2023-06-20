@@ -1,1 +1,0 @@
-- The ``Reduction Preview`` tab now correctly uses the values from the ``Experiment Settings`` tab in the final reduction.

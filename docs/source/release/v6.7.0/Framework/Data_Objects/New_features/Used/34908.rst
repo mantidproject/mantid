@@ -1,1 +1,0 @@
-- :ref:`LoadISISNexus <algm-LoadISISNexus>` will now load the notes from the ``.nxs`` file as a comment.

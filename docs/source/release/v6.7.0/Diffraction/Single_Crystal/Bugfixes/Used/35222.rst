@@ -1,1 +1,0 @@
-- Increased number of nearest neighbor detector pixels to search for :ref:`PredictPeaks <algm-PredictPeaks>` that caused some obvious peaks  on detector to be missed.

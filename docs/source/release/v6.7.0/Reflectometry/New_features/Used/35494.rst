@@ -1,1 +1,0 @@
-- The :ref:`algm-ReflectometryISISCalibration` algorithm now calculates and performs individual detector pixel corrections from an input file containing detector IDs and theta offsets.

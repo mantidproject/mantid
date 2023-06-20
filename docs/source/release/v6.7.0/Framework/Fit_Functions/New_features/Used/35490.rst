@@ -1,1 +1,0 @@
-- The A0 paramter in the Redfield function has been removed

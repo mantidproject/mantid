@@ -1,2 +1,0 @@
-- OSIRIS scripts now uses focus function instead of run_diffraction_focusing function to perform the focusing
-- create_vanadium function is added to the OSIRIS object which should be called before the focus function to create the vanadium runs

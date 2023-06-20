@@ -1,1 +1,0 @@
-- :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` will now save ``Groupingworkspace``s.

@@ -1,2 +1,0 @@
-- Fixed the calcuation of direction cosines in :ref:`SaveHKL <algm-SaveHKL>` and :ref:`SaveHKLCW <algm-SaveHKLCW>`
-- Added back in `Peak` method `getDetectorID()` that was removed in previous release associated with `LeanElasticPeak`

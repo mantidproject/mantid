@@ -1,1 +1,0 @@
-- Fixed bug in ``ExtractSpectra`` where X data would be needlessly copied, resulting in increased memory usage.
