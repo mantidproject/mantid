@@ -20,19 +20,23 @@ The position of the beam center :math:`\vec{p}` is given by
 
 
 where :math:`i` runs over all pixels within the largest square detector area centered on the initial guess for the beam center position.
-The initial guess is the center of the detector.
-:math:`I_i` is the detector count for pixel :math:`i`, and :math:`\vec{d}_i` is the pixel coordinates.
+The initial guess is (``CenterX``, ``CenterY``) which defaults to the center of the detector.
+:math:`I_i` is the detector count for pixel :math:`i`, and :math:`\vec{d}_i` is x-y projection of the pixel position.
+The range of pixels considered is limited to be those symmetric (in x and y separately) around the previous step's found beam center.
 The calculation above is repeated iteratively by replacing the initial guess with the position found with the previous iteration.
 The process stops when the difference between the positions found with two consecutive iterations is smaller than ``Tolerance`` in meters.
 
-If ``DirectBeam=False``, the beam center will be found using the scattered beam method.
-The process is identical to the direct beam method, with the only difference being that the pixels within a distance :math:`R` (the beam radius) of the beam center guess are excluded from the calculation.
-The direct beam is thus excluded and only the scattered data is used.
-As an equation, this means that ``DirectBeam=False`` ignores pixels in the region
+The integration range within the symmetric area of the detector can be controlled using ``BeamRadius`` (when ``DirectBeam=False``) and ``IntegrationRadius``.
+When both are in effect the pixels integrated are those that meet the equation
 
 .. math::
 
-   |\vec{d}_i - \vec{p}| < BeamRadius
+   BeamRadius < |\vec{d}_i - \vec{p}| < IntegrationRadius
+
+where :math:`\vec{p}` is the beam center from the previous iteration.
+Again, when ``DirectBeam=True`` is specified, the lower bound is ignored.
+When ``IntegrationRadius`` is not specified, the upper bound is ignored.
+Not specifying any of these three parameters uses all data within the symmetric x/y region.
 
 If the ``Output`` property is set, the beam centre will be placed in a table workspace.
 Otherwise, the result is placed in an ArrayProperty named ``CenterOfMass``.
@@ -47,10 +51,19 @@ Usage
 .. testcode:: ExBeamCenter
 
    # Load your data file
-   workspace = LoadSpice2D('BioSANS_empty_cell.xml')
+   LoadSpice2D('BioSANS_empty_cell.xml', OutputWorkspace='empty_cell')
 
    # Compute the center position, which will be put in a table workspace
-   FindCenterOfMassPosition('workspace', Output='center')
+   center = FindCenterOfMassPosition('empty_cell', Output='center')
+   x, y = center.column(1)
+   print(f"(x, y) = ({x:.4f}, {y:.4f})")
+
+Output:
+
+.. testoutput:: ExBeamCenter
+
+   (x, y) = (-0.0066, 0.0091)
+
 
 .. categories::
 

@@ -177,6 +177,8 @@ public:
    * Test that will load an actual data file and perform the center of mass
    * calculation. This test takes a longer time to execute so we won't include
    * it in the set of unit tests.
+   *
+   * This is a repeat of the usage example with lower resolution
    */
   void test_biosans_empty_cell() {
     const std::string IN_WKSP_NAME("wav");
