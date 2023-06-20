@@ -1,1 +1,0 @@
-- Fixed a bug where Mantid would not open on Windows when a user has non-ascii characters in their username.

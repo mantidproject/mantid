@@ -1,1 +1,0 @@
--  Add Q-Spacing Output for OSIRIS Instrument in Indirect Diffraction UI. The interface now produces three outputs in three units (Q-spacing, D-spacing, and Tof) instead of the previous two (D-spacing and Tof).

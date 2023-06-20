@@ -1,1 +1,0 @@
-- Changed the error message when the Polarization Corrections are set using a Parameter File without the necessary settings defined. The error now explains the required information is missing.

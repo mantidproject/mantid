@@ -23,6 +23,11 @@ Bugfixes
 - Fixed two minor issues in :ref:`algm-ReflectometryILLPreprocess` blocking normalisation to monitor for D17, and normalisation for both Figaro and D17.
 - :ref:`algm-LoadILLReflectometry` can load cycle 231 Figaro data by updating the metadata location of the chopper pair to sample distance.
 - Fixed the labelling of the workspaces output by :ref:`algm-PolarizationCorrectionWildes` which were being inverted, while ensuring the output workspace group order continues to match the documentation.
+- Move the sum banks step from :ref:`algm-ReflectometryISISLoadAndProcess` to :ref:`algm-ReflectometryReductionOneAuto` so that it takes place after flood correction. Also only perform the summing step when a detector ID region has been set.
 - The ``Signal``, ``Transmission``, and ``Background`` ROI selectors on the :ref:`Preview tab <refl_preview>` have been made more visible.
+
+.. image:: ../../images/6_7_release/Reflectometry/refl_preview_ROI_selectors.png
+    :align: center
+    :width: 700
 
 :ref:`Release 6.7.0 <v6.7.0>`

@@ -1,1 +1,0 @@
-- 1D Detectors can now be loaded into and cropped in the preview tab.

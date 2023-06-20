@@ -1,2 +1,0 @@
-- Added new methods to calculate the directions of the reverse incident and scattered beam within `Peak`
-- Added new method to calculate the direction cosine from a provided direction within `OrientedLattice`

@@ -1,1 +1,0 @@
-- Fixed a bug where the Save File input on the Sum Runs tab in the ISIS SANS GUI would stop auto-populating if you simply clicked the input or pressed enter without making any text changes.

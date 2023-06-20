@@ -1,1 +1,0 @@
-- Move the sum banks step from :ref:`algm-ReflectometryISISLoadAndProcess` to :ref:`algm-ReflectometryReductionOneAuto` so that it takes place after flood correction. Also only perform the summing step when a detector ID region has been set.

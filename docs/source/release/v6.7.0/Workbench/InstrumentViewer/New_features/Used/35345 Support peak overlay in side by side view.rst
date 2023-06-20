@@ -1,1 +1,0 @@
-- The peak overlay feature in the instrument viewer now works in the Side by Side view
