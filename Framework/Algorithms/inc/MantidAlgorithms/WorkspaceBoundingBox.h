@@ -30,10 +30,10 @@ public:
   ~WorkspaceBoundingBox();
 
   API::MatrixWorkspace_const_sptr getWorkspace() { return m_workspace; }
-  double getX() const { return m_xPos; }
-  double getY() const { return m_yPos; }
-  double getCenterX() const { return m_centerXPos; }
-  double getCenterY() const { return m_centerYPos; }
+  double getX() const { return m_centerXPosCurr; }
+  double getY() const { return m_centerYPosCurr; }
+  double getCenterX() const { return m_centerXPosPrev; }
+  double getCenterY() const { return m_centerYPosPrev; }
   double getXMin() const { return m_xPosMin; }
   double getXMax() const { return m_xPosMax; }
   double getYMin() const { return m_yPosMin; }
@@ -65,10 +65,10 @@ private:
   std::size_t m_numSpectra;
   double m_beamRadiusSq;
   bool m_ignoreDirectBeam;
-  double m_xPos{0}; // intermediate value
-  double m_yPos{0}; // intermediate value
-  double m_centerXPos{0};
-  double m_centerYPos{0};
+  double m_centerXPosCurr{0}; // intermediate value
+  double m_centerYPosCurr{0}; // intermediate value
+  double m_centerXPosPrev{0};
+  double m_centerYPosPrev{0};
   // overall range to consider
   double m_xPosMin{0};
   double m_xPosMax{0};

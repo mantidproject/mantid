@@ -74,13 +74,13 @@ double WorkspaceBoundingBox::countsValue(const std::size_t index) const {
 }
 
 void WorkspaceBoundingBox::resetIntermediatePosition() {
-  this->m_xPos = 0.;
-  this->m_yPos = 0.;
+  this->m_centerXPosCurr = 0.;
+  this->m_centerYPosCurr = 0.;
 }
 
 void WorkspaceBoundingBox::setCenter(const double x, const double y) {
-  this->m_centerXPos = x;
-  this->m_centerYPos = y;
+  this->m_centerXPosPrev = x;
+  this->m_centerYPosPrev = y;
 }
 
 /**
@@ -128,8 +128,8 @@ double WorkspaceBoundingBox::updatePositionAndReturnCount(const std::size_t inde
   const auto counts = this->countsValue(index);
   const auto &position = this->position(index);
 
-  this->m_xPos += counts * position.X();
-  this->m_yPos += counts * position.Y();
+  this->m_centerXPosCurr += counts * position.X();
+  this->m_centerYPosCurr += counts * position.Y();
 
   return counts;
 }
@@ -160,8 +160,8 @@ bool WorkspaceBoundingBox::includeInIntegration(const std::size_t index) {
 
 bool WorkspaceBoundingBox::includeInIntegration(const Kernel::V3D &position) {
   if (m_ignoreDirectBeam) {
-    const double dx = position.X() - this->m_centerXPos;
-    const double dy = position.Y() - this->m_centerYPos;
+    const double dx = position.X() - this->m_centerXPosPrev;
+    const double dy = position.Y() - this->m_centerYPosPrev;
 
     return bool(dx * dx + dy * dy >= m_beamRadiusSq);
   }
@@ -169,14 +169,18 @@ bool WorkspaceBoundingBox::includeInIntegration(const Kernel::V3D &position) {
 }
 
 double WorkspaceBoundingBox::calculateDistance() const {
-  const auto xExtent = (m_centerXPos - m_xPos);
-  const auto yExtent = (m_centerYPos - m_yPos);
+  const auto xExtent = (m_centerXPosPrev - m_centerXPosCurr);
+  const auto yExtent = (m_centerYPosPrev - m_centerYPosCurr);
   return sqrt(xExtent * xExtent + yExtent * yExtent);
 }
 
-double WorkspaceBoundingBox::calculateRadiusX() const { return std::min((m_xPos - m_xPosMin), (m_xPosMax - m_xPos)); }
+double WorkspaceBoundingBox::calculateRadiusX() const {
+  return std::min((m_centerXPosCurr - m_xPosMin), (m_xPosMax - m_centerXPosCurr));
+}
 
-double WorkspaceBoundingBox::calculateRadiusY() const { return std::min((m_yPos - m_yPosMin), (m_yPosMax - m_yPos)); }
+double WorkspaceBoundingBox::calculateRadiusY() const {
+  return std::min((m_centerYPosCurr - m_yPosMin), (m_yPosMax - m_centerYPosCurr));
+}
 
 /** Perform normalization on x/y coords over given values
  *
@@ -184,8 +188,8 @@ double WorkspaceBoundingBox::calculateRadiusY() const { return std::min((m_yPos 
  *  @param y :: value to normalize member y over
  */
 void WorkspaceBoundingBox::normalizePosition(const double totalCounts) {
-  this->m_xPos /= std::fabs(totalCounts);
-  this->m_yPos /= std::fabs(totalCounts);
+  this->m_centerXPosCurr /= std::fabs(totalCounts);
+  this->m_centerYPosCurr /= std::fabs(totalCounts);
 }
 
 /** Checks if a given x/y coord is within the bounding box
