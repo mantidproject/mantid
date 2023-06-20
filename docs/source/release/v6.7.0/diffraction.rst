@@ -15,7 +15,7 @@ New features
 - It is now possible to provide more than one detector height range in :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>`.
 - The ``InitialMask`` and ``FinalMask`` properties of :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` have been removed.
 - Improvements to :ref:`PEARL powder <isis-powder-diffraction-pearl-ref>` reduction output file and directory naming; ``.gss`` files and TOF and d-spacing ``.xye`` files are now in separate directories.
-- OSIRIS scripts now use a new ``focus`` :ref:`function <focus_osiris_isis-powder-diffraction-ref>` instead of the ``run_diffraction_focusing`` function to perform the focusing. Results should be the same.
+- OSIRIS scripts now use a new :ref:`focus function <focus_osiris_isis-powder-diffraction-ref>` instead of the ``run_diffraction_focusing`` function to perform the focusing. Results should be the same.
 - The :ref:`create_vanadium <create_vanadium_osiris_isis-powder-diffraction-ref>` function has been added to the OSIRIS object which should be called before the ``focus`` function to create the vanadium runs.
 - It is now possible to mask out detectors in the absorption and multiple scattering calculations :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>`, :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>`, and :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>`.
 - New parameter ``MinimumSignalToNoiseRatio`` has been added to the :ref:`FitPeaks <algm-FitPeaks>` and :ref:`PDCalibration <algm-PDCalibration>` algorithms. This will exclude peaks from automated fitting below a threshold signal-to-noise ratio estimated from the data in the fitting window.
