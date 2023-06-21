@@ -75,7 +75,6 @@ private:
 
   API::MatrixWorkspace_sptr m_inputW;
   API::MatrixWorkspace_sptr m_outputW;
-  DataObjects::EventWorkspace_sptr m_inputEW;
   DataObjects::EventWorkspace_sptr m_outputEW;
   API::ITableWorkspace_sptr m_calibrationWS;
   DataObjects::MaskWorkspace_sptr m_maskWS;

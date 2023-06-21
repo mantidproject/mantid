@@ -258,8 +258,8 @@ std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
   }
 
   m_inputW = getProperty(PropertyNames::INPUT_WKSP);
-  m_inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW);
-  if (m_inputEW && m_inputEW->getNumberEvents() <= 0)
+  auto inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW);
+  if (inputEW && inputEW->getNumberEvents() <= 0)
     result[PropertyNames::INPUT_WKSP] = "Empty workspace encounter, possibly due to beam down."
                                         "Please plot the pCharge-time to identify suitable range for "
                                         "re-time-slicing";
@@ -349,7 +349,6 @@ double AlignAndFocusPowder::getVecPropertyFromPmOrSelf(const std::string &name, 
 void AlignAndFocusPowder::exec() {
   // retrieve the properties
   m_inputW = getProperty(PropertyNames::INPUT_WKSP);
-  m_inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW);
   m_instName = m_inputW->getInstrument()->getName();
   try {
     m_instName = Kernel::ConfigService::Instance().getInstrument(m_instName).shortName();
@@ -450,11 +449,11 @@ void AlignAndFocusPowder::exec() {
 
   // Now setup the output workspace
   m_outputW = getProperty(PropertyNames::OUTPUT_WKSP);
-  if (m_inputEW) {
+  if (auto inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW)) {
     // event workspace
     if (m_outputW != m_inputW) {
       // out-of-place: clone the input EventWorkspace
-      m_outputEW = m_inputEW->clone();
+      m_outputEW = inputEW->clone();
       m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
     } else {
       // in-place
@@ -468,23 +467,23 @@ void AlignAndFocusPowder::exec() {
   }
 
   if (m_processLowResTOF) {
-    if (!m_inputEW) {
-      throw std::runtime_error("Input workspace is not EventWorkspace.  It is not supported now.");
-    } else {
+    if (auto inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW)) {
       // Make a brand new EventWorkspace
       m_lowResEW = std::dynamic_pointer_cast<EventWorkspace>(
-          WorkspaceFactory::Instance().create("EventWorkspace", m_inputEW->getNumberHistograms(), 2, 1));
+          WorkspaceFactory::Instance().create("EventWorkspace", inputEW->getNumberHistograms(), 2, 1));
 
       // Cast to the matrixOutputWS and save it
       m_lowResW = std::dynamic_pointer_cast<MatrixWorkspace>(m_lowResEW);
       // m_lowResW->setName(lowreswsname);
+    } else {
+      throw std::runtime_error("Input workspace is not EventWorkspace.  It is not supported now.");
     }
   }
 
   // set up a progress bar with the "correct" number of steps
   m_progress = std::make_unique<Progress>(this, 0., 1., 22);
 
-  if (m_inputEW) {
+  if (auto inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW)) {
     if (compressEventsTolerance > 0.) {
       g_log.information() << "running CompressEvents(Tolerance=" << compressEventsTolerance;
       if (!isEmpty(wallClockTolerance))
@@ -1238,13 +1237,12 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename, const std:
  * @param ws :: any Workspace. Does nothing if not EventWorkspace.
  */
 void AlignAndFocusPowder::doSortEvents(const Mantid::API::Workspace_sptr &ws) {
-  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
-  if (!eventWS)
-    return;
-  Algorithm_sptr alg = this->createChildAlgorithm("SortEvents");
-  alg->setProperty("InputWorkspace", eventWS);
-  alg->setPropertyValue("SortBy", "X Value");
-  alg->executeAsChildAlg();
+  if (auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws)) {
+    Algorithm_sptr alg = this->createChildAlgorithm("SortEvents");
+    alg->setProperty("InputWorkspace", eventWS);
+    alg->setPropertyValue("SortBy", "X Value");
+    alg->executeAsChildAlg();
+  }
 }
 
 } // namespace Mantid::WorkflowAlgorithms
