@@ -833,6 +833,57 @@ reduced chi-squared (since v6.3). The scaling of the covariance matrix in `curve
 
 .. figure:: /images/ScipyCurveFit_Mantid_comparison_LinearFit.png
 
+**Example - Fit two data sets that has nan or infinite values:**
+
+.. code-block:: python
+
+    from mantid.simpleapi import *
+    import numpy as np
+
+    # create data
+    xData=np.linspace(start=0,stop=10,num=22)
+
+    yData=[]
+    for x in xData:
+        yData.append(2.0)
+
+    yData2=[]
+    for x in xData:
+        yData2.append(5.0)
+
+    yData[11] = np.nan
+    yData2[11] = np.inf
+
+    eData = [0.01] * len(xData)
+    eData2 = [0.01] * len(xData)
+
+    # create workspaces
+    input = CreateWorkspace(xData,yData, eData)
+    input2 = CreateWorkspace(xData,yData2, eData2)
+
+    # create function
+    myFunc=';name=FlatBackground,$domains=i,A0=0'
+    multiFunc='composite=MultiDomainFunction,NumDeriv=1'+myFunc+myFunc+";"
+
+    # do fit
+    fit_output = Fit(Function=multiFunc, InputWorkspace=input, WorkspaceIndex=0, \
+                    InputWorkspace_1=input2, WorkspaceIndex_1=0, \
+                    StartX = 0.1, EndX=9.5, StartX_1 = 0.1, EndX_1=9.5,Output='fit',
+                    IgnoreInvalidData=True)
+
+    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
+
+    # print results
+    print("Constant 1: {0:.2f}".format(paramTable.column(1)[0]))
+    print("Constant 2: {0:.2f}".format(paramTable.column(1)[1]))
+
+Output:
+
+.. testoutput:: invalidData
+
+    Constant 1: 2.00
+    Constant 2: 5.00
+
 References
 ----------
 
