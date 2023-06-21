@@ -453,12 +453,9 @@ void AlignAndFocusPowder::exec() {
     // event workspace
     if (m_outputW != m_inputW) {
       // out-of-place: clone the input EventWorkspace
-      m_outputEW = inputEW->clone();
-      m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
-    } else {
-      // in-place
-      m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-    }
+      EventWorkspace_sptr outputEW = inputEW->clone();
+      m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputEW);
+    } // in-place doesn't require anything
   } else {
     // workspace2D
     if (m_outputW != m_inputW) {
@@ -483,24 +480,9 @@ void AlignAndFocusPowder::exec() {
   // set up a progress bar with the "correct" number of steps
   m_progress = std::make_unique<Progress>(this, 0., 1., 22);
 
-  if (auto inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW)) {
+  if (auto outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW)) {
     if (compressEventsTolerance > 0.) {
-      g_log.information() << "running CompressEvents(Tolerance=" << compressEventsTolerance;
-      if (!isEmpty(wallClockTolerance))
-        g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
-      g_log.information() << ") started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
-      API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
-      compressAlg->setProperty("InputWorkspace", m_outputEW);
-      compressAlg->setProperty("OutputWorkspace", m_outputEW);
-      compressAlg->setProperty("OutputWorkspace", m_outputEW);
-      compressAlg->setProperty("Tolerance", compressEventsTolerance);
-      if (!isEmpty(wallClockTolerance)) {
-        compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
-        compressAlg->setPropertyValue("StartTime", getPropertyValue(PropertyNames::COMPRESS_WALL_START));
-      }
-      compressAlg->executeAsChildAlg();
-      m_outputEW = compressAlg->getProperty("OutputWorkspace");
-      m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
+      compressEventsOutputWS(compressEventsTolerance, wallClockTolerance);
     } else {
       g_log.information() << "Not compressing event list\n";
       doSortEvents(m_outputW); // still sort to help some thing out
@@ -531,15 +513,17 @@ void AlignAndFocusPowder::exec() {
     }
     cropAlg->executeAsChildAlg();
     m_outputW = cropAlg->getProperty("OutputWorkspace");
-    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
   // filter the input events if appropriate
   double removePromptPulseWidth = getProperty(PropertyNames::REMOVE_PROMPT_PULSE);
   if (removePromptPulseWidth > 0.) {
-    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-    if (m_outputEW->getNumberEvents() > 0) {
+    bool removePromptPulse(false);
+    if (auto outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW)) {
+      removePromptPulse = (outputEW->getNumberEvents() > 0);
+    }
+    if (removePromptPulse) {
       g_log.information() << "running RemovePromptPulse(Width=" << removePromptPulseWidth << ") started at "
                           << Types::Core::DateAndTime::getCurrentTime() << "\n";
       API::IAlgorithm_sptr filterPAlg = createChildAlgorithm("RemovePromptPulse");
@@ -554,7 +538,6 @@ void AlignAndFocusPowder::exec() {
 
       filterPAlg->executeAsChildAlg();
       m_outputW = filterPAlg->getProperty("OutputWorkspace");
-      m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     } else {
       g_log.information("skipping RemovePromptPulse on empty EventWorkspace");
     }
@@ -570,7 +553,6 @@ void AlignAndFocusPowder::exec() {
     alg->setProperty("MaskingInformation", maskBinTableWS);
     alg->executeAsChildAlg();
     m_outputW = alg->getProperty("OutputWorkspace");
-    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
@@ -587,7 +569,6 @@ void AlignAndFocusPowder::exec() {
     outputw = maskDetAlg->getProperty("Workspace");
     // casting
     m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputw);
-    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
@@ -610,8 +591,6 @@ void AlignAndFocusPowder::exec() {
   }
 
   m_outputW = convertUnits(m_outputW, "dSpacing");
-  // update the other pointer that people use
-  m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   m_progress->report();
 
   if (m_calibrationWS) {
@@ -650,7 +629,6 @@ void AlignAndFocusPowder::exec() {
     alg->setPropertyValue("Type", "PowderTOF");
     alg->executeAsChildAlg();
     m_outputW = alg->getProperty("OutputWorkspace");
-    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
 
   if (LRef > 0. || minwl > 0. || DIFCref > 0. || (!isEmpty(maxwl))) {
@@ -825,23 +803,8 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   // compress again if appropriate
-  m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-  if ((m_outputEW) && (compressEventsTolerance > 0.)) {
-    g_log.information() << "running CompressEvents(Tolerance=" << compressEventsTolerance;
-    if (!isEmpty(wallClockTolerance))
-      g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
-    g_log.information() << ") started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
-    API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
-    compressAlg->setProperty("InputWorkspace", m_outputEW);
-    compressAlg->setProperty("OutputWorkspace", m_outputEW);
-    compressAlg->setProperty("Tolerance", compressEventsTolerance);
-    if (!isEmpty(wallClockTolerance)) {
-      compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
-      compressAlg->setPropertyValue("StartTime", getPropertyValue("CompressStartTime"));
-    }
-    compressAlg->executeAsChildAlg();
-    m_outputEW = compressAlg->getProperty("OutputWorkspace");
-    m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
+  if (compressEventsTolerance > 0.) {
+    compressEventsOutputWS(compressEventsTolerance, wallClockTolerance);
   }
   m_progress->report();
 
@@ -1242,6 +1205,27 @@ void AlignAndFocusPowder::doSortEvents(const Mantid::API::Workspace_sptr &ws) {
     alg->setProperty("InputWorkspace", eventWS);
     alg->setPropertyValue("SortBy", "X Value");
     alg->executeAsChildAlg();
+  }
+}
+
+void AlignAndFocusPowder::compressEventsOutputWS(const double compressEventsTolerance,
+                                                 const double wallClockTolerance) {
+  if (auto outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW)) {
+    g_log.information() << "running CompressEvents(Tolerance=" << compressEventsTolerance;
+    if (!isEmpty(wallClockTolerance))
+      g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
+    g_log.information() << ") started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
+    API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
+    compressAlg->setProperty("InputWorkspace", outputEW);
+    compressAlg->setProperty("OutputWorkspace", outputEW);
+    compressAlg->setProperty("Tolerance", compressEventsTolerance);
+    if (!isEmpty(wallClockTolerance)) {
+      compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
+      compressAlg->setPropertyValue("StartTime", getPropertyValue(PropertyNames::COMPRESS_WALL_START));
+    }
+    compressAlg->executeAsChildAlg();
+    outputEW = compressAlg->getProperty("OutputWorkspace");
+    m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputEW);
   }
 }
 

@@ -75,7 +75,6 @@ private:
 
   API::MatrixWorkspace_sptr m_inputW;
   API::MatrixWorkspace_sptr m_outputW;
-  DataObjects::EventWorkspace_sptr m_outputEW;
   API::ITableWorkspace_sptr m_calibrationWS;
   DataObjects::MaskWorkspace_sptr m_maskWS;
   DataObjects::GroupingWorkspace_sptr m_groupWS;
@@ -103,6 +102,7 @@ private:
   double tmax{0.0};
   bool m_preserveEvents{false};
   void doSortEvents(const Mantid::API::Workspace_sptr &ws);
+  void compressEventsOutputWS(const double compressEventsTolerance, const double wallClockTolerance);
 
   /// Low resolution TOF matrix workspace
   API::MatrixWorkspace_sptr m_lowResW;
