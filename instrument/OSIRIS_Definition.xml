@@ -698,12 +698,12 @@
 </type>
 
 
-<component type="graphite" idlist="graphite">
+<component type="silica" idlist="silica">
   <properties />
   <location  />
 </component>
 
-<type name="graphite">
+<type name="silica">
  <component type="pix1">
   <location r="1.5825" t="-11.5"    p="0" name="g963" />
   <location r="1.5821" t="-14.829"  p="0" name="g964" />
@@ -768,7 +768,7 @@
 <idlist idname="diffraction">
   <id start="3" end="962" />
 </idlist>
-<idlist idname="graphite">
+<idlist idname="silica">
   <id start="963" end="1004" />
 </idlist>
 

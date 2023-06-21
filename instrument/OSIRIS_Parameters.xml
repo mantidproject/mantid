@@ -8,11 +8,15 @@
 </parameter>
 
 <parameter name="analysers" type="string">
-  <value val="graphite,diffraction" />
+  <value val="graphite,silicon,diffraction" />
 </parameter>
 
 <parameter name="refl-graphite" type="string">
   <value val="002,004" />
+</parameter>
+
+<parameter name="refl-silicon" type="string">
+  <value val="111" />
 </parameter>
 
 <parameter name="refl-diffraction" type="string">
