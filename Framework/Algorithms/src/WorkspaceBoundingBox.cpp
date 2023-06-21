@@ -212,10 +212,8 @@ double WorkspaceBoundingBox::calculateRadiusY() const {
   return std::min((m_centerYPosCurr - m_yPosMin), (m_yPosMax - m_centerYPosCurr));
 }
 
-/** Perform normalization on x/y coords over given values
- *
- *  @param x :: value to normalize member x over
- *  @param y :: value to normalize member y over
+/**
+ * Perform normalization on x/y coords over given values
  */
 void WorkspaceBoundingBox::normalizePosition(const double totalCounts) {
   this->m_centerXPosCurr /= std::fabs(totalCounts);
