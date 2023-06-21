@@ -246,21 +246,25 @@ namespace { // anonymous namespace
 template <class T>
 void filterEventsHelper(std::vector<T> &events, const double xmin, const double xmax, const bool xminIsSet,
                         const bool xmaxIsSet) {
-  if (xminIsSet && xmaxIsSet) {
-    events.erase(std::remove_if(events.begin(), events.end(),
-                                [xmin, xmax](const auto &event) {
-                                  const double tof = event.tof();
-                                  return (tof < xmin || tof > xmax);
-                                }),
-                 events.end());
-  } else if (xminIsSet) { // xmax isn't set
-    events.erase(std::remove_if(events.begin(), events.end(), [xmin](const auto &event) { return event.tof() < xmin; }),
-                 events.end());
-  } else if (xmaxIsSet) { // xmin isn't set
-    events.erase(std::remove_if(events.begin(), events.end(), [xmax](const auto &event) { return event.tof() > xmax; }),
-                 events.end());
-  }
   // otherwise do nothing because neither was set, but the exec already checks for that
+  if (!(xminIsSet && xmaxIsSet))
+    return;
+
+  auto predicate = [&]() -> std::function<bool(const T &)> {
+    if (xminIsSet && xmaxIsSet) {
+      return [xmin, xmax](const T &event) {
+        const double tof = event.tof();
+        return bool(tof < xmin || tof > xmax);
+      };
+    } else if (xminIsSet) { // xmax isn't set
+      return [xmin](const T &event) { return bool(event.tof() < xmin); };
+    } else if (xmaxIsSet) { // xmin isn't set
+      return [xmax](const T &event) { return bool(event.tof() > xmax); };
+    } else {
+      throw std::runtime_error("filterEventsHelper doesn't know how to ");
+    }
+  }();
+  events.erase(std::remove_if(events.begin(), events.end(), predicate), events.end());
 }
 } // namespace
 
