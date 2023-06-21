@@ -597,7 +597,10 @@ def load_raw_files(run_number_string, instrument, file_ext=None):
     run_number_list = generate_run_numbers(run_number_string=run_number_string)
     file_ext = "" if file_ext is None else file_ext
     file_name_list = [instrument._generate_input_file_name(run_number=run_number, file_ext=file_ext) for run_number in run_number_list]
-    load_raw_ws = _load_list_of_files(file_name_list)
+    if instrument._inst_settings.keep_raw_workspace is not None:
+        load_raw_ws = _load_list_of_files(file_name_list, keep_original=instrument._inst_settings.keep_raw_workspace)
+    else:
+        load_raw_ws = _load_list_of_files(file_name_list)
     return load_raw_ws
 
 
