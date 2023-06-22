@@ -243,28 +243,13 @@ void ExtractSpectra::cropRagged(MatrixWorkspace &workspace, int index) {
 }
 
 namespace { // anonymous namespace
-template <class T>
-void filterEventsHelper(std::vector<T> &events, const double xmin, const double xmax, const bool xminIsSet,
-                        const bool xmaxIsSet) {
-  // otherwise do nothing because neither was set, but the exec already checks for that
-  if (!(xminIsSet && xmaxIsSet))
-    return;
-
-  auto predicate = [&]() -> std::function<bool(const T &)> {
-    if (xminIsSet && xmaxIsSet) {
-      return [xmin, xmax](const T &event) {
-        const double tof = event.tof();
-        return bool(tof < xmin || tof > xmax);
-      };
-    } else if (xminIsSet) { // xmax isn't set
-      return [xmin](const T &event) { return bool(event.tof() < xmin); };
-    } else if (xmaxIsSet) { // xmin isn't set
-      return [xmax](const T &event) { return bool(event.tof() > xmax); };
-    } else {
-      throw std::runtime_error("filterEventsHelper doesn't know how to ");
-    }
-  }();
-  events.erase(std::remove_if(events.begin(), events.end(), predicate), events.end());
+template <class T> void filterEventsHelper(std::vector<T> &events, const double xmin, const double xmax) {
+  events.erase(std::remove_if(events.begin(), events.end(),
+                              [xmin, xmax](const T &event) {
+                                const double tof = event.tof();
+                                return bool(tof < xmin || tof > xmax);
+                              }),
+               events.end());
 }
 } // namespace
 
@@ -276,13 +261,9 @@ void filterEventsHelper(std::vector<T> &events, const double xmin, const double 
  * input workspace
  */
 void ExtractSpectra::execEvent() {
-  // filtering is changed by whether the range is set
-  const bool minXIsSet = !isDefault("XMin");
-  const bool maxXIsSet = !isDefault("XMax");
-
   // use min/max from workspace if the values aren't supplied by the user
-  const double minX_val = minXIsSet ? getProperty("XMin") : eventW->getTofMin();
-  const double maxX_val = maxXIsSet ? getProperty("XMax") : eventW->getTofMax();
+  const double minX_val = isDefault("XMin") ? eventW->getTofMin() : getProperty("XMin");
+  const double maxX_val = isDefault("XMax") ? eventW->getTofMax() : getProperty("XMax");
 
   BinEdges binEdges(2);
   if (m_commonBoundaries) {
@@ -294,8 +275,6 @@ void ExtractSpectra::execEvent() {
     binEdges = {minX_val, maxX_val};
   }
 
-  //  eventW->sortAll(TOF_SORT, nullptr); TODO REMOVE
-
   Progress prog(this, 0.0, 1.0, eventW->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*eventW))
   for (int i = 0; i < static_cast<int>(eventW->getNumberHistograms()); ++i) {
@@ -305,15 +284,15 @@ void ExtractSpectra::execEvent() {
     if (!el.empty()) {
       switch (el.getEventType()) {
       case TOF: {
-        filterEventsHelper(el.getEvents(), minX_val, maxX_val, minXIsSet, maxXIsSet);
+        filterEventsHelper(el.getEvents(), minX_val, maxX_val);
         break;
       }
       case WEIGHTED: {
-        filterEventsHelper(el.getWeightedEvents(), minX_val, maxX_val, minXIsSet, maxXIsSet);
+        filterEventsHelper(el.getWeightedEvents(), minX_val, maxX_val);
         break;
       }
       case WEIGHTED_NOTIME: {
-        filterEventsHelper(el.getWeightedEventsNoTime(), minX_val, maxX_val, minXIsSet, maxXIsSet);
+        filterEventsHelper(el.getWeightedEventsNoTime(), minX_val, maxX_val);
         break;
       }
       }
