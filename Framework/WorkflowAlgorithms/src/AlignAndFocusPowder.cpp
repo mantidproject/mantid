@@ -657,10 +657,8 @@ void AlignAndFocusPowder::exec() {
     // turn off the low res stuff
     m_processLowResTOF = false;
 
-    EventWorkspace_sptr ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-    if (ews)
-      g_log.information() << "Number of events = " << ews->getNumberEvents() << ". ";
-    g_log.information("\n");
+    if (const auto ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW))
+      g_log.information() << "Number of events = " << ews->getNumberEvents() << ".\n";
 
     m_outputW = convertUnits(m_outputW, "Wavelength");
 
@@ -676,15 +674,13 @@ void AlignAndFocusPowder::exec() {
     removeAlg->setProperty("XMax", maxwl);
     removeAlg->executeAsChildAlg();
     m_outputW = removeAlg->getProperty("OutputWorkspace");
-    if (ews)
+    if (const auto ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW))
       g_log.information() << "Number of events = " << ews->getNumberEvents() << ".\n";
   } else if (DIFCref > 0.) {
     g_log.information() << "running RemoveLowResTof(RefDIFC=" << DIFCref << ",K=3.22) started at "
                         << Types::Core::DateAndTime::getCurrentTime() << "\n";
-    EventWorkspace_sptr ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-    if (ews)
-      g_log.information() << "Number of events = " << ews->getNumberEvents() << ". ";
-    g_log.information("\n");
+    if (const auto ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW))
+      g_log.information() << "Number of events = " << ews->getNumberEvents() << ".\n";
 
     API::IAlgorithm_sptr removeAlg = createChildAlgorithm("RemoveLowResTOF");
     removeAlg->setProperty("InputWorkspace", m_outputW);
