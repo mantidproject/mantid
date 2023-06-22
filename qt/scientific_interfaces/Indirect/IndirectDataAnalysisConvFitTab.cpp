@@ -30,9 +30,8 @@ using namespace Mantid::API;
 namespace {
 Mantid::Kernel::Logger g_log("ConvFit");
 
-std::vector<std::string> CONVFIT_HIDDEN_PROPS =
-    std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "OutputWorkspace",
-                              "IgnoreInvalidData", "Output", "PeakRadius", "PlotParameter"});
+std::vector<std::string> CONVFIT_HIDDEN_PROPS = std::vector<std::string>(
+    {"CreateOutput", "LogValue", "PassWSIndexToFunction", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 } // namespace
 
 namespace MantidQt::CustomInterfaces::IDA {
