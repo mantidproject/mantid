@@ -235,7 +235,8 @@ class OSIRISDiffractionFocusingWithPaalmanPingsAbsorptionCorrection(_OSIRISDiffr
     ]
 
     def runTest(self):
-        self.tolerance = 0.0001
+        self.tolerance = 1e-8
+        self.tolerance_is_rel_err = True
         super().runPreTest()
         sample_details = SampleDetails(radius=1.1, height=8, center=[0, 0, 0], shape="cylinder")
         sample_details.set_material(chemical_formula="Cr2-Ga-N", number_density=10.0)
