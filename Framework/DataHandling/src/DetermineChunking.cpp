@@ -120,8 +120,18 @@ void DetermineChunking::exec() {
   }
   this->setProperty("OutputWorkspace", strategy);
 
+  if (maxChunk == 0 || isEmpty(maxChunk)) {
+    return;
+  }
+
   Poco::File fileinfo(filename);
   const double fileSizeGiB = static_cast<double>(fileinfo.getSize()) * BYTES_TO_GiB;
+
+  // don't bother opening the file if its size is "small"
+  // note that prenexus "_runinfo.xml" files don't represent what
+  // is actually loaded
+  if (fileType != PRENEXUS_FILE && 6. * fileSizeGiB < maxChunk)
+    return;
 
   // --------------------- DETERMINE NUMBER OF CHUNKS
   double wkspSizeGiB = 0;
@@ -229,6 +239,7 @@ void DetermineChunking::exec() {
     return;
   }
 
+  // --------------------- FILL IN THE CHUNKING TABLE
   for (int i = 1; i <= numChunks; i++) {
     Mantid::API::TableRow row = strategy->appendRow();
     if (fileType == PRENEXUS_FILE || fileType == EVENT_NEXUS_FILE) {

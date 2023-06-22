@@ -67,6 +67,9 @@ void CreateWorkspace::init() {
       std::make_unique<WorkspaceProperty<>>("ParentWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Name of a parent workspace.");
   declareProperty(std::make_unique<ArrayProperty<double>>("Dx"), "X error values for workspace (optional).");
+  declareProperty("ParallelStorageMode", "",
+                  "The parallel storage mode of the output workspace for MPI builds. This paramter has been deprecated "
+                  "and will be ignored because MPI support has been removed from Mantid. ");
 }
 
 /// Input validation
@@ -169,6 +172,8 @@ void CreateWorkspace::exec() {
   if (parentWS) {
     outputWS = create<HistoWorkspace>(*parentWS, nSpec, histogram);
   } else {
+    g_log.warning()
+        << "MPI support has been removed from Mantid. ParallelStorageMode has been deprecated and will be ignored.";
     IndexInfo indexInfo(nSpec);
     outputWS = create<Workspace2D>(indexInfo, histogram);
   }
