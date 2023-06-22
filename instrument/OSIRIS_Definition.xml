@@ -698,12 +698,12 @@
 </type>
 
 
-<component type="silica" idlist="silica">
+<component type="graphite" idlist="graphite">
   <properties />
   <location  />
 </component>
 
-<type name="silica">
+<type name="graphite">
  <component type="pix1">
   <location r="1.5825" t="-11.5"    p="0" name="g963" />
   <location r="1.5821" t="-14.829"  p="0" name="g964" />
@@ -760,6 +760,32 @@
   <algebra val="app-shape" />
 </type>
 
+  <component type="silica" idlist="silica">
+    <properties />
+    <location  />
+  </component>
+
+  <type name="silica">
+    <component type="pix2">
+      <location r="1.582" t="-11."    p="0" name="g1005" />
+      <location r="1.582" t="-14.82"  p="0" name="g1006" />
+      <location r="1.582" t="-18.15"  p="0" name="g1007" />
+      <location r="1.582" t="-21.48"  p="0" name="g1008" />
+      <location r="1.582" t="-24.81"  p="0" name="g1009" />
+      <location r="1.582" t="-28.14"  p="0" name="g1010" />
+    </component>
+  </type>
+
+  <type name="pix2" is="detector">
+    <cuboid id="app-shape">
+      <left-front-bottom-point  x="0.004"   y="-0.12"  z="0.01"     />
+      <left-front-top-point     x="0.004"   y="-0.12"  z="0.0003"  />
+      <left-back-bottom-point   x="-0.004"  y="-0.12"  z="0.01"     />
+      <right-front-bottom-point x="0.004"   y="0.12"   z="0.01"     />
+    </cuboid>
+    <algebra val="app-shape" />
+  </type>
+  
 <!-- DETECTOR/MONITOR IDs -->
 
 <idlist idname="monitors">
@@ -768,8 +794,10 @@
 <idlist idname="diffraction">
   <id start="3" end="962" />
 </idlist>
-<idlist idname="silica">
+<idlist idname="graphite">
   <id start="963" end="1004" />
 </idlist>
-
+  <idlist idname="silica">
+    <id start="1005" end="1010" />
+</idlist>
 </instrument>
