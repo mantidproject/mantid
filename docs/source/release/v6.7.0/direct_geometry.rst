@@ -46,6 +46,7 @@ MSlice
 Bugfixes
 ############
 - Fixed GDOS intensity correction so that the correction is applied in the same way regardless of the rotation of the slice plot.
+- Fixed the integration of GDOS cuts.
 - Fix for an error when saving a slice plot as a matlab file.
 - Warning is now omitted if a cut is taken with a higher resolution than the parent slice. This causes the appearance of missing lines between adjacent datapoints.
 - When taking a cut, if an intensity range is provided it is now applied to the plot y limits.
