@@ -116,13 +116,20 @@ std::vector<std::pair<std::string, size_t>> IndirectFitDataModel::getResolutions
   return resolutionVector;
 }
 
-void IndirectFitDataModel::setResolution(const std::string &name) {
-  setResolution(name, getNumberOfWorkspaces() - WorkspaceID{1});
+bool IndirectFitDataModel::setResolution(const std::string &name) {
+  return setResolution(name, getNumberOfWorkspaces() - WorkspaceID{1});
 }
 
-void IndirectFitDataModel::setResolution(const std::string &name, WorkspaceID workspaceID) {
+bool IndirectFitDataModel::setResolution(const std::string &name, WorkspaceID workspaceID) {
+  bool isValid = true;
   if (!name.empty() && m_adsInstance.doesExist(name)) {
     const auto resolution = m_adsInstance.retrieveWS<Mantid::API::MatrixWorkspace>(name);
+    auto y = resolution->readY(0);
+    for (auto value : y) {
+      if (value != value) {
+        isValid = false;
+      }
+    }
     if (m_resolutions->size() > workspaceID.value) {
       m_resolutions->at(workspaceID.value) = resolution;
     } else if (m_resolutions->size() == workspaceID.value) {
@@ -134,6 +141,7 @@ void IndirectFitDataModel::setResolution(const std::string &name, WorkspaceID wo
   } else {
     throw std::runtime_error("A valid resolution file needs to be selected.");
   }
+  return isValid;
 }
 
 void IndirectFitDataModel::setSpectra(const std::string &spectra, WorkspaceID workspaceID) {

@@ -10,7 +10,7 @@
 #include <utility>
 
 #include "IndirectAddWorkspaceDialog.h"
-
+#include "MantidAPI/AlgorithmManager.h"
 namespace {
 
 class ScopedFalse {
@@ -53,7 +53,18 @@ void IndirectFitDataPresenter::addWorkspace(const std::string &workspaceName, co
   m_model->addWorkspace(workspaceName, spectra);
 }
 
-void IndirectFitDataPresenter::setResolution(const std::string &name) { m_model->setResolution(name); }
+void IndirectFitDataPresenter::setResolution(const std::string &name) {
+  if (m_model->setResolution(name) == false) {
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("ReplaceSpecialValues");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", name);
+    alg->setProperty("OutputWorkspace", name);
+    alg->setProperty("NaNValue", 0.0);
+    alg->setProperty("InfinityValue", 0.0);
+    alg->execute();
+    displayWarning("Replaced the NaN's and infinities in " + name + " with zeros");
+  }
+}
 
 void IndirectFitDataPresenter::setSampleWSSuffices(const QStringList &suffixes) { m_wsSampleSuffixes = suffixes; }
 
