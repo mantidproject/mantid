@@ -15,6 +15,7 @@
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
@@ -78,6 +79,10 @@ void LoadInstrument::init() {
                   "If set to False then the spectrum numbers and detector IDs of the "
                   "workspace are not modified."
                   "This property must be set to either True or False.");
+  declareProperty("IncludeMonitors", true,
+                  "If set to True, Monitors will be assigned spectra when rewriting the spectra map");
+  // setPropertySettings("IncludeMonitors", std::make_unique<Kernel::EnabledWhenProperty>(
+  //                                       "RewriteSpectraMap",Kernel::ePropertyCriterion::IS_EQUAL_TO, "1"));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -230,8 +235,11 @@ void LoadInstrument::exec() {
   // Rebuild the spectra map for this workspace so that it matches the
   // instrument, if required
   const OptionalBool RewriteSpectraMap = getProperty("RewriteSpectraMap");
-  if (RewriteSpectraMap == OptionalBool::True)
-    ws->rebuildSpectraMapping();
+  if (RewriteSpectraMap == OptionalBool::True) {
+    const bool includeMonitors = getProperty("IncludeMonitors");
+    const specnum_t specNumOffset = 1; // Constant offset from detector ID used to derive spectrum number
+    ws->rebuildSpectraMapping(includeMonitors, specNumOffset);
+  }
 }
 
 //-----------------------------------------------------------------------------------------------------------------------
