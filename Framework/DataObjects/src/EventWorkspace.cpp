@@ -421,10 +421,8 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
 #pragma omp for nowait
     for (int64_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++) {
       const EventList &evList = this->getSpectrum(workspaceIndex);
-      double temp = evList.getTofMin();
-      tXmin = std::min(temp, tXmin);
-      temp = evList.getTofMax();
-      tXmax = std::max(temp, tXmax);
+      tXmin = std::min(evList.getTofMin(), tXmin);
+      tXmax = std::max(evList.getTofMax(), tXmax);
     }
 #pragma omp critical
     {
