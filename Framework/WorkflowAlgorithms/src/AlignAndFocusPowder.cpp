@@ -533,6 +533,13 @@ void AlignAndFocusPowder::exec() {
       filterPAlg->setProperty("InputWorkspace", m_outputW);
       filterPAlg->setProperty("OutputWorkspace", m_outputW);
       filterPAlg->setProperty("Width", removePromptPulseWidth);
+
+      // if some of the range was known in CropWorkspace-TOF, use it again here
+      if ((xmin >= 0.))
+        filterPAlg->setProperty("TMin", xmin);
+      if ((xmax > 0.))
+        filterPAlg->setProperty("TMax", xmax);
+
       filterPAlg->executeAsChildAlg();
       m_outputW = filterPAlg->getProperty("OutputWorkspace");
       m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
