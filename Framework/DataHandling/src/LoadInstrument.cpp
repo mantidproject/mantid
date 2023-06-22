@@ -81,8 +81,8 @@ void LoadInstrument::init() {
                   "This property must be set to either True or False.");
   declareProperty("IncludeMonitors", true,
                   "If set to True, Monitors will be assigned spectra when rewriting the spectra map");
-  // setPropertySettings("IncludeMonitors", std::make_unique<Kernel::EnabledWhenProperty>(
-  //                                       "RewriteSpectraMap",Kernel::ePropertyCriterion::IS_EQUAL_TO, "1"));
+  setPropertySettings("IncludeMonitors", std::make_unique<Kernel::EnabledWhenProperty>(
+                                             "RewriteSpectraMap", Kernel::ePropertyCriterion::IS_EQUAL_TO, "1"));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
