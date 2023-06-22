@@ -35,7 +35,7 @@ Output:
 
     True
 
-.. testcleanup:: ExSaveHKLSimple
+.. testcleanup:: ExSaveReflections
 
     import os
     os.remove(path)
