@@ -244,6 +244,16 @@ void PDCalibration::init() {
                   "(highest Y value position) and "
                   "the peak width will either be estimated by observation or calculated.");
 
+  declareProperty("HighBackground", false,
+                  "Flag whether the data has high background comparing to "
+                  "peaks' intensities. "
+                  "For example, vanadium peaks usually have high background.");
+
+  declareProperty("MinimumSignalToNoiseRatio", 0.,
+                  "Minimum signal-to-noise ratio such that all the peaks with "
+                  "signal-to-noise ratio under this value will be excluded."
+                  "Note, the algorithm will not exclude a peak for which the noise cannot be estimated.");
+
   std::vector<std::string> modes{"DIFC", "DIFC+TZERO", "DIFC+TZERO+DIFA"};
   declareProperty("CalibrationParameters", "DIFC", std::make_shared<StringListValidator>(modes),
                   "Select calibration parameters to fit.");
@@ -269,11 +279,6 @@ void PDCalibration::init() {
       std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>("DiagnosticWorkspaces", "", Direction::Output),
       "Workspaces to promote understanding of calibration results");
 
-  declareProperty("MinimumSignalToNoiseRatio", 0.,
-                  "Minimum signal-to-noise ratio such that all the peaks with "
-                  "signal-to-noise ratio under this value will be excluded."
-                  "Note, the algorithm will not exclude a peak for which the noise cannot be estimated.");
-
   // make group for Input properties
   std::string inputGroup("Input Options");
   setPropertyGroup("InputWorkspace", inputGroup);
@@ -292,6 +297,7 @@ void PDCalibration::init() {
   setPropertyGroup("PeakWidthPercent", fitPeaksGroup);
   setPropertyGroup("MinimumPeakHeight", fitPeaksGroup);
   setPropertyGroup("MinimumSignalToNoiseRatio", fitPeaksGroup);
+  setPropertyGroup("HighBackground", fitPeaksGroup);
   setPropertyGroup("MaxChiSq", fitPeaksGroup);
   setPropertyGroup("ConstrainPeakPositions", fitPeaksGroup);
 
@@ -488,7 +494,8 @@ void PDCalibration::exec() {
   algFitPeaks->setProperty("MinimumSignalToNoiseRatio", minSignalToNoiseRatio);
   // some fitting strategy
   algFitPeaks->setProperty("FitFromRight", true);
-  algFitPeaks->setProperty("HighBackground", false);
+  const bool highBackground = getProperty("HighBackground");
+  algFitPeaks->setProperty("HighBackground", highBackground);
   bool constrainPeakPosition = getProperty("ConstrainPeakPositions");
   algFitPeaks->setProperty("ConstrainPeakPositions",
                            constrainPeakPosition); // TODO Pete: need to test this option
