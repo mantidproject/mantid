@@ -2830,7 +2830,7 @@ double EventList::getTofMin() const {
     return tMin;
 
   // when events are ordered by tof just need the first value
-  if (this->order == TOF_SORT) {
+  if (this->order == TOF_SORT || this->order == PULSETIMETOF_SORT) {
     switch (eventType) {
     case TOF:
       return this->events.begin()->tof();
@@ -2872,7 +2872,7 @@ double EventList::getTofMax() const {
     return tMax;
 
   // when events are ordered by tof just need the first value
-  if (this->order == TOF_SORT) {
+  if (this->order == TOF_SORT || this->order == PULSETIMETOF_SORT) {
     switch (eventType) {
     case TOF:
       return this->events.rbegin()->tof();
