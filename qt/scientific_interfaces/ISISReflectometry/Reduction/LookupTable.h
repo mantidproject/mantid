@@ -37,9 +37,9 @@ public:
 private:
   std::vector<LookupRow> m_lookupRows;
 
+  boost::optional<LookupRow> findLookupRow(std::string const &title, boost::optional<double> const &, double) const;
   boost::optional<LookupRow> searchByTheta(std::vector<LookupRow> lookupRows, boost::optional<double> const &,
                                            double) const;
-  std::vector<LookupRow> searchByTitle(Row const &row) const;
   std::vector<LookupRow> findMatchingRegexes(std::string const &title) const;
   std::vector<LookupRow> findEmptyRegexes() const;
 };

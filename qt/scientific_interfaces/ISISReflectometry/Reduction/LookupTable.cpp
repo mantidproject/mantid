@@ -7,6 +7,8 @@
 
 #include "LookupTable.h"
 #include "IGroup.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "ParseReflectometryStrings.h"
 #include "PreviewRow.h"
 #include "Row.h"
 #include "RowExceptions.h"
@@ -21,9 +23,13 @@ constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 bool equalWithinTolerance(double val1, double val2, double tolerance) {
   return std::abs(val1 - val2) <= (tolerance + 2.0 * EPSILON);
 }
+
+static const std::string EMPTY_SEARCH_TITLE = "";
 } // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+
+using namespace Mantid::API;
 
 LookupTable::LookupTable(std::vector<LookupRow> rowsIn) : m_lookupRows(std::move(rowsIn)) {}
 
@@ -32,26 +38,33 @@ LookupTable::LookupTable(std::initializer_list<LookupRow> rowsIn) : m_lookupRows
 std::vector<LookupRow> const &LookupTable::rows() const { return m_lookupRows; }
 
 boost::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double tolerance) const {
-  // First filter lookup rows by title, if the run has one
-  auto lookupRows = searchByTitle(row);
-  if (auto found = searchByTheta(lookupRows, row.theta(), tolerance)) {
-    return found;
-  }
-  // If we didn't find an explicit regex that matches, then we allow the user to specify a lookup row with an empty
-  // regex as a default, which falls back to matching all titles
-  lookupRows = findEmptyRegexes();
-  // Now filter by angle; it should be unique
-  if (auto found = searchByTheta(lookupRows, row.theta(), tolerance)) {
-    return found;
-  }
-  // If we didn't find a lookup row where theta matches, then we allow the user to specify a "wildcard" row
-  // which will be used for everything where a specific match is not found
-  auto result = findWildcardLookupRow();
-  return result;
+  auto title = !row.getParent() ? EMPTY_SEARCH_TITLE : row.getParent()->name();
+  return findLookupRow(title, row.theta(), tolerance);
 }
 
 boost::optional<LookupRow> LookupTable::findLookupRow(PreviewRow const &previewRow, double tolerance) const {
-  if (auto found = searchByTheta(m_lookupRows, previewRow.theta(), tolerance)) {
+  auto title = previewRow.getLoadedWs()->getTitle();
+  auto titleAndTheta = parseTitleAndThetaFromRunTitle(title);
+
+  if (titleAndTheta.is_initialized()) {
+    return findLookupRow(titleAndTheta.get()[0], previewRow.theta(), tolerance);
+  } else {
+    return findLookupRow(title, previewRow.theta(), tolerance);
+  }
+}
+
+boost::optional<LookupRow> LookupTable::findLookupRow(std::string const &title, boost::optional<double> const &theta,
+                                                      double tolerance) const {
+  // First filter lookup rows by title
+  auto lookupRows = findMatchingRegexes(title);
+  if (auto found = searchByTheta(lookupRows, theta, tolerance)) {
+    return found;
+  }
+  // If we didn't find an explicit regex that matches, then we allow the user to specify a lookup row with an empty
+  // regex as a default
+  lookupRows = findEmptyRegexes();
+  // Now filter by angle; it should be unique
+  if (auto found = searchByTheta(lookupRows, theta, tolerance)) {
     return found;
   }
   // If we didn't find a lookup row where theta matches, then we allow the user to specify a "wildcard" row
@@ -92,16 +105,6 @@ std::vector<LookupRow> LookupTable::findEmptyRegexes() const {
   auto results = std::vector<LookupRow>();
   std::copy_if(m_lookupRows.cbegin(), m_lookupRows.cend(), std::back_inserter(results),
                [](auto const &candidate) { return !candidate.titleMatcher(); });
-  return results;
-}
-
-std::vector<LookupRow> LookupTable::searchByTitle(Row const &row) const {
-  if (!row.getParent()) {
-    return findMatchingRegexes("");
-  }
-
-  auto const &title = row.getParent()->name();
-  auto results = findMatchingRegexes(title);
   return results;
 }
 
