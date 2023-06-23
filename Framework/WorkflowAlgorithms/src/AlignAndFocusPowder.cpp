@@ -848,14 +848,18 @@ API::MatrixWorkspace_sptr AlignAndFocusPowder::diffractionFocus(API::MatrixWorks
     return ws;
   }
 
-  g_log.information() << "running DiffractionFocussing started at " << Types::Core::DateAndTime::getCurrentTime()
-                      << "\n";
+  // cannot convert to histogram if running with ragged bins
+  // otherwise the data is a histogram *before* the correct binning is set
+  const bool preserveEvents = m_delta_ragged.empty() ? m_preserveEvents : true;
+
+  g_log.information() << "running DiffractionFocussing(PreserveEvents=" << preserveEvents << ") started at "
+                      << Types::Core::DateAndTime::getCurrentTime() << "\n";
 
   API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
   focusAlg->setProperty("InputWorkspace", ws);
   focusAlg->setProperty("OutputWorkspace", ws);
   focusAlg->setProperty("GroupingWorkspace", m_groupWS);
-  focusAlg->setProperty("PreserveEvents", m_preserveEvents);
+  focusAlg->setProperty("PreserveEvents", preserveEvents);
   focusAlg->executeAsChildAlg();
   ws = focusAlg->getProperty("OutputWorkspace");
 
@@ -992,6 +996,7 @@ API::MatrixWorkspace_sptr AlignAndFocusPowder::rebinRagged(API::MatrixWorkspace_
   alg->setProperty("Delta", m_delta_ragged);
   alg->setProperty("InputWorkspace", matrixws);
   alg->setProperty("OutputWorkspace", matrixws);
+  alg->setProperty("PreserveEvents", m_preserveEvents);
 
   // log the parameters used
   g_log.information() << "running RebinRagged(";
