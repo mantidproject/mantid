@@ -334,12 +334,17 @@ class ColorbarWidget(QWidget):
                 self.cmin_value = cmin
             else:  # reset values back
                 self.update_clim_text()
+        else:  # reset values back
+            self.update_clim_text()
+
         if self.cmax.hasAcceptableInput():
             cmax = float(self.cmax.text())
             if cmax > self.cmin_value:
                 self.cmax_value = cmax
             else:  # reset values back
                 self.update_clim_text()
+        else:  # reset values back
+            self.update_clim_text()
 
     def _create_linear_normalize_object(self):
         if self.autoscale.isChecked():
