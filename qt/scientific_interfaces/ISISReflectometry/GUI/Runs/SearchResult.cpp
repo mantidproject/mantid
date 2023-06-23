@@ -30,25 +30,20 @@ void SearchResult::parseRun(std::string const &runNumber) {
     addError("Run number is not specified");
 }
 
-/** Extract the group name and angle from the run title. Expects the title to
- * be in the format: "group_name th=angle". If it is not in this format, then
- * the group name is set to the full title, the angle is empty, and the error
- * message is set.
+/** Extract the group name and angle from the run title.
+ * If it is not in the expected format, then the group name is set to the full title
+ * the angle is empty, and the error message is set.
  */
 void SearchResult::parseMetadataFromTitle() {
-  static boost::regex titleFormatRegex("(.*)(th[:=]\\s*([0-9.\\-]+))(.*)");
-  boost::smatch matches;
-
-  if (!boost::regex_search(m_title, matches, titleFormatRegex)) {
+  auto titleAndTheta = parseTitleAndThetaFromRunTitle(m_title);
+  if (!titleAndTheta.is_initialized()) {
     m_groupName = m_title;
     addError("Theta was not specified in the run title.");
     return;
   }
 
-  constexpr auto preThetaGroup = 1;
-  constexpr auto thetaValueGroup = 3;
-  m_theta = matches[thetaValueGroup].str();
-  m_groupName = matches[preThetaGroup].str();
+  m_theta = titleAndTheta.get()[1];
+  m_groupName = titleAndTheta.get()[0];
 
   // Validate that the angle parses correctly
   auto const maybeTheta = parseTheta(m_theta);
