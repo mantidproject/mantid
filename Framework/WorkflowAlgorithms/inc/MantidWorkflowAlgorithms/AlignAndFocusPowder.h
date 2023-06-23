@@ -91,7 +91,7 @@ private:
   std::vector<double> m_delta_ragged;
   std::vector<double> m_resonanceLower;
   std::vector<double> m_resonanceUpper;
-  bool dspace{false};
+  bool binInDspace{false};
   double xmin{0.0};
   double xmax{0.0};
   double LRef{0.0};
@@ -103,6 +103,8 @@ private:
   bool m_preserveEvents{false};
   void doSortEvents(const Mantid::API::Workspace_sptr &ws);
   void compressEventsOutputWS(const double compressEventsTolerance, const double wallClockTolerance);
+  bool shouldCompressUnfocused(const double compressTolerance, const double tofmin, const double tofmax,
+                               const bool hasWallClockTolerance);
 
   /// Low resolution TOF matrix workspace
   API::MatrixWorkspace_sptr m_lowResW;
