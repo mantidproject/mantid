@@ -105,7 +105,10 @@ MANTIDQT_ISISREFLECTOMETRY_DLL Instrument makeInstrument();
 MANTIDQT_ISISREFLECTOMETRY_DLL Instrument makeEmptyInstrument();
 
 /* Preview */
-MANTIDQT_ISISREFLECTOMETRY_DLL PreviewRow makePreviewRow(std::vector<std::string> const &runNumbers, double angle);
+MANTIDQT_ISISREFLECTOMETRY_DLL PreviewRow makePreviewRow(const double theta);
+MANTIDQT_ISISREFLECTOMETRY_DLL PreviewRow makePreviewRow(std::vector<std::string> const &runNumbers,
+                                                         const double theta);
+MANTIDQT_ISISREFLECTOMETRY_DLL PreviewRow makePreviewRow(const double theta, const std::string &title);
 
 } // namespace ModelCreationHelper
 } // namespace ISISReflectometry
