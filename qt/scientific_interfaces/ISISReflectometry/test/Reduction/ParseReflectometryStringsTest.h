@@ -281,6 +281,34 @@ public:
     TS_ASSERT_EQUALS(boost::get<TransmissionRunPair>(result), expected);
   }
 
+  void testParseTitleAndThetaFromRunTitle() {
+    auto runTitle = "ASF SM=0.75 th=0.8 ['SM2']=0.75";
+    auto result = parseTitleAndThetaFromRunTitle(runTitle);
+    std::vector<std::string> expected = {"ASF SM=0.75 ", "0.8"};
+    TS_ASSERT(result.is_initialized());
+    TS_ASSERT_EQUALS(result.get(), expected);
+  }
+
+  void testParseTitleAndThetaFromRunTitleReturnsNoneForEmptyString() {
+    auto runTitle = "";
+    auto result = parseTitleAndThetaFromRunTitle(runTitle);
+    TS_ASSERT(!result.is_initialized());
+  }
+
+  void testParseTitleAndThetaFromRunTitleWithThetaOnly() {
+    auto runTitle = "th=0.8";
+    auto result = parseTitleAndThetaFromRunTitle(runTitle);
+    std::vector<std::string> expected = {"", "0.8"};
+    TS_ASSERT(result.is_initialized());
+    TS_ASSERT_EQUALS(result.get(), expected);
+  }
+
+  void testParseTitleAndThetaFromRunTitleReturnsNoneForNoTheta() {
+    auto runTitle = "ASF SM=0.75";
+    auto result = parseTitleAndThetaFromRunTitle(runTitle);
+    TS_ASSERT(!result.is_initialized());
+  }
+
 private:
   enum class Result : int { Value = 0, Error = 1 };
 
