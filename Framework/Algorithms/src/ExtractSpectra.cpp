@@ -146,6 +146,7 @@ void ExtractSpectra::exec() {
   }
   setProperty("OutputWorkspace", m_inputWorkspace);
 
+  // don't trim x-range if those values are not specified
   if (isDefault("XMin") && isDefault("XMax"))
     return;
 
@@ -242,35 +243,27 @@ void ExtractSpectra::cropRagged(MatrixWorkspace &workspace, int index) {
 }
 
 namespace { // anonymous namespace
-
-template <class T> struct eventFilter {
-  eventFilter(const double minValue, const double maxValue) : minValue(minValue), maxValue(maxValue) {}
-
-  bool operator()(const T &value) {
-    const double tof = value.tof();
-    return !(tof <= maxValue && tof >= minValue);
-  }
-
-  double minValue;
-  double maxValue;
-};
-
 template <class T> void filterEventsHelper(std::vector<T> &events, const double xmin, const double xmax) {
-  events.erase(std::remove_if(events.begin(), events.end(), eventFilter<T>(xmin, xmax)), events.end());
+  events.erase(std::remove_if(events.begin(), events.end(),
+                              [xmin, xmax](const T &event) {
+                                const double tof = event.tof();
+                                return bool(tof < xmin || tof > xmax);
+                              }),
+               events.end());
 }
 } // namespace
 
-/** Executes the algorithm
+/**
+ * Executes the algorithm. This does not sort the events because the method of removing events outside of range looks at
+ * all of the events.
+ *
  *  @throw std::out_of_range If a property is set to an invalid value for the
  * input workspace
  */
 void ExtractSpectra::execEvent() {
-  double minX_val = getProperty("XMin");
-  double maxX_val = getProperty("XMax");
-  if (isEmpty(minX_val))
-    minX_val = eventW->getTofMin();
-  if (isEmpty(maxX_val))
-    maxX_val = eventW->getTofMax();
+  // use min/max from workspace if the values aren't supplied by the user
+  const double minX_val = isDefault("XMin") ? eventW->getTofMin() : getProperty("XMin");
+  const double maxX_val = isDefault("XMax") ? eventW->getTofMax() : getProperty("XMax");
 
   BinEdges binEdges(2);
   if (m_commonBoundaries) {
@@ -282,27 +275,27 @@ void ExtractSpectra::execEvent() {
     binEdges = {minX_val, maxX_val};
   }
 
-  eventW->sortAll(TOF_SORT, nullptr);
-
   Progress prog(this, 0.0, 1.0, eventW->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*eventW))
   for (int i = 0; i < static_cast<int>(eventW->getNumberHistograms()); ++i) {
     PARALLEL_START_INTERRUPT_REGION
     EventList &el = eventW->getSpectrum(i);
 
-    switch (el.getEventType()) {
-    case TOF: {
-      filterEventsHelper(el.getEvents(), minX_val, maxX_val);
-      break;
-    }
-    case WEIGHTED: {
-      filterEventsHelper(el.getWeightedEvents(), minX_val, maxX_val);
-      break;
-    }
-    case WEIGHTED_NOTIME: {
-      filterEventsHelper(el.getWeightedEventsNoTime(), minX_val, maxX_val);
-      break;
-    }
+    if (!el.empty()) {
+      switch (el.getEventType()) {
+      case TOF: {
+        filterEventsHelper(el.getEvents(), minX_val, maxX_val);
+        break;
+      }
+      case WEIGHTED: {
+        filterEventsHelper(el.getWeightedEvents(), minX_val, maxX_val);
+        break;
+      }
+      case WEIGHTED_NOTIME: {
+        filterEventsHelper(el.getWeightedEventsNoTime(), minX_val, maxX_val);
+        break;
+      }
+      }
     }
 
     // If the X axis is NOT common, then keep the initial X axis, just clear the
