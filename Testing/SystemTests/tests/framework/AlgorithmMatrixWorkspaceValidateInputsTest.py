@@ -16,6 +16,6 @@ class AlgorithmMatrixWorkspaceValidateInputsTest(AlgorithmValidateInputsTestBase
 
     def _setup_test(self) -> None:
         self._workspace_type = "MatrixWorkspace"
-        self._exclude_algorithms = ["DNSMergeRuns"]
+        self._exclude_algorithms = []
 
         CreateSampleWorkspace(OutputWorkspace=INPUT_WS_NAME)
