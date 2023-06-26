@@ -111,3 +111,54 @@ class ColorbarWidgetTest(TestCase):
 
             self.assertEqual(c_min, expected_c_min)
             self.assertEqual(c_max, 99)
+
+    def test_invalid_cmax_range_is_reset(self):
+        image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+
+        self.widget.cmax_value = 10
+        # less than cmin_value therefore invalid
+        self.widget.cmax.setText("-10")
+        self.widget.clim_changed()
+
+        self.assertEqual("10", self.widget.cmax.text())
+
+    def test_invalid_cmin_range_is_reset(self):
+        image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+
+        self.widget.cmax_value = 10
+        self.widget.cmin_value = 0
+        # greater than cmax_value therefore invalid
+        self.widget.cmin.setText("20")
+        self.widget.clim_changed()
+
+        self.assertEqual("0", self.widget.cmin.text())
+
+    def test_invalid_cmax_syntax_is_reset(self):
+        image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+
+        self.widget.cmax_value = 10
+        self.widget.cmax.setText("0,1")
+        self.widget.clim_changed()
+
+        self.assertEqual("10", self.widget.cmax.text())
+
+    def test_invalid_cmin_syntax_is_reset(self):
+        image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+
+        self.widget.cmin_value = 0
+        self.widget.cmin.setText("0,1")
+        self.widget.clim_changed()
+
+        self.assertEqual("0", self.widget.cmin.text())

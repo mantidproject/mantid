@@ -328,23 +328,34 @@ class ColorbarWidget(QWidget):
     def _manual_clim(self):
         """Update stored colorbar limits
         The new limits are found from user input"""
-        if self.cmin.hasAcceptableInput():
-            cmin = float(self.cmin.text())
-            if cmin < self.cmax_value:
-                self.cmin_value = cmin
-            else:  # reset values back
-                self.update_clim_text()
-        else:  # reset values back
-            self.update_clim_text()
+        self._update_cmin()
+        self._update_cmax()
 
-        if self.cmax.hasAcceptableInput():
-            cmax = float(self.cmax.text())
-            if cmax > self.cmin_value:
-                self.cmax_value = cmax
-            else:  # reset values back
-                self.update_clim_text()
-        else:  # reset values back
+    def _update_cmin(self):
+        """Attempt to update cmin with user input. Reset to previous value if invalid input"""
+        if not self.cmin.hasAcceptableInput():
             self.update_clim_text()
+            return
+
+        cmin = float(self.cmin.text())
+        if cmin >= self.cmax_value:
+            self.update_clim_text()
+            return
+
+        self.cmin_value = cmin
+
+    def _update_cmax(self):
+        """Attempt to update cmax with user input. Reset to previous value if invalid input"""
+        if not self.cmax.hasAcceptableInput():
+            self.update_clim_text()
+            return
+
+        cmax = float(self.cmax.text())
+        if cmax <= self.cmin_value:
+            self.update_clim_text()
+            return
+
+        self.cmax_value = cmax
 
     def _create_linear_normalize_object(self):
         if self.autoscale.isChecked():
