@@ -59,10 +59,6 @@ public:
   /// base target instrument (mainly used in testing)
   bool isInstrumentDifferent() const { return m_different_instrument_sp; }
 
-protected:
-  Parallel::ExecutionMode
-  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
-
 private:
   /// Initialisation code
   void init() override;

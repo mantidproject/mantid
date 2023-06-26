@@ -38,10 +38,6 @@
 #include <execinfo.h>
 #endif
 
-#ifdef MPI_BUILD
-#include <boost/mpi.hpp>
-#endif
-
 namespace {
 // We use a raw pointer over a unique_ptr to avoid problems with static deallocation order of static
 // variables. In certain circumstances, e.g. unit testing, the shutdown method on FrameworkManager is
@@ -115,11 +111,7 @@ void terminateHandler() {
 #endif
 
 /// Default constructor
-FrameworkManagerImpl::FrameworkManagerImpl()
-#ifdef MPI_BUILD
-    : m_mpi_environment(argc, argv)
-#endif
-{
+FrameworkManagerImpl::FrameworkManagerImpl() {
 #ifdef __linux__
   std::set_terminate(terminateHandler);
 #endif
@@ -143,10 +135,6 @@ FrameworkManagerImpl::FrameworkManagerImpl()
   loadPlugins();
   disableNexusOutput();
   setNumOMPThreadsToConfigValue();
-
-#ifdef MPI_BUILD
-  g_log.notice() << "This MPI process is rank: " << boost::mpi::communicator().rank() << '\n';
-#endif
 
   g_log.debug() << "FrameworkManager created.\n";
 

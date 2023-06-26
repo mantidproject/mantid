@@ -121,14 +121,8 @@ const std::string LOG_LEVEL_KEY("logging.loggers.root.level");
 ConfigServiceImpl::ConfigServiceImpl()
     : m_pConf(nullptr), m_pSysConfig(new Poco::Util::SystemConfiguration()), m_changed_keys(), m_strBaseDir(""),
       m_propertyString(""), m_properties_file_name("Mantid.properties"),
-#ifdef MPI_BUILD
-      // Use a different user properties file for an mpi-enabled build to avoid
-      // confusion if both are used on the same file system
-      m_user_properties_file_name("Mantid-mpi.user.properties"),
-#else
-      m_user_properties_file_name("Mantid.user.properties"),
-#endif
-      m_dataSearchDirs(), m_instrumentDirs(), m_proxyInfo(), m_isProxySet(false) {
+      m_user_properties_file_name("Mantid.user.properties"), m_dataSearchDirs(), m_instrumentDirs(), m_proxyInfo(),
+      m_isProxySet(false) {
   // Register StdChannel with Poco
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
       "StdoutChannel", new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);

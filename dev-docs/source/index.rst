@@ -257,7 +257,6 @@ Component Overviews
 .. toctree::
    :maxdepth: 1
 
-   AlgorithmMPISupport
    BatchWidget/index
    EventWorkspaceDev
    HandlingXML

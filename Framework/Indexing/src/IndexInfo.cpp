@@ -9,8 +9,6 @@
 #include "MantidIndexing/SpectrumNumberTranslator.h"
 #include "MantidKernel/make_cow.h"
 
-#include "MantidParallel/Collectives.h"
-#include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
@@ -21,14 +19,7 @@ namespace Mantid::Indexing {
 
 /// Construct a default IndexInfo, with contiguous spectrum numbers starting at
 /// 1 and no spectrum definitions.
-IndexInfo::IndexInfo(const size_t globalSize, const Parallel::StorageMode &storageMode)
-    : IndexInfo(globalSize, storageMode, Parallel::Communicator{}) {}
-
-/// Construct a default IndexInfo, with contiguous spectrum numbers starting at
-/// 1 and no spectrum definitions.
-IndexInfo::IndexInfo(const size_t globalSize, const Parallel::StorageMode storageMode,
-                     const Parallel::Communicator &communicator)
-    : m_storageMode(storageMode), m_communicator(std::make_unique<Parallel::Communicator>(communicator)) {
+IndexInfo::IndexInfo(const size_t globalSize) {
   // Default to spectrum numbers 1...globalSize
   std::vector<SpectrumNumber> specNums(globalSize);
   std::iota(specNums.begin(), specNums.end(), 1);
@@ -37,14 +28,7 @@ IndexInfo::IndexInfo(const size_t globalSize, const Parallel::StorageMode storag
 
 /// Construct with given spectrum number for each index and no spectrum
 /// definitions.
-IndexInfo::IndexInfo(std::vector<SpectrumNumber> spectrumNumbers, const Parallel::StorageMode storageMode)
-    : IndexInfo(std::move(spectrumNumbers), storageMode, Parallel::Communicator{}) {}
-
-/// Construct with given spectrum number for each index and no spectrum
-/// definitions.
-IndexInfo::IndexInfo(std::vector<SpectrumNumber> spectrumNumbers, const Parallel::StorageMode storageMode,
-                     const Parallel::Communicator &communicator)
-    : m_storageMode(storageMode), m_communicator(std::make_unique<Parallel::Communicator>(communicator)) {
+IndexInfo::IndexInfo(std::vector<SpectrumNumber> spectrumNumbers) {
   makeSpectrumNumberTranslator(std::move(spectrumNumbers));
 }
 
@@ -57,10 +41,7 @@ IndexInfo::IndexInfo(std::vector<SpectrumNumber> spectrumNumbers, const Parallel
  * extract spectrum numbers while maintaining the partitioning, avoiding the
  * need to redistribute data between partitions (MPI ranks). Throws if any of
  * the spectrum numbers is not present in parent. */
-template <class IndexType>
-IndexInfo::IndexInfo(std::vector<IndexType> indices, const IndexInfo &parent)
-    : m_storageMode(parent.m_storageMode),
-      m_communicator(std::make_unique<Parallel::Communicator>(*parent.m_communicator)) {
+template <class IndexType> IndexInfo::IndexInfo(std::vector<IndexType> indices, const IndexInfo &parent) {
   if (const auto parentSpectrumDefinitions = parent.spectrumDefinitions()) {
     m_spectrumDefinitions = Kernel::make_cow<std::vector<SpectrumDefinition>>();
     const auto &indexSet = parent.makeIndexSet(indices);
@@ -74,9 +55,7 @@ IndexInfo::IndexInfo(std::vector<IndexType> indices, const IndexInfo &parent)
 }
 
 IndexInfo::IndexInfo(const IndexInfo &other)
-    : m_storageMode(other.m_storageMode),
-      m_communicator(std::make_unique<Parallel::Communicator>(*other.m_communicator)),
-      m_spectrumDefinitions(other.m_spectrumDefinitions), m_spectrumNumberTranslator(other.m_spectrumNumberTranslator) {
+    : m_spectrumDefinitions(other.m_spectrumDefinitions), m_spectrumNumberTranslator(other.m_spectrumNumberTranslator) {
 }
 
 IndexInfo::IndexInfo(IndexInfo &&) noexcept = default;
@@ -244,86 +223,58 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(const std::vector<size_t> &d
   }
 
   // Global vector of spectrum definitions. For this purpose we do not need
-  // actual definitions which would be hard to transmit via MPI (many small
-  // vectors of unknown length). Either single detector or error flag.
-  std::vector<std::vector<std::pair<int64_t, size_t>>> spectrumDefinitions(communicator().size());
-  auto &thisRankSpectrumDefinitions = spectrumDefinitions[communicator().rank()];
-  thisRankSpectrumDefinitions.resize(size());
+  // actual definitions either single detector or error flag.
+  std::vector<std::pair<int64_t, size_t>> spectrumDefinitions;
+  spectrumDefinitions.resize(size());
   for (size_t i = 0; i < size(); ++i) {
     const auto &spectrumDefinition = m_spectrumDefinitions->operator[](i);
     if (spectrumDefinition.size() == 1) {
       const auto detectorIndex = spectrumDefinition[0].first;
       const auto timeIndex = spectrumDefinition[0].second;
-      thisRankSpectrumDefinitions[i] = std::make_pair(detectorIndex, timeIndex);
+      spectrumDefinitions[i] = std::make_pair(detectorIndex, timeIndex);
     }
     // detectorIndex is unsigned so we can use negative values as error flags.
     if (spectrumDefinition.size() == 0)
-      thisRankSpectrumDefinitions[i] = {-1, 0};
+      spectrumDefinitions[i] = {-1, 0};
     if (spectrumDefinition.size() > 1)
-      thisRankSpectrumDefinitions[i] = {-2, 0};
+      spectrumDefinitions[i] = {-2, 0};
   }
 
-  std::vector<size_t> allSizes;
-  Parallel::gather(communicator(), size(), allSizes, 0);
   std::vector<GlobalSpectrumIndex> spectrumIndices;
-  int tag = 0;
-  if (communicator().rank() == 0) {
-    for (int rank = 1; rank < communicator().size(); ++rank) {
-      spectrumDefinitions[rank].resize(allSizes[rank]);
-      auto buffer = reinterpret_cast<char *>(spectrumDefinitions[rank].data());
-      auto bytes = static_cast<int>(sizeof(std::pair<int64_t, size_t>) * allSizes[rank]);
-      communicator().recv(rank, tag, buffer, bytes);
-    }
-    std::vector<size_t> currentIndex(communicator().size(), 0);
-    for (size_t i = 0; i < globalSize(); ++i) {
-      int rank = static_cast<int>(m_spectrumNumberTranslator->partitionOf(GlobalSpectrumIndex(i)));
-      const auto spectrumDefinition = spectrumDefinitions[rank][currentIndex[rank]++];
-      if (spectrumDefinition.first >= 0) {
-        const auto detectorIndex = static_cast<size_t>(spectrumDefinition.first);
-        const auto timeIndex = static_cast<size_t>(spectrumDefinition.second);
-        if (detectorMap.size() > detectorIndex && detectorMap[detectorIndex].first != 0) {
-          spectrumIndices.emplace_back(i);
-          if (detectorMap[detectorIndex].first == 1) {
-            ++detectorMap[detectorIndex].first;
-          }
-          if (detectorMap[detectorIndex].second.size() <= timeIndex) {
-            detectorMap[detectorIndex].second.resize(timeIndex + 1, {0});
-            detectorMap[detectorIndex].second[timeIndex] = 1;
-          } else {
-            ++detectorMap[detectorIndex].second[timeIndex];
-          }
+  for (size_t i = 0; i < globalSize(); ++i) {
+    const auto spectrumDefinition = spectrumDefinitions[i];
+    if (spectrumDefinition.first >= 0) {
+      const auto detectorIndex = static_cast<size_t>(spectrumDefinition.first);
+      const auto timeIndex = static_cast<size_t>(spectrumDefinition.second);
+      if (detectorMap.size() > detectorIndex && detectorMap[detectorIndex].first != 0) {
+        spectrumIndices.emplace_back(i);
+        if (detectorMap[detectorIndex].first == 1) {
+          ++detectorMap[detectorIndex].first;
+        }
+        if (detectorMap[detectorIndex].second.size() <= timeIndex) {
+          detectorMap[detectorIndex].second.resize(timeIndex + 1, {0});
+          detectorMap[detectorIndex].second[timeIndex] = 1;
+        } else {
+          ++detectorMap[detectorIndex].second[timeIndex];
         }
       }
-      if (spectrumDefinition.first == -2)
-        throw std::runtime_error("SpectrumDefinition contains multiple entries. "
-                                 "No unique mapping from detector to spectrum "
-                                 "possible");
     }
-    for (int rank = 1; rank < communicator().size(); ++rank) {
-      auto buffer = reinterpret_cast<char *>(spectrumIndices.data());
-      auto bytes = static_cast<int>(sizeof(int64_t) * spectrumIndices.size());
-      communicator().send(rank, tag, buffer, bytes);
-    }
-    if (std::any_of(detectorMap.begin(), detectorMap.end(),
-                    [](const std::pair<char, std::vector<char>> &p) { return p.first == 1; })) {
-      throw std::runtime_error("Some of the requested detectors do not have a "
-                               "corresponding spectrum");
-    }
-    if (std::any_of(detectorMap.begin(), detectorMap.end(), [](const std::pair<char, std::vector<char>> &p) {
-          return std::any_of(p.second.begin(), p.second.end(), [](char c) { return c > 1; });
-        })) {
-      throw std::runtime_error("Some of the spectra map to the same detector "
-                               "at the same time index");
-    }
-  } else {
-    auto buffer = reinterpret_cast<char *>(thisRankSpectrumDefinitions.data());
-    auto bytes = static_cast<int>(sizeof(std::pair<int64_t, size_t>) * size());
-    communicator().send(0, tag, buffer, bytes);
-    spectrumIndices.resize(detectorIndices.size());
-    buffer = reinterpret_cast<char *>(spectrumIndices.data());
-    bytes = static_cast<int>(sizeof(int64_t) * spectrumIndices.size());
-    const auto status = communicator().recv(0, tag, buffer, bytes);
-    spectrumIndices.resize(*status.count<int64_t>());
+    if (spectrumDefinition.first == -2)
+      throw std::runtime_error("SpectrumDefinition contains multiple entries. "
+                               "No unique mapping from detector to spectrum "
+                               "possible");
+  }
+
+  if (std::any_of(detectorMap.begin(), detectorMap.end(),
+                  [](const std::pair<char, std::vector<char>> &p) { return p.first == 1; })) {
+    throw std::runtime_error("Some of the requested detectors do not have a "
+                             "corresponding spectrum");
+  }
+  if (std::any_of(detectorMap.begin(), detectorMap.end(), [](const std::pair<char, std::vector<char>> &p) {
+        return std::any_of(p.second.begin(), p.second.end(), [](char c) { return c > 1; });
+      })) {
+    throw std::runtime_error("Some of the spectra map to the same detector "
+                             "at the same time index");
   }
 
   if (detectorIndices.size() > spectrumIndices.size())
@@ -340,30 +291,10 @@ bool IndexInfo::isOnThisPartition(GlobalSpectrumIndex globalIndex) const {
   return helperSet.size() == 1;
 }
 
-/// Returns the storage mode used in MPI runs.
-Parallel::StorageMode IndexInfo::storageMode() const { return m_storageMode; }
-
-/// Returns the communicator used in MPI runs.
-const Parallel::Communicator &IndexInfo::communicator() const { return *m_communicator; }
-
 void IndexInfo::makeSpectrumNumberTranslator(std::vector<SpectrumNumber> &&spectrumNumbers) const {
-  PartitionIndex partition;
-  int numberOfPartitions;
-  if (m_storageMode == Parallel::StorageMode::Distributed) {
-    partition = PartitionIndex(m_communicator->rank());
-    numberOfPartitions = m_communicator->size();
-  } else if (m_storageMode == Parallel::StorageMode::Cloned) {
-    partition = PartitionIndex(0);
-    numberOfPartitions = 1;
-  } else if (m_storageMode == Parallel::StorageMode::MasterOnly) {
-    if (m_communicator->rank() != 0)
-      throw std::runtime_error("IndexInfo: storage mode is " + Parallel::toString(m_storageMode) +
-                               " but creation on non-master rank has been attempted");
-    partition = PartitionIndex(0);
-    numberOfPartitions = 1;
-  } else {
-    throw std::runtime_error("IndexInfo: unknown storage mode " + Parallel::toString(m_storageMode));
-  }
+  PartitionIndex partition = PartitionIndex(0);
+  int numberOfPartitions = 1;
+
   auto partitioner = std::make_unique<RoundRobinPartitioner>(numberOfPartitions, partition,
                                                              Partitioner::MonitorStrategy::TreatAsNormalSpectrum);
   m_spectrumNumberTranslator =

@@ -8,7 +8,7 @@
 
 """ SANSLoad algorithm which handles loading SANS files"""
 
-from mantid.api import ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress, WorkspaceProperty
+from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress, WorkspaceProperty
 from mantid.kernel import Direction, FloatArrayProperty
 from sans.algorithm_detail.load_data import SANSLoadDataFactory
 from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
@@ -17,7 +17,7 @@ from sans.common.enums import SANSDataType
 from sans.state.Serializer import Serializer
 
 
-class SANSLoad(ParallelDataProcessorAlgorithm):
+class SANSLoad(DataProcessorAlgorithm):
     def category(self):
         return "SANS\\Load"
 

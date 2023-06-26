@@ -308,16 +308,4 @@ void AlignDetectors::align(const ConversionFactors &converter, Progress &progres
     eventW->clearMRU();
   }
 }
-
-Parallel::ExecutionMode
-AlignDetectors::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  using namespace Parallel;
-  const auto inputMode = storageModes.at("InputWorkspace");
-  const auto &calibrationMode = storageModes.find("CalibrationWorkspace");
-  if (calibrationMode != storageModes.end())
-    if (calibrationMode->second != StorageMode::Cloned)
-      return ExecutionMode::Invalid;
-  return getCorrespondingExecutionMode(inputMode);
-}
-
 } // namespace Mantid::Algorithms

@@ -7,7 +7,7 @@
 from mantid.api import (
     mtd,
     AlgorithmFactory,
-    DistributedDataProcessorAlgorithm,
+    DataProcessorAlgorithm,
     ITableWorkspaceProperty,
     MatrixWorkspaceProperty,
     MultipleFileProperty,
@@ -126,7 +126,7 @@ def uniqueDescription(name, wksp):
     return "{}={}".format(name, value)
 
 
-class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
+class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
     def category(self):
         return "Diffraction\\Reduction"
 

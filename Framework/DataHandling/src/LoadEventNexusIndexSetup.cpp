@@ -12,7 +12,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/Extract.h"
-#include "MantidIndexing/Scatter.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -43,10 +42,8 @@ void setupConsistentSpectrumNumbers(IndexInfo &filtered, const std::vector<detid
 } // namespace
 
 LoadEventNexusIndexSetup::LoadEventNexusIndexSetup(MatrixWorkspace_const_sptr instrumentWorkspace, const int32_t min,
-                                                   const int32_t max, std::vector<int32_t> range,
-                                                   Parallel::Communicator communicator)
-    : m_instrumentWorkspace(std::move(instrumentWorkspace)), m_min(min), m_max(max), m_range(std::move(range)),
-      m_communicator(std::move(communicator)) {}
+                                                   const int32_t max, std::vector<int32_t> range)
+    : m_instrumentWorkspace(std::move(instrumentWorkspace)), m_min(min), m_max(max), m_range(std::move(range)) {}
 
 std::pair<int32_t, int32_t> LoadEventNexusIndexSetup::eventIDLimits() const { return {m_min, m_max}; }
 
@@ -62,8 +59,7 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo() {
   // We need to filter based on detector IDs, but use IndexInfo for filtering
   // for a unified filtering mechanism. Thus we set detector IDs as (temporary)
   // spectrum numbers.
-  IndexInfo indexInfo(std::vector<SpectrumNumber>(detIDs.begin(), detIDs.end()), Parallel::StorageMode::Cloned,
-                      m_communicator);
+  IndexInfo indexInfo(std::vector<SpectrumNumber>(detIDs.begin(), detIDs.end()));
   indexInfo.setSpectrumDefinitions(specDefs);
 
   auto filtered = filterIndexInfo(indexInfo);
@@ -76,7 +72,7 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo() {
     setupConsistentSpectrumNumbers(filtered, detIDs);
   }
 
-  return scatter(filtered);
+  return filtered;
 }
 
 IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(const std::vector<std::string> &bankNames) {
@@ -104,14 +100,14 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(const std::vector<std::string>
                                "tree; or it did not contain any detectors. Try "
                                "unchecking SingleBankPixelsOnly.");
   }
-  Indexing::IndexInfo indexInfo(std::move(spectrumNumbers), Parallel::StorageMode::Cloned, m_communicator);
+  Indexing::IndexInfo indexInfo(std::move(spectrumNumbers));
   indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
   setupConsistentSpectrumNumbers(indexInfo, instrument->getDetectorIDs(true));
   // Filters are ignored when selecting bank names. Reset min/max to avoid
   // unintended dropping of events in the loader.
   m_min = EMPTY_INT();
   m_max = EMPTY_INT();
-  return scatter(indexInfo);
+  return indexInfo;
 }
 
 IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
@@ -134,9 +130,9 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
         spectrumDefinitions.emplace_back(detectorInfo.indexOf(id));
       }
     }
-    Indexing::IndexInfo indexInfo(spectrumNumbers, Parallel::StorageMode::Cloned, m_communicator);
+    Indexing::IndexInfo indexInfo(spectrumNumbers);
     indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
-    return scatter(indexInfo);
+    return indexInfo;
   } else {
     SpectrumDetectorMapping mapping(spec, udet, monitors);
     auto uniqueSpectra = mapping.getSpectrumNumbers();
@@ -151,18 +147,17 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
         }
       }
     }
-    Indexing::IndexInfo indexInfo(std::vector<Indexing::SpectrumNumber>(uniqueSpectra.begin(), uniqueSpectra.end()),
-                                  Parallel::StorageMode::Cloned, m_communicator);
+    Indexing::IndexInfo indexInfo(std::vector<Indexing::SpectrumNumber>(uniqueSpectra.begin(), uniqueSpectra.end()));
     indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
-    return scatter(filterIndexInfo(indexInfo));
+    return filterIndexInfo(indexInfo);
   }
 }
 
 /** Filter IndexInfo based on optional spectrum range/list provided.
  *
  * Checks the validity of user provided spectrum range/list. This method assumes
- * that spectrum numbers in `indexInfo` argument are sorted and that the
- * Parallel::StorageMode of `indexInfo` is `Cloned`. */
+ * that spectrum numbers in `indexInfo` argument are sorted
+ */
 IndexInfo LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
   // Check if range [SpectrumMin, SpectrumMax] was supplied
   if (m_min != EMPTY_INT() || m_max != EMPTY_INT()) {

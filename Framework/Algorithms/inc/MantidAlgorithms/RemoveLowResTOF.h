@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/IComponent.h"
@@ -14,7 +14,7 @@
 namespace Mantid {
 
 namespace Algorithms {
-class MANTID_ALGORITHMS_DLL RemoveLowResTOF : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL RemoveLowResTOF : public API::Algorithm {
 public:
   RemoveLowResTOF();
   const std::string name() const override;

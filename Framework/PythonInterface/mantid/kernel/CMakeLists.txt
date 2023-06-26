@@ -93,18 +93,9 @@ if(WIN32) # .lib -> .dll
   string(REPLACE "/lib/" "/bin/" NEXUSLIB ${NEXUSLIB})
   string(REPLACE ".lib" ".dll" NEXUSLIB ${NEXUSLIB})
 endif()
-set(MPISETUP_PY mpisetup)
-if(MPI_EXPERIMENTAL)
-  set(IMPORT_MPI_IN_PYTHON True)
-else()
-  set(IMPORT_MPI_IN_PYTHON False)
-endif()
 
 # Build version
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py)
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py)
-
 # Package version
 if(WIN32)
   # NeXus library is in the same place relative to the Python library
@@ -114,7 +105,6 @@ endif()
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py
 )
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py)
 
 # Add a precompiled header where they are supported
 list(APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
@@ -153,14 +143,4 @@ mtd_install_files(
   ${WORKBENCH_SITE_PACKAGES}/mantid/kernel
   RENAME
   ${PACKAGESETUP_PY}.py
-)
-
-mtd_install_files(
-  FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py
-  INSTALL_DIRS
-  ${SITE_PACKAGES}/mantid/kernel
-  ${WORKBENCH_SITE_PACKAGES}/mantid/kernel
-  RENAME
-  ${MPISETUP_PY}.py
 )

@@ -18,8 +18,6 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
-#include "MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h"
-#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ExtractSpectra;
@@ -28,52 +26,6 @@ using namespace API;
 using namespace Kernel;
 using namespace DataObjects;
 using namespace HistogramData;
-
-namespace {
-void run_parallel_DetectorList_fails(const Parallel::Communicator &comm) {
-  Indexing::IndexInfo indexInfo(1000, Parallel::StorageMode::Distributed, comm);
-  auto alg = ParallelTestHelpers::create<ExtractSpectra>(comm);
-  alg->setProperty("InputWorkspace", create<Workspace2D>(indexInfo, Points(1)));
-  alg->setProperty("DetectorList", "1");
-  if (comm.size() == 1) {
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-  } else {
-    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e, std::string(e.what()),
-                            "MatrixWorkspace: Using getIndicesFromDetectorIDs in "
-                            "a parallel run is most likely incorrect. Aborting.");
-  }
-}
-
-void run_parallel_WorkspaceIndexList(const Parallel::Communicator &comm) {
-  Indexing::IndexInfo indexInfo(1000, Parallel::StorageMode::Distributed, comm);
-  auto alg = ParallelTestHelpers::create<ExtractSpectra>(comm);
-  alg->setProperty("InputWorkspace", create<Workspace2D>(indexInfo, Points(1)));
-  alg->setProperty("WorkspaceIndexList", "0-" + std::to_string(comm.size()));
-  TS_ASSERT_THROWS_NOTHING(alg->execute());
-  MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
-  TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
-  if (comm.rank() == 0) {
-    TS_ASSERT_EQUALS(out->getNumberHistograms(), 2);
-  } else {
-    TS_ASSERT_EQUALS(out->getNumberHistograms(), 1);
-  }
-}
-
-void run_parallel_WorkspaceIndexRange(const Parallel::Communicator &comm) {
-  Indexing::IndexInfo indexInfo(3 * comm.size(), Parallel::StorageMode::Distributed, comm);
-  auto alg = ParallelTestHelpers::create<ExtractSpectra>(comm);
-  alg->setProperty("InputWorkspace", create<Workspace2D>(indexInfo, Points(1)));
-  alg->setProperty("StartWorkspaceIndex", std::to_string(comm.size() + 1));
-  TS_ASSERT_THROWS_NOTHING(alg->execute());
-  MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
-  TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
-  if (comm.rank() == 0) {
-    TS_ASSERT_EQUALS(out->getNumberHistograms(), 1);
-  } else {
-    TS_ASSERT_EQUALS(out->getNumberHistograms(), 2);
-  }
-}
-} // namespace
 
 class ExtractSpectraTest : public CxxTest::TestSuite {
 private:
@@ -490,10 +442,6 @@ public:
         params,
         "Some invalid Properties found: \n XMax: XMax must be greater than XMin\n XMin: XMin must be less than XMax");
   }
-
-  void test_parallel_DetectorList_fails() { ParallelTestHelpers::runParallel(run_parallel_DetectorList_fails); }
-  void test_parallel_WorkspaceIndexList() { ParallelTestHelpers::runParallel(run_parallel_WorkspaceIndexList); }
-  void test_parallel_WorkspaceIndexRange() { ParallelTestHelpers::runParallel(run_parallel_WorkspaceIndexRange); }
 
   // ----- Slice tests -----
   // These tests have been copied from the old SliceTest.h after the Slice function was replaced by

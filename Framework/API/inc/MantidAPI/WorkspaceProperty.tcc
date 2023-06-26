@@ -216,27 +216,13 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
       Mantid::API::Workspace_sptr wksp;
       // if the workspace name is empty then there is no point asking the ADS
       if (m_workspaceName.empty()) {
-        // If workspace is null on a non-master rank this usually indicates that
-        // this is a MasterOnly workspace and algorithm execution. In cases
-        // where the workspace is null for other reasons we can rely on the
-        // master rank failing.
-        if (!m_isMasterRank)
-          return {};
-        else
-          return isOptionalWs();
+        return isOptionalWs();
       }
 
       try {
         wksp = AnalysisDataService::Instance().retrieve(m_workspaceName);
       } catch (Kernel::Exception::NotFoundError &) {
-        // Check to see if the workspace is not logged with the ADS because it
-        // is optional.
-        // Similar to above, if the workspace is not in the ADS this indicates
-        // MasterOnly workspace and execution.
-        if (!m_isMasterRank)
-          return {};
-        else
-          return isOptionalWs();
+        return isOptionalWs();
       }
 
       // At this point we have a valid pointer to a Workspace so we need to
@@ -333,7 +319,7 @@ template <typename TYPE> bool WorkspaceProperty<TYPE>::store() {
     if (this->operator()()) {
       // Note use of addOrReplace rather than add
       API::AnalysisDataService::Instance().addOrReplace(m_workspaceName, this->operator()());
-    } else if (m_isMasterRank) {
+    } else {
       throw std::runtime_error("WorkspaceProperty doesn't point to a workspace");
     }
     result = true;
@@ -345,11 +331,6 @@ template <typename TYPE> bool WorkspaceProperty<TYPE>::store() {
 }
 
 template <typename TYPE> Workspace_sptr WorkspaceProperty<TYPE>::getWorkspace() const { return this->operator()(); }
-
-/// Sets a flag indicating whether this is the master rank in MPI builds.
-template <typename TYPE> void WorkspaceProperty<TYPE>::setIsMasterRank(bool isMasterRank) {
-  m_isMasterRank = isMasterRank;
-}
 
 /** Checks whether the entered workspace group is valid.
  *  To be valid *all* members of the group have to be valid.

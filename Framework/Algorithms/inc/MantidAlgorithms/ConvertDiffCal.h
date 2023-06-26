@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -15,7 +15,7 @@ namespace Algorithms {
 
 /** ConvertDiffCal : TODO: DESCRIPTION
  */
-class MANTID_ALGORITHMS_DLL ConvertDiffCal : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL ConvertDiffCal : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

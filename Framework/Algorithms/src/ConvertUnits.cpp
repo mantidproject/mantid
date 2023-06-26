@@ -20,7 +20,6 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidParallel/Communicator.h"
 
 #include <numeric>
 
@@ -500,8 +499,6 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
 
 /// Calls Rebin as a Child Algorithm to align the bins
 API::MatrixWorkspace_sptr ConvertUnits::alignBins(const API::MatrixWorkspace_sptr &workspace) {
-  if (communicator().size() != 1)
-    throw std::runtime_error("ConvertUnits: Parallel support for aligning bins not implemented.");
   // Create a Rebin child algorithm
   auto childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);

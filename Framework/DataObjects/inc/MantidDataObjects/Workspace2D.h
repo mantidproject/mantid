@@ -34,7 +34,7 @@ public:
    */
   const std::string id() const override { return "Workspace2D"; }
 
-  Workspace2D(const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
+  Workspace2D();
   Workspace2D &operator=(const Workspace2D &other) = delete;
   ~Workspace2D() override;
 

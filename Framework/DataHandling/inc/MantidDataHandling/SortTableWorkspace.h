@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
@@ -14,7 +14,7 @@ namespace DataHandling {
 
 /** SortTableWorkspace : TODO: DESCRIPTION
  */
-class MANTID_DATAHANDLING_DLL SortTableWorkspace : public API::ParallelAlgorithm {
+class MANTID_DATAHANDLING_DLL SortTableWorkspace : public API::Algorithm {
 public:
   const std::string name() const override { return "SortTableWorkspace"; }
   int version() const override;

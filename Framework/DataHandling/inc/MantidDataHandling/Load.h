@@ -41,10 +41,6 @@ public:
   /// Override setPropertyValue
   void setPropertyValue(const std::string &name, const std::string &value) override;
 
-protected:
-  Parallel::ExecutionMode
-  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
-
 private:
   /// This method returns shared pointer to a load algorithm which got
   /// the highest preference after file check.

@@ -25,7 +25,7 @@ perform it's task.
 Takes a workspace as input and the filename of a grouping file of a suitable
 format.
 */
-class DLLExport AlignAndFocusPowder : public API::DistributedDataProcessorAlgorithm {
+class DLLExport AlignAndFocusPowder : public API::DataProcessorAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "AlignAndFocusPowder"; }
