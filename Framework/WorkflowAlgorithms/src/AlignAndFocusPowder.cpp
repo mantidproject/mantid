@@ -754,6 +754,14 @@ void AlignAndFocusPowder::exec() {
       if (m_processLowResTOF)
         m_lowResW = rebin(m_lowResW);
     } else if (!m_delta_ragged.empty()) {
+      // to speed up RebinRagged later, sort events once here
+      // making RebinRagged faster when preserveEvents=False would be better
+      if (!m_preserveEvents) {
+        doSortEvents(m_outputW);
+        if (m_processLowResTOF)
+          doSortEvents(m_lowResW);
+      }
+
       m_outputW = rebinRagged(m_outputW, true);
       if (m_processLowResTOF)
         m_lowResW = rebinRagged(m_lowResW, true);
