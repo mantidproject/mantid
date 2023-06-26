@@ -40,7 +40,7 @@ using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using API::WorkspaceProperty;
 
-namespace {
+namespace { // anonymous namespace
 namespace PropertyNames {
 const std::string INPUT_WKSP("InputWorkspace");
 const std::string OUTPUT_WKSP("OutputWorkspace");
@@ -81,7 +81,15 @@ const std::string UNWRAP_REF("UnwrapRef");
 const std::string LOWRES_REF("LowResRef");
 const std::string LOWRES_SPEC_OFF("LowResSpectrumOffset");
 } // namespace PropertyNames
-} // namespace
+
+void getTofRange(const MatrixWorkspace_const_sptr &wksp, double &tmin, double &tmax) {
+  if (const auto eventWksp = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp)) {
+    eventWksp->getEventXMinMax(tmin, tmax);
+  } else {
+    wksp->getXMinMax(tmin, tmax);
+  }
+}
+} // anonymous namespace
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(AlignAndFocusPowder)
@@ -501,21 +509,27 @@ void AlignAndFocusPowder::exec() {
   }
   m_progress->report();
 
+  // hold onto over tof range for CropWorkspace(tof) and RemovePromptPulse
+  double tofmin = EMPTY_DBL();
+  double tofmax = EMPTY_DBL();
+
   // crop the workspace in time-of-flight
   if (xmin >= 0. || xmax > 0.) {
-    double tempmin;
-    double tempmax;
-    m_outputW->getXMinMax(tempmin, tempmax);
+    getTofRange(m_outputW, tofmin, tofmax);
 
     g_log.information() << "running CropWorkspace(TOFmin=" << xmin << ", TOFmax=" << xmax << ") started at "
                         << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
     cropAlg->setProperty("InputWorkspace", m_outputW);
     cropAlg->setProperty("OutputWorkspace", m_outputW);
-    if ((xmin >= 0.) && (xmin > tempmin))
+    if ((xmin >= 0.) && (xmin > tofmin)) {
       cropAlg->setProperty("Xmin", xmin);
-    if ((xmax > 0.) && (xmax < tempmax))
+      tofmin = xmin; // increase value
+    }
+    if ((xmax > 0.) && (xmax < tofmax)) {
       cropAlg->setProperty("Xmax", xmax);
+      tofmax = xmax;
+    }
     cropAlg->executeAsChildAlg();
     m_outputW = cropAlg->getProperty("OutputWorkspace");
     m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
@@ -533,6 +547,12 @@ void AlignAndFocusPowder::exec() {
       filterPAlg->setProperty("InputWorkspace", m_outputW);
       filterPAlg->setProperty("OutputWorkspace", m_outputW);
       filterPAlg->setProperty("Width", removePromptPulseWidth);
+
+      // if some of the range was known in CropWorkspace-TOF, use it again here
+      // they default to EMPTY_DBL which the alg interprets as unset
+      filterPAlg->setProperty("TMin", tofmin);
+      filterPAlg->setProperty("TMax", tofmax);
+
       filterPAlg->executeAsChildAlg();
       m_outputW = filterPAlg->getProperty("OutputWorkspace");
       m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);

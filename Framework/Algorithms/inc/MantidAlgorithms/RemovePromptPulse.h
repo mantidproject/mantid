@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Run.h"
 #include "MantidAlgorithms/DllConfig.h"
 
@@ -41,6 +42,7 @@ private:
   void exec() override;
   /// Try to get the frequency from a given name.
   double getFrequency(const API::Run &run);
+  void getTofRange(const API::MatrixWorkspace_const_sptr &wksp, double &tmin, double &tmax);
   std::vector<double> calculatePulseTimes(const double tmin, const double tmax, const double period);
 };
 
