@@ -10,6 +10,7 @@ from mantid.api import (
     PropertyMode,
     WorkspaceGroupProperty,
     Progress,
+    IMDEventWorkspace,
     mtd,
     SpectraAxis,
     WorkspaceGroup,
@@ -347,7 +348,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup("CorrectionsWorkspace", "Output Options")
 
     def PyExec(self):
-
         self.log().warning("CalculateMonteCarloAbsorption is deprecated, please use PaalmanPingsMonteCarloAbsorption instead.")
 
         # set up progress reporting
@@ -492,21 +492,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setProperty("CorrectionsWorkspace", self._output_ws)
 
     def _setup(self):
-
         # The beam properties and monte carlo properties are simply passed straight on to the
         # SimpleShapeMonteCarloAbsorptionCorrection algorithm so they are being put into
         # a dictionary for simplicity
-        self._sample_ws = self.getProperty("SampleWorkspace").value
-        self._container_ws = self.getProperty("ContainerWorkspace").value
-        sample_is_group = isinstance(self._sample_ws, WorkspaceGroup)
-        container_is_group = isinstance(self._container_ws, WorkspaceGroup)
-
-        # Currently we cannot support workspace groups because the output of the child
-        # algorithm is a workspace group. This causes a crash in the ADS when this
-        # algorithm attempts to put a workspace group into another workspace group
-        if sample_is_group or container_is_group:
-            raise RuntimeError("CalculateMonteCarloAbsorption does not currently support" " WorkspaceGroups")
-
         self._general_kwargs = {
             "BeamHeight": self.getProperty("BeamHeight").value,
             "BeamWidth": self.getProperty("BeamWidth").value,
@@ -578,7 +566,24 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self._set_can_method = "Chemical Formula" if self._container_chemical_formula != "" else "Cross Sections"
 
     def validateInputs(self):
+        self._sample_ws = self.getProperty("SampleWorkspace").value
+        self._container_ws = self.getProperty("ContainerWorkspace").value
+
+        # Currently we cannot support workspace groups because the output of the child
+        # algorithm is a workspace group. This causes a crash in the ADS when this
+        # algorithm attempts to put a workspace group into another workspace group
         issues = dict()
+        if isinstance(self._sample_ws, WorkspaceGroup):
+            issues["SampleWorkspace"] = "The SampleWorkspace cannot be a 'WorkspaceGroup' type."
+        if isinstance(self._sample_ws, IMDEventWorkspace):
+            issues["SampleWorkspace"] = "The SampleWorkspace cannot be a 'IMDEventWorkspace' type."
+        if isinstance(self._container_ws, WorkspaceGroup):
+            issues["ContainerWorkspace"] = "The ContainerWorkspace cannot be a 'WorkspaceGroup' type."
+        if isinstance(self._container_ws, IMDEventWorkspace):
+            issues["ContainerWorkspace"] = "The ContainerWorkspace cannot be a 'IMDEventWorkspace' type."
+
+        if issues:
+            return issues
 
         try:
             self._setup()
@@ -660,7 +665,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         # ----- Indirect Elastic Conversions -----
 
         if self._emode == "Indirect":
-
             if x_unit == "MomentumTransfer":
                 self._transposed = True
                 return self._create_waves_indirect_elastic(self._tranpose_ws(workspace))
