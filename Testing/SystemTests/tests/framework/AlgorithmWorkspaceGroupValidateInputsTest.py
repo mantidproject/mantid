@@ -6,17 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
 
-from AlgorithmDialogsStartupTestBase import AlgorithmDialogsStartupTestBase
+from AlgorithmValidateInputsTestBase import AlgorithmValidateInputsTestBase, INPUT_WS_NAME
 
 
-class AlgorithmDialogsWorkspaceGroupStartupTest(AlgorithmDialogsStartupTestBase):
+class AlgorithmWorkspaceGroupValidateInputsTest(AlgorithmValidateInputsTestBase):
     """
-    A system test for testing that the Algorithm Dialogs open ok with a WorkspaceGroup in the ADS.
+    A system test for testing that the Algorithm validateInputs method works with a WorkspaceGroup in the ADS.
     """
 
     def _setup_test(self) -> None:
         self._workspace_type = "WorkspaceGroup"
+        self._exclude_algorithms = ["BayesStretch", "CalculateMonteCarloAbsorption", "DNSFlippingRatioCorr", "MatchPeaks", "Mean"]
 
         ws1 = CreateSampleWorkspace()
         ws2 = CreateSampleWorkspace()
-        GroupWorkspaces(InputWorkspaces=[ws1, ws2], OutputWorkspace="group")
+        GroupWorkspaces(InputWorkspaces=[ws1, ws2], OutputWorkspace=INPUT_WS_NAME)
