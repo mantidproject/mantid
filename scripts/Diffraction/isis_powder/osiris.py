@@ -260,6 +260,16 @@ class Osiris(AbstractInst):
         return paalman_corrected
 
     def _apply_discus_multiple_scattering(self, ws_to_correct):
+        if self._inst_settings.neutron_paths_single:
+            neutron_paths_single = int(self._inst_settings.neutron_paths_single)
+        else:
+            neutron_paths_single = 100
+
+        if self._inst_settings.neutron_paths_multiple:
+            neutron_paths_multiple = int(self._inst_settings.neutron_paths_multiple)
+        else:
+            neutron_paths_multiple = 100
+
         X = [1.0]
         Y = [1.0]
         Sofq_isotropic = mantid.CreateWorkspace(DataX=X, DataY=Y, UnitX="MomentumTransfer")
@@ -269,8 +279,8 @@ class Osiris(AbstractInst):
         mantid.DiscusMultipleScatteringCorrection(
             InputWorkspace=ws_to_correct,
             StructureFactorWorkspace=Sofq_isotropic,
-            NeutronPathsSingle=100,
-            NeutronPathsMultiple=100,
+            NeutronPathsSingle=neutron_paths_single,
+            NeutronPathsMultiple=neutron_paths_multiple,
             OutputWorkspace="MSResults",
         )
 
