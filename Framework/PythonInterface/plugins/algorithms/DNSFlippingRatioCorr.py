@@ -211,8 +211,12 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         for key in workspaces.keys():
             workspaces[key] = self.getProperty(key).value
 
-        # dimensions must match
         datasf = self.getProperty("SFDataWorkspace").value
+        if datasf is None:
+            issues["SFDataWorkspace"] = "SFDataWorkspace must be a MatrixWorkspace"
+            return issues
+
+        # dimensions must match
         ndims = datasf.getNumDims()
         nhists = datasf.getNumberHistograms()
         nblocks = datasf.blocksize()
