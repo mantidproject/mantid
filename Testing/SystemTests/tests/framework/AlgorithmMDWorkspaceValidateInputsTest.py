@@ -16,7 +16,7 @@ class AlgorithmMDWorkspaceValidateInputsTest(AlgorithmValidateInputsTestBase):
 
     def _setup_test(self) -> None:
         self._workspace_type = "MDWorkspace"
-        self._exclude_algorithms = ["HB3AIntegratePeaks"]
+        self._exclude_algorithms = []
 
         CreateMDWorkspace(
             Dimensions="3",

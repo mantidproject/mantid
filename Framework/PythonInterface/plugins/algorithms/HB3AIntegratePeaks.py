@@ -113,13 +113,14 @@ class HB3AIntegratePeaks(PythonAlgorithm):
             issues["InputWorkspace"] = "The same number of PeaksWorkspace must be provided as InputWorkspace"
 
         for input_ws in input_workspaces:
-            if not (isinstance(AnalysisDataService[input_ws], MultipleExperimentInfos)):
+            workspace = AnalysisDataService[input_ws]
+            if not (isinstance(workspace, MultipleExperimentInfos)):
                 issues["InputWorkspace"] = "Workspace need to be a MDEventWorkspace"
-            elif AnalysisDataService[input_ws].getSpecialCoordinateSystem().name != "QSample":
+            elif workspace.getSpecialCoordinateSystem().name != "QSample":
                 issues["InputWorkspace"] = "Input workspace expected to be in QSample, " "workspace is in '{}'".format(
-                    input_ws.getSpecialCoordinateSystem().name
+                    workspace.getSpecialCoordinateSystem().name
                 )
-            elif AnalysisDataService[input_ws].getNumDims() != 3:
+            elif workspace.getNumDims() != 3:
                 issues["InputWorkspace"] = "Workspace has the wrong number of dimensions"
 
         for peak_ws in peak_workspaces:
