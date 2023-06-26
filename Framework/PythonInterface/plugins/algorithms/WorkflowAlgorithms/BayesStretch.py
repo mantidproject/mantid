@@ -86,13 +86,19 @@ class BayesStretch(PythonAlgorithm):
         if self._e_min > self._e_max:
             issues["EMax"] = "Must be less than EnergyMin"
 
-        # Validate fitting range within data range
-        data_min = self._sam_ws.readX(0)[0]
-        if self._e_min < data_min:
-            issues["EMin"] = "EMin must be more than the minimum x range of the data."
-        data_max = self._sam_ws.readX(0)[-1]
-        if self._e_max > data_max:
-            issues["EMax"] = "EMax must be less than the maximum x range of the data"
+        if self._res_ws is None:
+            issues["ResolutionWorkspace"] = "Must be a MatrixWorkspace"
+
+        if self._sam_ws is None:
+            issues["SampleWorkspace"] = "Must be a MatrixWorkspace"
+        else:
+            # Validate fitting range within data range
+            data_min = self._sam_ws.readX(0)[0]
+            if self._e_min < data_min:
+                issues["EMin"] = "EMin must be more than the minimum x range of the data."
+            data_max = self._sam_ws.readX(0)[-1]
+            if self._e_max > data_max:
+                issues["EMax"] = "EMax must be less than the maximum x range of the data"
 
         return issues
 
@@ -332,6 +338,7 @@ class BayesStretch(PythonAlgorithm):
         self._sam_name = self.getPropertyValue("SampleWorkspace")
         self._sam_ws = self.getProperty("SampleWorkspace").value
         self._res_name = self.getPropertyValue("ResolutionWorkspace")
+        self._res_ws = self.getProperty("ResolutionWorkspace").value
         self._e_min = self.getProperty("EMin").value
         self._e_max = self.getProperty("EMax").value
         self._sam_bins = self.getPropertyValue("SampleBins")
