@@ -123,7 +123,7 @@ class ColorbarWidgetTest(TestCase):
         self.widget.cmax.setText("-10")
         self.widget.clim_changed()
 
-        self.assertEqual("10", self.widget.cmax.text())
+        self.assertEqual("10.0", self.widget.cmax.text())
 
     def test_invalid_cmin_range_is_reset(self):
         image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
@@ -137,7 +137,7 @@ class ColorbarWidgetTest(TestCase):
         self.widget.cmin.setText("20")
         self.widget.clim_changed()
 
-        self.assertEqual("0", self.widget.cmin.text())
+        self.assertEqual("0.0", self.widget.cmin.text())
 
     def test_invalid_cmax_syntax_is_reset(self):
         image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
@@ -149,7 +149,7 @@ class ColorbarWidgetTest(TestCase):
         self.widget.cmax.setText("0,1")
         self.widget.clim_changed()
 
-        self.assertEqual("10", self.widget.cmax.text())
+        self.assertEqual("10.0", self.widget.cmax.text())
 
     def test_invalid_cmin_syntax_is_reset(self):
         image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
@@ -161,4 +161,4 @@ class ColorbarWidgetTest(TestCase):
         self.widget.cmin.setText("0,1")
         self.widget.clim_changed()
 
-        self.assertEqual("0", self.widget.cmin.text())
+        self.assertEqual("0.0", self.widget.cmin.text())
