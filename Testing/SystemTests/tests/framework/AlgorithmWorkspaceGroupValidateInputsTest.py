@@ -16,7 +16,6 @@ class AlgorithmWorkspaceGroupValidateInputsTest(AlgorithmValidateInputsTestBase)
 
     def _setup_test(self) -> None:
         self._workspace_type = "WorkspaceGroup"
-        self._exclude_algorithms = []
 
         ws1 = CreateSampleWorkspace()
         ws2 = CreateSampleWorkspace()

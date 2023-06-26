@@ -39,9 +39,8 @@ class AlgorithmValidateInputsTestBase(MantidSystemTest, metaclass=ABCMeta):
         print(f"Running the Algorithm{self._workspace_type}ValidateInputsTest with a {self._workspace_type} in the ADS")
 
         for algorithm_name in self._unique_algorithm_names:
-            if algorithm_name not in self._exclude_algorithms:
-                print(algorithm_name)  # Useful for debugging
-                self._attempt_validate_inputs(algorithm_name)
+            print(algorithm_name)  # Useful for debugging
+            self._attempt_validate_inputs(algorithm_name)
 
     def _attempt_validate_inputs(self, algorithm_name: str) -> None:
         """Attempt to validate the inputs for the most recent version of the algorithm provided."""
