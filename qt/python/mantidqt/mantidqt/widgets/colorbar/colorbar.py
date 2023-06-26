@@ -341,7 +341,13 @@ class ColorbarWidget(QWidget):
             self.update_clim_text()
             return
 
-        cmin = float(self.cmin.text())
+        # QDoubleValidator can let through some things like 0,111
+        try:
+            cmin = float(self.cmin.text())
+        except ValueError:
+            self.update_clim_text()
+            return
+
         if cmin >= self.cmax_value:
             self.update_clim_text()
             return
@@ -354,7 +360,12 @@ class ColorbarWidget(QWidget):
             self.update_clim_text()
             return
 
-        cmax = float(self.cmax.text())
+        try:
+            cmax = float(self.cmax.text())
+        except ValueError:
+            self.update_clim_text()
+            return
+
         if cmax <= self.cmin_value:
             self.update_clim_text()
             return
