@@ -68,7 +68,9 @@ class ColorbarWidget(QWidget):
         self.cmin = QLineEdit()
         self.cmin_value = 0
         self.cmin.setMaximumWidth(100)
+        self.cmin_default_style_sheet = self.cmin.styleSheet()
         self.cmin.editingFinished.connect(self.clim_changed)
+        self.cmin.textEdited.connect(self._set_cmin_box_outline)
         self.cmin_layout = QHBoxLayout()
         self.cmin_layout.addStretch()
         self.cmin_layout.addWidget(self.cmin)
@@ -79,7 +81,9 @@ class ColorbarWidget(QWidget):
         self.cmax = QLineEdit()
         self.cmax_value = 1
         self.cmax.setMaximumWidth(100)
+        self.cmax_default_style_sheet = self.cmax.styleSheet()
         self.cmax.editingFinished.connect(self.clim_changed)
+        self.cmax.textEdited.connect(self._set_cmax_box_outline)
         self.cmax_layout = QHBoxLayout()
         self.cmax_layout.addStretch()
         self.cmax_layout.addWidget(self.cmax)
@@ -400,3 +404,15 @@ class ColorbarWidget(QWidget):
         if not self.norm.model().item(option_index, 0).isEnabled():
             self.norm.model().item(option_index, 0).setEnabled(True)
             self.norm.setItemData(option_index, "", Qt.ToolTipRole)
+
+    def _set_cmax_box_outline(self):
+        if not self.cmax.hasAcceptableInput():
+            self.cmax.setStyleSheet("border: 1px solid red")
+        else:
+            self.cmax.setStyleSheet(self.cmax_default_style_sheet)
+
+    def _set_cmin_box_outline(self):
+        if not self.cmin.hasAcceptableInput():
+            self.cmin.setStyleSheet("border: 1px solid red")
+        else:
+            self.cmin.setStyleSheet(self.cmin_default_style_sheet)
