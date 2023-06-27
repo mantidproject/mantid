@@ -319,7 +319,7 @@ def _perform_absolute_normalization(spline, ws):
 
     sample_material = ws.sample().getMaterial()
     sample_number_density = sample_material.numberDensityEffective
-    sample_shape = spline.sample().getShape()
+    sample_shape = ws.sample().getShape()
     num_sample_atoms = sample_shape.volume() * sample_number_density
 
     abs_norm_factor = v_cross_section * num_v_atoms / (num_sample_atoms * 4 * math.pi)
