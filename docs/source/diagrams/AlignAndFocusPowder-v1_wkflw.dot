@@ -25,13 +25,13 @@ digraph AlignAndFocusPowder {
     clearDiffCal      [label="ApplyDiffCal v1\nClear parameters"]
     compressEvents    [label="CompressEvents v1"]
     compressEvents2   [label="CompressEvents v1"]
-    convertUnits1     [label="ConvertUnits v1\nTime-of-Flight"]
-    convertUnits2     [label="ConvertUnits v1\nd-spacing"]
-    convertUnits3     [label="ConvertUnits v1\nTime-of-Flight"]
-    convertUnits4     [label="ConvertUnits v1\nd-spacing"]
-    convertUnits5     [label="ConvertUnits v1\nwavelength"]
-    convertUnits6     [label="ConvertUnits v1\nd-spacing"]
-    convertUnits7     [label="ConvertUnits v1\nwavelength"]
+    convertUnitsTof1     [label="ConvertUnits v1\nTime-of-Flight"]
+    convertUnitsTof2     [label="ConvertUnits v1\nTime-of-Flight"]
+    convertUnitsD1     [label="ConvertUnits v1\nd-spacing"]
+    convertUnitsD2     [label="ConvertUnits v1\nd-spacing"]
+    convertUnitsD3     [label="ConvertUnits v1\nd-spacing"]
+    convertUnitsWL1     [label="ConvertUnits v1\nwavelength"]
+    convertUnitsWL2     [label="ConvertUnits v1\nwavelength"]
     cropWorkspaceTof  [label="CropWorkspace v1\ntof range"]
     cropWorkspaceWL   [label="CropWorkspace v1\nwavelength range"]
     diffFocus         [label="DiffractionFocussing v2"]
@@ -58,8 +58,8 @@ digraph AlignAndFocusPowder {
     isDspace1         [label="Is d-space binning?"]
     isDspace2         [label="Is d-space binning?"]
     isDspace3         [label="Is d-space binning?"]
-    ifParams          [label="LRef specified?"]
-    ifParams2          [label="DIFCref specified?"]
+    ifLref          [label="LRef specified?"]
+    ifDIFCref          [label="DIFCref specified?"]
     ifRaggedTof       [label="ragged rebin\nand tof binning"]
   }
 
@@ -87,36 +87,36 @@ digraph AlignAndFocusPowder {
 
   hasCalibration         -> applyDiffCal         [label="Yes"]
   CalibrationWorkspace   -> applyDiffCal
-  applyDiffCal           -> convertUnits4
-  hasCalibration         -> convertUnits4        [label="No"]
-  convertUnits4          -> clearDiffCal
+  applyDiffCal           -> convertUnitsD2
+  hasCalibration         -> convertUnitsD2        [label="No"]
+  convertUnitsD2          -> clearDiffCal
 
   clearDiffCal           -> hasResonance
   hasResonance           -> lorentz              [label="No"]
-  hasResonance           -> convertUnits5        [label="Yes"]
-  convertUnits5          -> maskBins
-  maskBins               -> convertUnits6
-  convertUnits6          -> lorentz
+  hasResonance           -> convertUnitsWL1        [label="Yes"]
+  convertUnitsWL1          -> maskBins
+  maskBins               -> convertUnitsD3
+  convertUnitsD3          -> lorentz
 
-  lorentz                -> ifParams
+  lorentz                -> ifLref
 
-  ifParams               -> convertUnits7            [label="No"]
-  cropWorkspaceWL        -> convertUnits2
+  ifLref               -> convertUnitsWL2            [label="No"]
+  cropWorkspaceWL        -> convertUnitsD1
 
-  convertUnits2          -> isDspace2
+  convertUnitsD1          -> isDspace2
 
-  ifParams               -> convertUnits1        [label="Yes"]
-  convertUnits1          -> unwrapSNS
+  ifLref               -> convertUnitsTof1        [label="Yes"]
+  convertUnitsTof1          -> unwrapSNS
   UnwrapRef              -> unwrapSNS
-  unwrapSNS              -> convertUnits7
-  convertUnits7 -> ifParams2
+  unwrapSNS              -> convertUnitsWL2
+  convertUnitsWL2 -> ifDIFCref
 
 
-  ifParams2 -> cropWorkspaceWL  [label="No"]
-  ifParams2 -> removeLowResTOF  [label="Yes"]
+  ifDIFCref -> cropWorkspaceWL  [label="No"]
+  ifDIFCref -> removeLowResTOF  [label="Yes"]
 
   LowResRef              -> removeLowResTOF
-  removeLowResTOF        -> convertUnits2
+  removeLowResTOF        -> convertUnitsD1
 
   isDspace2              -> diffFocus            [label="No"]
   isDspace2              -> rebin2               [label="Yes"]
@@ -131,9 +131,9 @@ digraph AlignAndFocusPowder {
   rebin3                 -> editGeom
   isDspace3              -> editGeom             [label="No"]
 
-  editGeom               -> convertUnits3
+  editGeom               -> convertUnitsTof2
 
-  convertUnits3 -> compressEvents2
+  convertUnitsTof2 -> compressEvents2
 
   compressTol2           -> compressEvents2
   compressEvents2        -> ifRaggedTof
