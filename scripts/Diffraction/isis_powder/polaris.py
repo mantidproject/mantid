@@ -47,6 +47,8 @@ class Polaris(AbstractInst):
     def create_vanadium(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
+        if not self._inst_settings.multiple_scattering or not self._inst_settings.do_absorb_corrections:
+            raise ValueError("You must set multiple_scattering=True and do_absorb_corrections=True when creating the " "vanadium run.")
 
         per_detector = False
         if self._inst_settings.per_detector_vanadium:
