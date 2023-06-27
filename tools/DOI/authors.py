@@ -307,6 +307,9 @@ _translations = {
     "carson sears": "Sears, Carson",
     "Carson Sears": "Sears, Carson",
     "searscr": "Sears, Carson",
+    "Reece Boston": "Boston, Reece",
+    "Marie Backman": "Backman, Marie",
+    "eric pellegrini": "Pellegrini, Eric",
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -329,6 +332,7 @@ _blacklist = [
     "davidvoneshen",
     "dependabot[bot]",
     "pre-commit-ci[bot]",
+    "Reece Boston (4rx)",
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,
