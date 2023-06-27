@@ -83,7 +83,7 @@ const std::string LOWRES_SPEC_OFF("LowResSpectrumOffset");
 } // namespace PropertyNames
 
 void getTofRange(const MatrixWorkspace_const_sptr &wksp, double &tmin, double &tmax) {
-  if (const auto eventWksp = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp)) {
+  if (const auto eventWksp = std::dynamic_pointer_cast<const EventWorkspace>(wksp)) {
     eventWksp->getEventXMinMax(tmin, tmax);
   } else {
     wksp->getXMinMax(tmin, tmax);
@@ -258,8 +258,8 @@ std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
   }
 
   m_inputW = getProperty(PropertyNames::INPUT_WKSP);
-  m_inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW);
-  if (m_inputEW && m_inputEW->getNumberEvents() <= 0)
+  auto inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW);
+  if (inputEW && inputEW->getNumberEvents() <= 0)
     result[PropertyNames::INPUT_WKSP] = "Empty workspace encounter, possibly due to beam down."
                                         "Please plot the pCharge-time to identify suitable range for "
                                         "re-time-slicing";
@@ -349,7 +349,6 @@ double AlignAndFocusPowder::getVecPropertyFromPmOrSelf(const std::string &name, 
 void AlignAndFocusPowder::exec() {
   // retrieve the properties
   m_inputW = getProperty(PropertyNames::INPUT_WKSP);
-  m_inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW);
   m_instName = m_inputW->getInstrument()->getName();
   try {
     m_instName = Kernel::ConfigService::Instance().getInstrument(m_instName).shortName();
@@ -368,7 +367,7 @@ void AlignAndFocusPowder::exec() {
   tths = getProperty(PropertyNames::POLAR);
   phis = getProperty(PropertyNames::AZIMUTHAL);
   m_params = getProperty(PropertyNames::BINNING);
-  dspace = getProperty(PropertyNames::BIN_IN_D);
+  binInDspace = getProperty(PropertyNames::BIN_IN_D);
   auto dmin = getVecPropertyFromPmOrSelf(PropertyNames::D_MINS, m_dmins);
   auto dmax = getVecPropertyFromPmOrSelf(PropertyNames::D_MAXS, m_dmaxs);
   this->getVecPropertyFromPmOrSelf(PropertyNames::RAGGED_DELTA, m_delta_ragged);
@@ -392,9 +391,9 @@ void AlignAndFocusPowder::exec() {
   } else if (m_params.size() == 1 && m_delta_ragged.empty()) {
     // if there is 1 binning parameter and not in ragged rebinning mode
     // ignore what people asked for
-    dspace = bool(dmax > 0.);
+    binInDspace = bool(dmax > 0.);
   }
-  if (dspace) {
+  if (binInDspace) {
     if (m_params.size() == 1 && (!isEmpty(dmin)) && (!isEmpty(dmax))) {
       if (dmin > 0. && dmax > dmin) {
         double step = m_params[0];
@@ -432,7 +431,7 @@ void AlignAndFocusPowder::exec() {
   if (tmax > 0.) {
     xmax = tmax;
   }
-  if (!dspace && m_params.size() == 3) {
+  if (!binInDspace && m_params.size() == 3) {
     xmin = m_params[0];
     xmax = m_params[2];
   }
@@ -450,16 +449,13 @@ void AlignAndFocusPowder::exec() {
 
   // Now setup the output workspace
   m_outputW = getProperty(PropertyNames::OUTPUT_WKSP);
-  if (m_inputEW) {
+  if (auto inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW)) {
     // event workspace
     if (m_outputW != m_inputW) {
       // out-of-place: clone the input EventWorkspace
-      m_outputEW = m_inputEW->clone();
-      m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
-    } else {
-      // in-place
-      m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-    }
+      EventWorkspace_sptr outputEW = inputEW->clone();
+      m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputEW);
+    } // in-place doesn't require anything
   } else {
     // workspace2D
     if (m_outputW != m_inputW) {
@@ -468,44 +464,35 @@ void AlignAndFocusPowder::exec() {
   }
 
   if (m_processLowResTOF) {
-    if (!m_inputEW) {
-      throw std::runtime_error("Input workspace is not EventWorkspace.  It is not supported now.");
-    } else {
+    if (auto inputEW = std::dynamic_pointer_cast<EventWorkspace>(m_inputW)) {
       // Make a brand new EventWorkspace
       m_lowResEW = std::dynamic_pointer_cast<EventWorkspace>(
-          WorkspaceFactory::Instance().create("EventWorkspace", m_inputEW->getNumberHistograms(), 2, 1));
+          WorkspaceFactory::Instance().create("EventWorkspace", inputEW->getNumberHistograms(), 2, 1));
 
       // Cast to the matrixOutputWS and save it
       m_lowResW = std::dynamic_pointer_cast<MatrixWorkspace>(m_lowResEW);
       // m_lowResW->setName(lowreswsname);
+    } else {
+      throw std::runtime_error("Input workspace is not EventWorkspace.  It is not supported now.");
     }
   }
 
   // set up a progress bar with the "correct" number of steps
   m_progress = std::make_unique<Progress>(this, 0., 1., 22);
 
-  if (m_inputEW) {
-    if (compressEventsTolerance > 0.) {
-      g_log.information() << "running CompressEvents(Tolerance=" << compressEventsTolerance;
-      if (!isEmpty(wallClockTolerance))
-        g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
-      g_log.information() << ") started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
-      API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
-      compressAlg->setProperty("InputWorkspace", m_outputEW);
-      compressAlg->setProperty("OutputWorkspace", m_outputEW);
-      compressAlg->setProperty("OutputWorkspace", m_outputEW);
-      compressAlg->setProperty("Tolerance", compressEventsTolerance);
-      if (!isEmpty(wallClockTolerance)) {
-        compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
-        compressAlg->setPropertyValue("StartTime", getPropertyValue(PropertyNames::COMPRESS_WALL_START));
-      }
-      compressAlg->executeAsChildAlg();
-      m_outputEW = compressAlg->getProperty("OutputWorkspace");
-      m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
-    } else {
-      g_log.information() << "Not compressing event list\n";
-      doSortEvents(m_outputW); // still sort to help some thing out
-    }
+  if (m_maskWS) {
+    g_log.information() << "running MaskDetectors started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
+
+    API::IAlgorithm_sptr maskDetAlg = createChildAlgorithm("MaskDetectors");
+    // cast to Workspace for MaksDetectors alg
+    Workspace_sptr outputw = std::dynamic_pointer_cast<Workspace>(m_outputW);
+    maskDetAlg->setProperty("Workspace", outputw);
+    MatrixWorkspace_sptr mksws = std::dynamic_pointer_cast<MatrixWorkspace>(m_maskWS);
+    maskDetAlg->setProperty("MaskedWorkspace", mksws);
+    maskDetAlg->executeAsChildAlg();
+    outputw = maskDetAlg->getProperty("Workspace");
+    // casting
+    m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputw);
   }
   m_progress->report();
 
@@ -532,15 +519,17 @@ void AlignAndFocusPowder::exec() {
     }
     cropAlg->executeAsChildAlg();
     m_outputW = cropAlg->getProperty("OutputWorkspace");
-    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
   // filter the input events if appropriate
-  double removePromptPulseWidth = getProperty(PropertyNames::REMOVE_PROMPT_PULSE);
+  const double removePromptPulseWidth = getProperty(PropertyNames::REMOVE_PROMPT_PULSE);
   if (removePromptPulseWidth > 0.) {
-    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-    if (m_outputEW->getNumberEvents() > 0) {
+    bool removePromptPulse(false);
+    if (auto outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW)) {
+      removePromptPulse = (outputEW->getNumberEvents() > 0);
+    }
+    if (removePromptPulse) {
       g_log.information() << "running RemovePromptPulse(Width=" << removePromptPulseWidth << ") started at "
                           << Types::Core::DateAndTime::getCurrentTime() << "\n";
       API::IAlgorithm_sptr filterPAlg = createChildAlgorithm("RemovePromptPulse");
@@ -555,7 +544,6 @@ void AlignAndFocusPowder::exec() {
 
       filterPAlg->executeAsChildAlg();
       m_outputW = filterPAlg->getProperty("OutputWorkspace");
-      m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     } else {
       g_log.information("skipping RemovePromptPulse on empty EventWorkspace");
     }
@@ -571,28 +559,15 @@ void AlignAndFocusPowder::exec() {
     alg->setProperty("MaskingInformation", maskBinTableWS);
     alg->executeAsChildAlg();
     m_outputW = alg->getProperty("OutputWorkspace");
-    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
-  if (m_maskWS) {
-    g_log.information() << "running MaskDetectors started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
-
-    API::IAlgorithm_sptr maskDetAlg = createChildAlgorithm("MaskDetectors");
-    // cast to Workspace for MaksDetectors alg
-    Workspace_sptr outputw = std::dynamic_pointer_cast<Workspace>(m_outputW);
-    maskDetAlg->setProperty("Workspace", outputw);
-    MatrixWorkspace_sptr mksws = std::dynamic_pointer_cast<MatrixWorkspace>(m_maskWS);
-    maskDetAlg->setProperty("MaskedWorkspace", mksws);
-    maskDetAlg->executeAsChildAlg();
-    outputw = maskDetAlg->getProperty("Workspace");
-    // casting
-    m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputw);
-    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+  // do a calculation to determine if compressing the un-focussed data will reduce data size
+  if (shouldCompressUnfocused(compressEventsTolerance, tofmin, tofmax, !isEmpty(wallClockTolerance))) {
+    compressEventsOutputWS(compressEventsTolerance, wallClockTolerance);
   }
-  m_progress->report();
 
-  if (!dspace)
+  if (!binInDspace)
     m_outputW = rebin(m_outputW);
   m_progress->report();
 
@@ -610,9 +585,9 @@ void AlignAndFocusPowder::exec() {
     m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputw);
   }
 
+  m_progress->report();
+
   m_outputW = convertUnits(m_outputW, "dSpacing");
-  // update the other pointer that people use
-  m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   m_progress->report();
 
   if (m_calibrationWS) {
@@ -651,16 +626,16 @@ void AlignAndFocusPowder::exec() {
     alg->setPropertyValue("Type", "PowderTOF");
     alg->executeAsChildAlg();
     m_outputW = alg->getProperty("OutputWorkspace");
-    m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
 
-  if (LRef > 0. || minwl > 0. || DIFCref > 0. || (!isEmpty(maxwl))) {
-    m_outputW = convertUnits(m_outputW, "TOF");
-  }
   m_progress->report();
 
   // Beyond this point, low resolution TOF workspace is considered.
   if (LRef > 0.) {
+    // this algorithm was originally created for POWGEN before issues in the DAS were fixed
+    // it is not used in any current reduction and remains for legacy data processing
+    m_outputW = convertUnits(m_outputW, "TOF");
+
     g_log.information() << "running UnwrapSNS(LRef=" << LRef << ",Tmin=" << tmin << ",Tmax=" << tmax << ") started at "
                         << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr removeAlg = createChildAlgorithm("UnwrapSNS");
@@ -676,14 +651,12 @@ void AlignAndFocusPowder::exec() {
   }
   m_progress->report();
 
-  if (minwl > 0. || (!isEmpty(maxwl))) { // just crop the worksapce
+  if (minwl > 0. || (!isEmpty(maxwl))) { // just crop the workspace
     // turn off the low res stuff
     m_processLowResTOF = false;
 
-    EventWorkspace_sptr ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-    if (ews)
-      g_log.information() << "Number of events = " << ews->getNumberEvents() << ". ";
-    g_log.information("\n");
+    if (const auto ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW))
+      g_log.information() << "Number of events = " << ews->getNumberEvents() << ".\n";
 
     m_outputW = convertUnits(m_outputW, "Wavelength");
 
@@ -699,15 +672,23 @@ void AlignAndFocusPowder::exec() {
     removeAlg->setProperty("XMax", maxwl);
     removeAlg->executeAsChildAlg();
     m_outputW = removeAlg->getProperty("OutputWorkspace");
-    if (ews)
+    if (const auto ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW))
       g_log.information() << "Number of events = " << ews->getNumberEvents() << ".\n";
   } else if (DIFCref > 0.) {
+    m_outputW = convertUnits(m_outputW, "TOF");
+    // this correction has some assumptions on the events being compressed
+    if (auto outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW)) {
+      if (compressEventsTolerance > 0.) {
+        compressEventsOutputWS(compressEventsTolerance, wallClockTolerance);
+      }
+    }
+
+    // this is a legacy way for describing the minimum wavelength to remove from the data
+    // it is uncommon that it is used
     g_log.information() << "running RemoveLowResTof(RefDIFC=" << DIFCref << ",K=3.22) started at "
                         << Types::Core::DateAndTime::getCurrentTime() << "\n";
-    EventWorkspace_sptr ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-    if (ews)
-      g_log.information() << "Number of events = " << ews->getNumberEvents() << ". ";
-    g_log.information("\n");
+    if (const auto ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW))
+      g_log.information() << "Number of events = " << ews->getNumberEvents() << ".\n";
 
     API::IAlgorithm_sptr removeAlg = createChildAlgorithm("RemoveLowResTOF");
     removeAlg->setProperty("InputWorkspace", m_outputW);
@@ -726,12 +707,11 @@ void AlignAndFocusPowder::exec() {
   }
   m_progress->report();
 
-  EventWorkspace_sptr ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-  if (ews) {
-    size_t numhighevents = ews->getNumberEvents();
+  if (const auto ews = std::dynamic_pointer_cast<EventWorkspace>(m_outputW)) {
+    const size_t numhighevents = ews->getNumberEvents();
     if (m_processLowResTOF) {
       EventWorkspace_sptr lowes = std::dynamic_pointer_cast<EventWorkspace>(m_lowResW);
-      size_t numlowevents = lowes->getNumberEvents();
+      const size_t numlowevents = lowes->getNumberEvents();
       g_log.information() << "Number of high TOF events = " << numhighevents << "; "
                           << "Number of low TOF events = " << numlowevents << ".\n";
     }
@@ -746,16 +726,11 @@ void AlignAndFocusPowder::exec() {
   }
   m_progress->report();
 
-  if (dspace) {
+  if (binInDspace) {
     m_outputW = rebin(m_outputW);
     if (m_processLowResTOF)
       m_lowResW = rebin(m_lowResW);
   }
-  m_progress->report();
-
-  doSortEvents(m_outputW);
-  if (m_processLowResTOF)
-    doSortEvents(m_lowResW);
   m_progress->report();
 
   // copy the output workspace just before `DiffractionFocusing`
@@ -771,19 +746,22 @@ void AlignAndFocusPowder::exec() {
     m_lowResW = diffractionFocus(m_lowResW);
   m_progress->report();
 
-  doSortEvents(m_outputW);
-  if (m_processLowResTOF)
-    doSortEvents(m_lowResW);
-  m_progress->report();
-
   // this next call should probably be in for rebin as well
   // but it changes the system tests
-  if (dspace) {
+  if (binInDspace) {
     if (m_resampleX != 0.) {
       m_outputW = rebin(m_outputW);
       if (m_processLowResTOF)
         m_lowResW = rebin(m_lowResW);
     } else if (!m_delta_ragged.empty()) {
+      // to speed up RebinRagged later, sort events once here
+      // making RebinRagged faster when preserveEvents=False would be better
+      if (!m_preserveEvents) {
+        doSortEvents(m_outputW);
+        if (m_processLowResTOF)
+          doSortEvents(m_lowResW);
+      }
+
       m_outputW = rebinRagged(m_outputW, true);
       if (m_processLowResTOF)
         m_lowResW = rebinRagged(m_lowResW, true);
@@ -826,27 +804,12 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   // compress again if appropriate
-  m_outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-  if ((m_outputEW) && (compressEventsTolerance > 0.)) {
-    g_log.information() << "running CompressEvents(Tolerance=" << compressEventsTolerance;
-    if (!isEmpty(wallClockTolerance))
-      g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
-    g_log.information() << ") started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
-    API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
-    compressAlg->setProperty("InputWorkspace", m_outputEW);
-    compressAlg->setProperty("OutputWorkspace", m_outputEW);
-    compressAlg->setProperty("Tolerance", compressEventsTolerance);
-    if (!isEmpty(wallClockTolerance)) {
-      compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
-      compressAlg->setPropertyValue("StartTime", getPropertyValue("CompressStartTime"));
-    }
-    compressAlg->executeAsChildAlg();
-    m_outputEW = compressAlg->getProperty("OutputWorkspace");
-    m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
+  if (compressEventsTolerance > 0.) {
+    compressEventsOutputWS(compressEventsTolerance, wallClockTolerance);
   }
   m_progress->report();
 
-  if (!dspace && !m_delta_ragged.empty()) {
+  if (!binInDspace && !m_delta_ragged.empty()) {
     m_outputW = rebinRagged(m_outputW, false);
   }
 
@@ -893,21 +856,18 @@ API::MatrixWorkspace_sptr AlignAndFocusPowder::diffractionFocus(API::MatrixWorks
     return ws;
   }
 
-  if (m_maskWS) {
-    API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
-    maskAlg->setProperty("Workspace", m_groupWS);
-    maskAlg->setProperty("MaskedWorkspace", m_maskWS);
-    maskAlg->executeAsChildAlg();
-  }
+  // cannot convert to histogram if running with ragged bins
+  // otherwise the data is a histogram *before* the correct binning is set
+  const bool preserveEvents = m_delta_ragged.empty() ? m_preserveEvents : true;
 
-  g_log.information() << "running DiffractionFocussing started at " << Types::Core::DateAndTime::getCurrentTime()
-                      << "\n";
+  g_log.information() << "running DiffractionFocussing(PreserveEvents=" << preserveEvents << ") started at "
+                      << Types::Core::DateAndTime::getCurrentTime() << "\n";
 
   API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
   focusAlg->setProperty("InputWorkspace", ws);
   focusAlg->setProperty("OutputWorkspace", ws);
   focusAlg->setProperty("GroupingWorkspace", m_groupWS);
-  focusAlg->setProperty("PreserveEvents", m_preserveEvents);
+  focusAlg->setProperty("PreserveEvents", preserveEvents);
   focusAlg->executeAsChildAlg();
   ws = focusAlg->getProperty("OutputWorkspace");
 
@@ -1044,6 +1004,7 @@ API::MatrixWorkspace_sptr AlignAndFocusPowder::rebinRagged(API::MatrixWorkspace_
   alg->setProperty("Delta", m_delta_ragged);
   alg->setProperty("InputWorkspace", matrixws);
   alg->setProperty("OutputWorkspace", matrixws);
+  alg->setProperty("PreserveEvents", m_preserveEvents);
 
   // log the parameters used
   g_log.information() << "running RebinRagged(";
@@ -1238,13 +1199,82 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename, const std:
  * @param ws :: any Workspace. Does nothing if not EventWorkspace.
  */
 void AlignAndFocusPowder::doSortEvents(const Mantid::API::Workspace_sptr &ws) {
-  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
-  if (!eventWS)
-    return;
-  Algorithm_sptr alg = this->createChildAlgorithm("SortEvents");
-  alg->setProperty("InputWorkspace", eventWS);
-  alg->setPropertyValue("SortBy", "X Value");
-  alg->executeAsChildAlg();
+  if (auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws)) {
+    Algorithm_sptr alg = this->createChildAlgorithm("SortEvents");
+    alg->setProperty("InputWorkspace", eventWS);
+    alg->setPropertyValue("SortBy", "X Value");
+    alg->executeAsChildAlg();
+  }
+}
+
+void AlignAndFocusPowder::compressEventsOutputWS(const double compressEventsTolerance,
+                                                 const double wallClockTolerance) {
+  if (auto outputEW = std::dynamic_pointer_cast<EventWorkspace>(m_outputW)) {
+    g_log.information() << "running CompressEvents(Tolerance=" << compressEventsTolerance;
+    if (!isEmpty(wallClockTolerance))
+      g_log.information() << " and WallClockTolerance=" << wallClockTolerance;
+    g_log.information() << ") started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
+    API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
+    compressAlg->setProperty("InputWorkspace", outputEW);
+    compressAlg->setProperty("OutputWorkspace", outputEW);
+    compressAlg->setProperty("Tolerance", compressEventsTolerance);
+    if (!isEmpty(wallClockTolerance)) {
+      compressAlg->setProperty("WallClockTolerance", wallClockTolerance);
+      compressAlg->setPropertyValue("StartTime", getPropertyValue(PropertyNames::COMPRESS_WALL_START));
+    }
+    compressAlg->executeAsChildAlg();
+    outputEW = compressAlg->getProperty("OutputWorkspace");
+    m_outputW = std::dynamic_pointer_cast<MatrixWorkspace>(outputEW);
+  }
+}
+
+/**
+ * Return true if a rough estimate suggests that the size of the events will be smaller
+ * after compressing. This assumes that the the events are equally spread throughout the
+ * supplied time-of-flight range with a spacing of compressTolerance.
+ */
+bool AlignAndFocusPowder::shouldCompressUnfocused(const double compressTolerance, const double tofmin,
+                                                  const double tofmax, const bool hasWallClockTolerance) {
+  // compressing isn't an option
+  if (compressTolerance <= 0)
+    return false;
+  // compressing to WEIGHTED (w/ time) is harder to predict
+  if (hasWallClockTolerance)
+    return false;
+
+  // estimate the time-of-flight range for the data
+  // if the parameters aren't supplied, guess 20,000us range
+  const double tofRange = (isEmpty(tofmin) || isEmpty(tofmax)) ? 200000. : std::fabs(tofmax - tofmin);
+
+  // assume one frame although this is generically wrong
+  // there are 3 fields in weighted events no time
+  const double sizeWeightedEventsEstimate = 3. * tofRange / compressTolerance;
+
+  if (const auto eventWS = std::dynamic_pointer_cast<const EventWorkspace>(m_outputW)) {
+    double numEvents = static_cast<double>(eventWS->getNumberEvents());
+    const auto eventType = eventWS->getEventType();
+    if (eventType == API::EventType::TOF) {
+      // there are two fields in tof
+      numEvents *= 2.;
+    } else if (eventType == API::EventType::WEIGHTED) {
+      // there are four fields in weighted w/ time
+      numEvents *= 4.;
+    } else if (eventType == API::EventType::WEIGHTED_NOTIME) {
+      // there are 3 fields in weighted events no time
+      numEvents *= 3.;
+    } else {
+      return false; // not coded for something else
+    }
+
+    // there is an error as this doesn't account for the number of spectra, but this is meant to be
+    // a rough calculation
+    g_log.information() << "Calculation for compressing events early with size of events currently " << numEvents
+                        << " and comparing to " << sizeWeightedEventsEstimate << "\n";
+    return sizeWeightedEventsEstimate < numEvents;
+  }
+
+  // fall-through is to not compress
+  return false;
 }
 
 } // namespace Mantid::WorkflowAlgorithms

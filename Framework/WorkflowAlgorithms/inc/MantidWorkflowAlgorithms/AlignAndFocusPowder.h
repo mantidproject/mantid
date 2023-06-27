@@ -75,8 +75,6 @@ private:
 
   API::MatrixWorkspace_sptr m_inputW;
   API::MatrixWorkspace_sptr m_outputW;
-  DataObjects::EventWorkspace_sptr m_inputEW;
-  DataObjects::EventWorkspace_sptr m_outputEW;
   API::ITableWorkspace_sptr m_calibrationWS;
   DataObjects::MaskWorkspace_sptr m_maskWS;
   DataObjects::GroupingWorkspace_sptr m_groupWS;
@@ -93,7 +91,7 @@ private:
   std::vector<double> m_delta_ragged;
   std::vector<double> m_resonanceLower;
   std::vector<double> m_resonanceUpper;
-  bool dspace{false};
+  bool binInDspace{false};
   double xmin{0.0};
   double xmax{0.0};
   double LRef{0.0};
@@ -104,6 +102,9 @@ private:
   double tmax{0.0};
   bool m_preserveEvents{false};
   void doSortEvents(const Mantid::API::Workspace_sptr &ws);
+  void compressEventsOutputWS(const double compressEventsTolerance, const double wallClockTolerance);
+  bool shouldCompressUnfocused(const double compressTolerance, const double tofmin, const double tofmax,
+                               const bool hasWallClockTolerance);
 
   /// Low resolution TOF matrix workspace
   API::MatrixWorkspace_sptr m_lowResW;

@@ -226,6 +226,13 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                     loader.setProperty("BlockList", self.getProperty("LogBlockList").value)
             except RuntimeError:
                 pass  # let it drop on the floor
+
+        # don't automatically bin the data to start
+        try:
+            loader.setProperty("NumberOfBins", 1)
+        except RuntimeError:
+            pass  # let it drop on the floor
+
         for key, value in kwargs.items():
             if isinstance(value, str):
                 loader.setPropertyValue(key, value)
