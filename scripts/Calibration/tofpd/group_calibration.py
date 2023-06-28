@@ -212,7 +212,7 @@ def cc_calibrate_groups(
             if group in SkipCrossCorrelation:
                 # set the detector offsets to zero
                 for item in ws_indices:
-                    mtd["_tmp_group_cc_main"].dataY(item)[0] = 0.0
+                    mtd["_tmp_group_cc_main"].dataY(int(item))[0] = 0.0
                 logger.notice(f"Cross correlation skipped for group-{group}.")
                 converged = True
             else:
