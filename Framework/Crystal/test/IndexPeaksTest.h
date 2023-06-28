@@ -403,6 +403,7 @@ public:
     const auto &lattice = peaksWS->sample().getOrientedLattice();
     TS_ASSERT_EQUALS(0, lattice.getMaxOrder())
     TS_ASSERT_EQUALS(false, lattice.getCrossTerm())
+    TS_ASSERT_DELTA(0.0, lattice.getModUB()[0][0], 1e-6)
   }
 
   void test_exec_with_three_mod_vectors_and_cross_terms_from_alg_input_with_lattice_update() {
@@ -425,6 +426,7 @@ public:
     TS_ASSERT_DELTA(V3D(-0.333, 0.667, 0.333).norm(), lattice.getModVec(1).norm(), 1e-8)
     TS_ASSERT_DELTA(V3D(0.333, -0.667, 0.333).norm(), lattice.getModVec(2).norm(), 1e-8)
     TS_ASSERT_EQUALS(true, lattice.getCrossTerm())
+    TS_ASSERT_DELTA(0.071918, lattice.getModUB()[0][0], 1e-6)
   }
 
   void test_exec_mod_vectors_save_cleared_across_runs() {
