@@ -52,6 +52,7 @@ cmake \
   -DENABLE_PRECOMMIT=OFF \
   -DCONDA_BUILD=True \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
+  -DPython_EXECUTABLE=$PYTHON \
   -GNinja \
   ../
 
