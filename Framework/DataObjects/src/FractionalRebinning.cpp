@@ -567,6 +567,8 @@ void rebinToOutput(const Quadrilateral &inputQ, const MatrixWorkspace_const_sptr
  * It is used to take into account the input area fractions when calcuting
  * the final output fractions.
  * This can be null to indicate that the input was a standard 2D workspace.
+ * @param ignorePartialOverlaps A boolean indicating whether partial detector
+ * overlaps should be ignored.
  */
 void rebinToFractionalOutput(const Quadrilateral &inputQ, const MatrixWorkspace_const_sptr &inputWS, const size_t i,
                              const size_t j, RebinnedOutput &outputWS, const std::vector<double> &verticalAxis,
