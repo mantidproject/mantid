@@ -372,7 +372,7 @@ AlgorithmHistory_sptr WorkspaceHistory::parseAlgorithmHistory(const std::string 
   getWordsInString(info[EXEC_TIME], dummy, dummy, date, time);
   Mantid::Types::Core::DateAndTime utc_start;
   // If not legacy version construct normally else Parse in the legacy data
-  if (std::isdigit(date[6])) {
+  if (std::isdigit(static_cast<unsigned char>(date[6]))) {
     Mantid::Types::Core::DateAndTime timeConstruction(date + "T" + time);
     utc_start = timeConstruction;
   } else {

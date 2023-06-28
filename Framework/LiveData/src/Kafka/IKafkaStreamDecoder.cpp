@@ -501,7 +501,7 @@ void IKafkaStreamDecoder::checkRunEnd(const std::string &topicName, bool &checkO
 int IKafkaStreamDecoder::runNumber() const noexcept {
   // If the run ID is empty or if any non-digit char was found in the string
   if (m_runId.empty() || (std::find_if_not(m_runId.cbegin(), m_runId.cend(),
-                                           [](const char c) { return std::isdigit(c); }) != m_runId.end()))
+                                           [](const unsigned char c) { return std::isdigit(c); }) != m_runId.end()))
     return -1;
 
   return std::atoi(m_runId.c_str());

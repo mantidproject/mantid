@@ -161,7 +161,7 @@ int ALCDataLoadingPresenter::extractRunNumber(const std::string &file) {
   returnVal = returnVal.substr(found + 1);
 
   // Remove all non-digits
-  returnVal.erase(std::remove_if(returnVal.begin(), returnVal.end(), [](auto c) { return !std::isdigit(c); }),
+  returnVal.erase(std::remove_if(returnVal.begin(), returnVal.end(), [](unsigned char c) { return !std::isdigit(c); }),
                   returnVal.end());
 
   // Return run number as int (removes leading 0's)
@@ -420,7 +420,8 @@ bool ALCDataLoadingPresenter::checkCustomGrouping() {
  * @returns :: True if grouping OK, false if bad
  */
 std::string ALCDataLoadingPresenter::isCustomGroupingValid(const std::string &group, bool &isValid) {
-  if (!std::isdigit(group[0]) || std::any_of(std::begin(group), std::end(group), ::isalpha) ||
+  if (!std::isdigit(static_cast<unsigned char>(group[0])) ||
+      std::any_of(std::begin(group), std::end(group), ::isalpha) ||
       std::any_of(std::begin(group), std::end(group), is_decimal)) {
     isValid = false;
     return "";

@@ -546,7 +546,7 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN, std::string &l
 
   std::string firstBase = firstFN;
   size_t i = firstBase.size() - 1;
-  while (isdigit(firstBase[i]))
+  while (isdigit(static_cast<unsigned char>(firstBase[i])))
     i--;
   if (i == firstBase.size() - 1) {
     throw Exception::FileError("File name must end with a number.", firstFN);
@@ -560,7 +560,7 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN, std::string &l
 
   std::string lastBase = lastFN;
   i = lastBase.size() - 1;
-  while (isdigit(lastBase[i]))
+  while (isdigit(static_cast<unsigned char>(lastBase[i])))
     i--;
   if (i == lastBase.size() - 1) {
     throw Exception::FileError("File name must end with a number.", lastFN);
@@ -616,7 +616,8 @@ int PlotAsymmetryByLogValue::extractRunNumberFromRunName(std::string runName) {
   runName = runName.substr(found + 1);
 
   // Remove all non-digits
-  runName.erase(std::remove_if(runName.begin(), runName.end(), [](auto c) { return !std::isdigit(c); }), runName.end());
+  runName.erase(std::remove_if(runName.begin(), runName.end(), [](unsigned char c) { return !std::isdigit(c); }),
+                runName.end());
 
   // Return run number as int (removes leading 0's)
   return std::stoi(runName);
