@@ -159,7 +159,7 @@ void InelasticDataManipulationElwinTab::runFileInput() {
     size_t runNumberStart = 0;
     const auto strLength = runNumber.length();
     for (size_t i = 0; i < strLength; i++) {
-      if (std::isdigit(runNumber[i])) {
+      if (std::isdigit(static_cast<unsigned char>(runNumber[i]))) {
         runNumberStart = i;
         break;
       }
