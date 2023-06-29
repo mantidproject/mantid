@@ -243,9 +243,10 @@ The workflow follows these step:
         1 2208.3
         2 2208.3
         3 2208.3
-        4 2253.3
-        5 2208.3
-        6 2165.0
+        4 2208.3
+        5 2164.1
+        6 2121.7
+
 
 .. testcode:: group_cal
 
@@ -266,9 +267,9 @@ The workflow follows these step:
 .. testoutput:: group_cal
 
     DetID DIFC
-        1 2208.7
-        2 2319.2
-        3 2098.3
+        1 2208.3
+        2 2208.3
+        3 2208.3
         4 2365.6
         5 2318.3
         6 2272.8

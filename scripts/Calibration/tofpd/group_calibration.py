@@ -360,6 +360,8 @@ def pdcalibration_groups(
             DiagnosticWorkspaces=f"{output_basename}_pd_diag",
         )
         if to_skip:
+            if isinstance(to_skip, list):
+                to_skip = [int(element) for element in to_skip]  # issue with numpy.int64
             ExtractSpectra(data_ws, WorkspaceIndexList=to_skip, OutputWorkspace="_tmp_group_to_skip")
             ExtractUnmaskedSpectra("_tmp_group_to_skip", OutputWorkspace="_tmp_group_to_skip")
             PDCalibration(
