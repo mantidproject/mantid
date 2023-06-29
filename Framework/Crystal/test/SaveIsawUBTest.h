@@ -12,10 +12,11 @@
 
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidCrystal/SaveIsawUB.h"
-
-#include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
@@ -146,5 +147,50 @@ public:
     }
 
     remove(File2.c_str());
+  }
+
+  void test_exec_rotate_by_gonio() {
+    // Fake output WS
+    std::string wsname = "ws_rot_gonio";
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().addOrReplace(wsname, ws);
+
+    // set goiniomter
+    auto set_gon_alg = AlgorithmFactory::Instance().create("SetGoniometer", 1);
+    set_gon_alg->initialize();
+    set_gon_alg->setLogging(false);
+    set_gon_alg->setProperty("Workspace", wsname);
+    set_gon_alg->setPropertyValue("Axis0", "90, 0.0,1.0,0.0, 1");
+    set_gon_alg->execute();
+
+    // set UB with default
+    auto set_ub_alg = AlgorithmFactory::Instance().create("SetUB", 1);
+    set_ub_alg->initialize();
+    set_ub_alg->setLogging(false);
+    set_ub_alg->setProperty("Workspace", wsname);
+    set_ub_alg->execute();
+
+    // save UB with gonio rotation applied
+    SaveIsawUB save_ub_alg;
+    TS_ASSERT_THROWS_NOTHING(save_ub_alg.initialize())
+    TS_ASSERT(save_ub_alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(save_ub_alg.setProperty("Filename", "SaveISawUBTest_RotGonio.mat"));
+    TS_ASSERT_THROWS_NOTHING(save_ub_alg.setPropertyValue("InputWorkspace", wsname));
+    TS_ASSERT_THROWS_NOTHING(save_ub_alg.setProperty("RotateByGoniometerMatrix", true));
+    TS_ASSERT_THROWS_NOTHING(save_ub_alg.execute(););
+    TS_ASSERT(save_ub_alg.isExecuted());
+
+    // load UB (will now be different to one orignally applied)
+    LoadIsawUB load_ub_alg;
+    TS_ASSERT_THROWS_NOTHING(load_ub_alg.initialize())
+    TS_ASSERT(load_ub_alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(load_ub_alg.setProperty("Filename", save_ub_alg.getPropertyValue("Filename")));
+    TS_ASSERT_THROWS_NOTHING(load_ub_alg.setPropertyValue("InputWorkspace", wsname));
+    TS_ASSERT_THROWS_NOTHING(load_ub_alg.execute());
+    TS_ASSERT(load_ub_alg.isExecuted());
+
+    // check UB has changed
+    auto rotated_ub = ws->sample().getOrientedLattice().getUB();
+    TS_ASSERT_DELTA(1.0, rotated_ub[0][0], 1e-8); // previously 0 in original (unrotated UB)
   }
 };
