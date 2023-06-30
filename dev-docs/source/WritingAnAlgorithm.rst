@@ -22,6 +22,9 @@ from a base ``Algorithm`` class, which provides the support and services require
 
 Getting Started
 ###############
+
+Creating a new algorithm is simplified using :ref:`class_maker.py <class_maker_py>`
+
 The first step is to create a new directory, with any name of your choice,
 under your MantidInstall directory (on Windows, probably located at ``C:\\MantidInstall``).
 Alternatively, you can just do everything in the UserAlgorithms directory.
@@ -37,22 +40,11 @@ create files called ``MyAlg.h`` and ``MyAlg.cpp`` and paste in the following boi
    :language: cpp
    :linenos:
 
-**Source file (MyAlg.cpp)**:
+**Source file** :download:`MyAlg.cpp <cppalgexample/MyAlg.cpp>`
 
-.. code-block:: cpp
-
-    #include "MyAlg.h"
-
-    // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(MyAlg);
-
-    void MyAlg::init()
-    {
-    }
-
-    void MyAlg::exec()
-    {
-    }
+.. literalinclude:: cppalgexample/MyAlg.cpp
+   :language: cpp
+   :linenos:
 
 At this point you will already have something that will compile and run. To do so (on Windows),
 copy the files ``build.bat`` and ``SConstruct`` from ``UserAlgorithms`` into the directory containing your code and execute ``build.bat``.
