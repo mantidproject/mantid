@@ -31,36 +31,11 @@ where category is an optional argument to set the algorithm's category.
 To do the same thing 'by hand',
 create files called ``MyAlg.h`` and ``MyAlg.cpp`` and paste in the following boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorithm name):
 
-**Header file (MyAlg.h)**:
+**Header file** :download:`MyAlg.h <cppalgexample/MyAlg.h>`
 
-.. code-block:: cpp
-
-    #pragma once
-
-    #include "MantidAPI/Algorithm.h"
-
-    class DLLExport MyAlg : public Mantid::API::Algorithm
-    {
-    public:
-      /// (Empty) Constructor
-      MyAlg() : Mantid::API::Algorithm() {}
-      /// Virtual destructor
-      virtual ~MyAlg() = default;
-      /// Algorithm's name
-      const std::string name() const override { return "MyAlg"; }
-      /// Algorithm's purpose/summary
-      const std::string summary() const override { return "Summary";}
-      /// Algorithm's version
-      int version() const override { return (1); }
-      /// Algorithm's category for identification
-      const std::string category() const override { return "UserDefined"; }
-
-    private:
-      /// Initialisation code
-      void init() override;
-      /// Execution code
-      void exec() override;
-    };
+.. literalinclude:: cppalgexample/MyAlg.h
+   :language: cpp
+   :linenos:
 
 **Source file (MyAlg.cpp)**:
 
