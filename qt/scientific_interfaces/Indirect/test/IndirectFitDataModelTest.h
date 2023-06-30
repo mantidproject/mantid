@@ -49,10 +49,10 @@ public:
   void test_setResolution() { TS_ASSERT_EQUALS(m_fitData->setResolution("resolution workspace"), true); }
 
   void test_setResolutin_bad_data() {
-    Mantid::API::MatrixWorkspace_sptr ws =
-        Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("resolution workspace");
-    auto y = ws->mutableY(0);
-    y[1] = NAN;
+    Mantid::API::MatrixWorkspace_sptr ws = ads_instance.retrieveWS<MatrixWorkspace>("resolution workspace");
+    auto y = ws->dataY(0);
+    y[1] = double(NAN);
+    ads_instance.addOrReplace("resolution workspace", ws);
     TS_ASSERT_EQUALS(m_fitData->setResolution("resolution workspace"), false);
   }
 
