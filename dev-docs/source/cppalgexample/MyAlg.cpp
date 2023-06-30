@@ -7,12 +7,14 @@
 
 #include "MantidAlgorithms/MyAlg.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
 using Mantid::API::InstrumentValidator;
+using Mantid::API::MatrixWorkspace;
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::Direction;
@@ -41,16 +43,16 @@ const std::string MyAlg::summary() const { return "Multiplies a workspace by a c
 void MyAlg::init() {
   auto instrumentValidator = std::make_shared<CompositeValidator>();
   instrumentValidator->add<InstrumentValidator>();
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Direction::Input,
-                                                                            instrumentValidator),
-                  "An input workspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input, instrumentValidator),
+      "An input workspace.");
   declareProperty("NumberToApply", EMPTY_DBL(), "Value to apply to workspace. This is extra information");
 
   std::vector<std::string> propOptions{"X", "Y"};
   declareProperty("WayToApply", propOptions.back(), std::make_shared<StringListValidator>(propOptions),
                   "Which axis to apply values to");
 
-  declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -71,7 +73,41 @@ std::map<std::string, std::string> MyAlg::validateInputs() {
 /** Execute the algorithm.
  */
 void MyAlg::exec() {
-  // TODO Auto-generated execute stub
+  API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  const double number = getProperty("NumberToApply");
+  const std::string axisToApply = getPropertyValue("WayToApply");
+
+  // set up the output
+  if (outputWS != inputWS) {
+    outputWS = inputWS->clone();
+  }
+
+  // set up a lambda for doing the transformation
+  auto transformer = std::function<double(double)>([number](const double &value) { return value * number; });
+
+  // do the actual work
+  const auto NUM_HIST = outputWS->getNumberHistograms();
+  if (axisToApply == "X") {
+    for (std::size_t i = 0; i < NUM_HIST; ++i) {
+      // this gets read/write axis to the x-values
+      auto &axis = outputWS->getSpectrum(i).dataX();
+      std::transform(axis.cbegin(), axis.cend(), axis.begin(), transformer);
+    }
+  } else if (axisToApply == "Y") {
+    for (std::size_t i = 0; i < NUM_HIST; ++i) {
+      // this gets read/write axis to the y-values
+      auto &axis = outputWS->getSpectrum(i).dataY();
+      std::transform(axis.cbegin(), axis.cend(), axis.begin(), transformer);
+    }
+  } else {
+    std::stringstream msg;
+    msg << "The developer forgot to write code for NumberToApply=" << axisToApply;
+    throw std::runtime_error(msg.str());
+  }
+
+  // pass back the output workspace
+  setProperty("OutputWorkspace", outputWS);
 }
 
 } // namespace Algorithms
