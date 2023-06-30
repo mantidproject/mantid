@@ -145,7 +145,7 @@ bool IndirectFitDataModel::setResolution(const std::string &name, WorkspaceID wo
   return isValid;
 }
 
-void IndirectFitDataModel::removeSpecialValues(const std::string name) {
+void IndirectFitDataModel::removeSpecialValues(const std::string &name) {
   auto alg = Mantid::API::AlgorithmManager::Instance().create("ReplaceSpecialValues");
   alg->initialize();
   alg->setProperty("InputWorkspace", name);

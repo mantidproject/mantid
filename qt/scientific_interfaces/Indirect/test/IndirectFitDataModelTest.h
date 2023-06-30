@@ -10,6 +10,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
+#include <math.h>
 
 #include "IndirectFitDataModel.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -44,6 +45,16 @@ public:
   }
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
+
+  void test_setResolution() { TS_ASSERT_EQUALS(m_fitData->setResolution("resolution workspace"), true); }
+
+  void test_setResolutin_bad_data() {
+    Mantid::API::MatrixWorkspace_sptr ws =
+        Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("resolution workspace");
+    auto y = ws->mutableY(0);
+    y[1] = NAN;
+    TS_ASSERT_EQUALS(m_fitData->setResolution("resolution workspace"), false);
+  }
 
   void test_hasWorkspace_returns_true_for_ws_in_model() { TS_ASSERT(m_fitData->hasWorkspace("data workspace 1")); }
 
