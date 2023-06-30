@@ -9,6 +9,7 @@
 #include "DllConfig.h"
 #include "IndirectFitData.h"
 #include "IndirectFitDataModel.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -142,6 +143,16 @@ bool IndirectFitDataModel::setResolution(const std::string &name, WorkspaceID wo
     throw std::runtime_error("A valid resolution file needs to be selected.");
   }
   return isValid;
+}
+
+void IndirectFitDataModel::removeSpecialValues(const std::string name) {
+  auto alg = Mantid::API::AlgorithmManager::Instance().create("ReplaceSpecialValues");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", name);
+  alg->setProperty("OutputWorkspace", name);
+  alg->setProperty("NaNValue", 0.0);
+  alg->setProperty("InfinityValue", 0.0);
+  alg->execute();
 }
 
 void IndirectFitDataModel::setSpectra(const std::string &spectra, WorkspaceID workspaceID) {

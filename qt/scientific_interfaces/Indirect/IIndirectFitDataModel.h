@@ -72,6 +72,7 @@ public:
   virtual void setExcludeRegion(const std::string &exclude, FitDomainIndex index) = 0;
 
   virtual std::pair<WorkspaceID, WorkspaceIndex> getSubIndices(FitDomainIndex) const = 0;
+  virtual void removeSpecialValues(const std::string name) = 0;
 };
 
 } // namespace IDA

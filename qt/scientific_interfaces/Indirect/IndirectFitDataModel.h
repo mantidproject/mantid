@@ -74,6 +74,7 @@ public:
   std::string getExcludeRegion(FitDomainIndex index) const override;
   std::vector<double> getExcludeRegionVector(WorkspaceID workspaceID, WorkspaceIndex spectrum) const override;
   std::vector<double> getExcludeRegionVector(FitDomainIndex index) const override;
+  void removeSpecialValues(const std::string name) override;
 
 private:
   void addNewWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra);
