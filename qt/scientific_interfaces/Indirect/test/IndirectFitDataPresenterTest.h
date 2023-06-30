@@ -199,12 +199,16 @@ public:
     EXPECT_CALL(*m_model, setResolution("WorkspaceName")).Times(Exactly(1));
     m_presenter->setResolution("WorkspaceName");
     EXPECT_CALL(*m_model, removeSpecialValues("WorkspaceName")).Times(Exactly(0));
+    EXPECT_CALL(*m_view, displayWarning("Replaced the NaN's and infinities in WorkspaceName with zeros"))
+        .Times(Exactly(0));
   }
 
   void test_setResolution_has_bad_values() {
     ON_CALL(*m_model, setResolution("WorkspaceName")).WillByDefault(Return(false));
     EXPECT_CALL(*m_model, setResolution("WorkspaceName")).Times(Exactly(1));
     EXPECT_CALL(*m_model, removeSpecialValues("WorkspaceName")).Times(Exactly(1));
+    EXPECT_CALL(*m_view, displayWarning("Replaced the NaN's and infinities in WorkspaceName with zeros"))
+        .Times(Exactly(1));
 
     m_presenter->setResolution("WorkspaceName");
   }
