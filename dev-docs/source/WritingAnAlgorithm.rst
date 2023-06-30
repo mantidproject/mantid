@@ -9,7 +9,7 @@ Writing An Algorithm
 Introduction
 ############
 
-Mantid's :ref:`plugin <Plugin>` architecture has been engineered so that it is easy for a user to write their own algorithm.
+Mantid's :ref:`plugin <Plugin>` architecture has been engineered so that it is easy for a developer, or intrepid user, to write an algorithm.
 This page is a primer for the user about to write their first algorithm and assumes no great knowledge of C++.
 It covers the basics, with links to more advanced options where appropriate.
 There is special description for the case when you are looking to add a custom :ref:`MD conversion plugin <WritingCustomConvertToMDTransformation>`.
@@ -17,8 +17,8 @@ There is special description for the case when you are looking to add a custom :
 Alternatively, you can implement your algorithm in :ref:`Python <emwp_intro>`.
 See :ref:`Python Vs C++ Algorithms <PythonVSCppAlgorithms>` for a comparison of Mantid's two programming languages.
 
-All :ref:`algorithms <Algorithms List>` in Mantid `inherit <http://en.wikipedia.org/wiki/Inheritance_(computer_science)>`__
-from a base ``Algorithm`` class, which provides the support and services required for running a specific algorithm and greatly simplifies the process of writing a new one.
+All :ref:`algorithms <Algorithms List>` in Mantid `inherit <http://en.wikipedia.org/wiki/Inheritance_(computer_science)>`__ from a base ``Algorithm`` class,
+which provides the support and services required for running a specific algorithm and greatly simplifies the process of writing a new one.
 
 Getting Started
 ###############
@@ -34,9 +34,9 @@ The intentionally failing unit test, ``MyAlgTest.h``, and user docs, ``MyAlg-v1.
 The excerpts below are the files created and formatted using the ``pre-commit`` hooks configured for c++ files.
 The exact contents of the generated code may change, the methods required do not.
 
-**Header file** :download:`MyAlg.h <cppalgexample/MyAlg.h>` from ``class_maker.py``
+**Header file** :download:`MyAlg_initial.h <cppalgexample/MyAlg_initial.h>` from ``class_maker.py``
 
-.. literalinclude:: cppalgexample/MyAlg.h
+.. literalinclude:: cppalgexample/MyAlg_initial.h
    :language: cpp
    :lines: 7-
    :linenos:
@@ -48,24 +48,45 @@ The exact contents of the generated code may change, the methods required do not
    :lines: 8-
    :linenos:
 
-The first step is to create a new directory, with any name of your choice,
-under your MantidInstall directory (on Windows, probably located at ``C:\\MantidInstall``).
-Alternatively, you can just do everything in the UserAlgorithms directory.
-The UserAlgorithms directory contains a simple Python script called ``createAlg.py``.
-This can be used to create a new 'empty' algorithm - to create one called 'MyAlg' you should type ``python createAlg.py myAlg category``,
-where category is an optional argument to set the algorithm's category.
-To do the same thing 'by hand',
-create files called ``MyAlg.h`` and ``MyAlg.cpp`` and paste in the following boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorithm name):
-
-At this point you will already have something that will compile and run. To do so (on Windows),
-copy the files ``build.bat`` and ``SConstruct`` from ``UserAlgorithms`` into the directory containing your code and execute ``build.bat``.
+At this point you will already have something that will compile and run.
 If you then start MantidWorkbench your algorithm will appear in the list of available algorithms and could be run.
 But, of course, it won't do anything of interest until you have written some algorithm code...
 
 Coding the Algorithm
 ####################
 
-You will see that the algorithm skeletons set up in the last section contain two methods/functions/subroutines called ``init`` and ``exec``.
+You will see that the algorithm has a variety of methods that need to be filled in.
+The example linked here is used throughout the majority of this document.
+The first few do not normally change very often
+
+The full files described below are :download:`MyAlg.h <cppalgexample/MyAlg.h>` and :download:`MyAlg.cpp <cppalgexample/MyAlg.cpp>`.
+Only ``MyAlg.cpp`` will be shown in detail.
+
+.. literalinclude:: cppalgexample/MyAlg.cpp
+   :language: cpp
+   :lines: 26-36
+   :linenos:
+
+The ``name()`` method should not be verified.
+
+The ``version()`` method normally returns ``1``.
+Mantid allows for having multiple versions of an algorithm registered which is facilitated by this method.
+The most common use cases for multiple versions are when the signature or underly assumptions are radically changed.
+Overall, few algorithms have more than one "version."
+
+The ``category()`` method aids users in finding the algorithm.
+The return can be a semilcolon (``;``) delimited string of categors/subcategories.
+You are highly encouraged to stay to the list of :ref:`existing categories <Algorithms List>`.
+
+The ``summary()`` method is a brief description of the algorithms functionality.
+It is automatically re-used in the python docstring, and the generated help.
+The first sentence of the summary (up to the first period, ``.``) is what appears in the generated gui for the algorithm.
+
+You will see that the algorithm skeletons set up in the last section contain two larger methods called ``init`` and ``exec``.
+These are described in sections below.
+
+**FOLD THIS PARAGRAPH IN ELSEWHERE**
+
 It will be no surprise to discover that these will, respectively,
 contain the code to initialise and execute the algorithm,
 which goes in the ``.cpp`` file between the curly brackets of each method.
@@ -75,23 +96,64 @@ which provide additional services such as the validation of properties,
 fetching workspaces from the ``AnalysisDataService``,
 handling errors and filling the workspace histories.
 
+Logging
+-------
+
+The algorithm base class defines an object, ``g_log``.
+The ``g_log`` object enables access to the :ref:`logging <Logging>` facilities of Mantid,
+and is an invaluable tool in understanding the running of your algorithms.
+When writing information to the logs, be aware of the various levels available and that the default level for users is set to ``notice``.
+
+The logging framework does have facility for flushing logs.
+However, logging ``std::endl`` will force the framework to flush at that time and developers should prever ``"\n"`` instead to not interfere with the framework.
+
+
 Initialization
 --------------
+
+The ``init()`` method written in your algorithm is called as part of the larger algorithm lifecycle.
+It is a private method that cannot be called directly, but one can call an algorithm's inherited ``initialize()`` method for the desired effect.
+For details, look at the source of the ``API::Algorithm::initialize()`` `method <https://github.com/mantidproject/mantid/blob/main/Framework/API/src/Algorithm.cpp#L281>`_.
 
 The initialization (init) method is executed by the ``FrameworkManager`` when an algorithm is requested and must contain the declaration of the properties required by the algorithm.
 Atypically, it can also contain other initialization code such as the calculation of constants used by the algorithm, so long as this does not rely on the values of any of the properties.
 
-Calls to the ``declareProperty`` method are used to add a property to this algorithm.
+Calls to the inherited ``declareProperty()`` method are used to add a property to this algorithm.
 See the properties page for more information on the types of properties supported and the example algorithms in ``UserAlgorithms`` (especially `PropertyAlgorithm <https://github.com/mantidproject/mantid/blob/main/Framework/Examples/PropertyAlgorithm.cpp>`__
 and `WorkspaceAlgorithm <https://github.com/mantidproject/mantid/blob/main/Framework/Examples/WorkspaceAlgorithm.cpp>`__)
 for further guidance on how to use them.
+There are many overloaded signatures for ``declareProperty()`` which are intended to make things easier, but can often be confusing due to the many options available.
 
-For the simple types (integer, double or string), the basic syntax is::
+.. literalinclude:: cppalgexample/MyAlg.cpp
+   :language: cpp
+   :lines: 41-55
+   :linenos:
 
-   declareProperty("UniquePropertyName",value);
+This example shows a couple of different ways of declaring properites.
+They all have a couple of features in common:
+
+* Every property has a name. Here they are ``InputWorkspace``, ``NumberToApply``, ``WayToApply``, and ``OutputWorkspace``
+* Every property has a default value, many of which are effectively empty.
+  Here they are empty workspace name, ``EMPTY_DBL()`` (special float value), ``"Y"``, and empty name.
+  It is extremely unusual to specify a default workspace name
+* Every property has documentation.
+  Most of the ones here are very uniformative, but the document on ``NumberToApply`` was written to demonstrate a particular point.
+  Everything up to the first period (``.``) appears in the mouseover in the generated algorithm dialogs.
+  The whole string appears in the user docs and python help.
 
 An optional :ref:`validator <Properties Validators>` or :ref:`directional argument <Properties Directions>` (input, output or both) can also be appended.
 The syntax for other property types (``WorkspaceProperty`` and ``ArrayProperty``) is more complex - see the :ref:`properties <Properties>` page.
+
+While not part of the initialization, the optional ``validateInputs()`` method allows for cross-checking parameters.
+This particular example shows how one would ban a particular value, but normally a validator would be placed on the property itself for this behavior
+
+.. literalinclude:: cppalgexample/MyAlg.cpp
+   :language: cpp
+   :lines: 57-68
+   :linenos:
+
+The key is the name of the property that has an issue and the value is the error message presented to users.
+It is not uncommon to mark both properties invalid if they are mutually exclusive.
 
 Execution
 #########
@@ -166,12 +228,6 @@ This call will also initialise the algorithm, so the algorithm's properties can 
      childAlg->setProperty<Workspace_sptr>("Workspace",workspacePointer);
      childAlg->execute();
 
-Logging
--------
-
-The ``g_log`` object enables access to the :ref:`logging <Logging>` facilities of Mantid,
-and is an invaluable tool in understanding the running of your algorithms.
-
 Enhancing asynchronous running
 ------------------------------
 
@@ -212,3 +268,9 @@ This makes it easier for users to find where they went wrong.
 If your ``validateInputs()`` method validates an input workspace property,
 bear in mind that the user could provide a ``WorkspaceGroup`` (or an unexpected type of workspace) - when retrieving the property,
 check that casting it to its intended type succeeded before attempting to use it.
+
+Calling Algorithms
+##################
+
+There are many potential subtleties for how algorithms are written.
+Much of the algorithm lifecycle is hidden from the caller in python, but are much more explicit in C++.
