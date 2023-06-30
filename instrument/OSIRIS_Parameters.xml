@@ -16,7 +16,7 @@
 </parameter>
 
 <parameter name="refl-silicon" type="string">
-  <value val="111" />
+  <value val="111,333" />
 </parameter>
 
 <parameter name="refl-diffraction" type="string">

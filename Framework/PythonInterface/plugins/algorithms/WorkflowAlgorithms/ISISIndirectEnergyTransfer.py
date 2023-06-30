@@ -90,7 +90,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(
             name="Reflection",
             defaultValue="",
-            validator=StringListValidator(["002", "004", "006", "111"]),
+            validator=StringListValidator(["002", "004", "006", "111", "333"]),
             doc="Reflection number for instrument setup during run.",
         )
 
