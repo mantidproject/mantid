@@ -25,6 +25,24 @@ class _AtomData(TypedDict):
 
 class AtomsData(collections.abc.Sequence):
     def __init__(self, atoms_data: Dict[str, _AtomData]) -> None:
+        """Data container for Atomic position information
+
+        AtomsData objects can be iterated, indexed and sliced to obtain
+        a dict of data for each atom.
+
+        Args:
+            atoms_data: dict of data arranged by atom. Each key is a string of
+                the form "atom_0", "atom_1" etc. and each value is a dict with
+                signature {"coord": length-3 array,
+                           "mass": float,
+                           "sort": int,
+                           "symbol": str}
+                where "coord" is in Angstrom, "mass" is in a.m.u.,
+                "sort" is an identifier for symmetry-equivalent sites and
+                "symbol" is a chemical element symbol.
+
+        """
+
         # Make a map matching int indices to atoms_data keys
         test = re.compile(r"^atom_(\d+)$")
 
@@ -57,10 +75,14 @@ class AtomsData(collections.abc.Sequence):
     @staticmethod
     def _check_item(item: _AtomData, n_atoms: Optional[int] = None) -> _AtomData:
         """
-        Raise an error if Atoms data item is unsuitable
+        Check a dict of atom data is suitable for use as item in AtomsData
 
-        :param item: element to be added
-        :param n_atoms: Number of atoms in data. If provided, check that "sort" value is not higher than expected.
+        Args:
+            item: element to be added
+            n_atoms: Number of atoms in data. If provided, check that "sort" value is not higher than expected.
+
+        Returns:
+            The input item
         """
 
         if not isinstance(item, dict):
@@ -156,7 +178,16 @@ class AtomsData(collections.abc.Sequence):
 
     @staticmethod
     def from_dict(data: "AtomsData.JSONableData") -> "AtomsData":
-        """Construct from JSON-compatible dictionary"""
+        """Construct AtomsData from JSON-compatible dictionary
+
+        Args:
+            data: Unlike the main constructor AtomsData(), this data should
+                be in JSON-compatible form: i.e. the length-3 numpy arrays are
+                replaced with length-3 List[float]. Usually this data will be
+                obtained from an external file or from the AtomsData.to_dict()
+                method.
+
+        """
         atoms_data = {}  # type: Dict[str, _AtomData]
 
         for atom_key, atom_data in data.items():
