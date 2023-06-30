@@ -1,25 +1,30 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
-class DLLExport MyAlg : public Mantid::API::Algorithm {
+namespace Mantid {
+namespace Algorithms {
+
+/** MyAlg : TODO: DESCRIPTION
+ */
+class MANTID_ALGORITHMS_DLL MyAlg : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  MyAlg() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  virtual ~MyAlg() = default;
-  /// Algorithm's name
-  const std::string name() const override { return "MyAlg"; }
-  /// Algorithm's purpose/summary
-  const std::string summary() const override { return "Summary"; }
-  /// Algorithm's version
-  int version() const override { return (1); }
-  /// Algorithm's category for identification
-  const std::string category() const override { return "UserDefined"; }
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  /// Initialisation code
   void init() override;
-  /// Execution code
   void exec() override;
 };
+
+} // namespace Algorithms
+} // namespace Mantid

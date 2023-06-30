@@ -25,6 +25,29 @@ Getting Started
 
 Creating a new algorithm is simplified using :ref:`class_maker.py <class_maker_py>`
 
+.. code-block:: bash
+
+  $ python buildconfig/class_maker.py --alg Algorithms MyAlg
+
+which will give an amount of information about all that it did.
+The intentionally failing unit test, ``MyAlgTest.h``, and user docs, ``MyAlg-v1.rst``, will not be described here, but need to be updated before contributing.
+The excerpts below are the files created and formatted using the ``pre-commit`` hooks configured for c++ files.
+The exact contents of the generated code may change, the methods required do not.
+
+**Header file** :download:`MyAlg.h <cppalgexample/MyAlg.h>` from ``class_maker.py``
+
+.. literalinclude:: cppalgexample/MyAlg.h
+   :language: cpp
+   :lines: 7-
+   :linenos:
+
+**Source file** :download:`MyAlg_initial.cpp <cppalgexample/MyAlg_initial.cpp>` from ``class_maker.py``
+
+.. literalinclude:: cppalgexample/MyAlg_initial.cpp
+   :language: cpp
+   :lines: 8-
+   :linenos:
+
 The first step is to create a new directory, with any name of your choice,
 under your MantidInstall directory (on Windows, probably located at ``C:\\MantidInstall``).
 Alternatively, you can just do everything in the UserAlgorithms directory.
@@ -33,18 +56,6 @@ This can be used to create a new 'empty' algorithm - to create one called 'MyAlg
 where category is an optional argument to set the algorithm's category.
 To do the same thing 'by hand',
 create files called ``MyAlg.h`` and ``MyAlg.cpp`` and paste in the following boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorithm name):
-
-**Header file** :download:`MyAlg.h <cppalgexample/MyAlg.h>`
-
-.. literalinclude:: cppalgexample/MyAlg.h
-   :language: cpp
-   :linenos:
-
-**Source file** :download:`MyAlg.cpp <cppalgexample/MyAlg.cpp>`
-
-.. literalinclude:: cppalgexample/MyAlg.cpp
-   :language: cpp
-   :linenos:
 
 At this point you will already have something that will compile and run. To do so (on Windows),
 copy the files ``build.bat`` and ``SConstruct`` from ``UserAlgorithms`` into the directory containing your code and execute ``build.bat``.
