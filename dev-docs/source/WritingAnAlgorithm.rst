@@ -9,29 +9,27 @@ Writing An Algorithm
 Introduction
 ############
 
-Mantid's :ref:`plugin <Plugin>` architecture has been engineered so that it is easy for a user
-to write their own algorithm. This page is a primer for the user about to write their first algorithm and assumes no
-great knowledge of C++.
+Mantid's :ref:`plugin <Plugin>` architecture has been engineered so that it is easy for a user to write their own algorithm.
+This page is a primer for the user about to write their first algorithm and assumes no great knowledge of C++.
 It covers the basics, with links to more advanced options where appropriate.
 There is special description for the case when you are looking to add a custom :ref:`MD conversion plugin <WritingCustomConvertToMDTransformation>`.
 
 Alternatively, you can implement your algorithm in :ref:`Python <emwp_intro>`.
-See :ref:`Python Vs C++ Algorithms <PythonVSCppAlgorithms>` for a comparison of Mantid's
-two programming languages.
+See :ref:`Python Vs C++ Algorithms <PythonVSCppAlgorithms>` for a comparison of Mantid's two programming languages.
 
 All :ref:`algorithms <Algorithms List>` in Mantid `inherit <http://en.wikipedia.org/wiki/Inheritance_(computer_science)>`__
-from a base ``Algorithm`` class, which provides the support and services required for running a specific
-algorithm and greatly simplifies the process of writing a new one.
+from a base ``Algorithm`` class, which provides the support and services required for running a specific algorithm and greatly simplifies the process of writing a new one.
 
 Getting Started
 ###############
-The first step is to create a new directory, with any name of your choice, under your MantidInstall directory
-(on Windows, probably located at ``C:\\MantidInstall``). Alternatively, you can just do everything in the
-UserAlgorithms directory. The UserAlgorithms directory contains a simple Python script called ``createAlg.py``.
-This can be used to create a new 'empty' algorithm - to create one called 'MyAlg' you should type ``python
-createAlg.py myAlg category``, where category is an optional argument to set the algorithm's category.
-To do the same thing 'by hand', create files called ``MyAlg.h`` and ``MyAlg.cpp`` and paste in the following
-boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorithm name):
+The first step is to create a new directory, with any name of your choice,
+under your MantidInstall directory (on Windows, probably located at ``C:\\MantidInstall``).
+Alternatively, you can just do everything in the UserAlgorithms directory.
+The UserAlgorithms directory contains a simple Python script called ``createAlg.py``.
+This can be used to create a new 'empty' algorithm - to create one called 'MyAlg' you should type ``python createAlg.py myAlg category``,
+where category is an optional argument to set the algorithm's category.
+To do the same thing 'by hand',
+create files called ``MyAlg.h`` and ``MyAlg.cpp`` and paste in the following boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorithm name):
 
 **Header file (MyAlg.h)**:
 
@@ -81,32 +79,32 @@ boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorit
     {
     }
 
-At this point you will already have something that will compile and run. To do so (on Windows), copy the files
-``build.bat`` & ``SConstruct`` from ``UserAlgorithms`` into the directory containing your code and execute ``build.bat``.
+At this point you will already have something that will compile and run. To do so (on Windows),
+copy the files ``build.bat`` and ``SConstruct`` from ``UserAlgorithms`` into the directory containing your code and execute ``build.bat``.
 If you then start MantidWorkbench your algorithm will appear in the list of available algorithms and could be run.
 But, of course, it won't do anything of interest until you have written some algorithm code...
 
 Coding the Algorithm
 ####################
 
-You will see that the algorithm skeletons set up in the last section contain two methods/functions/subroutines
-called ``init`` and ``exec``. It will be no surprise to discover that these will, respectively, contain the code to
-initialise and execute the algorithm, which goes in the ``.cpp`` file between the curly brackets of each method.
-Note that these are private methods (i.e. cannot be called directly); an algorithm is run by calling the base
-class's ``initialize()`` and ``execute()`` methods, which provide additional services such as the validation of properties,
-fetching workspaces from the ``AnalysisDataService``, handling errors and filling the workspace histories.
+You will see that the algorithm skeletons set up in the last section contain two methods/functions/subroutines called ``init`` and ``exec``.
+It will be no surprise to discover that these will, respectively,
+contain the code to initialise and execute the algorithm,
+which goes in the ``.cpp`` file between the curly brackets of each method.
+Note that these are private methods (i.e. cannot be called directly);
+an algorithm is run by calling the base class's ``initialize()`` and ``execute()`` methods,
+which provide additional services such as the validation of properties,
+fetching workspaces from the ``AnalysisDataService``,
+handling errors and filling the workspace histories.
 
 Initialization
 --------------
 
-The initialization (init) method is executed by the ``FrameworkManager`` when an algorithm is requested and must
-contain the declaration of the properties required by the algorithm. Atypically, it can also contain other
-initialization code such as the calculation of constants used by the algorithm, so long as this does not
-rely on the values of any of the properties.
+The initialization (init) method is executed by the ``FrameworkManager`` when an algorithm is requested and must contain the declaration of the properties required by the algorithm.
+Atypically, it can also contain other initialization code such as the calculation of constants used by the algorithm, so long as this does not rely on the values of any of the properties.
 
-Calls to the ``declareProperty`` method are used to add a property to this algorithm. See the properties page
-for more information on the types of properties supported and the example algorithms in ``UserAlgorithms``
-(especially `PropertyAlgorithm <https://github.com/mantidproject/mantid/blob/main/Framework/Examples/PropertyAlgorithm.cpp>`__
+Calls to the ``declareProperty`` method are used to add a property to this algorithm.
+See the properties page for more information on the types of properties supported and the example algorithms in ``UserAlgorithms`` (especially `PropertyAlgorithm <https://github.com/mantidproject/mantid/blob/main/Framework/Examples/PropertyAlgorithm.cpp>`__
 and `WorkspaceAlgorithm <https://github.com/mantidproject/mantid/blob/main/Framework/Examples/WorkspaceAlgorithm.cpp>`__)
 for further guidance on how to use them.
 
@@ -114,10 +112,8 @@ For the simple types (integer, double or string), the basic syntax is::
 
    declareProperty("UniquePropertyName",value);
 
-An optional :ref:`validator <Properties Validators>` or
-:ref:`directional argument <Properties Directions>` (input, output or both)
-can also be appended. The syntax for other property types (``WorkspaceProperty`` & ``ArrayProperty``) is more
-complex - see the :ref:`properties <Properties>` page.
+An optional :ref:`validator <Properties Validators>` or :ref:`directional argument <Properties Directions>` (input, output or both) can also be appended.
+The syntax for other property types (``WorkspaceProperty`` and ``ArrayProperty``) is more complex - see the :ref:`properties <Properties>` page.
 
 Execution
 #########
@@ -125,14 +121,15 @@ Execution
 Fetching properties
 -------------------
 
-Before the data can be processed, the first task is likely to be to fetch the values of the input properties.
+Before the data can be processed,
+the first task is likely to be to fetch the values of the input properties.
 This uses the ``getProperty`` method as follows::
 
     TYPE myProperty = getProperty("PropertyName");
 
-where ``TYPE`` is the type of the property (``int``, ``double``, ``std::string``, ``std::vector``...). Note that the
-value of a ``WorkspaceProperty`` is a :ref:`shared pointer <Shared Pointer>`
-to the workspace, which is referred to as ``Mantid::API::Workspace_sptr`` or ``Mantid::API::Workspace_const_sptr``.
+where ``TYPE`` is the type of the property (``int``, ``double``, ``std::string``, ``std::vector``...).
+Note that the value of a ``WorkspaceProperty`` is a :ref:`shared pointer <Shared Pointer>` to the workspace,
+which is referred to as ``Mantid::API::Workspace_sptr`` or ``Mantid::API::Workspace_const_sptr``.
 The latter should be used for input workspaces that will not need to be changed in the course of the algorithm.
 
 If a handle is required on the property itself, rather than just its value, then the same method is used as follows::
@@ -146,9 +143,8 @@ Creating the output workspace
 -----------------------------
 
 Usually, the result of an algorithm will be stored in another new workspace and the algorithm
-will need to create that new workspace through a call to the ``WorkspaceFactory``. For the (common)
-example where the output workspace should be of the same type and size as the input one, the code
-would read as follows::
+will need to create that new workspace through a call to the ``WorkspaceFactory``.
+For the (common) example where the output workspace should be of the same type and size as the input one, the code would read as follows::
 
    Mantid::API::Workspace_sptr outputWorkspace = Mantid::API::WorkspaceFactory::Instance().create(inputWorkspace);
 
@@ -164,13 +160,11 @@ where ``outputWorkspace`` is a shared pointer to the created output workspace.
 Using workspaces
 ----------------
 
-The bulk of most algorithms will involve the manipulation of the data contained in workspaces
-and information on how to interact with these is given :ref:`here <WorkingWithWorkspaces>`.
+The bulk of most algorithms will involve the manipulation of the data contained in workspaces and information on how to interact with these is given :ref:`here <WorkingWithWorkspaces>`.
 The more advanced user may also want to refer to the full
 `workspace documentation <http://doxygen.mantidproject.org/nightly/d3/de9/classMantid_1_1API_1_1Workspace.html>`__.
 
-Those familiar with C++ should make use of private methods and data members to break up the execution code into
-more manageable and readable sections.
+Those familiar with C++ should make use of private methods and data members to break up the execution code into more manageable and readable sections.
 
 Further Features
 ################
@@ -183,8 +177,7 @@ Child Algorithms
 ----------------
 
 Algorithms may wish to make use of the functionality of other algorithms as part of their execution.
-For example, if a units change is required the ``ConvertUnits`` algorithm could be used. Mantid therefore
-has the concept of a child algorithm and this is accessed through a call to the
+For example, if a units change is required the ``ConvertUnits`` algorithm could be used. Mantid therefore has the concept of a child algorithm and this is accessed through a call to the
 ``createChildAlgorithm`` method as follows::
 
     Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("AlgorithmName");
@@ -198,17 +191,17 @@ This call will also initialise the algorithm, so the algorithm's properties can 
 Logging
 -------
 
-The ``g_log`` object enables access to the :ref:`logging <Logging>` facilities of Mantid, and is an invaluable
-tool in understanding the running of your algorithms.
+The ``g_log`` object enables access to the :ref:`logging <Logging>` facilities of Mantid,
+and is an invaluable tool in understanding the running of your algorithms.
 
 Enhancing asynchronous running
 ------------------------------
 
-Any algorithm can be run asynchronously without modification. However, some features
-are only enabled if code is added within the ``exec()`` method. ``Algorithm::interruption_point()`` should
-be called at appropriate intervals so that the algorithm's execution can be interrupted.
-``Algorithm::progress(double p)`` reports the progress of the algorithm. ``p`` must be between
-0 (start) and 1 (finish).
+Any algorithm can be run asynchronously without modification.
+However, some features are only enabled if code is added within the ``exec()`` method.
+``Algorithm::interruption_point()`` should be called at appropriate intervals so that the algorithm's execution can be interrupted.
+``Algorithm::progress(double p)`` reports the progress of the algorithm.
+``p`` must be between 0 (start) and 1 (finish).
 
 Exceptions
 ----------
@@ -219,27 +212,25 @@ These will be caught in the base Algorithm class, which will report the failure 
 Validation of inputs
 --------------------
 
-:ref:`Validators <Properties Validators>` allow you to give feedback
-to the user if the input of a property is incorrect (for example, typing non-numeric characters
-in a number field).
+:ref:`Validators <Properties Validators>` allow you to give feedback to the user if the input of a property is incorrect (for example, typing non-numeric characters in a number field).
 
-For more advanced validation, override the ``Algorithm::validateInputs()`` method. This is a
-method that returns a map where:
+For more advanced validation, override the ``Algorithm::validateInputs()`` method.
+This is a method that returns a map where:
 
 - The key is the name of the property that is in error.
 
 - The value is a string describing the error.
 
-This method allows you to provide validation that depends on several property values at once
-(something that cannot be done with ``IValidator``). Its default implementation returns an empty map,
-signifying no errors.
+This method allows you to provide validation that depends on several property values at once (something that cannot be done with ``IValidator``).
+Its default implementation returns an empty map, signifying no errors.
 
-It will be called in dialogs **after** parsing all inputs and setting the properties, but **before** executing.
+It will be called in dialogs **after** parsing all inputs and setting the properties,
+but **before** executing.
 It is also called again in the ``execute()`` call, which will throw if this returns something.
 
 This will set a "star" ``*`` label next to each property that is reporting an error.
 This makes it easier for users to find where they went wrong.
 
-If your ``validateInputs()`` method validates an input workspace property, bear in mind that the user
-could provide a ``WorkspaceGroup`` (or an unexpected type of workspace) - when retrieving the property,
+If your ``validateInputs()`` method validates an input workspace property,
+bear in mind that the user could provide a ``WorkspaceGroup`` (or an unexpected type of workspace) - when retrieving the property,
 check that casting it to its intended type succeeded before attempting to use it.
