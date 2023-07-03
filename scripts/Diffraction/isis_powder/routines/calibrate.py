@@ -47,6 +47,15 @@ def create_van(instrument, run_details, absorb, spline=True):
     solid_angle = instrument.get_solid_angle_corrections(run_details.run_number, run_details)
     if solid_angle:
         aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws, RHSWorkspace=solid_angle)
+        aligned_ws = mantid.ReplaceSpecialValues(
+            InputWorkspace=aligned_ws,
+            OutputWorkspace=aligned_ws.name(),
+            NaNValue=0,
+            InfinityValue=0,
+            BigNumberThreshold=1e15,
+            SmallNumberThreshold=-1e15,
+        )
+
         mantid.DeleteWorkspace(solid_angle)
     focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws, GroupingFileName=run_details.grouping_file_path)
     # convert back to TOF based on engineered detector positions
