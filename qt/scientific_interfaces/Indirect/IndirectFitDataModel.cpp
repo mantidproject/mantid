@@ -125,7 +125,7 @@ bool IndirectFitDataModel::setResolution(const std::string &name, WorkspaceID wo
   bool isValid = true;
   if (!name.empty() && m_adsInstance.doesExist(name)) {
     const auto resolution = m_adsInstance.retrieveWS<Mantid::API::MatrixWorkspace>(name);
-    auto y = resolution->readY(0);
+    auto y = resolution->readY(workspaceID.value);
     isValid = std::all_of(y.cbegin(), y.cend(), [](double value) { return value == value; });
 
     if (m_resolutions->size() > workspaceID.value) {
