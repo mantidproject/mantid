@@ -531,7 +531,11 @@ def run_vanadium_calibration(per_detector):
 
     # Run create vanadium twice to ensure we get two different output splines / files
     pdf_inst_obj.create_vanadium(
-        first_cycle_run_no=vanadium_run, do_absorb_corrections=True, multiple_scattering=False, per_detector_vanadium=per_detector
+        first_cycle_run_no=vanadium_run,
+        do_absorb_corrections=True,
+        multiple_scattering=True,
+        per_detector_vanadium=per_detector,
+        mayers_mult_scat_events=0,
     )
 
     # Check the spline looks good and was saved

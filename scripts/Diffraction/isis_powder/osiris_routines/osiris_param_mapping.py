@@ -25,5 +25,6 @@ attr_mapping = [
     ParamMapEntry(ext_name="xye_filename", int_name="xye_filename"),
     ParamMapEntry(ext_name="sample_empty_scale", int_name="sample_empty_scale", optional=True),
     ParamMapEntry(ext_name="keep_raw_workspace", int_name="keep_raw_workspace", optional=True),
+    ParamMapEntry(ext_name="mayers_mult_scat_events", int_name="mayers_mult_scat_events", optional=True),
 ]
 attr_mapping.extend(PARAM_MAPPING)

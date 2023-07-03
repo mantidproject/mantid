@@ -16,7 +16,7 @@ from isis_powder.routines.run_details import create_run_details_object, get_cal_
 from isis_powder.polaris_routines import polaris_advanced_config
 
 
-def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium):
+def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium, msevents):
     mantid.MaskDetectors(ws_to_correct, SpectraList=list(range(1, 55)))
 
     absorb_dict = polaris_advanced_config.absorption_correction_params
@@ -26,6 +26,7 @@ def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vana
         multiple_scattering=multiple_scattering,
         sample_details_obj=sample_details_obj,
         is_vanadium=is_vanadium,
+        msevents=msevents,
     )
     return ws_to_correct
 
