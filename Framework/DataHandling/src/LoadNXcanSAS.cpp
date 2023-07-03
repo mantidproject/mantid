@@ -131,23 +131,65 @@ void loadLogs(H5::Group &entry, const Mantid::API::MatrixWorkspace_sptr &workspa
 
 // ----- SAMPLE
 
+namespace {
+bool hasAperture(H5::Group &entry) {
+  try {
+    entry.openGroup(sasInstrumentGroupName).openGroup(sasInstrumentApertureGroupName);
+    return true;
+  } catch (H5::GroupIException &) {
+  } catch (H5::FileIException &) {
+  }
+  return false;
+}
+
+bool hasSample(H5::Group &entry) {
+  try {
+    entry.openGroup(sasInstrumentSampleGroupAttr);
+    return true;
+  } catch (H5::GroupIException &) {
+  } catch (H5::FileIException &) {
+    return false;
+  }
+}
+
+int convertToGeometryFlag(std::string &geometryString) {
+  if (geometryString == "Cylinder")
+    return 1;
+  if (geometryString == "FlatPlate")
+    return 2;
+  if (geometryString == "Disc")
+    return 3;
+  return 0;
+}
+} // namespace
+
 void loadSample(H5::Group &entry, const Mantid::API::MatrixWorkspace_sptr &workspace) {
   auto &&sample = workspace->mutableSample();
 
-  // Load UserFile and BatchFile (optional)
-  auto &&apertureGroup = entry.openGroup(sasInstrumentApertureGroupName);
-  auto &&height =
-      Mantid::DataHandling::H5Util::readArray1DCoerce<double>(apertureGroup, sasInstrumentApertureGapHeight);
-  auto &&width = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(apertureGroup, sasInstrumentApertureGapWidth);
-  auto &&geometry = Mantid::DataHandling::H5Util::readArray1DCoerce<int>(apertureGroup, sasInstrumentApertureShape);
+  if (hasAperture(entry)) {
+    auto &&apertureGroup = entry.openGroup(sasInstrumentGroupName).openGroup(sasInstrumentApertureGroupName);
+    auto &&height =
+        Mantid::DataHandling::H5Util::readArray1DCoerce<double>(apertureGroup, sasInstrumentApertureGapHeight);
+    auto &&width =
+        Mantid::DataHandling::H5Util::readArray1DCoerce<double>(apertureGroup, sasInstrumentApertureGapWidth);
+    auto &&geometry = Mantid::DataHandling::H5Util::readString(apertureGroup, sasInstrumentApertureShape);
+    if (!height.empty()) {
+      sample.setHeight(height.front());
+    }
+    if (!width.empty()) {
+      sample.setWidth(width.front());
+    }
+    if (auto &&geometryFlag = convertToGeometryFlag(geometry)) {
+      sample.setGeometryFlag(geometryFlag);
+    }
+  }
 
-  auto &&sampleGroup = entry.openGroup(sasInstrumentSampleClassAttr);
-  auto &&thickness = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(sampleGroup, sasInstrumentSampleThickness);
-
-  sample.setHeight(height.front());
-  sample.setWidth(width.front());
-  sample.setGeometryFlag(geometry.front());
-  sample.setThickness(thickness.front());
+  if (hasSample(entry)) {
+    auto &&sampleGroup = entry.openGroup(sasInstrumentSampleGroupAttr);
+    auto &&thickness =
+        Mantid::DataHandling::H5Util::readArray1DCoerce<double>(sampleGroup, sasInstrumentSampleThickness);
+    sample.setThickness(thickness.front());
+  }
 }
 
 // ----- INSTRUMENT

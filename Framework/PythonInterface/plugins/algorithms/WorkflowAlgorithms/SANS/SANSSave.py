@@ -11,6 +11,7 @@
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, FileProperty, FileAction, Progress
 from mantid.kernel import Direction, logger
 from sans.algorithm_detail.save_workspace import save_to_file, get_zero_error_free_workspace, file_format_with_append
+from sans.common.file_information import convert_to_shape
 from sans.common.general_functions import get_detector_names_from_instrument
 from sans.common.constant_containers import SANSInstrument_string_as_key_NoInstrument
 from sans.common.enums import SaveType
@@ -137,7 +138,8 @@ class SANSSave(DataProcessorAlgorithm):
         workspace = self.getProperty("InputWorkspace").value
 
         sample = workspace.sample()
-        geometry = sample.getGeometryFlag()
+        maybe_geometry = convert_to_shape(sample.getGeometryFlag())
+        geometry = maybe_geometry.value if maybe_geometry is not None else "Disc"
         height = sample.getHeight()
         width = sample.getWidth()
         thickness = sample.getThickness()

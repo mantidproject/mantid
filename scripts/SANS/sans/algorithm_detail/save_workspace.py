@@ -61,6 +61,8 @@ def get_save_strategy(file_format_bundle, file_name, save_options, additional_pr
         save_options.update(additional_properties)
         save_options.update(additional_run_numbers)
     elif file_format is SaveType.NX_CAN_SAS:
+        maybe_geometry = convert_to_shape(additional_properties["geometry"])
+        additional_properties["geometry"] = maybe_geometry.value if maybe_geometry is not None else "Disc"
         file_name = get_file_name(file_format_bundle, file_name, "_nxcansas", ".h5")
         save_name = "SaveNXcanSAS"
         save_options.update(additional_properties)
