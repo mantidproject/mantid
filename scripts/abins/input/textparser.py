@@ -7,7 +7,7 @@
 from contextlib import contextmanager
 from io import BufferedReader
 import re
-from typing import Sequence
+from typing import Callable, Sequence, Tuple
 
 from abins.constants import EOF, ONE_CHARACTER
 
@@ -28,6 +28,36 @@ class TextParser:
         finally:
             file_obj.seek(pos)
 
+    @staticmethod
+    def _get_test_from_args(msg: str = None, regex: str = None) -> Tuple[Callable[[str], bool], str]:
+        """Validate string/regex search and create a line-testing function"""
+        if (msg is not None) and (regex is not None):
+            raise ValueError("msg or regex should be provided, not both")
+
+        elif msg is not None:
+            msg = bytes(msg, "utf8")
+
+            def test(line):
+                if line.strip() and msg in line:
+                    return True
+                else:
+                    return False
+
+            pattern = msg
+
+        elif regex is not None:
+            compiled_regex = re.compile(bytes(regex, "utf8"))
+
+            def test(line):
+                return compiled_regex.match(line)
+
+            pattern = regex
+
+        else:
+            raise ValueError("No msg or regex provided: nothing to match")
+
+        return test, pattern
+
     @classmethod
     def find_first(cls, *, file_obj: BufferedReader, msg: str = None, regex: str = None) -> str:
         """
@@ -38,51 +68,36 @@ class TextParser:
         :param regex: regular expression to find (use *instead of* msg option).
              This string will be compiled to a Python re.Pattern.
         """
-        if msg is not None:
-            msg = bytes(msg, "utf8")
-        if regex is not None:
-            regex = bytes(regex, "utf8")
+        test, pattern = cls._get_test_from_args(msg=msg, regex=regex)
 
-        if msg and regex:
-            raise ValueError("msg or regex should be provided, not both")
-        elif msg:
-            while not cls.file_end(file_obj):
-                line = file_obj.readline()
-                if line.strip() and msg in line:
-                    return line
-            raise EOFError(f'"{msg.decode()}" not found')
-        elif regex:
-            test = re.compile(regex)
-            while not cls.file_end(file_obj):
-                line = file_obj.readline()
-                if test.match(line):
-                    return line
-            raise EOFError(f'"{regex.decode()}" not found')
-        else:
-            raise ValueError("No msg or regex provided: nothing to match")
+        while not cls.file_end(file_obj):
+            line = file_obj.readline()
+
+            if test(line):
+                return line
+
+        raise EOFError(f'"{pattern}" not found')
 
     @classmethod
-    def find_last(cls, file_obj=None, msg=None):
+    def find_last(cls, *, file_obj: BufferedReader, msg: str = None, regex: str = None) -> str:
         """
-        Moves file current position to the last occurrence of msg.
+        Moves file current position to the last occurrence of msg or regex.
 
         :param file_obj: file object from which we read
         :param msg: keyword to find
         """
-        msg = bytes(msg, "utf8")
+        test, pattern = cls._get_test_from_args(msg=msg, regex=regex)
 
-        found = False
         last_entry = None
 
         while not cls.file_end(file_obj):
             pos = file_obj.tell()
             line = file_obj.readline()
-            if line.strip() and msg in line:
+            if test(line):
                 last_entry = pos
-                found = True
 
-        if not found:
-            raise EOFError(f'No entry "{msg.decode()}" has been found.')
+        if last_entry is None:
+            raise EOFError(f'No entry "{pattern}" has been found.')
         else:
             file_obj.seek(last_entry)
 
