@@ -1,1 +1,0 @@
-- Fixed bug where opening the plot options for a script-created plot with error bars, would crash Workbench.

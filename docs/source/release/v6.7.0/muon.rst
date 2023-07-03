@@ -6,21 +6,6 @@ Muon Changes
    :local:
 
 
-Frequency Domain Analysis
--------------------------
-
-Bugfixes
-############
-
-
-
-Muon Analysis
--------------
-
-Bugfixes
-############
-
-
 
 Muon Analysis and Frequency Domain Analysis
 -------------------------------------------
@@ -28,22 +13,6 @@ Muon Analysis and Frequency Domain Analysis
 Bugfixes
 ############
 - The comments are no longer empty when loading the newest version of the nxs file.
-
-
-ALC
----
-
-Bugfixes
-############
-
-
-
-Elemental Analysis
-------------------
-
-Bugfixes
-############
-
 
 
 Algorithms

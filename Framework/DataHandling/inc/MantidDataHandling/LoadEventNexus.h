@@ -182,10 +182,6 @@ public:
   std::string m_top_entry_name;
   std::unique_ptr<::NeXus::File> m_file;
 
-protected:
-  Parallel::ExecutionMode
-  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
-
 private:
   /// Possible loaders types
   enum class LoaderType;

@@ -1,2 +1,0 @@
-- Fixed GDOS intensity correction so that the correction is applied in the same way regardless of rotation of the slice plot.
-- Fix for error when saving a slice plot as a matlab file.

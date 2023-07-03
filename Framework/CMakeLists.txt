@@ -5,21 +5,6 @@ if(stdint)
   add_definitions(-DHAVE_STDINT_H)
 endif()
 
-# MPI-enable build setup
-
-# Only available on Linux (specifically RedHat), and for a framework-only build
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  option(MPI_BUILD "Enable MPI options")
-  if(MPI_BUILD)
-    include(MPISetup)
-  endif(MPI_BUILD)
-endif()
-
-option(MPI_EXPERIMENTAL "Enable MPI options")
-if(MPI_EXPERIMENTAL)
-  include(BoostMPI)
-endif()
-
 add_custom_target(FrameworkTests) # target for all framework tests
 include(TestTargetFunctions)
 add_dependencies(check FrameworkTests)
@@ -51,12 +36,6 @@ add_subdirectory(Reflectometry)
 add_subdirectory(SINQ)
 add_subdirectory(TestHelpers)
 add_subdirectory(WorkflowAlgorithms)
-
-# If an MPI-enabled build, add in the MPI-specific algorithms package
-if(MPI_BUILD)
-  add_subdirectory(MPIAlgorithms)
-endif()
-
 add_subdirectory(MDAlgorithms)
 add_subdirectory(Doxygen)
 add_subdirectory(ScriptRepository)

@@ -1,1 +1,0 @@
-- It is now possible to overwrite or add a new sample log from either :ref:`algm-LoadILLReflectometry`,  :ref:`algm-ReflectometryILLPreProcess` or :ref:`algm-ReflectometryILLAutoProcess`.

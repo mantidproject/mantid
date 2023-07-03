@@ -2803,6 +2803,21 @@ std::vector<DateAndTime> EventList::getPulseTOFTimesAtSample(const double &facto
 }
 
 // --------------------------------------------------------------------------
+
+namespace { // anonymous namespace
+template <class T> double getTofMinimumHelper(const std::vector<T> &events) {
+  const auto result = std::min_element(events.cbegin(), events.cend(),
+                                       [](const auto &left, const auto &right) { return left.tof() < right.tof(); });
+  return result->tof();
+}
+
+template <class T> double getTofMaximumHelper(const std::vector<T> &events) {
+  const auto result = std::max_element(events.cbegin(), events.cend(),
+                                       [](const auto &left, const auto &right) { return left.tof() < right.tof(); });
+  return result->tof();
+}
+} // anonymous namespace
+
 /**
  * @return The minimum tof value for the list of the events.
  */
@@ -2827,23 +2842,21 @@ double EventList::getTofMin() const {
   }
 
   // now we are stuck with a linear search
-  double temp = tMin; // start with the largest possible value
-  size_t numEvents = this->getNumberEvents();
-  for (size_t i = 0; i < numEvents; i++) {
-    switch (eventType) {
-    case TOF:
-      temp = this->events[i].tof();
-      break;
-    case WEIGHTED:
-      temp = this->weightedEvents[i].tof();
-      break;
-    case WEIGHTED_NOTIME:
-      temp = this->weightedEventsNoTime[i].tof();
-      break;
-    }
-    if (temp < tMin)
-      tMin = temp;
+  switch (eventType) {
+  case TOF: {
+    tMin = getTofMinimumHelper(this->events);
+    break;
   }
+  case WEIGHTED: {
+    tMin = getTofMinimumHelper(this->weightedEvents);
+    break;
+  }
+  case WEIGHTED_NOTIME: {
+    tMin = getTofMinimumHelper(this->weightedEventsNoTime);
+    break;
+  }
+  }
+
   return tMin;
 }
 
@@ -2871,23 +2884,21 @@ double EventList::getTofMax() const {
   }
 
   // now we are stuck with a linear search
-  size_t numEvents = this->getNumberEvents();
-  double temp = tMax; // start with the smallest possible value
-  for (size_t i = 0; i < numEvents; i++) {
-    switch (eventType) {
-    case TOF:
-      temp = this->events[i].tof();
-      break;
-    case WEIGHTED:
-      temp = this->weightedEvents[i].tof();
-      break;
-    case WEIGHTED_NOTIME:
-      temp = this->weightedEventsNoTime[i].tof();
-      break;
-    }
-    if (temp > tMax)
-      tMax = temp;
+  switch (eventType) {
+  case TOF: {
+    tMax = getTofMaximumHelper(this->events);
+    break;
   }
+  case WEIGHTED: {
+    tMax = getTofMaximumHelper(this->weightedEvents);
+    break;
+  }
+  case WEIGHTED_NOTIME: {
+    tMax = getTofMaximumHelper(this->weightedEventsNoTime);
+    break;
+  }
+  }
+
   return tMax;
 }
 

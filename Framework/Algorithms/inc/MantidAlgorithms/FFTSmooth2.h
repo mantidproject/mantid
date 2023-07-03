@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -17,7 +17,7 @@ namespace Algorithms {
     @author Roman Tolchenov
     @date 07/07/2009
  */
-class MANTID_ALGORITHMS_DLL FFTSmooth2 : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL FFTSmooth2 : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FFTSmooth"; }

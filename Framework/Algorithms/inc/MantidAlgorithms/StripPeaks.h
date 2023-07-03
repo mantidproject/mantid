@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -35,7 +35,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 30/10/2008
 */
-class MANTID_ALGORITHMS_DLL StripPeaks : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL StripPeaks : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "StripPeaks"; }

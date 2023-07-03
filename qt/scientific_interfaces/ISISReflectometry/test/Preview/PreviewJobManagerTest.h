@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "../../../ISISReflectometry/Reduction/RowExceptions.h"
 #include "GUI/Batch/BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
@@ -22,10 +23,12 @@
 using Mantid::API::AlgorithmRuntimeProps;
 using Mantid::API::IAlgorithm_sptr;
 using MantidQt::API::ConfiguredAlgorithm;
+using ::testing::_;
 using ::testing::ByRef;
 using ::testing::Eq;
 using ::testing::NotNull;
 using ::testing::Return;
+using ::testing::Throw;
 using WorkspaceCreationHelper::StubAlgorithm;
 
 namespace {
@@ -112,6 +115,19 @@ public:
     jobManager.startSumBanks(previewRow);
   }
 
+  void test_start_sum_banks_calls_notify_algorithm_error_when_multiple_rows_exception_occurs() {
+    auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
+    auto mockJobRunner = makeJobRunner();
+    auto previewRow = makePreviewRow();
+    auto mockSubscriber = MockJobManagerSubscriber();
+
+    expectSumBanksAlgCreationThrowsMultipleRowsException(*mockAlgFactory);
+    EXPECT_CALL(mockSubscriber, notifySumBanksAlgorithmError).Times(1);
+
+    auto jobManager = makeJobManager(std::move(mockJobRunner), mockSubscriber, std::move(mockAlgFactory));
+    jobManager.startSumBanks(previewRow);
+  }
+
   void test_start_reduction() {
     auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
     auto mockJobRunner = makeJobRunner();
@@ -122,6 +138,19 @@ public:
     expectAlgorithmExecuted(stubAlg, *mockJobRunner);
 
     auto jobManager = makeJobManager(std::move(mockJobRunner), std::move(mockAlgFactory));
+    jobManager.startReduction(previewRow);
+  }
+
+  void test_start_reduction_calls_notify_algorithm_error_when_multiple_rows_exception_occurs() {
+    auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
+    auto mockJobRunner = makeJobRunner();
+    auto previewRow = makePreviewRow();
+    auto mockSubscriber = MockJobManagerSubscriber();
+
+    expectReductionAlgCreationThrowsMultipleRowsException(*mockAlgFactory);
+    EXPECT_CALL(mockSubscriber, notifyReductionAlgorithmError).Times(1);
+
+    auto jobManager = makeJobManager(std::move(mockJobRunner), mockSubscriber, std::move(mockAlgFactory));
     jobManager.startReduction(previewRow);
   }
 
@@ -273,9 +302,10 @@ private:
     return PreviewJobManager(std::move(mockJobRunner), std::move(algFactory));
   }
 
-  PreviewJobManager makeJobManager(std::unique_ptr<MockJobRunner> mockJobRunner,
-                                   MockJobManagerSubscriber &mockSubscriber) {
-    auto jobManager = makeJobManager(std::move(mockJobRunner));
+  PreviewJobManager
+  makeJobManager(std::unique_ptr<MockJobRunner> mockJobRunner, MockJobManagerSubscriber &mockSubscriber,
+                 std::unique_ptr<IReflAlgorithmFactory> algFactory = std::make_unique<MockReflAlgorithmFactory>()) {
+    auto jobManager = makeJobManager(std::move(mockJobRunner), std::move(algFactory));
     jobManager.subscribe(&mockSubscriber);
     return jobManager;
   }
@@ -329,6 +359,14 @@ private:
   void expectReductionAlgorithmCreated(MockReflAlgorithmFactory &mockAlgFactory, PreviewRow &previewRow,
                                        IConfiguredAlgorithm_sptr const &alg) {
     EXPECT_CALL(mockAlgFactory, makeReductionAlgorithm(Eq(ByRef(previewRow)))).Times(1).WillOnce(Return(alg));
+  }
+
+  void expectSumBanksAlgCreationThrowsMultipleRowsException(MockReflAlgorithmFactory &mockAlgFactory) {
+    EXPECT_CALL(mockAlgFactory, makeSumBanksAlgorithm(_)).Times(1).WillOnce(Throw(MultipleRowsFoundException("")));
+  }
+
+  void expectReductionAlgCreationThrowsMultipleRowsException(MockReflAlgorithmFactory &mockAlgFactory) {
+    EXPECT_CALL(mockAlgFactory, makeReductionAlgorithm(_)).Times(1).WillOnce(Throw(MultipleRowsFoundException("")));
   }
 
   void expectAlgorithmExecuted(IConfiguredAlgorithm_sptr const &alg, MockJobRunner &mockJobRunner) {

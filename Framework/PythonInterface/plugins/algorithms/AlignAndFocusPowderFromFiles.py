@@ -7,7 +7,7 @@
 from mantid.api import (
     mtd,
     AlgorithmFactory,
-    DistributedDataProcessorAlgorithm,
+    DataProcessorAlgorithm,
     ITableWorkspaceProperty,
     MatrixWorkspaceProperty,
     MultipleFileProperty,
@@ -126,7 +126,7 @@ def uniqueDescription(name, wksp):
     return "{}={}".format(name, value)
 
 
-class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
+class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
     def category(self):
         return "Diffraction\\Reduction"
 
@@ -226,6 +226,13 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                     loader.setProperty("BlockList", self.getProperty("LogBlockList").value)
             except RuntimeError:
                 pass  # let it drop on the floor
+
+        # don't automatically bin the data to start
+        try:
+            loader.setProperty("NumberOfBins", 1)
+        except RuntimeError:
+            pass  # let it drop on the floor
+
         for key, value in kwargs.items():
             if isinstance(value, str):
                 loader.setPropertyValue(key, value)

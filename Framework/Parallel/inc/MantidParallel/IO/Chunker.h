@@ -12,7 +12,6 @@
 
 namespace Mantid {
 namespace Parallel {
-class Communicator;
 namespace IO {
 
 /** Chunking class for Parallel::IO::EventLoader.

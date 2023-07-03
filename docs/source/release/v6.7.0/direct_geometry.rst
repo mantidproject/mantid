@@ -16,6 +16,9 @@ New features
 - :ref:`LagrangeILLReduction <algm-LagrangeILLReduction>` can now accept NeXus data as input for both sample and container runs.
 - `Shiver <https://github.com/neutrons/Shiver>`_ has been added as a menu item for Direct interfaces.
 
+.. image:: ../../images/6_7_release/Direct/shiver_interface.png
+    :align: center
+
 Bugfixes
 ############
 - The :ref:`ALFView <ALFView-ref>` peak picker tool is now offset on the y axis by the background amount.
@@ -34,21 +37,16 @@ New features
 - ``getSpectrum``, from the :ref:`Crystal Field Python interface`, now allows specification of the range for x values.
 - Added a function to print eigenvectors for a :ref:`CrystalField <Crystal Field Python Interface>` object in human readable form.
 
-Bugfixes
-############
-
 
 
 MSlice
 ------
 
-New features
-############
-
 
 Bugfixes
 ############
 - Fixed GDOS intensity correction so that the correction is applied in the same way regardless of the rotation of the slice plot.
+- Fixed the integration of GDOS cuts.
 - Fix for an error when saving a slice plot as a matlab file.
 - Warning is now omitted if a cut is taken with a higher resolution than the parent slice. This causes the appearance of missing lines between adjacent datapoints.
 - When taking a cut, if an intensity range is provided it is now applied to the plot y limits.
@@ -70,8 +68,6 @@ New features
 - ``Read All`` button is removed.
 - Functionality of the red asterisk next to the ``Data Directory`` edit box is improved.
 
-Bugfixes
-############
 
 
 :ref:`Release 6.7.0 <v6.7.0>`

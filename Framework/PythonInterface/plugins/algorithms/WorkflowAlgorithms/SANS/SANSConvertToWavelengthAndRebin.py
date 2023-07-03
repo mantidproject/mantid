@@ -12,7 +12,7 @@ from json import JSONDecodeError
 from typing import List, Tuple
 
 from mantid.api import (
-    DistributedDataProcessorAlgorithm,
+    DataProcessorAlgorithm,
     WorkspaceGroupProperty,
     MatrixWorkspaceProperty,
     AlgorithmFactory,
@@ -31,7 +31,7 @@ from sans.common.general_functions import (
 )
 
 
-class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
+class SANSConvertToWavelengthAndRebin(DataProcessorAlgorithm):
     WAV_PAIRS = "WavelengthPairs"
 
     def category(self):

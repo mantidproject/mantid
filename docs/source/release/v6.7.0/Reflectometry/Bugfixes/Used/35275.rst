@@ -1,1 +1,0 @@
-- The Preview tab now shows the binned output of the reduction on the 1D plot.

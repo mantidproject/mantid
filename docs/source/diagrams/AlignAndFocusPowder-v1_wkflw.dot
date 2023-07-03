@@ -7,8 +7,8 @@ digraph AlignAndFocusPowder {
     InputWorkspace
     OutputWorkspace
     RemovePromptPulseWidth
-    CompressTolerance
-    CropWaveLengthMin
+    compressTol1 [label="CompressTolerance"]
+    compressTol2 [label="CompressTolerance"]
     MaskWorkspace
     MaskBinTable
     CalibrationWorkspace
@@ -25,15 +25,15 @@ digraph AlignAndFocusPowder {
     clearDiffCal      [label="ApplyDiffCal v1\nClear parameters"]
     compressEvents    [label="CompressEvents v1"]
     compressEvents2   [label="CompressEvents v1"]
-    convertUnits1     [label="ConvertUnits v1\nTime-of-Flight"]
-    convertUnits2     [label="ConvertUnits v1\nd-spacing"]
-    convertUnits3     [label="ConvertUnits v1\nTime-of-Flight"]
-    convertUnits4     [label="ConvertUnits v1\nd-spacing"]
-    convertUnits5     [label="ConvertUnits v1\nwavelength"]
-    convertUnits6     [label="ConvertUnits v1\nd-spacing"]
-    convertUnits7     [label="ConvertUnits v1\nwavelength"]
+    convertUnitsTof1     [label="ConvertUnits v1\nTime-of-Flight"]
+    convertUnitsTof2     [label="ConvertUnits v1\nTime-of-Flight"]
+    convertUnitsD1     [label="ConvertUnits v1\nd-spacing"]
+    convertUnitsD2     [label="ConvertUnits v1\nd-spacing"]
+    convertUnitsD3     [label="ConvertUnits v1\nd-spacing"]
+    convertUnitsWL1     [label="ConvertUnits v1\nwavelength"]
+    convertUnitsWL2     [label="ConvertUnits v1\nwavelength"]
     cropWorkspaceTof  [label="CropWorkspace v1\ntof range"]
-    cropWorkspaceWL   [label="CropWorkspace v1\ntof range"]
+    cropWorkspaceWL   [label="CropWorkspace v1\nwavelength range"]
     diffFocus         [label="DiffractionFocussing v2"]
     editGeom          [label="EditInstrumentGeometry v1"]
     lorentz           [label="LorentzCorrection v1"]
@@ -46,99 +46,96 @@ digraph AlignAndFocusPowder {
     rebinRagged       [label="RebinRagged v1"]
     removeLowResTOF   [label="RemoveLowResTOF v1"]
     removePromptPulse [label="RemovePromptPulse v1"]
-    sortEvents1       [label="SortEvents v1"]
-    sortEvents2       [label="SortEvents v1"]
     unwrapSNS         [label="UnwrapSNS v1"]
   }
 
   subgraph decisions {
     $decision_style
-    isEventWorkspace1 [label="Is event workspace?"]
-    isEventWorkspace2 [label="Is event workspace?"]
-    isEventWorkspace3 [label="Is event workspace?"]
-    isCompression     [label="Have compression value?"]
+    isLarge           [label="Is large event workspace?"]
     hasCalibration    [label="Has calibration?"]
     hasResonance      [label="Has absorption\nResonances?"]
+
     isDspace1         [label="Is d-space binning?"]
     isDspace2         [label="Is d-space binning?"]
     isDspace3         [label="Is d-space binning?"]
-    ifParams          [label="LRef or\nDIFCref specified?"]
+    ifLref          [label="LRef specified?"]
+    ifDIFCref          [label="DIFCref specified?"]
     ifRaggedTof       [label="ragged rebin\nand tof binning"]
   }
 
 
-  InputWorkspace         -> isEventWorkspace1
-
-  isEventWorkspace1      -> isCompression       [label="Yes"]
-  isCompression          -> compressEvents      [label="Yes"]
-  isCompression          -> sortEvents1         [label="No"]
-  CompressTolerance      -> compressEvents
-
-  sortEvents1            -> cropWorkspaceTof
-  compressEvents         -> cropWorkspaceTof
-
-  isEventWorkspace1      -> cropWorkspaceTof        [label="No"]
-  CropWaveLengthMin      -> cropWorkspaceTof
-  cropWorkspaceTof       -> removePromptPulse
+  InputWorkspace         -> maskDetectors
+  MaskWorkspace          -> maskDetectors
+  maskDetectors          -> cropWorkspaceTof
 
   RemovePromptPulseWidth -> removePromptPulse
+  cropWorkspaceTof       -> removePromptPulse
 
   removePromptPulse      -> maskBinsTable
   MaskBinTable           -> maskBinsTable
 
-  maskBinsTable          -> maskDetectors
-  MaskWorkspace          -> maskDetectors
-  maskDetectors          -> isDspace1
-  isDspace1              -> rebin1            [label="Yes"]
-  rebin1                 -> hasCalibration
-  isDspace1              -> hasCalibration               [label="No"]
+  maskBinsTable          ->  isLarge
+  compressTol1           -> compressEvents
+  isLarge                -> compressEvents      [label="Yes"]
+  isLarge                -> isDspace1           [label="No"]
+  compressEvents         -> isDspace1
+
+  isDspace1              -> rebin1            [label="No"]
   params1                -> rebin1
+  rebin1                 -> hasCalibration
+  isDspace1              -> hasCalibration    [label="Yes"]
 
   hasCalibration         -> applyDiffCal         [label="Yes"]
-  hasCalibration         -> convertUnits4        [label="No"]
   CalibrationWorkspace   -> applyDiffCal
-  applyDiffCal           -> convertUnits4
-  convertUnits4          -> clearDiffCal
+  applyDiffCal           -> convertUnitsD2
+  hasCalibration         -> convertUnitsD2        [label="No"]
+  convertUnitsD2          -> clearDiffCal
+
   clearDiffCal           -> hasResonance
   hasResonance           -> lorentz              [label="No"]
-  hasResonance           -> convertUnits5        [label="Yes"]
-  convertUnits5          -> maskBins
-  maskBins               -> convertUnits6
-  convertUnits6          -> lorentz
+  hasResonance           -> convertUnitsWL1        [label="Yes"]
+  convertUnitsWL1          -> maskBins
+  maskBins               -> convertUnitsD3
+  convertUnitsD3          -> lorentz
 
-  lorentz                -> ifParams
+  lorentz                -> ifLref
 
-  ifParams               -> convertUnits7            [label="No"]
-  convertUnits7          -> cropWorkspaceWL
-  cropWorkspaceWL        -> convertUnits2
+  ifLref               -> convertUnitsWL2            [label="No"]
+  cropWorkspaceWL        -> convertUnitsD1
 
-  ifParams               -> convertUnits1        [label="Yes"]
-  convertUnits1          -> unwrapSNS
+  convertUnitsD1          -> isDspace2
+
+  ifLref               -> convertUnitsTof1        [label="Yes"]
+  convertUnitsTof1          -> unwrapSNS
   UnwrapRef              -> unwrapSNS
-  unwrapSNS              -> removeLowResTOF
+  unwrapSNS              -> convertUnitsWL2
+  convertUnitsWL2 -> ifDIFCref
+
+
+  ifDIFCref -> cropWorkspaceWL  [label="No"]
+  ifDIFCref -> removeLowResTOF  [label="Yes"]
+
   LowResRef              -> removeLowResTOF
-  removeLowResTOF        -> convertUnits2
-  convertUnits2          -> isDspace2
+  removeLowResTOF        -> convertUnitsD1
 
   isDspace2              -> diffFocus            [label="No"]
   isDspace2              -> rebin2               [label="Yes"]
   params2                -> rebin2
   rebin2                 -> diffFocus
   GroupingWorkspace      -> diffFocus
-  diffFocus              -> isEventWorkspace2
-  isEventWorkspace2      -> sortEvents2          [label="Yes"]
-  isEventWorkspace2      -> isDspace3            [label="No"]
-  sortEvents2            -> isDspace3
+
+  diffFocus              -> isDspace3
 
 
   isDspace3              -> rebin3               [label="Yes"]
   rebin3                 -> editGeom
   isDspace3              -> editGeom             [label="No"]
 
-  editGeom               -> convertUnits3
-  convertUnits3          -> isEventWorkspace3
-  isEventWorkspace3      -> ifRaggedTof          [label="No"]
-  isEventWorkspace3      -> compressEvents2      [label="Yes"]
+  editGeom               -> convertUnitsTof2
+
+  convertUnitsTof2 -> compressEvents2
+
+  compressTol2           -> compressEvents2
   compressEvents2        -> ifRaggedTof
   ifRaggedTof            -> rebinRagged          [label="Yes"]
   rebinRagged            -> OutputWorkspace

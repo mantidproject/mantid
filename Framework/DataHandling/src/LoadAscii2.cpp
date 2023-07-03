@@ -300,7 +300,7 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
  * @param[in] columns : the columns of values in the current line of data
  */
 void LoadAscii2::parseLine(const std::string &line, std::list<std::string> &columns) {
-  if (std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+') {
+  if (std::isdigit(static_cast<unsigned char>(line.at(0))) || line.at(0) == '-' || line.at(0) == '+') {
     const int cols = splitIntoColumns(columns, line);
     if (cols > 4 || cols < 0) {
       // there were more separators than there should have been, which isn't
@@ -421,7 +421,7 @@ void LoadAscii2::setcolumns(std::ifstream &file, std::string &line, std::list<st
       // std::string line = line;
       boost::trim(line);
       if (!line.empty()) {
-        if (std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+') {
+        if (std::isdigit(static_cast<unsigned char>(line.at(0))) || line.at(0) == '-' || line.at(0) == '+') {
           const int cols = splitIntoColumns(columns, line);
           // we might have the first set of values but there can't be more than
           // 3 commas if it is
@@ -501,7 +501,7 @@ void LoadAscii2::processHeader(std::ifstream &file) {
           ++validRows;
           continue;
         }
-        if (std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+') {
+        if (std::isdigit(static_cast<unsigned char>(line.at(0))) || line.at(0) == '-' || line.at(0) == '+') {
           lineCols = this->splitIntoColumns(columns, line);
           // we might have the first set of values but there can't be more than
           // 3 delimiters if it is
@@ -710,7 +710,8 @@ bool LoadAscii2::skipLine(const std::string &line, bool header) const {
  */
 bool LoadAscii2::badLine(const std::string &line) const {
   // Empty or comment
-  return (!(std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+') && line.at(0) != m_comment.at(0));
+  return (!(std::isdigit(static_cast<unsigned char>(line.at(0))) || line.at(0) == '-' || line.at(0) == '+') &&
+          line.at(0) != m_comment.at(0));
 }
 
 /**

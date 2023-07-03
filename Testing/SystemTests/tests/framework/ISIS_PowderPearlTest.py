@@ -72,7 +72,7 @@ class _CreateVanadiumTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 0.05  # Required for difference in spline data between operating systems
         return (
-            "PEARL98472_tt70-Results-D-Grp",
+            "PRL98472_tt70-d",
             "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode),
             "Van_spline_data_tt70",
             "ISIS_Powder-PEARL00098472_splined.nxs",
@@ -146,7 +146,36 @@ class FocusTest(systemtesting.MantidSystemTest):
         assert_output_file_exists(xye_dSpac_outdir, "PRL98507_tt70_d.xye")
 
         self.tolerance = 1e-8  # Required for difference in spline data between operating systems
-        return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
+        return "PRL98507_tt70-d", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            config["datasearch.directories"] = self.existing_config
+            mantid.mtd.clear()
+
+
+class FocusTestIncludingFileExtWorkspaceName(systemtesting.MantidSystemTest):
+    # same as FocusTest but with added argument incl_file_ext_in_wsname=True
+    focus_results = None
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        inst_object = setup_inst_object(tt_mode="tt88", focus_mode="Trans")
+        self.focus_results = run_focus(
+            inst_object, tt_mode="tt70", file_ext=".nxs", incl_file_ext_in_wsname=True, subtract_empty=True, spline_path=spline_path
+        )
+
+    def validate(self):
+        # just check file extension (nxs) in workspace name
+        return "PRL98507_tt70_nxs-d", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
 
     def cleanup(self):
         try:
@@ -201,9 +230,9 @@ class FocusLongThenShortTest(systemtesting.MantidSystemTest):
 
         self.tolerance = 1e-8  # Required for difference in spline data between operating systems
         return (
-            "PEARL98507_tt70-Results-D-Grp",
+            "PRL98507_tt70-d",
             "ISIS_Powder-PEARL00098507_tt70Atten.nxs",
-            "PEARL98507_tt70_long-Results-D-Grp",
+            "PRL98507_tt70_long-d",
             "ISIS_Powder-PEARL00098507_tt70Long.nxs",
         )
 
@@ -228,7 +257,7 @@ class FocusWithAbsorbCorrectionsTest(systemtesting.MantidSystemTest):
         self.focus_results = run_focus_with_absorb_corrections()
 
     def validate(self):
-        return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70_absorb.nxs"
+        return "PRL98507_tt70-d", "ISIS_Powder-PEARL00098507_tt70_absorb.nxs"
 
     def cleanup(self):
         try:
@@ -251,7 +280,7 @@ class FocusWithoutEmptySubtractionTest(systemtesting.MantidSystemTest):
         self.focus_results = run_focus(inst_object, tt_mode="tt70", subtract_empty=False, spline_path=spline_path)
 
     def validate(self):
-        return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70NoEmptySub.nxs"
+        return "PRL98507_tt70-d", "ISIS_Powder-PEARL00098507_tt70NoEmptySub.nxs"
 
     def cleanup(self):
         try:
@@ -357,7 +386,7 @@ def run_vanadium_calibration(inst_object, **kwargs):
     inst_object.create_vanadium(run_in_cycle=vanadium_run, do_absorb_corrections=True, **kwargs)
 
 
-def run_focus(inst_object, tt_mode, subtract_empty, spline_path=None, custom_grouping_filename=None):
+def run_focus(inst_object, tt_mode, subtract_empty, spline_path=None, custom_grouping_filename=None, **kwargs):
     run_number = 98507
     attenuation_file_name = "PRL112_DC25_10MM_FF.OUT"
 
@@ -369,16 +398,21 @@ def run_focus(inst_object, tt_mode, subtract_empty, spline_path=None, custom_gro
         original_splined_path = os.path.join(input_dir, splined_file_name)
         shutil.copy(original_splined_path, spline_path)
 
+    default_kwargs = {
+        "vanadium_normalisation": True,
+        "do_absorb_corrections": False,
+        "perform_attenuation": True,
+        "attenuation_file": "ZTA",
+        "attenuation_files": [{"name": "ZTA", "path": attenuation_path}],
+    }
+    kwargs = {**default_kwargs, **kwargs}  # overwrite defaults with kwargs passed
+
     return inst_object.focus(
         run_number=run_number,
-        vanadium_normalisation=True,
-        do_absorb_corrections=False,
-        perform_attenuation=True,
-        attenuation_file="ZTA",
-        attenuation_files=[{"name": "ZTA", "path": attenuation_path}],
         tt_mode=tt_mode,
         subtract_empty_instrument=subtract_empty,
         custom_grouping_filename=custom_grouping_filename,
+        **kwargs,
     )
 
 
@@ -401,7 +435,7 @@ def setup_inst_object(**kwargs):
         long_mode=False,
         calibration_directory=calibration_dir,
         output_directory=output_dir,
-        **kwargs
+        **kwargs,
     )
     return inst_obj
 

@@ -8,7 +8,7 @@
 
 """A base class to share functionality between SANSSingleReduction versions."""
 
-from mantid.api import DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, Progress, PropertyMode
+from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, Progress, PropertyMode
 from mantid.kernel import Direction
 from sans.algorithm_detail.bundles import ReductionSettingBundle, CompletedSlices
 from sans.algorithm_detail.single_execution import get_final_output_workspaces, get_merge_bundle_for_merge_request
@@ -19,7 +19,7 @@ from sans.data_objects.sans_workflow_algorithm_outputs import SANSWorkflowAlgori
 from sans.state.Serializer import Serializer
 
 
-class SANSSingleReductionBase(DistributedDataProcessorAlgorithm):
+class SANSSingleReductionBase(DataProcessorAlgorithm):
     def _pyinit(self):
         # ----------
         # INPUT

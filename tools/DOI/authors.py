@@ -307,6 +307,10 @@ _translations = {
     "carson sears": "Sears, Carson",
     "Carson Sears": "Sears, Carson",
     "searscr": "Sears, Carson",
+    "Reece Boston": "Boston, Reece",
+    "Marie Backman": "Backman, Marie",
+    "eric pellegrini": "Pellegrini, Eric",
+    "Reece Boston (4rx)": "Boston, Reece",
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT

@@ -59,5 +59,6 @@ attr_mapping = [
     ParamMapEntry(ext_name="user_name", int_name="user_name"),
     ParamMapEntry(ext_name="vanadium_cropping_values", int_name="van_crop_values"),
     ParamMapEntry(ext_name="vanadium_peaks_masking_file", int_name="masking_file_name"),
+    ParamMapEntry(ext_name="keep_raw_workspace", int_name="keep_raw_workspace", optional=True),
 ]
 attr_mapping.extend(COMMON_PARAM_MAPPING)

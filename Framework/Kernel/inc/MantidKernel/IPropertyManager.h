@@ -180,6 +180,9 @@ public:
    *  @throw std::invalid_argument  if the name argument is empty
    */
   void declareProperty(const std::string &name, const char *value, const unsigned int direction) {
+    if (value == nullptr)
+      throw std::invalid_argument("Attempted to set " + name + " to nullptr");
+
     declareProperty(name, std::string(value), std::make_shared<NullValidator>(), "", direction);
   }
 

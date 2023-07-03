@@ -1,1 +1,0 @@
-- :ref:`LagrangeILLReduction <algm-LagrangeILLReduction>` can now process ASCII data even if they contain only one scan step.

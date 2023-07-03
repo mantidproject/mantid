@@ -12,7 +12,7 @@ from mantid.api import (
     mtd,
     AlgorithmFactory,
     AnalysisDataService,
-    DistributedDataProcessorAlgorithm,
+    DataProcessorAlgorithm,
     FileAction,
     FileProperty,
     ITableWorkspaceProperty,
@@ -40,16 +40,6 @@ from mantid.kernel import (
 )
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
 from mantid.utils import absorptioncorrutils
-
-if AlgorithmFactory.exists("GatherWorkspaces"):
-    HAVE_MPI = True
-    from mpi4py import MPI
-
-    mpiRank = MPI.COMM_WORLD.Get_rank()
-else:
-    HAVE_MPI = False
-    mpiRank = 0  # simplify if clauses
-
 
 EVENT_WORKSPACE_ID = "EventWorkspace"
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
@@ -137,7 +127,7 @@ def getBasename(filename):
 # pylint: disable=too-many-instance-attributes
 
 
-class SNSPowderReduction(DistributedDataProcessorAlgorithm):
+class SNSPowderReduction(DataProcessorAlgorithm):
     COMPRESS_TOL_TOF = 0.01
     _resampleX = None
     _binning = None
@@ -426,10 +416,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         samRuns = self._getLinearizedFilenames("Filename")
         self._determineInstrument(samRuns[0])
 
-        preserveEvents = self.getProperty("PreserveEvents").value
-        if HAVE_MPI and preserveEvents:
-            self.log().warning("preserveEvents set to False for MPI tasks.")
-            preserveEvents = False
         self._info = None
         self._chunks = self.getProperty("MaxChunkSize").value
 
@@ -523,6 +509,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             self._cache_dirs,  # Cache dir for absorption correction workspace
         )
 
+        preserveEvents = self.getProperty("PreserveEvents").value
         if self.getProperty("Sum").value and len(samRuns) > 1:
             self.log().information('Ignoring value of "Sum" property')
             # Sum input sample runs and then do reduction
@@ -612,10 +599,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             else:
                 van_run_ws_name = None
 
-            # return if MPI is used and there is more than 1 processor
-            if mpiRank > 0:
-                return
-
             # return if there is no sample run
             # Note: sample run must exist in logic
             # VZ: Discuss with Pete
@@ -658,32 +641,28 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             if is_event_workspace(sam_ws_name) and self.COMPRESS_TOL_TOF > 0.0:
                 api.CompressEvents(InputWorkspace=sam_ws_name, OutputWorkspace=sam_ws_name, Tolerance=self.COMPRESS_TOL_TOF)  # 5ns/
 
-            # write out the files
-            # FIXME - need documentation for mpiRank
-            if mpiRank == 0:
-                if self._scaleFactor != 1.0:
-                    api.Scale(sam_ws_name, Factor=self._scaleFactor, OutputWorkspace=sam_ws_name)
-                if self._offsetFactor != 0.0:
-                    api.ConvertToMatrixWorkspace(InputWorkspace=sam_ws_name, OutputWorkspace=sam_ws_name)
-                    api.Scale(sam_ws_name, Factor=self._offsetFactor, OutputWorkspace=sam_ws_name, Operation="Add")
-                # make sure there are no negative values - gsas hates them
-                if self.getProperty("PushDataPositive").value != "None":
-                    addMin = self.getProperty("PushDataPositive").value == "AddMinimum"
-                    api.ResetNegatives(InputWorkspace=sam_ws_name, OutputWorkspace=sam_ws_name, AddMinimum=addMin, ResetValue=0.0)
+            if self._scaleFactor != 1.0:
+                api.Scale(sam_ws_name, Factor=self._scaleFactor, OutputWorkspace=sam_ws_name)
+            if self._offsetFactor != 0.0:
+                api.ConvertToMatrixWorkspace(InputWorkspace=sam_ws_name, OutputWorkspace=sam_ws_name)
+                api.Scale(sam_ws_name, Factor=self._offsetFactor, OutputWorkspace=sam_ws_name, Operation="Add")
+            # make sure there are no negative values - gsas hates them
+            if self.getProperty("PushDataPositive").value != "None":
+                addMin = self.getProperty("PushDataPositive").value == "AddMinimum"
+                api.ResetNegatives(InputWorkspace=sam_ws_name, OutputWorkspace=sam_ws_name, AddMinimum=addMin, ResetValue=0.0)
 
-                self._save(sam_ws_name, self._info, normalized, False)
+            self._save(sam_ws_name, self._info, normalized, False)
         # ENDFOR
 
         # convert everything into d-spacing as the final units
-        if mpiRank == 0:
-            workspacelist = set(workspacelist)  # only do each workspace once
-            for wksp in workspacelist:
-                api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits").value)
+        workspacelist = set(workspacelist)  # only do each workspace once
+        for wksp in workspacelist:
+            api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits").value)
 
-                propertyName = "OutputWorkspace%s" % wksp
-                if not self.existsProperty(propertyName):
-                    self.declareProperty(WorkspaceProperty(propertyName, wksp, Direction.Output))
-                self.setProperty(propertyName, wksp)
+            propertyName = "OutputWorkspace%s" % wksp
+            if not self.existsProperty(propertyName):
+                self.declareProperty(WorkspaceProperty(propertyName, wksp, Direction.Output))
+            self.setProperty(propertyName, wksp)
 
         return
 
@@ -784,11 +763,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             self.log().debug(
                 "Load run %s: number of events = %d. " % (os.path.split(filename)[-1], get_workspace(out_ws_name).getNumberEvents())
             )
-        if HAVE_MPI:
-            msg = "MPI Task = %s ;" % (str(mpiRank))
-            if is_event_workspace(out_ws_name):
-                msg += "Number Events = " + str(get_workspace(out_ws_name).getNumberEvents())
-            self.log().debug(msg)
 
         # filter bad pulses
         if self._filterBadPulses > 0.0:
@@ -1072,17 +1046,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         for item in output_wksp_list:
             assert isinstance(item, str)
-
-        # Sum workspaces for all mpi tasks
-        if HAVE_MPI:
-            for split_index in range(num_out_wksp):
-                api.GatherWorkspaces(
-                    InputWorkspace=output_wksp_list[split_index],
-                    PreserveEvents=preserveEvents,
-                    AccumulationMethod="Add",
-                    OutputWorkspace=output_wksp_list[split_index],
-                )
-        # ENDIF MPI
 
         if self._chunks > 0:
             # When chunks are added, proton charge is summed for all chunks

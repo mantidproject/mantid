@@ -123,7 +123,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         if not self.model.ws:
             self._initialise_dimensions(workspace)
 
-        self._set_workspace(workspace)
+        self._set_workspace(workspace, True)
 
     def cancel_drawing_region(self):
         """
@@ -159,10 +159,12 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         self.view.create_dimensions(dims_info=Dimensions.get_dimensions_info(workspace))
         self.view.create_axes_orthogonal(redraw_on_zoom=not WorkspaceInfo.can_support_dynamic_rebinning(workspace))
 
-    def _set_workspace(self, workspace):
+    def _set_workspace(self, workspace, show_all_data=False):
         self.model.ws = workspace
         self.view.set_workspace(workspace)
         self.new_plot()
+        if show_all_data:
+            self.show_all_data_clicked()
 
     def _on_rectangle_selected(self, eclick, erelease):
         """

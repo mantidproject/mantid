@@ -132,7 +132,7 @@ public:
     auto mockRegionSelector = makeRegionSelector();
     auto mockInstViewModel = makeInstViewModel();
 
-    expectLoadWorkspaceCompletedForLinearDetector(*mockModel, *mockJobManager, *mockDockedWidgets, *mockInstViewModel);
+    expectLoadWorkspaceCompletedForLinearDetector(*mockModel, *mockDockedWidgets, *mockInstViewModel);
 
     EXPECT_CALL(*mockRegionSelector, clearWorkspace()).Times(1);
 
@@ -211,6 +211,20 @@ public:
     auto mockDockedWidgets = makePreviewDockedWidgets();
     expectInstViewSetToEditMode(*mockDockedWidgets);
     expectSumBanksCalledOnSelectedDetectors(*mockModel, *mockInstViewModel, *mockDockedWidgets, *mockJobManager);
+    // TODO check that the model is called to sum banks
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
+                                               std::move(mockInstViewModel), std::move(mockDockedWidgets)));
+    presenter.notifyInstViewShapeChanged();
+  }
+
+  void test_notify_inst_view_shape_removed() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockInstViewModel = makeInstViewModel();
+    auto mockJobManager = makeJobManager();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    expectInstViewSetToEditMode(*mockDockedWidgets);
+    expectSumBanksCalledNoSelectedDetectors(*mockModel, *mockInstViewModel, *mockDockedWidgets, *mockJobManager);
     // TODO check that the model is called to sum banks
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
                                                std::move(mockInstViewModel), std::move(mockDockedWidgets)));
@@ -593,16 +607,15 @@ private:
     EXPECT_CALL(linePlot, setPlotErrorBars(true)).Times(1);
   }
 
-  void expectLoadWorkspaceCompletedForLinearDetector(MockPreviewModel &mockModel, MockJobManager &mockJobManager,
+  void expectLoadWorkspaceCompletedForLinearDetector(MockPreviewModel &mockModel,
                                                      MockPreviewDockedWidgets &mockDockedWidgets,
                                                      MockInstViewModel &mockInstViewModel) {
     auto ws = createLinearDetectorWorkspace();
 
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
     EXPECT_CALL(mockModel, getDefaultTheta()).Times(1);
     EXPECT_CALL(mockInstViewModel, updateWorkspace(ws)).Times(1);
     EXPECT_CALL(mockDockedWidgets, setInstViewToolbarEnabled(true)).Times(1);
-    EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
   }
 
   void expectLoadWorkspaceCompletedUpdatesInstrumentView(MockPreviewDockedWidgets &mockDockedWidgets,
@@ -618,7 +631,7 @@ private:
     auto ws = createRectangularDetectorWorkspace();
     auto angle = 2.3;
 
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
     EXPECT_CALL(mockModel, getDefaultTheta()).Times(1).WillOnce(Return(angle));
     EXPECT_CALL(mockView, setAngle(angle)).Times(1);
   }
@@ -626,7 +639,7 @@ private:
   void expectInstViewModelUpdatedWithLoadedWorkspace(MockPreviewModel &mockModel,
                                                      MockInstViewModel &mockInstViewModel) {
     auto ws = createRectangularDetectorWorkspace();
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
     EXPECT_CALL(mockInstViewModel, updateWorkspace(Eq(ws))).Times(1);
   }
 
@@ -635,12 +648,30 @@ private:
                                                MockJobManager &mockJobManager) {
     auto detIndices = std::vector<size_t>{44, 45, 46};
     auto detIDs = std::vector<Mantid::detid_t>{2, 3, 4};
-    auto detIDsStr = ProcessingInstructions{"2-4"};
+    auto previousDetIDsStr = boost::optional<ProcessingInstructions>{};
+    auto detIDsStr = boost::optional<ProcessingInstructions>{"2-4"};
     EXPECT_CALL(mockDockedWidgets, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
     EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
-    EXPECT_CALL(mockModel, getSelectedBanks()).Times(1);
-    EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr))).Times(1);
+    EXPECT_CALL(mockModel, getSelectedBanks()).WillOnce(Return(previousDetIDsStr)).WillOnce(Return(detIDsStr));
+    EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr.get()))).Times(1);
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
+  }
+
+  void expectSumBanksCalledNoSelectedDetectors(MockPreviewModel &mockModel, MockInstViewModel &mockInstViewModel,
+                                               MockPreviewDockedWidgets &mockDockedWidgets,
+                                               MockJobManager &mockJobManager) {
+    auto ws = createRectangularDetectorWorkspace();
+    auto detIndices = std::vector<size_t>{};
+    auto detIDs = std::vector<Mantid::detid_t>{};
+    auto previousDetIDsStr = boost::optional<ProcessingInstructions>{"2-4"};
+    auto detIDsStr = boost::optional<ProcessingInstructions>{""};
+    EXPECT_CALL(mockDockedWidgets, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
+    EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
+    EXPECT_CALL(mockModel, getSelectedBanks()).WillOnce(Return(previousDetIDsStr)).WillOnce(Return(detIDsStr));
+    EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr.get()))).Times(1);
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, setSummedWs(Eq(ws))).Times(1);
+    EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(0);
   }
 
   void expectSumBanksCalledOnUnchangedDetectors(MockPreviewModel &mockModel, MockInstViewModel &mockInstViewModel,

@@ -67,13 +67,9 @@ void CreateWorkspace::init() {
       std::make_unique<WorkspaceProperty<>>("ParentWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Name of a parent workspace.");
   declareProperty(std::make_unique<ArrayProperty<double>>("Dx"), "X error values for workspace (optional).");
-  std::vector<std::string> propOptions{Parallel::toString(Parallel::StorageMode::Cloned),
-                                       Parallel::toString(Parallel::StorageMode::Distributed),
-                                       Parallel::toString(Parallel::StorageMode::MasterOnly)};
-  declareProperty("ParallelStorageMode", Parallel::toString(Parallel::StorageMode::Cloned),
-                  std::make_shared<StringListValidator>(propOptions),
-                  "The parallel storage mode of the output workspace for MPI builds");
-  setPropertySettings("ParallelStorageMode", std::make_unique<InvisibleProperty>());
+  declareProperty("ParallelStorageMode", "",
+                  "The parallel storage mode of the output workspace for MPI builds. This paramter has been deprecated "
+                  "and will be ignored because MPI support has been removed from Mantid. ");
 }
 
 /// Input validation
@@ -176,8 +172,9 @@ void CreateWorkspace::exec() {
   if (parentWS) {
     outputWS = create<HistoWorkspace>(*parentWS, nSpec, histogram);
   } else {
-    auto storageMode = Parallel::fromString(getProperty("ParallelStorageMode"));
-    IndexInfo indexInfo(nSpec, storageMode, communicator());
+    g_log.warning()
+        << "MPI support has been removed from Mantid. ParallelStorageMode has been deprecated and will be ignored.";
+    IndexInfo indexInfo(nSpec);
     outputWS = create<Workspace2D>(indexInfo, histogram);
   }
 
@@ -188,8 +185,6 @@ void CreateWorkspace::exec() {
   for (int i = 0; i < nSpec; i++) {
     PARALLEL_START_INTERRUPT_REGION
 
-    // In an MPI run the global index i is not necessarily on this rank, i.e.,
-    // there might not be a corrsponding workspace index.
     const auto localIndices = indexInfo.makeIndexSet({static_cast<GlobalSpectrumIndex>(i)});
     if (localIndices.empty())
       continue;
@@ -274,15 +269,4 @@ void CreateWorkspace::exec() {
   // Set OutputWorkspace property
   setProperty("OutputWorkspace", outputWS);
 }
-
-Parallel::ExecutionMode
-CreateWorkspace::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  const auto storageMode = Parallel::fromString(getProperty("ParallelStorageMode"));
-  if (!storageModes.empty())
-    if (storageModes.begin()->second != storageMode)
-      throw std::invalid_argument("Input workspace storage mode differs from "
-                                  "requested output workspace storage mode.");
-  return Parallel::getCorrespondingExecutionMode(storageMode);
-}
-
 } // namespace Mantid::Algorithms

@@ -67,6 +67,7 @@ requirements:
     - euphonic {{ euphonic }}
     - toml
     - libglu  # [linux]
+    - libopenblas {{ libopenblas }}  # [osx]
 
 about:
   home: https://github.com/mantidproject/mantid

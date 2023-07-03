@@ -9,7 +9,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidParallel/Communicator.h"
 
 #include "Poco/Glob.h"
 
@@ -143,19 +142,8 @@ void GroupWorkspaces::addToGroup(const API::Workspace_sptr &workspace) {
     AnalysisDataService::Instance().remove(workspace->getName());
   } else {
     if (!m_group)
-      m_group = std::make_shared<WorkspaceGroup>(workspace->storageMode());
-    else if (communicator().size() != 1 && m_group->storageMode() != workspace->storageMode()) {
-      throw std::runtime_error("WorkspaceGroup with mixed Parallel::Storage mode is not supported.");
-    }
+      m_group = std::make_shared<WorkspaceGroup>();
     m_group->addWorkspace(workspace);
   }
-}
-
-Parallel::ExecutionMode
-GroupWorkspaces::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  static_cast<void>(storageModes);
-  const std::vector<std::string> names = getProperty("InputWorkspaces");
-  const auto ws = AnalysisDataService::Instance().retrieve(names.front());
-  return Parallel::getCorrespondingExecutionMode(ws->storageMode());
 }
 } // namespace Mantid::Algorithms

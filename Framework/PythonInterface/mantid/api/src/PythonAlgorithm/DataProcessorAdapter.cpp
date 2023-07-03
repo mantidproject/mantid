@@ -20,7 +20,4 @@ DataProcessorAdapter<Base>::DataProcessorAdapter(PyObject *self)
     : AlgorithmAdapter<API::GenericDataProcessorAlgorithm<Base>>(self) {}
 
 template class DataProcessorAdapter<API::Algorithm>;
-template class DataProcessorAdapter<API::SerialAlgorithm>;
-template class DataProcessorAdapter<API::ParallelAlgorithm>;
-template class DataProcessorAdapter<API::DistributedAlgorithm>;
 } // namespace Mantid::PythonInterface

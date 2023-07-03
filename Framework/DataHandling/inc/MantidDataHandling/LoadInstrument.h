@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 
 /// @cond Exclude from doxygen documentation
@@ -53,7 +53,7 @@ Required Properties:
 @author Anders Markvardsen, ISIS, RAL
 @date 7/3/2008
 */
-class MANTID_DATAHANDLING_DLL LoadInstrument : public API::DistributedAlgorithm {
+class MANTID_DATAHANDLING_DLL LoadInstrument : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadInstrument"; };

@@ -1,2 +1,0 @@
-- Check GSAS-II reflection file output exists before loading results in GSAS-II tab of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` (this can happen if no reflections are within the TOF limits specified)
-- Prevent TOF limits having min > max in GSAS-II tab of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`

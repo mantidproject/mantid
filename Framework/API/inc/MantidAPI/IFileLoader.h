@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
 namespace API {
@@ -16,7 +16,7 @@ Defines an interface to an algorithm that loads a file so that it can take part
 in
 the automatic selection procedure provided by the FileLoaderRegistry.
  */
-template <typename DescriptorType> class MANTID_API_DLL IFileLoader : public ParallelAlgorithm {
+template <typename DescriptorType> class MANTID_API_DLL IFileLoader : public Algorithm {
 public:
   /// Returns a confidence value that this algorithm can load a file
   virtual int confidence(DescriptorType &descriptor) const = 0;

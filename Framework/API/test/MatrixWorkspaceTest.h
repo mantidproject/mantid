@@ -20,7 +20,6 @@
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/NexusTestHelper.h"
-#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -119,28 +118,6 @@ MatrixWorkspace_sptr makeWorkspaceWithMixedValidAndInvalidDetectors(size_t inval
   spec.addDetectorID(INVALID_DET_ID);
 
   return ws;
-}
-
-void run_legacy_setting_spectrum_numbers_with_MPI(const Parallel::Communicator &comm) {
-  using namespace Parallel;
-  for (const auto storageMode : {StorageMode::MasterOnly, StorageMode::Cloned, StorageMode::Distributed}) {
-    WorkspaceTester ws;
-    if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
-      Indexing::IndexInfo indexInfo(1000, storageMode, comm);
-      ws.initialize(indexInfo, HistogramData::Histogram(HistogramData::Points(1)));
-    }
-    if (storageMode == StorageMode::Distributed && comm.size() > 1) {
-      TS_ASSERT_THROWS_EQUALS(ws.getSpectrum(0).setSpectrumNo(42), const std::logic_error &e, std::string(e.what()),
-                              "Setting spectrum numbers in MatrixWorkspace via "
-                              "ISpectrum::setSpectrumNo is not possible in MPI "
-                              "runs for distributed workspaces. Use "
-                              "IndexInfo.");
-    } else {
-      if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
-        TS_ASSERT_THROWS_NOTHING(ws.getSpectrum(0).setSpectrumNo(42));
-      }
-    }
-  }
 }
 } // namespace
 
@@ -1761,10 +1738,6 @@ public:
     // Try to rotate the parent
     TS_ASSERT_THROWS(compInfo.setRotation(compInfo.parent(compInfo.indexOf(det.getComponentID())), Quat(1, 2, 3, 4)),
                      const std::runtime_error &);
-  }
-
-  void test_legacy_setting_spectrum_numbers_with_MPI() {
-    ParallelTestHelpers::runParallel(run_legacy_setting_spectrum_numbers_with_MPI);
   }
 
   void test_detectorSignedTwoTheta() {

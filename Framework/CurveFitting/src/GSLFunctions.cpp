@@ -84,8 +84,8 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
 int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
   auto *p = reinterpret_cast<struct GSL_FitData *>(params);
-  gsl_matrix *J_tr = gsl_matrix_calloc(J->size2, J->size1);
-  gsl_matrix_transpose_memcpy(J_tr, J);
+  std::unique_ptr<gsl_matrix, decltype(&gsl_matrix_free)> J_tr(gsl_matrix_calloc(J->size2, J->size1), gsl_matrix_free);
+  gsl_matrix_transpose_memcpy(J_tr.get(), J);
   EigenMatrix m(J_tr->size2, J_tr->size1);
   p->J.setJ(&m);
 

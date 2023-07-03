@@ -12,7 +12,7 @@
 namespace Mantid {
 namespace Indexing {
 
-/** Partition index. This is an int since it is used as MPI rank.
+/** Partition index
 
   @author Simon Heybrock
   @date 2017

@@ -5,7 +5,7 @@ Running Sanitizers
 ##################
 
 .. contents::
-    :local:
+   :local:
 
 Overview
 =========
@@ -49,29 +49,29 @@ First, delete *CMakeCache.txt* if using GCC and your system compiler is GCC 7 or
 To change to a sanitized build navigate to your build folder and execute the
 following if you're using a single-config generator (eg Ninja):
 
-    .. code-block:: sh
+.. code-block:: sh
 
-        cmake *path_to_src* -DUSE_SANITIZER=*Mode* -DCMAKE_BUILD_TYPE=RelWithDebInfo
+   cmake *path_to_src* -DUSE_SANITIZER=*Mode* -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
 ...or the following with a multi-config generator (eg Visual Studio):
 
-    .. code-block:: sh
+.. code-block:: sh
 
-        cmake *path_to_src* -DUSE_SANITIZER=*Mode*
+   cmake *path_to_src* -DUSE_SANITIZER=*Mode*
 
 If you are using GCC and need to specify a different compiler too (for example if your system
 default is GCC-7)
 
-    .. code-block:: sh
+.. code-block:: sh
 
-        CC=gcc-8 CXX=g++-8 cmake *path_to_src* -DUSE_SANITIZER=*Mode* -DCMAKE_BUILD_TYPE=RelWithDebInfo
+   CC=gcc-8 CXX=g++-8 cmake *path_to_src* -DUSE_SANITIZER=*Mode* -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
 
 For example, to switch to an address sanitizer build the following can be used:
 
-    .. code-block:: sh
+.. code-block:: sh
 
-        cmake *path_to_src* -DUSE_SANITIZER=Address -DCMAKE_BUILD_TYPE=RelWithDebInfo
+   cmake *path_to_src* -DUSE_SANITIZER=Address -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
 CMake GUI
 ---------
@@ -106,11 +106,11 @@ This flag is switched to /O1 in order to improve stack trace information (see ab
 
 The following path (or equivalent for your Visual Studio version) needs to be added to your path environment variable in order for Visual Studio to find some .lib files that are used by the sanitizer and also to locate a symbolizer exe that is required for useful error messages:
 
-C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.27.29110\\bin\\Hostx64\\x64
+.. code-block:: sh
 
-Additional information is available on this web page:
+   C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.27.29110\\bin\\Hostx64\\x64
 
-https://devblogs.microsoft.com/cppblog/asan-for-windows-x64-and-debug-build-support/
+Additional information is available on this `web page <https://devblogs.microsoft.com/cppblog/asan-for-windows-x64-and-debug-build-support/>`_.
 
 Advanced Details
 ================
@@ -122,10 +122,10 @@ CMake substitutes in various flags for the address sanitizer builds to
 setup suppressions etc... this is the equivalent of doing the following
 in a local shell:
 
-    .. code-block:: sh
+.. code-block:: sh
 
-        export ASAN_OPTIONS="verify_asan_link_order=0:detect_stack_use_after_return=true:halt_on_error=false:suppressions=*path_to_mantid*/tools/Sanitizer/Address.supp"
-        export LSAN_OPTIONS="suppressions=*path_to_mantid*/tools/Sanitizer/Leak.supp"
+   export ASAN_OPTIONS="verify_asan_link_order=0:detect_stack_use_after_return=true:halt_on_error=false:suppressions=*path_to_mantid*/tools/Sanitizer/Address.supp"
+   export LSAN_OPTIONS="suppressions=*path_to_mantid*/tools/Sanitizer/Leak.supp"
 
 All code executed which is executed in that shell will now be sanitized
 correctly. To save developers effort the CXX_ADD_TEST macro (in
@@ -149,16 +149,20 @@ ASAN instrumentation. This can be split into two categories:
 If you need / want to profile C++ components which are triggered from Python
 the following steps should setup your environment:
 
-    .. code-block:: sh
+.. code-block:: sh
 
-        # Get the path to your linked ASAN
-        ldd bin/KernelTest | grep "libasan"
-        export LD_PRELOAD=/usr/lib/path_to/libasan.so.x
+   # Get the path to your linked ASAN
+   ldd bin/KernelTest | grep "libasan"
+   export LD_PRELOAD=/usr/lib/path_to/libasan.so.x
 
-        # You may want to re-run the ASAN_OPTIONS export dropping
-        # the verify to make sure that the C++ component is being instrumented:
+   # leak detection should only show the largest 25 leaks
+   export LSAN_OPTIONS="max_leaks=25"
 
-        export ASAN_OPTIONS="detect_stack_use_after_return=true:halt_on_error=false:suppressions=*path_to_mantid*/buildconfig/Sanitizer/Address.supp"
+   # You may want to re-run the ASAN_OPTIONS export dropping
+   # the verify to make sure that the C++ component is being instrumented:
+   # log_path is the prefix for the file the results are written to
+
+   export ASAN_OPTIONS="detect_stack_use_after_return=true:halt_on_error=false:log_path=asan:suppressions=*path_to_mantid*/tools/Sanitizer/Address.supp"
 
 
 Common Problems
