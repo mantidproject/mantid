@@ -535,7 +535,7 @@ def run_vanadium_calibration(per_detector):
         do_absorb_corrections=True,
         multiple_scattering=True,
         per_detector_vanadium=per_detector,
-        mayers_mult_scat_events=0,
+        mayers_mult_scat_events=100,
     )
 
     # Check the spline looks good and was saved
