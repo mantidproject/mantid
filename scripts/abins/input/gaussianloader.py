@@ -41,13 +41,12 @@ class GAUSSIANLoader(AbInitioLoader):
             self._clerk.get_input_filename(),
             "rb",
         ) as gaussian_file:
-
             # create dummy lattice vectors
             self._generates_lattice_vectors(data=data)
 
             masses = self._read_masses_from_file(file_obj=gaussian_file)
             # move file pointer to the last optimized atomic positions
-            self._parser.find_last(file_obj=gaussian_file, msg="Input orientation:")
+            self._parser.find_last(file_obj=gaussian_file, regex=r"^\s+(Input|Standard) orientation:")
             self._read_atomic_coordinates(file_obj=gaussian_file, data=data, masses_from_file=masses)
 
             # read frequencies, corresponding atomic displacements for a molecule
@@ -82,7 +81,6 @@ class GAUSSIANLoader(AbInitioLoader):
             file_obj.readline()
 
         while not self._parser.block_end(file_obj=file_obj, msg=end_msgs):
-
             line = file_obj.readline()
             entries = line.split()
             z_number = int(entries[1])
@@ -123,7 +121,6 @@ class GAUSSIANLoader(AbInitioLoader):
 
         # parse block with frequencies and atomic displacements
         while not (self._parser.block_end(file_obj=file_obj, msg=end_msg) or self._parser.file_end(file_obj=file_obj)):
-
             self._read_freq_block(file_obj=file_obj, freq=freq)
             self._read_atomic_disp_block(file_obj=file_obj, disp=atomic_disp)
 
@@ -203,7 +200,6 @@ class GAUSSIANLoader(AbInitioLoader):
         key = bytes(key, "utf8")
 
         while not self._parser.file_end(file_obj=file_obj):
-
             line = file_obj.readline()
             if end_msg in line:
                 break
