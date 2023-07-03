@@ -22,7 +22,7 @@ boost:
   - 1.77
 
 numpy:
-  - 1.20
+  - 1.21.*
 
 matplotlib:
   - 3.6.*

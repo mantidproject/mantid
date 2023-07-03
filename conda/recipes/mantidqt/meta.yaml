@@ -46,6 +46,8 @@ requirements:
     - setuptools {{ setuptools }}
     - tbb-devel {{ tbb }}
     - versioningit
+    - numpy {{ numpy }}                      # [build_platform != target_platform]
+
 
   run:
     - matplotlib {{ matplotlib }}
