@@ -49,8 +49,8 @@ public:
   void test_setResolution() { TS_ASSERT_EQUALS(m_fitData->setResolution("resolution workspace"), true); }
 
   void test_setResolutin_bad_data() {
-    std::vector<double> x = {0., 1., 2.};
-    std::vector<double> y = {sqrt(-1.), 1., 2.};
+    std::vector<double> x = {0., 1., 2., 0., 1., 2., 0., 1., 2., 0., 1., 2.};
+    std::vector<double> y = {sqrt(-1.), 1., 2., sqrt(-1.), 1., 2., sqrt(-1.), 1., 2., sqrt(-1.), 1., 2.};
 
     auto alg = AlgorithmManager::Instance().create("CreateWorkspace");
     alg->initialize();
@@ -58,6 +58,7 @@ public:
     alg->setProperty("OutputWorkspace", "NAN");
     alg->setProperty("DataX", x);
     alg->setProperty("DataY", y);
+    alg->setProperty("NSpec", 4);
     alg->execute();
     TS_ASSERT_EQUALS(m_fitData->setResolution("NAN"), false);
   }
