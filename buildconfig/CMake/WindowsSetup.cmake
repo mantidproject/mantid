@@ -124,7 +124,7 @@ endif()
 
 set(MSVC_IDE_ENV
     "\
-PYTHONPATH=${MSVC_BIN_DIR}\n\
+PYTHONPATH=${MSVC_BIN_DIR}\;${PROJECT_SOURCE_DIR}/qt/applications/workbench\;${PROJECT_SOURCE_DIR}/Framework/PythonInterface\;${PROJECT_SOURCE_DIR}/qt/python/mantidqt\;${PROJECT_SOURCE_DIR}/qt/python/mantidqtinterfaces\n\
 PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\n\
 PATH=${MSVC_PATHS}"
 )
