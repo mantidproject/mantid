@@ -156,24 +156,27 @@ bool hasSample(H5::Group &entry) {
 void loadSample(H5::Group &entry, const Mantid::API::MatrixWorkspace_sptr &workspace) {
   auto &&sample = workspace->mutableSample();
 
+  // Load Height, Width, and Geometry from the aperture group and save to Sample object.
   if (hasAperture(entry)) {
     auto &&apertureGroup = entry.openGroup(sasInstrumentGroupName).openGroup(sasInstrumentApertureGroupName);
+
     auto &&height =
         Mantid::DataHandling::H5Util::readArray1DCoerce<double>(apertureGroup, sasInstrumentApertureGapHeight);
-    auto &&width =
-        Mantid::DataHandling::H5Util::readArray1DCoerce<double>(apertureGroup, sasInstrumentApertureGapWidth);
-    auto &&geometry = Mantid::DataHandling::H5Util::readString(apertureGroup, sasInstrumentApertureShape);
     if (!height.empty()) {
       sample.setHeight(height.front());
     }
+    auto &&width =
+        Mantid::DataHandling::H5Util::readArray1DCoerce<double>(apertureGroup, sasInstrumentApertureGapWidth);
     if (!width.empty()) {
       sample.setWidth(width.front());
     }
+    auto &&geometry = Mantid::DataHandling::H5Util::readString(apertureGroup, sasInstrumentApertureShape);
     if (auto &&geometryFlag = Sample::getGeometryFlagFromString(geometry)) {
       sample.setGeometryFlag(geometryFlag);
     }
   }
 
+  // Load thickness from the sample group and save to the Sample object.
   if (hasSample(entry)) {
     auto &&sampleGroup = entry.openGroup(sasInstrumentSampleGroupAttr);
     auto &&thickness =

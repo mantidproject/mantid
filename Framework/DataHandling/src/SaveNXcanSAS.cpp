@@ -759,21 +759,21 @@ void SaveNXcanSAS::init() {
   declareProperty(std::make_unique<Mantid::API::FileProperty>("Filename", "", API::FileProperty::Save, ".h5"),
                   "The name of the .h5 file to save");
 
-  std::vector<std::string> radiation_source{"Spallation Neutron Source",
-                                            "Pulsed Reactor Neutron Source",
-                                            "Reactor Neutron Source",
-                                            "Synchrotron X-ray Source",
-                                            "Pulsed Muon Source",
-                                            "Rotating Anode X-ray",
-                                            "Fixed Tube X-ray",
-                                            "neutron",
-                                            "x-ray",
-                                            "muon",
-                                            "electron"};
+  std::vector<std::string> radiationSourceOptions{"Spallation Neutron Source",
+                                                  "Pulsed Reactor Neutron Source",
+                                                  "Reactor Neutron Source",
+                                                  "Synchrotron X-ray Source",
+                                                  "Pulsed Muon Source",
+                                                  "Rotating Anode X-ray",
+                                                  "Fixed Tube X-ray",
+                                                  "neutron",
+                                                  "x-ray",
+                                                  "muon",
+                                                  "electron"};
   declareProperty("RadiationSource", "Spallation Neutron Source",
-                  std::make_shared<Kernel::StringListValidator>(radiation_source), "The type of radiation used.");
-  std::vector<std::string> geometry{"Cylinder", "FlatPlate", "Disc"};
-  declareProperty("Geometry", "Disc", std::make_shared<Kernel::StringListValidator>(geometry),
+                  std::make_shared<Kernel::StringListValidator>(radiationSourceOptions), "The type of radiation used.");
+  std::vector<std::string> geometryOptions{"Cylinder", "FlatPlate", "Disc"};
+  declareProperty("Geometry", "Disc", std::make_shared<Kernel::StringListValidator>(geometryOptions),
                   "The geometry type of the collimation.");
   declareProperty("SampleHeight", 0.0,
                   "The height of the collimation element in mm. If specified as 0 it will not be recorded.");
@@ -837,18 +837,18 @@ std::map<std::string, std::string> SaveNXcanSAS::validateInputs() {
 }
 
 void SaveNXcanSAS::exec() {
-  Mantid::API::MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
-  std::string filename = getPropertyValue("Filename");
+  Mantid::API::MatrixWorkspace_sptr &&workspace = getProperty("InputWorkspace");
+  std::string &&filename = getPropertyValue("Filename");
 
-  std::string radiationSource = getPropertyValue("RadiationSource");
-  std::string geometry = getProperty("Geometry");
-  double beamHeight = getProperty("SampleHeight");
-  double beamWidth = getProperty("SampleWidth");
-  std::string detectorNames = getPropertyValue("DetectorNames");
-  double sampleThickness = getProperty("SampleThickness");
+  std::string &&radiationSource = getPropertyValue("RadiationSource");
+  std::string &&geometry = getProperty("Geometry");
+  double &&beamHeight = getProperty("SampleHeight");
+  double &&beamWidth = getProperty("SampleWidth");
+  double &&sampleThickness = getProperty("SampleThickness");
+  std::string &&detectorNames = getPropertyValue("DetectorNames");
 
-  Mantid::API::MatrixWorkspace_sptr transmissionSample = getProperty("Transmission");
-  Mantid::API::MatrixWorkspace_sptr transmissionCan = getProperty("TransmissionCan");
+  Mantid::API::MatrixWorkspace_sptr &&transmissionSample = getProperty("Transmission");
+  Mantid::API::MatrixWorkspace_sptr &&transmissionCan = getProperty("TransmissionCan");
 
   // Remove the file if it already exists
   if (Poco::File(filename).exists()) {
