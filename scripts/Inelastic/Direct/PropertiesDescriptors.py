@@ -13,7 +13,7 @@ import os
 import numpy as np
 import math
 import re
-from collections import Iterable
+from collections.abc import Iterable
 import mantid.simpleapi as mantid
 from mantid import api
 

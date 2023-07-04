@@ -52,7 +52,7 @@ def make_decorator(algorithm_to_decorate):
         setattr(type, "set_" + name, setter)
         setattr(type, "get_" + name, getter)
 
-    argspec = inspect.getargspec(algorithm_to_decorate)
+    argspec = inspect.getfullargspec(algorithm_to_decorate)
     for parameter in argspec.varargs.split(","):
         m = re.search("(^\w+)", parameter)  # Take the parameter key part from the defaults given as 'key=value'
         if m:
