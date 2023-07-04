@@ -37,7 +37,7 @@ requirements:
     - qscintilla2 {{ qscintilla2 }}
     - qt-main {{ qt_main }}
     - qt-webengine
-    - setuptools {{ setuptools }}
+    - setuptools
     - tbb-devel {{ tbb }}
     - versioningit
 

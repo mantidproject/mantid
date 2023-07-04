@@ -27,7 +27,7 @@ requirements:
     - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
   host:
     - python {{ python }}
-    - setuptools {{ setuptools }}
+    - setuptools
     - sphinx {{ sphinx }}
     - sphinx_bootstrap_theme {{ sphinx_bootstrap_theme }}
     - mantidqt {{ version }}

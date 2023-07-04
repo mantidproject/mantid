@@ -43,7 +43,7 @@ requirements:
     - occt
     - python {{ python }}
     - poco {{ poco }}
-    - setuptools {{ setuptools }}
+    - setuptools
     - tbb-devel {{ tbb }}
     - pip
     - openssl

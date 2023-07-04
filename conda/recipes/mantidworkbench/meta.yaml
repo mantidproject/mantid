@@ -27,7 +27,7 @@ requirements:
     - {{ cdt('libx11-devel') }}  # [linux]
     - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
   host:
-    - setuptools {{ setuptools }}
+    - setuptools
     - mantidqt {{ version }}
     - python {{ python }}
     - versioningit
