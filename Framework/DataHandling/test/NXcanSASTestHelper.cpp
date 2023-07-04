@@ -10,6 +10,7 @@
 #include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
@@ -124,6 +125,13 @@ Mantid::API::MatrixWorkspace_sptr provide1DWorkspace(NXcanSASTestParameters &par
   // Set instrument
   set_instrument(ws, parameters.instrumentName);
   ws->getSpectrum(0).setDetectorID(1);
+
+  // Set Sample info
+  auto &&sample = ws->mutableSample();
+  sample.setGeometryFlag(Mantid::API::Sample::getGeometryFlagFromString(parameters.geometry));
+  sample.setHeight(parameters.beamHeight);
+  sample.setWidth(parameters.beamWidth);
+  sample.setThickness(parameters.sampleThickness);
 
   // Set to point data or histogram data
   if (parameters.isHistogram) {

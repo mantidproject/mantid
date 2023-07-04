@@ -772,7 +772,7 @@ void SaveNXcanSAS::init() {
                                             "electron"};
   declareProperty("RadiationSource", "Spallation Neutron Source",
                   std::make_shared<Kernel::StringListValidator>(radiation_source), "The type of radiation used.");
-  std::vector<std::string> geometry{"Cylinder", "Flat plate", "Disc"};
+  std::vector<std::string> geometry{"Cylinder", "FlatPlate", "Disc"};
   declareProperty("Geometry", "Disc", std::make_shared<Kernel::StringListValidator>(geometry),
                   "The geometry type of the collimation.");
   declareProperty("SampleHeight", 0.0,

@@ -148,18 +148,8 @@ bool hasSample(H5::Group &entry) {
     return true;
   } catch (H5::GroupIException &) {
   } catch (H5::FileIException &) {
-    return false;
   }
-}
-
-int convertToGeometryFlag(std::string &geometryString) {
-  if (geometryString == "Cylinder")
-    return 1;
-  if (geometryString == "FlatPlate")
-    return 2;
-  if (geometryString == "Disc")
-    return 3;
-  return 0;
+  return false;
 }
 } // namespace
 
@@ -179,7 +169,7 @@ void loadSample(H5::Group &entry, const Mantid::API::MatrixWorkspace_sptr &works
     if (!width.empty()) {
       sample.setWidth(width.front());
     }
-    if (auto &&geometryFlag = convertToGeometryFlag(geometry)) {
+    if (auto &&geometryFlag = Sample::getGeometryFlagFromString(geometry)) {
       sample.setGeometryFlag(geometryFlag);
     }
   }
