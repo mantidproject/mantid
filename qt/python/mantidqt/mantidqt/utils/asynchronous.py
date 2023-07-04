@@ -229,7 +229,7 @@ def set_interval(interval):
 
             def inner_wrap():
                 function(*args, **kwargs)
-                while not stop.isSet():
+                while not stop.is_set():
                     stop.wait(interval)
                     function(*args, **kwargs)
 

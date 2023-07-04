@@ -215,7 +215,7 @@ else:
         __tracebackhide__ = True  # Hide traceback for py.test
         from numpy.core import ndarray
         from numpy.lib import iscomplexobj, real, imag
-        from numpy.testing.utils import assert_array_almost_equal, build_err_msg, gisfinite, gisnan
+        from numpy.testing import assert_array_almost_equal, build_err_msg, gisfinite, gisnan
 
         # Handle complex numbers: separate into real/imag to handle
         # nan/inf/negative zero correctly
