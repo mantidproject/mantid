@@ -19,7 +19,7 @@ namespace Mantid {
 namespace Parallel {
 namespace IO {
 
-/** NXEventDataLoader is used to load entries from the the Nexus NXevent_data
+/** NXEventDataLoader is used to load entries from the Nexus NXevent_data
   group, in particular event_index, event_time_zero, event_id, and
   event_time_offset. The class is templated such that the types of
   event_index, event_time_zero, and event_time_offset can be set as required.

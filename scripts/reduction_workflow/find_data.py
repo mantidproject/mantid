@@ -96,7 +96,7 @@ def find_data(file, instrument="", allow_multiple=False):
             else:
                 return f[0]
     except:
-        # FileFinder couldn't make sense of the the supplied information
+        # FileFinder couldn't make sense of the supplied information
         pass
 
     # Third, assume a run number, without instrument name to take care of list of full paths
@@ -110,7 +110,7 @@ def find_data(file, instrument="", allow_multiple=False):
             else:
                 return f[0]
     except:
-        # FileFinder couldn't make sense of the the supplied information
+        # FileFinder couldn't make sense of the supplied information
         pass
 
     # If we didn't find anything, raise an exception

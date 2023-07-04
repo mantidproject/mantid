@@ -24,7 +24,7 @@ def findLine(chop_times, chopDist, moderator_limits):
 
     chop_times: a list of the opening and closing times of the chopper within the time frame
     chopDist: a list of the distance from moderator to chopper in meters
-    moderator_limits: the earliest and latest times that neutrons can leave the the moderator in microseconds
+    moderator_limits: the earliest and latest times that neutrons can leave the moderator in microseconds
     """
     lines = []
     for i in range(len(chop_times)):

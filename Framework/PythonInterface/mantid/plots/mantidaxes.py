@@ -515,7 +515,7 @@ class MantidAxes(Axes):
         return new_artist
 
     def relim(self, visible_only=True):
-        # Hiding the markers during the the relim ensures they are not factored
+        # Hiding the markers during the relim ensures they are not factored
         # in (assuming that visible_only is True)
         with artists_hidden(self.interactive_markers):
             Axes.relim(self, visible_only)  # relim on any non-errorbar objects

@@ -315,7 +315,7 @@ void Algorithm::initialize() {
  * It will be called in dialogs after parsing all inputs and setting the
  * properties, but BEFORE executing.
  *
- * @return a map where: Key = string name of the the property;
+ * @return a map where: Key = string name of the property;
             Value = string describing the problem with the property.
  */
 std::map<std::string, std::string> Algorithm::validateInputs() { return std::map<std::string, std::string>(); }

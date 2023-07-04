@@ -1177,9 +1177,9 @@ def AddRuns(
                     The property can be set to "Monitors" in order to emulate the binning of the monitors or to a
                     string list with the same format that is used for the Rebin algorithm. This property is ignored
                     when saving as event data.
-    @param isOverlay: sets if the the overlay mechanism should be used when the saveAsEvent flag is set
+    @param isOverlay: sets if the overlay mechanism should be used when the saveAsEvent flag is set
     @param time_shifts: provides additional time shifts if the isOverlay flag is specified. The time shifts are specified
-                        in a string list. Either time_shifts is not used or a list with times in secomds. Note that there
+                        in a string list. Either time_shifts is not used or a list with times in seconds. Note that there
                         has to be one entry fewer than the number of workspaces to add.
     @param defType: the file type
     @param rawTypes: the raw types

@@ -158,7 +158,7 @@ language, layout, and collecting images.
 Beta Testing Begins
 ###################
 
-* Initial amalgamation of the the release notes:
+* Initial amalgamation of the release notes:
 
   * ``git pull`` on ``release-next``.
   * Create a new branch using the `Mantid Git Workflow guidance <https://developer.mantidproject.org/GitWorkflow.html#new-branches>`__.

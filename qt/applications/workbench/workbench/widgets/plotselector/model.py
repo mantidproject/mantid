@@ -168,8 +168,7 @@ class PlotSelectorModel(object):
 
     def export_plot(self, plot_number, save_absolute_path):
         """
-        Export a plot, with the type based on the the filename
-        extension
+        Export a plot, with the type based on the filename extension
         :param plot_number: The unique number in GlobalFigureManager
         :param save_absolute_path: The absolute path, with the
                                    extension giving the type

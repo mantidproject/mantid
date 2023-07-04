@@ -258,7 +258,7 @@ boost::optional<IndexedSatelliteInfo> indexSatellite(const V3D &mainHKL, const i
 /**
  * Index the main reflections on the workspace using the given UB matrix
  * @param peaks Vector of pointer to peaks
- * @param ub A UB matrix to define the the transform from Q_sample to hkl
+ * @param ub A UB matrix to define the transform from Q_sample to hkl
  * @param tolerance If an index is within this tolerance of an integer then
  * accept it
  * @param optimizeUB If true optimize the UB for these peaks

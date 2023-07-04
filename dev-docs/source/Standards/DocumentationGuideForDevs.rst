@@ -17,7 +17,7 @@ and processed using `Sphinx <http://www.sphinx-doc.org/en/master/>`__ along with
 Configuration
 -------------
 
-The documentation is configured using CMake and assumes the the instructions in the
+The documentation is configured using CMake and assumes the instructions in the
 :ref:`Getting Started <GettingStarted>` section have been followed.
 
 The following settings, relating to the documentation, are available:
@@ -72,7 +72,7 @@ Sphinx is built on the ``docutils`` package that allows for directives to be ins
     .. warning::
        This text will show up surrounded by a coloured box.
 
-tells sphinx to treat the the given text differently and flag it so that a user will see it as a warning. The name of the directive is ``warning`` and the ``..`` is a reST comment syntax. The directive name must be followed by ``::`` so that Sphinx process knows it has a directive command and not just plain text. For a list of directives known to Sphinx, see `here <http://www.sphinx-doc.org/en/master/rest.html#directives>`__.
+tells sphinx to treat the given text differently and flag it so that a user will see it as a warning. The name of the directive is ``warning`` and the ``..`` is a reST comment syntax. The directive name must be followed by ``::`` so that Sphinx process knows it has a directive command and not just plain text. For a list of directives known to Sphinx, see `here <http://www.sphinx-doc.org/en/master/rest.html#directives>`__.
 
 Comments
 ########

@@ -1536,7 +1536,7 @@ void QtAbstractPropertyBrowserPrivate::slotPropertyDataChanged(QtProperty *prope
     \a item of the property as parameters. The passed \a item is
     deleted just after this call is finished.
 
-    If the the parent of \a item is 0, the removed \a item was a
+    If the parent of \a item is 0, the removed \a item was a
     top level property in this editor.
 
     This function must be reimplemented in derived classes. Note that

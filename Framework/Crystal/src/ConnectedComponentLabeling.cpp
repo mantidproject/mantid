@@ -105,7 +105,7 @@ using VecEdgeIndexPair = std::vector<EdgeIndexPair>;
  * Free function performing the CCL implementation over a range defined by the
  *iterator.
  *
- * @param iterator : Iterator giving access the the image
+ * @param iterator : Iterator giving access to the image
  * @param strategy : Strategy for identifying background
  * @param neighbourElements : Grid of DisjointElements the same size as the
  *image

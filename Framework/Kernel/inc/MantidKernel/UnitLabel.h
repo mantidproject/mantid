@@ -25,7 +25,7 @@ public:
   using AsciiString = std::string;
   /// Type that can hold a unicode string. This may vary per-platform depending
   /// on the
-  /// width of the the built-in std::wstring
+  /// width of the built-in std::wstring
   using Utf8String = std::wstring;
 
   /// Constructor giving labels as ascii, unicode, and latex respectively

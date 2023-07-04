@@ -45,7 +45,7 @@ const QString MantidWSIndexWidget::CONTOUR_PLOT = "Contour Plot";
 /**
  * Construct a widget of this type
  * @param parent :: The owning dialog
- * @param flags :: Window flags that are passed the the QWidget constructor
+ * @param flags :: Window flags that are passed to the QWidget constructor
  * @param wsNames :: the names of the workspaces to be plotted
  * @param showWaterfallOption :: true if waterfall plot enabled
  * @param showTiledOption :: true if tiled plot enabled
@@ -765,12 +765,12 @@ bool MantidWSIndexWidget::usingSpectraNumbers() const {
 /**
  * Construct an object of this type
  * @param parent :: The MantidUI area
- * @param flags :: Window flags that are passed the the QDialog constructor
+ * @param flags :: Window flags that are passed to the QDialog constructor
  * @param wsNames :: the names of the workspaces to be plotted
  * @param showWaterfallOption :: If true the waterfall checkbox is created
  * @param showPlotAll :: If true the "Plot all" button is created
  * @param showTiledOption :: If true the "Tiled" option is created
- * @param isAdvanced :: true if adanced plotting dialog is created
+ * @param isAdvanced :: true if advanced plotting dialog is created
  */
 MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, const Qt::WindowFlags &flags, const QList<QString> &wsNames,
                                          const bool showWaterfallOption, const bool showPlotAll,

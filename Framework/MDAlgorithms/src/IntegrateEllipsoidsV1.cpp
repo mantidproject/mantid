@@ -278,7 +278,7 @@ void IntegrateEllipsoidsV1::initInstance(API::Algorithm &alg) {
                       "different integration radius.  Q includes the 2*pi factor.");
 
   alg.declareProperty("UseOnePercentBackgroundCorrection", true,
-                      "If this options is enabled, then the the top 1% of the "
+                      "If this options is enabled, then the top 1% of the "
                       "background will be removed"
                       "before the background subtraction.");
 

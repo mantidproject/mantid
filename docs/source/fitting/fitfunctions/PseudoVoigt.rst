@@ -150,7 +150,7 @@ Before Mantid release v3.14, the equation of Pseudo-Voigt is defined as
 This equation has several issues:
 
 1. It does not have normalized Gaussian and Lorentzian.
-2. At :math:`x = x_0`, :math:`pV(x_0) = h`.  By this definition, the mixing ratio factor :math:`\eta` between Gaussian and Lorentzian is the the intensity ratio at :math:`x = x_0`.  But it does not make sense with other :math:`x` value. According to the literature or manual (Fullprof and GSAS), :math:`\eta` shall be the ratio of the intensities between Gaussian and Lorentzian.
+2. At :math:`x = x_0`, :math:`pV(x_0) = h`.  By this definition, the mixing ratio factor :math:`\eta` between Gaussian and Lorentzian is the intensity ratio at :math:`x = x_0`.  But it does not make sense with other :math:`x` value. According to the literature or manual (Fullprof and GSAS), :math:`\eta` shall be the ratio of the intensities between Gaussian and Lorentzian.
 
 
 The figure below shows data together with a fitted Pseudo-Voigt function, as well as Gaussian and Lorentzian with equal parameters. The mixing parameter for that example is 0.7, which means that the function is behaving more like a Gaussian.

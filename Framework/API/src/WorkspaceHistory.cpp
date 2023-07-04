@@ -307,7 +307,7 @@ void WorkspaceHistory::loadNestedHistory(::NeXus::File *file, const AlgorithmHis
   }
 }
 
-/** Find all the algorithm entries at a particular point the the nexus file
+/** Find all the algorithm entries at a particular point the nexus file
  * @param file :: The handle to the nexus file
  * @returns set of integers. One for each algorithm at the level in the file.
  */

@@ -57,7 +57,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
                  "the name/object exists it will raise an error.")
             .def("addOrReplace", &DataServiceExporter::addOrReplaceItem, (arg("self"), arg("name"), arg("item")),
                  "Adds the given object to the service with the given name. "
-                 "The the name exists the object is replaced.")
+                 "If the name exists the object is replaced.")
             .def("doesExist", &SvcType::doesExist, (arg("self"), arg("name")),
                  "Returns True if the object is found in the service.")
             .def("retrieve", &DataServiceExporter::retrieveOrKeyError, (arg("self"), arg("name")),

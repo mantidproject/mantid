@@ -299,7 +299,7 @@ where to find X, usually something like @command{g++ @w{-o runner}
 @item
 If you have @uref{http://www.trolltech.com,Qt} installed, try running
 @command{cxxtestgen} with the option @w{@command{--gui=QtGui}}.  As
-always, compile and link the the Qt headers and libraries.
+always, compile and link the Qt headers and libraries.
 
 @end itemize
 

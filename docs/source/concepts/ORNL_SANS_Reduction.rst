@@ -66,7 +66,7 @@ Reduction script
   Reduce()
 
 
-The ``hfir_command_interface`` import statement gives us access the the various commands we will use to set up the reduction process.
+The ``hfir_command_interface`` import statement gives us access to the various commands we will use to set up the reduction process.
 
 The first important part of the script is to declare which instrument you are using.
 This will define the general flow of the reduction process. In this particular case, this is done by calling ``GPSANS()``.

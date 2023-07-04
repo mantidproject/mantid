@@ -98,7 +98,7 @@ void IntegrateEllipsoidsTwoStep::init() {
   declareProperty("WeakPeakThreshold", 1.0, mustBePositive, "Intensity threshold use to classify a peak as weak.");
 
   declareProperty("UseOnePercentBackgroundCorrection", true,
-                  "If this options is enabled, then the the top 1% of the "
+                  "If this options is enabled, then the top 1% of the "
                   "background will be removed"
                   "before the background subtraction.");
 

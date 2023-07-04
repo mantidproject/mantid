@@ -145,7 +145,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
 
     Subcategories can be given using the "\\" separator, e.g. Algorithms\\Transforms
 
-    If the argument list is empty then the the file is assumed to be an algorithm file
+    If the argument list is empty then the file is assumed to be an algorithm file
     and the lists is pulled from the algorithm object
     """
 

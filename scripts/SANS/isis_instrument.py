@@ -752,7 +752,7 @@ class ISISInstrument(BaseInstrument):
         @param coord2: the second coordinate, which is y here
         @param coord1_scale_factor: scale factor for the first coordinate
         @param coord2_scale_factor: scale factor for the second coordinate
-        @param relative_displacement: If the the displacement is to be relative (it normally should be)
+        @param relative_displacement: If the displacement is to be relative (it normally should be)
         """
         raise RuntimeError("Not Implemented")
 
@@ -1019,7 +1019,7 @@ class LOQ(ISISInstrument):
         @param coord2: the second coordinate, which is y here
         @param coord1_scale_factor: scale factor for the first coordinate
         @param coord2_scale_factor: scale factor for the second coordinate
-        @param relative_displacement: If the the displacement is to be relative (it normally should be)
+        @param relative_displacement: If the displacement is to be relative (it normally should be)
         """
         MoveInstrumentComponent(
             Workspace=workspace, ComponentName=component_name, X=coord1, Y=coord2, RelativePosition=relative_displacement
@@ -1295,7 +1295,7 @@ class SANS2D(ISISInstrument):
         @param coord2: the second coordinate, which is y here
         @param coord1_scale_factor: scale factor for the first coordinate
         @param coord2_scale_factor: scale factor for the second coordinate
-        @param relative_displacement: If the the displacement is to be relative (it normally should be)
+        @param relative_displacement: If the displacement is to be relative (it normally should be)
         """
         MoveInstrumentComponent(
             Workspace=workspace, ComponentName=component_name, X=coord1, Y=coord2, RelativePosition=relative_displacement
@@ -1700,7 +1700,7 @@ class LARMOR(ISISInstrument):
         @param coord2: the second coordinate, which is y here
         @param coord1_scale_factor: scale factor for the first coordinate
         @param coord2_scale_factor: scale factor for the second coordinate
-        @param relative_displacement: If the the displacement is to be relative (it normally should be)
+        @param relative_displacement: If the displacement is to be relative (it normally should be)
         """
         # Shift the component in the y direction
         MoveInstrumentComponent(Workspace=workspace, ComponentName=component_name, Y=coord2, RelativePosition=relative_displacement)

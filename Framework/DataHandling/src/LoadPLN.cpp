@@ -404,7 +404,7 @@ protected:
     // get the absolute time for the start of the frame
     auto const offset = m_startTime + frameStart();
 
-    // adjust the the tof to account for the correction and allocate events
+    // adjust the tof to account for the correction and allocate events
     // that occur before the sample time as slow events from the previous pulse
     double tof = tobs + m_tofCorrection - m_sampleTime;
     if (tof < 0.0)

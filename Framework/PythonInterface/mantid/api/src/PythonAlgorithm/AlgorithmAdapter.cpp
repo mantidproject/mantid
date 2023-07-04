@@ -98,7 +98,7 @@ template <typename BaseAlgorithm> const std::string AlgorithmAdapter<BaseAlgorit
  */
 template <typename BaseAlgorithm> const std::vector<std::string> AlgorithmAdapter<BaseAlgorithm>::seeAlso() const {
   try {
-    // The GIL is required so that the the reference count of the
+    // The GIL is required so that the reference count of the
     // list object can be decremented safely
     GlobalInterpreterLock gil;
     return Converters::PySequenceToVector<std::string>(callMethod<list>(getSelf(), "seeAlso"))();

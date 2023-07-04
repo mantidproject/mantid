@@ -109,7 +109,7 @@ class ResultsTabModel(object):
 
     def log_selection(self, existing_selection):
         """
-        Combine the existing selection state of log values with the the set for the current
+        Combine the existing selection state of log values with the set for the current
         workspace at the top of the list
         :param existing_selection: A dict defining any current selection model. The
         format matches that of the ListSelectorPresenter class' model.

@@ -57,7 +57,7 @@ MantidEV and the work does not need to be repeated.
 
 To actually load a selected file, press the apply button at the bottom
 of the tab.  This will take a little while depending on the file size,
-but you can watch the progress bar on the the GUI and note what
+but you can watch the progress bar on the GUI and note what
 workspaces have been created, to see how it is progressing.
 
 Find Peaks

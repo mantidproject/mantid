@@ -456,7 +456,7 @@ public:
     // Since the value is identical, isCommonBins is still true.
     ws.mutableX(0)[0] = 1.;
     TS_ASSERT(ws.isCommonBins());
-    // Once we change the the value, however, isCommonsBins should return false
+    // Once we change the value, however, isCommonsBins should return false
     ws.mutableX(0)[0] = 2.;
     TS_ASSERT_EQUALS(ws.isCommonBins(), false);
   }

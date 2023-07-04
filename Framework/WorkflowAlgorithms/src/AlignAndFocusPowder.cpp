@@ -1230,7 +1230,7 @@ void AlignAndFocusPowder::compressEventsOutputWS(const double compressEventsTole
 
 /**
  * Return true if a rough estimate suggests that the size of the events will be smaller
- * after compressing. This assumes that the the events are equally spread throughout the
+ * after compressing. This assumes that the events are equally spread throughout the
  * supplied time-of-flight range with a spacing of compressTolerance.
  */
 bool AlignAndFocusPowder::shouldCompressUnfocused(const double compressTolerance, const double tofmin,

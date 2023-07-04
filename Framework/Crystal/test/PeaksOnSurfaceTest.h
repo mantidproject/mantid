@@ -307,7 +307,7 @@ therefore does cross the surface boundaries.
     TSM_ASSERT("Should fully intersect sphere", lineIntersectsSphere(line, lineStart, peakCenter, peakRadius + delta));
 
     // Now move the peak center to give a scenario, where the line segment would
-    // not intersect the sphere, but the the infinite line would.
+    // not intersect the sphere, but the infinite line would.
     peakCenter = V3D(2, 1, 0);
     TSM_ASSERT("Line segment does NOT intersect sphere, but infinite line does",
                !lineIntersectsSphere(line, lineStart, peakCenter, peakRadius - delta));

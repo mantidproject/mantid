@@ -11,7 +11,7 @@ Description
 
 This SANS workflow algorithm will compute the sensitivity correction
 from a given flood field data set. It will apply the proper corrections
-to the data according the the input property manager object. Those
+to the data according to the input property manager object. Those
 corrections may include dark current subtraction, moving the beam
 center, the solid angle correction, and applying a patch.
 

@@ -667,8 +667,8 @@ def check_child_ws_for_name_and_type_for_added_eventdata(wsGroup, number_of_entr
 
 def extract_child_ws_for_added_eventdata(ws_group, appendix):
     """
-    Extract the the child workspaces from a workspace group which was
-    created by adding event data. The workspace group must contains a data
+    Extract the child workspaces from a workspace group which was
+    created by adding event data. The workspace group must contain a data
     workspace which is an EventWorkspace and a monitor workspace which is a
     matrix workspace.
     @param ws_group :: workspace group.
@@ -1679,7 +1679,7 @@ def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift)
     """
     Determines the min and max values for Q which are subsequently used for fitting.
     @param rear_data_name: name of the rear data set
-    @param front_data_name: name of the the front data set
+    @param front_data_name: name of the front data set
     @param rescale_shift: the rescale and shift object
     """
     min_q = None
@@ -2074,7 +2074,7 @@ def quaternion_to_angle_and_axis(quaternion):
     s_parameter = math.sqrt(1 - quaternion[0] * quaternion[0])
 
     axis = []
-    # If the the angle is zero, then it does not make sense to have an axis
+    # If the angle is zero, then it does not make sense to have an axis
     if s_parameter < 1e-8:
         axis.append(quaternion[1])
         axis.append(quaternion[2])

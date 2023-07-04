@@ -54,7 +54,7 @@ void updatePythonPaths() {
  *     declared in the `pythonscripts.directories`
  *   - import mantid.simpleapi (if not already imported) to load python plugins
  *   - register FrameworkManager.shutdown as an atexit function
- * @param importSimpleApi If true the the mantid.simpleapi module is imported on
+ * @param importSimpleApi If true the mantid.simpleapi module is imported on
  * first access
  * @return A reference to the FrameworkManagerImpl instance
  */
