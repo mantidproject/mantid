@@ -603,27 +603,70 @@ public:
   }
 
   void test_flippers_any_order_correct() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    using namespace Mantid::Kernel;
+    constexpr size_t nBins{3};
+    constexpr size_t nHist{2};
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    const double yVal = 2.3;
+    Counts counts{yVal, 4.2 * yVal, yVal};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
+    MatrixWorkspace_sptr ws11 = ws00->clone();
+    const std::vector<std::string> wsNames{std::initializer_list<std::string>{"ws00", "ws11"}};
+    const std::array<MatrixWorkspace_sptr, 2> wsList{{ws00, ws11}};
+    for (size_t i = 0; i != nHist; ++i) {
+      ws11->mutableY(i) *= 2.;
+      ws11->mutableE(i) *= 2.;
+    }
+    AnalysisDataService::Instance().addOrReplace(wsNames.front(), wsList.front());
+    AnalysisDataService::Instance().addOrReplace(wsNames.back(), wsList.back());
+    auto effWS = idealEfficiencies(edges);
     PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "1"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "1, 0"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "01, 00, 11"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "01, 00, 10, 11"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
   }
 
   void test_flippers_reject_incorrect_values() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    using namespace Mantid::Kernel;
+    constexpr size_t nBins{3};
+    constexpr size_t nHist{2};
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    const double yVal = 2.3;
+    Counts counts{yVal, 4.2 * yVal, yVal};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
+    MatrixWorkspace_sptr ws11 = ws00->clone();
+    const std::vector<std::string> wsNames{std::initializer_list<std::string>{"ws00", "ws11"}};
+    const std::array<MatrixWorkspace_sptr, 2> wsList{{ws00, ws11}};
+    for (size_t i = 0; i != nHist; ++i) {
+      ws11->mutableY(i) *= 2.;
+      ws11->mutableE(i) *= 2.;
+    }
+    AnalysisDataService::Instance().addOrReplace(wsNames.front(), wsList.front());
+    AnalysisDataService::Instance().addOrReplace(wsNames.back(), wsList.back());
+    auto effWS = idealEfficiencies(edges);
     PolarizationCorrectionWildes alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("Flippers", "2"))
-    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("Flippers", "04, 17"))
-    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("Flippers", "03, 00, 11"))
-    TS_ASSERT_THROWS_ANYTHING(alg.setPropertyValue("Flippers", "01, 00, 10, 11, 00"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", wsNames))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", m_outputWSName))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Efficiencies", effWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Flippers", "04, 17"))
+    TS_ASSERT_THROWS_ANYTHING(alg.execute())
   }
 
   void test_FailureWhenAnInputWorkspaceIsMissing() {

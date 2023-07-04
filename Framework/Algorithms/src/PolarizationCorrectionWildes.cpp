@@ -364,7 +364,7 @@ void PolarizationCorrectionWildes::init() {
 void PolarizationCorrectionWildes::exec() {
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
   const auto flippers = parseFlipperSetup(flipperProperty);
-  const bool analyzer = flippers.front() != "1" || flippers.back() != "1";
+  const bool analyzer = flippers.front() != "0" && flippers.back() != "1";
   const auto inputs = mapInputsToDirections(flippers);
   checkConsistentNumberHistograms(inputs);
   const EfficiencyMap efficiencies = efficiencyFactors();
