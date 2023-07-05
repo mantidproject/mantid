@@ -32,7 +32,9 @@ double MNP2(const Mantid::Geometry::IPeak &p) { return p.getIntMNP().norm2(); }
 
 double QMOD(const Mantid::Geometry::IPeak &p) { return p.getQSampleFrame().norm(); }
 
-double SN(const Mantid::Geometry::IPeak &p) { return p.getIntensity() / p.getSigmaIntensity(); }
+double SN(const Mantid::Geometry::IPeak &p) {
+  return (p.getSigmaIntensity() > 0) ? (p.getIntensity() / p.getSigmaIntensity()) : (0.0);
+}
 
 double RUN(const Mantid::Geometry::IPeak &p) { return p.getRunNumber(); }
 
