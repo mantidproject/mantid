@@ -52,23 +52,19 @@ class SaveReflectionsTest(unittest.TestCase):
         # Add a bunch of random peaks that happen to fall on the
         # detetor bank defined in the IDF
         center_q = np.array([-5.1302, 2.5651, 3.71809])
-        qs = []
         for i in np.arange(0, 1, 0.1):
             for j in np.arange(-0.5, 0, 0.1):
                 q = center_q.copy()
                 q[1] += j
                 q[2] += i
-                qs.append(q)
-
-        # Add the peaks to the PeaksWorkspace with dummy values for intensity,
-        # Sigma, and HKL
-        for q in qs:
-            peak = ws.createPeak(q)
-            peak.setIntensity(100)
-            peak.setSigmaIntensity(10)
-            peak.setHKL(1, 1, 1)
-            peak.setAbsorptionWeightedPathLength(1.0)
-            ws.addPeak(peak)
+                # Add the peaks to the PeaksWorkspace with dummy values for intensity,
+                # Sigma, and HKL
+                peak = ws.createPeak(q)
+                peak.setIntensity(100)
+                peak.setSigmaIntensity(10)
+                peak.setHKL(1, 1, 1)
+                peak.setAbsorptionWeightedPathLength(1.0)
+                ws.addPeak(peak)
         return ws
 
     def _create_modulated_peak_table(self):
@@ -286,7 +282,9 @@ class SaveReflectionsTest(unittest.TestCase):
     def test_save_empty_peak_table(self, mock_log):
         empty_peaks = CreatePeaksWorkspace(self._workspace, NumberOfPeaks=0)
         SaveReflections(InputWorkspace=empty_peaks, Filename="test.int", Format="Jana")
-        mock_log.assert_called_once_with("Peaks workspace empty_peaks is empty - an empty file will be produced.")
+        mock_log.assert_called_once_with(
+            "There are no peaks with Intens/Sigma >= 0.0 in peak workspace empty_peaks. An empty file will be produced."
+        )
 
     # Private api
     def _assert_file_content_equal(self, reference_result, file_name):
