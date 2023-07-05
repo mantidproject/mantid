@@ -797,9 +797,7 @@ void LoadPLN::loadEnvironParameters(const std::string &hdfFile, API::LogManager 
   auto time_str = logm.getPropertyValueAsType<std::string>("end_time");
 
   // load the environment variables for the dataset loaded
-  std::vector<std::string> tags = {"P01PS05", "P01PSP05", "T01S00", "T01S06", "T01S07", "T01S08", "T01SP00", "T01SP06",
-                                   "T01SP07", "T01SP08",  "T2S1",   "T2S2",   "T2S3",   "T2S4",   "T2SP1",   "T2SP2"};
-
+  auto tags = ANSTO::filterDatasets(entry, "data/", "^[A-Z][0-9]{1,3}[A-Z]{1,3}[0-9]{1,3}$");
   for (const auto &tag : tags) {
     MapNeXusToSeries<double>(entry, "data/" + tag, 0.0, logm, time_str, "env_" + tag, 1.0, m_datasetIndex);
   }
