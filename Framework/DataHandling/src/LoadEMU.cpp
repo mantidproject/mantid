@@ -1150,7 +1150,7 @@ template <typename FD> void LoadEMU<FD>::loadEnvironParameters(const std::string
   auto time_str = logm.getPropertyValueAsType<std::string>("end_time");
 
   // load the environment variables for the dataset loaded
-  auto tags = ANSTO::filterDatasets(entry, "data/", "^[A-Z][0-9]{1,3}[A-Z]{1,3}[0-9]{1,3}$");
+  auto tags = ANSTO::filterDatasets(entry, "data/", "^[A-Z]{1,3}[0-9]{1,3}[A-Z]{1,3}[0-9]{1,3}$");
   for (const auto &tag : tags) {
     MapNeXusToSeries<double>(entry, "data/" + tag, 0.0, logm, time_str, "env_" + tag, 1.0, m_datasetIndex);
   }
