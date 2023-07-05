@@ -135,4 +135,3 @@ mtd_install_files(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py INSTALL_DIRS ${Python_SITELIB_RELPATH}/mantid/kernel
   RENAME ${PACKAGESETUP_PY}.py
 )
-
