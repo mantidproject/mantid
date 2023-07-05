@@ -1,0 +1,1 @@
+- Fix bug saving empty peak tables in :ref:`SaveReflections <algm-SaveReflections>` using SHELX format
