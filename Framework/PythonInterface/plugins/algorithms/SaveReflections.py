@@ -465,7 +465,7 @@ class SHELXFormat(object):
             line = col_format.format(*data)
             f_handle.write(line)
         # write row of zeros to end file
-        f_handle.write(col_format.format(*len(data) * [0.0]))
+        f_handle.write(col_format.format(*col_format.count("{") * [0.0]))
 
 
 # ------------------------------------------------------------------------------------------------------

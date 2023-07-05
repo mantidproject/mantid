@@ -263,6 +263,17 @@ class SaveReflectionsTest(unittest.TestCase):
             Format=output_format,
         )
 
+    @patch("mantid.kernel.logger.warning")
+    def test_MinIntensOverSigma(self, mock_log):
+        file_name = os.path.join(self._test_dir, "test_shelx_MinIntensOverSigma.hkl")
+
+        # set MinIntensOverSigma
+        SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format="SHELX", MinIntensOverSigma=20)
+
+        mock_log.assert_called_once_with(
+            "There are no peaks with Intens/Sigma >= 20.0 in peak workspace ws. An empty file will be produced."
+        )
+
     def test_save_invalid_format(self):
         # Arrange
         file_name = os.path.join(self._test_dir, "test_SHELX_modulated.hkl")
