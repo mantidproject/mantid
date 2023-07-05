@@ -48,7 +48,6 @@ requirements:
     - versioningit
     - numpy {{ numpy }}                      # [build_platform != target_platform]
 
-
   run:
     - matplotlib {{ matplotlib }}
     - {{ pin_compatible("qscintilla2", max_pin="x.x") }}
