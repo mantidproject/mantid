@@ -4,11 +4,18 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import mantid.simpleapi
+
+# local imports
 import mantid.api
 from mantid.kernel import Direction, IntArrayProperty, StringArrayProperty, StringListValidator
+import mantid.simpleapi
+
+# third party imports
 import numpy
+
+# standard imports
 from collections import defaultdict
+from typing import Union
 
 
 # pylint: disable=no-init,invalid-name
@@ -57,9 +64,9 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     bankmin = defaultdict(lambda: 1, {"D33": 0, "SEQUOIA": 23, "TOPAZ": 10})  # default is one
     bankmax = {
         "ARCS": 115,
-        "BIOSANS": 88,
+        "BIOSANS": 104,
         "CG2": 48,
-        "CG3": 88,
+        "CG3": 104,
         "CHESS": 163,
         "CNCS": 50,
         "CORELLI": 91,
@@ -265,7 +272,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 raise RuntimeError('Could not generate values from "{}"'.format(value))
             return result - min_value
 
-    def _getBankName(self, banknum, validFrom):  # noqa: C901
+    def _getBankName(self, banknum: Union[str, int], validFrom: str) -> str:  # noqa: C901
         banknum = int(banknum)
         if not (self.bankmin[self.instname] <= banknum <= self.bankmax[self.instname]):
             raise ValueError("Out of range index={} for {} instrument bank numbers".format(banknum, self.instname))
@@ -325,9 +332,11 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             else:
                 return "detector{}".format(banknum)
         elif self.instname == "CG3" or self.instname == "BIOSANS":
-            if "2019-10-01" in validFrom:
+            if "2023-10-01" in validFrom:  # CG3_Definition.xml, BIOSANS_Definition.xml
                 return "bank{}".format(banknum)
-            else:
+            elif "2019-10-01" in validFrom:  # CG3_Definition_2019_2023.xml, BIOSANS_Definition_2019_2023.xml
+                return "bank{}".format(banknum)
+            else:  # any other CG3_Definition_XXX.xml, BIOSANS_Definition_XXX.xml
                 if banknum == 1:
                     return "detector1"
                 elif banknum == 2:
