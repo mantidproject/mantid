@@ -455,7 +455,8 @@ void FindDetectorsPar::populate_values_from_file(const API::MatrixWorkspace_sptr
 //
 int FindDetectorsPar::count_changes(const char *const Buf, size_t buf_size) {
   bool is_symbol(false), is_space(true);
-  int space_to_symbol_change(0), symbol_to_space_change(0);
+  int space_to_symbol_change(0);
+  // int symbol_to_space_change(0);
   size_t symbols_start(0);
   // supress leading spaces;
   for (size_t i = 0; i < buf_size; i++) {
@@ -483,7 +484,7 @@ int FindDetectorsPar::count_changes(const char *const Buf, size_t buf_size) {
     if (Buf[i] == ' ') { // this is a space
       if (is_symbol) {
         is_symbol = false;
-        symbol_to_space_change++;
+        // symbol_to_space_change++;
       }
       is_space = true;
     }

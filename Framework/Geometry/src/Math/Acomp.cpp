@@ -813,14 +813,14 @@ i.e. one pass.
   std::vector<BnId> Work;           // Working copy
   std::vector<BnId> PIComp;         // Store for PI componends
   std::vector<BnId> Tmod;           // store modified components
-  int changeCount(0);               // Number change
+  // int changeCount(0);               // Number change
   std::vector<BnId>::iterator uend; // itor to remove unique
   // Need to make an initial copy.
   Work = DNFobj;
 
-  int cnt(0);
+  // int cnt(0);
   do {
-    cnt++;
+    // cnt++;
     // Deal with tri-state objects ??
     sort(Work.begin(), Work.end());
     uend = unique(Work.begin(), Work.end());
@@ -847,7 +847,7 @@ i.e. one pass.
             Tmod.emplace_back(cVal.second);
             oc->setPI(0);
             vc->setPI(0);
-            changeCount++; // 1 changed
+            // changeCount++; // 1 changed
           }
         }
       }

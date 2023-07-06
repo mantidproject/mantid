@@ -767,7 +767,7 @@ public:
     std::vector<API::IMDNode *> boxes;
     b->getBoxes(boxes, 1000, true);
     TS_ASSERT_EQUALS(boxes.size(), 10000);
-    size_t numOnDisk = 0;
+    // size_t numOnDisk = 0;
     uint64_t eventsOnDisk = 0;
     uint64_t maxFilePos = 0;
     for (auto box : boxes) {
@@ -781,7 +781,7 @@ public:
         continue;
 
       if (pIO->wasSaved()) {
-        numOnDisk++;
+        // numOnDisk++;
         eventsOnDisk += pIO->getFileSize();
         // Track the last point used in the file
         uint64_t fileEnd = pIO->getFilePosition() + pIO->getFileSize();
