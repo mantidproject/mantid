@@ -49,8 +49,6 @@ public:
     m_range = std::make_pair(0.0, 1.0);
     m_peakCentre = 0.5;
     m_background = 1.0;
-    m_allTwoTheta = std::vector<double>{1.0, 2.3, 3.3};
-    m_averageTwoTheta = 2.2;
 
     auto algorithmManager = std::make_unique<NiceMock<MockALFAlgorithmManager>>();
     auto model = std::make_unique<NiceMock<MockALFAnalysisModel>>();
@@ -260,12 +258,7 @@ public:
   void test_clear_will_clear_the_two_theta_in_the_model_and_update_the_view() {
     EXPECT_CALL(*m_model, clear()).Times(1);
 
-    EXPECT_CALL(*m_model, extractedWorkspace()).Times(1).WillOnce(Return(nullptr));
-    EXPECT_CALL(*m_view, addSpectrum(_)).Times(1);
-
-    EXPECT_CALL(*m_model, averageTwoTheta()).Times(1).WillOnce(Return(m_averageTwoTheta));
-    EXPECT_CALL(*m_model, allTwoThetas()).Times(1).WillOnce(Return(m_allTwoTheta));
-    EXPECT_CALL(*m_view, setAverageTwoTheta(m_averageTwoTheta, m_allTwoTheta)).Times(1);
+    expectUpdateViewFromModel();
 
     m_presenter->clear();
   }
@@ -273,6 +266,8 @@ public:
   void test_notifyCropWorkspaceComplete_triggers_the_model_to_calculate_an_estimate_peak() {
     EXPECT_CALL(*m_model, calculateEstimate(_)).Times(1);
     EXPECT_CALL(*m_view, enable()).Times(1);
+
+    expectUpdateViewFromModel();
 
     m_presenter->notifyCropWorkspaceComplete(nullptr);
   }
@@ -332,6 +327,15 @@ private:
     EXPECT_CALL(*m_view, replot()).Times(1);
   }
 
+  void expectUpdateTwoThetaInViewFromModel() {
+    auto const allTwoTheta = std::vector<double>{1.0, 2.3, 3.3};
+    std::optional<double> const average = 2.2;
+
+    EXPECT_CALL(*m_model, averageTwoTheta()).Times(1).WillOnce(Return(average));
+    EXPECT_CALL(*m_model, allTwoThetas()).Times(1).WillOnce(Return(allTwoTheta));
+    EXPECT_CALL(*m_view, setAverageTwoTheta(average, allTwoTheta)).Times(1);
+  }
+
   void expectUpdateRotationAngleCalled() {
     std::optional<double> const angle(1.20003);
     EXPECT_CALL(*m_model, rotationAngle()).Times(1).WillOnce(Return(angle));
@@ -344,6 +348,13 @@ private:
     EXPECT_CALL(*m_view, setRotationAngle(_)).Times(0);
   }
 
+  void expectUpdateViewFromModel() {
+    expectUpdatePlotInViewFromModel();
+    expectUpdateTwoThetaInViewFromModel();
+    expectUpdatePeakCentreInViewFromModel();
+    expectUpdateRotationAngleCalled();
+  }
+
   std::unique_ptr<AlgorithmRuntimeProps> m_algProperties;
 
   Mantid::API::MatrixWorkspace_sptr m_workspace;
@@ -351,8 +362,6 @@ private:
   std::pair<double, double> m_range;
   double m_peakCentre;
   double m_background;
-  std::vector<double> m_allTwoTheta;
-  std::optional<double> m_averageTwoTheta;
 
   NiceMock<MockALFAlgorithmManager> *m_algorithmManager;
   NiceMock<MockALFAnalysisModel> *m_model;
