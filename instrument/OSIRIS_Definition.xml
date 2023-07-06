@@ -760,12 +760,12 @@
   <algebra val="app-shape" />
 </type>
 
-  <component type="silica" idlist="silica">
+  <component type="silicon" idlist="silicon">
     <properties />
     <location  />
   </component>
 
-  <type name="silica">
+  <type name="silicon">
     <component type="pix2">
       <location r="1.582" t="-11."    p="0" name="g1005" />
       <location r="1.582" t="-14.82"  p="0" name="g1006" />
@@ -797,7 +797,7 @@
 <idlist idname="graphite">
   <id start="963" end="1004" />
 </idlist>
-  <idlist idname="silica">
+  <idlist idname="silicon">
     <id start="1005" end="1010" />
 </idlist>
 </instrument>
