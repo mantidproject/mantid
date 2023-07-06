@@ -198,6 +198,17 @@ class MaskBTPTest(unittest.TestCase):
         self.assertEqual(int(32 * 160), len(masked))
         self.checkConsistentMask(wksp, masked)
 
+    def test_biosans_midrange(self):
+        # load latest instrument definition, 104 banks and 4 tubes per bank
+        workspace = LoadEmptyInstrument(Filename="CG3_Definition.xml", OutputWorkspace="CG3csejf234f")
+        masked = MaskBTP(Workspace=workspace, Pixels="1-42")
+        self.assertEqual(42 * 4 * 104, len(masked))
+        # load previous instrument definition, 88 banks and 4 tubes per bank
+        workspace = LoadEmptyInstrument(Filename="CG3_Definition.xml", OutputWorkspace="CG3csejf234f")
+        masked = MaskBTP(Workspace=workspace, Pixels="1-42")
+        self.assertEqual(42 * 4 * 104, len(masked))
+        DeleteWorkspace("CG3csejf234f")
+
     def test_components(self):
         # this also verifies support for instruments that aren't explicitly in the list
         wksp = LoadEmptyInstrument(InstrumentName="GEM", OutputWorkspace="GEM")
