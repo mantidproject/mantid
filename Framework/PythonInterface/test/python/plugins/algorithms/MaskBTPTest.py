@@ -201,11 +201,11 @@ class MaskBTPTest(unittest.TestCase):
     def test_biosans_midrange(self):
         # load latest instrument definition, 104 banks and 4 tubes per bank
         workspace = LoadEmptyInstrument(Filename="CG3_Definition.xml", OutputWorkspace="CG3csejf234f")
-        masked = MaskBTP(Workspace=workspace, Pixels="1-42")
+        masked = MaskBTP(Workspace=workspace, Pixel="1-42")
         self.assertEqual(42 * 4 * 104, len(masked))
         # load previous instrument definition, 88 banks and 4 tubes per bank
         workspace = LoadEmptyInstrument(Filename="CG3_Definition.xml", OutputWorkspace="CG3csejf234f")
-        masked = MaskBTP(Workspace=workspace, Pixels="1-42")
+        masked = MaskBTP(Workspace=workspace, Pixel="1-42")
         self.assertEqual(42 * 4 * 104, len(masked))
         DeleteWorkspace("CG3csejf234f")
 
