@@ -1,0 +1,1 @@
+* :ref:`MaskBTP <algm-MaskBTP>` can now mask BIOSANS data containing the midrange detector.
