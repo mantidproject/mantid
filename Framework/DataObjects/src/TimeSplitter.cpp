@@ -204,6 +204,9 @@ std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const 
 }
 
 void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, const int value) {
+  // If start time == stop time, the map will be corrupted.
+  if (start == stop)
+    return;
   assertIncreasing(start, stop);
   if (m_roi_map.empty()) {
     // set the values without checks
