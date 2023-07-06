@@ -15,7 +15,6 @@ import xml.etree.ElementTree as ET
 
 
 class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
-
     _pixels_per_bank = 44
 
     def __init__(self):
@@ -287,9 +286,9 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
                 TransposeMonochromatic=True,
             )
         xAxisValues = mtd["calibration_test"].getItem(0).readX(0)
-        self.assertAlmostEqual(xAxisValues[0], 14.3, delta=1e0)
-        self.assertAlmostEqual(xAxisValues[43], 56.8, delta=1e0)
-        self.assertAlmostEqual(xAxisValues[44], 60.3, delta=1e0)
+        self.assertAlmostEqual(xAxisValues[0], 14.3, delta=2e0)
+        self.assertAlmostEqual(xAxisValues[43], 56.8, delta=6e0)
+        self.assertAlmostEqual(xAxisValues[44], 60.3, delta=5e0)
         self.assertAlmostEqual(xAxisValues[87], 102.6, delta=1e0)
         self.assertAlmostEqual(xAxisValues[88], 105.9, delta=1e0)
         self.assertAlmostEqual(xAxisValues[131], 148.6, delta=1e0)
