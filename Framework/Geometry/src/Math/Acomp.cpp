@@ -810,10 +810,10 @@ i.e. one pass.
     return 0;
   // Note: need to store PI components separately
   // since we don't want to loop continuously through them
-  std::vector<BnId> Work;           // Working copy
-  std::vector<BnId> PIComp;         // Store for PI componends
-  std::vector<BnId> Tmod;           // store modified components
-  // int changeCount(0);               // Number change
+  std::vector<BnId> Work;   // Working copy
+  std::vector<BnId> PIComp; // Store for PI componends
+  std::vector<BnId> Tmod;   // store modified components
+  // int changeCount(0);    // Number change
   std::vector<BnId>::iterator uend; // itor to remove unique
   // Need to make an initial copy.
   Work = DNFobj;

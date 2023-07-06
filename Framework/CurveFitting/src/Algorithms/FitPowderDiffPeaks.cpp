@@ -2450,8 +2450,8 @@ void FitPowderDiffPeaks::genPeaksFromTable(const TableWorkspace_sptr &peakparamw
 
     if (good) {
       m_vecPeakFunctions.emplace_back(d_h, make_pair(hkl, newpeak));
-    // } else {
-    //  ++numbadrows;
+      // } else {
+      //  ++numbadrows;
     }
   } // ENDFOR Each potential peak
 
