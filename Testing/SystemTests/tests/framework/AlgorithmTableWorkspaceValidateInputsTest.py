@@ -16,6 +16,5 @@ class AlgorithmTableWorkspaceValidateInputsTest(AlgorithmValidateInputsTestBase)
 
     def _setup_test(self) -> None:
         self._workspace_type = "TableWorkspace"
-        self._exclude_algorithms = ["DNSMergeRuns", "Mean"]
 
         CreateEmptyTableWorkspace(OutputWorkspace=INPUT_WS_NAME)

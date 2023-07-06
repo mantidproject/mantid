@@ -39,21 +39,27 @@ class AlgorithmValidateInputsTestBase(MantidSystemTest, metaclass=ABCMeta):
         print(f"Running the Algorithm{self._workspace_type}ValidateInputsTest with a {self._workspace_type} in the ADS")
 
         for algorithm_name in self._unique_algorithm_names:
-            if algorithm_name not in self._exclude_algorithms:
-                print(algorithm_name)  # Useful for debugging
-                self._attempt_validate_inputs(algorithm_name)
+            print(algorithm_name)  # Useful for debugging
+            self._attempt_validate_inputs(algorithm_name)
 
     def _attempt_validate_inputs(self, algorithm_name: str) -> None:
         """Attempt to validate the inputs for the most recent version of the algorithm provided."""
         algorithm = AlgorithmManager.create(algorithm_name)
 
         properties_valid = self._set_all_workspace_properties(algorithm)
+        if not properties_valid:
+            return
 
-        if properties_valid:
+        try:
             # This is the real test - does the validateInputs function run successfully
             algorithm.validateInputs()
+        except Exception as ex:
+            # Makes sure that an exception gets printed if it fails, and then re-raises the exception
+            print(ex)
+            raise ex
 
-    def _set_all_workspace_properties(self, algorithm) -> bool:
+    @staticmethod
+    def _set_all_workspace_properties(algorithm) -> bool:
         """
         Attempt to set all algorithm properties which have the word "Workspace" in their name. They are set to
         the name of the workspace stored in the ADS. If setting the property fails, then ignore the property.
