@@ -204,9 +204,9 @@ class MaskBTPTest(unittest.TestCase):
         masked = MaskBTP(Workspace=workspace, Pixel="1-42")
         self.assertEqual(42 * 4 * 104, len(masked))
         # load previous instrument definition, 88 banks and 4 tubes per bank
-        workspace = LoadEmptyInstrument(Filename="CG3_Definition.xml", OutputWorkspace="CG3csejf234f")
+        workspace = LoadEmptyInstrument(Filename="CG3_Definition_2019_2023.xml", OutputWorkspace="CG3csejf234f")
         masked = MaskBTP(Workspace=workspace, Pixel="1-42")
-        self.assertEqual(42 * 4 * 104, len(masked))
+        self.assertEqual(42 * 4 * 88, len(masked))
         DeleteWorkspace("CG3csejf234f")
 
     def test_components(self):
