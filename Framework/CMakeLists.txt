@@ -140,30 +140,28 @@ if(NOT FULL_PACKAGE_BUILD)
   add_subdirectory(PostInstall)
 endif()
 
-if(CONDA_ENV)
-  configure_package_config_file(
-    ${CMAKE_SOURCE_DIR}/buildconfig/CMake/MantidFrameworkConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
-  )
+configure_package_config_file(
+  ${CMAKE_SOURCE_DIR}/buildconfig/CMake/MantidFrameworkConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+)
 
-  write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake
-    VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK}
-    COMPATIBILITY SameMajorVersion
-  )
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake
+  VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK}
+  COMPATIBILITY SameMajorVersion
+)
 
-  install(
-    FILES "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake"
-          "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake"
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
-    COMPONENT Devel
-  )
+install(
+  FILES "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake"
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+  COMPONENT Devel
+)
 
-  install(
-    FILES ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindNexus.cmake ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindJsonCPP.cmake
-          ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindTBB.cmake ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindMuParser.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework/find_modules
-    COMPONENT Devel
-  )
-endif()
+install(
+  FILES ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindNexus.cmake ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindJsonCPP.cmake
+        ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindTBB.cmake ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindMuParser.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework/find_modules
+  COMPONENT Devel
+)

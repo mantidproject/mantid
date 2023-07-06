@@ -48,11 +48,7 @@ if(WIN32)
     set(_qrc_file_contents
         "<!DOCTYPE RCC><RCC version=\"1.0\">\n<qresource prefix=\"/qt/etc\">\n<file alias=\"qt.conf\">qt.conf.${BUILD_TYPE}</file>\n</qresource>\n</RCC>\n"
     )
-    if(CONDA_BUILD OR CONDA_ENV)
-      file(TO_CMAKE_PATH $ENV{CONDA_PREFIX}/Library _qt5_dir)
-    else()
-      set(_qt5_dir ${THIRD_PARTY_DIR}/lib/qt5)
-    endif()
+    file(TO_CMAKE_PATH $ENV{CONDA_PREFIX}/Library _qt5_dir)
     # Write qt.conf.BUILD_TYPE file and get resources file name
     if(${BUILD_TYPE} STREQUAL "build")
       file(WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${_qt5_dir}\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
@@ -101,7 +97,7 @@ else()
   else()
     set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
   endif()
-  if(APPLE AND CONDA_ENV)
+  if(APPLE)
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
          "[Paths]\nPlugins = PlugIns\nImports = Resources/qml\nQml2Imports = Resources/qml"
     )

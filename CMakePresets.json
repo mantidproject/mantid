@@ -13,7 +13,6 @@
       "binaryDir": "${sourceDir}/build",
       "generator": "Ninja",
       "cacheVariables": {
-        "CONDA_ENV": true,
         "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}"
       }
     },

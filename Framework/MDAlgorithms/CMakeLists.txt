@@ -396,8 +396,4 @@ target_include_directories(
 generate_mantid_export_header(MDAlgorithms TRUE)
 
 # Installation settings
-if(CONDA_ENV)
-  mtd_install_framework_lib(TARGETS MDAlgorithms PLUGIN_LIB)
-else()
-  mtd_install_targets(TARGETS MDAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
-endif()
+mtd_install_framework_lib(TARGETS MDAlgorithms PLUGIN_LIB)

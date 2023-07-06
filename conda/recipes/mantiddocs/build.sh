@@ -51,7 +51,6 @@ cmake \
   -DPACKAGE_DOCS=ON \
   -DENABLE_PRECOMMIT=OFF \
   -DCONDA_BUILD=True \
-  -DCONDA_ENV=True \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
   -GNinja \
   ../

@@ -7,7 +7,7 @@ if(WIN32)
 endif()
 find_package(Git ${_git_requires})
 
-if(MSVC AND CONDA_ENV)
+if(MSVC)
   # Print out where we are looking for 3rd party stuff
   set(Python_FIND_REGISTRY NEVER)
   # used in later parts for MSVC to bundle Python
