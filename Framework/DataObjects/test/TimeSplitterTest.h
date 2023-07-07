@@ -352,7 +352,12 @@ public:
     splitter.addROI(ONE, TWO, 1);
     splitter.addROI(TWO, THREE, 2);
     splitter.addROI(FOUR, FIVE, 3); // a gap with the previous ROI
+    std::cout << std::endl << "DEBUG splitter: " << std::endl << splitter.debugPrint();
     const SplittingIntervalVec splitVec = splitter.toSplitters(true);
+    std::cout << "DEBUG splitVec: " << std::endl;
+    for (const auto &item : splitVec) {
+      std::cout << "DEBUG :" << item.debugStrPrint();
+    }
     TS_ASSERT_EQUALS(splitVec.size(), 4);
     TS_ASSERT(splitVec[0] == SplittingInterval(ONE, TWO, 1));
     TS_ASSERT(splitVec[1] == SplittingInterval(TWO, THREE, 2));
