@@ -349,14 +349,21 @@ public:
 
   void test_toSplitters() {
     TimeSplitter splitter;
+    std::cout << std::endl << "DEBUG splitter (empty): " << std::endl << splitter.debugPrint();
+
     splitter.addROI(ONE, TWO, 1);
+    std::cout << std::endl << "DEBUG splitter.addROI(ONE, TWO, 1): " << std::endl << splitter.debugPrint();
+
     splitter.addROI(TWO, THREE, 2);
+    std::cout << std::endl << "DEBUG splitter.addROI(TWO, THREE, 2): " << std::endl << splitter.debugPrint();
+
     splitter.addROI(FOUR, FIVE, 3); // a gap with the previous ROI
-    std::cout << std::endl << "DEBUG splitter: " << std::endl << splitter.debugPrint();
+    std::cout << std::endl << "DEBUG splitter.addROI(FOUR, FIVE, 3): " << std::endl << splitter.debugPrint();
+
     const SplittingIntervalVec splitVec = splitter.toSplitters(true);
-    std::cout << "DEBUG splitVec: " << std::endl;
+    std::cout << std::endl << "DEBUG splitVec: " << std::endl;
     for (const auto &item : splitVec) {
-      std::cout << "DEBUG :" << item.debugStrPrint();
+      std::cout << std::endl << "DEBUG :" << item.debugStrPrint();
     }
     TS_ASSERT_EQUALS(splitVec.size(), 4);
     TS_ASSERT(splitVec[0] == SplittingInterval(ONE, TWO, 1));
