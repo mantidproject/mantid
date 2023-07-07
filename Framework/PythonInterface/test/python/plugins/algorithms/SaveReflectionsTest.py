@@ -297,6 +297,15 @@ class SaveReflectionsTest(unittest.TestCase):
             "There are no peaks with Intens/Sigma >= 0.0 in peak workspace empty_peaks. An empty file will be produced."
         )
 
+    def test_save_lean_peak_table_GSAS(self):
+        reference_result = self._get_reference_result("lean_peak_GSAS.hkl")
+        file_name = os.path.join(self._test_dir, "test_lean_peak_GSAS.hkl")
+        empty_peaks = CreatePeaksWorkspace(self._workspace, NumberOfPeaks=1, OutputType="LeanElasticPeak")
+
+        SaveReflections(InputWorkspace=empty_peaks, Filename=file_name, Format="GSAS")  # calls SaveHKLCW
+
+        self._assert_file_content_equal(reference_result, file_name)
+
     # Private api
     def _assert_file_content_equal(self, reference_result, file_name):
         with open(reference_result, "r") as ref_file:

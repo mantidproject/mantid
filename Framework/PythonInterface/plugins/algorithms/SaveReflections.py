@@ -489,9 +489,16 @@ class SaveHKLFormat(object):
         if has_modulated_indexing(workspace):
             raise RuntimeError("Cannot currently save modulated structures to GSAS or SHELX formats")
 
-        from mantid.simpleapi import SaveHKL
+        from mantid.dataobjects import LeanElasticPeaksWorkspace
 
-        SaveHKL(Filename=file_name, InputWorkspace=workspace, ScalePeaks=scale)
+        if isinstance(workspace, LeanElasticPeaksWorkspace):
+            from mantid.simpleapi import SaveHKLCW
+
+            SaveHKLCW(OutputFile=file_name, Workspace=workspace)
+        else:
+            from mantid.simpleapi import SaveHKL
+
+            SaveHKL(Filename=file_name, InputWorkspace=workspace, ScalePeaks=scale)
 
 
 class ReflectionFormat(Enum):
