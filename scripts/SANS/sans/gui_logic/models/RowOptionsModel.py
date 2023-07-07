@@ -47,7 +47,7 @@ class RowOptionsModel(object):
             "PhiMin": float,
             "PhiMax": float,
             "UseMirror": bool,
-            "ScaleWorkspace": str,
+            "BackgroundWorkspace": str,
             "ScaleFactor": float,
         }
 

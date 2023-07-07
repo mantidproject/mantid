@@ -153,3 +153,9 @@ class GuiStateDirector(object):
 
         if "UseMirror" in options.keys():
             state_gui_model.phi_limit_use_mirror = options["UseMirror"]
+
+        if "BackgroundWorkspace" in options.keys():
+            state_gui_model.background_workspace = options["BackgroundWorkspace"]
+
+        if "ScaleFactor" in options.keys():
+            state_gui_model.scale_factor = options["ScaleFactor"]
