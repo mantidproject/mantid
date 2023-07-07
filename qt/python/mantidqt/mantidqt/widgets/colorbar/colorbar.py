@@ -24,7 +24,7 @@ from qtpy.QtCore import Signal, Qt
 from qtpy.QtGui import QDoubleValidator
 
 NORM_OPTS = ["Linear", "Log", "SymmetricLog10", "Power"]
-MIN_LOG_VALUE = 1e-4
+AUTO_SCALE_OPTS = ["Min/Max", "3(Sig)", "1.5(IQR)"]
 
 
 def register_customized_colormaps():
@@ -79,7 +79,7 @@ class ColorbarWidget(QWidget):
         self.cmin_cmax_red_outline_style_sheet = "border: 1px solid red"
 
         self.linear_validator = QDoubleValidator(parent=self)
-        self.log_validator = QDoubleValidator(MIN_LOG_VALUE, sys.float_info.max, 3, self)
+        self.log_validator = QDoubleValidator(sys.float_info.min, sys.float_info.max, 3, self)
         self.cmax = QLineEdit()
         self.cmax_value = 1
         self.cmax.setMaximumWidth(100)
@@ -127,6 +127,15 @@ class ColorbarWidget(QWidget):
         self.autoscale.setChecked(True)
         self.autoscale.stateChanged.connect(self.update_clim)
 
+        self.auto_layout = QHBoxLayout()
+        self.autotype = QComboBox()
+        self.autotype.addItems(AUTO_SCALE_OPTS)
+        self.autotype.setCurrentIndex(0)
+        self.autotype.currentIndexChanged.connect(self.norm_changed)
+
+        self.auto_layout.addWidget(self.autotype)
+        self.auto_layout.addStretch()
+
         self.canvas = FigureCanvas(Figure())
         if parent:
             # Set facecolor to match parent
@@ -144,13 +153,14 @@ class ColorbarWidget(QWidget):
         self.layout.addLayout(self.cmin_layout)
         self.layout.addLayout(self.norm_layout)
         self.layout.addWidget(self.autoscale)
+        self.layout.addLayout(self.auto_layout)
 
     def set_mappable(self, mappable):
         """
         When a new plot is created this method should be called with the new mappable
         """
         # sanity check the mappable
-        mappable = self._validate_mappable(mappable)
+        # mappable = self._validate_mappable(mappable)
         self.ax.clear()
         try:  # Use current cmap
             cmap = get_current_cmap(self.colorbar)
@@ -224,7 +234,11 @@ class ColorbarWidget(QWidget):
         """
         idx = self.norm.currentIndex()
         if self.autoscale.isChecked():
-            cmin = cmax = None
+            climits = self._calculate_clim()
+            if climits is not None:
+                cmin, cmax = climits
+            else:
+                cmin = cmax = None
         else:
             cmin = self.cmin_value
             cmax = self.cmax_value
@@ -235,10 +249,6 @@ class ColorbarWidget(QWidget):
         elif NORM_OPTS[idx] == "SymmetricLog10":
             return SymLogNorm(1e-8 if cmin is None else max(1e-8, abs(cmin) * 1e-3), vmin=cmin, vmax=cmax)
         elif NORM_OPTS[idx] == "Log":
-            cmin = MIN_LOG_VALUE if cmin is not None and cmin <= 0 else cmin
-            if cmin is None and cmax is None:
-                climits = self._calculate_clim()
-                cmin, cmax = climits if climits is not None else (cmin, cmax)
             return LogNorm(vmin=cmin, vmax=cmax)
         else:
             return Normalize(vmin=cmin, vmax=cmax)
@@ -312,25 +322,41 @@ class ColorbarWidget(QWidget):
 
     def _calculate_clim(self) -> tuple:
         """Calculate the colorbar limits to use when autoscale is turned on."""
-        axes = self.colorbar.mappable
+        try:
+            axes = self.colorbar.mappable
+        except AttributeError:
+            return None
+
         try:
             data = axes.get_array_clipped_to_bounds()
         except AttributeError:
             data = axes.get_array()
 
         log_normalisation = NORM_OPTS[self.norm.currentIndex()] == "Log"
-        try:
+        if log_normalisation:
+            mask = np.logical_and(np.isfinite(data), np.greater(data, 0))
+        else:
+            mask = np.isfinite(data)
+
+        if mask.any():
+            scale_type = AUTO_SCALE_OPTS[self.autotype.currentIndex()]
+            if scale_type == "Min/Max":
+                vmin, vmax = np.min(data[mask]), np.max(data[mask])
+            elif scale_type == "3(Sig)":
+                mean, sigma = np.mean(data[mask]), np.std(data[mask])
+                vmin, vmax = mean - 3 * sigma, mean + 3 * sigma
+            elif scale_type == "1.5(IQR)":
+                Q1, Q3 = np.percentile(data[mask], [25, 75])
+                vmin, vmax = Q1 - 1.5 * (Q3 - Q1), Q3 + 1.5 * (Q3 - Q1)
             if log_normalisation:
-                mask = np.logical_and(np.isfinite(data), np.greater(data, 0))
-            else:
-                mask = np.isfinite(data)
-            if data[mask].any():
-                return data[mask].min(), data[mask].max()
-            else:
-                return (0.1, 1.0)
-        except (ValueError, RuntimeWarning):
-            # All values are masked
-            return None
+                # sanity check
+                if vmax <= 0:
+                    vmax = 1.0
+                if vmin <= 0 or np.isclose(vmin, vmax):
+                    vmin = 1e-4 * vmax
+            return vmin, vmax
+        else:
+            return (0.1, 1.0)
 
     def _manual_clim(self):
         """Update stored colorbar limits
@@ -390,11 +416,11 @@ class ColorbarWidget(QWidget):
             log_index, symmetric_log_index = NORM_OPTS.index("Log"), NORM_OPTS.index("SymmetricLog10")
             if np.all(data_array <= 0):
                 self._disable_normalisation_option(mappable, log_index, LogNorm, "Log scale is disabled for non-positive data")
-            elif data_array.all() is np.ma.masked:
-                self._disable_normalisation_option(mappable, log_index, LogNorm, "Log scale is disabled for masked data")
-                self._disable_normalisation_option(
-                    mappable, symmetric_log_index, SymLogNorm, "SymmetricLog10 scale is disabled for masked data"
-                )
+            # elif data_array.all() is np.ma.masked:
+            #     self._disable_normalisation_option(mappable, log_index, LogNorm, "Log scale is disabled for masked data")
+            #     self._disable_normalisation_option(
+            #         mappable, symmetric_log_index, SymLogNorm, "SymmetricLog10 scale is disabled for masked data"
+            #     )
             else:
                 self._enable_normalisation_option(log_index)
                 self._enable_normalisation_option(symmetric_log_index)
