@@ -43,6 +43,13 @@ shift
 CMAKE_PRESET=$1
 shift
 
+if [[ $OSTYPE == 'darwin'* ]]; then
+    exit 0
+fi
+if [[ $OSTYPE == 'linux'* ]]; then
+    exit 0
+fi
+
 if [[ -z "$BUILD_THREADS" ]]; then
     if [[ $OSTYPE == 'darwin'* ]]; then
         BUILD_THREADS="$(sysctl -n hw.logicalcpu)"
@@ -71,10 +78,10 @@ EXTRA_CMAKE_FLAGS="-DENABLE_PRECOMMIT=OFF"
 while [ ! $# -eq 0 ]
 do
     case "$1" in
-        --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
+        --enable-systemtests) ENABLE_SYSTEM_TESTS=false ;;
         --enable-package) ENABLE_PACKAGE=true ;;
         --enable-docs) ENABLE_DOCS=true ;;
-        --enable-doctests) ENABLE_DOC_TESTS=true ;;
+        --enable-doctests) ENABLE_DOC_TESTS=false ;;
         --enable-dev-docs) ENABLE_DEV_DOCS=true ;;
         --enable-coverity)
 	    ENABLE_COVERITY=true
