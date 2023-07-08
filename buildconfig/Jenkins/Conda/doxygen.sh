@@ -9,10 +9,6 @@
 # Expected args:
 #   1. WORKSPACE: path to the root of the source code. On Windows, only use / for
 #                 this argument do not use \\ or \ in the path.
-
-# temp skip doxygen
-exit 0
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/mamba-utils
 
