@@ -208,12 +208,14 @@ void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, con
   if (start == stop)
     return;
   assertIncreasing(start, stop);
-  const DateAndTime &firstTime = m_roi_map.begin()->first;
-  const DateAndTime &lastTime = m_roi_map.rbegin()->first;
   if (m_roi_map.empty()) {
     // set the values without checks
     clearAndReplace(start, stop, value);
-  } else if ((start <= firstTime) && (stop >= lastTime)) {
+    return;
+  }
+  const DateAndTime &firstTime = m_roi_map.begin()->first;
+  const DateAndTime &lastTime = m_roi_map.rbegin()->first;
+  if ((start <= firstTime) && (stop >= lastTime)) {
     // the new ROI covers the whole of the existing TimeSplitter, thus replace it
     clearAndReplace(start, stop, value);
   } else if ((stop < firstTime) || (start > lastTime)) {
