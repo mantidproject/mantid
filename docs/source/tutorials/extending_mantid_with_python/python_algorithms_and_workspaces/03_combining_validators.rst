@@ -4,9 +4,8 @@
 Combining Validators
 ====================
 
-A special validator, ``CompositeValidator``, exists so that many validators
-can be combined together. This then requires that each validator is
-satisfied for the input value to be accepted.
+A special validator, :class:`~mantid.kernel.CompositeValidator`, exists so that many validators can be combined together.
+This then requires that each validator is satisfied for the input value to be accepted.
 
 A composite validator can be constructed by:
 
