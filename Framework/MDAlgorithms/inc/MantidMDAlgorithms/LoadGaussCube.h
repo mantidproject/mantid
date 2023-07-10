@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -14,7 +14,7 @@ namespace MDAlgorithms {
 
 /** LoadGaussCube : TODO: DESCRIPTION
  */
-class MANTID_MDALGORITHMS_DLL LoadGaussCube : public API::Algorithm {
+class MANTID_MDALGORITHMS_DLL LoadGaussCube : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
