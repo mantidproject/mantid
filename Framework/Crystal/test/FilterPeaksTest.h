@@ -368,6 +368,17 @@ public:
     AnalysisDataService::Instance().remove(inWS->getName());
   }
 
+  void test_filter_by_signal_to_noise_non_integrated_peak() {
+    // peak with I>0 but sigma==0 (as produced by FindSXPeaks)
+    auto inWS = createInputWorkspace(1, 1, 1, 1.0, 0);
+
+    auto outWS = runAlgorithm(inWS, "Signal/Noise", 0, ">");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
+  }
+
   void test_filter_by_bank() {
     const double h = 1;
     const double k = 1;
