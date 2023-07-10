@@ -92,7 +92,7 @@ class AtomsData(collections.abc.Sequence):
             raise ValueError("Invalid structure of the dictionary to be added.")
 
         # "symbol"
-        if not (symbol := item["symbol"]) in abins.constants.ALL_SYMBOLS:
+        if (symbol := item["symbol"]) not in abins.constants.ALL_SYMBOLS:
             # Check is symbol was loaded as type bytes
             if isinstance(symbol, bytes):
                 utf8_symbol = symbol.decode("utf-8")
@@ -137,15 +137,15 @@ class AtomsData(collections.abc.Sequence):
     def __len__(self) -> int:
         return len(self._data)
 
-    @overload  # noqa F811
+    @overload
     def __getitem__(self, item: int) -> _AtomData:
         ...
 
-    @overload  # noqa F811
-    def __getitem__(self, item: slice) -> List[_AtomData]:  # noqa F811
+    @overload
+    def __getitem__(self, item: slice) -> List[_AtomData]:
         ...
 
-    def __getitem__(self, item):  # F811
+    def __getitem__(self, item):
         return self._data[item]
 
     def extract(self):
