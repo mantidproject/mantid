@@ -40,6 +40,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     NAME = "Name"
     EMAIL = "Email"
     _, _, newer_version_available = CheckMantidVersion()
+    newer_version_available = True
 
     def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
