@@ -174,9 +174,9 @@ int DetectorEfficiencyVariation::doDetectorTests(const API::MatrixWorkspace_cons
   if (variation < 1) {
     variation = 1.0 / variation;
   }
-  // criterion for if the the first spectrum is larger than expected
+  // criterion for if the first spectrum is larger than expected
   double largest = average * variation;
-  // criterion for if the the first spectrum is lower than expected
+  // criterion for if the first spectrum is lower than expected
   double lowest = average / variation;
 
   const auto numSpec = static_cast<int>(counts1->getNumberHistograms());

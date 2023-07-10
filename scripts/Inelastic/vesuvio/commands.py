@@ -100,7 +100,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 
 class VesuvioTOFFitRoutine(object):
     """
-    A class for executing the the Vesuvio TOF Fit Routine from a Vesuvio Driver Script.
+    A class for executing the Vesuvio TOF Fit Routine from a Vesuvio Driver Script.
 
     Attributes:
         _ms_helper                   A helper object for multiple scattering parameters.
@@ -873,7 +873,7 @@ def _create_intensity_constraint_str(intensity_constraints):
 def _create_user_defined_ties_str(masses):
     """
     Creates the internal ties for each mass profile as defined by the user to be used when fitting the data
-    @param masses   :: The mass profiles for the data which contain the the ties
+    @param masses   :: The mass profiles for the data which contain the ties
     @return         :: A string to be passed as the Ties input to fitting
     """
     user_defined_ties = []

@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name,R0912
 """
     Classes for each reduction step. Those are kept separately
-    from the the interface class so that the DgsReduction class could
+    from the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
 import os
@@ -155,7 +155,6 @@ class DiffractionReductionScripter(BaseReductionScripter):
         if dofilter:
             # a) Construct python script with generating filters
             for runtuple in datafilenames:
-
                 runnumber = runtuple[0]
                 datafilename = runtuple[1]
 
@@ -270,7 +269,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         # put together the output
         datafilenames = []
-        for (filename, runnumber) in zip(runnumbers_str, runnumbers):
+        for filename, runnumber in zip(runnumbers_str, runnumbers):
             datafilenames.append((runnumber, filename))
 
         return datafilenames

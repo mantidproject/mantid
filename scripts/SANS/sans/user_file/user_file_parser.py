@@ -1448,16 +1448,16 @@ class TransParser(UserFileComponentParser):
         elif self._is_radius(setting):
             output = self._extract_radius(setting)
         elif self._is_roi(setting):
-            # Note that we need the original line in order to extract the the case sensitive meaning
+            # Note that we need the original line in order to extract the case sensitive meaning
             output = self._extract_roi(setting, line)
         elif self._is_mask(setting):
-            # Note that we need the original line in order to extract the the case sensitive meaning
+            # Note that we need the original line in order to extract the case sensitive meaning
             output = self._extract_mask(setting, line)
         elif self._is_sample_workspace(setting):
-            # Note that we need the original line in order to extract the the case sensitive meaning
+            # Note that we need the original line in order to extract the case sensitive meaning
             output = self._extract_sample_workspace(setting, line)
         elif self._is_can_workspace(setting):
-            # Note that we need the original line in order to extract the the case sensitive meaning
+            # Note that we need the original line in order to extract the case sensitive meaning
             output = self._extract_can_workspace(setting, line)
         else:
             raise RuntimeError("TransParser: Unknown command for TRANS: {0}".format(line))

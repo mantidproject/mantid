@@ -481,7 +481,7 @@ reduction. On a high level these are:
 +-------------------+------------------------------------------------------------------------------------------------+
 | **compatibility** | This group contains information for the compatibility mode, e.g. the time-of-flight binning.   |
 +-------------------+------------------------------------------------------------------------------------------------+
-| **convert_to_q**  | This group contains information for the the momentum transfer conversion, e.g. the momentum    |
+| **convert_to_q**  | This group contains information for the momentum transfer conversion, e.g. the momentum        |
 |                   | transfer binning information.                                                                  |
 +-------------------+------------------------------------------------------------------------------------------------+
 | **data**          | This group contains information about the data which is to be reduced.                         |

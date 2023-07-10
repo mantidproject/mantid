@@ -56,7 +56,7 @@ In the table below details of the information loaded is shown, for more informat
 +----------------------------------+--------------------------------------------+----------------------------------------+
 | Time Zero Vector                 | ``instrument/detector_1/time_zero`` can be | TimeZeroList property                  |
 |                                  | a single value or an array. This contains  |                                        |
-|                                  | either the the values from the array or the|                                        |
+|                                  | either the values from the array or the    |                                        |
 |                                  | single value expanded into a vector        |                                        |
 +----------------------------------+--------------------------------------------+----------------------------------------+
 | First good time                  | ``instrument/detector_1/first_good_bin``   | FirstGoodData property                 |

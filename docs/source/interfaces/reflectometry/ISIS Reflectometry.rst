@@ -447,7 +447,7 @@ This table details the behaviour of the actions in the tool bar, from left to ri
 Keyboard Shortcuts
 ==================
 
-The following keyboard shortcuts are available for editing in the the runs
+The following keyboard shortcuts are available for editing in the runs
 table.
 
 +-----------------------------+---------------------------------------+

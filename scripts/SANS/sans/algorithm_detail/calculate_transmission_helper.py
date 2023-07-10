@@ -60,7 +60,7 @@ def apply_flat_background_correction_to_monitors(
     :return: a corrected workspace.
     """
     for workspace_index in monitor_indices:
-        # Get the the flat background region for this monitor.
+        # Get the flat background region for this monitor.
         spectrum = workspace.getSpectrum(workspace_index)
         spectrum_number = spectrum.getSpectrumNo()
         monitor_key = str(spectrum_number)

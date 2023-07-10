@@ -20,7 +20,7 @@ a file.
 By default the algorithm attempts to guess which lines are header lines
 by trying to see where a contiguous block of numbers starts. This can be
 turned off by specifying the "SkipNumLines" property, which will then
-tell the algorithm to simply use that as the the number of header lines.
+tell the algorithm to simply use that as the number of header lines.
 
 The format can be one of:
 

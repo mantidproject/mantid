@@ -18,7 +18,7 @@ algorithms, known as workflow algorithms, also record the algorithms they use in
 displayed having just the parent algorithm in the list but with an option to expand the tree next to the item. Clicking
 this item displays an indented list of the child algorithms used by this step.
 
-The "Unroll" check box will also appear next to workflow algorithms. This option is used in conjunction with the the options
+The "Unroll" check box will also appear next to workflow algorithms. This option is used in conjunction with the options
 in the scripting section.
 
 Properties

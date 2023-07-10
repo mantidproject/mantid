@@ -75,7 +75,7 @@ void FindSXPeaks::init() {
   declareProperty("PeakFindingStrategy", strongestPeakStrategy,
                   std::make_shared<StringListValidator>(peakFindingStrategy),
                   "Different options for peak finding."
-                  "1. StrongestPeakOnly: Looks only for the the strongest peak in each "
+                  "1. StrongestPeakOnly: Looks only for the strongest peak in each "
                   "spectrum (provided there is "
                   "one). This options is more performant than the AllPeaks option.\n"
                   "2. AllPeaks: This strategy will find all peaks in each "

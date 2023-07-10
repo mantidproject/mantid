@@ -838,7 +838,7 @@ class AbinsAlgorithm:
     @staticmethod
     def _compare_one_line(one_line, pattern):
         """
-        compares line in the the form of string with a pattern.
+        compares line in the form of string with a pattern.
         :param one_line:  line in the for mof string to be compared
         :param pattern: string which should be present in the line after removing white spaces and setting all
                         letters to lower case

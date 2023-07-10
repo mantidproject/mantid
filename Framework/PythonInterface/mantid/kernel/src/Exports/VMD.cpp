@@ -78,7 +78,7 @@ void export_VMD() {
 
       .def("norm", &VMD::norm, arg("self"), "Returns the length of the vector")
 
-      .def("norm2", &VMD::norm2, arg("self"), "Returns the the squared length of the vector")
+      .def("norm2", &VMD::norm2, arg("self"), "Returns the squared length of the vector")
 
       .def("normalize", &VMD::normalize, arg("self"),
            "Normalizes the length of the vector "

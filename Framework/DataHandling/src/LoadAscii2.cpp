@@ -318,7 +318,7 @@ void LoadAscii2::parseLine(const std::string &line, std::list<std::string> &colu
       if (m_spectra.size() == m_spectrumIDcount) {
         m_spectrumIDcount++;
       } else {
-        // if not then they've ommitted IDs in the the file previously and just
+        // if not then they've omitted IDs in the file previously and just
         // decided to include one (which is wrong and confuses everything)
         throw std::runtime_error("Line " + std::to_string(m_lineNo) +
                                  ": Inconsistent inclusion of spectra IDs. All spectra must have "
@@ -379,7 +379,7 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace, con
   for (size_t i = 0; i < numSpectra; ++i) {
     localWorkspace->setSharedX(i, m_spectra[i].sharedX());
     localWorkspace->setSharedY(i, m_spectra[i].sharedY());
-    // if E or DX are ommitted they're implicitly initalised as 0
+    // if E or DX are omitted they're implicitly initialised as 0
     if (m_baseCols == 4 || m_baseCols == 3) {
       // E in file
       localWorkspace->setSharedE(i, m_spectra[i].sharedE());

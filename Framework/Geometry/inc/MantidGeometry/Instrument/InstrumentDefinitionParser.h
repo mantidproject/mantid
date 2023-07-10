@@ -70,7 +70,7 @@ public:
   /// Save DOM tree to xml file
   void saveDOM_Tree(std::string &outFilename);
 
-  /// Getter the the applied caching option.
+  /// Get the applied caching option.
   CachingOption getAppliedCachingOption() const;
 
   /// creates a vtp filename from a given xml filename

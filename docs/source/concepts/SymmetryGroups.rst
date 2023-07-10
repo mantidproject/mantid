@@ -300,7 +300,7 @@ The code reveals that axioms 2 - 4 are fulfilled, but that the group is not clos
       3. Identity: True
       4. Inversion: True
 
-Looking into the group table above shows the reason: The combination of a mirror plane and a two-fold rotation axis implies the the presence of an inversion center. Similarly, the identity can be removed:
+Looking into the group table above shows the reason: The combination of a mirror plane and a two-fold rotation axis implies the presence of an inversion center. Similarly, the identity can be removed:
 
 .. testcode:: ExSymmetryGroupAxiomsIdentity
 

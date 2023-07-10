@@ -124,7 +124,7 @@ void CreateSampleWorkspace::init() {
   declareProperty("NumScanPoints", 1, std::make_shared<BoundedValidator<int>>(0, 360, true),
                   "Add a number of time indexed detector scan points to the "
                   "instrument. The detectors are rotated in 1 degree "
-                  "increments around the the sample position in the x-z plane. "
+                  "increments around the sample position in the x-z plane. "
                   "Minimum (default) is 1 scan point, which gives a "
                   "non-scanning workspace.");
 

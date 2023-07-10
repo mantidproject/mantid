@@ -220,7 +220,7 @@ def quaternion_to_angle_and_axis(quaternion):
     s_parameter = sqrt(1 - quaternion[0] * quaternion[0])
 
     axis = []
-    # If the the angle is zero, then it does not make sense to have an axis
+    # If the angle is zero, then it does not make sense to have an axis
     if s_parameter < 1e-8:
         axis.append(quaternion[1])
         axis.append(quaternion[2])

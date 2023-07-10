@@ -118,14 +118,14 @@ bool endswith(const std::string &str, const std::string &ending) {
 void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix, const GroupingWorkspace_sptr &wksp) {
   alg->declareProperty(std::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
                            "OutputGroupingWorkspace", prefix + "_group", Direction::Output),
-                       "Set the the output GroupingWorkspace, if any.");
+                       "Set the output GroupingWorkspace, if any.");
   alg->setProperty("OutputGroupingWorkspace", wksp);
 }
 
 void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix, const MaskWorkspace_sptr &wksp) {
   alg->declareProperty(std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
                            "OutputMaskWorkspace", prefix + "_mask", Direction::Output),
-                       "Set the the output MaskWorkspace, if any.");
+                       "Set the output MaskWorkspace, if any.");
   alg->setProperty("OutputMaskWorkspace", wksp);
 }
 

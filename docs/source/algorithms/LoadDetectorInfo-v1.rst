@@ -60,7 +60,7 @@ See :ref:`algm-UpdateInstrumentFromFile` which can do similar job in modifying t
 **Detectors.dat** data format
 #############################
 
-The the detector data can be stored as ASCII or `NeXus <http://download.nexusformat.org/>`_ data file. It contains roughly corresponds
+The detector data can be stored as ASCII or `NeXus <http://download.nexusformat.org/>`_ data file. It contains roughly corresponds
 to the detector.dat file, present on the instrument and written to the run files. The contents of these data can be overwritten by the file,
 provided as input for this algorithm
 

@@ -59,7 +59,7 @@ Line2D::Line2D(Python::Object obj, Line2D::Data &&dataOwner)
 }
 
 /**
- * The data is being deleted so the the line is removed from the axes
+ * The data is being deleted so the line is removed from the axes
  * if it is present
  */
 Line2D::~Line2D() noexcept {

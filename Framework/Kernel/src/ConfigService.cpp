@@ -1231,7 +1231,7 @@ std::string ConfigServiceImpl::getDirectoryOfExecutable() const {
 /**
  * Get the full path to the executing program (i.e. whatever Mantid is embedded
  * in)
- * @returns A string containing the full path the the executable
+ * @returns A string containing the full path the executable
  */
 std::string ConfigServiceImpl::getPathToExecutable() const {
   std::string execpath;

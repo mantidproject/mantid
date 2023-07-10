@@ -378,7 +378,7 @@ void CalculateCountRate::setOutLogParameters(const DataObjects::EventWorkspace_s
       if (tLogMin > runTMax || tLogMax < runTMin) { // log time is outside of the experiment time.
                                                     // Log normalization is impossible
         this->disableNormalization("Normalization log " + m_pNormalizationLog->name() +
-                                   " time lies outside of the the whole experiment time. "
+                                   " time lies outside of the whole experiment time. "
                                    "Log normalization impossible.");
         useLogAccuracy = false;
       } else {

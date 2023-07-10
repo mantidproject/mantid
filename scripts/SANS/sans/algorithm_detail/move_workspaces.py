@@ -590,7 +590,7 @@ class SANSMoveLOQ(SANSMove):
                 # Get the detector name
                 component_name = self.inst_state.detector_names[detector].detector_name
 
-                # Shift the detector by the the input amount
+                # Shift the detector by the input amount
                 offset = {CanonicalCoordinates.X: x_shift, CanonicalCoordinates.Y: y_shift}
                 move_component(workspace, offset, component_name)
 

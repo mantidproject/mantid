@@ -76,7 +76,7 @@ class EnggCalibrateFull(PythonAlgorithm):
             ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
             doc="Information on fitted peaks. The table has one row per calibrated "
             "detector contains. In each row, the parameters of all the peaks fitted "
-            "are specified together with the the expected peak value (in d-spacing). "
+            "are specified together with the expected peak value (in d-spacing). "
             "The expected values are given in the field labelled 'dSpacing'. When "
             "fitting back-to-back exponential functions, the 'X0' column has the fitted "
             "peak center.",
@@ -212,7 +212,6 @@ class EnggCalibrateFull(PythonAlgorithm):
         prog = Progress(self, start=0, end=1, nreports=len(indices))
 
         for i in indices:
-
             try:
                 fitted_peaks_table = self._fit_peaks(ws, i, expected_peaks_d)
                 difa, difc, tzero = self._fit_difc_linear(fitted_peaks_table)

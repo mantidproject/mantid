@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
-    from the the interface class so that the DgsReduction class could
+    from the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
 import os
@@ -17,7 +17,6 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 
 
 class SampleSetupScript(BaseScriptElement):
-
     sample_file = ""
     live_button = False
     output_wsname = ""

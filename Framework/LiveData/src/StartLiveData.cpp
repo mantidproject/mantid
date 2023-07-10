@@ -48,7 +48,7 @@ void StartLiveData::init() {
                   "Process live data starting from the current time only.");
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>("FromStartOfRun", false, Direction::Input),
-                  "Record live data, but go back to the the start of the run and process "
+                  "Record live data, but go back to the start of the run and process "
                   "all data since then.");
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>("FromTime", false, Direction::Input),

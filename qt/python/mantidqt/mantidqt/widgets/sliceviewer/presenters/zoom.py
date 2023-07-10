@@ -28,7 +28,7 @@ class ScrollZoomMixin:
                            Default=1.2 as experimentally it seems to give quite smooth scrolling without jumping too much
         :param redraw: If True then force a canvas redraw after zooming, else it is assumed this will be dealt with
                        by an external entity
-        :param toolbar: An optional toolbar instance. If present the navstack is updated before the the zoom takes place
+        :param toolbar: An optional toolbar instance. If present the navstack is updated before the zoom takes place
         :param callback: Optional callback called when zoom completes
         """
         callback = callback if callback is not None else _noop

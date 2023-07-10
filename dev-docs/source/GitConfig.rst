@@ -116,7 +116,7 @@ You may find the following aliases helpful. You can also add your own.
 
    [alias]
            # Check out a pull request for testing. The first argument is the name of the remote and the
-           # second is the the pull request number,
+           # second is the pull request number,
            # e.g. git test-pr origin 12345
            test-pr = "!f() { git fetch $1 pull/$2/merge:pr/$2-merged && git checkout pr/$2-merged; }; f"
            # Remove all branches starting pr/

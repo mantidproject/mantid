@@ -1,5 +1,5 @@
-# First generate rules for the the workbench application itself egg link name has to match that in setup.py name or
-# Visual Studio generates a warning that the output filename of the target does not match the output that is produced by
+# First generate rules for the workbench application itself egg link name has to match that in setup.py name or Visual
+# Studio generates a warning that the output filename of the target does not match the output that is produced by
 # setuptools.
 if(APPLE OR WIN32)
   if(WIN32)
