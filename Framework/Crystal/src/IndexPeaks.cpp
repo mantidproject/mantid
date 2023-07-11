@@ -479,6 +479,8 @@ void IndexPeaks::exec() {
       g_log.warning("empty modVector 3, skipping saving");
       lattice.setModVec3(V3D(0.0, 0.0, 0.0));
     }
+    // set modUB now mod vectors populated
+    lattice.setModUB(lattice.getUB() * lattice.getModHKL());
   }
 
   CombinedIndexingStats indexingInfo;
