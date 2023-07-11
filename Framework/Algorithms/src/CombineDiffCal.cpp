@@ -166,16 +166,16 @@ void CombineDiffCal::exec() {
     if (!(maskWorkspace && maskWorkspace->isMasked(detid))) {
       std::shared_ptr<Mantid::API::TableRow> pixelCalibrationRow = binarySearchForRow(pixelCalibrationWS, detid);
       if (pixelCalibrationRow) {
-        double difcPD = groupedCalibrationRow.Double(1);
-        double difcArb = calibrationWS->spectrumInfo().diffractometerConstants(
+        const double difcPD = groupedCalibrationRow.Double(1);
+        const double difcArb = calibrationWS->spectrumInfo().diffractometerConstants(
             calibrationWS->getIndicesFromDetectorIDs({detid})[0])[Kernel::UnitParams::difc];
-        double difcPrev = pixelCalibrationRow->Double(1);
-        double difaPrev = pixelCalibrationRow->Double(2);
+        const double difcPrev = pixelCalibrationRow->Double(1);
+        const double difaPrev = pixelCalibrationRow->Double(2);
 
-        double difcNew = (difcPD / difcArb) * difcPrev;
-        double difaNew = ((difcPD / difcArb) * (difcPD / difcArb)) * difaPrev;
+        const double difcNew = (difcPD / difcArb) * difcPrev;
+        const double difaNew = ((difcPD / difcArb) * (difcPD / difcArb)) * difaPrev;
 
-        double tzeroNew = pixelCalibrationRow->Double(3);
+        const double tzeroNew = pixelCalibrationRow->Double(3);
 
         Mantid::API::TableRow newRow = outputWorkspace->appendRow();
         newRow << detid << difcNew << difaNew << tzeroNew;
