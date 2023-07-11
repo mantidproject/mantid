@@ -21,6 +21,17 @@ DECLARE_ALGORITHM(CombineDiffCal)
 
 //----------------------------------------------------------------------------------------------
 
+namespace { // anonymous namespace
+namespace ColNames {
+const std::string DETID("detid");
+const std::string DIFC("difc");
+const std::string DIFA("difa");
+const std::string TZERO("tzero");
+} // namespace ColNames
+} // anonymous namespace
+
+//----------------------------------------------------------------------------------------------
+
 /// Algorithms name for identification. @see Algorithm::name
 const std::string CombineDiffCal::name() const { return "CombineDiffCal"; }
 
@@ -63,7 +74,7 @@ API::ITableWorkspace_sptr CombineDiffCal::sortTableWorkspace(DataObjects::TableW
   alg->setLoggingOffset(1);
   alg->setProperty("InputWorkspace", table);
   alg->setProperty("OutputWorkspace", table);
-  alg->setProperty("Columns", "detid");
+  alg->setProperty("Columns", ColNames::DETID);
   alg->executeAsChildAlg();
 
   return alg->getProperty("OutputWorkspace");
@@ -77,14 +88,14 @@ std::string generateErrorString(const DataObjects::TableWorkspace_sptr &ws) {
   const std::vector<std::string> columnNames = ws->getColumnNames();
 
   std::stringstream error;
-  if (!findColumn(columnNames, "detid"))
-    error << "detid ";
-  if (!findColumn(columnNames, "difc"))
-    error << "difc ";
-  if (!findColumn(columnNames, "difa"))
-    error << "difa ";
-  if (!findColumn(columnNames, "tzero"))
-    error << "tzero ";
+  if (!findColumn(columnNames, ColNames::DETID))
+    error << ColNames::DETID << " ";
+  if (!findColumn(columnNames, ColNames::DIFC))
+    error << ColNames::DIFC << " ";
+  if (!findColumn(columnNames, ColNames::DIFA))
+    error << ColNames::DIFA << " ";
+  if (!findColumn(columnNames, ColNames::TZERO))
+    error << ColNames::TZERO << " ";
 
   return error.str();
 }
@@ -153,10 +164,10 @@ void CombineDiffCal::exec() {
   const DataObjects::MaskWorkspace_sptr maskWorkspace = getProperty("MaskWorkspace");
 
   DataObjects::TableWorkspace_sptr outputWorkspace = std::make_shared<DataObjects::TableWorkspace>();
-  outputWorkspace->addColumn("int", "detid");
-  outputWorkspace->addColumn("double", "difc");
-  outputWorkspace->addColumn("double", "difa");
-  outputWorkspace->addColumn("double", "tzero");
+  outputWorkspace->addColumn("int", ColNames::DETID);
+  outputWorkspace->addColumn("double", ColNames::DIFC);
+  outputWorkspace->addColumn("double", ColNames::DIFA);
+  outputWorkspace->addColumn("double", ColNames::TZERO);
 
   Mantid::API::TableRow groupedCalibrationRow = groupedCalibrationWS->getFirstRow();
   do {
