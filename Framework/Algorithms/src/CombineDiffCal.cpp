@@ -28,6 +28,14 @@ const std::string DIFC("difc");
 const std::string DIFA("difa");
 const std::string TZERO("tzero");
 } // namespace ColNames
+
+namespace PropertyNames {
+const std::string PIXEL_CALIB("PixelCalibration");
+const std::string GROUP_CALIB("GroupedCalibration");
+const std::string ARB_CALIB("CalibrationWorkspace");
+const std::string OUTPUT_WKSP("OutputWorkspace");
+const std::string MASK_WKSP("MaskWorkspace");
+} // namespace PropertyNames
 } // anonymous namespace
 
 //----------------------------------------------------------------------------------------------
@@ -50,21 +58,21 @@ const std::string CombineDiffCal::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CombineDiffCal::init() {
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>(PropertyNames::PIXEL_CALIB, "",
+                                                                                   Direction::Input),
+                  "OffsetsWorkspace generated from cross-correlation. This is the source of DIFCpixel.");
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>(PropertyNames::GROUP_CALIB, "",
+                                                                                   Direction::Input),
+                  "DiffCal table generated from calibrating grouped spectra. This is the source of DIFCgroup.");
   declareProperty(
-      std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>("PixelCalibration", "", Direction::Input),
-      "OffsetsWorkspace generated from cross-correlation. This is the source of DIFCpixel.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>("GroupedCalibration", "", Direction::Input),
-      "DiffCal table generated from calibrating grouped spectra. This is the source of DIFCgroup.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("CalibrationWorkspace", "", Direction::Input),
+      std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::ARB_CALIB, "", Direction::Input),
       "Workspace where conversion from d-spacing to time-of-flight for each spectrum is determined from. This is the "
       "source of DIFCarb.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>("OutputWorkspace", "", Direction::Output),
-      "DiffCal table generated from calibrating grouped spectra");
-  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>("MaskWorkspace", "", Direction::Input,
-                                                                                  API::PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>(PropertyNames::OUTPUT_WKSP, "",
+                                                                                   Direction::Output),
+                  "DiffCal table generated from calibrating grouped spectra");
+  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
+                      PropertyNames::MASK_WKSP, "", Direction::Input, API::PropertyMode::Optional),
                   "MaskedWorkspace for PixelCalibration");
 }
 
@@ -103,16 +111,16 @@ std::string generateErrorString(const DataObjects::TableWorkspace_sptr &ws) {
 std::map<std::string, std::string> CombineDiffCal::validateInputs() {
   std::map<std::string, std::string> results;
 
-  const DataObjects::TableWorkspace_sptr groupedCalibrationWS = getProperty("GroupedCalibration");
-  const DataObjects::TableWorkspace_sptr pixelCalibrationWS = getProperty("PixelCalibration");
+  const DataObjects::TableWorkspace_sptr groupedCalibrationWS = getProperty(PropertyNames::GROUP_CALIB);
+  const DataObjects::TableWorkspace_sptr pixelCalibrationWS = getProperty(PropertyNames::PIXEL_CALIB);
 
   const auto groupedResult = generateErrorString(groupedCalibrationWS);
   if (!groupedResult.empty())
-    results["GroupedCalibration"] = "The GroupedCalibration Workspace is missing [ " + groupedResult + "]";
+    results[PropertyNames::GROUP_CALIB] = "The GroupedCalibration Workspace is missing [ " + groupedResult + "]";
 
   const auto pixelResult = generateErrorString(pixelCalibrationWS);
   if (!pixelResult.empty())
-    results["PixelCalibration"] = "The PixelCalibration Workspace is missing [ " + pixelResult + "]";
+    results[PropertyNames::PIXEL_CALIB] = "The PixelCalibration Workspace is missing [ " + pixelResult + "]";
 
   return results;
 }
@@ -153,15 +161,15 @@ void addRowFromGroupedCalibration(const DataObjects::TableWorkspace_sptr &ws, Ma
 /** Execute the algorithm.
  */
 void CombineDiffCal::exec() {
-  const API::MatrixWorkspace_sptr calibrationWS = getProperty("CalibrationWorkspace");
+  const API::MatrixWorkspace_sptr calibrationWS = getProperty(PropertyNames::ARB_CALIB);
 
-  DataObjects::TableWorkspace_sptr presortedGroupedCalibrationWS = getProperty("GroupedCalibration");
+  DataObjects::TableWorkspace_sptr presortedGroupedCalibrationWS = getProperty(PropertyNames::GROUP_CALIB);
   const API::ITableWorkspace_sptr groupedCalibrationWS = sortTableWorkspace(presortedGroupedCalibrationWS);
 
-  DataObjects::TableWorkspace_sptr presortedPixelCalibrationWS = getProperty("PixelCalibration");
+  DataObjects::TableWorkspace_sptr presortedPixelCalibrationWS = getProperty(PropertyNames::PIXEL_CALIB);
   const API::ITableWorkspace_sptr pixelCalibrationWS = sortTableWorkspace(presortedPixelCalibrationWS);
 
-  const DataObjects::MaskWorkspace_sptr maskWorkspace = getProperty("MaskWorkspace");
+  const DataObjects::MaskWorkspace_sptr maskWorkspace = getProperty(PropertyNames::MASK_WKSP);
 
   DataObjects::TableWorkspace_sptr outputWorkspace = std::make_shared<DataObjects::TableWorkspace>();
   outputWorkspace->addColumn("int", ColNames::DETID);
@@ -200,7 +208,7 @@ void CombineDiffCal::exec() {
     }
   } while (groupedCalibrationRow.next());
 
-  setProperty("OutputWorkspace", outputWorkspace);
+  setProperty(PropertyNames::OUTPUT_WKSP, outputWorkspace);
 }
 
 } // namespace Mantid::Algorithms
