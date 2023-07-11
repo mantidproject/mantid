@@ -143,7 +143,7 @@ std::shared_ptr<Mantid::API::TableRow> binarySearchForRow(const API::ITableWorks
   return nullptr;
 }
 
-void addRowFromGroupedCalibration(const DataObjects::TableWorkspace_sptr &ws, Mantid::API::TableRow row) {
+void addRowFromPreviousCalibration(const DataObjects::TableWorkspace_sptr &ws, Mantid::API::TableRow row) {
   Mantid::API::TableRow newRow = ws->appendRow();
   newRow << row.Int(0) << row.Double(1) << row.Double(2) << row.Double(3);
 }
@@ -177,9 +177,14 @@ void CombineDiffCal::exec() {
   outputWorkspace->addColumn("double", ColNames::DIFA);
   outputWorkspace->addColumn("double", ColNames::TZERO);
 
+  std::set<int> detidsInGrpCalib;
+
+  // loop through all rows in the grouped calibration table
+  // this will calculate an updated row or copy the row if it is missing from the pixel calibration
   Mantid::API::TableRow groupedCalibrationRow = groupedCalibrationWS->getFirstRow();
   do {
-    int detid = groupedCalibrationRow.Int(0);
+    const int detid = groupedCalibrationRow.Int(0);
+    detidsInGrpCalib.insert(detid);
     bool prevDifValsExist = false;
 
     if (!(maskWorkspace && maskWorkspace->isMasked(detid))) {
@@ -203,10 +208,27 @@ void CombineDiffCal::exec() {
     }
 
     if (!prevDifValsExist) {
-      // copy from group
-      addRowFromGroupedCalibration(outputWorkspace, groupedCalibrationRow);
+      // copy from group calibration
+      addRowFromPreviousCalibration(outputWorkspace, groupedCalibrationRow);
     }
   } while (groupedCalibrationRow.next());
+
+  // loop through rows in the pixel calibration table
+  // this will add rows that are not already represented
+  bool shouldSortOutputTable{false};
+  Mantid::API::TableRow pixelCalibrationRow = pixelCalibrationWS->getFirstRow();
+  do {
+    const int detid = pixelCalibrationRow.Int(0);
+    if (detidsInGrpCalib.count(detid) == 0) {
+      // copy from pixel calibration
+      addRowFromPreviousCalibration(outputWorkspace, pixelCalibrationRow);
+      shouldSortOutputTable = true;
+    }
+  } while (pixelCalibrationRow.next());
+
+  // if rows were copied from the pixel calibration, the output should be sorted
+  if (shouldSortOutputTable)
+    outputWorkspace = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(sortTableWorkspace(outputWorkspace));
 
   setProperty(PropertyNames::OUTPUT_WKSP, outputWorkspace);
 }
