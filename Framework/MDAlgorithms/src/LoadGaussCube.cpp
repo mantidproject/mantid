@@ -60,6 +60,22 @@ void LoadGaussCube::init() {
 }
 
 //----------------------------------------------------------------------------------------------
+/** Validate input
+ */
+std::map<std::string, std::string> LoadGaussCube::validateInputs() {
+  // check three dimensions specified
+  std::map<std::string, std::string> errors;
+  std::vector<std::string> prop_names = {"Names", "Frames", "Units"};
+  for (auto name : prop_names) {
+    std::vector<std::string> prop = getProperty(name);
+    if (prop.size() != 3) {
+      errors.emplace(name, "Workspace must have three dimensions.");
+    }
+  }
+  return errors;
+}
+
+//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LoadGaussCube::exec() {
