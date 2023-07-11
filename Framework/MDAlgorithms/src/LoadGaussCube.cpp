@@ -90,8 +90,8 @@ void LoadGaussCube::exec() {
 
   // read lower extent
   std::vector<double> extents(6, 0.0);
-  std::string str = getWord(in, false); // init string and ignore the first element
-  // get lower limit
+  getWord(in, false); // ignore the first element of this row
+  std::string str;
   for (int idim = 0; idim < 3; ++idim) {
     str = getWord(in, false);
     if (str.length() < 1) {
