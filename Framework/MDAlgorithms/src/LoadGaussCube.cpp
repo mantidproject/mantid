@@ -94,9 +94,10 @@ void LoadGaussCube::exec() {
       str = getWord(in, true); // ignore
     }
     extents[2 * idim + 1] = extents[2 * idim] + std::stod(getWord(in, true));
-    readToEndOfLine(in, true);
+    if (idim < 2) {
+      readToEndOfLine(in, true); // already at EOL for idim==2
+    }
   }
-  readToEndOfLine(in, true);
 
   // read signal array
   auto nelem = nbins[0] * nbins[1] * nbins[2];
