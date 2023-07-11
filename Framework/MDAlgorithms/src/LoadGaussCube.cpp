@@ -69,7 +69,7 @@ std::map<std::string, std::string> LoadGaussCube::validateInputs() {
   for (auto name : prop_names) {
     std::vector<std::string> prop = getProperty(name);
     if (prop.size() != 3) {
-      errors.emplace(name, "Workspace must have three dimensions.");
+      errors.emplace(name, "Property must contain three elements (workspace must have three dimensions).");
     }
   }
   return errors;

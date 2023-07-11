@@ -8,14 +8,15 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidMDAlgorithms/LoadGaussCube.h"
+
+using namespace Mantid::DataObjects;
 
 using Mantid::MDAlgorithms::LoadGaussCube;
 
 class LoadGaussCubeTest : public CxxTest::TestSuite {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
   static LoadGaussCubeTest *createSuite() { return new LoadGaussCubeTest(); }
   static void destroySuite(LoadGaussCubeTest *suite) { delete suite; }
 
@@ -26,27 +27,29 @@ public:
   }
 
   void test_exec() {
-    // Create test input if necessary
-    MatrixWorkspace_sptr
-        inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
 
-        LoadGaussCube alg;
-    // Don't put output in ADS by default
-    alg.setChild(true);
+    LoadGaussCube alg;
+    // alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "gauss_cube_example.cube"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "test_md"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    // Retrieve the workspace from the algorithm. The type here will probably need to change. It should
-    // be the type using in declareProperty for the "OutputWorkspace" type.
-    // We can't use auto as it's an implicit conversion.
-    Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS);
-    TS_FAIL("TODO: Check the results and remove this line");
-  }
+    MDHistoWorkspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>("__test_md");
+    TS_ASSERT(ws);
 
-  void test_Something() { TS_FAIL("You forgot to write a test!"); }
+    TS_ASSERT_EQUALS(3, ws->getNumDims());
+    for (int idim = 0; idim < ws->getNumDims(); ++idim) {
+      auto dim = ws->getDimension(idim);
+      TS_ASSERT_EQUALS(-10.0, dim->getMaximum());
+      TS_ASSERT_EQUALS(10.0, dim->getMinimum());
+      TS_ASSERT_EQUALS(3, dim->getNBins());
+    }
+
+    // Check the data
+    const auto signal = ws->getSignalArray();
+    TS_ASSERT_DELTA(0.912648, signal[0], 0.000001); // Check the first value
+  }
 };
