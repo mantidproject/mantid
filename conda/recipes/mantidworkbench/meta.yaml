@@ -31,6 +31,7 @@ requirements:
     - mantidqt {{ version }}
     - python {{ python }}
     - versioningit
+    - importlib_resources {{ importlib_resources }}
   run:
     - ipykernel
     - psutil
