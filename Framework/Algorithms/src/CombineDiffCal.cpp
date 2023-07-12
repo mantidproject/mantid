@@ -115,8 +115,27 @@ std::map<std::string, std::string> CombineDiffCal::validateInputs() {
   const DataObjects::TableWorkspace_sptr pixelCalibrationWS = getProperty(PropertyNames::PIXEL_CALIB);
 
   const auto groupedResult = generateErrorString(groupedCalibrationWS);
-  if (!groupedResult.empty())
+  if (!groupedResult.empty()) {
     results[PropertyNames::GROUP_CALIB] = "The GroupedCalibration Workspace is missing [ " + groupedResult + "]";
+  } else {
+    // the equations haven't been derived for difa != tzero != 0
+    std::stringstream msg("");
+    const auto difa = groupedCalibrationWS->getColumn(ColNames::DIFA);
+    const auto tzero = groupedCalibrationWS->getColumn(ColNames::TZERO);
+    const auto numRows = groupedCalibrationWS->rowCount();
+    for (std::size_t i = 0; i < numRows; ++i) {
+      if (difa->toDouble(i) != 0.) {
+        msg << "found nonzero difa in row " << i;
+        break;
+      } else if (tzero->toDouble(i) != 0.) {
+        msg << "found nonzero tzero in row " << i;
+        break;
+      }
+    }
+    if (!msg.str().empty()) {
+      results[PropertyNames::GROUP_CALIB] = msg.str();
+    }
+  }
 
   const auto pixelResult = generateErrorString(pixelCalibrationWS);
   if (!pixelResult.empty())
