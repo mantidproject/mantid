@@ -53,8 +53,14 @@ std::string ISISDataArchive::getArchivePath(const std::set<std::string> &filenam
   }
 
   for (const auto &filename : filenames) {
-    const std::string path_without_extension = getPath(filename);
+    std::string path_without_extension = getPath(filename);
     if (!path_without_extension.empty()) {
+#ifdef __APPLE__
+      // Replace Linux path with macOS path if we're on a Mac.
+      constexpr char *unixString = "/archive/";
+      constexpr char *macOSString = "/Volumes/inst$/";
+      path_without_extension.replace(0, strlen(unixString), macOSString);
+#endif
       std::string fullPath = getCorrectExtension(path_without_extension, exts);
       if (!fullPath.empty())
         return fullPath;
@@ -75,7 +81,7 @@ std::string ISISDataArchive::getPath(const std::string &fName) const {
 
   std::ostringstream os = sendRequest(fName);
   os << Poco::Path::separator() << fName;
-  const std::string expectedPath = os.str();
+  std::string expectedPath = os.str();
   return expectedPath;
 }
 
