@@ -211,16 +211,29 @@ void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, con
   if (m_roi_map.empty()) {
     // set the values without checks
     clearAndReplace(start, stop, value);
-  } else if ((start <= m_roi_map.begin()->first) && (stop >= m_roi_map.rbegin()->first)) {
-    // overwrite existing map
+    return;
+  }
+  const DateAndTime &firstTime = m_roi_map.begin()->first;
+  const DateAndTime &lastTime = m_roi_map.rbegin()->first;
+  if ((start <= firstTime) && (stop >= lastTime)) {
+    // the new ROI covers the whole of the existing TimeSplitter, thus replace it
     clearAndReplace(start, stop, value);
-  } else if ((stop < m_roi_map.begin()->first) || (start > m_roi_map.rbegin()->first)) {
-    // adding to one end or the other
+  } else if ((stop < firstTime) || (start > lastTime)) {
+    // the new ROI lies outside the whole of the existing TimeSplitter, thus just add it
     if (value > NO_TARGET) { // only add non-ignore values
       m_roi_map.insert({start, value});
       m_roi_map.insert({stop, NO_TARGET});
     }
-  } else {
+  } else if (start == lastTime) { // the new ROI starts at the end of the existing TimeSplitter
+    if (value > NO_TARGET) {      // only add non-ignore values
+      m_roi_map.rbegin()->second = value;
+      m_roi_map.insert({stop, NO_TARGET});
+    }
+  } else if (stop == firstTime) { // the new ROI ends at the start of the existing TimeSplitter
+    if (value > NO_TARGET) {      // only add non-ignore values
+      m_roi_map.insert({start, value});
+    }
+  } else { // the new ROI either overlaps or is inside the existing TimeSplitter
     // do the interesting version
     g_log.debug() << "addROI(" << start << ", " << stop << ", " << value << ")\n";
 

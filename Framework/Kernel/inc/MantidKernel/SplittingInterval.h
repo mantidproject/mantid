@@ -38,6 +38,7 @@ public:
   SplittingInterval operator&(const SplittingInterval &b) const;
   /// @endcond
   SplittingInterval operator|(const SplittingInterval &b) const;
+  std::string debugStrPrint() const;
 
   bool operator==(const SplittingInterval &ti) const;
 
