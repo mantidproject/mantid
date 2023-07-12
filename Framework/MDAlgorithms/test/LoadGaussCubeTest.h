@@ -45,7 +45,7 @@ public:
     TS_ASSERT(ws);
 
     TS_ASSERT_EQUALS(3, ws->getNumDims());
-    for (int idim = 0; idim < ws->getNumDims(); ++idim) {
+    for (size_t idim = 0; idim < ws->getNumDims(); ++idim) {
       auto dim = ws->getDimension(idim);
       TS_ASSERT_DELTA(-10.0, dim->getMinimum(), 1e-6);
       TS_ASSERT_DELTA(10.0, dim->getMaximum(), 1e-6);

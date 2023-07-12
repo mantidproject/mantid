@@ -92,7 +92,7 @@ void LoadGaussCube::exec() {
   std::vector<double> extents(6, 0.0);
   getWord(in, false); // ignore the first element of this row
   std::string str;
-  for (int idim = 0; idim < 3; ++idim) {
+  for (size_t idim = 0; idim < 3; ++idim) {
     str = getWord(in, false);
     if (str.length() < 1) {
       throw std::logic_error(std::string(
@@ -104,9 +104,9 @@ void LoadGaussCube::exec() {
 
   // read nbins and upper extent
   std::vector<int> nbins(3, 0);
-  for (int idim = 0; idim < 3; ++idim) {
+  for (size_t idim = 0; idim < 3; ++idim) {
     nbins[idim] = std::stoi(getWord(in, false)); // first element in row
-    for (int iskip = 0; iskip < idim; ++iskip) {
+    for (size_t iskip = 0; iskip < idim; ++iskip) {
       str = getWord(in, true); // ignore
     }
     extents[2 * idim + 1] = extents[2 * idim] + std::stod(getWord(in, true));
@@ -116,7 +116,7 @@ void LoadGaussCube::exec() {
   }
 
   // read signal array
-  auto nelem = nbins[0] * nbins[1] * nbins[2];
+  size_t nelem = nbins[0] * nbins[1] * nbins[2];
   std::vector<double> signal(nelem, 0.0);
   std::vector<double> error(nelem, 0.0);
 
