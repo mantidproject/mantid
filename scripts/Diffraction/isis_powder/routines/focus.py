@@ -323,9 +323,12 @@ def _perform_absolute_normalization(spline, ws):
     sample_material = ws.sample().getMaterial()
     sample_number_density = sample_material.numberDensityEffective
     sample_shape = ws.sample().getShape()
-    num_sample_atoms = sample_shape.volume() * sample_number_density
-    if num_sample_atoms < 1e-10:
-        raise RuntimeError("Absolute unit normalization cannot be done without a sample material and shape/volume defined.")
+
+    try:
+        # number density in Angstroms-3, volume in m3. Don't bother with 1E30 factor because will cancel
+        num_sample_atoms = sample_shape.volume() * sample_number_density
+    except RuntimeError as exception:
+        raise RuntimeError("Absolute unit normalization cannot be done without a sample material and shape/volume defined.") from exception
 
     abs_norm_factor = v_cross_section * num_v_atoms / (num_sample_atoms * 4 * math.pi)
     logger.notice("Performing absolute normalisation, multiplying by factor=" + str(abs_norm_factor))
