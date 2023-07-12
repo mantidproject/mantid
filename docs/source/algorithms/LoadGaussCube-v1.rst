@@ -10,35 +10,20 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
-
+Algorithm to load Gaussian Cube files (for volumetric data) into a 3D :ref:`MDHistoWorkspace <MDHistoWorkspace>`.
+The file is assumed to follow the XYZ order for flattening (i.e. the outer loop is over X coordinate and inner loop
+is over Z).
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - LoadGaussCube**
 
-.. testcode:: LoadGaussCubeExample
+.. code-block:: python
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+    from mantid.simpleapi import *
 
-   wsOut = LoadGaussCube()
-
-   # Print the result
-   print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
-
-Output:
-
-.. testoutput:: LoadGaussCubeExample
-
-  The output workspace has ?? spectra
+    ws = LoadGaussCube(Filename="gauss_cube_example.cube", Names=['[H,0,0]','[0,K,0]','[0,0,L]'], Frames='HKL,HKL,HKL', Units='rlu,rlu,rlu')
 
 .. categories::
 
