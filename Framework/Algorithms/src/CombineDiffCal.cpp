@@ -36,6 +36,10 @@ const std::string ARB_CALIB("CalibrationWorkspace");
 const std::string OUTPUT_WKSP("OutputWorkspace");
 const std::string MASK_WKSP("MaskWorkspace");
 } // namespace PropertyNames
+
+int getDetId(const std::shared_ptr<const API::Column> &detIdColumn, const std::size_t rowNum) {
+  return static_cast<int>((*detIdColumn)[rowNum]);
+}
 } // anonymous namespace
 
 //----------------------------------------------------------------------------------------------
@@ -144,21 +148,41 @@ std::map<std::string, std::string> CombineDiffCal::validateInputs() {
   return results;
 }
 
-std::shared_ptr<Mantid::API::TableRow> binarySearchForRow(const API::ITableWorkspace_sptr &ws, int detid) {
-  size_t start = 0;
+std::shared_ptr<Mantid::API::TableRow> binarySearchForRow(const API::ITableWorkspace_sptr &ws, const int detid,
+                                                          const size_t lastStart) {
+  size_t start = lastStart;
   size_t end = ws->rowCount() - 1;
-  while (end >= start) {
-    size_t currentPosition = start + ((end - start) / 2);
 
-    Mantid::API::TableRow currentRow = ws->getRow(currentPosition);
-    if (currentRow.Int(0) > detid) {
-      end = currentPosition - 1;
-    } else if (currentRow.Int(0) < detid) {
-      start = currentPosition + 1;
+  // looking at the detid column is faster
+  std::shared_ptr<const API::Column> detIdColumn = ws->getColumn("detid");
+
+  // since both tables are already sorted, linear search the first two rows
+  if (getDetId(detIdColumn, start) == detid) {
+    return std::make_shared<Mantid::API::TableRow>(ws->getRow(start));
+  } else {
+    start += 1; // advance to the second position
+    if ((end >= start) && (getDetId(detIdColumn, start) == detid)) {
+      return std::make_shared<Mantid::API::TableRow>(ws->getRow(start));
     } else {
-      return std::make_shared<Mantid::API::TableRow>(currentRow);
+      start += 1; // don't need to include this index in the bisect
     }
   }
+
+  // do bisecting search
+  while (end >= start) {
+    const size_t currentPosition = start + ((end - start) / 2);
+
+    const auto detIdInRow = getDetId(detIdColumn, currentPosition);
+    if (detIdInRow > detid) {
+      end = currentPosition - 1;
+    } else if (detIdInRow < detid) {
+      start = currentPosition + 1;
+    } else {
+      return std::make_shared<Mantid::API::TableRow>(ws->getRow(currentPosition));
+    }
+  }
+
+  // did not find the row
   return nullptr;
 }
 
@@ -180,6 +204,7 @@ void addRowFromPreviousCalibration(const DataObjects::TableWorkspace_sptr &ws, M
 /** Execute the algorithm.
  */
 void CombineDiffCal::exec() {
+  // read in properties and sort copies of the tables
   const API::MatrixWorkspace_sptr calibrationWS = getProperty(PropertyNames::ARB_CALIB);
 
   DataObjects::TableWorkspace_sptr presortedGroupedCalibrationWS = getProperty(PropertyNames::GROUP_CALIB);
@@ -190,13 +215,25 @@ void CombineDiffCal::exec() {
 
   const DataObjects::MaskWorkspace_sptr maskWorkspace = getProperty(PropertyNames::MASK_WKSP);
 
+  // make the output workspace
   DataObjects::TableWorkspace_sptr outputWorkspace = std::make_shared<DataObjects::TableWorkspace>();
   outputWorkspace->addColumn("int", ColNames::DETID);
   outputWorkspace->addColumn("double", ColNames::DIFC);
   outputWorkspace->addColumn("double", ColNames::DIFA);
   outputWorkspace->addColumn("double", ColNames::TZERO);
 
+  // keep track of which ids were already added to the output
   std::set<int> detidsInGrpCalib;
+
+  API::Progress prog(this, 0.0, 1.0, groupedCalibrationWS->rowCount());
+
+  // cache values from calibrationWS since getting DIFC can be expensive
+  std::map<std::size_t, double> difcArbMap;
+
+  // searching for the row in the pixel calibration table can be expensive
+  // this variable is used to keep track of how far has already been processed
+  // in order to reduce the search space
+  std::size_t lastStart = 0;
 
   // loop through all rows in the grouped calibration table
   // this will calculate an updated row or copy the row if it is missing from the pixel calibration
@@ -207,22 +244,39 @@ void CombineDiffCal::exec() {
     bool prevDifValsExist = false;
 
     if (!(maskWorkspace && maskWorkspace->isMasked(detid))) {
-      std::shared_ptr<Mantid::API::TableRow> pixelCalibrationRow = binarySearchForRow(pixelCalibrationWS, detid);
+      std::shared_ptr<Mantid::API::TableRow> pixelCalibrationRow =
+          binarySearchForRow(pixelCalibrationWS, detid, lastStart);
       if (pixelCalibrationRow) {
+        // value from groupedCalibrationRow
         const double difcPD = groupedCalibrationRow.Double(1);
-        const double difcArb = calibrationWS->spectrumInfo().diffractometerConstants(
-            calibrationWS->getIndicesFromDetectorIDs({detid})[0])[Kernel::UnitParams::difc];
+
+        // get value from groupedCalibrationWS
+        const auto wkspIndex = calibrationWS->getIndicesFromDetectorIDs({detid}).front();
+        double difcArb;
+        if (difcArbMap.count(wkspIndex) > 0) {
+          difcArb = difcArbMap.find(wkspIndex)->second;
+        } else {
+          difcArb = calibrationWS->spectrumInfo().diffractometerConstants(wkspIndex)[Kernel::UnitParams::difc];
+          difcArbMap.emplace(wkspIndex, difcArb);
+        }
+
+        // difc and difa values from pixelCalibrationWS
         const double difcPrev = pixelCalibrationRow->Double(1);
         const double difaPrev = pixelCalibrationRow->Double(2);
 
+        // calculate new difc and difa
         const double difcNew = (difcPD / difcArb) * difcPrev;
         const double difaNew = ((difcPD / difcArb) * (difcPD / difcArb)) * difaPrev;
 
+        // copy tzero from pixelCalibrationWS
         const double tzeroNew = pixelCalibrationRow->Double(3);
 
         Mantid::API::TableRow newRow = outputWorkspace->appendRow();
         newRow << detid << difcNew << difaNew << tzeroNew;
         prevDifValsExist = true;
+
+        // update where to start next search from
+        lastStart = pixelCalibrationRow->row() + 1;
       }
     }
 
@@ -230,6 +284,8 @@ void CombineDiffCal::exec() {
       // copy from group calibration
       addRowFromPreviousCalibration(outputWorkspace, groupedCalibrationRow);
     }
+
+    prog.report();
   } while (groupedCalibrationRow.next());
 
   // loop through rows in the pixel calibration table
@@ -238,10 +294,12 @@ void CombineDiffCal::exec() {
   Mantid::API::TableRow pixelCalibrationRow = pixelCalibrationWS->getFirstRow();
   do {
     const int detid = pixelCalibrationRow.Int(0);
-    if (detidsInGrpCalib.count(detid) == 0) {
-      // copy from pixel calibration
-      addRowFromPreviousCalibration(outputWorkspace, pixelCalibrationRow);
-      shouldSortOutputTable = true;
+    if (!(maskWorkspace && maskWorkspace->isMasked(detid))) {
+      if (detidsInGrpCalib.count(detid) == 0) {
+        // copy from pixel calibration
+        addRowFromPreviousCalibration(outputWorkspace, pixelCalibrationRow);
+        shouldSortOutputTable = true;
+      }
     }
   } while (pixelCalibrationRow.next());
 
