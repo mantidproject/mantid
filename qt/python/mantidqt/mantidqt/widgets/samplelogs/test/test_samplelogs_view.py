@@ -9,7 +9,7 @@ import unittest
 
 import matplotlib as mpl
 
-mpl.use("Agg")  # noqa
+mpl.use("Agg")
 from mantid.simpleapi import CreateSampleWorkspace, RenameWorkspace, DeleteWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder

@@ -14,14 +14,14 @@ import matplotlib
 
 rcParams = matplotlib.rcParams
 
-import matplotlib.image as mi  # noqa: E402
-import matplotlib.colors as mcolors  # noqa: E402
-import matplotlib.cbook as cbook  # noqa: E402
-from matplotlib.transforms import IdentityTransform, Affine2D  # noqa: E402
+import matplotlib.image as mi
+import matplotlib.colors as mcolors
+import matplotlib.cbook as cbook
+from matplotlib.transforms import IdentityTransform, Affine2D
 
-from mantid.plots.mantidimage import MantidImage  # noqa: E402
+from mantid.plots.mantidimage import MantidImage
 
-import numpy as np  # noqa: E402
+import numpy as np
 
 IDENTITY_TRANSFORM = IdentityTransform()
 

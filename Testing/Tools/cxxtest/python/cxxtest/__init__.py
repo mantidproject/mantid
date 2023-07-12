@@ -33,4 +33,4 @@ __copyright__ = "TODO"
 __license__ = "LGPL"
 __url__ = "http://cxxtest.tigris.org/"
 
-from cxxtest.cxxtestgen import *  # noqa: E402, F401
+from cxxtest.cxxtestgen import *

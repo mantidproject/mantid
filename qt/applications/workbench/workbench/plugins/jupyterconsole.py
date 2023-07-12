@@ -14,12 +14,12 @@ warnings.filterwarnings(action="ignore", category=DeprecationWarning, module="ip
 warnings.filterwarnings(action="ignore", category=DeprecationWarning, module=".*jupyter.*")
 
 # third-party library imports
-from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole  # noqa
-from qtpy.QtWidgets import QVBoxLayout  # noqa
+from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole
+from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
-from ..config.fonts import text_font  # noqa
-from ..plugins.base import PluginWidget  # noqa
+from ..config.fonts import text_font
+from ..plugins.base import PluginWidget
 
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 

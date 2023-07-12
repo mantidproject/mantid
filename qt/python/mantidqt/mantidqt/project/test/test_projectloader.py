@@ -18,11 +18,11 @@ from os.path import isdir, join  # noqa
 from shutil import rmtree  # noqa
 import tempfile  # noqa
 
-from mantid.api import AnalysisDataService as ADS  # noqa
-from mantid.simpleapi import CreateSampleWorkspace  # noqa
-from unittest import mock  # noqa
-from mantidqt.project import projectloader, projectsaver  # noqa
-from mantidqt.utils.qt.testing import start_qapplication  # noqa
+from mantid.api import AnalysisDataService as ADS
+from mantid.simpleapi import CreateSampleWorkspace
+from unittest import mock
+from mantidqt.project import projectloader, projectsaver
+from mantidqt.utils.qt.testing import start_qapplication
 
 project_file_ext = ".mtdproj"
 working_directory = tempfile.mkdtemp()

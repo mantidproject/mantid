@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # Dialog for message
-from qtpy.QtWidgets import QDialog  # noqa
+from qtpy.QtWidgets import QDialog
 from mantid.kernel import Logger
 
 try:

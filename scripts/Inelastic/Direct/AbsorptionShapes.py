@@ -71,7 +71,7 @@ class anAbsorptionShape(object):
 
         # the workspace used for testing correct properties settings
         rhash = random.randint(1, 100000)
-        self._testWorkspace = CreateSampleWorkspace(OutputWorkspace="_adsShape_" + str(rhash), NumBanks=1, BankPixelWidth=1)  # noqa: E127
+        self._testWorkspace = CreateSampleWorkspace(OutputWorkspace="_adsShape_" + str(rhash), NumBanks=1, BankPixelWidth=1)
 
         if MaterialValue is not None:
             self.material = MaterialValue
@@ -251,7 +251,7 @@ class anAbsorptionShape(object):
                 "FlatPlate": FlatPlate(),
                 "HollowCylinder": HollowCylinder(),
                 "Sphere": Sphere(),
-            }  # noqa: E127
+            }
 
         if not isinstance(str_val, str):
             raise ValueError(
@@ -320,7 +320,7 @@ class anAbsorptionShape(object):
         if "Axis" in shape_dict:
             self._axis_is_default = False
         for ik in range(0, len(opt_prop_list)):
-            if not opt_prop_list[ik] in shape_dict:
+            if opt_prop_list[ik] not in shape_dict:
                 opt_val = opt_val_list[ik]
                 if isinstance(opt_val, types.FunctionType):
                     shape_dict[opt_prop_list[ik]] = opt_val(shape_dict)
@@ -373,7 +373,6 @@ class Cylinder(anAbsorptionShape):
     """
 
     def __init__(self, Material=None, CylinderParams=None):
-
         anAbsorptionShape.__init__(self, Material)
         self.shape = CylinderParams
         self._shape_has_axis = True
@@ -385,8 +384,8 @@ class Cylinder(anAbsorptionShape):
     @shape.setter
     def shape(self, value):
         shape_dict = self._set_list_property(
-            value, "Cylinder", ["Height", "Radius"], ["Axis", "Center"], [[0.0, 1.0, 0.0], [0.0, 0.0, 0.0]]  # noqa
-        )  # noqa
+            value, "Cylinder", ["Height", "Radius"], ["Axis", "Center"], [[0.0, 1.0, 0.0], [0.0, 0.0, 0.0]]
+        )
 
         self._ShapeDescription = shape_dict
 
@@ -456,7 +455,6 @@ class FlatPlate(anAbsorptionShape):
     """
 
     def __init__(self, Material=None, PlateParams=None):
-
         anAbsorptionShape.__init__(self, Material)
         self.shape = PlateParams
 
@@ -466,9 +464,7 @@ class FlatPlate(anAbsorptionShape):
 
     @shape.setter
     def shape(self, value):
-        shape_dict = self._set_list_property(
-            value, "FlatPlate", ["Height", "Width", "Thick"], ["Center", "Angle"], [[0.0, 0.0, 0.0], 0.0]
-        )  # noqa: E127
+        shape_dict = self._set_list_property(value, "FlatPlate", ["Height", "Width", "Thick"], ["Center", "Angle"], [[0.0, 0.0, 0.0], 0.0])
 
         self._ShapeDescription = shape_dict
 
@@ -523,7 +519,6 @@ class HollowCylinder(anAbsorptionShape):
     """
 
     def __init__(self, Material=None, CylinderParams=None):
-
         anAbsorptionShape.__init__(self, Material)
         self.shape = CylinderParams
         self._CanSetSample = False
@@ -539,7 +534,7 @@ class HollowCylinder(anAbsorptionShape):
     def shape(self, value):
         shape_dict = self._set_list_property(
             value, "HollowCylinder", ["Height", "InnerRadius", "OuterRadius"], ["Axis", "Center"], [[0.0, 1.0, 0.0], [0.0, 0.0, 0.0]]
-        )  # noqa: E127
+        )
         #
         self._ShapeDescription = shape_dict
         if len(shape_dict) != 0:
@@ -638,7 +633,6 @@ class Sphere(anAbsorptionShape):
     """
 
     def __init__(self, Material=None, SphereParams=None):
-
         anAbsorptionShape.__init__(self, Material)
         self.shape = SphereParams
         self._CanSetSample = False
@@ -651,7 +645,7 @@ class Sphere(anAbsorptionShape):
     #
     @shape.setter
     def shape(self, value):
-        shape_dict = self._set_list_property(value, "Sphere", ["Radius"], ["Center"], [[0.0, 0.0, 0.0]])  # noqa: E127
+        shape_dict = self._set_list_property(value, "Sphere", ["Radius"], ["Center"], [[0.0, 0.0, 0.0]])
 
         self._ShapeDescription = shape_dict
         if len(shape_dict) != 0:

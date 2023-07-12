@@ -39,16 +39,15 @@ repos:
     - id: cmake-format
     #- id: cmake-lint <- not ready yet
 
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.265
+    # ruff must appear before black in the list of hooks
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+
   - repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
       - id: black
         exclude: scripts/templates/reference/|Testing/Tools/cxxtest
-
-  - repo: https://github.com/PyCQA/flake8.git
-    rev: 6.0.0
-    hooks:
-      - id: flake8
-        # Have to manually copy this from the .flake8 as flake8 will just ignore the config if the file is passed
-        exclude: Framework/PythonInterface/test|qt/applications/workbench/workbench/app/resources.py|qt/python/mantidqt/mantidqt/resources.py|qt/python/mantidqt/mantidqt/dialogs/errorreports/resources_qt5.py|Testing/PerformanceTests|Testing/SystemTests/lib|Testing/SystemTests/scripts|Testing/SystemTests/tests/framework/reference|scripts/ErrorReporter/ui_errorreport.py
-        args: ['--extend-ignore=E999,F821,E402,E127']

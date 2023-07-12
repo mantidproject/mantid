@@ -150,7 +150,7 @@ class StateCalculateTransmission(metaclass=JsonSerializable):
     def set_sample_wavelength_high(self, val):
         self.fit[DataType.SAMPLE.value].wavelength_high = val
 
-    def validate(self):  # noqa
+    def validate(self):
         is_invalid = {}
         # -----------------
         # Incident monitor
@@ -167,7 +167,7 @@ class StateCalculateTransmission(metaclass=JsonSerializable):
         # Transmission, either we need some ROI (ie radius, roi files /mask files) or a transmission monitor
         # --------------
         has_no_transmission_monitor_setting = self.transmission_monitor is None
-        has_no_transmission_roi_setting = self.transmission_radius_on_detector is None and self.transmission_roi_files is None  # noqa
+        has_no_transmission_roi_setting = self.transmission_radius_on_detector is None and self.transmission_roi_files is None
         if has_no_transmission_monitor_setting and has_no_transmission_roi_setting:
             entry = validation_message(
                 "No transmission settings were specified.",

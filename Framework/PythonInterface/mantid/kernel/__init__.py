@@ -23,16 +23,16 @@ funcreturns = funcinspect
 ###############################################################################
 # Do site-specific setup for packages
 ###############################################################################
-from mantid.kernel import packagesetup as _mantidsite  # noqa: E402
+from mantid.kernel import packagesetup as _mantidsite
 
 _mantidsite.set_NEXUSLIB_var()
 
 ###############################################################################
 # Load the C++ library
 ###############################################################################
-from mantid.utils import import_mantid_cext  # noqa: E402
+from mantid.utils import import_mantid_cext
 
 # insert all the classes from _kernel in the mantid.kernel namespace
 import_mantid_cext("._kernel", "mantid.kernel", globals())
 
-from mantid.kernel._aliases import *  # noqa: E402,F401
+from mantid.kernel._aliases import *

@@ -345,7 +345,7 @@ class TableModelTest(unittest.TestCase):
         try:
             setattr(table_model, prop, "")
             has_raised = False
-        except:  # noqa
+        except:
             has_raised = True
         self.assertFalse(has_raised)
 

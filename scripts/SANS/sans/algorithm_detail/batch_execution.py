@@ -663,7 +663,7 @@ def create_initial_reduction_packages(state, workspaces, monitors):
 
     data_info = state.data
     sample_scatter_period = data_info.sample_scatter_period
-    requires_new_period_selection = len(workspaces[SANSDataType.SAMPLE_SCATTER]) > 1 and sample_scatter_period == ALL_PERIODS  # noqa
+    requires_new_period_selection = len(workspaces[SANSDataType.SAMPLE_SCATTER]) > 1 and sample_scatter_period == ALL_PERIODS
 
     is_multi_period = len(workspaces[SANSDataType.SAMPLE_SCATTER]) > 1
     is_multi_wavelength = len(state.wavelength.wavelength_interval.selected_ranges) > 1

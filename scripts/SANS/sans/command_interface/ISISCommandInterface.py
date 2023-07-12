@@ -129,8 +129,8 @@ def ZOOM(idf_path=None):
 # ----------------------------------------------------------------------------------------------------------------------
 @deprecated
 def _SetWavelengthRange(start, end):
-    _ = start  # noqa
-    _ = end  # noqa
+    _ = start
+    _ = end
     pass
 
 
@@ -153,12 +153,12 @@ def TransWorkspace(sample, can=None):
     @param sample the workspace to use for the sample
     @param can calculated transmission for the can
     """
-    _, _ = sample, can  # noqa
+    _, _ = sample, can
     raise NotImplementedError("The TransWorkspace command is not implemented in SANS v2.")
 
 
 def createColetteScript(inputdata, format, reduced, centreit, plotresults, csvfile="", savepath=""):
-    _, _, _, _, _, _, _ = inputdata, format, reduced, centreit, plotresults, csvfile, savepath  # noqa
+    _, _, _, _, _, _, _ = inputdata, format, reduced, centreit, plotresults, csvfile, savepath
     raise NotImplementedError("The creatColleteScript command is not implemented in SANS v2.")
 
 
@@ -173,7 +173,7 @@ def AssignSample(sample_run, reload=True, period=ALL_PERIODS):
     @param reload: must be set to True
     @param period: the period (entry) number to load, default is the first period
     """
-    _ = reload  # noqa
+    _ = reload
     # First of all the default for all periods used to be -1. If we encounter this then set periods to ALL_PERIODS
     period = int(period)
     period = ALL_PERIODS if period == -1 else period
@@ -201,7 +201,7 @@ def AssignCan(can_run, reload=True, period=ALL_PERIODS):
     @param reload: must be set to True
     @param period: the period (entry) number to load, default is the first period
     """
-    _ = reload  # noqa
+    _ = reload
     # First of all the default for all periods used to be -1. If we encounter this then set periods to ALL_PERIODS
     period = int(period)
     period = ALL_PERIODS if period == -1 else period
@@ -231,7 +231,7 @@ def TransmissionSample(sample, direct, reload=True, period_t=ALL_PERIODS, period
     @param period_t: the entry number of the transmission run (default single entry file)
     @param period_d: the entry number of the direct run (default single entry file)
     """
-    _ = reload  # noqa
+    _ = reload
     # First of all the default for all periods used to be -1. If we encounter this then set periods to ALL_PERIODS
     period_t = int(period_t)
     period_d = int(period_d)
@@ -260,7 +260,7 @@ def TransmissionCan(can, direct, reload=True, period_t=-1, period_d=-1):
     @param period_t: the entry number of the transmission run (default single entry file)
     @param period_d: the entry number of the direct run (default single entry file)
     """
-    _ = reload  # noqa
+    _ = reload
     # First of all the default for all periods used to be -1. If we encounter this then set periods to ALL_PERIODS
     period_t = int(period_t)
     period_d = int(period_d)
@@ -592,7 +592,7 @@ def LimitsR(rmin, rmax, quiet=False, reducer=None):
     @param quiet: if True then no message will be logged.
     @param reducer: legacy parameter
     """
-    _ = reducer  # noqa
+    _ = reducer
     rmin = float(rmin)
     rmax = float(rmax)
     if not quiet:
@@ -876,7 +876,7 @@ def BatchReduce(  # noqa
     reducer=None,
     combineDet=None,
     save_as_zero_error_free=False,
-):  # noqa
+):
     """
     @param filename: the CSV file with the list of runs to analyse
     @param format: type of file to load, nxs for Nexus, etc.

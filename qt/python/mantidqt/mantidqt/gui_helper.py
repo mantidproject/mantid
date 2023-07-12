@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import QApplication  # noqa
+from qtpy.QtWidgets import QApplication
 from qtpy import QtCore, QtGui
 import matplotlib
 import sys
@@ -32,7 +32,7 @@ def set_matplotlib_backend():
         if backend.endswith("workbench") or backend.endswith("qt5agg"):
             backend = "Qt5Agg"
     else:
-        from qtpy import PYQT5  # noqa
+        from qtpy import PYQT5
 
         if PYQT5:
             backend = "Qt5Agg"

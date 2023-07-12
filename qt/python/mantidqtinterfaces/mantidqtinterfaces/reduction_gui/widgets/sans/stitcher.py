@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, protected-access, super-on-old-class
-from qtpy.QtWidgets import QButtonGroup, QFileDialog, QMessageBox, QFrame  # noqa
+from qtpy.QtWidgets import QButtonGroup, QFileDialog, QMessageBox, QFrame
 from qtpy.QtCore import QFile, QObject, QEvent, Qt, QFileInfo  # noqa
-from qtpy.QtGui import QDoubleValidator  # noqa
+from qtpy.QtGui import QDoubleValidator
 import os
 from mantidqtinterfaces.reduction_gui.settings.application_settings import GeneralSettings
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget

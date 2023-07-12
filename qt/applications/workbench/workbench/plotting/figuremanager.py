@@ -558,7 +558,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
 def new_figure_manager(num, *args, **kwargs):
     """Create a new figure manager instance"""
-    from matplotlib.figure import Figure  # noqa
+    from matplotlib.figure import Figure
 
     figure_class = kwargs.pop("FigureClass", Figure)
     this_fig = figure_class(*args, **kwargs)

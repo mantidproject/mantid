@@ -287,19 +287,19 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.set_current_page(0)
 
         runs_icon = icons.get_icon("mdi.play")
-        _ = QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)  # noqa
+        _ = QListWidgetItem(runs_icon, "Runs", self.tab_choice_list)
 
         settings_icon = icons.get_icon("mdi.settings")
-        _ = QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)  # noqa
+        _ = QListWidgetItem(settings_icon, "Settings", self.tab_choice_list)
 
         centre_icon = icons.get_icon("mdi.adjust")
-        _ = QListWidgetItem(centre_icon, "Beam Centre", self.tab_choice_list)  # noqa
+        _ = QListWidgetItem(centre_icon, "Beam Centre", self.tab_choice_list)
 
         add_runs_page_icon = icons.get_icon("mdi.plus")
-        _ = QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)  # noqa
+        _ = QListWidgetItem(add_runs_page_icon, "Sum Runs", self.tab_choice_list)
 
         diagnostic_icon = icons.get_icon("mdi.stethoscope")
-        _ = QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)  # noqa
+        _ = QListWidgetItem(diagnostic_icon, "Diagnostic Page", self.tab_choice_list)
 
         # Set the 0th row enabled
         self.tab_choice_list.setCurrentRow(0)

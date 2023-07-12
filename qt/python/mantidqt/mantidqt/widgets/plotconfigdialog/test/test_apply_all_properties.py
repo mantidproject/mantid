@@ -11,7 +11,7 @@ import unittest
 import matplotlib
 from matplotlib import use as mpl_use
 
-mpl_use("Agg")  # noqa
+mpl_use("Agg")
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import NullLocator
 from matplotlib.patches import BoxStyle

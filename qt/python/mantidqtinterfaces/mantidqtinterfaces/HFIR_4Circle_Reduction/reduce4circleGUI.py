@@ -45,8 +45,8 @@ from mantidqtinterfaces.HFIR_4Circle_Reduction.detector2dview import Detector2DV
 from mantidqtinterfaces.HFIR_4Circle_Reduction.hfctables import KShiftTableWidget
 from mantidqtinterfaces.HFIR_4Circle_Reduction.hfctables import MatrixTable
 from mantid.kernel import Logger
-from qtpy.QtWidgets import QButtonGroup, QFileDialog, QMessageBox, QMainWindow, QInputDialog  # noqa
-from qtpy.QtCore import QSettings  # noqa
+from qtpy.QtWidgets import QButtonGroup, QFileDialog, QMessageBox, QMainWindow, QInputDialog
+from qtpy.QtCore import QSettings
 
 try:
     from mantidqt.utils.qt import load_ui
@@ -2362,7 +2362,6 @@ class MainWindow(QMainWindow):
             # go through all rows
             num_rows = self.ui.tableWidget_surveyTable.rowCount()
             for i_row in range(num_rows):
-
                 select_line = True
 
                 # filter HKL (nuclear)

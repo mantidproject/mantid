@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 import matplotlib
 
-matplotlib.use("Agg")  # noqa
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from mantidqt.utils.qt.testing import start_qapplication

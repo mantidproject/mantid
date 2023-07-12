@@ -1,6 +1,32 @@
 [tool.black]
 line-length = 140
 
+[tool.ruff]
+line-length = 140
+# https://beta.ruff.rs/docs/rules/
+select = ["C90", "E", "F", "RUF100", "W"]
+ignore = ["E402", # module level import not at top of file
+          "E722", # bare except
+	  "E741", "E743", # ambiguous function name, generally 'l'
+          "F403", # wild imports
+          "F405", "F821", # unknown names from probably from wild imports
+]
+exclude = [
+   "Framework/PythonInterface/test",
+   "qt/applications/workbench/workbench/app/resources.py",
+   "qt/python/mantidqt/mantidqt/resources.py",
+   "qt/python/mantidqt/mantidqt/dialogs/errorreports/resources_qt5.py",
+   "Testing/PerformanceTests",
+   "Testing/SystemTests/lib",
+   "Testing/SystemTests/scripts",
+   "Testing/SystemTests/tests/framework/reference",
+   "scripts/ErrorReporter/ui_errorreport.py"
+   ]
+
+[tool.ruff.mccabe]
+max-complexity = 20
+
+
 [tool.versioningit.vcs]
 method = "git"
 default-tag = "0.0.0"
