@@ -135,6 +135,8 @@ pipeline {
             always {
               archive_ctest_log()
               publish_test_reports()
+              // Workaround for Windows so that failing system tests will fail the build
+              bat "\"${WIN_BASH}\" -ex -c \"test ${currentBuild.currentResult} != UNSTABLE\""
             }
           }
         }
@@ -426,8 +428,6 @@ def publish_test_reports() {
   xunit thresholds: [failed(failureThreshold: '0')],
     tools: [CTest(excludesPattern: '', pattern: "${CHECKOUT_DIR}/build/Testing/**/*.xml", stopProcessingIfError: true)]
   junit "${CHECKOUT_DIR}/build/Testing/SystemTests/scripts/TEST-*.xml"
-  // Workaround so that a failing system test will actually fail the build
-  sh "test ${currentBuild.currentResult} != UNSTABLE"
 }
 
 def package_conda(platform, base_or_workbench) {
