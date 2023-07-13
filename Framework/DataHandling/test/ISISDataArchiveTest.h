@@ -106,8 +106,11 @@ public:
 
     MockOutRequests arch;
     const std::string actualPath = arch.getArchivePath(filenames, exts);
-
+#ifdef __APPLE__
+    std::string expectedPath = "/Volumes/inst$/default/path";
+#else
     std::string expectedPath = "/archive/default/path";
+#endif
 #ifdef _WIN32
     expectedPath += "\\";
 #else
