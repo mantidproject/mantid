@@ -64,14 +64,16 @@ const std::string CombineDiffCal::summary() const {
 void CombineDiffCal::init() {
   declareProperty(std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>(PropertyNames::PIXEL_CALIB, "",
                                                                                    Direction::Input),
-                  "OffsetsWorkspace generated from cross-correlation. This is the source of DIFCpixel.");
-  declareProperty(std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>(PropertyNames::GROUP_CALIB, "",
-                                                                                   Direction::Input),
-                  "DiffCal table generated from calibrating grouped spectra. This is the source of DIFCgroup.");
+                  "DiffCal TableWorkspace that will be updated. This is often generated from cross-correlation. "
+                  "These are the \"prev\" values in the documentation.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>(PropertyNames::GROUP_CALIB, "",
+                                                                       Direction::Input),
+      "DiffCal table generated from calibrating grouped spectra. This is the \"DIFCpd\" value in the documentation.");
   declareProperty(
       std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::ARB_CALIB, "", Direction::Input),
-      "Workspace where conversion from d-spacing to time-of-flight for each spectrum is determined from. This is the "
-      "source of DIFCarb.");
+      "Workspace where conversion from d-spacing to time-of-flight for each spectrum is determined from. "
+      "This is the \"DIFCarb\" value in the documentation.");
   declareProperty(std::make_unique<WorkspaceProperty<DataObjects::TableWorkspace>>(PropertyNames::OUTPUT_WKSP, "",
                                                                                    Direction::Output),
                   "DiffCal table generated from calibrating grouped spectra");
