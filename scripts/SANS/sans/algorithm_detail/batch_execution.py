@@ -100,6 +100,8 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         SANSDataType.CAN_SCATTER: "CanScatterMonitorWorkspace",
     }
 
+    scaled_background_ws = create_scaled_background_workspace(state)
+
     workspaces, monitors = provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_to_monitor)
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -138,6 +140,18 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         #  Run the reduction
         # -----------------------------------
         reduction_alg.execute()
+
+        # -----------------------------------
+        # TODO: Subtract the background from the slice.
+        # -----------------------------------
+
+        # 1. Query the user file. Merged, HAB, or LAB?
+        # 2. Minus the scaled workspace from the main reduction's output (once per slice)
+        # subtractScaledBackground()
+        # 2a. In place? Or do we want to save as an extra workspace? Depends on sci request.
+        # 3. Save to ADS/File/Both as below.
+        if scaled_background_ws:
+            pass
 
         # -----------------------------------
         # Get the output of the algorithm
@@ -549,6 +563,25 @@ def get_multi_period_workspaces(load_alg, workspace_name, number_of_workspaces):
     return workspaces
 
 
+def create_scaled_background_workspace(state) -> str:
+    state.background_subtraction.verify()
+    background_ws_name = state.background_subtraction.workspace
+    if not background_ws_name:
+        return None
+    scaled_bg_ws_name = "__" + state.background_subtraction.workspace + "_scaled"  # __ makes the ws invisible
+
+    scale_name = "Scale"
+    scale_options = {
+        "InputWorkspace": background_ws_name,
+        "Factor": state.background_subtraction.scale_factor,
+        "OutputWorkspace": scaled_bg_ws_name,
+    }
+    scale_alg = create_unmanaged_algorithm(scale_name, **scale_options)
+    scale_alg.setAlwaysStoreInADS(True)
+    scale_alg.execute()
+    return scaled_bg_ws_name
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for reduction packages
 # ----------------------------------------------------------------------------------------------------------------------
@@ -643,12 +676,12 @@ def create_initial_reduction_packages(state, workspaces, monitors):
     This provides the initial split of the workspaces.
 
     If the data stems from multi-period data, then we need to split up the workspaces. The state object is valid
-    for each one of these workspaces. Hence we need to create a deep copy of them for each reduction package.
+    for each one of these workspaces. Hence, we need to create a deep copy of them for each reduction package.
 
     The way multi-period files are handled over the different workspaces input types is:
     1. The sample scatter period determines all other periods, i.e. if the sample scatter workspace is has only
        one period, but the sample transmission has two, then only the first period is used.
-    2. If the sample scatter period is not available on an other workspace type, then the last period on that
+    2. If the sample scatter period is not available on another workspace type, then the last period on that
        workspace type is used.
 
     For the cases where the periods between the different workspaces types does not match, an information is logged.
@@ -658,7 +691,7 @@ def create_initial_reduction_packages(state, workspaces, monitors):
     :param monitors: The monitors contributing to the reduction
     :return: A set of "Reduction packages" where each reduction package defines a single reduction.
     """
-    # For loaded peri0d we create a package
+    # For loaded period we create a package
     packages = []
 
     data_info = state.data

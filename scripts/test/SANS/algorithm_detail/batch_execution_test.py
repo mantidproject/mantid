@@ -17,6 +17,7 @@ from sans.algorithm_detail.batch_execution import (
     select_reduction_alg,
     save_workspace_to_file,
     delete_reduced_workspaces,
+    create_scaled_background_workspace,
 )
 from sans.common.enums import SaveType
 
@@ -363,6 +364,36 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             "TransmissionCan": transmission_can_name,
         }
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
+
+    def test_get_scaled_background_workspace_no_background(self):
+        state = mock.MagicMock()
+        state.background_subtraction.workspace = None
+
+        result = create_scaled_background_workspace(state)
+
+        state.background_subtraction.verify.assert_called_once()
+        self.assertIsNone(result, "When no background ws is set, this should return None.")
+
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
+    def test_get_scaled_background_workspace_calls_algs(self, mock_alg_manager):
+        state = mock.MagicMock()
+        ws_name = "workspace"
+        scale_factor = 1.12
+        expected_out_name = "__" + ws_name + "_scaled"
+        state.background_subtraction.workspace = ws_name
+        state.background_subtraction.scale_factor = scale_factor
+
+        result = create_scaled_background_workspace(state)
+
+        state.background_subtraction.verify.assert_called_once()
+
+        expected_options = {
+            "InputWorkspace": ws_name,
+            "Factor": scale_factor,
+            "OutputWorkspace": expected_out_name,
+        }
+        mock_alg_manager.assert_called_once_with("Scale", **expected_options)
+        self.assertEqual(result, expected_out_name, "Should output the scaled ws name.")
 
 
 class DeleteMethodsTest(unittest.TestCase):
