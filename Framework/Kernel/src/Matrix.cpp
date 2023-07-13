@@ -1352,7 +1352,6 @@ Attempt to diagonalise the matrix IF symmetric
     ZeroComp[i] = 0;
   }
 
-  // int iteration = 0;
   for (int i = 0; i < 100; i++) // max 50 iterations
   {
     double sm = 0.0; // sum of off-diagonal terms
@@ -1406,7 +1405,6 @@ Attempt to diagonalise the matrix IF symmetric
             A.rotate(tau, sinAngle, ip, j, iq, j);
           for (int j = 0; j < static_cast<int>(m_numRows); j++)
             EigenVec.rotate(tau, sinAngle, j, ip, j, iq);
-          // iteration++;
         }
       }
     }

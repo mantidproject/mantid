@@ -1409,9 +1409,6 @@ TMDE(void MDGridBox)::integrateCylinder(Mantid::API::CoordTransform &radiusTrans
   }
 
   // OK, we've done all the vertices. Now we go through and check each box.
-  // size_t numFullyContained = 0;
-  // size_t numPartiallyContained = 0;
-
   for (size_t i = 0; i < numBoxes; ++i) {
     API::IMDNode *box = m_Children[i];
     // Box partially contained?
@@ -1448,7 +1445,6 @@ TMDE(void MDGridBox)::integrateCylinder(Mantid::API::CoordTransform &radiusTrans
       //        std::cout << "box at " << i << " (" << box->getExtentsStr() <<
       //        ") is fully contained. Vertices = " << verticesContained[i] <<
       //        "\n";
-      // numFullyContained++;
       // Go on to the next box
       continue;
     }
@@ -1482,7 +1478,6 @@ TMDE(void MDGridBox)::integrateCylinder(Mantid::API::CoordTransform &radiusTrans
       // Use the detailed integration method.
       box->integrateCylinder(radiusTransform, radius, length, signal, errorSquared, signal_fit);
       //        std::cout << ".signal=" << signal << "\n";
-      // numPartiallyContained++;
     }
   } // (for each box)
 

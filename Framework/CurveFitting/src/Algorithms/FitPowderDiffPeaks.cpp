@@ -2440,7 +2440,6 @@ void FitPowderDiffPeaks::genPeaksFromTable(const TableWorkspace_sptr &peakparamw
                                      {"I", "Height"}, {"S", "Sigma"}, {"S2", "Sigma2"}};
 
   // Generate Peaks
-  // size_t numbadrows = 0;
   size_t numrows = peakparamws->rowCount();
   for (size_t ir = 0; ir < numrows; ++ir) {
     double d_h;
@@ -2450,8 +2449,6 @@ void FitPowderDiffPeaks::genPeaksFromTable(const TableWorkspace_sptr &peakparamw
 
     if (good) {
       m_vecPeakFunctions.emplace_back(d_h, make_pair(hkl, newpeak));
-      // } else {
-      //  ++numbadrows;
     }
   } // ENDFOR Each potential peak
 
