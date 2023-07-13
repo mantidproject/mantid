@@ -1,0 +1,26 @@
+usage: class_maker.py [-h] [--force] [--no-header] [--no-test] [--no-cpp]
+                      [--no-rst] [--no-cmake] [--alg] [--subfolder SUBFOLDER]
+                      [--project PROJECT]
+                      SUBPROJECT CLASSNAME
+
+Utility to create Mantid class files: header, source and test. version 1.0
+
+positional arguments:
+  SUBPROJECT            The subproject under Framework/; e.g. Kernel
+  CLASSNAME             Name of the class to create
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --force               Force overwriting existing files. Use with caution!
+  --no-header           Don't create the header file
+  --no-test             Don't create the test file
+  --no-cpp              Don't create the cpp file
+  --no-rst              Don't create the rst file
+  --no-cmake            Don't modify cmake files
+  --alg                 Create an Algorithm stub. This adds some methods
+                        common to algorithms.
+  --subfolder SUBFOLDER
+                        Put the source under a subfolder below the main part
+                        of the project, e.g. Geometry/Instrument.
+  --project PROJECT     The project in which this goes. Default: Framework.
+                        Can be MantidQt
