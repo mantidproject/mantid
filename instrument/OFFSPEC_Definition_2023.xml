@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd" name="OFFSPEC" valid-from="2020-01-01 00:00:00" valid-to="2023-07-11 23:59:59" last-modified="2020-10-23 13:51:00">
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd" name="OFFSPEC" valid-from="2023-07-12 00:00:00" valid-to="2115-01-02 23:59:59" last-modified="2023-07-12 17:21:00">
    <defaults>
       <length unit="meter" />
       <angle unit="degree" />
@@ -81,13 +81,13 @@
    
    <type name="DetectorBench">
       <component type="WLSFDetector">
-         <location z="3.62 " />
+         <location z="3.33 " />
       </component>
    </type>
    
    <type name="WLSFDetector">
       <component type="wlsfpixel">
-         <locations y="-0.2074" y-end="0.190808" n-elements="768" />
+         <locations y="-0.20846" y-end="0.256994" n-elements="768" />
       </component>
    </type>
    
