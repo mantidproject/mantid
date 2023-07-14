@@ -18,8 +18,9 @@ from sans.algorithm_detail.batch_execution import (
     save_workspace_to_file,
     delete_reduced_workspaces,
     create_scaled_background_workspace,
+    subtract_scaled_background,
 )
-from sans.common.enums import SaveType
+from sans.common.enums import SaveType, ReductionMode
 
 
 class ADSMock(object):
@@ -394,6 +395,35 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         }
         mock_alg_manager.assert_called_once_with("Scale", **expected_options)
         self.assertEqual(result, expected_out_name, "Should output the scaled ws name.")
+
+    def test_subtract_scaled_background_with_all_detectors_fails(self):
+        reduction_package = mock.MagicMock()
+        scaled_ws_name = "__workspace_scaled"
+        reduction_package.reduction_mode = ReductionMode.ALL
+        self.assertRaisesRegex(
+            ValueError,
+            f"Reduction Mode '{ReductionMode.ALL}' is incompatible with scaled background reduction. The ReductionMode "
+            f"must be set to '{ReductionMode.MERGED}', '{ReductionMode.HAB}', or '{ReductionMode.LAB}'.",
+            subtract_scaled_background,
+            reduction_package,
+            scaled_ws_name,
+        )
+
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
+    def test_subtract_background_from_merged_calls_algorithms_correctly(self, mock_alg_manager):
+        mock_minus = mock.MagicMock()
+        reduction_package = mock.MagicMock()
+        mock_alg_manager.return_value = mock_minus
+        scaled_ws_name = "__workspace_scaled"
+        reduction_package.reduction_mode = ReductionMode.MERGED
+        reduction_package.reduced_merged_name = ["ws1", "ws2"]
+
+        created_workspaces = subtract_scaled_background(reduction_package, scaled_ws_name)
+
+        mock_alg_manager.assert_any_call("Minus", **{"RHSWorkspace": scaled_ws_name, "LHSWorkspace": "ws1", "OutputWorkspace": "ws1_bgsub"})
+        mock_alg_manager.assert_any_call("Minus", **{"RHSWorkspace": scaled_ws_name, "LHSWorkspace": "ws2", "OutputWorkspace": "ws2_bgsub"})
+        self.assertEqual(["ws1_bgsub", "ws2_bgsub"], created_workspaces)
+        self.assertEqual(mock_minus.execute.call_count, 2)
 
 
 class DeleteMethodsTest(unittest.TestCase):

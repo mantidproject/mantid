@@ -142,18 +142,6 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         reduction_alg.execute()
 
         # -----------------------------------
-        # TODO: Subtract the background from the slice.
-        # -----------------------------------
-
-        # 1. Query the user file. Merged, HAB, or LAB?
-        # 2. Minus the scaled workspace from the main reduction's output (once per slice)
-        # subtractScaledBackground()
-        # 2a. In place? Or do we want to save as an extra workspace? Depends on sci request.
-        # 3. Save to ADS/File/Both as below.
-        if scaled_background_ws:
-            pass
-
-        # -----------------------------------
         # Get the output of the algorithm
         # -----------------------------------
         _get_ws_from_alg(reduction_alg, reduction_package)
@@ -171,6 +159,12 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
         group_workspaces_if_required(reduction_package, output_mode, save_can, event_slice_optimisation=event_slice_optimisation)
+
+        # -----------------------------------
+        # Subtract the background from the slice.
+        # -----------------------------------
+        if scaled_background_ws:
+            subtract_scaled_background(reduction_package, scaled_background_ws)
 
     data = state.data
     additional_run_numbers = {
@@ -564,7 +558,7 @@ def get_multi_period_workspaces(load_alg, workspace_name, number_of_workspaces):
 
 
 def create_scaled_background_workspace(state) -> str:
-    state.background_subtraction.verify()
+    state.background_subtraction.validate()
     background_ws_name = state.background_subtraction.workspace
     if not background_ws_name:
         return None
@@ -1561,6 +1555,37 @@ def save_workspace_to_file(workspace_name, file_formats, file_name, additional_r
 
     save_alg = create_unmanaged_algorithm(save_name, **save_options)
     save_alg.execute()
+
+
+def subtract_scaled_background(reduction_package, scaled_ws_name: str):
+    def run_minus_alg():
+        output_name = ws_name + "_bgsub"
+        minus_options["LHSWorkspace"] = ws_name
+        minus_options["OutputWorkspace"] = output_name
+        minus_alg = create_unmanaged_algorithm(minus_name, **minus_options)
+        minus_alg.setAlwaysStoreInADS(True)
+        minus_alg.execute()
+        return output_name
+
+    if reduction_package.reduction_mode == ReductionMode.ALL:
+        raise ValueError(
+            f"Reduction Mode '{ReductionMode.ALL}' is incompatible with scaled background reduction. The "
+            f"ReductionMode must be set to '{ReductionMode.MERGED}', '{ReductionMode.HAB}', or '{ReductionMode.LAB}'."
+        )
+    minus_name = "Minus"
+    minus_options = {"RHSWorkspace": scaled_ws_name}
+    output_workspaces = []
+
+    if reduction_package.reduction_mode == ReductionMode.MERGED:
+        for ws_name in reduction_package.reduced_merged_name:
+            output_workspaces.append(run_minus_alg())
+    elif reduction_package.reduction_mode == ReductionMode.HAB:
+        for ws_name in reduction_package.reduced_hab_name:
+            output_workspaces.append(run_minus_alg())
+    elif reduction_package.reduction_mode == ReductionMode.LAB:
+        for ws_name in reduction_package.reduced_lab_name:
+            output_workspaces.append(run_minus_alg())
+    return output_workspaces
 
 
 # ----------------------------------------------------------------------------------------------------------------------
