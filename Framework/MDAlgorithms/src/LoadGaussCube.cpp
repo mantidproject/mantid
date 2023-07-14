@@ -10,6 +10,7 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/Strings.h"
 #include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 
 #include <fstream>
 
@@ -67,7 +68,12 @@ std::map<std::string, std::string> LoadGaussCube::validateInputs() {
   std::map<std::string, std::string> errors;
   std::vector<std::string> prop_names = {"Names", "Frames", "Units"};
   for (auto name : prop_names) {
-    std::vector<std::string> prop = getProperty(name);
+    std::vector<std::string> prop;
+    if (name == "Names") {
+      prop = parseNames(getProperty(name));
+    } else {
+      prop = getProperty(name);
+    }
     if (prop.size() != 3) {
       errors.emplace(name, "Property must contain three elements (workspace must have three dimensions).");
     }
@@ -132,7 +138,7 @@ void LoadGaussCube::exec() {
   alg.setProperty("Dimensionality", 3);
   alg.setProperty("NumberOfBins", nbins);
   alg.setProperty("Extents", extents);
-  alg.setPropertyValue("Names", getPropertyValue("Names"));
+  alg.setProperty("Names", parseNames(getProperty("Names")));
   alg.setPropertyValue("Frames", getPropertyValue("Frames"));
   alg.setPropertyValue("Units", getPropertyValue("Units"));
   alg.setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));

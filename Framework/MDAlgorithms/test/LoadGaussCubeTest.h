@@ -37,7 +37,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "test_md"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Units", "rlu,rlu,rlu"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Frames", "HKL,HKL,HKL"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Names", "H,K,L"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Names", "[H,0,0],[0,K,0],[0,0,L]"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
