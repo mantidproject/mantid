@@ -164,7 +164,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # Subtract the background from the slice.
         # -----------------------------------
         if scaled_background_ws:
-            subtract_scaled_background(reduction_package, scaled_background_ws)
+            reduction_package.reduced_bgsub_name = subtract_scaled_background(reduction_package, scaled_background_ws)
 
     data = state.data
     additional_run_numbers = {
@@ -1330,12 +1330,13 @@ def delete_reduced_workspaces(reduction_packages, include_non_transmission=True)
             reduced_lab = reduction_package.reduced_lab
             reduced_hab = reduction_package.reduced_hab
             reduced_merged = reduction_package.reduced_merged
+            reduced_bgsub = reduction_package.reduced_bgsub_name
 
             # Remove samples
             reduced_lab_sample = reduction_package.reduced_lab_sample
             reduced_hab_sample = reduction_package.reduced_hab_sample
 
-            workspaces_to_delete.extend([reduced_lab, reduced_hab, reduced_merged, reduced_lab_sample, reduced_hab_sample])
+            workspaces_to_delete.extend([reduced_lab, reduced_hab, reduced_merged, reduced_bgsub, reduced_lab_sample, reduced_hab_sample])
 
         _delete_workspaces(delete_alg, workspaces_to_delete)
 
@@ -1441,6 +1442,8 @@ def get_all_names_to_save(reduction_packages, save_can):
         reduced_lab_sample = reduction_package.reduced_lab_sample
         reduced_hab_sample = reduction_package.reduced_hab_sample
 
+        reduced_bgsub = reduction_package.reduced_bgsub_name
+
         trans_name = get_transmission_names_to_save(reduction_package, False)
         trans_can_name = get_transmission_names_to_save(reduction_package, True)
 
@@ -1451,6 +1454,8 @@ def get_all_names_to_save(reduction_packages, save_can):
                 names_to_save.append((get_ws_names_from_group(reduced_lab), trans_name, trans_can_name))
             if reduced_hab:
                 names_to_save.append((get_ws_names_from_group(reduced_hab), trans_name, trans_can_name))
+            if reduced_bgsub:
+                names_to_save.append((reduced_bgsub, trans_name, trans_can_name))
             if reduced_lab_can:
                 names_to_save.append((get_ws_names_from_group(reduced_lab_can), [], trans_can_name))
             if reduced_hab_can:
@@ -1463,11 +1468,15 @@ def get_all_names_to_save(reduction_packages, save_can):
         # If we have merged reduction then store the
         elif reduced_merged:
             names_to_save.append((get_ws_names_from_group(reduced_merged), trans_name, trans_can_name))
+            if reduced_bgsub:
+                names_to_save.append((reduced_bgsub, trans_name, trans_can_name))
         else:
             if reduced_lab:
                 names_to_save.append((get_ws_names_from_group(reduced_lab), trans_name, trans_can_name))
             if reduced_hab:
                 names_to_save.append((get_ws_names_from_group(reduced_hab), trans_name, trans_can_name))
+            if reduced_bgsub:
+                names_to_save.append((reduced_bgsub, trans_name, trans_can_name))
 
     return names_to_save
 
@@ -1490,6 +1499,8 @@ def get_event_slice_names_to_save(reduction_packages, save_can):
         reduced_hab_can = reduction_package.reduced_hab_can
         reduced_lab_sample = reduction_package.reduced_lab_sample
         reduced_hab_sample = reduction_package.reduced_hab_sample
+
+        reduced_bgsub_names = reduction_package.reduced_bgsub_name
 
         reduced_lab_names = [] if reduced_lab is None else reduced_lab.getNames()
         reduced_hab_names = [] if reduced_hab is None else reduced_hab.getNames()
@@ -1518,6 +1529,7 @@ def get_event_slice_names_to_save(reduction_packages, save_can):
         else:
             names_to_save.extend(_get_names_in_list(reduced_lab_names, trans_name, trans_can_name))
             names_to_save.extend(_get_names_in_list(reduced_hab_names, trans_name, trans_can_name))
+        names_to_save.extend(_get_names_in_list(reduced_bgsub_names, trans_name, trans_can_name))
 
     # We might have some workspaces as duplicates (the group workspaces), so make them unique
     return set(names_to_save)
@@ -1664,6 +1676,7 @@ class ReductionPackage(object):
         self.reduced_hab_base_name = None
         self.reduced_merged_name = None
         self.reduced_merged_base_name = None
+        self.reduced_bgsub_name = None
 
         # Partial reduced can workspace names
         self.reduced_lab_can_name = None
