@@ -122,6 +122,11 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     set(_cxxtest_h_files ${part} ${_cxxtest_h_files})
   endforeach(part ${ARGN})
 
+  if(TARGET cppcheck)
+    add_custom_target(${_cxxtest_testname}Sources SOURCES ${_cxxtest_cpp_files})
+    add_dependencies(cppcheck ${_cxxtest_testname}Sources)
+  endif()
+
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeader.h)
     enable_precompiled_headers(PrecompiledHeader.h _cxxtest_cpp_files)
   endif()
