@@ -14,7 +14,7 @@ from enum import Enum
 import numpy as np
 
 from mantid.kernel import *
-from mantid.api import *
+from mantid.api import *  # AnalysisDataService
 from mantid.simpleapi import *
 from tube_spec import TubeSpec
 from ideal_tube import IdealTube
@@ -326,14 +326,23 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
     def _crop_and_scale_workspace(self, ws, start_pixel, end_pixel, uamphr_to_rescale):
         scaled_ws_name = ws.name() + self._SCALED_WS_SUFFIX
-        CropWorkspace(InputWorkspace=ws, OutputWorkspace=scaled_ws_name, StartWorkspaceIndex=start_pixel, EndWorkspaceIndex=end_pixel)
-        scaled_ws = Scale(
-            InputWorkspace=scaled_ws_name,
-            OutputWorkspace=scaled_ws_name,
-            Operation="Multiply",
-            Factor=uamphr_to_rescale / self._get_proton_charge(ws),
-        )
-        return scaled_ws
+
+        crop_alg = self.createChildAlgorithm("CropWorkspace")
+        crop_alg.setProperty("InputWorkspace", ws)
+        crop_alg.setProperty("StartWorkspaceIndex", start_pixel)
+        crop_alg.setProperty("EndWorkspaceIndex", end_pixel)
+        crop_alg.execute()
+        ws = crop_alg.getProperty("OutputWorkspace").value
+
+        scale_alg = self.createChildAlgorithm("Scale")
+        scale_alg.setAlwaysStoreInADS(True)
+        scale_alg.setProperty("InputWorkspace", ws)
+        scale_alg.setProperty("Operation", "Multiply")
+        scale_alg.setProperty("Factor", uamphr_to_rescale / self._get_proton_charge(ws))
+        scale_alg.setProperty("OutputWorkspace", scaled_ws_name)
+        scale_alg.execute()
+
+        return mtd[scaled_ws_name]
 
     def _merge_workspaces(self, ws_to_known_edges):
         """
@@ -361,10 +370,15 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             # If there is only one workspace in the list then there is nothing to multiply together.
             # We re-name the workspace because we still need a workspace matching the output ws name but
             # there is no need to also keep the scaled workspace in this situation.
-            RenameWorkspace(InputWorkspace=rhs_ws, OutputWorkspace=self._MERGED_WS_NAME)
+            self._rename_workspace(rhs_ws, self._MERGED_WS_NAME)
+            return
 
         for ws in ws_list[1:]:
-            rhs_ws = Multiply(RHSWorkspace=rhs_ws, LHSWorkspace=ws, OutputWorkspace=self._MERGED_WS_NAME)
+            alg = self.createChildAlgorithm("Multiply", RHSWorkspace=rhs_ws, LHSWorkspace=ws)
+            alg.execute()
+            rhs_ws = alg.getProperty("OutputWorkspace").value
+
+        AnalysisDataService.add(self._MERGED_WS_NAME, rhs_ws)
 
     def _get_tube_name(self, tube_id):
         """Construct the name of the tube based on the id given"""
@@ -449,19 +463,34 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
         saved_file_name = self._SAVED_INPUT_DATA_PREFIX + data_file
         try:
-            ws = Load(Filename=saved_file_name, OutputWorkspace=ws_name)
+            alg = self.createChildAlgorithm("Load", Filename=saved_file_name, OutputWorkspace=ws_name)
+            alg.setAlwaysStoreInADS(True)
+            alg.execute()
             self.log().notice(f"Loaded saved file from {saved_file_name}.")
-            return ws
+            return mtd[ws_name]
         except (ValueError, RuntimeError):
             pass
 
         self.log().notice(f"Loading and integrating data from {data_file}.")
-        ws = Load(Filename=data_file, OutputWorkspace=ws_name)
+        alg = self.createChildAlgorithm("Load", Filename=data_file, OutputWorkspace=ws_name)
+        alg.execute()
+        ws = alg.getProperty("OutputWorkspace").value
+
         # Turn event mode into histogram with given bins
-        ws = Rebin(ws, self._time_bins, PreserveEvents=False, OutputWorkspace=ws)
+        rebin_alg = self.createChildAlgorithm("Rebin")
+        rebin_alg.setAlwaysStoreInADS(True)
+        rebin_alg.setProperty("InputWorkspace", ws)
+        rebin_alg.setProperty("Params", self._time_bins)
+        rebin_alg.setProperty("PreserveEvents", False)
+        rebin_alg.setProperty("OutputWorkspace", ws_name)
+        rebin_alg.execute()
+        ws = mtd[ws_name]
 
         if self.getProperty("SaveIntegratedWorkspaces").value:
-            SaveNexusProcessed(ws, saved_file_name)
+            save_alg = self.createChildAlgorithm("SaveNexusProcessed")
+            save_alg.setProperty("InputWorkspace", ws)
+            save_alg.setProperty("Filename", saved_file_name)
+            save_alg.execute()
 
         return ws
 
@@ -894,8 +923,8 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         tube_num = tube_id % DetectorInfo.NUM_TUBES_PER_MODULE
         ws_suffix = f"{tube_id}_{module}_{tube_num}"
 
-        diagnostic_workspaces.append(RenameWorkspace(InputWorkspace=self._FIT_DATA_WS, OutputWorkspace=f"Fit{ws_suffix}"))
-        diagnostic_workspaces.append(RenameWorkspace(InputWorkspace=self._TUBE_PLOT_WS, OutputWorkspace=f"Tube{ws_suffix}"))
+        diagnostic_workspaces.append(self._rename_workspace(self._FIT_DATA_WS, f"Fit{ws_suffix}"))
+        diagnostic_workspaces.append(self._rename_workspace(self._TUBE_PLOT_WS, f"Tube{ws_suffix}"))
 
         # Save the fitted positions to see how well the fit does, all in mm
         known_positions = []
@@ -958,6 +987,11 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             return mtd[output_ws_name]
         else:
             return alg.getProperty("OutputWorkspace").value
+
+    def _rename_workspace(self, input_ws, new_name):
+        alg = self.createChildAlgorithm("RenameWorkspace", InputWorkspace=input_ws, OutputWorkspace=new_name)
+        alg.execute()
+        return alg.getProperty("OutputWorkspace").value
 
 
 # Register algorithm with Mantid
