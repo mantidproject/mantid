@@ -8,7 +8,6 @@ from collections import namedtuple
 from mantid.api import MatrixWorkspace
 from mantid.dataobjects import EventWorkspace
 from sans.common.general_functions import create_unmanaged_algorithm
-from sans.common.file_information import convert_to_shape
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import SaveType
 
@@ -53,16 +52,11 @@ def get_save_strategy(file_format_bundle, file_name, save_options, additional_pr
         file_name = get_file_name(file_format_bundle, file_name, "", ".nxs")
         save_name = "SaveNexusProcessed"
     elif file_format is SaveType.CAN_SAS:
-        # Needs to be in string form for SaveCanSAS1D.
-        maybe_geometry = convert_to_shape(additional_properties["Geometry"])
-        additional_properties["Geometry"] = maybe_geometry.value if maybe_geometry is not None else "Disc"
         file_name = get_file_name(file_format_bundle, file_name, "", ".xml")
         save_name = "SaveCanSAS1D"
         save_options.update(additional_properties)
         save_options.update(additional_run_numbers)
     elif file_format is SaveType.NX_CAN_SAS:
-        maybe_geometry = convert_to_shape(additional_properties["Geometry"])
-        additional_properties["Geometry"] = maybe_geometry.value if maybe_geometry is not None else "Disc"
         file_name = get_file_name(file_format_bundle, file_name, "_nxcansas", ".h5")
         save_name = "SaveNXcanSAS"
         save_options.update(additional_properties)
