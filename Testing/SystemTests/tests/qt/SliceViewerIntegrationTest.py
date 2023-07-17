@@ -26,6 +26,7 @@ from mantid.simpleapi import (
     CreateSampleWorkspace,
     DeleteWorkspace,
     FakeMDEventData,
+    BinMD,
     ConvertToDistribution,
     Scale,
     SetUB,
@@ -603,6 +604,58 @@ class SliceViewerTestIntegerYAxis(systemtesting.MantidSystemTest, HelperTestingC
         self.assertFalse((xticklocs % 1 == 0).all())
         self.assertTrue((yticklocs % 1 == 0).all())
         pres.view.close()
+
+
+class SliceViewerTestCreateMDEvent(systemtesting.MantidSystemTest, HelperTestingClass):
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        test_dir = tempfile.mkdtemp()
+
+        ws = CreateMDWorkspace(
+            Dimensions="4",
+            EventType="MDEvent",
+            Extents="-5.7644,5.7644,-5.7644,5.7644,-5.7644,5.7644,-11.3897,11.3897",
+            Names="Q_sample_x,Q_sample_y,Q_sample_z,DeltaE",
+            Units="Angstrom^-1,Angstrom^-1,Angstrom^-1,DeltaE",
+        )
+
+        SetMDFrame(ws, MDFrame="QSample", Axes=[0, 1, 2])
+        FakeMDEventData(ws, UniformParams="1000000")
+
+        binned_ws = BinMD(
+            InputWorkspace=ws,
+            AxisAligned=False,
+            BasisVector0="[H,H,0],unit,-1.4747400283813477,-0.03335599973797798,0.26337599754333496,0",
+            BasisVector1="DeltaE,DeltaE,0,0,0,1",
+            BasisVector2="[-H,H,0],unit,-0.2630769908428192,-0.01594259962439537,-1.4750800132751465,0",
+            BasisVector3="[0,0,L],unit,-0.025200000032782555,1.0592399835586548,-0.006953829899430275,0",
+            NormalizeBasisVectors=False,
+            OutputExtents=[-3.8441, 3.8559, -2, 8, -0.1, 0.1, -5.43682, 5.43682],
+            OutputBins=[154, 100, 1, 218],
+        )
+
+        UB = [-0.13829092, -0.09642086, -0.0040107, -0.00392306, -0.00138571, 0.16858273, -0.09642447, 0.13834213, -0.00110674]
+
+        AddSampleLog(binned_ws, LogName="sample")
+        SetUB(binned_ws, UB=UB)
+        binned_ws.clearOriginalWorkspaces()
+
+        pres = SliceViewer(binned_ws)
+        self.assertEqual(pres.get_proj_matrix().flatten().tolist(), [1, 0, 0, 0, 1, 0, 0, 0, 1])
+        pres.view.close()
+
+        binned_ws.getExperimentInfo(0).run().addProperty("W_MATRIX", [1, 0, 1, 1, 0, -1, 0, 1, 0], True)
+
+        SaveMD(binned_ws, Filename=os.path.join(test_dir, "md_event_to_hist_4d.nxs"))
+        DeleteWorkspace(binned_ws)
+
+        binned_ws = LoadMD(os.path.join(test_dir, "md_event_to_hist_4d.nxs"))
+        pres = SliceViewer(binned_ws)
+        self.assertEqual(pres.get_proj_matrix().flatten().tolist(), [1, 0, 1, 1, 0, -1, 0, 1, 0])
+        pres.view.close()
+
+        shutil.rmtree(test_dir)
 
 
 # private helper functions
