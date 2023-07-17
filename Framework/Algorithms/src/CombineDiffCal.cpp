@@ -259,7 +259,7 @@ void CombineDiffCal::exec() {
           difcArb = difcArbMap.find(wkspIndex)->second;
         } else {
           difcArb = calibrationWS->spectrumInfo().diffractometerConstants(wkspIndex)[Kernel::UnitParams::difc];
-          difcArbMap.emplace(wkspIndex, difcArb);
+          difcArbMap[wkspIndex] = difcArb;
         }
 
         // difc and difa values from pixelCalibrationWS
