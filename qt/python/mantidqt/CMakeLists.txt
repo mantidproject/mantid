@@ -3,16 +3,7 @@
 include(PythonPackageTargetFunctions)
 
 # mantidqt
-if(APPLE)
-  set(_install_lib_dirs)
-  if(ENABLE_WORKBENCH)
-    list(APPEND _install_lib_dirs ${WORKBENCH_SITE_PACKAGES})
-  endif()
-else()
-  set(_install_lib_dirs "${SITE_PACKAGES}")
-endif()
-
-add_python_package(mantidqt INSTALL_LIB_DIRS ${_install_lib_dirs})
+add_python_package(mantidqt)
 
 # Now add any compiled sip targets
 add_subdirectory(mantidqt)

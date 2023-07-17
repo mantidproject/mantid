@@ -21,6 +21,7 @@ cmake \
   -DMANTID_FRAMEWORK_LIB=BUILD \
   -DMANTID_QT_LIB=OFF \
   -DENABLE_WORKBENCH=OFF \
+  -DPython_EXECUTABLE=$PYTHON \
   -GNinja \
   ../
 

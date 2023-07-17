@@ -26,6 +26,7 @@
 #   --git-tag: specify a tag for a release or nightly version
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/mamba-utils
+start_time=$(date +%s)
 
 # Setup expected variables
 REPO_ROOT_DIR=$SCRIPT_DIR/../../..
@@ -74,6 +75,7 @@ do
   shift
 done
 
+
 # Mamba
 setup_mamba $WORKSPACE/mambaforge "package-conda" true
 # boa 0.15.1 causes an issue with zstd import on Windows
@@ -109,7 +111,10 @@ cd $RECIPES_DIR
 EXTRA_BUILD_OPTIONS="--debug "
 
 if [[ $OSTYPE == "msys" ]]; then
-    EXTRA_BUILD_OPTIONS+="--no-build-id" # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
+    # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
+    EXTRA_BUILD_OPTIONS+="--no-build-id"
+elif [[ $OSTYPE == 'darwin'* ]]; then
+    EXTRA_BUILD_OPTIONS+="-m ./osx_64.yaml"
 fi
 
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
@@ -124,3 +129,8 @@ fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     conda mambabuild ./mantidworkbench/ $EXTRA_BUILD_OPTIONS
 fi
+
+# elapsed time with second resolution
+end_time=$(date +%s)
+elapsed=$(( end_time - start_time ))
+echo "Conda packaging script took $elapsed seconds."

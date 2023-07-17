@@ -21,12 +21,18 @@ requirements:
     - ninja  # [unix]
     - cmake
     - git
+    - python {{ python }}                    # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - setuptools {{ setuptools }}            # [build_platform != target_platform]
+    - numpy {{ numpy }}                      # [build_platform != target_platform]
+    - pyqt {{ pyqt }}                        # [build_platform != target_platform]
+    - qt-main {{ qt_main }}                  # [build_platform != target_platform]
     - {{ cdt('mesa-libgl-devel') }}  # [linux]
     - {{ cdt('mesa-dri-drivers') }}  # [linux]
     - {{ cdt('libxxf86vm') }}  # [linux]
     - {{ cdt('libx11-devel') }}  # [linux]
     - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
-    - libcxx {{ libcxx }}  # [osx]
+    - libcxx  # [osx]
 
   host:
     - eigen
@@ -40,6 +46,7 @@ requirements:
     - setuptools {{ setuptools }}
     - tbb-devel {{ tbb }}
     - versioningit
+    - numpy {{ numpy }}                      # [build_platform != target_platform]
 
   run:
     - matplotlib {{ matplotlib }}
