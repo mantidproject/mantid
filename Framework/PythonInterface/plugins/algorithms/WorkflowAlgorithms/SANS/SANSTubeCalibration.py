@@ -53,6 +53,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
     _SAVED_INPUT_DATA_PREFIX = "saved_"
     _TUBE_PLOT_WS = "__TubePlot"
     _FIT_DATA_WS = "__FittedData"
+    _C_VALUES_WS = "cvalues"
     _SCALED_WS_SUFFIX = "_scaled"
     _CAL_TABLE_ID_COL = "Detector ID"
     _CAL_TABLE_POS_COL = "Detector Position"
@@ -240,7 +241,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             raise RuntimeError("Calibration failed - unable to generate calibration table")
 
         ApplyCalibration(result, caltable)
-        cvalues = CreateWorkspace(DataX=list(diagnostic_output.keys()), DataY=meanCvalue)
+        cvalues = self._create_workspace(data_x=list(diagnostic_output.keys()), data_y=meanCvalue, output_ws_name=self._C_VALUES_WS)
 
         self._save_calibrated_ws_as_nexus(result)
 
@@ -745,7 +746,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         if len(y_data) == 0:
             raise RuntimeError("Cannot find any counts for the tube in the integrated workspace")
 
-        tube_y_data = CreateWorkspace(list(range(len(y_data))), y_data, OutputWorkspace=self._TUBE_PLOT_WS)
+        tube_y_data = self._create_workspace(data_x=list(range(len(y_data))), data_y=y_data, output_ws_name=self._TUBE_PLOT_WS)
 
         peak_positions = []
         fitt_y_values = []
@@ -778,7 +779,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             avg_resolution = sum(resolution_params) / float(len(resolution_params))
 
         # Create the diagnostic workspace of fitted values
-        CreateWorkspace(np.hstack(fitt_x_values), np.hstack(fitt_y_values), OutputWorkspace=self._FIT_DATA_WS)
+        self._create_workspace(np.hstack(fitt_x_values), np.hstack(fitt_y_values), self._FIT_DATA_WS)
 
         return peak_positions, avg_resolution
 
@@ -812,7 +813,9 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             raise RuntimeError("Too few usable points in tube to perform fitting.")
 
         # Fit quadratic to known positions
-        poly_fitting_workspace = self._create_workspace(valid_tube_positions, relevant_known_positions, "PolyFittingWorkspace")
+        poly_fitting_workspace = self._create_workspace(
+            valid_tube_positions, relevant_known_positions, "PolyFittingWorkspace", store_in_ADS=False
+        )
         try:
             fitted_params = self._run_fitting_function_params_only(
                 function="name=Polynomial,n=2",
@@ -901,7 +904,9 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         for i in range(len(peak_positions)):
             fitted_positions.append(peak_positions[i] * DetectorInfo.DEFAULT_PIXEL_SIZE + first_pixel_pos)
             known_positions.append(known_edges[i] * 1000.0 - peak_positions[i] * DetectorInfo.DEFAULT_PIXEL_SIZE - first_pixel_pos)
-        diagnostic_workspaces.append(CreateWorkspace(DataX=fitted_positions, DataY=known_positions, OutputWorkspace=f"Data{ws_suffix}"))
+        diagnostic_workspaces.append(
+            self._create_workspace(data_x=fitted_positions, data_y=known_positions, output_ws_name=f"Data{ws_suffix}")
+        )
 
         # Interrogate the calibration table to see how much we have shifted pixels for the tube
         calibrated_shift = []
@@ -911,7 +916,9 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             calibrated_shift.append(det_pos.getX() * 1000.0 - ref_pixel_pos)
             ref_positions.append(ref_pixel_pos)
             ref_pixel_pos += DetectorInfo.DEFAULT_PIXEL_SIZE
-        diagnostic_workspaces.append(CreateWorkspace(DataX=ref_positions, DataY=calibrated_shift, OutputWorkspace=f"Shift{ws_suffix}"))
+        diagnostic_workspaces.append(
+            self._create_workspace(data_x=ref_positions, data_y=calibrated_shift, output_ws_name=f"Shift{ws_suffix}")
+        )
 
         return diagnostic_workspaces
 
@@ -939,14 +946,18 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             for msg in tube_calibration_issues:
                 self.log().warning(msg)
 
-    def _create_workspace(self, data_x, data_y, output_ws_name, store_in_ADS=False):
+    def _create_workspace(self, data_x, data_y, output_ws_name, store_in_ADS=True):
         alg = self.createChildAlgorithm("CreateWorkspace")
         alg.setAlwaysStoreInADS(store_in_ADS)
         alg.setProperty("DataX", data_x)
         alg.setProperty("DataY", data_y)
         alg.setProperty("OutputWorkspace", output_ws_name)
         alg.execute()
-        return alg.getProperty("OutputWorkspace").value
+
+        if store_in_ADS:
+            return mtd[output_ws_name]
+        else:
+            return alg.getProperty("OutputWorkspace").value
 
 
 # Register algorithm with Mantid
