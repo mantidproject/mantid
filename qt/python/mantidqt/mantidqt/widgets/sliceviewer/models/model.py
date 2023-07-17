@@ -536,12 +536,12 @@ class SliceViewerModel(SliceViewerBaseModel):
             for idim in range(ndims):
                 basis_matrix[:, idim] = list(ws.getBasisVector(idim))
             # exclude non-Q dim elements from basis vectors
-            qflags = [ws.getDimension(idim).getMDFrame().isQ() for idim in range(ndims)]
+            qflags = np.array([ws.getDimension(idim).getMDFrame().isQ() for idim in range(ndims)])
             i_nonq = np.flatnonzero(np.invert(qflags))
-            qmask = np.invert(basis_matrix[i_nonq, :].astype(bool).sum(axis=0).astype(bool))
+            qmask = np.invert(basis_matrix[:, i_nonq] == 1).ravel()
             # extract proj matrix from basis vectors of q dimension
             # note for 2D the last col/row of proj_matrix is 0,0,1 - i.e. L
-            proj_matrix[: qmask.sum(), : qmask.sum()] = basis_matrix[qmask, :][:, qflags]
+            proj_matrix[: qmask.sum(), : qflags.sum()] = basis_matrix[qmask, :][:, qflags]
         return proj_matrix
 
     def get_proj_matrix(self):

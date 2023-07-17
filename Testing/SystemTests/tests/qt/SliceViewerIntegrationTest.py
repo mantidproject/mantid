@@ -26,6 +26,7 @@ from mantid.simpleapi import (
     CreateSampleWorkspace,
     DeleteWorkspace,
     FakeMDEventData,
+    BinMD,
     ConvertToDistribution,
     Scale,
     SetUB,
@@ -602,6 +603,49 @@ class SliceViewerTestIntegerYAxis(systemtesting.MantidSystemTest, HelperTestingC
         yticklocs = pres.view.data_view.ax.get_yticks()
         self.assertFalse((xticklocs % 1 == 0).all())
         self.assertTrue((yticklocs % 1 == 0).all())
+        pres.view.close()
+
+
+class SliceViewerTestCreateMDEvent(systemtesting.MantidSystemTest, HelperTestingClass):
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        ws = CreateMDWorkspace(
+            Dimensions="4",
+            EventType="MDEvent",
+            Extents="-5.7644,5.7644,-5.7644,5.7644,-5.7644,5.7644,-11.3897,11.3897",
+            Names="Q_sample_x,Q_sample_y,Q_sample_z,DeltaE",
+            Units="Angstrom^-1,Angstrom^-1,Angstrom^-1,DeltaE",
+        )
+
+        SetMDFrame(ws, MDFrame="QSample", Axes=[0, 1, 2])
+        FakeMDEventData(ws, UniformParams="1000000")
+
+        binned_ws = BinMD(
+            InputWorkspace=ws,
+            AxisAligned=False,
+            BasisVector0="[H,H,0],unit,-1.4747400283813477,-0.03335599973797798,0.26337599754333496,0",
+            BasisVector1="DeltaE,DeltaE,0,0,0,1",
+            BasisVector2="[-H,H,0],unit,-0.2630769908428192,-0.01594259962439537,-1.4750800132751465,0",
+            BasisVector3="[0,0,L],unit,-0.025200000032782555,1.0592399835586548,-0.006953829899430275,0",
+            NormalizeBasisVectors=False,
+            OutputExtents=[-3.8441, 3.8559, -2, 8, -0.1, 0.1, -5.43682, 5.43682],
+            OutputBins=[154, 100, 1, 218],
+        )
+
+        binned_ws.clearOriginalWorkspaces()
+
+        pres = SliceViewer(binned_ws)
+        proj_matrix = pres.get_proj_matrix().tolist()
+        self.assertAlmostEqual(proj_matrix[0][0], -1.4747400283813477)
+        self.assertAlmostEqual(proj_matrix[0][1], -0.2630769908428192)
+        self.assertAlmostEqual(proj_matrix[0][2], -0.025200000032782555)
+        self.assertAlmostEqual(proj_matrix[1][0], -0.03335599973797798)
+        self.assertAlmostEqual(proj_matrix[1][1], -0.01594259962439537)
+        self.assertAlmostEqual(proj_matrix[1][2], 1.0592399835586548)
+        self.assertAlmostEqual(proj_matrix[2][0], 0.26337599754333496)
+        self.assertAlmostEqual(proj_matrix[2][1], -1.4750800132751465)
+        self.assertAlmostEqual(proj_matrix[2][2], -0.006953829899430275)
         pres.view.close()
 
 
