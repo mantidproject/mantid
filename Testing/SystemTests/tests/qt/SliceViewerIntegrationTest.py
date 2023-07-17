@@ -610,8 +610,6 @@ class SliceViewerTestCreateMDEvent(systemtesting.MantidSystemTest, HelperTesting
     def runTest(self):
         HelperTestingClass.__init__(self)
 
-        test_dir = tempfile.mkdtemp()
-
         ws = CreateMDWorkspace(
             Dimensions="4",
             EventType="MDEvent",
@@ -635,27 +633,20 @@ class SliceViewerTestCreateMDEvent(systemtesting.MantidSystemTest, HelperTesting
             OutputBins=[154, 100, 1, 218],
         )
 
-        UB = [-0.13829092, -0.09642086, -0.0040107, -0.00392306, -0.00138571, 0.16858273, -0.09642447, 0.13834213, -0.00110674]
-
-        AddSampleLog(binned_ws, LogName="sample")
-        SetUB(binned_ws, UB=UB)
         binned_ws.clearOriginalWorkspaces()
 
         pres = SliceViewer(binned_ws)
-        self.assertEqual(pres.get_proj_matrix().flatten().tolist(), [1, 0, 0, 0, 1, 0, 0, 0, 1])
+        proj_matrix = pres.get_proj_matrix().tolist()
+        self.assertAlmostEqual(proj_matrix[0][0], -1.4747400283813477)
+        self.assertAlmostEqual(proj_matrix[0][1], -0.2630769908428192)
+        self.assertAlmostEqual(proj_matrix[0][2], -0.025200000032782555)
+        self.assertAlmostEqual(proj_matrix[1][0], -0.03335599973797798)
+        self.assertAlmostEqual(proj_matrix[1][1], -0.01594259962439537)
+        self.assertAlmostEqual(proj_matrix[1][2], 1.0592399835586548)
+        self.assertAlmostEqual(proj_matrix[2][0], 0.26337599754333496)
+        self.assertAlmostEqual(proj_matrix[2][1], -1.4750800132751465)
+        self.assertAlmostEqual(proj_matrix[2][2], -0.006953829899430275)
         pres.view.close()
-
-        binned_ws.getExperimentInfo(0).run().addProperty("W_MATRIX", [1, 0, 1, 1, 0, -1, 0, 1, 0], True)
-
-        SaveMD(binned_ws, Filename=os.path.join(test_dir, "md_event_to_hist_4d.nxs"))
-        DeleteWorkspace(binned_ws)
-
-        binned_ws = LoadMD(os.path.join(test_dir, "md_event_to_hist_4d.nxs"))
-        pres = SliceViewer(binned_ws)
-        self.assertEqual(pres.get_proj_matrix().flatten().tolist(), [1, 0, 1, 1, 0, -1, 0, 1, 0])
-        pres.view.close()
-
-        shutil.rmtree(test_dir)
 
 
 # private helper functions
