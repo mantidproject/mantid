@@ -93,6 +93,13 @@ class AdvancedSetupWidget(BaseWidget):
         dv7.setBottom(0.0)
         self._content.scaledata_edit.setValidator(dv7)
 
+        self._content.pushdatapos_combo.activated.connect(self._onlyOneAdditive)
+
+        dv_offsetdata = QDoubleValidator(self._content.offsetdata_edit)
+        dv_offsetdata.setBottom(0.0)
+        self._content.offsetdata_edit.setValidator(dv_offsetdata)
+        self._content.offsetdata_edit.editingFinished.connect(self._onlyOneAdditive)
+
         dv8 = QDoubleValidator(self._content.numberdensity_edit)
         dv8.setBottom(0.0)
         self._content.numberdensity_edit.setValidator(dv8)
@@ -146,6 +153,10 @@ class AdvancedSetupWidget(BaseWidget):
         """
 
         self._content.pushdatapos_combo.setCurrentIndex(self._content.pushdatapos_combo.findText(state.pushdatapositive))
+        if state.offsetdata:
+            self._content.offsetdata_edit.setText(str(state.offsetdata).strip())
+        else:
+            self._content.offsetdata_edit.setText("0")
         self._content.unwrap_edit.setText(str(state.unwrapref))
         self._content.lowres_edit.setText(str(state.lowresref))
         self._content.removepromptwidth_edit.setText(str(state.removepropmppulsewidth))
@@ -196,6 +207,7 @@ class AdvancedSetupWidget(BaseWidget):
         # Initialize AdvancedSetupScript static variables with widget's content
         #
         s.pushdatapositive = str(self._content.pushdatapos_combo.currentText())
+        s.offsetdata = self._content.offsetdata_edit.text().strip()
         s.unwrapref = self._content.unwrap_edit.text()
         s.lowresref = self._content.lowres_edit.text()
         s.cropwavelengthmin = str(self._content.cropwavelengthmin_edit.text())
@@ -272,6 +284,23 @@ class AdvancedSetupWidget(BaseWidget):
         except ValueError as e:
             self._content.sampleformula_edit.setToolTip(str(e).replace("MaterialBuilder::setFormula() - ", ""))
             self._content.sampleformula_edit.setStyleSheet("QLineEdit{background:salmon;}")
+
+    def _onlyOneAdditive(self):
+        # enable offsetdata only when pushdatapositive is None
+        pushdatapositive = str(self._content.pushdatapos_combo.currentText())
+        if pushdatapositive == "None":
+            # can edit the offsetdata
+            self._content.offsetdata_edit.setEnabled(True)
+        else:
+            self._content.offsetdata_edit.setEnabled(False)
+            self._content.offsetdata_edit.setText("0")
+
+        # enable pushdatapositive only when offsetdata isn't set
+        offsetdata_is_set = False
+        offsetdata = self._content.offsetdata_edit.text().strip()
+        if len(offsetdata) > 0:
+            offsetdata_is_set = bool(float(offsetdata) != 0.0)
+        self._content.pushdatapos_combo.setEnabled(not offsetdata_is_set)
 
     def _calculate_packing_fraction(self):
         try:
