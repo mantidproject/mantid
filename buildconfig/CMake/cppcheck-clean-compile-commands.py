@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -28,7 +28,6 @@ CompileCommands = Sequence[Mapping[str, str]]
 def main() -> int:
     """
     Main entry point for the program.
-
     """
     logging.basicConfig(format="", level=DEFAULT_LOG_LEVEL)
     args = parse_arguments()
@@ -57,7 +56,8 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def remove_source_entries(compile_commands: CompileCommands) -> CompileCommands:
-    """Given a list of filepaths check the list of compile commands and remove
+    """
+    Given a list of filepaths check the list of compile commands and remove
     any entries whose file element matches
 
     :param compile_commands: An array of dicts defining compile commands for a
