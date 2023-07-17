@@ -139,7 +139,6 @@ class SANSSave(DataProcessorAlgorithm):
 
         sample = workspace.sample()
         maybe_geometry = convert_to_shape(sample.getGeometryFlag())
-        geometry = maybe_geometry.value if maybe_geometry is not None else "Disc"
         height = sample.getHeight()
         width = sample.getWidth()
         thickness = sample.getThickness()
@@ -161,11 +160,12 @@ class SANSSave(DataProcessorAlgorithm):
             "Transmission": transmission,
             "TransmissionCan": transmission_can,
             "DetectorNames": detectors,
-            "Geometry": geometry,
             "SampleHeight": height,
             "SampleWidth": width,
             "SampleThickness": thickness,
         }
+        if maybe_geometry is not None:
+            additional_properties["Geometry"] = maybe_geometry.value
 
         additional_run_numbers = {
             "SampleTransmissionRunNumber": self.getProperty("SampleTransmissionRunNumber").value,
