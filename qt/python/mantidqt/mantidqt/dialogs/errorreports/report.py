@@ -69,6 +69,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
                 "Warning: your version of MantidWorkbench is out of date.<br>"
                 f'<a href="{MANTID_DOWNLOAD_LINK}">Get the latest version here</a><br><br></span>'
             )
+            self.requestTextBrowser.setOpenExternalLinks(True)
             self.requestTextBrowser.insertHtml(msg)
 
         self.input_name_line_edit.textChanged.connect(self.set_button_status)
