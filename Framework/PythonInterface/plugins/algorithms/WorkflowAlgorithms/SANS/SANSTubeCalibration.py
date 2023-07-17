@@ -641,18 +641,36 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             self.log().debug("Histogram was excluded from the calibration as it did not have an assigned detector.")
         return peak_positions, avg_resolution
 
-    def _run_fitting_function(self, function, input_ws, start_x, end_x):
+    def _create_fitting_function(self, function, input_ws, start_x, end_x):
         alg = self.createChildAlgorithm("Fit")
+        alg.setRethrows(True)
         alg.setProperty("Function", function)
         alg.setProperty("InputWorkspace", input_ws)
         alg.setProperty("StartX", str(start_x))
         alg.setProperty("EndX", str(end_x))
         alg.setProperty("CreateOutput", True)
+        return alg
+
+    def _run_fitting_function(self, function, input_ws, start_x, end_x):
+        """
+        Create and run the fitting function, returning a tuple with the two output workspaces.
+        The first workspace in the tuple is the OutputParameters workspace and the second is the OutputWorkspace.
+        """
+        alg = self._create_fitting_function(function, input_ws, start_x, end_x)
         alg.execute()
         params_ws = alg.getProperty("OutputParameters").value
         fit_ws = alg.getProperty("OutputWorkspace").value
 
         return params_ws, fit_ws
+
+    def _run_fitting_function_params_only(self, function, input_ws, start_x, end_x):
+        """
+        Create and run the fitting function, returning the OutputParameters workspace.
+        """
+        alg = self._create_fitting_function(function, input_ws, start_x, end_x)
+        alg.setProperty("OutputParametersOnly", True)
+        alg.execute()
+        return alg.getProperty("OutputParameters").value
 
     def _fit_flat_top_peak(self, peak_centre, fit_params, ws):
         # Find the position
@@ -794,20 +812,19 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             raise RuntimeError("Too few usable points in tube to perform fitting.")
 
         # Fit quadratic to known positions
-        PolyFittingWorkspace = CreateWorkspace(dataX=valid_tube_positions, dataY=relevant_known_positions)
+        poly_fitting_workspace = self._create_workspace(valid_tube_positions, relevant_known_positions, "PolyFittingWorkspace")
         try:
-            Fit(
-                InputWorkspace=PolyFittingWorkspace,
-                Function="name=Polynomial,n=2",
-                StartX=str(0.0),
-                EndX=str(num_detectors),
-                Output="QF",
+            fitted_params = self._run_fitting_function_params_only(
+                function="name=Polynomial,n=2",
+                input_ws=poly_fitting_workspace,
+                start_x=str(0.0),
+                end_x=str(num_detectors),
             )
         except:
             raise RuntimeError("Fitting tube positions to known positions failed")
 
         # Get the fitted coefficients, excluding the last row in the parameters table because it is the error value
-        coefficients = [row["Value"] for row in mtd["QF_Parameters"]][:-1]
+        coefficients = [row["Value"] for row in fitted_params][:-1]
 
         # Evaluate the fitted quadratic against the number of detectors
         return np.polynomial.polynomial.polyval(list(range(num_detectors)), coefficients)
@@ -921,6 +938,15 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             self.log().warning("There were the following tube calibration errors:")
             for msg in tube_calibration_issues:
                 self.log().warning(msg)
+
+    def _create_workspace(self, data_x, data_y, output_ws_name, store_in_ADS=False):
+        alg = self.createChildAlgorithm("CreateWorkspace")
+        alg.setAlwaysStoreInADS(store_in_ADS)
+        alg.setProperty("DataX", data_x)
+        alg.setProperty("DataY", data_y)
+        alg.setProperty("OutputWorkspace", output_ws_name)
+        alg.execute()
+        return alg.getProperty("OutputWorkspace").value
 
 
 # Register algorithm with Mantid
