@@ -314,13 +314,21 @@ def _perform_absolute_normalization(spline, ws):
     v_number_density = vanadium_material.numberDensityEffective
     v_cross_section = vanadium_material.totalScatterXSection()
     vanadium_shape = spline.sample().getShape()
-    # number density in Angstroms-3, volume in m3. Don't bother with 1E30 factor because will cancel
-    num_v_atoms = vanadium_shape.volume() * v_number_density
+    try:
+        # number density in Angstroms-3, volume in m3. Don't bother with 1E30 factor because will cancel
+        num_v_atoms = vanadium_shape.volume() * v_number_density
+    except RuntimeError as exception:
+        raise RuntimeError("Please set a valid shape on the vanadium workspace.") from exception
 
     sample_material = ws.sample().getMaterial()
     sample_number_density = sample_material.numberDensityEffective
-    sample_shape = spline.sample().getShape()
-    num_sample_atoms = sample_shape.volume() * sample_number_density
+    sample_shape = ws.sample().getShape()
+
+    try:
+        # number density in Angstroms-3, volume in m3. Don't bother with 1E30 factor because will cancel
+        num_sample_atoms = sample_shape.volume() * sample_number_density
+    except RuntimeError as exception:
+        raise RuntimeError("Absolute unit normalization cannot be done without a sample material and shape/volume defined.") from exception
 
     abs_norm_factor = v_cross_section * num_v_atoms / (num_sample_atoms * 4 * math.pi)
     logger.notice("Performing absolute normalisation, multiplying by factor=" + str(abs_norm_factor))
