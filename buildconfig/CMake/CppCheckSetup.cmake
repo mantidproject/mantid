@@ -11,7 +11,10 @@ if(CPPCHECK_EXECUTABLE)
     "${CPPCHECK_BUILD_DIR}/CppCheck_Suppressions.txt"
   )
 
-  # setup the standard arguments --inline-suppr appears to be ignored if --suppresions-list is specified
+  # Set up the standard arguments --inline-suppr appears to be ignored if --suppresions-list is specified. Cppcheck >=
+  # 2.10 requires all "file" entries within a compile_commands.json to exist whereas previously only a warning was
+  # emitted if an entry didn't exist. Files such as qrc_*, moc_* files from Qt are listed but don't exist as they mare
+  # made by build rules. We filter the raw cmake-generated compile_commands.json below before executing cppcheck.
   set(CPPCHECK_ARGS
       --enable=all
       --inline-suppr
@@ -19,7 +22,7 @@ if(CPPCHECK_EXECUTABLE)
       --std=c++${CMAKE_CXX_STANDARD} # use the standard from cmake
       --cppcheck-build-dir="${CPPCHECK_BUILD_DIR}/cache"
       --suppressions-list="${CPPCHECK_BUILD_DIR}/CppCheck_Suppressions.txt"
-      --project="${CMAKE_BINARY_DIR}/compile_commands.json"
+      --project="${CMAKE_BINARY_DIR}/compile_commands_cppcheck.json"
       -i"${CMAKE_BINARY_DIR}"
       # Force cppcheck to check when we use project-wide macros
       -DDLLExport=
@@ -54,6 +57,8 @@ if(CPPCHECK_EXECUTABLE)
   if(NOT TARGET cppcheck)
     add_custom_target(
       cppcheck
+      COMMAND ${Python_EXECUTABLE} ${CMAKE_MODULE_PATH}/cppcheck-clean-compile-commands.py
+              ${CMAKE_BINARY_DIR}/compile_commands.json --outfile ${CMAKE_BINARY_DIR}/compile_commands_cppcheck.json
       COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} ${_cppcheck_xml_args}
       WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
       COMMENT "Running cppcheck"
