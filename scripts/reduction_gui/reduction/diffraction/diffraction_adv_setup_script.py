@@ -141,9 +141,9 @@ class AdvancedSetupScript(BaseScriptElement):
             parvalue = parnamevaluedict[parname]
             if parvalue != "" and parname != "Instrument" and parname != "Facility":
                 if str(parvalue) == "True":
-                    parvalue = True
+                    parvalue = "1"
                 elif str(parvalue) == "False":
-                    parvalue = False
+                    parvalue = "0"
                 if not isinstance(parvalue, dict):
                     script += '%-10s = "%s",\n' % (parname, parvalue)
                 else:
