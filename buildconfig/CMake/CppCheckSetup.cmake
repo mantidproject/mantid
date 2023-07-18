@@ -13,7 +13,7 @@ if(CPPCHECK_EXECUTABLE)
 
   # Set up the standard arguments --inline-suppr appears to be ignored if --suppresions-list is specified. Cppcheck >=
   # 2.10 requires all "file" entries within a compile_commands.json to exist whereas previously only a warning was
-  # emitted if an entry didn't exist. Files such as qrc_*, moc_* files from Qt are listed but don't exist as they mare
+  # emitted if an entry didn't exist. Files such as qrc_*, moc_* files from Qt are listed but don't exist as they are
   # made by build rules. We filter the raw cmake-generated compile_commands.json below before executing cppcheck.
   set(CPPCHECK_ARGS
       --enable=all
