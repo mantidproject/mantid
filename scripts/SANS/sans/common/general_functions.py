@@ -28,6 +28,7 @@ from sans.common.enums import (
     DataType,
     TransmissionType,
     SANSInstrument,
+    SANSDetector,
 )
 
 # -------------------------------------------
@@ -329,13 +330,13 @@ def convert_bank_name_to_detector_type_isis(detector_name):
 
 def convert_instrument_and_detector_type_to_bank_name(instrument, detector_type):
     if instrument is SANSInstrument.SANS2D:
-        bank_name = "front-detector" if detector_type is DetectorType.HAB else "rear-detector"
+        bank_name = SANSDetector.SANS2D_HAB.value if detector_type is DetectorType.HAB else SANSDetector.SANS2D_LAB.value
     elif instrument is SANSInstrument.LOQ:
-        bank_name = "HAB" if detector_type is DetectorType.HAB else "main-detector-bank"
+        bank_name = SANSDetector.LOQ_HAB.value if detector_type is DetectorType.HAB else SANSDetector.LOQ_LAB.value
     elif instrument is SANSInstrument.LARMOR:
-        bank_name = "DetectorBench"
+        bank_name = SANSDetector.LARMOR_LAB.value
     elif instrument is SANSInstrument.ZOOM:
-        bank_name = "rear-detector"
+        bank_name = SANSDetector.ZOOM_LAB.value
     else:
         raise RuntimeError("Cropping Component: The instrument {0} is currently not supported.".format(instrument))
     return bank_name
