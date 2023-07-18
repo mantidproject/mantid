@@ -38,7 +38,7 @@ const std::string LoadGaussCube::category() const { return "MDAlgorithms"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadGaussCube::summary() const {
-  return "Algorithm to load gauss cube files and output an 3D MDHistoWorkspace.";
+  return "Algorithm to load gauss cube files and output a 3D MDHistoWorkspace.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ void LoadGaussCube::exec() {
   // open file
   std::ifstream in(Filename.c_str());
   // skip header
-  for (int iline = 0; iline < 2; ++iline) {
+  for (int indexOfLine = 0; indexOfLine < 2; ++indexOfLine) {
     in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
   }
 
@@ -98,36 +98,36 @@ void LoadGaussCube::exec() {
   std::vector<double> extents(6, 0.0);
   getWord(in, false); // ignore the first element of this row
   std::string str;
-  for (size_t idim = 0; idim < 3; ++idim) {
+  for (size_t indexOfDim = 0; indexOfDim < 3; ++indexOfDim) {
     str = getWord(in, false);
     if (str.length() < 1) {
       throw std::logic_error(std::string(
           "Third line must contain 4 elements (first isignored) and subsequent 3 are the lower extents of workspace."));
     }
-    extents[2 * idim] = std::stod(str);
+    extents[2 * indexOfDim] = std::stod(str);
   }
   readToEndOfLine(in, true);
 
   // read nbins and upper extent
   std::vector<int> nbins(3, 0);
-  for (size_t idim = 0; idim < 3; ++idim) {
-    nbins[idim] = std::stoi(getWord(in, false)); // first element in row
-    for (size_t iskip = 0; iskip < idim; ++iskip) {
+  for (size_t indexOfDim = 0; indexOfDim < 3; ++indexOfDim) {
+    nbins[indexOfDim] = std::stoi(getWord(in, false)); // first element in row
+    for (size_t indexOfWordToSkip = 0; indexOfWordToSkip < indexOfDim; ++indexOfWordToSkip) {
       str = getWord(in, true); // ignore
     }
-    extents[2 * idim + 1] = extents[2 * idim] + std::stod(getWord(in, true));
-    if (idim < 2) {
-      readToEndOfLine(in, true); // already at EOL for idim==2
+    extents[2 * indexOfDim + 1] = extents[2 * indexOfDim] + std::stod(getWord(in, true));
+    if (indexOfDim < 2) {
+      readToEndOfLine(in, true); // already at EOL for indexOfDim==2
     }
   }
 
   // read signal array
-  size_t nelem = nbins[0] * nbins[1] * nbins[2];
-  std::vector<double> signal(nelem, 0.0);
-  std::vector<double> error(nelem, 0.0);
+  size_t nBinsTotal = nbins[0] * nbins[1] * nbins[2];
+  std::vector<double> signal(nBinsTotal, 0.0);
+  std::vector<double> error(nBinsTotal, 0.0);
 
-  for (size_t ielem = 0; ielem < nelem && in.good(); ++ielem) {
-    signal[ielem] = std::stod(getWord(in, true));
+  for (size_t indexOfBin = 0; indexOfBin < nBinsTotal && in.good(); ++indexOfBin) {
+    signal[indexOfBin] = std::stod(getWord(in, true));
   }
 
   // make output workspace
