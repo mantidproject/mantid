@@ -608,22 +608,33 @@ std::vector<size_t> MatrixWorkspace::getIndicesFromDetectorIDs(const std::vector
                              "in a parallel run is most likely incorrect. "
                              "Aborting.");
 
+  // create a set because looking for existence of value is faster than from vector
+  std::set<detid_t> detIdSet(detIdList.cbegin(), detIdList.cend());
+
+  // create a mapping of detector number to workspace index
   std::map<detid_t, std::set<size_t>> detectorIDtoWSIndices;
-  for (size_t i = 0; i < getNumberHistograms(); ++i) {
-    auto detIDs = getSpectrum(i).getDetectorIDs();
-    for (auto detID : detIDs) {
-      detectorIDtoWSIndices[detID].insert(i);
+  const size_t NUM_HIST = getNumberHistograms();
+  for (size_t i = 0; i < NUM_HIST; ++i) {
+    const auto &detIDs = getSpectrum(i).getDetectorIDs();
+    for (const auto &detID : detIDs) {
+      // only add things to the map that are being asked for
+      if (detIdSet.count(detID) > 0) {
+        detectorIDtoWSIndices[detID].insert(i);
+      }
     }
   }
 
+  // create a vector of workspace indices with the same order as the input list
   std::vector<size_t> indexList;
   indexList.reserve(detIdList.size());
-  for (const auto detId : detIdList) {
-    auto wsIndices = detectorIDtoWSIndices.find(detId);
+  for (const auto &detId : detIdList) {
+    const auto wsIndices = detectorIDtoWSIndices.find(detId);
     if (wsIndices != detectorIDtoWSIndices.end()) {
       std::copy(wsIndices->second.cbegin(), wsIndices->second.cend(), std::back_inserter(indexList));
     }
   }
+  assert(detIDList.size() == indexList.size()); // verify size in debug builds
+
   return indexList;
 }
 
