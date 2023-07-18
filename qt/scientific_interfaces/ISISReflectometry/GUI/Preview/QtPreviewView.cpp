@@ -25,6 +25,7 @@ QtPreviewView::QtPreviewView(QWidget *parent)
     : QWidget(parent), m_imageInfo(new MantidQt::MantidWidgets::ImageInfoWidgetMini(this)) {
   m_ui.setupUi(this);
   m_ui.statusbar_layout->addWidget(m_imageInfo);
+  m_ui.title_display_label->setWordWrap(true);
   connectSignals();
 }
 
@@ -66,4 +67,7 @@ void QtPreviewView::setAngle(double angle) {
 
 void QtPreviewView::setUpdateAngleButtonEnabled(bool enabled) { m_ui.update_button->setEnabled(enabled); }
 
+void QtPreviewView::setTitle(const std::string &title) {
+  m_ui.title_display_label->setText(QString::fromStdString(title));
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

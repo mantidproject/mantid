@@ -45,5 +45,6 @@ public:
   virtual double getAngle() const = 0;
   virtual void setAngle(double angle) = 0;
   virtual void setUpdateAngleButtonEnabled(bool enabled) = 0;
+  virtual void setTitle(const std::string &title) = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -116,6 +116,9 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
     m_view->setAngle(*theta);
   }
 
+  auto runTitle = ws->getTitle();
+  m_view->setTitle(runTitle);
+
   // Clear the region selector to ensure all spectra are shown.
   m_regionSelector->clearWorkspace();
 

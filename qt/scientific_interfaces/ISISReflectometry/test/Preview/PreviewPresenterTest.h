@@ -169,6 +169,17 @@ public:
     presenter.notifyLoadWorkspaceCompleted();
   }
 
+  void test_run_title_is_set_when_workspace_loaded() {
+    auto mockModel = makeModel();
+    auto mockView = std::make_unique<MockPreviewView>();
+
+    expectLoadWorkspaceCompletedSetsRunTitle(*mockView, *mockModel);
+
+    auto deps = packDeps(mockView.get(), std::move(mockModel));
+    auto presenter = PreviewPresenter(std::move(deps));
+    presenter.notifyLoadWorkspaceCompleted();
+  }
+
   void test_notify_load_workspace_error_reenables_load_widgets() {
     auto mockModel = makeModel();
     auto mockView = std::make_unique<MockPreviewView>();
@@ -634,6 +645,13 @@ private:
     EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
     EXPECT_CALL(mockModel, getDefaultTheta()).Times(1).WillOnce(Return(angle));
     EXPECT_CALL(mockView, setAngle(angle)).Times(1);
+  }
+
+  void expectLoadWorkspaceCompletedSetsRunTitle(MockPreviewView &mockView, MockPreviewModel &mockModel) {
+    auto ws = createRectangularDetectorWorkspace();
+
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
+    EXPECT_CALL(mockView, setTitle(ws->getTitle())).Times(1);
   }
 
   void expectInstViewModelUpdatedWithLoadedWorkspace(MockPreviewModel &mockModel,
