@@ -132,24 +132,22 @@ void loadLogs(H5::Group &entry, const Mantid::API::MatrixWorkspace_sptr &workspa
 // ----- SAMPLE
 
 namespace {
-bool hasAperture(H5::Group &entry) {
+std::optional<H5::Group> getAperture(H5::Group &entry) {
   try {
-    entry.openGroup(sasInstrumentGroupName).openGroup(sasInstrumentApertureGroupName);
-    return true;
+    return entry.openGroup(sasInstrumentGroupName).openGroup(sasInstrumentApertureGroupName);
   } catch (H5::GroupIException &) {
   } catch (H5::FileIException &) {
   }
-  return false;
+  return std::nullopt;
 }
 
-bool hasSample(H5::Group &entry) {
+std::optional<H5::Group> getSample(H5::Group &entry) {
   try {
-    entry.openGroup(sasInstrumentSampleGroupAttr);
-    return true;
+    return entry.openGroup(sasInstrumentSampleGroupAttr);
   } catch (H5::GroupIException &) {
   } catch (H5::FileIException &) {
   }
-  return false;
+  return std::nullopt;
 }
 } // namespace
 
@@ -157,8 +155,9 @@ void loadSample(H5::Group &entry, const Mantid::API::MatrixWorkspace_sptr &works
   auto &&sample = workspace->mutableSample();
 
   // Load Height, Width, and Geometry from the aperture group and save to Sample object.
-  if (hasAperture(entry)) {
-    auto &&apertureGroup = entry.openGroup(sasInstrumentGroupName).openGroup(sasInstrumentApertureGroupName);
+
+  if (auto &&maybeApertureGroup = getAperture(entry)) {
+    auto &&apertureGroup = *maybeApertureGroup;
 
     auto &&height =
         Mantid::DataHandling::H5Util::readArray1DCoerce<double>(apertureGroup, sasInstrumentApertureGapHeight);
@@ -177,8 +176,8 @@ void loadSample(H5::Group &entry, const Mantid::API::MatrixWorkspace_sptr &works
   }
 
   // Load thickness from the sample group and save to the Sample object.
-  if (hasSample(entry)) {
-    auto &&sampleGroup = entry.openGroup(sasInstrumentSampleGroupAttr);
+  if (auto &&maybeSampleGroup = getSample(entry)) {
+    auto &&sampleGroup = *maybeSampleGroup;
     auto &&thickness =
         Mantid::DataHandling::H5Util::readArray1DCoerce<double>(sampleGroup, sasInstrumentSampleThickness);
     sample.setThickness(thickness.front());
