@@ -30,7 +30,6 @@ public:
   void test_exec() {
 
     LoadGaussCube alg;
-    // alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "gauss_cube_example.cube"));
@@ -57,5 +56,21 @@ public:
     TS_ASSERT_DELTA(0.912648, signal[0], 1e-6);
     TS_ASSERT_DELTA(0.512429, signal[5], 1e-6);
     TS_ASSERT_DELTA(0.954200, signal[26], 1e-6);
+
+    // clear ADS
+    Mantid::API::AnalysisDataService::Instance().clear();
+  }
+
+  void test_exec_input_validation_for_three_elements() {
+
+    LoadGaussCube alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "gauss_cube_example.cube"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "test_md"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Units", "rlu,rlu"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Frames", "HKL,HKL"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Names", "H,K"));
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 };
