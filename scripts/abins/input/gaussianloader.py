@@ -45,8 +45,9 @@ class GAUSSIANLoader(AbInitioLoader):
             self._generates_lattice_vectors(data=data)
 
             masses = self._read_masses_from_file(file_obj=gaussian_file)
-            # move file pointer to the last optimized atomic positions
-            self._parser.find_last(file_obj=gaussian_file, regex=r"^\s+(Input|Standard) orientation:")
+            # move file pointer to the last optimized atomic positions, in standard orientation
+            # (i.e. the reference structure for reported atomic displacements)
+            self._parser.find_last(file_obj=gaussian_file, regex=r"^\s+Standard orientation:\s+$")
             self._read_atomic_coordinates(file_obj=gaussian_file, data=data, masses_from_file=masses)
 
             # read frequencies, corresponding atomic displacements for a molecule
