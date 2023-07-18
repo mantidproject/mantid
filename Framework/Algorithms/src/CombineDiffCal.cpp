@@ -255,11 +255,12 @@ void CombineDiffCal::exec() {
         // get value from groupedCalibrationWS
         const auto wkspIndex = calibrationWS->getIndicesFromDetectorIDs({detid}).front();
         double difcArb;
-        if (difcArbMap.count(wkspIndex) > 0) {
-          difcArb = difcArbMap.find(wkspIndex)->second;
-        } else {
+        const auto difcArbIter = difcArbMap.find(wkspIndex);
+        if (difcArbIter == difcArbMap.end()) {
           difcArb = calibrationWS->spectrumInfo().diffractometerConstants(wkspIndex)[Kernel::UnitParams::difc];
           difcArbMap[wkspIndex] = difcArb;
+        } else {
+          difcArb = difcArbIter->second;
         }
 
         // difc and difa values from pixelCalibrationWS
