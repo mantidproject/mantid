@@ -127,7 +127,7 @@ variableScope:${CMAKE_SOURCE_DIR}/Framework/API/src/NotebookBuilder.cpp:157
 constVariable:${CMAKE_SOURCE_DIR}/Framework/API/src/NotebookBuilder.cpp:110
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:156
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:167
-variableScope:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:249
+variableScope:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:250
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:56
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:63
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:74
