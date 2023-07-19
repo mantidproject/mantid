@@ -22,6 +22,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/StartsWithValidator.h"
+#include "MantidKernel/UsageService.h"
 
 #include <memory>
 
@@ -144,6 +145,7 @@ void Fit::initializeMinimizer(size_t maxIterations) {
   std::string minimizerName = getPropertyValue("Minimizer");
   m_minimizer = API::FuncMinimizerFactory::Instance().createMinimizer(minimizerName);
   m_minimizer->initialize(m_costFunction, maxIterations);
+  registerMinimizerUsage();
 }
 
 /**
@@ -367,6 +369,15 @@ void Fit::createOutput() {
                                              m_costFunction->getValues());
     }
   }
+}
+
+/*
+Register usage of the minimizer with the UsageService
+*/
+void Fit::registerMinimizerUsage() {
+  std::stringstream ss;
+  ss << m_minimizer->name() << " Minimizer";
+  Kernel::UsageService::Instance().registerFeatureUsage(Kernel::FeatureType::Function, ss.str(), false);
 }
 
 /** Executes the algorithm
