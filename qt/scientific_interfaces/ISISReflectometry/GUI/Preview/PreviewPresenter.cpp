@@ -288,6 +288,10 @@ void PreviewPresenter::runSumBanks() {
 }
 
 void PreviewPresenter::runReduction() {
+  if (!m_model->getLoadedWs()) {
+    g_log.error("Unable to perform preview reduction because there is no run loaded");
+    return;
+  }
   m_view->disableMainWidget();
   m_view->setUpdateAngleButtonEnabled(false);
   // Ensure the angle is up to date

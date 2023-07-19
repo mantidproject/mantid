@@ -317,6 +317,22 @@ public:
     presenter.notifyUpdateAngle();
   }
 
+  void test_notify_update_angle_with_no_loaded_ws_does_not_run_reduction() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockJobManager = makeJobManager();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    auto mockRegionSelector = makeRegionSelector();
+
+    expectRunReductionNoLoadedWs(*mockModel, *mockJobManager);
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
+                                  std::move(mockDockedWidgets), std::move(mockRegionSelector)));
+
+    presenter.notifyUpdateAngle();
+  }
+
   void test_rectangular_roi_requested() {
     auto mockView = makeView();
     auto mockDockedWidgets = makePreviewDockedWidgets();
@@ -358,6 +374,23 @@ public:
 
     expectEditROIMode(*mockDockedWidgets);
     expectRunReduction(*mockView, *mockModel, *mockJobManager, *mockRegionSelector);
+    expectRegionSelectionChanged(*mockModel, *mockRegionSelector);
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
+                                  std::move(mockDockedWidgets), std::move(mockRegionSelector)));
+    presenter.notifyRegionChanged();
+  }
+
+  void test_notify_region_changed_with_no_loaded_ws_does_not_start_reduction() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockJobManager = makeJobManager();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+    auto mockRegionSelector = makeRegionSelector();
+
+    expectEditROIMode(*mockDockedWidgets);
+    expectRunReductionNoLoadedWs(*mockModel, *mockJobManager);
     expectRegionSelectionChanged(*mockModel, *mockRegionSelector);
 
     auto presenter =
@@ -623,7 +656,7 @@ private:
                                                      MockInstViewModel &mockInstViewModel) {
     auto ws = createLinearDetectorWorkspace();
 
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(3).WillOnce(Return(ws));
     EXPECT_CALL(mockModel, getDefaultTheta()).Times(1);
     EXPECT_CALL(mockInstViewModel, updateWorkspace(ws)).Times(1);
     EXPECT_CALL(mockDockedWidgets, setInstViewToolbarEnabled(true)).Times(1);
@@ -642,7 +675,7 @@ private:
     auto ws = createRectangularDetectorWorkspace();
     auto angle = 2.3;
 
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(3).WillOnce(Return(ws));
     EXPECT_CALL(mockModel, getDefaultTheta()).Times(1).WillOnce(Return(angle));
     EXPECT_CALL(mockView, setAngle(angle)).Times(1);
   }
@@ -650,14 +683,14 @@ private:
   void expectLoadWorkspaceCompletedSetsRunTitle(MockPreviewView &mockView, MockPreviewModel &mockModel) {
     auto ws = createRectangularDetectorWorkspace();
 
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(3).WillOnce(Return(ws));
     EXPECT_CALL(mockView, setTitle(ws->getTitle())).Times(1);
   }
 
   void expectInstViewModelUpdatedWithLoadedWorkspace(MockPreviewModel &mockModel,
                                                      MockInstViewModel &mockInstViewModel) {
     auto ws = createRectangularDetectorWorkspace();
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(3).WillOnce(Return(ws));
     EXPECT_CALL(mockInstViewModel, updateWorkspace(Eq(ws))).Times(1);
   }
 
@@ -687,7 +720,7 @@ private:
     EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
     EXPECT_CALL(mockModel, getSelectedBanks()).WillOnce(Return(previousDetIDsStr)).WillOnce(Return(detIDsStr));
     EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr.get()))).Times(1);
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
     EXPECT_CALL(mockModel, setSummedWs(Eq(ws))).Times(1);
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(0);
   }
@@ -810,6 +843,9 @@ private:
 
   void expectRunReduction(MockPreviewView &mockView, MockPreviewModel &mockModel, MockJobManager &mockJobManager,
                           MockRegionSelector &mockRegionSelector) {
+    auto ws = createLinearDetectorWorkspace();
+
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(mockView, disableMainWidget()).Times(1);
     EXPECT_CALL(mockView, setUpdateAngleButtonEnabled(false)).Times(1);
     // Check theta is set
@@ -830,6 +866,11 @@ private:
     EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Transmission, roi)).Times(1);
     // Check reduction is executed
     EXPECT_CALL(mockModel, reduceAsync(Ref(mockJobManager))).Times(1);
+  }
+
+  void expectRunReductionNoLoadedWs(MockPreviewModel &mockModel, MockJobManager &mockJobManager) {
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(mockModel, reduceAsync(Ref(mockJobManager))).Times(0);
   }
 
   void expectProcessingEnabled(MockBatchPresenter &mainPresenter) {
