@@ -46,10 +46,21 @@ def euphonic_calculate_modes(filename: str, cutoff: float = 20.0, gamma: bool = 
     """
 
     from math import ceil
-    from euphonic.cli.utils import force_constants_from_file
+    import euphonic
     from euphonic.util import mp_grid
+    from packaging import version
 
-    fc = force_constants_from_file(filename)
+    if version.parse(euphonic.__version__) < version.parse("1.0"):
+        from euphonic.cli.utils import force_constants_from_file
+
+        fc = force_constants_from_file(filename)
+    else:
+        from euphonic.cli.utils import load_data_from_file
+
+        fc = load_data_from_file(filename)
+        if not isinstance(fc, euphonic.ForceConstants):
+            raise ValueError(f"Did not find force constants in {filename}; cannot sample the Brillouin zone.")
+
     recip_lattice_lengths = np.linalg.norm(fc.crystal.reciprocal_cell().to("1/angstrom").magnitude, axis=1)
     mp_sampling = [ceil(x) for x in (cutoff * recip_lattice_lengths / (2 * np.pi))]
     qpts = mp_grid(mp_sampling)
