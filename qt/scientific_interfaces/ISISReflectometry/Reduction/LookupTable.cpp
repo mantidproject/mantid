@@ -43,7 +43,7 @@ boost::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double tol
 }
 
 boost::optional<LookupRow> LookupTable::findLookupRow(PreviewRow const &previewRow, double tolerance) const {
-  auto title = previewRow.getLoadedWs()->getTitle();
+  auto title = !previewRow.getLoadedWs() ? EMPTY_SEARCH_TITLE : previewRow.getLoadedWs()->getTitle();
   auto titleAndTheta = parseTitleAndThetaFromRunTitle(title);
 
   if (titleAndTheta.is_initialized()) {

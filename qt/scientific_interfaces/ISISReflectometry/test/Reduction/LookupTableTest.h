@@ -335,6 +335,18 @@ public:
     TS_ASSERT_EQUALS(emptyRegexRow, foundLookupRow);
   }
 
+  void test_no_loaded_ws_matches_only_empty_regex_for_preview_row() {
+    auto constexpr angle = 2.3;
+    auto emptyRegexRow = ModelCreationHelper::makeLookupRow(angle, boost::none);
+    auto regexRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay"));
+    auto table = LookupTable{emptyRegexRow, regexRow};
+
+    auto row = ModelCreationHelper::makePreviewRow({"1234"}, angle);
+    const auto foundLookupRow = table.findLookupRow(row, m_exactMatchTolerance);
+    TS_ASSERT(foundLookupRow);
+    TS_ASSERT_EQUALS(emptyRegexRow, foundLookupRow);
+  }
+
   void test_get_wildcard_row_returns_wildcard_row() {
     auto constexpr angle = 2.3;
     auto wildcardRow = ModelCreationHelper::makeWildcardLookupRow();
