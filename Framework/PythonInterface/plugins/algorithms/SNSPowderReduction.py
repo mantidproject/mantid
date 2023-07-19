@@ -358,6 +358,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 if bool(cache_dir) and Path(cache_dir).exists() is False:
                     issues["CacheDir"] = f"Directory {cache_dir} does not exist"
 
+        # can only specify vertical offset in one way
+        if (not self.getProperty("OffsetData").isDefault) and (not self.getProperty("PushDataPositive").isDefault):
+            issues["OffsetData"] = "Cannot specify with PushDataPositive"
+            issues["PushDataPositive"] = "Cannot specify with OffsetData"
+
         # We cannot clear the cache if property "CacheDir" has not been set
         if self.getProperty("CleanCache").value and not bool(self.getProperty("CacheDir").value):
             issues["CleanCache"] = 'Property "CacheDir" must be set in order to clean the cache'
