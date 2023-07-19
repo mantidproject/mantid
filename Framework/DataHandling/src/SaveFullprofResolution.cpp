@@ -439,7 +439,7 @@ std::string SaveFullprofResolution::toProf9IrfString() {
 }
 
 //
-/** Check wether a profile parameter map has the parameter
+/** Check whether a profile parameter map has the parameter
  */
 bool SaveFullprofResolution::has_key(std::map<std::string, double> profmap, const std::string &key) {
   map<string, double>::iterator fiter;
