@@ -38,12 +38,12 @@ LookupTable::LookupTable(std::initializer_list<LookupRow> rowsIn) : m_lookupRows
 std::vector<LookupRow> const &LookupTable::rows() const { return m_lookupRows; }
 
 boost::optional<LookupRow> LookupTable::findLookupRow(Row const &row, double tolerance) const {
-  auto title = !row.getParent() ? EMPTY_SEARCH_TITLE : row.getParent()->name();
+  auto const &title = !row.getParent() ? EMPTY_SEARCH_TITLE : row.getParent()->name();
   return findLookupRow(title, row.theta(), tolerance);
 }
 
 boost::optional<LookupRow> LookupTable::findLookupRow(PreviewRow const &previewRow, double tolerance) const {
-  auto title = !previewRow.getLoadedWs() ? EMPTY_SEARCH_TITLE : previewRow.getLoadedWs()->getTitle();
+  auto const title = !previewRow.getLoadedWs() ? EMPTY_SEARCH_TITLE : previewRow.getLoadedWs()->getTitle();
   auto titleAndTheta = parseTitleAndThetaFromRunTitle(title);
 
   if (titleAndTheta.is_initialized()) {
