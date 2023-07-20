@@ -44,6 +44,9 @@ sphinx:
 sphinx_bootstrap_theme:
   - 0.8.1
 
+scipy:
+  - '>=1.10.0'
+
 pyqt:
   - 5.15
 
