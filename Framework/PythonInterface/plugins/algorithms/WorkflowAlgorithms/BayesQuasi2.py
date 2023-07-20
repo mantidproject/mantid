@@ -8,34 +8,33 @@
 
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, WorkspaceGroupProperty, Progress
 from mantid.kernel import StringListValidator, Direction
-import mantid.simpleapi as s_api
 from mantid import logger
-from IndirectCommon import GetThetaQ, CheckHistZero, CheckHistSame
+from IndirectCommon import GetThetaQ
 
 from typing import Dict, List
 from numpy import ndarray
+import numpy as np
 
 try:
-    from quickBayes.fitting.fit_engine import FitEngine
+    from quickBayes.workflow.QlData import QLData
 except (Exception, Warning):
     import subprocess
 
     print(
         subprocess.Popen(
-            "python -m pip install -U quickBayes==1.0.0b7",
+            "python -m pip install -U quickBayes==1.0.0b12",
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             stdin=subprocess.PIPE,
         ).communicate()
     )
-    from quickBayes.fitting.fit_engine import FitEngine
+    from quickBayes.workflow.QlData import QLData
 from quickBayes.functions.qldata_function import QlDataFunction
 from quickBayes.utils.general import get_background_function
-from quickBayes.workflow.QlData import QLData
+
 from quickBayes.functions.qse_function import QSEFunction
 from quickBayes.workflow.QSE import QlStretchedExp
-import numpy as np
 
 
 class BayesQuasi2(PythonAlgorithm):
@@ -226,7 +225,7 @@ class BayesQuasi2(PythonAlgorithm):
                 e_data.append(results_errors[key])
                 axis_names.append(key)
 
-        params = self.create_ws(
+        _ = self.create_ws(
             OutputWorkspace=f"{name}_results",
             DataX=np.array(x_data),
             DataY=np.array(y_data),
@@ -238,7 +237,7 @@ class BayesQuasi2(PythonAlgorithm):
             VerticalAxisValues=axis_names,
         )
 
-        prob_ws = self.create_ws(
+        _ = self.create_ws(
             OutputWorkspace=f"{name}_prob",
             DataX=np.array(x_data),
             DataY=np.array(prob),
