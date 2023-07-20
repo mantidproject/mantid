@@ -598,13 +598,13 @@ public:
     align_and_focus.setProperty("ResampleX", 1000);
     align_and_focus.setProperty("Dspacing", false);
 
-    const std::string INSTR("HRPD");
+    const std::string instrfilename("HRPD_Definition_pre20210301.xml");
     const std::string calfilename("hrpd_new_072_01.cal");
     const std::string grpfilename("hrpd_new_072_01_grp.xml"); // TODO add to external data repo
     if (useCalfile)
       align_and_focus.setPropertyValue("CalFilename", calfilename);
     else if (useCalWksp) {
-      loadDiffCal(INSTR, calfilename, false, true, true);
+      loadDiffCal(instrfilename, calfilename, false, true, true);
       // didn't load group
       align_and_focus.setPropertyValue("CalibrationWorkspace", m_loadDiffWSName + "_cal");
       align_and_focus.setPropertyValue("MaskWorkspace", m_loadDiffWSName + "_mask");
@@ -613,7 +613,7 @@ public:
     if (useGroupfile)
       align_and_focus.setPropertyValue("GroupFilename", grpfilename);
     else if (useGroupWksp) {
-      loadDiffCal(INSTR, calfilename, true, false, true);
+      loadDiffCal(instrfilename, calfilename, true, false, true);
       align_and_focus.setPropertyValue("GroupingWorkspace", m_loadDiffWSName + "_group");
       // didn't load calibration
       align_and_focus.setPropertyValue("MaskWorkspace", m_loadDiffWSName + "_mask");
@@ -813,11 +813,11 @@ public:
   }
 
   /* Utility functions */
-  void loadDiffCal(const std::string &instrname, const std::string &calfilename, bool group, bool cal, bool mask) {
+  void loadDiffCal(const std::string &instrfilename, const std::string &calfilename, bool group, bool cal, bool mask) {
     LoadDiffCal loadDiffAlg;
     loadDiffAlg.initialize();
     loadDiffAlg.setPropertyValue("Filename", calfilename);
-    loadDiffAlg.setPropertyValue("InstrumentName", instrname);
+    loadDiffAlg.setPropertyValue("InstrumentFilename", instrfilename);
     loadDiffAlg.setProperty("MakeGroupingWorkspace", group);
     loadDiffAlg.setProperty("MakeCalWorkspace", cal);
     loadDiffAlg.setProperty("MakeMaskWorkspace", mask);
