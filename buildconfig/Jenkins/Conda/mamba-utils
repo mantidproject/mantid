@@ -33,7 +33,7 @@ setup_mamba () {
 create_and_activate_env() {
   #on ARM MAC OS, create x64 env rather than default ARM env.
   if [[ $OSTYPE == 'darwin'* && $(uname -p) == 'arm' ]]; then
-    local conda_subdir_str="CONDA_SUBDIR=osx-64"
+    local conda_subdir_str="osx-64"
   else
     local conda_subdir_str=""
   fi
