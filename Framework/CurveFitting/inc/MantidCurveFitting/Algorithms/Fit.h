@@ -99,7 +99,7 @@ private:
   void finalizeMinimizer(size_t nIterations);
   void copyMinimizerOutput(const API::IFuncMinimizer &minimizer);
   void createOutput();
-  void registerMinimizerUsage();
+  void registerMinimizerAndCostFuncUsage();
   /// The cost function
   std::shared_ptr<CostFunctions::CostFuncFitting> m_costFunction;
   /// The minimizer

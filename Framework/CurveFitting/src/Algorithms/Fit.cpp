@@ -145,7 +145,7 @@ void Fit::initializeMinimizer(size_t maxIterations) {
   std::string minimizerName = getPropertyValue("Minimizer");
   m_minimizer = API::FuncMinimizerFactory::Instance().createMinimizer(minimizerName);
   m_minimizer->initialize(m_costFunction, maxIterations);
-  registerMinimizerUsage();
+  registerMinimizerAndCostFuncUsage();
 }
 
 /**
@@ -372,11 +372,14 @@ void Fit::createOutput() {
 }
 
 /*
-Register usage of the minimizer with the UsageService
+Register usage of the minimizer and cost function with the UsageService
 */
-void Fit::registerMinimizerUsage() {
+void Fit::registerMinimizerAndCostFuncUsage() {
   std::stringstream ss;
   ss << m_minimizer->name() << " Minimizer";
+  Kernel::UsageService::Instance().registerFeatureUsage(Kernel::FeatureType::Function, ss.str(), false);
+  ss.str("");
+  ss << m_costFunction->name() << " Cost Function";
   Kernel::UsageService::Instance().registerFeatureUsage(Kernel::FeatureType::Function, ss.str(), false);
 }
 
