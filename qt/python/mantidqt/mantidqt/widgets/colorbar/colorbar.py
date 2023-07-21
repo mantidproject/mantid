@@ -274,6 +274,8 @@ class ColorbarWidget(QWidget):
         else:
             self._manual_clim()
 
+        self._set_cmin_cmax_box_outline(self.cmin)
+        self._set_cmin_cmax_box_outline(self.cmax)
         self.colorbar.mappable.set_clim(self.cmin_value, self.cmax_value)
         self.redraw()
 
