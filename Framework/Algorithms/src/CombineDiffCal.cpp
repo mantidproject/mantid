@@ -83,7 +83,7 @@ void CombineDiffCal::init() {
 }
 
 /// sort the calibration table according increasing values in column "detid"
-API::ITableWorkspace_sptr CombineDiffCal::sortTableWorkspace(DataObjects::TableWorkspace_sptr &table) {
+DataObjects::TableWorkspace_sptr CombineDiffCal::sortTableWorkspace(DataObjects::TableWorkspace_sptr &table) {
   auto alg = createChildAlgorithm("SortTableWorkspace");
   alg->setLoggingOffset(1);
   alg->setProperty("InputWorkspace", table);
@@ -91,7 +91,8 @@ API::ITableWorkspace_sptr CombineDiffCal::sortTableWorkspace(DataObjects::TableW
   alg->setProperty("Columns", ColNames::DETID);
   alg->executeAsChildAlg();
 
-  return alg->getProperty("OutputWorkspace");
+  API::ITableWorkspace_sptr output = alg->getProperty("OutputWorkspace");
+  return std::dynamic_pointer_cast<DataObjects::TableWorkspace>(output);
 }
 
 bool findColumn(const std::vector<std::string> &columnNames, const std::string &name) {
@@ -210,10 +211,10 @@ void CombineDiffCal::exec() {
   const API::MatrixWorkspace_sptr calibrationWS = getProperty(PropertyNames::ARB_CALIB);
 
   DataObjects::TableWorkspace_sptr presortedGroupedCalibrationWS = getProperty(PropertyNames::GROUP_CALIB);
-  const API::ITableWorkspace_sptr groupedCalibrationWS = sortTableWorkspace(presortedGroupedCalibrationWS);
+  const auto groupedCalibrationWS = sortTableWorkspace(presortedGroupedCalibrationWS);
 
   DataObjects::TableWorkspace_sptr presortedPixelCalibrationWS = getProperty(PropertyNames::PIXEL_CALIB);
-  const API::ITableWorkspace_sptr pixelCalibrationWS = sortTableWorkspace(presortedPixelCalibrationWS);
+  const auto pixelCalibrationWS = sortTableWorkspace(presortedPixelCalibrationWS);
 
   const DataObjects::MaskWorkspace_sptr maskWorkspace = getProperty(PropertyNames::MASK_WKSP);
 
@@ -241,7 +242,7 @@ void CombineDiffCal::exec() {
   // this will calculate an updated row or copy the row if it is missing from the pixel calibration
   Mantid::API::TableRow groupedCalibrationRow = groupedCalibrationWS->getFirstRow();
   do {
-    const int detid = groupedCalibrationRow.Int(0);
+    const int detid = groupedCalibrationWS->cell_cast<int>(groupedCalibrationRow.row(), 0);
     detidsInGrpCalib.insert(detid);
     bool prevDifValsExist = false;
 
@@ -250,7 +251,7 @@ void CombineDiffCal::exec() {
           binarySearchForRow(pixelCalibrationWS, detid, lastStart);
       if (pixelCalibrationRow) {
         // value from groupedCalibrationRow
-        const double difcPD = groupedCalibrationRow.Double(1);
+        const double difcPD = groupedCalibrationWS->cell_cast<double>(groupedCalibrationRow.row(), 1);
 
         // get value from groupedCalibrationWS
         const auto wkspIndex = calibrationWS->getIndicesFromDetectorIDs({detid}).front();
@@ -264,15 +265,15 @@ void CombineDiffCal::exec() {
         }
 
         // difc and difa values from pixelCalibrationWS
-        const double difcPrev = pixelCalibrationRow->Double(1);
-        const double difaPrev = pixelCalibrationRow->Double(2);
+        const double difcPrev = pixelCalibrationWS->cell_cast<double>(pixelCalibrationRow->row(), 1);
+        const double difaPrev = pixelCalibrationWS->cell_cast<double>(pixelCalibrationRow->row(), 2);
 
         // calculate new difc and difa
         const double difcNew = (difcPD / difcArb) * difcPrev;
         const double difaNew = ((difcPD / difcArb) * (difcPD / difcArb)) * difaPrev;
 
         // copy tzero from pixelCalibrationWS
-        const double tzeroNew = pixelCalibrationRow->Double(3);
+        const double tzeroNew = pixelCalibrationWS->cell_cast<double>(pixelCalibrationRow->row(), 3);
 
         Mantid::API::TableRow newRow = outputWorkspace->appendRow();
         newRow << detid << difcNew << difaNew << tzeroNew;
