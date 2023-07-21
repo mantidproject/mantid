@@ -169,15 +169,6 @@ class AbstractInst(object):
 
         return run_details.splined_vanadium_file_path
 
-    def get_vanadium_normalization_cutoff(self):
-        """
-        Returns the cutoff value used to limit large values that can result from the vanadium normalization process.
-        It is used by ReplaceSpecialValues algorithm to replace values that exceed the cutoff with zero.
-
-        :return: The cutoff value used in the vanadium normalization process.
-        """
-        return None
-
     # Mandatory overrides
 
     def _get_run_details(self, run_number_string):

@@ -52,7 +52,6 @@ def run_diffraction_focusing(
     absorb_corrections=False,
     empty_can_subtraction_method="Simple",
     sample_details=None,
-    vanadium_normalization_cutoff=None,
     paalman_pings_events_per_point=None,
     simple_events_per_point=None,
 ):
@@ -77,7 +76,6 @@ def run_diffraction_focusing(
         sample_empty_scale=sample_empty_scale,
         absorb_corrections=absorb_corrections,
         empty_can_subtraction_method=empty_can_subtraction_method,
-        vanadium_normalization_cutoff=vanadium_normalization_cutoff,
         paalman_pings_events_per_point=paalman_pings_events_per_point,
         simple_events_per_point=simple_events_per_point,
     )
@@ -217,7 +215,6 @@ class OSIRISDiffractionFocusingWithSimpleAbsorptionCorrection(_OSIRISDiffraction
             empty_can_subtraction_method="Simple",
             sample_details=sample_details,
             simple_events_per_point=100,
-            vanadium_normalization_cutoff=100000000,
         )
 
     def skipTests(self):
@@ -250,7 +247,6 @@ class OSIRISDiffractionFocusingWithPaalmanPingsAbsorptionCorrection(_OSIRISDiffr
             empty_can_subtraction_method="PaalmanPings",
             sample_details=sample_details,
             paalman_pings_events_per_point=100,
-            vanadium_normalization_cutoff=100000000,
         )
 
     def skipTests(self):
