@@ -11,7 +11,7 @@ from sans.common.enums import BinningType
 from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from ui.sans_isis.summation_settings_widget import SummationSettingsWidget
-from test.SANS.gui_logic.fake_signal import FakeSignal
+from fake_signal import FakeSignal
 
 
 class SummationSettingsPresenterTest(unittest.TestCase):
