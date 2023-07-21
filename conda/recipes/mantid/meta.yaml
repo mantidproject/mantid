@@ -60,6 +60,7 @@ requirements:
     - h5py
     - {{ pin_compatible("hdf5", max_pin="x.x") }}
     - lib3mf  # [win]
+    - libgsl {{ libgsl }}
     - nexus
     - {{ pin_compatible("numpy", upper_bound="1.25") }}
     - {{ pin_compatible("occt", max_pin="x.x.x") }}

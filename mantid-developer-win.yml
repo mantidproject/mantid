@@ -16,6 +16,7 @@ dependencies:
   - h5py
   - hdf5>=1.12,<1.13
   - jsoncpp>=1.9.4,<2
+  - libgsl=so.25
   - librdkafka>=1.6.0
   - lib3mf # windows only
   - muparser>=2.3.2
