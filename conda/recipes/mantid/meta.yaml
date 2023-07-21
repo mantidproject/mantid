@@ -67,7 +67,7 @@ requirements:
     - python
     - python-dateutil
     - pyyaml
-    - scipy
+    - scipy {{ scipy }}
     - openssl
     - euphonic {{ euphonic }}
     - toml
