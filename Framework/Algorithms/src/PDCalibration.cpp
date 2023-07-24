@@ -188,6 +188,11 @@ const std::string PDCalibration::summary() const {
 void PDCalibration::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::InOut),
                   "Input signal workspace");
+  declareProperty("StartWorkspaceIndex", EMPTY_INT(), "Starting workspace index for fit");
+  declareProperty("StopWorkspaceIndex", EMPTY_INT(),
+                  "Last workspace index to fit (which is included). "
+                  "If a value larger than the workspace index of last spectrum, "
+                  "then the workspace index of last spectrum is used.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("TofBinning", std::make_shared<RebinParamsValidator>()),
                   "Min, Step, and Max of time-of-flight bins. "
@@ -282,6 +287,8 @@ void PDCalibration::init() {
   // make group for Input properties
   std::string inputGroup("Input Options");
   setPropertyGroup("InputWorkspace", inputGroup);
+  setPropertyGroup("StartWorkspaceIndex", inputGroup);
+  setPropertyGroup("StopWorkspaceIndex", inputGroup);
   setPropertyGroup("TofBinning", inputGroup);
   setPropertyGroup("PreviousCalibrationFile", inputGroup);
   setPropertyGroup("PreviousCalibrationTable", inputGroup);
@@ -432,6 +439,11 @@ void PDCalibration::exec() {
   m_uncalibratedWS = loadAndBin();
   setProperty("InputWorkspace", m_uncalibratedWS);
 
+  m_startWorkspaceIndex = isDefault("StartWorkspaceIndex") ? 0 : getProperty("StartWorkspaceIndex");
+  m_stopWorkspaceIndex = isDefault("StartWorkspaceIndex")
+                             ? static_cast<int>(m_uncalibratedWS->getNumberHistograms() - 1)
+                             : getProperty("StopWorkspaceIndex");
+
   auto uncalibratedEWS = std::dynamic_pointer_cast<EventWorkspace>(m_uncalibratedWS);
   auto isEvent = bool(uncalibratedEWS);
 
@@ -462,7 +474,7 @@ void PDCalibration::exec() {
                    << "\", found peak widths and resolution should not be "
                       "directly compared to delta-d/d";
   }
-  auto NUMHIST = static_cast<int>(m_uncalibratedWS->getNumberHistograms());
+  auto NUMHIST = m_stopWorkspaceIndex - m_startWorkspaceIndex + 1;
 
   // A pair of workspaces, one containing the nominal peak centers in TOF units,
   // the other containing the left and right fitting ranges around each nominal
@@ -481,6 +493,11 @@ void PDCalibration::exec() {
   algFitPeaks->setLoggingOffset(3);
 
   algFitPeaks->setProperty("InputWorkspace", m_uncalibratedWS);
+
+  // limit the spectra to fit
+  algFitPeaks->setProperty("StartWorkspaceIndex", static_cast<int>(m_startWorkspaceIndex));
+  algFitPeaks->setProperty("StopWorkspaceIndex", static_cast<int>(m_stopWorkspaceIndex));
+
   // theoretical peak center
   algFitPeaks->setProperty("PeakCentersWorkspace", tof_peak_center_ws);
 
@@ -562,7 +579,7 @@ void PDCalibration::exec() {
   // to obtain difc, difa, and tzero for each pixel
 
    PRAGMA_OMP(parallel for schedule(dynamic, 1))
-   for (int wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
+   for (int wkspIndex = m_startWorkspaceIndex; wkspIndex <= m_stopWorkspaceIndex; ++wkspIndex) {
      PARALLEL_START_INTERRUPT_REGION
      if ((isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) || !spectrumInfo.hasDetectors(wkspIndex) ||
          spectrumInfo.isMonitor(wkspIndex)) {
@@ -590,8 +607,8 @@ void PDCalibration::exec() {
      // height of fitted peak centers, default `nan` for failed fitted peaks
      std::vector<double> height_vec_full(numPeaks, std::nan(""));
      std::vector<double> weights; // weights for diff const fits
-     // for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
-     const size_t rowNumInFitTableOffset = wkspIndex * numPeaks;
+     // row where first peak occurs
+     const size_t rowNumInFitTableOffset = (wkspIndex - m_startWorkspaceIndex) * numPeaks;
      // We assumed that the current spectrum contains peaks near the nominal
      // peak centers. Now we check how many peaks we actually found
      for (size_t peakIndex = 0; peakIndex < numPeaks; ++peakIndex) {
@@ -1042,8 +1059,13 @@ std::tuple<double, double, double> PDCalibration::getDSpacingToTof(const std::se
 
 void PDCalibration::setCalibrationValues(const detid_t detid, const double difc, const double difa,
                                          const double tzero) {
+  // don't set values that aren't in the table
+  const auto rowIter = m_detidToRow.find(detid);
+  if (rowIter == m_detidToRow.end())
+    return;
 
-  auto rowNum = m_detidToRow[detid];
+  // get the row number
+  auto rowNum = rowIter->second;
 
   // detid is already there
   m_calibrationTable->cell<double>(rowNum, 1) = difc;
@@ -1115,6 +1137,44 @@ API::MatrixWorkspace_sptr PDCalibration::rebin(API::MatrixWorkspace_sptr wksp) {
   return wksp;
 }
 
+std::set<detid_t> PDCalibration::detIdsForTable() {
+  std::set<detid_t> detids;
+
+  // return early since everything is being used
+  if (isDefault("StartWorkspaceIndex") && isDefault("StopWorkspaceIndex"))
+    return detids;
+
+  // get the indices to loop over
+  std::size_t startIndex = 0;
+  if (!isDefault("StartWorkspaceIndex"))
+    startIndex = static_cast<std::size_t>(m_startWorkspaceIndex);
+  std::size_t stopIndex = m_uncalibratedWS->getNumberHistograms();
+  if (!isDefault("StopWorkspaceIndex"))
+    stopIndex = static_cast<std::size_t>(m_stopWorkspaceIndex);
+
+  for (std::size_t i = startIndex; i <= stopIndex; ++i) {
+    const auto detidsForSpectrum = m_uncalibratedWS->getSpectrum(i).getDetectorIDs();
+    for (const auto &detid : detidsForSpectrum) {
+      detids.emplace(detid);
+    }
+  }
+  return detids;
+}
+
+void PDCalibration::createCalTableHeader() {
+  // create a new workspace
+  m_calibrationTable = std::make_shared<DataObjects::TableWorkspace>();
+  // TODO m_calibrationTable->setTitle("");
+  m_calibrationTable->addColumn("int", "detid");
+  m_calibrationTable->addColumn("double", "difc");
+  m_calibrationTable->addColumn("double", "difa");
+  m_calibrationTable->addColumn("double", "tzero");
+  if (m_hasDasIds)
+    m_calibrationTable->addColumn("int", "dasid");
+  m_calibrationTable->addColumn("double", "tofmin");
+  m_calibrationTable->addColumn("double", "tofmax");
+}
+
 /**
  * Read a calibration table workspace provided by user, or load from a file
  * provided by User
@@ -1147,24 +1207,21 @@ void PDCalibration::createCalTableFromExisting() {
 
   m_hasDasIds = hasDasIDs(calibrationTableOld);
 
+  const auto includedDetids = detIdsForTable();
+  const bool limitDetids = !includedDetids.empty();
+
   // generate the map of detid -> row
   API::ColumnVector<int> detIDs = calibrationTableOld->getVector("detid");
   const size_t numDets = detIDs.size();
+  std::size_t rowNum = 0;
   for (size_t i = 0; i < numDets; ++i) {
-    m_detidToRow[static_cast<detid_t>(detIDs[i])] = i;
+    // only add rows for detids that exist in input workspace
+    if ((!limitDetids) || (includedDetids.count(detIDs[i]) > 0))
+      m_detidToRow[static_cast<detid_t>(detIDs[i])] = rowNum++;
   }
 
   // create a new workspace
-  m_calibrationTable = std::make_shared<DataObjects::TableWorkspace>();
-  // TODO m_calibrationTable->setTitle("");
-  m_calibrationTable->addColumn("int", "detid");
-  m_calibrationTable->addColumn("double", "difc");
-  m_calibrationTable->addColumn("double", "difa");
-  m_calibrationTable->addColumn("double", "tzero");
-  if (m_hasDasIds)
-    m_calibrationTable->addColumn("int", "dasid");
-  m_calibrationTable->addColumn("double", "tofmin");
-  m_calibrationTable->addColumn("double", "tofmax");
+  this->createCalTableHeader();
 
   // copy over the values
   for (std::size_t rowNum = 0; rowNum < calibrationTableOld->rowCount(); ++rowNum) {
@@ -1202,24 +1259,21 @@ void PDCalibration::createCalTableNew() {
   API::MatrixWorkspace_const_sptr difcWS = alg->getProperty("OutputWorkspace");
 
   // create a new workspace
-  m_calibrationTable = std::make_shared<DataObjects::TableWorkspace>();
-  // TODO m_calibrationTable->setTitle("");
-  m_calibrationTable->addColumn("int", "detid");
-  m_calibrationTable->addColumn("double", "difc");
-  m_calibrationTable->addColumn("double", "difa");
-  m_calibrationTable->addColumn("double", "tzero");
-  m_hasDasIds = false;
-  m_calibrationTable->addColumn("double", "tofmin");
-  m_calibrationTable->addColumn("double", "tofmax");
-  setProperty("OutputCalibrationTable", m_calibrationTable);
+  this->createCalTableHeader();
 
   const detid2index_map allDetectors = difcWS->getDetectorIDToWorkspaceIndexMap(false);
+
+  const auto includedDetids = detIdsForTable();
+  const bool limitDetids = !includedDetids.empty();
 
   // copy over the values
   auto it = allDetectors.begin();
   size_t i = 0;
   for (; it != allDetectors.end(); ++it) {
     const detid_t detID = it->first;
+    // only add rows for detids that exist in input workspace
+    if (limitDetids && (includedDetids.count(detID) == 0))
+      continue;
     m_detidToRow[detID] = i++;
     const size_t wi = it->second;
     API::TableRow newRow = m_calibrationTable->appendRow();
