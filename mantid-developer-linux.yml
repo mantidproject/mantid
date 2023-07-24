@@ -39,7 +39,7 @@ dependencies:
   - qt-gtk-platformtheme # Use native theme on GTK-based systems, which provides a significantly better performing file browser.
   - requests>=2.25.1
   - scipy>=1.10.0
-  - setuptools=47.0.0 # Pinned purposefully due to incompatibility with later versions
+  - setuptools=49.6.0 # Pinned purposefully due to incompatibility with later versions
   - sphinx >= 4.5.*
   - sphinx_bootstrap_theme>=0.8.1
   - tbb-devel=2021.*
