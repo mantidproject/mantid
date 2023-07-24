@@ -442,6 +442,18 @@ void FitPeaks::init() {
 std::map<std::string, std::string> FitPeaks::validateInputs() {
   map<std::string, std::string> issues;
 
+  // check that min/max spectra indices make sense - only matters if both are specified
+  if (!(isDefault(PropertyNames::START_WKSP_INDEX) && isDefault(PropertyNames::START_WKSP_INDEX))) {
+    const int startIndex = getProperty(PropertyNames::START_WKSP_INDEX);
+    const int stopIndex = getProperty(PropertyNames::STOP_WKSP_INDEX);
+    if (startIndex > stopIndex) {
+      const std::string msg =
+          PropertyNames::START_WKSP_INDEX + " must be less than or equal to " + PropertyNames::STOP_WKSP_INDEX;
+      issues[PropertyNames::START_WKSP_INDEX] = msg;
+      issues[PropertyNames::STOP_WKSP_INDEX] = msg;
+    }
+  }
+
   // check that the peak parameters are in parallel properties
   bool haveCommonPeakParameters(false);
   std::vector<string> suppliedParameterNames = getProperty(PropertyNames::PEAK_PARAM_NAMES);
