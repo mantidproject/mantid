@@ -189,9 +189,17 @@ std::shared_ptr<Mantid::API::TableRow> binarySearchForRow(const API::ITableWorks
   return nullptr;
 }
 
-void addRowFromPreviousCalibration(const DataObjects::TableWorkspace_sptr &ws, Mantid::API::TableRow row) {
+void addRowFromPreviousCalibration(DataObjects::TableWorkspace_sptr &ws,
+                                   const DataObjects::TableWorkspace_sptr &previousTable, const int rowNum) {
+  // get the old values
+  const int detid = previousTable->cell_cast<int>(rowNum, 0);
+  const double difc = previousTable->cell_cast<double>(rowNum, 1);
+  const double difa = previousTable->cell_cast<double>(rowNum, 2);
+  const double tzero = previousTable->cell_cast<double>(rowNum, 3);
+
+  // copy to new table workspace
   Mantid::API::TableRow newRow = ws->appendRow();
-  newRow << row.Int(0) << row.Double(1) << row.Double(2) << row.Double(3);
+  newRow << detid << difc << difa << tzero;
 }
 
 // Per Pixel:
@@ -286,7 +294,7 @@ void CombineDiffCal::exec() {
 
     if (!prevDifValsExist) {
       // copy from group calibration
-      addRowFromPreviousCalibration(outputWorkspace, groupedCalibrationRow);
+      addRowFromPreviousCalibration(outputWorkspace, groupedCalibrationWS, groupedCalibrationRow.row());
     }
 
     prog.report();
@@ -295,17 +303,17 @@ void CombineDiffCal::exec() {
   // loop through rows in the pixel calibration table
   // this will add rows that are not already represented
   bool shouldSortOutputTable{false};
-  Mantid::API::TableRow pixelCalibrationRow = pixelCalibrationWS->getFirstRow();
-  do {
-    const int detid = pixelCalibrationRow.Int(0);
+  const std::size_t NUM_PIXEL_ROW = pixelCalibrationWS->rowCount();
+  for (std::size_t i = 0; i < NUM_PIXEL_ROW; ++i) {
+    const int detid = pixelCalibrationWS->cell_cast<int>(i, 0);
     if (!(maskWorkspace && maskWorkspace->isMasked(detid))) {
       if (detidsInGrpCalib.count(detid) == 0) {
         // copy from pixel calibration
-        addRowFromPreviousCalibration(outputWorkspace, pixelCalibrationRow);
+        addRowFromPreviousCalibration(outputWorkspace, pixelCalibrationWS, i);
         shouldSortOutputTable = true;
       }
     }
-  } while (pixelCalibrationRow.next());
+  }
 
   // if rows were copied from the pixel calibration, the output should be sorted
   if (shouldSortOutputTable)
