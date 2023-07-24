@@ -772,23 +772,12 @@ void SaveNXcanSAS::init() {
                                                   "electron"};
   declareProperty("RadiationSource", "Spallation Neutron Source",
                   std::make_shared<Kernel::StringListValidator>(radiationSourceOptions), "The type of radiation used.");
-  std::vector<std::string> geometryOptions{"Cylinder", "FlatPlate", "Disc"};
-  declareProperty("Geometry", "Disc", std::make_shared<Kernel::StringListValidator>(geometryOptions),
-                  "The geometry type of the collimation.");
-  declareProperty("SampleHeight", 0.0,
-                  "The height of the collimation element in mm. If specified as 0 it will not be recorded.");
-  declareProperty("SampleWidth", 0.0,
-                  "The width of the collimation element in mm. If specified as 0 it will not be recorded.");
   declareProperty("DetectorNames", "",
                   "Specify in a comma separated list, which detectors to store "
                   "information about; \nwhere each name must match a name "
                   "given for a detector in the [[IDF|instrument definition "
                   "file (IDF)]]. \nIDFs are located in the instrument "
                   "sub-directory of the Mantid install directory.");
-
-  declareProperty("SampleThickness", 0.0,
-                  "The thickness of the sample in mm. If specified as 0 it will not be recorded.");
-
   declareProperty(
       std::make_unique<API::WorkspaceProperty<>>("Transmission", "", Kernel::Direction::Input, PropertyMode::Optional,
                                                  std::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
@@ -805,6 +794,16 @@ void SaveNXcanSAS::init() {
   declareProperty("SampleDirectRunNumber", "", "The run number for the sample direct workspace. Optional.");
   declareProperty("CanScatterRunNumber", "", "The run number for the can scatter workspace. Optional.");
   declareProperty("CanDirectRunNumber", "", "The run number for the can direct workspace. Optional.");
+
+  std::vector<std::string> const geometryOptions{"Cylinder", "FlatPlate", "Disc"};
+  declareProperty("Geometry", "", std::make_shared<Kernel::StringListValidator>(geometryOptions),
+                  "The geometry type of the collimation.");
+  declareProperty("SampleHeight", 0.0,
+                  "The height of the collimation element in mm. If specified as 0 it will not be recorded.");
+  declareProperty("SampleWidth", 0.0,
+                  "The width of the collimation element in mm. If specified as 0 it will not be recorded.");
+  declareProperty("SampleThickness", 0.0,
+                  "The thickness of the sample in mm. If specified as 0 it will not be recorded.");
 }
 
 std::map<std::string, std::string> SaveNXcanSAS::validateInputs() {
