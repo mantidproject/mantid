@@ -41,11 +41,37 @@ class DetectorInfo:
     TOTAL_PIXELS = NUM_TUBES * NUM_PIXELS_IN_TUBE
     DEFAULT_PIXEL_SIZE = (522.2 + 519.2) / 511  # Default size of a pixel in real space in mm
     NUM_TUBES_PER_MODULE = 24
+    REAR_NAME = "rear"
+    FRONT_NAME = "front"
 
 
 class FuncForm(Enum):
     EDGES = 1
     FLAT_TOP_PEAK = 2
+
+
+class Prop:
+    STRIP_POSITIONS = "StripPositions"
+    DATA_FILES = "DataFiles"
+    HALF_DET_WIDTH = "HalfDetectorWidth"
+    STRIP_WIDTH = "StripWidth"
+    STRIP_TO_TUBE_CENTRE = "StripToTubeCentre"
+    SIDE_OFFSET = "SideOffset"
+    ENCODER = "EncoderAtBeamCentre"
+    ENCODER_REAR_260 = "EncoderAtBeamCentreForRear260Strip"
+    REAR_DET = "RearDetector"
+    THRESHOLD = "Threshold"
+    SKIP_TUBES_ON_ERROR = "SkipTubesOnEdgeFindingError"
+    MARGIN = "Margin"
+    START_PIXEL = "StartingPixel"
+    END_PIXEL = "EndingPixel"
+    FIT_EDGES = "FitEdges"
+    TIME_BINS = "Timebins"
+    BACKGROUND = "Background"
+    VERTICAL_OFFSET = "VerticalOffset"
+    CVALUE_THRESHOLD = "CValueThreshold"
+    OUTPUT_FILE = "OutputFile"
+    SAVE_INPUT_WS = "SaveIntegratedWorkspaces"
 
 
 class SANSTubeCalibration(DataProcessorAlgorithm):
@@ -59,7 +85,12 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
     _CAL_TABLE_NAME = "CalibTable"
     _INF = sys.float_info.max  # Acceptable approximation for infinity
     _MERGED_WS_NAME = "original"
+    _CALIBRATED_WS_NAME = "result"
     _NEXUS_SUFFIX = ".nxs"
+    _PROTON_CHRG_LOG = "proton_charge_by_period"
+    _REAR_DET_Z_LOG = "Rear_Det_Z"
+    _FRONT_DET_Z_LOG = "Front_Det_Z"
+    _BEAM_STOPPER_STRIP_POSITION = 260
 
     def category(self):
         return "SANS\\Calibration"
@@ -69,66 +100,69 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            "StripPositions", [1040, 920, 755, 590, 425, 260, 95, 5], direction=Direction.Input, doc="Which strip positions were used"
+            Prop.STRIP_POSITIONS, [1040, 920, 755, 590, 425, 260, 95, 5], direction=Direction.Input, doc="Which strip positions were used"
         )
         self.declareProperty(
-            "DataFiles",
+            Prop.DATA_FILES,
             ["SANS2D00064390.nxs", "SANS2D00064391.nxs", "SANS2D00064392.nxs", "SANS2D00064393.nxs", "SANS2D00064388.nxs"],
             direction=Direction.Input,
             doc="Which strip positions were used for which runs",
         )
-        self.declareProperty("HalfDetectorWidth", 520.7, direction=Direction.Input)
-        self.declareProperty("StripWidth", 38.0, direction=Direction.Input)
-        self.declareProperty("StripToTubeCentre", 21.0, direction=Direction.Input)
-        self.declareProperty("SideOffset", 0.0, direction=Direction.Input)
-        self.declareProperty("EncoderAtBeamCentre", 270.0, direction=Direction.Input)
+        self.declareProperty(Prop.HALF_DET_WIDTH, 520.7, direction=Direction.Input)
+        self.declareProperty(Prop.STRIP_WIDTH, 38.0, direction=Direction.Input)
+        self.declareProperty(Prop.STRIP_TO_TUBE_CENTRE, 21.0, direction=Direction.Input)
+        self.declareProperty(Prop.SIDE_OFFSET, 0.0, direction=Direction.Input)
+        self.declareProperty(Prop.ENCODER, 270.0, direction=Direction.Input)
         self.declareProperty(
-            "EncoderAtBeamCentreForRear260Strip",
+            Prop.ENCODER_REAR_260,
             470.0,
             direction=Direction.Input,
             doc="Encoder at beam centre position for the 260 strip on the rear detector."
             "This is used for rear detector calibration only.",
         )
-        self.declareProperty("RearDetector", True, direction=Direction.Input, doc="Whether to use the front or rear detector.")
+        self.declareProperty(Prop.REAR_DET, True, direction=Direction.Input, doc="Whether to use the front or rear detector.")
         self.declareProperty(
-            "Threshold",
+            Prop.THRESHOLD,
             600,
             direction=Direction.Input,
             doc="Threshold is the number of counts past which we class something as an edge.  "
             "This is quite sensitive to change, since we sometimes end up picking.",
         )
         self.declareProperty(
-            "SkipTubesOnEdgeFindingError",
+            Prop.SKIP_TUBES_ON_ERROR,
             False,
             direction=Direction.Input,
             doc="Whether to skip calibration of tubes that we could not find the correct number of"
             "edges for. If set to False then the algorithm will terminate when it encounters a"
             "tube that it cannot find the correct number of edges for.",
         )
-        self.declareProperty("Margin", 25, direction=Direction.Input, doc="FIXME: Detector margin")
-        self.declareProperty("StartingPixel", 20, direction=Direction.Input, doc="Lower bound of detector's active region")
-        self.declareProperty("EndingPixel", 495, direction=Direction.Input, doc="Upper bound of detector's active region")
+        self.declareProperty(Prop.MARGIN, 25, direction=Direction.Input, doc="FIXME: Detector margin")
+        self.declareProperty(Prop.START_PIXEL, 20, direction=Direction.Input, doc="Lower bound of detector's active region")
+        self.declareProperty(Prop.END_PIXEL, 495, direction=Direction.Input, doc="Upper bound of detector's active region")
         self.declareProperty(
-            "FitEdges", False, direction=Direction.Input, doc="FIXME: Fit the full edge of a shadow, instead of just the top and bottom."
+            Prop.FIT_EDGES,
+            False,
+            direction=Direction.Input,
+            doc="FIXME: Fit the full edge of a shadow, instead of just the top and bottom.",
         )
-        self.declareProperty("Timebins", "5000,93000,98000", direction=Direction.Input, doc="Time of flight bins to use")
-        self.declareProperty("Background", 2500.0, direction=Direction.Input, doc="The baseline below the mesa for FlatTopPeak fitting")
+        self.declareProperty(Prop.TIME_BINS, "5000,93000,98000", direction=Direction.Input, doc="Time of flight bins to use")
+        self.declareProperty(Prop.BACKGROUND, 2500.0, direction=Direction.Input, doc="The baseline below the mesa for FlatTopPeak fitting")
         self.declareProperty(
-            "VerticalOffset",
+            Prop.VERTICAL_OFFSET,
             -0.005,
             direction=Direction.Input,
             doc="Estimate of how many metres off-vertical the Cd strip is at bottom of the detector. "
             "Negative if strips are more to left at bottom than top of cylindrical Y plot.",
         )
         self.declareProperty(
-            "CValueThreshold",
+            Prop.CVALUE_THRESHOLD,
             6.0,
             direction=Direction.Input,
             doc="A notification will be logged for any tubes with a cvalue above this threshold when the calibration has completed.",
         )
-        self.declareProperty(FileProperty(name="OutputFile", defaultValue="", action=FileAction.OptionalSave, extensions=["nxs"]))
+        self.declareProperty(FileProperty(name=Prop.OUTPUT_FILE, defaultValue="", action=FileAction.OptionalSave, extensions=["nxs"]))
         self.declareProperty(
-            "SaveIntegratedWorkspaces",
+            Prop.SAVE_INPUT_WS,
             True,
             direction=Direction.Input,
             doc="Save input workspaces after loading and integrating."
@@ -137,36 +171,36 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        num_files = len(self.getProperty("DataFiles").value)
-        num_positions = len(self.getProperty("StripPositions").value)
+        num_files = len(self.getProperty(Prop.DATA_FILES).value)
+        num_positions = len(self.getProperty(Prop.STRIP_POSITIONS).value)
 
-        if num_positions != len(set(self.getProperty("StripPositions").value)):
-            issues["StripPositions"] = "Duplicate strip positions are not permitted."
+        if num_positions != len(set(self.getProperty(Prop.STRIP_POSITIONS).value)):
+            issues[Prop.STRIP_POSITIONS] = "Duplicate strip positions are not permitted."
         if num_positions > num_files:
             # This algorithm currently expects there to be only one strip per data file
-            issues["DataFiles"] = "There must be a measurement for each strip position."
+            issues[Prop.DATA_FILES] = "There must be a measurement for each strip position."
         if num_files > num_positions:
-            issues["StripPositions"] = "There must be a strip position for each measurement."
-        if self.getProperty("EndingPixel").value <= self.getProperty("StartingPixel").value:
-            issues["EndingPixel"] = "The ending pixel must have a greater index than the starting pixel."
-        if self.getProperty("EndingPixel").value > DetectorInfo.NUM_PIXELS_IN_TUBE:
-            issues["EndingPixel"] = f"The ending pixel must be less than or equal to {DetectorInfo.NUM_PIXELS_IN_TUBE}"
+            issues[Prop.STRIP_POSITIONS] = "There must be a strip position for each measurement."
+        if self.getProperty(Prop.END_PIXEL).value <= self.getProperty(Prop.START_PIXEL).value:
+            issues[Prop.END_PIXEL] = "The ending pixel must have a greater index than the starting pixel."
+        if self.getProperty(Prop.END_PIXEL).value > DetectorInfo.NUM_PIXELS_IN_TUBE:
+            issues[Prop.END_PIXEL] = f"The ending pixel must be less than or equal to {DetectorInfo.NUM_PIXELS_IN_TUBE}"
 
         return issues
 
     def PyExec(self):
-        self._background = self.getProperty("Background").value
-        self._time_bins = self.getProperty("TimeBins").value
-        margin = self.getProperty("Margin").value
-        vertical_offset = self.getProperty("VerticalOffset").value
-        threshold = self.getProperty("Threshold").value
-        start_pixel = self.getProperty("StartingPixel").value
-        end_pixel = self.getProperty("EndingPixel").value
-        fit_edges = self.getProperty("FitEdges").value
-        self._rear = self.getProperty("RearDetector").value
-        data_files = self.getProperty("DataFiles").value
-        skip_tube_on_error = self.getProperty("SkipTubesOnEdgeFindingError").value
-        self._detector_name = "rear" if self._rear else "front"
+        self._background = self.getProperty(Prop.BACKGROUND).value
+        self._time_bins = self.getProperty(Prop.TIME_BINS).value
+        margin = self.getProperty(Prop.MARGIN).value
+        vertical_offset = self.getProperty(Prop.VERTICAL_OFFSET).value
+        threshold = self.getProperty(Prop.THRESHOLD).value
+        start_pixel = self.getProperty(Prop.START_PIXEL).value
+        end_pixel = self.getProperty(Prop.END_PIXEL).value
+        fit_edges = self.getProperty(Prop.FIT_EDGES).value
+        self._rear = self.getProperty(Prop.REAR_DET).value
+        data_files = self.getProperty(Prop.DATA_FILES).value
+        skip_tube_on_error = self.getProperty(Prop.SKIP_TUBES_ON_ERROR).value
+        self._detector_name = DetectorInfo.REAR_NAME if self._rear else DetectorInfo.FRONT_NAME
 
         load_report = Progress(self, start=0, end=0.4, nreports=len(data_files))
         ws_list = self._load_calibration_data(data_files, load_report)
@@ -187,19 +221,19 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         load_report.report()
 
         # Perform the calibration for each tube
-        alg = self.createChildAlgorithm("CloneWorkspace", InputWorkspace=self._MERGED_WS_NAME, OutputWorkspace="result")
+        alg = self.createChildAlgorithm("CloneWorkspace", InputWorkspace=self._MERGED_WS_NAME, OutputWorkspace=self._CALIBRATED_WS_NAME)
         alg.setAlwaysStoreInADS(True)
         alg.execute()
-        result = mtd["result"]
+        result = mtd[self._CALIBRATED_WS_NAME]
 
         meanCvalue = []
         caltable = None
         diagnostic_output = dict()
 
         # Loop through tubes to generate a calibration table
-        tube_report = Progress(self, start=0.4, end=0.9, nreports=120)
+        tube_report = Progress(self, start=0.4, end=0.9, nreports=DetectorInfo.NUM_TUBES)
         self._tube_calibration_errors = []
-        for tube_id in range(120):
+        for tube_id in range(DetectorInfo.NUM_TUBES):
             tube_name = self._get_tube_name(tube_id)
             tube_report.report(f"Calculating tube {tube_name}")
             self.log().notice("\n==================================================")
@@ -256,13 +290,13 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
     def _match_workspaces_to_strip_positions(self, ws_list):
         """Match the strip positions to the workspaces"""
         strip_pos_to_ws = dict()
-        for i, position in enumerate(self.getProperty("StripPositions").value):
+        for i, position in enumerate(self.getProperty(Prop.STRIP_POSITIONS).value):
             strip_pos_to_ws[position] = ws_list[i]
 
         return strip_pos_to_ws
 
     def _calculate_known_strip_edges(self, ws_list):
-        det_z_logname = "Rear_Det_Z" if self._rear else "Front_Det_Z"
+        det_z_logname = self._REAR_DET_Z_LOG if self._rear else self._FRONT_DET_Z_LOG
         ws = ws_list[0]
 
         if not ws.run().hasProperty(det_z_logname):
@@ -270,11 +304,11 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
                 f'Run log does not contain an entry for "{det_z_logname}". This is required to calculate the strip edge positions.'
             )
         sample_to_detector_dist = ws.run().getProperty(det_z_logname).firstValue()
-        half_det_width = self.getProperty("HalfDetectorWidth").value
-        strip_width = self.getProperty("StripWidth").value
-        strip_to_tube_centre = self.getProperty("StripToTubeCentre").value
-        side_offset = self.getProperty("SideOffset").value
-        encoder_at_beam_centre_main = self.getProperty("EncoderAtBeamCentre").value
+        half_det_width = self.getProperty(Prop.HALF_DET_WIDTH).value
+        strip_width = self.getProperty(Prop.STRIP_WIDTH).value
+        strip_to_tube_centre = self.getProperty(Prop.STRIP_TO_TUBE_CENTRE).value
+        side_offset = self.getProperty(Prop.SIDE_OFFSET).value
+        encoder_at_beam_centre_main = self.getProperty(Prop.ENCODER).value
 
         def calculate_edge(encoder):
             dist_from_beam = encoder_at_beam_centre - encoder
@@ -284,8 +318,8 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         strip_pos_to_ws = self._match_workspaces_to_strip_positions(ws_list)
         ws_to_known_edges = dict()
         for pos, ws in strip_pos_to_ws.items():
-            if self._rear and pos == 260:
-                encoder_at_beam_centre = self.getProperty("EncoderAtBeamCentreForRear260Strip").value
+            if self._rear and pos == self._BEAM_STOPPER_STRIP_POSITION:
+                encoder_at_beam_centre = self.getProperty(Prop.ENCODER_REAR_260).value
             else:
                 encoder_at_beam_centre = encoder_at_beam_centre_main
             left_edge = calculate_edge(pos + strip_width)
@@ -317,9 +351,8 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
         return ws_list
 
-    @staticmethod
-    def _get_proton_charge(ws):
-        proton_charge = ws.getRun()["proton_charge_by_period"].value
+    def _get_proton_charge(self, ws):
+        proton_charge = ws.getRun()[self._PROTON_CHRG_LOG].value
         return proton_charge[0] if type(proton_charge) is np.ndarray else proton_charge
 
     def _crop_and_scale_workspace(self, ws, start_pixel, end_pixel, uamphr_to_rescale):
@@ -394,7 +427,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         if not tube_spec.getNumTubes() == 1:
             raise RuntimeError(f"Found more than one tube for tube id {tube_id}")
         tube_ws_index_list = tube_spec.getTube(0)[0]
-        if not len(tube_ws_index_list) == 512:
+        if not len(tube_ws_index_list) == DetectorInfo.NUM_PIXELS_IN_TUBE:
             raise RuntimeError(f"Found incorrect number of counts for tube id {tube_id}")
 
         return [ws.dataY(ws_index)[0] for ws_index in tube_ws_index_list]
@@ -435,7 +468,8 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
         return edge_pixels
 
-    def _set_counts_to_one_outside_strip_boundaries(self, ws, boundaries):
+    @staticmethod
+    def _set_counts_to_one_outside_strip_boundaries(ws, boundaries):
         """Set counts equal to 1 for x values outside the strip position boundaries."""
         for ws_idx in range(ws.getNumberHistograms()):
             try:
@@ -484,7 +518,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         rebin_alg.execute()
         ws = mtd[ws_name]
 
-        if self.getProperty("SaveIntegratedWorkspaces").value:
+        if self.getProperty(Prop.SAVE_INPUT_WS).value:
             self._save_as_nexus(ws, saved_file_name)
 
         return ws
@@ -533,7 +567,8 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         next(b, None)
         return list(zip(a, b))
 
-    def _get_strip_edges_after_merge(self, known_edges):
+    @staticmethod
+    def _get_strip_edges_after_merge(known_edges):
         """Find the known edge pairs that will exist after the input workspaces have been merged."""
         merged_edge_pairs = []
 
@@ -577,14 +612,17 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
     @staticmethod
     def _get_fit_params(guessed_pixels, fit_edges, margin):
+        out_edge = 10.0
+        in_edge = 10.0
+
         if fit_edges:
-            return TubeCalibFitParams(guessed_pixels, margin=margin, outEdge=10.0, inEdge=10.0)
+            return TubeCalibFitParams(guessed_pixels, margin=margin, outEdge=out_edge, inEdge=in_edge)
         else:
             # Average the pairs of edges for a single peak fit
             guessed_avg = []
             for i in range(0, len(guessed_pixels), 2):
                 guessed_avg.append((guessed_pixels[i] + guessed_pixels[i + 1]) / 2)
-            fit_params = TubeCalibFitParams(guessed_avg, height=2000, width=2 * margin, margin=margin, outEdge=10.0, inEdge=10.0)
+            fit_params = TubeCalibFitParams(guessed_avg, height=2000, width=2 * margin, margin=margin, outEdge=out_edge, inEdge=in_edge)
             fit_params.setAutomatic(False)
             return fit_params
 
@@ -944,14 +982,14 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         return diagnostic_workspaces
 
     def _save_calibrated_ws_as_nexus(self, calibrated_ws):
-        output_file = self.getProperty("OutputFile").value
+        output_file = self.getProperty(Prop.OUTPUT_FILE).value
         if output_file:
             save_filepath = output_file if output_file.endswith(self._NEXUS_SUFFIX) else f"{output_file}{self._NEXUS_SUFFIX}"
             self._save_as_nexus(calibrated_ws, save_filepath)
 
     def _notify_tube_cvalue_status(self, cvalues):
         all_cvalues_ok = True
-        threshold = self.getProperty("CValueThreshold").value
+        threshold = self.getProperty(Prop.CVALUE_THRESHOLD).value
         for i in range(len(cvalues.dataY(0))):
             cvalue = cvalues.dataY(0)[i]
             if cvalue > threshold:
