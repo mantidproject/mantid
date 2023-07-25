@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import collections
+from collections.abc import Sequence
 import copy
 import warnings
 
@@ -86,14 +86,14 @@ def crop_banks_using_crop_list(bank_list, crop_values_list):
     :param crop_values_list: The cropping values to apply to each bank
     :return: A list of cropped workspaces
     """
-    if not isinstance(crop_values_list, collections.Sequence):
+    if not isinstance(crop_values_list, Sequence):
         raise ValueError("The cropping values were not in a list or tuple type")
     elif not isinstance(bank_list, list):
         # This error is probably internal as we control the bank lists
         raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
 
     output_list = []
-    if not isinstance(crop_values_list[0], collections.Sequence):  # All banks use the same cropping parameters.
+    if not isinstance(crop_values_list[0], Sequence):  # All banks use the same cropping parameters.
         for spectra in bank_list:
             output_list.append(crop_in_tof(ws_to_crop=spectra, x_min=crop_values_list[0], x_max=crop_values_list[-1]))
     else:  # Each bank has its own cropping parameters.
