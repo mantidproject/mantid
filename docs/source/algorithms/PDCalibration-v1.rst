@@ -39,7 +39,7 @@ If more than one constant is requested, the result that has the lowest
 <https://en.wikipedia.org/wiki/Reduced_chi-squared_statistic>`_ is
 returned. This favors using less parameters.
 
-A mask workspace is created, named "OutputCalibrationTable" + '_mask',
+A mask workspace is created, named with the ``OutputCalibrationTable`` parameter + ``_mask``,
 with uncalibrated pixels masked.
 
 The resulting calibration table can be saved with
@@ -47,12 +47,14 @@ The resulting calibration table can be saved with
 applied to a workspace with :ref:`algm-AlignDetectors`. There are also
 three workspaces placed in the ``DiagnosticWorkspace`` group. They are:
 
-* evaluated fit functions (``_fitted``)
-* raw peak fit values (``_fitparam``)
-* contain the fitted positions in dspace( ``_dspacing``)
-* peak widths (``_width``)
-* peak heights (``_height``)
-* instrument resolution (delta-d/d ``_resolution``)
+* evaluated fit functions (``_fitted``) which is the ``OutputPeakParametersWorkspace`` from :ref:`FitPeaks <algm-FitPeaks>`
+* raw peak fit values (``_fitparam``) which is the ``FittedPeaksWorkspace`` from :ref:`FitPeaks <algm-FitPeaks>`
+* uncertainties in raw fit values (``_fiterror``) which is the ``OutputParameterFitErrorsWorkspace`` from :ref:`FitPeaks <algm-FitPeaks>` when ``UseChisSq=True`` is set
+* contain the fitted positions in dspace( ``_dspacing``) derived from the effective peak parameters
+* peak widths (``_width``) derived from the effective peak parameters
+* peak heights (``_height``) derived from the effective peak parameters
+* instrument resolution (delta-d/d ``_resolution``) derived from the average of effective width/height of each peak.
+  This is only correct for Gaussian and Lorentzian peak shapes
 
 Since multiple peak shapes can be used,
 see the documentation for the individual :ref:`fit functions
@@ -61,6 +63,14 @@ values displayed in the diagnostic tables. For ``Gaussian`` and
 ``Lorentzian``, the widths and resolution are converted to values that
 can be directly compared with the results of
 :ref:`algm-EstimateResolutionDiffraction`.
+
+Limiting Spectra Calibrated
+---------------------------
+
+Supplying ``StartWorkspaceIndex`` and/or ``StopWorkspaceIndex`` will limit the spectra that are fitted.
+Only those that are fitted will exist in the output table, ``OutputCalibrationTable``.
+:ref:`CombineDiffCal <algm-CombineDiffCal>` can accept input of partial instrument calibration as the ``GroupedCalibration`` and will copy all other values fom the ``PixelCalibration``.
+In this mode, the ``CalibrationWorkspace`` supplied to :ref:`CombineDiffCal <algm-CombineDiffCal>`  should still be the ``InputWorkspace`` supplied to ``PDCalibration``.
 
 Usage
 -----
