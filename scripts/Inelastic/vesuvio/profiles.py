@@ -10,7 +10,7 @@ This is all essentially about parsing the user input and putting it into a form
 the Mantid fitting algorithm will understand
 """
 import ast
-import collections
+import collections.abc
 import re
 
 from mantid import logger
@@ -21,7 +21,6 @@ from mantid import logger
 
 
 class MassProfile(object):
-
     cfunction = None
 
     def __init__(self, width, mass, intensity=None):
@@ -49,7 +48,7 @@ class MassProfile(object):
         """
         ties_str = "{0}Mass={1:f}".format(param_prefix, self.mass)
 
-        if not isinstance(self.width, collections.Iterable):
+        if not isinstance(self.width, collections.abc.Iterable):
             ties_str += ",{0}={1:f}".format(param_prefix + "Width", self.width)
 
         return ties_str
@@ -119,7 +118,6 @@ class MassProfile(object):
 
 
 class GaussianMassProfile(MassProfile):
-
     cfunction = "GaussianComptonProfile"
 
     @classmethod
@@ -185,7 +183,6 @@ class GaussianMassProfile(MassProfile):
 
 
 class MultivariateGaussianMassProfile(MassProfile):
-
     cfunction = "MultivariateGaussianComptonProfile"
     integration_steps = 64
 
@@ -273,7 +270,6 @@ class MultivariateGaussianMassProfile(MassProfile):
 
 
 class GramCharlierMassProfile(MassProfile):
-
     cfunction = "GramCharlierComptonProfile"
 
     def __init__(self, width, mass, hermite_coeffs, k_free, sears_flag, hermite_coeff_vals=None, fsecoeff=None):

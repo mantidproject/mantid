@@ -16,7 +16,7 @@ import copy
 import math
 import time
 import numpy as np
-import collections
+import collections.abc
 import Direct.CommonFunctions as common
 import Direct.diagnostics as diagnostics
 from Direct.PropertyManager import PropertyManager
@@ -1252,12 +1252,12 @@ class DirectEnergyConversion(object):
                 mon1_peak = 0
             else:
                 mon_1_spec_ID = ei_mon_spectra[0]
-                if isinstance(mon_1_spec_ID, collections.Iterable):
+                if isinstance(mon_1_spec_ID, collections.abc.Iterable):
                     fix_ei = True  # This could be a HACK
                     mon_1_spec_ID = mon_1_spec_ID[0]
                 # -----------
                 mon_2_spec_ID = ei_mon_spectra[1]
-                if isinstance(mon_2_spec_ID, collections.Iterable):
+                if isinstance(mon_2_spec_ID, collections.abc.Iterable):
                     fix_ei = True  # This could be a HACK
                     mon_2_spec_ID = mon_2_spec_ID[1]
                 # -----------
