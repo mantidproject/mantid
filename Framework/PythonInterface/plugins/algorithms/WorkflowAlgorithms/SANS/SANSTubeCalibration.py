@@ -13,9 +13,8 @@ from enum import Enum
 
 import numpy as np
 
-from mantid.kernel import *
-from mantid.api import *  # AnalysisDataService
-from mantid.simpleapi import *
+from mantid.kernel import Direction, V3D
+from mantid.api import DataProcessorAlgorithm, AnalysisDataService, AlgorithmFactory, FileProperty, FileAction, Progress, mtd
 from tube_spec import TubeSpec
 from ideal_tube import IdealTube
 from tube_calib_fit_params import TubeCalibFitParams
