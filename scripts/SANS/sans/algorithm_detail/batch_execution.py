@@ -197,6 +197,9 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     if not use_optimizations:
         delete_optimization_workspaces(reduction_packages, workspaces, monitors, save_can)
 
+    if scaled_background_ws:
+        delete_workspace_by_name(scaled_background_ws)
+
     out_scale_factors = []
     out_shift_factors = []
     for reduction_package in reduction_packages:
@@ -1386,6 +1389,15 @@ def delete_optimization_workspaces(reduction_packages, workspaces, monitors, sav
         if not save_can:
             optimizations_to_delete.extend([reduction_package.reduced_lab_can, reduction_package.reduced_hab_can])
         _delete_workspaces(delete_alg, optimizations_to_delete)
+
+
+def delete_workspace_by_name(ws_name):
+    delete_name = "DeleteWorkspace"
+    delete_options = {}
+    delete_alg = create_unmanaged_algorithm(delete_name, **delete_options)
+    if ws_name and AnalysisDataService.doesExist(ws_name):
+        delete_alg.setProperty("Workspace", ws_name)
+        delete_alg.execute()
 
 
 def get_transmission_names_to_save(reduction_package, can):
