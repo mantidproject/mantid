@@ -57,6 +57,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
     _SCALED_WS_SUFFIX = "_scaled"
     _CAL_TABLE_ID_COL = "Detector ID"
     _CAL_TABLE_POS_COL = "Detector Position"
+    _CAL_TABLE_NAME = "CalibTable"
     _INF = sys.float_info.max  # Acceptable approximation for infinity
     _MERGED_WS_NAME = "original"
     _NEXUS_SUFFIX = ".nxs"
@@ -187,14 +188,18 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         load_report.report()
 
         # Perform the calibration for each tube
-        result = CloneWorkspace(InputWorkspace=self._MERGED_WS_NAME)
+        alg = self.createChildAlgorithm("CloneWorkspace", InputWorkspace=self._MERGED_WS_NAME, OutputWorkspace="result")
+        alg.setAlwaysStoreInADS(True)
+        alg.execute()
+        result = mtd["result"]
+
         meanCvalue = []
         caltable = None
         diagnostic_output = dict()
 
         # Loop through tubes to generate a calibration table
         tube_report = Progress(self, start=0.4, end=0.9, nreports=120)
-        tube_calibration_errors = []
+        self._tube_calibration_errors = []
         for tube_id in range(120):
             tube_name = self._get_tube_name(tube_id)
             tube_report.report(f"Calculating tube {tube_name}")
@@ -209,7 +214,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
                     f"found {len(guessed_pixels)} edges when exactly {len(known_edges_after_merge)} are required"
                 )
                 if skip_tube_on_error:
-                    tube_calibration_errors.append(error_msg)
+                    self._tube_calibration_errors.append(error_msg)
                     continue
                 raise RuntimeError(error_msg)
 
@@ -228,31 +233,25 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             except RuntimeError as error:
                 error_msg = f"Failure attempting to calibrate tube {tube_id} - {error}"
                 if skip_tube_on_error:
-                    tube_calibration_errors.append(error_msg)
+                    self._tube_calibration_errors.append(error_msg)
                     continue
                 raise RuntimeError(error_msg)
 
             diagnostic_output[tube_id] = self._create_diagnostic_workspaces(tube_id, peak_positions, known_edges, caltable)
             meanCvalue.append(meanC)
 
-        # Apply the generated calibration table
-        if not caltable:
-            self._log_tube_calibration_issues(tube_calibration_errors)
-            raise RuntimeError("Calibration failed - unable to generate calibration table")
-
-        ApplyCalibration(result, caltable)
+        self._apply_calibration(result, caltable)
         cvalues = self._create_workspace(data_x=list(diagnostic_output.keys()), data_y=meanCvalue, output_ws_name=self._C_VALUES_WS)
 
         self._save_calibrated_ws_as_nexus(result)
 
         # Group the diagnostic output for each tube
         # It seems to be faster to do this here rather than as we're calibrating each tube
-        for tube_id, workspaces in diagnostic_output.items():
-            GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=f"Tube_{tube_id:03}")
+        self._group_diagnostic_workspaces(diagnostic_output)
 
         # Print some final status information
         self.log().notice(strip_edge_calculation_info)
-        self._log_tube_calibration_issues(tube_calibration_errors)
+        self._log_tube_calibration_issues()
         self._notify_tube_cvalue_status(cvalues)
 
     def _match_workspaces_to_strip_positions(self, ws_list):
@@ -487,10 +486,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         ws = mtd[ws_name]
 
         if self.getProperty("SaveIntegratedWorkspaces").value:
-            save_alg = self.createChildAlgorithm("SaveNexusProcessed")
-            save_alg.setProperty("InputWorkspace", ws)
-            save_alg.setProperty("Filename", saved_file_name)
-            save_alg.execute()
+            self._save_as_nexus(ws, saved_file_name)
 
         return ws
 
@@ -616,10 +612,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         ideal_tube.setArray(known_positions)
 
         if not calib_table:
-            # Create the calibration table and add columns required by ApplyCalibration
-            calib_table = CreateEmptyTableWorkspace(OutputWorkspace="CalibTable")
-            calib_table.addColumn(type="int", name=self._CAL_TABLE_ID_COL)
-            calib_table.addColumn(type="V3D", name=self._CAL_TABLE_POS_COL)
+            calib_table = self._create_calibration_table_ws()
 
         peak_positions, meanC = self._perform_calibration_for_tube(ws, tube_spec, calib_table, func_form, fit_params, ideal_tube)
 
@@ -955,7 +948,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         output_file = self.getProperty("OutputFile").value
         if output_file:
             save_filepath = output_file if output_file.endswith(self._NEXUS_SUFFIX) else f"{output_file}{self._NEXUS_SUFFIX}"
-            SaveNexusProcessed(calibrated_ws, save_filepath)
+            self._save_as_nexus(calibrated_ws, save_filepath)
 
     def _notify_tube_cvalue_status(self, cvalues):
         all_cvalues_ok = True
@@ -969,10 +962,10 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         if all_cvalues_ok:
             self.log().notice(f"CValues for all tubes were below threshold {threshold}")
 
-    def _log_tube_calibration_issues(self, tube_calibration_issues):
-        if tube_calibration_issues:
+    def _log_tube_calibration_issues(self):
+        if self._tube_calibration_errors:
             self.log().warning("There were the following tube calibration errors:")
-            for msg in tube_calibration_issues:
+            for msg in self._tube_calibration_errors:
                 self.log().warning(msg)
 
     def _create_workspace(self, data_x, data_y, output_ws_name, store_in_ADS=True):
@@ -992,6 +985,39 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         alg = self.createChildAlgorithm("RenameWorkspace", InputWorkspace=input_ws, OutputWorkspace=new_name)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
+
+    def _create_calibration_table_ws(self):
+        """Create the calibration table and add columns required by ApplyCalibration"""
+        alg = self.createChildAlgorithm("CreateEmptyTableWorkspace", OutputWorkspace=self._CAL_TABLE_NAME)
+        alg.setAlwaysStoreInADS(True)
+        alg.execute()
+
+        calib_table = mtd[self._CAL_TABLE_NAME]
+        calib_table.addColumn(type="int", name=self._CAL_TABLE_ID_COL)
+        calib_table.addColumn(type="V3D", name=self._CAL_TABLE_POS_COL)
+        return calib_table
+
+    def _apply_calibration(self, ws_to_calibrate, caltable):
+        """Apply the generated calibration table"""
+        if not caltable:
+            self._log_tube_calibration_issues()
+            raise RuntimeError("Calibration failed - unable to generate calibration table")
+
+        cal_alg = self.createChildAlgorithm("ApplyCalibration", Workspace=ws_to_calibrate, CalibrationTable=caltable)
+        cal_alg.execute()
+
+    def _group_diagnostic_workspaces(self, diagnostic_output):
+        """Group the diagnostic output for each tube"""
+        alg = self.createChildAlgorithm("GroupWorkspaces")
+        alg.setAlwaysStoreInADS(True)
+        for tube_id, workspaces in diagnostic_output.items():
+            alg.setProperty("InputWorkspaces", workspaces)
+            alg.setProperty("OutputWorkspace", f"Tube_{tube_id:03}")
+            alg.execute()
+
+    def _save_as_nexus(self, ws, filename):
+        save_alg = self.createChildAlgorithm("SaveNexusProcessed", InputWorkspace=ws, Filename=filename)
+        save_alg.execute()
 
 
 # Register algorithm with Mantid
