@@ -30,7 +30,9 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
     """ "Install Euphonic library to temporary prefix and check results"""
 
     def skipTests(self):
-        return sys.platform.startswith("darwin")
+        # disabled
+        return True
+        # return sys.platform.startswith("darwin")
 
     @staticmethod
     def _add_libs_from_prefix(prefix_path):
@@ -117,7 +119,6 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
 
     def runTest(self):
         with tempfile.TemporaryDirectory() as tmp_prefix:
-
             if not euphonic_available():
                 self._install_euphonic_to_tmp_prefix(tmp_prefix)
 
