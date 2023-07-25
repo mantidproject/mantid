@@ -44,11 +44,6 @@ Add the following lines to ``~/.ssh/config``:
 
 If you need further help, ask another developer at the facility how to configure ssh.
 
-
-Setting up GitHub
-#################
-Please install the ZenHub Browser extension from this `page <https://www.zenhub.com/extension>`_.
-
 Building Mantid
 ###############
 See :ref:`BuildingWithCMake` for information about building Mantid.
