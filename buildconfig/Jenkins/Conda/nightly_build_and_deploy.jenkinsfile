@@ -285,7 +285,10 @@ pipeline {
                 selector: specific('${BUILD_NUMBER}'),
                 target: './',
                 flatten: false
-              package_conda("${PLATFORM}", "workbench")
+
+              catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                package_conda("${PLATFORM}", "workbench")
+              }
               archive_env_logs("${PLATFORM}")
               archive_conda_packages("${PLATFORM}")
               package_standalone()
