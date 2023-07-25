@@ -190,7 +190,7 @@ std::shared_ptr<Mantid::API::TableRow> binarySearchForRow(const API::ITableWorks
 }
 
 void addRowFromPreviousCalibration(DataObjects::TableWorkspace_sptr &ws,
-                                   const DataObjects::TableWorkspace_sptr &previousTable, const int rowNum) {
+                                   const DataObjects::TableWorkspace_sptr &previousTable, const std::size_t rowNum) {
   // get the old values
   const int detid = previousTable->cell_cast<int>(rowNum, 0);
   const double difc = previousTable->cell_cast<double>(rowNum, 1);
