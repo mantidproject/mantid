@@ -188,7 +188,9 @@ const std::string PDCalibration::summary() const {
 void PDCalibration::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::InOut),
                   "Input signal workspace");
-  declareProperty("StartWorkspaceIndex", EMPTY_INT(), "Starting workspace index for fit");
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
+  mustBePositive->setLower(0);
+  declareProperty("StartWorkspaceIndex", 0, mustBePositive, "Starting workspace index for fit");
   declareProperty("StopWorkspaceIndex", EMPTY_INT(),
                   "Last workspace index to fit (which is included). "
                   "If a value larger than the workspace index of last spectrum, "
@@ -439,10 +441,9 @@ void PDCalibration::exec() {
   m_uncalibratedWS = loadAndBin();
   setProperty("InputWorkspace", m_uncalibratedWS);
 
-  m_startWorkspaceIndex = isDefault("StartWorkspaceIndex") ? 0 : getProperty("StartWorkspaceIndex");
-  m_stopWorkspaceIndex = isDefault("StartWorkspaceIndex")
-                             ? static_cast<int>(m_uncalibratedWS->getNumberHistograms() - 1)
-                             : getProperty("StopWorkspaceIndex");
+  m_startWorkspaceIndex = getProperty("StartWorkspaceIndex");
+  m_stopWorkspaceIndex = isDefault("StopWorkspaceIndex") ? static_cast<int>(m_uncalibratedWS->getNumberHistograms() - 1)
+                                                         : getProperty("StopWorkspaceIndex");
 
   auto uncalibratedEWS = std::dynamic_pointer_cast<EventWorkspace>(m_uncalibratedWS);
   auto isEvent = bool(uncalibratedEWS);
