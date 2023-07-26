@@ -351,9 +351,11 @@ class MultiPythonFileInterpreter(QWidget):
 
     def save_current_file_as(self):
         previous_filename = self.current_editor().filename
+        current_editor_before_saving = self.current_editor()
         saved, filename = self.current_editor().save_as()
         if saved:
             self.open_file_in_new_tab(filename)
+            current_editor_before_saving.close()
             if previous_filename:
                 self.sig_file_name_changed.emit(previous_filename, filename)
 
