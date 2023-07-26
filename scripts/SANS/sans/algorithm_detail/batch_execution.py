@@ -274,21 +274,21 @@ def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):
     plot_kwargs = {"scalex": True, "scaley": True}
     ax_options = {"xscale": "linear", "yscale": "linear"}
 
-    ws_to_plot = []
+    workspaces_to_plot = []
 
     if reduction_package.reduction_mode == ReductionMode.ALL:
-        ws_to_plot = [reduction_package.reduced_hab, reduction_package.reduced_lab]
+        workspaces_to_plot = [reduction_package.reduced_hab, reduction_package.reduced_lab]
     elif reduction_package.reduction_mode == ReductionMode.HAB:
-        ws_to_plot = [reduction_package.reduced_hab]
+        workspaces_to_plot = [reduction_package.reduced_hab]
     elif reduction_package.reduction_mode == ReductionMode.LAB:
-        ws_to_plot = [reduction_package.reduced_lab]
+        workspaces_to_plot = [reduction_package.reduced_lab]
     elif reduction_package.reduction_mode == ReductionMode.MERGED:
-        ws_to_plot = [reduction_package.reduced_merged, reduction_package.reduced_hab, reduction_package.reduced_lab]
+        workspaces_to_plot = [reduction_package.reduced_merged, reduction_package.reduced_hab, reduction_package.reduced_lab]
     if reduction_package.reduced_bgsub:
-        ws_to_plot.extend(reduction_package.reduced_bgsub)
+        workspaces_to_plot.extend(reduction_package.reduced_bgsub)
 
     plot(
-        ws_to_plot,
+        workspaces_to_plot,
         wksp_indices=[0],
         overplot=True,
         fig=output_graph,
