@@ -218,7 +218,6 @@ pipeline {
             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE', message: 'Error during package_conda pipeline step for base on win-64') {
               package_conda('win-64', 'base')
             }
-            package_conda('win-64', 'base')
             archive_env_logs('win-64')
             archive_conda_packages('win-64')
           }
@@ -249,7 +248,6 @@ pipeline {
             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE', message: 'Error during package_conda pipeline step for base on osx-64') {
               package_conda('osx-64', 'base')
             }
-            package_conda('osx-64', 'base')
             archive_env_logs('osx-64')
             archive_conda_packages('osx-64')
           }
