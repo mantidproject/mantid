@@ -151,6 +151,14 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         reduction_package.out_scale_factor = out_scale_factor
         reduction_package.out_shift_factor = out_shift_factor
 
+        # -----------------------------------
+        # Subtract the background from the slice.
+        # -----------------------------------
+        if scaled_background_ws:
+            reduction_package.reduced_bgsub, reduction_package.reduced_bgsub_name = subtract_scaled_background(
+                reduction_package, scaled_background_ws
+            )
+
         if not event_slice_optimisation and plot_results:
             # Plot results is intended to show the result of each workspace/slice as it is reduced
             # as we reduce in bulk, it is not possible to plot live results while in event_slice mode
@@ -159,12 +167,6 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # The workspaces are already on the ADS, but should potentially be grouped
         # -----------------------------------
         group_workspaces_if_required(reduction_package, output_mode, save_can, event_slice_optimisation=event_slice_optimisation)
-
-        # -----------------------------------
-        # Subtract the background from the slice.
-        # -----------------------------------
-        if scaled_background_ws:
-            reduction_package.reduced_bgsub_name = subtract_scaled_background(reduction_package, scaled_background_ws)
 
     data = state.data
     additional_run_numbers = {
@@ -272,42 +274,27 @@ def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):
     plot_kwargs = {"scalex": True, "scaley": True}
     ax_options = {"xscale": "linear", "yscale": "linear"}
 
+    ws_to_plot = []
+
     if reduction_package.reduction_mode == ReductionMode.ALL:
-        plot(
-            [reduction_package.reduced_hab, reduction_package.reduced_lab],
-            wksp_indices=[0],
-            overplot=True,
-            fig=output_graph,
-            plot_kwargs=plot_kwargs,
-            ax_properties=ax_options,
-        )
+        ws_to_plot = [reduction_package.reduced_hab, reduction_package.reduced_lab]
     elif reduction_package.reduction_mode == ReductionMode.HAB:
-        plot(
-            [reduction_package.reduced_hab],
-            wksp_indices=[0],
-            overplot=True,
-            fig=output_graph,
-            plot_kwargs=plot_kwargs,
-            ax_properties=ax_options,
-        )
+        ws_to_plot = [reduction_package.reduced_hab]
     elif reduction_package.reduction_mode == ReductionMode.LAB:
-        plot(
-            [reduction_package.reduced_lab],
-            wksp_indices=[0],
-            overplot=True,
-            fig=output_graph,
-            plot_kwargs=plot_kwargs,
-            ax_properties=ax_options,
-        )
+        ws_to_plot = [reduction_package.reduced_lab]
     elif reduction_package.reduction_mode == ReductionMode.MERGED:
-        plot(
-            [reduction_package.reduced_merged, reduction_package.reduced_hab, reduction_package.reduced_lab],
-            wksp_indices=[0],
-            overplot=True,
-            fig=output_graph,
-            plot_kwargs=plot_kwargs,
-            ax_properties=ax_options,
-        )
+        ws_to_plot = [reduction_package.reduced_merged, reduction_package.reduced_hab, reduction_package.reduced_lab]
+    if reduction_package.reduced_bgsub:
+        ws_to_plot.extend(reduction_package.reduced_bgsub)
+
+    plot(
+        ws_to_plot,
+        wksp_indices=[0],
+        overplot=True,
+        fig=output_graph,
+        plot_kwargs=plot_kwargs,
+        ax_properties=ax_options,
+    )
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1589,7 +1576,8 @@ def subtract_scaled_background(reduction_package, scaled_ws_name: str):
         minus_alg = create_unmanaged_algorithm(minus_name, **minus_options)
         minus_alg.setAlwaysStoreInADS(True)
         minus_alg.execute()
-        return output_name
+        output_workspaces_names.append(output_name)
+        output_workspaces.append(get_workspace_from_algorithm(minus_alg, "OutputWorkspace"))
 
     if reduction_package.reduction_mode == ReductionMode.ALL:
         raise ValueError(
@@ -1598,18 +1586,19 @@ def subtract_scaled_background(reduction_package, scaled_ws_name: str):
         )
     minus_name = "Minus"
     minus_options = {"RHSWorkspace": scaled_ws_name}
+    output_workspaces_names = []
     output_workspaces = []
 
     if reduction_package.reduction_mode == ReductionMode.MERGED:
         for ws_name in reduction_package.reduced_merged_name:
-            output_workspaces.append(run_minus_alg())
+            run_minus_alg()
     elif reduction_package.reduction_mode == ReductionMode.HAB:
         for ws_name in reduction_package.reduced_hab_name:
-            output_workspaces.append(run_minus_alg())
+            run_minus_alg()
     elif reduction_package.reduction_mode == ReductionMode.LAB:
         for ws_name in reduction_package.reduced_lab_name:
-            output_workspaces.append(run_minus_alg())
-    return output_workspaces
+            run_minus_alg()
+    return output_workspaces, output_workspaces_names
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1667,6 +1656,7 @@ class ReductionPackage(object):
         self.reduced_hab = None
         self.reduced_hab_scaled = None
         self.reduced_merged = None
+        self.reduced_bgsub = None
 
         # -------------------------------------------------------
         # Reduced partial can workspaces (and partial workspaces)
