@@ -175,6 +175,9 @@ pipeline {
               timestamps ()
               retry(3)
           }
+          environment {
+            CATCH_ERROR_BLOCK_SUCCESS = "FALSE"
+          }
           steps {
             // Clean up conda-bld before we start to avoid any
             // confusion with old packages
@@ -186,15 +189,15 @@ pipeline {
             // in parallel
             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE', message: 'Error during package_conda pipeline step for base on linux-64') {
               package_conda('linux-64', 'base')
-              environment {
-                catchErrorBlockSuccess = "true"
+              script {
+                env.CATCH_ERROR_BLOCK_SUCCESS = "TRUE"
               }
             }
             archive_env_logs('linux-64')
             archive_conda_packages('linux-64')
             archive_conda_packages('noarch')
             script {
-              if (${env.catchErrorBlockSuccess} != "true") {
+              if (${env.CATCH_ERROR_BLOCK_SUCCESS} == "FALSE") {
                 error "The CatchError block failed. Throw error to intiate pipeline retry"
               }
             }
@@ -214,6 +217,9 @@ pipeline {
               timestamps ()
               retry(3)
           }
+          environment {
+            CATCH_ERROR_BLOCK_SUCCESS = "FALSE"
+          }
           steps {
             // Clean up conda-bld before we start to avoid any
             // confusion with old packages
@@ -225,14 +231,14 @@ pipeline {
             // in parallel
             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE', message: 'Error during package_conda pipeline step for base on win-64') {
               package_conda('win-64', 'base')
-              environment {
-                catchErrorBlockSuccess = "true"
+              script {
+                env.CATCH_ERROR_BLOCK_SUCCESS = "TRUE"
               }
             }
             archive_env_logs('win-64')
             archive_conda_packages('win-64')
             script {
-              if (${env.catchErrorBlockSuccess} != "true") {
+              if (${env.CATCH_ERROR_BLOCK_SUCCESS} == "FALSE") {
                 error "The CatchError block failed. Throw error to intiate pipeline retry"
               }
             }
@@ -252,6 +258,9 @@ pipeline {
               timestamps ()
               retry(3)
           }
+          environment {
+            CATCH_ERROR_BLOCK_SUCCESS = "FALSE"
+          }
           steps {
             // Clean up conda-bld before we start to avoid any
             // confusion with old packages
@@ -263,14 +272,14 @@ pipeline {
             // in parallel
             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE', message: 'Error during package_conda pipeline step for base on osx-64') {
               package_conda('osx-64', 'base')
-              environment {
-                catchErrorBlockSuccess = "true"
+              script {
+                env.CATCH_ERROR_BLOCK_SUCCESS = "TRUE"
               }
             }
             archive_env_logs('osx-64')
             archive_conda_packages('osx-64')
             script {
-              if (${env.catchErrorBlockSuccess} != "true") {
+              if (${env.CATCH_ERROR_BLOCK_SUCCESS} == "FALSE") {
                 error "The CatchError block failed. Throw error to intiate pipeline retry"
               }
             }
@@ -301,6 +310,9 @@ pipeline {
                 timestamps()
                 retry(3)
             }
+            environment {
+              CATCH_ERROR_BLOCK_SUCCESS = "FALSE"
+            }
             steps {
               // Clean up conda-bld before we start to avoid any
               // confusion with old packages
@@ -318,8 +330,8 @@ pipeline {
 
               catchError(buildResult: 'FAILURE', stageResult: 'FAILURE', message: "Error during package_conda pipeline step for workbench on ${PLATFORM}") {
                 package_conda("${PLATFORM}", "workbench")
-                environment {
-                  catchErrorBlockSuccess = "true"
+                script {
+                  env.CATCH_ERROR_BLOCK_SUCCESS = "TRUE"
                 }
               }
               archive_env_logs("${PLATFORM}")
@@ -328,7 +340,7 @@ pipeline {
               archive_standalone_package("${PLATFORM}")
 
               script {
-                if (${env.catchErrorBlockSuccess} != "true") {
+                if (${env.CATCH_ERROR_BLOCK_SUCCESS} == "FALSE") {
                   error "The CatchError block failed. Throw error to intiate pipeline retry"
                 }
               }
