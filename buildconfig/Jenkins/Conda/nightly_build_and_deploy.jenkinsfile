@@ -195,7 +195,7 @@ pipeline {
             archive_conda_packages('noarch')
             script {
               if (${env.catchErrorBlockSuccess} != true) {
-                error "The CatchError block failed. Throw error to intiate pipeline retry".
+                error "The CatchError block failed. Throw error to intiate pipeline retry"
               }
             }
           }
@@ -233,7 +233,7 @@ pipeline {
             archive_conda_packages('win-64')
             script {
               if (${env.catchErrorBlockSuccess} != true) {
-                error "The CatchError block failed. Throw error to intiate pipeline retry".
+                error "The CatchError block failed. Throw error to intiate pipeline retry"
               }
             }
           }
@@ -271,7 +271,7 @@ pipeline {
             archive_conda_packages('osx-64')
             script {
               if (${env.catchErrorBlockSuccess} != true) {
-                error "The CatchError block failed. Throw error to intiate pipeline retry".
+                error "The CatchError block failed. Throw error to intiate pipeline retry"
               }
             }
           }
@@ -329,7 +329,7 @@ pipeline {
 
               script {
                 if (${env.catchErrorBlockSuccess} != true) {
-                  error "The CatchError block failed. Throw error to intiate pipeline retry".
+                  error "The CatchError block failed. Throw error to intiate pipeline retry"
                 }
               }
             }
