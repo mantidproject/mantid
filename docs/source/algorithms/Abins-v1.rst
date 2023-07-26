@@ -83,6 +83,11 @@ Output:
     benzene_wrk_H_total
     benzene_wrk_H
 
+.. testcleanup:: AbinsCastepSimple
+
+    import os
+    os.remove("benzene.hdf5")
+
 **Example - loading CRYSTAL phonon data:**
 
 .. testcode:: AbinsCrystalSimple
@@ -106,6 +111,11 @@ Output:
     wrk_Na
     wrk_O_total
     wrk_O
+
+.. testcleanup:: AbinsCrystalSimple
+
+    import os
+    os.remove("b3lyp.hdf5")
 
 **Example - calling AbINS with more arguments:**
 
@@ -131,6 +141,11 @@ Output:
     wrk_verbose_atom_1
     wrk_verbose_atom_2_total
     wrk_verbose_atom_2
+
+.. testcleanup:: AbinsexplicitParameters
+
+    import os
+    os.remove("benzene.hdf5")
 
 .. categories::
 

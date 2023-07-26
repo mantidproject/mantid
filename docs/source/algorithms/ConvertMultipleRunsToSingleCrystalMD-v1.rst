@@ -69,6 +69,7 @@ Output:
    Number of Events = 100210
    There are 3 dimensions with names: Q_sample_x Q_sample_y Q_sample_z
 
+
 **Multiple files Q-sample**
 
 .. code-block:: python
@@ -131,6 +132,11 @@ Output:
    There are 1 experiment runs in the workspace
    Number of Events = 112266
    There are 3 dimensions with names: [H,0,0] [0,K,0] [0,0,L]
+
+.. testcleanup::
+
+    import os
+    os.remove(UBfilename)
 
 **Multiple files HKL**
 

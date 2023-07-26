@@ -72,15 +72,7 @@ Output:
 .. testcleanup:: ExSaveHKLSimple
 
     import os
-    def removeFiles(files):
-      for ws in files:
-        try:
-          path = os.path.join(os.path.expanduser("~"), ws)
-          os.remove(path)
-        except:
-          pass
-
-    removeFiles(["MyPeaks.hkl"])
+    os.remove(path)
 
 **Example - an example of running SaveHKL with sorting and filtering options.**
 
@@ -93,7 +85,7 @@ Output:
     print("Number of peaks in table {}".format(peaks.rowCount()))
 
     path = os.path.join(os.path.expanduser("~"), "MyPeaks.hkl")
-    SaveHKL(peaks, path, MinWavelength=0.5, MaxWavelength=2,MinDSpacing=0.2, SortBy='Bank')
+    SaveHKL(peaks, path, MinWavelength=0.5, MaxWavelength=2, MinDSpacing=0.2, SortBy='Bank')
 
     peaks = LoadHKL(path)
     print("Number of peaks in table {}".format(peaks.rowCount()))
@@ -108,15 +100,8 @@ Output:
 .. testcleanup:: ExSaveHKLOptions
 
     import os
-    def removeFiles(files):
-      for ws in files:
-        try:
-          path = os.path.join(os.path.expanduser("~"), ws)
-          os.remove(path)
-        except:
-          pass
+    os.remove(path)
 
-    removeFiles(["MyPeaks.hkl"])
 
 **Example - SaveHKL with shape from SetSample**
 
@@ -141,18 +126,11 @@ Output:
 
     True
 
-.. testcleanup:: ExSaveHKLSimple
+.. testcleanup:: ExSaveHKLSetSample
 
     import os
-    def removeFiles(files):
-      for ws in files:
-        try:
-          path = os.path.join(os.path.expanduser("~"), ws)
-          os.remove(path)
-        except:
-          pass
+    os.remove(path)
 
-    removeFiles(["MyPeaks.hkl"])
 
 References
 ----------

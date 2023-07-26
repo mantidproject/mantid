@@ -33,8 +33,6 @@
 #include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpConvPVoigt.h"
 #include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 
-#include <fstream>
-
 #include <cmath>
 #include <utility>
 
@@ -2183,8 +2181,6 @@ Workspace2D_sptr FitPowderDiffPeaks::genOutputFittedPatternWorkspace(std::vector
     throw std::logic_error(errmsg.str());
   }
 
-  size_t numpts = X.size();
-
   // 2. Create data workspace
   Workspace2D_sptr dataws = std::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", 5, pattern.size(), pattern.size()));
@@ -2197,16 +2193,6 @@ Workspace2D_sptr FitPowderDiffPeaks::genOutputFittedPatternWorkspace(std::vector
   dataws->setSharedY(0, m_dataWS->sharedY(workspaceindex));
   dataws->mutableY(1) = pattern;
   dataws->mutableY(2) = m_dataWS->y(workspaceindex) - pattern;
-
-  // 4. Debug
-  // FIXME Remove this section after unit test is finished.
-  std::ofstream ofile;
-  ofile.open("fittedpeaks.dat");
-  for (size_t i = 0; i < numpts; ++i) {
-    ofile << setw(12) << setprecision(5) << X[i] << setw(12) << setprecision(5) << pattern[i] << setw(12)
-          << setprecision(5) << dataws->y(0)[i] << setw(12) << setprecision(5) << dataws->y(2)[i] << '\n';
-  }
-  ofile.close();
 
   return dataws;
 }

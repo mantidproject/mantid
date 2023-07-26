@@ -144,6 +144,11 @@ Output:
     bank1 file ....csv exist = True
     calibration file ....csv exist = True
 
+.. testcleanup:: CorelliPowderCalibrationExample
+
+    import shutil
+    shutil.rmtree(calib_dir)
+
 .. categories::
 
 .. sourcelink::

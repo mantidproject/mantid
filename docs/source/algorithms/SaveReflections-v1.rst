@@ -35,18 +35,10 @@ Output:
 
     True
 
-.. testcleanup:: ExSaveHKLSimple
+.. testcleanup:: ExSaveReflections
 
     import os
-    def removeFiles(files):
-      for ws in files:
-        try:
-          path = os.path.join(os.path.expanduser("~"), ws)
-          os.remove(path)
-        except:
-          pass
-
-    removeFiles(["MyPeaks.hkl"])
+    os.remove(path)
 
 .. categories::
 
