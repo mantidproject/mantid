@@ -40,7 +40,7 @@ requirements:
     - hdf5 {{ hdf5 }}
     - jemalloc  # [unix]
     - jsoncpp
-    - librdkafka {{ librdkafka }}
+    - librdkafka
     - lib3mf  # [win]
     - muparser
     - nexus
