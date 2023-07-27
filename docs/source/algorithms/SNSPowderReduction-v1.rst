@@ -59,13 +59,11 @@ grouping it specifies takes precedence over the one that is in the
 ``CalibrationFile``. :ref:`algm-LoadDetectorsGroupingFile` performs
 the loading. The order of preference in which to use is (first found wins):
 
- * Calibration: ``<instrument>_cal``, then ``CalibrationFile``
+- Calibration: ``<instrument>_cal``, then ``CalibrationFile``
 
- * Grouping: ``<instrument>_group`` workspace, then ``GroupingFile``,
-  then ``CalibrationFile``
+- Grouping: ``<instrument>_group`` workspace, then ``GroupingFile``, then ``CalibrationFile``
 
- * Masking: ``<instrument>_mask``, then ``CalibrationFile``
-
+- Masking: ``<instrument>_mask``, then ``CalibrationFile``
 
 :ref:`algm-AlignAndFocusPowder` does the actual resolution of which information to use.
 
