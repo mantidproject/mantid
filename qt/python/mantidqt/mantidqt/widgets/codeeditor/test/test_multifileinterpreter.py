@@ -89,8 +89,8 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
                     ):
                         widget.open_file_in_new_tab(test_string)
                         widget.save_current_file_as()
-        # There's one tab when you create the editor, then another one was added when opening the mock file. Previously
-        # clicking 'Save Script as' would leave the original tab open, so you'd end up with 3 tabs instead of 2
+        # There's one tab when you create the editor, then another one was added when opening the mock file. Clicking
+        # 'Save Script as' should close the original tab with the old name, and leave you with a tab with the new name.
         self.assertEqual(2, widget.editor_count)
         self.assertEqual(False, widget.current_editor().editor.isModified(), msg="Orignal tab should be marked as modified")
 
