@@ -74,7 +74,7 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
                 widget.open_file_in_new_tab(filename)
         self.assertEqual(2, widget.editor_count, msg="Should be the original tab, plus one (not two) tabs for the file")
         # File should still be modified after attempted reopening because it was modified before reopening and we don't want to lose changes
-        self.assertEqual(True, widget.current_editor().editor.isModified(), msg="File should still be modified after attempted reopening")
+        self.assertTrue(widget.current_editor().editor.isModified(), msg="File should still be modified after attempted reopening")
 
 
 if __name__ == "__main__":
