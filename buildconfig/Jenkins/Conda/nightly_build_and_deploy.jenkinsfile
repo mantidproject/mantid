@@ -196,6 +196,7 @@ pipeline {
             archive_env_logs('linux-64')
             archive_conda_packages('linux-64')
             archive_conda_packages('noarch')
+            echo "${env.CATCH_ERROR_BLOCK_SUCCESS}"
             script {
               if (env.CATCH_ERROR_BLOCK_SUCCESS == "FALSE") {
                 error "The CatchError block failed. Throw error to intiate pipeline retry"
