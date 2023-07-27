@@ -424,6 +424,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             scaled_ws_name,
         )
 
+    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
     def test_subtract_background_from_merged_calls_algorithms_correctly(self, mock_alg_manager):
         mock_minus = mock.MagicMock()
@@ -433,11 +434,12 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         reduction_package.reduction_mode = ReductionMode.MERGED
         reduction_package.reduced_merged_name = ["ws1", "ws2"]
 
-        created_workspaces = subtract_scaled_background(reduction_package, scaled_ws_name)
+        created_workspaces, created_workspace_names = subtract_scaled_background(reduction_package, scaled_ws_name)
 
         mock_alg_manager.assert_any_call("Minus", **{"RHSWorkspace": scaled_ws_name, "LHSWorkspace": "ws1", "OutputWorkspace": "ws1_bgsub"})
         mock_alg_manager.assert_any_call("Minus", **{"RHSWorkspace": scaled_ws_name, "LHSWorkspace": "ws2", "OutputWorkspace": "ws2_bgsub"})
-        self.assertEqual(["ws1_bgsub", "ws2_bgsub"], created_workspaces)
+        self.assertEqual(["ws1_bgsub", "ws2_bgsub"], created_workspace_names)
+        self.assertEqual(len(created_workspaces), len(created_workspace_names))
         self.assertEqual(mock_minus.execute.call_count, 2)
 
 
