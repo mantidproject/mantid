@@ -92,7 +92,7 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
         # There's one tab when you create the editor, then another one was added when opening the mock file. Clicking
         # 'Save Script as' should close the original tab with the old name, and leave you with a tab with the new name.
         self.assertEqual(2, widget.editor_count)
-        self.assertEqual(False, widget.current_editor().editor.isModified(), msg="Orignal tab should be marked as modified")
+        self.assertEqual(False, widget.current_editor().editor.isModified(), msg="Tab should be marked as not modified")
 
 
 if __name__ == "__main__":
