@@ -7,6 +7,8 @@
 #include "MantidAlgorithms/UnGroupWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/InvisibleProperty.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid::Algorithms {
@@ -35,6 +37,11 @@ void UnGroupWorkspace::init() {
   // values
   declareProperty("InputWorkspace", "", "Name of the input workspace to ungroup",
                   std::make_shared<StringListValidator>(groupWorkspaceList));
+  // Invisible outputworkspaces property so algorithm history can be added to the individual workspaces
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspaces", "", Direction::Output,
+                                                                      PropertyMode::Optional),
+                  "Workspaces to be ungrouped");
+  setPropertySettings("OutputWorkspaces", std::make_unique<InvisibleProperty>());
 }
 
 /** Executes the algorithm
@@ -53,6 +60,15 @@ void UnGroupWorkspace::exec() {
   if (!wsGrpSptr) {
     throw std::runtime_error("Selected Workspace is not a WorkspaceGroup");
   }
+  // Store workspaces in an out direction group so they are picked up by algorithm history
+  setAlwaysStoreInADS(false);
+  auto output = std::make_shared<WorkspaceGroup>();
+  const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  for (const auto &ws_name : wsGrpSptr->getNames()) {
+    auto ws = ads.retrieve(ws_name);
+    output->addWorkspace(ws);
+  }
+  setProperty("OutputWorkspaces", output);
   // Notify observers that a WorkspaceGroup is about to be unrolled
   data_store.notificationCenter.postNotification(new Mantid::API::WorkspaceUnGroupingNotification(inputws, wsSptr));
   // Now remove the WorkspaceGroup from the ADS
