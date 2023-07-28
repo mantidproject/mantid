@@ -206,3 +206,37 @@ Underneath the cursor there is a checkbox labelled ``Track Cursor``.
 When checked, the information in the table is updated as the cursor moves
 around the image. If unchecked, the information within the table is updated
 only when the left-mouse button is clicked within the image.
+
+Colorbar Autoscaling
+--------------------
+
+Autoscaling options allow the colorbar limits to automatically be updated.
+There are several options to help "quickly" re-scale the limits.
+Some of the options are based on several statistical methods for determining outliers.
+
++----------+-----------------+-----------------+
+| Option   | Lower-Limit     | Upper-Limit     |
++============================+=================+
+| Min/Max  | min             | max             |
++----------------------------+-----------------+
+| 3(Sig)   | ave - 3 x std   | mean + 3 x std  |
++------------------------+------------+--------+
+| 1.5(IQR) | Q1 - 1.5 x IQR  | Q3 + 1.5 x IQR  |
++------------------------+------------+--------+
+| 1.5(MAD) | med - 1.5 x mad | med + 1.5 x mad |
++------------------------+------------+--------+
+
+.. figure:: ../images/wb-sliceviewer67-colorbar.png
+   :class: screenshot
+   :width: 75%
+   :align: center
+
+The abbreviations are listed as follows:
+- min = minimum
+- max = maximum
+- ave = average (or mean)
+- std = standard deviation
+- Q1  = 1st quartile (or 25th-percentile)
+- Q3  = 3rd quartile (or 75th-percentile)
+- med = median (or 1nd quartile or 50th-percentile)
+- mad = median absolute deviation
