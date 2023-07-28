@@ -69,10 +69,14 @@ class ColorbarWidget(QWidget):
         self.cmin_value = 0
         self.cmin.setMaximumWidth(100)
         self.cmin.editingFinished.connect(self.clim_changed)
+        self.cmin.textEdited.connect(lambda: self._set_cmin_cmax_box_outline(self.cmin))
         self.cmin_layout = QHBoxLayout()
         self.cmin_layout.addStretch()
         self.cmin_layout.addWidget(self.cmin)
         self.cmin_layout.addStretch()
+
+        self.cmin_cmax_default_style_sheet = self.cmin.styleSheet()
+        self.cmin_cmax_red_outline_style_sheet = "border: 1px solid red"
 
         self.linear_validator = QDoubleValidator(parent=self)
         self.log_validator = QDoubleValidator(MIN_LOG_VALUE, sys.float_info.max, 3, self)
@@ -80,6 +84,7 @@ class ColorbarWidget(QWidget):
         self.cmax_value = 1
         self.cmax.setMaximumWidth(100)
         self.cmax.editingFinished.connect(self.clim_changed)
+        self.cmax.textEdited.connect(lambda: self._set_cmin_cmax_box_outline(self.cmax))
         self.cmax_layout = QHBoxLayout()
         self.cmax_layout.addStretch()
         self.cmax_layout.addWidget(self.cmax)
@@ -269,6 +274,8 @@ class ColorbarWidget(QWidget):
         else:
             self._manual_clim()
 
+        self._set_cmin_cmax_box_outline(self.cmin)
+        self._set_cmin_cmax_box_outline(self.cmax)
         self.colorbar.mappable.set_clim(self.cmin_value, self.cmax_value)
         self.redraw()
 
@@ -328,18 +335,45 @@ class ColorbarWidget(QWidget):
     def _manual_clim(self):
         """Update stored colorbar limits
         The new limits are found from user input"""
-        if self.cmin.hasAcceptableInput():
+        self._update_cmin()
+        self._update_cmax()
+
+    def _update_cmin(self):
+        """Attempt to update cmin with user input. Reset to previous value if invalid input"""
+        if not self.cmin.hasAcceptableInput():
+            self.update_clim_text()
+            return
+
+        # QDoubleValidator can let through some things like 0,111
+        try:
             cmin = float(self.cmin.text())
-            if cmin < self.cmax_value:
-                self.cmin_value = cmin
-            else:  # reset values back
-                self.update_clim_text()
-        if self.cmax.hasAcceptableInput():
+        except ValueError:
+            self.update_clim_text()
+            return
+
+        if cmin >= self.cmax_value:
+            self.update_clim_text()
+            return
+
+        self.cmin_value = cmin
+
+    def _update_cmax(self):
+        """Attempt to update cmax with user input. Reset to previous value if invalid input"""
+        if not self.cmax.hasAcceptableInput():
+            self.update_clim_text()
+            return
+
+        try:
             cmax = float(self.cmax.text())
-            if cmax > self.cmin_value:
-                self.cmax_value = cmax
-            else:  # reset values back
-                self.update_clim_text()
+        except ValueError:
+            self.update_clim_text()
+            return
+
+        if cmax <= self.cmin_value:
+            self.update_clim_text()
+            return
+
+        self.cmax_value = cmax
 
     def _create_linear_normalize_object(self):
         if self.autoscale.isChecked():
@@ -384,3 +418,9 @@ class ColorbarWidget(QWidget):
         if not self.norm.model().item(option_index, 0).isEnabled():
             self.norm.model().item(option_index, 0).setEnabled(True)
             self.norm.setItemData(option_index, "", Qt.ToolTipRole)
+
+    def _set_cmin_cmax_box_outline(self, box: QLineEdit):
+        if not box.hasAcceptableInput():
+            box.setStyleSheet(self.cmin_cmax_red_outline_style_sheet)
+        else:
+            box.setStyleSheet(self.cmin_cmax_default_style_sheet)
