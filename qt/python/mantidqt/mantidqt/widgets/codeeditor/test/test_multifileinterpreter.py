@@ -7,6 +7,8 @@
 #    This file is part of the mantid workbench.
 #
 #
+import os.path
+import tempfile
 import unittest
 
 from unittest import mock
@@ -48,6 +50,31 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
             with mock.patch(PERMISSION_BOX_FUNC, lambda: True):
                 widget.open_file_in_new_tab(test_string)
         self.assertNotIn(MANTID_API_IMPORT, widget.current_editor().editor.text())
+
+    def test_open_same_file_twice_no_extra_tab(self):
+        widget = MultiPythonFileInterpreter()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            filename = os.path.join(temp_dir, "test_open_same_file_twice_no_extra_tab")
+            with open(filename, "w") as f:
+                f.write("Test")
+            with mock.patch("mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename", lambda s: filename):
+                widget.open_file_in_new_tab(filename)
+                widget.open_file_in_new_tab(filename)
+        self.assertEqual(2, widget.editor_count, msg="Should be the original tab, plus one (not two) tabs for the file")
+
+    def test_open_same_file_twice_no_tab_even_if_modified(self):
+        widget = MultiPythonFileInterpreter()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            filename = os.path.join(temp_dir, "test_open_same_file_twice_no_tab_even_if_modified")
+            with open(filename, "w") as f:
+                f.write("Test")
+            with mock.patch("mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename", lambda s: filename):
+                widget.open_file_in_new_tab(filename)
+                widget.current_editor().editor.append("Some text")
+                widget.open_file_in_new_tab(filename)
+        self.assertEqual(2, widget.editor_count, msg="Should be the original tab, plus one (not two) tabs for the file")
+        # File should still be modified after attempted reopening because it was modified before reopening and we don't want to lose changes
+        self.assertTrue(widget.current_editor().editor.isModified(), msg="File should still be modified after attempted reopening")
 
 
 if __name__ == "__main__":
