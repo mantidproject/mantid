@@ -46,7 +46,7 @@ public:
     TS_ASSERT(f0_FWHMY.empty());
   }
 
-  void test_build_1() {
+  void test_build_single_site_and_single_spectrum() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Ce");
     cf.setAttributeValue("Symmetries", " C2v");
@@ -70,7 +70,7 @@ public:
     TS_ASSERT_EQUALS(nControls, 0);
   }
 
-  void test_build_2() {
+  void test_build_multi_site_and_single_spectrum() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Ce, Yb");
     cf.setAttributeValue("Symmetries", " D3,  D6h");
@@ -94,7 +94,7 @@ public:
     TS_ASSERT_EQUALS(nControls, 0);
   }
 
-  void test_build_3() {
+  void test_build_single_site_and_multiple_spectra() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Ce");
     cf.setAttributeValue("Symmetries", " C2v");
@@ -118,7 +118,7 @@ public:
     TS_ASSERT_EQUALS(nControls, 2);
   }
 
-  void test_build_4() {
+  void test_build_multi_site_and_multiple_spectra() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Ce, Yb");
     cf.setAttributeValue("Symmetries", " D3,  D6h");
@@ -142,7 +142,7 @@ public:
     TS_ASSERT_EQUALS(nControls, 2);
   }
 
-  void test_build_5() {
+  void test_build_control_with_mismatching_FWHMs() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Ce");
     cf.setAttributeValue("Symmetries", " C2v");
@@ -155,7 +155,7 @@ public:
     TS_ASSERT_THROWS(cf.buildSource(), const std::runtime_error &);
   }
 
-  void xtest_build_7() {
+  void test_build_single_site_and_multiple_spectra_and_multiple_temperatures_and_FWHMs() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Ce");
     cf.setAttributeValue("Symmetries", " C2v");
@@ -180,7 +180,7 @@ public:
     TS_ASSERT_EQUALS(nControls, 2);
   }
 
-  void test_build_8() {
+  void test_build_multi_site_and_multiple_spectra_and_multiple_FWHMs() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Ce, Yb");
     cf.setAttributeValue("Symmetries", " D3,  D6h");
@@ -204,7 +204,7 @@ public:
     TS_ASSERT_EQUALS(nControls, 2);
   }
 
-  void test_build_9() {
+  void test_build_single_site_and_multiple_spectra_and_physical_properties() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Ce");
     cf.setAttributeValue("Symmetries", " C2v");
@@ -228,7 +228,7 @@ public:
     TS_ASSERT_EQUALS(nControls, 0);
   }
 
-  void test_build_10() {
+  void test_build_multi_site_and_multiple_spectra_and_physical_properties() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Ce, Yb");
     cf.setAttributeValue("Symmetries", " D3,  D6h");
@@ -252,7 +252,7 @@ public:
     TS_ASSERT_EQUALS(nControls, 0);
   }
 
-  void test_build_11() {
+  void test_build_single_site_and_multiple_spectra_and_physical_properties_and_multiple_temperatures() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Ce");
     cf.setAttributeValue("Symmetries", " C2v");
@@ -276,7 +276,7 @@ public:
     TS_ASSERT_EQUALS(nControls, 2);
   }
 
-  void test_build_12() {
+  void test_build_multi_site_and_multiple_spectra_and_physical_properties_and_multiple_temperatures() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Ce, Yb");
     cf.setAttributeValue("Symmetries", " D3,  D6h");
@@ -300,7 +300,7 @@ public:
     TS_ASSERT_EQUALS(nControls, 2);
   }
 
-  void test_build_15() {
+  void test_build_single_site_and_multiple_spectra_and_physical_properties_and_multiple_temperatures_and_FWHMs() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Ce");
     cf.setAttributeValue("Symmetries", " C2v");
@@ -324,7 +324,7 @@ public:
     TS_ASSERT_EQUALS(nControls, 2);
   }
 
-  void test_build_16() {
+  void test_build_multi_site_and_multiple_spectra_and_physical_properties_and_multiple_temperatures_and_FWHMs() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Ce, Yb");
     cf.setAttributeValue("Symmetries", " D3,  D6h");
@@ -348,7 +348,7 @@ public:
     TS_ASSERT_EQUALS(nControls, 2);
   }
 
-  void test_build_17() {
+  void test_build_control_with_empty_FWHMs() {
     Mantid::CurveFitting::Functions::CrystalFieldControl cf;
     cf.setAttributeValue("Ions", "Tb, Tb");
     cf.setAttributeValue("Symmetries", " C2,  C2");
