@@ -173,7 +173,7 @@ pipeline {
           agent { label 'linux-64' }
           options {
               timestamps ()
-              retry(3)
+              // retry(3) comment out for debug
           }
           environment {
             CATCH_ERROR_BLOCK_SUCCESS = "FALSE"
@@ -188,10 +188,13 @@ pipeline {
             // Build the base set of packages (ones not required for mantidworkbench)
             // in parallel
             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE', message: 'Error during package_conda pipeline step for base on linux-64') {
+              echo "Entered Catch Error"
               package_conda('linux-64', 'base')
+              echo "${env.CATCH_ERROR_BLOCK_SUCCESS}"
               script {
                 env.CATCH_ERROR_BLOCK_SUCCESS = "TRUE"
               }
+              echo "${env.CATCH_ERROR_BLOCK_SUCCESS}"
             }
             archive_env_logs('linux-64')
             archive_conda_packages('linux-64')
