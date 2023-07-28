@@ -173,10 +173,7 @@ pipeline {
           agent { label 'linux-64' }
           options {
               timestamps ()
-              // retry(3) comment out for debug
-          }
-          environment {
-            CATCH_ERROR_BLOCK_SUCCESS = "FALSE"
+              retry(3) comment out for debug
           }
           steps {
             // Clean up conda-bld before we start to avoid any
@@ -187,23 +184,13 @@ pipeline {
             checkoutSource("${GIT_SHA}")
             // Build the base set of packages (ones not required for mantidworkbench)
             // in parallel
-            catchError(buildResult: 'FAILURE', stageResult: 'FAILURE', message: 'Error during package_conda pipeline step for base on linux-64') {
-              echo "Entered Catch Error"
-              package_conda('linux-64', 'base')
-              echo "${env.CATCH_ERROR_BLOCK_SUCCESS}"
-              script {
-                env.CATCH_ERROR_BLOCK_SUCCESS = "TRUE"
-              }
-              echo "${env.CATCH_ERROR_BLOCK_SUCCESS}"
-            }
-            archive_env_logs('linux-64')
+            package_conda('linux-64', 'base')
             archive_conda_packages('linux-64')
             archive_conda_packages('noarch')
-            echo "${env.CATCH_ERROR_BLOCK_SUCCESS}"
-            script {
-              if (env.CATCH_ERROR_BLOCK_SUCCESS == "FALSE") {
-                error "The CatchError block failed. Throw error to intiate pipeline retry"
-              }
+          }
+          post {
+            always {
+              archive_env_logs('linux-64')
             }
           }
         }
@@ -221,9 +208,6 @@ pipeline {
               timestamps ()
               retry(3)
           }
-          environment {
-            CATCH_ERROR_BLOCK_SUCCESS = "FALSE"
-          }
           steps {
             // Clean up conda-bld before we start to avoid any
             // confusion with old packages
@@ -233,18 +217,12 @@ pipeline {
             checkoutSource("${GIT_SHA}")
             // Build the base set of packages (ones not required for mantidworkbench)
             // in parallel
-            catchError(buildResult: 'FAILURE', stageResult: 'FAILURE', message: 'Error during package_conda pipeline step for base on win-64') {
-              package_conda('win-64', 'base')
-              script {
-                env.CATCH_ERROR_BLOCK_SUCCESS = "TRUE"
-              }
-            }
-            archive_env_logs('win-64')
+            package_conda('win-64', 'base')
             archive_conda_packages('win-64')
-            script {
-              if (env.CATCH_ERROR_BLOCK_SUCCESS == "FALSE") {
-                error "The CatchError block failed. Throw error to intiate pipeline retry"
-              }
+          }
+          post {
+            always {
+              archive_env_logs('win-64')
             }
           }
         }
@@ -262,9 +240,6 @@ pipeline {
               timestamps ()
               retry(3)
           }
-          environment {
-            CATCH_ERROR_BLOCK_SUCCESS = "FALSE"
-          }
           steps {
             // Clean up conda-bld before we start to avoid any
             // confusion with old packages
@@ -274,18 +249,12 @@ pipeline {
             checkoutSource("${GIT_SHA}")
             // Build the base set of packages (ones not required for mantidworkbench)
             // in parallel
-            catchError(buildResult: 'FAILURE', stageResult: 'FAILURE', message: 'Error during package_conda pipeline step for base on osx-64') {
-              package_conda('osx-64', 'base')
-              script {
-                env.CATCH_ERROR_BLOCK_SUCCESS = "TRUE"
-              }
-            }
-            archive_env_logs('osx-64')
+            package_conda('osx-64', 'base')
             archive_conda_packages('osx-64')
-            script {
-              if (env.CATCH_ERROR_BLOCK_SUCCESS == "FALSE") {
-                error "The CatchError block failed. Throw error to intiate pipeline retry"
-              }
+          }
+          post {
+            always {
+              archive_env_logs('osx-64')
             }
           }
         }
@@ -314,9 +283,6 @@ pipeline {
                 timestamps()
                 retry(3)
             }
-            environment {
-              CATCH_ERROR_BLOCK_SUCCESS = "FALSE"
-            }
             steps {
               // Clean up conda-bld before we start to avoid any
               // confusion with old packages
@@ -332,21 +298,14 @@ pipeline {
                 target: './',
                 flatten: false
 
-              catchError(buildResult: 'FAILURE', stageResult: 'FAILURE', message: "Error during package_conda pipeline step for workbench on ${PLATFORM}") {
-                package_conda("${PLATFORM}", "workbench")
-                script {
-                  env.CATCH_ERROR_BLOCK_SUCCESS = "TRUE"
-                }
-              }
-              archive_env_logs("${PLATFORM}")
+              package_conda("${PLATFORM}", "workbench")
               archive_conda_packages("${PLATFORM}")
               package_standalone()
               archive_standalone_package("${PLATFORM}")
-
-              script {
-                if (env.CATCH_ERROR_BLOCK_SUCCESS == "FALSE") {
-                  error "The CatchError block failed. Throw error to intiate pipeline retry"
-                }
+            }
+            post {
+              always {
+                archive_env_logs("${PLATFORM}")
               }
             }
           }
