@@ -188,7 +188,7 @@ def decompile(code_object):
     Taken from
     http://thermalnoise.wordpress.com/2007/12/30/exploring-python-bytecode/
 
-    Extracts dissasembly information from the byte code and stores it in
+    Extracts disassembly information from the byte code and stores it in
     a list for further use.
 
     Call signature(s):
@@ -219,7 +219,7 @@ def decompile(code_object):
     return instructions
 
 
-# A must list all of the operators that behave like a function calls in byte-code
+# We must list all of the operators that behave like a function calls in byte-code
 # This is for the lhs functionality
 __operator_names = {
     "CALL_FUNCTION",
@@ -263,6 +263,8 @@ __operator_names = {
     "CALL_FUNCTION_EX",
     "LOAD_METHOD",
     "CALL_METHOD",
+    "DICT_MERGE",
+    "DICT_UPDATE",
 }
 
 
@@ -295,7 +297,6 @@ def process_frame(frame):
             start_index = index
             start_offset = offset
 
-    (offset, op, name, argument, argvalue) = ins_stack[-1]
     # Append the index of the last entry to form the last boundary
     call_function_locs[start_offset] = (start_index, len(ins_stack) - 1)
 
@@ -312,7 +313,6 @@ def process_frame(frame):
     # an intermediate reference. Currently this method does not provide the
     # correct answer and throws a KeyError. Ticket #4186
     output_var_names = []
-    max_returns = []
     last_func_offset = call_function_locs[last_i][0]
     (offset, op, name, argument, argvalue) = ins_stack[last_func_offset + 1]
     if name == "POP_TOP":  # no return values
