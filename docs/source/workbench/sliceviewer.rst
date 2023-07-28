@@ -216,15 +216,15 @@ Some of the options are based on several statistical methods for determining out
 
 +----------+-----------------+-----------------+
 | Option   | Lower-Limit     | Upper-Limit     |
-+============================+=================+
++==========+=================+=================+
 | Min/Max  | min             | max             |
-+----------------------------+-----------------+
++----------+-----------------+-----------------+
 | 3(Sig)   | ave - 3 x std   | mean + 3 x std  |
-+------------------------+------------+--------+
++----------+-----------------+-----------------+
 | 1.5(IQR) | Q1 - 1.5 x IQR  | Q3 + 1.5 x IQR  |
-+------------------------+------------+--------+
++----------+-----------------+-----------------+
 | 1.5(MAD) | med - 1.5 x mad | med + 1.5 x mad |
-+------------------------+------------+--------+
++----------+-----------------+-----------------+
 
 .. figure:: ../images/wb-sliceviewer67-colorbar.png
    :class: screenshot
@@ -238,5 +238,6 @@ The abbreviations are listed as follows:
 - std = standard deviation
 - Q1  = 1st quartile (or 25th-percentile)
 - Q3  = 3rd quartile (or 75th-percentile)
+- IQR = interquartile range
 - med = median (or 1nd quartile or 50th-percentile)
 - mad = median absolute deviation
