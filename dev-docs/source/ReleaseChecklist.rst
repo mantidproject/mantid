@@ -562,8 +562,8 @@ To do this:
 
 * On a clone of the mantid repository, check out the commit tagged as the relevant release number: ``git checkout tags/<vX.Y.Z> -b <new branch name>``.
 * On this branch, build the ``docs-html`` target (this target is produced by ``CMake``).
-* Clone the repository: https://github.com/mantidproject/docs-versioned
+* Clone the repository: https://github.com/mantidproject/docs-versioned.
 * Remaining on the ``main`` branch, create a directory for the relevant release in the form ``vX.Y.Z``.
 * Copy the built documentation into this new directory. The built documentation will be in your mantid build directory at ``<build directory>/docs/html``.
-* Stage the newly created directory, and commit it to your branch.
+* Stage the newly created directory and commit it to your branch.
 * After double-checking that these instructions have been followed correctly, push your branch to the main repository to deploy.
