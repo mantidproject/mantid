@@ -214,17 +214,17 @@ Autoscaling options allow the colorbar limits to automatically be updated.
 There are several options to help "quickly" re-scale the limits.
 Some of the options are based on several statistical methods for determining outliers.
 
-+----------+-----------------+-----------------+
-| Option   | Lower-Limit     | Upper-Limit     |
-+==========+=================+=================+
-| Min/Max  | min             | max             |
-+----------+-----------------+-----------------+
-| 3(Sig)   | ave - 3 x std   | mean + 3 x std  |
-+----------+-----------------+-----------------+
-| 1.5(IQR) | Q1 - 1.5 x IQR  | Q3 + 1.5 x IQR  |
-+----------+-----------------+-----------------+
-| 1.5(MAD) | med - 1.5 x mad | med + 1.5 x mad |
-+----------+-----------------+-----------------+
++-------------------------------+---------------------+---------------------+
+| Option                        | Lower-Limit         | Upper-Limit         |
++===============================+=====================+=====================+
+| Min/Max                       | ``min``             | ``max``             |
++-------------------------------+---------------------+---------------------+
+| 3-Sigma                       | ``ave - 3 x std``   | ``ave + 3 x std``   |
++-------------------------------+---------------------+---------------------+
+| 1.5-Interquartile Range       | ``Q1 - 1.5 x IQR``  | ``Q3 + 1.5 x IQR``  |
++-------------------------------+---------------------+---------------------+
+| 1.5-Median Absolute Deviation | ``med - 1.5 x mad`` | ``med + 1.5 x mad`` |
++-------------------------------+---------------------+---------------------+
 
 .. figure:: ../images/wb-sliceviewer67-colorbar.png
    :class: screenshot

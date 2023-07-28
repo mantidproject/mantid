@@ -23,7 +23,7 @@ from qtpy.QtCore import Signal
 from qtpy.QtGui import QDoubleValidator
 
 NORM_OPTS = ["Linear", "Log", "SymmetricLog10", "Power"]
-AUTO_SCALE_OPTS = ["Min/Max", "3(Sig)", "1.5(IQR)", "1.5(MAD)"]
+AUTO_SCALE_OPTS = ["Min/Max", "3-Sigma", "1.5-Interquartile Range", "1.5-Median Absolute Deviation"]
 
 
 def register_customized_colormaps():
@@ -345,13 +345,13 @@ class ColorbarWidget(QWidget):
             scale_type = AUTO_SCALE_OPTS[self.autotype.currentIndex()]
             if scale_type == "Min/Max":
                 vmin, vmax = np.min(data[mask]), np.max(data[mask])
-            elif scale_type == "3(Sig)":
+            elif scale_type == "3-Sigma":
                 mean, sigma = np.mean(data[mask]), np.std(data[mask])
                 vmin, vmax = mean - 3 * sigma, mean + 3 * sigma
-            elif scale_type == "1.5(IQR)":
+            elif scale_type == "1.5-Interquartile Range":
                 Q1, Q3 = np.percentile(data[mask], [25, 75])
                 vmin, vmax = Q1 - 1.5 * (Q3 - Q1), Q3 + 1.5 * (Q3 - Q1)
-            elif scale_type == "1.5(MAD)":
+            elif scale_type == "1.5-Median Absolute Deviation":
                 med = np.median(data[mask])
                 mad = np.median(np.abs(data[mask] - med))
                 vmin, vmax = med - 1.5 * mad, med + 1.5 * mad
