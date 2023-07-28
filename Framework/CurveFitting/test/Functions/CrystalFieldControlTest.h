@@ -162,7 +162,6 @@ public:
     cf.setAttributeValue("PhysicalProperties", "");
     cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
     cf.setAttributeValue("FWHMs", std::vector<double>({1.1, 1.2}));
-    cf.buildControls();
     auto source = cf.buildSource();
     std::string Ions = cf.getAttribute("Ions").asString();
     std::string Symmetries = cf.getAttribute("Symmetries").asString();
