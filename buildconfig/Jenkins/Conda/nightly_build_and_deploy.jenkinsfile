@@ -173,7 +173,7 @@ pipeline {
           agent { label 'linux-64' }
           options {
               timestamps ()
-              retry(3) comment out for debug
+              retry(3)
           }
           steps {
             // Clean up conda-bld before we start to avoid any
