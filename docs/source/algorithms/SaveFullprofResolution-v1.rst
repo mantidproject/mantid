@@ -83,11 +83,6 @@ Usage
   import os
   os.remove(savefile)
 
-Output:
-
-.. testoutput:: ExSaveIrf
-
-
 .. categories::
 
 .. sourcelink::
