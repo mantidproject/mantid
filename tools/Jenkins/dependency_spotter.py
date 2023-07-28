@@ -53,7 +53,7 @@ def form_url_for_build_artifact(build_number: int, os_name: str):
 
 
 def extract_package_versions(url: str, os_name: str) -> dict:
-    regex_pattern = os_name + "\/([\w\-]+)-([\w\-.]+)\.(conda|tar\.bz2)"  # noqa: W605
+    regex_pattern = os_name + r"\/([\w\-]+)-([\w\-.]+)\.(conda|tar\.bz2)"
     package_version_dict = {}
     with urllib.request.urlopen(url) as file:
         for line in file.readlines():
