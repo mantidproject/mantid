@@ -58,16 +58,9 @@ Usage
 
    For examples of applying custom rebinning, please refer to :ref:`algm-Rebin` documentation.
 
-**Example - Pair asymmetry for MUSR run:**
+**Example - Load and Apply MUSR run:**
 
-.. testcode:: ExMUSRPairAsymmetry
-
-
-
-
-Output:
-
-.. testoutput:: ExLoadAndApplyMUSR
+.. testcode:: ExLoadAndApplyMUSR
 
 	# Clear the ADS before starting
 	AnalysisDataService.clear()
