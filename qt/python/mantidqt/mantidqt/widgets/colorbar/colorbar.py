@@ -240,7 +240,7 @@ class ColorbarWidget(QWidget):
             cmin = self.cmin_value
             cmax = self.cmax_value
             # sanity check negative values switching to log-scale without autoscale
-            if NORM_OPTS[idx] == "Log" and cmin < 0:
+            if NORM_OPTS[idx] == "Log" and cmin <= 0:
                 climits = self._calculate_clim()
                 cmin = self.cmin_value = climits[0]
                 # keep previous maximum value if possible
