@@ -228,7 +228,7 @@ Some of the options are based on several statistical methods for determining out
 
 .. figure:: ../images/wb-sliceviewer67-colorbar.png
    :class: screenshot
-   :width: 75%
+   :width: 10%
    :align: center
 
 The abbreviations are listed as follows:
