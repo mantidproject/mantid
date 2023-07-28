@@ -782,27 +782,18 @@ class AbinsAlgorithm:
     @classmethod
     def _validate_euphonic_input_file(cls, filename_full_path: str) -> dict:
         logger.information("Validate force constants file for interpolation.")
-        from dos.load_euphonic import euphonic_available
 
-        if euphonic_available():
-            try:
-                from euphonic.cli.utils import force_constants_from_file
+        from dos.load_euphonic import force_constants_from_file
 
-                force_constants_from_file(filename_full_path)
-                return dict(Invalid=False, Comment="")
-            except Exception as error:
-                if hasattr(error, "message"):
-                    message = error.message
-                else:
-                    message = str(error)
-                return dict(Invalid=True, Comment=f"Problem opening force constants file with Euphonic.: {message}")
-        else:
-            return dict(
-                Invalid=True,
-                Comment=(
-                    "Could not import Euphonic module. " "Try running user/AdamJackson/install_euphonic.py from the Script Repository."
-                ),
-            )
+        try:
+            force_constants_from_file(filename_full_path)
+            return dict(Invalid=False, Comment="")
+        except Exception as error:
+            if hasattr(error, "message"):
+                message = error.message
+            else:
+                message = str(error)
+            return dict(Invalid=True, Comment=f"Problem opening force constants file with Euphonic.: {message}")
 
     @classmethod
     def _validate_vasp_input_file(cls, filename_full_path: str) -> dict:
