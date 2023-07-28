@@ -24,7 +24,6 @@ from qtpy.QtGui import QDoubleValidator
 
 NORM_OPTS = ["Linear", "Log", "SymmetricLog10", "Power"]
 AUTO_SCALE_OPTS = ["Min/Max", "3(Sig)", "1.5(IQR)", "1.5(MAD)"]
-MIN_LOG_VALUE = 1e-4
 
 
 def register_customized_colormaps():
