@@ -43,13 +43,7 @@ def dependency_spotter(first_build: int, second_build: int, os_name: str = "linu
 
 
 def form_url_for_build_artifact(build_number: int, os_name: str):
-    return (
-        "https://builds.mantidproject.org/job/main_nightly_deployment_prototype/"
-        + str(build_number)
-        + "/artifact/conda-bld/"
-        + os_name
-        + "/env_logs/mantidworkbench_build_environment.txt"
-    )
+    return f"https://builds.mantidproject.org/job/main_nightly_deployment_prototype/{str(build_number)}/artifact/conda-bld/{os_name}/env_logs/mantidworkbench_build_environment.txt"
 
 
 def extract_package_versions(url: str, os_name: str) -> dict:
