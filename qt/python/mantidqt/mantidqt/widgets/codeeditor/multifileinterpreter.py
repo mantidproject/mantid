@@ -319,7 +319,8 @@ class MultiPythonFileInterpreter(QWidget):
             if self.editor_at(i).filename == filepath:
                 matching_index = i
                 break
-
+                
+        # If the file is currently open, select that tab
         if matching_index > -1:
             self._tabs.setCurrentWidget(self.editor_at(matching_index))
         else:
