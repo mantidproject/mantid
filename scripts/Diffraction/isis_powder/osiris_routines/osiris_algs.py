@@ -12,7 +12,6 @@ from mantid.kernel import logger
 from mantid.simpleapi import (
     RebinToWorkspace,
     MergeRuns,
-    GroupWorkspaces,
     ConjoinSpectra,
     CreateWorkspace,
 )
@@ -154,7 +153,11 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run, drange=No
         )
         vanadium_runs = _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="vanadium_run_numbers")
     else:
-        empty_can_runs = get_empty_can_run_for_drange(all_run_numbers, drange) if inst_settings.subtract_empty_can else None
+        empty_can_runs = (
+            get_empty_can_run_for_drange(all_run_numbers, drange)
+            if (inst_settings.subtract_empty_can or inst_settings.empty_can_subtraction_method == "PaalmanPings")
+            else None
+        )
         vanadium_runs = get_van_run_for_drange(all_run_numbers, drange)
 
     grouping_file_name = inst_settings.grouping
@@ -200,23 +203,15 @@ def _correct_drange_overlap(merged_ws, drange_sets):
     return merged_ws
 
 
-def merge_dspacing_runs(focussed_runs, drange_sets, run_number, split=False):
+def merge_dspacing_runs(focussed_runs, drange_sets, run_number):
     if len(focussed_runs) == 1:
-        if split:
-            grouped_spectra = GroupWorkspaces(
-                InputWorkspaces=focussed_runs, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED
-            )
-        else:
-            grouped_spectra = GroupWorkspaces(
-                InputWorkspaces=focussed_runs[0], OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED
-            )
-        return [_correct_drange_overlap(grouped_spectra, drange_sets)]
+        input_workspaces_str = ",".join([ws.name() for ws in focussed_runs[0]])
+        ConjoinSpectra(InputWorkspaces=input_workspaces_str, OutputWorkspace="OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED)
 
-    extracted_spectra = focussed_runs
-    if split:
-        extracted_spectra = [common.extract_ws_spectra(ws) for ws in focussed_runs]
+        joined_spectra = AnalysisDataService["OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED]
+        return [_correct_drange_overlap(joined_spectra, drange_sets)]
 
-    have_same_spectra_count = len({len(spectra) for spectra in extracted_spectra}) == 1
+    have_same_spectra_count = len({len(spectra) for spectra in focussed_runs}) == 1
     if not have_same_spectra_count:
         logger.warning("Cannot merge focussed workspaces with different number of spectra")
         return [ws for ws in focussed_runs]
@@ -224,7 +219,7 @@ def merge_dspacing_runs(focussed_runs, drange_sets, run_number, split=False):
     output_name = "OSIRIS" + run_number + WORKSPACE_SUFFIX.MERGED
 
     # Group workspaces located at the same index
-    matched_spectra = [list(spectra) for spectra in zip(*extracted_spectra)]
+    matched_spectra = [list(spectra) for spectra in zip(*focussed_runs)]
     # Merge workspaces located at the same index
     merged_spectra = [MergeRuns(InputWorkspaces=spectra, OutputWorkspace=f"merged_{idx}") for idx, spectra in enumerate(matched_spectra)]
 
@@ -260,8 +255,6 @@ def merge_dspacing_runs(focussed_runs, drange_sets, run_number, split=False):
     input_workspaces_str = ",".join([ws.name() for ws in merged_spectra])
     ConjoinSpectra(InputWorkspaces=input_workspaces_str, OutputWorkspace=output_name)
 
-    if split:
-        common.remove_intermediate_workspace([ws for ws_group in matched_spectra for ws in ws_group])
     common.remove_intermediate_workspace([ws for ws in merged_spectra])
 
     joined_spectra = AnalysisDataService[output_name]

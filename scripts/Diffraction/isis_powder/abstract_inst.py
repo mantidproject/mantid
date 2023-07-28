@@ -80,10 +80,14 @@ class AbstractInst(object):
         paalman_pings_events_per_point=None,
     ):
         """
-        Focuses the user specified run - should be called by the concrete instrument
-        :param run_number_string: The run number(s) to be processed
-        :param do_van_normalisation: True to divide by the vanadium run, false to not.
-        :return:
+        Focuses the user specified run(s) - should be called by the concrete instrument.
+        :param run_number_string: The run number(s) to be processed.
+        :param do_van_normalisation: Whether to divide by the vanadium run or not.
+        :param do_absorb_corrections: Whether to apply absorption correction or not.
+        :param sample_details: Sample details for the run number(s).
+        :param empty_can_subtraction_method: The method for absorption correction. Can be 'Simple' or 'PaalmanPings'.
+        :param paalman_pings_events_per_point: The number of events used in Paalman Pings Monte Carlo absorption correction.
+        :return: the focussed run(s).
         """
         self._is_vanadium = False
         focused_runs = focus.focus(
