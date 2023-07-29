@@ -15,6 +15,7 @@
 #include <QDoubleValidator>
 #include <QLineEdit>
 #include <QVBoxLayout>
+#include <limits>
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using namespace MantidQt::Widgets::Common;
@@ -38,6 +39,10 @@ constexpr const char *FIGURE_FACECOLOR = "w";
 // values is used as an integer representation. See the setScaleType
 // method if this is changed.
 QStringList NORM_OPTS = {"Linear", "Log", "SymmetricLog10", "Power"};
+
+// validator limits for normalization options
+constexpr double MIN_DBL = std::numeric_limits<double>::min();
+constexpr double MAX_DBL = std::numeric_limits<double>::max();
 
 } // namespace
 
@@ -150,27 +155,34 @@ void ColorbarWidget::setScaleType(int index) {
     return;
   // Some ranges will be invalid for some scale types, e.g. x < 0 for PowerNorm.
   // Compute a valid range and reset user-specified range if necessary
-  auto autoscaleAndSetNorm = [this](auto norm) {
+  auto autoscale = [this](auto norm) {
     auto validRange = norm.autoscale(clim());
-    setNorm(std::move(norm));
     return validRange;
   };
 
   std::tuple<double, double> validRange;
   switch (index) {
   case 0:
-    validRange = autoscaleAndSetNorm(Normalize());
+    validRange = autoscale(Normalize());
+    setNorm(Normalize(std::get<0>(validRange), std::get<1>(validRange)));
     break;
   case 1:
-    validRange = autoscaleAndSetNorm(LogNorm());
+    validRange = autoscale(LogNorm());
+    setNorm(LogNorm(std::get<0>(validRange), std::get<1>(validRange)));
     break;
   case 2:
-    validRange = autoscaleAndSetNorm(SymLogNorm(SymLogNorm::DefaultLinearThreshold, SymLogNorm::DefaultLinearScale));
+    validRange = autoscale(SymLogNorm(SymLogNorm::DefaultLinearThreshold, SymLogNorm::DefaultLinearScale));
+    setNorm(SymLogNorm(SymLogNorm::DefaultLinearThreshold, SymLogNorm::DefaultLinearScale, std::get<0>(validRange),
+                       std::get<1>(validRange)));
     break;
   case 3:
-    validRange = autoscaleAndSetNorm(PowerNorm(getNthPower().toDouble()));
+    double gamma = getNthPower().toDouble();
+    validRange = autoscale(PowerNorm(gamma));
+    setNorm(PowerNorm(gamma, std::get<0>(validRange), std::get<1>(validRange)));
     break;
   }
+  updateValidator(index);
+
   setClim(std::get<0>(validRange), std::get<1>(validRange));
   m_ui.normTypeOpt->setCurrentIndex(index);
   emit scaleTypeChanged(index);
@@ -252,16 +264,32 @@ void ColorbarWidget::initLayout() {
   m_ui.verticalLayout->insertWidget(1, m_canvas);
   createColorbar();
 
-  // Set validators on the scale inputs
-  m_ui.scaleMinEdit->setValidator(new QDoubleValidator());
-  m_ui.scaleMaxEdit->setValidator(new QDoubleValidator());
-
   QRegExp rx("^-?(0\\.\\d*[1-9]|[1-9]\\d*(\\.\\d+)?)$"); // non-zero floats or integers
   m_ui.powerEdit->setValidator(new QRegExpValidator(rx));
 
   // Setup normalization options
   m_ui.normTypeOpt->addItems(NORM_OPTS);
   scaleTypeSelectionChanged(0);
+
+  int index = getScaleType();
+  updateValidator(index);
+}
+
+/**
+ * Update min/max validators based on normalization
+ * @param index Normalization index
+ */
+void ColorbarWidget::updateValidator(const int index) {
+  auto valid_min = new QDoubleValidator();
+  auto valid_max = new QDoubleValidator();
+  // only positive values for logarithmic scaling
+  if (index == 1) {
+    valid_min->setBottom(MIN_DBL);
+  } else {
+    valid_min->setBottom(-MAX_DBL);
+  }
+  m_ui.scaleMinEdit->setValidator(valid_min);
+  m_ui.scaleMaxEdit->setValidator(valid_max);
 }
 
 /**

@@ -72,6 +72,7 @@ private slots:
 
 private:
   void initLayout();
+  void updateValidator(const int index);
   void createColorbar(const Common::Python::Object &ticks = Common::Python::Object(),
                       const Common::Python::Object &format = Common::Python::Object());
   void connectSignals();
