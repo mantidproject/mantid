@@ -449,9 +449,13 @@ unusedStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/Python/CodeExecutio
 unusedStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/Python/CodeExecution.cpp:21
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:78
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:82
+shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:83
+shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:87
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:188
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:208
+shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:203
+shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:223
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:232
+shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:247
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/inc/MantidQtWidgets/Plotting/PreviewPlot.h:45
 constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/BankTextureBuilder.cpp:326
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/MiniPlotMpl.cpp:154
