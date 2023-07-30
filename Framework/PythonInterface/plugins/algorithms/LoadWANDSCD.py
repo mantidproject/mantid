@@ -293,10 +293,8 @@ class LoadWANDSCD(PythonAlgorithm):
 
         if grouping > 1:
             detector_list = ""
-            group_number = 0
             for x in range(0, 480 * 8, grouping):
                 for y in range(0, 512, grouping):
-                    group_number += 1
                     spectra_list = []
                     for j in range(grouping):
                         for i in range(grouping):
