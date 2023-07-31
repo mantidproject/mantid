@@ -122,11 +122,11 @@ bool IndirectFitDataModel::setResolution(const std::string &name) {
 }
 
 bool IndirectFitDataModel::setResolution(const std::string &name, WorkspaceID workspaceID) {
-  bool isValid = true;
+  bool hasValidValues = true;
   if (!name.empty() && m_adsInstance.doesExist(name)) {
     const auto resolution = m_adsInstance.retrieveWS<Mantid::API::MatrixWorkspace>(name);
     auto y = resolution->readY(workspaceID.value);
-    isValid = std::all_of(y.cbegin(), y.cend(), [](double value) { return value == value; });
+    hasValidValues = std::all_of(y.cbegin(), y.cend(), [](double value) { return value == value; });
 
     if (m_resolutions->size() > workspaceID.value) {
       m_resolutions->at(workspaceID.value) = resolution;
@@ -139,7 +139,7 @@ bool IndirectFitDataModel::setResolution(const std::string &name, WorkspaceID wo
   } else {
     throw std::runtime_error("A valid resolution file needs to be selected.");
   }
-  return isValid;
+  return hasValidValues;
 }
 
 void IndirectFitDataModel::removeSpecialValues(const std::string &name) {
