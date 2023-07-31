@@ -19,8 +19,8 @@ def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeli
 
     print("Files available for comparison:")
     if len(files_in_both_builds) > 0:
-        for file in files_in_both_builds:
-            print(file)
+        for i, file in enumerate(files_in_both_builds):
+            print(f"{i+1}) {file}")
     else:
         print("None")
     print("")
@@ -35,8 +35,23 @@ def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeli
     if len(files_in_both_builds) == 0:
         return
 
+    files_to_compare = input(
+        "Which files do you want to compare? (Either a single number, a comma-separated list of numbers, or 0 for all):"
+    )
+    if files_to_compare == "":
+        return
+    file_indices = files_to_compare.split(",")
+    if "0" in file_indices:
+        file_indices = range(len(files_in_both_builds))
+    else:
+        file_indices = [int(x) - 1 for x in file_indices]
+
+    if file_indices is None:
+        return
+
     print("")
-    for file in files_in_both_builds:
+    for file_id in file_indices:
+        file = files_in_both_builds[file_id]
         print(f"{file}:")
         print("")
         compare_dependencies_for_file(os_name, first_build, second_build, pipeline, file)
