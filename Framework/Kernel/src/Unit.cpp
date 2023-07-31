@@ -14,6 +14,7 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include <cfloat>
 #include <limits>
+#include <math.h>
 #include <sstream>
 
 namespace Mantid::Kernel {
@@ -547,6 +548,14 @@ double Energy_inWavenumber::singleFromTOF(const double tof) const {
 }
 
 Unit *Energy_inWavenumber::clone() const { return new Energy_inWavenumber(*this); }
+
+double calculateDIFCCorrection(const double l1, const double l2, const double twotheta, const double offset,
+                               const double binWidth) {
+  auto sinTheta = std::sin(twotheta / 2);
+  double newDIFC = (PhysicalConstants::NeutronMass * 1e6) / (PhysicalConstants::h * 1e10);
+  newDIFC *= (l1 + l2) * 2 * sinTheta * pow((1 + fabs(binWidth)), -1 * offset);
+  return newDIFC;
+}
 
 // ==================================================================================================
 /* D-SPACING

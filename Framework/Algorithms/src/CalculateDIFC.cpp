@@ -8,15 +8,24 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 
 namespace {
 
-// calculate DIFC using the geometry and
+/** Calculate the DIFC values and write them to OutputWorkspace
+ *
+ * @param progress :: progress indicator
+ * @param outputWs :: OutputWorkspace for DIFC Values
+ * @param offsetsWS :: Offset Workspace used to calculate DIFC
+ * @param detectorInfo :: Detector Info we are using
+ * @param binWidth :: binWidth used for logarithmically binned data
+ * @param is_signed :: flag for `Signed` Offset Mode
+ */
 void calculateFromOffset(API::Progress &progress, DataObjects::SpecialWorkspace2D &outputWs,
                          const DataObjects::OffsetsWorkspace *const offsetsWS,
-                         const Geometry::DetectorInfo &detectorInfo) {
+                         const Geometry::DetectorInfo &detectorInfo, double binWidth, bool is_signed) {
   const auto &detectorIDs = detectorInfo.detectorIDs();
   const bool haveOffset = (offsetsWS != nullptr);
   const double l1 = detectorInfo.l1();
@@ -27,8 +36,13 @@ void calculateFromOffset(API::Progress &progress, DataObjects::SpecialWorkspace2
       const double offset = (haveOffset) ? offsetsWS->getValue(detectorIDs[i], 0.) : 0.;
 
       // tofToDSpacingFactor gives 1/DIFC
-      double difc =
-          1. / Geometry::Conversion::tofToDSpacingFactor(l1, detectorInfo.l2(i), detectorInfo.twoTheta(i), offset);
+      double difc = 0.0;
+      if (is_signed) {
+        difc = Geometry::Conversion::calculateDIFCCorrection(l1, detectorInfo.l2(i), detectorInfo.twoTheta(i), offset,
+                                                             binWidth);
+      } else {
+        difc = 1. / Geometry::Conversion::tofToDSpacingFactor(l1, detectorInfo.l2(i), detectorInfo.twoTheta(i), offset);
+      }
       outputWs.setValue(detectorIDs[i], difc);
     }
 
@@ -92,6 +106,13 @@ void CalculateDIFC::init() {
                   "Optional: A TableWorkspace containing the DIFC values, "
                   "which will be copied. This property cannot be set in "
                   "conjunction with property OffsetsWorkspace.");
+  std::vector<std::string> modes{"Relative", "Absolute", "Signed"};
+
+  declareProperty("OffsetMode", "Relative", std::make_shared<Kernel::StringListValidator>(modes),
+                  "Optional: Whether to calculate a relative, absolute, or signed offset");
+
+  declareProperty("BinWidth", -0.001,
+                  "Optional: The bin width of the X axis, if using 'Signed' OffsetMode, this value must be provided");
   declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>("OffsetsWorkspace", "", Direction::Input,
                                                                         Mantid::API::PropertyMode::Optional),
                   "Optional: A OffsetsWorkspace containing the calibration "
@@ -123,6 +144,11 @@ void CalculateDIFC::exec() {
   API::ITableWorkspace_const_sptr calibWs = getProperty("CalibrationWorkspace");
   API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
   API::MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
+  double binWidth = getProperty("BinWidth");
+  bool is_signed = false;
+  if (std::string(getProperty("OffsetMode")) == "Signed") {
+    is_signed = true;
+  }
 
   if ((!bool(inputWs == outputWs)) ||
       // SpecialWorkspace2D is a Workspace2D where each spectrum
@@ -144,7 +170,7 @@ void CalculateDIFC::exec() {
     // this method handles calculating from instrument geometry as well,
     // and even when OffsetsWorkspace hasn't been set
     const auto &detectorInfo = inputWs->detectorInfo();
-    calculateFromOffset(progress, *outputSpecialWs, offsetsWs.get(), detectorInfo);
+    calculateFromOffset(progress, *outputSpecialWs, offsetsWs.get(), detectorInfo, binWidth, is_signed);
   }
 
   setProperty("OutputWorkspace", outputWs);

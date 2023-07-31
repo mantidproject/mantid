@@ -530,6 +530,13 @@ public:
     TS_ASSERT_THROWS(energyk.fromTOF(x, y, 1.0, 1, {}), const std::runtime_error &)
   }
 
+  void test_calculateDIFCCorrection() {
+    // DIFC = (mn/h)*(L1+L2)2sin(theta) * (1+|DX|)^{-offset}
+    // function params: l1, l2, twoTheta, offset, binWidth
+    double difcValue = calculateDIFCCorrection(2., 2., 1, 1, -1);
+    TS_ASSERT_DELTA(difcValue, 484.7537113879, 1.0e-6);
+  }
+
   //----------------------------------------------------------------------
   // d-Spacing tests
   //----------------------------------------------------------------------

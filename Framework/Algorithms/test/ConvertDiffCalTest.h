@@ -260,4 +260,132 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
+
+  // test with 'OffsetMode' set to 'Signed'
+  void test_signed_offset() {
+    std::list<class fake_entry> fake_entries;
+
+    for (int i = 0; i < 10; i++) {
+      fake_entry offsetEntry(i, fake_entry::offset, 1.);
+      fake_entry calEntry(i, fake_entry::calibration, std::pow(2, i));
+      fake_entries.emplace_back(offsetEntry);
+      fake_entries.emplace_back(calEntry);
+    }
+
+    /* generate fake workspaces */
+    class fake_workspaces fake_workspaces = generate_test_data(fake_entries);
+
+    ConvertDiffCal alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetsWorkspace", fake_workspaces.offsets));
+    std::string updated_calibration_table_name("updated_calibration_table");
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", updated_calibration_table_name));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetMode", "Signed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinWidth", 1.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreviousCalibration", fake_workspaces.calibration_table));
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    Workspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws =
+                                 AnalysisDataService::Instance().retrieveWS<Workspace>(updated_calibration_table_name));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    auto updated_calibration_table = std::dynamic_pointer_cast<ITableWorkspace>(ws);
+    TS_ASSERT(updated_calibration_table);
+
+    /* Get detector_ids */
+    auto detector_id_column = updated_calibration_table->getColumn(0);
+    int correct_size = 10;
+    TS_ASSERT_EQUALS(detector_id_column->size(), correct_size);
+    auto difc_column = updated_calibration_table->getColumn(1);
+    TS_ASSERT_EQUALS(difc_column->size(), correct_size);
+
+    TS_ASSERT_EQUALS(detector_id_column->toDouble(0), 0);
+    TS_ASSERT_EQUALS(detector_id_column->toDouble(1), 1);
+    TS_ASSERT_EQUALS(detector_id_column->toDouble(2), 2);
+    TS_ASSERT_EQUALS(detector_id_column->toDouble(3), 3);
+    TS_ASSERT_EQUALS(detector_id_column->toDouble(4), 4);
+    TS_ASSERT_EQUALS(detector_id_column->toDouble(5), 5);
+    TS_ASSERT_EQUALS(detector_id_column->toDouble(6), 6);
+    TS_ASSERT_EQUALS(detector_id_column->toDouble(7), 7);
+    TS_ASSERT_EQUALS(detector_id_column->toDouble(8), 8);
+    TS_ASSERT_EQUALS(detector_id_column->toDouble(9), 9);
+
+    /* check difc: */
+    TS_ASSERT_EQUALS(difc_column->toDouble(0), 0.5);
+    TS_ASSERT_EQUALS(difc_column->toDouble(1), 1.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(2), 2.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(3), 4.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(4), 8.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(5), 16.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(6), 32.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(7), 64.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(8), 128.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(9), 256.);
+  }
+
+  // test that zero offset does not change values
+  void test_signed_zero_offset() {
+    std::list<class fake_entry> fake_entries;
+
+    for (int i = 0; i < 10; i++) {
+      fake_entry offsetEntry(i, fake_entry::offset, 0.);
+      fake_entry calEntry(i, fake_entry::calibration, std::pow(2, i));
+      fake_entries.emplace_back(offsetEntry);
+      fake_entries.emplace_back(calEntry);
+    }
+
+    /* generate fake workspaces */
+    class fake_workspaces fake_workspaces = generate_test_data(fake_entries);
+
+    ConvertDiffCal alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetsWorkspace", fake_workspaces.offsets));
+    std::string updated_calibration_table_name("updated_calibration_table");
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", updated_calibration_table_name));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetMode", "Signed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinWidth", 1.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreviousCalibration", fake_workspaces.calibration_table));
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    Workspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws =
+                                 AnalysisDataService::Instance().retrieveWS<Workspace>(updated_calibration_table_name));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    auto updated_calibration_table = std::dynamic_pointer_cast<ITableWorkspace>(ws);
+    TS_ASSERT(updated_calibration_table);
+
+    /* Get detector_ids */
+    auto detector_id_column = updated_calibration_table->getColumn(0);
+
+    int correct_size = 10;
+    TS_ASSERT_EQUALS(detector_id_column->size(), correct_size);
+    auto difc_column = updated_calibration_table->getColumn(1);
+    TS_ASSERT_EQUALS(difc_column->size(), correct_size);
+
+    /* check difc: */
+    TS_ASSERT_EQUALS(difc_column->toDouble(0), 1);
+    TS_ASSERT_EQUALS(difc_column->toDouble(1), 2.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(2), 4.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(3), 8.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(4), 16.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(5), 32.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(6), 64.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(7), 128.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(8), 256.);
+    TS_ASSERT_EQUALS(difc_column->toDouble(9), 512.);
+  }
 };

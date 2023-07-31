@@ -1326,5 +1326,10 @@ double tofToDSpacingFactor(const double l1, const double l2, const double twoThe
   return Kernel::Units::tofToDSpacingFactor(l1, l2, twoTheta, offset);
 }
 
+double calculateDIFCCorrection(const double l1, const double l2, const double twoTheta, const double offset,
+                               const double binWidth) {
+  return Kernel::Units::calculateDIFCCorrection(l1, l2, twoTheta, offset, binWidth);
+}
+
 } // namespace Conversion
 } // namespace Mantid::Geometry
