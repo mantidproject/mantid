@@ -155,7 +155,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             self.dimensionWidget.set_editMax4(upperBound)
 
     def instrumentUpdateEvent(self):
-        changeToElastic = self.masterDict["instrument"] in ["WAND\u00B2"]
+        changeToElastic = self.masterDict["instrument"] in ["DEMAND", "WAND\u00B2"]
         if changeToElastic != self.instrumentElastic:
             self.instrumentElastic = changeToElastic
             self.dimensionWidget.toggleDeltaE(not changeToElastic)
@@ -244,7 +244,9 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                 pass
 
             instrumentName = self.masterDict["instrument"]
-            if instrumentName == "WAND\u00B2":
+            if instrumentName == "DEMAND":
+                instrumentName = "HB3A"
+            elif instrumentName == "WAND\u00B2":
                 instrumentName = "WAND"
 
             mantid.simpleapi.LoadEmptyInstrument(
@@ -260,6 +262,17 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                 mantid.simpleapi.RotateInstrumentComponent(
                     Workspace="__temp_instrument", ComponentName="Tank", Y=1, Angle=str(self.masterDict["S2"]), RelativeRotation=False
                 )
+            elif instrumentName == "HB3A":
+                mantid.simpleapi.AddSampleLog(
+                    Workspace="__temp_instrument", LogName="2theta", LogText=str(self.masterDict["S2"]), LogType="Number Series"
+                )
+                mantid.simpleapi.AddSampleLog(
+                    Workspace="__temp_instrument",
+                    LogName="det_trans",
+                    LogText=str(self.masterDict["DetZ"]),
+                    LogType="Number Series",
+                )
+                mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument", RewriteSpectraMap=True, InstrumentName="HB3A")
             elif instrumentName == "WAND":
                 mantid.simpleapi.AddSampleLog(
                     Workspace="__temp_instrument", LogName="HB2C:Mot:s2.RBV", LogText=str(self.masterDict["S2"]), LogType="Number Series"
@@ -288,7 +301,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                         return
             if self.masterDict["makeFast"]:
                 sp = numpy.arange(mantid.mtd["__temp_instrument"].getNumberHistograms())
-                if self.masterDict["instrument"] == "WAND\u00B2":
+                if self.masterDict["instrument"] in ["DEMAND", "WAND\u00B2"]:
                     sp = sp.reshape(-1, 512)
                     tomask = (
                         sp[:, 1::4].ravel().tolist()
@@ -328,7 +341,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         progressDialog.setRange(0, self.iterations)
         progressDialog.setWindowTitle("DGSPlanner progress")
 
-        if self.masterDict["instrument"] == "WAND\u00B2":
+        if self.masterDict["instrument"] in ["DEMAND", "WAND\u00B2"]:
             ei = UnitConversion.run("Wavelength", "Energy", self.masterDict["Ei"], 0, 0, 0, Elastic, 0)
         else:
             ei = self.masterDict["Ei"]
