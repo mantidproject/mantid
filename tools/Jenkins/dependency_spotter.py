@@ -4,6 +4,11 @@ import urllib.request
 
 
 def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeline: str, log_file: str):
+    if second_build < first_build:
+        yes_no = input("It looks like the second build is older than the first build, do you want to swap the order? (y/n)")
+        if yes_no.lower() == "y":
+            first_build, second_build = second_build, first_build
+
     if log_file:
         compare_dependencies_for_file(os_name, first_build, second_build, pipeline, log_file)
         return
