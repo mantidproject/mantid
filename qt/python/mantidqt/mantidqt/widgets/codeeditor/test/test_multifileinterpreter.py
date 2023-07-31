@@ -80,15 +80,16 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
         test_string = "Test file\n"
         widget = MultiPythonFileInterpreter()
         mock_open_func = mock.mock_open(read_data=test_string)
-        with mock.patch(widget.__module__ + ".open", mock_open_func, create=True):
-            with mock.patch(PERMISSION_BOX_FUNC, lambda: True):
-                with tempfile.TemporaryDirectory() as temp_dir:
-                    with mock.patch(
-                        "mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename",
-                        lambda s: os.path.join(temp_dir, "test_save_as_leaves_original_marked_unmodified"),
-                    ):
-                        widget.open_file_in_new_tab(test_string)
-                        widget.save_current_file_as()
+        ask_for_filename = "mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename"
+        test_file_name = "test_save_as_leaves_original_marked_unmodified"
+        # fmt: off
+        with mock.patch(widget.__module__ + ".open", mock_open_func, create=True), \
+                mock.patch(PERMISSION_BOX_FUNC, lambda: True), \
+                tempfile.TemporaryDirectory() as temp_dir, \
+                mock.patch(ask_for_filename, lambda s: os.path.join(temp_dir, test_file_name)):
+            widget.open_file_in_new_tab(test_string)
+            widget.save_current_file_as()
+        # fmt: on
         # There's one tab when you create the editor, then another one was added when opening the mock file. Clicking
         # 'Save Script as' should close the original tab with the old name, and leave you with a tab with the new name.
         self.assertEqual(2, widget.editor_count)
