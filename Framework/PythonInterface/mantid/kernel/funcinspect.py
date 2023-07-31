@@ -265,6 +265,9 @@ __operator_names = {
     "CALL_METHOD",
     "DICT_MERGE",
     "DICT_UPDATE",
+    "LIST_EXTEND",
+    "SET_UPDATE",
+    "BUILD_CONST_KEY_MAP",
 }
 
 
