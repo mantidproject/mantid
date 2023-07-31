@@ -1,12 +1,12 @@
+import argparse
 import re
-import sys
 import urllib.request
 
 
-def dependency_spotter(first_build: int, second_build: int, os_name: str = "linux-64"):
+def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeline: str):
     # Form URLs for each build artifact file
-    first_build_output_path = form_url_for_build_artifact(first_build, os_name)
-    second_build_output_path = form_url_for_build_artifact(second_build, os_name)
+    first_build_output_path = form_url_for_build_artifact(first_build, os_name, pipeline)
+    second_build_output_path = form_url_for_build_artifact(second_build, os_name, pipeline)
 
     # Read in the packages used, with versions
     first_output_packages = extract_package_versions(first_build_output_path, os_name)
@@ -42,8 +42,8 @@ def dependency_spotter(first_build: int, second_build: int, os_name: str = "linu
             print(p + " changed from " + packages_changed[p])
 
 
-def form_url_for_build_artifact(build_number: int, os_name: str):
-    return f"https://builds.mantidproject.org/job/main_nightly_deployment_prototype/{str(build_number)}/artifact/conda-bld/{os_name}/env_logs/mantidworkbench_build_environment.txt"
+def form_url_for_build_artifact(build_number: int, os_name: str, pipeline: str):
+    return f"https://builds.mantidproject.org/job/{pipeline}/{build_number}/artifact/conda-bld/{os_name}/env_logs/mantidworkbench_build_environment.txt"
 
 
 def extract_package_versions(url: str, os_name: str) -> dict:
@@ -60,7 +60,10 @@ def extract_package_versions(url: str, os_name: str) -> dict:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 4:
-        dependency_spotter(int(sys.argv[1]), int(sys.argv[2]), sys.argv[3])
-    else:
-        dependency_spotter(int(sys.argv[1]), int(sys.argv[2]))
+    parser = argparse.ArgumentParser(description="Script for checking dependency changes between two Jenkins builds")
+    parser.add_argument("-os", help="Operating system string, e.g. linux-64", default="linux-64", type=str)
+    parser.add_argument("--first", "-f", help="First (usually passing) build number", type=int)
+    parser.add_argument("--second", "-s", help="Second (usually failing) build number", type=int)
+    parser.add_argument("--pipeline", "-p", help="Build pipeline", default="main_nightly_deployment_prototype", type=str)
+    args = parser.parse_args()
+    dependency_spotter(os_name=args.os, first_build=args.first, second_build=args.second, pipeline=args.pipeline)
