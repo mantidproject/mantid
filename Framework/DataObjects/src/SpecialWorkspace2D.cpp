@@ -41,13 +41,7 @@ SpecialWorkspace2D::SpecialWorkspace2D(const Geometry::Instrument_const_sptr &in
   this->MatrixWorkspace::rebuildSpectraMapping(includeMonitors);
 
   // Make the mapping, which will be used for speed later.
-  detID_to_WI.clear();
-  for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
-    auto &dets = getSpectrum(wi).getDetectorIDs();
-    for (auto det : dets) {
-      detID_to_WI[det] = wi;
-    }
-  }
+  BuildDetectorIDMapping();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -59,13 +53,7 @@ SpecialWorkspace2D::SpecialWorkspace2D(const API::MatrixWorkspace_const_sptr &pa
   this->initialize(parent->getNumberHistograms(), 1, 1);
   API::WorkspaceFactory::Instance().initializeFromParent(*parent, *this, false);
   // Make the mapping, which will be used for speed later.
-  detID_to_WI.clear();
-  for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
-    auto &dets = getSpectrum(wi).getDetectorIDs();
-    for (auto det : dets) {
-      detID_to_WI[det] = wi;
-    }
-  }
+  BuildDetectorIDMapping();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -98,6 +86,16 @@ const std::string SpecialWorkspace2D::toString() const {
   os << "Title: " << getTitle() << "\n";
   os << "Histograms: " << getNumberHistograms() << "\n";
   return os.str();
+}
+
+void SpecialWorkspace2D::BuildDetectorIDMapping() {
+  detID_to_WI.clear();
+  for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
+    auto &dets = getSpectrum(wi).getDetectorIDs();
+    for (auto det : dets) {
+      detID_to_WI[det] = wi;
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------------

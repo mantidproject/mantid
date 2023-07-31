@@ -24,6 +24,7 @@ using Mantid::API::PropertyMode;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::GroupingWorkspace;
 using Mantid::DataObjects::GroupingWorkspace_const_sptr;
+using Mantid::DataObjects::GroupingWorkspace_sptr;
 using Mantid::DataObjects::MaskWorkspace;
 using Mantid::DataObjects::MaskWorkspace_const_sptr;
 using Mantid::Kernel::Direction;
@@ -179,9 +180,12 @@ bool SaveDiffCal::tableHasColumn(const std::string &ColumnName) const {
 void SaveDiffCal::exec() {
   m_calibrationWS = getProperty("CalibrationWorkspace");
   this->generateDetidToIndex();
-  GroupingWorkspace_const_sptr groupingWS = getProperty("GroupingWorkspace");
+
+  GroupingWorkspace_sptr groupingWS = getProperty("GroupingWorkspace");
+  if (bool(groupingWS) && groupingWS->IsDetectorIDMappingEmpty())
+    groupingWS->BuildDetectorIDMapping();
+
   MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
-  std::string filename = getProperty("Filename");
 
   // initialize `m_numValues` as the minimum of (CalibrationWorkspace_row_count,
   // GroupingWorkspace_histogram_count, MaskWorkspace_histogram_count)
@@ -194,6 +198,7 @@ void SaveDiffCal::exec() {
   }
 
   // delete the file if it already exists
+  std::string filename = getProperty("Filename");
   if (Poco::File(filename).exists()) {
     Poco::File(filename).remove();
   }
