@@ -221,8 +221,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         load_report.report()
 
         # Perform the calibration for each tube
-        alg = self.createChildAlgorithm("CloneWorkspace", InputWorkspace=self._MERGED_WS_NAME, OutputWorkspace=self._CALIBRATED_WS_NAME)
-        alg.setAlwaysStoreInADS(True)
+        alg = self._create_child_alg("CloneWorkspace", True, InputWorkspace=self._MERGED_WS_NAME, OutputWorkspace=self._CALIBRATED_WS_NAME)
         alg.execute()
         result = mtd[self._CALIBRATED_WS_NAME]
 
@@ -358,15 +357,14 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
     def _crop_and_scale_workspace(self, ws, start_pixel, end_pixel, uamphr_to_rescale):
         scaled_ws_name = ws.name() + self._SCALED_WS_SUFFIX
 
-        crop_alg = self.createChildAlgorithm("CropWorkspace")
+        crop_alg = self._create_child_alg("CropWorkspace")
         crop_alg.setProperty("InputWorkspace", ws)
         crop_alg.setProperty("StartWorkspaceIndex", start_pixel)
         crop_alg.setProperty("EndWorkspaceIndex", end_pixel)
         crop_alg.execute()
         ws = crop_alg.getProperty("OutputWorkspace").value
 
-        scale_alg = self.createChildAlgorithm("Scale")
-        scale_alg.setAlwaysStoreInADS(True)
+        scale_alg = self._create_child_alg("Scale", True)
         scale_alg.setProperty("InputWorkspace", ws)
         scale_alg.setProperty("Operation", "Multiply")
         scale_alg.setProperty("Factor", uamphr_to_rescale / self._get_proton_charge(ws))
@@ -405,7 +403,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             return
 
         for ws in ws_list[1:]:
-            alg = self.createChildAlgorithm("Multiply", RHSWorkspace=rhs_ws, LHSWorkspace=ws)
+            alg = self._create_child_alg("Multiply", RHSWorkspace=rhs_ws, LHSWorkspace=ws)
             alg.execute()
             rhs_ws = alg.getProperty("OutputWorkspace").value
 
@@ -495,8 +493,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
         saved_file_name = self._SAVED_INPUT_DATA_PREFIX + data_file
         try:
-            alg = self.createChildAlgorithm("Load", Filename=saved_file_name, OutputWorkspace=ws_name)
-            alg.setAlwaysStoreInADS(True)
+            alg = self._create_child_alg("Load", True, Filename=saved_file_name, OutputWorkspace=ws_name)
             alg.execute()
             self.log().notice(f"Loaded saved file from {saved_file_name}.")
             return mtd[ws_name]
@@ -504,13 +501,12 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             pass
 
         self.log().notice(f"Loading and integrating data from {data_file}.")
-        alg = self.createChildAlgorithm("Load", Filename=data_file, OutputWorkspace=ws_name)
+        alg = self._create_child_alg("Load", Filename=data_file, OutputWorkspace=ws_name)
         alg.execute()
         ws = alg.getProperty("OutputWorkspace").value
 
         # Turn event mode into histogram with given bins
-        rebin_alg = self.createChildAlgorithm("Rebin")
-        rebin_alg.setAlwaysStoreInADS(True)
+        rebin_alg = self._create_child_alg("Rebin", True)
         rebin_alg.setProperty("InputWorkspace", ws)
         rebin_alg.setProperty("Params", self._time_bins)
         rebin_alg.setProperty("PreserveEvents", False)
@@ -702,8 +698,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         return peak_positions, avg_resolution
 
     def _create_fitting_function(self, function, input_ws, start_x, end_x):
-        alg = self.createChildAlgorithm("Fit")
-        alg.setRethrows(True)
+        alg = self._create_child_alg("Fit")
         alg.setProperty("Function", function)
         alg.setProperty("InputWorkspace", input_ws)
         alg.setProperty("StartX", str(start_x))
@@ -1006,8 +1001,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
                 self.log().warning(msg)
 
     def _create_workspace(self, data_x, data_y, output_ws_name, store_in_ADS=True):
-        alg = self.createChildAlgorithm("CreateWorkspace")
-        alg.setAlwaysStoreInADS(store_in_ADS)
+        alg = self._create_child_alg("CreateWorkspace", store_in_ADS)
         alg.setProperty("DataX", data_x)
         alg.setProperty("DataY", data_y)
         alg.setProperty("OutputWorkspace", output_ws_name)
@@ -1019,14 +1013,13 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             return alg.getProperty("OutputWorkspace").value
 
     def _rename_workspace(self, input_ws, new_name):
-        alg = self.createChildAlgorithm("RenameWorkspace", InputWorkspace=input_ws, OutputWorkspace=new_name)
+        alg = self._create_child_alg("RenameWorkspace", InputWorkspace=input_ws, OutputWorkspace=new_name)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
     def _create_calibration_table_ws(self):
         """Create the calibration table and add columns required by ApplyCalibration"""
-        alg = self.createChildAlgorithm("CreateEmptyTableWorkspace", OutputWorkspace=self._CAL_TABLE_NAME)
-        alg.setAlwaysStoreInADS(True)
+        alg = self._create_child_alg("CreateEmptyTableWorkspace", True, OutputWorkspace=self._CAL_TABLE_NAME)
         alg.execute()
 
         calib_table = mtd[self._CAL_TABLE_NAME]
@@ -1040,21 +1033,27 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             self._log_tube_calibration_issues()
             raise RuntimeError("Calibration failed - unable to generate calibration table")
 
-        cal_alg = self.createChildAlgorithm("ApplyCalibration", Workspace=ws_to_calibrate, CalibrationTable=caltable)
+        cal_alg = self._create_child_alg("ApplyCalibration", Workspace=ws_to_calibrate, CalibrationTable=caltable)
         cal_alg.execute()
 
     def _group_diagnostic_workspaces(self, diagnostic_output):
         """Group the diagnostic output for each tube"""
-        alg = self.createChildAlgorithm("GroupWorkspaces")
-        alg.setAlwaysStoreInADS(True)
+        alg = self._create_child_alg("GroupWorkspaces", True)
         for tube_id, workspaces in diagnostic_output.items():
             alg.setProperty("InputWorkspaces", workspaces)
             alg.setProperty("OutputWorkspace", f"Tube_{tube_id:03}")
             alg.execute()
 
     def _save_as_nexus(self, ws, filename):
-        save_alg = self.createChildAlgorithm("SaveNexusProcessed", InputWorkspace=ws, Filename=filename)
+        save_alg = self._create_child_alg("SaveNexusProcessed", InputWorkspace=ws, Filename=filename)
         save_alg.execute()
+
+    def _create_child_alg(self, name, store_in_ADS=False, **kwargs):
+        alg = self.createChildAlgorithm(name, **kwargs)
+        alg.setRethrows(True)
+        if store_in_ADS:
+            alg.setAlwaysStoreInADS(True)
+        return alg
 
 
 # Register algorithm with Mantid
