@@ -30,7 +30,7 @@ class LoadCastepUsingEuphonicTest(unittest.TestCase):
         except ValueError:
             pass  # Clerk will freak out when passed mocked data to serialise
 
-        from_castep.assert_called_with(filename)
+        from_castep.assert_called_with(filename, prefer_non_loto=True)
 
 
 class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
