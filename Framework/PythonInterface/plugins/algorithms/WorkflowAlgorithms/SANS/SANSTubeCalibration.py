@@ -100,24 +100,26 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            Prop.STRIP_POSITIONS, [1040, 920, 755, 590, 425, 260, 95, 5], direction=Direction.Input, doc="Which strip positions were used"
+            Prop.STRIP_POSITIONS, [1040, 920, 755, 590, 425, 260, 95, 5], direction=Direction.Input, doc="Which strip positions were used."
         )
         self.declareProperty(
             Prop.DATA_FILES,
             ["SANS2D00064390.nxs", "SANS2D00064391.nxs", "SANS2D00064392.nxs", "SANS2D00064393.nxs", "SANS2D00064388.nxs"],
             direction=Direction.Input,
-            doc="Which strip positions were used for which runs",
+            doc="The runs corresponding to the strip positions that were used.",
         )
         self.declareProperty(Prop.HALF_DET_WIDTH, 520.7, direction=Direction.Input)
-        self.declareProperty(Prop.STRIP_WIDTH, 38.0, direction=Direction.Input)
+        self.declareProperty(
+            Prop.STRIP_WIDTH, 38.0, direction=Direction.Input, doc="The width of the strip being used for calibration, in mm."
+        )
         self.declareProperty(Prop.STRIP_TO_TUBE_CENTRE, 21.0, direction=Direction.Input)
         self.declareProperty(Prop.SIDE_OFFSET, 0.0, direction=Direction.Input)
-        self.declareProperty(Prop.ENCODER, 270.0, direction=Direction.Input)
+        self.declareProperty(Prop.ENCODER, 270.0, direction=Direction.Input, doc="The position of the encoder at beam centre.")
         self.declareProperty(
             Prop.ENCODER_REAR_260,
             470.0,
             direction=Direction.Input,
-            doc="Encoder at beam centre position for the 260 strip on the rear detector."
+            doc=f"Encoder at beam centre position for the {self._BEAM_STOPPER_STRIP_POSITION} strip on the rear detector."
             "This is used for rear detector calibration only.",
         )
         self.declareProperty(Prop.REAR_DET, True, direction=Direction.Input, doc="Whether to use the front or rear detector.")
@@ -125,8 +127,9 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             Prop.THRESHOLD,
             600,
             direction=Direction.Input,
-            doc="Threshold is the number of counts past which we class something as an edge.  "
-            "This is quite sensitive to change, since we sometimes end up picking.",
+            doc="The count value that we assume distinguishes between a strip and non-strip region in the data. "
+            "This is used for finding the locations of the strip edges. "
+            "Counts above the threshold are assumed to be non-strip regions, and vice versa.",
         )
         self.declareProperty(
             Prop.SKIP_TUBES_ON_ERROR,
@@ -136,14 +139,16 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             "edges for. If set to False then the algorithm will terminate when it encounters a"
             "tube that it cannot find the correct number of edges for.",
         )
-        self.declareProperty(Prop.MARGIN, 25, direction=Direction.Input, doc="FIXME: Detector margin")
+        self.declareProperty(
+            Prop.MARGIN, 25, direction=Direction.Input, doc="Region around the peak (in pixels) that is used for the peak fitting step"
+        )
         self.declareProperty(Prop.START_PIXEL, 20, direction=Direction.Input, doc="Lower bound of detector's active region")
         self.declareProperty(Prop.END_PIXEL, 495, direction=Direction.Input, doc="Upper bound of detector's active region")
         self.declareProperty(
             Prop.FIT_EDGES,
             False,
             direction=Direction.Input,
-            doc="FIXME: Fit the full edge of a shadow, instead of just the top and bottom.",
+            doc="Fits the full edge of a shadow, instead of just the top and bottom.",
         )
         self.declareProperty(Prop.TIME_BINS, "5000,93000,98000", direction=Direction.Input, doc="Time of flight bins to use")
         self.declareProperty(Prop.BACKGROUND, 2500.0, direction=Direction.Input, doc="The baseline below the mesa for FlatTopPeak fitting")
@@ -151,16 +156,20 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             Prop.VERTICAL_OFFSET,
             -0.005,
             direction=Direction.Input,
-            doc="Estimate of how many metres off-vertical the Cd strip is at bottom of the detector. "
-            "Negative if strips are more to left at bottom than top of cylindrical Y plot.",
+            doc="Estimate of how many metres off-vertical the strip is at the bottom of the detector. "
+            "Negative if strips are more to the left at the bottom than the top of cylindrical Y plot.",
         )
         self.declareProperty(
             Prop.CVALUE_THRESHOLD,
             6.0,
             direction=Direction.Input,
-            doc="A notification will be logged for any tubes with a cvalue above this threshold when the calibration has completed.",
+            doc="A notification will be logged for any tubes with a cvalue (average resolution) above "
+            "this threshold when the calibration has completed.",
         )
-        self.declareProperty(FileProperty(name=Prop.OUTPUT_FILE, defaultValue="", action=FileAction.OptionalSave, extensions=["nxs"]))
+        self.declareProperty(
+            FileProperty(name=Prop.OUTPUT_FILE, defaultValue="", action=FileAction.OptionalSave, extensions=["nxs"]),
+            doc="The location to save the calibration result out to as a Nexus file.",
+        )
         self.declareProperty(
             Prop.SAVE_INPUT_WS,
             True,
@@ -479,7 +488,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
                 continue
 
     def _get_integrated_workspace(self, data_file, progress):
-        """Load a tube calibration run. Search multiple places to ensure faster loading."""
+        """Load a tube calibration run. Search multiple places to ensure fastest possible loading."""
         ws_name = os.path.splitext(data_file)[0]
         progress.report(f"Loading {ws_name}")
         self.log().debug(f"looking for: {ws_name}")
@@ -888,9 +897,9 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
     def _get_calibrated_pixel_positions(self, ws, fit_positions, known_positions, ws_ids):
         """
-        Get the calibrated detector positions for one tube
-        The tube is specified by a list of workspace indices of its spectra
-        Calibration is assumed to be done parallel to the Y-axis
+        Get the calibrated detector positions for one tube.
+        The tube is specified by a list of workspace indices of its spectra.
+        Calibration is assumed to be done parallel to the Y-axis.
 
         :param ws: workspace with tubes to be calibrated - may be integrated or raw
         :param fit_positions: array of calibration positions (in pixels)
