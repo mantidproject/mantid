@@ -23,7 +23,8 @@ def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeli
     """
     if second_build < first_build:
         yes_no = input("It looks like the second build is older than the first build, do you want to swap the order? (y/n)")
-        if yes_no.lower() == "y":
+        yes_no = yes_no.lower()
+        if yes_no == "y" or yes_no == "yes":
             first_build, second_build = second_build, first_build
 
     if log_file:
