@@ -60,18 +60,14 @@ def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeli
         return
 
     files_to_compare = input(
-        "Which files do you want to compare? (Either a single number, a comma-separated list of numbers, or 0 for all):"
+        "Which files do you want to compare? (Either a single number, a comma-separated list of numbers, or leave blank for all):"
     )
+
     if files_to_compare == "":
-        return
-    file_indices = files_to_compare.split(",")
-    if "0" in file_indices:
         file_indices = range(len(files_in_both_builds))
     else:
+        file_indices = files_to_compare.split(",")
         file_indices = [int(x) - 1 for x in file_indices]
-
-    if file_indices is None:
-        return
 
     print("")
     for file_id in file_indices:
