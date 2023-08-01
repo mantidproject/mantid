@@ -7,16 +7,17 @@
 #pragma once
 
 #include "IndirectFitAnalysisTab.h"
-#include "MantidAPI/FunctionFactory.h"
-#include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
-
 #include "IndirectFitDataModel.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/UnitConversion.h"
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+#include <math.h>
 
 namespace {
 auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
@@ -44,6 +45,23 @@ public:
   }
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
+
+  void test_setResolution() { TS_ASSERT_EQUALS(m_fitData->setResolution("resolution workspace"), true); }
+
+  void test_setResolutin_bad_data() {
+    std::vector<double> x = {0., 1., 2., 0., 1., 2., 0., 1., 2., 0., 1., 2.};
+    std::vector<double> y = {sqrt(-1.), 1., 2., sqrt(-1.), 1., 2., sqrt(-1.), 1., 2., sqrt(-1.), 1., 2.};
+
+    auto alg = AlgorithmManager::Instance().create("CreateWorkspace");
+    alg->initialize();
+    alg->setAlwaysStoreInADS(true);
+    alg->setProperty("OutputWorkspace", "NAN");
+    alg->setProperty("DataX", x);
+    alg->setProperty("DataY", y);
+    alg->setProperty("NSpec", 4);
+    alg->execute();
+    TS_ASSERT_EQUALS(m_fitData->setResolution("NAN"), false);
+  }
 
   void test_hasWorkspace_returns_true_for_ws_in_model() { TS_ASSERT(m_fitData->hasWorkspace("data workspace 1")); }
 
