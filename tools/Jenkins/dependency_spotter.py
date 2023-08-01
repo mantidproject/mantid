@@ -170,6 +170,12 @@ if __name__ == "__main__":
     parser.add_argument("--first", "-f", help="First (usually passing) build number", type=int)
     parser.add_argument("--second", "-s", help="Second (usually failing) build number", type=int)
     parser.add_argument("--pipeline", "-p", help="Build pipeline", default="main_nightly_deployment_prototype", type=str)
-    parser.add_argument("--logfile", "-l", help="Log file name to compare, by default all of them are compared", default="", type=str)
+    parser.add_argument(
+        "--logfile",
+        "-l",
+        help="Log file name to compare, by default all of them are compared, e.g mantid_build_environment.txt",
+        default="",
+        type=str,
+    )
     args = parser.parse_args()
     dependency_spotter(os_name=args.os, first_build=args.first, second_build=args.second, pipeline=args.pipeline, log_file=args.logfile)
