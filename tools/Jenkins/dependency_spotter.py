@@ -1,3 +1,17 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+"""
+Script that takes two build numbers, and optionally the OS label, the pipeline name, and the name of the file
+to compare. It will then output the changes in conda package versions used in the two builds, if there are any,
+for which it uses the build artifacts.
+Example use: dependency_spotter -f 593 -s 598
+This will compare builds 593 and 598 from the "main_nightly_deployment_prototype" pipeline
+"""
+
 import argparse
 import re
 import urllib.request
