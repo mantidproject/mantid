@@ -32,6 +32,27 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 1);
   }
 
+  void test_empty_detID_map() {
+    // Create and initailize a workspace without an instrument
+    SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D());
+    TS_ASSERT_THROWS_NOTHING(ws->initialize(1, 1, 1));
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(ws->blocksize(), 1);
+
+    // Confirm that the detector ID map is empty
+    TS_ASSERT(ws->isDetectorIDMappingEmpty());
+
+    // Set a detector ID for the spectrum. Confirm that we can't get/set value for that detector ID
+    TS_ASSERT_THROWS_NOTHING(ws->getSpectrum(0).setDetectorID(0));
+    TSM_ASSERT_THROWS_ANYTHING("Can't get value for detector ID=0", ws->getValue(0));
+    TSM_ASSERT_THROWS_ANYTHING("Can't set value for detector ID=0", ws->setValue(0, 0, 0));
+
+    // Build the detector ID map. Confirm that we now can get/set value for that detector ID
+    TS_ASSERT_THROWS_NOTHING(ws->buildDetectorIDMapping());
+    TS_ASSERT_THROWS_NOTHING(ws->getValue(0));
+    TS_ASSERT_THROWS_NOTHING(ws->setValue(0, 0, 0));
+  }
+
   void testClone() {
     // As test_setValue_getValue, set on ws, get on clone.
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
