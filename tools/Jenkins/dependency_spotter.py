@@ -18,6 +18,9 @@ import urllib.request
 
 
 def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeline: str, log_file: str):
+    """
+    Main entry point
+    """
     if second_build < first_build:
         yes_no = input("It looks like the second build is older than the first build, do you want to swap the order? (y/n)")
         if yes_no.lower() == "y":
@@ -78,6 +81,10 @@ def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeli
 
 
 def extract_available_log_files(os_name: str, build_number: int, pipeline: str) -> list:
+    """
+    Reads the Jenkins page listing the artifacts from the specified build and extracts the
+    available files, e.g. mantid_build_environment.txt. Returns a list of these filenames
+    """
     url = form_url_for_build_artifact(build_number, os_name, pipeline, "")
     build_log_files = []
     regex_logfile = r"(mantid(docs)?[\w]+environment\.txt)"
@@ -91,6 +98,10 @@ def extract_available_log_files(os_name: str, build_number: int, pipeline: str) 
 
 
 def compare_dependencies_for_file(os_name: str, first_build: int, second_build: int, pipeline: str, log_file: str):
+    """
+    For a given file that appears in the build artifacts of the two builds specified, compare the packages and their
+    versions. It will list in the console any packages removed, added, or changed.
+    """
     # Form URLs for each build artifact file
     first_build_output_path = form_url_for_build_artifact(first_build, os_name, pipeline, log_file)
     second_build_output_path = form_url_for_build_artifact(second_build, os_name, pipeline, log_file)
@@ -130,10 +141,17 @@ def compare_dependencies_for_file(os_name: str, first_build: int, second_build: 
 
 
 def form_url_for_build_artifact(build_number: int, os_name: str, pipeline: str, log_file: str):
+    """
+    Form Jenkins URL from specified info.
+    """
     return f"https://builds.mantidproject.org/job/{pipeline}/{build_number}/artifact/conda-bld/{os_name}/env_logs/{log_file}"
 
 
 def extract_package_versions(url: str, os_name: str) -> dict:
+    """
+    Open specified URL and use a regular expression to extract the packages listed, and their versions. Returns
+    a dictionary of packages and their versions
+    """
     regex_pattern = os_name + r"\/([\w\-]+)-([\w\-.]+)\.(conda|tar\.bz2)"
     package_version_dict = {}
     with urllib.request.urlopen(url) as file:
