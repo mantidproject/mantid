@@ -182,8 +182,8 @@ void SaveDiffCal::exec() {
   this->generateDetidToIndex();
 
   GroupingWorkspace_sptr groupingWS = getProperty("GroupingWorkspace");
-  if (bool(groupingWS) && groupingWS->IsDetectorIDMappingEmpty())
-    groupingWS->BuildDetectorIDMapping();
+  if (bool(groupingWS) && groupingWS->isDetectorIDMappingEmpty())
+    groupingWS->buildDetectorIDMapping();
 
   MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
 
