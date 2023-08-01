@@ -9,6 +9,7 @@ import systemtesting
 from mantid import *
 from mantid.simpleapi import *
 import math
+import numpy as np
 
 
 class MagnetismReflectometryReductionTest(systemtesting.MantidSystemTest):
@@ -147,6 +148,52 @@ class MagnetismReflectometryReductionConstQWLCutTest(systemtesting.MantidSystemT
     def validate(self):
         refl = mtd["r_24949"].dataY(0)
         return math.fabs(refl[1] - 0.648596877775159) < 0.002
+
+
+class MagnetismReflectometryReductionEmptyCurve(systemtesting.MantidSystemTest):
+    r"""Input data has no events for in-out spin combination On-On, yielding
+    a reflectivity curve with only zero intensity values."""
+
+    def runTest(self):
+        wsg = LoadNexusProcessed(Filename="REF_M_42100.nxs")
+        options = {
+            "NormalizationWorkspace": None,
+            "SignalPeakPixelRange": [225, 245],
+            "SubtractSignalBackground": True,
+            "SignalBackgroundPixelRange": [20, 39],
+            "ApplyNormalization": False,
+            "NormPeakPixelRange": [225, 245],
+            "SubtractNormBackground": True,
+            "NormBackgroundPixelRange": [20, 39],
+            "CutLowResDataAxis": True,
+            "LowResDataAxisPixelRange": [127, 206],
+            "CutLowResNormAxis": True,
+            "LowResNormAxisPixelRange": [127, 206],
+            "CutTimeAxis": True,
+            "FinalRebin": True,
+            "QMin": 0.001,
+            "QStep": -0.01,
+            "RoundUpPixel": False,
+            "AngleOffset": 0,
+            "UseWLTimeAxis": False,
+            "TimeAxisStep": 400,
+            "UseSANGLE": True,
+            "TimeAxisRange": [11413.560217325685, 45388.809236341694],
+            "SpecularPixel": 235.5,
+            "ConstantQBinning": False,
+            "ConstQTrim": 0.1,
+            "CropFirstAndLastPoints": False,
+            "CleanupBadData": True,
+            "AcceptNullReflectivity": True,
+            "ErrorWeightedBackground": False,
+            "SampleLength": 10.0,
+            "DAngle0Overwrite": None,
+            "DirectPixelOverwrite": None,
+        }
+        MagnetismReflectometryReduction(InputWorkspace=wsg[1], OutputWorkspace="r_42100", **options)  # component with no counts
+
+    def validate(self):
+        return np.all(mtd["r_42100"].readY(0) < 1e-9)  # reflectivity curve has only zeroes
 
 
 class MRFilterCrossSectionsTest(systemtesting.MantidSystemTest):
