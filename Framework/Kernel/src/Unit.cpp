@@ -615,17 +615,17 @@ const UnitLabel dSpacing::label() const { return Symbol::Angstrom; }
 Unit *dSpacing::clone() const { return new dSpacing(*this); }
 
 void dSpacing::validateUnitParams(const int, const UnitParametersMap &params) {
-  double difc = 0.;
-  if (ParamPresentAndSet(&params, UnitParams::difc, difc)) {
+  double difc_set = 0.;
+  if (ParamPresentAndSet(&params, UnitParams::difc, difc_set)) {
     // check validations only applicable to fromTOF
     toDSpacingError = "";
-    double difa = 0.;
-    ParamPresentAndSet(&params, UnitParams::difa, difa);
-    if ((difa == 0) && (difc == 0)) {
+    double difa_set = 0.;
+    ParamPresentAndSet(&params, UnitParams::difa, difa_set);
+    if ((difa_set == 0) && (difc_set == 0)) {
       toDSpacingError = "Cannot convert to d spacing with DIFA=0 and DIFC=0";
     };
     // singleFromTOF currently assuming difc not negative
-    if (difc < 0.) {
+    if (difc_set < 0.) {
       toDSpacingError = "A positive difc value must be supplied in the extra parameters when "
                         "initialising " +
                         this->unitID() + " for conversion via TOF";
@@ -864,8 +864,8 @@ MomentumTransfer::MomentumTransfer() : Unit() {
 }
 
 void MomentumTransfer::validateUnitParams(const int, const UnitParametersMap &params) {
-  double difc = 0.;
-  if (!ParamPresentAndSet(&params, UnitParams::difc, difc)) {
+  double difc_set = 0.;
+  if (!ParamPresentAndSet(&params, UnitParams::difc, difc_set)) {
     if (!ParamPresent(params, UnitParams::twoTheta) || (!ParamPresent(params, UnitParams::l2)))
       throw std::runtime_error("A difc value or L2/two theta must be supplied "
                                "in the extra parameters when initialising " +
@@ -944,15 +944,15 @@ void DeltaE::validateUnitParams(const int emode, const UnitParametersMap &params
     throw std::invalid_argument("emode must be equal to 1 or 2 for energy transfer calculation");
   }
   // Efixed must be set to something
-  double efixed;
-  if (!ParamPresentAndSet(&params, UnitParams::efixed, efixed)) {
+  double efixed_set;
+  if (!ParamPresentAndSet(&params, UnitParams::efixed, efixed_set)) {
     if (emode == 1) { // direct, efixed=ei
       throw std::invalid_argument("efixed must be set for energy transfer calculation");
     } else {
       throw std::runtime_error("efixed must be set for energy transfer calculation");
     }
   }
-  if (efixed <= 0) {
+  if (efixed_set <= 0) {
     throw std::runtime_error("efixed must be greater than zero");
   }
   if (!ParamPresent(params, UnitParams::l2)) {
