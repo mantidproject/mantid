@@ -64,6 +64,10 @@ std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inPar
     rbParams[0] = xmin;
     rbParams[1] = inParams[0];
     rbParams[2] = xmax;
+    // if LogarithmicBinning has been set, make binning negative to enforce logarithmic binning
+    if (getProperty("LogarithmicBinning")) {
+      rbParams[1] = -fabs(rbParams[1]);
+    }
     if ((rbParams[1] < 0.) && (xmin < 0.) && (xmax > 0.)) {
       std::stringstream msg;
       msg << "Cannot create logarithmic binning that changes sign (xmin=" << xmin << ", xmax=" << xmax << ")";
@@ -159,6 +163,9 @@ void Rebin::init() {
   declareProperty("Power", 0., powerValidator,
                   "Splits the interval in bins which actual width is equal to requested width / (i ^ power); default "
                   "is linear. Power must be between 0 and 1.");
+
+  declareProperty("LogarithmicBinning", false,
+                  "Optional. Use logarithmic binning, even if positive step given in Params.");
 }
 
 /** Executes the rebin algorithm

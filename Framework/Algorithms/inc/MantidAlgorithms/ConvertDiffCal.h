@@ -26,6 +26,7 @@ public:
 private:
   void init() override;
   void exec() override;
+  bool m_isSigned{false};
 };
 
 } // namespace Algorithms

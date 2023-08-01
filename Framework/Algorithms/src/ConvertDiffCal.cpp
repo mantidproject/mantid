@@ -15,7 +15,29 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-namespace Mantid::Algorithms {
+namespace Mantid {
+
+namespace {
+
+const std::vector<const std::string> DIFC_TABLE_COLUMN_NAMES{"detid", "difc", "difa", "tzero"};
+const std::vector<const std::string> DIFC_TABLE_COLUMN_TYPES{"int", "double", "double", "double"};
+
+namespace OffsetMode {
+const std::string RELATIVE("Relative");
+const std::string ABSOLUTE("Absolute");
+const std::string SIGNED("Signed");
+} // namespace OffsetMode
+
+namespace PropertyNames {
+const std::string OFFSTS_WKSP("OffsetsWorkspace");
+const std::string CALIB_WKSP("PreviousCalibration");
+const std::string OUTPUT_WKSP("OutputWorkspace");
+const std::string OFFSET_MODE("OffsetMode");
+const std::string BINWIDTH("BinWidth");
+} // namespace PropertyNames
+} // namespace
+
+namespace Algorithms {
 
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::ITableWorkspace;
@@ -50,25 +72,51 @@ const std::string ConvertDiffCal::summary() const { return "Convert diffraction 
 /** Initialize the algorithm's properties.
  */
 void ConvertDiffCal::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>("OffsetsWorkspace", "", Direction::Input),
-                  "OffsetsWorkspace containing the calibration offsets.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(PropertyNames::OFFSTS_WKSP, "", Direction::Input),
+      "OffsetsWorkspace containing the calibration offsets.");
 
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("PreviousCalibration", "", Direction::Input,
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(PropertyNames::CALIB_WKSP, "", Direction::Input,
                                                                        API::PropertyMode::Optional),
                   "A calibration table used as a cache for creating the OutputWorkspace. "
                   "Effectively, this algorithm applies partial updates to this table and "
                   "returns it as the OutputWorkspace");
 
-  std::vector<std::string> modes{"Relative", "Absolute", "Signed"};
+  std::vector<std::string> modes{OffsetMode::RELATIVE, OffsetMode::ABSOLUTE, OffsetMode::SIGNED};
 
-  declareProperty("OffsetMode", "Relative", std::make_shared<Kernel::StringListValidator>(modes),
-                  "Optional: Whether to calculate a relative, absolute, or signed offset");
+  declareProperty(PropertyNames::OFFSET_MODE, OffsetMode
+                  : RELATIVE, std::make_shared<Kernel::StringListValidator>(modes),
+                    "Optional: Whether to calculate a relative, absolute, or signed offset");
 
-  declareProperty("BinWidth", -0.001,
-                  "Optional: The bin width of the X axis, if using 'Signed' OffsetMode, this value must be provided");
+  declareProperty(PropertyNames::BINWIDTH, EMPTY_DBL(),
+                  "Optional: The bin width of the X axis.  If using 'Signed' OffsetMode, this value is mandatory");
 
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputWorkspace", "", Direction::Output),
-                  "An output workspace.");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<ITableWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
+      "An output workspace.");
+}
+
+std::map<std::string, std::string> ConvertDiffCal::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  m_isSigned = (std::string(getProperty(PropertyNames::OFFSET_MODE)) == OffsetMode::SIGNED);
+  if (isDefault(PropertyNames::BINWIDTH) && m_isSigned) {
+    std::string msg = "Signed offset mode requires bin width to be specified.";
+    result[PropertyNames::BINWIDTH] = msg;
+    result[PropertyNames::OFFSET_MODE] = msg;
+  }
+
+  ITableWorkspace_sptr previous_calibration = getProperty(PropertyNames::CALIB_WKSP);
+  if (previous_calibration) {
+    /* validate previous calibration has correct columns */
+    std::vector<std::string> column_names = previous_calibration->getColumnNames();
+    if (column_names != DIFC_TABLE_COLUMN_NAMES) {
+      result[PropertyNames::CALIB_WKSP] = "PreviousCalibration table's column names do not match expected format";
+    }
+    // TODO validate PreviousCalibration table's column types with DIFC_TABLE_COLUMN_TYPES
+  }
+
+  return result;
 }
 
 /**
@@ -115,7 +163,7 @@ double getOffset(const OffsetsWorkspace_const_sptr &offsetsWS, const detid_t det
  * @return The offset adjusted value of DIFC
  */
 double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t index,
-                     const Mantid::API::SpectrumInfo &spectrumInfo, const double binWidth, bool is_signed) {
+                     const Mantid::API::SpectrumInfo &spectrumInfo, const double binWidth, const bool is_signed) {
   const detid_t detid = getDetID(offsetsWS, index);
   const double offset = getOffset(offsetsWS, detid);
   double twotheta;
@@ -127,22 +175,23 @@ double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t 
   }
   // the factor returned is what is needed to convert TOF->d-spacing
   // the table is supposed to be filled with DIFC which goes the other way
+  double newDIFC = 0.0;
   if (is_signed) {
-    const double newDIFC = Mantid::Geometry::Conversion::calculateDIFCCorrection(
-        spectrumInfo.l1(), spectrumInfo.l2(index), twotheta, offset, binWidth);
-    return newDIFC;
+    newDIFC = Mantid::Geometry::Conversion::calculateDIFCCorrection(spectrumInfo.l1(), spectrumInfo.l2(index), twotheta,
+                                                                    offset, binWidth);
   } else {
     const double factor =
         Mantid::Geometry::Conversion::tofToDSpacingFactor(spectrumInfo.l1(), spectrumInfo.l2(index), twotheta, offset);
-    return 1. / factor;
+    newDIFC = 1. / factor;
   }
+  return newDIFC;
 }
 
 double updateSignedDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t index, const double oldDIFC,
                         const double binWidth) {
   const detid_t detid = getDetID(offsetsWS, index);
   const double offset = getOffset(offsetsWS, detid);
-  double newDIFC = oldDIFC * pow(1 + fabs(binWidth), -1 * offset);
+  const double newDIFC = oldDIFC * pow(1.0 + fabs(binWidth), -1.0 * offset);
   return newDIFC;
 }
 
@@ -150,39 +199,23 @@ double updateSignedDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size
 /** Execute the algorithm.
  */
 void ConvertDiffCal::exec() {
-  OffsetsWorkspace_const_sptr offsetsWS = getProperty("OffsetsWorkspace");
+  OffsetsWorkspace_const_sptr offsetsWS = getProperty(PropertyNames::OFFSTS_WKSP);
 
   /* If a previous calibration is provided, initialize the output calibration table
    * with it */
   ITableWorkspace_sptr configWksp;
 
-  ITableWorkspace_sptr previous_calibration = getProperty("PreviousCalibration");
-  bool is_signed = false;
-  if (std::string(getProperty("OffsetMode")) == "Signed")
-    is_signed = true;
+  ITableWorkspace_sptr previous_calibration = getProperty(PropertyNames::CALIB_WKSP);
 
-  auto binWidth = getProperty("BinWidth");
+  auto binWidth = getProperty(PropertyNames::BINWIDTH);
 
-  std::vector<std::string> correct_columns{"detid", "difc", "difa", "tzero"};
   if (previous_calibration) {
-    /* validate correct format */
-    std::vector<std::string> column_names = previous_calibration->getColumnNames();
-    if (column_names != correct_columns) {
-      throw std::runtime_error("PreviousCalibration table's column names do not match expected "
-                               "format");
-    }
-
     configWksp = previous_calibration->clone();
-  }
-
-  else {
+  } else {
     // initial setup of new style config
     configWksp = std::make_shared<TableWorkspace>();
-
-    configWksp->addColumn("int", correct_columns[0]);
-    configWksp->addColumn("double", correct_columns[1]);
-    configWksp->addColumn("double", correct_columns[2]);
-    configWksp->addColumn("double", correct_columns[3]);
+    for (int i = 0; i < DIFC_TABLE_COLUMN_NAMES.size(); i++)
+      configWksp->addColumn(DIFC_TABLE_COLUMN_TYPES[i], DIFC_TABLE_COLUMN_NAMES[i]);
   }
 
   /* obtain detector ids from the previous calibration workspace */
@@ -222,10 +255,10 @@ void ConvertDiffCal::exec() {
         int row_to_update = iter->second;
 
         double &difc_value_to_update = configWksp->cell<double>(row_to_update, 1);
-        if (is_signed) {
+        if (m_isSigned) {
           difc_value_to_update = updateSignedDIFC(offsetsWS, i, difc_value_to_update, binWidth);
         } else {
-          difc_value_to_update = difc_value_to_update / (1 + new_offset_value);
+          difc_value_to_update = difc_value_to_update / (1.0 + new_offset_value);
         }
       }
 
@@ -233,7 +266,7 @@ void ConvertDiffCal::exec() {
       else {
         API::TableRow newrow = configWksp->appendRow();
         newrow << static_cast<int>(detector_id);
-        newrow << calculateDIFC(offsetsWS, i, spectrumInfo, binWidth, is_signed);
+        newrow << calculateDIFC(offsetsWS, i, spectrumInfo, binWidth, m_isSigned);
         newrow << 0.; // difa
         newrow << 0.; // tzero
       }
@@ -251,7 +284,8 @@ void ConvertDiffCal::exec() {
 
   // copy over the results
   configWksp = sortTable->getProperty("OutputWorkspace");
-  setProperty("OutputWorkspace", configWksp);
+  setProperty(PropertyNames::OUTPUT_WKSP, configWksp);
 }
 
-} // namespace Mantid::Algorithms
+} // namespace Algorithms
+} // namespace Mantid

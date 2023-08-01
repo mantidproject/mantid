@@ -50,7 +50,22 @@ void calculateFromOffset(API::Progress &progress, DataObjects::SpecialWorkspace2
   }
 }
 
-// look through the columns of detid and difc and copy theminto the
+namespace OffsetMode {
+const std::string RELATIVE("Relative");
+const std::string ABSOLUTE("Absolute");
+const std::string SIGNED("Signed");
+} // namespace OffsetMode
+
+namespace PropertyNames {
+const std::string INPUT_WKSP("InputWorkspace");
+const std::string OUTPUT_WKSP("OutputWorkspace");
+const std::string CALIB_WKSP("CalibrationWorkspace");
+const std::string OFFSTS_WKSP("OffsetsWorkspace");
+const std::string OFFSET_MODE("OffsetMode");
+const std::string BINWIDTH("BinWidth");
+} // namespace PropertyNames
+
+// look through the columns of detid and difc and copy them into the
 // SpecialWorkspace2D
 void calculateFromTable(API::Progress &progress, DataObjects::SpecialWorkspace2D &outputWs,
                         const API::ITableWorkspace &calibWs) {
@@ -97,24 +112,26 @@ const std::string CalculateDIFC::summary() const { return "Calculate the DIFC fo
 /** Initialize the algorithm's properties.
  */
 void CalculateDIFC::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::INPUT_WKSP, "", Direction::Input),
                   "Name of the workspace to have DIFC calculated from");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
-                  "Workspace containing DIFC for each pixel");
+  declareProperty(
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
+      "Workspace containing DIFC for each pixel");
   declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
-                      "CalibrationWorkspace", "", Direction::Input, Mantid::API::PropertyMode::Optional),
+                      PropertyNames::CALIB_WKSP, "", Direction::Input, Mantid::API::PropertyMode::Optional),
                   "Optional: A TableWorkspace containing the DIFC values, "
                   "which will be copied. This property cannot be set in "
                   "conjunction with property OffsetsWorkspace.");
-  std::vector<std::string> modes{"Relative", "Absolute", "Signed"};
+  std::vector<std::string> modes{OffsetMode::RELATIVE, OffsetMode::ABSOLUTE, OffsetMode::SIGNED};
 
-  declareProperty("OffsetMode", "Relative", std::make_shared<Kernel::StringListValidator>(modes),
-                  "Optional: Whether to calculate a relative, absolute, or signed offset");
+  declareProperty(PropertyNames::OFFSET_MODE, OffsetMode
+                  : RELATIVE, std::make_shared<Kernel::StringListValidator>(modes),
+                    "Optional: Whether to calculate a relative, absolute, or signed offset");
 
-  declareProperty("BinWidth", -0.001,
-                  "Optional: The bin width of the X axis, if using 'Signed' OffsetMode, this value must be provided");
-  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>("OffsetsWorkspace", "", Direction::Input,
-                                                                        Mantid::API::PropertyMode::Optional),
+  declareProperty(PropertyNames::BINWIDTH, EMPTY_DBL(),
+                  "Optional: The bin width of the X axis.  If using 'Signed' OffsetMode, this value is mandatory");
+  declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+                      PropertyNames::OFFSTS_WKSP, "", Direction::Input, Mantid::API::PropertyMode::Optional),
                   "Optional: A OffsetsWorkspace containing the calibration "
                   "offsets. This property cannot be set in conjunction with "
                   "property CalibrationWorkspace.");
@@ -123,13 +140,20 @@ void CalculateDIFC::init() {
 std::map<std::string, std::string> CalculateDIFC::validateInputs() {
   std::map<std::string, std::string> result;
 
-  OffsetsWorkspace_const_sptr offsetsWS = getProperty("OffsetsWorkspace");
-  API::ITableWorkspace_const_sptr calibrationWS = getProperty("CalibrationWorkspace");
+  OffsetsWorkspace_const_sptr offsetsWS = getProperty(PropertyNames::OFFSTS_WKSP);
+  API::ITableWorkspace_const_sptr calibrationWS = getProperty(PropertyNames::CALIB_WKSP);
 
   if ((bool(offsetsWS)) && (bool(calibrationWS))) {
     std::string msg = "Only specify calibration one way";
-    result["OffsetsWorkspace"] = msg;
-    result["CalibrationWorkspace"] = msg;
+    result[PropertyNames::OFFSTS_WKSP] = msg;
+    result[PropertyNames::CALIB_WKSP] = msg;
+  }
+
+  m_isSigned = (std::string(getProperty(PropertyNames::OFFSET_MODE)) == OffsetMode::SIGNED);
+  if (isDefault(PropertyNames::BINWIDTH) && m_isSigned) {
+    std::string msg = "Signed offset mode requires bin width to be specified.";
+    result[PropertyNames::BINWIDTH] = msg;
+    result[PropertyNames::OFFSET_MODE] = msg;
   }
 
   return result;
@@ -140,15 +164,11 @@ std::map<std::string, std::string> CalculateDIFC::validateInputs() {
  */
 void CalculateDIFC::exec() {
 
-  DataObjects::OffsetsWorkspace_const_sptr offsetsWs = getProperty("OffsetsWorkspace");
-  API::ITableWorkspace_const_sptr calibWs = getProperty("CalibrationWorkspace");
-  API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
-  API::MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
-  double binWidth = getProperty("BinWidth");
-  bool is_signed = false;
-  if (std::string(getProperty("OffsetMode")) == "Signed") {
-    is_signed = true;
-  }
+  DataObjects::OffsetsWorkspace_const_sptr offsetsWs = getProperty(PropertyNames::OFFSTS_WKSP);
+  API::ITableWorkspace_const_sptr calibWs = getProperty(PropertyNames::CALIB_WKSP);
+  API::MatrixWorkspace_sptr inputWs = getProperty(PropertyNames::INPUT_WKSP);
+  API::MatrixWorkspace_sptr outputWs = getProperty(PropertyNames::OUTPUT_WKSP);
+  double binWidth = getProperty(PropertyNames::BINWIDTH);
 
   if ((!bool(inputWs == outputWs)) ||
       // SpecialWorkspace2D is a Workspace2D where each spectrum
@@ -170,10 +190,10 @@ void CalculateDIFC::exec() {
     // this method handles calculating from instrument geometry as well,
     // and even when OffsetsWorkspace hasn't been set
     const auto &detectorInfo = inputWs->detectorInfo();
-    calculateFromOffset(progress, *outputSpecialWs, offsetsWs.get(), detectorInfo, binWidth, is_signed);
+    calculateFromOffset(progress, *outputSpecialWs, offsetsWs.get(), detectorInfo, binWidth, m_isSigned);
   }
 
-  setProperty("OutputWorkspace", outputWs);
+  setProperty(PropertyNames::OUTPUT_WKSP, outputWs);
 }
 
 } // namespace Algorithms

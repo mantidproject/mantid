@@ -549,11 +549,23 @@ double Energy_inWavenumber::singleFromTOF(const double tof) const {
 
 Unit *Energy_inWavenumber::clone() const { return new Energy_inWavenumber(*this); }
 
+// used in calculate of DIFC
+const double NEUTRON_MASS_OVER_H = (PhysicalConstants::NeutronMass * 1e6) / (PhysicalConstants::h * 1e10);
+
+/**
+ * Calculate DIFC in case of logarithmic binning, used in CalculateDIFC with Signed mode
+ * @param l1
+ * @param l2
+ * @param twoTheta scattering angle
+ * @param offset
+ * @param binWidth the bin width used in logarithmic binning (DX)
+ * Will calculate the value of DIFC following
+ *   DIFC = (mn/h) * (L1+L2) * 2sin(theta) * (1 + |DX|)^{-offset}
+ */
 double calculateDIFCCorrection(const double l1, const double l2, const double twotheta, const double offset,
                                const double binWidth) {
-  auto sinTheta = std::sin(twotheta / 2);
-  double newDIFC = (PhysicalConstants::NeutronMass * 1e6) / (PhysicalConstants::h * 1e10);
-  newDIFC *= (l1 + l2) * 2 * sinTheta * pow((1 + fabs(binWidth)), -1 * offset);
+  const double sinTheta = std::sin(twotheta / 2.0);
+  const double newDIFC = NEUTRON_MASS_OVER_H * (l1 + l2) * 2.0 * sinTheta * pow((1.0 + fabs(binWidth)), -1.0 * offset);
   return newDIFC;
 }
 
@@ -564,7 +576,7 @@ double calculateDIFCCorrection(const double l1, const double l2, const double tw
  * Conversion uses Bragg's Law: 2d sin(theta) = n * lambda
  */
 
-const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
+const double H_OVER_NEUTRON_MASS = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
 /**
  * Calculate and return conversion factor from tof to d-spacing.
@@ -587,7 +599,7 @@ double tofToDSpacingFactor(const double l1, const double l2, const double twoThe
   const double numerator = (1.0 + offset);
   sinTheta *= (l1 + l2);
 
-  return (numerator * CONSTANT) / sinTheta;
+  return (numerator * H_OVER_NEUTRON_MASS) / sinTheta;
 }
 
 DECLARE_UNIT(dSpacing)
