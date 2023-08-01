@@ -8,23 +8,10 @@
 # flake8: noqa F401   # "imported but unused" error not applicable
 
 # Submodules
-from . import parameters
-from . import constants
-from . import test_helpers
 
-from .io import IO
 
 # Frequency generator
-from .frequencypowdergenerator import FrequencyPowderGenerator
 
 # Data
-from .kpointsdata import KpointsData
-from .atomsdata import AtomsData
-from .abinsdata import AbinsData
-from .powderdata import PowderData
-from .sdata import SData, SDataByAngle
 
 # Calculating modules
-from .powdercalculator import PowderCalculator
-from .scalculatorfactory import SCalculatorFactory
-from .spowdersemiempiricalcalculator import SPowderSemiEmpiricalCalculator
