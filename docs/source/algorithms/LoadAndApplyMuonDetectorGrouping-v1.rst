@@ -87,7 +87,7 @@ Usage
 	MUSR_asym = mtd["MUSR00015189; Pair; long; Asym; #1"]
 
 
-	print(map('{0:.2f}'.format, MUSR_asym.readY(0)[1:10]))
+	print([f'{y:.2f}' for y in MUSR_asym.readY(0)[1:10]])
 
 Output:
 
