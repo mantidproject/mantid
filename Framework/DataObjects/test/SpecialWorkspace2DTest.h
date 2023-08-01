@@ -33,7 +33,7 @@ public:
   }
 
   void test_empty_detID_map() {
-    // Create and initailize a workspace without an instrument
+    // Create and initialize a workspace without an instrument
     SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D());
     TS_ASSERT_THROWS_NOTHING(ws->initialize(1, 1, 1));
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
