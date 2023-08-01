@@ -122,20 +122,27 @@ def compare_dependencies_for_file(os_name: str, first_build: int, second_build: 
             packages_added.extend(package)
 
     # Output
-    if len(packages_added) > 0:
+    output_package_changes_to_console(packages_added, packages_removed, packages_changed)
+
+
+def output_package_changes_to_console(added: list, removed: list, changed: dict):
+    """
+    Format and output the packages that have been added, removed, or changed version.
+    """
+    if len(added) > 0:
         print("Packages added:")
-        for p in packages_added:
+        for p in added:
             print(p)
         print("")
-    if len(packages_removed) > 0:
+    if len(removed) > 0:
         print("Packages removed:")
-        for p in packages_removed:
+        for p in removed:
             print(p)
         print("")
-    if len(packages_changed) > 0:
+    if len(changed) > 0:
         print("Packages changed:")
-        for p in packages_changed:
-            print(p + " changed from " + packages_changed[p])
+        for p in changed:
+            print(p + " changed from " + changed[p])
 
 
 def form_url_for_build_artifact(build_number: int, os_name: str, pipeline: str, log_file: str):
