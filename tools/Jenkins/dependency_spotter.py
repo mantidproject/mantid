@@ -56,6 +56,7 @@ def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeli
     print("")
 
     if len(files_in_both_builds) == 0:
+        print("No matching pair of files was found in the two builds specified, so unable to go any further.")
         return
 
     files_to_compare = input(
