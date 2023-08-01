@@ -80,5 +80,19 @@ class LoadWANDApplyGoniometerTiltTest(unittest.TestCase):
         LoadWANDTest_ws.delete()
 
 
+class LoadWANDGrouping(unittest.TestCase):
+    def test(self):
+        LoadWANDTest_ws = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping=None)
+        LoadWANDTest_ws_2x2 = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="2x2")
+        LoadWANDTest_ws_4x4 = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="4x4")
+
+        self.assertEqual(LoadWANDTest_ws.getSignalArray().sum(), LoadWANDTest_ws_2x2.getSignalArray().sum())
+        self.assertEqual(LoadWANDTest_ws.getSignalArray().sum(), LoadWANDTest_ws_4x4.getSignalArray().sum())
+
+        LoadWANDTest_ws.delete()
+        LoadWANDTest_ws_2x2.delete()
+        LoadWANDTest_ws_4x4.delete()
+
+
 if __name__ == "__main__":
     unittest.main()
