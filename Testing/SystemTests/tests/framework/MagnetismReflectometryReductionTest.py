@@ -155,7 +155,7 @@ class MagnetismReflectometryReductionEmptyCurve(systemtesting.MantidSystemTest):
     a reflectivity curve with only zero intensity values."""
 
     def runTest(self):
-        wsg = LoadNexusProcessed(Filename="REF_M_42100.nxs")
+        LoadNexusProcessed(Filename="REF_M_42100.nxs", OutputWorkspace="r42100")
         options = {
             "NormalizationWorkspace": None,
             "SignalPeakPixelRange": [225, 245],
@@ -190,10 +190,11 @@ class MagnetismReflectometryReductionEmptyCurve(systemtesting.MantidSystemTest):
             "DAngle0Overwrite": None,
             "DirectPixelOverwrite": None,
         }
-        MagnetismReflectometryReduction(InputWorkspace=wsg[1], OutputWorkspace="r_42100", **options)  # component with no counts
+        MagnetismReflectometryReduction(InputWorkspace="r42100", OutputWorkspace="r42100_reduced", **options)
 
     def validate(self):
-        return np.all(mtd["r_42100"].readY(0) < 1e-9)  # reflectivity curve has only zeroes
+        empty_component = mtd["r42100_reduced"][1]  # the second workspace in the GroupWorkspace is the empty one
+        return np.all(empty_component.readY(0) < 1e-9)  # reflectivity curve has only zeroes
 
 
 class MRFilterCrossSectionsTest(systemtesting.MantidSystemTest):
