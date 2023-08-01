@@ -119,6 +119,9 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         )
         self.declareProperty("CropFirstAndLastPoints", True, doc="If true, we crop the first and last points")
         self.declareProperty("CleanupBadData", True, doc="If true, we crop the points consistent with R=0")
+        self.declareProperty(
+            "AcceptNullReflectivity", False, doc="If true, reflectivity curves consisting of all zeros are accepted as valid"
+        )
         self.declareProperty("ConstQTrim", 0.5, doc="With const-Q binning, cut Q bins with contributions fewer than ConstQTrim of WL bins")
         self.declareProperty("SampleLength", 10.0, doc="Length of the sample in mm")
         self.declareProperty("ConstantQBinning", False, doc="If true, we convert to Q before summing")
@@ -507,8 +510,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Clean up the workspace for backward compatibility
         data_y = q_rebin.dataY(0)
 
-        # Sanity check
-        if sum(data_y) == 0:
+        if self.getProperty("AcceptNullReflectivity").value is False and sum(data_y) == 0:
             raise RuntimeError("The reflectivity is all zeros: check your peak selection")
 
         self.write_meta_data(q_rebin)
@@ -794,7 +796,12 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # and use 1 as the error on counts of zero. We normalize by the integrated
         # current _after_ the background subtraction so that the 1 doesn't have
         # to be changed to a 1/Charge.
-        subtracted = NormaliseByCurrent(InputWorkspace=subtracted, OutputWorkspace=str(subtracted))
+        try:
+            NormaliseByCurrent(InputWorkspace=subtracted, OutputWorkspace=str(subtracted))
+        except Exception as e:
+            logger.error(str(e))  # allow continuation when normalization fails (e.g. no proton charge)
+        finally:
+            subtracted = mtd[str(subtracted)]
 
         # Crop to only the selected peak region
         cropped = CropWorkspace(
