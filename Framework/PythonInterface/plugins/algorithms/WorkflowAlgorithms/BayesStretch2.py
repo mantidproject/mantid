@@ -1,22 +1,23 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, Progress
-from mantid.kernel import StringListValidator, Direction, IntBoundedValidator, FloatBoundedValidator
+from mantid.api import AlgorithmFactory, WorkspaceGroupProperty, Progress
+from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
 from mantid import logger
 from IndirectCommon import GetThetaQ
 from mantid.api import AnalysisDataService as ADS
-
+from quickBayesHelper import QuickBayesTemplate
 
 from functools import partial
-from typing import List
+
+# from typing import List
 from numpy import ndarray
 import numpy as np
-
+import multiprocessing
 
 try:
     from quickBayes.utils.parallel import parallel
@@ -42,41 +43,24 @@ except (Exception, Warning):
         ).communicate()
     )
     from quickBayes.utils.parallel import parallel
-
-
 from quickBayes.functions.qse_fixed import QSEFixFunction
 from quickBayes.utils.general import get_background_function
-
 from quickBayes.workflow.qse_search import QSEGridSearch
 
 
-class BayesStretch2(PythonAlgorithm):
+class BayesStretch2(QuickBayesTemplate):
     def category(self):
         return "Workflow\\MIDAS"
 
     def summary(self):
-        return "This is a variation of the stretched exponential option of Quasi."
+        return "Creates a grid showing the variation of a stretched exponential function for different FWHM and beta values."
 
     def PyInit(self):
         self.declareProperty(
-            MatrixWorkspaceProperty("SampleWorkspace", "", direction=Direction.Input), doc="Name of the Sample input Workspace"
-        )
-
-        self.declareProperty(
-            MatrixWorkspaceProperty("ResolutionWorkspace", "", direction=Direction.Input), doc="Name of the resolution input Workspace"
-        )
-
-        self.declareProperty(name="EMin", defaultValue=-0.2, doc="The start of the fitting range")
-
-        self.declareProperty(name="EMax", defaultValue=0.2, doc="The end of the fitting range")
-
-        self.declareProperty(name="Elastic", defaultValue=True, doc="Fit option for using the elastic peak")
-
-        self.declareProperty(
-            name="Background",
-            defaultValue="Flat",
-            validator=StringListValidator(["Linear", "Flat", "None"]),
-            doc="Fit option for the type of background",
+            name="NumberProcessors",
+            defaultValue=multiprocessing.cpu_count(),
+            doc="Number of cpu's to use, default is all'",
+            validator=IntBoundedValidator(lower=1),
         )
 
         self.declareProperty(name="NumberFWHM", defaultValue=3, doc="Number of sigma values", validator=IntBoundedValidator(lower=1))
@@ -97,127 +81,12 @@ class BayesStretch2(PythonAlgorithm):
             name="EndFWHM", defaultValue=0.1, doc="End of FWHM values", validator=FloatBoundedValidator(lower=0.0, upper=1.0)
         )
 
-        self.declareProperty(
-            WorkspaceGroupProperty("OutputWorkspaceFit", "", direction=Direction.Output), doc="The name of the fit output workspaces"
-        )
+        super().PyInit()
 
         self.declareProperty(
             WorkspaceGroupProperty("OutputWorkspaceContour", "", direction=Direction.Output),
             doc="The name of the contour output workspaces",
         )
-
-    def validateInputs(self):
-        start_x = self.getProperty("EMin").value
-        end_x = self.getProperty("EMax").value
-        issues = dict()
-
-        # Validate fitting range in energy
-        if start_x > end_x:
-            issues["EMax"] = "Must be less than EnergyMin"
-
-        # Validate fitting range within data range
-        ws = self.getProperty("SampleWorkspace").value
-        data_min = ws.readX(0)[0]
-        if start_x < data_min:
-            issues["EMin"] = "EMin must be more than the minimum x range of the data."
-        data_max = ws.readX(0)[-1]
-        if end_x > data_max:
-            issues["EMax"] = "EMax must be less than the maximum x range of the data"
-
-        return issues
-
-    def point_data(self, name):
-        """
-        Load data and convert to points
-        :param name: the name of the workspace
-        :return workspace, number of histograms
-        """
-        alg = self.createChildAlgorithm("ConvertToPointData", enableLogging=False)
-        alg.setProperty("InputWorkspace", name)
-        alg.setProperty("OutputWorkspace", name)
-        alg.execute()
-        ws = alg.getProperty("OutputWorkspace").value
-        return ws, ws.getNumberHistograms()
-
-    def group_ws(self, ws_list, name):
-        alg = self.createChildAlgorithm("GroupWorkspaces", enableLogging=False)
-        alg.setAlwaysStoreInADS(True)
-        alg.setProperty("InputWorkspaces", ws_list)
-        alg.setProperty("OutputWorkspace", name)
-        alg.execute()
-        return alg.getPropertyValue("OutputWorkspace")
-
-    def add_sample_logs(self, workspace, sample_logs: List, data_ws):
-        """
-        Method for adding sample logs to results
-        :param workspace: the workspace to add sample logs too
-        :param sample_logs: new sample logs to add
-        :param data_ws: the workspace to copy sample logs from
-        """
-        alg = self.createChildAlgorithm("CopyLogs", enableLogging=False)
-        alg.setProperty("InputWorkspace", data_ws)
-        alg.setProperty("OutputWorkspace", workspace)
-        alg.execute()
-        ws = alg.getPropertyValue("OutputWorkspace")
-
-        alg2 = self.createChildAlgorithm("AddSampleLogMultiple", enableLogging=False)
-        alg2.setProperty("Workspace", ws)
-        alg2.setProperty("LogNames", [log[0] for log in sample_logs])
-        alg2.setProperty("LogValues", [log[1] for log in sample_logs])
-        alg2.execute()
-
-    def create_ws(self, OutputWorkspace, DataX, DataY, NSpec, UnitX, YUnitLabel, VerticalAxisUnit, VerticalAxisValues, DataE=None):
-        """
-        A method to wrap the mantid CreateWorkspace algorithm
-        """
-        alg = self.createChildAlgorithm("CreateWorkspace", enableLogging=False)
-        alg.setAlwaysStoreInADS(True)
-        alg.setProperty("OutputWorkspace", OutputWorkspace)
-        alg.setProperty("DataX", DataX)
-        alg.setProperty("DataY", DataY)
-        alg.setProperty("NSpec", NSpec)
-        alg.setProperty("UnitX", UnitX)
-        alg.setProperty("YUnitLabel", YUnitLabel)
-        alg.setProperty("VerticalAxisUnit", VerticalAxisUnit)
-        alg.setProperty("VerticalAxisValues", VerticalAxisValues)
-        if DataE is not None:
-            alg.setProperty("DataE", DataE)
-
-        alg.execute()
-        return alg.getPropertyValue("OutputWorkspace")
-
-    def make_fit_ws(self, engine, max_features, ws_list, x_unit, name):
-        """
-        Simple function for creating a fit ws
-        :param engine: the quickBayes fit engine used
-        :param max_features: the maximum number of features (e.g. lorentzians)
-        :param ws_list: list of fit workspaces (inout)
-        :param x_unit: the x axis unit
-        :param name: name of the output
-        :return the list of fitting workspaces
-        """
-        x = list(engine._x_data)
-        y = list(engine._y_data)
-        axis_names = ["data"]
-        for j in range(max_features):
-            x_data, fit, e, df, de = engine.get_fit_values(j)
-
-            y += list(fit) + list(df)
-            x += list(x_data) + list(x_data)
-            axis_names.append(f"fit {j+1}")
-            axis_names.append(f"diff {j+1}")
-            ws = self.create_ws(
-                OutputWorkspace=f"{name}_workspace",
-                DataX=np.array(x),
-                DataY=np.array(y),
-                NSpec=len(axis_names),
-                UnitX=x_unit,
-                YUnitLabel="",
-                VerticalAxisUnit="Text",
-                VerticalAxisValues=axis_names,
-            )
-        ws_list.append(ws)
-        return ws_list
 
     def do_one_spec(self, spec, data):
         sample_ws = data["sample"]
@@ -273,15 +142,7 @@ class BayesStretch2(PythonAlgorithm):
         BG = get_background_function(BG_str)
         start_x = self.getProperty("EMin").value
         end_x = self.getProperty("EMax").value
-        # work around for bug
-        if start_x < sample_ws.readX(0)[0]:
-            start_x = sample_ws.readX(0)[0]
-        if end_x > sample_ws.readX(0)[-1]:
-            end_x = sample_ws.readX(0)[-1]
-
-        logger.information(" Number of spectra = {0} ".format(N))
-        logger.information(" Erange : {0}  to {1} ".format(start_x, end_x))
-
+        numCores = self.getProperty("NumberProcessors").value
         ########################################
         beta_start = self.getProperty("StartBeta").value
         beta_end = self.getProperty("EndBeta").value
@@ -291,6 +152,15 @@ class BayesStretch2(PythonAlgorithm):
         FWHM_end = self.getProperty("EndFWHM").value
         N_FWHM = self.getProperty("NumberFWHM").value
         ######################################
+
+        # work around for bug
+        if start_x < sample_ws.readX(0)[0]:
+            start_x = sample_ws.readX(0)[0]
+        if end_x > sample_ws.readX(0)[-1]:
+            end_x = sample_ws.readX(0)[-1]
+
+        logger.information(" Number of spectra = {0} ".format(N))
+        logger.information(" Erange : {0}  to {1} ".format(start_x, end_x))
 
         # initial values
         contour_list = []
@@ -315,7 +185,8 @@ class BayesStretch2(PythonAlgorithm):
 
         # calculation
         calc = partial(self.calculate_wrapper, data=data)
-        output = parallel(list(range(N)), calc)
+        output = parallel(list(range(N)), calc, N=numCores)
+        # record results
         for spec in range(N):
             contour_list.append(output[spec][0])
             beta_list.append(output[spec][1])
@@ -337,6 +208,15 @@ class BayesStretch2(PythonAlgorithm):
         return contour_list, beta_list, FWHM_list, sample_logs
 
     def make_contour(self, X, Y, Z, spec, name):
+        """
+        Create a countour workspace
+        :param X: the x data for the contour (e.g. FWHM)
+        :param Y: the y data for the contour (e.g. beta)
+        :param Z: the z data for the contour (e.g. the cost function)
+        :param spec: the spectrum number
+        :param name: part of the name for the output workspace
+        :returns the name of the output worksapce
+        """
         x = []
         y = []
         z = []
@@ -362,32 +242,15 @@ class BayesStretch2(PythonAlgorithm):
         y_unit.setLabel("FWHM", "")
         return ws_str
 
-    def duplicate_res(self, res_ws, N):
-        """
-        If a resolution ws has a single spectra, but we want use the same spectra repeatedly.
-        So we duplicate it
-        :param res_ws: the resolution workspace
-        :param N: the number of histograms we need
-        :return a list of repeated spectra
-        """
-        res_list = []
-        for j in range(N):
-            res_list.append({"x": res_ws.readX(0), "y": res_ws.readY(0)})
-        return res_list
-
-    def unique_res(self, res_ws, N):
-        """
-        If a resolution ws has multiple spectra, put them into a list for easy analysis
-        :param res_ws: the resolution workspace
-        :param N: the number of histograms we need
-        :return a list of spectra
-        """
-        res_list = []
-        for j in range(N):
-            res_list.append({"x": res_ws.readX(j), "y": res_ws.readY(j)})
-        return res_list
-
     def make_slice_ws(self, slice_list, x_data, x_unit, name):
+        """
+        Creates a workspace of a slice of the countour plot
+        :param slice_list: the z values from the slice
+        :param x_data: the x values for the slice
+        :param x_unit: the unit for the x data
+        :param name: the name of the output workspace
+        :return the workspace generated
+        """
         axis_names = []
         y_data = []
         xx = []
@@ -418,12 +281,12 @@ class BayesStretch2(PythonAlgorithm):
     ):
         """
         Takes the output of quickBayes and makes Mantid workspaces
-        :param results: dict of quickBayes parameter results
-        :param results_errors: dict of quickBayes parameter errors
+        :param beta_list: a list of the z values as a function of beta parameter
+        :param FWHM_list: a list of the z values as a function of FWHM parameter
         :param x_data: the x data for plotting the results (e.g. Q)
         :param x_unit: the x unit
         :param name: the name of the output worksapce
-        :return workspace of fit paramters and workspace of loglikelihoods (probs)
+        :return group workspaces with the FWHM and beta slices
         """
         beta = self.make_slice_ws(beta_list, x_data, x_unit, f"{name}_Stretch_Beta")
         FWHM = self.make_slice_ws(FWHM_list, x_data, x_unit, f"{name}_Stretch_FWHM")
@@ -455,7 +318,6 @@ class BayesStretch2(PythonAlgorithm):
             raise ValueError("RES file needs to have either 1 or the same number of histograms as sample.")
 
         contour_list, beta_list, FWHM_list, sample_logs = self.calculate(sample_ws, report_progress, res_list, N)
-
         sample_logs.append(("res_workspace", res_name))
 
         # report results
@@ -465,9 +327,7 @@ class BayesStretch2(PythonAlgorithm):
         slice_group = self.make_results(beta_list, FWHM_list, Q[1], "MomentumTransfer", name)
         self.add_sample_logs(slice_group, sample_logs, sample_ws)
 
-        # fit_ws = s_api.CreateWorkspace([0,1], [1,2])
         self.setProperty("OutputWorkspaceFit", slice_group)
-
         self.setProperty("OutputWorkspaceContour", contour_group)
 
 
