@@ -122,11 +122,11 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
 
     def _dSpaceBinning(self):
         """d binning used for testing the algorithm"""
-        return [0.1, -0.02, 2]
+        return [0.1 + 0.02, -0.02, 2 - 0.02]
 
     def _dPerpendicularBinning(self):
         """d perpendicular binning used for testing the algorithm"""
-        return [0.4, 0.1, 2]
+        return [0.4 - 0.1, 0.1, 2 + 0.1]
 
     def _FWHM(self):
         """FWHM used for testing the algorithm"""
