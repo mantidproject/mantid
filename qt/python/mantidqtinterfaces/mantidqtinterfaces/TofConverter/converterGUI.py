@@ -10,14 +10,9 @@ from qtpy.QtGui import QDoubleValidator
 from qtpy import QtCore
 from mantid.kernel import Logger
 from mantidqt.gui_helper import show_interface_help
+from mantidqt.utils.qt import load_ui
 import math
 from mantidqtinterfaces.TofConverter import convertUnits
-
-try:
-    from mantidqt.utils.qt import load_ui
-except ImportError:
-    Logger("TofConverter").information("Using legacy ui importer")
-    from mantidplot import load_ui
 
 
 class MainWindow(QMainWindow):
