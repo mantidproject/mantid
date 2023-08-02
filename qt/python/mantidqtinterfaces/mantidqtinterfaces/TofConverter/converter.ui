@@ -71,56 +71,6 @@
        <property name="whatsThis">
         <string>Drop down menu of the units for the input value</string>
        </property>
-       <item>
-        <property name="text">
-         <string>Energy (meV)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Wavelength (Angstroms)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Nu (THz)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Velocity (m/s)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Momentum (k Angstroms^-1)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Temperature (K)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Energy (cm^-1)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Momentum transfer (Q Angstroms^-1)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>d-spacing (Angstroms)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Time of flight (microseconds)</string>
-        </property>
-       </item>
       </widget>
       <widget class="QLineEdit" name="InputVal">
        <property name="geometry">
@@ -219,56 +169,6 @@
        <property name="whatsThis">
         <string>Drop down menu of the units for the input value to be converted to</string>
        </property>
-       <item>
-        <property name="text">
-         <string>Energy (meV)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Wavelength (Angstroms)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Nu (Thz)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Velocity (m/s)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Momentum (k Angstroms^-1)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Temperature (K)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Energy (cm^-1)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Momentum transfer (Q Angstroms^-1)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>d-spacing (Angstroms)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Time of flight (microseconds)</string>
-        </property>
-       </item>
       </widget>
       <widget class="QLabel" name="label_4">
        <property name="geometry">

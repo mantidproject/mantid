@@ -21,10 +21,10 @@ except ImportError:
 
 
 class MainWindow(QMainWindow):
-    needsThetaInputList = ["Momentum transfer (Q Angstroms^-1)", "d-spacing (Angstroms)"]
-    needsThetaOutputList = ["Momentum transfer (Q Angstroms^-1)", "d-spacing (Angstroms)"]
-    needsFlightPathInputList = ["Time of flight (microseconds)"]
-    needsFlightPathOutputList = ["Time of flight (microseconds)"]
+    needsThetaInputList = [convertUnits.MOMENTUM_TRANSFER, convertUnits.D_SPACING]
+    needsThetaOutputList = [convertUnits.MOMENTUM_TRANSFER, convertUnits.D_SPACING]
+    needsFlightPathInputList = [convertUnits.TIME_OF_FLIGHT]
+    needsFlightPathOutputList = [convertUnits.TIME_OF_FLIGHT]
 
     def thetaEnable(self, enabled):
         self.ui.scatteringAngleInput.setEnabled(enabled)
@@ -82,6 +82,10 @@ class MainWindow(QMainWindow):
         self.assistant_process = QtCore.QProcess(self)
         # pylint: disable=protected-access
         self.mantidplot_name = "TOF Converter"
+
+        # Add combo box options
+        self.ui.inputUnits.addItems(convertUnits.UNIT_LIST)
+        self.ui.outputUnits.addItems(convertUnits.UNIT_LIST)
 
         try:
             import mantid
