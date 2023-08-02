@@ -31,6 +31,7 @@ class Tester(object):
     }
 
     MASS_DELTA = 1e-3
+    FLOAT_EPS = np.finfo(np.float64).eps
 
     @staticmethod
     def _to_array_inplace(data: dict, key: str) -> None:
@@ -121,7 +122,7 @@ class Tester(object):
             )  # delta in amu units
 
             self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
-            assert_allclose(correct_atoms["atom_%s" % item]["coord"], atoms["atom_%s" % item]["coord"])
+            assert_allclose(correct_atoms["atom_%s" % item]["coord"], atoms["atom_%s" % item]["coord"], rtol=1e-7, atol=self.FLOAT_EPS)
 
         # check attributes
         self.assertEqual(correct_data["attributes"]["hash"], data["attributes"]["hash"])
@@ -176,7 +177,7 @@ class Tester(object):
             self.assertEqual(correct_atoms["atom_%s" % item]["sort"], atoms["atom_%s" % item]["sort"])
             self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"], delta=self.MASS_DELTA)
             self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
-            assert_allclose(np.array(correct_atoms["atom_%s" % item]["coord"]), atoms["atom_%s" % item]["coord"])
+            assert_allclose(np.array(correct_atoms["atom_%s" % item]["coord"]), atoms["atom_%s" % item]["coord"], atol=self.FLOAT_EPS)
 
     def check(
         self, *, name: str, loader: AbInitioLoader, extension: str = None, max_displacement_kpt: Real = float("Inf"), **loader_kwargs
