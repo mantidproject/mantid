@@ -98,6 +98,16 @@ class GuiStateDirectorTest(unittest.TestCase):
 
         self.assertEqual(state_model.all_states.save, new_state.all_states.save)
 
+    def test_that_background_ws_and_scale_factor_set_on_state_from_options_column(self):
+        state_model = self._get_state_gui_model()
+        director = GuiStateDirector(state_model, SANSFacility.ISIS)
+
+        state = self._get_row_entry(option_string="BackgroundWorkspace=whatever,ScaleFactor=0.9")
+        state = director.create_state(state)
+        self.assertTrue(isinstance(state, StateGuiModel))
+        self.assertEqual(state.all_states.background_subtraction.workspace, "whatever")
+        self.assertEqual(state.all_states.background_subtraction.scale_factor, 0.9)
+
 
 if __name__ == "__main__":
     unittest.main()

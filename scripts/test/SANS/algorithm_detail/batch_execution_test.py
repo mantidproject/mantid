@@ -17,8 +17,10 @@ from sans.algorithm_detail.batch_execution import (
     select_reduction_alg,
     save_workspace_to_file,
     delete_reduced_workspaces,
+    create_scaled_background_workspace,
+    subtract_scaled_background,
 )
-from sans.common.enums import SaveType
+from sans.common.enums import SaveType, ReductionMode
 
 
 class ADSMock(object):
@@ -78,6 +80,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         merged_workspace = _create_sample_ws_group("merged_workspace")
         lab_workspace = _create_sample_ws_group("lab_workspace")
         hab_workspace = _create_sample_ws_group("hab_workspace")
+        bgsub_workspace_name = ["bgsub_workspace"]
         reduced_lab_can = _create_sample_ws_group("reduced_lab_can")
         reduced_hab_can = _create_sample_ws_group("reduced_hab_can")
         reduced_lab_sample = _create_sample_ws_group("reduced_lab_sample")
@@ -88,6 +91,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         self.reduction_package_merged.reduced_merged = merged_workspace
         self.reduction_package_merged.reduced_lab = lab_workspace
         self.reduction_package_merged.reduced_hab = hab_workspace
+        self.reduction_package_merged.reduced_bgsub_name = bgsub_workspace_name
         self.reduction_package_merged.reduced_lab_can = reduced_lab_can
         self.reduction_package_merged.reduced_hab_can = reduced_hab_can
         self.reduction_package_merged.reduced_lab_sample = reduced_lab_sample
@@ -97,6 +101,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
 
         self.reduction_package.reduced_lab = lab_workspace
         self.reduction_package.reduced_hab = hab_workspace
+        self.reduction_package.reduced_bgsub_name = bgsub_workspace_name
         self.reduction_package.reduced_lab_can = reduced_lab_can
         self.reduction_package.reduced_hab_can = reduced_hab_can
         self.reduction_package.reduced_lab_sample = reduced_lab_sample
@@ -106,6 +111,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
 
         self.reduction_package_transmissions.reduced_lab = lab_workspace
         self.reduction_package_transmissions.reduced_hab = hab_workspace
+        self.reduction_package_transmissions.reduced_bgsub_name = bgsub_workspace_name
         self.reduction_package_transmissions.reduced_lab_can = reduced_lab_can
         self.reduction_package_transmissions.reduced_hab_can = reduced_hab_can
         self.reduction_package_transmissions.reduced_lab_sample = reduced_lab_sample
@@ -117,13 +123,13 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         reduction_packages = [self.reduction_package_merged]
         names_to_save = get_all_names_to_save(reduction_packages, save_can=False)
 
-        self.assertEqual(names_to_save, [(["merged_workspace"], [], [])])
+        self.assertEqual(names_to_save, [(["merged_workspace"], [], []), (["bgsub_workspace"], [], [])])
 
     def test_hab_and_lab_workspaces_returned_if_merged_workspace_not_present(self):
         reduction_packages = [self.reduction_package]
         names_to_save = get_all_names_to_save(reduction_packages, save_can=False)
 
-        self.assertEqual(names_to_save, [(["lab_workspace"], [], []), (["hab_workspace"], [], [])])
+        self.assertEqual(names_to_save, [(["lab_workspace"], [], []), (["hab_workspace"], [], []), (["bgsub_workspace"], [], [])])
 
     def test_can_workspaces_returned_if_save_can_selected(self):
         names_to_save = get_all_names_to_save([self.reduction_package_merged], True)
@@ -131,6 +137,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             "merged_workspace",
             "lab_workspace",
             "hab_workspace",
+            "bgsub_workspace",
             "reduced_lab_can",
             "reduced_hab_can",
             "reduced_lab_sample",
@@ -143,7 +150,15 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         reduction_packages = [self.reduction_package]
         names_to_save = get_all_names_to_save(reduction_packages, True)
 
-        names = {"lab_workspace", "hab_workspace", "reduced_lab_can", "reduced_hab_can", "reduced_lab_sample", "reduced_hab_sample"}
+        names = {
+            "lab_workspace",
+            "hab_workspace",
+            "bgsub_workspace",
+            "reduced_lab_can",
+            "reduced_hab_can",
+            "reduced_lab_sample",
+            "reduced_hab_sample",
+        }
         names_expected = [([name], [], []) for name in names]
         self.assertEqual(sorted(names_to_save), sorted(names_expected))
 
@@ -228,6 +243,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         names_expected = [
             (["lab_workspace"], ["transmission"], ["transmission_can"]),
             (["hab_workspace"], ["transmission"], ["transmission_can"]),
+            (["bgsub_workspace"], ["transmission"], ["transmission_can"]),
         ]
 
         self.assertEqual(names_to_save, names_expected)
@@ -240,6 +256,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         names_expected = [
             (["lab_workspace"], ["transmission"], ["transmission_can"]),
             (["hab_workspace"], ["transmission"], ["transmission_can"]),
+            (["bgsub_workspace"], ["transmission"], ["transmission_can"]),
             (["reduced_lab_can"], [], ["transmission_can"]),
             (["reduced_hab_can"], [], ["transmission_can"]),
             (["reduced_lab_sample"], ["transmission"], []),
@@ -363,6 +380,67 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             "TransmissionCan": transmission_can_name,
         }
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
+
+    def test_get_scaled_background_workspace_no_background(self):
+        state = mock.MagicMock()
+        state.background_subtraction.workspace = None
+
+        result = create_scaled_background_workspace(state)
+
+        state.background_subtraction.validate.assert_called_once()
+        self.assertIsNone(result, "When no background ws is set, this should return None.")
+
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
+    def test_get_scaled_background_workspace_calls_algs(self, mock_alg_manager):
+        state = mock.MagicMock()
+        ws_name = "workspace"
+        scale_factor = 1.12
+        expected_out_name = "__" + ws_name + "_scaled"
+        state.background_subtraction.workspace = ws_name
+        state.background_subtraction.scale_factor = scale_factor
+
+        result = create_scaled_background_workspace(state)
+
+        state.background_subtraction.validate.assert_called_once()
+
+        expected_options = {
+            "InputWorkspace": ws_name,
+            "Factor": scale_factor,
+            "OutputWorkspace": expected_out_name,
+        }
+        mock_alg_manager.assert_called_once_with("Scale", **expected_options)
+        self.assertEqual(result, expected_out_name, "Should output the scaled ws name.")
+
+    def test_subtract_scaled_background_with_all_detectors_fails(self):
+        reduction_package = mock.MagicMock()
+        scaled_ws_name = "__workspace_scaled"
+        reduction_package.reduction_mode = ReductionMode.ALL
+        self.assertRaisesRegex(
+            ValueError,
+            f"Reduction Mode '{ReductionMode.ALL}' is incompatible with scaled background reduction. The ReductionMode "
+            f"must be set to '{ReductionMode.MERGED}', '{ReductionMode.HAB}', or '{ReductionMode.LAB}'.",
+            subtract_scaled_background,
+            reduction_package,
+            scaled_ws_name,
+        )
+
+    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
+    def test_subtract_background_from_merged_calls_algorithms_correctly(self, mock_alg_manager):
+        mock_minus = mock.MagicMock()
+        reduction_package = mock.MagicMock()
+        mock_alg_manager.return_value = mock_minus
+        scaled_ws_name = "__workspace_scaled"
+        reduction_package.reduction_mode = ReductionMode.MERGED
+        reduction_package.reduced_merged_name = ["ws1", "ws2"]
+
+        created_workspaces, created_workspace_names = subtract_scaled_background(reduction_package, scaled_ws_name)
+
+        mock_alg_manager.assert_any_call("Minus", **{"RHSWorkspace": scaled_ws_name, "LHSWorkspace": "ws1", "OutputWorkspace": "ws1_bgsub"})
+        mock_alg_manager.assert_any_call("Minus", **{"RHSWorkspace": scaled_ws_name, "LHSWorkspace": "ws2", "OutputWorkspace": "ws2_bgsub"})
+        self.assertEqual(["ws1_bgsub", "ws2_bgsub"], created_workspace_names)
+        self.assertEqual(len(created_workspaces), len(created_workspace_names))
+        self.assertEqual(mock_minus.execute.call_count, 2)
 
 
 class DeleteMethodsTest(unittest.TestCase):
