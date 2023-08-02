@@ -40,19 +40,29 @@ class MainWindow(QMainWindow):
         inOption = self.ui.inputUnits.currentText()
         outOption = self.ui.outputUnits.currentText()
 
-        # for theta: enable if input or output unit requires it
-        if inOption in self.needsThetaInputList:
-            self.thetaEnable(True)
+        if inOption == outOption:
+            self.thetaEnable(False)
+            self.flightPathEnable(False)
+            self.ui.convertButton.setEnabled(False)
+            self.ui.convertedVal.setEnabled(False)
+            self.ui.convertedVal.setText("Input and output units are the same")
+        else:
+            self.ui.convertButton.setEnabled(True)
+            self.ui.convertedVal.setEnabled(True)
+            self.ui.convertedVal.clear()
+            # for theta: enable if input or output unit requires it
+            if inOption in self.needsThetaInputList:
+                self.thetaEnable(True)
 
-        if outOption in self.needsThetaOutputList:
-            self.thetaEnable(True)
+            if outOption in self.needsThetaOutputList:
+                self.thetaEnable(True)
 
-        # for flightpath: enable if input or output unit requires it
-        if inOption in self.needsFlightPathInputList:
-            self.flightPathEnable(True)
+            # for flightpath: enable if input or output unit requires it
+            if inOption in self.needsFlightPathInputList:
+                self.flightPathEnable(True)
 
-        if outOption in self.needsFlightPathOutputList:
-            self.flightPathEnable(True)
+            if outOption in self.needsFlightPathOutputList:
+                self.flightPathEnable(True)
 
     def __init__(self, parent=None, window_flags=None):
         QMainWindow.__init__(self, parent)
