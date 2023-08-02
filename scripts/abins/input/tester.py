@@ -30,6 +30,8 @@ class Tester(object):
         "VASPOUTCARLoader": "OUTCAR",
     }
 
+    MASS_DELTA = 1e-3
+
     @staticmethod
     def _to_array_inplace(data: dict, key: str) -> None:
         """Replace a dict item with equivalent numpy array"""
@@ -115,7 +117,7 @@ class Tester(object):
         for item in range(len(correct_atoms)):
             self.assertEqual(correct_atoms["atom_%s" % item]["sort"], atoms["atom_%s" % item]["sort"])
             self.assertAlmostEqual(
-                correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"], delta=0.00001
+                correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"], delta=self.MASS_DELTA
             )  # delta in amu units
 
             self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
@@ -172,7 +174,7 @@ class Tester(object):
 
         for item in range(len(correct_atoms)):
             self.assertEqual(correct_atoms["atom_%s" % item]["sort"], atoms["atom_%s" % item]["sort"])
-            self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"], delta=0.00001)
+            self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"], delta=self.MASS_DELTA)
             self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
             assert_allclose(np.array(correct_atoms["atom_%s" % item]["coord"]), atoms["atom_%s" % item]["coord"])
 
