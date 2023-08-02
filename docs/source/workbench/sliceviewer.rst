@@ -239,5 +239,5 @@ The abbreviations are listed as follows:
   - Q1  = 1st quartile (or 25th-percentile)
   - Q3  = 3rd quartile (or 75th-percentile)
   - IQR = interquartile range
-  - med = median (or 1nd quartile or 50th-percentile)
+  - med = median (or 2nd quartile or 50th-percentile)
   - mad = median absolute deviation
