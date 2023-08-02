@@ -93,7 +93,6 @@ class AlignComponents(PythonAlgorithm):
 
     # pylint: disable=too-many-locals
     def PyInit(self):
-
         #
         # Reference and input data
         self.declareProperty(
