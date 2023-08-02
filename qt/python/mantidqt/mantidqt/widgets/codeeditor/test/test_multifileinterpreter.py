@@ -17,7 +17,7 @@ from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 
 MANTID_API_IMPORT = "from mantid.simpleapi import *\n"
-PERMISSION_BOX_FUNC = "mantidqt.widgets.codeeditor.scriptcompatibility." "permission_box_to_prepend_import"
+PERMISSION_BOX_FUNC = "mantidqt.widgets.codeeditor.scriptcompatibility.permission_box_to_prepend_import"
 
 
 @start_qapplication
@@ -75,6 +75,25 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
         self.assertEqual(2, widget.editor_count, msg="Should be the original tab, plus one (not two) tabs for the file")
         # File should still be modified after attempted reopening because it was modified before reopening and we don't want to lose changes
         self.assertTrue(widget.current_editor().editor.isModified(), msg="File should still be modified after attempted reopening")
+
+    def test_save_as_closes_the_original_tab(self):
+        test_string = "Test file\n"
+        widget = MultiPythonFileInterpreter()
+        mock_open_func = mock.mock_open(read_data=test_string)
+        ask_for_filename = "mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename"
+        test_file_name = "test_save_as_leaves_original_marked_unmodified"
+        # fmt: off
+        with mock.patch(widget.__module__ + ".open", mock_open_func, create=True), \
+                mock.patch(PERMISSION_BOX_FUNC, lambda: True), \
+                tempfile.TemporaryDirectory() as temp_dir, \
+                mock.patch(ask_for_filename, lambda s: os.path.join(temp_dir, test_file_name)):
+            widget.open_file_in_new_tab(test_string)
+            widget.save_current_file_as()
+        # fmt: on
+        # There's one tab when you create the editor, then another one was added when opening the mock file. Clicking
+        # 'Save Script as' should close the original tab with the old name, and leave you with a tab with the new name.
+        self.assertEqual(2, widget.editor_count)
+        self.assertFalse(widget.current_editor().editor.isModified(), msg="Tab should be marked as not modified")
 
 
 if __name__ == "__main__":
