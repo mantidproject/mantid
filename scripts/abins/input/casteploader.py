@@ -23,10 +23,6 @@ class CASTEPLoader(AbInitioLoader):
         :param input_ab_initio_filename: name of file with phonon data (foo.phonon)
         """
         super().__init__(input_ab_initio_filename=input_ab_initio_filename)
-
-        # Regex pattern for a floating point number
-        self._float_regex = r"\-?(?:\d+\.?\d*|\d*\.?\d+)"
-        self._sum_rule = None
         self._ab_initio_program = "CASTEP"
 
     def read_vibrational_or_phonon_data(self) -> AbinsData:
