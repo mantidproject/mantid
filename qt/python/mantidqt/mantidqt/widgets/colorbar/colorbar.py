@@ -130,7 +130,7 @@ class ColorbarWidget(QWidget):
         self.autotype = QComboBox()
         self.autotype.addItems(AUTO_SCALE_OPTS)
         self.autotype.setCurrentIndex(0)
-        self.autotype.currentIndexChanged.connect(self.norm_changed)
+        self.autotype.currentIndexChanged.connect(self.auto_scale_type_changed)
 
         self.auto_layout.addWidget(self.autotype)
         self.auto_layout.addStretch()
@@ -224,6 +224,15 @@ class ColorbarWidget(QWidget):
         self.update_clim_validator()
         self.update_clim()
         self.scaleNormChanged.emit()
+
+    def auto_scale_type_changed(self):
+        """
+        Called when a different auto scale type is selected
+        """
+        self.autoscale.blockSignals(True)
+        self.autoscale.setChecked(True)
+        self.autoscale.blockSignals(False)
+        self.norm_changed()
 
     def get_norm(self):
         """
@@ -341,29 +350,39 @@ class ColorbarWidget(QWidget):
         else:
             mask = np.isfinite(data)
 
+        signal = data[mask].filled(np.nan) if np.ma.isMaskedArray(data) else data[mask]
+
         if mask.any():
-            scale_type = AUTO_SCALE_OPTS[self.autotype.currentIndex()]
-            if scale_type == "Min/Max":
-                vmin, vmax = np.min(data[mask]), np.max(data[mask])
-            elif scale_type == "3-Sigma":
-                mean, sigma = np.mean(data[mask]), np.std(data[mask])
-                vmin, vmax = mean - 3 * sigma, mean + 3 * sigma
-            elif scale_type == "1.5-Interquartile Range":
-                Q1, Q3 = np.percentile(data[mask], [25, 75])
-                vmin, vmax = Q1 - 1.5 * (Q3 - Q1), Q3 + 1.5 * (Q3 - Q1)
-            elif scale_type == "1.5-Median Absolute Deviation":
-                med = np.median(data[mask])
-                mad = np.median(np.abs(data[mask] - med))
-                vmin, vmax = med - 1.5 * mad, med + 1.5 * mad
-            if self._is_log_norm():
-                # sanity check
-                if vmax <= 0:
-                    vmax = 1.0
-                if vmin <= 0 or np.isclose(vmin, vmax):
-                    vmin = 1e-4 * vmax
+            vmin, vmax = self._calculate_auto_color_limits(signal)
+            # sparse data
+            if np.isclose(vmin, vmax):
+                vmin, vmax = self._calculate_auto_color_limits(np.unique(signal))
             return vmin, vmax
         else:
             return (0.1, 1.0)
+
+    def _calculate_auto_color_limits(self, signal):
+        """Calculate auto scale limits"""
+        scale_type = AUTO_SCALE_OPTS[self.autotype.currentIndex()]
+        if scale_type == "Min/Max":
+            vmin, vmax = np.nanmin(signal), np.nanmax(signal)
+        elif scale_type == "3-Sigma":
+            mean, sigma = np.nanmean(signal), np.nanstd(signal)
+            vmin, vmax = mean - 3 * sigma, mean + 3 * sigma
+        elif scale_type == "1.5-Interquartile Range":
+            Q1, Q3 = np.nanpercentile(signal, [25, 75])
+            vmin, vmax = Q1 - 1.5 * (Q3 - Q1), Q3 + 1.5 * (Q3 - Q1)
+        elif scale_type == "1.5-Median Absolute Deviation":
+            med = np.nanmedian(signal)
+            mad = np.nanmedian(np.abs(signal - med))
+            vmin, vmax = med - 1.5 * mad, med + 1.5 * mad
+        # sanity checks
+        if self._is_log_norm():
+            if vmax <= 0:
+                vmax = 1.0
+            if vmin <= 0 or np.isclose(vmin, vmax):
+                vmin = 1e-4 * vmax
+        return vmin, vmax
 
     def _is_log_norm(self):
         return NORM_OPTS[self.norm.currentIndex()] == "Log"
