@@ -32,10 +32,6 @@ class MainWindow(QMainWindow):
             self.ui.totalFlightPathInput.clear()
 
     def setInstrumentInputs(self):
-        # disable both
-        self.thetaEnable(False)
-        self.flightPathEnable(False)
-
         # get the values of the two unit strings
         inOption = self.ui.inputUnits.currentText()
         outOption = self.ui.outputUnits.currentText()
@@ -51,18 +47,9 @@ class MainWindow(QMainWindow):
             self.ui.convertedVal.setEnabled(True)
             self.ui.convertedVal.clear()
             # for theta: enable if input or output unit requires it
-            if inOption in self.needsThetaInputList:
-                self.thetaEnable(True)
-
-            if outOption in self.needsThetaOutputList:
-                self.thetaEnable(True)
-
+            self.thetaEnable(inOption in self.needsThetaInputList or outOption in self.needsThetaOutputList)
             # for flightpath: enable if input or output unit requires it
-            if inOption in self.needsFlightPathInputList:
-                self.flightPathEnable(True)
-
-            if outOption in self.needsFlightPathOutputList:
-                self.flightPathEnable(True)
+            self.flightPathEnable(inOption in self.needsFlightPathInputList or outOption in self.needsFlightPathOutputList)
 
     def __init__(self, parent=None, window_flags=None):
         QMainWindow.__init__(self, parent)
