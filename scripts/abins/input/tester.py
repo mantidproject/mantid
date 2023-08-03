@@ -30,7 +30,7 @@ class Tester(object):
         "VASPOUTCARLoader": "OUTCAR",
     }
 
-    MASS_DELTA = 1e-3
+    MASS_DELTA = 1e-5
     FLOAT_EPS = np.finfo(np.float64).eps
 
     @staticmethod
