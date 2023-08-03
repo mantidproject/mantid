@@ -59,7 +59,8 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
   static std::vector<double> rebinParamsFromInput(const std::vector<double> &inParams,
-                                                  const API::MatrixWorkspace &inputWS, Kernel::Logger &logger);
+                                                  const API::MatrixWorkspace &inputWS, Kernel::Logger &logger,
+                                                  bool useLogAnyway = false);
 
 protected:
   const std::string workspaceMethodName() const override { return "rebin"; }

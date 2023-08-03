@@ -19,8 +19,8 @@ namespace Mantid {
 
 namespace {
 
-const std::vector<const std::string> DIFC_TABLE_COLUMN_NAMES{"detid", "difc", "difa", "tzero"};
-const std::vector<const std::string> DIFC_TABLE_COLUMN_TYPES{"int", "double", "double", "double"};
+const std::vector<std::string> DIFC_TABLE_COLUMN_NAMES{"detid", "difc", "difa", "tzero"};
+const std::vector<std::string> DIFC_TABLE_COLUMN_TYPES{"int", "double", "double", "double"};
 
 namespace OffsetMode {
 const std::string RELATIVE("Relative");
@@ -84,9 +84,9 @@ void ConvertDiffCal::init() {
 
   std::vector<std::string> modes{OffsetMode::RELATIVE, OffsetMode::ABSOLUTE, OffsetMode::SIGNED};
 
-  declareProperty(PropertyNames::OFFSET_MODE, OffsetMode
-                  : RELATIVE, std::make_shared<Kernel::StringListValidator>(modes),
-                    "Optional: Whether to calculate a relative, absolute, or signed offset");
+  declareProperty(PropertyNames::OFFSET_MODE, OffsetMode::RELATIVE,
+                  std::make_shared<Kernel::StringListValidator>(modes),
+                  "Optional: Whether to calculate a relative, absolute, or signed offset");
 
   declareProperty(PropertyNames::BINWIDTH, EMPTY_DBL(),
                   "Optional: The bin width of the X axis.  If using 'Signed' OffsetMode, this value is mandatory");
@@ -214,7 +214,7 @@ void ConvertDiffCal::exec() {
   } else {
     // initial setup of new style config
     configWksp = std::make_shared<TableWorkspace>();
-    for (int i = 0; i < DIFC_TABLE_COLUMN_NAMES.size(); i++)
+    for (size_t i = 0; i < DIFC_TABLE_COLUMN_NAMES.size(); i++)
       configWksp->addColumn(DIFC_TABLE_COLUMN_TYPES[i], DIFC_TABLE_COLUMN_NAMES[i]);
   }
 

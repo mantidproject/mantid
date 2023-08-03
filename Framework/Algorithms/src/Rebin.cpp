@@ -45,10 +45,12 @@ using HistogramData::Exception::InvalidBinEdgesError;
  * @param inParams Input vector from user
  * @param inputWS Input workspace from user
  * @param logger A reference to a logger
+ * @param useLogarithmicBinningAnyway Flag indicating to use logarithmic binning
  * @returns A new vector containing the rebin parameters
  */
 std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
-                                                const API::MatrixWorkspace &inputWS, Kernel::Logger &logger) {
+                                                const API::MatrixWorkspace &inputWS, Kernel::Logger &logger,
+                                                bool useLogarithmicBinningAnyway) {
   std::vector<double> rbParams;
   // The validator only passes parameters with size 1, or 3xn. No need to check again here
   if (inParams.size() >= 3) {
@@ -65,7 +67,7 @@ std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inPar
     rbParams[1] = inParams[0];
     rbParams[2] = xmax;
     // if LogarithmicBinning has been set, make binning negative to enforce logarithmic binning
-    if (getProperty("LogarithmicBinning")) {
+    if (useLogarithmicBinningAnyway) {
       rbParams[1] = -fabs(rbParams[1]);
     }
     if ((rbParams[1] < 0.) && (xmin < 0.) && (xmax > 0.)) {
@@ -184,7 +186,8 @@ void Rebin::exec() {
   // Rebinning in-place
   bool inPlace = (inputWS == outputWS);
 
-  std::vector<double> rbParams = rebinParamsFromInput(getProperty("Params"), *inputWS, g_log);
+  std::vector<double> rbParams =
+      rebinParamsFromInput(getProperty("Params"), *inputWS, g_log, getProperty("LogarithmicBinning"));
 
   const bool dist = inputWS->isDistribution();
   const bool isHist = inputWS->isHistogramData();

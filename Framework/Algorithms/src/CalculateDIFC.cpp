@@ -122,11 +122,12 @@ void CalculateDIFC::init() {
                   "Optional: A TableWorkspace containing the DIFC values, "
                   "which will be copied. This property cannot be set in "
                   "conjunction with property OffsetsWorkspace.");
+
   std::vector<std::string> modes{OffsetMode::RELATIVE, OffsetMode::ABSOLUTE, OffsetMode::SIGNED};
 
-  declareProperty(PropertyNames::OFFSET_MODE, OffsetMode
-                  : RELATIVE, std::make_shared<Kernel::StringListValidator>(modes),
-                    "Optional: Whether to calculate a relative, absolute, or signed offset");
+  declareProperty(PropertyNames::OFFSET_MODE, OffsetMode::RELATIVE,
+                  std::make_shared<Kernel::StringListValidator>(modes),
+                  "Optional: Whether to calculate a relative, absolute, or signed offset");
 
   declareProperty(PropertyNames::BINWIDTH, EMPTY_DBL(),
                   "Optional: The bin width of the X axis.  If using 'Signed' OffsetMode, this value is mandatory");
