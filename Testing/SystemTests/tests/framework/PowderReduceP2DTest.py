@@ -110,23 +110,23 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
 
     def _dMax(self):
         """d max used for testing the algorithm"""
-        return 1.98
+        return 2
 
     def _dpMin(self):
         """dp min used for testing the algorithm"""
-        return 0.3
+        return 0.2
 
     def _dpMax(self):
         """dp max used for testing the algorithm"""
-        return 2.1
+        return 2
 
     def _dSpaceBinning(self):
         """d binning used for testing the algorithm"""
-        return -0.02
+        return [0.1 + 0.02, -0.02, 2 - 0.02]
 
     def _dPerpendicularBinning(self):
         """d perpendicular binning used for testing the algorithm"""
-        return 0.1
+        return [0.4 - 0.1, 0.1, 2 + 0.1]
 
     def _FWHM(self):
         """FWHM used for testing the algorithm"""
