@@ -106,7 +106,7 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
 
     def _dMin(self):
         """d min used for testing the algorithm"""
-        return 0.12
+        return 0.1
 
     def _dMax(self):
         """d max used for testing the algorithm"""
