@@ -57,7 +57,7 @@ Usage
 -----
 
 This is a workflow algorithm to process the results of powder diffraction experiments and create a p2d file for
-multidimensional Rietveld refinement. The algorithm is currently tested for the Instruments PG3 (POWGEN), SNAP and
+multidimensional Rietveld refinement. The algorithm is currently tested for the Instruments POWGEN, SNAP and
 PTXatPG3 (POWTEX detector at POWGEN instrument).
 
 .. categories::
