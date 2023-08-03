@@ -818,7 +818,7 @@ class PowderReduceP2D(DataProcessorAlgorithm):
             if self._doEdge:
                 self.binDataEdge(self._emptyWS)
             else:
-                self.binDataLog(self._sampleWS, list(self._dSpaceBinning), list(self._dPerpendicularBinning))
+                self.binDataLog(self._emptyWS, list(self._dSpaceBinning), list(self._dPerpendicularBinning))
 
         # Process vana data if given
         if self._doVana:
@@ -827,7 +827,7 @@ class PowderReduceP2D(DataProcessorAlgorithm):
             if self._doEdge:
                 self.binDataEdge(self._vanaWS)
             else:
-                self.binDataLog(self._sampleWS, list(self._dSpaceBinning), list(self._dPerpendicularBinning))
+                self.binDataLog(self._vanaWS, list(self._dSpaceBinning), list(self._dPerpendicularBinning))
             if not self._useDetCal:
                 self.postProcessVana(self._vanaWS)
             if self._doVanaEmpty:
@@ -836,7 +836,7 @@ class PowderReduceP2D(DataProcessorAlgorithm):
                 if self._doEdge:
                     self.binDataEdge(self._vanaEmptyWS)
                 else:
-                    self.binDataLog(self._sampleWS, list(self._dSpaceBinning), list(self._dPerpendicularBinning))
+                    self.binDataLog(self._vanaEmptyWS, list(self._dSpaceBinning), list(self._dPerpendicularBinning))
 
         # Check all datafiles for negative Values and correct those
         self.checkForNegatives(
