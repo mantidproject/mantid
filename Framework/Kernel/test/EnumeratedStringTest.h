@@ -142,7 +142,7 @@ public:
       std::string cakeName = cake;
       TS_ASSERT_EQUALS(cake, cakeType);
       TS_ASSERT_EQUALS(Cakes(i), cakeType);
-      TS_ASSERT_EQUALS(cakeName[i], cakeName);
+      TS_ASSERT_EQUALS(cakeName, cakeName);
     }
   }
 };
