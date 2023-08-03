@@ -152,6 +152,67 @@ public:
     AnalysisDataService::Instance().remove("test_out");
   }
 
+  // Check that logarithmic binning is performed if the BinningMode is set, even if positive binwidth
+  // Run once in the default manner, then run again with BinningMode set, and compare.
+  void testworkspace1D_logarithmic_binning_modeset() {
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
+    test_in1D->setDistribution(true);
+    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+
+    Rebin rebin_default;
+    rebin_default.initialize();
+    rebin_default.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin_default.setPropertyValue("OutputWorkspace", "test_out_default");
+    rebin_default.setPropertyValue("Params", "1.0,-1.0,1000.0");
+    TS_ASSERT(rebin_default.execute());
+    TS_ASSERT(rebin_default.isExecuted());
+    MatrixWorkspace_sptr rebindata_default =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_default");
+    auto &outX_default = rebindata_default->x(0);
+
+    // now run again but with positive step, using logarithmic mode
+    Rebin rebin_again;
+    rebin_again.initialize();
+    rebin_again.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin_again.setPropertyValue("OutputWorkspace", "test_out_again");
+    rebin_again.setPropertyValue("Params", "1.0,1.0,1000.0");
+    rebin_again.setPropertyValue("BinningMode", "Logarithmic");
+    TS_ASSERT(rebin_again.execute());
+    TS_ASSERT(rebin_again.isExecuted());
+    MatrixWorkspace_sptr rebindata_again =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_again");
+    auto &outX_again = rebindata_again->x(0);
+
+    TS_ASSERT_EQUALS(outX_default.size(), outX_again.size());
+    for (size_t i = 0; i < outX_default.size(); i++) {
+      TS_ASSERT_EQUALS(outX_default[i], outX_again[i]);
+    }
+    TS_ASSERT(checkBinWidthMonotonic(rebindata_again, false));
+
+    AnalysisDataService::Instance().remove("test_in1D");
+    AnalysisDataService::Instance().remove("test_out_default");
+    AnalysisDataService::Instance().remove("test_out_again");
+  }
+
+  void test_bad_binning() {
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
+    test_in1D->setDistribution(true);
+    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setRethrows(true);
+    rebin.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin.setPropertyValue("OutputWorkspace", "test_out");
+    rebin.setProperty("Params", "1.0,1.0,1000.0");
+    rebin.setProperty("BinningMode", "FunkyCrosswaysBinning"); // this is not a known binning mode
+    TS_ASSERT_THROWS_ANYTHING(rebin.execute(););
+    TS_ASSERT(!rebin.isExecuted());
+
+    AnalysisDataService::Instance().remove("test_in1D");
+    AnalysisDataService::Instance().remove("test_out");
+  }
+
   void testworkspace2D_dist() {
     Workspace2D_sptr test_in2D = Create2DWorkspace(50, 20);
     test_in2D->setDistribution(true);

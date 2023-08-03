@@ -27,6 +27,7 @@ namespace {
 
 enum class OffsetMode { RELATIVE, ABSOLUTE, SIGNED, enum_count };
 static std::string offsetModeNames[3]{"Relative", "Absolute", "Signed"};
+std::vector<std::string> offsetModeList(offsetModeNames, offsetModeNames + 3);
 
 void calculateFromOffset(API::Progress &progress, DataObjects::SpecialWorkspace2D &outputWs,
                          const DataObjects::OffsetsWorkspace *const offsetsWS,
@@ -134,7 +135,7 @@ void CalculateDIFC::init() {
                   "conjunction with property OffsetsWorkspace.");
 
   declareProperty(PropertyNames::OFFSET_MODE, offsetModeNames[size_t(OffsetMode::RELATIVE)],
-                  // string list validators not necessary with enumerated strings
+                  std::make_shared<Mantid::Kernel::StringListValidator>(offsetModeList),
                   "Optional: Whether to calculate a relative, absolute, or signed offset.  Default relative");
 
   declareProperty(PropertyNames::BINWIDTH, EMPTY_DBL(),

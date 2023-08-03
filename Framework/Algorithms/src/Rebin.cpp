@@ -22,6 +22,18 @@
 #include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
+
+namespace PropertyNames {
+const std::string INPUT_WKSP("InputWorkspace");
+const std::string OUTPUT_WKSP("OutputWorkspace");
+const std::string PARAMS("Params");
+const std::string PRSRV_EVENTS("PreserveEvents");
+const std::string FULL_BIN_ONLY("FullBinsOnly");
+const std::string IGNR_BIN_ERR("IgnoreBinErrors");
+const std::string POWER("Power");
+const std::string BINMODE("BinningMode");
+} // namespace PropertyNames
+
 namespace Algorithms {
 
 // Register the class into the algorithm factory
@@ -54,7 +66,6 @@ using HistogramData::Exception::InvalidBinEdgesError;
 std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
                                                 const API::MatrixWorkspace &inputWS, Kernel::Logger &logger,
                                                 BinningMode binMode) {
-  // BinningEnum binMode = BinningEnum::DEFAULT;
   std::vector<double> rbParams;
   // The validator only passes parameters with size 1, or 3xn. No need to check again here
   if (inParams.size() >= 3) {
@@ -70,26 +81,27 @@ std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inPar
     rbParams[0] = xmin;
     rbParams[1] = inParams[0];
     rbParams[2] = xmax;
-    // depending on binning mode, change sign of bin width parameter to signal bin type
-    // if linear binning specified, require positive bin width
-    // if logarithmic binning specified, require "negative" bin width
-    // otherwise just keep on truckin
-    switch (binMode) {
-    case BinningMode::LINEAR:
-      rbParams[1] = fabs(rbParams[1]);
-      break;
-    case BinningMode::LOGARITHMIC:
-      rbParams[1] = -fabs(rbParams[1]);
-      break;
-    case BinningMode::DEFAULT:
-    default:
-      break;
-    }
-    if ((rbParams[1] < 0.) && (xmin < 0.) && (xmax > 0.)) {
+
+    if ((binMode == BinningMode::LOGARITHMIC) && (xmin < 0.) && (xmax > 0.)) {
       std::stringstream msg;
       msg << "Cannot create logarithmic binning that changes sign (xmin=" << xmin << ", xmax=" << xmax << ")";
       throw std::runtime_error(msg.str());
     }
+  }
+  // depending on binning mode, change sign of bin width parameter to signal bin type
+  // if linear binning specified, require positive bin width
+  // if logarithmic binning specified, require "negative" bin width
+  // otherwise just keep on truckin
+  switch (binMode) {
+  case BinningMode::LINEAR:
+    rbParams[1] = fabs(rbParams[1]);
+    break;
+  case BinningMode::LOGARITHMIC:
+    rbParams[1] = -fabs(rbParams[1]);
+    break;
+  case BinningMode::DEFAULT:
+  default:
+    break;
   }
   return rbParams;
 }
@@ -107,8 +119,8 @@ std::map<std::string, std::string> Rebin::validateInputs() {
     // attempt to roughly guess how many bins these parameters imply
     double roughEstimate = 0;
 
-    if (!isDefault("Params")) {
-      const std::vector<double> params = getProperty("Params");
+    if (!isDefault(PropertyNames::PARAMS)) {
+      const std::vector<double> params = getProperty(PropertyNames::PARAMS);
 
       // Five significant places of the Euler-Mascheroni constant is probably more than enough for our needs
       double eulerMascheroni = 0.57721;
@@ -120,7 +132,7 @@ std::map<std::string, std::string> Rebin::validateInputs() {
         double factor = params[i + 1];
 
         if (factor <= 0) {
-          helpMessages["Params"] = "Provided width value cannot be negative for inverse power binning.";
+          helpMessages[PropertyNames::PARAMS] = "Provided width value cannot be negative for inverse power binning.";
           return helpMessages;
         }
 
@@ -144,27 +156,28 @@ std::map<std::string, std::string> Rebin::validateInputs() {
  *
  */
 void Rebin::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::INPUT_WKSP, "", Direction::Input),
                   "Workspace containing the input data");
-  declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
+  declareProperty(std::make_unique<WorkspaceProperty<>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
                   "The name to give the output workspace");
 
-  declareProperty(std::make_unique<ArrayProperty<double>>("Params", std::make_shared<RebinParamsValidator>()),
-                  "A comma separated list of first bin boundary, width, last bin boundary. "
-                  "Optionally this can be followed by a comma and more widths and last boundary pairs. "
-                  "Optionally this can also be a single number, which is the bin width. In this case, the boundary of "
-                  "binning will be determined by minimum and maximum TOF values among all events, or previous binning "
-                  "boundary, in case of event Workspace, or non-event Workspace, respectively. "
-                  "Negative width values indicate logarithmic binning.");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>(PropertyNames::PARAMS, std::make_shared<RebinParamsValidator>()),
+      "A comma separated list of first bin boundary, width, last bin boundary. "
+      "Optionally this can be followed by a comma and more widths and last boundary pairs. "
+      "Optionally this can also be a single number, which is the bin width. In this case, the boundary of "
+      "binning will be determined by minimum and maximum TOF values among all events, or previous binning "
+      "boundary, in case of event Workspace, or non-event Workspace, respectively. "
+      "Negative width values indicate logarithmic binning.");
 
-  declareProperty("PreserveEvents", true,
+  declareProperty(PropertyNames::PRSRV_EVENTS, true,
                   "Keep the output workspace as an EventWorkspace, if the input has events. If the input and output "
                   "EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the "
                   "workspace gets converted to a Workspace2D histogram.");
 
-  declareProperty("FullBinsOnly", false, "Omit the final bin if its width is smaller than the step size");
+  declareProperty(PropertyNames::FULL_BIN_ONLY, false, "Omit the final bin if its width is smaller than the step size");
 
-  declareProperty("IgnoreBinErrors", false,
+  declareProperty(PropertyNames::IGNR_BIN_ERR, false,
                   "Ignore errors related to zero/negative bin widths in input/output workspaces. When ignored, the "
                   "signal and errors are set to zero");
 
@@ -177,11 +190,11 @@ void Rebin::init() {
   auto powerValidator = std::make_shared<Mantid::Kernel::BoundedValidator<double>>();
   powerValidator->setLower(0);
   powerValidator->setUpper(1);
-  declareProperty("Power", 0., powerValidator,
+  declareProperty(PropertyNames::POWER, 0., powerValidator,
                   "Splits the interval in bins which actual width is equal to requested width / (i ^ power); default "
                   "is linear. Power must be between 0 and 1.");
 
-  declareProperty("BinningMode", binningModeNames[size_t(BinningMode::DEFAULT)],
+  declareProperty(PropertyNames::BINMODE, binningModeNames[size_t(BinningMode::DEFAULT)],
                   "Optional. "
                   "Either linear/log mode can be specified in the usual way through sign of bin width ('Default'), "
                   "or can be set to always use linear binning regardless of bin width sign ('Linear'), "
@@ -195,19 +208,20 @@ void Rebin::init() {
  */
 void Rebin::exec() {
   // Get the input workspace
-  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr inputWS = getProperty(PropertyNames::INPUT_WKSP);
+  MatrixWorkspace_sptr outputWS = getProperty(PropertyNames::OUTPUT_WKSP);
 
   // Are we preserving event workspace-iness?
-  bool PreserveEvents = getProperty("PreserveEvents");
+  bool PreserveEvents = getProperty(PropertyNames::PRSRV_EVENTS);
 
   // Rebinning in-place
   bool inPlace = (inputWS == outputWS);
 
   // get the binning mode as an enumerated string
-  EnumeratedString<BinningMode, binningModeNames> binningMode = std::string(getProperty("BinningMode"));
+  EnumeratedString<BinningMode, binningModeNames> binningMode(getProperty(PropertyNames::BINMODE));
+  printf("BINNING MODE %s %d\n", binningMode.c_str(), int(BinningMode(binningMode)));
 
-  std::vector<double> rbParams = rebinParamsFromInput(getProperty("Params"), *inputWS, g_log); //, binningMode);
+  std::vector<double> rbParams = rebinParamsFromInput(getProperty(PropertyNames::PARAMS), *inputWS, g_log, binningMode);
 
   const bool dist = inputWS->isDistribution();
   const bool isHist = inputWS->isHistogramData();
@@ -215,9 +229,9 @@ void Rebin::exec() {
   // workspace independent determination of length
   const auto histnumber = static_cast<int>(inputWS->getNumberHistograms());
 
-  bool fullBinsOnly = getProperty("FullBinsOnly");
+  bool fullBinsOnly = getProperty(PropertyNames::FULL_BIN_ONLY);
   bool useReverseLog = getProperty("UseReverseLogarithmic");
-  double power = getProperty("Power");
+  double power = getProperty(PropertyNames::POWER);
 
   double xmin = 0.;
   double xmax = 0.;
@@ -284,7 +298,7 @@ void Rebin::exec() {
     }
 
     // Assign it to the output workspace property
-    setProperty("OutputWorkspace", outputWS);
+    setProperty(PropertyNames::OUTPUT_WKSP, outputWS);
 
   } // END ---- EventWorkspace
 
@@ -308,7 +322,7 @@ void Rebin::exec() {
     // Copy over the 'vertical' axis
     if (inputWS->axes() > 1)
       outputWS->replaceAxis(1, std::unique_ptr<Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
-    bool ignoreBinErrors = getProperty("IgnoreBinErrors");
+    bool ignoreBinErrors = getProperty(PropertyNames::IGNR_BIN_ERR);
 
     Progress prog(this, 0.0, 1.0, histnumber);
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
@@ -347,13 +361,13 @@ void Rebin::exec() {
       g_log.information() << "Rebin: Converting Data back to Data Points.\n";
       Mantid::API::Algorithm_sptr ChildAlg = createChildAlgorithm("ConvertToPointData");
       ChildAlg->initialize();
-      ChildAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
+      ChildAlg->setProperty<MatrixWorkspace_sptr>(PropertyNames::INPUT_WKSP, outputWS);
       ChildAlg->execute();
       outputWS = ChildAlg->getProperty("OutputWorkspace");
     }
 
     // Assign it to the output workspace property
-    setProperty("OutputWorkspace", outputWS);
+    setProperty(PropertyNames::OUTPUT_WKSP, outputWS);
 
   } // END ---- Workspace2D
 }
@@ -400,7 +414,7 @@ void Rebin::propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS, const
                     FrequencyStandardDeviations(errSize, 0));
   // Use rebin function to redistribute the weights. Note that distribution flag
   // is set
-  bool ignoreErrors = getProperty("IgnoreBinErrors");
+  bool ignoreErrors = getProperty(PropertyNames::IGNR_BIN_ERR);
 
   try {
     auto newHist = HistogramData::rebin(oldHist, outputWS->binEdges(hist));
