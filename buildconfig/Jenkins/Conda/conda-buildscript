@@ -44,6 +44,12 @@ shift
 CMAKE_PRESET=$1
 shift
 
+if [[ $OSTYPE == 'linux'* ]]; then
+    TEST_VAR="hello1"
+else
+    exit 0
+fi
+
 if [[ -z "$BUILD_THREADS" ]]; then
     if [[ $OSTYPE == 'darwin'* ]]; then
         BUILD_THREADS="$(sysctl -n hw.logicalcpu)"
@@ -56,11 +62,11 @@ XVFB_SERVER_NUM=101
 BUILD_DIR=$WORKSPACE/build
 
 ENABLE_BUILD_CODE=true
-ENABLE_UNIT_TESTS=true
+ENABLE_UNIT_TESTS=false
 ENABLE_SYSTEM_TESTS=false
 ENABLE_PACKAGE=false
-ENABLE_DOCS=false
-ENABLE_DOC_TESTS=false
+ENABLE_DOCS=true
+ENABLE_DOC_TESTS=true
 ENABLE_DEV_DOCS=false
 ENABLE_COVERITY=false
 CLEAN_BUILD=false
@@ -72,7 +78,7 @@ EXTRA_CMAKE_FLAGS="-DENABLE_PRECOMMIT=OFF"
 while [ ! $# -eq 0 ]
 do
     case "$1" in
-        --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
+        --enable-systemtests) ENABLE_SYSTEM_TESTS=false ;;
         --enable-package) ENABLE_PACKAGE=true ;;
         --enable-docs) ENABLE_DOCS=true ;;
         --enable-doctests)

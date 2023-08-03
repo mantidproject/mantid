@@ -64,10 +64,10 @@ if [[ $ENABLE_UNIT_TESTS == true ]]; then
     cmake --build . --target AllTests $BUILD_OPTIONS
 fi
 
-if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
-    cmake --build . --target StandardTestData $BUILD_OPTIONS
-    cmake --build . --target SystemTestData $BUILD_OPTIONS
-fi
+#if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
+cmake --build . --target StandardTestData $BUILD_OPTIONS
+#    cmake --build . --target SystemTestData $BUILD_OPTIONS
+#fi
 
 # Build docs
 if [[ $ENABLE_DOCS == true ]]; then

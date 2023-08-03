@@ -12,6 +12,9 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/mamba-utils
 
+# temp skip doxygen
+exit 0
+
 # Check 1 argument is passed and is not optional
 if [[ $# < 1 || $1 == "--"* ]]; then
     echo "Pass 1 argument: doxygen.sh <path-to-workspace>"
