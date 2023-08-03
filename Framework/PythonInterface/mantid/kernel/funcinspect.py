@@ -313,10 +313,20 @@ def process_frame(frame):
     #     foo(FuncUsingLHS, 'Args')
     #
     # have the incorrect index at last_i due to the call being passed through
-    # an intermediate reference. Currently this method does not provide the
+    # an intermediate reference. Currently, this method does not provide the
     # correct answer and throws a KeyError. Ticket #4186
     output_var_names = []
     last_func_offset = call_function_locs[last_i][0]
+    # On Windows since migrating to Python 3.10, the last instruction index appears
+    # to be one step behind where it should be. We think it's related to the comment
+    # here:
+    # https://github.com/python/cpython/blob/v3.8.3/Python/ceval.c#L1139
+    _, _, last_i_name, _, _ = ins_stack[last_func_offset]
+    next_instruction_offset, _, next_instruction_name, _, _ = ins_stack[last_func_offset + 1]
+    if last_i_name == "DICT_MERGE" and next_instruction_name in __operator_names:
+        last_func_offset += 1
+        last_i = next_instruction_offset
+
     (offset, op, name, argument, argvalue) = ins_stack[last_func_offset + 1]
     if name == "POP_TOP":  # no return values
         pass
