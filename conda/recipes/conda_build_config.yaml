@@ -74,6 +74,9 @@ gsl:
 libopenblas:
   - '!=0.3.23'
 
+openssl:
+  - '!=3.1.2'
+
 # 8.2 causing segfaults in jupyter unit tests and doc builds.
 readline:
   - <8.2
