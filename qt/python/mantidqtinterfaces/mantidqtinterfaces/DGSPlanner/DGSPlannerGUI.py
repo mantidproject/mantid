@@ -19,7 +19,7 @@ from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinea
 from qtpy import QtCore, QtWidgets
 
 import mantid
-from mantid.kernel import UnitConversion, Elastic
+from mantid.kernel import UnitConversion, Elastic, UnitParametersMap
 from . import ClassicUBInputWidget
 from . import DimensionSelectorWidget
 from . import InstrumentSetupWidget
@@ -147,7 +147,8 @@ class DGSPlannerGUI(QtWidgets.QWidget):
 
     def eiWavelengthUpdateEvent(self):
         if self.instrumentElastic:
-            ei = UnitConversion.run("Wavelength", "Energy", self.masterDict["Ei"], 0, 0, 0, Elastic, 0)
+            params = UnitParametersMap()
+            ei = UnitConversion.run("Wavelength", "Energy", self.masterDict["Ei"], 0, Elastic, params)
             offset = ei * 0.01
             lowerBound = -offset
             upperBound = offset
@@ -342,7 +343,8 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         progressDialog.setWindowTitle("DGSPlanner progress")
 
         if self.masterDict["instrument"] in ["DEMAND", "WAND\u00B2"]:
-            ei = UnitConversion.run("Wavelength", "Energy", self.masterDict["Ei"], 0, 0, 0, Elastic, 0)
+            params = UnitParametersMap()
+            ei = UnitConversion.run("Wavelength", "Energy", self.masterDict["Ei"], 0, Elastic, params)
         else:
             ei = self.masterDict["Ei"]
 
