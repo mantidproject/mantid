@@ -32,7 +32,6 @@ private:
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
-  bool m_isSigned{false};
 };
 
 } // namespace Algorithms

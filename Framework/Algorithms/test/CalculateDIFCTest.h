@@ -166,4 +166,30 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
+
+  void test_fail_bad_offsetmode() {
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(NUM_SPEC, 1);
+    std::string outWSName("CalculateDIFCTest_withOffsets_OutputWS");
+
+    auto offsetsWS = OffsetsWorkspace_sptr(new OffsetsWorkspace(inputWS->getInstrument()));
+    const auto &spectrumInfo = offsetsWS->spectrumInfo();
+    for (int i = 0; i < NUM_SPEC; ++i) {
+      const auto &det = spectrumInfo.detector(i);
+      offsetsWS->setValue(det.getID(), 1);
+    }
+
+    CalculateDIFC alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setRethrows(true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetsWorkspace", offsetsWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetMode", "FlooflamKazam!"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinWidth", 1.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_ANYTHING(alg.execute(););
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
 };

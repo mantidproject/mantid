@@ -8,6 +8,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
@@ -23,9 +24,13 @@ namespace {
  * @param binWidth :: binWidth used for logarithmically binned data
  * @param is_signed :: flag for `Signed` Offset Mode
  */
+
+enum class OffsetMode { RELATIVE, ABSOLUTE, SIGNED, enum_count };
+static std::string offsetModeNames[3]{"Relative", "Absolute", "Signed"};
+
 void calculateFromOffset(API::Progress &progress, DataObjects::SpecialWorkspace2D &outputWs,
                          const DataObjects::OffsetsWorkspace *const offsetsWS,
-                         const Geometry::DetectorInfo &detectorInfo, double binWidth, bool is_signed) {
+                         const Geometry::DetectorInfo &detectorInfo, double binWidth, OffsetMode offsetMode) {
   const auto &detectorIDs = detectorInfo.detectorIDs();
   const bool haveOffset = (offsetsWS != nullptr);
   const double l1 = detectorInfo.l1();
@@ -35,12 +40,17 @@ void calculateFromOffset(API::Progress &progress, DataObjects::SpecialWorkspace2
       // offset=0 means that geometry is correct
       const double offset = (haveOffset) ? offsetsWS->getValue(detectorIDs[i], 0.) : 0.;
 
-      // tofToDSpacingFactor gives 1/DIFC
       double difc = 0.0;
-      if (is_signed) {
+      switch (offsetMode) {
+      // calculate DIFC for log binning
+      case OffsetMode::SIGNED:
         difc = Geometry::Conversion::calculateDIFCCorrection(l1, detectorInfo.l2(i), detectorInfo.twoTheta(i), offset,
                                                              binWidth);
-      } else {
+        break;
+      case OffsetMode::RELATIVE:
+      case OffsetMode::ABSOLUTE:
+      default:
+        // tofToDSpacingFactor gives 1/DIFC
         difc = 1. / Geometry::Conversion::tofToDSpacingFactor(l1, detectorInfo.l2(i), detectorInfo.twoTheta(i), offset);
       }
       outputWs.setValue(detectorIDs[i], difc);
@@ -50,11 +60,11 @@ void calculateFromOffset(API::Progress &progress, DataObjects::SpecialWorkspace2
   }
 }
 
-namespace OffsetMode {
-const std::string RELATIVE("Relative");
-const std::string ABSOLUTE("Absolute");
-const std::string SIGNED("Signed");
-} // namespace OffsetMode
+// namespace OffsetMode {
+// const std::string RELATIVE("Relative");
+// const std::string ABSOLUTE("Absolute");
+// const std::string SIGNED("Signed");
+// } // namespace OffsetMode
 
 namespace PropertyNames {
 const std::string INPUT_WKSP("InputWorkspace");
@@ -123,11 +133,9 @@ void CalculateDIFC::init() {
                   "which will be copied. This property cannot be set in "
                   "conjunction with property OffsetsWorkspace.");
 
-  std::vector<std::string> modes{OffsetMode::RELATIVE, OffsetMode::ABSOLUTE, OffsetMode::SIGNED};
-
-  declareProperty(PropertyNames::OFFSET_MODE, OffsetMode::RELATIVE,
-                  std::make_shared<Kernel::StringListValidator>(modes),
-                  "Optional: Whether to calculate a relative, absolute, or signed offset");
+  declareProperty(PropertyNames::OFFSET_MODE, offsetModeNames[size_t(OffsetMode::RELATIVE)],
+                  // string list validators not necessary with enumerated strings
+                  "Optional: Whether to calculate a relative, absolute, or signed offset.  Default relative");
 
   declareProperty(PropertyNames::BINWIDTH, EMPTY_DBL(),
                   "Optional: The bin width of the X axis.  If using 'Signed' OffsetMode, this value is mandatory");
@@ -150,8 +158,9 @@ std::map<std::string, std::string> CalculateDIFC::validateInputs() {
     result[PropertyNames::CALIB_WKSP] = msg;
   }
 
-  m_isSigned = (std::string(getProperty(PropertyNames::OFFSET_MODE)) == OffsetMode::SIGNED);
-  if (isDefault(PropertyNames::BINWIDTH) && m_isSigned) {
+  Mantid::Kernel::EnumeratedString<OffsetMode, offsetModeNames> offsetMode =
+      std::string(getProperty(PropertyNames::OFFSET_MODE));
+  if (isDefault(PropertyNames::BINWIDTH) && (offsetMode == OffsetMode::SIGNED)) {
     std::string msg = "Signed offset mode requires bin width to be specified.";
     result[PropertyNames::BINWIDTH] = msg;
     result[PropertyNames::OFFSET_MODE] = msg;
@@ -191,7 +200,9 @@ void CalculateDIFC::exec() {
     // this method handles calculating from instrument geometry as well,
     // and even when OffsetsWorkspace hasn't been set
     const auto &detectorInfo = inputWs->detectorInfo();
-    calculateFromOffset(progress, *outputSpecialWs, offsetsWs.get(), detectorInfo, binWidth, m_isSigned);
+    Mantid::Kernel::EnumeratedString<OffsetMode, offsetModeNames> offsetMode =
+        std::string(getProperty(PropertyNames::OFFSET_MODE));
+    calculateFromOffset(progress, *outputSpecialWs, offsetsWs.get(), detectorInfo, binWidth, offsetMode);
   }
 
   setProperty(PropertyNames::OUTPUT_WKSP, outputWs);

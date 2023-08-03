@@ -42,6 +42,12 @@ public:
     TS_ASSERT_EQUALS(dude1, coolGuyNames[1]);
   }
 
+  void testBadConstructor() {
+    typedef EnumeratedString<CoolGuys, coolGuyNames> COOLGUY;
+    TS_ASSERT_THROWS_ANYTHING(COOLGUY dude("Jeremy"););
+    TS_ASSERT_THROWS_ANYTHING(use(CoolGuys(4)););
+  }
+
   void testEnumCount() {
     EnumeratedString<Cakes, cakeNames> cake;
     EnumeratedString<CoolGuys, coolGuyNames> dude;

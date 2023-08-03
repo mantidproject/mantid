@@ -12,6 +12,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -22,11 +23,8 @@ namespace {
 const std::vector<std::string> DIFC_TABLE_COLUMN_NAMES{"detid", "difc", "difa", "tzero"};
 const std::vector<std::string> DIFC_TABLE_COLUMN_TYPES{"int", "double", "double", "double"};
 
-namespace OffsetMode {
-const std::string RELATIVE("Relative");
-const std::string ABSOLUTE("Absolute");
-const std::string SIGNED("Signed");
-} // namespace OffsetMode
+enum class OffsetMode { RELATIVE, ABSOLUTE, SIGNED, enum_count };
+static std::string offsetModeNames[size_t(OffsetMode::enum_count)] = {"Relative", "Absolute", "Signed"};
 
 namespace PropertyNames {
 const std::string OFFSTS_WKSP("OffsetsWorkspace");
@@ -82,10 +80,7 @@ void ConvertDiffCal::init() {
                   "Effectively, this algorithm applies partial updates to this table and "
                   "returns it as the OutputWorkspace");
 
-  std::vector<std::string> modes{OffsetMode::RELATIVE, OffsetMode::ABSOLUTE, OffsetMode::SIGNED};
-
-  declareProperty(PropertyNames::OFFSET_MODE, OffsetMode::RELATIVE,
-                  std::make_shared<Kernel::StringListValidator>(modes),
+  declareProperty(PropertyNames::OFFSET_MODE, offsetModeNames[size_t(OffsetMode::RELATIVE)],
                   "Optional: Whether to calculate a relative, absolute, or signed offset");
 
   declareProperty(PropertyNames::BINWIDTH, EMPTY_DBL(),
@@ -99,8 +94,9 @@ void ConvertDiffCal::init() {
 std::map<std::string, std::string> ConvertDiffCal::validateInputs() {
   std::map<std::string, std::string> result;
 
-  m_isSigned = (std::string(getProperty(PropertyNames::OFFSET_MODE)) == OffsetMode::SIGNED);
-  if (isDefault(PropertyNames::BINWIDTH) && m_isSigned) {
+  Mantid::Kernel::EnumeratedString<OffsetMode, offsetModeNames> offsetMode =
+      std::string(getProperty(PropertyNames::OFFSET_MODE));
+  if (isDefault(PropertyNames::BINWIDTH) && (offsetMode == OffsetMode::SIGNED)) {
     std::string msg = "Signed offset mode requires bin width to be specified.";
     result[PropertyNames::BINWIDTH] = msg;
     result[PropertyNames::OFFSET_MODE] = msg;
@@ -163,7 +159,7 @@ double getOffset(const OffsetsWorkspace_const_sptr &offsetsWS, const detid_t det
  * @return The offset adjusted value of DIFC
  */
 double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t index,
-                     const Mantid::API::SpectrumInfo &spectrumInfo, const double binWidth, const bool is_signed) {
+                     const Mantid::API::SpectrumInfo &spectrumInfo, const double binWidth, OffsetMode offsetMode) {
   const detid_t detid = getDetID(offsetsWS, index);
   const double offset = getOffset(offsetsWS, detid);
   double twotheta;
@@ -176,10 +172,10 @@ double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t 
   // the factor returned is what is needed to convert TOF->d-spacing
   // the table is supposed to be filled with DIFC which goes the other way
   double newDIFC = 0.0;
-  if (is_signed) {
+  if (offsetMode == OffsetMode::SIGNED)
     newDIFC = Mantid::Geometry::Conversion::calculateDIFCCorrection(spectrumInfo.l1(), spectrumInfo.l2(index), twotheta,
                                                                     offset, binWidth);
-  } else {
+  else {
     const double factor =
         Mantid::Geometry::Conversion::tofToDSpacingFactor(spectrumInfo.l1(), spectrumInfo.l2(index), twotheta, offset);
     newDIFC = 1. / factor;
@@ -207,7 +203,9 @@ void ConvertDiffCal::exec() {
 
   ITableWorkspace_sptr previous_calibration = getProperty(PropertyNames::CALIB_WKSP);
 
-  auto binWidth = getProperty(PropertyNames::BINWIDTH);
+  Mantid::Kernel::EnumeratedString<OffsetMode, offsetModeNames> offsetMode =
+      std::string(getProperty(PropertyNames::OFFSET_MODE));
+  const double binWidth = getProperty(PropertyNames::BINWIDTH);
 
   if (previous_calibration) {
     configWksp = previous_calibration->clone();
@@ -255,7 +253,7 @@ void ConvertDiffCal::exec() {
         int row_to_update = iter->second;
 
         double &difc_value_to_update = configWksp->cell<double>(row_to_update, 1);
-        if (m_isSigned) {
+        if (offsetMode == OffsetMode::SIGNED) {
           difc_value_to_update = updateSignedDIFC(offsetsWS, i, difc_value_to_update, binWidth);
         } else {
           difc_value_to_update = difc_value_to_update / (1.0 + new_offset_value);
@@ -266,7 +264,7 @@ void ConvertDiffCal::exec() {
       else {
         API::TableRow newrow = configWksp->appendRow();
         newrow << static_cast<int>(detector_id);
-        newrow << calculateDIFC(offsetsWS, i, spectrumInfo, binWidth, m_isSigned);
+        newrow << calculateDIFC(offsetsWS, i, spectrumInfo, binWidth, offsetMode);
         newrow << 0.; // difa
         newrow << 0.; // tzero
       }

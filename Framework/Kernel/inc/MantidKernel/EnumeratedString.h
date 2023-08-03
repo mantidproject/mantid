@@ -19,15 +19,17 @@ namespace Kernel {
  */
 
 namespace {
+// this function "uses" a variable so the compiler and linter won't complain
 template <class T> void use(T) {}
 } // namespace
 
-template <class E, std::string names[size_t(E::enum_count)]> class EnumeratedString {
+template <class E, const std::string names[size_t(E::enum_count)]> class EnumeratedString {
   /**
    * @property class E an `enum`, the final value *must* be `enum_count`
    *              (i.e. `enum class Fruit {apple, orange, enum_count}`)
    * @property string names[] a static c-style array of string names for each enum
    * Note that no checking is done on the compatibility of `E` and `names`, or their validity.
+   * The enum and string array *must* have same order.
    */
 public:
   EnumeratedString() {
@@ -38,9 +40,9 @@ public:
     // force a compiler error if no E::enum_count
     use<E>(E::enum_count); // Last element of enum MUST be enum_count
   }
-  EnumeratedString(const std::string &s) : value{findEFromString(s)}, name(s) {
-    // force a compiler error if no E::enum_count
-    use<E>(E::enum_count); // Last element of enum MUST be enum_count
+  EnumeratedString(const std::string &s) {
+    // only set values if valid string given
+    this->operator=(s);
   }
 
   EnumeratedString(const EnumeratedString &es) : value(es.value), name(es.name) {}

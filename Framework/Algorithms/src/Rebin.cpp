@@ -16,10 +16,13 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnumeratedString.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
-namespace Mantid::Algorithms {
+namespace Mantid {
+namespace Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Rebin)
@@ -50,7 +53,8 @@ using HistogramData::Exception::InvalidBinEdgesError;
  */
 std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
                                                 const API::MatrixWorkspace &inputWS, Kernel::Logger &logger,
-                                                bool useLogarithmicBinningAnyway) {
+                                                BinningMode binMode) {
+  // BinningEnum binMode = BinningEnum::DEFAULT;
   std::vector<double> rbParams;
   // The validator only passes parameters with size 1, or 3xn. No need to check again here
   if (inParams.size() >= 3) {
@@ -66,9 +70,20 @@ std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inPar
     rbParams[0] = xmin;
     rbParams[1] = inParams[0];
     rbParams[2] = xmax;
-    // if LogarithmicBinning has been set, make binning negative to enforce logarithmic binning
-    if (useLogarithmicBinningAnyway) {
+    // depending on binning mode, change sign of bin width parameter to signal bin type
+    // if linear binning specified, require positive bin width
+    // if logarithmic binning specified, require "negative" bin width
+    // otherwise just keep on truckin
+    switch (binMode) {
+    case BinningMode::LINEAR:
+      rbParams[1] = fabs(rbParams[1]);
+      break;
+    case BinningMode::LOGARITHMIC:
       rbParams[1] = -fabs(rbParams[1]);
+      break;
+    case BinningMode::DEFAULT:
+    default:
+      break;
     }
     if ((rbParams[1] < 0.) && (xmin < 0.) && (xmax > 0.)) {
       std::stringstream msg;
@@ -166,8 +181,11 @@ void Rebin::init() {
                   "Splits the interval in bins which actual width is equal to requested width / (i ^ power); default "
                   "is linear. Power must be between 0 and 1.");
 
-  declareProperty("LogarithmicBinning", false,
-                  "Optional. Use logarithmic binning, even if positive step given in Params.");
+  declareProperty("BinningMode", binningModeNames[size_t(BinningMode::DEFAULT)],
+                  "Optional. "
+                  "Either linear/log mode can be specified in the usual way through sign of bin width ('Default'), "
+                  "or can be set to always use linear binning regardless of bin width sign ('Linear'), "
+                  "or can be set to always use logarithmic binning regardlness of bin width sign ('Logarithmic').");
 }
 
 /** Executes the rebin algorithm
@@ -186,8 +204,10 @@ void Rebin::exec() {
   // Rebinning in-place
   bool inPlace = (inputWS == outputWS);
 
-  std::vector<double> rbParams =
-      rebinParamsFromInput(getProperty("Params"), *inputWS, g_log, getProperty("LogarithmicBinning"));
+  // get the binning mode as an enumerated string
+  EnumeratedString<BinningMode, binningModeNames> binningMode = std::string(getProperty("BinningMode"));
+
+  std::vector<double> rbParams = rebinParamsFromInput(getProperty("Params"), *inputWS, g_log); //, binningMode);
 
   const bool dist = inputWS->isDistribution();
   const bool isHist = inputWS->isHistogramData();
@@ -396,5 +416,5 @@ void Rebin::propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS, const
       throw;
   }
 }
-
-} // namespace Mantid::Algorithms
+} // namespace Algorithms
+} // namespace Mantid
