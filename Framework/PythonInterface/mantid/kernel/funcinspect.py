@@ -221,7 +221,7 @@ def decompile(code_object):
 
 # We must list all of the operators that behave like a function calls in byte-code
 # This is for the lhs functionality
-__operator_names = {
+OPERATOR_NAMES = {
     "CALL_FUNCTION",
     "CALL_FUNCTION_VAR",
     "CALL_FUNCTION_KW",
@@ -294,8 +294,8 @@ def process_frame(frame):
     start_offset = 0
 
     for index, instruction in enumerate(ins_stack):
-        (offset, op, name, argument, argvalue) = instruction
-        if name in __operator_names:
+        offset, _, name, _, _ = instruction
+        if name in OPERATOR_NAMES:
             call_function_locs[start_offset] = (start_index, index)
             start_index = index
             start_offset = offset
@@ -303,18 +303,6 @@ def process_frame(frame):
     # Append the index of the last entry to form the last boundary
     call_function_locs[start_offset] = (start_index, len(ins_stack) - 1)
 
-    # last_i should be the offset of a call_function_locs instruction.
-    # We use this to bracket the bit which we are interested in.
-    # Bug:
-    # Some types of call, eg
-    #    def foo(callableObj, *args, **kwargs):
-    #        x = callableObj(*args, **kwargs)
-    #
-    #     foo(FuncUsingLHS, 'Args')
-    #
-    # have the incorrect index at last_i due to the call being passed through
-    # an intermediate reference. Currently, this method does not provide the
-    # correct answer and throws a KeyError. Ticket #4186
     output_var_names = []
     last_func_offset = call_function_locs[last_i][0]
     # On Windows since migrating to Python 3.10, the last instruction index appears
@@ -323,19 +311,19 @@ def process_frame(frame):
     # https://github.com/python/cpython/blob/v3.8.3/Python/ceval.c#L1139
     _, _, last_i_name, _, _ = ins_stack[last_func_offset]
     next_instruction_offset, _, next_instruction_name, _, _ = ins_stack[last_func_offset + 1]
-    if last_i_name == "DICT_MERGE" and next_instruction_name in __operator_names:
+    if last_i_name == "DICT_MERGE" and next_instruction_name in OPERATOR_NAMES:
         last_func_offset += 1
         last_i = next_instruction_offset
 
-    (offset, op, name, argument, argvalue) = ins_stack[last_func_offset + 1]
+    _, _, name, _, argvalue = ins_stack[last_func_offset + 1]
     if name == "POP_TOP":  # no return values
         pass
-    if name == "STORE_FAST" or name == "STORE_NAME":  # one return value
+    elif name == "STORE_FAST" or name == "STORE_NAME":  # one return value
         output_var_names.append(argvalue)
-    if name == "UNPACK_SEQUENCE":  # Many Return Values, One equal sign
+    elif name == "UNPACK_SEQUENCE":  # Many Return Values, One equal sign
         for index in range(argvalue):
-            (offset_, op_, name_, argument_, argvalue_) = ins_stack[last_func_offset + 2 + index]
-            output_var_names.append(argvalue_)
+            _, _, _, _, sequence_argvalue = ins_stack[last_func_offset + 2 + index]
+            output_var_names.append(sequence_argvalue)
     max_returns = len(output_var_names)
     if name == "DUP_TOP":  # Many Return Values, Many equal signs
         # The output here should be a multi-dim list which mimics the variable unpacking sequence.
@@ -346,24 +334,24 @@ def process_frame(frame):
         count = 0
         max_returns = 0  # Must count the max_returns ourselves in this case
         while count < len(ins_stack[call_function_locs[last_i][0] : call_function_locs[last_i][1]]):
-            (offset_, op_, name_, argument_, argvalue_) = ins_stack[call_function_locs[last_i][0] + count]
-            if name_ == "UNPACK_SEQUENCE":  # Many Return Values, One equal sign
+            _, _, multi_name, _, multi_argvalue = ins_stack[call_function_locs[last_i][0] + count]
+            if multi_name == "UNPACK_SEQUENCE":  # Many Return Values, One equal sign
                 hold = []
-                if argvalue_ > max_returns:
-                    max_returns = argvalue_
-                for index in range(argvalue_):
-                    (_offset_, _op_, _name_, _argument_, _argvalue_) = ins_stack[call_function_locs[last_i][0] + count + 1 + index]
-                    hold.append(_argvalue_)
-                count = count + argvalue_
+                if multi_argvalue > max_returns:
+                    max_returns = multi_argvalue
+                for index in range(multi_argvalue):
+                    _, _, _, _, sequence_argvalue = ins_stack[call_function_locs[last_i][0] + count + 1 + index]
+                    hold.append(sequence_argvalue)
+                count += multi_argvalue
                 output_var_names.append(hold)
             # Need to now skip the entries we just appended with the for loop.
-            if name_ == "STORE_FAST" or name_ == "STORE_NAME":  # One Return Value
-                if 1 > max_returns:
+            if multi_name == "STORE_FAST" or multi_name == "STORE_NAME":  # One Return Value
+                if max_returns == 0:
                     max_returns = 1
-                output_var_names.append(argvalue_)
-            count = count + 1
+                output_var_names.append(multi_argvalue)
+            count += 1
 
-    return (max_returns, tuple(output_var_names))
+    return max_returns, tuple(output_var_names)
 
 
 # -------------------------------------------------------------------------------
@@ -414,13 +402,11 @@ def lhs_info(output_type="both", frame=None):
         del frame
 
     if output_type == "nreturns":
-        ret_vals = ret_vals[0]
+        return ret_vals[0]
     elif output_type == "names":
-        ret_vals = ret_vals[1]
+        return ret_vals[1]
     else:
-        pass
-
-    return ret_vals
+        return ret_vals
 
 
 # -------------------------------------------------------------------------------
