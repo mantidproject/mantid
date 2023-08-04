@@ -59,7 +59,8 @@ class BayesQuasi2(QuickBayesTemplate):
         )
         super().PyInit()
         self.declareProperty(
-            MatrixWorkspaceProperty("OutputWorkspaceResult", "", direction=Direction.Output), doc="The name of the result output workspaces"
+            MatrixWorkspaceProperty("OutputWorkspaceResult", "", optional=PropertyMode.Optional, direction=Direction.Output),
+            doc="The name of the result output workspaces",
         )
 
         self.declareProperty(

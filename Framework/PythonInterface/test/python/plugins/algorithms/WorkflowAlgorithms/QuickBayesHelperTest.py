@@ -27,6 +27,7 @@ class QuickBayesHelperTest(unittest.TestCase):
         self._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace=RES_NAME)
         self._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace=SAMPLE_NAME)
         self._alg = QuickBayesTemplate()
+        self._alg.initialize()
 
     def tearDown(self):
         """
