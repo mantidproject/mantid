@@ -170,11 +170,11 @@ set(PYTHON_PLUGINS
     algorithms/SaveGSSCW.py
     algorithms/SaveHKLCW.py
     algorithms/SaveINS.py
+    algorithms/SaveISISReflectometryORSO.py
     algorithms/SaveNexusPD.py
     algorithms/SaveP2D.py
     algorithms/SavePlot1DAsJson.py
     algorithms/SaveReflections.py
-    algorithms/SaveReflectometryORSO.py
     algorithms/SaveYDA.py
     algorithms/SelectNexusFilesByMetadata.py
     algorithms/SetDetScale.py
