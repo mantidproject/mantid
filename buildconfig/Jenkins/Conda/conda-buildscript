@@ -63,22 +63,22 @@ BUILD_DIR=$WORKSPACE/build
 
 ENABLE_BUILD_CODE=true
 ENABLE_UNIT_TESTS=true
-ENABLE_SYSTEM_TESTS=false
+ENABLE_SYSTEM_TESTS=true
 ENABLE_PACKAGE=false
 ENABLE_DOCS=true
 ENABLE_DOC_TESTS=true
 ENABLE_DEV_DOCS=false
 ENABLE_COVERITY=false
-CLEAN_BUILD=false
-CLEAN_EXTERNAL_PROJECTS=false
-USE_CORE_DUMPS=false
+CLEAN_BUILD=true
+CLEAN_EXTERNAL_PROJECTS=true
+USE_CORE_DUMPS=true
 EXTRA_CMAKE_FLAGS="-DENABLE_PRECOMMIT=OFF"
 
 # Handle flag inputs
 while [ ! $# -eq 0 ]
 do
     case "$1" in
-        --enable-systemtests) ENABLE_SYSTEM_TESTS=false ;;
+        --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
         --enable-package) ENABLE_PACKAGE=true ;;
         --enable-docs) ENABLE_DOCS=true ;;
         --enable-doctests)
