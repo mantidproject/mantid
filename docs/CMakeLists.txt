@@ -61,6 +61,7 @@ function(add_sphinx_build_target builder math_renderer)
       ${SPHINX_NOCOLOR}
       ${SPHINX_KEEPGOING}
       ${SPHINX_WARNINGS_AS_ERRORS_FLAG}
+      -vv
       -b
       ${builder}
       -d
