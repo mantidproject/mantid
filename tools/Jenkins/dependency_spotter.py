@@ -193,6 +193,8 @@ def extract_package_versions(url: str, os_name: str) -> Dict[str, str]:
             regex_result = re.search(pattern=regex_pattern, string=line.decode("utf-8"))
             if regex_result is not None and len(regex_result.groups()) == 3:
                 package_name = regex_result.group(1)
+                if package_name.startswith("mantid"):
+                    continue
                 version = regex_result.group(2)
                 package_version_dict[package_name] = version
     return package_version_dict
