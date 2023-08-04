@@ -7,6 +7,8 @@
 import unittest
 import platform
 from mantid.simpleapi import *
+from mantid import AnalysisDataService
+
 from quickBayesHelper import QuickBayesTemplate
 
 

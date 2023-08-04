@@ -4,122 +4,190 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import unittest
-import platform
-from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup
-from IndirectImport import is_supported_f2py_platform
+from mantid.simpleapi import Load, DeleteWorkspace, CreateWorkspace, CompareWorkspaces
+import numpy as np
+from mantid import AnalysisDataService
+
+# from quickBayesHelper import QuickBayesTemplate
+from BayesQuasi2 import BayesQuasi2
+
+from unittest import mock
+from quickBayes.fitting.fit_engine import FitEngine
+from quickBayes.utils.general import get_background_function
+from quickBayes.workflow.QlData import QLData
+from quickBayes.functions.qldata_function import QlDataFunction
 
 
-if is_supported_f2py_platform():
+SAMPLE_NAME = "__BayesStretchTest_Sample"
+RES_NAME = "__BayesStretchTest_Resolution"
 
-    class BayesStretchTest(unittest.TestCase):
-        _res_ws = None
-        _sample_ws = None
-        _resnorm_ws = None
-        _num_bins = None
-        _num_hists = None
 
-        def setUp(self):
-            self._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace="__BayesStretchTest_Resolution")
-            self._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace="__BayesStretchTest_Sample")
-            self._num_hists = self._sample_ws.getNumberHistograms()
+class BayesQuasi2Test(object):
+    """
+    These tests are for checking the helper class
+    for quickBayes. This algorithm is not registered
+    to Mantid.
 
-        def tearDown(self):
-            """
-            Remove workspaces from ADS.
-            """
-            DeleteWorkspace(self._sample_ws)
-            DeleteWorkspace(self._res_ws)
+    Going to test each method in isolation.
+    """
 
-        # ----------------------------------Algorithm tests----------------------------------------
+    def setUp(self):
+        self._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace=RES_NAME)
+        self._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace=SAMPLE_NAME)
+        self._alg = BayesQuasi2()
+        self._alg.initialize()
 
-        def test_Simple_Run(self):
-            """
-            Test Lorentzian fit for BayesStretch
-            """
-            fit_group, contour = BayesStretch(SampleWorkspace=self._sample_ws, ResolutionWorkspace=self._res_ws)
-            self._validate_shape(contour, fit_group)
-            self._validate_value(contour, fit_group)
+    def tearDown(self):
+        """
+        Remove workspaces from ADS.
+        """
+        DeleteWorkspace(self._sample_ws)
+        DeleteWorkspace(self._res_ws)
 
-        # -------------------------------- Failure cases ------------------------------------------
+    def assert_mock_called_with(self, mock_object, N_calls, call_number, **kargs):
+        self.assertEqual(N_calls, mock_object.call_count)
 
-        def test_invalid_e_min(self):
-            """
-            Test that an EMin of less than the data range is invalid
-            """
-            self.assertRaisesRegex(
-                RuntimeError,
-                "EMin must be more than the minimum x range of the data.",
-                BayesStretch,
-                OutputWorkspaceFit="fit_group",
-                OutputWorkspaceContour="contour",
-                SampleWorkspace=self._sample_ws,
-                ResolutionWorkspace=self._res_ws,
-                EMin=-10,
-            )
+        called_with = mock_object.call_args_list[call_number - 1][1]  # dict of {keyword: value}
+        self.assertEqual(len(kargs), len(called_with))
+        for j, keyword in enumerate(kargs):
+            expected = kargs[keyword]
+            if isinstance(expected, np.ndarray):
+                np.testing.assert_array_equal(expected, called_with[keyword])
+            else:
+                self.assertEqual(expected, called_with[keyword])
 
-        def test_invalid_e_max(self):
-            """
-            Test that an EMax of more than the data range is invalid
-            """
-            self.assertRaisesRegex(
-                RuntimeError,
-                "EMax must be less than the maximum x range of the data",
-                BayesStretch,
-                OutputWorkspaceFit="fit_group",
-                OutputWorkspaceContour="contour",
-                SampleWorkspace=self._sample_ws,
-                ResolutionWorkspace=self._res_ws,
-                EMax=10,
-            )
+    def test_make_fit_ws(self):
+        ws = CreateWorkspace([1, 2], [3, 4])
+        ws_list = [self._sample_ws, self._res_ws]
+        engine = mock.MagicMock(autospec=FitEngine, return_value=ws)
+        self._alg.create_ws = mock.Mock()
+        engine._x_data = [1, 2, 3]
+        engine._y_data = [4, 5, 6]
+        engine._e_data = [0.2, 0.1, 0.1]
+        engine.get_fit_values.return_value = [1, 2.1, 3], [4.1, 4.9, 6], [0.1, 0.1, 0.1], [0.1, -0.1, 0], [0, 0, 0]
 
-        # --------------------------------Validate results-----------------------------------------
+        output = self._alg.make_fit_ws(engine, 2, ws_list, "unit", "test")
+        CompareWorkspaces(Workspace1=ws, Workspace2=output[0], CheckAllData=True)
 
-        def _validate_shape(self, contour, fit_group):
-            """
-            Validates that the output workspaces are of the correct type, units and shape.
-            """
+        self._alg.create_ws.assert_called_once()
+        self.assert_mock_called_with(
+            self._alg.create_ws,
+            N_calls=1,
+            call_number=1,
+            OutputWorkspace="test_workspace",
+            DataX=np.array([1.0, 2.0, 3.0, 1.0, 2.1, 3.0, 1.0, 2.1, 3.0, 1.0, 2.1, 3.0, 1.0, 2.1, 3.0]),
+            DataY=np.array([4, 5, 6, 4.1, 4.9, 6, 0.1, -0.1, 0, 4.1, 4.9, 6, 0.1, -0.1, 0]),
+            NSpec=5,
+            UnitX="unit",
+            YUnitLabel="",
+            VerticalAxisUnit="Text",
+            VerticalAxisValues=["data", "fit 1", "diff 1", "fit 2", "diff 2"],
+            DataE=np.array([0.2, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0]),
+        )
 
-            # Test size/shape of contour group
-            self.assertTrue(isinstance(contour, WorkspaceGroup))
-            self.assertEqual(contour.getNumberOfEntries(), self._num_hists)
-            self.assertEqual(contour.getItem(0).getNumberHistograms(), 50)
-            self.assertEqual(contour.getItem(0).blocksize(), 30)
+    def test_add_to_make_fit_ws(self):
+        ws = CreateWorkspace([1, 2], [3, 4])
+        ws_list = [self._sample_ws, self._res_ws]
+        engine = mock.MagicMock(autospec=FitEngine, return_value=ws)
+        self._alg.create_ws = mock.Mock()
+        engine._x_data = [1, 2, 3]
+        engine._y_data = [4, 5, 6]
+        engine._e_data = [0.2, 0.1, 0.1]
+        engine.get_fit_values.return_value = [1, 2.1, 3], [4.1, 4.9, 6], [0.1, 0.1, 0.1], [0.1, -0.1, 0], [0, 0, 0]
 
-            # Test size/shape of fitting group
-            self.assertTrue(isinstance(fit_group, WorkspaceGroup))
-            self.assertEqual(fit_group.getNumberOfEntries(), 2)
-            self.assertEqual(fit_group.getItem(0).getNumberHistograms(), self._num_hists)
-            self.assertEqual(fit_group.getItem(0).blocksize(), 50)
-            self.assertEqual(fit_group.getItem(1).getNumberHistograms(), self._num_hists)
-            self.assertEqual(fit_group.getItem(1).blocksize(), 30)
+        output = self._alg.make_fit_ws(engine, 2, ws_list, "unit", "test")
 
-        def _validate_value(self, contour, fit_group):
-            """
-            Validates that the output workspaces have expected values
-            with values from the last known correct version
-            """
+        ws2 = CreateWorkspace([4, 2], [1, 3])
+        self._alg.create_ws.return_value = ws2
+        output = self._alg.make_fit_ws(engine, 2, ws_list, "unit", "test")
 
-            # Test values of contour
-            contour_ws_0 = contour.getItem(0)
-            tol_places = 10
-            self.assertAlmostEqual(contour_ws_0.dataY(13)[11], 0.0, places=tol_places)
-            self.assertAlmostEqual(contour_ws_0.dataY(14)[11], 0.0, places=tol_places)
-            self.assertAlmostEqual(contour_ws_0.dataY(15)[11], 0.0, places=tol_places)
-            self.assertAlmostEqual(contour_ws_0.dataY(15)[12], 0.0, places=tol_places)
+        CompareWorkspaces(Workspace1=ws, Workspace2=output[0], CheckAllData=True)
+        CompareWorkspaces(Workspace1=ws2, Workspace2=output[1], CheckAllData=True)
 
-            # Test values of fit_group
-            fit_ws_sigma = fit_group.getItem(0)
-            self.assertAlmostEqual(fit_ws_sigma.dataY(0)[13], 0.0, places=tol_places)
-            self.assertAlmostEqual(fit_ws_sigma.dataY(0)[14], 0.0, places=tol_places)
-            self.assertAlmostEqual(fit_ws_sigma.dataY(0)[48], 0.0, places=tol_places)
-            self.assertAlmostEqual(fit_ws_sigma.dataY(0)[49], 0.0, places=tol_places)
-            fit_ws_beta = fit_group.getItem(1)
-            self.assertAlmostEqual(fit_ws_beta.dataY(0)[11], 0.0, places=tol_places)
-            self.assertAlmostEqual(fit_ws_beta.dataY(0)[12], 0.0, places=tol_places)
-            self.assertAlmostEqual(fit_ws_beta.dataY(0)[21], 0.0, places=tol_places)
-            self.assertAlmostEqual(fit_ws_beta.dataY(0)[22], 0.0, places=tol_places)
+    def test_make_results(self):
+        results = {"a": [1, 2], "b": [2, 3], "c": [3, 4], "loglikelihood": [-1, -2]}
+        errors = {"a": [0.1, 0.2], "b": [0.2, 0.1], "c": [0.1, 0.2]}
+        x_data = [11, 12]
+        self._alg.create_ws = mock.Mock()
+        result_name, prob_name = self._alg.make_results(results, errors, x_data, "unit", 2, "data")
 
-    if __name__ == "__main__":
-        unittest.main()
+        self.assertEqual(result_name, "data_results")
+        self.assertEqual(prob_name, "data_prob")
+
+        self.assert_mock_called_with(
+            self._alg.create_ws,
+            N_calls=2,
+            call_number=1,
+            OutputWorkspace="data_results",
+            DataX=np.array([11, 12]),
+            DataY=np.array([[1, 2], [2, 3], [3, 4]]),
+            NSpec=3,
+            UnitX="unit",
+            YUnitLabel="",
+            VerticalAxisUnit="Text",
+            VerticalAxisValues=["a", "b", "c"],
+            DataE=np.array([[0.1, 0.2], [0.2, 0.1], [0.1, 0.2]]),
+        )
+
+        self.assert_mock_called_with(
+            self._alg.create_ws,
+            N_calls=2,
+            call_number=2,
+            OutputWorkspace="data_prob",
+            DataX=np.array([11, 12]),
+            DataY=np.array([-1, -2]),
+            NSpec=2,
+            UnitX="unit",
+            YUnitLabel="",
+            VerticalAxisUnit="Text",
+            VerticalAxisValues=["1 feature(s)", "2 feature(s)"],
+        )
+
+    @mock.patch("BayesQuasi2.get_background_function")
+    def test_calculate(self, get_BG_mock):
+        func_mock = mock.Mock()
+        engine_mock = mock.Mock()
+
+        get_BG_mock.return_value = func_mock
+        self._alg.setProperty("Emax", 0.3)
+        self._alg.setProperty("Emin", -0.3)
+        self._alg.setProperty("Elastic", True)
+        self._alg.setProperty("Background", "Linear")
+        self._alg.make_fit_ws = mock.Mock(return_value=["unit", "test"])  # use side effect to change outputs
+
+        method = mock.MagicMock(autospec=QLData)
+        method.preprocess_data.return_value = [1, 2], [3, 4]
+        result_mock = mock.PropertyMock(return_value=({"a": 1}, {"b": 2}))
+        type(method).get_parameters_and_errors = result_mock
+        method.fit_engine.return_value = engine_mock
+        mock_method = mock.Mock(return_value=method)
+
+        function = mock.MagicMock(autospec=QlDataFunction)
+        function.get_bounds.return_value = [-1, -2], [10, 20]
+        function.read_from_report.return_value = [6, 7]
+        mock_function = mock.Mock(return_value=function)
+
+        ws_list, results, errors, logs = self._alg.calculate(
+            self._sample_ws, mock.Mock(), [self._res_ws, self._sample_ws], 2, 3, mock_method, mock_function
+        )
+        self.assertEqual(2, len(ws_list))
+        self.assertEqual("unit", ws_list[0])
+        self.assertEqual("test", ws_list[1])
+
+        self.assertEqual({"a": 1}, results)
+        self.assertEqual({"b": 2}, errors)
+
+        self.assertEqual(4, len(logs))
+        self.assertEqual("background", logs[0][0])
+        self.assertEqual("Linear", logs[0][1])
+        self.assertEqual("elastic_peak", logs[1][0])
+        self.assertEqual(True, logs[1][1])
+        self.assertEqual("energy_min", logs[2][0])
+        self.assertEqual(-0.3, logs[2][1])
+        self.assertEqual("energy_max", logs[3][0])
+        self.assertEqual(0.3, logs[3][1])
+        # check mocks!!!!
+
+
+if __name__ == "__main__":
+    unittest.main()

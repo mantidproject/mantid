@@ -80,25 +80,28 @@ class BayesQuasi2(QuickBayesTemplate):
         """
         x = list(engine._x_data)
         y = list(engine._y_data)
+        errors = list(engine._e_data)
         axis_names = ["data"]
-        for j in range(max_features):
-            print(j)
-            x_data, fit, e, df, de = engine.get_fit_values(j)
 
-            y += list(fit) + list(df)
+        for j in range(max_features):
+            x_data, fit, e, diff_fit, diff_e = engine.get_fit_values(j)
+
+            y += list(fit) + list(diff_fit)
             x += list(x_data) + list(x_data)
+            errors += list(e) + list(diff_e)
             axis_names.append(f"fit {j+1}")
             axis_names.append(f"diff {j+1}")
-            ws = self.create_ws(
-                OutputWorkspace=f"{name}_workspace",
-                DataX=np.array(x),
-                DataY=np.array(y),
-                NSpec=len(axis_names),
-                UnitX=x_unit,
-                YUnitLabel="",
-                VerticalAxisUnit="Text",
-                VerticalAxisValues=axis_names,
-            )
+        ws = self.create_ws(
+            OutputWorkspace=f"{name}_workspace",
+            DataX=np.array(x),
+            DataY=np.array(y),
+            NSpec=len(axis_names),
+            UnitX=x_unit,
+            YUnitLabel="",
+            VerticalAxisUnit="Text",
+            VerticalAxisValues=axis_names,
+            DataE=np.array(errors),
+        )
         ws_list.append(ws)
         return ws_list
 
@@ -203,6 +206,7 @@ class BayesQuasi2(QuickBayesTemplate):
 
             # do the calculation
             workflow.execute(max_num_peaks, func, params)
+            print(workflow.get_parameters_and_errors)
             results, results_errors = workflow.get_parameters_and_errors
 
             init_params = func.read_from_report(results, 1, -1)

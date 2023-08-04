@@ -23,7 +23,6 @@ PATH_SEPARATOR = ";"
 
 
 class PluginLoader(object):
-
     extension = ".py"
 
     def __init__(self, filepath):
@@ -228,7 +227,7 @@ def sync_attrs(source, attrs, clients):
     for func_name in attrs:
         attr = source[func_name]
         for plugin in clients:
-            if hasattr(plugin, func_name):
+            if plugin.__name__ != func_name and hasattr(plugin, func_name):
                 setattr(plugin, func_name, attr)
 
 
