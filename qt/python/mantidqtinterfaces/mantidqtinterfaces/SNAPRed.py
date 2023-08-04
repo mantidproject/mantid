@@ -18,7 +18,6 @@ except ImportError:
     SNAPRedGUI = None
 
 if SNAPRedGUI is not None:
-    # NOTE: SNAPRed my need to use parent and flags in the future
     app, within_mantid = get_qapplication()
     if "workbench" in sys.modules:
         from workbench.config import get_window_config
@@ -34,7 +33,8 @@ if SNAPRedGUI is not None:
         with Resource.open("style.qss", "r") as styleSheet:
             app.setStyleSheet(styleSheet.read())
 
-    s = SNAPRedGUI(parent)
+    # turn off tranlucent when running in mantid
+    s = SNAPRedGUI(parent, window_flags=flags, translucentBackground=(not within_mantid))
     s.show()
 
     if not within_mantid:
