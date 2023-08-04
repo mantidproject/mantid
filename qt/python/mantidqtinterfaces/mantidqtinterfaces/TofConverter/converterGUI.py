@@ -111,7 +111,11 @@ class MainWindow(QMainWindow):
             else:
                 self.flightpath = -1.0
             if self.ui.scatteringAngleInput.text():
-                self.Theta = float(self.ui.scatteringAngleInput.text()) * math.pi / 360.0
+                # This Theta is the Bragg scattering angle, which is half the angle from the spherical coordinate system
+                # directed along the Mantid z-axis. See https://docs.mantidproject.org/nightly/concepts/UnitFactory.html.
+                # That's why there's a factor of 0.5 when converting to radians.
+                normalised_angle = (float(self.ui.scatteringAngleInput.text()) + 360) % 360
+                self.Theta = normalised_angle * math.pi / 360.0
             else:
                 self.Theta = -1.0
 
