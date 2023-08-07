@@ -633,7 +633,6 @@ std::vector<size_t> MatrixWorkspace::getIndicesFromDetectorIDs(const std::vector
       std::copy(wsIndices->second.cbegin(), wsIndices->second.cend(), std::back_inserter(indexList));
     }
   }
-  assert(detIdList.size() == indexList.size()); // verify size in debug builds
 
   return indexList;
 }

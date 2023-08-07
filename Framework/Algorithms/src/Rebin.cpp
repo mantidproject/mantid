@@ -67,7 +67,7 @@ using HistogramData::Exception::InvalidBinEdgesError;
  * @param inParams Input vector from user
  * @param inputWS Input workspace from user
  * @param logger A reference to a logger
- * @param binMode The enumerated string specifying the binning mode
+ * @param binModeName The enumerated string specifying the binning mode
  *    ("Default", "Linear", "Logarithmic", "ReverseLogarithmic", "Power")
  * @returns A new vector containing the rebin parameters
  * @throw runtime_error if bounds of logarithmic binning go from negative topositive

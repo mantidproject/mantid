@@ -299,7 +299,7 @@ public:
     rebin.setPropertyValue("InputWorkspace", "test_in1D");
     rebin.setPropertyValue("OutputWorkspace", "test_out");
     rebin.setPropertyValue("Params", "-1.0,1.0,1000.0");
-    rebin.setProperty("BinningMode", "Logarithmic"); // this is not a known binning mode
+    rebin.setProperty("BinningMode", "Logarithmic");
     TS_ASSERT_THROWS(rebin.execute(), const std::runtime_error &);
     TS_ASSERT(!rebin.isExecuted());
 
@@ -871,7 +871,7 @@ public:
   }
 
   void test_inversePowerValidateHarmonic() {
-    // Test that the validator which forbid breating more than 10000 bins works in a harmonic series case
+    // Test that the validator which forbid creating more than 10000 bins works in a harmonic series case
     Workspace2D_sptr test_1D = Create1DWorkspace(51);
     test_1D->setDistribution(false);
     AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
@@ -966,11 +966,12 @@ public:
     rebin.setPropertyValue("BinningMode", "Power");
     TS_ASSERT_THROWS_ANYTHING(rebin.execute());
 
-    // AnalysisDataService::Instance().remove("test_Rebin_revLog");
+    AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
   void test_inverseNoPowerWithBin() {
-    // Test that if the mode is set to power mode, will produce power binning
+    // Test that if the mode is set to linear, will NOT produce power binning,
+    // even if the power is set to nonzero
     Workspace2D_sptr test_1D = Create1DWorkspace(51);
     test_1D->setDistribution(false);
     AnalysisDataService::Instance().add("test_in_Rebin", test_1D);
@@ -1088,7 +1089,6 @@ private:
   enum class Monotonic : bool { INCREASE = false, DECREASE = true };
   bool checkBinWidthMonotonic(MatrixWorkspace_sptr ws, Monotonic monotonic = Monotonic::INCREASE,
                               bool ignoreLastBin = false) {
-    // bool reverse = (monotonic == Monotonic::DECREASE);
     size_t binEdgesTotal = ws->blocksize();
     if (ignoreLastBin)
       binEdgesTotal--;
@@ -1106,10 +1106,6 @@ private:
         allMonotonic &= lastBinSize > currentBinSize;
         break;
       }
-      // allMonotonic &= (reverse ? lastBinSize<currentBinSize : lastBinSize>currentBinSize);
-      // if (((lastBinSize < currentBinSize) && reverse) || ((lastBinSize > currentBinSize) && !reverse)) {
-      //   return false;
-      // }
       lastBinSize = currentBinSize;
     }
     return allMonotonic;
