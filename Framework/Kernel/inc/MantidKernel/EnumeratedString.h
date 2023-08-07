@@ -14,9 +14,9 @@ namespace Kernel {
  * This is to facilitate properties that are
  * fixed lists of strings.
 
-    @author Reece Boston, ORNL
-    @date 2023/08/02
- */
+@author Reece Boston, ORNL
+@date 2023/08/02
+*/
 
 namespace {
 // this function "uses" a variable so the compiler and linter won't complain
@@ -32,17 +32,24 @@ template <class E, const std::string names[size_t(E::enum_count)]> class Enumera
    * The enum and string array *must* have same order.
    */
 public:
-  EnumeratedString() {
+  constexpr EnumeratedString() {
     // force a compiler error if no E::enum_count
     use<E>(E::enum_count); // Last element of enum MUST be enum_count
   }
-  EnumeratedString(const E &e) : value(e), name{names[size_t(e)]} {
-    // force a compiler error if no E::enum_count
-    use<E>(E::enum_count); // Last element of enum MUST be enum_count
+  EnumeratedString(const E &e) {
+    try {
+      this->operator=(e);
+    } catch (std::exception &err) {
+      throw err;
+    }
   }
   EnumeratedString(const std::string &s) {
     // only set values if valid string given
-    this->operator=(s);
+    try {
+      this->operator=(s);
+    } catch (std::exception &err) {
+      throw err;
+    }
   }
 
   EnumeratedString(const EnumeratedString &es) : value(es.value), name(es.name) {}
@@ -52,11 +59,14 @@ public:
   constexpr operator std::string() const { return name; }
   // assign the object either by the enum, or by string
   constexpr EnumeratedString &operator=(E e) {
-    if (size_t(e) < size_t(E::enum_count)) {
+    if (size_t(e) < size_t(E::enum_count) && size_t(e) >= 0) {
       value = e;
       name = names[size_t(e)];
-    } else
-      throw std::runtime_error(std::string("Invalud enumerator for ") + typeid(E).name());
+    } else {
+      std::stringstream msg;
+      msg << "Invalid enumerator " << size_t(e) << " for enumerated string " << typeid(E).name();
+      throw std::runtime_error(msg.str());
+    }
     return *this;
   }
   constexpr EnumeratedString &operator=(std::string s) {
@@ -64,8 +74,11 @@ public:
     if (e != E::enum_count) {
       value = e;
       name = s;
-    } else
-      throw std::runtime_error(std::string("Invalid option for enumerated string from ") + typeid(E).name());
+    } else {
+      std::stringstream msg;
+      msg << "Invalid string " << s << " for enumerated string " << typeid(E).name();
+      throw std::runtime_error(msg.str());
+    }
     return *this;
   }
   // for comparison of the object to either enums or strings
@@ -73,6 +86,8 @@ public:
   constexpr bool operator!=(E e) const { return value != e; }
   constexpr bool operator==(std::string s) const { return name == s; }
   constexpr bool operator!=(std::string s) const { return name != s; }
+  constexpr bool operator==(const char *s) const { return name == std::string(s); }
+  constexpr bool operator!=(const char *s) const { return name != std::string(s); }
   constexpr bool operator==(EnumeratedString es) const { return value == es.value; }
   constexpr bool operator!=(EnumeratedString es) const { return value != es.value; }
   constexpr const char *c_str() const { return name.c_str(); }

@@ -30,9 +30,16 @@ const std::string PARAMS("Params");
 const std::string PRSRV_EVENTS("PreserveEvents");
 const std::string FULL_BIN_ONLY("FullBinsOnly");
 const std::string IGNR_BIN_ERR("IgnoreBinErrors");
+const std::string RVRS_LOG_BIN("UseReverseLogarithmic");
 const std::string POWER("Power");
 const std::string BINMODE("BinningMode");
 } // namespace PropertyNames
+
+namespace {
+const std::string binningModeNames[5]{"Default", "Linear", "Logarithmic", "ReverseLogarithmic", "Power"};
+enum class BinningMode { DEFAULT, LINEAR, LOGARITHMIC, REVERSELOG, POWER, enum_count };
+typedef Mantid::Kernel::EnumeratedString<BinningMode, binningModeNames> BINMODE;
+} // namespace
 
 namespace Algorithms {
 
@@ -60,16 +67,19 @@ using HistogramData::Exception::InvalidBinEdgesError;
  * @param inParams Input vector from user
  * @param inputWS Input workspace from user
  * @param logger A reference to a logger
- * @param useLogarithmicBinningAnyway Flag indicating to use logarithmic binning
+ * @param binMode The enumerated string specifying the binning mode
+ *    ("Default", "Linear", "Logarithmic", "ReverseLogarithmic", "Power")
  * @returns A new vector containing the rebin parameters
+ * @throw runtime_error if bounds of logarithmic binning go from negative topositive
  */
 std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
                                                 const API::MatrixWorkspace &inputWS, Kernel::Logger &logger,
-                                                BinningMode binMode) {
+                                                std::string binModeName) {
+  // EnumeratedString<Rebin::BinningMode, binningModeNames> binMode = binModeName;
   std::vector<double> rbParams;
-  // The validator only passes parameters with size 1, or 3xn. No need to check again here
+  // The validator only passes parameters with size 2n+1. No need to check again here
   if (inParams.size() >= 3) {
-    // Input are min, delta, max
+    // Input are min, delta1, mid1, delta2, mid2, ... , max
     rbParams = inParams;
   } else if (inParams.size() == 1) {
     double xmin = 0.;
@@ -81,28 +91,30 @@ std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inPar
     rbParams[0] = xmin;
     rbParams[1] = inParams[0];
     rbParams[2] = xmax;
+  }
 
-    if ((binMode == BinningMode::LOGARITHMIC) && (xmin < 0.) && (xmax > 0.)) {
+  // if linear or power binning specified, require positive bin width
+  // if logarithmic binning specified, require "negative" bin width
+  BINMODE binMode = binModeName;
+  if (binMode != BinningMode::DEFAULT) {
+    logger.information() << "Bin mode set, forcing bin parameters to match.";
+    for (size_t i = 0; i < rbParams.size() - 2; i += 2) { // e.g. xmin, xstep1, xmid1, xstep2, xmid2, xstep3, xmax
+      if (binMode == BinningMode::LINEAR || binMode == BinningMode::POWER) {
+        rbParams[i + 1] = fabs(rbParams[i + 1]);
+      } else if (binMode == BinningMode::LOGARITHMIC || binMode == BinningMode::REVERSELOG) {
+        rbParams[i + 1] = -fabs(rbParams[i + 1]);
+      }
+    }
+  } // end if
+  for (size_t i = 0; i < rbParams.size() - 2; i += 2) {
+    // make sure logarithmic binning does not change signs
+    if (rbParams[i] < 0 && rbParams[i + 1] < 0 && rbParams[i + 2] > 0) {
       std::stringstream msg;
-      msg << "Cannot create logarithmic binning that changes sign (xmin=" << xmin << ", xmax=" << xmax << ")";
+      msg << "Cannot create logarithmic binning that changes sign (xmin=";
+      msg << rbParams[i] << ", xmax=" << rbParams[i + 2] << ")";
       throw std::runtime_error(msg.str());
     }
-  }
-  // depending on binning mode, change sign of bin width parameter to signal bin type
-  // if linear binning specified, require positive bin width
-  // if logarithmic binning specified, require "negative" bin width
-  // otherwise just keep on truckin
-  switch (binMode) {
-  case BinningMode::LINEAR:
-    rbParams[1] = fabs(rbParams[1]);
-    break;
-  case BinningMode::LOGARITHMIC:
-    rbParams[1] = -fabs(rbParams[1]);
-    break;
-  case BinningMode::DEFAULT:
-  default:
-    break;
-  }
+  } // end for
   return rbParams;
 }
 
@@ -113,42 +125,74 @@ std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inPar
 /// Validate that the input properties are sane.
 std::map<std::string, std::string> Rebin::validateInputs() {
   std::map<std::string, std::string> helpMessages;
-  if (existsProperty("Power") && !isDefault("Power")) {
-    const double power = getProperty("Power");
 
-    // attempt to roughly guess how many bins these parameters imply
-    double roughEstimate = 0;
-
-    if (!isDefault(PropertyNames::PARAMS)) {
-      const std::vector<double> params = getProperty(PropertyNames::PARAMS);
-
-      // Five significant places of the Euler-Mascheroni constant is probably more than enough for our needs
-      double eulerMascheroni = 0.57721;
-
-      // Params is check by the validator first, so we can assume it is in a correct format
-      for (size_t i = 0; i < params.size() - 2; i += 2) {
-        double upperLimit = params[i + 2];
-        double lowerLimit = params[i];
-        double factor = params[i + 1];
-
-        if (factor <= 0) {
-          helpMessages[PropertyNames::PARAMS] = "Provided width value cannot be negative for inverse power binning.";
-          return helpMessages;
-        }
-
-        if (power == 1) {
-          roughEstimate += std::exp((upperLimit - lowerLimit) / factor - eulerMascheroni);
-        } else {
-          roughEstimate += std::pow(((upperLimit - lowerLimit) / factor) * (1 - power) + 1, 1 / (1 - power));
-        }
-      }
+  // as part of validation, force the binwidth to be compatible with set bin mode
+  MatrixWorkspace_sptr inputWS = getProperty(PropertyNames::INPUT_WKSP);
+  BINMODE binMode;
+  if (existsProperty(PropertyNames::BINMODE))
+    binMode = getPropertyValue(PropertyNames::BINMODE);
+  else
+    binMode = "Default";
+  std::vector<double> rbParams = getProperty(PropertyNames::PARAMS);
+  try {
+    std::vector<double> validParams = rebinParamsFromInput(rbParams, *inputWS, g_log, binMode);
+    if (binMode != BinningMode::DEFAULT) {
+      setProperty(PropertyNames::PARAMS, validParams);
+      rbParams = validParams;
     }
-
-    // Prevent the user form creating too many bins
-    if (roughEstimate > 10000) {
-      helpMessages["Power"] = "This binning is expected to give more than 10000 bins.";
-    }
+  } catch (std::exception &err) {
+    helpMessages[PropertyNames::PARAMS] = err.what();
   }
+
+  // perform checks on the power property, if valid
+  if (existsProperty(PropertyNames::POWER)) {
+    // ensure that the power property is set if using power binning
+    if (isDefault(PropertyNames::POWER) && binMode == BinningMode::POWER) {
+      std::string msg = "The binning mode was set to 'Power', but no power was given.";
+      helpMessages[PropertyNames::POWER] = msg;
+      helpMessages[PropertyNames::BINMODE] = msg;
+      return helpMessages;
+    }
+    // if the power is set, perform checks
+    else if (!isDefault(PropertyNames::POWER)) {
+      // power is only available in Default and Power binning modes
+      if (binMode != BinningMode::DEFAULT && binMode != BinningMode::POWER) {
+        g_log.information() << "Discarding input power for incompatible binning mode.";
+        setProperty(PropertyNames::POWER, 0.0);
+      } else { // power is a property, is not default, and binning mode is power of default
+        const double power = getProperty(PropertyNames::POWER);
+
+        // attempt to roughly guess how many bins these parameters imply
+        double roughEstimate = 0;
+
+        // Five significant places of the Euler-Mascheroni constant is probably more than enough for our needs
+        double eulerMascheroni = 0.57721;
+
+        // Params is checked by the validator first, so we can assume it is in a correct format
+        for (size_t i = 0; i < rbParams.size() - 2; i += 2) {
+          double upperLimit = rbParams[i + 2];
+          double lowerLimit = rbParams[i];
+          double factor = rbParams[i + 1];
+
+          // in default mode, give error if try to mix power and log binning
+          // because of prior validation, we can assume this will only happen in default mode
+          if (factor <= 0) {
+            helpMessages[PropertyNames::PARAMS] = "Provided width value cannot be negative for inverse power binning.";
+            return helpMessages;
+          }
+          if (power == 1) {
+            roughEstimate += std::exp((upperLimit - lowerLimit) / factor - eulerMascheroni);
+          } else {
+            roughEstimate += std::pow(((upperLimit - lowerLimit) / factor) * (1 - power) + 1, 1 / (1 - power));
+          }
+        } // end for i in rbParams.size()
+        // Prevent the user form creating too many bins
+        if (roughEstimate > 10000) {
+          helpMessages[PropertyNames::POWER] = "This binning is expected to give more than 10000 bins.";
+        }
+      } // end else
+    }   // end else if
+  }     // end if property power exists
   return helpMessages;
 }
 
@@ -182,7 +226,7 @@ void Rebin::init() {
                   "signal and errors are set to zero");
 
   declareProperty(
-      "UseReverseLogarithmic", false,
+      PropertyNames::RVRS_LOG_BIN, false,
       "For logarithmic intervals, the splitting starts from the end and goes back to the start, ie the bins are bigger "
       "at the start getting exponentially smaller until they reach the end. For these bins, the FullBinsOnly flag is "
       "ignored.");
@@ -192,13 +236,15 @@ void Rebin::init() {
   powerValidator->setUpper(1);
   declareProperty(PropertyNames::POWER, 0., powerValidator,
                   "Splits the interval in bins which actual width is equal to requested width / (i ^ power); default "
-                  "is linear. Power must be between 0 and 1.");
+                  "is linear. Power must be between 0 and 1.  Will only work in default mode.");
 
   declareProperty(PropertyNames::BINMODE, binningModeNames[size_t(BinningMode::DEFAULT)],
                   "Optional. "
-                  "Either linear/log mode can be specified in the usual way through sign of bin width ('Default'), "
-                  "or can be set to always use linear binning regardless of bin width sign ('Linear'), "
-                  "or can be set to always use logarithmic binning regardlness of bin width sign ('Logarithmic').");
+                  "Either linear/log mode can be specified in the usual way through sign of binwidth ('Default'), "
+                  "or can be set to always use linear binning regardless of binwidth sign ('Linear'), "
+                  "or can be set to always use logarithmic binning regardlness of binwidth sign ('Logarithmic'), "
+                  "or can be set to always use power binning ('Power', must give power property).  "
+                  "This will override all other specification or default behavior.");
 }
 
 /** Executes the rebin algorithm
@@ -218,10 +264,8 @@ void Rebin::exec() {
   bool inPlace = (inputWS == outputWS);
 
   // get the binning mode as an enumerated string
-  EnumeratedString<BinningMode, binningModeNames> binningMode(getProperty(PropertyNames::BINMODE));
-  printf("BINNING MODE %s %d\n", binningMode.c_str(), int(BinningMode(binningMode)));
-
-  std::vector<double> rbParams = rebinParamsFromInput(getProperty(PropertyNames::PARAMS), *inputWS, g_log, binningMode);
+  BINMODE binningMode(getProperty(PropertyNames::BINMODE));
+  std::vector<double> rbParams = getProperty(PropertyNames::PARAMS);
 
   const bool dist = inputWS->isDistribution();
   const bool isHist = inputWS->isHistogramData();
@@ -230,8 +274,13 @@ void Rebin::exec() {
   const auto histnumber = static_cast<int>(inputWS->getNumberHistograms());
 
   bool fullBinsOnly = getProperty(PropertyNames::FULL_BIN_ONLY);
-  bool useReverseLog = getProperty("UseReverseLogarithmic");
+  // allow for previous manner of setting reverse log, or new method
+  bool useReverseLog = getProperty(PropertyNames::RVRS_LOG_BIN) || (binningMode == BinningMode::REVERSELOG);
   double power = getProperty(PropertyNames::POWER);
+  // if some other binning method is set, ignore the power
+  if (binningMode != BinningMode::POWER && binningMode != BinningMode::DEFAULT) {
+    power = 0.0;
+  }
 
   double xmin = 0.;
   double xmax = 0.;
@@ -361,7 +410,7 @@ void Rebin::exec() {
       g_log.information() << "Rebin: Converting Data back to Data Points.\n";
       Mantid::API::Algorithm_sptr ChildAlg = createChildAlgorithm("ConvertToPointData");
       ChildAlg->initialize();
-      ChildAlg->setProperty<MatrixWorkspace_sptr>(PropertyNames::INPUT_WKSP, outputWS);
+      ChildAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
       ChildAlg->execute();
       outputWS = ChildAlg->getProperty("OutputWorkspace");
     }

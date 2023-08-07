@@ -25,6 +25,7 @@ const std::vector<std::string> DIFC_TABLE_COLUMN_TYPES{"int", "double", "double"
 
 enum class OffsetMode { RELATIVE, ABSOLUTE, SIGNED, enum_count };
 static std::string offsetModeNames[size_t(OffsetMode::enum_count)] = {"Relative", "Absolute", "Signed"};
+typedef Mantid::Kernel::EnumeratedString<OffsetMode, offsetModeNames> OFFSETMODE;
 
 namespace PropertyNames {
 const std::string OFFSTS_WKSP("OffsetsWorkspace");
@@ -94,8 +95,7 @@ void ConvertDiffCal::init() {
 std::map<std::string, std::string> ConvertDiffCal::validateInputs() {
   std::map<std::string, std::string> result;
 
-  Mantid::Kernel::EnumeratedString<OffsetMode, offsetModeNames> offsetMode =
-      std::string(getProperty(PropertyNames::OFFSET_MODE));
+  OFFSETMODE offsetMode = std::string(getProperty(PropertyNames::OFFSET_MODE));
   if (isDefault(PropertyNames::BINWIDTH) && (offsetMode == OffsetMode::SIGNED)) {
     std::string msg = "Signed offset mode requires bin width to be specified.";
     result[PropertyNames::BINWIDTH] = msg;
@@ -155,11 +155,11 @@ double getOffset(const OffsetsWorkspace_const_sptr &offsetsWS, const detid_t det
  * @param index :: Index being calculated
  * @param spectrumInfo :: Spectrum info used
  * @param binWidth :: binWidth used for logarithmically binned data
- * @param is_signed :: flag for `Signed` Offset Mode
+ * @param offsetMode :: indicates the OffsetMode to be used
  * @return The offset adjusted value of DIFC
  */
 double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t index,
-                     const Mantid::API::SpectrumInfo &spectrumInfo, const double binWidth, OffsetMode offsetMode) {
+                     const Mantid::API::SpectrumInfo &spectrumInfo, const double binWidth, OFFSETMODE offsetMode) {
   const detid_t detid = getDetID(offsetsWS, index);
   const double offset = getOffset(offsetsWS, detid);
   double twotheta;
@@ -203,8 +203,7 @@ void ConvertDiffCal::exec() {
 
   ITableWorkspace_sptr previous_calibration = getProperty(PropertyNames::CALIB_WKSP);
 
-  Mantid::Kernel::EnumeratedString<OffsetMode, offsetModeNames> offsetMode =
-      std::string(getProperty(PropertyNames::OFFSET_MODE));
+  OFFSETMODE offsetMode = std::string(getProperty(PropertyNames::OFFSET_MODE));
   const double binWidth = getProperty(PropertyNames::BINWIDTH);
 
   if (previous_calibration) {
