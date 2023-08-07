@@ -123,12 +123,11 @@ QPointF FigureCanvasQt::toDataCoords(QPoint pos) const {
   // matplotlib.backend_bases.LocationEvent where we transform first to
   // matplotlib's coordinate system, (0,0) is bottom left,
   // and then to the data coordinates
-  const int dpiRatio(devicePixelRatio());
-  const double xPosPhysical = pos.x() * dpiRatio;
+  const double xPosPhysical = pos.x();
   GlobalInterpreterLock lock;
   // Y=0 is at the bottom
   double height = PyFloat_AsDouble(Python::Object(m_figure.pyobj().attr("bbox").attr("height")).ptr());
-  const double yPosPhysical = ((height / devicePixelRatio()) - pos.y()) * dpiRatio;
+  const double yPosPhysical = height - pos.y();
   // Transform to data coordinates
   QPointF dataCoords;
   try {
