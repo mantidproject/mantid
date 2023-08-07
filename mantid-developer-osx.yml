@@ -58,6 +58,4 @@ dependencies:
   - clang_osx-64=14
   - clangxx_osx-64=14
   - llvm-openmp=14
-  # pip installs
-  - pip:
-    - quickBayes==1.0.0b5
+

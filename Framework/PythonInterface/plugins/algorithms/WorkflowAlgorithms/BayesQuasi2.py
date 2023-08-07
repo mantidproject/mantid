@@ -194,26 +194,28 @@ class BayesQuasi2(QuickBayesTemplate):
             sample = {"x": sx, "y": sy, "e": se}
 
             workflow = method(results, results_errors)
-            new_x, ry = workflow.preprocess_data(sample["x"], sample["y"], sample["e"], start_x, end_x, res_list[spec])
+            new_x, ry = workflow.preprocess_data(
+                x_data=sample["x"], y_data=sample["y"], e_data=sample["e"], start_x=start_x, end_x=end_x, res=res_list[spec]
+            )
 
             # setup fit function
-            func = function(BG, elastic, new_x, ry, start_x, end_x)
+            func = function(bg_function=BG, elastic_peak=elastic, r_x=new_x, r_y=ry, start_x=start_x, end_x=end_x)
             lower, upper = func.get_bounds()
 
             params = init_params if init_params is not None else func.get_guess()
             # just want a guess the same length as lower, it is not used
-            workflow.set_scipy_engine(func.get_guess(), lower, upper)
+            workflow.set_scipy_engine(guess=func.get_guess(), lower=lower, upper=upper)
 
             # do the calculation
-            workflow.execute(max_num_peaks, func, params)
-            print(workflow.get_parameters_and_errors)
+            workflow.execute(max_num_features=max_num_peaks, func=func, params=params)
+
             results, results_errors = workflow.get_parameters_and_errors
 
-            init_params = func.read_from_report(results, 1, -1)
+            init_params = func.read_from_report(report_dict=results, N=1, index=-1)
 
             engine = workflow.fit_engine
 
-            ws_list = self.make_fit_ws(engine, max_num_peaks, ws_list, "DeltaE", f"{name}_{spec}_")
+            ws_list = self.make_fit_ws(engine=engine, max_features=max_num_peaks, ws_list=ws_list, x_unit="DeltaE", name=f"{name}_{spec}_")
 
         sample_logs = [("background", BG_str), ("elastic_peak", elastic), ("energy_min", start_x), ("energy_max", end_x)]
 
@@ -225,11 +227,11 @@ class BayesQuasi2(QuickBayesTemplate):
 
         # get sample data
         name = self.getPropertyValue("SampleWorkspace")
-        sample_ws, N = self.point_data(name)
+        sample_ws, N = self.point_data(name=name)
 
         # get resolution data
         res_name = self.getPropertyValue("ResolutionWorkspace")
-        res_ws, N_res_hist = self.point_data(res_name)
+        res_ws, N_res_hist = self.point_data(name=res_name)
 
         # setup
         Q = GetThetaQ(sample_ws)
@@ -240,37 +242,51 @@ class BayesQuasi2(QuickBayesTemplate):
             max_num_peaks = 3
             if N_res_hist == 1:
                 prog = "QLr"  # res file
-                res_list = self.duplicate_res(res_ws, N)
+                res_list = self.duplicate_res(res_ws=res_ws, N=N)
             elif N_res_hist == N:
                 prog = "QLd"  # data file
-                res_list = self.unique_res(res_ws, N)
+                res_list = self.unique_res(res_ws=res_ws, N=N)
             else:
                 raise ValueError("RES file needs to have either 1 or the same number of histograms as sample.")
             ws_list, results, results_errors, sample_logs = self.calculate(
-                sample_ws, report_progress, res_list, N, max_num_peaks, QLData, QlDataFunction
+                sample_ws=sample_ws,
+                report_progress=report_progress,
+                res_list=res_list,
+                N=N,
+                max_num_peaks=max_num_peaks,
+                method=QLData,
+                function=QlDataFunction,
             )
 
         elif program == "QSe":
             max_num_peaks = 1
             if N_res_hist == 1:
                 prog = "QSe"  # res file
-                res_list = self.duplicate_res(res_ws, N)
+                res_list = self.duplicate_res(res_ws=res_ws, N=N)
             else:
                 raise ValueError("Stretched Exp ONLY works with RES file")
             ws_list, results, results_errors, sample_logs = self.calculate(
-                sample_ws, report_progress, res_list, N, max_num_peaks, QlStretchedExp, QSEFunction
+                sample_ws=sample_ws,
+                report_progress=report_progress,
+                res_list=res_list,
+                N=N,
+                max_num_peaks=max_num_peaks,
+                method=QlStretchedExp,
+                function=QSEFunction,
             )
 
         sample_logs.append(("res_workspace", res_name))
         sample_logs.append(("fit_program", prog))
 
         # report results
-        fits = self.group_ws(ws_list, name)
+        fits = self.group_ws(ws_list=ws_list, name=name)
         self.setProperty("OutputWorkspaceFit", fits)
-        self.add_sample_logs(fits, sample_logs, sample_ws)
+        self.add_sample_logs(workspace=fits, sample_logs=sample_logs, data_ws=sample_ws)
 
-        params, prob = self.make_results(results, results_errors, Q[1], "MomentumTransfer", max_num_peaks, name)
-        self.add_sample_logs(params, sample_logs, sample_ws)
+        params, prob = self.make_results(
+            results=results, results_errors=results_errors, x_data=Q[1], x_unit="MomentumTransfer", max_features=max_num_peaks, name=name
+        )
+        self.add_sample_logs(workspace=params, sample_logs=sample_logs, data_ws=sample_ws)
 
         self.setProperty("OutputWorkspaceResult", params)
         self.setProperty("OutputWorkspaceProb", prob)
