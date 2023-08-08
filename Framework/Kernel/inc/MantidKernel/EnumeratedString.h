@@ -36,14 +36,14 @@ public:
     // force a compiler error if no E::enum_count
     use<E>(E::enum_count); // Last element of enum MUST be enum_count
   }
-  EnumeratedString(const E &e) {
+  EnumeratedString(const E e) {
     try {
       this->operator=(e);
     } catch (std::exception &err) {
       throw err;
     }
   }
-  EnumeratedString(const std::string &s) {
+  EnumeratedString(const std::string s) {
     // only set values if valid string given
     try {
       this->operator=(s);
@@ -82,10 +82,10 @@ public:
     return *this;
   }
   // for comparison of the object to either enums or strings
-  bool operator==(const E &e) const { return value == e; }
-  bool operator!=(const E &e) const { return value != e; }
-  bool operator==(const std::string &s) const { return name == s; }
-  bool operator!=(const std::string &s) const { return name != s; }
+  bool operator==(const E e) const { return value == e; }
+  bool operator!=(const E e) const { return value != e; }
+  bool operator==(const std::string s) const { return name == s; }
+  bool operator!=(const std::string s) const { return name != s; }
   bool operator==(const char *s) const { return name == std::string(s); }
   bool operator!=(const char *s) const { return name != std::string(s); }
   bool operator==(const EnumeratedString es) const { return value == es.value; }
@@ -97,7 +97,7 @@ private:
   std::string name;
 
   // given a string, find the corresponding enum value
-  constexpr E findEFromString(std::string s) {
+  E findEFromString(const std::string s) {
     E e = E(0);
     for (; size_t(e) < size_t(E::enum_count); e = E(size_t(e) + 1))
       if (s == names[size_t(e)])
