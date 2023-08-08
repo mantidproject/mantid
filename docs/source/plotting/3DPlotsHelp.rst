@@ -82,7 +82,7 @@ Basic example of plotting a `Surface <https://matplotlib.org/mpl_toolkits/mplot3
     data = mtd['data_1'] # Extract individual workspace from group
 
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
-    ax.plot_surface(data)
+    ax.plot_surface(data, cmap='viridis')
     plt.show()
 
 For more advice: :ref:`02_scripting_plots`
