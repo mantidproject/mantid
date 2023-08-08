@@ -8,7 +8,6 @@
 
 #include "MantidKernel/EnumeratedString.h"
 #include <cxxtest/TestSuite.h>
-#include <json/value.h>
 
 using namespace Mantid::Kernel;
 
