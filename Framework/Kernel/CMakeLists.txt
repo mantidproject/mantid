@@ -349,7 +349,7 @@ set(TEST_FILES
     DynamicFactoryTest.h
     EigenConversionHelpersTest.h
     EnabledWhenPropertyTest.h
-    EnumeratedString.h
+    EnumeratedStringTest.h
     EnvironmentHistoryTest.h
     EqualBinsCheckerTest.h
     ErrorReporterTest.h

@@ -58,7 +58,7 @@ public:
   constexpr operator E() const { return value; }
   constexpr operator std::string() const { return name; }
   // assign the object either by the enum, or by string
-  constexpr EnumeratedString &operator=(E e) {
+  EnumeratedString &operator=(E e) {
     if (size_t(e) < size_t(E::enum_count) && size_t(e) >= 0) {
       value = e;
       name = names[size_t(e)];
@@ -69,7 +69,7 @@ public:
     }
     return *this;
   }
-  constexpr EnumeratedString &operator=(std::string s) {
+  EnumeratedString &operator=(std::string s) {
     E e = findEFromString(s);
     if (e != E::enum_count) {
       value = e;
