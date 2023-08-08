@@ -27,7 +27,7 @@ template <class E, const std::string names[size_t(E::enum_count)]> class Enumera
   /**
    * @property class E an `enum`, the final value *must* be `enum_count`
    *              (i.e. `enum class Fruit {apple, orange, enum_count}`)
-   * @property string names[] a static c-style array of string names for each enum
+   * @tparam string names[] a static c-style array of string names for each enum
    * Note that no checking is done on the compatibility of `E` and `names`, or their validity.
    * The enum and string array *must* have same order.
    */

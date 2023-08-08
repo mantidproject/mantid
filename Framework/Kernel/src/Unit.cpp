@@ -556,7 +556,7 @@ const double NEUTRON_MASS_OVER_H = (PhysicalConstants::NeutronMass * 1e6) / (Phy
  * Calculate DIFC in case of logarithmic binning, used in CalculateDIFC with Signed mode
  * @param l1
  * @param l2
- * @param twoTheta scattering angle
+ * @param twotheta scattering angle
  * @param offset
  * @param binWidth the bin width used in logarithmic binning (DX)
  * Will calculate the value of DIFC following
