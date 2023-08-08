@@ -37,12 +37,6 @@ Usage
    if os.path.isfile(filename):
        os.remove(filename)
 
-Output:
-
-.. testoutput:: StringToPng
-
-
-
 The file should look like
 
 .. figure:: /images/StringToPngTest.png
