@@ -1,2 +1,2 @@
-* ``BackgroundWorkspace`` and ``ScaleFactor`` can now be given in the ``Options`` column of the ISIS SANS Interface.
+- ``BackgroundWorkspace`` and ``ScaleFactor`` can now be given in the ``Options`` column of the ISIS SANS Interface.
   See :ref:`ISIS_SANS_scaled_background-ref` for more details.
