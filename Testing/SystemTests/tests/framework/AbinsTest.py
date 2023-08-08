@@ -496,14 +496,7 @@ class AbinsBinWidth(systemtesting.MantidSystemTest, HelperTestingClass):
         HelperTestingClass.__init__(self)
         name = "BenzeneBinWidthCASTEP"
 
-        # Two Castep backends are known to have slightly different results
-        try:
-            from euphonic import QpointPhononModes  # noqa: F401
-
-            self.ref_result = name + "Euphonic.nxs"
-        except ModuleNotFoundError:
-            self.ref_result = name + ".nxs"
-
+        self.ref_result = name + ".nxs"
         self.set_ab_initio_program("CASTEP")
         self.set_name(name)
         self.set_order(QUANTUM_ORDER_TWO)
