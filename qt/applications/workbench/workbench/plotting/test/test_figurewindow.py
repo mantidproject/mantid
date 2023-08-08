@@ -40,10 +40,11 @@ class Test(unittest.TestCase):
 
     def test_drag_and_drop_adds_plot_to_correct_axes(self):
         ax = self.fig.get_axes()[1]
+        dpi_ratio = self.fig.canvas.device_pixel_ratio
         # Find the center of the axes and simulate a drop event there
         # Need to use Qt logical pixels to factor in dpi
-        ax_x_centre = ax.xaxis.clipbox.min[0] + ax.xaxis.clipbox.width * 0.5
-        ax_y_centre = ax.yaxis.clipbox.min[1] + ax.yaxis.clipbox.height * 0.5
+        ax_x_centre = (ax.xaxis.clipbox.min[0] + ax.xaxis.clipbox.width * 0.5) / dpi_ratio
+        ax_y_centre = (ax.yaxis.clipbox.min[1] + ax.yaxis.clipbox.height * 0.5) / dpi_ratio
         mock_pos = Mock(position=lambda: Mock(x=lambda: ax_x_centre, y=lambda: ax_y_centre))
         mock_event = Mock()
         mock_event.mimeData().text.return_value = "ws"
