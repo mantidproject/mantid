@@ -48,6 +48,70 @@ public:
     NUMBINS = 50;
   }
 
+  /* some basic validation tests */
+
+  void test_make_three_params_default() {
+    // test that if only a binwidth is given, will create a full set of rebin params
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
+    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin.setPropertyValue("OutputWorkspace", "test_out");
+    rebin.setPropertyValue("Params", "2.0");
+    // verify that with the single rebin param, the algo will successfuly execute
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+
+    // ensure that the properties are not changed in default mode
+    // the "Params" property should still have a single value, 2.0
+    std::vector<double> rbParams = rebin.getProperty("Params");
+    TS_ASSERT_EQUALS(rbParams.size(), 1);
+    TS_ASSERT_EQUALS(2.0, rbParams[0]);
+
+    AnalysisDataService::Instance().remove("test_in1D");
+    AnalysisDataService::Instance().remove("test_out");
+  }
+
+  void test_failure_bad_log_binning_endpoints() {
+    // ensure that rebinning will fail if log binning from negative to positive
+    // this fails fast, due to the rebin param property validator
+    Rebin rebin;
+    rebin.initialize();
+    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "-1.0,-1.0,1000.0"));
+    TS_ASSERT(!rebin.isExecuted());
+  }
+
+  void test_failure_bad_rebin_params() {
+    // ensure that rebinning will fail if log binning from negative to positive
+    // this fails fast, due to the rebin param property validator
+    Rebin rebin;
+    rebin.initialize();
+    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "-1.0,-1.0,10.0"));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "100.0,-1.0,10.0"));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "100.0,1.0,10.0"));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "1.0,10.0"));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "1.0,-1.0,10.0,12.0"));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "1.0,0.0,2.0"));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "0.0"));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", ""));
+    TS_ASSERT(!rebin.isExecuted());
+  }
+
+  void test_failure_mixed_power_and_log() {
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("Params", "1.0,-1.0,10.0");
+    rebin.setProperty("Power", 0.5);
+    auto errmsgs = rebin.validateInputs();
+    auto errmsg = errmsgs.find("Params");
+    TS_ASSERT(errmsg != errmsgs.end());
+    TS_ASSERT(errmsg->second.substr(0, 20) == "Provided width value");
+  }
+
+  /* execution tests */
+
   void testworkspace1D_dist() {
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
     test_in1D->setDistribution(true);
@@ -146,7 +210,7 @@ public:
     bool dist = rebindata->isDistribution();
     TS_ASSERT(dist);
 
-    TS_ASSERT(checkBinWidthMonotonic(rebindata, false));
+    TS_ASSERT(checkBinWidthMonotonic(rebindata, Monotonic::INCREASE));
 
     AnalysisDataService::Instance().remove("test_in1D");
     AnalysisDataService::Instance().remove("test_out");
@@ -469,7 +533,7 @@ public:
     TS_ASSERT_DELTA(outX[4], 36, 1e-5);
     TS_ASSERT_DELTA(outX[5], 37, 1e-5);
 
-    TS_ASSERT(checkBinWidthMonotonic(out, true));
+    TS_ASSERT(checkBinWidthMonotonic(out, Monotonic::DECREASE));
 
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
@@ -497,7 +561,7 @@ public:
     TS_ASSERT_DELTA(outX[2], 40, 1e-5);
     TS_ASSERT_DELTA(outX[3], 42, 1e-5);
 
-    TS_ASSERT(checkBinWidthMonotonic(out, true));
+    TS_ASSERT(checkBinWidthMonotonic(out, Monotonic::DECREASE));
 
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
@@ -527,7 +591,7 @@ public:
     TS_ASSERT_DELTA(outX[3], 15, 1e-5);
     TS_ASSERT_DELTA(outX[4], 16, 1e-5);
 
-    TS_ASSERT(checkBinWidthMonotonic(out, true));
+    TS_ASSERT(checkBinWidthMonotonic(out, Monotonic::DECREASE));
 
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
@@ -620,7 +684,7 @@ public:
     TS_ASSERT_DELTA(outX[4], 36, 1e-5);
     TS_ASSERT_DELTA(outX[5], 37, 1e-5);
 
-    TS_ASSERT(checkBinWidthMonotonic(out, true));
+    TS_ASSERT(checkBinWidthMonotonic(out, Monotonic::DECREASE));
 
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
@@ -652,7 +716,7 @@ public:
     TS_ASSERT_DELTA(outX[5], 59, 1e-5);
     TS_ASSERT_DELTA(outX[6], 60, 1e-5);
 
-    TS_ASSERT(checkBinWidthMonotonic(out, true));
+    TS_ASSERT(checkBinWidthMonotonic(out, Monotonic::DECREASE));
 
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
@@ -681,7 +745,7 @@ public:
     TS_ASSERT_DELTA(outX[3], 3.28445705, 1e-5);
     TS_ASSERT_DELTA(outX[27], 10, 1e-5);
 
-    TS_ASSERT(checkBinWidthMonotonic(out, true));
+    TS_ASSERT(checkBinWidthMonotonic(out, Monotonic::DECREASE));
 
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
@@ -710,13 +774,13 @@ public:
     TS_ASSERT_DELTA(outX[3], 2.8333333, 1e-5);
     TS_ASSERT_DELTA(outX[30], 5, 1e-5);
 
-    TS_ASSERT(checkBinWidthMonotonic(out, true, true));
+    TS_ASSERT(checkBinWidthMonotonic(out, Monotonic::DECREASE, true));
 
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
   }
 
   void test_inversePowerValidateHarmonic() {
-    // Test that the validator which forbid breating more than 10000 bins works in a harmonic series case
+    // Test that the validator which forbid creating more than 10000 bins works in a harmonic series case
     Workspace2D_sptr test_1D = Create1DWorkspace(51);
     test_1D->setDistribution(false);
     AnalysisDataService::Instance().add("test_Rebin_revLog", test_1D);
@@ -746,6 +810,537 @@ public:
     rebin.setPropertyValue("Power", "0.5");
     TS_ASSERT_THROWS(rebin.execute(), const std::runtime_error &);
     AnalysisDataService::Instance().remove("test_Rebin_revLog");
+  }
+
+  //__/__/__/__/__/__/__/__/__/__/__/__/__/__/__/__/__//
+  //          TESTS FOR BINNING MODE BEHAVIOR         //
+  //__/__/__/__/__/__/__/__/__/__/__/__/__/__/__/__/__//
+
+  void test_failure_bad_binning_modeset() {
+    // ensure failure if bad binning mode is set
+    // fast failure because of string list validator
+    Rebin rebin;
+    rebin.initialize();
+    TS_ASSERT_THROWS_ANYTHING(
+        rebin.setProperty("BinningMode", "FunkyCrosswaysBinning")); // this is not a known binning mode
+  }
+
+  void test_failure_power_modeset_without_power() {
+    // Test Power binning mode will fail if no power is given
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("Params", "1.2, 1.2, 12.22");
+    rebin.setPropertyValue("BinningMode", "Power");
+    auto errmsgs = rebin.validateInputs();
+    auto errmsg = errmsgs.find("Power");
+    TS_ASSERT(errmsg != errmsgs.end());
+    TS_ASSERT(errmsg->second.substr(0, 35) == "The binning mode was set to 'Power'");
+  }
+
+  void test_failure_bad_log_binning_endpoints_modeset() {
+    // ensure failure with log binning from neg to pos with modeset
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setRethrows(true);
+    rebin.setPropertyValue("Params", "-1.0,1.0,1000.0");
+    rebin.setProperty("BinningMode", "Logarithmic");
+    auto errmsgs = rebin.validateInputs();
+    TS_ASSERT(!errmsgs.empty());
+    auto errmsg = errmsgs.find("Params");
+    TS_ASSERT(errmsg != errmsgs.end());
+    TS_ASSERT(errmsg->second.substr(0, 33) == "Cannot create logarithmic binning");
+  }
+
+  void do_test_property_unchanged(
+      // check that certain properties are unchanged by the execution of the algo
+      std::string property, bool propValue, std::string binMode, std::string step, double power) {
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
+    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin.setPropertyValue("OutputWorkspace", "test_out");
+    rebin.setPropertyValue("Params", step);
+    rebin.setProperty("Power", power);
+    if (binMode == "Power")
+      rebin.setProperty("Power", 0.5);
+    rebin.setProperty("BinningMode", binMode);
+    rebin.setProperty(property, propValue);
+    // verify that with the single rebin param, the algo will successfully execute
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    TS_ASSERT_EQUALS(propValue, bool(rebin.getProperty(property)));
+    AnalysisDataService::Instance().remove("test_in1D");
+    AnalysisDataService::Instance().remove("test_out");
+  }
+
+  void test_some_properties_always_unchanged() {
+    // these are properties which should not be changed anywhere inside algo
+    std::vector<std::string> props{"PreserveEvents", "FullBinsOnly", "IgnoreBinErrors"};
+    std::vector<bool> propV{false, true};
+    // try in all binning modes
+    std::vector<std::string> binModes{"Linear", "Logarithmic", "ReverseLogarithmic", "Power"};
+    std::vector<std::string> steps{"1.0", "-1.0"};
+    std::vector<double> powers{0.0, 0.5};
+
+    // run it every way possible
+    for (size_t ip = 0; ip < props.size(); ip++) {
+      for (size_t ib = 0; ib < binModes.size(); ib++) {
+        for (size_t is = 0; is < steps.size(); is++) {
+          for (size_t j = 0; j < powers.size(); j++) {
+            for (size_t k = 0; k < propV.size(); k++) {
+              do_test_property_unchanged(props[ip], propV[k], binModes[ib], steps[is], powers[j]);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void do_test_changes_usereverselogarithmic(std::string binMode, double step, bool rvrs) {
+    std::stringstream params;
+    params << "1.2," << step << ",12.22";
+
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
+    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("Params", params.str());
+    rebin.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin.setPropertyValue("OutputWorkspace", "test_out1D");
+    rebin.setProperty("UseReverseLogarithmic", rvrs);
+    rebin.setProperty("BinningMode", binMode);
+    if (binMode == "Power")
+      rebin.setProperty("Power", 0.5);
+    auto errmsgs = rebin.validateInputs();
+    TS_ASSERT(errmsgs.empty());
+    // exactly one of these will be true, the other false
+    bool validatedRvrs = rebin.getProperty("UseReverseLogarithmic");
+    TS_ASSERT_DIFFERS(rvrs, validatedRvrs);
+    // test successful execution
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    // ensure nothing changed in execution
+    bool stillRvrs = rebin.getProperty("UseReverseLogarithmic");
+    TS_ASSERT_EQUALS(validatedRvrs, stillRvrs);
+
+    AnalysisDataService::Instance().remove("test_in1D");
+    AnalysisDataService::Instance().remove("test_out1D");
+  }
+
+  void test_all_binning_modes_change_usereverselogarithmic() {
+    std::vector<std::string> binModes{"Linear", "Logarithmic", "ReverseLogarithmic", "Power"};
+    std::vector<double> steps{1.2, -1.2, -1.2, 1.2};
+    std::vector<bool> useRvrsLog{true, true, false, true};
+
+    for (size_t i = 0; i < binModes.size(); i++) {
+      do_test_changes_usereverselogarithmic(binModes[i], steps[i], useRvrsLog[i]);
+    }
+  }
+
+  void test_reverse_log_doesnt_change_usereverselogarithmic() {
+    // this additional test ensures the ReverseLog binning mode doesn't
+    // accidentally unset the "UseReverseLogarithmic" flag
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
+    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("Params", "1.2,-1.2,12.22");
+    rebin.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin.setPropertyValue("OutputWorkspace", "test_out1D");
+    rebin.setProperty("UseReverseLogarithmic", true);
+    rebin.setProperty("BinningMode", "ReverseLogarithmic");
+    auto errmsgs = rebin.validateInputs();
+    TS_ASSERT(errmsgs.empty());
+    // assert this is still true
+    TS_ASSERT(bool(rebin.getProperty("UseReverseLogarithmic")));
+    // test successful execution
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    // ensure nothing changed in execution
+    TS_ASSERT(bool(rebin.getProperty("UseReverseLogarithmic")));
+
+    AnalysisDataService::Instance().remove("test_in1D");
+    AnalysisDataService::Instance().remove("test_out1D");
+  }
+
+  void do_test_changes_rebin_params(std::string binMode, double step, double good_step, bool only_step = false) {
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
+    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+
+    double start, stop;
+    std::stringstream params;
+    if (only_step) {
+      MatrixWorkspace_sptr inputdata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_in1D");
+      auto &outX = inputdata->x(0);
+      start = outX[0];
+      stop = outX[outX.size() - 1];
+      params << step;
+    } else {
+      start = 1.0;
+      stop = 10.0;
+      params << start << "," << step << "," << stop;
+    }
+
+    // check that algo will change rebin params
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin.setPropertyValue("OutputWorkspace", "test_out1D");
+    rebin.setPropertyValue("Params", params.str());
+    rebin.setPropertyValue("BinningMode", binMode);
+    if (binMode == "Power")
+      rebin.setProperty("Power", 0.5);
+    auto errmsgs = rebin.validateInputs();
+    TS_ASSERT(errmsgs.empty());
+
+    std::vector<double> rbParams = rebin.getProperty("Params");
+    TS_ASSERT(rbParams[0] == start);
+    TS_ASSERT(rbParams[1] == good_step);
+    TS_ASSERT(rbParams[2] == stop);
+
+    // ensure execution, and nothing changes in execution
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    std::vector<double> rebinAgainParams = rebin.getProperty("Params");
+    TS_ASSERT_EQUALS(rbParams, rebinAgainParams);
+
+    AnalysisDataService::Instance().remove("test_in1D");
+    AnalysisDataService::Instance().remove("test_out1D");
+  }
+
+  void test_all_binning_modes_change_rebin_params() {
+    std::vector<std::string> binModes{"Linear", "Logarithmic", "ReverseLogarithmic", "Power"};
+    std::vector<double> steps{-1.0, 1.0, 1.0, -1.0};
+    std::vector<double> goodSteps{1.0, -1.0, -1.0, 1.0};
+
+    for (size_t i = 0; i < binModes.size(); i++) {
+      for (char only_step = 0; only_step < 2; only_step++) {
+        do_test_changes_rebin_params(binModes[i], steps[i], goodSteps[i], only_step);
+      }
+    }
+  }
+
+  void do_test_changes_power(std::string binMode, double step) {
+    // check that algo run in binning  mode will change power
+    std::stringstream params;
+    params << "1.0," << step << ",100.0";
+
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
+    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin.setPropertyValue("OutputWorkspace", "test_out1D");
+    rebin.setPropertyValue("Params", params.str());
+    rebin.setProperty("Power", 0.5);
+    rebin.setPropertyValue("BinningMode", binMode);
+    auto errmsgs = rebin.validateInputs();
+    TS_ASSERT(errmsgs.empty());
+    // ensure that power was unset
+    TS_ASSERT(double(rebin.getProperty("Power")) == 0.0);
+
+    // ensure execution, and nothing changes in execution
+    TS_ASSERT_THROWS_NOTHING(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+    TS_ASSERT(double(rebin.getProperty("Power")) == 0.0);
+
+    AnalysisDataService::Instance().remove("test_in1D");
+    AnalysisDataService::Instance().remove("test_out1D");
+  }
+
+  void test_all_binning_modes_change_power() {
+    std::vector<std::string> binningModes{"Linear", "Logarithmic", "ReverseLogarithmic"};
+    std::vector<double> steps{1.0, -1.0, -1.0};
+    for (size_t i = 0; i < binningModes.size(); i++) {
+      do_test_changes_power(binningModes[i], steps[i]);
+    }
+  }
+
+  void test_default_linear_and_modeset_equal_everywhere() {
+    // Check that linear binning mode equals to original behavior
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
+    test_in1D->setDistribution(true);
+    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+
+    // first run in the default manner for comparison
+    Rebin rebin_default;
+    rebin_default.initialize();
+    rebin_default.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin_default.setPropertyValue("OutputWorkspace", "test_out_default");
+    rebin_default.setPropertyValue("Params", "1.0,1.0,1000.0");
+    TS_ASSERT_THROWS_NOTHING(rebin_default.execute());
+    TS_ASSERT(rebin_default.isExecuted());
+
+    // retrieve binned axis
+    MatrixWorkspace_sptr rebindata_default =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_default");
+    auto &outX_default = rebindata_default->x(0);
+
+    // now run again using linear binning mode
+    Rebin rebin_again;
+    rebin_again.initialize();
+    rebin_again.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin_again.setPropertyValue("OutputWorkspace", "test_out_again");
+    // set the params as wrong as possible
+    rebin_again.setPropertyValue("Params", "1.0,-1.0,1000.0");
+    rebin_again.setProperty("Power", 0.5);
+    rebin_again.setProperty("UseReverseLogarithmic", true);
+    // set the binning mode and run
+    rebin_again.setPropertyValue("BinningMode", "Linear");
+    TS_ASSERT_THROWS_NOTHING(rebin_again.execute());
+    TS_ASSERT(rebin_again.isExecuted());
+
+    // retrieve binned axis
+    MatrixWorkspace_sptr rebindata_again =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_again");
+    auto &outX_again = rebindata_again->x(0);
+
+    // verify that all bin edges are the same
+    TS_ASSERT_EQUALS(outX_default.size(), outX_again.size());
+    for (size_t i = 0; i < outX_default.size(); i++) {
+      TS_ASSERT_EQUALS(outX_default[i], outX_again[i]);
+    }
+
+    AnalysisDataService::Instance().remove("test_in1D");
+    AnalysisDataService::Instance().remove("test_out_default");
+    AnalysisDataService::Instance().remove("test_out_again");
+  }
+
+  void test_default_log_and_modeset_equal_everywhere() {
+    // Check that linear binning mode equals to original behavior
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
+    test_in1D->setDistribution(true);
+    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+
+    // first run in the default manner for comparison
+    Rebin rebin_default;
+    rebin_default.initialize();
+    rebin_default.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin_default.setPropertyValue("OutputWorkspace", "test_out_default");
+    rebin_default.setPropertyValue("Params", "1.0,-1.0,1000.0");
+    TS_ASSERT_THROWS_NOTHING(rebin_default.execute());
+    TS_ASSERT(rebin_default.isExecuted());
+
+    // retrieve binned axis
+    MatrixWorkspace_sptr rebindata_default =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_default");
+    auto &outX_default = rebindata_default->x(0);
+
+    // now run again using log mode
+    Rebin rebin_again;
+    rebin_again.initialize();
+    rebin_again.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin_again.setPropertyValue("OutputWorkspace", "test_out_again");
+    // set the params as wrong as possible
+    rebin_again.setPropertyValue("Params", "1.0,1.0,1000.0");
+    rebin_again.setProperty("Power", 0.5);
+    rebin_again.setProperty("UseReverseLogarithmic", true);
+    // set the binning mode and run
+    rebin_again.setPropertyValue("BinningMode", "Logarithmic");
+    TS_ASSERT_THROWS_NOTHING(rebin_again.execute());
+    TS_ASSERT(rebin_again.isExecuted());
+
+    // retrieve binned axis
+    MatrixWorkspace_sptr rebindata_again =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_again");
+    auto &outX_again = rebindata_again->x(0);
+
+    // verify that all bin edges are the same
+    TS_ASSERT_EQUALS(outX_default.size(), outX_again.size());
+    for (size_t i = 0; i < outX_default.size(); i++) {
+      TS_ASSERT_EQUALS(outX_default[i], outX_again[i]);
+    }
+
+    // ensure the log bin steps are monotonically increasing
+    TS_ASSERT(checkBinWidthMonotonic(rebindata_default, Monotonic::INCREASE));
+    TS_ASSERT(checkBinWidthMonotonic(rebindata_again, Monotonic::INCREASE));
+
+    AnalysisDataService::Instance().remove("test_in1D");
+    AnalysisDataService::Instance().remove("test_out_default");
+    AnalysisDataService::Instance().remove("test_out_again");
+  }
+
+  void test_default_reverse_log_and_modeset_equal_everywhere() {
+    // Check that reverse logarithmic binning mode equals original behavior
+    Workspace2D_sptr test_in1D = Create1DWorkspace(50);
+    test_in1D->setDistribution(true);
+    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+
+    // run once in the default manner
+    Rebin rebin_default;
+    rebin_default.initialize();
+    rebin_default.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin_default.setPropertyValue("OutputWorkspace", "test_out_default");
+    rebin_default.setProperty("Params", "1.0,-1.0,1000.0");
+    rebin_default.setProperty("UseReverseLogarithmic", true);
+    TS_ASSERT_THROWS_NOTHING(rebin_default.execute());
+    TS_ASSERT(rebin_default.isExecuted());
+
+    // retrieve rebinned axis
+    MatrixWorkspace_sptr rebindata_default =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_default");
+    auto &outX_default = rebindata_default->x(0);
+
+    // now run again but with positive step, using logarithmic mode
+    Rebin rebin_again;
+    rebin_again.initialize();
+    rebin_again.setPropertyValue("InputWorkspace", "test_in1D");
+    rebin_again.setPropertyValue("OutputWorkspace", "test_out_again");
+    // set the params aswrong as possible
+    rebin_again.setProperty("Params", "1.0,1.0,1000.0");
+    rebin_again.setProperty("UseReverseLogarithmic", false);
+    rebin_again.setProperty("Power", "0.5");
+    // set the binning mode and run
+    rebin_again.setProperty("BinningMode", "ReverseLogarithmic");
+    TS_ASSERT_THROWS_NOTHING(rebin_again.execute());
+    TS_ASSERT(rebin_again.isExecuted());
+
+    // retrieve rebinned axis
+    MatrixWorkspace_sptr rebindata_again =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_again");
+    auto &outX_again = rebindata_again->x(0);
+
+    // verify that all bin edges are the same
+    TS_ASSERT_EQUALS(outX_default.size(), outX_again.size());
+    for (size_t i = 0; i < outX_default.size(); i++) {
+      TS_ASSERT_EQUALS(outX_default[i], outX_again[i]);
+    }
+
+    // verify the reverse log bin steps are monotonically decreasing
+    TS_ASSERT(checkBinWidthMonotonic(rebindata_default, Monotonic::DECREASE));
+    TS_ASSERT(checkBinWidthMonotonic(rebindata_again, Monotonic::DECREASE));
+
+    AnalysisDataService::Instance().remove("test_in1D");
+    AnalysisDataService::Instance().remove("test_out_default");
+    AnalysisDataService::Instance().remove("test_out_again");
+  }
+
+  void test_default_power_and_modeset_equal_everywhere() {
+    // Test that modeset to power mode equals default behavior
+    Workspace2D_sptr test_1D = Create1DWorkspace(51);
+    test_1D->setDistribution(false);
+    AnalysisDataService::Instance().add("test_in_Rebin", test_1D);
+
+    // run once the default way
+    Rebin rebin_once;
+    rebin_once.initialize();
+    rebin_once.setPropertyValue("InputWorkspace", "test_in_Rebin");
+    rebin_once.setPropertyValue("OutputWorkspace", "test_out_Rebin_once");
+    rebin_once.setPropertyValue("Params", "1, 1, 10");
+    rebin_once.setPropertyValue("Power", "0.5");
+    TS_ASSERT_THROWS_NOTHING(rebin_once.execute());
+
+    // retrieve rebinned axis
+    MatrixWorkspace_sptr out_once = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_Rebin_once");
+    auto &outX_once = out_once->x(0);
+
+    // run again by setting the binning mode
+    Rebin rebin_again;
+    rebin_again.initialize();
+    rebin_again.setPropertyValue("InputWorkspace", "test_in_Rebin");
+    rebin_again.setPropertyValue("OutputWorkspace", "oldman_rebinagain");
+    // set params as wrong as possible
+    rebin_again.setPropertyValue("Params", "1, -1, 10"); // set step to negative, just to confuse it
+    rebin_again.setProperty("Power", 0.5);
+    rebin_again.setProperty("UseReverseLogarithmic", true);
+    // set binning mode and execute
+    rebin_again.setPropertyValue("BinningMode", "Power");
+    TS_ASSERT_THROWS_NOTHING(rebin_again.execute());
+
+    // retrieve rebinned axis
+    MatrixWorkspace_sptr out_again = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("oldman_rebinagain");
+    auto &outX_again = out_again->x(0);
+
+    TS_ASSERT_EQUALS(outX_once.size(), outX_again.size());
+    for (size_t i = 0; i < outX_once.size(); i++) {
+      TS_ASSERT_EQUALS(outX_once[i], outX_again[i]);
+    }
+
+    TS_ASSERT(checkBinWidthMonotonic(out_once, Monotonic::DECREASE));
+    TS_ASSERT(checkBinWidthMonotonic(out_again, Monotonic::DECREASE));
+
+    AnalysisDataService::Instance().remove("test_in_Rebin");
+    AnalysisDataService::Instance().remove("test_out_Rebin_once");
+    AnalysisDataService::Instance().remove("oldman_rebinagain");
+  }
+
+  void do_test_ignores_power(std::string binMode, double step) {
+    // Test that if the mode is set to linear, will NOT produce power binning,
+    // even if the power is set to nonzero
+    Workspace2D_sptr test_1D = Create1DWorkspace(51);
+    test_1D->setDistribution(false);
+    AnalysisDataService::Instance().add("test_in_Rebin", test_1D);
+    std::stringstream params;
+    params << step;
+
+    // run once in the default method
+    Rebin rebin_once;
+    rebin_once.initialize();
+    rebin_once.setPropertyValue("InputWorkspace", "test_in_Rebin");
+    rebin_once.setPropertyValue("OutputWorkspace", "test_out_1");
+    rebin_once.setProperty("Params", params.str());
+    rebin_once.setProperty("Power", 0.0);
+    if (binMode == "ReverseLogarithmic")
+      rebin_once.setProperty("USeReverseLogarithmic", true);
+    TS_ASSERT_THROWS_NOTHING(rebin_once.execute());
+
+    MatrixWorkspace_sptr out_once = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_1");
+    auto &outX_once = out_once->x(0);
+
+    // run again, with the power set
+    Rebin rebin_again;
+    rebin_again.initialize();
+    rebin_again.setPropertyValue("InputWorkspace", "test_in_Rebin");
+    rebin_again.setPropertyValue("OutputWorkspace", "test_out_2");
+    rebin_again.setProperty("Params", params.str());
+    rebin_again.setProperty("Power", 0.5);
+    rebin_again.setProperty("BinningMode", binMode);
+    TS_ASSERT_THROWS_NOTHING(rebin_again.execute());
+
+    // the algo validation will remove the power if Linear binning is set
+    TS_ASSERT(double(rebin_again.getProperty("Power")) == 0.0);
+
+    MatrixWorkspace_sptr out_again = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_2");
+    auto &outX_again = out_again->x(0);
+
+    // run again, no power set
+    Rebin rebin_thrice;
+    rebin_thrice.initialize();
+    rebin_thrice.setPropertyValue("InputWorkspace", "test_in_Rebin");
+    rebin_thrice.setPropertyValue("OutputWorkspace", "test_out_3");
+    rebin_thrice.setProperty("Params", params.str());
+    rebin_thrice.setProperty("Power", 0.0);
+    rebin_thrice.setProperty("BinningMode", binMode);
+    TS_ASSERT_THROWS_NOTHING(rebin_thrice.execute());
+
+    MatrixWorkspace_sptr out_thrice = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_3");
+    auto &outX_thrice = out_thrice->x(0);
+
+    TS_ASSERT_EQUALS(outX_once.size(), outX_again.size());
+    TS_ASSERT_EQUALS(outX_once.size(), outX_thrice.size());
+    for (size_t i = 0; i < outX_once.size(); i++) {
+      TS_ASSERT_EQUALS(outX_once[i], outX_again[i]);
+      TS_ASSERT_EQUALS(outX_once[i], outX_thrice[i]);
+    }
+
+    AnalysisDataService::Instance().remove("test_in_Rebin");
+    AnalysisDataService::Instance().remove("test_out_1");
+    AnalysisDataService::Instance().remove("test_out_2");
+    AnalysisDataService::Instance().remove("test_out_3");
+  }
+
+  void test_all_bin_modes_ignore_power() {
+    std::vector<std::string> binModes{"Linear", "Logarithmic", "ReverseLogarithmic"};
+    std::vector<double> steps{1.0, -1.0, -1.0};
+
+    for (size_t i = 0; i < binModes.size(); i++) {
+      do_test_ignores_power(binModes[i], steps[i]);
+    }
   }
 
 private:
@@ -819,22 +1414,29 @@ private:
     TS_ASSERT_DELTA(yValues.rawData(), yExpected, 0.001);
   }
 
-  bool checkBinWidthMonotonic(MatrixWorkspace_sptr ws, bool reverse = false, bool ignoreLastBin = false) {
+  enum class Monotonic : bool { INCREASE = false, DECREASE = true };
+  bool checkBinWidthMonotonic(MatrixWorkspace_sptr ws, Monotonic monotonic = Monotonic::INCREASE,
+                              bool ignoreLastBin = false) {
     size_t binEdgesTotal = ws->blocksize();
     if (ignoreLastBin)
       binEdgesTotal--;
     auto binEdges = ws->binEdges(0);
     double lastBinSize = binEdges[1] - binEdges[0];
-    for (size_t i = 1; i < binEdgesTotal; ++i) {
+    bool allMonotonic = true;
+    for (size_t i = 1; i < binEdgesTotal && allMonotonic; ++i) {
       double currentBinSize = binEdges[i + 1] - binEdges[i];
 
-      if (((lastBinSize < currentBinSize) && reverse) || ((lastBinSize > currentBinSize) && !reverse)) {
-        return false;
+      switch (monotonic) {
+      case Monotonic::INCREASE:
+        allMonotonic &= lastBinSize < currentBinSize;
+        break;
+      case Monotonic::DECREASE:
+        allMonotonic &= lastBinSize > currentBinSize;
+        break;
       }
-
       lastBinSize = currentBinSize;
     }
-    return true;
+    return allMonotonic;
   }
 };
 
