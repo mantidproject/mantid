@@ -55,8 +55,8 @@ public:
   EnumeratedString(const EnumeratedString &es) : value(es.value), name(es.name) {}
 
   // treat the object as either the enum, or a string
-  constexpr operator E() const { return value; }
-  constexpr operator std::string() const { return name; }
+  operator E() const { return value; }
+  operator std::string() const { return name; }
   // assign the object either by the enum, or by string
   EnumeratedString &operator=(E e) {
     if (size_t(e) < size_t(E::enum_count) && size_t(e) >= 0) {
@@ -82,14 +82,14 @@ public:
     return *this;
   }
   // for comparison of the object to either enums or strings
-  constexpr bool operator==(E e) const { return value == e; }
-  constexpr bool operator!=(E e) const { return value != e; }
-  constexpr bool operator==(std::string s) const { return name == s; }
-  constexpr bool operator!=(std::string s) const { return name != s; }
-  constexpr bool operator==(const char *s) const { return name == std::string(s); }
-  constexpr bool operator!=(const char *s) const { return name != std::string(s); }
-  constexpr bool operator==(EnumeratedString es) const { return value == es.value; }
-  constexpr bool operator!=(EnumeratedString es) const { return value != es.value; }
+  bool operator==(const E &e) const { return value == e; }
+  bool operator!=(const E &e) const { return value != e; }
+  bool operator==(const std::string &s) const { return name == s; }
+  bool operator!=(const std::string &s) const { return name != s; }
+  bool operator==(const char *s) const { return name == std::string(s); }
+  bool operator!=(const char *s) const { return name != std::string(s); }
+  bool operator==(const EnumeratedString es) const { return value == es.value; }
+  bool operator!=(const EnumeratedString es) const { return value != es.value; }
   constexpr const char *c_str() const { return name.c_str(); }
 
 private:
