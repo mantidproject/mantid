@@ -74,7 +74,7 @@ class SimpleAPITest(unittest.TestCase):
             "FullBinsOnly(Input) *boolean*       Omit the final bin if its width is smaller than the step size\n\n"
             "IgnoreBinErrors(Input) *boolean*       Ignore errors related to zero/negative bin widths in input/output workspaces. When ignored, the signal and errors are set to zero\n\n"
             "UseReverseLogarithmic(Input) *boolean*       For logarithmic intervals, the splitting starts from the end and goes back to the start, ie the bins are bigger at the start getting exponentially smaller until they reach the end. For these bins, the FullBinsOnly flag is ignored.\n\n"
-            "Power(Input) *number*       Splits the interval in bins which actual width is equal to requested width / (i ^ power); default is linear. Power must be between 0 and 1.\n"
+            "Power(Input) *number*       Splits the interval in bins which actual width is equal to requested width / (i ^ power); default is linear. Power must be between 0 and 1.  Will only work in default mode.\n\n"
             "BinningMode(Input) *string*       Optional. Either linear/log mode can be specified in the usual way through sign of binwidth ('Default'), or can be set to always use linear binning regardless of binwidth sign ('Linear'), or can be set to always use logarithmic binning regardlness of binwidth sign ('Logarithmic'), or can be set to always use power binning ('Power', must give power property).  This will override all other specification or default behavior.\n"
         )
         doc = simpleapi.rebin.__doc__
