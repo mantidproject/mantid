@@ -32,7 +32,7 @@ template <class E, const std::string names[size_t(E::enum_count)]> class Enumera
    * The enum and string array *must* have same order.
    */
 public:
-  constexpr EnumeratedString() {
+  EnumeratedString() {
     // force a compiler error if no E::enum_count
     use<E>(E::enum_count); // Last element of enum MUST be enum_count
   }
@@ -90,7 +90,7 @@ public:
   bool operator!=(const char *s) const { return name != std::string(s); }
   bool operator==(const EnumeratedString es) const { return value == es.value; }
   bool operator!=(const EnumeratedString es) const { return value != es.value; }
-  constexpr const char *c_str() const { return name.c_str(); }
+  const char *c_str() const { return name.c_str(); }
 
 private:
   E value;
