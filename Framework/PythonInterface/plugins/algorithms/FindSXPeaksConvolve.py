@@ -160,29 +160,49 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             with np.errstate(divide="ignore", invalid="ignore"):
                 intens_over_sig = yconv / econv  # ignore 0/0 (produces NaN)
 
+            # find peaks above threshold I/sigma
             pk_mask = intens_over_sig > threshold_i_over_sig
-            pk_mask = binary_closing(pk_mask)
-            labels, nlabels = label(pk_mask)
+            pk_mask = binary_closing(pk_mask)  # removes holes - helps merge close peaks
+            labels, nlabels = label(pk_mask)  # identify contigous nearest-neightbour connected regions
             # identify labels of peaks above min size
             min_size = int(min_frac_size * kernel.size)
             nbins = sum_labels(pk_mask, labels, range(1, nlabels + 1))
             ilabels = np.flatnonzero(nbins > min_size) + 1
 
-            # find index of maximum bin in peak region
-            imaxs = maximum_position(y, labels, ilabels)
-            imaxs_ioversig = maximum_position(intens_over_sig, labels, ilabels)
+            # find index of maximum in I/sigma for each valid peak (label index in ilabels)
+            imaxs = maximum_position(intens_over_sig, labels, ilabels)
 
             # add peaks to table
             for ipk in range(len(imaxs)):
                 irow, icol, itof = imaxs[ipk]
+                # find peak position
+                # get data in kernel window around index with max I/sigma
+                irow_lo = np.clip(irow - kernel.shape[0] // 2, a_min=0, a_max=y.shape[0])
+                irow_hi = np.clip(irow + kernel.shape[0] // 2, a_min=0, a_max=y.shape[0])
+                icol_lo = np.clip(icol - kernel.shape[1] // 2, a_min=0, a_max=y.shape[1])
+                icol_hi = np.clip(icol + kernel.shape[1] // 2, a_min=0, a_max=y.shape[1])
+                itof_lo = np.clip(itof - kernel.shape[2] // 2, a_min=0, a_max=y.shape[2])
+                itof_hi = np.clip(itof + kernel.shape[2] // 2, a_min=0, a_max=y.shape[2])
+                ypk = y[irow_lo:irow_hi, icol_lo:icol_hi, itof_lo:itof_hi]
+                # integrate over TOF and select detector with max intensity
+                imax_det = np.argmax(ypk.sum(axis=2))
+                irow_max, icol_max = np.unravel_index(imax_det, ypk.shape[0:-1])
+                irow_max += irow_lo  # get index in entire array
+                icol_max += icol_lo
+                # find max in TOF dimension
+                itof_max = np.argmax(ypk.sum(axis=0).sum(axis=0)) + itof_lo
                 self.exec_child_alg(
-                    "AddPeak", PeaksWorkspace=peaks, RunWorkspace=ws, TOF=xspec[itof], DetectorID=int(peak_data.detids[irow, icol])
+                    "AddPeak",
+                    PeaksWorkspace=peaks,
+                    RunWorkspace=ws,
+                    TOF=xspec[itof_max],
+                    DetectorID=int(peak_data.detids[irow_max, icol_max]),
                 )
                 # set intensity of peak (rough estimate)
                 pk = peaks.getPeak(peaks.getNumberPeaks() - 1)
                 bin_width = xspec[itof + 1] - xspec[itof]
-                pk.setIntensity(yconv[imaxs_ioversig[ipk]] * bin_width)
-                pk.setSigmaIntensity(econv[imaxs_ioversig[ipk]] * bin_width)
+                pk.setIntensity(yconv[irow, icol, itof] * bin_width)
+                pk.setSigmaIntensity(econv[irow, icol, itof] * bin_width)
 
             # remove dummy peak
             self.exec_child_alg("DeleteTableRows", TableWorkspace=peaks, Rows=[irow_to_del])
