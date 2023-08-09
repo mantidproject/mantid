@@ -24,7 +24,7 @@ except (Exception, Warning):
 
     print(
         subprocess.Popen(
-            "python -m pip install -U quickBayes==1.0.0b12",
+            "python -m pip install -U quickBayes==1.0.0b14",
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
