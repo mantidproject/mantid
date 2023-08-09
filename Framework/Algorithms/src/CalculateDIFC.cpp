@@ -61,12 +61,6 @@ void calculateFromOffset(API::Progress &progress, DataObjects::SpecialWorkspace2
   }
 }
 
-// namespace OffsetMode {
-// const std::string RELATIVE("Relative");
-// const std::string ABSOLUTE("Absolute");
-// const std::string SIGNED("Signed");
-// } // namespace OffsetMode
-
 namespace PropertyNames {
 const std::string INPUT_WKSP("InputWorkspace");
 const std::string OUTPUT_WKSP("OutputWorkspace");
