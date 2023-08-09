@@ -14,7 +14,7 @@ this is representing an ``enum`` object in C++, but based on a set of strings in
 would be something like the following:
 
 .. code-block:: cpp
-   enum class : std::string StringPropertyOptions {option1="OptionOne", ... };
+   enum class StringPropertyOptions: std::string {option1="OptionOne", ... };
 
 However, this is not allowed under C++.
 
