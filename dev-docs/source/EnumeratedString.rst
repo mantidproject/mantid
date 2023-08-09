@@ -1,4 +1,4 @@
-.. _IndexProperty:
+.. _EnumeratedString:
 
 EnumeratedString
 ==============
@@ -95,7 +95,7 @@ An example of where this might be used inside an algorithm is shown below:
       // the StringListValidator is optional, but fails faster; the CAKETYPE cannot be set with string not in list
       declareProperty("CakeType", "Bundt", std::make_shared<Mantid::Kernel::StringListValidator>(cakeTypeList),
          "Mandatory.  The kind of cake for algorithm to bake.");
-   }
+   }https://github.com/mantidproject/mantid/pull/35904
 
    void BakeCake::exec() {
       // this will assign cakeType from the string property
