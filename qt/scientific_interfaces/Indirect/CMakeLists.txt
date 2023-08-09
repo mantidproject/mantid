@@ -102,6 +102,7 @@ set(SRC_FILES
     ResNorm.cpp
     Stretch.cpp
     Reduction/ISISEnergyTransferValidator.cpp
+    Reduction/ISISEnergyTransferModel.cpp
 )
 
 set(MOC_FILES
@@ -218,6 +219,7 @@ set(INC_FILES
     Reduction/ISISEnergyTransferData.h
     Reduction/ISISEnergyTransferValidator.h
     Reduction/ISISEnergyTransferModelUtils.h
+    Reduction/ISISEnergyTransferModel.h
 )
 
 set(UI_FILES
