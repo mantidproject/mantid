@@ -190,6 +190,7 @@ set(MOC_FILES
     ResNorm.h
     Stretch.h
     FitStatusWidget.h
+    Reduction/ISISEnergyTransferView.h
 )
 
 set(INC_FILES
