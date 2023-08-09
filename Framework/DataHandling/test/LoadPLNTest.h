@@ -77,6 +77,11 @@ public:
     TS_ASSERT_DELTA(logpm("TOFCorrection"), -256.456, 1.0e-3);
     TS_ASSERT_DELTA(logpm("Wavelength"), 4.6866, 1.0e-4);
     TS_ASSERT_DELTA(logpm("SampleRotation"), 13.001, 1.0e-3);
+
+    // check the env parameters
+    TS_ASSERT_DELTA(logpm("env_T01S00"), 1.4, 1.0e-3);
+    TS_ASSERT_DELTA(logpm("env_T2S2"), 323.205, 1.0e-3);
+    TS_ASSERT_THROWS(logpm("env_T3S1"), const std::runtime_error &);
   }
 
   void test_lambda_on_two_mode() {

@@ -53,7 +53,12 @@ void IndirectFitDataPresenter::addWorkspace(const std::string &workspaceName, co
   m_model->addWorkspace(workspaceName, spectra);
 }
 
-void IndirectFitDataPresenter::setResolution(const std::string &name) { m_model->setResolution(name); }
+void IndirectFitDataPresenter::setResolution(const std::string &name) {
+  if (m_model->setResolution(name) == false) {
+    m_model->removeSpecialValues(name);
+    displayWarning("Replaced the NaN's and infinities in " + name + " with zeros");
+  }
+}
 
 void IndirectFitDataPresenter::setSampleWSSuffices(const QStringList &suffixes) { m_wsSampleSuffixes = suffixes; }
 

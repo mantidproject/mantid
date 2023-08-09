@@ -4,52 +4,61 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Optional
+
+from os import PathLike
+from typing import Optional, Union
+
+from euphonic import ForceConstants, QpointPhononModes
+from euphonic.cli.utils import load_data_from_file
 
 import numpy as np
 
 from mantid.kernel import logger
 
 
-def euphonic_available():
-    """Find out if Euphonic modules can be imported, without raising an error
-
-    This allows the Simulation Interface to query the availability of these
-    formats without complex error-handling.
+def force_constants_from_file(filename: Union[str, PathLike]) -> ForceConstants:
     """
-    try:
-        from euphonic.cli.utils import force_constants_from_file  # noqa: F401
-        from euphonic.util import mp_grid  # noqa: F401
-    except ImportError:
-        return False
-    return True
+    Read force constants file with Euphonic
+
+    Imitates a function from Euphonic versions < 1.0 for compatibility purposes
+
+    Args:
+        filename: Force constant data file (phonopy.yaml, .castep_bin or
+            Euphonic JSON)
+    """
+    data = load_data_from_file(filename)
+    if not isinstance(data, ForceConstants):
+        raise ValueError(f"File {filename} does not contain force constants")
+    return data
 
 
-def euphonic_calculate_modes(filename: str, cutoff: float = 20.0, gamma: bool = True, acoustic_sum_rule: Optional[str] = "reciprocal"):
+def euphonic_calculate_modes(
+    filename: str, cutoff: float = 20.0, gamma: bool = True, acoustic_sum_rule: Optional[str] = "reciprocal"
+) -> QpointPhononModes:
     """
     Read force constants file with Euphonic and sample frequencies/modes
 
-    :param filename: Input data
-    :param cutoff:
-        Sampling density of Brillouin-zone. Specified as real-space length
-        cutoff in Angstrom.
-    :param gamma:
-        Shift sampling grid to include the Gamma-point.
-    :param acoustic_sum_rule:
-        Apply acoustic sum rule correction to force constants: options are
-        'realspace' and 'reciprocal', specifying different implementations of
-        the correction. If None, no correction is applied. This option is
-        referred to as "asr" in the Euphonic python API and command-line tools.
-
-    :returns: euphonic.QpointPhononModes
-
+    Args:
+        filename:
+            Input data
+        cutoff:
+            Sampling density of Brillouin-zone. Specified as real-space length
+            cutoff in Angstrom.
+        gamma:
+            Shift sampling grid to include the Gamma-point.
+        acoustic_sum_rule:
+            Apply acoustic sum rule correction to force constants: options are
+            'realspace' and 'reciprocal', specifying different implementations
+            of the correction. If None, no correction is applied. This option
+            is referred to as "asr" in the Euphonic python API and command-line
+            tools.
     """
 
     from math import ceil
-    from euphonic.cli.utils import force_constants_from_file
     from euphonic.util import mp_grid
 
     fc = force_constants_from_file(filename)
+
     recip_lattice_lengths = np.linalg.norm(fc.crystal.reciprocal_cell().to("1/angstrom").magnitude, axis=1)
     mp_sampling = [ceil(x) for x in (cutoff * recip_lattice_lengths / (2 * np.pi))]
     qpts = mp_grid(mp_sampling)

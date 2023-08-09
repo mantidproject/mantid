@@ -1,4 +1,4 @@
-# flake8: noqa F401   # "imported but unused" error not applicable
+# ruff: noqa: F401   # "imported but unused" error not applicable
 
 from .textparser import TextParser
 

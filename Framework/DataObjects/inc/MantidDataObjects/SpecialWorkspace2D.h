@@ -47,6 +47,8 @@ public:
   @return Standard string name  */
   const std::string id() const override { return "SpecialWorkspace2D"; }
 
+  bool isDetectorIDMappingEmpty() const { return detID_to_WI.empty(); }
+  void buildDetectorIDMapping();
   double getValue(const detid_t detectorID) const;
   double getValue(const detid_t detectorID, const double defaultValue) const;
 

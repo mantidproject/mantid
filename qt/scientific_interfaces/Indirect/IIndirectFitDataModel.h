@@ -61,8 +61,8 @@ public:
   virtual void setEndX(double endX, WorkspaceID workspaceID) = 0;
   virtual void setEndX(double startX, FitDomainIndex fitDomainIndex) = 0;
   virtual void setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
-  virtual void setResolution(const std::string &name) = 0;
-  virtual void setResolution(const std::string &name, WorkspaceID workspaceID) = 0;
+  virtual bool setResolution(const std::string &name) = 0;
+  virtual bool setResolution(const std::string &name, WorkspaceID workspaceID) = 0;
 
   virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(FitDomainIndex index) const = 0;
   virtual std::pair<double, double> getFittingRange(FitDomainIndex index) const = 0;
@@ -72,6 +72,7 @@ public:
   virtual void setExcludeRegion(const std::string &exclude, FitDomainIndex index) = 0;
 
   virtual std::pair<WorkspaceID, WorkspaceIndex> getSubIndices(FitDomainIndex) const = 0;
+  virtual void removeSpecialValues(const std::string &name) = 0;
 };
 
 } // namespace IDA

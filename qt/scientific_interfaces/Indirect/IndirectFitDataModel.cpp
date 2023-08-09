@@ -9,6 +9,7 @@
 #include "DllConfig.h"
 #include "IndirectFitData.h"
 #include "IndirectFitDataModel.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -116,13 +117,17 @@ std::vector<std::pair<std::string, size_t>> IndirectFitDataModel::getResolutions
   return resolutionVector;
 }
 
-void IndirectFitDataModel::setResolution(const std::string &name) {
-  setResolution(name, getNumberOfWorkspaces() - WorkspaceID{1});
+bool IndirectFitDataModel::setResolution(const std::string &name) {
+  return setResolution(name, getNumberOfWorkspaces() - WorkspaceID{1});
 }
 
-void IndirectFitDataModel::setResolution(const std::string &name, WorkspaceID workspaceID) {
+bool IndirectFitDataModel::setResolution(const std::string &name, WorkspaceID workspaceID) {
+  bool hasValidValues = true;
   if (!name.empty() && m_adsInstance.doesExist(name)) {
     const auto resolution = m_adsInstance.retrieveWS<Mantid::API::MatrixWorkspace>(name);
+    auto y = resolution->readY(workspaceID.value);
+    hasValidValues = std::all_of(y.cbegin(), y.cend(), [](double value) { return value == value; });
+
     if (m_resolutions->size() > workspaceID.value) {
       m_resolutions->at(workspaceID.value) = resolution;
     } else if (m_resolutions->size() == workspaceID.value) {
@@ -134,6 +139,17 @@ void IndirectFitDataModel::setResolution(const std::string &name, WorkspaceID wo
   } else {
     throw std::runtime_error("A valid resolution file needs to be selected.");
   }
+  return hasValidValues;
+}
+
+void IndirectFitDataModel::removeSpecialValues(const std::string &name) {
+  auto alg = Mantid::API::AlgorithmManager::Instance().create("ReplaceSpecialValues");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", name);
+  alg->setProperty("OutputWorkspace", name);
+  alg->setProperty("NaNValue", 0.0);
+  alg->setProperty("InfinityValue", 0.0);
+  alg->execute();
 }
 
 void IndirectFitDataModel::setSpectra(const std::string &spectra, WorkspaceID workspaceID) {

@@ -32,7 +32,6 @@ from mantid.simpleapi import (
     DeleteWorkspace,
     ConvertToMD,
     Rebin,
-    CreateGroupingWorkspace,
     GroupDetectors,
     SetUB,
 )
@@ -293,18 +292,15 @@ class LoadWANDSCD(PythonAlgorithm):
             SetUB(_tmp_ws, EnableLogging=False)
 
         if grouping > 1:
-            _tmp_group, _, _ = CreateGroupingWorkspace(InputWorkspace=_tmp_ws, EnableLogging=False)
-
-            group_number = 0
+            detector_list = ""
             for x in range(0, 480 * 8, grouping):
                 for y in range(0, 512, grouping):
-                    group_number += 1
+                    spectra_list = []
                     for j in range(grouping):
                         for i in range(grouping):
-                            _tmp_group.dataY(y + i + (x + j) * 512)[0] = group_number
-
-            _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, CopyGroupingFromWorkspace=_tmp_group, EnableLogging=False)
-            DeleteWorkspace(_tmp_group, EnableLogging=False)
+                            spectra_list.append(str(y + i + (x + j) * 512))
+                    detector_list += "," + "+".join(spectra_list)
+            _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, GroupingPattern=detector_list, EnableLogging=False)
 
         progress.report("Adding logs")
 

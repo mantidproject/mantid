@@ -185,9 +185,13 @@ pipeline {
             // Build the base set of packages (ones not required for mantidworkbench)
             // in parallel
             package_conda('linux-64', 'base')
-            archive_env_logs('linux-64')
             archive_conda_packages('linux-64')
             archive_conda_packages('noarch')
+          }
+          post {
+            always {
+              archive_env_logs('linux-64')
+            }
           }
         }
         stage('package conda: win-64') {
@@ -214,8 +218,12 @@ pipeline {
             // Build the base set of packages (ones not required for mantidworkbench)
             // in parallel
             package_conda('win-64', 'base')
-            archive_env_logs('win-64')
             archive_conda_packages('win-64')
+          }
+          post {
+            always {
+              archive_env_logs('win-64')
+            }
           }
         }
         stage('package conda: osx-64') {
@@ -242,8 +250,12 @@ pipeline {
             // Build the base set of packages (ones not required for mantidworkbench)
             // in parallel
             package_conda('osx-64', 'base')
-            archive_env_logs('osx-64')
             archive_conda_packages('osx-64')
+          }
+          post {
+            always {
+              archive_env_logs('osx-64')
+            }
           }
         }
       }
@@ -285,11 +297,16 @@ pipeline {
                 selector: specific('${BUILD_NUMBER}'),
                 target: './',
                 flatten: false
+
               package_conda("${PLATFORM}", "workbench")
-              archive_env_logs("${PLATFORM}")
               archive_conda_packages("${PLATFORM}")
               package_standalone()
               archive_standalone_package("${PLATFORM}")
+            }
+            post {
+              always {
+                archive_env_logs("${PLATFORM}")
+              }
             }
           }
         }
@@ -420,7 +437,7 @@ def build_and_test(platform) {
     bat "\"${WIN_BASH}\" -ex -c \"${buildscript_path}\
       ${workspace_unix_style}/${CHECKOUT_DIR} ${cmake_preset} ${common_args}\""
   } else {
-    sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} --enable-doctests"
+    sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} --enable-doctests --use-core-dumps"
   }
 }
 

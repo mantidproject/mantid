@@ -174,12 +174,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         summary of the algorithm
         :return:
         """
-        return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3) "
+        return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3)"
 
     def PyInit(self):
         self.copyProperties("AlignAndFocusPowderFromFiles", ["Filename", "PreserveEvents", "DMin", "DMax", "DeltaRagged"])
 
-        self.declareProperty("Sum", False, "Sum the runs. Does nothing for characterization runs")
+        self.declareProperty("Sum", False, "Sum the runs. Does nothing for characterization runs.")
         self.declareProperty(
             "PushDataPositive",
             "None",
@@ -189,7 +189,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         arrvalidator = IntArrayBoundedValidator(lower=-1)
         self.declareProperty(
             IntArrayProperty("BackgroundNumber", values=[0], validator=arrvalidator),
-            doc="If specified overrides value in CharacterizationRunsFile If -1 turns off correction.",
+            doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.",
         )
         self.declareProperty(
             IntArrayProperty("VanadiumNumber", values=[0], validator=arrvalidator),
@@ -206,7 +206,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         )  # CalFileName
         self.declareProperty(
             FileProperty(name="GroupingFile", defaultValue="", action=FileAction.OptionalLoad, extensions=[".xml"]),
-            "Overrides grouping from CalibrationFile",
+            "Overrides grouping from CalibrationFile.",
         )
         self.declareProperty(
             MultipleFileProperty(name="CharacterizationRunsFile", action=FileAction.OptionalLoad, extensions=["txt"]),
@@ -227,11 +227,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         )
         self.declareProperty(
             FloatArrayProperty("Binning", values=[0.0, 0.0, 0.0], direction=Direction.Input),
-            "Positive is linear bins, negative is logorithmic",
+            "Positive is linear bins, negative is logorithmic.",
         )  # Params
         self.copyProperties("AlignAndFocusPowderFromFiles", ["ResampleX"])
         self.declareProperty(
-            "BinInDspace", True, "If all three bin parameters a specified, whether they are in dspace (true) or " "time-of-flight (false)"
+            "BinInDspace", True, "If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)."
         )  # DSpacing
         # section of vanadium run processing
         self.declareProperty("StripVanadiumPeaks", True, "Subtract fitted vanadium peaks from the known positions.")
@@ -239,7 +239,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(
             "VanadiumPeakTol",
             0.05,
-            "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. " "Default=0.05, negative turns off",
+            "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off.",
         )
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
         self.declareProperty("VanadiumRadius", 0.3175, "Radius for CarpenterSampleCorrection")
@@ -255,16 +255,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             "ScaleData",
             defaultValue=1.0,
             validator=FloatBoundedValidator(lower=0.0, exclusive=True),
-            doc="Constant to multiply the data before writing out. This does not apply to " "PDFgetN files.",
+            doc="Constant to multiply the data before writing out. This does not apply to PDFgetN files.",
         )
         self.declareProperty(
             "OffsetData",
             defaultValue=0.0,
             validator=FloatBoundedValidator(lower=0.0, exclusive=False),
-            doc="Constant to add to the data before writing out. This does not apply to " "PDFgetN files.",
+            doc="Constant to add to the data before writing out. This does not apply to PDFgetN files.",
         )
         self.declareProperty(
-            "SaveAs", "gsas", "List of all output file types. Allowed values are 'fullprof', 'gsas', 'nexus', " "'pdfgetn', and 'topas'"
+            "SaveAs", "gsas", "List of all output file types. Allowed values are 'fullprof', 'gsas', 'nexus', 'pdfgetn', and 'topas'"
         )
         self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
         self.declareProperty(FileProperty(name="OutputDirectory", defaultValue="", action=FileAction.Directory))
@@ -296,7 +296,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(
             "SampleNumberDensity",
             defaultValue=Property.EMPTY_DBL,
-            doc="Number density of the sample in number of atoms per cubic Angstrom will be used instead of calculated",
+            doc="Number density of the sample in number of atoms per cubic Angstrom will be used instead of calculated.",
         )
         self.declareProperty("ContainerShape", defaultValue="PAC06", doc="Defines the container geometry")
         self.declareProperty(
@@ -304,7 +304,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         )
         self.copyProperties("AbsorptionCorrection", "ElementSize")
         self.declareProperty(
-            "NumWavelengthBins", defaultValue=1000, doc="Number of wavelength bin to calculate the for absorption correction"
+            "NumWavelengthBins", defaultValue=1000, doc="Number of wavelength bin to calculate the for absorption correction."
         )
 
         workspace_prop = WorkspaceProperty("SplittersWorkspace", "", Direction.Input, PropertyMode.Optional)
@@ -319,7 +319,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(
             "LowResolutionSpectraOffset",
             -1,
-            "If larger and equal to 0, then process low resolution TOF and offset is the spectra " "number. Otherwise, ignored.",
+            "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. Otherwise, ignored.",
         )  # LowResolutionSpectraOffset
 
         self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
@@ -329,11 +329,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # reduce logs being loaded
         self.declareProperty(
             StringArrayProperty(name="LogAllowList"),
-            "If specified, only these logs will be loaded from the file. This is passed to LoadEventNexus",
+            "If specified, only these logs will be loaded from the file. This is passed to LoadEventNexus.",
         )
         self.declareProperty(
-            StringArrayProperty(name="LogBlockList", values="Phase*,Speed*,BL*:Chop:*,chopper*TDC"),
-            "If specified, these logs will not be loaded from the file. This is passed to LoadEventNexus",
+            StringArrayProperty(name="LogBlockList", values="Phase\\*,Speed\\*,BL\\*:Chop:\\*,chopper\\*TDC"),
+            "If specified, these logs will not be loaded from the file. This is passed to LoadEventNexus.",
         )
 
         self.copyProperties("AlignAndFocusPowderFromFiles", ["FrequencyLogNames", "WaveLengthLogNames"])

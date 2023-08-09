@@ -58,24 +58,24 @@ void CrystalFieldControl::setAttribute(const std::string &name, const API::IFunc
     } else if (name == "FWHMs") {
       const size_t nSpec = m_temperatures.size();
       m_FWHMs = attr.asVector();
-      auto frontValue = m_FWHMs.front();
+      if (m_FWHMs.empty())
+        return;
       if (m_FWHMs.size() == 1 && m_FWHMs.size() != nSpec) {
+        auto frontValue = m_FWHMs.front();
         m_FWHMs.assign(nSpec, frontValue);
       }
-      if (!m_FWHMs.empty()) {
-        m_fwhmX.resize(nSpec);
-        m_fwhmY.resize(nSpec);
-        for (size_t i = 0; i < nSpec; ++i) {
-          m_fwhmX[i].clear();
-          m_fwhmY[i].clear();
-          if (nSpec > 1) {
-            auto &control = *getFunction(i);
-            control.setAttributeValue("FWHMX", std::vector<double>());
-            control.setAttributeValue("FWHMY", std::vector<double>());
-          } else {
-            API::IFunction::setAttributeValue("FWHMX", std::vector<double>());
-            API::IFunction::setAttributeValue("FWHMY", std::vector<double>());
-          }
+      m_fwhmX.resize(nSpec);
+      m_fwhmY.resize(nSpec);
+      for (size_t i = 0; i < nSpec; ++i) {
+        m_fwhmX[i].clear();
+        m_fwhmY[i].clear();
+        if (nSpec > 1) {
+          auto &control = *getFunction(i);
+          control.setAttributeValue("FWHMX", std::vector<double>());
+          control.setAttributeValue("FWHMY", std::vector<double>());
+        } else {
+          API::IFunction::setAttributeValue("FWHMX", std::vector<double>());
+          API::IFunction::setAttributeValue("FWHMY", std::vector<double>());
         }
       }
     } else if ((name.compare(0, 5, "FWHMX") == 0 || name.compare(0, 5, "FWHMY") == 0) && !attr.asVector().empty()) {
