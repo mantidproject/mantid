@@ -214,6 +214,7 @@ set(INC_FILES
     MSDFitModel.h
     Notifier.h
     IFQFitObserver.h
+    Reduction/ISISEnergyTransferData.h
 )
 
 set(UI_FILES
