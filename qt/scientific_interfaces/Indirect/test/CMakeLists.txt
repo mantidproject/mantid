@@ -28,6 +28,7 @@ set(TEST_FILES
     InelasticDataManipulationSqwTabModelTest.h
     InelasticDataManipulationSymmetriseTabModelTest.h
     IqtFitModelTest.h
+    ISISEnergyTransferModelTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesIndirectTestInitialization.h)
