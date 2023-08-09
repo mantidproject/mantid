@@ -258,7 +258,6 @@ Component Overviews
    :maxdepth: 1
 
    BatchWidget/index
-   EnumeratedString
    EventWorkspaceDev
    HandlingXML
    IndexProperty
