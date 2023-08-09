@@ -88,6 +88,10 @@ importlib_resources:
 librdkafka:
   - <=2.1.1
 
+# 2.3.12 causes build of docs-qthelp to fail on linux
+unixodbc:
+  - <=2.3.10
+
 pin_run_as_build:
     boost:
       max_pin: x.x
