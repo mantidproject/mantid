@@ -37,6 +37,7 @@ requirements:
     - mantidqt {{ version }}
     - versioningit
     - readline {{ readline }}  # [linux]
+    - unixodbc {{ unixodbc }}  # [linux]
 
 # there are no run requirements as it's just pure html
 
