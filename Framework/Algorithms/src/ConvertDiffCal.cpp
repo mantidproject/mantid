@@ -23,7 +23,7 @@ namespace {
 const std::vector<std::string> DIFC_TABLE_COLUMN_NAMES{"detid", "difc", "difa", "tzero"};
 const std::vector<std::string> DIFC_TABLE_COLUMN_TYPES{"int", "double", "double", "double"};
 
-enum class OffsetMode { RELATIVE, ABSOLUTE, SIGNED, enum_count };
+enum class OffsetMode { Relative, Absolute, Signed, enum_count };
 static std::string offsetModeNames[size_t(OffsetMode::enum_count)] = {"Relative", "Absolute", "Signed"};
 typedef Mantid::Kernel::EnumeratedString<OffsetMode, offsetModeNames> OFFSETMODE;
 
@@ -81,7 +81,7 @@ void ConvertDiffCal::init() {
                   "Effectively, this algorithm applies partial updates to this table and "
                   "returns it as the OutputWorkspace");
 
-  declareProperty(PropertyNames::OFFSET_MODE, offsetModeNames[size_t(OffsetMode::RELATIVE)],
+  declareProperty(PropertyNames::OFFSET_MODE, offsetModeNames[size_t(OffsetMode::Relative)],
                   "Optional: Whether to calculate a relative, absolute, or signed offset");
 
   declareProperty(PropertyNames::BINWIDTH, EMPTY_DBL(),
@@ -96,7 +96,7 @@ std::map<std::string, std::string> ConvertDiffCal::validateInputs() {
   std::map<std::string, std::string> result;
 
   OFFSETMODE offsetMode = std::string(getProperty(PropertyNames::OFFSET_MODE));
-  if (isDefault(PropertyNames::BINWIDTH) && (offsetMode == OffsetMode::SIGNED)) {
+  if (isDefault(PropertyNames::BINWIDTH) && (offsetMode == OffsetMode::Signed)) {
     std::string msg = "Signed offset mode requires bin width to be specified.";
     result[PropertyNames::BINWIDTH] = msg;
     result[PropertyNames::OFFSET_MODE] = msg;
@@ -172,7 +172,7 @@ double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t 
   // the factor returned is what is needed to convert TOF->d-spacing
   // the table is supposed to be filled with DIFC which goes the other way
   double newDIFC = 0.0;
-  if (offsetMode == OffsetMode::SIGNED)
+  if (offsetMode == OffsetMode::Signed)
     newDIFC = Mantid::Geometry::Conversion::calculateDIFCCorrection(spectrumInfo.l1(), spectrumInfo.l2(index), twotheta,
                                                                     offset, binWidth);
   else {
@@ -252,7 +252,7 @@ void ConvertDiffCal::exec() {
         int row_to_update = iter->second;
 
         double &difc_value_to_update = configWksp->cell<double>(row_to_update, 1);
-        if (offsetMode == OffsetMode::SIGNED) {
+        if (offsetMode == OffsetMode::Signed) {
           difc_value_to_update = updateSignedDIFC(offsetsWS, i, difc_value_to_update, binWidth);
         } else {
           difc_value_to_update = difc_value_to_update / (1.0 + new_offset_value);

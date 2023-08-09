@@ -15,7 +15,7 @@ namespace Mantid {
 
 namespace {
 
-enum class OffsetMode { RELATIVE, ABSOLUTE, SIGNED, enum_count };
+enum class OffsetMode { Relative, Absolute, Signed, enum_count };
 static std::string offsetModeNames[3]{"Relative", "Absolute", "Signed"};
 std::vector<std::string> offsetModeList(offsetModeNames, offsetModeNames + 3);
 typedef Mantid::Kernel::EnumeratedString<OffsetMode, offsetModeNames> OFFSETMODE;
@@ -37,7 +37,7 @@ void calculateFromOffset(API::Progress &progress, DataObjects::SpecialWorkspace2
   const double l1 = detectorInfo.l1();
 
   std::function<double(size_t const &, double const &)> difc_for_offset_mode;
-  if (offsetMode == OffsetMode::SIGNED) {
+  if (offsetMode == OffsetMode::Signed) {
     difc_for_offset_mode = [l1, detectorInfo, binWidth](size_t const &i, double const &offset) {
       return Geometry::Conversion::calculateDIFCCorrection(l1, detectorInfo.l2(i), detectorInfo.twoTheta(i), offset,
                                                            binWidth);
@@ -126,7 +126,7 @@ void CalculateDIFC::init() {
                   "which will be copied. This property cannot be set in "
                   "conjunction with property OffsetsWorkspace.");
 
-  declareProperty(PropertyNames::OFFSET_MODE, offsetModeNames[size_t(OffsetMode::RELATIVE)],
+  declareProperty(PropertyNames::OFFSET_MODE, offsetModeNames[size_t(OffsetMode::Relative)],
                   std::make_shared<Mantid::Kernel::StringListValidator>(offsetModeList),
                   "Optional: Whether to calculate a relative, absolute, or signed offset.  Default relative");
 
@@ -152,7 +152,7 @@ std::map<std::string, std::string> CalculateDIFC::validateInputs() {
   }
 
   OFFSETMODE offsetMode = std::string(getProperty(PropertyNames::OFFSET_MODE));
-  if (isDefault(PropertyNames::BINWIDTH) && (offsetMode == OffsetMode::SIGNED)) {
+  if (isDefault(PropertyNames::BINWIDTH) && (offsetMode == OffsetMode::Signed)) {
     std::string msg = "Signed offset mode requires bin width to be specified.";
     result[PropertyNames::BINWIDTH] = msg;
     result[PropertyNames::OFFSET_MODE] = msg;
