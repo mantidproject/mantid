@@ -180,6 +180,7 @@ set(INC_FILES
     inc/MantidKernel/EigenConversionHelpers.h
     inc/MantidKernel/EmptyValues.h
     inc/MantidKernel/EnabledWhenProperty.h
+    inc/MantidKernel/EnumeratedString.h
     inc/MantidKernel/EnvironmentHistory.h
     inc/MantidKernel/EqualBinsChecker.h
     inc/MantidKernel/ErrorReporter.h
@@ -348,6 +349,7 @@ set(TEST_FILES
     DynamicFactoryTest.h
     EigenConversionHelpersTest.h
     EnabledWhenPropertyTest.h
+    EnumeratedStringTest.h
     EnvironmentHistoryTest.h
     EqualBinsCheckerTest.h
     ErrorReporterTest.h
