@@ -14,6 +14,7 @@ this is representing an ``enum`` object in C++, but based on a set of strings in
 would be something like the following:
 
 .. code-block:: cpp
+
    enum class StringPropertyOptions: std::string {option1="OptionOne", ... };
 
 However, this is not allowed under C++.
@@ -76,6 +77,7 @@ Example of Use of EnumeratedString
 An example of where this might be used inside an algorithm is shown below:
 
 .. code-block:: cpp
+
    #include "MantidAlgorithms/BakeCake.h"
    #include "MantidKernel/EnumeratedString.h"
 
