@@ -9,6 +9,7 @@
 #include "DllConfig.h"
 #include "ISISEnergyTransferData.h"
 #include "IndirectDataReduction.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "ui_ISISEnergyTransfer.h"
 
 namespace MantidQt {
