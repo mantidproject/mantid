@@ -217,6 +217,7 @@ set(INC_FILES
     IFQFitObserver.h
     Reduction/ISISEnergyTransferData.h
     Reduction/ISISEnergyTransferValidator.h
+    Reduction/ISISEnergyTransferModelUtils.h
 )
 
 set(UI_FILES
