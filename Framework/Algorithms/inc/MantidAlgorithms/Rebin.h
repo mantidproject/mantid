@@ -8,16 +8,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidKernel/EnumeratedString.h"
 
 namespace Mantid {
-
-// namespace {
-// const std::string binningModeNames[5]={"Default", "Linear", "Logarithmic", "ReverseLogarithmic", "Power"};
-//   enum class BinningMode { DEFAULT, LINEAR, LOGARITHMIC, REVERSELOG, POWER, enum_count };
-//   typedef Mantid::Kernel::EnumeratedString<BinningMode, binningModeNames> BINMODE;
-// }
-
 namespace Algorithms {
 /** Takes a workspace as input and rebins the data according to the input rebin
    parameters.
@@ -67,8 +59,7 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
   static std::vector<double> rebinParamsFromInput(const std::vector<double> &inParams,
-                                                  const API::MatrixWorkspace &inputWS, Kernel::Logger &logger,
-                                                  std::string binModeName = "Default");
+                                                  const API::MatrixWorkspace &inputWS, Kernel::Logger &logger);
 
 protected:
   const std::string workspaceMethodName() const override { return "rebin"; }

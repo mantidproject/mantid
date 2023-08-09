@@ -31,8 +31,8 @@ using namespace API;
 using namespace HistogramData;
 using namespace DataObjects;
 
-/** Overwrites the parent (Rebin) init method
- * These properties will be declares instead
+/** Only calls its parent's (Rebin) init()
+ *
  */
 void InterpolatingRebin::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
@@ -54,26 +54,8 @@ void InterpolatingRebin::init() {
                   "logarithmic binning. ");
 }
 
-/**
- * Overwrites the parent (Rebin) validateInputs
- * Avoids all bother about binning modes and powers
- */
-/// Validate that the input properties are sane.
-std::map<std::string, std::string> InterpolatingRebin::validateInputs() {
-  std::map<std::string, std::string> helpMessages;
-
-  // as part of validation, force the binwidth to be compatible with set bin mode
-  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  std::vector<double> rbParams = getProperty("Params");
-  try {
-    std::vector<double> validParams = Rebin::rebinParamsFromInput(rbParams, *inputWS, g_log);
-  } catch (std::exception &err) {
-    helpMessages["Params"] = err.what();
-  }
-  return helpMessages;
-}
-
 /** Executes the rebin algorithm
+ *
  *  @throw runtime_error Thrown if the bin range does not intersect the range of
  *the input workspace
  */
@@ -82,8 +64,7 @@ void InterpolatingRebin::exec() {
   MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
 
   // retrieve the properties
-  std::vector<double> rb_params = getProperty("Params");
-  // std::vector<double> rb_params = Rebin::rebinParamsFromInput(getProperty("Params"), *inputW, g_log);
+  std::vector<double> rb_params = Rebin::rebinParamsFromInput(getProperty("Params"), *inputW, g_log);
   HistogramData::BinEdges XValues_new(0);
   // create new output X axis
   const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.mutableRawData());
