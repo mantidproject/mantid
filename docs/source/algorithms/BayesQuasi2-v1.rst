@@ -25,7 +25,7 @@ The output includes a workspace of the fitting parameters, the loglikelihoods (t
 and the fits (interpolated back onto the original sample binning).
 
 The stretched exponential results for the FWHM are different to :ref:`BayesQuasi <algm-BayesQuasi>`, as shown by the figure below.
-However, the new results agree with the FWHM values for fitting a single Lorentzian.
+However, the new results agree with the FWHM values for fitting a single Lorentzian ('QL').
 The new method provides FWHM results that are comparable for all :math:`Q` values (green and black data), unlike the original code that has a divergence for low :math`Q` values.
 
 .. figure:: /images/qse_cf.png

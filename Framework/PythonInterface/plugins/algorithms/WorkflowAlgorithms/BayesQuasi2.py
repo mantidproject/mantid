@@ -31,6 +31,16 @@ except (Exception, Warning):
             stdin=subprocess.PIPE,
         ).communicate()
     )
+    # used in BayesStretch, pip install here to prevent a seperate check
+    print(
+        subprocess.Popen(
+            "python -m pip install -U joblib",
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+        ).communicate()
+    )
     from quickBayes.utils.general import get_background_function
 
 

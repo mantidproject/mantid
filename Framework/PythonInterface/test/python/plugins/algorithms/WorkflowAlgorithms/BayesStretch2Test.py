@@ -1,125 +1,222 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import unittest
-import platform
-from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup
-from IndirectImport import is_supported_f2py_platform
+from mantid.simpleapi import Load, DeleteWorkspace, CreateWorkspace, CompareWorkspaces, GroupWorkspaces
+import numpy as np
+from mantid import AnalysisDataService
+from BayesStretch2 import BayesStretch2
+
+from unittest import mock
+from quickBayes.functions.qse_fixed import QSEFixFunction
+
+# from quickBayes.utils.general import get_background_function
+from quickBayes.workflow.qse_search import QSEGridSearch
 
 
-if is_supported_f2py_platform():
+SAMPLE_NAME = "__BayesStretchTest_Sample"
+RES_NAME = "__BayesStretchTest_Resolution"
 
-    class BayesStretchTest(unittest.TestCase):
-        _res_ws = None
-        _sample_ws = None
-        _resnorm_ws = None
-        _num_bins = None
-        _num_hists = None
 
-        def setUp(self):
-            self._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace="__BayesStretchTest_Resolution")
-            self._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace="__BayesStretchTest_Sample")
-            self._num_hists = self._sample_ws.getNumberHistograms()
+# def add_log_mock(workspace, sample_logs, data_ws):
+#         return workspace
 
-        def tearDown(self):
-            """
-            Remove workspaces from ADS.
-            """
-            DeleteWorkspace(self._sample_ws)
-            DeleteWorkspace(self._res_ws)
 
-        # ----------------------------------Algorithm tests----------------------------------------
+class BayesStretch2Test(object):
+    """
+    These tests are for checking the quickBayes
+    lib is used correctly. The results from the
+    lib are assumed to be correct (its fully tested).
 
-        def test_Simple_Run(self):
-            """
-            Test Lorentzian fit for BayesStretch
-            """
-            fit_group, contour = BayesStretch(SampleWorkspace=self._sample_ws, ResolutionWorkspace=self._res_ws)
-            self._validate_shape(contour, fit_group)
-            self._validate_value(contour, fit_group)
+    Going to test each method in isolation.
+    """
 
-        # -------------------------------- Failure cases ------------------------------------------
+    def setUp(self):
+        self._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace=RES_NAME)
+        self._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace=SAMPLE_NAME)
+        self._alg = BayesStretch2()
+        self._alg.initialize()
+        self._N_hist = 1
 
-        def test_invalid_e_min(self):
-            """
-            Test that an EMin of less than the data range is invalid
-            """
-            self.assertRaisesRegex(
-                RuntimeError,
-                "EMin must be more than the minimum x range of the data.",
-                BayesStretch,
-                OutputWorkspaceFit="fit_group",
-                OutputWorkspaceContour="contour",
-                SampleWorkspace=self._sample_ws,
-                ResolutionWorkspace=self._res_ws,
-                EMin=-10,
-            )
+    def tearDown(self):
+        """
+        Remove workspaces from ADS.
+        """
+        DeleteWorkspace(self._sample_ws)
+        DeleteWorkspace(self._res_ws)
 
-        def test_invalid_e_max(self):
-            """
-            Test that an EMax of more than the data range is invalid
-            """
-            self.assertRaisesRegex(
-                RuntimeError,
-                "EMax must be less than the maximum x range of the data",
-                BayesStretch,
-                OutputWorkspaceFit="fit_group",
-                OutputWorkspaceContour="contour",
-                SampleWorkspace=self._sample_ws,
-                ResolutionWorkspace=self._res_ws,
-                EMax=10,
-            )
+    def assert_mock_called_with(self, mock_object, N_calls, call_number, **kargs):
+        self.assertEqual(N_calls, mock_object.call_count)
 
-        # --------------------------------Validate results-----------------------------------------
+        called_with = mock_object.call_args_list[call_number - 1][1]  # dict of {keyword: value}
+        self.assertEqual(len(kargs), len(called_with))
+        for j, keyword in enumerate(kargs):
+            expected = kargs[keyword]
+            if isinstance(expected, np.ndarray):
+                np.testing.assert_array_equal(expected, called_with[keyword])
+            else:
+                self.assertEqual(expected, called_with[keyword])
 
-        def _validate_shape(self, contour, fit_group):
-            """
-            Validates that the output workspaces are of the correct type, units and shape.
-            """
+    def test_make_contour(self):
+        x = np.linspace(0.01, 0.1, 3)
+        y = np.linspace(0.8, 1.0, 3)
+        X, Y = np.meshgrid(x, y)
 
-            # Test size/shape of contour group
-            self.assertTrue(isinstance(contour, WorkspaceGroup))
-            self.assertEqual(contour.getNumberOfEntries(), self._num_hists)
-            self.assertEqual(contour.getItem(0).getNumberHistograms(), 50)
-            self.assertEqual(contour.getItem(0).blocksize(), 30)
+        Z = np.sin(X) - np.cos(Y)
 
-            # Test size/shape of fitting group
-            self.assertTrue(isinstance(fit_group, WorkspaceGroup))
-            self.assertEqual(fit_group.getNumberOfEntries(), 2)
-            self.assertEqual(fit_group.getItem(0).getNumberHistograms(), self._num_hists)
-            self.assertEqual(fit_group.getItem(0).blocksize(), 50)
-            self.assertEqual(fit_group.getItem(1).getNumberHistograms(), self._num_hists)
-            self.assertEqual(fit_group.getItem(1).blocksize(), 30)
+        ws_str = self._alg.make_contour(X, Y, Z, 0, "test")
+        ws = AnalysisDataService.retrieve(ws_str)
+        expect = [[-0.687, -0.642, -0.597], [-0.612, -0.567, -0.522], [-0.530, -0.485, -0.440]]
 
-        def _validate_value(self, contour, fit_group):
-            """
-            Validates that the output workspaces have expected values
-            with values from the last known correct version
-            """
+        self.assertEqual(ws.getNumberHistograms(), 3)
+        for j in range(ws.getNumberHistograms()):
+            np.testing.assert_almost_equal(ws.readX(j), x, 3)
+            np.testing.assert_almost_equal(ws.readY(j), expect[j], 3)
 
-            # Test values of contour
-            contour_ws_0 = contour.getItem(0)
-            tol_places = 10
-            self.assertAlmostEqual(contour_ws_0.dataY(13)[11], 0.0, places=tol_places)
-            self.assertAlmostEqual(contour_ws_0.dataY(14)[11], 0.0, places=tol_places)
-            self.assertAlmostEqual(contour_ws_0.dataY(15)[11], 0.0, places=tol_places)
-            self.assertAlmostEqual(contour_ws_0.dataY(15)[12], 0.0, places=tol_places)
+        label = ["beta", "FWHM"]
+        axis_values = [x, y]
+        for i in range(ws.axes()):
+            axis = ws.getAxis(i)
+            unit = axis.getUnit()
+            self.assertEqual(unit.caption(), label[i])
+            np.testing.assert_equal(axis.extractValues(), axis_values[i])
 
-            # Test values of fit_group
-            fit_ws_sigma = fit_group.getItem(0)
-            self.assertAlmostEqual(fit_ws_sigma.dataY(0)[13], 0.0, places=tol_places)
-            self.assertAlmostEqual(fit_ws_sigma.dataY(0)[14], 0.0, places=tol_places)
-            self.assertAlmostEqual(fit_ws_sigma.dataY(0)[48], 0.0, places=tol_places)
-            self.assertAlmostEqual(fit_ws_sigma.dataY(0)[49], 0.0, places=tol_places)
-            fit_ws_beta = fit_group.getItem(1)
-            self.assertAlmostEqual(fit_ws_beta.dataY(0)[11], 0.0, places=tol_places)
-            self.assertAlmostEqual(fit_ws_beta.dataY(0)[12], 0.0, places=tol_places)
-            self.assertAlmostEqual(fit_ws_beta.dataY(0)[21], 0.0, places=tol_places)
-            self.assertAlmostEqual(fit_ws_beta.dataY(0)[22], 0.0, places=tol_places)
+        DeleteWorkspace(ws)
 
-    if __name__ == "__main__":
-        unittest.main()
+    def test_make_slice_ws(self):
+        x = np.linspace(0.8, 1.0, 3)
+        y1 = -((x - 0.9) ** 2) + 0.01
+        y2 = -((x - 0.86) ** 2) + 0.01
+
+        Q = [0.4, 0.8]
+        slices = [(x, y1), (x, y2)]
+
+        ws_str = self._alg.make_slice_ws(slices, Q, "MomentumTransfer", "test")
+
+        ws = AnalysisDataService.retrieve(ws_str)
+        expect = [[0, 1e-2, 0.0], [0.006, 0.008, -0.01]]
+
+        self.assertEqual(ws.getNumberHistograms(), 2)
+        for j in range(ws.getNumberHistograms()):
+            np.testing.assert_almost_equal(ws.readX(j), x, 3)
+            np.testing.assert_almost_equal(ws.readY(j), expect[j], 3)
+
+        label = ["q", ""]
+        axis_values = [x, [str(val) for val in Q]]
+        for i in range(ws.axes()):
+            axis = ws.getAxis(i)
+            unit = axis.getUnit()
+            self.assertEqual(unit.caption(), label[i])
+            np.testing.assert_equal(axis.extractValues(), axis_values[i])
+        DeleteWorkspace(ws)
+
+    def test_make_results(self):
+        def slice(slice_list, x_data, x_unit, name):
+            return slice_list
+
+        self._alg.make_slice_ws = mock.Mock(side_effect=slice)
+        self._alg.group_ws = mock.Mock(return_value="group")
+
+        beta_list = [(1, 2), (3, 4)]
+        FWHM_list = [(5, 6), (7, 8)]
+        x_data = [9]
+
+        self._alg.make_results(beta_list, FWHM_list, x_data, "MomentumTransfer", "test")
+        self._alg.group_ws.assert_called_once_with([beta_list, FWHM_list], "test_Stretch_Fit")
+
+        self.assert_mock_called_with(
+            self._alg.make_slice_ws,
+            N_calls=2,
+            call_number=1,
+            slice_list=beta_list,
+            x_data=x_data,
+            x_unit="MomentumTransfer",
+            name="test_Stretch_Beta",
+        )
+        self.assert_mock_called_with(
+            self._alg.make_slice_ws,
+            N_calls=2,
+            call_number=2,
+            slice_list=FWHM_list,
+            x_data=x_data,
+            x_unit="MomentumTransfer",
+            name="test_Stretch_FWHM",
+        )
+
+    @mock.patch("BayesStretch2.QSEGridSearch")
+    @mock.patch("BayesStretch2.QSEFixFunction")
+    def test_do_one_spec(self, mock_QSe, mock_search):
+        data = {
+            "sample": self._sample_ws,
+            "start x": -0.3,
+            "end x": 0.3,
+            "res_list": [self._res_ws],
+            "beta start": 0.8,
+            "beta end": 1.0,
+            "N_beta": 10,
+            "FWHM start": 0.01,
+            "FWHM end": 0.2,
+            "N_FWHM": 20,
+            "BG": "Linear",
+            "elastic": True,
+            "name": "test",
+        }
+
+        method_mock = mock.MagicMock(autospec=QSEGridSearch)
+        method_mock.preprocess_data.return_value = ([7, 8, 9], [4, 5, 6])
+        method_mock.execute.return_value = ([1, 2, 3], [4, 5, 6])
+        method_mock.get_grid = mock.PropertyMock(return_value=[[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+        method_mock.get_x_axis.values = mock.PropertyMock(return_value=[0.8, 0.9, 1.0])
+        method_mock.get_y_axis.values = mock.PropertyMock(return_value=[0.01, 0.05, 0.1])
+        method_mock.get_slices.return_value = ([3, 2, 1], [6, 5, 4])
+        mock_search.return_value = method_mock
+
+        self._alg.make_contour = mock.Mock(return_value="contour_ws")
+
+        mock_function = mock.MagicMock(autospec=QSEFixFunction)
+        mock_function.get_guess.return_value = [11, 12]
+        mock_function.get_bounds.return_value = ([1, 2], [21, 22])
+        mock_QSe.return_value = mock_function
+
+        contour, beta, FWHM = self._alg.do_one_spec(0, data)
+
+        self.assert_mock_called_with(
+            method_mock.preprocess_data,
+            N_calls=1,
+            call_number=1,
+            x_data=self._sample_ws.readX(0),
+            y_data=self._sample_ws.readY(0),
+            e_data=self._sample_ws.readE(0),
+            start_x=-0.3,
+            end_x=0.3,
+            res=self._res_ws,
+        )
+
+        self.assert_mock_called_with(method_mock.set_x_axis, N_calls=1, call_number=1, start=0.8, end=1.0, N=10, label="beta")
+
+        self.assert_mock_called_with(method_mock.set_y_axis, N_calls=1, call_number=1, start=0.01, end=0.2, N=20, label="FWHM")
+
+        mock_QSe.assert_called_once_with(bg_function="Linear", elastic_peak=True, r_x=[7, 8, 9], r_y=[4, 5, 6], start_x=-0.3, end_x=0.3)
+
+        mock_function.add_single_SE.assert_called_once_with()
+        mock_function.set_delta_bounds.assert_called_once_with(lower=[0, -0.5], upper=[200, 0.5])
+
+        method_mock.set_scipy_engine(guess=[11, 12], lower=[1, 2], upper=[21, 22])
+        method_mock.execute.assert_called_once_with(func=mock_function)
+        method_mock.get_slices.assert_called_once_with()
+
+        self.assertEqual(contour, "contour_ws")
+        self.assertEqual(beta, (method_mock.get_x_axis.values, [3, 2, 1]))
+        self.assertEqual(FWHM, (method_mock.get_y_axis.values, [6, 5, 4]))
+
+    def point_mock(self, name):
+        if "res" in name:
+            return self._res_ws, self._N_hist
+        else:
+            return self._sample_ws, self._N_hist
+
+
+if __name__ == "__main__":
+    unittest.main()

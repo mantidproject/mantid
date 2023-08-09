@@ -112,19 +112,21 @@ class BayesStretch2(QuickBayesTemplate):
         sample = {"x": sx, "y": sy, "e": se}
 
         search = QSEGridSearch()
-        new_x, ry = search.preprocess_data(sample["x"], sample["y"], sample["e"], start_x, end_x, res_list[spec])
-        search.set_x_axis(beta_start, beta_end, N_beta, "beta")
-        search.set_y_axis(FWHM_start, FWHM_end, N_FWHM, "FWHM")
+        new_x, ry = search.preprocess_data(
+            x_data=sample["x"], y_data=sample["y"], e_data=sample["e"], start_x=start_x, end_x=end_x, res=res_list[spec]
+        )
+        search.set_x_axis(start=beta_start, end=beta_end, N=N_beta, label="beta")
+        search.set_y_axis(start=FWHM_start, end=FWHM_end, N=N_FWHM, label="FWHM")
 
         # setup fit function
-        func = QSEFixFunction(BG, elastic, new_x, ry, start_x, end_x)
+        func = QSEFixFunction(bg_function=BG, elastic_peak=elastic, r_x=new_x, r_y=ry, start_x=start_x, end_x=end_x)
         func.add_single_SE()
-        func.set_delta_bounds([0, -0.5], [200, 0.5])
-
-        search.set_scipy_engine(func.get_guess(), *func.get_bounds())
-        X, Y = search.execute(func)
+        func.set_delta_bounds(lower=[0, -0.5], upper=[200, 0.5])
+        bounds = func.get_bounds()
+        search.set_scipy_engine(guess=func.get_guess(), lower=bounds[0], upper=bounds[1])
+        X, Y = search.execute(func=func)
         Z = search.get_grid
-        contour = self.make_contour(X, Y, Z, spec, name)
+        contour = self.make_contour(X=X, Y=Y, Z=Z, spec=spec, name=name)
 
         beta_slice, FWHM_slice = search.get_slices()
         beta = (search.get_x_axis.values, beta_slice)
@@ -288,8 +290,8 @@ class BayesStretch2(QuickBayesTemplate):
         :param name: the name of the output worksapce
         :return group workspaces with the FWHM and beta slices
         """
-        beta = self.make_slice_ws(beta_list, x_data, x_unit, f"{name}_Stretch_Beta")
-        FWHM = self.make_slice_ws(FWHM_list, x_data, x_unit, f"{name}_Stretch_FWHM")
+        beta = self.make_slice_ws(slice_list=beta_list, x_data=x_data, x_unit=x_unit, name=f"{name}_Stretch_Beta")
+        FWHM = self.make_slice_ws(slice_list=FWHM_list, x_data=x_data, x_unit=x_unit, name=f"{name}_Stretch_FWHM")
         slice_group = self.group_ws([beta, FWHM], f"{name}_Stretch_Fit")
 
         return slice_group

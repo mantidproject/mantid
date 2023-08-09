@@ -26,9 +26,9 @@ def add_log_mock(workspace, sample_logs, data_ws):
 
 class BayesQuasi2Test(object):
     """
-    These tests are for checking the helper class
-    for quickBayes. This algorithm is not registered
-    to Mantid.
+    These tests are for checking the quickBayes
+    lib is used correctly. The results from the
+    lib are assumed to be correct (its fully tested).
 
     Going to test each method in isolation.
     """
