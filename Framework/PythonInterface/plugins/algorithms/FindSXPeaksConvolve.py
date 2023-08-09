@@ -51,7 +51,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
         )
         self.declareProperty(
             name="ThresholdIoverSigma",
-            defaultValue=6.0,
+            defaultValue=5.0,
             direction=Direction.Input,
             doc="Threhsold value for I/sigma used to identify statistically significant peaks.",
         )
@@ -170,16 +170,19 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
 
             # find index of maximum bin in peak region
             imaxs = maximum_position(y, labels, ilabels)
+            imaxs_ioversig = maximum_position(intens_over_sig, labels, ilabels)
 
             # add peaks to table
-            for ix, iy, iz in imaxs:
+            for ipk in range(len(imaxs)):
+                irow, icol, itof = imaxs[ipk]
                 self.exec_child_alg(
-                    "AddPeak", PeaksWorkspace=peaks, RunWorkspace=ws, TOF=xspec[iz], DetectorID=int(peak_data.detids[ix, iy])
+                    "AddPeak", PeaksWorkspace=peaks, RunWorkspace=ws, TOF=xspec[itof], DetectorID=int(peak_data.detids[irow, icol])
                 )
-                # set intensity of peak
+                # set intensity of peak (rough estimate)
                 pk = peaks.getPeak(peaks.getNumberPeaks() - 1)
-                pk.setIntensity(0.0)
-                pk.setSigmaIntensity(0.0)
+                bin_width = xspec[itof + 1] - xspec[itof]
+                pk.setIntensity(yconv[imaxs_ioversig[ipk]] * bin_width)
+                pk.setSigmaIntensity(econv[imaxs_ioversig[ipk]] * bin_width)
 
             # remove dummy peak
             self.exec_child_alg("DeleteTableRows", TableWorkspace=peaks, Rows=[irow_to_del])
