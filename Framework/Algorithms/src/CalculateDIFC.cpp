@@ -36,25 +36,23 @@ void calculateFromOffset(API::Progress &progress, DataObjects::SpecialWorkspace2
   const bool haveOffset = (offsetsWS != nullptr);
   const double l1 = detectorInfo.l1();
 
+  std::function<double(size_t const &, double const &)> difc_for_offset_mode;
+  if (offsetMode == OffsetMode::SIGNED) {
+    difc_for_offset_mode = [l1, detectorInfo, binWidth](size_t const &i, double const &offset) {
+      return Geometry::Conversion::calculateDIFCCorrection(l1, detectorInfo.l2(i), detectorInfo.twoTheta(i), offset,
+                                                           binWidth);
+    };
+  } else {
+    difc_for_offset_mode = [l1, detectorInfo](size_t const &i, double const &offset) {
+      return 1. / Geometry::Conversion::tofToDSpacingFactor(l1, detectorInfo.l2(i), detectorInfo.twoTheta(i), offset);
+    };
+  }
+
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     if ((!detectorInfo.isMasked(i)) && (!detectorInfo.isMonitor(i))) {
       // offset=0 means that geometry is correct
-      const double offset = (haveOffset) ? offsetsWS->getValue(detectorIDs[i], 0.) : 0.;
-
-      double difc = 0.0;
-      switch (offsetMode) {
-      // calculate DIFC for log binning
-      case OffsetMode::SIGNED:
-        difc = Geometry::Conversion::calculateDIFCCorrection(l1, detectorInfo.l2(i), detectorInfo.twoTheta(i), offset,
-                                                             binWidth);
-        break;
-      case OffsetMode::RELATIVE:
-      case OffsetMode::ABSOLUTE:
-      default:
-        // tofToDSpacingFactor gives 1/DIFC
-        difc = 1. / Geometry::Conversion::tofToDSpacingFactor(l1, detectorInfo.l2(i), detectorInfo.twoTheta(i), offset);
-      }
-      outputWs.setValue(detectorIDs[i], difc);
+      const double offset = (haveOffset ? offsetsWS->getValue(detectorIDs[i], 0.) : 0.);
+      outputWs.setValue(detectorIDs[i], difc_for_offset_mode(i, offset));
     }
 
     progress.report("Calculate DIFC");
