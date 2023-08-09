@@ -103,6 +103,8 @@ set(SRC_FILES
     Stretch.cpp
     Reduction/ISISEnergyTransferValidator.cpp
     Reduction/ISISEnergyTransferModel.cpp
+    Reduction/ISISEnergyTransferView.cpp
+    Reduction/ISISEnergyTransferPresenter.cpp
 )
 
 set(MOC_FILES
@@ -191,6 +193,7 @@ set(MOC_FILES
     Stretch.h
     FitStatusWidget.h
     Reduction/ISISEnergyTransferView.h
+    Reduction/ISISEnergyTransferPresenter.h
 )
 
 set(INC_FILES
