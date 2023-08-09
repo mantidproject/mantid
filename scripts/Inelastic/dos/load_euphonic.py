@@ -39,7 +39,7 @@ def euphonic_calculate_modes(
 
     """
 
-    if version.parse(euphonic_version) > version.parse(1.0):
+    if version.parse(euphonic_version) > version.parse("1.0"):
         phonon_data = euphonic.cli.utils.load_data_from_file(filename, frequencies_only=False)
     else:
         # Older versions of Euphonic split the file loading helper over two functions
