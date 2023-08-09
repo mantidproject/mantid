@@ -101,6 +101,7 @@ set(SRC_FILES
     Quasi.cpp
     ResNorm.cpp
     Stretch.cpp
+    Reduction/ISISEnergyTransferValidator.cpp
 )
 
 set(MOC_FILES
@@ -215,6 +216,7 @@ set(INC_FILES
     Notifier.h
     IFQFitObserver.h
     Reduction/ISISEnergyTransferData.h
+    Reduction/ISISEnergyTransferValidator.h
 )
 
 set(UI_FILES
