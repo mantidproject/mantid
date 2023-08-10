@@ -12,12 +12,13 @@
 using namespace Mantid::Kernel;
 
 namespace {
-enum class CoolGuys { Fred, Joe, Bill, enum_count };
-static std::string coolGuyNames[] = {"Frederic", "Joseph", "William"};
-enum class Cakes { Lemon, Devil, Angel, Bundt, Pound, enum_count };
-static std::string cakeNames[] = {"Lemon Cake", "Devil's Food Cake", "Angel Food Fake", "Bundt Cake", "Pound Cake"};
-typedef EnumeratedString<CoolGuys, coolGuyNames> COOLGUY;
-typedef EnumeratedString<Cakes, cakeNames> CAKE;
+enum class CoolGuys : char { Fred, Joe, Bill, enum_count };
+const std::vector<std::string> coolGuyNames{"Frederic", "Joseph", "William"};
+enum class Cakes : char { Lemon, Devil, Angel, Bundt, Pound, enum_count };
+const std::vector<std::string> cakeNames{"Lemon Cake", "Devil's Food Cake", "Angel Food Fake", "Bundt Cake",
+                                         "Pound Cake"};
+typedef EnumeratedString<CoolGuys, &coolGuyNames> COOLGUY;
+typedef EnumeratedString<Cakes, &cakeNames> CAKE;
 } // namespace
 
 class EnumeratedStringTest : public CxxTest::TestSuite {
@@ -189,19 +190,23 @@ public:
   }
 
   void testEnumCount() {
-    // windows doesn't know how to compile this test
-#ifndef _WIN32
     // try removing enum_count -- should give a compiler error
-    enum class Letters{a, b, enum_count};
-    static std::string letters[2] = {"a", "b"};
-    enum Graphia{alpha, beta, enum_count};
-    static std::string graphia[2] = {"alpha", "beta"};
-    EnumeratedString<Letters, letters> l1("a");
-    EnumeratedString<Graphia, graphia> l2("alpha");
+    enum class Letters : size_t { a, b, enum_count };
+    static const std::vector<std::string> letters{"a", "b"};
+    enum Graphia : size_t { alpha, beta, enum_count };
+    static const std::vector<std::string> graphia{"alpha", "beta"};
+    EnumeratedString<Letters, &letters> l1("a");
+    EnumeratedString<Graphia, &graphia> l2("alpha");
     TS_ASSERT_DIFFERS(l1, l2);
-#else
-    return;
-#endif
+  }
+
+  void testFailIfWrongNumbers() {
+    enum Letters : size_t { a, b, c, enum_count };
+    static const std::vector<std::string> letters = {"a", "b"};
+    typedef EnumeratedString<Letters, &letters> LETTERS;
+    TS_ASSERT_THROWS_ANYTHING(LETTERS l1);
+    TS_ASSERT_THROWS_ANYTHING(LETTERS l2(Letters::a));
+    TS_ASSERT_THROWS_ANYTHING(LETTERS l1("a"));
   }
 
   void testSwitchAndIf() {
