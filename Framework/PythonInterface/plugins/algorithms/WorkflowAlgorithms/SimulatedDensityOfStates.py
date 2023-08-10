@@ -17,10 +17,6 @@ from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as s_api
 
-from dos.load_castep import parse_castep_file
-from dos.load_euphonic import get_data_with_euphonic
-from dos.load_phonon import parse_phonon_file
-
 
 PEAK_WIDTH_ENERGY_FLAG = "energy"
 
@@ -254,6 +250,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         @return file_data dictionary holding all required data from the castep or phonon file
         """
+        from dos.load_euphonic import get_data_with_euphonic
+
         castep_filename = self.getPropertyValue("CASTEPFile")
         phonon_filename = self.getPropertyValue("PHONONFile")
         euphonic_filename = self.getPropertyValue("ForceConstantsFile")
@@ -746,6 +744,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         @param file_name - path to the file.
         @return tuple of the frequencies, ir and raman intensities and weights
         """
+        from dos.load_castep import parse_castep_file
+        from dos.load_phonon import parse_phonon_file
+
         ext = os.path.splitext(file_name)[1]
 
         if ext == ".phonon":
