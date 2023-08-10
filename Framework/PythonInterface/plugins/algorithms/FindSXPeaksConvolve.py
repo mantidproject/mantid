@@ -104,6 +104,16 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             direction=Direction.Input,
             doc="Minimum peak size as a fraction of the kernel size.",
         )
+        self.declareProperty(
+            name="RemoveOnEdge",
+            defaultValue=False,
+            direction=Direction.Input,
+            doc="If RemoveOnEdge=True then peaks at the edge of the data (within roughly 1/4 of the kernel size) will "
+            "be removed. Convolution produces invalid results at the edges of the data. To some extent such edge "
+            "effects are reduced in this algorithm due to the choice of padding and by dividing the convolution "
+            "results of the signal and error. However, some artifacts remain because the kernel used in the "
+            "convolution of the signal has some negative values and the kernel used for the error does not.",
+        )
 
     def PyExec(self):
         # get input
@@ -114,6 +124,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
         nfwhm = self.getProperty("NFWHM").value
         get_nbins_from_b2bexp_params = self.getProperty("GetNBinsFromBackToBackParams").value
         min_frac_size = self.getProperty("MinFracSize").value
+        remove_on_edge = self.getProperty("RemoveOnEdge").value
 
         # create ouput table workspace
         peaks = self.exec_child_alg("CreatePeaksWorkspace", InstrumentWorkspace=ws, NumberOfPeaks=0, OutputWorkspace="_peaks")
@@ -158,12 +169,12 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             yconv = convolve(input=y, weights=kernel, mode="nearest")
             econv = np.sqrt(convolve(input=e**2, weights=abs(kernel), mode="nearest"))
             with np.errstate(divide="ignore", invalid="ignore"):
-                intens_over_sig = yconv / econv  # ignore 0/0 (produces NaN)
+                intens_over_sig = yconv / econv  # ignore 0/0 which produces NaN (recall NaN > x = False)
 
             # find peaks above threshold I/sigma
             pk_mask = intens_over_sig > threshold_i_over_sig
             pk_mask = binary_closing(pk_mask)  # removes holes - helps merge close peaks
-            labels, nlabels = label(pk_mask)  # identify contigous nearest-neightbour connected regions
+            labels, nlabels = label(pk_mask)  # identify contiguous nearest-neighbour connected regions
             # identify labels of peaks above min size
             min_size = int(min_frac_size * kernel.size)
             nbins = sum_labels(pk_mask, labels, range(1, nlabels + 1))
@@ -191,18 +202,26 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
                 icol_max += icol_lo
                 # find max in TOF dimension
                 itof_max = np.argmax(ypk.sum(axis=0).sum(axis=0)) + itof_lo
-                self.exec_child_alg(
-                    "AddPeak",
-                    PeaksWorkspace=peaks,
-                    RunWorkspace=ws,
-                    TOF=xspec[itof_max],
-                    DetectorID=int(peak_data.detids[irow_max, icol_max]),
-                )
-                # set intensity of peak (rough estimate)
-                pk = peaks.getPeak(peaks.getNumberPeaks() - 1)
-                bin_width = xspec[itof + 1] - xspec[itof]
-                pk.setIntensity(yconv[irow, icol, itof] * bin_width)
-                pk.setSigmaIntensity(econv[irow, icol, itof] * bin_width)
+                # remove peaks on edge if required
+                do_add_peak = True
+                if remove_on_edge:
+                    for idim, (index, nbg) in enumerate([(irow_max, nrows_bg), (icol_max, ncols_bg), (itof_max, nbins_bg)]):
+                        if not 2 * nbg <= index <= y.shape[idim] - 2 * nbg - 1:
+                            do_add_peak = False
+                            break
+                if do_add_peak:
+                    self.exec_child_alg(
+                        "AddPeak",
+                        PeaksWorkspace=peaks,
+                        RunWorkspace=ws,
+                        TOF=xspec[itof_max],
+                        DetectorID=int(peak_data.detids[irow_max, icol_max]),
+                    )
+                    # set intensity of peak (rough estimate)
+                    pk = peaks.getPeak(peaks.getNumberPeaks() - 1)
+                    bin_width = xspec[itof + 1] - xspec[itof]
+                    pk.setIntensity(yconv[irow, icol, itof] * bin_width)
+                    pk.setSigmaIntensity(econv[irow, icol, itof] * bin_width)
 
             # remove dummy peak
             self.exec_child_alg("DeleteTableRows", TableWorkspace=peaks, Rows=[irow_to_del])
