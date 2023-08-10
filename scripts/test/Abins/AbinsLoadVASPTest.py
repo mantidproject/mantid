@@ -48,3 +48,7 @@ class AbinsLoadVASPTest(unittest.TestCase, abins.input.Tester):
     # IBRION=6 including frozen atoms
     def test_xml_frozenatoms_ibrion6(self):
         self.check(name="si_ibrion6_selective_LoadVASP", loader=VASPLoader)
+
+    # IBRION=8 from VASP 6 (in THz units)
+    def test_xml_vasp6(self):
+        self.check(name="ethanol_VASP6_LoadVASP", loader=VASPLoader)
