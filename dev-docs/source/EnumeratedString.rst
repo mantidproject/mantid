@@ -29,7 +29,7 @@ How to use the EnumeratedString
 
 First include the ``EnumeratedString.h`` header file.
 
-This is a template class, and its two template parameters are the name of an ``enum`` type, and a static, c-style array of
+This is a template class, and its two template parameters are the name of an ``enum`` type, and a _pointer_ to static vector of
 ``std::string`` objects.
 
 Below is an example.  Consider the mantid algorithm :ref:`BakeCake <algm-BakeCake>`, which has a string property,
@@ -46,16 +46,16 @@ The ``EnumeratedString`` should be setup as follows:
 
   namespace {
   enum class CakeTypeEnum {LEMON, BUNDT, POUND, enum_count};
-  const std::string cakeTypeNames[3] {"Lemon", "Bundt", "Pound"};
+  const std::vector<std::string> cakeTypeNames {"Lemon", "Bundt", "Pound"};
   // optional typedef
-  typedef EnumeratedString<CakeEnumType, cakeTypeNames> CAKETYPE;
+  typedef EnumeratedString<CakeEnumType, &cakeTypeNames> CAKETYPE;
   } // namespace
 
   // ...
 
   // initialize an object
-  EnumeratedString<CakeTypeEnum, cakeTypeNames> cake1 = CakeTypeEnum::LEMON;
-  EnumeratedString<CakeTypeEnum, cakeTypeNames> cake2 = "Lemon";
+  EnumeratedString<CakeTypeEnum, &cakeTypeNames> cake1 = CakeTypeEnum::LEMON;
+  EnumeratedString<CakeTypeEnum, &cakeTypeNames> cake2 = "Lemon";
 
   //init from the typedef
   CAKETYPE cake3 = "Pound";
@@ -64,7 +64,10 @@ The ``EnumeratedString`` should be setup as follows:
   bool notSameCake = (cake1!=cake3); //notSameCake = true, a Lemon cake is not a Pound cake
 
 Notice that the final element of the ``enum`` is called :code:`enum_count`.  This is mandatory.  This element indicates the
-number of elements inside the ``enum``.  A compiler error will be triggered if this is not included.
+number of elements inside the ``enum``, and used for verifying compatibility with the vector of strings.  A compiler error
+will be triggered if this is not included.
+
+Notice the use of the reference operator, :code:`&cakeTypeNames`, and _not_ :code:`cakeTypeNames`.
 
 In the above code, a :code:`CAKETYPE` object can be created either from a :code:`CakeTypeEnum`, or from one of the strings
 in the :code:`cakeTypeNames` array (either by the literal, or by accessig it in the array), or from another :code:`CAKETYPE`
@@ -85,17 +88,15 @@ An example of where this might be used inside an algorithm is shown below:
 
    namespace {
    enum class CakeTypeEnum {LEMON, BUNDT, POUND, enum_count};
-   const std::string cakeTypeNames[3] {"Lemon", "Bundt", "Pound"};
-   typedef EnumeratedString<CakeEnumType, cakeTypeNames> CAKETYPE;
-   // optional vector for StringListValidator
-   std::vector<std::string> cakeTypeList(cakeTypeNames, cakeTypeNames + 3);
+   const std::vector<std::string> cakeTypeNames {"Lemon", "Bundt", "Pound"};
+   typedef EnumeratedString<CakeEnumType, &cakeTypeNames> CAKETYPE;
    } // namespace
 
    namespace Algorithms {
 
    void BakeCake::init() {
       // the StringListValidator is optional, but fails faster; the CAKETYPE cannot be set with string not in list
-      declareProperty("CakeType", "Bundt", std::make_shared<Mantid::Kernel::StringListValidator>(cakeTypeList),
+      declareProperty("CakeType", "Bundt", std::make_shared<Mantid::Kernel::StringListValidator>(cakeTypeNames),
          "Mandatory.  The kind of cake for algorithm to bake.");
    }
 
@@ -116,25 +117,32 @@ An example of where this might be used inside an algorithm is shown below:
          break;
       }
 
-      getCakeIngredientsForCakeType("Bundt");
+      getLemonsForCake("Bundt");
+      getIngredientsForCake(cakeType);
 
       // other ways to compare
       if(cakeType == "Lemon"){
-         g_log.information() << "Baking a lemon cake";
+         g_log.information() << "Baking a lemon cake\n";
       }
       if(cakeType == CakeTypeEnum::BUNDT){
-         g_log.information() << "Baking a bundt cake";
+         g_log.information() << "Baking a bundt cake\n";
       }
       CAKETYPE poundCake = CakeTypeEnum::POUND;
       if(cakeType == poundCake){
-         g_log.information() << "Baking a pound cake";
+         g_log.information() << "Baking a pound cake\n";
       }
    }
 
-   void BakeCake::getCakeIngredientsForCakeType(CAKETYPE cakeType){
+   void BakeCake::getLemonsForCake(CAKETYPE cakeType){
       if(cakeType == CakeTypeEnum::LEMON){
-         g_log.information() << "Getting some lemons!";
+         g_log.information() << "Getting some lemons!\n";
+      } else {
+         g_log.information() << "I have no need for lemons.\n";
       }
+   }
+
+   void BakeCake::getIngredientsForCake(std::string cakeType){
+      g_log.information() << "Retrieving ingredients for a " << cakeType << " cake!\n";
    }
 
    }// namespace Algorithms
