@@ -16,9 +16,8 @@ namespace Mantid {
 namespace {
 
 enum class OffsetMode { RELATIVE_OFFSET, ABSOLUTE_OFFSET, SIGNED_OFFSET, enum_count };
-static std::string offsetModeNames[3]{"Relative", "Absolute", "Signed"};
-std::vector<std::string> offsetModeList(offsetModeNames, offsetModeNames + 3);
-typedef Mantid::Kernel::EnumeratedString<OffsetMode, offsetModeNames> OFFSETMODE;
+const std::vector<std::string> offsetModeNames{"Relative", "Absolute", "Signed"};
+typedef Mantid::Kernel::EnumeratedString<OffsetMode, &offsetModeNames> OFFSETMODE;
 
 /** Calculate the DIFC values and write them to OutputWorkspace
  *
@@ -127,7 +126,7 @@ void CalculateDIFC::init() {
                   "conjunction with property OffsetsWorkspace.");
 
   declareProperty(PropertyNames::OFFSET_MODE, offsetModeNames[size_t(OffsetMode::RELATIVE_OFFSET)],
-                  std::make_shared<Mantid::Kernel::StringListValidator>(offsetModeList),
+                  std::make_shared<Mantid::Kernel::StringListValidator>(offsetModeNames),
                   "Optional: Whether to calculate a relative, absolute, or signed offset.  Default relative");
 
   declareProperty(PropertyNames::BINWIDTH, EMPTY_DBL(),

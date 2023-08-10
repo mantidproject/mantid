@@ -24,8 +24,8 @@ const std::vector<std::string> DIFC_TABLE_COLUMN_NAMES{"detid", "difc", "difa", 
 const std::vector<std::string> DIFC_TABLE_COLUMN_TYPES{"int", "double", "double", "double"};
 
 enum class OffsetMode { RELATIVE_OFFSET, ABSOLUTE_OFFSET, SIGNED_OFFSET, enum_count };
-static std::string offsetModeNames[size_t(OffsetMode::enum_count)] = {"Relative", "Absolute", "Signed"};
-typedef Mantid::Kernel::EnumeratedString<OffsetMode, offsetModeNames> OFFSETMODE;
+const std::vector<std::string> offsetModeNames{"Relative", "Absolute", "Signed"};
+typedef Mantid::Kernel::EnumeratedString<OffsetMode, &offsetModeNames> OFFSETMODE;
 
 namespace PropertyNames {
 const std::string OFFSTS_WKSP("OffsetsWorkspace");
@@ -82,6 +82,7 @@ void ConvertDiffCal::init() {
                   "returns it as the OutputWorkspace");
 
   declareProperty(PropertyNames::OFFSET_MODE, offsetModeNames[size_t(OffsetMode::RELATIVE_OFFSET)],
+                  std::make_shared<Mantid::Kernel::StringListValidator>(offsetModeNames),
                   "Optional: Whether to calculate a relative, absolute, or signed offset");
 
   declareProperty(PropertyNames::BINWIDTH, EMPTY_DBL(),

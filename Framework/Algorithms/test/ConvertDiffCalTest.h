@@ -531,28 +531,9 @@ public:
   }
 
   void test_bad_offsetmode() {
-    std::list<class fake_entry> fake_entries;
-
-    for (int i = 0; i < 10; i++) {
-      fake_entry offsetEntry(i, fake_entry::offset, 0.);
-      fake_entry calEntry(i, fake_entry::calibration, std::pow(2, i));
-      fake_entries.emplace_back(offsetEntry);
-      fake_entries.emplace_back(calEntry);
-    }
-
-    /* generate fake workspaces */
-    class fake_workspaces fake_workspaces = generate_test_data(fake_entries);
-
     ConvertDiffCal alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetsWorkspace", fake_workspaces.offsets));
-    std::string updated_calibration_table_name("updated_calibration_table");
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", updated_calibration_table_name));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetMode", "KAzoOooOBalOoO!"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinWidth", 1.0));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreviousCalibration", fake_workspaces.calibration_table));
-    TS_ASSERT_THROWS_ANYTHING(alg.execute(););
-    TS_ASSERT(!alg.isExecuted());
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("OffsetMode", "KAzoOooOBalOoO!"));
   }
 };

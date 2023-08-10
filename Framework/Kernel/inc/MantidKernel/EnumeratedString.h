@@ -7,6 +7,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -18,25 +19,17 @@ namespace Kernel {
 @date 2023/08/02
 */
 
-namespace {
-// this function "uses" a variable so the compiler and linter won't complain
-template <class T> void use(T) {}
-} // namespace
-
-template <class E, const std::string names[size_t(E::enum_count)]> class EnumeratedString {
+template <class E, const std::vector<std::string> *names> class EnumeratedString {
   /**
    * @tparam class E an `enum`, the final value *must* be `enum_count`
    *              (i.e. `enum class Fruit {apple, orange, enum_count}`)
-   * @tparam string names[] a static c-style array of string names for each enum
-   * Note that no checking is done on the compatibility of `E` and `names`, or their validity.
+   * @tparam a pointer to a static vector of string names for each enum
    * The enum and string array *must* have same order.
    */
 public:
-  EnumeratedString() {
-    // force a compiler error if no E::enum_count
-    use<E>(E::enum_count); // Last element of enum MUST be enum_count
-  }
+  EnumeratedString() { ensureCompatibleSize(); }
   EnumeratedString(const E e) {
+    ensureCompatibleSize();
     try {
       this->operator=(e);
     } catch (std::exception &err) {
@@ -44,6 +37,7 @@ public:
     }
   }
   EnumeratedString(const std::string s) {
+    ensureCompatibleSize();
     // only set values if valid string given
     try {
       this->operator=(s);
@@ -59,9 +53,9 @@ public:
   operator std::string() const { return name; }
   // assign the object either by the enum, or by string
   EnumeratedString &operator=(E e) {
-    if (size_t(e) < size_t(E::enum_count) && size_t(e) >= 0) {
+    if (size_t(e) < names->size() && size_t(e) >= 0) {
       value = e;
-      name = names[size_t(e)];
+      name = names->at(size_t(e));
     } else {
       std::stringstream msg;
       msg << "Invalid enumerator " << size_t(e) << " for enumerated string " << typeid(E).name();
@@ -91,6 +85,7 @@ public:
   bool operator==(const EnumeratedString es) const { return value == es.value; }
   bool operator!=(const EnumeratedString es) const { return value != es.value; }
   const char *c_str() const { return name.c_str(); }
+  static size_t size() { return names->size(); }
 
 private:
   E value;
@@ -99,10 +94,19 @@ private:
   // given a string, find the corresponding enum value
   E findEFromString(const std::string s) {
     E e = E(0);
-    for (; size_t(e) < size_t(E::enum_count); e = E(size_t(e) + 1))
-      if (s == names[size_t(e)])
+    for (; size_t(e) < names->size(); e = E(size_t(e) + 1))
+      if (s == names->at(size_t(e)))
         break;
     return e;
+  }
+
+  void ensureCompatibleSize() {
+    if (size_t(E::enum_count) != names->size()) {
+      std::stringstream msg;
+      msg << "Size of " << typeid(E).name() << " incompatible with vector of names: ";
+      msg << size_t(E::enum_count) << " vs. " << names->size() << std::endl;
+      throw std::runtime_error(msg.str());
+    }
   }
 };
 
