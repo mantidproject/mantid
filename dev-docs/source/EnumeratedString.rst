@@ -29,7 +29,7 @@ How to use the EnumeratedString
 
 First include the ``EnumeratedString.h`` header file.
 
-This is a template class, and its two template parameters are the name of an ``enum`` type, and a _pointer_ to static vector of
+This is a template class, and its two template parameters are the name of an ``enum`` type, and a *pointer* to static vector of
 ``std::string`` objects.
 
 Below is an example.  Consider the mantid algorithm :code:`BakeCake`, which has a string property,
@@ -67,7 +67,7 @@ Notice that the final element of the ``enum`` is called :code:`enum_count`.  Thi
 number of elements inside the ``enum``, and used for verifying compatibility with the vector of strings.  A compiler error
 will be triggered if this is not included.
 
-Notice the use of the reference operator, :code:`&cakeTypeNames`, and _not_ :code:`cakeTypeNames`.
+Notice the use of the reference operator, :code:`&cakeTypeNames`, and *not* :code:`cakeTypeNames`.
 
 In the above code, a :code:`CAKETYPE` object can be created either from a :code:`CakeTypeEnum`, or from one of the strings
 in the :code:`cakeTypeNames` array (either by the literal, or by accessig it in the array), or from another :code:`CAKETYPE`
