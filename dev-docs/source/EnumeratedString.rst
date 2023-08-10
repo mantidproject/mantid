@@ -22,7 +22,7 @@ However, this is not allowed under C++.
 The ``EnumeratedString`` objects allow for binding an ``enum class`` to a C-style static array of strings, allowing for much
 of the same behavior.  This allows for easy-to-read ``if`` and ``switch`` statements, as well as easy conversions and assignments
 with strings from the allowed set.  This further adds an additional layer of validation for string properties, in additon to the
-``StringListValidator``s used in the property declarations.
+``StringListValidator`` used in the property declaration.
 
 How to use the EnumeratedString
 ----------------------------
@@ -32,7 +32,7 @@ First include the ``EnumeratedString.h`` header file.
 This is a template class, and its two template parameters are the name of an ``enum`` type, and a _pointer_ to static vector of
 ``std::string`` objects.
 
-Below is an example.  Consider the mantid algorithm :ref:`BakeCake <algm-BakeCake>`, which has a string property,
+Below is an example.  Consider the mantid algorithm :code:`BakeCake`, which has a string property,
 ``CakeType``.  This algorithm only knows how to bake a few types of cakes.  The allowed types of cake the user can set for
 this property are limited to "Lemon", "Bundt", and "Pound".
 
@@ -74,7 +74,7 @@ in the :code:`cakeTypeNames` array (either by the literal, or by accessig it in 
 object.  The only assignment/comparison not directly possible is from :code:`CakeTypeEnum` to one of the strings.  Otherwise
 free conversion and comparison from :code:`CAKETYPE`, :code:`CakeTypeEnum`, and strings from :code:`cakeTypeNames` is possible.
 
-Example of Use of EnumeratedString
+Example Use of EnumeratedString
 ----------------------------
 
 An example of where this might be used inside an algorithm is shown below:
