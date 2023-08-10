@@ -458,7 +458,7 @@ public:
   }
 
   void testValidateRunDataGroupingInvalid() {
-    IETInputData inputData("26185");
+    IETInputData inputData("iris26184_multi_graphite002_red");
     IETConversionData conversionData(0.5, 1, 2);
     IETGroupingData groupingData(IETGroupingType::CUSTOM);
     IETBackgroundData backgroundData(false);
@@ -470,11 +470,12 @@ public:
 
     std::vector<std::string> errors = m_model->validateRunData(runData, 1, 10);
     TS_ASSERT_EQUALS(errors.size(), 1);
-    TS_ASSERT_EQUALS(errors[0], "Please supply a custom grouping for detectors.");
+    if (errors.size() == 1)
+      TS_ASSERT_EQUALS(errors[0], "Please supply a custom grouping for detectors.");
   }
 
   void testValidateRunDataAnalysisInvalid() {
-    IETInputData inputData("26185");
+    IETInputData inputData("iris26184_multi_graphite002_red");
     IETConversionData conversionData(0.5, 1, 2);
     IETGroupingData groupingData(IETGroupingType::DEFAULT);
     IETBackgroundData backgroundData(false);
@@ -486,11 +487,12 @@ public:
 
     std::vector<std::string> errors = m_model->validateRunData(runData, 1, 10);
     TS_ASSERT_EQUALS(errors.size(), 1);
-    TS_ASSERT_EQUALS(errors[0], "Detailed Balance must be more than 0K");
+    if (errors.size() == 1)
+      TS_ASSERT_EQUALS(errors[0], "Detailed Balance must be more than 0K");
   }
 
   void testValidateRunDataSpectraInvalid() {
-    IETInputData inputData("26185");
+    IETInputData inputData("iris26184_multi_graphite002_red");
     IETConversionData conversionData(0.5, 4, 2);
     IETGroupingData groupingData(IETGroupingType::DEFAULT);
     IETBackgroundData backgroundData(false);
@@ -502,14 +504,15 @@ public:
 
     std::vector<std::string> errors = m_model->validateRunData(runData, 1, 10);
     TS_ASSERT_EQUALS(errors.size(), 1);
-    TS_ASSERT_EQUALS(errors[0], "Minimum spectra must be less than maximum spectra.");
+    if (errors.size() == 1)
+      TS_ASSERT_EQUALS(errors[0], "Minimum spectra must be less than maximum spectra.");
   }
 
   void testValidateRunDataBackgroundInvalid() {
-    IETInputData inputData("26185");
+    IETInputData inputData("iris26184_multi_graphite002_red");
     IETConversionData conversionData(0.5, 1, 2);
     IETGroupingData groupingData(IETGroupingType::DEFAULT);
-    IETBackgroundData backgroundData(true, 1, 20000);
+    IETBackgroundData backgroundData(true, -1, 1);
     IETAnalysisData analysisData;
     IETRebinData rebinData;
     IETOutputData outputData;
@@ -518,12 +521,14 @@ public:
 
     std::vector<std::string> errors = m_model->validateRunData(runData, 1, 10);
     TS_ASSERT_EQUALS(errors.size(), 2);
-    TS_ASSERT_EQUALS(errors[0], "The Start of Background Removal is less than the minimum of the data range");
-    TS_ASSERT_EQUALS(errors[1], "The End of Background Removal is more than the maximum of the data range");
+    if (errors.size() == 2) {
+      TS_ASSERT_EQUALS(errors[0], "The Start of Background Removal is less than the minimum of the data range");
+      TS_ASSERT_EQUALS(errors[1], "The End of Background Removal is more than the maximum of the data range");
+    }
   }
 
   void testValidateRunDataAllValid() {
-    IETInputData inputData("26185");
+    IETInputData inputData("iris26184_multi_graphite002_red");
     IETConversionData conversionData(0.5, 1, 2);
     IETGroupingData groupingData(IETGroupingType::DEFAULT);
     IETBackgroundData backgroundData(false);
@@ -546,11 +551,12 @@ public:
 
     std::vector<std::string> errors = m_model->validatePlotData(plotData);
     TS_ASSERT_EQUALS(errors.size(), 1);
-    TS_ASSERT_EQUALS(errors[0], "You must select a run file.");
+    if (errors.size() == 1)
+      TS_ASSERT_EQUALS(errors[0], "You must select a run file.");
   }
 
   void testValidatePlotDataSpectraInvalid() {
-    IETInputData inputData("26185");
+    IETInputData inputData("iris26184_multi_graphite002_red");
     IETConversionData conversionData(0.5, 4, 2);
     IETBackgroundData backgroundData(false);
 
@@ -558,26 +564,29 @@ public:
 
     std::vector<std::string> errors = m_model->validatePlotData(plotData);
     TS_ASSERT_EQUALS(errors.size(), 1);
-    TS_ASSERT_EQUALS(errors[0], "Minimum spectra must be less than maximum spectra.");
+    if (errors.size() == 1)
+      TS_ASSERT_EQUALS(errors[0], "Minimum spectra must be less than maximum spectra.");
   }
 
   void testValidatePlotDataBackgroundInvalid() {
-    IETInputData inputData("26185");
+    IETInputData inputData("iris26184_multi_graphite002_red");
     IETConversionData conversionData(0.5, 1, 2);
-    IETBackgroundData backgroundData(true, 1, 20000);
+    IETBackgroundData backgroundData(true, -1, 1);
 
     IETPlotData plotData(inputData, conversionData, backgroundData);
 
     std::vector<std::string> errors = m_model->validatePlotData(plotData);
     TS_ASSERT_EQUALS(errors.size(), 2);
-    TS_ASSERT_EQUALS(errors[0], "The Start of Background Removal is less than the minimum of the data range");
-    TS_ASSERT_EQUALS(errors[1], "The End of Background Removal is more than the maximum of the data range");
+    if (errors.size() == 2) {
+      TS_ASSERT_EQUALS(errors[0], "The Start of Background Removal is less than the minimum of the data range");
+      TS_ASSERT_EQUALS(errors[1], "The End of Background Removal is more than the maximum of the data range");
+    }
   }
 
   void testValidatePlotDataAllValid() {
-    IETInputData inputData("26185");
+    IETInputData inputData("iris26184_multi_graphite002_red");
     IETConversionData conversionData(0.5, 1, 2);
-    IETBackgroundData backgroundData(false, 10, 19000);
+    IETBackgroundData backgroundData(false);
 
     IETPlotData plotData(inputData, conversionData, backgroundData);
 
