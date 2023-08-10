@@ -58,6 +58,7 @@ cmake \
   ../
 
 cmake --build .
+cmake --build . --target StandardTestData
 run_with_xvfb cmake --build . --target docs-qthelp
 terminate_xvfb_sessions
 cmake --build . --target install
