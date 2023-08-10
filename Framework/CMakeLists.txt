@@ -158,3 +158,10 @@ install(
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
   COMPONENT Devel
 )
+
+install(
+  FILES ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindNexus.cmake ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindJsonCPP.cmake
+        ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindMuParser.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework/find_modules
+  COMPONENT Devel
+)
