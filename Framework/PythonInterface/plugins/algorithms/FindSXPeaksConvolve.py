@@ -14,6 +14,7 @@ from mantid.api import (
 )
 from mantid.kernel import (
     Direction,
+    FloatBoundedValidator,
     IntBoundedValidator,
     EnabledWhenProperty,
     PropertyCriterion,
@@ -53,6 +54,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             name="ThresholdIoverSigma",
             defaultValue=5.0,
             direction=Direction.Input,
+            validator=FloatBoundedValidator(lower=1.0),
             doc="Threhsold value for I/sigma used to identify statistically significant peaks.",
         )
         #   window parameters
@@ -60,7 +62,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             name="NRows",
             defaultValue=5,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=3),
+            validator=IntBoundedValidator(lower=2),
             doc="Number of row components in the detector to use in the convolution kernel. "
             "For WISH row components correspond to pixels along a single tube.",
         )
@@ -68,7 +70,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             name="NCols",
             defaultValue=5,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=3),
+            validator=IntBoundedValidator(lower=2),
             doc="Number of column components in the detector to use in the convolution kernel. "
             "For WISH column components correspond to tubes.",
         )
@@ -76,7 +78,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             name="NBins",
             defaultValue=10,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=3),
+            validator=IntBoundedValidator(lower=2),
             doc="Number of TOF bins to use in the convolution kernel.",
         )
         self.declareProperty(
@@ -90,6 +92,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             name="NFWHM",
             defaultValue=4,
             direction=Direction.Input,
+            validator=IntBoundedValidator(lower=1),
             doc="If GetNBinsFromBackToBackParams=True then the number of TOF bins will be NFWHM x FWHM of the "
             "BackToBackExponential peak at the center of each detector panel at the middle of the spectrum.",
         )
@@ -102,6 +105,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             name="MinFracSize",
             defaultValue=0.125,
             direction=Direction.Input,
+            validator=FloatBoundedValidator(lower=0.0),
             doc="Minimum peak size as a fraction of the kernel size.",
         )
         self.declareProperty(
@@ -147,9 +151,9 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             if get_nbins_from_b2bexp_params:
                 fwhm = get_fwhm_from_back_to_back_params(dummy_pk, ws, detid)
                 bin_width = xspec[icen + 1] - xspec[icen]
-                nbins = max(3, int(nfwhm * fwhm / bin_width)) if fwhm is not None else self.getProperty("NBins")
+                nbins = max(3, int(nfwhm * fwhm / bin_width)) if fwhm is not None else self.getProperty("NBins").value
             else:
-                nbins = self.getProperty("NBins")
+                nbins = self.getProperty("NBins").value
 
             # make a kernel with background subtraction shell of approx. same number of elements as peak region
             nrows_bg = max(1, nrows // 8)  # padding either side of e.g. nrows for bg shell
@@ -163,7 +167,6 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             # get data in detector coords
             peak_data = array_converter.get_peak_data(dummy_pk, detid, bank.getName(), bank.xpixels(), bank.ypixels(), 1, 1)
             _, y, e = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
-
             # perform convolutions to integrate kernel/shoebox
             # pad with nearest so don't get peaks at edge when -ve values go outside data extent
             yconv = convolve(input=y, weights=kernel, mode="nearest")
