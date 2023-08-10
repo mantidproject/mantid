@@ -32,8 +32,8 @@ First include the ``EnumeratedString.h`` header file.
 This is a template class, and its two template parameters are the name of an ``enum`` type, and a static, c-style array of
 ``std::string`` objects.
 
-Below is an example.  Consider the imaginary mantid algorithm, :ref:`BakeCake <algm-BakeCake>`, which has a string property,
-``CakeType``.  This algorithm only knows how to bakc a few types of cales.  The allowed types of cake the user can set for
+Below is an example.  Consider the mantid algorithm :ref:`BakeCake <algm-BakeCake>`, which has a string property,
+``CakeType``.  This algorithm only knows how to bake a few types of cakes.  The allowed types of cake the user can set for
 this property are limited to "Lemon", "Bundt", and "Pound".
 
 The ``EnumeratedString`` should be setup as follows:
@@ -69,7 +69,7 @@ number of elements inside the ``enum``.  A compiler error will be triggered if t
 In the above code, a :code:`CAKETYPE` object can be created either from a :code:`CakeTypeEnum`, or from one of the strings
 in the :code:`cakeTypeNames` array (either by the literal, or by accessig it in the array), or from another :code:`CAKETYPE`
 object.  The only assignment/comparison not directly possible is from :code:`CakeTypeEnum` to one of the strings.  Otherwise
-free converstion and comparison from :code:`CAKETYPE`, :code:`CakeTypeEnum`, and strings from :code:`cakeTypeNames` is possible.
+free conversion and comparison from :code:`CAKETYPE`, :code:`CakeTypeEnum`, and strings from :code:`cakeTypeNames` is possible.
 
 Example of Use of EnumeratedString
 ----------------------------
@@ -97,7 +97,7 @@ An example of where this might be used inside an algorithm is shown below:
       // the StringListValidator is optional, but fails faster; the CAKETYPE cannot be set with string not in list
       declareProperty("CakeType", "Bundt", std::make_shared<Mantid::Kernel::StringListValidator>(cakeTypeList),
          "Mandatory.  The kind of cake for algorithm to bake.");
-   }https://github.com/mantidproject/mantid/pull/35904
+   }
 
    void BakeCake::exec() {
       // this will assign cakeType from the string property
@@ -116,6 +116,8 @@ An example of where this might be used inside an algorithm is shown below:
          break;
       }
 
+      getCakeIngredientsForCakeType("Bundt");
+
       // other ways to compare
       if(cakeType == "Lemon"){
          g_log.information() << "Baking a lemon cake";
@@ -126,6 +128,12 @@ An example of where this might be used inside an algorithm is shown below:
       CAKETYPE poundCake = CakeTypeEnum::POUND;
       if(cakeType == poundCake){
          g_log.information() << "Baking a pound cake";
+      }
+   }
+
+   void BakeCake::getCakeIngredientsForCakeType(CAKETYPE cakeType){
+      if(cakeType == CakeTypeEnum::LEMON){
+         g_log.information() << "Getting some lemons!";
       }
    }
 
