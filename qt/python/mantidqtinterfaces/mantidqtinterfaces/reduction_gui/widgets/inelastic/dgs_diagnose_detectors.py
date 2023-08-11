@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from qtpy.QtWidgets import QFrame  # noqa
-from qtpy.QtGui import QDoubleValidator, QIntValidator  # noqa
+from qtpy.QtWidgets import QFrame
+from qtpy.QtGui import QDoubleValidator, QIntValidator
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_diagnose_detectors_script import DiagnoseDetectorsScript
 import mantidqtinterfaces.reduction_gui.widgets.util as util
@@ -59,7 +59,6 @@ class DiagnoseDetectorsWidget(BaseWidget):
             self._content.sambkg_median_test_low_edit,
             self._content.sambkg_errorbar_crit_edit,
         ]:
-
             dvp = QDoubleValidator(widget)
             dvp.setBottom(0.0)
             widget.setValidator(dvp)

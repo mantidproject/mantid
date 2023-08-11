@@ -12,7 +12,7 @@ from mantid.api import (
     mtd,
     AlgorithmFactory,
     AnalysisDataService,
-    DistributedDataProcessorAlgorithm,
+    DataProcessorAlgorithm,
     FileAction,
     FileProperty,
     ITableWorkspaceProperty,
@@ -34,21 +34,12 @@ from mantid.kernel import (
     Property,
     PropertyCriterion,
     PropertyManagerDataService,
+    StringArrayProperty,
     StringListValidator,
     StringTimeSeriesProperty,
 )
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
 from mantid.utils import absorptioncorrutils
-
-if AlgorithmFactory.exists("GatherWorkspaces"):
-    HAVE_MPI = True
-    from mpi4py import MPI
-
-    mpiRank = MPI.COMM_WORLD.Get_rank()
-else:
-    HAVE_MPI = False
-    mpiRank = 0  # simplify if clauses
-
 
 EVENT_WORKSPACE_ID = "EventWorkspace"
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
@@ -136,7 +127,7 @@ def getBasename(filename):
 # pylint: disable=too-many-instance-attributes
 
 
-class SNSPowderReduction(DistributedDataProcessorAlgorithm):
+class SNSPowderReduction(DataProcessorAlgorithm):
     COMPRESS_TOL_TOF = 0.01
     _resampleX = None
     _binning = None
@@ -183,12 +174,12 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         summary of the algorithm
         :return:
         """
-        return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3) "
+        return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3)"
 
     def PyInit(self):
         self.copyProperties("AlignAndFocusPowderFromFiles", ["Filename", "PreserveEvents", "DMin", "DMax", "DeltaRagged"])
 
-        self.declareProperty("Sum", False, "Sum the runs. Does nothing for characterization runs")
+        self.declareProperty("Sum", False, "Sum the runs. Does nothing for characterization runs.")
         self.declareProperty(
             "PushDataPositive",
             "None",
@@ -198,7 +189,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         arrvalidator = IntArrayBoundedValidator(lower=-1)
         self.declareProperty(
             IntArrayProperty("BackgroundNumber", values=[0], validator=arrvalidator),
-            doc="If specified overrides value in CharacterizationRunsFile If -1 turns off correction.",
+            doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.",
         )
         self.declareProperty(
             IntArrayProperty("VanadiumNumber", values=[0], validator=arrvalidator),
@@ -215,7 +206,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         )  # CalFileName
         self.declareProperty(
             FileProperty(name="GroupingFile", defaultValue="", action=FileAction.OptionalLoad, extensions=[".xml"]),
-            "Overrides grouping from CalibrationFile",
+            "Overrides grouping from CalibrationFile.",
         )
         self.declareProperty(
             MultipleFileProperty(name="CharacterizationRunsFile", action=FileAction.OptionalLoad, extensions=["txt"]),
@@ -236,11 +227,11 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         )
         self.declareProperty(
             FloatArrayProperty("Binning", values=[0.0, 0.0, 0.0], direction=Direction.Input),
-            "Positive is linear bins, negative is logorithmic",
+            "Positive is linear bins, negative is logorithmic.",
         )  # Params
         self.copyProperties("AlignAndFocusPowderFromFiles", ["ResampleX"])
         self.declareProperty(
-            "BinInDspace", True, "If all three bin parameters a specified, whether they are in dspace (true) or " "time-of-flight (false)"
+            "BinInDspace", True, "If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)."
         )  # DSpacing
         # section of vanadium run processing
         self.declareProperty("StripVanadiumPeaks", True, "Subtract fitted vanadium peaks from the known positions.")
@@ -248,7 +239,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty(
             "VanadiumPeakTol",
             0.05,
-            "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. " "Default=0.05, negative turns off",
+            "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off.",
         )
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
         self.declareProperty("VanadiumRadius", 0.3175, "Radius for CarpenterSampleCorrection")
@@ -264,16 +255,16 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             "ScaleData",
             defaultValue=1.0,
             validator=FloatBoundedValidator(lower=0.0, exclusive=True),
-            doc="Constant to multiply the data before writing out. This does not apply to " "PDFgetN files.",
+            doc="Constant to multiply the data before writing out. This does not apply to PDFgetN files.",
         )
         self.declareProperty(
             "OffsetData",
             defaultValue=0.0,
             validator=FloatBoundedValidator(lower=0.0, exclusive=False),
-            doc="Constant to add to the data before writing out. This does not apply to " "PDFgetN files.",
+            doc="Constant to add to the data before writing out. This does not apply to PDFgetN files.",
         )
         self.declareProperty(
-            "SaveAs", "gsas", "List of all output file types. Allowed values are 'fullprof', 'gsas', 'nexus', " "'pdfgetn', and 'topas'"
+            "SaveAs", "gsas", "List of all output file types. Allowed values are 'fullprof', 'gsas', 'nexus', 'pdfgetn', and 'topas'"
         )
         self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
         self.declareProperty(FileProperty(name="OutputDirectory", defaultValue="", action=FileAction.Directory))
@@ -305,7 +296,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty(
             "SampleNumberDensity",
             defaultValue=Property.EMPTY_DBL,
-            doc="Number density of the sample in number of atoms per cubic Angstrom will be used instead of calculated",
+            doc="Number density of the sample in number of atoms per cubic Angstrom will be used instead of calculated.",
         )
         self.declareProperty("ContainerShape", defaultValue="PAC06", doc="Defines the container geometry")
         self.declareProperty(
@@ -313,7 +304,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         )
         self.copyProperties("AbsorptionCorrection", "ElementSize")
         self.declareProperty(
-            "NumWavelengthBins", defaultValue=1000, doc="Number of wavelength bin to calculate the for absorption correction"
+            "NumWavelengthBins", defaultValue=1000, doc="Number of wavelength bin to calculate the for absorption correction."
         )
 
         workspace_prop = WorkspaceProperty("SplittersWorkspace", "", Direction.Input, PropertyMode.Optional)
@@ -328,16 +319,24 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty(
             "LowResolutionSpectraOffset",
             -1,
-            "If larger and equal to 0, then process low resolution TOF and offset is the spectra " "number. Otherwise, ignored.",
+            "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. Otherwise, ignored.",
         )  # LowResolutionSpectraOffset
 
         self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
 
         self.declareProperty("CompressTOFTolerance", 0.01, "Tolerance to compress events in TOF.")
 
-        self.copyProperties("AlignAndFocusPowderFromFiles", ["FrequencyLogNames", "WaveLengthLogNames"])
+        # reduce logs being loaded
+        self.declareProperty(
+            StringArrayProperty(name="LogAllowList"),
+            "If specified, only these logs will be loaded from the file. This is passed to LoadEventNexus.",
+        )
+        self.declareProperty(
+            StringArrayProperty(name="LogBlockList", values="Phase\\*,Speed\\*,BL\\*:Chop:\\*,chopper\\*TDC"),
+            "If specified, these logs will not be loaded from the file. This is passed to LoadEventNexus.",
+        )
 
-        return
+        self.copyProperties("AlignAndFocusPowderFromFiles", ["FrequencyLogNames", "WaveLengthLogNames"])
 
     def validateInputs(self):
         issues = dict()
@@ -353,12 +352,16 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         # The provided cache directory does not exist
         cache_dir_string = self.getProperty("CacheDir").value  # comma-delimited string representation of list
         if bool(cache_dir_string):
-
             cache_dirs = [candidate.strip() for candidate in cache_dir_string.split(",")]
 
             for cache_dir in cache_dirs:
                 if bool(cache_dir) and Path(cache_dir).exists() is False:
                     issues["CacheDir"] = f"Directory {cache_dir} does not exist"
+
+        # can only specify vertical offset in one way
+        if (not self.getProperty("OffsetData").isDefault) and (not self.getProperty("PushDataPositive").isDefault):
+            issues["OffsetData"] = "Cannot specify with PushDataPositive"
+            issues["PushDataPositive"] = "Cannot specify with OffsetData"
 
         # We cannot clear the cache if property "CacheDir" has not been set
         if self.getProperty("CleanCache").value and not bool(self.getProperty("CacheDir").value):
@@ -418,10 +421,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         samRuns = self._getLinearizedFilenames("Filename")
         self._determineInstrument(samRuns[0])
 
-        preserveEvents = self.getProperty("PreserveEvents").value
-        if HAVE_MPI and preserveEvents:
-            self.log().warning("preserveEvents set to False for MPI tasks.")
-            preserveEvents = False
         self._info = None
         self._chunks = self.getProperty("MaxChunkSize").value
 
@@ -515,6 +514,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             self._cache_dirs,  # Cache dir for absorption correction workspace
         )
 
+        preserveEvents = self.getProperty("PreserveEvents").value
         if self.getProperty("Sum").value and len(samRuns) > 1:
             self.log().information('Ignoring value of "Sum" property')
             # Sum input sample runs and then do reduction
@@ -559,7 +559,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             # END-FOR
         # ENDIF (Sum data or not)
 
-        for (samRunIndex, sam_ws_name) in enumerate(samwksplist):
+        for samRunIndex, sam_ws_name in enumerate(samwksplist):
             assert isinstance(sam_ws_name, str), "Assuming that samRun is a string. But it is %s" % str(type(sam_ws_name))
             if is_event_workspace(sam_ws_name):
                 self.log().information(
@@ -604,10 +604,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             else:
                 van_run_ws_name = None
 
-            # return if MPI is used and there is more than 1 processor
-            if mpiRank > 0:
-                return
-
             # return if there is no sample run
             # Note: sample run must exist in logic
             # VZ: Discuss with Pete
@@ -650,32 +646,28 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             if is_event_workspace(sam_ws_name) and self.COMPRESS_TOL_TOF > 0.0:
                 api.CompressEvents(InputWorkspace=sam_ws_name, OutputWorkspace=sam_ws_name, Tolerance=self.COMPRESS_TOL_TOF)  # 5ns/
 
-            # write out the files
-            # FIXME - need documentation for mpiRank
-            if mpiRank == 0:
-                if self._scaleFactor != 1.0:
-                    api.Scale(sam_ws_name, Factor=self._scaleFactor, OutputWorkspace=sam_ws_name)
-                if self._offsetFactor != 0.0:
-                    api.ConvertToMatrixWorkspace(InputWorkspace=sam_ws_name, OutputWorkspace=sam_ws_name)
-                    api.Scale(sam_ws_name, Factor=self._offsetFactor, OutputWorkspace=sam_ws_name, Operation="Add")
-                # make sure there are no negative values - gsas hates them
-                if self.getProperty("PushDataPositive").value != "None":
-                    addMin = self.getProperty("PushDataPositive").value == "AddMinimum"
-                    api.ResetNegatives(InputWorkspace=sam_ws_name, OutputWorkspace=sam_ws_name, AddMinimum=addMin, ResetValue=0.0)
+            if self._scaleFactor != 1.0:
+                api.Scale(sam_ws_name, Factor=self._scaleFactor, OutputWorkspace=sam_ws_name)
+            if self._offsetFactor != 0.0:
+                api.ConvertToMatrixWorkspace(InputWorkspace=sam_ws_name, OutputWorkspace=sam_ws_name)
+                api.Scale(sam_ws_name, Factor=self._offsetFactor, OutputWorkspace=sam_ws_name, Operation="Add")
+            # make sure there are no negative values - gsas hates them
+            if self.getProperty("PushDataPositive").value != "None":
+                addMin = self.getProperty("PushDataPositive").value == "AddMinimum"
+                api.ResetNegatives(InputWorkspace=sam_ws_name, OutputWorkspace=sam_ws_name, AddMinimum=addMin, ResetValue=0.0)
 
-                self._save(sam_ws_name, self._info, normalized, False)
+            self._save(sam_ws_name, self._info, normalized, False)
         # ENDFOR
 
         # convert everything into d-spacing as the final units
-        if mpiRank == 0:
-            workspacelist = set(workspacelist)  # only do each workspace once
-            for wksp in workspacelist:
-                api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits").value)
+        workspacelist = set(workspacelist)  # only do each workspace once
+        for wksp in workspacelist:
+            api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits").value)
 
-                propertyName = "OutputWorkspace%s" % wksp
-                if not self.existsProperty(propertyName):
-                    self.declareProperty(WorkspaceProperty(propertyName, wksp, Direction.Output))
-                self.setProperty(propertyName, wksp)
+            propertyName = "OutputWorkspace%s" % wksp
+            if not self.existsProperty(propertyName):
+                self.declareProperty(WorkspaceProperty(propertyName, wksp, Direction.Output))
+            self.setProperty(propertyName, wksp)
 
         return
 
@@ -776,11 +768,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             self.log().debug(
                 "Load run %s: number of events = %d. " % (os.path.split(filename)[-1], get_workspace(out_ws_name).getNumberEvents())
             )
-        if HAVE_MPI:
-            msg = "MPI Task = %s ;" % (str(mpiRank))
-            if is_event_workspace(out_ws_name):
-                msg += "Number Events = " + str(get_workspace(out_ws_name).getNumberEvents())
-            self.log().debug(msg)
 
         # filter bad pulses
         if self._filterBadPulses > 0.0:
@@ -911,6 +898,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
             WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value,
             ReductionProperties="__snspowderreduction",
+            LogAllowList=self.getPropertyValue("LogAllowList").strip(),
+            LogBlockList=self.getPropertyValue("LogBlockList").strip(),
             **otherArgs,
         )
 
@@ -1062,17 +1051,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         for item in output_wksp_list:
             assert isinstance(item, str)
-
-        # Sum workspaces for all mpi tasks
-        if HAVE_MPI:
-            for split_index in range(num_out_wksp):
-                api.GatherWorkspaces(
-                    InputWorkspace=output_wksp_list[split_index],
-                    PreserveEvents=preserveEvents,
-                    AccumulationMethod="Add",
-                    OutputWorkspace=output_wksp_list[split_index],
-                )
-        # ENDIF MPI
 
         if self._chunks > 0:
             # When chunks are added, proton charge is summed for all chunks

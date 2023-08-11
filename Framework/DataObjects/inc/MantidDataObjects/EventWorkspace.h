@@ -35,7 +35,7 @@ public:
   const std::string id() const override { return "EventWorkspace"; }
 
   // Constructor
-  EventWorkspace(const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
+  EventWorkspace();
 
   // Destructor
   ~EventWorkspace() override;
@@ -154,7 +154,7 @@ protected:
 
 private:
   EventWorkspace *doClone() const override { return new EventWorkspace(*this); }
-  EventWorkspace *doCloneEmpty() const override { return new EventWorkspace(storageMode()); }
+  EventWorkspace *doCloneEmpty() const override { return new EventWorkspace(); }
 
   EventList &getSpectrumWithoutInvalidation(const size_t index) override;
 

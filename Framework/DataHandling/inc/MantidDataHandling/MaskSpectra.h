@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
@@ -19,7 +19,7 @@ namespace DataHandling {
   @author Simon Heybrock
   @date 2017
 */
-class MANTID_DATAHANDLING_DLL MaskSpectra : public API::DistributedAlgorithm {
+class MANTID_DATAHANDLING_DLL MaskSpectra : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

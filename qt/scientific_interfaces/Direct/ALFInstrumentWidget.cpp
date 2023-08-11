@@ -28,7 +28,8 @@ namespace MantidQt::CustomInterfaces {
 
 ALFInstrumentWidget::ALFInstrumentWidget(QString workspaceName)
     : MantidWidgets::InstrumentWidget(std::move(workspaceName), nullptr, true, true, 0.0, 0.0, true,
-                                      MantidWidgets::InstrumentWidget::Dependencies(), false, getTabCustomizations()) {
+                                      MantidWidgets::InstrumentWidget::Dependencies(), false,
+                                      "ALFView/InstrumentWidget", getTabCustomizations()) {
   removeTab("Instrument");
   removeTab("Draw");
   hideHelp();

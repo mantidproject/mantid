@@ -11,7 +11,7 @@ from unittest.mock import Mock, call, patch
 
 from matplotlib import use as mpl_use
 
-mpl_use("Agg")  # noqa
+mpl_use("Agg")
 from matplotlib.pyplot import figure, subplots
 
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter

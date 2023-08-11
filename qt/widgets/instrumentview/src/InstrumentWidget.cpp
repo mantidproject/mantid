@@ -94,9 +94,6 @@ private:
 
 } // namespace
 
-// Name of the QSettings group to store the InstrumentWindw settings
-const char *InstrumentWidgetSettingsGroup = "Mantid/InstrumentWidget";
-
 /**
  * Exception type thrown when an istrument has no sample and cannot be displayed
  * in the instrument view.
@@ -116,11 +113,11 @@ public:
  */
 InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGeometry, bool autoscaling,
                                    double scaleMin, double scaleMax, bool setDefaultView, Dependencies deps,
-                                   bool useThread, TabCustomizations customizations)
+                                   bool useThread, QString settingsGroup, TabCustomizations customizations)
     : QWidget(parent), WorkspaceObserver(), m_instrumentDisplay(std::move(deps.instrumentDisplay)),
-      m_workspaceName(std::move(wsName)), m_instrumentActor(nullptr), m_surfaceType(FULL3D),
-      m_savedialog_dir(
-          QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"))),
+      m_workspaceName(std::move(wsName)), m_settingsGroup(std::move(settingsGroup)), m_instrumentActor(nullptr),
+      m_surfaceType(FULL3D), m_savedialog_dir(QString::fromStdString(
+                                 Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"))),
       mViewChanged(false), m_blocked(false), m_instrumentDisplayContextMenuOn(false),
       m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}), m_wsReplace(false), m_help(nullptr),
       m_qtConnect(std::move(deps.qtConnect)), m_qtMetaObject(std::move(deps.qtMetaObject)),
@@ -176,7 +173,7 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   infoLayout->setStretchFactor(m_help, 0);
   m_mainLayout->addLayout(infoLayout);
   QSettings settings;
-  settings.beginGroup(InstrumentWidgetSettingsGroup);
+  settings.beginGroup(getSettingsGroupName());
 
   if (m_useThread) {
     // disable all controls until background thread has finished
@@ -185,7 +182,7 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   } else {
     // create and setup the instrument actor immediately if not using the background thread
     m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
-                                                          scaleMin, scaleMax);
+                                                          scaleMin, scaleMax, m_settingsGroup);
     m_qtMetaObject->invokeMethod(m_instrumentActor.get(), "initialize", Qt::DirectConnection,
                                  Q_ARG(bool, resetGeometry), Q_ARG(bool, setDefaultView));
   }
@@ -377,7 +374,8 @@ void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling
   updateInfoText("Loading instrument...");
 
   m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
-                                                        scaleMin, scaleMax);
+                                                        scaleMin, scaleMax, m_settingsGroup);
+
   emit instrumentActorReset();
 
   if (m_useThread) {
@@ -585,7 +583,7 @@ void InstrumentWidget::setSurfaceType(int type) {
       backgroundColor = surface->getBackgroundColor();
     } else {
       QSettings settings;
-      settings.beginGroup(InstrumentWidgetSettingsGroup);
+      settings.beginGroup(getSettingsGroupName());
       peakLabelPrecision = settings.value("PeakLabelPrecision", 2).toInt();
       showPeakRow = settings.value("ShowPeakRows", true).toBool();
       showPeakLabels = settings.value("ShowPeakLabels", true).toBool();
@@ -1014,10 +1012,13 @@ void InstrumentWidget::setInfoText(const QString &text) { mInteractionInfo->setT
  */
 void InstrumentWidget::saveSettings() {
   QSettings settings;
-  settings.beginGroup(InstrumentWidgetSettingsGroup);
+  settings.beginGroup(getSettingsGroupName());
 
   if (m_instrumentDisplay->getGLDisplay())
     settings.setValue("BackgroundColor", m_instrumentDisplay->getGLDisplay()->currentBackgroundColor());
+  if (m_instrumentActor) {
+    m_instrumentActor->saveSettings();
+  }
 
   auto surface = getSurface();
   if (surface) {
@@ -1531,19 +1532,13 @@ void InstrumentWidget::addTab(const std::string &tabName) {
   // add the selected tabs back into the GUI
   addSelectedTabs();
 }
-/**
- * Return a name for a group in QSettings to store InstrumentWidget
- * configuration.
- */
-QString InstrumentWidget::getSettingsGroupName() const { return QString::fromLatin1(InstrumentWidgetSettingsGroup); }
 
 /**
  * Construct a name for a group in QSettings to store instrument-specific
  * configuration.
  */
 QString InstrumentWidget::getInstrumentSettingsGroupName() const {
-  return QString::fromLatin1(InstrumentWidgetSettingsGroup) + "/" +
-         QString::fromStdString(getInstrumentActor().getInstrumentName());
+  return getSettingsGroupName() + "/" + QString::fromStdString(getInstrumentActor().getInstrumentName());
 }
 
 bool InstrumentWidget::hasWorkspace(const std::string &wsName) const { return wsName == getWorkspaceNameStdString(); }

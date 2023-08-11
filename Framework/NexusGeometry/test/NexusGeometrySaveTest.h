@@ -295,7 +295,7 @@ used.
   }
 
   void test_nxsource_group_exists_and_is_in_nxinstrument_group() {
-    // this test checks that inside of the NXinstrument group, the the source
+    // this test checks that inside of the NXinstrument group, the source
     // data is saved to a group of NXclass NXsource
 
     // RAII file resource for test file destination.

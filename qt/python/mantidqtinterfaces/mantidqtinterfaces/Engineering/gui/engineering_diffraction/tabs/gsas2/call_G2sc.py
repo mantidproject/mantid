@@ -90,10 +90,8 @@ def enable_unit_cell(refine, override_unit_cell_lengths, project):
 
 def enable_limits(x_limits, project):
     if x_limits:
-        x_min, x_max = x_limits
-        if x_min and x_max:
-            for loop_index, loop_histogram in enumerate(project.histograms()):
-                loop_histogram.set_refinements({"Limits": [x_min[loop_index], x_max[loop_index]]})
+        for ihist, xlim in enumerate(zip(*x_limits)):
+            project.histograms()[ihist].set_refinements({"Limits": [min(xlim), max(xlim)]})  # ensure min <= max
 
 
 def run_microstrain_refinement(refine, project, path_to_project):
@@ -186,7 +184,7 @@ import_path = None
 try:
     import_path = os.path.join(path_to_gsas2, "GSASII")
     sys.path.insert(0, import_path)
-    import GSASIIscriptable as G2sc  # noqa: E402
+    import GSASIIscriptable as G2sc
 except ModuleNotFoundError:
     raise ImportError(f"GSAS-II was not found at {import_path}")
 

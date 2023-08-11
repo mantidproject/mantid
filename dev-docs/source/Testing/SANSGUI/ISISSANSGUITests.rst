@@ -49,8 +49,9 @@ In the ``Runs`` tab:
    an output name, one row without.
 #. Try changing a random setting in the settings tab and remember what you set
    it to.
-#. Make some more edits to the table. Check that the setting is still showing
-   the value you changed it to, rather than the original.
+#. Make some more edits to the table. Due to a known issue, the setting will change
+   back to its original value (once fixed, we expect the setting to keep showing
+   the value you changed it to).
 #. Click the ``Export Table`` button and save the table as a csv file. Check
    the file in an editor or Excel and ensure it looks like a sensible
    representation of the table in the format ``key,value,key,value,...``. All
@@ -160,6 +161,23 @@ Processing
    for each row.
 #. In the ``Settings`` tab, ``General, Scale, Event Slice, Sample`` sub-tab,
    change the ``Reduction Mode`` back to ``All``.
+
+*Scaled Background Subtracted Reduction*
+
+#. In the ``Settings`` tab, ``General, Scale, Event Slice, Sample`` sub-tab, set ``Reduction Mode`` to ``Merged``.
+#. Return to the ``Runs`` tab.
+#. Set the ``Save Options`` to ``Memory``.
+#. Select one of the rows and click ``Process Selected``
+#. Take note of the name of the reduced workspace with ``merged`` in the title.
+#. Make a copy of the row you just processed using the ``Copy`` and ``Paste`` buttons above the runs table.
+#. Change the ``Output Name`` of the new row to something like ``bgsub_test``.
+#. In the ``Options`` column, enter ``BackgroundWorkspace=<WS_NAME>, ScaleFactor=0.9`` (replacing <WS_NAME> with the
+   name of the merged workspace you took note of before).
+#. Select this new row and click ``Process Selected``.
+#. When it completes, two output files should have been created with ``bgsub_test`` in the name. One, which is the
+   normal output data. Another with the scaled subtraction, which should have ``_bgsub`` appended to the name.
+#. Right click on each of these and select ``Show Data``. The subtracted workspace's values should be 10% of the of the
+   unsubtracted workspace's values.
 
 Beam centre finder
 ##################

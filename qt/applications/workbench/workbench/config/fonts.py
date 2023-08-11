@@ -9,25 +9,10 @@
 #
 """ Utility functions to deal with fetching fonts
 """
-# std imports
-import os
-import os.path as osp
-import sys
-
 # third-party imports
 from qtpy.QtGui import QFont, QFontDatabase
 
-
-def is_ubuntu() -> bool:
-    """Return True if we're running an Ubuntu distro else return False"""
-    # platform.linux_distribution doesn't exist in Python 3.5
-    if sys.platform.startswith("linux") and osp.isfile("/etc/lsb-release"):
-        with open("/etc/lsb-release") as handle:
-            release_info = handle.read()
-            return bool("Ubuntu" in release_info or "neon" in release_info)
-    else:
-        return False
-
+import mantid.kernel.environment as mtd_env
 
 # Plain-text fonts
 MONOSPACE = [
@@ -46,14 +31,18 @@ MONOSPACE = [
 
 
 # Define reasonable point sizes on various OSes
-if sys.platform == "darwin":
+if mtd_env.is_mac():
     MONOSPACE = ["Menlo"] + MONOSPACE
     PT_SIZE = 12
-elif os.name == "nt":
+elif mtd_env.is_windows():
     PT_SIZE = 10
-elif is_ubuntu():
-    MONOSPACE = ["Ubuntu Mono"] + MONOSPACE
-    PT_SIZE = 11
+elif mtd_env.is_linux():
+    if mtd_env.is_ubuntu():
+        MONOSPACE = ["Ubuntu Mono"] + MONOSPACE
+        PT_SIZE = 11
+    else:
+        MONOSPACE = ["Ubuntu Mono", "DejaVu Sans Mono"] + MONOSPACE
+        PT_SIZE = 10
 else:
     PT_SIZE = 9
 

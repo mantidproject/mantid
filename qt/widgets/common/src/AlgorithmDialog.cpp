@@ -574,7 +574,6 @@ QString AlgorithmDialog::openFileDialog(const QString &propName) {
  * or a script input value
  * @param propName :: The name of the property
  * @param optionsBox :: A pointer to a QComoboBox object
- * @returns A newed QComboBox
  */
 void AlgorithmDialog::fillAndSetComboBox(const QString &propName, QComboBox *optionsBox) const {
   if (!optionsBox)

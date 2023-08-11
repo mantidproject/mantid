@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include <boost/scoped_array.hpp>
@@ -52,7 +52,7 @@ struct MonitorInfo {
 };
 } // namespace LoadNexusMonitorsAlg
 
-class MANTID_DATAHANDLING_DLL LoadNexusMonitors2 : public API::ParallelAlgorithm {
+class MANTID_DATAHANDLING_DLL LoadNexusMonitors2 : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadNexusMonitors"; }

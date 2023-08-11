@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_widget import FittingDataWidget
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_widget import FittingDataWidget
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_presenter import FittingPlotPresenter
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver
 
@@ -22,7 +22,7 @@ class FittingPresenter(object):
 
         # Fit started observer/notifiers
         self.fit_all_started_observer = GenericObserverWithArgPassing(self.fit_all_started)
-        self.data_widget.presenter.fit_all_started_notifier.add_subscriber(self.fit_all_started_observer)
+        self.plot_widget.fit_all_started_notifier.add_subscriber(self.fit_all_started_observer)
 
         self.fit_started_observer = GenericObserver(self.fit_started)
         self.plot_widget.view.fit_browser.fit_started_notifier.add_subscriber(self.fit_started_observer)
@@ -34,13 +34,13 @@ class FittingPresenter(object):
         self.fit_complete_observer = GenericObserverWithArgPassing(self.fit_done)
         self.plot_widget.view.fit_browser.fit_notifier.add_subscriber(self.fit_complete_observer)
 
-        # Fit enabled notifier
-        self.plot_widget.view.fit_browser.fit_enabled_notifier.add_subscriber(self.data_widget.presenter.fit_enabled_observer)
-
         self.connect_view_signals()
 
-    def fit_all_started(self, inputs):
-        ws_name_list, do_sequential = inputs
+    def fit_all_started(self, do_sequential):
+        if do_sequential:
+            ws_name_list = self.data_widget.get_sorted_active_ws_list()
+        else:
+            ws_name_list = self.data_widget.get_active_ws_list()
         # "all" refers to sequential/serial fit triggered in the data widget
         self.plot_widget.set_progress_bar_to_in_progress()
         self.disable_view(fit_all=True)
@@ -51,7 +51,12 @@ class FittingPresenter(object):
         self.plot_widget.update_browser()
         self.plot_widget.update_progress_bar()
         self.enable_view(fit_all=True)
-        self.data_widget.presenter.fit_completed(fit_props=fit_props)
+        self.plot_widget.fit_completed(
+            fit_props,
+            self.data_widget.presenter.get_loaded_ws_list(),
+            self.data_widget.presenter.get_active_ws_list(),
+            self.data_widget.presenter.get_log_ws_group_name(),
+        )
 
     def fit_started(self):
         # triggered in the fit property browser
@@ -62,7 +67,12 @@ class FittingPresenter(object):
         # triggered in the fit property browser
         self.enable_view()
         self.plot_widget.set_final_state_progress_bar(fit_props)
-        self.data_widget.presenter.fit_completed(fit_props=fit_props)
+        self.plot_widget.fit_completed(
+            fit_props,
+            self.data_widget.presenter.get_loaded_ws_list(),
+            self.data_widget.presenter.get_active_ws_list(),
+            self.data_widget.presenter.get_log_ws_group_name(),
+        )
 
     def disable_view(self, _=None, fit_all=False):
         self.data_widget.view.setEnabled(False)

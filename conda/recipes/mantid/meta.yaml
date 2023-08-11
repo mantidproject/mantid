@@ -16,17 +16,22 @@ requirements:
   build:
     - {{ compiler("c") }}
     - {{ compiler("cxx") }}
-    - llvm-openmp  # [osx]
-    - libgomp  # [linux]
-    - ninja  # [unix]
+    - llvm-openmp                            # [osx]
+    - libgomp                                # [linux]
+    - ninja                                  # [unix]
     - cmake
     - git
-    - {{ cdt('mesa-libgl-devel') }}  # [linux]
-    - {{ cdt('mesa-dri-drivers') }}  # [linux]
-    - {{ cdt('libxxf86vm') }}  # [linux]
-    - {{ cdt('libx11-devel') }}  # [linux]
-    - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
-    - libcxx {{ libcxx }}  # [osx]
+    - python {{ python }}                    # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - setuptools {{ setuptools }}            # [build_platform != target_platform]
+    - numpy {{ numpy }}                      # [build_platform != target_platform]
+    - {{ cdt('mesa-libgl-devel') }}          # [linux]
+    - {{ cdt('mesa-dri-drivers') }}          # [linux]
+    - {{ cdt('libxxf86vm') }}                # [linux]
+    - {{ cdt('libx11-devel') }}              # [linux]
+    - {{ cdt('xorg-x11-proto-devel') }}      # [linux]
+    - libcxx                                 # [osx]
+
   host:
     - boost {{ boost }}
     - eigen
@@ -35,19 +40,20 @@ requirements:
     - hdf5 {{ hdf5 }}
     - jemalloc  # [unix]
     - jsoncpp
-    - librdkafka
+    - librdkafka {{ librdkafka }}
     - lib3mf  # [win]
     - muparser
     - nexus
     - numpy {{ numpy }}
-    - occt {{ occt }}
+    - occt
     - python {{ python }}
-    - poco
+    - poco {{ poco }}
     - setuptools {{ setuptools }}
     - tbb-devel {{ tbb }}
     - pip
-    - openssl {{ openssl }}
+    - openssl
     - versioningit
+    - libglu  # [linux]
   run:
     - {{ pin_compatible("boost", max_pin="x.x") }}
     - {{ pin_compatible("gsl", max_pin="x.x") }}
@@ -55,15 +61,18 @@ requirements:
     - {{ pin_compatible("hdf5", max_pin="x.x") }}
     - lib3mf  # [win]
     - nexus
-    - {{ pin_compatible("numpy", upper_bound="1.24") }}
+    - {{ pin_compatible("numpy", upper_bound="1.25") }}
     - {{ pin_compatible("occt", max_pin="x.x.x") }}
+    - pycifrw {{ pycifrw }}
     - python
     - python-dateutil
     - pyyaml
-    - scipy
-    - openssl {{ openssl }}
-    - euphonic=0.6.*
+    - scipy {{ scipy }}
+    - openssl
+    - euphonic {{ euphonic }}
     - toml
+    - libglu  # [linux]
+    - libopenblas {{ libopenblas }}  # [osx]
 
 about:
   home: https://github.com/mantidproject/mantid

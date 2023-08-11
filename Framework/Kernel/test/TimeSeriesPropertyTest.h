@@ -19,6 +19,7 @@
 #include <cmath>
 #include <json/value.h>
 #include <memory>
+#include <numeric>
 #include <vector>
 
 using namespace Mantid::Kernel;
@@ -93,6 +94,13 @@ class TimeSeriesPropertyTest : public CxxTest::TestSuite {
     TS_ASSERT_EQUALS(left.size(), right.size());
     for (size_t i = 0; i < left.size(); i++)
       TS_ASSERT_DELTA(left[i], right[i], delta);
+  }
+
+  // compare two vectors element-wise for exact match
+  template <typename T> void assert_two_vectors(const std::vector<T> &left, const std::vector<T> &right) {
+    TS_ASSERT_EQUALS(left.size(), right.size());
+    for (size_t i = 0; i < left.size(); i++)
+      TS_ASSERT_EQUALS(left[i], right[i]);
   }
 
 public:
@@ -379,23 +387,35 @@ public:
     // no filter
     this->assert_two_vectors(log->filteredValuesAsVector(), log->valuesAsVector(), 0.01);
     // filter encompassing all the time domain
-    TimeROI *rois = new TimeROI;
-    rois->addROI("2007-11-30T16:17:00", "2007-11-30T16:17:31");
-    this->assert_two_vectors(log->filteredValuesAsVector(rois), log->valuesAsVector(), 0.01);
+    TimeROI rois;
+    rois.addROI("2007-11-30T16:17:00", "2007-11-30T16:17:31");
+    this->assert_two_vectors(log->filteredValuesAsVector(&rois), log->valuesAsVector(), 0.01);
+    this->assert_two_vectors(log->filteredTimesAsVector(&rois), log->timesAsVector());
+    TS_ASSERT_EQUALS(log->valuesAsVector().size(), log->timesAsVector().size());
+
     // times are outside the ROI's. Some times are at the upper boundaries of the ROI's, thus are excluded
-    rois->clear();
-    rois->addROI("2007-11-30T16:16:00", "2007-11-30T16:17:00"); // before the first time, including the first time
-    rois->addROI("2007-11-30T16:17:01", "2007-11-30T16:17:09"); // between times 1st and 2nd
-    rois->addROI("2007-11-30T16:17:15", "2007-11-30T16:17:20"); // between times 2nd and 3rd, including time 3rd
-    rois->addROI("2007-11-30T16:17:45", "2007-11-30T16:18:00"); // after last time
-    TS_ASSERT_EQUALS(log->filteredValuesAsVector(rois).size(), 0);
-    //
-    rois->clear();
-    rois->addROI("2007-11-30T16:16:30", "2007-11-30T16:17:05"); // capture the first time
-    rois->addROI("2007-11-30T16:17:10", "2007-11-30T16:17:20"); // capture second time, exclude the third
-    rois->addROI("2007-11-30T16:17:30", "2007-11-30T16:18:00"); // ROI after last time, including last time
-    std::vector<double> expected{9.99, 7.55, 10.55};
-    this->assert_two_vectors(log->filteredValuesAsVector(rois), expected, 0.01);
+    rois.clear();
+    rois.addROI("2007-11-30T16:16:00", "2007-11-30T16:17:00");  // before the first time, including the first time
+    rois.addROI("2007-11-30T16:17:01", "2007-11-30T16:17:09");  // between times 1st and 2nd
+    rois.addROI("2007-11-30T16:17:15", "2007-11-30T16:17:20");  // between times 2nd and 3rd, including time 3rd
+    rois.addROI("2007-11-30T16:17:45", "2007-11-30T16:18:00");  // after last time
+    std::vector<double> expected_values_one{9.99, 7.55, 10.55}; // 3rd value is notched out
+    std::vector<DateAndTime> expected_times_one{DateAndTime("2007-11-30T16:17:01"), DateAndTime("2007-11-30T16:17:15"),
+                                                DateAndTime("2007-11-30T16:17:45")};
+    this->assert_two_vectors(log->filteredValuesAsVector(&rois), expected_values_one, 0.01);
+    this->assert_two_vectors(log->filteredTimesAsVector(&rois), expected_times_one);
+
+    rois.clear();
+    rois.addROI("2007-11-30T16:16:30", "2007-11-30T16:17:05"); // capture the first time
+    rois.addROI("2007-11-30T16:17:10", "2007-11-30T16:17:20"); // capture second time, exclude the third
+    rois.addROI("2007-11-30T16:17:30", "2007-11-30T16:18:00"); // ROI after last time, including last time
+    std::vector<double> expected_values_two{9.99, 7.55, 10.55};
+    std::vector<DateAndTime> expected_times_two{DateAndTime("2007-11-30T16:17:00"), DateAndTime("2007-11-30T16:17:10"),
+                                                DateAndTime("2007-11-30T16:17:30")};
+    this->assert_two_vectors(log->filteredValuesAsVector(&rois), expected_values_two, 0.01);
+    this->assert_two_vectors(log->filteredTimesAsVector(&rois), expected_times_two);
+
+    delete log;
   }
 
   //----------------------------------------------------------------------------
@@ -408,9 +428,8 @@ public:
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
 
-    log->filterByTime(start, stop);
-
-    TS_ASSERT_EQUALS(log->realSize(), 3);
+    TimeROI roi(start, stop);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 3);
 
     delete log;
   }
@@ -424,12 +443,274 @@ public:
 
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
-
-    log->filterByTimes(roi);
-
-    TS_ASSERT_EQUALS(log->realSize(), 3);
+    // values are 2, 3, 4
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 3);
 
     delete log;
+  }
+
+  void test_removeDataOutsideTimeROI() {
+    TimeROI roi;
+    roi.addROI(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"));
+    roi.addROI(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"));
+
+    std::vector<DateAndTime> times;
+    std::vector<DateAndTime> times_expected;
+    std::vector<double> values;
+    std::vector<double> values_expected;
+
+    // 1. TimeSeriesProperty with a single value should have no changes after filtering
+    times = {DateAndTime("2007-11-30T16:19:00")};
+    times_expected = times;
+    values = {1.};
+    values_expected = values;
+    auto tsp_input = std::make_unique<TimeSeriesProperty<double>>("one_value", times, values);
+    auto tsp_expected = std::make_unique<TimeSeriesProperty<double>>("one_value", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
+
+    // 2. TimeSeriesProperty with two values
+    values = {1., 2.};
+    values_expected = values;
+    // a. TimeROI entirely between those values - no changes
+    times = {DateAndTime("2007-11-30T16:00:00"), DateAndTime("2007-11-30T20:00:00")};
+    times_expected = times;
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_a", times, values);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_a", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
+
+    // b. TimeROI entirely includes the values - no changes
+
+    // b1. First roi entirely includes the values
+    times = {DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T16:17:35")};
+    times_expected = times;
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_b1", times, values);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_b1", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
+
+    // b2. First roi includes first value, second roi includes second value
+    times = {DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T18:15:00")};
+    times_expected = times;
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_b2", times, values);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_b2", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
+
+    // c. TimeROI includes first value and not second - no changes
+    times = {DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T16:18:25")};
+    times_expected = times;
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_c", times, values);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_c", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
+
+    // d. TimeROI includes second value and not first - no changes
+    times = {DateAndTime("2007-11-30T16:17:00"), DateAndTime("2007-11-30T16:18:10")};
+    times_expected = times;
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_d", times, values);
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_d", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
+
+    // e. TimeROI is before both values - keep first
+    times = {DateAndTime("2007-11-30T16:18:35"), DateAndTime("2007-11-30T16:18:45")};
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_e", times, values);
+    times_expected = {times[0]};
+    values_expected = {values[0]};
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_e", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
+
+    // f. TimeROI is after both values - keep second
+    times = {DateAndTime("2007-11-30T16:16:10"), DateAndTime("2007-11-30T16:16:45")};
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_f", times, values);
+    times_expected = {times[1]};   // second time
+    values_expected = {values[1]}; // second value
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_f", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
+
+    // 3. TimeSeriesProperty with three values
+    values = {1., 2., 3.};
+
+    // a0 TimeROI entirely between the values - no changes
+    times = {DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:18:00"),
+             DateAndTime("2007-11-30T16:18:45")};
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("three_values_a0", times, values);
+    times_expected = times;
+    values_expected = values;
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("three_values_a0", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
+
+    // a. TimeROI includes first value only - keep the first two
+    times = {DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T16:18:30"),
+             DateAndTime("2007-11-30T16:18:45")};
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("three_values_a", times, values);
+    times_expected = {times[0], times[1]};
+    values_expected = {values[0], values[1]};
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("three_values_a", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
+
+    // b. TimeROI includes second value only - no changes
+    times = {DateAndTime("2007-11-30T16:17:00"), DateAndTime("2007-11-30T16:17:15"),
+             DateAndTime("2007-11-30T16:18:30")};
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("three_values_b", times, values);
+    times_expected = times;
+    values_expected = values;
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("three_values_b", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
+
+    // c. TimeROI includes third value only - keep the last two
+    times = {DateAndTime("2007-11-30T16:17:00"), DateAndTime("2007-11-30T16:17:05"),
+             DateAndTime("2007-11-30T16:18:20")};
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("three_values_c", times, values);
+    times_expected = {times[1], times[2]}; // last two
+    values_expected = {values[1], values[2]};
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("three_values_c", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
+  }
+
+  void test_cloneInTimeROI() {
+    TimeROI roi;
+    roi.addROI(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"));
+    roi.addROI(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"));
+
+    // Test a case where TimeROI includes the first time value only. The filtered data should be the first two
+    // datapoints.
+    std::vector<DateAndTime> times{DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T16:18:30"),
+                                   DateAndTime("2007-11-30T16:18:45")};
+    std::vector<DateAndTime> times_expected{times[0], times[1]};
+    std::vector<double> values{1., 2., 3.};
+    std::vector<double> values_expected{values[0], values[1]};
+
+    auto tsp_input = std::make_unique<TimeSeriesProperty<double>>("three_values", times, values);
+    auto tsp_expected = std::make_unique<TimeSeriesProperty<double>>("three_values", times_expected, values_expected);
+    auto tsp_result_base = std::shared_ptr<Property>(tsp_input->cloneInTimeROI(roi));
+    auto tsp_result = std::static_pointer_cast<TimeSeriesProperty<double>>(tsp_result_base);
+
+    // Make sure the cloned-in-roi time series copy is different from the original, i.e. the roi really filters out some
+    // data
+    TS_ASSERT(*tsp_result != *tsp_input);
+    // Test that the cloned copy is the same as expected
+    TS_ASSERT_EQUALS(*tsp_result, *tsp_expected);
+  }
+
+  void test_single_value_roi_mean() {
+    DateAndTime firstLogTime("2007-11-30T16:17:00");
+    TimeSeriesProperty<double> *prop = new TimeSeriesProperty<double>("doubleProp");
+    TS_ASSERT_THROWS_NOTHING(prop->addValue(firstLogTime, 1.)); // value that isn't zero
+
+    // single value no TimeROI
+    const auto statsEmptySingleValue = prop->getStatistics();
+    TS_ASSERT_EQUALS(statsEmptySingleValue.minimum, 1.);
+    TS_ASSERT_EQUALS(statsEmptySingleValue.maximum, 1.);
+    TS_ASSERT_EQUALS(statsEmptySingleValue.median, 1.);
+    TS_ASSERT_EQUALS(statsEmptySingleValue.mean, 1.);
+    TS_ASSERT_EQUALS(statsEmptySingleValue.standard_deviation, 0.);
+    TS_ASSERT_EQUALS(statsEmptySingleValue.time_mean, 1.);
+    TS_ASSERT_EQUALS(statsEmptySingleValue.time_standard_deviation, 0.);
+    TS_ASSERT_EQUALS(statsEmptySingleValue.duration, 0.);
+
+    // with TimeROI
+    TimeROI left(firstLogTime, firstLogTime + 10.);
+    const auto statsSingleValue = prop->getStatistics(&left);
+    TS_ASSERT_EQUALS(statsSingleValue.minimum, 1.);
+    TS_ASSERT_EQUALS(statsSingleValue.maximum, 1.);
+    TS_ASSERT_EQUALS(statsSingleValue.median, 1.);
+    TS_ASSERT_EQUALS(statsSingleValue.mean, 1.);
+    TS_ASSERT_EQUALS(statsSingleValue.standard_deviation, 0.);
+    TS_ASSERT_EQUALS(statsSingleValue.time_mean, 1.);
+    TS_ASSERT_EQUALS(statsSingleValue.time_standard_deviation, 0.);
+    TS_ASSERT_EQUALS(statsSingleValue.duration, 10.);
+
+    delete prop;
+  }
+
+  void test_multi_value_roi_mean() {
+    DateAndTime EPOCH("2007-11-30T16:17:00");
+    TimeSeriesProperty<double> *prop = new TimeSeriesProperty<double>("doubleProp");
+    for (size_t i = 1; i < 10; ++i) { // values are 1-9, times are first at 16:17:00, last at 16:17:16
+      TS_ASSERT_THROWS_NOTHING(prop->addValue(EPOCH + double(2 * (i - 1)), double(i))); // value that isn't zero
+    }
+
+    // these values are calculated by hand
+    const double MEAN_SIMPLE(5);
+    const double STDDEV_SIMPLE(2.581988897471611);
+    // single value no TimeROI
+    const auto statsEmptyRoi = prop->getStatistics();
+    TS_ASSERT_EQUALS(statsEmptyRoi.minimum, 1.);
+    TS_ASSERT_EQUALS(statsEmptyRoi.maximum, 9.);
+    TS_ASSERT_EQUALS(statsEmptyRoi.median, MEAN_SIMPLE);
+    TS_ASSERT_EQUALS(statsEmptyRoi.mean, MEAN_SIMPLE);
+    TS_ASSERT_EQUALS(statsEmptyRoi.standard_deviation, STDDEV_SIMPLE);
+    TS_ASSERT_EQUALS(statsEmptyRoi.time_mean, MEAN_SIMPLE);
+    TS_ASSERT_EQUALS(statsEmptyRoi.time_standard_deviation, STDDEV_SIMPLE);
+    TS_ASSERT_EQUALS(statsEmptyRoi.duration, 18.);
+
+    //    std::cout << "\n" << prop->value() << "\n"; // TODO REMOVE
+
+    // with TimeROI including everything
+    TimeROI roi(EPOCH, EPOCH + 18.);
+    const auto statsRoiAll = prop->getStatistics(&roi);
+    TS_ASSERT_EQUALS(statsRoiAll.minimum, 1.);
+    TS_ASSERT_EQUALS(statsRoiAll.maximum, 9.);
+    TS_ASSERT_EQUALS(statsRoiAll.median, MEAN_SIMPLE);
+    TS_ASSERT_EQUALS(statsRoiAll.mean, MEAN_SIMPLE);
+    TS_ASSERT_EQUALS(statsRoiAll.standard_deviation, STDDEV_SIMPLE);
+    TS_ASSERT_EQUALS(statsRoiAll.time_mean, MEAN_SIMPLE);
+    TS_ASSERT_EQUALS(statsRoiAll.time_standard_deviation, STDDEV_SIMPLE);
+    TS_ASSERT_EQUALS(statsRoiAll.duration, 18.);
+
+    // single TimeROI to include values [3,4] with the preceeding 2 being implicit
+    roi.clear();
+    roi.addROI(EPOCH + 3., EPOCH + 7.);
+    const auto statsROIOne = prop->getStatistics(&roi);
+    // not bothering with stddev
+    TS_ASSERT_EQUALS(statsROIOne.minimum, 2.);
+    TS_ASSERT_EQUALS(statsROIOne.maximum, 4.);
+    TS_ASSERT_EQUALS(statsROIOne.median, 3);
+    TS_ASSERT_EQUALS(statsROIOne.mean, 3);
+    TS_ASSERT_EQUALS(statsROIOne.time_mean, 3);
+    TS_ASSERT_EQUALS(statsROIOne.duration, 4.);
+
+    delete prop;
+  }
+
+  void test_extractStatistic() {
+    // same as
+    DateAndTime firstLogTime("2007-11-30T16:17:00");
+    TimeSeriesProperty<double> *prop = new TimeSeriesProperty<double>("doubleProp");
+    for (size_t i = 1; i < 10; ++i) { // values are 1-9, times are first at 16:17:00, last at 16:17:16
+      TS_ASSERT_THROWS_NOTHING(prop->addValue(firstLogTime + double(2 * (i - 1)), double(i))); // value that isn't zero
+    }
+
+    // no TimeROI
+    TS_ASSERT_EQUALS(prop->firstValue(), 1.);
+    TS_ASSERT_EQUALS(prop->extractStatistic(Math::StatisticType::FirstValue), 1.);
+    TS_ASSERT_EQUALS(prop->lastValue(), 9.);
+    TS_ASSERT_EQUALS(prop->extractStatistic(Math::StatisticType::LastValue), 9.);
+
+    // notch around the second value at EPOCH+2s which is 2
+    TimeROI roi(firstLogTime + 2., firstLogTime + 3.); // only a single value
+    TS_ASSERT_EQUALS(prop->firstValue(roi), 2.);
+    TS_ASSERT_EQUALS(prop->extractStatistic(Math::StatisticType::FirstValue, &roi), 2.);
+    TS_ASSERT_EQUALS(prop->lastValue(roi), 2.);
+    TS_ASSERT_EQUALS(prop->extractStatistic(Math::StatisticType::LastValue, &roi), 2.);
+
+    // add a second to include time=166:17:04, 3
+    roi.addROI(firstLogTime + 2., firstLogTime + 4.);
+    TS_ASSERT_EQUALS(prop->firstValue(roi), 2.);
+    TS_ASSERT_EQUALS(prop->extractStatistic(Math::StatisticType::FirstValue, &roi), 2.);
+    TS_ASSERT_EQUALS(prop->lastValue(roi), 3.);
+    TS_ASSERT_EQUALS(prop->extractStatistic(Math::StatisticType::LastValue, &roi), 3.);
+
+    delete prop;
   }
 
   void test_filterByTimesN() {
@@ -440,34 +721,42 @@ public:
     roi.addROI(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"));
     roi.addROI(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"));
 
-    // Since the filter is < stop, the last one is not counted, so there are  3
-    // taken out.
-
-    log->filterByTimes(roi);
-
-    TS_ASSERT_EQUALS(log->realSize(), 6);
-
+    std::vector<DateAndTime> expTimes{DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:20"),
+                                      DateAndTime("2007-11-30T16:17:30"), DateAndTime("2007-11-30T16:18:05"),
+                                      DateAndTime("2007-11-30T16:18:10"), DateAndTime("2007-11-30T16:18:20")};
+    this->assert_two_vectors(log->filteredValuesAsVector(&roi), {2, 3, 4, 7, 8, 9});
+    this->assert_two_vectors(log->filteredTimesAsVector(&roi), expTimes);
     delete log;
   }
 
   //----------------------------------------------------------------------------
-  /// Ticket #2591
+  /**
+   * Ticket #2591 - since the values are unchanged, specifying a TimeROI after all
+   * the actual values, will return the last value
+   */
   void test_filterByTime_ifOnlyOneValue_assumes_constant_instead() {
     TimeSeriesProperty<int> *log = createIntegerTSP(1);
     TS_ASSERT_EQUALS(log->realSize(), 1);
 
+    // original time is "2007-11-30T16:17:00"
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
     DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
-    log->filterByTime(start, stop);
+    TimeROI roi(start, stop);
 
     // Still there!
-    TS_ASSERT_EQUALS(log->realSize(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).front(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).front(), start);
 
     delete log;
   }
 
   //----------------------------------------------------------------------------
-  /// Ticket #2591
+  /**
+   * Ticket #2591 - since the values are unchanged, specifying a TimeROI after all
+   * the actual values, will return the last value
+   */
   void test_filterByTime_ifOnlyOneValue_assumes_constant_instead_2() {
     TimeSeriesProperty<int> *log = new TimeSeriesProperty<int>("MyIntLog");
     TS_ASSERT_THROWS_NOTHING(log->addValue("1990-01-01T00:00:00", 1));
@@ -475,10 +764,13 @@ public:
 
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
     DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
-    log->filterByTime(start, stop);
+    TimeROI roi(start, stop);
 
     // Still there!
-    TS_ASSERT_EQUALS(log->realSize(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredValuesAsVector(&roi).front(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).size(), 1);
+    TS_ASSERT_EQUALS(log->filteredTimesAsVector(&roi).front(), start);
 
     delete log;
   }
@@ -756,299 +1048,6 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  /**
-   * otuput 0 has entries: 3
-   * otuput 1 has entries: 5
-   * otuput 2 has entries: 2
-   * otuput 3 has entries: 7
-   * @brief test_splitByTimeVector
-   */
-  void test_splitByTimeVector() {
-    // create the splitters
-    std::vector<DateAndTime> split_time_vec;
-    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:17:10"));
-    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:17:40"));
-    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:17:55"));
-    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:17:56"));
-    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:18:09"));
-    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:18:45"));
-    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:22:50"));
-
-    std::vector<int> split_target_vec;
-    split_target_vec.emplace_back(1);
-    split_target_vec.emplace_back(0);
-    split_target_vec.emplace_back(2);
-    split_target_vec.emplace_back(0);
-    split_target_vec.emplace_back(1);
-    split_target_vec.emplace_back(3);
-
-    TimeSeriesProperty<int> log("test log");
-    log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
-    log.addValue(DateAndTime("2007-11-30T16:17:30"), 2);
-    log.addValue(DateAndTime("2007-11-30T16:18:00"), 3);
-    log.addValue(DateAndTime("2007-11-30T16:18:30"), 4);
-    log.addValue(DateAndTime("2007-11-30T16:19:00"), 5);
-    log.addValue(DateAndTime("2007-11-30T16:19:30"), 6);
-    log.addValue(DateAndTime("2007-11-30T16:20:00"), 7);
-    log.addValue(DateAndTime("2007-11-30T16:20:30"), 8);
-    log.addValue(DateAndTime("2007-11-30T16:21:00"), 9);
-    log.addValue(DateAndTime("2007-11-30T16:21:30"), 10);
-
-    std::vector<TimeSeriesProperty<int> *> outputs;
-    for (int itarget = 0; itarget < 4; ++itarget) {
-      TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
-      outputs.emplace_back(tsp);
-    }
-
-    log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
-
-    // Exam the split entries
-    TimeSeriesProperty<int> *out_0 = outputs[0];
-    // FIXME - Check whether out_0 is correct!
-    TS_ASSERT_EQUALS(out_0->size(), 3);
-    TS_ASSERT_EQUALS(out_0->nthValue(0), 2);
-    TS_ASSERT_EQUALS(out_0->nthValue(1), 3);
-    TS_ASSERT_EQUALS(out_0->nthValue(2), 4);
-
-    TimeSeriesProperty<int> *out_1 = outputs[1];
-    TS_ASSERT_EQUALS(out_1->size(), 5);
-    TS_ASSERT_EQUALS(out_1->nthValue(0), 1);
-    TS_ASSERT_EQUALS(out_1->nthValue(1), 2);
-    TS_ASSERT_EQUALS(out_1->nthValue(2), 3);
-    TS_ASSERT_EQUALS(out_1->nthValue(3), 4);
-    TS_ASSERT_EQUALS(out_1->nthValue(4), 5);
-
-    TimeSeriesProperty<int> *out_2 = outputs[2];
-    TS_ASSERT_EQUALS(out_2->size(), 2);
-    TS_ASSERT_EQUALS(out_2->nthValue(0), 2);
-    TS_ASSERT_EQUALS(out_2->nthValue(1), 3);
-
-    TimeSeriesProperty<int> *out_3 = outputs[3];
-    TS_ASSERT_EQUALS(out_3->size(), 7);
-    // out[3] should have entries: 4, 5, 6, 7, 8, 9, 10
-    for (int j = 0; j < out_3->size(); ++j) {
-      TS_ASSERT_EQUALS(out_3->nthValue(j), j + 4);
-    }
-
-    for (auto outputPtr : outputs) {
-      delete outputPtr;
-    }
-  }
-
-  //----------------------------------------------------------------------------
-  /** last splitter is before first entry
-   * @brief test_splitByTimeVectorEarlySplitter
-   */
-  void test_splitByTimeVectorEarlySplitter() {
-    // create the splitters
-    std::vector<DateAndTime> split_time_vec;
-    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:00:10"));
-    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:00:40"));
-    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:07:55"));
-    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:07:56"));
-    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:08:09"));
-    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:08:45"));
-    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:12:50"));
-
-    std::vector<int> split_target_vec;
-    split_target_vec.emplace_back(1);
-    split_target_vec.emplace_back(0);
-    split_target_vec.emplace_back(2);
-    split_target_vec.emplace_back(0);
-    split_target_vec.emplace_back(1);
-    split_target_vec.emplace_back(3);
-
-    TimeSeriesProperty<int> log("test log");
-    log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
-    log.addValue(DateAndTime("2007-11-30T16:17:30"), 2);
-    log.addValue(DateAndTime("2007-11-30T16:18:00"), 3);
-    log.addValue(DateAndTime("2007-11-30T16:18:30"), 4);
-    log.addValue(DateAndTime("2007-11-30T16:19:00"), 5);
-    log.addValue(DateAndTime("2007-11-30T16:19:30"), 6);
-    log.addValue(DateAndTime("2007-11-30T16:20:00"), 7);
-    log.addValue(DateAndTime("2007-11-30T16:20:30"), 8);
-    log.addValue(DateAndTime("2007-11-30T16:21:00"), 9);
-    log.addValue(DateAndTime("2007-11-30T16:21:30"), 10);
-
-    // Initialze the 4 splitters
-    std::vector<TimeSeriesProperty<int> *> outputs;
-    for (int itarget = 0; itarget < 4; ++itarget) {
-      outputs.emplace_back(new TimeSeriesProperty<int>("target"));
-    }
-
-    log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
-
-    // check
-    for (int i = 0; i < 4; ++i) {
-      TimeSeriesProperty<int> *out_i = outputs[i];
-      TS_ASSERT_EQUALS(out_i->size(), 0);
-      delete out_i;
-      outputs[i] = nullptr;
-    }
-
-    return;
-  }
-
-  //----------------------------------------------------------------------------
-  /** first splitter is after last entry
-   * @brief test_splitByTimeVectorLaterSplitter
-   */
-  void test_splitByTimeVectorLaterSplitter() {
-    // create the splitters
-    std::vector<DateAndTime> split_time_vec;
-    split_time_vec.emplace_back(DateAndTime("2007-12-30T16:00:10"));
-    split_time_vec.emplace_back(DateAndTime("2007-12-30T16:00:40"));
-    split_time_vec.emplace_back(DateAndTime("2007-12-30T16:07:55"));
-    split_time_vec.emplace_back(DateAndTime("2007-12-30T16:07:56"));
-    split_time_vec.emplace_back(DateAndTime("2007-12-30T16:08:09"));
-    split_time_vec.emplace_back(DateAndTime("2007-12-30T16:08:45"));
-    split_time_vec.emplace_back(DateAndTime("2007-12-30T16:12:50"));
-
-    std::vector<int> split_target_vec;
-    split_target_vec.emplace_back(1);
-    split_target_vec.emplace_back(0);
-    split_target_vec.emplace_back(2);
-    split_target_vec.emplace_back(0);
-    split_target_vec.emplace_back(1);
-    split_target_vec.emplace_back(3);
-
-    // create test log
-    TimeSeriesProperty<int> log("test log");
-    log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
-    log.addValue(DateAndTime("2007-11-30T16:17:30"), 2);
-    log.addValue(DateAndTime("2007-11-30T16:18:00"), 3);
-    log.addValue(DateAndTime("2007-11-30T16:18:30"), 4);
-    log.addValue(DateAndTime("2007-11-30T16:19:00"), 5);
-    log.addValue(DateAndTime("2007-11-30T16:19:30"), 6);
-    log.addValue(DateAndTime("2007-11-30T16:20:00"), 7);
-    log.addValue(DateAndTime("2007-11-30T16:20:30"), 8);
-    log.addValue(DateAndTime("2007-11-30T16:21:00"), 9);
-    log.addValue(DateAndTime("2007-11-30T16:21:30"), 10);
-
-    // Initialze the 4 splitters
-    std::vector<TimeSeriesProperty<int> *> outputs;
-    for (int itarget = 0; itarget < 4; ++itarget) {
-      outputs.emplace_back(new TimeSeriesProperty<int>("target"));
-    }
-
-    log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
-
-    // check
-    for (int i = 0; i < 4; ++i) {
-      TimeSeriesProperty<int> *out_i = outputs[i];
-      TS_ASSERT_EQUALS(out_i->size(), 1);
-      delete out_i;
-      outputs[i] = nullptr;
-    }
-  }
-
-  //----------------------------------------------------------------------------
-  /** high-frequency splitters splits a slow change log
-   * @brief test_splitByTimeVectorFastLogSplitter
-   */
-  void test_splitByTimeVectorFastLogSplitter() {
-    // create test log
-    TimeSeriesProperty<int> log("test log");
-    log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
-    log.addValue(DateAndTime("2007-11-30T16:17:30"), 2);
-    log.addValue(DateAndTime("2007-11-30T16:18:00"), 3);
-    log.addValue(DateAndTime("2007-11-30T16:18:30"), 4);
-    log.addValue(DateAndTime("2007-11-30T16:19:00"), 5);
-    log.addValue(DateAndTime("2007-11-30T16:19:30"), 6);
-    log.addValue(DateAndTime("2007-11-30T16:20:00"), 7);
-    log.addValue(DateAndTime("2007-11-30T16:20:30"), 8);
-    log.addValue(DateAndTime("2007-11-30T16:21:00"), 9);
-    log.addValue(DateAndTime("2007-11-30T16:21:30"), 10);
-
-    // create a high frequency splitter
-    DateAndTime split_time("2007-11-30T16:17:00");
-    int64_t dt = 100 * 1000;
-
-    std::vector<DateAndTime> vec_split_times;
-    std::vector<int> vec_split_target;
-
-    for (int i = 0; i < 10; ++i) {
-      for (int j = 0; j < 10; ++j) {
-        vec_split_times.emplace_back(split_time);
-        split_time += dt;
-        vec_split_target.emplace_back(j);
-      }
-    }
-
-    // push back last split-time (split stop)
-    vec_split_times.emplace_back(split_time);
-
-    // Initialze the 10 splitters
-    std::vector<TimeSeriesProperty<int> *> outputs;
-    for (int itarget = 0; itarget < 10; ++itarget) {
-      outputs.emplace_back(new TimeSeriesProperty<int>("target"));
-    }
-
-    // split time series property
-    log.splitByTimeVector(vec_split_times, vec_split_target, outputs);
-
-    // test
-    for (auto &it : outputs) {
-      TS_ASSERT_EQUALS(it->size(), 2);
-      delete it;
-      it = nullptr;
-    }
-  }
-
-  //----------------------------------------------------------------------------
-  /** Extreme case 1: the last entry of time series property is before the first
-   * splitter.  The test case is extracted from issue #21836, in which
-   * the last entry is before the first splitter
-   * @brief test_SplitByTimeExtremeCase1.
-   */
-  void test_SplitByTimeExtremeCase1() {
-    // create test log
-    TimeSeriesProperty<int> int_log("test int log 21836");
-    int_log.addValue(DateAndTime("2017-11-10T03:12:06"), 1);
-    int_log.addValue(DateAndTime("2017-11-10T03:12:31"), 3);
-    int_log.addValue(DateAndTime("2017-11-10T03:12:40"), 2);
-
-    TimeSeriesProperty<double> dbl_log("test double log 21836");
-    dbl_log.addValue(DateAndTime("2017-11-10T03:12:06"), 1.0);
-    dbl_log.addValue(DateAndTime("2017-11-10T03:12:31"), 3.0);
-    dbl_log.addValue(DateAndTime("2017-11-10T03:12:40"), 2.0);
-
-    // create the splitters
-    std::vector<DateAndTime> split_time_vec;
-    split_time_vec.emplace_back(DateAndTime("2017-11-10T03:13:06.814538624"));
-    split_time_vec.emplace_back(DateAndTime("2017-11-10T03:14:07.764311936"));
-    split_time_vec.emplace_back(DateAndTime("2017-11-10T03:15:07.697312000"));
-    split_time_vec.emplace_back(DateAndTime("2017-11-10T03:16:08.827971840"));
-    split_time_vec.emplace_back(DateAndTime("2017-11-10T03:17:08.745746688"));
-    split_time_vec.emplace_back(DateAndTime("2017-11-10T03:20:10.757950208"));
-
-    // create the target vector
-    std::vector<int> split_target_vec(5);
-    for (size_t i = 0; i < 5; ++i) {
-      split_target_vec[i] = (i + 1) % 2;
-    }
-
-    // Initialze the 2 splitters
-    std::vector<TimeSeriesProperty<int> *> outputs;
-    for (int itarget = 0; itarget < 2; ++itarget) {
-      outputs.emplace_back(new TimeSeriesProperty<int>("target"));
-    }
-
-    // split
-    int_log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
-
-    // check
-    for (int i = 0; i < 2; ++i) {
-      TimeSeriesProperty<int> *out_i = outputs[i];
-      TS_ASSERT_EQUALS(out_i->size(), 1);
-      delete out_i;
-      outputs[i] = nullptr;
-    }
-
-    return;
-  }
-
-  //----------------------------------------------------------------------------
   void test_statistics() {
     TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("MydoubleLog");
     TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T16:17:00", 1));
@@ -1079,6 +1078,44 @@ public:
     delete log;
   }
 
+  // this test is taken from PlotAsymmetryByLogValueTest::test_LogValueFunction
+  void test_statistics_excessiveROI() {
+    TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("MydoubleLog");
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T17:12:34", 178.3));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T17:13:08", 179.4));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("2007-11-30T17:13:42", 180.2));
+
+    constexpr double MIN{178.3};
+    constexpr double MAX{180.2};
+    constexpr double MEDIAN{179.4};
+    constexpr double MEAN{(178.3 + 179.4 + 180.2) / 3.};
+
+    // bare stats
+    const auto stats_no_roi = log->getStatistics();
+    TS_ASSERT_DELTA(stats_no_roi.minimum, MIN, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.maximum, MAX, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.median, MEDIAN, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.mean, MEAN, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.duration, (136 - 34),
+                    1e-3); // last interval is guessed to be same as penultimate interval
+    TS_ASSERT_DELTA(log->timeAverageValue(), stats_no_roi.mean, 1e-3);
+    TS_ASSERT_DELTA(stats_no_roi.time_mean, 179.3, 1e-3); // calculated by hand
+
+    // this starts 4 seconds before the log does to force checking the durations are done correctly
+    // roi duration is 100, but the first 4 seconds should be skipped
+    TimeROI roi(DateAndTime("2007-11-30T17:12:30"), DateAndTime("2007-11-30T17:14:10"));
+
+    // bare stats with the wacky TimROI
+    const auto stats_roi = log->getStatistics(&roi);
+    TS_ASSERT_DELTA(stats_roi.minimum, MIN, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.maximum, MAX, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.median, MEDIAN, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.mean, MEAN, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.duration, (130 - 34), 1e-3);
+    TS_ASSERT_DELTA(log->timeAverageValue(), stats_roi.mean, 1e-3);
+    TS_ASSERT_DELTA(stats_roi.time_mean, 179.24375, 1e-3); // calculated by hand
+  }
+
   void test_empty_statistics() {
     TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("MydoubleLog");
     TimeSeriesPropertyStatistics stats = log->getStatistics();
@@ -1092,6 +1129,49 @@ public:
     TS_ASSERT(std::isnan(stats.duration));
 
     delete log;
+  }
+
+  void test_EMU00081100() {
+    std::cout << "==============================>\n";
+    // this is taken from a log that was showing incorrect behavior
+    TimeSeriesProperty<double> log("field_danfysik");
+    log.addValue("2018-06-12T23:18:37.000000000", 2289.4013671875);
+    log.addValue("2018-06-12T23:18:37.000000000", 2289.4013671875);
+    log.addValue("2018-06-12T23:19:07.000000000", 2289.456298828125);
+    log.addValue("2018-06-12T23:19:37.000000000", 2289.4013671875);
+    log.addValue("2018-06-12T23:20:07.000000000", 2289.4013671875);
+    log.addValue("2018-06-12T23:20:38.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:21:08.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:21:39.000000000", 2289.4013671875);
+    log.addValue("2018-06-12T23:22:09.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:22:39.000000000", 2289.4013671875);
+    log.addValue("2018-06-12T23:23:10.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:23:40.000000000", 2289.456298828125);
+    log.addValue("2018-06-12T23:24:11.000000000", 2289.456298828125);
+    log.addValue("2018-06-12T23:24:42.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:25:12.000000000", 2289.346435546875);
+    log.addValue("2018-06-12T23:25:43.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:26:13.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:26:43.000000000", 2289.456298828125);
+    log.addValue("2018-06-12T23:27:14.000000000", 2289.51123046875);
+    log.addValue("2018-06-12T23:27:47.000000000", 2289.456298828125);
+    constexpr std::size_t NUM_VALS{20};
+    TS_ASSERT_EQUALS(log.size(), NUM_VALS);
+
+    // expected value calculated with a parallel implementation in python
+    constexpr double TIME_MEAN_EXP{2289.459125}; // previous was 2289.459295};
+    // the last duration is faked to be the same as the previous one (46-14)
+    constexpr double DURATION_EXP{(27 - 18) * 60. + (47 - 37) + (47 - 14)};
+    const auto &values = log.valuesAsVector();
+    TS_ASSERT_EQUALS(values.size(), NUM_VALS);
+    const double mean = std::accumulate(values.cbegin(), values.cend(), 0.) / double(NUM_VALS);
+
+    // test the statistics against what is expected
+    const auto statistics = log.getStatistics();
+    TS_ASSERT_DELTA(statistics.mean, mean, 1e-5);
+    TS_ASSERT_DELTA(statistics.time_mean, TIME_MEAN_EXP, 1e-5);
+    TS_ASSERT_EQUALS(statistics.duration, DURATION_EXP);
+    TS_ASSERT_DELTA(log.timeAverageValue(), TIME_MEAN_EXP, 1e-5);
   }
 
   void test_PlusEqualsOperator_Incompatible_Types_dontThrow() {
@@ -1111,6 +1191,29 @@ public:
     delete log;
     delete logi;
     delete val;
+  }
+
+  void test_LogAtStartOfTime() {
+    TimeSeriesProperty<double> *log = new TimeSeriesProperty<double>("doubleLog");
+    TS_ASSERT_THROWS_NOTHING(log->addValue("1990-Jan-01 00:00:00", 1));
+    TS_ASSERT_THROWS_NOTHING(log->addValue("1990-Jan-01 00:00:10", 2));
+
+    const auto rawstats = log->getStatistics();
+    TS_ASSERT_DELTA(rawstats.minimum, 1.0, 1e-3);
+    TS_ASSERT_DELTA(rawstats.maximum, 2.0, 1e-3);
+    TS_ASSERT_DELTA(rawstats.median, 1.5, 1e-3);
+    TS_ASSERT_DELTA(rawstats.mean, 1.5, 1e-3);
+    TS_ASSERT_DELTA(rawstats.duration, 20.0, 1e-3);
+    TS_ASSERT_DELTA(rawstats.time_mean, 1.5, 1e-3);
+
+    TimeROI roi(DateAndTime("1990-Jan-01 00:00:00"), DateAndTime("1990-Jan-01 00:00:20"));
+    const auto filteredstats = log->getStatistics(&roi);
+    TS_ASSERT_DELTA(filteredstats.minimum, 1.0, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.maximum, 2.0, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.median, 1.5, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.mean, 1.5, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.duration, 20.0, 1e-3);
+    TS_ASSERT_DELTA(filteredstats.time_mean, 1.5, 1e-3);
   }
 
   void test_PlusEqualsOperator_() {
@@ -1821,6 +1924,81 @@ public:
     return;
   }
 
+  void test_duplicateTimes() {
+    // emulate duplicates from the MDNorm test(s) with HYS_13656-13658
+    const DateAndTime time_first("2013-Jan-13 19:36:16.837000000");
+    const DateAndTime time_last("2013-Jan-13 19:36:21.900000202");
+    TimeSeriesProperty<double> prop("s1");
+    prop.addValue(time_first, -0.001722);
+    prop.addValue("2013-Jan-13 19:36:17.290000009", 0.004401);
+    prop.addValue("2013-Jan-13 19:36:17.400000023", 0.010716);
+    prop.addValue("2013-Jan-13 19:36:17.508999990", 0.016265);
+    prop.addValue("2013-Jan-13 19:36:17.727999972", 0.021814);
+    prop.addValue("2013-Jan-13 19:36:17.727999972", 0.027172);
+    prop.addValue("2013-Jan-13 19:36:17.947000014", 0.032721);
+    prop.addValue("2013-Jan-13 19:36:17.947000014", 0.037887);
+    prop.addValue("2013-Jan-13 19:36:18.180999981", 0.043437);
+    prop.addValue("2013-Jan-13 19:36:18.353000032", 0.052813);
+    prop.addValue("2013-Jan-13 19:36:18.353000032", 0.058171);
+    prop.addValue("2013-Jan-13 19:36:18.509000050", 0.063911);
+    prop.addValue("2013-Jan-13 19:36:18.680999981", 0.069269);
+    prop.addValue("2013-Jan-13 19:36:18.680999981", 0.074627);
+    prop.addValue("2013-Jan-13 19:36:18.915000068", 0.080367);
+    prop.addValue("2013-Jan-13 19:36:18.915000068", 0.085917);
+    prop.addValue("2013-Jan-13 19:36:19.165000068", 0.092231);
+    prop.addValue("2013-Jan-13 19:36:19.306000101", 0.100459);
+    prop.addValue("2013-Jan-13 19:36:19.306000101", 0.1062);
+    prop.addValue("2013-Jan-13 19:36:19.524999963", 0.111749);
+    prop.addValue("2013-Jan-13 19:36:19.524999963", 0.117107);
+    prop.addValue("2013-Jan-13 19:36:19.744000064", 0.122847);
+    prop.addValue("2013-Jan-13 19:36:19.744000064", 0.128205);
+    prop.addValue("2013-Jan-13 19:36:19.962000000", 0.133754);
+    prop.addValue("2013-Jan-13 19:36:19.962000000", 0.139112);
+    prop.addValue("2013-Jan-13 19:36:20.149999963", 0.144661);
+    prop.addValue("2013-Jan-13 19:36:20.353000032", 0.153081);
+    prop.addValue("2013-Jan-13 19:36:20.353000032", 0.158821);
+    prop.addValue("2013-Jan-13 19:36:20.571999895", 0.16437);
+    prop.addValue("2013-Jan-13 19:36:20.571999895", 0.169537);
+    prop.addValue("2013-Jan-13 19:36:20.696999895", 0.175086);
+    prop.addValue("2013-Jan-13 19:36:20.900000202", 0.180827);
+    prop.addValue("2013-Jan-13 19:36:20.900000202", 0.186376);
+    prop.addValue("2013-Jan-13 19:36:21.197000133", 0.191925);
+    prop.addValue("2013-Jan-13 19:36:21.197000133", 0.20111);
+    prop.addValue("2013-Jan-13 19:36:21.430999862", 0.20685);
+    prop.addValue("2013-Jan-13 19:36:21.430999862", 0.213165);
+    prop.addValue("2013-Jan-13 19:36:21.572000133", 0.218714);
+    prop.addValue("2013-Jan-13 19:36:21.775000202", 0.224072);
+    prop.addValue("2013-Jan-13 19:36:21.775000202", 0.229621);
+    prop.addValue(time_last, 0.235936);
+
+    // the log is built as a constant ramp up
+    const double MIN_VALUE = prop.valuesAsVector().front();
+    const double MAX_VALUE = prop.valuesAsVector().back();
+    constexpr std::size_t SIZE_ORIG = 1928 - 1888 + 1;   // difference in line numbers above
+    constexpr std::size_t SIZE_REDUCED = SIZE_ORIG - 15; // repeats counted by hand
+    // there is a fake duration tacked on which is the last non-zero duration beore it
+    const double DURATION = DateAndTime::secondsFromDuration(time_last - time_first) + (21.900000202 - 21.775000202);
+
+    const auto statsOrig = prop.getStatistics();
+    TS_ASSERT_EQUALS(statsOrig.minimum, MIN_VALUE);
+    TS_ASSERT_EQUALS(statsOrig.maximum, MAX_VALUE);
+    TS_ASSERT_EQUALS(statsOrig.duration, DURATION);
+    TS_ASSERT_EQUALS(prop.size(), SIZE_ORIG);
+    TS_ASSERT_EQUALS(prop.valuesAsVector().size(), SIZE_ORIG);
+
+    // remove duplicates
+    prop.eliminateDuplicates();
+    const auto statsReduced = prop.getStatistics();
+    TS_ASSERT_EQUALS(statsReduced.minimum, MIN_VALUE);
+    TS_ASSERT_EQUALS(statsReduced.maximum, MAX_VALUE);
+    TS_ASSERT_EQUALS(statsReduced.duration, DURATION);
+    TS_ASSERT_EQUALS(prop.size(), SIZE_REDUCED);
+    TS_ASSERT_EQUALS(prop.valuesAsVector().size(), SIZE_REDUCED);
+
+    // time average mean should be unchanged
+    TS_ASSERT_EQUALS(statsReduced.time_mean, statsOrig.time_mean);
+  }
+
   /*
    * Test getMemorySize()
    * Note that this will be same with new container
@@ -1943,9 +2121,9 @@ public:
     DateAndTime start = DateAndTime("2007-11-30T15:00:00"); // Much earlier than first time series value
     DateAndTime stop = DateAndTime("2007-11-30T17:00:00");  // Much later than last time series value
 
-    log->filterByTime(start, stop);
+    TimeROI roi(start, stop);
 
-    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->realSize());
+    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->filteredValuesAsVector(&roi).size());
 
     delete log;
   }

@@ -1184,6 +1184,8 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
     bool createsplitter = false;
 
     currTime = m_dblLog->nthTime(i);
+    if ((i + 1 < iend) && (currTime == m_dblLog->nthTime(i + 1)))
+      continue; // skip to the next value
     double currValue = m_dblLog->nthValue(i);
 
     // Filter out by time and direction (optional)
@@ -1771,16 +1773,12 @@ void GenerateEventsFilter::generateSplittersInSplitterWS() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Find run end time.  Here is how the run end time is defined ranked from
- * highest priority
- * 1. Run.endTime()
- * 2. Last proton charge log time
- * 3. Last event time
+/**
  * In order to consider the events in the last pulse,
  * 1. if proton charge does exist, then run end time will be extended by 1
  * pulse time
  * 2. otherwise, extended by 0.1 second (10 Hz)
- * Exception: None of the 3 conditions is found to determine run end time
+ * Exception: unable to determine run end time
  */
 DateAndTime GenerateEventsFilter::findRunEnd() {
   // Try to get the run end from Run object
@@ -1792,83 +1790,25 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
     norunendset = true;
   }
 
-  g_log.debug() << "Check point 1 "
-                << "Run end time = " << runendtime << "/" << runendtime.totalNanoseconds()
-                << ", no run end set = " << norunendset << "\n";
-
-  auto extended_ns = static_cast<int64_t>(1.0E8);
-  if (m_dataWS->run().hasProperty("proton_charge")) {
-    // Get last proton charge time and compare with run end time
-    // this does nothing but make sure that run().endTime() is same as proton
-    // charge end time
-    Kernel::TimeSeriesProperty<double> *protonchargelog =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_dataWS->run().getProperty("proton_charge"));
-    if (!protonchargelog) {
-      throw std::runtime_error("proton_charge log not found");
-    }
-
-    if (protonchargelog->size() > 1) {
-      Types::Core::DateAndTime tmpendtime = protonchargelog->lastTime();
-      extended_ns = protonchargelog->nthTime(1).totalNanoseconds() - protonchargelog->nthTime(0).totalNanoseconds();
-      if (tmpendtime > runendtime) {
-        // Use the last proton charge time
-        runendtime = tmpendtime;
-        g_log.debug() << "Check point 1B: "
-                      << "Use last proton charge time = " << tmpendtime.totalNanoseconds() << " as run end. "
-                      << "\n";
-      }
-      norunendset = false;
-    }
-
-    g_log.debug() << "Check point 2A "
-                  << " run end time = " << runendtime << "\n";
-  } else if (norunendset) {
-    // No proton_charge or run_end: sort events and find the last event
-    norunendset = false;
-
-    runendtime = 0;
-
+  if (norunendset) {
     DataObjects::EventWorkspace_const_sptr eventWS = std::dynamic_pointer_cast<const EventWorkspace>(m_dataWS);
-    if (!eventWS) {
-      stringstream errss;
-      errss << "Input workspace " << m_dataWS->getName()
-            << " is not an Eventworkspace and does not have sample log "
-               "'proton_charge'."
-               "Therefore it fails to find run end time.";
-      g_log.error(errss.str());
-
-      throw std::runtime_error(errss.str());
-    } else if (eventWS->getNumberEvents() == 0) {
-      stringstream errss;
-      errss << "Input EventWorkspace " << m_dataWS->getName()
-            << " has zero event and does not have sample log 'proton_charge'.  "
-               "Therefore, unable to "
-               "determine run end time";
-
-      g_log.error(errss.str());
-      throw std::runtime_error(errss.str());
+    if (!eventWS || eventWS->getNumberEvents() == 0) {
+      throw std::runtime_error("Run end time cannot be determined.");
+    } else {
+      runendtime = eventWS->getPulseTimeMax();
     }
-
-    for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i) {
-      const DataObjects::EventList &evlist = eventWS->getSpectrum(i);
-      if (evlist.getNumberEvents() > 0) {
-        // If event list is empty, the returned value may not make any sense
-        DateAndTime lastpulse = evlist.getPulseTimeMax();
-        if (lastpulse > runendtime)
-          runendtime = lastpulse;
-      }
-    }
-    g_log.debug() << "Check point 2B "
-                  << " from last event: run end time = " << runendtime << " / " << runendtime.totalNanoseconds()
-                  << "\n";
   }
 
-  // Check whether run end time is set
-  if (norunendset)
-    throw runtime_error("Run end time cannot be determined. ");
+  auto extended_ns = static_cast<int64_t>(1.0E8); // 0.1 seconds
+  if (m_dataWS->run().hasProperty("proton_charge")) {
+    Kernel::TimeSeriesProperty<double> *protonchargelog =
+        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_dataWS->run().getProperty("proton_charge"));
+    if (protonchargelog->size() > 1) {
+      extended_ns = protonchargelog->nthTime(1).totalNanoseconds() - protonchargelog->nthTime(0).totalNanoseconds();
+    }
+  }
 
-  // Add 1 second to make sure that no event left behind either last pulse time
-  // or last event time
+  // Add last pulse time or 0.1 seconds to make sure that no event left behind
   runendtime = DateAndTime(runendtime.totalNanoseconds() + extended_ns);
 
   return runendtime;

@@ -8,7 +8,7 @@
 """
     Base class for instrument-specific user interface
 """
-from qtpy.QtWidgets import QMessageBox  # noqa
+from qtpy.QtWidgets import QMessageBox
 import sys
 import os
 import traceback

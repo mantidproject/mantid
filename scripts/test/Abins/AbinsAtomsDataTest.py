@@ -4,9 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import json
 import unittest
 import numpy as np
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
 from abins import AtomsData
+from abins.test_helpers import assert_atom_almost_equal
 
 
 class AtomsDataTest(unittest.TestCase):
@@ -75,7 +80,7 @@ class AtomsDataTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             AtomsData._check_item(wrong_data)
 
-        wrong_data["coord"] = np.asarray([[1, 2], [4]])
+        wrong_data["coord"] = np.asarray([[1, 2], [4]], dtype=object)
         with self.assertRaises(ValueError):
             AtomsData._check_item(wrong_data)
 
@@ -140,6 +145,21 @@ class AtomsDataTest(unittest.TestCase):
             self.assertEqual(self._good_data["atom_%s" % el]["symbol"], data["atom_%s" % el]["symbol"])
             self.assertEqual(True, np.allclose(self._good_data["atom_%s" % el]["coord"], data["atom_%s" % el]["coord"]))
             self.assertEqual(self._good_data["atom_%s" % el]["mass"], data["atom_%s" % el]["mass"])
+
+    def test_json_roundtrip(self):
+        atoms_data = AtomsData(self._good_data)
+
+        with TemporaryDirectory() as td:
+            json_file = Path(td) / "atoms.json"
+            with open(json_file, "w") as fp:
+                json.dump(atoms_data.to_dict(), fp)
+
+            with open(json_file, "r") as fp:
+                atoms_roundtrip = AtomsData.from_dict(json.load(fp))
+
+        for i, atom_data in enumerate(atoms_data):
+            atom_roundtrip = atoms_roundtrip[i]
+            assert_atom_almost_equal(atom_data, atom_roundtrip, tester=self)
 
 
 if __name__ == "__main__":

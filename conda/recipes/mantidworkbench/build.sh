@@ -21,8 +21,8 @@ cmake \
   -DWORKBENCH_BIN_DIR=$PREFIX/bin \
   -DENABLE_PRECOMMIT=OFF \
   -DCONDA_BUILD=True \
-  -DCONDA_ENV=True \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
+  -DPython_EXECUTABLE=$PYTHON \
   -GNinja \
   ../
 

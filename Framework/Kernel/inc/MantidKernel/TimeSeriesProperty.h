@@ -148,8 +148,17 @@ public:
 
   /// Virtual destructor
   ~TimeSeriesProperty() override;
+
+private:
+  /// Construct a TimeSeriesProperty object with the base class data only
+  TimeSeriesProperty(const Property *const p);
+
+public:
   /// "Virtual" copy constructor
   TimeSeriesProperty<TYPE> *clone() const override;
+
+  /// Create a partial copy according to TimeROI
+  Property *cloneInTimeROI(const TimeROI &timeROI) const override;
   //
   /// Return time series property, containing time derivative of current
   /// property
@@ -180,14 +189,8 @@ public:
   /// Set name of property
   void setName(const std::string &name);
 
-  /// Filter out a run by time.
-  void filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop) override;
-  /// Filter by a range of times
-  void filterByTimes(const TimeROI &timeroi);
-
-  /// New split method
-  void splitByTimeVector(const std::vector<Types::Core::DateAndTime> &splitter_time_vec,
-                         const std::vector<int> &target_vec, const std::vector<TimeSeriesProperty *> &outputs);
+  // Remove time series values according to TimeROI
+  void removeDataOutsideTimeROI(const TimeROI &timeRoi) override;
 
   /// Fill a SplittingIntervalVec that will filter the events by matching
   void makeFilterByValue(std::vector<SplittingInterval> &split, double min, double max, double TimeTolerance = 0.0,
@@ -248,10 +251,14 @@ public:
   Types::Core::DateAndTime lastTime() const;
   /// Returns the first value regardless of filter
   TYPE firstValue() const;
+  /// Returns the first value in the TimeROI
+  TYPE firstValue(const Kernel::TimeROI &roi) const;
   /// Returns the first time regardless of filter
   Types::Core::DateAndTime firstTime() const;
   /// Returns the last value
   TYPE lastValue() const;
+  /// Returns the last value in the TimeROI
+  TYPE lastValue(const Kernel::TimeROI &roi) const;
   /// Returns the duration of the time series, possibly restricted by a TimeROI object
   double durationInSeconds(const Kernel::TimeROI *roi = nullptr) const;
 
@@ -304,7 +311,7 @@ public:
   /// Returns n-th value of n-th interval in an incredibly inefficient way.
   virtual TYPE nthValue(int n) const;
   /// Returns n-th time. NOTE: Complexity is order(n)! regardless of filter
-  Types::Core::DateAndTime nthTime(int n) const;
+  virtual Types::Core::DateAndTime nthTime(int n) const;
 
   // Returns whether the time series has been filtered
   bool isFiltered() const override { return false; }
@@ -352,6 +359,7 @@ private:
   double averageValueInFilter(const std::vector<TimeInterval> &filter) const;
   /// Calculate the time-weighted average and std-deviation of a property in a filtered range
   std::pair<double, double> averageAndStdDevInFilter(const std::vector<TimeInterval> &intervals) const;
+  void createFilteredData(const TimeROI &timeROI, std::vector<TimeValueUnit<TYPE>> &filteredData) const;
 
 protected:
   //----------------------------------------------------------------------------------------------

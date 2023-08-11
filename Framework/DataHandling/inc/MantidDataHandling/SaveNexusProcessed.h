@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <boost/optional.hpp>
@@ -34,7 +34,7 @@ Required Properties:
 <LI> Title - the title to describe the saved processed data
 </UL>
 */
-class MANTID_DATAHANDLING_DLL SaveNexusProcessed : public API::SerialAlgorithm {
+class MANTID_DATAHANDLING_DLL SaveNexusProcessed : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveNexusProcessed"; }

@@ -21,7 +21,7 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         return "SANS\\Reduction"
 
     def summary(self):
-        return "Runs the the core reduction elements which need to be carried out " "on individual event slices."
+        return "Runs the core reduction elements which need to be carried out " "on individual event slices."
 
     def PyInit(self):
         # ----------

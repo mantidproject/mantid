@@ -40,6 +40,14 @@ class AbinsLoadGAUSSIANTest(unittest.TestCase, abins.input.Tester):
     def test_gaussian_3(self):
         self.check(name=self._gaussian_system3, loader=abins.input.GAUSSIANLoader)
 
+    # ===================================================================================
+    # | Use cases: "Input orientation" available but not "Standard orientation"         |
+    # ===================================================================================
+    _gaussian_system4 = "croconic_input_orientation_LoadGAUSSIAN"
+
+    def test_gaussian_4(self):
+        self.check(name=self._gaussian_system4, loader=abins.input.GAUSSIANLoader)
+
 
 if __name__ == "__main__":
     unittest.main()

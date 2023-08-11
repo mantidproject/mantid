@@ -37,10 +37,7 @@ class DataProcessorAlgorithmTest(unittest.TestCase):
             "splitInput",
             "forwardProperties",
             "getProcessProperties",
-            "assemble",
             "saveNexus",
-            "isMainThread",
-            "getNThreads",
         ]
         for name in expected_attrs:
             if not hasattr(DataProcessorAlgorithm, name):

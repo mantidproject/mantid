@@ -168,8 +168,6 @@ The following Python script generate a synthetic data set (instrument and sample
     )
     ms_multi = correction_multiple_scattering(ws)
 
-.. testcleanup:: SampleOnly
-
 The following code generates a synthetic data set with instrument, sample and container.
 Notice that the output workspace group now contains ``_containerOnly`` and ``_sampleAndContainer`` workspaces.
 
@@ -227,8 +225,6 @@ Notice that the output workspace group now contains ``_containerOnly`` and ``_sa
         Method="SampleAndContainer",
         ElementSize=0.5,  # mm
     )
-
-.. testcleanup:: SampleAndContainer
 
 The following code demonstrates a workaround to deal with thin container walls where a separate
 element size for container is needed.
@@ -292,8 +288,6 @@ element size for container is needed.
         ContainerElementSize=0.45,
         OutputWorkspace="rst",
     )
-
-.. testcleanup:: SampleAndContainerWithDifferentContainerElementSize
 
 .. categories::
 

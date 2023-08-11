@@ -61,18 +61,25 @@ class DataCopier(UserNotifier):
 
         selected_columns = selection_model.selectedColumns()  # type: list
 
+        # introduced since a row from a ragged workspace row may not read the selected column index
+        def safe_index(row_index, column_index):
+            row = ws_read(row_index)
+            if column_index < len(row):
+                return row[column_index]
+            return ""
+
         # Qt gives back a QModelIndex, we need to extract the column from it
         column_data = []
         for index in selected_columns:
             column = index.column()
-            data = [str(ws_read(row)[column]) for row in range(num_rows)]
+            data = [str(safe_index(row, column)) for row in range(num_rows)]
             column_data.append(data)
 
         all_string_rows = []
         for i in range(num_rows):
             # Appends ONE value from each COLUMN, this is because the final string is being built vertically
             # the noqa disables a 'data' variable redefined warning
-            all_string_rows.append("\t".join([data[i] for data in column_data]))  # noqa: F812
+            all_string_rows.append("\t".join([data[i] for data in column_data]))
 
         # Finally all rows are joined together with a new line at the end of each row
         final_string = "\n".join(all_string_rows)

@@ -11,11 +11,10 @@ from mantid.kernel import ConfigService, logger, release_notes_url, release_date
 from mantidqt.interfacemanager import InterfaceManager
 from workbench.widgets.about.view import AboutView
 from workbench.widgets.about.usage_verification_view import UsageReportingVerificationView
-from mantidqt.widgets import manageuserdirectories  # noqa
+from mantidqt.widgets import manageuserdirectories
 
 
 class AboutPresenter(object):
-
     USAGE_REPORTING = "usagereports.enabled"
     DO_NOT_SHOW_GROUP = "Mantid/FirstUse"
     DO_NOT_SHOW = "DoNotShowUntilNextRelease"

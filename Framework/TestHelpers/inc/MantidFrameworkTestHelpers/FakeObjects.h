@@ -120,8 +120,7 @@ public:
 //===================================================================================================================
 class AxeslessWorkspaceTester : public MatrixWorkspace {
 public:
-  AxeslessWorkspaceTester(const Mantid::Parallel::StorageMode storageMode = Mantid::Parallel::StorageMode::Cloned)
-      : MatrixWorkspace(storageMode), m_spec(0) {}
+  AxeslessWorkspaceTester() : MatrixWorkspace(), m_spec(0) {}
 
   bool isRaggedWorkspace() const override {
     if (m_vec.empty()) {
@@ -220,8 +219,7 @@ private:
 
 class WorkspaceTester : public AxeslessWorkspaceTester {
 public:
-  WorkspaceTester(const Mantid::Parallel::StorageMode storageMode = Mantid::Parallel::StorageMode::Cloned)
-      : AxeslessWorkspaceTester(storageMode) {}
+  WorkspaceTester() : AxeslessWorkspaceTester() {}
 
   const std::string id() const override { return "WorkspaceTester"; }
 
@@ -251,7 +249,7 @@ protected:
 
 private:
   WorkspaceTester *doClone() const override { return new WorkspaceTester(*this); }
-  WorkspaceTester *doCloneEmpty() const override { return new WorkspaceTester(storageMode()); }
+  WorkspaceTester *doCloneEmpty() const override { return new WorkspaceTester(); }
 };
 
 //===================================================================================================================

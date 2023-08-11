@@ -19,7 +19,7 @@ The workflow proceeds as follows:
 
 4. Using the algorithm :ref:`LiquidsReflectometryReduction <algm-LiquidsReflectometryReduction>`, reduce the sample run with the normalization turned OFF (i.e. `NormFlag` set to `False`): :math:`I^{sample}(Q)`
 
-5. Calculate the sample reflectivity by dividing the sample reduction of step (4), :math:`I^{sample}(Q)`, by the the normalization in step (3), thus :math:`R^{sample}(Q) = I^{sample}(Q) / I_{norm}(Q)`.
+5. Calculate the sample reflectivity by dividing the sample reduction of step (4), :math:`I^{sample}(Q)`, by the normalization in step (3), thus :math:`R^{sample}(Q) = I^{sample}(Q) / I_{norm}(Q)`.
 
 References
 ------------

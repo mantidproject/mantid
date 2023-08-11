@@ -51,17 +51,21 @@ void FilterByTime::init() {
   auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(0.0);
   declareProperty(PropertyNames::START_TIME, 0.0, min,
-                  "The start time, in seconds, since the start of the run. "
+                  "The start time since the start of the run. "
+                  "Use an integer value for time in nanoseconds. "
+                  "Use a floating-point value for time in seconds. "
                   "Events before this time are filtered out. \nThe time of the "
-                  "first pulse (i.e. the first entry in the ProtonCharge "
+                  "first pulse (i.e. the first entry in the \"proton_charge\" "
                   "sample log) is used as the zero. " +
                       commonHelp);
 
   declareProperty(PropertyNames::STOP_TIME, 0.0, min,
-                  "The stop time, in seconds, since the start of the run. "
-                  "Events at or after this time are filtered out. \nThe time "
-                  "of the first pulse (i.e. the first entry in the "
-                  "ProtonCharge sample log) is used as the zero. " +
+                  "The stop time since the start of the run. "
+                  "Use an integer value for time in nanoseconds. "
+                  "Use a floating-point value for time in seconds. "
+                  "Events at or after this time are filtered out. \nThe AbsoluteStartTime "
+                  "or the time of the first pulse (i.e. the first entry in the "
+                  "\"proton_charge\" sample log) is used as the zero. " +
                       commonHelp);
 
   auto dateTime = std::make_shared<DateTimeValidator>();
@@ -99,15 +103,14 @@ void FilterByTime::exec() {
 
   // find the start time
   DateAndTime start;
-  if (isDefault(PropertyNames::ABS_START)) {
-    // time relative to first pulse - this defaults with start of run
-    const auto startOfRun = inputWS->getFirstPulseTime();
-    const double startRelative = getProperty(PropertyNames::START_TIME);
-    start = startOfRun + startRelative;
-  } else {
-    std::cout << PropertyNames::ABS_START << "=" << getPropertyValue(PropertyNames::ABS_START) << "\n";
-    // absolute time
+  const double startRelative = getProperty(PropertyNames::START_TIME);
+  if (!isDefault(PropertyNames::ABS_START)) {
+    // absolute start time is specified
     start = DateAndTime(getPropertyValue(PropertyNames::ABS_START));
+  } else {
+    // get run start from the log manager
+    const auto startOfRun = inputWS->run().getFirstPulseTime();
+    start = startOfRun + startRelative;
   }
 
   // find the stop time
@@ -116,14 +119,13 @@ void FilterByTime::exec() {
     // absolute time
     stop = DateAndTime(getPropertyValue(PropertyNames::ABS_STOP));
   } else if (!isDefault(PropertyNames::STOP_TIME)) {
-    // time relative to first pulse
-    const auto startOfRun = inputWS->getFirstPulseTime();
+    // stop time is relative to start time
     const double stopRelative = getProperty(PropertyNames::STOP_TIME);
-    stop = startOfRun + stopRelative;
+    stop = start - startRelative + stopRelative;
   } else {
     this->getLogger().debug("No end filter time specified - assuming last pulse");
-    const DateAndTime lastPulse = inputWS->getLastPulseTime();
-    stop = lastPulse + 10000.0; // so we get all events - needs to be past last pulse
+    stop = inputWS->run().getLastPulseTime();
+    stop += 10000.0; // so we get all events - needs to be past last pulse
   }
 
   // verify that stop is after start
@@ -168,6 +170,7 @@ void FilterByTime::exec() {
     timeroi.update_intersection(TimeROI(start, stop));
   }
   outputWS->mutableRun().setTimeROI(timeroi);
+  outputWS->mutableRun().removeDataOutsideTimeROI();
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(outputWS));
 }
 

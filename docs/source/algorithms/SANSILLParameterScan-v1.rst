@@ -31,7 +31,7 @@ The OutputJoinedWorkspace contains, if asked for, the reduced data on one worksp
 .. testcode:: ExSANSILLParameterScan
 
     # reduce part of an omega scan on D16.
-    SANSILLParameterScan(SampleRun="066321.nxs",
+    SANSILLParameterScan(SampleRun="025786.nxs",
                          OutputWorkspace="output2d",
                          OutputJoinedWorkspace="reduced",
                          Observable="Omega.value",

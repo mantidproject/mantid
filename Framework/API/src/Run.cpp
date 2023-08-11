@@ -90,16 +90,14 @@ std::shared_ptr<Run> Run::clone() {
 
 //-----------------------------------------------------------------------------------------------
 /**
- * Filter out a run by time. Takes out any TimeSeriesProperty log entries
- *outside of the given
- *  absolute time range.
+ * Filter out a run by time range. Takes out any TimeSeriesProperty log entries
+ * outside of the given absolute time range [start,stop), except for the entries immediately
+ * before and after the time range.
  *
  * Total proton charge will get re-integrated after filtering.
  *
- * @param start :: Absolute start time. Any log entries at times >= to this time
- *are kept.
- * @param stop :: Absolute stop time. Any log entries at times < than this time
- *are kept.
+ * @param start :: Absolute start time.
+ * @param stop :: Absolute stop time.
  */
 void Run::filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop) {
   LogManager::filterByTime(start, stop);
@@ -310,20 +308,15 @@ void Run::integrateProtonCharge(const std::string &logname) const {
       const std::vector<double> logValues = log->valuesAsVector();
       total = std::accumulate(logValues.begin(), logValues.end(), 0.0);
     } else {
-      // get the raw values
-      const std::map<Types::Core::DateAndTime, double> unfilteredValues = log->valueAsCorrectMap();
+      const auto &values = log->valuesAsVector();
+      const auto &times = log->timesAsVector();
+      const auto NUM_VALUES = values.size();
 
-      using valueType = std::map<Types::Core::DateAndTime, double>::value_type;
-
-      // accumulate the values that are "keep"
-      total = std::accumulate(unfilteredValues.cbegin(), unfilteredValues.cend(), 0.0,
-                              [timeroi](const double &previous, const valueType &value) {
-                                if (timeroi.valueAtTime(value.first)) {
-                                  return std::move(previous) + value.second;
-                                } else {
-                                  return std::move(previous);
-                                }
-                              });
+      total = 0.;
+      for (std::size_t i = 0; i < NUM_VALUES; ++i) {
+        if (timeroi.valueAtTime(times[i]))
+          total += values[i];
+      }
     }
 
     const std::string &unit = log->units();
@@ -616,8 +609,9 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen
 /** Load the object from an open NeXus file.
  * @param file :: open NeXus file
  * @param group :: name of the group to open. Empty string to NOT open a group,
- * but
- * load any NXlog in the current open group.
+ * but load any NXlog in the current open group.
+ * @param fileInfo descriptor with in-memory index with all entries
+ * @param prefix indicates current group location in file (absolute name)
  * @param keepOpen :: If true, then the file is left open after doing to load
  */
 void Run::loadNexus(::NeXus::File *file, const std::string &group, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,

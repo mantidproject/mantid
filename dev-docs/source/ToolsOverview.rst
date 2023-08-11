@@ -12,27 +12,19 @@ Tools Overview
 .. contents:: Contents
    :local:
 
+.. _class_maker_py:
+
 Creating classes: class_maker.py
 --------------------------------
 
-**To make it faster to create a new class**. This is a small python
-script located in /buildconfig/. It generates the .cpp, .h and test
-files for a class along with some code stubs. It can also flesh out more
-methods for new Algorithms, using the "--alg" option.
+To make it faster to create a new cpp class.
+This is a small python script located in `buildconfig/class_maker.py <https://github.com/mantidproject/mantid/blob/main/buildconfig/class_maker.py>`_.
+It generates the ``.cpp``, ``.h``, and test files for a class along with some code stubs.
+It can also flesh out more methods for new Algorithms, using the ``--alg`` option which also creates a stub user documentation page ``.rst``.
 
-::
-
-    usage: class_maker.py [-h] [--force] [--test] [--alg] SUBPROJECT CLASSNAME
-    Utility to create Mantid class files: header, source and test.
-    positional arguments:
-     SUBPROJECT  The subproject under Framework/; e.g. Kernel
-     CLASSNAME   Name of the class to create
-    optional arguments:
-     -h, --help  show this help message and exit
-     --force     Force overwriting existing files. Use with caution!
-     --test      Create only the test file.
-     --alg       Create an Algorithm stub. This adds some methods common to
-                 algorithms.
+.. this is created by running
+   python buildconfig/class_maker.py --help > dev-docs/source/class_maker.txt
+.. literalinclude:: class_maker.txt
 
 Moving/Renaming classes: move_class.py
 --------------------------------------

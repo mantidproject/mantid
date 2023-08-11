@@ -291,6 +291,56 @@ public:
     TS_ASSERT_EQUALS(filteredLog->size(), 6)
   }
 
+  /**
+   * This is based on the usage scenario in
+   * docs/source/tutorials/python_in_mantid/further_alg_ws/04_run_logs.rst
+   */
+  void test_usage_docs() {
+    Mantid::DateAndTime EPOCH("1990-Jan-01 00:00:00");
+    const std::size_t NUM_VALUES{100};
+    constexpr double FREQUENCY{2 * M_PI / 100.};
+
+    // integral of sine from zero to pi is 2
+    // divide by that range is 2/pi
+    constexpr double MEAN_EXP{2 / M_PI};
+
+    // Times start at GPS_EPOCH and are every second for 100 values
+    // The "sinewave" is a simple sine curve starting at 0 with a period of 100s and amplitude of one
+    // The "positive" log is true for the first half of the values
+    // The "negative" log is true for the second half of the values
+    TimeSeriesProperty<double> sinewave("sinewave");
+    TimeSeriesProperty<bool> negative("negative");
+    TimeSeriesProperty<bool> positive("positive");
+    for (std::size_t i = 0; i < NUM_VALUES; ++i) {
+      const double value = std::sin(static_cast<double>(i) * FREQUENCY);
+      const Mantid::DateAndTime time = EPOCH + static_cast<double>(i);
+      const bool isPositive(value >= 0);
+      sinewave.addValue(time, value);
+      negative.addValue(time, !isPositive);
+      positive.addValue(time, isPositive);
+    }
+
+    // verify logs are setup correctly
+    TS_ASSERT_EQUALS(sinewave.size(), NUM_VALUES);
+    TS_ASSERT_DELTA(sinewave.timeAverageValue(), 0., .001);
+    TS_ASSERT_EQUALS(negative.size(), NUM_VALUES);
+    TS_ASSERT_EQUALS(positive.size(), NUM_VALUES);
+
+    // logfilter with negative
+    LogFilter negativeFilter(&sinewave);
+    negativeFilter.addFilter(negative);
+    const FilteredTimeSeriesProperty<double> *negativeFilterLog = negativeFilter.data();
+    TS_ASSERT_EQUALS(negativeFilterLog->size(), 50);
+    TS_ASSERT_DELTA(negativeFilterLog->timeAverageValue(), -1 * MEAN_EXP, .001);
+
+    // logfilter with positive
+    LogFilter positiveFilter(&sinewave);
+    positiveFilter.addFilter(positive);
+    const FilteredTimeSeriesProperty<double> *positiveFilterLog = positiveFilter.data();
+    TS_ASSERT_EQUALS(positiveFilterLog->size(), 50);
+    TS_ASSERT_DELTA(positiveFilterLog->timeAverageValue(), MEAN_EXP, .001);
+  }
+
 private:
   /// Creates a test boolean filter
   /// @param type :: Which variant to create

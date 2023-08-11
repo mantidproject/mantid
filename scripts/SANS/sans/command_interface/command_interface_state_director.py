@@ -129,6 +129,7 @@ class FitData(object):
 # ----------------------------------------------------------------------------------------------------------------------
 # Command Interface State Director
 
+
 # Explanation of the implementation
 #
 # Previously the ISISCommandInterface just executed commands one after another. Settings were stored in the reduction
@@ -435,14 +436,14 @@ class CommandInterfaceStateDirector(object):
             self._processed_state_settings = {}
 
     def _process_clean(self, command):
-        _ = command  # noqa
+        _ = command
         raise RuntimeError(
             "Trying the process a Clean command. The clean command should have removed itself and "
             "all previous commands. If it is still here, then this is a bug"
         )
 
     def _process_reduction_dimensionality(self, command):
-        _ = command  # noqa
+        _ = command
         reduction_dimensionality = command.values[0]
         new_state_entries = {OtherId.REDUCTION_DIMENSIONALITY: reduction_dimensionality}
         self.add_to_processed_state_settings(new_state_entries)

@@ -465,7 +465,7 @@ class CrystalFieldMultiSite(object):
             self._setBackground(background=value)
         # Need this for a weird python bug: "IndexError: Function index (2) out of range (2)"
         # if user calls print(self.function) after setting background
-        _ = self.function.getTies()  # noqa: F841
+        _ = self.function.getTies()
 
     @property
     def Ions(self):

@@ -124,6 +124,7 @@ void FilterByLogValue::exec() {
   } catch (Exception::NotFoundError &) {
   }
 
+  const auto &roiInputWS = inputWS->run().getTimeROI();
   // Now make the splitter vector
   TimeROI *roi = new TimeROI();
   //  SplittingIntervalVec splitter;
@@ -216,7 +217,11 @@ void FilterByLogValue::exec() {
     }
     PARALLEL_CHECK_INTERRUPT_REGION
 
+    if (!roiInputWS.useAll()) {
+      roi->update_intersection(roiInputWS);
+    }
     outputWS->mutableRun().setTimeROI(*roi);
+    outputWS->mutableRun().removeDataOutsideTimeROI();
     // Cast the outputWS to the matrixOutputWS and save it
     this->setProperty("OutputWorkspace", outputWS);
   }

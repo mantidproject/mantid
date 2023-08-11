@@ -44,8 +44,7 @@ using Kernel::Exception::NotImplementedError;
 using std::size_t;
 using namespace Mantid::Kernel;
 
-EventWorkspace::EventWorkspace(const Parallel::StorageMode storageMode)
-    : IEventWorkspace(storageMode), mru(std::make_unique<EventWorkspaceMRU>()) {}
+EventWorkspace::EventWorkspace() : IEventWorkspace(), mru(std::make_unique<EventWorkspaceMRU>()) {}
 
 EventWorkspace::EventWorkspace(const EventWorkspace &other)
     : IEventWorkspace(other), mru(std::make_unique<EventWorkspaceMRU>()) {
@@ -422,10 +421,8 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
 #pragma omp for nowait
     for (int64_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++) {
       const EventList &evList = this->getSpectrum(workspaceIndex);
-      double temp = evList.getTofMin();
-      tXmin = std::min(temp, tXmin);
-      temp = evList.getTofMax();
-      tXmax = std::max(temp, tXmax);
+      tXmin = std::min(evList.getTofMin(), tXmin);
+      tXmax = std::max(evList.getTofMax(), tXmax);
     }
 #pragma omp critical
     {
@@ -740,5 +737,3 @@ IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_const_sptr>(const
   }
 }
 } // namespace Mantid::Kernel
-
-///\endcond TEMPLATE

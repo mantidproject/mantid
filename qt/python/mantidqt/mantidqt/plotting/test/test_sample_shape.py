@@ -16,7 +16,7 @@ from unittest.mock import patch, Mock
 import numpy as np
 import matplotlib
 
-matplotlib.use("AGG")  # noqa
+matplotlib.use("AGG")
 
 import mantid
 from mantid.api import AnalysisDataService as ADS

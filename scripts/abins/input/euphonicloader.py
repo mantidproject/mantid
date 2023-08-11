@@ -10,7 +10,7 @@ from pathlib import Path
 from .abinitioloader import AbInitioLoader
 from abins.parameters import sampling as sampling_parameters
 
-from dos.load_euphonic import euphonic_available, euphonic_calculate_modes
+from dos.load_euphonic import euphonic_calculate_modes
 
 
 class EuphonicLoader(AbInitioLoader):
@@ -39,11 +39,6 @@ class EuphonicLoader(AbInitioLoader):
         gamma-point-only sampling.
 
         """
-        if not euphonic_available():
-            raise ImportError(
-                "Could not import Euphonic library; this is " "required to import force constants from Phonopy or .castep_bin."
-            )
-
         cutoff = sampling_parameters["force_constants"]["qpt_cutoff"]
         modes = euphonic_calculate_modes(filename=self._clerk.get_input_filename(), cutoff=cutoff)
 

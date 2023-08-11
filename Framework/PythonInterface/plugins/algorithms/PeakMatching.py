@@ -25,7 +25,6 @@ class PeakMatching(PythonAlgorithm):
         return ["FitGaussianPeaks", "FindPeaks", "FindPeaksAutomatic"]
 
     def PyInit(self):
-
         self.declareProperty(
             ITableWorkspaceProperty(name="PeakTable", defaultValue="", direction=Direction.Input),
             doc="Table containing peaks to match to database",
@@ -150,7 +149,7 @@ class PeakMatching(PythonAlgorithm):
         counts = {}
 
         for entry in data:
-            if not (entry["element"] in counts):
+            if entry["element"] not in counts:
                 counts[entry["element"]] = entry["Rating"]
                 continue
             counts[entry["element"]] += entry["Rating"]

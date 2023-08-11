@@ -10,11 +10,13 @@
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/DllConfig.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/uniform_int_distribution.h"
 
 namespace Mantid {
 namespace DataObjects {
+
+template <typename MDE, size_t nd> class MDEventWorkspace;
 
 /**
     Provides a helper class to add fake data to an MD workspace

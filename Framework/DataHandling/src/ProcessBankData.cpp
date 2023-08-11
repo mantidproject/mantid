@@ -86,7 +86,7 @@ void ProcessBankData::run() { // override {
     for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
       if (counts[pixID - m_min_id] > 0) {
         size_t wi = getWorkspaceIndexFromPixelID(pixID);
-        // Find the the workspace index corresponding to that pixel ID
+        // Find the workspace index corresponding to that pixel ID
         // Allocate it
         if (wi < numEventLists) {
           outputWS.reserveEventListAt(wi, counts[pixID - m_min_id]);
@@ -199,7 +199,7 @@ void ProcessBankData::run() { // override {
   const size_t numEventLists = outputWS.getNumberHistograms();
   for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
     if (usedDetIds[pixID - m_min_id]) {
-      // Find the the workspace index corresponding to that pixel ID
+      // Find the workspace index corresponding to that pixel ID
       size_t wi = getWorkspaceIndexFromPixelID(pixID);
       if (wi < numEventLists) {
         auto &el = outputWS.getSpectrum(wi);

@@ -31,6 +31,7 @@
 #   --build-threads: pass the number of threads that can be used to build with, default is 1 thread per logical core
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/mamba-utils
+start_time=$(date +%s)
 
 # Check arguments passed are 2 or higher, and aren't optional flags.
 if [[ $# < 2 || $1 == "--"* || $2 == "--"* ]]; then
@@ -74,7 +75,10 @@ do
         --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
         --enable-package) ENABLE_PACKAGE=true ;;
         --enable-docs) ENABLE_DOCS=true ;;
-        --enable-doctests) ENABLE_DOC_TESTS=true ;;
+        --enable-doctests)
+            ENABLE_DOCS=true
+            ENABLE_DOC_TESTS=true
+            ;;
         --enable-dev-docs) ENABLE_DEV_DOCS=true ;;
         --enable-coverity)
 	    ENABLE_COVERITY=true
@@ -143,3 +147,8 @@ $SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE
 
 # Run unit and system tests
 $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS $USE_CORE_DUMPS
+
+# elapsed time with second resolution
+end_time=$(date +%s)
+elapsed=$(( end_time - start_time ))
+echo "Build & Test script took $elapsed seconds."

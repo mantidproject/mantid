@@ -10,7 +10,7 @@ import unittest
 
 import matplotlib
 
-matplotlib.use("AGG")  # noqa
+matplotlib.use("AGG")
 import matplotlib.pyplot as plt
 from numpy import array_equal
 

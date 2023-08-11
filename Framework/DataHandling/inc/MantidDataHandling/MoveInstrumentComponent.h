@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Instrument/Component.h"
 
@@ -43,7 +43,7 @@ shift and NewPos = OldPos + (X,Y,Z). The default value is true.</LI>
 @author Roman Tolchenov, Tessella Support Services plc
 @date 21/01/2009
 */
-class MANTID_DATAHANDLING_DLL MoveInstrumentComponent : public API::DistributedAlgorithm {
+class MANTID_DATAHANDLING_DLL MoveInstrumentComponent : public API::Algorithm {
 public:
   /// Default constructor
   MoveInstrumentComponent();

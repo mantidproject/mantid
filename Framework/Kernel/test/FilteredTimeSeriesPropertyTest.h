@@ -12,6 +12,7 @@
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Kernel::FilteredTimeSeriesProperty;
+using Mantid::Kernel::TimeROI;
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
 
@@ -524,10 +525,9 @@ public:
 
     DateAndTime start = DateAndTime("2007-11-30T15:00:00"); // Much earlier than first time series value
     DateAndTime stop = DateAndTime("2007-11-30T17:00:00");  // Much later than last time series value
+    TimeROI roi(start, stop);
 
-    log->filterByTime(start, stop);
-
-    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->realSize());
+    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->filteredValuesAsVector(&roi).size());
 
     delete log;
   }
@@ -536,29 +536,31 @@ public:
   void test_getStatistics_filtered() {
     const auto &log = getFilteredTestLog();
 
-    // calculate expected values
     const std::vector<double> durations{10, 5, 5, 10, 10, 10, 10, 10, 10, 5};
     const std::vector<double> values{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-    /* this commented out code contains the values we want eventually,
-       but it would change the existing behavior and is being
-       left alone for now
+    // verify that the values in the filter are as expected
+    const auto obsValues = log->filteredValuesAsVector();
+    TS_ASSERT_EQUALS(obsValues.size(), values.size());
+    if (obsValues.size() == values.size()) {
+      for (std::size_t i = 0; i < values.size(); ++i) {
+        TS_ASSERT_EQUALS(obsValues[i], values[i]);
+      }
+    }
+
+    // calculate expected values
     double exp_mean = 0.;
-    for (const auto value: values)
-        exp_mean += value;
+    for (const auto value : values)
+      exp_mean += value;
     exp_mean /= double(values.size()); // 5.5
 
     double exp_stddev = 0.;
-    for (const auto value: values)
-        exp_stddev += (value - exp_mean) * (value - exp_mean);
+    for (const auto value : values)
+      exp_stddev += (value - exp_mean) * (value - exp_mean);
     exp_stddev = std::sqrt(exp_stddev / double(values.size())); // 2.872
 
     // median is halfway between because it is even number of values
-    const double exp_median = 0.5 * (values[5] + values[6]);
-    */
-    const double exp_mean = 5.7777777719;
-    const double exp_stddev = 2.8974232916;
-    const double exp_median = 6.;
+    const double exp_median = 0.5 * (values[4] + values[5]);
 
     // calculate from values above
     double exp_duration = 0.;
@@ -605,14 +607,13 @@ public:
 
     TS_ASSERT_DIFFERS(unfilteredValues.size(), filteredValues.size());
     TS_ASSERT_EQUALS(unfilteredValues.size(), 11);
-    TS_ASSERT_EQUALS(filteredValues.size(), 9);
 
     // the filter should return these values, but that is a change in behavior
     // from what is currently expected
-    //    const std::vector<double> EXP_FILTERED_VALUES{1,2,3,4,5,6,7,8,9,10};
-    //    TS_ASSERT_EQUALS(filteredValues.size(), EXP_FILTERED_VALUES.size());
-    //    for (std::size_t i = 0; i < EXP_FILTERED_VALUES.size(); ++i)
-    //        TS_ASSERT_EQUALS(filteredValues[i], EXP_FILTERED_VALUES[i]);
+    const std::vector<double> EXP_FILTERED_VALUES{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    TS_ASSERT_EQUALS(filteredValues.size(), EXP_FILTERED_VALUES.size());
+    for (std::size_t i = 0; i < EXP_FILTERED_VALUES.size(); ++i)
+      TS_ASSERT_EQUALS(filteredValues[i], EXP_FILTERED_VALUES[i]);
   }
 
   void test_getSplittingIntervals_repeatedEntries() {
@@ -751,7 +752,7 @@ private:
     const double incrementSecs(10.0);
     for (int i = 1; i < 12; ++i) {
       const double val = static_cast<double>(i);
-      log->addValue(logTime.toISO8601String(), val);
+      log->addValue(logTime, val);
       logTime += incrementSecs;
     }
     return log;

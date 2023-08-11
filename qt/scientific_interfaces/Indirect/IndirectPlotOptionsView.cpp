@@ -21,6 +21,13 @@ auto constexpr SETTINGS_GROUP = "Indices suggestions";
 auto constexpr SETTING_NAME = "Suggestions";
 auto constexpr NUMBER_OF_SUGGESTIONS = 5;
 
+// make sure the unit id is a valid unit factory id
+// (https://docs.mantidproject.org/nightly/concepts/UnitFactory.html#id2)
+const std::map<std::string, std::string> displayStrToUnitId = {
+    {"D-Spacing", "dSpacing"},
+    {"Q-Squared", "QSquared"},
+};
+
 void saveIndicesSuggestions(QStringList const &suggestions) {
   QSettings settings;
   settings.beginGroup(SETTINGS_GROUP);
@@ -65,8 +72,11 @@ IndirectPlotOptionsView::IndirectPlotOptionsView(QWidget *parent)
 IndirectPlotOptionsView::~IndirectPlotOptionsView() = default;
 
 void IndirectPlotOptionsView::setupView() {
-  connect(m_plotOptions->cbWorkspace, SIGNAL(currentIndexChanged(QString const &)), this,
+  connect(m_plotOptions->cbWorkspace, SIGNAL(currentTextChanged(QString const &)), this,
           SLOT(emitSelectedWorkspaceChanged(QString const &)));
+
+  connect(m_plotOptions->cbPlotUnit, SIGNAL(currentTextChanged(QString const &)), this,
+          SLOT(emitSelectedUnitChanged(QString const &)));
 
   connect(m_plotOptions->leIndices, SIGNAL(editingFinished()), this, SLOT(emitSelectedIndicesChanged()));
   connect(m_plotOptions->leIndices, SIGNAL(textEdited(QString const &)), this,
@@ -84,6 +94,12 @@ void IndirectPlotOptionsView::setupView() {
 
 void IndirectPlotOptionsView::emitSelectedWorkspaceChanged(QString const &workspaceName) {
   emit selectedWorkspaceChanged(workspaceName.toStdString());
+}
+
+void IndirectPlotOptionsView::emitSelectedUnitChanged(QString const &unit) {
+  if (!unit.isEmpty()) {
+    emit selectedUnitChanged(displayStrToUnitId.at(unit.toStdString()));
+  }
 }
 
 void IndirectPlotOptionsView::emitSelectedIndicesChanged() {
@@ -137,6 +153,7 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
   m_plotOptions->tbPlot->setVisible(true);
   m_plotOptions->pbPlotSpectra->setVisible(true);
   m_plotOptions->pbPlotSpectra->setText(getAction(availableActions, "Plot Spectra"));
+  m_plotOptions->cbPlotUnit->setVisible(false);
 
   switch (plotType) {
   case PlotWidget::Spectra:
@@ -157,17 +174,37 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
     plotMenu->addAction(plotSpectraAction);
     plotMenu->addAction(plotTiledAction);
     break;
+  case PlotWidget::SpectraUnit:
+    m_plotOptions->tbPlot->setVisible(false);
+    m_plotOptions->cbPlotUnit->setVisible(true);
+    break;
+  case PlotWidget::SpectraContourUnit:
+    m_plotOptions->pbPlotSpectra->setVisible(false);
+    m_plotOptions->cbPlotUnit->setVisible(true);
+    plotMenu->addAction(plotSpectraAction);
+    plotMenu->addAction(plotContourAction);
+    break;
   default:
     std::runtime_error("Plot option not found. Plot types are Spectra, "
                        "SpectraContour or SpectraTiled.");
   }
   m_plotOptions->tbPlot->setMenu(plotMenu);
   m_plotOptions->tbPlot->setDefaultAction(plotSpectraAction);
+
+  m_plotOptions->cbPlotUnit->clear();
+  for (const auto &item : displayStrToUnitId) {
+    m_plotOptions->cbPlotUnit->addItem(QString::fromStdString(item.first));
+  }
 }
 
 void IndirectPlotOptionsView::setWorkspaceComboBoxEnabled(bool enable) {
   QSignalBlocker blocker(m_plotOptions->cbWorkspace);
   m_plotOptions->cbWorkspace->setEnabled(enable);
+}
+
+void IndirectPlotOptionsView::setUnitComboBoxEnabled(bool enable) {
+  QSignalBlocker blocker(m_plotOptions->cbPlotUnit);
+  m_plotOptions->cbPlotUnit->setEnabled(enable);
 }
 
 void IndirectPlotOptionsView::setIndicesLineEditEnabled(bool enable) {

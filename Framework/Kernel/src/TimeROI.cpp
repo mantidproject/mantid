@@ -267,37 +267,20 @@ bool TimeROI::isCompletelyInMask(const Types::Core::DateAndTime &startTime,
  * The value is, essentially, whatever it was at the last recorded time before or equal to the one requested.
  */
 bool TimeROI::valueAtTime(const Types::Core::DateAndTime &time) const {
-  if (this->useAll() || time < m_roi.front() || time >= m_roi.back()) {
-    // ignore everything outside of range
+  if (useNone() || empty())
     return ROI_IGNORE;
-  } else {
-    // find first value greater than this one
-    const auto iterUpper = std::upper_bound(m_roi.cbegin(), m_roi.cend(), time);
 
-    // check if it is on a boundary
-    if (std::find(iterUpper, m_roi.cend(), time) != m_roi.cend()) {
-      if (std::distance(m_roi.cbegin(), iterUpper) % 2 == 0)
-        return ROI_USE;
-      else
-        return ROI_IGNORE;
-    }
+  // ignore a time if it's outside ROI
+  if (time < m_roi.front() || time >= m_roi.back())
+    return ROI_IGNORE;
 
-    // find the first value lower than this
-    const auto iterLower = std::lower_bound(iterUpper, m_roi.cend(), time);
-
-    // use the value of that iterator
-    if (std::distance(m_roi.cbegin(), iterLower) % 2 == 0)
-      return ROI_IGNORE;
-    else
-      return ROI_USE;
-  }
-}
-
-bool TimeROI::valueAtTime(const std::vector<Types::Core::DateAndTime>::iterator &time) {
-  if (std::distance(m_roi.begin(), time) % 2 == 0)
-    return ROI_USE;
+  // get the first ROI time boundary greater than the input time. Note that ROI is a series of alternating ROI_USE and
+  // ROI_IGNORE values.
+  const auto iterUpper = std::upper_bound(m_roi.cbegin(), m_roi.cend(), time);
+  if (std::distance(m_roi.cbegin(), iterUpper) % 2 == 0)
+    return ROI_IGNORE;
   else
-    return ROI_IGNORE;
+    return ROI_USE;
 }
 
 /**
@@ -322,6 +305,13 @@ Types::Core::DateAndTime TimeROI::getEffectiveTime(const Types::Core::DateAndTim
     }
     return *iter;
   }
+}
+
+// returns the first time in the TimeROI
+Types::Core::DateAndTime TimeROI::firstTime() const {
+  if (m_roi.empty())
+    throw std::runtime_error("cannot return time from empty TimeROI");
+  return m_roi.front();
 }
 
 // returns the last time in the TimeROI
@@ -482,6 +472,28 @@ const std::vector<Kernel::TimeInterval> TimeROI::toTimeIntervals() const {
   // every other value is a start/stop
   for (std::size_t i = 0; i < NUM_VAL; i += 2) {
     output.emplace_back(m_roi[i], m_roi[i + 1]);
+  }
+
+  return output;
+}
+
+/**
+ * Time intervals returned where no time is before after. This is used in calculating ranges
+ * in TimeSeriesProperty.
+ * @param after Only give TimeIntervals after this time
+ */
+const std::vector<Kernel::TimeInterval> TimeROI::toTimeIntervals(const Types::Core::DateAndTime &after) const {
+  const auto NUM_VAL = m_roi.size();
+  std::vector<TimeInterval> output;
+  // every other value is a start/stop
+  for (std::size_t i = 0; i < NUM_VAL; i += 2) {
+    if (m_roi[i + 1] > after) { // make sure end is after the first time requested
+      if (m_roi[i] > after) {   // full region should be used
+        output.emplace_back(m_roi[i], m_roi[i + 1]);
+      } else {
+        output.emplace_back(after, m_roi[i + 1]);
+      }
+    }
   }
 
   return output;

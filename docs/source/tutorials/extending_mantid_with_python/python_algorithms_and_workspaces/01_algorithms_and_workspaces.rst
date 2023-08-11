@@ -7,22 +7,18 @@ Algorithms And Workspaces
 Declaring Workspace Properties
 ===============================
 
-Workspaces are the main source of data for input and most algorithms output
-another data workspace. Workspace properties are required in order to either
-provide input data for an algorithm or store data at the end of execution.
-Mantid has a variety of different workspace types, for example
-:ref:`MatrixWorkspace`, :ref:`EventWorkspace` or :ref:`Table Workspaces`.
+Workspaces are the main source of data for input and most algorithms output another data workspace.
+Workspace properties are required in order to either provide input data for an algorithm or store data at the end of execution.
+Mantid has a variety of different workspace types, for example :ref:`MatrixWorkspace <MatrixWorkspace>`, :ref:`EventWorkspace <EventWorkspace>` or :ref:`TableWorkspace <Table Workspaces>`.
 A generic Workspace type also exists which can refer to any of these.
 
-Declaring input workspace properties restricts the types of workspace that
-will be accepted when a user wants to pass a workspace into the algorithm.
-The example below declares a ``WorkspaceProperty`` which means that any
-workspace type will be accepted as input.
+Declaring input workspace properties restricts the types of workspace that will be accepted when a user wants to pass a workspace into the algorithm.
+The example below declares a ``WorkspaceProperty`` which means that any workspace type will be accepted as input.
 
 .. code-block:: python
 
-    from mantid.kernel import *
-    from mantid.api import *
+    from mantid.kernel import Direction
+    from mantid.api import WorkspaceProperty
 
     class WorkspaceProperties(PythonAlgorithm):
 
@@ -38,16 +34,12 @@ workspace type will be accepted as input.
 Other Workspace Types
 =====================
 
-As discussed above there are many different types of workspace. The above
-declarations allow any workspace type to be passed in to an algorithm. It
-is possible to restrict the type that can be accepted, for example to
-disallow table workspace types, by simply using a different class in the
-``self.declareProperty`` method.
+As discussed above there are many different types of workspace.
+The above declarations allow any workspace type to be passed in to an algorithm.
+It is possible to restrict the type that can be accepted, for example to disallow table workspace types, by simply using a different class in the ``self.declareProperty`` method.
 
 As an example, consider the definition above using ``WorkspaceProperty``.
-If we wanted to restrict the type to a ``MatrixWorkspace`` type then we
-can simply replace ``WorkspaceProperty`` with
-``MatrixWorkspaceProperty``
+If we wanted to restrict the type to a ``MatrixWorkspace`` type then we can simply replace ``WorkspaceProperty`` with ``MatrixWorkspaceProperty``
 
 .. code-block:: python
 
@@ -65,12 +57,13 @@ can simply replace ``WorkspaceProperty`` with
         def PyExec(self):
             pass
 
-Any workspace passed as input to this algorithm must now be of type
-``MatrixWorkspace``.
+Any workspace passed as input to this algorithm must now be of type ``MatrixWorkspace``.
+In general, using a specific workspace type reduces users passing an invalid input workspace.
 
-The currently available types of property are:
+Some of the currently available types of property are:
 
-* ``WorkspaceProperty``
-* ``MatrixWorkspaceProperty``
-* ``ITableWorkspaceProperty``
-* ``IPeaksWorkspaceProperty``
+* :class:`~mantid.api.WorkspaceProperty` for specifying :ref:`Workspace <Workspace>`
+* :class:`~mantid.api.MatrixWorkspaceProperty` for specifying :ref:`MatrixWorkspace <MatrixWorkspace>` as input or output
+* :class:`~mantid.api.IEventWorkspaceProperty` for specifying :ref:`EventWorkspace <EventWorkspace>`
+* :class:`~mantid.api.IPeaksWorkspaceProperty` for specifying :ref:`PeaksWorkspace <PeaksWorkspace>`
+* :class:`~mantid.api.ITableWorkspaceProperty` for specifying :ref:`TableWorkspace <Table Workspaces>`

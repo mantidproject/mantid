@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "OSIRIS" valid-from = "2014-05-06T00:00:00">
+
+  <component-link name = "OSIRIS">
+
+    <parameter name="analysis-type" type="string">
+      <value val="spectroscopy" />
+    </parameter>
+
+    <parameter name="analyser" type="string">
+      <value val="silicon" />
+    </parameter>
+
+    <parameter name="reflection" type="string">
+      <value val="333" />
+    </parameter>
+
+    <parameter name="Efixed">
+      <value val="18.7434" />
+    </parameter>
+
+    <parameter name="resolution">
+      <value val="0.0315" />
+    </parameter>
+
+  </component-link>
+
+</parameter-file>

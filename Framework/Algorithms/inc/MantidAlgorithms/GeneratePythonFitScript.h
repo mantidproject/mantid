@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction_fwd.h"
-#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 #include <string>
@@ -16,7 +16,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-class MANTID_ALGORITHMS_DLL GeneratePythonFitScript : public API::SerialAlgorithm {
+class MANTID_ALGORITHMS_DLL GeneratePythonFitScript : public API::Algorithm {
 
 public:
   std::string const name() const override;

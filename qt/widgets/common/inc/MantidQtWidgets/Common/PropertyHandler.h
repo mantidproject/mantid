@@ -99,35 +99,16 @@ public:
   // Check if it is a parameter property
   bool isParameter(QtProperty *prop);
 
-  /**
-   * Set function attribute value read from a QtProperty
-   * @param prop :: The property with the new attribute value
-   * @param resetProperties :: Flag to reset all properties of the handled
-   * function.
-   * @return true if successfull
-   */
+  /// Set function attribute value read from a QtProperty
   bool setAttribute(QtProperty *prop, bool resetProperties = true);
 
-  /**
-   * Set function attribute value
-   * @param attName :: The name of the attribute
-   * @param attValue :: The new attribute value
-   */
+  /// Set function attribute value
   void setAttribute(QString const &attName, Mantid::API::IFunction::Attribute const &attValue);
 
-  /**
-   * Set function's attribute if it has type double or int
-   * @param attName :: The name of the attribute
-   * @param attValue :: The new attribute value
-   */
+  /// Set function's attribute if it has type double or int
   template <typename AttributeType> void setAttribute(QString const &attName, AttributeType const &attValue);
 
-  /**
-   * Set function's attribute of any type.
-   * @param attName :: The name of the attribute
-   * @param attValue :: The new attribute value as a string. If the attValue's
-   *  format doesn't match the attribute's type it is ignored.
-   */
+  /// Set function's attribute of any type.
   void setAttribute(const QString &attName, const QString &attValue);
 
   /// Set function vector attribute value

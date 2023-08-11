@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid.simpleapi as api
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroup
+from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceGroup
 from mantid.kernel import Direction, StringArrayProperty, StringListValidator, V3D, StringArrayLengthValidator
 import numpy as np
 
@@ -56,7 +56,6 @@ class DNSMergeRuns(PythonAlgorithm):
         return "Merges runs performed at different detector bank positions into one matrix workspace."
 
     def PyInit(self):
-
         validator = StringArrayLengthValidator()
         validator.setLengthMin(1)  # group of workspaces may be given
 
@@ -96,6 +95,18 @@ class DNSMergeRuns(PythonAlgorithm):
         workspace_names = self._expand_groups(input_list)
         if len(workspace_names) < 2:
             issues["WorkspaceNames"] = "At least 2 workspaces required."
+        else:
+            # workspaces must have the same wavelength and normalization
+            result = api.CompareSampleLogs(workspace_names, "wavelength,normalized", 0.01)
+            if len(result) > 0:
+                issues["WorkspaceNames"] = "Cannot merge workspaces with different " + result
+
+        # All workspaces must have a MatrixWorkspace type
+        for wsname in workspace_names:
+            wks = api.AnalysisDataService.retrieve(wsname)
+            if not isinstance(wks, MatrixWorkspace):
+                issues["WorkspaceNames"] = "The Workspaces provided must all be of type 'MatrixWorkspace'"
+                return issues
 
         ws0 = api.AnalysisDataService.retrieve(workspace_names[0])
         ndims = ws0.getNumDims()
@@ -110,10 +121,6 @@ class DNSMergeRuns(PythonAlgorithm):
                 issues["WorkspaceNames"] = "Number of histohrams for workspace " + wks.name() + " does not match to one for " + ws0.name()
             if wks.blocksize() != nblocks:
                 issues["WorkspaceNames"] = "Number of blocks for workspace " + wks.name() + " does not match to one for " + ws0.name()
-        # workspaces must have the same wavelength and normalization
-        result = api.CompareSampleLogs(workspace_names, "wavelength,normalized", 0.01)
-        if len(result) > 0:
-            issues["WorkspaceNames"] = "Cannot merge workspaces with different " + result
 
         return issues
 

@@ -652,7 +652,7 @@ class LimitParser(UserFileComponentParser):
             + float_number
             + ")?\\s*"
             + end_string
-        )  # noqa
+        )
         self._radius_pattern = re.compile(self._radius_string)
 
     def parse_line(self, line):
@@ -728,7 +728,7 @@ class LimitParser(UserFileComponentParser):
             simple_pattern = self._extract_simple_pattern(event_binning, LimitsId.EVENTS_BINNING)
             rebin_values = simple_pattern[LimitsId.EVENTS_BINNING]
             prefix = -1.0 if rebin_values.step_type is RangeStepType.LOG else 1.0
-            binning_string = str(rebin_values.start) + "," + str(prefix * rebin_values.step) + "," + str(rebin_values.stop)  # noqa
+            binning_string = str(rebin_values.start) + "," + str(prefix * rebin_values.step) + "," + str(rebin_values.stop)
 
         output = {LimitsId.EVENTS_BINNING: binning_string}
         return output
@@ -969,12 +969,8 @@ class MaskParser(UserFileComponentParser):
         self._v_plus_h = "\\s*" + self._v + integer_number + "\\s*\\+\\s*" + self._h + integer_number
         self._h_plus_v = "\\s*" + self._h + integer_number + "\\s*\\+\\s*" + self._v + integer_number
 
-        self._vv_plus_hh = (
-            self._v + integer_number + self._additional_v + "\\s*\\+\\s*" + self._h + integer_number + self._additional_h
-        )  # noqa
-        self._hh_plus_vv = (
-            self._h + integer_number + self._additional_h + "\\s*\\+\\s*" + self._v + integer_number + self._additional_v
-        )  # noqa
+        self._vv_plus_hh = self._v + integer_number + self._additional_v + "\\s*\\+\\s*" + self._h + integer_number + self._additional_h
+        self._hh_plus_vv = self._h + integer_number + self._additional_h + "\\s*\\+\\s*" + self._v + integer_number + self._additional_v
 
         self._blocks = "\\s*(" + self._v_plus_h + "|" + self._h_plus_v + "|" + self._vv_plus_hh + "|" + self._hh_plus_vv + ")\\s*"
         self._block_pattern = re.compile(start_string + self._detector + self._blocks + end_string)
@@ -1448,16 +1444,16 @@ class TransParser(UserFileComponentParser):
         elif self._is_radius(setting):
             output = self._extract_radius(setting)
         elif self._is_roi(setting):
-            # Note that we need the original line in order to extract the the case sensitive meaning
+            # Note that we need the original line in order to extract the case sensitive meaning
             output = self._extract_roi(setting, line)
         elif self._is_mask(setting):
-            # Note that we need the original line in order to extract the the case sensitive meaning
+            # Note that we need the original line in order to extract the case sensitive meaning
             output = self._extract_mask(setting, line)
         elif self._is_sample_workspace(setting):
-            # Note that we need the original line in order to extract the the case sensitive meaning
+            # Note that we need the original line in order to extract the case sensitive meaning
             output = self._extract_sample_workspace(setting, line)
         elif self._is_can_workspace(setting):
-            # Note that we need the original line in order to extract the the case sensitive meaning
+            # Note that we need the original line in order to extract the case sensitive meaning
             output = self._extract_can_workspace(setting, line)
         else:
             raise RuntimeError("TransParser: Unknown command for TRANS: {0}".format(line))
@@ -2527,7 +2523,7 @@ class IgnoredParser(object):
             or does_pattern_match(self._habeff_pattern, line)
             or does_pattern_match(self._habpath_pattern, line)
             or does_pattern_match(self._back_mon_pattern, line)
-        ):  # noqa
+        ):
             ignore = True
         return ignore
 

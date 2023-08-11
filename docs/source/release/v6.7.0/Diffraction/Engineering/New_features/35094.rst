@@ -1,1 +1,0 @@
-- Check peak-window signal-to-noise ratio before attempting to fit a diffraction peak in :ref:`FitPeaks <algm-FitPeaks>`

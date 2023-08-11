@@ -94,11 +94,6 @@ Usage
   except:
     pass
 
-.. testoutput:: MDNormSCDExample
-
-
-
-
 References
 ----------
 

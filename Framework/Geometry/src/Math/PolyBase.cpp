@@ -463,7 +463,7 @@ std::vector<std::complex<double>> PolyBase::calcRoots(const double epsilon)
     return Out;
   }
   // THERE IS A QUARTIC / QUINTIC Solution availiable but...
-  // WS contains the the hessian matrix if required (eigenvalues/vectors)
+  // WS contains the hessian matrix if required (eigenvalues/vectors)
   //
   gsl_poly_complex_workspace *WS(gsl_poly_complex_workspace_alloc(iDegree + 1));
   auto RZ = new double[2 * (iDegree + 1)];

@@ -40,11 +40,17 @@ void RemovePromptPulse::init() {
   auto validator = std::make_shared<BoundedValidator<double>>();
   validator->setLower(0.0);
   declareProperty("Width", Mantid::EMPTY_DBL(), validator,
-                  "The width of the time of flight (in microseconds) to remove "
-                  "from the data.");
+                  "The width of the time of flight (in microseconds) to remove from the data.");
   declareProperty("Frequency", Mantid::EMPTY_DBL(), validator,
-                  "The frequency of the source (in Hz) used to calculate the "
-                  "minimum time of flight to filter.");
+                  "The frequency of the source (in Hz) used to calculate the minimum time of flight to filter.");
+  declareProperty(
+      "TMin", Mantid::EMPTY_DBL(),
+      "Minimum time of flight. "
+      "Execution will be faster if this is specified, but the value will be determined from the workspace if not.");
+  declareProperty(
+      "TMax", Mantid::EMPTY_DBL(),
+      "Minimum time of flight. "
+      "Execution will be faster if this is specified, but the value will be determined from the workspace if not.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -54,23 +60,48 @@ double getMedian(const API::Run &run, const std::string &name) {
   if (!run.hasProperty(name)) {
     return Mantid::EMPTY_DBL();
   }
-  auto *log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(run.getLogData(name));
-  if (!log)
-    return Mantid::EMPTY_DBL();
-
-  Kernel::TimeSeriesPropertyStatistics stats = run.getStatistics(name);
-  return stats.median;
-}
-
-void getTofRange(const MatrixWorkspace_const_sptr &wksp, double &tmin, double &tmax) {
-  DataObjects::EventWorkspace_const_sptr eventWksp = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp);
-  if (eventWksp == nullptr) {
-    wksp->getXMinMax(tmin, tmax);
-  } else {
-    eventWksp->getEventXMinMax(tmin, tmax);
+  try {
+    return run.getPropertyAsSingleValue(name, Kernel::Math::Median);
+  } catch (const std::invalid_argument &) {
+    return Mantid::EMPTY_DBL(); // maybe one of the other names will work
   }
 }
 } // namespace
+
+void RemovePromptPulse::getTofRange(const MatrixWorkspace_const_sptr &wksp, double &tmin, double &tmax) {
+  const auto timerStart = std::chrono::high_resolution_clock::now();
+
+  // first get the values from the properties
+  tmin = getProperty("TMin");
+  tmax = getProperty("TMax");
+
+  // only get the values that are not specified
+  const bool findTmin = isEmpty(tmin);
+  const bool findTmax = isEmpty(tmax);
+
+  if (findTmin && findTmax) {
+    if (const auto eventWksp = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp)) {
+      eventWksp->getEventXMinMax(tmin, tmax);
+    } else {
+      wksp->getXMinMax(tmin, tmax);
+    }
+  } else if (findTmin) {
+    if (const auto eventWksp = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp)) {
+      tmin = eventWksp->getEventXMin();
+    } else {
+      tmin = wksp->getXMin();
+    }
+  } else if (findTmax) {
+    if (const auto eventWksp = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp)) {
+      tmax = eventWksp->getEventXMax();
+    } else {
+      tmax = wksp->getXMax();
+    }
+  }
+  // the fall-through case is to use the properties for both which was set at the top of the function
+
+  addTimer("getTofRange", timerStart, std::chrono::high_resolution_clock::now());
+}
 
 /** Execute the algorithm.
  */
@@ -86,8 +117,7 @@ void RemovePromptPulse::exec() {
 
   // get the frequency
   double frequency = this->getProperty("Frequency");
-  if (this->isEmpty(frequency)) // it wasn't specified so try divination
-  {
+  if (this->isEmpty(frequency)) { // it wasn't specified so try divination
     frequency = this->getFrequency(inputWS->run());
     if (this->isEmpty(frequency)) {
       throw std::runtime_error("Failed to determine the frequency");
@@ -116,14 +146,15 @@ void RemovePromptPulse::exec() {
     g_log.information() << pulseTime << " ";
   g_log.information() << " microseconds\n";
 
+  // loop through each prompt pulse
   MatrixWorkspace_sptr outputWS;
-  for (double &pulseTime : pulseTimes) {
-    double right = pulseTime + width;
+  auto algo = createChildAlgorithm("MaskBins");
+  for (const double &pulseTime : pulseTimes) {
+    const double right = pulseTime + width;
 
     g_log.notice() << "Filtering tmin=" << pulseTime << ", tmax=" << right << " microseconds\n";
 
     // run maskbins to do the work on the first prompt pulse
-    auto algo = createChildAlgorithm("MaskBins");
     if (outputWS) {
       algo->setProperty<MatrixWorkspace_sptr>("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(outputWS));
     } else { // should only be first time

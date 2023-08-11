@@ -281,7 +281,9 @@ void FitPeaks::init() {
       "and -3 for non-converged fitting.");
 
   // properties about fitting range and criteria
-  declareProperty(PropertyNames::START_WKSP_INDEX, EMPTY_INT(), "Starting workspace index for fit");
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
+  mustBePositive->setLower(0);
+  declareProperty(PropertyNames::START_WKSP_INDEX, 0, mustBePositive, "Starting workspace index for fit");
   declareProperty(PropertyNames::STOP_WKSP_INDEX, EMPTY_INT(),
                   "Last workspace index to fit (which is included). "
                   "If a value larger than the workspace index of last spectrum, "
@@ -442,6 +444,18 @@ void FitPeaks::init() {
 std::map<std::string, std::string> FitPeaks::validateInputs() {
   map<std::string, std::string> issues;
 
+  // check that min/max spectra indices make sense - only matters if both are specified
+  if (!(isDefault(PropertyNames::START_WKSP_INDEX) && isDefault(PropertyNames::START_WKSP_INDEX))) {
+    const int startIndex = getProperty(PropertyNames::START_WKSP_INDEX);
+    const int stopIndex = getProperty(PropertyNames::STOP_WKSP_INDEX);
+    if (startIndex > stopIndex) {
+      const std::string msg =
+          PropertyNames::START_WKSP_INDEX + " must be less than or equal to " + PropertyNames::STOP_WKSP_INDEX;
+      issues[PropertyNames::START_WKSP_INDEX] = msg;
+      issues[PropertyNames::STOP_WKSP_INDEX] = msg;
+    }
+  }
+
   // check that the peak parameters are in parallel properties
   bool haveCommonPeakParameters(false);
   std::vector<string> suppliedParameterNames = getProperty(PropertyNames::PEAK_PARAM_NAMES);
@@ -546,10 +560,7 @@ void FitPeaks::processInputs() {
 
   // spectra to fit
   int start_wi = getProperty(PropertyNames::START_WKSP_INDEX);
-  if (isEmpty(start_wi))
-    m_startWorkspaceIndex = 0;
-  else
-    m_startWorkspaceIndex = static_cast<size_t>(start_wi);
+  m_startWorkspaceIndex = static_cast<size_t>(start_wi);
 
   // last spectrum's workspace index, which is included
   int stop_wi = getProperty(PropertyNames::STOP_WKSP_INDEX);

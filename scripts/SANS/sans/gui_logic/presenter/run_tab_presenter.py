@@ -1013,7 +1013,7 @@ class RunTabPresenter(PresenterCommon):
             and self._model.q_resolution_sample_h
             and self._model.q_resolution_source_w
             and self._model.q_resolution_sample_w
-        )  # noqa
+        )
         self._view.set_q_resolution_shape_to_rectangular(is_rectangular)
 
     def _set_on_view_q_rebin_string(self):

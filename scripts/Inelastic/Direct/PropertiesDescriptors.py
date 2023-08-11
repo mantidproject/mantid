@@ -1793,11 +1793,11 @@ class AbsCorrInfo(PropDescriptor):
         else:
             raise (
                 KeyError(
-                    "AbsCorrInfo accepts only a dictionary "  # noqa
-                    "with AbsorptionCorrections algorithm properties "  # noqa
+                    "AbsCorrInfo accepts only a dictionary "
+                    "with AbsorptionCorrections algorithm properties "
                     "or string representation of such dictionary"
                 )
-            )  # noqa
+            )
 
         if self._is_fast:
             algo_name = "AdsorptionCorrection"
@@ -1875,7 +1875,7 @@ def list_checker(val, list_in, mess_base):
     if val in list_in:
         return val
     else:
-        raise ValueError("{0} property can only have values from the set of: {1}".format(mess_base, str(list_in)))  # noqa  # noqa
+        raise ValueError("{0} property can only have values from the set of: {1}".format(mess_base, str(list_in)))
 
 
 # -----------------------------------------------------------------------------------------

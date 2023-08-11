@@ -71,7 +71,7 @@ class SingleReductionTest(unittest.TestCase):
             can_scatter_monitor_workspace,
             can_transmission_workspace,
             can_direct_workspace,
-        )  # noqa
+        )
 
     def _compare_to_reference(self, workspace, reference_file_name, check_spectra_map=True, mismatch_name=""):
         # Load the reference file
@@ -219,9 +219,7 @@ class SANSSingleReductionTest(SingleReductionTest):
             can_monitor,
             can_transmission,
             can_direct,
-        ) = self._load_workspace(
-            state
-        )  # noqa
+        ) = self._load_workspace(state)
 
         # Act
         output_settings = {"OutputWorkspaceLAB": EMPTY_NAME}
@@ -374,9 +372,7 @@ class SANSSingleReductionTest(SingleReductionTest):
             can_monitor,
             can_transmission,
             can_direct,
-        ) = self._load_workspace(
-            state
-        )  # noqa
+        ) = self._load_workspace(state)
 
         # Act
         output_settings = {"OutputWorkspaceHAB": "TestSingleReductionEvalHab"}
@@ -438,9 +434,7 @@ class SANSSingleReductionTest(SingleReductionTest):
             can_monitor,
             can_transmission,
             can_direct,
-        ) = self._load_workspace(
-            state
-        )  # noqa
+        ) = self._load_workspace(state)
 
         # Act
         output_settings = {"OutputWorkspaceMerged": EMPTY_NAME}
@@ -518,9 +512,7 @@ class SANSSingleReductionTest(SingleReductionTest):
             can_monitor,
             can_transmission,
             can_direct,
-        ) = self._load_workspace(
-            state
-        )  # noqa
+        ) = self._load_workspace(state)
 
         # Act
         output_settings = {"OutputWorkspaceLAB": EMPTY_NAME}
@@ -604,9 +596,7 @@ class SANSSingleReduction2Test(SingleReductionTest):
             can_monitor,
             can_transmission,
             can_direct,
-        ) = self._load_workspace(
-            state
-        )  # noqa
+        ) = self._load_workspace(state)
 
         # Act
         output_settings = {"OutputWorkspaceHAB": EMPTY_NAME}
@@ -744,9 +734,7 @@ class SANSSingleReduction2Test(SingleReductionTest):
             can_monitor,
             can_transmission,
             can_direct,
-        ) = self._load_workspace(
-            state
-        )  # noqa
+        ) = self._load_workspace(state)
 
         # Act
         output_settings = {"OutputWorkspaceLAB": EMPTY_NAME}

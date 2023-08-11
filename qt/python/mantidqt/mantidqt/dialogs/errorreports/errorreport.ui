@@ -45,10 +45,10 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'.SF NS Text'; font-size:12pt; color:#000000;&quot;&gt;We are really sorry that Mantid is not behaving as it should and are aware how frustrating this is. We'd be very grateful if you could provide us with some details about your problems. The more information you can give, the quicker we can fix this issue.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="openExternalLinks">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="openLinks">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
     </widget>
    </item>

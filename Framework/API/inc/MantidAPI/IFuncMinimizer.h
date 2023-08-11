@@ -40,7 +40,6 @@ public:
   virtual bool iterate(size_t iteration) = 0;
 
   /// Perform iteration with minimizer and return true if successful.
-  /// @param maxIterations :: Maximum number of iterations.
   virtual bool minimize(size_t maxIterations = 1000);
 
   /// Get the error string

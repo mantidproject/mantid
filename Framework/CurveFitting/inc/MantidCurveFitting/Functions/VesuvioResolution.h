@@ -93,7 +93,6 @@ private:
   double m_resolutionSigma;
   /// Lorentz FWHM
   double m_lorentzFWHM;
-  ///@}
 };
 
 } // namespace Functions

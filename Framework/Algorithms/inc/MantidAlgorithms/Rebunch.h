@@ -25,7 +25,7 @@ Takes a workspace as input and rebunches the data according to the input rebunch
 parameters.
     The process is exactly that defined by the mgenie code of T. G. Perring for
 both point and histogram data,
-    in that the the distribution flag is ignored for point data, and the
+    in that the distribution flag is ignored for point data, and the
 contributing point data points are averaged.
 
     Required Properties:

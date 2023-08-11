@@ -77,7 +77,7 @@ QGroupBox:title {
   <customwidget>
    <class>FittingDataView</class>
    <extends>QWidget</extends>
-   <header>mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_view</header>
+   <header>mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.data_handling.data_view</header>
   </customwidget>
   <customwidget>
    <class>FittingPlotView</class>

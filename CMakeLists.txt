@@ -64,13 +64,7 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   set(BUILD_MANTIDFRAMEWORK ON)
 endif()
 
-# Conda build variables
-set(CONDA_ENV
-    FALSE
-    CACHE BOOL "If True then we are building in a conda environment.
-          This predominately changes the operation of some the finders FindXXX.cmake
-          On windows it also prevents the use of the 3rdparty dependency directory"
-)
+# Conda build variable
 set(CONDA_BUILD
     FALSE
     CACHE

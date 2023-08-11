@@ -100,6 +100,8 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         SANSDataType.CAN_SCATTER: "CanScatterMonitorWorkspace",
     }
 
+    scaled_background_ws = create_scaled_background_workspace(state)
+
     workspaces, monitors = provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_to_monitor)
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -149,6 +151,14 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         reduction_package.out_scale_factor = out_scale_factor
         reduction_package.out_shift_factor = out_shift_factor
 
+        # -----------------------------------
+        # Subtract the background from the slice.
+        # -----------------------------------
+        if scaled_background_ws:
+            reduction_package.reduced_bgsub, reduction_package.reduced_bgsub_name = subtract_scaled_background(
+                reduction_package, scaled_background_ws
+            )
+
         if not event_slice_optimisation and plot_results:
             # Plot results is intended to show the result of each workspace/slice as it is reduced
             # as we reduce in bulk, it is not possible to plot live results while in event_slice mode
@@ -188,6 +198,9 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # -----------------------------------------------------------------------
     if not use_optimizations:
         delete_optimization_workspaces(reduction_packages, workspaces, monitors, save_can)
+
+    if scaled_background_ws:
+        delete_workspace_by_name(scaled_background_ws)
 
     out_scale_factors = []
     out_shift_factors = []
@@ -261,42 +274,27 @@ def plot_workspace_mantidqt(reduction_package, output_graph, plotting_module):
     plot_kwargs = {"scalex": True, "scaley": True}
     ax_options = {"xscale": "linear", "yscale": "linear"}
 
+    workspaces_to_plot = []
+
     if reduction_package.reduction_mode == ReductionMode.ALL:
-        plot(
-            [reduction_package.reduced_hab, reduction_package.reduced_lab],
-            wksp_indices=[0],
-            overplot=True,
-            fig=output_graph,
-            plot_kwargs=plot_kwargs,
-            ax_properties=ax_options,
-        )
+        workspaces_to_plot = [reduction_package.reduced_hab, reduction_package.reduced_lab]
     elif reduction_package.reduction_mode == ReductionMode.HAB:
-        plot(
-            [reduction_package.reduced_hab],
-            wksp_indices=[0],
-            overplot=True,
-            fig=output_graph,
-            plot_kwargs=plot_kwargs,
-            ax_properties=ax_options,
-        )
+        workspaces_to_plot = [reduction_package.reduced_hab]
     elif reduction_package.reduction_mode == ReductionMode.LAB:
-        plot(
-            [reduction_package.reduced_lab],
-            wksp_indices=[0],
-            overplot=True,
-            fig=output_graph,
-            plot_kwargs=plot_kwargs,
-            ax_properties=ax_options,
-        )
+        workspaces_to_plot = [reduction_package.reduced_lab]
     elif reduction_package.reduction_mode == ReductionMode.MERGED:
-        plot(
-            [reduction_package.reduced_merged, reduction_package.reduced_hab, reduction_package.reduced_lab],
-            wksp_indices=[0],
-            overplot=True,
-            fig=output_graph,
-            plot_kwargs=plot_kwargs,
-            ax_properties=ax_options,
-        )
+        workspaces_to_plot = [reduction_package.reduced_merged, reduction_package.reduced_hab, reduction_package.reduced_lab]
+    if reduction_package.reduced_bgsub:
+        workspaces_to_plot.extend(reduction_package.reduced_bgsub)
+
+    plot(
+        workspaces_to_plot,
+        wksp_indices=[0],
+        overplot=True,
+        fig=output_graph,
+        plot_kwargs=plot_kwargs,
+        ax_properties=ax_options,
+    )
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -549,6 +547,25 @@ def get_multi_period_workspaces(load_alg, workspace_name, number_of_workspaces):
     return workspaces
 
 
+def create_scaled_background_workspace(state) -> str:
+    state.background_subtraction.validate()
+    background_ws_name = state.background_subtraction.workspace
+    if not background_ws_name:
+        return None
+    scaled_bg_ws_name = "__" + state.background_subtraction.workspace + "_scaled"  # __ makes the ws invisible
+
+    scale_name = "Scale"
+    scale_options = {
+        "InputWorkspace": background_ws_name,
+        "Factor": state.background_subtraction.scale_factor,
+        "OutputWorkspace": scaled_bg_ws_name,
+    }
+    scale_alg = create_unmanaged_algorithm(scale_name, **scale_options)
+    scale_alg.setAlwaysStoreInADS(True)
+    scale_alg.execute()
+    return scaled_bg_ws_name
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for reduction packages
 # ----------------------------------------------------------------------------------------------------------------------
@@ -643,12 +660,12 @@ def create_initial_reduction_packages(state, workspaces, monitors):
     This provides the initial split of the workspaces.
 
     If the data stems from multi-period data, then we need to split up the workspaces. The state object is valid
-    for each one of these workspaces. Hence we need to create a deep copy of them for each reduction package.
+    for each one of these workspaces. Hence, we need to create a deep copy of them for each reduction package.
 
     The way multi-period files are handled over the different workspaces input types is:
     1. The sample scatter period determines all other periods, i.e. if the sample scatter workspace is has only
        one period, but the sample transmission has two, then only the first period is used.
-    2. If the sample scatter period is not available on an other workspace type, then the last period on that
+    2. If the sample scatter period is not available on another workspace type, then the last period on that
        workspace type is used.
 
     For the cases where the periods between the different workspaces types does not match, an information is logged.
@@ -658,12 +675,12 @@ def create_initial_reduction_packages(state, workspaces, monitors):
     :param monitors: The monitors contributing to the reduction
     :return: A set of "Reduction packages" where each reduction package defines a single reduction.
     """
-    # For loaded peri0d we create a package
+    # For loaded period we create a package
     packages = []
 
     data_info = state.data
     sample_scatter_period = data_info.sample_scatter_period
-    requires_new_period_selection = len(workspaces[SANSDataType.SAMPLE_SCATTER]) > 1 and sample_scatter_period == ALL_PERIODS  # noqa
+    requires_new_period_selection = len(workspaces[SANSDataType.SAMPLE_SCATTER]) > 1 and sample_scatter_period == ALL_PERIODS
 
     is_multi_period = len(workspaces[SANSDataType.SAMPLE_SCATTER]) > 1
     is_multi_wavelength = len(state.wavelength.wavelength_interval.selected_ranges) > 1
@@ -1303,12 +1320,13 @@ def delete_reduced_workspaces(reduction_packages, include_non_transmission=True)
             reduced_lab = reduction_package.reduced_lab
             reduced_hab = reduction_package.reduced_hab
             reduced_merged = reduction_package.reduced_merged
+            reduced_bgsub = reduction_package.reduced_bgsub_name
 
             # Remove samples
             reduced_lab_sample = reduction_package.reduced_lab_sample
             reduced_hab_sample = reduction_package.reduced_hab_sample
 
-            workspaces_to_delete.extend([reduced_lab, reduced_hab, reduced_merged, reduced_lab_sample, reduced_hab_sample])
+            workspaces_to_delete.extend([reduced_lab, reduced_hab, reduced_merged, reduced_bgsub, reduced_lab_sample, reduced_hab_sample])
 
         _delete_workspaces(delete_alg, workspaces_to_delete)
 
@@ -1358,6 +1376,15 @@ def delete_optimization_workspaces(reduction_packages, workspaces, monitors, sav
         if not save_can:
             optimizations_to_delete.extend([reduction_package.reduced_lab_can, reduction_package.reduced_hab_can])
         _delete_workspaces(delete_alg, optimizations_to_delete)
+
+
+def delete_workspace_by_name(ws_name):
+    delete_name = "DeleteWorkspace"
+    delete_options = {}
+    delete_alg = create_unmanaged_algorithm(delete_name, **delete_options)
+    if ws_name and AnalysisDataService.doesExist(ws_name):
+        delete_alg.setProperty("Workspace", ws_name)
+        delete_alg.execute()
 
 
 def get_transmission_names_to_save(reduction_package, can):
@@ -1414,6 +1441,8 @@ def get_all_names_to_save(reduction_packages, save_can):
         reduced_lab_sample = reduction_package.reduced_lab_sample
         reduced_hab_sample = reduction_package.reduced_hab_sample
 
+        reduced_bgsub = reduction_package.reduced_bgsub_name
+
         trans_name = get_transmission_names_to_save(reduction_package, False)
         trans_can_name = get_transmission_names_to_save(reduction_package, True)
 
@@ -1424,6 +1453,8 @@ def get_all_names_to_save(reduction_packages, save_can):
                 names_to_save.append((get_ws_names_from_group(reduced_lab), trans_name, trans_can_name))
             if reduced_hab:
                 names_to_save.append((get_ws_names_from_group(reduced_hab), trans_name, trans_can_name))
+            if reduced_bgsub:
+                names_to_save.append((reduced_bgsub, trans_name, trans_can_name))
             if reduced_lab_can:
                 names_to_save.append((get_ws_names_from_group(reduced_lab_can), [], trans_can_name))
             if reduced_hab_can:
@@ -1436,11 +1467,15 @@ def get_all_names_to_save(reduction_packages, save_can):
         # If we have merged reduction then store the
         elif reduced_merged:
             names_to_save.append((get_ws_names_from_group(reduced_merged), trans_name, trans_can_name))
+            if reduced_bgsub:
+                names_to_save.append((reduced_bgsub, trans_name, trans_can_name))
         else:
             if reduced_lab:
                 names_to_save.append((get_ws_names_from_group(reduced_lab), trans_name, trans_can_name))
             if reduced_hab:
                 names_to_save.append((get_ws_names_from_group(reduced_hab), trans_name, trans_can_name))
+            if reduced_bgsub:
+                names_to_save.append((reduced_bgsub, trans_name, trans_can_name))
 
     return names_to_save
 
@@ -1463,6 +1498,8 @@ def get_event_slice_names_to_save(reduction_packages, save_can):
         reduced_hab_can = reduction_package.reduced_hab_can
         reduced_lab_sample = reduction_package.reduced_lab_sample
         reduced_hab_sample = reduction_package.reduced_hab_sample
+
+        reduced_bgsub_names = reduction_package.reduced_bgsub_name
 
         reduced_lab_names = [] if reduced_lab is None else reduced_lab.getNames()
         reduced_hab_names = [] if reduced_hab is None else reduced_hab.getNames()
@@ -1491,6 +1528,7 @@ def get_event_slice_names_to_save(reduction_packages, save_can):
         else:
             names_to_save.extend(_get_names_in_list(reduced_lab_names, trans_name, trans_can_name))
             names_to_save.extend(_get_names_in_list(reduced_hab_names, trans_name, trans_can_name))
+        names_to_save.extend(_get_names_in_list(reduced_bgsub_names, trans_name, trans_can_name))
 
     # We might have some workspaces as duplicates (the group workspaces), so make them unique
     return set(names_to_save)
@@ -1528,6 +1566,39 @@ def save_workspace_to_file(workspace_name, file_formats, file_name, additional_r
 
     save_alg = create_unmanaged_algorithm(save_name, **save_options)
     save_alg.execute()
+
+
+def subtract_scaled_background(reduction_package, scaled_ws_name: str):
+    def run_minus_alg():
+        output_name = ws_name + "_bgsub"
+        minus_options["LHSWorkspace"] = ws_name
+        minus_options["OutputWorkspace"] = output_name
+        minus_alg = create_unmanaged_algorithm(minus_name, **minus_options)
+        minus_alg.setAlwaysStoreInADS(True)
+        minus_alg.execute()
+        output_workspaces_names.append(output_name)
+        output_workspaces.append(get_workspace_from_algorithm(minus_alg, "OutputWorkspace"))
+
+    if reduction_package.reduction_mode == ReductionMode.ALL:
+        raise ValueError(
+            f"Reduction Mode '{ReductionMode.ALL}' is incompatible with scaled background reduction. The "
+            f"ReductionMode must be set to '{ReductionMode.MERGED}', '{ReductionMode.HAB}', or '{ReductionMode.LAB}'."
+        )
+    minus_name = "Minus"
+    minus_options = {"RHSWorkspace": scaled_ws_name}
+    output_workspaces_names = []
+    output_workspaces = []
+
+    if reduction_package.reduction_mode == ReductionMode.MERGED:
+        for ws_name in reduction_package.reduced_merged_name:
+            run_minus_alg()
+    elif reduction_package.reduction_mode == ReductionMode.HAB:
+        for ws_name in reduction_package.reduced_hab_name:
+            run_minus_alg()
+    elif reduction_package.reduction_mode == ReductionMode.LAB:
+        for ws_name in reduction_package.reduced_lab_name:
+            run_minus_alg()
+    return output_workspaces, output_workspaces_names
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1585,6 +1656,7 @@ class ReductionPackage(object):
         self.reduced_hab = None
         self.reduced_hab_scaled = None
         self.reduced_merged = None
+        self.reduced_bgsub = None
 
         # -------------------------------------------------------
         # Reduced partial can workspaces (and partial workspaces)
@@ -1606,6 +1678,7 @@ class ReductionPackage(object):
         self.reduced_hab_base_name = None
         self.reduced_merged_name = None
         self.reduced_merged_base_name = None
+        self.reduced_bgsub_name = None
 
         # Partial reduced can workspace names
         self.reduced_lab_can_name = None

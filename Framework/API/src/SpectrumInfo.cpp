@@ -157,15 +157,15 @@ UnitParametersMap SpectrumInfo::diffractometerConstants(const size_t index, std:
     throw std::runtime_error("Retrieval of diffractometer constants not "
                              "implemented for scanning instrument");
   }
-  auto spectrumDef = checkAndGetSpectrumDefinition(index);
+  const auto &spectrumDef = checkAndGetSpectrumDefinition(index);
   std::vector<size_t> detectorIndicesOnly;
   std::vector<detid_t> calibratedDets;
   std::vector<detid_t> uncalibratedDets;
-  std::transform(spectrumDef.begin(), spectrumDef.end(), std::back_inserter(detectorIndicesOnly),
+  std::transform(spectrumDef.cbegin(), spectrumDef.cend(), std::back_inserter(detectorIndicesOnly),
                  [](auto const &pair) { return pair.first; });
   double difa{0.}, difc{0.}, tzero{0.};
   for (const auto &detIndex : detectorIndicesOnly) {
-    auto newDiffConstants = m_detectorInfo.diffractometerConstants(detIndex, calibratedDets, uncalibratedDets);
+    const auto newDiffConstants = m_detectorInfo.diffractometerConstants(detIndex, calibratedDets, uncalibratedDets);
     difa += std::get<0>(newDiffConstants);
     difc += std::get<1>(newDiffConstants);
     tzero += std::get<2>(newDiffConstants);
@@ -179,9 +179,10 @@ UnitParametersMap SpectrumInfo::diffractometerConstants(const size_t index, std:
   if (calibratedDets.size() == 0) {
     return {{UnitParams::difc, difcUncalibrated(index)}};
   }
-  return {{UnitParams::difa, difa / static_cast<double>(spectrumDefinition(index).size())},
-          {UnitParams::difc, difc / static_cast<double>(spectrumDefinition(index).size())},
-          {UnitParams::tzero, tzero / static_cast<double>(spectrumDefinition(index).size())}};
+  const auto specDefSize = static_cast<double>(spectrumDefinition(index).size());
+  return {{UnitParams::difa, difa / specDefSize},
+          {UnitParams::difc, difc / specDefSize},
+          {UnitParams::tzero, tzero / specDefSize}};
 }
 
 /** Calculate average diffractometer constants (DIFA, DIFC, TZERO) of

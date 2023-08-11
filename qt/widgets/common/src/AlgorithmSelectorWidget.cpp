@@ -75,7 +75,7 @@ AlgorithmSelectorWidget::~AlgorithmSelectorWidget() {
   AlgorithmFactory::Instance().notificationCenter.removeObserver(m_updateObserver);
 }
 
-/** Is the the execute button visible */
+/** Is the execute button visible */
 bool AlgorithmSelectorWidget::showExecuteButton() const { return m_execButton->isVisible(); }
 
 /** Show/hide the execute button */

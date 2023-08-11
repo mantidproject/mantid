@@ -17,11 +17,11 @@ Improved
 ########
 - The following changes were made to the :ref:`algm-MSDFit` algorithm:
    - Added model selection to the :ref:`algm-MSDFit` algorithm, with three current models: :ref:`MsdGauss <func-MsdGauss>`, :ref:`MsdYi <func-MsdYi>`, and :ref:`MsdYi <func-MsdYi>`. New models now work with workspaces in :math:`Q` not :math:`Q^2` (e.g. _eq workspaces 'Elastic Q').
-- The following changes were made to the the :ref:`algm-ConvolutionFitSequential` algorithm:
+- The following changes were made to the :ref:`algm-ConvolutionFitSequential` algorithm:
    - Added 'ExtractMembers' property to :ref:`algm-ConvolutionFitSequential` - this allows for extracting the members of the convolution fitting into their own workspaces.
    - Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.
    - The :ref:`algm-ConvolutionFitSequential` now performs correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
-- The following changes were made to the the :ref:`algm-ISISIndirectDiffractionReduction` algorithm:
+- The following changes were made to the :ref:`algm-ISISIndirectDiffractionReduction` algorithm:
    - Manual D-Ranges can now be supplied as a list/range, to the :ref:`algm-ISISIndirectDiffractionReduction` algorithm, each corresponding to their respective runs, in the supplied order.
    - The Sum Files option in the :ref:`algm-ISISIndirectDiffractionReduction` algorithm now allows for correctly corresponding each sum of
      sample runs defined with a range (e.g. A-B, where A and B are run numbers) to the corresponding vanadium run, dependent on D-Range.

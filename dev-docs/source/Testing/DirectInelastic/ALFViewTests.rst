@@ -62,7 +62,7 @@ Calculating the Rotation angle
 - Click the Fit button.
 - The peak centre should read approximately 0.877078.
 - A red line labelled Fitted Data should appear on the plot above.
-- The rotation angle should read 0.675824.
+- The rotation angle should read 1.26828.
 
 Clear when new load happens
 ---------------------------

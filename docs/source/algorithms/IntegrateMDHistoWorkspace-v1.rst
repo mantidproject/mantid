@@ -10,7 +10,7 @@
 Description
 -----------
 
-Provides limited integration of a :ref:`MDHistoWorkspace <MDHistoWorkspace>` in n-dimensions. Integration is always axis-aligned. Dimensions can only be integrated out, but no finer rebinning is permitted. Dimensions that do not require further rebinning will be left intact provided that the the binning parameters for those dimensions are not specified. For dimensions that are integrated, limits should be provided to give the range of the data to keep.
+Provides limited integration of a :ref:`MDHistoWorkspace <MDHistoWorkspace>` in n-dimensions. Integration is always axis-aligned. Dimensions can only be integrated out, but no finer rebinning is permitted. Dimensions that do not require further rebinning will be left intact provided that the binning parameters for those dimensions are not specified. For dimensions that are integrated, limits should be provided to give the range of the data to keep.
 
 Binning
 #######

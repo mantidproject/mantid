@@ -151,8 +151,8 @@ public:
   /** The method to convert events in a box into a table of
    * coodrinates/signal/errors casted into coord_t type
    *   Used to save events from plain binary file
-   *   @returns coordTable -- vector of events parameters
-   *   @return nColumns    -- number of parameters for each event
+   *   @param coordTable -- vector of events parameters
+   *   @param nColumns    -- number of parameters for each event
    */
   virtual void getEventsData(std::vector<coord_t> &coordTable, size_t &nColumns) const = 0;
   /** The method to convert the table of data into vector of events

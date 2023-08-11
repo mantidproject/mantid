@@ -118,14 +118,14 @@ bool endswith(const std::string &str, const std::string &ending) {
 void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix, const GroupingWorkspace_sptr &wksp) {
   alg->declareProperty(std::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
                            "OutputGroupingWorkspace", prefix + "_group", Direction::Output),
-                       "Set the the output GroupingWorkspace, if any.");
+                       "Set the output GroupingWorkspace, if any.");
   alg->setProperty("OutputGroupingWorkspace", wksp);
 }
 
 void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix, const MaskWorkspace_sptr &wksp) {
   alg->declareProperty(std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
                            "OutputMaskWorkspace", prefix + "_mask", Direction::Output),
-                       "Set the the output MaskWorkspace, if any.");
+                       "Set the output MaskWorkspace, if any.");
   alg->setProperty("OutputMaskWorkspace", wksp);
 }
 
@@ -336,8 +336,6 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids, const std
   setCalWSProperty(this, m_workspaceName, wksp);
 }
 
-/// @return true if the grouping information should be taken from the
-/// calibration file
 void LoadDiffCal::loadGroupingFromAlternateFile() {
   bool makeWS = getProperty(PropertyNames::MAKE_GRP);
   if (!makeWS)
@@ -499,15 +497,4 @@ void LoadDiffCal::exec() {
   makeMaskWorkspace(detids, use);
   makeCalWorkspace(detids, difc, difa, tzero, dasids, offset, use);
 }
-
-Parallel::ExecutionMode
-LoadDiffCal::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  // There is an optional input workspace which may have
-  // StorageMode::Distributed but it is merely used for passing an instrument.
-  // Output should always have StorageMode::Cloned, so we run with
-  // ExecutionMode::Identical.
-  static_cast<void>(storageModes);
-  return Parallel::ExecutionMode::Identical;
-}
-
 } // namespace Mantid::DataHandling

@@ -507,15 +507,15 @@ class SData(collections.abc.Sequence):
     def __len__(self) -> int:
         return len(self._data)
 
-    @overload  # noqa F811
+    @overload  # F811
     def __getitem__(self, item: int) -> OneAtomSData:
         ...
 
-    @overload  # noqa F811
-    def __getitem__(self, item: slice) -> List[OneAtomSData]:  # noqa F811
+    @overload  # F811
+    def __getitem__(self, item: slice) -> List[OneAtomSData]:  # F811
         ...
 
-    def __getitem__(self, item):  # noqa F811
+    def __getitem__(self, item):  # F811
         if isinstance(item, int):
             try:
                 return self._data[f"atom_{item}"]["s"]
@@ -585,15 +585,15 @@ class SDataByAngle(collections.abc.Sequence):
     def __len__(self) -> int:
         return len(self.angles)
 
-    @overload  # noqa F811
+    @overload  # F811
     def __getitem__(self, item: int) -> SData:
         ...
 
-    @overload  # noqa F811
-    def __getitem__(self: SDBA, item: slice) -> SDBA:  # noqa F811
+    @overload  # F811
+    def __getitem__(self: SDBA, item: slice) -> SDBA:  # F811
         ...
 
-    def __getitem__(self, item):  # noqa F811
+    def __getitem__(self, item):  # F811
         if isinstance(item, (int, slice)):
             data = {
                 atom_index: {
@@ -669,7 +669,6 @@ class SDataByAngle(collections.abc.Sequence):
         self.set_angle_data_from_dict(angle_index, data, add_to_existing=add_to_existing)
 
     def set_angle_data_from_dict(self, angle_index: int, data: Dict[str, OneAtomSData], add_to_existing: bool = False) -> None:
-
         for atom_key, atom_data in data.items():
             for order_key, order_data in atom_data["s"].items():
                 if add_to_existing:

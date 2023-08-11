@@ -4,19 +4,28 @@
 Mantid 6.7.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/6_7_release/indexCollage.png
    :class: screenshot
-   :width: 385px
+   :width: 500px
    :align: right
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 6.7.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+This release includes a wide array of updates, bugfixes, and new features.
+Notably there have been major changes to the code underlying event filtering: logs no longer have fake values to mimic the
+filtering/splitting and issues with the integrated proton charge have been fixed. More details can be found in :doc:`Framework release notes<framework>`.
+
+In addition to many improvements we would like to highlight the following:
+
+
+- Further refinements have been made to the :ref:`ALFView <ALFView-ref>` interface, new in v6.6.0.
+- The peak overlay feature in the :ref:`Instrument Viewer <InstrumentViewer>` now works in the side-by-side view and there is more flexibility to define how detector banks are arranged in side-by-side view.
+- Major changes have been made to the treatment of temperature in the algorithms :ref:`Abins <algm-Abins>` and :ref:`Abins2D <algm-Abins2D>` (for more details see :ref:`supporting documentation <DynamicalStructureFactorFromAbInitio>`)
+- File browser performance issues on GTK-based linux environments has been fixed.
+
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the

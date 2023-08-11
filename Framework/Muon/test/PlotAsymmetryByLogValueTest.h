@@ -443,10 +443,10 @@ public:
     // Now we want to test X values (log values) in the output workspace
     // rather than asymmetry (Y values)
     const auto &X = outWs->x(0);
-    // The correct 'Mean' calculated by the actual duration of the values
-    // correct duration is 118 seconds and 102 seconds, respectively.
-    TS_ASSERT_DELTA(X[0], 178.6135597415, 1e-5);
-    TS_ASSERT_DELTA(X[1], 179.2999979292, 1e-5);
+    // The correct 'Mean' calculated by hand. The actual duration of the values
+    // during the runs are 101 seconds and 96 seconds, respectively.
+    TS_ASSERT_DELTA(X[0], 178.66634, 1e-5);
+    TS_ASSERT_DELTA(X[1], 179.24375, 1e-5);
   }
 
   void test_invalidRunNumbers() {

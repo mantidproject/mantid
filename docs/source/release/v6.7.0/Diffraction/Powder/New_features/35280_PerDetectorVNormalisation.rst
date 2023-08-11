@@ -1,1 +1,0 @@
-- the ISIS powder diffraction scripts are now able to support per detector Vanadium normalisation. This has been enabled on the POLARIS instrument only so far

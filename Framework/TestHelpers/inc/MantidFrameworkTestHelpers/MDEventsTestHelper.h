@@ -140,12 +140,7 @@ namespace MDEventsTestHelper {
 Mantid::DataObjects::EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents, int numPixels = 400,
                                                                          int numBins = 160);
 
-/** Make a (optionally) file backed MDEventWorkspace with 10000 fake random data
- *points
- *
- * @param wsName :: name of the workspace in ADS
- * @return MDEW sptr
- */
+/// Make a (optionally) file backed MDEventWorkspace with 10000 fake random data points
 MDEventWorkspace3Lean::sptr makeFakeMDEventWorkspace(const std::string &wsName, long numEvents = 10000,
                                                      Kernel::SpecialCoordinateSystem coord = Kernel::None);
 

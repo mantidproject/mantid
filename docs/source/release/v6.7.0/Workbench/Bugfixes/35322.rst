@@ -1,1 +1,0 @@
-- Fixed issue in DrILL with loading rundexes related to issue in processing export algorithm name and the extension simultaneously.

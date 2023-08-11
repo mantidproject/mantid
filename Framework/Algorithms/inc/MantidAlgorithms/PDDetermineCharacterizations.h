@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 
@@ -27,7 +27,7 @@ namespace Algorithms {
 
 /** PDDetermineCharacterizations
  */
-class MANTID_ALGORITHMS_DLL PDDetermineCharacterizations : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL PDDetermineCharacterizations : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

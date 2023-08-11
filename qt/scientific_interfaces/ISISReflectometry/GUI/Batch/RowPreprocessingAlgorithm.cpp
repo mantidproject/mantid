@@ -35,10 +35,6 @@ void updateInstrumentSettingsProperties(Mantid::API::IAlgorithmRuntimeProps &pro
   Mantid::API::AlgorithmProperties::update("CalibrationFile", instrument.calibrationFilePath(), properties);
 }
 
-void updateExperimentSettingsProperties(Mantid::API::IAlgorithmRuntimeProps &properties, Experiment const &experiment) {
-  Mantid::API::AlgorithmProperties::update("Debug", experiment.debug(), properties);
-}
-
 } // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::PreprocessRow {
@@ -63,7 +59,6 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   updateInputWorkspacesProperties(*properties, row.runNumbers());
   updateInstrumentSettingsProperties(*properties, model.instrument());
-  updateExperimentSettingsProperties(*properties, model.experiment());
 
   // Return the configured algorithm
   auto jobAlgorithm =

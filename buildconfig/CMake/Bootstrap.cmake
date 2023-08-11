@@ -7,7 +7,7 @@ if(WIN32)
 endif()
 find_package(Git ${_git_requires})
 
-if(MSVC AND CONDA_ENV)
+if(MSVC)
   # Print out where we are looking for 3rd party stuff
   set(Python_FIND_REGISTRY NEVER)
   # used in later parts for MSVC to bundle Python
@@ -63,6 +63,35 @@ if(NOT Python_W_EXECUTABLE)
     NO_DEFAULT_PATH
   )
 endif()
+
+# Set a variable pointing to the relative location of the site packages directory w.r.t the prefix Used by install()
+# calls to place the Python packages in the correct place
+set(_code
+    "import os.path as osp
+import sys
+import sysconfig as scfg
+print(osp.relpath(scfg.get_path('purelib'), start=sys.prefix))
+"
+)
+execute_process(
+  COMMAND python -c ${_code}
+  RESULT_VARIABLE _result
+  OUTPUT_VARIABLE _output
+  ERROR_VARIABLE _error
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if(_result EQUAL 0)
+  if(WIN32)
+    set(Python_SITELIB_RELPATH "..\\${_output}")
+  else()
+    set(Python_SITELIB_RELPATH ${_output})
+  endif()
+else()
+  message(FATAL_ERROR "Error determining Python site packages location: ${_error}")
+endif()
+unset(_code)
+unset(_result)
+unset(_output)
 
 # Handle switching between previously configured Python verions
 if(Python_INCLUDE_DIR AND NOT Python_INCLUDE_DIR MATCHES ".*${Python_VERSION_MAJOR}\.${Python_VERSION_MINOR}.*")

@@ -24,9 +24,9 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("MSDFit");
-std::vector<std::string> MSDFIT_HIDDEN_PROPS = std::vector<std::string>(
-    {"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers", "OutputCompositeMembers",
-     "OutputWorkspace", "IgnoreInvalidData", "Output", "PeakRadius", "PlotParameter"});
+std::vector<std::string> MSDFIT_HIDDEN_PROPS =
+    std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
+                              "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
 const std::string MSDGAUSSFUNC{"MsdGauss"};
 const std::string MSDPETERSFUNC{"MsdPeters"};

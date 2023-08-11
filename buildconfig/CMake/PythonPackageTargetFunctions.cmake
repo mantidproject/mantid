@@ -59,15 +59,27 @@ function(add_python_package pkg_name)
     DEPENDS ${_setup_py}
   )
 
+  # Generate a sitecustomize.py file in the egg link directory as setuptools no longer generates site.py for v>=49.0.0
+  if(_parsed_arg_GENERATE_SITECUSTOMIZE AND Python_SETUPTOOLS_VERSION VERSION_GREATER_EQUAL 49.0.0)
+    add_custom_command(
+      OUTPUT ${_egg_link_dir}/sitecustomize.py
+      COMMAND ${CMAKE_COMMAND} -DSITECUSTOMIZE_DIR=${_egg_link_dir} -P ${CMAKE_MODULE_PATH}/WriteSiteCustomize.cmake
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      DEPENDS ${_setup_py} ${CMAKE_MODULE_PATH}/WriteSiteCustomize.cmake
+    )
+    list(APPEND _outputs ${_egg_link_dir}/sitecustomize.py)
+  endif()
+
   add_custom_target(${pkg_name} ALL DEPENDS ${_outputs})
 
   # When running the install target, run the following code instead that defers to the `pip install` command. It assumes
   # the `${CMAKE_CURRENT_SOURCE_DIR}`, the directory where `add_python_package` was called from, contains either a
   # `setup.py or `pyproject.toml` (there might be both) and avoids us having to add cmake install rules to install every
   # single .py file within the package.
-  install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
-  ${Python_EXECUTABLE} -m pip install ${CMAKE_CURRENT_SOURCE_DIR} --no-deps --ignore-installed --no-cache-dir -vvv)"
-          COMPONENT Runtime
+  install(
+    CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str}
+  python -m pip install ${CMAKE_CURRENT_SOURCE_DIR} --disable-pip-version-check --upgrade --no-deps --ignore-installed --no-cache-dir -vvv)"
+    COMPONENT Runtime
   )
 
 endfunction()

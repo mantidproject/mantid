@@ -8,11 +8,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/System.h"
 #include <vector>
@@ -49,13 +46,7 @@ protected:
   void forwardProperties();
   std::shared_ptr<Kernel::PropertyManager>
   getProcessProperties(const std::string &propertyManager = std::string()) const;
-  /// MPI option. If false, we will use one job event if MPI is available
-  bool m_useMPI;
-  Workspace_sptr assemble(Workspace_sptr partialWS);
-  Workspace_sptr assemble(const std::string &partialWSName, [[maybe_unused]] const std::string &outputWSName);
   void saveNexus(const std::string &outputWSName, const std::string &outputFile);
-  bool isMainThread();
-  int getNThreads();
 
   /// Divide a matrix workspace by another matrix workspace
   MatrixWorkspace_sptr divide(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
@@ -123,9 +114,5 @@ private:
 template <> MANTID_API_DLL void GenericDataProcessorAlgorithm<Algorithm>::visualStudioC4661Workaround();
 
 using DataProcessorAlgorithm = GenericDataProcessorAlgorithm<Algorithm>;
-using SerialDataProcessorAlgorithm = GenericDataProcessorAlgorithm<SerialAlgorithm>;
-using ParallelDataProcessorAlgorithm = GenericDataProcessorAlgorithm<ParallelAlgorithm>;
-using DistributedDataProcessorAlgorithm = GenericDataProcessorAlgorithm<DistributedAlgorithm>;
-
 } // namespace API
 } // namespace Mantid

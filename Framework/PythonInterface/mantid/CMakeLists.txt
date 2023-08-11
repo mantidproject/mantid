@@ -25,4 +25,3 @@ add_subdirectory(_plugins)
 
 # Defines the target the will cause the Python bundle to be copied
 set(PYBUNDLE_POST_TARGET PythonModule)
-include(${CMAKE_CURRENT_SOURCE_DIR}/BundlePython.cmake)

@@ -5,7 +5,6 @@ set(SRC_FILES
     src/LegacyConversion.cpp
     src/Partitioner.cpp
     src/RoundRobinPartitioner.cpp
-    src/Scatter.cpp
     src/SpectrumNumberTranslator.cpp
 )
 
@@ -22,7 +21,6 @@ set(INC_FILES
     inc/MantidIndexing/PartitionIndex.h
     inc/MantidIndexing/Partitioner.h
     inc/MantidIndexing/RoundRobinPartitioner.h
-    inc/MantidIndexing/Scatter.h
     inc/MantidIndexing/SpectrumIndexSet.h
     inc/MantidIndexing/SpectrumNumber.h
     inc/MantidIndexing/SpectrumNumberTranslator.h
@@ -41,7 +39,6 @@ set(TEST_FILES
     PartitionIndexTest.h
     PartitionerTest.h
     RoundRobinPartitionerTest.h
-    ScatterTest.h
     SpectrumIndexSetTest.h
     SpectrumNumberTest.h
     SpectrumNumberTranslatorTest.h
@@ -101,9 +98,5 @@ target_include_directories(
 generate_mantid_export_header(Indexing TRUE)
 
 # Installation settings
-if(CONDA_ENV)
-  set(TARGET_EXPORT_NAME "MantidIndexingTargets")
-  mtd_install_framework_lib(TARGETS Indexing INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
-else()
-  mtd_install_targets(TARGETS Indexing INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
-endif()
+set(TARGET_EXPORT_NAME "MantidIndexingTargets")
+mtd_install_framework_lib(TARGETS Indexing INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})

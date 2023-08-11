@@ -13,6 +13,7 @@
 """
 import platform as _platform
 import sys as _sys
+import os.path as _osp
 
 
 def is_windows():
@@ -35,6 +36,23 @@ def is_linux():
     Variant on is_apple
     """
     return _sys.platform.startswith("linux")
+
+
+def is_ubuntu() -> bool:
+    """Return True if we're running an Ubuntu distro else return False"""
+    if is_linux():
+        # first try platform module
+        version_info = _platform.uname().version.lower()
+        if "ubuntu" in version_info or "neon" in version_info:
+            return True
+        # then try release file
+        if _osp.isfile("/etc/lsb-release"):
+            with open("/etc/lsb-release") as handle:
+                release_info = handle.read()
+                return bool("Ubuntu" in release_info or "neon" in release_info)
+
+    # none of the previous checks worked
+    return False
 
 
 def is_32bit():

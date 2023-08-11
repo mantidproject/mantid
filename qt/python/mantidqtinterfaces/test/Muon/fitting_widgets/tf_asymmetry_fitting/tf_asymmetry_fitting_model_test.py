@@ -39,25 +39,25 @@ class TFAsymmetryFittingModelTest(unittest.TestCase):
     def setUpClass(cls):
         FrameworkManager.Instance()
 
+        cls.dataset_names = ["EMU20884; Group; fwd; Asymmetry", "EMU20884; Group; top; Asymmetry"]
+        cls.tf_non_compliant_dataset_names = ["EMU20884; Group; fwd; Asymmetry", "EMU20884; Pair Asym; long; Asymmetry"]
+        cls.fit_function = FunctionFactory.createFunction("FlatBackground")
+        cls.single_fit_functions = [cls.fit_function.clone(), cls.fit_function.clone()]
+        cls.simultaneous_fit_function = FunctionFactory.createInitializedMultiDomainFunction(str(cls.fit_function), len(cls.dataset_names))
+
+        cls.tf_single_function = create_tf_asymmetry_function(cls.fit_function.clone())
+
+        CreateSampleWorkspace(Function="One Peak", XMin=0.0, XMax=15.0, BinWidth=0.1, OutputWorkspace=cls.dataset_names[0])
+        CreateSampleWorkspace(Function="One Peak", XMin=0.0, XMax=15.0, BinWidth=0.1, OutputWorkspace=cls.dataset_names[1])
+
     def setUp(self):
         context = setup_context()
         self.model = TFAsymmetryFittingModel(context, context.fitting_context)
-        self.dataset_names = ["EMU20884; Group; fwd; Asymmetry", "EMU20884; Group; top; Asymmetry"]
-        self.tf_non_compliant_dataset_names = ["EMU20884; Group; fwd; Asymmetry", "EMU20884; Pair Asym; long; Asymmetry"]
-        self.fit_function = FunctionFactory.createFunction("FlatBackground")
-        self.single_fit_functions = [self.fit_function.clone(), self.fit_function.clone()]
-        self.simultaneous_fit_function = FunctionFactory.createInitializedMultiDomainFunction(
-            str(self.fit_function), len(self.dataset_names)
-        )
 
-        self.tf_single_function = create_tf_asymmetry_function(self.fit_function.clone())
         self.tf_single_fit_functions = [self.tf_single_function.clone(), self.tf_single_function.clone()]
         self.tf_simultaneous_fit_function = FunctionFactory.createInitializedMultiDomainFunction(
             str(self.tf_single_function), len(self.dataset_names)
         )
-
-        CreateSampleWorkspace(Function="One Peak", XMin=0.0, XMax=15.0, BinWidth=0.1, OutputWorkspace=self.dataset_names[0])
-        CreateSampleWorkspace(Function="One Peak", XMin=0.0, XMax=15.0, BinWidth=0.1, OutputWorkspace=self.dataset_names[1])
 
     def tearDown(self):
         self.model = None

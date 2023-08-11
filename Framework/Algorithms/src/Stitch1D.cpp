@@ -92,7 +92,6 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2, MatrixWorkspace_sptr &
  * @param a1 : start position in X
  * @param a2 : end position in X
  * @param source : Workspace to mask.
- * @return Masked workspace.
  */
 void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr &source) {
   const auto histogramCount = static_cast<int>(source->getNumberHistograms());

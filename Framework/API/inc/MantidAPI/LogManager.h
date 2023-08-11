@@ -64,10 +64,24 @@ public:
   const Types::Core::DateAndTime startTime() const;
   /// Return the run end time
   const Types::Core::DateAndTime endTime() const;
+  /// Return the first pulse time from sample logs
+  const Types::Core::DateAndTime getFirstPulseTime() const;
+  /// Return the last pulse time from sample logs
+  const Types::Core::DateAndTime getLastPulseTime() const;
   //-------------------------------------------------------------
 
   /// Filter the logs by time
   virtual void filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop);
+
+  /// For the time series properties, remove values according to TimeROI
+  virtual void removeDataOutsideTimeROI();
+
+  /// Create a new LogManager with a partial copy of its time series properties according to TimeROI
+  LogManager *cloneInTimeROI(const Kernel::TimeROI &timeROI);
+
+  /// Copy properties from another LogManager; filter copied time series properties according to TimeROI
+  void copyAndFilterProperties(const LogManager &other, const Kernel::TimeROI &timeROI);
+
   /// Filter the run by the given boolean log
   void filterByLog(const Kernel::TimeSeriesProperty<bool> &filter,
                    const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>());
@@ -171,16 +185,7 @@ public:
   /// Save the run to a NeXus file with a given group name
   virtual void saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) const;
 
-  /**
-   * @brief Load the run from a NeXus file with a given group name. Overload that uses NexusHDF5Descriptor for faster
-   * metadata lookup
-   *
-   * @param file currently opened NeXus file
-   * @param group current group (relative name)
-   * @param fileInfo descriptor with in-memory index with all entries
-   * @param prefix indicates current group location in file (absolute name)
-   * @param keepOpen
-   */
+  /// Load the run from a NeXus file with a given group name. Overload that uses NexusHDF5Descriptor for faster
   virtual void loadNexus(::NeXus::File *file, const std::string &group,
                          const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &prefix,
                          bool keepOpen = false);
@@ -189,7 +194,7 @@ public:
   /// Clear the logs
   void clearLogs();
 
-  /// Clear ou the cache of calculated statistics
+  /// Clear the cache of calculated statistics
   void clearSingleValueCache();
 
   // returns true if the log has a matching invalid values log filter
@@ -204,6 +209,8 @@ public:
 protected:
   bool hasStartTime() const;
   bool hasEndTime() const;
+  bool hasValidProtonChargeLog(std::string &error) const;
+
   void loadNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &prefix);
   /// Load the run from a NeXus file with a given group name
   void loadNexus(::NeXus::File *file, const std::map<std::string, std::string> &entries);

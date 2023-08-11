@@ -47,4 +47,5 @@ class PolrefExample(systemtesting.MantidSystemTest):
         # fully saved out to the nexus file (it's limited to the spectra that
         # are actually present in the saved workspace).
         self.disableChecking.append("SpectraMap")
+        self.disableChecking.append("Instrument")
         return "R_1", "PolrefTest.nxs"

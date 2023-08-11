@@ -22,7 +22,7 @@ import os
 import warnings
 import copy
 from pychop.Instruments import Instrument
-from qtpy.QtCore import QEventLoop, Qt, QProcess  # noqa
+from qtpy.QtCore import QEventLoop, Qt, QProcess
 from qtpy.QtWidgets import (
     QAction,
     QCheckBox,
@@ -43,7 +43,7 @@ from qtpy.QtWidgets import (
     QTextEdit,
     QVBoxLayout,
     QWidget,
-)  # noqa
+)
 from matplotlib.figure import Figure
 from matplotlib.widgets import Slider
 
@@ -52,7 +52,7 @@ try:
     from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
     from mantidqt.MPLwidgets import NavigationToolbar2QT as NavigationToolbar
 except ImportError:
-    from qtpy import PYQT5, PYSIDE2  # noqa
+    from qtpy import PYQT5, PYSIDE2
 
     if PYQT5 or PYSIDE2:
         from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas

@@ -6,14 +6,42 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
 import numbers
-from typing import Any, Dict, List, Optional, overload, Union
+from typing import Dict, List, Optional, overload, Union, TypedDict
 import re
 import numpy as np
+
 import abins
+from abins.constants import FLOAT_ID, FLOAT_TYPE
+
+
+class _AtomData(TypedDict):
+    """Item within AtomsData"""
+
+    coord: np.ndarray
+    mass: float
+    sort: int
+    symbol: str
 
 
 class AtomsData(collections.abc.Sequence):
-    def __init__(self, atoms_data: Dict[str, Dict[str, Any]]) -> None:
+    def __init__(self, atoms_data: Dict[str, _AtomData]) -> None:
+        """Data container for Atomic position information
+
+        AtomsData objects can be iterated, indexed and sliced to obtain
+        a dict of data for each atom.
+
+        Args:
+            atoms_data: dict of data arranged by atom. Each key is a string of
+                the form "atom_0", "atom_1" etc. and each value is a dict with
+                signature {"coord": length-3 array,
+                           "mass": float,
+                           "sort": int,
+                           "symbol": str}
+                where "coord" is in Angstrom, "mass" is in a.m.u.,
+                "sort" is an identifier for symmetry-equivalent sites and
+                "symbol" is a chemical element symbol.
+
+        """
 
         # Make a map matching int indices to atoms_data keys
         test = re.compile(r"^atom_(\d+)$")
@@ -45,12 +73,16 @@ class AtomsData(collections.abc.Sequence):
         self._data = [self._check_item(atoms_data[key], n_atoms=n_atoms) for key in sorted_atom_keys]
 
     @staticmethod
-    def _check_item(item: Dict[str, Any], n_atoms: Optional[int] = None) -> Dict[str, Any]:
+    def _check_item(item: _AtomData, n_atoms: Optional[int] = None) -> _AtomData:
         """
-        Raise an error if Atoms data item is unsuitable
+        Check a dict of atom data is suitable for use as item in AtomsData
 
-        :param item: element to be added
-        :param n_atoms: Number of atoms in data. If provided, check that "sort" value is not higher than expected.
+        Args:
+            item: element to be added
+            n_atoms: Number of atoms in data. If provided, check that "sort" value is not higher than expected.
+
+        Returns:
+            The input item
         """
 
         if not isinstance(item, dict):
@@ -60,11 +92,13 @@ class AtomsData(collections.abc.Sequence):
             raise ValueError("Invalid structure of the dictionary to be added.")
 
         # "symbol"
-        if not item["symbol"] in abins.constants.ALL_SYMBOLS:
+        if (symbol := item["symbol"]) not in abins.constants.ALL_SYMBOLS:
             # Check is symbol was loaded as type bytes
-            utf8_symbol = item["symbol"].decode("utf-8")
-            if utf8_symbol in abins.constants.ALL_SYMBOLS:
-                item["symbol"] = utf8_symbol
+            if isinstance(symbol, bytes):
+                utf8_symbol = symbol.decode("utf-8")
+
+                if utf8_symbol in abins.constants.ALL_SYMBOLS:
+                    item["symbol"] = utf8_symbol
             else:
                 raise ValueError("Invalid value of symbol.")
 
@@ -76,7 +110,7 @@ class AtomsData(collections.abc.Sequence):
             raise ValueError("Coordinates should have a form of 1D numpy array.")
         if coord.shape[0] != 3:
             raise ValueError("Coordinates should have a form of numpy array with three elements.")
-        if coord.dtype.num != abins.constants.FLOAT_ID:
+        if coord.dtype.num != FLOAT_ID:
             raise ValueError("Coordinates array should have real float dtype.")
 
         # "sort"
@@ -103,20 +137,68 @@ class AtomsData(collections.abc.Sequence):
     def __len__(self) -> int:
         return len(self._data)
 
-    @overload  # noqa F811
-    def __getitem__(self, item: int) -> Dict[str, Any]:
+    @overload
+    def __getitem__(self, item: int) -> _AtomData:
         ...
 
-    @overload  # noqa F811
-    def __getitem__(self, item: slice) -> List[Dict[str, Any]]:  # noqa F811
+    @overload
+    def __getitem__(self, item: slice) -> List[_AtomData]:
         ...
 
-    def __getitem__(self, item):  # noqa F811
+    def __getitem__(self, item):
         return self._data[item]
 
     def extract(self):
         # For compatibility, regenerate the dict format on-the-fly
         return {f"atom_{i}": item for i, item in enumerate(self._data)}
+
+    class JSONableAtomData(TypedDict):
+        """JSON-friendly representation of an AtomsData entry"""
+
+        coord: List[float]
+        mass: float
+        sort: int
+        symbol: str
+
+    JSONableData = Dict[str, "AtomsData.JSONableAtomData"]
+
+    def to_dict(self) -> "AtomsData.JSONableData":
+        """Get a JSON-compatible representation of the data"""
+        data: "AtomsData.JSONableData"
+        data = {
+            f"atom_{i}": {
+                "coord": item["coord"].tolist(),
+                "mass": float(item["mass"]),
+                "sort": int(item["sort"]),
+                "symbol": str(item["symbol"]),
+            }
+            for i, item in enumerate(self._data)
+        }
+        return data
+
+    @staticmethod
+    def from_dict(data: "AtomsData.JSONableData") -> "AtomsData":
+        """Construct AtomsData from JSON-compatible dictionary
+
+        Args:
+            data: Unlike the main constructor AtomsData(), this data should
+                be in JSON-compatible form: i.e. the length-3 numpy arrays are
+                replaced with length-3 List[float]. Usually this data will be
+                obtained from an external file or from the AtomsData.to_dict()
+                method.
+
+        """
+        atoms_data = {}  # type: Dict[str, _AtomData]
+
+        for atom_key, atom_data in data.items():
+            atoms_data[atom_key] = {
+                "coord": np.asarray(atom_data["coord"], dtype=FLOAT_TYPE),
+                "mass": atom_data["mass"],
+                "sort": atom_data["sort"],
+                "symbol": atom_data["symbol"],
+            }
+
+        return AtomsData(atoms_data)
 
     def __str__(self):
         return "Atoms data"

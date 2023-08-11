@@ -294,7 +294,8 @@ def generate(env, **kwargs):
             src_suffix = '$CXXTEST_SUFFIX'
             )
     else:
-        cxxtest_builder = (lambda *a: sys.stderr.write("ERROR: CXXTESTGEN NOT FOUND!"))
+        def cxxtest_builder(*a):
+            return sys.stderr.write('ERROR: CXXTESTGEN NOT FOUND!')
 
     def CxxTest(env, target, source = None, **kwargs):
         """Usage:

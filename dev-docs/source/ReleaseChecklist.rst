@@ -158,7 +158,7 @@ language, layout, and collecting images.
 Beta Testing Begins
 ###################
 
-* Initial amalgamation of the the release notes:
+* Initial amalgamation of the release notes:
 
   * ``git pull`` on ``release-next``.
   * Create a new branch using the `Mantid Git Workflow guidance <https://developer.mantidproject.org/GitWorkflow.html#new-branches>`__.
@@ -550,3 +550,20 @@ Open a PR updating the software ``doi``, ``date-released`` and ``version`` in th
 at the root of the repository.
 
 Notify the Release Manager when you complete all your tasks.
+
+**Deploy Versioned Documentation**
+
+Versioned documentation is accessible at https://docs.mantidproject.org/vX.Y.Z/.
+This documentation is hosted at https://mantidproject.github.io/docs-versioned/vX.Y.Z/.
+Documentation is deployed to GitHub via an action on the `docs-versioned <https://github.com/mantidproject/docs-versioned>`__ repository.
+This action runs on a push to the ``main`` branch of the repository.
+
+To do this:
+
+* On a clone of the mantid repository, check out the commit tagged as the relevant release number: ``git checkout tags/<vX.Y.Z> -b <new branch name>``.
+* On this branch, build the ``docs-html`` target (this target is produced by ``CMake``).
+* Clone the repository: https://github.com/mantidproject/docs-versioned.
+* Remaining on the ``main`` branch, create a directory for the relevant release in the form ``vX.Y.Z``.
+* Copy the built documentation into this new directory. The built documentation will be in your mantid build directory at ``<build directory>/docs/html``.
+* Stage the newly created directory and commit it to your branch.
+* After double-checking that these instructions have been followed correctly, push your branch to the main repository to deploy.

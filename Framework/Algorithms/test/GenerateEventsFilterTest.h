@@ -54,7 +54,6 @@ EventWorkspace_sptr createEventWorkspaceIntLog() {
   eventws->mutableRun().addProperty("run_start", runstarttime.toISO8601String());
   Types::Core::DateAndTime runendtime(runstoptime_ns);
   eventws->mutableRun().addProperty("run_end", runendtime.toISO8601String());
-
   // 3. Proton charge log
   Kernel::TimeSeriesProperty<double> *protonchargelog = new Kernel::TimeSeriesProperty<double>("proton_charge");
   int64_t curtime_ns = runstarttime_ns;
@@ -188,10 +187,8 @@ public:
     Types::Core::DateAndTime runstarttime(runstarttimestr);
     int64_t runstarttime_ns = runstarttime.totalNanoseconds();
 
-    Kernel::TimeSeriesProperty<double> *protonchargelog =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(eventWS->run().getProperty("proton_charge"));
     Types::Core::DateAndTime runstoptime =
-        Types::Core::DateAndTime(protonchargelog->lastTime().totalNanoseconds() + 100000);
+        Types::Core::DateAndTime(eventWS->mutableRun().endTime().totalNanoseconds() + 100000);
 
     // b) First interval
     Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
@@ -675,6 +672,7 @@ public:
     // Run star time
     int64_t runstarttime_ns = 3000000000;
     int64_t runstoptime_ns = 3001000000;
+    int64_t fakestoptime_ns = 4001000000;
     int64_t pulsetime_ns = 100000;
 
     Types::Core::DateAndTime runstarttime(runstarttime_ns);
@@ -685,7 +683,7 @@ public:
     // Proton charge log
     Kernel::TimeSeriesProperty<double> *protonchargelog = new Kernel::TimeSeriesProperty<double>("proton_charge");
     int64_t curtime_ns = runstarttime_ns;
-    while (curtime_ns <= runstoptime_ns) {
+    while (curtime_ns <= fakestoptime_ns) {
       Types::Core::DateAndTime curtime(curtime_ns);
       protonchargelog->addValue(curtime, 1.0);
       curtime_ns += pulsetime_ns;
@@ -810,10 +808,8 @@ public:
     Types::Core::DateAndTime runstarttime(runstarttimestr);
     int64_t runstarttime_ns = runstarttime.totalNanoseconds();
 
-    Kernel::TimeSeriesProperty<double> *protonchargelog =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(eventWS->run().getProperty("proton_charge"));
     Types::Core::DateAndTime runstoptime =
-        Types::Core::DateAndTime(protonchargelog->lastTime().totalNanoseconds() + 100000);
+        Types::Core::DateAndTime(eventWS->mutableRun().endTime().totalNanoseconds() + 100000);
 
     // First interval
     TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0] * 1.E9), runstarttime_ns);
@@ -1165,10 +1161,8 @@ public:
     Types::Core::DateAndTime runstarttime(runstarttimestr);
     int64_t runstarttime_ns = runstarttime.totalNanoseconds();
 
-    Kernel::TimeSeriesProperty<double> *protonchargelog =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(eventWS->run().getProperty("proton_charge"));
     Types::Core::DateAndTime runstoptime =
-        Types::Core::DateAndTime(protonchargelog->lastTime().totalNanoseconds() + 100000);
+        Types::Core::DateAndTime(eventWS->mutableRun().endTime().totalNanoseconds() + 100000);
 
     // First 3 intervals
     TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0] * 1.E9), runstarttime_ns);
@@ -1219,6 +1213,99 @@ public:
     // Clean
     AnalysisDataService::Instance().remove("Splitters08");
     AnalysisDataService::Instance().remove("TestEventWorkspace08");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test generation of splitters by time
+   */
+  void test_endRunTimeFromRun() {
+    // 1. Create input Workspace
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
+    eventWS->mutableRun().removeProperty("proton_charge");
+    AnalysisDataService::Instance().addOrReplace("TestWorkspace", eventWS);
+
+    // 2. Init and set property
+    GenerateEventsFilter alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", eventWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Splitters09"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InformationWorkspace", "SplitInfo09"));
+
+    // 3. Running and get result
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // 4. Check output
+    DataObjects::SplittersWorkspace_sptr splittersws = std::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(
+        AnalysisDataService::Instance().retrieve("Splitters09"));
+    DataObjects::TableWorkspace_sptr splittersinfo =
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("SplitInfo09"));
+
+    TS_ASSERT(splittersws);
+
+    TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), 1);
+    Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
+    Types::Core::DateAndTime runstart(3000000000);
+    TS_ASSERT_EQUALS(splitter0.start().totalNanoseconds(), runstart.totalNanoseconds());
+    TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), runstart.totalNanoseconds() + 101000000);
+    TS_ASSERT_EQUALS(splitter0.index(), 0);
+
+    TS_ASSERT_EQUALS(splittersws->rowCount(), 1);
+    TS_ASSERT_EQUALS(splittersinfo->rowCount(), 1);
+
+    AnalysisDataService::Instance().remove("Splitters09");
+    AnalysisDataService::Instance().remove("SplitInfo09");
+    AnalysisDataService::Instance().remove("TestWorkspace");
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test generation of splitters by time
+   */
+  void test_endRunTimeFromProtonChargeLog() {
+    // 1. Create input Workspace
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
+    eventWS->mutableRun().removeProperty("run_end");
+    AnalysisDataService::Instance().addOrReplace("TestWorkspace", eventWS);
+
+    // 2. Init and set property
+    GenerateEventsFilter alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", eventWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "Splitters10"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InformationWorkspace", "SplitInfo10"));
+
+    // 3. Running and get result
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // 4. Check output
+    DataObjects::SplittersWorkspace_sptr splittersws = std::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(
+        AnalysisDataService::Instance().retrieve("Splitters10"));
+    DataObjects::TableWorkspace_sptr splittersinfo =
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve("SplitInfo10"));
+
+    TS_ASSERT(splittersws);
+
+    TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), 1);
+    Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
+    Types::Core::DateAndTime runstart(3000000000);
+    Types::Core::DateAndTime runend(4001100000);
+    TS_ASSERT_EQUALS(splitter0.start().totalNanoseconds(), runstart.totalNanoseconds());
+    TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), runend.totalNanoseconds());
+    TS_ASSERT_EQUALS(splitter0.index(), 0);
+
+    TS_ASSERT_EQUALS(splittersws->rowCount(), 1);
+    TS_ASSERT_EQUALS(splittersinfo->rowCount(), 1);
+
+    AnalysisDataService::Instance().remove("Splitters10");
+    AnalysisDataService::Instance().remove("SplitInfo10");
+    AnalysisDataService::Instance().remove("TestWorkspace");
+
+    return;
   }
 
   //----------------------------------------------------------------------------------------------

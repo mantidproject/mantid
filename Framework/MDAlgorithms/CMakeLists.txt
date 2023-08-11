@@ -55,9 +55,9 @@ set(SRC_FILES
     src/ImportMDHistoWorkspaceBase.cpp
     src/Integrate3DEvents.cpp
     src/IntegrateEllipsoids.cpp
+    src/IntegrateEllipsoidsTwoStep.cpp
     src/IntegrateEllipsoidsV1.cpp
     src/IntegrateEllipsoidsV2.cpp
-    src/IntegrateEllipsoidsTwoStep.cpp
     src/IntegrateFlux.cpp
     src/IntegrateMDHistoWorkspace.cpp
     src/IntegratePeaksCWSD.cpp
@@ -69,6 +69,7 @@ set(SRC_FILES
     src/InvalidParameterParser.cpp
     src/LessThanMD.cpp
     src/LoadDNSSCD.cpp
+    src/LoadGaussCube.cpp
     src/LoadMD.cpp
     src/LoadSQW.cpp
     src/LoadSQW2.cpp
@@ -173,9 +174,9 @@ set(INC_FILES
     inc/MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h
     inc/MantidMDAlgorithms/Integrate3DEvents.h
     inc/MantidMDAlgorithms/IntegrateEllipsoids.h
+    inc/MantidMDAlgorithms/IntegrateEllipsoidsTwoStep.h
     inc/MantidMDAlgorithms/IntegrateEllipsoidsV1.h
     inc/MantidMDAlgorithms/IntegrateEllipsoidsV2.h
-    inc/MantidMDAlgorithms/IntegrateEllipsoidsTwoStep.h
     inc/MantidMDAlgorithms/IntegrateFlux.h
     inc/MantidMDAlgorithms/IntegrateMDHistoWorkspace.h
     inc/MantidMDAlgorithms/IntegratePeaksCWSD.h
@@ -187,6 +188,7 @@ set(INC_FILES
     inc/MantidMDAlgorithms/InvalidParameterParser.h
     inc/MantidMDAlgorithms/LessThanMD.h
     inc/MantidMDAlgorithms/LoadDNSSCD.h
+    inc/MantidMDAlgorithms/LoadGaussCube.h
     inc/MantidMDAlgorithms/LoadMD.h
     inc/MantidMDAlgorithms/LoadSQW.h
     inc/MantidMDAlgorithms/LoadSQW2.h
@@ -303,6 +305,7 @@ set(TEST_FILES
     InvalidParameterTest.h
     LessThanMDTest.h
     LoadDNSSCDTest.h
+    LoadGaussCubeTest.h
     LoadMDTest.h
     LoadSQW2Test.h
     LoadSQWTest.h
@@ -396,8 +399,4 @@ target_include_directories(
 generate_mantid_export_header(MDAlgorithms TRUE)
 
 # Installation settings
-if(CONDA_ENV)
-  mtd_install_framework_lib(TARGETS MDAlgorithms PLUGIN_LIB)
-else()
-  mtd_install_targets(TARGETS MDAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
-endif()
+mtd_install_framework_lib(TARGETS MDAlgorithms PLUGIN_LIB)

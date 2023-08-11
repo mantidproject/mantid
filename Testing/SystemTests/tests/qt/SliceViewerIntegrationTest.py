@@ -8,14 +8,16 @@
 from functools import partial
 import io
 import systemtesting
+import os
 import sys
+import shutil
+import tempfile
 from threading import Thread
 from unittest.mock import patch
 
 from matplotlib.colors import Normalize
 from numpy import hstack
 
-from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE
 from mantidqt.widgets.sliceviewer.views.dataview import SCALENORM
 from mantid.simpleapi import (
     CreateMDHistoWorkspace,
@@ -23,11 +25,16 @@ from mantid.simpleapi import (
     CreateSampleWorkspace,
     DeleteWorkspace,
     FakeMDEventData,
+    BinMD,
     ConvertToDistribution,
     Scale,
     SetUB,
     RenameWorkspace,
     ClearUB,
+    LoadMD,
+    SaveMD,
+    AddSampleLog,
+    SetMDFrame,
 )
 from mantid.api import AnalysisDataService
 from mantidqt.utils.qt.testing import get_application
@@ -248,7 +255,7 @@ class SliceViewerTestChangingNormUpdatesClimValidators(systemtesting.MantidSyste
         colorbar.autoscale.setChecked(False)
 
         colorbar.norm.setCurrentText("Log")
-        self.assertEqual(colorbar.cmin.validator().bottom(), MIN_LOG_VALUE)
+        self.assertGreaterThan(colorbar.cmin.validator().bottom(), 0)
 
         colorbar.norm.setCurrentText("Linear")
         self.assertEqual(colorbar.cmin.validator().bottom(), -inf)
@@ -510,6 +517,134 @@ class SliceViewerTestAxesLimitsRespectNonorthogonalTransform(systemtesting.Manti
         self.assertAlmostEqual(limits_nonorthog[0][1], 19, delta=1e-5)
         self.assertEqual(limits_nonorthog[1], limits[2:])
 
+        pres.view.close()
+
+
+class SliceViewerTestLoadMD(systemtesting.MantidSystemTest, HelperTestingClass):
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        test_dir = tempfile.mkdtemp()
+
+        ws = CreateMDHistoWorkspace(
+            Dimensionality=4,
+            Extents="-3,3,-10,10,-5,5,0,2",
+            SignalInput=[1] * 11**4,
+            ErrorInput=[1] * 11**4,
+            NumberOfBins="11,11,11,11",
+            Names="values,[H,0,0],[0,K,0],[0,0,L]",
+            Units="a.b.u.,r.l.u.,r.l.u.,r.l.u.",
+            Frames="General Frame,HKL,HKL,HKL",
+        )
+
+        SetMDFrame("ws", MDFrame="HKL", Axes=[1, 2, 3])
+        AddSampleLog("ws", LogName="sample")
+        ws.getExperimentInfo(0).run().addProperty("W_MATRIX", [1, 0, 0, 0, 1, 0, 0, 0, 1], True)
+        SaveMD("ws", Filename=os.path.join(test_dir, "mdhist_4d.nxs"))
+        DeleteWorkspace("ws")
+
+        ws = LoadMD(os.path.join(test_dir, "mdhist_4d.nxs"))
+        pres = SliceViewer(ws)
+        self.assertAlmostEqual(pres.get_proj_matrix().flatten().tolist(), [1, 0, 0, 0, 1, 0, 0, 0, 1])
+        pres.view.close()
+
+        shutil.rmtree(test_dir)
+
+
+class SliceViewerTestIntegerXAxis(systemtesting.MantidSystemTest, HelperTestingClass):
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        ws = CreateMDHistoWorkspace(
+            Dimensionality=4,
+            Extents="-2,2,-2,2,-2,2,-2,2",
+            SignalInput=[1] * 11**4,
+            ErrorInput=[1] * 11**4,
+            NumberOfBins="11,11,11,11",
+            Names="[H,0,0],values,[0,K,0],[0,0,L]",
+            Units="r.l.u.,a.b.u.,r.l.u.,r.l.u.",
+            Frames="HKL,General Frame,HKL,HKL",
+        )
+
+        SetMDFrame("ws", MDFrame="HKL", Axes=[0, 2, 3])
+        AddSampleLog("ws", LogName="sample")
+        ws.getExperimentInfo(0).run().addProperty("W_MATRIX", [1, 0, 0, 0, 1, 0, 0, 0, 1], True)
+
+        pres = SliceViewer(ws)
+        xticklocs = pres.view.data_view.ax.get_xticks()
+        yticklocs = pres.view.data_view.ax.get_yticks()
+        self.assertTrue((xticklocs % 1 == 0).all())
+        self.assertFalse((yticklocs % 1 == 0).all())
+        pres.view.close()
+
+
+class SliceViewerTestIntegerYAxis(systemtesting.MantidSystemTest, HelperTestingClass):
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        ws = CreateMDHistoWorkspace(
+            Dimensionality=4,
+            Extents="-2,2,-2,2,-2,2,-2,2",
+            SignalInput=[1] * 11**4,
+            ErrorInput=[1] * 11**4,
+            NumberOfBins="11,11,11,11",
+            Names="values,[H,0,0],[0,K,0],[0,0,L]",
+            Units="a.b.u.,r.l.u.,r.l.u.,r.l.u.",
+            Frames="General Frame,HKL,HKL,HKL",
+        )
+
+        SetMDFrame("ws", MDFrame="HKL", Axes=[1, 2, 3])
+        AddSampleLog("ws", LogName="sample")
+        ws.getExperimentInfo(0).run().addProperty("W_MATRIX", [1, 0, 0, 0, 1, 0, 0, 0, 1], True)
+
+        pres = SliceViewer(ws)
+        xticklocs = pres.view.data_view.ax.get_xticks()
+        yticklocs = pres.view.data_view.ax.get_yticks()
+        self.assertFalse((xticklocs % 1 == 0).all())
+        self.assertTrue((yticklocs % 1 == 0).all())
+        pres.view.close()
+
+
+class SliceViewerTestCreateMDEvent(systemtesting.MantidSystemTest, HelperTestingClass):
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        ws = CreateMDWorkspace(
+            Dimensions="4",
+            EventType="MDEvent",
+            Extents="-5.7644,5.7644,-5.7644,5.7644,-5.7644,5.7644,-11.3897,11.3897",
+            Names="Q_sample_x,Q_sample_y,Q_sample_z,DeltaE",
+            Units="Angstrom^-1,Angstrom^-1,Angstrom^-1,DeltaE",
+        )
+
+        SetMDFrame(ws, MDFrame="QSample", Axes=[0, 1, 2])
+        FakeMDEventData(ws, UniformParams="1000000")
+
+        binned_ws = BinMD(
+            InputWorkspace=ws,
+            AxisAligned=False,
+            BasisVector0="[H,H,0],unit,-1.4747400283813477,-0.03335599973797798,0.26337599754333496,0",
+            BasisVector1="DeltaE,DeltaE,0,0,0,1",
+            BasisVector2="[-H,H,0],unit,-0.2630769908428192,-0.01594259962439537,-1.4750800132751465,0",
+            BasisVector3="[0,0,L],unit,-0.025200000032782555,1.0592399835586548,-0.006953829899430275,0",
+            NormalizeBasisVectors=False,
+            OutputExtents=[-3.8441, 3.8559, -2, 8, -0.1, 0.1, -5.43682, 5.43682],
+            OutputBins=[154, 100, 1, 218],
+        )
+
+        binned_ws.clearOriginalWorkspaces()
+
+        pres = SliceViewer(binned_ws)
+        proj_matrix = pres.get_proj_matrix().tolist()
+        self.assertAlmostEqual(proj_matrix[0][0], -1.4747400283813477)
+        self.assertAlmostEqual(proj_matrix[0][1], -0.2630769908428192)
+        self.assertAlmostEqual(proj_matrix[0][2], -0.025200000032782555)
+        self.assertAlmostEqual(proj_matrix[1][0], -0.03335599973797798)
+        self.assertAlmostEqual(proj_matrix[1][1], -0.01594259962439537)
+        self.assertAlmostEqual(proj_matrix[1][2], 1.0592399835586548)
+        self.assertAlmostEqual(proj_matrix[2][0], 0.26337599754333496)
+        self.assertAlmostEqual(proj_matrix[2][1], -1.4750800132751465)
+        self.assertAlmostEqual(proj_matrix[2][2], -0.006953829899430275)
         pres.view.close()
 
 

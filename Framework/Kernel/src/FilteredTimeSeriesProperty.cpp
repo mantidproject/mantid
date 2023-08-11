@@ -159,6 +159,11 @@ template <typename TYPE> TimeInterval FilteredTimeSeriesProperty<TYPE>::nthInter
   return deltaT;
 }
 
+template <typename TYPE> Types::Core::DateAndTime FilteredTimeSeriesProperty<TYPE>::nthTime(int n) const {
+  const auto interval = this->nthInterval(n);
+  return interval.start();
+}
+
 //-----------------------------------------------------------------------------------------------
 /** Returns n-th value of n-th interval in an incredibly inefficient way.
  *  The algorithm is migrated from mthInterval()

@@ -89,6 +89,21 @@ class Pearl(AbstractInst):
     def should_subtract_empty_inst(self):
         return self._inst_settings.subtract_empty_inst
 
+    def _generate_out_file_paths(self, run_details):
+        output_file_paths = super()._generate_out_file_paths(run_details)
+        file_ext = run_details.file_extension
+        if file_ext and self._inst_settings.incl_file_ext_in_wsname:
+            output_file_paths["output_name"] = output_file_paths["output_name"] + file_ext.replace(".", "_")
+        return output_file_paths
+
+    def _get_output_formats(self, output_directory, xye_files_directory):
+        return {
+            "nxs_filename": output_directory,
+            "gss_filename": os.path.join(output_directory, "GSAS"),
+            "tof_xye_filename": os.path.join(xye_files_directory, "ToF"),
+            "dspacing_xye_filename": os.path.join(xye_files_directory, "dSpacing"),
+        }
+
     @contextmanager
     def _apply_temporary_inst_settings(self, kwargs, run):
         self._inst_settings.update_attributes(kwargs=kwargs)
@@ -201,10 +216,7 @@ class Pearl(AbstractInst):
             focus_mode=output_mode,
             attenuation_filepath=attenuation_path,
         )
-
-        group_name = "PEARL{0!s}_{1}{2}-Results-D-Grp"
-        mode = "_long" if self._inst_settings.long_mode else ""
-        group_name = group_name.format(run_details.output_run_string, self._inst_settings.tt_mode, mode)
+        group_name = self._generate_out_file_paths(run_details)["output_name"] + "-d"
         grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra, OutputWorkspace=group_name)
         return grouped_d_spacing, None
 

@@ -41,12 +41,16 @@ public:
 
   void makeDetectorIDToGroupMap(std::map<detid_t, int> &detIDToGroup, int64_t &ngroups) const;
   void makeDetectorIDToGroupVector(std::vector<int> &detIDToGroup, int64_t &ngroups) const;
+  int getTotalGroups() const;
+  std::vector<int> getGroupIDs() const;
+  std::vector<int> getDetectorIDsOfGroup(const int groupID) const;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   GroupingWorkspace(const GroupingWorkspace &) = default;
 
 private:
+  int translateToGroupID(const int n) const;
   GroupingWorkspace *doClone() const override { return new GroupingWorkspace(*this); }
   GroupingWorkspace *doCloneEmpty() const override { return new GroupingWorkspace(); }
 };

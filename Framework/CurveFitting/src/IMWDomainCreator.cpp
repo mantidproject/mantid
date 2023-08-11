@@ -344,8 +344,6 @@ void IMWDomainCreator::appendCompositeFunctionMembers(std::list<API::IFunction_s
  *   and members of the model.
  * @param function A Convolution function which model may or may not be a
  * composite function.
- * @return True if all conditions are fulfilled and it is possible to produce
- * the output.
  */
 void IMWDomainCreator::appendConvolvedCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList,
                                                                const API::IFunction_sptr &function) const {

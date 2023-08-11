@@ -68,6 +68,11 @@ Output: (note that only the fundamental excitations are included)
     benzene_wrk_H_total
     benzene_wrk_H
 
+.. testcleanup:: Abins2DCastepSimple
+
+    import os
+    os.remove("benzene.hdf5")
+
 **Example - using more arguments:**
 
 In practice we would usually select an instrument, incident energy,
@@ -95,6 +100,11 @@ Output:
 
    Created 34 workspaces
    including wrk_verbose_atom_1_total
+
+.. testcleanup:: Abins2DExplicitParameters
+
+    import os
+    os.remove("benzene.hdf5")
 
 .. categories::
 

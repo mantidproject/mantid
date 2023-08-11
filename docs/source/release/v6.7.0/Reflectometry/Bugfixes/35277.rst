@@ -1,1 +1,0 @@
-- Fixed two minor issues in :ref:`algm-ReflectometryILLPreprocessing` blocking the normalisation to monitor for D17, and no normalisation for both Figaro and D17.

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -35,7 +35,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella plc
     @date 5/02/2009
 */
-class MANTID_ALGORITHMS_DLL CalculateFlatBackground : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL CalculateFlatBackground : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CalculateFlatBackground"; }

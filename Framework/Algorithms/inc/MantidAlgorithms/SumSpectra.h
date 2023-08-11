@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include <set>
@@ -36,7 +36,7 @@ namespace Algorithms {
     @author Nick Draper, Tessella Support Services plc
     @date 22/01/2009
  */
-class MANTID_ALGORITHMS_DLL SumSpectra : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL SumSpectra : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SumSpectra"; }

@@ -77,8 +77,6 @@ The `x`-axis is the temperature in Kelvin, and the magnetic moment (`y`-axis) is
         if row['Value'] != 0:
             print("%7s = % 7.5g" % (row['Name'], row['Value']))
 
-.. testcleanup:: ExampleCrystalFieldMoment
-
 .. testoutput:: ExampleCrystalFieldMoment
    :hide:
    :options: +ELLIPSIS, +NORMALIZE_WHITESPACE

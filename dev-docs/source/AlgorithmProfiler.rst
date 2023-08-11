@@ -44,5 +44,13 @@ An example of this can be found in `FilterEvents.cpp <https://github.com/mantidp
 Analysing tool
 ^^^^^^^^^^^^^^
 
-The project is available here: https://github.com/nvaytet/mantid-profiler. It provides the nice graphical
+The `mantid-profiler project <https://github.com/mantidproject/mantid-profiler>`_ provides the nice graphical
 tool to interpret the information contained in the dumped file.
+The project has more detiled instructions, but in general
+
+.. code-block:: sh
+
+   python path/to/myscript.py & python path/to/mantid-profiler/mantid-profiler.py $!
+
+The ``&`` puts the python process in the background.
+The ``$!`` is the process-id (PID) of the last process run and allows mantid-profiler to attach to the process.

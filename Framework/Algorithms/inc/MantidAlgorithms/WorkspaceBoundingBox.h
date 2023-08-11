@@ -24,54 +24,56 @@ Kernel::Logger g_log("WorkspaceBoundingBox");
  */
 class WorkspaceBoundingBox {
 public:
-  WorkspaceBoundingBox(const API::MatrixWorkspace_const_sptr &workspace);
-  WorkspaceBoundingBox();
+  WorkspaceBoundingBox(const API::MatrixWorkspace_const_sptr &workspace, const double integrationRadius,
+                       const double beamRadius, const bool ignoreDirectBeam, const double cenX, const double cenY);
   ~WorkspaceBoundingBox();
 
-  API::MatrixWorkspace_const_sptr getWorkspace() { return m_workspace; }
-  double getX() const { return x; }
-  double getY() const { return y; }
-  double getCenterX() const { return centerX; }
-  double getCenterY() const { return centerY; }
-  double getXMin() const { return xMin; }
-  double getXMax() const { return xMax; }
-  double getYMin() const { return yMin; }
-  double getYMax() const { return yMax; }
+  double getCenterX() const { return m_centerXPosPrev; }
+  double getCenterY() const { return m_centerYPosPrev; }
 
-  void setPosition(double x, double y);
-  void setCenter(double x, double y);
-  void setBounds(double xMin, double xMax, double yMin, double yMax);
+  bool centerOfMassWithinBeamCenter();
+  void prepareCenterCalculation();
 
-  double calculateDistance() const;
-  double calculateRadiusX() const;
-  double calculateRadiusY() const;
+  double distanceFromPrevious() const;
 
-  double updatePositionAndReturnCount(int index);
-  int findFirstValidWs(const int numSpec) const;
-  bool isValidWs(int index) const;
-  bool isOutOfBoundsOfNonDirectBeam(const double beamRadius, int index, const bool directBeam);
-  bool containsPoint(double x, double y);
-  void normalizePosition(double x, double y);
-  void updateMinMax(int index);
+  void findNewCenterPosition();
 
 private:
-  Kernel::V3D &position(int index) const;
-  double yValue(const int index) const;
+  void initOverallRangeAndFindFirstCenter();
+  Kernel::V3D position(const std::size_t index) const;
+  void resetIntermediatePosition();
+  double countsValue(const std::size_t index) const;
+  bool isValidIndex(const std::size_t index) const;
+  void updateMinMax(const std::size_t index);
+  bool includeInIntegration(const std::size_t index);
+  bool includeInIntegration(const Kernel::V3D &position);
+  bool symmetricRegionContainsPoint(double x, double y);
+  void setCenterPrev(const double x, const double y);
+  void setBounds(const double xMin, const double xMax, const double yMin, const double yMax);
+  void normalizePosition(const double totalCounts);
+  double updatePositionAndReturnCount(const std::size_t index);
+  double calculateRadiusX() const;
+  double calculateRadiusY() const;
   API::MatrixWorkspace_const_sptr m_workspace;
   const API::SpectrumInfo *m_spectrumInfo;
-  double x{0};
-  double y{0};
-  double centerX{0};
-  double centerY{0};
-  double xMin{0};
-  double xMax{0};
-  double yMin{0};
-  double yMax{0};
-  // cache information
-  mutable int m_cachedPositionIndex{-1};
-  mutable Kernel::V3D m_cachedPosition;
-  mutable int m_cachedHistogramYIndex{-1};
-  mutable double m_cachedYValue;
+  std::size_t m_numSpectra;
+  double m_integrationRadiusSq;
+  double m_beamRadiusSq;
+  bool m_ignoreDirectBeam;
+  double m_centerXPosCurr{0};
+  double m_centerYPosCurr{0};
+  double m_centerXPosPrev{0};
+  double m_centerYPosPrev{0};
+  // overall range to consider
+  double m_xPosMin{0};
+  double m_xPosMax{0};
+  double m_yPosMin{0};
+  double m_yPosMax{0};
+  // range for current search
+  double m_xBoxMin{0};
+  double m_xBoxMax{0};
+  double m_yBoxMin{0};
+  double m_yBoxMax{0};
 };
 
 } // namespace Algorithms

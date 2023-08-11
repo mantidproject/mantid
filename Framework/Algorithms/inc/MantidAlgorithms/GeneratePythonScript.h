@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/SerialAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -26,7 +26,7 @@ namespace Algorithms {
   @author Peter G Parker, ISIS, RAL
   @date 2011-09-13
 */
-class MANTID_ALGORITHMS_DLL GeneratePythonScript : public API::SerialAlgorithm {
+class MANTID_ALGORITHMS_DLL GeneratePythonScript : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "GeneratePythonScript"; };

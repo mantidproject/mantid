@@ -55,14 +55,7 @@ public:
 public:
   virtual ~ImageInfoModel() = default;
 
-  /** Creates information about the point at the given coordinates in the
-  workspace.
-  @param x: x data coordinate
-  @param y: y data coordinate
-  @param signal: the signal value at x, y
-  @param extraValues: extra values to be displayed in the image info table
-  @return An ImageInfo object
-  */
+  /// Creates information about the point at the given coordinates in the workspace
   virtual ImageInfoModel::ImageInfo info(const double x, const double y, const double signal,
                                          const QMap<QString, QString> &extraValues) const = 0;
 };

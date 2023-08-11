@@ -11,7 +11,7 @@ Description
 
 The algorithm calculates the *MinValues* and *MaxValues* limits
 produced by the :ref:`algm-ConvertToMD` algorithm for three MD transformation possibilities
-namely **CopyToMD**, **|Q|** and **Q3D** [#f1]_. To estimate these limits the algorithm
+namely **CopyToMD**, **|Q|** and **Q3D**. To estimate these limits the algorithm
 uses the following procedure:
 
 -  If **QDimensions** is **CopyToMD** the first value in *MinValues* is going to
@@ -27,13 +27,13 @@ uses the following procedure:
    The maximum momentum transfer is :math:`k_{i}+k_{f}`.
 -  If **QDimensions** is **|Q|**, the first value of the *MinValues* is 0, and
    the first value of *MaxValues* is :math:`Q_{max}`
--  If QDimensions is **Q3D**, and **Q3DFrames** is **Q**, the first three values of
+-  If **QDimensions** is **Q3D**, and **Q3DFrames** is **Q**, the first three values of
    the *MinValues* are :math:`-Q_{max};-Q_{max};-Q_{max}`, and the first three values of
    *MaxValues* are :math:`Q_{max};Q_{max};Q_{max}`
--  If ***QDimensions** is **Q3D**, and **Q3DFrames** is **HKL** the first three values of
+-  If **QDimensions** is **Q3D**, and **Q3DFrames** is **HKL** the first three values of
    the *MinValues* are :math:`-Q_{max}\frac{a}{2\pi};-Q_{max}\frac{b}{2\pi};-Q_{max}\frac{c}{2\pi}`
    and the first three values of *MaxValues* are
-   :math:`Q_{max}\frac{a}{2\pi};Q_{max}\frac{b}{2\pi};Q_{max}\frac{c}{2\pi}` [#f2]_
+   :math:`Q_{max}\frac{a}{2\pi};Q_{max}\frac{b}{2\pi};Q_{max}\frac{c}{2\pi}` [#f1]_
 -  If **QDimensions** is **|Q|** or **Q3D**, and **dEAnalysisMode** is **Elastic** or
    **Inelastic**, the next value in *MinValues* is **dEmin**, and the next value
    in *MaxValues* is **dEmax**

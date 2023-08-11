@@ -538,7 +538,7 @@ void LoadEventPreNexus2::processImbedLogs() {
  * events
  * @param logtitle :: name of the log
  * @param mindex :: index of the log in pulse time ...
- * - mindex:  index of the the series in the list
+ * - mindex:  index of the series in the list
  */
 void LoadEventPreNexus2::addToWorkspaceLog(const std::string &logtitle, size_t mindex) {
   // Create TimeSeriesProperty

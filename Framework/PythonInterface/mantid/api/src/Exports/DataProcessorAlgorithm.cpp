@@ -63,31 +63,9 @@ template <class Base> void do_export(const std::string &name) {
            "Returns the named property manager from the service or creates "
            "a new one if it does not exist")
 
-      .def("assemble", &Adapter::assembleProxy, (arg("self"), arg("partial_wsname"), arg("output_wsname")),
-           "If an MPI build, assemble the partial workspaces from all MPI "
-           "processes. "
-           "Otherwise, simply returns the input workspace")
-
       .def("saveNexus", &Adapter::saveNexusProxy, (arg("self"), arg("output_wsname"), arg("output_filename")),
-           "Save a workspace as a nexus file. If this is an MPI build then "
-           "saving only "
-           "happens for the main thread.")
-
-      .def("isMainThread", &Adapter::isMainThreadProxy, arg("self"),
-           "Returns true if this algorithm is the main thread for an MPI "
-           "build. For "
-           "non-MPI build it always returns true")
-
-      .def("getNThreads", &Adapter::getNThreadsProxy, arg("self"),
-           "Returns the number of running MPI processes in an MPI build or 1 "
-           "for "
-           "a non-MPI build");
+           "Save a workspace as a nexus file");
 }
 } // namespace
 
 void export_DataProcessorAlgorithm() { do_export<Algorithm>("DataProcessorAlgorithm"); }
-void export_SerialDataProcessorAlgorithm() { do_export<SerialAlgorithm>("SerialDataProcessorAlgorithm"); }
-void export_ParallelDataProcessorAlgorithm() { do_export<ParallelAlgorithm>("ParallelDataProcessorAlgorithm"); }
-void export_DistributedDataProcessorAlgorithm() {
-  do_export<DistributedAlgorithm>("DistributedDataProcessorAlgorithm");
-}

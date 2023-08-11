@@ -23,7 +23,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Unit.h"
-#include "MantidParallel/Communicator.h"
 
 namespace Mantid::Algorithms {
 
@@ -381,6 +380,11 @@ void CompareWorkspaces::doComparison() {
   if (getProperty("CheckType")) {
     if ((ews1 && !ews2) || (!ews1 && ews2)) {
       recordMismatch("One workspace is an EventWorkspace and the other is not.");
+      return;
+    } else if (w1 && w2 && (w1->id() != w2->id())) {
+      std::stringstream msg;
+      msg << "Workspace ids do not match: \"" << w1->id() << "\" != \"" << w2->id() << "\"";
+      recordMismatch(msg.str());
       return;
     }
   }
@@ -1022,6 +1026,8 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
       std::string name = col->name();
       double s1 = 0.0;
       double s2 = 0.0;
+      V3D v1(0, 0, 0);
+      V3D v2(0, 0, 0);
       if (name == "RunNumber") {
         s1 = double(peak1.getRunNumber());
         s2 = double(peak2.getRunNumber());
@@ -1064,6 +1070,12 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
       } else if (name == "Col") {
         s1 = peak1.getCol();
         s2 = peak2.getCol();
+      } else if (name == "IntHKL") {
+        v1 = peak1.getIntHKL();
+        v2 = peak2.getIntHKL();
+      } else if (name == "IntMNP") {
+        v1 = peak1.getIntMNP();
+        v2 = peak2.getIntMNP();
       } else {
         g_log.information() << "Column " << name << " is not compared\n";
       }
@@ -1073,6 +1085,12 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
           mismatch = true;
         }
       } else if (std::fabs(s1 - s2) > tolerance) {
+        mismatch = true;
+      } else if (std::fabs(v1[0] - v2[0]) > tolerance) {
+        mismatch = true;
+      } else if (std::fabs(v1[1] - v2[1]) > tolerance) {
+        mismatch = true;
+      } else if (std::fabs(v1[2] - v2[2]) > tolerance) {
         mismatch = true;
       }
       if (mismatch) {
@@ -1329,28 +1347,4 @@ bool CompareWorkspaces::relErr(double x1, double x2, double errorVal) const {
 
   return (num / den > errorVal);
 }
-
-Parallel::ExecutionMode
-CompareWorkspaces::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  using namespace Parallel;
-  if (storageModes.at("Workspace1") == StorageMode::Cloned) {
-    if (storageModes.at("Workspace2") == StorageMode::Cloned)
-      return getCorrespondingExecutionMode(StorageMode::Cloned);
-    if (storageModes.at("Workspace2") == StorageMode::MasterOnly)
-      return getCorrespondingExecutionMode(StorageMode::MasterOnly);
-  }
-  if (storageModes.at("Workspace1") == StorageMode::MasterOnly) {
-    if (storageModes.at("Workspace2") != StorageMode::Distributed)
-      return getCorrespondingExecutionMode(StorageMode::MasterOnly);
-  }
-  return ExecutionMode::Invalid;
-}
-
-void CompareWorkspaces::execMasterOnly() {
-  if (communicator().rank() == 0)
-    exec();
-  else
-    setProperty("Result", true);
-}
-
 } // namespace Mantid::Algorithms

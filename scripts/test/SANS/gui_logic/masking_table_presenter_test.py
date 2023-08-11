@@ -38,7 +38,7 @@ class MaskingTablePresenterTest(unittest.TestCase):
                 masking_information(first="Corners", second="", third="infinite-cylinder, r = 20.0"),
                 masking_information(first="Phi", second="", third="L/PHI -90.0 90.0"),
             ]
-        )  # noqa
+        )
         view.set_table.assert_has_calls([first_call, second_call])
 
     def test_that_checks_display_mask_is_reenabled_after_error(self):

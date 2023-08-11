@@ -261,10 +261,6 @@ void LoadEventNexus::init() {
   loadType.emplace_back("Multiprocess (experimental)");
 #endif // _WIN32
 
-#ifdef MPI_EXPERIMENTAL
-  loadType.emplace_back("MPI");
-#endif // MPI_EXPERIMENTAL
-
   auto loadTypeValidator = std::make_shared<StringListValidator>(loadType);
   declareProperty("LoadType", "Default", loadTypeValidator,
                   "Set type of loader. 2 options {Default, Multiproceess},"
@@ -827,7 +823,7 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs<EventWorkspaceC
   return ret;
 }
 
-enum class LoadEventNexus::LoaderType { MPI, MULTIPROCESS, DEFAULT };
+enum class LoadEventNexus::LoaderType { MULTIPROCESS, DEFAULT };
 
 //-----------------------------------------------------------------------------
 /**
@@ -1115,45 +1111,33 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
 
   bool loaded{false};
   auto loaderType = defineLoaderType(haveWeights, oldNeXusFileNames, classType);
-  if (loaderType != LoaderType::DEFAULT) {
+  if (loaderType == LoaderType::MULTIPROCESS) {
     auto ws = m_ws->getSingleHeldWorkspace();
     m_file->close();
-    if (loaderType == LoaderType::MPI) {
-      try {
-        ParallelEventLoader::loadMPI(*ws, m_filename, m_top_entry_name, bankNames, event_id_is_spec);
-        g_log.information() << "Used MPI ParallelEventLoader.\n";
-        loaded = true;
-        shortest_tof = 0.0;
-        longest_tof = 1e10;
-      } catch (const std::runtime_error &) {
-        g_log.warning() << "MPI event loader failed, falling back to default loader.\n";
-      }
-    } else {
 
-      struct ExceptionOutput {
-        static void out(decltype(g_log) &log, const std::exception &except, int level = 0) {
-          log.warning() << std::string(level, ' ') << "exception: " << except.what() << '\n';
-          try {
-            std::rethrow_if_nested(except);
-          } catch (const std::exception &e) {
-            ExceptionOutput::out(log, e, level + 1);
-          } catch (...) {
-          }
+    struct ExceptionOutput {
+      static void out(decltype(g_log) &log, const std::exception &except, int level = 0) {
+        log.warning() << std::string(level, ' ') << "exception: " << except.what() << '\n';
+        try {
+          std::rethrow_if_nested(except);
+        } catch (const std::exception &e) {
+          ExceptionOutput::out(log, e, level + 1);
+        } catch (...) {
         }
-      };
-
-      try {
-        ParallelEventLoader::loadMultiProcess(*ws, m_filename, m_top_entry_name, bankNames, event_id_is_spec,
-                                              getProperty("Precount"));
-        g_log.information() << "Used Multiprocess ParallelEventLoader.\n";
-        loaded = true;
-        shortest_tof = 0.0;
-        longest_tof = 1e10;
-      } catch (const std::exception &e) {
-        ExceptionOutput::out(g_log, e);
-        g_log.warning() << "\nMultiprocess event loader failed, falling back "
-                           "to default loader.\n";
       }
+    };
+
+    try {
+      ParallelEventLoader::loadMultiProcess(*ws, m_filename, m_top_entry_name, bankNames, event_id_is_spec,
+                                            getProperty("Precount"));
+      g_log.information() << "Used Multiprocess ParallelEventLoader.\n";
+      loaded = true;
+      shortest_tof = 0.0;
+      longest_tof = 1e10;
+    } catch (const std::exception &e) {
+      ExceptionOutput::out(g_log, e);
+      g_log.warning() << "\nMultiprocess event loader failed, falling back "
+                         "to default loader.\n";
     }
 
     safeOpenFile(m_filename);
@@ -1392,7 +1376,7 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
 void LoadEventNexus::createSpectraMapping(const std::string &nxsfile, const bool monitorsOnly,
                                           const std::vector<std::string> &bankNames) {
   LoadEventNexusIndexSetup indexSetup(m_ws->getSingleHeldWorkspace(), getProperty("SpectrumMin"),
-                                      getProperty("SpectrumMax"), getProperty("SpectrumList"), communicator());
+                                      getProperty("SpectrumMax"), getProperty("SpectrumList"));
   if (!monitorsOnly && !bankNames.empty()) {
     if (!isDefault("SpectrumMin") || !isDefault("SpectrumMax") || !isDefault("SpectrumList"))
       g_log.warning() << "Spectrum min/max/list selection ignored when "
@@ -1647,16 +1631,6 @@ LoadEventNexus::LoaderType LoadEventNexus::defineLoaderType(const bool haveWeigh
 
   if (!noParallelConstrictions)
     return LoaderType::DEFAULT;
-#ifndef MPI_EXPERIMENTAL
   return LoaderType::MULTIPROCESS;
-#else
-  return propVal == "MPI" ? LoaderType::MPI : LoaderType::MULTIPROCESS;
-#endif
-}
-
-Parallel::ExecutionMode
-LoadEventNexus::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  static_cast<void>(storageModes);
-  return Parallel::ExecutionMode::Distributed;
 }
 } // namespace Mantid::DataHandling

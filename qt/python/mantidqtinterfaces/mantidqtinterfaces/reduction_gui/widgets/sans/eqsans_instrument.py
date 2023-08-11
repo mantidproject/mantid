@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from qtpy.QtWidgets import QButtonGroup, QDialog, QFileDialog, QFrame  # noqa
-from qtpy.QtGui import QDoubleValidator, QIntValidator  # noqa
+from qtpy.QtWidgets import QButtonGroup, QDialog, QFileDialog, QFrame
+from qtpy.QtGui import QDoubleValidator, QIntValidator
 import mantidqtinterfaces.reduction_gui.widgets.util as util
 import os
 from reduction_gui.reduction.sans.eqsans_options_script import ReductionOptions

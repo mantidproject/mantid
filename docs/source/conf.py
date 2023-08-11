@@ -52,7 +52,7 @@ if LooseVersion(sphinx_version) > LooseVersion("1.6"):
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    # we use pngmath over mathjax so that the the offline help isn't reliant on
+    # we use pngmath over mathjax so that the offline help isn't reliant on
     # anything external and we don't need to include the large mathjax package
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",

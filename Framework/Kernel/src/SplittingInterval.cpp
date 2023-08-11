@@ -55,6 +55,13 @@ bool SplittingInterval::operator==(const SplittingInterval &ti) const {
   }
 }
 
+std::string SplittingInterval::debugStrPrint() const {
+  std::stringstream ss;
+  ss << this->begin_str() << " to " << this->end_str();
+  ss << " index: " << index();
+  ss << std::endl;
+  return ss.str();
+}
 //------------------------------------------------------------------------------------------------
 /** Return true if the SplittingIntervalVec provided is a filter,
  * meaning that it only has an output index of 0.

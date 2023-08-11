@@ -40,7 +40,7 @@ obtained when the minimizers fail to produce any result and are shown
 in the detailed results as "nan". For the more difficult groups of
 problems the proportion of undefined values is higher for some
 minimizers. This can bias the statistics shown in the summary table in
-favor of the minimizers that fail more often, as some of the the hard
+favor of the minimizers that fail more often, as some of the hard
 problems are excluded from the median instead of contributing to a
 higher median (lower ranking).
 

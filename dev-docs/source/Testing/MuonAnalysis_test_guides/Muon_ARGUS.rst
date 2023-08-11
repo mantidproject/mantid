@@ -34,7 +34,7 @@ Single Pulse Test
      - click **Guess Alpha**, should get ``0.95``
 - Load the next run
 - Go to the **Fitting** tab
-     - Add a **StaticKuboToyabeTimeExpDecay** and **FlatBackground**
+     - Add a **StaticKuboToyabeTimesExpDecay** and **FlatBackground**
      - Click the **Fit** button
 - Expected Values are (similar):
 	- **A:** ``0.13``
@@ -58,7 +58,7 @@ This users the same sample as the single pulse test
      - click **Guess Alpha**, should get ``0.93``
 - Load the next run
 - Go to the **Fitting** tab
-     - Add a **StaticKuboToyabeTimeExpDecay** and **FlatBackground**
+     - Add a **StaticKuboToyabeTimesExpDecay** and **FlatBackground**
      - click the **Fit** button
 - Expected Values are (similar):
 	- **A:** ``0.12``
@@ -75,7 +75,6 @@ This users the same sample as the single pulse test
 	- Click **Guess Alpha**, should get ``0.91``
 - Load the next run
 - Go to the **Fitting** tab
-	- Add a **StaticKuboToyabeTimeExpDecay** and **FlatBackground**
 	- Click the **Fit** button
 - Expected Values are (similar):
 	- **A:** ``0.12``

@@ -78,7 +78,7 @@ pipeline {
       }
     }
     // Store the git commit hash in an environment variable so that we can use
-    // the same commit for all stages of the pipeline. This is perfomed by using
+    // the same commit for all stages of the pipeline. This is performed by using
     // the following step at the start of each subsequent stage:
     //   checkout scm: [$class: 'GitSCM', branches: [[name: "${GIT_SHA}"]], extensions: [[pruneTags: true]]]
     stage('Store git commit') {
@@ -92,86 +92,175 @@ pipeline {
     // Verify developer environment build/test while also building conda packages
     // in parallel. Running both steps in parallel reduces the overall pipeline
     // time, however if either part breaks then no publishing occurs.
-    stage('Build/Test: Development, Package: Conda') {
-      matrix {
-        axes {
-          // See the agent label above when changing these. They will need to
-          // match labels on the agents
-          axis {
-            name 'PLATFORM'
-            values 'linux-64', 'win-64', 'osx-64'
+    stage('Build and test, Conda packaging') {
+      parallel {
+        stage('build and test: linux-64') {
+          when {
+            beforeAgent true
+            beforeOptions true
+              anyOf {
+                expression { env.BUILD_DEVEL == 'all' }
+                expression { env.BUILD_DEVEL == 'linux-64' }
+            }
           }
-          axis {
-            name 'BUILD_TYPE'
-            values 'conda-devel', 'conda-release'
+          agent { label 'linux-64' }
+          options { timestamps () }
+          steps {
+            checkoutSource("${GIT_SHA}")
+            build_and_test('linux-64')
+          }
+          post {
+            always {
+              archive_ctest_log()
+              publish_test_reports()
+            }
           }
         }
-        stages {
-          stage('build and test') {
-            when {
-              beforeAgent true
-              beforeOptions true
-              allOf {
-                expression { env.BUILD_TYPE == 'conda-devel' }
-                anyOf {
-                  expression { env.BUILD_DEVEL == 'all' }
-                  expression { env.BUILD_DEVEL == "${PLATFORM}" }
-                }
-              }
-            }
-            agent { label "${PLATFORM}" }
-            options { timestamps () }
-            steps {
-              checkoutSource("${GIT_SHA}")
-              build_and_test("${PLATFORM}")
-            }
-            post {
-              always {
-                archive_ctest_log()
-                publish_test_reports()
-              }
+        stage('build and test: win-64') {
+          when {
+            beforeAgent true
+            beforeOptions true
+            anyOf {
+              expression { env.BUILD_DEVEL == 'all' }
+              expression { env.BUILD_DEVEL == 'win-64' }
             }
           }
-          stage('package conda') {
-            when {
-              beforeAgent true
-              beforeOptions true
-              allOf {
-                environment name: 'BUILD_TYPE', value: 'conda-release'
-                // Messy part of the pipeline. We build mantiddocs (noarch) on
-                // Linux but this is needed to package up mantidworkbench version so
-                // we pick the simple option of always building the linux one
-                anyOf {
-                  expression { env.PLATFORM.startsWith('linux') }
-                  expression { env.BUILD_PACKAGE == "${PLATFORM}" }
-                  expression { env.BUILD_PACKAGE == 'all' }
-                }
-              }
+          agent { label 'win-64' }
+          options { timestamps () }
+          steps {
+            checkoutSource("${GIT_SHA}")
+            build_and_test('win-64')
+          }
+          post {
+            always {
+              archive_ctest_log()
+              publish_test_reports()
+              // Workaround for Windows so that failing system tests will fail the build
+              bat "\"${WIN_BASH}\" -ex -c \"test ${currentBuild.currentResult} != UNSTABLE\""
             }
-            agent { label "${PLATFORM}" }
-            options {
-                timestamps ()
-                retry(3)
+          }
+        }
+        stage('build and test: osx-64') {
+          when {
+            beforeAgent true
+            beforeOptions true
+              anyOf {
+                expression { env.BUILD_DEVEL == 'all' }
+                expression { env.BUILD_DEVEL == 'osx-64' }
             }
-            steps {
-              // Clean up conda-bld before we start to avoid any
-              // confusion with old packages
-              dir('conda-bld') {
-                 deleteDir()
-              }
-              checkoutSource("${GIT_SHA}")
-              // Build the base set of packages (ones not required for mantidworkbench)
-              // in parallel
-              package_conda("${PLATFORM}", "base")
-              archive_env_logs("${PLATFORM}")
-              archive_conda_packages("${PLATFORM}", false)
-              archive_conda_packages("noarch", true)
+          }
+          agent { label 'osx-64' }
+          options { timestamps () }
+          steps {
+            checkoutSource("${GIT_SHA}")
+            build_and_test('osx-64')
+          }
+          post {
+            always {
+              archive_ctest_log()
+              publish_test_reports()
+            }
+          }
+        }
+        stage('package conda: linux-64') {
+          when {
+            beforeAgent true
+            beforeOptions true
+            // The mantiddocs package is built on linux so we always need to build the linux
+            // conda packages unless 'none' is specified.
+            expression { env.BUILD_PACKAGE != 'none' }
+          }
+          agent { label 'linux-64' }
+          options {
+              timestamps ()
+              retry(3)
+          }
+          steps {
+            // Clean up conda-bld before we start to avoid any
+            // confusion with old packages
+            dir('conda-bld') {
+               deleteDir()
+            }
+            checkoutSource("${GIT_SHA}")
+            // Build the base set of packages (ones not required for mantidworkbench)
+            // in parallel
+            package_conda('linux-64', 'base')
+            archive_conda_packages('linux-64')
+            archive_conda_packages('noarch')
+          }
+          post {
+            always {
+              archive_env_logs('linux-64')
+            }
+          }
+        }
+        stage('package conda: win-64') {
+          when {
+            beforeAgent true
+            beforeOptions true
+            anyOf {
+              expression { env.BUILD_PACKAGE == 'win-64' }
+              expression { env.BUILD_PACKAGE == 'all' }
+            }
+          }
+          agent { label 'win-64' }
+          options {
+              timestamps ()
+              retry(3)
+          }
+          steps {
+            // Clean up conda-bld before we start to avoid any
+            // confusion with old packages
+            dir('conda-bld') {
+               deleteDir()
+            }
+            checkoutSource("${GIT_SHA}")
+            // Build the base set of packages (ones not required for mantidworkbench)
+            // in parallel
+            package_conda('win-64', 'base')
+            archive_conda_packages('win-64')
+          }
+          post {
+            always {
+              archive_env_logs('win-64')
+            }
+          }
+        }
+        stage('package conda: osx-64') {
+          when {
+            beforeAgent true
+            beforeOptions true
+            anyOf {
+              expression { env.BUILD_PACKAGE == 'osx-64' }
+              expression { env.BUILD_PACKAGE == 'all' }
+            }
+          }
+          agent { label 'osx-64' }
+          options {
+              timestamps ()
+              retry(3)
+          }
+          steps {
+            // Clean up conda-bld before we start to avoid any
+            // confusion with old packages
+            dir('conda-bld') {
+               deleteDir()
+            }
+            checkoutSource("${GIT_SHA}")
+            // Build the base set of packages (ones not required for mantidworkbench)
+            // in parallel
+            package_conda('osx-64', 'base')
+            archive_conda_packages('osx-64')
+          }
+          post {
+            always {
+              archive_env_logs('osx-64')
             }
           }
         }
       }
     }
-    stage('Package: Workbench') {
+    stage('Package workbench') {
       matrix {
         axes {
           axis {
@@ -180,7 +269,7 @@ pipeline {
           }
         }
         stages {
-          stage('') {
+          stage('package workbench') {
             when {
               beforeAgent true
               beforeOptions true
@@ -208,11 +297,16 @@ pipeline {
                 selector: specific('${BUILD_NUMBER}'),
                 target: './',
                 flatten: false
+
               package_conda("${PLATFORM}", "workbench")
-              archive_env_logs("${PLATFORM}")
-              archive_conda_packages("${PLATFORM}", false)
+              archive_conda_packages("${PLATFORM}")
               package_standalone()
               archive_standalone_package("${PLATFORM}")
+            }
+            post {
+              always {
+                archive_env_logs("${PLATFORM}")
+              }
             }
           }
         }
@@ -249,6 +343,25 @@ pipeline {
       }
     }
 
+    stage ('Delete old non-main packages from Anaconda') {
+      when {
+        beforeAgent true
+        beforeOptions true
+        allOf {
+            expression { env.PUBLISH_PACKAGES == 'true' }
+            expression { env.ANACONDA_CHANNEL_LABEL != '' }
+        }
+      }
+      agent { label 'linux-64' } // Use linux for simplicity with shell scripts
+      options { timestamps () }
+      environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
+      steps {
+        checkoutSource("${GIT_SHA}")
+        sh "${CISCRIPT_DIR}/delete-old-packages.sh ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
+         "--channel mantid --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench"
+      }
+    }
+
     stage ('Publishing to Github') {
       when {
         beforeAgent true
@@ -279,25 +392,6 @@ pipeline {
         // Single quotes are required for token variables to avoid them leaking
         sh "${CISCRIPT_DIR}/publish-to-github ${WORKSPACE}" + ' ${GITHUB_TOKEN} ' +\
           "${GITHUB_RELEASES_REPO} ${generate_git_tag()} ${GIT_SHA} ${prerelease_option()} ${WORKSPACE}/standalone-packages/*"
-        }
-    }
-
-    stage ('Delete old non-main packages from Anaconda') {
-      when {
-        beforeAgent true
-        beforeOptions true
-        allOf {
-            expression { env.PUBLISH_PACKAGES == 'true' }
-            expression { env.ANACONDA_CHANNEL_LABEL != '' }
-        }
-      }
-      agent { label 'linux-64' } // Use linux for simplicity with shell scripts
-      options { timestamps () }
-      environment { ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}") }
-      steps {
-        checkoutSource("${GIT_SHA}")
-        sh "${CISCRIPT_DIR}/delete-old-packages.sh ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
-         "--channel mantid --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench"
       }
     }
   }
@@ -322,7 +416,15 @@ def toUnixStylePath(path) {
 
 def checkoutSource(sha) {
   dir(CHECKOUT_DIR) {
-    checkout scm: [$class: 'GitSCM', branches: [[name: sha]], extensions: [[$class: 'CleanCheckout', deleteUntrackedNestedRepositories: true], pruneTags(true)]]
+    checkout scm: [
+      $class: 'GitSCM',
+      branches: [[name: sha]],
+      extensions: [
+        [$class: 'CheckoutOption', timeout: 20],
+        [$class: 'CleanCheckout', deleteUntrackedNestedRepositories: true],
+        pruneTags(true)
+      ]
+    ]
   }
 }
 
@@ -335,7 +437,7 @@ def build_and_test(platform) {
     bat "\"${WIN_BASH}\" -ex -c \"${buildscript_path}\
       ${workspace_unix_style}/${CHECKOUT_DIR} ${cmake_preset} ${common_args}\""
   } else {
-    sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} --enable-doctests"
+    sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} --enable-doctests --use-core-dumps"
   }
 }
 
@@ -424,9 +526,9 @@ def prerelease_option() {
   return prerelease_flag
 }
 
-def archive_conda_packages(platform, allowEmpty) {
+def archive_conda_packages(platform) {
   archiveArtifacts artifacts: "**/conda-bld/${platform}/*.tar.bz2",
-    allowEmptyArchive: allowEmpty,
+    allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: true
 }
@@ -457,7 +559,7 @@ def archive_ctest_log(){
 
 def archive_env_logs(platform) {
   env_log_dir = "**/conda-bld/${platform}/env_logs"
-  archiveArtifacts artifacts: env_log_dir += "/**/*.*",
+  archiveArtifacts artifacts: env_log_dir += "/**/*.txt",
     allowEmptyArchive: false,
     fingerprint: true,
     onlyIfSuccessful: false

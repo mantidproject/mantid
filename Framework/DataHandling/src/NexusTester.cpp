@@ -60,7 +60,7 @@ void NexusTester::init() {
   declareProperty("FakeData", "Incrementing Numbers", std::make_shared<StringListValidator>(types),
                   "For writing: type of fake data to generate.");
 
-  declareProperty("CompressionFactor", 0.0, "The size of the file divided by the the size of the data on disk.",
+  declareProperty("CompressionFactor", 0.0, "The size of the file divided by the size of the data on disk.",
                   Direction::Output);
   declareProperty("SaveSpeed", 0.0, "The measured rate of saving the file, in MB (of data)/sec.", Direction::Output);
   declareProperty("LoadSpeed", 0.0, "The measured rate of loading the file, in MB (of data)/sec.", Direction::Output);

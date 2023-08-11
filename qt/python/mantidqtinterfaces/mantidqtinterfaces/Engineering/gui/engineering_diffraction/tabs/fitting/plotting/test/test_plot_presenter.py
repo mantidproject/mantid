@@ -158,6 +158,17 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.presenter.set_final_state_progress_bar(output_list=None, status="success")
         self.view.set_progress_bar.assert_has_calls([self.call_success])
 
+    def test_setup_toolbar(self):
+        # Get's called during setup, so let's begin with a blank slate.
+        self.view.reset_mock()
+
+        self.presenter.setup_toolbar()
+
+        self.view.set_slot_for_display_all.assert_called_once()
+        self.view.set_slot_for_fit_toggled.assert_called_once_with(self.presenter.fit_toggle)
+        self.view.set_slot_for_serial_fit.assert_called_once_with(self.presenter.do_serial_fit)
+        self.view.set_slot_for_seq_fit.assert_called_once_with(self.presenter.do_seq_fit)
+
     def test_hide_toolbar_fit_toggle(self):
         self.view.is_fit_browser_visible.return_value = True
         self.presenter.fit_toggle()

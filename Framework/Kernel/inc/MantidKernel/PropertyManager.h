@@ -21,6 +21,7 @@ namespace Kernel {
 //----------------------------------------------------------------------
 class SplittingInterval;
 template <typename T> class TimeSeriesProperty;
+class TimeROI;
 
 /**
  Property manager helper class.
@@ -56,6 +57,12 @@ public:
 
   void filterByProperty(const TimeSeriesProperty<bool> &filter,
                         const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>()) override;
+
+  // Create a new PropertyManager with a partial copy of its time series properties according to TimeROI
+  PropertyManager *cloneInTimeROI(const Kernel::TimeROI &timeROI);
+
+  // For the time series properties, remove values according to TimeROI
+  void removeDataOutsideTimeROI(const Kernel::TimeROI &timeROI);
 
   virtual ~PropertyManager() override;
 

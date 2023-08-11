@@ -187,7 +187,6 @@ void LoadILLLagrange::loadMetaData() {
 /**
  * Initializes the output workspace for LAGRANGE
  * @param dataset : dataset to be loaded into the returned workspace
- * @return : workspace with the correct data dimensions
  */
 void LoadILLLagrange::initWorkspace(const H5::DataSet &dataset) {
   // The number of spectra is always 1 + 1 monitor, for consistency with ASCII data loader

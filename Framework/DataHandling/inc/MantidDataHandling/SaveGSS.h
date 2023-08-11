@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
@@ -53,7 +53,7 @@ namespace DataHandling {
      @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
      @date 04/03/2009
   */
-class MANTID_DATAHANDLING_DLL SaveGSS : public Mantid::API::SerialAlgorithm {
+class MANTID_DATAHANDLING_DLL SaveGSS : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SaveGSS"; }

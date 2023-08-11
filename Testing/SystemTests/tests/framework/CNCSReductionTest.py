@@ -45,7 +45,7 @@ class CNCSReductionTest(systemtesting.MantidSystemTest):
 
         config["default.facility"] = "SNS"
         Load(Filename="CNCS_23936-23937", OutputWorkspace="sum")
-        GenerateGroupingPowder(InputWorkspace="sum", AngleStep=0.5, GroupingFilename=self.groupingFile)
+        GenerateGroupingPowder(InputWorkspace="sum", GroupingWorkspace="gws", AngleStep=0.5, GroupingFilename=self.groupingFile)
         Ei = mtd["sum"].getRun()["EnergyRequest"].firstValue()
         tib = CNCSSuggestTIB(Ei)
 

@@ -1,1 +1,0 @@
-- The Signal, Transmission, and Background ROI selectors on the Preview Tab have been made more visible.

@@ -30,7 +30,7 @@ void CreateSingleValuedWorkspace::exec() {
   double dataValue = getProperty("DataValue");
   double errorValue = getProperty("ErrorValue");
 
-  Indexing::IndexInfo indexInfo(1, Parallel::StorageMode::Cloned, communicator());
+  Indexing::IndexInfo indexInfo(1);
   auto singleValued = DataObjects::create<DataObjects::WorkspaceSingleValue>(indexInfo, HistogramData::Points(1));
 
   singleValued->mutableX(0)[0] = 0.0;
@@ -39,11 +39,4 @@ void CreateSingleValuedWorkspace::exec() {
 
   setProperty("OutputWorkspace", std::move(singleValued));
 }
-
-Parallel::ExecutionMode CreateSingleValuedWorkspace::getParallelExecutionMode(
-    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  static_cast<void>(storageModes);
-  return Parallel::ExecutionMode::Identical;
-}
-
 } // namespace Mantid::Algorithms

@@ -717,9 +717,7 @@ void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
 /**
  * @param experiment A reference to the experiment to be affected
  * @param args The user-supplied dictionary of flags
- * @param sampleEnv A pointer to the sample environment if one exists, otherwise
- * null
- * @return A string containing the XML definition of the shape
+ * @param sampleEnv A pointer to the sample environment if one exists, otherwise null
  */
 void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::PropertyManager_const_sptr &args,
                                const Geometry::SampleEnvironment *sampleEnv) {

@@ -729,14 +729,4 @@ API::WorkspaceGroup_sptr Load::groupWsList(const std::vector<API::Workspace_sptr
 
   return group;
 }
-
-Parallel::ExecutionMode
-Load::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  static_cast<void>(storageModes);
-  // The actually relevant execution mode is that of the underlying loader. Here
-  // we simply default to ExecutionMode::Distributed to guarantee that the
-  // normal exec() is being run on all ranks.
-  return Parallel::ExecutionMode::Distributed;
-}
-
 } // namespace Mantid::DataHandling

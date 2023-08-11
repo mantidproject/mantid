@@ -257,12 +257,14 @@ Component Overviews
 .. toctree::
    :maxdepth: 1
 
-   AlgorithmMPISupport
    BatchWidget/index
+   EnumeratedString
    EventWorkspaceDev
    HandlingXML
    IndexProperty
+   IndirectDataAnalysisAddingFitType
    IndirectDataAnalysisFileStructure
+   InelasticDataManipulationFileStructure
    InstrumentViewer
    ISISReflectometryInterface
    ISISSANSReductionBackend

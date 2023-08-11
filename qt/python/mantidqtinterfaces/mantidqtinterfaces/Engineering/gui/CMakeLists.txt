@@ -3,6 +3,8 @@
 set(TEST_PY_FILES
     # Common
     engineering_diffraction/tabs/common/test/test_vanadium_corrections.py
+    engineering_diffraction/tabs/common/data_handling/test/test_data_model.py
+    engineering_diffraction/tabs/common/data_handling/test/test_data_presenter.py
     # Cropping
     engineering_diffraction/tabs/common/cropping/test/test_cropping_model.py
     engineering_diffraction/tabs/common/cropping/test/test_cropping_presenter.py
@@ -15,8 +17,6 @@ set(TEST_PY_FILES
     engineering_diffraction/tabs/calibration/test/test_calib_presenter.py
     # Fitting
     engineering_diffraction/tabs/fitting/test/test_presenter.py
-    engineering_diffraction/tabs/fitting/data_handling/test/test_data_model.py
-    engineering_diffraction/tabs/fitting/data_handling/test/test_data_presenter.py
     engineering_diffraction/tabs/fitting/plotting/test/test_plot_presenter.py
     engineering_diffraction/tabs/fitting/plotting/test/test_plot_model.py
     # Focus

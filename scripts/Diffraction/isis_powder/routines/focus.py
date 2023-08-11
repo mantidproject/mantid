@@ -314,13 +314,21 @@ def _perform_absolute_normalization(spline, ws):
     v_number_density = vanadium_material.numberDensityEffective
     v_cross_section = vanadium_material.totalScatterXSection()
     vanadium_shape = spline.sample().getShape()
-    # number density in Angstroms-3, volume in m3. Don't bother with 1E30 factor because will cancel
-    num_v_atoms = vanadium_shape.volume() * v_number_density
+    try:
+        # number density in Angstroms-3, volume in m3. Don't bother with 1E30 factor because will cancel
+        num_v_atoms = vanadium_shape.volume() * v_number_density
+    except RuntimeError as exception:
+        raise RuntimeError("Please set a valid shape on the vanadium workspace.") from exception
 
     sample_material = ws.sample().getMaterial()
     sample_number_density = sample_material.numberDensityEffective
-    sample_shape = spline.sample().getShape()
-    num_sample_atoms = sample_shape.volume() * sample_number_density
+    sample_shape = ws.sample().getShape()
+
+    try:
+        # number density in Angstroms-3, volume in m3. Don't bother with 1E30 factor because will cancel
+        num_sample_atoms = sample_shape.volume() * sample_number_density
+    except RuntimeError as exception:
+        raise RuntimeError("Absolute unit normalization cannot be done without a sample material and shape/volume defined.") from exception
 
     abs_norm_factor = v_cross_section * num_v_atoms / (num_sample_atoms * 4 * math.pi)
     logger.notice("Performing absolute normalisation, multiplying by factor=" + str(abs_norm_factor))
@@ -337,7 +345,14 @@ def _normalize_one_spectrum(single_spectrum_ws, vanadium_ws, instrument):
         # crop based off max between 1000 and 2000 tof as the vanadium peak on Gem will always occur here
         complete = _crop_vanadium_to_percent_of_max(rebinned_vanadium, values_replaced, single_spectrum_ws, 1000, 2000)
     else:
-        complete = mantid.ReplaceSpecialValues(InputWorkspace=divided, NaNValue=0, InfinityValue=0.0, OutputWorkspace=single_spectrum_ws)
+        complete = mantid.ReplaceSpecialValues(
+            InputWorkspace=divided,
+            NaNValue=0,
+            InfinityValue=0.0,
+            BigNumberThreshold=1e13,
+            SmallNumberThreshold=-1e13,
+            OutputWorkspace=single_spectrum_ws,
+        )
 
     if instrument.perform_abs_vanadium_norm():
         complete = _perform_absolute_normalization(rebinned_vanadium, complete)

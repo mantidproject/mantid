@@ -120,9 +120,6 @@ void AnnularRingAbsorption::attachSample(MatrixWorkspace_sptr &workspace) {
   runSetSampleMaterial(workspace);
 }
 
-/**
- * @return Creates a new shape object for the sample
- */
 void AnnularRingAbsorption::runCreateSampleShape(API::MatrixWorkspace_sptr &workspace) {
   auto inst = workspace->getInstrument();
   auto refFrame = inst->getReferenceFrame();
@@ -203,7 +200,8 @@ const std::string AnnularRingAbsorption::cylinderXML(const std::string &id, cons
 }
 
 /**
- * @return Attaches a new Material object to the sample
+ * Attaches a new Material object to the sample
+ * @param workspace :: The workspace to attach the Material object to
  */
 void AnnularRingAbsorption::runSetSampleMaterial(API::MatrixWorkspace_sptr &workspace) {
   bool childLog = g_log.is(Logger::Priority::PRIO_DEBUG);

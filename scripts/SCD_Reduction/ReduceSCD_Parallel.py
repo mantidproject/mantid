@@ -23,7 +23,7 @@
 # the configuration file for the ReduceSCD_OneRun.py script, and that that
 # script will properly reduce one scd run.  Once a single run can be properly
 # reduced, set the additional parameters in the configuration file that specify
-# how the the list of runs will be processed in parallel.
+# how the list of runs will be processed in parallel.
 #
 
 #
@@ -46,7 +46,7 @@ import threading
 import time
 import ReduceDictionary
 
-sys.path.append("/opt/mantidnightly/bin")  # noqa
+sys.path.append("/opt/mantidnightly/bin")
 # sys.path.append("/opt/Mantid/bin")
 
 from mantid.simpleapi import *

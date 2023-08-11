@@ -493,7 +493,13 @@ class SNAPReduce(DataProcessorAlgorithm):
     def _loadMetaWS(self, runnumber):
         # currently only event nexus files are supported
         wsname = "__meta_SNAP_{}".format(runnumber)
-        LoadEventNexus(Filename="SNAP" + str(runnumber), OutputWorkspace=wsname, MetaDataOnly=True, LoadLogs=False)
+        LoadEventNexus(
+            Filename="SNAP" + str(runnumber),
+            OutputWorkspace=wsname,
+            MetaDataOnly=True,
+            NumberOfBins=1,
+            AllowList="det_arc1,det_arc2,det_lin1,det_lin2",
+        )
         return wsname
 
     def _alignAndFocus(self, filename, wkspname, detCalFilename, withUnfocussed, progStart, progDelta):
@@ -543,7 +549,6 @@ class SNAPReduce(DataProcessorAlgorithm):
         return wkspname, unfocussed
 
     def PyExec(self):
-
         if self.getProperty("EnableConfigurator").value:
             self._create_and_save_configuration()
             return  # do not carry out the reduction
@@ -716,7 +721,7 @@ class SNAPReduce(DataProcessorAlgorithm):
                 propprefix = "OutputWorkspace_{:d}_".format(i)
                 propNames = [propprefix + it for it in ["d", "norm", "normalizer"]]
                 wkspNames = ["%s_%s_d" % (new_Tag, runnumber), basename + "_red", "%s_%s_normalizer" % (new_Tag, runnumber)]
-                for (propName, wkspName) in zip(propNames, wkspNames):
+                for propName, wkspName in zip(propNames, wkspNames):
                     self._exportWorkspace(propName, wkspName)
 
         if background:
@@ -724,7 +729,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             prefix = "OutputWorkspace_{}".format(len(in_Runs))
             propNames = [prefix + it for it in ["", "_d"]]
             wkspNames = [background, unfocussedBkgd]
-            for (propName, wkspName) in zip(propNames, wkspNames):
+            for propName, wkspName in zip(propNames, wkspNames):
                 self._exportWorkspace(propName, wkspName)
 
     def _create_and_save_configuration(self):

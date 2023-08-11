@@ -286,35 +286,27 @@ class FunctionsTest(unittest.TestCase):
         fig.canvas.manager.superplot.set_bin_mode.assert_called_once_with(False)
 
     def test_create_subplots_axes_shape(self):
-        self._test_subplot_axes_shape_helper(cbar=False)
+        n_plots_to_expected_shape = {1: (1, 1), 2: (1, 2), 9: (3, 3), 10: (3, 4), 15: (4, 4)}
 
-    def test_create_subplots_axes_shape_with_cbar(self):
-        self._test_subplot_axes_shape_helper(cbar=True)
+        for n_plots in n_plots_to_expected_shape:
+            _, axes, _, _ = create_subplots(n_plots)
+            shape = axes.shape
+            expected_shape = n_plots_to_expected_shape[n_plots]
+            self.assertEqual(shape, expected_shape)
 
-    def test_create_subplots_creates_tight_figure(self):
+    def test_create_subplots_creates_tight_figure_by_default(self):
         from matplotlib.layout_engine import TightLayoutEngine
 
-        fig, _, _, _, _ = create_subplots(4)
+        fig, _, _, _ = create_subplots(4)
         layout_engine = fig.get_layout_engine()
         self.assertIsInstance(layout_engine, TightLayoutEngine)
 
-    def test_create_subplots_colour_bar_is_alongside_all_rows(self):
-        _, axes, _, _, cbar_axis = create_subplots(9, add_cbar_axis=True)
-        plots_height = 0
-        cbar_height = cbar_axis.bbox.height
-        for ax in axes[:, 0]:
-            plots_height += ax.bbox.height
+    def test_create_subplots_uses_given_layout_engine(self):
+        from matplotlib.layout_engine import ConstrainedLayoutEngine
 
-        # plots_height will be a bit less because of padding around the plots
-        self.assertLessEqual(plots_height, cbar_height)
-
-    def test_create_subplots_plots_in_colour_bar_column_are_the_same_size(self):
-        _, axes, _, _, _ = create_subplots(4, add_cbar_axis=True)
-        ax1_bbox = axes[0, 0].bbox
-        ax2_bbox = axes[0, 1].bbox
-
-        self.assertAlmostEqual(ax1_bbox.height, ax2_bbox.height, delta=0.01)
-        self.assertAlmostEqual(ax1_bbox.width, ax2_bbox.width, delta=0.01)
+        fig, _, _, _ = create_subplots(4, layout_engine="constrained")
+        layout_engine = fig.get_layout_engine()
+        self.assertIsInstance(layout_engine, ConstrainedLayoutEngine)
 
     # ------------- Failure tests -------------
     def test_that_manage_workspace_names_raises_on_mix_of_workspaces_and_names(self):
@@ -337,21 +329,6 @@ class FunctionsTest(unittest.TestCase):
             self.assertEqual(ax.get_xlabel(), err_ax.get_xlabel())
             # Compare title
             self.assertEqual(ax.get_title(), err_ax.get_title())
-
-    def _test_subplot_axes_shape_helper(self, cbar):
-        n_plots_to_correct_shape = {1: (1, 1), 2: (1, 2), 9: (3, 3), 10: (3, 4), 15: (4, 4)}
-
-        for n_plots in n_plots_to_correct_shape:
-            (
-                _,
-                axes,
-                _,
-                _,
-                _,
-            ) = create_subplots(n_plots, add_cbar_axis=cbar)
-            shape = axes.shape
-            expected_shape = n_plots_to_correct_shape[n_plots]
-            self.assertEqual(shape, expected_shape)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include <memory>
 namespace Mantid {
@@ -32,7 +32,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 25/08/2008
 */
-class MANTID_ALGORITHMS_DLL NormaliseByCurrent : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL NormaliseByCurrent : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "NormaliseByCurrent"; }

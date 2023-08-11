@@ -42,7 +42,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         return mtd[tmp_ws_name].getInstrument()
 
     def test_init_reducer(self):
-
         propman = self.prop_man
 
         self.assertEqual(propman.deltaE_mode, "direct")
@@ -289,7 +288,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue("spe" in formats)
 
     def test_allowed_values(self):
-
         propman = self.prop_man
         nm = propman.normalise_method
         self.assertEqual(nm, "monitor-1")
@@ -451,7 +449,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(propman.TestParam3, "initial2")
         changes = propman.getChangedProperties()
         self.assertTrue("TestParam2" in changes)
-        self.assertTrue(not ("TestParam3" in changes))
+        self.assertTrue("TestParam3" not in changes)
 
         changes = propman.update_defaults_from_instrument(ws.getInstrument())
 
@@ -527,7 +525,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(ei_spec[1], 5506)
 
     def test_set_energy_bins_and_ei(self):
-
         propman = self.prop_man
 
         propman.incident_energy = 20
@@ -616,7 +613,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertFalse(propman.energy_bins)
 
     def test_multirep_ei_iterate_over(self):
-
         propman = self.prop_man
         propman.incident_energy = 20
         propman.energy_bins = [-2, 0.1, 0.8]
@@ -1108,7 +1104,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(err_list["missing_runs_toSum"], "[11111]")
 
     def test_custom_print(self):
-
         propman = self.prop_man
         propman.sample_run = 1000
         propman.incident_energy = 20.0
