@@ -217,6 +217,117 @@ class BayesStretch2Test(object):
         else:
             return self._sample_ws, self._N_hist
 
+    def exec_setup(self, fit_ws, results):
+        self._alg.setProperty("Emax", 0.3)
+        self._alg.setProperty("Emin", -0.3)
+        self._alg.setProperty("Elastic", True)
+        self._alg.setProperty("Background", "Linear")
+        self._alg.setProperty("SampleWorkspace", self._sample_ws.name())
+        self._alg.setProperty("ResolutionWorkspace", self._res_ws)
+        self._alg.setProperty("OUTPUTWORKSPACEFIT", "out")
+        self._alg.setProperty("OutputWorkspaceContour", "contour")
+
+        # check if we need these here
+        self._alg.point_data = mock.Mock(side_effect=self.point_mock)
+        self._alg.duplicate_res = mock.Mock(return_value=[1, 1, 1])
+        self._alg.unique_res = mock.Mock(return_value=[2, 1, 3])
+        self._alg.calculate = mock.Mock(return_value=(["ws"], [1], [2], [("log", "sample")]))
+        self._alg.group_ws = mock.Mock(return_value=fit_ws)
+        self._alg.add_sample_logs = mock.Mock(side_effect=add_log_mock)
+        self._alg.make_results = mock.Mock(return_value=results.name())
+
+    @mock.patch("BayesStretch2.GetThetaQ")
+    @mock.patch("BayesStretch2.Progress")
+    def test_pyexec_QL_unique(self, prog_mock, get_Q_mock):
+        progress_mock = mock.Mock()
+        prog_mock.return_value = progress_mock
+
+        tmp = CreateWorkspace([1, 2], [3, 4])
+        fit_ws = GroupWorkspaces([tmp])
+        results = CreateWorkspace([5, 6], [7, 8])
+        results2 = GroupWorkspaces([results])
+        self.exec_setup(fit_ws, results2)
+
+        get_Q_mock.return_value = [1, 2, 3]
+        self._N_hist = 2
+
+        self._alg.execute()
+
+        self.assert_mock_called_with(self._alg.point_data, N_calls=2, call_number=1, name="__BayesStretchTest_Sample")
+        self.assert_mock_called_with(self._alg.point_data, N_calls=2, call_number=2, name="__BayesStretchTest_Resolution")
+        self.assertEqual(self._alg.duplicate_res.call_count, 0)
+        self.assertEqual(self._alg.unique_res.call_count, 1)
+
+        # calculate
+        self._alg.calculate.assert_called_once_with(sample_ws=self._sample_ws, report_progress=progress_mock, res_list=[2, 1, 3], N=2)
+        # add sample logs
+        self.assert_mock_called_with(
+            self._alg.add_sample_logs,
+            N_calls=2,
+            call_number=1,
+            workspace=fit_ws,
+            sample_logs=[("log", "sample"), ("res_workspace", "__BayesStretchTest_Resolution")],
+            data_ws=self._sample_ws,
+        )
+        self.assert_mock_called_with(
+            self._alg.add_sample_logs,
+            N_calls=2,
+            call_number=2,
+            workspace=results2.name(),
+            sample_logs=[("log", "sample"), ("res_workspace", "__BayesStretchTest_Resolution")],
+            data_ws=self._sample_ws,
+        )
+        # make results
+        self._alg.make_results.assert_called_once_with(
+            beta_list=[1], FWHM_list=[2], x_data=2, x_unit="MomentumTransfer", name="__BayesStretchTest_Sample"
+        )
+
+    @mock.patch("BayesStretch2.GetThetaQ")
+    @mock.patch("BayesStretch2.Progress")
+    def test_pyexec_QL_duplicate(self, prog_mock, get_Q_mock):
+        progress_mock = mock.Mock()
+        prog_mock.return_value = progress_mock
+
+        tmp = CreateWorkspace([1, 2], [3, 4])
+        fit_ws = GroupWorkspaces([tmp])
+        results = CreateWorkspace([5, 6], [7, 8])
+        results2 = GroupWorkspaces([results])
+        self.exec_setup(fit_ws, results2)
+
+        get_Q_mock.return_value = [1, 2, 3]
+        self._N_hist = 1
+
+        self._alg.execute()
+
+        self.assert_mock_called_with(self._alg.point_data, N_calls=2, call_number=1, name="__BayesStretchTest_Sample")
+        self.assert_mock_called_with(self._alg.point_data, N_calls=2, call_number=2, name="__BayesStretchTest_Resolution")
+        self.assertEqual(self._alg.duplicate_res.call_count, 1)
+        self.assertEqual(self._alg.unique_res.call_count, 0)
+
+        # calculate
+        self._alg.calculate.assert_called_once_with(sample_ws=self._sample_ws, report_progress=progress_mock, res_list=[1, 1, 1], N=1)
+        # add sample logs
+        self.assert_mock_called_with(
+            self._alg.add_sample_logs,
+            N_calls=2,
+            call_number=1,
+            workspace=fit_ws,
+            sample_logs=[("log", "sample"), ("res_workspace", "__BayesStretchTest_Resolution")],
+            data_ws=self._sample_ws,
+        )
+        self.assert_mock_called_with(
+            self._alg.add_sample_logs,
+            N_calls=2,
+            call_number=2,
+            workspace=results2.name(),
+            sample_logs=[("log", "sample"), ("res_workspace", "__BayesStretchTest_Resolution")],
+            data_ws=self._sample_ws,
+        )
+        # make results
+        self._alg.make_results.assert_called_once_with(
+            beta_list=[1], FWHM_list=[2], x_data=2, x_unit="MomentumTransfer", name="__BayesStretchTest_Sample"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

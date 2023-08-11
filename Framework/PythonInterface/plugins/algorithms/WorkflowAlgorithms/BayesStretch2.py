@@ -301,11 +301,11 @@ class BayesStretch2(QuickBayesTemplate):
 
         # get sample data
         name = self.getPropertyValue("SampleWorkspace")
-        sample_ws, N = self.point_data(name)
+        sample_ws, N = self.point_data(name=name)
 
         # get resolution data
         res_name = self.getPropertyValue("ResolutionWorkspace")
-        res_ws, N_res_hist = self.point_data(res_name)
+        res_ws, N_res_hist = self.point_data(name=res_name)
 
         # setup
         Q = GetThetaQ(sample_ws)
@@ -313,21 +313,23 @@ class BayesStretch2(QuickBayesTemplate):
 
         # do calculation
         if N_res_hist == 1:
-            res_list = self.duplicate_res(res_ws, N)
+            res_list = self.duplicate_res(res_ws=res_ws, N=N)
         elif N_res_hist == N:
-            res_list = self.unique_res(res_ws, N)
+            res_list = self.unique_res(res_ws=res_ws, N=N)
         else:
             raise ValueError("RES file needs to have either 1 or the same number of histograms as sample.")
 
-        contour_list, beta_list, FWHM_list, sample_logs = self.calculate(sample_ws, report_progress, res_list, N)
+        contour_list, beta_list, FWHM_list, sample_logs = self.calculate(
+            sample_ws=sample_ws, report_progress=report_progress, res_list=res_list, N=N
+        )
         sample_logs.append(("res_workspace", res_name))
 
         # report results
-        contour_group = self.group_ws(contour_list, f"{name}_Stretch_Contour")
-        self.add_sample_logs(contour_group, sample_logs, sample_ws)
+        contour_group = self.group_ws(ws_list=contour_list, name=f"{name}_Stretch_Contour")
+        self.add_sample_logs(workspace=contour_group, sample_logs=sample_logs, data_ws=sample_ws)
 
-        slice_group = self.make_results(beta_list, FWHM_list, Q[1], "MomentumTransfer", name)
-        self.add_sample_logs(slice_group, sample_logs, sample_ws)
+        slice_group = self.make_results(beta_list=beta_list, FWHM_list=FWHM_list, x_data=Q[1], x_unit="MomentumTransfer", name=name)
+        self.add_sample_logs(workspace=slice_group, sample_logs=sample_logs, data_ws=sample_ws)
 
         self.setProperty("OutputWorkspaceFit", slice_group)
         self.setProperty("OutputWorkspaceContour", contour_group)
