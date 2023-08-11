@@ -1,4 +1,4 @@
-name: mantid-developer-python-3-10
+name: mantid-developer
 
 channels:
   - conda-forge
