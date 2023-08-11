@@ -558,7 +558,6 @@ def getCalibration(
 
     parameters_tables = list()  # hold the names of all the fit parameter tables
     for i in range_list:
-
         # Deal with (i+1)st tube specified
         wht, skipped = tubeSet.getTube(i)
         all_skipped.update(skipped)
@@ -658,7 +657,6 @@ def getCalibrationFromPeakFile(ws, calibTable, iTube, PeakFile):
     print("Number of tubes read from file =", n_tubes)
 
     for i in range(n_tubes):
-
         # Deal with (i+1)st tube got from file
         tube_name = peak_array[i][0]  # e.g. 'MERLIN/door3/tube_3_1'
         tube = TubeSpec(ws)
