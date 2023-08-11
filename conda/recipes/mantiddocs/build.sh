@@ -53,7 +53,6 @@ cmake \
   -DCONDA_BUILD=True \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
   -DPython_EXECUTABLE=$PYTHON \
-  -DSPHINX_WARNINGS_AS_ERRORS=OFF \
   -GNinja \
   ../
 
