@@ -1,13 +1,13 @@
 .. _EnumeratedString:
 
 EnumeratedString
-==============
+==================
 
 .. contents::
   :local:
 
 Why EnumeratedString?
-------------------
+-----------------------
 
 It is common for a property to be a string, the value of which must be one of several enumerated values.  Programmatically,
 this is representing an ``enum`` object in C++, but based on a set of strings instead of integer-types.  What would be ideal
@@ -25,7 +25,7 @@ with strings from the allowed set.  This further adds an additional layer of val
 ``StringListValidator`` used in the property declaration.
 
 How to use the EnumeratedString
-----------------------------
+---------------------------------
 
 First include the ``EnumeratedString.h`` header file.
 
@@ -75,7 +75,7 @@ object.  The only assignment/comparison not directly possible is from :code:`Cak
 free conversion and comparison from :code:`CAKETYPE`, :code:`CakeTypeEnum`, and strings from :code:`cakeTypeNames` is possible.
 
 Example Use of EnumeratedString
-----------------------------
+---------------------------------
 
 An example of where this might be used inside an algorithm is shown below:
 
