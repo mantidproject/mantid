@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 # Mantid
 from mantid.api import AnalysisDataService as ADS
 from mantid.dataobjects import EventWorkspace, TableWorkspace, Workspace2D
-from mantid.simpleapi import *
+from mantid.simpleapi import CloneWorkspace, CreateWorkspace, DeleteWorkspace, Fit, GroupWorkspaces, RenameWorkspace
 from mantid.kernel import *
 
 # Calibration
