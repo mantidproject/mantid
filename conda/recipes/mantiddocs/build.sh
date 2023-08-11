@@ -58,7 +58,14 @@ cmake \
   ../
 
 cmake --build .
+
+# Build the StandardTestData target. We need this test data to build docs-qthelp
 cmake --build . --target StandardTestData
+
+# Configure the 'datasearch.directories' in the Mantid.properties file so the test data is found
+export STANDARD_TEST_DATA_DIR=$SRC_DIR/build/ExternalData/Testing/Data
+echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/UnitTest/;'$STANDARD_TEST_DATA_DIR'/DocTest/' >> $PREFIX/bin/Mantid.properties
+
 run_with_xvfb cmake --build . --target docs-qthelp
 terminate_xvfb_sessions
 cmake --build . --target install
