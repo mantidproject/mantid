@@ -412,7 +412,7 @@ def getCalibratedPixelPositions(
 
     :returns: list of pixel detector IDs, and list of their calibrated positions
     """
-    ws = mtd[str(input_workspace)]  # handle to the workspace
+    ws = ADS.retrieve(str(input_workspace))  # handle to the workspace
     # Arrays to be returned
     det_IDs = []
     det_positions = []
@@ -547,7 +547,7 @@ def getCalibration(
 
     This is the main method called from :func:`~tube.calibrate` to perform the calibration.
     """
-    ws = mtd[str(input_workspace)]  # handle to the input workspace
+    ws = ADS.retrieve(str(input_workspace))  # handle to the input workspace
     n_tubes = tubeSet.getNumTubes()
     print("Number of tubes =", n_tubes)
 
