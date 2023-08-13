@@ -329,7 +329,7 @@ public:
     ----------------------------------
 
     Args:
-      index: valid option including [0, 1, 2] where
+      index: valid option including [0, 1, 2, 3] where
           0: Linear
           1: Log
           2: SymmetricLog10

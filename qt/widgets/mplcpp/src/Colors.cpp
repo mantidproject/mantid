@@ -12,6 +12,7 @@
 #include <boost/optional.hpp>
 
 #include <algorithm>
+#include <iostream>
 #include <numeric>
 #include <tuple>
 
@@ -50,9 +51,11 @@ Python::Object createLog(OptionalTupleDouble clim = none) {
   GlobalInterpreterLock lock;
   if (clim.is_initialized()) {
     const auto &range = clim.get();
+    std::cout << "lmin = " << std::get<0>(range) << " lmax = " << std::get<1>(range) << std::endl;
     return colorsModule().attr("LogNorm")(std::get<0>(range), std::get<1>(range));
   } else
-    return colorsModule().attr("LogNorm")();
+    std::cout << "test";
+  return colorsModule().attr("LogNorm")();
 }
 
 // Factory function for creating a SymLogNorm instance
@@ -72,8 +75,11 @@ Python::Object createPowerNorm(double gamma, OptionalTupleDouble clim = none) {
   GlobalInterpreterLock lock;
   if (clim.is_initialized()) {
     const auto &range = clim.get();
+    std::cout << "lmin = " << std::get<0>(range) << " lmax = " << std::get<1>(range) << std::endl;
+
     return colorsModule().attr("PowerNorm")(gamma, std::get<0>(range), std::get<1>(range));
   } else {
+    std::cout << "test";
     return colorsModule().attr("PowerNorm")(gamma);
   }
 }
@@ -165,6 +171,7 @@ std::tuple<double, double> LogNorm::autoscale(std::tuple<double, double> clim) {
   if (std::get<0>(clim) <= 0.0) {
     std::get<0>(clim) = 1e-4 * std::get<1>(clim);
   }
+  std::cout << "amin = " << std::get<0>(clim) << " amax = " << std::get<1>(clim) << std::endl;
   return NormalizeBase::autoscale(clim);
 }
 
@@ -231,7 +238,7 @@ SymLogNorm::SymLogNorm(double linthresh, double linscale, double vmin, double vm
  */
 Python::Object SymLogNorm::tickLocator() const {
   GlobalInterpreterLock lock;
-  // Create log transform with base=10
+  // Create symlog transform with base=10
   auto transform =
       scaleModule().attr("SymmetricalLogTransform")(10, Python::Object(pyobj().attr("linthresh")), m_linscale);
 

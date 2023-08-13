@@ -44,8 +44,8 @@ public:
   QString getMinValue() const;
   QString getMaxValue() const;
   QString getNthPower() const;
-  void setMinPositiveValue(double /*unused*/) { /*Unused in this implementation*/
-  }
+  QString getMinPositiveValue() const;
+  void setMinPositiveValue(double /*minPos*/);
   int getScaleType() const;
   void setScaleType(int /*index*/);
   void setNthPower(double /*gamma*/);

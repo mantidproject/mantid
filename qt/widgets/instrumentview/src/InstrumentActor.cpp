@@ -1054,7 +1054,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin, const double &
   }
 
   if (m_autoscaling) {
-    m_DataMinScaleValue = m_DataMinValue;
+    m_DataMinScaleValue = m_DataPositiveMinValue;
     m_DataMaxScaleValue = m_DataMaxValue;
   }
 }

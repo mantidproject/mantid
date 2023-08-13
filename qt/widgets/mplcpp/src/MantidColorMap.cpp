@@ -116,7 +116,10 @@ void MantidColorMap::changeScaleType(MantidColorMap::ScaleType type) {
   case ScaleType::Linear:
     m_mappable.setNorm(Normalize());
     break;
-  case ScaleType::Log10:
+  case ScaleType::Log:
+    m_mappable.setNorm(LogNorm(0.0001, 1));
+    break;
+  case ScaleType::SymLog:
     m_mappable.setNorm(SymLogNorm(SymLogNorm::DefaultLinearThreshold, SymLogNorm::DefaultLinearScale, 0, 1));
     break;
   case ScaleType::Power:

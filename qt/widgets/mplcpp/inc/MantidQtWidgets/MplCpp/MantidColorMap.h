@@ -26,7 +26,7 @@ namespace MplCpp {
 class MANTID_MPLCPP_DLL MantidColorMap {
 public:
   /// Define the possible scale types
-  enum class ScaleType { Linear = 0, Log10 = 1, Power = 2 };
+  enum class ScaleType { Linear = 0, Log = 1, SymLog = 2, Power = 3 };
 
   static std::pair<QString, bool> chooseColorMap(const std::pair<QString, bool> &previous, QWidget *parent);
   static QString defaultColorMap();

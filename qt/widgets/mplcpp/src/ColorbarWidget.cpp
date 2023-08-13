@@ -15,6 +15,7 @@
 #include <QDoubleValidator>
 #include <QLineEdit>
 #include <QVBoxLayout>
+#include <iostream>
 #include <limits>
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
@@ -66,7 +67,7 @@ void ColorbarWidget::setNorm(const NormalizeBase &norm) {
   // matplotlib requires creating a brand new colorbar if the
   // normalization type changes
   createColorbar(norm.tickLocator(), norm.labelFormatter());
-  m_canvas->draw();
+  // m_canvas->draw();
 }
 
 /**
@@ -92,7 +93,7 @@ void ColorbarWidget::setClim(boost::optional<double> vmin, boost::optional<doubl
  * @return A tuple giving the current colorbar scale limits
  */
 std::tuple<double, double> ColorbarWidget::clim() const {
-  return std::make_tuple<double, double>(m_ui.scaleMinEdit->text().toDouble(), m_ui.scaleMaxEdit->text().toDouble());
+  return std::make_tuple<double, double>(m_ui.scaleMinPosEdit->text().toDouble(), m_ui.scaleMaxEdit->text().toDouble());
 }
 
 /**
@@ -144,6 +145,21 @@ QString ColorbarWidget::getNthPower() const { return m_ui.powerEdit->text(); }
 int ColorbarWidget::getScaleType() const { return m_ui.normTypeOpt->currentIndex(); }
 
 /**
+ * Update the minimum positive value of the normalization scale
+ * @param vmin New minimum of the scale
+ */
+void ColorbarWidget::setMinPositiveValue(double vmin) {
+  auto range = clim();
+  m_ui.scaleMinPosEdit->setText(QString::number(vmin));
+  std::cout << "min = " << std::get<0>(range) << " max = " << std::get<1>(range) << " " << vmin << std::endl;
+}
+
+// /**
+//  * @return The minimum positive color scale value as a string
+//  */
+// QString ColorbarWidget::getMinPositiveValue() const { return m_ui.powerEdit->text(); }
+
+/**
  * @brief Set the scale type from an integer representation
  * Linear=0, Log=1, SymLog=2, Power=3, which is backwards compatible
  * with the original Qwt version
@@ -155,36 +171,34 @@ void ColorbarWidget::setScaleType(int index) {
     return;
   // Some ranges will be invalid for some scale types, e.g. x < 0 for PowerNorm.
   // Compute a valid range and reset user-specified range if necessary
-  auto autoscale = [this](auto norm) {
-    auto validRange = norm.autoscale(clim());
-    return validRange;
+  auto autoscaleAndSetNorm = [this](auto norm) {
+    // auto validRange = norm.autoscale(clim());
+    setNorm(std::move(norm));
+    return clim(); // validRange;
   };
+
+  auto range = clim();
 
   std::tuple<double, double> validRange;
   switch (index) {
   case 0:
-    validRange = autoscale(Normalize());
-    setNorm(Normalize(std::get<0>(validRange), std::get<1>(validRange)));
+    validRange = autoscaleAndSetNorm(Normalize(std::get<0>(range), std::get<1>(range)));
     break;
   case 1:
-    validRange = autoscale(LogNorm());
-    setNorm(LogNorm(std::get<0>(validRange), std::get<1>(validRange)));
+    validRange = autoscaleAndSetNorm(LogNorm(std::get<0>(range), std::get<1>(range)));
     break;
   case 2:
-    validRange = autoscale(SymLogNorm(SymLogNorm::DefaultLinearThreshold, SymLogNorm::DefaultLinearScale));
-    setNorm(SymLogNorm(SymLogNorm::DefaultLinearThreshold, SymLogNorm::DefaultLinearScale, std::get<0>(validRange),
-                       std::get<1>(validRange)));
+    validRange = autoscaleAndSetNorm(SymLogNorm(SymLogNorm::DefaultLinearThreshold, SymLogNorm::DefaultLinearScale,
+                                                std::get<0>(range), std::get<1>(range)));
     break;
   case 3:
-    double gamma = getNthPower().toDouble();
-    validRange = autoscale(PowerNorm(gamma));
-    setNorm(PowerNorm(gamma, std::get<0>(validRange), std::get<1>(validRange)));
+    validRange = autoscaleAndSetNorm(PowerNorm(getNthPower().toDouble(), std::get<0>(range), std::get<1>(range)));
     break;
   }
-  updateValidator(index);
 
-  setClim(std::get<0>(validRange), std::get<1>(validRange));
-  m_ui.normTypeOpt->setCurrentIndex(index);
+  // setClim(std::get<0>(validRange), std::get<1>(validRange));
+  // m_ui.normTypeOpt->setCurrentIndex(index);
+  updateValidator(index);
   emit scaleTypeChanged(index);
 }
 
@@ -209,7 +223,7 @@ void ColorbarWidget::setNthPower(double gamma) {
  */
 void ColorbarWidget::scaleMinimumEdited() {
   // The validator ensures the text is a double
-  const double value = m_ui.scaleMinEdit->text().toDouble();
+  const double value = m_ui.scaleMinPosEdit->text().toDouble();
   emit minValueEdited(value);
   setClim(value, boost::none);
 }
@@ -242,7 +256,6 @@ void ColorbarWidget::scaleTypeSelectionChanged(int index) {
  * Called when the power exponent input has been edited
  */
 void ColorbarWidget::powerExponentEdited() {
-  setScaleType(3);
   // power edit has regexp validator so this should always be valid
   emit nthPowerChanged(m_ui.powerEdit->text().toDouble());
 }
@@ -269,7 +282,7 @@ void ColorbarWidget::initLayout() {
 
   // Setup normalization options
   m_ui.normTypeOpt->addItems(NORM_OPTS);
-  scaleTypeSelectionChanged(0);
+  // scaleTypeSelectionChanged(0);
 
   int index = getScaleType();
   updateValidator(index);
@@ -282,9 +295,11 @@ void ColorbarWidget::initLayout() {
 void ColorbarWidget::updateValidator(const int index) {
   auto valid_min = new QDoubleValidator();
   auto valid_max = new QDoubleValidator();
-  // only positive values for logarithmic scaling
+  // only positive values for logarithmic and nonnegative values for power scaling
   if (index == 1) {
     valid_min->setBottom(MIN_DBL);
+  } else if (index == 3) {
+    valid_min->setBottom(0);
   } else {
     valid_min->setBottom(-MAX_DBL);
   }

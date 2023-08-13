@@ -30,6 +30,7 @@
 #include "MantidQtWidgets/InstrumentView/BinDialog.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
+#include <iostream>
 #include <limits>
 #include <utility>
 
@@ -639,13 +640,14 @@ void InstrumentWidgetRenderTab::saveImage(const QString &filename) { m_instrWidg
  */
 void InstrumentWidgetRenderTab::setupColorBar(const ColorMap &cmap, double minValue, double maxValue,
                                               double minPositive, bool autoscaling) {
+  std::cout << minValue << " " << minPositive << std::endl;
   m_colorBarWidget->blockSignals(true);
-  m_colorBarWidget->setClim(minValue, maxValue);
-  m_colorBarWidget->blockSignals(false);
-  m_colorBarWidget->setMinPositiveValue(minPositive);
-  m_colorBarWidget->setupColorBarScaling(cmap);
   m_autoscaling->blockSignals(true);
+  m_colorBarWidget->setMinPositiveValue(minPositive);
+  m_colorBarWidget->setClim(minPositive, maxValue);
+  m_colorBarWidget->setupColorBarScaling(cmap);
   m_autoscaling->setChecked(autoscaling);
+  m_colorBarWidget->blockSignals(false);
   m_autoscaling->blockSignals(false);
 }
 

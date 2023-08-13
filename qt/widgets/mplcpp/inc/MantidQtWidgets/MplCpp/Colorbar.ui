@@ -72,7 +72,7 @@
     <widget class="QWidget" name="mplColorbar" native="true"/>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="scaleMinLayout" stretch="4,3,4">
+    <layout class="QHBoxLayout" name="scaleMinLayout" stretch="4,3,0,4">
      <property name="spacing">
       <number>0</number>
      </property>
@@ -90,7 +90,30 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLineEdit" name="scaleMinEdit"/>
+      <widget class="QLineEdit" name="scaleMinEdit">
+       <property name="minimumSize">
+        <size>
+         <width>55</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="scaleMinPosEdit">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>55</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="readOnly">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer_4">

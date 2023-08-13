@@ -12,6 +12,8 @@
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/NDArray.h"
 
+#include <iostream>
+
 using Mantid::PythonInterface::callMethodNoCheck;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::NDArray;
@@ -98,6 +100,13 @@ void ScalarMappable::setClim(boost::optional<double> vmin, boost::optional<doubl
   } else if (vmax.is_initialized()) {
     setClimAttr(none, vmax.get());
   }
+
+  // if (vmin.is_initialized()) {
+  //   PyObject_SetAttr(pyobj().ptr(), Py_BuildValue("s", "norm.vmin"), Py_BuildValue("f", vmin.get()));
+  // }
+  // if (vmax.is_initialized()) {
+  //   PyObject_SetAttr(pyobj().ptr(), Py_BuildValue("s", "norm.vmax"), Py_BuildValue("f", vmax.get()));
+  // }
 }
 
 /**
