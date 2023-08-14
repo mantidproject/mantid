@@ -43,6 +43,8 @@ class DetectorInfo:
     NUM_TUBES_PER_MODULE = 24
     REAR_NAME = "rear"
     FRONT_NAME = "front"
+    FRONT_SIDE_OFFSET = 1.1
+    HALF_DET_WIDTH = 520.7
 
 
 class FuncForm(Enum):
@@ -53,10 +55,8 @@ class FuncForm(Enum):
 class Prop:
     STRIP_POSITIONS = "StripPositions"
     DATA_FILES = "DataFiles"
-    HALF_DET_WIDTH = "HalfDetectorWidth"
     STRIP_WIDTH = "StripWidth"
     STRIP_TO_TUBE_CENTRE = "StripToTubeCentre"
-    SIDE_OFFSET = "SideOffset"
     ENCODER = "EncoderAtBeamCentre"
     ENCODER_REAR_260 = "EncoderAtBeamCentreForRear260Strip"
     REAR_DET = "RearDetector"
@@ -95,8 +95,16 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
     def category(self):
         return "SANS\\Calibration"
 
+    def name(self):
+        """Return the name of the algorithm."""
+        return "SANSTubeCalibration"
+
     def summary(self):
         return "Calibrates the tubes on the ISIS Sans2d Detector."
+
+    def seeAlso(self):
+        """Return a list of related algorithm names."""
+        return ["SANSTubeMerge"]
 
     def PyInit(self):
         self.declareProperty(
@@ -108,12 +116,10 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             direction=Direction.Input,
             doc="The runs corresponding to the strip positions that were used.",
         )
-        self.declareProperty(Prop.HALF_DET_WIDTH, 520.7, direction=Direction.Input)
         self.declareProperty(
             Prop.STRIP_WIDTH, 38.0, direction=Direction.Input, doc="The width of the strip being used for calibration, in mm."
         )
         self.declareProperty(Prop.STRIP_TO_TUBE_CENTRE, 21.0, direction=Direction.Input)
-        self.declareProperty(Prop.SIDE_OFFSET, 0.0, direction=Direction.Input)
         self.declareProperty(Prop.ENCODER, 270.0, direction=Direction.Input, doc="The position of the encoder at beam centre.")
         self.declareProperty(
             Prop.ENCODER_REAR_260,
@@ -304,7 +310,13 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         return strip_pos_to_ws
 
     def _calculate_known_strip_edges(self, ws_list):
-        det_z_logname = self._REAR_DET_Z_LOG if self._rear else self._FRONT_DET_Z_LOG
+        if self._rear:
+            det_z_logname = self._REAR_DET_Z_LOG
+            side_offset = 0.0
+        else:
+            det_z_logname = self._FRONT_DET_Z_LOG
+            side_offset = DetectorInfo.FRONT_SIDE_OFFSET
+
         ws = ws_list[0]
 
         if not ws.run().hasProperty(det_z_logname):
@@ -312,16 +324,14 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
                 f'Run log does not contain an entry for "{det_z_logname}". This is required to calculate the strip edge positions.'
             )
         sample_to_detector_dist = ws.run().getProperty(det_z_logname).firstValue()
-        half_det_width = self.getProperty(Prop.HALF_DET_WIDTH).value
         strip_width = self.getProperty(Prop.STRIP_WIDTH).value
         strip_to_tube_centre = self.getProperty(Prop.STRIP_TO_TUBE_CENTRE).value
-        side_offset = self.getProperty(Prop.SIDE_OFFSET).value
         encoder_at_beam_centre_main = self.getProperty(Prop.ENCODER).value
 
         def calculate_edge(encoder):
             dist_from_beam = encoder_at_beam_centre - encoder
             parallax_shift = dist_from_beam * strip_to_tube_centre / (strip_to_tube_centre - sample_to_detector_dist)
-            return -(encoder + parallax_shift - half_det_width) / 1000 + side_offset
+            return -(encoder + parallax_shift - DetectorInfo.HALF_DET_WIDTH) / 1000 + side_offset
 
         strip_pos_to_ws = self._match_workspaces_to_strip_positions(ws_list)
         ws_to_known_edges = dict()

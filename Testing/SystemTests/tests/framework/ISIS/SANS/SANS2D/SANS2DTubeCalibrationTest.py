@@ -21,14 +21,12 @@ class SANS2DTubeCalibrationTest:
     _DATA_FILES = ["SANS2D00069117.nxs", "SANS2D00069118.nxs", "SANS2D00069119.nxs", "SANS2D00069120.nxs", "SANS2D00069116.nxs"]
     _NUM_TUBES = 120
 
-    def _run_calibration_algorithm(self, side_offset, encoder_at_beam_centre, is_rear_det, threshold, skip_tubes_on_error):
+    def _run_calibration_algorithm(self, encoder_at_beam_centre, is_rear_det, threshold, skip_tubes_on_error):
         SANSTubeCalibration(
             StripPositions=[920, 755, 590, 425, 260],
             DataFiles=self._DATA_FILES,
-            HalfDetectorWidth=520.7,
             StripWidth=38.0,
             StripToTubeCentre=21.0,
-            SideOffset=side_offset,
             EncoderAtBeamCentre=encoder_at_beam_centre,
             EncoderAtBeamCentreForRear260Strip=470.0,
             RearDetector=is_rear_det,
@@ -78,9 +76,7 @@ class SANS2DTubeCalibrationRearDetectorTest(systemtesting.MantidSystemTest, SANS
         return self._DATA_FILES + [self._REFERENCE_FILE, self._CVALUES_REF_FILE]
 
     def runTest(self):
-        self._run_calibration_algorithm(
-            side_offset=0.0, encoder_at_beam_centre=270.0, is_rear_det=True, threshold=500, skip_tubes_on_error=False
-        )
+        self._run_calibration_algorithm(encoder_at_beam_centre=270.0, is_rear_det=True, threshold=500, skip_tubes_on_error=False)
         self.assertTrue(self._merged_workspace_exists())
         for tube_id in range(self._NUM_TUBES):
             self.assertTrue(self._tube_diagnostic_workspaces_exist(tube_id))
@@ -101,9 +97,7 @@ class SANS2DTubeCalibrationFrontDetectorTest(systemtesting.MantidSystemTest, SAN
         return self._DATA_FILES + [self._REFERENCE_FILE, self._CVALUES_REF_FILE]
 
     def runTest(self):
-        self._run_calibration_algorithm(
-            side_offset=1.1, encoder_at_beam_centre=474.2, is_rear_det=False, threshold=1000, skip_tubes_on_error=True
-        )
+        self._run_calibration_algorithm(encoder_at_beam_centre=474.2, is_rear_det=False, threshold=1000, skip_tubes_on_error=True)
         self.assertTrue(self._merged_workspace_exists())
         for tube_id in range(self._NUM_TUBES):
             try:
