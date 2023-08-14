@@ -131,12 +131,12 @@ def compare_dependencies_for_file(os_name: str, first_build: int, second_build: 
     packages_removed = []
     packages_changed = {}
     for package in first_output_packages:
-        if second_output_packages[package] is None:
+        if package not in second_output_packages:
             packages_removed.extend(package)
         elif second_output_packages[package] != first_output_packages[package]:
             packages_changed[package] = first_output_packages[package] + "  ->  " + second_output_packages[package]
     for package in second_output_packages:
-        if first_output_packages[package] is None:
+        if package not in first_output_packages:
             packages_added.extend(package)
 
     # Output
@@ -203,8 +203,8 @@ def extract_package_versions(url: str, os_name: str) -> Dict[str, str]:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script for checking dependency changes between two Jenkins builds")
     parser.add_argument("-os", help="Operating system string, e.g. linux-64", default="linux-64", type=str)
-    parser.add_argument("--first", "-f", help="First (usually passing) build number", type=int)
-    parser.add_argument("--second", "-s", help="Second (usually failing) build number", type=int)
+    parser.add_argument("--first", "-f", help="First (usually passing) build number", type=int, required=True)
+    parser.add_argument("--second", "-s", help="Second (usually failing) build number", type=int, required=True)
     parser.add_argument("--pipeline", "-p", help="Build pipeline", default="main_nightly_deployment_prototype", type=str)
     parser.add_argument(
         "--logfile",
