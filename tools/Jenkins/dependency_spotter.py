@@ -132,12 +132,12 @@ def compare_dependencies_for_file(os_name: str, first_build: int, second_build: 
     packages_changed = {}
     for package in first_output_packages:
         if package not in second_output_packages:
-            packages_removed.extend(package)
+            packages_removed.append(package)
         elif second_output_packages[package] != first_output_packages[package]:
             packages_changed[package] = first_output_packages[package] + "  ->  " + second_output_packages[package]
     for package in second_output_packages:
         if package not in first_output_packages:
-            packages_added.extend(package)
+            packages_added.append(package)
 
     # Output
     output_package_changes_to_console(packages_added, packages_removed, packages_changed)
