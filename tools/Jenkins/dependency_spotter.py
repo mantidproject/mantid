@@ -120,7 +120,10 @@ def compare_dependencies_for_file(os_name: str, first_build: int, second_build: 
     """
     # Form URLs for each build artifact file
     first_build_output_path = form_url_for_build_artifact(first_build, os_name, pipeline, log_file)
+    print(f"Path to first build: {first_build_output_path}")
     second_build_output_path = form_url_for_build_artifact(second_build, os_name, pipeline, log_file)
+    print(f"Path to second build: {second_build_output_path}")
+    print("")
 
     # Read in the packages used, with versions
     first_output_packages = extract_package_versions(first_build_output_path, os_name)
