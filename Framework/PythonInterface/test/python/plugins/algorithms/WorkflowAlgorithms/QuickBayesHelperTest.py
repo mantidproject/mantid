@@ -63,7 +63,6 @@ class QuickBayesHelperTest(unittest.TestCase):
         self.assertEqual(len(group_names), 2)
         self.assertTrue(SAMPLE_NAME in group_names)
         self.assertTrue(RES_NAME in group_names)
-        DeleteWorkspace(group)
 
     def test_add_sample_logs(self):
         # know that a new workspace has no sample logs
