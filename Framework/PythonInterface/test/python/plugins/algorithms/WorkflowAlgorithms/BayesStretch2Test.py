@@ -11,17 +11,11 @@ from BayesStretch2 import BayesStretch2
 
 from unittest import mock
 from quickBayes.functions.qse_fixed import QSEFixFunction
-
-# from quickBayes.utils.general import get_background_function
 from quickBayes.workflow.qse_search import QSEGridSearch
 
 
 SAMPLE_NAME = "__BayesStretchTest_Sample"
 RES_NAME = "__BayesStretchTest_Resolution"
-
-
-# def add_log_mock(workspace, sample_logs, data_ws):
-#         return workspace
 
 
 class BayesStretch2Test(object):
@@ -58,6 +52,12 @@ class BayesStretch2Test(object):
                 np.testing.assert_array_equal(expected, called_with[keyword])
             else:
                 self.assertEqual(expected, called_with[keyword])
+
+    def point_mock(self, name):
+        if "res" in name:
+            return self._res_ws, self._N_hist
+        else:
+            return self._sample_ws, self._N_hist
 
     def test_make_contour(self):
         x = np.linspace(0.01, 0.1, 3)
@@ -211,12 +211,6 @@ class BayesStretch2Test(object):
         self.assertEqual(beta, (method_mock.get_x_axis.values, [3, 2, 1]))
         self.assertEqual(FWHM, (method_mock.get_y_axis.values, [6, 5, 4]))
 
-    def point_mock(self, name):
-        if "res" in name:
-            return self._res_ws, self._N_hist
-        else:
-            return self._sample_ws, self._N_hist
-
     def exec_setup(self, fit_ws, results):
         self._alg.setProperty("Emax", 0.3)
         self._alg.setProperty("Emin", -0.3)
@@ -227,7 +221,6 @@ class BayesStretch2Test(object):
         self._alg.setProperty("OUTPUTWORKSPACEFIT", "out")
         self._alg.setProperty("OutputWorkspaceContour", "contour")
 
-        # check if we need these here
         self._alg.point_data = mock.Mock(side_effect=self.point_mock)
         self._alg.duplicate_res = mock.Mock(return_value=[1, 1, 1])
         self._alg.unique_res = mock.Mock(return_value=[2, 1, 3])

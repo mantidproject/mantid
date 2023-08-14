@@ -52,6 +52,7 @@ class QuickBayesHelperTest(unittest.TestCase):
         self.assertEqual(len(self._sample_ws.readY(0)) + 1, len(self._sample_ws.readX(0)))
         ws, _ = self._alg.point_data(self._sample_ws.name())
         self.assertEqual(len(ws.readY(0)), len(ws.readX(0)))
+        DeleteWorkspace(ws)
 
     def test_group_ws(self):
         ws_list = [self._sample_ws, self._res_ws]
@@ -62,6 +63,7 @@ class QuickBayesHelperTest(unittest.TestCase):
         self.assertEqual(len(group_names), 2)
         self.assertTrue(SAMPLE_NAME in group_names)
         self.assertTrue(RES_NAME in group_names)
+        DeleteWorkspace(group)
 
     def test_add_sample_logs(self):
         # know that a new workspace has no sample logs
@@ -70,6 +72,7 @@ class QuickBayesHelperTest(unittest.TestCase):
         run = ws.getRun()
         self.assertEqual(run.getLogData("unit").value, "test")
         self.assertEqual(run.getLogData("dur").value, 56200)
+        DeleteWorkspace(ws)
 
     def test_create_ws(self):
         name = self._alg.create_ws("test", [1, 2, 3, 4], [4, 5, 6, 7], 2, "energy", "TOF", "Text", ["unit", "python"])
@@ -89,6 +92,7 @@ class QuickBayesHelperTest(unittest.TestCase):
         ax = ws.getAxis(1)
         self.assertEqual(ax.label(0), "unit")
         self.assertEqual(ax.label(1), "python")
+        DeleteWorkspace(ws)
 
     def test_create_ws_with_errors(self):
         name = self._alg.create_ws(
@@ -96,7 +100,8 @@ class QuickBayesHelperTest(unittest.TestCase):
         )
         ws = AnalysisDataService.retrieve(name)
         self.assertListEqual(ws.readE(0), [0.1, 0.2])
-        self.assertListEqual(ws.readE(0), [0.3, 0.4])
+        self.assertListEqual(ws.readE(1), [0.3, 0.4])
+        DeleteWorkspace(ws)
 
     def test_duplicate_res(self):
         N = 3
@@ -107,16 +112,18 @@ class QuickBayesHelperTest(unittest.TestCase):
             data = ws_list[j]
             self.assertListEqual(ws.readX(0), data["x"])
             self.assertListEqual(ws.readY(0), data["y"])
+        DeleteWorkspace(ws)
 
     def test_unique_res(self):
         N = 2
         ws = CreateWorkspace([1, 2, -1, -2], [3, 4, -3, -4], NSpec=N)
-        ws_list = self._alg.duplicate_res(ws, N)
+        ws_list = self._alg.unique_res(ws, N)
         self.assertEqual(len(ws_list), N)
         for j in range(N):
             data = ws_list[j]
             self.assertListEqual(ws.readX(j), data["x"])
             self.assertListEqual(ws.readY(j), data["y"])
+        DeleteWorkspace(ws)
 
     # -------------------------------- Failure cases ------------------------------------------
     def test_start_greater_end(self):
@@ -125,7 +132,7 @@ class QuickBayesHelperTest(unittest.TestCase):
         self._alg.setProperty("SampleWorkspace", self._sample_ws)
         issues = self._alg.validateInputs()
         keys = list(issues.keys())
-        self.assertEqual(keys, 1)
+        self.assertEqual(len(keys), 1)
         self.assertEqual(keys[0], "EMax")
 
     def test_start_outside_data_range(self):
@@ -135,7 +142,7 @@ class QuickBayesHelperTest(unittest.TestCase):
         issues = self._alg.validateInputs()
 
         keys = list(issues.keys())
-        self.assertEqual(keys, 1)
+        self.assertEqual(len(keys), 1)
         self.assertEqual(keys[0], "EMin")
 
     def test_end_outside_data_range(self):
@@ -145,7 +152,7 @@ class QuickBayesHelperTest(unittest.TestCase):
         issues = self._alg.validateInputs()
 
         keys = list(issues.keys())
-        self.assertEqual(keys, 1)
+        self.assertEqual(len(keys), 1)
         self.assertEqual(keys[0], "EMax")
 
 
