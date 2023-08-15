@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
+from pathlib import Path
 from typing import Any, Dict, Mapping
 from unittest import TestCase
 
@@ -16,16 +17,25 @@ from abins.kpointsdata import KpointData
 
 
 # Module with helper functions used to create tests.
-def find_file(filename=None):
+def find_file(filename: str, try_upcase_suffix: bool = True) -> str:
     """
     Calculates path of filename with the testing data. Path is determined in the platform independent way.
 
     :param filename: name of file to find
+    :param try_upcase_suffix: if file not found, try with upper-case extension
+        (e.g. if filename.jpg not found, try filename.JPG)
     :returns: full path for the file with the testing data
     """
     from mantid.api import FileFinder
 
-    return FileFinder.Instance().getFullPath(filename)
+    result = FileFinder.Instance().getFullPath(filename)
+    if result:
+        return result
+    elif try_upcase_suffix:
+        path = Path(filename)
+        return find_file(str(path.with_suffix(path.suffix.upper())), try_upcase_suffix=False)
+    else:
+        raise ValueError(f"Could not find file '{filename}'")
 
 
 def remove_output_files(list_of_names=None):
