@@ -46,6 +46,8 @@ class SampleTransmissionCalculatorModel(object):
                 validation["histogram"] = "Histogram must be greater than zero."
             if bin_list[2] <= bin_list[0]:
                 validation["histogram"] = "Upper histogram edge must be greater than the lower bin."
+            if bin_list[1] > bin_list[2]:
+                validation["histogram"] = "Width cannot be greater than the upper bin."
         if input_dict["binning_type"] == 1:
             # multiple binning
             bin_list = input_dict["multiple_bin"].split(",")
