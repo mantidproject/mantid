@@ -79,7 +79,7 @@ readline:
   - <8.2
 
 euphonic:
-  - '>=1.2.1 <2.0'
+  - '>=1.2.1,<2.0'
 
 # 2.2.0 causes resolution issues in the mantidqt host environment on linux
 librdkafka:
