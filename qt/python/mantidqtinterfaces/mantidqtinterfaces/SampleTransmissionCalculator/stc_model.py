@@ -61,7 +61,10 @@ class SampleTransmissionCalculatorModel(object):
                             if bin_list[2 + 2 * i] <= bin_list[0 + 2 * i]:
                                 validation["histogram"] = "Upper histogram edge must be greater than the lower bin."
                     else:
-                        validation["histogram"] = "Histogram requires an odd number of values."
+                        validation["histogram"] = (
+                            "Histogram requires an odd number of values. It uses the same format as the Rebin algorithm, "
+                            "which is a comma separated list of first bin boundary, width, last bin boundary."
+                        )
                 except ValueError:
                     validation["histogram"] = "Histogram string not readable."
         if not input_dict["chemical_formula"]:

@@ -28,6 +28,12 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
         self.chemical_formula_err.setStyleSheet("QLabel { color : red; }")
         self.density_err.setStyleSheet("QLabel { color : red; }")
         self.thickness_err.setStyleSheet("QLabel { color : red; }")
+        self.multiple_line_edit.setToolTip(
+            "A comma separated list of first bin boundary, width, last bin boundary. \n"
+            "Optionally this can be followed by a comma and more widths and last boundary pairs. \n"
+            "E.g. 0,100,20000: from 0 rebin in constant size bins of 100 up to 20,000. \n"
+            "Or 0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000."
+        )
 
     def get_input_dict(self):
         input_dict = {
