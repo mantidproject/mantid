@@ -19,7 +19,6 @@ set(SRC_FILES
     ILLEnergyTransfer.cpp
     ISISCalibration.cpp
     ISISDiagnostics.cpp
-    ISISEnergyTransfer.cpp
     IndirectAddWorkspaceDialog.cpp
     IndirectBayes.cpp
     IndirectBayesTab.cpp
@@ -186,7 +185,6 @@ set(MOC_FILES
     InelasticDataManipulationTab.h
     ISISCalibration.h
     ISISDiagnostics.h
-    ISISEnergyTransfer.h
     LazyAsyncRunner.h
     Quasi.h
     ResNorm.h
@@ -237,7 +235,7 @@ set(UI_FILES
     ILLEnergyTransfer.ui
     ISISCalibration.ui
     ISISDiagnostics.ui
-    ISISEnergyTransfer.ui
+    Reduction/ISISEnergyTransfer.ui
     IndirectAddWorkspaceDialog.ui
     IndirectBayes.ui
     IndirectCorrections.ui
