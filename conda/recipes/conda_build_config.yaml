@@ -35,8 +35,8 @@ poco:
 pycifrw:
   - 4.4.1
 
-sphinx:
-  - 5.1.1
+setuptools:
+  - 49.6
 
 sphinx_bootstrap_theme:
   - 0.8.1
