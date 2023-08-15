@@ -5,12 +5,19 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, FileProperty, FileAction, Progress, AnalysisDataService
 
 
-class SANSTubeMerge(PythonAlgorithm):
+class Prop:
+    FRONT = "Front"
+    REAR = "Rear"
+    OUTPUT_FILE = "OutputFile"
+
+
+class SANSTubeMerge(DataProcessorAlgorithm):
+    _REAR_DET_NAME = "rear-detector"
+    _CALIBRATED_WS_NAME = "empty_instr"
+
     def category(self):
         return "SANS\\Calibration"
 
@@ -19,68 +26,85 @@ class SANSTubeMerge(PythonAlgorithm):
         return "SANSTubeMerge"
 
     def summary(self):
-        return "Merge the calibration of the SANS Tubes"
+        return "Merge the calibrations of the Sans2d front and rear detectors to obtain a single calibration file."
+
+    def seeAlso(self):
+        """Return a list of related algorithm names."""
+        return ["SANSTubeCalibration"]
 
     def PyInit(self):
-        # Declare properties
-        self.declareProperty(FileProperty(name="Front", defaultValue="", action=FileAction.Load, extensions=["nxs"]))
-        self.declareProperty(FileProperty(name="Rear", defaultValue="", action=FileAction.Load, extensions=["nxs"]))
-        self.declareProperty(FileProperty(name="OutputFile", defaultValue="", action=FileAction.OptionalSave, extensions=["nxs"]))
+        self.declareProperty(FileProperty(name=Prop.FRONT, defaultValue="", action=FileAction.Load, extensions=["nxs"]))
+        self.declareProperty(FileProperty(name=Prop.REAR, defaultValue="", action=FileAction.Load, extensions=["nxs"]))
+        self.declareProperty(FileProperty(name=Prop.OUTPUT_FILE, defaultValue="", action=FileAction.OptionalSave, extensions=["nxs"]))
 
     def PyExec(self):
-        # Run the algorithm
-        load_report = Progress(self, start=0.0, end=0.5, nreports=2)
-        load_report.report("Loading Rear")
-        rear_calib = Load(self.getProperty("Rear").value)
-        load_report.report("Loading Front")
-        front_calib = Load(self.getProperty("Front").value)  # noqa: F841
+        prog_report = Progress(self, start=0.0, end=0.5, nreports=2)
+        prog_report.report("Loading Rear")
+        rear_calib = self._load_file(self.getProperty(Prop.REAR).value, "rear_calib")
+        prog_report.report("Loading Front")
+        front_calib = self._load_file(self.getProperty(Prop.FRONT).value, "front_calib")
 
-        det_id_list = []
-        load_report = Progress(self, start=0.5, end=0.75, nreports=rear_calib.getNumberHistograms())
-        for ws_index in range(rear_calib.getNumberHistograms()):
-            load_report.report(f"Loading {ws_index}")
-            spectrum = rear_calib.getSpectrum(ws_index)
-            if spectrum.getSpectrumNo() < 0:
-                continue
-            for det_id in spectrum.getDetectorIDs():
-                if det_id > 2523511:
-                    continue
-                det_id_list.append(det_id)
-
+        # In the front detector calibration, move the pixels for the rear detector
+        # so that both calibrations are now in a single workspace
         rear_inst = rear_calib.getInstrument()
+        det_ids = front_calib.detectorInfo().detectorIDs()
 
-        # Creating an unmanaged version of the algorithm is important here.  Otherwise, things get
-        # really slow, and the workspace history becomes unmanageable.
-        move = AlgorithmManager.createUnmanaged("MoveInstrumentComponent")
-        move.initialize()
-        move.setChild(True)
-        move.setProperty("Workspace", "front_calib")
-        move.setProperty("RelativePosition", False)
+        move_alg = self._create_child_alg("MoveInstrumentComponent")
+        move_alg.setProperty("Workspace", front_calib)
+        move_alg.setProperty("RelativePosition", False)
 
-        load_report = Progress(self, start=0.75, end=1.0, nreports=len(det_id_list))
-        for det_id in det_id_list:
-            load_report.report(f"Gettings Detector {det_id}")
-            det = rear_inst.getDetector(det_id)
-            if "rear-detector" in det.getFullName():
-                move.setProperty("DetectorID", det_id)
-                move.setProperty("X", det.getPos().getX())
-                move.setProperty("Y", det.getPos().getY())
-                move.setProperty("Z", det.getPos().getZ())
-                move.setProperty("DetectorID", det_id)
-                move.execute()
+        prog_report = Progress(self, start=0.5, end=0.75, nreports=det_ids.size)
+        for det_id in det_ids:
+            prog_report.report(f"Checking detector {det_id}")
+            det = rear_inst.getDetector(det_id.item())
+            if self._REAR_DET_NAME in det.getFullName():
+                prog_report.report(f"Moving detector {det_id}")
+                move_alg.setProperty("DetectorID", det_id.item())
+                move_alg.setProperty("X", det.getPos().getX())
+                move_alg.setProperty("Y", det.getPos().getY())
+                move_alg.setProperty("Z", det.getPos().getZ())
+                move_alg.execute()
 
-        RenameWorkspace(InputWorkspace="front_calib", OutputWorkspace="merged")
-        DeleteWorkspace(Workspace="rear_calib")
-        # output_filename = self.getProperty("OutputFile").value
-        # SaveNexusProcessed('merged', output_filename)
-        # RemoveWorkspaceHistory('TubeCalibrationTable_512pixel_40673_BOTH_15Nov16')
+        prog_report = Progress(self, start=0.75, end=0.9, nreports=2)
+        prog_report.report("Creating merged calibration workspace")
+        self._create_empty_calibrated_workspace(front_calib, self._CALIBRATED_WS_NAME)
 
-        empty_instr = LoadEmptyInstrument("SANS2D_Definition_Tubes")
-        CopyInstrumentParameters("merged", empty_instr)
-        RemoveWorkspaceHistory(empty_instr)
-        output_filename = self.getProperty("OutputFile").value
+        output_filename = self.getProperty(Prop.OUTPUT_FILE).value
         if output_filename:
-            SaveNexusProcessed(empty_instr, output_filename)
+            prog_report.report("Saving to file")
+            self._save_ws_as_nexus(self._CALIBRATED_WS_NAME, output_filename)
+
+    def _load_file(self, file_name, ws_name):
+        alg = self._create_child_alg("Load", Filename=file_name, OutputWorkspace=ws_name)
+        alg.execute()
+        return alg.getProperty("OutputWorkspace").value
+
+    def _create_empty_calibrated_workspace(self, merged_calib_ws, calibrated_ws_name):
+        """Copy the instrument parameters of a merged calibration workspace into a new workspace with no counts"""
+
+        inst_file_name = merged_calib_ws.getInstrumentFilename(merged_calib_ws.getInstrument().getName())
+        load_inst_alg = self._create_child_alg("LoadEmptyInstrument", Filename=inst_file_name, OutputWorkspace=calibrated_ws_name)
+        load_inst_alg.execute()
+        calibrated_ws = load_inst_alg.getProperty("OutputWorkspace").value
+
+        copy_param_alg = self._create_child_alg("CopyInstrumentParameters", InputWorkspace=merged_calib_ws, OutputWorkspace=calibrated_ws)
+        copy_param_alg.execute()
+
+        remove_history_alg = self._create_child_alg("RemoveWorkspaceHistory", Workspace=calibrated_ws)
+        remove_history_alg.execute()
+
+        AnalysisDataService.add(calibrated_ws_name, calibrated_ws)
+
+    def _save_ws_as_nexus(self, ws_name, output_filename):
+        save_alg = self._create_child_alg("SaveNexusProcessed", InputWorkspace=ws_name, Filename=output_filename)
+        save_alg.execute()
+
+    def _create_child_alg(self, name, store_in_ADS=False, **kwargs):
+        alg = self.createChildAlgorithm(name, **kwargs)
+        alg.setRethrows(True)
+        if store_in_ADS:
+            alg.setAlwaysStoreInADS(True)
+        return alg
 
 
 AlgorithmFactory.subscribe(SANSTubeMerge)
