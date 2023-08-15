@@ -19,6 +19,8 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
         fig = Figure()
         self.axes = fig.add_subplot(111)
         self.plot_frame = FigureCanvas(fig)
+        self.axes.set_xlabel("Wavelength (Å)")
+        self.axes.set_ylabel("Transmission (%)")
         self.output_layout.replaceWidget(self.placeholder_widget, self.plot_frame)
         self.assistant_process = QtCore.QProcess(self)
         self.validation_label.setStyleSheet("QLabel { color : red; }")
@@ -62,6 +64,8 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
     def plot(self, x, y):
         self.axes.cla()
         self.axes.plot(x, y)
+        self.axes.set_xlabel("Wavelength (Å)")
+        self.axes.set_ylabel("Transmission (%)")
         self.plot_frame.figure.tight_layout()
         self.plot_frame.draw()
 
