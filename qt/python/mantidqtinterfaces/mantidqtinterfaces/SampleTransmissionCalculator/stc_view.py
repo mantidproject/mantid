@@ -76,6 +76,11 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
         self.plot_frame.draw()
 
     def set_validation_label(self, warning_text=""):
+        if warning_text == "":
+            self.validation_label.setStyleSheet("QLabel { color : red; }")
+        else:
+            self.validation_label.setStyleSheet("QLabel { color : red; border: 1px solid red }")
+
         self.validation_label.setText(warning_text)
 
     def clear_error_indicator(self):
