@@ -1,0 +1,18 @@
+name: 'Stale old issues'
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v8
+        with:
+          days-before-issue-stale: 180
+          # number of days after it's set to stale
+          days-before-close: 180
+          stale-issue-message: 'This issue has been marked as stale because there has been no activity for 180 days.
+                                 It will be closed after a further 180 days of no activity.'
+          close-issue-message: 'This issue has been closed automatically because there has been no activity for 360 days.'
+          close-issue-label: 'Closed by Stale'
