@@ -20,6 +20,7 @@ from qtpy.QtWidgets import QMainWindow
 # local imports
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.widgets.observers.observing_view import ObservingView
+from mantid.api import AnalysisDataServiceImpl
 import mantid.kernel
 
 
@@ -29,8 +30,6 @@ def _validate_workspaces(names: List[str]) -> List[bool]:
     :param names: A list of workspace names
     :return: List of bools, True if all workspaces have multiple bins
     """
-    from mantid.api import AnalysisDataServiceImpl
-
     ads = AnalysisDataServiceImpl.Instance()
     results = []
     for name in names:

@@ -27,18 +27,31 @@ class Test(unittest.TestCase):
         cls.show_patch = patch("workbench.plotting.figurewindow.QMainWindow.show")
         cls.show_patch.start()
 
+        cls.ws = CreateWorkspace(DataX=[0, 3], DataY=[3, 0], DataE=[1, 1], NSpec=1, OutputWorkspace="ws")
+        cls.single_bin_ws = CreateWorkspace(DataX=[0], DataY=[0], DataE=[1], NSpec=1, OutputWorkspace="single_bin_ws")
+
+    @classmethod
+    def setUp(cls):
         cls.fig, axs = plt.subplots(1, 2, subplot_kw={"projection": "mantid"})
         axs[0].plot([0, 1], [1, 0])
         axs[1].plot([0, 2], [2, 0])
         cls.fig_window = FigureWindow(cls.fig.canvas)
-        cls.ws = CreateWorkspace(DataX=[0, 3], DataY=[3, 0], DataE=[1, 1], NSpec=1, OutputWorkspace="ws")
 
     @classmethod
     def tearDownClass(cls):
         cls.ws.delete()
+        cls.single_bin_ws.delete()
         cls.show_patch.stop()
 
     def test_drag_and_drop_adds_plot_to_correct_axes(self):
+        ax = self._drop_workspace("ws")
+        self.assertEqual(2, len(ax.lines))
+
+    def test_drag_and_drop_wont_plot_a_single_binned_workspace(self):
+        ax = self._drop_workspace("single_bin_ws")
+        self.assertEqual(1, len(ax.lines))
+
+    def _drop_workspace(self, ws_name: str):
         ax = self.fig.get_axes()[1]
         dpi_ratio = self.fig.canvas.device_pixel_ratio
         # Find the center of the axes and simulate a drop event there
@@ -47,12 +60,12 @@ class Test(unittest.TestCase):
         ax_y_centre = (ax.yaxis.clipbox.min[1] + ax.yaxis.clipbox.height * 0.5) / dpi_ratio
         mock_pos = Mock(position=lambda: Mock(x=lambda: ax_x_centre, y=lambda: ax_y_centre))
         mock_event = Mock()
-        mock_event.mimeData().text.return_value = "ws"
+        mock_event.mimeData().text.return_value = ws_name
         mock_event.pos.return_value = mock_pos
         with patch("workbench.plotting.figurewindow.QMainWindow.dropEvent"):
             self.fig_window.dropEvent(mock_event)
 
-        self.assertEqual(2, len(ax.lines))
+        return ax
 
 
 if __name__ == "__main__":
