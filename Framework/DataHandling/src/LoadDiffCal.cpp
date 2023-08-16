@@ -108,14 +108,6 @@ void LoadDiffCal::init() {
 
 namespace { // anonymous
 
-bool endswith(const std::string &str, const std::string &ending) {
-  if (ending.size() > str.size()) {
-    return false;
-  }
-
-  return std::equal(str.begin() + str.size() - ending.size(), str.end(), ending.begin());
-}
-
 void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix, const GroupingWorkspace_sptr &wksp) {
   alg->declareProperty(std::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
                            "OutputGroupingWorkspace", prefix + "_group", Direction::Output),
@@ -436,7 +428,7 @@ void LoadDiffCal::exec() {
   m_filename = getPropertyValue(PropertyNames::CAL_FILE);
   m_workspaceName = getPropertyValue("WorkspaceName");
 
-  if (endswith(m_filename, ".cal")) {
+  if (std::filesystem::path(m_filename).extension() == ".cal") {
     runLoadCalFile();
     return;
   }
