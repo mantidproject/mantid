@@ -138,7 +138,7 @@ void Stitch1D::init() {
   declareProperty(std::make_unique<PropertyWithValue<bool>>("UseManualScaleFactor", false, Direction::Input),
                   "True to use a provided value for the scale factor.");
   declareProperty(
-      std::make_unique<WorkspaceProperty<WorkspaceSingleValue>>("OutputScalingWorkspace", "", Direction::Output),
+      "OutputScalingWorkspace", "",
       "Output WorkspaceSingleValue containing the scale factor and its error. No workspace creation if left empty.");
   auto manualScaleFactorValidator = std::make_shared<BoundedValidator<double>>();
   manualScaleFactorValidator->setLower(0);
@@ -598,7 +598,6 @@ void Stitch1D::exec() {
     createSingleAlg->executeAsChildAlg();
     MatrixWorkspace_sptr singleWS = createSingleAlg->getProperty("OutputWorkspace");
     AnalysisDataService::Instance().addOrReplace(scalingWsName, singleWS);
-    this->setProperty("OutputScalingWorkspace", singleWS);
   }
 }
 /** Put special values back.
