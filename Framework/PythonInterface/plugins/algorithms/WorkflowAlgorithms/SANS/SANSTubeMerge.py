@@ -17,6 +17,7 @@ class Prop:
 class SANSTubeMerge(DataProcessorAlgorithm):
     _REAR_DET_NAME = "rear-detector"
     _CALIBRATED_WS_NAME = "empty_instr"
+    _NEXUS_SUFFIX = ".nxs"
 
     def category(self):
         return "SANS\\Calibration"
@@ -33,9 +34,18 @@ class SANSTubeMerge(DataProcessorAlgorithm):
         return ["SANSTubeCalibration"]
 
     def PyInit(self):
-        self.declareProperty(FileProperty(name=Prop.FRONT, defaultValue="", action=FileAction.Load, extensions=["nxs"]))
-        self.declareProperty(FileProperty(name=Prop.REAR, defaultValue="", action=FileAction.Load, extensions=["nxs"]))
-        self.declareProperty(FileProperty(name=Prop.OUTPUT_FILE, defaultValue="", action=FileAction.OptionalSave, extensions=["nxs"]))
+        self.declareProperty(
+            FileProperty(name=Prop.FRONT, defaultValue="", action=FileAction.Load, extensions=["nxs"]),
+            doc="The path to the Nexus file containing the front detector calibration",
+        )
+        self.declareProperty(
+            FileProperty(name=Prop.REAR, defaultValue="", action=FileAction.Load, extensions=["nxs"]),
+            doc="The path to the Nexus file containing the rear detector calibration",
+        )
+        self.declareProperty(
+            FileProperty(name=Prop.OUTPUT_FILE, defaultValue="", action=FileAction.OptionalSave, extensions=["nxs"]),
+            doc="The location to save the merged calibration file to.",
+        )
 
     def PyExec(self):
         prog_report = Progress(self, start=0.0, end=0.5, nreports=2)
@@ -95,8 +105,9 @@ class SANSTubeMerge(DataProcessorAlgorithm):
 
         AnalysisDataService.add(calibrated_ws_name, calibrated_ws)
 
-    def _save_ws_as_nexus(self, ws_name, output_filename):
-        save_alg = self._create_child_alg("SaveNexusProcessed", InputWorkspace=ws_name, Filename=output_filename)
+    def _save_ws_as_nexus(self, ws_name, filename):
+        save_filepath = filename if filename.endswith(self._NEXUS_SUFFIX) else f"{filename}{self._NEXUS_SUFFIX}"
+        save_alg = self._create_child_alg("SaveNexusProcessed", InputWorkspace=ws_name, Filename=save_filepath)
         save_alg.execute()
 
     def _create_child_alg(self, name, store_in_ADS=False, **kwargs):
