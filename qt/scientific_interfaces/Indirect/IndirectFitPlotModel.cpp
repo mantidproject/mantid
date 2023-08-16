@@ -308,6 +308,7 @@ MatrixWorkspace_sptr IndirectFitPlotModel::createGuessWorkspace(const MatrixWork
   createWsAlg->setChild(true);
   createWsAlg->setLogging(false);
   createWsAlg->setProperty("Function", func->asString());
+  createWsAlg->setProperty("IgnoreInvalidData", true);
   createWsAlg->setProperty("InputWorkspace", inputWorkspace);
   createWsAlg->setProperty("OutputWorkspace", "__QENSGuess");
   createWsAlg->setProperty("StartX", startX);
