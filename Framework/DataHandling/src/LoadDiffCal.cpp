@@ -23,6 +23,7 @@
 
 #include <H5Cpp.h>
 #include <cmath>
+#include <filesystem>
 
 namespace Mantid::DataHandling {
 
@@ -347,18 +348,22 @@ void LoadDiffCal::loadGroupingFromAlternateFile() {
   std::string filename = getPropertyValue(PropertyNames::GROUP_FILE);
   g_log.information() << "Override grouping with information from \"" << filename << "\"\n";
 
+  // Determine the file format by its extension
+  std::string filenameExtension = std::filesystem::path(filename).extension();
   const std::vector<std::string> diffCalExtensions{".h5", ".hd5", ".hdf", ".cal"};
-  bool diffCalFormat = false;
-  for (auto s : diffCalExtensions) {
-    if (endswith(filename, s)) {
-      diffCalFormat = true;
-      break;
-    }
+  bool diffCalFormat = std::any_of(diffCalExtensions.begin(), diffCalExtensions.end(),
+                                   [filenameExtension](std::string const &s) { return s == filenameExtension; });
+  bool xmlFormat = filenameExtension == ".xml";
+  if (!diffCalFormat && !xmlFormat) {
+    throw std::runtime_error("Alternate grouping file has an invalid extension.");
   }
 
+  // Check that the instrument is defined
   if (!m_instrument) {
     throw std::runtime_error("Cannot load alternate grouping: the instrument is not defined.");
   }
+
+  // Load grouping definition into a workspace
   GroupingWorkspace_sptr groupingWorkspace = std::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
 
   if (diffCalFormat) {
@@ -370,19 +375,13 @@ void LoadDiffCal::loadGroupingFromAlternateFile() {
     alg->setProperty<bool>(PropertyNames::MAKE_MSK, false);
     alg->setPropertyValue("WorkspaceName", m_workspaceName);
     alg->executeAsChildAlg();
-
-    // get the workspace
     groupingWorkspace = alg->getProperty("OutputGroupingWorkspace");
-  } else if (filename.find(".xml") != std::string::npos) {
+  } else if (xmlFormat) {
     auto alg = createChildAlgorithm("LoadDetectorsGroupingFile");
     alg->setProperty("InputWorkspace", groupingWorkspace);
     alg->setProperty("InputFile", filename);
     alg->executeAsChildAlg();
-
-    // get the workspace
     groupingWorkspace = alg->getProperty("OutputWorkspace");
-  } else {
-    throw std::runtime_error("Alternate grouping file has an invalid extension.");
   }
 
   setGroupWSProperty(this, m_workspaceName, groupingWorkspace);
