@@ -47,6 +47,7 @@ dependencies:
   - toml>=0.10.2
   - versioningit>=2.1
   - importlib_resources==5.12.0
+  - joblib
 
   # Not Windows, OpenGL implementation:
   - mesalib>=18.0.0

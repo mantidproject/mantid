@@ -33,15 +33,6 @@ except (Exception, Warning):
             stdin=subprocess.PIPE,
         ).communicate()
     )
-    print(
-        subprocess.Popen(
-            "python -m pip install -U joblib",
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            stdin=subprocess.PIPE,
-        ).communicate()
-    )
     from quickBayes.utils.parallel import parallel
 from quickBayes.functions.qse_fixed import QSEFixFunction
 from quickBayes.utils.general import get_background_function
