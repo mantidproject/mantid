@@ -65,6 +65,9 @@
         </widget>
        </item>
        <item>
+        <widget class="QComboBox" name="inputWorkspace"/>
+       </item>
+       <item>
         <widget class="QLineEdit" name="InputVal">
          <property name="toolTip">
           <string>The value that you wish to convert</string>

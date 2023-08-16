@@ -8,11 +8,14 @@
 from qtpy.QtWidgets import QMainWindow, QMessageBox
 from qtpy.QtGui import QDoubleValidator
 from qtpy import QtCore
+from mantid.dataobjects import WorkspaceSingleValue
 from mantid.kernel import Logger
+from mantid.simpleapi import AnalysisDataService
 from mantidqt.gui_helper import show_interface_help
 from mantidqt.utils.qt import load_ui
 import math
 from mantidqtinterfaces.TofConverter import convertUnits
+from typing import Dict
 
 
 class MainWindow(QMainWindow):
@@ -60,12 +63,14 @@ class MainWindow(QMainWindow):
             self.setWindowFlags(window_flags)
         self.ui = load_ui(__file__, "converter.ui", baseinstance=self)
         self.ui.InputVal.setValidator(QDoubleValidator(self.ui.InputVal))
+        self.ui.InputVal.editingFinished.connect(self.input_val_editing_finished)
         self.ui.totalFlightPathInput.setValidator(QDoubleValidator(self.ui.totalFlightPathInput))
         self.ui.scatteringAngleInput.setValidator(QDoubleValidator(self.ui.scatteringAngleInput))
         self.ui.convertButton.clicked.connect(self.convert)
         self.ui.helpButton.clicked.connect(self.helpClicked)
         self.ui.inputUnits.currentIndexChanged.connect(self.setInstrumentInputs)
         self.ui.outputUnits.currentIndexChanged.connect(self.setInstrumentInputs)
+        self.ui.inputWorkspace.currentTextChanged.connect(self.input_option_changed)
         self.setInstrumentInputs()
 
         ##defaults
@@ -81,6 +86,9 @@ class MainWindow(QMainWindow):
         # Add combo box options
         self.ui.inputUnits.addItems(convertUnits.UNIT_LIST)
         self.ui.outputUnits.addItems(convertUnits.UNIT_LIST)
+        self.input_val_dict = self.get_all_single_value_workspaces()
+        self.input_val_dict["User specified"] = 0
+        self.ui.inputWorkspace.addItems(list(self.input_val_dict.keys()))
 
         try:
             import mantid
@@ -90,6 +98,19 @@ class MainWindow(QMainWindow):
         except ImportError:
             pass
 
+    @staticmethod
+    def get_all_single_value_workspaces() -> Dict[str, float]:
+        single_value_workspaces = {}
+        ws_names = AnalysisDataService.getObjectNames()
+        if len(ws_names) == 0:
+            return single_value_workspaces
+
+        ws_list = AnalysisDataService.retrieveWorkspaces(ws_names)
+        for ws in ws_list:
+            if isinstance(ws, WorkspaceSingleValue):
+                single_value_workspaces[ws.name()] = ws.readY(0)[0]
+        return single_value_workspaces
+
     def helpClicked(self):
         show_interface_help(self.mantidplot_name, self.assistant_process, area="utility")
 
@@ -97,6 +118,19 @@ class MainWindow(QMainWindow):
         self.assistant_process.close()
         self.assistant_process.waitForFinished()
         event.accept()
+
+    def input_option_changed(self, input_option: str):
+        if input_option in self.input_val_dict:
+            self.ui.InputVal.setText(str(self.input_val_dict[input_option]))
+
+        self.ui.InputVal.setEnabled(input_option == "User specified")
+
+    def input_val_editing_finished(self):
+        if self.ui.inputWorkspace.currentText() == "User specified":
+            try:
+                self.input_val_dict["User specified"] = float(self.ui.InputVal.text())
+            except ValueError:
+                pass
 
     def convert(self):
         # Always reset these values before conversion.
