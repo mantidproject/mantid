@@ -76,7 +76,7 @@ void LoadDiffCal::init() {
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::Load, exts),
                   "Path to the .h5 file.");
   declareProperty(std::make_unique<FileProperty>(PropertyNames::GROUP_FILE, "", FileProperty::OptionalLoad,
-                                                 std::vector<std::string>{".xml", ".cal"}),
+                                                 std::vector<std::string>{".xml", ".h5", ".hd5", ".hdf", ".cal"}),
                   "Overrides grouping from CalFileName");
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>(PropertyNames::MAKE_GRP, true, Direction::Input),
@@ -346,15 +346,25 @@ void LoadDiffCal::loadGroupingFromAlternateFile() {
 
   std::string filename = getPropertyValue(PropertyNames::GROUP_FILE);
   g_log.information() << "Override grouping with information from \"" << filename << "\"\n";
-  if (!m_instrument) {
-    throw std::runtime_error("Do not have an instrument defined before loading separate grouping");
-  }
-  GroupingWorkspace_sptr wksp = std::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
 
-  if (filename.find(".cal") != std::string::npos) {
+  const std::vector<std::string> diffCalExtensions{".h5", ".hd5", ".hdf", ".cal"};
+  bool diffCalFormat = false;
+  for (auto s : diffCalExtensions) {
+    if (endswith(filename, s)) {
+      diffCalFormat = true;
+      break;
+    }
+  }
+
+  if (!m_instrument) {
+    throw std::runtime_error("Cannot load alternate grouping: the instrument is not defined.");
+  }
+  GroupingWorkspace_sptr groupingWorkspace = std::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
+
+  if (diffCalFormat) {
     auto alg = createChildAlgorithm("LoadDiffCal");
-    alg->setProperty("InputWorkspace", wksp);
-    alg->setPropertyValue(PropertyNames::CAL_FILE, filename);
+    alg->setPropertyValue(PropertyNames::CAL_FILE, filename); // the alternate grouping file
+    alg->setProperty("InputWorkspace", groupingWorkspace);    // a workspace to get the instrument from
     alg->setProperty<bool>(PropertyNames::MAKE_CAL, false);
     alg->setProperty<bool>(PropertyNames::MAKE_GRP, true);
     alg->setProperty<bool>(PropertyNames::MAKE_MSK, false);
@@ -362,17 +372,20 @@ void LoadDiffCal::loadGroupingFromAlternateFile() {
     alg->executeAsChildAlg();
 
     // get the workspace
-    wksp = alg->getProperty("OutputGroupingWorkspace");
-  } else {
+    groupingWorkspace = alg->getProperty("OutputGroupingWorkspace");
+  } else if (filename.find(".xml") != std::string::npos) {
     auto alg = createChildAlgorithm("LoadDetectorsGroupingFile");
-    alg->setProperty("InputWorkspace", wksp);
+    alg->setProperty("InputWorkspace", groupingWorkspace);
     alg->setProperty("InputFile", filename);
     alg->executeAsChildAlg();
 
     // get the workspace
-    wksp = alg->getProperty("OutputWorkspace");
+    groupingWorkspace = alg->getProperty("OutputWorkspace");
+  } else {
+    throw std::runtime_error("Alternate grouping file has an invalid extension.");
   }
-  setGroupWSProperty(this, m_workspaceName, wksp);
+
+  setGroupWSProperty(this, m_workspaceName, groupingWorkspace);
 }
 
 void LoadDiffCal::runLoadCalFile() {
