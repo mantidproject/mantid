@@ -149,15 +149,10 @@ private:
     }
   }
 
-  bool isAlgorithmInHistory(const Mantid::API::Workspace_sptr ws) {
-    auto ws_histories = ws->getHistory().getAlgorithmHistories();
-    bool found = false;
-    for (auto alg_history : ws_histories) {
-      if (alg_history->name() == "UnGroupWorkspace") {
-        found = true;
-        break;
-      }
-    }
-    return found;
+  bool isAlgorithmInHistory(const Mantid::API::Workspace_sptr &ws) {
+    auto wsHistories = ws->getHistory().getAlgorithmHistories();
+    auto iter = std::find_if(wsHistories.cbegin(), wsHistories.cend(),
+                             [](auto const &algHistory) { return algHistory->name() == "UnGroupWorkspace"; });
+    return iter != wsHistories.cend();
   }
 };
