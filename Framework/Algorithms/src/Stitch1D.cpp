@@ -139,7 +139,7 @@ void Stitch1D::init() {
                   "True to use a provided value for the scale factor.");
   declareProperty(
       std::make_unique<WorkspaceProperty<WorkspaceSingleValue>>("OutputScalingWorkspace", "", Direction::Output),
-      "Output WorkspaceSingleValue containing the scale factor and its error. No creation if left empty");
+      "Output WorkspaceSingleValue containing the scale factor and its error. No workspace creation if left empty.");
   auto manualScaleFactorValidator = std::make_shared<BoundedValidator<double>>();
   manualScaleFactorValidator->setLower(0);
   manualScaleFactorValidator->setExclusive(true);
