@@ -98,7 +98,7 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
         input_dict = {
             "binning_type": 0,
             "single_low": 1.0,
-            "single_width": 0.1,
+            "single_width": 0.0,
             "single_high": 0.0,
             "multiple_bin": "0.0,0.1,20.0",
             "chemical_formula": "C",
@@ -108,6 +108,21 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
         }
         validation = self.model.validate(input_dict)
         self.assertEqual(validation, {"histogram": "Upper histogram edge must be greater than the lower bin."})
+
+    def test_validate_histogram_width_greater_than_min(self):
+        input_dict = {
+            "binning_type": 0,
+            "single_low": 1.0,
+            "single_width": 10.0,
+            "single_high": 5.0,
+            "multiple_bin": "0.0,0.1,20.0",
+            "chemical_formula": "C",
+            "density_type": "Number Density",
+            "density": 0.1,
+            "thickness": 0.1,
+        }
+        validation = self.model.validate(input_dict)
+        self.assertEqual(validation, {"histogram": "Width cannot be greater than the upper bin."})
 
     def test_validate_histogram_multiple_invalid_string(self):
         input_dict = {
@@ -137,7 +152,14 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
             "thickness": 0.1,
         }
         validation = self.model.validate(input_dict)
-        self.assertEqual(validation, {"histogram": "Histogram requires an odd number of values."})
+        self.assertEqual(
+            validation,
+            {
+                "histogram": "Histogram requires an odd number of values. It uses the same "
+                "format as the Rebin algorithm, which is a comma separated list "
+                "of first bin boundary, width, last bin boundary."
+            },
+        )
 
     def test_validate_no_formula(self):
         input_dict = {
