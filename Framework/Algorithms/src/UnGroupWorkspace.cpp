@@ -53,10 +53,7 @@ void UnGroupWorkspace::exec() {
     throw std::runtime_error("Selected Workspace is not a WorkspaceGroup");
   }
   // add algorithm history to the workspaces being released from the group
-  WorkspaceVector outputWorkspaces;
-  for (const auto &ws : wsGrpSptr->getAllItems())
-    outputWorkspaces.emplace_back(ws);
-  fillHistory(outputWorkspaces);
+  fillHistory(wsGrpSptr->getAllItems());
   // Notify observers that a WorkspaceGroup is about to be unrolled
   data_store.notificationCenter.postNotification(new Mantid::API::WorkspaceUnGroupingNotification(inputws, wsSptr));
   // Now remove the WorkspaceGroup from the ADS
