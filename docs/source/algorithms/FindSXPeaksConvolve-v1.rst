@@ -41,7 +41,7 @@ Useage
 
 **Example - FindSXPeaksConvolve**
 
-.. testcode:: exampleLoadGaussCube
+.. testcode:: exampleFindSXPeaksConvolve
 
     from mantid.simpleapi import *
 
@@ -52,9 +52,9 @@ Useage
 
 **Output:**
 
-.. testoutput:: exampleLoadGaussCube
+.. testoutput:: exampleFindSXPeaksConvolve
 
-    Found 308 peaks
+    Found 313 peaks
 
 
 .. categories::
