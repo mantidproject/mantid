@@ -10,7 +10,7 @@ dependencies:
   - cmake=3.19.*|>=3.21.0 # Avoid bug in 3.20.* with updating external projects
   - doxygen>=1.9.*
   - eigen=3.4.*
-  - euphonic=0.6.*
+  - euphonic>=1.2.1,<2.0
   - graphviz>=2.47.0
   - gsl=2.7 # Keep gsl a specific version to reduce changes in our fitting
   - h5py
@@ -46,7 +46,6 @@ dependencies:
   - texlive-core>=20180414
   - toml>=0.10.2
   - versioningit>=2.1
-  - importlib_resources==5.12.0
 
   # Not Windows, OpenGL implementation:
   - mesalib>=18.0.0
