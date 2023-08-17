@@ -123,6 +123,7 @@ class MainWindow(QMainWindow):
         if input_option in self.input_val_dict:
             self.ui.InputVal.setText(str(self.input_val_dict[input_option]))
 
+        # Don't allow alteration of the input value if it's from a workspace
         self.ui.InputVal.setEnabled(input_option == "User specified")
 
     def input_val_editing_finished(self):
