@@ -337,11 +337,14 @@ void LoadDiffCal::loadGroupingFromAlternateFile() {
   if (isDefault(PropertyNames::GROUP_FILE))
     return; // a separate grouping file was not specified
 
-  std::string filename = getPropertyValue(PropertyNames::GROUP_FILE);
+  std::basic_string<char> filename = getPropertyValue(PropertyNames::GROUP_FILE);
   g_log.information() << "Override grouping with information from \"" << filename << "\"\n";
 
-  // Determine the file format by its extension
-  std::string filenameExtension = std::filesystem::path(filename).extension();
+  // Determine file format by file name extension
+  std::filesystem::path filePath = std::filesystem::path(filename);
+  std::filesystem::path pathExt = filePath.extension();
+  std::string filenameExtension = pathExt.string();
+
   const std::vector<std::string> diffCalExtensions{".h5", ".hd5", ".hdf", ".cal"};
   bool diffCalFormat = std::any_of(diffCalExtensions.begin(), diffCalExtensions.end(),
                                    [filenameExtension](std::string const &s) { return s == filenameExtension; });
