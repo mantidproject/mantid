@@ -263,7 +263,7 @@ class BayesStretch2(QuickBayesTemplate):
         """
         beta = self.make_slice_ws(slice_list=beta_list, x_data=x_data, x_unit=x_unit, name=f"{name}_Stretch_Beta")
         FWHM = self.make_slice_ws(slice_list=FWHM_list, x_data=x_data, x_unit=x_unit, name=f"{name}_Stretch_FWHM")
-        slice_group = self.group_ws([beta, FWHM], f"{name}_Stretch_Fit")
+        slice_group = self.group_ws([beta, FWHM], name)
 
         return slice_group
 

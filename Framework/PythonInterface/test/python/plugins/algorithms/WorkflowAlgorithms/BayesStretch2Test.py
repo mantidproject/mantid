@@ -20,6 +20,10 @@ SAMPLE_NAME = "__BayesStretchTest_Sample"
 RES_NAME = "__BayesStretchTest_Resolution"
 
 
+def add_log_mock(workspace, sample_logs, data_ws):
+    return workspace
+
+
 class BayesStretch2Test(unittest.TestCase):
     """
     These tests are for checking the quickBayes

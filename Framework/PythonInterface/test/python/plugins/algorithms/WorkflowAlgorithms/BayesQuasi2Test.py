@@ -303,7 +303,7 @@ class BayesQuasi2Test(unittest.TestCase):
         self._alg.setProperty("ResolutionWorkspace", self._res_ws)
         self._alg.setProperty("Program", "QL")
         self._alg.setProperty("OutputWorkspaceFit", "fits")
-        self._alg.setProperty("OutputWorkspaceResults", "results")
+        self._alg.setProperty("OutputWorkspaceResult", "results")
         self._alg.setProperty("OutputWorkspaceProb", "prob")
 
         self._alg.point_data = mock.Mock(side_effect=self.point_mock)
