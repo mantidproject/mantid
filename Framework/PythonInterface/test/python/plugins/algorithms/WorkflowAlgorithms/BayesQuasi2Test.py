@@ -24,7 +24,7 @@ def add_log_mock(workspace, sample_logs, data_ws):
     return workspace
 
 
-class BayesQuasi2Test(object):
+class BayesQuasi2Test(unittest.TestCase):
     """
     These tests are for checking the quickBayes
     lib is used correctly. The results from the
@@ -83,7 +83,7 @@ class BayesQuasi2Test(object):
             self._alg.create_ws,
             N_calls=1,
             call_number=1,
-            OutputWorkspace="test_workspace",
+            OutputWorkspace="test",
             DataX=np.array([1.0, 2.0, 3.0, 1.0, 2.1, 3.0, 1.0, 2.1, 3.0, 1.0, 2.1, 3.0, 1.0, 2.1, 3.0]),
             DataY=np.array([4, 5, 6, 4.1, 4.9, 6, 0.1, -0.1, 0, 4.1, 4.9, 6, 0.1, -0.1, 0]),
             NSpec=5,
@@ -124,16 +124,16 @@ class BayesQuasi2Test(object):
         errors = {"a": [0.1, 0.2], "b": [0.2, 0.1], "c": [0.1, 0.2]}
         x_data = [11, 12]
         self._alg.create_ws = mock.Mock()
-        result_name, prob_name = self._alg.make_results(results, errors, x_data, "unit", 2, "data")
+        result_name, prob_name = self._alg.make_results(results, errors, x_data, "unit", 2, "data", "prob")
 
-        self.assertEqual(result_name, "data_results")
-        self.assertEqual(prob_name, "data_prob")
+        self.assertEqual(result_name, "data")
+        self.assertEqual(prob_name, "prob")
 
         self.assert_mock_called_with(
             self._alg.create_ws,
             N_calls=2,
             call_number=1,
-            OutputWorkspace="data_results",
+            OutputWorkspace="data",
             DataX=np.array([11, 12]),
             DataY=np.array([[1, 2], [2, 3], [3, 4]]),
             NSpec=3,
@@ -148,7 +148,7 @@ class BayesQuasi2Test(object):
             self._alg.create_ws,
             N_calls=2,
             call_number=2,
-            OutputWorkspace="data_prob",
+            OutputWorkspace="prob",
             DataX=np.array([11, 12]),
             DataY=np.array([-1, -2]),
             NSpec=2,
@@ -279,7 +279,7 @@ class BayesQuasi2Test(object):
             max_features=3,
             ws_list=[],
             x_unit="DeltaE",
-            name="__BayesStretchTest_Sample_0_",
+            name="__BayesStretchTest_Sample_QL_0_",
         )
         self.assert_mock_called_with(
             self._alg.make_fit_ws,
@@ -289,7 +289,7 @@ class BayesQuasi2Test(object):
             max_features=3,
             ws_list=["unit", "test"],
             x_unit="DeltaE",
-            name="__BayesStretchTest_Sample_1_",
+            name="__BayesStretchTest_Sample_QL_1_",
         )
 
     def exec_setup(self, fit_ws, results, probs):
@@ -300,7 +300,9 @@ class BayesQuasi2Test(object):
         self._alg.setProperty("SampleWorkspace", self._sample_ws.name())
         self._alg.setProperty("ResolutionWorkspace", self._res_ws)
         self._alg.setProperty("Program", "QL")
-        self._alg.setProperty("OUTPUTWORKSPACEFIT", "out")
+        self._alg.setProperty("OutputWorkspaceFit", "fits")
+        self._alg.setProperty("OutputWorkspaceResults", "results")
+        self._alg.setProperty("OutputWorkspaceProb", "prob")
 
         self._alg.point_data = mock.Mock(side_effect=self.point_mock)
         self._alg.duplicate_res = mock.Mock(return_value=[1, 1, 1])
@@ -369,7 +371,8 @@ class BayesQuasi2Test(object):
             x_data=2,
             x_unit="MomentumTransfer",
             max_features=1,
-            name="__BayesStretchTest_Sample",
+            name_params="results",
+            name_prob="prob",
         )
 
     @mock.patch("BayesQuasi2.GetThetaQ")
@@ -427,7 +430,8 @@ class BayesQuasi2Test(object):
             x_data=2,
             x_unit="MomentumTransfer",
             max_features=3,
-            name="__BayesStretchTest_Sample",
+            name_params="results",
+            name_prob="prob",
         )
 
     @mock.patch("BayesQuasi2.GetThetaQ")
@@ -486,7 +490,8 @@ class BayesQuasi2Test(object):
             x_data=2,
             x_unit="MomentumTransfer",
             max_features=3,
-            name="__BayesStretchTest_Sample",
+            name_params="results",
+            name_prob="prob",
         )
 
 

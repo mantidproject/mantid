@@ -18,7 +18,7 @@ SAMPLE_NAME = "__BayesStretchTest_Sample"
 RES_NAME = "__BayesStretchTest_Resolution"
 
 
-class BayesStretch2Test(object):
+class BayesStretch2Test(unittest.TestCase):
     """
     These tests are for checking the quickBayes
     lib is used correctly. The results from the
@@ -124,7 +124,7 @@ class BayesStretch2Test(object):
         x_data = [9]
 
         self._alg.make_results(beta_list, FWHM_list, x_data, "MomentumTransfer", "test")
-        self._alg.group_ws.assert_called_once_with([beta_list, FWHM_list], "test_Stretch_Fit")
+        self._alg.group_ws.assert_called_once_with([beta_list, FWHM_list], "test")
 
         self.assert_mock_called_with(
             self._alg.make_slice_ws,
