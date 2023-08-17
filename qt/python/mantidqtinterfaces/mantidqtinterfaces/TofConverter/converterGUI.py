@@ -50,9 +50,9 @@ class MainWindow(QMainWindow):
             self.ui.convertedVal.setEnabled(True)
             self.ui.convertedVal.clear()
             # for theta: enable if input or output unit requires it
-            is_momentum_dspacing_transform = convertUnits.MOMENTUM_TRANSFER and outOption == convertUnits.D_SPACING
             self.thetaEnable(
-                not is_momentum_dspacing_transform and (inOption in self.needsThetaInputList or outOption in self.needsThetaOutputList)
+                not convertUnits.is_momentum_dspacing_transform(inOption, outOption)
+                and (inOption in self.needsThetaInputList or outOption in self.needsThetaOutputList)
             )
             # for flightpath: enable if input or output unit requires it
             self.flightPathEnable(inOption in self.needsFlightPathInputList or outOption in self.needsFlightPathOutputList)

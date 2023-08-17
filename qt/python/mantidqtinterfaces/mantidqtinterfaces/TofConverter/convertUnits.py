@@ -23,11 +23,7 @@ UNIT_LIST = [ENERGY_MEV, WAVELENGTH, NU, VELOCITY, MOMENTUM, TEMPERATURE, ENERGY
 
 
 def doConversion(inputval, inOption, outOption, theta, flightpath):
-    if (
-        (inOption == MOMENTUM_TRANSFER or inOption == D_SPACING)
-        and (outOption == MOMENTUM_TRANSFER or outOption == D_SPACING)
-        and inOption != outOption
-    ):
+    if is_momentum_dspacing_transform(inOption, outOption):
         return convert_momentum_transfer_to_dspacing_or_back(float(inputval))
     stage1output = input2energy(float(inputval), inOption, theta, flightpath)
     stage2output = energy2output(stage1output, outOption, theta, flightpath)
@@ -146,3 +142,7 @@ def energy2output(Energy, outOption, theta, flightpath):
 
 def convert_momentum_transfer_to_dspacing_or_back(q_or_d: float) -> float:
     return 2 * math.pi / q_or_d
+
+
+def is_momentum_dspacing_transform(inOption: str, outOption: str) -> bool:
+    return (inOption == MOMENTUM_TRANSFER and outOption == D_SPACING) or (inOption == D_SPACING and outOption == MOMENTUM_TRANSFER)
