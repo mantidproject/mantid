@@ -337,7 +337,7 @@ void LoadDiffCal::loadGroupingFromAlternateFile() {
   if (isDefault(PropertyNames::GROUP_FILE))
     return; // a separate grouping file was not specified
 
-  std::basic_string<char> filename = getPropertyValue(PropertyNames::GROUP_FILE);
+  std::string filename = getPropertyValue(PropertyNames::GROUP_FILE);
   g_log.information() << "Override grouping with information from \"" << filename << "\"\n";
 
   // Determine file format by file name extension
