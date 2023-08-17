@@ -97,7 +97,7 @@ class QuickBayesTemplate(PythonAlgorithm):
         alg = self.createChildAlgorithm("GroupWorkspaces", enableLogging=False)
         alg.setAlwaysStoreInADS(True)
         alg.setProperty("InputWorkspaces", ws_list)
-        alg.setProperty("OutputWorkspace", f"{name}_workspaces")
+        alg.setProperty("OutputWorkspace", name)
         alg.execute()
         return alg.getPropertyValue("OutputWorkspace")
 

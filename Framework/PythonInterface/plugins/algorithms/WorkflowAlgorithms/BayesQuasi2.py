@@ -112,7 +112,8 @@ class BayesQuasi2(QuickBayesTemplate):
         x_data: ndarray,
         x_unit: str,
         max_features: int,
-        name: str,
+        name_params: str,
+        name_prob: str,
     ):
         """
         Takes the output of quickBayes and makes Mantid workspaces
@@ -121,7 +122,8 @@ class BayesQuasi2(QuickBayesTemplate):
         :param x_data: the x data for plotting the results (e.g. Q)
         :param x_unit: the x unit
         :param max_features: the maximum number of features used
-        :param name: the name of the output worksapce
+        :param name_params: the name of parameters workspace
+        :param name_prob: the name of the probability worksapce
         :return workspace of fit paramters and workspace of loglikelihoods (probs)
         """
         axis_names = []
@@ -138,7 +140,7 @@ class BayesQuasi2(QuickBayesTemplate):
                 axis_names.append(key)
 
         _ = self.create_ws(
-            OutputWorkspace=f"{name}_results",
+            OutputWorkspace=name_params,
             DataX=np.array(x_data),
             DataY=np.array(y_data),
             DataE=np.array(e_data),
@@ -150,7 +152,7 @@ class BayesQuasi2(QuickBayesTemplate):
         )
 
         _ = self.create_ws(
-            OutputWorkspace=f"{name}_prob",
+            OutputWorkspace=name_prob,
             DataX=np.array(x_data),
             DataY=np.array(prob),
             NSpec=max_features,
@@ -159,10 +161,11 @@ class BayesQuasi2(QuickBayesTemplate):
             VerticalAxisUnit="Text",
             VerticalAxisValues=[f"{k + 1} feature(s)" for k in range(max_features)],
         )
-        return f"{name}_results", f"{name}_prob"
+        return name_params, name_prob
 
     def calculate(self, sample_ws, report_progress, res_list, N, max_num_peaks, method, function):
         name = self.getPropertyValue("SampleWorkspace")
+        prog = self.getProperty("Program").value
         # get inputs
         elastic = self.getProperty("Elastic").value
         BG_str = self.getPropertyValue("Background")
@@ -215,7 +218,9 @@ class BayesQuasi2(QuickBayesTemplate):
 
             engine = workflow.fit_engine
 
-            ws_list = self.make_fit_ws(engine=engine, max_features=max_num_peaks, ws_list=ws_list, x_unit="DeltaE", name=f"{name}_{spec}_")
+            ws_list = self.make_fit_ws(
+                engine=engine, max_features=max_num_peaks, ws_list=ws_list, x_unit="DeltaE", name=f"{name}_{prog}_{spec}_"
+            )
 
         sample_logs = [("background", BG_str), ("elastic_peak", elastic), ("energy_min", start_x), ("energy_max", end_x)]
 
@@ -279,12 +284,19 @@ class BayesQuasi2(QuickBayesTemplate):
         sample_logs.append(("fit_program", prog))
 
         # report results
-        fits = self.group_ws(ws_list=ws_list, name=name)
+        fits = self.group_ws(ws_list=ws_list, name=self.getPropertyValue("OutputWorkspaceFit"))
+
         self.setProperty("OutputWorkspaceFit", fits)
         self.add_sample_logs(workspace=fits, sample_logs=sample_logs, data_ws=sample_ws)
 
         params, prob = self.make_results(
-            results=results, results_errors=results_errors, x_data=Q[1], x_unit="MomentumTransfer", max_features=max_num_peaks, name=name
+            results=results,
+            results_errors=results_errors,
+            x_data=Q[1],
+            x_unit="MomentumTransfer",
+            max_features=max_num_peaks,
+            name_params=self.getPropertyValue("OutputWorkspaceResult"),
+            name_prob=self.getPropertyValue("OutputWorkspaceProb"),
         )
         self.add_sample_logs(workspace=params, sample_logs=sample_logs, data_ws=sample_ws)
 

@@ -57,7 +57,7 @@ class QuickBayesHelperTest(unittest.TestCase):
     def test_group_ws(self):
         ws_list = [self._sample_ws, self._res_ws]
         name = self._alg.group_ws(ws_list, "test")
-        self.assertEqual(name, "test_workspaces")
+        self.assertEqual(name, "test")
         group = AnalysisDataService.retrieve(name)
         group_names = group.getNames()
         self.assertEqual(len(group_names), 2)

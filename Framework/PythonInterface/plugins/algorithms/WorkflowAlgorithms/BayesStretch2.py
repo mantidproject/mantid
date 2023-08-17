@@ -80,44 +80,36 @@ class BayesStretch2(QuickBayesTemplate):
         )
 
     def do_one_spec(self, spec, data):
-        sample_ws = data["sample"]
-        start_x = data["start x"]
-        end_x = data["end x"]
-        res_list = data["res_list"]
-        # report_progress = data['report']
-        beta_start = data["beta start"]
-        beta_end = data["beta end"]
-        N_beta = data["N_beta"]
-        FWHM_start = data["FWHM start"]
-        FWHM_end = data["FWHM end"]
-        N_FWHM = data["N_FWHM"]
-        BG = data["BG"]
-        elastic = data["elastic"]
-        name = data["name"]
-
         # report_progress.report(f"spectrum {spec}")
-        sx = sample_ws.readX(spec)
-        sy = sample_ws.readY(spec)
-        se = sample_ws.readE(spec)
+        sx = data["sample"].readX(spec)
+        sy = data["sample"].readY(spec)
+        se = data["sample"].readE(spec)
 
         sample = {"x": sx, "y": sy, "e": se}
 
         search = QSEGridSearch()
         new_x, ry = search.preprocess_data(
-            x_data=sample["x"], y_data=sample["y"], e_data=sample["e"], start_x=start_x, end_x=end_x, res=res_list[spec]
+            x_data=sample["x"],
+            y_data=sample["y"],
+            e_data=sample["e"],
+            start_x=data["start x"],
+            end_x=data["end x"],
+            res=data["res_list"][spec],
         )
-        search.set_x_axis(start=beta_start, end=beta_end, N=N_beta, label="beta")
-        search.set_y_axis(start=FWHM_start, end=FWHM_end, N=N_FWHM, label="FWHM")
+        search.set_x_axis(start=data["beta start"], end=data["beta end"], N=data["N_beta"], label="beta")
+        search.set_y_axis(start=data["FWHM start"], end=data["FWHM end"], N=data["N_FWHM"], label="FWHM")
 
         # setup fit function
-        func = QSEFixFunction(bg_function=BG, elastic_peak=elastic, r_x=new_x, r_y=ry, start_x=start_x, end_x=end_x)
+        func = QSEFixFunction(
+            bg_function=data["BG"], elastic_peak=data["elastic"], r_x=new_x, r_y=ry, start_x=data["start x"], end_x=data["end x"]
+        )
         func.add_single_SE()
         func.set_delta_bounds(lower=[0, -0.5], upper=[200, 0.5])
         bounds = func.get_bounds()
         search.set_scipy_engine(guess=func.get_guess(), lower=bounds[0], upper=bounds[1])
         X, Y = search.execute(func=func)
         Z = search.get_grid
-        contour = self.make_contour(X=X, Y=Y, Z=Z, spec=spec, name=name)
+        contour = self.make_contour(X=X, Y=Y, Z=Z, spec=spec, name=data["name"])
 
         beta_slice, FWHM_slice = search.get_slices()
         beta = (search.get_x_axis.values, beta_slice)
@@ -128,53 +120,41 @@ class BayesStretch2(QuickBayesTemplate):
         return self.do_one_spec(spec, data)
 
     def calculate(self, sample_ws, report_progress, res_list, N):
-        name = self.getPropertyValue("SampleWorkspace")
-        # get inputs
-        elastic = self.getProperty("Elastic").value
-        BG_str = self.getPropertyValue("Background")
-        BG = get_background_function(BG_str)
-        start_x = self.getProperty("EMin").value
-        end_x = self.getProperty("EMax").value
-        numCores = self.getProperty("NumberProcessors").value
-        ########################################
-        beta_start = self.getProperty("StartBeta").value
-        beta_end = self.getProperty("EndBeta").value
-        N_beta = self.getProperty("NumberBeta").value
+        data = {}
 
-        FWHM_start = self.getProperty("StartFWHM").value
-        FWHM_end = self.getProperty("EndFWHM").value
-        N_FWHM = self.getProperty("NumberFWHM").value
-        ######################################
+        data["name"] = self.getPropertyValue("SampleWorkspace")
+        # get inputs
+        data["elastic"] = self.getProperty("Elastic").value
+        BG_str = self.getPropertyValue("Background")
+        data["BG"] = get_background_function(BG_str)
+        data["start x"] = self.getProperty("EMin").value
+        data["end x"] = self.getProperty("EMax").value
+        numCores = self.getProperty("NumberProcessors").value
+        data["beta start"] = self.getProperty("StartBeta").value
+        data["beta end"] = self.getProperty("EndBeta").value
+        data["N_beta"] = self.getProperty("NumberBeta").value
+
+        data["FWHM start"] = self.getProperty("StartFWHM").value
+        data["FWHM end"] = self.getProperty("EndFWHM").value
+        data["N_FWHM"] = self.getProperty("NumberFWHM").value
 
         # work around for bug
-        if start_x < sample_ws.readX(0)[0]:
-            start_x = sample_ws.readX(0)[0]
-        if end_x > sample_ws.readX(0)[-1]:
-            end_x = sample_ws.readX(0)[-1]
+        if data["start x"] < sample_ws.readX(0)[0]:
+            data["start x"] = sample_ws.readX(0)[0]
+        if data["end x"] > sample_ws.readX(0)[-1]:
+            data["end x"] = sample_ws.readX(0)[-1]
 
         logger.information(" Number of spectra = {0} ".format(N))
-        logger.information(" Erange : {0}  to {1} ".format(start_x, end_x))
+        logger.information(" Erange : {0}  to {1} ".format(data["start x"], data["end x"]))
 
         # initial values
         contour_list = []
         beta_list = []
         FWHM_list = []
-        #
-        data = {}
+
         data["sample"] = sample_ws
-        data["start x"] = start_x
-        data["end x"] = end_x
         data["res_list"] = res_list
         data["report"] = report_progress
-        data["beta start"] = beta_start
-        data["beta end"] = beta_end
-        data["N_beta"] = N_beta
-        data["FWHM start"] = FWHM_start
-        data["FWHM end"] = FWHM_end
-        data["N_FWHM"] = N_FWHM
-        data["BG"] = BG
-        data["elastic"] = elastic
-        data["name"] = name
 
         # calculation
         calc = partial(self.calculate_wrapper, data=data)
@@ -187,15 +167,15 @@ class BayesStretch2(QuickBayesTemplate):
 
         sample_logs = [
             ("background", BG_str),
-            ("elastic_peak", elastic),
-            ("energy_min", start_x),
-            ("energy_max", end_x),
-            ("StartBeta", beta_start),
-            ("EndBeta", beta_end),
-            ("NumberBeta", N_beta),
-            ("StartFWHM", FWHM_start),
-            ("EndFWHM", FWHM_end),
-            ("NumberFWHM", N_FWHM),
+            ("elastic_peak", data["elastic"]),
+            ("energy_min", data["start x"]),
+            ("energy_max", data["end x"]),
+            ("StartBeta", data["beta start"]),
+            ("EndBeta", data["beta end"]),
+            ("NumberBeta", data["N_beta"]),
+            ("StartFWHM", data["FWHM start"]),
+            ("EndFWHM", data["FWHM end"]),
+            ("NumberFWHM", data["N_FWHM"]),
         ]
 
         return contour_list, beta_list, FWHM_list, sample_logs
@@ -316,10 +296,16 @@ class BayesStretch2(QuickBayesTemplate):
         sample_logs.append(("res_workspace", res_name))
 
         # report results
-        contour_group = self.group_ws(ws_list=contour_list, name=f"{name}_Stretch_Contour")
+        contour_group = self.group_ws(ws_list=contour_list, name=self.getPropertyValue("OutputWorkspaceContour"))
         self.add_sample_logs(workspace=contour_group, sample_logs=sample_logs, data_ws=sample_ws)
 
-        slice_group = self.make_results(beta_list=beta_list, FWHM_list=FWHM_list, x_data=Q[1], x_unit="MomentumTransfer", name=name)
+        slice_group = self.make_results(
+            beta_list=beta_list,
+            FWHM_list=FWHM_list,
+            x_data=Q[1],
+            x_unit="MomentumTransfer",
+            name=self.getPropertyValue("OutputWorkspaceFit"),
+        )
         self.add_sample_logs(workspace=slice_group, sample_logs=sample_logs, data_ws=sample_ws)
 
         self.setProperty("OutputWorkspaceFit", slice_group)
