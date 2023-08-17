@@ -122,9 +122,10 @@ def generate_script(fig, exclude_headers=False):
     cmds.extend(generate_workspace_retrieval_commands(fig) + [""])
     cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
     cmds.extend(plot_commands)
-    for ax in blank_axes:
-        cmds.append(f"{ax}.axis('off')")
-    cmds.append("")
+    if blank_axes:
+        for ax in blank_axes:
+            cmds.append(f"{ax}.axis('off')")
+        cmds.append("")
     cmds.append("plt.show()")
     cmds.append("# Scripting Plots in Mantid:")
     cmds.append("# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
