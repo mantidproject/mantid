@@ -7,6 +7,18 @@
 # pylint: disable=invalid-name,too-many-branches
 import math
 
+ENERGY_MEV = "Energy (meV)"
+WAVELENGTH = "Wavelength (Angstroms)"
+NU = "Nu (THz)"
+VELOCITY = "Velocity (m/s)"
+MOMENTUM = "Momentum (k Angstroms^-1)"
+TEMPERATURE = "Temperature (K)"
+ENERGY_CMINV = "Energy (cm^-1)"
+MOMENTUM_TRANSFER = "Momentum transfer (Q Angstroms^-1)"
+D_SPACING = "d-spacing (Angstroms)"
+TIME_OF_FLIGHT = "Time of flight (microseconds)"
+UNIT_LIST = [ENERGY_MEV, WAVELENGTH, NU, VELOCITY, MOMENTUM, TEMPERATURE, ENERGY_CMINV, MOMENTUM_TRANSFER, D_SPACING, TIME_OF_FLIGHT]
+
 # Used by converter GUI to do unit conversions
 
 
@@ -134,16 +146,3 @@ def energy2output(Energy, outOption, theta, flightpath):
 
 def convert_momentum_transfer_to_dspacing_or_back(q_or_d: float) -> float:
     return 2 * math.pi / q_or_d
-
-
-ENERGY_MEV = "Energy (meV)"
-WAVELENGTH = "Wavelength (Angstroms)"
-NU = "Nu (THz)"
-VELOCITY = "Velocity (m/s)"
-MOMENTUM = "Momentum (k Angstroms^-1)"
-TEMPERATURE = "Temperature (K)"
-ENERGY_CMINV = "Energy (cm^-1)"
-MOMENTUM_TRANSFER = "Momentum transfer (Q Angstroms^-1)"
-D_SPACING = "d-spacing (Angstroms)"
-TIME_OF_FLIGHT = "Time of flight (microseconds)"
-UNIT_LIST = [ENERGY_MEV, WAVELENGTH, NU, VELOCITY, MOMENTUM, TEMPERATURE, ENERGY_CMINV, MOMENTUM_TRANSFER, D_SPACING, TIME_OF_FLIGHT]
