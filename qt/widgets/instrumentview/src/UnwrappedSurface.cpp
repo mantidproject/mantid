@@ -443,7 +443,18 @@ void UnwrappedSurface::setPeaksWorkspace(const std::shared_ptr<Mantid::API::IPea
   po->setShowRowsFlag(m_showPeakRows);
   po->setShowLabelsFlag(m_showPeakLabels);
   po->setShowRelativeIntensityFlag(m_showPeakRelativeIntensity);
-  m_peakShapes.append(po);
+
+  bool containsPeak = false;
+  for (auto pkShape : m_peakShapes) {
+    if (pkShape->getPeaksWorkspace() == pws) {
+      containsPeak = true;
+      break;
+    }
+  }
+
+  if (!containsPeak)
+    m_peakShapes.append(po);
+
   m_startPeakShapes = true;
   connect(po, SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)), this,
           SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
