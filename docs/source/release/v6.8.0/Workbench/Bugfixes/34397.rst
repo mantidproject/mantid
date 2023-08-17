@@ -1,1 +1,1 @@
-- Catch unhandled exception when attempting to generate a plot script from and unsupported plot.
+- Catch unhandled exception when attempting to generate a plot script from an unsupported plot.
