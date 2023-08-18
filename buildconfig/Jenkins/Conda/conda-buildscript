@@ -75,7 +75,10 @@ do
         --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
         --enable-package) ENABLE_PACKAGE=true ;;
         --enable-docs) ENABLE_DOCS=true ;;
-        --enable-doctests) ENABLE_DOC_TESTS=true ;;
+        --enable-doctests)
+            ENABLE_DOCS=true
+            ENABLE_DOC_TESTS=true
+            ;;
         --enable-dev-docs) ENABLE_DEV_DOCS=true ;;
         --enable-coverity)
 	    ENABLE_COVERITY=true

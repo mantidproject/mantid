@@ -7,7 +7,7 @@
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.osiris_routines import osiris_advanced_config, osiris_algs, osiris_param_mapping
-from isis_powder.routines import instrument_settings, common_output, common, focus
+from isis_powder.routines import instrument_settings, common_output, common, focus, absorb_corrections, common_enums
 import copy
 import mantid.simpleapi as mantid
 import os
@@ -28,6 +28,16 @@ class Osiris(AbstractInst):
             inst_prefix="OSIRIS",
         )
         self._run_details_cached_obj = {}
+        self._sample_details = None
+
+    def set_sample_details(self, **kwargs):
+        kwarg_name = "sample"
+        sample_details_obj = common.dictionary_key_helper(
+            dictionary=kwargs,
+            key=kwarg_name,
+            exception_msg="The argument containing sample details was not found. Please" f" set the following argument: {kwarg_name}",
+        )
+        self._sample_details = sample_details_obj
 
     def create_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
@@ -76,6 +86,10 @@ class Osiris(AbstractInst):
             processed = self._focus(
                 run_number_string=run_number_string,
                 do_van_normalisation=self._inst_settings.van_norm,
+                do_absorb_corrections=self._inst_settings.absorb_corrections,
+                sample_details=self._sample_details,
+                empty_can_subtraction_method=self._inst_settings.empty_can_subtraction_method,
+                paalman_pings_events_per_point=self._inst_settings.paalman_pings_events_per_point,
             )
 
             processed = [
@@ -95,12 +109,11 @@ class Osiris(AbstractInst):
 
             d_spacing_group, tof_group = self._output_focused_ws(merged_runs, run_details)
 
-            if len(focussed_runs) != 1:
-                common.remove_intermediate_workspace([ws for ws_group in focussed_runs for ws in ws_group])
+            common.remove_intermediate_workspace(merged_runs)
         else:
             d_spacing_group, tof_group = self._output_focused_ws([ws for ws_group in focussed_runs for ws in ws_group], run_details)
 
-            common.remove_intermediate_workspace([ws for ws_group in focussed_runs for ws in ws_group])
+        common.remove_intermediate_workspace([ws for ws_group in focussed_runs for ws in ws_group])
 
         return d_spacing_group, tof_group
 
@@ -108,19 +121,30 @@ class Osiris(AbstractInst):
         self,
         run_number_string,
         do_van_normalisation,
+        do_absorb_corrections,
+        sample_details=None,
+        empty_can_subtraction_method=None,
+        paalman_pings_events_per_point=None,
     ):
         """
-        Override parent _focus function, used to focus samples in a specific drange
-        :param run_number_string: The run number(s) of the drange
-        :param do_van_normalisation: True to divide by the vanadium run, false to not.
-        :return:
+        Focuses the user specified run(s) - should be called by the concrete instrument.
+        :param run_number_string: The run number(s) to be processed.
+        :param do_van_normalisation: Whether to divide by the vanadium run or not.
+        :param do_absorb_corrections: Whether to apply absorption correction or not.
+        :param sample_details: Sample details for the run number(s).
+        :param empty_can_subtraction_method: The method for absorption correction. Can be 'Simple' or 'PaalmanPings'.
+        :param paalman_pings_events_per_point: The number of events used in Paalman Pings Monte Carlo absorption correction.
+        :return: the focussed run(s).
         """
         self._is_vanadium = False
         return focus.focus(
             run_number_string=run_number_string,
             perform_vanadium_norm=do_van_normalisation,
             instrument=self,
-            absorb=False,
+            absorb=do_absorb_corrections,
+            sample_details=sample_details,
+            empty_can_subtraction_method=empty_can_subtraction_method,
+            paalman_pings_events_per_point=paalman_pings_events_per_point,
         )
 
     def _setup_drange_sets(self):
@@ -153,9 +177,83 @@ class Osiris(AbstractInst):
                 return drange_name
         return None
 
+    def _apply_absorb_corrections(self, run_details, ws_to_correct):
+        """
+        Generates absorption corrections using monte carlo absorption.
+        :param ws_to_correct: workspace that needs to be corrected.
+        :param run_details: the run details of the workspace. Unused parameter added for API compatibility.
+        :return: A workspace containing the corrections.
+        """
+        if self._inst_settings.simple_events_per_point:
+            events_per_point = int(self._inst_settings.simple_events_per_point)
+        else:
+            events_per_point = 1000
+
+        container_geometry = self._sample_details.generate_container_geometry()
+        container_material = self._sample_details.generate_container_material()
+        if container_geometry and container_material:
+            mantid.SetSample(
+                ws_to_correct,
+                Geometry=self._sample_details.generate_sample_geometry(),
+                Material=self._sample_details.generate_sample_material(),
+                ContainerGeometry=container_geometry,
+                ContainerMaterial=container_material,
+            )
+
+        else:
+            mantid.SetSample(
+                ws_to_correct,
+                Geometry=self._sample_details.generate_sample_geometry(),
+                Material=self._sample_details.generate_sample_material(),
+            )
+
+        previous_units = ws_to_correct.getAxis(0).getUnit().unitID()
+        ws_units = common_enums.WORKSPACE_UNITS
+
+        if previous_units != ws_units.wavelength:
+            ws_to_correct = mantid.ConvertUnits(
+                InputWorkspace=ws_to_correct,
+                OutputWorkspace=ws_to_correct,
+                Target=ws_units.wavelength,
+            )
+
+        corrections = mantid.MonteCarloAbsorption(InputWorkspace=ws_to_correct, EventsPerPoint=events_per_point)
+
+        ws_to_correct = ws_to_correct / corrections
+
+        if previous_units != ws_units.wavelength:
+            ws_to_correct = mantid.ConvertUnits(
+                InputWorkspace=ws_to_correct,
+                Target=previous_units,
+                OutputWorkspace=ws_to_correct,
+            )
+
+        common.remove_intermediate_workspace(corrections)
+
+        return ws_to_correct
+
+    def _apply_paalmanpings_absorb_and_subtract_empty(self, workspace, summed_empty, sample_details, paalman_pings_events_per_point=None):
+        """
+        Applies the Paalman Pings Monte Carlo absorption to the workspace.
+
+        :param workspace: The input workspace containing the data to be corrected.
+        :param summed_empty:The workspace containing empty container run data.
+        :param sample_details: The details of the sample being corrected.
+        :param paalman_pings_events_per_point: The number of events per point for the Paalman-Pings correction.
+
+        :return: The corrected workspace.
+        """
+        mantid.SetInstrumentParameter(Workspace=workspace, ParameterName="deltaE-mode", Value="Elastic")
+        return absorb_corrections.apply_paalmanpings_absorb_and_subtract_empty(
+            workspace=workspace,
+            summed_empty=summed_empty,
+            sample_details=sample_details,
+            paalman_pings_events_per_point=paalman_pings_events_per_point,
+        )
+
     def apply_drange_cropping(self, run_number_string, focused_ws):
         """
-        Apply dspacing range cropping to a focused workspace.
+        Applies dspacing range cropping to a focused workspace.
         :param run_number_string: The run number to look up for the drange
         :param focused_ws: The workspace to be cropped
         :return: The cropped workspace in its drange
@@ -172,7 +270,7 @@ class Osiris(AbstractInst):
 
     def get_vanadium_path(self, run_details):
         """
-        Get the vanadium path from the run details
+        Returns the vanadium path from the run details
         :param run_details: The run details of the run number
         :return: the vanadium path
         """

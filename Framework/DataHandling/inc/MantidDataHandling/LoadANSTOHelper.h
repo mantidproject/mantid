@@ -14,6 +14,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidNexus/NexusClasses.h"
+#include <regex>
 
 #define TarTypeFlag_NormalFile '0'
 #define TarTypeFlag_HardLink '1'
@@ -27,6 +28,10 @@
 namespace Mantid {
 namespace DataHandling {
 namespace ANSTO {
+
+/// extract datasets from a group that match a regex filter
+std::vector<std::string> filterDatasets(const NeXus::NXEntry &entry, const std::string &groupPath,
+                                        const std::string &regexFilter);
 
 /// pointer to the vector of events
 using EventVector_pt = std::vector<Types::Event::TofEvent> *;

@@ -82,6 +82,10 @@ Output:
    The bank3 gradient is: 1.0
    The bank4 gradient is: 1.0
 
+.. testcleanup:: D7YIGCalibrationIntermediateExample
+
+    import os
+    os.remove("test_intermediateWavelength.xml")
 
 .. [#Fennell] T. Fennell, L. Mangin-Thro, H.Mutka, G.J. Nilsen, A.R. Wildes.
    *Wavevector and energy resolution of the polarized diffuse scattering spectrometer D7*,

@@ -92,15 +92,23 @@ class AtomsData(collections.abc.Sequence):
             raise ValueError("Invalid structure of the dictionary to be added.")
 
         # "symbol"
-        if (symbol := item["symbol"]) not in abins.constants.ALL_SYMBOLS:
-            # Check is symbol was loaded as type bytes
-            if isinstance(symbol, bytes):
-                utf8_symbol = symbol.decode("utf-8")
-
-                if utf8_symbol in abins.constants.ALL_SYMBOLS:
-                    item["symbol"] = utf8_symbol
+        if (symbol_raw := item["symbol"]) not in abins.constants.ALL_SYMBOLS:
+            # Check if symbol was loaded as type bytes
+            if isinstance(symbol_raw, bytes):
+                symbol = symbol_raw.decode("utf-8")
             else:
-                raise ValueError("Invalid value of symbol.")
+                symbol = symbol_raw
+                assert isinstance(symbol, str)
+
+            # Symbols from CASTEP may have subtypes e.g. H:D
+            if ":" in symbol:
+                symbol = symbol.split(":")[0]
+
+            # Final check that value is now valid
+            if symbol in abins.constants.ALL_SYMBOLS:
+                item["symbol"] = symbol
+            else:
+                raise ValueError(f"Invalid value of symbol: {item['symbol']}.")
 
         # "coord"
         coord = item["coord"]

@@ -60,10 +60,6 @@ You can get access to the Instrument for a workspace with
 
     instrument = ws.getInstrument()
 
-.. testoutput:: WorkspaceInstrument
-  :hide:
-
-
 Instrument Properties
 #####################
 
@@ -111,9 +107,6 @@ The instrument class has several methods to help in finding the objects that des
     bank1 = instrument.getComponentByName("bank1")
     # Or by Detector_id
     det101 = instrument.getDetector(101)
-
-.. testoutput:: InstrumentProperties
-  :hide:
 
 Instrument Parameters
 #####################

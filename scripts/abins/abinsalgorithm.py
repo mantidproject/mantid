@@ -11,6 +11,13 @@ import os
 import re
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
+import yaml
+
+try:
+    from yaml import CSafeLoader as SafeLoader
+except ImportError:
+    from yaml import SafeLoader
+
 import numpy as np
 from mantid.api import mtd, FileAction, FileProperty, WorkspaceGroup, WorkspaceProperty
 from mantid.kernel import Atom, Direction, StringListValidator, StringArrayProperty, logger
@@ -782,27 +789,22 @@ class AbinsAlgorithm:
     @classmethod
     def _validate_euphonic_input_file(cls, filename_full_path: str) -> dict:
         logger.information("Validate force constants file for interpolation.")
-        from dos.load_euphonic import euphonic_available
 
-        if euphonic_available():
-            try:
-                from euphonic.cli.utils import force_constants_from_file
+        from pathlib import Path
 
-                force_constants_from_file(filename_full_path)
-                return dict(Invalid=False, Comment="")
-            except Exception as error:
-                if hasattr(error, "message"):
-                    message = error.message
-                else:
-                    message = str(error)
-                return dict(Invalid=True, Comment=f"Problem opening force constants file with Euphonic.: {message}")
-        else:
-            return dict(
-                Invalid=True,
-                Comment=(
-                    "Could not import Euphonic module. " "Try running user/AdamJackson/install_euphonic.py from the Script Repository."
-                ),
-            )
+        if (suffix := Path(filename_full_path).suffix) == ".castep_bin":
+            # Assume any .castep_bin file is valid choice
+            pass
+
+        elif suffix == ".yaml":
+            # Check .yaml files have expected keys for Phonopy force constants
+            with open(filename, "r") as yaml_file:
+                phonon_data = yaml.load(yaml_file, Loader=SafeLoader)
+            if not {"phonopy", "force_constants"}.issubset(phonon_data):
+                return dict(Invalid=True, Comment=f"{filename_full_path} does not seem to be a valid phonopy.yaml with force constants")
+
+        # Did not return already: No problems found
+        return dict(Invalid=False, Comment="")
 
     @classmethod
     def _validate_vasp_input_file(cls, filename_full_path: str) -> dict:

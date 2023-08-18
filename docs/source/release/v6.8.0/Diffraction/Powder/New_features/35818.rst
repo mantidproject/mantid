@@ -1,1 +1,1 @@
-* Expose the OffsetData parameter in the Powder Diffraction Reduction gui
+- Expose the OffsetData parameter in the Powder Diffraction Reduction gui

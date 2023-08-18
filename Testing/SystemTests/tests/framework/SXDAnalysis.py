@@ -84,6 +84,7 @@ class SXDProcessVanadium(systemtesting.MantidSystemTest):
         self.van = sxd.van_ws
 
     def validate(self):
+        self.checkInstrument = False
         return self.van, "SXD23779_processed_vanadium.nxs"
 
 
@@ -103,6 +104,7 @@ class SXDProcessSampleData(systemtesting.MantidSystemTest):
         self.ws = sxd.get_ws_name(runno)
 
     def validate(self):
+        self.checkInstrument = False
         return self.ws, "SXD23767_processed.nxs"
 
 

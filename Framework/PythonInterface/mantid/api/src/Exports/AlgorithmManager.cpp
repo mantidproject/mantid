@@ -34,8 +34,10 @@ AlgorithmManagerImpl &instance() {
   auto &mgr = AlgorithmManager::Instance();
   std::call_once(INIT_FLAG, []() {
     PyRun_SimpleString("import atexit\n"
-                       "from mantid.api import AlgorithmManager\n"
-                       "atexit.register(lambda: AlgorithmManager.clear())");
+                       "def cleanupAlgorithmManager():\n"
+                       "    from mantid.api import AlgorithmManager\n"
+                       "    AlgorithmManager.clear()\n"
+                       "atexit.register(cleanupAlgorithmManager)");
   });
   return mgr;
 }

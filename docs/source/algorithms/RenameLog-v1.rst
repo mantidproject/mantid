@@ -32,14 +32,6 @@ Usage
 
   RenameLog(Workspace=wsname, OriginalLogName='a1b', NewLogName='A1B_New')
 
-.. testcleanup:: ExRenameLog
-
-
-Output:
-
-.. testoutput:: ExRenameLog
-
-
 .. categories::
 
 .. sourcelink::

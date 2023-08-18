@@ -10,7 +10,7 @@ set(DOCS_MATH_EXT
 set_property(CACHE DOCS_MATH_EXT PROPERTY STRINGS "sphinx.ext.imgmath" "sphinx.ext.mathjax")
 option(DOCS_PLOTDIRECTIVE "If enabled include plots generated with the plot directive. " OFF)
 option(DOCS_QTHELP "If enabled add a target to build the qthelp documentation" ON)
-option(SPHINX_WARNINGS_AS_ERRORS "non-zero exit if there are sphinx warnings" OFF)
+option(SPHINX_WARNINGS_AS_ERRORS "non-zero exit if there are sphinx warnings" ON)
 
 # Build layout
 set(SPHINX_CONF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
@@ -56,7 +56,7 @@ function(add_sphinx_build_target builder math_renderer)
     set(conf_builder ${SPHINX_CONF_DIR}/conf-${builder}.py)
   endif()
 
-  # -W turns warnings into errors, but there is an issue with getting the numpy intersphinx
+  # -W turns warnings into errors, but there is an issue with getting the numpy intersphinx.
   set(sphinx_options
       ${SPHINX_NOCOLOR}
       ${SPHINX_KEEPGOING}

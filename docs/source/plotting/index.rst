@@ -729,10 +729,10 @@ of the logs that are being excluded by the TimeROI.
 
    import matplotlib.pyplot as plt
    from mantid import plots
-   from mantid.simpleapi import Load
+   from mantid.simpleapi import Load, FilterByTime
 
-   w=Load('CNCS_7860')
-   ws_filtered=FilterByTime(w, StartTime=60, StopTime=120)
+   w = Load('CNCS_7860')
+   ws_filtered = FilterByTime(w, StartTime=60, StopTime=120)
    fig = plt.figure()
    ax1 = fig.add_subplot(211,projection='mantid')
    ax2 = fig.add_subplot(212,projection='mantid')
