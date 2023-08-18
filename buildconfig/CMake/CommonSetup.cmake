@@ -166,7 +166,10 @@ include(PylintSetup)
 # ######################################################################################################################
 # External Data for testing
 # ######################################################################################################################
-if(CXXTEST_FOUND OR PYUNITTEST_FOUND)
+if(ENABLE_DOCS
+   OR CXXTEST_FOUND
+   OR PYUNITTEST_FOUND
+)
   include(SetupDataTargets)
 endif()
 
