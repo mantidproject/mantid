@@ -106,8 +106,24 @@ Table Columns
 | **Sample Thickness**     |   Sets the sample thickness to be used in the reduction                                         |
 +--------------------------+-------------------------------------------------------------------------------------------------+
 | **Options**              |   This column allows the user to provide row specific settings. Currently only                  |
-|                          |   **WavelengthMin**, **WavelengthMax** and **EventSlices** can be set (see below for details)   |
+|                          |   **WavelengthMin**, **WavelengthMax**, **EventSlices** (see :ref:`ISIS_SANS_Settings_Tab-ref`  |
+|                          |   for details), **BackgroundWorkspace**, and **ScaleFactor** can be set (see below).            |
 +--------------------------+-------------------------------------------------------------------------------------------------+
+
+.. _ISIS_SANS_scaled_background-ref:
+
+Scaled Background Subtraction
++++++++++++++++++++++++++++++
+
+By setting **both** ``BackgroundWorkspace`` and ``ScaleFactor`` in the options a Scaled Background Subtraction will be
+performed. Giving these values will perform a background subtraction where the ``BackgroundWorkspace`` (representing a
+reduced solution run) will be multiplied by the ``ScaleFactor`` and then subtracted from the reduced HAB, LAB, or Merged
+main output workspace. It is then saved to the ADS or to a file (based on the save options below) in addition to the
+normal reduction output.
+
+The reduction will fail if only one of these values is set. Or, if the reduction mode is set to "All". This is because
+there is no way to determine if the workspace given as the ``BackgroundWorkspace`` is for the HAB or LAB, and so uses
+the value from the User File, therefore assuming that both reductions have used the same one.
 
 Save Options
 ------------

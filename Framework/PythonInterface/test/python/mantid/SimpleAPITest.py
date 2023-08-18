@@ -150,7 +150,7 @@ class SimpleAPITest(unittest.TestCase):
         try:
             (result,) = simpleapi.CompareWorkspaces(workspace1_test, workspace2_test)
             self.fail("Should not have made it to this point.")
-        except (ValueError):
+        except ValueError:
             pass
 
         simpleapi.DeleteWorkspace(ws1_name)

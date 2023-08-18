@@ -82,6 +82,11 @@ The output is given by:
 
     OutputWorkspace=\frac{OutputDataWorkspace}{OutputNormalizationWorkspace}-\frac{OutputBackgroundDataWorkspace}{OutputBackgroundNormalizationWorkspace}
 
+For citing this algorithm please use
+
+#. A.T. Savici, M.A. Gigg, O. Arnold, R. Tolchenov, R.E. Whitfield, S.E. Hahn, W. Zhou,  and I.A. Zaliznyak *Efficient data reduction for time-of-flight neutron scattering experiments on single crystals*, J. Appl. Cryst. **55.6**, 1514-1527 (2022) doi: `10.1107/S1600576722009645 <https://doi.org/10.1107/S1600576722009645>`_
+
+
 **Example - MDNorm**
 
 For diffraction measurements a sample code is found below:

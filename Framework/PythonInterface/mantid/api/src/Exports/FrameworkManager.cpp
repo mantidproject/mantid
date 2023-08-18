@@ -71,8 +71,10 @@ FrameworkManagerImpl &instance() {
     // delete any python objects still stored in other singletons like the
     // ADS or AlgorithmManager.
     PyRun_SimpleString("import atexit\n"
-                       "from mantid.api import FrameworkManager\n"
-                       "atexit.register(lambda: FrameworkManager.shutdown())");
+                       "def cleanupFrameworkManager():\n"
+                       "    from mantid.api import FrameworkManager\n"
+                       "    FrameworkManager.shutdown()\n"
+                       "atexit.register(cleanupFrameworkManager)");
   });
   return frameworkMgr;
 }

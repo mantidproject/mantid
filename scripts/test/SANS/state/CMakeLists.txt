@@ -3,6 +3,7 @@
 set(TEST_PY_FILES
     adjustment_test.py
     JsonSerializerTest.py
+    background_subtraction_test.py
     calculate_transmission_test.py
     convert_to_q_test.py
     data_test.py

@@ -195,7 +195,6 @@ class MultiPythonFileInterpreter(QWidget):
         # are being prompted to save
         self._tabs.setCurrentIndex(idx)
         if self.current_editor().confirm_close():
-
             # If the last editor tab is being closed, its zoom level
             # is saved for the new tab which opens automatically.
             if self.editor_count == 1:
@@ -315,7 +314,18 @@ class MultiPythonFileInterpreter(QWidget):
         with open(filepath, "r") as code_file:
             content = code_file.read()
 
-        self.append_new_editor(content=content, filename=filepath)
+        matching_index = -1
+        for i in range(self.editor_count):
+            if self.editor_at(i).filename == filepath:
+                matching_index = i
+                break
+
+        # If the file is currently open, select that tab
+        if matching_index > -1:
+            self._tabs.setCurrentWidget(self.editor_at(matching_index))
+        else:
+            self.append_new_editor(content=content, filename=filepath)
+
         if startup is False and mantid_api_import_needed(content) is True:
             add_mantid_api_import(self.current_editor().editor, content)
 
@@ -341,9 +351,12 @@ class MultiPythonFileInterpreter(QWidget):
 
     def save_current_file_as(self):
         previous_filename = self.current_editor().filename
+        current_editor_before_saving = self.current_editor()
         saved, filename = self.current_editor().save_as()
         if saved:
             self.open_file_in_new_tab(filename)
+            tab_index = self._tabs.indexOf(current_editor_before_saving)
+            self.close_tab(tab_index)
             if previous_filename:
                 self.sig_file_name_changed.emit(previous_filename, filename)
 

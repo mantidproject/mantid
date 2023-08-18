@@ -18,7 +18,6 @@ from unittest.mock import patch
 from matplotlib.colors import Normalize
 from numpy import hstack
 
-from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE
 from mantidqt.widgets.sliceviewer.views.dataview import SCALENORM
 from mantid.simpleapi import (
     CreateMDHistoWorkspace,
@@ -256,7 +255,7 @@ class SliceViewerTestChangingNormUpdatesClimValidators(systemtesting.MantidSyste
         colorbar.autoscale.setChecked(False)
 
         colorbar.norm.setCurrentText("Log")
-        self.assertEqual(colorbar.cmin.validator().bottom(), MIN_LOG_VALUE)
+        self.assertGreaterThan(colorbar.cmin.validator().bottom(), 0)
 
         colorbar.norm.setCurrentText("Linear")
         self.assertEqual(colorbar.cmin.validator().bottom(), -inf)

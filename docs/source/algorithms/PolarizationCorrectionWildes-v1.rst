@@ -144,8 +144,8 @@ Output:
 
 .. testoutput:: PolarizationEfficiencyCorExample
 
-   Ratio of corrected and original 'up' intensity at 15A: 1.038
-   Ratio of corrected and original 'down' intensity at 15A: 1.062
+   Ratio of corrected and original 'up' intensity at 15A: 0.1062
+   Ratio of corrected and original 'down' intensity at 15A: 10.38
 
 References
 ----------

@@ -98,16 +98,7 @@ Output:
 .. testcleanup:: SaveZODSEx
 
     import os
-    def removeFiles(files):
-      for ws in files:
-        try:
-          path = os.path.join(os.path.expanduser("~"), ws)
-          os.remove(path)
-        except:
-          pass
-
-    removeFiles(["ZODS.h5"])
-
+    os.remove("ZODS.h5")
 
 .. categories::
 

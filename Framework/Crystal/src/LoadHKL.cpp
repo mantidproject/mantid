@@ -76,7 +76,7 @@ void LoadHKL::exec() {
     double h = 0.0, k = 0.0, l = 0.0, m = 0.0, n = 0.0, p = 0.0;
     bool cosines;
     bool modvec;
-    if (line.length() == 89) {
+    if (line.length() < 95) {
       cosines = false;
       modvec = false;
     } else if (line.length() == 101) {

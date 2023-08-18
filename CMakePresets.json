@@ -23,7 +23,6 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "ENABLE_PRECOMMIT": "OFF",
-        "DOCS_HTML": "ON",
         "COLORED_COMPILER_OUTPUT": "OFF"
       }
     },
@@ -163,8 +162,7 @@
       "description": "Default build options for sanitiser builds",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-        "DOCS_HTML": "OFF"
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
       }
     },
     {

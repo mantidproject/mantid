@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import json
 from numbers import Real
+from typing import Any, Dict
+
 import numpy as np
 from numpy.testing import assert_allclose
 from typing import Union
@@ -27,6 +29,9 @@ class Tester(object):
         "VASPLoader": "xml",
         "VASPOUTCARLoader": "OUTCAR",
     }
+
+    MASS_DELTA = 1e-5
+    FLOAT_EPS = np.finfo(np.float64).eps
 
     @staticmethod
     def _to_array_inplace(data: dict, key: str) -> None:
@@ -113,18 +118,16 @@ class Tester(object):
         for item in range(len(correct_atoms)):
             self.assertEqual(correct_atoms["atom_%s" % item]["sort"], atoms["atom_%s" % item]["sort"])
             self.assertAlmostEqual(
-                correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"], delta=0.00001
+                correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"], delta=self.MASS_DELTA
             )  # delta in amu units
+
             self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
-            assert_allclose(correct_atoms["atom_%s" % item]["coord"], atoms["atom_%s" % item]["coord"])
+            assert_allclose(correct_atoms["atom_%s" % item]["coord"], atoms["atom_%s" % item]["coord"], rtol=1e-7, atol=self.FLOAT_EPS)
 
         # check attributes
         self.assertEqual(correct_data["attributes"]["hash"], data["attributes"]["hash"])
         self.assertEqual(correct_data["attributes"]["ab_initio_program"], data["attributes"]["ab_initio_program"])
-        try:
-            self.assertEqual(abins.test_helpers.find_file(filename + "." + extension), data["attributes"]["filename"])
-        except AssertionError:
-            self.assertEqual(abins.test_helpers.find_file(filename + "." + extension.upper()), data["attributes"]["filename"])
+        self.assertEqual(abins.test_helpers.find_file(f"{filename}.{extension}"), data["attributes"]["filename"])
 
         # check datasets
         assert_allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"])
@@ -132,12 +135,8 @@ class Tester(object):
     def _check_loader_data(
         self, correct_data=None, input_ab_initio_filename=None, extension=None, loader=None, max_displacement_kpt: Real = float("Inf")
     ):
-        try:
-            read_filename = abins.test_helpers.find_file(input_ab_initio_filename + "." + extension)
-            ab_initio_loader = loader(input_ab_initio_filename=read_filename)
-        except ValueError:
-            read_filename = abins.test_helpers.find_file(input_ab_initio_filename + "." + extension.upper())
-            ab_initio_loader = loader(input_ab_initio_filename=read_filename)
+        read_filename = abins.test_helpers.find_file(f"{input_ab_initio_filename}.{extension}")
+        ab_initio_loader = loader(input_ab_initio_filename=read_filename)
 
         abins_data = ab_initio_loader.load_formatted_data()
         self.assertTrue(abins_data.get_kpoints_data().is_normalised())
@@ -169,25 +168,28 @@ class Tester(object):
 
         for item in range(len(correct_atoms)):
             self.assertEqual(correct_atoms["atom_%s" % item]["sort"], atoms["atom_%s" % item]["sort"])
-            self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"], delta=0.00001)
+            self.assertAlmostEqual(correct_atoms["atom_%s" % item]["mass"], atoms["atom_%s" % item]["mass"], delta=self.MASS_DELTA)
             self.assertEqual(correct_atoms["atom_%s" % item]["symbol"], atoms["atom_%s" % item]["symbol"])
-            assert_allclose(np.array(correct_atoms["atom_%s" % item]["coord"]), atoms["atom_%s" % item]["coord"])
+            assert_allclose(np.array(correct_atoms["atom_%s" % item]["coord"]), atoms["atom_%s" % item]["coord"], atol=self.FLOAT_EPS)
 
-    def check(self, *, name: str, loader: AbInitioLoader, extension: str = None, max_displacement_kpt: Real = float("Inf")):
+    def check(
+        self, *, name: str, loader: AbInitioLoader, extension: str = None, max_displacement_kpt: Real = float("Inf"), **loader_kwargs
+    ):
         """Run loader and compare output with reference files
 
         Args:
             name: prefix for test files (e.g. 'ethane_LoadVASP')
+
             loader: loader class under test
             extension: file extension if not the default for given loader
             max_displacement_kpt: highest kpt index for which displacement data is checked
-
+            **loader_kwargs: passed to loader.__init__()
         """
         if extension is None:
             extension = self._loaders_extensions[str(loader)]
 
         # get calculated data
-        data = self._read_ab_initio(loader=loader, filename=name, extension=extension)
+        data = self._read_ab_initio(loader=loader, filename=name, extension=extension, **loader_kwargs)
 
         # get correct data
         correct_data = self._prepare_data(name, max_displacement_kpt=max_displacement_kpt)
@@ -206,21 +208,22 @@ class Tester(object):
             max_displacement_kpt=max_displacement_kpt,
         )
 
-    def _read_ab_initio(self, loader=None, filename=None, extension=None):
+    def _read_ab_initio(self, loader=None, filename=None, extension=None, **loader_kwargs) -> Dict[str, Any]:
         """
         Reads data from .{extension} file.
-        :param loader: ab initio loader
-        :param filename: name of file with vibrational or phonon data (name + extension)
-        :returns: vibrational or phonon data
+
+        Args:
+            loader: ab initio loader class (to instantiate and test)
+            filename: prefix of file with vibrational or phonon data
+            extension: extension of data file (e.g. ".phonon")
+            **loader_kwargs: passed to loader.__init__()
+
+        returns: vibrational or phonon data
+
         """
         # 1) Read data
-        try:
-            read_filename = abins.test_helpers.find_file(filename=filename + "." + extension)
-            ab_initio_reader = loader(input_ab_initio_filename=read_filename)
-        except ValueError:
-            read_filename = abins.test_helpers.find_file(filename=filename + "." + extension.upper())
-            ab_initio_reader = loader(input_ab_initio_filename=read_filename)
-
+        read_filename = abins.test_helpers.find_file(filename=f"{filename}.{extension}")
+        ab_initio_reader = loader(input_ab_initio_filename=read_filename, **loader_kwargs)
         data = self._get_reader_data(ab_initio_reader)
 
         # test validData method

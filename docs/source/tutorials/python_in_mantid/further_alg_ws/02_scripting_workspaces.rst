@@ -190,6 +190,10 @@ Output:
     Load Data
     Workspace list: ['Saved_wsGroup', 'ws1', 'ws2', 'ws3']
 
+.. testcleanup:: mask_detectors
+
+    os.remove(filePath)
+
 .. plot::
 
     # import mantid algorithms, matplotlib and plotSpectrum

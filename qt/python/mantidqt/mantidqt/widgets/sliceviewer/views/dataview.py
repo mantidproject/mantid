@@ -125,6 +125,7 @@ class SliceViewerDataView(QWidget):
         self.colorbar.cmax.setToolTip("Colormap maximum limit")
         self.colorbar.cmin.setToolTip("Colormap minimum limit")
         self.colorbar.autoscale.setToolTip("Automatically changes colormap limits when zooming on the plot")
+        self.colorbar.autotype.setToolTip("Method to determine autoscale limits when autoscaling")
         self.colorbar_layout.addWidget(self.colorbar)
         self.colorbar.colorbarChanged.connect(self.update_data_clim)
         self.colorbar.scaleNormChanged.connect(self.scale_norm_changed)

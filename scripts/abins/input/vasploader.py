@@ -306,9 +306,23 @@ class VASPLoader(AbInitioLoader):
         if dynmat is None:
             raise ValueError("Could not find a 'calculation' block containing a 'dynmat' block in VASP XML file.")
 
+        # Check if units provided for dynmat: we expect this to be THz^2 if so
+        unit = "default"
+        try:
+            unit = _to_text(_find_or_error(dynmat, "i", name="unit")).strip()
+        except ValueError:
+            pass
+
+        if unit == "default":
+            unit_factor = VASP_FREQ_TO_THZ * 1e12
+        elif unit == "THz^2":
+            unit_factor = 1e12
+        else:
+            raise ValueError(f"Hessian unit '{unit}' not recognised")
+
         # vasprun.xml reports raw eigenvectors in atomic units: convert to frequencies in cm-1
         eigenvalues = _to_text(_find_or_error(dynmat, "v", name="eigenvalues")).split()
-        frequencies = np.sqrt(-np.asarray(list(map(float, eigenvalues)), dtype=complex)) * VASP_FREQ_TO_THZ * 1e12 * HZ2INV_CM
+        frequencies = np.sqrt(-np.asarray(list(map(float, eigenvalues)), dtype=complex)) * unit_factor * HZ2INV_CM
         # store imaginary frequencies as -ve
         file_data["frequencies"] = np.asarray([frequencies.real + frequencies.imag], dtype=FLOAT_TYPE)
 

@@ -343,6 +343,9 @@ protected:
 MANTID_KERNEL_DLL double tofToDSpacingFactor(const double l1, const double l2, const double twoTheta,
                                              const double offset);
 
+MANTID_KERNEL_DLL double calculateDIFCCorrection(const double l1, const double l2, const double twotheta,
+                                                 const double offset, const double binWidth);
+
 //=================================================================================================
 /// d-Spacing in Angstrom
 class MANTID_KERNEL_DLL dSpacing : public Unit {

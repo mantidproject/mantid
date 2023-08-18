@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-# flake8: noqa F401   # "imported but unused" error not applicable
+# ruff: noqa: F401    # "imported but unused" error not applicable
 
 # Submodules
 from . import parameters

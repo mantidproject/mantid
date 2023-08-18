@@ -85,7 +85,10 @@ public:
 
     TS_ASSERT_DELTA(logpm("ReactorPower"), 19.066, 1.0e-3);
     TS_ASSERT_DELTA(logpm("ScanPeriod"), 240.733, 1.0e-3);
-    TS_ASSERT_DELTA(logpm("env_T3S1"), 0.0, 1.0e-3);
+    TS_ASSERT_DELTA(logpm("env_P01PSP03"), 20.0, 1.0e-3);
+    TS_ASSERT_DELTA(logpm("env_T01S00"), 295.002, 1.0e-3);
+    TS_ASSERT_DELTA(logpm("env_T02SP06"), 300.0, 1.0e-3);
+    TS_ASSERT_THROWS(logpm("env_T3S1"), const std::runtime_error &);
 
     // test some instrument parameters
     auto instr = output->getInstrument();

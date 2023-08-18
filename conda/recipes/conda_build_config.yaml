@@ -79,10 +79,11 @@ readline:
   - <8.2
 
 euphonic:
-  - 0.6.*
+  - '>=1.2.1,<2.0'
 
-importlib_resources:
-  - 5.12.0
+# 2.2.0 causes resolution issues in the mantidqt host environment on linux
+librdkafka:
+  - <=2.1.1
 
 pin_run_as_build:
     boost:

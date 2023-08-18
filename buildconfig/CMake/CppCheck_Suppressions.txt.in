@@ -82,10 +82,6 @@ containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:1
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:180
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:95
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Parallel/inc/MantidParallel/IO/EventDataPartitioner.h:86
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:597
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:601
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:846
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:926
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/VMD.cpp:428
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/VMD.cpp:536
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:58
@@ -346,7 +342,7 @@ unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/E
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Algorithm.cpp:74
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/InstrumentFileFinder.cpp:36
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmFactory.cpp:148
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmManager.cpp:108
+unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmManager.cpp:110
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc/MantidPythonInterface/core/DataServiceExporter.h:153
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/ITableWorkspace.cpp:251
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/MatrixWorkspace.cpp:65
