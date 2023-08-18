@@ -587,6 +587,6 @@ def formatRuns(runs, instrument_name):
                 # run already has instrument eg 'osi1000'
                 run_list.append(run)
     for idx, run in enumerate(run_list):
-        if type(run) == int:
+        if isinstance(run, int):
             run_list[idx] = instrument_name + str(run)
     return run_list
