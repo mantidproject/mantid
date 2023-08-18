@@ -50,6 +50,5 @@ dependencies:
   - cppcheck==2.10.3
   - pygments==2.11.2 # Had to pin back to 2.11 due to cppcheck error which is only fixed in cppcheck>=2.8
   - pre-commit==2.15 # Had to pin back to 2.15 as we can't handle changes made here (https://github.com/pre-commit/pre-commit/pull/2065 added in 2.16) on windows yet.
-  - importlib_resources==5.12.0
   - joblib
 
