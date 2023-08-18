@@ -38,14 +38,6 @@ class QuickBayesHelperTest(unittest.TestCase):
         DeleteWorkspace(self._sample_ws)
         DeleteWorkspace(self._res_ws)
 
-    def assertListEqual(self, a, b):
-        if len(a) != len(b):
-            raise ValueError("The lists are not the same length")
-        for j in range(len(a)):
-            if a[j] != b[j]:
-                raise ValueError(f"The values in the lists are not the same {a}, {b}")
-        return True
-
     # ----------------------------------Algorithm tests----------------------------------------
 
     def test_point_data(self):

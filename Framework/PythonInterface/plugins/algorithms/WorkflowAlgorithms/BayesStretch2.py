@@ -14,7 +14,6 @@ from quickBayesHelper import QuickBayesTemplate
 
 from functools import partial
 
-# from typing import List
 from numpy import ndarray
 import numpy as np
 import multiprocessing
