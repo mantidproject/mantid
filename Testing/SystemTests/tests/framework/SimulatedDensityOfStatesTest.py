@@ -4,7 +4,7 @@ from systemtesting import MantidSystemTest
 
 
 class SimulatedDensityOfStatesTest(MantidSystemTest):
-    """Make sure normal case will run regardless of Euphonic status"""
+    """Test from castep .phonon file at precalculated q-points"""
 
     def runTest(self):
         SimulatedDensityOfStates(
@@ -16,7 +16,7 @@ class SimulatedDensityOfStatesTest(MantidSystemTest):
 
 
 class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
-    """ "Install Euphonic library to temporary prefix and check results"""
+    """Interpolate phonon data from Phonopy yaml using Euphonic"""
 
     def runTest(self):
         SimulatedDensityOfStates(

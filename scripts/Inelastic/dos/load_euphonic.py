@@ -5,59 +5,56 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from os import PathLike
-from typing import Optional, Union
+from math import ceil
+from typing import Optional, Tuple
 
-from euphonic import ForceConstants, QpointPhononModes
-from euphonic.cli.utils import load_data_from_file
+from euphonic import __version__ as euphonic_version
+from euphonic import QpointPhononModes
+import euphonic.cli.utils
+from euphonic.util import mp_grid
 
 import numpy as np
+from packaging import version
 
 from mantid.kernel import logger
-
-
-def force_constants_from_file(filename: Union[str, PathLike]) -> ForceConstants:
-    """
-    Read force constants file with Euphonic
-
-    Imitates a function from Euphonic versions < 1.0 for compatibility purposes
-
-    Args:
-        filename: Force constant data file (phonopy.yaml, .castep_bin or
-            Euphonic JSON)
-    """
-    data = load_data_from_file(filename)
-    if not isinstance(data, ForceConstants):
-        raise ValueError(f"File {filename} does not contain force constants")
-    return data
 
 
 def euphonic_calculate_modes(
     filename: str, cutoff: float = 20.0, gamma: bool = True, acoustic_sum_rule: Optional[str] = "reciprocal"
 ) -> QpointPhononModes:
     """
-    Read force constants file with Euphonic and sample frequencies/modes
+    Read phonon data file with Euphonic and sample frequencies/modes if necessary
 
-    Args:
-        filename:
-            Input data
-        cutoff:
-            Sampling density of Brillouin-zone. Specified as real-space length
-            cutoff in Angstrom.
-        gamma:
-            Shift sampling grid to include the Gamma-point.
-        acoustic_sum_rule:
-            Apply acoustic sum rule correction to force constants: options are
-            'realspace' and 'reciprocal', specifying different implementations
-            of the correction. If None, no correction is applied. This option
-            is referred to as "asr" in the Euphonic python API and command-line
-            tools.
+    :param filename: Input data
+    :param cutoff:
+        Sampling density of Brillouin-zone. Specified as real-space length
+        cutoff in Angstrom.
+    :param gamma:
+        Shift sampling grid to include the Gamma-point.
+    :param acoustic_sum_rule:
+        Apply acoustic sum rule correction to force constants: options are
+        'realspace' and 'reciprocal', specifying different implementations of
+        the correction. If None, no correction is applied. This option is
+        referred to as "asr" in the Euphonic python API and command-line tools.
+
     """
 
-    from math import ceil
-    from euphonic.util import mp_grid
+    if version.parse(euphonic_version) > version.parse("1.0"):
+        phonon_data = euphonic.cli.utils.load_data_from_file(filename, frequencies_only=False)
+    else:
+        # Older versions of Euphonic split the file loading helper over two functions
+        try:
+            phonon_data = euphonic.cli.utils.force_constants_from_file(filename)
+        except TypeError:
+            # TypeError is raised if the file was phonon modes rather than force constants,
+            # so see if the file contains mode data directly
+            phonon_data = euphonic.cli.utils.modes_from_file(filename)
 
-    fc = force_constants_from_file(filename)
+    if isinstance(phonon_data, QpointPhononModes):
+        return phonon_data
+
+    # Did not return: should be ForceConstants. Now we interpolate these to obtain modes on regular grid.
+    fc = phonon_data
 
     recip_lattice_lengths = np.linalg.norm(fc.crystal.reciprocal_cell().to("1/angstrom").magnitude, axis=1)
     mp_sampling = [ceil(x) for x in (cutoff * recip_lattice_lengths / (2 * np.pi))]
@@ -70,12 +67,15 @@ def euphonic_calculate_modes(
         qpts += offsets
 
     logger.notice("Calculating phonon modes on {} grid".format("x".join(map(str, mp_sampling))))
-    modes = fc.calculate_qpoint_phonon_modes(qpts, asr=acoustic_sum_rule)
+    # Gamma-point splitting is suitable for band structures but gives worse statistics for DOS
+    modes = fc.calculate_qpoint_phonon_modes(qpts, asr=acoustic_sum_rule, splitting=False)
 
     return modes
 
 
-def get_data_with_euphonic(filename: str, cutoff: float = 20.0, gamma: bool = True, acoustic_sum_rule: Optional[str] = None):
+def get_data_with_euphonic(
+    filename: str, cutoff: float = 20.0, gamma: bool = True, acoustic_sum_rule: Optional[str] = None
+) -> Tuple[dict, dict]:
     """
     Read force constants file with Euphonic and sample frequencies/modes
 

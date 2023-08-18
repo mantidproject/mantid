@@ -120,7 +120,10 @@ def compare_dependencies_for_file(os_name: str, first_build: int, second_build: 
     """
     # Form URLs for each build artifact file
     first_build_output_path = form_url_for_build_artifact(first_build, os_name, pipeline, log_file)
+    print(f"Path to first build: {first_build_output_path}")
     second_build_output_path = form_url_for_build_artifact(second_build, os_name, pipeline, log_file)
+    print(f"Path to second build: {second_build_output_path}")
+    print("")
 
     # Read in the packages used, with versions
     first_output_packages = extract_package_versions(first_build_output_path, os_name)
@@ -131,13 +134,13 @@ def compare_dependencies_for_file(os_name: str, first_build: int, second_build: 
     packages_removed = []
     packages_changed = {}
     for package in first_output_packages:
-        if second_output_packages[package] is None:
-            packages_removed.extend(package)
+        if package not in second_output_packages:
+            packages_removed.append(package)
         elif second_output_packages[package] != first_output_packages[package]:
             packages_changed[package] = first_output_packages[package] + "  ->  " + second_output_packages[package]
     for package in second_output_packages:
-        if first_output_packages[package] is None:
-            packages_added.extend(package)
+        if package not in first_output_packages:
+            packages_added.append(package)
 
     # Output
     output_package_changes_to_console(packages_added, packages_removed, packages_changed)
@@ -193,6 +196,8 @@ def extract_package_versions(url: str, os_name: str) -> Dict[str, str]:
             regex_result = re.search(pattern=regex_pattern, string=line.decode("utf-8"))
             if regex_result is not None and len(regex_result.groups()) == 3:
                 package_name = regex_result.group(1)
+                if package_name.startswith("mantid"):
+                    continue
                 version = regex_result.group(2)
                 package_version_dict[package_name] = version
     return package_version_dict
@@ -201,8 +206,8 @@ def extract_package_versions(url: str, os_name: str) -> Dict[str, str]:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script for checking dependency changes between two Jenkins builds")
     parser.add_argument("-os", help="Operating system string, e.g. linux-64", default="linux-64", type=str)
-    parser.add_argument("--first", "-f", help="First (usually passing) build number", type=int)
-    parser.add_argument("--second", "-s", help="Second (usually failing) build number", type=int)
+    parser.add_argument("--first", "-f", help="First (usually passing) build number", type=int, required=True)
+    parser.add_argument("--second", "-s", help="Second (usually failing) build number", type=int, required=True)
     parser.add_argument("--pipeline", "-p", help="Build pipeline", default="main_nightly_deployment_prototype", type=str)
     parser.add_argument(
         "--logfile",

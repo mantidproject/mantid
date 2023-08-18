@@ -314,6 +314,9 @@ MANTID_GEOMETRY_DLL double tofToDSpacingFactor(const double l1, const double l2,
 double MANTID_GEOMETRY_DLL tofToDSpacingFactor(const double l1, const double l2, const double twoTheta,
                                                const std::vector<detid_t> &detectors,
                                                const std::map<detid_t, double> &offsets);
+
+MANTID_GEOMETRY_DLL double calculateDIFCCorrection(const double l1, const double l2, const double twoTheta,
+                                                   const double offset, const double binWidth);
 } // namespace Conversion
 
 } // namespace Geometry
