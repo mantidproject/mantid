@@ -185,13 +185,18 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   // Change to shape editing after a selection has been done to match instrument viewer default behaviour
   notifyInstViewEditRequested();
   // Get the masked workspace indices
+  boost::optional<ProcessingInstructions> detIDs = boost::none;
   auto indices = m_instViewModel->detIndicesToDetIDs(m_dockedWidgets->getSelectedDetectors());
-  auto detIDsStr = Mantid::Kernel::Strings::joinCompress(indices.cbegin(), indices.cend(), ",");
+  if (indices.size() > 0) {
+    auto detIDsStr = Mantid::Kernel::Strings::joinCompress(indices.cbegin(), indices.cend(), ",");
+    detIDs = ProcessingInstructions{detIDsStr};
+  }
 
-  if (detIDsStr == m_model->getSelectedBanks()) {
+  if (detIDs == m_model->getSelectedBanks()) {
     return;
   }
-  m_model->setSelectedBanks(ProcessingInstructions{detIDsStr});
+
+  m_model->setSelectedBanks(detIDs);
   // Execute summing the selected banks
   runSumBanks();
 }
@@ -278,7 +283,7 @@ void PreviewPresenter::plotLinePlot() {
 }
 
 void PreviewPresenter::runSumBanks() {
-  if (m_model->getSelectedBanks().get_value_or("").empty()) {
+  if (!m_model->getSelectedBanks().has_value() && !m_mainPresenter->hasROIDetectorIDsForPreviewRow()) {
     // Do not sum the workspace if no detector IDs have been selected
     m_model->setSummedWs(m_model->getLoadedWs());
     notifySumBanksCompleted();
