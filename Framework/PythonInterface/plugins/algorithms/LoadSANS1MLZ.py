@@ -142,7 +142,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
         if not self.getProperty("Wavelength").isDefault:
             metadata.setup.wavelength = user_wavelength
             self.log().notice("Wavelength set to user input.")
-        if (type(metadata.setup.wavelength) is str) or (metadata.setup.wavelength == 0.0):
+        if isinstance(metadata.setup.wavelength, str) or metadata.setup.wavelength == 0.0:
             self.log().error("Wavelength not defined.")
 
     def _log_data_analyzing(self, metadata):
