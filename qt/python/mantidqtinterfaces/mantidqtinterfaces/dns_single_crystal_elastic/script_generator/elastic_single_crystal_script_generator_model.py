@@ -55,8 +55,6 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         self._background_factor = options["background_factor"]
         self._ignore_vana = str(options["ignore_vana_fields"])
         self._sum_sf_nsf = str(options["sum_vana_sf_nsf"])
-        self._non_magnetic = options["separation"] and options["separation_coh_inc"]
-        self._xyz = options["separation"] and options["separation_xyz"]
         self._corrections = self._sample_background_correction or self._vana_correction or self._nicr_correction
         self._export_path = paths["export_dir"]
         self._ascii = paths["ascii"] and paths["export"] and bool(self._export_path)
