@@ -132,7 +132,10 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   runSumBanks();
 }
 
-void PreviewPresenter::notifyUpdateAngle() { runReduction(); }
+void PreviewPresenter::notifyUpdateAngle() {
+  // Re-run from the sum banks step to ensure the sliceviewer plot is up to date
+  runSumBanks();
+}
 
 void PreviewPresenter::notifySumBanksCompleted() {
   plotRegionSelector();
@@ -283,6 +286,9 @@ void PreviewPresenter::plotLinePlot() {
 }
 
 void PreviewPresenter::runSumBanks() {
+  // Ensure the angle is up to date so that we can check for matching experiment settings lookup rows
+  m_model->setTheta(m_view->getAngle());
+
   if (!m_model->getSelectedBanks().has_value() && !m_mainPresenter->hasROIDetectorIDsForPreviewRow()) {
     // Do not sum the workspace if no detector IDs have been selected
     m_model->setSummedWs(m_model->getLoadedWs());
