@@ -341,8 +341,11 @@ void LoadDiffCal::loadGroupingFromAlternateFile() {
   g_log.information() << "Override grouping with information from \"" << filename << "\"\n";
 
   // Determine file format by file name extension
-  std::filesystem::path filePath = std::filesystem::path(filename);
-  std::filesystem::path pathExt = filePath.extension();
+  // std::filesystem::path filePath = std::filesystem::path(filename);
+  // std::filesystem::path pathExt = filePath.extension();
+  // std::string filenameExtension = pathExt.string();
+
+  std::filesystem::path pathExt = std::filesystem::path(filename).extension();
   std::string filenameExtension = pathExt.string();
 
   const std::vector<std::string> diffCalExtensions{".h5", ".hd5", ".hdf", ".cal"};
