@@ -17,6 +17,7 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Unit.h"
@@ -37,12 +38,18 @@ using Mantid::DataObjects::GroupingWorkspace_sptr;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::EnumeratedString;
 using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::Exception::FileError;
 
 using namespace H5;
 
 namespace {
+enum class FilenameExtension { XML, H5, HD5, HDF, CAL, enum_count };
+const std::vector<std::string> calibFilenameExtensions{".h5", ".hd5", ".hdf", ".cal"};
+const std::vector<std::string> groupingFilenameExtensions{".xml", ".h5", ".hd5", ".hdf", ".cal"};
+typedef EnumeratedString<FilenameExtension, &groupingFilenameExtensions> GroupingFilenameExtension;
+
 namespace PropertyNames {
 const std::string CAL_FILE("Filename");
 const std::string GROUP_FILE("GroupFilename");
@@ -73,11 +80,12 @@ void LoadDiffCal::init() {
   // 3 properties for getting the right instrument
   LoadCalFile::getInstrument3WaysInit(this);
 
-  const std::vector<std::string> exts{".h5", ".hd5", ".hdf", ".cal"};
-  declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::Load, exts),
-                  "Path to the .h5 file.");
+  declareProperty(
+      std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::Load, calibFilenameExtensions),
+      "Path to the input calibration file.");
+
   declareProperty(std::make_unique<FileProperty>(PropertyNames::GROUP_FILE, "", FileProperty::OptionalLoad,
-                                                 std::vector<std::string>{".xml", ".h5", ".hd5", ".hdf", ".cal"}),
+                                                 groupingFilenameExtensions),
                   "Overrides grouping from CalFileName");
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>(PropertyNames::MAKE_GRP, true, Direction::Input),
@@ -337,34 +345,33 @@ void LoadDiffCal::loadGroupingFromAlternateFile() {
   if (isDefault(PropertyNames::GROUP_FILE))
     return; // a separate grouping file was not specified
 
-  std::string filename = getPropertyValue(PropertyNames::GROUP_FILE);
-  g_log.information() << "Override grouping with information from \"" << filename << "\"\n";
-
-  // Determine file format by file name extension
-  // std::filesystem::path filePath = std::filesystem::path(filename);
-  // std::filesystem::path pathExt = filePath.extension();
-  // std::string filenameExtension = pathExt.string();
-
-  std::filesystem::path pathExt = std::filesystem::path(filename).extension();
-  std::string filenameExtension = pathExt.string();
-
-  const std::vector<std::string> diffCalExtensions{".h5", ".hd5", ".hdf", ".cal"};
-  bool diffCalFormat = std::any_of(diffCalExtensions.begin(), diffCalExtensions.end(),
-                                   [filenameExtension](std::string const &s) { return s == filenameExtension; });
-  bool xmlFormat = filenameExtension == ".xml";
-  if (!diffCalFormat && !xmlFormat) {
-    throw std::runtime_error("Alternate grouping file has an invalid extension.");
-  }
-
   // Check that the instrument is defined
   if (!m_instrument) {
     throw std::runtime_error("Cannot load alternate grouping: the instrument is not defined.");
   }
-
-  // Load grouping definition into a workspace
+  // Create a grouping workspace with this instrument
   GroupingWorkspace_sptr groupingWorkspace = std::make_shared<DataObjects::GroupingWorkspace>(m_instrument);
 
-  if (diffCalFormat) {
+  // Get the alternate grouping file name
+  std::string filename = getPropertyValue(PropertyNames::GROUP_FILE);
+  g_log.information() << "Override grouping with information from \"" << filename << "\"\n";
+
+  // Determine the file format by its extension
+  std::string filenameExtension = std::filesystem::path(filename).extension().string();
+  GroupingFilenameExtension enFilenameExtension =
+      filenameExtension; // this will throw a runtime error if the extension is invalid
+  switch (enFilenameExtension) {
+  case FilenameExtension::XML: {
+    auto alg = createChildAlgorithm("LoadDetectorsGroupingFile");
+    alg->setProperty("InputWorkspace", groupingWorkspace);
+    alg->setProperty("InputFile", filename);
+    alg->executeAsChildAlg();
+    groupingWorkspace = alg->getProperty("OutputWorkspace");
+  } break;
+  case FilenameExtension::H5:
+  case FilenameExtension::HD5:
+  case FilenameExtension::HDF:
+  case FilenameExtension::CAL: {
     auto alg = createChildAlgorithm("LoadDiffCal");
     alg->setPropertyValue(PropertyNames::CAL_FILE, filename); // the alternate grouping file
     alg->setProperty("InputWorkspace", groupingWorkspace);    // a workspace to get the instrument from
@@ -374,12 +381,12 @@ void LoadDiffCal::loadGroupingFromAlternateFile() {
     alg->setPropertyValue("WorkspaceName", m_workspaceName);
     alg->executeAsChildAlg();
     groupingWorkspace = alg->getProperty("OutputGroupingWorkspace");
-  } else if (xmlFormat) {
-    auto alg = createChildAlgorithm("LoadDetectorsGroupingFile");
-    alg->setProperty("InputWorkspace", groupingWorkspace);
-    alg->setProperty("InputFile", filename);
-    alg->executeAsChildAlg();
-    groupingWorkspace = alg->getProperty("OutputWorkspace");
+  } break;
+  default:
+    std::ostringstream os;
+    os << "Alternate grouping file has an invalid extension: "
+       << "\"" << filenameExtension << "\"";
+    throw std::runtime_error(os.str());
   }
 
   setGroupWSProperty(this, m_workspaceName, groupingWorkspace);
