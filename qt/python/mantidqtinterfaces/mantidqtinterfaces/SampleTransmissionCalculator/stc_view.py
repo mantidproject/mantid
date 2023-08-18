@@ -17,6 +17,7 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
         super(SampleTransmissionCalculatorView, self).__init__(parent)
         self.setupUi(self)
         fig = Figure()
+        fig.set_layout_engine(layout="tight")
         self.axes = fig.add_subplot(111)
         self.plot_frame = FigureCanvas(fig)
         self.axes.set_xlabel("Wavelength (Å)")
