@@ -85,7 +85,7 @@ class BayesQuasi2Test(unittest.TestCase):
             self._alg.create_ws,
             N_calls=1,
             call_number=1,
-            OutputWorkspace="test",
+            OutputWorkspace="test_workspace",
             DataX=np.array([1.0, 2.0, 3.0, 1.0, 2.1, 3.0, 1.0, 2.1, 3.0, 1.0, 2.1, 3.0, 1.0, 2.1, 3.0]),
             DataY=np.array([4, 5, 6, 4.1, 4.9, 6, 0.1, -0.1, 0, 4.1, 4.9, 6, 0.1, -0.1, 0]),
             NSpec=5,

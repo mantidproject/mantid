@@ -277,9 +277,7 @@ class BayesStretch2Test(unittest.TestCase):
             data_ws=self._sample_ws,
         )
         # make results
-        self._alg.make_results.assert_called_once_with(
-            beta_list=[1], FWHM_list=[2], x_data=2, x_unit="MomentumTransfer", name="__BayesStretchTest_Sample"
-        )
+        self._alg.make_results.assert_called_once_with(beta_list=[1], FWHM_list=[2], x_data=2, x_unit="MomentumTransfer", name="out")
 
     @mock.patch("BayesStretch2.GetThetaQ")
     @mock.patch("BayesStretch2.Progress")
@@ -323,9 +321,7 @@ class BayesStretch2Test(unittest.TestCase):
             data_ws=self._sample_ws,
         )
         # make results
-        self._alg.make_results.assert_called_once_with(
-            beta_list=[1], FWHM_list=[2], x_data=2, x_unit="MomentumTransfer", name="__BayesStretchTest_Sample"
-        )
+        self._alg.make_results.assert_called_once_with(beta_list=[1], FWHM_list=[2], x_data=2, x_unit="MomentumTransfer", name="out")
 
 
 if __name__ == "__main__":
