@@ -45,10 +45,13 @@ using Mantid::Kernel::Exception::FileError;
 using namespace H5;
 
 namespace {
-enum class FilenameExtension { XML, H5, HD5, HDF, CAL, enum_count };
+enum class CalibFilenameExtensionEnum { H5, HD5, HDF, CAL, enum_count };
 const std::vector<std::string> calibFilenameExtensions{".h5", ".hd5", ".hdf", ".cal"};
+typedef EnumeratedString<CalibFilenameExtensionEnum, &calibFilenameExtensions> CalibFilenameExtension;
+
+enum class GroupingFilenameExtensionEnum { XML, H5, HD5, HDF, CAL, enum_count };
 const std::vector<std::string> groupingFilenameExtensions{".xml", ".h5", ".hd5", ".hdf", ".cal"};
-typedef EnumeratedString<FilenameExtension, &groupingFilenameExtensions> GroupingFilenameExtension;
+typedef EnumeratedString<GroupingFilenameExtensionEnum, &groupingFilenameExtensions> GroupingFilenameExtension;
 
 namespace PropertyNames {
 const std::string CAL_FILE("Filename");
@@ -356,22 +359,22 @@ void LoadDiffCal::loadGroupingFromAlternateFile() {
   std::string filename = getPropertyValue(PropertyNames::GROUP_FILE);
   g_log.information() << "Override grouping with information from \"" << filename << "\"\n";
 
-  // Determine the file format by its extension
+  // Determine file format by file name extension
   std::string filenameExtension = std::filesystem::path(filename).extension().string();
   GroupingFilenameExtension enFilenameExtension =
       filenameExtension; // this will throw a runtime error if the extension is invalid
   switch (enFilenameExtension) {
-  case FilenameExtension::XML: {
+  case GroupingFilenameExtensionEnum::XML: {
     auto alg = createChildAlgorithm("LoadDetectorsGroupingFile");
     alg->setProperty("InputWorkspace", groupingWorkspace);
     alg->setProperty("InputFile", filename);
     alg->executeAsChildAlg();
     groupingWorkspace = alg->getProperty("OutputWorkspace");
   } break;
-  case FilenameExtension::H5:
-  case FilenameExtension::HD5:
-  case FilenameExtension::HDF:
-  case FilenameExtension::CAL: {
+  case GroupingFilenameExtensionEnum::H5:
+  case GroupingFilenameExtensionEnum::HD5:
+  case GroupingFilenameExtensionEnum::HDF:
+  case GroupingFilenameExtensionEnum::CAL: {
     auto alg = createChildAlgorithm("LoadDiffCal");
     alg->setPropertyValue(PropertyNames::CAL_FILE, filename); // the alternate grouping file
     alg->setProperty("InputWorkspace", groupingWorkspace);    // a workspace to get the instrument from
@@ -441,7 +444,12 @@ void LoadDiffCal::exec() {
   m_filename = getPropertyValue(PropertyNames::CAL_FILE);
   m_workspaceName = getPropertyValue("WorkspaceName");
 
-  if (std::filesystem::path(m_filename).extension() == ".cal") {
+  // Determine file format by file name extension
+  std::string filenameExtension = std::filesystem::path(m_filename).extension().string();
+  CalibFilenameExtension enFilenameExtension =
+      filenameExtension; // this will throw a runtime error if the extension is invalid
+
+  if (enFilenameExtension == CalibFilenameExtensionEnum::CAL) {
     runLoadCalFile();
     return;
   }
