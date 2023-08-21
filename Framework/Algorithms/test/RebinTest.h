@@ -51,15 +51,20 @@ public:
   /* some basic validation tests */
 
   void test_make_three_params_default() {
+    const std::string IN_WKSP("creates_three_params_in");
+    const std::string OUT_WKSP("creates_three_params_out");
+
     // test that if only a binwidth is given, will create a full set of rebin params
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
-    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+    AnalysisDataService::Instance().add(IN_WKSP, test_in1D);
+
+    const double WIDTH(2.0);
 
     Rebin rebin;
     rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace", "test_in1D");
-    rebin.setPropertyValue("OutputWorkspace", "test_out");
-    rebin.setPropertyValue("Params", "2.0");
+    rebin.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin.setPropertyValue("OutputWorkspace", OUT_WKSP);
+    rebin.setProperty("Params", std::vector<double>{WIDTH});
     // verify that with the single rebin param, the algo will successfuly execute
     TS_ASSERT_THROWS_NOTHING(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
@@ -70,8 +75,8 @@ public:
     TS_ASSERT_EQUALS(rbParams.size(), 1);
     TS_ASSERT_EQUALS(2.0, rbParams[0]);
 
-    AnalysisDataService::Instance().remove("test_in1D");
-    AnalysisDataService::Instance().remove("test_out");
+    AnalysisDataService::Instance().remove(IN_WKSP);
+    AnalysisDataService::Instance().remove(OUT_WKSP);
   }
 
   void test_failure_bad_log_binning_endpoints() {
@@ -88,21 +93,21 @@ public:
     // this fails fast, due to the rebin param property validator
     Rebin rebin;
     rebin.initialize();
-    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "-1.0,-1.0,10.0"));
-    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "100.0,-1.0,10.0"));
-    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "100.0,1.0,10.0"));
-    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "1.0,10.0"));
-    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "1.0,-1.0,10.0,12.0"));
-    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "1.0,0.0,2.0"));
-    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", "0.0"));
-    TS_ASSERT_THROWS_ANYTHING(rebin.setPropertyValue("Params", ""));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{-1.0, -1.0, 10.0}));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{100.0, -1.0, 10.0}));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{100.0, 1.0, 10.0}));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{1.0, 10.0}));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{1.0, -1.0, 10.0, 12.0}));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{1.0, 0.0, 2.0}));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{0.0}));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{}));
     TS_ASSERT(!rebin.isExecuted());
   }
 
   void test_failure_mixed_power_and_log() {
     Rebin rebin;
     rebin.initialize();
-    rebin.setPropertyValue("Params", "1.0,-1.0,10.0");
+    rebin.setProperty("Params", std::vector<double>{1.0, -1.0, 10.0});
     rebin.setProperty("Power", 0.5);
     auto errmsgs = rebin.validateInputs();
     auto errmsg = errmsgs.find("Params");
@@ -829,7 +834,7 @@ public:
     // Test Power binning mode will fail if no power is given
     Rebin rebin;
     rebin.initialize();
-    rebin.setPropertyValue("Params", "1.2, 1.2, 12.22");
+    rebin.setProperty("Params", std::vector<double>{1.2, 1.2, 12.22});
     rebin.setPropertyValue("BinningMode", "Power");
     auto errmsgs = rebin.validateInputs();
     auto errmsg = errmsgs.find("Power");
@@ -842,7 +847,7 @@ public:
     Rebin rebin;
     rebin.initialize();
     rebin.setRethrows(true);
-    rebin.setPropertyValue("Params", "-1.0,1.0,1000.0");
+    rebin.setProperty("Params", std::vector<double>{-1.0, 1.0, 1000.0});
     rebin.setProperty("BinningMode", "Logarithmic");
     auto errmsgs = rebin.validateInputs();
     TS_ASSERT(!errmsgs.empty());
@@ -853,15 +858,19 @@ public:
 
   void do_test_property_unchanged(
       // check that certain properties are unchanged by the execution of the algo
-      std::string property, bool propValue, std::string binMode, std::string step, double power) {
+      std::string property, bool propValue, std::string binMode, double step, double power) {
+
+    const std::string IN_WKSP("properties_unchanged_in");
+    const std::string OUT_WKSP("properties_unchanged_out");
+
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
-    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+    AnalysisDataService::Instance().add(IN_WKSP, test_in1D);
 
     Rebin rebin;
     rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace", "test_in1D");
-    rebin.setPropertyValue("OutputWorkspace", "test_out");
-    rebin.setPropertyValue("Params", step);
+    rebin.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin.setPropertyValue("OutputWorkspace", OUT_WKSP);
+    rebin.setProperty("Params", std::vector<double>{step});
     rebin.setProperty("Power", power);
     if (binMode == "Power")
       rebin.setProperty("Power", 0.5);
@@ -871,8 +880,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
     TS_ASSERT_EQUALS(propValue, bool(rebin.getProperty(property)));
-    AnalysisDataService::Instance().remove("test_in1D");
-    AnalysisDataService::Instance().remove("test_out");
+    AnalysisDataService::Instance().remove(IN_WKSP);
+    AnalysisDataService::Instance().remove(OUT_WKSP);
   }
 
   void test_some_properties_always_unchanged() {
@@ -881,7 +890,7 @@ public:
     std::vector<bool> propV{false, true};
     // try in all binning modes
     std::vector<std::string> binModes{"Linear", "Logarithmic", "ReverseLogarithmic", "Power"};
-    std::vector<std::string> steps{"1.0", "-1.0"};
+    std::vector<double> steps{1.0, -1.0};
     std::vector<double> powers{0.0, 0.5};
 
     // run it every way possible
@@ -899,17 +908,17 @@ public:
   }
 
   void do_test_changes_usereverselogarithmic(std::string binMode, double step, bool rvrs) {
-    std::stringstream params;
-    params << "1.2," << step << ",12.22";
+    const std::string IN_WKSP("reset_reverse_log_in");
+    const std::string OUT_WKSP("reset_reverse_log_out");
 
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
-    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+    AnalysisDataService::Instance().add(IN_WKSP, test_in1D);
 
     Rebin rebin;
     rebin.initialize();
-    rebin.setPropertyValue("Params", params.str());
-    rebin.setPropertyValue("InputWorkspace", "test_in1D");
-    rebin.setPropertyValue("OutputWorkspace", "test_out1D");
+    rebin.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin.setPropertyValue("OutputWorkspace", OUT_WKSP);
+    rebin.setProperty("Params", std::vector<double>{1.2, step, 12.22});
     rebin.setProperty("UseReverseLogarithmic", rvrs);
     rebin.setProperty("BinningMode", binMode);
     if (binMode == "Power")
@@ -926,8 +935,8 @@ public:
     bool stillRvrs = rebin.getProperty("UseReverseLogarithmic");
     TS_ASSERT_EQUALS(validatedRvrs, stillRvrs);
 
-    AnalysisDataService::Instance().remove("test_in1D");
-    AnalysisDataService::Instance().remove("test_out1D");
+    AnalysisDataService::Instance().remove(IN_WKSP);
+    AnalysisDataService::Instance().remove(OUT_WKSP);
   }
 
   void test_all_binning_modes_change_usereverselogarithmic() {
@@ -943,14 +952,18 @@ public:
   void test_reverse_log_doesnt_change_usereverselogarithmic() {
     // this additional test ensures the ReverseLog binning mode doesn't
     // accidentally unset the "UseReverseLogarithmic" flag
+
+    const std::string IN_WKSP("no_reset_reverse_log_in");
+    const std::string OUT_WKSP("no_reset_reverse_log_out");
+
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
-    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+    AnalysisDataService::Instance().add(IN_WKSP, test_in1D);
 
     Rebin rebin;
     rebin.initialize();
-    rebin.setPropertyValue("Params", "1.2,-1.2,12.22");
-    rebin.setPropertyValue("InputWorkspace", "test_in1D");
-    rebin.setPropertyValue("OutputWorkspace", "test_out1D");
+    rebin.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin.setPropertyValue("OutputWorkspace", OUT_WKSP);
+    rebin.setProperty("Params", std::vector<double>{1.2, -1.2, 12.22});
     rebin.setProperty("UseReverseLogarithmic", true);
     rebin.setProperty("BinningMode", "ReverseLogarithmic");
     auto errmsgs = rebin.validateInputs();
@@ -963,34 +976,40 @@ public:
     // ensure nothing changed in execution
     TS_ASSERT(bool(rebin.getProperty("UseReverseLogarithmic")));
 
-    AnalysisDataService::Instance().remove("test_in1D");
-    AnalysisDataService::Instance().remove("test_out1D");
+    AnalysisDataService::Instance().remove(IN_WKSP);
+    AnalysisDataService::Instance().remove(OUT_WKSP);
   }
 
   void do_test_changes_rebin_params(std::string binMode, double step, double good_step, bool only_step = false) {
+
+    const std::string IN_WKSP("change_rebin_params_in");
+    const std::string OUT_WKSP("change_rebin_params_out");
+
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
-    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+    AnalysisDataService::Instance().add(IN_WKSP, test_in1D);
 
     double start, stop;
-    std::stringstream params;
+    std::vector<double> params;
     if (only_step) {
-      MatrixWorkspace_sptr inputdata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_in1D");
+      MatrixWorkspace_sptr inputdata = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(IN_WKSP);
       auto &outX = inputdata->x(0);
       start = outX[0];
       stop = outX[outX.size() - 1];
-      params << step;
+      params.push_back(step);
     } else {
       start = 1.0;
       stop = 10.0;
-      params << start << "," << step << "," << stop;
+      params.insert(params.begin(), {start, step, stop});
     }
+    TS_ASSERT_DIFFERS(params.size(), 0);
+    TS_ASSERT_EQUALS(params.size() % 2, 1);
 
     // check that algo will change rebin params
     Rebin rebin;
     rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace", "test_in1D");
-    rebin.setPropertyValue("OutputWorkspace", "test_out1D");
-    rebin.setPropertyValue("Params", params.str());
+    rebin.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin.setPropertyValue("OutputWorkspace", OUT_WKSP);
+    rebin.setProperty("Params", params);
     rebin.setPropertyValue("BinningMode", binMode);
     if (binMode == "Power")
       rebin.setProperty("Power", 0.5);
@@ -998,9 +1017,10 @@ public:
     TS_ASSERT(errmsgs.empty());
 
     std::vector<double> rbParams = rebin.getProperty("Params");
-    TS_ASSERT(rbParams[0] == start);
-    TS_ASSERT(rbParams[1] == good_step);
-    TS_ASSERT(rbParams[2] == stop);
+    TS_ASSERT_EQUALS(rbParams.size(), 3);
+    TS_ASSERT_EQUALS(rbParams[0], start);
+    TS_ASSERT_EQUALS(rbParams[1], good_step);
+    TS_ASSERT_EQUALS(rbParams[2], stop);
 
     // ensure execution, and nothing changes in execution
     TS_ASSERT_THROWS_NOTHING(rebin.execute());
@@ -1008,8 +1028,8 @@ public:
     std::vector<double> rebinAgainParams = rebin.getProperty("Params");
     TS_ASSERT_EQUALS(rbParams, rebinAgainParams);
 
-    AnalysisDataService::Instance().remove("test_in1D");
-    AnalysisDataService::Instance().remove("test_out1D");
+    AnalysisDataService::Instance().remove(IN_WKSP);
+    AnalysisDataService::Instance().remove(OUT_WKSP);
   }
 
   void test_all_binning_modes_change_rebin_params() {
@@ -1026,17 +1046,18 @@ public:
 
   void do_test_changes_power(std::string binMode, double step) {
     // check that algo run in binning  mode will change power
-    std::stringstream params;
-    params << "1.0," << step << ",100.0";
+
+    const std::string IN_WKSP("changes_power_in");
+    const std::string OUT_WKSP("changes_power_out");
 
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
-    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+    AnalysisDataService::Instance().add(IN_WKSP, test_in1D);
 
     Rebin rebin;
     rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace", "test_in1D");
-    rebin.setPropertyValue("OutputWorkspace", "test_out1D");
-    rebin.setPropertyValue("Params", params.str());
+    rebin.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin.setPropertyValue("OutputWorkspace", OUT_WKSP);
+    rebin.setProperty("Params", std::vector<double>{1.0, step, 10.0});
     rebin.setProperty("Power", 0.5);
     rebin.setPropertyValue("BinningMode", binMode);
     auto errmsgs = rebin.validateInputs();
@@ -1049,8 +1070,8 @@ public:
     TS_ASSERT(rebin.isExecuted());
     TS_ASSERT(double(rebin.getProperty("Power")) == 0.0);
 
-    AnalysisDataService::Instance().remove("test_in1D");
-    AnalysisDataService::Instance().remove("test_out1D");
+    AnalysisDataService::Instance().remove(IN_WKSP);
+    AnalysisDataService::Instance().remove(OUT_WKSP);
   }
 
   void test_all_binning_modes_change_power() {
@@ -1063,31 +1084,37 @@ public:
 
   void test_default_linear_and_modeset_equal_everywhere() {
     // Check that linear binning mode equals to original behavior
+
+    const std::string IN_WKSP("default_modeset_linear_in");
+    const std::string OUT_WKSP1("default_equal_out");
+    const std::string OUT_WKSP2("modeset_equal_out");
+
+    const double START = 1.0, STEP = 1.0, STOP = 10.0;
+
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
     test_in1D->setDistribution(true);
-    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+    AnalysisDataService::Instance().add(IN_WKSP, test_in1D);
 
     // first run in the default manner for comparison
     Rebin rebin_default;
     rebin_default.initialize();
-    rebin_default.setPropertyValue("InputWorkspace", "test_in1D");
-    rebin_default.setPropertyValue("OutputWorkspace", "test_out_default");
-    rebin_default.setPropertyValue("Params", "1.0,1.0,1000.0");
+    rebin_default.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin_default.setPropertyValue("OutputWorkspace", OUT_WKSP1);
+    rebin_default.setProperty("Params", std::vector<double>{START, STEP, STOP});
     TS_ASSERT_THROWS_NOTHING(rebin_default.execute());
     TS_ASSERT(rebin_default.isExecuted());
 
     // retrieve binned axis
-    MatrixWorkspace_sptr rebindata_default =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_default");
+    MatrixWorkspace_sptr rebindata_default = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUT_WKSP1);
     auto &outX_default = rebindata_default->x(0);
 
     // now run again using linear binning mode
     Rebin rebin_again;
     rebin_again.initialize();
-    rebin_again.setPropertyValue("InputWorkspace", "test_in1D");
-    rebin_again.setPropertyValue("OutputWorkspace", "test_out_again");
+    rebin_again.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin_again.setPropertyValue("OutputWorkspace", OUT_WKSP2);
     // set the params as wrong as possible
-    rebin_again.setPropertyValue("Params", "1.0,-1.0,1000.0");
+    rebin_again.setProperty("Params", std::vector<double>{START, -STEP, STOP});
     rebin_again.setProperty("Power", 0.5);
     rebin_again.setProperty("UseReverseLogarithmic", true);
     // set the binning mode and run
@@ -1096,8 +1123,7 @@ public:
     TS_ASSERT(rebin_again.isExecuted());
 
     // retrieve binned axis
-    MatrixWorkspace_sptr rebindata_again =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_again");
+    MatrixWorkspace_sptr rebindata_again = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUT_WKSP2);
     auto &outX_again = rebindata_again->x(0);
 
     // verify that all bin edges are the same
@@ -1106,38 +1132,44 @@ public:
       TS_ASSERT_EQUALS(outX_default[i], outX_again[i]);
     }
 
-    AnalysisDataService::Instance().remove("test_in1D");
-    AnalysisDataService::Instance().remove("test_out_default");
-    AnalysisDataService::Instance().remove("test_out_again");
+    AnalysisDataService::Instance().remove(IN_WKSP);
+    AnalysisDataService::Instance().remove(OUT_WKSP1);
+    AnalysisDataService::Instance().remove(OUT_WKSP2);
   }
 
   void test_default_log_and_modeset_equal_everywhere() {
     // Check that linear binning mode equals to original behavior
+
+    const std::string IN_WKSP("default_modeset_log_in");
+    const std::string OUT_WKSP1("default_equal_out");
+    const std::string OUT_WKSP2("modeset_equal_out");
+
+    const double START = 1.0, STEP = -1.0, STOP = 10.0;
+
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
     test_in1D->setDistribution(true);
-    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+    AnalysisDataService::Instance().add(IN_WKSP, test_in1D);
 
     // first run in the default manner for comparison
     Rebin rebin_default;
     rebin_default.initialize();
-    rebin_default.setPropertyValue("InputWorkspace", "test_in1D");
-    rebin_default.setPropertyValue("OutputWorkspace", "test_out_default");
-    rebin_default.setPropertyValue("Params", "1.0,-1.0,1000.0");
+    rebin_default.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin_default.setPropertyValue("OutputWorkspace", OUT_WKSP1);
+    rebin_default.setProperty("Params", std::vector<double>{START, STEP, STOP});
     TS_ASSERT_THROWS_NOTHING(rebin_default.execute());
     TS_ASSERT(rebin_default.isExecuted());
 
     // retrieve binned axis
-    MatrixWorkspace_sptr rebindata_default =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_default");
+    MatrixWorkspace_sptr rebindata_default = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUT_WKSP1);
     auto &outX_default = rebindata_default->x(0);
 
     // now run again using log mode
     Rebin rebin_again;
     rebin_again.initialize();
-    rebin_again.setPropertyValue("InputWorkspace", "test_in1D");
-    rebin_again.setPropertyValue("OutputWorkspace", "test_out_again");
+    rebin_again.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin_again.setPropertyValue("OutputWorkspace", OUT_WKSP2);
     // set the params as wrong as possible
-    rebin_again.setPropertyValue("Params", "1.0,1.0,1000.0");
+    rebin_again.setProperty("Params", std::vector<double>{START, -STEP, STOP});
     rebin_again.setProperty("Power", 0.5);
     rebin_again.setProperty("UseReverseLogarithmic", true);
     // set the binning mode and run
@@ -1146,8 +1178,7 @@ public:
     TS_ASSERT(rebin_again.isExecuted());
 
     // retrieve binned axis
-    MatrixWorkspace_sptr rebindata_again =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_again");
+    MatrixWorkspace_sptr rebindata_again = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUT_WKSP2);
     auto &outX_again = rebindata_again->x(0);
 
     // verify that all bin edges are the same
@@ -1157,42 +1188,48 @@ public:
     }
 
     // ensure the log bin steps are monotonically increasing
-    TS_ASSERT(checkBinWidthMonotonic(rebindata_default, Monotonic::INCREASE));
-    TS_ASSERT(checkBinWidthMonotonic(rebindata_again, Monotonic::INCREASE));
+    TS_ASSERT(checkBinWidthMonotonic(rebindata_default, Monotonic::INCREASE, true));
+    TS_ASSERT(checkBinWidthMonotonic(rebindata_again, Monotonic::INCREASE, true));
 
-    AnalysisDataService::Instance().remove("test_in1D");
-    AnalysisDataService::Instance().remove("test_out_default");
-    AnalysisDataService::Instance().remove("test_out_again");
+    AnalysisDataService::Instance().remove(IN_WKSP);
+    AnalysisDataService::Instance().remove(OUT_WKSP1);
+    AnalysisDataService::Instance().remove(OUT_WKSP2);
   }
 
   void test_default_reverse_log_and_modeset_equal_everywhere() {
     // Check that reverse logarithmic binning mode equals original behavior
+
+    const std::string IN_WKSP("default_modeset_equal_in");
+    const std::string OUT_WKSP1("default_equal_out");
+    const std::string OUT_WKSP2("modeset_equal_out");
+
+    const double START = 1.0, STEP = -1.0, STOP = 10.0;
+
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
     test_in1D->setDistribution(true);
-    AnalysisDataService::Instance().add("test_in1D", test_in1D);
+    AnalysisDataService::Instance().add(IN_WKSP, test_in1D);
 
     // run once in the default manner
     Rebin rebin_default;
     rebin_default.initialize();
-    rebin_default.setPropertyValue("InputWorkspace", "test_in1D");
-    rebin_default.setPropertyValue("OutputWorkspace", "test_out_default");
-    rebin_default.setProperty("Params", "1.0,-1.0,1000.0");
+    rebin_default.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin_default.setPropertyValue("OutputWorkspace", OUT_WKSP1);
+    rebin_default.setProperty("Params", std::vector<double>{START, STEP, STOP});
     rebin_default.setProperty("UseReverseLogarithmic", true);
     TS_ASSERT_THROWS_NOTHING(rebin_default.execute());
     TS_ASSERT(rebin_default.isExecuted());
 
     // retrieve rebinned axis
-    MatrixWorkspace_sptr rebindata_default =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_default");
+    MatrixWorkspace_sptr rebindata_default = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUT_WKSP1);
     auto &outX_default = rebindata_default->x(0);
 
     // now run again but with positive step, using logarithmic mode
     Rebin rebin_again;
     rebin_again.initialize();
-    rebin_again.setPropertyValue("InputWorkspace", "test_in1D");
-    rebin_again.setPropertyValue("OutputWorkspace", "test_out_again");
+    rebin_again.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin_again.setPropertyValue("OutputWorkspace", OUT_WKSP2);
     // set the params aswrong as possible
-    rebin_again.setProperty("Params", "1.0,1.0,1000.0");
+    rebin_again.setProperty("Params", std::vector<double>{START, -STEP, STOP});
     rebin_again.setProperty("UseReverseLogarithmic", false);
     rebin_again.setProperty("Power", "0.5");
     // set the binning mode and run
@@ -1201,8 +1238,7 @@ public:
     TS_ASSERT(rebin_again.isExecuted());
 
     // retrieve rebinned axis
-    MatrixWorkspace_sptr rebindata_again =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_again");
+    MatrixWorkspace_sptr rebindata_again = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUT_WKSP2);
     auto &outX_again = rebindata_again->x(0);
 
     // verify that all bin edges are the same
@@ -1215,37 +1251,45 @@ public:
     TS_ASSERT(checkBinWidthMonotonic(rebindata_default, Monotonic::DECREASE));
     TS_ASSERT(checkBinWidthMonotonic(rebindata_again, Monotonic::DECREASE));
 
-    AnalysisDataService::Instance().remove("test_in1D");
-    AnalysisDataService::Instance().remove("test_out_default");
-    AnalysisDataService::Instance().remove("test_out_again");
+    AnalysisDataService::Instance().remove(IN_WKSP);
+    AnalysisDataService::Instance().remove(OUT_WKSP1);
+    AnalysisDataService::Instance().remove(OUT_WKSP2);
   }
 
   void test_default_power_and_modeset_equal_everywhere() {
     // Test that modeset to power mode equals default behavior
+
+    const std::string IN_WKSP("default_modeset_equal_in");
+    const std::string OUT_WKSP1("default_equal_out");
+    const std::string OUT_WKSP2("oldman_rebinagain");
+
+    const double START = 1.0, STEP = 1.0, STOP = 10.0;
+
     Workspace2D_sptr test_1D = Create1DWorkspace(51);
     test_1D->setDistribution(false);
-    AnalysisDataService::Instance().add("test_in_Rebin", test_1D);
+    AnalysisDataService::Instance().add(IN_WKSP, test_1D);
 
     // run once the default way
     Rebin rebin_once;
     rebin_once.initialize();
-    rebin_once.setPropertyValue("InputWorkspace", "test_in_Rebin");
-    rebin_once.setPropertyValue("OutputWorkspace", "test_out_Rebin_once");
-    rebin_once.setPropertyValue("Params", "1, 1, 10");
-    rebin_once.setPropertyValue("Power", "0.5");
+    rebin_once.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin_once.setPropertyValue("OutputWorkspace", OUT_WKSP1);
+    rebin_once.setProperty("Params", std::vector<double>{START, STEP, STOP});
+    rebin_once.setProperty("Power", 0.5);
     TS_ASSERT_THROWS_NOTHING(rebin_once.execute());
 
     // retrieve rebinned axis
-    MatrixWorkspace_sptr out_once = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_Rebin_once");
+    MatrixWorkspace_sptr out_once = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUT_WKSP1);
     auto &outX_once = out_once->x(0);
 
     // run again by setting the binning mode
     Rebin rebin_again;
     rebin_again.initialize();
-    rebin_again.setPropertyValue("InputWorkspace", "test_in_Rebin");
-    rebin_again.setPropertyValue("OutputWorkspace", "oldman_rebinagain");
+    rebin_again.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin_again.setPropertyValue("OutputWorkspace", OUT_WKSP2);
     // set params as wrong as possible
-    rebin_again.setPropertyValue("Params", "1, -1, 10"); // set step to negative, just to confuse it
+    rebin_again.setProperty("Params",
+                            std::vector<double>{START, -STEP, STOP}); // set step to negative, just to confuse it
     rebin_again.setProperty("Power", 0.5);
     rebin_again.setProperty("UseReverseLogarithmic", true);
     // set binning mode and execute
@@ -1253,7 +1297,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(rebin_again.execute());
 
     // retrieve rebinned axis
-    MatrixWorkspace_sptr out_again = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("oldman_rebinagain");
+    MatrixWorkspace_sptr out_again = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUT_WKSP2);
     auto &outX_again = out_again->x(0);
 
     TS_ASSERT_EQUALS(outX_once.size(), outX_again.size());
@@ -1264,74 +1308,80 @@ public:
     TS_ASSERT(checkBinWidthMonotonic(out_once, Monotonic::DECREASE));
     TS_ASSERT(checkBinWidthMonotonic(out_again, Monotonic::DECREASE));
 
-    AnalysisDataService::Instance().remove("test_in_Rebin");
-    AnalysisDataService::Instance().remove("test_out_Rebin_once");
-    AnalysisDataService::Instance().remove("oldman_rebinagain");
+    AnalysisDataService::Instance().remove(IN_WKSP);
+    AnalysisDataService::Instance().remove(OUT_WKSP1);
+    AnalysisDataService::Instance().remove(OUT_WKSP2);
   }
 
   void do_test_ignores_power(std::string binMode, double step) {
     // Test that if the mode is set to linear, will NOT produce power binning,
     // even if the power is set to nonzero
+
+    const std::string IN_WKSP("default_modeset_equal_in");
+    const std::string OUT_WKSP1("default_equal_out");
+    const std::string OUT_WKSP2("modeset_equal_out");
+    const std::string OUT_WKSP3("oldman_rebinagain");
+
+    const std::vector<double> PARAMS{step};
+
     Workspace2D_sptr test_1D = Create1DWorkspace(51);
     test_1D->setDistribution(false);
-    AnalysisDataService::Instance().add("test_in_Rebin", test_1D);
-    std::stringstream params;
-    params << step;
+    AnalysisDataService::Instance().add(IN_WKSP, test_1D);
 
     // run once in the default method
     Rebin rebin_once;
     rebin_once.initialize();
-    rebin_once.setPropertyValue("InputWorkspace", "test_in_Rebin");
-    rebin_once.setPropertyValue("OutputWorkspace", "test_out_1");
-    rebin_once.setProperty("Params", params.str());
+    rebin_once.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin_once.setPropertyValue("OutputWorkspace", OUT_WKSP1);
+    rebin_once.setProperty("Params", PARAMS);
     rebin_once.setProperty("Power", 0.0);
     if (binMode == "ReverseLogarithmic")
       rebin_once.setProperty("USeReverseLogarithmic", true);
     TS_ASSERT_THROWS_NOTHING(rebin_once.execute());
 
-    MatrixWorkspace_sptr out_once = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_1");
+    MatrixWorkspace_sptr out_once = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUT_WKSP1);
     auto &outX_once = out_once->x(0);
 
     // run again, with the power set
-    Rebin rebin_again;
-    rebin_again.initialize();
-    rebin_again.setPropertyValue("InputWorkspace", "test_in_Rebin");
-    rebin_again.setPropertyValue("OutputWorkspace", "test_out_2");
-    rebin_again.setProperty("Params", params.str());
-    rebin_again.setProperty("Power", 0.5);
-    rebin_again.setProperty("BinningMode", binMode);
-    TS_ASSERT_THROWS_NOTHING(rebin_again.execute());
+    Rebin rebin_twice;
+    rebin_twice.initialize();
+    rebin_twice.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin_twice.setPropertyValue("OutputWorkspace", OUT_WKSP2);
+    rebin_twice.setProperty("Params", PARAMS);
+    rebin_twice.setProperty("Power", 0.5);
+    rebin_twice.setProperty("BinningMode", binMode);
+    TS_ASSERT_THROWS_NOTHING(rebin_twice.execute());
 
     // the algo validation will remove the power if Linear binning is set
-    TS_ASSERT(double(rebin_again.getProperty("Power")) == 0.0);
+    TS_ASSERT_EQUALS(double(rebin_twice.getProperty("Power")), 0.0);
 
-    MatrixWorkspace_sptr out_again = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_2");
-    auto &outX_again = out_again->x(0);
+    MatrixWorkspace_sptr out_twice = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUT_WKSP2);
+    auto &outX_twice = out_twice->x(0);
 
-    // run again, no power set
+    // run again, with binmode set, but no power set
     Rebin rebin_thrice;
     rebin_thrice.initialize();
-    rebin_thrice.setPropertyValue("InputWorkspace", "test_in_Rebin");
-    rebin_thrice.setPropertyValue("OutputWorkspace", "test_out_3");
-    rebin_thrice.setProperty("Params", params.str());
+    rebin_thrice.setPropertyValue("InputWorkspace", IN_WKSP);
+    rebin_thrice.setPropertyValue("OutputWorkspace", OUT_WKSP3);
+    rebin_thrice.setProperty("Params", PARAMS);
     rebin_thrice.setProperty("Power", 0.0);
     rebin_thrice.setProperty("BinningMode", binMode);
     TS_ASSERT_THROWS_NOTHING(rebin_thrice.execute());
 
-    MatrixWorkspace_sptr out_thrice = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out_3");
+    MatrixWorkspace_sptr out_thrice = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(OUT_WKSP3);
     auto &outX_thrice = out_thrice->x(0);
 
-    TS_ASSERT_EQUALS(outX_once.size(), outX_again.size());
+    TS_ASSERT_EQUALS(outX_once.size(), outX_twice.size());
     TS_ASSERT_EQUALS(outX_once.size(), outX_thrice.size());
     for (size_t i = 0; i < outX_once.size(); i++) {
-      TS_ASSERT_EQUALS(outX_once[i], outX_again[i]);
+      TS_ASSERT_EQUALS(outX_once[i], outX_twice[i]);
       TS_ASSERT_EQUALS(outX_once[i], outX_thrice[i]);
     }
 
-    AnalysisDataService::Instance().remove("test_in_Rebin");
-    AnalysisDataService::Instance().remove("test_out_1");
-    AnalysisDataService::Instance().remove("test_out_2");
-    AnalysisDataService::Instance().remove("test_out_3");
+    AnalysisDataService::Instance().remove(IN_WKSP);
+    AnalysisDataService::Instance().remove(OUT_WKSP1);
+    AnalysisDataService::Instance().remove(OUT_WKSP2);
+    AnalysisDataService::Instance().remove(OUT_WKSP3);
   }
 
   void test_all_bin_modes_ignore_power() {
@@ -1421,19 +1471,22 @@ private:
     if (ignoreLastBin)
       binEdgesTotal--;
     auto binEdges = ws->binEdges(0);
+
+    std::function<bool(double, double)> checkBinSizeChange;
+    switch (monotonic) {
+    case Monotonic::INCREASE:
+      checkBinSizeChange = [](double lastBinSize, double currentBinSize) { return currentBinSize > lastBinSize; };
+      break;
+    case Monotonic::DECREASE:
+      checkBinSizeChange = [](double lastBinSize, double currentBinSize) { return currentBinSize < lastBinSize; };
+      break;
+    }
+
     double lastBinSize = binEdges[1] - binEdges[0];
     bool allMonotonic = true;
-    for (size_t i = 1; i < binEdgesTotal && allMonotonic; ++i) {
+    for (size_t i = 1; i < binEdgesTotal && allMonotonic; i++) {
       double currentBinSize = binEdges[i + 1] - binEdges[i];
-
-      switch (monotonic) {
-      case Monotonic::INCREASE:
-        allMonotonic &= lastBinSize < currentBinSize;
-        break;
-      case Monotonic::DECREASE:
-        allMonotonic &= lastBinSize > currentBinSize;
-        break;
-      }
+      allMonotonic &= checkBinSizeChange(lastBinSize, currentBinSize);
       lastBinSize = currentBinSize;
     }
     return allMonotonic;
