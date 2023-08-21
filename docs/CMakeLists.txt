@@ -98,14 +98,6 @@ function(add_sphinx_build_target builder math_renderer)
                EXCLUDE_FROM_DEFAULT_BUILD 1
                EXCLUDE_FROM_ALL 1
   )
-  if(UNIX AND NOT APPLE)
-    add_custom_command(
-      TARGET ${target_name}
-      PRE_BUILD
-      COMMAND export LC_ALL=C
-      COMMENT "This sets the locale before running sphinx"
-    )
-  endif()
 endfunction()
 
 # Documentation types
