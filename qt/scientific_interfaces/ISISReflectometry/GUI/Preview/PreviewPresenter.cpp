@@ -116,6 +116,9 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
     m_view->setAngle(*theta);
   }
 
+  auto const runTitle = ws->getTitle();
+  m_view->setTitle(runTitle);
+
   // Clear the region selector to ensure all spectra are shown.
   m_regionSelector->clearWorkspace();
 
@@ -285,6 +288,10 @@ void PreviewPresenter::runSumBanks() {
 }
 
 void PreviewPresenter::runReduction() {
+  if (!m_model->getLoadedWs()) {
+    g_log.error("Unable to perform preview reduction because there is no run loaded");
+    return;
+  }
   m_view->disableMainWidget();
   m_view->setUpdateAngleButtonEnabled(false);
   // Ensure the angle is up to date
