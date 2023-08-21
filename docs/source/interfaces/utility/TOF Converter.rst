@@ -11,7 +11,7 @@ Input
 -----
 
 ToF Converter will take an Input value i.e the value you wish to convert.
-If you wish to convert Momentum Transfer or d-spacing then a Scattering angle :math:`\theta` will need to be specified.
+If you wish to convert to/from Momentum Transfer or d-spacing to/from another unit, then a Scattering angle :math:`\theta` will need to be specified.
 If you wish to convert Time of Flight then you will need to specify a Total Flight path in meters.
 
 Output
