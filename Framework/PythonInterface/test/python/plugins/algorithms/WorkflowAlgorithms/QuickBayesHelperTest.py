@@ -101,8 +101,8 @@ class QuickBayesHelperTest(unittest.TestCase):
         self.assertEqual(len(ws_list), N)
         for j in range(N):
             data = ws_list[j]
-            self.assertListEqual(list(ws.readX(0)), data["x"])
-            self.assertListEqual(list(ws.readY(0)), data["y"])
+            self.assertListEqual(list(ws.readX(0)), list(data["x"]))
+            self.assertListEqual(list(ws.readY(0)), list(data["y"]))
         DeleteWorkspace(ws)
 
     def test_unique_res(self):
@@ -112,8 +112,8 @@ class QuickBayesHelperTest(unittest.TestCase):
         self.assertEqual(len(ws_list), N)
         for j in range(N):
             data = ws_list[j]
-            self.assertListEqual(list(ws.readX(j)), data["x"])
-            self.assertListEqual(list(ws.readY(j)), data["y"])
+            self.assertListEqual(list(ws.readX(j)), list(data["x"]))
+            self.assertListEqual(list(ws.readY(j)), list(data["y"]))
         DeleteWorkspace(ws)
 
     # -------------------------------- Failure cases ------------------------------------------
