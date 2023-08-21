@@ -31,7 +31,7 @@ def _validate_workspaces(names: List[str]) -> List[bool]:
     :return: List of bools, True if all workspaces have multiple bins
     """
     ads = AnalysisDataServiceImpl.Instance()
-    results = []
+    has_multiple_bins = []
     for name in names:
         result = False
         ws = ads.retrieve(name)
@@ -44,9 +44,9 @@ def _validate_workspaces(names: List[str]) -> List[bool]:
                     result = True
                     break
         finally:
-            results.append(result)
+            has_multiple_bins.append(result)
 
-    return results
+    return has_multiple_bins
 
 
 class FigureWindow(QMainWindow, ObservingView):
