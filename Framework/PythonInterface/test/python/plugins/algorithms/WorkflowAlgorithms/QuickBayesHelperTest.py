@@ -70,10 +70,10 @@ class QuickBayesHelperTest(unittest.TestCase):
         ws = AnalysisDataService.retrieve(name)
         self.assertEqual(ws.name(), "test")
         self.assertEqual(ws.getNumberHistograms(), 2)
-        self.assertListEqual(ws.readX(0), [1, 2])
-        self.assertListEqual(ws.readX(1), [3, 4])
-        self.assertListEqual(ws.readY(0), [4, 5])
-        self.assertListEqual(ws.readY(1), [6, 7])
+        self.assertListEqual(list(ws.readX(0)), [1, 2])
+        self.assertListEqual(list(ws.readX(1)), [3, 4])
+        self.assertListEqual(list(ws.readY(0)), [4, 5])
+        self.assertListEqual(list(ws.readY(1)), [6, 7])
 
         ax = ws.getAxis(0)
         self.assertEqual(ax.getUnit().caption(), "Energy")
@@ -90,8 +90,8 @@ class QuickBayesHelperTest(unittest.TestCase):
             "test", [1, 2, 3, 4], [4, 5, 6, 7], 2, "energy", "TOF", "Text", ["unit", "python"], DataE=[0.1, 0.2, 0.3, 0.4]
         )
         ws = AnalysisDataService.retrieve(name)
-        self.assertListEqual(ws.readE(0), [0.1, 0.2])
-        self.assertListEqual(ws.readE(1), [0.3, 0.4])
+        self.assertListEqual(list(ws.readE(0)), [0.1, 0.2])
+        self.assertListEqual(list(ws.readE(1)), [0.3, 0.4])
         DeleteWorkspace(ws)
 
     def test_duplicate_res(self):
@@ -101,8 +101,8 @@ class QuickBayesHelperTest(unittest.TestCase):
         self.assertEqual(len(ws_list), N)
         for j in range(N):
             data = ws_list[j]
-            self.assertListEqual(ws.readX(0), data["x"])
-            self.assertListEqual(ws.readY(0), data["y"])
+            self.assertListEqual(list(ws.readX(0)), data["x"])
+            self.assertListEqual(list(ws.readY(0)), data["y"])
         DeleteWorkspace(ws)
 
     def test_unique_res(self):
@@ -112,8 +112,8 @@ class QuickBayesHelperTest(unittest.TestCase):
         self.assertEqual(len(ws_list), N)
         for j in range(N):
             data = ws_list[j]
-            self.assertListEqual(ws.readX(j), data["x"])
-            self.assertListEqual(ws.readY(j), data["y"])
+            self.assertListEqual(list(ws.readX(j)), data["x"])
+            self.assertListEqual(list(ws.readY(j)), data["y"])
         DeleteWorkspace(ws)
 
     # -------------------------------- Failure cases ------------------------------------------
