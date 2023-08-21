@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/UnGroupWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -98,6 +99,28 @@ public:
     removeFromADS(std::vector<std::string>(1, wsName));
   }
 
+  void test_Leaving_Members_Are_Given_Algorithm_History() {
+    std::vector<std::string> members{"test_Leaving_Members_Are_Given_Algorithm_History_Members_1",
+                                     "test_Leaving_Members_Are_Given_Algorithm_History_Members_2"};
+    const std::string groupName = "test_Leaving_Members_Are_Given_Algorithm_History_Group";
+    addTestGroupToADS(groupName, members);
+
+    Mantid::Algorithms::UnGroupWorkspace alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", groupName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    auto &ads = Mantid::API::AnalysisDataService::Instance();
+    const auto m1 = ads.retrieve(members[0]);
+    const auto m2 = ads.retrieve(members[1]);
+
+    TS_ASSERT(isAlgorithmInHistory(m1));
+    TS_ASSERT(isAlgorithmInHistory(m2));
+
+    removeFromADS(members);
+  }
+
 private:
   void addTestGroupToADS(const std::string &name, const std::vector<std::string> &inputs) {
     auto newGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
@@ -124,5 +147,12 @@ private:
       if (ads.doesExist(member))
         ads.remove(member);
     }
+  }
+
+  bool isAlgorithmInHistory(const Mantid::API::Workspace_sptr &ws) {
+    auto wsHistories = ws->getHistory().getAlgorithmHistories();
+    auto iter = std::find_if(wsHistories.cbegin(), wsHistories.cend(),
+                             [](auto const &algHistory) { return algHistory->name() == "UnGroupWorkspace"; });
+    return iter != wsHistories.cend();
   }
 };
