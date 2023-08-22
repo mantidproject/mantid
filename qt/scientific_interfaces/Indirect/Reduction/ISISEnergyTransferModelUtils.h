@@ -10,6 +10,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::API;
@@ -34,6 +35,13 @@ IAlgorithm_sptr loadAlgorithm(std::string const &filename, std::string const &ou
   loader->setProperty("Filename", filename);
   loader->setProperty("OutputWorkspace", outputName);
   return loader;
+}
+
+void deleteWorkspace(std::string const &name) {
+  auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleter->initialize();
+  deleter->setProperty("Workspace", name);
+  deleter->execute();
 }
 
 std::string createRangeString(std::size_t const &from, std::size_t const &to) {
@@ -70,32 +78,14 @@ std::string createDetectorGroupingString(std::size_t const &numberOfDetectors, s
   return createDetectorGroupingString(groupSize, numberOfGroups, numberOfDetectors, spectraMin);
 }
 
-void deleteWorkspace(std::string const &name) {
-  auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
-  deleter->initialize();
-  deleter->setProperty("Workspace", name);
-  deleter->execute();
-}
-
-double getSampleLog(const MatrixWorkspace_const_sptr &workspace, std::string const &logName,
-                    double const &defaultValue) {
-  try {
-    return workspace->getLogAsSingleValue(logName);
-  } catch (std::exception const &) {
-    return defaultValue;
-  }
-}
-
 double getSampleLog(const MatrixWorkspace_const_sptr &workspace, std::vector<std::string> const &logNames,
                     double const &defaultValue) {
-  double value(defaultValue);
   for (auto const &logName : logNames) {
-    value = getSampleLog(workspace, logName, defaultValue);
-    if (value != defaultValue)
-      break;
+    if (workspace->run().hasProperty(logName))
+      return workspace->getLogAsSingleValue(logName);
   }
-  deleteWorkspace(workspace->getName());
-  return value;
+
+  return defaultValue;
 }
 
 double loadSampleLog(std::string const &filename, std::vector<std::string> const &logNames,
@@ -104,11 +94,15 @@ double loadSampleLog(std::string const &filename, std::vector<std::string> const
   auto loader = loadAlgorithm(filename, temporaryWorkspace);
   loader->execute();
 
+  double value(defaultValue);
+
   if (doesExistInADS(temporaryWorkspace)) {
-    return getSampleLog(getADSMatrixWorkspace(temporaryWorkspace), logNames, defaultValue);
-  } else {
-    return defaultValue;
+    auto workspace = getADSMatrixWorkspace(temporaryWorkspace);
+    value = getSampleLog(workspace, logNames, defaultValue);
+    deleteWorkspace(workspace->getName());
   }
+
+  return value;
 }
 
 std::vector<std::size_t> getCustomGroupingNumbers(std::string const &customString) {

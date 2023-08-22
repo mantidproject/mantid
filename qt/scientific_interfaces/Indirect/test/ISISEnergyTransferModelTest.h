@@ -127,8 +127,6 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void test_validateRunData() {}
-
   void testSetInstrumentProperties() {
     auto model = makeModel();
     auto reductionAlgorithm = makeReductionAlgorithm();
