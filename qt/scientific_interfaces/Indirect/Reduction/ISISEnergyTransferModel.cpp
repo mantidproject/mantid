@@ -52,13 +52,9 @@ std::vector<std::string> IETModel::validateRunData(IETRunData const &runData, st
 }
 
 void IETModel::setInstrumentProperties(IAlgorithm_sptr const &reductionAlg, InstrumentData const &instData) {
-  std::string instrument = instData.getInstrument();
-  std::string analyser = instData.getAnalyser();
-  std::string reflection = instData.getReflection();
-
-  reductionAlg->setProperty("Instrument", instrument);
-  reductionAlg->setProperty("Analyser", analyser);
-  reductionAlg->setProperty("Reflection", reflection);
+  reductionAlg->setProperty("Instrument", instData.getInstrument());
+  reductionAlg->setProperty("Analyser", instData.getAnalyser());
+  reductionAlg->setProperty("Reflection", instData.getReflection());
 }
 
 void IETModel::setInputProperties(IAlgorithm_sptr const &reductionAlg, IETInputData const &inputData) {
@@ -242,16 +238,6 @@ void IETModel::plotRawFile(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
     loadAlg->setPropertyValue("SpectrumMax", std::to_string(spectraMax));
   }
   loadAlg->execute();
-
-  // Rebin the workspace to its self to ensure constant binning
-  auto inputToRebin = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
-  inputToRebin->setPropertyValue("WorkspaceToMatch", name);
-  inputToRebin->setPropertyValue("WorkspaceToRebin", name);
-  inputToRebin->setPropertyValue("OutputWorkspace", name);
-
-  IAlgorithm_sptr rebinAlg = AlgorithmManager::Instance().create("RebinToWorkspace");
-  rebinAlg->initialize();
-  batchAlgoRunner->addAlgorithm(rebinAlg, std::move(inputToRebin));
 
   auto inputFromRebin = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   inputFromRebin->setPropertyValue("InputWorkspace", name);
