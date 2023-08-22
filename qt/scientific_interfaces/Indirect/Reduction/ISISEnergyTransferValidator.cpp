@@ -91,7 +91,7 @@ std::vector<std::string> IETDataValidator::validateBackgroundData(IETBackgroundD
 std::string IETDataValidator::validateAnalysisData(IETAnalysisData analysisData) {
   if (analysisData.getUseDetailedBalance()) {
     if (analysisData.getDetailedBalance() == 0.0) {
-      return "Detailed Balance must be more than 0K";
+      return "Detailed Balance must be more than 0 K";
     }
   }
   return "";

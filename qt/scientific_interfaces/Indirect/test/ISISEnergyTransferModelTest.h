@@ -486,7 +486,7 @@ public:
     std::vector<std::string> errors = m_model->validateRunData(runData, 1, 10);
     TS_ASSERT_EQUALS(errors.size(), 1);
     if (errors.size() == 1)
-      TS_ASSERT_EQUALS(errors[0], "Detailed Balance must be more than 0K");
+      TS_ASSERT_EQUALS(errors[0], "Detailed Balance must be more than 0 K");
   }
 
   void testValidateRunDataSpectraInvalid() {
