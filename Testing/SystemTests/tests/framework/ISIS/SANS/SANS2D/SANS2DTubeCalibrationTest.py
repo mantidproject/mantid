@@ -31,7 +31,7 @@ class SANS2DTubeCalibrationTest:
             EncoderAtBeamCentreForRear260Strip=470.0,
             RearDetector=is_rear_det,
             Threshold=threshold,
-            SkipTubesOnEdgeFindingError=skip_tubes_on_error,
+            SkipTubesOnError=skip_tubes_on_error,
             Margin=25,
             StartingPixel=20,
             EndingPixel=495,

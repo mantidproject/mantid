@@ -61,7 +61,7 @@ class Prop:
     ENCODER_REAR_260 = "EncoderAtBeamCentreForRear260Strip"
     REAR_DET = "RearDetector"
     THRESHOLD = "Threshold"
-    SKIP_TUBES_ON_ERROR = "SkipTubesOnEdgeFindingError"
+    SKIP_TUBES_ON_ERROR = "SkipTubesOnError"
     MARGIN = "Margin"
     START_PIXEL = "StartingPixel"
     END_PIXEL = "EndingPixel"
@@ -142,8 +142,8 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             False,
             direction=Direction.Input,
             doc="Whether to skip calibration of tubes that we could not find the correct number of"
-            "edges for. If set to False then the algorithm will terminate when it encounters a"
-            "tube that it cannot find the correct number of edges for.",
+            "edges for, or where another error has occurred during calibration. If set to False then"
+            "the algorithm will terminate when it encounters a tube that cannot be calibrated.",
         )
         self.declareProperty(
             Prop.MARGIN, 25, direction=Direction.Input, doc="Region around the peak (in pixels) that is used for the peak fitting step"
