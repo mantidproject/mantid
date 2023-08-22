@@ -1,1 +1,1 @@
-* :ref:`LoadDiffCal <algm-LoadDiffCal>` now accepts an alternate grouping definition in the HDF format.
+- :ref:`LoadDiffCal <algm-LoadDiffCal>` now accepts an alternate grouping definition in the HDF format.
