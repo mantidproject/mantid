@@ -11,7 +11,23 @@
 /*
   This file contains immutable data classes and constants that facilitate communication among the view, presenter, and
   model components for the ISIS Energy Transfer tab. The classes only provide getters to prevent data modification,
-  ensuring the stability and integrity of the communication process.
+  ensuring the stability and integrity of the communication process. The classes are as the following
+  IETInputData (line 35): contains the parameters values for the input section
+  IETConversionData(line 57): contains the parameters values for the conversion section
+  IETGroupingType(line 72): contains the types of the grouping
+  IETGroupingData(line 83): contains the parameters values for the grouping section
+  IETBackgroundData(line 102): contains the parameters values for the background section
+  IETAnalysisData(line 117): contains the parameters values for the spectra range (this is used by algorithm and plot
+  spectra range)
+  IETRebinData(line 136): contains the parameters values for the rebin section
+  IETOutputData(line 159): contains the parameters values for the output section
+  InstrumentData(line 172): contains the parameters values for the instrument details
+  IETRunData(line 217): contains the parameters of the main algorithm (ISISIndirectEnergyTransrWrapper)
+  IETPlotData(line 244): contains the parameters used in plotting the data
+  IETSaveData(line 260): contains the parameters used in saving the workspaces
+  IETGroupOption(line 282): contains the available group options
+  IETRebinType(289): contains the types of rebinning
+  IETGroupingConstants(295): constants used during the goruping process
 */
 
 namespace MantidQt::CustomInterfaces {
