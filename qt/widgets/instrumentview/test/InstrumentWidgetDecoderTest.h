@@ -60,7 +60,7 @@ public:
   void test_adding_duplicate_peak_workspace_to_instrument_view() {
     auto pw = std::make_shared<PeaksWorkspace>();
     std::shared_ptr<PeaksWorkspace> pw2 = std::move(pw->clone());
-    m_instrumentWidget->setSurfaceType(3);
+    m_instrumentWidget->setSurfaceType(InstrumentWidget::SurfaceType::CYLINDRICAL_Z);
     auto unwrappedSurface = std::dynamic_pointer_cast<UnwrappedSurface>(m_instrumentWidget->getSurface());
 
     // Start with no peaks
