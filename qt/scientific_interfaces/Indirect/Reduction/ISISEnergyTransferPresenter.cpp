@@ -68,23 +68,23 @@ bool IETPresenter::validateInstrumentDetails() {
 }
 
 InstrumentData IETPresenter::getInstrumentData() {
-  auto instrument = getInstrumentName().toStdString();
-  auto analyser = getAnalyserName().toStdString();
-  auto reflection = getReflectionName().toStdString();
-
   QMap<QString, QString> instrumentDetails = getInstrumentDetails();
 
-  auto specMin = instrumentDetails["spectra-min"].toInt();
-  auto specMax = instrumentDetails["spectra-max"].toInt();
-  auto eFixed = instrumentDetails["Efixed"].toDouble();
-  auto rebinDefault = instrumentDetails["rebin-default"].toStdString();
-  auto cm1ConvertChoice = instrumentDetails["cm-1-convert-choice"] == "true";
-  auto saveNexusChoice = instrumentDetails["save-nexus-choice"] == "true";
-  auto saveAsciiChoice = instrumentDetails["save-ascii-choice"] == "true";
-  auto foldFramesChoice = instrumentDetails["fold-frames-choice"] == "true";
+  auto specMin = ;
+  auto specMax = ;
+  auto eFixed = ;
+  auto rebinDefault = ;
+  auto cm1ConvertChoice = == "true";
+  auto saveNexusChoice = ;
+  auto saveAsciiChoice = ;
+  auto foldFramesChoice = ;
 
-  return InstrumentData(instrument, analyser, reflection, specMin, specMax, eFixed, rebinDefault, cm1ConvertChoice,
-                        saveNexusChoice, saveAsciiChoice, foldFramesChoice);
+  return InstrumentData(
+      getInstrumentName().toStdString(), getAnalyserName().toStdString(), getReflectionName().toStdString(),
+      instrumentDetails["spectra-min"].toInt(), instrumentDetails["spectra-max"].toInt(),
+      instrumentDetails["Efixed"].toDouble(), instrumentDetails["rebin-default"].toStdString(),
+      instrumentDetails["cm-1-convert-choice"] == "true", instrumentDetails["save-nexus-choice"] == "true",
+      instrumentDetails["save-ascii-choice"] == "true", instrumentDetails["fold-frames-choice"] == "true");
 }
 
 void IETPresenter::setInstrumentDefault() {
@@ -136,7 +136,8 @@ bool IETPresenter::validate() {
   }
 
   QString error = uiv.generateErrorMessage();
-  showMessageBox(error);
+  if (!error.isEmpty())
+    showMessageBox(error);
 
   return validateInstrumentDetails() && uiv.isAllInputValid();
 }
@@ -210,19 +211,17 @@ void IETPresenter::notifySaveCustomGroupingClicked() {
   InstrumentData instrumentData = getInstrumentData();
   std::string customGrouping = m_view->getCustomGrouping();
 
-  std::string customGroupingOutput = IETGroupingConstants::GROUPING_WS_NAME;
-  std::string defaultGroupingFilename = IETGroupingConstants::DEFAULT_GROUPING_FILENAME;
-
   if (!customGrouping.empty()) {
     m_model->createGroupingWorkspace(instrumentData.getInstrument(), instrumentData.getAnalyser(), customGrouping,
-                                     customGroupingOutput);
+                                     IETGroupingConstants::GROUPING_WS_NAME);
   } else {
     m_view->displayWarning("The custom grouping is empty.");
   }
 
-  if (doesExistInADS(customGroupingOutput)) {
+  if (doesExistInADS(IETGroupingConstants::GROUPING_WS_NAME)) {
     auto const saveDirectory = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
-    m_view->showSaveCustomGroupingDialog(customGroupingOutput, defaultGroupingFilename, saveDirectory);
+    m_view->showSaveCustomGroupingDialog(IETGroupingConstants::GROUPING_WS_NAME,
+                                         IETGroupingConstants::DEFAULT_GROUPING_FILENAME, saveDirectory);
   }
 }
 
