@@ -258,7 +258,7 @@ public:
     TS_ASSERT(enTwoLetters_from_constructor == "Ab");
     TS_ASSERT(enTwoLetters_from_constructor == "AB");
 
-    // test operator==(const std::string s) const
+    // test operator==(const std::string& s) const
     TS_ASSERT(enTwoLetters_from_constructor == std::string("ab"));
     TS_ASSERT(enTwoLetters_from_constructor == std::string("aB"));
     TS_ASSERT(enTwoLetters_from_constructor == std::string("Ab"));
@@ -273,16 +273,16 @@ public:
     TS_ASSERT(enTwoLetters_from_constructor != "cd");
     TS_ASSERT(enTwoLetters_from_constructor != "Ba");
 
-    // test operator!=(const std::string s)
+    // test operator!=(const std::string& s)
     TS_ASSERT(enTwoLetters_from_constructor != std::string("cd"));
     TS_ASSERT(enTwoLetters_from_constructor != std::string("BA"));
 
     // 2. Test a use case with mixed-case string introduced through the assignment operator: EnumeratedString
-    // &operator=(std::string s)
+    // &operator=(std::string& s)
     TS_ASSERT_THROWS_NOTHING(TWO_LETTERS enTwoLetters_from_assignment = std::string("aB"));
     TWO_LETTERS enTwoLetters_from_assignment = std::string("aB");
     TS_ASSERT(enTwoLetters_from_assignment.c_str() == std::string("aB"))
-    TS_ASSERT(enTwoLetters_from_constructor == TwoLettersEnum::ab)
+    TS_ASSERT(enTwoLetters_from_assignment == TwoLettersEnum::ab)
 
     // test operator==(const char *s) const
     TS_ASSERT(enTwoLetters_from_assignment == "ab");
@@ -290,7 +290,7 @@ public:
     TS_ASSERT(enTwoLetters_from_assignment == "Ab");
     TS_ASSERT(enTwoLetters_from_assignment == "AB");
 
-    // test operator==(const std::string s) const
+    // test operator==(const std::string& s) const
     TS_ASSERT(enTwoLetters_from_assignment == std::string("ab"));
     TS_ASSERT(enTwoLetters_from_assignment == std::string("aB"));
     TS_ASSERT(enTwoLetters_from_assignment == std::string("Ab"));
@@ -304,7 +304,7 @@ public:
     TS_ASSERT(enTwoLetters_from_assignment != "cd");
     TS_ASSERT(enTwoLetters_from_assignment != "Ba");
 
-    // test operator!=(const std::string s)
+    // test operator!=(const std::string& s)
     TS_ASSERT(enTwoLetters_from_assignment != std::string("cd"));
     TS_ASSERT(enTwoLetters_from_assignment != std::string("BA"));
   }
