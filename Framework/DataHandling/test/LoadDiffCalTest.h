@@ -200,7 +200,7 @@ public:
   void test_alternate_grouping_definition_hdf_format() {
     std::string outWSName("LoadDiffCalTest");
     std::string filename("LoadDiffCalTest.h5");
-    std::string groupingfile("LoadDiffCalTest_grp.h5");
+    std::string groupingfile("LoadDiffCalTest_grp.HdF");
 
     // Create ingredients for a test calibration file.
     SaveDiffCalTest saveDiffCal;

@@ -19,6 +19,10 @@ namespace Kernel {
 @author Reece Boston, ORNL
 @date 2023/08/02
 */
+namespace {
+bool CompareStrings(const std::string &a, const std::string &b) { return a == b; }
+bool CompareStringsCaseInsensitive(const std::string &a, const std::string &b) { return boost::iequals(a, b); }
+} // namespace
 
 namespace {
 std::function<bool(const std::string &, const std::string &)> compareStrings =
@@ -38,6 +42,7 @@ class EnumeratedString {
    *
    * @tparam an optional pointer to a statically defined string comparator.
    */
+public:
 public:
   EnumeratedString() { ensureCompatibleSize(); }
 

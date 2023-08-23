@@ -37,6 +37,7 @@ using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::GroupingWorkspace_sptr;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D;
+using Mantid::Kernel::CompareStringsCaseInsensitive;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::EnumeratedString;
 using Mantid::Kernel::PropertyWithValue;
@@ -47,11 +48,13 @@ using namespace H5;
 namespace {
 enum class CalibFilenameExtensionEnum { H5, HD5, HDF, CAL, enum_count };
 const std::vector<std::string> calibFilenameExtensions{".h5", ".hd5", ".hdf", ".cal"};
-typedef EnumeratedString<CalibFilenameExtensionEnum, &calibFilenameExtensions> CalibFilenameExtension;
+typedef EnumeratedString<CalibFilenameExtensionEnum, &calibFilenameExtensions, &CompareStringsCaseInsensitive>
+    CalibFilenameExtension;
 
 enum class GroupingFilenameExtensionEnum { XML, H5, HD5, HDF, CAL, enum_count };
 const std::vector<std::string> groupingFilenameExtensions{".xml", ".h5", ".hd5", ".hdf", ".cal"};
-typedef EnumeratedString<GroupingFilenameExtensionEnum, &groupingFilenameExtensions> GroupingFilenameExtension;
+typedef EnumeratedString<GroupingFilenameExtensionEnum, &groupingFilenameExtensions, &CompareStringsCaseInsensitive>
+    GroupingFilenameExtension;
 
 namespace PropertyNames {
 const std::string CAL_FILE("Filename");
