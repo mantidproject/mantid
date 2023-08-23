@@ -23,7 +23,7 @@ switch(GIT_BRANCH) {
     PACKAGE_SUFFIX_DEFAULT = 'Unstable'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'unstable'
     GITHUB_RELEASES_TAG_DEFAULT = ''
-    PLATFORM_CHOICES = ['none', 'all', 'linux-64', 'win-64', 'osx-64']
+    PLATFORM_CHOICES = ['none', 'all', 'linux-64', 'win-64', 'osx-64-M1']
     break
 }
 
@@ -140,20 +140,20 @@ pipeline {
             }
           }
         }
-        stage('build and test: osx-64') {
+        stage('build and test: osx-64-M1') {
           when {
             beforeAgent true
             beforeOptions true
               anyOf {
                 expression { env.BUILD_DEVEL == 'all' }
-                expression { env.BUILD_DEVEL == 'osx-64' }
+                expression { env.BUILD_DEVEL == 'osx-64-M1' }
             }
           }
           agent { label 'osx-64' }
           options { timestamps () }
           steps {
             checkoutSource("${GIT_SHA}")
-            build_and_test('osx-64')
+            build_and_test('osx-64-M1')
           }
           post {
             always {
