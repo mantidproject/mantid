@@ -28,8 +28,8 @@
 #   --use-core-dumps: Activate core dumps (Linux only)
 #
 # Possible parameters:
-#   --specific-systemtests: Space separated list, enclosed in "", of system test names to be given as the ctest -R flag
-#   --specific-unittests: Space separated list, enclosed in "", of unit test names to be given as the ctest -R flag
+#   --specific-systemtests: Pipe separated list, enclosed in "", of system test names to be given as the ctest -R flag
+#   --specific-unittests: Pipe separated list, enclosed in "", of unit test names to be given as the ctest -R flag
 #   --extra-cmake-flags: Extra flags to pass directly to cmake, enclose in "", defaults to nothing
 #   --build-threads: pass the number of threads that can be used to build with, default is 1 thread per logical core
 
