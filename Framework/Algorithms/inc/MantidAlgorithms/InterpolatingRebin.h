@@ -76,6 +76,7 @@ protected:
   const std::string workspaceMethodName() const override { return ""; }
   // Overridden Algorithm methods
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
   void outputYandEValues(const API::MatrixWorkspace_const_sptr &inputW, const HistogramData::BinEdges &XValues_new,

@@ -96,6 +96,29 @@ public:
     AnalysisDataService::Instance().remove("InterpolatingRebinTest_outdist");
   }
 
+  void test_interp_rebin_only_step() {
+    // test that InterpolatingRebin can work if *only* given step size
+
+    Workspace2D_sptr test_in1D = Create1DData();
+    test_in1D->setDistribution(true);
+    AnalysisDataService::Instance().add("InterpolatingRebinTest_indist", test_in1D);
+
+    const double WIDTH(1.5);
+
+    InterpolatingRebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace", "InterpolatingRebinTest_indist");
+    rebin.setPropertyValue("OutputWorkspace", "InterpolatingRebinTest_outdist");
+    rebin.setProperty("Params", std::vector<double>{WIDTH});
+    TS_ASSERT_THROWS_NOTHING(rebin.execute())
+    TS_ASSERT(rebin.isExecuted())
+
+    // ensure the rebinning params are unchanged by algo
+    std::vector<double> params = rebin.getProperty("Params");
+    TS_ASSERT_EQUALS(params.size(), 1);
+    TS_ASSERT_EQUALS(params.front(), WIDTH);
+  }
+
   void testWorkspace_nondist() {
 
     Workspace2D_sptr test_in1D = Create1DData();
