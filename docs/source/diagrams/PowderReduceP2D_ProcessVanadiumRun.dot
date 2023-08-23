@@ -17,7 +17,7 @@ digraph PowderReduceP2D_FocusAndSum {
     RemovePromptPulse           [label="RemovePromptPulse v1"]
     LoadDiffCal                 [label="LoadDiffCal v1"]
     MaskDetectors               [label="MaskDetectors v1"]
-    ApplyDiffCal              [label="ApplyDiffCal v1"]
+    ApplyDiffCal                [label="ApplyDiffCal v1"]
     ConvertUnits                [label="ConvertUnits v1\nwith target 'Wavelength'"]
     CylinderAbsorption          [label="CylinderAbsorption v1"]
     Divide                      [label="Divide v1"]
