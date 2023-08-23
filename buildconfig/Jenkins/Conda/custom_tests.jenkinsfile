@@ -1,0 +1,128 @@
+// // This script expects the following environment variables to be set by the Jenkins job:
+// GITHUB_USER_NAME - The name of the user, being used with pushing/pulling from git
+// GITHUB_USER_EMAIL - The email of the user, being used with pushing/pulling from git
+// GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for cloning and pushing to the mantid repo
+
+// conda-build can't copy a local source if the conda-bld directory is
+// also part of the source. Checkout to a subdirectory to avoid this.
+CHECKOUT_DIR = 'source'
+CISCRIPT_DIR = "${CHECKOUT_DIR}/buildconfig/Jenkins/Conda"
+pipeline {
+  agent none
+  options { checkoutToSubdirectory(CHECKOUT_DIR) }
+  parameters {
+      booleanParam(name: 'TEST_LINUX', defaultValue: true, description: 'If True, the specified tests will run on Linux')
+      booleanParam(name: 'TEST_WINDOWS', defaultValue: true, description: 'If True, the specified tests will run on Windows')
+      booleanParam(name: 'TEST_MACOS', defaultValue: true, description: 'If True, the specified tests will run on MacOS')
+      booleanParam(name: 'RUN_UNIT_TESTS', defaultValue: true, description: 'If True, the unit tests will be run')
+      booleanParam(name: 'RUN_SYSTEM_TESTS', defaultValue: true, description: 'If True, the system tests will be run')
+      string(name: 'SPECIFIC_UNIT_TESTS', defaultValue: '',
+             description: '(Optional) Space separated list of unit test names to used as the -R option with ctest')
+      string(name: 'SPECIFIC_SYSTEM_TESTS', defaultValue: '',
+             description: '(Optional) Space separated list of system test names to used as the -R option with ctest')
+  }
+  environment {
+    WIN_BASH = "C:\\Program Files\\git\\bin\\bash.exe"
+    GIT_AUTHOR_NAME = "${GITHUB_USER_NAME}"
+    GIT_AUTHOR_EMAIL = "${GITHUB_USER_EMAIL}"
+    GIT_COMMITTER_NAME = "${GITHUB_USER_NAME}"
+    GIT_COMMITTER_EMAIL = "${GITHUB_USER_EMAIL}"
+  }
+  stages {
+    stage('Build and test') {
+      parallel {
+        stage('build and test: linux-64') {
+          when {
+            beforeAgent true
+            beforeOptions true
+            expression { env.TEST_LINUX }
+          }
+          agent { label 'linux-64' }
+          options { timestamps () }
+          steps {
+            build_and_test('linux-64')
+          }
+          post {
+            always {
+              archive_ctest_log()
+              publish_test_reports()
+            }
+          }
+        }
+        stage('build and test: win-64') {
+          when {
+            beforeAgent true
+            beforeOptions true
+            expression { env.TEST_WINDOWS }
+          }
+          agent { label 'win-64' }
+          options { timestamps () }
+          steps {
+            build_and_test('win-64')
+          }
+          post {
+            always {
+              archive_ctest_log()
+              publish_test_reports()
+            }
+          }
+        }
+        stage('build and test: osx-64') {
+          when {
+            beforeAgent true
+            beforeOptions true
+            expression { env.TEST_MACOS }
+          }
+          agent { label 'osx-64' }
+          options { timestamps () }
+          steps {
+            build_and_test('osx-64')
+          }
+          post {
+            always {
+              archive_ctest_log()
+              publish_test_reports()
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+def build_and_test(platform) {
+  buildscript_path = "${CISCRIPT_DIR}/conda-buildscript"
+  common_args = "--clean-external-projects"
+  if(!env.RUN_UNIT_TESTS) {
+    common_args = common_args + " --disable-unittests"
+  }
+  else if(!env.SPECIFIC_UNIT_TESTS == '') {
+      common_args = common_args + " --specific-unittests \"${SPECIFIC_UNIT_TESTS}\""
+  }
+
+  if(!env.RUN_SYSTEM_TESTS) {
+    common_args = common_args + " --enable-systemtests"
+    if(!env.SPECIFIC_SYSTEM_TESTS == '') {
+      common_args = common_args + " --specific-systemtests \"${SPECIFIC_SYSTEM_TESTS}\""
+    }
+  }
+
+  cmake_preset = "${platform}-ci"
+  if(platform.startsWith('win')) {
+    workspace_unix_style = toUnixStylePath("${WORKSPACE}")
+    bat "\"${WIN_BASH}\" -ex -c \"${buildscript_path}\
+      ${workspace_unix_style}/${CHECKOUT_DIR} ${cmake_preset} ${common_args}\""
+  } else {
+    sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} --use-core-dumps"
+  }
+}
+
+def archive_ctest_log(){
+  archiveArtifacts artifacts: "${CHECKOUT_DIR}/build/ctest_log/*.log", fingerprint: true
+}
+
+def publish_test_reports() {
+  xunit thresholds: [failed(failureThreshold: '0')],
+    tools: [CTest(excludesPattern: '', pattern: "${CHECKOUT_DIR}/build/Testing/**/*.xml", stopProcessingIfError: true)]
+  junit "${CHECKOUT_DIR}/build/Testing/SystemTests/scripts/TEST-*.xml"
+}
