@@ -25,7 +25,7 @@ elif [[ $OSTYPE == 'darwin'* ]]; then
       MAMBAFORGE_SCRIPT_NAME=Mambaforge-$MAMBAFORGE_VERSION-MacOSX-arm64.sh
       EXPECTED_INSTALLER_SHA=$MACARM_SHA256
       # add sbin to path to provide access to md5 for mambaforge install script
-      if [[ ! echo $PATH | grep "/sbin:" ]]; then
+      if [[ $(echo $PATH | grep -c "/sbin:") -eq 0 ]]; then
         export PATH=/sbin:$PATH
       fi
       echo $PATH
