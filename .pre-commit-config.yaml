@@ -40,7 +40,7 @@ repos:
     #- id: cmake-lint <- not ready yet
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.0.284
+    rev: v0.0.285
     # ruff must appear before black in the list of hooks
     hooks:
       - id: ruff
