@@ -55,7 +55,7 @@ class PlotFitPanePresenter(BasePanePresenter):
     def match_raw_selection(self, workspace_names, plot_raw):
         ws_list = []
         workspace_list = workspace_names
-        if type(workspace_names) != list:
+        if not isinstance(workspace_names, list):
             workspace_list = [workspace_names]
         for workspace_name in workspace_list:
             fit_raw_data = self._fitting_context.fit_to_raw
