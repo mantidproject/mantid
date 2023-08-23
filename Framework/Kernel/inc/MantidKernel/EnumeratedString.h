@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <boost/algorithm/string.hpp>
 #include <string>
 #include <vector>
 
@@ -18,14 +19,21 @@ namespace Kernel {
 @author Reece Boston, ORNL
 @date 2023/08/02
 */
+namespace {
+bool CompareStrings(const std::string &a, const std::string &b) { return a == b; }
+bool CompareStringsCaseInsensitive(const std::string &a, const std::string &b) { return boost::iequals(a, b); }
+} // namespace
 
-template <class E, const std::vector<std::string> *names> class EnumeratedString {
+template <class E, const std::vector<std::string> *names,
+          bool (*StringComparator)(const std::string &, const std::string &) = &CompareStrings>
+class EnumeratedString {
   /**
    * @tparam class E an `enum`, the final value *must* be `enum_count`
    *              (i.e. `enum class Fruit {apple, orange, enum_count}`)
    * @tparam a pointer to a static vector of string names for each enum
    * The enum and string array *must* have same order.
    */
+public:
 public:
   EnumeratedString() { ensureCompatibleSize(); }
 
@@ -88,7 +96,8 @@ private:
   E findEFromString(const std::string s) {
     E e = E(0);
     for (; size_t(e) < names->size(); e = E(size_t(e) + 1))
-      if (s == names->at(size_t(e)))
+      // if (s == names->at(size_t(e)))
+      if (StringComparator(s, names->at(size_t(e))))
         break;
     return e;
   }
