@@ -31,9 +31,9 @@ digraph PowderReduceP2D_FocusAndSum {
   subgraph decisions{
     $decision_style
     maskFile        [label="Is masking file specified?"]
-    detcal        [label="Is calibration file of type detcal?"]
-    detcal2        [label="Is calibration file of type detcal?"]
-    detcal3        [label="Is calibration file of type detcal?"]
+    detcal          [label="Is calibration file of type detcal?"]
+    detcal2         [label="Is calibration file of type detcal?"]
+    detcal3         [label="Is calibration file of type detcal?"]
     edgebinning     [label="Is edgebinning specified?"]
   }
 
