@@ -95,7 +95,7 @@ class PlotsLoader(object):
 
         for sublist in creation_args:
             for cargs_dict in sublist:
-                if "norm" in cargs_dict and type(cargs_dict["norm"]) is dict:
+                if "norm" in cargs_dict and isinstance(cargs_dict["norm"], dict):
                     cargs_dict["norm"] = self.restore_normalise_obj_from_dict(cargs_dict["norm"])
         fig, axes_matrix, _, _ = create_subplots(len(creation_args))
         axes_list = axes_matrix.flatten().tolist()

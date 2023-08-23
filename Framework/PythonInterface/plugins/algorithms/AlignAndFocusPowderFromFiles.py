@@ -192,7 +192,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         runnumbers = self.getProperty(propertyName).value
         linearizedRuns = []
         for item in runnumbers:
-            if type(item) == list:
+            if isinstance(item, list):
                 linearizedRuns.extend(item)
             else:
                 linearizedRuns.append(item)
