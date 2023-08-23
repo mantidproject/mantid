@@ -24,6 +24,8 @@ elif [[ $OSTYPE == 'darwin'* ]]; then
     if [[ $(uname -p) == 'arm' ]]; then
       MAMBAFORGE_SCRIPT_NAME=Mambaforge-$MAMBAFORGE_VERSION-MacOSX-arm64.sh
       EXPECTED_INSTALLER_SHA=$MACARM_SHA256
+      # add sbin to path to provide access to md5 for mambaforge install script
+      export PATH=/sbin:$PATH
     else
       MAMBAFORGE_SCRIPT_NAME=Mambaforge-$MAMBAFORGE_VERSION-MacOSX-x86_64.sh
       EXPECTED_INSTALLER_SHA=$MACX86_SHA256
@@ -77,7 +79,6 @@ if [ ! -f $EXPECTED_MAMBA_EXE ]; then
           sed -e '/^export\ CONDA_/s/\\/\//g' | \
           sed -e '/^export\ CONDA_/s/\(\w\)\:/\/\1/g' > $EXPECTED_MAMBAFORGE_PATH/etc/profile.d/conda.sh
     else
-        echo $PATH
         bash $MAMBAFORGE_SCRIPT_NAME -b -p $EXPECTED_MAMBAFORGE_PATH
     fi
     rm $MAMBAFORGE_SCRIPT_NAME
