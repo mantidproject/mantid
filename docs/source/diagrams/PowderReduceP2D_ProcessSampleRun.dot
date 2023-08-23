@@ -44,7 +44,7 @@ digraph PowderReduceP2D_FocusAndSum {
   LoadMask                  -> detcal
   detcal                    -> LoadDetcal  [label="Yes"]
   detcal                    -> FindDetectorsPar  [label="No"]
-  LoadDetcal                    -> FindDetectorsPar
+  LoadDetcal                -> FindDetectorsPar
   FindDetectorsPar          -> FilterBadPulses
   FilterBadPulses           -> RemovePromptPulse
   RemovePromptPulse         -> detcal2
