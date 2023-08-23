@@ -226,16 +226,16 @@ pipeline {
             }
           }
         }
-        stage('package conda: osx-64') {
+        stage('package conda: osx-64-M1') {
           when {
             beforeAgent true
             beforeOptions true
             anyOf {
-              expression { env.BUILD_PACKAGE == 'osx-64' }
+              expression { env.BUILD_PACKAGE == 'osx-64-M1' }
               expression { env.BUILD_PACKAGE == 'all' }
             }
           }
-          agent { label 'osx-64' }
+          agent { label 'osx-64-M1' }
           options {
               timestamps ()
               retry(3)
@@ -249,12 +249,12 @@ pipeline {
             checkoutSource("${GIT_SHA}")
             // Build the base set of packages (ones not required for mantidworkbench)
             // in parallel
-            package_conda('osx-64', 'base')
-            archive_conda_packages('osx-64')
+            package_conda('osx-64-M1', 'base')
+            archive_conda_packages('osx-64-M1')
           }
           post {
             always {
-              archive_env_logs('osx-64')
+              archive_env_logs('osx-64-M1')
             }
           }
         }
@@ -265,7 +265,7 @@ pipeline {
         axes {
           axis {
             name 'PLATFORM'
-            values 'linux-64', 'win-64', 'osx-64'
+            values 'linux-64', 'win-64', 'osx-64-M1'
           }
         }
         stages {

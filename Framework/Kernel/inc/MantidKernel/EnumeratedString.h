@@ -102,10 +102,11 @@ private:
 
   void ensureCompatibleSize() {
     if (size_t(E::enum_count) != names->size()) {
-      std::stringstream msg;
-      msg << "Size of " << typeid(E).name() << " incompatible with vector of names: ";
-      msg << size_t(E::enum_count) << " vs. " << names->size() << std::endl;
-      throw std::runtime_error(msg.str());
+      // std::stringstream msg;
+      // msg << "Size of " << typeid(E).name() << " incompatible with vector of names: ";
+      // msg << size_t(E::enum_count) << " vs. " << names->size() << std::endl;
+      // throw std::runtime_error(msg.str());
+      static_assert(names->size() == size_t(E::enum_count));
     }
   }
 };

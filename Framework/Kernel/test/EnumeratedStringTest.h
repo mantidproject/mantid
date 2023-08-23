@@ -191,7 +191,7 @@ public:
 
   void testEnumCount() {
     // try removing enum_count -- should give a compiler error
-    enum class Letters : size_t { a, b, enum_count };
+    enum class Letters : size_t { a, b, c, enum_count };
     static const std::vector<std::string> letters{"a", "b"};
     enum Graphia : size_t { alpha, beta, enum_count };
     static const std::vector<std::string> graphia{"alpha", "beta"};
