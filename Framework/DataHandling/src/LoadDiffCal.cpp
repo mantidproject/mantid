@@ -364,8 +364,8 @@ void LoadDiffCal::loadGroupingFromAlternateFile() {
 
   // Determine file format by file name extension
   std::string filenameExtension = std::filesystem::path(filename).extension().string();
-  GroupingFilenameExtension enFilenameExtension =
-      filenameExtension; // this will throw a runtime error if the extension is invalid
+  GroupingFilenameExtension enFilenameExtension(
+      filenameExtension); // this will throw a runtime error if the extension is invalid
   switch (enFilenameExtension) {
   case GroupingFilenameExtensionEnum::XML: {
     auto alg = createChildAlgorithm("LoadDetectorsGroupingFile");
@@ -449,9 +449,8 @@ void LoadDiffCal::exec() {
 
   // Determine file format by file name extension
   std::string filenameExtension = std::filesystem::path(m_filename).extension().string();
-  CalibFilenameExtension enFilenameExtension =
-      filenameExtension; // this will throw a runtime error if the extension is invalid
-
+  CalibFilenameExtension enFilenameExtension(
+      filenameExtension); // this will throw a runtime error if the extension is invalid
   if (enFilenameExtension == CalibFilenameExtensionEnum::CAL) {
     runLoadCalFile();
     return;

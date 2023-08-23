@@ -64,7 +64,7 @@ public:
     }
     return *this;
   }
-  EnumeratedString &operator=(std::string s) {
+  EnumeratedString &operator=(const std::string &s) {
     E e = findEFromString(s);
     if (e != E::enum_count) {
       value = e;
@@ -79,12 +79,16 @@ public:
   // for comparison of the object to either enums or strings
   bool operator==(const E e) const { return value == e; }
   bool operator!=(const E e) const { return value != e; }
-  bool operator==(const std::string s) const { return name == s; }
-  bool operator!=(const std::string s) const { return name != s; }
-  bool operator==(const char *s) const { return name == std::string(s); }
-  bool operator!=(const char *s) const { return name != std::string(s); }
+
+  bool operator==(const std::string &s) const { return StringComparator(name, s); }
+  bool operator!=(const std::string &s) const { return !StringComparator(name, s); }
+
+  bool operator==(const char *s) const { return StringComparator(name, std::string(s)); }
+  bool operator!=(const char *s) const { return !StringComparator(name, std::string(s)); }
+
   bool operator==(const EnumeratedString es) const { return value == es.value; }
   bool operator!=(const EnumeratedString es) const { return value != es.value; }
+
   const char *c_str() const { return name.c_str(); }
   static size_t size() { return names->size(); }
 
@@ -93,10 +97,9 @@ private:
   std::string name;
 
   // given a string, find the corresponding enum value
-  E findEFromString(const std::string s) {
+  E findEFromString(const std::string &s) {
     E e = E(0);
     for (; size_t(e) < names->size(); e = E(size_t(e) + 1))
-      // if (s == names->at(size_t(e)))
       if (StringComparator(s, names->at(size_t(e))))
         break;
     return e;
