@@ -97,7 +97,7 @@ std::ostringstream ISISDataArchive::sendRequest(const std::string &fName) const 
   Kernel::InternetHelper inetHelper;
   std::ostringstream os;
   try {
-    inetHelper.sendRequest(std::string(URL_PREFIX) + fName, os);
+    inetHelper.sendRequest(URL_PREFIX.data() + fName, os);
   } catch (Kernel::Exception::InternetError &ie) {
     g_log.warning() << "Could not access archive index." << ie.what();
   }
