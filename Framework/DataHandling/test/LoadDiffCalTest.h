@@ -200,6 +200,8 @@ public:
   void test_alternate_grouping_definition_hdf_format() {
     std::string outWSName("LoadDiffCalTest");
     std::string filename("LoadDiffCalTest.h5");
+    // intentionally giving groupingfile a mixed-case file name extension to test the robustness of LoadDiffCal file
+    // name validation
     std::string groupingfile("LoadDiffCalTest_grp.HdF");
 
     // Create ingredients for a test calibration file.
