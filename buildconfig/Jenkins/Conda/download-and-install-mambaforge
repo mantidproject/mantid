@@ -28,6 +28,7 @@ elif [[ $OSTYPE == 'darwin'* ]]; then
       if [[ ! echo $PATH | grep "/sbin:" ]]; then
         export PATH=/sbin:$PATH
       fi
+      echo $PATH
     else
       MAMBAFORGE_SCRIPT_NAME=Mambaforge-$MAMBAFORGE_VERSION-MacOSX-x86_64.sh
       EXPECTED_INSTALLER_SHA=$MACX86_SHA256
