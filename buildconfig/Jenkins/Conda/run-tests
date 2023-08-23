@@ -11,8 +11,8 @@
 #   5. ENABLE_DOC_TESTS: Whether or not the doc tests should be ran
 #   6. BUILD_THREADS: The number of threads to use during testing
 #   7. USE_CORE_DUMPS: Activate core dumps (Linux only)
-#   8. SPECIFIC_SYSTEM_TESTS: Space separated list, enclosed in "", of system test names to be given as the ctest -R flag
-#   9. SPECIFIC_UNIT_TESTS: Space separated list, enclosed in "", of unit test names to be given as the ctest -R flag
+#   8. SPECIFIC_SYSTEM_TESTS: Pipe separated list, enclosed in "", of system test names to be given as the ctest -R flag
+#   9. SPECIFIC_UNIT_TESTS: Pipe separated list, enclosed in "", of unit test names to be given as the ctest -R flag
 
 WORKSPACE=$1
 ENABLE_SYSTEM_TESTS=$2
