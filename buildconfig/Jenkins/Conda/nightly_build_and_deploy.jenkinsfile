@@ -149,7 +149,7 @@ pipeline {
                 expression { env.BUILD_DEVEL == 'osx-64-M1' }
             }
           }
-          agent { label 'osx-64' }
+          agent { label 'osx-64-M1' }
           options { timestamps () }
           steps {
             checkoutSource("${GIT_SHA}")
