@@ -70,15 +70,6 @@ bool IETPresenter::validateInstrumentDetails() {
 InstrumentData IETPresenter::getInstrumentData() {
   QMap<QString, QString> instrumentDetails = getInstrumentDetails();
 
-  auto specMin = ;
-  auto specMax = ;
-  auto eFixed = ;
-  auto rebinDefault = ;
-  auto cm1ConvertChoice = == "true";
-  auto saveNexusChoice = ;
-  auto saveAsciiChoice = ;
-  auto foldFramesChoice = ;
-
   return InstrumentData(
       getInstrumentName().toStdString(), getAnalyserName().toStdString(), getReflectionName().toStdString(),
       instrumentDetails["spectra-min"].toInt(), instrumentDetails["spectra-max"].toInt(),
