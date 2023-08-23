@@ -17,6 +17,7 @@
 #
 # Possible flags:
 #   --enable-systemtests: Runs the system tests from being compiled or ran
+#   --disable-unittests: Disables unit testing
 #   --enable-package: Runs a package being produced
 #   --enable-docs: Runs the docs from being built
 #   --enable-dev-docs: Runs the developer docs from being built
@@ -27,8 +28,11 @@
 #   --use-core-dumps: Activate core dumps (Linux only)
 #
 # Possible parameters:
+#   --specific-systemtests: Space separated list, enclosed in "", of system test names to be given as the ctest -R flag
+#   --specific-unittests: Space separated list, enclosed in "", of unit test names to be given as the ctest -R flag
 #   --extra-cmake-flags: Extra flags to pass directly to cmake, enclose in "", defaults to nothing
 #   --build-threads: pass the number of threads that can be used to build with, default is 1 thread per logical core
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $SCRIPT_DIR/mamba-utils
 start_time=$(date +%s)
@@ -67,12 +71,15 @@ CLEAN_BUILD=false
 CLEAN_EXTERNAL_PROJECTS=false
 USE_CORE_DUMPS=false
 EXTRA_CMAKE_FLAGS="-DENABLE_PRECOMMIT=OFF"
+SPECIFIC_SYSTEM_TESTS=""
+SPECIFIC_UNIT_TESTS=""
 
 # Handle flag inputs
 while [ ! $# -eq 0 ]
 do
     case "$1" in
         --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
+        --disable-unittests) ENABLE_UNIT_TESTS=false ;;
         --enable-package) ENABLE_PACKAGE=true ;;
         --enable-docs) ENABLE_DOCS=true ;;
         --enable-doctests)
@@ -93,6 +100,14 @@ do
             ;;
         --build-threads)
             BUILD_THREADS="$2"
+            shift
+            ;;
+        --specific-systemtests)
+            SPECIFIC_SYSTEM_TESTS="$2"
+            shift
+            ;;
+        --specific-unittests)
+            SPECIFIC_UNIT_TESTS="$2"
             shift
             ;;
         *)
@@ -146,7 +161,7 @@ rm -rf  $BUILD_DIR/ctest_log
 $SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS
 
 # Run unit and system tests
-$SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS $USE_CORE_DUMPS
+$SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS $USE_CORE_DUMPS "$SPECIFIC_SYSTEM_TESTS" "$SPECIFIC_UNIT_TESTS"
 
 # elapsed time with second resolution
 end_time=$(date +%s)
