@@ -180,6 +180,7 @@ Project Recovery test
 - Change Plot type from individual to `Tiled`, and again click `Plot all`
 - In the workspace window right-click the ``Rename2`` workspace and select `Show Data`
 - In the top toolbar, navigate to ``Interfaces > Reflectometry`` and open the ``ISIS Reflectometry`` interface
+- In the top toolbar, navigate to ``Interfaces >Diffraction`` and open the ``Engineering Diffraction`` interface.
 
 .. image:: ../../images/reporter-test-4.png
 
