@@ -111,7 +111,7 @@ fi
 
 if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
     # Build doctests without using Xvfb for better output when things fail. Output to file due to console memory issues
-    QT_QPA_PLATFORM=offscreen cmake --build . --target docs-doctest -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS > doctest_output.txt
+    QT_QPA_PLATFORM=offscreen cmake --build . --target docs-doctest -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS > doctest_log.log
 fi
 
 if [[ $ENABLE_SYSTEM_TESTS == false ]]; then
