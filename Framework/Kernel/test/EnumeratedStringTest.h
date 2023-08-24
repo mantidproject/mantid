@@ -19,6 +19,8 @@ const std::vector<std::string> cakeNames{"Lemon Cake", "Devil's Food Cake", "Ang
                                          "Pound Cake"};
 typedef EnumeratedString<CoolGuys, &coolGuyNames> COOLGUY;
 typedef EnumeratedString<Cakes, &cakeNames> CAKE;
+
+bool firstLetterComparator(const std::string &x, const std::string &y) { return x[0] == y[0]; }
 } // namespace
 
 class EnumeratedStringTest : public CxxTest::TestSuite {
@@ -238,5 +240,88 @@ public:
     default:
       TS_FAIL("EnumeratedString in 'SWITCH' failed to match to enumerated value");
     }
+  }
+
+  void testCaseInsensitiveNameComparison() {
+    enum TwoLettersEnum : size_t { ab, cd, enum_count };
+    static const std::vector<std::string> twoLetters = {"ab", "cd"};
+    typedef EnumeratedString<TwoLettersEnum, &twoLetters, &CompareStringsCaseInsensitive> TWO_LETTERS;
+
+    // 1. Test a use case with mixed-case string introduced through the constructor: EnumeratedString(const std::string
+    // s)
+    TS_ASSERT_THROWS_NOTHING(TWO_LETTERS enTwoLetters("aB"));
+    TWO_LETTERS enTwoLetters_from_constructor("aB");
+    TS_ASSERT(enTwoLetters_from_constructor.c_str() == std::string("aB"))
+    TS_ASSERT(enTwoLetters_from_constructor == TwoLettersEnum::ab)
+
+    // test operator==(const char *s) const
+    TS_ASSERT(enTwoLetters_from_constructor == "ab");
+    TS_ASSERT(enTwoLetters_from_constructor == "aB");
+    TS_ASSERT(enTwoLetters_from_constructor == "Ab");
+    TS_ASSERT(enTwoLetters_from_constructor == "AB");
+
+    // test operator==(const std::string& s) const
+    TS_ASSERT(enTwoLetters_from_constructor == std::string("ab"));
+    TS_ASSERT(enTwoLetters_from_constructor == std::string("aB"));
+    TS_ASSERT(enTwoLetters_from_constructor == std::string("Ab"));
+    TS_ASSERT(enTwoLetters_from_constructor == std::string("AB"));
+
+    TS_ASSERT(!(enTwoLetters_from_constructor == "cd"));
+    TS_ASSERT(!(enTwoLetters_from_constructor == "bA"));
+    TS_ASSERT(!(enTwoLetters_from_constructor == std::string("cd")));
+    TS_ASSERT(!(enTwoLetters_from_constructor == std::string("bA")));
+
+    // test operator!=(const char *s) const
+    TS_ASSERT(enTwoLetters_from_constructor != "cd");
+    TS_ASSERT(enTwoLetters_from_constructor != "Ba");
+
+    // test operator!=(const std::string& s)
+    TS_ASSERT(enTwoLetters_from_constructor != std::string("cd"));
+    TS_ASSERT(enTwoLetters_from_constructor != std::string("BA"));
+
+    // 2. Test a use case with mixed-case string introduced through the assignment operator: EnumeratedString
+    // &operator=(std::string& s)
+    TS_ASSERT_THROWS_NOTHING(TWO_LETTERS enTwoLetters_from_assignment = std::string("aB"));
+    TWO_LETTERS enTwoLetters_from_assignment = std::string("aB");
+    TS_ASSERT(enTwoLetters_from_assignment.c_str() == std::string("aB"))
+    TS_ASSERT(enTwoLetters_from_assignment == TwoLettersEnum::ab)
+
+    // test operator==(const char *s) const
+    TS_ASSERT(enTwoLetters_from_assignment == "ab");
+    TS_ASSERT(enTwoLetters_from_assignment == "aB");
+    TS_ASSERT(enTwoLetters_from_assignment == "Ab");
+    TS_ASSERT(enTwoLetters_from_assignment == "AB");
+
+    // test operator==(const std::string& s) const
+    TS_ASSERT(enTwoLetters_from_assignment == std::string("ab"));
+    TS_ASSERT(enTwoLetters_from_assignment == std::string("aB"));
+    TS_ASSERT(enTwoLetters_from_assignment == std::string("Ab"));
+    TS_ASSERT(enTwoLetters_from_assignment == std::string("AB"));
+
+    TS_ASSERT(!(enTwoLetters_from_assignment == "cd"));
+    TS_ASSERT(!(enTwoLetters_from_assignment == "bA"));
+    TS_ASSERT(!(enTwoLetters_from_assignment == std::string("cd")));
+
+    // test operator!=(const char *s) const
+    TS_ASSERT(enTwoLetters_from_assignment != "cd");
+    TS_ASSERT(enTwoLetters_from_assignment != "Ba");
+
+    // test operator!=(const std::string& s)
+    TS_ASSERT(enTwoLetters_from_assignment != std::string("cd"));
+    TS_ASSERT(enTwoLetters_from_assignment != std::string("BA"));
+  }
+
+  void test_customNameComparator() {
+    enum FirstLetterEnum : size_t { A, B, C, enum_count };
+    static const std::vector<std::string> words = {"apple", "banana", "cherry"};
+    typedef EnumeratedString<FirstLetterEnum, &words, &firstLetterComparator> Fruit;
+
+    Fruit apple = FirstLetterEnum::A;
+    Fruit banana = FirstLetterEnum::B;
+    Fruit cherry = FirstLetterEnum::C;
+
+    TS_ASSERT_EQUALS(apple, "apricot");
+    TS_ASSERT_EQUALS(banana, "blueberry");
+    TS_ASSERT_EQUALS(cherry, "corn");
   }
 };
