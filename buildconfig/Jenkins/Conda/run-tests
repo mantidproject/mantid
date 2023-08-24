@@ -109,8 +109,8 @@ if [[ $ENABLE_UNIT_TESTS == true ]]; then
 fi
 
 if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
-    run_with_xvfb cmake --build . --target docs-doctest -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS
-    terminate_xvfb_sessions
+    # Build doctests without using Xvfb for better output when things fail
+    QT_QPA_PLATFORM=offscreen cmake --build . --target docs-doctest -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS
 fi
 
 if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
