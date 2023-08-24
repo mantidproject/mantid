@@ -17,11 +17,12 @@ Project Recovery test
   :ref:`Project Recovery concepts page <Project Recovery>`.
 - Download the ISIS sample dataset from the `Downloads page <http://download.mantidproject.org/>`_.
 - `TOPAZ_3132_event.nxs` - available in ``/Testing/Data/SystemTest/``, get this by building the `SystemTestData` target.
-  It should be in ``ExternalData/Testing/Data/SystemTest/``
-- The files `INTER000*` are in the ISIS sample data
+  It should be in ``ExternalData/Testing/Data/SystemTest/``.
+- The files `INTER000*` are in the ISIS sample data.
 - Include the directory containing the test files in your Managed User Directories.
-- Set up a save directory to store output for comparison, referred to as ``testing_directory`` below
-- Note that if you have error reporting enabled, simply select ``Do not share information`` in the Error Reporter dialog
+- Set your facility to ISIS.
+- Set up a save directory to store output for comparison, referred to as ``testing_directory`` below.
+- Note that if you have error reporting enabled, simply select ``Do not share information`` in the Error Reporter dialog.
 
 
 **Time required 15 - 30  minutes**
