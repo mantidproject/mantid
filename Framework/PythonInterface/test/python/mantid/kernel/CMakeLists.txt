@@ -39,6 +39,7 @@ set(TEST_PY_FILES
     RebinParamsValidatorTest.py
     StatisticsTest.py
     StringContainsValidatorTest.py
+    test_funcinspect.py
     TimeSeriesPropertyTest.py
     QuatTest.py
     UnitConversionTest.py

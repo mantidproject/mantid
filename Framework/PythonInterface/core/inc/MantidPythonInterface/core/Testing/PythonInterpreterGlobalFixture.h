@@ -25,7 +25,6 @@ public:
     namespace py = boost::python;
 
     Py_Initialize();
-    PyEval_InitThreads();
     Mantid::PythonInterface::importNumpy();
     // Insert the directory of the properties file as a sitedir
     // to ensure the built copy of mantid gets picked up

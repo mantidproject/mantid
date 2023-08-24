@@ -11,7 +11,7 @@ from mantid.simpleapi import *
 import random
 import types
 import ast
-import collections
+import collections.abc
 
 
 class anAbsorptionShape(object):
@@ -281,7 +281,7 @@ class anAbsorptionShape(object):
         if value is None or not value:
             self._axis_is_default = True
             return {}
-        if not isinstance(value, collections.Iterable):
+        if not isinstance(value, collections.abc.Iterable):
             value = [value]
         n_elements = len(value)
         if n_elements < len(mandatory_prop_list):

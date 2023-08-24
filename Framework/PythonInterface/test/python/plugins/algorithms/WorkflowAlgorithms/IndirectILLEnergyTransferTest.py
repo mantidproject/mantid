@@ -12,7 +12,6 @@ from mantid import config
 
 
 class IndirectILLEnergyTransferTest(unittest.TestCase):
-
     _runs = dict(
         [
             ("one_wing_QENS", "090661"),
@@ -72,7 +71,7 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
 
     def test_one_wing_QENS(self):
         # tests one wing QENS with PSD range
-        args = {"Run": self._runs["one_wing_QENS"], "ManualPSDIntegrationRange": [20, 100]}
+        args = {"Run": self._runs["one_wing_QENS"], "ManualPSDIntegrationRange": [20, 100], "OutputWorkspace": "res"}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 18, 1024)
 
@@ -82,37 +81,43 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         self.assertTrue(deltaE[-1] > -deltaE[0])
 
     def test_one_wing_EFWS(self):
-        args = {"Run": self._runs["one_wing_EFWS"]}
+        args = {"Run": self._runs["one_wing_EFWS"], "OutputWorkspace": "res"}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 18, 256)
 
     def test_one_wing_IFWS(self):
-        args = {"Run": self._runs["one_wing_IFWS"]}
+        args = {"Run": self._runs["one_wing_IFWS"], "OutputWorkspace": "res"}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 18, 256)
 
     def test_two_wing_EFWS(self):
-        args = {"Run": self._runs["two_wing_EFWS"]}
+        args = {"Run": self._runs["two_wing_EFWS"], "OutputWorkspace": "res"}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 2, 18, 8)
 
     def test_two_wing_IFWS(self):
-        args = {"Run": self._runs["two_wing_IFWS"]}
+        args = {"Run": self._runs["two_wing_IFWS"], "OutputWorkspace": "res"}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 2, 18, 512)
 
     def test_spectrum_axis(self):
-        args = {"Run": self._runs["one_wing_EFWS"], "SpectrumAxis": "2Theta"}
+        args = {"Run": self._runs["one_wing_EFWS"], "SpectrumAxis": "2Theta", "OutputWorkspace": "res"}
         res = IndirectILLEnergyTransfer(**args)
         self.assertTrue(res.getItem(0).getAxis(1).getUnit().unitID(), "Theta")
 
     def test_bats(self):
-        args = {"Run": self._runs["bats"], "PulseChopper": "34", "GroupDetectors": False}
+        args = {"Run": self._runs["bats"], "PulseChopper": "34", "GroupDetectors": False, "OutputWorkspace": "res"}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 2050, 1121)
 
     def test_bats_monitor(self):
-        args = {"Run": self._runs["bats"], "PulseChopper": "34", "GroupDetectors": False, "DeleteMonitorWorkspace": False}
+        args = {
+            "Run": self._runs["bats"],
+            "PulseChopper": "34",
+            "GroupDetectors": False,
+            "DeleteMonitorWorkspace": False,
+            "OutputWorkspace": "res",
+        }
         res = IndirectILLEnergyTransfer(**args)
         mon_ws = "res_215962_mon"
         self.assertTrue(mtd.doesExist(mon_ws))
@@ -122,17 +127,22 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         self._check_workspace_group(res, 1, 2050, 1121)
 
     def test_bats_grouped(self):
-        args = {"Run": self._runs["bats"], "PulseChopper": "34"}
+        args = {"Run": self._runs["bats"], "PulseChopper": "34", "OutputWorkspace": "res"}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 18, 1121)
 
     def test_psd_tubes_only(self):
-        args = {"Run": self._runs["one_wing_QENS"], "DiscardSingleDetectors": True}
+        args = {"Run": self._runs["one_wing_QENS"], "DiscardSingleDetectors": True, "OutputWorkspace": "res"}
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 16, 1024)
 
     def test_3_sd(self):
-        args = {"Run": self._runs["3_single_dets"], "DiscardSingleDetectors": False, "GroupDetectors": False}
+        args = {
+            "Run": self._runs["3_single_dets"],
+            "DiscardSingleDetectors": False,
+            "GroupDetectors": False,
+            "OutputWorkspace": "res",
+        }
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 2051, 984)
 
@@ -171,7 +181,6 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         self.assertEqual(epp_ws.rowCount(), 516)
 
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
-
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup))
 
         self.assertEqual(wsgroup.getNumberOfEntries(), nentries)
