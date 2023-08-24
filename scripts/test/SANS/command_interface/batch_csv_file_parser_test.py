@@ -100,6 +100,22 @@ class BatchCsvParserTest(unittest.TestCase):
             parser.parse_batch_file(batch_file_path)
         BatchCsvParserTest._remove_csv(batch_file_path)
 
+    def test_that_raises_when_background_workspace_is_specified_but_no_scale_factor(self):
+        content = "# MANTID_BATCH_FILE add more text here\n" "sample_sans,test,output_as,test, background_workspace, test\n"
+        batch_file_path = BatchCsvParserTest._save_to_csv(content)
+        parser = BatchCsvParser()
+        with self.assertRaises(ValueError):
+            parser.parse_batch_file(batch_file_path)
+        BatchCsvParserTest._remove_csv(batch_file_path)
+
+    def test_that_raises_when_scale_factor_is_specified_but_no_background_workspace(self):
+        content = "# MANTID_BATCH_FILE add more text here\n" "sample_sans,test,output_as,test, scale_factor, 1.1\n"
+        batch_file_path = BatchCsvParserTest._save_to_csv(content)
+        parser = BatchCsvParser()
+        with self.assertRaises(ValueError):
+            parser.parse_batch_file(batch_file_path)
+        BatchCsvParserTest._remove_csv(batch_file_path)
+
     def test_that_parses_two_lines_correctly(self):
         content = (
             "# MANTID_BATCH_FILE add more text here\n"
