@@ -211,17 +211,37 @@ public:
     auto model = makeModel();
     auto reductionAlgorithm = makeReductionAlgorithm();
 
-    IETRebinData rebinData(false, "Multiple", 1.0, 2.0, 3.0, "1,3,5");
+    IETRebinData rebinData(true, "Multiple", 1.0, 2.0, 3.0, "1,2,10");
     model->setRebinProperties(reductionAlgorithm, rebinData);
 
-    TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("RebinString"), "1,3,5");
+    TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("RebinString"), "1,2,10");
+  }
+
+  void testSetRebinPropertiesWithMultipleLogRebin() {
+    auto model = makeModel();
+    auto reductionAlgorithm = makeReductionAlgorithm();
+
+    IETRebinData rebinData(true, "Multiple", 1.0, 2.0, 3.0, "2,-0.035,10");
+    model->setRebinProperties(reductionAlgorithm, rebinData);
+
+    TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("RebinString"), "2,-0.035,10");
+  }
+
+  void testSetRebinPropertiesWithMultipleVariableRangeRebin() {
+    auto model = makeModel();
+    auto reductionAlgorithm = makeReductionAlgorithm();
+
+    IETRebinData rebinData(true, "Multiple", 1.0, 2.0, 3.0, "0,2,10,4,20");
+    model->setRebinProperties(reductionAlgorithm, rebinData);
+
+    TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("RebinString"), "0,2,10,4,20");
   }
 
   void testSetRebinPropertiesWithSingleRebin() {
     auto model = makeModel();
     auto reductionAlgorithm = makeReductionAlgorithm();
 
-    IETRebinData rebinData(false, "Single", 0.0, 2.0, 6.0, "");
+    IETRebinData rebinData(true, "Single", 0.0, 2.0, 6.0, "");
     model->setRebinProperties(reductionAlgorithm, rebinData);
 
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("RebinString"), "0.000000,6.000000,2.000000");
@@ -231,7 +251,7 @@ public:
     auto model = makeModel();
     auto reductionAlgorithm = makeReductionAlgorithm();
 
-    IETRebinData rebinData(true, "Single", 0.0, 0.0, 0.0, "1.0, 3.0, 5.0");
+    IETRebinData rebinData(false, "Single", 0.0, 0.0, 0.0, "1.0, 3.0, 5.0");
     model->setRebinProperties(reductionAlgorithm, rebinData);
 
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("RebinString"), "");

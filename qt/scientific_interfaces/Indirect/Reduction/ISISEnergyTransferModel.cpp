@@ -88,7 +88,7 @@ void IETModel::setBackgroundProperties(IAlgorithm_sptr const &reductionAlg, IETB
 }
 
 void IETModel::setRebinProperties(IAlgorithm_sptr const &reductionAlg, IETRebinData const &rebinData) {
-  if (!rebinData.getDoNotRebin()) {
+  if (rebinData.getShouldRebin()) {
     std::string rebin;
 
     if (rebinData.getRebinType() == IETRebinType::SINGLE) {

@@ -52,7 +52,7 @@ public:
   void testGetCustomGroupingNumbers() {
     auto result = getCustomGroupingNumbers("1,2,3-5,6");
     std::vector<std::size_t> expected = {1, 2, 3, 5, 6};
-    for (int i = 0; i < result.size(); i++) {
+    for (size_t i = 0; i < result.size(); i++) {
       TS_ASSERT_EQUALS(result[i], expected[i]);
     }
   }

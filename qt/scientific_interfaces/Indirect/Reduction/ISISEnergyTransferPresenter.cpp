@@ -98,7 +98,7 @@ bool IETPresenter::validate() {
   }
 
   auto rebinDetails = runData.getRebinData();
-  if (!rebinDetails.getDoNotRebin()) {
+  if (rebinDetails.getShouldRebin()) {
     if (rebinDetails.getRebinType() == IETRebinType::SINGLE) {
       double rebinWidth = rebinDetails.getRebinWidth();
       if (rebinWidth < 0) {

@@ -135,12 +135,12 @@ private:
 
 class IETRebinData {
 public:
-  IETRebinData(const bool &doNotRebin = false, const std::string &rebinType = "", const double &rebinLow = 0.0,
+  IETRebinData(const bool &shouldRebin = false, const std::string &rebinType = "", const double &rebinLow = 0.0,
                const double &rebinHigh = 0.0, const double &rebinWidth = 0.0, const std::string &rebinString = "")
-      : m_doNotRebin(doNotRebin), m_rebinType(rebinType), m_rebinLow(rebinLow), m_rebinWidth(rebinWidth),
+      : m_shouldRebin(shouldRebin), m_rebinType(rebinType), m_rebinLow(rebinLow), m_rebinWidth(rebinWidth),
         m_rebinHigh(rebinHigh), m_rebinString(rebinString) {}
 
-  bool getDoNotRebin() const { return m_doNotRebin; }
+  bool getShouldRebin() const { return m_shouldRebin; }
   std::string getRebinType() const { return m_rebinType; }
   double getRebinLow() const { return m_rebinLow; }
   double getRebinHigh() const { return m_rebinHigh; }
@@ -148,7 +148,7 @@ public:
   std::string getRebinString() const { return m_rebinString; }
 
 private:
-  bool m_doNotRebin;
+  bool m_shouldRebin;
   std::string m_rebinType;
   double m_rebinLow;
   double m_rebinWidth;
