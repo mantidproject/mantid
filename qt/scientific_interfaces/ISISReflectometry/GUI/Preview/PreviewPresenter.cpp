@@ -286,6 +286,11 @@ void PreviewPresenter::plotLinePlot() {
 }
 
 void PreviewPresenter::runSumBanks() {
+  if (!m_model->getLoadedWs()) {
+    g_log.error("Unable to perform sum banks step because there is no run loaded");
+    return;
+  }
+
   // Ensure the angle is up to date so that we can check for matching experiment settings lookup rows
   m_model->setTheta(m_view->getAngle());
 

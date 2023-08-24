@@ -212,11 +212,13 @@ public:
   void test_run_title_is_set_when_workspace_loaded() {
     auto mockModel = makeModel();
     auto mockView = std::make_unique<MockPreviewView>();
+    auto mainPresenter = MockBatchPresenter();
 
     expectLoadWorkspaceCompletedSetsRunTitle(*mockView, *mockModel);
 
     auto deps = packDeps(mockView.get(), std::move(mockModel));
     auto presenter = PreviewPresenter(std::move(deps));
+    presenter.acceptMainPresenter(&mainPresenter);
     presenter.notifyLoadWorkspaceCompleted();
   }
 
@@ -337,6 +339,23 @@ public:
     presenter.notifyInstViewShapeChanged();
   }
 
+  void test_notify_inst_view_shape_changed_with_no_loaded_ws() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockInstViewModel = makeInstViewModel();
+    auto mockJobManager = makeJobManager();
+    auto mockDockedWidgets = makePreviewDockedWidgets();
+
+    auto detIDsStr = ProcessingInstructions{"44-46"};
+    EXPECT_CALL(*mockModel, getSelectedBanks()).Times(1).WillOnce(Return(detIDsStr));
+    expectRunSumBanksNoLoadedWs(*mockModel, *mockJobManager);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
+                                               std::move(mockInstViewModel), std::move(mockDockedWidgets)));
+
+    presenter.notifyInstViewShapeChanged();
+  }
+
   void test_notify_region_selector_export_to_ads_requested() {
     auto mockView = makeView();
     auto mockModel = makeModel();
@@ -407,7 +426,7 @@ public:
     auto mockDockedWidgets = makePreviewDockedWidgets();
     auto mockRegionSelector = makeRegionSelector();
 
-    expectRunReductionNoLoadedWs(*mockModel, *mockJobManager);
+    expectRunSumBanksNoLoadedWs(*mockModel, *mockJobManager);
 
     auto presenter =
         PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), makeInstViewModel(),
@@ -739,7 +758,7 @@ private:
                                                      MockInstViewModel &mockInstViewModel) {
     auto ws = createLinearDetectorWorkspace();
 
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(3).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
     EXPECT_CALL(mockModel, getDefaultTheta()).Times(1);
     EXPECT_CALL(mockInstViewModel, updateWorkspace(ws)).Times(1);
     EXPECT_CALL(mockDockedWidgets, setInstViewToolbarEnabled(true)).Times(1);
@@ -758,7 +777,7 @@ private:
     auto ws = createRectangularDetectorWorkspace();
     auto angle = 2.3;
 
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(3).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
     EXPECT_CALL(mockModel, getDefaultTheta()).Times(1).WillOnce(Return(angle));
     EXPECT_CALL(mockView, setAngle(angle)).Times(1);
   }
@@ -766,14 +785,14 @@ private:
   void expectLoadWorkspaceCompletedSetsRunTitle(MockPreviewView &mockView, MockPreviewModel &mockModel) {
     auto ws = createRectangularDetectorWorkspace();
 
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(3).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
     EXPECT_CALL(mockView, setTitle(ws->getTitle())).Times(1);
   }
 
   void expectInstViewModelUpdatedWithLoadedWorkspace(MockPreviewModel &mockModel,
                                                      MockInstViewModel &mockInstViewModel) {
     auto ws = createRectangularDetectorWorkspace();
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(3).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
     EXPECT_CALL(mockInstViewModel, updateWorkspace(Eq(ws))).Times(1);
   }
 
@@ -784,6 +803,8 @@ private:
     auto detIDs = std::vector<Mantid::detid_t>{2, 3, 4};
     auto previousDetIDsStr = boost::optional<ProcessingInstructions>{};
     auto detIDsStr = boost::optional<ProcessingInstructions>{"2-4"};
+    auto ws = createRectangularDetectorWorkspace();
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(mockDockedWidgets, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
     EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
     EXPECT_CALL(mockModel, getSelectedBanks()).WillOnce(Return(previousDetIDsStr)).WillOnce(Return(detIDsStr));
@@ -798,7 +819,7 @@ private:
     auto ws = createRectangularDetectorWorkspace();
     auto theta = 0.3;
 
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillRepeatedly(Return(ws));
     EXPECT_CALL(mockView, getAngle()).Times(1).WillOnce(Return(theta));
     EXPECT_CALL(mockModel, setTheta(theta)).Times(1);
     EXPECT_CALL(mockModel, getSelectedBanks()).WillOnce(Return(boost::none));
@@ -811,9 +832,7 @@ private:
     auto ws = createRectangularDetectorWorkspace();
     auto theta = 0.3;
 
-    EXPECT_CALL(mockView, getAngle()).Times(2).WillRepeatedly(Return(theta));
-    EXPECT_CALL(mockModel, setTheta(theta)).Times(2);
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(2).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(4).WillRepeatedly(Return(ws));
     EXPECT_CALL(mockModel, getSelectedBanks()).WillOnce(Return(boost::none));
     EXPECT_CALL(mockMainPresenter, hasROIDetectorIDsForPreviewRow()).WillOnce(Return(false));
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(0);
@@ -833,7 +852,7 @@ private:
     EXPECT_CALL(mockModel, getSelectedBanks()).WillOnce(Return(previousDetIDsStr)).WillOnce(Return(detIDsStr));
     EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr))).Times(1);
     EXPECT_CALL(mockMainPresenter, hasROIDetectorIDsForPreviewRow()).WillOnce(Return(false));
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(3).WillOnce(Return(ws)).WillOnce(Return(ws)).WillOnce(Return(nullptr));
     EXPECT_CALL(mockModel, setSummedWs(Eq(ws))).Times(1);
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(0);
   }
@@ -843,6 +862,7 @@ private:
                                                               MockPreviewDockedWidgets &mockDockedWidgets,
                                                               MockJobManager &mockJobManager,
                                                               MockBatchPresenter &mockMainPresenter) {
+    auto ws = createRectangularDetectorWorkspace();
     auto detIndices = std::vector<size_t>{};
     auto detIDs = std::vector<Mantid::detid_t>{};
     auto previousDetIDsStr = boost::optional<ProcessingInstructions>{"2-4"};
@@ -851,6 +871,7 @@ private:
     EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
     EXPECT_CALL(mockModel, getSelectedBanks()).WillOnce(Return(previousDetIDsStr)).WillOnce(Return(detIDsStr));
     EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr))).Times(1);
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(mockMainPresenter, hasROIDetectorIDsForPreviewRow()).WillOnce(Return(true));
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
   }
@@ -872,6 +893,11 @@ private:
     EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
     EXPECT_CALL(mockModel, getSelectedBanks()).Times(1).WillOnce(Return(detIDsStr));
     EXPECT_CALL(mockModel, setSelectedBanks(Eq(detIDsStr))).Times(0);
+    EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(0);
+  }
+
+  void expectRunSumBanksNoLoadedWs(MockPreviewModel &mockModel, MockJobManager &mockJobManager) {
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(0);
   }
 
@@ -997,7 +1023,7 @@ private:
                           MockRegionSelector &mockRegionSelector, bool checkTheta = true) {
     auto ws = createLinearDetectorWorkspace();
 
-    EXPECT_CALL(mockModel, getLoadedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(mockModel, getLoadedWs()).Times(AtLeast(1)).WillRepeatedly(Return(ws));
     EXPECT_CALL(mockView, disableMainWidget()).Times(1);
     EXPECT_CALL(mockView, setUpdateAngleButtonEnabled(false)).Times(1);
     if (checkTheta) {
