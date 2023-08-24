@@ -55,7 +55,7 @@ This was last updated for Release 6.2. Check if the organiser has considered if 
 
     Install/Uninstall,:r:`Y`,:b:`Y`,:g:`Y`,:o:`Y`, "**Windows only**: install Mantid, go to the Windows 'Apps & features' list and verify the icon is there for Mantid. Uninstall Mantid from within the 'Apps & features' list and verify that the desktop and start menu shortcuts are removed."
     Project Save/Load,:r:`Y`,:b:`Y`,:g:`Y`,:o:`Y`, "Test the small areas below and do not delete workspaces or plots you produce and manipulate, maybe open a few interfaces. Then File > Save Project and try to reload it! Diagnose any problems."
-    About / First Time Setup Menu,:r:`Y`,,,,"Check Opens Successfully + all buttons and links work"
+    About / First Time Setup Menu,:r:`Y`,,,,"Under Help > About (**On MAC** Mantid > About). Check Opens Successfully + all buttons and links work"
     Help Documentation,,:b:`Y`,:g:`Y`,,"Open all `Help` menu bar options. Load a few algorithm dialogs and click the **?**. Produce some plots (1D, Waterfall,Colorfill,3D Surface) and check **?** links."
     SliceViewer,:r:`Y`,:b:`Y`,,:o:`Y`, "Please **only** test basic SliceViewer functionality, such as outlined :ref:`here <04_displaying_2D_data>`, and please use SV with unusual data and in unusual ways! If you want extra inspiration, here are the advanced :ref:`SliceViewer Manual Testing instructions <sliceviewer_testing>`. Do NOT complete these advanced tests, however you may find the initial Data section useful."
     GUI Plotting,,:b:`Y`,:g:`Y`,,"Produce 1D (Individual, Waterfall, Tiled), 2D (Colorfill and Contour) and 3D (Surface and Wireframe) plots with different data types. :ref:`03_displaying_1D_data` :ref:`3D_Plots`"
