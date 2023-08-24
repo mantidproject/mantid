@@ -87,18 +87,22 @@ class TransformToIqt(PythonAlgorithm):
         param_table = self._calculate_parameters()
 
         if not self._dry_run:
+            logger.warning("BEFORE TRANSFORM")
             self._output_workspace = self._transform()
-
+            logger.warning("AFTER TRANSFORM")
             self._add_logs()
-
+            logger.warning("AFTER LOGS")
         else:
             skip_prog = Progress(self, start=0.3, end=1.0, nreports=2)
             skip_prog.report("skipping transform")
             skip_prog.report("skipping add logs")
             logger.information("Dry run, will not run TransformToIqt")
 
+        logger.warning("BEFORE SET ANYTHING")
         self.setProperty("ParameterWorkspace", param_table)
+        logger.warning("AFTER SET PARAMETERWORKSPACE")
         self.setProperty("OutputWorkspace", self._output_workspace)
+        logger.warning("AFTER SET OUTPUTWORKSPACE")
 
     def _setup(self):
         """
@@ -226,12 +230,13 @@ class TransformToIqt(PythonAlgorithm):
             ("iqt_resolution_workspace", self._resolution),
             ("iqt_binning", "%f,%f,%f" % (self._e_min, self._e_width, self._e_max)),
         ]
-
+        logger.warning("BEFORE ADDSAMPLELOGMULTIPLE")
         log_alg = self.createChildAlgorithm(name="AddSampleLogMultiple", startProgress=0.9, endProgress=1.0, enableLogging=True)
         log_alg.setProperty("Workspace", self._output_workspace)
         log_alg.setProperty("LogNames", [item[0] for item in sample_logs])
         log_alg.setProperty("LogValues", [item[1] for item in sample_logs])
         log_alg.execute()
+        logger.warning("AFTER ADDSAMPLELOGMULTIPLE")
 
     def _transform(self):
         """
@@ -242,9 +247,11 @@ class TransformToIqt(PythonAlgorithm):
         # Process resolution data
         res_number_of_histograms = CheckHistZero(self._resolution)[0]
         sample_number_of_histograms = CheckHistZero(self._sample)[0]
+        logger.warning("AFTER CHECKHISTZERO")
         if res_number_of_histograms > 1 and sample_number_of_histograms is not res_number_of_histograms:
             CheckHistSame(self._sample, "Sample", self._resolution, "Resolution")
-
+            logger.warning("AFTER CHECKHISTSAME")
+        logger.warning("BEFORE CALCULATEIQT")
         calculateiqt_alg = self.createChildAlgorithm(name="CalculateIqt", startProgress=0.3, endProgress=1.0, enableLogging=True)
         calculateiqt_alg.setAlwaysStoreInADS(False)
         args = {
@@ -258,15 +265,19 @@ class TransformToIqt(PythonAlgorithm):
             "NumberOfIterations": self._number_of_iterations,
             "SeedValue": self._seed,
         }
+        logger.warning("SETTING PROPERTIES")
         for key, value in args.items():
             calculateiqt_alg.setProperty(key, value)
         calculateiqt_alg.execute()
+
+        logger.warning("AFTER CALCULATEIQT")
 
         iqt = calculateiqt_alg.getProperty("OutputWorkspace").value
 
         # Set Y axis unit and label
         iqt.setYUnit("")
         iqt.setYUnitLabel("Intensity")
+        logger.warning("SET THE LABELS")
         return iqt
 
     def _check_analysers_and_reflection(self):
