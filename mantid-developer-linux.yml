@@ -46,6 +46,7 @@ dependencies:
   - texlive-core>=20180414
   - toml>=0.10.2
   - versioningit>=2.1
+  - joblib
 
   # Not Windows, OpenGL implementation:
   - mesalib>=18.0.0
@@ -73,3 +74,5 @@ dependencies:
   - pygments==2.11.2 # Had to pin back to 2.11 due to cppcheck error which is only fixed in cppcheck>=2.8
   - gcovr>=4.2
   - pre-commit>=2.12.0
+
+
