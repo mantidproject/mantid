@@ -184,6 +184,9 @@ class RunTabPresenter(PresenterCommon):
         def on_sample_geometry_selection(self, show_geometry):
             self._presenter.on_sample_geometry_view_changed(show_geometry)
 
+        def on_background_subtraction_selection(self, show_background):
+            self._presenter.on_background_subtraction_view_changed(show_background)
+
         def on_field_edit(self):
             self._presenter.update_model_from_view()
 
@@ -803,6 +806,12 @@ class RunTabPresenter(PresenterCommon):
             self._view.show_geometry()
         else:
             self._view.hide_geometry()
+
+    def on_background_subtraction_view_changed(self, show_background):
+        if show_background:
+            self._view.show_background_subtraction()
+        else:
+            self._view.hide_background_subtraction()
 
     def get_row_indices(self):
         """

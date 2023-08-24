@@ -119,6 +119,10 @@ class BatchCsvParser(object):
             pack_val(row.sample_height),
             BatchFileKeywords.SAMPLE_WIDTH.value,
             pack_val(row.sample_width),
+            BatchFileKeywords.BACKGROUND_WORKSPACE.value,
+            pack_val(row.background_ws),
+            BatchFileKeywords.SCALE_FACTOR.value,
+            pack_val(row.scale_factor),
         ]
 
     def _parse_csv_row(self, row, row_number):
