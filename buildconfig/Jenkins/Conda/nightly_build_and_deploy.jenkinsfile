@@ -111,8 +111,7 @@ pipeline {
           }
           post {
             always {
-              archive_ctest_log()
-	      archive_doctest_log()
+              archive_test_logs()
               publish_test_reports()
             }
           }
@@ -134,8 +133,7 @@ pipeline {
           }
           post {
             always {
-              archive_ctest_log()
-	      archive_doctest_log()
+              archive_test_logs()
               publish_test_reports()
               // Workaround for Windows so that failing system tests will fail the build
               bat "\"${WIN_BASH}\" -ex -c \"test ${currentBuild.currentResult} != UNSTABLE\""
@@ -159,8 +157,7 @@ pipeline {
           }
           post {
             always {
-              archive_ctest_log()
-	      archive_doctest_log()
+              archive_test_logs()
               publish_test_reports()
             }
           }
@@ -556,12 +553,8 @@ def archive_standalone_package(platform) {
   }
 }
 
-def archive_ctest_log(){
-  archiveArtifacts artifacts: "${CHECKOUT_DIR}/build/ctest_log/*.log", fingerprint: true
-}
-
-def archive_doctest_log() {
-  archiveArtifacts artifacts: "${CHECKOUT_DIR}/build/doctest_log.log", fingerprint: true
+def archive_test_logs(){
+  archiveArtifacts artifacts: "${CHECKOUT_DIR}/build/test_logs/*.log", fingerprint: true
 }
 
 def archive_env_logs(platform) {

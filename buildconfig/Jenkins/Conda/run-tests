@@ -101,16 +101,16 @@ fi
 
 # Run unit tests
 cd $WORKSPACE/build
-# mkdir for ctest log
-mkdir -p ctest_log
+# mkdir for test logs
+mkdir -p test_logs
 if [[ $ENABLE_UNIT_TESTS == true ]]; then
-    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test -O ctest_log/$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
+    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test -O test_logs/ctest_$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
     terminate_xvfb_sessions
 fi
 
 if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
     # Build doctests without using Xvfb for better output when things fail. Output to file due to console memory issues
-    QT_QPA_PLATFORM=offscreen cmake --build . --target docs-doctest -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS > doctest_log.log
+    QT_QPA_PLATFORM=offscreen cmake --build . --target docs-doctest -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS > test_logs/doctest_$OSTYPE.log
 fi
 
 if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
