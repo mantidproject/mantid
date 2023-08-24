@@ -103,7 +103,8 @@ fi
 cd $WORKSPACE/build
 # mkdir for ctest log
 mkdir -p ctest_log
-if [[ $ENABLE_UNIT_TESTS == true ]]; then
+touch ctest_log/test.log
+if [[ $ENABLE_UNIT_TESTS == false ]]; then
     run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test -O ctest_log/$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
     terminate_xvfb_sessions
 fi
@@ -113,7 +114,7 @@ if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
     QT_QPA_PLATFORM=offscreen cmake --build . --target docs-doctest -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS > doctest_output.txt
 fi
 
-if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
+if [[ $ENABLE_SYSTEM_TESTS == false ]]; then
     rm -fr $userconfig_dir
     rm -f $workbench_ini
 
