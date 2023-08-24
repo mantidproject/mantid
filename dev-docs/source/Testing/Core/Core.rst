@@ -73,7 +73,7 @@ This was last updated for Release 6.2. Check if the organiser has considered if 
     ,Error handling in Python, "Get creative, e.g. run code without imports, wrong filepath in Manage User directories, indent errors. Are Error Messages Useful??"
     **Algorithms**
     ,Execution, "Check 5-10 algorithms"
-    ,Input Validation, "Input invalid values and see if a USEFUL :r:`*` tooltip appears or after executing there is a useful error"
+    ,Input Validation, "Input invalid values and see if a USEFUL `*` tooltip appears or after executing there is a useful error"
     ,Progress and Cancelling, "Show Algorithm Toolbox + run some algorithms. Is the Progress Reported helpfully, under Details do algorithms appear and does cancelling work? e.g. Pause"
     **Fitting**
     ,Normal, "Plot a spectrum, click 'Fit' Toolbar button. Add different functions, add ties. :ref:`02_complex_case`"
