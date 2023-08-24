@@ -84,7 +84,7 @@ class TransformToIqt(PythonAlgorithm):
 
         self._check_analysers_and_reflection()
 
-        self._calculate_parameters()
+        param_table = self._calculate_parameters()
 
         if not self._dry_run:
             self._output_workspace = self._transform()
@@ -97,7 +97,7 @@ class TransformToIqt(PythonAlgorithm):
             skip_prog.report("skipping add logs")
             logger.information("Dry run, will not run TransformToIqt")
 
-        self.setProperty("ParameterWorkspace", self._parameter_table)
+        self.setProperty("ParameterWorkspace", param_table)
         self.setProperty("OutputWorkspace", self._output_workspace)
 
     def _setup(self):
@@ -218,7 +218,7 @@ class TransformToIqt(PythonAlgorithm):
             ]
         )
 
-        self.setProperty("ParameterWorkspace", param_table)
+        return param_table
 
     def _add_logs(self):
         sample_logs = [
