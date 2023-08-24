@@ -79,7 +79,7 @@ Future improvements
 
 
 ISIS Energy Transfer Model
-++++++++++++++++++++++++++
+==========================
 The model is the place where the logic should be implemented. It defines the interface to work with algorithms and other operations.
 The model doesn't have a reference to the view and should be independent of the UI framework. In the current implementation, :code:`IETMdoel`
 is the model of the tab.
