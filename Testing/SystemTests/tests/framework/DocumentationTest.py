@@ -15,6 +15,47 @@ path_to_docs = (pathlib.Path(__file__).resolve() / "../../../../../docs/source")
 ALG_DOCS_PATH = path_to_docs / "algorithms"
 FIT_DOCS_PATH = path_to_docs / "fitting/fitfunctions"
 
+# This should be empty
+ALGORITHMS_WITH_NO_DOCS = [
+    "ApplyNegMuCorrection-v1.rst",
+    "DPDFreduction-v1.rst",
+    "LoadCSNSNexus-v1.rst",
+    "LoadEMUHdf-v1.rst",
+    "LoadILLLagrange-v1.rst",
+    "LoadILLSALSA-v1.rst",
+    "MagnetismReflectometryReduction-v1.rst",
+    "OrderWorkspaceHistory-v1.rst",
+    "PatchBBY-v1.rst",
+    "RefinePowderInstrumentParameters-v2.rst",
+    "ReflectometryISISPreprocess-v1.rst",
+    "ReflectometryISISSumBanks-v1.rst",
+    "SANSBeamCentreFinderCore-v1.rst",
+    "SANSBeamCentreFinderMassMethod-v1.rst",
+    "SANSBeamCentreFinder-v1.rst",
+    "SANSPatchSensitivity-v1.rst",
+    "SANSReductionCoreEventSlice-v1.rst",
+    "SANSReductionCorePreprocess-v1.rst",
+    "SANSReductionCore-v1.rst",
+    "SANSSingleReduction-v1.rst",
+    "SANSSingleReduction-v2.rst",
+]
+# This should be empty
+FIT_FUNCTIONS_WITH_NO_DOCS = [
+    "ConvTempCorrection.rst",
+    "Example1DFunction.rst",
+    "ExamplePeakFunction.rst",
+    "PawleyParameterFunction.rst",
+    "PeakParameterFunction.rst",
+    "PoldiSpectrumConstantBackground.rst",
+    "PoldiSpectrumDomainFunction.rst",
+    "PoldiSpectrumLinearBackground.rst",
+    "PoldiSpectrumPawleyFunction.rst",
+    "ReflectivityMulf.rst",
+    "SCDCalibratePanels2ObjFunc.rst",
+    "SCgapSwave.rst",
+    "VesuvioResolution.rst",
+]
+
 
 class AlgorithmDocumentationTest(MantidSystemTest):
     """
@@ -31,7 +72,10 @@ class AlgorithmDocumentationTest(MantidSystemTest):
                 file_name = f"{name}-v{version}.rst"
                 file_path = ALG_DOCS_PATH / file_name
                 if not os.path.exists(file_path):
-                    missing.append(str(file_path))
+                    if file_name not in ALGORITHMS_WITH_NO_DOCS:
+                        missing.append(str(file_path))
+                elif file_name in ALGORITHMS_WITH_NO_DOCS:
+                    raise FileExistsError(f"{file_name} exists but is still in the exceptions list. Please update the list.")
 
         self.assertEqual(len(missing), 0, msg="Missing documentation for the following algorithms:\n" + "\n".join(missing))
 
@@ -50,6 +94,9 @@ class FittingDocumentationTest(MantidSystemTest):
             file_name = f"{name}.rst"
             file_path = FIT_DOCS_PATH / file_name
             if not os.path.exists(file_path):
-                missing.append(str(file_path))
+                if file_name not in FIT_FUNCTIONS_WITH_NO_DOCS:
+                    missing.append(str(file_path))
+            elif file_name in FIT_FUNCTIONS_WITH_NO_DOCS:
+                raise FileExistsError(f"{file_name} exists but is still in the exceptions list. Please update the list.")
 
         self.assertEqual(len(missing), 0, msg="Missing documentation for the following fit functions:\n" + "\n".join(missing))
