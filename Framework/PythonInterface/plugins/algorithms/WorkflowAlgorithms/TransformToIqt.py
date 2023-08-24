@@ -268,6 +268,7 @@ class TransformToIqt(PythonAlgorithm):
         logger.warning("SETTING PROPERTIES")
         for key, value in args.items():
             calculateiqt_alg.setProperty(key, value)
+        logger.warning("AFTER SETTING PROPERTIES")
         calculateiqt_alg.execute()
 
         logger.warning("AFTER CALCULATEIQT")
