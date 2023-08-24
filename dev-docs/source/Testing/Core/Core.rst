@@ -46,6 +46,7 @@ This was last updated for Release 6.2. Check if the organiser has considered if 
     SliceViewer, "Please **only** test basic SliceViewer functionality, such as outlined :ref:`here <04_displaying_2D_data>`, and please use SV with unusual data and in unusual ways! If you want extra inspiration, here are the advanced :ref:`SliceViewer Manual Testing instructions <sliceviewer_testing>`. Do NOT complete these advanced tests, however you may find the initial Data section useful."
     GUI Plotting, "Produce 1D (Individual, Waterfall, Tiled), 2D (Colorfill and Contour) and 3D (Surface and Wireframe) plots with different data types. :ref:`03_displaying_1D_data` :ref:`3D_Plots`"
     Manipulating Plots, "See Plot Help Docs for info on Toolbar **?** buttons, Click Menus, Plots Toolbox, Settings"
+    Plot Workspace Rename, "Load some data, make a plot, rename the workspace, check the window and plot titles have updated"
     Scripting Plots, "For some ideas: :ref:`01_basic_plot_scripting` :ref:`06_formatting_plots` :ref:`plotting` + run any `MPL code <https://matplotlib.org/gallery/index.html>`_ and check if Figure Options and Generate a script work."
     Settings (Preferences on Mac), "Check all options work. Some may need restart."
     Script Editor / Interpreter, "Check basic functionality, such as checking the buttons/options at the top of SE, running algorithms, accessing workspace properties in both environments. Does autocompletion work for mantid algorithms/numpy/matplotlib? :ref:`02_scripts`"
