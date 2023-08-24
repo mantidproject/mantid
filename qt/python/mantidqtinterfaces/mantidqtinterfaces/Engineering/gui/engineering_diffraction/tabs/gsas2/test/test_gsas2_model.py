@@ -421,7 +421,7 @@ class TestGSAS2Model(unittest.TestCase):
         table = CreateEmptyTableWorkspace(OutputWorkspace="expected_gsas2_output_GSASII_lattice_parameters")
         for column in range(len(column_titles)):
             value_type = "double"
-            if type(row_one_values[column]) == str:
+            if isinstance(row_one_values[column], str):
                 value_type = "str"
             table.addReadOnlyColumn(value_type, column_titles[column])
         table.addRow(row_one_values)
@@ -570,7 +570,7 @@ class TestGSAS2Model(unittest.TestCase):
         table = CreateEmptyTableWorkspace(OutputWorkspace="expected_gsas2_output_GSASII_instrument_parameters")
         for column in range(len(column_titles)):
             value_type = "double"
-            if type(row_one_values[column]) == str:
+            if isinstance(row_one_values[column], str):
                 value_type = "str"
             table.addReadOnlyColumn(value_type, column_titles[column])
         table.addRow(row_one_values)
@@ -600,7 +600,7 @@ class TestGSAS2Model(unittest.TestCase):
         table = CreateEmptyTableWorkspace(OutputWorkspace="expected_gsas2_output_GSASII_lattice_parameters")
         for column in range(len(column_titles)):
             value_type = "double"
-            if type(row_one_values[column]) == str:
+            if isinstance(row_one_values[column], str):
                 value_type = "str"
             table.addReadOnlyColumn(value_type, column_titles[column])
         table.addRow(row_one_values)

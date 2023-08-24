@@ -52,7 +52,7 @@ class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenterStandard):
         """Create a table item to display the data. The data is always readonly
         here.
         """
-        if type(data) == float:
+        if isinstance(data, float):
             display_data = self.FLOAT_FORMAT_STR.format(data)
         else:
             display_data = str(data)

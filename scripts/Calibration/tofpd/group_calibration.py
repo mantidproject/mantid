@@ -138,13 +138,13 @@ def cc_calibrate_groups(
         # Figure out input parameters for CrossCorrelate and GetDetectorOffset, specifically
         # for those parameters for which both a single value and a list is accepted. If a
         # list is given, that means different parameter setup will be used for different groups.
-        Xmin_group = Xmin[int(group) - 1] if type(Xmin) == list else Xmin
-        Xmax_group = Xmax[int(group) - 1] if type(Xmax) == list else Xmax
-        MDS_group = MaxDSpaceShift[int(group) - 1] if type(MaxDSpaceShift) == list else MaxDSpaceShift
-        DRef_group = DReference[int(group) - 1] if type(DReference) == list else DReference
-        OT_group = OffsetThreshold[int(group) - 1] if type(OffsetThreshold) == list else OffsetThreshold
-        pf_group = PeakFunction[int(group) - 1] if type(PeakFunction) == list else PeakFunction
-        snpts_group = SmoothNPoints[int(group) - 1] if type(SmoothNPoints) == list else SmoothNPoints
+        Xmin_group = Xmin[int(group) - 1] if isinstance(Xmin, list) else Xmin
+        Xmax_group = Xmax[int(group) - 1] if isinstance(Xmax, list) else Xmax
+        MDS_group = MaxDSpaceShift[int(group) - 1] if isinstance(MaxDSpaceShift, list) else MaxDSpaceShift
+        DRef_group = DReference[int(group) - 1] if isinstance(DReference, list) else DReference
+        OT_group = OffsetThreshold[int(group) - 1] if isinstance(OffsetThreshold, list) else OffsetThreshold
+        pf_group = PeakFunction[int(group) - 1] if isinstance(PeakFunction, list) else PeakFunction
+        snpts_group = SmoothNPoints[int(group) - 1] if isinstance(SmoothNPoints, list) else SmoothNPoints
         cycling = OT_group < 1.0
 
         try:

@@ -18,7 +18,6 @@ import re
 
 
 class GenerateLogbook(PythonAlgorithm):
-
     _data_directory = None
     _facility = None
     _instrument = None
@@ -66,7 +65,6 @@ class GenerateLogbook(PythonAlgorithm):
         return issues
 
     def PyInit(self):
-
         self.declareProperty(
             FileProperty("Directory", "", action=FileAction.Directory), doc="Path to directory containing data files for logging."
         )
@@ -265,7 +263,7 @@ class GenerateLogbook(PythonAlgorithm):
                 continue
             if op == "+":
                 padding = 0
-                if type(values[ind1]) == str:
+                if isinstance(values[ind1], str):
                     padding = " "
                 new_val = values[ind1] + padding + values[ind2]
             elif op == "-":

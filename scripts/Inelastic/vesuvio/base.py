@@ -9,7 +9,6 @@ from mantid.api import Algorithm
 
 
 class VesuvioBase(Algorithm):
-
     # There seems to be a problem with Python algorithms
     # defining a __init__ method
     _INST = None
@@ -30,7 +29,7 @@ class VesuvioBase(Algorithm):
         ret_props = None
         if "return_values" in kwargs:
             ret_props = kwargs["return_values"]
-            if type(ret_props) is str:
+            if isinstance(ret_props, str):
                 ret_props = [ret_props]
             del kwargs["return_values"]
 
