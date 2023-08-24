@@ -109,17 +109,26 @@ Table Columns
 |                          |   **WavelengthMin**, **WavelengthMax**, **EventSlices** (see :ref:`ISIS_SANS_Settings_Tab-ref`  |
 |                          |   for details), **BackgroundWorkspace**, and **ScaleFactor** can be set (see below).            |
 +--------------------------+-------------------------------------------------------------------------------------------------+
+| **Background Workspace** |   This column allows the user to provide a workspace for scaled background subtraction          |
+|                          |   (see below).                                                                                  |
++--------------------------+-------------------------------------------------------------------------------------------------+
+| **Scale Factor**         |   Scale factor to be used for scaled background subtraction (see below).                        |
++--------------------------+-------------------------------------------------------------------------------------------------+
 
 .. _ISIS_SANS_scaled_background-ref:
 
 Scaled Background Subtraction
 +++++++++++++++++++++++++++++
 
-By setting **both** ``BackgroundWorkspace`` and ``ScaleFactor`` in the options a Scaled Background Subtraction will be
+Additional hidden columns can be shown on the table by checking the ``Scaled Background Subtraction`` checkbox above
+the table on the right hand side.
+
+By setting **both** ``Background Workspace`` and ``Scale Factor`` a Scaled Background Subtraction will be
 performed. Giving these values will perform a background subtraction where the ``BackgroundWorkspace`` (representing a
 reduced solution run) will be multiplied by the ``ScaleFactor`` and then subtracted from the reduced HAB, LAB, or Merged
 main output workspace. It is then saved to the ADS or to a file (based on the save options below) in addition to the
-normal reduction output.
+normal reduction output. The subtracted workspace will have the same name as the normal output workspace with ``_bgsub``
+appended to its name.
 
 The reduction will fail if only one of these values is set. Or, if the reduction mode is set to "All". This is because
 there is no way to determine if the workspace given as the ``BackgroundWorkspace`` is for the HAB or LAB, and so uses
