@@ -1,0 +1,1 @@
+- `pystog <https://github.com/neutrons/pystog>`_ to use the conda package rather than ship with the source in mantid. It is an optional dependency so the user must install the `pystog conda package <https://anaconda.org/neutrons/pystog>`_ themselves.
