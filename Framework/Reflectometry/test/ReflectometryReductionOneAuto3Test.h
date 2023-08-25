@@ -823,6 +823,37 @@ public:
     ADS.clear();
   }
 
+  void test_polarization_correction_with_background_subtraction() {
+
+    std::string const name = "input";
+    prepareInputGroup(name, "Fredrikze");
+    applyPolarizationEfficiencies(name);
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", true);
+    alg.setProperty("SubtractBackground", true);
+    alg.setProperty("BackgroundProcessingInstructions", "3-4");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_EQUALS(outQGroup.size(), 4);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 4);
+
+    ADS.clear();
+  }
+
   void test_input_workspace_group_with_default_output_workspaces() {
     ReflectometryReductionOneAuto3 alg;
     setup_alg_on_input_workspace_group_with_run_number(alg);
