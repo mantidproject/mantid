@@ -8,7 +8,7 @@
 import os
 import systemtesting
 from mantid.simpleapi import *
-from mantid.simpleapi import PelicanCrystalProcessing
+from PelicanCrystalProcessing import PelicanCrystalProcessing
 from mantid import config
 
 

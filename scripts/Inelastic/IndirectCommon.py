@@ -188,38 +188,31 @@ def createQaxis(inputWS):
 
 
 def GetWSangles(inWS):
-    if isinstance(inWS, str):
-        ws = s_api.mtd[inWS]
-    else:
-        ws = inWS
-    num_hist = ws.getNumberHistograms()  # get no. of histograms/groups
-    source_pos = ws.getInstrument().getSource().getPos()
-    sample_pos = ws.getInstrument().getSample().getPos()
+    num_hist = s_api.mtd[inWS].getNumberHistograms()  # get no. of histograms/groups
+    source_pos = s_api.mtd[inWS].getInstrument().getSource().getPos()
+    sample_pos = s_api.mtd[inWS].getInstrument().getSample().getPos()
     beam_pos = sample_pos - source_pos
     angles = []  # will be list of angles
     for index in range(0, num_hist):
-        detector = ws.getDetector(index)  # get index
+        detector = s_api.mtd[inWS].getDetector(index)  # get index
         two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi  # calc angle
         angles.append(two_theta)  # add angle
     return angles
 
 
-def GetThetaQ(ws_in):
+def GetThetaQ(ws):
     """
     Returns the theta and elastic Q for each spectrum in a given workspace.
 
     @param ws Workspace to get theta and Q for
     @returns A tuple containing a list of theta values and a list of Q values
     """
-    if isinstance(ws_in, str):
-        ws = s_api.mtd[ws_in]
-    else:
-        ws = ws_in
+
     e_fixed = getEfixed(ws)
     wavelas = math.sqrt(81.787 / e_fixed)  # Elastic wavelength
     k0 = 4.0 * math.pi / wavelas
 
-    axis = ws.getAxis(1)
+    axis = s_api.mtd[ws].getAxis(1)
 
     # If axis is in spec number need to retrieve angles and calculate Q
     if axis.isSpectra():

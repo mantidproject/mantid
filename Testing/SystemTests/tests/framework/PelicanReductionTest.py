@@ -8,7 +8,7 @@
 import systemtesting
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace
-from mantid.simpleapi import PelicanReduction
+from PelicanReduction import PelicanReduction
 
 
 class PelicanReductionSOFQWTest(systemtesting.MantidSystemTest):

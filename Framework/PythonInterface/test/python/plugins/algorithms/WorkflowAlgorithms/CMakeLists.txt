@@ -5,9 +5,6 @@ set(TEST_PY_FILES
     ApplyPaalmanPingsCorrectionTest.py
     BayesQuasiTest.py
     BayesStretchTest.py
-    BayesQuasi2Test.py
-    BayesStretch2Test.py
-    QuickBayesHelperTest.py
     CalculateMonteCarloAbsorptionTest.py
     CorelliPowderCalibrationCreateTest.py
     DetectorFloodWeightingTest.py

@@ -11,7 +11,7 @@ import tempfile
 import systemtesting
 from mantid.simpleapi import mtd
 from mantid.api import FileFinder
-from mantid.simpleapi import ElasticEMUauReduction
+from ElasticEMUauReduction import ElasticEMUauReduction
 
 
 class ElasticEMUauReductionAxisTest(systemtesting.MantidSystemTest):
