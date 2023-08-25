@@ -1,8 +1,3 @@
-// // This script expects the following environment variables to be set by the Jenkins job:
-// GITHUB_USER_NAME - The name of the user, being used with pushing/pulling from git
-// GITHUB_USER_EMAIL - The email of the user, being used with pushing/pulling from git
-// GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for cloning and pushing to the mantid repo
-
 // conda-build can't copy a local source if the conda-bld directory is
 // also part of the source. Checkout to a subdirectory to avoid this.
 CHECKOUT_DIR = 'source'
@@ -25,10 +20,6 @@ pipeline {
   }
   environment {
     WIN_BASH = "C:\\Program Files\\git\\bin\\bash.exe"
-    GIT_AUTHOR_NAME = "${GITHUB_USER_NAME}"
-    GIT_AUTHOR_EMAIL = "${GITHUB_USER_EMAIL}"
-    GIT_COMMITTER_NAME = "${GITHUB_USER_NAME}"
-    GIT_COMMITTER_EMAIL = "${GITHUB_USER_EMAIL}"
   }
   stages {
     stage('Build and test') {
