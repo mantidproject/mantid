@@ -12,11 +12,9 @@ pipeline {
       booleanParam(name: 'RUN_UNIT_TESTS', defaultValue: true, description: 'If True, the unit tests will be run')
       booleanParam(name: 'RUN_SYSTEM_TESTS', defaultValue: true, description: 'If True, the system tests will be run')
       string(name: 'SPECIFIC_UNIT_TESTS', defaultValue: '',
-             description: '(Optional) Pipe separated list of unit test names to used as the -R option with ctest \n
-                           e.g. MeanTest|AddNoteTest|GlobTest')
+             description: '(Optional) Pipe separated list of unit test names to used as the -R option with ctest \n e.g. MeanTest|AddNoteTest|GlobTest')
       string(name: 'SPECIFIC_SYSTEM_TESTS', defaultValue: '',
-             description: '(Optional) Pipe separated list of system test names to used as the -R option with ctest \n
-                           e.g. MeanTest|AddNoteTest|GlobTest')
+             description: '(Optional) Pipe separated list of system test names to used as the -R option with ctest \n e.g. MeanTest|AddNoteTest|GlobTest')
   }
   environment {
     WIN_BASH = "C:\\Program Files\\git\\bin\\bash.exe"
