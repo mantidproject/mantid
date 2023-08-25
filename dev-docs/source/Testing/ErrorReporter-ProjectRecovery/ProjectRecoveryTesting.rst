@@ -269,7 +269,7 @@ Project Recovery test
 - Restart MantidWorkbench
 - Choose ``Only open in script editor``
 - Mantid should open a script named ``ordered_recovery.py`` in the script editor
-- This should contain only the ``Load`` command and no previous history (to see full history, right-click on the
+- This should contain only the ``Load`` command and no previous history (to see full history, run the script, right-click on the
   workspace and select ``Show History``)
 
 Finally, test out a few ideas of your own. Note that some more niche aspects of plotting are not saved, such as 3D plots,
