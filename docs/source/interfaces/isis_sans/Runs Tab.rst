@@ -130,9 +130,31 @@ main output workspace. It is then saved to the ADS or to a file (based on the sa
 normal reduction output. The subtracted workspace will have the same name as the normal output workspace with ``_bgsub``
 appended to its name.
 
-The reduction will fail if only one of these values is set. Or, if the reduction mode is set to "All". This is because
-there is no way to determine if the workspace given as the ``BackgroundWorkspace`` is for the HAB or LAB, and so uses
-the value from the User File, therefore assuming that both reductions have used the same one.
+**Note:** The background subtraction workspace will be subtracted **in addition** to the normal subtraction
+performed when values are given in the Can columns. If you only wish to subtract the scaled background, leave the can
+cells blank.
+
+Examples:
+
+- Given Values: Sample (Scatter, Transmission, and Direct), and Can (Scatter, Transmission, and Direct)
+
+  - OutputName = Sample - Can
+
+- Given Values: Sample (Scatter, Transmission, and Direct), Can (Scatter, Transmission, and Direct), and  Scaled
+  Background Workspace
+
+  - OutputName = Sample - Can
+  - OutputName_bgsub = Sample - Can - (Background Workspace * Scale Factor)
+
+- Given Values: Sample (Scatter, Transmission, and Direct) and Scaled Background Workspace
+
+  - OutputName = Sample
+  - OutputName_bgsub = Sample - (Background Workspace * Scale Factor)
+
+The reduction will fail if only one of ``Background Workspace`` and ``Scale Factor`` is set. Or, if the reduction mode
+is set to "All". This is because there is no way to determine if the workspace given as the ``BackgroundWorkspace`` is
+for the HAB or LAB, and so uses the value from the User File, therefore assuming that both reductions have used the same
+one.
 
 Save Options
 ------------

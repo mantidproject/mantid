@@ -164,8 +164,7 @@ Processing
 
 *Scaled Background Subtracted Reduction*
 
-#. In the ``Settings`` tab, ``General, Scale, Event Slice, Sample`` sub-tab, set ``Reduction Mode`` to ``Merged``.
-#. Return to the ``Runs`` tab.
+#. Click over to the ``Runs`` tab.
 #. Set the ``Save Options`` to ``Memory``.
 #. Select one of the rows and click ``Process Selected``
 #. Take note of the name of the reduced workspace with ``merged`` in the title.
@@ -174,6 +173,7 @@ Processing
 #. Check the ``Scaled Background Subtraction`` checkbox.
 #. In the ``BackgroundWorkspace`` column, enter the name of the merged workspace you took note of before.
 #. In the ``ScaleFactor`` column, enter ``0.9``.
+#. In the ``Settings`` tab, ``General, Scale, Event Slice, Sample`` sub-tab, set ``Reduction Mode`` to ``Merged``.
 #. Select this new row and click ``Process Selected``.
 #. When it completes, two output files should have been created with ``bgsub_test`` in the name. One, which is the
    normal output data. Another with the scaled subtraction, which should have ``_bgsub`` appended to the name.
