@@ -187,7 +187,7 @@ public:
     auto mockJobManager = makeJobManager();
     auto mainPresenter = MockBatchPresenter();
 
-    expectLoadWorkspaceCompletedDoesNotSumBanks(*mockModel, *mockJobManager, mainPresenter, *mockView);
+    expectLoadWorkspaceCompletedDoesNotSumBanks(*mockModel, *mockJobManager, mainPresenter);
 
     auto deps = packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager));
     auto presenter = PreviewPresenter(std::move(deps));
@@ -812,7 +812,7 @@ private:
   }
 
   void expectLoadWorkspaceCompletedDoesNotSumBanks(MockPreviewModel &mockModel, MockJobManager &mockJobManager,
-                                                   MockBatchPresenter &mockMainPresenter, MockPreviewView &mockView) {
+                                                   MockBatchPresenter &mockMainPresenter) {
     auto ws = createRectangularDetectorWorkspace();
 
     EXPECT_CALL(mockModel, getLoadedWs()).Times(4).WillRepeatedly(Return(ws));
