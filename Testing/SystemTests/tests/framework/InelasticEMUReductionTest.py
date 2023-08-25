@@ -7,7 +7,7 @@
 
 import systemtesting
 from mantid.simpleapi import mtd
-from mantid.simpleapi import InelasticEMUauReduction
+from InelasticEMUauReduction import InelasticEMUauReduction
 
 
 class InelasticEMUauReductionAxisTest(systemtesting.MantidSystemTest):

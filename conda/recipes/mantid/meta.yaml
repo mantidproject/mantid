@@ -73,7 +73,6 @@ requirements:
     - toml
     - libglu  # [linux]
     - libopenblas {{ libopenblas }}  # [osx]
-    - joblib
 
 about:
   home: https://github.com/mantidproject/mantid
