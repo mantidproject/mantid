@@ -297,6 +297,8 @@ class BatchCsvParserTest(unittest.TestCase):
         test_row.sample_thickness = "1.0"
         test_row.sample_height = 5.0
         test_row.sample_width = 5.4
+        test_row.background_ws = "TestWS"
+        test_row.scale_factor = 1.3
 
         expected = (
             "sample_sans,SANS2D00022025,"
@@ -309,7 +311,9 @@ class BatchCsvParserTest(unittest.TestCase):
             "user_file,a_user_file.txt,"
             "sample_thickness,1.0,"
             "sample_height,5.0,"
-            "sample_width,5.4"
+            "sample_width,5.4,"
+            "background_workspace,TestWS,"
+            "scale_factor,1.3"
         )
 
         mocked_handle = mock.mock_open()
