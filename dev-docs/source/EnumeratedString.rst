@@ -30,9 +30,9 @@ How to use the EnumeratedString
 First include the ``EnumeratedString.h`` header file.
 
 This is a template class, and its three template parameters are the name of an ``enum`` type, a *pointer* to static vector of
-``std::string`` objects, and an optional *pointer* to a statically defined function for comparing ``std::string`` objects. The last
-template parameter is defaulted to ``CompareStrings`` which implements a case-sensitive string comparison. A predefined function for case-insensitive
-string comparison, ``CompareStringsCaseInsensitive``, is also provided as an option.
+``std::string`` objects, and an optional *pointer* to a statically defined ``std::function`` for comparing ``std::string`` objects. The last
+template parameter is defaulted to ``compareStrings`` which implements a case-sensitive string comparison. A predefined function for case-insensitive
+string comparison, ``compareStringsCaseInsensitive``, is also provided as an option.
 
 Below is an example.  Consider the mantid algorithm :code:`BakeCake`, which has a string property,
 ``CakeType``.  This algorithm only knows how to bake a few types of cakes.  The allowed types of cake the user can set for
@@ -152,7 +152,7 @@ An example of where this might be used inside an algorithm is shown below:
 
 This will easily handle branching logic on the basis of a set number of possible string values, using an ``enum`` to base the set of strings.
 
-In the code examples above, if you don't want to distinguish a name "Lemon" from, say, "LEMON", you can make a case-insensitive ``CAKETYPE``:
+In the code examples above, if you don't want to distinguish between names like "Lemon" and "LEMON", you can define your ``CAKETYPE`` as case-insensitive:
 
 .. code-block:: cpp
 
@@ -164,12 +164,10 @@ In the code examples above, if you don't want to distinguish a name "Lemon" from
   enum class CakeTypeEnum {LEMON, BUNDT, POUND, enum_count};
   const std::vector<std::string> cakeTypeNames {"Lemon", "Bundt", "Pound"};
   // optional typedef
-  typedef EnumeratedString<CakeEnumType, &cakeTypeNames, &CompareStringsCaseInsensitive> CAKETYPE;
+  typedef EnumeratedString<CakeEnumType, &cakeTypeNames, &compareStringsCaseInsensitive> CAKETYPE;
   } // namespace
 
-This might be useful, for example, if you need to enumerate some file name extensions and treat ".cpp" the same way as ".CPP".
-
-You can also provide your own string comparator like ``firstLetterComparator`` below:
+You can also provide your own string comparator like ``firstLetterComparator`` shown below:
 
 .. code-block:: cpp
 
@@ -178,11 +176,12 @@ You can also provide your own string comparator like ``firstLetterComparator`` b
   namespace Mantid {
 
   namespace {
-  bool firstLetterComparator(const std::string &x, const std::string &y) { return x[0] == y[0]; }
+  std::function<bool(const std::string &, const std::string &)> firstLetterComparator =
+    [](const std::string &x, const std::string &y) { return x[0] == y[0]; };
   enum class CakeTypeEnum {L, B, P, enum_count};
   const std::vector<std::string> cakeTypeFirstLetters {"L", "B", "P"};
   // optional typedef
   typedef EnumeratedString<CakeEnumType, &cakeTypeFirstLetters, &firstLetterComparator> CAKETYPE;
   } // namespace
 
-in which case a "Lemon" cake will get the same enumeration as a "Lime" cake.
+in which case a "Lemon" cake will get the same ``enum`` value as a "Lime" cake.
