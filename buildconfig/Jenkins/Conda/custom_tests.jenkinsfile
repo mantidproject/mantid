@@ -26,9 +26,9 @@ pipeline {
           when {
             beforeAgent true
             beforeOptions true
-            expression { env.TEST_LINUX }
+            expression { env.TEST_LINUX == 'true' }
           }
-          agent { label 'linux-64' }
+          agent { label 'core-testing-linux' }
           options { timestamps () }
           steps {
             build_and_test('linux-64')
@@ -43,7 +43,7 @@ pipeline {
           when {
             beforeAgent true
             beforeOptions true
-            expression { env.TEST_WINDOWS }
+            expression { env.TEST_WINDOWS == 'true'}
           }
           agent { label 'win-64' }
           options { timestamps () }
@@ -60,7 +60,7 @@ pipeline {
           when {
             beforeAgent true
             beforeOptions true
-            expression { env.TEST_MACOS }
+            expression { env.TEST_MACOS == 'true'}
           }
           agent { label 'osx-64' }
           options { timestamps () }
@@ -81,19 +81,21 @@ pipeline {
 def build_and_test(platform) {
   buildscript_path = "${CISCRIPT_DIR}/conda-buildscript"
   common_args = "--clean-external-projects"
-  if(!env.RUN_UNIT_TESTS) {
+  if(env.RUN_UNIT_TESTS != 'true') {
     common_args = common_args + " --disable-unittests"
   }
-  else if(!env.SPECIFIC_UNIT_TESTS == '') {
+  else if(env.SPECIFIC_UNIT_TESTS != '') {
       common_args = common_args + " --specific-unittests \"${SPECIFIC_UNIT_TESTS}\""
   }
 
-  if(env.RUN_SYSTEM_TESTS) {
+  if(env.RUN_SYSTEM_TESTS == 'true') {
     common_args = common_args + " --enable-systemtests"
-    if(!env.SPECIFIC_SYSTEM_TESTS == '') {
+    if(env.SPECIFIC_SYSTEM_TESTS != '') {
       common_args = common_args + " --specific-systemtests \"${SPECIFIC_SYSTEM_TESTS}\""
     }
   }
+
+  println common_args
 
   cmake_preset = "${platform}-ci"
   if(platform.startsWith('win')) {
