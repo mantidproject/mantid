@@ -20,11 +20,6 @@ namespace Kernel {
 @date 2023/08/02
 */
 namespace {
-bool CompareStrings(const std::string &a, const std::string &b) { return a == b; }
-bool CompareStringsCaseInsensitive(const std::string &a, const std::string &b) { return boost::iequals(a, b); }
-} // namespace
-
-namespace {
 std::function<bool(const std::string &, const std::string &)> compareStrings =
     [](const std::string &x, const std::string &y) { return x == y; };
 std::function<bool(const std::string &, const std::string &)> compareStringsCaseInsensitive =
