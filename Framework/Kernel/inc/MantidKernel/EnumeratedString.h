@@ -19,14 +19,16 @@ namespace Kernel {
 @author Reece Boston, ORNL
 @date 2023/08/02
 */
+
 namespace {
-bool CompareStrings(const std::string &a, const std::string &b) { return a == b; }
-bool CompareStringsCaseInsensitive(const std::string &a, const std::string &b) { return boost::iequals(a, b); }
-template <bool (*StringComparator)(const std::string &, const std::string &)> void useStringComparator() {}
+std::function<bool(const std::string &, const std::string &)> compareStrings =
+    [](const std::string &x, const std::string &y) { return x == y; };
+std::function<bool(const std::string &, const std::string &)> compareStringsCaseInsensitive =
+    [](const std::string &x, const std::string &y) { return boost::iequals(x, y); };
 } // namespace
 
 template <class E, const std::vector<std::string> *names,
-          bool (*StringComparator)(const std::string &, const std::string &) = &CompareStrings>
+          std::function<bool(const std::string &, const std::string &)> *stringComparator = &compareStrings>
 class EnumeratedString {
   /**
    * @tparam class E an `enum`, the final value *must* be `enum_count`
@@ -84,11 +86,11 @@ public:
   bool operator==(const E e) const { return value == e; }
   bool operator!=(const E e) const { return value != e; }
 
-  bool operator==(const std::string &s) const { return StringComparator(name, s); }
-  bool operator!=(const std::string &s) const { return !StringComparator(name, s); }
+  bool operator==(const std::string &s) const { return (*stringComparator)(name, s); }
+  bool operator!=(const std::string &s) const { return !(*stringComparator)(name, s); }
 
-  bool operator==(const char *s) const { return StringComparator(name, std::string(s)); }
-  bool operator!=(const char *s) const { return !StringComparator(name, std::string(s)); }
+  bool operator==(const char *s) const { return (*stringComparator)(name, std::string(s)); }
+  bool operator!=(const char *s) const { return !(*stringComparator)(name, std::string(s)); }
 
   bool operator==(const EnumeratedString es) const { return value == es.value; }
   bool operator!=(const EnumeratedString es) const { return value != es.value; }
@@ -104,7 +106,7 @@ private:
   E findEFromString(const std::string &s) {
     E e = E(0);
     for (; size_t(e) < names->size(); e = E(size_t(e) + 1))
-      if (StringComparator(s, names->at(size_t(e))))
+      if ((*stringComparator)(s, names->at(size_t(e))))
         break;
     return e;
   }
@@ -117,9 +119,6 @@ private:
       throw std::runtime_error(msg.str());
     }
   }
-
-  // A do-nothing method to prevent a compiler warning that CompareStringsCaseInsensitive is defined, but not used
-  void useCompareStringsCaseInsensitive() { useStringComparator<&CompareStringsCaseInsensitive>(); }
 };
 } // namespace Kernel
 } // namespace Mantid

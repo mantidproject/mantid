@@ -20,7 +20,8 @@ const std::vector<std::string> cakeNames{"Lemon Cake", "Devil's Food Cake", "Ang
 typedef EnumeratedString<CoolGuys, &coolGuyNames> COOLGUY;
 typedef EnumeratedString<Cakes, &cakeNames> CAKE;
 
-bool firstLetterComparator(const std::string &x, const std::string &y) { return x[0] == y[0]; }
+std::function<bool(const std::string &, const std::string &)> firstLetterComparator =
+    [](const std::string &x, const std::string &y) { return x[0] == y[0]; };
 } // namespace
 
 class EnumeratedStringTest : public CxxTest::TestSuite {
@@ -245,7 +246,7 @@ public:
   void testCaseInsensitiveNameComparison() {
     enum TwoLettersEnum : size_t { ab, cd, enum_count };
     static const std::vector<std::string> twoLetters = {"ab", "cd"};
-    typedef EnumeratedString<TwoLettersEnum, &twoLetters, &CompareStringsCaseInsensitive> TWO_LETTERS;
+    typedef EnumeratedString<TwoLettersEnum, &twoLetters, &compareStringsCaseInsensitive> TWO_LETTERS;
 
     // 1. Test a use case with mixed-case string introduced through the constructor: EnumeratedString(const std::string
     // s)
@@ -280,7 +281,7 @@ public:
     TS_ASSERT(enTwoLetters_from_constructor != std::string("BA"));
 
     // 2. Test a use case with mixed-case string introduced through the assignment operator: EnumeratedString
-    // &operator=(std::string& s)
+    // &operator=(const td::string& s)
     TS_ASSERT_THROWS_NOTHING(TWO_LETTERS enTwoLetters_from_assignment = std::string("aB"));
     TWO_LETTERS enTwoLetters_from_assignment = std::string("aB");
     TS_ASSERT(enTwoLetters_from_assignment.c_str() == std::string("aB"))
