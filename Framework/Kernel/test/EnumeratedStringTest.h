@@ -278,7 +278,7 @@ public:
     TS_ASSERT(enTwoLetters_from_constructor != std::string("BA"));
 
     // 2. Test a use case with mixed-case string introduced through the assignment operator: EnumeratedString
-    // &operator=(const td::string& s)
+    // &operator=(const std::string& s)
     TS_ASSERT_THROWS_NOTHING(TWO_LETTERS enTwoLetters_from_assignment = std::string("aB"));
     TWO_LETTERS enTwoLetters_from_assignment = std::string("aB");
     TS_ASSERT(enTwoLetters_from_assignment.c_str() == std::string("aB"))
