@@ -19,9 +19,6 @@ const std::vector<std::string> cakeNames{"Lemon Cake", "Devil's Food Cake", "Ang
                                          "Pound Cake"};
 typedef EnumeratedString<CoolGuys, &coolGuyNames> COOLGUY;
 typedef EnumeratedString<Cakes, &cakeNames> CAKE;
-
-std::function<bool(const std::string &, const std::string &)> firstLetterComparator =
-    [](const std::string &x, const std::string &y) { return x[0] == y[0]; };
 } // namespace
 
 class EnumeratedStringTest : public CxxTest::TestSuite {
@@ -315,6 +312,8 @@ public:
   void test_customNameComparator() {
     enum FirstLetterEnum : size_t { A, B, C, enum_count };
     static const std::vector<std::string> words = {"apple", "banana", "cherry"};
+    static std::function<bool(const std::string &, const std::string &)> firstLetterComparator =
+        [](const std::string &x, const std::string &y) { return x[0] == y[0]; };
     typedef EnumeratedString<FirstLetterEnum, &words, &firstLetterComparator> Fruit;
 
     Fruit apple = FirstLetterEnum::A;
