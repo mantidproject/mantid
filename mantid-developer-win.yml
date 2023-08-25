@@ -2,7 +2,6 @@ name: mantid-developer
 
 channels:
   - conda-forge
-  - neutrons
 
 dependencies:
   - boost=1.77.* # Also pulls in boost-cpp. 1.78 clashes with icu version from Qt
@@ -31,7 +30,6 @@ dependencies:
   - psutil>=5.8.0
   - pycifrw==4.4.1 # Force to 4.4.1 as later versions cause issues with loading CIF files
   - pyqt>=5.15,<6
-  - pystog==0.4.3
   - python-dateutil>=2.8.1
   - python=3.10.*
   - pyyaml>=5.4.1

@@ -8,12 +8,7 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, WorkspaceFactory
 from mantid.kernel import Direction, StringListValidator, logger
 
-try:
-    from pystog.converter import Converter as StogConverter
-except ImportError:
-    logger.information("Install https://github.com/neutrons/pystog to enable PDConvertRealSpace")
-    logger.information("https://anaconda.org/neutrons/pystog")
-    StogConverter = None
+from pystog.converter import Converter
 
 Gr = "G(r)"
 GKr = "GK(r)"
@@ -87,7 +82,7 @@ class PDConvertRealSpace(PythonAlgorithm):
             logger.warning("The input and output functions are the same. Nothing to be done")
             return
 
-        c = StogConverter()
+        c = Converter()
         transformation = {Gr: {GKr: c.G_to_GK, gr: c.G_to_g}, GKr: {Gr: c.GK_to_G, gr: c.GK_to_g}, gr: {Gr: c.g_to_G, GKr: c.g_to_GK}}
 
         sample_kwargs = {
@@ -109,6 +104,5 @@ class PDConvertRealSpace(PythonAlgorithm):
             output_ws.setE(sp_num, new_e)
 
 
-# Register algorithm with Mantid if pystog is found
-if StogConverter:
-    AlgorithmFactory.subscribe(PDConvertRealSpace)
+# Register algorithm with Mantid.
+AlgorithmFactory.subscribe(PDConvertRealSpace)
