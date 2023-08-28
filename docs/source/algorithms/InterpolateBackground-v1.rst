@@ -15,8 +15,8 @@ background at all the temperature points. Instead, we want to measure the empty 
 at selected critical temperature points and for the rest of points, we want to do perform the interpolation
 to estimate the empty container.
 
-This algorithm will perform the interpolation for two empty container runs. The algorithm will perform
-a linear interpolation of the data. Below is the function used for the linear interpolation:
+This algorithm will perform a linear interpolation on the background temperature for two empty container runs.
+Below is the function used for the interpolation:
 
 .. math::
 
