@@ -38,33 +38,33 @@ class InterpolateBackground(PythonAlgorithm):
         wsGroup = mtd[self.getProperty("WorkspaceGroup").value]
         if not isinstance(wsGroup, WorkspaceGroup):
             issues["WorkspaceGroup"] = "Input workspace group is not a workspace group"
-
-        wsNames = wsGroup.getNames()
-        if len(wsNames) != 2:
-            issues["WorkspaceGroup"] = "Input Workspace Group must have exactly 2 workspaces"
         else:
-            ws1 = mtd[wsNames[0]]
-            ws2 = mtd[wsNames[1]]
-            if ws1.blocksize() != ws2.blocksize():
-                issues["WorkspaceGroup"] = "Workspaces must have the same number of bins"
-            if ws1.getRun().hasProperty("SampleTemp") and ws2.getRun().hasProperty("SampleTemp"):
-                temp1 = int(ws1.getRun().getPropertyAsSingleValue("SampleTemp"))
-                temp2 = int(ws2.getRun().getPropertyAsSingleValue("SampleTemp"))
-                if temp1 < temp2:
-                    self.low_temp = temp1
-                    self.high_temp = temp2
-                    self.low_ws = wsNames[0]
-                    self.high_ws = wsNames[1]
-                else:
-                    self.low_temp = temp2
-                    self.high_temp = temp1
-                    self.low_ws = wsNames[1]
-                    self.high_ws = wsNames[0]
-                self.interpo_temp = int(self.getProperty("InterpolateTemp").value)
-                if not self.low_temp < self.interpo_temp < self.high_temp:
-                    issues["InterpolateTemp"] = f"Interpolated temp must be a value between {self.low_temp} and {self.high_temp}"
+            wsNames = wsGroup.getNames()
+            if len(wsNames) != 2:
+                issues["WorkspaceGroup"] = "Input Workspace Group must have exactly 2 workspaces"
             else:
-                issues["WorkspaceGroup"] = "A workspace in WorkspaceGroup is missing 'SampleTemp' property"
+                ws1 = mtd[wsNames[0]]
+                ws2 = mtd[wsNames[1]]
+                if ws1.blocksize() != ws2.blocksize():
+                    issues["WorkspaceGroup"] = "Workspaces must have the same number of bins"
+                if ws1.getRun().hasProperty("SampleTemp") and ws2.getRun().hasProperty("SampleTemp"):
+                    temp1 = int(ws1.getRun().getPropertyAsSingleValue("SampleTemp"))
+                    temp2 = int(ws2.getRun().getPropertyAsSingleValue("SampleTemp"))
+                    if temp1 < temp2:
+                        self.low_temp = temp1
+                        self.high_temp = temp2
+                        self.low_ws = wsNames[0]
+                        self.high_ws = wsNames[1]
+                    else:
+                        self.low_temp = temp2
+                        self.high_temp = temp1
+                        self.low_ws = wsNames[1]
+                        self.high_ws = wsNames[0]
+                    self.interpo_temp = int(self.getProperty("InterpolateTemp").value)
+                    if not self.low_temp < self.interpo_temp < self.high_temp:
+                        issues["InterpolateTemp"] = f"Interpolated temp must be a value between {self.low_temp} and {self.high_temp}"
+                else:
+                    issues["WorkspaceGroup"] = "A workspace in WorkspaceGroup is missing 'SampleTemp' property"
 
         return issues
 
