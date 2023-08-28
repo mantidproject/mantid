@@ -46,7 +46,7 @@ public:
     this->operator=(e);
   }
 
-  EnumeratedString(const std::string s) {
+  EnumeratedString(const std::string &s) {
     ensureCompatibleSize();
     this->operator=(s);
   }
@@ -59,7 +59,7 @@ public:
 
   // assign the object either by the enum, or by string
   EnumeratedString &operator=(E e) {
-    if (size_t(e) < names->size() && size_t(e) >= 0) {
+    if (size_t(e) < names->size() && size_t(e) > 0) {
       value = e;
       name = names->at(size_t(e));
     } else {
@@ -92,8 +92,8 @@ public:
   bool operator==(const char *s) const { return (*stringComparator)(name, std::string(s)); }
   bool operator!=(const char *s) const { return !(*stringComparator)(name, std::string(s)); }
 
-  bool operator==(const EnumeratedString es) const { return value == es.value; }
-  bool operator!=(const EnumeratedString es) const { return value != es.value; }
+  bool operator==(const EnumeratedString &es) const { return value == es.value; }
+  bool operator!=(const EnumeratedString &es) const { return value != es.value; }
 
   const char *c_str() const { return name.c_str(); }
   static size_t size() { return names->size(); }
