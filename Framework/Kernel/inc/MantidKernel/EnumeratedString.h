@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include <boost/algorithm/string.hpp>
-#include <sstream> // std::stringstream
+#include <sstream>
 #include <string>
 #include <vector>
 
