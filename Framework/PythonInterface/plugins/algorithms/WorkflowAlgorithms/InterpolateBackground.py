@@ -48,8 +48,8 @@ class InterpolateBackground(PythonAlgorithm):
             if ws1.blocksize() != ws2.blocksize():
                 issues["WorkspaceGroup"] = "Workspaces must have the same number of bins"
             if ws1.getRun().hasProperty("SampleTemp") and ws2.getRun().hasProperty("SampleTemp"):
-                temp1 = int(ws1.getRun().getProperty("SampleTemp").value)
-                temp2 = int(ws2.getRun().getProperty("SampleTemp").value)
+                temp1 = int(ws1.getRun().getPropertyAsSingleValue("SampleTemp"))
+                temp2 = int(ws2.getRun().getPropertyAsSingleValue("SampleTemp"))
                 if temp1 < temp2:
                     self.low_temp = temp1
                     self.high_temp = temp2
