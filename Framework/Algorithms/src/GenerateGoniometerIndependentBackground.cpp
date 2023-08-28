@@ -37,17 +37,21 @@ const std::string GenerateGoniometerIndependentBackground::name() const {
 int GenerateGoniometerIndependentBackground::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string GenerateGoniometerIndependentBackground::category() const { return "TODO: FILL IN A CATEGORY"; }
+const std::string GenerateGoniometerIndependentBackground::category() const {
+  return "CorrectionFunctions\\BackgroundCorrections";
+}
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string GenerateGoniometerIndependentBackground::summary() const { return "TODO: FILL IN A SUMMARY"; }
+const std::string GenerateGoniometerIndependentBackground::summary() const {
+  return "Extract the background from a dataset where sample is rotated through multiple positions";
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void GenerateGoniometerIndependentBackground::init() {
   declareProperty(std::make_unique<ArrayProperty<std::string>>("InputWorkspaces", std::make_shared<ADSValidator>()),
-                  "Input workspaces");
+                  "Input workspaces. Must be :ref:`EventWorkspace` and have at least 2 input workspaces.");
 
   const std::vector<std::string> exts{".map", ".xml"};
   declareProperty(
@@ -55,13 +59,13 @@ void GenerateGoniometerIndependentBackground::init() {
       "A file that consists of lists of spectra numbers to group. To be read by :ref:`algm-LoadDetectorsGroupingFile`");
 
   declareProperty("PercentMin", 0.0, std::make_shared<BoundedValidator<double>>(0, 99.9),
-                  "Percentage of input files that will be combined to create the background");
+                  "Starting percentage range of input files that will be combined to create the background");
 
   declareProperty("PercentMax", 20.0, std::make_shared<BoundedValidator<double>>(0.1, 100),
-                  "Percentage of input files that will be combined to create the background");
+                  "Ending percentage range of input files that will be combined to create the background");
 
   declareProperty(std::make_unique<WorkspaceProperty<EventWorkspace>>("OutputWorkspace", "", Direction::Output),
-                  "An output workspace.");
+                  "Extracted background workspace.");
 }
 
 std::map<std::string, std::string> GenerateGoniometerIndependentBackground::validateInputs() {
