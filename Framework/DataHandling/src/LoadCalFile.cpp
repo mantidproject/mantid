@@ -98,13 +98,11 @@ Geometry::Instrument_const_sptr LoadCalFile::getInstrument3Ways(Algorithm *alg) 
   if (inWS) {
     inst = inWS->getInstrument();
   } else {
-    Algorithm_sptr childAlg = alg->createChildAlgorithm("LoadInstrument", 0.0, 0.2);
-    MatrixWorkspace_sptr tempWS = std::make_shared<Workspace2D>();
-    childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
+    Algorithm_sptr childAlg = alg->createChildAlgorithm("LoadEmptyInstrument", 0.0, 0.2);
     childAlg->setPropertyValue("Filename", InstrumentFilename);
     childAlg->setPropertyValue("InstrumentName", InstrumentName);
-    childAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
     childAlg->executeAsChildAlg();
+    MatrixWorkspace_sptr tempWS = childAlg->getProperty("OutputWorkspace");
     inst = tempWS->getInstrument();
   }
 

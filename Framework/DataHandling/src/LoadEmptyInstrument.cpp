@@ -19,6 +19,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
+#include <filesystem>
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory as a file loading algorithm
@@ -29,6 +30,8 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 using namespace HistogramData;
+using LoadGeometry::FilenameExtension;
+using LoadGeometry::FilenameExtensionEnum;
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -60,8 +63,9 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
 
 /// Initialisation method.
 void LoadEmptyInstrument::init() {
+
   declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad, LoadGeometry::validExtensions()),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad, LoadGeometry::validExtensions),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Files can also be .hdf5 or "
@@ -98,15 +102,34 @@ void LoadEmptyInstrument::init() {
  *values
  */
 void LoadEmptyInstrument::exec() {
-  // load the instrument into this workspace
-  const std::string filename = getPropertyValue("Filename");
-  const std::string instrumentname = getPropertyValue("InstrumentName");
-  Instrument_const_sptr instrument;
   Progress prog(this, 0.0, 1.0, 10);
 
-  // Call LoadIstrument as a child algorithm
-  MatrixWorkspace_sptr ws = this->runLoadInstrument(filename, instrumentname);
-  instrument = ws->getInstrument();
+  // load the instrument into this workspace
+  MatrixWorkspace_sptr ws;
+  const std::string instrumentName = getPropertyValue("InstrumentName");
+  const std::string filename = getPropertyValue("Filename");
+  if (!instrumentName.empty())
+    ws = this->runLoadInstrument(filename, instrumentName);
+  else {
+    std::string ext{std::filesystem::path(filename).extension().string()};
+    FilenameExtension enFilenameExtension(ext);
+    switch (enFilenameExtension) {
+    case FilenameExtensionEnum::XML:
+    case FilenameExtensionEnum::HDF5:
+      ws = this->runLoadInstrument(filename, instrumentName);
+      break;
+    case FilenameExtensionEnum::NXS:
+      ws = this->runLoadInstrumentFromNexus(filename);
+      break;
+    default:
+      std::ostringstream os;
+      os << "Instrument file has an invalid extension: "
+         << "\"" << ext << "\"";
+      throw std::runtime_error(os.str());
+    }
+  }
+
+  Instrument_const_sptr instrument = ws->getInstrument();
 
   // Get number of detectors stored in instrument
   const size_t number_spectra = instrument->getNumberDetectors();
@@ -146,14 +169,28 @@ void LoadEmptyInstrument::exec() {
   }
 }
 
-/// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
+// Call LoadIstrument as a child algorithm
 API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument(const std::string &filename,
                                                                  const std::string &instrumentname) {
+  auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+
   auto loadInst = createChildAlgorithm("LoadInstrument", 0, 0.5);
   loadInst->setPropertyValue("Filename", filename);
   loadInst->setPropertyValue("InstrumentName", instrumentname);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
+  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
+
+  loadInst->execute();
+
+  return ws;
+}
+
+// Call runLoadInstrumentFromNexus as a child algorithm
+API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrumentFromNexus(const std::string &filename) {
   auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+
+  auto loadInst = createChildAlgorithm("LoadInstrumentFromNexus", 0, 0.5);
+  loadInst->setPropertyValue("Filename", filename);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
 
   loadInst->execute();

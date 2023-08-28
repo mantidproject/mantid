@@ -19,6 +19,8 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
+
 #include <vector>
 
 using namespace Mantid::API;
@@ -27,6 +29,11 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using ScopedFileHelper::ScopedFile;
+
+namespace {
+/// static Logger definition
+Logger g_log("LoadEmptyInstrumentTest");
+} // namespace
 
 class LoadEmptyInstrumentTest : public CxxTest::TestSuite {
 public:
@@ -51,6 +58,8 @@ public:
   }
 
   void testExecSLS() {
+    g_log.notice("\ntestExecSLS...");
+
     LoadEmptyInstrument loaderSLS;
     loaderSLS.setRethrows(true);
 
@@ -81,6 +90,8 @@ public:
   }
 
   void testExecENGINEX() {
+    g_log.notice("\ntestExecENGINEX...");
+
     LoadEmptyInstrument loaderSLS;
 
     TS_ASSERT_THROWS_NOTHING(loaderSLS.initialize());
@@ -109,6 +120,8 @@ public:
   }
 
   void testExecMUSR() {
+    g_log.notice("\ntestExecMUSR...");
+
     LoadEmptyInstrument loaderMUSR;
 
     TS_ASSERT_THROWS_NOTHING(loaderMUSR.initialize());
@@ -137,6 +150,7 @@ public:
   }
 
   void testParameterTags() {
+    g_log.notice("\ntestParameterTags...");
 
     LoadEmptyInstrument loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
@@ -418,6 +432,7 @@ public:
 
   // Tests specific to when  <offsets spherical="delta" /> is set in IDF
   void testIDFwhenSphericalOffsetSet() {
+    g_log.notice("\ntestIDFwhenSphericalOffsetSet...");
 
     LoadEmptyInstrument loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
@@ -529,6 +544,8 @@ public:
   // also test that when loading an instrument a 2nd time that parameters
   // defined in instrument gets loaded as well
   void testToscaParameterTags() {
+    g_log.notice("\ntestToscaParameterTags...");
+
     LoadEmptyInstrument loader;
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
@@ -590,6 +607,8 @@ public:
   // also test that when loading an instrument a 2nd time that parameters
   // defined in instrument gets loaded as well
   void testHRPDParameterTags() {
+    g_log.notice("\ntestHRPDParameterTags...");
+
     LoadEmptyInstrument loader;
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
@@ -646,6 +665,8 @@ public:
   }
 
   void testGEMParameterTags() {
+    g_log.notice("\ntestGEMParameterTags...");
+
     LoadEmptyInstrument loader;
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
@@ -689,9 +710,17 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
-  void test_DUM_Instrument_asEventWorkspace() { do_test_DUM_Instrument(true); }
+  void test_DUM_Instrument_asEventWorkspace() {
+    g_log.notice("\ntest_DUM_Instrument_asEventWorkspace...");
 
-  void test_DUM_Instrument() { do_test_DUM_Instrument(false); }
+    do_test_DUM_Instrument(true);
+  }
+
+  void test_DUM_Instrument() {
+    g_log.notice("\ntest_DUM_Instrument...");
+
+    do_test_DUM_Instrument(false);
+  }
 
   void do_test_DUM_Instrument(bool asEvent) {
     LoadEmptyInstrument loader;
@@ -767,6 +796,8 @@ public:
   }
 
   void test_BIOSANS_Instrument() {
+    g_log.notice("\ntest_BIOSANS_Instrument...");
+
     LoadEmptyInstrument loader;
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
@@ -794,6 +825,8 @@ public:
   }
 
   void testSANS2D() {
+    g_log.notice("\ntestSANS2D...");
+
     LoadEmptyInstrument loader;
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
@@ -840,6 +873,8 @@ public:
   }
 
   void testCheckIfVariousInstrumentsLoad() {
+    g_log.notice("\ntestCheckIfVariousInstrumentsLoad...");
+
     LoadEmptyInstrument loaderPolRef;
     loaderPolRef.initialize();
     loaderPolRef.setPropertyValue("Filename", "POLREF_Definition.xml");
@@ -934,6 +969,8 @@ public:
    detector
   */
   void testIDFFileWithNoDetector() {
+    g_log.notice("\ntestIDFFileWithNoDetector...");
+
     const std::string instrumentName = "Minimal_Definition";
     const std::string idfFilename = instrumentName + "_MissingDetectorIDs.xml";
 
@@ -981,6 +1018,8 @@ public:
   }
 
   void test_output_workspace_contains_instrument_with_expected_name() {
+    g_log.notice("\ntest_output_workspace_contains_instrument_with_expected_name...");
+
     LoadEmptyInstrument alg;
     alg.setChild(true);
     const std::string inputFile = "unit_testing/SMALLFAKE_example_geometry.hdf5";
@@ -996,6 +1035,8 @@ public:
   }
 
   void test_load_loki() {
+    g_log.notice("\ntest_load_loki...");
+
     LoadEmptyInstrument alg;
     alg.setChild(true);
     const std::string inputFile = "LOKI_Definition.hdf5";
@@ -1016,6 +1057,8 @@ public:
   }
 
   void test_load_loki_from_instrument_name() {
+    g_log.notice("\ntest_load_loki_from_instrument_name...");
+
     LoadEmptyInstrument alg;
     alg.setChild(true);
     alg.initialize();
@@ -1035,6 +1078,7 @@ public:
   }
 
   void test_compare_wish_idf_vs_nexus() {
+    g_log.notice("\ntest_compare_wish_idf_vs_nexus...");
     // Now rerun
     LoadEmptyInstrument alg;
     alg.setChild(true);
