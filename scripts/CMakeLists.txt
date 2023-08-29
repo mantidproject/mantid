@@ -1,9 +1,6 @@
 # External GUIs
 add_subdirectory(ExternalInterfaces)
 
-# External projects
-include(PyStoG)
-
 # .pth files
 set(_pth_dirs
     .
