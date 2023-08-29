@@ -59,12 +59,12 @@ public:
 
   // assign the object either by the enum, or by string
   EnumeratedString &operator=(E e) {
-    if (size_t(e) < names->size()) {
+    if (int(e) >= 0 && size_t(e) < names->size()) {
       value = e;
       name = names->at(size_t(e));
     } else {
       std::stringstream msg;
-      msg << "Invalid enumerator " << size_t(e) << " for enumerated string " << typeid(E).name();
+      msg << "Invalid enumerator " << int(e) << " for enumerated string " << typeid(E).name();
       throw std::runtime_error(msg.str());
     }
     return *this;
