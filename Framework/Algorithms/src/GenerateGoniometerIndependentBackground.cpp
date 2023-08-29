@@ -182,9 +182,7 @@ void GenerateGoniometerIndependentBackground::exec() {
   alg->executeAsChildAlg();
   GroupingWorkspace_sptr groupWS = alg->getProperty("OutputWorkspace");
 
-  const size_t numGroups = groupWS->getTotalGroups();
-
-  Progress progress(this, 0.0, 1.0, numInputs + numGroups);
+  Progress progress(this, 0.0, 1.0, numInputs + groupWS->getTotalGroups());
 
   std::vector<MatrixWorkspace_sptr> grouped_inputs;
   // Run GroupDetectors on all the input workspaces
@@ -204,6 +202,7 @@ void GenerateGoniometerIndependentBackground::exec() {
   }
 
   // all spectra for all input workspaces have same binning
+  const size_t numGroups = grouped_inputs.front()->getNumberHistograms();
   const auto blocksize = grouped_inputs.front()->blocksize();
   const auto Xvalues = grouped_inputs.front()->readX(0);
 
