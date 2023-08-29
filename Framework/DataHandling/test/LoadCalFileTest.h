@@ -23,7 +23,7 @@ using namespace Mantid::Kernel;
 
 namespace {
 /// static Logger definition
-Logger g_log("LoadEmptyInstrumentTest");
+Logger g_log("LoadCalFileTest");
 } // namespace
 
 class LoadCalFileTest : public CxxTest::TestSuite {

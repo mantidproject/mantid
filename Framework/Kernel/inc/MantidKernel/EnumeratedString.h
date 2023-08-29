@@ -59,7 +59,7 @@ public:
 
   // assign the object either by the enum, or by string
   EnumeratedString &operator=(E e) {
-    if (size_t(e) < names->size() && size_t(e) > 0) {
+    if (size_t(e) < names->size()) {
       value = e;
       name = names->at(size_t(e));
     } else {
