@@ -38,11 +38,13 @@ class RunSetupScript(BaseScriptElement):
     vanrunnumber = ""
     vannoiserunnumber = ""
     vanbkgdrunnumber = ""
+    interpolatetemp = ""
 
     disablebkgdcorrection = False
     disablevancorrection = False
     disablevanbkgdcorrection = False
     doresamplex = False
+    enableinterpolate = False
 
     parnamelist = None
 
@@ -79,6 +81,8 @@ class RunSetupScript(BaseScriptElement):
         self.parnamelist.append("DisableVanadiumCorrection")
         self.parnamelist.append("DisableVanadiumBackgroundCorrection")
         self.parnamelist.append("DoReSampleX")
+        self.parnamelist.append("InterpolateTemp")
+        self.parnamelist.append("EnableInterpolate")
 
         return
 
@@ -116,6 +120,9 @@ class RunSetupScript(BaseScriptElement):
         pardict["DisableVanadiumCorrection"] = str(int(self.disablevancorrection))
         pardict["DisableVanadiumBackgroundCorrection"] = str(int(self.disablevanbkgdcorrection))
         pardict["DoReSampleX"] = str(int(self.doresamplex))
+
+        pardict["InterpolateTemp"] = self.interpolatetemp
+        pardict["EnableInterpolate"] = str(int(self.enableinterpolate))
 
         return pardict
 
@@ -241,6 +248,14 @@ class RunSetupScript(BaseScriptElement):
             )
             self.disablevanbkgdcorrection = bool(int(tempbool))
 
+            self.interpolatetemp = BaseScriptElement.getIntElement(
+                instrument_dom, "interpolatetemp", default=RunSetupScript.interpolatetemp
+            )
+            tempbool = BaseScriptElement.getStringElement(
+                instrument_dom, "enableinterpolate", default=str(int(RunSetupScript.enableinterpolate))
+            )
+            self.enableinterpolate = bool(int(tempbool))
+
             # tempint = BaseScriptElement.getStringElement(instrument_dom,
             # try:
             #     self.vannoiserunnumber = int(tempint)
@@ -271,5 +286,8 @@ class RunSetupScript(BaseScriptElement):
         self.bkgdrunnumber = RunSetupScript.bkgdrunnumber
         self.vanrunnumber = RunSetupScript.vanrunnumber
         self.vanbkgdrunnumber = RunSetupScript.vanbkgdrunnumber
+
+        self.interpolatetemp = RunSetupScript.interpolatetemp
+        self.enableinterpolate = RunSetupScript.enableinterpolate
 
         return

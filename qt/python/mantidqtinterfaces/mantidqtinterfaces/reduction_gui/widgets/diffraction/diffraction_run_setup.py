@@ -91,6 +91,7 @@ class RunSetupWidget(BaseWidget):
         self._content.disablebkgdcorr_chkbox.setChecked(False)
         self._content.disablevancorr_chkbox.setChecked(False)
         self._content.disablevanbkgdcorr_chkbox.setChecked(False)
+        self._content.interpolateenable_chkbox.setChecked(False)
 
         # Label
         if self._instrument_name is not False:
@@ -111,6 +112,7 @@ class RunSetupWidget(BaseWidget):
         self._content.vanrun_edit.setEnabled(True)
         self._content.vanbkgdrun_edit.setEnabled(True)
         self._content.resamplex_edit.setEnabled(False)
+        self._content.interpolatetemp_edit.setEnabled(False)
 
         # Constraints/Validator
         expression = r"[\d,-]*"
@@ -126,6 +128,10 @@ class RunSetupWidget(BaseWidget):
         siv = QIntValidator(self._content.resamplex_edit)
         siv.setBottom(0)
         self._content.resamplex_edit.setValidator(siv)
+
+        iv4 = QIntValidator(self._content.interpolatetemp_edit)
+        iv4.setBottom(0)
+        self._content.interpolatetemp_edit.setValidator(iv4)
 
         # Float/Double
         fiv = QDoubleValidator(self._content.binning_edit)
@@ -149,7 +155,7 @@ class RunSetupWidget(BaseWidget):
 
         self._content.usebin_button.clicked.connect(self._usebin_clicked)
         self._content.resamplex_button.clicked.connect(self._resamplex_clicked)
-
+        self._content.interpolateenable_chkbox.clicked.connect(self._enableinterpo_clicked)
         self._content.help_button.clicked.connect(self._show_help)
 
         # mutex for whether to update the linear/log drop-down
@@ -299,6 +305,9 @@ class RunSetupWidget(BaseWidget):
 
         s.vanbkgdrunnumber = self._content.vanbkgdrun_edit.text()
         s.disablevanbkgdcorrection = self._content.disablevanbkgdcorr_chkbox.isChecked()
+
+        s.interpolatetemp = self._content.interpolatetemp_edit.text()
+        s.interpolateenable = self._content.interpolateenable_chkbox.isChecked()
 
         return s
 
@@ -493,6 +502,15 @@ class RunSetupWidget(BaseWidget):
         else:
             self._content.binning_edit.setEnabled(True)
             self._content.resamplex_edit.setEnabled(False)
+
+        return
+
+    def _enableinterpo_clicked(self):
+        """Handling event if 'Interpo Empty' is clicked"""
+        if self._content.interpolateenable_chkbox.isChecked() is True:
+            self._content.interpolatetemp_edit.setEnabled(True)
+        else:
+            self._content.interpolatetemp_edit.setEnabled(False)
 
         return
 
