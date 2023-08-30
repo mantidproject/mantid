@@ -100,8 +100,6 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         SANSDataType.CAN_SCATTER: "CanScatterMonitorWorkspace",
     }
 
-    scaled_background_ws = create_scaled_background_workspace(state)
-
     workspaces, monitors = provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_to_monitor)
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -154,6 +152,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # -----------------------------------
         # Subtract the background from the slice.
         # -----------------------------------
+        scaled_background_ws = create_scaled_background_workspace(state, reduction_package)
         if scaled_background_ws:
             reduction_package.reduced_bgsub, reduction_package.reduced_bgsub_name = subtract_scaled_background(
                 reduction_package, scaled_background_ws
@@ -547,11 +546,35 @@ def get_multi_period_workspaces(load_alg, workspace_name, number_of_workspaces):
     return workspaces
 
 
-def create_scaled_background_workspace(state) -> str:
+def create_scaled_background_workspace(state, reduction_package) -> str:
+    if not state.background_subtraction.workspace:
+        return None
     state.background_subtraction.validate()
     background_ws_name = state.background_subtraction.workspace
-    if not background_ws_name:
-        return None
+    if not AnalysisDataService.doesExist(background_ws_name):
+        # Check for full one.
+        reduced_name = ""
+        if reduction_package.reduction_mode == ReductionMode.MERGED:
+            reduced_name = reduction_package.reduced_merged_name[0]
+        elif reduction_package.reduction_mode == ReductionMode.HAB:
+            reduced_name = reduction_package.reduced_hab_name[0]
+        elif reduction_package.reduction_mode == ReductionMode.LAB:
+            reduced_name = reduction_package.reduced_lab_name[0]
+        full_name = (
+            background_ws_name
+            + reduced_name.split(
+                state.save.user_specified_output_name
+                if state.save.user_specified_output_name
+                else str(state.data.sample_scatter_run_number),
+                1,
+            )[-1]
+        )
+
+        if AnalysisDataService.doesExist(full_name):
+            background_ws_name = full_name
+        else:
+            raise ValueError(f"BackgroundWorkspace: The workspace '{background_ws_name}' or '{full_name}' could not be found in the ADS.")
+
     scaled_bg_ws_name = "__" + state.background_subtraction.workspace + "_scaled"  # __ makes the ws invisible
 
     scale_name = "Scale"
