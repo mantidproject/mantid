@@ -31,17 +31,10 @@ function run_with_xvfb {
         # Use -noreset because of an X Display bug caused by a race condition in xvfb: https://gitlab.freedesktop.org/xorg/xserver/-/issues/1102
         xvfb-run -e /dev/stderr --server-args="-core -noreset -screen 0 640x480x24" \
         --server-num=${XVFB_SERVER_NUM} $@
+        # Remove Xvfb X server lock files after running
+        rm -f /tmp/.X${XVFB_SERVER_NUM}-lock
     else
         eval $@
-    fi
-}
-
-function terminate_xvfb_sessions {
-    if [ $(command -v xvfb-run) ]; then
-        echo "Terminating existing Xvfb sessions"
-
-        # Remove Xvfb X server lock files
-        rm -f /tmp/.X${XVFB_SERVER_NUM}-lock
     fi
 }
 
@@ -102,7 +95,6 @@ cd $WORKSPACE/build
 mkdir -p test_logs
 if [[ $ENABLE_UNIT_TESTS == true ]]; then
     run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test -O test_logs/ctest_$OSTYPE.log --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
-    terminate_xvfb_sessions
 fi
 
 if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
@@ -121,5 +113,4 @@ if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     echo "CheckMantidVersion.OnStartup = 0" >> $userprops
 
     run_with_xvfb $SYSTEM_TEST_EXECUTABLE $WINDOWS_TEST_OPTIONS -j$BUILD_THREADS_SYSTEM_TESTS -l information --quiet --output-on-failure
-    terminate_xvfb_sessions
 fi
