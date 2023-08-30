@@ -756,7 +756,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         end = min(int(peak_centre + inedge + margin), right_limit)
         width = (end - start) / 3.0
 
-        function = f"name=FlatTopPeak, Centre={peak_centre}, endGrad={endGrad}, Width={width}, Background={self._background}"
+        function = f"name=FlatTopPeak, Centre={peak_centre}, EndGrad={endGrad}, Width={width}, Background={self._background}"
         params_ws, fit_ws = self._run_fitting_function(function, ws, start, end)
 
         # peak center is in position 1 of the parameter list -> parameter Centre of fitFlatTopPeak

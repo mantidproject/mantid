@@ -9,14 +9,14 @@ class FlatTopPeak(IFunction1D):
     def init(self):
         self.declareParameter("Scale", -2400.0, "The height of the mesa.")
         self.declareParameter("Centre", 50.0, "The location of the middle of the mesa.")
-        self.declareParameter("endGrad", 3.0, "The width of the transition between the base and the peak.")
+        self.declareParameter("EndGrad", 3.0, "The width of the transition between the base and the peak.")
         self.declareParameter("Background", 2500.0, "The baseline below the mesa.")
         self.declareParameter("Width", 20.0, "The breadth of the top of the mesa.")
 
     def function1D(self, xvals):
         scale = self.getParameterValue("Scale")
         centre = self.getParameterValue("Centre")
-        endGrad = self.getParameterValue("endGrad")
+        endGrad = self.getParameterValue("EndGrad")
         background = self.getParameterValue("Background")
         width = self.getParameterValue("Width")
 
