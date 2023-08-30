@@ -41,9 +41,6 @@ function terminate_xvfb_sessions() {
     if [ $(command -v xvfb-run) ]; then
         echo "Terminating existing Xvfb sessions"
 
-        # Kill Xvfb processes
-        killall Xvfb || true
-
         # Remove Xvfb X server lock files
         rm -f /tmp/.X${XVFB_SERVER_NUM}-lock
     fi
