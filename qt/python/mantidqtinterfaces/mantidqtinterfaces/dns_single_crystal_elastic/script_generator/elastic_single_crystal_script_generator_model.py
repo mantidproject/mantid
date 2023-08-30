@@ -145,7 +145,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
             f"\n          'omega_offset': {options['omega_offset']},"
             f"\n          'norm_to': '{self._norm}',"
             f"\n          'dx': '{options['dx']}',"
-            f"\n          'dy': '{options['dx']}',"
+            f"\n          'dy': '{options['dy']}',"
             "}",
             "",
         ]
