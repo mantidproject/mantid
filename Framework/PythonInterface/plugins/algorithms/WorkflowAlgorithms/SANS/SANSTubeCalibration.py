@@ -13,7 +13,7 @@ from enum import Enum
 
 import numpy as np
 
-from mantid.kernel import Direction, V3D
+from mantid.kernel import Direction, V3D, StringArrayProperty, StringArrayMandatoryValidator, IntArrayProperty, IntArrayMandatoryValidator
 from mantid.api import DataProcessorAlgorithm, AnalysisDataService, AlgorithmFactory, FileProperty, FileAction, Progress, mtd
 from tube_spec import TubeSpec
 from ideal_tube import IdealTube
@@ -75,7 +75,7 @@ class Prop:
 
 
 class SANSTubeCalibration(DataProcessorAlgorithm):
-    _SAVED_INPUT_DATA_PREFIX = "saved_"
+    _SAVED_INPUT_DATA_PREFIX = "tubeCalibSaved_"
     _TUBE_PLOT_WS = "__TubePlot"
     _FIT_DATA_WS = "__FittedData"
     _C_VALUES_WS = "cvalues"
@@ -108,13 +108,12 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            Prop.STRIP_POSITIONS, [1040, 920, 755, 590, 425, 260, 95, 5], direction=Direction.Input, doc="Which strip positions were used."
+            IntArrayProperty(Prop.STRIP_POSITIONS, values=[1040, 920, 755, 590, 425, 260, 95, 5], validator=IntArrayMandatoryValidator()),
+            doc="Which strip positions were used.",
         )
         self.declareProperty(
-            Prop.DATA_FILES,
-            ["SANS2D00064390.nxs", "SANS2D00064391.nxs", "SANS2D00064392.nxs", "SANS2D00064393.nxs", "SANS2D00064388.nxs"],
-            direction=Direction.Input,
-            doc="The runs corresponding to the strip positions that were used.",
+            StringArrayProperty(Prop.DATA_FILES, values=[], validator=StringArrayMandatoryValidator()),
+            doc="The run files corresponding to the strip positions that were used.",
         )
         self.declareProperty(
             Prop.STRIP_WIDTH, 38.0, direction=Direction.Input, doc="The width of the strip being used for calibration, in mm."
