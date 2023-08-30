@@ -430,9 +430,8 @@ if [[ ${DO_DOCTESTS_USER} == true ]]; then
         rm -fr $BUILD_DIR/docs/doctrees/*
     fi
     # Build HTML to verify that no referencing errors have crept in.
-    run_with_xvfb ${CMAKE_EXE} --build . --target docs-html
-    terminate_xvfb_sessions
-    run_with_xvfb ${CMAKE_EXE} --build . --target docs-doctest
+    QT_QPA_PLATFORM=offscreen ${CMAKE_EXE} --build . --target docs-html
+    QT_QPA_PLATFORM=offscreen ${CMAKE_EXE} --build . --target docs-doctest
 fi
 
 ###############################################################################
