@@ -35,6 +35,11 @@ function run_with_xvfb {
     fi
 }
 
+function doctest_exit {
+    echo "Failed when running the DocTests. Read the doctest_${OSTYPE}.log build artifact"
+    echo "Note that Sphinx warnings are set to be treated as errors"
+}
+
 # Clean up prior to testing
 # Prevent race conditions when creating the user config directory
 if [[ $OSTYPE == "msys"* ]]; then
@@ -81,6 +86,8 @@ if [[ $ENABLE_UNIT_TESTS == true ]]; then
 fi
 
 if [[ $ENABLE_DOCS == true && $ENABLE_DOC_TESTS == true ]]; then
+    # Setup doctest failure exit message
+    trap doctest_exit INT TERM EXIT
     # Build doctests without using Xvfb for better output when things fail. Output to file due to console memory issues
     QT_QPA_PLATFORM=offscreen cmake --build . --target docs-doctest -j$BUILD_THREADS $WINDOWS_BUILD_OPTIONS > test_logs/doctest_$OSTYPE.log
 fi
