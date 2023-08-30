@@ -444,8 +444,8 @@ void UnwrappedSurface::setPeaksWorkspace(const std::shared_ptr<Mantid::API::IPea
   po->setShowLabelsFlag(m_showPeakLabels);
   po->setShowRelativeIntensityFlag(m_showPeakRelativeIntensity);
 
-  if (!std::any_of(m_peakShapes.begin(), m_peakShapes.end(),
-                   [pws](auto pkShape) { return pkShape->getPeaksWorkspace() == pws; }))
+  if (!std::any_of(m_peakShapes.cbegin(), m_peakShapes.cend(),
+                   [&pws](auto const &pkShape) { return pkShape->getPeaksWorkspace() == pws; }))
     m_peakShapes.append(po);
 
   m_startPeakShapes = true;
