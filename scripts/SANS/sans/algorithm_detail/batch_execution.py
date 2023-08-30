@@ -546,34 +546,38 @@ def get_multi_period_workspaces(load_alg, workspace_name, number_of_workspaces):
     return workspaces
 
 
+def check_for_background_workspace_in_ads(state, reduction_package):
+    background_ws_name = state.background_subtraction.workspace
+    if AnalysisDataService.doesExist(background_ws_name):
+        return background_ws_name
+    # Check for full one.
+    reduced_name = ""
+    if reduction_package.reduction_mode == ReductionMode.MERGED:
+        reduced_name = reduction_package.reduced_merged_name[0]
+    elif reduction_package.reduction_mode == ReductionMode.HAB:
+        reduced_name = reduction_package.reduced_hab_name[0]
+    elif reduction_package.reduction_mode == ReductionMode.LAB:
+        reduced_name = reduction_package.reduced_lab_name[0]
+    full_name = (
+        background_ws_name
+        + reduced_name.split(
+            state.save.user_specified_output_name if state.save.user_specified_output_name else str(state.data.sample_scatter_run_number),
+            1,
+        )[-1]
+    )
+
+    if AnalysisDataService.doesExist(full_name):
+        background_ws_name = full_name
+    else:
+        raise ValueError(f"BackgroundWorkspace: The workspace '{background_ws_name}' or '{full_name}' could not be found in the ADS.")
+
+
 def create_scaled_background_workspace(state, reduction_package) -> str:
     if not state.background_subtraction.workspace:
         return None
     state.background_subtraction.validate()
-    background_ws_name = state.background_subtraction.workspace
-    if not AnalysisDataService.doesExist(background_ws_name):
-        # Check for full one.
-        reduced_name = ""
-        if reduction_package.reduction_mode == ReductionMode.MERGED:
-            reduced_name = reduction_package.reduced_merged_name[0]
-        elif reduction_package.reduction_mode == ReductionMode.HAB:
-            reduced_name = reduction_package.reduced_hab_name[0]
-        elif reduction_package.reduction_mode == ReductionMode.LAB:
-            reduced_name = reduction_package.reduced_lab_name[0]
-        full_name = (
-            background_ws_name
-            + reduced_name.split(
-                state.save.user_specified_output_name
-                if state.save.user_specified_output_name
-                else str(state.data.sample_scatter_run_number),
-                1,
-            )[-1]
-        )
 
-        if AnalysisDataService.doesExist(full_name):
-            background_ws_name = full_name
-        else:
-            raise ValueError(f"BackgroundWorkspace: The workspace '{background_ws_name}' or '{full_name}' could not be found in the ADS.")
+    background_ws_name = check_for_background_workspace_in_ads(state, reduction_package)
 
     scaled_bg_ws_name = "__" + state.background_subtraction.workspace + "_scaled"  # __ makes the ws invisible
 

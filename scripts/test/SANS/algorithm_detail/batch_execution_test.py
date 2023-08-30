@@ -383,23 +383,26 @@ class GetAllNamesToSaveTest(unittest.TestCase):
 
     def test_get_scaled_background_workspace_no_background(self):
         state = mock.MagicMock()
+        reduction_package = mock.MagicMock()
         state.background_subtraction.workspace = None
 
-        result = create_scaled_background_workspace(state)
+        result = create_scaled_background_workspace(state, reduction_package)
 
-        state.background_subtraction.validate.assert_called_once()
         self.assertIsNone(result, "When no background ws is set, this should return None.")
 
+    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService")
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
-    def test_get_scaled_background_workspace_calls_algs(self, mock_alg_manager):
+    def test_get_scaled_background_workspace_calls_algs(self, mock_alg_manager, ads):
         state = mock.MagicMock()
+        reduction_package = mock.MagicMock()
+        ads.doesExist.return_value = True
         ws_name = "workspace"
         scale_factor = 1.12
         expected_out_name = "__" + ws_name + "_scaled"
         state.background_subtraction.workspace = ws_name
         state.background_subtraction.scale_factor = scale_factor
 
-        result = create_scaled_background_workspace(state)
+        result = create_scaled_background_workspace(state, reduction_package)
 
         state.background_subtraction.validate.assert_called_once()
 
