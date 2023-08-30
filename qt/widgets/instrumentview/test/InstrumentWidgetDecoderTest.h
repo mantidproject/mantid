@@ -8,9 +8,11 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetDecoder.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetEncoder.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedSphere.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -19,6 +21,7 @@
 #include "MantidPythonInterface/core/VersionCompat.h"
 #include <QApplication>
 
+using namespace Mantid::DataObjects;
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
@@ -52,6 +55,32 @@ public:
     TS_ASSERT_THROWS_NOTHING(m_decoder->decode(m_infoMap, *m_instrumentWidget, QString(""), false));
     // Set to 2
     TS_ASSERT_EQUALS(m_instrumentWidget->getCurrentTab(), 2)
+  }
+
+  void test_adding_duplicate_peak_workspace_to_instrument_view() {
+    auto pw = std::make_shared<PeaksWorkspace>();
+    std::shared_ptr<PeaksWorkspace> pw2 = pw->clone();
+    m_instrumentWidget->setSurfaceType(InstrumentWidget::SurfaceType::CYLINDRICAL_Z);
+    auto unwrappedSurface = std::dynamic_pointer_cast<UnwrappedSurface>(m_instrumentWidget->getSurface());
+
+    // Start with no peaks
+    TS_ASSERT_EQUALS(unwrappedSurface->getPeakOverlayCount(), 0)
+
+    // Add a peak
+    unwrappedSurface->setPeaksWorkspace(pw);
+    TS_ASSERT_EQUALS(unwrappedSurface->getPeakOverlayCount(), 1)
+
+    // Add the same peak worspace again, shouldn't increase the number of overlays
+    unwrappedSurface->setPeaksWorkspace(pw);
+    TS_ASSERT_EQUALS(unwrappedSurface->getPeakOverlayCount(), 1)
+
+    // Add a different peak workspace
+    unwrappedSurface->setPeaksWorkspace(pw2);
+    TS_ASSERT_EQUALS(unwrappedSurface->getPeakOverlayCount(), 2)
+
+    // Clear all peak workspaces
+    unwrappedSurface->clearPeakOverlays();
+    TS_ASSERT_EQUALS(unwrappedSurface->getPeakOverlayCount(), 0)
   }
 
 private:
