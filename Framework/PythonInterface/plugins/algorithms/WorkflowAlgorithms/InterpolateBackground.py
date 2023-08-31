@@ -7,7 +7,7 @@
 
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceGroup
 from mantid.kernel import Direction
-from mantid.simpleapi import mtd
+from mantid.simpleapi import mtd, RenameWorkspace
 
 
 class InterpolateBackground(PythonAlgorithm):
@@ -27,7 +27,9 @@ class InterpolateBackground(PythonAlgorithm):
             direction=Direction.Input,
             doc="Workspace Group with two workspaces containing data from empty container runs",
         )
-        self.declareProperty(name="InterpolateTemp", defaultValue="", direction=Direction.Input, doc="Target temperature to interpolate at")
+        self.declareProperty(
+            name="InterpolateTemp", defaultValue=0.0, direction=Direction.Input, doc="Target temperature to interpolate at"
+        )
         self.declareProperty(
             name="OutputWorkspace", defaultValue="Output", direction=Direction.Output, doc="Output Workspace with interpolated data"
         )
@@ -48,8 +50,8 @@ class InterpolateBackground(PythonAlgorithm):
                 if ws1.blocksize() != ws2.blocksize():
                     issues["WorkspaceGroup"] = "Workspaces must have the same number of bins"
                 if ws1.getRun().hasProperty("SampleTemp") and ws2.getRun().hasProperty("SampleTemp"):
-                    temp1 = int(ws1.getRun().getPropertyAsSingleValue("SampleTemp"))
-                    temp2 = int(ws2.getRun().getPropertyAsSingleValue("SampleTemp"))
+                    temp1 = ws1.getRun().getPropertyAsSingleValue("SampleTemp")
+                    temp2 = ws2.getRun().getPropertyAsSingleValue("SampleTemp")
                     if temp1 < temp2:
                         self.low_temp = temp1
                         self.high_temp = temp2
@@ -60,7 +62,7 @@ class InterpolateBackground(PythonAlgorithm):
                         self.high_temp = temp1
                         self.low_ws = wsNames[1]
                         self.high_ws = wsNames[0]
-                    self.interpo_temp = int(self.getProperty("InterpolateTemp").value)
+                    self.interpo_temp = self.getProperty("InterpolateTemp").value
                     if not self.low_temp < self.interpo_temp < self.high_temp:
                         issues["InterpolateTemp"] = f"Interpolated temp must be a value between {self.low_temp} and {self.high_temp}"
                 else:
@@ -74,10 +76,10 @@ class InterpolateBackground(PythonAlgorithm):
 
         scalar = (self.interpo_temp - self.low_temp) / (self.high_temp - self.interpo_temp)
         outputWS = lowWS + scalar * highWS - scalar * lowWS
+        output_ws_name = self.getProperty("OutputWorkspace").value
+        RenameWorkspace(InputWorkspace=outputWS, OutputWorkspace=output_ws_name)
 
-        self.setProperty("OutputWorkspace", outputWS.name())
-
-        return outputWS
+        return output_ws_name
 
 
 # Register algorithm with Mantid
