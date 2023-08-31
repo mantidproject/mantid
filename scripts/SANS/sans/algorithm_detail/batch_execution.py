@@ -116,6 +116,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         reduction_packages,
     )
 
+    scaled_background_ws = None
     # ------------------------------------------------------------------------------------------------------------------
     # Run reductions (one at a time)
     # ------------------------------------------------------------------------------------------------------------------
@@ -149,10 +150,11 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         reduction_package.out_scale_factor = out_scale_factor
         reduction_package.out_shift_factor = out_shift_factor
 
-        # -----------------------------------
+        # ---------------------------------------
         # Subtract the background from the slice.
-        # -----------------------------------
-        scaled_background_ws = create_scaled_background_workspace(state, reduction_package)
+        # ---------------------------------------
+        if not scaled_background_ws:
+            scaled_background_ws = create_scaled_background_workspace(state, reduction_package)
         if scaled_background_ws:
             reduction_package.reduced_bgsub, reduction_package.reduced_bgsub_name = subtract_scaled_background(
                 reduction_package, scaled_background_ws
