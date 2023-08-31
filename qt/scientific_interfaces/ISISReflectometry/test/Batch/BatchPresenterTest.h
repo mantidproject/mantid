@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Batch/BatchPresenter.h"
+#include "../../../ISISReflectometry/Reduction/RowExceptions.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "../MainWindow/MockMainWindowPresenter.h"
 #include "../Preview/MockPreviewPresenter.h"
@@ -31,6 +32,7 @@ using testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
 using testing::StrictMock;
+using testing::Throw;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -569,6 +571,32 @@ public:
     presenter->notifyPreviewApplyRequested();
   }
 
+  void testHasROIDetectorIDsForPreviewRow() {
+    auto const lookupRow = makeLookupRow(boost::none);
+    auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
+    runHasROIDetectorIDsForPreviewRowTest(maybeLookupRow, true);
+  }
+
+  void testHasROIDetectorIDsForPreviewRowNoDetectorIdsInLookupRow() {
+    auto lookupRow = makeLookupRow(boost::none);
+    lookupRow.setRoiDetectorIDs(boost::none);
+    auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
+    runHasROIDetectorIDsForPreviewRowTest(maybeLookupRow, false);
+  }
+
+  void testHasROIDetectorIDsForPreviewRowNoLookupRowFound() {
+    runHasROIDetectorIDsForPreviewRowTest(boost::none, false);
+  }
+
+  void testHasROIDetectorIDsForPreviewRowMultipleLookupRowsFound() {
+    auto mockModel = makeMockModel();
+    auto const previewRow = PreviewRow({"12345"});
+    EXPECT_CALL(*mockModel, findLookupPreviewRowProxy(_)).WillOnce(Throw(MultipleRowsFoundException("")));
+    auto presenter = makePresenter(std::move(mockModel));
+    EXPECT_CALL(*m_previewPresenter, getPreviewRow()).Times(1).WillOnce(ReturnRef(previewRow));
+    TS_ASSERT_EQUALS(presenter->hasROIDetectorIDsForPreviewRow(), false);
+  }
+
 private:
   NiceMock<MockBatchView> m_view;
   NiceMock<MockBatchJobManager> *m_jobManager;
@@ -588,6 +616,15 @@ private:
   RunsTable m_runsTable;
   Slicing m_slicing;
   std::deque<IConfiguredAlgorithm_sptr> m_mockAlgorithmsList;
+
+  void runHasROIDetectorIDsForPreviewRowTest(boost::optional<LookupRow> lookupRow, bool expectedResult) {
+    auto mockModel = makeMockModel();
+    auto const previewRow = PreviewRow({"12345"});
+    EXPECT_CALL(*mockModel, findLookupPreviewRowProxy(_)).Times(1).WillOnce(Return(lookupRow));
+    auto presenter = makePresenter(std::move(mockModel));
+    EXPECT_CALL(*m_previewPresenter, getPreviewRow()).Times(1).WillOnce(ReturnRef(previewRow));
+    TS_ASSERT_EQUALS(presenter->hasROIDetectorIDsForPreviewRow(), expectedResult);
+  }
 
   class BatchPresenterFriend : public BatchPresenter {
     friend class BatchPresenterTest;

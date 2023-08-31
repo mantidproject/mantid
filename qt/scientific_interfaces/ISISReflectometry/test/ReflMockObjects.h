@@ -105,6 +105,7 @@ public:
   MOCK_METHOD0(setBatchUnsaved, void());
   MOCK_METHOD0(notifyChangesSaved, void());
   MOCK_METHOD0(notifyPreviewApplyRequested, void());
+  MOCK_CONST_METHOD0(hasROIDetectorIDsForPreviewRow, bool());
 };
 
 class MockRunsPresenter : public IRunsPresenter {
