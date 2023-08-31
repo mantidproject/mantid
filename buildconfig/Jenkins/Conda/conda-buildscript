@@ -142,6 +142,10 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz *.exe
 # Remove test logs from previous builds
 rm -rf  $BUILD_DIR/test_logs
 
+if [[ $ENABLE_DOCS == true ]]; then
+	export LC_ALL=C
+fi
+
 # Run the script that handles the build
 $SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS
 
