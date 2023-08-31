@@ -98,7 +98,7 @@ def extract_available_log_files(os_name: str, build_number: int, pipeline: str) 
     """
     url = form_url_for_build_artifact(build_number, os_name, pipeline, "")
     build_log_files = []
-    regex_logfile = r"(mantid(docs)?[\w]+environment\.txt)"
+    regex_logfile = r"((mantid|package-conda)[\w]+environment\.txt)"
     # Log files for first build
     with urllib.request.urlopen(url) as file:
         for line in file.readlines():
