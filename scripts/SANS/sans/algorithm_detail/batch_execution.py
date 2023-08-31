@@ -567,7 +567,7 @@ def check_for_background_workspace_in_ads(state, reduction_package):
     )
 
     if AnalysisDataService.doesExist(full_name):
-        background_ws_name = full_name
+        return full_name
     else:
         raise ValueError(f"BackgroundWorkspace: The workspace '{background_ws_name}' or '{full_name}' could not be found in the ADS.")
 
