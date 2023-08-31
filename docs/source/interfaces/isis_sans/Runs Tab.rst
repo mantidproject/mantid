@@ -110,7 +110,8 @@ Table Columns
 |                          |   for details), **BackgroundWorkspace**, and **ScaleFactor** can be set (see below).            |
 +--------------------------+-------------------------------------------------------------------------------------------------+
 | **Background Workspace** |   This column allows the user to provide a workspace for scaled background subtraction          |
-|                          |   (see below).                                                                                  |
+|                          |   (see below). This can either be the name of a workspace already in the ADS or math the Output |
+|                          |   Name from another row in the runs table.                                                      |
 +--------------------------+-------------------------------------------------------------------------------------------------+
 | **Scale Factor**         |   Scale factor to be used for scaled background subtraction (see below).                        |
 +--------------------------+-------------------------------------------------------------------------------------------------+
