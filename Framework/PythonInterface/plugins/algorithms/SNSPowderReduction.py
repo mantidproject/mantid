@@ -426,6 +426,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._num_wl_bins = self.getProperty("NumWavelengthBins").value
 
         self._interpoTemp = self.getProperty("InterpolateTargetTemp").value
+        self._enableInterpo = False
         if self._interpoTemp > 0.0:
             self._enableInterpo = True
 
@@ -1415,10 +1416,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         if self._enableInterpo:
             can_run_ws_name_1, can_run_number_1 = self._generate_container_run_name(can_run_numbers, 0)
             can_run_ws_name_2, can_run_number_2 = self._generate_container_run_name(can_run_numbers, 1)
-            self._focusAndSum(can_run_number_1, preserveEvents, final_name=can_run_ws_name_1, absorptionWksp=absorptionWksp)
-            self._focusAndSum(can_run_number_2, preserveEvents, final_name=can_run_ws_name_2, absorptionWksp=absorptionWksp)
-            can_ws_group = api.GroupWorkspaces([can_run_ws_name_1, can_run_ws_name_2])
-            interpo_ws = api.InterpolateBackground(can_ws_group, self._interpoTemp, OutputWorkspace="InterpolatedBackground")
+
+            self._focusAndSum([can_run_number_1], preserveEvents, final_name=can_run_ws_name_1, absorptionWksp=absorptionWksp)
+            self._focusAndSum([can_run_number_2], preserveEvents, final_name=can_run_ws_name_2, absorptionWksp=absorptionWksp)
+            empty_run_ws_group = api.GroupWorkspaces([can_run_ws_name_1, can_run_ws_name_2])
+            interpo_ws = api.InterpolateBackground(empty_run_ws_group, self._interpoTemp, OutputWorkspace="InterpolatedBackground")
             # smooth background
             smoothParams = self.getProperty("BackgroundSmoothParams").value
             if smoothParams is not None and len(smoothParams) > 0:

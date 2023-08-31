@@ -81,8 +81,7 @@ class RunSetupScript(BaseScriptElement):
         self.parnamelist.append("DisableVanadiumCorrection")
         self.parnamelist.append("DisableVanadiumBackgroundCorrection")
         self.parnamelist.append("DoReSampleX")
-        self.parnamelist.append("InterpolateTemp")
-        self.parnamelist.append("EnableInterpolate")
+        self.parnamelist.append("InterpolateTargetTemp")
 
         return
 
@@ -121,8 +120,7 @@ class RunSetupScript(BaseScriptElement):
         pardict["DisableVanadiumBackgroundCorrection"] = str(int(self.disablevanbkgdcorrection))
         pardict["DoReSampleX"] = str(int(self.doresamplex))
 
-        pardict["InterpolateTemp"] = self.interpolatetemp
-        pardict["EnableInterpolate"] = str(int(self.enableinterpolate))
+        pardict["InterpolateTargetTemp"] = self.interpolatetemp
 
         return pardict
 
