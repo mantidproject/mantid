@@ -16,7 +16,7 @@ The algorithm uses this information to find the correct detector positions and o
 Once separate front and rear detector calibration files have been saved from this algorithm, :ref:`algm-SANSTubeMerge` can be used to merge these into a single calibration file.
 
 Loading and Merging the Input Data
------------
+----------------------------------
 
 The algorithm attempts to load all the data files by checking a number of locations to ensure that loading is as fast as possible. If a matching workspace can be found in the ADS, then this will be used.
 If not, the algorithm checks the locations in your Mantid user directories to find and load any input files that were previously saved by the algorithm.
@@ -30,7 +30,7 @@ Each dataset is then scaled relative to the first dataset in the list, using the
 The algorithm merges each individual dataset into a single workspace containing all of the vertical strips. The workspace containing the merged data will appear in the ADS with name ``original``.
 
 Finding the Correct Pixel Locations
------------
+-----------------------------------
 
 Each detector tube is calibrated in turn using the merged dataset. The first step is to find the approximate pixel locations of the strip edges in the data for the given tube.
 The counts in the data should be very low where the strips are located, so should change from high to low at the left edge of each strip and from low to high at the right edge.
@@ -44,7 +44,7 @@ A quadratic fitting function is then used to compare the known positions with th
 This position error is then used to calculate the corrected position for each detector pixel.
 
 Correcting the Detector Pixel Locations
------------
+---------------------------------------
 
 Once the corrected pixel positions have been calculated for all tubes, :ref:`ApplyCalibration <algm-ApplyCalibration>` is called to move all the detector pixels in the workspace to their correct positions.
 On completion of the calibration, there will be a workspace in the ADS called ``result`` that contains these corrected detector positions.
