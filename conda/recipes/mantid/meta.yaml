@@ -31,7 +31,7 @@ requirements:
     - {{ cdt('libx11-devel') }}              # [linux]
     - {{ cdt('xorg-x11-proto-devel') }}      # [linux]
     - libcxx                                 # [osx]
-    - rhash {{ rhash }}
+    - rhash {{ rhash }}                      # [unix]
 
   host:
     - boost {{ boost }}
