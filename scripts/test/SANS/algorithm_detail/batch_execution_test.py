@@ -382,15 +382,6 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         }
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
 
-    def test_get_scaled_background_workspace_no_background(self):
-        state = mock.MagicMock()
-        reduction_package = mock.MagicMock()
-        state.background_subtraction.workspace = None
-
-        result = create_scaled_background_workspace(state, reduction_package)
-
-        self.assertIsNone(result, "When no background ws is set, this should return None.")
-
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
     def test_get_scaled_background_workspace_calls_algs(self, mock_alg_manager):

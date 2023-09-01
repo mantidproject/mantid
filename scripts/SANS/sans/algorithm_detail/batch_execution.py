@@ -153,9 +153,9 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # ---------------------------------------
         # Subtract the background from the slice.
         # ---------------------------------------
-        if not scaled_background_ws:
-            scaled_background_ws = create_scaled_background_workspace(state, reduction_package)
-        if scaled_background_ws:
+        if state.background_subtraction.workspace or state.background_subtraction.scale_factor:
+            if not scaled_background_ws:
+                scaled_background_ws = create_scaled_background_workspace(state, reduction_package)
             reduction_package.reduced_bgsub, reduction_package.reduced_bgsub_name = subtract_scaled_background(
                 reduction_package, scaled_background_ws
             )
@@ -575,8 +575,6 @@ def check_for_background_workspace_in_ads(state, reduction_package):
 
 
 def create_scaled_background_workspace(state, reduction_package) -> str:
-    if not state.background_subtraction.workspace:
-        return None
     state.background_subtraction.validate()
 
     background_ws_name = check_for_background_workspace_in_ads(state, reduction_package)
