@@ -38,11 +38,8 @@ bool isNexus(const std::string &filename);
 /// version that reuses the metadata container
 bool isNexus(const std::string &filename, const std::map<std::string, std::set<std::string>> &allEntries);
 
-/// Define allowed file extensions for geometry
-const std::vector<std::string> validExtensions{".xml", ".nxs", ".hdf5"};
-enum class FilenameExtensionEnum { XML, NXS, HDF5, enum_count };
-typedef EnumeratedString<FilenameExtensionEnum, &validExtensions, &compareStringsCaseInsensitive> FilenameExtension;
-
+/// List allowed file extensions for geometry
+const std::vector<std::string> validExtensions();
 } // namespace LoadGeometry
 
 } // namespace DataHandling

@@ -69,7 +69,7 @@ private:
   void exec() override;
 
   API::MatrixWorkspace_sptr runLoadInstrument(const std::string &filename, const std::string &instrumentname);
-  API::MatrixWorkspace_sptr runLoadInstrumentFromNexus(const std::string &filename);
+  API::MatrixWorkspace_sptr runLoadIDFFromNexus(const std::string &filename);
 };
 
 } // namespace DataHandling

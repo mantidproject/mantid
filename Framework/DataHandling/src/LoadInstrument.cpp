@@ -48,7 +48,7 @@ void LoadInstrument::init() {
                   "The name of the workspace to load the instrument definition "
                   "into. Any existing instrument will be replaced.");
   declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad, LoadGeometry::validExtensions),
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad, LoadGeometry::validExtensions()),
       "The filename (including its full or relative path) of an instrument "
       "definition file. The file extension must either be .xml or .XML when "
       "specifying an instrument definition file. Files can also be .hdf5 or "

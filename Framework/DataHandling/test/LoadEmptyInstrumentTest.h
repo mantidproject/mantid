@@ -149,6 +149,66 @@ public:
     check_workspace_detectors(output, 64);
   }
 
+  void testLoadFromNexus() {
+    g_log.notice("\ntestLoadFromNexus...");
+
+    LoadEmptyInstrument loader;
+
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT(loader.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "PG3_46577.nxs.h5"));
+    TS_ASSERT_THROWS_NOTHING(inputFile = loader.getPropertyValue("Filename"));
+    wsName = "LEIT_LoadFromNexus";
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", wsName));
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS(result, inputFile);
+
+    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("OutputWorkspace"));
+    TS_ASSERT(!result.compare(wsName));
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    TS_ASSERT(loader.isExecuted());
+
+    // Retrieve the workspace that has the instrument
+    MatrixWorkspace_sptr ws;
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+
+    // Check the instrument name
+    Instrument_const_sptr inst = ws->getInstrument();
+    TS_ASSERT(inst->getName() == "POWGEN");
+
+    // Check the total number of detectors
+    check_workspace_detectors(ws, 43121);
+  }
+
+  void testLoadFromNexusNoIDF() {
+    g_log.notice("\ntestLoadFromNexusNoIDF...");
+
+    LoadEmptyInstrument loader;
+
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT(loader.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "PG3_2583.nxs"));
+    TS_ASSERT_THROWS_NOTHING(inputFile = loader.getPropertyValue("Filename"));
+    wsName = "LEIT_LoadFromNexusNoIDF";
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", wsName));
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS(result, inputFile);
+
+    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("OutputWorkspace"));
+    TS_ASSERT(!result.compare(wsName));
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(!loader.isExecuted());
+  }
+
   void testParameterTags() {
     g_log.notice("\ntestParameterTags...");
 

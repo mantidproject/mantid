@@ -9,7 +9,6 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/LoadGeometry.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -17,8 +16,13 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
+
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
+
 #include <filesystem>
 
 namespace Mantid::DataHandling {
@@ -30,8 +34,27 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 using namespace HistogramData;
-using LoadGeometry::FilenameExtension;
-using LoadGeometry::FilenameExtensionEnum;
+
+namespace {
+const std::vector<std::string> validFilenameExtensions{".xml", ".nxs", ".hdf5", ".nxs.h5"};
+enum class FilenameExtensionEnum { XML, NXS, HDF5, NXS_H5, enum_count };
+typedef EnumeratedString<FilenameExtensionEnum, &validFilenameExtensions, &compareStringsCaseInsensitive>
+    FilenameExtension;
+FilenameExtension getValidFilenameExtension(const std::string &filename) {
+  std::string ext{std::filesystem::path(filename).extension().string()};
+  std::string stem{std::filesystem::path(filename).stem().string()};
+  std::string pre_ext{std::filesystem::path(stem).extension().string()};
+
+  if (!pre_ext.empty()) {
+    std::string double_ext{pre_ext + ext};
+    try {
+      return FilenameExtension(double_ext);
+    } catch (...) {
+    }
+  }
+  return FilenameExtension(ext);
+}
+} // namespace
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -64,13 +87,12 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
 /// Initialisation method.
 void LoadEmptyInstrument::init() {
 
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad, LoadGeometry::validExtensions),
-      "The filename (including its full or relative path) of an instrument "
-      "definition file. The file extension must either be .xml or .XML when "
-      "specifying an instrument definition file. Files can also be .hdf5 or "
-      ".nxs for usage with NeXus Geometry files. Note Filename or "
-      "InstrumentName must be specified but not both.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad, validFilenameExtensions),
+                  "The filename (including its full or relative path) of an instrument "
+                  "definition file. The file extension must either be .xml or .XML when "
+                  "specifying an instrument definition file. Files can also be .hdf5 or "
+                  ".nxs for usage with NeXus Geometry files. Note Filename or "
+                  "InstrumentName must be specified but not both.");
   declareProperty("InstrumentName", "",
                   "Name of instrument. Can be used instead of Filename to "
                   "specify an IDF");
@@ -111,20 +133,20 @@ void LoadEmptyInstrument::exec() {
   if (!instrumentName.empty())
     ws = this->runLoadInstrument(filename, instrumentName);
   else {
-    std::string ext{std::filesystem::path(filename).extension().string()};
-    FilenameExtension enFilenameExtension(ext);
+    FilenameExtension enFilenameExtension = getValidFilenameExtension(filename);
     switch (enFilenameExtension) {
     case FilenameExtensionEnum::XML:
     case FilenameExtensionEnum::HDF5:
       ws = this->runLoadInstrument(filename, instrumentName);
       break;
     case FilenameExtensionEnum::NXS:
-      ws = this->runLoadInstrumentFromNexus(filename);
+    case FilenameExtensionEnum::NXS_H5:
+      ws = this->runLoadIDFFromNexus(filename);
       break;
     default:
       std::ostringstream os;
       os << "Instrument file has an invalid extension: "
-         << "\"" << ext << "\"";
+         << "\"" << enFilenameExtension.c_str() << "\"";
       throw std::runtime_error(os.str());
     }
   }
@@ -169,7 +191,7 @@ void LoadEmptyInstrument::exec() {
   }
 }
 
-// Call LoadIstrument as a child algorithm
+// Call LoadInstrument as a child algorithm
 API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument(const std::string &filename,
                                                                  const std::string &instrumentname) {
   auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
@@ -185,17 +207,58 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument(const std::stri
   return ws;
 }
 
-// Call runLoadInstrumentFromNexus as a child algorithm
-API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrumentFromNexus(const std::string &filename) {
+// Call LoadIDFFromNexus as a child algorithm
+API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadIDFFromNexus(const std::string &filename) {
+  const std::string instrumentEntryName{"/instrument/instrument_xml"};
+  // There are two possibilities for the parent of the instrument IDF entry
+  const std::string instrumentParentEntryName_1{"mantid_workspace_1"};
+  const std::string instrumentParentEntryName_2{"raw_data_1"};
+  std::string instrumentParentEntryName{instrumentParentEntryName_1};
+
+  // Test if instrument XML definition exists in the file
+  bool foundIDF{false};
+  try {
+    ::NeXus::File nxsfile(filename);
+    nxsfile.openPath(instrumentParentEntryName + instrumentEntryName);
+    foundIDF = true;
+  } catch (::NeXus::Exception &) {
+  }
+
+  if (!foundIDF) {
+    instrumentParentEntryName = instrumentParentEntryName_2;
+    try {
+      ::NeXus::File nxsfile(filename);
+      nxsfile.openPath(instrumentParentEntryName + instrumentEntryName);
+      foundIDF = true;
+    } catch (::NeXus::Exception &) {
+    }
+  }
+
+  if (!foundIDF) {
+    throw std::runtime_error("No instrument XML definition found in " + filename + " at " +
+                             instrumentParentEntryName_1 + instrumentEntryName + " or at " +
+                             instrumentParentEntryName_2 + instrumentEntryName);
+  }
+
+  auto loadInst = createChildAlgorithm("LoadIDFFromNexus");
+
+  // Execute the child algorithm. Catch and log any error, but don't stop.
   auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+  try {
+    loadInst->setPropertyValue("Filename", filename);
+    loadInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace", ws);
+    loadInst->setPropertyValue("InstrumentParentPath", instrumentParentEntryName);
+    loadInst->execute();
+  } catch (std::invalid_argument &) {
+    getLogger().error("Invalid argument to LoadIDFFromNexus Child Algorithm ");
+  } catch (std::runtime_error &) {
+    getLogger().debug("No instrument definition found by LoadIDFFromNexus in " + filename + " at " +
+                      instrumentParentEntryName + instrumentEntryName);
+  }
 
-  auto loadInst = createChildAlgorithm("LoadInstrumentFromNexus", 0, 0.5);
-  loadInst->setPropertyValue("Filename", filename);
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
-
-  loadInst->execute();
+  if (!loadInst->isExecuted())
+    getLogger().information("No IDF loaded from the Nexus file " + filename);
 
   return ws;
 }
-
 } // namespace Mantid::DataHandling
