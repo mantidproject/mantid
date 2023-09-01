@@ -79,5 +79,7 @@ bool LoadGeometry::isNexus(const std::string &filename,
   return true;
 }
 
+/// List allowed file extensions for geometry
 const std::vector<std::string> LoadGeometry::validExtensions() { return {".xml", ".nxs", ".hdf5"}; }
+
 } // namespace Mantid::DataHandling
