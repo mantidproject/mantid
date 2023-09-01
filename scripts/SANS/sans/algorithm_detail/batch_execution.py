@@ -552,7 +552,7 @@ def check_for_background_workspace_in_ads(state, reduction_package):
     background_ws_name = state.background_subtraction.workspace
     if AnalysisDataService.doesExist(background_ws_name):
         return background_ws_name
-    # Check for full one.
+    # Look for a workspace that has a reduction suffix appended (such as _merged_1D_2.2_10.0)
     reduced_name = ""
     if reduction_package.reduction_mode == ReductionMode.MERGED:
         reduced_name = reduction_package.reduced_merged_name[0]
