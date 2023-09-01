@@ -340,7 +340,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(
             "InterpolateTargetTemp",
             0.0,
-            "If specified, perform linear interpolation of background runs. Must specify exactly two background runs",
+            "Temperature in Kelvin. If specified, perform interpolation of background runs. Must specify exactly two background runs",
         )
 
     def validateInputs(self):
