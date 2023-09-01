@@ -1,0 +1,1 @@
+- Update HRPD definition to reflect modifications to low-angle bank modules for runs from 01-MAR-23 onwards
