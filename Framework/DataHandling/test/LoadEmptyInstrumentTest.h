@@ -209,6 +209,30 @@ public:
     TS_ASSERT(!loader.isExecuted());
   }
 
+  void testLoadFileWithInvalidExtension() {
+    g_log.notice("\ntestLoadFileWithInvalidExtension...");
+
+    LoadEmptyInstrument loader;
+
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT(loader.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "abc.xyz"));
+    TS_ASSERT_THROWS_NOTHING(inputFile = loader.getPropertyValue("Filename"));
+    wsName = "LEIT_testLoadFileWithInvalidExtension";
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", wsName));
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS(result, inputFile);
+
+    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("OutputWorkspace"));
+    TS_ASSERT(!result.compare(wsName));
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(!loader.isExecuted());
+  }
+
   void testParameterTags() {
     g_log.notice("\ntestParameterTags...");
 

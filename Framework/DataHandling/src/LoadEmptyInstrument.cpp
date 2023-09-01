@@ -36,20 +36,24 @@ using namespace DataObjects;
 using namespace HistogramData;
 
 namespace {
-const std::vector<std::string> validFilenameExtensions{".xml", ".nxs", ".hdf5", ".nxs.h5"};
-enum class FilenameExtensionEnum { XML, NXS, HDF5, NXS_H5, enum_count };
+const std::vector<std::string> validFilenameExtensions{".xml", ".hdf5", ".nxs", ".nxs.h5"};
+enum class FilenameExtensionEnum { XML, HDF5, NXS, NXS_H5, enum_count };
 typedef EnumeratedString<FilenameExtensionEnum, &validFilenameExtensions, &compareStringsCaseInsensitive>
     FilenameExtension;
+// This method attempts to retrieve an enumerated file name extension. If it fails, an std::runtime _error will be
+// thrown.
 FilenameExtension getValidFilenameExtension(const std::string &filename) {
   std::string ext{std::filesystem::path(filename).extension().string()};
+  // Note, a file name might have a double extension such as ".nxs.h5", which is valid.
+  // It may also have a double extension such as .lite.nxs, which is invalid.
+  // In the latter case a single extension, .nxs, which is valid, should be retrieved.
   std::string stem{std::filesystem::path(filename).stem().string()};
   std::string pre_ext{std::filesystem::path(stem).extension().string()};
-
   if (!pre_ext.empty()) {
     std::string double_ext{pre_ext + ext};
     try {
       return FilenameExtension(double_ext);
-    } catch (...) {
+    } catch (std::runtime_error &) {
     }
   }
   return FilenameExtension(ext);
@@ -87,12 +91,11 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
 /// Initialisation method.
 void LoadEmptyInstrument::init() {
 
-  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad, validFilenameExtensions),
-                  "The filename (including its full or relative path) of an instrument "
-                  "definition file. The file extension must either be .xml or .XML when "
-                  "specifying an instrument definition file. Files can also be .hdf5 or "
-                  ".nxs for usage with NeXus Geometry files. Note Filename or "
-                  "InstrumentName must be specified but not both.");
+  declareProperty(
+      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad, validFilenameExtensions),
+      "The filename (including its full or relative path) of an instrument "
+      "definition file. Supported file name extensions are: .xml, hdf5, .nxs, or .nxs.h5, all case-insensitive."
+      "Note, Filename or InstrumentName must be specified, but not both.");
   declareProperty("InstrumentName", "",
                   "Name of instrument. Can be used instead of Filename to "
                   "specify an IDF");
@@ -133,7 +136,7 @@ void LoadEmptyInstrument::exec() {
   if (!instrumentName.empty())
     ws = this->runLoadInstrument(filename, instrumentName);
   else {
-    FilenameExtension enFilenameExtension = getValidFilenameExtension(filename);
+    FilenameExtension enFilenameExtension{getValidFilenameExtension(filename)};
     switch (enFilenameExtension) {
     case FilenameExtensionEnum::XML:
     case FilenameExtensionEnum::HDF5:
@@ -145,7 +148,7 @@ void LoadEmptyInstrument::exec() {
       break;
     default:
       std::ostringstream os;
-      os << "Instrument file has an invalid extension: "
+      os << "Instrument file name has an invalid extension: "
          << "\"" << enFilenameExtension.c_str() << "\"";
       throw std::runtime_error(os.str());
     }
@@ -242,7 +245,7 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadIDFFromNexus(const std::st
 
   auto loadInst = createChildAlgorithm("LoadIDFFromNexus");
 
-  // Execute the child algorithm. Catch and log any error, but don't stop.
+  // Execute the child algorithm. Catch and log any error.
   auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
   try {
     loadInst->setPropertyValue("Filename", filename);
