@@ -97,6 +97,10 @@ if [[ -n "$GIT_TAG" ]]; then
     git tag -a $GIT_TAG -m "Tagging $GIT_TAG"
 fi
 
+# Set locale to avoid problems building the docs
+# See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
+export LC_ALL=C
+
 # Run conda build. Use a known path so packages built in other steps can be
 # copied to a known location and reused.
 # Use the workspace root outside of the git tree or conda-build cannot

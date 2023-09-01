@@ -142,8 +142,10 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz *.exe
 # Remove test logs from previous builds
 rm -rf  $BUILD_DIR/test_logs
 
+# Set locale to avoid problems building the docs
+# See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
 if [[ $ENABLE_DOCS == true ]]; then
-	export LC_ALL=C
+    export LC_ALL=C
 fi
 
 # Run the script that handles the build
