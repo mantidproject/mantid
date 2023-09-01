@@ -7,16 +7,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/EnumeratedString.h"
-
 #include <algorithm>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
-
-using Mantid::Kernel::compareStringsCaseInsensitive;
-using Mantid::Kernel::EnumeratedString;
 
 namespace Mantid {
 namespace DataHandling {
@@ -30,16 +25,14 @@ namespace LoadGeometry {
 
 /// Determine if the Geometry file type is IDF
 bool isIDF(const std::string &filename);
-
 /// Determine if the Geometry file type is Nexus
 bool isNexus(const std::string &filename);
-
 /// Determine if the Geometry file type is Nexus
 /// version that reuses the metadata container
 bool isNexus(const std::string &filename, const std::map<std::string, std::set<std::string>> &allEntries);
-
 /// List allowed file extensions for geometry
 const std::vector<std::string> validExtensions();
+
 } // namespace LoadGeometry
 
 } // namespace DataHandling

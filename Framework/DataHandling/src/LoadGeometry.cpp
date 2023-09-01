@@ -9,8 +9,6 @@
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 
-#include <filesystem>
-
 namespace Mantid::DataHandling {
 
 /// Determine if the Geometry file type is IDF
