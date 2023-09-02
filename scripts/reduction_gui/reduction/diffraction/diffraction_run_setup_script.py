@@ -38,7 +38,7 @@ class RunSetupScript(BaseScriptElement):
     vanrunnumber = ""
     vannoiserunnumber = ""
     vanbkgdrunnumber = ""
-    interpolatetemp = ""
+    interpolatetemp = 0.0
 
     disablebkgdcorrection = False
     disablevancorrection = False
@@ -82,7 +82,7 @@ class RunSetupScript(BaseScriptElement):
         self.parnamelist.append("DisableVanadiumBackgroundCorrection")
         self.parnamelist.append("DoReSampleX")
         self.parnamelist.append("InterpolateTargetTemp")
-
+        self.parnamelist.append("EnableInterpolate")
         return
 
     def buildParameterDict(self):
@@ -121,7 +121,7 @@ class RunSetupScript(BaseScriptElement):
         pardict["DoReSampleX"] = str(int(self.doresamplex))
 
         pardict["InterpolateTargetTemp"] = self.interpolatetemp
-
+        pardict["EnableInterpolate"] = str(int(self.enableinterpolate))
         return pardict
 
     def set_default_pars(self, inst_name):
@@ -246,8 +246,8 @@ class RunSetupScript(BaseScriptElement):
             )
             self.disablevanbkgdcorrection = bool(int(tempbool))
 
-            self.interpolatetemp = BaseScriptElement.getIntElement(
-                instrument_dom, "interpolatetemp", default=RunSetupScript.interpolatetemp
+            self.interpolatetemp = BaseScriptElement.getFloatElement(
+                instrument_dom, "interpolatetargettemp", default=RunSetupScript.interpolatetemp
             )
             tempbool = BaseScriptElement.getStringElement(
                 instrument_dom, "enableinterpolate", default=str(int(RunSetupScript.enableinterpolate))

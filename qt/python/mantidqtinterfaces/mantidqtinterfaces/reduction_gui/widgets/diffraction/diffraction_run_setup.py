@@ -129,7 +129,7 @@ class RunSetupWidget(BaseWidget):
         siv.setBottom(0)
         self._content.resamplex_edit.setValidator(siv)
 
-        iv4 = QIntValidator(self._content.interpolatetemp_edit)
+        iv4 = QDoubleValidator(self._content.interpolatetemp_edit)
         iv4.setBottom(0)
         self._content.interpolatetemp_edit.setValidator(iv4)
 
@@ -229,7 +229,11 @@ class RunSetupWidget(BaseWidget):
         if state.vanbkgdrunnumber is not None and state.vanbkgdrunnumber != "":
             self._content.vanbkgdrun_edit.setText(state.vanbkgdrunnumber)
         self._content.disablevanbkgdcorr_chkbox.setChecked(state.disablevanbkgdcorrection)
-
+        # Interpolate background
+        self._content.interpolateenable_chkbox.setChecked(state.enableinterpolate)
+        if state.interpolatetemp is not None and self._content.interpolateenable_chkbox.isChecked() is True:
+            self._content.interpolatetemp_edit.setEnabled(True)
+            self._content.interpolatetemp_edit.setText(str(state.interpolatetemp))
         # self._content.vannoiserun_edit.setText(str(state.vannoiserunnumber))
         # if state.vanrunnumber < 0:
         #     self._content.disablevancorr_chkbox.setChecked(True)
@@ -307,7 +311,7 @@ class RunSetupWidget(BaseWidget):
         s.disablevanbkgdcorrection = self._content.disablevanbkgdcorr_chkbox.isChecked()
 
         s.interpolatetemp = self._content.interpolatetemp_edit.text()
-        s.interpolateenable = self._content.interpolateenable_chkbox.isChecked()
+        s.enableinterpolate = self._content.interpolateenable_chkbox.isChecked()
 
         return s
 
@@ -511,7 +515,7 @@ class RunSetupWidget(BaseWidget):
             self._content.interpolatetemp_edit.setEnabled(True)
         else:
             self._content.interpolatetemp_edit.setEnabled(False)
-
+            self._content.interpolatetemp_edit.setText("")
         return
 
     def _show_help(self):
