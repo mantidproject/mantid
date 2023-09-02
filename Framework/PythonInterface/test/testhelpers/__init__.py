@@ -10,7 +10,7 @@ are for use in unit tests only!
 
 
 from contextlib import contextmanager
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 # Import mantid to set MANTIDPATH for any ConfigService call that may be done
 import mantid  # noqa
@@ -155,7 +155,7 @@ def can_be_instantiated(cls):
 # Work around for slow testhelpers.assert_almost_equal that was fixed in 1.9.0:
 #   - https://github.com/numpy/numpy/commit/79d3a94f41b7e3c661eceed2f26ba6cce362ba4f
 # Running assert_almost_equal in a tight loop with v<1.9.0 causes major slows (read minutes)
-if LooseVersion(numpy.__version__) >= LooseVersion("1.9.0"):
+if Version(numpy.__version__) >= Version("1.9.0"):
     assert_almost_equal = numpy.testing.assert_almost_equal
 else:
 

@@ -380,10 +380,10 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
 
         # Find all the peaks. find_peaks was introduced in scipy 1.1.0, if using an older version use find_peaks_cwt
         # however this will not do an equally good job as it cannot sort by prominence (also added in 1.1.0)
-        from distutils.version import LooseVersion
+        from packaging.version import Version
         import scipy
 
-        if LooseVersion(scipy.__version__) >= LooseVersion("1.1.0"):
+        if Version(scipy.__version__) >= Version("1.1.0"):
             raw_peaks, _ = scipy.signal.find_peaks(raw_yvals)
             flat_peaks, params = scipy.signal.find_peaks(flat_yvals, prominence=(None, None))
             prominence = params["prominences"]

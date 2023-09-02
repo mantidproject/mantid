@@ -8,11 +8,10 @@ import unittest
 from mantid.kernel import DateAndTime
 import numpy
 from numpy import timedelta64, datetime64
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 
 class DateAndTimeTest(unittest.TestCase):
-
     iso_str = "2008-12-18T17:58:38"
     # We had to add a space to the end of the string representation to get around an IPython bug (#8351)
     iso_str_plus_space = iso_str + " "
@@ -36,7 +35,7 @@ class DateAndTimeTest(unittest.TestCase):
         self.assertEqual(dt, dt_np)
 
     def test_convert_from_np(self):
-        if LooseVersion(numpy.__version__) < LooseVersion("1.9"):
+        if Version(numpy.__version__) < Version("1.9"):
             dt_np = datetime64("2000-01-01T00:00Z")
         else:  # newer numpy only uses UTC and warns on specifying timezones
             dt_np = datetime64("2000-01-01T00:00")
