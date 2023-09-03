@@ -82,9 +82,6 @@ euphonic:
 librdkafka:
   - <=2.1.1
 
-cmake:
-  - '!=3.27.4'
-
 pin_run_as_build:
     boost:
       max_pin: x.x
