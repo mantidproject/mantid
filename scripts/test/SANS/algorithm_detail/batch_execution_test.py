@@ -405,19 +405,6 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         mock_alg_manager.assert_called_once_with("Scale", **expected_options)
         self.assertEqual(result, expected_out_name, "Should output the scaled ws name.")
 
-    def test_subtract_scaled_background_with_all_detectors_fails(self):
-        reduction_package = mock.MagicMock()
-        scaled_ws_name = "__workspace_scaled"
-        reduction_package.reduction_mode = ReductionMode.ALL
-        self.assertRaisesRegex(
-            ValueError,
-            f"Reduction Mode '{ReductionMode.ALL}' is incompatible with scaled background reduction. The ReductionMode "
-            f"must be set to '{ReductionMode.MERGED}', '{ReductionMode.HAB}', or '{ReductionMode.LAB}'.",
-            subtract_scaled_background,
-            reduction_package,
-            scaled_ws_name,
-        )
-
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
     def test_subtract_background_from_merged_calls_algorithms_correctly(self, mock_alg_manager):
@@ -480,6 +467,19 @@ class GetAllNamesToSaveTest(unittest.TestCase):
 
         self.assertRaisesRegex(
             ValueError, r"The workspace .* could not be found in the ADS\.", check_for_background_workspace_in_ads, state, reduction_package
+        )
+
+    def test_create_scaled_background_with_all_detectors_fails(self):
+        reduction_package = mock.MagicMock()
+        state = mock.MagicMock()
+        reduction_package.reduction_mode = ReductionMode.ALL
+        self.assertRaisesRegex(
+            ValueError,
+            f"Reduction Mode '{ReductionMode.ALL}' is incompatible with scaled background reduction. The ReductionMode "
+            f"must be set to '{ReductionMode.MERGED}', '{ReductionMode.HAB}', or '{ReductionMode.LAB}'.",
+            create_scaled_background_workspace,
+            state,
+            reduction_package,
         )
 
 

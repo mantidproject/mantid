@@ -576,6 +576,11 @@ def check_for_background_workspace_in_ads(state, reduction_package):
 
 def create_scaled_background_workspace(state, reduction_package) -> str:
     state.background_subtraction.validate()
+    if reduction_package.reduction_mode == ReductionMode.ALL:
+        raise ValueError(
+            f"Reduction Mode '{ReductionMode.ALL}' is incompatible with scaled background reduction. The "
+            f"ReductionMode must be set to '{ReductionMode.MERGED}', '{ReductionMode.HAB}', or '{ReductionMode.LAB}'."
+        )
 
     background_ws_name = check_for_background_workspace_in_ads(state, reduction_package)
 
@@ -1606,11 +1611,6 @@ def subtract_scaled_background(reduction_package, scaled_ws_name: str):
         output_workspaces_names.append(output_name)
         output_workspaces.append(get_workspace_from_algorithm(minus_alg, "OutputWorkspace"))
 
-    if reduction_package.reduction_mode == ReductionMode.ALL:
-        raise ValueError(
-            f"Reduction Mode '{ReductionMode.ALL}' is incompatible with scaled background reduction. The "
-            f"ReductionMode must be set to '{ReductionMode.MERGED}', '{ReductionMode.HAB}', or '{ReductionMode.LAB}'."
-        )
     minus_name = "Minus"
     minus_options = {"RHSWorkspace": scaled_ws_name}
     output_workspaces_names = []
