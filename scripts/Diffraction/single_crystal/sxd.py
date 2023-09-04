@@ -18,10 +18,10 @@ tof_max = 18800
 
 
 class SXD(BaseSX):
-    def __init__(self, vanadium_runno=None, empty_runno=None, detcal_path=None):
+    def __init__(self, vanadium_runno=None, empty_runno=None, detcal_path=None, file_ext=".raw"):
         self.empty_runno = empty_runno
         self.detcal_path = detcal_path
-        super().__init__(vanadium_runno)
+        super().__init__(vanadium_runno, file_ext)
         self.sphere_shape = """<sphere id="sphere">
                                <centre x="0.0"  y="0.0" z="0.0" />
                                <radius val="0.003"/>
@@ -30,7 +30,7 @@ class SXD(BaseSX):
     def process_data(self, runs: Sequence[str], *args):
         gonio_angles = args
         for irun, run in enumerate(runs):
-            wsname = self.load_run(run)
+            wsname = self.load_run(run, self.file_ext)
             # set goniometer
             if self.gonio_axes is not None:
                 if len(gonio_angles) != len(self.gonio_axes):
@@ -59,9 +59,9 @@ class SXD(BaseSX):
             self.set_ws(run, wsname)
         return wsname
 
-    def load_run(self, runno):
+    def load_run(self, runno, file_ext=".raw"):
         wsname = "SXD" + str(runno)
-        mantid.Load(Filename=wsname + ".raw", OutputWorkspace=wsname, EnableLogging=False)
+        mantid.Load(Filename=wsname + self.file_ext, OutputWorkspace=wsname, EnableLogging=False)
         if self.detcal_path is not None:
             mantid.LoadParameterFile(Workspace=wsname, Filename=self.detcal_path, EnableLogging=False)
         mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=tof_min, XMax=tof_max, EnableLogging=False)
@@ -95,8 +95,8 @@ class SXD(BaseSX):
 
     def process_vanadium(self):
         # load empty and vanadium
-        empty_ws = self.load_run(self.empty_runno)
-        self.van_ws = self.load_run(self.van_runno)
+        empty_ws = self.load_run(self.empty_runno, self.file_ext)
+        self.van_ws = self.load_run(self.van_runno, self.file_ext)
         # create grouping file per bank
         bank_grouping_ws, _, ngroups = mantid.CreateGroupingWorkspace(
             InputWorkspace=self.van_ws, GroupDetectorsBy="bank", OutputWorkspace="bank_groups", EnableLogging=False

@@ -30,13 +30,14 @@ class INTEGRATION_TYPE(Enum):
 
 
 class BaseSX(ABC):
-    def __init__(self, vanadium_runno: str):
+    def __init__(self, vanadium_runno: str, file_ext: str):
         self.runs = dict()
         self.van_runno = vanadium_runno
         self.van_ws = None
         self.gonio_axes = None
         self.sample_dict = None
         self.n_mcevents = 1200
+        self.file_ext = file_ext  # file extension
 
     # --- decorator to apply to all runs is run=None ---
     def default_apply_to_all_runs(func):
