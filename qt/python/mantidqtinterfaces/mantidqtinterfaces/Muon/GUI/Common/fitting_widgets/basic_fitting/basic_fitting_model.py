@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, logger
 from mantid.api import CompositeFunction, IAlgorithm, IFunction
-from mantid.simpleapi import CopyLogs, EvaluateFunction
+from mantid.simpleapi import CopyLogs
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_list_to_group
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws, make_group
@@ -31,7 +31,7 @@ from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_
 )
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context import MuonContext
-from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_create_workspace_without_storing
+from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_Fit, evaluate_function, run_create_workspace
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import check_exclude_start_and_end_x_is_valid, x_limits_of_workspace
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
@@ -848,13 +848,12 @@ class BasicFittingModel:
         else:
             raise ValueError(f"Plot guess type '{self.fitting_context.plot_guess_type}' is not recognised.")
 
-        extended_workspace = run_create_workspace_without_storing(x_data=data, y_data=data, name="extended_workspace")
-
         try:
             if self._double_pulse_enabled():
                 self._evaluate_double_pulse_function(fit_function, output_workspace)
             else:
-                EvaluateFunction(InputWorkspace=extended_workspace, Function=fit_function, OutputWorkspace=output_workspace)
+                extended_workspace = run_create_workspace(x_data=data, y_data=data, name="extended_workspace")
+                evaluate_function(extended_workspace, fit_function, output_workspace)
         except RuntimeError:
             logger.error("Failed to plot guess.")
             return ""
