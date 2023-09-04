@@ -61,7 +61,7 @@ IETRunData IETView::getRunData() {
   IETAnalysisData analysisDetails(m_uiForm.ckDetailedBalance->isChecked(), m_uiForm.spDetailedBalance->value(),
                                   m_uiForm.ckScaleMultiplier->isChecked(), m_uiForm.spScaleMultiplier->value());
 
-  IETRebinData rebinDetails(m_uiForm.ckDoNotRebin->isChecked(), m_uiForm.cbRebinType->currentText().toStdString(),
+  IETRebinData rebinDetails(!m_uiForm.ckDoNotRebin->isChecked(), m_uiForm.cbRebinType->currentText().toStdString(),
                             m_uiForm.spRebinLow->value(), m_uiForm.spRebinHigh->value(), m_uiForm.spRebinWidth->value(),
                             m_uiForm.leRebinString->text().toStdString());
 
