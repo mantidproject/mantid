@@ -154,6 +154,26 @@ class SXDTest(unittest.TestCase):
         mock_save_nxs.assert_called_once_with(InputWorkspace=self.peaks.name(), Filename=fpath + ".nxs")
         mock_save_ref.assert_called_once_with(InputWorkspace=self.peaks.name(), Filename=fpath + ".int", Format=fmt, SplitFiles=False)
 
+    @patch(sxd_path + ".mantid.SaveReflections")
+    @patch(sxd_path + ".mantid.SaveNexus")
+    def test_save_all_peaks(self, mock_save_nxs, mock_save_ref):
+        self.sxd.runs = dict()
+        for runno in range(1234, 1236):
+            self.sxd.runs[str(runno)] = {"ws": self.ws.name(), "found_int_MD_opt": self.peaks.name()}
+        SetUB(self.peaks, UB="0.25,0,0,0,0.25,0,0,0,0.1")
+
+        pk_type, int_type = PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS
+        fmt = "SHELX"
+
+        self.sxd.save_all_peaks(pk_type, int_type, self._test_dir, fmt)
+
+        all_peaks_name = "1234-1235_found_int_MD_opt"
+        fpath = path.join(self._test_dir, f"{all_peaks_name}_{fmt}")
+        mock_save_nxs.assert_called_once_with(InputWorkspace=all_peaks_name, Filename=fpath + ".nxs")
+        mock_save_ref.assert_called_once_with(InputWorkspace=all_peaks_name, Filename=fpath + ".int", Format=fmt, SplitFiles=False)
+        self.assertTrue(HasUB(Workspace=all_peaks_name))
+        ClearUB(Workspace=self.peaks)
+
     def test_predict_peaks(self):
         # make peaks ws and set a UB
         peaks = self._make_peaks_detids(wsname="peaks_for_predict")

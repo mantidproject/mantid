@@ -367,14 +367,17 @@ class BaseSX(ABC):
         mantid.SaveNexus(InputWorkspace=peaks, Filename=filepath[:-3] + "nxs")
 
     def save_all_peaks(self, peak_type, integration_type, save_dir, save_format, run_ref=None):
-        runs = self.runs.keys()
+        runs = list(self.runs.keys())
         if len(runs) > 1:
             # get name for peak table from range of runs integrated
             min_ws = min(runs, key=lambda k: int("".join(filter(str.isdigit, k))))
             max_ws = max(runs, key=lambda k: int("".join(filter(str.isdigit, k))))
             all_peaks = f'{"-".join([min_ws, max_ws])}_{peak_type.value}_{integration_type.value}'
-            mantid.CreatePeaksWorkspace(InstrumentWorkspace=self.van_ws, NumberOfPeaks=0, OutputWorkspace=all_peaks)
-            for run in runs:
+            # clone first peak table
+            mantid.CloneWorkspace(
+                InputWorkspace=self.get_peaks(runs[0], peak_type, integration_type), OutputWorkspace=all_peaks, EnableLogging=False
+            )
+            for run in runs[1:]:
                 peaks = self.get_peaks(run, peak_type, integration_type)
                 if run_ref is not None and run_ref != run:
                     self.make_UB_consistent(self.get_peaks(run_ref, peak_type, integration_type), peaks)
