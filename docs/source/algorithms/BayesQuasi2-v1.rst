@@ -33,26 +33,6 @@ The new method provides FWHM results that are comparable for all :math:`Q` value
    :width: 400px
    :align: center
 
-
-
-
-Usage
------
-
-**Example - BayesQuasi2**
-
-.. code::
-
-    sampleWs = Load('irs26176_graphite002_red.nxs')
-    resWs = Load('irs26173_graphite002_red.nxs')
-
-    # Run BayesQuasi2 algorithm
-    fit_ws, result_ws, prob_ws = BayesQuasi2(SampleWorkspace='irs26176_graphite002_red', ResolutionWorkspace='iris26173_graphite002_res',
-                                             OutputWorkspaceFit='irs26176_graphite002_red_workspaces',
-                                             OutputWorkspaceResult='irs26176_graphite002_red_results',
-                                             OutputWorkspaceProb='irs26176_graphite002_red_prob')
-
-
 .. categories::
 
 .. sourcelink::
