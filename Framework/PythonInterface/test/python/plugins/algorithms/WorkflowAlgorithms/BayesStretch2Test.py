@@ -151,9 +151,7 @@ class BayesStretch2Test(unittest.TestCase):
             name="test_Stretch_FWHM",
         )
 
-    @mock.patch("BayesStretch2.QSEGridSearch")
-    @mock.patch("BayesStretch2.QSEFixFunction")
-    def test_do_one_spec(self, mock_QSe, mock_search):
+    def test_do_one_spec(self):
         data = {
             "sample": self._sample_ws,
             "start x": -0.3,
@@ -177,45 +175,50 @@ class BayesStretch2Test(unittest.TestCase):
         method_mock.get_x_axis.values = mock.PropertyMock(return_value=[0.8, 0.9, 1.0])
         method_mock.get_y_axis.values = mock.PropertyMock(return_value=[0.01, 0.05, 0.1])
         method_mock.get_slices.return_value = ([3, 2, 1], [6, 5, 4])
-        mock_search.return_value = method_mock
 
         self._alg.make_contour = mock.Mock(return_value="contour_ws")
 
         mock_function = mock.MagicMock(autospec=QSEFixFunction)
         mock_function.get_guess.return_value = [11, 12]
         mock_function.get_bounds.return_value = ([1, 2], [21, 22])
-        mock_QSe.return_value = mock_function
 
-        contour, beta, FWHM = self._alg.do_one_spec(0, data)
+        with patch("BayesStretch2.QSEGridSearch", return_value=method_mock) as mock_search:
+            with patch("BayesStretch2.QSEFixFunction", return_value=method_mock) as mock_QSe:
+                mock_search.return_value = method_mock
+                mock_QSe.return_value = mock_function
 
-        self.assert_mock_called_with(
-            method_mock.preprocess_data,
-            N_calls=1,
-            call_number=1,
-            x_data=self._sample_ws.readX(0),
-            y_data=self._sample_ws.readY(0),
-            e_data=self._sample_ws.readE(0),
-            start_x=-0.3,
-            end_x=0.3,
-            res=self._res_ws,
-        )
+                contour, beta, FWHM = self._alg.do_one_spec(0, data)
 
-        self.assert_mock_called_with(method_mock.set_x_axis, N_calls=1, call_number=1, start=0.8, end=1.0, N=10, label="beta")
+                self.assert_mock_called_with(
+                    method_mock.preprocess_data,
+                    N_calls=1,
+                    call_number=1,
+                    x_data=self._sample_ws.readX(0),
+                    y_data=self._sample_ws.readY(0),
+                    e_data=self._sample_ws.readE(0),
+                    start_x=-0.3,
+                    end_x=0.3,
+                    res=self._res_ws,
+                )
 
-        self.assert_mock_called_with(method_mock.set_y_axis, N_calls=1, call_number=1, start=0.01, end=0.2, N=20, label="FWHM")
+                self.assert_mock_called_with(method_mock.set_x_axis, N_calls=1, call_number=1, start=0.8, end=1.0, N=10, label="beta")
 
-        mock_QSe.assert_called_once_with(bg_function="Linear", elastic_peak=True, r_x=[7, 8, 9], r_y=[4, 5, 6], start_x=-0.3, end_x=0.3)
+                self.assert_mock_called_with(method_mock.set_y_axis, N_calls=1, call_number=1, start=0.01, end=0.2, N=20, label="FWHM")
 
-        mock_function.add_single_SE.assert_called_once_with()
-        mock_function.set_delta_bounds.assert_called_once_with(lower=[0, -0.5], upper=[200, 0.5])
+                mock_QSe.assert_called_once_with(
+                    bg_function="Linear", elastic_peak=True, r_x=[7, 8, 9], r_y=[4, 5, 6], start_x=-0.3, end_x=0.3
+                )
 
-        method_mock.set_scipy_engine(guess=[11, 12], lower=[1, 2], upper=[21, 22])
-        method_mock.execute.assert_called_once_with(func=mock_function)
-        method_mock.get_slices.assert_called_once_with()
+                mock_function.add_single_SE.assert_called_once_with()
+                mock_function.set_delta_bounds.assert_called_once_with(lower=[0, -0.5], upper=[200, 0.5])
 
-        self.assertEqual(contour, "contour_ws")
-        self.assertEqual(beta, (method_mock.get_x_axis.values, [3, 2, 1]))
-        self.assertEqual(FWHM, (method_mock.get_y_axis.values, [6, 5, 4]))
+                method_mock.set_scipy_engine(guess=[11, 12], lower=[1, 2], upper=[21, 22])
+                method_mock.execute.assert_called_once_with(func=mock_function)
+                method_mock.get_slices.assert_called_once_with()
+
+                self.assertEqual(contour, "contour_ws")
+                self.assertEqual(beta, (method_mock.get_x_axis.values, [3, 2, 1]))
+                self.assertEqual(FWHM, (method_mock.get_y_axis.values, [6, 5, 4]))
 
     def exec_setup(self, fit_ws, results):
         self._alg.setProperty("Emax", 0.3)
