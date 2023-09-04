@@ -9,6 +9,7 @@ import numpy as np
 from enum import Enum
 import mantid.simpleapi as mantid
 from mantid.api import FunctionFactory, AnalysisDataService as ADS
+from mantid.kernel import logger
 from FindGoniometerFromUB import getSignMaxAbsValInCol
 from mantid.geometry import CrystalStructure, SpaceGroupFactory, ReflectionGenerator, ReflectionConditionFilter
 from os import path
@@ -183,6 +184,13 @@ class BaseSX(ABC):
     def convert_to_MD(self, run=None, frame="Q (lab frame)"):
         wsname = self.get_ws_name(run)
         md_name = wsname + "_MD"
+        if frame == "HKL" and not BaseSX.retrieve(wsname).sample().hasOrientedLattice():
+            peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
+            if peaks is not None and peaks.sample().hasOrientedLattice():
+                mantid.SetUB(wsname, UB=peaks.sample().getOrientedLattice().getUB())
+            else:
+                logger.error(f"No UB specified for {wsname} or found peaks - cannot transform to HKL.")
+                return
         BaseSX.convert_ws_to_MD(wsname, md_name, frame)
         self.set_md(run, md_name)
 

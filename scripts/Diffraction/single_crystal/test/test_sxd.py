@@ -12,6 +12,8 @@ from mantid.simpleapi import (
     CloneWorkspace,
     SaveParameterFile,
     SetUB,
+    ClearUB,
+    HasUB,
 )
 from Diffraction.single_crystal.sxd import SXD
 from Diffraction.single_crystal.base_sx import PEAK_TYPE, INTEGRATION_TYPE
@@ -162,6 +164,25 @@ class SXDTest(unittest.TestCase):
             self.sxd.predict_peaks(run=runno, peak_type=pk_type)
             pred_peaks = self.sxd.get_peaks(runno, pk_type)
             self.assertEqual(pred_peaks.name(), peaks.name() + "_" + pk_type.value)
+
+    @patch(sxd_path + ".SXD.set_md")
+    @patch(sxd_path + ".BaseSX.convert_ws_to_MD")
+    def test_convert_to_md_sets_ub_if_HKL(self, mock_conv_md, mock_set_md):
+        self.peaks = self._make_peaks_detids(wsname="peaks_for_md")
+        SetUB(self.peaks, UB="0.25,0,0,0,0.25,0,0,0,0.1")
+        runno = 1234
+        wsname = self.ws.name()
+        self.sxd.runs = {str(runno): {"ws": wsname, "found": self.peaks.name()}}
+
+        self.sxd.convert_to_MD(run=runno, frame="HKL")
+
+        mock_conv_md.assert_called_with(wsname, wsname + "_MD", "HKL")
+        mock_set_md.assert_called_with(runno, wsname + "_MD")
+        # assert UB is set for HKL conversion
+        self.assertTrue(HasUB(Workspace=self.ws))
+        # delete UB to restore ws to initial state
+        for ws in [self.ws, self.peaks]:
+            ClearUB(Workspace=ws)
 
     #  --- methods specific to SXD class ---
 
