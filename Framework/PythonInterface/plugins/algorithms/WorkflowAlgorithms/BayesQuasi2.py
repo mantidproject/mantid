@@ -34,12 +34,6 @@ except (Exception, Warning):
     from quickBayes.utils.general import get_background_function
 
 
-from quickBayes.workflow.QlData import QLData
-from quickBayes.functions.qldata_function import QlDataFunction
-from quickBayes.functions.qse_function import QSEFunction
-from quickBayes.workflow.QSE import QlStretchedExp
-
-
 class BayesQuasi2(QuickBayesTemplate):
     def summary(self):
         return "This algorithm uses the Python quickBayes package to fit the quasielastic data (Lorentzians or stretched exponential)."
@@ -227,6 +221,11 @@ class BayesQuasi2(QuickBayesTemplate):
         return ws_list, results, results_errors, sample_logs
 
     def PyExec(self):
+        from quickBayes.workflow.QlData import QLData
+        from quickBayes.functions.qldata_function import QlDataFunction
+        from quickBayes.functions.qse_function import QSEFunction
+        from quickBayes.workflow.QSE import QlStretchedExp
+
         self.log().information("BayesQuasi input")
         program = self.getPropertyValue("Program")
 

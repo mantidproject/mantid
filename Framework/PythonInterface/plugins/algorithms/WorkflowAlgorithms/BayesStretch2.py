@@ -33,9 +33,6 @@ except (Exception, Warning):
         ).communicate()
     )
     from quickBayes.utils.parallel import parallel
-from quickBayes.functions.qse_fixed import QSEFixFunction
-from quickBayes.utils.general import get_background_function
-from quickBayes.workflow.qse_search import QSEGridSearch
 
 
 class BayesStretch2(QuickBayesTemplate):
@@ -79,7 +76,9 @@ class BayesStretch2(QuickBayesTemplate):
         )
 
     def do_one_spec(self, spec, data):
-        # report_progress.report(f"spectrum {spec}")
+        from quickBayes.functions.qse_fixed import QSEFixFunction
+        from quickBayes.workflow.qse_search import QSEGridSearch
+
         sx = data["sample"].readX(spec)
         sy = data["sample"].readY(spec)
         se = data["sample"].readE(spec)
@@ -119,6 +118,8 @@ class BayesStretch2(QuickBayesTemplate):
         return self.do_one_spec(spec, data)
 
     def calculate(self, sample_ws, report_progress, res_list, N):
+        from quickBayes.utils.general import get_background_function
+
         data = {}
 
         data["name"] = self.getPropertyValue("SampleWorkspace")
