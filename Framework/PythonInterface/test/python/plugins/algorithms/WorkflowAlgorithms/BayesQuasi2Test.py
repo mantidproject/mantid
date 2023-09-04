@@ -333,8 +333,8 @@ class BayesQuasi2Test(unittest.TestCase):
         get_Q_mock.return_value = [1, 2, 3]
         self._N_hist = 1
 
-        with mock("BayesQuasi2.QlStretchedExp") as method_mock:
-            with mock("BayesQuasi2.QSEFunction") as function_mock:
+        with mock.patch("BayesQuasi2.QlStretchedExp") as method_mock:
+            with mock.patch("BayesQuasi2.QSEFunction") as function_mock:
                 self._alg.execute()
 
                 self.assert_mock_called_with(self._alg.point_data, N_calls=2, call_number=1, name="__BayesStretchTest_Sample")
@@ -392,8 +392,8 @@ class BayesQuasi2Test(unittest.TestCase):
 
         get_Q_mock.return_value = [1, 2, 3]
 
-        with mock("BayesQuasi2.QLData") as method_mock:
-            with mock("BayesQuasi2.QlDataFunction") as function_mock:
+        with mock.patch("BayesQuasi2.QLData") as method_mock:
+            with mock.patch("BayesQuasi2.QlDataFunction") as function_mock:
                 self._alg.execute()
 
                 self.assert_mock_called_with(self._alg.point_data, N_calls=2, call_number=1, name="__BayesStretchTest_Sample")
@@ -452,8 +452,8 @@ class BayesQuasi2Test(unittest.TestCase):
         get_Q_mock.return_value = [1, 2, 3]
         self._N_hist = 2
 
-        with mock("BayesQuasi2.QLData") as method_mock:
-            with mock("BayesQuasi2.QlDataFunction") as function_mock:
+        with mock.patch("BayesQuasi2.QLData") as method_mock:
+            with mock.patch("BayesQuasi2.QlDataFunction") as function_mock:
                 self._alg.execute()
 
                 self.assert_mock_called_with(self._alg.point_data, N_calls=2, call_number=1, name="__BayesStretchTest_Sample")
