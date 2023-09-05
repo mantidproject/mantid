@@ -8,8 +8,7 @@
 from mantid.kernel import config
 from mantid.api import mtd
 from mantid.simpleapi import ReflectometryILLPreprocess
-import numpy.testing
-from testhelpers import assertRaisesNothing, assert_almost_equal, create_algorithm, illhelpers
+from testhelpers import assertRaisesNothing, create_algorithm, illhelpers
 import unittest
 import ReflectometryILL_common as common
 import math

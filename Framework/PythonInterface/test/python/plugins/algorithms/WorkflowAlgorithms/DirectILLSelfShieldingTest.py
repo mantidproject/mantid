@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from testhelpers import assert_almost_equal, illhelpers, run_algorithm
+from numpy.testing import assert_almost_equal
+from testhelpers import illhelpers, run_algorithm
 from mantid.api import mtd
 import unittest
 

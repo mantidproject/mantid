@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QMenu
-from testhelpers import assert_almost_equal
+from numpy.testing import assert_almost_equal
 
 # local package imports
 from mantid.plots import MantidAxes
