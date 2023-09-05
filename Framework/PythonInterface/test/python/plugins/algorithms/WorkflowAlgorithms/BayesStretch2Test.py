@@ -169,7 +169,7 @@ class BayesStretch2Test(unittest.TestCase):
         }
 
         self._alg.QSEGridSearch = mock.Mock()
-        self._alg.QlDataFunction = mock.Mock()
+        self._alg.QSEFixFunction = mock.Mock()
 
         method_mock = mock.MagicMock(autospec=QSEGridSearch)
         method_mock.preprocess_data.return_value = ([7, 8, 9], [4, 5, 6])
@@ -185,7 +185,7 @@ class BayesStretch2Test(unittest.TestCase):
         mock_function = mock.MagicMock(autospec=QSEFixFunction)
         mock_function.get_guess.return_value = [11, 12]
         mock_function.get_bounds.return_value = ([1, 2], [21, 22])
-        self._alg.QlDataFunction.return_value = mock_function
+        self._alg.QSEFixFunction.return_value = mock_function
 
         contour, beta, FWHM = self._alg.do_one_spec(0, data)
 
@@ -205,7 +205,7 @@ class BayesStretch2Test(unittest.TestCase):
 
         self.assert_mock_called_with(method_mock.set_y_axis, N_calls=1, call_number=1, start=0.01, end=0.2, N=20, label="FWHM")
 
-        mock_QSe.assert_called_once_with(bg_function="Linear", elastic_peak=True, r_x=[7, 8, 9], r_y=[4, 5, 6], start_x=-0.3, end_x=0.3)
+        method_mock.assert_called_once_with(bg_function="Linear", elastic_peak=True, r_x=[7, 8, 9], r_y=[4, 5, 6], start_x=-0.3, end_x=0.3)
 
         mock_function.add_single_SE.assert_called_once_with()
         mock_function.set_delta_bounds.assert_called_once_with(lower=[0, -0.5], upper=[200, 0.5])

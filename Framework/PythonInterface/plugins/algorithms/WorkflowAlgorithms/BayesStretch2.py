@@ -75,14 +75,13 @@ class BayesStretch2(QuickBayesTemplate):
             doc="The name of the contour output workspaces",
         )
 
-    # @staticmethod
-    def QSEFixFunction(bg_function, elastic_peak, r_x, r_y, start_x, end_x):
+    # Cannot make static as it prevents it being mocked later
+    def QSEFixFunction(self, bg_function, elastic_peak, r_x, r_y, start_x, end_x):
         from quickBayes.functions.qse_fixed import QSEFixFunction
 
         return QSEFixFunction(bg_function=bg_function, elastic_peak=elastic_peak, r_x=r_x, r_y=r_y, start_x=start_x, end_x=end_x)
 
-    # @staticmethod
-    def QSEGridSearch():
+    def QSEGridSearch(self):
         from quickBayes.workflow.qse_search import QSEGridSearch
 
         return QSEGridSearch()

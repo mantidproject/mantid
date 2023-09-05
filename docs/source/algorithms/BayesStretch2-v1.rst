@@ -16,6 +16,7 @@ is given for the :math:`z` values.
 
 This routine replaces the :ref:`BayesStretch <algm-BayesStretch>` algorithm.
 
+
 .. categories::
 
 .. sourcelink::

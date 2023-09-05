@@ -220,26 +220,23 @@ class BayesQuasi2(QuickBayesTemplate):
 
         return ws_list, results, results_errors, sample_logs
 
-    # @staticmethod
-    def QLData():
+    # Cannot make static as it prevents it being mocked later
+    def QLData(self):
         from quickBayes.workflow.QlData import QLData
 
         return QLData
 
-    # @staticmethod
-    def QlDataFunction():
+    def QlDataFunction(self):
         from quickBayes.functions.qldata_function import QlDataFunction
 
         return QlDataFunction
 
-    # @staticmethod
-    def QSEFunction():
+    def QSEFunction(self):
         from quickBayes.functions.qse_function import QSEFunction
 
         return QSEFunction
 
-    # @staticmethod
-    def QlStretchedExp():
+    def QlStretchedExp(self):
         from quickBayes.workflow.QSE import QlStretchedExp
 
         return QlStretchedExp
