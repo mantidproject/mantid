@@ -11,6 +11,7 @@ pipeline {
       booleanParam(name: 'TEST_MACOS', defaultValue: true, description: 'If True, the specified tests will run on MacOS')
       booleanParam(name: 'RUN_UNIT_TESTS', defaultValue: true, description: 'If True, the unit tests will be run')
       booleanParam(name: 'RUN_SYSTEM_TESTS', defaultValue: true, description: 'If True, the system tests will be run')
+      booleanParam(name: 'RUN_DOC_TESTS', defaultValue: true, description: 'If True, run the documentation tests')
       string(name: 'SPECIFIC_UNIT_TESTS', defaultValue: '',
              description: '(Optional) Pipe separated list of unit test names to used as the -R option with ctest \n e.g. MeanTest|AddNoteTest|GlobTest')
       string(name: 'SPECIFIC_SYSTEM_TESTS', defaultValue: '',
@@ -81,6 +82,11 @@ pipeline {
 def build_and_test(platform) {
   buildscript_path = "${CISCRIPT_DIR}/conda-buildscript"
   common_args = "--clean-external-projects"
+
+  if(env.RUN_DOC_TESTS == 'true'){
+    common_args = common_args + " --enable-docs --enable-doctests"
+  }
+
   if(env.RUN_UNIT_TESTS != 'true') {
     common_args = common_args + " --disable-unittests"
   }
