@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 import tempfile
 import shutil
 from os import path
@@ -205,6 +205,50 @@ class SXDTest(unittest.TestCase):
             ClearUB(Workspace=ws)
 
     #  --- methods specific to SXD class ---
+
+    @patch("Diffraction.single_crystal.base_sx.mantid.SetGoniometer")
+    @patch(sxd_path + ".SXD.set_ws")
+    @patch(sxd_path + ".SXD.load_run")
+    @patch(sxd_path + ".SXD._divide_workspaces")
+    @patch(sxd_path + ".mantid.DeleteWorkspace")
+    @patch(sxd_path + ".mantid.ConvertUnits")
+    def test_process_data_with_gonio_angle_strings(self, mock_conv, mock_del, mock_divide, mock_load, mock_set_ws, mock_set_gonio):
+        sxd = SXD(vanadium_runno=1, empty_runno=2)
+        sxd.set_goniometer_axes([0, 1, 0, 1], [1, 0, 0, 0])
+        sxd.van_ws = "van"
+        mock_load.return_value = "wsname"
+        runnos = range(3, 6)
+
+        sxd.process_data(runnos, "log1", "log2")  # log names passed to SetGoniometer
+
+        self.assertEqual(mock_set_gonio.call_count, len(runnos))
+        expected_calls = len(runnos) * [call(Workspace="wsname", EnableLogging=False, Axis0="log1,0,1,0,1", Axis1="log2,1,0,0,0")]
+        mock_set_gonio.assert_has_calls(expected_calls)
+
+    @patch("Diffraction.single_crystal.base_sx.mantid.SetGoniometer")
+    @patch(sxd_path + ".SXD.set_ws")
+    @patch(sxd_path + ".SXD.load_run")
+    @patch(sxd_path + ".SXD._divide_workspaces")
+    @patch(sxd_path + ".mantid.DeleteWorkspace")
+    @patch(sxd_path + ".mantid.ConvertUnits")
+    def test_process_data_with_gonio_angle_sequences(self, mock_conv, mock_del, mock_divide, mock_load, mock_set_ws, mock_set_gonio):
+        sxd = SXD(vanadium_runno=1, empty_runno=2)
+        sxd.set_goniometer_axes([0, 1, 0, 1], [1, 0, 0, 0])
+        sxd.van_ws = "van"
+        mock_load.return_value = "wsname"
+        log1_vals = [10, 20, 30]
+        log2_vals = [40, 50, 60]
+        runnos = range(3, 6)
+
+        sxd.process_data(runnos, log1_vals, log2_vals)  # log names passed to SetGoniometer
+
+        self.assertEqual(mock_set_gonio.call_count, len(runnos))
+        expected_calls = []
+        for irun in range(len(runnos)):
+            expected_calls.append(
+                call(Workspace="wsname", EnableLogging=False, Axis0=f"{log1_vals[irun]},0,1,0,1", Axis1=f"{log2_vals[irun]},1,0,0,0")
+            )
+        mock_set_gonio.assert_has_calls(expected_calls)
 
     def test_remove_remove_peaks_on_detector_edge(self):
         nedges = [1, 2, 3]
