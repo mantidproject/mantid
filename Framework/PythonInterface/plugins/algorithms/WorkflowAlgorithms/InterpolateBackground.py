@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceGroup, WorkspaceGroupProperty
+from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceGroup, WorkspaceGroupProperty, MatrixWorkspaceProperty
 from mantid.kernel import Direction
 from mantid.simpleapi import mtd, RenameWorkspace
 
@@ -22,22 +22,24 @@ class InterpolateBackground(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            WorkspaceGroupProperty("WorkspaceGroup", "", Direction.Input),
+            WorkspaceGroupProperty("WorkspaceGroup", "", Direction.Input, PropertyMode.Mandatory),
             doc="Workspace Group with two workspaces containing data from empty container runs",
         )
         self.declareProperty(
             name="InterpolateTemp", defaultValue=0.0, direction=Direction.Input, doc="Target temperature to interpolate at"
         )
         self.declareProperty(
-            name="OutputWorkspace", defaultValue="Output", direction=Direction.Output, doc="Output Workspace with interpolated data"
+            MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output, PropertyMode.Mandatory),
+            doc="Output Workspace with interpolated data",
         )
 
     def validateInputs(self):
         issues = dict()
 
-        wsGroup = mtd[self.getProperty("WorkspaceGroup").value]
+        wsGroup = self.getProperty("WorkspaceGroup").value
         if not isinstance(wsGroup, WorkspaceGroup):
             issues["WorkspaceGroup"] = "Input workspace group is not a workspace group"
+            print(type(wsGroup))
         else:
             wsNames = wsGroup.getNames()
             if len(wsNames) != 2:
@@ -74,10 +76,11 @@ class InterpolateBackground(PythonAlgorithm):
 
         scalar = (self.interpo_temp - self.low_temp) / (self.high_temp - self.interpo_temp)
         outputWS = lowWS + scalar * highWS - scalar * lowWS
+
         output_ws_name = self.getProperty("OutputWorkspace").value
         RenameWorkspace(InputWorkspace=outputWS, OutputWorkspace=output_ws_name)
 
-        return output_ws_name
+        self.setProperty("OutputWorkspace", outputWS)
 
 
 # Register algorithm with Mantid
