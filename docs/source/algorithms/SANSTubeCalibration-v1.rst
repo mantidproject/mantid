@@ -10,9 +10,10 @@ Description
 -----------
 
 This algorithm calibrates the individual pixels for either the front or rear detector of the Sans2d instrument at ISIS.
-The ``DataFiles`` property takes a list of file names, each one containing data for a single strip held at a different location in front of the detector.
+The ``DataFiles`` property takes a list of file names, each one containing scattering data from H2O, which is a constant intensity 2D image, but masked by a vertical strip beamstop held at a different location in front of the detector.
+Since the strip is a straight vertical line, the image of the strip onto the detector should be a straight vertical line, after calibration of the pixels of the detector.
 The list of strip positions that each data file corresponds to is passed to the ``StripPositions`` property.
-The algorithm uses this information to find the correct detector positions and outputs a workspace with the detector pixels in these calibrated positions.
+The algorithm uses this information to find the correct detector pixel positions and outputs a workspace with the detector pixels in these calibrated positions.
 Once separate front and rear detector calibration files have been saved from this algorithm, :ref:`algm-SANSTubeMerge` can be used to merge these into a single calibration file.
 
 Loading and Merging the Input Data
