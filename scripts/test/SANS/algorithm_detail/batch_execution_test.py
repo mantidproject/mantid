@@ -383,6 +383,8 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         }
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
 
+
+class ScaledBackgroundSubtractionTest(unittest.TestCase):
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
     def test_get_scaled_background_workspace_calls_algs(self, mock_alg_manager):
