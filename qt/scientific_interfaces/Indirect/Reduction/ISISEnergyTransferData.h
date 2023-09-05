@@ -37,7 +37,7 @@ public:
   IETInputData(const std::string &inputFiles = "", const std::string &inputText = "", const bool &sumFiles = false,
                const bool &loadLogFiles = false, const bool &useCalibration = false,
                const std::string &calibrationWorkspace = "")
-      : m_inputFiles(inputFiles), m_sumFiles(sumFiles), m_inputText(inputText), m_loadLogFiles(loadLogFiles),
+      : m_inputFiles(inputFiles), m_inputText(inputText), m_sumFiles(sumFiles), m_loadLogFiles(loadLogFiles),
         m_useCalibration(useCalibration), m_calibrationWorkspace(calibrationWorkspace) {}
 
   std::string getInputFiles() const { return m_inputFiles; }
