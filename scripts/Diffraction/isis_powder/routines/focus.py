@@ -162,6 +162,9 @@ def _absorb_and_empty_corrections(
     empty_can_subtraction_method,
     paalman_pings_events_per_point,
 ):
+    if absorb and sample_details is None:
+        raise TypeError("To apply absorption correction you need to supply `sample_details` using `set_sample_details` method")
+
     if absorb and empty_can_subtraction_method == "PaalmanPings":
         if run_details.sample_empty:  # need summed_empty including container
             input_workspace = instrument._apply_paalmanpings_absorb_and_subtract_empty(
