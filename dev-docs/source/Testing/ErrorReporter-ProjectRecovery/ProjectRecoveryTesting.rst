@@ -16,9 +16,7 @@ Project Recovery test
   Further instructions can be found on the
   :ref:`Project Recovery concepts page <Project Recovery>`.
 - Download the ISIS sample dataset from the `Downloads page <http://download.mantidproject.org/>`_.
-- `TOPAZ_3132_event.nxs` - available in ``/Testing/Data/SystemTest/``, get this by building the `SystemTestData` target.
-  It should be in ``ExternalData/Testing/Data/SystemTest/``.
-- The files ``INTER000*`` are in the ISIS sample data.
+- The files ``INTER000*`` and ``SXD23767.raw`` are in the ISIS sample data.
 - Include the directory containing the test files in your Managed User Directories.
 - Set your facility to ISIS.
 - Set up a save directory to store output for comparison, referred to as ``testing_directory`` below.
@@ -183,7 +181,7 @@ Project Recovery test
 - Change Plot type from individual to `Tiled`, and again click `Plot all`
 - In the workspace window right-click the ``Rename2`` workspace and select `Show Data`
 - In the top toolbar, navigate to ``Interfaces > Reflectometry`` and open the ``ISIS Reflectometry`` interface
-- In the top toolbar, navigate to ``Interfaces >Diffraction`` and open the ``Engineering Diffraction`` interface.
+- In the top toolbar, navigate to ``Interfaces > Diffraction`` and open the ``Engineering Diffraction`` interface.
 
 .. image:: ../../images/reporter-test-4.png
 
