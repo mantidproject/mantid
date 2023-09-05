@@ -73,7 +73,6 @@ def generate_script(fig, exclude_headers=False):
     """
     plot_commands = []
     plot_headers = ["import matplotlib.pyplot as plt", "from mantid.plots.utility import MantidAxType"]
-    blank_axes = []
 
     for ax in fig.get_axes():
         if not isinstance(ax, MantidAxes):
@@ -85,7 +84,8 @@ def generate_script(fig, exclude_headers=False):
             plot_headers.extend(colormap_headers)
         else:
             if not curve_in_ax(ax):
-                blank_axes.append(ax_object_var)
+                plot_commands.append(f"{ax_object_var}.axis('off')")
+                plot_commands.append("")
                 continue
             plot_commands.extend(get_plot_cmds(ax, ax_object_var))  # ax.plot
 
@@ -122,10 +122,6 @@ def generate_script(fig, exclude_headers=False):
     cmds.extend(generate_workspace_retrieval_commands(fig) + [""])
     cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
     cmds.extend(plot_commands)
-    if blank_axes:
-        for ax in blank_axes:
-            cmds.append(f"{ax}.axis('off')")
-        cmds.append("")
     cmds.append("plt.show()")
     cmds.append("# Scripting Plots in Mantid:")
     cmds.append("# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
