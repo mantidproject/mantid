@@ -425,7 +425,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             alg.execute()
             rhs_ws = alg.getProperty("OutputWorkspace").value
 
-        AnalysisDataService.add(self._MERGED_WS_NAME, rhs_ws)
+        AnalysisDataService.addOrReplace(self._MERGED_WS_NAME, rhs_ws)
 
     def _get_tube_name(self, tube_id):
         """Construct the name of the tube based on the id given"""
