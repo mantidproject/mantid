@@ -217,9 +217,9 @@ def force_layer_backing_BigSur():
     # https://codereview.qt-project.org/gitweb?p=qt/qtbase.git;a=commitdiff;h=c5d904639dbd690a36306e2b455610029704d821
     # A complication with Big Sur numbering means we check for 10.16 and 11:
     #   https://eclecticlight.co/2020/08/13/macos-version-numbering-isnt-so-simple/
-    from distutils.version import LooseVersion
+    from packaging.version import Version
     import platform
 
-    mac_vers = LooseVersion(platform.mac_ver()[0])
+    mac_vers = Version(platform.mac_ver()[0])
     if mac_vers >= "11" or mac_vers == "10.16":
         os.environ["QT_MAC_WANTS_LAYER"] = "1"
