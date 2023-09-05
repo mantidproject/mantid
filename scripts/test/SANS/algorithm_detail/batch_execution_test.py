@@ -20,6 +20,7 @@ from sans.algorithm_detail.batch_execution import (
     create_scaled_background_workspace,
     subtract_scaled_background,
     check_for_background_workspace_in_ads,
+    group_bgsub_if_required,
 )
 from sans.common.enums import SaveType, ReductionMode
 
@@ -481,6 +482,19 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             state,
             reduction_package,
         )
+
+    @mock.patch("sans.algorithm_detail.batch_execution.add_to_group")
+    def test_group_bgsub_if_required(self, mock_add):
+        reduction_package = mock.MagicMock()
+        reduction_package.reduction_mode = ReductionMode.MERGED
+        mock_bgsub_ws_1 = mock.MagicMock()
+        mock_bgsub_ws_2 = mock.MagicMock()
+        reduction_package.reduced_bgsub = [mock_bgsub_ws_1, mock_bgsub_ws_2]
+        reduction_package.reduced_merged_base_name = ["merged", "merged_2"]
+        group_bgsub_if_required(reduction_package)
+
+        mock_add.assert_any_call(reduction_package.reduced_bgsub[0], reduction_package.reduced_merged_base_name[0])
+        mock_add.assert_called_with(reduction_package.reduced_bgsub[1], reduction_package.reduced_merged_base_name[1])
 
 
 class DeleteMethodsTest(unittest.TestCase):
