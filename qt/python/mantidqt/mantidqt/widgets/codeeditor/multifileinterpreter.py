@@ -12,7 +12,7 @@ import os.path as osp
 from os import linesep
 
 # 3rd party imports
-from qtpy.QtCore import Qt, Slot, Signal
+from qtpy.QtCore import Qt, Slot, Signal, QFileSystemWatcher
 from qtpy.QtWidgets import QVBoxLayout, QWidget
 
 # local imports
@@ -66,6 +66,11 @@ class MultiPythonFileInterpreter(QWidget):
         # setting defaults
         self.confirm_on_save = True
 
+        # Object to monitor file changes
+        self.file_watcher = QFileSystemWatcher()
+        self.file_watcher.fileChanged.connect(self.file_changed_event)
+        self.files_changed_unhandled = set()
+
     def _tab_title_and_tooltip(self, filename):
         """Create labels for the tab title and tooltip from a filename"""
         if filename is None:
@@ -95,6 +100,10 @@ class MultiPythonFileInterpreter(QWidget):
         self.confirm_on_save = config.get("project", "prompt_save_editor_modified", type=bool)
         self.completion_enabled = config.get("Editors", "completion_enabled", type=bool)
         self.on_completion_change()
+
+    def file_changed_event(self, filename):
+        if filename not in self.files_changed_unhandled:
+            self.files_changed_unhandled.add(filename)
 
     @property
     def editor_count(self):
@@ -133,6 +142,9 @@ class MultiPythonFileInterpreter(QWidget):
             # Otherwise the zoom level of the last tab closed is used
             # Or the default (0) if this is the very first tab
             current_zoom = self.zoom_level
+
+        if filename is not None and filename not in self.file_watcher.files():
+            self.file_watcher.addPath(filename)
 
         interpreter = PythonFileInterpreter(font, content, filename=filename, parent=self, completion_enabled=self.completion_enabled)
 
@@ -202,6 +214,10 @@ class MultiPythonFileInterpreter(QWidget):
 
             widget = self.editor_at(idx)
             filename = self.editor_at(idx).filename
+            if filename in self.file_watcher.files():
+                self.file_watcher.removePath(filename)
+            if filename in self.files_changed_unhandled:
+                self.files_changed_unhandled.remove(filename)
             # note: this does not close the widget, that is why we manually close it
             self._tabs.removeTab(idx)
             widget.close()
