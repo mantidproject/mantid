@@ -40,6 +40,7 @@ requirements:
     - hdf5 {{ hdf5 }}
     - jemalloc  # [unix]
     - jsoncpp
+    - libopenblas {{ libopenblas }}  # [osx or linux]
     - librdkafka {{ librdkafka }}
     - lib3mf  # [win]
     - muparser
@@ -72,7 +73,6 @@ requirements:
     - euphonic {{ euphonic }}
     - toml
     - libglu  # [linux]
-    - libopenblas {{ libopenblas }}  # [osx]
 
 about:
   home: https://github.com/mantidproject/mantid
