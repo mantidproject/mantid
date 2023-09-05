@@ -205,7 +205,9 @@ class BayesStretch2Test(unittest.TestCase):
 
         self.assert_mock_called_with(method_mock.set_y_axis, N_calls=1, call_number=1, start=0.01, end=0.2, N=20, label="FWHM")
 
-        method_mock.assert_called_once_with(bg_function="Linear", elastic_peak=True, r_x=[7, 8, 9], r_y=[4, 5, 6], start_x=-0.3, end_x=0.3)
+        self._alg.QSEFixFunction.assert_called_once_with(
+            bg_function="Linear", elastic_peak=True, r_x=[7, 8, 9], r_y=[4, 5, 6], start_x=-0.3, end_x=0.3
+        )
 
         mock_function.add_single_SE.assert_called_once_with()
         mock_function.set_delta_bounds.assert_called_once_with(lower=[0, -0.5], upper=[200, 0.5])
