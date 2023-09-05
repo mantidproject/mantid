@@ -82,6 +82,7 @@ Usage
 
    # create histogram workspace
    ws = CreateSampleWorkspace()
+   raise RuntimeError("Test error")
 
    print("Number of spectra: {}".format(ws.getNumberHistograms()))
    print("Number of bins: {}".format(ws.blocksize()))
