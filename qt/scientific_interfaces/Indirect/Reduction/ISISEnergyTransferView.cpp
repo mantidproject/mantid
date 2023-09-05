@@ -44,8 +44,8 @@ IETView::~IETView() {}
 
 IETRunData IETView::getRunData() {
   IETInputData inputDetails(m_uiForm.dsRunFiles->getFilenames().join(",").toStdString(),
-                            m_uiForm.ckSumFiles->isChecked(), m_uiForm.ckLoadLogFiles->isChecked(),
-                            m_uiForm.ckUseCalib->isChecked(),
+                            m_uiForm.dsRunFiles->getText().toStdString(), m_uiForm.ckSumFiles->isChecked(),
+                            m_uiForm.ckLoadLogFiles->isChecked(), m_uiForm.ckUseCalib->isChecked(),
                             m_uiForm.dsCalibrationFile->getCurrentDataName().toStdString());
 
   IETConversionData conversionDetails(m_uiForm.spEfixed->value(), m_uiForm.spSpectraMin->value(),
@@ -75,8 +75,8 @@ IETRunData IETView::getRunData() {
 
 IETPlotData IETView::getPlotData() {
   IETInputData inputDetails(m_uiForm.dsRunFiles->getFilenames().join(",").toStdString(),
-                            m_uiForm.ckSumFiles->isChecked(), m_uiForm.ckLoadLogFiles->isChecked(),
-                            m_uiForm.ckUseCalib->isChecked(),
+                            m_uiForm.dsRunFiles->getText().toStdString(), m_uiForm.ckSumFiles->isChecked(),
+                            m_uiForm.ckLoadLogFiles->isChecked(), m_uiForm.ckUseCalib->isChecked(),
                             m_uiForm.dsCalibrationFile->getCurrentDataName().toStdString());
 
   IETConversionData conversionDetails(m_uiForm.spEfixed->value(), m_uiForm.spPlotTimeSpecMin->value(),

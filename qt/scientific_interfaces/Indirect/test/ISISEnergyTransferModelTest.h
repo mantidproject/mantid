@@ -143,7 +143,7 @@ public:
     auto model = makeModel();
     auto reductionAlgorithm = makeReductionAlgorithm();
 
-    IETInputData inputData("input_workspace", true, true, true, "calibration_workspace");
+    IETInputData inputData("input_workspace", "input_workspace", true, true, true, "calibration_workspace");
     model->setInputProperties(reductionAlgorithm, inputData);
 
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("InputFiles"), "input_workspace");
@@ -156,7 +156,7 @@ public:
     auto model = makeModel();
     auto reductionAlgorithm = makeReductionAlgorithm();
 
-    IETInputData inputData("input_workspace", false, false, false, "");
+    IETInputData inputData("input_workspace", "input_workspace", false, false, false, "");
     model->setInputProperties(reductionAlgorithm, inputData);
 
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("InputFiles"), "input_workspace");
@@ -364,7 +364,8 @@ public:
   void testRunIETAlgorithm() {
     MantidQt::API::BatchAlgorithmRunner *batch = new MantidQt::API::BatchAlgorithmRunner(nullptr);
 
-    IETInputData inputData("input_workspace1, input_workspace2", true, false, true, "calibration_workspace");
+    IETInputData inputData("input_workspace1, input_workspace2", "input_workspace1, input_workspace2", true, false,
+                           true, "calibration_workspace");
     IETConversionData conversionData(1.0, 1, 2);
     IETGroupingData groupingData(IETGroupingType::DEFAULT, 2, "map_file");
     IETBackgroundData backgroundData(true, 0, 1);

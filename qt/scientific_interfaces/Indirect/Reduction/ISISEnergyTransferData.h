@@ -34,12 +34,14 @@ namespace MantidQt::CustomInterfaces {
 
 class IETInputData {
 public:
-  IETInputData(const std::string &inputFiles = "", const bool &sumFiles = false, const bool &loadLogFiles = false,
-               const bool &useCalibration = false, const std::string &calibrationWorkspace = "")
-      : m_inputFiles(inputFiles), m_sumFiles(sumFiles), m_loadLogFiles(loadLogFiles), m_useCalibration(useCalibration),
-        m_calibrationWorkspace(calibrationWorkspace) {}
+  IETInputData(const std::string &inputFiles = "", const std::string &inputText = "", const bool &sumFiles = false,
+               const bool &loadLogFiles = false, const bool &useCalibration = false,
+               const std::string &calibrationWorkspace = "")
+      : m_inputFiles(inputFiles), m_sumFiles(sumFiles), m_inputText(inputText), m_loadLogFiles(loadLogFiles),
+        m_useCalibration(useCalibration), m_calibrationWorkspace(calibrationWorkspace) {}
 
   std::string getInputFiles() const { return m_inputFiles; }
+  std::string getInputText() const { return m_inputText; }
   bool getSumFiles() const { return m_sumFiles; }
   bool getLoadLogFiles() const { return m_loadLogFiles; }
   bool getUseCalibration() const { return m_useCalibration; }
@@ -47,6 +49,7 @@ public:
 
 private:
   std::string m_inputFiles;
+  std::string m_inputText;
   bool m_sumFiles;
   bool m_loadLogFiles;
 
