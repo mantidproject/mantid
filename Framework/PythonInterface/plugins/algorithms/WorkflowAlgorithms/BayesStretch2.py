@@ -75,17 +75,26 @@ class BayesStretch2(QuickBayesTemplate):
             doc="The name of the contour output workspaces",
         )
 
-    def do_one_spec(self, spec, data):
+    # @staticmethod
+    def QSEFixFunction(bg_function, elastic_peak, r_x, r_y, start_x, end_x):
         from quickBayes.functions.qse_fixed import QSEFixFunction
+
+        return QSEFixFunction(bg_function=bg_function, elastic_peak=elastic_peak, r_x=r_x, r_y=r_y, start_x=start_x, end_x=end_x)
+
+    # @staticmethod
+    def QSEGridSearch():
         from quickBayes.workflow.qse_search import QSEGridSearch
 
+        return QSEGridSearch()
+
+    def do_one_spec(self, spec, data):
         sx = data["sample"].readX(spec)
         sy = data["sample"].readY(spec)
         se = data["sample"].readE(spec)
 
         sample = {"x": sx, "y": sy, "e": se}
 
-        search = QSEGridSearch()
+        search = self.QSEGridSearch()
         new_x, ry = search.preprocess_data(
             x_data=sample["x"],
             y_data=sample["y"],
@@ -98,7 +107,7 @@ class BayesStretch2(QuickBayesTemplate):
         search.set_y_axis(start=data["FWHM start"], end=data["FWHM end"], N=data["N_FWHM"], label="FWHM")
 
         # setup fit function
-        func = QSEFixFunction(
+        func = self.QSEFixFunction(
             bg_function=data["BG"], elastic_peak=data["elastic"], r_x=new_x, r_y=ry, start_x=data["start x"], end_x=data["end x"]
         )
         func.add_single_SE()
@@ -117,16 +126,20 @@ class BayesStretch2(QuickBayesTemplate):
     def calculate_wrapper(self, spec, data):
         return self.do_one_spec(spec, data)
 
-    def calculate(self, sample_ws, report_progress, res_list, N):
+    @staticmethod
+    def get_background_function(BG_str):
         from quickBayes.utils.general import get_background_function
 
+        return get_background_function(BG_str)
+
+    def calculate(self, sample_ws, report_progress, res_list, N):
         data = {}
 
         data["name"] = self.getPropertyValue("SampleWorkspace")
         # get inputs
         data["elastic"] = self.getProperty("Elastic").value
         BG_str = self.getPropertyValue("Background")
-        data["BG"] = get_background_function(BG_str)
+        data["BG"] = self.get_background_function(BG_str)
         data["start x"] = self.getProperty("EMin").value
         data["end x"] = self.getProperty("EMax").value
         numCores = self.getProperty("NumberProcessors").value

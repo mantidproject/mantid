@@ -220,12 +220,31 @@ class BayesQuasi2(QuickBayesTemplate):
 
         return ws_list, results, results_errors, sample_logs
 
-    def PyExec(self):
+    # @staticmethod
+    def QLData():
         from quickBayes.workflow.QlData import QLData
+
+        return QLData
+
+    # @staticmethod
+    def QlDataFunction():
         from quickBayes.functions.qldata_function import QlDataFunction
+
+        return QlDataFunction
+
+    # @staticmethod
+    def QSEFunction():
         from quickBayes.functions.qse_function import QSEFunction
+
+        return QSEFunction
+
+    # @staticmethod
+    def QlStretchedExp():
         from quickBayes.workflow.QSE import QlStretchedExp
 
+        return QlStretchedExp
+
+    def PyExec(self):
         self.log().information("BayesQuasi input")
         program = self.getPropertyValue("Program")
 
@@ -258,8 +277,8 @@ class BayesQuasi2(QuickBayesTemplate):
                 res_list=res_list,
                 N=N,
                 max_num_peaks=max_num_peaks,
-                method=QLData,
-                function=QlDataFunction,
+                method=self.QLData(),
+                function=self.QlDataFunction(),
             )
 
         elif program == "QSe":
@@ -275,8 +294,8 @@ class BayesQuasi2(QuickBayesTemplate):
                 res_list=res_list,
                 N=N,
                 max_num_peaks=max_num_peaks,
-                method=QlStretchedExp,
-                function=QSEFunction,
+                method=self.QlStretchedExp(),
+                function=self.QSEFunction(),
             )
 
         sample_logs.append(("res_workspace", res_name))
