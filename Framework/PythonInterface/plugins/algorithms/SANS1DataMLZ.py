@@ -305,19 +305,19 @@ class SANSdata:
         during the data processing
         """
         self._check_data_size()
-        if (type(self.setup.collimation) is str) or (self.setup.collimation == 0.0):
+        if isinstance(self.setup.collimation, str) or self.setup.collimation == 0.0:
             self.logs["warning"].append("Collimation is not specified in the datafile.")
 
-        if (type(self.setup.l2) is str) or (self.setup.l2 == 0.0):
+        if isinstance(self.setup.l2, str) or self.setup.l2 == 0.0:
             self.logs["warning"].append("SD - sample detector distance ('l2') is not specified in the datafile.")
 
-        if (type(self.setup.wavelength) is str) or (self.setup.wavelength == 0.0):
+        if isinstance(self.setup.wavelength, str) or self.setup.wavelength == 0.0:
             self.logs["warning"].append("Lambda (wavelength) is not specified in the datafile." " Wavelength is set to user's input.")
 
-        if (type(self.counter.sum_all_counts) is str) or (self.counter.sum_all_counts == 0.0):
+        if isinstance(self.counter.sum_all_counts, str) or self.counter.sum_all_counts == 0.0:
             self.logs["warning"].append("Sum of all counts is not specified in the datafile.")
 
-        if (type(self.counter.duration) is str) or (self.counter.duration == 0.0):
+        if isinstance(self.counter.duration, str) or self.counter.duration == 0.0:
             self.logs["warning"].append("Duration of the measurement is not specified in the datafile.")
 
         if (self.counter.monitor2 is None) or (self.counter.monitor2 == 0.0):

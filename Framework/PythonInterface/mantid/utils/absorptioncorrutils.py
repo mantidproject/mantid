@@ -36,7 +36,7 @@ def _getBasename(filename):
     """
     Helper function to get the filename without the path or extension
     """
-    if type(filename) == list:
+    if isinstance(filename, list):
         filename = filename[0]
     name = os.path.split(filename)[-1]
     for extension in _EXTENSIONS_NXS:

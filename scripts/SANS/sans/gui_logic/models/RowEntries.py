@@ -34,6 +34,9 @@ class _UserEntries(object):
         self.sample_thickness: float = None
         self.sample_width: float = None
 
+        self.background_ws: str = None
+        self.scale_factor: float = None
+
         self.can_direct_period: str = None
         self.can_scatter_period: str = None
         self.can_transmission_period: str = None
@@ -60,6 +63,8 @@ class _UserEntries(object):
                 self._sample_shape,
                 self.sample_thickness,
                 self.sample_width,
+                self.background_ws,
+                self.scale_factor,
                 self.can_direct_period,
                 self.can_scatter_period,
                 self.can_transmission_period,
@@ -79,6 +84,8 @@ class _UserEntries(object):
                 other._sample_shape,
                 other.sample_thickness,
                 other.sample_width,
+                other.background_ws,
+                other.scale_factor,
                 other.can_direct_period,
                 other.can_scatter_period,
                 other.can_transmission_period,

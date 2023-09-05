@@ -10,12 +10,14 @@ digraph PowderReduceP2D_FocusAndSum {
 
   subgraph algorithms {
     $algorithm_style
+    LoadMask                    [label="LoadMask v1"]
+    LoadDetcal                  [label="LoadIsawDetCal v1"]
     FindDetectorsPar            [label="FindDetectorsPar v1"]
     FilterBadPulses             [label="FilterBadPulses v1"]
     RemovePromptPulse           [label="RemovePromptPulse v1"]
     LoadDiffCal                 [label="LoadDiffCal v1"]
     MaskDetectors               [label="MaskDetectors v1"]
-    AlignDetectors              [label="AlignDetectors v1"]
+    ApplyDiffCal                [label="ApplyDiffCal v1"]
     ConvertUnits                [label="ConvertUnits v1\nwith target 'Wavelength'"]
     Bin2DPowderDiffraction1     [label="Bin2DPowderDiffraction v1\nusing a specified edgebinning file."]
     Bin2DPowderDiffraction2     [label="Bin2DPowderDiffraction v1\nusing logbinning."]
@@ -24,6 +26,10 @@ digraph PowderReduceP2D_FocusAndSum {
 
   subgraph decisions{
     $decision_style
+    maskFile        [label="Is masking file specified?"]
+    detcal          [label="Is calibration file of type detcal?"]
+    detcal2         [label="Is calibration file of type detcal?"]
+    detcal3         [label="Is calibration file of type detcal?"]
     edgebinning     [label="Is edgebinning specified?"]
   }
 
@@ -32,13 +38,23 @@ digraph PowderReduceP2D_FocusAndSum {
     $value_style
   }
 
-  SampleData	            -> FindDetectorsPar
+  SampleData	            -> maskFile
+  maskFile   	            -> LoadMask  [label="Yes"]
+  maskFile   	            -> detcal  [label="No"]
+  LoadMask                  -> detcal
+  detcal                    -> LoadDetcal  [label="Yes"]
+  detcal                    -> FindDetectorsPar  [label="No"]
+  LoadDetcal                -> FindDetectorsPar
   FindDetectorsPar          -> FilterBadPulses
   FilterBadPulses           -> RemovePromptPulse
-  RemovePromptPulse         -> LoadDiffCal
+  RemovePromptPulse         -> detcal2
+  detcal2                   -> LoadDiffCal [label="No"]
+  detcal2                   -> MaskDetectors [label="Yes"]
   LoadDiffCal               -> MaskDetectors
-  MaskDetectors             -> AlignDetectors
-  AlignDetectors            -> ConvertUnits
+  MaskDetectors             -> detcal3
+  detcal3                   -> ApplyDiffCal  [label="No"]
+  detcal3                   -> ConvertUnits  [label="Yes"]
+  ApplyDiffCal              -> ConvertUnits
   ConvertUnits              -> edgebinning
   edgebinning               -> Bin2DPowderDiffraction1  [label="Yes"]
   edgebinning               -> Bin2DPowderDiffraction2  [label="No"]

@@ -17,6 +17,7 @@ dependencies:
   - hdf5>=1.12,<1.13
   - jemalloc=5.2.0 # We have noticed 5.2.1 can cause a hang on older glibc versions (Cent OS 7, Ubuntu 18.04). Observed with import CaChannel and also our MeierTest.
   - jsoncpp>=1.9.4,<2
+  - libopenblas!=0.3.23,!=0.3.24 # pinned the same as macOS for consistency
   - librdkafka>=1.6.0
   - matplotlib=3.6.*
   - muparser>=2.3.2
@@ -30,7 +31,7 @@ dependencies:
   - pycifrw==4.4.1 # Force to 4.4.1 as later versions cause issues with loading CIF files
   - pyqt>=5.15,<6
   - python-dateutil>=2.8.1
-  - python=3.8.*
+  - python=3.10.*
   - pyyaml>=5.4.1
   - qscintilla2
   - qt=5.15.8 # Avoid unexpected qt upgrades
@@ -39,7 +40,7 @@ dependencies:
   - qt-gtk-platformtheme # Use native theme on GTK-based systems, which provides a significantly better performing file browser.
   - requests>=2.25.1
   - scipy>=1.10.0
-  - setuptools=49.6.0 # Pinned purposefully due to incompatibility with later versions
+  - setuptools
   - sphinx >= 4.5.*
   - sphinx_bootstrap_theme>=0.8.1
   - tbb-devel=2021.*

@@ -4,5 +4,3 @@ CONDA_BUILD_SYSROOT:
   - /opt/MacOSX10.10.sdk
 target_platform:
   - osx-64
-setuptools:
-  - 49.6

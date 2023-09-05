@@ -90,9 +90,14 @@ void removeById(AlgorithmManagerImpl &self, AlgorithmIDProxy idHolder) {
  * @return A python list of managed algorithms that are currently running
  */
 boost::python::list runningInstancesOf(AlgorithmManagerImpl const *const self, const std::string &algName) {
-  ReleaseGlobalInterpreterLock releaseGIL;
+  std::vector<IAlgorithm_const_sptr> mgrAlgs;
+
+  {
+    ReleaseGlobalInterpreterLock releaseGIL;
+    mgrAlgs = self->runningInstancesOf(algName);
+  }
+
   boost::python::list algs;
-  auto mgrAlgs = self->runningInstancesOf(algName);
   for (auto &mgrAlg : mgrAlgs) {
     algs.append(mgrAlg);
   }

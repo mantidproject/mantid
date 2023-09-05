@@ -35,11 +35,11 @@ the following equations:
 
 Update existing calibration:
 
-.. math:: DIFC = DIFC_{old} & * & (1+|BinWidth|)^{-offset}
+.. math:: DIFC = DIFC_{old} \cdot (1+|BinWidth|)^{-offset}
 
 Calculate :math:`DIFC` from geometry of the experiment:
 
-.. math:: DIFC = \frac{m_n}{h}&(L1 + L2)&2sin\theta & * & (1+|BinWidth|)^{-offset}
+.. math:: DIFC = \frac{m_n}{h} \cdot (L1 + L2) 2 \sin(\theta) \cdot (1+|BinWidth|)^{-offset}
 
 The calculations for signed mode is appropriate for full-pattern cross-correlation with logarithmically binned data
 

@@ -61,7 +61,7 @@ public:
   void testExperimentSettingsWithPreviewRow() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto theta = 0.7;
-    auto previewRow = makePreviewRow(theta, "2-3", "4-5", "6-7");
+    auto previewRow = makePreviewRow(theta, "2-3", "4-5", "6-7", ProcessingInstructions{"10-50"});
     auto result = Reduction::createAlgorithmRuntimeProps(model, previewRow);
 
     // Check results from the experiment settings tab
@@ -70,6 +70,7 @@ public:
     TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), "2-3");
     TS_ASSERT_EQUALS(result->getPropertyValue("BackgroundProcessingInstructions"), "4-5");
     TS_ASSERT_EQUALS(result->getPropertyValue("TransmissionProcessingInstructions"), "6-7");
+    TS_ASSERT_EQUALS(result->getPropertyValue("ROIDetectorIDs"), "10-50");
     assertProperty(*result, "ThetaIn", theta);
   }
 
@@ -321,7 +322,8 @@ private:
 
   PreviewRow makePreviewRow(double theta = 0.1, const std::string &processingInstructions = "10-11",
                             const std::string &backgroundProcessingInstructions = "",
-                            const std::string &transmissionProcessingInstructions = "") {
+                            const std::string &transmissionProcessingInstructions = "",
+                            const boost::optional<ProcessingInstructions> &roiDetectorIDs = boost::none) {
     auto previewRow = PreviewRow({"12345"});
     previewRow.setTheta(theta);
     previewRow.setProcessingInstructions(ROIType::Signal, processingInstructions);
@@ -329,6 +331,8 @@ private:
       previewRow.setProcessingInstructions(ROIType::Background, backgroundProcessingInstructions);
     if (!transmissionProcessingInstructions.empty())
       previewRow.setProcessingInstructions(ROIType::Transmission, transmissionProcessingInstructions);
+    if (roiDetectorIDs)
+      previewRow.setSelectedBanks(roiDetectorIDs);
     return previewRow;
   }
 
@@ -385,6 +389,7 @@ private:
     assertProperty(result, "ScaleFactor", 0.7);
     TS_ASSERT_EQUALS(result.getPropertyValue("ProcessingInstructions"), "1");
     TS_ASSERT_EQUALS(result.getPropertyValue("BackgroundProcessingInstructions"), "3,7");
+    TS_ASSERT_EQUALS(result.getPropertyValue("ROIDetectorIDs"), "3-22");
   }
 
   void checkMatchesWildcardRowExcludingProcessingInstructions(IAlgorithmRuntimeProps const &result) {
@@ -396,6 +401,7 @@ private:
     assertProperty(result, "MomentumTransferMax", 1.1);
     assertProperty(result, "ScaleFactor", 0.7);
     TS_ASSERT_EQUALS(result.getPropertyValue("BackgroundProcessingInstructions"), "3,7");
+    TS_ASSERT_EQUALS(result.getPropertyValue("ROIDetectorIDs"), "3-22");
   }
 
   void checkMatchesInstrument(IAlgorithmRuntimeProps const &result, bool isPreview = false) {

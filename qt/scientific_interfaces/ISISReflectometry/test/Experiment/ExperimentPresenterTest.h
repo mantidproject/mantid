@@ -820,6 +820,8 @@ public:
     previewRow.setProcessingInstructions(ROIType::Transmission, "12"s);
     previewRow.setTheta(2.3);
 
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(1);
+
     presenter.notifyPreviewApplyRequested(previewRow);
     // Row with angle 2.3 is the last row in the look-up table
     auto row = presenter.experiment().lookupTableRows().back();
@@ -827,6 +829,8 @@ public:
     TS_ASSERT_EQUALS(row.processingInstructions().get(), "10");
     TS_ASSERT_EQUALS(row.backgroundProcessingInstructions().get(), "11");
     TS_ASSERT_EQUALS(row.transmissionProcessingInstructions().get(), "12");
+
+    verifyAndClear();
   }
 
   void testNotifyPreviewApplyRequestedClearsProcessingInstructionsWhenMissing() {
@@ -835,6 +839,8 @@ public:
     auto previewRow = PreviewRow({"1234"});
     previewRow.setTheta(2.3);
 
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(1);
+
     presenter.notifyPreviewApplyRequested(previewRow);
     // Row with angle 2.3 is the last row in the look-up table
     auto row = presenter.experiment().lookupTableRows().back();
@@ -842,6 +848,99 @@ public:
     TS_ASSERT(!row.processingInstructions());
     TS_ASSERT(!row.backgroundProcessingInstructions());
     TS_ASSERT(!row.transmissionProcessingInstructions());
+
+    verifyAndClear();
+  }
+
+  void testNotifyPreviewApplyRequestedDoesNotResetRowStateIfNoSettingsChanged() {
+    // makeExperiment will create a model Experiment with two lookup rows and a wildcard row
+    auto presenter = makePresenter(makeDefaults(), makeExperiment());
+    auto previewRow = PreviewRow({"1234"});
+    previewRow.setSelectedBanks("3-22"s);
+    previewRow.setProcessingInstructions(ROIType::Signal, "4-6"s);
+    previewRow.setProcessingInstructions(ROIType::Background, "2-3,7-8"s);
+    previewRow.setProcessingInstructions(ROIType::Transmission, "4"s);
+    previewRow.setTheta(2.3);
+
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(0);
+
+    presenter.notifyPreviewApplyRequested(previewRow);
+    // Row with angle 2.3 is the last row in the look-up table
+    auto row = presenter.experiment().lookupTableRows().back();
+    TS_ASSERT_EQUALS(row.roiDetectorIDs().get(), "3-22");
+    TS_ASSERT_EQUALS(row.processingInstructions().get(), "4-6");
+    TS_ASSERT_EQUALS(row.backgroundProcessingInstructions().get(), "2-3,7-8");
+    TS_ASSERT_EQUALS(row.transmissionProcessingInstructions().get(), "4");
+
+    verifyAndClear();
+  }
+
+  void testNotifyPreviewApplyRequestedResetsRowStateIfOnlyDetROIChanged() {
+    // makeExperiment will create a model Experiment with two lookup rows and a wildcard row
+    auto presenter = makePresenter(makeDefaults(), makeExperiment());
+    auto previewRow = PreviewRow({"1234"});
+    previewRow.setSelectedBanks("10-20"s);
+    previewRow.setProcessingInstructions(ROIType::Signal, "4-6"s);
+    previewRow.setProcessingInstructions(ROIType::Background, "2-3,7-8"s);
+    previewRow.setProcessingInstructions(ROIType::Transmission, "4"s);
+    previewRow.setTheta(2.3);
+
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(1);
+
+    presenter.notifyPreviewApplyRequested(previewRow);
+
+    verifyAndClear();
+  }
+
+  void testNotifyPreviewApplyRequestedResetsRowStateIfOnlySignalROIChanged() {
+    // makeExperiment will create a model Experiment with two lookup rows and a wildcard row
+    auto presenter = makePresenter(makeDefaults(), makeExperiment());
+    auto previewRow = PreviewRow({"1234"});
+    previewRow.setSelectedBanks("3-22"s);
+    previewRow.setProcessingInstructions(ROIType::Signal, "4-10"s);
+    previewRow.setProcessingInstructions(ROIType::Background, "2-3,7-8"s);
+    previewRow.setProcessingInstructions(ROIType::Transmission, "4"s);
+    previewRow.setTheta(2.3);
+
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(1);
+
+    presenter.notifyPreviewApplyRequested(previewRow);
+
+    verifyAndClear();
+  }
+
+  void testNotifyPreviewApplyRequestedResetsRowStateIfOnlyBackgroundROIChanged() {
+    // makeExperiment will create a model Experiment with two lookup rows and a wildcard row
+    auto presenter = makePresenter(makeDefaults(), makeExperiment());
+    auto previewRow = PreviewRow({"1234"});
+    previewRow.setSelectedBanks("3-22"s);
+    previewRow.setProcessingInstructions(ROIType::Signal, "4-6"s);
+    previewRow.setProcessingInstructions(ROIType::Background, "7-8"s);
+    previewRow.setProcessingInstructions(ROIType::Transmission, "4"s);
+    previewRow.setTheta(2.3);
+
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(1);
+
+    presenter.notifyPreviewApplyRequested(previewRow);
+
+    verifyAndClear();
+  }
+
+  void testNotifyPreviewApplyRequestedResetsRowStateIfOnlyTransmissionROIChanged() {
+    // makeExperiment will create a model Experiment with two lookup rows and a wildcard row
+    auto presenter = makePresenter(makeDefaults(), makeExperiment());
+    auto previewRow = PreviewRow({"1234"});
+    previewRow.setSelectedBanks("3-22"s);
+    previewRow.setProcessingInstructions(ROIType::Signal, "4-6"s);
+    previewRow.setProcessingInstructions(ROIType::Background, "2-3,7-8"s);
+    previewRow.setProcessingInstructions(ROIType::Transmission, boost::none);
+    previewRow.setTheta(2.3);
+
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(1);
+
+    presenter.notifyPreviewApplyRequested(previewRow);
+
+    verifyAndClear();
   }
 
   void testNotifyPreviewApplyRequestedMatchingRowNotFound() {
@@ -851,7 +950,11 @@ public:
     // This angle doesn't match any in the experiment lookup table
     previewRow.setTheta(10);
 
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(0);
+
     TS_ASSERT_THROWS(presenter.notifyPreviewApplyRequested(previewRow), RowNotFoundException const &);
+
+    verifyAndClear();
   }
 
   void testNotifyPreviewApplyRequestedInvalidTable() {
@@ -865,7 +968,10 @@ public:
     auto previewRow = PreviewRow({""});
 
     // THEN an InvalidTableException is thrown.
+    EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(0);
     TS_ASSERT_THROWS(presenter.notifyPreviewApplyRequested(previewRow), InvalidTableException const &);
+
+    verifyAndClear();
   }
 
 private:

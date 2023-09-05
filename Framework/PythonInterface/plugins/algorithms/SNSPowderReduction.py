@@ -116,7 +116,7 @@ def allEventWorkspaces(*args):
 
 
 def getBasename(filename):
-    if type(filename) == list:
+    if isinstance(filename, list):
         filename = filename[0]
     name = os.path.split(filename)[-1]
     for extension in EXTENSIONS_NXS:
@@ -690,7 +690,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         runnumbers = self.getProperty(propertyName).value
         linearizedRuns = []
         for item in runnumbers:
-            if type(item) == list:
+            if isinstance(item, list):
                 linearizedRuns.extend(item)
             else:
                 linearizedRuns.append(item)

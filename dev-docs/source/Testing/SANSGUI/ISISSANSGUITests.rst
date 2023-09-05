@@ -164,15 +164,18 @@ Processing
 
 *Scaled Background Subtracted Reduction*
 
-#. In the ``Settings`` tab, ``General, Scale, Event Slice, Sample`` sub-tab, set ``Reduction Mode`` to ``Merged``.
-#. Return to the ``Runs`` tab.
+#. Create a new copy of the User File in your file browser.
+#. In this new copy, change the the ``Reduction Mode`` to ``Merged`` using a text editor.
+#. Back in the ISIS SANS interface, change the user file to this new file.
+#. Click over to the ``Runs`` tab.
 #. Set the ``Save Options`` to ``Memory``.
 #. Select one of the rows and click ``Process Selected``
 #. Take note of the name of the reduced workspace with ``merged`` in the title.
 #. Make a copy of the row you just processed using the ``Copy`` and ``Paste`` buttons above the runs table.
 #. Change the ``Output Name`` of the new row to something like ``bgsub_test``.
-#. In the ``Options`` column, enter ``BackgroundWorkspace=<WS_NAME>, ScaleFactor=0.9`` (replacing <WS_NAME> with the
-   name of the merged workspace you took note of before).
+#. Check the ``Scaled Background Subtraction`` checkbox.
+#. In the ``BackgroundWorkspace`` column, enter the name of the merged workspace you took note of before.
+#. In the ``ScaleFactor`` column, enter ``0.9``.
 #. Select this new row and click ``Process Selected``.
 #. When it completes, two output files should have been created with ``bgsub_test`` in the name. One, which is the
    normal output data. Another with the scaled subtraction, which should have ``_bgsub`` appended to the name.

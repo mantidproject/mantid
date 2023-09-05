@@ -1,1 +1,0 @@
-- New algorithm available, :ref:`InterpolateBackground <algm-InterpolateBackground>`, used to perform linear interpolation for temperature of two background runs

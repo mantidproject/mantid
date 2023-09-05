@@ -156,6 +156,7 @@ set(SRC_FILES
     src/FlatPlateAbsorption.cpp
     src/GeneralisedSecondDifference.cpp
     src/GenerateEventsFilter.cpp
+    src/GenerateGoniometerIndependentBackground.cpp
     src/GenerateIPythonNotebook.cpp
     src/GeneratePeaks.cpp
     src/GeneratePythonFitScript.cpp
@@ -501,6 +502,7 @@ set(INC_FILES
     inc/MantidAlgorithms/GSLFunctions.h
     inc/MantidAlgorithms/GeneralisedSecondDifference.h
     inc/MantidAlgorithms/GenerateEventsFilter.h
+    inc/MantidAlgorithms/GenerateGoniometerIndependentBackground.h
     inc/MantidAlgorithms/GenerateIPythonNotebook.h
     inc/MantidAlgorithms/GeneratePeaks.h
     inc/MantidAlgorithms/GeneratePythonFitScript.h
@@ -857,6 +859,7 @@ set(TEST_FILES
     FlatPlateAbsorptionTest.h
     GeneralisedSecondDifferenceTest.h
     GenerateEventsFilterTest.h
+    GenerateGoniometerIndependentBackgroundTest.h
     GenerateIPythonNotebookTest.h
     GeneratePeaksTest.h
     GeneratePythonFitScriptTest.h

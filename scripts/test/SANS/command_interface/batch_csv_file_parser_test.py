@@ -100,6 +100,22 @@ class BatchCsvParserTest(unittest.TestCase):
             parser.parse_batch_file(batch_file_path)
         BatchCsvParserTest._remove_csv(batch_file_path)
 
+    def test_that_raises_when_background_workspace_is_specified_but_no_scale_factor(self):
+        content = "# MANTID_BATCH_FILE add more text here\n" "sample_sans,test,output_as,test, background_workspace, test\n"
+        batch_file_path = BatchCsvParserTest._save_to_csv(content)
+        parser = BatchCsvParser()
+        with self.assertRaises(ValueError):
+            parser.parse_batch_file(batch_file_path)
+        BatchCsvParserTest._remove_csv(batch_file_path)
+
+    def test_that_raises_when_scale_factor_is_specified_but_no_background_workspace(self):
+        content = "# MANTID_BATCH_FILE add more text here\n" "sample_sans,test,output_as,test, scale_factor, 1.1\n"
+        batch_file_path = BatchCsvParserTest._save_to_csv(content)
+        parser = BatchCsvParser()
+        with self.assertRaises(ValueError):
+            parser.parse_batch_file(batch_file_path)
+        BatchCsvParserTest._remove_csv(batch_file_path)
+
     def test_that_parses_two_lines_correctly(self):
         content = (
             "# MANTID_BATCH_FILE add more text here\n"
@@ -281,6 +297,8 @@ class BatchCsvParserTest(unittest.TestCase):
         test_row.sample_thickness = "1.0"
         test_row.sample_height = 5.0
         test_row.sample_width = 5.4
+        test_row.background_ws = "TestWS"
+        test_row.scale_factor = 1.3
 
         expected = (
             "sample_sans,SANS2D00022025,"
@@ -293,7 +311,9 @@ class BatchCsvParserTest(unittest.TestCase):
             "user_file,a_user_file.txt,"
             "sample_thickness,1.0,"
             "sample_height,5.0,"
-            "sample_width,5.4"
+            "sample_width,5.4,"
+            "background_workspace,TestWS,"
+            "scale_factor,1.3"
         )
 
         mocked_handle = mock.mock_open()

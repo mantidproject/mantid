@@ -10,6 +10,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
+
 namespace Algorithms {
 /** Takes a workspace as input and rebins the data according to the input rebin
    parameters.
@@ -59,7 +60,8 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
   static std::vector<double> rebinParamsFromInput(const std::vector<double> &inParams,
-                                                  const API::MatrixWorkspace &inputWS, Kernel::Logger &logger);
+                                                  const API::MatrixWorkspace &inputWS, Kernel::Logger &logger,
+                                                  std::string binModeName = "Default");
 
 protected:
   const std::string workspaceMethodName() const override { return "rebin"; }

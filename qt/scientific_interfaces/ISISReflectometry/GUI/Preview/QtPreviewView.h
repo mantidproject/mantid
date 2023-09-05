@@ -47,6 +47,7 @@ public:
   double getAngle() const override;
   void setAngle(double angle) override;
   void setUpdateAngleButtonEnabled(bool enable) override;
+  void setTitle(const std::string &title) override;
 
 private:
   Ui::PreviewWidget m_ui;

@@ -17,14 +17,14 @@ additional measurements of Vanadium(``VanaData``) and an empty can(``EmptyData``
 but are not necessary. If an empty measurement is specified, it is substracted from the sample
 measurement. If a Vanadium measurement is specified, the sample measurement is divided by the
 vanadium measurement. If either or both are not specified these steps are skipped. It is highly
-recommended to specify both.
+recommended to specify both. Additionally, an empty vanadium measurement can be supplied.
 
 Calibration, Grouping, Masking
 ##############################
 
 The calibration is done using the Calibration File(``CalFile``). Additionally three
 implicit workspaces (``<instrument>_group``, ``<instrument>_cal``, ``<instrument>_mask``) are
-created during the algorithms execution if they do not exist already.
+created during the algorithms execution if they do not exist already. Masking can be applied by an xml file as well.
 
 Binning
 #######
@@ -57,7 +57,7 @@ Usage
 -----
 
 This is a workflow algorithm to process the results of powder diffraction experiments and create a p2d file for
-multidimensional Rietveld refinement. The algorithm is currently tested for the Instruments PG3 (POWGEN) and
+multidimensional Rietveld refinement. The algorithm is currently tested for the Instruments POWGEN, SNAP and
 PTXatPG3 (POWTEX detector at POWGEN instrument).
 
 .. categories::

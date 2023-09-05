@@ -26,6 +26,8 @@ class BatchFileKeywords(Enum):
     SAMPLE_THICKNESS = "sample_thickness"
     SAMPLE_HEIGHT = "sample_height"
     SAMPLE_WIDTH = "sample_width"
+    BACKGROUND_WORKSPACE = "background_workspace"
+    SCALE_FACTOR = "scale_factor"
 
 
 class BatchCsvParser(object):
@@ -117,6 +119,10 @@ class BatchCsvParser(object):
             pack_val(row.sample_height),
             BatchFileKeywords.SAMPLE_WIDTH.value,
             pack_val(row.sample_width),
+            BatchFileKeywords.BACKGROUND_WORKSPACE.value,
+            pack_val(row.background_ws),
+            BatchFileKeywords.SCALE_FACTOR.value,
+            pack_val(row.scale_factor),
         ]
 
     def _parse_csv_row(self, row, row_number):
@@ -178,6 +184,11 @@ class BatchCsvParser(object):
             row_entry.sample_transmission = run_number
             row_entry.sample_transmission_period = period
 
+        elif key_enum is BatchFileKeywords.BACKGROUND_WORKSPACE:
+            row_entry.background_ws = value
+        elif key_enum is BatchFileKeywords.SCALE_FACTOR:
+            row_entry.scale_factor = value
+
         elif key_enum is BatchFileKeywords.SAMPLE_HEIGHT:
             row_entry.sample_height = value
         elif key_enum is BatchFileKeywords.SAMPLE_THICKNESS:
@@ -230,7 +241,11 @@ class BatchCsvParser(object):
                 "Inconsistent can transmission settings in row {0}. Either both the transmission "
                 "and the direct beam run are set or none.".format(row_number)
             )
-
+        if bool(output.background_ws) != bool(output.scale_factor):
+            raise ValueError(
+                "Inconsistent scaled background subtraction settings in row {0}. Either both the background workspace "
+                "and the scale factor are set or none.".format(row_number)
+            )
         # Ensure that can scatter is specified if the transmissions are set
         if bool(output.can_transmission) and not bool(output.can_scatter):
             raise ValueError("The can transmission was set but not the scatter file in row {0}.".format(row_number))

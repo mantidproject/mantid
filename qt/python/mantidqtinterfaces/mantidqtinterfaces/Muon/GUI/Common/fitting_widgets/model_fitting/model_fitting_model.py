@@ -222,7 +222,7 @@ class ModelFittingModel(BasicFittingModel):
     @staticmethod
     def _convert_str_column_values_to_int(parameter_values: list) -> list:
         """Converts any str column values to an int so that they can be fitted."""
-        if type(parameter_values[0][0]) == str:
+        if isinstance(parameter_values[0][0], str):
             return range(len(parameter_values[0]))
         else:
             return parameter_values[0]

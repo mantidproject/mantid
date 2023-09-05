@@ -6,7 +6,7 @@ channels:
 dependencies:
   - boost=1.77.* # Also pulls in boost-cpp. 1.78 clashes with icu version from Qt
   - ccache
-  - cmake=3.19.*|>=3.21.0 # Avoid bug in 3.20.* with updating external projects
+  - cmake>=3.21.0,<3.27.0 # Avoid bug in 3.20.* and 3.27.* with updating external projects
   - conda-wrappers
   - doxygen>=1.9.*
   - eigen=3.4.*
@@ -31,7 +31,7 @@ dependencies:
   - pycifrw==4.4.1 # Force to 4.4.1 as later versions cause issues with loading CIF files
   - pyqt>=5.15,<6
   - python-dateutil>=2.8.1
-  - python=3.8.*
+  - python=3.10.*
   - pyyaml>=5.4.1
   - qscintilla2
   - qt=5.15.8 # Avoid unexpected qt upgrades
@@ -39,7 +39,7 @@ dependencies:
   - qtpy>=1.9.0
   - requests>=2.25.1
   - scipy>=1.10.0
-  - setuptools=49.6.0 # Pinned purposefully due to incompatibility with later versions
+  - setuptools
   - sphinx >= 4.5.*
   - sphinx_bootstrap_theme=>0.8.1
   - tbb-devel=2021.*

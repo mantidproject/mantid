@@ -401,9 +401,11 @@ protected:
 
   /// get whether we are tracking the history for this algorithm,
   bool trackingHistory();
-  /// Copy workspace history for input workspaces to output workspaces and
+  /// Copy workspace history from input workspaces to output workspaces and
   /// record the history for ths algorithm
   virtual void fillHistory();
+  /// Copy workspace history from input workspaces to provided vector of output workspaces
+  void fillHistory(const std::vector<Workspace_sptr> &outputWorkspaces);
 
   /// Set to true to stop execution
   std::atomic<bool> m_cancel;
@@ -462,8 +464,6 @@ private:
   bool executeAsyncImpl(const Poco::Void &i);
 
   bool doCallProcessGroups(Mantid::Types::Core::DateAndTime &start_time);
-
-  void fillHistory(const std::vector<Workspace_sptr> &outputWorkspaces);
 
   // Report that the algorithm has completed.
   void reportCompleted(const double &duration, const bool groupProcessing = false);

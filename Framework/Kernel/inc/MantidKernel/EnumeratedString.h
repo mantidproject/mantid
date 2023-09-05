@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <boost/algorithm/string.hpp>
 #include <string>
 #include <vector>
 
@@ -19,31 +20,35 @@ namespace Kernel {
 @date 2023/08/02
 */
 
-template <class E, const std::vector<std::string> *names> class EnumeratedString {
+namespace {
+std::function<bool(const std::string &, const std::string &)> compareStrings =
+    [](const std::string &x, const std::string &y) { return x == y; };
+std::function<bool(const std::string &, const std::string &)> compareStringsCaseInsensitive =
+    [](const std::string &x, const std::string &y) { return boost::iequals(x, y); };
+} // namespace
+
+template <class E, const std::vector<std::string> *names,
+          std::function<bool(const std::string &, const std::string &)> *stringComparator = &compareStrings>
+class EnumeratedString {
   /**
    * @tparam class E an `enum`, the final value *must* be `enum_count`
    *              (i.e. `enum class Fruit {apple, orange, enum_count}`)
    * @tparam a pointer to a static vector of string names for each enum
    * The enum and string array *must* have same order.
+   *
+   * @tparam an optional pointer to a statically defined string comparator.
    */
 public:
   EnumeratedString() { ensureCompatibleSize(); }
+
   EnumeratedString(const E e) {
     ensureCompatibleSize();
-    try {
-      this->operator=(e);
-    } catch (std::exception &err) {
-      throw err;
-    }
+    this->operator=(e);
   }
+
   EnumeratedString(const std::string s) {
     ensureCompatibleSize();
-    // only set values if valid string given
-    try {
-      this->operator=(s);
-    } catch (std::exception &err) {
-      throw err;
-    }
+    this->operator=(s);
   }
 
   EnumeratedString(const EnumeratedString &es) : value(es.value), name(es.name) {}
@@ -51,6 +56,7 @@ public:
   // treat the object as either the enum, or a string
   operator E() const { return value; }
   operator std::string() const { return name; }
+
   // assign the object either by the enum, or by string
   EnumeratedString &operator=(E e) {
     if (size_t(e) < names->size() && size_t(e) >= 0) {
@@ -63,7 +69,7 @@ public:
     }
     return *this;
   }
-  EnumeratedString &operator=(std::string s) {
+  EnumeratedString &operator=(const std::string &s) {
     E e = findEFromString(s);
     if (e != E::enum_count) {
       value = e;
@@ -75,15 +81,20 @@ public:
     }
     return *this;
   }
+
   // for comparison of the object to either enums or strings
   bool operator==(const E e) const { return value == e; }
   bool operator!=(const E e) const { return value != e; }
-  bool operator==(const std::string s) const { return name == s; }
-  bool operator!=(const std::string s) const { return name != s; }
-  bool operator==(const char *s) const { return name == std::string(s); }
-  bool operator!=(const char *s) const { return name != std::string(s); }
+
+  bool operator==(const std::string &s) const { return (*stringComparator)(name, s); }
+  bool operator!=(const std::string &s) const { return !(*stringComparator)(name, s); }
+
+  bool operator==(const char *s) const { return (*stringComparator)(name, std::string(s)); }
+  bool operator!=(const char *s) const { return !(*stringComparator)(name, std::string(s)); }
+
   bool operator==(const EnumeratedString es) const { return value == es.value; }
   bool operator!=(const EnumeratedString es) const { return value != es.value; }
+
   const char *c_str() const { return name.c_str(); }
   static size_t size() { return names->size(); }
 
@@ -92,10 +103,10 @@ private:
   std::string name;
 
   // given a string, find the corresponding enum value
-  E findEFromString(const std::string s) {
+  E findEFromString(const std::string &s) {
     E e = E(0);
     for (; size_t(e) < names->size(); e = E(size_t(e) + 1))
-      if (s == names->at(size_t(e)))
+      if ((*stringComparator)(s, names->at(size_t(e))))
         break;
     return e;
   }
@@ -109,6 +120,5 @@ private:
     }
   }
 };
-
 } // namespace Kernel
 } // namespace Mantid

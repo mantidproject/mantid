@@ -257,7 +257,13 @@ void ConfigServiceImpl::setBaseDirectory() {
     // add a trailing slash.
     // Note: adding it to the MANTIDPATH itself will make other parts of the
     // code crash.
+#ifdef _WIN32
+    // In case Poco returns a Windows long path (prefixed with "\\?\"), we cannot
+    // mix forward and back slashes in the path.
+    m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "\\";
+#else
     m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
+#endif
     f = Poco::File(m_strBaseDir + m_properties_file_name);
     if (f.exists())
       return;

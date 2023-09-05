@@ -828,6 +828,10 @@ Algorithm_sptr ReflectometryReductionOneAuto3::createAlgorithmForGroupMember(std
         std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputNames.iVsLam));
     auto newProcInst = convertToSpectrumNumber("0", currentWorkspace);
     alg->setProperty("ProcessingInstructions", newProcInst);
+    // We only want to recalculate IvsQ, so we should not perform the sum banks or background subtraction steps
+    alg->setProperty("SubtractBackground", false);
+    alg->setProperty("BackgroundProcessingInstructions", "");
+    alg->setProperty("ROIDetectorIDs", "");
   }
 
   return alg;

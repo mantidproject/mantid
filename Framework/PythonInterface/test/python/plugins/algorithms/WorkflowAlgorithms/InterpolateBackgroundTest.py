@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
-from mantid.simpleapi import DeleteWorkspace, mtd, InterpolateBackground, CreateWorkspace, GroupWorkspaces
+from mantid.simpleapi import DeleteWorkspace, InterpolateBackground, CreateWorkspace, GroupWorkspaces
 
 
 class InterpolateBackgroundTest(unittest.TestCase):
@@ -25,20 +25,19 @@ class InterpolateBackgroundTest(unittest.TestCase):
     def test_nominal(self):
         self.ws1.getRun().addProperty("SampleTemp", "100", False)
         self.ws2.getRun().addProperty("SampleTemp", "400", False)
-        outputWSName = InterpolateBackground(self.wsGroup, self.interpo)
-        outputWS = mtd[outputWSName]
+        outputWS = InterpolateBackground(self.wsGroup, self.interpo)
         expected = [15, 30, 45, 60, 75, 90, 105, 120, 135, 150]
         self.assertListEqual(list(outputWS.readY(0)), expected)
 
     def test_bad_input(self):
         # Test raises Runtime error if a workspace is missing SampleTemp property
-        with self.assertRaisesRegex(RuntimeError, "SampleTemp"):
+        with self.assertRaisesRegex(RuntimeError, "invalid Properties"):
             InterpolateBackground(self.wsGroup, self.interpo)
         self.ws2 = CreateWorkspace(dataX=self.dataX, dataY=self.dataY2, nspec=2, OutputWorkspace="ws2")
         self.ws1.getRun().addProperty("SampleTemp", "100", False)
         self.ws2.getRun().addProperty("SampleTemp", "400", False)
         # Test raises Runtime error if workspaces have a different number of bins
-        with self.assertRaisesRegex(RuntimeError, "same number of bins"):
+        with self.assertRaisesRegex(RuntimeError, "invalid Properties"):
             InterpolateBackground(self.wsGroup, self.interpo)
 
 

@@ -18,8 +18,13 @@ from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapt
 
 class GuiStateDirectorTest(unittest.TestCase):
     @staticmethod
-    def _get_row_entry(option_string="", sample_thickness=8.0):
-        row_entry = RowEntries(sample_scatter="SANS2D00022024", sample_thickness=sample_thickness)
+    def _get_row_entry(option_string="", sample_thickness=8.0, background_workspace="test", scale_factor=1.1):
+        row_entry = RowEntries(
+            sample_scatter="SANS2D00022024",
+            sample_thickness=sample_thickness,
+            background_ws=background_workspace,
+            scale_factor=scale_factor,
+        )
         row_entry.options.set_user_options(option_string)
         return row_entry
 
@@ -97,16 +102,6 @@ class GuiStateDirectorTest(unittest.TestCase):
         new_state = director.create_state(self._get_row_entry(), row_user_file="NotThere.txt")
 
         self.assertEqual(state_model.all_states.save, new_state.all_states.save)
-
-    def test_that_background_ws_and_scale_factor_set_on_state_from_options_column(self):
-        state_model = self._get_state_gui_model()
-        director = GuiStateDirector(state_model, SANSFacility.ISIS)
-
-        state = self._get_row_entry(option_string="BackgroundWorkspace=whatever,ScaleFactor=0.9")
-        state = director.create_state(state)
-        self.assertTrue(isinstance(state, StateGuiModel))
-        self.assertEqual(state.all_states.background_subtraction.workspace, "whatever")
-        self.assertEqual(state.all_states.background_subtraction.scale_factor, 0.9)
 
 
 if __name__ == "__main__":

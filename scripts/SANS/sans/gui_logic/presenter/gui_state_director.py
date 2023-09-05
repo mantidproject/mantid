@@ -70,6 +70,11 @@ class GuiStateDirector(object):
         if row_entry.sample_shape:
             gui_state.sample_shape = row_entry.sample_shape
 
+        if row_entry.background_ws:
+            gui_state.background_workspace = row_entry.background_ws
+        if row_entry.scale_factor:
+            gui_state.scale_factor = row_entry.scale_factor
+
         # 4. Create the rest of the state based on the builder.
         gui_state.all_states.data = data_builder.build()
         return gui_state
@@ -153,9 +158,3 @@ class GuiStateDirector(object):
 
         if "UseMirror" in options.keys():
             state_gui_model.phi_limit_use_mirror = options["UseMirror"]
-
-        if "BackgroundWorkspace" in options.keys():
-            state_gui_model.background_workspace = options["BackgroundWorkspace"]
-
-        if "ScaleFactor" in options.keys():
-            state_gui_model.scale_factor = options["ScaleFactor"]

@@ -10,6 +10,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 #include <set>
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -203,6 +204,29 @@ boost::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std:
       errorColumns.emplace_back(1);
     return errorColumns;
   }
+}
+
+/** Extract the group name and angle from the run title. Expects the title to
+ * be in the format: "group_name th=angle".
+ * If it is not in this format then boost::none is returned.
+ * If the format matches then the first element of the vector is the title and the second is theta.
+ */
+boost::optional<std::vector<std::string>> parseTitleAndThetaFromRunTitle(std::string const &runTitle) {
+  boost::smatch matches;
+  static const boost::regex runTitleFormatRegex("(.*)(th[:=]\\s*([0-9.\\-]+))(.*)");
+
+  if (!boost::regex_search(runTitle, matches, runTitleFormatRegex)) {
+    return boost::none;
+  }
+
+  std::vector<std::string> parsedResult;
+
+  constexpr auto preThetaGroup = 1;
+  constexpr auto thetaValueGroup = 3;
+  parsedResult.push_back(matches[preThetaGroup].str());
+  parsedResult.push_back(matches[thetaValueGroup].str());
+
+  return parsedResult;
 }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

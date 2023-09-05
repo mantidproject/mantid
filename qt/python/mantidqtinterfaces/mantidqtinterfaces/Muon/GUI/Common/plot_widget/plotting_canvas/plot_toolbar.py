@@ -10,7 +10,6 @@ from qtpy import QtCore, QtWidgets
 
 
 class PlotToolbar(MantidNavigationToolbar):
-
     toolitems = (
         MantidStandardNavigationTools.HOME,
         MantidStandardNavigationTools.BACK,
@@ -29,7 +28,6 @@ class PlotToolbar(MantidNavigationToolbar):
     )
 
     def __init__(self, figure_canvas, parent=None):
-
         super().__init__(figure_canvas, parent)
 
         self.is_major_grid_on = False
@@ -39,9 +37,9 @@ class PlotToolbar(MantidNavigationToolbar):
         self.disable_autoscale_notifier = GenericObservable()
         self.range_changed_notifier = GenericObservable()
 
-        # Adjust icon size or they are too small in PyQt5 by default
+        # Adjust icon size, or they are too small in PyQt5 by default
         dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
-        self.setIconSize(QtCore.QSize(24 * dpi_ratio, 24 * dpi_ratio))
+        self.setIconSize(QtCore.QSize(int(24 * dpi_ratio), int(24 * dpi_ratio)))
 
     def toggle_legend(self):
         for ax in self.canvas.figure.get_axes():

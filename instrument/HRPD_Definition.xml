@@ -4,9 +4,9 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="HRPD" valid-from   ="1900-01-31 23:59:59"
+ name="HRPD" valid-from   ="2023-03-01 00:00:00"
                         valid-to     ="2100-01-31 23:59:59"
-		        last-modified="2010-05-04 00:00:00">
+		        last-modified="2021-01-28 00:00:00">
 
 <defaults>
   <length unit="meter" />
@@ -17,7 +17,7 @@
     <handedness val="right" />
   </reference-frame>
   <offsets spherical="delta" />
-  <default-view view="cylindrical_y"/>
+  <default-view view="3D"/>
 </defaults>
 
 
@@ -27,14 +27,15 @@
     (2008-08-26T16:21:30).
     
     Instrument detector descriptions obtained from Kevin Knight and 
-    Richard Ibberson.
+    Richard Ibberson. Edited by Dominic Fortes to reflect modifications
+	to low-angle bank modules.
 
   
   -->
 
 
 <!--  source and sample-position components -->
-<component type="undulator">
+<component type="moderator">
   <location z="-95." />
 </component>
 
@@ -45,7 +46,7 @@
 <!--  DEFINITION OF TYPES -->
 
 <!--  Source types -->
-<type name="undulator" is="Source">
+<type name="moderator" is="Source">
 </type>
 
 <!--  Sample-position types -->
@@ -68,7 +69,7 @@
 </component>
 <type name="monitors">
 <component type="monitor">
-  <location  r="0.6" t="180" p="0" name="upstream_monitor_det"/>
+  <location  r="1.70" t="180" p="0" name="upstream_monitor_det"/>
   <location  r="1.74" t="0" p="0" name="downstream_monitor_det"/>
 </component>
 </type>
@@ -119,9 +120,9 @@
 <type name="bank_la">
 <properties />
 <component type="module_la">
-  <location  r="0" t="0" p="2.86241" name="mod0"/>
+  <location  r="0" t="0" p="0" rot="9.0000" name="mod0"/>
   <location  r="0" t="0" p="0" name="mod1"/>
-  <location  r="0" t="0" p="-2.86241" name="mod2"/>
+  <location  r="0" t="0" p="0" rot="-9.0000"  name="mod2"/>
 </component>
 </type>
 <type name="module_bsk">
@@ -374,41 +375,52 @@
   <location  r="0" t="98.2941" p="0" name="Det112"> <facing x="0.0" y="0.0" z="0.0"/> </location>
   <location  r="0" t="98.4521" p="0" name="Det113"> <facing x="0.0" y="0.0" z="0.0"/> </location>
   <location  r="0" t="98.6101" p="0" name="Det114"> <facing x="0.0" y="0.0" z="0.0"/> </location>
-  <location  r="0" t="98.768" p="0" name="Det115" > <facing x="0.0" y="0.0" z="0.0"/> </location>
-  <location  r="0" t="98.926" p="0" name="Det116" > <facing x="0.0" y="0.0" z="0.0"/> </location>
-  <location  r="0" t="99.084" p="0" name="Det117" > <facing x="0.0" y="0.0" z="0.0"/> </location>
-  <location  r="0" t="99.242" p="0" name="Det118" > <facing x="0.0" y="0.0" z="0.0"/> </location>
-  <location  r="0" t="99.4" p="0" name="Det119"   > <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location  r="0" t="98.768" p="0" name="Det115"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location  r="0" t="98.926" p="0" name="Det116"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location  r="0" t="99.084" p="0" name="Det117"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location  r="0" t="99.242" p="0" name="Det118"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location  r="0" t="99.400" p="0" name="Det119"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location  r="0" t="99.558" p="0" name="Det120"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location  r="0" t="99.716" p="0" name="Det121"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location  r="0" t="99.874" p="0" name="Det122"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location  r="0" t="100.032" p="0" name="Det123"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location  r="0" t="100.190" p="0" name="Det124"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location  r="0" t="100.348" p="0" name="Det125"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location  r="0" t="100.506" p="0" name="Det126"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  <location  r="0" t="100.664" p="0" name="Det127"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  
 </component>
 </type>
 <type name="module_la">
 <properties />
 <component type="tube_la">
-  <location  r="-0.26" t="32" p="0" name="Det0"/>
-  <location  r="-0.236957" t="31.8261" p="0" name="Det1"/>
-  <location  r="-0.213913" t="31.6522" p="0" name="Det2"/>
-  <location  r="-0.19087" t="31.4783" p="0" name="Det3"/>
-  <location  r="-0.167826" t="31.3043" p="0" name="Det4"/>
-  <location  r="-0.144783" t="31.1304" p="0" name="Det5"/>
-  <location  r="-0.121739" t="30.9565" p="0" name="Det6"/>
-  <location  r="-0.0986957" t="30.7826" p="0" name="Det7"/>
-  <location  r="-0.0756522" t="30.6087" p="0" name="Det8"/>
-  <location  r="-0.0526087" t="30.4348" p="0" name="Det9"/>
-  <location  r="-0.0295652" t="30.2609" p="0" name="Det10"/>
-  <location  r="-0.00652173" t="30.087" p="0" name="Det11"/>
-  <location  r="0.0165217" t="29.913" p="0" name="Det12"/>
-  <location  r="0.0395652" t="29.7391" p="0" name="Det13"/>
-  <location  r="0.0626087" t="29.5652" p="0" name="Det14"/>
-  <location  r="0.0856522" t="29.3913" p="0" name="Det15"/>
-  <location  r="0.108696" t="29.2174" p="0" name="Det16"/>
-  <location  r="0.131739" t="29.0435" p="0" name="Det17"/>
-  <location  r="0.154783" t="28.8696" p="0" name="Det18"/>
-  <location  r="0.177826" t="28.6957" p="0" name="Det19"/>
-  <location  r="0.20087" t="28.5217" p="0" name="Det20"/>
-  <location  r="0.223913" t="28.3478" p="0" name="Det21"/>
-  <location  r="0.246957" t="28.1739" p="0" name="Det22"/>
-  <location  r="0.27" t="28" p="0" name="Det23"/>
+  <location  r="0.265891" t="27.958717" p="0" name="Det0"/>
+  <location  r="0.242943" t="28.123325" p="0" name="Det1"/>
+  <location  r="0.220030" t="28.289721" p="0" name="Det2"/>
+  <location  r="0.197154" t="28.457933" p="0" name="Det3"/>
+  <location  r="0.174314" t="28.627987" p="0" name="Det4"/>
+  <location  r="0.151511" t="28.799910" p="0" name="Det5"/>
+  <location  r="0.128746" t="28.973731" p="0" name="Det6"/>
+  <location  r="0.106019" t="29.149478" p="0" name="Det7"/>
+  <location  r="0.083332" t="29.327179" p="0" name="Det8"/>
+  <location  r="0.060684" t="29.506865" p="0" name="Det9"/>
+  <location  r="0.038077" t="29.688564" p="0" name="Det10"/>
+  <location  r="0.015510" t="29.872307" p="0" name="Det11"/>
+  <location  r="-0.007014" t="30.058125" p="0" name="Det12"/>
+  <location  r="-0.029496" t="30.246050" p="0" name="Det13"/> 
+  <location  r="-0.051935" t="30.436113" p="0" name="Det14"/>
+  <location  r="-0.074330" t="30.628346" p="0" name="Det15"/>
+  <location  r="-0.096680" t="30.822783" p="0" name="Det16"/>
+  <location  r="-0.118985" t="31.019457" p="0" name="Det17"/>
+  <location  r="-0.141244" t="31.218403" p="0" name="Det18"/>  
+  <location  r="-0.163455" t="31.419654" p="0" name="Det19"/>
+  <location  r="-0.185619" t="31.623247" p="0" name="Det20"/>
+  <location  r="-0.207734" t="31.829217" p="0" name="Det21"/>
+  <location  r="-0.229799" t="32.037601" p="0" name="Det22"/>
+  <location  r="-0.251814" t="32.248435" p="0" name="Det23"/>
 </component>
+
+
 </type>
 
 
@@ -814,8 +826,8 @@
   <cylinder id="shape">
     <centre-of-bottom-base x="0.0" y="-0.05" z="0.0" />
     <axis x="0.0" y="1.0" z="0" />
-    <radius val="0.0125" />
-    <height val="0.1" />
+    <radius val="0.00625" />
+    <height val="0.2" />
   </cylinder>
   <algebra val="shape" />  
 </type>
@@ -834,30 +846,93 @@
   <id start="8100" end="8227" />
 </idlist>
 <idlist idname="bank1">
-  <id start="901000" end="901119" />
-  <id start="902000" end="902119" />
-  <id start="903000" end="903119" />
-  <id start="904000" end="904119" />
-  <id start="905000" end="905119" />
-  <id start="906000" end="906119" />
-  <id start="907000" end="907119" />
-  <id start="911000" end="911119" />
-  <id start="912000" end="912119" />
-  <id start="913000" end="913119" />
-  <id start="914000" end="914119" />
-  <id start="915000" end="915119" />
-  <id start="916000" end="916119" />
-  <id start="917000" end="917119" />
+  <id start="901000" end="901127" />
+  <id start="902000" end="902127" />
+  <id start="903000" end="903127" />
+  <id start="904000" end="904127" />
+  <id start="905000" end="905127" />
+  <id start="906000" end="906127" />
+  <id start="907000" end="907127" />
+  <id start="911000" end="911127" />
+  <id start="912000" end="912127" />
+  <id start="913000" end="913127" />
+  <id start="914000" end="914127" />
+  <id start="915000" end="915127" />
+  <id start="916000" end="916127" />
+  <id start="917000" end="917127" />
 </idlist>
 <idlist idname="bank2">
-  <id start="10100" end="10107" />
-  <id start="10200" end="10207" />
-  <id start="10300" end="10307" />
-  <id start="10400" end="10407" />
-  <id start="10500" end="10507" />
-  <id start="10600" end="10607" />
-  <id start="10700" end="10707" />
-  <id start="10800" end="10807" />
-  <id start="10900" end="10907" />
+  <id val="10301"/>
+  <id val="10303"/>
+  <id val="10305"/>
+  <id val="10307"/>
+  <id val="10201"/>
+  <id val="10203"/>
+  <id val="10205"/>
+  <id val="10207"/>
+  <id val="10101"/>
+  <id val="10103"/>
+  <id val="10105"/>
+  <id val="10107"/>
+  <id val="10601"/>
+  <id val="10603"/>
+  <id val="10605"/>
+  <id val="10607"/>
+  <id val="10501"/>
+  <id val="10503"/>
+  <id val="10505"/>
+  <id val="10507"/>
+  <id val="10401"/>
+  <id val="10403"/>
+  <id val="10405"/>
+  <id val="10407"/>
+  <id val="10300"/>
+  <id val="10302"/>
+  <id val="10304"/>
+  <id val="10306"/>
+  <id val="10200"/>
+  <id val="10202"/>
+  <id val="10204"/>
+  <id val="10206"/>
+  <id val="10100"/>
+  <id val="10102"/>
+  <id val="10104"/>
+  <id val="10106"/>
+  <id val="10600"/>
+  <id val="10602"/>
+  <id val="10604"/>
+  <id val="10606"/>
+  <id val="10500"/>
+  <id val="10502"/>
+  <id val="10504"/>
+  <id val="10506"/>
+  <id val="10400"/>
+  <id val="10402"/>
+  <id val="10404"/>
+  <id val="10406"/>
+  <id val="10901"/>
+  <id val="10903"/>
+  <id val="10905"/>
+  <id val="10907"/>
+  <id val="10801"/>
+  <id val="10803"/>
+  <id val="10805"/>
+  <id val="10807"/>
+  <id val="10701"/>
+  <id val="10703"/>
+  <id val="10705"/>
+  <id val="10707"/>
+  <id val="11201"/>
+  <id val="11203"/>
+  <id val="11205"/>
+  <id val="11207"/>
+  <id val="11101"/>
+  <id val="11103"/>
+  <id val="11105"/>
+  <id val="11107"/>
+  <id val="11001"/>
+  <id val="11003"/>
+  <id val="11005"/>
+  <id val="11007"/>
 </idlist>
 </instrument>

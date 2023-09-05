@@ -10,7 +10,8 @@
 # pylint: disable=invalid-name
 from Direct.NonIDF_Properties import *
 
-from collections import OrderedDict, Iterable
+from collections import OrderedDict
+from collections.abc import Iterable
 from mantid.kernel import funcinspect
 
 

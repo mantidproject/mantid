@@ -13,13 +13,12 @@ import os
 import numpy as np
 import math
 import re
-from collections import Iterable
+from collections.abc import Iterable, Callable
 import mantid.simpleapi as mantid
 from mantid import api
 
 import Direct.ReductionHelpers as prop_helpers
 from Direct.AbsorptionShapes import *
-import collections
 
 
 # -----------------------------------------------------------------------------------------
@@ -551,7 +550,7 @@ class SaveFileName(PropDescriptor):
     def __set__(self, instance, value):
         if value is None:
             self._file_name = None
-        elif isinstance(value, collections.Callable):
+        elif isinstance(value, Callable):
             self._custom_print = value
         else:
             self._file_name = str(value)

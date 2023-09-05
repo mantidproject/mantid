@@ -281,7 +281,7 @@ def fitting_algorithm(inout=False):
                 del kwargs["InputWorkspace"]
 
             # Check for behaviour consistent with old API
-            if type(function) == str and function in _api.AnalysisDataService:
+            if isinstance(function, str) and function in _api.AnalysisDataService:
                 msg = "Fit API has changed. The function must now come " + "first in the argument list and the workspace second."
                 raise ValueError(msg)
             # Deal with case where function is a FunctionWrapper.
@@ -822,7 +822,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
         # Matched nothing
         return False
 
-    if type(ignore_regex) is str:
+    if isinstance(ignore_regex, str):
         ignore_regex = [ignore_regex]
     # Compile regexes
     for index, expr in enumerate(ignore_regex):

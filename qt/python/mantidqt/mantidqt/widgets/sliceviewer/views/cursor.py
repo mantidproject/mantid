@@ -107,7 +107,7 @@ class MoveMouseCursor:
     def move_from(self, cur_pos_data: Tuple[float, float]) -> None:
         """
         Calculate a new position based on the given starting position
-        and self.newpixel transform and move the mouse cursor there.
+        and self.new_pixel transform and move the mouse cursor there.
         :param cur_pos_data: Current cursor position in data coordinates
         """
         new_pos_data = self.clip(self.new_pixel(*cur_pos_data))

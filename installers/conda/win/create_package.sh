@@ -87,7 +87,8 @@ echo "Removing jq from conda env"
 echo "jq removed from conda env"
 
 # Pip install quasielasticbayes so it can be packaged alongside workbench on windows
-$CONDA_ENV_PATH/python.exe -m pip install quasielasticbayes
+# Version 0.2.0 is built for Python 3.10
+$CONDA_ENV_PATH/python.exe -m pip install quasielasticbayes==0.2.0
 
 echo "Copying root packages of env files (Python, DLLs, Lib, Scripts, ucrt, and msvc files) to package/bin"
 mkdir $COPY_DIR/bin

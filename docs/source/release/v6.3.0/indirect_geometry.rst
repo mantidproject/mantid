@@ -8,7 +8,7 @@ Indirect Geometry Changes
 New Features
 ------------
 - The Bayes Fortran libraries have been moved to a separate ``quasielasticbayes`` package.
-  This allows hose on non-Windows platforms to install them with  ``pip``: ``python -m pip install --user quasielasticbayes``.
+  This allows those on non-Windows platforms to install them with  ``pip``: ``python -m pip install --user quasielasticbayes``.
 - In :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` fitting tabs, a button has been added that will unify the fit range for all spectra selected.
 - :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` now allows defining constraints for more than two masses using the ``ConstraintsProfile`` .
 

@@ -30,9 +30,9 @@ class TestFunctionBrowser(GuiWindowTest):
         rect = view.getVisualRectParameterProperty(param_name)
         pos = rect.center()
         if self.is_multi:
-            pos -= QPoint(rect.width() / 5, 0)
+            pos -= QPoint(int(rect.width() / 5), 0)
         else:
-            pos += QPoint(rect.width() / 4, 0)
+            pos += QPoint(int(rect.width() / 4), 0)
         tree = view.treeWidget().viewport()
         QTest.mouseMove(tree, pos)
         yield

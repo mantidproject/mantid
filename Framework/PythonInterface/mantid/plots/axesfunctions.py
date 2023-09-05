@@ -7,7 +7,7 @@
 #  This file is part of the mantid package
 #
 #
-import collections
+import collections.abc
 import matplotlib
 import matplotlib.collections as mcoll
 import matplotlib.colors
@@ -795,7 +795,7 @@ def update_colorplot_datalimits(axes, mappables, axis="both"):
     # ax.relim in matplotlib < 2.2 doesn't take into account of images
     # and it doesn't support collections at all as of verison 3 so we'll take
     # over
-    if not isinstance(mappables, collections.Iterable):
+    if not isinstance(mappables, collections.abc.Iterable):
         mappables = [mappables]
     xmin_all, xmax_all, ymin_all, ymax_all = _LARGEST, _SMALLEST, _LARGEST, _SMALLEST
     for mappable in mappables:

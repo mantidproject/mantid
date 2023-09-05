@@ -18,7 +18,7 @@ an instrument.
 Or if OffsetMode is `Signed` :math:`DIFC` will be calculated with the following equation
 for logarithmically binned data:
 
-.. math:: DIFC = \frac{m_n}{h}&(L1 + L2)&2sin\theta & * & (1+|BinWidth|)^{-offset}
+.. math:: DIFC = \frac{m_n}{h} \cdot (L1 + L2) 2 \sin(\theta) \cdot (1+|BinWidth|)^{-offset}
 
 DIFC is used in the equation
 
