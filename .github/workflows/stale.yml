@@ -1,4 +1,4 @@
-name: 'Stale old issues'
+name: 'Stale old issues and prs'
 on:
   schedule:
     - cron: '0 0 * * *'
