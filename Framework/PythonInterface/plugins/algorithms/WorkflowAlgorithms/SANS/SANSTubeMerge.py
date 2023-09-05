@@ -103,7 +103,7 @@ class SANSTubeMerge(DataProcessorAlgorithm):
         remove_history_alg = self._create_child_alg("RemoveWorkspaceHistory", Workspace=calibrated_ws)
         remove_history_alg.execute()
 
-        AnalysisDataService.add(calibrated_ws_name, calibrated_ws)
+        AnalysisDataService.addOrReplace(calibrated_ws_name, calibrated_ws)
 
     def _save_ws_as_nexus(self, ws_name, filename):
         save_filepath = filename if filename.endswith(self._NEXUS_SUFFIX) else f"{filename}{self._NEXUS_SUFFIX}"
