@@ -11,7 +11,7 @@ import sys
 import glob
 import os
 from mantid.kernel import ConfigService
-from mantid.plots.utility import mpl_version_info, get_current_cmap
+from mantid.plots.utility import get_current_cmap
 from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
@@ -189,10 +189,7 @@ class ColorbarWidget(QWidget):
         if rev:
             name += "_r"
         self.colorbar.mappable.set_cmap(name)
-        if mpl_version_info() >= (3, 1):
-            self.colorbar.update_normal(self.colorbar.mappable)
-        else:
-            self.colorbar.set_cmap(name)
+        self.colorbar.update_normal(self.colorbar.mappable)
         self.redraw()
 
     def mappable_changed(self):
