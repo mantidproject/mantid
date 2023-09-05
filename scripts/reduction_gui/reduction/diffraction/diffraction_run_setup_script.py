@@ -119,8 +119,10 @@ class RunSetupScript(BaseScriptElement):
         pardict["DisableVanadiumCorrection"] = str(int(self.disablevancorrection))
         pardict["DisableVanadiumBackgroundCorrection"] = str(int(self.disablevanbkgdcorrection))
         pardict["DoReSampleX"] = str(int(self.doresamplex))
-
-        pardict["InterpolateTargetTemp"] = self.interpolatetemp
+        if self.interpolatetemp == "":
+            pardict["InterpolateTargetTemp"] = 0.0
+        else:
+            pardict["InterpolateTargetTemp"] = self.interpolatetemp
         pardict["EnableInterpolate"] = str(int(self.enableinterpolate))
         return pardict
 

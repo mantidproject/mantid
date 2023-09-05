@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceGroup
+from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceGroup, WorkspaceGroupProperty
 from mantid.kernel import Direction
 from mantid.simpleapi import mtd, RenameWorkspace
 
@@ -22,9 +22,7 @@ class InterpolateBackground(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            name="WorkspaceGroup",
-            defaultValue="",
-            direction=Direction.Input,
+            WorkspaceGroupProperty("WorkspaceGroup", "", Direction.Input),
             doc="Workspace Group with two workspaces containing data from empty container runs",
         )
         self.declareProperty(
