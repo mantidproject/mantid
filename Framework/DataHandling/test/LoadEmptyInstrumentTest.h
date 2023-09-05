@@ -157,20 +157,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "PG3_46577.nxs.h5"));
-    TS_ASSERT_THROWS_NOTHING(inputFile = loader.getPropertyValue("Filename"));
+    inputFile = "PG3_46577.nxs.h5";
     wsName = "LEIT_LoadFromNexus";
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", inputFile));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", wsName));
 
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("Filename"));
-    TS_ASSERT_EQUALS(result, inputFile);
-
-    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("OutputWorkspace"));
-    TS_ASSERT(!result.compare(wsName));
-
     TS_ASSERT_THROWS_NOTHING(loader.execute());
-
     TS_ASSERT(loader.isExecuted());
 
     // Retrieve the workspace that has the instrument
@@ -193,17 +185,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "PG3_2583.nxs"));
-    TS_ASSERT_THROWS_NOTHING(inputFile = loader.getPropertyValue("Filename"));
+    inputFile = "PG3_2583.nxs";
     wsName = "LEIT_LoadFromNexusNoIDF";
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", inputFile));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", wsName));
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("Filename"));
-    TS_ASSERT_EQUALS(result, inputFile);
-
-    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("OutputWorkspace"));
-    TS_ASSERT(!result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT(!loader.isExecuted());
@@ -217,17 +202,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
 
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "abc.xyz"));
-    TS_ASSERT_THROWS_NOTHING(inputFile = loader.getPropertyValue("Filename"));
+    inputFile = "abc.xyz";
     wsName = "LEIT_testLoadFileWithInvalidExtension";
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", inputFile));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", wsName));
-
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("Filename"));
-    TS_ASSERT_EQUALS(result, inputFile);
-
-    TS_ASSERT_THROWS_NOTHING(result = loader.getPropertyValue("OutputWorkspace"));
-    TS_ASSERT(!result.compare(wsName));
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT(!loader.isExecuted());
