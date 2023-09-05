@@ -121,12 +121,13 @@ Project Recovery test
 .. code-block:: python
 
    testing_directory=<path-to-test>
-   Load(Filename= 'TOPAZ_3132_event.nxs', OutputWorkspace='TOPAZ_3132_event', LoadMonitors='1')
-   ConvertToMD(InputWorkspace='TOPAZ_3132_event', QDimensions='Q3D', dEAnalysisMode='Elastic', Q3DFrames='Q_sample', LorentzCorrection='1', OutputWorkspace='TOPAZ_3132_md',\
-   MinValues='-25,-25,-25', MaxValues='25,25,25', SplitInto='2', SplitThreshold='50', MaxRecursionDepth='13', MinRecursionDepth='7')
-   DeleteWorkspace("TOPAZ_3132_event")
-   multi_d = RenameWorkspace('TOPAZ_3132_md')
-   peaks=FindPeaksMD(InputWorkspace='multi_d', PeakDistanceThreshold='0.37680', MaxPeaks='50', DensityThresholdFactor='100', OutputWorkspace='TOPAZ_3132_peaks')
+   Load(Filename=r'SXD23767.raw', OutputWorkspace='SXD23767')
+   ConvertToDiffractionMDWorkspace(InputWorkspace='SXD23767', OutputWorkspace='SXD23767_MD', OneEventPerBin=False, SplitThreshold=30)
+   DeleteWorkspace("SXD23767")
+   multi_d = RenameWorkspace('SXD23767_MD')
+   peaks = FindPeaksMD(InputWorkspace='multi_d', PeakDistanceThreshold=0.4, MaxPeaks=10,
+           PeakFindingStrategy='NumberOfEventsNormalization', SignalThresholdFactor=10,
+           OutputType='Peak', OutputWorkspace='SingleCrystalPeakTable', EdgePixels=1)
 
    long1=CreateMDHistoWorkspace(Dimensionality=2, Extents='-3,3,-10,10', SignalInput=range(0,10000), ErrorInput=range(0,10000),\
                            NumberOfBins='100,100', Names='Dim1,Dim2', Units='MomentumTransfer, EnergyTransfer')
