@@ -19,7 +19,7 @@ import numpy as np
 import multiprocessing
 
 try:
-    from quickBayes.utils.parallel import parallel
+    pass
 except (Exception, Warning):
     import subprocess
 
@@ -32,7 +32,6 @@ except (Exception, Warning):
             stdin=subprocess.PIPE,
         ).communicate()
     )
-    from quickBayes.utils.parallel import parallel
 
 
 class BayesStretch2(QuickBayesTemplate):
@@ -85,6 +84,11 @@ class BayesStretch2(QuickBayesTemplate):
         from quickBayes.workflow.qse_search import QSEGridSearch
 
         return QSEGridSearch()
+
+    def parallel(self, items, function, N):
+        from quickBayes.utils.parallel import parallel
+
+        return parallel(items=items, function=function, N=N)
 
     def do_one_spec(self, spec, data):
         sx = data["sample"].readX(spec)
@@ -170,7 +174,7 @@ class BayesStretch2(QuickBayesTemplate):
 
         # calculation
         calc = partial(self.calculate_wrapper, data=data)
-        output = parallel(list(range(N)), calc, N=numCores)
+        output = self.parallel(list(range(N)), calc, N=numCores)
         # record results
         for spec in range(N):
             contour_list.append(output[spec][0])

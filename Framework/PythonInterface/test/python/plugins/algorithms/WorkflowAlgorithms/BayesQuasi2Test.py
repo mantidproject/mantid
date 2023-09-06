@@ -13,7 +13,6 @@ from BayesQuasi2 import BayesQuasi2
 
 from unittest import mock
 from quickBayes.fitting.fit_engine import FitEngine
-from quickBayes.utils.general import get_background_function
 from quickBayes.workflow.QlData import QLData
 from quickBayes.functions.qldata_function import QlDataFunction
 
@@ -35,19 +34,19 @@ class BayesQuasi2Test(unittest.TestCase):
     Going to test each method in isolation.
     """
 
-    def setUp(self):
-        self._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace=RES_NAME)
-        self._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace=SAMPLE_NAME)
-        self._alg = BayesQuasi2()
-        self._alg.initialize()
-        self._N_hist = 1
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace=RES_NAME)
+        cls._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace=SAMPLE_NAME)
+        cls._alg = BayesQuasi2()
+        cls._alg.initialize()
+        cls._N_hist = 1
 
     def tearDown(self):
         """
         Remove workspaces from ADS.
         """
-        DeleteWorkspace(self._sample_ws)
-        DeleteWorkspace(self._res_ws)
+        AnalysisDataService.clear()
 
     def point_mock(self, name):
         if "res" in name:
@@ -96,9 +95,6 @@ class BayesQuasi2Test(unittest.TestCase):
             DataE=np.array([0.2, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0]),
         )
 
-        DeleteWorkspace(ws)
-        DeleteWorkspace("compare_msgs")
-
     def test_add_to_make_fit_ws(self):
         ws = CreateWorkspace([1, 2], [3, 4])
         ws_list = [self._sample_ws, self._res_ws]
@@ -117,9 +113,6 @@ class BayesQuasi2Test(unittest.TestCase):
 
         CompareWorkspaces(Workspace1=ws, Workspace2=output[0], CheckAllData=True)
         CompareWorkspaces(Workspace1=ws2, Workspace2=output[1], CheckAllData=True)
-
-        DeleteWorkspace(ws)
-        DeleteWorkspace("compare_msgs")
 
     def test_make_results(self):
         results = {"a": [1, 2], "b": [2, 3], "c": [3, 4], "loglikelihood": [-1, -2]}
@@ -160,12 +153,12 @@ class BayesQuasi2Test(unittest.TestCase):
             VerticalAxisValues=["1 feature(s)", "2 feature(s)"],
         )
 
-    @mock.patch("BayesQuasi2.get_background_function")
-    def test_calculate(self, get_BG_mock):
+    def test_calculate(self):
         func_mock = mock.Mock()
         engine_mock = mock.Mock()
 
-        get_BG_mock.return_value = func_mock
+        self._alg.get_background_function = mock.Mock(return_value=func_mock)
+
         self._alg.setProperty("Emax", 0.3)
         self._alg.setProperty("Emin", -0.3)
         self._alg.setProperty("Elastic", True)
@@ -207,7 +200,7 @@ class BayesQuasi2Test(unittest.TestCase):
         self.assertEqual("energy_max", logs[3][0])
         self.assertEqual(0.3, logs[3][1])
 
-        get_BG_mock.assert_called_once_with("Linear")
+        self._alg.get_background_function.assert_called_once_with("Linear")
         self.assertEqual(mock_method.call_count, 2)
 
         def get_ws(spec):

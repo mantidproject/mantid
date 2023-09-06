@@ -122,17 +122,17 @@ class QuickBayesTemplate(PythonAlgorithm):
 
     def create_ws(self, OutputWorkspace, DataX, DataY, NSpec, UnitX, YUnitLabel, VerticalAxisUnit, VerticalAxisValues, DataE=None):
         """
-                A method to wrap the mantid CreateWorkspace algorithm
-                :param OutputWorkspace: the name of the output Workspace
-                :param DataX: the x data
-                :param DataY: the y data
-                :param NSpec: the number of spectra in x and y
-                :param UnitX: the x UnitX
-                :param YUnitLabel: the label for the y units
-                :param VerticalAxisUnit: the unit for the vertical axis
-        `       :param VerticalAxisValues: the values for the vertical axis
-                :param DataE: the error data
-                :returns the output workspace
+        A method to wrap the mantid CreateWorkspace algorithm
+        :param OutputWorkspace: the name of the output Workspace
+        :param DataX: the x data
+        :param DataY: the y data
+        :param NSpec: the number of spectra in x and y
+        :param UnitX: the x UnitX
+        :param YUnitLabel: the label for the y units
+        :param VerticalAxisUnit: the unit for the vertical axis
+        :param VerticalAxisValues: the values for the vertical axis
+        :param DataE: the error data
+        :returns the output workspace
         """
         alg = self.createChildAlgorithm("CreateWorkspace", enableLogging=False)
         alg.setAlwaysStoreInADS(True)
@@ -176,4 +176,4 @@ class QuickBayesTemplate(PythonAlgorithm):
         return res_list
 
     def PyExec(self):
-        raise NotImplementedError()
+        raise NotImplementedError("This class is for shared functionality when using quickBayes. It does not have an execute")

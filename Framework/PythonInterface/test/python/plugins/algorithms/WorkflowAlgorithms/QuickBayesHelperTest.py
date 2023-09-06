@@ -25,18 +25,18 @@ class QuickBayesHelperTest(unittest.TestCase):
     Going to test each method in isolation.
     """
 
-    def setUp(self):
-        self._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace=RES_NAME)
-        self._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace=SAMPLE_NAME)
-        self._alg = QuickBayesTemplate()
-        self._alg.initialize()
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace=RES_NAME)
+        cls._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace=SAMPLE_NAME)
+        cls._alg = QuickBayesTemplate()
+        cls._alg.initialize()
 
     def tearDown(self):
         """
         Remove workspaces from ADS.
         """
-        DeleteWorkspace(self._sample_ws)
-        DeleteWorkspace(self._res_ws)
+        AnalysisDataService.clear()
 
     # ----------------------------------Algorithm tests----------------------------------------
 
@@ -44,7 +44,6 @@ class QuickBayesHelperTest(unittest.TestCase):
         self.assertEqual(len(self._sample_ws.readY(0)) + 1, len(self._sample_ws.readX(0)))
         ws, _ = self._alg.point_data(self._sample_ws.name())
         self.assertEqual(len(ws.readY(0)), len(ws.readX(0)))
-        DeleteWorkspace(ws)
 
     def test_group_ws(self):
         ws_list = [self._sample_ws, self._res_ws]
@@ -63,7 +62,6 @@ class QuickBayesHelperTest(unittest.TestCase):
         run = ws.getRun()
         self.assertEqual(run.getLogData("unit").value, "test")
         self.assertEqual(run.getLogData("dur").value, 56200)
-        DeleteWorkspace(ws)
 
     def test_create_ws(self):
         name = self._alg.create_ws("test", [1, 2, 3, 4], [4, 5, 6, 7], 2, "energy", "TOF", "Text", ["unit", "python"])
@@ -83,7 +81,6 @@ class QuickBayesHelperTest(unittest.TestCase):
         ax = ws.getAxis(1)
         self.assertEqual(ax.label(0), "unit")
         self.assertEqual(ax.label(1), "python")
-        DeleteWorkspace(ws)
 
     def test_create_ws_with_errors(self):
         name = self._alg.create_ws(
@@ -92,7 +89,6 @@ class QuickBayesHelperTest(unittest.TestCase):
         ws = AnalysisDataService.retrieve(name)
         self.assertListEqual(list(ws.readE(0)), [0.1, 0.2])
         self.assertListEqual(list(ws.readE(1)), [0.3, 0.4])
-        DeleteWorkspace(ws)
 
     def test_duplicate_res(self):
         N = 3
@@ -103,7 +99,6 @@ class QuickBayesHelperTest(unittest.TestCase):
             data = ws_list[j]
             self.assertListEqual(list(ws.readX(0)), list(data["x"]))
             self.assertListEqual(list(ws.readY(0)), list(data["y"]))
-        DeleteWorkspace(ws)
 
     def test_unique_res(self):
         N = 2
@@ -114,7 +109,6 @@ class QuickBayesHelperTest(unittest.TestCase):
             data = ws_list[j]
             self.assertListEqual(list(ws.readX(j)), list(data["x"]))
             self.assertListEqual(list(ws.readY(j)), list(data["y"]))
-        DeleteWorkspace(ws)
 
     # -------------------------------- Failure cases ------------------------------------------
     def test_start_greater_end(self):

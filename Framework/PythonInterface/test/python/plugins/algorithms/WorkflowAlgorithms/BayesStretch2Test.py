@@ -33,19 +33,19 @@ class BayesStretch2Test(unittest.TestCase):
     Going to test each method in isolation.
     """
 
-    def setUp(self):
-        self._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace=RES_NAME)
-        self._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace=SAMPLE_NAME)
-        self._alg = BayesStretch2()
-        self._alg.initialize()
-        self._N_hist = 1
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace=RES_NAME)
+        cls._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace=SAMPLE_NAME)
+        cls._alg = BayesStretch2()
+        cls._alg.initialize()
+        cls._N_hist = 1
 
     def tearDown(self):
         """
         Remove workspaces from ADS.
         """
-        DeleteWorkspace(self._sample_ws)
-        DeleteWorkspace(self._res_ws)
+        AnalysisDataService.clear()
 
     def assert_mock_called_with(self, mock_object, N_calls, call_number, **kargs):
         self.assertEqual(N_calls, mock_object.call_count)
@@ -89,8 +89,6 @@ class BayesStretch2Test(unittest.TestCase):
             self.assertEqual(unit.caption(), label[i])
             np.testing.assert_equal(axis.extractValues(), axis_values[i])
 
-        DeleteWorkspace(ws)
-
     def test_make_slice_ws(self):
         x = np.linspace(0.8, 1.0, 3)
         y1 = -((x - 0.9) ** 2) + 0.01
@@ -116,7 +114,6 @@ class BayesStretch2Test(unittest.TestCase):
             unit = axis.getUnit()
             self.assertEqual(unit.caption(), label[i])
             np.testing.assert_equal(axis.extractValues(), axis_values[i])
-        DeleteWorkspace(ws)
 
     def test_make_results(self):
         def slice(slice_list, x_data, x_unit, name):

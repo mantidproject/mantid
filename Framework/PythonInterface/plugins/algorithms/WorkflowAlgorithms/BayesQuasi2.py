@@ -18,7 +18,7 @@ import numpy as np
 from quickBayesHelper import QuickBayesTemplate
 
 try:
-    from quickBayes.utils.general import get_background_function
+    pass
 except (Exception, Warning):
     import subprocess
 
@@ -31,7 +31,6 @@ except (Exception, Warning):
             stdin=subprocess.PIPE,
         ).communicate()
     )
-    from quickBayes.utils.general import get_background_function
 
 
 class BayesQuasi2(QuickBayesTemplate):
@@ -163,7 +162,7 @@ class BayesQuasi2(QuickBayesTemplate):
         # get inputs
         elastic = self.getProperty("Elastic").value
         BG_str = self.getPropertyValue("Background")
-        BG = get_background_function(BG_str)
+        BG = self.get_background_function(BG_str)
         start_x = self.getProperty("EMin").value
         end_x = self.getProperty("EMax").value
         # work around for bug
@@ -240,6 +239,11 @@ class BayesQuasi2(QuickBayesTemplate):
         from quickBayes.workflow.QSE import QlStretchedExp
 
         return QlStretchedExp
+
+    def get_background_function(self, bg_str):
+        from quickBayes.utils.general import get_background_function
+
+        return get_background_function(bg_str)
 
     def PyExec(self):
         self.log().information("BayesQuasi input")
