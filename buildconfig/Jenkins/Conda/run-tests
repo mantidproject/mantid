@@ -101,8 +101,6 @@ else
     SYSTEM_TEST_EXECUTABLE=$WORKSPACE/build/systemtest
 fi
 
-
-
 # Run unit tests
 cd $WORKSPACE/build
 # mkdir for test logs
