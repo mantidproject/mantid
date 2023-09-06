@@ -189,6 +189,9 @@ class Osiris(AbstractInst):
         else:
             events_per_point = 1000
 
+        if self._sample_details is None:
+            raise TypeError("To apply absorption correction you need to supply `sample_details` using `set_sample_details` method")
+
         container_geometry = self._sample_details.generate_container_geometry()
         container_material = self._sample_details.generate_container_material()
         if container_geometry and container_material:
