@@ -19,6 +19,7 @@ from sans.algorithm_detail.batch_execution import (
     delete_reduced_workspaces,
     create_scaled_background_workspace,
     subtract_scaled_background,
+    check_for_background_workspace_in_ads,
 )
 from sans.common.enums import SaveType, ReductionMode
 
@@ -381,25 +382,18 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         }
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
 
-    def test_get_scaled_background_workspace_no_background(self):
-        state = mock.MagicMock()
-        state.background_subtraction.workspace = None
-
-        result = create_scaled_background_workspace(state)
-
-        state.background_subtraction.validate.assert_called_once()
-        self.assertIsNone(result, "When no background ws is set, this should return None.")
-
+    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
     def test_get_scaled_background_workspace_calls_algs(self, mock_alg_manager):
         state = mock.MagicMock()
+        reduction_package = mock.MagicMock()
         ws_name = "workspace"
         scale_factor = 1.12
         expected_out_name = "__" + ws_name + "_scaled"
         state.background_subtraction.workspace = ws_name
         state.background_subtraction.scale_factor = scale_factor
 
-        result = create_scaled_background_workspace(state)
+        result = create_scaled_background_workspace(state, reduction_package)
 
         state.background_subtraction.validate.assert_called_once()
 
@@ -410,19 +404,6 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         }
         mock_alg_manager.assert_called_once_with("Scale", **expected_options)
         self.assertEqual(result, expected_out_name, "Should output the scaled ws name.")
-
-    def test_subtract_scaled_background_with_all_detectors_fails(self):
-        reduction_package = mock.MagicMock()
-        scaled_ws_name = "__workspace_scaled"
-        reduction_package.reduction_mode = ReductionMode.ALL
-        self.assertRaisesRegex(
-            ValueError,
-            f"Reduction Mode '{ReductionMode.ALL}' is incompatible with scaled background reduction. The ReductionMode "
-            f"must be set to '{ReductionMode.MERGED}', '{ReductionMode.HAB}', or '{ReductionMode.LAB}'.",
-            subtract_scaled_background,
-            reduction_package,
-            scaled_ws_name,
-        )
 
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
@@ -441,6 +422,65 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         self.assertEqual(["ws1_bgsub", "ws2_bgsub"], created_workspace_names)
         self.assertEqual(len(created_workspaces), len(created_workspace_names))
         self.assertEqual(mock_minus.execute.call_count, 2)
+
+    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
+    def test_check_for_background_workspace_in_ads_workspace_exists(self):
+        state = mock.MagicMock()
+        reduction_package = mock.MagicMock()
+        state.background_subtraction.workspace = "test_ws"
+
+        self.assertEqual("test_ws", check_for_background_workspace_in_ads(state, reduction_package))
+
+    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService")
+    def test_check_for_background_workspace_in_ads_suffix_workspace_exists(self, ads):
+        state = mock.MagicMock()
+        reduction_package = mock.MagicMock()
+        reduction_package.reduction_mode = ReductionMode.MERGED
+        reduction_package.reduced_merged_name = ["other_ws_merged_1D_1_2"]
+        state.background_subtraction.workspace = "test_ws"
+        state.save.user_specified_output_name = "other_ws"
+        ads.doesExist.side_effect = [False, True]  # Regular workspace not present, suffixed one is.
+
+        self.assertEqual("test_ws_merged_1D_1_2", check_for_background_workspace_in_ads(state, reduction_package))
+
+    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService")
+    def test_check_for_background_workspace_in_ads_suffix_workspace_exists_and_no_name_given(self, ads):
+        state = mock.MagicMock()
+        reduction_package = mock.MagicMock()
+        reduction_package.reduction_mode = ReductionMode.MERGED
+        reduction_package.reduced_merged_name = ["74044_merged_1D_1_2"]
+        state.background_subtraction.workspace = "test_ws"
+        state.save.user_specified_output_name = None
+        state.data.sample_scatter_run_number = 74044
+        ads.doesExist.side_effect = [False, True]  # Regular workspace not present, suffixed one is.
+
+        self.assertEqual("test_ws_merged_1D_1_2", check_for_background_workspace_in_ads(state, reduction_package))
+
+    @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(False))
+    def test_check_for_background_workspace_in_ads_workspace_none_exists(self):
+        state = mock.MagicMock()
+        reduction_package = mock.MagicMock()
+        reduction_package.reduction_mode = ReductionMode.MERGED
+        reduction_package.reduced_merged_name = ["other_ws_merged_1D_1_2"]
+        state.background_subtraction.workspace = "test_ws"
+        state.save.user_specified_output_name = "other_ws"
+
+        self.assertRaisesRegex(
+            ValueError, r"The workspace .* could not be found in the ADS\.", check_for_background_workspace_in_ads, state, reduction_package
+        )
+
+    def test_create_scaled_background_with_all_detectors_fails(self):
+        reduction_package = mock.MagicMock()
+        state = mock.MagicMock()
+        reduction_package.reduction_mode = ReductionMode.ALL
+        self.assertRaisesRegex(
+            ValueError,
+            f"Reduction Mode '{ReductionMode.ALL}' is incompatible with scaled background reduction. The ReductionMode "
+            f"must be set to '{ReductionMode.MERGED}', '{ReductionMode.HAB}', or '{ReductionMode.LAB}'.",
+            create_scaled_background_workspace,
+            state,
+            reduction_package,
+        )
 
 
 class DeleteMethodsTest(unittest.TestCase):

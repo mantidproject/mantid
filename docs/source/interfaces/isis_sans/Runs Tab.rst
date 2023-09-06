@@ -107,10 +107,11 @@ Table Columns
 +--------------------------+-------------------------------------------------------------------------------------------------+
 | **Options**              |   This column allows the user to provide row specific settings. Currently only                  |
 |                          |   **WavelengthMin**, **WavelengthMax**, **EventSlices** (see :ref:`ISIS_SANS_Settings_Tab-ref`  |
-|                          |   for details), **BackgroundWorkspace**, and **ScaleFactor** can be set (see below).            |
+|                          |   for details).                                                                                 |
 +--------------------------+-------------------------------------------------------------------------------------------------+
 | **Background Workspace** |   This column allows the user to provide a workspace for scaled background subtraction          |
-|                          |   (see below).                                                                                  |
+|                          |   (see below). This can either be the name of a workspace already in the ADS or match the       |
+|                          |   Output Name from another row in the runs table.                                               |
 +--------------------------+-------------------------------------------------------------------------------------------------+
 | **Scale Factor**         |   Scale factor to be used for scaled background subtraction (see below).                        |
 +--------------------------+-------------------------------------------------------------------------------------------------+
@@ -138,18 +139,18 @@ Examples:
 
 - Given Values: Sample (Scatter, Transmission, and Direct), and Can (Scatter, Transmission, and Direct)
 
-  - OutputName = Sample - Can
+  - Output = Sample - Can
 
 - Given Values: Sample (Scatter, Transmission, and Direct), Can (Scatter, Transmission, and Direct), and  Scaled
   Background Workspace
 
-  - OutputName = Sample - Can
-  - OutputName_bgsub = Sample - Can - (Background Workspace * Scale Factor)
+  - Output = Sample - Can
+  - Output_bgsub = Sample - Can - (Background Workspace * Scale Factor)
 
 - Given Values: Sample (Scatter, Transmission, and Direct) and Scaled Background Workspace
 
-  - OutputName = Sample
-  - OutputName_bgsub = Sample - (Background Workspace * Scale Factor)
+  - Output = Sample
+  - Output_bgsub = Sample - (Background Workspace * Scale Factor)
 
 The reduction will fail if only one of ``Background Workspace`` and ``Scale Factor`` is set. Or, if the reduction mode
 is set to "All". This is because there is no way to determine if the workspace given as the ``BackgroundWorkspace`` is
