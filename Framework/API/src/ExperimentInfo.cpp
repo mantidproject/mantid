@@ -930,7 +930,9 @@ void ExperimentInfo::saveExperimentInfoNexus(::NeXus::File *file, bool saveInstr
 }
 
 /** Load the sample and log info from an open NeXus file.
- * @param file :: open NeXus file
+ * @param file :: open NeXus file object
+ * @param fileInfo :: The file info descriptor corresponding to the provided file
+ * @param prefix :: The prefix of the file
  */
 void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
                                                const std::string &prefix) {

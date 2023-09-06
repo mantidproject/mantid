@@ -9,8 +9,8 @@ import unittest
 
 import matplotlib as mpl
 
-mpl.use("Agg")  # noqa
-from mantid.simpleapi import CreateSampleWorkspace
+mpl.use("Agg")
+from mantid.simpleapi import CreateSampleWorkspace, RenameWorkspace, DeleteWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
@@ -28,3 +28,23 @@ class SampleLogsViewTest(unittest.TestCase, QtWidgetFinder):
         QApplication.sendPostedEvents()
 
         self.assert_no_toplevel_widgets()
+
+    def test_workspace_updates(self):
+        ws = CreateSampleWorkspace()
+        pres = SampleLogs(ws)
+
+        # check rename of workspace
+        assert pres.view.windowTitle() == "ws sample logs"
+        assert pres.model._workspace_name == "ws"
+        RenameWorkspace("ws", "new_name")
+        assert pres.view.windowTitle() == "new_name sample logs"
+        assert pres.model._workspace_name == "new_name"
+
+        # check the workspace replaced if same name
+        ws2 = CreateSampleWorkspace(OutputWorkspace="new_name", BinWidth=1000)
+        assert repr(pres.model.get_ws()) == repr(ws2)
+
+        # delete workspace and check that the widget closes
+        assert pres.view.isVisible()
+        DeleteWorkspace("new_name")
+        assert not pres.view.isVisible()

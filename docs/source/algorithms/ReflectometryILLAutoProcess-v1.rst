@@ -101,6 +101,11 @@ Usage
 
     The R(Q) workspace has 672 points
 
+.. testcleanup:: SingleAngle
+
+    import os
+    os.remove("ws_0.out")
+
 **Example - Multiple Angles**
 
 .. testsetup:: MultipleAngles
@@ -128,6 +133,13 @@ Usage
     The R(Q) workspace at first angle has 186 points
     The R(Q) workspace at second angle has 94 points
     The R(Q) workspace at second angle has 280 points
+
+
+.. testcleanup:: MultipleAngles
+
+    import os
+    os.remove("ws_0.out")
+    os.remove("ws_1.out")
 
 **Example - Full treatment with 3 angles and multiple numors summed**
 

@@ -50,7 +50,7 @@ class SliceViewerView(QWidget, ObservingView):
         self._peaks_view = None
         # config the splitter appearance
         splitterStyleStr = """QSplitter::handle{
-            border: 1px dotted gray;
+            border: 1px solid gray;
             min-height: 10px;
             max-height: 20px;
             }"""

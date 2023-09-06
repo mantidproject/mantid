@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
@@ -16,7 +16,7 @@ namespace Algorithms {
 /** Extracts specified spectra from a workspace and places them in a new
   workspace.
 */
-class MANTID_ALGORITHMS_DLL ExtractSpectra : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL ExtractSpectra : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -37,19 +37,23 @@ private:
   void checkProperties();
   std::size_t getXMinIndex(const size_t wsIndex = 0);
   std::size_t getXMaxIndex(const size_t wsIndex = 0);
+  std::size_t histXMaxIndex() const;
+  const Kernel::cow_ptr<Mantid::HistogramData::HistogramX> getCroppedXHistogram(const API::MatrixWorkspace &workspace);
+  void cropCommon(API::MatrixWorkspace &workspace, Kernel::cow_ptr<Mantid::HistogramData::HistogramX> XHistogram,
+                  int index);
   void cropRagged(API::MatrixWorkspace &workspace, int index);
 
   /// The input workspace
   API::MatrixWorkspace_sptr m_inputWorkspace;
   DataObjects::EventWorkspace_sptr eventW;
   /// The bin index to start the cropped workspace from
-  std::size_t m_minX = 0;
+  std::size_t m_minXIndex = 0;
   /// The bin index to end the cropped workspace at
-  std::size_t m_maxX = 0;
+  std::size_t m_maxXIndex = 0;
   /// Flag indicating whether the input workspace has common boundaries
   bool m_commonBoundaries = false;
   /// Flag indicating whether we're dealing with histogram data
-  bool m_histogram = false;
+  bool m_isHistogramData = false;
   /// Flag indicating whether XMin and/or XMax has been set
   bool m_croppingInX = false;
   /// The list of workspaces to extract.

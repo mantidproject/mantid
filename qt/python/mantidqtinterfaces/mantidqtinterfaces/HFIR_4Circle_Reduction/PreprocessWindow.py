@@ -11,7 +11,7 @@ from mantidqtinterfaces.HFIR_4Circle_Reduction import reduce4circleControl
 from mantidqtinterfaces.HFIR_4Circle_Reduction import guiutility as gui_util
 from mantidqtinterfaces.HFIR_4Circle_Reduction import fourcircle_utility as fourcircle_utility
 from mantidqtinterfaces.HFIR_4Circle_Reduction import NTableWidget
-from qtpy.QtWidgets import QFileDialog, QMainWindow  # noqa
+from qtpy.QtWidgets import QFileDialog, QMainWindow
 from mantid.kernel import Logger
 
 try:

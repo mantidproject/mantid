@@ -144,6 +144,7 @@ void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow cons
   AlgorithmProperties::update("ProcessingInstructions", lookupRow.processingInstructions(), properties);
   AlgorithmProperties::update("BackgroundProcessingInstructions", lookupRow.backgroundProcessingInstructions(),
                               properties);
+  AlgorithmProperties::update("ROIDetectorIDs", lookupRow.roiDetectorIDs(), properties);
 }
 
 void updateWavelengthRangeProperties(AlgorithmRuntimeProps &properties,
@@ -304,7 +305,7 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const &model, Preview
                                                     Mantid::API::IAlgorithm_sptr alg) {
   // Create the algorithm
   if (!alg) {
-    alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+    alg = Mantid::API::AlgorithmManager::Instance().create("ReflectometryISISLoadAndProcess");
   }
   alg->setRethrows(true);
   alg->setAlwaysStoreInADS(false);
@@ -338,15 +339,20 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
     updateLookupRowProperties(*properties, *lookupRow);
   }
   // Update properties from the preview tab
-  properties->setProperty("InputWorkspace", previewRow.getSummedWs());
+  properties->setProperty("InputRunList", previewRow.runNumbers());
   properties->setProperty("ThetaIn", previewRow.theta());
+  if (previewRow.getSelectedBanks().has_value()) {
+    properties->setProperty("ROIDetectorIDs", previewRow.getSelectedBanks().get());
+  }
   updateProcessingInstructionsProperties(*properties, previewRow);
+
+  properties->setProperty("HideInputWorkspaces", true);
   return properties;
 }
 
 void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) {
   auto &row = dynamic_cast<PreviewRow &>(item);
-  MatrixWorkspace_sptr outputWs = algorithm->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWs = algorithm->getProperty("OutputWorkspaceBinned");
   row.setReducedWs(outputWs);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction
@@ -390,7 +396,6 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
   auto lookupRow = row ? findLookupRow(*row, model) : findWildcardLookupRow(model);
   if (lookupRow) {
     updateLookupRowProperties(*properties, *lookupRow);
-    AlgorithmProperties::update("ROIDetectorIDs", lookupRow->roiDetectorIDs(), *properties);
   }
   // Update properties the user has specifically set for this run
   if (row) {

@@ -10,8 +10,6 @@ if(CMAKE_COMPILER_IS_GNUCXX
   add_definitions(-DBOOST_PYTHON_USE_GCC_SYMBOL_VISIBILITY)
 endif()
 
-set(PYTHON_DEPS ${MPI_CXX_LIBRARIES})
-
 # Keep boost python separate from other boost
 set(_boost_libs_orig ${Boost_LIBRARIES})
 set(Boost_LIBRARIES)
@@ -95,18 +93,9 @@ add_subdirectory(mantid)
 
 include(PythonPackageTargetFunctions)
 
-# Adds `mantid` as a target in the `MantidFramework/Python` folder
-if(APPLE)
-  set(_install_lib_dirs)
-  list(APPEND _install_lib_dirs ${WORKBENCH_SITE_PACKAGES})
-else()
-  set(_install_lib_dirs "${SITE_PACKAGES}")
-endif()
-
 add_python_package(
   PythonInterface
   EGGLINKNAME mantid
-  INSTALL_LIB_DIRS ${_install_lib_dirs}
   GENERATE_SITECUSTOMIZE
 )
 

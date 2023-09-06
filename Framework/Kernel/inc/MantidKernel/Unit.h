@@ -93,18 +93,7 @@ public:
   void toTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const int &_emode,
              const UnitParametersMap &params);
 
-  /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
-   *  @param xvalue ::   A single X-value to convert
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry,
-   * 2=indirect geometry)
-   *  @param params ::  Map containing optional parameters eg
-   *                    The sample-detector distance (in metres)
-   *                    The scattering angle (in radians)
-   *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
-   *                    Delta (not currently used)
-   *  @return the value in TOF units.
-   */
+  /// Convert from the concrete unit to time-of-flight. TOF is in microseconds.
   double convertSingleToTOF(const double xvalue, const double &l1, const int &emode, const UnitParametersMap &params);
 
   /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
@@ -126,34 +115,10 @@ public:
   void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const int &_emode,
                const UnitParametersMap &params);
 
-  /** Convert from the time-of-flight to the concrete unit. TOF is in
-   * microseconds.
-   *  @param xvalue ::   A single X-value to convert
-   *  @param l1 ::       The source-sample distance (in metres)
-   *  @param emode ::    The energy mode (0=elastic, 1=direct geometry,
-   * 2=indirect geometry)
-   *  @param params ::  Map containing optional parameters eg
-   *                    The sample-detector distance (in metres)
-   *                    The scattering angle (in radians)
-   *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
-   *                    Delta (not currently used)
-   *  @return the value in these units.
-   */
+  /// Convert from the time-of-flight to the concrete unit. TOF is in microseconds.
   double convertSingleFromTOF(const double xvalue, const double &l1, const int &emode, const UnitParametersMap &params);
 
-  /** Initialize the unit to perform conversion using singleToTof() and
-   *singleFromTof()
-   *
-   *  @param _l1 ::       The source-sample distance (in metres)
-   *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
-   *2=indirect geometry)
-   *  @param params ::    map containing other optional parameters:
-   *                      The sample-detector distance (in metres)
-   *                      The scattering angle (in radians)
-   *                      Fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-   *                      Diffractometer constants (DIFA, DIFC, TZERO)
-   *                      Delta: unused
-   */
+  /// Initialize the unit to perform conversion using singleToTof() and singleFromTof()
   void initialize(const double &_l1, const int &_emode, const UnitParametersMap &params);
 
   /** Finalize the initialization. This will be overridden by subclasses as
@@ -377,6 +342,9 @@ protected:
 
 MANTID_KERNEL_DLL double tofToDSpacingFactor(const double l1, const double l2, const double twoTheta,
                                              const double offset);
+
+MANTID_KERNEL_DLL double calculateDIFCCorrection(const double l1, const double l2, const double twotheta,
+                                                 const double offset, const double binWidth);
 
 //=================================================================================================
 /// d-Spacing in Angstrom

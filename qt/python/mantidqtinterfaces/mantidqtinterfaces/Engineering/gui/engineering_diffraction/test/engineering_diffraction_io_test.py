@@ -32,7 +32,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_view import SettingsView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import SettingsPresenter
 
-IO_VERSION = 1
+IO_VERSION = 2
 TEST_FILE = "ENGINX_277208_focused_bank_2.nxs"
 TEST_WS = "ENGINX_277208_focused_bank_2_Fitting"
 FIT_WS = TEST_WS + "_Workspace"
@@ -180,7 +180,7 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
 
     def test_fits_encode(self):
         self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE)
-        self.presenter.fitting_presenter.data_widget.presenter.model._fit_results = FIT_RESULTS
+        self.presenter.fitting_presenter.plot_widget.model._fit_results = FIT_RESULTS
         self.fitprop_browser.read_current_fitprop.return_value = FIT_DICT
         self.fitprop_browser.plotDiff.return_value = True
         self.presenter.fitting_presenter.data_widget.presenter.plotted = {FIT_WS}

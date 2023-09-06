@@ -1,3 +1,6 @@
+set "parent_dir=%RECIPE_DIR%\.."
+CALL "%parent_dir%\archive_env_logs.bat" %BUILD_PREFIX% %PREFIX% mantidworkbench
+
 mkdir build && cd build
 
 cmake ^
@@ -5,7 +8,6 @@ cmake ^
     -DCMAKE_INSTALL_LIBDIR=%LIBRARY_LIB% ^
     -DCMAKE_PREFIX_PATH=%LIBRARY_PREFIX% ^
     -DCONDA_BUILD=True ^
-    -DCONDA_ENV=True ^
     -DENABLE_PRECOMMIT=OFF ^
     -DENABLE_DOCS=OFF ^
     -DMANTID_FRAMEWORK_LIB=SYSTEM ^

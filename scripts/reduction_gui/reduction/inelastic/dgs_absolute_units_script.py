@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
-    from the the interface class so that the DgsReduction class could
+    from the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
 import xml.dom.minidom
@@ -16,7 +16,6 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 
 
 class AbsoluteUnitsScript(BaseScriptElement):
-
     do_absolute_units = False
     absunits_vanadium = ""
     grouping_file = ""
@@ -144,7 +143,7 @@ class AbsoluteUnitsScript(BaseScriptElement):
             )
             self.absunits_median_test_out_high = BaseScriptElement.getFloatElement(
                 instrument_dom, "median_test_out_high", default=AbsoluteUnitsScript.absunits_median_test_out_high
-            )  # noqa
+            )
             self.absunits_median_test_low = BaseScriptElement.getFloatElement(
                 instrument_dom, "median_test_low", default=AbsoluteUnitsScript.absunits_median_test_low
             )

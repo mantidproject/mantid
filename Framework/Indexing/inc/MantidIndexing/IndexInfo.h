@@ -9,7 +9,6 @@
 #include "MantidIndexing/DllConfig.h"
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidParallel/StorageMode.h"
 
 #include <functional>
 #include <set>
@@ -17,9 +16,6 @@
 
 namespace Mantid {
 class SpectrumDefinition;
-namespace Parallel {
-class Communicator;
-}
 namespace Indexing {
 class GlobalSpectrumIndex;
 class SpectrumIndexSet;
@@ -56,13 +52,9 @@ class SpectrumNumberTranslator;
 */
 class MANTID_INDEXING_DLL IndexInfo {
 public:
-  explicit IndexInfo(const size_t globalSize, const Parallel::StorageMode &storageMode = Parallel::StorageMode::Cloned);
-  IndexInfo(const size_t globalSize, const Parallel::StorageMode storageMode,
-            const Parallel::Communicator &communicator);
-  explicit IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
-                     const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
-  IndexInfo(std::vector<SpectrumNumber> spectrumNumbers, const Parallel::StorageMode storageMode,
-            const Parallel::Communicator &communicator);
+  IndexInfo(const size_t globalSize);
+  IndexInfo(std::vector<SpectrumNumber> spectrumNumbers);
+
   template <class IndexType> IndexInfo(std::vector<IndexType> indices, const IndexInfo &parent);
 
   IndexInfo(const IndexInfo &other);
@@ -95,14 +87,8 @@ public:
 
   bool isOnThisPartition(GlobalSpectrumIndex globalIndex) const;
 
-  Parallel::StorageMode storageMode() const;
-  const Parallel::Communicator &communicator() const;
-
 private:
   void makeSpectrumNumberTranslator(std::vector<SpectrumNumber> &&spectrumNumbers) const;
-
-  Parallel::StorageMode m_storageMode;
-  std::unique_ptr<Parallel::Communicator> m_communicator;
 
   Kernel::cow_ptr<std::vector<SpectrumDefinition>> m_spectrumDefinitions{nullptr};
   mutable Kernel::cow_ptr<SpectrumNumberTranslator> m_spectrumNumberTranslator{nullptr};

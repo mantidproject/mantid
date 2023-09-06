@@ -17,7 +17,7 @@
 namespace Mantid {
 namespace Kernel {
 /**
-  This implements the the Mersenne Twister 19937 pseudo-random number
+  This implements the Mersenne Twister 19937 pseudo-random number
   generator algorithm as a specialzation of the PseudoRandomNumberGenerator
   interface.
 */

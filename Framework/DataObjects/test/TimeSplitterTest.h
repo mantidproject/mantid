@@ -13,6 +13,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/TimeSplitter.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeROI.h"
 #include <cxxtest/TestSuite.h>
 
@@ -24,6 +25,7 @@ using Mantid::DataObjects::EventList;
 using Mantid::DataObjects::EventSortType;
 using Mantid::DataObjects::TimeSplitter;
 using Mantid::Kernel::SplittingInterval;
+using Mantid::Kernel::SplittingIntervalVec;
 using Mantid::Kernel::TimeROI;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
@@ -78,13 +80,18 @@ private:
   }
 
   /// Instantiate an EventList for every input destination index
+  /// Insert an EventList for NO_TARGET if not provided in destinations
   std::map<int, EventList *> instantiatePartials(const std::vector<int> &destinations) {
     std::map<int, EventList *> partials;
+
     for (int destination : destinations) {
       if (partials.find(destination) != partials.cend())
-        throw std::runtime_error("cannot have duplicate destinations");
+        continue;
       partials[destination] = new EventList();
     }
+    // insert an EventList for NO_TARGET if not provided in destinations
+    if (partials.find(TimeSplitter::NO_TARGET) == partials.cend())
+      partials[TimeSplitter::NO_TARGET] = new EventList();
     return partials;
   }
 
@@ -96,7 +103,7 @@ private:
    * any time `t` such that times[i] <= t < times[i+1] will be associated to
    * destination index `indexes[i]`
    *
-   * Destination index '-1` is allowed.
+   * Destination index '-1` is allowed and means no destination
    *
    * @param times : vector of times
    * @param indexes : vector of destination indexes
@@ -115,7 +122,7 @@ private:
    *
    * The size of vector `intervals` must be the same as `destinations`.
    *
-   * Destination index '-1` is allowed.
+   * Destination index '-1` is allowed and means no destination
    *
    * @param intervals : time intervals (in seconds) between consecutive DateAndTime boundaries
    * @param destinations : vector of destination indexes
@@ -136,6 +143,37 @@ private:
     return splitter;
   }
 
+  /**
+   * Helper function to generate the event times associated to each event in the list as a string
+   *
+   * @param partial : the input event list
+   * @param timeType : which time to select for each event (pulse, pulse+TOF, pulse+corrected_TOF)
+   * @param factor : dimensionless quantity to rescale the TOF of each event
+   * @param shift : TOF offset, in micro-seconds, to be applied after rescaling
+   */
+  std::vector<std::string> timesToStr(const EventList *partial, const EventSortType &timeType,
+                                      const double &factor = 0.0, const double &shift = 0.0) {
+    std::vector<DateAndTime> dates;
+    switch (timeType) {
+    case (EventSortType::PULSETIME_SORT):
+      dates = partial->getPulseTimes();
+      break;
+    case (EventSortType::PULSETIMETOF_SORT):
+      dates = partial->getPulseTOFTimes();
+      break;
+    case (EventSortType::TIMEATSAMPLE_SORT):
+      // method getPulseTOFTimesAtSample requires argument `shift` in micro-seconds
+      dates = partial->getPulseTOFTimesAtSample(factor, shift);
+      break;
+    default:
+      throw std::runtime_error("timesToStr: Unhandled event sorting type");
+    }
+    std::vector<std::string> obtained;
+    std::transform(dates.cbegin(), dates.cend(), std::back_inserter(obtained),
+                   [](const DateAndTime &date) { return date.toSimpleString(); });
+    return obtained;
+  };
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -151,7 +189,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({0}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({0}));
 
     // add ROI for first half to go to 1st output
     splitter.addROI(TWO, THREE, 1);
@@ -161,7 +199,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({0, 1}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({0, 1}));
 
     // add ROI for second half to go to 2nd output
     splitter.addROI(THREE, FOUR, 2);
@@ -171,7 +209,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 2}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({1, 2}));
 
     // have whole thing go to 3rd output
     splitter.addROI(TWO, FOUR, 3);
@@ -181,7 +219,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({3}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({3}));
 
     // prepend a section that goes to 1st output
     splitter.addROI(ONE, TWO, 1);
@@ -191,7 +229,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 3}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({1, 3}));
 
     // append a section that goes to 2nd output
     splitter.addROI(FOUR, FIVE, 2);
@@ -201,7 +239,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), 2);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 4);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({1, 2, 3}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({1, 2, 3}));
 
     // set before the beginning to mask
     splitter.addROI(ONE, TWO, TimeSplitter::NO_TARGET);
@@ -211,7 +249,7 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), 2);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({2, 3}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({2, 3}));
 
     // set after the end to mask
     splitter.addROI(FOUR, FIVE, TimeSplitter::NO_TARGET);
@@ -221,14 +259,30 @@ public:
     TS_ASSERT_EQUALS(splitter.valueAtTime(FOUR), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.valueAtTime(FIVE), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 2);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({3}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({3}));
   }
 
   void test_emptySplitter() {
     TimeSplitter splitter;
     TS_ASSERT_EQUALS(splitter.valueAtTime(DateAndTime("2023-01-01T11:00:00")), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 0);
-    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::vector<int>({}));
+    TS_ASSERT_EQUALS(splitter.outputWorkspaceIndices(), std::set<int>({}));
+  }
+
+  void test_addAdjacentROI() {
+    // append to ROI with touching boundary
+    TimeSplitter splitter;
+    splitter.addROI(ONE, TWO, 1);
+    splitter.addROI(TWO, THREE, 2);
+    TS_ASSERT_EQUALS(splitter.numRawValues(), 3);
+    TS_ASSERT_EQUALS(splitter.valueAtTime(TWO), 2);
+
+    // prepend to ROI with touching boundary
+    TimeSplitter splitter2;
+    splitter2.addROI(TWO, THREE, 2);
+    splitter2.addROI(ONE, TWO, 1);
+    TS_ASSERT_EQUALS(splitter2.numRawValues(), 3);
+    TS_ASSERT_EQUALS(splitter2.valueAtTime(TWO), 2);
   }
 
   void test_gap() {
@@ -266,36 +320,61 @@ public:
 
     // start with empty TimeSplitter
     TimeSplitter splitter;
-    TS_ASSERT(splitter.getTimeROI(TimeSplitter::NO_TARGET).empty());
-    TS_ASSERT(splitter.getTimeROI(0).empty());
+    TS_ASSERT(splitter.getTimeROI(TimeSplitter::NO_TARGET).useAll());
+    TS_ASSERT(splitter.getTimeROI(0).useAll());
 
     // place to put the output
     TimeROI roi;
 
     // add a single TimeROI
     splitter.addROI(ONE, THREE, 1);
-    TS_ASSERT(splitter.getTimeROI(TimeSplitter::NO_TARGET).empty());
-    TS_ASSERT(splitter.getTimeROI(0).empty());
-    TS_ASSERT(splitter.getTimeROI(0).empty());
+    TS_ASSERT(splitter.getTimeROI(TimeSplitter::NO_TARGET).useAll());
+    TS_ASSERT(splitter.getTimeROI(0).useAll());
+    TS_ASSERT(splitter.getTimeROI(0).useAll());
     roi = splitter.getTimeROI(1);
-    TS_ASSERT(!roi.empty());
+    TS_ASSERT(!roi.useAll());
     TS_ASSERT_EQUALS(roi.numBoundaries(), 2);
 
     // add the same output index, but with a gap from the previous
     splitter.addROI(FOUR, FIVE, 1);
     roi = splitter.getTimeROI(TimeSplitter::NO_TARGET - 1); // intentionally trying a "big" negative for ignore filter
-    TS_ASSERT(!roi.empty());
+    TS_ASSERT(!roi.useAll());
     TS_ASSERT_EQUALS(roi.numBoundaries(), 2);
-    TS_ASSERT(splitter.getTimeROI(0).empty());
-    TS_ASSERT(splitter.getTimeROI(0).empty());
+    TS_ASSERT(splitter.getTimeROI(0).useAll());
+    TS_ASSERT(splitter.getTimeROI(0).useAll());
     roi = splitter.getTimeROI(1);
-    TS_ASSERT(!roi.empty());
+    TS_ASSERT(!roi.useAll());
     TS_ASSERT_EQUALS(roi.numBoundaries(), 4);
   }
 
+  void test_toSplitters() {
+    TimeSplitter splitter;
+    splitter.addROI(ONE, TWO, 1);
+    splitter.addROI(TWO, THREE, 2);
+    splitter.addROI(FOUR, FIVE, 3); // a gap with the previous ROI
+    const SplittingIntervalVec splitVec = splitter.toSplitters(true);
+    TS_ASSERT_EQUALS(splitVec.size(), 4);
+    TS_ASSERT(splitVec[0] == SplittingInterval(ONE, TWO, 1));
+    TS_ASSERT(splitVec[1] == SplittingInterval(TWO, THREE, 2));
+    TS_ASSERT(splitVec[2] == SplittingInterval(THREE, FOUR, TimeSplitter::NO_TARGET));
+    TS_ASSERT(splitVec[3] == SplittingInterval(FOUR, FIVE, 3));
+    const SplittingIntervalVec splitVecNoTarget = splitter.toSplitters(false);
+    TS_ASSERT_EQUALS(splitVecNoTarget.size(), 3);
+    TS_ASSERT(splitVecNoTarget[0] == SplittingInterval(ONE, TWO, 1));
+    TS_ASSERT(splitVecNoTarget[1] == SplittingInterval(TWO, THREE, 2));
+    TS_ASSERT(splitVecNoTarget[2] == SplittingInterval(FOUR, FIVE, 3));
+  }
+
+  /** Test that a TimeSplitter object constructed from a MatrixWorkspace object
+   * containing absolute times is equivalent to a TimeSplitter object built by
+   * successively adding time ROIs. Also test that TimeSplitter supports
+   * "OutputWorkspaceIndexedFrom1" property of FilterEvents class: optionally shift
+   * all target indexes (just for the output naming purposes) so they start from 1.
+   * @brief test_timeSplitterFromMatrixWorkspaceAbsoluteTimes
+   */
   void test_timeSplitterFromMatrixWorkspaceAbsoluteTimes() {
     TimeSplitter splitter;
-    splitter.addROI(DateAndTime(0, 0), DateAndTime(10, 0), 1);
+    splitter.addROI(DateAndTime(0, 0), DateAndTime(10, 0), 0);
     splitter.addROI(DateAndTime(10, 0), DateAndTime(15, 0), 3);
     splitter.addROI(DateAndTime(15, 0), DateAndTime(20, 0), 2);
 
@@ -308,20 +387,30 @@ public:
     X[2] = 15.0;
     X[3] = 20.0;
 
-    Y[0] = 1.0;
+    Y[0] = 0.0;
     Y[1] = 3.0;
     Y[2] = 2.0;
     auto convertedSplitter = new TimeSplitter(ws);
 
     TS_ASSERT(splitter.numRawValues() == convertedSplitter->numRawValues() && convertedSplitter->numRawValues() == 4);
     TS_ASSERT(splitter.valueAtTime(DateAndTime(0, 0)) == convertedSplitter->valueAtTime(DateAndTime(0, 0)) &&
-              convertedSplitter->valueAtTime(DateAndTime(0, 0)) == 1);
+              convertedSplitter->valueAtTime(DateAndTime(0, 0)) == 0);
     TS_ASSERT(splitter.valueAtTime(DateAndTime(12, 0)) == convertedSplitter->valueAtTime(DateAndTime(12, 0)) &&
               convertedSplitter->valueAtTime(DateAndTime(12, 0)) == 3);
     TS_ASSERT(splitter.valueAtTime(DateAndTime(20, 0)) == convertedSplitter->valueAtTime(DateAndTime(20, 0)) &&
               convertedSplitter->valueAtTime(DateAndTime(20, 0)) == TimeSplitter::NO_TARGET);
+
+    // test shifing all input indexes by 1
+    TS_ASSERT(convertedSplitter->getWorkspaceIndexName(0, 1) == "1"); // 0 becomes 1
+    TS_ASSERT(convertedSplitter->getWorkspaceIndexName(3, 1) == "4"); // 3 becomes 4
+    TS_ASSERT(convertedSplitter->getWorkspaceIndexName(2, 1) == "3"); // 2 becomes 3
   }
 
+  /** Test that a TimeSplitter object constructed from a MatrixWorkspace object
+   * containing relative times is equivalent to a TimeSplitter object built by
+   * successively adding time ROIs.
+   * @brief test_timeSplitterFromMatrixWorkspaceRelativeTimes
+   */
   void test_timeSplitterFromMatrixWorkspaceRelativeTimes() {
     TimeSplitter splitter;
     int64_t offset_ns{TWO.totalNanoseconds()};
@@ -371,7 +460,7 @@ public:
     // by design, a table workspace used for event filtering must have 3 columns
     tws->addColumn("double", "start");
     tws->addColumn("double", "stop");
-    tws->addColumn("str", "target"); // index of a workspace where the filtered time events will be output
+    tws->addColumn("str", "target"); // to be used as a suffix of the output workspace name
 
     // by design, all times in the table must be in seconds
     const double time1_s{1.0e-5};
@@ -427,7 +516,7 @@ public:
     // by design, a table workspace used for event filtering must have 3 columns
     tws->addColumn("double", "start");
     tws->addColumn("double", "stop");
-    tws->addColumn("str", "target"); // index of a workspace where the filtered time events will be output
+    tws->addColumn("str", "target"); // to be used as a suffix of the output workspace name
 
     // by design, all times in the table must be in seconds
     const double time1_s{1.0e-5};
@@ -445,7 +534,7 @@ public:
     row << time5_s << time6_s << std::to_string(TimeSplitter::NO_TARGET);
 
     // create a TimeSplitter object from the table. By design, the table user must know whether
-    // the table holds absolute or relative times. In the latter case the user must have
+    // the table holds absolute or relative times. In the latter case the user must specify
     // a time offset to be used with the table.
     DateAndTime offset(THREE);
     TimeSplitter workspaceDerivedSplitter(tws, offset);
@@ -481,6 +570,82 @@ public:
     TS_ASSERT(referenceSplitter.valueAtTime(time4_abs) == workspaceDerivedSplitter.valueAtTime(time4_abs));
     TS_ASSERT(referenceSplitter.valueAtTime(time5_abs) == workspaceDerivedSplitter.valueAtTime(time5_abs));
     TS_ASSERT(referenceSplitter.valueAtTime(time6_abs) == workspaceDerivedSplitter.valueAtTime(time6_abs));
+  }
+
+  /** Test that a TimeSplitter object constructed from a TableWorkspace object
+   * containing non-numeric targets is equivalent to a TimeSplitter object built by
+   * successively adding time ROIs. Also check that the TimeSplitter internal mapping
+   * of the target names is correct.
+   * @brief test_timeSplitterFromTableWorkspaceRelativeTimes
+   */
+  void test_timeSplitterFromTableWorkspaceWithNonNumericTargets() {
+    auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
+
+    // by design, a table workspace used for event filtering must have 3 columns
+    tws->addColumn("double", "start");
+    tws->addColumn("double", "stop");
+    tws->addColumn("str", "target"); // to be used as a suffix of the output workspace name
+
+    // by design, all times in the table must be in seconds
+    const double time1_s{1.0e-5};
+    const double time2_s{1.5e-5};
+    const double time3_s{2.0e-5};
+    const double time4_s{3.0e-5};
+    const double time5_s{4.0e-5};
+    const double time6_s{5.0e-5};
+
+    TableRow row = tws->getFirstRow();
+    row << time1_s << time2_s << "A";
+    row.next();
+    row << time3_s << time4_s << std::to_string(TimeSplitter::NO_TARGET);
+    row.next();
+    row << time5_s << time6_s << "B";
+
+    // create a TimeSplitter object from the table. By design, the table user must know whether
+    // the table holds absolute or relative times. In the latter case the user must specify
+    // a time offset to be used with the table.
+    DateAndTime offset(THREE);
+    TimeSplitter workspaceDerivedSplitter(tws, offset);
+
+    // build a reference time splitter
+
+    // create all time objects and offset them
+    DateAndTime time1_abs(time1_s, 0.0);
+    DateAndTime time2_abs(time2_s, 0.0);
+    DateAndTime time3_abs(time3_s, 0.0);
+    DateAndTime time4_abs(time4_s, 0.0);
+    DateAndTime time5_abs(time5_s, 0.0);
+    DateAndTime time6_abs(time6_s, 0.0);
+
+    int64_t offset_ns = offset.totalNanoseconds();
+    time1_abs += offset_ns;
+    time2_abs += offset_ns;
+    time3_abs += offset_ns;
+    time4_abs += offset_ns;
+    time5_abs += offset_ns;
+    time6_abs += offset_ns;
+
+    // build the reference splitter by adding ROIs
+    TimeSplitter referenceSplitter;
+    referenceSplitter.addROI(time1_abs, time2_abs, 0);
+    referenceSplitter.addROI(time3_abs, time4_abs, TimeSplitter::NO_TARGET);
+    referenceSplitter.addROI(time5_abs, time6_abs, 1);
+
+    // check that the two time splitters are the same internally
+    TS_ASSERT_EQUALS(referenceSplitter.numRawValues(), workspaceDerivedSplitter.numRawValues());
+    TS_ASSERT(referenceSplitter.valueAtTime(time1_abs) == workspaceDerivedSplitter.valueAtTime(time1_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time2_abs) == workspaceDerivedSplitter.valueAtTime(time2_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time3_abs) == workspaceDerivedSplitter.valueAtTime(time3_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time4_abs) == workspaceDerivedSplitter.valueAtTime(time4_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time5_abs) == workspaceDerivedSplitter.valueAtTime(time5_abs));
+    TS_ASSERT(referenceSplitter.valueAtTime(time6_abs) == workspaceDerivedSplitter.valueAtTime(time6_abs));
+
+    // check that non-numeric target names are internally mapped to consecutive indexes starting from 0
+    TS_ASSERT(workspaceDerivedSplitter.getWorkspaceIndexName(0) == "A");
+    TS_ASSERT(workspaceDerivedSplitter.getWorkspaceIndexName(1) == "B");
+    // check that "no target" index name is mapped to the correct value
+    TS_ASSERT(workspaceDerivedSplitter.getWorkspaceIndexName(TimeSplitter::NO_TARGET) ==
+              std::to_string(TimeSplitter::NO_TARGET));
   }
 
   /** Test that a TimeSplitter object constructed from a SplittersWorkspace object
@@ -551,30 +716,6 @@ public:
 
   void test_splitEventList() {
     DateAndTime startTime{TWO};
-    // return the times associated to each event in the list as a string
-    // factor is a dimensionless quantity, and shift is a time in micro-seconds
-    auto timesToStr = [](const EventList *partial, const EventSortType &timeType, const double &factor = 0.0,
-                         const double &shift = 0.0) {
-      std::vector<DateAndTime> dates;
-      switch (timeType) {
-      case (EventSortType::PULSETIME_SORT):
-        dates = partial->getPulseTimes();
-        break;
-      case (EventSortType::PULSETIMETOF_SORT):
-        dates = partial->getPulseTOFTimes();
-        break;
-      case (EventSortType::TIMEATSAMPLE_SORT):
-        // method getPulseTOFTimesAtSample requires argument `shift` in micro-seconds
-        dates = partial->getPulseTOFTimesAtSample(factor, shift);
-        break;
-      default:
-        throw std::runtime_error("timesToStr: Unhandled event sorting type");
-      }
-      std::vector<std::string> obtained;
-      std::transform(dates.cbegin(), dates.cend(), std::back_inserter(obtained),
-                     [](const DateAndTime &date) { return date.toSimpleString(); });
-      return obtained;
-    };
     // Generate the events. Six events, the first at "2023-Jan-01 12:00:00" and then every 30 seconds. The last
     // event happening at "2023-Jan-01 12:02:30".
     double pulsePeriod{60.}; // time between consecutive pulses, in seconds
@@ -639,5 +780,44 @@ public:
     expected = {};
     TS_ASSERT(timesToStr(partials[TimeSplitter::NO_TARGET], EventSortType::TIMEATSAMPLE_SORT, factor, shift) ==
               expected);
+  }
+
+  // This test aims to test a TimeSplitter containing a splitter that will end up holding no events
+  void test_splitEventListLeapingTimes() {
+    // Generate the events. Six events, the first at "2023-Jan-01 12:00:00" and then every 30 seconds. The last
+    // event happening at "2023-Jan-01 12:02:30".
+    DateAndTime startTime{TWO};
+    double pulsePeriod{60.}; // time between consecutive pulses, in seconds
+    size_t nPulses{3};
+    size_t eventsPerPulse{2};
+    EventType eventType = EventType::TOF;
+    EventList events = this->generateEvents(startTime, pulsePeriod, nPulses, eventsPerPulse, eventType);
+    // Generate a splitter with six intervals:
+    // interval ["2023-Jan-01 12:00:00", "2023-Jan-01 12:00:30") with destination 0
+    // interval ["2023-Jan-01 12:00:30", "2023-Jan-01 12:00:45") with destination 1
+    // interval ["2023-Jan-01 12:00:45", "2023-Jan-01 12:01:00") with destination 2
+    // interval ["2023-Jan-01 12:01:00", "2023-Jan-01 12:02:00") with destination 3
+    // interval ["2023-Jan-01 12:02:00", "2023-Jan-01 12:02:10") with destination 1
+    // interval ["2023-Jan-01 12:02:10", "2023-Jan-01 12:02:20") with destination 2
+    std::vector<double> intervals{30, 15, 15, 60, 10, 10};
+    const std::vector<int> destinations{0, 1, 2, 3, 1, 2};
+    TimeSplitter splitter = this->generateSplitter(startTime, intervals, destinations);
+    // Generate the output partial event lists
+    std::map<int, EventList *> partials = this->instantiatePartials(destinations);
+    /// Split events according to pulse time + TOF
+    bool pulseTof{true};
+    splitter.splitEventList(events, partials, pulseTof);
+    /// Check which event landed on which partial event list
+    std::vector<std::string> expected;
+    expected = {"2023-Jan-01 12:00:00"};
+    TS_ASSERT(timesToStr(partials[0], EventSortType::PULSETIMETOF_SORT) == expected);
+    expected = {"2023-Jan-01 12:00:30", "2023-Jan-01 12:02:00"};
+    TS_ASSERT(timesToStr(partials[1], EventSortType::PULSETIMETOF_SORT) == expected);
+    expected = {}; // no events for this workspace
+    TS_ASSERT(timesToStr(partials[2], EventSortType::PULSETIMETOF_SORT) == expected);
+    expected = {"2023-Jan-01 12:01:00", "2023-Jan-01 12:01:30"};
+    TS_ASSERT(timesToStr(partials[3], EventSortType::PULSETIMETOF_SORT) == expected);
+    expected = {"2023-Jan-01 12:02:30"};
+    TS_ASSERT(timesToStr(partials[TimeSplitter::NO_TARGET], EventSortType::PULSETIMETOF_SORT) == expected);
   }
 };

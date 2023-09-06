@@ -1013,7 +1013,7 @@ void Integrate3DEvents::addModEvent(std::pair<std::pair<double, double>, V3D> ev
 
 /**
  * Integrate a list of events, centered about (0,0,0) given the principal
- * axes for the events and the standard deviations in the the directions
+ * axes for the events and the standard deviations in the directions
  * of the principal axes.
  *
  * @param E1Vec             Vector of values for calculating edge of detectors

@@ -39,7 +39,7 @@ static const signal_t MDMaskValue = std::numeric_limits<double>::quiet_NaN();
 
 class MANTID_API_DLL IMDWorkspace : public Workspace, public API::MDGeometry {
 public:
-  IMDWorkspace(const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
+  IMDWorkspace();
   IMDWorkspace &operator=(const IMDWorkspace &other) = delete;
 
   /**

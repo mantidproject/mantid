@@ -34,7 +34,7 @@ public:
   virtual ~FunctionDomain() = default;
   /// Return the number of points in the domain
   virtual size_t size() const = 0;
-  /// Reset the the domain so it can be reused. Implement this method for
+  /// Reset the domain so it can be reused. Implement this method for
   /// domains with a state.
   virtual void reset() const {}
 };

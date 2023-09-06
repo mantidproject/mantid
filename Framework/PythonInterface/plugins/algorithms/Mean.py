@@ -42,19 +42,24 @@ class Mean(PythonAlgorithm):
         issues = dict()
         workspaces = self.getProperty("Workspaces").value.split(",")
         name = workspaces[0].strip()
-        if name not in mtd:
-            issues["Workspaces"] = f"Workspace '{name}' does not exist"
+
+        validation_message = self._validate_workspace_type(name)
+        if validation_message != "":
+            issues["Workspaces"] = validation_message
             return issues
+
         ws1 = mtd[name]
         nSpectra = ws1.getNumberHistograms()
 
         for index in range(1, len(workspaces)):
             name = workspaces[index].strip()
-            if name not in mtd:
-                issues["Workspaces"] = f"Workspace '{name}' does not exist"
-                return issues
-            ws2 = mtd[name]
 
+            validation_message = self._validate_workspace_type(name)
+            if validation_message != "":
+                issues["Workspaces"] = validation_message
+                return issues
+
+            ws2 = mtd[name]
             if not self._are_workspaces_compatible(ws1, ws2):
                 issues["Workspaces"] = "Input Workspaces are not the same shape."
                 # cannot run the next test if this fails
@@ -63,6 +68,13 @@ class Mean(PythonAlgorithm):
                 if not numpy.allclose(ws1.readX(spectra), ws2.readX(spectra)):
                     issues["Workspaces"] = "The data should have the same order for x values. Sort your data first"
         return issues
+
+    def _validate_workspace_type(self, workspace_name):
+        if workspace_name not in mtd:
+            return f"Workspace '{workspace_name}' does not exist"
+        if not isinstance(mtd[workspace_name], MatrixWorkspace):
+            return f"Workspace '{workspace_name}' is not a MatrixWorkspace"
+        return ""
 
     def _are_workspaces_compatible(self, ws_a, ws_b):
         match_bins = ws_a.blocksize() == ws_b.blocksize()

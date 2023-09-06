@@ -126,6 +126,7 @@ set(SRC_FILES
     src/Functions/LogNormal.cpp
     src/Functions/Lorentzian.cpp
     src/Functions/MagneticOrderParameter.cpp
+    src/Functions/Meier.cpp
     src/Functions/MultivariateGaussianComptonProfile.cpp
     src/Functions/MuonFInteraction.cpp
     src/Functions/MuoniumDecouplingCurve.cpp
@@ -311,6 +312,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/LogNormal.h
     inc/MantidCurveFitting/Functions/Lorentzian.h
     inc/MantidCurveFitting/Functions/MagneticOrderParameter.h
+    inc/MantidCurveFitting/Functions/Meier.h
     inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
     inc/MantidCurveFitting/Functions/MuonFInteraction.h
     inc/MantidCurveFitting/Functions/MuoniumDecouplingCurve.h
@@ -485,6 +487,7 @@ set(TEST_FILES
     Functions/LogNormalTest.h
     Functions/LorentzianTest.h
     Functions/MagneticOrderParameterTest.h
+    Functions/MeierTest.h
     Functions/MultivariateGaussianComptonProfileTest.h
     Functions/MuonFInteractionTest.h
     Functions/MuoniumDecouplingCurveTest.h
@@ -586,8 +589,4 @@ target_include_directories(
 generate_mantid_export_header(CurveFitting FALSE)
 
 # Installation settings
-if(CONDA_ENV)
-  mtd_install_framework_lib(TARGETS CurveFitting PLUGIN_LIB)
-else()
-  mtd_install_targets(TARGETS CurveFitting INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
-endif()
+mtd_install_framework_lib(TARGETS CurveFitting PLUGIN_LIB)

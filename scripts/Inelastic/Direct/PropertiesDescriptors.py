@@ -13,13 +13,12 @@ import os
 import numpy as np
 import math
 import re
-from collections import Iterable
+from collections.abc import Iterable, Callable
 import mantid.simpleapi as mantid
 from mantid import api
 
 import Direct.ReductionHelpers as prop_helpers
 from Direct.AbsorptionShapes import *
-import collections
 
 
 # -----------------------------------------------------------------------------------------
@@ -549,10 +548,9 @@ class SaveFileName(PropDescriptor):
         return name
 
     def __set__(self, instance, value):
-
         if value is None:
             self._file_name = None
-        elif isinstance(value, collections.Callable):
+        elif isinstance(value, Callable):
             self._custom_print = value
         else:
             self._file_name = str(value)
@@ -574,7 +572,6 @@ class InstrumentDependentProp(PropDescriptor):
         self._prop_name = prop_name
 
     def __get__(self, instance, owner=None):
-
         if instance is None:
             return self
         # pylint: disable=protected-access
@@ -1034,7 +1031,6 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
             prop_helpers.ComplexProperty.__init__(self, ["monovan_lo_frac", "monovan_hi_frac"])
 
     def __get__(self, instance, owner=None):
-
         if instance is None:
             return self
 
@@ -1326,7 +1322,6 @@ class SaveFormat(PropDescriptor):
         self._save_format.add(value)
 
     def validate(self, instance, owner):
-
         n_formats = len(self._save_format)
         if n_formats == 0:
             return (False, 1, "No internal save format is defined. Results may be lost")
@@ -1544,7 +1539,6 @@ class MonoCorrectionFactor(PropDescriptor):
         return cash_id
 
     def validate(self, instance, owner=None):
-
         if self._cor_factor is None:
             return (True, 0, "")
         if self._cor_factor <= 0:
@@ -1589,7 +1583,7 @@ class MotorLogName(PropDescriptor):
 
 class MotorOffset(PropDescriptor):
     """Initial value used to identify crystal rotation angle according to the formula:
-    psi=motor_offset+wccr.timeAverageValue() where wccr is the log describing
+    psi=motor_offset+wccr.getTimeAveragedValue() where wccr is the log describing
     crystal rotation. See motor_log_name property for its description.
     """
 
@@ -1615,7 +1609,7 @@ class MotorOffset(PropDescriptor):
 
 class RotationAngle(PropDescriptor):
     """Property used to identify rotation angle
-    psi=motor_offset+wccr.timeAverageValue().
+    psi=motor_offset+wccr.getTimeAveragedValue().
 
     If set to None or not set, the rotation angle
     is calculated from motor_offset and log, containing
@@ -1678,7 +1672,7 @@ class RotationAngle(PropDescriptor):
         log_names = self._motor_log._log_names
         for name in log_names:
             try:
-                value = working_ws.getRun().getLogData(name).timeAverageValue()
+                value = working_ws.getRun().getTimeAveragedValue(name)
                 break
             # pylint: disable=bare-except
             except:
@@ -1798,11 +1792,11 @@ class AbsCorrInfo(PropDescriptor):
         else:
             raise (
                 KeyError(
-                    "AbsCorrInfo accepts only a dictionary "  # noqa
-                    "with AbsorptionCorrections algorithm properties "  # noqa
+                    "AbsCorrInfo accepts only a dictionary "
+                    "with AbsorptionCorrections algorithm properties "
                     "or string representation of such dictionary"
                 )
-            )  # noqa
+            )
 
         if self._is_fast:
             algo_name = "AdsorptionCorrection"
@@ -1880,7 +1874,7 @@ def list_checker(val, list_in, mess_base):
     if val in list_in:
         return val
     else:
-        raise ValueError("{0} property can only have values from the set of: {1}".format(mess_base, str(list_in)))  # noqa  # noqa
+        raise ValueError("{0} property can only have values from the set of: {1}".format(mess_base, str(list_in)))
 
 
 # -----------------------------------------------------------------------------------------

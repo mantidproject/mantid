@@ -14,6 +14,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -377,16 +378,25 @@ void CalculateCountRate::setOutLogParameters(const DataObjects::EventWorkspace_s
       if (tLogMin > runTMax || tLogMax < runTMin) { // log time is outside of the experiment time.
                                                     // Log normalization is impossible
         this->disableNormalization("Normalization log " + m_pNormalizationLog->name() +
-                                   " time lies outside of the the whole experiment time. "
+                                   " time lies outside of the whole experiment time. "
                                    "Log normalization impossible.");
         useLogAccuracy = false;
       } else {
         if (!m_tmpLogHolder) {
           m_tmpLogHolder = std::unique_ptr<Kernel::TimeSeriesProperty<double>>(m_pNormalizationLog->clone());
         }
-        m_tmpLogHolder->filterByTime(runTMin, runTMax);
-        m_pNormalizationLog = m_tmpLogHolder.get();
-        m_numLogSteps = m_pNormalizationLog->realSize();
+        Kernel::TimeROI roi(runTMin, runTMax);
+        if (Kernel::FilteredTimeSeriesProperty<double> *filteredLog =
+                dynamic_cast<Kernel::FilteredTimeSeriesProperty<double> *>(m_tmpLogHolder.get())) {
+          filteredLog->filterWith(roi);
+          m_pNormalizationLog = filteredLog;
+        } else {
+          filteredLog = new Kernel::FilteredTimeSeriesProperty<double>(m_tmpLogHolder.get());
+          filteredLog->filterWith(roi);
+          m_pNormalizationLog = filteredLog;
+        }
+
+        m_numLogSteps = m_pNormalizationLog->size();
       }
     } else {
       if (tLogMin > runTMin || tLogMax < runTMax) {
@@ -399,7 +409,7 @@ void CalculateCountRate::setOutLogParameters(const DataObjects::EventWorkspace_s
   }
 
   if (useLogAccuracy) {
-    m_numLogSteps = m_pNormalizationLog->realSize();
+    m_numLogSteps = m_pNormalizationLog->size();
     if (m_numLogSteps < 2) { // should not ever happen but...
 
       this->disableNormalization("Number of points in the Normalization log " + m_pNormalizationLog->name() +

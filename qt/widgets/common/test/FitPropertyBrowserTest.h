@@ -10,7 +10,11 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/PropertyHandler.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h"
+#include <QApplication>
 #include <QString>
+#include <QTimer>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -94,6 +98,121 @@ public:
     TS_ASSERT_EQUALS(oldExpString.toStdString(), expectedTieExpression);
   }
 
+  void test_removeFunctionRemovesTie() {
+    m_fitPropertyBrowser->init();
+    m_fitPropertyBrowser->createCompositeFunction("name=Gaussian,Height=10.0,PeakCentre=-0.145,Sigma=0.135;"
+                                                  "name=Gaussian,Height=12.0,PeakCentre=0.245,Sigma=0.135;"
+                                                  "ties=(f0.Height=f1.Height)");
+    auto f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
+    auto f1Handler = m_fitPropertyBrowser->getPeakHandler(QString("f1"));
+    TS_ASSERT(f0Handler->hasTies());
+    m_fitPropertyBrowser->removeFunction(f1Handler);
+    f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
+    TS_ASSERT(!f0Handler->hasTies());
+  }
+
+  void test_removeFunctionRenamesOtherFunction() {
+    m_fitPropertyBrowser->init();
+    m_fitPropertyBrowser->createCompositeFunction(
+        "name=Gaussian,Height=10.0,PeakCentre=-0.145,Sigma=0.135;name=FlatBackground,A0=10;"
+        "ties=(f0.Height=f1.A0)");
+    auto f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
+    TS_ASSERT_EQUALS(QString("f0-Gaussian"), f0Handler->functionName());
+    m_fitPropertyBrowser->removeFunction(f0Handler);
+    // f0 should now be the flat background function
+    f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
+    TS_ASSERT(!f0Handler->hasTies());
+    TS_ASSERT_EQUALS(QString("f0-FlatBackground"), f0Handler->functionName());
+  }
+
+  void test_removeFunctionUpdatesTieString() {
+    m_fitPropertyBrowser->init();
+    m_fitPropertyBrowser->createCompositeFunction(
+        "name=Gaussian,Height=10.0,PeakCentre=-0.145,Sigma=0.135;name=FlatBackground,A0=10;"
+        "name=Gaussian,Height=10.0,PeakCentre=-0.555,Sigma=0.135;ties=(f0.Height=f2.Sigma)");
+    auto cf = m_fitPropertyBrowser->compositeFunction();
+    auto f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
+    auto f1Handler = m_fitPropertyBrowser->getPeakHandler(QString("f1"));
+    auto tie = cf->getTie(cf->parameterIndex("f0.Height"));
+    std::string tie_str = tie->asString();
+    TS_ASSERT_EQUALS(tie_str.substr(tie_str.find("=") + 1), "f2.Sigma");
+
+    m_fitPropertyBrowser->removeFunction(f1Handler);
+
+    TS_ASSERT(f0Handler->hasTies());
+    tie = cf->getTie(cf->parameterIndex("f0.Height"));
+    tie_str = tie->asString();
+    TS_ASSERT_EQUALS(tie_str.substr(tie_str.find("=") + 1), "f1.Sigma");
+  }
+
+  void test_circularTieIsNotAdded() {
+    m_fitPropertyBrowser->init();
+    m_fitPropertyBrowser->createCompositeFunction("name=Gaussian,Height=10.0,PeakCentre=-0.145,Sigma=0.135;"
+                                                  "name=Gaussian,Height=12.0,PeakCentre=0.245,Sigma=0.135;"
+                                                  "ties=(f0.Height=f1.Height)");
+
+    auto f1Handler = m_fitPropertyBrowser->getPeakHandler(QString("f1"));
+
+    expect_and_close_message_box();
+
+    // bad circualr tie
+    f1Handler->addTie("f1.Height=f0.Height");
+    TS_ASSERT(!f1Handler->hasTies());
+  }
+
+  void test_selfTieIsNotAdded() {
+    m_fitPropertyBrowser->init();
+    m_fitPropertyBrowser->createCompositeFunction("name=Gaussian,Height=10.0,PeakCentre=-0.145,Sigma=0.135");
+
+    auto f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
+
+    expect_and_close_message_box();
+
+    // bad self tie
+    f0Handler->addTie("f0.Height=f0.Height");
+    TS_ASSERT(!f0Handler->hasTies());
+  }
+
+  void test_tiesAreAppliedOnLoad() {
+    m_fitPropertyBrowser->init();
+    m_fitPropertyBrowser->createCompositeFunction("name=Gaussian,Height=10.0,PeakCentre=-0.145,Sigma=0.135;"
+                                                  "name=Gaussian,Height=12.0,PeakCentre=0.245,Sigma=0.135;"
+                                                  "ties=(f0.Height=f1.Height)");
+
+    auto f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
+    auto heightProperty = f0Handler->getParameterProperty(QString("Height"));
+    const auto height = heightProperty->valueText().toDouble();
+    TS_ASSERT_EQUALS(height, 12);
+  }
+
+  void test_tiesAreAppliedOnNewTie() {
+    m_fitPropertyBrowser->init();
+    m_fitPropertyBrowser->createCompositeFunction("name=Gaussian,Height=10.0,PeakCentre=-0.145,Sigma=0.135;"
+                                                  "name=Gaussian,Height=12.0,PeakCentre=0.245,Sigma=0.135;");
+
+    auto f0Handler = m_fitPropertyBrowser->getPeakHandler(QString("f0"));
+    auto heightProperty = f0Handler->getParameterProperty(QString("Height"));
+    auto height = heightProperty->valueText().toDouble();
+    TS_ASSERT_EQUALS(height, 10);
+
+    f0Handler->addTie("f0.Height=f1.Height");
+
+    heightProperty = f0Handler->getParameterProperty(QString("Height"));
+    height = heightProperty->valueText().toDouble();
+    TS_ASSERT_EQUALS(height, 12);
+  }
+
 private:
   std::unique_ptr<MantidQt::MantidWidgets::FitPropertyBrowser> m_fitPropertyBrowser;
+
+  void expect_and_close_message_box() {
+    QTimer::singleShot(0, [=]() {
+      auto msgBox = QApplication::activeModalWidget();
+      if (msgBox) {
+        msgBox->close();
+      } else {
+        TS_FAIL("Expected critical error message box to be shown");
+      }
+    });
+  }
 };

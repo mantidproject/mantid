@@ -36,6 +36,10 @@ public:
   MOCK_METHOD1(createWorkspace, void(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties));
   MOCK_METHOD1(scaleX, void(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties));
   MOCK_METHOD1(rebunch, void(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties));
+
+  // The algorithms used for fitting the extracted Out of plane angle workspace
+  MOCK_METHOD1(cropWorkspace, void(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties));
+  MOCK_METHOD1(fit, void(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

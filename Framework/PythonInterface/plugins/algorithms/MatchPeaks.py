@@ -38,7 +38,6 @@ def mask_ws(ws_to_mask, xstart, xend):
 
 
 class MatchPeaks(PythonAlgorithm):
-
     # Mandatory workspaces
     _input_ws = None
     _output_ws = None
@@ -107,31 +106,43 @@ class MatchPeaks(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        input1 = self.getPropertyValue("InputWorkspace")
-        input2 = self.getPropertyValue("InputWorkspace2")
-        input3 = self.getPropertyValue("InputWorkspace3")
+        input1 = self.getProperty("InputWorkspace").value
+        input2 = self.getProperty("InputWorkspace2").value
+        input3 = self.getProperty("InputWorkspace3").value
+        input2_name = self.getPropertyValue("InputWorkspace2")
+        input3_name = self.getPropertyValue("InputWorkspace3")
+
+        if input1 is None:
+            issues["InputWorkspace"] = "InputWorkspace must be a MatrixWorkspace"
+        if input2_name and input2 is None:
+            issues["InputWorkspace2"] = "InputWorkspace2 must be a MatrixWorkspace"
+        if input3_name and input3 is None:
+            issues["InputWorkspace3"] = "InputWorkspace3 must be a MatrixWorkspace"
+
+        if issues:
+            return issues
 
         if input3:
             if not input2:
                 issues["InputWorkspace2"] = "When InputWorkspace3 is given, InputWorkspace2 is also required."
             else:
-                if mtd[input3].isDistribution() and not mtd[input2].isDistribution():
+                if input3.isDistribution() and not input2.isDistribution():
                     issues["InputWorkspace3"] = "InputWorkspace2 and InputWorkspace3 must be either point data or " "histogram data"
-                elif mtd[input3].blocksize() != mtd[input2].blocksize():
+                elif input3.blocksize() != input2.blocksize():
                     issues["InputWorkspace3"] = "Incompatible number of bins"
-                elif mtd[input3].getNumberHistograms() != mtd[input2].getNumberHistograms():
+                elif input3.getNumberHistograms() != input2.getNumberHistograms():
                     issues["InputWorkspace3"] = "Incompatible number of spectra"
-                elif np.any(mtd[input3].extractX() - mtd[input2].extractX()):
+                elif np.any(input3.extractX() - input2.extractX()):
                     issues["InputWorkspace3"] = "Incompatible x-values"
 
         if input2:
-            if mtd[input1].isDistribution() and not mtd[input2].isDistribution():
+            if input1.isDistribution() and not input2.isDistribution():
                 issues["InputWorkspace2"] = "InputWorkspace2 and InputWorkspace3 must be either point data or " "histogram data"
-            elif mtd[input1].blocksize() != mtd[input2].blocksize():
+            elif input1.blocksize() != input2.blocksize():
                 issues["InputWorkspace2"] = "Incompatible number of bins"
-            elif mtd[input1].getNumberHistograms() != mtd[input2].getNumberHistograms():
+            elif input1.getNumberHistograms() != input2.getNumberHistograms():
                 issues["InputWorkspace2"] = "Incompatible number of spectra"
-            elif np.any(mtd[input1].extractX() - mtd[input2].extractX()):
+            elif np.any(input1.extractX() - input2.extractX()):
                 issues["InputWorkspace2"] = "Incompatible x-values"
 
         return issues

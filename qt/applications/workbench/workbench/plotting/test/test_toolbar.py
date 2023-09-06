@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 import matplotlib
 
-matplotlib.use("Agg")  # noqa
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from mantidqt.utils.qt.testing import start_qapplication
@@ -129,6 +129,19 @@ class ToolBarTest(unittest.TestCase):
         axes[1][0].grid()
         # Grid button should be OFF because not all subplots have grids.
         self.assertFalse(self._is_grid_button_checked(fig))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_plot_script_generator_is_enabled_for_non_square_tiled_plots(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+
+        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={"projection": "mantid"})
+        # Simulate a 2x2 grid showing three plots
+        axes[0][0].plot([-10, 10], [1, 2])
+        axes[0][1].plot([-10, 10], [1, 2])
+        axes[1][0].plot([-10, 10], [1, 2])
+        axes[1][1].axis("off")
+
+        self.assertTrue(self._is_button_enabled(fig, "generate_plot_script"))
 
     def test_is_colorbar(self):
         """Verify the functionality of _is_colorbar, which determines whether a set of axes is a colorbar."""

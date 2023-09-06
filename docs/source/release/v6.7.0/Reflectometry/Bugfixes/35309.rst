@@ -1,1 +1,0 @@
-- :ref:`LoadILLReflectometry` can load cycle 231 Figaro data by updating the metadata location of the chopper pair to sample distance.

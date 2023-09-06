@@ -24,7 +24,7 @@ The steps this algorithm performs are:
 
 Input runs and transmission runs are loaded if required, or existing workspaces are used if they are already loaded. When runs are loaded, they are named based on the run number with a ``TOF_`` or ``TRANS_`` prefix. To determine whether workspaces are already loaded, workspace names are matched based on the run number with or without this prefix. Other naming formats are not considered to match.
 
-If a value is provided for the ``CalibrationFile`` property then calibration will be applied for input runs that are loaded (but not where existing workspaces are being used). The calibration file supplied should be a ``.dat`` file containing two columns separated by a single space. The left hand column should contain the workspace indices of the detectors to move. The right hand column should contain the Y locations of the corresponding detector pixels in mm.
+If a value is provided for the ``CalibrationFile`` property then calibration will be applied for input runs that are loaded (but not where existing workspaces are being used). The calibration will be performed using :ref:`algm-ReflectometryISISCalibration`. See the documentation for the required calibration file format.
 
 If time slicing is enabled, the input run must be an event workspace and have monitors loaded; otherwise, it must be a histogram workspace. If the workspace already exists but is the incorrect type or is missing monitors, it will be reloaded.
 

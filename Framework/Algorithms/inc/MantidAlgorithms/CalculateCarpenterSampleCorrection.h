@@ -18,7 +18,7 @@ namespace Algorithms {
     out by Jack Carpenter and Asfia Huq and implmented in Java by
     Alok Chatterjee.  Translated to C++ by Dennis Mikkelson.
  */
-class MANTID_ALGORITHMS_DLL CalculateCarpenterSampleCorrection : public API::DistributedDataProcessorAlgorithm {
+class MANTID_ALGORITHMS_DLL CalculateCarpenterSampleCorrection : public API::DataProcessorAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;

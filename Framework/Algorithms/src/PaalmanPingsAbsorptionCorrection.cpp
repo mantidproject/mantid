@@ -174,6 +174,9 @@ void PaalmanPingsAbsorptionCorrection::exec() {
       g_log.information() << "Spectrum " << i << " does not have a detector defined for it\n";
       continue;
     }
+    if (spectrumInfo.isMasked(i)) {
+      continue;
+    }
     const auto &det = spectrumInfo.detector(i);
 
     // scattering and self-absorption in sample L2 distances, used for A_s,s and

@@ -1,16 +1,12 @@
-# First generate rules for the the workbench application itself egg link name has to match that in setup.py name or
-# Visual Studio generates a warning that the output filename of the target does not match the output that is produced by
+# First generate rules for the workbench application itself egg link name has to match that in setup.py name or Visual
+# Studio generates a warning that the output filename of the target does not match the output that is produced by
 # setuptools.
 if(APPLE OR WIN32)
   if(WIN32)
     # handled separately below
     set(_exclude_on_install "resources\.pyc?")
   endif()
-  add_python_package(
-    workbench EXECUTABLE
-    EGGLINKNAME MantidWorkbench EXCLUDE_FROM_INSTALL ${_exclude_on_install}
-    INSTALL_LIB_DIRS "${WORKBENCH_SITE_PACKAGES}"
-  )
+  add_python_package(workbench EXECUTABLE EGGLINKNAME MantidWorkbench EXCLUDE_FROM_INSTALL ${_exclude_on_install})
   # Allow VS to start workbench for debugging
   set(_vs_debugger_args "${MSVC_BIN_DIR}/workbench-script.pyw --single-process")
   # cmake-format: off
@@ -48,11 +44,7 @@ if(WIN32)
     set(_qrc_file_contents
         "<!DOCTYPE RCC><RCC version=\"1.0\">\n<qresource prefix=\"/qt/etc\">\n<file alias=\"qt.conf\">qt.conf.${BUILD_TYPE}</file>\n</qresource>\n</RCC>\n"
     )
-    if(CONDA_BUILD OR CONDA_ENV)
-      file(TO_CMAKE_PATH $ENV{CONDA_PREFIX}/Library _qt5_dir)
-    else()
-      set(_qt5_dir ${THIRD_PARTY_DIR}/lib/qt5)
-    endif()
+    file(TO_CMAKE_PATH $ENV{CONDA_PREFIX}/Library _qt5_dir)
     # Write qt.conf.BUILD_TYPE file and get resources file name
     if(${BUILD_TYPE} STREQUAL "build")
       file(WRITE ${_qt_conf_file} "[Paths]\nPrefix = ${_qt5_dir}\n\n[Platforms]\nWindowsArguments = dpiawareness=1\n")
@@ -101,7 +93,7 @@ else()
   else()
     set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
   endif()
-  if(APPLE AND CONDA_ENV)
+  if(APPLE)
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
          "[Paths]\nPlugins = PlugIns\nImports = Resources/qml\nQml2Imports = Resources/qml"
     )

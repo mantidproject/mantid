@@ -9,7 +9,7 @@ import unittest
 
 import matplotlib
 
-matplotlib.use("Agg")  # noqa
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from mantid.plots.legend import LegendProperties
 from numpy import testing as np_testing

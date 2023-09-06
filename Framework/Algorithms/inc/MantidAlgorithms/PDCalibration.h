@@ -39,6 +39,8 @@ private:
   API::MatrixWorkspace_sptr loadAndBin();
   API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr wksp);
   API::MatrixWorkspace_sptr load(const std::string &filename);
+  std::set<detid_t> detIdsForTable();
+  void createCalTableHeader();
   void createCalTableFromExisting();
   void createCalTableNew();
   void createInformationWorkspaces();
@@ -64,8 +66,10 @@ private:
   API::ITableWorkspace_sptr m_peakHeightTable{nullptr};
   std::vector<double> m_peaksInDspacing;
   std::map<detid_t, size_t> m_detidToRow;
-  double m_tofMin{0.}; // first bin boundary when rebinning in TOF (user input)
-  double m_tofMax{0.}; // last bin boundary when rebinning in TOF (user input)
+  int m_startWorkspaceIndex; ///< start index
+  int m_stopWorkspaceIndex;  ///< stop index (workspace index of the last spectrum included)
+  double m_tofMin{0.};       ///< first bin boundary when rebinning in TOF (user input)
+  double m_tofMax{0.};       ///< last bin boundary when rebinning in TOF (user input)
   double m_tzeroMin{0.};
   double m_tzeroMax{0.};
   double m_difaMin{0.};

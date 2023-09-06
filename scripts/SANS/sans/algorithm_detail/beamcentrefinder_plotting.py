@@ -8,7 +8,7 @@ import sys
 
 IN_WORKBENCH = False
 
-if "workbench.app.mainwindow" in sys.modules:
+if "workbench.app" in sys.modules:
     try:
         from mantidqt.plotting.functions import plot
 

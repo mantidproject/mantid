@@ -2,12 +2,12 @@
 include(ExternalProject)
 
 # mslice
-set(_mslice_external_root ${CMAKE_CURRENT_BINARY_DIR}/mslice)
+set(_mslice_external_root ${CMAKE_CURRENT_BINARY_DIR}/src/mslice)
 externalproject_add(
   mslice
   PREFIX ${_mslice_external_root}
   GIT_REPOSITORY "https://github.com/mantidproject/mslice.git"
-  GIT_TAG b22da15086e3b3f7755c5209ef03f869ce561aa2
+  GIT_TAG 6099d1575fff4ad5fc5c33b04251cf7f40f384e3
   EXCLUDE_FROM_ALL 1
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
@@ -30,14 +30,14 @@ else()
 endif()
 # Let the parent lists file know where dev copy of mslice is
 set(MSLICE_DEV
-    ${_mslice_external_root}/src/mslice
+    ${_mslice_external_root}/src/mslice/src
     PARENT_SCOPE
 )
 
 # Installation MSLICE_DEV is only set in PARENT_SCOPE! so don't use it here
 foreach(_bundle ${BUNDLES})
   install(
-    DIRECTORY ${_mslice_external_root}/src/mslice/mslice/
+    DIRECTORY ${_mslice_external_root}/src/mslice/src/mslice/
     DESTINATION ${_bundle}scripts/ExternalInterfaces/mslice
     COMPONENT Runtime
   )

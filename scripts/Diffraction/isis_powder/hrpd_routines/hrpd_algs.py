@@ -11,11 +11,15 @@ from isis_powder.routines import common, absorb_corrections, sample_details, com
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 
 
-def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering):
+def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, msevents):
     absorb_dict = hrpd_advanced_config.absorption_correction_params
     sample_details_obj = absorb_corrections.create_vanadium_sample_details_obj(config_dict=absorb_dict)
     ws_to_correct = absorb_corrections.run_cylinder_absorb_corrections(
-        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering, sample_details_obj=sample_details_obj, is_vanadium=True
+        ws_to_correct=ws_to_correct,
+        multiple_scattering=multiple_scattering,
+        sample_details_obj=sample_details_obj,
+        is_vanadium=True,
+        msevents=msevents,
     )
     return ws_to_correct
 

@@ -6,8 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "ALFAlgorithmManager.h"
 #include "ALFAnalysisModel.h"
 #include "DllConfig.h"
+#include "IALFAlgorithmManagerSubscriber.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <QWidget>
@@ -44,10 +46,12 @@ public:
   virtual void clear() = 0;
 };
 
-class MANTIDQT_DIRECT_DLL ALFAnalysisPresenter final : public IALFAnalysisPresenter {
+class MANTIDQT_DIRECT_DLL ALFAnalysisPresenter final : public IALFAnalysisPresenter,
+                                                       public IALFAlgorithmManagerSubscriber {
 
 public:
-  explicit ALFAnalysisPresenter(IALFAnalysisView *m_view, std::unique_ptr<IALFAnalysisModel> m_model);
+  explicit ALFAnalysisPresenter(IALFAnalysisView *view, std::unique_ptr<IALFAnalysisModel> model,
+                                std::unique_ptr<IALFAlgorithmManager> algorithmManager);
   QWidget *getView() override;
 
   void setExtractedWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace,
@@ -59,6 +63,11 @@ public:
   void notifyExportWorkspaceToADSClicked() override;
   void notifyExternalPlotClicked() override;
   void notifyResetClicked() override;
+
+  void notifyAlgorithmError(std::string const &message) override;
+  void notifyCropWorkspaceComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
+  void notifyFitComplete(Mantid::API::MatrixWorkspace_sptr workspace, Mantid::API::IFunction_sptr function,
+                         std::string fitStatus) override;
 
   std::size_t numberOfTubes() const override;
 
@@ -78,6 +87,7 @@ private:
 
   IALFAnalysisView *m_view;
   std::unique_ptr<IALFAnalysisModel> m_model;
+  std::unique_ptr<IALFAlgorithmManager> m_algorithmManager;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

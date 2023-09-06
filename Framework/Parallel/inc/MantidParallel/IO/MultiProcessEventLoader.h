@@ -15,10 +15,15 @@
 #include <unordered_map>
 #include <vector>
 
+#include "MantidTypes/Event/TofEvent.h"
+
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 #include "MantidParallel/IO/EventsListsShmemStorage.h"
+#include "MantidParallel/IO/NXEventDataLoader.h"
 
 #include "MantidParallel/DllConfig.h"
+
+using Mantid::Types::Event::TofEvent;
 
 namespace Mantid {
 namespace Parallel {
@@ -73,6 +78,8 @@ private:
     static void loadFromGroupWrapper(const H5::DataType &type, EventsListsShmemStorage &storage, const H5::Group &group,
                                      const std::vector<std::string> &bankNames, const std::vector<int32_t> &bankOffsets,
                                      std::size_t from, std::size_t to);
+
+    static void eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count, const int32_t bankOffset);
   };
 
   void assembleFromShared(std::vector<std::vector<Mantid::Types::Event::TofEvent> *> &result) const;
@@ -88,6 +95,23 @@ private:
   std::vector<std::string> m_segmentNames;
   std::string m_storageName;
 };
+
+/** Transform event IDs to global spectrum numbers using the bankOffsets stored
+ * at object creation.
+ *
+ * The transformation is in-place to save memory bandwidth and modifies the
+ * range pointed to by `event_id_start`.
+ * @param event_id_start Starting position of chunk of data containing event
+ * IDs.
+ * @param count Number of items in data chunk
+ * @param bankOffset Offset to subtract from the array `event_id_start`.
+ */
+template <typename MultiProcessEventLoader::LoadType LT>
+void MultiProcessEventLoader::GroupLoader<LT>::eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count,
+                                                                            const int32_t bankOffset) {
+  for (size_t i = 0; i < count; ++i)
+    event_id_start[i] -= bankOffset;
+}
 
 /// Wrapper to avoid manual processing of all cases of 2 template arguments
 template <typename MultiProcessEventLoader::LoadType LT>
@@ -151,7 +175,7 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pre
       eventId.resize(cnt);
       loader.readEventID(eventId.data(), start, cnt);
 
-      detail::eventIdToGlobalSpectrumIndex(eventId.data(), cnt, bankOffsets[bankIdx]);
+      eventIdToGlobalSpectrumIndex(eventId.data(), cnt, bankOffsets[bankIdx]);
 
       std::unordered_map<int32_t, std::size_t> eventsPerPixel;
       for (auto &pixId : eventId) {
@@ -259,7 +283,7 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pro
         task.partitioner = task.loader.setBankIndex(task.bankIdx);
         task.loader.readEventTimeOffset(task.eventTimeOffset.data(), task.from, task.eventTimeOffset.size());
         task.loader.readEventID(task.eventId.data(), task.from, task.eventId.size());
-        detail::eventIdToGlobalSpectrumIndex(task.eventId.data(), task.eventId.size(), bankOffsets[task.bankIdx]);
+        eventIdToGlobalSpectrumIndex(task.eventId.data(), task.eventId.size(), bankOffsets[task.bankIdx]);
         ++taskCount;
       }
       ++finished;

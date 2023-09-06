@@ -249,7 +249,6 @@ private:
 
   void checkDataItem(const MatrixWorkspace_sptr &work_in1, const MatrixWorkspace_sptr &work_in2,
                      const MatrixWorkspace_sptr &work_out1, size_t i, size_t ws2Index) {
-    // printf("I=%d\tws2Index=%d\n",i,ws2Index);
     double sig1 = work_in1->y(i / work_in1->blocksize())[i % work_in1->blocksize()];
     double sig2 = work_in2->y(ws2Index / work_in2->blocksize())[ws2Index % work_in2->blocksize()];
     double sig2e = work_in2->e(ws2Index / work_in2->blocksize())[ws2Index % work_in2->blocksize()];

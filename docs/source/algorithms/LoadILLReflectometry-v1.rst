@@ -100,13 +100,13 @@ Output:
    logs_to_replace = {"ChopperSetting.firstChopper": 2, "ChopperSetting.secondChopper": 1}
    ws = LoadILLReflectometry('ILL/D17/317369.nxs', LogsToReplace=logs_to_replace)
 
-   print("The first chopper ID is: {}.".format(ws.getRun().getLogData("ChopperSetting.firstChopper").value)
+   print("The first chopper ID is: {}.".format(int(ws.getRun().getLogData("ChopperSetting.firstChopper").value)))
 
 Output:
 
 .. testoutput:: ReplaceSampleLog
 
-   The first chopper ID is: 2.0.
+   The first chopper ID is: 2.
 
 .. testcleanup:: ReplaceSampleLog
 

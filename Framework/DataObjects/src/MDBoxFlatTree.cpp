@@ -705,7 +705,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes, API::
       hFile->getAttr("event_type", eventType);
 
       if (eventType != WSEventType)
-        throw Kernel::Exception::FileError("Trying to open MDWorkspace nexus file with the the events: " + eventType +
+        throw Kernel::Exception::FileError("Trying to open MDWorkspace nexus file with the events: " + eventType +
                                                "\n different from workspace type: " + WSEventType,
                                            fileName);
     } else // it is possible that workspace group has been created by somebody

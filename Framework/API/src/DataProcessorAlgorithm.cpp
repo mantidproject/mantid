@@ -21,10 +21,6 @@
 #include <stdexcept>
 #include <utility>
 
-#ifdef MPI_BUILD
-#include <boost/mpi.hpp>
-#endif
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -35,7 +31,7 @@ namespace Mantid::API {
  */
 template <class Base>
 GenericDataProcessorAlgorithm<Base>::GenericDataProcessorAlgorithm()
-    : m_useMPI(false), m_loadAlg("Load"), m_accumulateAlg("Plus"), m_loadAlgFileProp("Filename"),
+    : m_loadAlg("Load"), m_accumulateAlg("Plus"), m_loadAlgFileProp("Filename"),
       m_propertyManagerPropertyName("ReductionProperties") {
   Base::enableHistoryRecordingForChild(true);
 }
@@ -204,60 +200,6 @@ template <class Base> MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::
 }
 
 /**
- * Assemble the partial workspaces from all MPI processes
- * @param partialWS :: workspace to assemble
- * thread only)
- */
-template <class Base> Workspace_sptr GenericDataProcessorAlgorithm<Base>::assemble(Workspace_sptr partialWS) {
-  Workspace_sptr outputWS = std::move(partialWS);
-#ifdef MPI_BUILD
-  auto gatherAlg = createChildAlgorithm("GatherWorkspaces");
-  gatherAlg->setLogging(true);
-  gatherAlg->setAlwaysStoreInADS(true);
-  gatherAlg->setProperty("InputWorkspace", partialWS);
-  gatherAlg->setProperty("PreserveEvents", true);
-  gatherAlg->setPropertyValue("OutputWorkspace", "_total");
-  gatherAlg->execute();
-
-  if (isMainThread()) {
-    outputWS = AnalysisDataService::Instance().retrieve("_total");
-  }
-#endif
-
-  return outputWS;
-}
-
-/**
- * Assemble the partial workspaces from all MPI processes
- * @param partialWSName :: Name of the workspace to assemble
- * @param outputWSName :: Name of the assembled workspace (available in main
- * thread only)
- */
-template <class Base>
-Workspace_sptr GenericDataProcessorAlgorithm<Base>::assemble(const std::string &partialWSName,
-                                                             [[maybe_unused]] const std::string &outputWSName) {
-#ifdef MPI_BUILD
-  std::string threadOutput = partialWSName;
-  Workspace_sptr partialWS = AnalysisDataService::Instance().retrieve(partialWSName);
-  auto gatherAlg = createChildAlgorithm("GatherWorkspaces");
-  gatherAlg->setLogging(true);
-  gatherAlg->setAlwaysStoreInADS(true);
-  gatherAlg->setProperty("InputWorkspace", partialWS);
-  gatherAlg->setProperty("PreserveEvents", true);
-  gatherAlg->setPropertyValue("OutputWorkspace", outputWSName);
-  gatherAlg->execute();
-
-  if (isMainThread())
-    threadOutput = outputWSName;
-#else
-  const std::string &threadOutput = partialWSName;
-
-#endif
-  Workspace_sptr outputWS = AnalysisDataService::Instance().retrieve(threadOutput);
-  return outputWS;
-}
-
-/**
  * Save a workspace as a nexus file, with check for which thread
  * we are executing in.
  * @param outputWSName :: Name of the workspace to save
@@ -265,36 +207,12 @@ Workspace_sptr GenericDataProcessorAlgorithm<Base>::assemble(const std::string &
  */
 template <class Base>
 void GenericDataProcessorAlgorithm<Base>::saveNexus(const std::string &outputWSName, const std::string &outputFile) {
-#ifdef MPI_BUILD
-  if (boost::mpi::communicator().rank() <= 0 && !outputFile.empty()) {
-#else
   if (!outputFile.empty()) {
-#endif
     auto saveAlg = createChildAlgorithm("SaveNexus");
     saveAlg->setPropertyValue("Filename", outputFile);
     saveAlg->setPropertyValue("InputWorkspace", outputWSName);
     saveAlg->execute();
   }
-}
-
-/// Return true if we are running on the main thread
-template <class Base> bool GenericDataProcessorAlgorithm<Base>::isMainThread() {
-  bool mainThread;
-#ifdef MPI_BUILD
-  mainThread = (boost::mpi::communicator().rank() == 0);
-#else
-  mainThread = true;
-#endif
-  return mainThread;
-}
-
-/// Return the number of MPI processes running
-template <class Base> int GenericDataProcessorAlgorithm<Base>::getNThreads() {
-#ifdef MPI_BUILD
-  return boost::mpi::communicator().size();
-#else
-  return 1;
-#endif
 }
 
 /**
@@ -328,19 +246,6 @@ Workspace_sptr GenericDataProcessorAlgorithm<Base>::load(const std::string &inpu
         loadAlg->setAlwaysStoreInADS(true);
       }
 
-// Set up MPI if available
-#ifdef MPI_BUILD
-      // First, check whether the loader allows use to chunk the data
-      if (loadAlg->existsProperty("ChunkNumber") && loadAlg->existsProperty("TotalChunks")) {
-        m_useMPI = true;
-        // The communicator containing all processes
-        boost::mpi::communicator world;
-        g_log.notice() << "Chunk/Total: " << world.rank() + 1 << "/" << world.size() << '\n';
-        loadAlg->setPropertyValue("OutputWorkspace", outputWSName);
-        loadAlg->setProperty("ChunkNumber", world.rank() + 1);
-        loadAlg->setProperty("TotalChunks", world.size());
-      }
-#endif
       loadAlg->execute();
 
       if (loadQuiet) {
@@ -524,9 +429,6 @@ MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::createWorkspaceSingleV
 template <typename T> void GenericDataProcessorAlgorithm<T>::visualStudioC4661Workaround() {}
 
 template class GenericDataProcessorAlgorithm<Algorithm>;
-template class MANTID_API_DLL GenericDataProcessorAlgorithm<SerialAlgorithm>;
-template class MANTID_API_DLL GenericDataProcessorAlgorithm<ParallelAlgorithm>;
-template class MANTID_API_DLL GenericDataProcessorAlgorithm<DistributedAlgorithm>;
 
 template <> MANTID_API_DLL void GenericDataProcessorAlgorithm<Algorithm>::visualStudioC4661Workaround() {}
 

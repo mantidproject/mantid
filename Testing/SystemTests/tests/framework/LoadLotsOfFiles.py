@@ -18,6 +18,7 @@ BANNED_FILES = [
     "80tube_DIRECT_3146_M1_30April15_r3146.dat",
     "992 Descriptions.txt",
     "BASIS_AutoReduction_Mask.xml",
+    "bl11_moderatorCoefficients_2018.dat",
     "BioSANS_dark_current.xml",
     "BioSANS_empty_cell.xml",
     "BioSANS_empty_trans.xml",

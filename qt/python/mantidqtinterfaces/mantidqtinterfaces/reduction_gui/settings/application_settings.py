@@ -16,7 +16,7 @@ From mantidplot:
 .config/Mantid/MantidPlot.conf
 """
 
-from qtpy.QtCore import QObject, QSettings, Signal  # noqa
+from qtpy.QtCore import QObject, QSettings, Signal
 
 unicode = str
 

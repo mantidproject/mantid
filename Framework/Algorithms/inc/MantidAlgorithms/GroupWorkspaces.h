@@ -40,10 +40,6 @@ public:
 
   std::map<std::string, std::string> validateInputs() override;
 
-protected:
-  Parallel::ExecutionMode
-  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
-
 private:
   /// Overridden Init method
   void init() override;

@@ -20,6 +20,10 @@ requirements:
     - ninja  # [unix]
     - cmake
     - git
+    - python {{ python }}                    # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - setuptools                             # [build_platform != target_platform]
+    - numpy {{ numpy }}                      # [build_platform != target_platform]
     - {{ cdt('mesa-libgl-devel') }}  # [linux]
     - {{ cdt('mesa-dri-drivers') }}  # [linux]
     - {{ cdt('libxxf86vm') }}  # [linux]
@@ -27,11 +31,12 @@ requirements:
     - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
   host:
     - python {{ python }}
-    - setuptools {{ setuptools }}
+    - setuptools
     - sphinx {{ sphinx }}
     - sphinx_bootstrap_theme {{ sphinx_bootstrap_theme }}
     - mantidqt {{ version }}
     - versioningit
+    - readline {{ readline }}  # [linux]
 
 # there are no run requirements as it's just pure html
 

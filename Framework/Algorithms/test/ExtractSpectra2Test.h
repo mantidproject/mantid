@@ -16,8 +16,6 @@
 #include "MantidIndexing/IndexInfo.h"
 
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
-#include "MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h"
-#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 
 using Mantid::Algorithms::ExtractSpectra2;
 using namespace Mantid;
@@ -27,21 +25,6 @@ using namespace DataObjects;
 using namespace HistogramData;
 
 namespace {
-void run_parallel(const Parallel::Communicator &comm) {
-  Indexing::IndexInfo indexInfo(1000, Parallel::StorageMode::Distributed, comm);
-  auto alg = ParallelTestHelpers::create<ExtractSpectra2>(comm);
-  alg->setProperty("InputWorkspace", create<Workspace2D>(indexInfo, Points(1)));
-  alg->setProperty("InputWorkspaceIndexSet", "0-" + std::to_string(comm.size()));
-  TS_ASSERT_THROWS_NOTHING(alg->execute());
-  MatrixWorkspace_const_sptr out = alg->getProperty("OutputWorkspace");
-  TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
-  if (0 % comm.size() == comm.rank()) {
-    TS_ASSERT_EQUALS(out->getNumberHistograms(), 2);
-  } else {
-    TS_ASSERT_EQUALS(out->getNumberHistograms(), 1);
-  }
-}
-
 std::shared_ptr<Workspace2D> createWorkspace() {
   auto ws = create<Workspace2D>(5, Points(1));
   ws->setHistogram(0, Points{0.0}, Counts{1.0});
@@ -117,8 +100,6 @@ public:
     TS_ASSERT_EQUALS(ws->x(1)[0], 1.0);
     TS_ASSERT_EQUALS(ws->x(2)[0], 2.0);
   }
-
-  void test_parallel() { ParallelTestHelpers::runParallel(run_parallel); }
 
   void test_BinEdgeAxis() {
     auto input = createWorkspace();

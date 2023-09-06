@@ -180,6 +180,7 @@ set(INC_FILES
     inc/MantidKernel/EigenConversionHelpers.h
     inc/MantidKernel/EmptyValues.h
     inc/MantidKernel/EnabledWhenProperty.h
+    inc/MantidKernel/EnumeratedString.h
     inc/MantidKernel/EnvironmentHistory.h
     inc/MantidKernel/EqualBinsChecker.h
     inc/MantidKernel/ErrorReporter.h
@@ -348,6 +349,7 @@ set(TEST_FILES
     DynamicFactoryTest.h
     EigenConversionHelpersTest.h
     EnabledWhenPropertyTest.h
+    EnumeratedStringTest.h
     EnvironmentHistoryTest.h
     EqualBinsCheckerTest.h
     ErrorReporterTest.h
@@ -496,12 +498,6 @@ endif()
 set_property(TARGET Kernel PROPERTY FOLDER "MantidFramework")
 target_compile_features(Kernel PUBLIC cxx_std_17)
 
-# if we are not in a conda env ${HDF5_LIBRARIES} are full paths to the libs and not cmake targets, therefore we need to
-# include the headers
-if(NOT CONDA_ENV)
-  target_include_directories(Kernel SYSTEM PUBLIC ${HDF5_INCLUDE_DIRS})
-endif()
-
 target_link_libraries(
   Kernel
   PUBLIC Mantid::Types
@@ -592,14 +588,7 @@ set(COLORMAPS_FOLDER ${MANTID_ROOT}/installers/colormaps/)
 set(MANTIDPUBLISHER "https://upload.mantidproject.org/scriptrepository?debug=1")
 set(HTML_ROOT ${DOCS_BUILDDIR}/html)
 
-# For an mpi-enabled build, do not log to file, format console output (which winds up in a file) differently These
-# settings carry down to the installation configuration below
-if(MPI_BUILD)
-  set(CONSOLEPATTERN "%H:%M:%S,%i [%N:%P] %p %s - %t")
-else()
-  set(CONSOLEPATTERN "%s-[%p] %t")
-endif()
-
+set(CONSOLEPATTERN "%s-[%p] %t")
 set(CONSOLECHANNELCLASS "ConsoleChannel")
 set(ALIASDEPRECATED "Raise")
 set(ALGORITHMDEPRECATED "Raise")
@@ -625,12 +614,7 @@ endif()
 set(MANTID_ROOT_BUILD ${MANTID_ROOT})
 set(MANTID_ROOT ..)
 
-# Log to file for installed packages but not mpi
-if(MPI_BUILD OR MPI_EXPERIMENTAL)
-  set(ENABLE_NETWORK_ACCESS 0)
-else()
-  set(ENABLE_NETWORK_ACCESS 1)
-endif()
+set(ENABLE_NETWORK_ACCESS 1)
 set(FRAMEWORK_PLUGINS_DIR ${MANTID_ROOT}/plugins)
 set(PYTHONPLUGIN_DIRS "${FRAMEWORK_PLUGINS_DIR}/python")
 set(PYTHONPLUGIN_MANIFEST "${PYTHONPLUGIN_DIRS}/python-plugin-manifest.txt")
@@ -667,9 +651,5 @@ mtd_install_files(
 )
 
 # Installation settings
-if(CONDA_ENV)
-  set(TARGET_EXPORT_NAME "MantidKernelTargets")
-  mtd_install_framework_lib(TARGETS Kernel INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
-else()
-  mtd_install_targets(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
-endif()
+set(TARGET_EXPORT_NAME "MantidKernelTargets")
+mtd_install_framework_lib(TARGETS Kernel INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})

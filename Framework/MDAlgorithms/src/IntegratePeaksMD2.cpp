@@ -154,7 +154,7 @@ void IntegratePeaksMD2::init() {
                   "to spherical integration).");
 
   declareProperty("UseOnePercentBackgroundCorrection", true,
-                  "If this options is enabled, then the the top 1% of the "
+                  "If this options is enabled, then the top 1% of the "
                   "background will be removed"
                   "before the background subtraction.");
 

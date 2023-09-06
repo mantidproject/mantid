@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitDataPresenter.h"
 
+#include <map>
 #include <utility>
 
 #include "IndirectAddWorkspaceDialog.h"
@@ -52,7 +53,12 @@ void IndirectFitDataPresenter::addWorkspace(const std::string &workspaceName, co
   m_model->addWorkspace(workspaceName, spectra);
 }
 
-void IndirectFitDataPresenter::setResolution(const std::string &name) { m_model->setResolution(name); }
+void IndirectFitDataPresenter::setResolution(const std::string &name) {
+  if (m_model->setResolution(name) == false) {
+    m_model->removeSpecialValues(name);
+    displayWarning("Replaced the NaN's and infinities in " + name + " with zeros");
+  }
+}
 
 void IndirectFitDataPresenter::setSampleWSSuffices(const QStringList &suffixes) { m_wsSampleSuffixes = suffixes; }
 
@@ -222,16 +228,32 @@ void IndirectFitDataPresenter::setModelExcludeAndEmit(const std::string &exclude
   m_model->setExcludeRegion(exclude, subIndices.first, subIndices.second);
 }
 
+/**
+ * Gets a map of selected rows, with no repeats
+ * @param selectedIndices:: [input] the list of QModelIndex's
+ * @returns map of unique (by row) QModelIndex's
+ */
+std::map<int, QModelIndex> IndirectFitDataPresenter::getUniqueIndices(const QModelIndexList &selectedIndices) {
+  // remove repeated rows
+  std::map<int, QModelIndex> uniqueIndices;
+  for (auto item : selectedIndices) {
+    uniqueIndices.emplace(item.row(), item);
+  }
+  return uniqueIndices;
+}
+
+/**
+ * Removes selected rows, with no repeats
+ */
 void IndirectFitDataPresenter::removeSelectedData() {
   auto selectedIndices = m_view->getSelectedIndexes();
-  std::sort(selectedIndices.begin(), selectedIndices.end());
   if (selectedIndices.size() == 0) {
     // check that there are selected indexes.
     return;
   }
-  for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {
-    --item;
-    m_model->removeDataByIndex(FitDomainIndex(item->row()));
+  auto uniqueIndices = getUniqueIndices(selectedIndices);
+  for (auto item = uniqueIndices.rbegin(); item != uniqueIndices.rend(); ++item) {
+    m_model->removeDataByIndex(FitDomainIndex(item->second.row()));
   }
   updateTableFromModel();
   emit dataRemoved();

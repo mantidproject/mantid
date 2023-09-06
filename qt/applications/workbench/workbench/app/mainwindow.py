@@ -24,27 +24,27 @@ from workbench.widgets.settings.presenter import SettingsPresenter
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import QByteArray, QEventLoop, Qt, QPoint, QSize, QCoreApplication  # noqa
-from qtpy.QtGui import QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap  # noqa
-from qtpy.QtWidgets import QApplication, QDesktopWidget, QFileDialog, QMainWindow, QSplashScreen, QMessageBox  # noqa
-from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
-from mantidqt.interfacemanager import InterfaceManager  # noqa
-from mantidqt.widgets import manageuserdirectories  # noqa
-from mantidqt.widgets.scriptrepository import ScriptRepositoryView  # noqa
-from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
-from mantidqt.utils.qt import add_actions, create_action, widget_updates_disabled  # noqa
-from mantidqt.project.project import Project  # noqa
-from mantidqt.usersubwindowfactory import UserSubWindowFactory  # noqa
+from qtpy.QtCore import QByteArray, QEventLoop, Qt, QPoint, QSize, QCoreApplication
+from qtpy.QtGui import QColor, QFontDatabase, QGuiApplication, QIcon, QPixmap
+from qtpy.QtWidgets import QApplication, QDesktopWidget, QFileDialog, QMainWindow, QSplashScreen, QMessageBox
+from mantidqt.algorithminputhistory import AlgorithmInputHistory
+from mantidqt.interfacemanager import InterfaceManager
+from mantidqt.widgets import manageuserdirectories
+from mantidqt.widgets.scriptrepository import ScriptRepositoryView
+from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
+from mantidqt.utils.qt import add_actions, create_action, widget_updates_disabled
+from mantidqt.project.project import Project
+from mantidqt.usersubwindowfactory import UserSubWindowFactory
 
-from workbench.config import CONF  # noqa
-from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
-from workbench.utils.windowfinder import find_all_windows_that_are_savable  # noqa
-from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads  # noqa
+from workbench.config import CONF
+from workbench.plotting.globalfiguremanager import GlobalFigureManager
+from workbench.utils.windowfinder import find_all_windows_that_are_savable
+from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads
 from workbench.utils.io import input_qinputdialog
-from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
-from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu  # noqa
-from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback  # noqa
-from mantidqt.utils.qt.qappthreadcall import QAppThreadCall  # noqa
+from workbench.projectrecovery.projectrecovery import ProjectRecovery
+from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu
+from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from workbench.config import get_window_config
 
 # -----------------------------------------------------------------------------
@@ -583,7 +583,7 @@ class MainWindow(QMainWindow):
             self.writeSettings(CONF)
             # Close all open plots
             # We don't want this at module scope here
-            import matplotlib.pyplot as plt  # noqa
+            import matplotlib.pyplot as plt
 
             plt.close("all")
 

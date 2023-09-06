@@ -162,7 +162,7 @@ public:
   /// Adds a Kernel::V3D value to the parameter map.
   void addV3D(const IComponent *comp, const std::string &name, const std::string &value,
               const std::string *const pDescription = nullptr);
-  /// @param value :: Parameter value as a Kernel::V3D
+  /// Adds a Kernel::V3D value to the parameter map.
   void addV3D(const IComponent *comp, const std::string &name, const Kernel::V3D &value,
               const std::string *const pDescription = nullptr);
   /// Adds a Kernel::Quat value to the parameter map.

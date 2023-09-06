@@ -60,7 +60,7 @@ Plotting Improvements
 
 +----------------------------------------------+-------------------------------------------------+
 |Plots of a temperature ramp on WISH using "Temp" selected as the log:                           |
-|More details :ref:`here <05_plotting_advanced>`_                                                |
+|More details :ref:`here <05_plotting_advanced>`                                                 |
 +----------------------------------------------+-------------------------------------------------+
 | .. image:: ../../images/ArtWaterfallT1.png   |   .. image:: ../../images/ArtSurfacePlotT1.png  |
 +----------------------------------------------+-------------------------------------------------+

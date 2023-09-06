@@ -105,8 +105,4 @@ target_include_directories(
 generate_mantid_export_header(ICat True)
 
 # Installation settings
-if(CONDA_ENV)
-  mtd_install_framework_lib(TARGETS ICat PLUGIN_LIB)
-else()
-  mtd_install_targets(TARGETS ICat INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
-endif()
+mtd_install_framework_lib(TARGETS ICat PLUGIN_LIB)

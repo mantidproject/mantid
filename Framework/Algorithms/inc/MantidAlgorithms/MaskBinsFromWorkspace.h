@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
 
@@ -16,7 +16,7 @@ namespace Histogram {
 class BinEdges;
 }
 namespace Algorithms {
-class MANTID_ALGORITHMS_DLL MaskBinsFromWorkspace : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL MaskBinsFromWorkspace : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "MaskBinsFromWorkspace"; }

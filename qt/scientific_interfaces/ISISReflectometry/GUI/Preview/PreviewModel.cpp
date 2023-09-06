@@ -74,7 +74,6 @@ void PreviewModel::loadAndPreprocessWorkspaceAsync(std::string const &workspaceN
 
 /** Sum spectra across banks
  *
- * @param wsIndices : the workspace indices of the spectra to sum
  * @param jobManager : the job manager that will execute the algorithm
  */
 void PreviewModel::sumBanksAsync(IJobManager &jobManager) { jobManager.startSumBanks(*m_runDetails); }

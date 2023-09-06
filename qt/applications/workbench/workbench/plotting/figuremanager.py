@@ -21,7 +21,7 @@ from matplotlib.collections import LineCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtGui import QImage
-from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
+from qtpy.QtWidgets import QApplication, QLabel, QFileDialog, QMessageBox
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
@@ -449,25 +449,43 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         GlobalFigureManager.figure_visibility_changed(self.num)
 
     def generate_plot_script_clipboard(self):
-        script = generate_script(self.canvas.figure, exclude_headers=True)
-        QApplication.clipboard().setText(script)
-        logger.notice("Plotting script copied to clipboard.")
+        try:
+            script = generate_script(self.canvas.figure, exclude_headers=True)
+        except Exception as e:
+            self._handle_script_generation_exception(e)
+        else:
+            QApplication.clipboard().setText(script)
+            logger.notice("Plotting script copied to clipboard.")
 
     def generate_plot_script_file(self):
-        script = generate_script(self.canvas.figure)
-        filepath = open_a_file_dialog(
-            parent=self.canvas,
-            default_suffix=".py",
-            file_filter="Python Files (*.py)",
-            accept_mode=QFileDialog.AcceptSave,
-            file_mode=QFileDialog.AnyFile,
+        try:
+            script = generate_script(self.canvas.figure)
+        except Exception as e:
+            self._handle_script_generation_exception(e)
+        else:
+            filepath = open_a_file_dialog(
+                parent=self.canvas,
+                default_suffix=".py",
+                file_filter="Python Files (*.py)",
+                accept_mode=QFileDialog.AcceptSave,
+                file_mode=QFileDialog.AnyFile,
+            )
+            if filepath:
+                try:
+                    with open(filepath, "w") as f:
+                        f.write(script)
+                except IOError as io_error:
+                    logger.error("Could not write file: {}\n{}" "".format(filepath, io_error))
+
+    # If a user creates a plot from a script using mpl features we don't support, asking for a recreated script from the
+    # plot can lead to problems. This should only really be supported for plots created by workbench.
+    def _handle_script_generation_exception(self, e: Exception):
+        msg = (
+            "Problem encountered when generating the plot script.\n"
+            "Plot script generation is only officially supported for plots created by Mantid Workbench."
         )
-        if filepath:
-            try:
-                with open(filepath, "w") as f:
-                    f.write(script)
-            except IOError as io_error:
-                logger.error("Could not write file: {}\n{}" "".format(filepath, io_error))
+        QMessageBox.critical(self.window, "Error generating plot script", msg + "\n\n" + str(e), QMessageBox.Ok, QMessageBox.NoButton)
+        logger.error(msg)
 
     def set_figure_zoom_to_display_all(self):
         axes = self.canvas.figure.get_axes()
@@ -558,7 +576,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
 def new_figure_manager(num, *args, **kwargs):
     """Create a new figure manager instance"""
-    from matplotlib.figure import Figure  # noqa
+    from matplotlib.figure import Figure
 
     figure_class = kwargs.pop("FigureClass", Figure)
     this_fig = figure_class(*args, **kwargs)

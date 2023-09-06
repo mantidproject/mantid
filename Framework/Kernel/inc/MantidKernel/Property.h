@@ -173,9 +173,6 @@ public:
 
   /// Add to this
   virtual Property &operator+=(Property const *rhs) = 0;
-  virtual void filterByTime(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop);
-  virtual void splitByTime(std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
-                           bool isProtonCharge = true) const;
 
   virtual int size() const;
 

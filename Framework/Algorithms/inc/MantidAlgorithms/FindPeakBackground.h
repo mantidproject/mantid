@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
@@ -23,7 +23,7 @@ namespace Algorithms {
 
 /** FindPeakBackground : Calculate Zscore for a Matrix Workspace
  */
-class MANTID_ALGORITHMS_DLL FindPeakBackground : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL FindPeakBackground : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FindPeakBackground"; }

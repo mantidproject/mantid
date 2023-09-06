@@ -24,9 +24,6 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include "MantidParallel/ExecutionMode.h"
-#include "MantidParallel/StorageMode.h"
-
 namespace Poco {
 template <class R, class A, class O, class S> class ActiveMethod;
 template <class O> class ActiveStarter;
@@ -46,9 +43,6 @@ using time_point_ns = std::chrono::time_point<std::chrono::high_resolution_clock
 } // namespace Kernel
 namespace Indexing {
 class SpectrumIndexSet;
-}
-namespace Parallel {
-class Communicator;
 }
 namespace API {
 //----------------------------------------------------------------------
@@ -299,9 +293,6 @@ public:
 
   void copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum);
 
-  const Parallel::Communicator &communicator() const;
-  void setCommunicator(const Parallel::Communicator &communicator);
-
   // Function to declare properties (i.e. store them)
   void declareProperty(std::unique_ptr<Kernel::Property> p, const std::string &doc = "") override;
 
@@ -362,14 +353,6 @@ public:
   /// The argument is the property name. Default - do nothing.
   void afterPropertySet(const std::string &) override;
 
-  void filterByTime(const Types::Core::DateAndTime & /*start*/, const Types::Core::DateAndTime & /*stop*/) override {
-    throw(std::runtime_error("Not yet implmented"));
-  }
-  void splitByTime(std::vector<Kernel::SplittingInterval> & /*splitter*/,
-                   std::vector<Kernel::PropertyManager *> /* outputs*/) const override {
-    throw(std::runtime_error("Not yet implmented"));
-  }
-
   void filterByProperty(const Kernel::TimeSeriesProperty<bool> & /*filter*/, const std::vector<std::string> &
                         /* excludedFromFiltering */) override {
     throw(std::runtime_error("Not yet implmented"));
@@ -382,13 +365,6 @@ protected:
   virtual void init() = 0;
   /// Virtual method - must be overridden by concrete algorithm
   virtual void exec() = 0;
-
-  void exec(Parallel::ExecutionMode executionMode);
-  virtual void execDistributed();
-  virtual void execMasterOnly();
-
-  virtual Parallel::ExecutionMode
-  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const;
 
   /// Returns a semi-colon separated list of workspace types to attach this
   /// algorithm
@@ -425,9 +401,11 @@ protected:
 
   /// get whether we are tracking the history for this algorithm,
   bool trackingHistory();
-  /// Copy workspace history for input workspaces to output workspaces and
+  /// Copy workspace history from input workspaces to output workspaces and
   /// record the history for ths algorithm
   virtual void fillHistory();
+  /// Copy workspace history from input workspaces to provided vector of output workspaces
+  void fillHistory(const std::vector<Workspace_sptr> &outputWorkspaces);
 
   /// Set to true to stop execution
   std::atomic<bool> m_cancel;
@@ -487,16 +465,10 @@ private:
 
   bool doCallProcessGroups(Mantid::Types::Core::DateAndTime &start_time);
 
-  void fillHistory(const std::vector<Workspace_sptr> &outputWorkspaces);
-
   // Report that the algorithm has completed.
   void reportCompleted(const double &duration, const bool groupProcessing = false);
 
   void registerFeatureUsage() const;
-
-  Parallel::ExecutionMode getExecutionMode() const;
-  std::map<std::string, Parallel::StorageMode> getInputWorkspaceStorageModes() const;
-  void setupSkipValidationMasterOnly();
 
   bool isCompoundProperty(const std::string &name) const;
 
@@ -555,9 +527,6 @@ private:
 
   /// Reserved property names
   std::vector<std::string> m_reservedList;
-
-  /// (MPI) communicator used when executing the algorithm.
-  std::unique_ptr<Parallel::Communicator> m_communicator;
 
   /// The earliest this class should be considered for garbage collection
   Mantid::Types::Core::DateAndTime m_gcTime;

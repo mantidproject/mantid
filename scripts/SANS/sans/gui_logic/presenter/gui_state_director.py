@@ -70,6 +70,11 @@ class GuiStateDirector(object):
         if row_entry.sample_shape:
             gui_state.sample_shape = row_entry.sample_shape
 
+        if row_entry.background_ws:
+            gui_state.background_workspace = row_entry.background_ws
+        if row_entry.scale_factor:
+            gui_state.scale_factor = row_entry.scale_factor
+
         # 4. Create the rest of the state based on the builder.
         gui_state.all_states.data = data_builder.build()
         return gui_state
@@ -78,7 +83,7 @@ class GuiStateDirector(object):
         self._set_data_entry(data_builder.set_sample_scatter, row_entry.sample_scatter)
         self._set_data_period_entry(data_builder.set_sample_scatter_period, row_entry.sample_scatter_period)
         self._set_data_entry(data_builder.set_sample_transmission, row_entry.sample_transmission)
-        self._set_data_period_entry(data_builder.set_sample_transmission_period, row_entry.sample_transmission_period)  # noqa
+        self._set_data_period_entry(data_builder.set_sample_transmission_period, row_entry.sample_transmission_period)
         self._set_data_entry(data_builder.set_sample_direct, row_entry.sample_direct)
         self._set_data_period_entry(data_builder.set_sample_direct_period, row_entry.sample_direct_period)
         self._set_data_entry(data_builder.set_can_scatter, row_entry.can_scatter)
@@ -114,7 +119,7 @@ class GuiStateDirector(object):
                 entry_as_integer = int(entry)
                 if entry_as_integer > 0:
                     func(entry_as_integer)
-            except ValueError:  # noqa
+            except ValueError:
                 pass
 
     @staticmethod

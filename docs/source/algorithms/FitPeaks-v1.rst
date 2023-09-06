@@ -402,8 +402,8 @@ Output:
   fp2 = PG3_733_peak_positions.readY(0)[-3]
 
   # print data
-  print ('Spectrum 1: Expected right most 3 peaks at {0:.7f}, {1:.7f}, {2:.7f}'.format(ep0, ep1, ep2))
-  print ('Spectrum 1: Found    right most 3 peaks at {0:.7f}, {1:.7f}, {2:.7f}'.format(fp0, fp1, fp2))
+  print ('Spectrum 1: Expected right most 3 peaks at {0:.3f}, {1:.3f}, {2:.3f}'.format(ep0, ep1, ep2))
+  print ('Spectrum 1: Found    right most 3 peaks at {0:.3f}, {1:.3f}, {2:.3f}'.format(fp0, fp1, fp2))
 
   # delete workspaces
   DeleteWorkspace(Workspace='PG3_733_peak_positions')
@@ -416,8 +416,8 @@ Output:
 
 .. testoutput::  ExFitVanadiumPeaks
 
-  Spectrum 1: Expected right most 3 peaks at 2.1401000, 1.5133000, 1.2356000
-  Spectrum 1: Found    right most 3 peaks at 2.1485553, 1.5190662, 1.2404027
+  Spectrum 1: Expected right most 3 peaks at 2.140, 1.513, 1.236
+  Spectrum 1: Found    right most 3 peaks at 2.149, 1.519, 1.240
 
 **Example - Fit back-to-back exponential peaks (Vulcan diamond):**
 

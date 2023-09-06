@@ -119,6 +119,9 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         )
         self.declareProperty("CropFirstAndLastPoints", True, doc="If true, we crop the first and last points")
         self.declareProperty("CleanupBadData", True, doc="If true, we crop the points consistent with R=0")
+        self.declareProperty(
+            "AcceptNullReflectivity", False, doc="If true, reflectivity curves consisting of all zeros are accepted as valid"
+        )
         self.declareProperty("ConstQTrim", 0.5, doc="With const-Q binning, cut Q bins with contributions fewer than ConstQTrim of WL bins")
         self.declareProperty("SampleLength", 10.0, doc="Length of the sample in mm")
         self.declareProperty("ConstantQBinning", False, doc="If true, we convert to Q before summing")
@@ -322,7 +325,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         pixel_width = float(workspace.getInstrument().getNumberParameter("pixel-width")[0]) / 1000.0
         det_distance = workspace.getRun()["SampleDetDis"].getStatistics().mean
         # Check units
-        if not workspace.getRun()["SampleDetDis"].units in ["m", "meter"]:
+        if workspace.getRun()["SampleDetDis"].units not in ["m", "meter"]:
             det_distance /= 1000.0
 
         round_up = self.getProperty("RoundUpPixel").value
@@ -426,9 +429,9 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         sample_detector_distance = run_object["SampleDetDis"].getStatistics().mean
         source_sample_distance = run_object["ModeratorSamDis"].getStatistics().mean
         # Check units
-        if not run_object["SampleDetDis"].units in ["m", "meter"]:
+        if run_object["SampleDetDis"].units not in ["m", "meter"]:
             sample_detector_distance /= 1000.0
-        if not run_object["ModeratorSamDis"].units in ["m", "meter"]:
+        if run_object["ModeratorSamDis"].units not in ["m", "meter"]:
             source_sample_distance /= 1000.0
         source_detector_distance = source_sample_distance + sample_detector_distance
 
@@ -507,8 +510,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Clean up the workspace for backward compatibility
         data_y = q_rebin.dataY(0)
 
-        # Sanity check
-        if sum(data_y) == 0:
+        if self.getProperty("AcceptNullReflectivity").value is False and sum(data_y) == 0:
             raise RuntimeError("The reflectivity is all zeros: check your peak selection")
 
         self.write_meta_data(q_rebin)
@@ -794,7 +796,12 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # and use 1 as the error on counts of zero. We normalize by the integrated
         # current _after_ the background subtraction so that the 1 doesn't have
         # to be changed to a 1/Charge.
-        subtracted = NormaliseByCurrent(InputWorkspace=subtracted, OutputWorkspace=str(subtracted))
+        try:
+            NormaliseByCurrent(InputWorkspace=subtracted, OutputWorkspace=str(subtracted))
+        except Exception as e:
+            logger.error(str(e))  # allow continuation when normalization fails (e.g. no proton charge)
+        finally:
+            subtracted = mtd[str(subtracted)]
 
         # Crop to only the selected peak region
         cropped = CropWorkspace(

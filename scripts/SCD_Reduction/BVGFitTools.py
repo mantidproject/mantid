@@ -11,7 +11,7 @@ from mantid.simpleapi import *
 from scipy.interpolate import interp1d
 from scipy.ndimage.filters import convolve
 import ICConvoluted as ICC
-from mantid.simpleapi import BivariateGaussian
+import BivariateGaussian
 
 plt.ion()
 
@@ -306,7 +306,7 @@ def fitScaling(n_events, box, YTOF, YBVG, goodIDX=None, neigh_length_m=3):
     dP = 8
     fitMaxIDX = tuple(np.array(np.unravel_index(YJOINT.argmax(), YJOINT.shape)))
     if goodIDX is None:
-        goodIDX = np.zeros_like(YJOINT).astype(np.bool)
+        goodIDX = np.zeros_like(YJOINT).astype(bool)
         goodIDX[
             max(fitMaxIDX[0] - dP, 0) : min(fitMaxIDX[0] + dP, goodIDX.shape[0]),
             max(fitMaxIDX[1] - dP, 0) : min(fitMaxIDX[1] + dP, goodIDX.shape[1]),
@@ -368,7 +368,6 @@ def fitTOFCoordinate(
     iccFitDict=None,
     fitPenalty=None,
 ):
-
     # Get info from the peak
     tof = peak.getTOF()  # in us
     wavelength = peak.getWavelength()  # in Angstrom
@@ -378,7 +377,7 @@ def fitTOFCoordinate(
 
     # Set the qMask
     if qMask is None:
-        qMask = np.ones_like(box.getNumEventsArray()).astype(np.bool)
+        qMask = np.ones_like(box.getNumEventsArray()).astype(bool)
 
     # Calculate the optimal pp_lambda and
     tofWS, ppl = ICCFT.getTOFWS(

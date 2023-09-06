@@ -17,10 +17,6 @@ from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as s_api
 
-from dos.load_castep import parse_castep_file
-from dos.load_euphonic import euphonic_available, get_data_with_euphonic
-from dos.load_phonon import parse_phonon_file
-
 
 PEAK_WIDTH_ENERGY_FLAG = "energy"
 
@@ -134,14 +130,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         ions = self.getProperty("Ions").value
         calc_partial = len(ions) > 0
-
-        if euphonic_filename and not euphonic_available():
-            issues["ForceConstantsFile"] = (
-                "Cannot import the Euphonic library for force constants import. "
-                "This will be included in a future version of Mantid. "
-                "Until then, it can be installed using users/AdamJackson/install_euphonic.py "
-                "from the Script Repository."
-            )
 
         if spec_type == "IonTable" and not pdos_available:
             issues["SpectrumType"] = "Cannot produce ion table when only .castep file is provided"
@@ -262,6 +250,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         @return file_data dictionary holding all required data from the castep or phonon file
         """
+        from dos.load_euphonic import get_data_with_euphonic
+
         castep_filename = self.getPropertyValue("CASTEPFile")
         phonon_filename = self.getPropertyValue("PHONONFile")
         euphonic_filename = self.getPropertyValue("ForceConstantsFile")
@@ -271,13 +261,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         elif castep_filename:
             return self._read_data_from_file(castep_filename)
         elif euphonic_filename:
-            if euphonic_available():
-                file_data, self._element_isotope = get_data_with_euphonic(
-                    euphonic_filename, cutoff=float(self.getPropertyValue("ForceConstantsSampling")), acoustic_sum_rule=None
-                )
-            else:
-                raise ValueError("Could not load file using Euphonic: you may need to install this library.")
-
+            file_data, self._element_isotope = get_data_with_euphonic(
+                euphonic_filename, cutoff=float(self.getPropertyValue("ForceConstantsSampling")), acoustic_sum_rule=None
+            )
             self._num_ions = file_data["num_ions"]
             return file_data
 
@@ -758,6 +744,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         @param file_name - path to the file.
         @return tuple of the frequencies, ir and raman intensities and weights
         """
+        from dos.load_castep import parse_castep_file
+        from dos.load_phonon import parse_phonon_file
+
         ext = os.path.splitext(file_name)[1]
 
         if ext == ".phonon":

@@ -166,7 +166,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         whether ROI is drawn
         :return:
         """
-        is_drawn = not (self._myPolygon is None)
+        is_drawn = self._myPolygon is not None
 
         return is_drawn
 

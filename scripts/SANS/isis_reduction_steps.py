@@ -2005,7 +2005,7 @@ class NormalizeToMonitor(ReductionStep):
             is_prompt_peak_instrument(reducer)
             and reducer.transmission_calculator.removePromptPeakMin is not None
             and reducer.transmission_calculator.removePromptPeakMax is not None
-        ):  # noqa
+        ):
             RemoveBins(
                 InputWorkspace=self.output_wksp,
                 OutputWorkspace=self.output_wksp,
@@ -2204,7 +2204,7 @@ class TransmissionCalc(ReductionStep):
         # Perform the a dark run background correction if one was specified
         self._correct_dark_run_background(reducer, tmpWS, trans_det_ids)
 
-        if is_prompt_peak_instrument(reducer) and self.removePromptPeakMin is not None and self.removePromptPeakMax is not None:  # noqa
+        if is_prompt_peak_instrument(reducer) and self.removePromptPeakMin is not None and self.removePromptPeakMax is not None:
             RemoveBins(
                 InputWorkspace=tmpWS,
                 OutputWorkspace=tmpWS,
@@ -2341,7 +2341,7 @@ class TransmissionCalc(ReductionStep):
         """
         return reducer.get_transmissions()
 
-    def calculate(self, reducer):  # noqa
+    def calculate(self, reducer):
         LAMBDAMIN = "lambda_min"
         LAMBDAMAX = "lambda_max"
         FITMETHOD = "fit_method"
@@ -3661,7 +3661,6 @@ class UserFile(ReductionStep):
             _issueWarning('Error in user file after L/, "%s" is not a valid limit line' % limit_type.upper())
 
     def _read_mon_line(self, details, reducer):  # noqa: C901
-
         # MON/LENGTH, MON/SPECTRUM and MON/TRANS all accept the INTERPOLATE option
         interpolate = False
         interPlace = details.upper().find("/INTERPOLATE")
@@ -4390,7 +4389,7 @@ class GetSampleGeom(ReductionStep):
         Reads the geometry information stored in the workspace
         but doesn't replace values that have been previously set
         """
-        _ = reducer  # noqa
+        _ = reducer
         wksp = mtd[workspace]
         if isinstance(wksp, WorkspaceGroup):
             wksp = wksp[0]

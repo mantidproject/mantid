@@ -255,7 +255,6 @@ class RunTabPresenterTest(unittest.TestCase):
                 ConfigService=mock.DEFAULT,
                 os=mock.DEFAULT,
             ) as mock_datasearch:
-
                 mock_datasearch["add_dir_to_datasearch"].return_value = (mock.Mock(), mock.Mock())
                 self.presenter.on_batch_file_load()
 
@@ -345,7 +344,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter.update_view_from_table_model.assert_called_with()
 
     def test_that_all_columns_shown_when_multi_period_is_true(self):
-
         self.presenter.set_view(mock.MagicMock())
 
         self.presenter.on_multiperiod_changed(True)
@@ -353,12 +351,25 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter._view.show_period_columns.assert_called_once_with()
 
     def test_that_period_columns_hidden_when_multi_period_is_false(self):
-
         self.presenter.set_view(mock.MagicMock())
 
         self.presenter.on_multiperiod_changed(False)
 
         self.presenter._view.hide_period_columns.assert_called_once_with()
+
+    def test_that_all_columns_shown_when_background_subtraction_is_true(self):
+        self.presenter.set_view(mock.MagicMock())
+
+        self.presenter.on_background_subtraction_view_changed(True)
+
+        self.presenter._view.show_background_subtraction.assert_called_once_with()
+
+    def test_that_all_columns_hidden_when_background_subtraction_is_false(self):
+        self.presenter.set_view(mock.MagicMock())
+
+        self.presenter.on_background_subtraction_view_changed(False)
+
+        self.presenter._view.hide_background_subtraction.assert_called_once_with()
 
     def test_on_data_changed_updates_table_model(self):
         self.presenter._beam_centre_presenter = mock.Mock()
@@ -382,7 +393,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter.update_view_from_table_model.assert_called_with()
 
     def test_setup_instrument_specific_settings(self):
-
         self.presenter.set_view(mock.MagicMock())
         self.presenter._beam_centre_presenter = mock.MagicMock()
         self.presenter._workspace_diagnostic_presenter = mock.MagicMock()
@@ -507,7 +517,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter._view.progress_bar_value, 1)
 
     def test_that_update_progress_sets_correctly(self):
-
         view = mock.MagicMock()
         self.presenter.set_view(view)
 
@@ -517,7 +526,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.progress_bar_maximum, 200)
 
     def test_that_notify_progress_updates_state_and_tooltip_of_row(self):
-
         view = mock.MagicMock()
         self.presenter.set_view(view)
         self.presenter.on_row_appended()
@@ -528,7 +536,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter._table_model.get_row(0).tool_tip, None)
 
     def test_that_process_selected_does_nothing_if_no_states_selected(self):
-
         view = mock.MagicMock()
         view.get_selected_rows = mock.MagicMock(return_value=[])
         self.presenter.set_view(view)
@@ -568,7 +575,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter._process_rows.assert_called_with(expected)
 
     def test_that_process_selected_ignores_all_empty_rows(self):
-
         view = mock.MagicMock()
         view.get_selected_rows = mock.MagicMock(return_value=[0, 1])
         self.presenter.set_view(view)
@@ -587,7 +593,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter._process_rows.assert_called_with([populated_row])
 
     def test_that_process_all_ignores_empty_rows(self):
-
         view = mock.MagicMock()
         view.get_selected_rows = mock.MagicMock(return_value=[0, 1])
         self.presenter.set_view(view)
@@ -673,7 +678,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter._view.add_runs_presenter.handle_new_save_directory.assert_called_once_with("a_new_directory")
 
     def test_that_validate_output_modes_raises_if_no_file_types_selected_for_file_mode(self):
-
         view = mock.MagicMock()
 
         view.save_types = [SaveType.NO_TYPE]
@@ -698,7 +702,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertRaises(ValueError, self.presenter._validate_output_modes)
 
     def test_that_validate_output_modes_does_not_raise_if_no_file_types_selected_for_memory_mode(self):
-
         view = mock.MagicMock()
         view.save_types = [SaveType.NO_TYPE]
 
@@ -729,7 +732,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter._view.enable_file_type_buttons.assert_called_once()
 
     def test_that_on_reduction_mode_changed_calls_update_front_if_selection_is_HAB(self):
-
         self.presenter._beam_centre_presenter = mock.MagicMock()
 
         self.presenter.on_reduction_mode_selection_has_changed("Hab")
@@ -740,7 +742,6 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter._beam_centre_presenter.update_front_selected.assert_called_once_with()
 
     def test_that_on_reduction_mode_changed_calls_update_rear_if_selection_is_LAB(self):
-
         self.presenter._beam_centre_presenter = mock.MagicMock()
 
         self.presenter.on_reduction_mode_selection_has_changed("rear")

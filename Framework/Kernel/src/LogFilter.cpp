@@ -121,10 +121,18 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
   // apply the filter to the property
   if (m_prop) {
     // create a TimeROI to apply
-    TimeROI timeroi(m_filter.get());
+    TimeROI timeroi;
 
     // if the end point is a open, then the last point in the TimeROI needs to be modified to make things work out
     if (filterOpenEnded) {
+      if (m_filter->size() == 1 && m_filter->lastValue()) {
+        // create a pretend ROI from the start to the year 2100
+        timeroi.addROI(m_filter->lastTime(), DateAndTime("2100-Jan-01 00:00:01"));
+      } else {
+        // default constructor is fine
+        timeroi = TimeROI(m_filter.get());
+      }
+
       // do a test filtering so the second to last interval can be inspected
       m_prop->filterWith(timeroi);
       // determine how far out to adjust the last ROI
@@ -139,6 +147,8 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
       else if (newEnd > oldEnd)
         timeroi.addROI(oldEnd, newEnd);
       // both ends match (lucky guess earlier) so there is nothing to adjust
+    } else {
+      timeroi = TimeROI(m_filter.get());
     }
 
     // apply the filter
@@ -197,7 +207,7 @@ void LogFilter::setFilter(const TimeROI &roi, const bool filterOpenEnded) {
   // put the results into the TimeSeriesProperty
   std::vector<bool> values;
   std::vector<DateAndTime> times;
-  for (const auto splitter : roi.toSplitters()) {
+  for (const auto &splitter : roi.toTimeIntervals()) {
     values.emplace_back(true);
     values.emplace_back(false);
     times.emplace_back(splitter.start());
@@ -210,6 +220,9 @@ void LogFilter::setFilter(const TimeROI &roi, const bool filterOpenEnded) {
   }
 
   // set as the filter
+  if (!m_filter) {
+    m_filter = std::make_unique<TimeSeriesProperty<bool>>("filter");
+  }
   m_filter->replaceValues(times, values);
 }
 

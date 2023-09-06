@@ -50,29 +50,11 @@ namespace {
  * Return the path to the Python executable
  * @param base Directory to serve as base for absolute paths
  */
-#if defined(CONDA_ENV)
 inline std::string pythonExecutable(const fs::path &) {
   // We assume the conda environement is activated and python will be found
   // on the PATH
   return bp::search_path(PYTHON_EXECUTABLE_PATH).generic_string();
 }
-#else
-/**
- * Check the given path and make it absolute if it is relative. The base
- * is taken as the directory given
- * @param path A filesystem path as a string
- * @param base Directory to serve as base for absolute paths
- */
-inline std::string absolutePath(const char *path, const fs::path &base) {
-  fs::path abspath(path);
-  if (!abspath.is_absolute()) {
-    abspath = base / path;
-  }
-  return abspath.generic_string();
-}
-
-inline std::string pythonExecutable(const fs::path &dirOfExe) { return absolutePath(PYTHON_EXECUTABLE_PATH, dirOfExe); }
-#endif
 
 /**
  * Given a list of existing executable/arguments append those
@@ -88,23 +70,8 @@ void appendArguments(ExeArgs *exeArgs, int argc, char **argv) {
     return;
 
   const auto startupArgsSize{exeArgs->size()};
-#if defined(__APPLE__) && !defined(CONDA_ENV)
-  // On first launch of quarantined apps launchd passes a command line parameter
-  // of the form -psn_0_XXXXXX to the application. We discard this otherwise
-  // workbench's argparse will choke on it.
-  // https://stackoverflow.com/questions/10242115/os-x-strange-psn-command-line-parameter-when-launched-from-finder
-  const auto acceptedArg = [](const char *arg) -> bool {
-    if (std::string(arg).compare(0, 5, "-psn_") == 0)
-      return false;
-    return true;
-  };
-  const auto nargs = std::count_if(argv + 1, argv + argc, acceptedArg);
-  exeArgs->resize(startupArgsSize + nargs);
-  std::copy_if(argv + 1, argv + argc, std::next(exeArgs->begin(), startupArgsSize), acceptedArg);
-#else
   exeArgs->resize(startupArgsSize + argc - 1);
   std::copy(argv + 1, argv + argc, std::next(exeArgs->begin(), startupArgsSize));
-#endif
 }
 
 /**
@@ -115,22 +82,6 @@ void appendArguments(ExeArgs *exeArgs, int argc, char **argv) {
  */
 decltype(boost::this_process::environment()) childEnvironment([[maybe_unused]] const fs::path &dirOfExe) {
   auto env = boost::this_process::environment();
-
-#if !defined(CONDA_ENV)
-  auto insertAtFront = [&env](const auto &name, const auto &value) {
-    const auto existingValue = env[name];
-    env[name] = value;
-    env[name] += existingValue.to_string();
-  };
-  const auto dirOfExeStr = dirOfExe.string();
-  insertAtFront("PATH", dirOfExeStr);
-  insertAtFront("PYTHONPATH", dirOfExeStr);
-
-#if defined(QT_PLUGIN_PATH)
-  env["QT_PLUGIN_PATH"] = absolutePath(QT_PLUGIN_PATH, dirOfExe);
-#endif // QT_PLUGIN_PATH
-
-#endif // NOT_CONDA_ENV
 
   // It was observed on Qt >= 5.12 that the QtWebEngineProcess would fail to
   // load the icudtl.dat resources due to Chromium sandboxing restrictions. It

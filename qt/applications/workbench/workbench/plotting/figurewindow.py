@@ -9,6 +9,7 @@
 #
 """Provides the QMainWindow subclass for a plotting window"""
 # std imports
+from typing import List
 import weakref
 
 # 3rdparty imports
@@ -19,6 +20,33 @@ from qtpy.QtWidgets import QMainWindow
 # local imports
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.widgets.observers.observing_view import ObservingView
+from mantid.api import AnalysisDataServiceImpl
+import mantid.kernel
+
+
+def _validate_workspaces(names: List[str]) -> List[bool]:
+    """
+    Checks that workspaces being over plot have multiple bins
+    :param names: A list of workspace names
+    :return: List of bools, True if all workspaces have multiple bins
+    """
+    ads = AnalysisDataServiceImpl.Instance()
+    has_multiple_bins = []
+    for name in names:
+        result = False
+        ws = ads.retrieve(name)
+        try:
+            result = ws.blocksize() > 1
+        except RuntimeError:
+            # blocksize() implementation in Workspace2D and EventWorkspace can through an error if histograms are not equal
+            for i in ws.getNumberHistograms():
+                if ws.y(i).size() > 1:
+                    result = True
+                    break
+        finally:
+            has_multiple_bins.append(result)
+
+    return has_multiple_bins
 
 
 class FigureWindow(QMainWindow, ObservingView):
@@ -94,15 +122,7 @@ class FigureWindow(QMainWindow, ObservingView):
 
         # This creates a matplotlib LocationEvent so that the axis in which the
         # drop event occurred can be calculated
-        try:
-            x, y = self._canvas.mouseEventCoords(event.pos())
-        except AttributeError:  # matplotlib v1.5 does not have mouseEventCoords
-            try:
-                dpi_ratio = self._canvas.devicePixelRatio() or 1
-            except AttributeError:
-                dpi_ratio = 1
-            x = dpi_ratio * event.pos().x()
-            y = dpi_ratio * self._canvas.figure.bbox.height / dpi_ratio - event.pos().y()
+        x, y = self._canvas.mouseEventCoords(event.pos())
 
         location_event = LocationEvent("AxesGetterEvent", self._canvas, x, y)
         ax = location_event.inaxes if location_event.inaxes else self._canvas.figure.axes[0]
@@ -131,6 +151,9 @@ class FigureWindow(QMainWindow, ObservingView):
         :param ax: The matplotlib axes object to overplot onto
         """
         if len(names) == 0:
+            return
+        if not all(_validate_workspaces(names)):
+            mantid.kernel.logger.warning("To overplot, workspace(s) must have multiple bins")
             return
         # local import to avoid circular import with FigureManager
         from mantidqt.plotting.functions import pcolormesh, plot_from_names, plot_surface, plot_wireframe, plot_contour

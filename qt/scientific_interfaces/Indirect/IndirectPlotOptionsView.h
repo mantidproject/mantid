@@ -22,7 +22,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-enum PlotWidget { Spectra, SpectraBin, SpectraContour, SpectraTiled };
+enum PlotWidget { Spectra, SpectraBin, SpectraContour, SpectraTiled, SpectraUnit, SpectraContourUnit };
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsView : public API::MantidWidget {
   Q_OBJECT
@@ -33,6 +33,7 @@ public:
 
   virtual void setPlotType(PlotWidget const &plotType, std::map<std::string, std::string> const &availableActions);
   virtual void setWorkspaceComboBoxEnabled(bool enable);
+  virtual void setUnitComboBoxEnabled(bool enable);
   virtual void setIndicesLineEditEnabled(bool enable);
   virtual void setPlotButtonEnabled(bool enable);
   void setPlotButtonText(QString const &text);
@@ -57,6 +58,7 @@ public:
 
 signals:
   void selectedWorkspaceChanged(std::string const &workspaceName);
+  void selectedUnitChanged(std::string const &unit);
   void selectedIndicesChanged(std::string const &indices);
   void plotSpectraClicked();
   void plotBinsClicked();
@@ -65,6 +67,7 @@ signals:
 
 private slots:
   void emitSelectedWorkspaceChanged(QString const &workspaceName);
+  void emitSelectedUnitChanged(QString const &unit);
   void emitSelectedIndicesChanged();
   void emitSelectedIndicesChanged(QString const &indices);
   void emitPlotSpectraClicked();

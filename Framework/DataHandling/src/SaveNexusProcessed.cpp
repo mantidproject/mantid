@@ -13,6 +13,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -239,10 +240,12 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
   const std::string workspaceID = inputWorkspace->id();
   if ((workspaceID.find("Workspace2D") == std::string::npos) &&
       (workspaceID.find("RebinnedOutput") == std::string::npos) &&
-      (workspaceID.find("WorkspaceSingleValue") == std::string::npos) && !m_eventWorkspace && !tableWorkspace &&
+      (workspaceID.find("WorkspaceSingleValue") == std::string::npos) &&
+      (workspaceID.find("GroupingWorkspace") == std::string::npos) && !m_eventWorkspace && !tableWorkspace &&
       !offsetsWorkspace && !maskWorkspace)
     throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, "
-                                         "EventWorkspace, ITableWorkspace, OffsetsWorkspace or MaskWorkspace.");
+                                         "EventWorkspace, ITableWorkspace, OffsetsWorkspace, "
+                                         "GroupingWorkspace, or MaskWorkspace.");
 
   // Create progress object for initial part - depends on whether events are
   // processed
@@ -298,6 +301,8 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
         workspaceTypeGroupName = "offsets_workspace";
       else if (maskWorkspace)
         workspaceTypeGroupName = "mask_workspace";
+      else if (std::dynamic_pointer_cast<const GroupingWorkspace>(inputWorkspace))
+        workspaceTypeGroupName = "grouping_workspace";
       else
         workspaceTypeGroupName = "workspace";
 

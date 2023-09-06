@@ -2484,7 +2484,7 @@ void InstrumentDefinitionParser::setComponentLinks(std::shared_ptr<Geometry::Ins
 
 /**
 Apply the cache.
-@param cacheToApply : Cache file object to use the the geometries.
+@param cacheToApply : Cache file object to use the geometries.
 */
 void InstrumentDefinitionParser::applyCache(const IDFObject_const_sptr &cacheToApply) {
   const std::string cacheFullPath = cacheToApply->getFileFullPathStr();

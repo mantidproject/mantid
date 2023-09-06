@@ -324,7 +324,7 @@ inline bool NexusFileIO::writeSingleValueNXLog(const std::string &name, const st
 template <class T> void NexusFileIO::writeNumericTimeLog(const Kernel::TimeSeriesProperty<T> *timeSeries) const {
   // write NXlog section for double values
   NXstatus status;
-  // get a name for the log, possibly removing the the path component
+  // get a name for the log, possibly removing the path component
   std::string logName = timeSeries->name();
   size_t ipos = logName.find_last_of("/\\");
   if (ipos != std::string::npos)

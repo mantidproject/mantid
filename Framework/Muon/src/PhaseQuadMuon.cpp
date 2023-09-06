@@ -87,7 +87,7 @@ void PhaseQuadMuon::exec() {
 
 //------------------------------------------------------------------------------------------------
 /** Checks that the input workspace and table have compatible dimensions
- * @return a map where: Key = string name of the the property; Value = string
+ * @return a map where: Key = string name of the property; Value = string
  * describing the problem with the property.
  */
 std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {

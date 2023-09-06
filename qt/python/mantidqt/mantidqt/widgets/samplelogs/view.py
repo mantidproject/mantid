@@ -24,25 +24,33 @@ from qtpy.QtWidgets import (
     QFrame,
     QSpacerItem,
 )
-from qtpy.QtCore import QItemSelectionModel, Qt
+from qtpy.QtCore import QItemSelectionModel, Qt, Signal
+from mantidqt.widgets.observers.observing_view import ObservingView
 from mantidqt.MPLwidgets import FigureCanvas
+from mantid.api import Workspace
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
 
-class SampleLogsView(QSplitter):
+class SampleLogsView(QSplitter, ObservingView):
     """Sample Logs View
 
     This contains a table of the logs, a plot of the currently
     selected logs, and the statistics of the selected log.
     """
 
+    close_signal = Signal()
+    rename_signal = Signal(str)
+    replace_signal = Signal(str, Workspace)
+
     def __init__(self, presenter, parent=None, window_flags=Qt.Window, name="", isMD=False, noExp=0):
-        super(SampleLogsView, self).__init__(parent)
+        super().__init__(parent)
 
         self.presenter = presenter
 
         self.setWindowTitle("{} sample logs".format(name))
+        self.TITLE_STRING = "{} sample logs"
+
         self.setWindowFlags(window_flags)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
@@ -102,6 +110,11 @@ class SampleLogsView(QSplitter):
         self.show_filtered.setChecked(True)
         self.show_filtered.stateChanged.connect(self.presenter.filtered_changed)
         layout_options.addWidget(self.show_filtered)
+        self.show_timeROI = QCheckBox("Time ROI")
+        self.show_timeROI.setToolTip("Toggle shaded regions that indicate values outside TimeROI regions")
+        self.show_timeROI.setChecked(True)
+        self.show_timeROI.stateChanged.connect(self.presenter.show_timeroi_changed)
+        layout_options.addWidget(self.show_timeROI)
         self.spaceItem = QSpacerItem(10, 10, QSizePolicy.Expanding)
         layout_options.addSpacerItem(self.spaceItem)
         layout_right.addLayout(layout_options)
@@ -132,12 +145,11 @@ class SampleLogsView(QSplitter):
         self.addWidget(self.frame_right)
         self.setStretchFactor(0, 1)
 
+        self.close_signal.connect(self.close)
+        self.rename_signal.connect(self._rename)
+
         self.resize(1200, 800)
         self.show()
-
-    def closeEvent(self, event):
-        self.deleteLater()
-        super(SampleLogsView, self).closeEvent(event)
 
     def tableMenu(self, event):
         """Right click menu for table, can plot or print selected logs"""
@@ -202,6 +214,7 @@ class SampleLogsView(QSplitter):
                 label=log_text,
                 FullTime=not self.full_time.isChecked(),
                 Filtered=self.show_filtered.isChecked(),
+                ShowTimeROI=self.show_timeROI.isChecked(),
                 ExperimentInfo=exp,
             )
 
@@ -212,6 +225,10 @@ class SampleLogsView(QSplitter):
     def set_log_controls(self, are_logs_filtered):
         """Sets log specific settings based on the log clicked on"""
         self.show_filtered.setEnabled(are_logs_filtered)
+
+    def enable_timeROI(self, time_roi_has_effect):
+        self.show_timeROI.setEnabled(time_roi_has_effect)
+        self.show_timeROI.setChecked(time_roi_has_effect)
 
     def get_row_log_name(self, i):
         """Returns the log name of particular row"""

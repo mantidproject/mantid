@@ -188,14 +188,7 @@ private:
   template <typename Type>
   void saveGenericBlock(const std::vector<Type> &DataBlock, const uint64_t blockPosition) const;
 
-  /** Load generic data block from the opened NeXus file.
-    *@param Block         -- the storage vector to place data into
-    *@param blockPosition -- The starting place to read data from
-    *@param nPoints       -- number of data points (events) to read
-
-    *@returns Block -- resized block of data containing serialized events
-    representation.
-  */
+  /// Load generic data block from the opened NeXus file.
   template <typename Type>
   void loadGenericBlock(std::vector<Type> &Block, const uint64_t blockPosition, const size_t nPoints) const;
 };

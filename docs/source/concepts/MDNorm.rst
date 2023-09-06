@@ -159,12 +159,16 @@ As of release 3.3, the normalization can be calculated for single crystal
 diffraction (:ref:`MDNormSCD <algm-MDNormSCD>`)
 and single crystal direct geometry inelastic scattering
 (:ref:`MDNormDirectSC <algm-MDNormDirectSC>`).
+These were merged into a single one, :ref:`MDNorm <algm-MDNorm>` with more functionality,
+in release 4.0.
 
 References
 ----------
 
-The source for how this calculation is done is
+The source for how this calculation can be found in
 
-#. T.M. Michels-Clark, A.T. Savici, V.E. Lynch, X.P. Wang and C.M. Hoffmann *Expanding Lorentz and spectrum corrections to large volumes of reciprocal space for single-crystal time-of-flight neutron diffraction.* J Appl Crystallogr **49.2** (2016) doi: `10.1107/S1600576716001369 <http://dx.doi.org/10.1107/S1600576716001369>`_
+#. A.T. Savici, M. A. Gigg, O. Arnold, R. Tolchenov, R.E. Whitfield, S. E. Hahn, W. Zhou,  and I. A. Zaliznyak *Efficient data reduction for time-of-flight neutron scattering experiments on single crystals*, J. Appl. Cryst. **55.6**, 1514-1527 (2022) doi: `10.1107/S1600576722009645 <https://doi.org/10.1107/S1600576722009645>`_
+
+#. T.M. Michels-Clark, A.T. Savici, V.E. Lynch, X.P. Wang, and C.M. Hoffmann *Expanding Lorentz and spectrum corrections to large volumes of reciprocal space for single-crystal time-of-flight neutron diffraction.* J Appl Crystallogr **49.2**, 497–506 (2016) doi: `10.1107/S1600576716001369 <http://dx.doi.org/10.1107/S1600576716001369>`_
 
 .. categories:: Concepts

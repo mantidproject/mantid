@@ -49,6 +49,9 @@ public:
   virtual void loadSettings() = 0;
   virtual void saveSettings() = 0;
 
+  virtual void disable(std::string const &reason) = 0;
+  virtual void enable() = 0;
+
   virtual std::optional<std::string> getSampleFile() const = 0;
   virtual std::optional<std::string> getVanadiumFile() const = 0;
 
@@ -62,7 +65,7 @@ public:
   virtual void clearShapes() = 0;
   virtual void drawRectanglesAbove(std::vector<DetectorTube> const &tubes) = 0;
 
-  virtual void warningBox(std::string const &message) = 0;
+  virtual void displayWarning(std::string const &message) = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFInstrumentView final : public QWidget, public IALFInstrumentView {
@@ -82,6 +85,9 @@ public:
   void loadSettings() override;
   void saveSettings() override;
 
+  void disable(std::string const &reason) override;
+  void enable() override;
+
   std::optional<std::string> getSampleFile() const override;
   std::optional<std::string> getVanadiumFile() const override;
 
@@ -95,7 +101,7 @@ public:
   void clearShapes() override;
   void drawRectanglesAbove(std::vector<DetectorTube> const &tubes) override;
 
-  void warningBox(std::string const &message) override;
+  void displayWarning(std::string const &message) override;
 
 private slots:
   void reconnectInstrumentActor();

@@ -120,7 +120,11 @@ void MaskBins::execEvent() {
 
   Progress progress(this, 0.0, 1.0, outputWS->getNumberHistograms() * 2);
 
-  outputWS->sortAll(Mantid::DataObjects::TOF_SORT, &progress);
+  {
+    const auto timerStart = std::chrono::high_resolution_clock::now();
+    outputWS->sortAll(Mantid::DataObjects::TOF_SORT, &progress);
+    addTimer("sortEvents", timerStart, std::chrono::high_resolution_clock::now());
+  }
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(indexSet.size()); // NOLINT

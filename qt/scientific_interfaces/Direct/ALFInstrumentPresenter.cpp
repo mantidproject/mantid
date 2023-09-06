@@ -37,7 +37,10 @@ void ALFInstrumentPresenter::loadSettings() { m_view->loadSettings(); }
 
 void ALFInstrumentPresenter::saveSettings() { m_view->saveSettings(); }
 
-void ALFInstrumentPresenter::notifyAlgorithmError(std::string const &message) { m_view->warningBox(message); }
+void ALFInstrumentPresenter::notifyAlgorithmError(std::string const &message) {
+  m_view->enable();
+  m_view->displayWarning(message);
+}
 
 void ALFInstrumentPresenter::loadSample() {
   m_dataSwitch = ALFData::SAMPLE;
@@ -50,6 +53,7 @@ void ALFInstrumentPresenter::loadVanadium() {
 }
 
 void ALFInstrumentPresenter::loadAndNormalise() {
+  m_view->disable(m_dataSwitch == ALFData::SAMPLE ? "Loading sample" : "Loading vanadium");
   m_analysisPresenter->clear();
 
   if (auto const filepath = getFileFromView()) {
@@ -64,7 +68,8 @@ void ALFInstrumentPresenter::notifyLoadComplete(Mantid::API::MatrixWorkspace_spt
   if (m_model->isALFData(workspace)) {
     m_algorithmManager->normaliseByCurrent(m_model->normaliseByCurrentProperties(workspace));
   } else {
-    m_view->warningBox("The loaded data is not from the ALF instrument");
+    m_view->enable();
+    m_view->displayWarning("The loaded data is not from the ALF instrument");
   }
 }
 
@@ -76,6 +81,7 @@ void ALFInstrumentPresenter::notifyNormaliseByCurrentComplete(Mantid::API::Matri
 
 void ALFInstrumentPresenter::generateLoadedWorkspace() {
   if (!m_model->hasData(ALFData::SAMPLE)) {
+    m_view->enable();
     return;
   }
 
@@ -120,6 +126,7 @@ void ALFInstrumentPresenter::convertSampleToDSpacing(Mantid::API::MatrixWorkspac
 
 void ALFInstrumentPresenter::notifyConvertUnitsComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
   m_model->replaceSampleWorkspaceInADS(workspace);
+  m_view->enable();
 }
 
 void ALFInstrumentPresenter::notifyInstrumentActorReset() { updateAnalysisViewFromModel(); }
@@ -167,10 +174,12 @@ void ALFInstrumentPresenter::updateInstrumentViewFromModel() {
 }
 
 void ALFInstrumentPresenter::updateAnalysisViewFromModel() {
+  m_view->disable("Processing selection");
   if (m_model->hasSelectedTubes()) {
     m_algorithmManager->createWorkspace(m_model->createWorkspaceAlgorithmProperties(m_view->getInstrumentActor()));
   } else {
     m_analysisPresenter->setExtractedWorkspace(nullptr, {});
+    m_view->enable();
   }
 }
 
@@ -184,6 +193,7 @@ void ALFInstrumentPresenter::notifyScaleXComplete(Mantid::API::MatrixWorkspace_s
 
 void ALFInstrumentPresenter::notifyRebunchComplete(Mantid::API::MatrixWorkspace_sptr const &workspace) {
   m_analysisPresenter->setExtractedWorkspace(workspace, m_model->twoThetasClosestToZero());
+  m_view->enable();
 }
 
 } // namespace MantidQt::CustomInterfaces

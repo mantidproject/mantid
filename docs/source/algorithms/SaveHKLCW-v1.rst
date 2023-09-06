@@ -35,7 +35,8 @@ The corresponding format without direction cosines is.
 +----+----+----+------+------------+----+
 
 The output file contains a short header containing the default title,
-format string and wavelength.
+format string and wavelength. See the docmentation for :ref:`algm-SaveHKL`
+for additional information about convetions in direction cosines.
 
 Usage
 -----
@@ -78,8 +79,8 @@ The resulting output file (Usage_Example.hkl) looks like this
     Single crystal data
     (3i4,2f8.2,i4,6f8.5)
     0.66667  0   0
-       1   1   1    0.00    0.00   1-1.00000 0.33333 0.00000-0.66667 0.00000-0.66667
-       1  -1   1    0.00    0.00   1-1.00000 0.33333 0.00000 0.66667 0.00000-0.66667
+       1   1   1    0.00    0.00   1-1.00000 0.33333-0.00000-0.66667-0.00000-0.66667
+       1  -1   1    0.00    0.00   1-1.00000 0.33333-0.00000 0.66667-0.00000-0.66667
 
 
 .. categories::

@@ -49,7 +49,7 @@ public:
   }
 };
 
-QString makeNumber(double d) { return QString::number(d, 'g', 16); }
+QString makeNumber(double d) { return QString::number(d, 'g', 6); }
 
 QStringList defaultHeaders() {
   QStringList headers;

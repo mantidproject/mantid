@@ -122,7 +122,6 @@ private:
   //      herr_t      status;
   //      char cbank0[10],cbank[100];
   //      char ibank0[10],ibank[100];
-  //      int mpi_size, mpi_rank;
 };
 
 } // namespace DataHandling

@@ -122,7 +122,7 @@ void ISpectrum::clearDetectorIDs() {
 /// @return the spectrum number of this spectrum
 specnum_t ISpectrum::getSpectrumNo() const { return m_specNo; }
 
-/** Sets the the spectrum number of this spectrum
+/** Sets the spectrum number of this spectrum
  * @param num :: the spectrum number of this spectrum */
 void ISpectrum::setSpectrumNo(specnum_t num) {
   m_specNo = num;

@@ -56,9 +56,6 @@ public:
                                                              const API::MatrixWorkspace_const_sptr &rhs);
 
 protected:
-  Parallel::ExecutionMode
-  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
-
   ~BinaryOperation() = default;
 
   // Overridden Algorithm methods
@@ -127,24 +124,13 @@ protected:
    */
   virtual void performEventBinaryOperation(DataObjects::EventList &lhs, const DataObjects::EventList &rhs);
 
-  /** Carries out the binary operation IN-PLACE on a single EventList,
-   * with another (histogrammed) spectrum as the right-hand operand.
-   *
-   *  @param lhs :: Reference to the EventList that will be modified in place.
-   *  @param rhsX :: Rhs X bin boundaries
-   *  @param rhsY :: Rhs data values
-   *  @param rhsE :: Rhs error values
-   */
+  /// Carries out the binary operation IN-PLACE on a single EventList, with another (histogrammed) spectrum as the
+  /// right-hand operand.
   virtual void performEventBinaryOperation(DataObjects::EventList &lhs, const MantidVec &rhsX, const MantidVec &rhsY,
                                            const MantidVec &rhsE);
 
-  /** Carries out the binary operation IN-PLACE on a single EventList,
-   * with a single (double) value as the right-hand operand
-   *
-   *  @param lhs :: Reference to the EventList that will be modified in place.
-   *  @param rhsY :: The rhs data value
-   *  @param rhsE :: The rhs error value
-   */
+  /// Carries out the binary operation IN-PLACE on a single EventList, with a single (double) value as the right-hand
+  /// operand
   virtual void performEventBinaryOperation(DataObjects::EventList &lhs, const double &rhsY, const double &rhsE);
 
   /** Should be overridden by operations that need to manipulate the units of

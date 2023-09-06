@@ -14,8 +14,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h"
-#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
@@ -23,8 +21,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexusGeometry/Hdf5Version.h"
-#include "MantidParallel/Collectives.h"
-#include "MantidParallel/Communicator.h"
 
 #include "Poco/Path.h"
 #include <cxxtest/TestSuite.h>
@@ -84,72 +80,6 @@ void run_multiprocess_load(const std::string &file, bool precount) {
     }
   }
 }
-
-namespace {
-std::shared_ptr<const EventWorkspace> load_reference_workspace(const std::string &filename) {
-  // Construct default communicator *without* threading backend. In non-MPI run
-  // (such as when running unit tests) this will thus just be a communicator
-  // containing a single rank, independently on all ranks, which is what we want
-  // for default loading bhavior.
-  Parallel::Communicator comm;
-  auto alg = ParallelTestHelpers::create<LoadEventNexus>(comm);
-  alg->setProperty("Filename", filename);
-  alg->setProperty("LoadLogs", false);
-  TS_ASSERT_THROWS_NOTHING(alg->execute());
-  TS_ASSERT(alg->isExecuted());
-  Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
-  return std::dynamic_pointer_cast<const EventWorkspace>(out);
-}
-void run_MPI_load(const Parallel::Communicator &comm, const std::shared_ptr<std::mutex> &mutex,
-                  const std::string &filename) {
-  std::shared_ptr<const EventWorkspace> reference;
-  std::shared_ptr<const EventWorkspace> eventWS;
-  {
-    std::lock_guard<std::mutex> lock(*mutex);
-    reference = load_reference_workspace(filename);
-    auto alg = ParallelTestHelpers::create<LoadEventNexus>(comm);
-    alg->setProperty("Filename", filename);
-    alg->setProperty("LoadLogs", false);
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
-    TS_ASSERT(alg->isExecuted());
-    Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
-    if (comm.size() != 1) {
-      TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
-    }
-    eventWS = std::dynamic_pointer_cast<const EventWorkspace>(out);
-  }
-  const size_t localSize = eventWS->getNumberHistograms();
-  auto localEventCount = eventWS->getNumberEvents();
-  std::vector<size_t> localSizes;
-  std::vector<size_t> localEventCounts;
-  Parallel::gather(comm, localSize, localSizes, 0);
-  Parallel::gather(comm, localEventCount, localEventCounts, 0);
-  if (comm.rank() == 0) {
-    TS_ASSERT_EQUALS(std::accumulate(localSizes.begin(), localSizes.end(), static_cast<size_t>(0)),
-                     reference->getNumberHistograms());
-    TS_ASSERT_EQUALS(std::accumulate(localEventCounts.begin(), localEventCounts.end(), static_cast<size_t>(0)),
-                     reference->getNumberEvents());
-  }
-
-  const auto &indexInfo = eventWS->indexInfo();
-  size_t localCompared = 0;
-  for (size_t i = 0; i < reference->getNumberHistograms(); ++i) {
-    for (const auto &index :
-         indexInfo.makeIndexSet({static_cast<Indexing::SpectrumNumber>(reference->getSpectrum(i).getSpectrumNo())})) {
-      TS_ASSERT_EQUALS(eventWS->getSpectrum(index), reference->getSpectrum(i));
-      ++localCompared;
-    }
-  }
-  // Consistency check: Make sure we really compared all spectra (protects
-  // against missing spectrum numbers or inconsistent mapping in IndexInfo).
-  std::vector<size_t> compared;
-  Parallel::gather(comm, localCompared, compared, 0);
-  if (comm.rank() == 0) {
-    TS_ASSERT_EQUALS(std::accumulate(compared.begin(), compared.end(), static_cast<size_t>(0)),
-                     reference->getNumberHistograms());
-  }
-}
-} // namespace
 
 class LoadEventNexusTest : public CxxTest::TestSuite {
 private:
@@ -963,7 +893,7 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
     TSM_ASSERT_EQUALS("Groups size should be same as nperiods", outGroup->size(), nPeriods);
     // mean of proton charge for each period
-    std::array<double, 4> protonChargeMeans = {0.00110488, 0.00110392, 0.00110343, 0.00110404};
+    std::array<double, 4> protonChargeMeans = {0.00110488, 0.00110392, 0.00110336, 0.00110404};
     for (size_t i = 0; i < outGroup->size(); ++i) {
       EventWorkspace_sptr ws = std::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
       TS_ASSERT(ws);
@@ -1004,33 +934,6 @@ public:
 
       isFirstChildWorkspace = false;
     }
-  }
-
-  void test_MPI_load() {
-    // Note that this and other MPI tests currently work only in non-MPI builds
-    // with the default event loader, i.e., ParallelEventLoader is not
-    // supported. The reason is the locking we need in the test for HDF5 access,
-    // which implies that the communication within ParallelEventLoader will
-    // simply get stuck. Additionally, it will fail for the CNCS file since
-    // empty banks contain a dummy event with an invalid event ID, which
-    // ParallelEventLoader does not support.
-    int threads = 3; // Limited number of threads to avoid long running test.
-    ParallelTestHelpers::ParallelRunner runner(threads);
-    // Test reads from multiple threads, which is not supported by our HDF5
-    // libraries, so we need a mutex.
-    auto hdf5Mutex = std::make_shared<std::mutex>();
-    runner.runSerial(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
-    runner.runParallel(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
-  }
-
-  void test_MPI_load_ISIS() {
-    int threads = 3; // Limited number of threads to avoid long running test.
-    ParallelTestHelpers::ParallelRunner runner(threads);
-    // Test reads from multiple threads, which is not supported by our HDF5
-    // libraries, so we need a mutex.
-    auto hdf5Mutex = std::make_shared<std::mutex>();
-    runner.runSerial(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
-    runner.runParallel(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
   }
 
   void test_load_CG3_bad_event_id() {

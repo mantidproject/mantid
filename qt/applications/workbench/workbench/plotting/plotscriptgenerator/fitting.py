@@ -31,9 +31,9 @@ def get_fit_cmds(fig):
 
 
 def _get_fit_variable_assignment_command(fit_property, property_value):
-    if type(property_value) == str:
+    if isinstance(property_value, str):
         return '{}="{}"'.format(fit_property, property_value)
-    elif type(property_value) == float:
+    elif isinstance(property_value, float):
         return "{0}={1:.5f}".format(fit_property, property_value)
     else:
         return "{}={}".format(fit_property, property_value)

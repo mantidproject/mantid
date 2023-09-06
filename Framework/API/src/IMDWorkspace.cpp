@@ -19,8 +19,8 @@ using Mantid::Kernel::VMD;
 namespace Mantid::API {
 //-----------------------------------------------------------------------------------------------
 /** Default constructor */
-IMDWorkspace::IMDWorkspace(const Parallel::StorageMode storageMode)
-    : Workspace(storageMode), Mantid::API::MDGeometry(),
+IMDWorkspace::IMDWorkspace()
+    : Workspace(), Mantid::API::MDGeometry(),
       m_convention(Kernel::ConfigService::Instance().getString("Q.convention")) {}
 
 /** Creates a single iterator and returns it.
@@ -46,8 +46,8 @@ std::unique_ptr<IMDIterator> IMDWorkspace::createIterator(Mantid::Geometry::MDIm
  */
 std::string IMDWorkspace::getConvention() const { return m_convention; }
 
-//---------------------------------------------------------------------------------------------
-/** @return the convention
+/** Sets the convention of the workspace
+ * @param convention : The convention to use.
  */
 void IMDWorkspace::setConvention(std::string convention) { m_convention = std::move(convention); }
 

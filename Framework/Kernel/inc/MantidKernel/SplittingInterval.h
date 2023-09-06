@@ -32,14 +32,13 @@ public:
 
   SplittingInterval(const Types::Core::DateAndTime &start, const Types::Core::DateAndTime &stop, const int index = 0);
 
-  double duration() const;
-
   int index() const;
 
   /// @cond
   SplittingInterval operator&(const SplittingInterval &b) const;
   /// @endcond
   SplittingInterval operator|(const SplittingInterval &b) const;
+  std::string debugStrPrint() const;
 
   bool operator==(const SplittingInterval &ti) const;
 

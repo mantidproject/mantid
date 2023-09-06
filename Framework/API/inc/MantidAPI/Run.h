@@ -53,9 +53,6 @@ public:
 
   /// Filter the logs by time
   void filterByTime(const Types::Core::DateAndTime start, const Types::Core::DateAndTime stop) override;
-  /// Split the logs based on the given intervals
-  void splitByTime(Kernel::SplittingIntervalVec &splitter, std::vector<LogManager *> outputs) const override;
-
   void setTimeROI(const Kernel::TimeROI &timeroi) override;
 
   /// Return an approximate memory size for the object in bytes
@@ -68,6 +65,9 @@ public:
   /// Integrate the proton charge over the whole run time - default log
   /// proton_charge
   void integrateProtonCharge(const std::string &logname = "proton_charge") const;
+
+  /// update property "duration" with the duration of the Run's TimeROI attribute
+  void setDuration();
 
   /// Store the given values as a set of histogram bin boundaries
   void storeHistogramBinBoundaries(const std::vector<double> &histoBins);
@@ -108,16 +108,8 @@ public:
   /// Save the run to a NeXus file with a given group name
   void saveNexus(::NeXus::File *file, const std::string &group, bool keepOpen = false) const override;
 
-  /**
-   * @brief Load the run from a NeXus file with a given group name. Overload that uses NexusHDF5Descriptor for faster
-   * metadata lookup
-   *
-   * @param file currently opened NeXus file
-   * @param group current group (relative name)
-   * @param fileInfo descriptor with in-memory index with all entries
-   * @param prefix indicates current group location in file (absolute name)
-   * @param keepOpen
-   */
+  /// Load the run from a NeXus file with a given group name. Overload that uses NexusHDF5Descriptor for faster metadata
+  /// lookup
   void loadNexus(::NeXus::File *file, const std::string &group, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
                  const std::string &prefix, bool keepOpen = false) override;
   /// Load the run from a NeXus file with a given group name

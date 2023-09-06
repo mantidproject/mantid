@@ -38,20 +38,21 @@ Explicit filters
 :ref:`algm-FilterEvents` takes either a :class:`SplittersWorkspace
 <mantid.api.ISplittersWorkspace>`, :ref:`TableWorkspace <Table
 Workspaces>`, or :ref:`MatrixWorkspace <MatrixWorkspace>` as the
-``SplittersWorkspace``. The events are split into output workspaces
-according to the times that they arrive at detectors. Note, times in
-MatrixWorkspace and TableWorkspace are in seconds.
+``SplitterWorkspace``. The events are split into output workspaces
+according to their pulse times or the times they arrive at detectors.
+Note, times in ``MatrixWorkspace`` and ``TableWorkspace`` are in seconds,
+while times in ``SplittersWorkspace`` are in nanoseconds.
 
 :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` will create a
 :class:`SplittersWorkspace <mantid.api.ISplittersWorkspace>` based on
 its various options. This result can be supplied as the
-``SplittersWorkspace`` input property of ref:`algm-FilterEvents`. It
-will also generate an ``InformationWorkspace`` which can be passed
-along to :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>`.
+``SplitterWorkspace`` input property of :ref:`FilterEvents <algm-FilterEvents>`.
+It will also generate an ``InformationWorkspace`` which can be passed
+along to :ref:`FilterEvents <algm-FilterEvents>`.
 Depending on the parameters in :ref:`GenerateEventsFilter
 <algm-GenerateEventsFilter>`, the events will be filtered based on
-their pulse times or their absolute times.  An neutron event's
-absolute time is the summation of its pulse time and TOF.
+their pulse times or their absolute times.  A neutron event's
+absolute time is the sum of its pulse time and TOF.
 
 Custom event filters
 ====================
@@ -62,10 +63,10 @@ this, one must generate their own splitters workspace. The workspace
 is generally 3 columns, with the first two being start and stop times
 and the third being the workspace index to put the events into. For
 filtering with time relative to the start of the run, the first two
-columns are ``float``. To specify the times as absolute, in the case
-of filtering files that will be summed together, the first two columns
-should be ``int64``. For both of the examples below, the filter
-workspaces are created using the following function:
+columns can be either integer or floating-point values. To specify the
+times as absolute, the first two columns should be of ``long64`` type.
+For both of the examples below, the filter workspaces are created using
+the following function:
 
 .. code-block:: python
 
@@ -83,9 +84,8 @@ Relative time
 -------------
 
 The easiest way to generate a custom event filter is to make one
-relative to the start time of the run or relative to a specified
-epoch. As the times in the table are seconds, a table can be created
-and used
+relative to the start time of the run. Note, the times in the
+table are in seconds.
 
 .. code-block:: python
 
@@ -104,7 +104,7 @@ Absolute time
 -------------
 
 If instead a custom filter is to be created with absolute time, the
-time must be processed somewhat to go into the table workspace. Much of the
+time must be processed somewhat to go into the table workspace:
 
 .. code-block:: python
 

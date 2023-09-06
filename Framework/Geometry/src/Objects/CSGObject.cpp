@@ -484,7 +484,6 @@ int CSGObject::setObject(const int objName, const std::string &lineStr) {
 /**
  * Returns just the cell string object
  * @param MList :: List of indexable Hulls
- * @return Cell String (from m_topRule)
  * @todo Break infinite recursion
  */
 void CSGObject::convertComplement(const std::map<int, CSGObject> &MList)
@@ -716,13 +715,13 @@ std::unique_ptr<CompGrp> CSGObject::procComp(std::unique_ptr<Rule> ruleItem) con
 * that the point is on.
 * - (b) Creates a list of normals to the touching surfaces
 * - (c) Checks if normals and "normal pair bisection vector" are contary.
-* If any are found to be so the the point is
+* If any are found to be so the point is
 * on a surface.
 * - (d) Return 1 / 0 depending on test (c)
 
 * \todo This needs to be completed to deal with apex points
 * In the case of a apex (e.g. top of a pyramid) you need
-* to interate over all clusters of points on the Snorm
+* to iterate over all clusters of points on the Snorm
 * ie. sum of 2, sum of 3 sum of 4. etc. to be certain
 * to get a correct normal test.
 

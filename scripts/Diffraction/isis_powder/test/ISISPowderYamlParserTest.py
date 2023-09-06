@@ -59,7 +59,7 @@ class ISISPowderYamlParserTest(unittest.TestCase):
         returned_dict = yaml_parser.get_run_dictionary(run_number_string="120-130", file_path=yaml_handle.name)
         self.assertEqual(returned_dict["test_item"], expected_value, "Range returned incorrect value")
 
-        # Check the the second dictionary works with unbounded ranges
+        # Check that the second dictionary works with unbounded ranges
         returned_dict = yaml_parser.get_run_dictionary(run_number_string="205", file_path=yaml_handle.name)
         self.assertEqual(returned_dict["test_item"], second_value)
 
@@ -142,7 +142,7 @@ class ISISPowderYamlParserTest(unittest.TestCase):
             yaml_parser.get_run_dictionary(run_number_string="11", file_path=file_path)
 
     def test_yaml_sanity_detects_val_larger_than_unbound(self):
-        # If we have a value that is larger the the unbounded range can we detect this
+        # If we have a value that is larger than the unbounded range can we detect this
         file_handle = self.get_temp_file_handle()
         file_handle.write("30-:\n")
         file_handle.write("35:\n")

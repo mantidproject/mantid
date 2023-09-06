@@ -205,6 +205,8 @@ void LoadMD::execLoader() {
     }
 
     // Now the ExperimentInfo
+    auto prog = std::make_unique<Progress>(this, 0.0, 0.1, 1);
+    prog->report("Load experiment information.");
     bool lazyLoadExpt = fileBacked;
     MDBoxFlatTree::loadExperimentInfos(m_file.get(), m_filename, ws, *fileInfo.get(), "MDEventWorkspace", lazyLoadExpt);
 
@@ -289,6 +291,8 @@ void LoadMD::loadHisto() {
   }
 
   // Now the ExperimentInfo
+  auto prog = std::make_unique<Progress>(this, 0.0, 0.1, 1);
+  prog->report("Load experiment information.");
   MDBoxFlatTree::loadExperimentInfos(m_file.get(), m_filename, ws);
 
   // Coordinate system

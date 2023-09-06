@@ -41,7 +41,7 @@ def plotSpectrum(
     :param indices: A single int or list of ints specifying the workspace indices to plot
     :param distribution: ``None`` (default) asks the workspace. ``False`` means
                          divide by bin width. ``True`` means do not divide by bin width.
-                         Applies only when the the workspace is a MatrixWorkspace histogram.
+                         Applies only when the workspace is a MatrixWorkspace histogram.
     :param error_bars: If true then error bars will be added for each curve
     :param type: curve style for plot it 1: scatter/dots otherwise line which is default
     :param window: If passed an existing plot then the plot will occur in that plot

@@ -304,9 +304,6 @@ void ConvertToMD::exec() {
  * @param mdEventWS :: The output MDEventWorkspace
  * @param targWSDescr :: The description of the target workspace, used in the
  *algorithm
- *
- * @return  :: modified targWSDescription containing the number of experiment
- *info added from the current MD workspace
  */
 void ConvertToMD::addExperimentInfo(API::IMDEventWorkspace_sptr &mdEventWS, MDWSDescription &targWSDescr) const {
   // Copy ExperimentInfo (instrument, run, sample) to the output WS

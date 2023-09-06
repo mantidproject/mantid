@@ -40,9 +40,13 @@ std::string RebinParamsValidator::checkValidity(const std::vector<double> &value
   }
 
   // bin widths must not be zero
-  for (size_t i = 1; i < value.size(); i += 2) {
-    if (value[i] == 0.0) {
-      return "Cannot have a zero bin width";
+  if (value.size() == 1 && value[0] == 0.0) {
+    return "Cannot have a zero bin width";
+  } else {
+    for (size_t i = 1; i < value.size(); i += 2) {
+      if (value[i] == 0.0) {
+        return "Cannot have a zero bin width";
+      }
     }
   }
 

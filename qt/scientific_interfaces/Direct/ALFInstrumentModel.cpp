@@ -79,20 +79,24 @@ double calculateOutOfPlaneAngle(Mantid::Kernel::V3D const &pos, Mantid::Kernel::
   return asin(vec.scalar_prod(normal));
 }
 
-void loadEmptyInstrument(std::string const &outputName) {
+MatrixWorkspace_sptr loadEmptyInstrument() {
   auto alg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
   alg->initialize();
+  alg->setAlwaysStoreInADS(false);
   alg->setProperty("InstrumentName", INSTRUMENT_NAME);
-  alg->setProperty("OutputWorkspace", outputName);
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
+  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
+  return outputWorkspace;
 }
 
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
 
-ALFInstrumentModel::ALFInstrumentModel() : m_sample(), m_vanadium(), m_tubes(), m_twoThetasClosestToZero() {
-  loadEmptyInstrument(loadedWsName());
+ALFInstrumentModel::ALFInstrumentModel()
+    : m_emptyInstrument(loadEmptyInstrument()), m_sample(), m_vanadium(), m_tubes(), m_twoThetasClosestToZero() {
+  ADS.addOrReplace(loadedWsName(), m_emptyInstrument->clone());
 }
 
 void ALFInstrumentModel::setData(ALFData const &dataType, MatrixWorkspace_sptr const &workspace) {
@@ -114,7 +118,7 @@ void ALFInstrumentModel::setSample(MatrixWorkspace_sptr const &sample) {
   auto const sampleRemoved = m_sample && !sample;
   m_sample = sample;
   if (sampleRemoved) {
-    loadEmptyInstrument(loadedWsName());
+    ADS.addOrReplace(loadedWsName(), m_emptyInstrument->clone());
   }
 }
 

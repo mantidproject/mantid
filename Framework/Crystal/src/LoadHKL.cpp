@@ -41,7 +41,6 @@ void LoadHKL::exec() {
 
   std::string filename = getPropertyValue("Filename");
   PeaksWorkspace_sptr ws(new PeaksWorkspace());
-  bool cosines = false;
 
   std::fstream in;
   in.open(filename.c_str(), std::ios::in);
@@ -74,34 +73,57 @@ void LoadHKL::exec() {
   double mu1 = 0.0, mu2 = 0.0, wl1 = 0.0, wl2 = 0.0, sc1 = 0.0, astar1 = 0.0;
   do {
     getline(in, line);
-    if (line.length() > 125)
+    double h = 0.0, k = 0.0, l = 0.0, m = 0.0, n = 0.0, p = 0.0;
+    bool cosines;
+    bool modvec;
+    if (line.length() < 95) {
+      cosines = false;
+      modvec = false;
+    } else if (line.length() == 101) {
+      cosines = false;
+      modvec = true;
+    } else if (line.length() == 157) {
       cosines = true;
-    double h = std::stod(line.substr(0, 4));
-    double k = std::stod(line.substr(4, 4));
-    double l = std::stod(line.substr(8, 4));
-    if (h == 0.0 && k == 0 && l == 0)
+      modvec = false;
+    } else {
+      cosines = true;
+      modvec = true;
+    }
+
+    h = std::stod(line.substr(0, 4));
+    k = std::stod(line.substr(4, 4));
+    l = std::stod(line.substr(8, 4));
+    if (h == 0.0 && k == 0.0 && l == 0.0) {
       break;
-    double Inti = std::stod(line.substr(12, 8));
-    double SigI = std::stod(line.substr(20, 8));
-    double wl = std::stod(line.substr(32, 8));
+    }
+
+    int offset = 0;
+
+    if (modvec) {
+      m = std::stod(line.substr(12, 4));
+      n = std::stod(line.substr(16, 4));
+      p = std::stod(line.substr(20, 4));
+      offset += 12;
+    }
+
+    double Inti = std::stod(line.substr(12 + offset, 8));
+    double SigI = std::stod(line.substr(20 + offset, 8));
+    double wl = std::stod(line.substr(32 + offset, 8));
     double tbar, trans, scattering;
     int run, bank;
     int seqNum;
+
+    tbar = std::stod(line.substr(40 + offset, 8)); // tbar
+
     if (cosines) {
-      tbar = std::stod(line.substr(40, 8)); // tbar
-      run = std::stoi(line.substr(102, 6));
-      trans = std::stod(line.substr(114, 7)); // transmission
-      seqNum = std::stoi(line.substr(109, 7));
-      bank = std::stoi(line.substr(121, 4));
-      scattering = std::stod(line.substr(125, 9));
-    } else {
-      tbar = std::stod(line.substr(40, 7)); // tbar
-      run = std::stoi(line.substr(47, 7));
-      trans = std::stod(line.substr(61, 7)); // transmission
-      seqNum = std::stoi(line.substr(54, 7));
-      bank = std::stoi(line.substr(68, 4));
-      scattering = std::stod(line.substr(72, 9));
+      offset += 54;
     }
+
+    run = std::stoi(line.substr(48 + offset, 6));
+    seqNum = std::stoi(line.substr(54 + offset, 7));
+    trans = std::stod(line.substr(61 + offset, 7)); // transmission
+    bank = std::stoi(line.substr(68 + offset, 4));
+    scattering = std::stod(line.substr(72 + offset, 9));
 
     if (first) {
       mu1 = -std::log(trans) / tbar;
@@ -116,6 +138,8 @@ void LoadHKL::exec() {
 
     Peak peak(inst, scattering, wl);
     peak.setHKL(qSign * h, qSign * k, qSign * l);
+    peak.setIntHKL(V3D(h, k, l) * qSign);
+    peak.setIntMNP(V3D(m, n, p) * qSign);
     peak.setIntensity(Inti);
     peak.setSigmaIntensity(SigI);
     peak.setRunNumber(run);

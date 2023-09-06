@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
-    from the the interface class so that the DgsReduction class could
+    from the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
 import xml.dom.minidom
@@ -48,6 +48,7 @@ class AdvancedSetupScript(BaseScriptElement):
     # Class attributes
     #
     pushdatapositive = "None"
+    offsetdata = 0.0
     unwrapref = ""
     lowresref = ""
     cropwavelengthmin = ""
@@ -111,6 +112,7 @@ class AdvancedSetupScript(BaseScriptElement):
             "FilterBadPulses",
             "BackgroundSmoothParams",
             "PushDataPositive",
+            "OffsetData",
             "PreserveEvents",
             "OutputFilePrefix",
             "ScaleData",
@@ -162,7 +164,15 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["MaxChunkSize"] = self.maxchunksize
         pardict["FilterBadPulses"] = self.filterbadpulses
         pardict["BackgroundSmoothParams"] = self.bkgdsmoothpars
-        pardict["PushDataPositive"] = self.pushdatapositive
+        # these two parameters cannot be specified at the same time so
+        # initally set them at their default values
+        pardict["PushDataPositive"] = "None"
+        pardict["OffsetData"] = 0.0
+        if self.pushdatapositive == "None":
+            pardict["OffsetData"] = self.offsetdata
+        else:
+            pardict["PushDataPositive"] = self.pushdatapositive
+
         pardict["StripVanadiumPeaks"] = self.stripvanadiumpeaks
         pardict["VanadiumFWHM"] = self.vanadiumfwhm
         pardict["VanadiumPeakTol"] = self.vanadiumpeaktol
@@ -237,6 +247,7 @@ class AdvancedSetupScript(BaseScriptElement):
             self.pushdatapositive = BaseScriptElement.getStringElement(
                 instrument_dom, "pushdatapositive", default=AdvancedSetupScript.pushdatapositive
             )
+            self.offsetdata = BaseScriptElement.getStringElement(instrument_dom, "offsetdata", default=AdvancedSetupScript.offsetdata)
 
             self.stripvanadiumpeaks = getBooleanElement(instrument_dom, "stripvanadiumpeaks", AdvancedSetupScript.stripvanadiumpeaks)
 
@@ -306,6 +317,7 @@ class AdvancedSetupScript(BaseScriptElement):
         r"""reset instance's attributes with the values of the class' attributes"""
         class_attrs_selected = [
             "pushdatapositive",
+            "offsetdata",
             "unwrapref",
             "lowresref",
             "cropwavelengthmin",

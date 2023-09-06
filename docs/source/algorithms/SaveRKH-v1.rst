@@ -9,7 +9,7 @@
 Description
 -----------
 
-Saves the the given workspace to a file which will be formatted in one
+Saves the given workspace to a file which will be formatted in one
 of the LOQ data formats.  1D or 2D workspaces may be saved. If a 1D workspace
 is 'horizontal' (a single spectrum) then the first column in the three column
 output will contain the X values of the spectrum (giving the bin centre if histogram

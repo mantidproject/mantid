@@ -533,7 +533,6 @@ void LoadHFIRSANS::rotateDetector() {
 
 /**
  * Calculates the detector distances and sets them as Run properties
- * @return : sample_detector_distance
  */
 void LoadHFIRSANS::setDetectorDistance() {
 

@@ -8,6 +8,7 @@
 
 #include "ALFInstrumentPresenter.h"
 #include "ALFInstrumentWidget.h"
+#include "ALFView.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/InputController.h"
@@ -77,6 +78,7 @@ void ALFInstrumentView::loadSettings() {
   settings.endGroup();
 
   if (!vanadiumRun.toString().isEmpty()) {
+    disable("Loading vanadium");
     m_vanadium->setUserInput(vanadiumRun);
   }
 }
@@ -86,6 +88,18 @@ void ALFInstrumentView::saveSettings() {
   settings.beginGroup(m_settingsGroup);
   settings.setValue("vanadium-run", m_vanadium->getText());
   settings.endGroup();
+}
+
+void ALFInstrumentView::disable(std::string const &reason) {
+  if (auto parent = static_cast<ALFView *>(parentWidget())) {
+    parent->disable(reason);
+  }
+}
+
+void ALFInstrumentView::enable() {
+  if (auto parent = static_cast<ALFView *>(parentWidget())) {
+    parent->enable();
+  }
 }
 
 void ALFInstrumentView::reconnectInstrumentActor() {
@@ -130,7 +144,7 @@ void ALFInstrumentView::setVanadiumRun(std::string const &runNumber) {
 
 void ALFInstrumentView::sampleLoaded() {
   if (!m_sample->getText().isEmpty() && !m_sample->isValid()) {
-    warningBox(m_sample->getFileProblem().toStdString());
+    displayWarning(m_sample->getFileProblem().toStdString());
     return;
   }
   m_presenter->loadSample();
@@ -138,7 +152,7 @@ void ALFInstrumentView::sampleLoaded() {
 
 void ALFInstrumentView::vanadiumLoaded() {
   if (!m_vanadium->isValid()) {
-    warningBox(m_vanadium->getFileProblem().toStdString());
+    displayWarning(m_vanadium->getFileProblem().toStdString());
     return;
   }
   m_presenter->loadVanadium();
@@ -193,7 +207,7 @@ void ALFInstrumentView::drawRectanglesAbove(std::vector<DetectorTube> const &tub
   }
 }
 
-void ALFInstrumentView::warningBox(std::string const &message) {
+void ALFInstrumentView::displayWarning(std::string const &message) {
   QMessageBox::warning(this, "ALFView", QString::fromStdString(message));
 }
 

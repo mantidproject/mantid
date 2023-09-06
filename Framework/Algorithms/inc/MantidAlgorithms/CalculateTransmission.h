@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -47,7 +47,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 22/01/2009
 */
-class MANTID_ALGORITHMS_DLL CalculateTransmission : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL CalculateTransmission : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CalculateTransmission"; }

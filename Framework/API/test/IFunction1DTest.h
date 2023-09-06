@@ -61,13 +61,13 @@ public:
     FunctionValues values(domain);
     function.function(domain, values);
     for (size_t i = 0; i < domain.size(); ++i) {
-      TS_ASSERT_EQUALS(values.getCalculated(i), A * (1.0 + 0.1 * double(i)) + B);
+      TS_ASSERT_DELTA(values.getCalculated(i), A * (1.0 + 0.1 * double(i)) + B, 1e-8);
     }
 
     IFunction1DTest_Jacobian jacobian(10, 2);
     function.functionDeriv(domain, jacobian);
     for (size_t i = 0; i < domain.size(); ++i) {
-      TS_ASSERT_EQUALS(jacobian.get(i, 0), 1.0 + 0.1 * double(i));
+      TS_ASSERT_DELTA(jacobian.get(i, 0), 1.0 + 0.1 * double(i), 1e-8);
       TS_ASSERT_EQUALS(jacobian.get(i, 1), 1.0);
     }
   }

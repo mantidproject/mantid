@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
@@ -27,6 +28,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::DataObjects::WorkspaceSingleValue;
 using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramY;
 
@@ -92,7 +94,6 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2, MatrixWorkspace_sptr &
  * @param a1 : start position in X
  * @param a2 : end position in X
  * @param source : Workspace to mask.
- * @return Masked workspace.
  */
 void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr &source) {
   const auto histogramCount = static_cast<int>(source->getNumberHistograms());
@@ -136,6 +137,9 @@ void Stitch1D::init() {
                   "Scaling either with respect to LHS workspace or RHS workspace");
   declareProperty(std::make_unique<PropertyWithValue<bool>>("UseManualScaleFactor", false, Direction::Input),
                   "True to use a provided value for the scale factor.");
+  declareProperty(
+      "OutputScalingWorkspace", "",
+      "Output WorkspaceSingleValue containing the scale factor and its error. No workspace creation if left empty.");
   auto manualScaleFactorValidator = std::make_shared<BoundedValidator<double>>();
   manualScaleFactorValidator->setLower(0);
   manualScaleFactorValidator->setExclusive(true);
@@ -584,8 +588,18 @@ void Stitch1D::exec() {
   }
   setProperty("OutputWorkspace", result);
   setProperty("OutScaleFactor", m_scaleFactor);
-}
 
+  // if required, create the output single value workspace containing the scaling factor and its error
+  const std::string scalingWsName = this->getPropertyValue("OutputScalingWorkspace");
+  if (!scalingWsName.empty()) {
+    auto createSingleAlg = createChildAlgorithm("CreateSingleValuedWorkspace");
+    createSingleAlg->setProperty("DataValue", m_scaleFactor);
+    createSingleAlg->setProperty("ErrorValue", m_errorScaleFactor);
+    createSingleAlg->executeAsChildAlg();
+    MatrixWorkspace_sptr singleWS = createSingleAlg->getProperty("OutputWorkspace");
+    AnalysisDataService::Instance().addOrReplace(scalingWsName, singleWS);
+  }
+}
 /** Put special values back.
  * @param ws : MatrixWorkspace to resinsert special values into.
  */

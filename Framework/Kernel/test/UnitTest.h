@@ -530,6 +530,18 @@ public:
     TS_ASSERT_THROWS(energyk.fromTOF(x, y, 1.0, 1, {}), const std::runtime_error &)
   }
 
+  void test_calculateDIFCCorrection() {
+    // DIFC = (mn/h)*(L1+L2)2sin(theta) * (1+|DX|)^{-offset}
+    // function params: l1, l2, twoTheta, offset, binWidth
+    const double l1 = 2.0, l2 = 2.0, tt = 1.0, offset = 1.0, dx = -1.0;
+    double difcValue_ref = (Mantid::PhysicalConstants::NeutronMass) / (Mantid::PhysicalConstants::h)*1e-4;
+    // with offset=1, DX=-1, (1+|DX|)^{-offset} = 0.5
+    // then  DIFC = (mn/h)*(L1+L2) sin(theta)
+    difcValue_ref *= (l1 + l2) * std::sin(tt / 2.0);
+    const double difcValue = calculateDIFCCorrection(l1, l2, tt, offset, dx);
+    TS_ASSERT_DELTA(difcValue, difcValue_ref, 1.0e-6);
+  }
+
   //----------------------------------------------------------------------
   // d-Spacing tests
   //----------------------------------------------------------------------

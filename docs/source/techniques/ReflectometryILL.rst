@@ -172,7 +172,7 @@ Polarisation correction
 
 The polarisation correction is handled by :ref:`ReflectometryILLPolarizationCor <algm-ReflectometryILLPolarizationCor>` algorithm. This algorithm is an ILL-specific wrapper around :ref:`PolarizationEffiencyCor <algm-PolarizationEfficiencyCor>`. It is typically run in reflectometry reduction workflow, namely the workflow in the :ref:`ReflectometryILLAutoProcess <algm-ReflectometryILLAutoProcess>` algorithm, between :ref:`ReflectometryILLSumForeground <algm-ReflectometryILLSumForeground>` and :ref:`ReflectometryILLConvertToQ <algm-ReflectometryILLConvertToQ>`.
 
-The algorithm accepts a list of workspace names as *InputWorkspaces*. Thus, the workspaces have to be accessible from the the analysis data service. One to four workspaces can be named. If only a single workspace is given, it is treated as the direct beam. The algorithm loads the polarization efficiencies from *EfficiencyFile*. This file should be in the ILL format readable by :ref:`LoadILLPolarizationFactors <algm-LoadILLPolarizationFactors>`.
+The algorithm accepts a list of workspace names as *InputWorkspaces*. Thus, the workspaces have to be accessible from the analysis data service. One to four workspaces can be named. If only a single workspace is given, it is treated as the direct beam. The algorithm loads the polarization efficiencies from *EfficiencyFile*. This file should be in the ILL format readable by :ref:`LoadILLPolarizationFactors <algm-LoadILLPolarizationFactors>`.
 
 The first workspace in *InputWorkspaces* is picked as a reference. The instrument configuration is extracted from the sample logs of this workspace. Further, this workspace is used as *WavelengthReference* for :ref:`LoadILLPolarizationFactors <algm-LoadILLPolarizationFactors>`. To make sure the wavelength axes of all workspaces are consistent comply, they are run through :ref:`RebinToWorkspace <algm-RebinToWorkspace>`, with workspaces being matched to the reference.
 
@@ -193,7 +193,7 @@ Below is the relevant workflow diagram describing polarization correction workfl
 
     config['default.facility'] = 'ILL'
     config['default.instrument'] = 'D17'
-    config.appendDataSearchSubDir('/ILL/D17/')
+    config.appendDataSearchSubDir('ILL/D17/')
 
 .. testcode:: AnalyzerlessEx
 
@@ -388,6 +388,9 @@ The example below shows a silicon oxide reduction with coherent summation at two
 .. testcleanup:: D17DetectorAngleCoherent
 
     mtd.clear()
+    import os
+    for i in range(2):
+        os.remove(f"{name}_{i}.out")
 
 D17 user angle, incoherent summation
 ------------------------------------
@@ -398,7 +401,7 @@ The example below shows a quartz reduction with incoherent summation at four dif
 
    config.setFacility('ILL')
    config['default.instrument'] = 'D17'
-   config.appendDataSearchSubDir('../SystemTest/ILL/D17/')
+   config.appendDataSearchSubDir('ILL/D17/')
 
 .. testcode:: D17UserAngleQuartz
 
@@ -445,6 +448,9 @@ The example below shows a quartz reduction with incoherent summation at four dif
 .. testcleanup:: D17UserAngleQuartz
 
     mtd.clear()
+    import os
+    for i in range(4):
+        os.remove(f"{name}_{i}.out")
 
 FIGARO detector angle, gravity correction
 -----------------------------------------
@@ -456,7 +462,7 @@ This reduction includes the gravity correction, which is set explicitly via `Cor
 
    config.setFacility('ILL')
    config['default.instrument'] = 'FIGARO'
-   config.appendDataSearchSubDir('../SystemTest/ILL/FIGARO/')
+   config.appendDataSearchSubDir('ILL/FIGARO/')
 
 .. testcode:: FIGARODetectorAngleGravityCorrection
 
@@ -508,6 +514,9 @@ This reduction includes the gravity correction, which is set explicitly via `Cor
 .. testcleanup:: FIGARODetectorAngleGravityCorrection
 
     mtd.clear()
+    import os
+    for i in range(2):
+        os.remove(f"{name}_{i}.out")
 
 References
 ----------

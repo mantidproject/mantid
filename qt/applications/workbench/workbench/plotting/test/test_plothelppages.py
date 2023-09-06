@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import patch
 from matplotlib import use as mpl_use
 
-mpl_use("Agg")  # noqa
+mpl_use("Agg")
 import numpy as np
 from workbench.plotting.plothelppages import *
 from matplotlib.pyplot import figure

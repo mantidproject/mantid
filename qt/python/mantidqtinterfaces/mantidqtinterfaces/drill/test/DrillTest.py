@@ -22,7 +22,6 @@ app = QApplication(sys.argv)
 
 
 class DrillTest(unittest.TestCase):
-
     ###########################################################################
     # helper methods                                                          #
     ###########################################################################
@@ -40,7 +39,7 @@ class DrillTest(unittest.TestCase):
         y = self.view.table.rowViewportPosition(row) + self.view.table.rowHeight(row) / 2
         x = self.view.table.columnViewportPosition(column) + self.view.table.columnWidth(column) / 2
 
-        QTest.mouseClick(self.view.table.viewport(), Qt.LeftButton, modifier, QPoint(x, y))
+        QTest.mouseClick(self.view.table.viewport(), Qt.LeftButton, modifier, QPoint(int(x), int(y)))
 
     def selectRow(self, row, modifier):
         """
@@ -55,7 +54,7 @@ class DrillTest(unittest.TestCase):
         x = 0 + vertical_header.length() / 2
         y = vertical_header.sectionPosition(row) + vertical_header.sectionSize(row) / 2
 
-        QTest.mouseClick(vertical_header.viewport(), Qt.LeftButton, modifier, QPoint(x, y))
+        QTest.mouseClick(vertical_header.viewport(), Qt.LeftButton, modifier, QPoint(int(x), int(y)))
 
     def selectColumn(self, column, modifier):
         """
@@ -70,7 +69,7 @@ class DrillTest(unittest.TestCase):
         x = horizontal_header.sectionPosition(column) + horizontal_header.sectionSize(column) / 2
         y = 0 + horizontal_header.length() / 2
 
-        QTest.mouseClick(horizontal_header.viewport(), Qt.LeftButton, modifier, QPoint(x, y))
+        QTest.mouseClick(horizontal_header.viewport(), Qt.LeftButton, modifier, QPoint(int(x), int(y)))
 
     def editCell(self, row, column):
         """
@@ -82,8 +81,8 @@ class DrillTest(unittest.TestCase):
         """
         y = self.view.table.rowViewportPosition(row) + 1
         x = self.view.table.columnViewportPosition(column) + 1
-        QTest.mouseClick(self.view.table.viewport(), Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
-        QTest.mouseDClick(self.view.table.viewport(), Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
+        QTest.mouseClick(self.view.table.viewport(), Qt.LeftButton, Qt.NoModifier, QPoint(int(x), int(y)))
+        QTest.mouseDClick(self.view.table.viewport(), Qt.LeftButton, Qt.NoModifier, QPoint(int(x), int(y)))
 
     def setCellContents(self, row, column, contents):
         """
@@ -418,7 +417,7 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.copy, Qt.LeftButton)
         self.selectRow(3, Qt.NoModifier)
         QTest.mouseClick(self.view.paste, Qt.LeftButton)
-        for (k, v) in self.model._samples[3].getParameterValues().items():
+        for k, v in self.model._samples[3].getParameterValues().items():
             self.assertEqual(v, data[2][self.view.columns[0]])
 
         # cut paste
@@ -431,7 +430,7 @@ class DrillTest(unittest.TestCase):
         QTest.mouseClick(self.view.cut, Qt.LeftButton)
         self.selectRow(7, Qt.NoModifier)
         QTest.mouseClick(self.view.paste, Qt.LeftButton)
-        for (k, v) in self.model._samples[7].getParameterValues().items():
+        for k, v in self.model._samples[7].getParameterValues().items():
             self.assertEqual(v, data[6][self.view.columns[0]])
 
     def test_erase(self):

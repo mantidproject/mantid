@@ -991,7 +991,7 @@ double IndexingUtils::Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB, const std::
 
 /**
   STATIC method Optimize_Direction: Calculates the vector for which the
-  dot product of the the vector with each of the specified Qxyz vectors
+  dot product of the vector with each of the specified Qxyz vectors
   is most nearly the corresponding integer index.  The calculated best_vec
   minimizes the sum squared differences between best_vec dot (qx,qy,z)
   and the corresponding index for all of the specified Q vectors and

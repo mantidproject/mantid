@@ -1,1 +1,0 @@
-- Fixed the labelling of the workspaces output by :ref:`PolarizationCorrectionWildes` which were being inverted, while ensuring the output workspace group order continues to match the documentation.

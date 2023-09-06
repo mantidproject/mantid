@@ -117,12 +117,12 @@ public:
   WeightedEventNoTime(double tof, const Mantid::Types::Core::DateAndTime pulsetime, double weight, double errorSquared);
   WeightedEventNoTime(double tof, const Mantid::Types::Core::DateAndTime pulsetime, float weight, float errorSquared);
 
-  WeightedEventNoTime(const Types::Event::TofEvent &, double weight, double errorSquared);
-  WeightedEventNoTime(const Types::Event::TofEvent &, float weight, float errorSquared);
+  WeightedEventNoTime(const Types::Event::TofEvent &rhs, double weight, double errorSquared);
+  WeightedEventNoTime(const Types::Event::TofEvent &rhs, float weight, float errorSquared);
 
-  WeightedEventNoTime(const WeightedEvent &);
+  WeightedEventNoTime(const WeightedEvent &rhs);
 
-  WeightedEventNoTime(const Types::Event::TofEvent &);
+  WeightedEventNoTime(const Types::Event::TofEvent &rhs);
 
   WeightedEventNoTime();
 

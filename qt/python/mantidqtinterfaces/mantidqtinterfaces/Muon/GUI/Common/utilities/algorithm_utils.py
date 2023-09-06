@@ -425,3 +425,19 @@ def run_create_workspace_without_storing(x_data, y_data, name):
     alg.setProperty("OutputWorkspace", name)
     alg.execute()
     return alg.getProperty("OutputWorkspace").value
+
+
+def evaluate_function(input_ws_name: str, fun: str, out_ws_name: str):
+    """
+    Evaluates the guess workspace for the input workspace and function
+    :param input_ws_name: Name of the workspace in the ADS
+    :param fun: Function to be evaluated
+    :param out_ws_name: Output workspace name
+    """
+    mantid.AnalysisDataService.retrieve(input_ws_name)
+    alg = mantid.AlgorithmManager.createUnmanaged("EvaluateFunction")
+    alg.initialize()
+    alg.setProperty("Function", fun)
+    alg.setProperty("InputWorkspace", input_ws_name)
+    alg.setProperty("OutputWorkspace", out_ws_name)
+    alg.execute()

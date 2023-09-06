@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -31,8 +32,7 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr extractedWorkspace() const = 0;
   virtual bool isDataExtracted() const = 0;
 
-  virtual Mantid::API::MatrixWorkspace_sptr doFit(std::pair<double, double> const &range) = 0;
-  virtual void calculateEstimate(std::pair<double, double> const &range) = 0;
+  virtual void calculateEstimate(Mantid::API::MatrixWorkspace_sptr const &workspace) = 0;
 
   virtual void exportWorkspaceCopyToADS() const = 0;
 
@@ -44,6 +44,15 @@ public:
   virtual double peakCentre() const = 0;
   virtual double background() const = 0;
   virtual Mantid::API::IPeakFunction_const_sptr getPeakCopy() const = 0;
+
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  cropWorkspaceProperties(std::pair<double, double> const &range) const = 0;
+  virtual std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  fitProperties(std::pair<double, double> const &range) const = 0;
+
+  virtual void setFitResult(Mantid::API::MatrixWorkspace_sptr workspace, Mantid::API::IFunction_sptr function,
+                            std::string fitStatus) = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr fitWorkspace() const = 0;
 
   virtual std::string fitStatus() const = 0;
 
@@ -67,8 +76,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr extractedWorkspace() const override;
   bool isDataExtracted() const override;
 
-  Mantid::API::MatrixWorkspace_sptr doFit(std::pair<double, double> const &range) override;
-  void calculateEstimate(std::pair<double, double> const &range) override;
+  void calculateEstimate(Mantid::API::MatrixWorkspace_sptr const &workspace) override;
 
   void exportWorkspaceCopyToADS() const override;
 
@@ -81,6 +89,15 @@ public:
   double background() const override;
   Mantid::API::IPeakFunction_const_sptr getPeakCopy() const override;
 
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  cropWorkspaceProperties(std::pair<double, double> const &range) const override;
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps>
+  fitProperties(std::pair<double, double> const &range) const override;
+
+  void setFitResult(Mantid::API::MatrixWorkspace_sptr workspace, Mantid::API::IFunction_sptr function,
+                    std::string fitStatus) override;
+  inline Mantid::API::MatrixWorkspace_sptr fitWorkspace() const noexcept override { return m_fitWorkspace; }
+
   std::string fitStatus() const override;
 
   std::size_t numberOfTubes() const override;
@@ -91,8 +108,7 @@ public:
   std::optional<double> rotationAngle() const override;
 
 private:
-  Mantid::API::IFunction_sptr calculateEstimate(Mantid::API::MatrixWorkspace_sptr &workspace,
-                                                std::pair<double, double> const &range);
+  Mantid::API::IFunction_sptr calculateEstimateImpl(Mantid::API::MatrixWorkspace_sptr const &workspace);
 
   Mantid::API::IFunction_sptr m_function;
   std::string m_fitStatus;

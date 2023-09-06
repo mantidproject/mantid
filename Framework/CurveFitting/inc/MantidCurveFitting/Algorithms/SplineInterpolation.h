@@ -66,7 +66,7 @@ private:
   void calculateDerivatives(const API::MatrixWorkspace_const_sptr &inputWorkspace,
                             const API::MatrixWorkspace_sptr &outputWorkspace, const size_t order) const;
 
-  /// Find the the interpolation range
+  /// Find the interpolation range
   std::pair<size_t, size_t> findInterpolationRange(const API::MatrixWorkspace_const_sptr &iwspt,
                                                    const API::MatrixWorkspace_sptr &mwspt, const size_t row);
 

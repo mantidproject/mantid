@@ -78,8 +78,6 @@ The `x`-axis is given in Tesla, and the magnetisation (`y`-axis) is in bohr magn
         if row['Value'] != 0:
             print("%7s = % 7.5g" % (row['Name'], row['Value']))
 
-.. testcleanup:: ExampleCrystalFieldMagnetisation
-
 .. testoutput:: ExampleCrystalFieldMagnetisation
    :hide:
    :options: +ELLIPSIS, +NORMALIZE_WHITESPACE

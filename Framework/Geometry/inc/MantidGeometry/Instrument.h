@@ -172,7 +172,6 @@ public:
   Types::Core::DateAndTime getValidToDate() const { return m_ValidTo; }
 
   /// Set the date from which the instrument definition begins to be valid.
-  /// @param val :: date
   void setValidFromDate(const Types::Core::DateAndTime &val);
 
   /// Set the date at which the instrument definition is no longer valid.
@@ -315,6 +314,9 @@ MANTID_GEOMETRY_DLL double tofToDSpacingFactor(const double l1, const double l2,
 double MANTID_GEOMETRY_DLL tofToDSpacingFactor(const double l1, const double l2, const double twoTheta,
                                                const std::vector<detid_t> &detectors,
                                                const std::map<detid_t, double> &offsets);
+
+MANTID_GEOMETRY_DLL double calculateDIFCCorrection(const double l1, const double l2, const double twoTheta,
+                                                   const double offset, const double binWidth);
 } // namespace Conversion
 
 } // namespace Geometry

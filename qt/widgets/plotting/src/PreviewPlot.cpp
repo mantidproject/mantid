@@ -414,6 +414,9 @@ bool PreviewPlot::eventFilter(QObject *watched, QEvent *evt) {
   case QEvent::Resize:
     stopEvent = handleWindowResizeEvent();
     break;
+  case QEvent::UpdateLater:
+    m_redrawOnPaint = true;
+    break;
   case QEvent::Paint:
     if (m_redrawOnPaint) {
       m_redrawOnPaint = false;

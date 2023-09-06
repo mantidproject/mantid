@@ -330,7 +330,7 @@ void SaveAscii2::exec() {
 
 std::string SaveAscii2::createSpectrumFilename(size_t workspaceIndex) {
   std::string filename = getProperty("Filename");
-  size_t extPosition;
+  size_t extPosition{std::string::npos};
   for (const std::string &ext : m_asciiExts) {
     extPosition = filename.find(ext);
     if (extPosition != std::string::npos)

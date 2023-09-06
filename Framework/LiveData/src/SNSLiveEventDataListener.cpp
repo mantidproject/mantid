@@ -1300,7 +1300,7 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
 
   m_indexMap = m_eventBuffer->getDetectorIDToWorkspaceIndexMap(true /* bool throwIfMultipleDets */);
 
-  // We always want to have at least one value for the the scan index time
+  // We always want to have at least one value for the scan index time
   // series.  We may have already gotten a scan start packet by the time we
   // get here and therefor don't need to do anything.  If not, we need to put
   // a 0 into the time series.

@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from qtpy.QtWidgets import QFrame  # noqa
-from qtpy.QtGui import QDoubleValidator  # noqa
+from qtpy.QtWidgets import QFrame
+from qtpy.QtGui import QDoubleValidator
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_absolute_units_script import AbsoluteUnitsScript
 import mantidqtinterfaces.reduction_gui.widgets.util as util
@@ -62,7 +62,6 @@ class AbsoluteUnitsWidget(BaseWidget):
             self._content.median_test_out_low_edit,
             self._content.errorbar_crit_edit,
         ]:
-
             dvp = QDoubleValidator(widget)
             dvp.setBottom(0.0)
             widget.setValidator(dvp)

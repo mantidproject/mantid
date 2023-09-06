@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import LoadWANDSCD
 import unittest
+import numpy as np
 
 
 class LoadWANDTest(unittest.TestCase):
@@ -61,6 +62,36 @@ class LoadWANDTest(unittest.TestCase):
         self.assertAlmostEqual(run.getGoniometer(1).getEulerAngles("YZY")[0], -142.5)  # s1 from HB2C_7001
 
         LoadWANDTest_ws.delete()
+
+
+class LoadWANDApplyGoniometerTiltTest(unittest.TestCase):
+    def test(self):
+        sgl, sgu = np.deg2rad(-6.2), np.deg2rad(-0.4)  # radian
+        UB = np.array([[0.0167, -0.0181, -0.0762], [-0.2218, -0.1959, -0.0009], [-0.0968, 0.1419, -0.011]])  # crystal align
+        Rx = np.array([[1, 0, 0], [0, np.cos(sgl), np.sin(sgl)], [0, -np.sin(sgl), np.cos(sgl)]])  # 'HB2C:Mot:sgl.RBV,1,0,0,-1'
+        Rz = np.array([[np.cos(sgu), np.sin(sgu), 0], [-np.sin(sgu), np.cos(sgu), 0], [0, 0, 1]])  # 'HB2C:Mot:sgu.RBV,0,0,1,-1'
+
+        LoadWANDTest_ws = LoadWANDSCD("HB2C_475936.nxs.h5", ApplyGoniometerTilt=False)
+        np.testing.assert_array_almost_equal(UB, LoadWANDTest_ws.getExperimentInfo(0).sample().getOrientedLattice().getUB())
+        LoadWANDTest_ws.delete()
+
+        LoadWANDTest_ws = LoadWANDSCD("HB2C_475936.nxs.h5", ApplyGoniometerTilt=True)
+        np.testing.assert_array_almost_equal(Rx @ Rz @ UB, LoadWANDTest_ws.getExperimentInfo(0).sample().getOrientedLattice().getUB())
+        LoadWANDTest_ws.delete()
+
+
+class LoadWANDGrouping(unittest.TestCase):
+    def test(self):
+        LoadWANDTest_ws = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping=None)
+        LoadWANDTest_ws_2x2 = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="2x2")
+        LoadWANDTest_ws_4x4 = LoadWANDSCD("HB2C_475936.nxs.h5", Grouping="4x4")
+
+        self.assertEqual(LoadWANDTest_ws.getSignalArray().sum(), LoadWANDTest_ws_2x2.getSignalArray().sum())
+        self.assertEqual(LoadWANDTest_ws.getSignalArray().sum(), LoadWANDTest_ws_4x4.getSignalArray().sum())
+
+        LoadWANDTest_ws.delete()
+        LoadWANDTest_ws_2x2.delete()
+        LoadWANDTest_ws_4x4.delete()
 
 
 if __name__ == "__main__":

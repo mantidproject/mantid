@@ -58,7 +58,7 @@ def calcSomeTOF(box, peak, refitIDX=None, q_frame="sample"):
     QX, QY, QZ = getQXQYQZ(box)
 
     if refitIDX is None:
-        refitIDX = np.ones_like(QX).astype(np.bool)
+        refitIDX = np.ones_like(QX).astype(bool)
 
     if q_frame == "lab":
         qS0 = peak.getQLabFrame()
@@ -156,7 +156,7 @@ def getQuickTOFWS(
     scatteringHalfAngle = 0.5 * peak.getScattering()
     energy = 81.804 / wavelength**2 / 1000.0  # in eV
     if qMask is None:
-        qMask = np.ones_like(box.getNumEventsArray()).astype(np.bool)
+        qMask = np.ones_like(box.getNumEventsArray()).astype(bool)
 
     calc_pp_lambda = False
     if pp_lambda is None:
@@ -341,7 +341,7 @@ def getOptimizedGoodIDX(
     maxppl = maxppl_frac * pred_ppl
     pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck > minppl]
     pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck < maxppl]
-    if pp_lambda_toCheck == []:
+    if len(pp_lambda_toCheck) == 0:
         pp_lambda_toCheck = [meanBG * 1.96]
         print("Cannot find suitable background.  Consider adjusting MinpplFrac or MaxpplFrac")
 

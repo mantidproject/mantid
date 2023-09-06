@@ -66,7 +66,7 @@ class AsyncTask(threading.Thread):
             # treat SyntaxErrors as special as the traceback makes no sense
             # and the lineno is part of the exception instance
             self.error_cb(AsyncTaskFailure(self._elapsed(time_start), SyntaxError, exc, None))
-        except:  # noqa
+        except:
             self.exit_code = TaskExitCode.ERROR
             self.error_cb(AsyncTaskFailure.from_excinfo(self._elapsed(time_start)))
         else:
@@ -229,7 +229,7 @@ def set_interval(interval):
 
             def inner_wrap():
                 function(*args, **kwargs)
-                while not stop.isSet():
+                while not stop.is_set():
                     stop.wait(interval)
                     function(*args, **kwargs)
 

@@ -45,18 +45,10 @@ DLLExport QString addExtension(const QString &filename, const QString &selectedF
 
 DLLExport QString getFilter(const Mantid::Kernel::Property *baseProp);
 
-/** For file dialogs
- *
- * @param exts :: vector of extensions
- * @return a string that filters files by extenstions
- */
+/// For file dialogs
 DLLExport QString getFilter(const std::vector<std::string> &exts);
 
-/** Format extension into expected form (*.ext)
- *
- * @param extension :: extension to be formatted
- * @return a QString of the expected form
- */
+/// Format extension into expected form (*.ext)
 DLLExport QString formatExtension(const std::string &extension);
 
 DLLExport QString getCaption(const std::string &dialogName, const Mantid::Kernel::Property *prop);

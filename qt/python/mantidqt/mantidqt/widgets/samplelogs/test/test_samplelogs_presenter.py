@@ -9,7 +9,7 @@
 #
 import matplotlib
 
-matplotlib.use("Agg")  # noqa: E402
+matplotlib.use("Agg")
 import unittest
 
 from unittest import mock
@@ -32,7 +32,6 @@ class SampleLogsTest(unittest.TestCase):
         self.model.get_exp = mock.Mock(return_value=0)
 
     def test_sampleLogs(self):
-
         presenter = SampleLogs(None, model=self.model, view=self.view)
 
         # setup calls

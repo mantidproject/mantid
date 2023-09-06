@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALFAnalysisView.h"
 #include "ALFAnalysisPresenter.h"
+#include "ALFView.h"
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidQtIcons/Icon.h"
@@ -219,6 +220,18 @@ void ALFAnalysisView::setupRotationAngleWidget(QGridLayout *layout) {
   layout->addWidget(new QLabel("Rotation:"), 5, 0);
   layout->addWidget(m_rotationAngle, 5, 1, 1, 3);
   layout->addWidget(m_fitRequired, 5, 4);
+}
+
+void ALFAnalysisView::disable(std::string const &reason) {
+  if (auto parent = static_cast<ALFView *>(parentWidget())) {
+    parent->disable(reason);
+  }
+}
+
+void ALFAnalysisView::enable() {
+  if (auto parent = static_cast<ALFView *>(parentWidget())) {
+    parent->enable();
+  }
 }
 
 void ALFAnalysisView::notifyPeakPickerChanged() { m_presenter->notifyPeakPickerChanged(); }

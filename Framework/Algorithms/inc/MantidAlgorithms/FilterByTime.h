@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
@@ -21,7 +21,7 @@ namespace Algorithms {
     @author Janik Zikovsky, SNS
     @date September 14th, 2010
 */
-class MANTID_ALGORITHMS_DLL FilterByTime : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL FilterByTime : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FilterByTime"; };
@@ -42,6 +42,7 @@ public:
 private:
   // Implement abstract Algorithm methods
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
   /// Pointer for an event workspace

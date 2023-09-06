@@ -12,8 +12,8 @@ import sys
 import os
 import traceback
 from mantidqt.gui_helper import get_qapplication
-from qtpy.QtWidgets import QAction, QDialog, QFileDialog, QMainWindow, QMessageBox  # noqa
-from qtpy.QtCore import QFile, QFileInfo, QSettings  # noqa
+from qtpy.QtWidgets import QAction, QDialog, QFileDialog, QMainWindow, QMessageBox
+from qtpy.QtCore import QFile, QFileInfo, QSettings
 from mantid.kernel import Logger
 
 # Check whether Mantid is available
@@ -24,10 +24,10 @@ try:
 except ImportError:
     pass
 try:
-    from mantidqt.utils.qt import load_ui  # noqa
+    from mantidqt.utils.qt import load_ui
 except ImportError:
     Logger("ReductionGUI").information("Using legacy ui importer")
-    from mantidplot import load_ui  # noqa
+    from mantidplot import load_ui
 
 unicode = str
 
@@ -35,7 +35,7 @@ STARTUP_WARNING = ""
 
 if CAN_REDUCE:
     try:
-        import reduction  # noqa
+        import reduction
 
         if os.path.splitext(os.path.basename(reduction.__file__))[0] == "reduction":
             home_dir = os.path.expanduser("~")
@@ -48,8 +48,8 @@ if CAN_REDUCE:
         STARTUP_WARNING = "Please contact the Mantid team with the following message:\n\n\n"
         STARTUP_WARNING += unicode(traceback.format_exc())
 
-from mantidqtinterfaces.reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT  # noqa
-from mantidqtinterfaces.reduction_gui.settings.application_settings import GeneralSettings  # noqa
+from mantidqtinterfaces.reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT
+from mantidqtinterfaces.reduction_gui.settings.application_settings import GeneralSettings
 
 
 class ReductionGUI(QMainWindow):

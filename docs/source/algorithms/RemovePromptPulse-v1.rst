@@ -9,7 +9,10 @@
 Description
 -----------
 
-Remove the prompt pulse tor a time of flight measurement
+Remove the prompt pulse tor a time of flight measurement.
+
+Specifying the ``Tmin`` and ``Tmax`` parameters can speed up performance of this algorithm with EventWorkspace.
+These two parameters will only limit the possible locations of prompt pulses and are **not** used to crop the data to a range.
 
 
 Usage

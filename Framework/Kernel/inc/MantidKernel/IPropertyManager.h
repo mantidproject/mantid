@@ -180,6 +180,9 @@ public:
    *  @throw std::invalid_argument  if the name argument is empty
    */
   void declareProperty(const std::string &name, const char *value, const unsigned int direction) {
+    if (value == nullptr)
+      throw std::invalid_argument("Attempted to set " + name + " to nullptr");
+
     declareProperty(name, std::string(value), std::make_shared<NullValidator>(), "", direction);
   }
 
@@ -329,10 +332,6 @@ public:
 
   /// Get the list of managed properties in a given group.
   std::vector<Property *> getPropertiesInGroup(const std::string &group) const;
-
-  virtual void filterByTime(const Types::Core::DateAndTime & /*start*/, const Types::Core::DateAndTime & /*stop*/) = 0;
-  virtual void splitByTime(std::vector<SplittingInterval> & /*splitter*/,
-                           std::vector<PropertyManager *> /* outputs*/) const = 0;
 
   virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filter*/, const std::vector<std::string> &
                                 /* excludedFromFiltering */) = 0;

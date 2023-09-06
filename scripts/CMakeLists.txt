@@ -64,6 +64,7 @@ mtd_install_files(
 # Testing
 add_subdirectory(test)
 add_subdirectory(Diffraction/isis_powder)
+add_subdirectory(Diffraction/single_crystal)
 add_subdirectory(Engineering)
 
 # Ensure we don't get stale pyc files around

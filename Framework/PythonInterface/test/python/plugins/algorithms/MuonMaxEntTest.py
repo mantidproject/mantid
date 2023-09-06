@@ -11,51 +11,48 @@ from mantid.simpleapi import *
 from mantid.api import *
 
 
+def create_workspace():
+    x_data = np.linspace(0, 30.0, 100)
+    e_data = []
+    y_data = []
+    for xx in x_data:
+        y_data.append(np.sin(2.3 * xx + 0.1) * np.exp(-xx / 2.19703))
+        e_data.append(np.cos(0.2 * xx))
+    for xx in x_data:
+        y_data.append(np.sin(4.3 * xx + 0.2) * np.exp(-xx / 2.19703))
+        e_data.append(np.cos(0.2 * xx))
+
+    inputData = CreateWorkspace(DataX=x_data, DataY=y_data, DataE=e_data, NSpec=2, UnitX="Time", StoreInADS=False)
+    return inputData
+
+
+def create_workspace_with_dead_detectors():
+    inputData = CreateSimulationWorkspace("MUSR", "0,1,32")
+    xData = (inputData.dataX(0)[1:] + inputData.dataX(0)[:-1]) / 2.0
+    for j in range(inputData.getNumberHistograms()):
+        if j == 42 or j == 24:
+            inputData.dataY(j)[:] = np.zeros(len(xData))
+            inputData.dataE(j)[:] = np.cos(0.3 * xData)
+        else:
+            phi = 2.0 * math.pi * (j + 1) / (inputData.getNumberHistograms() + 1)
+            inputData.dataY(j)[:] = np.sin(2.3 * xData + phi)
+            inputData.dataE(j)[:] = np.cos(0.3 * xData)
+    return inputData
+
+
 class MuonMaxEntTest(unittest.TestCase):
-    def genData(self):
-        x_data = np.linspace(0, 30.0, 100)
-        e_data = np.cos(0.0 * x_data)
-        y_data = np.sin(2.3 * x_data + 0.1) * np.exp(-x_data / 2.19703)
-        inputData = CreateWorkspace(DataX=x_data, DataY=y_data, DataE=e_data, UnitX="Time")
-        return inputData
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls._workspace = create_workspace()
+        cls._workspace_with_dead_detectors = create_workspace_with_dead_detectors()
 
-    def genData2(self):
-        x_data = np.linspace(0, 30.0, 100)
-        e_data = []
-        y_data = []
-        for xx in x_data:
-            y_data.append(np.sin(2.3 * xx + 0.1) * np.exp(-xx / 2.19703))
-            e_data.append(np.cos(0.2 * xx))
-        for xx in x_data:
-            y_data.append(np.sin(4.3 * xx + 0.2) * np.exp(-xx / 2.19703))
-            e_data.append(np.cos(0.2 * xx))
+    @classmethod
+    def tearDownClass(cls) -> None:
+        AnalysisDataService.clear()
 
-        inputData = CreateWorkspace(DataX=x_data, DataY=y_data, DataE=e_data, NSpec=2, UnitX="Time")
-        return inputData
-
-    def genDataWithDeadDetectors(self):
-        inputData = CreateSimulationWorkspace("MUSR", "0,1,32")
-        xData = (inputData.dataX(0)[1:] + inputData.dataX(0)[:-1]) / 2.0
-        for j in range(inputData.getNumberHistograms()):
-            if j == 42 or j == 24:
-                inputData.dataY(j)[:] = np.zeros(len(xData))
-                inputData.dataE(j)[:] = np.cos(0.3 * xData)
-            else:
-                phi = 2.0 * math.pi * (j + 1) / (inputData.getNumberHistograms() + 1)
-                inputData.dataY(j)[:] = np.sin(2.3 * xData + phi)
-                inputData.dataE(j)[:] = np.cos(0.3 * xData)
-        return inputData
-
-    def cleanUp(self):
-        DeleteWorkspace("InputData")
-        DeleteWorkspace("freq")
-        DeleteWorkspace("time")
-        DeleteWorkspace("phase")
-
-    def test_executes(self):
-        inputData = self.genData()
+    def test_executes_on_multiple_spectra(self):
         MuonMaxent(
-            InputWorkspace=inputData,
+            InputWorkspace=self._workspace,
             Npts=32768,
             FitDeaDTime=False,
             FixPhases=True,
@@ -69,25 +66,23 @@ class MuonMaxEntTest(unittest.TestCase):
         time = AnalysisDataService.retrieve("time")
         phase = AnalysisDataService.retrieve("phase")
         self.assertEqual(freq.getNumberHistograms(), 1)
-        self.assertEqual(time.getNumberHistograms(), 1)
-        self.assertEqual(phase.rowCount(), 1)
-        self.cleanUp()
+        self.assertEqual(time.getNumberHistograms(), 2)
+        self.assertEqual(phase.rowCount(), 2)
 
     def test_deadDetectors(self):
-        inputData = self.genDataWithDeadDetectors()
         # check input data has 2 dead detectors
-        for k in range(inputData.getNumberHistograms()):
+        for k in range(self._workspace_with_dead_detectors.getNumberHistograms()):
             if k == 24 or k == 42:
-                self.assertEqual(np.count_nonzero(inputData.readY(k)), 0)
+                self.assertEqual(np.count_nonzero(self._workspace_with_dead_detectors.readY(k)), 0)
             else:
-                self.assertNotEqual(np.count_nonzero(inputData.readY(k)), 0)
+                self.assertNotEqual(np.count_nonzero(self._workspace_with_dead_detectors.readY(k)), 0)
         MuonMaxent(
-            InputWorkspace=inputData,
+            InputWorkspace=self._workspace_with_dead_detectors,
             Npts=32768,
             FitDeaDTime=False,
             FixPhases=False,
-            OuterIterations=5,
-            InnerIterations=5,
+            OuterIterations=1,
+            InnerIterations=1,
             OutputWorkspace="freq",
             ReconstructedSpectra="time",
             OutputPhaseTable="phase",
@@ -110,57 +105,27 @@ class MuonMaxEntTest(unittest.TestCase):
                 self.assertNotEqual(phase.cell(j, 1), 999.0)
 
         self.assertEqual(phase.rowCount(), 64)
-        self.cleanUp()
 
-    def test_exitOnNAN(self):
-        inputData = self.genData()
-        try:
+    def test_raises_when_stuck_looping_due_to_nan_values(self):
+        with self.assertRaisesRegex(RuntimeError, "MuonMaxent-v1: invalid value: a=[0-9]*.[0-9]* b=nan c=nan"):
             MuonMaxent(
-                InputWorkspace=inputData,
+                InputWorkspace=self._workspace,
                 Npts=32768,
                 FitDeaDTime=False,
                 FixPhases=True,
-                OuterIterations=10,
-                InnerIterations=10,
+                OuterIterations=2,
+                InnerIterations=1,
                 OutputWorkspace="freq",
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except RuntimeError:
-            pass
-        else:
-            self.fail("should throw an error as it will get stuck in a loop due to NAN values")
-        finally:
-            DeleteWorkspace("InputData")
 
-    def test_multipleSpec(self):
-        inputData = self.genData2()
-        MuonMaxent(
-            InputWorkspace=inputData,
-            Npts=32768,
-            FitDeaDTime=False,
-            FixPhases=True,
-            OuterIterations=1,
-            InnerIterations=1,
-            OutputWorkspace="freq",
-            ReconstructedSpectra="time",
-            OutputPhaseTable="phase",
-        )
-        freq = AnalysisDataService.retrieve("freq")
-        time = AnalysisDataService.retrieve("time")
-        phase = AnalysisDataService.retrieve("phase")
-        self.assertEqual(freq.getNumberHistograms(), 1)
-        self.assertEqual(time.getNumberHistograms(), 2)
-        self.assertEqual(phase.rowCount(), 2)
-        self.cleanUp()
-
-    def test_badRange(self):
-        inputData = self.genData2()
-        try:
+    def test_raises_when_start_is_greater_than_end(self):
+        with self.assertRaisesRegex(RuntimeError, "Some invalid Properties found"):
             MuonMaxent(
-                InputWorkspace=inputData,
-                FirstGoodData=10.0,
-                LastGoodData=1.0,
+                InputWorkspace=self._workspace,
+                FirstGoodTime=10.0,
+                LastGoodTime=1.0,
                 Npts=32768,
                 FitDeaDTime=False,
                 FixPhases=True,
@@ -170,19 +135,12 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except:
-            pass
-        else:
-            self.fail("should have failed as start > end")
-        finally:
-            DeleteWorkspace("InputData")
 
-    def test_badStart(self):
-        inputData = self.genData2()
-        try:
+    def test_raises_when_start_is_less_than_zero(self):
+        with self.assertRaisesRegex(RuntimeError, "Some invalid Properties found"):
             MuonMaxent(
-                InputWorkspace=inputData,
-                FirstGoodData=-10.0,
+                InputWorkspace=self._workspace,
+                FirstGoodTime=-10.0,
                 Npts=32768,
                 FitDeaDTime=False,
                 FixPhases=True,
@@ -192,18 +150,11 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except:
-            pass
-        else:
-            self.fail("should have failed as start < 0.0")
-        finally:
-            DeleteWorkspace("InputData")
 
-    def test_badInner(self):
-        inputData = self.genData2()
-        try:
+    def test_raises_when_inner_iterations_is_less_than_zero(self):
+        with self.assertRaisesRegex(RuntimeError, "Some invalid Properties found"):
             MuonMaxent(
-                InputWorkspace=inputData,
+                InputWorkspace=self._workspace,
                 Npts=32768,
                 FitDeaDTime=False,
                 FixPhases=True,
@@ -213,18 +164,11 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except:
-            pass
-        else:
-            self.fail("should have failed as InnerIterations <= 0.0")
-        finally:
-            DeleteWorkspace("InputData")
 
-    def test_badOuter(self):
-        inputData = self.genData2()
-        try:
+    def test_raises_when_outer_iterations_is_less_than_zero(self):
+        with self.assertRaisesRegex(RuntimeError, "Some invalid Properties found"):
             MuonMaxent(
-                InputWorkspace=inputData,
+                InputWorkspace=self._workspace,
                 Npts=32768,
                 FitDeaDTime=False,
                 FixPhases=True,
@@ -234,18 +178,11 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except:
-            pass
-        else:
-            self.fail("should have failed as OuterIterations <= 0.0")
-        finally:
-            DeleteWorkspace("InputData")
 
-    def test_badField(self):
-        inputData = self.genData2()
-        try:
+    def test_raises_when_maxfield_is_less_than_zero(self):
+        with self.assertRaisesRegex(RuntimeError, "Some invalid Properties found"):
             MuonMaxent(
-                InputWorkspace=inputData,
+                InputWorkspace=self._workspace,
                 Npts=32768,
                 MaxField=-10.0,
                 FitDeaDTime=False,
@@ -256,18 +193,11 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except:
-            pass
-        else:
-            self.fail("should have failed as MaxField <= 0.0")
-        finally:
-            DeleteWorkspace("InputData")
 
-    def test_badFactor(self):
-        inputData = self.genData2()
-        try:
+    def test_raises_when_factor_is_less_than_zero(self):
+        with self.assertRaisesRegex(RuntimeError, "Some invalid Properties found"):
             MuonMaxent(
-                InputWorkspace=inputData,
+                InputWorkspace=self._workspace,
                 Npts=32768,
                 Factor=-10.0,
                 FitDeaDTime=False,
@@ -278,18 +208,11 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except:
-            pass
-        else:
-            self.fail("should have failed as Factor <= 0.0")
-        finally:
-            DeleteWorkspace("InputData")
 
-    def test_badDefault(self):
-        inputData = self.genData2()
-        try:
+    def test_raises_when_defaultlevel_is_less_than_zero(self):
+        with self.assertRaisesRegex(RuntimeError, "Some invalid Properties found"):
             MuonMaxent(
-                InputWorkspace=inputData,
+                InputWorkspace=self._workspace,
                 Npts=32768,
                 DefaultLevel=-10.0,
                 FitDeaDTime=False,
@@ -300,12 +223,6 @@ class MuonMaxEntTest(unittest.TestCase):
                 ReconstructedSpectra="time",
                 OutputPhaseTable="phase",
             )
-        except:
-            pass
-        else:
-            self.fail("should have failed as DefaultLevel <= 0.0")
-        finally:
-            DeleteWorkspace("InputData")
 
 
 if __name__ == "__main__":

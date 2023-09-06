@@ -71,7 +71,7 @@ public:
        boost::optional<double> detectorDistance = boost::none);
 
   void setDetectorID(int id);
-  int getDetectorID() const;
+  int getDetectorID() const override;
   void addContributingDetID(const int id);
   void removeContributingDetector(const int id);
   const std::set<int> &getContributingDetIDs() const;
@@ -118,6 +118,9 @@ public:
   virtual Mantid::Kernel::V3D getDetPos() const;
   double getL1() const override;
   double getL2() const override;
+
+  Mantid::Kernel::V3D getDetectorDirectionSampleFrame() const override;
+  Mantid::Kernel::V3D getSourceDirectionSampleFrame() const override;
 
   /// Assignment
   Peak &operator=(const Peak &other);

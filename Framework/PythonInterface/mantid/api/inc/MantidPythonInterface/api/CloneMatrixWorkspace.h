@@ -17,7 +17,7 @@ class MatrixWorkspace;
 
 namespace PythonInterface {
 //** @name Numpy clones of data*/
-///{
+///@{
 /// Create a numpy array from the X values of the given workspace reference
 PyObject *cloneX(const API::MatrixWorkspace &self);
 /// Create a numpy array from the Y values of the given workspace reference

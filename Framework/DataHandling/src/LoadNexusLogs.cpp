@@ -780,23 +780,30 @@ void LoadNexusLogs::loadLogs(::NeXus::File &file, const std::string &absolute_en
     auto itPrefixBegin = logsSet.lower_bound(absolute_entry_name);
 
     if (allow_list.empty()) {
+      // convert the blocklist into a bunch of objects to handle globbing
+      const bool has_block_list = (!block_list.empty());
+      std::vector<std::unique_ptr<Poco::Glob>> globblock_list;
+      if (has_block_list) {
+        std::transform(block_list.cbegin(), block_list.cend(), std::back_inserter(globblock_list),
+                       [](const auto &block) { return std::make_unique<Poco::Glob>(block); });
+      }
+
       for (auto it = itPrefixBegin;
            it != logsSet.end() && it->compare(0, absolute_entry_name.size(), absolute_entry_name) == 0; ++it) {
         // must be third level entry
         if (std::count(it->begin(), it->end(), '/') == 3) {
-          if (!block_list.empty()) {
+          if (has_block_list) {
             bool skip = false;
-            for (const auto &block : block_list) {
-              Poco::Glob glob(block);
-              if (glob.match((*it).substr((*it).find_last_of("/") + 1))) {
+            for (auto &block : globblock_list) {
+              if (block->match((*it).substr((*it).find_last_of("/") + 1))) {
                 skip = true;
-                break;
+                break; // from the loop of block items
               }
             }
             if (skip) {
-              continue;
+              continue; // go to next log
             }
-          }
+          } // end of looping over block_list
 
           if (isNxLog) {
             loadNXLog(file, *it, logClass, workspace);
@@ -855,8 +862,10 @@ void LoadNexusLogs::loadNXLog(::NeXus::File &file, const std::string &absolute_e
   // Just verify that time and value entries exist
   const std::string timeEntry = absolute_entry_name + "/time";
   const std::string valueEntry = absolute_entry_name + "/value";
+  const std::string validatorEntry = absolute_entry_name + "/value_valid";
   bool foundValue = false;
   bool foundTime = false;
+  bool foundValidator = false;
 
   const std::map<std::string, std::set<std::string>> &allEntries = getFileInfo()->getAllEntries();
   // reverse search to take advantage of the fact that these are located in SDS
@@ -868,7 +877,10 @@ void LoadNexusLogs::loadNXLog(::NeXus::File &file, const std::string &absolute_e
     if (entriesSet.count(valueEntry) == 1) {
       foundValue = true;
     }
-    if (foundTime && foundValue) {
+    if (entriesSet.count(validatorEntry) == 1) {
+      foundValidator = true;
+    }
+    if (foundTime && foundValue && foundValidator) {
       break;
     }
   }
@@ -884,12 +896,14 @@ void LoadNexusLogs::loadNXLog(::NeXus::File &file, const std::string &absolute_e
   try {
     if (overwritelogs || !(workspace->run().hasProperty(entry_name))) {
       auto logValue = createTimeSeries(file, entry_name, freqStart, g_log);
-      // Create (possibly) a boolean time series, companion to time series `entry_name`.
-      auto validityLogValue = createTimeSeriesValidityFilter(file, *logValue, g_log);
-      if (validityLogValue) {
-        appendEndTimeLog(validityLogValue.get(), workspace->run());
-        workspace->mutableRun().addProperty(std::move(validityLogValue), overwritelogs);
-        m_logsWithInvalidValues.emplace_back(entry_name);
+      // Create (possibly) a boolean time series, companion to time series `entry_name`
+      if (foundValidator) {
+        auto validityLogValue = createTimeSeriesValidityFilter(file, *logValue, g_log);
+        if (validityLogValue) {
+          appendEndTimeLog(validityLogValue.get(), workspace->run());
+          workspace->mutableRun().addProperty(std::move(validityLogValue), overwritelogs);
+          m_logsWithInvalidValues.emplace_back(entry_name);
+        }
       }
       appendEndTimeLog(logValue.get(), workspace->run());
       workspace->mutableRun().addProperty(std::move(logValue), overwritelogs);

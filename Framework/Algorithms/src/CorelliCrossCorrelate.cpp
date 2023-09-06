@@ -149,11 +149,11 @@ void CorelliCrossCorrelate::exec() {
   std::transform(tdc.begin(), tdc.end(), tdc.begin(), [offset](auto timing) { return timing + offset; });
 
   // Determine period from chopper frequency.
-  auto motorSpeed = dynamic_cast<TimeSeriesProperty<double> *>(inputWS->run().getProperty("BL9:Chop:Skf4:MotorSpeed"));
-  if (!motorSpeed) {
+  if (!inputWS->run().hasProperty("BL9:Chop:Skf4:MotorSpeed")) {
     throw Exception::NotFoundError("Could not find a log value for the motor speed", "BL9:Chop:Skf4:MotorSpeed");
   }
-  double period = 1e9 / static_cast<double>(motorSpeed->timeAverageValue());
+  const auto motorSpeed = inputWS->run().getPropertyAsSingleValue("BL9:Chop:Skf4:MotorSpeed");
+  double period = 1e9 / motorSpeed;
   g_log.information() << "Frequency = " << 1e9 / period << "Hz Period = " << period << "ns\n";
 
   // Get the sample and source, calculate distances.

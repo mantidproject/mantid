@@ -21,8 +21,23 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
 std::string stringValueOrEmpty(boost::optional<double> value) { return value ? std::to_string(*value) : ""; }
 
+std::map<std::string, std::string> getStitchParams(OptionDefaults const &stitchDefaults) {
+  std::map<std::string, std::string> initialStitchParameters;
+  auto const &alg = Mantid::API::AlgorithmManager::Instance().create("Stitch1DMany");
+  auto const &algPropNames = alg->getDeclaredPropertyNames();
+  for (auto const &algPropName : algPropNames) {
+    std::string const &defaultPropName = "Stitch" + algPropName;
+    auto const &propValue = stitchDefaults.getStringOrEmpty(algPropName, defaultPropName);
+    if (!propValue.empty()) {
+      initialStitchParameters[algPropName] = propValue;
+    }
+  }
+  return initialStitchParameters;
+}
+
 Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
-  auto defaults = OptionDefaults(std::move(instrument));
+  // Looks for defaults for use in ReflectometryReductionOneAuto algorithm
+  auto defaults = OptionDefaults(instrument, "ReflectometryReductionOneAuto");
 
   auto analysisMode =
       analysisModeFromString(defaults.getStringOrDefault("AnalysisMode", "AnalysisMode", "PointDetectorAnalysis"));
@@ -63,8 +78,9 @@ Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
   auto transmissionStitchOptions =
       TransmissionStitchOptions(transmissionRunRange, transmissionStitchParams, transmissionScaleRHS);
 
-  // We currently don't specify stitch parameters in the parameters file
-  auto stitchParameters = std::map<std::string, std::string>();
+  // Looks for default Output Stitch Properties for use in Stitch1DMany algorithm
+  auto const &stitchDefaults = OptionDefaults(std::move(instrument), "Stitch1DMany");
+  auto const &stitchParameters = getStitchParams(stitchDefaults);
 
   // For per-theta defaults, we can only specify defaults for the wildcard row
   // i.e.  where theta is empty. It probably doesn't make sense to specify

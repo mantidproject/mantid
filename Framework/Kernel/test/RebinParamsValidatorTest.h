@@ -51,6 +51,12 @@ public:
     TS_ASSERT_EQUALS(standardValidator.isValid(vec), "Bin boundary values must be given in order of increasing value");
   }
 
+  void testFailZeroBin_only() {
+    // Don't give a 0 bin
+    std::vector<double> vec{0.0};
+    TS_ASSERT(!standardValidator.isValid(vec).empty());
+  }
+
   void testFailZeroBin_or_bad_log() {
     // Don't give a 0 bin
     std::vector<double> vec(3);

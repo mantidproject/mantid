@@ -148,6 +148,10 @@ echo
 # Remove jq
 "$CONDA_EXE" remove --quiet --prefix "$bundle_conda_prefix" --yes jq
 
+# Pip install quasielasticbayes so it can be packaged alongside workbench
+# Version 0.2.0 is built for Python 3.10
+$bundle_conda_prefix/bin/python -m pip install quasielasticbayes==0.2.0
+
 # Trim and fixup bundle
 trim_conda "$bundle_conda_prefix"
 fixup_bundle "$bundle_conda_prefix" "$bundle_icon"

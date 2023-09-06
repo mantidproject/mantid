@@ -323,26 +323,18 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             self.max_releaser = self.figure.canvas.mpl_connect("button_release_event", self.max_release)
 
     def min_follow_mouse(self, event):
-        if event.xdata:
-            if self.initial_x_limits[0] <= float(event.xdata) <= self.initial_x_limits[1]:
-                self.min_line.set_xdata([event.xdata, event.xdata])
-                self.set_x_min_line_edit(event.xdata)
-            else:
-                self.min_line.set_xdata([self.initial_x_limits[0], self.initial_x_limits[0]])
-                self.set_x_min_line_edit(self.initial_x_limits[0])
+        if event.xdata and self.initial_x_limits[0] <= float(event.xdata) <= float(self.x_max_line_edit.text()):
+            self.min_line.set_xdata([event.xdata, event.xdata])
+            self.set_x_min_line_edit(event.xdata)
         else:
             self.min_line.set_xdata([self.initial_x_limits[0], self.initial_x_limits[0]])
             self.set_x_min_line_edit(self.initial_x_limits[0])
         self.figure.canvas.draw_idle()
 
     def max_follow_mouse(self, event):
-        if event.xdata:
-            if self.initial_x_limits[0] <= float(event.xdata) <= self.initial_x_limits[1]:
-                self.max_line.set_xdata([event.xdata, event.xdata])
-                self.set_x_max_line_edit(event.xdata)
-            else:
-                self.max_line.set_xdata([self.initial_x_limits[1], self.initial_x_limits[1]])
-                self.set_x_max_line_edit(self.initial_x_limits[1])
+        if event.xdata and float(self.x_min_line_edit.text()) <= float(event.xdata) <= self.initial_x_limits[1]:
+            self.max_line.set_xdata([event.xdata, event.xdata])
+            self.set_x_max_line_edit(event.xdata)
         else:
             self.max_line.set_xdata([self.initial_x_limits[1], self.initial_x_limits[1]])
             self.set_x_max_line_edit(self.initial_x_limits[1])
@@ -370,20 +362,22 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
         new_value = self.x_min_line_edit.text()
         if self.min_line and new_value != "":
             new_value = float(new_value)
-            if self.initial_x_limits[0] <= new_value <= self.initial_x_limits[1]:
+            if self.initial_x_limits[0] <= new_value <= float(self.x_max_line_edit.text()):
                 self.min_line.set_xdata([new_value, new_value])
             else:
                 self.min_line.set_xdata([self.initial_x_limits[0], self.initial_x_limits[0]])
+                self.set_x_min_line_edit(self.initial_x_limits[0])
             self.figure.canvas.draw_idle()
 
     def set_max_line_from_line_edit(self):
         new_value = self.x_max_line_edit.text()
         if self.max_line and new_value != "":
             new_value = float(new_value)
-            if self.initial_x_limits[0] <= new_value <= self.initial_x_limits[1]:
+            if float(self.x_min_line_edit.text()) <= new_value <= self.initial_x_limits[1]:
                 self.max_line.set_xdata([new_value, new_value])
             else:
                 self.max_line.set_xdata([self.initial_x_limits[1], self.initial_x_limits[1]])
+                self.set_x_max_line_edit(self.initial_x_limits[1])
             self.figure.canvas.draw_idle()
 
     def set_x_limits(self, x_minimum, x_maximum):

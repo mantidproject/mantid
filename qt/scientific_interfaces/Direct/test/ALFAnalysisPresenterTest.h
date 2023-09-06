@@ -11,6 +11,7 @@
 
 #include "ALFAnalysisMocks.h"
 #include "ALFAnalysisPresenter.h"
+#include "MockALFAlgorithmManager.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -32,24 +33,30 @@ using namespace MantidQt::MantidWidgets;
 
 class ALFAnalysisPresenterTest : public CxxTest::TestSuite {
 public:
-  ALFAnalysisPresenterTest() { FrameworkManager::Instance(); }
+  ALFAnalysisPresenterTest() {
+    FrameworkManager::Instance();
+    m_workspace = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    m_function = Mantid::API::FunctionFactory::Instance().createFunction("Gaussian");
+  }
 
   static ALFAnalysisPresenterTest *createSuite() { return new ALFAnalysisPresenterTest(); }
 
   static void destroySuite(ALFAnalysisPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_workspaceName = "test";
+    m_algProperties = std::make_unique<AlgorithmRuntimeProps>();
+
     m_range = std::make_pair(0.0, 1.0);
     m_peakCentre = 0.5;
     m_background = 1.0;
-    m_allTwoTheta = std::vector<double>{1.0, 2.3, 3.3};
-    m_averageTwoTheta = 2.2;
 
+    auto algorithmManager = std::make_unique<NiceMock<MockALFAlgorithmManager>>();
     auto model = std::make_unique<NiceMock<MockALFAnalysisModel>>();
+
+    m_algorithmManager = algorithmManager.get();
     m_model = model.get();
     m_view = std::make_unique<NiceMock<MockALFAnalysisView>>();
-    m_presenter = std::make_unique<ALFAnalysisPresenter>(m_view.get(), std::move(model));
+    m_presenter = std::make_unique<ALFAnalysisPresenter>(m_view.get(), std::move(model), std::move(algorithmManager));
   }
 
   void tearDown() override {
@@ -67,18 +74,22 @@ public:
   void test_setExtractedWorkspace_will_set_the_workspace_and_thetas_in_the_model_and_update_the_view() {
     auto const twoThetas = std::vector<double>{1.1, 2.2};
 
-    EXPECT_CALL(*m_model, setExtractedWorkspace(_, twoThetas)).Times(1);
+    EXPECT_CALL(*m_model, setExtractedWorkspace(Eq(m_workspace), twoThetas)).Times(1);
 
-    expectCalculateEstimate();
+    expectCalculateEstimate(m_workspace);
 
-    EXPECT_CALL(*m_model, extractedWorkspace()).Times(1).WillOnce(Return(nullptr));
-    EXPECT_CALL(*m_view, addSpectrum(_)).Times(1);
+    m_presenter->setExtractedWorkspace(m_workspace, twoThetas);
+  }
 
-    EXPECT_CALL(*m_model, averageTwoTheta()).Times(1).WillOnce(Return(m_averageTwoTheta));
-    EXPECT_CALL(*m_model, allTwoThetas()).Times(1).WillOnce(Return(m_allTwoTheta));
-    EXPECT_CALL(*m_view, setAverageTwoTheta(m_averageTwoTheta, m_allTwoTheta)).Times(1);
+  void test_setExtractedWorkspace_will_update_the_view_if_no_data_is_extracted() {
+    auto workspace = nullptr;
+    auto const twoThetas = std::vector<double>{1.1, 2.2};
 
-    m_presenter->setExtractedWorkspace(nullptr, twoThetas);
+    EXPECT_CALL(*m_model, setExtractedWorkspace(Eq(workspace), twoThetas)).Times(1);
+
+    expectCalculateEstimate(workspace);
+
+    m_presenter->setExtractedWorkspace(workspace, twoThetas);
   }
 
   void test_notifyPeakPickerChanged_will_removeFitSpectrum_if_fit_status_is_empty() {
@@ -117,15 +128,7 @@ public:
     EXPECT_CALL(*m_model, peakCentre()).Times(1).WillOnce(Return(0.0));
     EXPECT_CALL(*m_model, setPeakCentre(m_peakCentre)).Times(1);
 
-    EXPECT_CALL(*m_model, background()).Times(1).WillOnce(Return(m_background));
-    EXPECT_CALL(*m_model, getPeakCopy()).Times(1).WillOnce(Return(nullptr));
-    EXPECT_CALL(*m_view, setPeak(_, m_background)).Times(1);
-
-    EXPECT_CALL(*m_model, fitStatus()).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(*m_view, setPeakCentreStatus("")).Times(1);
-
-    EXPECT_CALL(*m_view, removeFitSpectrum()).Times(1);
-    EXPECT_CALL(*m_view, replot()).Times(1);
+    expectUpdatePeakCentreInViewFromModel();
 
     expectUpdateRotationAngleCalled();
 
@@ -197,9 +200,9 @@ public:
     EXPECT_CALL(*m_view, peakCentre()).Times(1).WillOnce(Return(m_peakCentre));
     EXPECT_CALL(*m_view, getRange()).Times(2).WillRepeatedly(Return(m_range));
 
-    EXPECT_CALL(*m_model, doFit(m_range)).Times(1);
-
-    expectUpdateRotationAngleCalled();
+    EXPECT_CALL(*m_view, disable("Fitting")).Times(1);
+    EXPECT_CALL(*m_model, fitProperties(m_range)).Times(1).WillOnce(Return(ByMove(std::move(m_algProperties))));
+    EXPECT_CALL(*m_algorithmManager, fit(NotNull())).Times(1);
 
     m_presenter->notifyFitClicked();
   }
@@ -237,15 +240,11 @@ public:
     // Assert no call to calculateEstimate
     EXPECT_CALL(*m_model, calculateEstimate(_)).Times(0);
 
-    expectUpdateRotationAngleCalled();
-
     m_presenter->notifyResetClicked();
   }
 
   void test_that_calculateEstimate_is_called_as_expected() {
-    expectCalculateEstimate();
-    expectUpdateRotationAngleCalled();
-
+    expectCalculateEstimate(m_workspace);
     m_presenter->notifyResetClicked();
   }
 
@@ -259,22 +258,82 @@ public:
   void test_clear_will_clear_the_two_theta_in_the_model_and_update_the_view() {
     EXPECT_CALL(*m_model, clear()).Times(1);
 
-    EXPECT_CALL(*m_model, extractedWorkspace()).Times(1).WillOnce(Return(nullptr));
-    EXPECT_CALL(*m_view, addSpectrum(_)).Times(1);
-
-    EXPECT_CALL(*m_model, averageTwoTheta()).Times(1).WillOnce(Return(m_averageTwoTheta));
-    EXPECT_CALL(*m_model, allTwoThetas()).Times(1).WillOnce(Return(m_allTwoTheta));
-    EXPECT_CALL(*m_view, setAverageTwoTheta(m_averageTwoTheta, m_allTwoTheta)).Times(1);
+    expectUpdateViewFromModel();
 
     m_presenter->clear();
   }
 
-private:
-  void expectCalculateEstimate() {
-    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(true));
-    EXPECT_CALL(*m_view, getRange()).Times(1).WillRepeatedly(Return(m_range));
+  void test_notifyCropWorkspaceComplete_triggers_the_model_to_calculate_an_estimate_peak() {
+    EXPECT_CALL(*m_model, calculateEstimate(_)).Times(1);
+    EXPECT_CALL(*m_view, enable()).Times(1);
 
-    EXPECT_CALL(*m_model, calculateEstimate(m_range)).Times(1);
+    expectUpdateViewFromModel();
+
+    m_presenter->notifyCropWorkspaceComplete(nullptr);
+  }
+
+  void test_notifyFitComplete_will_update_the_model_and_then_the_view() {
+    std::string const fitStatus("Fit success");
+
+    EXPECT_CALL(*m_model, setFitResult(Eq(m_workspace), Eq(m_function), fitStatus)).Times(1);
+    EXPECT_CALL(*m_model, fitWorkspace()).Times(1).WillOnce(Return(m_workspace));
+    EXPECT_CALL(*m_view, addFitSpectrum(Eq(m_workspace))).Times(1);
+    expectUpdatePeakCentreInViewFromModel();
+    expectUpdateRotationAngleCalled();
+    EXPECT_CALL(*m_view, enable()).Times(1);
+
+    m_presenter->notifyFitComplete(m_workspace, m_function, fitStatus);
+  }
+
+  void test_notifyAlgorithmError_will_display_a_message_in_the_view() {
+    std::string const message("This is a warning message");
+
+    EXPECT_CALL(*m_view, enable()).Times(1);
+    EXPECT_CALL(*m_view, displayWarning(message)).Times(1);
+
+    m_presenter->notifyAlgorithmError(message);
+  }
+
+private:
+  void expectCalculateEstimate(MatrixWorkspace_sptr const &workspace) {
+    EXPECT_CALL(*m_model, isDataExtracted()).Times(1).WillOnce(Return(workspace != nullptr));
+    if (workspace) {
+      EXPECT_CALL(*m_view, disable("Calculating estimate parameters")).Times(1);
+      EXPECT_CALL(*m_view, getRange()).Times(1).WillRepeatedly(Return(m_range));
+
+      EXPECT_CALL(*m_model, cropWorkspaceProperties(m_range))
+          .Times(1)
+          .WillOnce(Return(ByMove(std::move(m_algProperties))));
+      EXPECT_CALL(*m_algorithmManager, cropWorkspace(NotNull())).Times(1);
+    } else {
+      expectUpdatePlotInViewFromModel();
+    }
+  }
+
+  void expectUpdatePlotInViewFromModel() {
+    EXPECT_CALL(*m_model, extractedWorkspace()).Times(1).WillOnce(Return(m_workspace));
+    EXPECT_CALL(*m_view, addSpectrum(Eq(m_workspace))).Times(1);
+  }
+
+  void expectUpdatePeakCentreInViewFromModel() {
+    EXPECT_CALL(*m_model, background()).Times(1).WillOnce(Return(m_background));
+    EXPECT_CALL(*m_model, getPeakCopy()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(*m_view, setPeak(_, m_background)).Times(1);
+
+    EXPECT_CALL(*m_model, fitStatus()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(*m_view, setPeakCentreStatus("")).Times(1);
+
+    EXPECT_CALL(*m_view, removeFitSpectrum()).Times(1);
+    EXPECT_CALL(*m_view, replot()).Times(1);
+  }
+
+  void expectUpdateTwoThetaInViewFromModel() {
+    auto const allTwoTheta = std::vector<double>{1.0, 2.3, 3.3};
+    std::optional<double> const average = 2.2;
+
+    EXPECT_CALL(*m_model, averageTwoTheta()).Times(1).WillOnce(Return(average));
+    EXPECT_CALL(*m_model, allTwoThetas()).Times(1).WillOnce(Return(allTwoTheta));
+    EXPECT_CALL(*m_view, setAverageTwoTheta(average, allTwoTheta)).Times(1);
   }
 
   void expectUpdateRotationAngleCalled() {
@@ -289,13 +348,22 @@ private:
     EXPECT_CALL(*m_view, setRotationAngle(_)).Times(0);
   }
 
-  std::string m_workspaceName;
+  void expectUpdateViewFromModel() {
+    expectUpdatePlotInViewFromModel();
+    expectUpdateTwoThetaInViewFromModel();
+    expectUpdatePeakCentreInViewFromModel();
+    expectUpdateRotationAngleCalled();
+  }
+
+  std::unique_ptr<AlgorithmRuntimeProps> m_algProperties;
+
+  Mantid::API::MatrixWorkspace_sptr m_workspace;
+  Mantid::API::IFunction_sptr m_function;
   std::pair<double, double> m_range;
   double m_peakCentre;
   double m_background;
-  std::vector<double> m_allTwoTheta;
-  std::optional<double> m_averageTwoTheta;
 
+  NiceMock<MockALFAlgorithmManager> *m_algorithmManager;
   NiceMock<MockALFAnalysisModel> *m_model;
   std::unique_ptr<NiceMock<MockALFAnalysisView>> m_view;
   std::unique_ptr<ALFAnalysisPresenter> m_presenter;

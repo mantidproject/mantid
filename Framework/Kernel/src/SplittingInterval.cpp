@@ -20,9 +20,6 @@ SplittingInterval::SplittingInterval(const Types::Core::DateAndTime &start, cons
                                      const int index)
     : TimeInterval(start, stop), m_index(index) {}
 
-/// Returns the duration in seconds
-double SplittingInterval::duration() const { return DateAndTime::secondsFromDuration(this->length()); }
-
 /// Return the index (destination of this split time block)
 int SplittingInterval::index() const { return m_index; }
 
@@ -58,6 +55,13 @@ bool SplittingInterval::operator==(const SplittingInterval &ti) const {
   }
 }
 
+std::string SplittingInterval::debugStrPrint() const {
+  std::stringstream ss;
+  ss << this->begin_str() << " to " << this->end_str();
+  ss << " index: " << index();
+  ss << std::endl;
+  return ss.str();
+}
 //------------------------------------------------------------------------------------------------
 /** Return true if the SplittingIntervalVec provided is a filter,
  * meaning that it only has an output index of 0.

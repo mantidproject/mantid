@@ -25,7 +25,7 @@ Workspace is as loose term that encompases a range of possible data structures. 
 Workspaces Types
 ------------------
 
--  :ref:`Matrix Workspace <MatrixWorkspace>` - Is really a catagorisation for a family which contains measured (or derived) data with associated errors and an axis giving information about where the the measurement was made. Matrix Workspaces are typically create initially by executing one of Mantid's :ref:`Load<algm-Load>` algorithms, for example :ref:`LoadRaw <algm-LoadRaw>` or :ref:`LoadNexus <algm-LoadNexus>`. Of data structures representing 2D measurement data. The following are common sorts of Matrix Workspace:
+-  :ref:`Matrix Workspace <MatrixWorkspace>` - Is really a catagorisation for a family which contains measured (or derived) data with associated errors and an axis giving information about where the measurement was made. Matrix Workspaces are typically create initially by executing one of Mantid's :ref:`Load<algm-Load>` algorithms, for example :ref:`LoadRaw <algm-LoadRaw>` or :ref:`LoadNexus <algm-LoadNexus>`. Of data structures representing 2D measurement data. The following are common sorts of Matrix Workspace:
 
    -  :ref:`Workspace 2D <Workspace2D>` - A workspace for holding two
       dimensional histogram data in memory, this is the most commonly used

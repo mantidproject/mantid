@@ -17,6 +17,21 @@
 
 namespace Mantid::DataHandling::ANSTO {
 
+// Extract datasets from the group that match a regex filter
+std::vector<std::string> filterDatasets(const NeXus::NXEntry &entry, const std::string &groupPath,
+                                        const std::string &regexFilter) {
+  std::vector<std::string> fvalues;
+  auto group = entry.openNXGroup(groupPath);
+  auto datasets = group.datasets();
+  for (auto nxi : datasets) {
+    if (std::regex_match(nxi.nxname, std::regex(regexFilter))) {
+      fvalues.emplace_back(nxi.nxname);
+    }
+  }
+
+  return fvalues;
+}
+
 // ProgressTracker
 ProgressTracker::ProgressTracker(API::Progress &progBar, const char *msg, int64_t target, size_t count)
     : m_msg(msg), m_count(count), m_step(target / count), m_next(m_step), m_progBar(progBar) {

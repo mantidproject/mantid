@@ -28,8 +28,8 @@ Currently there are three normalization scheme supported: by Count, by Monitor a
 If None is selected, no normalization will be performed and all normalization related properties
 will be ignored (on the GUI end, they will be disabled instead).
 
-If the "HB2C:CS:CrystalAlign:UBMatrix" property exist, it will be converted into the OrientedLattice
-on the OutputWorkspace.
+If the "HB2C:CS:CrystalAlign:UBMatrix" property exists and apply goniometer tilt is true,
+it will be converted into the OrientedLattice on the OutputWorkspace.
 The goniometer tilts (sgu and sgl) are combined into the UB Matrix so that only omega (s1) needs to
 be taken into account during rotation.
 

@@ -8,7 +8,7 @@
 #
 
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
-from mantid.api import AnalysisDataService as ADS  # noqa
+from mantid.api import AnalysisDataService as ADS
 
 
 class MatrixWorkspaceDisplayAttributes(object):

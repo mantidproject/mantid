@@ -14,7 +14,7 @@ from sans.gui_logic.models.sum_runs_model import SumRunsModel
 from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter, AddRunsFilenameManager
-from test.SANS.gui_logic.fake_signal import FakeSignal
+from fake_signal import FakeSignal
 from ui.sans_isis.add_runs_page import AddRunsPage
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 

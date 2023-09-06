@@ -11,6 +11,8 @@ from qtpy import QtWidgets, QtCore
 class FittingPlotToolbar(MantidNavigationToolbar):
     sig_home_clicked = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
+    sig_serial_fit_clicked = QtCore.Signal()
+    sig_seq_fit_clicked = QtCore.Signal()
 
     toolitems = (
         MantidNavigationTool("Home", "Center display on contents", "mdi.home", "on_home_clicked", None),
@@ -20,6 +22,8 @@ class FittingPlotToolbar(MantidNavigationToolbar):
         MantidStandardNavigationTools.PAN,
         MantidStandardNavigationTools.ZOOM,
         MantidNavigationTool("Fit", "Open/close fitting tab", None, "toggle_fit", False),
+        MantidNavigationTool("Serial Fit", "Fit each spec with the starting guess.", None, "serial_fit", None),
+        MantidNavigationTool("Sequential Fit", "Fit each spec using the output of a previous run", None, "seq_fit", None),
     )
 
     def __init__(self, canvas, parent, coordinates=True):
@@ -42,6 +46,12 @@ class FittingPlotToolbar(MantidNavigationToolbar):
             if self._actions["pan"].isChecked():
                 self.pan()
         self.sig_toggle_fit_triggered.emit()
+
+    def serial_fit(self):
+        self.sig_serial_fit_clicked.emit()
+
+    def seq_fit(self):
+        self.sig_seq_fit_clicked.emit()
 
     def handle_fit_browser_close(self):
         """

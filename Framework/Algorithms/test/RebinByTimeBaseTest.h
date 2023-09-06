@@ -228,9 +228,9 @@ public:
     alg.setProperty("InputWorkspace", ws);
     auto rebinArgs1List = {double(badStep)};
     Mantid::MantidVec rebinArgs1 = rebinArgs1List; // Step is zero!.
-    alg.setProperty("Params", rebinArgs1);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     try {
+      alg.setProperty("Params", rebinArgs1);
       alg.execute();
     } catch (std::invalid_argument &) {
       return;

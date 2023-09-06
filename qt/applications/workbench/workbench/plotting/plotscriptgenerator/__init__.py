@@ -84,6 +84,8 @@ def generate_script(fig, exclude_headers=False):
             plot_headers.extend(colormap_headers)
         else:
             if not curve_in_ax(ax):
+                plot_commands.append(f"{ax_object_var}.axis('off')")
+                plot_commands.append("")
                 continue
             plot_commands.extend(get_plot_cmds(ax, ax_object_var))  # ax.plot
 

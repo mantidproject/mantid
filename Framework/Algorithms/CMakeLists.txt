@@ -141,7 +141,6 @@ set(SRC_FILES
     src/FilterBadPulses.cpp
     src/FilterByLogValue.cpp
     src/FilterByTime.cpp
-    src/FilterByTime2.cpp
     src/FilterByXValue.cpp
     src/FilterEvents.cpp
     src/FindCenterOfMassPosition.cpp
@@ -157,6 +156,7 @@ set(SRC_FILES
     src/FlatPlateAbsorption.cpp
     src/GeneralisedSecondDifference.cpp
     src/GenerateEventsFilter.cpp
+    src/GenerateGoniometerIndependentBackground.cpp
     src/GenerateIPythonNotebook.cpp
     src/GeneratePeaks.cpp
     src/GeneratePythonFitScript.cpp
@@ -486,7 +486,6 @@ set(INC_FILES
     inc/MantidAlgorithms/FilterBadPulses.h
     inc/MantidAlgorithms/FilterByLogValue.h
     inc/MantidAlgorithms/FilterByTime.h
-    inc/MantidAlgorithms/FilterByTime2.h
     inc/MantidAlgorithms/FilterByXValue.h
     inc/MantidAlgorithms/FilterEvents.h
     inc/MantidAlgorithms/FindCenterOfMassPosition.h
@@ -503,6 +502,7 @@ set(INC_FILES
     inc/MantidAlgorithms/GSLFunctions.h
     inc/MantidAlgorithms/GeneralisedSecondDifference.h
     inc/MantidAlgorithms/GenerateEventsFilter.h
+    inc/MantidAlgorithms/GenerateGoniometerIndependentBackground.h
     inc/MantidAlgorithms/GenerateIPythonNotebook.h
     inc/MantidAlgorithms/GeneratePeaks.h
     inc/MantidAlgorithms/GeneratePythonFitScript.h
@@ -843,7 +843,6 @@ set(TEST_FILES
     FFTTest.h
     FilterBadPulsesTest.h
     FilterByLogValueTest.h
-    FilterByTime2Test.h
     FilterByTimeTest.h
     FilterByXValueTest.h
     FilterEventsTest.h
@@ -860,6 +859,7 @@ set(TEST_FILES
     FlatPlateAbsorptionTest.h
     GeneralisedSecondDifferenceTest.h
     GenerateEventsFilterTest.h
+    GenerateGoniometerIndependentBackgroundTest.h
     GenerateIPythonNotebookTest.h
     GeneratePeaksTest.h
     GeneratePythonFitScriptTest.h
@@ -1084,8 +1084,4 @@ target_include_directories(
 generate_mantid_export_header(Algorithms FALSE)
 
 # Installation settings
-if(CONDA_ENV)
-  mtd_install_framework_lib(TARGETS Algorithms PLUGIN_LIB)
-else()
-  mtd_install_targets(TARGETS Algorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
-endif()
+mtd_install_framework_lib(TARGETS Algorithms PLUGIN_LIB)

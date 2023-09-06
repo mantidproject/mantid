@@ -10,52 +10,11 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAlgorithms/CreateWorkspace.h"
-#include "MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h"
-#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Memory.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
-
-namespace {
-void run_create(const Parallel::Communicator &comm, const std::string &storageMode) {
-  using namespace Parallel;
-  auto alg = ParallelTestHelpers::create<Algorithms::CreateWorkspace>(comm);
-  std::vector<double> dataEYX(2000);
-  int nspec = 1000;
-  alg->setProperty<int>("NSpec", nspec);
-  alg->setProperty<std::vector<double>>("DataX", dataEYX);
-  alg->setProperty<std::vector<double>>("DataY", dataEYX);
-  alg->setProperty<std::vector<double>>("DataE", dataEYX);
-  alg->setProperty<std::vector<double>>("Dx", dataEYX);
-  alg->setProperty("ParallelStorageMode", storageMode);
-  alg->execute();
-  MatrixWorkspace_const_sptr ws = alg->getProperty("OutputWorkspace");
-  if (comm.rank() == 0 || fromString(storageMode) != StorageMode::MasterOnly) {
-    TS_ASSERT_EQUALS(ws->storageMode(), fromString(storageMode));
-    switch (ws->storageMode()) {
-    case Parallel::StorageMode::Cloned: {
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nspec);
-      break;
-    }
-    case Parallel::StorageMode::Distributed: {
-      int remainder = nspec % comm.size() > comm.rank() ? 1 : 0;
-      size_t expected = nspec / comm.size() + remainder;
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(), expected);
-      break;
-    }
-    case Parallel::StorageMode::MasterOnly: {
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nspec);
-      break;
-    }
-    }
-  } else {
-    TS_ASSERT_EQUALS(ws, nullptr);
-  }
-}
-} // namespace
-
 class CreateWorkspaceTest : public CxxTest::TestSuite {
 public:
   void testMeta() {
@@ -246,16 +205,6 @@ public:
 
     // Remove workspace
     Mantid::API::AnalysisDataService::Instance().remove("test_CreateWorkspace");
-  }
-
-  void test_parallel_cloned() { ParallelTestHelpers::runParallel(run_create, "Parallel::StorageMode::Cloned"); }
-
-  void test_parallel_distributed() {
-    ParallelTestHelpers::runParallel(run_create, "Parallel::StorageMode::Distributed");
-  }
-
-  void test_parallel_master_only() {
-    ParallelTestHelpers::runParallel(run_create, "Parallel::StorageMode::MasterOnly");
   }
 
 private:

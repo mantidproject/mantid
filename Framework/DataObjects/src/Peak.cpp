@@ -77,7 +77,6 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::
  * @param m_inst :: Shared pointer to the instrument for this peak detection
  * @param m_detectorID :: ID to the detector of the center of the peak
  * @param m_Wavelength :: incident neutron wavelength, in Angstroms
- * @return
  */
 Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID, double m_Wavelength) : BasePeak() {
   // Initialization of m_inst, sourcePos, m_samplePos
@@ -95,7 +94,6 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID, doub
  * @param m_detectorID :: ID to the detector of the center of the peak
  * @param m_Wavelength :: incident neutron wavelength, in Angstroms
  * @param HKL :: vector with H,K,L position of the peak
- * @return
  */
 Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID, double m_Wavelength,
            const Mantid::Kernel::V3D &HKL)
@@ -117,7 +115,6 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID, doub
  * @param m_Wavelength :: incident neutron wavelength, in Angstroms
  * @param HKL :: vector with H,K,L position of the peak
  * @param goniometer :: a 3x3 rotation matrix
- * @return
  */
 Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID, double m_Wavelength,
            const Mantid::Kernel::V3D &HKL, const Mantid::Kernel::Matrix<double> &goniometer)
@@ -137,7 +134,6 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID, doub
  * @param m_inst :: Shared pointer to the instrument for this peak detection
  * @param scattering :: fake detector position using scattering angle
  * @param m_Wavelength :: incident neutron wavelength, in Angstroms
- * @return
  */
 Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering, double m_Wavelength)
     : BasePeak(), m_row(-1), m_col(-1) {
@@ -154,7 +150,6 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering, dou
 /**
  * @brief Copy constructor
  * @param other : Source
- * @return
  */
 Peak::Peak(const Peak &other) = default;
 
@@ -163,7 +158,6 @@ Peak::Peak(const Peak &other) = default;
  *
  * @param ipeak :: const reference to an IPeak object though actually
  * referencing a Peak object.
- * @return
  */
 Peak::Peak(const Geometry::IPeak &ipeak)
     : BasePeak(ipeak), m_initialEnergy(ipeak.getInitialEnergy()), m_finalEnergy(ipeak.getFinalEnergy()) {
@@ -409,6 +403,22 @@ double Peak::getAzimuthal() const {
   V3D detDir = detPos - m_samplePos;
 
   return atan2(detDir.Y(), detDir.X());
+}
+
+// -------------------------------------------------------------------------------------
+/** Calculate the scattered beam direction in the sample frame  */
+Mantid::Kernel::V3D Peak::getDetectorDirectionSampleFrame() const {
+  V3D detDir = detPos - m_samplePos;
+  detDir /= detDir.norm();
+  return getInverseGoniometerMatrix() * detDir;
+}
+
+// -------------------------------------------------------------------------------------
+/** Calculate the reverse incident beam direction in the sample frame  */
+Mantid::Kernel::V3D Peak::getSourceDirectionSampleFrame() const {
+  V3D beamDir = m_samplePos - sourcePos;
+  beamDir /= beamDir.norm();
+  return getInverseGoniometerMatrix() * beamDir * -1.0;
 }
 
 // -------------------------------------------------------------------------------------

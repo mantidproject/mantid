@@ -101,7 +101,6 @@ void splitIgnoringWhitespaceEmptyTokens(const std::string &str, const std::strin
  * @param options  tokenizer settings. The number can be found using the
  * StringTokenizer::Options enum
  * @throw Throws std::runtime_error if options > 7.
- * @return a const reference to the index'th token.
  */
 Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str, const std::string &separators,
                                                  unsigned options) {

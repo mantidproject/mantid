@@ -46,12 +46,7 @@ public:
   static bool isReadable(const std::string &filename, const Version version = AnyVersion);
 
 public:
-  /**
-   * Constructor accepting a filename
-   * @param filename input filename
-   * @param init true: expensive init including walking through the file, false:
-   * don't init
-   */
+  /// Constructor accepting a filename
   NexusDescriptor(const std::string &filename, const bool init = true);
   /// Destructor
   ~NexusDescriptor();

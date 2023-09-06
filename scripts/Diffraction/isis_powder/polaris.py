@@ -47,6 +47,8 @@ class Polaris(AbstractInst):
     def create_vanadium(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
+        if not self._inst_settings.multiple_scattering or not self._inst_settings.do_absorb_corrections:
+            raise ValueError("You must set multiple_scattering=True and do_absorb_corrections=True when creating the " "vanadium run.")
 
         per_detector = False
         if self._inst_settings.per_detector_vanadium:
@@ -60,7 +62,7 @@ class Polaris(AbstractInst):
         self.ensure_per_detector_and_vanadium_output_are_in_sync(vanadium_d, per_detector)
 
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
-        polaris_algs.save_unsplined_vanadium(vanadium_ws=vanadium_d, output_path=run_details.unsplined_vanadium_file_path)
+        common.save_unsplined_vanadium(vanadium_ws=vanadium_d, output_path=run_details.unsplined_vanadium_file_path)
         return vanadium_d
 
     def ensure_per_detector_and_vanadium_output_are_in_sync(self, vanadium_d, per_detector):
@@ -123,7 +125,10 @@ class Polaris(AbstractInst):
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:
             return polaris_algs.calculate_van_absorb_corrections(
-                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering, is_vanadium=self._is_vanadium
+                ws_to_correct=ws_to_correct,
+                multiple_scattering=self._inst_settings.multiple_scattering,
+                is_vanadium=self._is_vanadium,
+                msevents=self._inst_settings.mayers_mult_scat_events,
             )
         else:
             return absorb_corrections.run_cylinder_absorb_corrections(
@@ -131,6 +136,7 @@ class Polaris(AbstractInst):
                 multiple_scattering=self._inst_settings.multiple_scattering,
                 sample_details_obj=self._sample_details,
                 is_vanadium=self._is_vanadium,
+                msevents=self._inst_settings.mayers_mult_scat_events,
             )
 
     def _crop_banks_to_user_tof(self, focused_banks):

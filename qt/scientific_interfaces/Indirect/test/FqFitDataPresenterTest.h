@@ -107,8 +107,9 @@ public:
   MOCK_METHOD2(setEndX, void(double endX, FitDomainIndex fitDomainIndex));
   MOCK_METHOD3(setExcludeRegion, void(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum));
   MOCK_METHOD2(setExcludeRegion, void(const std::string &exclude, FitDomainIndex index));
-  MOCK_METHOD1(setResolution, void(const std::string &name));
-  MOCK_METHOD2(setResolution, void(const std::string &name, WorkspaceID workspaceID));
+  MOCK_METHOD1(removeSpecialValues, void(const std::string &name));
+  MOCK_METHOD1(setResolution, bool(const std::string &name));
+  MOCK_METHOD2(setResolution, bool(const std::string &name, WorkspaceID workspaceID));
   MOCK_CONST_METHOD2(getFittingRange, std::pair<double, double>(WorkspaceID workspaceID, WorkspaceIndex spectrum));
   MOCK_CONST_METHOD1(getFittingRange, std::pair<double, double>(FitDomainIndex index));
   MOCK_CONST_METHOD2(getExcludeRegion, std::string(WorkspaceID workspaceID, WorkspaceIndex spectrum));

@@ -24,7 +24,7 @@ class AddRunsPage(QtWidgets.QWidget, Ui_AddRunsPage):
 
     def _connect_signals(self):
         self.sumButton.pressed.connect(self.sum)
-        self.fileNameEdit.editingFinished.connect(self.outFileChanged)
+        self.fileNameEdit.textEdited.connect(self.outFileChanged)
         self.saveDirectoryButton.clicked.connect(self.saveDirectoryClicked)
 
     def run_selector_view(self):

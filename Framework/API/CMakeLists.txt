@@ -34,7 +34,6 @@ set(SRC_FILES
     src/DeprecatedAlgorithm.cpp
     src/DeprecatedAlias.cpp
     src/DetectorSearcher.cpp
-    src/DistributedAlgorithm.cpp
     src/DomainCreatorFactory.cpp
     src/EnabledWhenWorkspaceIsType.cpp
     src/EqualBinSizesValidator.cpp
@@ -117,7 +116,6 @@ set(SRC_FILES
     src/NumericAxis.cpp
     src/NumericAxisValidator.cpp
     src/OrientedLatticeValidator.cpp
-    src/ParallelAlgorithm.cpp
     src/ParamFunction.cpp
     src/ParameterReference.cpp
     src/ParameterTie.cpp
@@ -138,7 +136,6 @@ set(SRC_FILES
     src/ScriptBuilder.cpp
     src/ScriptRepository.cpp
     src/ScriptRepositoryFactory.cpp
-    src/SerialAlgorithm.cpp
     src/SingleCountValidator.cpp
     src/SpectraAxis.cpp
     src/SpectraAxisValidator.cpp
@@ -209,7 +206,6 @@ set(INC_FILES
     inc/MantidAPI/DeprecatedAlgorithm.h
     inc/MantidAPI/DeprecatedAlias.h
     inc/MantidAPI/DetectorSearcher.h
-    inc/MantidAPI/DistributedAlgorithm.h
     inc/MantidAPI/DomainCreatorFactory.h
     inc/MantidAPI/EnabledWhenWorkspaceIsType.h
     inc/MantidAPI/EqualBinSizesValidator.h
@@ -324,7 +320,6 @@ set(INC_FILES
     inc/MantidAPI/NumericAxis.h
     inc/MantidAPI/NumericAxisValidator.h
     inc/MantidAPI/OrientedLatticeValidator.h
-    inc/MantidAPI/ParallelAlgorithm.h
     inc/MantidAPI/ParamFunction.h
     inc/MantidAPI/ParameterReference.h
     inc/MantidAPI/ParameterTie.h
@@ -344,7 +339,6 @@ set(INC_FILES
     inc/MantidAPI/ScriptBuilder.h
     inc/MantidAPI/ScriptRepository.h
     inc/MantidAPI/ScriptRepositoryFactory.h
-    inc/MantidAPI/SerialAlgorithm.h
     inc/MantidAPI/SingleCountValidator.h
     inc/MantidAPI/SingleValueParameter.h
     inc/MantidAPI/SingleValueParameterParser.h
@@ -388,7 +382,6 @@ set(TEST_FILES
     AlgorithmFactoryTest.h
     AlgorithmHasPropertyTest.h
     AlgorithmHistoryTest.h
-    AlgorithmMPITest.h
     AlgorithmManagerTest.h
     AlgorithmPropertyTest.h
     AlgorithmRuntimePropsTest.h
@@ -561,9 +554,5 @@ target_include_directories(
 generate_mantid_export_header(API TRUE)
 
 # Installation settings
-if(CONDA_ENV)
-  set(TARGET_EXPORT_NAME "MantidAPITargets")
-  mtd_install_framework_lib(TARGETS API INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
-else()
-  mtd_install_targets(TARGETS API INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
-endif()
+set(TARGET_EXPORT_NAME "MantidAPITargets")
+mtd_install_framework_lib(TARGETS API INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})

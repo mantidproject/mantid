@@ -107,6 +107,7 @@ set(TEST_PY_FILES
     ReflectometryReductionOneLiveDataTest.py
     ReflectometrySliceEventWorkspaceTest.py
     RetrieveRunInfoTest.py
+    SNSPowderReductionTest.py
     SANSWideAngleCorrectionTest.py
     SaveGEMMAUDParamFileTest.py
     SaveNexusPDTest.py

@@ -16,7 +16,7 @@ import copy
 import math
 import time
 import numpy as np
-import collections
+import collections.abc
 import Direct.CommonFunctions as common
 import Direct.diagnostics as diagnostics
 from Direct.PropertyManager import PropertyManager
@@ -627,7 +627,6 @@ class DirectEnergyConversion(object):
     # Handles cleanup of the convert_to_energy method
 
     def clean_up_convert_to_energy(self, start_time):
-
         # Must! clear background ws (if present in multirep) to calculate background
         # source for next workspace
         if "bkgr_ws_source" in mtd:
@@ -893,12 +892,12 @@ class DirectEnergyConversion(object):
     # -------------------------------------------------------------------------------
 
     def get_ei(self, data_run, ei_guess):
-        """Calculate incident energy of neutrons and the time of the of the
+        """Calculate incident energy of neutrons and the time of the
             peak in the monitor spectrum
 
         The X data is corrected to set the first monitor peak at t=0 by subtracting
             t_mon + t_det_delay
-        where the detector delay time is retrieved from the the instrument
+        where the detector delay time is retrieved from the instrument
         The position of the "source" component is also moved to match the position of
         the first monitor
         """
@@ -1253,12 +1252,12 @@ class DirectEnergyConversion(object):
                 mon1_peak = 0
             else:
                 mon_1_spec_ID = ei_mon_spectra[0]
-                if isinstance(mon_1_spec_ID, collections.Iterable):
+                if isinstance(mon_1_spec_ID, collections.abc.Iterable):
                     fix_ei = True  # This could be a HACK
                     mon_1_spec_ID = mon_1_spec_ID[0]
                 # -----------
                 mon_2_spec_ID = ei_mon_spectra[1]
-                if isinstance(mon_2_spec_ID, collections.Iterable):
+                if isinstance(mon_2_spec_ID, collections.abc.Iterable):
                     fix_ei = True  # This could be a HACK
                     mon_2_spec_ID = mon_2_spec_ID[1]
                 # -----------
@@ -1799,7 +1798,6 @@ class DirectEnergyConversion(object):
     # pylint: disable=unused-argument
 
     def _do_mono_ISIS(self, data_run, ei_guess, white_run=None, map_file=None, spectra_masks=None, Tzero=None):
-
         # Do ISIS stuff for Ei
         _, mon1_peak = self.get_ei(data_run, ei_guess)
 

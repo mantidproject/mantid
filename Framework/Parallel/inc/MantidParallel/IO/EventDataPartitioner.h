@@ -17,8 +17,7 @@ namespace IO {
 
 /** Partition the event_time_offset and event_id entries and combine them with
   pulse time information obtained from PulseTimeGenerator. Partitioning is to
-  obtain a separate vector of events for each rank in an MPI run of Mantid,
-  i.e., each event_id is assigned to a specific MPI rank. Currently a
+  obtain a separate vector of events. Currently a
   round-robin partitioning scheme is hard-coded.
 
   @author Simon Heybrock

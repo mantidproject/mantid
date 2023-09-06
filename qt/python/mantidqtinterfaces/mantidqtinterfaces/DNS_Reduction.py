@@ -18,10 +18,10 @@ import os
 # command line
 sys.path.pop(0)
 
-from mantidqt.gui_helper import get_qapplication  # noqa: E402
-from qtpy import QtGui, QtWidgets  # noqa: E402
+from mantidqt.gui_helper import get_qapplication
+from qtpy import QtGui, QtWidgets
 
-from mantidqtinterfaces.dns_powder_tof.main_widget import DNSReductionGuiWidget  # noqa: E402
+from mantidqtinterfaces.dns_powder_tof.main_widget import DNSReductionGuiWidget
 
 app, within_mantid = get_qapplication()
 reducer_widget = DNSReductionGuiWidget(name="DNS-Reduction", app=app, within_mantid=within_mantid)

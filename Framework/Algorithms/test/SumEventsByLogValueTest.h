@@ -8,7 +8,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/SumEventsByLogValue.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -126,9 +128,66 @@ public:
     // Check the times & the proton charge
     TS_ASSERT_EQUALS(outWS->Double(0, 3), 89.0);
     TS_ASSERT_EQUALS(outWS->Double(1, 3), 10.0);
-    TS_ASSERT_EQUALS(outWS->Double(0, 4), 90.0E7);
+    TS_ASSERT_EQUALS(outWS->Double(0, 4), 89.0E7);
     TS_ASSERT_EQUALS(outWS->Double(1, 4), 10.0E7);
     // Save more complex tests for a system test
+  }
+
+  void test_loadNexus() {
+    EventWorkspace_sptr WS;
+    auto loader = AlgorithmManager::Instance().create("LoadEventNexus");
+    loader->initialize();
+    loader->setPropertyValue("Filename", "HYSA_2934.nxs.h5");
+    loader->setPropertyValue("LoadMonitors", "1");
+    loader->setPropertyValue("OutputWorkspace", "testInput");
+    loader->execute();
+    TS_ASSERT(loader->isExecuted());
+
+    WS = AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::EventWorkspace>("testInput");
+    TS_ASSERT(WS); // workspace is loaded
+    auto monWS = std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(WS->monitorWorkspace());
+    IAlgorithm_sptr alg = std::make_shared<SumEventsByLogValue>();
+    alg->initialize();
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", WS));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outws"));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", monWS));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("LogName", "scan_index"));
+    alg->setChild(true);
+    TS_ASSERT(alg->execute());
+
+    Workspace_sptr out = alg->getProperty("OutputWorkspace");
+    auto outWS = std::dynamic_pointer_cast<ITableWorkspace>(out);
+    TS_ASSERT_EQUALS(outWS->rowCount(), 15);
+    TS_ASSERT_DELTA(outWS->Double(0, 3), 52.5557912258, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(0, 4), 46952433630., 1e5);
+    TS_ASSERT_DELTA(outWS->Double(1, 3), 6.44623244, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(1, 4), 5778581320., 1e5);
+    TS_ASSERT_DELTA(outWS->Double(2, 3), 6.498204369, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(2, 4), 5822380670., 1e5);
+    TS_ASSERT_DELTA(outWS->Double(3, 3), 6.684533796, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(3, 4), 5992781100., 1e5);
+    TS_ASSERT_DELTA(outWS->Double(4, 3), 6.437640537, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(4, 4), 5769687580., 1e5);
+    TS_ASSERT_DELTA(outWS->Double(5, 3), 6.724165215, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(5, 4), 6023179260., 1e5);
+    TS_ASSERT_DELTA(outWS->Double(6, 3), 6.691884511, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(6, 4), 6013516070., 1e5);
+    TS_ASSERT_DELTA(outWS->Double(7, 3), 6.744685377, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(7, 4), 6061209320., 1e5);
+    TS_ASSERT_DELTA(outWS->Double(8, 3), 6.446148924, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(8, 4), 5791900280., 1e5);
+    TS_ASSERT_DELTA(outWS->Double(9, 3), 5.9836761152, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(9, 4), 5375061070., 1e5);
+    TS_ASSERT_DELTA(outWS->Double(10, 3), 6.520652694, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(10, 4), 5855660020., 1e5);
+    TS_ASSERT_DELTA(outWS->Double(11, 3), 6.687109917, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(11, 4), 5994962980., 1e5);
+    TS_ASSERT_DELTA(outWS->Double(12, 3), 6.732920325, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(12, 4), 5921132720., 1e5);
+    TS_ASSERT_DELTA(outWS->Double(13, 3), 6.475679524, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(13, 4), 5790246570., 1e5);
+    TS_ASSERT_DELTA(outWS->Double(14, 3), 3.196203628, 1e-5);
+    TS_ASSERT_DELTA(outWS->Double(14, 4), 2874897850., 1e5);
   }
 
 private:
@@ -163,6 +222,7 @@ private:
     run.addProperty(intTSP);
 
     auto proton_charge = new TimeSeriesProperty<double>("proton_charge");
+    proton_charge->setUnits("picoCoulombs");
     for (int i = 0; i < 100; ++i) {
       proton_charge->addValue(run_start + static_cast<double>(i), 1.0E7);
     }

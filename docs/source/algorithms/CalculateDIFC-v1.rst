@@ -15,7 +15,12 @@ an instrument.
 
 .. math:: DIFC = \frac{m_n}{h} \frac{(L_1 + L_2) 2 \sin(\theta)}{1 + {offset}}
 
-This is used in the equation
+Or if OffsetMode is `Signed` :math:`DIFC` will be calculated with the following equation
+for logarithmically binned data:
+
+.. math:: DIFC = \frac{m_n}{h} \cdot (L1 + L2) 2 \sin(\theta) \cdot (1+|BinWidth|)^{-offset}
+
+DIFC is used in the equation
 
 .. math:: TOF = DIFC \times d
 

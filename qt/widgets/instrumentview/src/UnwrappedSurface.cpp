@@ -443,7 +443,11 @@ void UnwrappedSurface::setPeaksWorkspace(const std::shared_ptr<Mantid::API::IPea
   po->setShowRowsFlag(m_showPeakRows);
   po->setShowLabelsFlag(m_showPeakLabels);
   po->setShowRelativeIntensityFlag(m_showPeakRelativeIntensity);
-  m_peakShapes.append(po);
+
+  if (!std::any_of(m_peakShapes.cbegin(), m_peakShapes.cend(),
+                   [&pws](auto const &pkShape) { return pkShape->getPeaksWorkspace() == pws; }))
+    m_peakShapes.append(po);
+
   m_startPeakShapes = true;
   connect(po, SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)), this,
           SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
@@ -666,8 +670,8 @@ void UnwrappedSurface::zoom() {
  * @param udet :: detector to unwrap.
  * @param pos :: detector position relative to the sample origin
  */
-void UnwrappedSurface::calcUV(UnwrappedDetector &udet, Mantid::Kernel::V3D &pos) {
-  this->project(pos, udet.u, udet.v, udet.uscale, udet.vscale);
+void UnwrappedSurface::calcUV(UnwrappedDetector &udet) {
+  this->project(udet.detIndex, udet.u, udet.v, udet.uscale, udet.vscale);
   calcSize(udet);
 }
 

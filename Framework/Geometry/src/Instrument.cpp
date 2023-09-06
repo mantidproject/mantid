@@ -181,7 +181,6 @@ void Instrument::setPhysicalInstrument(std::unique_ptr<Instrument> physInst) {
 
 //------------------------------------------------------------------------------------------
 /**	Fills a copy of the detector cache
- * @returns a map of the detectors hold by the instrument
  */
 void Instrument::getDetectors(detid2det_map &out_map) const {
   if (m_map) {
@@ -1325,6 +1324,11 @@ namespace Conversion {
  */
 double tofToDSpacingFactor(const double l1, const double l2, const double twoTheta, const double offset) {
   return Kernel::Units::tofToDSpacingFactor(l1, l2, twoTheta, offset);
+}
+
+double calculateDIFCCorrection(const double l1, const double l2, const double twoTheta, const double offset,
+                               const double binWidth) {
+  return Kernel::Units::calculateDIFCCorrection(l1, l2, twoTheta, offset, binWidth);
 }
 
 } // namespace Conversion

@@ -1,1 +1,0 @@
-- The Osiris script and the Indirect Diffraction UI now produces the same results

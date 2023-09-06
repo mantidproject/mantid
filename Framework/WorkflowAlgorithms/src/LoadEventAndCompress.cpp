@@ -235,23 +235,15 @@ void LoadEventAndCompress::exec() {
 
     progress.report();
   }
-  Workspace_sptr total = assemble(resultWS);
 
   // don't assume that any chunk had the correct binning so just reset it here
-  EventWorkspace_sptr totalEventWS = std::dynamic_pointer_cast<EventWorkspace>(total);
+  EventWorkspace_sptr totalEventWS = std::dynamic_pointer_cast<EventWorkspace>(resultWS);
   if (totalEventWS->getNEvents())
     totalEventWS->resetAllXToSingleBin();
 
   // Don't bother compressing combined workspace. DetermineChunking is designed
   // to prefer loading full banks so no further savings should be available.
 
-  setProperty("OutputWorkspace", total);
+  setProperty("OutputWorkspace", resultWS);
 }
-
-Parallel::ExecutionMode
-LoadEventAndCompress::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  static_cast<void>(storageModes);
-  return Parallel::ExecutionMode::Distributed;
-}
-
 } // namespace Mantid::WorkflowAlgorithms

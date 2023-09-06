@@ -60,24 +60,12 @@ private:
   /// Overwrites Algorithm method
   void execLoader() override;
 
-  /**
-   * Load log data from a group
-   * @param file input Nexus file handler
-   * @param absolute_entry_name full entry name in Nexus
-   * @param entry_class type of the entry (NXlog)
-   * @param workspace input workspace
-   */
+  /// Load log data from a group
   void loadLogs(::NeXus::File &file, const std::string &absolute_entry_name, const std::string &entry_class,
                 const std::shared_ptr<API::MatrixWorkspace> &workspace, const std::vector<std::string> &allow_list,
                 const std::vector<std::string> &block_list) const;
 
-  /**
-   * Load an NXlog entry
-   * @param file input Nexus file handler
-   * @param absolute_entry_name full entry name in Nexus
-   * @param entry_class type of the entry (NXlog)
-   * @param workspace input workspace
-   */
+  /// Load an NXlog entry
   void loadNXLog(::NeXus::File &file, const std::string &absolute_entry_name, const std::string &entry_class,
                  const std::shared_ptr<API::MatrixWorkspace> &workspace) const;
 

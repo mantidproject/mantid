@@ -67,7 +67,7 @@ double Quadratic::eqnValue(const Kernel::V3D &Pt) const
 
 int Quadratic::side(const Kernel::V3D &Pt) const
 /**
-  Determine if the the Point is true to the surface or
+  Determine if the Point is true to the surface or
   on the other side
   @param Pt :: Point to check
   @retval 1 : if the point is "true" to the surface

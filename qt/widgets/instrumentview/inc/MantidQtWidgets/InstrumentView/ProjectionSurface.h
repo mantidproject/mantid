@@ -254,6 +254,7 @@ public:
   void clearAlignmentPlane();
   void clearComparisonPeaks();
   bool hasPeakOverlays() const { return !m_peakShapes.isEmpty(); }
+  int getPeakOverlayCount() const { return m_peakShapes.count(); }
   void setPeakLabelPrecision(int n);
   int getPeakLabelPrecision() const { return m_peakLabelPrecision; }
   void setShowPeakRowsFlag(bool on);

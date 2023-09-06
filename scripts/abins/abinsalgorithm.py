@@ -11,6 +11,13 @@ import os
 import re
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
+import yaml
+
+try:
+    from yaml import CSafeLoader as SafeLoader
+except ImportError:
+    from yaml import SafeLoader
+
 import numpy as np
 from mantid.api import mtd, FileAction, FileProperty, WorkspaceGroup, WorkspaceProperty
 from mantid.kernel import Atom, Direction, StringListValidator, StringArrayProperty, logger
@@ -613,7 +620,12 @@ class AbinsAlgorithm:
         num_workspaces = mtd[ws_name].getNumberOfEntries()
         for wrk_num in range(num_workspaces):
             wrk = mtd[ws_name].getItem(wrk_num)
-            SaveAscii(InputWorkspace=Scale(wrk, scale, "Multiply"), Filename=wrk.name() + ".dat", Separator="Space", WriteSpectrumID=False)
+            SaveAscii(
+                InputWorkspace=Scale(wrk, scale, "Multiply", StoreInADS=False),
+                Filename=wrk.name() + ".dat",
+                Separator="Space",
+                WriteSpectrumID=False,
+            )
 
     @staticmethod
     def get_cross_section(scattering: str = "Total", nucleons_number: Optional[int] = None, *, protons_number: int) -> float:
@@ -777,27 +789,22 @@ class AbinsAlgorithm:
     @classmethod
     def _validate_euphonic_input_file(cls, filename_full_path: str) -> dict:
         logger.information("Validate force constants file for interpolation.")
-        from dos.load_euphonic import euphonic_available
 
-        if euphonic_available():
-            try:
-                from euphonic.cli.utils import force_constants_from_file
+        from pathlib import Path
 
-                force_constants_from_file(filename_full_path)
-                return dict(Invalid=False, Comment="")
-            except Exception as error:
-                if hasattr(error, "message"):
-                    message = error.message
-                else:
-                    message = str(error)
-                return dict(Invalid=True, Comment=f"Problem opening force constants file with Euphonic.: {message}")
-        else:
-            return dict(
-                Invalid=True,
-                Comment=(
-                    "Could not import Euphonic module. " "Try running user/AdamJackson/install_euphonic.py from the Script Repository."
-                ),
-            )
+        if (suffix := Path(filename_full_path).suffix) == ".castep_bin":
+            # Assume any .castep_bin file is valid choice
+            pass
+
+        elif suffix == ".yaml":
+            # Check .yaml files have expected keys for Phonopy force constants
+            with open(filename, "r") as yaml_file:
+                phonon_data = yaml.load(yaml_file, Loader=SafeLoader)
+            if not {"phonopy", "force_constants"}.issubset(phonon_data):
+                return dict(Invalid=True, Comment=f"{filename_full_path} does not seem to be a valid phonopy.yaml with force constants")
+
+        # Did not return already: No problems found
+        return dict(Invalid=False, Comment="")
 
     @classmethod
     def _validate_vasp_input_file(cls, filename_full_path: str) -> dict:
@@ -833,7 +840,7 @@ class AbinsAlgorithm:
     @staticmethod
     def _compare_one_line(one_line, pattern):
         """
-        compares line in the the form of string with a pattern.
+        compares line in the form of string with a pattern.
         :param one_line:  line in the for mof string to be compared
         :param pattern: string which should be present in the line after removing white spaces and setting all
                         letters to lower case

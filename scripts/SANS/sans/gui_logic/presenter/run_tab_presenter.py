@@ -184,6 +184,9 @@ class RunTabPresenter(PresenterCommon):
         def on_sample_geometry_selection(self, show_geometry):
             self._presenter.on_sample_geometry_view_changed(show_geometry)
 
+        def on_background_subtraction_selection(self, show_background):
+            self._presenter.on_background_subtraction_view_changed(show_background)
+
         def on_field_edit(self):
             self._presenter.update_model_from_view()
 
@@ -804,6 +807,12 @@ class RunTabPresenter(PresenterCommon):
         else:
             self._view.hide_geometry()
 
+    def on_background_subtraction_view_changed(self, show_background):
+        if show_background:
+            self._view.show_background_subtraction()
+        else:
+            self._view.hide_background_subtraction()
+
     def get_row_indices(self):
         """
         Gets the indices of row which are not empty.
@@ -1013,7 +1022,7 @@ class RunTabPresenter(PresenterCommon):
             and self._model.q_resolution_sample_h
             and self._model.q_resolution_source_w
             and self._model.q_resolution_sample_w
-        )  # noqa
+        )
         self._view.set_q_resolution_shape_to_rectangular(is_rectangular)
 
     def _set_on_view_q_rebin_string(self):

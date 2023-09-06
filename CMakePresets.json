@@ -13,7 +13,6 @@
       "binaryDir": "${sourceDir}/build",
       "generator": "Ninja",
       "cacheVariables": {
-        "CONDA_ENV": true,
         "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}"
       }
     },
@@ -24,7 +23,6 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "ENABLE_PRECOMMIT": "OFF",
-        "DOCS_HTML": "ON",
         "COLORED_COMPILER_OUTPUT": "OFF"
       }
     },
@@ -96,6 +94,18 @@
       }
     },
     {
+      "name": "doxygen-ci",
+      "description": "Build options for Doxygen CI build",
+      "inherits": [
+        "ci-default",
+        "conda"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "USE_DOT": "FALSE"
+      }
+    },
+    {
       "name": "osx",
       "description": "Default build options for a developer OSX build",
       "inherits": [
@@ -152,8 +162,7 @@
       "description": "Default build options for sanitiser builds",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-        "DOCS_HTML": "OFF"
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
       }
     },
     {

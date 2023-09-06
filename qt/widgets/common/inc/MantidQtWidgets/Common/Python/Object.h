@@ -37,7 +37,7 @@ template <typename T = PyObject> using Handle = boost::python::handle<T>;
 template <typename T> using ToPythonValue = boost::python::to_python_value<T>;
 
 // Helper to forward to boost python
-inline ssize_t Len(const Python::Object &obj) { return boost::python::len(obj); }
+inline boost::python::ssize_t Len(const Python::Object &obj) { return boost::python::len(obj); }
 
 // Helper to create an Object from a new reference to a raw PyObject*
 inline Python::Object NewRef(PyObject *obj) {

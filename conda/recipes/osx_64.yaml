@@ -1,0 +1,6 @@
+MACOSX_DEPLOYMENT_TARGET:
+  - 10.10
+CONDA_BUILD_SYSROOT:
+  - /opt/MacOSX10.10.sdk
+target_platform:
+  - osx-64

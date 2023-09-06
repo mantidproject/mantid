@@ -101,7 +101,6 @@ class VASPLoader(AbInitioLoader):
         parser = TextParser()
 
         with open(filename, "rb") as fd:
-
             # Lattice vectors are found first, with block formatted e.g.
             #
             #  Lattice vectors:
@@ -232,10 +231,12 @@ class VASPLoader(AbInitioLoader):
 
     @staticmethod
     def _read_vasprun(filename: str, diagonalize: bool = False, apply_sum_rule: bool = False) -> Dict[str, Any]:
-
         file_data = {"k_vectors": np.array([[0, 0, 0]], dtype=FLOAT_TYPE), "weights": np.array([1.0], dtype=FLOAT_TYPE), "atoms": {}}
 
         root = ElementTree.parse(filename).getroot()
+
+        incar_block = _find_or_error(root, "incar")
+        ibrion = int(_to_text(_find_or_error(incar_block, "i", name="IBRION")))
 
         structure_block = _find_or_error(root, "structure", name="finalpos")
         varray = _find_or_error(_find_or_error(structure_block, "crystal"), "varray", name="basis")
@@ -250,12 +251,18 @@ class VASPLoader(AbInitioLoader):
         if len(positions.shape) != 2 or positions.shape[1] != 3:
             raise AssertionError("Positions in XML 'finalpos' don't look like an Nx3 array.")
 
-        try:
-            selective_varray = _find_or_error(structure_block, "varray", name="selective")
-        except ValueError:
-            # No selective dynamics (i.e. no frozen atoms)
+        # VASP silently ignores selective dynamics for IBRION=6 dynamics, but still writes them
+        # to the structure information. So, we need to explicitly ignore the information in that case.
+        if ibrion == 6:
             selective_varray = None
+        else:
+            try:
+                selective_varray = _find_or_error(structure_block, "varray", name="selective")
+            except ValueError:
+                # No selective dynamics (i.e. no frozen atoms)
+                selective_varray = None
 
+        # Selective dynamics limits the degrees of freedom; treat the system as though only the mobile atoms are present
         if selective_varray:
             selective_bools = np.asarray(
                 list(map(_collapse_bools, [_to_text(v).split() for v in selective_varray.findall("v")])), dtype=bool
@@ -299,9 +306,23 @@ class VASPLoader(AbInitioLoader):
         if dynmat is None:
             raise ValueError("Could not find a 'calculation' block containing a 'dynmat' block in VASP XML file.")
 
+        # Check if units provided for dynmat: we expect this to be THz^2 if so
+        unit = "default"
+        try:
+            unit = _to_text(_find_or_error(dynmat, "i", name="unit")).strip()
+        except ValueError:
+            pass
+
+        if unit == "default":
+            unit_factor = VASP_FREQ_TO_THZ * 1e12
+        elif unit == "THz^2":
+            unit_factor = 1e12
+        else:
+            raise ValueError(f"Hessian unit '{unit}' not recognised")
+
         # vasprun.xml reports raw eigenvectors in atomic units: convert to frequencies in cm-1
         eigenvalues = _to_text(_find_or_error(dynmat, "v", name="eigenvalues")).split()
-        frequencies = np.sqrt(-np.asarray(list(map(float, eigenvalues)), dtype=complex)) * VASP_FREQ_TO_THZ * 1e12 * HZ2INV_CM
+        frequencies = np.sqrt(-np.asarray(list(map(float, eigenvalues)), dtype=complex)) * unit_factor * HZ2INV_CM
         # store imaginary frequencies as -ve
         file_data["frequencies"] = np.asarray([frequencies.real + frequencies.imag], dtype=FLOAT_TYPE)
 

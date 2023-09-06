@@ -25,7 +25,7 @@ using std::size_t;
 DECLARE_WORKSPACE(Workspace2D)
 
 /// Constructor
-Workspace2D::Workspace2D(const Parallel::StorageMode storageMode) : HistoWorkspace(storageMode) {}
+Workspace2D::Workspace2D() : HistoWorkspace() {}
 
 Workspace2D::Workspace2D(const Workspace2D &other) : HistoWorkspace(other), m_monitorList(other.m_monitorList) {
   data.resize(other.data.size());
@@ -350,7 +350,7 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
 }
 
 Workspace2D *Workspace2D::doClone() const { return new Workspace2D(*this); }
-Workspace2D *Workspace2D::doCloneEmpty() const { return new Workspace2D(storageMode()); }
+Workspace2D *Workspace2D::doCloneEmpty() const { return new Workspace2D(); }
 } // namespace Mantid::DataObjects
 
 namespace Mantid::Kernel {
@@ -380,5 +380,3 @@ IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_const_sptr>(const st
   }
 }
 } // namespace Mantid::Kernel
-
-///\endcond TEMPLATE

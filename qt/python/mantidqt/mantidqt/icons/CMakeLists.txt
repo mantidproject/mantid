@@ -17,7 +17,7 @@ mtd_add_sip_module(
   PYQT_VERSION 5
   INCLUDE_DIRS ${COMMON_SIP_DIR} ${ICONS_INC_DIR} ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
   LINK_LIBS ${WORKBENCH_LINK_LIBS}
-  INSTALL_DIR ${WORKBENCH_SITE_PACKAGES}/mantidqt/icons
+  INSTALL_DIR ${Python_SITELIB_RELPATH}/mantidqt/icons
   LINUX_INSTALL_RPATH "\$ORIGIN/../.."
   OSX_INSTALL_RPATH "@loader_path/../..;@loader_path/../../Frameworks"
   FOLDER Qt5

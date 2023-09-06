@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/IJobRunner.h"
 #include "Reduction/Item.h"
+#include "Reduction/RowExceptions.h"
 
 #include <memory>
 
@@ -20,7 +21,7 @@ Mantid::Kernel::Logger g_log("Reflectometry Preview Job Manager");
 
 constexpr auto PREPROCESS_ALG_NAME = "ReflectometryISISPreprocess";
 constexpr auto SUM_BANKS_ALG_NAME = "ReflectometryISISSumBanks";
-constexpr auto REDUCTION_ALG_NAME = "ReflectometryReductionOneAuto";
+constexpr auto REDUCTION_ALG_NAME = "ReflectometryISISLoadAndProcess";
 
 enum class AlgorithmType { PREPROCESS, SUM_BANKS, REDUCTION };
 
@@ -36,6 +37,11 @@ AlgorithmType algorithmType(MantidQt::API::IConfiguredAlgorithm_sptr &configured
     throw std::logic_error(std::string("Preview tab error: callback from invalid algorithm ") + name);
   }
 }
+
+const std::string LOADING_ERROR_PREFIX("Error loading workspace: ");
+const std::string SUMMING_ERROR_PREFIX("Error summing banks: ");
+const std::string REDUCTION_ERROR_PREFIX("Error performing reduction: ");
+const std::string MULTIPLE_ROWS_ERROR_MSG("Matched multiple lookup rows in the Experiment Settings tab");
 } // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -92,15 +98,15 @@ void PreviewJobManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algo
   // injecting IReflMessageHandler as other tabs do. This is not urgent for the initial implementation though.
   switch (algorithmType(algorithm)) {
   case AlgorithmType::PREPROCESS:
-    g_log.error(std::string("Error loading workspace: ") + message);
+    g_log.error(LOADING_ERROR_PREFIX + message);
     m_notifyee->notifyLoadWorkspaceAlgorithmError();
     break;
   case AlgorithmType::SUM_BANKS:
-    g_log.error(std::string("Error summing banks: ") + message);
+    g_log.error(SUMMING_ERROR_PREFIX + message);
     m_notifyee->notifySumBanksAlgorithmError();
     break;
   case AlgorithmType::REDUCTION:
-    g_log.error(std::string("Error performing reduction: ") + message);
+    g_log.error(REDUCTION_ERROR_PREFIX + message);
     m_notifyee->notifyReductionAlgorithmError();
     break;
   };
@@ -110,9 +116,25 @@ void PreviewJobManager::startPreprocessing(PreviewRow &row) {
   executeAlg(m_algFactory->makePreprocessingAlgorithm(row));
 }
 
-void PreviewJobManager::startSumBanks(PreviewRow &row) { executeAlg(m_algFactory->makeSumBanksAlgorithm(row)); }
+void PreviewJobManager::startSumBanks(PreviewRow &row) {
+  try {
+    executeAlg(m_algFactory->makeSumBanksAlgorithm(row));
+  } catch (MultipleRowsFoundException const &) {
+    g_log.error(SUMMING_ERROR_PREFIX + MULTIPLE_ROWS_ERROR_MSG);
+    m_notifyee->notifySumBanksAlgorithmError();
+    return;
+  }
+}
 
-void PreviewJobManager::startReduction(PreviewRow &row) { executeAlg(m_algFactory->makeReductionAlgorithm(row)); }
+void PreviewJobManager::startReduction(PreviewRow &row) {
+  try {
+    executeAlg(m_algFactory->makeReductionAlgorithm(row));
+  } catch (MultipleRowsFoundException const &) {
+    g_log.error(REDUCTION_ERROR_PREFIX + MULTIPLE_ROWS_ERROR_MSG);
+    m_notifyee->notifyReductionAlgorithmError();
+    return;
+  }
+}
 
 void PreviewJobManager::executeAlg(IConfiguredAlgorithm_sptr alg) {
   m_jobRunner->clearAlgorithmQueue();

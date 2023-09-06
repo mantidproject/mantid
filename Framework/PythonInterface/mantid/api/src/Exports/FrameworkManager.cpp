@@ -54,7 +54,7 @@ void updatePythonPaths() {
  *     declared in the `pythonscripts.directories`
  *   - import mantid.simpleapi (if not already imported) to load python plugins
  *   - register FrameworkManager.shutdown as an atexit function
- * @param importSimpleApi If true the the mantid.simpleapi module is imported on
+ * @param importSimpleApi If true the mantid.simpleapi module is imported on
  * first access
  * @return A reference to the FrameworkManagerImpl instance
  */
@@ -71,8 +71,10 @@ FrameworkManagerImpl &instance() {
     // delete any python objects still stored in other singletons like the
     // ADS or AlgorithmManager.
     PyRun_SimpleString("import atexit\n"
-                       "from mantid.api import FrameworkManager\n"
-                       "atexit.register(lambda: FrameworkManager.shutdown())");
+                       "def cleanupFrameworkManager():\n"
+                       "    from mantid.api import FrameworkManager\n"
+                       "    FrameworkManager.shutdown()\n"
+                       "atexit.register(cleanupFrameworkManager)");
   });
   return frameworkMgr;
 }

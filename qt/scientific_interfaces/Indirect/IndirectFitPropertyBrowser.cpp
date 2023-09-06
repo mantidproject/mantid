@@ -237,7 +237,9 @@ std::string IndirectFitPropertyBrowser::fitEvaluationType() const {
   return m_fitOptionsBrowser->getProperty("EvaluationType").toStdString();
 }
 
-bool IndirectFitPropertyBrowser::ignoreInvalidData() const { return false; }
+bool IndirectFitPropertyBrowser::ignoreInvalidData() const {
+  return m_fitOptionsBrowser->getProperty("IgnoreInvalidData").toStdString() != "0";
+}
 
 std::string IndirectFitPropertyBrowser::fitType() const {
   return m_fitOptionsBrowser->getProperty("FitType").toStdString();

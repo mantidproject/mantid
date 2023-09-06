@@ -7,7 +7,7 @@ Superplot
 Superplot is a decorator widget of the plot window. It facilitates over-plotting
 and manipulation of overplotted data. The superplot is accessible:
 
-* Directly in the toolbar of the the plot window
+* Directly in the toolbar of the plot window
 * In the context menu of supported workspaces, in the submenu "Plot"
 
 

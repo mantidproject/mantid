@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 #include <string>
 #include <vector>
@@ -42,7 +42,7 @@ enum FileType {
   RAW_FILE          ///< ISIS raw files
 };
 
-class MANTID_DATAHANDLING_DLL DetermineChunking : public API::ParallelAlgorithm {
+class MANTID_DATAHANDLING_DLL DetermineChunking : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

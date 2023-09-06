@@ -23,7 +23,6 @@ PATH_SEPARATOR = ";"
 
 
 class PluginLoader(object):
-
     extension = ".py"
 
     def __init__(self, filepath):
@@ -127,7 +126,7 @@ def load(path):
         path = path.split(PATH_SEPARATOR)
 
     loaded = []
-    if type(path) == list:
+    if isinstance(path, list):
         loaded += load_from_list(path)
     elif _os.path.isfile(path) and path.endswith(PluginLoader.extension):  # Single file
         loaded += load_from_file(path)

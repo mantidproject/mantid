@@ -48,7 +48,7 @@ class UserNotifier(object):
         font_metrics = QFontMetrics(QFont(" "))
         # The height itself is divided by 2 just to reduce the offset so that the tooltip is
         # reasonably positioned, relative to the cursor
-        return QCursor.pos() + QPoint(font_metrics.height() / 2, 0)
+        return QCursor.pos() + QPoint(int(font_metrics.height() / 2), 0)
 
     def show_status_message(self, msg):
         self._status_bar.showMessage(msg, self.DEFAULT_TIMEOUT)

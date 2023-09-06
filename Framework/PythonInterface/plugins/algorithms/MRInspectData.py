@@ -237,9 +237,9 @@ class DataInfo(object):
         sample_detector_distance = run_object["SampleDetDis"].getStatistics().mean
         source_sample_distance = run_object["ModeratorSamDis"].getStatistics().mean
         # Check units
-        if not run_object["SampleDetDis"].units in ["m", "meter"]:
+        if run_object["SampleDetDis"].units not in ["m", "meter"]:
             sample_detector_distance /= 1000.0
-        if not run_object["ModeratorSamDis"].units in ["m", "meter"]:
+        if run_object["ModeratorSamDis"].units not in ["m", "meter"]:
             source_sample_distance /= 1000.0
 
         source_detector_distance = source_sample_distance + sample_detector_distance

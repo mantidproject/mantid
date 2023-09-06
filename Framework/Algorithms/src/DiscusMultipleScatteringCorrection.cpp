@@ -365,7 +365,6 @@ void DiscusMultipleScatteringCorrection::getXMinMax(const Mantid::API::MatrixWor
       }
     }
   }
-  // workspace not partitioned at this point so don't replicate code using m_indexInfo->communicator
   if (xmin > xmax)
     throw std::runtime_error("Unable to determine min and max x values for workspace");
 }
@@ -822,7 +821,6 @@ DiscusMultipleScatteringCorrection::generateInputKOutputWList(const double efixe
  * Prepare a profile of Q*S(Q) that will later be used to calculate a cumulative probability distribution
  * for use in importance sampling
  * @param qmax The maxmimum q value required based on the data in the InputWorkspace
- * @return A pointer to a histogram containing the Q*S(Q) profile
  */
 void DiscusMultipleScatteringCorrection::prepareQSQ(double qmax) {
   for (auto &SQWSMapping : m_SQWSs) {

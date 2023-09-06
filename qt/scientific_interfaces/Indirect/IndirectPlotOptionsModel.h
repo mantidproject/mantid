@@ -37,6 +37,9 @@ public:
   virtual void setFixedIndices(std::string const &indices);
   virtual bool indicesFixed() const;
 
+  virtual void setUnit(std::string const &unit);
+  boost::optional<std::string> unit();
+
   virtual std::string formatIndices(std::string const &indices) const;
   virtual bool validateIndices(std::string const &indices, MantidAxis const &axisType = MantidAxis::Spectrum) const;
   virtual bool setIndices(std::string const &indices);
@@ -55,6 +58,7 @@ public:
 private:
   bool validateSpectra(const Mantid::API::MatrixWorkspace_sptr &workspace, std::string const &spectra) const;
   bool validateBins(const Mantid::API::MatrixWorkspace_sptr &workspace, std::string const &bins) const;
+  std::string convertUnit(const std::string &workspaceName, const std::string &unit);
 
   boost::optional<std::string> checkWorkspaceSize(std::string const &workspaceName, MantidAxis const &axisType) const;
 
@@ -62,6 +66,7 @@ private:
   bool m_fixedIndices;
   boost::optional<std::string> m_workspaceIndices;
   boost::optional<std::string> m_workspaceName;
+  boost::optional<std::string> m_unit;
   std::unique_ptr<ExternalPlotter> m_plotter;
 };
 

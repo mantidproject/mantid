@@ -15,6 +15,7 @@
 #include "IBatchView.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/IMessageHandler.h"
+#include "Reduction/RowExceptions.h"
 #include <memory>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -371,5 +372,18 @@ void BatchPresenter::clearADSHandle() {
 void BatchPresenter::notifyPreviewApplyRequested() {
   auto const &previewRow = m_previewPresenter->getPreviewRow();
   m_experimentPresenter->notifyPreviewApplyRequested(previewRow);
+}
+
+bool BatchPresenter::hasROIDetectorIDsForPreviewRow() const {
+  auto const &previewRow = m_previewPresenter->getPreviewRow();
+  try {
+    auto const lookupRow = m_model->findLookupRow(previewRow);
+    if (!lookupRow || !lookupRow->roiDetectorIDs().has_value()) {
+      return false;
+    }
+  } catch (MultipleRowsFoundException const &) {
+    return false;
+  }
+  return true;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

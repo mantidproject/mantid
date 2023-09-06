@@ -82,6 +82,4 @@ target_link_libraries(
 
 # Installation settings
 set_target_properties(PythonGeometryModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/")
-mtd_install_targets(
-  TARGETS PythonGeometryModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/geometry ${WORKBENCH_SITE_PACKAGES}/mantid/geometry
-)
+mtd_install_shared_library(TARGETS PythonGeometryModule DESTINATION ${Python_SITELIB_RELPATH}/mantid/geometry)

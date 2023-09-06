@@ -213,7 +213,7 @@ void LoadISISNexus2::exec() {
     }
   }
 
-  // Determine the the data block for the detectors and monitors
+  // Determine the data block for the detectors and monitors
   bseparateMonitors =
       findSpectraDetRangeInFile(entry, m_spec, ndets, nsp1, m_monitors, bexcludeMonitors, bseparateMonitors);
 
