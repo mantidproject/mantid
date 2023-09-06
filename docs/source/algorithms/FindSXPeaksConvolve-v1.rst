@@ -14,7 +14,7 @@ banks of type :ref:`RectangularDetector <RectangularDetector>` (e.g. SXD, TOPAZ)
 convolution with a shoebox kernel.
 
 The size of the kernel is defined in the input to the algorithm and should match the approximate extent of a typical peak.
-The size on the detector is governed by ``NRows`` and``NCols`` which are in units of pixels.
+The size on the detector is governed by ``NRows`` and ``NCols`` which are in units of pixels.
 The size of the kernel along the TOF dimension can be specified in one of two ways:
 
 1. Provide ``NBins`` - number of TOF bins in the kernel
@@ -23,7 +23,7 @@ The size of the kernel along the TOF dimension can be specified in one of two wa
    of a :ref:`BackToBackExponential <func-BackToBackExponential>` peak at the center of each detector panel/bank at the
    middle of the spectrum.
 
-Note to use method 2 back-to-back exponential coefficients must be defined in the Parameters.xml file for the
+Note to use method 2, back-to-back exponential coefficients must be defined in the Parameters.xml file for the
 instrument.
 
 The integration requires a background shell with negative weights, such that the total kernel size is increased by a
@@ -36,8 +36,8 @@ the integrated intensity is determined by convolution of the squared error array
 The threshold for peak detection is given by ``ThresholdIoverSigma`` which is the cutoff ratio of intensity/sigma (i.e.
 a valid peak would be expected to have intensity/sigma > 3). Stronger peaks will have a larger intensity/sigma.
 
-Useage
------------
+Usage
+-----
 
 **Example - FindSXPeaksConvolve**
 

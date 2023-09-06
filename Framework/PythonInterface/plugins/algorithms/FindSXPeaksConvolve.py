@@ -55,7 +55,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             defaultValue=5.0,
             direction=Direction.Input,
             validator=FloatBoundedValidator(lower=1.0),
-            doc="Threhsold value for I/sigma used to identify statistically significant peaks.",
+            doc="Threshold value for I/sigma used to identify statistically significant peaks.",
         )
         #   window parameters
         self.declareProperty(
@@ -130,7 +130,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
         min_frac_size = self.getProperty("MinFracSize").value
         remove_on_edge = self.getProperty("RemoveOnEdge").value
 
-        # create ouput table workspace
+        # create output table workspace
         peaks = self.exec_child_alg("CreatePeaksWorkspace", InstrumentWorkspace=ws, NumberOfPeaks=0, OutputWorkspace="_peaks")
 
         array_converter = InstrumentArrayConverter(ws)

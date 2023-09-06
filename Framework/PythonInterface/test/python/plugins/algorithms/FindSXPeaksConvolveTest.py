@@ -15,6 +15,24 @@ from testhelpers import WorkspaceCreationHelper
 from numpy import array, sqrt
 
 
+XML_PARAMS = """
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "basic_rect" valid-from = "2013-11-06T00:00:00">
+<component-link name = "bank1">
+<parameter name="BackToBackExponential:A" type="fitting">
+<formula eq="2" unit="TOF" result-unit="1/TOF" /> <fixed />
+</parameter>
+<parameter name="BackToBackExponential:B" type="fitting">
+<formula eq="2" unit="TOF" result-unit="1/TOF" /> <fixed />
+</parameter>
+<parameter name="BackToBackExponential:S" type="fitting">
+<formula eq="0.1" unit="TOF" result-unit="TOF" />
+</parameter>
+</component-link>
+</parameter-file>
+"""
+
+
 class FindSXPeaksConvolveTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -35,23 +53,7 @@ class FindSXPeaksConvolveTest(unittest.TestCase):
             cls.ws.setY(ispec, cls.ws.readY(ispec) + peak_1D[::-1])
             cls.ws.setE(ispec, sqrt(cls.ws.readY(ispec)))
         # Add back-to-back exponential params
-        xml_params = """
-        <?xml version="1.0" encoding="UTF-8" ?>
-        <parameter-file instrument = "basic_rect" valid-from = "2013-11-06T00:00:00">
-        <component-link name = "bank1">
-        <parameter name="BackToBackExponential:A" type="fitting">
-        <formula eq="2" unit="TOF" result-unit="1/TOF" /> <fixed />
-        </parameter>
-        <parameter name="BackToBackExponential:B" type="fitting">
-        <formula eq="2" unit="TOF" result-unit="1/TOF" /> <fixed />
-        </parameter>
-        <parameter name="BackToBackExponential:S" type="fitting">
-        <formula eq="0.1" unit="TOF" result-unit="TOF" />
-        </parameter>
-        </component-link>
-        </parameter-file>
-        """
-        LoadParameterFile(cls.ws, ParameterXML=xml_params)
+        LoadParameterFile(cls.ws, ParameterXML=XML_PARAMS)
 
     @classmethod
     def tearDownClass(cls):
