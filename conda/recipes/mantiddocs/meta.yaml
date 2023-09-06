@@ -29,6 +29,7 @@ requirements:
     - {{ cdt('libxxf86vm') }}  # [linux]
     - {{ cdt('libx11-devel') }}  # [linux]
     - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
+    - pystog==0.4.3  # some algorithm documentation needs this to register optional functionality
   host:
     - python {{ python }}
     - setuptools

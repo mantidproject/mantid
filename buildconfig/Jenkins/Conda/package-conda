@@ -124,7 +124,8 @@ if [[ $ENABLE_BUILD_QT == true ]]; then
     conda mambabuild ./mantidqt/ $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_DOCS == true ]]; then
-    conda mambabuild ./mantiddocs/ $EXTRA_BUILD_OPTIONS
+    # extra channel for optional dependency for algorithms to build
+    conda mambabuild ./mantiddocs/ --channel neutrons $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     conda mambabuild ./mantidworkbench/ $EXTRA_BUILD_OPTIONS
