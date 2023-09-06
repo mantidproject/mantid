@@ -93,7 +93,7 @@ class WishSX(BaseSX):
 
     def process_vanadium(self):
         # vanadium
-        self.van_ws = self.load_run(self.van_runno, ext=self.file_ext)
+        self.van_ws = self.load_run(self.van_runno, file_ext=self.file_ext)
         mantid.SmoothNeighbours(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Radius=3)
         mantid.SmoothData(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, NPoints=301)
         # correct vanadium for absorption
