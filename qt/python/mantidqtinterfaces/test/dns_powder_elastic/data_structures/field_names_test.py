@@ -1,10 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
-
+# Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 import unittest
 
 from mantidqtinterfaces.dns_powder_elastic.data_structures.field_names import field_dict
