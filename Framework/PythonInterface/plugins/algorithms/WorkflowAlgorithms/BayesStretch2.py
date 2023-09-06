@@ -19,7 +19,7 @@ import numpy as np
 import multiprocessing
 
 try:
-    pass
+    import quickBayes  # noqa: F401
 except (Exception, Warning):
     import subprocess
 
