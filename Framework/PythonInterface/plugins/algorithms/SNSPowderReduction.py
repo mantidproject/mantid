@@ -1432,7 +1432,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     IgnoreXBins=True,
                     AllSpectra=True,
                 )
-            return interpo_ws
+            return interpo_ws.name()
         else:
             can_run_ws_name, can_run_number = self._generate_container_run_name(can_run_numbers, samRunIndex)
 
