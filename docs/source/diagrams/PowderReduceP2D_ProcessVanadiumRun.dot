@@ -1,21 +1,23 @@
-digraph PowderReduceP2D_ProcessVanRun {
-  label="Process Vanadium Run Workflow"
+digraph PowderReduceP2D_FocusAndSum {
+  label="Process Sample Run Workflow"
   $global_style
 
   subgraph params {
-    $param_style
-    VanadiumData
+    #$param_style
+    SampleData
     OutputWorkspace
   }
 
   subgraph algorithms {
     $algorithm_style
+    LoadMask                    [label="LoadMask v1"]
+    LoadDetcal                  [label="LoadIsawDetCal v1"]
     FindDetectorsPar            [label="FindDetectorsPar v1"]
     FilterBadPulses             [label="FilterBadPulses v1"]
     RemovePromptPulse           [label="RemovePromptPulse v1"]
     LoadDiffCal                 [label="LoadDiffCal v1"]
     MaskDetectors               [label="MaskDetectors v1"]
-    AlignDetectors              [label="AlignDetectors v1"]
+    ApplyDiffCal                [label="ApplyDiffCal v1"]
     ConvertUnits                [label="ConvertUnits v1\nwith target 'Wavelength'"]
     CylinderAbsorption          [label="CylinderAbsorption v1"]
     Divide                      [label="Divide v1"]
@@ -28,6 +30,10 @@ digraph PowderReduceP2D_ProcessVanRun {
 
   subgraph decisions{
     $decision_style
+    maskFile        [label="Is masking file specified?"]
+    detcal          [label="Is calibration file of type detcal?"]
+    detcal2         [label="Is calibration file of type detcal?"]
+    detcal3         [label="Is calibration file of type detcal?"]
     edgebinning     [label="Is edgebinning specified?"]
   }
 
@@ -36,13 +42,24 @@ digraph PowderReduceP2D_ProcessVanRun {
     $value_style
   }
 
-  VanadiumData	            -> FindDetectorsPar
+  SampleData	            -> maskFile
+  maskFile   	            -> LoadMask  [label="Yes"]
+  maskFile   	            -> detcal  [label="No"]
+  LoadMask                  -> detcal
+  detcal                    -> LoadDetcal  [label="Yes"]
+  detcal                    -> FindDetectorsPar  [label="No"]
+  LoadDetcal                -> FindDetectorsPar
   FindDetectorsPar          -> FilterBadPulses
   FilterBadPulses           -> RemovePromptPulse
-  RemovePromptPulse         -> LoadDiffCal
+  RemovePromptPulse         -> detcal2
+  detcal2                   -> LoadDiffCal [label="No"]
+  detcal2                   -> MaskDetectors [label="Yes"]
   LoadDiffCal               -> MaskDetectors
-  MaskDetectors             -> AlignDetectors
-  AlignDetectors            -> ConvertUnits
+  MaskDetectors             -> detcal3
+  detcal3                   -> ApplyDiffCal  [label="No"]
+  detcal3                   -> ConvertUnits  [label="Yes"]
+  ApplyDiffCal              -> ConvertUnits
+  ConvertUnits              -> edgebinning
   ConvertUnits              -> CylinderAbsorption
   CylinderAbsorption        -> Divide
   Divide                    -> edgebinning
@@ -52,7 +69,6 @@ digraph PowderReduceP2D_ProcessVanRun {
   Bin2DPowderDiffraction2   -> StripVanadiumPeaks
   StripVanadiumPeaks        -> FFTSmooth
   FFTSmooth                 -> OutputWorkspace
-
 
 
 }

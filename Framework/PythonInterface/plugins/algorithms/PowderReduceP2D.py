@@ -13,7 +13,7 @@ from mantid.simpleapi import (
     RemovePromptPulse,
     LoadDiffCal,
     MaskDetectors,
-    AlignDetectors,
+    ApplyDiffCal,
     ConvertUnits,
     CylinderAbsorption,
     Divide,
@@ -24,6 +24,9 @@ from mantid.simpleapi import (
     SaveP2D,
     Scale,
     CreateWorkspace,
+    LoadMask,
+    LoadEventNexus,
+    LoadIsawDetCal,
 )
 from mantid import mtd
 
@@ -68,6 +71,16 @@ class PowderReduceP2D(DataProcessorAlgorithm):
                 doc="Vanadium measurement for intensity correction.",
             )
             self.declareProperty(
+                "DoVanaBackgroundCorrection",
+                False,
+                direction=Direction.Input,
+                doc="If set to True you have to declare an empty can measurement for vanadium background correction.",
+            )
+            self.declareProperty(
+                FileProperty("VanaEmpty", "", action=FileAction.OptionalLoad, direction=Direction.Input),
+                doc="Empty measurement for vanadium data.",
+            )
+            self.declareProperty(
                 "DoBackgroundCorrection",
                 False,
                 direction=Direction.Input,
@@ -91,6 +104,8 @@ class PowderReduceP2D(DataProcessorAlgorithm):
             self.setPropertyGroup("SampleData", grp1)
             self.setPropertyGroup("DoIntensityCorrection", grp1)
             self.setPropertyGroup("VanaData", grp1)
+            self.setPropertyGroup("DoVanaBackgroundCorrection", grp1)
+            self.setPropertyGroup("VanaEmpty", grp1)
             self.setPropertyGroup("DoBackgroundCorrection", grp1)
             self.setPropertyGroup("EmptyData", grp1)
             self.setPropertyGroup("CalFile", grp1)
@@ -124,13 +139,6 @@ class PowderReduceP2D(DataProcessorAlgorithm):
                 validator=IntBoundedValidator(lower=0),
                 direction=Direction.Input,
                 doc="Maximum value for 2 Theta. Everything bigger gets removed.",
-            )
-            self.declareProperty(
-                "WavelengthCenter",
-                0.7,
-                validator=FloatBoundedValidator(lower=0.0),
-                direction=Direction.Input,
-                doc="Center Wavelength is used to calculate automatic values for lambdaMin and lambdaMax if they are not specified.",
             )
             self.declareProperty(
                 "LambdaMin",
@@ -183,13 +191,24 @@ class PowderReduceP2D(DataProcessorAlgorithm):
             grp2 = "Data Ranges"
             self.setPropertyGroup("TwoThetaMin", grp2)
             self.setPropertyGroup("TwoThetaMax", grp2)
-            self.setPropertyGroup("WavelengthCenter", grp2)
             self.setPropertyGroup("LambdaMin", grp2)
             self.setPropertyGroup("LambdaMax", grp2)
             self.setPropertyGroup("DMin", grp2)
             self.setPropertyGroup("DMax", grp2)
             self.setPropertyGroup("DpMin", grp2)
             self.setPropertyGroup("DpMax", grp2)
+
+        def loadLoadMask():
+            self.declareProperty(
+                FileProperty("Maskfile", "", action=FileAction.OptionalLoad, direction=Direction.Input),
+                doc="Maskfile that should be used. If specified, an Instrument has to be given as well.",
+            )
+            self.declareProperty(
+                "Instrument", "", direction=Direction.Input, doc="Instrument used. Only needs to be specified if an Maskfile is specified."
+            )
+            grp15 = "LoadMask"
+            self.setPropertyGroup("Maskfile", grp15)
+            self.setPropertyGroup("Instrument", grp15)
 
         def loadFindDetectorsPar():
             # Input for FindDetectorsPar
@@ -286,14 +305,6 @@ class PowderReduceP2D(DataProcessorAlgorithm):
             self.setPropertyGroup("EndWorkspaceIndex", grp7)
             self.setPropertyGroup("ComponentList", grp7)
 
-        def loadAlignDetectors():
-            # Input for AlignDetectors
-            # self.copyProperties('AlignDetectors', ['CalibrationWorkspace', 'OffsetsWorkspace'])
-            # grp8 = 'AlignDetectors'
-            # self.setPropertyGroup('CalibrationWorkspace', grp8)
-            # self.setPropertyGroup('OffsetsWorkspace', grp8)
-            pass
-
         def loadCylinderAbsorption():
             # Input for CylinderAbsorption
             self.declareProperty(
@@ -375,8 +386,8 @@ class PowderReduceP2D(DataProcessorAlgorithm):
                 "Tolerance",
                 2,
                 direction=Direction.Input,
-                doc="A measure of the strictness desired in meeting the condition on peak candidates. "
-                "Passed through to FindPeaks. Default 2.",
+                doc="A measure of the strictness desired in meeting the condition on peak candidates. Passed through to FindPeaks."
+                "Default 4.",
             )
             self.declareProperty(
                 "PeakPositionTolerance",
@@ -388,8 +399,7 @@ class PowderReduceP2D(DataProcessorAlgorithm):
                 "BackgroundType",
                 "Quadratic",
                 direction=Direction.Input,
-                doc="The type of background of the histogram. Present choices include Linear and Quadratic. "
-                "Allowed values: [Linear, Quadratic]",
+                doc="The type of background of the histogram. Allowed values: Linear, Quadratic",
             )
             self.copyProperties("StripVanadiumPeaks", ["HighBackground", "WorkspaceIndex"])
             grp11 = "StripVanadiumPeaks"
@@ -412,15 +422,15 @@ class PowderReduceP2D(DataProcessorAlgorithm):
                 "Params",
                 "20,2",
                 direction=Direction.Input,
-                doc="The filter parameters: For Zeroing, 1 parameter: n - an integer greater than 1 meaning that the Fourier coefficients "
-                "with frequencies outside the 1/n of the original range will be set to zero. For Butterworth, 2 parameters: n "
-                "and order, giving the 1/n truncation and the smoothing order.",
+                doc="The filter parameters: For Zeroing, 1 parameter: n - an integer greater than 1 meaning that the Fourier coefficients"
+                "with frequencies outside the 1/n of the original range will be set to zero. For Butterworth, 2 parameters: n and order, "
+                "giving the 1/n truncation and the smoothing order.",
             )
             self.declareProperty(
                 "IgnoreXBins",
                 True,
                 direction=Direction.Input,
-                doc="Ignores the requirement that X bins be linear and of the same size. Set this to true if you are using log binning. "
+                doc="Ignores the requirement that X bins be linear and of the same size. Set this to true if you are using log binning."
                 "The output X axis will be the same as the input either way.",
             )
             self.declareProperty("AllSpectra", True, direction=Direction.Input, doc="Smooth all spectra.")
@@ -462,12 +472,12 @@ class PowderReduceP2D(DataProcessorAlgorithm):
 
         loadInputOutputFiles()
         loadDataRanges()
+        loadLoadMask()
         loadFindDetectorsPar()
         loadFilterBadPulses()
         loadRemovePromptPulse()
         loadLoadDiffCal()
         loadMaskDetectors()
-        loadAlignDetectors()
         loadCylinderAbsorption()
         loadBin2DPowderDiffraction()
         loadStripVanadiumPeaks()
@@ -484,12 +494,12 @@ class PowderReduceP2D(DataProcessorAlgorithm):
             self._sampleWS = "Sample"
             self._vanaWS = "Vana"
             self._emptyWS = "Empty"
+            self._vanaEmptyWS = "VanaEmpty"
 
         def getLimits():
             # 2 theta and lambda limits
             self._tthMin = self.getProperty("TwoThetaMin").value
             self._tthMax = self.getProperty("TwoThetaMax").value
-            self._wlCenter = self.getProperty("WavelengthCenter").value
             self._lambdaMin = self.getProperty("LambdaMin").value
             self._lambdaMax = self.getProperty("LambdaMax").value
             # d and dperp limits
@@ -503,12 +513,26 @@ class PowderReduceP2D(DataProcessorAlgorithm):
             self._doEdge = self.getProperty("DoEdgebinning").value
             self._doVana = self.getProperty("DoIntensityCorrection").value
             self._doEmpty = self.getProperty("DoBackgroundCorrection").value
+            self._doVanaEmpty = self.getProperty("DoVanaBackgroundCorrection").value
 
         def getLoadParameters():
             # Load
             self._sample = self.getPropertyValue("SampleData")
             self._vana = self.getPropertyValue("VanaData")
             self._empty = self.getPropertyValue("EmptyData")
+            self._vanaEmpty = self.getPropertyValue("VanaEmpty")
+
+        def getLoadMaskParameters():
+            self._maskFile = self.getProperty("MaskFile").value
+            self._instrument = self.getProperty("Instrument").value
+
+        def getLoadIsawDetCalParameters():
+            self._detCalFilename = self.getPropertyValue("CalFile")
+            if self._detCalFilename[-7:] != ".detcal":
+                self._detCalFilename = ""
+                self._useDetCal = False
+            else:
+                self._useDetCal = True
 
         def getFindDetectorsParParamters():
             # FindDetectorsPar
@@ -549,11 +573,9 @@ class PowderReduceP2D(DataProcessorAlgorithm):
             self._endWorkspaceIndex = self.getProperty("EndWorkspaceIndex").value
             self._componentList = self.getProperty("ComponentList").value
 
-        def getAlignDetectorsParameters():
-            # AlignDetectors
+        def getApplyDiffCalParameters():
+            # ApplyDiffCal
             self._calibrationFile = self._filename
-            # self._calibrationWorkspace = self.getProperty('CalibrationWorkspace')
-            # self._offsetsWorkspace = self.getProperty('OffsetsWorkspace')
 
         def getCylinderAbsorptionParameters():
             # CylinderAbsorption
@@ -609,12 +631,14 @@ class PowderReduceP2D(DataProcessorAlgorithm):
         getLimits()
         getReductionStyle()
         getLoadParameters()
+        getLoadMaskParameters()
+        getLoadIsawDetCalParameters()
         getFindDetectorsParParamters()
         getFilterBadPulsesParameters()
         getRemovePromptPulseParameters()
         getLoadDiffCalParameters()
         getMaskDetectorsParameters()
-        getAlignDetectorsParameters()
+        getApplyDiffCalParameters()
         getCylinderAbsorptionParameters()
         getBind2DPowderDiffractionParameters()
         getStripVanadiumPeaksParameters()
@@ -627,25 +651,35 @@ class PowderReduceP2D(DataProcessorAlgorithm):
             if self._SystemTest:
                 Load(Filename=filename, OutputWorkspace=wsName, BankName="bank22")
             else:
-                Load(Filename=filename, OutputWorkspace=wsName)
+                if self._useDetCal:
+                    LoadEventNexus(Filename=filename, OutputWorkspace=wsName, LoadLogs=True)
+                else:
+                    Load(Filename=filename, OutputWorkspace=wsName)
+        if self._maskFile != "":
+            LoadMask(
+                InputFile=self._maskFile, RefWorkspace=wsName, Instrument=self._instrument, OutputWorkspace=self._workspaceName + "_mask"
+            )
+        if self._useDetCal:
+            LoadIsawDetCal(InputWorkspace=wsName, Filename=self._detCalFilename)
         FindDetectorsPar(
             InputWorkspace=wsName, ReturnLinearRanges=self._returnLinearRanges, ParFile=self._parFile, OutputParTable=self._outputParTable
         )
         FilterBadPulses(InputWorkspace=wsName, Outputworkspace=wsName, LowerCutoff=self._lowerCutoff)
         RemovePromptPulse(InputWorkspace=wsName, OutputWorkspace=wsName, Width=self._width, Frequency=self._frequency)
-        LoadDiffCal(
-            InputWorkspace=wsName,
-            InstrumentName=self._instrumentName,
-            InstrumentFilename=self._instrumentFilename,
-            Filename=self._filename,
-            MakeGroupingWorkspace=self._makeGroupingWorkspace,
-            MakeCalWorkspace=self._makeCalWorkspace,
-            MakeMaskWorkspace=self._makeMaskWorkspace,
-            WorkspaceName=self._workspaceName,
-            TofMin=self._tofMin,
-            TofMax=self._tofMax,
-            FixConversionIssues=self._fixConversionIssues,
-        )
+        if not self._useDetCal:
+            LoadDiffCal(
+                InputWorkspace=wsName,
+                InstrumentName=self._instrumentName,
+                InstrumentFilename=self._instrumentFilename,
+                Filename=self._filename,
+                MakeGroupingWorkspace=self._makeGroupingWorkspace,
+                MakeCalWorkspace=self._makeCalWorkspace,
+                MakeMaskWorkspace=self._makeMaskWorkspace,
+                WorkspaceName=self._workspaceName,
+                TofMin=self._tofMin,
+                TofMax=self._tofMax,
+                FixConversionIssues=self._fixConversionIssues,
+            )
         MaskDetectors(
             Workspace=wsName,
             SpectraList=self._spectraList,
@@ -657,7 +691,10 @@ class PowderReduceP2D(DataProcessorAlgorithm):
             EndWorkspaceIndex=self._endWorkspaceIndex,
             ComponentList=self._componentList,
         )
-        AlignDetectors(InputWorkspace=wsName, OutputWorkspace=wsName, CalibrationFile=self._calibrationFile)
+        if not self._useDetCal:
+            ApplyDiffCal(InstrumentWorkspace=wsName, CalibrationFile=self._calibrationFile)
+            ConvertUnits(InputWorkspace=wsName, OutputWorkspace=wsName, Target="dSpacing")
+            ApplyDiffCal(InstrumentWorkspace=wsName, ClearCalibration=True)
         ConvertUnits(InputWorkspace=wsName, OutputWorkspace=wsName, Target="Wavelength")
 
     def processVana(self, wsName):
@@ -687,8 +724,8 @@ class PowderReduceP2D(DataProcessorAlgorithm):
         Bin2DPowderDiffraction(
             InputWorkspace=wsName,
             OutputWorkspace=wsName,
-            dSpaceBinning=[self._dMin - dSpaceBinning, dSpaceBinning, self._dMax + dSpaceBinning],
-            dPerpendicularBinning=[self._dpMin - dPerpBinning, dPerpBinning, self._dpMax + dPerpBinning],
+            dSpaceBinning=[dSpaceBinning[0], dSpaceBinning[1], dSpaceBinning[2]],
+            dPerpendicularBinning=[dPerpBinning[0], dPerpBinning[1], dPerpBinning[2]],
         )
 
     def postProcessVana(self, wsName):
@@ -737,13 +774,30 @@ class PowderReduceP2D(DataProcessorAlgorithm):
                 DataY=yDataNew,
                 DataE=eData,
                 NSpec=mtd[wsName].getNumberHistograms(),
+                UnitX="dSpacing",
                 ParentWorkspace=mtd[wsName],
             )
+            mtd[wsName].setDistribution(True)
 
-    def checkForNegatives(self, wsName, useVana, vanaWsName, useEmpty, emptyWsName, addMinimum, resetValue, addMinimumVana, resetValueVana):
+    def checkForNegatives(
+        self,
+        wsName,
+        useVana,
+        vanaWsName,
+        useEmpty,
+        emptyWsName,
+        useVanaEmpty,
+        vanaEmptyWsName,
+        addMinimum,
+        resetValue,
+        addMinimumVana,
+        resetValueVana,
+    ):
         self.ResetNegatives2D(wsName, addMinimum, resetValue)
         if useVana:
             self.ResetNegatives2D(vanaWsName, addMinimumVana, resetValueVana)
+            if useVanaEmpty:
+                self.ResetNegatives2D(vanaEmptyWsName, addMinimum, resetValue)
         if useEmpty:
             self.ResetNegatives2D(emptyWsName, addMinimum, resetValue)
 
@@ -756,7 +810,7 @@ class PowderReduceP2D(DataProcessorAlgorithm):
         if self._doEdge:
             self.binDataEdge(self._sampleWS)
         else:
-            self.binDataLog(self._sampleWS, self._dSpaceBinning[0], self._dPerpendicularBinning[0])
+            self.binDataLog(self._sampleWS, list(self._dSpaceBinning), list(self._dPerpendicularBinning))
 
         # Process empty data if given
         if self._doEmpty:
@@ -764,7 +818,7 @@ class PowderReduceP2D(DataProcessorAlgorithm):
             if self._doEdge:
                 self.binDataEdge(self._emptyWS)
             else:
-                self.binDataLog(self._emptyWS, self._dSpaceBinning[0], self._dPerpendicularBinning[0])
+                self.binDataLog(self._emptyWS, list(self._dSpaceBinning), list(self._dPerpendicularBinning))
 
         # Process vana data if given
         if self._doVana:
@@ -773,8 +827,16 @@ class PowderReduceP2D(DataProcessorAlgorithm):
             if self._doEdge:
                 self.binDataEdge(self._vanaWS)
             else:
-                self.binDataLog(self._vanaWS, self._dSpaceBinning[0], self._dPerpendicularBinning[0])
-            self.postProcessVana(self._vanaWS)
+                self.binDataLog(self._vanaWS, list(self._dSpaceBinning), list(self._dPerpendicularBinning))
+            if not self._useDetCal:
+                self.postProcessVana(self._vanaWS)
+            if self._doVanaEmpty:
+                self.processData(self._vanaEmpty, self._vanaEmptyWS)
+                self.processVana(self._vanaEmptyWS)
+                if self._doEdge:
+                    self.binDataEdge(self._vanaEmptyWS)
+                else:
+                    self.binDataLog(self._vanaEmptyWS, list(self._dSpaceBinning), list(self._dPerpendicularBinning))
 
         # Check all datafiles for negative Values and correct those
         self.checkForNegatives(
@@ -783,6 +845,27 @@ class PowderReduceP2D(DataProcessorAlgorithm):
             self._vanaWS,
             self._doEmpty,
             self._emptyWS,
+            self._doVanaEmpty,
+            self._vanaEmptyWS,
+            self._addMinimum,
+            self._resetValue,
+            self._addMinimumVana,
+            self._addMinimumVana,
+        )
+
+        # Correct vanadium data with empty vanadium measurement
+        if self._doVanaEmpty:
+            Minus(LHSWorkspace=self._vanaWS, RHSWorkspace=self._vanaEmptyWS, OutputWorkspace=self._vanaWS)
+
+        # Check all datafiles for negative Values and correct those
+        self.checkForNegatives(
+            self._sampleWS,
+            self._doVana,
+            self._vanaWS,
+            self._doEmpty,
+            self._emptyWS,
+            self._doVanaEmpty,
+            self._vanaEmptyWS,
             self._addMinimum,
             self._resetValue,
             self._addMinimumVana,
@@ -800,6 +883,8 @@ class PowderReduceP2D(DataProcessorAlgorithm):
             self._vanaWS,
             self._doEmpty,
             self._emptyWS,
+            self._doVanaEmpty,
+            self._vanaEmptyWS,
             self._addMinimum,
             self._resetValue,
             self._addMinimumVana,
