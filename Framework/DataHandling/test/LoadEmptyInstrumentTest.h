@@ -153,6 +153,7 @@ public:
     g_log.notice("\ntestLoadFromNexus...");
 
     LoadEmptyInstrument loader;
+    loader.setRethrows(true);
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
@@ -181,6 +182,7 @@ public:
     g_log.notice("\ntestLoadFromNexusNoIDF...");
 
     LoadEmptyInstrument loader;
+    loader.setRethrows(true);
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
@@ -190,14 +192,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", inputFile));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", wsName));
 
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    TS_ASSERT(!loader.isExecuted());
+    TS_ASSERT_THROWS(loader.execute(), const std::runtime_error &);
   }
 
   void testLoadFileWithInvalidExtension() {
     g_log.notice("\ntestLoadFileWithInvalidExtension...");
 
     LoadEmptyInstrument loader;
+    loader.setRethrows(true);
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
@@ -207,8 +209,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", inputFile));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", wsName));
 
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    TS_ASSERT(!loader.isExecuted());
+    TS_ASSERT_THROWS(loader.execute(), const std::runtime_error &);
   }
 
   void testParameterTags() {
