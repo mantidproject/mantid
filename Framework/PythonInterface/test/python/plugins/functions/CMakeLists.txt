@@ -15,6 +15,7 @@ set(TEST_PY_FILES
     EISFDiffSphereAlkylTest.py
     Example1DFunctionTest.py
     ExamplePeakFunctionTest.py
+    FlatTopPeakTest.py
     FmuFTest.py
     GauBroadGauKTTest.py
     GaussBesselTest.py

@@ -1,6 +1,6 @@
 # Tests for ISIS SANS
 
-set(TEST_PY_FILES SANSConvertToWavelengthAndRebinTest.py)
+set(TEST_PY_FILES SANSConvertToWavelengthAndRebinTest.py SANSTubeCalibrationTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
