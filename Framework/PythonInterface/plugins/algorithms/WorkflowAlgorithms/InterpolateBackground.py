@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceGroup, WorkspaceGroupProperty, MatrixWorkspaceProperty
+from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceGroup, WorkspaceGroupProperty, WorkspaceProperty
 from mantid.kernel import Direction
 from mantid.simpleapi import mtd, RenameWorkspace
 
@@ -29,7 +29,7 @@ class InterpolateBackground(PythonAlgorithm):
             name="InterpolateTemp", defaultValue=0.0, direction=Direction.Input, doc="Target temperature to interpolate at"
         )
         self.declareProperty(
-            MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output, PropertyMode.Mandatory),
+            WorkspaceProperty("OutputWorkspace", "", Direction.Output, PropertyMode.Mandatory),
             doc="Output Workspace with interpolated data",
         )
 
