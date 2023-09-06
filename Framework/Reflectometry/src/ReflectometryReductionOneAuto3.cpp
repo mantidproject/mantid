@@ -64,7 +64,7 @@ std::vector<std::string> getGroupMemberNames(const std::string &groupName) {
 
 std::string vectorToString(const std::vector<std::string> &vec) {
   std::string result;
-  for (auto item : vec) {
+  for (const auto &item : vec) {
     if (!result.empty())
       result += ",";
     result += item;
@@ -78,7 +78,7 @@ void removeAllWorkspacesFromGroup(const std::string &groupName) {
 }
 
 void removeWorkspacesFromADS(const std::vector<std::string> &workspaceNames) {
-  for (auto workspaceName : workspaceNames)
+  for (const auto &workspaceName : workspaceNames)
     AnalysisDataService::Instance().remove(workspaceName);
 }
 
@@ -796,7 +796,7 @@ Algorithm_sptr ReflectometryReductionOneAuto3::createAlgorithmForGroupMember(std
 
   // Copy all the non-workspace properties over
   const std::vector<Property *> props = getProperties();
-  for (auto &prop : props) {
+  for (const auto &prop : props) {
     if (prop) {
       IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       if (!wsProp)

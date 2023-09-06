@@ -2107,7 +2107,7 @@ void FunctionTreeView::setParameterConstraint(const QString &paramName, const QS
 
 QStringList FunctionTreeView::getGlobalParameters() const {
   QStringList globals;
-  for (auto prop : m_properties) {
+  for (const auto &prop : m_properties) {
     if (prop.prop->checkOption(globalOptionName)) {
       auto const name = getParameterName(prop.prop);
       globals << name;
@@ -2117,7 +2117,7 @@ QStringList FunctionTreeView::getGlobalParameters() const {
 }
 
 void FunctionTreeView::setGlobalParameters(const QStringList &globals) {
-  for (auto ap : m_properties) {
+  for (const auto &ap : m_properties) {
     auto prop = ap.prop;
     if (!prop->hasOption(globalOptionName))
       continue;

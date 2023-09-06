@@ -457,7 +457,7 @@ void CorelliCalibrationDatabase::exec() {
   saveCalibrationTable(calibDatabaseDir);
 
   // Clean up memory
-  for (auto &[compname, calibws] : component_caibws_map) {
+  for (const auto &[compname, calibws] : component_caibws_map) {
     if (calibws) {
       g_log.debug() << "Removing " << compname << "calibration table from ADS\n";
       AnalysisDataService::Instance().remove(calibws->getName());
@@ -518,7 +518,7 @@ void CorelliCalibrationDatabase::updateComponentDatabaseFiles(const std::string 
 void CorelliCalibrationDatabase::loadNonCalibratedComponentDatabase(
     const std::string &calibdbdir, std::map<std::string, TableWorkspace_sptr> &calibwsmap) {
   // go through all the components
-  for (auto &[componentname, componentcaltable] : calibwsmap) {
+  for (const auto &[componentname, componentcaltable] : calibwsmap) {
     // check whether the calibration workspace has been loaded
     if (componentcaltable) // skip if it has been loaded
       continue;
@@ -551,8 +551,8 @@ void CorelliCalibrationDatabase::createOutputCalibrationTable(std::map<std::stri
   CorelliCalibration::CalibrationTableHandler handler = CorelliCalibration::CalibrationTableHandler();
   handler.setCalibrationTable(mOutputWS);
 
-  for (auto componentname : orderedcomponents) {
-    auto componentcaltable = calibwsmap[componentname];
+  for (const auto &componentname : orderedcomponents) {
+    const auto componentcaltable = calibwsmap[componentname];
     if (componentcaltable) {
       // only take care of calibrated components (before and now)
       auto lastpos = CorelliCalibration::CalibrationTableHandler::getLatestCalibratedPosition(componentcaltable);
@@ -675,7 +675,7 @@ std::string CorelliCalibrationDatabase::joinPath(const std::string &directory, c
 void CorelliCalibrationDatabase::setComponentMap(const std::vector<std::string> &componentnames,
                                                  std::map<std::string, DataObjects::TableWorkspace_sptr> &compmap) {
   // Add entries
-  for (auto compname : componentnames)
+  for (const auto &compname : componentnames)
     compmap[compname] = nullptr;
 }
 

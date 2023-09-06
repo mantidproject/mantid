@@ -196,7 +196,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
   // Get a list of the other time-series logs in the input workspace
   auto otherLogs = getNumberSeriesLogs();
   // Add a column for each of these 'other' logs
-  for (auto &otherLog : otherLogs) {
+  for (const auto &otherLog : otherLogs) {
     auto newColumn = outputWorkspace->addColumn("double", otherLog.first);
     // Set these columns to be containing X values
     newColumn->setPlotType(1);
@@ -235,7 +235,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
     interruption_point();
 
     // filter the logs
-    for (auto &otherLog : otherLogs) {
+    for (const auto &otherLog : otherLogs) {
       // Calculate the average value of each 'other' log for the current value
       // of the main log
       // Have to (maybe inefficiently) fetch back column by name - move outside
@@ -266,7 +266,7 @@ void SumEventsByLogValue::filterEventList(const API::IEventList &eventList, cons
     return;
 
   const auto pulseTimes = eventList.getPulseTimes();
-  for (auto pulseTime : pulseTimes) {
+  for (const auto &pulseTime : pulseTimes) {
     // Find the value of the log at the time of this event
     // This algorithm is really concerned with 'slow' logs so we don't care
     // about
@@ -333,7 +333,7 @@ void SumEventsByLogValue::addMonitorCounts(const ITableWorkspace_sptr &outputWor
 std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>> SumEventsByLogValue::getNumberSeriesLogs() {
   std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>> numberSeriesProps;
   const auto &logs = m_inputWorkspace->run().getLogData();
-  for (auto log : logs) {
+  for (const auto &log : logs) {
     const std::string logName = log->name();
     // Don't add the log that's the one being summed against
     if (logName == m_logName)
@@ -390,7 +390,7 @@ template <typename T> void SumEventsByLogValue::createBinnedOutput(const Kernel:
     PARALLEL_START_INTERRUPT_REGION
     const IEventList &eventList = m_inputWorkspace->getSpectrum(spec);
     const auto pulseTimes = eventList.getPulseTimes();
-    for (auto pulseTime : pulseTimes) {
+    for (const auto &pulseTime : pulseTimes) {
       // Find the value of the log at the time of this event
       const double logValue = log->getSingleValue(pulseTime);
       if (logValue >= XValues.front() && logValue < XValues.back()) {

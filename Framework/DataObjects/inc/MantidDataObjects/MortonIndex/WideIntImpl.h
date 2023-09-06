@@ -792,7 +792,7 @@ public:
   constexpr static wide_integer<Bits, Signed> from_str(const char *c) {
     wide_integer<Bits, Signed> res = 0;
 
-    bool is_neg = is_same<Signed, signed>::value && *c == '-';
+    const bool is_neg = is_same<Signed, signed>::value && *c == '-';
     if (is_neg) {
       ++c;
     }

@@ -280,7 +280,7 @@ bool SaveReflectometryAscii::checkGroups() {
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getPropertyValue("InputWorkspace"));
     if (!group)
       return false;
-    for (auto i : group->getAllItems()) {
+    for (const auto &i : group->getAllItems()) {
       if (i->getName().empty())
         g_log.warning("InputWorkspace must have a name, skip");
       else {
