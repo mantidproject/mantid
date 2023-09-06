@@ -72,7 +72,7 @@ requirements:
     - openssl
     - euphonic {{ euphonic }}
     - toml
-    - libglu  # [linux]]
+    - libglu  # [linux]
     - joblib
 
 about:
