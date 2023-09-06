@@ -11,7 +11,6 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidHistogramData/Slice.h"
 #include "MantidIndexing/Extract.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -61,6 +60,22 @@ std::map<std::string, std::string> ExtractSpectra::validateInputs() {
       helpMessages["XMax"] = "XMax must be greater than XMin";
     }
   }
+
+  if (!isDefault("StartWorkspaceIndex")) {
+    const int minSpec_i = getProperty("StartWorkspaceIndex");
+    auto minSpec = static_cast<size_t>(minSpec_i);
+    API::MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+    const size_t numberOfSpectra = ws->indexInfo().globalSize();
+    int maxSpec_i = getProperty("EndWorkspaceIndex");
+    auto maxSpec = static_cast<size_t>(maxSpec_i);
+    if (isEmpty(maxSpec_i))
+      maxSpec = numberOfSpectra - 1;
+    if (maxSpec < minSpec) {
+      helpMessages["StartWorkspaceIndex"] = "StartWorkspaceIndex must be less than or equal to EndWorkspaceIndex";
+      helpMessages["EndWorkspaceIndex"] = "EndWorkspaceIndex must be greater than or equal to StartWorkspaceIndex";
+    }
+  }
+
   return helpMessages;
 }
 
@@ -111,7 +126,7 @@ void ExtractSpectra::init() {
  */
 void ExtractSpectra::exec() {
   m_inputWorkspace = getProperty("InputWorkspace");
-  m_histogram = m_inputWorkspace->isHistogramData();
+  m_isHistogramData = m_inputWorkspace->isHistogramData();
   m_commonBoundaries = m_inputWorkspace->isCommonBins();
   this->checkProperties();
 
@@ -131,6 +146,7 @@ void ExtractSpectra::exec() {
   }
   setProperty("OutputWorkspace", m_inputWorkspace);
 
+  // don't trim x-range if those values are not specified
   if (isDefault("XMin") && isDefault("XMax"))
     return;
 
@@ -144,10 +160,11 @@ void ExtractSpectra::exec() {
 /// Execute the algorithm in case of a histogrammed data.
 void ExtractSpectra::execHistogram() {
   auto size = static_cast<int>(m_inputWorkspace->getNumberHistograms());
+  auto croppedCommonXHistogram = getCroppedXHistogram(*m_inputWorkspace);
   Progress prog(this, 0.0, 1.0, size);
   for (int i = 0; i < size; ++i) {
     if (m_commonBoundaries) {
-      m_inputWorkspace->setHistogram(i, slice(m_inputWorkspace->histogram(i), m_minX, m_maxX - m_histogram));
+      this->cropCommon(*m_inputWorkspace, croppedCommonXHistogram, i);
     } else {
       this->cropRagged(*m_inputWorkspace, i);
     }
@@ -156,48 +173,107 @@ void ExtractSpectra::execHistogram() {
   }
 }
 
-namespace { // anonymous namespace
+/** Returns a pointer to a cropped X Histogram to be used as the X Histogram
+ *  for each of the spectra in the new cropped workspace
+ *  @param workspace :: The workspace from which to get the cropped X Histogram
+ *  @return XHistogram :: Pointer to cropped X Histogram from the workspace
+ */
+const Kernel::cow_ptr<Mantid::HistogramData::HistogramX>
+ExtractSpectra::getCroppedXHistogram(const API::MatrixWorkspace &workspace) {
+  const auto hist = workspace.histogram(0);
+  auto begin = m_minXIndex;
+  auto end = histXMaxIndex();
 
-template <class T> struct eventFilter {
-  eventFilter(const double minValue, const double maxValue) : minValue(minValue), maxValue(maxValue) {}
+  auto cropped(hist);
+  cropped.resize(end - begin);
 
-  bool operator()(const T &value) {
-    const double tof = value.tof();
-    return !(tof <= maxValue && tof >= minValue);
+  auto xEnd = hist.xMode() == Histogram::XMode::Points ? end : end + 1;
+  cropped.mutableX().assign(hist.x().begin() + begin, hist.x().begin() + xEnd);
+  return cropped.sharedX();
+}
+
+/** Crops the given workspace in accordance with m_minX and m_maxX
+ *  @param workspace :: The output workspace to crop
+ *  @param XHistogram :: Pointer to the cropped X Histogram to be used in the output workspace
+ *  @param index :: The workspace index of the spectrum
+ */
+void ExtractSpectra::cropCommon(API::MatrixWorkspace &workspace,
+                                Kernel::cow_ptr<Mantid::HistogramData::HistogramX> XHistogram, int index) {
+  const auto hist = workspace.histogram(index);
+  auto begin = m_minXIndex;
+  auto end = histXMaxIndex();
+
+  auto cropped(hist);
+  cropped.resize(end - begin);
+
+  cropped.setSharedX(XHistogram);
+
+  if (cropped.sharedY())
+    cropped.mutableY().assign(hist.y().begin() + begin, hist.y().begin() + end);
+  if (cropped.sharedE())
+    cropped.mutableE().assign(hist.e().begin() + begin, hist.e().begin() + end);
+  if (cropped.sharedDx())
+    cropped.mutableDx().assign(hist.dx().begin() + begin, hist.dx().begin() + end);
+
+  workspace.setHistogram(index, cropped);
+}
+
+/** Zeroes all data points outside the X values given
+ *  @param workspace :: The output workspace to crop
+ *  @param index :: The workspace index of the spectrum
+ */
+void ExtractSpectra::cropRagged(MatrixWorkspace &workspace, int index) {
+  auto &Y = workspace.mutableY(index);
+  auto &E = workspace.mutableE(index);
+  const size_t size = Y.size();
+  size_t startX = this->getXMinIndex(index);
+  if (startX > size)
+    startX = size;
+  for (size_t i = 0; i < startX; ++i) {
+    Y[i] = 0.0;
+    E[i] = 0.0;
   }
+  size_t endX = this->getXMaxIndex(index);
+  if (endX > 0 && m_isHistogramData)
+    endX -= 1;
+  for (size_t i = endX; i < size; ++i) {
+    Y[i] = 0.0;
+    E[i] = 0.0;
+  }
+}
 
-  double minValue;
-  double maxValue;
-};
-
+namespace { // anonymous namespace
 template <class T> void filterEventsHelper(std::vector<T> &events, const double xmin, const double xmax) {
-  events.erase(std::remove_if(events.begin(), events.end(), eventFilter<T>(xmin, xmax)), events.end());
+  events.erase(std::remove_if(events.begin(), events.end(),
+                              [xmin, xmax](const T &event) {
+                                const double tof = event.tof();
+                                return bool(tof < xmin || tof > xmax);
+                              }),
+               events.end());
 }
 } // namespace
 
-/** Executes the algorithm
+/**
+ * Executes the algorithm. This does not sort the events because the method of removing events outside of range looks at
+ * all of the events.
+ *
  *  @throw std::out_of_range If a property is set to an invalid value for the
  * input workspace
  */
 void ExtractSpectra::execEvent() {
-  double minX_val = getProperty("XMin");
-  double maxX_val = getProperty("XMax");
-  if (isEmpty(minX_val))
-    minX_val = eventW->getTofMin();
-  if (isEmpty(maxX_val))
-    maxX_val = eventW->getTofMax();
+  // use min/max from workspace if the values aren't supplied by the user
+  const double minX_val = isDefault("XMin") ? eventW->getTofMin() : getProperty("XMin");
+  const double maxX_val = isDefault("XMax") ? eventW->getTofMax() : getProperty("XMax");
 
   BinEdges binEdges(2);
   if (m_commonBoundaries) {
     auto &oldX = m_inputWorkspace->x(0);
-    binEdges = BinEdges(oldX.begin() + m_minX, oldX.begin() + m_maxX);
+    binEdges = BinEdges(oldX.begin() + m_minXIndex, oldX.begin() + m_maxXIndex);
   }
-  if (m_maxX - m_minX < 2) {
+  if (m_maxXIndex - m_minXIndex < 2) {
     // create new output X axis
     binEdges = {minX_val, maxX_val};
   }
-
-  eventW->sortAll(TOF_SORT, nullptr);
 
   Progress prog(this, 0.0, 1.0, eventW->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*eventW))
@@ -205,19 +281,21 @@ void ExtractSpectra::execEvent() {
     PARALLEL_START_INTERRUPT_REGION
     EventList &el = eventW->getSpectrum(i);
 
-    switch (el.getEventType()) {
-    case TOF: {
-      filterEventsHelper(el.getEvents(), minX_val, maxX_val);
-      break;
-    }
-    case WEIGHTED: {
-      filterEventsHelper(el.getWeightedEvents(), minX_val, maxX_val);
-      break;
-    }
-    case WEIGHTED_NOTIME: {
-      filterEventsHelper(el.getWeightedEventsNoTime(), minX_val, maxX_val);
-      break;
-    }
+    if (!el.empty()) {
+      switch (el.getEventType()) {
+      case TOF: {
+        filterEventsHelper(el.getEvents(), minX_val, maxX_val);
+        break;
+      }
+      case WEIGHTED: {
+        filterEventsHelper(el.getWeightedEvents(), minX_val, maxX_val);
+        break;
+      }
+      case WEIGHTED_NOTIME: {
+        filterEventsHelper(el.getWeightedEventsNoTime(), minX_val, maxX_val);
+        break;
+      }
+      }
     }
 
     // If the X axis is NOT common, then keep the initial X axis, just clear the
@@ -226,7 +304,8 @@ void ExtractSpectra::execEvent() {
       const auto oldDx = el.pointStandardDeviations();
       el.setHistogram(binEdges);
       if (oldDx) {
-        el.setPointStandardDeviations(oldDx.begin() + m_minX, oldDx.begin() + (m_maxX - m_histogram));
+        auto end = histXMaxIndex();
+        el.setPointStandardDeviations(oldDx.begin() + m_minXIndex, oldDx.begin() + end);
       }
     }
     propagateBinMasking(*eventW, i);
@@ -238,12 +317,13 @@ void ExtractSpectra::execEvent() {
 
 /// Propagate bin masking if there is any.
 void ExtractSpectra::propagateBinMasking(MatrixWorkspace &workspace, const int i) const {
+  auto end = histXMaxIndex();
   if (workspace.hasMaskedBins(i)) {
     MatrixWorkspace::MaskList filteredMask;
     for (const auto &mask : workspace.maskedBins(i)) {
       const size_t maskIndex = mask.first;
-      if (maskIndex >= m_minX && maskIndex < m_maxX - m_histogram)
-        filteredMask[maskIndex - m_minX] = mask.second;
+      if (maskIndex >= m_minXIndex && maskIndex < end)
+        filteredMask[maskIndex - m_minXIndex] = mask.second;
     }
     if (filteredMask.size() > 0)
       workspace.setMaskedBins(i, filteredMask);
@@ -261,23 +341,26 @@ void ExtractSpectra::propagateBinMasking(MatrixWorkspace &workspace, const int i
  * input workspace
  */
 void ExtractSpectra::checkProperties() {
-  m_minX = this->getXMinIndex();
-  m_maxX = this->getXMaxIndex();
+  m_minXIndex = this->getXMinIndex();
+  m_maxXIndex = this->getXMaxIndex();
   const size_t xSize = m_inputWorkspace->x(0).size();
-  if (m_minX > 0 || m_maxX < xSize) {
-    if (m_minX > m_maxX) {
+  if (m_minXIndex > 0 || m_maxXIndex < xSize) {
+    if (m_minXIndex > m_maxXIndex) {
       throw std::out_of_range("XMin must be less than XMax");
     }
     m_croppingInX = true;
     if (m_commonBoundaries && !std::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace) &&
-        (m_minX == m_maxX || (m_histogram && m_maxX == m_minX + 1))) {
-      m_minX--;
-      m_maxX = m_minX + 1 + m_histogram;
+        (m_minXIndex == m_maxXIndex || (m_isHistogramData && m_maxXIndex == m_minXIndex + 1))) {
+      m_minXIndex--;
+      m_maxXIndex = m_minXIndex + 1;
+      if (m_isHistogramData) {
+        m_maxXIndex += 1;
+      }
     }
   }
   if (!m_commonBoundaries) {
-    m_minX = 0;
-    m_maxX = static_cast<int>(m_inputWorkspace->x(0).size());
+    m_minXIndex = 0;
+    m_maxXIndex = static_cast<int>(m_inputWorkspace->x(0).size());
   }
 
   // The hierarchy of inputs is (one is being selected):
@@ -298,12 +381,6 @@ void ExtractSpectra::checkProperties() {
       auto maxSpec = static_cast<size_t>(maxSpec_i);
       if (isEmpty(maxSpec_i))
         maxSpec = numberOfSpectra - 1;
-      if (maxSpec < minSpec) {
-        g_log.error("StartWorkspaceIndex must be less than or equal to "
-                    "EndWorkspaceIndex");
-        throw std::out_of_range("StartWorkspaceIndex must be less than or equal "
-                                "to EndWorkspaceIndex");
-      }
       if (maxSpec - minSpec + 1 != numberOfSpectra) {
         m_workspaceIndexList.reserve(maxSpec - minSpec + 1);
         for (size_t i = minSpec; i <= maxSpec; ++i)
@@ -363,28 +440,11 @@ size_t ExtractSpectra::getXMaxIndex(const size_t wsIndex) {
   return xIndex;
 }
 
-/** Zeroes all data points outside the X values given
- *  @param workspace :: The output workspace to crop
- *  @param index ::         The workspace index of the spectrum
- */
-void ExtractSpectra::cropRagged(MatrixWorkspace &workspace, int index) {
-  auto &Y = workspace.mutableY(index);
-  auto &E = workspace.mutableE(index);
-  const size_t size = Y.size();
-  size_t startX = this->getXMinIndex(index);
-  if (startX > size)
-    startX = size;
-  for (size_t i = 0; i < startX; ++i) {
-    Y[i] = 0.0;
-    E[i] = 0.0;
+size_t ExtractSpectra::histXMaxIndex() const {
+  if (m_isHistogramData) {
+    return m_maxXIndex - 1;
   }
-  size_t endX = this->getXMaxIndex(index);
-  if (endX > 0)
-    endX -= m_histogram;
-  for (size_t i = endX; i < size; ++i) {
-    Y[i] = 0.0;
-    E[i] = 0.0;
-  }
+  return m_maxXIndex;
 }
 
 } // namespace Mantid::Algorithms

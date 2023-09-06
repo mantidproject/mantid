@@ -15,7 +15,7 @@ class MuonWorkspaceWrapper(object):
 
     A single instance of the wrapped workspace exists, but it is either in the ADS or stored in a
     class attribute. Either way, a single property "workspace" will always return it; with the
-    show() and hide() methods storing/retrieving it from the the ADS. The show() attribute takes a
+    show() and hide() methods storing/retrieving it from the ADS. The show() attribute takes a
     name, which is a string using a folder-like syntax to describe the workspaces location within a
     nested structure of group workspaces
 

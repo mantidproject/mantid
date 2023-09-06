@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """
     Classes for each reduction step. Those are kept separately
-    from the the interface class so that the HFIRReduction class could
+    from the interface class so that the HFIRReduction class could
     be used independently of the interface implementation
 """
 import xml.dom.minidom
@@ -15,7 +15,6 @@ from reduction_gui.reduction.reflectometer.refl_data_script import DataSets as R
 
 
 class DataSeries(BaseScriptElement):
-
     data_sets = []
 
     def __init__(self, data_class=REFLDataSets):

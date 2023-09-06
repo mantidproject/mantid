@@ -243,18 +243,20 @@ std::vector<double> ConjoinXRuns::getXAxis(const MatrixWorkspace_sptr &ws, doubl
     }
     xstart += double(s);
   } else {
-    // try time series first
+    // get the time filtering from the Run object
+    const TimeROI &timeroi = run.getTimeROI();
 
+    // try time series first
     auto timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData(m_logEntry));
     if (timeSeriesDouble) {
       // try double series
-      axis = timeSeriesDouble->filteredValuesAsVector();
+      axis = timeSeriesDouble->filteredValuesAsVector(&timeroi);
     } else {
       // try int series next
 
       auto timeSeriesInt = dynamic_cast<TimeSeriesProperty<int> *>(run.getLogData(m_logEntry));
       if (timeSeriesInt) {
-        std::vector<int> intAxis = timeSeriesInt->filteredValuesAsVector();
+        std::vector<int> intAxis = timeSeriesInt->filteredValuesAsVector(&timeroi);
         axis = std::vector<double>(intAxis.begin(), intAxis.end());
       } else {
         // then scalar

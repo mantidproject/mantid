@@ -105,8 +105,6 @@ domains = {
     "5237234+ewancook@users.noreply.github.com": "STFC",
     "40766142+SamJenkins1@users.noreply.github.com": "STFC",
     "aybamidele@gmail.com": "STFC",
-    "5237234+ewancook@users.noreply.github.com": "STFC",
-    "samjones714@gmail.com": "STFC",
     "40830825+robertapplin@users.noreply.github.com": "STFC",
     "robertgjapplin@gmail.com": "STFC",
     "luzpaz@users.noreply.github.com": "OTHERS",

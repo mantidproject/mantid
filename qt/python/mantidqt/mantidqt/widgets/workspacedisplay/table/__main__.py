@@ -12,11 +12,11 @@ import matplotlib
 
 matplotlib.use("Qt5Agg")
 
-from qtpy.QtWidgets import QApplication  # noqa: F402
+from qtpy.QtWidgets import QApplication
 
-from mantid.simpleapi import Load  # noqa: F402
-from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay  # noqa: F402
-import matplotlib.pyplot as plt  # noqa: F402
+from mantid.simpleapi import Load
+from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
+import matplotlib.pyplot as plt
 
 app = QApplication([])
 ws = Load("SavedTableWorkspace.nxs")

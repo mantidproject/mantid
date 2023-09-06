@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -23,7 +23,7 @@ namespace Algorithms {
     </UL>
 
 */
-class MANTID_ALGORITHMS_DLL CropWorkspaceRagged : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL CropWorkspaceRagged : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CropWorkspaceRagged"; }

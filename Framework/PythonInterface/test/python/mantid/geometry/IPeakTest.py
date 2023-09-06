@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.kernel import V3D
-from mantid.simpleapi import CreateSimulationWorkspace, CreatePeaksWorkspace
+from mantid.simpleapi import CreateSimulationWorkspace, CreatePeaksWorkspace, LoadInstrument
 import numpy as np
 import numpy.testing as npt
 
@@ -16,6 +16,8 @@ class IPeakTest(unittest.TestCase):
         # IPeak cannot currently be instatiated so this is a quick way
         # getting a handle to a peak object
         ws = CreateSimulationWorkspace("SXD", BinParams="1,1,10")
+        # load IDF pre cycle 19_1 when bank 1 upgraded and position was changed
+        LoadInstrument(Workspace=ws, Filename="SXD_Definition.xml", RewriteSpectraMap=False)
         peaks = CreatePeaksWorkspace(ws, 1)
         self._peak = peaks.getPeak(0)
 

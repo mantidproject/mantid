@@ -18,6 +18,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -28,9 +29,14 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::Kernel::Logger;
 using Types::Event::TofEvent;
-
 using namespace std;
+
+namespace {
+/// static Logger definition
+Logger g_log("FilterEventsTest");
+} // namespace
 
 /* TODO LIST
  *  1. Remove all Ptest
@@ -55,6 +61,7 @@ public:
   /** Test initialization
    */
   void test_Initialization() {
+    g_log.notice("\ntest_Initialization...");
     FilterEvents alg;
     alg.initialize();
 
@@ -72,6 +79,7 @@ public:
    * (5) "Experiment": 5 pulse times.  10 events in each pulse
    */
   void test_CreatedEventWorskpaceAndSplitter() {
+    g_log.notice("\ntest_CreatedEventWorskpaceAndSplitter...");
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
     int64_t tofdt = 10 * 1000 * 1000;
@@ -91,14 +99,79 @@ public:
     return;
   }
 
-  //----------------------------------------------------------------------------------------------
+  void test_protonCharge() {
+    g_log.notice("\ntest_protonCharge...");
+    int64_t runstart_i64 = 10000000000; // 10 seconds, beginning of the fake run
+    int64_t pulsedt = 10000000;         // 1/100 seconds in nanoseconds, time between consecutive pulses
+    int64_t tofdt = 1000000;            // 1 milisecond in nanoseconds, spacing between neutrons events within a pulse
+    size_t numpulses = 1000;
+
+    // Create EventWorkspace with 10 detector-banks, each bank containing one pixel.
+    // the total proton charge is 1000
+    EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+    AnalysisDataService::Instance().addOrReplace("TestProtonCharge", inpWS);
+
+    // Create SplittersWorkspace with 999 intervals and three output workspaces cycling every three pulses
+    // Notice below that the proton charge of the first pulse goes to the unfiltered workspace
+    // index   DateAndTime
+    //   0     1990-Jan-01 00:00:10.005000000
+    //   1     1990-Jan-01 00:00:10.015000000
+    //   2     1990-Jan-01 00:00:10.025000000
+    //   0     1990-Jan-01 00:00:10.035000000
+    //   1     1990-Jan-01 00:00:10.045000000
+    //   2     1990-Jan-01 00:00:10.055000000
+    //   0     1990-Jan-01 00:00:10.065000000
+    //...
+    //   2     1990-Jan-01 00:00:19.985000000
+    //  -1     1990-Jan-01 00:00:19.995000000
+    std::string name{"splitterPeriodic"};
+    int64_t start{runstart_i64 + 5000 * 1000}; // an offset of 5 miliseconds, in nanoseconds
+    int64_t end{runstart_i64 + pulsedt * static_cast<int64_t>(numpulses)};
+    int64_t splitInterval{pulsedt};
+    int splitterCount{3}; // number of destination workspaces
+    SplittersWorkspace_sptr splittersWorkspace = createPeriodSplitters(start, end, splitInterval, splitterCount);
+    AnalysisDataService::Instance().addOrReplace("SplitterPeriodic", splittersWorkspace);
+
+    FilterEvents filter;
+    filter.initialize();
+
+    // Set properties
+    filter.setProperty("InputWorkspace", "TestProtonCharge");
+    filter.setProperty("OutputWorkspaceBaseName", "PChargeSplit");
+    filter.setProperty("SplitterWorkspace", "SplitterPeriodic");
+    filter.setProperty("OutputTOFCorrectionWorkspace", "PChargeCorrection");
+    filter.setProperty("OutputUnfilteredEvents", true);
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(filter.execute());
+    TS_ASSERT(filter.isExecuted());
+
+    // Get output
+    int numsplittedws = filter.getProperty("NumberOutputWS");
+    TS_ASSERT_EQUALS(numsplittedws, 4);
+
+    std::vector<std::string> suffixes{"0", "1", "2", "unfiltered"};
+    std::vector<double> protonCharges;
+    for (const std::string &suffix : suffixes) {
+      EventWorkspace_sptr filteredws =
+          std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("PChargeSplit_" + suffix));
+      TS_ASSERT(filteredws);
+      protonCharges.emplace_back(filteredws->run().getProtonCharge());
+    }
+
+    // the first proton charge at 1990-Jan-01 00:00:10.000 goes to the unfiltered workspace because the first interval
+    // begins at 1990-Jan-01 00:00:10.005
+    std::vector<double> expectedProtonCharges{333.0, 333.0, 333.0, 1.0};
+    TS_ASSERT_EQUALS(protonCharges, expectedProtonCharges);
+  }
+
   /**  Filter events without any correction
    *  Event workspace:
    * (1) 10 detectors
-   * (2) Run starts @ 20000000000 seconds
-   * (3) Pulse length = 100*1000*1000 seconds
+   * (2) Run starts @ 20000000000 ns
+   * (3) Pulse length = 100*1000*1000 ns
    * (4) Within one pulse, two consecutive events/neutrons is apart for
-   *10*1000*1000 seconds
+   *10*1000*1000 ns
    * (5) "Experiment": 5 pulse times.  10 events in each pulse
    *
    * In this test
@@ -117,15 +190,27 @@ public:
    *  5: 20400000000, 20465000000, 2
    */
   void test_FilterNoCorrection() {
-    // Create EventWorkspace and SplittersWorkspace
-    int64_t runstart_i64 = 20000000000;
-    int64_t pulsedt = 100 * 1000 * 1000;
-    int64_t tofdt = 10 * 1000 * 1000;
+    g_log.notice("\ntest_FilterNoCorrection...");
+    int64_t runstart_i64 = 20000000000;  // 20 seconds, beginning of the fake run
+    int64_t pulsedt = 100 * 1000 * 1000; // 100 miliseconds, time between consecutive pulses
+    int64_t tofdt = 10 * 1000 * 1000;    // 10 miliseconds, spacing between neutrons events within a pulse
     size_t numpulses = 5;
 
+    // Create EventWorkspace with 10 detector-banks, each bank containing one pixel.
     EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
+    // Create SplittersWorkspace
+    // index         DateandTime        time-int64_t
+    //   0    1990-Jan-01 00:00:20      20000000000
+    //   1    1990-Jan-01 00:00:20.035  20035000000
+    //  -1    1990-Jan-01 00:00:20.195  20195000000
+    //   2    1990-Jan-01 00:00:20.200  20200000000
+    //  -1    1990-Jan-01 00:00:20.265  20265000000
+    //   2    1990-Jan-01 00:00:20.300  20300000000
+    //  -1    1990-Jan-01 00:00:20.365  20365000000
+    //   2    1990-Jan-01 00:00:20.400  20400000000
+    //  -1    1990-Jan-01 00:00:20.465  20465000000
     SplittersWorkspace_sptr splws = createSplittersWorkspace(runstart_i64, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
 
@@ -137,6 +222,7 @@ public:
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS01");
     filter.setProperty("SplitterWorkspace", "Splitter02");
     filter.setProperty("OutputTOFCorrectionWorkspace", "CorrectionWS");
+    filter.setProperty("OutputUnfilteredEvents", true);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
@@ -152,38 +238,20 @@ public:
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
-    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 2);
-
-    // check splitter log
-    TS_ASSERT(filteredws0->run().hasProperty("splitter"));
-    Kernel::TimeSeriesProperty<int> *splitter0 =
-        dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws0->run().getProperty("splitter"));
-    TS_ASSERT(splitter0);
-    TS_ASSERT_EQUALS(splitter0->size(), 2);
-    TS_ASSERT_EQUALS(splitter0->nthTime(0), Types::Core::DateAndTime(runstart_i64));
-    TS_ASSERT_EQUALS(splitter0->nthValue(0), 1);
-    TS_ASSERT_EQUALS(splitter0->nthTime(1), Types::Core::DateAndTime(20035000000));
-    TS_ASSERT_EQUALS(splitter0->nthValue(1), 0);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 1);
+    TS_ASSERT_EQUALS(filteredws0->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20 to 1990-Jan-01 00:00:20.035000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws0->run().getProperty("duration")->value()), 0.035, 1.E-9);
 
     // Check Workspace group 1
     EventWorkspace_sptr filteredws1 =
         std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
-    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 3);
-
-    // check splitter log
-    TS_ASSERT(filteredws0->run().hasProperty("splitter"));
-    Kernel::TimeSeriesProperty<int> *splitter1 =
-        dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws1->run().getProperty("splitter"));
-    TS_ASSERT(splitter1);
-    TS_ASSERT_EQUALS(splitter1->size(), 3);
-    TS_ASSERT_EQUALS(splitter1->nthTime(0), Types::Core::DateAndTime(runstart_i64));
-    TS_ASSERT_EQUALS(splitter1->nthValue(0), 0);
-    TS_ASSERT_EQUALS(splitter1->nthTime(1), Types::Core::DateAndTime(20035000000));
-    TS_ASSERT_EQUALS(splitter1->nthValue(1), 1);
-    TS_ASSERT_EQUALS(splitter1->nthTime(2), Types::Core::DateAndTime(20195000000));
-    TS_ASSERT_EQUALS(splitter1->nthValue(2), 0);
+    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 1);
+    TS_ASSERT_EQUALS(filteredws1->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.035000000 to 1990-Jan-01 00:00:20.195000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws1->run().getProperty("duration")->value()), 0.160, 1.E-9);
 
     // Check Workspace group 2
     EventWorkspace_sptr filteredws2 =
@@ -191,56 +259,32 @@ public:
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 21);
     TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 3);
-
+    TS_ASSERT_EQUALS(filteredws2->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.200000000 to 1990-Jan-01 00:00:20.265000000\n"
+                     "1: 1990-Jan-01 00:00:20.300000000 to 1990-Jan-01 00:00:20.365000000\n"
+                     "2: 1990-Jan-01 00:00:20.400000000 to 1990-Jan-01 00:00:20.465000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws2->run().getProperty("duration")->value()), 0.195, 1.E-9);
     EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();
-
     TofEvent eventmin = elist3.getEvent(0);
     TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(), runstart_i64 + pulsedt * 2);
     TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
-
     TofEvent eventmax = elist3.getEvent(20);
     TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(), runstart_i64 + pulsedt * 4);
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000), 1.0E-4);
 
-    // check splitter log
-    TS_ASSERT(filteredws2->run().hasProperty("splitter"));
-    Kernel::TimeSeriesProperty<int> *splitter2 =
-        dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws2->run().getProperty("splitter"));
-    TS_ASSERT(splitter2);
-    TS_ASSERT_EQUALS(splitter2->size(), 7);
-
-    TS_ASSERT_EQUALS(splitter2->nthTime(0), Types::Core::DateAndTime(runstart_i64));
-    TS_ASSERT_EQUALS(splitter2->nthValue(0), 0);
-
-    TS_ASSERT_EQUALS(splitter2->nthTime(1), Types::Core::DateAndTime(20200000000));
-    TS_ASSERT_EQUALS(splitter2->nthValue(1), 1);
-    TS_ASSERT_EQUALS(splitter2->nthTime(2), Types::Core::DateAndTime(20265000000));
-    TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
-
-    TS_ASSERT_EQUALS(splitter2->nthTime(3), Types::Core::DateAndTime(20300000000));
-    TS_ASSERT_EQUALS(splitter2->nthValue(3), 1);
-    TS_ASSERT_EQUALS(splitter2->nthTime(4), Types::Core::DateAndTime(20365000000));
-    TS_ASSERT_EQUALS(splitter2->nthValue(4), 0);
-
-    TS_ASSERT_EQUALS(splitter2->nthTime(5), Types::Core::DateAndTime(20400000000));
-    TS_ASSERT_EQUALS(splitter2->nthValue(5), 1);
-    TS_ASSERT_EQUALS(splitter2->nthTime(6), Types::Core::DateAndTime(20465000000));
-    TS_ASSERT_EQUALS(splitter2->nthValue(6), 0);
-
-    // verify the log: duration
-    std::string duration0str = filteredws0->run().getProperty("duration")->value();
-    double duration0 = std::stod(duration0str);
-    TS_ASSERT_DELTA(duration0, 35000000 * 1.E-9, 1.E-9);
-
-    std::string duration1str = filteredws1->run().getProperty("duration")->value();
-    double duration1 = std::stod(duration1str);
-    TS_ASSERT_DELTA(duration1, (20195000000 - 20035000000) * 1.E-9, 1.E-9);
-
-    std::string duration2str = filteredws2->run().getProperty("duration")->value();
-    double duration2 = std::stod(duration2str);
-    TS_ASSERT_DELTA(duration2,
-                    (20265000000 - 20200000000 + 20365000000 - 20300000000 + 20465000000 - 20400000000) * 1.E-9, 1.E-9);
+    // check unfiltered workspace
+    EventWorkspace_sptr unfilteredws =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_unfiltered"));
+    TS_ASSERT(unfilteredws);
+    TS_ASSERT_EQUALS(unfilteredws->getSpectrum(1).getNumberEvents(), 9);
+    TS_ASSERT_EQUALS(unfilteredws->run().getProtonCharge(), 0);
+    TS_ASSERT_EQUALS(unfilteredws->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.195000000 to 1990-Jan-01 00:00:20.200000000\n"
+                     "1: 1990-Jan-01 00:00:20.265000000 to 1990-Jan-01 00:00:20.300000000\n"
+                     "2: 1990-Jan-01 00:00:20.365000000 to 1990-Jan-01 00:00:20.400000000\n"
+                     "3: 1990-Jan-01 00:00:20.465000000 to 1990-Jan-01 00:00:20.500000000\n");
+    TS_ASSERT_DELTA(std::stod(unfilteredws->run().getProperty("duration")->value()), 0.110, 1.E-9);
 
     // Clean up
     AnalysisDataService::Instance().remove("Test02");
@@ -254,8 +298,7 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /**  Filter events without any correction and test for user-specified
-   *workspace starting value
+  /**  Filter events without any correction and test for user-specified workspace starting value
    *  Event workspace:
    * (1) 10 detectors
    * (2) Run starts @ 20000000000 seconds
@@ -270,6 +313,7 @@ public:
    *events
    */
   void test_FilterWOCorrection2() {
+    g_log.notice("\ntest_FilterWOCorrection2...");
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -279,6 +323,17 @@ public:
     EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
+    // Create SplittersWorkspace
+    // index         DateandTime        time-int64_t
+    //   0    1990-Jan-01 00:00:20      20000000000
+    //   1    1990-Jan-01 00:00:20.035  20035000000
+    //  -1    1990-Jan-01 00:00:20.195  20195000000
+    //   2    1990-Jan-01 00:00:20.200  20200000000
+    //  -1    1990-Jan-01 00:00:20.265  20265000000
+    //   2    1990-Jan-01 00:00:20.300  20300000000
+    //  -1    1990-Jan-01 00:00:20.365  20365000000
+    //   2    1990-Jan-01 00:00:20.400  20400000000
+    //  -1    1990-Jan-01 00:00:20.465  20465000000
     SplittersWorkspace_sptr splws = createSplittersWorkspace(runstart_i64, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
 
@@ -289,7 +344,7 @@ public:
     filter.setProperty("InputWorkspace", "Test02");
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS01");
     filter.setProperty("SplitterWorkspace", "Splitter02");
-    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
+    filter.setProperty("OutputUnfilteredEvents", true);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
@@ -297,39 +352,64 @@ public:
 
     // Get output
     int numsplittedws = filter.getProperty("NumberOutputWS");
-    TS_ASSERT_EQUALS(numsplittedws, 3);
+    TS_ASSERT_EQUALS(numsplittedws, 4);
 
-    // 4.1 Workspace group 0
+    // Workspace group 0
     EventWorkspace_sptr filteredws0 =
-        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 1);
+    TS_ASSERT_EQUALS(filteredws0->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20 to 1990-Jan-01 00:00:20.035000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws0->run().getProperty("duration")->value()), 0.035, 1.E-9);
 
-    // 4.2 Workspace group 1
+    // Workspace group 1
     EventWorkspace_sptr filteredws1 =
-        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
+    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 1);
+    TS_ASSERT_EQUALS(filteredws1->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.035000000 to 1990-Jan-01 00:00:20.195000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws1->run().getProperty("duration")->value()), 0.160, 1.E-9);
 
-    // 4.3 Workspace group 2
+    // Workspace group 2
     EventWorkspace_sptr filteredws2 =
-        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_3"));
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 21);
-
+    TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 3);
+    TS_ASSERT_EQUALS(filteredws2->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.200000000 to 1990-Jan-01 00:00:20.265000000\n"
+                     "1: 1990-Jan-01 00:00:20.300000000 to 1990-Jan-01 00:00:20.365000000\n"
+                     "2: 1990-Jan-01 00:00:20.400000000 to 1990-Jan-01 00:00:20.465000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws2->run().getProperty("duration")->value()), 0.195, 1.E-9);
     EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();
-
     TofEvent eventmin = elist3.getEvent(0);
     TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(), runstart_i64 + pulsedt * 2);
     TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
-
     TofEvent eventmax = elist3.getEvent(20);
     TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(), runstart_i64 + pulsedt * 4);
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000), 1.0E-4);
 
-    // 5. Clean up
+    // Workspace Unfiltered
+    // DEBUG: add tests for the unfiltered workspace
+    EventWorkspace_sptr unfilteredws =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS01_unfiltered"));
+    TS_ASSERT(unfilteredws);
+    TS_ASSERT_EQUALS(unfilteredws->getSpectrum(1).getNumberEvents(), 9);
+    TS_ASSERT_EQUALS(unfilteredws->run().getProtonCharge(), 0);
+    TS_ASSERT_EQUALS(unfilteredws->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.195000000 to 1990-Jan-01 00:00:20.200000000\n"
+                     "1: 1990-Jan-01 00:00:20.265000000 to 1990-Jan-01 00:00:20.300000000\n"
+                     "2: 1990-Jan-01 00:00:20.365000000 to 1990-Jan-01 00:00:20.400000000\n"
+                     "3: 1990-Jan-01 00:00:20.465000000 to 1990-Jan-01 00:00:20.500000000\n");
+    TS_ASSERT_DELTA(std::stod(unfilteredws->run().getProperty("duration")->value()), 0.110, 1.E-9);
+
+    // Clean up
     AnalysisDataService::Instance().remove("Test02");
     AnalysisDataService::Instance().remove("Splitter02");
     std::vector<std::string> outputwsnames = filter.getProperty("OutputWorkspaceNames");
@@ -343,7 +423,8 @@ public:
   //----------------------------------------------------------------------------------------------
   /**  Filter test with TOF correction
    */
-  void test_FilterWithCustumizedCorrection() {
+  void test_FilterWithCustomizedCorrection() {
+    g_log.notice("\ntest_FilterWithCustomizedCorrection...");
     // 1. Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -353,6 +434,28 @@ public:
     EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("EventData", inpWS);
 
+    // Create SplittersWorkspace with two destination workspaces plus the unfiltered workspace
+    // index         DateandTime        time-int64_t
+    //   0    1990-Jan-01 00:00:20.020  20000000000
+    //  -1    1990-Jan-01 00:00:20.040  20040000000
+    //   1    1990-Jan-01 00:00:20.060  20060000000
+    //  -1    1990-Jan-01 00:00:20.080  20080000000
+    //   0    1990-Jan-01 00:00:20.120  20120000000
+    //  -1    1990-Jan-01 00:00:20.140  20140000000
+    //   1    1990-Jan-01 00:00:20.160  20160000000
+    //  -1    1990-Jan-01 00:00:20.180  20180000000
+    //   0    1990-Jan-01 00:00:20.220  20220000000
+    //  -1    1990-Jan-01 00:00:20.240  20240000000
+    //   1    1990-Jan-01 00:00:20.260  20260000000
+    //  -1    1990-Jan-01 00:00:20.280  20280000000
+    //   0    1990-Jan-01 00:00:20.320  20320000000
+    //  -1    1990-Jan-01 00:00:20.340  20340000000
+    //   1    1990-Jan-01 00:00:20.360  20360000000
+    //  -1    1990-Jan-01 00:00:20.380  20380000000
+    //   0    1990-Jan-01 00:00:20.420  20420000000
+    //  -1    1990-Jan-01 00:00:20.440  20440000000
+    //   1    1990-Jan-01 00:00:20.460  20460000000
+    //  -1    1990-Jan-01 00:00:20.480  20480000000
     SplittersWorkspace_sptr splws = createFastFreqLogSplitter(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("SplitterTableX", splws);
     TS_ASSERT_EQUALS(splws->rowCount(), static_cast<size_t>(numpulses) * 2);
@@ -364,45 +467,50 @@ public:
     FilterEvents filter;
     filter.initialize();
 
-    // 2. Set properties
+    // Set properties
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("InputWorkspace", "EventData"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("OutputWorkspaceBaseName", "SplittedDataX"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("CorrectionToSample", "Customized"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("DetectorTOFCorrectionWorkspace", "TimeCorrectionTableX"));
     TS_ASSERT_THROWS_NOTHING(filter.setProperty("SplitterWorkspace", splws));
+    TS_ASSERT_THROWS_NOTHING(filter.setProperty("OutputUnfilteredEvents", true));
 
-    // 3. Execute
+    // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
     TS_ASSERT(filter.isExecuted());
 
-    // 4. Get output
-    // 4.1 Workspace group 0
+    // Get output
+    // Workspace group 0
     EventWorkspace_sptr filteredws0 =
         std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SplittedDataX_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 15);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(9).getNumberEvents(), 15);
-    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 5);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 0);
 
-    // 4.2 Workspace group 1
+    // Workspace group 1
     EventWorkspace_sptr filteredws1 =
         std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SplittedDataX_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 10);
-    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 5);
-
-    // 4.3 Some individual events
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 0);
+    // Some individual events
     EventList elist3 = filteredws1->getSpectrum(3);
     elist3.sortPulseTimeTOF();
-
     if (elist3.getNumberEvents() > 0) {
       TofEvent eventmin = elist3.getEvent(0);
       TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(), runstart_i64);
       TS_ASSERT_DELTA(eventmin.tof(), 80 * 1000, 1.0E-4);
     }
 
-    // 5. Clean
+    // Unfiltered workspace
+    EventWorkspace_sptr unfilteredws =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SplittedDataX_unfiltered"));
+    TS_ASSERT(unfilteredws);
+    TS_ASSERT_EQUALS(unfilteredws->getSpectrum(1).getNumberEvents(), 25);
+    TS_ASSERT_EQUALS(unfilteredws->run().getProtonCharge(), 5);
+    // Clean
     AnalysisDataService::Instance().remove("EventData");
     AnalysisDataService::Instance().remove("TimeCorrectionTableX");
     AnalysisDataService::Instance().remove("SplitterTableX");
@@ -419,11 +527,28 @@ public:
   /** Test filtering with correction of direct geometry
    */
   void test_FilterElasticCorrection() {
-    EventWorkspace_sptr ws = createEventWorkspaceElastic(0, 1000000);
+    g_log.notice("\ntest_FilterElasticCorrection...");
+    int64_t runstart{20000000000}; // start run date from Mantid's Epoch, in nanoseconds
+    int64_t pulsedt{1000000};      // time between consecutive pulses, in nanoseconds
+
+    EventWorkspace_sptr ws = createEventWorkspaceElastic(runstart, pulsedt);
     AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 10000);
 
-    MatrixWorkspace_sptr splws = createMatrixSplittersElastic();
+    // Create SplittersWorkspace with 8 destination-workspaces plus the unfiltered workspace
+    // index            DateandTime
+    //  2     1990-Jan-01 00:00:20.001000000
+    //  5     1990-Jan-01 00:00:20.001300000
+    //  4     1990-Jan-01 00:00:20.002000000
+    // -1     1990-Jan-01 00:00:20.002190000
+    //  6     1990-Jan-01 00:00:20.004000000
+    //  7     1990-Jan-01 00:00:20.005000000
+    //  8     1990-Jan-01 00:00:20.005500000
+    // -1     1990-Jan-01 00:00:20.007000000
+    //  1     1990-Jan-01 00:00:20.008000000
+    //  3     1990-Jan-01 00:00:20.009000000
+    // -1     1990-Jan-01 00:00:20.010000000
+    MatrixWorkspace_sptr splws = createMatrixSplittersElastic(runstart);
     AnalysisDataService::Instance().addOrReplace("SplitterTableX", splws);
 
     // Run the filtering
@@ -434,6 +559,7 @@ public:
     filter.setProperty("OutputWorkspaceBaseName", "SplittedDataElastic");
     filter.setProperty("CorrectionToSample", "Elastic");
     filter.setProperty("SplitterWorkspace", "SplitterTableX");
+    filter.setProperty("OutputUnfilteredEvents", true);
 
     TS_ASSERT_THROWS_NOTHING(filter.execute());
     TS_ASSERT(filter.isExecuted());
@@ -476,10 +602,14 @@ public:
   /** Test filtering with correction of direct geometry
    */
   void test_FilterDGCorrection() {
-    EventWorkspace_sptr ws = createEventWorkspaceDirect(0, 1000000);
+    g_log.notice("\ntest_FilterDGCorrection...");
+    int64_t runstart{20000000000}; // start run date from Mantid's Epoch, in nanoseconds
+    int64_t pulsedt{1000000};      // time between consecutive pulses, in nanoseconds
+
+    EventWorkspace_sptr ws = createEventWorkspaceDirect(runstart, pulsedt);
     AnalysisDataService::Instance().addOrReplace("MockDirectEventWS", ws);
 
-    MatrixWorkspace_sptr splws = createMatrixSplittersDG();
+    MatrixWorkspace_sptr splws = createMatrixSplittersDG(runstart);
     AnalysisDataService::Instance().addOrReplace("SplitterTableX", splws);
 
     // Run the filtering
@@ -526,11 +656,14 @@ public:
   /** Test filtering with correction to indirect geometry inelastic instrument
    */
   void test_FilterIndirectGeometryCorrection() {
-    // Create workspaces for filtering
-    EventWorkspace_sptr ws = createEventWorkspaceInDirect(0, 1000000);
+    g_log.notice("\ntest_FilterIndirectGeometryCorrection...");
+    int64_t runstart{20000000000}; // start run date from Mantid's Epoch, in nanoseconds
+    int64_t pulsedt{1000000};      // time between consecutive pulses, in nanoseconds
+
+    EventWorkspace_sptr ws = createEventWorkspaceInDirect(runstart, pulsedt);
     AnalysisDataService::Instance().addOrReplace("MockIndirectEventWS", ws);
 
-    MatrixWorkspace_sptr splws = createMatrixSplittersDG();
+    MatrixWorkspace_sptr splws = createMatrixSplittersDG(runstart);
     AnalysisDataService::Instance().addOrReplace("SplitterTableX", splws);
 
     // Run the filtering
@@ -607,17 +740,27 @@ public:
         979: 4: 3.65e+08  -  4.65e+08: 2
    */
   void test_FilterRelativeTime() {
+    g_log.notice("\ntest_FilterRelativeTime...");
     // Create EventWorkspace and SplittersWorkspace
-    int64_t runstart_i64 = 20000000000;
-    int64_t pulsedt = 100 * 1000 * 1000;
-    int64_t tofdt = 10 * 1000 * 1000;
+    int64_t runstart_i64 = 20000000000;  // 20 seconds, beginning of the fake run
+    int64_t pulsedt = 100 * 1000 * 1000; // 100 miliseconds, time between consecutive pulses
+    int64_t tofdt = 10 * 1000 * 1000;    // 10 miliseconds, spacing between neutrons events within a pulse
     size_t numpulses = 5;
 
+    // Create EventWorkspace with 10 detector-banks, each bank containing one pixel.
     EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("Test10", inpWS);
 
+    // Create SplittersWorkspace with two destination workspaces plus the unfiltered workspace
+    // index    Relative time-int64_t  Absolute DateAndTime
+    //   0            000000000        1990-Jan-01 00:00:20.000
+    //   1            035000000        1990-Jan-01 00:00:20.035
+    //   2            195000000        1990-Jan-01 00:00:20.195
+    //  -1            465000000        1990-Jan-01 00:00:20.465
     API::MatrixWorkspace_sptr splws = createMatrixSplitter(0, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter10", splws);
+    TimeSplitter timeSplitter = TimeSplitter(splws, DateAndTime(runstart_i64));
+    std::string printout{timeSplitter.debugPrint()};
 
     FilterEvents filter;
     filter.initialize();
@@ -627,6 +770,7 @@ public:
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS10");
     filter.setProperty("SplitterWorkspace", "Splitter10");
     filter.setProperty("RelativeTime", true);
+    filter.setProperty("OutputUnfilteredEvents", true);
     filter.setProperty("OutputWorkspaceIndexedFrom1", false);
 
     // Execute
@@ -635,7 +779,7 @@ public:
 
     // Get 3 output workspaces
     int numsplittedws = filter.getProperty("NumberOutputWS");
-    TS_ASSERT_EQUALS(numsplittedws, 3);
+    TS_ASSERT_EQUALS(numsplittedws, 4);
 
     std::vector<std::string> output_ws_vector = filter.getProperty("OutputWorkspaceNames");
     for (size_t i = 0; i < output_ws_vector.size(); ++i)
@@ -647,41 +791,20 @@ public:
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
-
-    // check sample log "splitter"
-    TS_ASSERT(filteredws0->run().hasProperty("splitter"));
-    Kernel::TimeSeriesProperty<int> *splitter0 =
-        dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws0->run().getProperty("splitter"));
-    TS_ASSERT(splitter0);
-    TS_ASSERT_EQUALS(splitter0->size(), 2);
-    TS_ASSERT_EQUALS(splitter0->nthTime(0), Types::Core::DateAndTime(runstart_i64));
-    TS_ASSERT_EQUALS(splitter0->nthValue(0), 1);
-    TS_ASSERT_EQUALS(splitter0->nthTime(1).totalNanoseconds(),
-                     Types::Core::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds() + runstart_i64);
-    TS_ASSERT_EQUALS(splitter0->nthValue(1), 0);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 1);
+    TS_ASSERT_EQUALS(filteredws0->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20 to 1990-Jan-01 00:00:20.035000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws0->run().getProperty("duration")->value()), 0.035, 1.E-9);
 
     // Workspace 1
     EventWorkspace_sptr filteredws1 =
         std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS10_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
-
-    // check log
-    TS_ASSERT(filteredws1->run().hasProperty("splitter"));
-    Kernel::TimeSeriesProperty<int> *splitter1 =
-        dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws1->run().getProperty("splitter"));
-    TS_ASSERT(splitter1);
-    TS_ASSERT_EQUALS(splitter1->size(), 3);
-
-    TS_ASSERT_EQUALS(splitter1->nthTime(0), Types::Core::DateAndTime(runstart_i64));
-    TS_ASSERT_EQUALS(splitter1->nthValue(0), 0);
-
-    TS_ASSERT_EQUALS(splitter1->nthTime(1).totalNanoseconds(),
-                     Types::Core::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds() + runstart_i64);
-    TS_ASSERT_EQUALS(splitter1->nthValue(1), 1);
-    TS_ASSERT_EQUALS(splitter1->nthTime(2).totalNanoseconds(),
-                     Types::Core::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() + runstart_i64);
-    TS_ASSERT_EQUALS(splitter1->nthValue(2), 0);
+    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 1);
+    TS_ASSERT_EQUALS(filteredws1->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.035000000 to 1990-Jan-01 00:00:20.195000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws1->run().getProperty("duration")->value()), 0.160, 1.E-9);
 
     // Workspace 2
     EventWorkspace_sptr filteredws2 =
@@ -689,24 +812,20 @@ public:
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 27);
 
-    TS_ASSERT(filteredws2->run().hasProperty("splitter"));
+    TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 3);
+    TS_ASSERT_EQUALS(filteredws2->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.195000000 to 1990-Jan-01 00:00:20.465000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws2->run().getProperty("duration")->value()), 0.270, 1.E-9);
 
-    // check splitter log
-    TS_ASSERT(filteredws2->run().hasProperty("splitter"));
-    Kernel::TimeSeriesProperty<int> *splitter2 =
-        dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws2->run().getProperty("splitter"));
-    TS_ASSERT(splitter2);
-    TS_ASSERT_EQUALS(splitter2->size(), 7);
-
-    TS_ASSERT_EQUALS(splitter2->nthTime(0), Types::Core::DateAndTime(runstart_i64));
-    TS_ASSERT_EQUALS(splitter2->nthValue(0), 0);
-
-    TS_ASSERT_EQUALS(splitter2->nthTime(1).totalNanoseconds(),
-                     Types::Core::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() + runstart_i64);
-    TS_ASSERT_EQUALS(splitter2->nthValue(1), 1);
-    TS_ASSERT_EQUALS(splitter2->nthTime(2).totalNanoseconds(),
-                     Types::Core::DateAndTime(static_cast<int>(2.65e+08)).totalNanoseconds() + runstart_i64);
-    TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
+    // Unfiltered workspace
+    EventWorkspace_sptr unfilteredws =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS10_unfiltered"));
+    TS_ASSERT(unfilteredws);
+    TS_ASSERT_EQUALS(unfilteredws->getSpectrum(1).getNumberEvents(), 3);
+    TS_ASSERT_EQUALS(unfilteredws->run().getProtonCharge(), 0);
+    TS_ASSERT_EQUALS(unfilteredws->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.465000000 to 1990-Jan-01 00:00:20.500000000\n");
+    TS_ASSERT_DELTA(std::stod(unfilteredws->run().getProperty("duration")->value()), 0.035, 1.E-9);
 
     // Check spectrum 3 of workspace 2
     EventList elist3 = filteredws2->getSpectrum(3);
@@ -720,8 +839,9 @@ public:
     TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(), runstart_i64 + pulsedt * 4);
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000), 1.0E-4);
 
-    //  Test the sample logs
     std::vector<std::string> outputwsnames = filter.getProperty("OutputWorkspaceNames");
+
+    //  Test the sample logs
     for (const auto &outputwsname : outputwsnames) {
       EventWorkspace_sptr filtered_ws = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(
           AnalysisDataService::Instance().retrieve(outputwsname));
@@ -729,7 +849,6 @@ public:
       TS_ASSERT(filtered_ws->run().hasProperty("LogA"));
       TS_ASSERT(filtered_ws->run().hasProperty("LogB"));
       TS_ASSERT(filtered_ws->run().hasProperty("LogC"));
-
       Kernel::Property *logA = filtered_ws->run().getProperty("LogA");
       std::string valueA = logA->value();
       TS_ASSERT_EQUALS(valueA.compare("A"), 0);
@@ -744,6 +863,246 @@ public:
     // clean up all the workspaces generated
     AnalysisDataService::Instance().remove("Test10");
     AnalysisDataService::Instance().remove("Splitter10");
+    for (const auto &outputwsname : outputwsnames) {
+      AnalysisDataService::Instance().remove(outputwsname);
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * Same as test_FilterRelativeTime, but without "run_start" property in EventWorkspace.
+   * The test must fail as SplitterWorkspace does not have "FilterStartTime" property specified.
+   */
+  void test_NoFilterStartTime() {
+    g_log.notice("\ntest_NoFilterStartTime...");
+    // Create EventWorkspace and SplitterWorkspace
+    int64_t runstart_i64 = 20000000000;
+    int64_t pulsedt = 100 * 1000 * 1000;
+    int64_t tofdt = 10 * 1000 * 1000;
+    size_t numpulses = 5;
+
+    EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+
+    // For this test EventWorkspace won't have run start specified
+    inpWS->mutableRun().removeProperty("run_start");
+    inpWS->mutableRun().removeProperty("proton_charge");
+
+    AnalysisDataService::Instance().addOrReplace("Test14", inpWS);
+
+    // Create SplitterWorkspace with two destination workspaces plus the unfiltered workspace
+    // index    Relative DateandTime     time-int64_t
+    //   0    1990-Jan-01 00:00:00.000
+    //   1    1990-Jan-01 00:00:00.035
+    //   2    1990-Jan-01 00:00:00.195
+    //  -1    1990-Jan-01 00:00:00.465
+    API::MatrixWorkspace_sptr splws = createMatrixSplitter(0, pulsedt, tofdt);
+    AnalysisDataService::Instance().addOrReplace("Splitter14", splws);
+    TimeSplitter timeSplitter = TimeSplitter(splws);
+    std::string printout{timeSplitter.debugPrint()};
+
+    FilterEvents filter;
+    filter.initialize();
+
+    // Set properties
+    filter.setProperty("InputWorkspace", "Test14");
+    filter.setProperty("OutputWorkspaceBaseName", "FilteredWS14");
+    filter.setProperty("SplitterWorkspace", "Splitter14");
+    filter.setProperty("RelativeTime", true);
+
+    // Check that it fails to execute
+    TS_ASSERT(!filter.execute());
+
+    AnalysisDataService::Instance().remove("Test14");
+    AnalysisDataService::Instance().remove("Splitter14");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * Same as test_FilterRelativeTime, but without "run_start" property in EventWorkspace.
+   * The test must fail as it tries to set FilterEvents "FilterStartTime" property with a wrong format.
+   */
+  void test_WrongFormatFilterStartTime() {
+    g_log.notice("\ntest_WrongFormatFilterStartTime...");
+    // Create EventWorkspace and SplitterWorkspace
+    int64_t runstart_i64 = 20000000000;
+    int64_t pulsedt = 100 * 1000 * 1000;
+    int64_t tofdt = 10 * 1000 * 1000;
+    size_t numpulses = 5;
+
+    EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+
+    // For this test EventWorkspace won't have run start specified
+    inpWS->mutableRun().removeProperty("run_start");
+    inpWS->mutableRun().removeProperty("proton_charge");
+
+    AnalysisDataService::Instance().addOrReplace("Test15", inpWS);
+
+    // Create SplitterWorkspace with two destination workspaces plus the unfiltered workspace
+    // index    Relative DateandTime     time-int64_t
+    //   0    1990-Jan-01 00:00:00.000
+    //   1    1990-Jan-01 00:00:00.035
+    //   2    1990-Jan-01 00:00:00.195
+    //  -1    1990-Jan-01 00:00:00.465
+    API::MatrixWorkspace_sptr splws = createMatrixSplitter(0, pulsedt, tofdt);
+    AnalysisDataService::Instance().addOrReplace("Splitter15", splws);
+    TimeSplitter timeSplitter = TimeSplitter(splws);
+    std::string printout{timeSplitter.debugPrint()};
+
+    FilterEvents filter;
+    filter.initialize();
+
+    // Set properties
+    filter.setProperty("InputWorkspace", "Test15");
+    filter.setProperty("OutputWorkspaceBaseName", "FilteredWS15");
+    filter.setProperty("SplitterWorkspace", "Splitter15");
+    filter.setProperty("RelativeTime", true);
+
+    // Check that it throws while trying to set a wrong-format FilterStartTime
+    TS_ASSERT_THROWS(filter.setProperty("FilterStartTime", "04/16/2023 3:00PM"), const std::invalid_argument &);
+
+    // Check that it fails to execute
+    TS_ASSERT(!filter.execute());
+
+    AnalysisDataService::Instance().remove("Test15");
+    AnalysisDataService::Instance().remove("Splitter15");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * Same as test_FilterRelativeTime, but without "run_start" property in EventWorkspace.
+   * Instead, the test will use FilterEvents "FilterStartTime" property.
+   */
+  void test_FilterRelativeTimeWithFilterStartTime() {
+    g_log.notice("\ntest_FilterRelativeTimeWithFilterStartTime...");
+    // Create EventWorkspace and SplittersWorkspace
+    int64_t runstart_i64 = 20000000000;
+    int64_t pulsedt = 100 * 1000 * 1000;
+    int64_t tofdt = 10 * 1000 * 1000;
+    size_t numpulses = 5;
+
+    EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+    // For this test EventWorkspace won't have run start specified
+    inpWS->mutableRun().removeProperty("run_start");
+
+    AnalysisDataService::Instance().addOrReplace("Test16", inpWS);
+
+    // Create SplittersWorkspace with two destination workspaces plus the unfiltered workspace
+    // index    Relative DateandTime     time-int64_t
+    //   0    1990-Jan-01 00:00:00.000
+    //   1    1990-Jan-01 00:00:00.035
+    //   2    1990-Jan-01 00:00:00.195
+    //  -1    1990-Jan-01 00:00:00.465
+    API::MatrixWorkspace_sptr splws = createMatrixSplitter(0, pulsedt, tofdt);
+    AnalysisDataService::Instance().addOrReplace("Splitter16", splws);
+    TimeSplitter timeSplitter = TimeSplitter(splws);
+    std::string printout{timeSplitter.debugPrint()};
+
+    FilterEvents filter;
+    filter.initialize();
+
+    // Set properties
+    filter.setProperty("InputWorkspace", "Test16");
+    filter.setProperty("OutputWorkspaceBaseName", "FilteredWS16");
+    filter.setProperty("SplitterWorkspace", "Splitter16");
+    filter.setProperty("RelativeTime", true);
+    filter.setProperty("OutputUnfilteredEvents", true);
+    filter.setProperty("OutputWorkspaceIndexedFrom1", false);
+
+    DateAndTime filterStartTime(20 /*sec*/, 0 /*ns*/);
+    filter.setProperty("FilterStartTime", filterStartTime.toISO8601String());
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(filter.execute());
+    TS_ASSERT(filter.isExecuted());
+
+    // Get 3 output workspaces
+    int numsplittedws = filter.getProperty("NumberOutputWS");
+    TS_ASSERT_EQUALS(numsplittedws, 4);
+
+    std::vector<std::string> output_ws_vector = filter.getProperty("OutputWorkspaceNames");
+    for (size_t i = 0; i < output_ws_vector.size(); ++i)
+      std::cout << "Output workspace " << i << ": " << output_ws_vector[i] << "\n";
+
+    // Workspace 0
+    EventWorkspace_sptr filteredws0 =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS16_0"));
+    TS_ASSERT(filteredws0);
+    TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
+    TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 1);
+    TS_ASSERT_EQUALS(filteredws0->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20 to 1990-Jan-01 00:00:20.035000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws0->run().getProperty("duration")->value()), 0.035, 1.E-9);
+
+    // Workspace 1
+    EventWorkspace_sptr filteredws1 =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS16_1"));
+    TS_ASSERT(filteredws1);
+    TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
+    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 1);
+    TS_ASSERT_EQUALS(filteredws1->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.035000000 to 1990-Jan-01 00:00:20.195000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws1->run().getProperty("duration")->value()), 0.160, 1.E-9);
+
+    // Workspace 2
+    EventWorkspace_sptr filteredws2 =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS16_2"));
+    TS_ASSERT(filteredws2);
+    TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 27);
+
+    TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 3);
+    TS_ASSERT_EQUALS(filteredws2->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.195000000 to 1990-Jan-01 00:00:20.465000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws2->run().getProperty("duration")->value()), 0.270, 1.E-9);
+
+    // Unfiltered workspace
+    EventWorkspace_sptr unfilteredws =
+        std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS16_unfiltered"));
+    TS_ASSERT(unfilteredws);
+    TS_ASSERT_EQUALS(unfilteredws->getSpectrum(1).getNumberEvents(), 3);
+    TS_ASSERT_EQUALS(unfilteredws->run().getProtonCharge(), 0);
+    TS_ASSERT_EQUALS(unfilteredws->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.465000000 to 1990-Jan-01 00:00:20.500000000\n");
+    TS_ASSERT_DELTA(std::stod(unfilteredws->run().getProperty("duration")->value()), 0.035, 1.E-9);
+
+    // Check spectrum 3 of workspace 2
+    EventList elist3 = filteredws2->getSpectrum(3);
+    elist3.sortPulseTimeTOF();
+
+    TofEvent eventmin = elist3.getEvent(0);
+    TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(), runstart_i64 + pulsedt * 2);
+    TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
+
+    TofEvent eventmax = elist3.getEvent(26);
+    TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(), runstart_i64 + pulsedt * 4);
+    TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000), 1.0E-4);
+
+    std::vector<std::string> outputwsnames = filter.getProperty("OutputWorkspaceNames");
+
+    //  Test the sample logs
+    for (const auto &outputwsname : outputwsnames) {
+      EventWorkspace_sptr filtered_ws = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+          AnalysisDataService::Instance().retrieve(outputwsname));
+
+      TS_ASSERT(filtered_ws->run().hasProperty("LogA"));
+      TS_ASSERT(filtered_ws->run().hasProperty("LogB"));
+      TS_ASSERT(filtered_ws->run().hasProperty("LogC"));
+      Kernel::Property *logA = filtered_ws->run().getProperty("LogA");
+      std::string valueA = logA->value();
+      TS_ASSERT_EQUALS(valueA.compare("A"), 0);
+
+      TS_ASSERT(filtered_ws->run().hasProperty("slow_int_log"));
+      Kernel::TimeSeriesProperty<int> *intlog =
+          dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filtered_ws->run().getProperty("slow_int_log"));
+      TS_ASSERT(intlog);
+      TS_ASSERT_EQUALS(intlog->units(), "meter");
+    }
+
+    // clean up all the workspaces generated
+    AnalysisDataService::Instance().remove("Test16");
+    AnalysisDataService::Instance().remove("Splitter16");
     for (const auto &outputwsname : outputwsnames) {
       AnalysisDataService::Instance().remove(outputwsname);
     }
@@ -772,7 +1131,8 @@ public:
    * events
    */
   void test_tableSplitter() {
-    // Create EventWorkspace and SplittersWorkspace
+    g_log.notice("\ntest_tableSplitter...");
+    // Create EventWorkspace and SplitterWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
     int64_t tofdt = 10 * 1000 * 1000;
@@ -792,15 +1152,15 @@ public:
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS_FromTable");
     filter.setProperty("SplitterWorkspace", "TableSplitter1");
     filter.setProperty("RelativeTime", true);
-    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
+    filter.setProperty("OutputUnfilteredEvents", true);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
     TS_ASSERT(filter.isExecuted());
 
-    // Get 3 output workspaces
+    // Get output workspaces
     int numsplittedws = filter.getProperty("NumberOutputWS");
-    TS_ASSERT_EQUALS(numsplittedws, 3);
+    TS_ASSERT_EQUALS(numsplittedws, 4);
 
     std::vector<std::string> output_ws_vector = filter.getProperty("OutputWorkspaceNames");
     for (size_t i = 0; i < output_ws_vector.size(); ++i)
@@ -812,65 +1172,40 @@ public:
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
-
-    TS_ASSERT(filteredws0->run().hasProperty("splitter"));
-    // check sample log "splitter"
-    TS_ASSERT(filteredws0->run().hasProperty("splitter"));
-    Kernel::TimeSeriesProperty<int> *splitter0 =
-        dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws0->run().getProperty("splitter"));
-    TS_ASSERT(splitter0);
-    TS_ASSERT_EQUALS(splitter0->size(), 2);
-    TS_ASSERT_EQUALS(splitter0->nthTime(0), Types::Core::DateAndTime(runstart_i64));
-    TS_ASSERT_EQUALS(splitter0->nthValue(0), 1);
-    TS_ASSERT_EQUALS(splitter0->nthTime(1).totalNanoseconds(),
-                     Types::Core::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds() + runstart_i64);
-    TS_ASSERT_EQUALS(splitter0->nthValue(1), 0);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 1);
+    TS_ASSERT_EQUALS(filteredws0->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20 to 1990-Jan-01 00:00:20.035000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws0->run().getProperty("duration")->value()), 0.035, 1.E-9);
 
     // Workspace 1
     EventWorkspace_sptr filteredws1 =
         std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_B"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
-
-    // check log
-    TS_ASSERT(filteredws1->run().hasProperty("splitter"));
-    Kernel::TimeSeriesProperty<int> *splitter1 =
-        dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws1->run().getProperty("splitter"));
-    TS_ASSERT(splitter1);
-    TS_ASSERT_EQUALS(splitter1->size(), 3);
-
-    TS_ASSERT_EQUALS(splitter1->nthTime(0), Types::Core::DateAndTime(runstart_i64));
-    TS_ASSERT_EQUALS(splitter1->nthValue(0), 0);
-
-    TS_ASSERT_EQUALS(splitter1->nthTime(1).totalNanoseconds(),
-                     Types::Core::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds() + runstart_i64);
-    TS_ASSERT_EQUALS(splitter1->nthValue(1), 1);
-    TS_ASSERT_EQUALS(splitter1->nthTime(2).totalNanoseconds(),
-                     Types::Core::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() + runstart_i64);
-    TS_ASSERT_EQUALS(splitter1->nthValue(2), 0);
+    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 1);
+    TS_ASSERT_EQUALS(filteredws1->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.035000000 to 1990-Jan-01 00:00:20.195000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws1->run().getProperty("duration")->value()), 0.160, 1.E-9);
 
     // Workspace 2
     EventWorkspace_sptr filteredws2 =
         std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_C"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 27);
+    TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 3);
+    TS_ASSERT_EQUALS(filteredws2->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.195000000 to 1990-Jan-01 00:00:20.465000000\n");
+    TS_ASSERT_DELTA(std::stod(filteredws2->run().getProperty("duration")->value()), 0.270, 1.E-9);
 
-    // check splitter log
-    TS_ASSERT(filteredws2->run().hasProperty("splitter"));
-    Kernel::TimeSeriesProperty<int> *splitter2 =
-        dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws2->run().getProperty("splitter"));
-    TS_ASSERT(splitter2);
-    TS_ASSERT_EQUALS(splitter2->size(), 7);
-
-    TS_ASSERT_EQUALS(splitter2->nthTime(0), Types::Core::DateAndTime(runstart_i64));
-    TS_ASSERT_EQUALS(splitter2->nthValue(0), 0);
-
-    TS_ASSERT_EQUALS(splitter2->nthTime(1).totalNanoseconds(),
-                     Types::Core::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() + runstart_i64);
-    TS_ASSERT_EQUALS(splitter2->nthValue(1), 1);
-    TS_ASSERT_EQUALS(splitter2->nthTime(2).totalNanoseconds(),
-                     Types::Core::DateAndTime(static_cast<int>(2.65e+08)).totalNanoseconds() + runstart_i64);
-    TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
+    // unfiltered workspace
+    EventWorkspace_sptr unfilteredws = std::dynamic_pointer_cast<EventWorkspace>(
+        AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_unfiltered"));
+    TS_ASSERT(unfilteredws);
+    TS_ASSERT_EQUALS(unfilteredws->getSpectrum(1).getNumberEvents(), 3);
+    TS_ASSERT_EQUALS(unfilteredws->run().getProtonCharge(), 0);
+    TS_ASSERT_EQUALS(unfilteredws->run().getTimeROI().debugStrPrint(),
+                     "0: 1990-Jan-01 00:00:20.465000000 to 1990-Jan-01 00:00:20.500000000\n");
+    TS_ASSERT_DELTA(std::stod(unfilteredws->run().getProperty("duration")->value()), 0.035, 1.E-9);
 
     // Check spectrum 3 of workspace 2
     EventList elist3 = filteredws2->getSpectrum(3);
@@ -895,81 +1230,13 @@ public:
     return;
   }
 
-  /** Test the feature to exclude some sample logs to be split and add to child
-   * workspaces
-   * @brief Utest_excludeSampleLogs
-   */
-  void test_excludeSampleLogs() {
-    // Create EventWorkspace and SplittersWorkspace
-    int64_t runstart_i64 = 20000000000;
-    int64_t pulsedt = 100 * 1000 * 1000;
-    int64_t tofdt = 10 * 1000 * 1000;
-    size_t numpulses = 5;
-
-    EventWorkspace_sptr inpWS = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
-    AnalysisDataService::Instance().addOrReplace("Test12", inpWS);
-
-    DataObjects::TableWorkspace_sptr splws = createTableSplitters(0, pulsedt, tofdt);
-    AnalysisDataService::Instance().addOrReplace("TableSplitter2", splws);
-
-    FilterEvents filter;
-    filter.initialize();
-
-    // Set properties
-    filter.setProperty("InputWorkspace", "Test12");
-    filter.setProperty("OutputWorkspaceBaseName", "FilteredFromTable");
-    filter.setProperty("SplitterWorkspace", "TableSplitter2");
-    filter.setProperty("RelativeTime", true);
-    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
-
-    std::vector<std::string> prop_vec;
-    prop_vec.emplace_back("LogB");
-    prop_vec.emplace_back("slow_int_log");
-    filter.setProperty("TimeSeriesPropertyLogs", prop_vec);
-    filter.setProperty("ExcludeSpecifiedLogs", true);
-
-    // Execute
-    TS_ASSERT_THROWS_NOTHING(filter.execute());
-    TS_ASSERT(filter.isExecuted());
-
-    // Get 3 output workspaces
-    int numsplittedws = filter.getProperty("NumberOutputWS");
-    TS_ASSERT_EQUALS(numsplittedws, 3);
-
-    // check number of sample logs
-    size_t num_original_logs = inpWS->run().getProperties().size();
-
-    std::vector<std::string> outputwsnames = filter.getProperty("OutputWorkspaceNames");
-    for (const auto &outputwsname : outputwsnames) {
-      EventWorkspace_sptr childworkspace =
-          std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputwsname));
-      TS_ASSERT(childworkspace);
-      // there is 1 sample logs that is excluded from propagating to the child
-      // workspaces. LogB is not TSP, so it won't be excluded even if it is
-      // listed
-      // a new TSP splitter is added by FilterEvents. So there will be exactly
-      // same number, but some different, sample logs in the input and output
-      // workspaces
-
-      TS_ASSERT_EQUALS(num_original_logs, childworkspace->run().getProperties().size());
-    }
-
-    // clean workspaces
-    AnalysisDataService::Instance().remove("Test12");
-    AnalysisDataService::Instance().remove("TableSplitter2");
-    for (const auto &outputwsname : outputwsnames) {
-      AnalysisDataService::Instance().remove(outputwsname);
-    }
-
-    return;
-  }
-
   /** test for the case that the input workspace name is same as output base
    * workspace name
    * @brief test_ThrowSameName
    */
   void test_ThrowSameName() {
-    // Create EventWorkspace and SplittersWorkspace
+    g_log.notice("\ntest_ThrowSameName...");
+    // Create EventWorkspace and SplitterWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
     int64_t tofdt = 10 * 1000 * 1000;
@@ -989,7 +1256,6 @@ public:
     filter.setProperty("OutputWorkspaceBaseName", "Test13");
     filter.setProperty("SplitterWorkspace", "TableSplitter2");
     filter.setProperty("RelativeTime", true);
-    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
     filter.setProperty("GroupWorkspaces", true);
 
     // Execute
@@ -1007,7 +1273,8 @@ public:
    * @brief test_ThrowSameName
    */
   void test_groupWorkspaces() {
-    // Create EventWorkspace and SplittersWorkspace
+    g_log.notice("\ntest_groupWorkspaces...");
+    // Create EventWorkspace and SplitterWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
     int64_t tofdt = 10 * 1000 * 1000;
@@ -1027,7 +1294,6 @@ public:
     filter.setProperty("OutputWorkspaceBaseName", "13");
     filter.setProperty("SplitterWorkspace", "TableSplitter2");
     filter.setProperty("RelativeTime", true);
-    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
     filter.setProperty("GroupWorkspaces", true);
 
     // Execute
@@ -1044,7 +1310,9 @@ public:
    * basename_startTime_stopTime
    */
   void test_descriptiveWorkspaceNamesTime() {
-    // Create EventWorkspace and SplittersWorkspace
+    g_log.notice("\ntest_descriptiveWorkspaceNamesTime...");
+
+    // Create EventWorkspace and SplitterWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
     int64_t tofdt = 10 * 1000 * 1000;
@@ -1075,6 +1343,7 @@ public:
     filter.setProperty("InformationWorkspace", "InfoWorkspace");
     filter.setProperty("RelativeTime", true);
     filter.setProperty("DescriptiveOutputNames", true);
+    filter.setProperty("OutputUnfilteredEvents", true);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
@@ -1105,7 +1374,9 @@ public:
    * basename_startTime_stopTime
    */
   void test_descriptiveWorkspaceNamesLog() {
-    // Create EventWorkspace and SplittersWorkspace
+    g_log.notice("\ntest_descriptiveWorkspaceNamesLog...");
+
+    // Create EventWorkspace and SplitterWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
     int64_t tofdt = 10 * 1000 * 1000;
@@ -1130,6 +1401,7 @@ public:
     filter.setProperty("InformationWorkspace", "InfoWorkspace");
     filter.setProperty("RelativeTime", true);
     filter.setProperty("DescriptiveOutputNames", true);
+    filter.setProperty("OutputUnfilteredEvents", true);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
@@ -1157,65 +1429,84 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace.  This workspace has
-   * @param runstart_i64 : absolute run start time in int64_t format with unit
-   * nanosecond
-   * @param pulsedt : pulse length in int64_t format with unit nanosecond
-   * @param todft : time interval between 2 adjacent event in same pulse in
-   * int64_t format of unit nanosecond
+   * @param runstart_i64 : absolute run start time in int64_t format with unit of nanoseconds
+   * @param pulsedt : time between consecutive pulses in int64_t format with unit nanosecond
+   * @param todft : time interval between 2 adjacent events in same pulse in int64_t format of unit nanosecond
    * @param numpulses : number of pulses in the event workspace
    */
   EventWorkspace_sptr createEventWorkspace(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt, size_t numpulses) {
-    // Create an EventWorkspace with 10 detectors
-    EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1, true);
 
-    Types::Core::DateAndTime runstart(runstart_i64);
+    constexpr int64_t N_EVENTS_IN_PULSE{10};
+    constexpr double nanosecToMilisec{0.001};
+    constexpr double nanosecToSec{1e-9};
+    // Validation: the TOF of the last event cannot exceed pulsedt, lest we incur in frame overlap.
+    if (tofdt * N_EVENTS_IN_PULSE > pulsedt)
+      throw std::invalid_argument("tofdt cannot exceed pulsedt / N_EVENTS_IN_PULSE");
 
+    // Create an EventWorkspace with 10 detectors, one pixel per detector, and no events
+    int detectorBankCount{10};
+    int pixelPerBankcount{1};
+    bool clearEvents{true};
+    EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
+        detectorBankCount, pixelPerBankcount, clearEvents);
+
+    // create a vector with all the epoch pulse times
+    DateAndTime runstart(runstart_i64);
+    std::vector<DateAndTime> pulseTimes;
+    for (int64_t pid = 0; pid < static_cast<int64_t>(numpulses); pid++) {
+      int64_t pulsetime_i64 = pid * pulsedt + runstart.totalNanoseconds();
+      DateAndTime pulsetime(pulsetime_i64);
+      pulseTimes.emplace_back(pulsetime);
+    }
+
+    // create a vector with all events. These will be the same for all detector pixels
+    std::vector<TofEvent> events;
+    for (const auto &pulseTime : pulseTimes)
+      for (int64_t e = 0; e < N_EVENTS_IN_PULSE; e++) {
+        double tof = nanosecToMilisec * static_cast<double>(e * tofdt); // TOF in miliseconds
+        TofEvent event(tof, pulseTime);
+        events.emplace_back(event);
+      }
+
+    // Iterate over all the spectra (detectorBankCount * pixelPerBankcount)
+    // Populate its event list using the previous vector of events
+    for (size_t histIndex = 0; histIndex < eventWS->getNumberHistograms(); histIndex++) {
+      auto &elist = eventWS->getSpectrum(histIndex); // event list
+      for (const auto &event : events)
+        elist.addEventQuickly(event);
+    }
+
+    // Insert a sample log for the start and end of the run, with one charge count per pulse
     eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(), true);
+    double duration = nanosecToSec * static_cast<double>(pulsedt * numpulses);
+    DateAndTime runEnd = runstart + duration;
+    eventWS->mutableRun().addProperty("run_end", runEnd.toISO8601String(), true);
 
-    // create a pcharge log
+    // Insert a sample log for the proton charge
     auto pchargeLog = std::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
-
-    for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
-      auto &elist = eventWS->getSpectrum(i);
-
-      for (int64_t pid = 0; pid < static_cast<int64_t>(numpulses); pid++) {
-        int64_t pulsetime_i64 = pid * pulsedt + runstart.totalNanoseconds();
-        Types::Core::DateAndTime pulsetime(pulsetime_i64);
-
-        // add pulse time to proton charge log once and only once
-        if (i == 0) {
-          pchargeLog->addValue(pulsetime, 1.);
-          std::cout << "Add proton charge log " << pulsetime.totalNanoseconds() << " (" << pulsetime.toSimpleString()
-                    << ")"
-                    << "\n";
-        }
-
-        for (size_t e = 0; e < 10; e++) {
-          double tof = static_cast<double>(e * tofdt / 1000);
-          TofEvent event(tof, pulsetime);
-          elist.addEventQuickly(event);
-        }
-      } // FOR each pulse
-    }   // For each bank
-
+    for (const auto &pulseTime : pulseTimes)
+      pchargeLog->addValue(pulseTime, 1.);
     eventWS->mutableRun().addLogData(pchargeLog.release());
     eventWS->mutableRun().integrateProtonCharge();
 
-    // add some arbitrary sample log for splitting or not splitting
+    // add single value logs, which won't be need to split
     eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("LogA", "A"));
     eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("LogB", "B"));
     eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("LogC", "C"), true);
     eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("Title", "Testing EventWorkspace"));
-    eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<double>("duration", 1000.));
+    eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<double>("duration", duration));
 
-    // add an integer slow log
+    // add time series log. The TimeRoi associated to the Run object of each target workspace
+    // will be applied when finding out its conserved values.
     auto int_tsp = std::make_unique<Kernel::TimeSeriesProperty<int>>("slow_int_log");
     int_tsp->setUnits("meter");
-    for (size_t i = 0; i < 10; ++i) {
-      Types::Core::DateAndTime log_time(runstart_i64 + 5 * pulsedt * i);
-      int log_value = static_cast<int>(i + 1) * 20;
-      int_tsp->addValue(log_time, log_value);
-      std::cout << "Add slow int log (" << i << "): " << log_time.toSimpleString() << ", " << log_value << "\n";
+    int entriesCount{10};                           // this log will have 10 entries
+    double probingPeriod = duration / entriesCount; // time in between consecutive log entries
+    DateAndTime logTime = runstart;
+    for (int i = 0; i < entriesCount; ++i) {
+      int logValue = (i + 1) * 20;
+      int_tsp->addValue(logTime, logValue);
+      logTime += probingPeriod;
     }
     eventWS->mutableRun().addLogData(int_tsp.release());
 
@@ -1224,16 +1515,13 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace to mimic direct inelastic scattering insturment.
-   * This workspace will have the same neutron events as the test case in
-   *EventList
-   *
-   * @param runstart_i64 : absolute run start time in int64_t format with unit
-   *nanosecond
-   * @param pulsedt : pulse length in int64_t format with unit nanosecond
+   * This workspace will have the same neutron events as the test case in EventList.
+   * @param runstart_i64 : start run date from Mantid's Epoch time, in nanoseconds
+   * @param pulsedt : time between consecutive pulses, in nanoseconds
+   * @param pulseCount : number of pulses
    */
-  EventWorkspace_sptr createEventWorkspaceDirect(int64_t runstart_i64, int64_t pulsedt) {
-    // Create an EventWorkspace with 10 banks with 1 detector each.  No events
-    // is generated
+  EventWorkspace_sptr createEventWorkspaceDirect(int64_t runstart_i64, int64_t pulsedt, int64_t pulseCount = 1000) {
+    // Create an EventWorkspace with 10 banks with 1 detector each.  No events are generated
     EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1, true);
 
     // L1 = 10
@@ -1242,10 +1530,13 @@ public:
 
     Types::Core::DateAndTime runstart(runstart_i64);
 
-    EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt);
+    // Create `pulseCount` pulses with one event per pulse
+    EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt, pulseCount);
+    Types::Core::DateAndTime runend(runstart + pulseCount * pulsedt);
 
     // Set properties: (1) run_start time; (2) Ei
     eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(), true);
+    eventWS->mutableRun().addProperty("run_end", runend.toISO8601String(), true);
 
     double shift = 2.E-4;
     double ei = (l1 * l1 * PhysicalConstants::NeutronMass) / (shift * shift * 2. * PhysicalConstants::meV);
@@ -1270,17 +1561,21 @@ public:
     return eventWS;
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Create an EventWorkspace to mimic direct inelastic scattering insturment.
-   * This workspace has
-   * @param runstart_i64 : absolute run start time in int64_t format with unit
-   * nanosecond
-   * @param pulsedt : pulse length in int64_t format with unit nanosecond
+  /** Create an EventWorkspace to mimic direct inelastic scattering instrument
+   * @param runstart_i64 : start run date from Mantid's Epoch time, in nanoseconds
+   * @param pulsedt : time between consecutive pulses, in nanoseconds
+   * @param pulseCount : number of pulses
    */
-  EventWorkspace_sptr createEventWorkspaceInDirect(int64_t runstart_i64, int64_t pulsedt) {
-    // Create an EventWorkspace with 10 banks with 1 detector each.  No events
-    // is generated
+  EventWorkspace_sptr createEventWorkspaceInDirect(int64_t runstart_i64, int64_t pulsedt, int64_t pulseCount = 1000) {
+    // Create an EventWorkspace with 10 banks with 1 detector each.  No events are generated
     EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1, true);
+
+    // Properties for the start and end of the run
+    Types::Core::DateAndTime runstart(runstart_i64);
+    Types::Core::DateAndTime runend(runstart + pulseCount * pulsedt);
+    eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(), true);
+    eventWS->mutableRun().addProperty("run_end", runend.toISO8601String(), true);
+
     // Add EFixed to each detector
     const ParameterMap &pmap = eventWS->constInstrumentParameters();
 
@@ -1300,8 +1595,8 @@ public:
       }
     }
 
-    // Add neutrons
-    EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt);
+    // Create `pulseCount` pulses with one event per pulse
+    EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt, pulseCount);
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
       auto &elist = eventWS->getSpectrum(i);
 
@@ -1314,25 +1609,26 @@ public:
     return eventWS;
   }
 
-  //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace as diffractometer
-   * @brief createEventWorkspaceElastic
-   * @param runstart_i64
-   * @param pulsedt
+   * @param runstart_i64 : start run date from Mantid's Epoch time, in nanoseconds
+   * @param pulsedt : time between consecutive pulses, in nanoseconds
+   * @param pulseCount : number of pulses
    * @return
    */
-  EventWorkspace_sptr createEventWorkspaceElastic(int64_t runstart_i64, int64_t pulsedt) {
+  EventWorkspace_sptr createEventWorkspaceElastic(int64_t runstart_i64, int64_t pulsedt, int64_t pulseCount = 1000) {
     // Create an EventWorkspace with 10 banks with 1 detector each.  No events
     // is generated
     EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1, true);
 
     Types::Core::DateAndTime runstart(runstart_i64);
 
-    // Create 1000 events
-    EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt);
+    // Create `pulseCount` pulses with one event per pulse
+    EventList fakeevlist = fake_uniform_time_sns_data(runstart_i64, pulsedt, pulseCount);
+    Types::Core::DateAndTime runend(runstart + pulseCount * pulsedt);
 
-    // Set properties: (1) run_start time; (2) Ei
+    // Set properties
     eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(), true);
+    eventWS->mutableRun().addProperty("run_end", runend.toISO8601String(), true);
 
     // Add neutrons
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
@@ -1347,18 +1643,46 @@ public:
     return eventWS;
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Create a  Splitter for output
-   *  Region:
-   * 0: pulse 0: 0 ~ 3+
-   * 1: pulse 0: 3+ ~ pulse 1: 9+
-   * 2: from pulse 2: 0 ~ 6+
-   * -1: from pulse 2: 6+ ~ 9+
-   * @param runstart_i64 : absolute run start time in int64_t format with unit
-   * nanosecond
-   * @param pulsedt : pulse length in int64_t format with unit nanosecond
-   * @param todft : time interval between 2 adjacent event in same pulse in
-   * int64_t format of unit nanosecond
+  /**
+   * SplitterWorkspace with alternating splitters of same time span
+   *
+   * intervals [t_00, t_01], [t_10, t_11], ..[t_n0, t_n1] such that t_00==start and t_n1<=end
+   *
+   * @param start : start time of the first splitter
+   * @param end : upper time boundary to the splitters
+   * @param span : time interval between two splitters
+   * @param count : number of splitters
+   * @return
+   */
+  SplittersWorkspace_sptr createPeriodSplitters(int64_t start, int64_t end, int64_t span, int count) {
+    SplittersWorkspace_sptr splitters = std::make_shared<SplittersWorkspace>();
+    int64_t intervalBegin{start};
+    int intervalIndex{0};
+    while (intervalBegin + span <= end) {
+      Kernel::SplittingInterval interval(intervalBegin, intervalBegin + span, intervalIndex);
+      splitters->addSplitter(interval);
+      intervalBegin += span;
+      intervalIndex++;
+      if (intervalIndex == count)
+        intervalIndex = 0;
+    }
+    return splitters;
+  }
+
+  /** Create a  SplitterWorkspace containing five splitters and three target-workspace indexes
+   *
+   * List of splitters (all times relative to runstart_i64):
+   *            start-time                 end-time                   target-index
+   * -------------------------------------------------------------------------------
+   *               0                  3*tofdt + tofdt/2                      0
+   *       3*tofdt + tofdt/2       pulsedt + 9*tofdt + tofdt/2               1
+   *          2*pulsedt          2*pulsedt + 6*tofdt + tofdt/2               2
+   *          3*pulsedt          3*pulsedt + 6*tofdt + tofdt/2               2
+   *          4*pulsedt          4*pulsedt + 6*tofdt + tofdt/2               2
+   *
+   * @param runstart_i64 : absolute run start time in int64_t format with unit nanosecond
+   * @param pulsedt : time between consecutive pulses in int64_t format with unit nanosecond
+   * @param todft : time interval between 2 adjacent event in same pulse in int64_t format of unit nanosecond
    * @param numpulses : number of pulses in the event workspace
    */
   SplittersWorkspace_sptr createSplittersWorkspace(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt) {
@@ -1379,6 +1703,7 @@ public:
     // 3. Splitter 2: from 3rd pulse, 0 ~ 6+
     for (size_t i = 2; i < 5; i++) {
       t0 = runstart_i64 + i * pulsedt;
+      TS_ASSERT(t0 >= t1); // validate the previous splitter doesn't overlap with the next one
       t1 = runstart_i64 + i * pulsedt + 6 * tofdt + tofdt / 2;
       Kernel::SplittingInterval interval2(t0, t1, 2);
       splitterws->addSplitter(interval2);
@@ -1601,10 +1926,11 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Fake uniform time data more close to SNS case
-   * A list of 1000 events
-   * Pulse length: 1000000 * nano-second
+   * @param runstart : run start time in nanoseconds
+   * @param pulsedt : time between consecutive pulses, in nanoseconds
+   * @param pulseCount : number of pulses
    */
-  EventList fake_uniform_time_sns_data(int64_t runstart, int64_t pulselength) {
+  EventList fake_uniform_time_sns_data(int64_t runstart, int64_t pulselength, int64_t pulseCount = 1000) {
     // Clear the list
     EventList el = EventList();
 
@@ -1612,7 +1938,7 @@ public:
     unsigned seed1 = 1;
     std::minstd_rand0 g1(seed1);
 
-    for (int time = 0; time < 1000; time++) {
+    for (int time = 0; time < pulseCount; time++) {
       // All pulse times from 0 to 999 in seconds
       Types::Core::DateAndTime pulsetime(static_cast<int64_t>(time * pulselength + runstart));
       double tof = static_cast<double>(g1() % 1000);
@@ -1623,10 +1949,9 @@ public:
   }
 
   /** Create a matrix splitters workspace for elastic correction
-   * @brief createMatrixSplittersElastic
-   * @return
+   * @param runstart_i64 : start run date from Mantid's Epoch time, in nanoseconds
    */
-  API::MatrixWorkspace_sptr createMatrixSplittersElastic() {
+  API::MatrixWorkspace_sptr createMatrixSplittersElastic(int64_t runstart) {
     MatrixWorkspace_sptr spws =
         std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 10));
 
@@ -1646,9 +1971,12 @@ public:
     vec_splitTimes[9] = 9000000;
     vec_splitTimes[10] = 10000000;
 
-    // convert the splitters' time to second
-    for (size_t i = 0; i < vec_splitTimes.size(); ++i)
-      vec_splitTimes[i] *= 1.E-9;
+    // add runstart and convert the splitters' time to second
+    constexpr double nanosecondToSecond{1.E-9};
+    for (size_t i = 0; i < vec_splitTimes.size(); ++i) {
+      vec_splitTimes[i] += static_cast<double>(runstart);
+      vec_splitTimes[i] *= nanosecondToSecond;
+    }
 
     vec_splitGroup[0] = 2;
     vec_splitGroup[1] = 5;
@@ -1664,7 +1992,10 @@ public:
     return spws;
   }
 
-  API::MatrixWorkspace_sptr createMatrixSplittersDG() {
+  /** Create a matrix splitters workspace for direct geometry correction
+   * @param runstart_i64 : start run date from Mantid's Epoch time, in nanoseconds
+   */
+  API::MatrixWorkspace_sptr createMatrixSplittersDG(int64_t runstart = 0) {
     MatrixWorkspace_sptr spws =
         std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 10));
 
@@ -1684,9 +2015,12 @@ public:
     vec_splitTimes[9] = 9000000;
     vec_splitTimes[10] = 10000000;
 
-    // convert the splitters' time to second
-    for (size_t i = 0; i < vec_splitTimes.size(); ++i)
-      vec_splitTimes[i] *= 1.E-9;
+    // add runstart and convert the splitters' time to second
+    constexpr double nanosecondToSecond{1.E-9};
+    for (size_t i = 0; i < vec_splitTimes.size(); ++i) {
+      vec_splitTimes[i] += static_cast<double>(runstart);
+      vec_splitTimes[i] *= nanosecondToSecond;
+    }
 
     vec_splitGroup[0] = 2;
     vec_splitGroup[1] = 5;

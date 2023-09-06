@@ -193,9 +193,9 @@ The workflow follows these step:
         1 2208.3
         2 2318.6
         3 2098.0
-        4 2255.4
-        5 2208.3
-        6 2163.0
+        4 2208.3
+        5 2161.2
+        6 2115.7
 
 .. testcode:: group_cal
 
@@ -217,9 +217,10 @@ The workflow follows these step:
         1 2208.3
         2 2318.7
         3 2097.9
-        4 2253.3
-        5 2208.3
-        6 2165.0
+        4 2208.3
+        5 2164.1
+        6 2121.7
+
 
 .. testcode:: group_cal
 
@@ -242,9 +243,10 @@ The workflow follows these step:
         1 2208.3
         2 2208.3
         3 2208.3
-        4 2253.3
-        5 2208.3
-        6 2165.0
+        4 2208.3
+        5 2164.1
+        6 2121.7
+
 
 .. testcode:: group_cal
 
@@ -265,10 +267,10 @@ The workflow follows these step:
 .. testoutput:: group_cal
 
     DetID DIFC
-        1 2208.7
-        2 2319.2
-        3 2098.3
-        4 2365.5
+        1 2208.3
+        2 2208.3
+        3 2208.3
+        4 2365.6
         5 2318.3
         6 2272.8
 
@@ -354,9 +356,9 @@ The same complete calibration can just be run with just
         1 2208.7
         2 2319.0
         3 2098.4
-        4 2367.7
-        5 2318.2
-        6 2270.7
+        4 2368.8
+        5 2318.3
+        6 2269.5
 
 The resulting :ref:`diffcal <DiffractionCalibrationWorkspace>` can be
 saved with :ref:`SaveDiffCal <algm-SaveDiffCal>`.

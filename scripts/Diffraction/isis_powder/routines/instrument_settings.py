@@ -133,10 +133,8 @@ class InstrumentSettings(object):
         # Does the attribute exist - has it changed and are we suppressing warnings
 
         if not suppress_warnings:
-
             previous_value = getattr(self, attribute_name) if hasattr(self, attribute_name) else None
             if previous_value is not None and previous_value != param_val:
-
                 # Print warning of what we value we are replacing for which parameter
                 warnings.warn(
                     "Replacing parameter: '"
@@ -154,9 +152,9 @@ class InstrumentSettings(object):
 
 def _check_value_is_in_enum(val, enum):
     """
-    Checks the the specified value is in the enum object. If it is
+    Checks whether the specified value is in the enum object. If it is
     it will return the correctly capitalised version which should be used.
-    This is so the script not longer needs to convert to lower / upper case.
+    This is so the script no longer needs to convert to lower / upper case.
     If the value was not in the enum it raises a value error and tells the user
     the values available
     :param val: The value to search for in the enumeration
@@ -168,7 +166,6 @@ def _check_value_is_in_enum(val, enum):
     lower_string_val = str(val).lower()
 
     for enum_val in enum_known_vals:
-
         if lower_string_val == enum_val.lower():
             # Get the correctly capitalised value so we no longer have to call lower
             val = enum_val

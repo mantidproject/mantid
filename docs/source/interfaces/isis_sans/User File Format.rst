@@ -611,7 +611,7 @@ Qualifiers
 **/ROI**
     Similar to the RADIUS we can specify a region of interest via a mask file which is used to measure the number of neutrons transmitted through the sample. Both ROI and RADIUS can be used together. Note that if you specified a TRANSPEC, it will be used instead.
 **/MASK**
-    This command excludes detector regions which were possibly specified by the the ROI or RADIUS command. Note that if you specified a TRANSPEC, it will be ignored.
+    This command excludes detector regions which were possibly specified by the ROI or RADIUS command. Note that if you specified a TRANSPEC, it will be ignored.
 
 
 Parameters

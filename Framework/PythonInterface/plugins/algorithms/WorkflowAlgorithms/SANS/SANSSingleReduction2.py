@@ -293,7 +293,6 @@ class SANSSingleReduction(SANSSingleReductionBase):
         for reduction_mode, output_workspaces in list(reduction_mode_vs_output_workspaces.items()):
             workspace_names = reduction_mode_vs_workspace_names[reduction_mode]
             for output_workspace, output_name in zip(output_workspaces, workspace_names):
-                # In an MPI reduction output_workspace is produced on the master rank, skip others.
                 if output_workspace is None:
                     continue
                 else:

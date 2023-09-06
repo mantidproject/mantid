@@ -46,8 +46,8 @@ DECLARE_ALGORITHM(FindPeaks)
 /** Constructor
  */
 FindPeaks::FindPeaks()
-    : API::ParallelAlgorithm(), m_peakParameterNames(), m_bkgdParameterNames(), m_bkgdOrder(0), m_outPeakTableWS(),
-      m_dataWS(), m_inputPeakFWHM(0), m_highBackground(false), m_rawPeaksTable(false), m_numTableParams(0),
+    : m_peakParameterNames(), m_bkgdParameterNames(), m_bkgdOrder(0), m_outPeakTableWS(), m_dataWS(),
+      m_inputPeakFWHM(0), m_highBackground(false), m_rawPeaksTable(false), m_numTableParams(0),
       m_centreIndex(1) /* for Gaussian */, m_peakFuncType(""), m_backgroundType(""), m_vecPeakCentre(),
       m_vecFitWindows(), m_backgroundFunction(), m_peakFunction(), m_minGuessedPeakWidth(0), m_maxGuessedPeakWidth(0),
       m_stepGuessedPeakWidth(0), m_usePeakPositionTolerance(false), m_peakPositionTolerance(0.0), m_fitFunctions(),
@@ -1285,7 +1285,6 @@ void FindPeaks::estimatePeakRange(const HistogramX &vecX, size_t i_centre, size_
  * @param peakfunction :: peak function
  * @param bkgdfunction :: background function
  * @param isoutputraw :: flag to output raw function parameters
- * @param mincost Chi2 value for this set of parameters
  * @param mincost :: minimum/best cost function value
  */
 void FindPeaks::addInfoRow(const size_t spectrum, const API::IPeakFunction_const_sptr &peakfunction,

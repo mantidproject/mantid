@@ -24,7 +24,7 @@ constexpr auto TOOLBAR_CLS = "NavigationToolbar2QT";
 // This implementation is tied to the implementation
 // details of NavigationToolbar in matplotlib.backend_bases
 // It relies on the values of strings such as the mode
-// and the name of the the zoom/pan methods
+// and the name of the zoom/pan methods
 constexpr auto TOOLBAR_MODE_ATTR = "mode";
 constexpr auto TOOLBAR_ZOOM_MODE_STR = "zoom rect";
 constexpr auto TOOLBAR_ZOOM_METHOD = "zoom";

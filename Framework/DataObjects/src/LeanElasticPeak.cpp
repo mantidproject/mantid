@@ -112,6 +112,11 @@ double LeanElasticPeak::getTOF() const {
   throw Exception::NotImplementedError("LeanElasticPeak::getTOF(): no detector infomation in LeanElasticPeak");
 }
 
+// returns the detectorID of the pixel, throws NotImplementedError for LeanElasticPeak
+int LeanElasticPeak::getDetectorID() const {
+  throw Exception::NotImplementedError("LeanElasticPeak::getDetectorID(): no detector infomation in LeanElasticPeak");
+}
+
 /// returns the row (y) of the pixel of the detector, throws NotImplementedError for LeanElasticPeak
 int LeanElasticPeak::getRow() const {
   throw Exception::NotImplementedError("LeanElasticPeak::getRow(): no detector infomation in LeanElasticPeak");
@@ -137,6 +142,24 @@ double LeanElasticPeak::getAzimuthal() const {
     return atan2(detectorDir[refFrame->pointingUp()], detectorDir[refFrame->pointingHorizontal()]);
   else
     return atan2(detectorDir[1], detectorDir[0]);
+}
+
+// -------------------------------------------------------------------------------------
+/** Calculate the scattered beam direction in the sample frame  */
+Mantid::Kernel::V3D LeanElasticPeak::getDetectorDirectionSampleFrame() const {
+  const V3D qSample = getQSampleFrame();
+  const double qSign = (m_convention != "Crystallography") ? 1.0 : -1.0;
+  return getSourceDirectionSampleFrame() * -1.0 - qSample * qSign * getWavelength() / (2 * M_PI);
+}
+
+// -------------------------------------------------------------------------------------
+/** Calculate the reverse incident beam direction in the sample frame  */
+Mantid::Kernel::V3D LeanElasticPeak::getSourceDirectionSampleFrame() const {
+  std::shared_ptr<const ReferenceFrame> refFrame = getReferenceFrame();
+  if (refFrame)
+    return getInverseGoniometerMatrix() * refFrame->vecPointingAlongBeam() * -1.0;
+  else
+    return getInverseGoniometerMatrix() * V3D(0, 0, -1);
 }
 
 // -------------------------------------------------------------------------------------

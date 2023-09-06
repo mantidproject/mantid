@@ -17,7 +17,7 @@ from reduction_workflow.command_interface import *
 from .hfir_command_interface import DarkCurrent, NoDarkCurrent, NoNormalization  # noqa: F401
 from .hfir_command_interface import SolidAngle, NoSolidAngle  # noqa: F401
 from .hfir_command_interface import DirectBeamCenter, ScatteringBeamCenter  # noqa: F401
-from .hfir_command_interface import SetBeamCenter as BaseSetBeamCenter  # noqa: F401
+from .hfir_command_interface import SetBeamCenter as BaseSetBeamCenter
 
 from .hfir_command_interface import SensitivityCorrection, SetSensitivityBeamCenter  # noqa: F401
 from .hfir_command_interface import SensitivityDirectBeamCenter, SensitivityScatteringBeamCenter  # noqa: F401

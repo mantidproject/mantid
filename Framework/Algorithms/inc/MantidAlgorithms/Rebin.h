@@ -6,10 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
+
 namespace Algorithms {
 /** Takes a workspace as input and rebins the data according to the input rebin
    parameters.
@@ -35,7 +36,7 @@ namespace Algorithms {
     @author Dickon Champion, STFC
     @date 25/02/2008
  */
-class MANTID_ALGORITHMS_DLL Rebin : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL Rebin : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Rebin"; }
@@ -59,7 +60,8 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
   static std::vector<double> rebinParamsFromInput(const std::vector<double> &inParams,
-                                                  const API::MatrixWorkspace &inputWS, Kernel::Logger &logger);
+                                                  const API::MatrixWorkspace &inputWS, Kernel::Logger &logger,
+                                                  std::string binModeName = "Default");
 
 protected:
   const std::string workspaceMethodName() const override { return "rebin"; }

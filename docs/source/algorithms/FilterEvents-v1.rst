@@ -10,16 +10,16 @@ Description
 -----------
 
 This algorithm filters events from a single :ref:`EventWorkspace` to
-one or multiple :ref:`EventWorkspaces <EventWorkspace>` according to
-the ``SplittersWorkspace`` property. The :ref:`EventFiltering` concept
+one or multiple target event workspaces according to
+the ``SplitterWorkspace`` property. The :ref:`EventFiltering` concept
 page has a detailed introduction to event filtering.
 
 Specifying the splitting strategy
----------------------------------
+#################################
 
-The ``SplittersWorkspace`` describes much of the information for
-splitting the ``InputWorkspace`` into the various output
-workspaces. It can have one of three types
+The ``SplitterWorkspace`` provides information for
+splitting the ``InputWorkspace`` into target output
+workspaces. It can have one of three types:
 
 +--------------------------------------------------------------+-------------+----------+
 | workspace class                                              | units       | rel/abs  |
@@ -31,56 +31,31 @@ workspaces. It can have one of three types
 | :ref:`TableWorkspace <Table Workspaces>`                     | seconds     | either   |
 +--------------------------------------------------------------+-------------+----------+
 
-Whether the values in :ref:`MatrixWorkspace <MatrixWorkspace>` and
-:ref:`TableWorkspace <Table Workspaces>` is treated as relative or
-absolute time is dependent on the value of ``RelativeTime``. In the
-case of ``RelativeTime=True``, the time is relative to the start of
+Whether the times in ``SplitterWorkspace`` are treated as relative or
+absolute is dependent on the value of ``RelativeTime``. In the
+case of ``RelativeTime=True``, the times are relative to the start of
 the run (in the ``ws.run()['run_start']``) or, if specified, the
 ``FilterStartTime``. In the case of ``RelativeTime=False``, the times
 are relative to the :class:`GPS epoch <mantid.kernel.DateAndTime>`.
 
 Both :ref:`TableWorkspace <Table Workspaces>` and
 :class:`SplittersWorkspace <mantid.api.ISplittersWorkspace>` have 3
-columns, ``start``, ``stop``, and ``target`` which should be a float,
-float, and string. The :ref:`event filtering <EventFiltering>` concept
-page has details on creating the :ref:`TableWorkspace <Table
-Workspaces>` by hand.
-
-If the ``SplittersWorkspace`` is a :ref:`MatrixWorkspace
-<MatrixWorkspace>`, it must have a single spectrum with the x-value is
-the time boundaries and the y-value is the workspace group index.
+columns, ``start``, ``stop``, and ``target``. :ref:`MatrixWorkspace
+<MatrixWorkspace>` has a single spectrum where X-values
+represent the time boundaries and Y-values represent the target workspace indexes.
+The :ref:`filter-events-usage-label` examples and :ref:`Event Filtering <EventFiltering>` concept
+page have details on creating the ``SplitterWorkspace`` by hand.
+Note that event filtering treats all time intervals as [inclusive,exclusive).
 
 The optional ``InformationWorkspace`` is a :ref:`TableWorkspace <Table
-Workspaces>` for information of splitters.
+Workspaces>` for information on splitters.
 
 Unfiltered Events
------------------
+#################
 
-Some events are not inside any splitters. They are put to a workspace
-name ended with ``_unfiltered``. If
-``OutputWorkspaceIndexedFrom1=True``, then this workspace will not be
-created.
-
-Using FilterEvents with fast-changing logs
-------------------------------------------
-
-There are a few parameters to consider when the log filtering is
-expected to produce a large splitter table. An example of such a case
-would be a data file for which the events need to be split according
-to a log with two or more states changing in the kHz range. To reduce
-the filtering time, one may do the following:
-
-- Make sure the ``SplitterWorkspace`` input is a :ref:`MatrixWorkspace
-  <MatrixWorkspace>`. Such a workspace can be produced by using the
-  ``FastLog = True`` option when calling :ref:`GenerateEventsFilter
-  <algm-GenerateEventsFilter>`.
-- Choose the logs to split. Filtering the logs can take a substantial
-  amount of time. To save time, you may want to split only the logs
-  you will need for analysis. To do so, set ``ExcludeSpecifiedLogs =
-  False`` and list the logs you need in
-  ``TimeSeriesPropertyLogs``. For example, if we only need to know the
-  accumulated proton charge for each filtered workspace, we would set
-  ``TimeSeriesPropertyLogs = proton_charge``.
+Some events do not fall into any time-splitting intervals. They are put into a workspace
+with the name ending with ``_unfiltered``. If ``OutputUnfilteredEvents=False``,
+this workspace will not be created.
 
 Correcting time neutron was at the sample
 #########################################
@@ -113,23 +88,22 @@ and stored in the ``OutputTOFCorrectionWorkspace``.
   in the ``DetectorTOFCorrectionWorkspace``.
 
 
-Difference from FilterByLogValue
---------------------------------
+Filter by pulse time vs. full time
+##################################
 
-In :ref:`FilterByLogValue <algm-FilterByLogValue>`,
-``EventList.splitByTime()`` is used. In FilterEvents, it only uses
-this when ``FilterByPulse=True``. Otherwise,
-``EventList.splitByFullTime()`` is used. The difference between
-``splitByTime`` and ``splitByFullTime`` is that ``splitByTime``
-filters events by pulse time, and ``splitByFullTime`` considers both
-pulse time and TOF.
+In the case of ``FilterByPulseTime=True``, events will be filtered by pulse time.
+This is recommended for slow sample environment logs. The algorithm
+will run faster, but with lower precision. In the case of ``FilterByPulseTime=False``,
+events will be filtered by full time, i.e. pulse time plus TOF.
+
+.. _filter-events-usage-label:
 
 Usage
 -----
 
-**Example - Filtering event without correction on TOF**
+**Example - Filtering events without correction on TOF**
 
-.. testcode:: FilterEventNoCorrection
+.. testcode:: FilterEventsNoCorrection
 
     ws = Load(Filename='CNCS_7860_event.nxs')
     splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp',
@@ -138,8 +112,8 @@ Usage
     FilterEvents(InputWorkspace=ws, SplitterWorkspace=splitws, InformationWorkspace=infows,
             OutputWorkspaceBaseName='tempsplitws',  GroupWorkspaces=True,
             FilterByPulseTime = False, OutputWorkspaceIndexedFrom1 = False,
-            CorrectionToSample = "None", SpectrumWithoutDetector = "Skip", SplitSampleLogs = False,
-            OutputTOFCorrectionWorkspace='mock')
+            CorrectionToSample = "None", SpectrumWithoutDetector = "Skip",
+            OutputTOFCorrectionWorkspace='mock', OutputUnfilteredEvents = True)
 
     # Print result
     wsgroup = mtd["tempsplitws"]
@@ -148,10 +122,9 @@ Usage
         tmpws = mtd[name]
         print("workspace %s has %d events" % (name, tmpws.getNumberEvents()))
 
-
 Output:
 
-.. testoutput:: FilterEventNoCorrection
+.. testoutput:: FilterEventsNoCorrection
 
     workspace tempsplitws_0 has 124 events
     workspace tempsplitws_1 has 16915 events
@@ -161,9 +134,9 @@ Output:
     workspace tempsplitws_5 has 5133 events
     workspace tempsplitws_unfiltered has 50603 events
 
-**Example - Filtering event by a user-generated TableWorkspace**
+**Example - Filtering events by a user-generated TableWorkspace**
 
-.. testcode:: FilterEventNoCorrection
+.. testcode:: FilterEventsNoCorrection
 
     import numpy as np
     ws = Load(Filename='CNCS_7860_event.nxs')
@@ -183,39 +156,87 @@ Output:
     FilterEvents(InputWorkspace=ws, SplitterWorkspace=split_table_ws,
             OutputWorkspaceBaseName='tempsplitws3',  GroupWorkspaces=True,
             FilterByPulseTime = False, OutputWorkspaceIndexedFrom1 = False,
-            CorrectionToSample = "None", SpectrumWithoutDetector = "Skip", SplitSampleLogs = False,
+            CorrectionToSample = "None", SpectrumWithoutDetector = "Skip",
             OutputTOFCorrectionWorkspace='mock',
-            RelativeTime=True)
+            RelativeTime=True, OutputUnfilteredEvents = True)
 
-    # Print result
+    # print result
     wsgroup = mtd["tempsplitws3"]
     wsnames = wsgroup.getNames()
     for name in sorted(wsnames):
         tmpws = mtd[name]
         print("workspace %s has %d events" % (name, tmpws.getNumberEvents()))
-        split_log = tmpws.run().getProperty('splitter')
-        entry_0 = np.datetime_as_string(split_log.times[0].astype(np.dtype('M8[s]')), timezone='UTC')
-        entry_1 = np.datetime_as_string(split_log.times[1].astype(np.dtype('M8[s]')), timezone='UTC')
-        print('event splitter log: entry 0 and entry 1 are {0} and {1}.'.format(entry_0, entry_1))
-
+        time_roi = tmpws.run().getTimeROI()
+        splitters = time_roi.toTimeIntervals()
+        for index, splitter in enumerate(splitters, 1):
+            times = np.array(splitter, dtype=np.int64) * np.timedelta64(1, 'ns') + np.datetime64('1990-01-01T00:00')
+            print("event splitter " + str(index) + ": from " + np.datetime_as_string(times[0], timezone='UTC') + " to " + np.datetime_as_string(times[1], timezone='UTC'))
 
 Output:
 
-.. testoutput:: FilterEventNoCorrection
+.. testoutput:: FilterEventsNoCorrection
 
     workspace tempsplitws3_a has 77580 events
-    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:10:17Z.
+    event splitter 1: from 2010-03-25T16:08:37.000000000Z to 2010-03-25T16:10:17.000000000Z
     workspace tempsplitws3_b has 0 events
-    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:11:57Z.
+    event splitter 1: from 2010-03-25T16:11:57.000000000Z to 2010-03-25T16:13:37.000000000Z
+    event splitter 2: from 2010-03-25T16:18:37.000000000Z to 2010-03-25T16:19:27.000000000Z
     workspace tempsplitws3_c has 0 events
-    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:15:17Z.
+    event splitter 1: from 2010-03-25T16:15:17.000000000Z to 2010-03-25T16:18:37.000000000Z
     workspace tempsplitws3_unfiltered has 34686 events
-    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:10:17Z.
+    event splitter 1: from 2010-03-25T16:10:17.000000000Z to 2010-03-25T16:11:57.000000000Z
+    event splitter 2: from 2010-03-25T16:13:37.000000000Z to 2010-03-25T16:15:17.000000000Z
 
+**Example - Filtering events by a user-generated MatrixWorkspace**
 
-**Example - Filtering event by pulse time**
+.. testcode:: FilterEventsNoCorrection
 
-.. testcode:: FilterEventByPulseTime
+    import numpy as np
+    ws = Load(Filename='CNCS_7860_event.nxs')
+
+    # create MatrixWorkspace. Use -1 as a target for unfiltered events.
+    times = [0, 100, 200, 300, 400, 600, 650]
+    targets = [0, -1, 1, -1, 2, 1]
+    split_matrix_ws = CreateWorkspace(DataX=times, DataY=targets, NSpec=1)
+
+    # filter events
+    FilterEvents(InputWorkspace=ws, SplitterWorkspace=split_matrix_ws,
+            OutputWorkspaceBaseName='tempsplitws4',  GroupWorkspaces=True,
+            FilterByPulseTime = False, OutputWorkspaceIndexedFrom1 = False,
+            CorrectionToSample = "None", SpectrumWithoutDetector = "Skip",
+            OutputTOFCorrectionWorkspace='mock',
+            RelativeTime=True, OutputUnfilteredEvents = True)
+
+    # print result
+    wsgroup = mtd["tempsplitws4"]
+    wsnames = wsgroup.getNames()
+    for name in sorted(wsnames):
+        tmpws = mtd[name]
+        print("workspace %s has %d events" % (name, tmpws.getNumberEvents()))
+        time_roi = tmpws.run().getTimeROI()
+        splitters = time_roi.toTimeIntervals()
+        for index, splitter in enumerate(splitters, 1):
+            times = np.array(splitter, dtype=np.int64) * np.timedelta64(1, 'ns') + np.datetime64('1990-01-01T00:00')
+            print("event splitter " + str(index) + ": from " + np.datetime_as_string(times[0], timezone='UTC') + " to " + np.datetime_as_string(times[1], timezone='UTC'))
+
+Output:
+
+.. testoutput:: FilterEventsNoCorrection
+
+    workspace tempsplitws4_0 has 77580 events
+    event splitter 1: from 2010-03-25T16:08:37.000000000Z to 2010-03-25T16:10:17.000000000Z
+    workspace tempsplitws4_1 has 0 events
+    event splitter 1: from 2010-03-25T16:11:57.000000000Z to 2010-03-25T16:13:37.000000000Z
+    event splitter 2: from 2010-03-25T16:18:37.000000000Z to 2010-03-25T16:19:27.000000000Z
+    workspace tempsplitws4_2 has 0 events
+    event splitter 1: from 2010-03-25T16:15:17.000000000Z to 2010-03-25T16:18:37.000000000Z
+    workspace tempsplitws4_unfiltered has 34686 events
+    event splitter 1: from 2010-03-25T16:10:17.000000000Z to 2010-03-25T16:11:57.000000000Z
+    event splitter 2: from 2010-03-25T16:13:37.000000000Z to 2010-03-25T16:15:17.000000000Z
+
+**Example - Filtering events by pulse time**
+
+.. testcode:: FilterEventsByPulseTime
 
     ws = Load(Filename='CNCS_7860_event.nxs')
     splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp',
@@ -230,7 +251,6 @@ Output:
         OutputWorkspaceIndexedFrom1 = True,
         CorrectionToSample = "None",
         SpectrumWithoutDetector = "Skip",
-        SplitSampleLogs = False,
         OutputTOFCorrectionWorkspace='mock')
 
     # Print result
@@ -240,10 +260,9 @@ Output:
         tmpws = mtd[name]
         print("workspace %s has %d events" % (name, tmpws.getNumberEvents()))
 
-
 Output:
 
-.. testoutput:: FilterEventByPulseTime
+.. testoutput:: FilterEventsByPulseTime
 
     workspace tempsplitws_1 has 123 events
     workspace tempsplitws_2 has 16951 events
@@ -253,9 +272,9 @@ Output:
     workspace tempsplitws_6 has 5067 events
 
 
-**Example - Filtering event with correction on TOF**
+**Example - Filtering events with correction on TOF**
 
-.. testcode:: FilterEventTOFCorrection
+.. testcode:: FilterEventsTOFCorrection
 
     ws = Load(Filename='CNCS_7860_event.nxs')
     splitws, infows = GenerateEventsFilter(InputWorkspace=ws, UnitOfTime='Nanoseconds', LogName='SampleTemp',
@@ -269,8 +288,8 @@ Output:
         CorrectionToSample = "Direct",
         IncidentEnergy=3,
         SpectrumWithoutDetector = "Skip",
-        SplitSampleLogs = False,
-        OutputTOFCorrectionWorkspace='mock')
+        OutputTOFCorrectionWorkspace='mock',
+        OutputUnfilteredEvents = True)
 
     # Print result
     wsgroup = mtd["tempsplitws"]
@@ -279,10 +298,9 @@ Output:
         tmpws = mtd[name]
         print("workspace %s has %d events" % (name, tmpws.getNumberEvents()))
 
-
 Output:
 
-.. testoutput:: FilterEventTOFCorrection
+.. testoutput:: FilterEventsTOFCorrection
 
     workspace tempsplitws_0 has 123 events
     workspace tempsplitws_1 has 16951 events

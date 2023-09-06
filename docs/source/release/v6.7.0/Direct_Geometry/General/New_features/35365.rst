@@ -1,1 +1,0 @@
-- New menu item for Direct interfaces, Shiver is added.

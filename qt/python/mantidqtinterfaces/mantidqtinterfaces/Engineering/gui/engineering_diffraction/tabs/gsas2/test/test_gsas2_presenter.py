@@ -69,7 +69,6 @@ class TestGSAS2Presenter(unittest.TestCase):
 
     @patch(presenter_path + ".presenter.GSAS2Presenter.plot_result")
     def test_on_plot_index_changed(self, mock_plot_result):
-
         self.presenter.current_plot_index = 1
 
         # Same index

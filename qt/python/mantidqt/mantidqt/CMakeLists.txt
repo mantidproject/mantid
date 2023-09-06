@@ -36,7 +36,7 @@ mtd_add_sip_module(
             Qt5::Gui
             Qt5::Qscintilla
             Mantid::API
-  INSTALL_DIR ${WORKBENCH_SITE_PACKAGES}/mantidqt
+  INSTALL_DIR ${Python_SITELIB_RELPATH}/mantidqt
   LINUX_INSTALL_RPATH "\$ORIGIN/.."
   OSX_INSTALL_RPATH "@loader_path/..;@loader_path/../../Frameworks"
   FOLDER Qt5

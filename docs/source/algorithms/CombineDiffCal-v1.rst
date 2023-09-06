@@ -11,11 +11,34 @@ Description
 
 This algorithm combines pixel calibration results (:math:`prev` subscript below) from the ``PixelCalibration`` workspace with the calibration of focussed data from :ref:`PDCalibration <algm-PDCalibration-v1>` (:math:`pd` subscript below).
 The :math:`arb` subscript below denotes values found in the ``CalibrationWorkspace``.
+This is part of the larger workflow for :ref:`powder diffraction calibration <Powder Diffraction Calibration>`.
 
-.. note::
+.. warning::
 
    The ``GroupedCalibration`` table is assumed to not have :math:`DIFA` or :math:`TZERO` set.
-   It is also assumed to have calibration values for **all** detector pixels.
+
+Input arguments
+---------------
+
+* ``PixelCalibration`` is the previous calibration result
+
+  * Has values for each detector pixel
+  * Provides :math:`DIFC_{prev}`, :math:`DIFA_{prev}`, and :math:`TZERO_{prev}`
+
+* ``GroupedCalibration``
+
+  * Has values for each detector pixel, but the values are generally the same within a focused group
+  * Provides :math:`DIFC_{pd}`
+  * Is the ``OutputCalibrationTable`` from previous :ref:`PDCalibration <algm-PDCalibration>` execution
+
+* ``CalibrationWorkspace``
+
+  * Has values for each spectrum which are grouped pixels
+  * Provides :math:`DIFC_{arb}`
+  * Is the ``InputWorkspace`` from previous :ref:`PDCalibration <algm-PDCalibration>` execution
+
+How values are combined
+-----------------------
 
 The effective calibration values are calculated using the following equations
 

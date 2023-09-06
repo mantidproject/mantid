@@ -18,8 +18,13 @@ from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapt
 
 class GuiStateDirectorTest(unittest.TestCase):
     @staticmethod
-    def _get_row_entry(option_string="", sample_thickness=8.0):
-        row_entry = RowEntries(sample_scatter="SANS2D00022024", sample_thickness=sample_thickness)
+    def _get_row_entry(option_string="", sample_thickness=8.0, background_workspace="test", scale_factor=1.1):
+        row_entry = RowEntries(
+            sample_scatter="SANS2D00022024",
+            sample_thickness=sample_thickness,
+            background_ws=background_workspace,
+            scale_factor=scale_factor,
+        )
         row_entry.options.set_user_options(option_string)
         return row_entry
 

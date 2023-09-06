@@ -12,7 +12,7 @@ from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.models.run_finder import SummableRunFinder
 from sans.gui_logic.presenter.RunSelectorPresenter import RunSelectorPresenter
 from ui.sans_isis.run_selector_widget import RunSelectorWidget
-from test.SANS.gui_logic.fake_signal import FakeSignal
+from fake_signal import FakeSignal
 
 
 class RunSelectorPresenterTest(unittest.TestCase):

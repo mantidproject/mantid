@@ -37,12 +37,6 @@ public:
    */
   static void runLoadInstrument(const std::string &inst_name, const Mantid::DataObjects::Workspace2D_sptr &workspace);
 
-  /**
-   * Populate spectra mapping to detector IDs
-   *
-   * @param workspace: Workspace2D object
-   * @param nxbins: number of bins in X
-   * @param nybins: number of bins in Y
-   */
+  /// Populate spectra mapping to detector IDs
   static void runLoadMappingTable(const Mantid::DataObjects::Workspace2D_sptr &workspace, int nxbins, int nybins);
 };

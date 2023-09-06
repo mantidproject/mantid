@@ -10,8 +10,8 @@
 """
 TOFTOF reduction workflow gui.
 """
-from qtpy.QtCore import Qt  # noqa
-from qtpy.QtGui import QDoubleValidator  # noqa
+from qtpy.QtCore import Qt
+from qtpy.QtGui import QDoubleValidator
 from qtpy.QtWidgets import (
     QButtonGroup,
     QCheckBox,
@@ -29,7 +29,7 @@ from qtpy.QtWidgets import (
     QSpacerItem,
     QWidget,
     QVBoxLayout,
-)  # noqa
+)
 from mantidqtinterfaces.reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
 from mantidqtinterfaces.reduction_gui.widgets.data_table_view import DataTableView, DataTableModel

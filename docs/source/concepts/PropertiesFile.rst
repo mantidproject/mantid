@@ -167,8 +167,10 @@ The logging priority levels for the file logging and console logging can also be
 
   #Set the log to debug level or above (7=debug)
   ConfigService.setLogLevel(7)
-  #Set the log to critical level (2=critical)
-  ConfigService.setLogLevel(2)
+  #Set the log to critical level (2=critical) and do not log that it was changed
+  ConfigService.setLogLevel(2, True)
+  # Set the log to information and do not log that it was changed
+  ConfigService.setLogLevel("information", True)
 
 
 

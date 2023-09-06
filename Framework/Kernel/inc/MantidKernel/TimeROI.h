@@ -19,6 +19,7 @@ class MANTID_KERNEL_DLL TimeROI {
 public:
   /// the underlying property needs a name
   static const std::string NAME;
+  static const TimeROI USE_NONE;
 
   TimeROI();
   TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
@@ -26,7 +27,11 @@ public:
   double durationInSeconds() const;
   double durationInSeconds(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   std::size_t numBoundaries() const;
-  bool empty() const;
+  std::size_t numberOfRegions() const;
+  /// TimeROI selects all time to be used
+  bool useAll() const;
+  /// TimeROI selects no time to be used as all is invalid
+  bool useNone() const;
   void clear();
   void addROI(const std::string &startTime, const std::string &stopTime);
   void addROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
@@ -36,6 +41,7 @@ public:
   void addMask(const std::time_t &startTime, const std::time_t &stopTime);
   bool valueAtTime(const Types::Core::DateAndTime &time) const;
   Types::Core::DateAndTime getEffectiveTime(const Types::Core::DateAndTime &time) const;
+  Types::Core::DateAndTime firstTime() const;
   Types::Core::DateAndTime lastTime() const;
 
   void replaceROI(const TimeSeriesProperty<bool> *roi);
@@ -43,12 +49,14 @@ public:
   void update_union(const TimeROI &other);
   void update_intersection(const TimeROI &other);
   void update_or_replace_intersection(const TimeROI &other);
-  const Kernel::SplittingIntervalVec toSplitters() const;
+  const std::vector<Kernel::TimeInterval> toTimeIntervals() const;
+  const std::vector<Kernel::TimeInterval> toTimeIntervals(const Types::Core::DateAndTime &after) const;
   bool operator==(const TimeROI &other) const;
   bool operator!=(const TimeROI &other) const;
   /// print the ROI boundaries to a string
   std::string debugStrPrint(const std::size_t type = 0) const;
   size_t getMemorySize() const;
+  Types::Core::DateAndTime timeAtIndex(unsigned long index) const;
 
   // nexus items
   void saveNexus(::NeXus::File *file) const;
@@ -56,9 +64,9 @@ public:
 private:
   std::vector<Types::Core::DateAndTime> getAllTimes(const TimeROI &other);
   void validateValues(const std::string &label);
+  bool empty() const;
   bool isCompletelyInROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
   bool isCompletelyInMask(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
-  bool valueAtTime(const std::vector<Types::Core::DateAndTime>::iterator &time);
   std::vector<Types::Core::DateAndTime> m_roi;
 };
 

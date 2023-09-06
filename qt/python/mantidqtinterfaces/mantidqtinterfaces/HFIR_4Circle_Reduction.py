@@ -9,7 +9,7 @@ import sys
 from mantidqt.gui_helper import set_matplotlib_backend, get_qapplication
 
 set_matplotlib_backend()  # must be called before anything tries to use matplotlib
-from mantidqtinterfaces.HFIR_4Circle_Reduction import reduce4circleGUI  # noqa
+from mantidqtinterfaces.HFIR_4Circle_Reduction import reduce4circleGUI
 
 app, within_mantid = get_qapplication()
 if "workbench" in sys.modules:

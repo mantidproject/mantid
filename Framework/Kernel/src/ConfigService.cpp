@@ -54,10 +54,12 @@
 
 #include <algorithm>
 #include <cctype>
+#include <codecvt>
 #include <exception>
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <locale>
 #include <stdexcept>
 #include <utility>
 
@@ -107,6 +109,8 @@ std::vector<std::string> splitPath(const std::string &path) {
   return splitted;
 }
 
+const std::string LOG_LEVEL_KEY("logging.loggers.root.level");
+
 } // end of anonymous namespace
 
 //-------------------------------
@@ -117,14 +121,8 @@ std::vector<std::string> splitPath(const std::string &path) {
 ConfigServiceImpl::ConfigServiceImpl()
     : m_pConf(nullptr), m_pSysConfig(new Poco::Util::SystemConfiguration()), m_changed_keys(), m_strBaseDir(""),
       m_propertyString(""), m_properties_file_name("Mantid.properties"),
-#ifdef MPI_BUILD
-      // Use a different user properties file for an mpi-enabled build to avoid
-      // confusion if both are used on the same file system
-      m_user_properties_file_name("Mantid-mpi.user.properties"),
-#else
-      m_user_properties_file_name("Mantid.user.properties"),
-#endif
-      m_dataSearchDirs(), m_instrumentDirs(), m_proxyInfo(), m_isProxySet(false) {
+      m_user_properties_file_name("Mantid.user.properties"), m_dataSearchDirs(), m_instrumentDirs(), m_proxyInfo(),
+      m_isProxySet(false) {
   // Register StdChannel with Poco
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
       "StdoutChannel", new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
@@ -259,7 +257,13 @@ void ConfigServiceImpl::setBaseDirectory() {
     // add a trailing slash.
     // Note: adding it to the MANTIDPATH itself will make other parts of the
     // code crash.
+#ifdef _WIN32
+    // In case Poco returns a Windows long path (prefixed with "\\?\"), we cannot
+    // mix forward and back slashes in the path.
+    m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "\\";
+#else
     m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
+#endif
     f = Poco::File(m_strBaseDir + m_properties_file_name);
     if (f.exists())
       return;
@@ -789,8 +793,6 @@ std::vector<std::string> ConfigServiceImpl::getKeys(const std::string &keyName) 
 
 /**
  * Recursively gets a list of all config options from a given root node.
- *
- * @return Vector containing all config options
  */
 void ConfigServiceImpl::getKeysRecursive(const std::string &root, std::vector<std::string> &allKeys) const {
   std::vector<std::string> rootKeys = getKeys(root);
@@ -914,6 +916,8 @@ void ConfigServiceImpl::setString(const std::string &key, const std::string &val
   } else if (key == "logging.channels.consoleChannel.class") {
     // this key requires reloading logging for it to take effect
     configureLogging();
+  } else if (key == LOG_LEVEL_KEY) {
+    this->setLogLevel(value);
   }
 
   m_notificationCenter.postNotification(new ValueChanged(key, value, old));
@@ -1206,7 +1210,9 @@ std::string ConfigServiceImpl::getAppDataDir() {
   const std::string applicationName = "mantid";
 #if POCO_OS == POCO_OS_WINDOWS_NT
   const std::string vendorName = "mantidproject";
-  std::string appdata = std::getenv("APPDATA");
+  wchar_t *w_appdata = _wgetenv(L"APPDATA");
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+  std::string appdata = converter.to_bytes(w_appdata);
   Poco::Path path(appdata);
   path.makeDirectory();
   path.pushDirectory(vendorName);
@@ -1231,7 +1237,7 @@ std::string ConfigServiceImpl::getDirectoryOfExecutable() const {
 /**
  * Get the full path to the executing program (i.e. whatever Mantid is embedded
  * in)
- * @returns A string containing the full path the the executable
+ * @returns A string containing the full path the executable
  */
 std::string ConfigServiceImpl::getPathToExecutable() const {
   std::string execpath;
@@ -1886,9 +1892,22 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename, const bo
  */
 void ConfigServiceImpl::setLogLevel(int logLevel, bool quiet) {
   Mantid::Kernel::Logger::setLevelForAll(logLevel);
+  // update the internal value to keep strings in sync
+  m_pConf->setString(LOG_LEVEL_KEY, g_log.getLevelName());
+
   if (!quiet) {
-    g_log.log("logging set to " + Logger::PriorityNames[logLevel] + " priority",
+    g_log.log("logging set to " + Logger::PriorityNames[std::size_t(logLevel)] + " priority",
               static_cast<Logger::Priority>(logLevel));
+  }
+}
+
+void ConfigServiceImpl::setLogLevel(std::string logLevel, bool quiet) {
+  Mantid::Kernel::Logger::setLevelForAll(logLevel);
+  // update the internal value to keep strings in sync
+  m_pConf->setString(LOG_LEVEL_KEY, g_log.getLevelName());
+
+  if (!quiet) {
+    g_log.log("logging set to " + logLevel + " priority", static_cast<Logger::Priority>(g_log.getLevel()));
   }
 }
 

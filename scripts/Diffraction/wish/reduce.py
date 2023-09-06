@@ -155,7 +155,7 @@ class Wish:
 
     # Reads a wish data file return a workspace with a short name
     def read(self, number, panel, extension):
-        if type(number) is int:
+        if isinstance(number, int):
             filename = self.datafile
             logger.notice("will be reading filename...{}".format(filename))
             spectra_min, spectra_max = self.return_panel_van.get(panel) if self.is_vanadium else self.return_panel.get(panel)
@@ -385,7 +385,7 @@ class Wish:
         simple.DeleteWorkspace("WISH_diff_mask")
 
     def process_incidentmon(self, number, extension, spline_terms=20):
-        if type(number) is int:
+        if isinstance(number, int):
             filename = self.get_file_name(number, extension)
             works = "monitor{}".format(number)
             shared_load_files(extension, filename, works, 4, 4, True)

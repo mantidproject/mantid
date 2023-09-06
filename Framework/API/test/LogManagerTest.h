@@ -13,6 +13,7 @@
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 #include <cmath>
@@ -166,6 +167,13 @@ public:
     LogManager runInfo;
     // Nothing there yet
     TS_ASSERT_THROWS(runInfo.endTime(), const std::runtime_error &);
+    // Proton Charge log with only one entry
+    addTimeSeriesEntry(runInfo, "proton_charge", 78.9);
+    TS_ASSERT_EQUALS(runInfo.endTime(), DateAndTime("2011-05-24T00:00:00"));
+    runInfo.removeProperty("proton_charge");
+    // Proton Charge log with multiple entries
+    addTestTimeSeries<double>(runInfo, "proton_charge");
+    TS_ASSERT_EQUALS(runInfo.endTime(), DateAndTime("2012-07-19T16:19:20"));
     // Add run_end and see that get picked up
     const std::string run_end("2013-12-19T13:38:00");
     auto run_end_prop = new PropertyWithValue<std::string>("run_end", run_end);
@@ -177,6 +185,8 @@ public:
     runInfo.addProperty(end_time_prop);
     TS_ASSERT_EQUALS(runInfo.endTime(), DateAndTime(end_time));
 
+    // Remove proton charge log to make sure endTime() throws correct exceptions
+    runInfo.removeProperty("proton_charge");
     // Set run_end back to valid value and make end_time contain nonsense
     run_end_prop->setValue(run_end);
     end_time_prop->setValue("__");
@@ -687,6 +697,63 @@ public:
       TS_ASSERT_DELTA(filtered->nthValue(4), 21, 1e-5);
       TS_ASSERT_DELTA(filtered->nthValue(5), 22, 1e-5);
     }
+  }
+
+  void test_removeDataOutsideTimeROI() {
+    // Build an input run info object with a few properties, including a time series
+    LogManager run_input;
+    addTestPropertyWithValue<double>(run_input, "single-double", 2023.0);
+    addTestPropertyWithValue<std::string>(run_input, "single_string", "2023");
+    addTestTimeSeries<double>(run_input, "time_series");
+
+    // Create a TimeROI
+    TimeROI roi;
+    roi.addROI(DateAndTime("2012-07-19T16:17:20"), DateAndTime("2012-07-19T16:17:35"));
+    roi.addROI(DateAndTime("2012-07-19T16:17:45"), DateAndTime("2012-07-19T16:18:10"));
+
+    // Build an expected run info object with the same properties as the input, except for the time series
+    LogManager run_expect;
+    addTestPropertyWithValue<double>(run_expect, "single-double", 2023.0);
+    addTestPropertyWithValue<std::string>(run_expect, "single_string", "2023");
+    // Use a filtered time series property instead of original
+    auto tsp = run_input.getTimeSeriesProperty<double>("time_series");
+    run_expect.addProperty(tsp->cloneInTimeROI(roi), true);
+    run_expect.setTimeROI(roi);
+
+    // Test that after the input run info is filtered with the same TimeROI, the result is as expected
+    run_input.setTimeROI(roi);
+    run_input.removeDataOutsideTimeROI();
+    TS_ASSERT_EQUALS(run_input, run_expect);
+  }
+
+  void test_cloneInTimeROI() {
+    // Build an input run info object with a few properties, including a time series
+    LogManager run_input;
+    addTestPropertyWithValue<double>(run_input, "single-double", 2023.0);
+    addTestPropertyWithValue<std::string>(run_input, "single_string", "2023");
+    addTestTimeSeries<double>(run_input, "time_series");
+
+    // Create a TimeROI
+    TimeROI roi;
+    roi.addROI(DateAndTime("2012-07-19T16:17:20"), DateAndTime("2012-07-19T16:17:35"));
+    roi.addROI(DateAndTime("2012-07-19T16:17:45"), DateAndTime("2012-07-19T16:18:10"));
+
+    // Build an expected run info object with the same properties as the input, except for the time series
+    LogManager run_expect;
+    addTestPropertyWithValue<double>(run_expect, "single-double", 2023.0);
+    addTestPropertyWithValue<std::string>(run_expect, "single_string", "2023");
+    // Use a filtered time series property instead of original
+    auto tsp = run_input.getTimeSeriesProperty<double>("time_series");
+    run_expect.addProperty(tsp->cloneInTimeROI(roi), true);
+    run_expect.setTimeROI(roi);
+
+    // Create a cloned-in-roi copy of the orginal run info object
+    LogManager *run_result_ptr = run_input.cloneInTimeROI(roi);
+    // Make sure the copy is different from the original, i.e. the roi really filters out some data
+    TS_ASSERT(*run_result_ptr != run_input);
+    // Test that the copy is the same as expected
+    TS_ASSERT_EQUALS(*run_result_ptr, run_expect);
+    delete run_result_ptr;
   }
 
 private:

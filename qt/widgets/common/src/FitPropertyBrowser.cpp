@@ -1437,9 +1437,8 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
     if (oldExp == exp)
       return;
 
-    Mantid::API::ParameterTie *tie = new Mantid::API::ParameterTie(compositeFunction().get(), parName.toStdString());
     try {
-      tie->set(exp.toStdString());
+      compositeFunction().get()->tie(parName.toStdString(), exp.toStdString());
       h->addTie(parName + "=" + exp);
     } catch (...) {
       const auto msg =
@@ -1448,7 +1447,6 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
 
       m_stringManager->setValue(prop, oldExp);
     }
-    delete tie;
   } else if (getHandler()->setAttribute(prop)) { // setting an attribute may
                                                  // change function parameters
     emit functionChanged();

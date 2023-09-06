@@ -48,7 +48,6 @@ spline_path = os.path.join(calibration_dir, spline_rel_path)
 
 
 class CreateVanadiumNoSolidAngleTest(systemtesting.MantidSystemTest):
-
     calibration_results = None
     existing_config = config["datasearch.directories"]
 
@@ -60,6 +59,7 @@ class CreateVanadiumNoSolidAngleTest(systemtesting.MantidSystemTest):
         self.calibration_results = run_vanadium_calibration(do_solid_angle_corrections=False)
 
     def validate(self):
+        self.checkInstrument = False  # want to check focused results, not the instrument geometry
         self.tolerance = 0.05  # Required for difference in spline data between operating systems
         return self.calibration_results.name(), "ISIS_Powder-HRPD-VanSplined_66031_hrpd_new_072_01_corr.cal.nxs"
 
@@ -73,7 +73,6 @@ class CreateVanadiumNoSolidAngleTest(systemtesting.MantidSystemTest):
 
 
 class FocusNoSolidAngleTest(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -87,6 +86,8 @@ class FocusNoSolidAngleTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         # check output files as expected
+        self.checkInstrument = False  # want to check focused results, not the instrument geometry
+
         def generate_error_message(expected_file, output_dir):
             return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
 
@@ -135,7 +136,6 @@ class FocusNoSolidAngleTest(systemtesting.MantidSystemTest):
 
 
 class VanadiumAndFocusWithSolidAngleTest(systemtesting.MantidSystemTest):
-
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -148,6 +148,7 @@ class VanadiumAndFocusWithSolidAngleTest(systemtesting.MantidSystemTest):
         self.focus_results = run_focus(do_solid_angle_corrections=True)
 
     def validate(self):
+        self.checkInstrument = False  # want to check focused results, not the instrument geometry
         if platform.system() == "Darwin":  # OSX requires higher tolerance for splines
             self.tolerance = 0.1
             self.tolerance_is_rel_err = True
@@ -190,7 +191,6 @@ def run_vanadium_calibration(do_solid_angle_corrections):
     if not os.path.exists(spline_path):
         raise RuntimeError("Could not find output spline at the following path: {}".format(spline_path))
     splined_ws = mantid.Load(Filename=spline_path)
-
     return splined_ws
 
 

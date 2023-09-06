@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (
+    AlgorithmManager,
     DataProcessorAlgorithm,
     AlgorithmFactory,
     Progress,
@@ -14,8 +15,18 @@ from mantid.api import (
     FileAction,
     WorkspaceUnitValidator,
     FunctionFactory,
+    AnalysisDataService,
 )
-from mantid.kernel import Direction, FloatBoundedValidator, IntBoundedValidator, EnabledWhenProperty, PropertyCriterion, logger
+from mantid.kernel import (
+    Direction,
+    FloatBoundedValidator,
+    IntBoundedValidator,
+    EnabledWhenProperty,
+    PropertyCriterion,
+    logger,
+    CompositeValidator,
+    CompositeRelation,
+)
 import numpy as np
 from scipy.signal import convolve2d
 from scipy.ndimage import label
@@ -33,7 +44,7 @@ class PEAK_MASK_STATUS(Enum):
     DENSITY_MIN = "Peak mask density is below limit"
     VACANCY_MAX = "Peak mask has too many vacancies"
     ON_EDGE = "Peak mask is on the detector edge"
-    NBINS_MIN = "Peak does not have enough TOF bins"
+    NBINS_MIN = "Peak does not have enough non-zero bins"
     NO_PEAK = "No peak detected."
 
 
@@ -173,12 +184,12 @@ class InstrumentArrayConverter:
 
     def _get_detid_array_rect_detector(self, bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge):
         col_step, row_step = bank.idstep(), bank.idstepbyrow()  # step in detID along col and row
-        if bank.idfillbyfirst_y():
-            col_step, row_step = row_step, col_step
         # need to adjust range depending on whether above min/max row/col
         drow_vec = np.arange(max(0, row - drows), min(row + drows + 1, bank.xpixels())) - row
         dcol_vec = np.arange(max(0, col - dcols), min(col + dcols + 1, bank.ypixels())) - col
         dcol, drow = np.meshgrid(dcol_vec, drow_vec)
+        if bank.idfillbyfirst_y():
+            col_step, row_step = row_step, col_step
         detids = detid + dcol * col_step + drow * row_step
         # create bool mask for detector edges
         detector_edges = np.logical_or.reduce(
@@ -194,37 +205,20 @@ class InstrumentArrayConverter:
         icol_peak = np.where(dcol_vec == 0)[0][0]
         return detids, detector_edges, irow_peak, icol_peak
 
-    def get_peak_region_array(self, peak, detid, bank_name, nrows, ncols, nrows_edge, ncols_edge):
+    def get_peak_data(self, peak, detid, bank_name, nrows, ncols, nrows_edge, ncols_edge):
         """
         :param peak: peak object
         :param detid: detector id of peak (from peak table)
         :param bank_name: bank name on which detector resides (from peak table)
         :param dpixel: width of detector window in pixels (along row and columns)
-        :return signal: 3D numpy array containing signal/intensities (row x cols x bins)
-        :return errors: 3D numpy array containing errors (row x cols x bins)
-        :return irow_peak: index of peak position along first dim (row)
-        :return icol_peak: index of peak position along second dim (col)
-        :return ispec: spectrum index corresponding to detid of peak
-        :return edges: bool mask True for pixels on the edge of a detector bank/panel
+        :return peak_data: PeakData object storing detids in peak region
         """
         bank = self.inst.getComponentByName(bank_name)
         row, col = peak.getRow(), peak.getCol()
         drows, dcols = nrows // 2, ncols // 2
-        detids, detector_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge)
-        # get signal and error from each spectrum
-        ispecs = np.array(self.ws.getIndicesFromDetectorIDs([int(d) for d in detids.flatten()])).reshape(detids.shape)
-        signal = np.zeros((*ispecs.shape, self.ws.blocksize()))
-        errors = np.zeros(signal.shape)
-        for irow in range(signal.shape[0]):
-            for icol in range(signal.shape[1]):
-                ispec = int(ispecs[irow, icol])
-                signal[irow, icol, :] = self.ws.readY(ispec)
-                errors[irow, icol, :] = self.ws.readE(ispec)
-        # get x bin centers
-        xvals = self.ws.readX(int(ispecs[irow_peak, icol_peak]))
-        if len(xvals) > self.ws.blocksize():
-            xvals = 0.5 * (xvals[:-1] + xvals[1:])  # convert to bin centers
-        return xvals, signal, errors, irow_peak, icol_peak, detector_edges, detids
+        detids, det_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge)
+        peak_data = PeakData(irow_peak, icol_peak, det_edges, detids, peak, self.ws)
+        return peak_data
 
 
 class PeakData:
@@ -232,31 +226,71 @@ class PeakData:
     This class is used to hold data and integration parameters for single-crystal Bragg peaks
     """
 
-    def __init__(self, xpk, signal, error, irow, icol, det_edges, dets, peak, dTOF):
+    def __init__(self, irow, icol, det_edges, detids, peak, ws):
+        # set data
+        self.ws = ws
+        self.irow, self.icol = irow, icol
+        self.det_edges = det_edges
+        self.detids = detids
         # extract peak properties
         self.hkl = np.round(peak.getHKL(), 2)  # used for plot title
         self.wl = peak.getWavelength()
         self.theta = peak.getScattering() / 2
-        self.tof = peak.getTOF()
-        # set data
-        self.xpk = xpk
-        self.signal, self.error = signal, error
-        self.irow, self.icol = irow, icol
-        self.det_edges = det_edges
-        self.dets = dets
-        # set initial integration limits
-        self.initial_frac_width = dTOF / self.tof
-        self.ixlo = np.argmin(abs(xpk - (self.tof - 0.5 * dTOF)))
-        self.ixhi = np.argmin(abs(xpk - (self.tof + 0.5 * dTOF)))
-        self.ixpk = np.argmin(abs(xpk - self.tof))
-        self.ixlo_opt, self.ixhi_opt = self.ixlo, self.ixhi
-        self.ypk, self.epk_sq = None, None
+        if self.ws.getAxis(0).getUnit().unitID() == "dSpacing":
+            self.xpos = peak.getDSpacing()
+        else:
+            self.xpos = peak.getTOF()
+        # null init attributes
+        self.initial_frac_width = None
+        self.ixpk = None
+        self.ixlo, self.ixhi = None, None
+        self.ixlo_opt, self.ixhi_opt = None, None
+        self.xpk, self.ypk, self.epk_sq = None, None, None
         self.peak_mask, self.non_bg_mask = None, None
         self.status = None
         self.intens, self.sig = 0, 0
+        self.x_integrated_data = None
+
+    def get_data_arrays(self):
+        # get signal and error from each spectrum
+        ispecs = np.array(self.ws.getIndicesFromDetectorIDs([int(d) for d in self.detids.flatten()])).reshape(self.detids.shape)
+        signal = np.zeros((*ispecs.shape, self.ws.blocksize()))
+        errors = np.zeros(signal.shape)
+        xcens = np.zeros(signal.shape)
+        for irow in range(signal.shape[0]):
+            for icol in range(signal.shape[1]):
+                ispec = int(ispecs[irow, icol])
+                signal[irow, icol, :] = self.ws.readY(ispec)
+                errors[irow, icol, :] = self.ws.readE(ispec)
+                xvals = self.ws.readX(ispec)
+                if len(xvals) > signal.shape[-1]:
+                    xvals = 0.5 * (xvals[:-1] + xvals[1:])  # convert to bin centers
+                xcens[irow, icol, :] = xvals
+        return xcens, signal, errors
+
+    def get_roi_on_detector(self, detids):
+        isort = np.argsort(detids.flatten())
+        ws_roi = exec_simpleapi_alg(
+            "ExtractSpectra", InputWorkspace=self.ws, DetectorList=detids.flat[isort], OutputWorkspace=f"__roi{detids.flat[0]}"
+        )
+        return ws_roi, isort
+
+    def integrate_xrange(self, xmin, xmax):
+        # Pass in sorted detid list as ExtractSpectra does partial sorting
+        ws_roi, isort = self.get_roi_on_detector(self.detids)
+        ws_roi = exec_simpleapi_alg(
+            "Integration", InputWorkspace=ws_roi, RangeLower=xmin, RangeUpper=xmax, IncludePartialBins=True, OutputWorkspace=ws_roi
+        )
+        # GroupDetectors sorts the workspace by detector ID so need to get correct order
+        x_integrated_data = np.zeros(self.detids.size)
+        x_integrated_data[isort] = np.squeeze(AnalysisDataService.retrieve(ws_roi).extractY())
+        x_integrated_data = x_integrated_data.reshape(self.detids.shape)
+        exec_simpleapi_alg("DeleteWorkspace", Workspace=ws_roi)
+        return x_integrated_data
 
     def integrate_peak(
         self,
+        frac_width,
         use_nearest,
         integrate_on_edge,
         optimise_mask,
@@ -267,18 +301,30 @@ class PeakData:
         min_npixels_per_vacancy,
         max_nvacancies,
         min_nbins,
+        optimise_xwindow,
+        threshold_i_over_sig,
     ):
-        self.peak_mask, self.non_bg_mask, peak_label = self.find_peak_mask(self.ixlo, self.ixhi, use_nearest)
+        # get xlimits
+        dx = frac_width * self.xpos
+        self.xmin, self.xmax = self.xpos - 0.5 * dx, self.xpos + 0.5 * dx
+        # find peak mask with intial x-limits
+        self.x_integrated_data, self.peak_mask, self.non_bg_mask, peak_label = self.find_peak_mask(self.xmin, self.xmax, use_nearest)
         self.status = self._is_peak_mask_valid(
             self.peak_mask, peak_label, npk_min, density_min, nrow_max, ncol_max, min_npixels_per_vacancy, max_nvacancies, integrate_on_edge
         )
+        # focus data - need to do this for plotting anyway even if mask not valid
+        self.focus_data_in_detector_mask()
+        self.ixmin, self.ixmax = self._find_xslice_indices(self.xmin, self.xmax)
+        self.ixmin_opt, self.ixmax_opt = self.ixmin, self.ixmax
+        self.xmin_opt, self.xmax_opt = self.xmin, self.xmax
         if self.status == PEAK_MASK_STATUS.VALID:
-            self.focus_data_in_detector_mask()
             # find bg and pk bins in focused spectrum by maximising I/sig
-            self.find_peak_limits(self.ixlo, self.ixhi)
+            self.find_peak_limits(self.ixmin, self.ixmax, optimise_xwindow, threshold_i_over_sig)
             if optimise_mask:
                 # update the peak mask
-                opt_peak_mask, opt_non_bg_mask, peak_label = self.find_peak_mask(self.ixlo_opt, self.ixhi_opt, use_nearest)
+                opt_xintegrated_data, opt_peak_mask, opt_non_bg_mask, peak_label = self.find_peak_mask(
+                    self.xmin_opt, self.xmax_opt, use_nearest
+                )
                 # combine masks as optimal TOF window can truncate peak slightly
                 opt_peak_mask = np.logical_or(self.peak_mask, opt_peak_mask)
                 new_status = self._is_peak_mask_valid(
@@ -295,22 +341,24 @@ class PeakData:
                 if new_status == PEAK_MASK_STATUS.VALID:
                     self.status = new_status
                     # refocus data and re-optimise TOF limits
+                    self.x_integrated_data = opt_xintegrated_data
                     self.peak_mask = opt_peak_mask
                     self.non_bg_mask = np.logical_and(self.non_bg_mask, opt_non_bg_mask)
                     self.focus_data_in_detector_mask()
-                    self.find_peak_limits(min(self.ixlo, self.ixlo_opt), max(self.ixhi, self.ixhi_opt))
-            if self.ixhi_opt - self.ixlo_opt < min_nbins:
+                    self.find_peak_limits(self.ixmin_opt, self.ixmax_opt, optimise_xwindow, threshold_i_over_sig)
+            if np.sum(self.ypk[self.ixmin_opt : self.ixmax_opt] / np.sqrt(self.epk_sq[self.ixmin_opt : self.ixmax_opt]) > 1) < min_nbins:
                 self.status = PEAK_MASK_STATUS.NBINS_MIN
             else:
                 # do integration
                 self.scale_intensity_by_bin_width()
-                self.intens = np.sum(self.ypk[self.ixlo_opt : self.ixhi_opt])
-                self.sig = np.sqrt(np.sum(self.epk_sq[self.ixlo_opt : self.ixhi_opt]))
+                self.intens = np.sum(self.ypk[self.ixmin_opt : self.ixmax_opt])
+                self.sig = np.sqrt(np.sum(self.epk_sq[self.ixmin_opt : self.ixmax_opt]))
 
-    def find_peak_mask(self, ixlo, ixhi, use_nearest):
-        _, ipeak2D = self.find_bg_pts_seed_skew(self.signal[:, :, ixlo:ixhi].sum(axis=2).flatten())
-        non_bg_mask = np.zeros(self.signal.shape[0:2], dtype=bool)
-        non_bg_mask[np.unravel_index(ipeak2D, self.signal.shape[0:2])] = True
+    def find_peak_mask(self, xmin, xmax, use_nearest):
+        x_integrated_data = self.integrate_xrange(xmin, xmax)
+        _, ipeak2D = self.find_bg_pts_seed_skew(x_integrated_data.flatten())
+        non_bg_mask = np.zeros(self.detids.shape, dtype=bool)
+        non_bg_mask[np.unravel_index(ipeak2D, self.detids.shape)] = True
         labeled_array, num_features = label(non_bg_mask)
         # find label corresponding to peak
         peak_label = labeled_array[self.irow, self.icol]
@@ -321,7 +369,7 @@ class PeakData:
             ilabel = np.argmax([np.sum(labeled_array == lab) for lab in labels])
             peak_label = labels[ilabel]
         peak_mask = labeled_array == peak_label
-        return peak_mask, non_bg_mask, peak_label
+        return x_integrated_data, peak_mask, non_bg_mask, peak_label
 
     def _is_peak_mask_valid(
         self, peak_mask, peak_label, npk_min, density_min, nrow_max, ncol_max, min_npixels_per_vacancy, max_nvacancies, integrate_on_edge
@@ -392,30 +440,54 @@ class PeakData:
     def _calc_snr(signal, error_sq):
         return np.sum(signal) / np.sqrt(np.sum(error_sq))
 
+    def _focus_detids(self, detids):
+        if not self.ws.isCommonBins():
+            # get ws with just the selected detids
+            ws_roi, _ = self.get_roi_on_detector(detids)
+            # force common binning (same bin edges as first spectrum)
+            ws_roi_spec = exec_simpleapi_alg(
+                "ExtractSingleSpectrum", InputWorkspace=ws_roi, WorkspaceIndex=0, OutputWorkspace=ws_roi + "_spec"
+            )
+            exec_simpleapi_alg("RebinToWorkspace", WorkspaceToRebin=ws_roi, WorkspaceToMatch=ws_roi_spec, OutputWorkspace=ws_roi)
+            ws_foc = exec_simpleapi_alg(
+                "GroupDetectors",
+                InputWorkspace=ws_roi,
+                WorkspaceIndexList=range(0, len(detids)),
+                OutputWorkspace=f"__foc{detids[0]}",
+            )
+            exec_simpleapi_alg("DeleteWorkspaces", WorkspaceList=[ws_roi, ws_roi_spec])
+        else:
+            ws_foc = exec_simpleapi_alg(
+                "GroupDetectors",
+                InputWorkspace=self.ws,
+                DetectorList=",".join([str(id) for id in detids]),
+                OutputWorkspace=f"__foc{detids[0]}",
+            )
+        return ws_foc
+
     def focus_data_in_detector_mask(self):
-        # focus peak in TOF
-        self.ypk = self.signal[self.peak_mask].sum(axis=0)
-        self.epk_sq = np.sum(self.error[self.peak_mask] ** 2, axis=0)
         # get background shell of non peak/feature pixels
         kernel = np.ones((3, 3))
         bg_shell_mask = convolve2d(self.peak_mask, kernel, mode="same")
         norm = convolve2d(np.ones(bg_shell_mask.shape), kernel, mode="same")
         bg_shell_mask = (bg_shell_mask / norm) > 0
         bg_shell_mask = np.logical_and(bg_shell_mask, ~self.non_bg_mask)
-        # focus background shell
-        scale = self.peak_mask.sum() / bg_shell_mask.sum()
-        ybg = scale * self.signal[bg_shell_mask].sum(axis=0)
-        ebg_sq = (scale**2) * np.sum(self.error[bg_shell_mask] ** 2, axis=0)
-        # replace zero errors in epk and ebg_sq  with avg. error in same quarter of spectrum in background data
-        width = len(self.ypk) / 4
-        iquarter = self.ixpk // width
-        ebg_sq_subset = ebg_sq[int(iquarter * width) : int((iquarter + 1) * width)]
-        ebg_sq_avg = np.mean(ebg_sq_subset[ebg_sq_subset > 0])
-        self.epk_sq[self.epk_sq == 0] = ebg_sq_avg
-        ebg_sq[ebg_sq == 0] = ebg_sq_avg
-        # subtract bg from focused peak
-        self.ypk = self.ypk - ybg  # removes background and powder lines (roughly line up in tof)
-        self.epk_sq = self.epk_sq + ebg_sq
+        # focus and subtract background shell
+        ws_bg_foc = self._focus_detids(self.detids[bg_shell_mask])
+        scale = exec_simpleapi_alg(
+            "CreateSingleValuedWorkspace", DataValue=self.peak_mask.sum() / bg_shell_mask.sum(), OutputWorkspace="__scale"
+        )
+        exec_simpleapi_alg("Multiply", LHSWorkspace=ws_bg_foc, RHSWorkspace=scale, OutputWorkspace=ws_bg_foc)
+        ws_pk_foc = self._focus_detids(self.detids[self.peak_mask])
+        exec_simpleapi_alg("RebinToWorkspace", WorkspaceToRebin=ws_bg_foc, WorkspaceToMatch=ws_pk_foc, OutputWorkspace=ws_bg_foc)
+        exec_simpleapi_alg("Subtract", LHSWorkspace=ws_pk_foc, RHSWorkspace=ws_bg_foc, OutputWorkspace=ws_pk_foc)
+        ws_pk_foc = AnalysisDataService.retrieve(ws_pk_foc)
+        self.ypk = ws_pk_foc.readY(0).copy()
+        self.epk_sq = ws_pk_foc.readE(0).copy() ** 2
+        self.xpk = ws_pk_foc.readX(0).copy()
+        if len(self.xpk) > len(self.ypk):
+            self.xpk = 0.5 * (self.xpk[:-1] + self.xpk[1:])  # convert to bin centers
+        exec_simpleapi_alg("DeleteWorkspaces", WorkspaceList=[ws_bg_foc, ws_pk_foc, scale])
 
     def scale_intensity_by_bin_width(self):
         # multiply by bin width (as eventually want integrated intensity)
@@ -425,23 +497,47 @@ class PeakData:
         self.epk_sq[1:] = self.epk_sq[1:] * (dx**2)
         self.epk_sq[0] = self.epk_sq[0] * (dx[0] ** 2)
 
-    def find_peak_limits(self, ilo, ihi):
-        # find initial background points in tof window using skew method
-        ibg, _ = self.find_bg_pts_seed_skew(self.ypk[ilo:ihi])
-        # create mask and find largest contiguous region of peak bins
-        skew_mask = np.ones(ihi - ilo, dtype=bool)
-        skew_mask[ibg] = False
-        labels, nlabel = label(skew_mask)
-        if nlabel == 0:
-            ilabel = 0
+    def _find_xslice_indices(self, xmin, xmax):
+        return np.argmin(abs(self.xpk - xmin)), np.argmin(abs(self.xpk - xmax)) + 1
+
+    def find_peak_limits(self, ixmin, ixmax, optimise_xwindow, threshold_i_over_sig):
+        # translate window to maximise I/sigma
+        ixmin, ixmax, intens_over_sig = self.translate_xwindow_to_max_intens_over_sigma(self.ypk, self.epk_sq, ixmin, ixmax)
+        if optimise_xwindow and intens_over_sig > threshold_i_over_sig:
+            # find initial background points in tof/d-spacing window using skew method
+            ibg, _ = self.find_bg_pts_seed_skew(self.ypk[ixmin:ixmax])
+            # create mask and find largest contiguous region of peak bins
+            skew_mask = np.ones(ixmax - ixmin, dtype=bool)
+            skew_mask[ibg] = False
+            labels, nlabel = label(skew_mask)
+            if nlabel == 0:
+                ilabel = 0
+            else:
+                ilabel = np.argmax([np.sum(labels == ilabel) for ilabel in range(1, nlabel + 1)]) + 1
+            istart, iend = np.flatnonzero(labels == ilabel)[[0, -1]] + ixmin
+            # expand window to maximise I/sig (good for when peak not entirely in window)
+            self.ixmin_opt, self.ixmax_opt = self.optimise_xwindow_size_to_max_intens_over_sig(self.ypk, self.epk_sq, istart, iend + 1)
         else:
-            ilabel = np.argmax([np.sum(labels == ilabel) for ilabel in range(1, nlabel + 1)]) + 1
-        istart, iend = np.flatnonzero(labels == ilabel)[[0, -1]] + ilo
-        # expand window to maximise I/sig (good for when peak not entirely in window)
-        self.ixlo_opt, self.ixhi_opt = self.optimise_tof_window_intens_over_sig(self.ypk, self.epk_sq, istart, iend + 1)
+            self.ixmin_opt, self.ixmax_opt = ixmin, ixmax
+        self.xmin_opt, self.xmax_opt = self.xpk[self.ixmin_opt], self.xpk[self.ixmax_opt - 1]
 
     @staticmethod
-    def optimise_tof_window_intens_over_sig(signal, error_sq, ilo, ihi, ntol=8, nbg=5):
+    def translate_xwindow_to_max_intens_over_sigma(signal, error_sq, ilo, ihi):
+        dx = ihi - ilo
+        kernel = np.ones(dx)
+        istart = max(0, ilo - dx)
+        iend = min(ihi + dx, signal.size + 1)
+        # calc I/sigma using convolution - this assumes data are background subtracted
+        i_over_sig = np.convolve(signal[istart:iend], kernel, mode="valid") / np.sqrt(
+            np.convolve(error_sq[istart:iend], kernel, mode="valid")
+        )
+        imax_i_over_sigma = np.nanargmax(i_over_sig)
+        ilo_opt = imax_i_over_sigma + istart
+        ihi_opt = ilo_opt + dx
+        return ilo_opt, ihi_opt, i_over_sig[imax_i_over_sigma]
+
+    @staticmethod
+    def optimise_xwindow_size_to_max_intens_over_sig(signal, error_sq, ilo, ihi, ntol=8, nbg=5):
         if ihi == ilo:
             ihi += 1
         # increase window to RHS
@@ -482,39 +578,37 @@ class PeakData:
         return ilo - istep_lo, ihi + istep_hi
 
     def update_peak_position(self):
-        idet = np.argmax(self.signal[:, :, self.ixlo_opt : self.ixhi_opt].sum(axis=2)[self.peak_mask])
-        det = self.dets[self.peak_mask][idet]
-        self.irow, self.icol = np.where(self.dets == det)
-        # update tof
-        imax = np.argmax(self.ypk[self.ixlo_opt : self.ixhi_opt]) + self.ixlo_opt
-        self.tof = self.xpk[imax]
-        return det, self.tof
+        idet = np.argmax(self.x_integrated_data[self.peak_mask])
+        det = self.detids[self.peak_mask][idet]
+        self.irow, self.icol = np.where(self.detids == det)
+        # update tof/d-spacing
+        imax = np.argmax(self.ypk[self.ixmin_opt : self.ixmax_opt]) + self.ixmin_opt
+        self.xpos = self.xpk[imax]
+        return det, self.xpos
 
     def get_dTOF_over_TOF(self):
-        return (self.xpk[self.ixhi_opt] - self.xpk[self.ixlo_opt]) / self.tof
+        # note dDSpacing/DSpacing = dTOF/TOF as TOF/dSpacing = const (for difa=tzero=0)
+        return (self.xmax_opt - self.xmin_opt) / self.xpos
 
     def plot_integrated_peak(self, fig, ax, ipk, norm_func):
-        if self.status is not PEAK_MASK_STATUS.VALID:
-            self.focus_data_in_detector_mask()  # focus data on invalid peak mask found
-        image_data = self.signal[:, :, self.ixlo_opt : self.ixhi_opt].sum(axis=2)
         # get color axis limits (for LogNorm scale)
-        if np.any(image_data > 0):
-            inonzero = image_data > 0
-            vmin = image_data[inonzero].min()
-            vmax = image_data[inonzero].mean()
+        if np.any(self.x_integrated_data > 0):
+            inonzero = self.x_integrated_data > 0
+            vmin = self.x_integrated_data[inonzero].min()
+            vmax = self.x_integrated_data[self.peak_mask].mean()
             if vmax <= vmin:
-                vmax = image_data.max()
+                vmax = self.x_integrated_data.max()
         else:
             vmin, vmax = 1, 1
         norm = norm_func(vmin=vmin, vmax=vmax)
         # limits for 1D plot
-        ipad = int((self.ixhi - self.ixlo) / 2)  # extra portion of data shown outside the 1D window
-        istart = max(min(self.ixlo, self.ixlo_opt) - ipad, 0)
-        iend = min(max(self.ixhi, self.ixhi_opt) + ipad, len(self.xpk) - 1)
+        ipad = (self.ixmax - self.ixmin) // 4  # extra portion of data shown outside the 1D window
+        istart = max(min(self.ixmin, self.ixmin_opt) - ipad, 0)
+        iend = min(max(self.ixmax, self.ixmax_opt) + ipad, len(self.xpk) - 1)
         # 2D plot - data integrated over optimal TOF range (not range for which mask determined)
         if not ax[0].images:
             # 2D colorfill
-            img = ax[0].imshow(image_data, norm=norm)
+            img = ax[0].imshow(self.x_integrated_data, norm=norm)
             ax[0].plot(*np.where(self.peak_mask.T), "xw", label="mask")
             ax[0].plot(self.icol, self.irow, "or", label="cen")
             ax[0].set_xlabel("dColumn")
@@ -522,8 +616,8 @@ class PeakData:
             cbar = fig.colorbar(img, orientation="horizontal", ax=ax[0], label="Intensity")
             cbar.ax.tick_params(labelsize=7, which="both")
             # 1D focused spectrum
-            ax[1].axvline(self.xpk[self.ixlo_opt], ls="--", color="b", label="Optimal window")
-            ax[1].axvline(self.xpk[self.ixhi_opt - 1], ls="--", color="b")
+            ax[1].axvline(self.xmin_opt, ls="--", color="b", label="Optimal window")
+            ax[1].axvline(self.xmax_opt, ls="--", color="b")
             ax[1].errorbar(
                 self.xpk[istart:iend],
                 self.ypk[istart:iend],
@@ -534,32 +628,34 @@ class PeakData:
                 color="k",
                 label="data",
             )
-            ax[1].axvline(self.tof, ls="--", color="k", label="Centre")
-            ax[1].axvline(self.xpk[self.ixlo], ls=":", color="r", label="Initial window")
-            ax[1].axvline(self.xpk[self.ixhi - 1], ls=":", color="r")
-            ax[1].axhline(0, ls=":", color="k")
-            ax[1].legend(fontsize=7, loc=1, ncol=2)
+            ax[1].axvline(self.xpos, ls="--", color=3 * [0.5], alpha=0.5, label="Centre")
+            ax[1].axvline(self.xmin, ls=":", color="r", label="Initial window")
+            ax[1].axvline(self.xmax, ls=":", color="r")
+            ax[1].axhline(0, ls=":", color=3 * [0.5], alpha=0.5)
+            ax[1].legend(fontsize=7, ncol=2, bbox_to_anchor=(0.75, 0), loc="lower center", bbox_transform=fig.transFigure)
+            box = ax[1].get_position()
+            ax[1].set_position([box.x0, box.y0 + 0.1, box.width, box.height - 0.1])
             ax[1].set_xlabel(r"TOF ($\mu$s)")
             ax[1].set_ylabel("Intensity")
         else:
             # update 2D colorfill
             img = ax[0].images[0]
             img.set_norm(norm)
-            img.set_data(image_data)
+            img.set_data(self.x_integrated_data)
             xmask, ymask = np.where(self.peak_mask.T)
             ax[0].lines[0].set_xdata(xmask)
             ax[0].lines[0].set_ydata(ymask)
             ax[0].lines[1].set_xdata(self.icol)
             ax[0].lines[1].set_ydata(self.irow)
-            img.set_extent([-0.5, image_data.shape[1] - 0.5, image_data.shape[0] - 0.5, -0.5])
+            img.set_extent([-0.5, self.x_integrated_data.shape[1] - 0.5, self.x_integrated_data.shape[0] - 0.5, -0.5])
             # update 1D focused spectrum
             # vlines
-            xlo, xhi, data, xtof, xlo_init, xhi_init, y0 = ax[1].lines
-            xlo.set_xdata([self.xpk[self.ixlo_opt]])
-            xhi.set_xdata([self.xpk[self.ixhi_opt - 1]])
-            xlo_init.set_xdata([self.xpk[self.ixlo]])
-            xhi_init.set_xdata([self.xpk[self.ixhi - 1]])
-            xtof.set_xdata([self.tof])
+            xmin_line, xmax_line, data, xpos_line, xmin_init_line, xmax_init_line, y0 = ax[1].lines
+            xmin_line.set_xdata(self.xmin_opt)
+            xmax_line.set_xdata(self.xmax_opt)
+            xmin_init_line.set_xdata(self.xmin)
+            xmax_init_line.set_xdata(self.xmax)
+            xpos_line.set_xdata([self.xpos])
             # spectrum
             yerr = np.sqrt(self.epk_sq[istart:iend])
             data.set_xdata(self.xpk[istart:iend])
@@ -606,11 +702,12 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
 
     def PyInit(self):
         # Input
+        input_ws_unit_validator = CompositeValidator(
+            [WorkspaceUnitValidator("TOF"), WorkspaceUnitValidator("dSpacing")], relation=CompositeRelation.OR
+        )
         self.declareProperty(
-            MatrixWorkspaceProperty(
-                name="InputWorkspace", defaultValue="", direction=Direction.Input, validator=WorkspaceUnitValidator("TOF")
-            ),
-            doc="A MatrixWorkspace to integrate (x-axis must be TOF).",
+            MatrixWorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input, validator=input_ws_unit_validator),
+            doc="A MatrixWorkspace to integrate (x-axis must be TOF or d-Spacing).",
         )
         self.declareProperty(
             IPeaksWorkspaceProperty(name="PeaksWorkspace", defaultValue="", direction=Direction.Input),
@@ -681,6 +778,21 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         do_use_B2B_exp_params = EnabledWhenProperty("GetTOFWindowFromBackToBackParams", PropertyCriterion.IsNotDefault)
         self.setPropertySettings("NFWHM", do_use_B2B_exp_params)
         self.declareProperty(
+            name="OptimiseXWindowSize",
+            defaultValue=True,
+            direction=Direction.Input,
+            doc="If True the size of the xWindow will be optimised to maximise I/Sigma. If False the xwindow "
+            "will be translated to maximise I/sigma in region +/- 2(initial_xwindow)",
+        )
+        self.declareProperty(
+            name="ThresholdIoverSigma",
+            defaultValue=0.0,
+            direction=Direction.Input,
+            validator=FloatBoundedValidator(lower=0),
+            doc="Threshold I/sigma before optimising x window size.",
+        )
+        self.setPropertySettings("ThresholdIoverSigma", EnabledWhenProperty("OptimiseXWindowSize", PropertyCriterion.IsDefault))
+        self.declareProperty(
             name="OptimiseMask",
             defaultValue=False,
             direction=Direction.Input,
@@ -697,7 +809,10 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         self.setPropertyGroup("ScaleThetaWidthByWavelength", "Integration Window Parameters")
         self.setPropertyGroup("GetTOFWindowFromBackToBackParams", "Integration Window Parameters")
         self.setPropertyGroup("NFWHM", "Integration Window Parameters")
+        self.setPropertyGroup("OptimiseXWindowSize", "Integration Window Parameters")
+        self.setPropertyGroup("ThresholdIoverSigma", "Integration Window Parameters")
         self.setPropertyGroup("OptimiseMask", "Integration Window Parameters")
+
         # peak validation
         self.declareProperty(
             name="IntegrateIfOnEdge",
@@ -866,6 +981,8 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         n_b2b_fwhm = self.getProperty("NFWHM").value
         nrows = self.getProperty("NRows").value
         ncols = self.getProperty("NCols").value
+        optimise_xwindow = self.getProperty("OptimiseXWindowSize").value
+        threshold_i_over_sig = self.getProperty("ThresholdIoverSigma").value
         optimise_mask = self.getProperty("OptimiseMask").value
         # peak mask validation
         integrate_on_edge = self.getProperty("IntegrateIfOnEdge").value
@@ -917,9 +1034,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             pk_ws_int.addPeak(pk)
             pk = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)  # don't overwrite pk in input ws
             # get data array in window around peak region
-            xpk, signal, error, irow, icol, det_edges, dets = array_converter.get_peak_region_array(
-                pk, detid, bank_names[ipk], nrows, ncols, nrows_edge, ncols_edge
-            )
+            peak_data = array_converter.get_peak_data(pk, detid, bank_names[ipk], nrows, ncols, nrows_edge, ncols_edge)
             if get_dTOF_from_b2bexp_params:
                 fwhm = self.get_fwhm_from_back_to_back_params(pk, ws, detid)
                 if fwhm is None:
@@ -932,8 +1047,9 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                     dTOF = n_b2b_fwhm * fwhm
             else:
                 dTOF = self.calc_initial_dTOF(pk, dt0_over_t0, dth, scale_dth)
-            peak_data = PeakData(xpk, signal, error, irow, icol, det_edges, dets, pk, dTOF)
+            frac_width = dTOF / pk.getTOF()
             peak_data.integrate_peak(
+                frac_width,
                 use_nearest,
                 integrate_on_edge,
                 optimise_mask,
@@ -944,15 +1060,18 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 min_npixels_per_vacancy,
                 max_nvacancies,
                 min_nbins,
+                optimise_xwindow,
+                threshold_i_over_sig,
             )
             if peak_data.status is PEAK_MASK_STATUS.VALID:
                 if update_peak_pos:
                     hkl = pk.getHKL()
                     mnp = pk.getIntMNP()
-                    det, tof = peak_data.update_peak_position()
+                    det, xpos = peak_data.update_peak_position()
                     # replace last added peak
                     irows_delete.append(pk_ws_int.getNumberPeaks() - 1)
-                    self.child_AddPeak(PeaksWorkspace=pk_ws_int, RunWorkspace=ws, TOF=tof, DetectorID=int(det))
+                    # Note TOF in AddPeak is interpreted as the x-unit of the workspace (i.e. this works for d-spacing)
+                    self.child_AddPeak(PeaksWorkspace=pk_ws_int, RunWorkspace=ws, TOF=xpos, DetectorID=int(det))
                     pk_new = pk_ws_int.getPeak(pk_ws_int.getNumberPeaks() - 1)
                     pk_new.setHKL(*hkl)
                     pk_new.setIntMNP(mnp)
@@ -977,7 +1096,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         # estimate TOF resolution params
         thetas = np.array([pk_data.theta for pk_data in peak_data_collection if pk_data.status == PEAK_MASK_STATUS.VALID])
         wavelengths = np.array([pk_data.wl for pk_data in peak_data_collection if pk_data.status == PEAK_MASK_STATUS.VALID])
-        scaled_cot_th_sq = ((wavelengths**2) / np.tan(thetas)) ** 2 if scale_dth else (1 / np.tan(thetas))
+        scaled_cot_th_sq = (wavelengths / np.tan(thetas)) ** 2 if scale_dth else (1 / np.tan(thetas)) ** 2
         frac_tof_widths = np.array(
             [pk_data.get_dTOF_over_TOF() for pk_data in peak_data_collection if pk_data.status == PEAK_MASK_STATUS.VALID]
         )
@@ -1094,7 +1213,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             ax[1].plot(xlim, slope * xlim + intercept, "-k", label="fit")
             xvals = np.linspace(min(thetas), max(thetas))
             if not scale_dth:
-                ax[0].plot(np.degrees(xvals), np.sqrt(intercept * (1 / np.tan(xvals) ** 2) + slope), "-k", label="fit")
+                ax[0].plot(np.degrees(xvals), np.sqrt(slope * (1 / np.tan(xvals) ** 2) + intercept), "-k", label="fit")
             else:
                 ylim = ax[0].get_ylim()
                 colors = line.get_cmap().colors
@@ -1102,7 +1221,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 wls = np.linspace(wavelengths.min(), wavelengths.max(), nwl)
                 icolors = np.linspace(0, len(colors) - 1, nwl, dtype=int)
                 for wl, icolor in zip(wls, icolors):
-                    ax[0].plot(np.degrees(xvals), np.sqrt(intercept * ((wl**2) / np.tan(xvals) ** 2) + slope), "-", color=colors[icolor])
+                    ax[0].plot(np.degrees(xvals), np.sqrt(slope * (wl / np.tan(xvals)) ** 2 + intercept), "-", color=colors[icolor])
                 ax[0].set_ylim(*ylim)  # reset limits so suitable for data point coverage not fit lines
             # add resolution parameters to the plot title
             ax[1].set_title(rf"$d\theta$={np.degrees(estimated_dth):.2f}$^\circ$" + "\n$dT_{bk}/T_{bk}$" + f"={estimated_dt0_over_t0:.2E}")
@@ -1125,6 +1244,19 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         for prop, value in kwargs.items():
             alg.setProperty(prop, value)
         alg.execute()
+
+
+def exec_simpleapi_alg(alg_name, **kwargs):
+    alg = AlgorithmManager.create(alg_name)
+    alg.initialize()
+    alg.setLogging(False)
+    for prop, value in kwargs.items():
+        alg.setProperty(prop, value)
+    alg.execute()
+    if "OutputWorkspace" in alg.outputProperties():
+        return alg.getPropertyValue("OutputWorkspace")
+    else:
+        return None
 
 
 # register algorithm with mantid

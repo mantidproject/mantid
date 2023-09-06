@@ -8,6 +8,7 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -721,10 +722,18 @@ void DgsReduction::exec() {
 
   progress.report();
 
+  // sort events if necessary
+  if (auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(outputWS)) {
+    const auto timerStart = std::chrono::high_resolution_clock::now();
+    g_log.information("Sorting events");
+    eventWS->sortAll(Mantid::DataObjects::TOF_SORT, nullptr);
+    addTimer("sortByTOF", timerStart, std::chrono::high_resolution_clock::now());
+  }
+
   // Convert from DeltaE to powder S(Q,W)
   const bool doPowderConvert = this->getProperty("DoPowderDataConversion");
   if (doPowderConvert) {
-    g_log.notice() << "Converting to powder S(Q,W)\n";
+    g_log.notice("Converting to powder S(Q,W)");
     // Collect information
     std::string sqwWsName = outputWsName + "_pd_sqw";
     std::vector<double> qBinning = this->getProperty("PowderMomTransferRange");

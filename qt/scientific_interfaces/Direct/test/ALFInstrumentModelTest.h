@@ -15,13 +15,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MockInstrumentActor.h"
 
 #include <memory>
@@ -61,33 +56,10 @@ MatrixWorkspace_sptr loadFile(std::string const &filename) {
   alg->initialize();
   alg->setAlwaysStoreInADS(false);
   alg->setProperty("Filename", filename);
-  alg->setProperty("OutputWorkspace", "__not_in_ads");
+  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
   alg->execute();
   Workspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
   return std::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace);
-}
-
-MatrixWorkspace_sptr normaliseByCurrent(MatrixWorkspace_sptr const &inputWorkspace) {
-  auto alg = AlgorithmManager::Instance().create("NormaliseByCurrent");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
-}
-
-MatrixWorkspace_sptr convertUnits(MatrixWorkspace_sptr const &inputWorkspace, std::string const &target) {
-  auto alg = AlgorithmManager::Instance().create("ConvertUnits");
-  alg->initialize();
-  alg->setAlwaysStoreInADS(false);
-  alg->setProperty("InputWorkspace", inputWorkspace);
-  alg->setProperty("Target", target);
-  alg->setProperty("OutputWorkspace", NOT_IN_ADS);
-  alg->execute();
-  MatrixWorkspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");
-  return outputWorkspace;
 }
 
 } // namespace
@@ -97,16 +69,12 @@ public:
   ALFInstrumentModelTest() {
     FrameworkManager::Instance();
 
-    m_nonALFData = "IRIS00072464.raw";
     m_ALFData = "ALF82301.raw";
-    m_ALFEdgeCaseData = "ALF83743.raw";
-
-    m_singleTubeDetectorIDs = std::vector<DetectorTube>{{2500u, 2501u, 2502u}};
-    m_multiTubeDetectorIDs = std::vector<DetectorTube>{{2500u, 2501u, 2502u}, {3500u, 3501u, 3502u}};
 
     m_model = std::make_unique<ALFInstrumentModel>();
 
-    m_loadedWs = convertUnits(normaliseByCurrent(loadFile(m_ALFData)), "dSpacing");
+    m_nonALFLoadedWs = loadFile("IRIS00072464.raw");
+    m_loadedWs = loadFile("ALF82301_preprocessed.nxs");
   }
 
   static ALFInstrumentModelTest *createSuite() { return new ALFInstrumentModelTest(); }
@@ -189,7 +157,7 @@ public:
   }
 
   void test_isALFData_returns_false_when_the_workspace_is_ALF_data() {
-    TS_ASSERT(!m_model->isALFData(loadFile(m_nonALFData)));
+    TS_ASSERT(!m_model->isALFData(m_nonALFLoadedWs));
   }
 
   void test_isALFData_returns_true_when_the_workspace_is_ALF_data() { TS_ASSERT(m_model->isALFData(m_loadedWs)); }
@@ -208,13 +176,13 @@ public:
 
   void test_binningMismatch_returns_true_if_the_sample_and_vanadium_have_different_binning() {
     m_model->setData(ALFData::SAMPLE, m_loadedWs);
-    m_model->setData(ALFData::VANADIUM, loadFile(m_nonALFData));
+    m_model->setData(ALFData::VANADIUM, m_nonALFLoadedWs);
 
     TS_ASSERT(m_model->binningMismatch());
   }
 
   void test_axisIsDSpacing_returns_false_if_the_axis_is_not_dSpacing() {
-    m_model->setData(ALFData::SAMPLE, loadFile(m_nonALFData));
+    m_model->setData(ALFData::SAMPLE, m_nonALFLoadedWs);
     TS_ASSERT(!m_model->axisIsDSpacing());
   }
 
@@ -458,18 +426,19 @@ private:
     m_model->setData(ALFData::SAMPLE, m_loadedWs);
     m_model->replaceSampleWorkspaceInADS(m_loadedWs);
 
-    m_singleTubeDetectorIDs = findWholeTubes(m_loadedWs->componentInfo(), {2500u, 2501u, 2502u});
+    auto const singleTubeDetectorIDs = findWholeTubes(m_loadedWs->componentInfo(), {2500u, 2501u, 2502u});
 
-    TS_ASSERT(m_model->setSelectedTubes(m_singleTubeDetectorIDs));
+    TS_ASSERT(m_model->setSelectedTubes(singleTubeDetectorIDs));
   }
 
   void setMultipleTubesSelected() {
     m_model->setData(ALFData::SAMPLE, m_loadedWs);
     m_model->replaceSampleWorkspaceInADS(m_loadedWs);
 
-    m_multiTubeDetectorIDs = findWholeTubes(m_loadedWs->componentInfo(), {2500u, 2501u, 2502u, 3500u, 3501u, 3502u});
+    auto const multiTubeDetectorIDs =
+        findWholeTubes(m_loadedWs->componentInfo(), {2500u, 2501u, 2502u, 3500u, 3501u, 3502u});
 
-    TS_ASSERT(m_model->setSelectedTubes(m_multiTubeDetectorIDs));
+    TS_ASSERT(m_model->setSelectedTubes(multiTubeDetectorIDs));
   }
 
   void expectInstrumentActorCalls(std::size_t const workspaceIndex = 0u) {
@@ -482,14 +451,10 @@ private:
         .WillRepeatedly(DoAll(SetArgReferee<1>(0u), SetArgReferee<2>(50u)));
   }
 
-  std::string m_nonALFData;
   std::string m_ALFData;
-  std::string m_ALFEdgeCaseData;
 
+  Mantid::API::MatrixWorkspace_sptr m_nonALFLoadedWs;
   Mantid::API::MatrixWorkspace_sptr m_loadedWs;
-
-  std::vector<DetectorTube> m_singleTubeDetectorIDs;
-  std::vector<DetectorTube> m_multiTubeDetectorIDs;
 
   std::unique_ptr<NiceMock<MockInstrumentActor>> m_instrumentActor;
   std::unique_ptr<ALFInstrumentModel> m_model;

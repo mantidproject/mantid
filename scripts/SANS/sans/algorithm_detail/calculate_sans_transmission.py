@@ -301,7 +301,7 @@ def _perform_prompt_peak_correction(workspace, prompt_peak_correction_min, promp
     """
     # We perform only a prompt peak correction if the start and stop values of the bins we want to remove,
     # were explicitly set. Some instruments require it, others don't.
-    if prompt_peak_correction_enabled and prompt_peak_correction_min is not None and prompt_peak_correction_max is not None:  # noqa
+    if prompt_peak_correction_enabled and prompt_peak_correction_min is not None and prompt_peak_correction_max is not None:
         remove_name = "RemoveBins"
         remove_options = {
             "InputWorkspace": workspace,

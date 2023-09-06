@@ -370,10 +370,13 @@ class MantidSystemTest(unittest.TestCase):
         checker.execute()
         if not checker.getProperty("Result").value:
             print(self.__class__.__name__)
+
             if mismatchName:
-                SaveNexus(InputWorkspace=valNames[0], Filename=self.__class__.__name__ + mismatchName + "-mismatch.nxs")
+                mismatchName = self.__class__.__name__ + mismatchName + "-mismatch.nxs"
             else:
-                SaveNexus(InputWorkspace=valNames[0], Filename=self.__class__.__name__ + "-mismatch.nxs")
+                mismatchName = self.__class__.__name__ + "-mismatch.nxs"
+            print(f'Saving mismatch to "{mismatchName}"')
+            SaveNexus(InputWorkspace=valNames[0], Filename=mismatchName)
             return False
 
         return True
@@ -1029,12 +1032,10 @@ class TestManager(object):
 
         # Now look through all the test modules and build the list of data files
         for modkey in modtests.keys():
-
             fname = modkey + ".py"
             files_required_by_test_module[modkey] = []
             with open(os.path.join(os.path.dirname(test_path), test_path, fname), "r") as pyfile:
                 for line in pyfile.readlines():
-
                     # Search for all instances of '.nxs' or '.raw'
                     for ext in extensions:
                         for indx in [m.start() for m in re.finditer(ext, line)]:
@@ -1492,7 +1493,6 @@ def testThreadsLoopImpl(
         # Check if local_test_list exists: if all data was locked,
         # then there is no test list
         if local_test_list and test_sub_directory:
-
             if not options.quiet:
                 print(
                     "##### Thread %2i will execute module: [%3i] %s (%i tests)" % (process_number, imodule, modname, len(local_test_list))

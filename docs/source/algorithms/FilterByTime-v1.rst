@@ -18,11 +18,15 @@ a PulseTime value not within the range specified.
 -  The integrated proton charge of the run is also re-calculated
    according to the filtered out ProtonCharge pulse log.
 
-You must specify:
+Do not specify:
 
--  Both StartTime and Stop time, or
--  Both AbsoluteStartTime and AbsoluteStop time.
--  But not another combination of the four, or the algorithm will abort.
+-  Both AbsoluteStartTime and StartTime, or
+-  Both AbsoluteStoptTime and StopTime
+
+If neither AbsoluteStartTime nor StartTime is specified,
+the time of the first pulse will be used as the start time.
+If neither AbsoluteStopTime nor StopTime is specified,
+the time of the last pulse will be used as the stop time.
 
 A more detailed introduction to event filtering can be found
 :ref:`here <EventFiltering>`.

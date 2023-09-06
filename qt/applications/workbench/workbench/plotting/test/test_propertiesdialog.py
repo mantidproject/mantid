@@ -16,7 +16,7 @@ from unittest.mock import MagicMock
 # third-party library imports
 import matplotlib
 
-matplotlib.use("AGG")  # noqa
+matplotlib.use("AGG")
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import LogFormatterSciNotation, ScalarFormatter
@@ -38,7 +38,6 @@ from workbench.plotting.propertiesdialog import (
 
 @start_qapplication
 class PropertiesDialogTest(unittest.TestCase):
-
     # Success tests
     def test_axis_editor_initialised_with_correct_values(self):
         # make figure

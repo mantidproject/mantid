@@ -341,7 +341,7 @@ void CalculateFlatBackground::Mean(const HistogramData::Histogram &histogram, do
   // the last iterator
   background = std::accumulate(YS.begin() + startInd, YS.begin() + endInd + 1, 0.0) / numBins;
   // The error on the total number of background counts in the background region
-  // is taken as the sqrt the total number counts. To get the the error on the
+  // is taken as the sqrt the total number counts. To get the error on the
   // counts in each bin just divide this by the number of bins. The variance =
   // error^2 that is the total variance divide by the number of bins _squared_.
   variance = std::accumulate(ES.begin() + startInd, ES.begin() + endInd + 1, 0.0, VectorHelper::SumSquares<double>()) /

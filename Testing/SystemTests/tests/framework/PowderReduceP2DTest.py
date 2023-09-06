@@ -27,7 +27,6 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         self.calFile = self._calFile()
         self.twoThetaMin = self._twoThetaMin()
         self.twoThetaMax = self._twoThetaMax()
-        self.wavelengthCenter = self._wavelengthCenter()
         self.lambdaMin = self._lambdaMin()
         self.lambdaMax = self._lambdaMax()
         self.dMin = self._dMin()
@@ -54,7 +53,6 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
             CalFile=self.calFile,
             TwoThetaMin=self.twoThetaMin,
             TwoThetaMax=self.twoThetaMax,
-            WavelengthCenter=self.wavelengthCenter,
             LambdaMin=self.lambdaMin,
             LambdaMax=self.lambdaMax,
             DMin=self.dMin,
@@ -98,10 +96,6 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         """2theta max used for testing the algorithm"""
         return 150
 
-    def _wavelengthCenter(self):
-        """center wavelength used for testing the algorithm"""
-        return 0.566
-
     def _lambdaMin(self):
         """lambda min used for testing the algorithm"""
         return 0.1
@@ -120,7 +114,7 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
 
     def _dpMin(self):
         """dp min used for testing the algorithm"""
-        return 0.4
+        return 0.2
 
     def _dpMax(self):
         """dp max used for testing the algorithm"""
@@ -128,11 +122,11 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
 
     def _dSpaceBinning(self):
         """d binning used for testing the algorithm"""
-        return -0.02
+        return [0.1 + 0.02, -0.02, 2 - 0.02]
 
     def _dPerpendicularBinning(self):
         """d perpendicular binning used for testing the algorithm"""
-        return 0.1
+        return [0.4 - 0.1, 0.1, 2 + 0.1]
 
     def _FWHM(self):
         """FWHM used for testing the algorithm"""

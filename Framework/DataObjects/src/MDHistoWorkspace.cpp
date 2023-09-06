@@ -814,7 +814,7 @@ void MDHistoWorkspace::multiply(const MDHistoWorkspace &b_ws) {
  *
  * @param signal :: signal to apply
  * @param error :: error (not squared) to apply
- * @return *this after operation */
+ */
 void MDHistoWorkspace::multiply(const signal_t signal, const signal_t error) {
   signal_t b = signal;
   signal_t db2 = error * error;

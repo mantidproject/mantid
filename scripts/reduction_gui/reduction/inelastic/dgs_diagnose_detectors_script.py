@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
-    from the the interface class so that the DgsReduction class could
+    from the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
 import xml.dom.minidom
@@ -16,7 +16,6 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 
 
 class DiagnoseDetectorsScript(BaseScriptElement):
-
     high_counts = 1.0e10
     low_counts = 1.0e-10
     median_test_out_high = 100

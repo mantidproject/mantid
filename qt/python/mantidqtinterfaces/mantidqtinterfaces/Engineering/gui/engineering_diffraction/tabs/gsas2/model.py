@@ -14,6 +14,8 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 
+from typing import List
+
 from mantid.geometry import CrystalStructure, ReflectionGenerator, ReflectionConditionFilter
 from mantid.simpleapi import CreateWorkspace, LoadGSS, DeleteWorkspace, CreateEmptyTableWorkspace, Load, logger
 from mantid.api import AnalysisDataService as ADS
@@ -726,8 +728,11 @@ class GSAS2Model(object):
             result_reflections_txt = os.path.join(
                 self.user_save_directory, self.project_name + f"_reflections_{histogram_index}_{phase_name}.txt"
             )
-            loaded_reflections.append(np.genfromtxt(result_reflections_txt)[2:])
-            # first 2 lines iin file are histogram and phase name
+            if os.path.exists(result_reflections_txt):
+                # omit first 2 lines in file (which are histogram and phase name)
+                loaded_reflections.append(np.genfromtxt(result_reflections_txt)[2:])
+            else:
+                logger.warning(f"No reflections found for phase {phase_name} within x-limits of the fit.")
         return loaded_reflections
 
     def load_gsas_reflections_all_histograms_for_table(self):
@@ -919,34 +924,48 @@ class GSAS2Model(object):
 
     def plot_result(self, index_histograms, axis):
         gsas_histogram_workspace, reflections = self.load_result_for_plot(index_histograms)
-        plot_window_title = self.plot_gsas_histogram(axis, gsas_histogram_workspace, reflections, index_histograms, self.data_files)
+        plot_window_title = self.plot_gsas_histogram(axis, gsas_histogram_workspace, reflections, index_histograms)
         return plot_window_title
 
-    def plot_gsas_histogram(self, axis, gsas_histogram, reflection_positions, histogram_index, data_file_list):
+    def plot_gsas_histogram(self, axis, gsas_histogram, reflection_positions, histogram_index):
         axis.plot(gsas_histogram, color="#1105f0", label="observed", linestyle="None", marker="+", wkspIndex=0)
         axis.plot(gsas_histogram, color="#246b01", label="calculated", wkspIndex=1)
         axis.plot(gsas_histogram, color="#09acb8", label="difference", wkspIndex=2)
         axis.plot(gsas_histogram, color="#ff0000", label="background", wkspIndex=3)
         _, y_max = axis.get_ylim()
-        if reflection_positions:
-            axis.plot(
-                reflection_positions,
-                [-0.10 * y_max] * len(reflection_positions),
-                color="#1105f0",
-                label="reflections",
-                linestyle="None",
-                marker="|",
-                mew=1.5,
-                ms=8,
-            )
+
+        reflection_labels = self._create_reflection_labels(reflection_positions)
+
+        for i_phase, positions in enumerate(reflection_positions):
+            if len(positions) > 0:
+                y_offset_positions = [(i_phase + 1) * -0.05 * y_max] * len(positions)
+                axis.plot(
+                    positions,
+                    y_offset_positions,
+                    label=reflection_labels[i_phase],
+                    linestyle="None",
+                    marker="|",
+                    mew=1.5,
+                    ms=8,
+                )
         axis.set_xlabel("Time-of-flight ($\\mu s$)")
         axis.set_ylabel("Normalized Intensity")
         plt.show()
 
         input_file_name = ""
-        if data_file_list:
-            if len(data_file_list) == 1:
-                input_file_name = os.path.basename(data_file_list[0])
+        if self.data_files:
+            if len(self.data_files) == 1:
+                input_file_name = os.path.basename(self.data_files[0])
             else:
-                input_file_name = os.path.basename(data_file_list[histogram_index - 1])
+                input_file_name = os.path.basename(self.data_files[histogram_index - 1])
         return "GSAS-II Refinement " + input_file_name
+
+    def _create_reflection_labels(self, reflection_positions: List[np.array]) -> List[str]:
+        """Create the labels used to identify different phase reflection lists
+        The primary format, if the number of phase names equals the number of positions, is 'reflections_{phase_name}'
+        The fallback format is 'reflections_phase_{index}' where index starts at 1
+        """
+        reflection_labels = [f"reflections_{phase_name}" for phase_name in self.phase_names_list]
+        if len(reflection_labels) != len(reflection_positions):
+            return [f"reflections_phase_{i}" for i in range(1, len(reflection_positions) + 1)]
+        return reflection_labels

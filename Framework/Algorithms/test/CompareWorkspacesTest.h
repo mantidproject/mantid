@@ -126,6 +126,25 @@ public:
     TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
+  void test_LeanPeaksWithModulationVectorsMatch() {
+    // generate a lean elastic peak workspace with two peaks
+    auto lpws = std::make_shared<LeanElasticPeaksWorkspace>();
+    // add peaks
+    LeanElasticPeak pk1(V3D(0.0, 0.0, 6.28319), 2.0);     // (100)
+    LeanElasticPeak pk2(V3D(6.28319, 0.0, 6.28319), 1.0); // (110)
+    pk1.setIntHKL(V3D(1, 0, 0));
+    pk2.setIntHKL(V3D(1, 1, 0));
+    pk2.setIntMNP(V3D(1, 2, 3));
+    pk2.setIntMNP(V3D(3, 2, 1));
+    lpws->addPeak(pk1);
+    lpws->addPeak(pk2);
+
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<Workspace>(lpws)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<Workspace>(lpws)));
+    TS_ASSERT(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+  }
+
   void test_RelativeErrorInPeaksWorkspace() {
     if (!checker.isInitialized())
       checker.initialize();

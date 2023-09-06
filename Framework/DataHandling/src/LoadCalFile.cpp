@@ -165,7 +165,7 @@ void LoadCalFile::exec() {
     groupWS->setTitle(title);
     declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("OutputGroupingWorkspace",
                                                                            WorkspaceName + "_group", Direction::Output),
-                    "Set the the output GroupingWorkspace, if any.");
+                    "Set the output GroupingWorkspace, if any.");
     groupWS->mutableRun().addProperty("Filename", CalFilename);
     setProperty("OutputGroupingWorkspace", groupWS);
   }
@@ -175,7 +175,7 @@ void LoadCalFile::exec() {
     offsetsWS->setTitle(title);
     declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
                         "OutputOffsetsWorkspace", WorkspaceName + "_offsets", Direction::Output),
-                    "Set the the output OffsetsWorkspace, if any.");
+                    "Set the output OffsetsWorkspace, if any.");
     offsetsWS->mutableRun().addProperty("Filename", CalFilename);
     setProperty("OutputOffsetsWorkspace", offsetsWS);
   }
@@ -185,7 +185,7 @@ void LoadCalFile::exec() {
     maskWS->setTitle(title);
     declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputMaskWorkspace", WorkspaceName + "_mask",
                                                                          Direction::Output),
-                    "Set the the output MaskWorkspace, if any.");
+                    "Set the output MaskWorkspace, if any.");
     maskWS->mutableRun().addProperty("Filename", CalFilename);
     setProperty("OutputMaskWorkspace", maskWS);
   }
@@ -339,15 +339,4 @@ bool LoadCalFile::idIsMonitor(const Instrument_const_sptr &inst, int detID) {
   auto it = std::find(monitorList.begin(), monitorList.end(), detID);
   return (it != monitorList.end());
 }
-
-Parallel::ExecutionMode
-LoadCalFile::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  // There is an optional input workspace which may have
-  // StorageMode::Distributed but it is merely used for passing an instrument.
-  // Output should always have StorageMode::Cloned, so we run with
-  // ExecutionMode::Identical.
-  static_cast<void>(storageModes);
-  return Parallel::ExecutionMode::Identical;
-}
-
 } // namespace Mantid::DataHandling

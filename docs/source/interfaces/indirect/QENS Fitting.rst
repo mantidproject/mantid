@@ -89,6 +89,9 @@ Evaluate Function As
 Fit Type
   Only available in sequential fits. Controls whether each fit is initialised from the end values of the previous fit.
 
+Ignore Invalid Data
+  If ticked the fit will exclude data points with values of `NAN` or `inf`. It will also exclude data with error bars of zero.
+
 Preview Plots
 ~~~~~~~~~~~~~
 
@@ -285,6 +288,8 @@ Sample
 Resolution
   Either a resolution file (_res.nxs) or workspace (_res) or an :math:`S(Q,
   \omega)` file (*_sqw.nxs*, *_sqw.dave*) or workspace (*_sqw*).
+  If the resolution data contains any `NAN` values they will be replaced with zeros and
+  a warning will be provided to the user when loading the data.
 
 .. _convfit-example-workflow:
 

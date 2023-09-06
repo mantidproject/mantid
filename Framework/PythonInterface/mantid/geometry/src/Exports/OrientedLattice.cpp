@@ -47,6 +47,10 @@ Mantid::Kernel::V3D qFromHKL(const OrientedLattice &self, const object &vec) {
 Mantid::Kernel::V3D hklFromQ(const OrientedLattice &self, const object &vec) {
   return self.hklFromQ(Converters::PyObjectToV3D(vec)());
 }
+
+Mantid::Kernel::V3D cosFromDir(const OrientedLattice &self, const object &vec) {
+  return self.cosFromDir(Converters::PyObjectToV3D(vec)());
+}
 } // namespace
 
 void export_OrientedLattice() {
@@ -112,5 +116,6 @@ void export_OrientedLattice() {
            "matrix "
            "as a :class:`numpy.ndarray` with shape ``(3,3)``. ")
       .def("qFromHKL", &qFromHKL, (arg("self"), arg("vec")), ":math:`Q` vector from :math:`HKL` vector")
-      .def("hklFromQ", &hklFromQ, (arg("self"), arg("vec")), ":math:`HKL` value from :math:`Q` vector");
+      .def("hklFromQ", &hklFromQ, (arg("self"), arg("vec")), ":math:`HKL` value from :math:`Q` vector")
+      .def("cosFromDir", &cosFromDir, (arg("self"), arg("vec")), "Direction cosine from direction vector");
 }

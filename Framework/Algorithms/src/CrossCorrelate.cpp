@@ -17,6 +17,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -90,11 +91,49 @@ void CrossCorrelate::init() {
   declareProperty("WorkspaceIndexMax", 0, mustBePositive,
                   " The workspace index of the last member of the range of "
                   "spectra to cross-correlate against.");
+  // Alternatively to min and max index, a list of indices can be supplied
+  declareProperty(std::make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
+                  "A comma-separated list of individual workspace indices of "
+                  "spectra to cross-correlate against.");
   // Only the data in the range X_min, X_max will be used
   declareProperty("XMin", 0.0, "The starting point of the region to be cross correlated.");
   declareProperty("XMax", 0.0, "The ending point of the region to be cross correlated.");
   // max is .1
   declareProperty("MaxDSpaceShift", EMPTY_DBL(), "Optional float for maximum shift to calculate (in d-spacing)");
+}
+
+/// Validate that input properties are sane
+std::map<std::string, std::string> CrossCorrelate::validateInputs() {
+  std::map<std::string, std::string> helpMessages;
+
+  // Unless a list was specified, check that workspace index min and max make sense
+  if (isDefault("WorkspaceIndexList")) {
+    const int wsIndexMin = getProperty("WorkspaceIndexMin");
+    const int wsIndexMax = getProperty("WorkspaceIndexMax");
+    if (wsIndexMin >= wsIndexMax) {
+      helpMessages["WorkspaceIndexMin"] = "Must specify WorkspaceIndexMin < WorkspaceIndexMax";
+      helpMessages["WorkspaceIndexMax"] = "Must specify WorkspaceIndexMin < WorkspaceIndexMax";
+    }
+  }
+
+  // Valid input is either min and max workspace index OR list but not both
+  if (!isDefault("WorkspaceIndexList") && (!isDefault("WorkspaceIndexMin") || !isDefault("WorkspaceIndexMax"))) {
+    const std::string msg = "Must specify either WorkspaceIndexMin and WorkspaceIndexMax, "
+                            "or WorkspaceIndexList, but not both.";
+    helpMessages["WorkspaceIndexMin"] = msg;
+    helpMessages["WorkspaceIndexMax"] = msg;
+    helpMessages["WorkspaceIndexList"] = msg;
+  }
+
+  // Check that the data range specified makes sense
+  const double xmin = getProperty("XMin");
+  const double xmax = getProperty("XMax");
+  if (xmin >= xmax) {
+    helpMessages["XMin"] = "Must specify XMin < XMax";
+    helpMessages["XMax"] = "Must specify XMin < XMax";
+  }
+
+  return helpMessages;
 }
 
 /** Executes the algorithm
@@ -107,35 +146,28 @@ void CrossCorrelate::exec() {
   int referenceSpectra = getProperty("ReferenceSpectra");
   double xmin = getProperty("XMin");
   double xmax = getProperty("XMax");
-  const int wsIndexMin = getProperty("WorkspaceIndexMin");
-  const int wsIndexMax = getProperty("WorkspaceIndexMax");
 
   const auto index_ref = static_cast<size_t>(referenceSpectra);
 
-  if (wsIndexMin >= wsIndexMax)
-    throw std::runtime_error("Must specify WorkspaceIndexMin<WorkspaceIndexMax");
-  // Get the number of spectra in range wsIndexMin to wsIndexMax
-  int numSpectra = 1 + wsIndexMax - wsIndexMin;
-  // Indexes of all spectra in range
-  std::vector<size_t> indexes(boost::make_counting_iterator(wsIndexMin), boost::make_counting_iterator(wsIndexMax + 1));
-
-  if (numSpectra == 0) {
-    std::ostringstream message;
-    message << "No spectra in range between" << wsIndexMin << " and " << wsIndexMax;
-    throw std::runtime_error(message.str());
+  // Get indices of spectra either based on min and max index or from a list
+  std::vector<size_t> indexes = getProperty("WorkspaceIndexList");
+  if (indexes.empty()) {
+    const int wsIndexMin = getProperty("WorkspaceIndexMin");
+    const int wsIndexMax = getProperty("WorkspaceIndexMax");
+    indexes.reserve(wsIndexMax - wsIndexMin + 1);
+    std::copy(boost::make_counting_iterator(wsIndexMin), boost::make_counting_iterator(wsIndexMax + 1),
+              std::back_inserter(indexes));
   }
-  // Output messageage information
+  int numSpectra = static_cast<int>(indexes.size());
+
+  // Output message information
   g_log.information() << "There are " << numSpectra << " spectra in the range\n";
 
-  // checdataIndex that the data range specified madataIndexes sense
-  if (xmin >= xmax)
-    throw std::runtime_error("Must specify xmin < xmax, " + std::to_string(xmin) + " vs " + std::to_string(xmax));
-
-  // TadataIndexe a copy of  the referenceSpectra spectrum
+  // Take a copy of the referenceSpectra spectrum
   auto &referenceSpectraE = inputWS->e(index_ref);
   auto &referenceSpectraX = inputWS->x(index_ref);
   auto &referenceSpectraY = inputWS->y(index_ref);
-  // Now checdataIndex if the range between x_min and x_max is valid
+  // Now check if the range between x_min and x_max is valid
   using std::placeholders::_1;
   auto rangeStart =
       std::find_if(referenceSpectraX.cbegin(), referenceSpectraX.cend(), std::bind(std::greater<double>(), _1, xmin));

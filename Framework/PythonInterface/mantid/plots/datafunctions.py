@@ -813,8 +813,17 @@ def get_sample_log(workspace, **kwargs):
         y = tsp.filtered_value
     FullTime = kwargs.pop("FullTime", False)
     StartFromLog = kwargs.pop("StartFromLog", False)
+    ShowTimeROI = kwargs.pop("ShowTimeROI", not run.getTimeROI().useAll())  # default is not bother when useAll
     if FullTime:
         x = times.astype(datetime.datetime)
+        if ShowTimeROI:
+            roi = np.full(x.shape, True, dtype=bool)
+            intervals = run.getTimeROI().toTimeIntervals()
+            for interval in intervals:
+                start = np.timedelta64(interval[0].totalNanoseconds(), "ns") + np.datetime64("1990-01-01T00:00")
+                stop = np.timedelta64(interval[1].totalNanoseconds(), "ns") + np.datetime64("1990-01-01T00:00")
+                roi &= (x.astype("datetime64[ns]") < start) | (x.astype("datetime64[ns]") > stop)
+            kwargs["roi"] = roi
     else:
         # Compute relative time, preserving t=0 at run start. Logs can record before
         # run start and will have negative time offset
@@ -828,6 +837,18 @@ def get_sample_log(workspace, **kwargs):
                 t0 = run["proton_charge"].times.astype("datetime64[us]")[0]
             except:
                 pass  # TODO: Maybe raise a warning?
+
+        if ShowTimeROI:
+            x = (times - t0).astype(float) * 1e3
+            roi = np.full(x.shape, True, dtype=bool)
+            intervals = run.getTimeROI().toTimeIntervals()
+            for interval in intervals:
+                start = np.timedelta64(interval[0].totalNanoseconds(), "ns") + np.datetime64("1990-01-01T00:00")
+                start = (start - t0).astype("datetime64[ns]")
+                stop = np.timedelta64(interval[1].totalNanoseconds(), "ns") + np.datetime64("1990-01-01T00:00")
+                stop = (stop - t0).astype("datetime64[ns]")
+                roi &= (x.astype("datetime64[ns]") < start) | (x.astype("datetime64[ns]") > stop)
+            kwargs["roi"] = roi
         x = (times - t0).astype(float) * 1e-6
     return x, y, FullTime, LogName, units, kwargs
 
@@ -1260,8 +1281,7 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
                 mantid.kernel.logger.warning(
                     "Minor ticks on colorbar scale cannot be shown " "as the range between min value and max value is too large"
                 )
-        figure.subplots_adjust(wspace=0.5, hspace=0.5)
-        colorbar = figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.06)
+        colorbar = figure.colorbar(image, ax=figure.axes, ticks=locator, pad=0.05)
         colorbar.set_label(label)
 
 

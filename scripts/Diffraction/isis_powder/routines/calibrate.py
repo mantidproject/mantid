@@ -10,7 +10,7 @@ import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import INPUT_BATCHING
 
 
-def create_van(instrument, run_details, absorb):
+def create_van(instrument, run_details, absorb, spline=True):
     """
     Creates a splined vanadium run for the following instrument. Requires the run_details for the
     vanadium workspace we will process and whether to apply absorption corrections.
@@ -28,7 +28,7 @@ def create_van(instrument, run_details, absorb):
 
     instrument.create_solid_angle_corrections(corrected_van_ws, run_details)
 
-    if not (run_details.empty_inst_runs is None):
+    if run_details.empty_inst_runs is not None:
         summed_empty_inst = common.generate_summed_runs(empty_ws_string=run_details.empty_inst_runs, instrument=instrument)
         mantid.SaveNexus(Filename=run_details.summed_empty_inst_file_path, InputWorkspace=summed_empty_inst)
         corrected_van_ws = common.subtract_summed_runs(ws_to_correct=corrected_van_ws, empty_ws=summed_empty_inst)
@@ -47,6 +47,15 @@ def create_van(instrument, run_details, absorb):
     solid_angle = instrument.get_solid_angle_corrections(run_details.run_number, run_details)
     if solid_angle:
         aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws, RHSWorkspace=solid_angle)
+        aligned_ws = mantid.ReplaceSpecialValues(
+            InputWorkspace=aligned_ws,
+            OutputWorkspace=aligned_ws.name(),
+            NaNValue=0,
+            InfinityValue=0,
+            BigNumberThreshold=1e15,
+            SmallNumberThreshold=-1e15,
+        )
+
         mantid.DeleteWorkspace(solid_angle)
     focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws, GroupingFileName=run_details.grouping_file_path)
     # convert back to TOF based on engineered detector positions
@@ -55,7 +64,9 @@ def create_van(instrument, run_details, absorb):
     focused_spectra = instrument._crop_van_to_expected_tof_range(focused_spectra)
 
     d_spacing_group, tof_group = instrument._output_focused_ws(processed_spectra=focused_spectra, run_details=run_details)
-    _create_vanadium_splines(focused_spectra, instrument, run_details)
+
+    if spline:
+        _create_vanadium_splines(focused_spectra, instrument, run_details)
 
     common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group, unit_to_keep=instrument._get_unit_to_keep())
 
@@ -84,7 +95,7 @@ def create_van_per_detector(instrument, run_details, absorb):
     input_van_ws = input_van_ws_list[0]  # As we asked for a summed ws there should only be one returned
     instrument.create_solid_angle_corrections(input_van_ws, run_details)
 
-    if not (run_details.empty_inst_runs is None):
+    if run_details.empty_inst_runs is not None:
         summed_empty = common.generate_summed_runs(empty_ws_string=run_details.empty_inst_runs, instrument=instrument)
         mantid.SaveNexus(Filename=run_details.summed_empty_inst_file_path, InputWorkspace=summed_empty)
         corrected_van_ws = common.subtract_summed_runs(ws_to_correct=input_van_ws, empty_ws=summed_empty)

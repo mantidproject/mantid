@@ -80,7 +80,7 @@ class EAPlotDataPanePresenter(BasePanePresenter):
         and updates to the values from recalculation.
         :param workspace: workspace 2D object
         """
-        if type(workspace) == str:
+        if isinstance(workspace, str):
             workspace_name = workspace
         else:
             workspace_name = workspace.name()

@@ -27,7 +27,10 @@ Input Wavelength
 The wavelength range to calculate transmission over can be given either by
 providing a single binning range in the format of a start, width and end value or
 by providing a bin parameter string as used in the :ref:`Rebin <algm-Rebin>`
-algorithm.
+algorithm, which is a comma separated list of first bin boundary, width, last bin boundary.
+Optionally this can be followed by a comma and more widths and last boundary pairs.
+E.g. 0,100,20000 - from 0 rebin in constant size bins of 100 up to 20,000.
+Or 0,100,10000,200,20000 - from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000.
 
 Sample Details
 ~~~~~~~~~~~~~~

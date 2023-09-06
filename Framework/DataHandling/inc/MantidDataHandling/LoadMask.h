@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
@@ -31,7 +31,7 @@ namespace DataHandling {
   @author
   @date 2011-11-02
 */
-class MANTID_DATAHANDLING_DLL LoadMask : public API::ParallelAlgorithm {
+class MANTID_DATAHANDLING_DLL LoadMask : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadMask"; };

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmFactory, DistributedDataProcessorAlgorithm
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm
 from mantid.kernel import ConfigService
 from mantid.simpleapi import SetSample
 
@@ -29,7 +29,7 @@ def _getLogValue(propertyManager, key):
     return propertyManager[key].lastValue()
 
 
-class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
+class SetSampleFromLogs(DataProcessorAlgorithm):
     def category(self):
         return "Sample"
 

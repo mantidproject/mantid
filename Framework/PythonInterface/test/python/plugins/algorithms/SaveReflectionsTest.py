@@ -52,23 +52,19 @@ class SaveReflectionsTest(unittest.TestCase):
         # Add a bunch of random peaks that happen to fall on the
         # detetor bank defined in the IDF
         center_q = np.array([-5.1302, 2.5651, 3.71809])
-        qs = []
         for i in np.arange(0, 1, 0.1):
             for j in np.arange(-0.5, 0, 0.1):
                 q = center_q.copy()
                 q[1] += j
                 q[2] += i
-                qs.append(q)
-
-        # Add the peaks to the PeaksWorkspace with dummy values for intensity,
-        # Sigma, and HKL
-        for q in qs:
-            peak = ws.createPeak(q)
-            peak.setIntensity(100)
-            peak.setSigmaIntensity(10)
-            peak.setHKL(1, 1, 1)
-            peak.setAbsorptionWeightedPathLength(1.0)
-            ws.addPeak(peak)
+                # Add the peaks to the PeaksWorkspace with dummy values for intensity,
+                # Sigma, and HKL
+                peak = ws.createPeak(q)
+                peak.setIntensity(100)
+                peak.setSigmaIntensity(10)
+                peak.setHKL(1, 1, 1)
+                peak.setAbsorptionWeightedPathLength(1.0)
+                ws.addPeak(peak)
         return ws
 
     def _create_modulated_peak_table(self):
@@ -267,6 +263,17 @@ class SaveReflectionsTest(unittest.TestCase):
             Format=output_format,
         )
 
+    @patch("mantid.kernel.logger.warning")
+    def test_MinIntensOverSigma(self, mock_log):
+        file_name = os.path.join(self._test_dir, "test_shelx_MinIntensOverSigma.hkl")
+
+        # set MinIntensOverSigma
+        SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format="SHELX", MinIntensOverSigma=20)
+
+        mock_log.assert_called_once_with(
+            "There are no peaks with Intens/Sigma >= 20.0 in peak workspace ws. An empty file will be produced."
+        )
+
     def test_save_invalid_format(self):
         # Arrange
         file_name = os.path.join(self._test_dir, "test_SHELX_modulated.hkl")
@@ -286,7 +293,18 @@ class SaveReflectionsTest(unittest.TestCase):
     def test_save_empty_peak_table(self, mock_log):
         empty_peaks = CreatePeaksWorkspace(self._workspace, NumberOfPeaks=0)
         SaveReflections(InputWorkspace=empty_peaks, Filename="test.int", Format="Jana")
-        mock_log.assert_called_once_with("Peaks workspace empty_peaks is empty - an empty file will be produced.")
+        mock_log.assert_called_once_with(
+            "There are no peaks with Intens/Sigma >= 0.0 in peak workspace empty_peaks. An empty file will be produced."
+        )
+
+    def test_save_lean_peak_table_GSAS(self):
+        reference_result = self._get_reference_result("lean_peak_GSAS.hkl")
+        file_name = os.path.join(self._test_dir, "test_lean_peak_GSAS.hkl")
+        empty_peaks = CreatePeaksWorkspace(self._workspace, NumberOfPeaks=1, OutputType="LeanElasticPeak")
+
+        SaveReflections(InputWorkspace=empty_peaks, Filename=file_name, Format="GSAS")  # calls SaveHKLCW
+
+        self._assert_file_content_equal(reference_result, file_name)
 
     # Private api
     def _assert_file_content_equal(self, reference_result, file_name):

@@ -47,6 +47,9 @@ boost::optional<std::map<std::string, std::string>> parseOptions(std::string con
 MANTIDQT_ISISREFLECTOMETRY_DLL
 boost::optional<boost::optional<std::string>> parseProcessingInstructions(std::string const &instructions);
 
+MANTIDQT_ISISREFLECTOMETRY_DLL
+boost::optional<std::vector<std::string>> parseTitleAndThetaFromRunTitle(std::string const &runTitle);
+
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

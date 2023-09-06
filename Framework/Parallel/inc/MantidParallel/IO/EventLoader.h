@@ -19,11 +19,10 @@ class TofEvent;
 }
 } // namespace Types
 namespace Parallel {
-class Communicator;
 namespace IO {
 
 /** Loader for event data from Nexus files with parallelism based on multiple
-  processes (MPI) for performance.
+  processes for performance.
 
   @author Simon Heybrock
   @date 2017
@@ -32,10 +31,6 @@ namespace EventLoader {
 MANTID_PARALLEL_DLL std::unordered_map<int32_t, size_t>
 makeAnyEventIdToBankMap(const std::string &filename, const std::string &groupName,
                         const std::vector<std::string> &bankNames);
-MANTID_PARALLEL_DLL void load(const Communicator &communicator, const std::string &filename,
-                              const std::string &groupName, const std::vector<std::string> &bankNames,
-                              const std::vector<int32_t> &bankOffsets,
-                              const std::vector<std::vector<Types::Event::TofEvent> *> &eventLists);
 
 MANTID_PARALLEL_DLL void load(const std::string &filename, const std::string &groupName,
                               const std::vector<std::string> &bankNames, const std::vector<int32_t> &bankOffsets,

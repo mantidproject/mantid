@@ -10,7 +10,7 @@ import unittest
 
 import matplotlib
 
-matplotlib.use("AGG")  # noqa
+matplotlib.use("AGG")
 
 import numpy as np
 import time

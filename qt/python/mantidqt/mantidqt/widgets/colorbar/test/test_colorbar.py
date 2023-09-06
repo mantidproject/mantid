@@ -37,28 +37,6 @@ class ColorbarWidgetTest(TestCase):
         # The clim gets updated here
         self.widget.set_mappable(image)
 
-    def test_that_masked_data_in_log_mode_will_cause_a_switch_back_to_linear_normalisation(self):
-        image = plt.imshow(self.data, cmap="plasma", norm=LogNorm(vmin=0.01, vmax=1.0))
-        masked_image = plt.imshow(self.masked_data, cmap="plasma", norm=LogNorm(vmin=0.01, vmax=1.0))
-
-        self.widget.set_mappable(image)
-        self.widget.norm.setCurrentIndex(NORM_OPTS.index("Log"))
-        self.widget.set_mappable(masked_image)
-
-        self.assertEqual(self.widget.norm.currentIndex(), NORM_OPTS.index("Linear"))
-        self.assertTrue(isinstance(masked_image.norm, Normalize))
-
-    def test_that_masked_data_in_symmetric_log_mode_will_cause_a_switch_back_to_linear_normalisation(self):
-        image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=0.01, vmax=1.0))
-        masked_image = plt.imshow(self.masked_data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=0.01, vmax=1.0))
-
-        self.widget.set_mappable(image)
-        self.widget.norm.setCurrentIndex(NORM_OPTS.index("SymmetricLog10"))
-        self.widget.set_mappable(masked_image)
-
-        self.assertEqual(self.widget.norm.currentIndex(), NORM_OPTS.index("Linear"))
-        self.assertTrue(isinstance(masked_image.norm, Normalize))
-
     def test_that_switching_normalisation_will_autoscale_the_colorbar_limits_appropriately(self):
         image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
 
@@ -111,3 +89,56 @@ class ColorbarWidgetTest(TestCase):
 
             self.assertEqual(c_min, expected_c_min)
             self.assertEqual(c_max, 99)
+
+    def test_invalid_cmax_range_is_reset(self):
+        image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+
+        self.widget.cmax_value = 10
+        # less than cmin_value therefore invalid
+        self.widget.cmax.setText("-10")
+        self.widget.clim_changed()
+
+        self.assertEqual("10.0", self.widget.cmax.text())
+
+    def test_invalid_cmin_range_is_reset(self):
+        image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+
+        self.widget.cmax_value = 10
+        self.widget.cmin_value = 0
+        # greater than cmax_value therefore invalid
+        self.widget.cmin.setText("20")
+        self.widget.clim_changed()
+
+        self.assertEqual("0.0", self.widget.cmin.text())
+
+    def test_invalid_cmax_syntax_is_reset(self):
+        image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+        self.widget.cmax_value = 10
+
+        for value in ("0,1", "0,001"):
+            self.widget.cmax.setText(value)
+            self.widget.clim_changed()
+
+            self.assertEqual("10.0", self.widget.cmax.text())
+
+    def test_invalid_cmin_syntax_is_reset(self):
+        image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+        self.widget.cmin_value = 0
+
+        for value in ("0,1", "0,001"):
+            self.widget.cmin.setText(value)
+            self.widget.clim_changed()
+
+            self.assertEqual("0.0", self.widget.cmin.text())

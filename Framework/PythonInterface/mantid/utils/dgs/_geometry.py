@@ -69,7 +69,7 @@ class ErrorCodes(Enum):
     GONIOMETR = 6
 
 
-def _qangle_validate_inputs(  # noqa: C901
+def _qangle_validate_inputs(
     hkl: np.array,
     Ei: float or np.array,
     DeltaE: float or np.array,

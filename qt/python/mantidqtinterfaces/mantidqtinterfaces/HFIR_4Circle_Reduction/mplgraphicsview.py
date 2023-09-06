@@ -12,7 +12,7 @@ from mantidqt.MPLwidgets import NavigationToolbar2QT as NavigationToolbar2
 from matplotlib.figure import Figure
 import matplotlib.image
 import matplotlib.collections
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QSizePolicy  # noqa
+from qtpy.QtWidgets import QWidget, QVBoxLayout, QSizePolicy
 from qtpy.QtCore import Signal as pyqtSignal
 
 
@@ -207,7 +207,6 @@ class IndicatorManager(object):
         ret_key = None
 
         for line_key in self._lineManager.keys():
-
             if x is not None and y is not None:
                 # 2 way
                 raise NotImplementedError("ASAP")

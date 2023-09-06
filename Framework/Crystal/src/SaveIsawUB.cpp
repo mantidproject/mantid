@@ -7,7 +7,10 @@
 #include "MantidCrystal/SaveIsawUB.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 
 #include <fstream>
 #include <iomanip>
@@ -21,6 +24,7 @@ namespace Mantid::Crystal {
 DECLARE_ALGORITHM(SaveIsawUB)
 
 using namespace Mantid::Kernel;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace std;
 
@@ -33,6 +37,11 @@ void SaveIsawUB::init() {
   const std::vector<std::string> exts{".mat", ".ub", ".txt"};
   declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, exts),
                   "Path to an ISAW-style UB matrix text file.");
+
+  declareProperty(
+      std::make_unique<PropertyWithValue<bool>>("RotateByGoniometerMatrix", false, Direction::Input),
+      "If True this option will rotate the UB by the goniometer rotation, R - i.e. will save R*UB. "
+      "If the InputWorkspace is a PeaksWorkspace then the goniometer matrix will be taken from the first peak.");
 }
 
 double SaveIsawUB::getErrorVolume(const OrientedLattice &lattice) {
@@ -76,32 +85,44 @@ double SaveIsawUB::getErrorVolume(const OrientedLattice &lattice) {
  */
 void SaveIsawUB::exec() {
   try {
-    Workspace_sptr ws1 = getProperty("InputWorkspace");
-    ExperimentInfo_sptr ws;
-    MultipleExperimentInfos_sptr MDWS = std::dynamic_pointer_cast<MultipleExperimentInfos>(ws1);
-    if (MDWS != nullptr) {
-      ws = MDWS->getExperimentInfo(0);
+    Workspace_sptr ws = getProperty("InputWorkspace");
+    ExperimentInfo_sptr expInfo;
+    MultipleExperimentInfos_sptr expInfoMD = std::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
+    if (expInfoMD != nullptr && expInfoMD->getNumExperimentInfo() > 0) {
+      expInfo = expInfoMD->getExperimentInfo(0);
     } else {
-      ws = std::dynamic_pointer_cast<ExperimentInfo>(ws1);
+      expInfo = std::dynamic_pointer_cast<ExperimentInfo>(ws);
     }
 
-    if (!ws)
+    if (!expInfo)
       throw std::invalid_argument("Must specify either a MatrixWorkspace or a "
                                   "PeaksWorkspace or a MDWorkspace.");
 
-    if (!ws->sample().hasOrientedLattice())
+    if (!expInfo->sample().hasOrientedLattice())
       throw std::invalid_argument("Workspace must have an oriented lattice to save");
 
-    std::string Filename = getProperty("Filename");
-
-    ofstream out;
-    out.open(Filename.c_str());
-
-    OrientedLattice lattice = ws->sample().getOrientedLattice();
+    OrientedLattice lattice = expInfo->sample().getOrientedLattice();
     Kernel::DblMatrix ub = lattice.getUB();
     Kernel::DblMatrix modub = lattice.getModUB();
 
+    // rotate by gonio matrix if requested
+    if (getProperty("RotateByGoniometerMatrix")) {
+      DblMatrix gonioR(3, 3, true); // identity
+      auto peakWs = std::dynamic_pointer_cast<PeaksWorkspace>(ws);
+      if (peakWs != nullptr) {
+        gonioR = peakWs->getPeak(0).getGoniometerMatrix();
+      } else {
+        gonioR = expInfo->run().getGoniometer().getR();
+      }
+      ub = gonioR * ub;
+      modub = gonioR * modub;
+    }
+
     // Write the ISAW UB matrix
+    std::string Filename = getProperty("Filename");
+    ofstream out;
+    out.open(Filename.c_str());
+
     const int beam = 2;
     const int up = 1;
     const int back = 0;

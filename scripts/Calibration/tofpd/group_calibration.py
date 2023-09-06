@@ -4,6 +4,7 @@ import json
 import datetime
 import numpy as np
 from mantid.simpleapi import (
+    CompressEvents,
     ConvertUnits,
     ExtractSpectra,
     Rebin,
@@ -26,7 +27,6 @@ from mantid.simpleapi import (
     logger,
     RenameWorkspace,
     Integration,
-    CloneWorkspace,
     CreateGroupingWorkspace,
     CreateDetectorTable,
     CreateEmptyTableWorkspace,
@@ -55,6 +55,29 @@ DIAMOND = (
     1.2615,
     2.0599,
 )
+
+
+def _getBrightestWorkspaceIndex(wksp):
+    """Figure out brightest spectra to be used as the reference for cross correlation.
+    The brightest spectrum will be used as the reference
+    """
+    intg = Integration(InputWorkspace=wksp, OutputWorkspace="_tmp_group_intg")  # RangeLower=1.22, RangeUpper=1.30, )
+    brightest_spec_index = int(np.argmax(intg.extractY()))
+    DeleteWorkspace("_tmp_group_intg")
+    return brightest_spec_index
+
+
+def _createDetToWkspIndexMap(wksp):
+    mapping = {}
+    spectrumInfo = wksp.spectrumInfo()
+    for wksp_index in range(wksp.getNumberHistograms()):
+        detids = wksp.getSpectrum(wksp_index).getDetectorIDs()
+        for detid in detids:  # add each detector id in separately
+            if spectrumInfo.isMasked(wksp_index):
+                mapping[detid] = -1
+            else:
+                mapping[detid] = wksp_index
+    return mapping
 
 
 def cc_calibrate_groups(
@@ -93,8 +116,8 @@ def cc_calibrate_groups(
     :param previous_calibration: Optional previous diffcal workspace
     :param Step: step size for binning of data and input for GetDetectorOffsets, default 0.001
     :param DReference: Derefernce parameter for GetDetectorOffsets, default 1.2615
-    :param Xmin: Xmin parameter for CrossCorrelate, default 1.22
-    :param Xmax: Xmax parameter for CrossCorrelate, default 1.30
+    :param Xmin: Minimum d-spacing for CrossCorrelate, default 1.22
+    :param Xmax: Maximum d-spacing for CrossCorrelate, default 1.30
     :param MaxDSpaceShift: MaxDSpaceShift paramter for CrossCorrelate, default None
     :param OffsetThreshold: Convergence threshold for cycling cross correlation, default 1E-4
     :param SkipCrossCorrelation: Skip cross correlation for specified groups
@@ -105,53 +128,53 @@ def cc_calibrate_groups(
     if previous_calibration:
         ApplyDiffCal(data_ws, CalibrationWorkspace=previous_calibration)
 
-    data_d = ConvertUnits(data_ws, Target="dSpacing", OutputWorkspace="data_d")
-
-    group_list = np.unique(group_ws.extractY())
+    det2WkspIndex = _createDetToWkspIndexMap(data_ws)
 
     _accum_cc = None
     to_skip = []
-    for group in group_list:
+    for group in group_ws.getGroupIDs():
+        if group == -1:
+            continue  # this is a group of unset pixels
         # Figure out input parameters for CrossCorrelate and GetDetectorOffset, specifically
         # for those parameters for which both a single value and a list is accepted. If a
         # list is given, that means different parameter setup will be used for different groups.
-        Xmin_group = Xmin[int(group) - 1] if type(Xmin) == list else Xmin
-        Xmax_group = Xmax[int(group) - 1] if type(Xmax) == list else Xmax
-        MDS_group = MaxDSpaceShift[int(group) - 1] if type(MaxDSpaceShift) == list else MaxDSpaceShift
-        DRef_group = DReference[int(group) - 1] if type(DReference) == list else DReference
-        OT_group = OffsetThreshold[int(group) - 1] if type(OffsetThreshold) == list else OffsetThreshold
-        pf_group = PeakFunction[int(group) - 1] if type(PeakFunction) == list else PeakFunction
-        snpts_group = SmoothNPoints[int(group) - 1] if type(SmoothNPoints) == list else SmoothNPoints
+        Xmin_group = Xmin[int(group) - 1] if isinstance(Xmin, list) else Xmin
+        Xmax_group = Xmax[int(group) - 1] if isinstance(Xmax, list) else Xmax
+        MDS_group = MaxDSpaceShift[int(group) - 1] if isinstance(MaxDSpaceShift, list) else MaxDSpaceShift
+        DRef_group = DReference[int(group) - 1] if isinstance(DReference, list) else DReference
+        OT_group = OffsetThreshold[int(group) - 1] if isinstance(OffsetThreshold, list) else OffsetThreshold
+        pf_group = PeakFunction[int(group) - 1] if isinstance(PeakFunction, list) else PeakFunction
+        snpts_group = SmoothNPoints[int(group) - 1] if isinstance(SmoothNPoints, list) else SmoothNPoints
         cycling = OT_group < 1.0
 
-        indexes = np.where(group_ws.extractY().flatten() == group)[0]
-        sn = np.array(group_ws.getSpectrumNumbers())[indexes]
         try:
-            ws_indexes = [data_d.getIndexFromSpectrumNumber(int(i)) for i in sn]
+            # detector ids that get focussed together
+            detids = group_ws.getDetectorIDsOfGroup(int(group))
+            # convert to workspace indices in the input data
+            ws_indices = np.asarray([det2WkspIndex[detid] for detid in detids])
+            # remove masked spectra
+            ws_indices = ws_indices[ws_indices != -1]
         except RuntimeError:
             # data does not contain spectrum in group
             continue
 
         if group in SkipCrossCorrelation:
-            to_skip.extend(ws_indexes)
+            to_skip.extend(ws_indices)
 
-        ExtractSpectra(data_d, WorkspaceIndexList=ws_indexes, OutputWorkspace="_tmp_group_cc")
-        ExtractUnmaskedSpectra("_tmp_group_cc", OutputWorkspace="_tmp_group_cc")
-        ExtractSpectra(data_ws, WorkspaceIndexList=ws_indexes, OutputWorkspace="_tmp_group_cc_raw")
-        ExtractUnmaskedSpectra("_tmp_group_cc_raw", OutputWorkspace="_tmp_group_cc_raw")
-        num_spectra = mtd["_tmp_group_cc"].getNumberHistograms()
+        num_spectra = len(ws_indices)  # takes masking into account
         if num_spectra < 2:
-            continue
-        Rebin("_tmp_group_cc", Params=f"{Xmin_group},{Step},{Xmax_group}", OutputWorkspace="_tmp_group_cc")
+            to_skip.extend(ws_indices)
+            continue  # go to next group
+
+        # grab out the spectra in d-space and time-of-flight
+        ExtractSpectra(data_ws, WorkspaceIndexList=ws_indices, OutputWorkspace="_tmp_group_cc_raw")
+        ConvertUnits("_tmp_group_cc_raw", Target="dSpacing", OutputWorkspace="_tmp_group_cc_main")
+        Rebin("_tmp_group_cc_main", Params=(Xmin_group, Step, Xmax_group), OutputWorkspace="_tmp_group_cc_main")
         if snpts_group >= 3:
-            SmoothData("_tmp_group_cc", NPoints=snpts_group, OutputWorkspace="_tmp_group_cc")
+            SmoothData("_tmp_group_cc_main", NPoints=snpts_group, OutputWorkspace="_tmp_group_cc_main")
 
         # Figure out brightest spectra to be used as the reference for cross correlation.
-        CloneWorkspace("_tmp_group_cc_raw", OutputWorkspace="_tmp_group_cc_raw_tmp")
-        intg = Integration(
-            "_tmp_group_cc_raw_tmp", StartWorkspaceIndex=0, EndWorkspaceIndex=num_spectra - 1, OutputWorkspace="_tmp_group_intg"
-        )
-        brightest_spec_index = int(np.argmax(np.array([intg.readY(i)[0] for i in range(num_spectra)])))
+        brightest_spec_index = _getBrightestWorkspaceIndex("_tmp_group_cc_main")
 
         # Cycling cross correlation. At each step, we will use the obtained offsets and DIFC's from
         # previous step to obtain new DIFC's. In this way, spectra in group will come closer and closer
@@ -161,45 +184,47 @@ def cc_calibrate_groups(
         # relative offset).
         num_cycle = 1
         while True:
+            # take the data in d-space and perform cross correlation on a subset of spectra
+            # the output workspace is the cross correlation data for only the requested spectra
             CrossCorrelate(
-                "_tmp_group_cc",
+                InputWorkspace="_tmp_group_cc_main",
                 Xmin=Xmin_group,
                 XMax=Xmax_group,
                 MaxDSpaceShift=MDS_group,
                 ReferenceSpectra=brightest_spec_index,
                 WorkspaceIndexMin=0,
                 WorkspaceIndexMax=num_spectra - 1,
-                OutputWorkspace="_tmp_group_cc",
+                OutputWorkspace="_tmp_group_cc_main",
             )
 
             bin_range = (Xmax_group - Xmin_group) / Step
             GetDetectorOffsets(
-                InputWorkspace="_tmp_group_cc",
+                InputWorkspace="_tmp_group_cc_main",
                 Step=Step,
                 Xmin=-bin_range,
                 XMax=bin_range,
                 DReference=DRef_group,
                 MaxOffset=1,
                 PeakFunction=pf_group,
-                OutputWorkspace="_tmp_group_cc",
+                OutputWorkspace="_tmp_group_cc_main",
             )
 
-            if group not in SkipCrossCorrelation:
-                offsets_tmp = []
-                for item in ws_indexes:
-                    if abs(mtd["_tmp_group_cc"].readY(item)) != 0:
-                        offsets_tmp.append(abs(mtd["_tmp_group_cc"].readY(item)))
-                offsets_tmp = np.array(offsets_tmp)
-                logger.notice(f"Running group-{group}, cycle-{num_cycle}.")
-                logger.notice(f"Median offset (no sign) = {np.median(offsets_tmp)}")
-                logger.notice(f"Running group-{group}, cycle-{num_cycle}.")
-                logger.notice(f"Median offset (no sign) = {np.median(offsets_tmp)}")
-                converged = np.median(offsets_tmp) < OT_group
-            else:
-                for item in ws_indexes:
-                    mtd["_tmp_group_cc"].dataY(item)[0] = 0.0
+            if group in SkipCrossCorrelation:
+                # set the detector offsets to zero
+                for item in ws_indices:
+                    mtd["_tmp_group_cc_main"].dataY(int(item))[0] = 0.0
                 logger.notice(f"Cross correlation skipped for group-{group}.")
                 converged = True
+            else:
+                # collect the non-zero offsets for determining convergence
+                offsets_tmp = np.abs(mtd["_tmp_group_cc_main"].extractY())
+                offsets_tmp = offsets_tmp[offsets_tmp != 0.0]
+                logger.notice(f"Running group-{group}, cycle-{num_cycle}.")
+                logger.notice(f"Median offset (no sign) = {np.median(offsets_tmp)}")
+                logger.notice(f"Running group-{group}, cycle-{num_cycle}.")
+                logger.notice(f"Median offset (no sign) = {np.median(offsets_tmp)}")
+                # it has converged if the median is less than offset-threshold for the group
+                converged = np.median(offsets_tmp) < OT_group
 
             if not cycling or converged:
                 if cycling and converged:
@@ -208,27 +233,27 @@ def cc_calibrate_groups(
                         logger.notice(f"with offset threshold {OT_group}.")
                 break
             else:
+                # create the input data for the next loop by applying the calibration
                 previous_calibration = ConvertDiffCal(
-                    "_tmp_group_cc", PreviousCalibration=previous_calibration, OutputWorkspace="_tmp_group_cc_diffcal"
+                    "_tmp_group_cc_main", PreviousCalibration=previous_calibration, OutputWorkspace="_tmp_group_cc_diffcal"
                 )
                 ApplyDiffCal("_tmp_group_cc_raw", CalibrationWorkspace="_tmp_group_cc_diffcal")
-                ConvertUnits("_tmp_group_cc_raw", Target="dSpacing", OutputWorkspace="_tmp_group_cc")
-                Rebin("_tmp_group_cc", Params=f"{Xmin_group},{Step},{Xmax_group}", OutputWorkspace="_tmp_group_cc")
+                ConvertUnits("_tmp_group_cc_raw", Target="dSpacing", OutputWorkspace="_tmp_group_cc_main")
+                Rebin("_tmp_group_cc_main", Params=f"{Xmin_group},{Step},{Xmax_group}", OutputWorkspace="_tmp_group_cc_main")
 
             num_cycle += 1
 
         if not _accum_cc:
-            _accum_cc = RenameWorkspace("_tmp_group_cc")
+            _accum_cc = RenameWorkspace("_tmp_group_cc_main")
         else:
-            _accum_cc += mtd["_tmp_group_cc"]
-            # DeleteWorkspace('_tmp_group_cc')
+            _accum_cc += mtd["_tmp_group_cc_main"]
 
     previous_calibration = ConvertDiffCal(
         "_accum_cc", PreviousCalibration=previous_calibration, OutputWorkspace=f"{output_basename}_cc_diffcal"
     )
 
     DeleteWorkspace("_accum_cc")
-    DeleteWorkspace("_tmp_group_cc")
+    DeleteWorkspace("_tmp_group_cc_main")
     DeleteWorkspace("_tmp_group_cc_raw")
     if cycling and "_tmp_group_cc_diffcal" in mtd:
         DeleteWorkspace("_tmp_group_cc_diffcal")
@@ -281,41 +306,22 @@ def pdcalibration_groups(
 
     CreateDetectorTable(data_ws, DetectorTableWorkspace="calib_table_bak")
 
+    # time-focus the data into the requested number of groups
     ApplyDiffCal(data_ws, CalibrationWorkspace=cc_diffcal)
-    ConvertUnits(data_ws, Target="dSpacing", OutputWorkspace="_tmp_data_aligned")
-    DiffractionFocussing("_tmp_data_aligned", GroupingWorkspace=group_ws, OutputWorkspace="_tmp_data_aligned")
-
+    ConvertUnits(data_ws, Target="dSpacing", OutputWorkspace=data_ws)
+    DiffractionFocussing(data_ws, GroupingWorkspace=group_ws, OutputWorkspace="_tmp_data_aligned")
+    if mtd["_tmp_data_aligned"].id() == "EventWorkspace":
+        CompressEvents(InputWorkspace="_tmp_data_aligned", OutputWorkspace="_tmp_data_aligned")
     ConvertUnits("_tmp_data_aligned", Target="TOF", OutputWorkspace="_tmp_data_aligned")
+    # rebin the data and drop events even if they were present before
+    Rebin(InputWorkspace="_tmp_data_aligned", OutputWorkspace="_tmp_data_aligned", Params=TofBinning, PreserveEvents=False)
+
+    # put the input data back into time-of-flight
+    ConvertUnits(data_ws, Target="dSpacing", OutputWorkspace=data_ws)
 
     instrument = data_ws.getInstrument().getName()
 
-    if instrument != "POWGEN":
-        PDCalibration(
-            InputWorkspace="_tmp_data_aligned",
-            TofBinning=TofBinning,
-            PreviousCalibrationTable=previous_calibration,
-            PeakFunction=PeakFunction,
-            PeakPositions=PeakPositions,
-            PeakWindow=PeakWindow,
-            PeakWidthPercent=PeakWidthPercent,
-            OutputCalibrationTable=f"{output_basename}_pd_diffcal",
-            DiagnosticWorkspaces=f"{output_basename}_pd_diag",
-        )
-        if to_skip:
-            ExtractSpectra(data_ws, WorkspaceIndexList=to_skip, OutputWorkspace="_tmp_group_to_skip")
-            ExtractUnmaskedSpectra("_tmp_group_to_skip", OutputWorkspace="_tmp_group_to_skip")
-            PDCalibration(
-                InputWorkspace="_tmp_group_to_skip",
-                TofBinning=TofBinning,
-                PreviousCalibrationTable=previous_calibration,
-                PeakFunction=PeakFunction,
-                PeakPositions=PeakPositions,
-                PeakWindow=PeakWindow,
-                PeakWidthPercent=PeakWidthPercent,
-                OutputCalibrationTable=f"{output_basename}_pd_diffcal_skip",
-                DiagnosticWorkspaces=f"{output_basename}_pd_diag_skip",
-            )
-    else:
+    if instrument == "POWGEN":
         pdcalib_for_powgen(
             mtd["_tmp_data_aligned"],
             TofBinning,
@@ -340,6 +346,34 @@ def pdcalibration_groups(
                 PeakWidthPercent,
                 f"{output_basename}_pd_diffcal_skip",
                 f"{output_basename}_pd_diag_skip",
+            )
+    else:
+        PDCalibration(
+            InputWorkspace="_tmp_data_aligned",
+            TofBinning=TofBinning,
+            PreviousCalibrationTable=previous_calibration,
+            PeakFunction=PeakFunction,
+            PeakPositions=PeakPositions,
+            PeakWindow=PeakWindow,
+            PeakWidthPercent=PeakWidthPercent,
+            OutputCalibrationTable=f"{output_basename}_pd_diffcal",
+            DiagnosticWorkspaces=f"{output_basename}_pd_diag",
+        )
+        if to_skip:
+            if isinstance(to_skip, list):
+                to_skip = [int(element) for element in to_skip]  # issue with numpy.int64
+            ExtractSpectra(data_ws, WorkspaceIndexList=to_skip, OutputWorkspace="_tmp_group_to_skip")
+            ExtractUnmaskedSpectra("_tmp_group_to_skip", OutputWorkspace="_tmp_group_to_skip")
+            PDCalibration(
+                InputWorkspace="_tmp_group_to_skip",
+                TofBinning=TofBinning,
+                PreviousCalibrationTable=previous_calibration,
+                PeakFunction=PeakFunction,
+                PeakPositions=PeakPositions,
+                PeakWindow=PeakWindow,
+                PeakWidthPercent=PeakWidthPercent,
+                OutputCalibrationTable=f"{output_basename}_pd_diffcal_skip",
+                DiagnosticWorkspaces=f"{output_basename}_pd_diag_skip",
             )
 
     CombineDiffCal(

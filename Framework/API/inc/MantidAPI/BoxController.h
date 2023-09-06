@@ -36,7 +36,6 @@ public:
   /** Constructor
    *
    * @param nd :: number of dimensions
-   * @return BoxController instance
    */
   BoxController(size_t nd)
       : nd(nd), m_maxId(0), m_SplitThreshold(1024), m_splitTopInto(boost::none), m_numSplit(1), m_numTopSplit(1),

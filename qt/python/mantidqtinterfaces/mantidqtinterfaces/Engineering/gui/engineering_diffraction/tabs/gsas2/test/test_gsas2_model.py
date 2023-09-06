@@ -353,6 +353,24 @@ class TestGSAS2Model(unittest.TestCase):
             _try_delete(stem_user_dir)
             _try_delete(save_directory)
 
+    def test_create_reflection_labels_returns_a_primary_format_when_lists_match_size(self):
+        phase_names = ["Fe", "Fe_gamma"]
+        positions = [[1.0, 2.0], [3.0, 4.0]]
+
+        self.model.phase_names_list = phase_names
+        labels = self.model._create_reflection_labels(positions)
+
+        self.assertEqual(["reflections_Fe", "reflections_Fe_gamma"], labels)
+
+    def test_create_reflection_labels_returns_indexed_labels_when_positions_have_a_different_size(self):
+        phase_names = ["Fe", "Fe_gamma"]
+        positions = [[1.0, 2.0]]
+
+        self.model.phase_names_list = phase_names
+        labels = self.model._create_reflection_labels(positions)
+
+        self.assertEqual(["reflections_phase_1"], labels)
+
     def test_load_gsas_histogram(self):
         self.model.x_min = [20000]
         self.model.x_max = [21000]
@@ -369,6 +387,13 @@ class TestGSAS2Model(unittest.TestCase):
         expected_reflections = [np.array([38789.37179684, 33592.5813729, 23753.54208634, 20257.08875516, 19394.68589842])]
         # check all values in two numpy arrays are the same
         self.assertTrue((reflections[0] - expected_reflections[0]).all())
+
+    @patch(model_path + ".os.path.exists")
+    def test_load_gsas2_reflections_file_not_exist(self, mock_path_exists):
+        mock_path_exists.return_value = False
+        self.model.phase_names_list = ["Fe_gamma"]
+        reflections = self.model.load_gsas_reflections_per_histogram_for_plot(1)
+        self.assertTrue(len(reflections) == 0)
 
     def test_create_lattice_parameter_table(self):
         self.model.phase_names_list = ["Fe_gamma"]
@@ -396,7 +421,7 @@ class TestGSAS2Model(unittest.TestCase):
         table = CreateEmptyTableWorkspace(OutputWorkspace="expected_gsas2_output_GSASII_lattice_parameters")
         for column in range(len(column_titles)):
             value_type = "double"
-            if type(row_one_values[column]) == str:
+            if isinstance(row_one_values[column], str):
                 value_type = "str"
             table.addReadOnlyColumn(value_type, column_titles[column])
         table.addRow(row_one_values)
@@ -545,7 +570,7 @@ class TestGSAS2Model(unittest.TestCase):
         table = CreateEmptyTableWorkspace(OutputWorkspace="expected_gsas2_output_GSASII_instrument_parameters")
         for column in range(len(column_titles)):
             value_type = "double"
-            if type(row_one_values[column]) == str:
+            if isinstance(row_one_values[column], str):
                 value_type = "str"
             table.addReadOnlyColumn(value_type, column_titles[column])
         table.addRow(row_one_values)
@@ -575,7 +600,7 @@ class TestGSAS2Model(unittest.TestCase):
         table = CreateEmptyTableWorkspace(OutputWorkspace="expected_gsas2_output_GSASII_lattice_parameters")
         for column in range(len(column_titles)):
             value_type = "double"
-            if type(row_one_values[column]) == str:
+            if isinstance(row_one_values[column], str):
                 value_type = "str"
             table.addReadOnlyColumn(value_type, column_titles[column])
         table.addRow(row_one_values)

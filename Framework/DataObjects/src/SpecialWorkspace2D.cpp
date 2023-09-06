@@ -29,7 +29,6 @@ DECLARE_WORKSPACE(SpecialWorkspace2D)
  *
  * @param inst :: input instrument that is the base for this workspace
  * @param includeMonitors :: If false the monitors are not included
- * @return created SpecialWorkspace2D
  */
 SpecialWorkspace2D::SpecialWorkspace2D(const Geometry::Instrument_const_sptr &inst, const bool includeMonitors) {
   // Init the Workspace2D with one spectrum per detector, in the same order.
@@ -42,32 +41,19 @@ SpecialWorkspace2D::SpecialWorkspace2D(const Geometry::Instrument_const_sptr &in
   this->MatrixWorkspace::rebuildSpectraMapping(includeMonitors);
 
   // Make the mapping, which will be used for speed later.
-  detID_to_WI.clear();
-  for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
-    auto &dets = getSpectrum(wi).getDetectorIDs();
-    for (auto det : dets) {
-      detID_to_WI[det] = wi;
-    }
-  }
+  buildDetectorIDMapping();
 }
 
 //----------------------------------------------------------------------------------------------
 /** Constructor, building from a MatrixWorkspace
  *
  * @param parent :: input workspace that is the base for this workspace
- * @return created SpecialWorkspace2D
  */
 SpecialWorkspace2D::SpecialWorkspace2D(const API::MatrixWorkspace_const_sptr &parent) {
   this->initialize(parent->getNumberHistograms(), 1, 1);
   API::WorkspaceFactory::Instance().initializeFromParent(*parent, *this, false);
   // Make the mapping, which will be used for speed later.
-  detID_to_WI.clear();
-  for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
-    auto &dets = getSpectrum(wi).getDetectorIDs();
-    for (auto det : dets) {
-      detID_to_WI[det] = wi;
-    }
-  }
+  buildDetectorIDMapping();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -100,6 +86,16 @@ const std::string SpecialWorkspace2D::toString() const {
   os << "Title: " << getTitle() << "\n";
   os << "Histograms: " << getNumberHistograms() << "\n";
   return os.str();
+}
+
+void SpecialWorkspace2D::buildDetectorIDMapping() {
+  detID_to_WI.clear();
+  for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
+    auto &dets = getSpectrum(wi).getDetectorIDs();
+    for (auto det : dets) {
+      detID_to_WI[det] = wi;
+    }
+  }
 }
 
 //----------------------------------------------------------------------------------------------

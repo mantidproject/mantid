@@ -20,7 +20,8 @@ Error Reporter test
   methods to crash Mantid no longer works, then ask other developers for a
   suitable method and update these instructions.
 - Make sure the location of this file is included in your search directories. Full instructions :ref:`are available online <mantid:getting started>`.
-- These tests should be run with someone who has access to the error reports database. Please contact Daniel Murphy when you are going to run these tests.
+- These tests should be run with someone who has access to the error reports database.
+  Please contact the developer managing support before you run these tests.
 
 **Time required 10 - 20  minutes**
 

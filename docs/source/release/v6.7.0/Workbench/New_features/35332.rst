@@ -1,0 +1,1 @@
+- The Error Reporter will now prompt the user to upgrade to the latest version of Mantid if a new version is available.

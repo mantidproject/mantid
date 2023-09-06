@@ -242,8 +242,8 @@ void SaveOpenGenieAscii::getSampleLogs() {
       addToOutputBuffer("effective_time", m_floatType, effectiveTime);
     }
 
-    if (auto *timeSeries = dynamic_cast<ITimeSeriesProperty *>(logEntry)) {
-      outValue = std::to_string(timeSeries->timeAverageValue());
+    if (dynamic_cast<ITimeSeriesProperty *>(logEntry)) {
+      outValue = std::to_string(m_inputWS->run().getTimeAveragedValue(logName));
     } else {
       outValue = logEntry->value();
     }
@@ -275,8 +275,6 @@ void SaveOpenGenieAscii::inputValidation() {
  * Attempts to open the file at the user specified path. If this
  * fails an exception is thrown else it returns the handle as a
  * std stream.
- *
- * @return:: The opened file as an file stream
  */
 void SaveOpenGenieAscii::openFileStream(std::ofstream &stream) {
   // Retrieve the filename from the properties

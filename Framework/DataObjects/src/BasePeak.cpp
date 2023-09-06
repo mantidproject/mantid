@@ -276,6 +276,14 @@ double BasePeak::getValueByColName(std::string name) const {
     return double(this->getPeakNumber());
   else if (name == "tbar")
     return this->getAbsorptionWeightedPathLength();
+  else if (name == "qlab")
+    return this->getQLabFrame().norm2();
+  else if (name == "qsample")
+    return this->getQSampleFrame().norm2();
+  else if (name == "inthkl")
+    return this->getIntHKL().norm2();
+  else if (name == "intmnp")
+    return this->getIntMNP().norm2();
   else
     throw std::runtime_error("BasePeak::getValueByColName() unknown column or "
                              "column is not a number: " +

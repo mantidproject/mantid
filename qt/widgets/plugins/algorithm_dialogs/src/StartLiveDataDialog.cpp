@@ -184,7 +184,7 @@ void StartLiveDataDialog::initLayout() {
   updateConnectionChoices(ui.cmbInstrument->currentText());
   updateConnectionDetails(ui.cmbConnection->currentText());
   setDefaultAccumulationMethod(ui.cmbConnListener->currentText());
-  initListenerPropLayout();
+  initListenerPropLayout(ui.cmbConnListener->currentText());
 
   //=========== SLOTS =============
   connect(ui.processingAlgo, SIGNAL(changedAlgorithm()), this, SLOT(changeProcessingAlgorithm()));
@@ -206,7 +206,8 @@ void StartLiveDataDialog::initLayout() {
 
   connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(setDefaultAccumulationMethod(const QString &)));
-  connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(initListenerPropLayout()));
+  connect(ui.cmbConnListener, SIGNAL(currentIndexChanged(const QString &)), this,
+          SLOT(initListenerPropLayout(const QString &)));
   connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(updateUiElements(const QString &)));
   connect(ui.cmbInstrument, SIGNAL(currentIndexChanged(const QString &)), this,
@@ -391,7 +392,7 @@ void StartLiveDataDialog::accept() {
  * Update the Listener Properties group box for the current LiveListener.
  *
  */
-void StartLiveDataDialog::initListenerPropLayout() {
+void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
   // remove previous listener's properties
   auto props = m_algorithm->getPropertiesInGroup("ListenerProperties");
   for (auto &prop : props) {
@@ -416,6 +417,10 @@ void StartLiveDataDialog::initListenerPropLayout() {
       }
     }
 
+    // set the instrument and listener properties early to get the listener's properties
+    // this will be overriden by the same values in parseInput() function
+    m_algorithm->setPropertyValue("Instrument", ui.cmbInstrument->currentText().toStdString());
+    m_algorithm->setPropertyValue("Listener", listener.toStdString());
     // find the listener's properties
     props = m_algorithm->getPropertiesInGroup("ListenerProperties");
 

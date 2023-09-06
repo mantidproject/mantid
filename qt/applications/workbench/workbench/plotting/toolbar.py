@@ -226,9 +226,9 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
                     # The artist is not tracked - ignore this one and check the rest
                     continue
 
-        # For plot-to-script button to show, every axis must be a MantidAxes with lines in it
         # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
-        if not all((isinstance(ax, MantidAxes) and curve_in_ax(ax)) for ax in fig.get_axes()) or fig.get_axes()[0].is_waterfall():
+        # There must be at least one MantidAxis plot with data for to generate a script, others will be skipped
+        if not any((isinstance(ax, MantidAxes) and curve_in_ax(ax)) for ax in fig.get_axes()) or fig.get_axes()[0].is_waterfall():
             self.set_generate_plot_script_enabled(False)
 
         # reenable script generation for colormaps

@@ -178,11 +178,12 @@ Preview tab
 ---------------
 
 - Go to the Reduction Preview tab.
-- Type ``INTER45455`` into the ``Run`` input. Set the ``Angle`` to ``1`` and click ``Load``. The instrument view plot should display the data. If the plot remains blank then check that you have added the path to your unit test data to your Mantid user directories (see set up instructions).
-- Click the rectangle-select button above the plot and draw a region onto the instrument view. The selected detector segments should be summed and the result plotted on the second (slice viewer) plot.
-- Check that multiple regions can be added to the instrument view, and that moving and resizing them updates the slice viewer plot.
+- Type ``INTER45455`` into the ``Run`` input. Set the ``Angle`` to ``1`` and click ``Load``. The instrument view plot should display the data on a detector with four banks. If the plot shows only a single bank then check that you have added the path to your unit test data to your Mantid user directories (see set up instructions). Note, with this dataset, we expect an error "Detector with ID..." to be thrown at this stage.
+- Go to the drop-down underneath the color scale next to the second (slice viewer) plot and select ``SymmetricLog10``. This should allow you to see the counts on the slice viewer plot more clearly. You should see what appear as roughly four horizontal lines of data on the plot.
+- Going back to the instrument view plot, click the rectangle-select button above it and draw a single region that selects all detector banks. The selected detector segments should be summed and the result plotted on the slice viewer, appearing as a single line of data.
+- Reduce the size of your original region on the instrument view and check that multiple regions can be added to the plot. Check that when moving and resizing regions, the slice viewer plot is updated.
 - Check that you can delete regions from the instrument view by selecting them and pressing the delete key on your keyboard.
-- Make sure you have at least one region selected on the instrument view. Then go to the drop-down underneath the color scale (next to the slice viewer plot) and select ``SymmetricLog10``. This should allow you to see the counts on the plot more clearly.
+- Make sure you have at least one region selected on the instrument view.
 - Click the rectangle select button above the slice viewer plot and draw a ``Signal`` region on the plot. A reduction will now be triggered for the selected spectra and the result plotted on the 1D plot.
 - Click the drop-down on the rectangle select button and select ``Transmission``. Draw a transmission region onto the slice viewer plot. Then, in the same way, add one or more ``Background`` regions. The reduction should be re-run each time a region is added:
 
@@ -200,5 +201,5 @@ Preview tab
   - View the history for ``ReflectometryISISSumBanks`` and check that the input for ``ROIDetectorIDs`` matches the range of detector IDs you selected.
 
 - Back in the Reflectometry interface, go to the Runs tab. In the Process Runs table on the right-hand panel of the tab, enter Run ``INTER45455`` and Angle ``1`` into the first child row. Click Process.
-- Compare plots of the ``preview_summed_ws`` (from the Preview reduction) with ``IvsQ_45455`` (from the batch reduction). They should be the same.
+- Compare plots of the ``preview_reduced_ws`` (from the Preview reduction) with ``IvsQ_binned_45455`` (from the batch reduction). They should be the same.
 - The plots on the Reduction Preview tab are located within three dockable widgets. Check that the widgets can be undocked, re-docked, re-sized etc. without error or loss of functionality.

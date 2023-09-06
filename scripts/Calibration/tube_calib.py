@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 # Mantid
 from mantid.api import AnalysisDataService as ADS
 from mantid.dataobjects import EventWorkspace, TableWorkspace, Workspace2D
-from mantid.simpleapi import *
+from mantid.simpleapi import CloneWorkspace, CreateWorkspace, DeleteWorkspace, Fit, GroupWorkspaces, RenameWorkspace
 from mantid.kernel import *
 
 # Calibration
@@ -412,7 +412,7 @@ def getCalibratedPixelPositions(
 
     :returns: list of pixel detector IDs, and list of their calibrated positions
     """
-    ws = mtd[str(input_workspace)]  # handle to the workspace
+    ws = ADS.retrieve(str(input_workspace))  # handle to the workspace
     # Arrays to be returned
     det_IDs = []
     det_positions = []
@@ -547,7 +547,7 @@ def getCalibration(
 
     This is the main method called from :func:`~tube.calibrate` to perform the calibration.
     """
-    ws = mtd[str(input_workspace)]  # handle to the input workspace
+    ws = ADS.retrieve(str(input_workspace))  # handle to the input workspace
     n_tubes = tubeSet.getNumTubes()
     print("Number of tubes =", n_tubes)
 
@@ -558,7 +558,6 @@ def getCalibration(
 
     parameters_tables = list()  # hold the names of all the fit parameter tables
     for i in range_list:
-
         # Deal with (i+1)st tube specified
         wht, skipped = tubeSet.getTube(i)
         all_skipped.update(skipped)
@@ -658,7 +657,6 @@ def getCalibrationFromPeakFile(ws, calibTable, iTube, PeakFile):
     print("Number of tubes read from file =", n_tubes)
 
     for i in range(n_tubes):
-
         # Deal with (i+1)st tube got from file
         tube_name = peak_array[i][0]  # e.g. 'MERLIN/door3/tube_3_1'
         tube = TubeSpec(ws)

@@ -148,7 +148,7 @@ template <typename DestElementType> void NDArrayToVector<DestElementType>::copyT
  */
 template <typename DestElementType>
 void NDArrayToVector<DestElementType>::throwIfSizeMismatched(const TypedVector &dest) const {
-  if (PyArray_SIZE((PyArrayObject *)m_arr.ptr()) == static_cast<ssize_t>(dest.size())) {
+  if (PyArray_SIZE((PyArrayObject *)m_arr.ptr()) == static_cast<boost::python::ssize_t>(dest.size())) {
     return;
   } else {
     throw std::invalid_argument("Invalid number of elements while copying from ndarray. "

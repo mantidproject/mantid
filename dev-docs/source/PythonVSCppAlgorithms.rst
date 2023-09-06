@@ -13,6 +13,11 @@ Overview
 Mantid can be extended both with python and C++ algorithms as plug-ins. There are a number of considerations to take into account when deciding which language to choose.
 These are summarised in the table and discussed below. Generally, it is recommended to implement **atomic** operations in C++, and **workflows** in python.
 
+Further documentation for implementing algorithms:
+
+* :ref:`user tutorial for writing a python algorithm <emwp_intro>`
+* :ref:`developer docs for writing a C++ algorithm <WritingAnAlgorithm>`
+
 Algorithm Language Comparison
 -----------------------------
 

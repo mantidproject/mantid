@@ -104,8 +104,6 @@ public:
   std::string name() const override { return "Convolution"; }
   const std::string category() const override { return "General"; }
   /// Function you want to fit to.
-  /// @param domain :: The buffer for writing the calculated values. Must be big
-  /// enough to accept dataSize() values
   void function(const API::FunctionDomain &domain, API::FunctionValues &values) const override;
   void functionFFTMode(const API::FunctionDomain &domain, API::FunctionValues &values) const;
   void functionDirectMode(const API::FunctionDomain &domain, API::FunctionValues &values) const;

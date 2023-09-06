@@ -36,7 +36,6 @@ class SaveHKLCW(PythonAlgorithm):
         self.declareProperty("DirectionCosines", False, direction=Direction.Input, doc="If to include the direction cosines output")
 
     def PyExec(self):
-
         peak_ws = self.getProperty("Workspace").value
         outFile = self.getPropertyValue("OutputFile")
         header = self.getProperty("Header").value
@@ -56,16 +55,11 @@ class SaveHKLCW(PythonAlgorithm):
                 f.write(f"{wavelength:.5f}  0   0\n")
 
             if directionCosines:
-                U = peak_ws.sample().getOrientedLattice().getU()
                 for p in peak_ws:
-                    ki_n = p.getReferenceFrame().vecPointingAlongBeam()
-                    R = p.getGoniometerMatrix()
-                    RU = np.dot(R, U)
-                    ki = ki_n * (2 * np.pi / p.getWavelength())
-                    kf_n = ki - p.getQLabFrame()  # direction of scattered wavevector
-                    kf_n = kf_n * (1.0 / kf_n.norm())
-                    dir_cos_1 = np.dot(RU.T, -ki_n)  # notice ki direction is reversed
-                    dir_cos_2 = np.dot(RU.T, kf_n)
+                    kr_n = p.getSourceDirectionSampleFrame()
+                    kf_n = p.getDetectorDirectionSampleFrame()
+                    reverse_incident_cos = peak_ws.sample().getOrientedLattice().cosFromDir(kr_n)
+                    scattered_cos = peak_ws.sample().getOrientedLattice().cosFromDir(kf_n)
                     f.write(
                         "{:4.0f}{:4.0f}{:4.0f}{:8.2f}{:8.2f}{:4d}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}{:8.5f}\n".format(
                             p.getH(),
@@ -74,12 +68,12 @@ class SaveHKLCW(PythonAlgorithm):
                             p.getIntensity(),
                             p.getSigmaIntensity(),
                             1,
-                            dir_cos_1[0],
-                            dir_cos_2[0],
-                            dir_cos_1[1],
-                            dir_cos_2[1],
-                            dir_cos_1[2],
-                            dir_cos_2[2],
+                            reverse_incident_cos[0],
+                            scattered_cos[0],
+                            reverse_incident_cos[1],
+                            scattered_cos[1],
+                            reverse_incident_cos[2],
+                            scattered_cos[2],
                         )
                     )
             else:

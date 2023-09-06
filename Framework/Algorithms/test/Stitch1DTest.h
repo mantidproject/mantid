@@ -13,6 +13,7 @@
 #include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramDx.h"
@@ -32,6 +33,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using Mantid::Algorithms::Stitch1D;
+using Mantid::DataObjects::WorkspaceSingleValue;
+using Mantid::DataObjects::WorkspaceSingleValue_sptr;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::HistogramDx;
 using Mantid::HistogramData::HistogramE;
@@ -326,6 +329,7 @@ public:
     alg.setProperty("LHSWorkspace", point_ws_1);
     alg.setProperty("RHSWorkspace", point_ws_2);
     alg.setPropertyValue("OutputWorkspace", "dummy_value");
+    alg.setPropertyValue("OutputScalingWorkspace", "scaling_workspace");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
     double scaleFactor = alg.getProperty("OutScaleFactor");
@@ -337,6 +341,12 @@ public:
     TS_ASSERT_EQUALS(stitched->y(0).rawData(), y_values);
     const std::vector<double> dx_values{3., 9., 2., 9., 1., 9.};
     TS_ASSERT_EQUALS(stitched->dx(0).rawData(), dx_values);
+    // Check the single value workspace is correct
+    WorkspaceSingleValue_sptr singleWs =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceSingleValue>("scaling_workspace");
+    TS_ASSERT_DELTA(singleWs->x(0)[0], 0.0, 1e-08);
+    TS_ASSERT_DELTA(singleWs->y(0)[0], 1. / 3., 1e-08);
+    TS_ASSERT_DELTA(singleWs->e(0)[0], 0.175682092, 1e-08);
   }
 
   void test_point_data_without_dx() {

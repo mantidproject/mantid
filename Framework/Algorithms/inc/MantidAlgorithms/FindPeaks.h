@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
@@ -47,7 +47,7 @@ namespace Algorithms {
     @date 25/11/2008
 */
 
-class MANTID_ALGORITHMS_DLL FindPeaks : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL FindPeaks : public API::Algorithm {
 public:
   /// Constructor
   FindPeaks();

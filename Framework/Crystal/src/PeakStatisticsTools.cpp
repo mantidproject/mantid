@@ -132,13 +132,15 @@ UniqueReflectionCollection::UniqueReflectionCollection(const UnitCell &cell, con
 /// the reflection family can not be found are ignored.
 void UniqueReflectionCollection::addObservations(const std::vector<Peak> &peaks) {
   for (auto const &peak : peaks) {
-    V3D hkl = peak.getHKL();
-    hkl.round();
+    V3D hkl = peak.getIntHKL();
+    V3D mnp = peak.getIntMNP();
 
-    auto reflection = m_reflections.find(m_pointgroup->getReflectionFamily(hkl));
+    if (mnp.norm2() == 0.0) {
+      auto reflection = m_reflections.find(m_pointgroup->getReflectionFamily(hkl));
 
-    if (reflection != m_reflections.end()) {
-      (*reflection).second.addPeak(peak);
+      if (reflection != m_reflections.end()) {
+        (*reflection).second.addPeak(peak);
+      }
     }
   }
 }

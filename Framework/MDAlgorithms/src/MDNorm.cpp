@@ -809,8 +809,6 @@ void MDNorm::createBackgroundNormalizationWS(const DataObjects::MDHistoWorkspace
  * as the input binning parameters
  * @param parameters :: map of binning parameters
  * @param tempDataWS :: the workspace weare using to aggregate from
- * @return :: bool - true means the binning is correct to aggreagete using
- * tempDataWS
  */
 void MDNorm::validateBinningForTemporaryDataWorkspace(const std::map<std::string, std::string> &parameters,
                                                       const Mantid::API::IMDHistoWorkspace_sptr &tempDataWS) {

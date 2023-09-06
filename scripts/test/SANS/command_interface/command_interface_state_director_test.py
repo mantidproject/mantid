@@ -31,7 +31,7 @@ class CommandInterfaceStateDirectorTest(unittest.TestCase):
     def _assert_raises_nothing(self, func, parameter):
         try:
             func(parameter)
-        except:  # noqa
+        except:
             self.fail()
 
     def test_can_set_commands_without_exceptions(self):

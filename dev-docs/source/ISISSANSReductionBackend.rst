@@ -646,7 +646,7 @@ In fact, the dictionary maps from enum-like classes, defined in *settings_tags.p
 a list of settings. The settings can be simple values, lists, dictionaries or *named_tuples* defined
 in *settings_tags.py*.
 
-Note that the naming of a large chunk of the the enum-like classes in *settings_tags.py*
+Note that the naming of a large chunk of the enum-like classes in *settings_tags.py*
 was driven by the corresponding name in the user file definition. We can consider
 changing the naming in the future. Also note that some settings only allow one value,
 which means that the director which uses these settings will use the last value in the list.
@@ -690,7 +690,7 @@ The relevant builder is chosen via the factory method *def get_scale_builder(dat
 where *data_info* is an object of type *StateData*. The resulting *StateScaleBuilder* allows
 for setting the parameters on the state object which is currently being built. Via the
 *automatic_setters* decorator it provides setter methods which forward to the state which is currently built.
-The name of the the setters is *set_PARAMTERNAME* for a given parameter name on the state.
+The name of the setters is *set_PARAMTERNAME* for a given parameter name on the state.
 The advantage of the decorator is that we can exclude access to parameters of the state which
 are automatically set by the builder.
 
@@ -702,7 +702,7 @@ are automatically set by the builder.
         ...
 
 In the *exclusions* input we can specify parameters which should not receive a setter.
-Note the the first input of the decorator is the state class which is being constructed by
+Note the first input of the decorator is the state class which is being constructed by
 the builder.
 
 

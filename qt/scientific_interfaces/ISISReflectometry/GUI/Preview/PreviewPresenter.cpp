@@ -116,24 +116,26 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
     m_view->setAngle(*theta);
   }
 
-  if (hasLinearDetector(ws)) {
-    m_dockedWidgets->resetInstView();
-    m_dockedWidgets->setInstViewToolbarEnabled(false);
-    m_model->setSummedWs(ws);
-    notifySumBanksCompleted();
-  } else {
-    // Notify the instrument view model that the workspace has changed before we get the surface
-    m_instViewModel->updateWorkspace(ws);
-    plotInstView();
-    // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
-    m_dockedWidgets->setInstViewToolbarEnabled(true);
-    notifyInstViewZoomRequested();
-    // Perform summing banks to update the next plot, if possible
-    runSumBanks();
-  }
+  auto const runTitle = ws->getTitle();
+  m_view->setTitle(runTitle);
+
+  // Clear the region selector to ensure all spectra are shown.
+  m_regionSelector->clearWorkspace();
+
+  // Notify the instrument view model that the workspace has changed before we get the surface
+  m_instViewModel->updateWorkspace(ws);
+  plotInstView();
+  // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
+  m_dockedWidgets->setInstViewToolbarEnabled(true);
+  notifyInstViewZoomRequested();
+  // Perform summing banks to update the next plot, if possible
+  runSumBanks();
 }
 
-void PreviewPresenter::notifyUpdateAngle() { runReduction(); }
+void PreviewPresenter::notifyUpdateAngle() {
+  // Re-run from the sum banks step to ensure the sliceviewer plot is up to date
+  runSumBanks();
+}
 
 void PreviewPresenter::notifySumBanksCompleted() {
   plotRegionSelector();
@@ -186,13 +188,18 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   // Change to shape editing after a selection has been done to match instrument viewer default behaviour
   notifyInstViewEditRequested();
   // Get the masked workspace indices
+  boost::optional<ProcessingInstructions> detIDs = boost::none;
   auto indices = m_instViewModel->detIndicesToDetIDs(m_dockedWidgets->getSelectedDetectors());
-  auto detIDsStr = Mantid::Kernel::Strings::joinCompress(indices.cbegin(), indices.cend(), ",");
+  if (indices.size() > 0) {
+    auto detIDsStr = Mantid::Kernel::Strings::joinCompress(indices.cbegin(), indices.cend(), ",");
+    detIDs = ProcessingInstructions{detIDsStr};
+  }
 
-  if (detIDsStr == m_model->getSelectedBanks()) {
+  if (detIDs == m_model->getSelectedBanks()) {
     return;
   }
-  m_model->setSelectedBanks(ProcessingInstructions{detIDsStr});
+
+  m_model->setSelectedBanks(detIDs);
   // Execute summing the selected banks
   runSumBanks();
 }
@@ -210,7 +217,7 @@ void PreviewPresenter::notifyRectangularROIModeRequested() {
   auto const roiType = roiTypeFromString(regionType);
   m_dockedWidgets->setEditROIState(false);
   m_dockedWidgets->setRectangularROIState(true);
-  m_regionSelector->addRectangularRegion(regionType, roiTypeToColor(roiType));
+  m_regionSelector->addRectangularRegion(regionType, roiTypeToColor(roiType), roiTypeToHatch(roiType));
 }
 
 void PreviewPresenter::notifyRegionChanged() {
@@ -278,9 +285,29 @@ void PreviewPresenter::plotLinePlot() {
   m_plotPresenter->plot();
 }
 
-void PreviewPresenter::runSumBanks() { m_model->sumBanksAsync(*m_jobManager); }
+void PreviewPresenter::runSumBanks() {
+  if (!m_model->getLoadedWs()) {
+    g_log.error("Unable to perform sum banks step because there is no run loaded");
+    return;
+  }
+
+  // Ensure the angle is up to date so that we can check for matching experiment settings lookup rows
+  m_model->setTheta(m_view->getAngle());
+
+  if (!m_model->getSelectedBanks().has_value() && !m_mainPresenter->hasROIDetectorIDsForPreviewRow()) {
+    // Do not sum the workspace if no detector IDs have been selected
+    m_model->setSummedWs(m_model->getLoadedWs());
+    notifySumBanksCompleted();
+  } else {
+    m_model->sumBanksAsync(*m_jobManager);
+  }
+}
 
 void PreviewPresenter::runReduction() {
+  if (!m_model->getLoadedWs()) {
+    g_log.error("Unable to perform preview reduction because there is no run loaded");
+    return;
+  }
   m_view->disableMainWidget();
   m_view->setUpdateAngleButtonEnabled(false);
   // Ensure the angle is up to date

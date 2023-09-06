@@ -457,7 +457,6 @@ void GeneratePeaks::generatePeaks(
 
 //----------------------------------------------------------------------------------------------
 /** Create a function for fitting.
- *  @return The requested function to fit
  */
 void GeneratePeaks::createFunction(std::string &peaktype, std::string &bkgdtype) {
   // Create peak function

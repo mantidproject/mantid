@@ -221,7 +221,13 @@ public:
     TimeSeriesProperty<double> *pclog = dynamic_cast<TimeSeriesProperty<double> *>(run.getLogData("proton_charge"));
     TS_ASSERT(pclog);
     TS_ASSERT_EQUALS(pclog->size(), 23806);
-    TS_ASSERT(pclog->getStatistics().duration > 4e9);
+    // interesting behavior shown
+    // last time in seconds is 4.29497e+09 which is 2147-Oct-11 03:51:09
+    // but the maximum DateAndTime to be represented is 2136-Feb-20 23:53:38.427387903
+    // so the final time in the log ends up being DateAndTime::maximum()
+    const double DURATION_EXP =
+        DateAndTime::secondsFromDuration(DateAndTime::maximum() - DateAndTime("2011-Sep-03 21:22:53"));
+    TS_ASSERT_EQUALS(pclog->getStatistics().duration, DURATION_EXP);
 
     // 3rd entry On-Off
     testWS = createTestWorkspace();

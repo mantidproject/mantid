@@ -54,7 +54,6 @@ public:
   /// Virtual copy constructor
   std::shared_ptr<IFunction> clone() const override;
   /// Set the workspace.
-  /// @param ws :: Shared pointer to a workspace
   void setWorkspace(std::shared_ptr<const Workspace> ws) override;
 
   void function(const FunctionDomain &domain, FunctionValues &values) const override;

@@ -13,9 +13,9 @@ import numpy
 
 sys.path.append("..")
 # the following matplotlib imports cannot be placed before the setting of the backend, so we ignore flake8 warnings
-from mantidqt.MPLwidgets import *  # noqa
-from matplotlib.figure import Figure  # noqa
-from mpl_toolkits.mplot3d import Axes3D  # noqa
+from mantidqt.MPLwidgets import *
+from matplotlib.figure import Figure
+from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot  # noqa
 
 try:
@@ -177,6 +177,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
             "CHESS",
             "CNCS",
             "DNS",
+            "DEMAND",
             "EXED",
             "FOCUS",
             "HET",
@@ -367,30 +368,43 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         d = dict()
         self.instrument = text
         d["instrument"] = str(self.instrument)
-        if self.instrument in ["HYSPEC", "EXED", "WAND\u00B2"]:
+        if self.instrument in ["HYSPEC", "EXED", "DEMAND", "WAND\u00B2"]:
             self.labelS2.show()
             self.editS2.show()
         else:
             self.labelS2.hide()
             self.editS2.hide()
 
-        if self.instrument in ["WAND\u00B2"]:
+        if self.instrument in ["DEMAND", "WAND\u00B2"]:
             self.labelDetZ.show()
             self.editDetZ.show()
             self.setLabelEi("Wavelength")
-            self.setEiVal(str(1.488))
-            self.goniometerNames = ["s1", "sgl", "sgu"]
-            self.goniometerDirections = ["0,1,0", "1,0,0", "0,0,1"]
-            self.goniometerRotationSense = [1, -1, -1]
+            if self.instrument == "DEMAND":
+                self.setDetZVal(str(410.258))
+                self.setLabelDetZ("DetTrans")
+                self.setEiVal(str(1.542))
+                self.goniometerNames = ["omega", "chi", "phi"]
+                self.goniometerDirections = ["0,1,0", "0,0,1", "0,1,0"]
+                self.goniometerRotationSense = [-1, -1, -1]
+            else:
+                self.setDetZVal(str(0.0))
+                self.setLabelDetZ("DetZ")
+                self.setEiVal(str(1.488))
+                self.goniometerNames = ["s1", "sgl", "sgu"]
+                self.goniometerDirections = ["0,1,0", "1,0,0", "0,0,1"]
+                self.goniometerRotationSense = [1, -1, -1]
         else:
             self.labelDetZ.hide()
             self.editDetZ.hide()
             self.setLabelEi("Incident Energy")
             self.setEiVal(str(10.0))
-            # d['gonioLabels']=['psi','gl','gs']
             self.goniometerNames = ["psi", "gl", "gs"]
             self.goniometerDirections = ["0,1,0", "0,0,1", "1,0,0"]
             self.goniometerRotationSense = [1, 1, 1]
+
+        d["gonioLabels"] = self.goniometerNames
+        d["gonioDirs"] = self.goniometerDirections
+        d["gonioSenses"] = self.goniometerRotationSense
 
         self.updateAll(**d)
         self.updateTable()
@@ -422,6 +436,14 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.Ei = float(val)
         self.editEi.setText(val)
         self.updateAll(Ei=float(val))
+
+    def setLabelDetZ(self, newLabel):
+        self.labelDetZ.setText(newLabel)
+
+    def setDetZVal(self, val):
+        self.DetZ = float(val)
+        self.editDetZ.setText(val)
+        self.updateAll(DetZ=float(val))
 
     def getInstrumentComboBox(self):
         return self.combo

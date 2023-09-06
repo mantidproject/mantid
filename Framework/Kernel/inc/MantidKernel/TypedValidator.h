@@ -116,7 +116,7 @@ private:
     return typedValue;
   }
   /**
-   * Extract the the shared_ptr value type
+   * Extract the shared_ptr value type
    * @param value :: The value
    * @returns The concrete type
    */

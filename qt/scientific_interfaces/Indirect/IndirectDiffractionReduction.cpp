@@ -47,7 +47,7 @@ void IndirectDiffractionReduction::initLayout() {
   m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
   m_plotOptionsPresenter =
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra, "0");
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraUnit, "0");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
@@ -413,10 +413,12 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   // and stop if unable to parse correctly.
   QString drangeWsName;
   QString tofWsName;
+  QString qWsName;
   try {
     QString nameBase = QString::fromStdString(Mantid::Kernel::MultiFileNameParsing::suggestWorkspaceName(stlFileNames));
     tofWsName = nameBase + "_tof";
     drangeWsName = nameBase + "_dRange";
+    qWsName = nameBase + "_q";
   } catch (std::runtime_error &re) {
     g_log.error(re.what());
     return;
@@ -445,15 +447,25 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   auto inputFromReductionProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   inputFromReductionProps->setPropertyValue("InputWorkspace", drangeWsName.toStdString());
 
-  IAlgorithm_sptr convertUnits = AlgorithmManager::Instance().create("ConvertUnits");
-  convertUnits->initialize();
-  convertUnits->setProperty("OutputWorkspace", tofWsName.toStdString());
-  convertUnits->setProperty("Target", "TOF");
-  m_batchAlgoRunner->addAlgorithm(convertUnits, std::move(inputFromReductionProps));
+  IAlgorithm_sptr tofConvertUnits = AlgorithmManager::Instance().create("ConvertUnits");
+  tofConvertUnits->initialize();
+  tofConvertUnits->setProperty("OutputWorkspace", tofWsName.toStdString());
+  tofConvertUnits->setProperty("Target", "TOF");
+  m_batchAlgoRunner->addAlgorithm(tofConvertUnits, std::move(inputFromReductionProps));
+
+  inputFromReductionProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  inputFromReductionProps->setPropertyValue("InputWorkspace", drangeWsName.toStdString());
+
+  IAlgorithm_sptr qConvertUnits = AlgorithmManager::Instance().create("ConvertUnits");
+  qConvertUnits->initialize();
+  qConvertUnits->setProperty("OutputWorkspace", qWsName.toStdString());
+  qConvertUnits->setProperty("Target", "QSquared");
+  m_batchAlgoRunner->addAlgorithm(qConvertUnits, std::move(inputFromReductionProps));
 
   m_plotWorkspaces.clear();
   m_plotWorkspaces.emplace_back(tofWsName.toStdString());
   m_plotWorkspaces.emplace_back(drangeWsName.toStdString());
+  m_plotWorkspaces.emplace_back(qWsName.toStdString());
 
   // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
@@ -797,10 +809,10 @@ void IndirectDiffractionReduction::runFilesFound() {
 void IndirectDiffractionReduction::manualGroupingToggled(int state) {
   switch (state) {
   case Qt::Unchecked:
-    m_plotOptionsPresenter->setPlotType(PlotWidget::Spectra);
+    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraUnit);
     break;
   case Qt::Checked:
-    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraContour);
+    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraContourUnit);
     break;
   default:
     return;

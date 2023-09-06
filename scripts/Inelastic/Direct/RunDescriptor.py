@@ -14,7 +14,7 @@ from mantid.dataobjects import *
 from mantid.kernel import funcinspect
 from Direct.PropertiesDescriptors import *
 import re
-import collections
+import collections.abc
 
 
 class RunList(object):
@@ -485,7 +485,7 @@ class RunDescriptor(PropDescriptor):
                     self._set_run_list(instance, run_num, file_path, fext)
                 else:
                     self._set_single_run(instance, run_num, file_path, fext)
-        elif isinstance(value, collections.Iterable):  # xrange provided
+        elif isinstance(value, collections.abc.Iterable):  # xrange provided
             value = list(value)
             self._set_run_list(instance, value, "", None)
         else:
@@ -536,7 +536,6 @@ class RunDescriptor(PropDescriptor):
                         self._fext = fext
 
     def _set_run_list(self, instance, run_list, file_path=None, fext=None):
-
         if self._run_list and self._run_list.check_runs_equal(run_list, file_path, fext):
             return
         else:
@@ -956,7 +955,6 @@ class RunDescriptor(PropDescriptor):
         spec_to_mon = RunDescriptor._holder.spectra_to_monitors_list
         combined_spec_list = prop_helpers.process_prop_list(mon_ws, "CombinedSpectraIDList")
         if monitors_separate and spec_to_mon:
-
             for specID in spec_to_mon:
                 if specID not in combined_spec_list:
                     mon_ws = self.copy_spectrum2monitors(data_ws, mon_ws, specID)
@@ -967,14 +965,14 @@ class RunDescriptor(PropDescriptor):
         if monitors_ID:
 
             def flatten_list(targ_list, source):
-                if isinstance(source, collections.Iterable):
+                if isinstance(source, collections.abc.Iterable):
                     for item in source:
                         targ_list = flatten_list(targ_list, item)
                 else:
                     targ_list.append(source)
                 return targ_list
 
-            if isinstance(monitors_ID, collections.Iterable):
+            if isinstance(monitors_ID, collections.abc.Iterable):
                 mon_list = []
                 mon_list = flatten_list(mon_list, monitors_ID)
             else:
@@ -1514,7 +1512,6 @@ class RunDescriptor(PropDescriptor):
         # end
 
         for ind, run_num in enumerate(runs_to_sum[load_start:num_to_sum]):
-
             RunDescriptor._logger("*** Adding  #{0}/{1}, run N: {2} ".format(ind + 1 + load_start, num_to_sum, run_num))
 
             term_name = "{0}_ADDITIVE_#{1}/{2}".format(inst_name, ind + 1 + load_start, num_to_sum)  #

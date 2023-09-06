@@ -232,7 +232,7 @@ private:
    * @details The QLab vector of the events are shifted by the QLab vector
    * of the peak. Spatial distribution of the events in QLab space is
    * described with principal axes of the ellipsoid, as well as the
-   * standard deviations in the the directions of the principal axes.
+   * standard deviations in the directions of the principal axes.
    * @param E1Vec : Vector of values for calculating edge of detectors
    * @param peak_q : The Q-vector for the peak center.
    * @param ev_list : List of events centered around the peak (here with

@@ -27,5 +27,6 @@ public:
   MOCK_METHOD(double, getAngle, (), (const, override));
   MOCK_METHOD(void, setAngle, (double), (override));
   MOCK_METHOD(void, setUpdateAngleButtonEnabled, (bool), (override));
+  MOCK_METHOD(void, setTitle, (const std::string &), (override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -69,7 +69,7 @@ public:
   bool isFunct() const { return !m_terms.empty(); }
   /// Returns the name of the expression which is a function or variable name.
   std::string name() const { return m_funct; }
-  /// Returns the the expression's binary operator on its left. Can be an empty
+  /// Returns the expression's binary operator on its left. Can be an empty
   /// string.
   std::string operator_name() const { return m_op; }
   /// Returns the top level terms of the expression (function arguments). For a

@@ -14,6 +14,7 @@ from mantidqt.MPLwidgets import FigureCanvas
 from .EngDiff_fitpropertybrowser import EngDiffFitPropertyBrowser
 from workbench.plotting.toolbar import ToolbarStateManager
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_toolbar import FittingPlotToolbar
+from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 
 Ui_plot, _ = load_ui(__file__, "plot_widget.ui")
 
@@ -78,6 +79,10 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.fit_browser.removePropertiesFromSettingsBrowser(hide_props)
         self.fit_browser.toggleWsListVisible()
         self.fit_browser.closing.connect(self.toolbar.handle_fit_browser_close)
+
+        fit_enabled_observer = GenericObserverWithArgPassing(self.set_sequential_serial_fit_enabled)
+        self.fit_browser.fit_enabled_notifier.add_subscriber(fit_enabled_observer)
+
         self.vLayout_fitprop.addWidget(self.fit_browser)
         self.hide_fit_browser()
         self.hide_fit_progress_bar()
@@ -127,6 +132,12 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
 
     def set_slot_for_display_all(self):
         self.toolbar.sig_home_clicked.connect(self.display_all)
+
+    def set_slot_for_serial_fit(self, presenter_func):
+        self.toolbar.sig_serial_fit_clicked.connect(presenter_func)
+
+    def set_slot_for_seq_fit(self, presenter_func):
+        self.toolbar.sig_seq_fit_clicked.connect(presenter_func)
 
     def show_cancel_button(self, show: bool):
         self.cancel_button.setVisible(show)
@@ -224,6 +235,10 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
             if "success" in status.lower():
                 self.fit_browser.loadFunction(func_str)
                 self.fit_browser.save_current_setup(setup_name)
+
+    def set_sequential_serial_fit_enabled(self, fit_enabled):
+        self.toolbar.set_action_enabled("Serial Fit", fit_enabled)
+        self.toolbar.set_action_enabled("Sequential Fit", fit_enabled)
 
     # =================
     # Component Getters

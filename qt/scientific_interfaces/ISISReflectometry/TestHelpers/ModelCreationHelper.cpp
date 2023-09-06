@@ -5,12 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ModelCreationHelper.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include <utility>
 
 #include "../../ISISReflectometry/Reduction/Batch.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper {
+
+using namespace Mantid::API;
 
 namespace { // unnamed
 Row makeRowWithOutputNames(std::vector<std::string> const &outputNames) {
@@ -476,8 +480,25 @@ Instrument makeEmptyInstrument() {
 
 /* Preview */
 
-PreviewRow makePreviewRow(std::vector<std::string> const &runNumbers, double theta) {
+PreviewRow makePreviewRow(const double theta) {
+  const std::string title = "";
+  auto row = makePreviewRow(theta, title);
+  return row;
+}
+
+PreviewRow makePreviewRow(std::vector<std::string> const &runNumbers, const double theta) {
   auto row = PreviewRow(runNumbers);
+  row.setTheta(theta);
+  return row;
+}
+
+PreviewRow makePreviewRow(const double theta, const std::string &title) {
+  MatrixWorkspace_sptr loadedWS =
+      std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
+  loadedWS->setTitle(title);
+
+  auto row = PreviewRow(std::vector<std::string>{"12345"});
+  row.setLoadedWs(loadedWS);
   row.setTheta(theta);
   return row;
 }

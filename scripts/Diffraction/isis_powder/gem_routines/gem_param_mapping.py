@@ -61,5 +61,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="user_name", int_name="user_name"),
     ParamMapEntry(ext_name="vanadium_cropping_values", int_name="vanadium_cropping_values"),
     ParamMapEntry(ext_name="vanadium_normalisation", int_name="do_van_norm"),
+    ParamMapEntry(ext_name="keep_raw_workspace", int_name="keep_raw_workspace", optional=True),
+    ParamMapEntry(ext_name="mayers_mult_scat_events", int_name="mayers_mult_scat_events", optional=True),
 ]
 attr_mapping.extend(COMMON_PARAM_MAPPING)

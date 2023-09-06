@@ -31,7 +31,6 @@ def add_missing_elements(from_list, to_list):
 
 
 class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
-
     _chopped_data = None
     _data_files = None
     _load_logs = None
@@ -85,13 +84,13 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(
             name="Analyser",
             defaultValue="",
-            validator=StringListValidator(["graphite", "mica", "fmica"]),
+            validator=StringListValidator(["graphite", "mica", "fmica", "silicon"]),
             doc="Analyser bank used during run.",
         )
         self.declareProperty(
             name="Reflection",
             defaultValue="",
-            validator=StringListValidator(["002", "004", "006"]),
+            validator=StringListValidator(["002", "004", "006", "111", "333"]),
             doc="Reflection number for instrument setup during run.",
         )
 

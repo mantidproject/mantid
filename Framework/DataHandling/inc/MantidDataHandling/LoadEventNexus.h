@@ -115,16 +115,7 @@ public:
   static void loadEntryMetadata(const std::string &nexusfilename, T WS, const std::string &entry_name,
                                 const Kernel::NexusHDF5Descriptor &descriptor);
 
-  /**
-   * Load instrument from Nexus file if possible, else from IDF spacified by
-   * Nexus file
-   * @param nexusfilename input nexus file name
-   * @param localWorkspace input
-   * @param top_entry_name e.g. /entry
-   * @param alg input algorithm executing this task
-   * @param descriptor input descriptor
-   * @return true: success, false: failure
-   */
+  /// Load instrument from Nexus file if possible, else from IDF spacified by Nexus file
   template <typename T>
   static bool loadInstrument(const std::string &nexusfilename, T localWorkspace, const std::string &top_entry_name,
                              Algorithm *alg, const Kernel::NexusHDF5Descriptor *descriptor = nullptr);
@@ -134,15 +125,7 @@ public:
   static bool runLoadIDFFromNexus(const std::string &nexusfilename, T localWorkspace, const std::string &top_entry_name,
                                   Algorithm *alg);
 
-  /**
-   * Load instrument from IDF file specified by Nexus file
-   * @param nexusfilename input nexus file name
-   * @param localWorkspace input
-   * @param top_entry_name e.g. /entry
-   * @param alg input algorithm executing this task
-   * @param descriptor input descriptor
-   * @return true: success, false: failure
-   */
+  /// Load instrument from IDF file specified by Nexus file
   template <typename T>
   static bool runLoadInstrument(const std::string &nexusfilename, T localWorkspace, const std::string &top_entry_name,
                                 Algorithm *alg, const Kernel::NexusHDF5Descriptor *descriptor = nullptr);
@@ -198,10 +181,6 @@ public:
   /// name of top level NXentry to use
   std::string m_top_entry_name;
   std::unique_ptr<::NeXus::File> m_file;
-
-protected:
-  Parallel::ExecutionMode
-  getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const override;
 
 private:
   /// Possible loaders types
@@ -482,6 +461,7 @@ void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace, const s
  *geometry
  *  @param top_entry_name :: entry name at the top of the NXS file
  *  @param alg :: Handle of the algorithm
+ *  @param descriptor :: The Nexus HDF5 file descriptor
  *  @return true if successful
  */
 template <typename T>
@@ -745,6 +725,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
  *instrument geometry
  *  @param top_entry_name :: entry name at the top of the Nexus file
  *  @param alg :: Handle of the algorithm
+ *  @param descriptor :: The Nexus HDF5 file descriptor
  *  @return true if successful
  */
 template <typename T>

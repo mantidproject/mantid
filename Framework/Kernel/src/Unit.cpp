@@ -14,6 +14,7 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include <cfloat>
 #include <limits>
+#include <math.h>
 #include <sstream>
 
 namespace Mantid::Kernel {
@@ -548,6 +549,26 @@ double Energy_inWavenumber::singleFromTOF(const double tof) const {
 
 Unit *Energy_inWavenumber::clone() const { return new Energy_inWavenumber(*this); }
 
+// used in calculate of DIFC
+const double NEUTRON_MASS_OVER_H = (PhysicalConstants::NeutronMass * 1e6) / (PhysicalConstants::h * 1e10);
+
+/**
+ * Calculate DIFC in case of logarithmic binning, used in CalculateDIFC with Signed mode
+ * @param l1
+ * @param l2
+ * @param twotheta scattering angle
+ * @param offset
+ * @param binWidth the bin width used in logarithmic binning (DX)
+ * Will calculate the value of DIFC following
+ *   DIFC = (mn/h) * (L1+L2) * 2sin(theta) * (1 + |DX|)^{-offset}
+ */
+double calculateDIFCCorrection(const double l1, const double l2, const double twotheta, const double offset,
+                               const double binWidth) {
+  const double sinTheta = std::sin(twotheta / 2.0);
+  const double newDIFC = NEUTRON_MASS_OVER_H * (l1 + l2) * 2.0 * sinTheta * pow((1.0 + fabs(binWidth)), -1.0 * offset);
+  return newDIFC;
+}
+
 // ==================================================================================================
 /* D-SPACING
  * ==================================================================================================
@@ -555,7 +576,7 @@ Unit *Energy_inWavenumber::clone() const { return new Energy_inWavenumber(*this)
  * Conversion uses Bragg's Law: 2d sin(theta) = n * lambda
  */
 
-const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
+const double H_OVER_NEUTRON_MASS = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
 /**
  * Calculate and return conversion factor from tof to d-spacing.
@@ -578,7 +599,7 @@ double tofToDSpacingFactor(const double l1, const double l2, const double twoThe
   const double numerator = (1.0 + offset);
   sinTheta *= (l1 + l2);
 
-  return (numerator * CONSTANT) / sinTheta;
+  return (numerator * H_OVER_NEUTRON_MASS) / sinTheta;
 }
 
 DECLARE_UNIT(dSpacing)
@@ -594,17 +615,17 @@ const UnitLabel dSpacing::label() const { return Symbol::Angstrom; }
 Unit *dSpacing::clone() const { return new dSpacing(*this); }
 
 void dSpacing::validateUnitParams(const int, const UnitParametersMap &params) {
-  double difc = 0.;
-  if (ParamPresentAndSet(&params, UnitParams::difc, difc)) {
+  double difc_set = 0.;
+  if (ParamPresentAndSet(&params, UnitParams::difc, difc_set)) {
     // check validations only applicable to fromTOF
     toDSpacingError = "";
-    double difa = 0.;
-    ParamPresentAndSet(&params, UnitParams::difa, difa);
-    if ((difa == 0) && (difc == 0)) {
+    double difa_set = 0.;
+    ParamPresentAndSet(&params, UnitParams::difa, difa_set);
+    if ((difa_set == 0) && (difc_set == 0)) {
       toDSpacingError = "Cannot convert to d spacing with DIFA=0 and DIFC=0";
     };
     // singleFromTOF currently assuming difc not negative
-    if (difc < 0.) {
+    if (difc_set < 0.) {
       toDSpacingError = "A positive difc value must be supplied in the extra parameters when "
                         "initialising " +
                         this->unitID() + " for conversion via TOF";
@@ -843,8 +864,8 @@ MomentumTransfer::MomentumTransfer() : Unit() {
 }
 
 void MomentumTransfer::validateUnitParams(const int, const UnitParametersMap &params) {
-  double difc = 0.;
-  if (!ParamPresentAndSet(&params, UnitParams::difc, difc)) {
+  double difc_set = 0.;
+  if (!ParamPresentAndSet(&params, UnitParams::difc, difc_set)) {
     if (!ParamPresent(params, UnitParams::twoTheta) || (!ParamPresent(params, UnitParams::l2)))
       throw std::runtime_error("A difc value or L2/two theta must be supplied "
                                "in the extra parameters when initialising " +
@@ -923,15 +944,15 @@ void DeltaE::validateUnitParams(const int emode, const UnitParametersMap &params
     throw std::invalid_argument("emode must be equal to 1 or 2 for energy transfer calculation");
   }
   // Efixed must be set to something
-  double efixed;
-  if (!ParamPresentAndSet(&params, UnitParams::efixed, efixed)) {
+  double efixed_set;
+  if (!ParamPresentAndSet(&params, UnitParams::efixed, efixed_set)) {
     if (emode == 1) { // direct, efixed=ei
       throw std::invalid_argument("efixed must be set for energy transfer calculation");
     } else {
       throw std::runtime_error("efixed must be set for energy transfer calculation");
     }
   }
-  if (efixed <= 0) {
+  if (efixed_set <= 0) {
     throw std::runtime_error("efixed must be greater than zero");
   }
   if (!ParamPresent(params, UnitParams::l2)) {

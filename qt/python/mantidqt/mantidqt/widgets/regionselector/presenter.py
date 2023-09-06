@@ -28,9 +28,9 @@ class Selector(RectangleSelector):
         "interactive": True,
     }
 
-    def __init__(self, region_type: str, color: str, *args):
-        self.kwargs["props"] = dict(facecolor="white", edgecolor=color, alpha=0.2, linewidth=2, fill=True)
-        self.kwargs["handle_props"] = dict(markersize=4)
+    def __init__(self, region_type: str, color: str, hatch: str, *args):
+        self.kwargs["props"] = dict(facecolor=color, edgecolor=color, alpha=0.4, hatch=hatch, linewidth=3, fill=True)
+        self.kwargs["handle_props"] = dict(markersize=6)
         self.kwargs["drag_from_anywhere"] = True
         self.kwargs["ignore_event_outside"] = True
 
@@ -123,7 +123,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         if not self.model.ws:
             self._initialise_dimensions(workspace)
 
-        self._set_workspace(workspace)
+        self._set_workspace(workspace, True)
 
     def cancel_drawing_region(self):
         """
@@ -133,7 +133,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
             self._selectors.pop()
             self._drawing_region = False
 
-    def add_rectangular_region(self, region_type, color):
+    def add_rectangular_region(self, region_type: str, color: str, hatch: str):
         """
         Add a rectangular region selection tool.
         """
@@ -143,7 +143,7 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         if self._drawing_region:
             self._selectors.pop()
 
-        self._selectors.append(Selector(region_type, color, self.view._data_view.ax, self._on_rectangle_selected))
+        self._selectors.append(Selector(region_type, color, hatch, self.view._data_view.ax, self._on_rectangle_selected))
 
         self._drawing_region = True
 
@@ -159,10 +159,12 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
         self.view.create_dimensions(dims_info=Dimensions.get_dimensions_info(workspace))
         self.view.create_axes_orthogonal(redraw_on_zoom=not WorkspaceInfo.can_support_dynamic_rebinning(workspace))
 
-    def _set_workspace(self, workspace):
+    def _set_workspace(self, workspace, show_all_data=False):
         self.model.ws = workspace
         self.view.set_workspace(workspace)
         self.new_plot()
+        if show_all_data:
+            self.show_all_data_clicked()
 
     def _on_rectangle_selected(self, eclick, erelease):
         """
@@ -213,3 +215,6 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
     def get_extra_image_info_columns(self, xdata, ydata):
         return {}
+
+    def is_integer_frame(self):
+        return False, False

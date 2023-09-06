@@ -42,6 +42,9 @@ Output:
     Peak in dSpace 2.6...
     Peak from calibration 2.6...
 
+.. testcleanup:: ExDiffractionEventCalibrateDetectors
+
+    os.remove(os.path.join(config["defaultsave.directory"], 'Test.DetCal'))
 
 .. categories::
 

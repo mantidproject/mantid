@@ -37,6 +37,10 @@ public:
   virtual void createWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
   virtual void scaleX(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
   virtual void rebunch(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
+
+  // The algorithms used for fitting the extracted Out of plane angle workspace
+  virtual void cropWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
+  virtual void fit(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) = 0;
 };
 
 class MANTIDQT_DIRECT_DLL ALFAlgorithmManager final : public IALFAlgorithmManager, public API::JobRunnerSubscriber {
@@ -59,6 +63,10 @@ public:
   void scaleX(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
   void rebunch(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
 
+  // The algorithms used for fitting the extracted Out of plane angle workspace
+  void cropWorkspace(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
+  void fit(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
+
   void notifyBatchComplete(bool error) override { (void)error; };
   void notifyBatchCancelled() override{};
   void notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr &algorithm) override { (void)algorithm; };
@@ -79,6 +87,9 @@ private:
   void notifyCreateWorkspaceComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
   void notifyScaleXComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
   void notifyRebunchComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
+
+  void notifyCropWorkspaceComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
+  void notifyFitComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
 
   std::unique_ptr<API::IJobRunner> m_jobRunner;
   IALFAlgorithmManagerSubscriber *m_subscriber;

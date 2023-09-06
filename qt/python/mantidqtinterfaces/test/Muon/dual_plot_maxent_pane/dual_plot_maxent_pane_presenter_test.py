@@ -158,7 +158,7 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
         self.presenter.clear()
         self.model.clear_data.asseert_called_once_with()
         self.assertEqual(self.presenter._maxent_ws_name, None)
-        self.view.update_selection.aseert_called_once_with([])
+        self.view.update_selection.assert_called_once_with([])
         self.presenter.clear_subplots.assert_called_once_with()
 
     def test_get_plot_type_MHz(self):

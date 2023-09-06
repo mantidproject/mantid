@@ -71,7 +71,7 @@ class SANSBatchReduction(object):
             output_mode is not OutputMode.PUBLISH_TO_ADS
             and output_mode is not OutputMode.SAVE_TO_FILE
             and output_mode is not OutputMode.BOTH
-        ):  # noqa
+        ):
             raise RuntimeError(
                 "The output mode has to be an enum of type OutputMode. The provided type is" " {0}".format(type(output_mode))
             )

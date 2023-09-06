@@ -12,7 +12,7 @@ Description
 
 Performs wavelength polarization correction on a TOF reflectometer spectrometer.
 
-Algorithm is based on the the paper Fredrikze, H, et al. "Calibration of a polarized neutron reflectometer" Physica B 297 (2001).
+Algorithm is based on the paper Fredrikze, H, et al. "Calibration of a polarized neutron reflectometer" Physica B 297 (2001).
 
 Polarizer and Analyzer efficiencies are calculated and used to perform an intensity correction on the input workspace. The input workspace(s) are in units of wavelength
 inverse angstroms.

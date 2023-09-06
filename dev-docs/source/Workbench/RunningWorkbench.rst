@@ -12,10 +12,10 @@ Mantid Workbench is run on two separate Processes. The first process, known as t
 of the two processes are roughly as follows:
 
 - The child process is the process on which the Workbench is opened. If there is a terminating fault that occurs when using the Workbench,
-such as a segmentation fault, this process will exit. Alternatively, a close event triggered by a user will also cause this process to exit.
+  such as a segmentation fault, this process will exit. Alternatively, a close event triggered by a user will also cause this process to exit.
 
 - The responsibility of the parent process is to wait for the child process to exit. When the child process exits, a decision is made whether
-an ErrorReporter window needs to be opened depending on the exit code of the Workbench.
+  an ErrorReporter window needs to be opened depending on the exit code of the Workbench.
 
 A note on debugging
 ###################

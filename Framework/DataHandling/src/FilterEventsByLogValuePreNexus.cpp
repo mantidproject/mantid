@@ -628,7 +628,7 @@ void FilterEventsByLogValuePreNexus::processEventLogs() {
 //----------------------------------------------------------------------------------------------
 /** Add absolute time series to log
  * @param logtitle :: title of the log to be inserted to workspace
- * @param mindex ::  index of the the series in the wrong detectors map
+ * @param mindex ::  index of the series in the wrong detectors map
  */
 void FilterEventsByLogValuePreNexus::addToWorkspaceLog(const std::string &logtitle, size_t mindex) {
   // Create TimeSeriesProperty
@@ -656,7 +656,7 @@ void FilterEventsByLogValuePreNexus::addToWorkspaceLog(const std::string &logtit
 
 //----------------------------------------------------------------------------------------------
 /** Perform statistics to event (wrong pixel ID) logs
- * @param mindex ::  index of the the series in the list
+ * @param mindex ::  index of the series in the list
  */
 void FilterEventsByLogValuePreNexus::doStatToEventLog(size_t mindex) {
   // Create a vector of event log time entries

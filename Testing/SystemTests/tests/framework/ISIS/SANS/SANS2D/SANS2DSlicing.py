@@ -42,7 +42,7 @@ class SANS2DMinimalSingleReductionSliced(SANS2DMinimalBatchReductionSliced):
         i.AssignCan("22023")
         i.TransmissionSample("22041", "22024")
         i.TransmissionCan("22024", "22024")
-        i.SetEventSlices("0.0-450, 5-10")
+        i.SetEventSlices("0.0-451, 5-10")
         reduced = i.WavRangeReduction()
         RenameWorkspace(reduced, OutputWorkspace="trans_test_rear_1D_1.5_12.5")
 

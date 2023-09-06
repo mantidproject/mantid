@@ -8,7 +8,7 @@
 # Dialog to set up HTTP data downloading server and download HB3A data to local
 ##########
 import os
-from qtpy.QtWidgets import QDialog, QFileDialog, QMessageBox  # noqa
+from qtpy.QtWidgets import QDialog, QFileDialog, QMessageBox
 import mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
 
 import qtpy  # noqa

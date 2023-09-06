@@ -48,7 +48,7 @@ class AbstractInst(object):
     def user_name(self):
         return self._user_name
 
-    def _create_vanadium(self, run_number_string, do_absorb_corrections, per_detector=False):
+    def _create_vanadium(self, run_number_string, do_absorb_corrections, do_spline=True, per_detector=False):
         """
         Creates a vanadium calibration - should be called by the concrete instrument
         :param run_number_string : The user input string for any run within the cycle
@@ -59,10 +59,16 @@ class AbstractInst(object):
         """
         self._is_vanadium = True
         run_details = self._get_run_details(run_number_string)
+
         if per_detector:
             return calibrate.create_van_per_detector(instrument=self, run_details=run_details, absorb=do_absorb_corrections)
 
-        return calibrate.create_van(instrument=self, run_details=run_details, absorb=do_absorb_corrections)
+        return calibrate.create_van(
+            instrument=self,
+            run_details=run_details,
+            absorb=do_absorb_corrections,
+            spline=do_spline,
+        )
 
     def _focus(
         self,
@@ -74,13 +80,17 @@ class AbstractInst(object):
         paalman_pings_events_per_point=None,
     ):
         """
-        Focuses the user specified run - should be called by the concrete instrument
-        :param run_number_string: The run number(s) to be processed
-        :param do_van_normalisation: True to divide by the vanadium run, false to not.
-        :return:
+        Focuses the user specified run(s) - should be called by the concrete instrument.
+        :param run_number_string: The run number(s) to be processed.
+        :param do_van_normalisation: Whether to divide by the vanadium run or not.
+        :param do_absorb_corrections: Whether to apply absorption correction or not.
+        :param sample_details: Sample details for the run number(s).
+        :param empty_can_subtraction_method: The method for absorption correction. Can be 'Simple' or 'PaalmanPings'.
+        :param paalman_pings_events_per_point: The number of events used in Paalman Pings Monte Carlo absorption correction.
+        :return: the focussed run(s).
         """
         self._is_vanadium = False
-        return focus.focus(
+        focused_runs = focus.focus(
             run_number_string=run_number_string,
             perform_vanadium_norm=do_van_normalisation,
             instrument=self,
@@ -89,6 +99,18 @@ class AbstractInst(object):
             empty_can_subtraction_method=empty_can_subtraction_method,
             paalman_pings_events_per_point=paalman_pings_events_per_point,
         )
+
+        return self._output_focused_runs(focused_runs, run_number_string)
+
+    def _output_focused_runs(self, focused_runs, run_number_string):
+        run_details = self._get_run_details(run_number_string)
+        for focused_run in focused_runs:
+            d_spacing_group, tof_group = self._output_focused_ws(focused_run, run_details=run_details)
+            common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group, unit_to_keep=self._get_unit_to_keep())
+
+            common.remove_intermediate_workspace(focused_run)
+
+        return d_spacing_group
 
     def mask_prompt_pulses_if_necessary(self, ws_list):
         """
@@ -127,6 +149,25 @@ class AbstractInst(object):
         produce a differential cross section
         """
         return False
+
+    def apply_drange_cropping(self, run_number_string, focused_ws):
+        """
+        Apply dspacing range cropping to a focused workspace. It is now only used with OSIRIS script
+        :param run_number_string: The run number to look up for the drange
+        :param focused_ws: The workspace to be cropped
+        :return: The cropped workspace in its drange
+        """
+
+        return focused_ws
+
+    def get_vanadium_path(self, run_details):
+        """
+        Get the vanadium path from the run details
+        :param run_details: The run details of the run number
+        :return: the vanadium path
+        """
+
+        return run_details.splined_vanadium_file_path
 
     # Mandatory overrides
 
@@ -369,9 +410,9 @@ class AbstractInst(object):
         """
         output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
         output_directory = os.path.abspath(os.path.expanduser(output_directory))
-        dat_files_directory = output_directory
+        xye_files_directory = output_directory
         if self._inst_settings.dat_files_directory:
-            dat_files_directory = os.path.join(output_directory, self._inst_settings.dat_files_directory)
+            xye_files_directory = os.path.join(output_directory, self._inst_settings.dat_files_directory)
 
         file_type = "" if run_details.file_extension is None else run_details.file_extension.lstrip(".")
         out_file_names = {"output_folder": output_directory}
@@ -386,18 +427,21 @@ class AbstractInst(object):
         }
         format_options = self._add_formatting_options(format_options)
 
-        output_formats = {
-            "nxs_filename": output_directory,
-            "gss_filename": output_directory,
-            "tof_xye_filename": dat_files_directory,
-            "dspacing_xye_filename": dat_files_directory,
-        }
+        output_formats = self._get_output_formats(output_directory, xye_files_directory)
         for key, output_dir in output_formats.items():
             filepath = os.path.join(output_dir, getattr(self._inst_settings, key).format(**format_options))
             out_file_names[key] = filepath
 
         out_file_names["output_name"] = os.path.splitext(os.path.basename(out_file_names["nxs_filename"]))[0]
         return out_file_names
+
+    def _get_output_formats(self, output_directory, xye_files_directory):
+        return {
+            "nxs_filename": output_directory,
+            "gss_filename": output_directory,
+            "tof_xye_filename": xye_files_directory,
+            "dspacing_xye_filename": xye_files_directory,
+        }
 
     def _generate_inst_filename(self, run_number, file_ext):
         if isinstance(run_number, list):

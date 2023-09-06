@@ -11,6 +11,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeROI.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 
@@ -1744,85 +1746,6 @@ public:
     TS_ASSERT_THROWS(el.filterByPulseTime(100, 200, el), const std::invalid_argument &);
   }
 
-  void test_filter_by_time_at_sample_behaves_like_filter_by_pulse_time() {
-
-    const double tofFactor = 0; // No TOF component
-    const double tofOffset = 0; // No offset
-
-    // Go through each possible EventType (except the no-time one) as the input
-    for (int this_type = 0; this_type < 3; this_type++) {
-      EventType curType = static_cast<EventType>(this_type);
-      this->fake_data();
-      el.switchTo(curType);
-
-      // Filter into this
-      EventList out;
-      // Manually set a sort mode to verify that is it is switched afterward
-      out.setSortOrder(Mantid::DataObjects::TOF_SORT);
-
-      if (curType == WEIGHTED_NOTIME) {
-        TS_ASSERT_THROWS(el.filterByTimeAtSample(100, 200, tofFactor, tofOffset, out), const std::runtime_error &);
-      } else {
-        TS_ASSERT_THROWS_NOTHING(el.filterByTimeAtSample(100, 200, tofFactor, tofOffset, out););
-
-        int numGood = 0;
-        for (std::size_t i = 0; i < el.getNumberEvents(); i++)
-          if ((el.getEvent(i).pulseTime() >= 100) && (el.getEvent(i).pulseTime() < 200))
-            numGood++;
-
-        // Good # of events.
-        TS_ASSERT_EQUALS(numGood, out.getNumberEvents());
-        TS_ASSERT_EQUALS(curType, out.getEventType());
-        TS_ASSERT_EQUALS(Mantid::DataObjects::TIMEATSAMPLE_SORT, out.getSortType());
-
-        for (std::size_t i = 0; i < out.getNumberEvents(); i++) {
-          // Check that the times are within the given limits.
-          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100), out.getEvent(i).pulseTime());
-          TS_ASSERT_LESS_THAN(out.getEvent(i).pulseTime(), DateAndTime(200));
-        }
-      }
-    }
-  }
-
-  void test_filter_by_time_at_sample_with_offset() {
-
-    const double tofFactor = 0;    // No TOF component
-    const double tofOffset = 1e-6; // one microsecond offset
-
-    const int64_t startTEpoch = 100; // Nanoseconds
-    const int64_t endTEpoch = 200;   // Nanoseconds
-
-    // Go through each possible EventType (except the no-time one) as the input
-    for (int this_type = 0; this_type < 3; this_type++) {
-      EventType curType = static_cast<EventType>(this_type);
-      this->fake_data();
-      el.switchTo(curType);
-
-      // Filter into this
-      EventList out = EventList();
-
-      if (curType == WEIGHTED_NOTIME) {
-        TS_ASSERT_THROWS(el.filterByTimeAtSample(startTEpoch, endTEpoch, tofFactor, tofOffset, out),
-                         const std::runtime_error &);
-      } else {
-        TS_ASSERT_THROWS_NOTHING(el.filterByTimeAtSample(startTEpoch, endTEpoch, tofFactor, tofOffset, out););
-
-        // Simulate the filtering
-        int numGood = 0;
-        for (std::size_t i = 0; i < el.getNumberEvents(); i++) {
-          if ((el.getEvent(i).pulseTime() >= startTEpoch + static_cast<int64_t>(tofOffset * 1e9)) &&
-              (el.getEvent(i).pulseTime() < endTEpoch + static_cast<int64_t>(tofOffset * 1e9))) {
-            numGood++;
-          }
-        }
-
-        // Good # of events.
-        TS_ASSERT_EQUALS(numGood, out.getNumberEvents());
-        TS_ASSERT_EQUALS(curType, out.getEventType());
-      }
-    }
-  }
-
   void test_filterByPulseTime_withTimeROI() {
     // Go through each possible EventType (except the no-time one) as the input
     for (int this_type = 0; this_type < 3; this_type++) {
@@ -1831,9 +1754,9 @@ public:
       el.switchTo(curType);
 
       // Filter into this
-      EventList out;
-      // Manually set a sort mode to verify that is it is switched afterward
-      out.setSortOrder(Mantid::DataObjects::TOF_SORT);
+      EventList *out = new EventList();
+      // Manually set a sort mode to verify it has switched
+      out->setSortOrder(Mantid::DataObjects::TOF_SORT);
       Kernel::TimeROI *timeRoi = nullptr;
       TS_ASSERT_THROWS(el.filterByPulseTime(timeRoi, out), const std::invalid_argument &);
       timeRoi = new Kernel::TimeROI();
@@ -1851,13 +1774,13 @@ public:
             numGood++;
 
         // Good # of events.
-        TS_ASSERT_EQUALS(numGood, out.getNumberEvents());
-        TS_ASSERT_EQUALS(curType, out.getEventType());
+        TS_ASSERT_EQUALS(numGood, out->getNumberEvents());
+        TS_ASSERT_EQUALS(curType, out->getEventType());
 
-        for (std::size_t i = 0; i < out.getNumberEvents(); i++) {
+        for (std::size_t i = 0; i < out->getNumberEvents(); i++) {
           // Check that the times are within the given limits.
-          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100), out.getEvent(i).pulseTime());
-          TS_ASSERT_LESS_THAN(out.getEvent(i).pulseTime(), DateAndTime(300));
+          TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100), out->getEvent(i).pulseTime());
+          TS_ASSERT_LESS_THAN(out->getEvent(i).pulseTime(), DateAndTime(300));
         }
       }
     }
@@ -1873,210 +1796,19 @@ public:
     return event.pulseTime().totalNanoseconds() + static_cast<int64_t>(event.tof() * 1e3 * L1 / (L1 + L2));
   }
 
-  void test_filter_by_time_at_sample() {
-
-    const double L1 = 1;
-    const double L2 = 0.01;
-    const double tofFactor = L1 / (L1 + L2); // No TOF component
-    const double tofOffset = 0;              // Elastic scattering. No offset.
-
-    const int64_t startTEpoch = 100; // Nanoseconds
-    const int64_t endTEpoch = 200;   // Nanoseconds
-
-    // Go through each possible EventType (except the no-time one) as the input
-    for (int this_type = 0; this_type < 3; this_type++) {
-      EventType curType = static_cast<EventType>(this_type);
-      this->fake_data();
-      el.switchTo(curType);
-
-      // Filter into this
-      EventList out = EventList();
-
-      if (curType == WEIGHTED_NOTIME) {
-        TS_ASSERT_THROWS(el.filterByTimeAtSample(startTEpoch, endTEpoch, tofFactor, tofOffset, out),
-                         const std::runtime_error &);
-      } else {
-        TS_ASSERT_THROWS_NOTHING(el.filterByTimeAtSample(startTEpoch, endTEpoch, tofFactor, tofOffset, out););
-
-        for (std::size_t i = 0; i < out.getNumberEvents(); i++) {
-          int64_t eventTAtSample = calculatedTAtSample(out.getEvent(i), L1, L2);
-          TSM_ASSERT_LESS_THAN_EQUALS(this_type, startTEpoch, eventTAtSample);
-          TS_ASSERT_LESS_THAN(eventTAtSample, endTEpoch);
-        }
-      }
-    }
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  /** Test method to split events by full time (pulse + tof) withtout correction
-   * on TOF
-   */
-  void test_splitByFullTime() {
-    // Create 1000 random events close to SNS's frequency
-    fake_uniform_time_sns_data();
-
-    // Output will be 10 event lists
-    std::map<int, EventList *> outputs;
-    for (int i = 0; i < 10; i++)
-      outputs.emplace(i, new EventList());
-    outputs.emplace(-1, new EventList());
-
-    // Generate time splitters
-    SplittingIntervalVec split;
-
-    // Start only at 100
-    for (int i = 1; i < 10; i++) {
-      // Reject the odd hundreds pulse times (100-199, 300-399, etc).
-      if ((i % 2) == 0)
-        split.emplace_back(SplittingInterval(i * 1000000, (i + 1) * 1000000, i));
-      else
-        split.emplace_back(SplittingInterval(i * 1000000, (i + 1) * 1000000, -1));
-    }
-
-    // Do the splitting
-    el.splitByFullTime(split, outputs, false, 1.0, 0.0);
-
-    // No events in the first ouput 0-99
-    TS_ASSERT_EQUALS(outputs[0]->getNumberEvents(), 0);
-
-    for (int i = 1; i < 10; i++) {
-      EventList *myOut = outputs[i];
-      if ((i % 2) == 0) {
-        // Even
-        TS_ASSERT_EQUALS(myOut->getNumberEvents(), 1);
-      } else {
-        // Odd
-        TS_ASSERT_EQUALS(myOut->getNumberEvents(), 0);
-      }
-    }
-
-    // Clean the pointers
-    for (auto &output : outputs) {
-      delete output.second;
-    }
-
-    return;
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  /** Test method to split events by full time (pulse + tof) withtout correction
-   * on TOF
-   * and with vector splitter
-   */
-  void test_splitByFullTimeVectorSplitter() {
-    // Create 1000 random events close to SNS's frequency
-    fake_uniform_time_sns_data();
-    el.sortPulseTimeTOF();
-
-    // Output will be 10 event lists
-    std::map<int, EventList *> outputs;
-    for (int i = 0; i < 10; i++)
-      outputs.emplace(i, new EventList());
-    outputs.emplace(-1, new EventList());
-
-    // Generate time splitters
-    std::vector<int64_t> vec_splitTimes{1000000, 2000000, 3000000, 4000000, 5000000,
-                                        6000000, 7000000, 8000000, 9000000, 10000000};
-    std::vector<int> vec_splitGroup{-1, 2, -1, 4, -1, 6, -1, 8, -1};
-    // Do the splitting
-    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs, false, 1.0, 0.0);
-
-    // No events in the first ouput 0-99
-    TS_ASSERT_EQUALS(outputs[0]->getNumberEvents(), 0);
-
-    for (int i = 1; i < 10; i++) {
-      EventList *myOut = outputs[i];
-      if ((i % 2) == 0) {
-        // Even
-        TS_ASSERT_EQUALS(myOut->getNumberEvents(), 1);
-      } else {
-        // Odd
-        TS_ASSERT_EQUALS(myOut->getNumberEvents(), 0);
-      }
-    }
-
-    // Clean the pointers
-    for (auto &output : outputs) {
-      delete output.second;
-    }
-
-    return;
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  void test_splitByTime_allTypes() {
-    // Go through each possible EventType as the input
-    for (int this_type = 0; this_type < 3; this_type++) {
-      EventType curType = static_cast<EventType>(this_type);
-      this->fake_data_only_two_times(150, 850);
-      el.switchTo(curType);
-
-      std::vector<EventList *> outputs;
-      for (size_t i = 0; i < 10; i++)
-        outputs.emplace_back(new EventList());
-
-      SplittingIntervalVec split;
-      // Slices of 100
-      for (int i = 0; i < 10; i++)
-        split.emplace_back(SplittingInterval(i * 100, (i + 1) * 100, i));
-
-      if (curType == WEIGHTED_NOTIME) {
-        // Error cause no time
-        TS_ASSERT_THROWS(el.splitByTime(split, outputs), const std::runtime_error &);
-      } else {
-        // Do the splitting
-        TS_ASSERT_THROWS_NOTHING(el.splitByTime(split, outputs););
-
-        TS_ASSERT_EQUALS(outputs[0]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[1]->getNumberEvents(), 1);
-        TS_ASSERT_EQUALS(outputs[2]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[3]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[4]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[5]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[6]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[7]->getNumberEvents(), 0);
-        TS_ASSERT_EQUALS(outputs[8]->getNumberEvents(), 1);
-        TS_ASSERT_EQUALS(outputs[9]->getNumberEvents(), 0);
-
-        TS_ASSERT_EQUALS(outputs[0]->getEventType(), curType);
-      }
-
-      for (size_t i = 0; i < 10; i++)
-        delete outputs[i];
-    }
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  void test_splitByTime_FilterWithOverlap() {
-    this->fake_uniform_time_data();
-
-    std::vector<EventList *> outputs(1, new EventList());
-
-    SplittingIntervalVec split;
-    split.emplace_back(SplittingInterval(100, 200, 0));
-    split.emplace_back(SplittingInterval(150, 250, 0));
-
-    // Do the splitting
-    el.splitByTime(split, outputs);
-
-    // No events in the first ouput 0-99
-    TS_ASSERT_EQUALS(outputs.front()->getNumberEvents(), 150);
-    delete outputs.front();
-  }
-
   //-----------------------------------------------------------------------------------------------
   void do_testSplit_FilterInPlace(bool weighted) {
     this->fake_uniform_time_data();
     if (weighted)
       el *= 3.0;
 
-    SplittingIntervalVec split;
-    split.emplace_back(SplittingInterval(100, 200, 0));
-    split.emplace_back(SplittingInterval(150, 250, 0));
-    split.emplace_back(SplittingInterval(300, 350, 0));
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(100, 200);
+    timeRoi->addROI(150, 250);
+    timeRoi->addROI(300, 350);
 
     // Do the splitting
-    el.filterInPlace(split);
+    el.filterInPlace(timeRoi);
 
     // 100-249; 300-349 are in the output, everything else is gone.
     TS_ASSERT_EQUALS(el.getNumberEvents(), 200);
@@ -2102,11 +1834,11 @@ public:
     if (weighted)
       el.switchTo(WEIGHTED);
 
-    SplittingIntervalVec split;
-    split.emplace_back(SplittingInterval(1500, 1700, 0));
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(1500, 1700);
 
     // Do the splitting
-    el.filterInPlace(split);
+    el.filterInPlace(timeRoi);
 
     // Nothing left
     TS_ASSERT_EQUALS(el.getNumberEvents(), 0);
@@ -2118,11 +1850,11 @@ public:
     if (weighted)
       el *= 3.0;
 
-    SplittingIntervalVec split;
-    split.emplace_back(SplittingInterval(-10, 1700, 0));
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(-10, 1700);
 
     // Do the splitting
-    el.filterInPlace(split);
+    el.filterInPlace(timeRoi);
 
     // Nothing left
     TS_ASSERT_EQUALS(el.getNumberEvents(), 1000);
@@ -2143,8 +1875,21 @@ public:
   void test_filterInPlace_notime_throws() {
     this->fake_uniform_time_data();
     el.switchTo(WEIGHTED_NOTIME);
-    SplittingIntervalVec split;
-    TS_ASSERT_THROWS(el.filterInPlace(split), const std::runtime_error &)
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    timeRoi->addROI(0, 100);
+    TS_ASSERT_THROWS(el.filterInPlace(timeRoi), const std::runtime_error &)
+  }
+
+  void test_filterInPlace_emptyROI_throws() {
+    this->fake_uniform_time_data();
+    Kernel::TimeROI *timeRoi = new TimeROI();
+    TS_ASSERT_THROWS(el.filterInPlace(timeRoi), const std::invalid_argument &)
+  }
+
+  void test_filterInPlace_nullptr_throws() {
+    this->fake_uniform_time_data();
+    Kernel::TimeROI *timeRoi = nullptr;
+    TS_ASSERT_THROWS(el.filterInPlace(timeRoi), const std::runtime_error &)
   }
 
   //----------------------------------------------------------------------------------------------
@@ -2400,149 +2145,6 @@ public:
     // first value
     TS_ASSERT_DELTA(result[el.getNumberEvents() - 1], 2.5, 0.000001);
     // last value
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  /** Test method to split events by full time (pulse + tof) with correction on
-   * TOF
-   * and with vector splitter
-   */
-  void test_splitByFullTimeVectorSplitterCorrection() {
-    // Create 1000 random events close to SNS's frequency
-    fake_uniform_time_sns_data();
-
-    el.sortPulseTimeTOF();
-
-    // Output will be 10 event lists
-    std::map<int, EventList *> outputs;
-    for (int i = 0; i < 10; i++)
-      outputs.emplace(i, new EventList());
-    outputs.emplace(-1, new EventList());
-
-    // Generate time splitters
-    std::vector<int64_t> vec_splitTimes(11);
-    std::vector<int> vec_splitGroup(10, -1);
-
-    // manually set up the data
-    vec_splitTimes[0] = 1000000;
-    vec_splitTimes[1] = 1300000; // Rule in  1,339,000
-    vec_splitTimes[2] = 2000000;
-    vec_splitTimes[3] = 2190000; // Rule out 2,155,000
-    vec_splitTimes[4] = 4000000;
-    vec_splitTimes[5] = 5000000;
-    vec_splitTimes[6] = 5500000; // Rule in  5,741,000
-    vec_splitTimes[7] = 7000000;
-    vec_splitTimes[8] = 8000000;
-    vec_splitTimes[9] = 9000000;
-    vec_splitTimes[10] = 10000000;
-
-    vec_splitGroup[0] = 2;
-    vec_splitGroup[1] = 5;
-    vec_splitGroup[2] = 4;
-    vec_splitGroup[4] = 6;
-    vec_splitGroup[5] = 7;
-    vec_splitGroup[6] = 8;
-    vec_splitGroup[8] = 1;
-
-    // Do the splitting
-    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs, true, 0.0, 2.0E-4);
-
-    // Examine result
-    TS_ASSERT_EQUALS(outputs.size(), 11);
-
-    // group 2
-    EventList *e2 = outputs[2];
-    TS_ASSERT_EQUALS(e2->getNumberEvents(), 1);
-
-    // group 5
-    EventList *e5 = outputs[5];
-    TS_ASSERT_EQUALS(e5->getNumberEvents(), 0);
-
-    // group 4
-    EventList *e4 = outputs[4];
-    TS_ASSERT_EQUALS(e4->getNumberEvents(), 0);
-
-    // group 7
-    EventList *e7 = outputs[7];
-    TS_ASSERT_EQUALS(e7->getNumberEvents(), 1);
-
-    // Clean the pointers
-    for (auto &output : outputs) {
-      delete output.second;
-    }
-
-    return;
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  /** Test method to split events by full time (pulse + tof) with correction on
-   * TOF
-   * and with vector splitter
-   */
-  void test_splitByFullTimeVectorSplitterCorrection2() {
-    // Create 1000 random events close to SNS's frequency
-    fake_uniform_time_sns_data();
-
-    el.sortPulseTimeTOF();
-    // Output will be 10 event lists
-    std::map<int, EventList *> outputs;
-    for (int i = 0; i < 10; i++)
-      outputs.emplace(i, new EventList());
-    outputs.emplace(-1, new EventList());
-
-    // Generate time splitters
-    std::vector<int64_t> vec_splitTimes(11);
-    std::vector<int> vec_splitGroup(10, -1);
-
-    // manually set up the data
-    vec_splitTimes[0] = 1000000;
-    vec_splitTimes[1] = 1300000; // Rule in  1,339,000
-    vec_splitTimes[2] = 2000000;
-    vec_splitTimes[3] = 2190000; // Rule out 2,155,000
-    vec_splitTimes[4] = 4000000;
-    vec_splitTimes[5] = 5000000;
-    vec_splitTimes[6] = 5600000; // Rule in  5,741,000
-    vec_splitTimes[7] = 7000000;
-    vec_splitTimes[8] = 8000000;
-    vec_splitTimes[9] = 9000000;
-    vec_splitTimes[10] = 10000000;
-
-    vec_splitGroup[0] = 2;
-    vec_splitGroup[1] = 5; // group 2 and 5 are complimentary
-    vec_splitGroup[2] = 4;
-    vec_splitGroup[4] = 6;
-    vec_splitGroup[5] = 7;
-    vec_splitGroup[6] = 8;
-    vec_splitGroup[8] = 1;
-
-    // Do the splitting
-    el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs, true, 0.5, 2.0E-4);
-
-    // Examine result
-    TS_ASSERT_EQUALS(outputs.size(), 11);
-
-    // group 2
-    EventList *e2 = outputs[2];
-    TS_ASSERT_EQUALS(e2->getNumberEvents(), 0);
-
-    // group 5
-    EventList *e5 = outputs[5];
-    TS_ASSERT_EQUALS(e5->getNumberEvents(), 1);
-
-    // group 4
-    EventList *e4 = outputs[4];
-    TS_ASSERT_EQUALS(e4->getNumberEvents(), 0);
-
-    // group 7
-    // EventList* e7 = outputs[7];
-    // TS_ASSERT_EQUALS(e7->getNumberEvents(), 1);
-
-    // Clean the pointers
-    for (auto &output : outputs) {
-      delete output.second;
-    }
-
-    return;
   }
 
   //==================================================================================

@@ -58,16 +58,9 @@ Usage
 
    For examples of applying custom rebinning, please refer to :ref:`algm-Rebin` documentation.
 
-**Example - Pair asymmetry for MUSR run:**
+**Example - Load and Apply MUSR run:**
 
-.. testcode:: ExMUSRPairAsymmetry
-
-
-
-
-Output:
-
-.. testoutput:: ExLoadAndApplyMUSR
+.. testcode:: ExLoadAndApplyMUSR
 
 	# Clear the ADS before starting
 	AnalysisDataService.clear()
@@ -94,7 +87,7 @@ Output:
 	MUSR_asym = mtd["MUSR00015189; Pair; long; Asym; #1"]
 
 
-	print(map('{0:.2f}'.format, MUSR_asym.readY(0)[1:10]))
+	print([f'{y:.2f}' for y in MUSR_asym.readY(0)[1:10]])
 
 Output:
 

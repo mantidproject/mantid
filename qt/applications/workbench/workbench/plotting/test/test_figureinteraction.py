@@ -14,7 +14,7 @@ import unittest
 # third-party library imports
 import matplotlib
 
-matplotlib.use("AGG")  # noqa
+matplotlib.use("AGG")
 import matplotlib.pyplot as plt
 import numpy as np
 from qtpy.QtCore import Qt

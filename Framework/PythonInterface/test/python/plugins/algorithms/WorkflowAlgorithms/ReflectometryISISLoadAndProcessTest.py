@@ -14,6 +14,8 @@ from testhelpers import assertRaisesNothing, create_algorithm
 
 class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
     _CALIBRATION_TEST_DATA = FileFinder.getFullPath("ISISReflectometry/calibration_test_data_INTER45455.dat")
+    _INTER45455_DETECTOR_ROI = "6-62"
+    _TEST_2D_WS_DETECTOR_ROI = "4-7"
 
     def setUp(self):
         self._oldFacility = config["default.facility"]
@@ -190,6 +192,17 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ["ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(AnalysisDataService.retrieve("testIvsQBin"), history)
+
+    def test_hide_workspaces_option_hides_input_workspaces(self):
+        args = self._default_options
+        args["InputRunList"] = "13460"
+        args["FirstTransmissionRunList"] = "13460"
+        args["ProcessingInstructions"] = "4"
+        args["HideInputWorkspaces"] = True
+        outputs = ["IvsQ_13460", "IvsQ_binned_13460", "TRANS_LAM_13460"]
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ["ReflectometryISISPreprocess", "ReflectometryISISPreprocess", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
+        self._check_history(AnalysisDataService.retrieve("IvsQ_binned_13460"), history)
 
     def test_debug_option_outputs_extra_workspaces(self):
         self._create_workspace(13460, "TOF_")
@@ -637,42 +650,83 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ["no_TOF_group", "TOF_12345+67890", "12345", "67890"]
         self._assert_run_algorithm_succeeds(args, outputs)
 
-    def test_sum_banks_is_run_for_2D_detector_workspace(self):
+    def test_sum_banks_runs_for_2D_detector_workspace_when_detector_ROI_specified(self):
+        self._create_2D_detector_workspace(38415, "TOF_")
+
+        def _check_num_histograms_and_first_y_value(ws_name, expected_num_histograms, expected_y_value):
+            ws = AnalysisDataService.retrieve(ws_name)
+            self.assertTrue(ws.getNumberHistograms(), expected_num_histograms)
+            self._assert_delta(ws.readY(2)[0], expected_y_value)
+
+        _check_num_histograms_and_first_y_value("TOF_38415", 6, 0.3)
+        args = self._default_options
+        args["InputRunList"] = "38415"
+        args["ROIDetectorIDs"] = self._TEST_2D_WS_DETECTOR_ROI
+        outputs = ["IvsQ_38415", "IvsQ_binned_38415", "TOF", "TOF_38415", "TOF_38415_summed_segment"]
+        self._assert_run_algorithm_succeeds(args, outputs)
+        self._check_sum_banks(AnalysisDataService.retrieve("IvsQ_binned_38415"), is_summed=True)
+        _check_num_histograms_and_first_y_value("TOF_38415_summed_segment", 4, 0.6)
+
+    def test_sum_banks_not_run_for_2D_detector_workspace_when_no_detector_ROI(self):
         self._create_2D_detector_workspace(38415, "TOF_")
         args = self._default_options
         args["InputRunList"] = "38415"
-        outputs = ["IvsQ_38415", "IvsQ_binned_38415", "TOF", "TOF_38415", "TOF_38415_summed_segment"]
+        outputs = ["IvsQ_38415", "IvsQ_binned_38415", "TOF", "TOF_38415"]
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ["ReflectometryISISSumBanks", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
-        self._check_history(AnalysisDataService.retrieve("IvsQ_binned_38415"), history)
+        self._check_sum_banks(AnalysisDataService.retrieve("IvsQ_binned_38415"), is_summed=False)
 
     def test_sum_banks_is_not_run_for_linear_detector_workspace(self):
         self._create_workspace(38415, "TOF_")
         args = self._default_options
         args["InputRunList"] = "38415"
+        args["ROIDetectorIDs"] = "1"
         outputs = ["IvsQ_38415", "IvsQ_binned_38415", "TOF", "TOF_38415"]
         self._assert_run_algorithm_succeeds(args, outputs)
-        history = ["ReflectometryReductionOneAuto", "GroupWorkspaces"]
-        self._check_history(AnalysisDataService.retrieve("IvsQ_binned_38415"), history)
+        self._check_sum_banks(AnalysisDataService.retrieve("IvsQ_binned_38415"), is_summed=False)
 
-    def test_algorithm_passes_calibration_filepath_to_preprocessing_step(self):
+    def test_sum_banks_not_run_for_mix_of_workspace_types(self):
+        self._create_2D_detector_workspace(13460, "TOF_")
+        self._create_workspace(13463, "TRANS_")
+        args = self._default_options
+        args["InputRunList"] = "13460"
+        args["FirstTransmissionRunList"] = "13463"
+        args["ROIDetectorIDs"] = self._TEST_2D_WS_DETECTOR_ROI
+        self._assert_run_algorithm_throws_with_correct_msg(args, "some but not all input and transmission workspaces require summing")
+
+    def test_summed_workspaces_hidden_when_selected(self):
+        self._create_2D_detector_workspace(38415, "__TOF_")
+        self._create_2D_detector_workspace(38416, "__TRANS_")
+        self._create_2D_detector_workspace(38417, "__TRANS_")
+        args = self._default_options
+        args["InputRunList"] = "38415"
+        args["FirstTransmissionRunList"] = "38416"
+        args["SecondTransmissionRunList"] = "38417"
+        args["HideInputWorkspaces"] = True
+        args["ROIDetectorIDs"] = self._TEST_2D_WS_DETECTOR_ROI
+        outputs = ["IvsQ_38415", "IvsQ_binned_38415", "TRANS_LAM_38416_38417"]
+        self._assert_run_algorithm_succeeds(args, outputs)
+        self._check_sum_banks(AnalysisDataService.retrieve("IvsQ_binned_38415"), is_summed=True)
+
+    def test_calibration_file_is_applied_when_provided(self):
         args = self._default_options
         args["InputRunList"] = "INTER45455"
         del args["ProcessingInstructions"]
         args["CalibrationFile"] = self._CALIBRATION_TEST_DATA
         args["AnalysisMode"] = "MultiDetectorAnalysis"
+        args["ROIDetectorIDs"] = self._INTER45455_DETECTOR_ROI
         outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "TOF_45455_summed_segment"]
         self._assert_run_algorithm_succeeds(args, outputs)
+        self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=True)
 
-    def test_algorithm_passes_calibration_filepath_to_preprocessing_step_in_debug_mode(self):
+    def test_calibration_is_skipped_if_file_not_provided(self):
         args = self._default_options
         args["InputRunList"] = "INTER45455"
         del args["ProcessingInstructions"]
-        args["CalibrationFile"] = self._CALIBRATION_TEST_DATA
-        args["Debug"] = True
         args["AnalysisMode"] = "MultiDetectorAnalysis"
-        outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "Calib_Table_45455", "TOF_45455_summed_segment", "IvsLam_45455"]
+        args["ROIDetectorIDs"] = self._INTER45455_DETECTOR_ROI
+        outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "TOF_45455_summed_segment"]
         self._assert_run_algorithm_succeeds(args, outputs)
+        self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=False)
 
     def test_invalid_polarization_efficiency_file_name_raises_error(self):
         args = self._default_options
@@ -763,6 +817,23 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         else:
             algNames = [alg.name() for alg in history]
         self.assertEqual(algNames, expected)
+
+    def _check_calibration(self, ws, is_calibrated):
+        """Check whether the calibration algorithm has run by checking the workspace history"""
+        self._check_child_history(ws, 0, "ReflectometryISISCalibration", is_calibrated)
+
+    def _check_sum_banks(self, ws, is_summed):
+        """Check whether the sum banks algorithm has run by checking the workspace history"""
+        self._check_child_history(ws, 0, "ReflectometryISISSumBanks", is_summed)
+
+    def _check_child_history(self, ws, child_idx, alg_name, is_present):
+        """Check whether the given algorithm has run by checking the workspace child algorithm history"""
+        history = ws.getHistory()
+        reductionHistory = history.getAlgorithmHistory(history.size() - 1)
+        childHistory = reductionHistory.getChildHistories()[child_idx]
+        childAlgs = childHistory.getChildHistories()
+        algNames = [alg.name() for alg in childAlgs]
+        self.assertEqual(alg_name in algNames, is_present)
 
     def _check_history_algorithm_properties(self, ws, toplevel_idx, child_idx, property_values):
         parent_hist = ws.getHistory().getAlgorithmHistory(toplevel_idx)

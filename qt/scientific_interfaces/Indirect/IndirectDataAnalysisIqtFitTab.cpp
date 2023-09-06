@@ -27,9 +27,9 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("IqtFit");
-std::vector<std::string> IQTFIT_HIDDEN_PROPS = std::vector<std::string>(
-    {"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers", "OutputCompositeMembers",
-     "OutputWorkspace", "IgnoreInvalidData", "Output", "PeakRadius", "PlotParameter"});
+std::vector<std::string> IQTFIT_HIDDEN_PROPS =
+    std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
+                              "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 } // namespace
 
 namespace MantidQt::CustomInterfaces::IDA {

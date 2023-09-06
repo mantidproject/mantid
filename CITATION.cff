@@ -6,9 +6,9 @@ authors:
     email: mantid-help@mantidproject.org
     website: https://www.mantidproject.org/
 title: Manipulation and Analysis Toolkit for Instrument Data
-version: 6.6.0
-doi: 10.5286/Software/Mantid6.6
-date-released: 2023-02-21
+version: 6.7.0
+doi: 10.5286/Software/Mantid6.7
+date-released: 2023-06-27
 keywords:
   - mantid
   - neutron

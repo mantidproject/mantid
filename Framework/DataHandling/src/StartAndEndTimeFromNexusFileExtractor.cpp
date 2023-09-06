@@ -127,7 +127,7 @@ Mantid::Types::Core::DateAndTime extractDateAndTime(TimeType type, const std::st
  * Gets the start time from the nexus file
  * @param filename: the file name
  * @return the start time
- * @throws if the the start time cannot be extracted
+ * @throws if the start time cannot be extracted
  */
 Mantid::Types::Core::DateAndTime extractStartTime(const std::string &filename) {
   return extractDateAndTime(TimeType::StartTime, filename);
@@ -137,7 +137,7 @@ Mantid::Types::Core::DateAndTime extractStartTime(const std::string &filename) {
  * Gets the start time from the nexus file
  * @param filename: the file name
  * @return the start time
- * @throws if the the start time cannot be extracted
+ * @throws if the start time cannot be extracted
  */
 Mantid::Types::Core::DateAndTime extractEndTime(const std::string &filename) {
   return extractDateAndTime(TimeType::EndTime, filename);

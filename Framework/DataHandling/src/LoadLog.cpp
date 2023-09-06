@@ -391,8 +391,7 @@ bool LoadLog::LoadSNSText() {
 
 /**
  * Takes as input a string and try to determine what type it is.
- * @param s :: The input string
- * @param s ::  string to be classified
+ * @param s :: The input string to be classified
  * @return A enum kind which tells what type the string is
  */
 LoadLog::kind LoadLog::classify(const std::string &s) const {

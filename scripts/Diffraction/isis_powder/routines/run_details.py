@@ -130,7 +130,6 @@ class _RunDetails(object):
         van_paths,
         summed_empty_inst_path,
     ):
-
         # Essential attribute
         self.empty_inst_runs = empty_inst_run_number
         self.run_number = run_number

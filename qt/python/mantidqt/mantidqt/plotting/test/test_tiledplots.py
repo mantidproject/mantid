@@ -13,7 +13,7 @@ from unittest import TestCase, main
 # third party imports
 import matplotlib
 
-matplotlib.use("AGG")  # noqa
+matplotlib.use("AGG")
 import matplotlib.pyplot as plt
 from matplotlib import _pylab_helpers
 

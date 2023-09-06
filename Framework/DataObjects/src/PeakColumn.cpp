@@ -51,6 +51,8 @@ public:
     m_type_index.emplace("QSample", "V3D");
     m_type_index.emplace("PeakNumber", "int");
     m_type_index.emplace("TBar", "double");
+    m_type_index.emplace("IntHKL", "V3D");
+    m_type_index.emplace("IntMNP", "V3D");
   }
 
   inline const auto &data() const { return m_type_index; }
@@ -160,6 +162,10 @@ template <class T> void PeakColumn<T>::print(size_t index, std::ostream &s) cons
     s << std::fixed << std::setprecision(m_hklPrec) << peak.getL();
   } else if (m_name == "PeakNumber") {
     s << peak.getPeakNumber();
+  } else if (m_name == "IntHKL") {
+    s << peak.getIntHKL();
+  } else if (m_name == "IntMNP") {
+    s << peak.getIntMNP();
   } else
     s << peak.getValueByColName(m_name);
   s.flags(fflags);
@@ -313,6 +319,12 @@ template <class T> const void *PeakColumn<T>::void_pointer(size_t index) const {
     return boost::get<Kernel::V3D>(&value);
   } else if (m_name == "QSample") {
     value = peak.getQSampleFrame();
+    return boost::get<Kernel::V3D>(&value);
+  } else if (m_name == "IntHKL") {
+    value = peak.getIntHKL();
+    return boost::get<Kernel::V3D>(&value);
+  } else if (m_name == "IntMNP") {
+    value = peak.getIntMNP();
     return boost::get<Kernel::V3D>(&value);
   } else {
     throw std::runtime_error("void_pointer() - Unknown peak column name or type: " + m_name);

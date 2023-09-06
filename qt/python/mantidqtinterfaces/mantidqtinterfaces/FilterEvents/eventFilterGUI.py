@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name, too-many-lines, too-many-instance-attributes
 import numpy
 
-from qtpy.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QSlider, QVBoxLayout, QWidget  # noqa
+from qtpy.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QSlider, QVBoxLayout, QWidget
 from qtpy.QtGui import QDoubleValidator, QDesktopServices, QRegExpValidator  # noqa
 from qtpy.QtCore import QUrl, QRegExp
 
@@ -114,7 +114,7 @@ class MainWindow(QMainWindow):
         # validates any number, but does not accept comma, contrary to QDoubleValidator
         # this way, it is possible to cast to float without checking for stray commas.
         regexp = QRegExp("[-+]?((\d+\.?\d*)|(\.\d+))(e[-+]?\d+)?")  # noqa
-        # noqa because flake is not happy about regex escape sequences
+        # because flake is not happy about regex escape sequences
 
         regexp_val = QRegExpValidator(regexp, self)
 
@@ -661,7 +661,7 @@ class MainWindow(QMainWindow):
         self.canvas.draw()
 
         # Load property's statistic and give suggestion on parallel and fast log
-        timeavg = samplelog.timeAverageValue()
+        timeavg = self._dataWS.getRun().getTimeAveragedValue(logname)
         numentries = samplelog.size()
         stat = samplelog.getStatistics()
 

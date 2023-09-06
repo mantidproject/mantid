@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAlgorithms/FFT.h"
 
@@ -17,7 +17,7 @@ namespace Algorithms {
     @author Roman Tolchenov
     @date 01/10/2009
  */
-class MANTID_ALGORITHMS_DLL RealFFT : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL RealFFT : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RealFFT"; }

@@ -67,9 +67,6 @@ public:
   /// Get fitting function.
   virtual API::IFunction_sptr getFittingFunction() const { return m_function; }
   /// Calculates covariance matrix
-  /// @param covar :: Returned covariance matrix, here as
-  /// @param epsrel :: Is used to remove linear-dependent columns
-  ///
   virtual void calCovarianceMatrix(EigenMatrix &covar, double epsrel = 1e-8);
 
   /// Calculate fitting errors

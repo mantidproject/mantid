@@ -26,6 +26,12 @@ class RegionSelectorTest(unittest.TestCase):
     def test_matrix_workspaces_allowed(self):
         self.assertIsNotNone(RegionSelector(Mock(), view=Mock()))
 
+    def test_show_all_data_not_called_on_creation(self):
+        region_selector = RegionSelector(ws=Mock(), view=Mock())
+        region_selector.show_all_data_clicked = Mock()
+
+        region_selector.show_all_data_clicked.assert_not_called()
+
     def test_invalid_workspaces_fail(self):
         invalid_types = [WS_TYPE.MDH, WS_TYPE.MDE, None]
         mock_ws = Mock()
@@ -42,6 +48,7 @@ class RegionSelectorTest(unittest.TestCase):
 
     def test_update_workspace_updates_model(self):
         region_selector = RegionSelector(view=Mock())
+        region_selector.show_all_data_clicked = Mock()
         mock_ws = Mock()
 
         region_selector.update_workspace(mock_ws)
@@ -61,16 +68,18 @@ class RegionSelectorTest(unittest.TestCase):
     def test_update_workspace_updates_view(self):
         mock_view = Mock()
         region_selector = RegionSelector(view=mock_view)
+        region_selector.show_all_data_clicked = Mock()
         mock_ws = Mock()
 
         region_selector.update_workspace(mock_ws)
 
         mock_view.set_workspace.assert_called_once_with(mock_ws)
+        region_selector.show_all_data_clicked.assert_called_once()
 
     def test_add_rectangular_region_creates_selector(self):
         region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
 
-        region_selector.add_rectangular_region("test", "black")
+        region_selector.add_rectangular_region("test", "black", "/")
 
         self.assertEqual(1, len(region_selector._selectors))
         self.assertTrue(region_selector._selectors[0].active)
@@ -79,9 +88,9 @@ class RegionSelectorTest(unittest.TestCase):
     def test_add_second_rectangular_region_deactivates_first_selector(self):
         region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
 
-        region_selector.add_rectangular_region("test", "black")
+        region_selector.add_rectangular_region("test", "black", "/")
         region_selector._drawing_region = False
-        region_selector.add_rectangular_region("test", "black")
+        region_selector.add_rectangular_region("test", "black", "/")
 
         self.assertEqual(2, len(region_selector._selectors))
 
@@ -90,11 +99,12 @@ class RegionSelectorTest(unittest.TestCase):
 
     def test_clear_workspace_will_clear_all_the_selectors_and_model_workspace(self):
         region_selector = RegionSelector(view=self.mock_view)
+        region_selector.show_all_data_clicked = Mock()
         mock_ws = Mock()
 
         region_selector.update_workspace(mock_ws)
-        region_selector.add_rectangular_region("test", "black")
-        region_selector.add_rectangular_region("test", "black")
+        region_selector.add_rectangular_region("test", "black", "/")
+        region_selector.add_rectangular_region("test", "black", "/")
 
         region_selector.clear_workspace()
 
@@ -269,14 +279,14 @@ class RegionSelectorTest(unittest.TestCase):
         mock_observer = Mock()
         region_selector.subscribe(mock_observer)
 
-        region_selector.add_rectangular_region("test", "black")
+        region_selector.add_rectangular_region("test", "black", "/")
         region_selector._on_rectangle_selected(Mock(), Mock())
 
         mock_observer.notifyRegionChanged.assert_called_once()
 
     def test_cancel_drawing_region_will_remove_last_selector(self):
         region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
-        region_selector.add_rectangular_region("test", "black")
+        region_selector.add_rectangular_region("test", "black", "/")
         self.assertEqual(1, len(region_selector._selectors))
         region_selector.cancel_drawing_region()
         self.assertEqual(0, len(region_selector._selectors))
@@ -284,11 +294,11 @@ class RegionSelectorTest(unittest.TestCase):
     def test_when_multiple_region_adds_are_requested_only_one_region_is_added(self):
         # Given
         region_selector = RegionSelector(ws=Mock(), view=self.mock_view)
-        region_selector.add_rectangular_region("test", "black")
+        region_selector.add_rectangular_region("test", "black", "/")
         self.assertEqual(1, len(region_selector._selectors))
 
         # When
-        region_selector.add_rectangular_region("test2", "green")
+        region_selector.add_rectangular_region("test2", "green", "O")
 
         # Then
         self.assertEqual(1, len(region_selector._selectors))

@@ -272,6 +272,7 @@ Usage
     print("Y-Unit Label of " + str(acc_ws.getName()) + ": " + str(acc_ws.YUnitLabel()))
 
 .. testcleanup:: Preset
+
     mtd.clear()
 
 .. testoutput:: Preset

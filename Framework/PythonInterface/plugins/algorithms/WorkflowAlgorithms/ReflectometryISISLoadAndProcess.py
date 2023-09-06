@@ -35,6 +35,7 @@ class Prop:
     GROUP_TOF = "GroupTOFWorkspaces"
     RELOAD = "ReloadInvalidWorkspaces"
     DEBUG = "Debug"
+    HIDE_INPUT = "HideInputWorkspaces"
     OUTPUT_WS = "OutputWorkspace"
     OUTPUT_WS_BINNED = "OutputWorkspaceBinned"
     OUTPUT_WS_LAM = "OutputWorkspaceWavelength"
@@ -85,22 +86,23 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Execute the algorithm."""
+        if self.getProperty(Prop.HIDE_INPUT).value:
+            self._tofPrefix = "__" + self._tofPrefix
+            self._transPrefix = "__" + self._transPrefix
         self._reload = self.getProperty(Prop.RELOAD).value
         # Convert run numbers to real workspaces
         inputRuns = self.getProperty(Prop.RUNS).value
         inputWorkspaces = self._getInputWorkspaces(inputRuns, False)
-        roiDetectorIDs = self.getProperty(Prop.ROI_DETECTOR_IDS).value
-        summedSegmentWorkspaces = self._sumBanks(inputWorkspaces, roiDetectorIDs)
         firstTransRuns = self.getProperty(Prop.FIRST_TRANS_RUNS).value
         firstTransWorkspaces = self._getInputWorkspaces(firstTransRuns, True)
-        firstTransWorkspaces = self._sumBanks(firstTransWorkspaces, roiDetectorIDs)
         secondTransRuns = self.getProperty(Prop.SECOND_TRANS_RUNS).value
         secondTransWorkspaces = self._getInputWorkspaces(secondTransRuns, True)
-        secondTransWorkspaces = self._sumBanks(secondTransWorkspaces, roiDetectorIDs)
         # Combine multiple input runs, if required
-        inputWorkspace = self._sumWorkspaces(summedSegmentWorkspaces, False)
+        inputWorkspace = self._sumWorkspaces(inputWorkspaces, False)
         firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True)
         secondTransWorkspace = self._sumWorkspaces(secondTransWorkspaces, True)
+        # Check if we will need to sum banks as part of the reduction
+        self._should_sum_banks(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
         # Slice the input workspace, if required
         inputWorkspace = self._sliceWorkspace(inputWorkspace)
         # Perform the reduction
@@ -125,7 +127,10 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             if AnalysisDataService.doesExist(summed_seg_name):
                 tofWorkspaces.add(summed_seg_name)
         # Create the group
-        self._group_workspaces(tofWorkspaces, "TOF")
+        if self.getProperty(Prop.HIDE_INPUT).value:
+            self._group_workspaces(tofWorkspaces, "__TOF")
+        else:
+            self._group_workspaces(tofWorkspaces, "TOF")
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -159,6 +164,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self.declareProperty(Prop.RELOAD, True, doc="If true, reload input workspaces if they are of the incorrect type")
         self.declareProperty(Prop.GROUP_TOF, True, doc="If true, group the TOF workspaces")
 
+        self.declareProperty(Prop.HIDE_INPUT, False, doc="If true, make the input workspaces invisible in the ADS.")
+
     def _declarePreprocessProperties(self):
         """Copy properties from the child preprocess algorithm"""
         properties = ["CalibrationFile"]
@@ -167,7 +174,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _declareSumBanksProperties(self):
         """Copy properties from the child sum banks algorithm"""
         properties = ["ROIDetectorIDs"]
-        self.copyProperties("ReflectometryISISSumBanks", properties)
+        self._copy_properties_from_reduction_algorithm(properties)
 
     def _declareSlicingProperties(self):
         """Copy properties from the child slicing algorithm and add our own custom ones"""
@@ -329,17 +336,25 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self.log().information(f'Loaded polarization efficiency information from file "{efficiencies_ws}"')
         return ws
 
-    def _sumBanks(self, workspace_names, roiDetectorIDs):
-        output_workspace_names = workspace_names.copy()
-        for i, workspace_name in enumerate(workspace_names):
-            workspace = AnalysisDataService.retrieve(workspace_name)
-            if self._has_single_2D_rectangular_detector(workspace):
-                output_workspace_names[i] = _summedSegmentWorkspace(workspace_name)
-                args = {"InputWorkspace": workspace, "ROIDetectorIDs": roiDetectorIDs, "OutputWorkspace": output_workspace_names[i]}
-                alg = self.createChildAlgorithm("ReflectometryISISSumBanks", **args)
-                alg.setAlwaysStoreInADS(True)
-                alg.execute()
-        return output_workspace_names
+    def _should_sum_banks(self, inputWorkspace, firstTransWorkspace, secondTransWorkspace):
+        """Checks if we should perform a sum banks step as part of the reduction and sets the ROIDetectorIDs property accordingly"""
+        if self.getProperty(Prop.ROI_DETECTOR_IDS).isDefault:
+            # Only sum banks when a region of detector IDs to sum has been passed in
+            return
+
+        perform_sum = []
+        for workspace_name in [inputWorkspace, firstTransWorkspace, secondTransWorkspace]:
+            if workspace_name is not None:
+                workspace = AnalysisDataService.retrieve(workspace_name)
+                perform_sum.append(self._has_single_2D_rectangular_detector(workspace))
+
+        should_sum = perform_sum[0]
+        if not all(sum_ws == should_sum for sum_ws in perform_sum):
+            raise RuntimeError("Not implemented when some but not all input and transmission workspaces require summing across banks")
+
+        if not should_sum:
+            # Setting the property to its default will prevent summing taking place
+            self.setProperty(Prop.ROI_DETECTOR_IDS, "")
 
     def _has_single_2D_rectangular_detector(self, workspace) -> bool:
         """Returns true if workspace has a single 2D rectangular detector, and is not a group workspace."""
@@ -354,7 +369,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             return False
 
         if num_rect_detectors != 1:
-            raise NotImplementedError(f"Not implemented for more than one rectangular detector, " f"{num_rect_detectors} were found.")
+            raise NotImplementedError(f"Not implemented for more than one rectangular detector, {num_rect_detectors} were found.")
 
         # We don't sum banks for a linear detector
         if rect_detectors[0].xpixels() == 1 or rect_detectors[0].ypixels() == 1:
@@ -363,23 +378,32 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if is_group:
             raise NotImplementedError("Not implemented for a WorkspaceGroup containing 2D detectors.")
 
-        if not self._spectra_refer_to_rectangular_detector(workspace, rect_detectors[0]):
+        if not self._all_spectra_refer_to_rectangular_detector(workspace, rect_detectors[0]):
             return False
 
         return True
 
     @staticmethod
-    def _spectra_refer_to_rectangular_detector(workspace, rectangular_detector) -> bool:
-        """Returns true if the detectors in a rectangular bank are found in a workspace."""
+    def _all_spectra_refer_to_rectangular_detector(workspace, rectangular_detector) -> bool:
+        """Checks if all data in a workspace is from the rectangular detector."""
+        rect_det_id_start = rectangular_detector.minDetectorID()
+        rect_det_id_end = rectangular_detector.maxDetectorID()
+        ws_has_detectors = False
 
-        def _safe_get_id(ws_index):
+        for ws_index in range(workspace.getNumberHistograms()):
             try:
-                return workspace.getDetector(ws_index).getID()
-            except Exception:
-                return None
+                det = workspace.getDetector(ws_index)
+                if not det.isMonitor():
+                    det_id = det.getID()
+                    if not rect_det_id_start <= det_id <= rect_det_id_end:
+                        # Workspace contains data that is not from the rectangular detector
+                        return False
+                    ws_has_detectors = True
+            except RuntimeError:
+                # Ignore detectors that don't have IDs
+                continue
 
-        workspace_det_ids = [_safe_get_id(i) for i in range(workspace.getNumberHistograms())]
-        return all(det_id in workspace_det_ids for det_id in [rectangular_detector.minDetectorID(), rectangular_detector.maxDetectorID()])
+        return ws_has_detectors
 
     def _prefixedName(self, name, isTrans):
         """Add a prefix for TOF workspaces onto the given name"""
@@ -500,7 +524,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         calibration_filepath = self.getPropertyValue("CalibrationFile")
         if calibration_filepath:
             args["CalibrationFile"] = calibration_filepath
-            args[Prop.DEBUG] = self.getPropertyValue(Prop.DEBUG)
         alg = self.createChildAlgorithm("ReflectometryISISPreprocess", **args)
         alg.setRethrows(True)
         alg.execute()
@@ -612,6 +635,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         flood_workspace = self._loadFloodCorrectionWorkspace()
         if flood_workspace:
             alg.setProperty("FloodWorkspace", flood_workspace)
+        alg.setProperty("HideSummedWorkspaces", self.getProperty(Prop.HIDE_INPUT).value)
         efficiencies_ws = self._loadPolarizationCorrectionWorkspace()
         if efficiencies_ws:
             alg.setProperty("PolarizationEfficiencies", efficiencies_ws)

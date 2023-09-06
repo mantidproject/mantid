@@ -14,11 +14,11 @@ import matplotlib
 
 matplotlib.use("Qt5Agg")
 
-from qtpy.QtWidgets import QApplication  # noqa: F402
+from qtpy.QtWidgets import QApplication
 
-from mantid.simpleapi import Load  # noqa: F402
-from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay  # noqa: F402
-from mantidqt.plotting.functions import plot  # noqa: F402
+from mantid.simpleapi import Load
+from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
+from mantidqt.plotting.functions import plot
 
 app = QApplication([])
 LOQ74044 = Load("LOQ74044.nxs")

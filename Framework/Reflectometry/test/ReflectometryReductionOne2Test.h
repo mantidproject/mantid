@@ -774,7 +774,7 @@ public:
     setupAlgorithm(alg, 1.5, 15.0, "3+4");
 
     // The reference angle when summing in Q is taken from the centre of the
-    // ROI. If we have an even number of pixels it clips the the lower value,
+    // ROI. If we have an even number of pixels it clips the lower value,
     // i.e. detector 3 here
     double const detectorTheta = twoThetaForDetector3() / 2.0;
     double const thetaIn = 22.0;

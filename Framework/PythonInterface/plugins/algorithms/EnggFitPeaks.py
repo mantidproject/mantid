@@ -76,7 +76,6 @@ class EnggFitPeaks(PythonAlgorithm):
         )
 
     def PyExec(self):
-
         import EnggUtils
 
         # Get peaks in dSpacing from file
@@ -111,7 +110,7 @@ class EnggFitPeaks(PythonAlgorithm):
             txt = "Peaks effectively found: " + str(found_peaks)[1:-1]
             self.log().warning(
                 "Some peaks from the list of expected peaks were not found by the algorithm "
-                "FindPeaks which this algorithm uses to check that the data has the the "
+                "FindPeaks which this algorithm uses to check that the data has the "
                 "expected peaks. " + txt
             )
 

@@ -107,8 +107,6 @@ public:
 
   Workspace_sptr getWorkspace() const override;
 
-  void setIsMasterRank(bool isMasterRank) override;
-
 private:
   std::string isValidGroup(const std::shared_ptr<WorkspaceGroup> &wsGroup) const;
 
@@ -133,8 +131,6 @@ private:
 
   /// for access to logging streams
   static Kernel::Logger g_log;
-
-  bool m_isMasterRank{true};
 };
 
 template <typename TYPE> Kernel::Logger WorkspaceProperty<TYPE>::g_log("WorkspaceProperty");

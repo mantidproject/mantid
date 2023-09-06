@@ -125,7 +125,7 @@ class CurveProperties(dict):
     def __eq__(self, other):
         for prop, value in sorted(self.items()):
             other_value = other[prop]
-            if type(value) is float:
+            if isinstance(value, float):
                 if not isclose(value, other_value, atol=1e-5):
                     return False
             else:
@@ -231,7 +231,7 @@ class CurveProperties(dict):
         try:
             barlines = curve[2][0]
             props["errorevery"] = int(barlines.axes.creation_args[len(barlines.axes.creation_args) - 1]["errorevery"])
-        except (IndexError, TypeError, KeyError):
+        except (IndexError, TypeError, KeyError, AttributeError):
             props["errorevery"] = 1
         try:
             caps = curve[1]

@@ -31,13 +31,28 @@ class PeaksWorkspaceDataPresenter(TableWorkspaceDataPresenterStandard):
     # Defines a custom role to be used for sorting with QSortFilterProxy.
     # See https://doc.qt.io/qt-5/qsortfilterproxymodel.html#sortRole-prop
     DATA_SORT_ROLE = 2001
-    HIDDEN_COLUMNS = ["RunNumber", "DetID", "Wavelength", "Energy", "TOF", "DSpacing", "BinCount", "Row", "Col", "QLab", "QSample", "TBar"]
+    HIDDEN_COLUMNS = [
+        "RunNumber",
+        "DetID",
+        "Wavelength",
+        "Energy",
+        "TOF",
+        "DSpacing",
+        "BinCount",
+        "Row",
+        "Col",
+        "QLab",
+        "QSample",
+        "TBar",
+        "IntHKL",
+        "IntMNP",
+    ]
 
     def create_item(self, data, _):
         """Create a table item to display the data. The data is always readonly
         here.
         """
-        if type(data) == float:
+        if isinstance(data, float):
             display_data = self.FLOAT_FORMAT_STR.format(data)
         else:
             display_data = str(data)

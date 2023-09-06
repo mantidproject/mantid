@@ -11,6 +11,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/cow_ptr.h"
+
 #include <iosfwd>
 #include <vector>
 
@@ -21,8 +22,6 @@ class DateAndTime;
 }
 } // namespace Types
 namespace Kernel {
-class SplittingInterval;
-using SplittingIntervalVec = std::vector<SplittingInterval>;
 class Unit;
 } // namespace Kernel
 namespace DataObjects {
@@ -266,33 +265,12 @@ public:
 
   void filterByPulseTime(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, EventList &output) const;
 
-  void filterByPulseTime(Kernel::TimeROI *timeRoi, EventList &output) const;
+  void filterByPulseTime(Kernel::TimeROI *timeRoi, EventList *output) const;
 
-  void filterByTimeAtSample(Types::Core::DateAndTime start, Types::Core::DateAndTime stop, double tofFactor,
-                            double tofOffset, EventList &output) const;
-
-  void filterInPlace(Kernel::SplittingIntervalVec &splitter);
+  void filterInPlace(Kernel::TimeROI *timeRoi);
 
   /// Initialize the detector ID's and event type of the destination event lists when splitting this list
   void initializePartials(std::map<int, EventList *> partials) const;
-
-  void splitByTime(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs) const;
-
-  void splitByFullTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs, bool docorrection,
-                       double toffactor, double tofshift) const;
-
-  /// Split ...
-  std::string splitByFullTimeMatrixSplitter(const std::vector<int64_t> &vec_splitters_time,
-                                            const std::vector<int> &vecgroups,
-                                            std::map<int, EventList *> vec_outputEventList, bool docorrection,
-                                            double toffactor, double tofshift) const;
-
-  /// Split events by pulse time
-  void splitByPulseTime(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs) const;
-
-  /// Split events by pulse time with Matrix splitters
-  void splitByPulseTimeWithMatrix(const std::vector<int64_t> &vec_times, const std::vector<int> &vec_target,
-                                  std::map<int, EventList *> outputs) const;
 
   void multiply(const double value, const double error = 0.0) override;
   EventList &operator*=(const double value);
@@ -392,9 +370,7 @@ private:
   template <class T>
   static void compressEventsHelper(const std::vector<T> &events, std::vector<WeightedEventNoTime> &out,
                                    double tolerance);
-  template <class T>
-  void compressEventsParallelHelper(const std::vector<T> &events, std::vector<WeightedEventNoTime> &out,
-                                    double tolerance);
+
   template <class T>
   static void compressFatEventsHelper(const std::vector<T> &events, std::vector<WeightedEvent> &out,
                                       const double tolerance, const Mantid::Types::Core::DateAndTime &timeStart,
@@ -405,8 +381,6 @@ private:
   template <class T>
   static void integrateHelper(std::vector<T> &events, const double minX, const double maxX, const bool entireRange,
                               double &sum, double &error);
-  template <class T>
-  static double integrateHelper(std::vector<T> &events, const double minX, const double maxX, const bool entireRange);
   template <class T> void convertTofHelper(std::vector<T> &events, const std::function<double(double)> &func);
 
   template <class T> void convertTofHelper(std::vector<T> &events, const double factor, const double offset);
@@ -427,44 +401,12 @@ private:
   template <class T>
   static void filterByPulseTimeHelper(std::vector<T> &events, Types::Core::DateAndTime start,
                                       Types::Core::DateAndTime stop, std::vector<T> &output);
-  template <class T>
-  static void filterByTimeAtSampleHelper(std::vector<T> &events, Types::Core::DateAndTime start,
-                                         Types::Core::DateAndTime stop, double tofFactor, double tofOffset,
-                                         std::vector<T> &output);
-  template <class T>
-  static void filterByTimeROIHelper(std::vector<T> &events, const Kernel::SplittingIntervalVec &intervals,
-                                    std::vector<T> &output);
-
-  template <class T> void filterInPlaceHelper(Kernel::SplittingIntervalVec &splitter, typename std::vector<T> &events);
-  template <class T>
-  void splitByTimeHelper(Kernel::SplittingIntervalVec &splitter, std::vector<EventList *> outputs,
-                         typename std::vector<T> &events) const;
-  template <class T>
-  void splitByFullTimeHelper(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
-                             typename std::vector<T> &events, bool docorrection, double toffactor,
-                             double tofshift) const;
-  /// Split events by pulse time
-  template <class T>
-  void splitByPulseTimeHelper(Kernel::SplittingIntervalVec &splitter, std::map<int, EventList *> outputs,
-                              typename std::vector<T> &events) const;
-
-  /// Split events (template) by pulse time with matrix splitters
-  template <class T>
-  void splitByPulseTimeWithMatrixHelper(const std::vector<int64_t> &vec_split_times,
-                                        const std::vector<int> &vec_split_target, std::map<int, EventList *> outputs,
-                                        typename std::vector<T> &events) const;
 
   template <class T>
-  std::string splitByFullTimeVectorSplitterHelper(const std::vector<int64_t> &vectimes,
-                                                  const std::vector<int> &vecgroups, std::map<int, EventList *> outputs,
-                                                  typename std::vector<T> &vecEvents, bool docorrection,
-                                                  double toffactor, double tofshift) const;
+  static void filterByTimeROIHelper(std::vector<T> &events, const std::vector<Kernel::TimeInterval> &intervals,
+                                    EventList *output);
 
-  template <class T>
-  std::string
-  splitByFullTimeSparseVectorSplitterHelper(const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,
-                                            std::map<int, EventList *> outputs, typename std::vector<T> &vecEvents,
-                                            bool docorrection, double toffactor, double tofshift) const;
+  template <class T> void filterInPlaceHelper(Kernel::TimeROI *timeRoi, typename std::vector<T> &events);
 
   template <class T> static void multiplyHelper(std::vector<T> &events, const double value, const double error = 0.0);
   template <class T>

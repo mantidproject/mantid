@@ -121,6 +121,7 @@ public:
   }
 
   void test_loadSample_will_not_attempt_a_load_when_an_empty_filepath_is_provided() {
+    EXPECT_CALL(*m_view, disable("Loading sample")).Times(1);
     EXPECT_CALL(*m_analysisPresenter, clear()).Times(1);
 
     EXPECT_CALL(*m_view, getSampleFile()).Times(1).WillOnce(Return(std::nullopt));
@@ -138,6 +139,7 @@ public:
     std::string const filename("ALF82301");
 
     EXPECT_CALL(*m_view, getSampleFile()).Times(1).WillOnce(Return(filename));
+    EXPECT_CALL(*m_view, disable("Loading sample")).Times(1);
     EXPECT_CALL(*m_analysisPresenter, clear()).Times(1);
     EXPECT_CALL(*m_model, loadProperties(filename)).Times(1).WillOnce(Return(ByMove(std::move(m_algProperties))));
     EXPECT_CALL(*m_algorithmManager, load(_)).Times(1);
@@ -147,7 +149,8 @@ public:
 
   void test_notifyLoadComplete_opens_a_warning_if_the_data_is_not_ALF_data() {
     EXPECT_CALL(*m_model, isALFData(_)).Times(1).WillOnce(Return(false));
-    EXPECT_CALL(*m_view, warningBox("The loaded data is not from the ALF instrument")).Times(1);
+    EXPECT_CALL(*m_view, enable()).Times(1);
+    EXPECT_CALL(*m_view, displayWarning("The loaded data is not from the ALF instrument")).Times(1);
 
     m_presenter->notifyLoadComplete(nullptr);
   }
@@ -159,8 +162,8 @@ public:
         .WillOnce(Return(ByMove(std::move(m_algProperties))));
     EXPECT_CALL(*m_algorithmManager, normaliseByCurrent(NotNull())).Times(1);
 
-    // Expect no call to warningBox
-    EXPECT_CALL(*m_view, warningBox(_)).Times(0);
+    // Expect no call to displayWarning
+    EXPECT_CALL(*m_view, displayWarning(_)).Times(0);
 
     m_presenter->notifyLoadComplete(nullptr);
   }
@@ -248,6 +251,7 @@ public:
 
   void test_notifyConvertUnitsComplete_adds_the_workspace_to_the_ADS() {
     EXPECT_CALL(*m_model, replaceSampleWorkspaceInADS(_)).Times(1);
+    EXPECT_CALL(*m_view, enable()).Times(1);
     m_presenter->notifyConvertUnitsComplete(nullptr);
   }
 
@@ -269,8 +273,18 @@ public:
     std::vector<double> twoThetas{1.0, 2.0};
     EXPECT_CALL(*m_model, twoThetasClosestToZero()).Times(1).WillOnce(Return(twoThetas));
     EXPECT_CALL(*m_analysisPresenter, setExtractedWorkspace(_, twoThetas)).Times(1);
+    EXPECT_CALL(*m_view, enable()).Times(1);
 
     m_presenter->notifyRebunchComplete(nullptr);
+  }
+
+  void test_notifyAlgorithmError_will_display_a_message_in_the_view() {
+    std::string const message("This is a warning message");
+
+    EXPECT_CALL(*m_view, enable()).Times(1);
+    EXPECT_CALL(*m_view, displayWarning(message)).Times(1);
+
+    m_presenter->notifyAlgorithmError(message);
   }
 
 private:
@@ -307,6 +321,7 @@ private:
   }
 
   void expectUpdateAnalysisViewFromModel(bool hasTubes = true) {
+    EXPECT_CALL(*m_view, disable("Processing selection")).Times(1);
     EXPECT_CALL(*m_model, hasSelectedTubes()).Times(1).WillOnce(Return(hasTubes));
 
     if (hasTubes) {
@@ -315,6 +330,7 @@ private:
       EXPECT_CALL(*m_algorithmManager, createWorkspace(NotNull())).Times(1);
     } else {
       EXPECT_CALL(*m_analysisPresenter, setExtractedWorkspace(IsNull(), std::vector<double>{})).Times(1);
+      EXPECT_CALL(*m_view, enable()).Times(1);
     }
   }
 

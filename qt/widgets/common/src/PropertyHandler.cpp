@@ -461,20 +461,34 @@ void PropertyHandler::removeFunction() {
         break;
       }
     }
-    ph->renameChildren();
+    ph->renameChildren(*cf);
     m_browser->setFitEnabled(cf->nFunctions() > 0);
   }
 }
 
-void PropertyHandler::renameChildren() const {
+void PropertyHandler::renameChildren(const Mantid::API::CompositeFunction &cf) {
   m_browser->m_changeSlotsEnabled = false;
-  // update tie properties, as the parameter names may change
-  QMap<QString, QtProperty *>::const_iterator it = m_ties.begin();
-  for (; it != m_ties.end(); ++it) {
+  for (auto it = m_ties.begin(); it != m_ties.end();) {
+    QString parName = it.key();
+    QString fullName = functionPrefix() + "." + parName;
     QtProperty *prop = it.value();
-    Mantid::API::ParameterTie *tie = m_fun->getTie(m_fun->parameterIndex(it.key().toStdString()));
-    if (!tie)
+    Mantid::API::ParameterTie *tie = cf.getTie(cf.parameterIndex(fullName.toStdString()));
+    if (!tie) {
+      // In this case the tie has been removed from the composite function since it contained a reference to
+      // the function which was removed
+      QtProperty *parProp = getParameterProperty(parName);
+      if (parProp != nullptr) {
+        parProp->removeSubProperty(prop);
+        // Don't increment the iterator if we delete the current tie.
+        it = m_ties.erase(it);
+        parProp->setEnabled(true);
+      }
       continue;
+    } else {
+      ++it;
+    }
+    // Refresh gui value in case it has been updated by the composite function re-indexing it's functions
+    // after one is removed
     QStringList qtie = QString::fromStdString(tie->asString()).split("=");
     if (qtie.size() < 2)
       continue;
@@ -489,7 +503,7 @@ void PropertyHandler::renameChildren() const {
       continue;
     QtProperty *nameProp = h->item()->property();
     nameProp->setPropertyName(h->functionName());
-    h->renameChildren();
+    h->renameChildren(cf);
   }
   m_browser->m_changeSlotsEnabled = true;
 }
@@ -644,6 +658,17 @@ bool PropertyHandler::setParameter(QtProperty *prop) {
     std::string parName = prop->propertyName().toStdString();
     double parValue = m_browser->m_parameterManager->value(prop);
     m_fun->setParameter(parName, parValue);
+
+    // If the parameter is fixed, re-fix to update the subproperty.
+    if (m_fun->isFixed(m_fun->parameterIndex(parName))) {
+      foreach (QtProperty *subProp, prop->subProperties()) {
+        if (subProp->propertyName() == "Fix") {
+          fix(prop->propertyName());
+          break;
+        }
+      }
+    }
+
     m_browser->sendParameterChanged(m_fun.get());
     m_browser->sendParameterChanged(functionPrefix());
     return true;
@@ -651,8 +676,11 @@ bool PropertyHandler::setParameter(QtProperty *prop) {
   if (m_cf) {
     for (size_t i = 0; i < m_cf->nFunctions(); i++) {
       bool res = getHandler(i)->setParameter(prop);
-      if (res)
+      if (res) {
+        m_cf->applyTies();
+        updateParameters();
         return true;
+      }
     }
   }
   return false;
@@ -1108,6 +1136,7 @@ void PropertyHandler::addTie(const QString &tieStr) {
   try {
     auto &cfun = *m_browser->compositeFunction();
     cfun.tie(name, expr);
+    cfun.applyTies();
     const bool recursive = true;
     QString parName = QString::fromStdString(cfun.parameterLocalName(cfun.parameterIndex(name), recursive));
     foreach (QtProperty *parProp, m_parameters) {
@@ -1121,6 +1150,7 @@ void PropertyHandler::addTie(const QString &tieStr) {
         m_browser->m_stringManager->setValue(tieProp, QString::fromStdString(expr));
         m_browser->m_changeSlotsEnabled = true;
         parProp->addSubProperty(tieProp);
+        updateParameters();
         return;
       }
     }
@@ -1139,7 +1169,7 @@ void PropertyHandler::fix(const QString &parName) {
     m_browser->m_changeSlotsEnabled = false;
     QtProperty *tieProp = m_ties[parName];
     if (!tieProp) {
-      tieProp = m_browser->m_stringManager->addProperty("Tie");
+      tieProp = m_browser->m_stringManager->addProperty("Fix");
       m_ties[parName] = tieProp;
     }
     m_browser->m_stringManager->setValue(tieProp, parValue);

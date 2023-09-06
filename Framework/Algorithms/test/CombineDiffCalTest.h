@@ -40,13 +40,20 @@ public:
 
   CombineDiffCalTest() { FrameworkManager::Instance(); }
 
-  DataObjects::TableWorkspace_sptr createPixelCalibrationTableUnsorted() {
-    // create table with correct column names
+  /// create table with correct column names
+  DataObjects::TableWorkspace_sptr createEmptyCalibrationTable() {
     DataObjects::TableWorkspace_sptr table = std::make_shared<DataObjects::TableWorkspace>();
     table->addColumn("int", "detid");
     table->addColumn("double", "difc");
     table->addColumn("double", "difa");
     table->addColumn("double", "tzero");
+
+    return table;
+  }
+
+  DataObjects::TableWorkspace_sptr createPixelCalibrationTableUnsorted() {
+    // create table with correct column names
+    DataObjects::TableWorkspace_sptr table = createEmptyCalibrationTable();
 
     // fill the values
     //      new_row << entry.detector_id << entry.difc << entry.difa << entry.tzero;
@@ -67,11 +74,7 @@ public:
 
   DataObjects::TableWorkspace_sptr createPixelCalibrationTable() {
     // create table with correct column names
-    DataObjects::TableWorkspace_sptr table = std::make_shared<DataObjects::TableWorkspace>();
-    table->addColumn("int", "detid");
-    table->addColumn("double", "difc");
-    table->addColumn("double", "difa");
-    table->addColumn("double", "tzero");
+    DataObjects::TableWorkspace_sptr table = createEmptyCalibrationTable();
 
     // fill the values
     //      new_row << entry.detector_id << entry.difc << entry.difa << entry.tzero;
@@ -90,23 +93,21 @@ public:
     return table;
   }
 
-  DataObjects::TableWorkspace_sptr createGroupedCalibrationTable() {
+  DataObjects::TableWorkspace_sptr createGroupedCalibrationTable(const bool fullTable) {
     // create table with correct column names
-    DataObjects::TableWorkspace_sptr table = std::make_shared<DataObjects::TableWorkspace>();
-    table->addColumn("int", "detid");
-    table->addColumn("double", "difc");
-    table->addColumn("double", "difa");
-    table->addColumn("double", "tzero");
+    DataObjects::TableWorkspace_sptr table = createEmptyCalibrationTable();
 
     // fill the values
     //      new_row << entry.detector_id << entry.difc << entry.difa << entry.tzero;
     TableRow newRow = table->appendRow();
-    newRow << 100 << 1000.0 << 0.0 << 0.0;
+    if (fullTable) { // most tests have values for all pixels
+      newRow << 100 << 1000.0 << 0.0 << 0.0;
 
-    newRow = table->appendRow();
-    newRow << 101 << 1001.0 << 0.0 << 0.0;
+      newRow = table->appendRow();
+      newRow << 101 << 1001.0 << 0.0 << 0.0;
+      newRow = table->appendRow();
+    }
 
-    newRow = table->appendRow();
     newRow << 102 << 1110.0 << 0.0 << 0.0;
 
     newRow = table->appendRow();
@@ -117,11 +118,7 @@ public:
 
   DataObjects::TableWorkspace_sptr createCalibrationTableArgs() {
     // create table with correct column names
-    DataObjects::TableWorkspace_sptr table = std::make_shared<DataObjects::TableWorkspace>();
-    table->addColumn("int", "detid");
-    table->addColumn("double", "difc");
-    table->addColumn("double", "difa");
-    table->addColumn("double", "tzero");
+    DataObjects::TableWorkspace_sptr table = createEmptyCalibrationTable();
 
     // fill the values
     //      new_row << entry.detector_id << entry.difc << entry.difa << entry.tzero;
@@ -264,7 +261,7 @@ public:
     const auto difCalPixelCalibration = createPixelCalibrationTable();
 
     // fake data to simulate the output of PDCalibration GroupedCalibration
-    const auto difCalGroupedCalibration = createGroupedCalibrationTable();
+    const auto difCalGroupedCalibration = createGroupedCalibrationTable(true);
 
     // fake data to simulate CalibrationWorkspace
     const auto diffCalCalibrationWs = createCalibrationWorkspace();
@@ -289,7 +286,7 @@ public:
     const auto difCalPixelCalibration = createPixelCalibrationTableUnsorted();
 
     // fake data to simulate the output of PDCalibration GroupedCalibration
-    const auto difCalGroupedCalibration = createGroupedCalibrationTable();
+    const auto difCalGroupedCalibration = createGroupedCalibrationTable(true);
 
     // fake data to simulate CalibrationWorkspace
     const auto diffCalCalibrationWs = createCalibrationWorkspace();
@@ -315,7 +312,7 @@ public:
     const auto difCalPixelCalibration = createPixelCalibrationTable();
 
     // fake data to simulate the output of PDCalibration GroupedCalibration
-    const auto difCalGroupedCalibration = createGroupedCalibrationTable();
+    const auto difCalGroupedCalibration = createGroupedCalibrationTable(true);
 
     // fake data to simulate CalibrationWorkspace
     const auto diffCalCalibrationWs = createCalibrationWorkspace();
@@ -336,5 +333,61 @@ public:
     TS_ASSERT(output);
 
     confirmMaskedResults(output);
+  }
+
+  void testSingleGroupedSpectrum() {
+    // cases to cover (can be in the same dataset)
+    // single pixel with pixel==group==arb
+    // single pixel with pixel==arb!=group
+    // single pixel with pixel==arb!=group
+    // grouped with arb==group
+    // grouped with arb!=group
+
+    // test input
+
+    // fake data to simulate the output of cross correlate PixelCalibration
+    const auto difCalPixelCalibration = createPixelCalibrationTable();
+
+    // fake data to simulate the output of PDCalibration GroupedCalibration
+    // detids 100 and 102 will be missing
+    const auto difCalGroupedCalibration = createGroupedCalibrationTable(false);
+
+    // fake data to simulate CalibrationWorkspace
+    const auto diffCalCalibrationWs = createCalibrationWorkspace();
+
+    // set up algorithm
+    auto alg = setupAlg(difCalPixelCalibration, difCalGroupedCalibration, diffCalCalibrationWs);
+
+    // run the algorithm
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+
+    DataObjects::TableWorkspace_sptr output = alg->getProperty("OutputWorkspace");
+    TS_ASSERT(output);
+
+    // validate the output
+    TS_ASSERT_EQUALS(output->rowCount(), 4);
+
+    auto detid = output->getColumn("detid");
+    TS_ASSERT_EQUALS(detid->toDouble(0), 100.);
+    TS_ASSERT_EQUALS(detid->toDouble(1), 101.);
+    TS_ASSERT_EQUALS(detid->toDouble(2), 102.);
+    TS_ASSERT_EQUALS(detid->toDouble(3), 103.);
+
+    // double difc = (difcPD /difcArb) * difcPrev;
+    // double difa = ((difcPD / difcArb) * (difcPD / difcArb)) * difaPrev;
+    auto difc = output->getColumn("difc");
+    TS_ASSERT(difc);
+    TS_ASSERT_EQUALS(difc->toDouble(0), 1000.);
+    TS_ASSERT_EQUALS(difc->toDouble(1), 1001.);
+    TS_ASSERT_EQUALS(difc->toDouble(2), (1110. / 1100.) * 1099.);
+    TS_ASSERT_EQUALS(difc->toDouble(3), (1110. / 1100.) * 1101.);
+
+    auto difa = output->getColumn("difa");
+    TS_ASSERT_EQUALS(difa->toDouble(0), 1.);
+    TS_ASSERT_EQUALS(difa->toDouble(1), 2.);
+    TS_ASSERT_EQUALS(difa->toDouble(2), ((1110. / 1100.) * (1110. / 1100.)) * 3.);
+    TS_ASSERT_EQUALS(difa->toDouble(3), ((1110. / 1100.) * (1110. / 1100.)) * 4.);
+    // detids 100 and 102 will be copied from the pixel calibration table
   }
 };

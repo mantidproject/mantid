@@ -30,6 +30,19 @@ as follows using geometry of the experiment:
 If a detector is present in the PreviousCalibration table but is not found in the
 OffsetsWorkspace, it will be propagated to the output calibration table unchanged.
 
+If `Signed` offset mode is specified, the :math:`DIFC` will be calculated or updated with
+the following equations:
+
+Update existing calibration:
+
+.. math:: DIFC = DIFC_{old} \cdot (1+|BinWidth|)^{-offset}
+
+Calculate :math:`DIFC` from geometry of the experiment:
+
+.. math:: DIFC = \frac{m_n}{h} \cdot (L1 + L2) 2 \sin(\theta) \cdot (1+|BinWidth|)^{-offset}
+
+The calculations for signed mode is appropriate for full-pattern cross-correlation with logarithmically binned data
+
 Usage
 -----
 

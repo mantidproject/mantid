@@ -5,14 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
-from typing import List, NamedTuple, overload
+from typing import List, NamedTuple, overload, Type, TypedDict, TypeVar
 from math import isclose
 
 import numpy as np
 from numpy.linalg import norm
 from mantid.kernel import logger as mantid_logger
 
-from abins.constants import COMPLEX_ID, FLOAT_ID, GAMMA_POINT, SMALL_K
+from abins.constants import COMPLEX_ID, COMPLEX_TYPE, FLOAT_ID, FLOAT_TYPE
 
 
 class KpointData(NamedTuple):
@@ -22,6 +22,9 @@ class KpointData(NamedTuple):
     weight: float
     frequencies: np.ndarray
     atomic_displacements: np.ndarray
+
+
+KPD = TypeVar("KPD", bound="KpointsData")
 
 
 class KpointsData(collections.abc.Sequence):
@@ -60,7 +63,6 @@ class KpointsData(collections.abc.Sequence):
         if logger is None:
             logger = mantid_logger
 
-        self._data = {}
         dim = 3
 
         for arg in (frequencies, atomic_displacements, weights, k_vectors, unit_cell):
@@ -92,6 +94,7 @@ class KpointsData(collections.abc.Sequence):
         num_freq = frequencies.shape[1]
         if not (frequencies.shape == (num_k, num_freq) and frequencies.dtype.num == FLOAT_ID):
             raise ValueError("Invalid value of frequencies.")
+
         self._frequencies = frequencies
 
         # atomic_displacements
@@ -109,32 +112,6 @@ class KpointsData(collections.abc.Sequence):
             return {str(i): row for i, row in enumerate(array)}
         else:
             return {i: row for i, row in enumerate(array)}
-
-    def get_gamma_point_data(self):
-        """
-        Extracts k points data only for Gamma point.
-        :returns: dictionary with data only for Gamma point
-        """
-        gamma_pkt_index = -1
-        k_vectors = self._array_to_dict(self._k_vectors)
-
-        # look for index of Gamma point
-        for k_index, k in k_vectors.items():
-            if np.linalg.norm(k) < SMALL_K:
-                gamma_pkt_index = k_index
-                break
-        else:
-            raise ValueError("Gamma point not found.")
-
-        k_points = {
-            "weights": {GAMMA_POINT: self._data["weights"][gamma_pkt_index]},
-            "k_vectors": {GAMMA_POINT: self._data["k_vectors"][gamma_pkt_index]},
-            "frequencies": {GAMMA_POINT: self._data["frequencies"][gamma_pkt_index]},
-            "atomic_displacements": {GAMMA_POINT: self._data["atomic_displacements"][gamma_pkt_index]},
-            "unit_cell": self.unit_cell,
-        }
-
-        return k_points
 
     def is_normalised(self) -> bool:
         """
@@ -162,18 +139,45 @@ class KpointsData(collections.abc.Sequence):
     def __len__(self):
         return self._weights.size
 
-    @overload  # noqa F811
+    @overload  # F811
     def __getitem__(self, item: int) -> KpointData:
         ...
 
-    @overload  # noqa F811
-    def __getitem__(self, item: slice) -> List[KpointData]:  # noqa F811
+    @overload  # F811
+    def __getitem__(self, item: slice) -> List[KpointData]:  # F811
         ...
 
-    def __getitem__(self, item):  # noqa F811
+    def __getitem__(self, item):  # F811
         if isinstance(item, int):
             return KpointData(self._k_vectors[item], self._weights[item], self._frequencies[item], self._atomic_displacements[item])
         elif isinstance(item, slice):
             return [self[i] for i in range(len(self))[item]]
 
         return self._data[item]
+
+    class JSONableData(TypedDict):
+        """JSON-friendly representation of KpointsData"""
+
+        frequencies: List[List[float]]
+        atomic_displacements: List[List[List[List[float]]]]
+        weights: List[float]
+        k_vectors: List[List[float]]
+        unit_cell: List[List[float]]
+
+    def to_dict(self) -> "KpointsData.JSONableData":
+        """Get a JSON-compatible representation of the data"""
+        return self.JSONableData(
+            frequencies=self._frequencies.tolist(),
+            atomic_displacements=self._atomic_displacements.view(FLOAT_TYPE).tolist(),
+            weights=self._weights.tolist(),
+            k_vectors=self._k_vectors.tolist(),
+            unit_cell=self.unit_cell.tolist(),
+        )
+
+    @classmethod
+    def from_dict(cls: Type[KPD], data: "KpointsData.JSONableData") -> KPD:
+        """Construct from JSON-compatible dictionary"""
+        array_data = {key: np.asarray(value, dtype=FLOAT_TYPE) for key, value in data.items()}
+        array_data["atomic_displacements"] = array_data["atomic_displacements"].view(COMPLEX_TYPE)
+
+        return cls(**array_data)

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -ex
 
+parent_dir="$(dirname "$RECIPE_DIR")"
+bash "${parent_dir}"/archive_env_logs.sh "$BUILD_PREFIX" "$PREFIX" 'mantidworkbench'
+
+
 mkdir build
 cd build
 
@@ -17,8 +21,8 @@ cmake \
   -DWORKBENCH_BIN_DIR=$PREFIX/bin \
   -DENABLE_PRECOMMIT=OFF \
   -DCONDA_BUILD=True \
-  -DCONDA_ENV=True \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
+  -DPython_EXECUTABLE=$PYTHON \
   -GNinja \
   ../
 

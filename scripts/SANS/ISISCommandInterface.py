@@ -508,7 +508,6 @@ def WavRangeReduction(  # noqa: C901
             if ReductionSingleton().instrument._NAME == "LOQ" and ReductionSingleton().get_beam_center(
                 "rear"
             ) != ReductionSingleton().get_beam_center("front"):
-
                 # It is necessary to reload sample, transmission and can files.
                 # reload sample
                 issueWarning("Trying to reload workspaces")
@@ -1321,6 +1320,7 @@ def check_if_event_workspace(file_name):
 ################################################################################
 # Input check functions
 
+
 # Check the input for time shifts when adding event files
 def check_time_shifts_for_added_event_files(number_of_files, time_shifts=""):
     # If there are no entries then proceed.
@@ -1517,7 +1517,7 @@ def AddRuns(
                     The property can be set to "Monitors" in order to emulate the binning of the monitors or to a
                     string list with the same format that is used for the Rebin algorithm. This property is ignored
                     when saving as event data.
-    @param isOverlay: sets if the the overlay mechanism should be used when the saveAsEvent flag is set
+    @param isOverlay: sets if the overlay mechanism should be used when the saveAsEvent flag is set
     @param time_shifts: provides additional time shifts if the isOverlay flag is specified. The time shifts are specified
                         in a string list. Either time_shifts is not used or a list with times in secomds. Note that there
                         has to be one entry fewer than the number of workspaces to add.

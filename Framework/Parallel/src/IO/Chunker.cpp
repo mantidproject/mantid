@@ -4,10 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <algorithm>
+#include <iterator>
 #include <numeric>
 #include <utility>
 
-#include "MantidParallel/Communicator.h"
 #include "MantidParallel/IO/Chunker.h"
 
 namespace Mantid::Parallel::IO {
@@ -109,8 +110,7 @@ std::vector<std::vector<int>> Chunker::makeWorkerGroups() const {
  * minimizing the number of workers per bank:
  * 1. Avoid overhead from loading event_index and event_time_zero for a bank on
  *    more workers than necessary.
- * 2. Reduce the number of banks a worker is loading from to allow more flexible
- *    ordering when redistributing data with MPI in the loader.
+ * 2. Reduce the number of banks a worker is loading from.
  * If more than one worker is used to load a subset of banks, chunks are
  * assigned in a round-robin fashion to workers. This is not reset when reaching
  * the end of a bank, i.e., the worker loading the first chunk of the banks in a

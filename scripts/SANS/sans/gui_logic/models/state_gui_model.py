@@ -102,6 +102,28 @@ class StateGuiModel(ModelCommon):
     def batch_file(self, value):
         self._all_states.save.batch_file = value
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # Background Subtraction Options
+    # ------------------------------------------------------------------------------------------------------------------
+
+    @property
+    def background_workspace(self):
+        val = self._all_states.background_subtraction.workspace
+        return self._get_val_or_default(val)
+
+    @background_workspace.setter
+    def background_workspace(self, value):
+        self._all_states.background_subtraction.workspace = value
+
+    @property
+    def scale_factor(self):
+        val = self._all_states.background_subtraction.scale_factor
+        return self._get_val_or_default(val, 1.0)
+
+    @scale_factor.setter
+    def scale_factor(self, value):
+        self._all_states.background_subtraction.scale_factor = value
+
     # ==================================================================================================================
     # ==================================================================================================================
     # BeamCentre TAB

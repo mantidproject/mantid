@@ -49,6 +49,8 @@ public:
 
   double twoTheta() const { return m_spectrumInfo->twoTheta(m_index); }
 
+  double azimuthal() const { return m_spectrumInfo->azimuthal(m_index); }
+
   double signedTwoTheta() const { return m_spectrumInfo->signedTwoTheta(m_index); }
 
   double l2() const { return m_spectrumInfo->l2(m_index); }

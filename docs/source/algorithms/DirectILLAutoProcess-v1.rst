@@ -227,6 +227,15 @@ Output:
 .. testcleanup:: ExDirectILLAutoProcessPowder
 
     mtd.clear()
+    import os
+    to_remove = ["vanadium_auto_SofQW_085801_Ei9meV_T20.0K.nxs",
+                 "vanadium_auto_SofTW_085801_Ei9meV_T20.0K.nxspe",
+                 "vanadium_auto_diag_085801_Ei9meV_T20.0K",
+                 "vanadium_auto_integral_085801_Ei9meV_T20.0K.nxs",
+                 "container_087306_Ei9meV_T1.5K.nxs",
+                 "container_087311_Ei9meV_T100.0K.nxs"]
+    for ftr in to_remove:
+        os.remove(ftr)
 
 .. categories::
 

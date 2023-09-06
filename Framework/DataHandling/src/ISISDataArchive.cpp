@@ -27,9 +27,9 @@ DECLARE_ARCHIVESEARCH(ISISDataArchive, ISISDataSearch)
 
 namespace {
 #ifdef _WIN32
-const char *URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/windir?name=";
+constexpr std::string_view URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/windir?name=";
 #else
-const char *URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unixdir?name=";
+constexpr std::string_view URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unixdir?name=";
 #endif
 } // namespace
 
@@ -53,8 +53,14 @@ std::string ISISDataArchive::getArchivePath(const std::set<std::string> &filenam
   }
 
   for (const auto &filename : filenames) {
-    const std::string path_without_extension = getPath(filename);
+    std::string path_without_extension = getPath(filename);
     if (!path_without_extension.empty()) {
+#ifdef __APPLE__
+      // Replace Linux path with macOS path if we're on a Mac.
+      constexpr std::string_view unixString = "/archive/";
+      constexpr std::string_view macOSString = "/Volumes/inst$/";
+      path_without_extension.replace(0, unixString.length(), macOSString);
+#endif
       std::string fullPath = getCorrectExtension(path_without_extension, exts);
       if (!fullPath.empty())
         return fullPath;
@@ -75,7 +81,7 @@ std::string ISISDataArchive::getPath(const std::string &fName) const {
 
   std::ostringstream os = sendRequest(fName);
   os << Poco::Path::separator() << fName;
-  const std::string expectedPath = os.str();
+  std::string expectedPath = os.str();
   return expectedPath;
 }
 
@@ -91,7 +97,7 @@ std::ostringstream ISISDataArchive::sendRequest(const std::string &fName) const 
   Kernel::InternetHelper inetHelper;
   std::ostringstream os;
   try {
-    inetHelper.sendRequest(URL_PREFIX + fName, os);
+    inetHelper.sendRequest(URL_PREFIX.data() + fName, os);
   } catch (Kernel::Exception::InternetError &ie) {
     g_log.warning() << "Could not access archive index." << ie.what();
   }

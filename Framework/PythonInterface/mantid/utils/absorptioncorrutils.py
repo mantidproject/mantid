@@ -36,7 +36,7 @@ def _getBasename(filename):
     """
     Helper function to get the filename without the path or extension
     """
-    if type(filename) == list:
+    if isinstance(filename, list):
         filename = filename[0]
     name = os.path.split(filename)[-1]
     for extension in _EXTENSIONS_NXS:
@@ -110,7 +110,6 @@ def __get_cache_name(
         # use mantid build-in alg to generate the cache filename and sha1
         ascii_hash = ""
         for cache_dir in cache_dirs:
-
             ascii_name, ascii_hash = mantid.simpleapi.CreateCacheFilename(
                 Prefix=prefix_name, OtherProperties=property_string, CacheDir=cache_dir
             )
@@ -488,7 +487,7 @@ def calc_1st_absorption_corr_using_wksp(
         raise ValueError("Unrecognized absorption correction method '{}'".format(abs_method))
 
 
-def create_absorption_input(  # noqa: C901
+def create_absorption_input(
     filename,
     props=None,
     num_wl_bins=1000,

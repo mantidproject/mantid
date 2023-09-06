@@ -102,6 +102,7 @@ size_t MultiDomainFunction::getNumberDomains() const { return getMaxIndex() + 1;
 /// Function you want to fit to.
 /// @param domain :: The buffer for writing the calculated values. Must be big
 /// enough to accept dataSize() values
+/// @param values :: A storage object for the calculated values
 void MultiDomainFunction::function(const FunctionDomain &domain, FunctionValues &values) const {
   // works only on CompositeDomain
   if (!dynamic_cast<const CompositeDomain *>(&domain)) {

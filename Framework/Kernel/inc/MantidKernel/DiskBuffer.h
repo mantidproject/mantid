@@ -130,7 +130,7 @@ protected:
   /** A forward list for the buffer of "toWrite" objects.   */
   std::list<ISaveable *> m_toWriteBuffer;
 
-  /// Mutex for modifying the the toWrite buffer.
+  /// Mutex for modifying the toWrite buffer.
   std::mutex m_mutex;
 
   // ----------------------- Free space map

@@ -69,7 +69,7 @@ public:
     mrun.addProperty<double>("Radius", 0.1, true);
 
     const bool expectEmptyFile{false};
-    const double expectedTbar{0.1489}, expectedTransmission{0.9469};
+    const double expectedTbar{0.14888}, expectedTransmission{0.9469};
 
     assertFileContent(assertSaveExec(ws), expectEmptyFile, expectedTbar, expectedTransmission);
   }
@@ -95,7 +95,7 @@ public:
     const double radius{0.1};
 
     const bool expectEmptyFile{false};
-    const double expectedTbar{0.1489}, expectedTransmission{0.9469};
+    const double expectedTbar{0.14888}, expectedTransmission{0.9469};
     assertFileContent(assertSaveExec(ws, radius, smu, amu), expectEmptyFile, expectedTbar, expectedTransmission);
   }
 
@@ -144,6 +144,7 @@ public:
     V3D qSampleFrame = UBMatrix * hkl * 2 * M_PI;
     Peak p(ws->getInstrument(), qSampleFrame, run.getGoniometer().getR());
     p.setHKL(hkl);
+    p.setIntHKL(hkl);
     p.setRunNumber(1000);
     p.setBankName("bank1");
     p.setIntensity(1.0);
@@ -182,12 +183,12 @@ public:
     TS_ASSERT_DELTA(wl, 1.55025, 1e-4);
     TS_ASSERT_EQUALS(tbar, 0);
     // compare to direction cosines produced with other software
-    TS_ASSERT_DELTA(dir_cos_1_x, -0.03516, 1e-4);
-    TS_ASSERT_DELTA(dir_cos_1_y, -0.71004, 1e-4);
-    TS_ASSERT_DELTA(dir_cos_1_z, -0.70328, 1e-4);
-    TS_ASSERT_DELTA(dir_cos_2_x, -0.13886, 1e-4);
-    TS_ASSERT_DELTA(dir_cos_2_y, 0.96643, 1e-4);
-    TS_ASSERT_DELTA(dir_cos_2_z, -0.21619, 1e-4);
+    TS_ASSERT_DELTA(dir_cos_1_x, -0.03516, 1e-3);
+    TS_ASSERT_DELTA(dir_cos_1_y, -0.71007, 1e-3);
+    TS_ASSERT_DELTA(dir_cos_1_z, -0.70368, 1e-3);
+    TS_ASSERT_DELTA(dir_cos_2_x, -0.13889, 1e-3);
+    TS_ASSERT_DELTA(dir_cos_2_y, 0.96627, 1e-3);
+    TS_ASSERT_DELTA(dir_cos_2_z, -0.21574, 1e-3);
     TS_ASSERT_EQUALS(dsp, 1000);
     TS_ASSERT_EQUALS(col, 0);
     TS_ASSERT_EQUALS(row, 0);
@@ -199,12 +200,12 @@ public:
     auto peaks_pos = ws->getPeak(0).getDetPos();
     peaks_pos.normalize();
     V3D dir_cos_2 = RU * peaks_pos;
-    TS_ASSERT_DELTA(dir_cos_1_x, dir_cos_1[0], 1e-4);
-    TS_ASSERT_DELTA(dir_cos_1_y, dir_cos_1[1], 1e-4);
-    TS_ASSERT_DELTA(dir_cos_1_z, dir_cos_1[2], 1e-4);
-    TS_ASSERT_DELTA(dir_cos_2_x, dir_cos_2[0], 1e-4);
-    TS_ASSERT_DELTA(dir_cos_2_y, dir_cos_2[1], 1e-4);
-    TS_ASSERT_DELTA(dir_cos_2_z, dir_cos_2[2], 1e-4);
+    TS_ASSERT_DELTA(dir_cos_1_x, dir_cos_1[0], 1e-3);
+    TS_ASSERT_DELTA(dir_cos_1_y, dir_cos_1[1], 1e-3);
+    TS_ASSERT_DELTA(dir_cos_1_z, dir_cos_1[2], 1e-3);
+    TS_ASSERT_DELTA(dir_cos_2_x, dir_cos_2[0], 1e-3);
+    TS_ASSERT_DELTA(dir_cos_2_y, dir_cos_2[1], 1e-3);
+    TS_ASSERT_DELTA(dir_cos_2_z, dir_cos_2[2], 1e-3);
 
     if (Poco::File(outfile).exists())
       Poco::File(outfile).remove();

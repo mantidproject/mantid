@@ -196,10 +196,6 @@ void MDWSDescription::setUpMissingParameters(const MDWSDescription &SourceMatrWS
  *
  * @param NewMDWorkspaceD -- MD workspace description, obtained from algorithm
  *parameters
- *
- * @returns NewMDWorkspaceD -- modified md workspace description, which is
- *compatible with existing MD workspace
- *
  */
 void MDWSDescription::checkWSCorresponsMDWorkspace(const MDWSDescription &NewMDWorkspaceD) {
   if (m_NDims != NewMDWorkspaceD.m_NDims) {
@@ -321,9 +317,7 @@ std::string MDWSDescription::getEModeStr() const { return Kernel::DeltaEMode::as
  *  @param inWS2D -- input workspace
  *  @param dimPropertyNames  -- names of properties which should be treated as
  *dimensions
- *  @param AddCoord --
- *
- *  @return AddCoord       -- vector of additional coordinates (derived from WS
+ *  @param AddCoord       -- vector of additional coordinates (derived from WS
  *properties) for current multidimensional event
  */
 void MDWSDescription::fillAddProperties(const Mantid::API::MatrixWorkspace_const_sptr &inWS2D,

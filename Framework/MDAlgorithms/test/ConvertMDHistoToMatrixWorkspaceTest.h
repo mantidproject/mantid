@@ -213,7 +213,7 @@ public:
   output matrix workspace, should be the one that has the greatest delta (start
  - end point) in the original coordinates.
 
-  In this case, that corresponds the the X-axis of the input workspace, so we
+  In this case, that corresponds to the X-axis of the input workspace, so we
  should see the extents of the output matrix workspace
   corresponding to -10 to 10, because that is how the cut was made.
 
@@ -288,7 +288,7 @@ public:
   output matrix workspace, should be the one that has the greatest delta (start
  - end point) in the original coordinates.
 
-  In this case, that corresponds the the Y-axis of the input MD workspace, so we
+  In this case, that corresponds to the Y-axis of the input MD workspace, so we
  should see the extents of the output matrix workspace
   corresponding to -10 to 10, because that is how the cut was made.
 

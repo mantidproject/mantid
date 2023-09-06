@@ -12,7 +12,7 @@ from systemtesting import MantidSystemTest, linux_distro_description
 
 
 def load_nexus_in_multiple_threads(filename, nthreads):
-    """Attempt to load the the given filename from multiple threads at once"""
+    """Attempt to load the given filename from multiple threads at once"""
     results = [None for i in range(nthreads)]
     with concurrent.futures.ThreadPoolExecutor(max_workers=nthreads) as executor:
         jobs = [executor.submit(load_nexus, filename, index) for index in range(nthreads)]

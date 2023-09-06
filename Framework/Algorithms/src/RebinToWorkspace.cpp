@@ -169,15 +169,4 @@ void RebinToWorkspace::histogram(API::MatrixWorkspace_sptr &toRebin, API::Matrix
 
   setProperty("OutputWorkspace", std::move(outputWS));
 }
-
-Parallel::ExecutionMode
-RebinToWorkspace::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  // Probably we can relax these restrictions based on particular combination
-  // with storage mode of WorkspaceToRebin, but this is simple and sufficient
-  // for now.
-  if (storageModes.at("WorkspaceToMatch") != Parallel::StorageMode::Cloned)
-    throw std::runtime_error("WorkspaceToMatch must have " + Parallel::toString(Parallel::StorageMode::Cloned));
-  return Parallel::getCorrespondingExecutionMode(storageModes.at("WorkspaceToRebin"));
-}
-
 } // namespace Mantid::Algorithms

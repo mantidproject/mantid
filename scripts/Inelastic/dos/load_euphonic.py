@@ -4,30 +4,26 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Optional
+
+from math import ceil
+from typing import Optional, Tuple
+
+from euphonic import __version__ as euphonic_version
+from euphonic import QpointPhononModes
+import euphonic.cli.utils
+from euphonic.util import mp_grid
 
 import numpy as np
+from packaging import version
 
 from mantid.kernel import logger
 
 
-def euphonic_available():
-    """Find out if Euphonic modules can be imported, without raising an error
-
-    This allows the Simulation Interface to query the availability of these
-    formats without complex error-handling.
+def euphonic_calculate_modes(
+    filename: str, cutoff: float = 20.0, gamma: bool = True, acoustic_sum_rule: Optional[str] = "reciprocal"
+) -> QpointPhononModes:
     """
-    try:
-        from euphonic.cli.utils import force_constants_from_file  # noqa: F401
-        from euphonic.util import mp_grid  # noqa: F401
-    except ImportError:
-        return False
-    return True
-
-
-def euphonic_calculate_modes(filename: str, cutoff: float = 20.0, gamma: bool = True, acoustic_sum_rule: Optional[str] = "reciprocal"):
-    """
-    Read force constants file with Euphonic and sample frequencies/modes
+    Read phonon data file with Euphonic and sample frequencies/modes if necessary
 
     :param filename: Input data
     :param cutoff:
@@ -41,15 +37,25 @@ def euphonic_calculate_modes(filename: str, cutoff: float = 20.0, gamma: bool = 
         the correction. If None, no correction is applied. This option is
         referred to as "asr" in the Euphonic python API and command-line tools.
 
-    :returns: euphonic.QpointPhononModes
-
     """
 
-    from math import ceil
-    from euphonic.cli.utils import force_constants_from_file
-    from euphonic.util import mp_grid
+    if version.parse(euphonic_version) > version.parse("1.0"):
+        phonon_data = euphonic.cli.utils.load_data_from_file(filename, frequencies_only=False)
+    else:
+        # Older versions of Euphonic split the file loading helper over two functions
+        try:
+            phonon_data = euphonic.cli.utils.force_constants_from_file(filename)
+        except TypeError:
+            # TypeError is raised if the file was phonon modes rather than force constants,
+            # so see if the file contains mode data directly
+            phonon_data = euphonic.cli.utils.modes_from_file(filename)
 
-    fc = force_constants_from_file(filename)
+    if isinstance(phonon_data, QpointPhononModes):
+        return phonon_data
+
+    # Did not return: should be ForceConstants. Now we interpolate these to obtain modes on regular grid.
+    fc = phonon_data
+
     recip_lattice_lengths = np.linalg.norm(fc.crystal.reciprocal_cell().to("1/angstrom").magnitude, axis=1)
     mp_sampling = [ceil(x) for x in (cutoff * recip_lattice_lengths / (2 * np.pi))]
     qpts = mp_grid(mp_sampling)
@@ -61,12 +67,15 @@ def euphonic_calculate_modes(filename: str, cutoff: float = 20.0, gamma: bool = 
         qpts += offsets
 
     logger.notice("Calculating phonon modes on {} grid".format("x".join(map(str, mp_sampling))))
-    modes = fc.calculate_qpoint_phonon_modes(qpts, asr=acoustic_sum_rule)
+    # Gamma-point splitting is suitable for band structures but gives worse statistics for DOS
+    modes = fc.calculate_qpoint_phonon_modes(qpts, asr=acoustic_sum_rule, splitting=False)
 
     return modes
 
 
-def get_data_with_euphonic(filename: str, cutoff: float = 20.0, gamma: bool = True, acoustic_sum_rule: Optional[str] = None):
+def get_data_with_euphonic(
+    filename: str, cutoff: float = 20.0, gamma: bool = True, acoustic_sum_rule: Optional[str] = None
+) -> Tuple[dict, dict]:
     """
     Read force constants file with Euphonic and sample frequencies/modes
 

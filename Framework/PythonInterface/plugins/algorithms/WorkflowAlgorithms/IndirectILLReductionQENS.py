@@ -9,11 +9,10 @@ import numpy
 from mantid import mtd
 from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator, FloatArrayMandatoryValidator, IntBoundedValidator
 from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, FileAction, WorkspaceGroupProperty, Progress
-from mantid.simpleapi import *  # noqa
+from mantid.simpleapi import *
 
 
 class IndirectILLReductionQENS(PythonAlgorithm):
-
     _sample_files = None
     _alignment_files = None
     _background_files = None
@@ -48,7 +47,6 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         return "IndirectILLReductionQENS"
 
     def PyInit(self):
-
         self.declareProperty(MultipleFileProperty("Run", extensions=["nxs"]), doc="Run number(s) of sample run(s).")
 
         self.declareProperty(
@@ -161,7 +159,6 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         )
 
     def validateInputs(self):
-
         issues = dict()
 
         uo = self.getProperty("UnmirrorOption").value
@@ -185,7 +182,6 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         return issues
 
     def setUp(self):
-
         self._sample_file = self.getPropertyValue("Run")
         self._alignment_file = self.getPropertyValue("AlignmentRun").replace(",", "+")  # automatic summing
         self._background_file = self.getPropertyValue("BackgroundRun").replace(",", "+")  # automatic summing
@@ -306,7 +302,6 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         DeleteWorkspace(tmp_int)
 
     def PyExec(self):
-
         self.setUp()
 
         self._filter_all_input_files()
@@ -458,7 +453,6 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 raise RuntimeError("Inconsistent mirror sense in alignment run. Unable to perform unmirror.")
 
         if wings == 1:  # one wing
-
             name = mtd[ws].getItem(0).getName()
 
             if self._unmirror_option < 6:  # do unmirror 0, i.e. nothing
@@ -476,7 +470,6 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 )
 
         elif wings == 2:  # two wing
-
             left = mtd[ws].getItem(0).getName()
             right = mtd[ws].getItem(1).getName()
 

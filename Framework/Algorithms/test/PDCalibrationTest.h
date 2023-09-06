@@ -114,6 +114,16 @@ void createSampleWS() {
   moveInstr.setProperty("RelativePosition", false);
   moveInstr.execute();
 }
+
+std::vector<double> convertPosToD(const double difc) {
+  using Mantid::Kernel::UnitParams;
+  std::vector<double> dValues(PEAK_TOFS);
+  Mantid::Kernel::Units::dSpacing dSpacingUnit;
+  std::vector<double> unusedy;
+  dSpacingUnit.fromTOF(dValues, unusedy, -1., 0, Mantid::Kernel::UnitParametersMap{{UnitParams::difc, difc}});
+
+  return dValues;
+}
 } // namespace
 
 class PDCalibrationTest : public CxxTest::TestSuite {
@@ -125,7 +135,18 @@ public:
 
   PDCalibrationTest() { FrameworkManager::Instance(); }
 
-  void setUp() override { createSampleWS(); }
+  void setUp() override {
+    // individual spectra
+    createSampleWS();
+
+    // group detectors
+    GroupDetectors2 groupDet;
+    groupDet.initialize();
+    groupDet.setPropertyValue("InputWorkspace", "PDCalibrationTest_WS");
+    groupDet.setPropertyValue("OutputWorkspace", "PDCalibrationTest_WS_grouped");
+    groupDet.setPropertyValue("DetectorList", "100,101,102,103");
+    groupDet.execute();
+  }
 
   void test_Init() {
     PDCalibration alg;
@@ -162,11 +183,7 @@ public:
 
   void test_exec_difc() {
     // setup the peak postions based on transformation from detID=155
-    using Mantid::Kernel::UnitParams;
-    std::vector<double> dValues(PEAK_TOFS);
-    Mantid::Kernel::Units::dSpacing dSpacingUnit;
-    std::vector<double> unusedy;
-    dSpacingUnit.fromTOF(dValues, unusedy, -1., 0, Mantid::Kernel::UnitParametersMap{{UnitParams::difc, DIFC_155}});
+    std::vector<double> dValues = convertPosToD(DIFC_155);
 
     const std::string prefix{"PDCalibration_difc"};
 
@@ -392,14 +409,10 @@ public:
   }
 
   void test_exec_fit_diff_constants_with_chisq() {
-    using Mantid::Kernel::UnitParams;
     // setup the peak postions based on transformation from detID=155
     // allow refining DIFA, but don't set the transformation to require it
     // setup the peak postions based on transformation from detID=155
-    std::vector<double> dValues(PEAK_TOFS);
-    Mantid::Kernel::Units::dSpacing dSpacingUnit;
-    std::vector<double> unusedy;
-    dSpacingUnit.fromTOF(dValues, unusedy, -1., 0, Mantid::Kernel::UnitParametersMap{{UnitParams::difc, DIFC_155}});
+    std::vector<double> dValues = convertPosToD(DIFC_155);
 
     const std::string prefix{"PDCalibration_difc"};
 
@@ -440,27 +453,15 @@ public:
   }
 
   void test_exec_grouped_detectors() {
-    using Mantid::Kernel::UnitParams;
-    // group detectors
-    GroupDetectors2 groupDet;
-    groupDet.initialize();
-    groupDet.setPropertyValue("InputWorkspace", "PDCalibrationTest_WS");
-    groupDet.setPropertyValue("OutputWorkspace", "PDCalibrationTest_WS");
-    groupDet.setPropertyValue("DetectorList", "100,101,102,103");
-    groupDet.execute();
-
     // setup the peak postions based on transformation from detID=155
-    std::vector<double> dValues(PEAK_TOFS);
-    Mantid::Kernel::Units::dSpacing dSpacingUnit;
-    std::vector<double> unusedy;
-    dSpacingUnit.fromTOF(dValues, unusedy, -1., 0, Mantid::Kernel::UnitParametersMap{{UnitParams::difc, DIFC_155}});
+    std::vector<double> dValues = convertPosToD(DIFC_155);
 
     const std::string prefix{"PDCalibration_difc"};
 
     PDCalibration alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "PDCalibrationTest_WS_grouped"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
@@ -470,10 +471,47 @@ public:
 
     ITableWorkspace_sptr calTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(prefix + "cal");
     TS_ASSERT(calTable);
+    TS_ASSERT_EQUALS(calTable->rowCount(), 100); // all detids are included
     Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
     std::vector<int> detIDs = col0->data();
     // test that the cal table has the same difc value for grouped dets
     size_t index = std::find(detIDs.begin(), detIDs.end(), 100) - detIDs.begin();
+    TS_ASSERT_DELTA(calTable->cell<double>(index + 0, 1), calTable->cell<double>(index, 1), 1E-5); // det 100
+    TS_ASSERT_DELTA(calTable->cell<double>(index + 1, 1), calTable->cell<double>(index, 1), 1E-5); // det 101
+    TS_ASSERT_DELTA(calTable->cell<double>(index + 2, 1), calTable->cell<double>(index, 1), 1E-5); // det 102
+    TS_ASSERT_DELTA(calTable->cell<double>(index + 3, 1), calTable->cell<double>(index, 1), 1E-5); // det 103
+  }
+
+  void test_exec_grouped_detectors_limit_spectra() {
+    // setup the peak postions based on transformation from detID=155
+    std::vector<double> dValues = convertPosToD(DIFC_155);
+
+    const std::string prefix{"PDCalibration_difc"};
+
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "PDCalibrationTest_WS_grouped"));
+    // selecting only the pixel that was grouped
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StopWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    ITableWorkspace_sptr calTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(prefix + "cal");
+    TS_ASSERT(calTable);
+    TS_ASSERT_EQUALS(calTable->rowCount(), 4); // only the grouped detectors should be included
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+    // test that the cal table has the same difc value for grouped dets
+    size_t index = std::find(detIDs.begin(), detIDs.end(), 100) - detIDs.begin();
+    TS_ASSERT_EQUALS(index, 0); // should start at zero
+    TS_ASSERT_DELTA(calTable->cell<double>(index + 0, 1), calTable->cell<double>(index, 1), 1E-5); // det 100
     TS_ASSERT_DELTA(calTable->cell<double>(index + 1, 1), calTable->cell<double>(index, 1), 1E-5); // det 101
     TS_ASSERT_DELTA(calTable->cell<double>(index + 2, 1), calTable->cell<double>(index, 1), 1E-5); // det 102
     TS_ASSERT_DELTA(calTable->cell<double>(index + 3, 1), calTable->cell<double>(index, 1), 1E-5); // det 103

@@ -20,7 +20,7 @@ class SANSReductionCore(SANSReductionCoreBase):
         return "SANS\\Reduction"
 
     def summary(self):
-        return " Runs the the core reduction elements."
+        return " Runs the core reduction elements."
 
     def PyInit(self):
         self._pyinit_input()

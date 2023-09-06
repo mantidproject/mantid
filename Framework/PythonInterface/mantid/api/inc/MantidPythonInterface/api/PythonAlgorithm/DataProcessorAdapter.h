@@ -98,17 +98,9 @@ public:
     return this->getProcessProperties(propertyManager);
   }
 
-  API::Workspace_sptr assembleProxy(const std::string &partialWSName, const std::string &outputWSName) {
-    return this->assemble(partialWSName, outputWSName);
-  }
-
   void saveNexusProxy(const std::string &outputWSName, const std::string &outputFile) {
     this->saveNexus(outputWSName, outputFile);
   }
-
-  bool isMainThreadProxy() { return this->isMainThread(); }
-
-  int getNThreadsProxy() { return this->getNThreads(); }
   // ------------------------------------------------------------------------
 };
 } // namespace PythonInterface

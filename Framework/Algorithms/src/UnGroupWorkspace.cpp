@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/UnGroupWorkspace.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -53,6 +52,8 @@ void UnGroupWorkspace::exec() {
   if (!wsGrpSptr) {
     throw std::runtime_error("Selected Workspace is not a WorkspaceGroup");
   }
+  // add algorithm history to the workspaces being released from the group
+  fillHistory(wsGrpSptr->getAllItems());
   // Notify observers that a WorkspaceGroup is about to be unrolled
   data_store.notificationCenter.postNotification(new Mantid::API::WorkspaceUnGroupingNotification(inputws, wsSptr));
   // Now remove the WorkspaceGroup from the ADS

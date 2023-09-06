@@ -17,8 +17,11 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
         super(SampleTransmissionCalculatorView, self).__init__(parent)
         self.setupUi(self)
         fig = Figure()
+        fig.set_layout_engine(layout="tight")
         self.axes = fig.add_subplot(111)
         self.plot_frame = FigureCanvas(fig)
+        self.axes.set_xlabel("Wavelength (Å)")
+        self.axes.set_ylabel("Transmission (%)")
         self.output_layout.replaceWidget(self.placeholder_widget, self.plot_frame)
         self.assistant_process = QtCore.QProcess(self)
         self.validation_label.setStyleSheet("QLabel { color : red; }")
@@ -26,6 +29,12 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
         self.chemical_formula_err.setStyleSheet("QLabel { color : red; }")
         self.density_err.setStyleSheet("QLabel { color : red; }")
         self.thickness_err.setStyleSheet("QLabel { color : red; }")
+        self.multiple_line_edit.setToolTip(
+            "A comma separated list of first bin boundary, width, last bin boundary. \n"
+            "Optionally this can be followed by a comma and more widths and last boundary pairs. \n"
+            "E.g. 0,100,20000: from 0 rebin in constant size bins of 100 up to 20,000. \n"
+            "Or 0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000."
+        )
 
     def get_input_dict(self):
         input_dict = {
@@ -62,10 +71,17 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
     def plot(self, x, y):
         self.axes.cla()
         self.axes.plot(x, y)
+        self.axes.set_xlabel("Wavelength (Å)")
+        self.axes.set_ylabel("Transmission (%)")
         self.plot_frame.figure.tight_layout()
         self.plot_frame.draw()
 
     def set_validation_label(self, warning_text=""):
+        if warning_text == "":
+            self.validation_label.setStyleSheet("QLabel { color : red; }")
+        else:
+            self.validation_label.setStyleSheet("QLabel { color : red; border: 1px solid red }")
+
         self.validation_label.setText(warning_text)
 
     def clear_error_indicator(self):

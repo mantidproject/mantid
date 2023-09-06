@@ -141,6 +141,19 @@ public:
 
   void testInvalidCorrectionOptionsFromParamsFile() { getDefaultsFromParamsFileThrows("Correction_Invalid"); }
 
+  void testDefaultStitchParamsOptions() {
+    auto result = getDefaults();
+    TS_ASSERT_EQUALS(result.stitchParameters().empty(), true);
+  }
+
+  void testValidStitchParamsOptionsFromParamsFile() {
+    auto result = getDefaultsFromParamsFile("Experiment");
+    auto stitchResults = result.stitchParameters();
+    TS_ASSERT_EQUALS(stitchResults.size(), 1);
+    TS_ASSERT_EQUALS(stitchResults.begin()->first, "ManualScaleFactors");
+    TS_ASSERT_EQUALS(stitchResults.begin()->second, "1");
+  }
+
 private:
   Experiment getDefaults() {
     // Provide the mandatory params file so that we don't throw. Other params

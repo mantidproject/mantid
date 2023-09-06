@@ -524,7 +524,6 @@ std::map<int, double> IntegratePeaksCWSD::getMeasureTime() {
 
 //----------------------------------------------------------------------------------------------
 /** Get peak information from peaks workspace
- * @return
  */
 void IntegratePeaksCWSD::getPeakInformation() {
   m_vecPeaks = m_peaksWS->getPeaks();

@@ -6,7 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Run.h"
 #include "MantidAlgorithms/DllConfig.h"
 
@@ -18,7 +19,7 @@ namespace Algorithms {
   @author
   @date 2011-07-18
 */
-class MANTID_ALGORITHMS_DLL RemovePromptPulse : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL RemovePromptPulse : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override;
@@ -41,6 +42,7 @@ private:
   void exec() override;
   /// Try to get the frequency from a given name.
   double getFrequency(const API::Run &run);
+  void getTofRange(const API::MatrixWorkspace_const_sptr &wksp, double &tmin, double &tmax);
   std::vector<double> calculatePulseTimes(const double tmin, const double tmax, const double period);
 };
 

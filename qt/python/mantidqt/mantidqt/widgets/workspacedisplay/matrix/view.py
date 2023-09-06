@@ -169,8 +169,15 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         :param position: The position to open the menu, e.g. where
                          the mouse button was clicked
         """
-        context_menu = self.setup_bin_context_menu(self.currentWidget())
-        context_menu.exec_(self.currentWidget().horizontalHeader().mapToGlobal(position))
+        table = self.currentWidget()
+        context_menu = self.setup_bin_context_menu(table)
+        header = table.horizontalHeader()
+        # If you right-click on a column header, then select that column, unless you're already clicking
+        # inside a selected column
+        index_of_selected_column = header.logicalIndexAt(position)
+        if index_of_selected_column not in [x.column() for x in table.selectionModel().selectedColumns()]:
+            table.selectColumn(index_of_selected_column)
+        context_menu.exec_(header.mapToGlobal(position))
 
     def spectra_context_menu_opened(self, position):
         """
@@ -178,8 +185,15 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         :param position: The position to open the menu, e.g. where
                          the mouse button was clicked
         """
-        context_menu = self.setup_spectra_context_menu(self.currentWidget())
-        context_menu.exec_(self.currentWidget().verticalHeader().mapToGlobal(position))
+        table = self.currentWidget()
+        context_menu = self.setup_spectra_context_menu(table)
+        header = table.verticalHeader()
+        # If you right-click on a row header, then select that row, unless you're already clicking
+        # inside a selected row
+        index_of_selected_row = header.logicalIndexAt(position)
+        if index_of_selected_row not in [x.row() for x in table.selectionModel().selectedRows()]:
+            table.selectRow(index_of_selected_row)
+        context_menu.exec_(header.mapToGlobal(position))
 
     def setup_plot_bin_actions(self, context_menu, table):
         plot_bin_action = QAction(self.GRAPH_ICON, "Plot bin (values only)", self)

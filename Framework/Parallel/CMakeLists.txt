@@ -1,57 +1,28 @@
 set(SRC_FILES
-    src/Communicator.cpp
-    src/ExecutionMode.cpp
     src/IO/Chunker.cpp
     src/IO/EventLoader.cpp
-    src/IO/EventParser.cpp
     src/IO/EventsListsShmemManager.cpp
     src/IO/EventsListsShmemStorage.cpp
     src/IO/MultiProcessEventLoader.cpp
     src/IO/NXEventDataLoader.cpp
     src/IO/EventLoaderChild.cpp
-    src/Request.cpp
-    src/StorageMode.cpp
-    src/ThreadingBackend.cpp
     src/IO/EventLoaderHelpers.cpp
 )
 
 set(INC_FILES
-    inc/MantidParallel/Collectives.h
-    inc/MantidParallel/Communicator.h
-    inc/MantidParallel/ExecutionMode.h
     inc/MantidParallel/IO/Chunker.h
     inc/MantidParallel/IO/EventDataPartitioner.h
     inc/MantidParallel/IO/EventLoader.h
     inc/MantidParallel/IO/EventLoaderHelpers.h
-    inc/MantidParallel/IO/EventParser.h
     inc/MantidParallel/IO/EventsListsShmemManager.h
     inc/MantidParallel/IO/EventsListsShmemStorage.h
     inc/MantidParallel/IO/MultiProcessEventLoader.h
     inc/MantidParallel/IO/NXEventDataLoader.h
     inc/MantidParallel/IO/NXEventDataSource.h
     inc/MantidParallel/IO/PulseTimeGenerator.h
-    inc/MantidParallel/Nonblocking.h
-    inc/MantidParallel/Request.h
-    inc/MantidParallel/Status.h
-    inc/MantidParallel/StorageMode.h
-    inc/MantidParallel/ThreadingBackend.h
 )
 
-set(TEST_FILES
-    ChunkerTest.h
-    CollectivesTest.h
-    CommunicatorTest.h
-    EventDataPartitionerTest.h
-    EventLoaderTest.h
-    EventParserTest.h
-    ExecutionModeTest.h
-    NonblockingTest.h
-    ParallelRunnerTest.h
-    PulseTimeGeneratorTest.h
-    RequestTest.h
-    StorageModeTest.h
-    ThreadingBackendTest.h
-)
+set(TEST_FILES ChunkerTest.h EventDataPartitionerTest.h PulseTimeGeneratorTest.h)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
@@ -132,11 +103,7 @@ target_include_directories(
 generate_mantid_export_header(Parallel FALSE)
 
 # Installation settings
-if(CONDA_ENV)
-  set(TARGET_EXPORT_NAME "MantidParallelTargets")
-  mtd_install_framework_lib(TARGETS Parallel INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
-else()
-  mtd_install_targets(TARGETS Parallel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
-endif()
+set(TARGET_EXPORT_NAME "MantidParallelTargets")
+mtd_install_framework_lib(TARGETS Parallel INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
 
 mtd_install_targets(TARGETS EventParallelLoader INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

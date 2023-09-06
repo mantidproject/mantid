@@ -251,7 +251,8 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
     # create a subplot of the appropriate number of dimensions
     # extend in number of columns if the number of plottables is not a square number
     workspaces_len = len(workspaces)
-    fig, axes, nrows, ncols, cbar_axis = create_subplots(workspaces_len, fig=fig, add_cbar_axis=True)
+    # constrained layout since adding colour bar later
+    fig, axes, nrows, ncols = create_subplots(workspaces_len, fig=fig, layout_engine="constrained")
 
     plots = []
     row_idx, col_idx = 0, 0
@@ -281,11 +282,8 @@ def pcolormesh(workspaces, fig=None, color_norm=None, normalize_by_bin_width=Non
     for pt in plots:
         pt.set_clim(colorbar_min, colorbar_max)
 
-    # Adjust locations to ensure the plots don't overlap
-    fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
-
     axes = axes.ravel()
-    colorbar = fig.colorbar(pcm, cax=cbar_axis)
+    colorbar = fig.colorbar(pcm, ax=axes)
     add_colorbar_label(colorbar, axes)
 
     if fig.canvas.manager is not None:

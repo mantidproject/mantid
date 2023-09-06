@@ -271,7 +271,7 @@ public:
     FunctionParameterDecorator_sptr fn = getFunctionParameterDecoratorGaussian();
     IFunction_sptr decoratedFunction = fn->getDecoratedFunction();
 
-    fn->tie("Height", "Height=2.0*Sigma");
+    fn->tie("Height", "2.0*Sigma");
     ParameterTie *tie = fn->getTie(fn->parameterIndex("Height"));
     TS_ASSERT(tie);
     TS_ASSERT_EQUALS(decoratedFunction->getTie(0), tie);

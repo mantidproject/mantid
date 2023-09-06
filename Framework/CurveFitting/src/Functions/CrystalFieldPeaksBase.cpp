@@ -335,7 +335,7 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en, Comple
     case 's':
     case 'J':
     case 'j': {
-      if (ion.size() > 1 && std::isdigit(ion[1])) {
+      if (ion.size() > 1 && std::isdigit(static_cast<unsigned char>(ion[1]))) {
         // Need to store as 2J to allow half-integer values
         try {
           auto J2 = std::stof(ion.substr(1)) * 2.;

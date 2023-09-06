@@ -105,11 +105,24 @@ void ExperimentPresenter::notifyInstrumentChanged(std::string const &instrumentN
   restoreDefaults();
 }
 
+namespace {
+bool hasUpdatedSettings(boost::optional<LookupRow> const lookupRow, PreviewRow const &previewRow) {
+  return lookupRow->roiDetectorIDs() != previewRow.getSelectedBanks() ||
+         lookupRow->processingInstructions() != previewRow.getProcessingInstructions(ROIType::Signal) ||
+         lookupRow->backgroundProcessingInstructions() != previewRow.getProcessingInstructions(ROIType::Background) ||
+         lookupRow->transmissionProcessingInstructions() != previewRow.getProcessingInstructions(ROIType::Transmission);
+}
+} // namespace
+
 void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewRow) {
   if (!hasValidSettings()) {
     throw InvalidTableException("The Experiment Settings table contains invalid settings.");
   }
   if (auto const foundRow = m_model.findLookupRow(previewRow, m_thetaTolerance)) {
+    if (!hasUpdatedSettings(foundRow, previewRow)) {
+      return;
+    }
+
     auto lookupRowCopy = *foundRow;
 
     lookupRowCopy.setRoiDetectorIDs(previewRow.getSelectedBanks());
@@ -120,6 +133,7 @@ void ExperimentPresenter::notifyPreviewApplyRequested(PreviewRow const &previewR
 
     m_model.updateLookupRow(std::move(lookupRowCopy), m_thetaTolerance);
     updateViewFromModel();
+    m_mainPresenter->notifySettingsChanged();
   } else {
     throw RowNotFoundException("There is no row with angle matching '" + std::to_string(previewRow.theta()) +
                                "' in the Lookup Table.");
