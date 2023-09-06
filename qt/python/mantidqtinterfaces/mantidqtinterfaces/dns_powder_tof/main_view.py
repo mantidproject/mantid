@@ -45,8 +45,6 @@ class DNSReductionGUIView(QMainWindow):
         self.modus_mapping = {
             self.ui.actionPowder_Elastic: "powder_elastic",
             self.ui.actionPowder_TOF: "powder_tof",
-            # self.ui.actionSingle_crystal_elastic: 'sc_elastic',
-            # self.ui.actionSingle_crystal_TOF: 'sc_tof',
         }
         self.modus_titles = {
             "powder_elastic": "DNS Reduction GUI - Powder Elastic",
