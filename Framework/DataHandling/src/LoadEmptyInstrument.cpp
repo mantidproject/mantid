@@ -91,11 +91,9 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
 /// Initialisation method.
 void LoadEmptyInstrument::init() {
 
-  declareProperty(
-      std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad, validFilenameExtensions),
-      "The filename (including its full or relative path) of an instrument "
-      "definition file. Supported file name extensions are: .xml, hdf5, .nxs, or .nxs.h5, all case-insensitive."
-      "Note, Filename or InstrumentName must be specified, but not both.");
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad, validFilenameExtensions),
+                  "Path to a file (full or relative) defining the instrument. The file could be an"
+                  " IDF or a NeXus Geometry file. Note, Filename or InstrumentName must be specified, but not both.");
   declareProperty("InstrumentName", "",
                   "Name of instrument. Can be used instead of Filename to "
                   "specify an IDF");
