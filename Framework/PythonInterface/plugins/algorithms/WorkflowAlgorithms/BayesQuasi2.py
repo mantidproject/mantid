@@ -18,7 +18,7 @@ import numpy as np
 from quickBayesHelper import QuickBayesTemplate
 
 try:
-    pass  # fmt: skip
+    import quickBayes  # noqa: F401
 except (Exception, Warning):
     import subprocess
 
