@@ -192,7 +192,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", inputFile));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", wsName));
 
-    TS_ASSERT_THROWS(loader.execute(), const std::runtime_error &);
+    std::string err_msg{"No instrument XML definition found"};
+    TS_ASSERT_THROWS_EQUALS(loader.execute(), const std::runtime_error &e, std::string(e.what()).find(err_msg), 0);
   }
 
   void testLoadFileWithInvalidExtension() {
@@ -209,7 +210,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", inputFile));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", wsName));
 
-    TS_ASSERT_THROWS(loader.execute(), const std::runtime_error &);
+    std::string err_msg{"Invalid string .xyz for enumerated string"};
+    TS_ASSERT_THROWS_EQUALS(loader.execute(), const std::runtime_error &e, std::string(e.what()).find(err_msg), 0);
   }
 
   void testParameterTags() {
