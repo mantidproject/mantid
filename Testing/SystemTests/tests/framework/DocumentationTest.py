@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import os
 import pathlib
+from pathlib import Path
 
 from systemtesting import MantidSystemTest
 from mantid.api import AlgorithmFactory, FunctionFactory
@@ -57,6 +57,17 @@ FIT_FUNCTIONS_WITH_NO_DOCS = [
 ]
 
 
+def file_exists_under_dir(dir_path: Path, file_name: str) -> bool:
+    """
+    Search for file name in hte given directory and all its subdirectories
+    :param dir_path: directory to search under
+    :param file_name: name of the file
+    :return: bool, true if file found
+    """
+    found_files = [path for path in dir_path.rglob(file_name) if path.is_file]
+    return len(found_files) > 0
+
+
 class AlgorithmDocumentationTest(MantidSystemTest):
     """
     This test checks that all registered algorithms have a documentation page.
@@ -70,14 +81,13 @@ class AlgorithmDocumentationTest(MantidSystemTest):
         for name, versions in all_algs.items():
             for version in versions:
                 file_name = f"{name}-v{version}.rst"
-                file_path = ALG_DOCS_PATH / file_name
-                if not os.path.exists(file_path):
+                if not file_exists_under_dir(ALG_DOCS_PATH, file_name):
                     if file_name not in ALGORITHMS_WITH_NO_DOCS:
-                        missing.append(str(file_path))
+                        missing.append(str(file_name))
                 elif file_name in ALGORITHMS_WITH_NO_DOCS:
                     raise FileExistsError(f"{file_name} exists but is still in the exceptions list. Please update the list.")
 
-        self.assertEqual(len(missing), 0, msg="Missing documentation for the following algorithms:\n" + "\n".join(missing))
+        self.assertEqual(len(missing), 0, msg="Missing the following algorithm docs:\n" + "\n".join(missing))
 
 
 class FittingDocumentationTest(MantidSystemTest):
@@ -92,11 +102,10 @@ class FittingDocumentationTest(MantidSystemTest):
 
         for name in all_fit_funcs:
             file_name = f"{name}.rst"
-            file_path = FIT_DOCS_PATH / file_name
-            if not os.path.exists(file_path):
+            if not file_exists_under_dir(FIT_DOCS_PATH, file_name):
                 if file_name not in FIT_FUNCTIONS_WITH_NO_DOCS:
-                    missing.append(str(file_path))
+                    missing.append(str(file_name))
             elif file_name in FIT_FUNCTIONS_WITH_NO_DOCS:
                 raise FileExistsError(f"{file_name} exists but is still in the exceptions list. Please update the list.")
 
-        self.assertEqual(len(missing), 0, msg="Missing documentation for the following fit functions:\n" + "\n".join(missing))
+        self.assertEqual(len(missing), 0, msg="Missing the following fit function docs:\n" + "\n".join(missing))
