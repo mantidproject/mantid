@@ -102,6 +102,8 @@ std::string IETView::getCustomGrouping() { return m_uiForm.leCustomGroups->text(
 
 std::string IETView::getGroupOutputOption() { return m_uiForm.cbGroupOutput->currentText().toStdString(); }
 
+bool IETView::getGroupOutputCheckbox() { return m_uiForm.ckGroupOutput->isChecked(); }
+
 IndirectPlotOptionsView *IETView::getPlotOptionsView() { return m_uiForm.ipoPlotOptions; }
 
 std::string IETView::getFirstFilename() { return m_uiForm.dsRunFiles->getFirstFilename().toStdString(); }
@@ -145,6 +147,20 @@ void IETView::showSaveCustomGroupingDialog(std::string const &customGroupingOutp
 void IETView::displayWarning(std::string const &message) {
   QMessageBox::warning(nullptr, "", QString::fromStdString(message));
 }
+
+void IETView::setBackgroundSectionVisible(bool visible) { m_uiForm.gbBackgroundRemoval->setVisible(visible); }
+void IETView::setPlotTimeSectionVisible(bool visible) { m_uiForm.gbPlotTime->setVisible(visible); }
+void IETView::setPlottingOptionsVisible(bool visible) { m_uiForm.fPlottingOptions->setVisible(visible); }
+void IETView::setScaleFactorVisible(bool visible) {
+  m_uiForm.ckScaleMultiplier->setVisible(visible);
+  m_uiForm.spScaleMultiplier->setVisible(visible);
+}
+void IETView::setAclimaxSaveVisible(bool visible) { m_uiForm.ckSaveAclimax->setVisible(visible); }
+void IETView::setNXSPEVisible(bool visible) { m_uiForm.ckSaveNXSPE->setVisible(visible); }
+void IETView::setFoldMultipleFramesVisible(bool visible) { m_uiForm.ckFold->setVisible(visible); }
+void IETView::setOutputInCm1Visible(bool visible) { m_uiForm.ckCm1Units->setVisible(visible); }
+void IETView::setGrouptOutputCheckBoxVisible(bool visible) { m_uiForm.ckGroupOutput->setVisible(visible); }
+void IETView::setGroupOutputDropdownVisible(bool visible) { m_uiForm.cbGroupOutput->setVisible(visible); }
 
 void IETView::setDetailedBalance(double detailedBalance) { m_uiForm.spDetailedBalance->setValue(detailedBalance); }
 

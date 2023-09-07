@@ -133,12 +133,12 @@ void IETModel::setOutputProperties(IAlgorithm_sptr const &reductionAlg, IETOutpu
   reductionAlg->setProperty("OutputWorkspace", outputGroupName);
 }
 
-std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::string const &inputFiles) {
+std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::string const &inputText) {
   std::string instrument = instData.getInstrument();
   std::string analyser = instData.getAnalyser();
   std::string reflection = instData.getReflection();
 
-  return instrument + inputFiles + "_" + analyser + "_" + reflection + "_Reduced";
+  return instrument + inputText + "_" + analyser + "_" + reflection + "_Reduced";
 }
 
 std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData instData,
@@ -154,7 +154,7 @@ std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batch
   setAnalysisProperties(reductionAlg, runData.getAnalysisData());
   setGroupingProperties(reductionAlg, runData.getGroupingData(), runData.getConversionData());
 
-  std::string outputGroupName = getOuputGroupName(instData, runData.getInputData().getInputFiles());
+  std::string outputGroupName = getOuputGroupName(instData, runData.getInputData().getInputText());
   setOutputProperties(reductionAlg, runData.getOutputData(), outputGroupName);
 
   batchAlgoRunner->addAlgorithm(reductionAlg);
@@ -359,19 +359,26 @@ double IETModel::loadDetailedBalance(std::string const &filename) {
   return detailedBalance;
 }
 
-std::vector<std::string> IETModel::groupWorkspaces(std::string groupName, std::string groupOption) {
+std::vector<std::string> IETModel::groupWorkspaces(std::string groupName, std::string instrument,
+                                                   std::string groupOption, bool shouldGroup) {
   std::vector<std::string> outputWorkspaces;
 
   if (doesExistInADS(groupName)) {
     if (auto const outputGroup = getADSWorkspaceGroup(groupName)) {
       outputWorkspaces = outputGroup->getNames();
 
-      if (groupOption == IETGroupOption::UNGROUPED) {
-        ungroupWorkspace(outputGroup->getName());
-      } else if (groupOption == IETGroupOption::SAMPLECHANGERGROUPED) {
-        groupWorkspaceBySampleChanger(outputGroup->getName());
-        // If we are grouping by sample we want to ungroup the reduced group leaving only the sample grouped
-        ungroupWorkspace(outputGroup->getName());
+      if (instrument == "OSIRIS") {
+        if (!shouldGroup) {
+          ungroupWorkspace(outputGroup->getName());
+        }
+      } else {
+        if (groupOption == IETGroupOption::UNGROUPED) {
+          ungroupWorkspace(outputGroup->getName());
+        } else if (groupOption == IETGroupOption::SAMPLECHANGERGROUPED) {
+          groupWorkspaceBySampleChanger(outputGroup->getName());
+          // If we are grouping by sample we want to ungroup the reduced group leaving only the sample grouped
+          ungroupWorkspace(outputGroup->getName());
+        }
       }
     }
   }

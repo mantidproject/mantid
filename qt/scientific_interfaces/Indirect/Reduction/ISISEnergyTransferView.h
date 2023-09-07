@@ -40,6 +40,7 @@ public:
 
   std::string getGroupOutputOption();
   IndirectPlotOptionsView *getPlotOptionsView();
+  bool getGroupOutputCheckbox();
 
   std::string getFirstFilename();
 
@@ -51,6 +52,17 @@ public:
   void showSaveCustomGroupingDialog(std::string const &customGroupingOutput, std::string const &defaultGroupingFilename,
                                     std::string const &saveDirectory);
   void displayWarning(std::string const &message);
+
+  void setBackgroundSectionVisible(bool visible);
+  void setPlotTimeSectionVisible(bool visible);
+  void setPlottingOptionsVisible(bool visible);
+  void setScaleFactorVisible(bool visible);
+  void setAclimaxSaveVisible(bool visible);
+  void setNXSPEVisible(bool visible);
+  void setFoldMultipleFramesVisible(bool visible);
+  void setOutputInCm1Visible(bool visible);
+  void setGrouptOutputCheckBoxVisible(bool visible);
+  void setGroupOutputDropdownVisible(bool visible);
 
   void setDetailedBalance(double detailedBalance);
   void setRunFilesEnabled(bool enable);

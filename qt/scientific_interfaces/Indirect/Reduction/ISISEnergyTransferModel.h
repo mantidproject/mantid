@@ -58,7 +58,8 @@ public:
                                std::string const &customGrouping, std::string const &outputName);
   double loadDetailedBalance(std::string const &filename);
 
-  std::vector<std::string> groupWorkspaces(std::string groupName, std::string groupOption);
+  std::vector<std::string> groupWorkspaces(std::string groupName, std::string intrument, std::string groupOption,
+                                           bool shouldGroup);
   void ungroupWorkspace(std::string const &workspaceName);
   void groupWorkspaceBySampleChanger(std::string const &workspaceName);
 };

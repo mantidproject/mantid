@@ -82,6 +82,29 @@ void IETPresenter::setInstrumentDefault() {
   if (validateInstrumentDetails()) {
     InstrumentData instrumentDetails = getInstrumentData();
     m_view->setInstrumentDefault(instrumentDetails);
+    if (instrumentDetails.getInstrument() == "OSIRIS" || instrumentDetails.getInstrument() == "IRIS") {
+      m_view->setBackgroundSectionVisible(false);
+      m_view->setPlotTimeSectionVisible(false);
+      m_view->setPlottingOptionsVisible(false);
+      m_view->setScaleFactorVisible(false);
+      m_view->setAclimaxSaveVisible(false);
+      m_view->setNXSPEVisible(false);
+      m_view->setFoldMultipleFramesVisible(false);
+      m_view->setOutputInCm1Visible(false);
+      m_view->setGroupOutputDropdownVisible(false);
+      m_view->setGrouptOutputCheckBoxVisible(true);
+    } else {
+      m_view->setBackgroundSectionVisible(true);
+      m_view->setPlotTimeSectionVisible(true);
+      m_view->setPlottingOptionsVisible(true);
+      m_view->setScaleFactorVisible(true);
+      m_view->setAclimaxSaveVisible(true);
+      m_view->setNXSPEVisible(true);
+      m_view->setFoldMultipleFramesVisible(true);
+      m_view->setOutputInCm1Visible(true);
+      m_view->setGroupOutputDropdownVisible(true);
+      m_view->setGrouptOutputCheckBoxVisible(false);
+    }
   }
 }
 
@@ -149,7 +172,9 @@ void IETPresenter::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
   if (!error) {
-    m_outputWorkspaces = m_model->groupWorkspaces(m_outputGroupName, m_view->getGroupOutputOption());
+    InstrumentData instrumentData = getInstrumentData();
+    m_outputWorkspaces = m_model->groupWorkspaces(m_outputGroupName, instrumentData.getInstrument(),
+                                                  m_view->getGroupOutputOption(), m_view->getGroupOutputCheckbox());
     m_pythonExportWsName = m_outputWorkspaces[0];
 
     if (m_outputWorkspaces.size() != 0) {
