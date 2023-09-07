@@ -1179,6 +1179,9 @@ def group_workspaces_if_required(reduction_package, output_mode, save_can, event
             add_to_group(reduced_lab, reduction_package.reduced_lab_base_name)
             add_to_group(reduced_hab, reduction_package.reduced_hab_base_name)
 
+    if requires_grouping:
+        group_bgsub_if_required(reduction_package)
+
     # Can group workspace depends on if save_can is checked and output_mode
     # Logic table for which group to save CAN into
     # CAN | FILE | In OPTIMIZATION group
@@ -1209,6 +1212,22 @@ def group_workspaces_if_required(reduction_package, output_mode, save_can, event
     add_to_group(reduction_package.calculated_transmission_can, reduction_package.calculated_transmission_can_base_name)
     add_to_group(reduction_package.unfitted_transmission, reduction_package.unfitted_transmission_base_name)
     add_to_group(reduction_package.unfitted_transmission_can, reduction_package.unfitted_transmission_can_base_name)
+
+
+def group_bgsub_if_required(reduction_package):
+    reduced_bgsub = reduction_package.reduced_bgsub
+    is_bgsub_reduction = reduced_bgsub is not None
+
+    if is_bgsub_reduction:
+        base_names = []
+        if reduction_package.reduction_mode == ReductionMode.HAB:
+            base_names = reduction_package.reduced_lab_base_name
+        if reduction_package.reduction_mode == ReductionMode.LAB:
+            base_names = reduction_package.reduced_lab_base_name
+        if reduction_package.reduction_mode == ReductionMode.MERGED:
+            base_names = reduction_package.reduced_merged_base_name
+        for ws, base_name in zip(reduced_bgsub, base_names):
+            add_to_group(ws, base_name)
 
 
 def add_to_group(workspace, name_of_group_workspace):
