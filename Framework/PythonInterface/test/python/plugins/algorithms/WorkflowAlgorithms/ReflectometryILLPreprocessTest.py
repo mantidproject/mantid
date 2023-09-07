@@ -4,14 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import math
+import numpy
+import unittest
 
 from mantid.kernel import config
 from mantid.api import mtd
-from mantid.simpleapi import ReflectometryILLPreprocess
 from testhelpers import assertRaisesNothing, create_algorithm, illhelpers
-import unittest
 import ReflectometryILL_common as common
-import math
 
 
 class ReflectometryILLPreprocessTest(unittest.TestCase):
