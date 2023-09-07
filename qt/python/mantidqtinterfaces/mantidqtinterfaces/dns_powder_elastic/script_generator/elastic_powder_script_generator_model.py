@@ -63,7 +63,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         return (
             f"ConvertMDHistoToMatrixWorkspace('{sample}_{sample_type}', "
             f"Outputworkspace='mat_{sample}_{sample_type}',"
-            " Normalization='NoNormalization')"
+            " Normalization='NoNormalization', FindXAxis=False)"
             ""
         )
 
@@ -77,7 +77,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
                 ""
             )
         if self._nexus:
-            lines += f"\nSaveNexus('mat_{sample}_{sample_type}'," f" '{self._export_path}/{sample}_{sample_type}.nxs')"
+            lines += f"\nSaveNexus('mat_{sample}_{sample_type}', '{self._export_path}/{sample}_{sample_type}.nxs')"
         return lines
 
     def _get_xyz_lines(self):
@@ -106,7 +106,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             return lines
 
         nsf_sf_pairs = self._get_nsf_sf_pairs()
-        lines += ["# separation of coherent and incoherent scattering of non" " magnetic sample"]
+        lines += ["# separation of coherent and incoherent scattering of non magnetic sample"]
         for sample_field in sorted(nsf_sf_pairs):
             # normally only z is measured but just in case
             lines += [
@@ -139,12 +139,12 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     @staticmethod
     def _get_header_lines():
         lines = [
-            "from mantidqtinterfaces.dns_powder_elastic.scripts." "md_powder_elastic import " "load_all, background_subtraction",
+            "from mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic import load_all, background_subtraction",
             "from mantidqtinterfaces.dns_powder_elastic.scripts.md_powder"
             "_elastic import "
             "vanadium_correction, flipping_ratio_correction",
-            "from mantidqtinterfaces.dns_powder_elastic.scripts.md_powder" "_elastic import " "non_magnetic_separation, xyz_separation",
-            "from mantid.simpleapi import ConvertMDHistoToMatrixWorkspace," " mtd",
+            "from mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic import non_magnetic_separation, xyz_separation",
+            "from mantid.simpleapi import ConvertMDHistoToMatrixWorkspace, mtd",
             "from mantid.simpleapi import SaveAscii, SaveNexus",
             "",
         ]
@@ -166,17 +166,17 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         return ["", f"binning = {binning}"]
 
     def _get_load_data_lines(self):
-        lines = ["wss_sample = load_all(sample_data, binning, " f"normalize_to='{self._norm}')"]
+        lines = [f"wss_sample = load_all(sample_data, binning, normalize_to='{self._norm}')"]
         if self._corrections:
-            lines += ["wss_standard = load_all(standard_data, " f"binning, normalize_to='{self._norm}')"]
+            lines += [f"wss_standard = load_all(standard_data, binning, normalize_to='{self._norm}')"]
         return lines
 
     def _set_loop(self):
         if len(self._sample_data.keys()) == 1:
-            self._loop = "for workspace in wss_sample['" f"{list(self._sample_data.keys())[0]}']:"
+            self._loop = f"for workspace in wss_sample['{list(self._sample_data.keys())[0]}']:"
             self._spacing = "\n" + " " * 4
         else:
-            self._loop = "for sample, workspacelist in wss_sample.items(): " "\n    for workspace in workspacelist:"
+            self._loop = "for sample, workspacelist in wss_sample.items(): \n    for workspace in workspacelist:"
             self._spacing = "\n" + " " * 8
 
     def _get_subtract_bg_from_standard_lines(self):
@@ -192,7 +192,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _get_background_string(self):
         if self._sample_background_correction:
-            return f"{self._spacing}background_subtraction(workspace, " f"factor={self._background_factor})"
+            return f"{self._spacing}background_subtraction(workspace, factor={self._background_factor})"
         return ""
 
     def _get_vana_correction_string(self):
@@ -240,7 +240,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
             "# convert the output sample MDHistoWorkspaces to MatrixWorkspaces",
             f"{self._loop}{self._spacing}ConvertMDHistoToMatrixWorkspace"
             "(workspace, Outputworkspace='mat_{}'.format(workspace), "
-            f"Normalization='NoNormalization'){save_string}",
+            f"Normalization='NoNormalization', FindXAxis=False){save_string}",
             "",
         ]
         return lines
@@ -390,9 +390,9 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         found then the empty string will be returned.
         """
         if self._corrections and not self._standard_data:
-            return "Standard data have to be selected to perform reduction " "of sample data."
+            return "Standard data have to be selected to perform reduction of sample data."
         if self._bank_positions_not_compatible():
-            return "Detector rotation angles of the selected standard data " "do not match the angles of the selected sample data."
+            return "Detector rotation angles of the selected standard data do not match the angles of the selected sample data."
         if self._vana_correction and self._vana_not_in_standard():
             return (
                 "Detector efficiency correction option is chosen, "
