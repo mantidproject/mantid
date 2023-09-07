@@ -107,7 +107,7 @@ void SaveReflectometryAscii::data() {
       if (m_ws->hasDx(0))
         outputval(m_ws->dx(0)[i]);
       else
-        outputval(points[i] * ((points[1] + points[0]) / points[1]));
+        outputval(points[i] * ((points[1] - points[0]) / points[1]));
     }
     if (m_ext == ".lam") {
       // the final column contains wavelength calculated using momentum exchange (first column)
