@@ -1,0 +1,1 @@
+- Monitor for external changes to script files that are open in Mantid to prevent loss of work.
