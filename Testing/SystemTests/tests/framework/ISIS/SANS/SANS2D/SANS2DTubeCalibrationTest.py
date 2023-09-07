@@ -82,6 +82,7 @@ class SANS2DTubeCalibrationRearDetectorTest(systemtesting.MantidSystemTest, SANS
             self.assertTrue(self._tube_diagnostic_workspaces_exist(tube_id))
 
     def validate(self):
+        self.tolerance = 1e-8
         self.disableChecking.append("SpectraMap")
         self.disableChecking.append("Axes")
 
@@ -107,6 +108,7 @@ class SANS2DTubeCalibrationFrontDetectorTest(systemtesting.MantidSystemTest, SAN
                 self.assertEqual(str(e), "\"'Tube_103' does not exist.\"")
 
     def validate(self):
+        self.tolerance = 1e-8
         self.disableChecking.append("SpectraMap")
         self.disableChecking.append("Axes")
 
