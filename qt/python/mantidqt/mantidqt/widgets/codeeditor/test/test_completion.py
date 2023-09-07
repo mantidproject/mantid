@@ -7,7 +7,6 @@
 #  This file is part of the mantid workbench.
 import re
 import unittest
-from distutils.version import LooseVersion
 
 import matplotlib.pyplot as plt  # noqa # Needs importing so it's availiabe in the tests, but isn't actually used.
 import numpy as np
@@ -55,8 +54,7 @@ class CodeCompletionTest(unittest.TestCase):
         self._run_check_call_tip_generated("import numpy as np\n# My code", r"np\.asarray\(a, \[dtype\], .*\)")
 
     def test_numpy_call_tips_generated_handling_wildcards_properly_if_numpy_imported_in_script(self):
-        if LooseVersion(np.__version__) >= LooseVersion("1.21"):
-            self._run_check_call_tip_generated("import numpy as np\n# My code", r"np\.asarray\(a, \[dtype\], \[order\], \*, \[like\]\)")
+        self._run_check_call_tip_generated("import numpy as np\n# My code", r"np\.asarray\(a, \[dtype\], \[order\], \*, \[like\]\)")
 
     def test_call_tips_generated_if_syntax_errors_in_script(self):
         self._run_check_call_tip_generated("from mantid.simpleapi import *\n print 'Hello', 'World'", "Rebin")

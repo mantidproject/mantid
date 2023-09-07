@@ -8,7 +8,6 @@ import numpy as np
 import re
 import unittest
 
-import testhelpers
 import CrystalField
 from mantid.simpleapi import CalculateChiSquared, CreateWorkspace, FlatBackground, FunctionFactory, Gaussian, LinearBackground
 
@@ -148,7 +147,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         y = y / c_mbsr
         expected_y = [12.474955, 1.190169, 0.122781, 0.042940, 10.837438]
         np.testing.assert_equal(x, r)
-        testhelpers.assert_almost_equal(y, expected_y, 6)
+        np.testing.assert_almost_equal(y, expected_y, 6)
 
     def test_get_spectrum_ws(self):
         cfms = CrystalField.CrystalFieldMultiSite(
@@ -231,13 +230,13 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         y = y / c_mbsr
         expected_y = [12.474946, 1.190160, 0.122785, 0.042940, 10.837170]
         np.testing.assert_equal(x, r)
-        testhelpers.assert_almost_equal(y, expected_y, 6)
+        np.testing.assert_almost_equal(y, expected_y, 6)
 
         x, y = cfms.getSpectrum(1, r)
         y = y / c_mbsr
         expected_y = [6.304662, 0.331218, 1.224681, 0.078540, 2.638049]
         np.testing.assert_equal(x, r)
-        testhelpers.assert_almost_equal(y, expected_y, 6)
+        np.testing.assert_almost_equal(y, expected_y, 6)
 
     def test_get_spectrum_ws_multi_spectra(self):
         cfms = CrystalField.CrystalFieldMultiSite(
@@ -304,13 +303,13 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         y = y / c_mbsr
         expected_y = [3.904037, 0.744519, 0.274897, 0.175713, 0.106540]
         np.testing.assert_equal(x, r)
-        testhelpers.assert_almost_equal(y, expected_y, 6)
+        np.testing.assert_almost_equal(y, expected_y, 6)
 
         x, y = cfms.getSpectrum(1, r)
         y = y / c_mbsr
         expected_y = [3.704726, 0.785600, 0.296255, 0.190176, 0.115650]
         np.testing.assert_equal(x, r)
-        testhelpers.assert_almost_equal(y, expected_y, 6)
+        np.testing.assert_almost_equal(y, expected_y, 6)
 
     def test_fit_multi_ion_single_spectrum(self):
         params = {"B20": 0.37737, "B22": 3.9770, "B40": -0.031787, "B42": -0.11611, "B44": -0.12544, "Temperature": 44.0, "FWHM": 1.1}

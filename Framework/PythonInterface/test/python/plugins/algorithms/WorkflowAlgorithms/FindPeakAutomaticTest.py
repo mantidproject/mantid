@@ -398,9 +398,8 @@ class FindPeaksAutomaticTest(unittest.TestCase):
         self.assertPeakFound(peak1, self.centre[0], self.height[0] + 10, self.width[0], 0.05)
         self.assertPeakFound(peak2, self.centre[1], self.height[1] + 10, self.width[1], 0.05)
 
-    def test_find_peaks_is_called_if_scipy_version_higher_1_1_0(self):
+    def test_find_peaks_is_called_correctly(self):
         mock_scipy = mock.MagicMock()
-        mock_scipy.__version__ = "1.1.0"
         mock_scipy.signal.find_peaks.return_value = (self.peakids, {"prominences": self.peakids})
         with mock.patch.dict("sys.modules", scipy=mock_scipy):
             self.alg_instance.process(
@@ -418,27 +417,6 @@ class FindPeaksAutomaticTest(unittest.TestCase):
 
             self.assertEqual(2, mock_scipy.signal.find_peaks.call_count)
             self.assertEqual(0, mock_scipy.signal.find_peaks_cwt.call_count)
-
-    def test_find_peaks_cwt_is_called_if_scipy_version_lower_1_1_0(self):
-        mock_scipy = mock.MagicMock()
-        mock_scipy.__version__ = "1.0.0"
-        mock_scipy.signal.find_peaks.return_value = (self.peakids, {"prominences": self.peakids})
-        with mock.patch.dict("sys.modules", scipy=mock_scipy):
-            self.alg_instance.process(
-                self.x_values,
-                self.y_values,
-                raw_error=np.sqrt(self.y_values),
-                acceptance=0,
-                average_window=50,
-                bad_peak_to_consider=2,
-                use_poisson=False,
-                peak_width_estimate=5,
-                fit_to_baseline=False,
-                prog_reporter=mock.Mock(),
-            )
-
-            self.assertEqual(0, mock_scipy.signal.find_peaks.call_count)
-            self.assertEqual(1, mock_scipy.signal.find_peaks_cwt.call_count)
 
     def test_process_calls_find_good_peaks(self):
         with mock.patch("plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic.CreateWorkspace") as mock_create_ws:

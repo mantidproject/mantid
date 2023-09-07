@@ -7,7 +7,7 @@
 import numpy
 import systemtesting
 from mantid.simpleapi import ConvertUnits, DetectorEfficiencyCorUser, DirectILLCollectData
-from testhelpers import assert_almost_equal
+from numpy.testing import assert_almost_equal
 
 
 class IN4(systemtesting.MantidSystemTest):

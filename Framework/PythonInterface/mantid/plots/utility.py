@@ -6,24 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 # std imports
-import collections
 from contextlib import contextmanager
 from enum import Enum
-from distutils.version import LooseVersion
 
 # 3rd party imports
 from matplotlib import colors
 from matplotlib.legend import Legend
-from matplotlib import colormaps, __version__ as mpl_version_str
+from matplotlib import colormaps
 from matplotlib.container import ErrorbarContainer
 
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
-# matplotlib version information
-MPLVersionInfo = collections.namedtuple("MPLVersionInfo", ("major", "minor", "patch"))
-MATPLOTLIB_VERSION_INFO = MPLVersionInfo._make(map(int, mpl_version_str.split(".")))
-
 # Restrict zooming out of plots.
 ZOOM_LIMIT = 1e300
 
@@ -152,35 +146,20 @@ def get_current_cmap(object):
         return object.get_cmap()
 
 
-def mpl_version_info():
-    """Returns a namedtuple of (major,minor,patch)"""
-    return MATPLOTLIB_VERSION_INFO
-
-
 def row_num(ax):
     """
     Returns the row number of an input axes with relation to a gridspec
-    Version check to avoid calling depreciated method in matplotlib > 3.2
     """
-    if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
-        # An 'inset' axes does not have a subplotspec, so return None
-        return ax.get_subplotspec().rowspan.start if hasattr(ax, "get_subplotspec") else None
-    else:
-        # An 'inset' axes does not have a rowNum, so return None
-        return ax.rowNum if hasattr(ax, "rowNum") else None
+    # An 'inset' axes does not have a subplotspec, so return None
+    return ax.get_subplotspec().rowspan.start if hasattr(ax, "get_subplotspec") else None
 
 
 def col_num(ax):
     """
     Returns the column number of an input axes with relation to a gridspec
-    Version check to avoid calling depreciated method in matplotlib > 3.2
     """
-    if LooseVersion(mpl_version_str) >= LooseVersion("3.2.0"):
-        # An 'inset' axes does not have a subplotspec, so return None
-        return ax.get_subplotspec().colspan.start if hasattr(ax, "get_subplotspec") else None
-    else:
-        # An 'inset' axes does not have a colNum, so return None
-        return ax.colNum if hasattr(ax, "colNum") else None
+    # An 'inset' axes does not have a subplotspec, so return None
+    return ax.get_subplotspec().colspan.start if hasattr(ax, "get_subplotspec") else None
 
 
 def zoom_axis(ax, coord, x_or_y, factor):
