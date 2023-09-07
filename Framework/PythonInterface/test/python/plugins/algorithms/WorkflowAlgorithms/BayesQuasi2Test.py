@@ -42,7 +42,8 @@ class BayesQuasi2Test(unittest.TestCase):
         cls._alg.initialize()
         cls._N_hist = 1
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         """
         Remove workspaces from ADS.
         """

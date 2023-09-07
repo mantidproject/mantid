@@ -32,7 +32,8 @@ class QuickBayesHelperTest(unittest.TestCase):
         cls._alg = QuickBayesTemplate()
         cls._alg.initialize()
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         """
         Remove workspaces from ADS.
         """
