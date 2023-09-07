@@ -83,7 +83,8 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
     def test_get_to_matrix_string(self):
         test_v = self.model._get_to_matrix_string("a1", "vana")
         self.assertEqual(
-            test_v, "ConvertMDHistoToMatrixWorkspace('a1_vana', Outputworkspace='mat_" "a1_vana', Normalization='NoNormalization')"
+            test_v,
+            "ConvertMDHistoToMatrixWorkspace('a1_vana', Outputworkspace='mat_a1_vana', Normalization='NoNormalization', FindXAxis=False)",
         )
 
     def test_get_sep_save_string(self):
@@ -92,7 +93,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.model._export_path = "1234/"
         test_v = self.model._get_sep_save_string("a1", "vana")
         self.assertEqual(
-            test_v, "SaveAscii('mat_a1_vana', '1234//a1_vana.csv', WriteSpectrumID" "=False)\nSaveNexus('mat_a1_vana', '1234//a1_vana.nxs')"
+            test_v, "SaveAscii('mat_a1_vana', '1234//a1_vana.csv', WriteSpectrumID=False)\nSaveNexus('mat_a1_vana', '1234//a1_vana.nxs')"
         )
         self.model._ascii = False
         self.model._nexus = False
@@ -119,7 +120,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(
             test_v[1],
             "ConvertMDHistoToMatrixWorkspace('knso_nuclear_coh', Outputworks"
-            "pace='mat_knso_nuclear_coh', Normalization='NoNormalization')",
+            "pace='mat_knso_nuclear_coh', Normalization='NoNormalization', FindXAxis=False)",
         )
         self.assertEqual(
             test_v[2],
@@ -129,7 +130,8 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         )
         self.assertEqual(
             test_v[3],
-            "ConvertMDHistoToMatrixWorkspace('knso_magnetic', Outputworkspac" "e='mat_knso_magnetic', Normalization='NoNormalization')",
+            "ConvertMDHistoToMatrixWorkspace('knso_magnetic', Outputworkspace='mat_knso_magnetic', "
+            "Normalization='NoNormalization', FindXAxis=False)",
         )
         self.assertEqual(
             test_v[4],
@@ -140,7 +142,8 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         )
         self.assertEqual(
             test_v[5],
-            "ConvertMDHistoToMatrixWorkspace('knso_spin_incoh', Outputworks" "pace='mat_knso_spin_incoh', Normalization='NoNormalization')",
+            "ConvertMDHistoToMatrixWorkspace('knso_spin_incoh', Outputworks"
+            "pace='mat_knso_spin_incoh', Normalization='NoNormalization', FindXAxis=False)",
         )
         self.assertEqual(
             test_v[6],
@@ -165,52 +168,52 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         test_v = self.model._get_non_magnetic_lines()
         self.assertIsInstance(test_v, list)
         self.assertEqual(len(test_v), 16)
-        self.assertEqual(test_v[0], "# separation of coherent and incoherent scattering of non" " magnetic sample")
-        self.assertEqual(test_v[1], "knso_x_nuclear_coh, knso_x_spin_incoh = non_magnetic_separation('knso_x_sf'," " 'knso_x_nsf')")
+        self.assertEqual(test_v[0], "# separation of coherent and incoherent scattering of non magnetic sample")
+        self.assertEqual(test_v[1], "knso_x_nuclear_coh, knso_x_spin_incoh = non_magnetic_separation('knso_x_sf', 'knso_x_nsf')")
         self.assertEqual(
             test_v[2],
             "ConvertMDHistoToMatrixWorkspace('knso_x_nuclear_coh', Outputwork"
-            "space='mat_knso_x_nuclear_coh', Normalization='NoNormalization')",
+            "space='mat_knso_x_nuclear_coh', Normalization='NoNormalization', FindXAxis=False)",
         )
         self.assertEqual(test_v[3], "")
         self.assertEqual(
             test_v[4],
             "ConvertMDHistoToMatrixWorkspace('knso_x_spin_incoh', Outputwork"
-            "space='mat_knso_x_spin_incoh', Normalization='NoNormalization')",
+            "space='mat_knso_x_spin_incoh', Normalization='NoNormalization', FindXAxis=False)",
         )
         self.assertEqual(test_v[5], "")
-        self.assertEqual(test_v[6], "knso_y_nuclear_coh, knso_y_spin_incoh = non_magnetic_separation('knso_y_sf'" ", 'knso_y_nsf')")
+        self.assertEqual(test_v[6], "knso_y_nuclear_coh, knso_y_spin_incoh = non_magnetic_separation('knso_y_sf', 'knso_y_nsf')")
         self.assertEqual(
             test_v[7],
             "ConvertMDHistoToMatrixWorkspace('knso_y_nuclear_coh', Outputw"
             "orkspace='mat_knso_y_nuclear_coh', Normalization='NoNormaliza"
-            "tion')",
+            "tion', FindXAxis=False)",
         )
         self.assertEqual(test_v[8], "")
         self.assertEqual(
             test_v[9],
             "ConvertMDHistoToMatrixWorkspace('knso_y_spin_incoh', Outputwo"
             "rkspace='mat_knso_y_spin_incoh', Normalization='NoNormalizatio"
-            "n')",
+            "n', FindXAxis=False)",
         )
         self.assertEqual(test_v[10], "")
-        self.assertEqual(test_v[11], "knso_z_nuclear_coh, knso_z_spin_incoh = non_magnetic_separation('knso_z_sf'," " 'knso_z_nsf')")
+        self.assertEqual(test_v[11], "knso_z_nuclear_coh, knso_z_spin_incoh = non_magnetic_separation('knso_z_sf', 'knso_z_nsf')")
         self.assertEqual(
             test_v[12],
             "ConvertMDHistoToMatrixWorkspace('knso_z_nuclear_coh', Outputwor"
             "kspace='mat_knso_z_nuclear_coh', Normalization='NoNormalizati"
-            "on')",
+            "on', FindXAxis=False)",
         )
         self.assertEqual(test_v[13], "")
         self.assertEqual(
             test_v[14],
             "ConvertMDHistoToMatrixWorkspace('knso_z_spin_incoh', Outputwor"
             "kspace='mat_knso_z_spin_incoh', Normalization='NoNormalizatio"
-            "n')",
+            "n', FindXAxis=False)",
         )
         self.assertEqual(test_v[15], "")
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.script_generator." "elastic_powder_script_generator_mod" "el.DNSElasticDataset")
+    @patch("mantidqtinterfaces.dns_powder_elastic.script_generator.elastic_powder_script_generator_model.DNSElasticDataset")
     def test_setup_sample_data(self, mock_dns_elastic_powder_dataset):
         self.model._sample_data = None
         mock_dns_elastic_powder_dataset.return_value = self.sample_data
@@ -218,7 +221,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(self.model._sample_data, self.sample_data)
         self.assertEqual(self.model._plot_list, ["mat_knso_x_sf"])
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.script_generator." "elastic_powder_script_generator_mod" "el.DNSElasticDataset")
+    @patch("mantidqtinterfaces.dns_powder_elastic.script_generator.elastic_powder_script_generator_model.DNSElasticDataset")
     def test_setup_standard_data(self, mock_dns_elastic_powder_dataset):
         self.model._standard_data = None
         self.model._corrections = True
@@ -232,7 +235,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertIsInstance(test_v, list)
         self.assertEqual(len(test_v), 6)
         self.assertEqual(
-            test_v[0], "from mantidqtinterfaces.dns_powder_elastic.scripts." "md_powder_elastic import " "load_all, background_subtraction"
+            test_v[0], "from mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic import load_all, background_subtraction"
         )
         self.assertEqual(
             test_v[1],
@@ -242,7 +245,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         )
         self.assertEqual(
             test_v[2],
-            "from mantidqtinterfaces.dns_powder_elastic.scripts." "md_powder_elastic import " "non_magnetic_separation, xyz_separation",
+            "from mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic import non_magnetic_separation, xyz_separation",
         )
         self.assertEqual(test_v[3], "from mantid.simpleapi import ConvertMDHistoToMatrixWorkspace, mtd")
         self.assertEqual(test_v[4], "from mantid.simpleapi import SaveAscii, SaveNexus")
@@ -277,7 +280,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
             test_v,
             [
                 "wss_sample = load_all(sample_data, binning, normalize_to='time')",
-                "wss_standard = load_all(standard_data, binning, normalize_to='" "time')",
+                "wss_standard = load_all(standard_data, binning, normalize_to='time')",
             ],
         )
         self.model._corrections = False
@@ -288,7 +291,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.model._loop = None
         self.model._spacing = None
         self.model._set_loop()
-        self.assertEqual(self.model._loop, "for sample, workspacelist in wss_sample.items(): \n    for work" "space in workspacelist:")
+        self.assertEqual(self.model._loop, "for sample, workspacelist in wss_sample.items(): \n    for workspace in workspacelist:")
         self.assertEqual(self.model._spacing, "\n" + " " * 8)
         self.model._sample_data = {"123": 1}
         self.model._set_loop()
@@ -348,7 +351,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(test_v, [])
         self.model._sample_background_correction = True
         test_v = self.model._get_sample_corrections_lines()
-        self.assertEqual(test_v, ["", "# correct sample data", "123    background_subtraction" "(workspace, factor=1)"])
+        self.assertEqual(test_v, ["", "# correct sample data", "123    background_subtraction(workspace, factor=1)"])
 
     def test_get_nicr_cor_lines(self):
         self.model._nicr_correction = False
@@ -365,7 +368,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(test_v, "")
         self.model._ascii = True
         test_v = self.model._get_ascii_save_string()
-        self.assertEqual(test_v, "    SaveAscii('mat_{}'.format(workspace), '123/{}.csv'.format(wo" "rkspace), WriteSpectrumID=False)")
+        self.assertEqual(test_v, "    SaveAscii('mat_{}'.format(workspace), '123/{}.csv'.format(workspace), WriteSpectrumID=False)")
 
     def test_get_nexus_save_string(self):
         self.model._nexus = False
@@ -374,7 +377,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
         self.assertEqual(test_v, "")
         self.model._nexus = True
         test_v = self.model._get_nexus_save_string()
-        self.assertEqual(test_v, "    SaveNexus('mat_{}'.format(workspace), '123/{}.nxs'.format(wo" "rkspace))")
+        self.assertEqual(test_v, "    SaveNexus('mat_{}'.format(workspace), '123/{}.nxs'.format(workspace))")
 
     def test_get_convert_to_matrix_lines(self):
         test_v = self.model._get_convert_to_matrix_lines("abc")
@@ -385,7 +388,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
                 "# convert the output sample MDHistoWorkspaces to MatrixWorkspaces",
                 "123    ConvertMDHistoToMatrixWorkspace(wor"
                 "kspace, Outputworkspace='mat_{}'.format(workspace), Normalizati"
-                "on='NoNormalization')abc",
+                "on='NoNormalization', FindXAxis=False)abc",
                 "",
             ],
         )
@@ -402,7 +405,7 @@ class DNSElasticPowderScriptGeneratorModelTest(unittest.TestCase):
             "mat(workspace), '123/{}.nxs'.format(workspace))",
         )
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.script_generator." "elastic_powder_script_generator_model.DNSElasticDataset")
+    @patch("mantidqtinterfaces.dns_powder_elastic.script_generator.elastic_powder_script_generator_model.DNSElasticDataset")
     def test_script_maker(self, mock_dns_elastic_powder_dataset):
         mock_dns_elastic_powder_dataset.return_value = self.standard_data
         options = {
