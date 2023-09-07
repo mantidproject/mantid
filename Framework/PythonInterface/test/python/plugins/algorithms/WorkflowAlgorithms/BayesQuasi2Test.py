@@ -34,20 +34,19 @@ class BayesQuasi2Test(unittest.TestCase):
     Going to test each method in isolation.
     """
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace=RES_NAME)
-        cls._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace=SAMPLE_NAME)
-        cls._alg = BayesQuasi2()
-        cls._alg.initialize()
-        cls._N_hist = 1
+    def setUp(self):
+        self._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace=RES_NAME)
+        self._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace=SAMPLE_NAME)
+        self._alg = BayesQuasi2()
+        self._alg.initialize()
+        self._N_hist = 1
 
-    @classmethod
-    def tearDownClass(cls):
+    def tearDown(self):
         """
         Remove workspaces from ADS.
         """
-        AnalysisDataService.clear()
+        DeleteWorkspace(self._sample_ws)
+        DeleteWorkspace(self._res_ws)
 
     def point_mock(self, name):
         if "res" in name:
@@ -95,6 +94,8 @@ class BayesQuasi2Test(unittest.TestCase):
             VerticalAxisValues=["data", "fit 1", "diff 1", "fit 2", "diff 2"],
             DataE=np.array([0.2, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0]),
         )
+        DeleteWorkspace(ws)
+        DeleteWorkspace("compare_msgs")
 
     def test_add_to_make_fit_ws(self):
         ws = CreateWorkspace([1, 2], [3, 4])
@@ -114,6 +115,9 @@ class BayesQuasi2Test(unittest.TestCase):
 
         CompareWorkspaces(Workspace1=ws, Workspace2=output[0], CheckAllData=True)
         CompareWorkspaces(Workspace1=ws2, Workspace2=output[1], CheckAllData=True)
+
+        DeleteWorkspace(ws)
+        DeleteWorkspace("compare_msgs")
 
     def test_make_results(self):
         results = {"a": [1, 2], "b": [2, 3], "c": [3, 4], "loglikelihood": [-1, -2]}
