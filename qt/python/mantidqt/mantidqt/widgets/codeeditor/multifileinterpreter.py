@@ -452,14 +452,23 @@ class MultiPythonFileInterpreter(QWidget):
             return
 
         self.files_changed_unhandled.remove(file)
-        reload_button = QMessageBox.question(
-            self,
-            "",
-            f"The current file ({file}) has been modified by an external source. \n\nWould you like to reload the file?",
-            buttons=(QMessageBox.Yes | QMessageBox.No),
-            defaultButton=QMessageBox.Yes,
-        )
-        if reload_button == QMessageBox.Yes:
-            self.reload_file(file)
+        if osp.isfile(file):
+            reload_button = QMessageBox.question(
+                self,
+                "",
+                f"The current file ({file}) has been modified by an external source. \n\nWould you like to reload the file?",
+                buttons=(QMessageBox.Yes | QMessageBox.No),
+                defaultButton=QMessageBox.Yes,
+            )
+            if reload_button == QMessageBox.Yes:
+                self.reload_file(file)
+            else:
+                self.current_editor().mark_as_modified()
         else:
+            QMessageBox.warning(
+                self,
+                "",
+                f"The current file ({file}) doesn't exist anymore, which is due to an external source deleting or renaming the \
+                    file. The contents of this tab will remain unchanged, but are unsaved.",
+            )
             self.current_editor().mark_as_modified()
