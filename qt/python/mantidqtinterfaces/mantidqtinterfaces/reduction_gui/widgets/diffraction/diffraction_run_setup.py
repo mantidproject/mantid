@@ -91,6 +91,7 @@ class RunSetupWidget(BaseWidget):
         self._content.disablebkgdcorr_chkbox.setChecked(False)
         self._content.disablevancorr_chkbox.setChecked(False)
         self._content.disablevanbkgdcorr_chkbox.setChecked(False)
+        self._content.interpolateenable_chkbox.setChecked(False)
 
         # Label
         if self._instrument_name is not False:
@@ -111,6 +112,7 @@ class RunSetupWidget(BaseWidget):
         self._content.vanrun_edit.setEnabled(True)
         self._content.vanbkgdrun_edit.setEnabled(True)
         self._content.resamplex_edit.setEnabled(False)
+        self._content.interpolatetemp_edit.setEnabled(False)
 
         # Constraints/Validator
         expression = r"[\d,-]*"
@@ -126,6 +128,10 @@ class RunSetupWidget(BaseWidget):
         siv = QIntValidator(self._content.resamplex_edit)
         siv.setBottom(0)
         self._content.resamplex_edit.setValidator(siv)
+
+        iv4 = QDoubleValidator(self._content.interpolatetemp_edit)
+        iv4.setBottom(0)
+        self._content.interpolatetemp_edit.setValidator(iv4)
 
         # Float/Double
         fiv = QDoubleValidator(self._content.binning_edit)
@@ -149,7 +155,7 @@ class RunSetupWidget(BaseWidget):
 
         self._content.usebin_button.clicked.connect(self._usebin_clicked)
         self._content.resamplex_button.clicked.connect(self._resamplex_clicked)
-
+        self._content.interpolateenable_chkbox.clicked.connect(self._enableinterpo_clicked)
         self._content.help_button.clicked.connect(self._show_help)
 
         # mutex for whether to update the linear/log drop-down
@@ -223,7 +229,11 @@ class RunSetupWidget(BaseWidget):
         if state.vanbkgdrunnumber is not None and state.vanbkgdrunnumber != "":
             self._content.vanbkgdrun_edit.setText(state.vanbkgdrunnumber)
         self._content.disablevanbkgdcorr_chkbox.setChecked(state.disablevanbkgdcorrection)
-
+        # Interpolate background
+        self._content.interpolateenable_chkbox.setChecked(state.enableinterpolate)
+        if state.interpolatetemp is not None and self._content.interpolateenable_chkbox.isChecked() is True:
+            self._content.interpolatetemp_edit.setEnabled(True)
+            self._content.interpolatetemp_edit.setText(str(state.interpolatetemp))
         # self._content.vannoiserun_edit.setText(str(state.vannoiserunnumber))
         # if state.vanrunnumber < 0:
         #     self._content.disablevancorr_chkbox.setChecked(True)
@@ -299,6 +309,9 @@ class RunSetupWidget(BaseWidget):
 
         s.vanbkgdrunnumber = self._content.vanbkgdrun_edit.text()
         s.disablevanbkgdcorrection = self._content.disablevanbkgdcorr_chkbox.isChecked()
+
+        s.interpolatetemp = self._content.interpolatetemp_edit.text()
+        s.enableinterpolate = self._content.interpolateenable_chkbox.isChecked()
 
         return s
 
@@ -494,6 +507,15 @@ class RunSetupWidget(BaseWidget):
             self._content.binning_edit.setEnabled(True)
             self._content.resamplex_edit.setEnabled(False)
 
+        return
+
+    def _enableinterpo_clicked(self):
+        """Handling event if 'Interpo Empty' is clicked"""
+        if self._content.interpolateenable_chkbox.isChecked() is True:
+            self._content.interpolatetemp_edit.setEnabled(True)
+        else:
+            self._content.interpolatetemp_edit.setEnabled(False)
+            self._content.interpolatetemp_edit.setText("")
         return
 
     def _show_help(self):

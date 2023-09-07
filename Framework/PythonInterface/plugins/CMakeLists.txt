@@ -259,6 +259,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/IndirectSampleChanger.py
     algorithms/WorkflowAlgorithms/IndirectTransmissionMonitor.py
     algorithms/WorkflowAlgorithms/IndirectTwoPeakFit.py
+    algorithms/WorkflowAlgorithms/InterpolateBackground.py
     algorithms/WorkflowAlgorithms/IqtFitMultiple.py
     algorithms/WorkflowAlgorithms/LoadWAND.py
     algorithms/WorkflowAlgorithms/LagrangeILLReduction.py

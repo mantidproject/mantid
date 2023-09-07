@@ -337,6 +337,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         )
 
         self.copyProperties("AlignAndFocusPowderFromFiles", ["FrequencyLogNames", "WaveLengthLogNames"])
+        self.declareProperty(
+            "InterpolateTargetTemp",
+            0.0,
+            "Temperature in Kelvin. If specified, perform interpolation of background runs. Must specify exactly two background runs",
+        )
 
     def validateInputs(self):
         issues = dict()
@@ -367,6 +372,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         if self.getProperty("CleanCache").value and not bool(self.getProperty("CacheDir").value):
             issues["CleanCache"] = 'Property "CacheDir" must be set in order to clean the cache'
 
+        if self.getProperty("InterpolateTargetTemp").value > 0.0 and not len(self.getProperty("BackgroundNumber").value) == 2:
+            issues["InterpolateTargetTemp"] = "If InterpolateTargetTemp specified, you must provide two background run numbers"
         return issues
 
     # pylint: disable=too-many-locals,too-many-branches,too-many-statements
@@ -417,6 +424,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._containerScaleFactor = self.getProperty("ContainerScaleFactor").value
         self._elementSize = self.getProperty("ElementSize").value
         self._num_wl_bins = self.getProperty("NumWavelengthBins").value
+
+        self._interpoTemp = self.getProperty("InterpolateTargetTemp").value
+        self._enableInterpo = False
+        if self._interpoTemp > 0.0:
+            self._enableInterpo = True
 
         samRuns = self._getLinearizedFilenames("Filename")
         self._determineInstrument(samRuns[0])
@@ -570,7 +582,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self._info = self._getinfo(sam_ws_name)
 
             # process the container
-            can_run_numbers = self._info["container"].value
+            if self._enableInterpo:
+                can_run_numbers = self.getProperty("BackgroundNumber").value
+            else:
+                can_run_numbers = self._info["container"].value
             can_run_numbers = ["%s_%d" % (self._instrument, value) for value in can_run_numbers]
             # Check if existing container
             #  - has history and is using SNSPowderReduction
@@ -1398,7 +1413,28 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         :param can_run_numbers:
         :return:
         """
-        can_run_ws_name, can_run_number = self._generate_container_run_name(can_run_numbers, samRunIndex)
+        if self._enableInterpo:
+            can_run_ws_name_1, can_run_number_1 = self._generate_container_run_name(can_run_numbers, 0)
+            can_run_ws_name_2, can_run_number_2 = self._generate_container_run_name(can_run_numbers, 1)
+
+            self._focusAndSum([can_run_number_1], preserveEvents, final_name=can_run_ws_name_1, absorptionWksp=absorptionWksp)
+            self._focusAndSum([can_run_number_2], preserveEvents, final_name=can_run_ws_name_2, absorptionWksp=absorptionWksp)
+            empty_run_ws_group = api.GroupWorkspaces([can_run_ws_name_1, can_run_ws_name_2])
+            interpo_ws = api.InterpolateBackground(empty_run_ws_group, self._interpoTemp, OutputWorkspace="InterpolatedBackground")
+            # smooth background
+            smoothParams = self.getProperty("BackgroundSmoothParams").value
+            if smoothParams is not None and len(smoothParams) > 0:
+                api.FFTSmooth(
+                    InputWorkspace=interpo_ws,
+                    OutputWorkspace=interpo_ws,
+                    Filter="Butterworth",
+                    Params=smoothParams,
+                    IgnoreXBins=True,
+                    AllSpectra=True,
+                )
+            return interpo_ws.name()
+        else:
+            can_run_ws_name, can_run_number = self._generate_container_run_name(can_run_numbers, samRunIndex)
 
         if can_run_ws_name is not None:
             if self.does_workspace_exist(can_run_ws_name):

@@ -286,6 +286,8 @@ class DiffractionReductionScripter(BaseReductionScripter):
             runsetupdict["VanadiumNumber"] = -1
         if int(runsetupdict["DisableVanadiumBackgroundCorrection"]) == 1:
             runsetupdict["VanadiumBackgroundNumber"] = -1
+        if int(runsetupdict["EnableInterpolate"]) == 0:
+            runsetupdict["InterpolateTargetTemp"] = ""
 
         # b) do resample X or binning
         if int(runsetupdict["DoReSampleX"]) == 0:
@@ -307,6 +309,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 "DisableVanadiumCorrection",
                 "DisableVanadiumBackgroundCorrection",
                 "DoReSampleX",
+                "EnableInterpolate",
             ]:
                 continue
 
