@@ -145,8 +145,8 @@ signals:
   void fileNameChanged(const QString &fileName);
   /// Progress has been made in script execution
   void progressMade(const int progress);
-  /// Focus in
-  void focusIn(const QString &filename);
+  /// The editor now has focus
+  void editorFocusIn(const QString &filename);
 
 protected:
   /// Write to the given device

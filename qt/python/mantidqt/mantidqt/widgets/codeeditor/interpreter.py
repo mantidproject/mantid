@@ -150,7 +150,7 @@ class PythonFileInterpreter(QWidget):
 
         self.editor.modificationChanged.connect(self.sig_editor_modified)
         self.editor.fileNameChanged.connect(self.sig_filename_modified)
-        self.editor.focusIn.connect(self.sig_focus_in)
+        self.editor.editorFocusIn.connect(self.sig_focus_in)
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 

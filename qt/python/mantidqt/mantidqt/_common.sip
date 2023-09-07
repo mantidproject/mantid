@@ -205,6 +205,7 @@ signals:
   void textZoomedIn();
   void textZoomedOut();
   void progressMade(const int);
+  void editorFocusIn(const QString &filename);
 
 private:
   ScriptEditor(const ScriptEditor&);

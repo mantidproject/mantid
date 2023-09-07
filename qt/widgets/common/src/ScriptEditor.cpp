@@ -503,7 +503,7 @@ void ScriptEditor::dropEvent(QDropEvent *de) {
 
 void ScriptEditor::focusInEvent(QFocusEvent *fe) {
   if (fe->gotFocus()) { // Probably always true but no harm in checking
-    emit focusIn(m_filename);
+    emit editorFocusIn(m_filename);
     QsciScintilla::focusInEvent(fe);
   }
 }
