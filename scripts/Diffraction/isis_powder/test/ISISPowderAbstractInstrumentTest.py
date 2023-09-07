@@ -77,6 +77,19 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
             self.fail('Could not find file "{}"'.format(name))
         return full_path
 
+    def _setup_output_focused_runs_test(self, mock_get_run_details, mock_get_mode, mock_output_ws, mock_keep_unit):
+        mock_inst = self._setup_mock_inst(calibration_dir="ignored", output_dir="ignored", yaml_file_path="ISISPowderRunDetailsTest.yaml")
+        mock_run_details = create_autospec(run_details._RunDetails)
+        runs = ["123", "124"]
+        run_string = "-".join(runs)
+        mock_run_details.output_string = run_string
+        mock_run_details.output_run_string = run_string
+        mock_get_run_details.return_value = mock_run_details
+        # produce output that allows us to test that run_details.output_run_string provided is correct
+        mock_output_ws.side_effect = lambda focused_run, run_details: 2 * [run_details.output_run_string]
+
+        return mock_get_mode, mock_inst, mock_keep_unit, run_string, runs
+
     def _setup_mock_inst(
         self,
         yaml_file_path,
@@ -233,16 +246,10 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
     def test_output_focused_runs_individual_batch_mode(
         self, mock_get_run_details, mock_get_mode, mock_output_ws, mock_keep_unit, mock_remove_ws
     ):
-        mock_inst = self._setup_mock_inst(calibration_dir="ignored", output_dir="ignored", yaml_file_path="ISISPowderRunDetailsTest.yaml")
+        mock_get_mode, mock_inst, mock_keep_unit, run_string, runs = self._setup_output_focused_runs_test(
+            mock_get_run_details, mock_get_mode, mock_output_ws, mock_keep_unit
+        )
         mock_get_mode.return_value = "Individual"
-        mock_run_details = create_autospec(run_details._RunDetails)
-        runs = ["123", "124"]
-        run_string = "-".join(runs)
-        mock_run_details.output_string = run_string
-        mock_run_details.output_run_string = run_string
-        mock_get_run_details.return_value = mock_run_details
-        # produce output that allows us to test that run_details.output_run_string provided is correct
-        mock_output_ws.side_effect = lambda focused_run, run_details: 2 * [run_details.output_run_string]
 
         mock_inst._output_focused_runs(focused_runs=["INST123_foc", "INST124_foc"], run_number_string=run_string)
 
@@ -257,16 +264,10 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
     def test_output_focused_runs_summed_batch_mode(
         self, mock_get_run_details, mock_get_mode, mock_output_ws, mock_keep_unit, mock_remove_ws
     ):
-        mock_inst = self._setup_mock_inst(calibration_dir="ignored", output_dir="ignored", yaml_file_path="ISISPowderRunDetailsTest.yaml")
+        mock_get_mode, mock_inst, mock_keep_unit, run_string, runs = self._setup_output_focused_runs_test(
+            mock_get_run_details, mock_get_mode, mock_output_ws, mock_keep_unit
+        )
         mock_get_mode.return_value = "Summed"
-        mock_run_details = create_autospec(run_details._RunDetails)
-        runs = ["123", "124"]
-        run_string = "-".join(runs)
-        mock_run_details.output_string = run_string
-        mock_run_details.output_run_string = run_string
-        mock_get_run_details.return_value = mock_run_details
-        # produce output that allows us to test that run_details.output_run_string provided is correct
-        mock_output_ws.side_effect = lambda focused_run, run_details: 2 * [run_details.output_run_string]
 
         mock_inst._output_focused_runs(focused_runs=["INST123_foc", "INST124_foc"], run_number_string=run_string)
 
