@@ -197,7 +197,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   API::FrameworkManager::Instance();
 
-  for (auto dir : directionList)
+  for (auto &dir : directionList)
     for (int sgn = 1; sgn > -2; sgn -= 2) {
       dir.normalize();
       Quat Q(sgn * dphi, dir);

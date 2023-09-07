@@ -17,34 +17,46 @@ lambda_min = 0.8
 
 
 class WishSX(BaseSX):
-    def __init__(self, vanadium_runno=None, ext=".raw"):
-        super().__init__(vanadium_runno)
+    def __init__(self, vanadium_runno=None, file_ext=".raw"):
+        super().__init__(vanadium_runno, file_ext)
         self.sphere_shape = """<sphere id="sphere">
                                <centre x="0.0"  y="0.0" z="0.0" />
                                <radius val="0.0025"/>
                                </sphere>"""  # sphere radius 2.5mm  - used for vanadium and NaCl
-        self.ext = ext  # allow to load .nxs for testing purposes
 
     def process_data(self, runs: Sequence[str], *args):
         """
-        Loads runs, set goniometer (based on positional args), normalises by vanadium and corrects for absorption
-        :param runs: list of run numbers (string or int)
-        :param args: positonal args (require one for each goniometer axis) - can be motor names or lists of angles (one for each run)
-        :return: name of last loaded workspaces
+        Function to load and normalise a sequence of runs
+        :param runs: sequence of run numbers (can be ints or string)
+        :param args: goniometer angles - one positional arg for each goniometer axis/motor
+        :return: workspace name of last run loaded
+
+        Examples for providing goniometer angles (passed to SetGoniometer)
+        e.g. using motor names for 2 axes defined sxd.set_goniometer_axes for 3 runs
+        wish.process_data(range(3), "wccr", "ewald_pos")
+        e.g. using a sequence of angles for each motor
+        wish.process_data(range(3), [1,2,3], [4,5,6]])  # e.g. for the first run wccr=1 and ewald_pos=4
         """
         gonio_angles = args
         for irun, run in enumerate(runs):
-            wsname = self.load_run(run, self.ext)
+            wsname = self.load_run(run, self.file_ext)
             # set goniometer
             if self.gonio_axes is not None:
                 if len(gonio_angles) != len(self.gonio_axes):
-                    logger.warning("No goniometer will be applied as the number of goniometer angles doesn't match the number of axes set.")
+                    logger.warning(
+                        "No goniometer will be applied as the number of goniometer angles doesn't " "match the number of axes set."
+                    )
                 elif isinstance(gonio_angles[0], str):
-                    # gonio_angles are a list of motor strings (same for all runs)
                     self._set_goniometer_on_ws(wsname, gonio_angles)
                 else:
-                    # gonio_angles is a list of individual or tuple motor angles for each run
-                    self._set_goniometer_on_ws(wsname, gonio_angles[irun])
+                    if len(gonio_angles[0]) == len(runs):
+                        # gonio_angles is a list of individual or tuple motor angles for each run
+                        self._set_goniometer_on_ws(wsname, [angles[irun] for angles in gonio_angles])
+                    else:
+                        logger.warning(
+                            "No goniometer will be applied as the number of goniometer angles for each motor doesn't "
+                            "match the number of runs."
+                        )
             # correct for empty counts and normalise by vanadium
             self._divide_workspaces(wsname, self.van_ws)  # van_ws has been converted to TOF
             # set sample (must be done after gonio to rotate shape) and correct for attenuation
@@ -81,7 +93,7 @@ class WishSX(BaseSX):
 
     def process_vanadium(self):
         # vanadium
-        self.van_ws = self.load_run(self.van_runno, ext=self.ext)
+        self.van_ws = self.load_run(self.van_runno, file_ext=self.file_ext)
         mantid.SmoothNeighbours(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Radius=3)
         mantid.SmoothData(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, NPoints=301)
         # correct vanadium for absorption
@@ -97,10 +109,10 @@ class WishSX(BaseSX):
         mantid.ConvertUnits(InputWorkspace=self.van_ws, OutputWorkspace=self.van_ws, Target="TOF", EnableLogging=False)
 
     @staticmethod
-    def load_run(runno, ext=".raw"):
+    def load_run(runno, file_ext=".raw"):
         wsname = "WISH000" + str(runno)
         mon_name = wsname + "_monitors"
-        mantid.Load(Filename=wsname + ext, OutputWorkspace=wsname)
+        mantid.Load(Filename=wsname + file_ext, OutputWorkspace=wsname)
         mantid.ExtractMonitors(InputWorkspace=wsname, DetectorWorkspace=wsname, MonitorWorkspace=mon_name)
         mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=tof_min, XMax=tof_max)
         mantid.CropWorkspace(InputWorkspace=mon_name, OutputWorkspace=mon_name, XMin=tof_min, XMax=tof_max)

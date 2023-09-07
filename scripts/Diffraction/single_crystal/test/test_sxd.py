@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 import tempfile
 import shutil
 from os import path
@@ -12,6 +12,8 @@ from mantid.simpleapi import (
     CloneWorkspace,
     SaveParameterFile,
     SetUB,
+    ClearUB,
+    HasUB,
 )
 from Diffraction.single_crystal.sxd import SXD
 from Diffraction.single_crystal.base_sx import PEAK_TYPE, INTEGRATION_TYPE
@@ -152,6 +154,26 @@ class SXDTest(unittest.TestCase):
         mock_save_nxs.assert_called_once_with(InputWorkspace=self.peaks.name(), Filename=fpath + ".nxs")
         mock_save_ref.assert_called_once_with(InputWorkspace=self.peaks.name(), Filename=fpath + ".int", Format=fmt, SplitFiles=False)
 
+    @patch(sxd_path + ".mantid.SaveReflections")
+    @patch(sxd_path + ".mantid.SaveNexus")
+    def test_save_all_peaks(self, mock_save_nxs, mock_save_ref):
+        self.sxd.runs = dict()
+        for runno in range(1234, 1236):
+            self.sxd.runs[str(runno)] = {"ws": self.ws.name(), "found_int_MD_opt": self.peaks.name()}
+        SetUB(self.peaks, UB="0.25,0,0,0,0.25,0,0,0,0.1")
+
+        pk_type, int_type = PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS
+        fmt = "SHELX"
+
+        self.sxd.save_all_peaks(pk_type, int_type, self._test_dir, fmt)
+
+        all_peaks_name = "1234-1235_found_int_MD_opt"
+        fpath = path.join(self._test_dir, f"{all_peaks_name}_{fmt}")
+        mock_save_nxs.assert_called_once_with(InputWorkspace=all_peaks_name, Filename=fpath + ".nxs")
+        mock_save_ref.assert_called_once_with(InputWorkspace=all_peaks_name, Filename=fpath + ".int", Format=fmt, SplitFiles=False)
+        self.assertTrue(HasUB(Workspace=all_peaks_name))
+        ClearUB(Workspace=self.peaks)
+
     def test_predict_peaks(self):
         # make peaks ws and set a UB
         peaks = self._make_peaks_detids(wsname="peaks_for_predict")
@@ -163,7 +185,70 @@ class SXDTest(unittest.TestCase):
             pred_peaks = self.sxd.get_peaks(runno, pk_type)
             self.assertEqual(pred_peaks.name(), peaks.name() + "_" + pk_type.value)
 
+    @patch(sxd_path + ".SXD.set_md")
+    @patch(sxd_path + ".BaseSX.convert_ws_to_MD")
+    def test_convert_to_md_sets_ub_if_HKL(self, mock_conv_md, mock_set_md):
+        self.peaks = self._make_peaks_detids(wsname="peaks_for_md")
+        SetUB(self.peaks, UB="0.25,0,0,0,0.25,0,0,0,0.1")
+        runno = 1234
+        wsname = self.ws.name()
+        self.sxd.runs = {str(runno): {"ws": wsname, "found": self.peaks.name()}}
+
+        self.sxd.convert_to_MD(run=runno, frame="HKL")
+
+        mock_conv_md.assert_called_with(wsname, wsname + "_MD", "HKL")
+        mock_set_md.assert_called_with(runno, wsname + "_MD")
+        # assert UB is set for HKL conversion
+        self.assertTrue(HasUB(Workspace=self.ws))
+        # delete UB to restore ws to initial state
+        for ws in [self.ws, self.peaks]:
+            ClearUB(Workspace=ws)
+
     #  --- methods specific to SXD class ---
+
+    @patch("Diffraction.single_crystal.base_sx.mantid.SetGoniometer")
+    @patch(sxd_path + ".SXD.set_ws")
+    @patch(sxd_path + ".SXD.load_run")
+    @patch(sxd_path + ".SXD._divide_workspaces")
+    @patch(sxd_path + ".mantid.DeleteWorkspace")
+    @patch(sxd_path + ".mantid.ConvertUnits")
+    def test_process_data_with_gonio_angle_strings(self, mock_conv, mock_del, mock_divide, mock_load, mock_set_ws, mock_set_gonio):
+        sxd = SXD(vanadium_runno=1, empty_runno=2)
+        sxd.set_goniometer_axes([0, 1, 0, 1], [1, 0, 0, 0])
+        sxd.van_ws = "van"
+        mock_load.return_value = "wsname"
+        runnos = range(3, 6)
+
+        sxd.process_data(runnos, "log1", "log2")  # log names passed to SetGoniometer
+
+        self.assertEqual(mock_set_gonio.call_count, len(runnos))
+        expected_calls = len(runnos) * [call(Workspace="wsname", EnableLogging=False, Axis0="log1,0,1,0,1", Axis1="log2,1,0,0,0")]
+        mock_set_gonio.assert_has_calls(expected_calls)
+
+    @patch("Diffraction.single_crystal.base_sx.mantid.SetGoniometer")
+    @patch(sxd_path + ".SXD.set_ws")
+    @patch(sxd_path + ".SXD.load_run")
+    @patch(sxd_path + ".SXD._divide_workspaces")
+    @patch(sxd_path + ".mantid.DeleteWorkspace")
+    @patch(sxd_path + ".mantid.ConvertUnits")
+    def test_process_data_with_gonio_angle_sequences(self, mock_conv, mock_del, mock_divide, mock_load, mock_set_ws, mock_set_gonio):
+        sxd = SXD(vanadium_runno=1, empty_runno=2)
+        sxd.set_goniometer_axes([0, 1, 0, 1], [1, 0, 0, 0])
+        sxd.van_ws = "van"
+        mock_load.return_value = "wsname"
+        log1_vals = [10, 20, 30]
+        log2_vals = [40, 50, 60]
+        runnos = range(3, 6)
+
+        sxd.process_data(runnos, log1_vals, log2_vals)  # log names passed to SetGoniometer
+
+        self.assertEqual(mock_set_gonio.call_count, len(runnos))
+        expected_calls = []
+        for irun in range(len(runnos)):
+            expected_calls.append(
+                call(Workspace="wsname", EnableLogging=False, Axis0=f"{log1_vals[irun]},0,1,0,1", Axis1=f"{log2_vals[irun]},1,0,0,0")
+            )
+        mock_set_gonio.assert_has_calls(expected_calls)
 
     def test_remove_remove_peaks_on_detector_edge(self):
         nedges = [1, 2, 3]

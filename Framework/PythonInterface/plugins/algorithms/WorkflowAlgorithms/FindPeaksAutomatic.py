@@ -378,23 +378,17 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
         )
         prog_reporter.report("Removed background")
 
-        # Find all the peaks. find_peaks was introduced in scipy 1.1.0, if using an older version use find_peaks_cwt
-        # however this will not do an equally good job as it cannot sort by prominence (also added in 1.1.0)
-        from distutils.version import LooseVersion
+        # Find all the peaks. find_peaks was introduced in scipy 1.1.0
         import scipy
 
-        if LooseVersion(scipy.__version__) >= LooseVersion("1.1.0"):
-            raw_peaks, _ = scipy.signal.find_peaks(raw_yvals)
-            flat_peaks, params = scipy.signal.find_peaks(flat_yvals, prominence=(None, None))
-            prominence = params["prominences"]
-            flat_peaks = sorted(zip(flat_peaks, prominence), key=lambda x: x[1], reverse=True)
-            if fit_to_baseline:
-                flat_peaks = [peak_idx for peak_idx, prom in flat_peaks if peak_idx]
-            else:
-                flat_peaks = [peak_idx for peak_idx, prom in flat_peaks if peak_idx in raw_peaks]
+        raw_peaks, _ = scipy.signal.find_peaks(raw_yvals)
+        flat_peaks, params = scipy.signal.find_peaks(flat_yvals, prominence=(None, None))
+        prominence = params["prominences"]
+        flat_peaks = sorted(zip(flat_peaks, prominence), key=lambda x: x[1], reverse=True)
+        if fit_to_baseline:
+            flat_peaks = [peak_idx for peak_idx, prom in flat_peaks if peak_idx]
         else:
-            flat_peaks = scipy.signal.find_peaks_cwt(flat_yvals, widths=np.array([0.1]))
-            flat_peaks = sorted(flat_peaks, key=lambda peak_idx: flat_yvals[peak_idx], reverse=True)
+            flat_peaks = [peak_idx for peak_idx, prom in flat_peaks if peak_idx in raw_peaks]
 
         return (
             self.find_good_peaks(

@@ -7,7 +7,6 @@
 # pylint: disable=no-init,invalid-name,too-many-instance-attributes
 from mantid.api import *
 from mantid.kernel import *
-from distutils.version import LooseVersion
 import numpy as np
 import os
 
@@ -202,9 +201,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             localtimediff = np.timedelta64(0, "s")
 
         epoch = "1990-01-01T00:00"
-        # older numpy assumes local timezone
-        if LooseVersion(np.__version__) < LooseVersion("1.9"):
-            epoch = epoch + "Z"
         return np.datetime64(epoch) + localtimediff
 
     def _getLogsInfo(self, logtimeslist):

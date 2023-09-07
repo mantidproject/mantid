@@ -19,7 +19,6 @@ set(SRC_FILES
     ILLEnergyTransfer.cpp
     ISISCalibration.cpp
     ISISDiagnostics.cpp
-    ISISEnergyTransfer.cpp
     IndirectAddWorkspaceDialog.cpp
     IndirectBayes.cpp
     IndirectBayesTab.cpp
@@ -101,6 +100,10 @@ set(SRC_FILES
     Quasi.cpp
     ResNorm.cpp
     Stretch.cpp
+    Reduction/ISISEnergyTransferValidator.cpp
+    Reduction/ISISEnergyTransferModel.cpp
+    Reduction/ISISEnergyTransferView.cpp
+    Reduction/ISISEnergyTransferPresenter.cpp
 )
 
 set(MOC_FILES
@@ -182,12 +185,13 @@ set(MOC_FILES
     InelasticDataManipulationTab.h
     ISISCalibration.h
     ISISDiagnostics.h
-    ISISEnergyTransfer.h
     LazyAsyncRunner.h
     Quasi.h
     ResNorm.h
     Stretch.h
     FitStatusWidget.h
+    Reduction/ISISEnergyTransferView.h
+    Reduction/ISISEnergyTransferPresenter.h
 )
 
 set(INC_FILES
@@ -214,6 +218,10 @@ set(INC_FILES
     MSDFitModel.h
     Notifier.h
     IFQFitObserver.h
+    Reduction/ISISEnergyTransferData.h
+    Reduction/ISISEnergyTransferValidator.h
+    Reduction/ISISEnergyTransferModelUtils.h
+    Reduction/ISISEnergyTransferModel.h
 )
 
 set(UI_FILES
@@ -227,7 +235,7 @@ set(UI_FILES
     ILLEnergyTransfer.ui
     ISISCalibration.ui
     ISISDiagnostics.ui
-    ISISEnergyTransfer.ui
+    Reduction/ISISEnergyTransfer.ui
     IndirectAddWorkspaceDialog.ui
     IndirectBayes.ui
     IndirectCorrections.ui

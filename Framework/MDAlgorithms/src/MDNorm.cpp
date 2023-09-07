@@ -463,7 +463,7 @@ void MDNorm::exec() {
     symmetryOps = Geometry::SymmetryOperationFactory::Instance().createSymOps(symOps);
   }
   g_log.debug() << "Symmetry operations\n";
-  for (auto so : symmetryOps) {
+  for (const auto &so : symmetryOps) {
     g_log.debug() << so.identifier() << "\n";
   }
   m_numSymmOps = symmetryOps.size();
@@ -857,7 +857,7 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(const std::map<std::string
   // sort out which axes are dimensional and check names
   size_t parametersIndex = 0;
   std::vector<size_t> dimensionIndex(numDimsTemp + 1, 3); // stores h, k, l or Qx, Qy, Qz dimensions
-  for (auto const &p : parameters) {
+  for (const auto &p : parameters) {
     auto key = p.first;
     auto value = p.second;
     // value starts with QDimension0, then other stuff
@@ -1091,7 +1091,7 @@ MDNorm::binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetry
     // Reset symmetry operation index
     double soIndex = 0;
 
-    for (auto so : symmetryOps) {
+    for (const auto &so : symmetryOps) {
       // Q transformation matrix: From Q_lab to HKL or Q_sample
       // Building symmetric operation matrix
       DblMatrix soMatrix = buildSymmetryMatrix(so);
@@ -1117,7 +1117,7 @@ MDNorm::binBackgroundWS(const std::vector<Geometry::SymmetryOperation> &symmetry
       binMD->setPropertyValue("OutputWorkspace", getPropertyValue("OutputBackgroundDataWorkspace"));
       // set binning properties
       size_t qindex = 0;
-      for (auto const &p : parameters) {
+      for (const auto &p : parameters) {
         auto key = p.first;
         auto value = p.second;
         std::stringstream basisVector;
@@ -1176,7 +1176,7 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry
 
   double soIndex = 0;
   std::vector<size_t> qDimensionIndices;
-  for (auto so : symmetryOps) {
+  for (const auto &so : symmetryOps) {
     // calculate dimensions for binning
     DblMatrix soMatrix = buildSymmetryMatrix(so);
     DblMatrix Qtransform;
@@ -1197,7 +1197,7 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(const std::vector<Geometry
     binMD->setPropertyValue("OutputWorkspace", getPropertyValue("OutputDataWorkspace"));
     // set binning properties
     size_t qindex = 0;
-    for (auto const &p : parameters) {
+    for (const auto &p : parameters) {
       auto key = p.first;
       auto value = p.second;
       std::stringstream basisVector;

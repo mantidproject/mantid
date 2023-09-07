@@ -70,6 +70,7 @@ set(PYTHON_PLUGINS
     algorithms/FindGoniometerFromUB.py
     algorithms/FindGlobalBMatrix.py
     algorithms/FindSatellitePeaks.py
+    algorithms/FindSXPeaksConvolve.py
     algorithms/FitGaussian.py
     algorithms/FitIncidentSpectrum.py
     algorithms/GSASIIRefineFitPeaks.py
@@ -208,7 +209,10 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/AddSampleLogMultiple.py
     algorithms/WorkflowAlgorithms/ApplyPaalmanPingsCorrection.py
     algorithms/WorkflowAlgorithms/BayesQuasi.py
+    algorithms/WorkflowAlgorithms/BayesQuasi2.py
     algorithms/WorkflowAlgorithms/BayesStretch.py
+    algorithms/WorkflowAlgorithms/BayesStretch2.py
+    algorithms/WorkflowAlgorithms/quickBayesHelper.py
     algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/ConvertMultipleRunsToSingleCrystalMD.py
     algorithms/WorkflowAlgorithms/CorelliPowderCalibrationCreate.py
@@ -255,6 +259,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/IndirectSampleChanger.py
     algorithms/WorkflowAlgorithms/IndirectTransmissionMonitor.py
     algorithms/WorkflowAlgorithms/IndirectTwoPeakFit.py
+    algorithms/WorkflowAlgorithms/InterpolateBackground.py
     algorithms/WorkflowAlgorithms/IqtFitMultiple.py
     algorithms/WorkflowAlgorithms/LoadWAND.py
     algorithms/WorkflowAlgorithms/LagrangeILLReduction.py
@@ -296,6 +301,8 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/SANS/SANSSingleReduction.py
     algorithms/WorkflowAlgorithms/SANS/SANSSingleReduction2.py
     algorithms/WorkflowAlgorithms/SANS/SANSSingleReductionBase.py
+    algorithms/WorkflowAlgorithms/SANS/SANSTubeCalibration.py
+    algorithms/WorkflowAlgorithms/SANS/SANSTubeMerge.py
     algorithms/WorkflowAlgorithms/SANSAbsoluteScale.py
     algorithms/WorkflowAlgorithms/SANSAzimuthalAverage1D.py
     algorithms/WorkflowAlgorithms/SANSBeamSpreaderTransmission.py
@@ -343,6 +350,7 @@ set(PYTHON_PLUGINS
     functions/EISFDiffSphere.py
     functions/EISFDiffSphereAlkyl.py
     functions/FickDiffusion.py
+    functions/FlatTopPeak.py
     functions/FmuF.py
     functions/GauBroadGauKT.py
     functions/GaussBessel.py

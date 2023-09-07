@@ -12,12 +12,10 @@ import sys
 # dangling references in the notification centre that cause a segfault
 import qtpy.QtCore  # noqa: F401
 
-from distutils.version import LooseVersion
 import os
 
 import mantid
 from mantid.kernel import ConfigService
-from sphinx import __version__ as sphinx_version
 import sphinx_bootstrap_theme
 
 # Workaround a segfault importing readline with doctests and PyQt5.
@@ -38,14 +36,10 @@ sys.path.insert(0, os.path.abspath(os.path.join("..", "sphinxext")))
 
 # -- General configuration ------------------------------------------------
 
-if LooseVersion(sphinx_version) > LooseVersion("1.6"):
 
-    def setup(app):
-        """Called automatically by Sphinx when starting the build process"""
-        if hasattr(app, "add_css_file"):  # >=v1.8
-            app.add_css_file("custom.css")
-        else:
-            app.add_stylesheet("custom.css")  # v1.6-1.8
+def setup(app):
+    """Called automatically by Sphinx when starting the build process"""
+    app.add_css_file("custom.css")
 
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -72,12 +66,8 @@ extensions = [
     "mantiddoc.doctest",
 ]
 # Deal with math extension. Can be overridden with MATH_EXT environment variable
-# If set to imgmath we deal with the fact that < 1.8 is was called pngmath
 mathext = os.environ.get("MATH_EXT", "sphinx.ext.imgmath")
-if mathext.endswith("imgmath") and LooseVersion(sphinx_version) <= LooseVersion("1.8"):
-    extensions.append("sphinx.ext.pngmath")
-else:
-    extensions.append(mathext)
+extensions.append(mathext)
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -198,10 +188,7 @@ html_static_path = ["_static"]
 
 # If true, Smart Quotes will be used to convert quotes and dashes to
 # typographically correct entities.
-if sphinx_version < "1.7":
-    html_use_smartypants = True
-else:
-    smartquotes = True
+smartquotes = True
 
 # Hide the Sphinx usage as we reference it on github instead.
 html_show_sphinx = False

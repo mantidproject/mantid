@@ -103,7 +103,7 @@ std::string getRunLabel(const std::string &instrument, const std::vector<int> &r
 
   std::ostringstream label;
   label << instrument;
-  for (auto range : ranges) {
+  for (const auto &range : ranges) {
     label << createStringFromRange(range, zeroPadding);
     // Only pad the first set
     zeroPadding = 0;
@@ -325,7 +325,7 @@ std::set<Mantid::detid_t> getAllDetectorIDsFromGroupWorkspace(const Mantid::API:
  */
 std::vector<int> getAllDetectorIDsFromGroup(const Grouping &grouping) {
   std::vector<int> groupDetectors;
-  for (auto group : grouping.groups) {
+  for (const auto &group : grouping.groups) {
     std::vector<int> groupDetectorIDs = Mantid::Kernel::Strings::parseRange(group);
     groupDetectors.insert(groupDetectors.end(), groupDetectorIDs.begin(), groupDetectorIDs.end());
   }

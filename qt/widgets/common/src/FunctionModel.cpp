@@ -573,7 +573,7 @@ void FunctionModel::setResolutionFromWorkspace(const IFunction_sptr &fun, const 
     auto comp = inst->getComponentByName(analyser[0]);
     if (comp && comp->hasParameter("resolution")) {
       auto params = comp->getNumberParameter("resolution", true);
-      for (auto param : fun->getParameterNames()) {
+      for (const auto &param : fun->getParameterNames()) {
         if (param.find("FWHM") != std::string::npos) {
           fun->setParameter(param, params[0]);
         }

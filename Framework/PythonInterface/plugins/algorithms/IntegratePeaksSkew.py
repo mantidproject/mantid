@@ -1036,7 +1036,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             # get data array in window around peak region
             peak_data = array_converter.get_peak_data(pk, detid, bank_names[ipk], nrows, ncols, nrows_edge, ncols_edge)
             if get_dTOF_from_b2bexp_params:
-                fwhm = self.get_fwhm_from_back_to_back_params(pk, ws, detid)
+                fwhm = get_fwhm_from_back_to_back_params(pk, ws, detid)
                 if fwhm is None:
                     logger.warning(
                         f"No back to back exponential parameters found for peak {ipk} - a default value of"
@@ -1185,14 +1185,6 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         return pk.getTOF() * np.sqrt(dt0_over_t0**2 + (dth_pk / np.tan(pk.getScattering() / 2)) ** 2)
 
     @staticmethod
-    def get_fwhm_from_back_to_back_params(pk, ws, detid):
-        func = FunctionFactory.Instance().createPeakFunction("BackToBackExponential")
-        func.setParameter("X0", pk.getTOF())  # set centre
-        func.setMatrixWorkspace(ws, ws.getIndicesFromDetectorIDs([int(detid)])[0], 0.0, 0.0)  # calc A,B,S based on peak cen
-        is_valid = all(func.isExplicitlySet(ipar) for ipar in [1, 2, 4])
-        return func.fwhm() if is_valid else None
-
-    @staticmethod
     def plot_TOF_resolution(
         fig, ax, thetas, scaled_cot_th_sq, frac_tof_widths, wavelengths, scale_dth, estimated_dt0_over_t0, estimated_dth
     ):
@@ -1244,6 +1236,14 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         for prop, value in kwargs.items():
             alg.setProperty(prop, value)
         alg.execute()
+
+
+def get_fwhm_from_back_to_back_params(pk, ws, detid):
+    func = FunctionFactory.Instance().createPeakFunction("BackToBackExponential")
+    func.setParameter("X0", pk.getTOF())  # set centre
+    func.setMatrixWorkspace(ws, ws.getIndicesFromDetectorIDs([int(detid)])[0], 0.0, 0.0)  # calc A,B,S based on peak cen
+    is_valid = all(func.isExplicitlySet(ipar) for ipar in [1, 2, 4])
+    return func.fwhm() if is_valid else None
 
 
 def exec_simpleapi_alg(alg_name, **kwargs):
