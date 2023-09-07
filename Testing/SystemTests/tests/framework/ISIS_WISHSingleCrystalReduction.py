@@ -201,7 +201,7 @@ class WISHProcessVanadiumForNormalisationTest(MantidSystemTest):
         ADS.clear()
 
     def runTest(self):
-        wish = WishSX(vanadium_runno=19612, ext=".nxs")  # load .nxs that only includes spectra nums 1-19461
+        wish = WishSX(vanadium_runno=19612, file_ext=".nxs")  # load .nxs that only includes spectra nums 1-19461
         wish.process_vanadium()
         # select subset of spectra for comparision
         ExtractSpectra(InputWorkspace="WISH00019612", OutputWorkspace="WISH00019612_spec", WorkspaceIndexList="500,2500,10000")
