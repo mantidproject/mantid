@@ -36,5 +36,8 @@ attr_mapping = [
     ),
     ParamMapEntry(ext_name="paalman_pings_events_per_point", int_name="paalman_pings_events_per_point", optional=True),
     ParamMapEntry(ext_name="simple_events_per_point", int_name="simple_events_per_point", optional=True),
+    ParamMapEntry(ext_name="multiple_scattering", int_name="multiple_scattering", optional=True),
+    ParamMapEntry(ext_name="neutron_paths_single", int_name="neutron_paths_single", optional=True),
+    ParamMapEntry(ext_name="neutron_paths_multiple", int_name="neutron_paths_multiple", optional=True),
 ]
 attr_mapping.extend(PARAM_MAPPING)
