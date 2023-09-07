@@ -224,16 +224,16 @@ ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(const Mantid
   bool copyTies = getProperty("CopyTies");
   if (numDomains > 1 && copyTies) {
     auto originalNames = original->getParameterNames();
-    for (auto name : originalNames) {
-      auto index = original->parameterIndex(name);
+    for (const auto &name : originalNames) {
+      const auto index = original->parameterIndex(name);
       auto originalTie = original->getTie(index);
       if (originalTie) {
-        auto stringTie = originalTie->asString();
+        const auto stringTie = originalTie->asString();
         // check the tie only exists in the user function (f)
         auto start = stringTie.find_first_of(".") + 1;
-        auto end = stringTie.find_first_of("=");
+        const auto end = stringTie.find_first_of("=");
         // the wrapped name added 9 characters
-        auto LHName = stringTie.substr(start, 9);
+        const auto LHName = stringTie.substr(start, 9);
         // need to do in 2 steps
         auto RHName = stringTie.substr(end, std::string::npos);
 
@@ -241,7 +241,7 @@ ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(const Mantid
         RHName = RHName.substr(start, 9);
         if (LHName == INSERT_FUNCTION && LHName == RHName) {
           // get new tie
-          auto newTie = rmInsertFunction(stringTie);
+          const auto newTie = rmInsertFunction(stringTie);
           multi->addTies(newTie);
         }
       }
@@ -356,7 +356,7 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(const Mantid::API::I
   bool copyTies = getProperty("CopyTies");
   if (numDomains > 1 && copyTies) {
     auto originalNames = original->getParameterNames();
-    for (auto name : originalNames) {
+    for (const auto &name : originalNames) {
       auto index = original->parameterIndex(name);
       auto originalTie = original->getTie(index);
       if (originalTie) {

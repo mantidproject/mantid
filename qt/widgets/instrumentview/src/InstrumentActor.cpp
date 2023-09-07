@@ -182,7 +182,7 @@ void InstrumentActor::setUpWorkspace(const std::shared_ptr<const Mantid::API::Ma
     }
 
     const auto &specDef = spectrumInfo.spectrumDefinition(wi);
-    for (auto info : specDef)
+    for (const auto &info : specDef)
       m_detIndex2WsIndex[info.first] = wi;
   }
 
@@ -1113,7 +1113,7 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
     if (compParamNames.size() > 0) {
       text += QString::fromStdString("\nParameters from: " + paramComp->getName() + "\n");
       std::sort(compParamNames.begin(), compParamNames.end(), Mantid::Kernel::CaseInsensitiveStringComparator());
-      for (auto paramName : compParamNames) {
+      for (const auto &paramName : compParamNames) {
         // no need to search recursively as we are asking from the matching
         // component
         std::string paramValue = "";
