@@ -74,8 +74,6 @@ std::string LoadEmptyInstrument::retrieveValidInstrumentFilenameExtension(const 
   std::ostringstream os;
   os << "Instrument file name \"" << filename << "\" has an invalid extension.";
   throw std::runtime_error(os.str());
-
-  return ext;
 }
 
 // Return all valid instrument file name extensions
