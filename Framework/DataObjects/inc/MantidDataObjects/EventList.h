@@ -205,6 +205,8 @@ public:
                          EventList *destination);
   // get EventType declaration
   void generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E, bool skipError = false) const override;
+  void generateHistogram(const double xmin, const double step, const double xmax, const MantidVec &X, MantidVec &Y,
+                         MantidVec &E, bool skipError = false) const;
   void generateHistogramPulseTime(const MantidVec &X, MantidVec &Y, MantidVec &E,
                                   bool skipError = false) const override;
 
@@ -352,6 +354,10 @@ private:
                                                                      const double &tofOffset) const;
 
   void generateCountsHistogram(const MantidVec &X, MantidVec &Y) const;
+  void generateCountsHistogramUnsorted(const double xmin, const double step, const double xmax, const MantidVec &X,
+                                       MantidVec &Y) const;
+  void generateCountsHistogramUnsortedLog(const double xmin, const double step, const double xmax, const MantidVec &X,
+                                          MantidVec &Y) const;
 
   void generateCountsHistogramPulseTime(const MantidVec &X, MantidVec &Y) const;
 

@@ -1946,6 +1946,28 @@ void EventList::generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E
   }
 }
 
+void EventList::generateHistogram(const double xmin, const double step, const double xmax, const MantidVec &X,
+                                  MantidVec &Y, MantidVec &E, bool skipError) const {
+  switch (eventType) {
+  case TOF:
+    if (step < 0) // log
+      this->generateCountsHistogramUnsortedLog(xmin, step, xmax, X, Y);
+    else // linear
+      this->generateCountsHistogramUnsorted(xmin, step, xmax, X, Y);
+    if (!skipError)
+      this->generateErrorsHistogram(Y, E);
+    break;
+
+  case WEIGHTED:
+    throw Kernel::Exception::NotImplementedError("TODO");
+    break;
+
+  case WEIGHTED_NOTIME:
+    throw Kernel::Exception::NotImplementedError("TODO");
+    break;
+  }
+}
+
 // --------------------------------------------------------------------------
 /** With respect to PulseTime Fill a histogram given specified histogram bounds.
  * Does not modify
@@ -2160,6 +2182,74 @@ void EventList::generateCountsHistogram(const MantidVec &X, MantidVec &Y) const 
       ++Y[bin];
     }
   } // end if (there are any events to histogram)
+}
+
+void EventList::generateCountsHistogramUnsorted(const double xmin, const double step, const double xmax,
+                                                const MantidVec &X, MantidVec &Y) const {
+  // For slight speed=up.
+  size_t x_size = X.size();
+
+  if (x_size <= 1) {
+    // X was not set. Return an empty array.
+    Y.resize(0, 0);
+    return;
+  }
+
+  // Clear the Y data, assign all to 0.
+  Y.resize(x_size - 1, 0);
+
+  // Do we even have any events to do?
+  if (this->events.empty())
+    return;
+
+  for (const TofEvent &ev : this->events) {
+    double tof = ev.tof();
+    if (tof < xmin || tof >= xmax)
+      continue;
+
+    auto n_bin = static_cast<size_t>((tof - xmin) / step);
+    Y[n_bin]++;
+  }
+}
+
+void EventList::generateCountsHistogramUnsortedLog(const double xmin, const double step, const double xmax,
+                                                   const MantidVec &X, MantidVec &Y) const {
+  // For slight speed=up.
+  size_t x_size = X.size();
+
+  if (x_size <= 1) {
+    // X was not set. Return an empty array.
+    Y.resize(0, 0);
+    return;
+  }
+
+  // Clear the Y data, assign all to 0.
+  Y.resize(x_size - 1, 0);
+
+  // Do we even have any events to do?
+  if (this->events.empty())
+    return;
+
+  /* formula to get bin_number from TOF
+
+  bin_number = log_{abs(step) + 1}(tof/xmin) (that is log base abs(step)+1)
+
+  rewritten as
+
+  bin_number = log(tof)/log(abs(step)+1) - log(xmin)/log(abs(step)+1)
+  */
+
+  const auto divisor = log(abs(step) + 1); // use this to do change of base
+  const auto offset = log(xmin) / divisor;
+
+  for (const TofEvent &ev : this->events) {
+    double tof = ev.tof();
+    if (tof < xmin || tof >= xmax)
+      continue;
+
+    auto n_bin = static_cast<size_t>(log(tof) / divisor - offset);
+    Y[n_bin]++;
+  }
 }
 
 // --------------------------------------------------------------------------
