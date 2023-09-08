@@ -40,25 +40,46 @@ const std::vector<std::string> validFilenameExtensions{".xml", ".hdf5", ".nxs", 
 enum class FilenameExtensionEnum { XML, HDF5, NXS, NXS_H5, enum_count };
 typedef EnumeratedString<FilenameExtensionEnum, &validFilenameExtensions, &compareStringsCaseInsensitive>
     FilenameExtension;
-// This method attempts to retrieve an enumerated file name extension. If it fails, an std::runtime _error will be
-// thrown.
-FilenameExtension getValidFilenameExtension(const std::string &filename) {
+} // namespace
+
+// This method attempts to retrieve a valid, i.e. enumerated, instrument file name extension.
+// Possible double and single extensions are considered. If no valid file name extension could
+// be retrieved, a std::runtime _error will be thrown. For example, a file name might have a double
+// extension such as ".nxs.h5", which is valid. It may also have a double extension such as .lite.nxs,
+// which is invalid. In the latter case a single extension, .nxs, which is valid, should be retrieved.
+std::string LoadEmptyInstrument::retrieveValidInstrumentFilenameExtension(const std::string &filename) {
   std::string ext{std::filesystem::path(filename).extension().string()};
-  // Note, a file name might have a double extension such as ".nxs.h5", which is valid.
-  // It may also have a double extension such as .lite.nxs, which is invalid.
-  // In the latter case a single extension, .nxs, which is valid, should be retrieved.
   std::string stem{std::filesystem::path(filename).stem().string()};
   std::string pre_ext{std::filesystem::path(stem).extension().string()};
+
+  // Test a possible double extension
   if (!pre_ext.empty()) {
     std::string double_ext{pre_ext + ext};
     try {
-      return FilenameExtension(double_ext);
+      FilenameExtension fne(double_ext);
+      UNUSED_ARG(fne);
+      return double_ext;
     } catch (std::runtime_error &) {
     }
   }
-  return FilenameExtension(ext);
+
+  // Test a possible single extension
+  try {
+    FilenameExtension fne(ext);
+    UNUSED_ARG(fne);
+    return ext;
+  } catch (std::runtime_error &) {
+  }
+
+  std::ostringstream os;
+  os << "Instrument file name \"" << filename << "\" has an invalid extension.";
+  throw std::runtime_error(os.str());
+
+  return ext;
 }
-} // namespace
+
+// Return all valid instrument file name extensions
+std::vector<std::string> LoadEmptyInstrument::getValidInstrumentFilenameExtensions() { return validFilenameExtensions; }
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -134,7 +155,7 @@ void LoadEmptyInstrument::exec() {
   if (!instrumentName.empty())
     ws = this->runLoadInstrument(filename, instrumentName);
   else {
-    FilenameExtension enFilenameExtension{getValidFilenameExtension(filename)};
+    FilenameExtension enFilenameExtension{retrieveValidInstrumentFilenameExtension(filename)};
     switch (enFilenameExtension) {
     case FilenameExtensionEnum::XML:
     case FilenameExtensionEnum::HDF5:

@@ -212,10 +212,39 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", inputFile));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", wsName));
 
-    std::string err_msg{"Invalid string .xyz for enumerated string"};
-    TS_ASSERT_THROWS_EQUALS(loader.execute(), const std::runtime_error &e, std::string(e.what()).find(err_msg), 0);
+    std::ostringstream os;
+    os << "Instrument file name \"" << inputFile << "\" has an invalid extension.";
+    TS_ASSERT_THROWS_EQUALS(loader.execute(), const std::runtime_error &e, std::string(e.what()).find(os.str()), 0);
 
     TS_ASSERT(!loader.isExecuted())
+  }
+
+  // Unlike testLoadFileWithInvalidExtension, this test doesn't test the LoadEmptyInstrument algorithm per se.
+  // It only tests a stand-alone method for retrieving valid instrument file name extensions.
+  void testRetrieveValidInstrumentFilenameExtension() {
+    g_log.notice("\ntestRetrieveValidInstrumentFilenameExtension...");
+
+    std::string inputFile;
+    std::string stem{"abc"};
+
+    // Test some invalid extensions
+    std::ostringstream os;
+    std::vector invalid_extensions{
+        "", ".", ".xyz", ".uvw.xyz", ".rst.uvw.xyz", ".nxs.h5.xyz", ".rst.nxs.uvw", ".rst.nxs.h5.uvw"};
+    for (auto const &ext : invalid_extensions) {
+      inputFile = stem + ext;
+      os.str("");
+      os << "Instrument file name \"" << inputFile << "\" has an invalid extension.";
+      TS_ASSERT_THROWS_EQUALS(LoadEmptyInstrument::retrieveValidInstrumentFilenameExtension(inputFile),
+                              const std::runtime_error &e, std::string(e.what()), os.str());
+    }
+
+    // Test all valid extensions
+    std::vector<std::string> valid_extensions = LoadEmptyInstrument::getValidInstrumentFilenameExtensions();
+    for (auto const &ext : valid_extensions) {
+      inputFile = stem + ext;
+      TS_ASSERT_EQUALS(LoadEmptyInstrument::retrieveValidInstrumentFilenameExtension(inputFile), ext);
+    }
   }
 
   void testParameterTags() {
