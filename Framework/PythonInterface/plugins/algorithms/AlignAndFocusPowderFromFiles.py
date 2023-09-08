@@ -622,10 +622,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
             if not wksp:
                 raise RuntimeError("Trying to load calibration without a donor workspace")
 
-            if "TMin" in self.__getAlignAndFocusArgs():
-                tmin_val = self.__getAlignAndFocusArgs()["TMin"]
-            else:
-                tmin_val = 0.0
+            tmin_val = self.__getAlignAndFocusArgs().get("TMin", 0.0)
 
             LoadDiffCal(
                 InputWorkspace=wksp,
