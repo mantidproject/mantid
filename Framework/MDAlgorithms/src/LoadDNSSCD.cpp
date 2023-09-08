@@ -279,7 +279,7 @@ void LoadDNSSCD::exec() {
 
   ExperimentInfo_sptr expinfo = std::make_shared<ExperimentInfo>();
   API::Run &run = expinfo->mutableRun();
-  for (auto fname : filenames) {
+  for (const auto &fname : filenames) {
     std::map<std::string, std::string> str_metadata;
     std::map<std::string, double> num_metadata;
     try {

@@ -18,19 +18,31 @@ tof_max = 18800
 
 
 class SXD(BaseSX):
-    def __init__(self, vanadium_runno=None, empty_runno=None, detcal_path=None):
+    def __init__(self, vanadium_runno=None, empty_runno=None, detcal_path=None, file_ext=".raw"):
         self.empty_runno = empty_runno
         self.detcal_path = detcal_path
-        super().__init__(vanadium_runno)
+        super().__init__(vanadium_runno, file_ext)
         self.sphere_shape = """<sphere id="sphere">
                                <centre x="0.0"  y="0.0" z="0.0" />
                                <radius val="0.003"/>
                                </sphere>"""  # sphere radius 3mm  - used for vanadium and NaCl
 
     def process_data(self, runs: Sequence[str], *args):
+        """
+        Function to load and normalise a sequence of runs
+        :param runs: sequence of run numbers (can be ints or string)
+        :param args: goniometer angles - one positional arg for each goniometer axis/motor
+        :return: workspace name of last run loaded
+
+        Examples for providing goniometer angles (passed to SetGoniometer)
+        e.g. using motor names for 2 axes defined sxd.set_goniometer_axes for 3 runs
+        sxd.process_data(range(3), "wccr", "ewald_pos")
+        e.g. using a sequence of angles for each motor
+        sxd.process_data(range(3), [1,2,3], [4,5,6]])  # e.g. for the first run wccr=1 and ewald_pos=4
+        """
         gonio_angles = args
         for irun, run in enumerate(runs):
-            wsname = self.load_run(run)
+            wsname = self.load_run(run, self.file_ext)
             # set goniometer
             if self.gonio_axes is not None:
                 if len(gonio_angles) != len(self.gonio_axes):
@@ -38,8 +50,14 @@ class SXD(BaseSX):
                 elif isinstance(gonio_angles[0], str):
                     self._set_goniometer_on_ws(wsname, gonio_angles)
                 else:
-                    # gonio_angles is a list of individual or tuple motor angles for each run
-                    self._set_goniometer_on_ws(wsname, gonio_angles[irun])
+                    if len(gonio_angles[0]) == len(runs):
+                        # gonio_angles is a list of individual or tuple motor angles for each run
+                        self._set_goniometer_on_ws(wsname, [angles[irun] for angles in gonio_angles])
+                    else:
+                        logger.warning(
+                            "No goniometer will be applied as the number of goniometer angles for each motor doesn't "
+                            "match the number of runs."
+                        )
             # normalise by vanadium
             self._divide_workspaces(wsname, self.van_ws)  # van_ws has been converted to TOF
             # set sample (must be done after gonio to rotate shape) and correct for attenuation
@@ -59,9 +77,9 @@ class SXD(BaseSX):
             self.set_ws(run, wsname)
         return wsname
 
-    def load_run(self, runno):
+    def load_run(self, runno, file_ext=".raw"):
         wsname = "SXD" + str(runno)
-        mantid.Load(Filename=wsname + ".raw", OutputWorkspace=wsname, EnableLogging=False)
+        mantid.Load(Filename=wsname + self.file_ext, OutputWorkspace=wsname, EnableLogging=False)
         if self.detcal_path is not None:
             mantid.LoadParameterFile(Workspace=wsname, Filename=self.detcal_path, EnableLogging=False)
         mantid.CropWorkspace(InputWorkspace=wsname, OutputWorkspace=wsname, XMin=tof_min, XMax=tof_max, EnableLogging=False)
@@ -95,8 +113,8 @@ class SXD(BaseSX):
 
     def process_vanadium(self):
         # load empty and vanadium
-        empty_ws = self.load_run(self.empty_runno)
-        self.van_ws = self.load_run(self.van_runno)
+        empty_ws = self.load_run(self.empty_runno, self.file_ext)
+        self.van_ws = self.load_run(self.van_runno, self.file_ext)
         # create grouping file per bank
         bank_grouping_ws, _, ngroups = mantid.CreateGroupingWorkspace(
             InputWorkspace=self.van_ws, GroupDetectorsBy="bank", OutputWorkspace="bank_groups", EnableLogging=False

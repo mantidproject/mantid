@@ -69,7 +69,7 @@ FqFitParameters createFqFitParameters(const MatrixWorkspace_sptr &workspace) {
 
 std::string createSpectra(const std::vector<std::size_t> &spectrum) {
   std::string spectra = "";
-  for (auto spec : spectrum) {
+  for (const auto spec : spectrum) {
     spectra.append(std::to_string(spec) + ",");
   }
   return spectra;
@@ -85,7 +85,7 @@ std::string getHWHMName(const std::string &resultName) {
 void deleteTemporaryWorkspaces(std::vector<std::string> const &workspaceNames) {
   auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
   deleter->setLogging(false);
-  for (auto const &name : workspaceNames) {
+  for (const auto &name : workspaceNames) {
     deleter->setProperty("Workspace", name);
     deleter->execute();
   }
@@ -150,7 +150,7 @@ std::vector<std::string> subdivideWidthWorkspace(const MatrixWorkspace_sptr &wor
   subworkspaces.reserve(1 + 2 * widthSpectra.size());
 
   int start = 0;
-  for (auto spectrum_number : widthSpectra) {
+  for (const auto &spectrum_number : widthSpectra) {
     const auto spectrum = static_cast<int>(spectrum_number);
     if (spectrum > start) {
       auto const outputName = "__extracted_" + std::to_string(start) + "_to_" + std::to_string(spectrum);
@@ -309,7 +309,7 @@ void FqFitDataPresenter::setActiveWidth(std::size_t widthIndex, WorkspaceID work
              // existing spectra list.
       auto spectra_vec = std::vector<std::size_t>({widthSpectra[widthIndex]});
       auto spectra = m_model->getSpectra(workspaceID);
-      for (auto i : spectra) {
+      for (const auto &i : spectra) {
         if ((std::find(spectra_vec.begin(), spectra_vec.end(), i.value) == spectra_vec.end())) {
           spectra_vec.push_back(i.value);
         }
@@ -330,8 +330,8 @@ void FqFitDataPresenter::setActiveEISF(std::size_t eisfIndex, WorkspaceID worksp
              // existing spectra list.
       auto spectra_vec = std::vector<std::size_t>({eisfSpectra[eisfIndex]});
       auto spectra = m_model->getSpectra(workspaceID);
-      for (auto i : spectra) {
-        if ((std::find(spectra_vec.begin(), spectra_vec.end(), i.value) == spectra_vec.end())) {
+      for (const auto &i : spectra) {
+        if ((std::find(spectra_vec.cbegin(), spectra_vec.cend(), i.value) == spectra_vec.cend())) {
           spectra_vec.push_back(i.value);
         }
       }

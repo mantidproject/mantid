@@ -9,6 +9,7 @@ import numpy as np
 from enum import Enum
 import mantid.simpleapi as mantid
 from mantid.api import FunctionFactory, AnalysisDataService as ADS
+from mantid.kernel import logger
 from FindGoniometerFromUB import getSignMaxAbsValInCol
 from mantid.geometry import CrystalStructure, SpaceGroupFactory, ReflectionGenerator, ReflectionConditionFilter
 from os import path
@@ -29,13 +30,14 @@ class INTEGRATION_TYPE(Enum):
 
 
 class BaseSX(ABC):
-    def __init__(self, vanadium_runno: str):
+    def __init__(self, vanadium_runno: str, file_ext: str):
         self.runs = dict()
         self.van_runno = vanadium_runno
         self.van_ws = None
         self.gonio_axes = None
         self.sample_dict = None
         self.n_mcevents = 1200
+        self.file_ext = file_ext  # file extension
 
     # --- decorator to apply to all runs is run=None ---
     def default_apply_to_all_runs(func):
@@ -183,6 +185,13 @@ class BaseSX(ABC):
     def convert_to_MD(self, run=None, frame="Q (lab frame)"):
         wsname = self.get_ws_name(run)
         md_name = wsname + "_MD"
+        if frame == "HKL" and not BaseSX.retrieve(wsname).sample().hasOrientedLattice():
+            peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
+            if peaks is not None and peaks.sample().hasOrientedLattice():
+                mantid.SetUB(wsname, UB=peaks.sample().getOrientedLattice().getUB())
+            else:
+                logger.error(f"No UB specified for {wsname} or found peaks - cannot transform to HKL.")
+                return
         BaseSX.convert_ws_to_MD(wsname, md_name, frame)
         self.set_md(run, md_name)
 
@@ -358,14 +367,17 @@ class BaseSX(ABC):
         mantid.SaveNexus(InputWorkspace=peaks, Filename=filepath[:-3] + "nxs")
 
     def save_all_peaks(self, peak_type, integration_type, save_dir, save_format, run_ref=None):
-        runs = self.runs.keys()
+        runs = list(self.runs.keys())
         if len(runs) > 1:
             # get name for peak table from range of runs integrated
             min_ws = min(runs, key=lambda k: int("".join(filter(str.isdigit, k))))
             max_ws = max(runs, key=lambda k: int("".join(filter(str.isdigit, k))))
             all_peaks = f'{"-".join([min_ws, max_ws])}_{peak_type.value}_{integration_type.value}'
-            mantid.CreatePeaksWorkspace(InstrumentWorkspace=self.van_ws, NumberOfPeaks=0, OutputWorkspace=all_peaks)
-            for run in runs:
+            # clone first peak table
+            mantid.CloneWorkspace(
+                InputWorkspace=self.get_peaks(runs[0], peak_type, integration_type), OutputWorkspace=all_peaks, EnableLogging=False
+            )
+            for run in runs[1:]:
                 peaks = self.get_peaks(run, peak_type, integration_type)
                 if run_ref is not None and run_ref != run:
                     self.make_UB_consistent(self.get_peaks(run_ref, peak_type, integration_type), peaks)

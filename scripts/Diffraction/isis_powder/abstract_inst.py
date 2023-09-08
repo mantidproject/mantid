@@ -104,7 +104,10 @@ class AbstractInst(object):
 
     def _output_focused_runs(self, focused_runs, run_number_string):
         run_details = self._get_run_details(run_number_string)
-        for focused_run in focused_runs:
+        input_batching = self._get_input_batching_mode()
+        for irun, focused_run in enumerate(focused_runs):
+            if input_batching == common_enums.INPUT_BATCHING.Individual:
+                run_details.output_run_string = str(common.generate_run_numbers(run_number_string=run_number_string)[irun])
             d_spacing_group, tof_group = self._output_focused_ws(focused_run, run_details=run_details)
             common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group, unit_to_keep=self._get_unit_to_keep())
 

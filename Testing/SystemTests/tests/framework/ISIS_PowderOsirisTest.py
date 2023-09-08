@@ -109,6 +109,14 @@ def setup_inst_object(user_name, with_container=False):
     return inst_obj
 
 
+def setup_sample_details():
+    sample_details = SampleDetails(radius=1.1, height=8, center=[0, 0, 0], shape="cylinder")
+    sample_details.set_material(chemical_formula="Cr2-Ga-N", number_density=0.02)
+    sample_details.set_container(chemical_formula="Al", mass_density=2.71, radius=1.2)
+
+    return sample_details
+
+
 def _try_delete(path):
     try:
         # Use this instead of os.remove as we could be passed a non-empty dir
@@ -200,18 +208,14 @@ class OSIRISDiffractionFocusingWithMergingTest(_OSIRISDiffractionFocusingTest):
 class OSIRISDiffractionFocusingWithSimpleAbsorptionCorrection(_OSIRISDiffractionFocusingTest):
     refrence_ws_name = "OSI120032_d_spacing_simple_corrected.nxs"
     required_run_files = [
-        "OSI82717.nxs",
-        "OSI82718.nxs",  # empty can
+        "OSI82717.nxs",  # empty can
         "OSIRIS00119963.nxs",
-        "OSIRIS00119964.nxs",  # van
-        "OSIRIS00120032.nxs",
+        "OSIRIS00120032.nxs",  # van
     ]
 
     def runTest(self):
         super().runPreTest()
-        sample_details = SampleDetails(radius=1.1, height=8, center=[0, 0, 0], shape="cylinder")
-        sample_details.set_material(chemical_formula="Cr2-Ga-N", number_density=10.0)
-        sample_details.set_container(chemical_formula="Al", number_density=2.7, radius=1.2)
+        sample_details = setup_sample_details()
 
         self.results = run_diffraction_focusing(
             "120032",
@@ -230,9 +234,7 @@ class OSIRISDiffractionFocusingWithSimpleAbsorptionCorrection(_OSIRISDiffraction
 class OSIRISDiffractionFocusingWithPaalmanPingsAbsorptionCorrection(_OSIRISDiffractionFocusingTest):
     refrence_ws_name = "OSI120032_d_spacing_paalman_corrected.nxs"
     required_run_files = [
-        "OSI82717.nxs",
         "OSI82718.nxs",  # empty can
-        "OSIRIS00119963.nxs",
         "OSIRIS00119964.nxs",  # van
         "OSIRIS00120032.nxs",
     ]
@@ -241,9 +243,7 @@ class OSIRISDiffractionFocusingWithPaalmanPingsAbsorptionCorrection(_OSIRISDiffr
         self.tolerance = 1e-8
         self.tolerance_is_rel_err = True
         super().runPreTest()
-        sample_details = SampleDetails(radius=1.1, height=8, center=[0, 0, 0], shape="cylinder")
-        sample_details.set_material(chemical_formula="Cr2-Ga-N", number_density=10.0)
-        sample_details.set_container(chemical_formula="Al", number_density=2.7, radius=1.2)
+        sample_details = setup_sample_details()
 
         self.results = run_diffraction_focusing(
             "120032",
@@ -271,9 +271,7 @@ class OSIRISDiffractionFocusingWithMultipleScattering(_OSIRISDiffractionFocusing
 
     def runTest(self):
         super().runPreTest()
-        sample_details = SampleDetails(radius=1.1, height=8, center=[0, 0, 0], shape="cylinder")
-        sample_details.set_material(chemical_formula="Cr2-Ga-N", number_density=10.0)
-        sample_details.set_container(chemical_formula="Al", number_density=2.7, radius=1.2)
+        sample_details = setup_sample_details()
 
         self.results = run_diffraction_focusing(
             "120032",
@@ -287,6 +285,8 @@ class OSIRISDiffractionFocusingWithMultipleScattering(_OSIRISDiffractionFocusing
             neutron_paths_single=5,
             neutron_paths_multiple=5,
         )
+
+        mantid.SaveNexus(InputWorkspace=self.results, Filename=r"C:\Users\joy22959\Documents\test\multiscatt")
 
     def skipTests(self):
         return False

@@ -46,7 +46,7 @@ std::vector<double> extractQValues(const MatrixWorkspace_sptr &workspace, const 
   // ...otherwise, compute the momentum transfer for each spectrum, if possible
   else {
     const auto &spectrumInfo = workspace->spectrumInfo();
-    for (auto spectrum : spectra) {
+    for (const auto &spectrum : spectra) {
       if (spectrumInfo.hasDetectors(spectrum.value)) {
         const auto detID = spectrumInfo.detector(spectrum.value).getID();
         double efixed = workspace->getEFixed(detID);

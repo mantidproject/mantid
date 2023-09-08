@@ -12,7 +12,6 @@
 #include "ILLEnergyTransfer.h"
 #include "ISISCalibration.h"
 #include "ISISDiagnostics.h"
-#include "ISISEnergyTransfer.h"
 #include "IndirectTransmission.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -21,6 +20,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "Reduction/ISISEnergyTransferPresenter.h"
 
 #include <QDir>
 #include <QMessageBox>
@@ -75,7 +75,7 @@ void IndirectDataReduction::initLayout() {
   m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
   // Create the tabs
-  addTab<ISISEnergyTransfer>("ISIS Energy Transfer");
+  addTab<IETPresenter>("ISIS Energy Transfer");
   addTab<ISISCalibration>("ISIS Calibration");
   addTab<ISISDiagnostics>("ISIS Diagnostics");
   addTab<IndirectTransmission>("Transmission");

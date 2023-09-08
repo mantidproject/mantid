@@ -758,7 +758,7 @@ void CrystalFieldFunction::buildSingleSiteMultiSpectrum() const {
   }
   const auto &physProps = m_control.physProps();
   size_t i = nSpec;
-  for (auto &prop : physProps) {
+  for (const auto &prop : physProps) {
     auto physPropFun = buildPhysprop(nre, energies, waveFunctions, hamiltonian, prop);
     fun->addFunction(physPropFun);
     fun->setDomainIndex(i, i);
@@ -851,7 +851,7 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
     }
 
     size_t i = 0;
-    for (auto &prop : physProps) {
+    for (const auto &prop : physProps) {
       auto physPropFun = buildPhysprop(nre, energies, waveFunctions, hamiltonian, prop);
       compositePhysProps[i]->addFunction(physPropFun);
       std::string propName = "ion";
@@ -862,7 +862,7 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
   }
   m_target->checkFunction();
   size_t i = nSpec;
-  for (auto &propFun : compositePhysProps) {
+  for (const auto &propFun : compositePhysProps) {
     multiDomain->addFunction(propFun);
     multiDomain->setDomainIndex(i, i);
     ++i;
@@ -1074,7 +1074,7 @@ void CrystalFieldFunction::updateSingleSiteMultiSpectrum() const {
                    FWHMs.size() > iSpec ? FWHMs[iSpec] : 0., iSpec, iFirst, intensityScaling);
   }
 
-  for (auto &prop : m_mapPrefixes2PhysProps) {
+  for (const auto &prop : m_mapPrefixes2PhysProps) {
     updatePhysprop(nre, energies, waveFunctions, hamiltonian, *prop.second);
   }
 }
@@ -1131,7 +1131,7 @@ void CrystalFieldFunction::updateMultiSiteMultiSpectrum() const {
     std::string prefix("ion");
     prefix.append(std::to_string(ionIndex)).append(".");
     auto prefixSize = prefix.size();
-    for (auto prop : m_mapPrefixes2PhysProps) {
+    for (const auto &prop : m_mapPrefixes2PhysProps) {
       if (prop.first.substr(0, prefixSize) == prefix) {
         updatePhysprop(nre, energies, waveFunctions, hamiltonian, *prop.second);
       }

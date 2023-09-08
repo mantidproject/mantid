@@ -247,11 +247,11 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws, cons
       colValues << static_cast<int>(specNo) << detIds;
       if (isScanning) {
         std::set<int> timeIndexSet;
-        for (auto def : spectrumInfo.spectrumDefinition(wsIndex)) {
+        for (const auto &def : spectrumInfo.spectrumDefinition(wsIndex)) {
           timeIndexSet.insert(int(def.second));
         }
 
-        std::string timeIndexes = createTruncatedList(timeIndexSet);
+        const std::string timeIndexes = createTruncatedList(timeIndexSet);
         colValues << timeIndexes;
       }
       // Y/E

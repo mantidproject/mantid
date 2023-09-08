@@ -16,6 +16,7 @@ import random
 import string
 import tempfile
 import unittest
+from unittest.mock import patch, create_autospec, call
 import warnings
 
 
@@ -24,7 +25,6 @@ def _gen_random_string():
 
 
 class _MockInst(AbstractInst):
-
     _param_map = [
         ParamMapEntry(ext_name="cal_dir", int_name="calibration_dir"),
         ParamMapEntry(ext_name="cal_map", int_name="cal_mapping_path"),
@@ -62,7 +62,6 @@ class _MockInst(AbstractInst):
 
 
 class ISISPowderAbstractInstrumentTest(unittest.TestCase):
-
     _folders_to_remove = set()
     CALIB_FILE_NAME = "ISISPowderRunDetailsTest.yaml"
     GROUPING_FILE_NAME = "hrpd_new_072_01.cal"
@@ -77,6 +76,19 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
         if not full_path:
             self.fail('Could not find file "{}"'.format(name))
         return full_path
+
+    def _setup_output_focused_runs_test(self, mock_get_run_details, mock_get_mode, mock_output_ws, mock_keep_unit):
+        mock_inst = self._setup_mock_inst(calibration_dir="ignored", output_dir="ignored", yaml_file_path="ISISPowderRunDetailsTest.yaml")
+        mock_run_details = create_autospec(run_details._RunDetails)
+        runs = ["123", "124"]
+        run_string = "-".join(runs)
+        mock_run_details.output_string = run_string
+        mock_run_details.output_run_string = run_string
+        mock_get_run_details.return_value = mock_run_details
+        # produce output that allows us to test that run_details.output_run_string provided is correct
+        mock_output_ws.side_effect = lambda focused_run, run_details: 2 * [run_details.output_run_string]
+
+        return mock_get_mode, mock_inst, mock_keep_unit, run_string, runs
 
     def _setup_mock_inst(
         self,
@@ -225,6 +237,42 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
         # Test non-numerical input
         self.assertRaises(ValueError, mock_inst.set_beam_parameters, height="height", width=-2)
         self.assertRaises(ValueError, mock_inst.set_beam_parameters, height=-1.234, width=True)
+
+    @patch("isis_powder.routines.common.remove_intermediate_workspace")
+    @patch("isis_powder.routines.common.keep_single_ws_unit")
+    @patch("isis_powder.abstract_inst.AbstractInst._output_focused_ws")
+    @patch("isis_powder.abstract_inst.AbstractInst._get_input_batching_mode")
+    @patch("isis_powder.abstract_inst.AbstractInst._get_run_details")
+    def test_output_focused_runs_individual_batch_mode(
+        self, mock_get_run_details, mock_get_mode, mock_output_ws, mock_keep_unit, mock_remove_ws
+    ):
+        mock_get_mode, mock_inst, mock_keep_unit, run_string, runs = self._setup_output_focused_runs_test(
+            mock_get_run_details, mock_get_mode, mock_output_ws, mock_keep_unit
+        )
+        mock_get_mode.return_value = "Individual"
+
+        mock_inst._output_focused_runs(focused_runs=["INST123_foc", "INST124_foc"], run_number_string=run_string)
+
+        expected_calls = [call(d_spacing_group=run, tof_group=run, unit_to_keep=None) for run in runs]
+        mock_keep_unit.assert_has_calls(expected_calls)
+
+    @patch("isis_powder.routines.common.remove_intermediate_workspace")
+    @patch("isis_powder.routines.common.keep_single_ws_unit")
+    @patch("isis_powder.abstract_inst.AbstractInst._output_focused_ws")
+    @patch("isis_powder.abstract_inst.AbstractInst._get_input_batching_mode")
+    @patch("isis_powder.abstract_inst.AbstractInst._get_run_details")
+    def test_output_focused_runs_summed_batch_mode(
+        self, mock_get_run_details, mock_get_mode, mock_output_ws, mock_keep_unit, mock_remove_ws
+    ):
+        mock_get_mode, mock_inst, mock_keep_unit, run_string, runs = self._setup_output_focused_runs_test(
+            mock_get_run_details, mock_get_mode, mock_output_ws, mock_keep_unit
+        )
+        mock_get_mode.return_value = "Summed"
+
+        mock_inst._output_focused_runs(focused_runs=["INST123_foc", "INST124_foc"], run_number_string=run_string)
+
+        expected_calls = 2 * [call(d_spacing_group=run_string, tof_group=run_string, unit_to_keep=None)]
+        mock_keep_unit.assert_has_calls(expected_calls)
 
 
 if __name__ == "__main__":

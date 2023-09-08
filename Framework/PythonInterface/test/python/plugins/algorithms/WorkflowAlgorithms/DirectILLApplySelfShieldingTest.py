@@ -7,8 +7,8 @@
 
 from mantid.api import mtd
 from mantid.simpleapi import CloneWorkspace
-import numpy.testing
-from testhelpers import assert_almost_equal, illhelpers, run_algorithm
+from numpy.testing import assert_almost_equal
+from testhelpers import illhelpers, run_algorithm
 import unittest
 
 

@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import mtd
-import numpy.testing
-from testhelpers import assert_almost_equal, illhelpers, run_algorithm
+from numpy.testing import assert_almost_equal
+from testhelpers import illhelpers, run_algorithm
 import unittest
 
 
