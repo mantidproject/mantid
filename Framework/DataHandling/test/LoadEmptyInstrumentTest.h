@@ -194,6 +194,8 @@ public:
 
     std::string err_msg{"No instrument XML definition found"};
     TS_ASSERT_THROWS_EQUALS(loader.execute(), const std::runtime_error &e, std::string(e.what()).find(err_msg), 0);
+
+    TS_ASSERT(!loader.isExecuted())
   }
 
   void testLoadFileWithInvalidExtension() {
@@ -212,6 +214,8 @@ public:
 
     std::string err_msg{"Invalid string .xyz for enumerated string"};
     TS_ASSERT_THROWS_EQUALS(loader.execute(), const std::runtime_error &e, std::string(e.what()).find(err_msg), 0);
+
+    TS_ASSERT(!loader.isExecuted())
   }
 
   void testParameterTags() {
