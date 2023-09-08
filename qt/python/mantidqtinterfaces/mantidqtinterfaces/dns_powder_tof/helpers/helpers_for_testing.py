@@ -4,6 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantid.simpleapi import BinMD, FakeMDEventData, CreateMDWorkspace
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
 
@@ -230,9 +231,86 @@ def get_fake_tof_options():
     return tof_opt
 
 
+# OKcomment: not used anywhere
+def get_fake_elastic_sc_options():
+    el_opt = {
+        "a": 2,
+        "b": 3,
+        "c": 4,
+        "alpha": 78,
+        "beta": 86,
+        "gamma": 85,
+        "hkl1": "1,2,3",
+        "hkl2": "2,3,4",
+        "omega_offset": 0,
+        "dx": 1,
+        "dy": 2,
+        "wavelength": 4.74,
+    }
+    return el_opt
+
+
 def get_fake_tof_errors():  # matches data 1,2 above
     return {"channel_widths": [2.0, 1.6], "chan_error": True, "tof_channels": [1, 1000], "tof_error": True}
 
 
 def get_fake_tof_data_dic():
     return {"knso": {"path": "C:/data", -6.0: [0, 1, 2, 3, 4, 5, 6, 7, 8], -5.0: [2, 3, 4]}}
+
+
+def get_fake_elastic_data_dic():
+    return {
+        "knso": {
+            "path": "C:/data",
+            "x_nsf": range(554574, 554634, 6),
+            "x_sf": range(554573, 554633, 6),
+            "y_nsf": range(554576, 554636, 6),
+            "y_sf": range(554575, 554635, 6),
+            "z_nsf": range(554578, 554638, 6),
+            "z_sf": range(554577, 554637, 6),
+        },
+    }
+
+
+def get_elastic_standard_data_dic():
+    return {
+        "vana": {"path": "C:/_knso_554573_to_554632_ip_vana", "z_nsf": range(10, 20, 1), "z_sf": range(0, 10, 1)},
+        "nicr": {
+            "path": "C:/_knso_554573_to_554632_ip_nicr",
+            "x_nsf": range(10, 20, 1),
+            "x_sf": range(0, 10, 1),
+            "y_nsf": range(30, 40, 1),
+            "y_sf": range(20, 30, 1),
+            "z_nsf": range(50, 60, 1),
+            "z_sf": range(40, 50, 1),
+        },
+        "empty": {
+            "path": "C:/_knso_554573_to_554632_ip_empty",
+            "x_nsf": range(10, 20, 1),
+            "x_sf": range(0, 10, 1),
+            "y_nsf": range(30, 40, 1),
+            "y_sf": range(20, 30, 1),
+            "z_nsf": range(50, 60, 1),
+            "z_sf": range(40, 50, 1),
+        },
+    }
+
+
+def get_fake_MD_workspace_unique(name="test", factor=1):
+    ws = CreateMDWorkspace(
+        Dimensions="3",
+        EventType="MDEvent",
+        Extents="0,150,-10,110,0,20",
+        Names="Scattering Angle,Omega,TOF",
+        Units="degree,degree,us",
+        OutputWorkspace="test",
+    )
+    FakeMDEventData(ws, UniformParams=str(-15 * 12 * 2 * factor))
+    bws = BinMD(
+        InputWorkspace=ws,
+        AlignedDim0="Scattering Angle,0,150,5",
+        AlignedDim1="Omega,-10,110,4",
+        AlignedDim2="TOF,0,20,1",
+        OutputWorkspace=name,
+    )
+    return bws
