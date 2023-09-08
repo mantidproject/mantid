@@ -70,8 +70,8 @@ class MultiPythonFileInterpreter(QWidget):
         self.file_watcher = QFileSystemWatcher()
         self.file_watcher.fileChanged.connect(self.file_changed_event)
         # When monitor_files_changing is True, then any files that are detected
-        # as modified by the QFileSystemWatcher will be added to the set. We 
-        # need to disable the file monitoring when we want to save the file so 
+        # as modified by the QFileSystemWatcher will be added to the set. We
+        # need to disable the file monitoring when we want to save the file so
         # we don't get notified about our own save.
         self.files_changed_unhandled = set()
         self.monitor_files_changing = True
