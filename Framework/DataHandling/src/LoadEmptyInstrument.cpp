@@ -44,7 +44,7 @@ typedef EnumeratedString<FilenameExtensionEnum, &validFilenameExtensions, &compa
 
 // This method attempts to retrieve a valid, i.e. enumerated, instrument file name extension.
 // Possible double and single extensions are considered. If no valid file name extension could
-// be retrieved, a std::runtime _error will be thrown. For example, a file name might have a double
+// be retrieved, an std::runtime_error will be thrown. For example, a file name might have a double
 // extension such as ".nxs.h5", which is valid. It may also have a double extension such as .lite.nxs,
 // which is invalid. In the latter case a single extension, .nxs, which is valid, should be retrieved.
 std::string LoadEmptyInstrument::retrieveValidInstrumentFilenameExtension(const std::string &filename) {
