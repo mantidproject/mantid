@@ -1,1 +1,0 @@
--  :ref:`Powder Elastic<dns_powder_elastic-ref>` operational mode has been integrated into the :ref:`DNS Reduction GUI<dns_reduction-ref>`. This mode enables users to perform reduction of elastic powder diffraction data.
