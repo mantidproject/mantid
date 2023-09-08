@@ -107,7 +107,7 @@ class MultiPythonFileInterpreter(QWidget):
         self.on_completion_change()
 
     def file_changed_event(self, filename):
-        if self.monitor_files_changing and filename not in self.files_changed_unhandled:
+        if self.monitor_files_changing:
             self.files_changed_unhandled.add(filename)
 
     @property
