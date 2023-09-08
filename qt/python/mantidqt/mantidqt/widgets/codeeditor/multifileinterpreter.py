@@ -472,7 +472,7 @@ class MultiPythonFileInterpreter(QWidget):
             QMessageBox.warning(
                 self,
                 "",
-                f"The current file ({file}) doesn't exist anymore, which is due to an external source deleting or renaming the \
-                    file. The contents of this tab will remain unchanged, but are unsaved.",
+                f"The current file ({file}) doesn't exist anymore, which is due to an external source deleting or renaming the"
+                + " file. The contents of this tab will remain unchanged, but are unsaved. Saving will recreate the file.",
             )
             self.current_editor().mark_as_modified()
