@@ -43,10 +43,12 @@ class DNSReductionGUIView(QMainWindow):
         self.ui.actionDNS_website.triggered.connect(self._open_dns_webpage)
         # connect mode switching signals
         self.modus_mapping = {
+            self.ui.actionPowder_Elastic: "powder_elastic",
             self.ui.actionPowder_TOF: "powder_tof",
         }
         self.modus_titles = {
-            "powder_tof": "DNS Reduction - Powder TOF",
+            "powder_elastic": "DNS Reduction GUI - Powder Elastic",
+            "powder_tof": "DNS Reduction GUI - Powder TOF",
         }
         for key in self.modus_mapping:
             key.triggered.connect(self._modus_change)
@@ -133,10 +135,3 @@ class DNSReductionGUIView(QMainWindow):
         if old_message and not clear:
             message = " AND ".join((message, old_message))
         self.ui.statusbar.showMessage(message, time * 1000)
-
-    def switch_to_plot_tab(self):
-        for i, subview in enumerate(self.subviews):
-            if "Plot" in subview.NAME:
-                self.ui.tabWidget.setCurrentIndex(i)
-                self._tab_changed(i)
-                break
