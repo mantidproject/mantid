@@ -45,7 +45,7 @@ class BayesQuasi(PythonAlgorithm):
     def summary(self):
         return (
             "This algorithm is deprecated, please use BayesQuasi2 instead. \n"
-            + "************************************************************ \n \n"
+            + "************************************************************* \n \n"
             + "This algorithm runs the Fortran QLines programs which fits a Delta function of"
             + " amplitude 0 and Lorentzians of amplitude A(j) and HWHM W(j) where j=1,2,3. The"
             + " whole function is then convolved with the resolution function."

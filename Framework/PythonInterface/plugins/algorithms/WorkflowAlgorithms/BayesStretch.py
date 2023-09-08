@@ -39,7 +39,7 @@ class BayesStretch(PythonAlgorithm):
     def summary(self):
         return (
             "This algorithm is deprecated, please use BayesStretch2 instead. \n"
-            + "*********************************************************** \n \n"
+            + "*************************************************************** \n \n"
             + "This is a variation of the stretched exponential option of Quasi."
         )
 
