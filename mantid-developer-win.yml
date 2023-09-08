@@ -22,7 +22,7 @@ dependencies:
   - matplotlib=3.6.*
   - nexus=4.4.*
   - ninja>=1.10.2
-  - numpy<1.25
+  - numpy>=1.22,<1.25
   - occt
   - conda-wrappers
   - pip>=21.0.1
@@ -40,7 +40,7 @@ dependencies:
   - requests>=2.25.1
   - scipy>=1.10.0
   - setuptools
-  - sphinx >= 4.5.*
+  - sphinx>=4.5.*
   - sphinx_bootstrap_theme=>0.8.1
   - tbb-devel=2021.*
   - toml>=0.10.2
