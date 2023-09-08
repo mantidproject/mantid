@@ -621,6 +621,12 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         if loadCalibration or loadGrouping or loadMask:
             if not wksp:
                 raise RuntimeError("Trying to load calibration without a donor workspace")
+
+            if "TMin" in self.__getAlignAndFocusArgs():
+                tmin_val = self.__getAlignAndFocusArgs()["TMin"]
+            else:
+                tmin_val = 0.0
+
             LoadDiffCal(
                 InputWorkspace=wksp,
                 Filename=self.getPropertyValue("CalFileName"),
@@ -629,6 +635,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 MakeGroupingWorkspace=loadGrouping,
                 MakeMaskWorkspace=loadMask,
                 WorkspaceName=self.instr,
+                TofMin=tmin_val,
             )
         if loadCalibration:
             self.__calWksp = self.instr + "_cal"
