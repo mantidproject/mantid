@@ -278,3 +278,4 @@ Component Overviews
    Widgets/Plotting
    WritingAnAlgorithm
    WritingCustomConvertToMDTransformation
+   ISISEnergyTransferTab

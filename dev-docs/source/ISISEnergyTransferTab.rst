@@ -1,7 +1,7 @@
 .. _ISISEnergyTransferTab:
 
 ISIS Energy Transfer Tab
-========================
+------------------------
 The ISIS Energy Transfer tab uses the MVP pattern for its implementation. The code has undergone a refactoring process
 from a single class structure to an MVP pattern, aimed at enhancing modularity, testability, readability, and clear separation of concerns.
 The user interface (UI) components are divided into three distinct classes: a view, a model, and a presenter.
@@ -65,7 +65,7 @@ Similar to the algorithm execution, the presenter manages data plotting.
 The function :code:`notifyPlotRawClicked` responds to the plot button click, while :code:`plotRawComplete` manages post-plotting tasks.
 
 Dependency on :code:`IndirectDataReductionTab`
-++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++
 Currently, :code:`IETPresenter` implements :code:`IndirectDataReductionTab` which does some UI
 logic, additionally coupled to QT. The presenter should not have a dependency
 on QT but the current presenter is using this interface to adapt with the legacy code.
@@ -85,7 +85,7 @@ The model doesn't have a reference to the view and should be independent of the 
 is the model of the tab.
 
 ISIS Indirect Energy Transfer Wrapper
-++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++
 :code:`ISISIndirectEnergyTransferWrapper` is the main algorithm in the tab. Various functions manage operations related to algorithm execution.
 A series of setters configure algorithm parameters. :code:`validateRunData` employs :code:`IETDataValidator` to validate algorithm parameters.
 Execution of the algorithm takes place within :code:`runIETAlgorithm` post validation and parameters configuration.
