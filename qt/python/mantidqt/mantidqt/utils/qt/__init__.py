@@ -221,5 +221,5 @@ def force_layer_backing_BigSur():
     import platform
 
     mac_vers = Version(platform.mac_ver()[0])
-    if mac_vers >= "11" or mac_vers == "10.16":
+    if mac_vers >= Version("11") or mac_vers == Version("10.16"):
         os.environ["QT_MAC_WANTS_LAYER"] = "1"
