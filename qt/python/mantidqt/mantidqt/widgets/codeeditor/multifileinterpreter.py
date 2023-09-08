@@ -148,8 +148,7 @@ class MultiPythonFileInterpreter(QWidget):
             # Or the default (0) if this is the very first tab
             current_zoom = self.zoom_level
 
-        if filename is not None and filename not in self.file_watcher.files():
-            self.file_watcher.addPath(filename)
+        self.add_file_to_watcher(filename)
 
         interpreter = PythonFileInterpreter(font, content, filename=filename, parent=self, completion_enabled=self.completion_enabled)
 
@@ -176,6 +175,10 @@ class MultiPythonFileInterpreter(QWidget):
             line_count = content.count(linesep)
             interpreter.editor.setCursorPosition(line_count, 0)
         return tab_idx
+
+    def add_file_to_watcher(self, file):
+        if file is not None and file not in self.file_watcher.files():
+            self.file_watcher.addPath(file)
 
     def abort_current(self):
         """Request that that the current execution be cancelled"""
@@ -386,6 +389,7 @@ class MultiPythonFileInterpreter(QWidget):
         self.monitor_files_changing = False
         try:
             self.current_editor().save(force_save=True)
+            self.add_file_to_watcher(self.current_editor().filename)
         finally:
             self.monitor_files_changing = True
 
@@ -395,6 +399,7 @@ class MultiPythonFileInterpreter(QWidget):
         self.monitor_files_changing = False
         try:
             saved, filename = self.current_editor().save_as()
+            self.add_file_to_watcher(filename)
         finally:
             self.monitor_files_changing = True
         if saved:
