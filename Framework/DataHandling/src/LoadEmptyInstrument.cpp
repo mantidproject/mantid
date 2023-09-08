@@ -57,8 +57,7 @@ std::string LoadEmptyInstrument::retrieveValidInstrumentFilenameExtension(const 
     std::string double_ext{pre_ext + ext};
     try {
       FilenameExtension fne(double_ext);
-      UNUSED_ARG(fne);
-      return double_ext;
+      return fne.c_str();
     } catch (std::runtime_error &) {
     }
   }
@@ -66,8 +65,7 @@ std::string LoadEmptyInstrument::retrieveValidInstrumentFilenameExtension(const 
   // Test a possible single extension
   try {
     FilenameExtension fne(ext);
-    UNUSED_ARG(fne);
-    return ext;
+    return fne.c_str();
   } catch (std::runtime_error &) {
   }
 
