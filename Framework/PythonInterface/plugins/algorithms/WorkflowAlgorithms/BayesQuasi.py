@@ -44,7 +44,9 @@ class BayesQuasi(PythonAlgorithm):
 
     def summary(self):
         return (
-            "This algorithm runs the Fortran QLines programs which fits a Delta function of"
+            "This algorithm is deprecated, please use BayesQuasi2 instead. \n"
+            + "************************************************************* \n \n"
+            + "This algorithm runs the Fortran QLines programs which fits a Delta function of"
             + " amplitude 0 and Lorentzians of amplitude A(j) and HWHM W(j) where j=1,2,3. The"
             + " whole function is then convolved with the resolution function."
         )
@@ -139,12 +141,12 @@ class BayesQuasi(PythonAlgorithm):
 
     # pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
-
         self.check_platform_support()
 
         from IndirectBayes import CalcErange, GetXYE
 
         setup_prog = Progress(self, start=0.0, end=0.3, nreports=5)
+        self.log().warning("This algorithm is deprecated, please use BayesQuasi2 instead.")
         self.log().information("BayesQuasi input")
 
         erange = [self._e_min, self._e_max]
@@ -428,7 +430,6 @@ class BayesQuasi(PythonAlgorithm):
             self._e_max = last_data_point
 
     def _add_sample_logs(self, workspace, fit_program, e_range, binning):
-
         sample_binning, res_binning = binning
         energy_min, energy_max = e_range
 
@@ -516,7 +517,6 @@ class BayesQuasi(PythonAlgorithm):
         return outWS
 
     def _add_xye_data(self, data, xout, Y, E):
-
         dX, dY, dE = data[0], data[1], data[2]
         dX = np.append(dX, np.array(xout))
         dY = np.append(dY, np.array(Y))

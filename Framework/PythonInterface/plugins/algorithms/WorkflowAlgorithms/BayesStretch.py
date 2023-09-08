@@ -37,7 +37,11 @@ class BayesStretch(PythonAlgorithm):
         return "Workflow\\MIDAS"
 
     def summary(self):
-        return "This is a variation of the stretched exponential option of Quasi."
+        return (
+            "This algorithm is deprecated, please use BayesStretch2 instead. \n"
+            + "*************************************************************** \n \n"
+            + "This is a variation of the stretched exponential option of Quasi."
+        )
 
     def PyInit(self):
         self.declareProperty(
@@ -110,6 +114,7 @@ class BayesStretch(PythonAlgorithm):
         from IndirectCommon import CheckXrange, CheckAnalysersOrEFixed, getEfixed, GetThetaQ, CheckHistZero
 
         setup_prog = Progress(self, start=0.0, end=0.3, nreports=5)
+        logger.warning("This algorithm is deprecated, please use BayesStretch2 instead.")
         logger.information("BayesStretch input")
         logger.information("Sample is %s" % self._sam_name)
         logger.information("Resolution is %s" % self._res_name)
