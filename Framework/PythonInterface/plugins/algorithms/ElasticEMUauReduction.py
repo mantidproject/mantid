@@ -592,13 +592,6 @@ class ElasticEMUauReduction(PythonAlgorithm):
         irun = iws.getRun()
         start = irun.startTime()
 
-        # include the reactor power as a factor
-        rpwr = irun.getLogData(parameter)
-        txv = (rpwr.times - start.to_datetime64()) / np.timedelta64(1, "s")  # time in seconds
-        avg_pwr = np.mean(rpwr.value)
-        rpfact = rpwr.value / avg_pwr
-        pwrfn = interpolate.interp1d(txv, rpfact, bounds_error=False, fill_value="extrapolate")
-
         # get the period from the frame rate and count, there may be addnl
         # events after the last frame so inc by 1 to catch all
         scan = irun.getLogData("ScanPeriod")
@@ -610,6 +603,18 @@ class ElasticEMUauReduction(PythonAlgorithm):
             pulses.append(np.arange(t0, t0 + dt, step=step_size))
         pulses = np.concatenate(pulses).ravel()
         values = tsmap(pulses)
+
+        # include the reactor power or beam monitor as a factor
+        rpwr = irun.getLogData("ReactorPower")
+        if len(rpwr.times) == 1:
+            txv = [0, period[0]]
+            rpfact = [1, 1]
+        else:
+            txv = (rpwr.times - start.to_datetime64()) / np.timedelta64(1, "s")  # time in seconds
+            avg_pwr = np.mean(rpwr.value)
+            rpfact = rpwr.value / avg_pwr
+        pwrfn = interpolate.interp1d(txv, rpfact, bounds_error=False, fill_value="extrapolate")
+
         weights = pwrfn(pulses)
         kwargs = bin_params.copy()
         kwargs["weights"] = weights
@@ -650,58 +655,61 @@ class ElasticEMUauReduction(PythonAlgorithm):
         iws = mtd[input_ws]
         irun = iws.getRun()
         start = irun.startTime()
-        if not env_tag or stepped_env:
-            # get the period from the frame rate and count, there may be addnl
-            # events after the last frame so inc by 1 to catch all
-            scan = irun.getLogData("ScanPeriod")
-            period = scan.value
-            times = (scan.times - start.to_datetime64()) / np.timedelta64(1, "s")  # time in seconds
 
-            # if env and stepped then expand the map to resemble a step fn
-            # mapping (time, time+period) -> evalue
-            if env_tag and stepped_env:
-                tss = irun.getLogData(env_tag)
-                tsv = np.vstack((times, times + period)).T.reshape(
+        # get the scan times and period
+        scan = irun.getLogData("ScanPeriod")
+        period = scan.value
+        times = (scan.times - start.to_datetime64()) / np.timedelta64(1, "s")  # time in seconds
+
+        if env_tag:  # sample env scan
+            tss = irun.getLogData(env_tag)
+
+            # if single point processing (0,T) -> env,
+            # extend the bin edges so the bin width is non-zero
+            if len(tss.value) == 1:
+                tsmap = interpolate.interp1d(
+                    [times[0], times[0] + period[0]], [tss.value[0], tss.value[0]], bounds_error=False, fill_value="extrapolate"
+                )
+                bin_params = {"bins": [tss.value[0] - 1, tss.value[0] + 1]}
+
+            elif stepped_env:
+                txv = np.vstack((times, times + period)).T.reshape(
                     -1,
                 )
-                txv = np.vstack((tss.value, tss.value)).T.reshape(
+                tyv = np.vstack((tss.value, tss.value)).T.reshape(
                     -1,
                 )
-                tsmap = interpolate.interp1d(tsv, txv, bounds_error=False, fill_value="extrapolate")
+                tsmap = interpolate.interp1d(txv, tyv, bounds_error=False, fill_value="extrapolate")
 
                 # sort the env values if necessary as histogram bins are assumed sorted
                 def is_sorted(a):
                     return np.all(a[:-1] <= a[1:])
 
                 txv = tss.value if is_sorted(tss.value) else np.sort(tss.value)
-            else:
-                txv = times
-                tsmap = interpolate.interp1d(times, txv, bounds_error=False, fill_value="extrapolate")
 
-            # use bin edges and centre the bins on the mid points
-            bin_edges = np.zeros(len(txv) + 1)
-            bin_edges[1:-1] = 0.5 * (txv[1:] + txv[:-1])
-            bin_edges[0] = 2 * txv[0] - bin_edges[1]
-            bin_edges[-1] = 2 * bin_edges[-2] - bin_edges[-3]
-            bin_params = {"bins": bin_edges}
+                # take the mid point as the bin edges
+                bin_edges = np.zeros(len(txv) + 1)
+                bin_edges[1:-1] = 0.5 * (txv[1:] + txv[:-1])
+                bin_edges[0] = 2 * txv[0] - bin_edges[1]
+                bin_edges[-1] = 2 * txv[-1] - bin_edges[-2]
+                bin_params = {"bins": bin_edges}
 
-        else:
-            # assume the env parameter is continuous
-            tss = irun.getLogData(env_tag)
-            txv = (tss.times - start.to_datetime64()) / np.timedelta64(1, "s")  # time in seconds
-            tsmap = interpolate.interp1d(txv, tss.value, bounds_error=False, fill_value="extrapolate")
+            else:  # continuously variable param
+                times = (tss.times - start.to_datetime64()) / np.timedelta64(1, "s")  # time in seconds
+                tsmap = interpolate.interp1d(times, tss.value, bounds_error=False, fill_value="extrapolate")
 
-            # bins are not defined so use the limits of the observation, noting
-            # that SICS records the value at the end of the scan for each dataset
-            # so add the value at t = 0 as a limit
-            no_bins = len(tss.value)
+                # bins are not defined so use the limits of the observation, noting
+                # that SICS records the value at the end of the scan for each dataset
+                # so add the value at t = 0 as a limit
+                ystart = tsmap(0)
+                ymin = min(ystart, np.min(tss.value))
+                ymax = max(ystart, np.max(tss.value))
+                bin_params = {"bins": len(tss.value), "range": (ymin, ymax)}
 
-            ymin, ymax = np.min(tss.value), np.max(tss.value)
-            ystart = tsmap(0)
-            ymin = min(ystart, ymin)
-            ymax = max(ystart, ymax)
-            bin_range = (ymin, ymax)
-            bin_params = {"bins": no_bins, "range": bin_range}
+        else:  # time scan
+            bin_range = [times[0], times[-1] + period[-1]]
+            tsmap = interpolate.interp1d(bin_range, bin_range, bounds_error=False, fill_value="extrapolate")
+            bin_params = {"bins": len(times), "range": bin_range}
 
         return tsmap, bin_params
 
