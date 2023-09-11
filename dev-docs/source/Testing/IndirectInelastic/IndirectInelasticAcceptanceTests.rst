@@ -86,7 +86,8 @@ Data analysis Elwin
 
 --------------
 
-#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
+#. Go to the ``Elwin`` tab
 #. Enter ``irs26176_graphite002_red.nxs`` in ``Input file``
 #. Click ``Run`` - this should produce 3 new workspaces ``_elf``, ``_eq`` and ``_eq2``
 #. Now in ``Input file`` choose browse, navigate to the ISIS-Sample data and select the two files above simultaneously, by using shift key
@@ -133,8 +134,8 @@ Data analysis I(Q, T)
 
 --------------
 
-#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
-#. Go to the ``I(Q, T)`` tab
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
+#. Go to the ``Iqt`` tab
 #. Load the ``irs26176_graphite002_red.nxs`` file from the sample data
 #. Load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data
 #. Click ``Run``
