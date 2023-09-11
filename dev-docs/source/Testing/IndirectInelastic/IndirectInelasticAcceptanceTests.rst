@@ -86,7 +86,8 @@ Data analysis Elwin
 
 --------------
 
-#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
+#. Go to the ``Elwin`` tab
 #. Enter ``irs26176_graphite002_red.nxs`` in ``Input file``
 #. Click ``Run`` - this should produce 3 new workspaces ``_elf``, ``_eq`` and ``_eq2``
 #. Now in ``Input file`` choose browse, navigate to the ISIS-Sample data and select the two files above simultaneously, by using shift key
@@ -133,8 +134,8 @@ Data analysis I(Q, T)
 
 --------------
 
-#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
-#. Go to the ``I(Q, T)`` tab
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
+#. Go to the ``Iqt`` tab
 #. Load the ``irs26176_graphite002_red.nxs`` file from the sample data
 #. Load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data
 #. Click ``Run``
@@ -200,7 +201,7 @@ Data analysis Conv Fit
 #. Click ``Run``; the plot should update and new workspaces are created in the main Mantid GUI
 #. Try the various ``Plot`` options in the interface
 
-   (a)  ``Output`` drop-down set to All and click ``Plot`` - should give 4 separate plots
+   (a)  ``Output`` drop-down set to All and click ``Plot`` - should give 5 separate plots
    (b)  ``Plot Current Preview`` - should result in a plot with three datasets
    (c)  Enable the ``Plot Guess`` checkbox - should not change anything, but should not break anything either!
 
