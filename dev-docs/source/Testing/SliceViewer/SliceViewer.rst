@@ -181,9 +181,9 @@ Test the :ref:`Peak Overlay<mantid:sliceviewer_peaks_overlay>`
 3. Double click a row
 
     - It should change the slicepoint along the integrated momentum axis and zoom into the peak - e.g. in (X,Y) = (H,K) then the slicepoint along L will be set to 1 and there will be a cross at (0,0).
-    - Note for ``md_4D`` the cross should be plotted at all E (obviously a Bragg peak will only be on the elastic line but the peak object has no elastic/inelastic logic and the sliceviewer only knows that `E` is not a momentum axis, it could be temperature etc.).
+    - Note for ``md_4D`` a peak will not be plotted if a non-Q axis is viewed, if both axes are Q-dimensions then the cross should be plotted at all E (obviously a Bragg peak will only be on the elastic line but the peak object has no elastic/inelastic logic and the sliceviewer only knows that `E` is not a momentum axis, it could be temperature etc.).
 
-4. Click Add Peaks in the Peak Actions section at the top of the peak viewer
+4. Click Add Peaks in the Peak Actions section at the top of the peak viewer (note for 4D workspaces the peak overlay won't work for non_Q dimensions).
 
 5. Click somewhere in the colorfill plot
 
@@ -305,7 +305,7 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 15. Try to change the a* column of the u1 to 1 (this would take u1 out of the plane of the slice, i.e. not orthogonal to u3) - it should reset to 0 - i.e. u1 = [0,1,0].
 16. Click and hold down on one of the red markers with white face on the colorfill plot and drag, release at ~K=1.
 
-    - This should reset the vectors int he table such that the cut is along u1 = [0,0,1] - i.e. u1 <-> u2
+    - This should reset the vectors in the table such that the cut is along u1 = [0,0,1] - i.e. u1 <-> u2
     - The thickness along u2 should be adjusted to ~2
 
 17. Set the step of u2 = 2 in the table, check that it sets (start,stop) = (-1,1)
@@ -314,7 +314,7 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
     - u1 ~ [0,0,1]  and u2 ~ [0,1,0]
     - There should be a peak in the 1D plot at x~1
 
-19. For u1 change c* = -1 and b* = 0 - check that u2 = [0,-1,0] and there is a peak at x~-1
+19. For u1 set b*=0 and c* = -1 and start=-2 - check that u2 = [0,-1,0] and there is a peak at x~-1
 20. To change the centre of the cut move the central white marker of the cut representation to (K,L) ~ (2,0),
 
     - The entire cut representation should move
