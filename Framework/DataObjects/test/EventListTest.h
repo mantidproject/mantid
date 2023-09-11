@@ -15,6 +15,7 @@
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -2485,6 +2486,58 @@ public:
     auto freqHist = e.histogram();
     TS_ASSERT_EQUALS(freqHist.counts()[0], 4.0);
     TS_ASSERT_EQUALS(freqHist.counts()[1], 2.0);
+  }
+
+  void test_generateHistogramUnsortedLinear() {
+    EventList e;
+
+    // some of these values will go to incorrect bins when simply converted from tof to bin_number
+    for (int x = 0; x < 100; x++)
+      e += TofEvent(x * 0.1);
+
+    MantidVec X, expected_Y, expected_E, Y, E;
+    VectorHelper::createAxisFromRebinParams({0., 0.1, 10}, X, true);
+
+    TS_ASSERT(!e.isSortedByTof());
+
+    // do unsorted histogram then compare and check still unsorted
+    e.generateHistogram(0, 0.1, 10, X, Y, E);
+    TS_ASSERT(!e.isSortedByTof());
+
+    // do sorted method to get expected results
+    e.generateHistogram(X, expected_Y, expected_E);
+    TS_ASSERT(e.isSortedByTof());
+
+    for (size_t i = 1; i < Y.size(); i++) {
+      TS_ASSERT_EQUALS(expected_Y[i], Y[i]);
+      TS_ASSERT_EQUALS(expected_E[i], E[i]);
+    }
+  }
+
+  void test_generateHistogramUnsortedLog() {
+    EventList e;
+
+    // some of these values will go to incorrect bins when simply converted from tof to bin_number
+    for (int x = 0; x < 100; x++)
+      e += TofEvent(pow(1.001, x));
+
+    MantidVec X, expected_Y, expected_E, Y, E;
+    VectorHelper::createAxisFromRebinParams({1., -0.001, 1.1}, X, true);
+
+    TS_ASSERT(!e.isSortedByTof());
+
+    // do unsorted histogram then compare and check still unsorted
+    e.generateHistogram(1, -0.001, 1.1, X, Y, E);
+    TS_ASSERT(!e.isSortedByTof());
+
+    // do sorted method to get expected results
+    e.generateHistogram(X, expected_Y, expected_E);
+    TS_ASSERT(e.isSortedByTof());
+
+    for (size_t i = 1; i < Y.size(); i++) {
+      TS_ASSERT_EQUALS(expected_Y[i], Y[i]);
+      TS_ASSERT_EQUALS(expected_E[i], E[i]);
+    }
   }
 };
 
