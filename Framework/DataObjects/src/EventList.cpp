@@ -2207,8 +2207,28 @@ void EventList::generateCountsHistogramUnsorted(const double xmin, const double 
     if (tof < xmin || tof >= xmax)
       continue;
 
+    // approximate bin
     auto n_bin = static_cast<size_t>((tof - xmin) / step);
-    Y[n_bin]++;
+
+    // find exact bin
+    bool outOfBounds = false;
+
+    while (!outOfBounds && tof < X[n_bin]) {
+      if (n_bin == 0)
+        outOfBounds = true;
+      else
+        n_bin--;
+    }
+
+    while (!outOfBounds && tof >= X[n_bin + 1]) {
+      if (n_bin == x_size - 1)
+        outOfBounds = true;
+      else
+        n_bin++;
+    }
+
+    if (!outOfBounds)
+      Y[n_bin]++;
   }
 }
 
@@ -2247,8 +2267,28 @@ void EventList::generateCountsHistogramUnsortedLog(const double xmin, const doub
     if (tof < xmin || tof >= xmax)
       continue;
 
+    // approximate bin
     auto n_bin = static_cast<size_t>(log(tof) / divisor - offset);
-    Y[n_bin]++;
+
+    // find exact bin
+    bool outOfBounds = false;
+
+    while (!outOfBounds && tof < X[n_bin]) {
+      if (n_bin == 0)
+        outOfBounds = true;
+      else
+        n_bin--;
+    }
+
+    while (!outOfBounds && tof >= X[n_bin + 1]) {
+      if (n_bin == x_size - 1)
+        outOfBounds = true;
+      else
+        n_bin++;
+    }
+
+    if (!outOfBounds)
+      Y[n_bin]++;
   }
 }
 
