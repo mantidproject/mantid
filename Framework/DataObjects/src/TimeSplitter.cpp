@@ -511,38 +511,43 @@ void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const st
   int destination = TimeSplitter::NO_TARGET;
 
   // is there an EventList mapped to the destination index?
-  EventList *partial = nullptr;
-  if (partials.find(destination) != partials.cend())
-    partial = partials[destination];
+  auto partial = partials.find(destination);
 
   auto itTime = times.cbegin();   // initialize iterator over times
   auto itEvent = events.cbegin(); // initialize iterator over the events
+  const auto itEventEnd = events.cend();
 
+  const auto m_roi_map_cend = m_roi_map.cend();
   // iterate over all events. For each event try finding its destination event list, a.k.a. partial.
   // If the partial is found, append the event to it. It is assumed events are sorted by either pulse time or tof
-  while (itEvent != events.cend()) {
+  while (itEvent != itEventEnd) {
     // Check if we need to advance the splitter and therefore select a different partial event list
     if (*itTime >= stop) {
       // advance to the new stopping boundary, and find the new destination index
       while (*itTime >= stop) {
         destination = itSplitter->second;
         itSplitter++;
-        if (itSplitter == m_roi_map.cend())
+        if (itSplitter == m_roi_map_cend)
           stop = DateAndTime::maximum(); // a.k.a stopping boundary at an "infinite" time
         else
           stop = itSplitter->first;
       }
-      if (partials.find(destination) == partials.cend())
-        partial = nullptr;
-      else
-        partial = partials[destination];
+      partial = partials.find(destination);
     }
-    if (partial) {
-      partial->addEventQuickly(*itEvent); // emplaces a copy of *itEvent in partial
+    if (partial == partials.end()) {
+      // advance both the iterator over events and times until we get past this splitter
+      while (*itTime < stop && itEvent != itEventEnd) {
+        itTime++;
+        itEvent++;
+      }
+    } else {
+      while (*itTime < stop && itEvent != itEventEnd) {
+        partial->second->addEventQuickly(*itEvent); // emplaces a copy of *itEvent in partial
+        // advance both the iterator over events and times
+        itTime++;
+        itEvent++;
+      }
     }
-    // advance both the iterator over events and times
-    itTime++;
-    itEvent++;
   }
 }
 
