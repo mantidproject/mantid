@@ -354,10 +354,12 @@ private:
                                                                      const double &tofOffset) const;
 
   void generateCountsHistogram(const MantidVec &X, MantidVec &Y) const;
-  void generateCountsHistogramUnsorted(const double xmin, const double step, const double xmax, const MantidVec &X,
-                                       MantidVec &Y) const;
-  void generateCountsHistogramUnsortedLog(const double xmin, const double step, const double xmax, const MantidVec &X,
-                                          MantidVec &Y) const;
+  void generateCountsHistogram(const double xmin, const double step, const double xmax, const MantidVec &X,
+                               MantidVec &Y) const;
+
+  size_t findLinearBin(const MantidVec &X, const double xmin, const double step, const double tof) const;
+  size_t findLogBin(const MantidVec &X, const double tof, const double divisor, const double offset) const;
+  size_t findExactBin(const MantidVec &X, const double tof, size_t n_bin) const;
 
   void generateCountsHistogramPulseTime(const MantidVec &X, MantidVec &Y) const;
 

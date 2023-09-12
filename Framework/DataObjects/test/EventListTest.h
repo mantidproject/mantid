@@ -2488,20 +2488,44 @@ public:
     TS_ASSERT_EQUALS(freqHist.counts()[1], 2.0);
   }
 
-  void test_generateHistogramUnsortedLinear() {
-    EventList e;
+  void test_generateHistogramUnsortedLinear_TOF() {
+    const auto e = createLinearTestData();
+    run_generateHistogramUnsortedTest(e, {0., 0.1, 100.});
+  }
 
-    // some of these values will go to incorrect bins when simply converted from tof to bin_number
-    for (int x = 0; x < 100; x++)
-      e += TofEvent(x * 0.1);
+  void test_generateHistogramUnsortedLinear_WEIGHTED() {
+    const auto e = createLinearTestData(WEIGHTED);
+    run_generateHistogramUnsortedTest(e, {0., 0.1, 100.});
+  }
 
+  void test_generateHistogramUnsortedLinear_WEIGHTED_NOTIME() {
+    const auto e = createLinearTestData(WEIGHTED_NOTIME);
+    run_generateHistogramUnsortedTest(e, {0., 0.1, 100.});
+  }
+
+  void test_generateHistogramUnsortedLog_TOF() {
+    const auto e = createLogTestData();
+    run_generateHistogramUnsortedTest(e, {1., -0.001, 1.1});
+  }
+
+  void test_generateHistogramUnsortedLog_WEIGHTED() {
+    const auto e = createLogTestData(WEIGHTED);
+    run_generateHistogramUnsortedTest(e, {1., -0.001, 1.1});
+  }
+
+  void test_generateHistogramUnsortedLog_WEIGHTED_NOTIME() {
+    const auto e = createLogTestData(WEIGHTED_NOTIME);
+    run_generateHistogramUnsortedTest(e, {1., -0.001, 1.1});
+  }
+
+  void run_generateHistogramUnsortedTest(EventList e, std::vector<double> rebinParams) {
     MantidVec X, expected_Y, expected_E, Y, E;
-    VectorHelper::createAxisFromRebinParams({0., 0.1, 10}, X, true);
+    VectorHelper::createAxisFromRebinParams(rebinParams, X, true);
 
     TS_ASSERT(!e.isSortedByTof());
 
     // do unsorted histogram then compare and check still unsorted
-    e.generateHistogram(0, 0.1, 10, X, Y, E);
+    e.generateHistogram(rebinParams[0], rebinParams[1], rebinParams[2], X, Y, E);
     TS_ASSERT(!e.isSortedByTof());
 
     // do sorted method to get expected results
@@ -2514,30 +2538,58 @@ public:
     }
   }
 
-  void test_generateHistogramUnsortedLog() {
+  const EventList createLinearTestData(EventType eventType = TOF) {
     EventList e;
 
-    // some of these values will go to incorrect bins when simply converted from tof to bin_number
-    for (int x = 0; x < 100; x++)
-      e += TofEvent(pow(1.001, x));
+    if (eventType != TOF)
+      el.switchTo(eventType);
 
-    MantidVec X, expected_Y, expected_E, Y, E;
-    VectorHelper::createAxisFromRebinParams({1., -0.001, 1.1}, X, true);
+    // some of these values will go to incorrect bins when simply converted from tof to bin_number when binned with {0.,
+    // 0.1, 100.}
 
-    TS_ASSERT(!e.isSortedByTof());
-
-    // do unsorted histogram then compare and check still unsorted
-    e.generateHistogram(1, -0.001, 1.1, X, Y, E);
-    TS_ASSERT(!e.isSortedByTof());
-
-    // do sorted method to get expected results
-    e.generateHistogram(X, expected_Y, expected_E);
-    TS_ASSERT(e.isSortedByTof());
-
-    for (size_t i = 1; i < Y.size(); i++) {
-      TS_ASSERT_EQUALS(expected_Y[i], Y[i]);
-      TS_ASSERT_EQUALS(expected_E[i], E[i]);
+    switch (eventType) {
+    case TOF:
+      for (int x = -10; x < 1010; x++)
+        e += TofEvent(x * 0.1);
+      break;
+    case WEIGHTED:
+      for (int x = -10; x < 1010; x++)
+        e += WeightedEvent(x * 0.1);
+      break;
+    case WEIGHTED_NOTIME:
+      for (int x = -10; x < 1010; x++)
+        e += TofEvent(x * 0.1);
+      break;
     }
+
+    return e;
+  }
+
+  const EventList createLogTestData(EventType eventType = TOF) {
+    EventList e;
+
+    if (eventType != TOF)
+      el.switchTo(eventType);
+
+    // some of these values will go to incorrect bins when simply converted from tof to bin_number when binned with {1.,
+    // -0.001, 1.1}
+
+    switch (eventType) {
+    case TOF:
+      for (int x = 0; x < 100; x++)
+        e += TofEvent(pow(1.001, x));
+      break;
+    case WEIGHTED:
+      for (int x = 0; x < 100; x++)
+        e += WeightedEvent(pow(1.001, x));
+      break;
+    case WEIGHTED_NOTIME:
+      for (int x = 0; x < 100; x++)
+        e += TofEvent(pow(1.001, x));
+      break;
+    }
+
+    return e;
   }
 };
 

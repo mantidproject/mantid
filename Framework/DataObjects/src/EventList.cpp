@@ -1950,10 +1950,7 @@ void EventList::generateHistogram(const double xmin, const double step, const do
                                   MantidVec &Y, MantidVec &E, bool skipError) const {
   switch (eventType) {
   case TOF:
-    if (step < 0) // log
-      this->generateCountsHistogramUnsortedLog(xmin, step, xmax, X, Y);
-    else // linear
-      this->generateCountsHistogramUnsorted(xmin, step, xmax, X, Y);
+    this->generateCountsHistogram(xmin, step, xmax, X, Y);
     if (!skipError)
       this->generateErrorsHistogram(Y, E);
     break;
@@ -2184,56 +2181,51 @@ void EventList::generateCountsHistogram(const MantidVec &X, MantidVec &Y) const 
   } // end if (there are any events to histogram)
 }
 
-void EventList::generateCountsHistogramUnsorted(const double xmin, const double step, const double xmax,
-                                                const MantidVec &X, MantidVec &Y) const {
-  // For slight speed=up.
-  size_t x_size = X.size();
+/* Find the bin which this TOF value falls in with linear binning, assumes TOF is in range of X
+ */
+size_t EventList::findLinearBin(const MantidVec &X, const double xmin, const double step, const double tof) const {
+  auto n_bin = static_cast<size_t>((tof - xmin) / step);
 
-  if (x_size <= 1) {
-    // X was not set. Return an empty array.
-    Y.resize(0, 0);
-    return;
-  }
-
-  // Clear the Y data, assign all to 0.
-  Y.resize(x_size - 1, 0);
-
-  // Do we even have any events to do?
-  if (this->events.empty())
-    return;
-
-  for (const TofEvent &ev : this->events) {
-    double tof = ev.tof();
-    if (tof < xmin || tof >= xmax)
-      continue;
-
-    // approximate bin
-    auto n_bin = static_cast<size_t>((tof - xmin) / step);
-
-    // find exact bin
-    bool outOfBounds = false;
-
-    while (!outOfBounds && tof < X[n_bin]) {
-      if (n_bin == 0)
-        outOfBounds = true;
-      else
-        n_bin--;
-    }
-
-    while (!outOfBounds && tof >= X[n_bin + 1]) {
-      if (n_bin == x_size - 1)
-        outOfBounds = true;
-      else
-        n_bin++;
-    }
-
-    if (!outOfBounds)
-      Y[n_bin]++;
-  }
+  return findExactBin(X, tof, n_bin);
 }
 
-void EventList::generateCountsHistogramUnsortedLog(const double xmin, const double step, const double xmax,
-                                                   const MantidVec &X, MantidVec &Y) const {
+/* Find the bin which this TOF value falls in with log binning, assumes TOF is in range of X
+ *
+ * formula to get bin_number from TOF
+ *
+ * bin_number = log_{abs(step) + 1}(tof/xmin) (that is log base abs(step)+1)
+ *
+ * rewritten as
+ *
+ * bin_number = log(tof)/log(abs(step)+1) - log(xmin)/log(abs(step)+1)
+ */
+size_t EventList::findLogBin(const MantidVec &X, const double tof, const double divisor, const double offset) const {
+  auto n_bin = static_cast<size_t>(log(tof) / divisor - offset);
+
+  return findExactBin(X, tof, n_bin);
+}
+
+size_t EventList::findExactBin(const MantidVec &X, const double tof, size_t n_bin) const {
+  while (tof < X[n_bin])
+    n_bin--;
+
+  while (tof >= X[n_bin + 1])
+    n_bin++;
+
+  return n_bin;
+}
+
+// --------------------------------------------------------------------------
+/** Fill a histogram given specified histogram bounds. Does not modify
+ * the eventlist (const method).
+ *
+ * This histogram without sorting the events first and will be quicker in some cases
+ *
+ * @param X :: The x bins
+ * @param Y :: The generated counts histogram
+ */
+void EventList::generateCountsHistogram(const double xmin, const double step, const double xmax, const MantidVec &X,
+                                        MantidVec &Y) const {
   // For slight speed=up.
   size_t x_size = X.size();
 
@@ -2249,15 +2241,6 @@ void EventList::generateCountsHistogramUnsortedLog(const double xmin, const doub
   // Do we even have any events to do?
   if (this->events.empty())
     return;
-
-  /* formula to get bin_number from TOF
-
-  bin_number = log_{abs(step) + 1}(tof/xmin) (that is log base abs(step)+1)
-
-  rewritten as
-
-  bin_number = log(tof)/log(abs(step)+1) - log(xmin)/log(abs(step)+1)
-  */
 
   const auto divisor = log(abs(step) + 1); // use this to do change of base
   const auto offset = log(xmin) / divisor;
@@ -2268,27 +2251,13 @@ void EventList::generateCountsHistogramUnsortedLog(const double xmin, const doub
       continue;
 
     // approximate bin
-    auto n_bin = static_cast<size_t>(log(tof) / divisor - offset);
+    size_t n_bin;
+    if (step < 0) // log
+      n_bin = findLogBin(X, tof, divisor, offset);
+    else // linear
+      n_bin = findLinearBin(X, xmin, step, tof);
 
-    // find exact bin
-    bool outOfBounds = false;
-
-    while (!outOfBounds && tof < X[n_bin]) {
-      if (n_bin == 0)
-        outOfBounds = true;
-      else
-        n_bin--;
-    }
-
-    while (!outOfBounds && tof >= X[n_bin + 1]) {
-      if (n_bin == x_size - 1)
-        outOfBounds = true;
-      else
-        n_bin++;
-    }
-
-    if (!outOfBounds)
-      Y[n_bin]++;
+    Y[n_bin]++;
   }
 }
 
