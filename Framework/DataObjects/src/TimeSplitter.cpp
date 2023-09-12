@@ -86,10 +86,24 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
   size_t noninteger_target_names_count{0};
   size_t notarget_names_count{0}; // count "-1" targets
 
+  size_t number_of_zero_width_intervals(0);
+
+  std::cout << "Creating a time splitter from a table workspace. Total number of rows: " << tws->rowCount()
+            << std::endl;
+
   for (size_t ii = 0; ii < tws->rowCount(); ii++) {
+    if (ii % 100000 == 0) {
+      std::cout << "Row: " << ii << std::endl;
+    }
     // by design, the times in the table must be in seconds
     double timeStart_s{col_start->toDouble(ii)};
     double timeStop_s{col_stop->toDouble(ii)};
+
+    if (timeStart_s == timeStop_s) {
+      number_of_zero_width_intervals++;
+      continue;
+    }
+
     if (timeStart_s < 0 || timeStop_s < 0) {
       throw std::runtime_error("All times in TableWorkspace must be >= 0 to construct TimeSplitter.");
     }
@@ -132,11 +146,22 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
     }
 
     addROI(timeStart, timeStop, target_index);
+
+    if (m_singleTargetTimeVectors.count(target_index) > 0) {
+      m_singleTargetTimeVectors[target_index].push_back(timeStart);
+      m_singleTargetTimeVectors[target_index].push_back(timeStop);
+    } else
+      m_singleTargetTimeVectors[target_index] = std::vector<DateAndTime>();
   }
+
+  std::cout << "NUMBER OF ZERO-WIDTH SPLITTER INTERVALS: " << number_of_zero_width_intervals << std::endl;
 
   // Verify that the input target names are either all numeric or all non-numeric. The exception is a name "-1", i.e. no
   // target specified. That name is ok to mix with non-numeric names.
-  if (noninteger_target_names_count != 0 && noninteger_target_names_count != tws->rowCount() - notarget_names_count) {
+  // if (noninteger_target_names_count != 0 && noninteger_target_names_count != tws->rowCount() - notarget_names_count)
+  // {
+  if (noninteger_target_names_count != 0 &&
+      noninteger_target_names_count != tws->rowCount() - notarget_names_count - number_of_zero_width_intervals) {
     throw std::runtime_error("Valid splitter targets cannot be a mix of numeric and non-numeric names.");
   }
 }
@@ -343,32 +368,39 @@ std::set<int> TimeSplitter::outputWorkspaceIndices() const {
  * This will raise an exception if the workspace index does not exist in the TimeSplitter.
  */
 TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
+
+  std::cout << "NUMBER OF ITEMS IN ROI MAP: " << m_roi_map.size() << std::endl;
+
   // convert indexes less than NO_TARGET to NO_TARGET
   const int effectiveIndex = std::max<int>(workspaceIndex, NO_TARGET);
 
+  bool presorted_splitter{true};
+
   TimeROI output;
+
+  if (presorted_splitter) {
+    output.replaceROI(m_singleTargetTimeVectors[effectiveIndex]);
+    return output;
+  }
+
   using map_value_type = std::map<DateAndTime, int>::value_type;
   auto indexFinder = [effectiveIndex](const map_value_type &value) { return value.second == effectiveIndex; };
-  // find the first place this workspace index exists
-  auto iter = std::find_if(m_roi_map.begin(), m_roi_map.end(), indexFinder);
-  // add the ROI found then loop until we reach the end
-  while (iter != m_roi_map.end()) {
-    // add the ROI
+  auto iter = m_roi_map.begin();
+  int n = 0;
+  while ((iter = std::find_if(iter, m_roi_map.end(), indexFinder)) != m_roi_map.end()) {
     const auto startTime = iter->first;
-    iter++;
-    // if the next iterator is the end there is nothing to add
-    if (iter != m_roi_map.end()) {
+    if (++iter != m_roi_map.end()) { // if the next iterator is the end, there is nothing to add
       const auto stopTime = iter->first;
       output.addROI(startTime, stopTime);
     }
-
-    // look for the next place the workspace index occurs
-    iter = std::find_if(iter, m_roi_map.end(), indexFinder);
+    if (effectiveIndex == 0 && n % 10000 == 0)
+      std::cout << "TimeSplitter::getTimeROI iteration: " << n << std::endl;
+    n++;
   }
 
   // error check that something is there
   // ignore index being empty is ok
-  if ((workspaceIndex >= 0) && (output.useAll())) {
+  if (effectiveIndex >= 0 && output.useAll()) { // useAll==true means the ROI is empty
     std::stringstream msg;
     msg << "No regions exist for workspace index " << workspaceIndex;
   }

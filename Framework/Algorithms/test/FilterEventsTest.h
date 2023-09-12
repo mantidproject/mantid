@@ -11,6 +11,8 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/FilterEvents.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
@@ -1228,6 +1230,57 @@ public:
     }
 
     return;
+  }
+
+  void test_tableSplitterHuge() {
+    std::string my_str;
+    getline(std::cin, my_str);
+    g_log.notice("\ntest_tableSplitterHuge...");
+
+    // Load event workspace
+    std::string event_ws_filename{"REF_M_40380"};
+    std::string event_ws_name{"event_ws"};
+
+    Mantid::DataHandling::LoadEventNexus leLoader;
+    leLoader.initialize();
+    leLoader.setProperty("Filename", event_ws_filename);
+    leLoader.setProperty("OutputWorkspace", event_ws_name);
+    leLoader.execute();
+
+    auto event_ws = std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(event_ws_name));
+
+    // Load splitter workspace
+    Mantid::DataHandling::LoadNexusProcessed loader;
+    std::string splitter_ws_filename{"PATH TO SPLITTER WORKSPACE NXS FILE"};
+    std::string splitter_ws_name{"huge_ws"};
+
+    loader.initialize();
+    loader.setProperty("Filename", splitter_ws_filename);
+    loader.setProperty("OutputWorkspace", splitter_ws_name);
+    loader.execute();
+
+    auto splitter_ws = std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
+        AnalysisDataService::Instance().retrieve(splitter_ws_name));
+
+    FilterEvents filter;
+    filter.initialize();
+
+    // Set properties
+    filter.setProperty("InputWorkspace", event_ws);
+    filter.setProperty("OutputWorkspaceBaseName", "FilteredWS_FromTable");
+    filter.setProperty("SplitterWorkspace", splitter_ws);
+    filter.setProperty("RelativeTime", true);
+    filter.setProperty("GroupWorkspaces", true);
+    filter.setProperty("FilterByPulseTime", false);
+    filter.setProperty("OutputWorkspaceIndexedFrom1", false);
+    filter.setProperty("CorrectionToSample", "None");
+    filter.setProperty("SpectrumWithoutDetector", "Skip");
+    filter.setProperty("SplitSampleLogs", true);
+    filter.setProperty("ExcludeSpecifiedLogs", true);
+    filter.setProperty("OutputTOFCorrectionWorkspace", "_tmp");
+    filter.execute();
+
+    // clean-up?
   }
 
   /** test for the case that the input workspace name is same as output base

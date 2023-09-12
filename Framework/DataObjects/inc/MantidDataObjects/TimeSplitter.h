@@ -65,6 +65,8 @@ private:
   // These 2 maps are complementary to each other
   std::map<std::string, int> m_name_index_map;
   std::map<int, std::string> m_index_name_map;
+
+  std::map<int, std::vector<DateAndTime>> m_singleTargetTimeVectors;
 };
 } // namespace DataObjects
 } // namespace Mantid
