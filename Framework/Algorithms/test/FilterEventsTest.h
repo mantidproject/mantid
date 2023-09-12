@@ -1233,8 +1233,6 @@ public:
   }
 
   void test_tableSplitterHuge() {
-    std::string my_str;
-    getline(std::cin, my_str);
     g_log.notice("\ntest_tableSplitterHuge...");
 
     // Load event workspace
