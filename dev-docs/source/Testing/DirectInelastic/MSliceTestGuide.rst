@@ -18,8 +18,9 @@ See here for the current MSlice documentation: http://mantidproject.github.io/ms
 Set Up
 ------
 
+#. Ensure you have the `ISIS Sample Data <http://download.mantidproject.org>`__ available on your machine.
 #. Open ``Interfaces`` > ``Direct`` > ``MSlice``
-#. Go to the ``Data Loading`` tab and select ``MAR21335_Ei60meV.nxs`` from the Mantid unit test files
+#. Go to the ``Data Loading`` tab and select ``MAR21335_Ei60meV.nxs`` from the sample data.
 #. Click ``Load Data``
 #. This should open the ``Workspace Manager`` tab with a workspace called ``MAR21335_Ei60meV``
 
@@ -269,7 +270,7 @@ The Workspace Manager
 #. In the ``Slice`` tab of the renamed workspace click on ``Display`` and verify that the original slice plot is displayed
 #. Select the renamed workspace and click on ``Delete``
 #. The renamed workspace should disappear and the ``Workspace Manager`` should be empty
-#. Go to the ``Data Loading`` tab and select ``MAR21335_Ei60meV.nxs`` from the Mantid unit test files
+#. Go to the ``Data Loading`` tab and select ``MAR21335_Ei60meV.nxs`` from the sample data.
 #. Click ``Load Data``
 #. Select the ``MAR21335_Ei60meV`` workspace again, click on ``Compose``, select ``Scale`` and enter a scale factor of 2, then click ``Ok``
 #. A new workspace with the name ``MAR21335_Ei60meV_scaled`` appears
