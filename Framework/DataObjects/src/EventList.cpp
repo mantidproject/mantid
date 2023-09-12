@@ -1849,6 +1849,62 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const Ma
   std::transform(E.cbegin(), E.cend(), E.begin(), static_cast<double (*)(double)>(sqrt));
 }
 
+template <class T>
+void EventList::histogramForWeightsHelper(const std::vector<T> &events, const double xmin, const double step,
+                                          const double xmax, const MantidVec &X, MantidVec &Y, MantidVec &E) {
+  // For slight speed=up.
+  size_t x_size = X.size();
+
+  if (x_size <= 1) {
+    // X was not set. Return an empty array.
+    Y.resize(0, 0);
+    return;
+  }
+
+  // If the sizes are the same, then the "resize" command will NOT clear the
+  // original values.
+  bool mustFill = (Y.size() == x_size - 1);
+  // Clear the Y data, assign all to 0.
+  Y.resize(x_size - 1, 0.0);
+  // Clear the Error data, assign all to 0.
+  // Note: Errors will be squared until the last step.
+  E.resize(x_size - 1, 0.0);
+
+  if (mustFill) {
+    // We must make sure the starting point is 0.0
+    std::fill(Y.begin(), Y.end(), 0.0);
+    std::fill(E.begin(), E.end(), 0.0);
+  }
+
+  //---------------------- Histogram without weights
+  //---------------------------------
+
+  // Do we even have any events to do?
+  if (events.empty())
+    return;
+
+  const auto divisor = log(abs(step) + 1); // use this to do change of base
+  const auto offset = log(xmin) / divisor;
+
+  for (const T &ev : events) {
+    double tof = ev.tof();
+    if (tof < xmin || tof >= xmax)
+      continue;
+
+    size_t n_bin;
+    if (step < 0) // log
+      n_bin = findLogBin(X, tof, divisor, offset);
+    else // linear
+      n_bin = findLinearBin(X, xmin, step, tof);
+
+    Y[n_bin] += ev.weight();
+    E[n_bin] += ev.errorSquared();
+  }
+
+  // Now do the sqrt of all errors
+  std::transform(E.cbegin(), E.cend(), E.begin(), static_cast<double (*)(double)>(sqrt));
+}
+
 // --------------------------------------------------------------------------
 /** Generates both the Y and E (error) histograms w.r.t Pulse Time
  * for an EventList with or without WeightedEvents.
@@ -1956,11 +2012,11 @@ void EventList::generateHistogram(const double xmin, const double step, const do
     break;
 
   case WEIGHTED:
-    throw Kernel::Exception::NotImplementedError("TODO");
+    histogramForWeightsHelper(this->weightedEvents, xmin, step, xmax, X, Y, E);
     break;
 
   case WEIGHTED_NOTIME:
-    throw Kernel::Exception::NotImplementedError("TODO");
+    histogramForWeightsHelper(this->weightedEventsNoTime, xmin, step, xmax, X, Y, E);
     break;
   }
 }
@@ -2183,8 +2239,8 @@ void EventList::generateCountsHistogram(const MantidVec &X, MantidVec &Y) const 
 
 /* Find the bin which this TOF value falls in with linear binning, assumes TOF is in range of X
  */
-size_t EventList::findLinearBin(const MantidVec &X, const double xmin, const double step, const double tof) const {
-  auto n_bin = static_cast<size_t>((tof - xmin) / step);
+size_t EventList::findLinearBin(const MantidVec &X, const double xmin, const double step, const double tof) {
+  auto n_bin = static_cast<size_t>((tof - xmin) / step); // approximate bin
 
   return findExactBin(X, tof, n_bin);
 }
@@ -2199,13 +2255,13 @@ size_t EventList::findLinearBin(const MantidVec &X, const double xmin, const dou
  *
  * bin_number = log(tof)/log(abs(step)+1) - log(xmin)/log(abs(step)+1)
  */
-size_t EventList::findLogBin(const MantidVec &X, const double tof, const double divisor, const double offset) const {
-  auto n_bin = static_cast<size_t>(log(tof) / divisor - offset);
+size_t EventList::findLogBin(const MantidVec &X, const double tof, const double divisor, const double offset) {
+  auto n_bin = static_cast<size_t>(log(tof) / divisor - offset); // approximate bin
 
   return findExactBin(X, tof, n_bin);
 }
 
-size_t EventList::findExactBin(const MantidVec &X, const double tof, size_t n_bin) const {
+size_t EventList::findExactBin(const MantidVec &X, const double tof, size_t n_bin) {
   while (tof < X[n_bin])
     n_bin--;
 

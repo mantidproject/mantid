@@ -357,9 +357,9 @@ private:
   void generateCountsHistogram(const double xmin, const double step, const double xmax, const MantidVec &X,
                                MantidVec &Y) const;
 
-  size_t findLinearBin(const MantidVec &X, const double xmin, const double step, const double tof) const;
-  size_t findLogBin(const MantidVec &X, const double tof, const double divisor, const double offset) const;
-  size_t findExactBin(const MantidVec &X, const double tof, size_t n_bin) const;
+  static size_t findLinearBin(const MantidVec &X, const double xmin, const double step, const double tof);
+  static size_t findLogBin(const MantidVec &X, const double tof, const double divisor, const double offset);
+  static size_t findExactBin(const MantidVec &X, const double tof, size_t n_bin);
 
   void generateCountsHistogramPulseTime(const MantidVec &X, MantidVec &Y) const;
 
@@ -386,6 +386,9 @@ private:
 
   template <class T>
   static void histogramForWeightsHelper(const std::vector<T> &events, const MantidVec &X, MantidVec &Y, MantidVec &E);
+  template <class T>
+  static void histogramForWeightsHelper(const std::vector<T> &events, const double xmin, const double step,
+                                        const double xmax, const MantidVec &X, MantidVec &Y, MantidVec &E);
   template <class T>
   static void integrateHelper(std::vector<T> &events, const double minX, const double maxX, const bool entireRange,
                               double &sum, double &error);
