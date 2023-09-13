@@ -356,8 +356,8 @@ private:
   void generateCountsHistogram(const MantidVec &X, MantidVec &Y) const;
   void generateCountsHistogram(const double step, const MantidVec &X, MantidVec &Y) const;
 
-  static boost::optional<size_t> findLinearBin(const MantidVec &X, const double xmin, const double step,
-                                               const double tof);
+  static boost::optional<size_t> findLinearBin(const MantidVec &X, const double tof, const double divisor,
+                                               const double offset);
   static boost::optional<size_t> findLogBin(const MantidVec &X, const double tof, const double divisor,
                                             const double offset);
   static boost::optional<size_t> findExactBin(const MantidVec &X, const double tof, size_t n_bin);

@@ -2491,31 +2491,37 @@ public:
   void test_generateHistogramUnsortedLinear_TOF() {
     const auto e = createLinearTestData();
     run_generateHistogramUnsortedTest(e, {0., 0.1, 100.}, 999.);
+    run_generateHistogramUnsortedTest(e, {50., 1.0, 100.}, 490.);
   }
 
   void test_generateHistogramUnsortedLinear_WEIGHTED() {
     const auto e = createLinearTestData(WEIGHTED);
     run_generateHistogramUnsortedTest(e, {0., 0.1, 100.}, 999.);
+    run_generateHistogramUnsortedTest(e, {50., 1.0, 100.}, 490.);
   }
 
   void test_generateHistogramUnsortedLinear_WEIGHTED_NOTIME() {
     const auto e = createLinearTestData(WEIGHTED_NOTIME);
     run_generateHistogramUnsortedTest(e, {0., 0.1, 100.}, 999.);
+    run_generateHistogramUnsortedTest(e, {50., 1.0, 100.}, 490.);
   }
 
   void test_generateHistogramUnsortedLog_TOF() {
     const auto e = createLogTestData();
     run_generateHistogramUnsortedTest(e, {1., -0.001, 1.1}, 95.);
+    run_generateHistogramUnsortedTest(e, {1.05, -0.002, 1.1}, 45.);
   }
 
   void test_generateHistogramUnsortedLog_WEIGHTED() {
     const auto e = createLogTestData(WEIGHTED);
     run_generateHistogramUnsortedTest(e, {1., -0.001, 1.1}, 95.);
+    run_generateHistogramUnsortedTest(e, {1.05, -0.002, 1.1}, 45.);
   }
 
   void test_generateHistogramUnsortedLog_WEIGHTED_NOTIME() {
     const auto e = createLogTestData(WEIGHTED_NOTIME);
     run_generateHistogramUnsortedTest(e, {1., -0.001, 1.1}, 95.);
+    run_generateHistogramUnsortedTest(e, {1.05, -0.002, 1.1}, 45.);
   }
 
   void test_generateHistogramUnsortedLinear_TOF_bad_params() {
