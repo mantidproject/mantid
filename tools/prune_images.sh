@@ -13,7 +13,7 @@ if [ "$1" = "--dry-run" ]; then
     }
 else
     delete_file() {
-	rm -f $IMAGE_DIRECTORY/$1$2
+	rm $IMAGE_DIRECTORY/**/$1$2
         echo \'$1$2\' has been deleted
     }
 fi
