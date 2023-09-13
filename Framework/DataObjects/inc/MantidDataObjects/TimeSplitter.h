@@ -29,6 +29,12 @@ class EventList; // Forward declaration
 class MANTID_DATAOBJECTS_DLL TimeSplitter {
 
 public:
+  // some temprorary timing helpers
+  static double getTime1();
+  static double getTime2();
+  static double getTime3();
+  static double getTime4();
+
   static constexpr int NO_TARGET{-1}; // no target (a.k.a. destination) workspace for filtered out events
   TimeSplitter() = default;
   TimeSplitter(const DateAndTime &start, const DateAndTime &stop, const int value = DEFAULT_TARGET);

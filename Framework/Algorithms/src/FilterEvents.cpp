@@ -536,7 +536,6 @@ TimeROI FilterEvents::partialROI(const int &index) {
   TimeROI roi{m_timeSplitter.getTimeROI(index)};
 
   std::cout << "ROI: BOUNDARIES: " << roi.numBoundaries() << std::endl;
-  std::cout << "ROI: REGIONS: " << roi.numberOfRegions() << std::endl;
 
   if (index == TimeSplitter::NO_TARGET) {
     std::cout << "FilterEvents::partialROI case TimeSplitter::NO_TARGET " << std::endl;
@@ -571,8 +570,8 @@ void FilterEvents::parseInputSplitters() {
   } else if (m_splitterTableWorkspace) {
     m_timeSplitter =
         TimeSplitter(m_splitterTableWorkspace, m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime::GPS_EPOCH);
-    std::cout << "\nSPLITTER TABLE WORKSPACE CASE"
-              << "\n";
+    // std::cout << "\nSPLITTER TABLE WORKSPACE CASE"
+    //          << "\n";
   } else {
     m_timeSplitter =
         TimeSplitter(m_matrixSplitterWS, m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime::GPS_EPOCH);
@@ -691,7 +690,6 @@ void FilterEvents::createOutputWorkspaces() {
         }
       } else {
         wsname << m_timeSplitter.getWorkspaceIndexName(wsindex, delta_wsindex);
-        std::cout << "WSNAME: " << wsname.str() << std::endl;
       }
     } else {
       wsname << "unfiltered";
@@ -1036,6 +1034,11 @@ void FilterEvents::filterEvents(double progressamount) {
   PARALLEL_CHECK_INTERRUPT_REGION
   progress(0.1 + progressamount, "Splitting logs");
   addTimer("filterEventsMethod", startTime, std::chrono::high_resolution_clock::now());
+
+  std::cout << "events.sortPulseTimeTOF: elapsed time(s): " << TimeSplitter::getTime1() << std::endl;
+  std::cout << "events.sortPulseTime() elapsed time(s): " << TimeSplitter::getTime2() << std::endl;
+  std::cout << "events.getPulseTOFTimes elapsed time(s): " << TimeSplitter::getTime3() << std::endl;
+  std::cout << "TS::splitEventVec elapsed time(s): " << TimeSplitter::getTime4() << std::endl;
 }
 
 } // namespace Mantid::Algorithms

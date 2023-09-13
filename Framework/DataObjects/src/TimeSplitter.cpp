@@ -11,6 +11,11 @@
 #include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeROI.h"
 
+static double elapsed_time_case_1{0.0};
+static double elapsed_time_case_2{0.0};
+static double elapsed_time_case_3{0.0};
+static double elapsed_time_case_4{0.0};
+
 namespace Mantid {
 using API::EventType;
 using Kernel::SplittingInterval;
@@ -457,32 +462,54 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
     return;
 
   // sort the list in-place
-  if (pulseTof)
+  if (pulseTof) {
     // this sorting is preserved under linear transformation tof --> factor*tof+shift with factor>0
+    auto start = std::chrono::system_clock::now();
     events.sortPulseTimeTOF();
-  else
+    auto stop = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = stop - start;
+    elapsed_time_case_1 += elapsed_seconds.count();
+  } else {
+    auto start = std::chrono::system_clock::now();
     events.sortPulseTime();
+    auto stop = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = stop - start;
+    elapsed_time_case_2 += elapsed_seconds.count();
+  }
 
   // fetch the times associated to each event
   std::vector<DateAndTime> times;
-  if (pulseTof)
-    if (tofCorrect)
-      times = events.getPulseTOFTimesAtSample(factor, shift);
-    else
-      times = events.getPulseTOFTimes();
-  else
-    times = events.getPulseTimes();
 
-  // split the events
-  switch (events.getEventType()) {
-  case EventType::TOF:
-    this->splitEventVec(times, events.getEvents(), partials);
-    break;
-  case EventType::WEIGHTED:
-    this->splitEventVec(times, events.getWeightedEvents(), partials);
-    break;
-  default:
-    throw std::runtime_error("Unhandled event type");
+  {
+    auto start = std::chrono::system_clock::now();
+    // std::vector<DateAndTime> times;
+    if (pulseTof)
+      if (tofCorrect)
+        times = events.getPulseTOFTimesAtSample(factor, shift);
+      else
+        times = events.getPulseTOFTimes();
+    else
+      times = events.getPulseTimes();
+    auto stop = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = stop - start;
+    elapsed_time_case_3 += elapsed_seconds.count();
+  }
+  {
+    // split the events
+    auto start = std::chrono::system_clock::now();
+    switch (events.getEventType()) {
+    case EventType::TOF:
+      this->splitEventVec(times, events.getEvents(), partials);
+      break;
+    case EventType::WEIGHTED:
+      this->splitEventVec(times, events.getWeightedEvents(), partials);
+      break;
+    default:
+      throw std::runtime_error("Unhandled event type");
+    }
+    auto stop = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = stop - start;
+    elapsed_time_case_4 += elapsed_seconds.count();
   }
 }
 
@@ -560,6 +587,11 @@ void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const st
     }
   }
 }
+
+double TimeSplitter::getTime1() { return elapsed_time_case_1; }
+double TimeSplitter::getTime2() { return elapsed_time_case_2; }
+double TimeSplitter::getTime3() { return elapsed_time_case_3; }
+double TimeSplitter::getTime4() { return elapsed_time_case_4; }
 
 } // namespace DataObjects
 } // namespace Mantid

@@ -1247,6 +1247,8 @@ public:
 
     auto event_ws = std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(event_ws_name));
 
+    std::cout << "Total number of events: " << event_ws->getNumberEvents() << "\n";
+
     // Load splitter workspace
     Mantid::DataHandling::LoadNexusProcessed loader;
     std::string splitter_ws_filename{"PATH TO SPLITTER WORKSPACE NXS FILE"};
@@ -1277,6 +1279,27 @@ public:
     filter.setProperty("ExcludeSpecifiedLogs", true);
     filter.setProperty("OutputTOFCorrectionWorkspace", "_tmp");
     filter.execute();
+
+    std::map<std::string, size_t> output_workspaces{{"FilteredWS_FromTable_unfiltered", 0},
+                                                    {"FilteredWS_FromTable_on_off", 2028},
+                                                    {"FilteredWS_FromTable_off_off", 2184},
+                                                    {"FilteredWS_FromTable_off_on", 0},
+                                                    {"FilteredWS_FromTable_on_on", 0}};
+
+    size_t total_events{0};
+    for (auto output_ws : output_workspaces) {
+      if (AnalysisDataService::Instance().doesExist(output_ws.first)) {
+        auto partial_event_ws =
+            std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(output_ws.first));
+        size_t number_of_events = partial_event_ws->getNumberEvents();
+        TS_ASSERT(number_of_events == output_ws.second);
+        std::cout << "Partial workspace \"" << output_ws.first << "\":" << number_of_events << " events\n";
+        total_events += number_of_events;
+      } else
+        std::cout << "Workspace \"" << output_ws.first << "\" not found."
+                  << "\n";
+    }
+    std::cout << "Total number of events in all partial workspaces: " << total_events << "\n";
 
     // clean-up?
   }
