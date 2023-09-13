@@ -952,7 +952,10 @@ void EventList::sort(const EventSortType order) const {
  * SHOULD ONLY BE USED IN TESTS or if you know what you are doing.
  * @param order :: sort order to set.
  */
-void EventList::setSortOrder(const EventSortType order) const { this->order = order; }
+void EventList::setSortOrder(const EventSortType order) const {
+  if (this->order != order)
+    this->order = order;
+}
 
 // --------------------------------------------------------------------------
 /** Sort events by TOF in one thread */
