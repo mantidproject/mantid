@@ -328,8 +328,9 @@ void Rebin::exec() {
         const EventList &el = eventInputWS->getSpectrum(i);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
-        el.generateHistogram(rbParams[1], XValues_new.rawData(), y_data,
-                             e_data); // Hack to test functionally, remove before flight
+        el.generateHistogram(
+            rbParams[1], XValues_new.rawData(), y_data,
+            e_data); // Hack to test functionally, will only work for linear and log binning, remove before flight
 
         // Copy the data over.
         outputWS->mutableY(i) = y_data;

@@ -1894,14 +1894,16 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const do
     if (tof < xmin || tof >= xmax)
       continue;
 
-    size_t n_bin;
+    boost::optional<size_t> n_bin;
     if (step < 0) // log
       n_bin = findLogBin(X, tof, divisor, offset);
     else // linear
       n_bin = findLinearBin(X, xmin, step, tof);
 
-    Y[n_bin] += ev.weight();
-    E[n_bin] += ev.errorSquared();
+    if (n_bin) {
+      Y[n_bin.get()] += ev.weight();
+      E[n_bin.get()] += ev.errorSquared();
+    }
   }
 
   // Now do the sqrt of all errors
@@ -2242,7 +2244,8 @@ void EventList::generateCountsHistogram(const MantidVec &X, MantidVec &Y) const 
 
 /* Find the bin which this TOF value falls in with linear binning, assumes TOF is in range of X
  */
-size_t EventList::findLinearBin(const MantidVec &X, const double xmin, const double step, const double tof) {
+boost::optional<size_t> EventList::findLinearBin(const MantidVec &X, const double xmin, const double step,
+                                                 const double tof) {
   auto n_bin = static_cast<size_t>((tof - xmin) / step); // approximate bin
 
   return findExactBin(X, tof, n_bin);
@@ -2258,13 +2261,16 @@ size_t EventList::findLinearBin(const MantidVec &X, const double xmin, const dou
  *
  * bin_number = log(tof)/log(abs(step)+1) - log(xmin)/log(abs(step)+1)
  */
-size_t EventList::findLogBin(const MantidVec &X, const double tof, const double divisor, const double offset) {
+boost::optional<size_t> EventList::findLogBin(const MantidVec &X, const double tof, const double divisor,
+                                              const double offset) {
   auto n_bin = static_cast<size_t>(log(tof) / divisor - offset); // approximate bin
 
   return findExactBin(X, tof, n_bin);
 }
 
-size_t EventList::findExactBin(const MantidVec &X, const double tof, size_t n_bin) {
+boost::optional<size_t> EventList::findExactBin(const MantidVec &X, const double tof, size_t n_bin) {
+  if (n_bin >= X.size())
+    return boost::none;
 
   while (tof < X[n_bin])
     n_bin--;
@@ -2312,14 +2318,14 @@ void EventList::generateCountsHistogram(const double step, const MantidVec &X, M
     if (tof < xmin || tof >= xmax)
       continue;
 
-    // approximate bin
-    size_t n_bin;
+    boost::optional<size_t> n_bin;
     if (step < 0) // log
       n_bin = findLogBin(X, tof, divisor, offset);
     else // linear
       n_bin = findLinearBin(X, xmin, step, tof);
 
-    Y[n_bin]++;
+    if (n_bin)
+      Y[n_bin.get()]++;
   }
 }
 
