@@ -524,14 +524,24 @@ void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const st
     // Check if we need to advance the splitter and therefore select a different partial event list
     if (*itTime >= stop) {
       // advance to the new stopping boundary, and find the new destination index
-      while (*itTime >= stop) {
+      while (itSplitter != m_roi_map_cend && *itTime >= itSplitter->first) {
+        itSplitter++;
+      }
+      // determine the new stop time
+      if (itSplitter == m_roi_map_cend) {
+        stop = DateAndTime::maximum(); // a.k.a stopping boundary at an "infinite" time
+      } else {
+        stop = itSplitter->first;
+      }
+      // determine the new destination
+      if (itSplitter == m_roi_map.cbegin()) {
+        destination = -1;
+      } else { // get the value from the previous iterator
+        itSplitter--;
         destination = itSplitter->second;
         itSplitter++;
-        if (itSplitter == m_roi_map_cend)
-          stop = DateAndTime::maximum(); // a.k.a stopping boundary at an "infinite" time
-        else
-          stop = itSplitter->first;
       }
+      // find the new partial to add to
       partial = partials.find(destination);
     }
     if (partial == partials.end()) {
