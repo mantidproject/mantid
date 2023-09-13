@@ -328,7 +328,7 @@ void Rebin::exec() {
         const EventList &el = eventInputWS->getSpectrum(i);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
-        el.generateHistogram(rbParams[0], rbParams[1], rbParams[2], XValues_new.rawData(), y_data,
+        el.generateHistogram(rbParams[1], XValues_new.rawData(), y_data,
                              e_data); // Hack to test functionally, remove before flight
 
         // Copy the data over.

@@ -2490,52 +2490,106 @@ public:
 
   void test_generateHistogramUnsortedLinear_TOF() {
     const auto e = createLinearTestData();
-    run_generateHistogramUnsortedTest(e, {0., 0.1, 100.});
+    run_generateHistogramUnsortedTest(e, {0., 0.1, 100.}, 999.);
   }
 
   void test_generateHistogramUnsortedLinear_WEIGHTED() {
     const auto e = createLinearTestData(WEIGHTED);
-    run_generateHistogramUnsortedTest(e, {0., 0.1, 100.});
+    run_generateHistogramUnsortedTest(e, {0., 0.1, 100.}, 999.);
   }
 
   void test_generateHistogramUnsortedLinear_WEIGHTED_NOTIME() {
     const auto e = createLinearTestData(WEIGHTED_NOTIME);
-    run_generateHistogramUnsortedTest(e, {0., 0.1, 100.});
+    run_generateHistogramUnsortedTest(e, {0., 0.1, 100.}, 999.);
   }
 
   void test_generateHistogramUnsortedLog_TOF() {
     const auto e = createLogTestData();
-    run_generateHistogramUnsortedTest(e, {1., -0.001, 1.1});
+    run_generateHistogramUnsortedTest(e, {1., -0.001, 1.1}, 95.);
   }
 
   void test_generateHistogramUnsortedLog_WEIGHTED() {
     const auto e = createLogTestData(WEIGHTED);
-    run_generateHistogramUnsortedTest(e, {1., -0.001, 1.1});
+    run_generateHistogramUnsortedTest(e, {1., -0.001, 1.1}, 95.);
   }
 
   void test_generateHistogramUnsortedLog_WEIGHTED_NOTIME() {
     const auto e = createLogTestData(WEIGHTED_NOTIME);
-    run_generateHistogramUnsortedTest(e, {1., -0.001, 1.1});
+    run_generateHistogramUnsortedTest(e, {1., -0.001, 1.1}, 95.);
   }
 
-  void run_generateHistogramUnsortedTest(EventList e, std::vector<double> rebinParams) {
+  void test_generateHistogramUnsortedLinear_TOF_bad_params() {
+    // putting incorrect parameters in generateHistogram should not cause segfault
+    const auto e = createLinearTestData();
+
+    std::vector<double> rebinParams = {0., 0.1, 100.};
+    MantidVec X, expected_Y, expected_E, Y, E;
+    VectorHelper::createAxisFromRebinParams(rebinParams, X, true);
+
+    TS_ASSERT(!e.isSortedByTof());
+
+    // setting step size to 0.001 will cause findLinearBin to get bin out of range of X
+    TS_ASSERT_THROWS_NOTHING(e.generateHistogram(0.01, X, Y, E));
+
+    TS_ASSERT_DELTA(std::reduce(Y.begin(), Y.end()), 101, 1e-8);
+  }
+
+  void test_generateHistogramUnsortedLinear_WEIGHTED_bad_params() {
+    // putting incorrect parameters in generateHistogram should not cause segfault
+    const auto e = createLinearTestData(WEIGHTED);
+
+    std::vector<double> rebinParams = {0., 0.1, 100.};
+    MantidVec X, expected_Y, expected_E, Y, E;
+    VectorHelper::createAxisFromRebinParams(rebinParams, X, true);
+
+    TS_ASSERT(!e.isSortedByTof());
+
+    // setting step size to 0.001 will cause findLinearBin to get bin out of range of X
+    TS_ASSERT_THROWS_NOTHING(e.generateHistogram(0.01, X, Y, E));
+
+    TS_ASSERT_DELTA(std::reduce(Y.begin(), Y.end()), 101, 1e-8);
+  }
+
+  void test_generateHistogramUnsortedLog_bad_params() {
+    // putting incorrect parameters in generateHistogram should not cause segfault
+    const auto e = createLogTestData();
+
+    std::vector<double> rebinParams = {1., -0.001, 1.1};
+    MantidVec X, expected_Y, expected_E, Y, E;
+    VectorHelper::createAxisFromRebinParams(rebinParams, X, true);
+
+    TS_ASSERT(!e.isSortedByTof());
+
+    // setting step size to -0.001 will cause findLogBin to get bin out of range of X
+    TS_ASSERT_THROWS_NOTHING(e.generateHistogram(-0.0001, X, Y, E));
+
+    TS_ASSERT_DELTA(std::reduce(Y.begin(), Y.end()), 10, 1e-8);
+  }
+
+  void run_generateHistogramUnsortedTest(EventList e, std::vector<double> rebinParams,
+                                         const double expected_total = 0) {
     MantidVec X, expected_Y, expected_E, Y, E;
     VectorHelper::createAxisFromRebinParams(rebinParams, X, true);
 
     TS_ASSERT(!e.isSortedByTof());
 
     // do unsorted histogram then compare and check still unsorted
-    e.generateHistogram(rebinParams[0], rebinParams[1], rebinParams[2], X, Y, E);
+    e.generateHistogram(rebinParams[1], X, Y, E);
     TS_ASSERT(!e.isSortedByTof());
 
     // do sorted method to get expected results
     e.generateHistogram(X, expected_Y, expected_E);
     TS_ASSERT(e.isSortedByTof());
 
+    double total_counts = 0;
+
     for (size_t i = 1; i < Y.size(); i++) {
       TS_ASSERT_EQUALS(expected_Y[i], Y[i]);
+      total_counts += Y[i];
       TS_ASSERT_EQUALS(expected_E[i], E[i]);
     }
+
+    TS_ASSERT_DELTA(total_counts, expected_total, 1e-8);
   }
 
   const EventList createLinearTestData(EventType eventType = TOF) {

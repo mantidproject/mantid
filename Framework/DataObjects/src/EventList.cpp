@@ -1850,8 +1850,8 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const Ma
 }
 
 template <class T>
-void EventList::histogramForWeightsHelper(const std::vector<T> &events, const double xmin, const double step,
-                                          const double xmax, const MantidVec &X, MantidVec &Y, MantidVec &E) {
+void EventList::histogramForWeightsHelper(const std::vector<T> &events, const double step, const MantidVec &X,
+                                          MantidVec &Y, MantidVec &E) {
   // For slight speed=up.
   size_t x_size = X.size();
 
@@ -1882,6 +1882,9 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const do
   // Do we even have any events to do?
   if (events.empty())
     return;
+
+  const auto xmin = X.front();
+  const auto xmax = X.back();
 
   const auto divisor = log(abs(step) + 1); // use this to do change of base
   const auto offset = log(xmin) / divisor;
@@ -2002,21 +2005,21 @@ void EventList::generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E
   }
 }
 
-void EventList::generateHistogram(const double xmin, const double step, const double xmax, const MantidVec &X,
-                                  MantidVec &Y, MantidVec &E, bool skipError) const {
+void EventList::generateHistogram(const double step, const MantidVec &X, MantidVec &Y, MantidVec &E,
+                                  bool skipError) const {
   switch (eventType) {
   case TOF:
-    this->generateCountsHistogram(xmin, step, xmax, X, Y);
+    this->generateCountsHistogram(step, X, Y);
     if (!skipError)
       this->generateErrorsHistogram(Y, E);
     break;
 
   case WEIGHTED:
-    histogramForWeightsHelper(this->weightedEvents, xmin, step, xmax, X, Y, E);
+    histogramForWeightsHelper(this->weightedEvents, step, X, Y, E);
     break;
 
   case WEIGHTED_NOTIME:
-    histogramForWeightsHelper(this->weightedEventsNoTime, xmin, step, xmax, X, Y, E);
+    histogramForWeightsHelper(this->weightedEventsNoTime, step, X, Y, E);
     break;
   }
 }
@@ -2262,6 +2265,7 @@ size_t EventList::findLogBin(const MantidVec &X, const double tof, const double 
 }
 
 size_t EventList::findExactBin(const MantidVec &X, const double tof, size_t n_bin) {
+
   while (tof < X[n_bin])
     n_bin--;
 
@@ -2280,8 +2284,7 @@ size_t EventList::findExactBin(const MantidVec &X, const double tof, size_t n_bi
  * @param X :: The x bins
  * @param Y :: The generated counts histogram
  */
-void EventList::generateCountsHistogram(const double xmin, const double step, const double xmax, const MantidVec &X,
-                                        MantidVec &Y) const {
+void EventList::generateCountsHistogram(const double step, const MantidVec &X, MantidVec &Y) const {
   // For slight speed=up.
   size_t x_size = X.size();
 
@@ -2297,6 +2300,9 @@ void EventList::generateCountsHistogram(const double xmin, const double step, co
   // Do we even have any events to do?
   if (this->events.empty())
     return;
+
+  const auto xmin = X.front();
+  const auto xmax = X.back();
 
   const auto divisor = log(abs(step) + 1); // use this to do change of base
   const auto offset = log(xmin) / divisor;
