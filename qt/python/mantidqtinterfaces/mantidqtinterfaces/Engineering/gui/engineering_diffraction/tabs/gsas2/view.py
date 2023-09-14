@@ -218,7 +218,7 @@ class GSAS2View(QtWidgets.QWidget, Ui_calib):
             if docked_height > new_height:
                 new_height = docked_height
             new_width = new_height * aspect_ratio
-            self.plot_dock.resize(new_width, new_height)
+            self.plot_dock.resize(int(new_width), int(new_height))
             self.has_first_undock_occurred = 1
 
         self.update_axes_position()
