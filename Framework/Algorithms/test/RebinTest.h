@@ -1393,6 +1393,35 @@ public:
     }
   }
 
+  void test_histogram_unsorted_linear() { do_test_unsorted(false, "0.0,4.0,100"); }
+
+  void test_histogram_unsorted_linear2() { do_test_unsorted(false, "4.0"); }
+
+  void test_histogram_unsorted_varying_step() { do_test_unsorted(true, "0.0,2.0,50,4.0,100"); }
+
+  void test_histogram_unsorted_log() { do_test_unsorted(false, "1.0,-1,100"); }
+
+  void test_histogram_unsorted_reverse_log() { do_test_unsorted(true, "1.0,-1,100", true); }
+
+  void test_histogram_unsorted_power() { do_test_unsorted(true, "1.0,0.5,100", false, 0.5); }
+
+  void do_test_unsorted(bool expectSorted, std::string params, bool useReverseLogarithmic = false, double power = 0) {
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::createEventWorkspace2(50, 100);
+
+    Rebin rebin;
+    rebin.initialize();
+    rebin.setProperty("InputWorkspace", test_in);
+    rebin.setPropertyValue("OutputWorkspace", "output");
+    rebin.setProperty("Params", params);
+    rebin.setProperty("Power", power);
+    rebin.setProperty("UseReverseLogarithmic", useReverseLogarithmic);
+    rebin.setProperty("PreserveEvents", false);
+    TS_ASSERT(rebin.execute());
+    TS_ASSERT(rebin.isExecuted());
+
+    TS_ASSERT_EQUALS(test_in->getSpectrum(0).isSortedByTof(), expectSorted);
+  }
+
 private:
   Workspace2D_sptr Create1DWorkspace(int size) {
     auto retVal = createWorkspace<Workspace2D>(1, size, size - 1);

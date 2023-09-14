@@ -320,6 +320,9 @@ void Rebin::exec() {
       // Initialize progress reporting.
       Progress prog(this, 0.0, 1.0, histnumber);
 
+      bool useUnsortingHistogram = (rbParams.size() < 4) && !useReverseLog && power == 0.0;
+      g_log.information() << "Generating histogram without sorting=" << useUnsortingHistogram << "\n";
+
       // Go through all the histograms and set the data
       PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
       for (int i = 0; i < histnumber; ++i) {
@@ -328,9 +331,10 @@ void Rebin::exec() {
         const EventList &el = eventInputWS->getSpectrum(i);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
-        el.generateHistogram(
-            rbParams[1], XValues_new.rawData(), y_data,
-            e_data); // Hack to test functionally, will only work for linear and log binning, remove before flight
+        if (useUnsortingHistogram)
+          el.generateHistogram(rbParams[1], XValues_new.rawData(), y_data, e_data);
+        else
+          el.generateHistogram(XValues_new.rawData(), y_data, e_data);
 
         // Copy the data over.
         outputWS->mutableY(i) = y_data;
