@@ -78,6 +78,7 @@ Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and
 
     c. Change colormap
     d. Reverse colormap
+    e. Change auto-scale option from default `Min/Max`  to another e.g. `3-sigma`
 
 6. Test transposing axes: click the Y button to the right of the Time-of-flight label (top left corner) - the image should be transposed and the axes labels updated.
 
@@ -95,6 +96,8 @@ MD Workspaces
 MD workspaces hold multi-dimensional data (typically 2-4D) and come in two forms: :ref:`MDEventWorkspace <MDWorkspace>`, :ref:`MDHistoWorkspace <MDHistoWorkspace>`.
 In terms of sliceviewer functionality, the key difference is that MDHistoWorkspace have binned the events onto a regular grid and cannot be dynamically rebinned unless the original MDWorkspace
 (that holds the events) exists in the ADS (and the MDHistoWorkspace has not been altered by a binary operation e.g. ``MinusMD``).
+
+.. _md_event_tests:
 
 MDWorkspace (with events)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -274,7 +277,6 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 
 4. Open the cut tool and check that:
 
-    - Disabled non-ortho view
     - Disabled ROI tool
     - Disabled line plots
     - Sliceviewer should look like
@@ -305,7 +307,7 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 15. Try to change the a* column of the u1 to 1 (this would take u1 out of the plane of the slice, i.e. not orthogonal to u3) - it should reset to 0 - i.e. u1 = [0,1,0].
 16. Click and hold down on one of the red markers with white face on the colorfill plot and drag, release at ~K=1.
 
-    - This should reset the vectors in the table such that the cut is along u1 = [0,0,1] - i.e. u1 <-> u2
+    - This should reset the vectors in the table such that the cut is along u1 = [0,0,1] - i.e. u1 and u2 are swapped
     - The thickness along u2 should be adjusted to ~2
 
 17. Set the step of u2 = 2 in the table, check that it sets (start,stop) = (-1,1)
@@ -342,7 +344,7 @@ Specific Tests
 1. Representation of integrated peaks
 #####################################
 
-1. Run the code below to generate fake data and integrate peaks in the 3D MDWorkspace ``md_3D``
+1. Run the code below to generate fake data and integrate peaks in the 3D MDWorkspace ``md_3D`` from :ref:`md_event_tests`
 
 .. code-block:: python
 
