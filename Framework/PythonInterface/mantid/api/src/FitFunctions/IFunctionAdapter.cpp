@@ -8,6 +8,7 @@
 #include "MantidPythonInterface/core/CallMethod.h"
 #include "MantidPythonInterface/core/Converters/PyNativeTypeExtractor.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
@@ -167,6 +168,7 @@ PyObject *IFunctionAdapter::getAttributeValue(const IFunction &self, const API::
   UNUSED_ARG(self);
   std::string type = attr.type();
   PyObject *result(nullptr);
+  GlobalInterpreterLock gilLock;
   if (type == "int")
     result = to_python_value<const int &>()(attr.asInt());
   else if (type == "double")
