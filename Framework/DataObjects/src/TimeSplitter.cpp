@@ -462,16 +462,19 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
     return;
 
   // sort the list in-place
+  EventSortType sortOrder; // this will be used to set order on outputs
   if (pulseTof) {
     // this sorting is preserved under linear transformation tof --> factor*tof+shift with factor>0
     auto start = std::chrono::system_clock::now();
     events.sortPulseTimeTOF();
+    sortOrder = EventSortType::PULSETIMETOF_SORT;
     auto stop = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = stop - start;
     elapsed_time_case_1 += elapsed_seconds.count();
   } else {
     auto start = std::chrono::system_clock::now();
     events.sortPulseTime();
+    sortOrder = EventSortType::PULSETIME_SORT;
     auto stop = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = stop - start;
     elapsed_time_case_2 += elapsed_seconds.count();
@@ -510,6 +513,12 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
     auto stop = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = stop - start;
     elapsed_time_case_4 += elapsed_seconds.count();
+  }
+
+  // set the sort order on the EventLists since we know the sorting already
+  for (auto &partial : partials) {
+    if (!partial.second->empty())
+      partial.second->setSortOrder(sortOrder);
   }
 }
 
