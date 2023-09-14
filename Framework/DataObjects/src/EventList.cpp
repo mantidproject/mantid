@@ -1849,6 +1849,20 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const Ma
   std::transform(E.cbegin(), E.cend(), E.begin(), static_cast<double (*)(double)>(sqrt));
 }
 
+// --------------------------------------------------------------------------
+/** Generates both the Y and E (error) histograms
+ * for an EventList with WeightedEvents.
+ *
+ * This histograms without sorting the events first by using the bin step size to estimate the bin number. This only
+ * works for logarithmic or linear binning.
+ *
+ * @param events: vector of events (with weights)
+ * @param step: bin step size
+ * @param X: X-bins supplied
+ * @param Y: counts returned
+ * @param E: errors returned
+ * @throw runtime_error if the EventList does not have weighted events
+ */
 template <class T>
 void EventList::histogramForWeightsHelper(const std::vector<T> &events, const double step, const MantidVec &X,
                                           MantidVec &Y, MantidVec &E) {
@@ -2013,8 +2027,27 @@ void EventList::generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E
   }
 }
 
+// --------------------------------------------------------------------------
+/** Generates both the Y and E (error) histograms w.r.t TOF
+ * for an EventList with or without WeightedEvents.
+ *
+ * This calculates histogram without sorting the events by using the step size to estimate the bin number. This has been
+ * made to only work for logarithmic or linear binning. This falls back to using the sorted histogram method if the
+ * events are already sorted, as that will be faster.
+ *
+ * @param step: bin step size
+ * @param X: x-bins supplied
+ * @param Y: counts returned
+ * @param E: errors returned
+ * @param skipError: skip calculating the error. This has no effect for weighted
+ *        events; you can just ignore the returned E vector.
+ */
 void EventList::generateHistogram(const double step, const MantidVec &X, MantidVec &Y, MantidVec &E,
                                   bool skipError) const {
+  // if events are already sorted, use faster sorted histogram method
+  if (isSortedByTof())
+    return generateHistogram(X, Y, E, skipError);
+
   switch (eventType) {
   case TOF:
     this->generateCountsHistogram(step, X, Y);
@@ -2248,16 +2281,21 @@ void EventList::generateCountsHistogram(const MantidVec &X, MantidVec &Y) const 
   } // end if (there are any events to histogram)
 }
 
-/* Find the bin which this TOF value falls in with linear binning, assumes TOF is in range of X
+/** Find the bin which this TOF value falls in with linear binning, assumes TOF is in range of X
  *
  * bin_number =  (tof - xmin) / step
+ *
+ * @param X :: The x bins
+ * @param tof :: TOF of the event we are trying to bin
+ * @param divisor :: pre-calculated divisor
+ * @param offset :: pre-calculated offset
  */
 boost::optional<size_t> EventList::findLinearBin(const MantidVec &X, const double tof, const double divisor,
                                                  const double offset) {
   return findExactBin(X, tof, static_cast<size_t>(tof / divisor - offset));
 }
 
-/* Find the bin which this TOF value falls in with log binning, assumes TOF is in range of X
+/** Find the bin which this TOF value falls in with log binning, assumes TOF is in range of X
  *
  * formula to get bin_number from TOF
  *
@@ -2268,12 +2306,23 @@ boost::optional<size_t> EventList::findLinearBin(const MantidVec &X, const doubl
  * bin_number = log(tof)/log(abs(step)+1) - log(xmin)/log(abs(step)+1)
  *
  * or bin_number = log(tof)/divisor - offset, where divisor and offset are precalulated
+ *
+ * @param X :: The x bins
+ * @param tof :: TOF of the event we are trying to bin
+ * @param divisor :: pre-calculated divisor
+ * @param offset :: pre-calculated offset
  */
 boost::optional<size_t> EventList::findLogBin(const MantidVec &X, const double tof, const double divisor,
                                               const double offset) {
   return findExactBin(X, tof, static_cast<size_t>(log(tof) / divisor - offset));
 }
 
+/** Find the exact bin which a TOF falls in starting from the provided estimated one.
+ *
+ * @param X :: The x bins
+ * @param tof :: TOF of the event we are trying to bin
+ * @param n_bin :: starting estiamted bin number
+ */
 boost::optional<size_t> EventList::findExactBin(const MantidVec &X, const double tof, size_t n_bin) {
   if (n_bin >= X.size())
     return boost::none;
@@ -2291,8 +2340,10 @@ boost::optional<size_t> EventList::findExactBin(const MantidVec &X, const double
 /** Fill a histogram given specified histogram bounds. Does not modify
  * the eventlist (const method).
  *
- * This histogram without sorting the events first and will be quicker in some cases
+ * This histogram without sorting the events by using the step size to estimate the bin number. This only works for
+ * logarithmic or linear binning.
  *
+ * @param step :: bin step size
  * @param X :: The x bins
  * @param Y :: The generated counts histogram
  */
