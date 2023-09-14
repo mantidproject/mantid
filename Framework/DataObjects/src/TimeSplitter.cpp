@@ -571,19 +571,15 @@ void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const st
       // find the new partial to add to
       partial = partials.find(destination);
     }
-    if (partial == partials.end()) {
-      // advance both the iterator over events and times until we get past this splitter
-      while (*itTime < stop && itEvent != itEventEnd) {
-        itTime++;
-        itEvent++;
-      }
-    } else {
-      while (*itTime < stop && itEvent != itEventEnd) {
+
+    // loop over events up to the end of the roi
+    const bool shouldAppend = (partial != partials.end());
+    while (*itTime < stop && itEvent != itEventEnd) {
+      if (shouldAppend)
         partial->second->addEventQuickly(*itEvent); // emplaces a copy of *itEvent in partial
-        // advance both the iterator over events and times
-        itTime++;
-        itEvent++;
-      }
+      // advance both the iterator over events and times
+      itTime++;
+      itEvent++;
     }
   }
 }
