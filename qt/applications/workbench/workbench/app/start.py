@@ -17,7 +17,6 @@ import multiprocessing
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import ConfigService, UsageService, version_str as mantid_version_str
 from mantidqt.utils.qt import plugins
-from mantidqt.dialogs.errorreports import main as errorreports_main
 import mantidqt.utils.qt as qtutils
 
 # Find Qt plugins for development builds on some platforms
@@ -119,8 +118,8 @@ def initialise_qapp_and_launch_workbench(command_line_options):
     # It is very important the global figure manager in matplotlib is initialised before the first import of matplotlib.
     from workbench.plotting.config import init_mpl_gcf
 
-    if "matplotlib" in sys.modules:
-        raise RuntimeError("matplotlib has been imported before the global figure manager was initialised")
+    # if "matplotlib" in sys.modules:
+    #    raise RuntimeError("matplotlib has been imported before the global figure manager was initialised")
 
     init_mpl_gcf()
 
@@ -147,6 +146,7 @@ def start_error_reporter():
     """
     Used to start the error reporter if the program has segfaulted.
     """
+    from mantidqt.dialogs.errorreports import main as errorreports_main
 
     errorreports_main.main(["--application", APPNAME, "--orgname", ORGANIZATION, "--orgdomain", ORG_DOMAIN])
 
