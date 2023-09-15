@@ -32,7 +32,6 @@ public:
   // some temprorary timing helpers
   static double getTime1();
   static double getTime2();
-  static double getTime3();
   static double getTime4();
 
   static constexpr int NO_TARGET{-1}; // no target (a.k.a. destination) workspace for filtered out events
@@ -64,9 +63,12 @@ private:
   static constexpr int DEFAULT_TARGET{0};
   void clearAndReplace(const DateAndTime &start, const DateAndTime &stop, const int value);
   /// Distribute a list of events by comparing a vector of times against the splitter boundaries.
-  template <typename EVENTTYPE>
-  void splitEventVec(const std::vector<DateAndTime> &times, const std::vector<EVENTTYPE> &events,
-                     std::map<int, EventList *> &partials) const;
+  template <typename EventType>
+  void splitEventVec(const std::vector<EventType> &events, std::map<int, EventList *> &partials, bool pulseTof,
+                     bool tofCorrect, double factor, double shift) const;
+  template <typename EventType>
+  void splitEventVec(const std::function<DateAndTime(const EventType &)> &timeCalc,
+                     const std::vector<EventType> &events, std::map<int, EventList *> &partials) const;
   std::map<DateAndTime, int> m_roi_map;
   // These 2 maps are complementary to each other
   std::map<std::string, int> m_name_index_map;

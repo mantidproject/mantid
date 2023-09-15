@@ -1037,7 +1037,6 @@ void FilterEvents::filterEvents(double progressamount) {
 
   std::cout << "events.sortPulseTimeTOF: elapsed time(s): " << TimeSplitter::getTime1() << std::endl;
   std::cout << "events.sortPulseTime() elapsed time(s): " << TimeSplitter::getTime2() << std::endl;
-  std::cout << "events.getPulseTOFTimes elapsed time(s): " << TimeSplitter::getTime3() << std::endl;
   std::cout << "TS::splitEventVec elapsed time(s): " << TimeSplitter::getTime4() << std::endl;
 }
 

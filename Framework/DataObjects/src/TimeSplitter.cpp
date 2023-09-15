@@ -13,7 +13,6 @@
 
 static double elapsed_time_case_1{0.0};
 static double elapsed_time_case_2{0.0};
-static double elapsed_time_case_3{0.0};
 static double elapsed_time_case_4{0.0};
 
 namespace Mantid {
@@ -480,32 +479,15 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
     elapsed_time_case_2 += elapsed_seconds.count();
   }
 
-  // fetch the times associated to each event
-  std::vector<DateAndTime> times;
-
-  {
-    auto start = std::chrono::system_clock::now();
-    // std::vector<DateAndTime> times;
-    if (pulseTof)
-      if (tofCorrect)
-        times = events.getPulseTOFTimesAtSample(factor, shift);
-      else
-        times = events.getPulseTOFTimes();
-    else
-      times = events.getPulseTimes();
-    auto stop = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = stop - start;
-    elapsed_time_case_3 += elapsed_seconds.count();
-  }
   {
     // split the events
     auto start = std::chrono::system_clock::now();
     switch (events.getEventType()) {
     case EventType::TOF:
-      this->splitEventVec(times, events.getEvents(), partials);
+      this->splitEventVec(events.getEvents(), partials, pulseTof, tofCorrect, factor, shift);
       break;
     case EventType::WEIGHTED:
-      this->splitEventVec(times, events.getWeightedEvents(), partials);
+      this->splitEventVec(events.getWeightedEvents(), partials, pulseTof, tofCorrect, factor, shift);
       break;
     default:
       throw std::runtime_error("Unhandled event type");
@@ -529,17 +511,42 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
  * in the TimeSplitter object. The destination index is the key to find the target event list
  * in the partials map.
  *
- * @tparam EVENTTYPE : one of EventType::TOF or EventType::WEIGHTED
- * @param times : times associated to the events, used to find the destination index
+ * @tparam EventType : one of EventType::TOF or EventType::WEIGHTED
  * @param events : list of input events
  * @param partials : target list of partial event lists, associated to the different destination indexes
- * @throws : if the size of times and events are different
+ * @param pulseTof : if True, split according to Pulse + TOF time, otherwise split by Pulse time
+ * @param tofCorrect : rescale and shift the TOF values (factor*TOF + shift)
+ * @param factor : rescale the TOF values by a dimensionless factor.
+ * @param shift : shift the TOF values after rescaling, in units of microseconds.
  */
-template <typename EVENTTYPE>
-void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const std::vector<EVENTTYPE> &events,
-                                 std::map<int, EventList *> &partials) const {
-  if (times.size() != events.size())
-    throw std::invalid_argument("Vector of event times and vector of events have different size");
+template <typename EventType>
+void TimeSplitter::splitEventVec(const std::vector<EventType> &events, std::map<int, EventList *> &partials,
+                                 bool pulseTof, bool tofCorrect, double factor, double shift) const {
+  if (pulseTof) {
+    constexpr double microToNano{1000.0}; // time unit conversion
+    if (tofCorrect) {
+      // times = events.getPulseTOFTimesAtSample(factor, shift);
+      std::function<DateAndTime(const EventType &)> timeCalc = [microToNano, factor, shift](const EventType &event) {
+        return event.pulseTime() + static_cast<int64_t>((factor * event.tof() + shift) * microToNano);
+      };
+      this->splitEventVec(timeCalc, events, partials);
+    } else {
+      // times = events.getPulseTOFTimes();
+      std::function<DateAndTime(const EventType &)> timeCalc = [microToNano](const EventType &event) {
+        return event.pulseTime() + static_cast<int64_t>(event.tof() * microToNano);
+      };
+      this->splitEventVec(timeCalc, events, partials);
+    }
+  } else {
+    // times = events.getPulseTimes();
+    std::function<DateAndTime(const EventType &)> timeCalc = [](const EventType &event) { return event.pulseTime(); };
+    this->splitEventVec(timeCalc, events, partials);
+  }
+}
+
+template <typename EventType>
+void TimeSplitter::splitEventVec(const std::function<DateAndTime(const EventType &)> &timeCalc,
+                                 const std::vector<EventType> &events, std::map<int, EventList *> &partials) const {
   // initialize the iterator over the splitter
   // it assumes the splitter keys (DateAndTime objects) are sorted by increasing time.
   auto itSplitter = m_roi_map.cbegin(); // iterator over the splitter
@@ -549,7 +556,6 @@ void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const st
   // is there an EventList mapped to the destination index?
   auto partial = partials.find(destination);
 
-  auto itTime = times.cbegin();   // initialize iterator over times
   auto itEvent = events.cbegin(); // initialize iterator over the events
   const auto itEventEnd = events.cend();
 
@@ -558,9 +564,10 @@ void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const st
   // If the partial is found, append the event to it. It is assumed events are sorted by either pulse time or tof
   while (itEvent != itEventEnd) {
     // Check if we need to advance the splitter and therefore select a different partial event list
-    if (*itTime >= stop) {
+    const auto eventTime = timeCalc(*itEvent);
+    if (eventTime >= stop) {
       // advance to the new stopping boundary, and find the new destination index
-      while (itSplitter != m_roi_map_cend && *itTime >= itSplitter->first) {
+      while (itSplitter != m_roi_map_cend && eventTime >= itSplitter->first) {
         itSplitter++;
       }
       // determine the new stop time
@@ -583,11 +590,10 @@ void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const st
 
     // loop over events up to the end of the roi
     const bool shouldAppend = (partial != partials.end());
-    while (*itTime < stop && itEvent != itEventEnd) {
+    while (timeCalc(*itEvent) < stop && itEvent != itEventEnd) {
       if (shouldAppend)
         partial->second->addEventQuickly(*itEvent); // emplaces a copy of *itEvent in partial
-      // advance both the iterator over events and times
-      itTime++;
+      // advance event iterator
       itEvent++;
     }
   }
@@ -595,7 +601,6 @@ void TimeSplitter::splitEventVec(const std::vector<DateAndTime> &times, const st
 
 double TimeSplitter::getTime1() { return elapsed_time_case_1; }
 double TimeSplitter::getTime2() { return elapsed_time_case_2; }
-double TimeSplitter::getTime3() { return elapsed_time_case_3; }
 double TimeSplitter::getTime4() { return elapsed_time_case_4; }
 
 } // namespace DataObjects
