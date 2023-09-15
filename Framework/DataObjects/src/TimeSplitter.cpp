@@ -523,17 +523,16 @@ template <typename EventType>
 void TimeSplitter::splitEventVec(const std::vector<EventType> &events, std::map<int, EventList *> &partials,
                                  bool pulseTof, bool tofCorrect, double factor, double shift) const {
   if (pulseTof) {
-    constexpr double microToNano{1000.0}; // time unit conversion
     if (tofCorrect) {
       // times = events.getPulseTOFTimesAtSample(factor, shift);
-      std::function<DateAndTime(const EventType &)> timeCalc = [microToNano, factor, shift](const EventType &event) {
-        return event.pulseTime() + static_cast<int64_t>((factor * event.tof() + shift) * microToNano);
+      std::function<DateAndTime(const EventType &)> timeCalc = [factor, shift](const EventType &event) {
+        return event.pulseTOFTimeAtSample(factor, shift);
       };
       this->splitEventVec(timeCalc, events, partials);
     } else {
       // times = events.getPulseTOFTimes();
-      std::function<DateAndTime(const EventType &)> timeCalc = [microToNano](const EventType &event) {
-        return event.pulseTime() + static_cast<int64_t>(event.tof() * microToNano);
+      std::function<DateAndTime(const EventType &)> timeCalc = [](const EventType &event) {
+        return event.pulseTOFTime();
       };
       this->splitEventVec(timeCalc, events, partials);
     }
