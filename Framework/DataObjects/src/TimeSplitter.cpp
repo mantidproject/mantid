@@ -522,25 +522,20 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
 template <typename EventType>
 void TimeSplitter::splitEventVec(const std::vector<EventType> &events, std::map<int, EventList *> &partials,
                                  bool pulseTof, bool tofCorrect, double factor, double shift) const {
+  // determine the right functnio for getting the "pulse time" for the event
+  std::function<DateAndTime(const EventType &)> timeCalc;
   if (pulseTof) {
     if (tofCorrect) {
-      // times = events.getPulseTOFTimesAtSample(factor, shift);
-      std::function<DateAndTime(const EventType &)> timeCalc = [factor, shift](const EventType &event) {
-        return event.pulseTOFTimeAtSample(factor, shift);
-      };
-      this->splitEventVec(timeCalc, events, partials);
+      timeCalc = [factor, shift](const EventType &event) { return event.pulseTOFTimeAtSample(factor, shift); };
     } else {
-      // times = events.getPulseTOFTimes();
-      std::function<DateAndTime(const EventType &)> timeCalc = [](const EventType &event) {
-        return event.pulseTOFTime();
-      };
-      this->splitEventVec(timeCalc, events, partials);
+      timeCalc = [](const EventType &event) { return event.pulseTOFTime(); };
     }
   } else {
-    // times = events.getPulseTimes();
-    std::function<DateAndTime(const EventType &)> timeCalc = [](const EventType &event) { return event.pulseTime(); };
-    this->splitEventVec(timeCalc, events, partials);
+    timeCalc = [](const EventType &event) { return event.pulseTime(); };
   }
+
+  // do the actual event splitting
+  this->splitEventVec(timeCalc, events, partials);
 }
 
 template <typename EventType>
