@@ -231,7 +231,7 @@ class SampleLogsModel:
                 item.setToolTip("All of the values in the log are marked invalid, none of them are filtered.")
             elif invalid_value_count > 0:
                 saturation = 10 + (170 * (invalid_value_count / (log_size + invalid_value_count)))
-                item.setData(QColor.fromHsv(0, saturation, 255), Qt.BackgroundRole)
+                item.setData(QColor.fromHsv(0, int(saturation), 255), Qt.BackgroundRole)
                 aux_verb = "is" if invalid_value_count == 1 else "are"
                 item.setToolTip(
                     f"{invalid_value_count}/{log_size+invalid_value_count} of the values in the log"
