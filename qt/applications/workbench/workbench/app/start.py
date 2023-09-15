@@ -116,8 +116,11 @@ def initialize():
 
 
 def initialise_qapp_and_launch_workbench(command_line_options):
-    # Set the global figure manager in matplotlib. Very important this happens first.
+    # It is very important the global figure manager in matplotlib is initialised before the first import of matplotlib.
     from workbench.plotting.config import init_mpl_gcf
+
+    if "matplotlib" in sys.modules:
+        raise RuntimeError("matplotlib has been imported before the global figure manager was initialised")
 
     init_mpl_gcf()
 
