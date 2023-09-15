@@ -1905,7 +1905,7 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const do
 
   if (step < 0) {
     findBin = findLogBin;
-    divisor = log(abs(step) + 1); // use this to do change of base
+    divisor = log1p(abs(step)); // use this to do change of base
     offset = log(xmin) / divisor;
   } else {
     findBin = findLinearBin;
@@ -2372,7 +2372,7 @@ void EventList::generateCountsHistogram(const double step, const MantidVec &X, M
 
   if (step < 0) {
     findBin = findLogBin;
-    divisor = log(abs(step) + 1); // use this to do change of base
+    divisor = log1p(abs(step)); // use this to do change of base
     offset = log(xmin) / divisor;
   } else {
     findBin = findLinearBin;
