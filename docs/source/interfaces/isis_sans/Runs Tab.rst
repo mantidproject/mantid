@@ -157,6 +157,13 @@ is set to "All". This is because there is no way to determine if the workspace g
 for the HAB or LAB, and so uses the value from the User File, therefore assuming that both reductions have used the same
 one.
 
+**Using scaled background subtraction with time slicing:**
+
+The specified ``Background Workspace`` will be scaled and subtracted from all sample slices. When time slicing,
+specifying the ``Background Workspace`` using an Output Name (from another row in the runs table) will only work if the
+workspace has been time sliced to match the sample workspace. In this case, specifying by Output Name will result in the
+first time slice from the ``Background Workspace`` being used for all subtractions.
+
 Save Options
 ------------
 
