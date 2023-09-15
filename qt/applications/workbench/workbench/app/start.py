@@ -30,7 +30,6 @@ from qtpy.QtCore import QCoreApplication, Qt
 # QApplication is created or paths to Qt's resources will not be set up correctly
 from workbench.app.resources import qCleanupResources
 from workbench.config import APPNAME, ORG_DOMAIN, ORGANIZATION
-from workbench.plugins.exception_handler import exception_logger
 from workbench.widgets.about.presenter import AboutPresenter
 
 # Constants
@@ -172,6 +171,8 @@ def create_and_launch_workbench(app, command_line_options):
 
         # decorates the excepthook callback with the reference to the main window
         # this is used in case the user wants to terminate the workbench from the error window shown
+        from workbench.plugins.exception_handler import exception_logger
+
         sys.excepthook = partial(exception_logger, main_window)
 
         # Load matplotlib as early as possible and set our defaults
