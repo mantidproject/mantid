@@ -361,8 +361,10 @@ class ColorbarWidget(QWidget):
     def _calculate_auto_color_limits(self, signal):
         """Calculate auto scale limits"""
         scale_type = AUTO_SCALE_OPTS[self.autotype.currentIndex()]
+        signal_min, signal_max = np.nanmin(signal), np.nanmax(signal)
+
         if scale_type == "Min/Max":
-            vmin, vmax = np.nanmin(signal), np.nanmax(signal)
+            vmin, vmax = signal_min, signal_max
         elif scale_type == "3-Sigma":
             mean, sigma = np.nanmean(signal), np.nanstd(signal)
             vmin, vmax = mean - 3 * sigma, mean + 3 * sigma
@@ -373,6 +375,10 @@ class ColorbarWidget(QWidget):
             med = np.nanmedian(signal)
             mad = np.nanmedian(np.abs(signal - med))
             vmin, vmax = med - 1.5 * mad, med + 1.5 * mad
+
+        vmin = max(vmin, signal_min)
+        vmax = min(vmax, signal_max)
+
         # sanity checks
         if self._is_log_norm():
             if vmax <= 0:
