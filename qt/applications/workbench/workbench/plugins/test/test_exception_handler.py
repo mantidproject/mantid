@@ -32,9 +32,9 @@ class ExceptionHandlerTest(unittest.TestCase):
         self.assertEqual(1, mock_WorkbenchErrorMessageBox.call_count)
         mock_errorbox.exec_.assert_called_once_with()
 
-    @patch("workbench.plugins.exception_handler.CrashReportPage")
+    @patch("workbench.plugins.exception_handler.create_crash_report_page", autospec=True)
     @patch("workbench.plugins.exception_handler.logger")
-    def test_exception_logged(self, mock_logger, mock_CrashReportPage):
+    def test_exception_logged(self, mock_logger, mock_create_crash_report_page):
         UsageService.setEnabled(True)
 
         widget = MockQWidget()
@@ -42,6 +42,6 @@ class ExceptionHandlerTest(unittest.TestCase):
         exception_logger(widget, ValueError, None, None)
 
         self.assertEqual(1, mock_logger.error.call_count)
-        mock_CrashReportPage.assert_called_once_with(show_continue_terminate=True)
+        mock_create_crash_report_page.assert_called_once_with(show_continue_terminate=True)
         # 'user selects' continue working by default
         self.assertEqual(0, widget.close.call_count)

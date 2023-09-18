@@ -27,9 +27,7 @@ def exception_logger(main_window, exc_type, exc_value, exc_traceback):
     logger.error("".join(traceback.format_exception(exc_type, exc_value, exc_traceback)))
 
     if UsageService.isEnabled():
-        from mantidqt.dialogs.errorreports.report import CrashReportPage
-
-        page = CrashReportPage(show_continue_terminate=True)
+        page = create_crash_report_page(show_continue_terminate=True)
         presenter = ErrorReporterPresenter(page, "", "workbench", traceback.format_exception(exc_type, exc_value, exc_traceback))
         presenter.show_view_blocking()
         if not page.continue_working:
@@ -37,3 +35,9 @@ def exception_logger(main_window, exc_type, exc_value, exc_traceback):
     else:
         # show the exception message without the traceback
         WorkbenchErrorMessageBox(main_window, "".join(traceback.format_exception_only(exc_type, exc_value))).exec_()
+
+
+def create_crash_report_page(show_continue_terminate):
+    from mantidqt.dialogs.errorreports.report import CrashReportPage
+
+    return CrashReportPage(show_continue_terminate)
