@@ -10,27 +10,7 @@
 @date December 06, 2017
 """
 import numpy as np
-
-try:
-    from scipy.special import spherical_jn
-
-    def j1(z):
-        return spherical_jn(1, z)
-
-    def j1d(z):
-        return spherical_jn(1, z, derivative=True)
-
-except ImportError:
-    # spherical_jn removed from scipy >= 1.0.0
-    from scipy.special import sph_jn
-
-    def j1(z):
-        return sph_jn(1, z)[0][1]
-
-    def j1d(z):
-        return sph_jn(1, z)[1][1]
-
-
+from scipy.special import spherical_jn
 from mantid.api import IFunction1D, FunctionFactory
 
 
@@ -39,7 +19,7 @@ class EISFDiffSphereAlkyl(IFunction1D):
     alkyl molecule.
     """
 
-    vecbessel = np.vectorize(lambda z: j1(z) / z)
+    vecbessel = np.vectorize(lambda z: spherical_jn(1, z) / z)
 
     def category(self):
         return "QuasiElastic"
