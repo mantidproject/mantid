@@ -268,6 +268,12 @@ void FilterEvents::exec() {
   progress(m_progress, "Create Output Workspaces.");
   createOutputWorkspaces();
 
+  LogManager::reportTiming();
+
+  TimeROI::reportTiming();
+
+  TimeSeriesProperty<double>::reportTiming();
+
   // Optional import corrections
   m_progress = 0.20;
   progress(m_progress, "Importing TOF corrections. ");
@@ -1035,9 +1041,17 @@ void FilterEvents::filterEvents(double progressamount) {
   progress(0.1 + progressamount, "Splitting logs");
   addTimer("filterEventsMethod", startTime, std::chrono::high_resolution_clock::now());
 
-  std::cout << "events.sortPulseTimeTOF: elapsed time(s): " << TimeSplitter::getTime1() << std::endl;
-  std::cout << "events.sortPulseTime() elapsed time(s): " << TimeSplitter::getTime2() << std::endl;
-  std::cout << "TS::splitEventVec elapsed time(s): " << TimeSplitter::getTime4() << std::endl;
+  const auto stopTime = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsed_seconds = stopTime - startTime;
+
+  std::cout << "Time (s) spent in FilterEvents::filterEvents:" << elapsed_seconds.count() << "\n";
+
+  std::cout << "Cumulative time (s) spent in events.sortPulseTimeTOF: " << TimeSplitter::getTime1() << std::endl;
+  std::cout << "Cumulative time (s) spent in events.sortPulseTime(): " << TimeSplitter::getTime2() << std::endl;
+  std::cout << "Cumulative time (s) spent in TS::splitEventVec(s): " << TimeSplitter::getTime4() << std::endl;
+  std::cout << "Cumulative time (s) spent in TS::rebuildTargetTimeVectors (s): " << TimeSplitter::getTime5()
+            << std::endl;
+  // std::cout << "Cumulative time (s) spent in TS::getTimeROI (s): " << TimeSplitter::getTime10() << std::endl;
 }
 
 } // namespace Mantid::Algorithms

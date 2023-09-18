@@ -33,6 +33,8 @@ public:
   static double getTime1();
   static double getTime2();
   static double getTime4();
+  static double getTime5();
+  // static double getTime10();
 
   static constexpr int NO_TARGET{-1}; // no target (a.k.a. destination) workspace for filtered out events
   TimeSplitter() = default;
@@ -58,6 +60,7 @@ public:
                       bool tofCorrect = false, double factor = 1.0, double shift = 0.0) const;
   /// Print the (destination index | DateAndTime boundary) pairs of this splitter.
   std::string debugPrint() const;
+  void rebuildTargetTimeVectors();
 
 private:
   static constexpr int DEFAULT_TARGET{0};
@@ -69,12 +72,18 @@ private:
   template <typename EventType>
   void splitEventVec(const std::function<DateAndTime(const EventType &)> &timeCalc,
                      const std::vector<EventType> &events, std::map<int, EventList *> &partials) const;
+
+  void resetTargetTimeVectors();
+  void addTimeIntervalToTargetVector(const DateAndTime &intervalStart, const DateAndTime &intervalStop,
+                                     const int target);
+
   std::map<DateAndTime, int> m_roi_map;
   // These 2 maps are complementary to each other
   std::map<std::string, int> m_name_index_map;
   std::map<int, std::string> m_index_name_map;
 
-  std::map<int, std::vector<DateAndTime>> m_singleTargetTimeVectors;
+  std::map<int, std::vector<DateAndTime>> m_targetTimeVectors;
+  bool validTargetTimeVectors{false};
 };
 } // namespace DataObjects
 } // namespace Mantid

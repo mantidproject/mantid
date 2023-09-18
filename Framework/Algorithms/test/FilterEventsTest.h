@@ -1251,7 +1251,8 @@ public:
 
     // Load splitter workspace
     Mantid::DataHandling::LoadNexusProcessed loader;
-    std::string splitter_ws_filename{"PATH TO SPLITTER WORKSPACE NXS FILE"};
+    std::string splitter_ws_filename{"/SNS/users/r1e/for_Pete/splitter_table_25s.nxs"};
+    // std::string splitter_ws_filename{"/SNS/users/r1e/for_Pete/splitter_table.nxs"};
     std::string splitter_ws_name{"huge_ws"};
 
     loader.initialize();

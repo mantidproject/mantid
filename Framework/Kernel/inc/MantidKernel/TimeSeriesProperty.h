@@ -141,6 +141,8 @@ public:
  */
 template <typename TYPE> class DLLExport TimeSeriesProperty : public Property, public ITimeSeriesProperty {
 public:
+  static void reportTiming();
+
   /// Constructor
   explicit TimeSeriesProperty(const std::string &name);
   TimeSeriesProperty(const std::string &name, const std::vector<Types::Core::DateAndTime> &times,

@@ -11,8 +11,53 @@
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include <chrono>
 #include <nexus/NeXusFile.hpp>
 #include <numeric>
+
+namespace {
+class CumulativeTimer {
+public:
+  CumulativeTimer(const std::string &timer_name) { name = timer_name; }
+
+public:
+  void incrementTimeSpent(const double time_s) { total_time_spent_s += time_s; }
+  void reportTiming() { std::cout << "Cumulative time (s) spent in " << name << ": " << total_time_spent_s << "\n"; }
+
+private:
+  std::string name;
+  double total_time_spent_s = 0.0;
+};
+
+std::shared_ptr<CumulativeTimer> copyAndFilterProperties_Timer =
+    std::make_shared<CumulativeTimer>("LogManager::CopyAndFilterProperties");
+std::shared_ptr<CumulativeTimer> cloneInTimeROI_Timer = std::make_shared<CumulativeTimer>("LogManager::cloneInTimeROI");
+std::shared_ptr<CumulativeTimer> setTimeROI_Timer = std::make_shared<CumulativeTimer>("LogManager::setTimeROI");
+std::shared_ptr<CumulativeTimer> clearSingleValueCache_Timer =
+    std::make_shared<CumulativeTimer>("LogManager::clearSingleValueCache");
+std::shared_ptr<CumulativeTimer> m_manager_cloneInTimeROI_Timer =
+    std::make_shared<CumulativeTimer>("m_manager->cloneInTimeROI");
+std::shared_ptr<CumulativeTimer> outputTimeROI_update_or_replace_intersection_Timer =
+    std::make_shared<CumulativeTimer>("outputTimeROI_update_or_replace_intersection_Timer");
+
+// The constructor saves the start time, the destructor calculates the elapsed time
+class CodeBlockTimer {
+public:
+  CodeBlockTimer(std::shared_ptr<CumulativeTimer> cumulativeTimer) {
+    cumulative_timer = cumulativeTimer;
+    start = std::chrono::system_clock::now();
+  }
+  ~CodeBlockTimer() {
+    std::chrono::time_point<std::chrono::system_clock> stop = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = stop - start;
+    cumulative_timer->incrementTimeSpent(elapsed_seconds.count());
+  }
+
+private:
+  std::shared_ptr<CumulativeTimer> cumulative_timer;
+  std::chrono::time_point<std::chrono::system_clock> start;
+};
+} // namespace
 
 namespace Mantid::API {
 
@@ -288,14 +333,22 @@ void LogManager::filterByTime(const Types::Core::DateAndTime start, const Types:
  */
 LogManager *LogManager::cloneInTimeROI(const Kernel::TimeROI &timeROI) {
   LogManager *newMgr = new LogManager();
-  newMgr->m_manager = std::unique_ptr<PropertyManager>(m_manager->cloneInTimeROI(timeROI));
+
+  {
+    CodeBlockTimer timer(m_manager_cloneInTimeROI_Timer);
+    newMgr->m_manager = std::unique_ptr<PropertyManager>(m_manager->cloneInTimeROI(timeROI));
+  }
 
   // This LogManager object may have filtered out some data previously, in which case it would be holding the TimeROI
   // used. Therefore, the cloned object's TimeROI should be an intersection of the input TimeROI with the one being
   // held.
-  TimeROI outputTimeROI(timeROI);
-  outputTimeROI.update_or_replace_intersection(*m_timeroi);
-  newMgr->m_timeroi = std::make_unique<Kernel::TimeROI>(outputTimeROI);
+  {
+    CodeBlockTimer timer(outputTimeROI_update_or_replace_intersection_Timer);
+
+    TimeROI outputTimeROI(timeROI);
+    outputTimeROI.update_or_replace_intersection(*m_timeroi);
+    newMgr->m_timeroi = std::make_unique<Kernel::TimeROI>(outputTimeROI);
+  }
 
   return newMgr;
 }
@@ -306,9 +359,22 @@ LogManager *LogManager::cloneInTimeROI(const Kernel::TimeROI &timeROI) {
  * @param timeROI :: a series of time regions used to determine which time series values should be included in the copy.
  */
 void LogManager::copyAndFilterProperties(const LogManager &other, const Kernel::TimeROI &timeROI) {
-  this->m_manager = std::unique_ptr<PropertyManager>(other.m_manager->cloneInTimeROI(timeROI));
-  this->setTimeROI(timeROI);
-  this->clearSingleValueCache();
+  CodeBlockTimer timer(copyAndFilterProperties_Timer);
+
+  {
+    CodeBlockTimer timer(cloneInTimeROI_Timer);
+    this->m_manager = std::unique_ptr<PropertyManager>(other.m_manager->cloneInTimeROI(timeROI));
+  }
+
+  {
+    CodeBlockTimer timer(setTimeROI_Timer);
+    this->setTimeROI(timeROI);
+  }
+
+  {
+    CodeBlockTimer timer(clearSingleValueCache_Timer);
+    this->clearSingleValueCache();
+  }
 }
 
 /**
@@ -789,4 +855,12 @@ template MANTID_API_DLL std::vector<int> LogManager::getPropertyValueAsType(cons
 template MANTID_API_DLL std::vector<long> LogManager::getPropertyValueAsType(const std::string &) const;
 /** @endcond */
 
+void LogManager::reportTiming() {
+  copyAndFilterProperties_Timer->reportTiming();
+  cloneInTimeROI_Timer->reportTiming();
+  setTimeROI_Timer->reportTiming();
+  clearSingleValueCache_Timer->reportTiming();
+  m_manager_cloneInTimeROI_Timer->reportTiming();
+  outputTimeROI_update_or_replace_intersection_Timer->reportTiming();
+}
 } // namespace Mantid::API

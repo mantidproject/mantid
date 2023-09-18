@@ -14,6 +14,8 @@
 static double elapsed_time_case_1{0.0};
 static double elapsed_time_case_2{0.0};
 static double elapsed_time_case_4{0.0};
+static double elapsed_time_case_5{0.0};
+// static double elapsed_time_case_10{0.0};
 
 namespace Mantid {
 using API::EventType;
@@ -96,9 +98,6 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
             << std::endl;
 
   for (size_t ii = 0; ii < tws->rowCount(); ii++) {
-    if (ii % 100000 == 0) {
-      std::cout << "Row: " << ii << std::endl;
-    }
     // by design, the times in the table must be in seconds
     double timeStart_s{col_start->toDouble(ii)};
     double timeStop_s{col_stop->toDouble(ii)};
@@ -150,12 +149,6 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
     }
 
     addROI(timeStart, timeStop, target_index);
-
-    if (m_singleTargetTimeVectors.count(target_index) > 0) {
-      m_singleTargetTimeVectors[target_index].push_back(timeStart);
-      m_singleTargetTimeVectors[target_index].push_back(timeStop);
-    } else
-      m_singleTargetTimeVectors[target_index] = std::vector<DateAndTime>();
   }
 
   std::cout << "NUMBER OF ZERO-WIDTH SPLITTER INTERVALS: " << number_of_zero_width_intervals << std::endl;
@@ -233,6 +226,8 @@ std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const 
 }
 
 void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, const int value) {
+  resetTargetTimeVectors();
+
   // If start time == stop time, the map will be corrupted.
   if (start == stop)
     return;
@@ -318,6 +313,44 @@ void TimeSplitter::clearAndReplace(const DateAndTime &start, const DateAndTime &
     m_roi_map.insert({start, value});
     m_roi_map.insert({stop, NO_TARGET});
   }
+  resetTargetTimeVectors();
+}
+
+// Target time vectors must be reset every time the ROI map is modified.
+// They must be rebuilt on demand, after the ROI map is settled.
+void TimeSplitter::resetTargetTimeVectors() {
+  if (validTargetTimeVectors) {
+    m_targetTimeVectors.clear();
+    validTargetTimeVectors = false;
+  }
+}
+
+void TimeSplitter::addTimeIntervalToTargetVector(const DateAndTime &intervalStart, const DateAndTime &intervalStop,
+                                                 const int target) {
+  if (m_targetTimeVectors.count(target) > 0) {
+    if (m_targetTimeVectors[target].back() == intervalStart)
+      m_targetTimeVectors[target].back() = intervalStop;
+    else {
+      m_targetTimeVectors[target].push_back(intervalStart);
+      m_targetTimeVectors[target].push_back(intervalStop);
+    }
+  } else {
+    m_targetTimeVectors[target] = std::vector<DateAndTime>();
+    m_targetTimeVectors[target].push_back(intervalStart);
+    m_targetTimeVectors[target].push_back(intervalStop);
+  }
+}
+
+void TimeSplitter::rebuildTargetTimeVectors() {
+  auto start = std::chrono::system_clock::now();
+  resetTargetTimeVectors();
+  for (auto it = m_roi_map.begin(); it != std::prev(m_roi_map.end()); it++) {
+    addTimeIntervalToTargetVector(it->first, std::next(it)->first, it->second);
+  }
+  validTargetTimeVectors = true;
+  auto stop = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = stop - start;
+  elapsed_time_case_5 += elapsed_seconds.count();
 }
 
 /**
@@ -375,18 +408,23 @@ TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
 
   std::cout << "NUMBER OF ITEMS IN ROI MAP: " << m_roi_map.size() << std::endl;
 
-  // convert indexes less than NO_TARGET to NO_TARGET
-  const int effectiveIndex = std::max<int>(workspaceIndex, NO_TARGET);
-
-  bool presorted_splitter{true};
-
-  TimeROI output;
-
-  if (presorted_splitter) {
-    output.replaceROI(m_singleTargetTimeVectors[effectiveIndex]);
-    return output;
+#if 1
+  if (!validTargetTimeVectors) {
+    std::cout << "***REBUILDING PARTIAL TIME SPLITTER VECTORS***"
+              << "\n";
+    rebuildTargetTimeVectors();
   }
 
+  // convert indexes less than NO_TARGET to NO_TARGET
+  const int effectiveIndex = std::max<int>(workspaceIndex, NO_TARGET);
+  return TimeROI(m_targetTimeVectors[effectiveIndex]);
+#endif
+
+#if 0
+  auto start = std::chrono::system_clock::now();
+  TimeROI output;
+  // convert indexes less than NO_TARGET to NO_TARGET
+  const int effectiveIndex = std::max<int>(workspaceIndex, NO_TARGET);
   using map_value_type = std::map<DateAndTime, int>::value_type;
   auto indexFinder = [effectiveIndex](const map_value_type &value) { return value.second == effectiveIndex; };
   auto iter = m_roi_map.begin();
@@ -409,7 +447,12 @@ TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
     msg << "No regions exist for workspace index " << workspaceIndex;
   }
 
+  auto stop = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = stop - start;
+  elapsed_time_case_10 += elapsed_seconds.count();
+
   return output;
+#endif
 }
 
 /**
@@ -596,6 +639,7 @@ void TimeSplitter::splitEventVec(const std::function<DateAndTime(const EventType
 double TimeSplitter::getTime1() { return elapsed_time_case_1; }
 double TimeSplitter::getTime2() { return elapsed_time_case_2; }
 double TimeSplitter::getTime4() { return elapsed_time_case_4; }
-
+double TimeSplitter::getTime5() { return elapsed_time_case_5; }
+// double TimeSplitter::getTime10() { return elapsed_time_case_10; }
 } // namespace DataObjects
 } // namespace Mantid
