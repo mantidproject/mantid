@@ -7,8 +7,7 @@
 import unittest
 from unittest import mock
 
-from mantidqt.dialogs.errorreports.presenter import ErrorReporterPresenter
-from mantidqt.dialogs.errorreports.report import MAX_STACK_TRACE_LENGTH
+from mantidqt.dialogs.errorreports.presenter import ErrorReporterPresenter, MAX_STACK_TRACE_LENGTH
 
 
 class ErrorReportPresenterTest(unittest.TestCase):
