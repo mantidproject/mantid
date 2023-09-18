@@ -1635,8 +1635,14 @@ void FitPropertyBrowser::doFit(int maxIterations) {
       }
     }
     observeFinish(alg);
-    alg->executeAsync();
+    Poco::ActiveResult<bool> result(alg->executeAsync());
     m_fitAlgParameters = alg->toString();
+    while (!result.available()) {
+      QCoreApplication::processEvents();
+    }
+    if (!result.error().empty()) {
+      emit algorithmFinished(QString());
+    }
   } catch (const std::exception &e) {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
