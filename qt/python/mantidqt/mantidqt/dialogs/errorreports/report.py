@@ -25,7 +25,6 @@ For example:
 Thank you!"""
 
 PLAIN_TEXT_MAX_LENGTH = 3200
-MAX_STACK_TRACE_LENGTH = 10000
 MANTID_DOWNLOAD_LINK = "http://download.mantidproject.org"
 
 ErrorReportUIBase, ErrorReportUI = load_ui(__file__, "errorreport.ui")

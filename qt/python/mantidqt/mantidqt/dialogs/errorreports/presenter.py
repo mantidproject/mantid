@@ -10,7 +10,8 @@ from typing import Optional
 from qtpy.QtCore import QSettings
 
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
-from mantidqt.dialogs.errorreports.report import MAX_STACK_TRACE_LENGTH
+
+MAX_STACK_TRACE_LENGTH = 10000
 
 
 class ErrorReporterPresenter(object):

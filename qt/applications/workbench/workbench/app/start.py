@@ -186,6 +186,13 @@ def create_and_launch_workbench(app, command_line_options):
         FrameworkManagerImpl.Instance()
         main_window.post_mantid_init()
 
+        # This will check the current version. This is here in this form
+        # because previously this import would happen earlier in the startup process,
+        # which would then cause several side effects, one of which was the
+        # FrameworkManager being created prematurely. This was evident by the
+        # welcome message not appearing in the message window in Workbench.
+        from mantidqt.dialogs.errorreports.report import CrashReportPage  # noqa
+
         if main_window.splash:
             main_window.splash.hide()
 

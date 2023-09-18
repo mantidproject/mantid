@@ -14,7 +14,6 @@ from qtpy import QT_VERSION
 from qtpy.QtCore import QCoreApplication, QSettings
 
 from mantidqt.dialogs.errorreports.presenter import ErrorReporterPresenter
-from mantidqt.dialogs.errorreports.report import CrashReportPage
 import mantidqt.utils.qt as qtutils
 
 
@@ -46,6 +45,8 @@ def main(argv: Sequence[str] = None) -> int:
     app.setOrganizationDomain(command_line_args.org_domain)
     app.setApplicationName(command_line_args.application)
     QSettings.setDefaultFormat(QSettings.IniFormat)
+    from mantidqt.dialogs.errorreports.report import CrashReportPage
+
     form = CrashReportPage(show_continue_terminate=False)
     presenter = ErrorReporterPresenter(form, exit_code_str, command_line_args.application)
     presenter.show_view()

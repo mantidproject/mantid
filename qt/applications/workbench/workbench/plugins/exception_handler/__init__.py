@@ -9,7 +9,7 @@ import traceback
 
 from mantid.kernel import UsageService, logger
 from mantidqt.dialogs.errorreports.presenter import ErrorReporterPresenter
-from mantidqt.dialogs.errorreports.report import CrashReportPage
+
 from workbench.plugins.exception_handler.error_messagebox import WorkbenchErrorMessageBox
 
 
@@ -27,6 +27,8 @@ def exception_logger(main_window, exc_type, exc_value, exc_traceback):
     logger.error("".join(traceback.format_exception(exc_type, exc_value, exc_traceback)))
 
     if UsageService.isEnabled():
+        from mantidqt.dialogs.errorreports.report import CrashReportPage
+
         page = CrashReportPage(show_continue_terminate=True)
         presenter = ErrorReporterPresenter(page, "", "workbench", traceback.format_exception(exc_type, exc_value, exc_traceback))
         presenter.show_view_blocking()
