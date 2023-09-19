@@ -11,7 +11,6 @@ from qtpy.QtWidgets import QMessageBox
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
-from mantid.simpleapi import CheckMantidVersion
 
 from .details import MoreDetailsDialog
 
@@ -39,7 +38,6 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     CONTACT_INFO = "ContactInfo"
     NAME = "Name"
     EMAIL = "Email"
-    _, _, newer_version_available = CheckMantidVersion()
 
     def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
@@ -63,7 +61,11 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.icon.setPixmap(QtGui.QPixmap(":/images/crying_mantid.png"))
 
         self.requestTextBrowser.anchorClicked.connect(self.interface_manager.showWebPage)
-        if self.newer_version_available:
+
+        from mantid.simpleapi import CheckMantidVersion
+
+        _, _, newer_version_available = CheckMantidVersion()
+        if newer_version_available:
             msg = (
                 "<span style=\" font-family:'.SF NS Text'; font-size:12pt; color:#000000;\">"
                 "Warning: your version of MantidWorkbench is out of date.<br>"
