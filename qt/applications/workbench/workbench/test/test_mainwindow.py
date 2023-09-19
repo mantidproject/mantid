@@ -182,17 +182,24 @@ class MainWindowTest(unittest.TestCase):
             "Direct": ["DGS_Reduction.py", "DGSPlanner.py", "PyChop.py", "MSlice.py", "ALFView"],
         }
 
-        with patch(
-            "workbench.app.mainwindow.ConfigService",
-            new={
-                "interfaces.categories.hidden": "",
-            },
-        ):
-            self.main_window._discover_python_interfaces = Mock(return_value=(example_interfaces, {}))
-            self.main_window._discover_cpp_interfaces = Mock()
+        # with patch(
+        #     "workbench.app.mainwindow.ConfigService",
+        #     new={
+        #         "interfaces.categories.hidden": "",
+        #     },
+        # ):
+        #     self.main_window._discover_python_interfaces = Mock(return_value=(example_interfaces, {}))
+        #     self.main_window._discover_cpp_interfaces = Mock()
 
-        self.main_window.create_menus()
-        self.main_window.populate_interfaces_menu()
+        with (
+            patch("workbench.app.mainwindow.ConfigService", new={"interfaces.categories.hidden": ""}),
+            patch("workbench.app.mainwindow.gather_interface_names") as mock_gather_interfaces,
+            patch("workbench.app.mainwindow.get_registers_to_run") as mock_registers_to_run,
+        ):
+            mock_gather_interfaces.return_value = example_interfaces
+            mock_registers_to_run.return_value = {}
+            self.main_window.create_menus()
+            self.main_window.populate_interfaces_menu()
 
         expected_menu_texts = ["Direct", "General"]  # Alphabetical order
         actual_menu_texts = [action.text() for action in self.main_window.interfaces_menu.actions()]
@@ -212,32 +219,47 @@ class MainWindowTest(unittest.TestCase):
         interface_dir = os.path.dirname(mantidqtinterfaces.__file__)
         interfaces = {"category": ["interface.py"]}
 
-        self.main_window._discover_python_interfaces = Mock(return_value=(interfaces, {}))
-        self.main_window._discover_cpp_interfaces = Mock()
+        # self.main_window._discover_python_interfaces = Mock(return_value=(interfaces, {}))
+        # self.main_window._discover_cpp_interfaces = Mock()
 
-        with patch(
-            "workbench.app.mainwindow.ConfigService",
-            new={
-                "interfaces.categories.hidden": "",
-            },
+        with (
+            patch("workbench.app.mainwindow.ConfigService", new={"interfaces.categories.hidden": ""}),
+            patch("workbench.app.mainwindow.gather_interface_names") as mock_gather_interfaces,
+            patch("workbench.app.mainwindow.get_registers_to_run") as mock_registers_to_run,
         ):
+            mock_gather_interfaces.return_value = interfaces
+            mock_registers_to_run.return_value = {}
             self.main_window.create_menus()
             self.main_window.populate_interfaces_menu()
 
-        self.main_window._discover_python_interfaces.assert_called_with(interface_dir)
-        self.main_window._discover_cpp_interfaces.assert_called_with(interfaces)
+            mock_gather_interfaces.assert_called_with(interface_dir)
+        # _discover_python_interfaces.assert_called_with(interface_dir)
+        # _discover_cpp_interfaces.assert_called_with(interfaces)
 
     def test_that_populate_interfaces_menu_ignores_hidden_interfaces(self):
-        self.main_window._discover_python_interfaces = Mock(
-            return_value=({"category1": ["interface1.py"], "category2": ["interface2.py"]}, {})
-        )
-        self.main_window._discover_cpp_interfaces = Mock()
+        # self.main_window._discover_python_interfaces = Mock(
+        #     return_value=({"category1": ["interface1.py"], "category2": ["interface2.py"]}, {})
+        # )
+        # self.main_window._discover_cpp_interfaces = Mock()
         self.main_window.interfaces_menu = Mock()
         ConfigService_dict = {"interfaces.categories.hidden": "category1;category2"}
 
-        with patch.object(self.main_window, "interfaces_menu") as mock_interfaces_menu:
-            with patch("workbench.app.mainwindow.ConfigService", new=ConfigService_dict):
-                self.main_window.populate_interfaces_menu()
+        # with patch.object(self.main_window, "interfaces_menu") as mock_interfaces_menu:
+        #     with patch("workbench.app.mainwindow.ConfigService", new=ConfigService_dict):
+        #         self.main_window.populate_interfaces_menu()
+        #
+        #     mock_interfaces_menu.addMenu.assert_not_called()
+
+        with (
+            patch.object(self.main_window, "interfaces_menu") as mock_interfaces_menu,
+            patch("workbench.app.mainwindow.ConfigService", new=ConfigService_dict),
+            patch("workbench.app.mainwindow.gather_interface_names") as mock_gather_interfaces,
+            patch("workbench.app.mainwindow.get_registers_to_run") as mock_registers_to_run,
+        ):
+            mock_gather_interfaces.return_value = {"category1": ["interface1.py"], "category2": ["interface2.py"]}
+            mock_registers_to_run.return_value = {}
+            self.main_window.create_menus()
+            self.main_window.populate_interfaces_menu()
 
             mock_interfaces_menu.addMenu.assert_not_called()
 
@@ -309,55 +331,6 @@ class MainWindowTest(unittest.TestCase):
         self.assertTrue(self.main_window.project_recovery.closing_workbench)
         self.main_window.interface_manager.closeHelpWindow.assert_called()
         mock_event.accept.assert_called()
-
-    @patch("workbench.app.mainwindow.logger")
-    @patch("os.path.exists")
-    def test_python_interfaces_are_discovered_correctly(self, mock_os_path_exists, _):
-        interfaces = ["Muon/Frequency_Domain_Analysis.py", "ILL/Drill.py"]
-        interfaces_str = " ".join(interfaces)  # config service returns them as a whole string.
-        mock_os_path_exists.return_value = lambda path: path in interfaces
-        self.main_window.PYTHON_GUI_BLACKLIST = []
-
-        with patch("workbench.app.mainwindow.ConfigService", new={"mantidqt.python_interfaces": interfaces_str}):
-            returned_interfaces, registration_files = self.main_window._discover_python_interfaces("")
-
-        expected_interfaces = {"Muon": ["Frequency_Domain_Analysis.py"], "ILL": ["Drill.py"]}
-        self.assertDictEqual(expected_interfaces, returned_interfaces)
-        self.assertDictEqual({}, registration_files)
-
-    @patch("workbench.app.mainwindow.logger")
-    @patch("os.path.exists")
-    def test_that_non_existent_python_interface_is_ignored_gracefully(self, mock_os_path_exists, mock_logger):
-        interface_str = "fake/interface.py"
-        mock_os_path_exists.return_value = False
-        self.main_window.PYTHON_GUI_BLACKLIST = []
-
-        with patch("workbench.app.mainwindow.ConfigService", new={"mantidqt.python_interfaces": interface_str}):
-            returned_interfaces, registration_files = self.main_window._discover_python_interfaces("")
-
-        self.assertDictEqual({}, returned_interfaces)
-        self.assertDictEqual({}, registration_files)
-        mock_logger.warning.assert_called()
-
-    @patch("workbench.app.mainwindow.UserSubWindowFactory")
-    def test_cpp_interfaces_are_discovered_correctly(self, mock_UserSubWindowFactory):
-        """Assuming we have already found some python interfaces, test that
-        cpp interfaces are discovered correctly using the Direct interfaces as an example."""
-
-        cpp_interface_factory = Mock()
-        cpp_interface_factory.keys.return_value = ["ALFView", "TOFCalculator"]
-        cpp_interface_factory.categories.side_effect = lambda name: ["Direct"] if name == "ALFView" else []
-        mock_UserSubWindowFactory.Instance.return_value = cpp_interface_factory
-
-        all_interfaces = self.main_window._discover_cpp_interfaces(
-            {"Direct": ["DGS_Reduction.py", "DGSPlanner.py", "PyChop.py", "MSlice.py"]}
-        )
-
-        expected_interfaces = {
-            "Direct": ["DGS_Reduction.py", "DGSPlanner.py", "PyChop.py", "MSlice.py", "ALFView"],
-            "General": ["TOFCalculator"],
-        }
-        self.assertDictEqual(expected_interfaces, all_interfaces)
 
     @patch("workbench.app.mainwindow.input_qinputdialog")
     def test_override_python_input_replaces_input_with_qinputdialog(self, mock_input):

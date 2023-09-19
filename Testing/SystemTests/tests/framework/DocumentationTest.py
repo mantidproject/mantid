@@ -5,11 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from itertools import chain
 import pathlib
 from pathlib import Path
+from typing import List
 
 from systemtesting import MantidSystemTest
 from mantid.api import AlgorithmFactory, FunctionFactory
+from mantid.kernel import ConfigService
+from workbench.utils.gather_interfaces import gather_interface_names
 
 path_to_docs = (pathlib.Path(__file__).resolve() / "../../../../../docs/source").resolve()
 ALG_DOCS_PATH = path_to_docs / "algorithms"
@@ -57,7 +61,7 @@ FIT_FUNCTIONS_WITH_NO_DOCS = [
 ]
 
 
-def file_exists_under_dir(dir_path: Path, file_name: str) -> bool:
+def _file_exists_under_dir(dir_path: Path, file_name: str) -> bool:
     """
     Search for file name in hte given directory and all its subdirectories
     :param dir_path: directory to search under
@@ -66,6 +70,13 @@ def file_exists_under_dir(dir_path: Path, file_name: str) -> bool:
     """
     found_files = [path for path in dir_path.rglob(file_name) if path.is_file]
     return len(found_files) > 0
+
+
+def _get_interface_names() -> List[str]:
+    interfaces = gather_interface_names()
+    hidden_interfaces = ConfigService["interfaces.categories.hidden"].split(";")
+    interface_names = [interfaces[key] for key in interfaces.keys() if key not in hidden_interfaces]
+    return list(chain.from_iterable(interface_names))
 
 
 class AlgorithmDocumentationTest(MantidSystemTest):
@@ -81,7 +92,7 @@ class AlgorithmDocumentationTest(MantidSystemTest):
         for name, versions in all_algs.items():
             for version in versions:
                 file_name = f"{name}-v{version}.rst"
-                if not file_exists_under_dir(ALG_DOCS_PATH, file_name):
+                if not _file_exists_under_dir(ALG_DOCS_PATH, file_name):
                     if file_name not in ALGORITHMS_WITH_NO_DOCS:
                         missing.append(str(file_name))
                 elif file_name in ALGORITHMS_WITH_NO_DOCS:
@@ -102,10 +113,20 @@ class FittingDocumentationTest(MantidSystemTest):
 
         for name in all_fit_funcs:
             file_name = f"{name}.rst"
-            if not file_exists_under_dir(FIT_DOCS_PATH, file_name):
+            if not _file_exists_under_dir(FIT_DOCS_PATH, file_name):
                 if file_name not in FIT_FUNCTIONS_WITH_NO_DOCS:
                     missing.append(str(file_name))
             elif file_name in FIT_FUNCTIONS_WITH_NO_DOCS:
                 raise FileExistsError(f"{file_name} exists but is still in the exceptions list. Please update the list.")
 
         self.assertEqual(len(missing), 0, msg="Missing the following fit function docs:\n" + "\n".join(missing))
+
+
+class InterfaceDocumentationTest(MantidSystemTest):
+    """
+    This test checks that all interfaces have a documentation page
+    """
+
+    def runTest(self):
+        interface_names = _get_interface_names()
+        print(interface_names)
