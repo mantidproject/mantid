@@ -152,8 +152,11 @@ void IETPresenter::algorithmComplete(bool error) {
     m_outputWorkspaces = m_model->groupWorkspaces(m_outputGroupName, m_view->getGroupOutputOption());
     m_pythonExportWsName = m_outputWorkspaces[0];
 
-    setOutputPlotOptionsWorkspaces(m_outputWorkspaces);
-    m_view->setSaveEnabled(true);
+    if (m_outputWorkspaces.size() != 0) {
+      setOutputPlotOptionsWorkspaces(m_outputWorkspaces);
+      m_view->setOutputWorkspaces(m_outputWorkspaces);
+      m_view->setSaveEnabled(true);
+    }
   }
 }
 
