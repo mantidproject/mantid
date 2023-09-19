@@ -10,6 +10,7 @@
 # system imports
 
 # 3rd-party imports
+import sys
 import warnings
 
 import matplotlib as mpl
@@ -44,6 +45,10 @@ def init_mpl_gcf():
     """
     Replace vanilla Gcf with our custom manager
     """
+    # It is very important this assertion is met. If matplotlib is imported before we set the 'Gcf' object to our
+    # custom global figure manager, then the plotting in mantid will be broken.
+    assert "matplotlib.backend_bases" not in sys.modules
+
     setattr(_pylab_helpers, "Gcf", GlobalFigureManager)
 
 

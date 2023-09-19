@@ -114,11 +114,8 @@ def initialize():
 
 
 def initialise_qapp_and_launch_workbench(command_line_options):
+    # Set the global figure manager in matplotlib. Very important this happens first.
     from workbench.plotting.config import init_mpl_gcf
-
-    # It is very important this assertion is met. If matplotlib is imported before we set the 'Gcf' object to our
-    # custom global figure manager, then the plotting in mantid will be broken.
-    assert "matplotlib.backend_bases" not in sys.modules
 
     init_mpl_gcf()
 
