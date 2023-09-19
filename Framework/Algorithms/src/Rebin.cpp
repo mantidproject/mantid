@@ -106,7 +106,7 @@ std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inPar
       }
     }
   } // end if
-  for (size_t i = 0; i < rbParams.size() - 2; i += 2) {
+  for (size_t i = 1; i < rbParams.size() - 2; i += 2) {
     // make sure logarithmic binning does not change signs
     if (rbParams[i] < 0 && rbParams[i + 1] < 0 && rbParams[i + 2] > 0) {
       std::stringstream msg;
