@@ -7,6 +7,7 @@
 from systemtesting import MantidSystemTest
 
 from mantid.api import AlgorithmFactory
+from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.interfacemanager import InterfaceManager
 
 
@@ -22,6 +23,7 @@ class AlgorithmCreateDialogsTest(MantidSystemTest):
         algorithm_names = [algorithm.name for algorithm in AlgorithmFactory.Instance().getDescriptors(True, True)]
         # Remove duplicate algorithm names as we will only test the most recent versions
         self._unique_algorithm_names = list(dict.fromkeys(algorithm_names))
+        CreateSampleWorkspace(OutputWorkspace="name")
 
     def runTest(self) -> None:
         """Run the test for the provided workspace type in the ADS."""
@@ -30,6 +32,6 @@ class AlgorithmCreateDialogsTest(MantidSystemTest):
 
         for algorithm_name in self._unique_algorithm_names:
             print(algorithm_name)  # Useful for debugging
-            presets = {}
+            presets = {"InputWorkspace": "1", "OutputWorkspace": "out"}
             manager = InterfaceManager()
             manager.createDialogFromName(algorithm_name, -1, None, False, presets, "")
