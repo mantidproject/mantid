@@ -83,7 +83,7 @@ std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inPar
     rbParams = inParams;
   } else if (inParams.size() == 1) {
     double xmin = 0.;
-    double xmax = 0.;
+    double xmax = 1.;
     inputWS.getXMinMax(xmin, xmax);
 
     logger.information() << "Using the current min and max as default " << xmin << ", " << xmax << '\n';
