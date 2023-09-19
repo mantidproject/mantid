@@ -7,9 +7,15 @@
 #pragma once
 
 #include "MantidKernel/EnumeratedString.h"
+#include "MantidKernel/Logger.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
+
+namespace {
+/// static Logger definition
+Logger g_log("EnumeratedStringTest");
+} // namespace
 
 namespace {
 enum class CoolGuys : char { Fred, Joe, Bill, enum_count };
@@ -25,6 +31,8 @@ class EnumeratedStringTest : public CxxTest::TestSuite {
 private:
 public:
   void testConstructor() {
+    g_log.notice("\ntestConstructor...");
+
     // test constructor from enumerator
     COOLGUY dude1(CoolGuys::Fred);
     TS_ASSERT_EQUALS(dude1, CoolGuys(0));
@@ -60,6 +68,8 @@ public:
   }
 
   void testAssignment() {
+    g_log.notice("\ntestAssignment...");
+
     COOLGUY dude;
     std::vector<COOLGUY> coolGuys;
     // make a vector of all CoolGuy values
@@ -101,6 +111,8 @@ public:
   }
 
   void testBadAssignment() {
+    g_log.notice("\ntestBadAssignment...");
+
     CAKE cake = Cakes(3);
     COOLGUY dude("William");
     TS_ASSERT_THROWS_ANYTHING(dude = "Jeremy"); // Jeremy is not a cool guy
@@ -117,6 +129,8 @@ public:
 
   // test ability to case from enumerated string to other objects
   void testCasting() {
+    g_log.notice("\ntestCasting...");
+
     CAKE cake(Cakes::Pound);
 
     // test we can cast from enumerated string to enum
@@ -167,6 +181,8 @@ public:
   bool functionOfString(const std::string &tastyName) { return (tastyName == cakeNames[0]); }
 
   void testAsFunctionArg() {
+    g_log.notice("\ntestAsFunctionArg...");
+
     // test that enumerated string parameter can be set by enum or string
     CAKE scrumptious = Cakes(0);
     TS_ASSERT(functionOfCake(scrumptious));
@@ -190,6 +206,8 @@ public:
   }
 
   void testEnumCount() {
+    g_log.notice("\ntestEnumCount...");
+
     // try removing enum_count -- should give a compiler error
     enum class Letters : size_t { a, b, enum_count };
     static const std::vector<std::string> letters{"a", "b"};
@@ -201,6 +219,8 @@ public:
   }
 
   void testFailIfWrongNumbers() {
+    g_log.notice("\ntestFailIfWrongNumbers...");
+
     enum Letters : size_t { a, b, c, enum_count };
     static const std::vector<std::string> letters = {"a", "b"};
     typedef EnumeratedString<Letters, &letters> LETTERS;
@@ -210,6 +230,8 @@ public:
   }
 
   void testSwitchAndIf() {
+    g_log.notice("\ntestSwitchAndIf...");
+
     const size_t index = 3;
     CAKE tasty = Cakes(index), scrumptious = Cakes(index);
 
@@ -241,6 +263,8 @@ public:
   }
 
   void testCaseInsensitiveNameComparison() {
+    g_log.notice("\ntestCaseInsensitiveNameComparison...");
+
     enum TwoLettersEnum : size_t { ab, cd, enum_count };
     static const std::vector<std::string> twoLetters = {"ab", "cd"};
     typedef EnumeratedString<TwoLettersEnum, &twoLetters, &compareStringsCaseInsensitive> TWO_LETTERS;
@@ -310,6 +334,8 @@ public:
   }
 
   void test_customNameComparator() {
+    g_log.notice("\ntest_customNameComparator...");
+
     enum FirstLetterEnum : size_t { A, B, C, enum_count };
     static const std::vector<std::string> words = {"apple", "banana", "cherry"};
     static std::function<bool(const std::string &, const std::string &)> firstLetterComparator =

@@ -40,13 +40,14 @@ void LoadCalFile::getInstrument3WaysInit(Algorithm *alg) {
       "Optional: An input workspace with the instrument we want to use.");
 
   alg->declareProperty(std::make_unique<PropertyWithValue<std::string>>("InstrumentName", "", Direction::Input),
-                       "Optional: Name of the instrument to base the "
-                       "GroupingWorkspace on which to base the "
-                       "GroupingWorkspace.");
+                       "Optional: Name of the instrument on which to base the GroupingWorkspace.");
 
-  alg->declareProperty(std::make_unique<FileProperty>("InstrumentFilename", "", FileProperty::OptionalLoad, ".xml"),
-                       "Optional: Path to the instrument definition file on "
-                       "which to base the GroupingWorkspace.");
+  const std::vector<std::string> validFilenameExtensions{".xml", ".hdf5", ".nxs", ".nxs.h5"};
+  alg->declareProperty(
+      std::make_unique<FileProperty>("InstrumentFilename", "", FileProperty::OptionalLoad, validFilenameExtensions),
+      "Optional: Path to a file (full or relative) defining the instrument on which to base the GroupingWorkspace. "
+      "The file could be an IDF or a NeXus Geometry file. Note, InstrumentFilename or InstrumentName must be "
+      "specified, but not both.");
 
   alg->setPropertyGroup("InputWorkspace", grpName);
   alg->setPropertyGroup("InstrumentName", grpName);
@@ -98,13 +99,11 @@ Geometry::Instrument_const_sptr LoadCalFile::getInstrument3Ways(Algorithm *alg) 
   if (inWS) {
     inst = inWS->getInstrument();
   } else {
-    Algorithm_sptr childAlg = alg->createChildAlgorithm("LoadInstrument", 0.0, 0.2);
-    MatrixWorkspace_sptr tempWS = std::make_shared<Workspace2D>();
-    childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
+    Algorithm_sptr childAlg = alg->createChildAlgorithm("LoadEmptyInstrument", 0.0, 0.2);
     childAlg->setPropertyValue("Filename", InstrumentFilename);
     childAlg->setPropertyValue("InstrumentName", InstrumentName);
-    childAlg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
     childAlg->executeAsChildAlg();
+    MatrixWorkspace_sptr tempWS = childAlg->getProperty("OutputWorkspace");
     inst = tempWS->getInstrument();
   }
 
