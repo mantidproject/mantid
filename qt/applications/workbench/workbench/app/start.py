@@ -17,7 +17,6 @@ import multiprocessing
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import ConfigService, UsageService, version_str as mantid_version_str
 from mantidqt.utils.qt import plugins
-from mantidqt.dialogs.errorreports import main as errorreports_main
 import mantidqt.utils.qt as qtutils
 
 # Find Qt plugins for development builds on some platforms
@@ -31,7 +30,6 @@ from qtpy.QtCore import QCoreApplication, Qt
 # QApplication is created or paths to Qt's resources will not be set up correctly
 from workbench.app.resources import qCleanupResources
 from workbench.config import APPNAME, ORG_DOMAIN, ORGANIZATION
-from workbench.plugins.exception_handler import exception_logger
 from workbench.widgets.about.presenter import AboutPresenter
 
 # Constants
@@ -144,6 +142,7 @@ def start_error_reporter():
     """
     Used to start the error reporter if the program has segfaulted.
     """
+    from mantidqt.dialogs.errorreports import main as errorreports_main
 
     errorreports_main.main(["--application", APPNAME, "--orgname", ORGANIZATION, "--orgdomain", ORG_DOMAIN])
 
@@ -169,6 +168,8 @@ def create_and_launch_workbench(app, command_line_options):
 
         # decorates the excepthook callback with the reference to the main window
         # this is used in case the user wants to terminate the workbench from the error window shown
+        from workbench.plugins.exception_handler import exception_logger
+
         sys.excepthook = partial(exception_logger, main_window)
 
         # Load matplotlib as early as possible and set our defaults
