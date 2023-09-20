@@ -420,10 +420,28 @@ void PDCalibration::exec() {
   }
 
   m_peaksInDspacing = getProperty("PeakPositions");
-  // Sort peak positions, required for correct peak window calculations
-  std::sort(m_peaksInDspacing.begin(), m_peaksInDspacing.end());
+  std::vector<double> peakWindow = getProperty("PeakWindow");
+  // if peak windows given for each peak center, sort all by peak center
+  if (peakWindow.size() > 1) {
+    // load windows into ordered map keyed by peak center
+    std::map<double, std::pair<double, double>> peakEdgeAndCenter;
+    for (std::size_t i = 0; i < m_peaksInDspacing.size(); i++) {
+      peakEdgeAndCenter[m_peaksInDspacing[i]] = {peakWindow[2 * i], peakWindow[2 * i + 1]};
+    }
+    m_peaksInDspacing.clear();
+    peakWindow.clear();
+    // retrieve ordered center, windows
+    std::size_t i = 0;
+    for (auto it = peakEdgeAndCenter.begin(); it != peakEdgeAndCenter.end(); it++, i++) {
+      m_peaksInDspacing[i] = it->first;
+      peakWindow[2 * i] = it->second.first;
+      peakWindow[2 * i + 1] = it->second.second;
+    }
+  } else {
+    // Sort peak positions, required for correct peak window calculations
+    std::sort(m_peaksInDspacing.begin(), m_peaksInDspacing.end());
+  }
 
-  const std::vector<double> peakWindow = getProperty("PeakWindow");
   const double minPeakHeight = getProperty("MinimumPeakHeight");
   const double minSignalToNoiseRatio = getProperty("MinimumSignalToNoiseRatio");
   const double maxChiSquared = getProperty("MaxChiSq");
