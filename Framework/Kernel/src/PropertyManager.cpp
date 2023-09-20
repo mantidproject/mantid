@@ -179,7 +179,8 @@ void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> &f
  * A partially cloned time series property should include all time values enclosed by the ROI regions,
  * each defined as [roi_start,roi_end), plus the values immediately before and after an ROI region, if available.
  * Properties that are not time series will be cloned with no changes.
- * @param timeROI :: a series of time regions used to determine which time series values should be included in the copy.
+ * @param timeROI :: time region of interest, i.e. time boundaries used to determine which time series values should be
+ * included in the copy.
  */
 PropertyManager *PropertyManager::cloneInTimeROI(const Kernel::TimeROI &timeROI) {
   PropertyManager *newMgr = new PropertyManager();

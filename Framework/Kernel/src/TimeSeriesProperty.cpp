@@ -27,29 +27,6 @@ namespace {
 Logger g_log("TimeSeriesProperty");
 } // namespace
 
-namespace {
-//----------------------------------------------------------------------------------------------
-/** Convert time range boundaries to vector index boundaries
- * @param elems :: vector of time series data
- * @param range_left :: time range left boundary
- * @param range_right :: time range right boundary
- * @param left_index :: (output) left index boundary
- * @param right_index :: (output) right index boundary
- */
-template <typename TYPE>
-void timeRangeToIndexBounds(std::vector<TimeValueUnit<TYPE>> &elems, const DateAndTime &left, const DateAndTime right,
-                            std::size_t &left_index, std::size_t &right_index) {
-  const auto left_iter = std::lower_bound(elems.cbegin() + left_index, elems.cend(), left,
-                                          [](const auto &left, const auto &right) { return left.time() < right; });
-  const auto right_iter = std::upper_bound(left_iter, elems.cend(), right,
-                                           [](const auto &left, const auto &right) { return left < right.time(); });
-
-  left_index = std::distance(elems.cbegin(), left_iter);
-  right_index = std::distance(elems.cbegin(), right_iter);
-  right_index = std::min(right_index, elems.size() - 1);
-}
-} // namespace
-
 template <typename TYPE> void TimeSeriesProperty<TYPE>::reportTiming() {
   std::cout << "Cumulative time (s) spent in TimeSeriesProperty::cloneInTimeROI (s): " << elapsed_time_case_1 << "\n";
 }
@@ -98,7 +75,8 @@ TimeSeriesProperty<TYPE>::TimeSeriesProperty(const Property *const p)
  * Create a partial copy of this object according to a TimeROI. The partially cloned object
  * should include all time values enclosed by the ROI regions, each defined as [roi_start,roi_end),
  * plus the values immediately before and after an ROI region, if available.
- * @param timeROI :: a series of time regions used to determine which values should be included in the copy.
+ * @param timeROI :: time region of interest, i.e. time boundaries used to determine which values should be included in
+ * the copy.
  */
 template <typename TYPE> Property *TimeSeriesProperty<TYPE>::cloneInTimeROI(const TimeROI &timeROI) const {
 
@@ -296,10 +274,10 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::setName(const std::strin
 
 /**
  * Fill in the supplied vector of time series data according to the input TimeROI. Include all time values
- * within ROI regions defined as [roi_start,roi_end), plus the values immediately before and after an ROI region,
+ * within ROI regions defined as [roi_start,roi_end), plus the values immediately before and after each ROI region,
  * if available.
- * @param timeROI :: a series of time regions used to determine which values should be included in the filtered data
- * vector
+ * @param timeROI :: time region of interest, i.e. time boundaries used to determine which values should be included in
+ * the filtered data vector
  * @param filteredData :: (output) a vector of TimeValueUnit pairs to be filled in
  */
 template <typename TYPE>
@@ -325,35 +303,41 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
     return;
   }
 
-  std::size_t lastIndexCopied{0};
-  for (const auto &splitter : timeROI.toTimeIntervals()) {
-    // convert ROI time interval to indexes wrt m_values
-    std::size_t index_start{lastIndexCopied};
-    std::size_t index_stop{0};
-    timeRangeToIndexBounds(m_values, splitter.start(), splitter.stop(), index_start, index_stop);
+  // Get all ROI time boundaries. By design, every other value is a start/stop of an ROI "use" region.
+  const std::vector<Types::Core::DateAndTime> &roiTimes = timeROI.getAllTimes();
+  auto itROI{roiTimes.begin()};
 
-    // by design, we need to keep the last datapoint before a use region and the first datapoint after a use region, if
-    // any of those datapoints are available. Since the index interval for the use region is obtained using
-    // std::lower_bound() and std::upper_bound(), index_stop must already be correct, as long as we treat it
-    // inclusively, but index_start needs to be adjusted if possible.
-    if (index_start > 0)
-      index_start--;
+  auto itValue{m_values.begin()};
+  const auto itValueEnd{m_values.end()};  // last value overall, exclusive
+  auto itBeginUseValue{itValue};          // first value to use per ROI region, inclusive
+  auto itEndUseValue{itValue};            // last value to use per ROI region, exclusive
+  auto itLastValueUsed{m_values.begin()}; // last value used overall
 
-    // handle potential overlaps between successive index intervals, so we don't copy the same datapoints twice
+  while (itROI != roiTimes.end() && itValue != itValueEnd) {
+    // Find the first value in the current ROI "use" region
+    while (itValue != itValueEnd && itValue->time() < (*itROI))
+      itValue++;
+    // By design, include the value immediately preceding the first value strictly in the ROI "use" region.
+    itBeginUseValue = itValue == m_values.begin() ? itValue : std::prev(itValue);
+    // To avoid using the same value more than once, make sure the new starting point is past the last value used.
     if (!filteredData.empty()) {
-      index_start = std::max(index_start, lastIndexCopied + 1);
-      if (index_start > index_stop)
-        continue;
+      itBeginUseValue = std::max(itBeginUseValue, std::next(itLastValueUsed));
     }
 
-    // copy datapoints within the ROI index interval
-    if (index_stop + 1 == m_values.size()) {
-      std::copy(m_values.cbegin() + index_start, m_values.cend(), std::back_inserter(filteredData));
-    } else {
-      std::copy(m_values.cbegin() + index_start, m_values.cbegin() + index_stop + 1, std::back_inserter(filteredData));
+    // Find the first value past the current ROI "use" region
+    while (itValue != itValueEnd && itValue->time() < *(std::next(itROI)))
+      itValue++;
+    // By design, include the current value, which requires advancing itEndUseValue.
+    itEndUseValue = itValue == itValueEnd ? itValue : std::next(itValue);
+
+    // Copy all [begin,end) values and mark the last value used
+    if (itBeginUseValue < itEndUseValue) {
+      std::copy(itBeginUseValue, itEndUseValue, std::back_inserter(filteredData));
+      itLastValueUsed = std::prev(itEndUseValue);
     }
 
-    lastIndexCopied = index_stop;
+    // Go to the next ROI "use" region
+    std::advance(itROI, 2);
   }
 }
 

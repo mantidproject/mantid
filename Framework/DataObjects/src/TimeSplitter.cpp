@@ -317,7 +317,6 @@ void TimeSplitter::clearAndReplace(const DateAndTime &start, const DateAndTime &
 }
 
 // Target time vectors must be reset every time the ROI map is modified.
-// They must be rebuilt on demand, after the ROI map is settled.
 void TimeSplitter::resetTargetTimeVectors() {
   if (validTargetTimeVectors) {
     m_targetTimeVectors.clear();
