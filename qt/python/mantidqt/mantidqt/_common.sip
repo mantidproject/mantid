@@ -339,25 +339,14 @@ class InterfaceManager {
 using namespace MantidQt::API;
 %End
 public:
-  InterfaceManager();
+  InterfaceManager() throw(std::exception);
   AlgorithmDialog *createDialogFromName(
       const QString &algorithmName, const int version = -1,
       QWidget *parent = nullptr, bool forScript = false,
       const QHash<QString, QString> &presetValues = QHash<QString, QString>(),
       const QString &optionalMsg = QString(),
       const QStringList &enabled = QStringList(),
-      const QStringList &disabled = QStringList());
-  %MethodCode
-  try {
-    sipRes = sipCpp->createDialogFromName(*a0, a1, a2, a3, *a4, *a5, *a6, *a7);
-  } catch(const std::exception & exc) {
-    SIP_BLOCK_THREADS
-    PyErr_SetString(PyExc_RuntimeError, exc.what());
-    SIP_UNBLOCK_THREADS
-  } catch(...) {
-    sipRaiseUnknownException();
-  }
- %End
+      const QStringList &disabled = QStringList()) throw(std::exception);
 
   UserSubWindow *createSubWindow(
       const QString &interface_name,
