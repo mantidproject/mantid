@@ -152,7 +152,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         :param name: The name of Fit's output workspace.
         """
         if not name:
-            self.fit_notifier.notify_subscribers([self.get_fitprop()])
+            self.fit_notifier.notify_subscribers([])
             return
         super(EngDiffFitPropertyBrowser, self).fitting_done_slot(name)
         self.save_current_setup(self.workspaceName())
