@@ -421,6 +421,7 @@ void PDCalibration::exec() {
 
   m_peaksInDspacing = getProperty("PeakPositions");
   std::vector<double> peakWindow = getProperty("PeakWindow");
+  std::size_t const NUMPEAKS = m_peaksInDspacing.size();
   // if peak windows given for each peak center, sort all by peak center
   if (peakWindow.size() > 1) {
     // load windows into ordered map keyed by peak center
@@ -430,6 +431,8 @@ void PDCalibration::exec() {
     }
     m_peaksInDspacing.clear();
     peakWindow.clear();
+    m_peaksInDspacing.resize(NUMPEAKS);
+    peakWindow.resize(2 * NUMPEAKS);
     // retrieve ordered center, windows
     std::size_t i = 0;
     for (auto it = peakEdgeAndCenter.begin(); it != peakEdgeAndCenter.end(); it++, i++) {
