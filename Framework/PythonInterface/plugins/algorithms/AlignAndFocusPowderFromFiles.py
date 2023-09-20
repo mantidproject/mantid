@@ -291,8 +291,8 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 try:
                     # put together list of logs that matter, all the others will be skipped
                     allowedLogs = []
-                    allowedLogs.extend(self.getProperty("FrequencyLogNames"))
-                    allowedLogs.extend(self.getProperty("WaveLengthLogNames"))
+                    allowedLogs.extend(self.getProperty("FrequencyLogNames").value)
+                    allowedLogs.extend(self.getProperty("WaveLengthLogNames").value)
                     # MetaDataOnly=True is only supported by LoadEventNexus
                     loader = self.__createLoader(filename, tempname, MetaDataOnly=True, AllowList=allowedLogs)
                     loader.execute()
