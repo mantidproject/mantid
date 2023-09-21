@@ -151,6 +151,9 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         This is called after Fit finishes to update the fit curves.
         :param name: The name of Fit's output workspace.
         """
+        if not name:
+            self.fit_notifier.notify_subscribers([])
+            return
         super(EngDiffFitPropertyBrowser, self).fitting_done_slot(name)
         self.save_current_setup(self.workspaceName())
         self.fit_notifier.notify_subscribers([self.get_fitprop()])
