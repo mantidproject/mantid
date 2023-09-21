@@ -529,20 +529,24 @@ class SliceViewerModel(SliceViewerBaseModel):
         return proj_matrix
 
     def projection_matrix_from_basis(self, ws):
-        proj_matrix = np.zeros((3, 3))
         ndims = ws.getNumDims()
         basis_matrix = np.zeros((ndims, ndims))
         if len(list(ws.getBasisVector(0))) == ndims:  # basis vectors valid
+            proj_matrix = np.eye(3)
             for idim in range(ndims):
                 basis_matrix[:, idim] = list(ws.getBasisVector(idim))
-            # exclude non-Q dim elements from basis vectors
-            qflags = np.array([ws.getDimension(idim).getMDFrame().isQ() for idim in range(ndims)])
-            i_nonq = np.flatnonzero(np.invert(qflags))
-            qmask = np.invert(basis_matrix[:, i_nonq] == 1).ravel()
+            # find columns of basis_matrix to keep (corresponding axes that are momentum transfer)
+            q_axes = np.array([ws.getDimension(idim).getMDFrame().isQ() for idim in range(ndims)])
+            # find rows of basis matrix to exclude (corresponding to non-momentum components of basis vectors)
+            # note this depends on the order of the axes in the original workspace
+            i_nonq_axes = np.flatnonzero(np.invert(q_axes))
+            q_comps = np.invert(basis_matrix[:, i_nonq_axes].any(axis=1))
             # extract proj matrix from basis vectors of q dimension
             # note for 2D the last col/row of proj_matrix is 0,0,1 - i.e. L
-            proj_matrix[: qmask.sum(), : qflags.sum()] = basis_matrix[qmask, :][:, qflags]
-        return proj_matrix
+            proj_matrix[: q_comps.sum(), : q_comps.sum()] = basis_matrix[q_comps, :][:, q_axes]
+            return proj_matrix
+        else:
+            return np.zeros((3, 3))  # singular matrix should be ignored
 
     def get_proj_matrix(self):
         ws = self._get_ws()

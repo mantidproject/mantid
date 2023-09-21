@@ -507,9 +507,10 @@ class SliceViewerModelTest(unittest.TestCase):
         ws.getExperimentInfo().run().get().value = [0, 1, 1, 0, 0, 1, 1, 0, 0]
         model = SliceViewerModel(ws)
 
-        # should revert to orthogonal
+        # should revert to orthogonal (as given by basis vectors on workspace)
+        # i.e. not angles returned by proj_matrix in ws.getExperimentInfo().run().get().value
         axes_angles = model.get_axes_angles()
-        self.assertAlmostEqual(axes_angles[1, 2], np.pi / 4, delta=1e-10)
+        self.assertAlmostEqual(axes_angles[1, 2], np.pi / 2, delta=1e-10)
         for iy in range(1, 3):
             self.assertAlmostEqual(axes_angles[0, iy], np.pi / 2, delta=1e-10)
 
@@ -538,7 +539,7 @@ class SliceViewerModelTest(unittest.TestCase):
     def test_calculate_axes_angles_uses_W_if_basis_vectors_unavailable_and_W_available_MDHisto(self):
         # test MD histo
         ws = _create_mock_workspace(IMDHistoWorkspace, SpecialCoordinateSystem.HKL, has_oriented_lattice=True, ndims=3)
-        ws.getBasisVector.side_effect = lambda x: [0.0]
+        ws.getBasisVector.side_effect = lambda x: [0.0]  # will cause proj_matrix to be all zeros
         ws.getExperimentInfo().run().get().value = [0, 1, 1, 0, 0, 1, 1, 0, 0]
         model = SliceViewerModel(ws)
 
