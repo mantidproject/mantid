@@ -648,6 +648,42 @@ class SliceViewerTestCreateMDEvent(systemtesting.MantidSystemTest, HelperTesting
         pres.view.close()
 
 
+class SliceViewerTestCreateMDHisto(systemtesting.MantidSystemTest, HelperTestingClass):
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        ws_4D_histo = CreateMDWorkspace(
+            Dimensions="4",
+            Extents="-3,3,-3,3,-3,3,-1,1",
+            Names="H,K,L,E",
+            Units="r.l.u.,r.l.u.,r.l.u.,meV",
+            Frames="HKL,HKL,HKL,General Frame",
+            SplitInto="2",
+            SplitThreshold="10",
+        )
+        expt_info = CreateSampleWorkspace()
+        ws_4D_histo.addExperimentInfo(expt_info)
+        SetUB(ws_4D_histo, 1, 1, 2, 90, 90, 120)
+        binned_ws = BinMD(
+            InputWorkspace=ws_4D_histo,
+            AxisAligned=False,
+            BasisVector0="L,r.l.u.,0,0,1,0",
+            BasisVector1="E,meV,0,0,0,1",
+            BasisVector2="H,r.l.u.,1,0,0,0",
+            BasisVector3="K,r.l.u.,0,1,0,0",
+            OutputExtents="-3,3,-1,1,-3,3,-3,3",
+            OutputBins="11,11,11,11",
+            OutputWorkspace="ws_4D_slice_axis_aligned",
+            NormalizeBasisVectors=False,
+        )
+
+        binned_ws.clearOriginalWorkspaces()
+
+        pres = SliceViewer(binned_ws)
+        self.assertListEqual(pres.get_proj_matrix().tolist(), [[0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]])
+        pres.view.close()
+
+
 # private helper functions
 def toolbar_actions(presenter, text_labels):
     """
