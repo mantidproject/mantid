@@ -37,10 +37,6 @@ New features
 ############
 - Added new SNAPRed menu item for Diffraction interfaces
 
-Bugfixes
-############
-
-
 
 Single Crystal Diffraction
 --------------------------
