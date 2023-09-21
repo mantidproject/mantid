@@ -25,7 +25,7 @@ Bugfixes
 - Fixed bug in absolute unit normalisation in ISIS powder reduction where the vanadium workspace shape was used instead of the sample.
 - Raise errors in absolute normalisation due to lack of sample/vanadium shape and material in ISIS powder reduction
 - Raise an error in POLARIS (ISIS) powder reduction script if user tries to creta a vanadium workspace without correcting for absorption and multiple scattering.
-- Exposed ``MSEvents` parameter of :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` to users of ISIS powder reduction scripts (parameter ``mayers_mult_scat_events`` in the instrument settings).
+- Exposed ``MSEvents`` parameter of :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` to users of ISIS powder reduction scripts (parameter ``mayers_mult_scat_events`` in the instrument settings).
 - Fix type conversion bug producing an error in the cross-corellation functionality of the powder diffraction calibration scripts used in :ref:`powder diffraction calibration <Powder Diffraction Calibration>`.
 - Fixed bug in ISIS powder reduction for workspaces being overwritten when focussing using individual batching mode (this affected POLARIS and GEM)
 
