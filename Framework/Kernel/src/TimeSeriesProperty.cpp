@@ -309,19 +309,25 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
   const auto itROIEnd{roiTimes.end()};
 
   auto itValue{m_values.begin()};
-  const auto itValueEnd{m_values.end()};  // last value overall, exclusive
-  auto itBeginUseValue{itValue};          // first value to use per ROI region, inclusive
-  auto itEndUseValue{itValue};            // last value to use per ROI region, exclusive
-  auto itLastValueUsed{m_values.begin()}; // last value used overall
+  const auto itValueEnd{m_values.end()}; // last value overall, exclusive
+  auto itBeginUseValue{itValue};         // first value to use per ROI region, inclusive
+  auto itEndUseValue{itValue};           // last value to use per ROI region, exclusive
+  auto itLastValueUsed{itValue};         // last value used overall
 
-  while (itROI != roiTimes.end() && itValue != itValueEnd) {
-    // For dense TimeROIs and sparse values, the last used value might be many ROI regions away from the the current
-    // ROI. Work out that difference to save time. Be careful, however, not to overdo it, because the last used value
-    // might be in an ROI "ignore" region together with more values, in which case advancing ROI is prone to skip some
-    // valid values.
-    while (std::distance(itROI, itROIEnd) >= 2 && *(std::next(itROI)) < itValue->time() &&
-           *(std::next(itROI, 2)) <= itValue->time())
-      std::advance(itROI, 2);
+  // std::cout << "NUMBER OF VALUES: " << m_values.size() << " NUMBER OF ROI BOUNDARIES: " << roiTimes.size() <<
+  // std::endl;
+  bool denseROIs = roiTimes.size() > m_values.size();
+
+  while (itROI != itROIEnd && itValue != itValueEnd) {
+    if (denseROIs) {
+      // For dense TimeROIs, or sparse values, the last used value might be many ROI regions away from the the current
+      // ROI. Work out that difference to save time. Be careful, however, not to overdo it, because the last used value
+      // might be in an ROI "ignore" region together with more values, in which case advancing ROI could miss one or
+      // more of those values.
+      while (std::distance(itROI, itROIEnd) >= 2 && *(std::next(itROI)) < itValue->time() &&
+             *(std::next(itROI, 2)) <= itValue->time())
+        std::advance(itROI, 2);
+    }
 
     // Find the first value in the current ROI "use" region
     while (itValue != itValueEnd && itValue->time() < (*itROI))
