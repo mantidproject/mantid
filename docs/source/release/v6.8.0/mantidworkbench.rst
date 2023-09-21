@@ -27,9 +27,6 @@ Bugfixes
 InstrumentViewer
 ----------------
 
-New features
-############
-
 
 Bugfixes
 ############

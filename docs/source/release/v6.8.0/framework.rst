@@ -24,17 +24,6 @@ Bugfixes
 - :ref:`MaskBTP <algm-MaskBTP>` can now mask BIOSANS data containing the midrange detector.
 - The progress bar for :ref:`LoadMD <algm-LoadMD>` now includes loading experiment information.
 
-Fit Functions
--------------
-
-New features
-############
-
-
-Bugfixes
-############
-
-
 
 Data Objects
 ------------
@@ -60,9 +49,6 @@ New features
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>`, can now perform linear interpolation for temperature of two empty container background runs using new :ref:`InterpolateBackground <algm-InterpolateBackground>` algorithm
 - New algorithm available, :ref:`InterpolateBackground <algm-InterpolateBackground>`, used to perform linear interpolation for temperature of two background runs
 - Drop support for numpy v1.21 because it's no longer maintained.
-
-Bugfixes
-############
 
 
 
