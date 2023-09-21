@@ -52,11 +52,11 @@ class GatherInterfacesTest(TestCase):
         mock_UserSubWindowFactory.Instance.return_value = cpp_interface_factory
 
         with patch("workbench.utils.gather_interfaces._discover_python_interfaces") as mock_python_discovery:
-            mock_python_discovery.return_value = {"Direct": ["DGS_Reduction.py", "DGSPlanner.py", "PyChop.py", "MSlice.py"]}
+            mock_python_discovery.return_value = {"Direct": ["DGS_Reduction.py", "DGS_Planner.py", "PyChop.py", "MSlice.py"]}
             all_interfaces = gather_interface_names()
 
         expected_interfaces = {
-            "Direct": ["DGS_Reduction.py", "DGSPlanner.py", "PyChop.py", "MSlice.py", "ALFView"],
+            "Direct": ["DGS_Reduction.py", "DGS_Planner.py", "PyChop.py", "MSlice.py", "ALFView"],
             "General": ["TOFCalculator"],
         }
         self.assertDictEqual(expected_interfaces, all_interfaces)

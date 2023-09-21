@@ -140,16 +140,14 @@ class InterfaceDocumentationTest(MantidSystemTest):
 
         for category, interfaces in interfaces.items():
             for interface_name in interfaces:
-                file_names = []
                 if interface_name.endswith(".py"):
                     interface_name = interface_name.replace(".py", "").replace("_", " ")
-                else:
-                    file_names.append(f"{category} {interface_name}.rst")
-                file_names.append(f"{interface_name}.rst")
+
+                file_names = [f"{interface_name}.rst", f"{category} {interface_name}.rst"]
                 if not any(_file_exists_under_dir(INTERFACES_DOCS_PATH, file_name) for file_name in file_names):
                     if all(file_name not in INTERFACES_WITH_NO_DOCS for file_name in file_names):
-                        missing.append(file_names)
+                        missing.append(f"({category}) {interface_name}.rst")
                 elif any(file_name in INTERFACES_WITH_NO_DOCS for file_name in file_names):
                     raise FileExistsError(f"{' or '.join(file_names)} exists but is still in the exceptions list. Please update the list.")
 
-        self.assertEqual(len(missing), 0, msg="Missing the following interface docs:\n" + "\n".join("/".join(names) for names in missing))
+        self.assertEqual(len(missing), 0, msg="Missing the following interface docs:\n" + "\n".join(missing))

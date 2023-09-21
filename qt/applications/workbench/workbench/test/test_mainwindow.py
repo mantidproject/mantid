@@ -179,7 +179,7 @@ class MainWindowTest(unittest.TestCase):
     def test_interfaces_menu_texts_are_correct(self, _):
         example_interfaces = {
             "General": ["TOFCalculator"],
-            "Direct": ["DGS_Reduction.py", "DGSPlanner.py", "PyChop.py", "MSlice.py", "ALFView"],
+            "Direct": ["DGS_Reduction.py", "DGS_Planner.py", "PyChop.py", "MSlice.py", "ALFView"],
         }
 
         with (
@@ -195,7 +195,7 @@ class MainWindowTest(unittest.TestCase):
         expected_menu_texts = ["Direct", "General"]  # Alphabetical order
         actual_menu_texts = [action.text() for action in self.main_window.interfaces_menu.actions()]
         self.assertEqual(expected_menu_texts, actual_menu_texts)
-        expected_direct_texts = ["ALFView", "DGSPlanner", "DGS Reduction", "MSlice", "PyChop"]
+        expected_direct_texts = ["ALFView", "DGS Planner", "DGS Reduction", "MSlice", "PyChop"]
         expected_general_texts = ["TOFCalculator"]
         submenus = list(filter(lambda child: isinstance(child, QMenu), self.main_window.interfaces_menu.children()))
         actual_direct_texts = [action.text() for action in submenus[0].actions()]
