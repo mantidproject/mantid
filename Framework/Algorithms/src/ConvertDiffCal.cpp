@@ -116,6 +116,8 @@ std::map<std::string, std::string> ConvertDiffCal::validateInputs() {
   return result;
 }
 
+namespace { // anonymous namespace to enscope the below functions
+
 /**
  * @throws std::logic_error if there is more than one detector id
  * for the spectrum.
@@ -132,8 +134,6 @@ detid_t getDetID(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t inde
   }
   return (*(detIDs.begin()));
 }
-
-namespace { // anonymous namespace to enscope the below functions
 
 /** Calculate the DIFC for values not found from previous calibration
  * @throws in relative or absolute, throws logic error if offset <= -1
