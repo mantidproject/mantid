@@ -1049,7 +1049,7 @@ void FilterEvents::filterEvents(double progressamount) {
   std::cout << "Cumulative time (s) spent in events.sortPulseTimeTOF: " << TimeSplitter::getTime1() << std::endl;
   std::cout << "Cumulative time (s) spent in events.sortPulseTime(): " << TimeSplitter::getTime2() << std::endl;
   std::cout << "Cumulative time (s) spent in TS::splitEventVec(s): " << TimeSplitter::getTime4() << std::endl;
-  std::cout << "Cumulative time (s) spent in TS::rebuildTargetTimeVectors (s): " << TimeSplitter::getTime5()
+  std::cout << "Cumulative time (s) spent in TS::rebuildCachedPartialTimeROIs (s): " << TimeSplitter::getTime5()
             << std::endl;
   // std::cout << "Cumulative time (s) spent in TS::getTimeROI (s): " << TimeSplitter::getTime10() << std::endl;
 }

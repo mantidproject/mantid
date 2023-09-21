@@ -60,7 +60,7 @@ public:
                       bool tofCorrect = false, double factor = 1.0, double shift = 0.0) const;
   /// Print the (destination index | DateAndTime boundary) pairs of this splitter.
   std::string debugPrint() const;
-  void rebuildTargetTimeVectors();
+  void rebuildCachedPartialTimeROIs();
 
 private:
   static constexpr int DEFAULT_TARGET{0};
@@ -73,17 +73,15 @@ private:
   void splitEventVec(const std::function<DateAndTime(const EventType &)> &timeCalc,
                      const std::vector<EventType> &events, std::map<int, EventList *> &partials) const;
 
-  void resetTargetTimeVectors();
-  void addTimeIntervalToTargetVector(const DateAndTime &intervalStart, const DateAndTime &intervalStop,
-                                     const int target);
+  void resetCachedPartialTimeROIs();
 
   std::map<DateAndTime, int> m_roi_map;
   // These 2 maps are complementary to each other
   std::map<std::string, int> m_name_index_map;
   std::map<int, std::string> m_index_name_map;
 
-  std::map<int, std::vector<DateAndTime>> m_targetTimeVectors;
-  bool validTargetTimeVectors{false};
+  std::map<int, Kernel::TimeROI> m_cachedPartialTimeROIs;
+  bool validCachedPartialTimeROIs{false};
 };
 } // namespace DataObjects
 } // namespace Mantid

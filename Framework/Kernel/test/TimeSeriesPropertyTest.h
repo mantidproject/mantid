@@ -450,6 +450,9 @@ public:
   }
 
   void test_removeDataOutsideTimeROI() {
+    /*std::string my_str;
+    getline(std::cin, my_str);*/
+
     TimeROI roi;
     roi.addROI(DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"));
     roi.addROI(DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"));

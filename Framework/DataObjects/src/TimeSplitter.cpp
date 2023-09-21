@@ -226,7 +226,7 @@ std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const 
 }
 
 void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, const int value) {
-  resetTargetTimeVectors();
+  resetCachedPartialTimeROIs();
 
   // If start time == stop time, the map will be corrupted.
   if (start == stop)
@@ -313,40 +313,49 @@ void TimeSplitter::clearAndReplace(const DateAndTime &start, const DateAndTime &
     m_roi_map.insert({start, value});
     m_roi_map.insert({stop, NO_TARGET});
   }
-  resetTargetTimeVectors();
+  resetCachedPartialTimeROIs();
 }
 
 // Target time vectors must be reset every time the ROI map is modified.
-void TimeSplitter::resetTargetTimeVectors() {
-  if (validTargetTimeVectors) {
-    m_targetTimeVectors.clear();
-    validTargetTimeVectors = false;
+void TimeSplitter::resetCachedPartialTimeROIs() {
+  if (validCachedPartialTimeROIs) {
+    m_cachedPartialTimeROIs.clear();
+    validCachedPartialTimeROIs = false;
   }
 }
 
-void TimeSplitter::addTimeIntervalToTargetVector(const DateAndTime &intervalStart, const DateAndTime &intervalStop,
-                                                 const int target) {
-  if (m_targetTimeVectors.count(target) > 0) {
-    if (m_targetTimeVectors[target].back() == intervalStart)
-      m_targetTimeVectors[target].back() = intervalStop;
-    else {
-      m_targetTimeVectors[target].push_back(intervalStart);
-      m_targetTimeVectors[target].push_back(intervalStop);
-    }
-  } else {
-    m_targetTimeVectors[target] = std::vector<DateAndTime>();
-    m_targetTimeVectors[target].push_back(intervalStart);
-    m_targetTimeVectors[target].push_back(intervalStop);
-  }
-}
-
-void TimeSplitter::rebuildTargetTimeVectors() {
+void TimeSplitter::rebuildCachedPartialTimeROIs() {
   auto start = std::chrono::system_clock::now();
-  resetTargetTimeVectors();
+  resetCachedPartialTimeROIs();
+
+  std::map<int, std::vector<DateAndTime>> partialTimeVectors;
+
+  int target{NO_TARGET};
+  DateAndTime intervalStart, intervalStop;
   for (auto it = m_roi_map.begin(); it != std::prev(m_roi_map.end()); it++) {
-    addTimeIntervalToTargetVector(it->first, std::next(it)->first, it->second);
+    intervalStart = it->first;
+    intervalStop = std::next(it)->first;
+    target = it->second;
+
+    if (partialTimeVectors.count(target) > 0) {
+      if (partialTimeVectors[target].back() == intervalStart)
+        partialTimeVectors[target].back() = intervalStop; // merging adjacent splitting intervals
+      else {                                              // adding a new splitting interval
+        partialTimeVectors[target].push_back(intervalStart);
+        partialTimeVectors[target].push_back(intervalStop);
+      }
+    } else { // adding the first splitting interval for this target
+      partialTimeVectors[target] = std::vector<DateAndTime>();
+      partialTimeVectors[target].push_back(intervalStart);
+      partialTimeVectors[target].push_back(intervalStop);
+    }
   }
-  validTargetTimeVectors = true;
+
+  for (auto vec : partialTimeVectors) {
+    m_cachedPartialTimeROIs[vec.first] = TimeROI(vec.second);
+  }
+
+  validCachedPartialTimeROIs = true;
   auto stop = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = stop - start;
   elapsed_time_case_5 += elapsed_seconds.count();
@@ -404,54 +413,12 @@ std::set<int> TimeSplitter::outputWorkspaceIndices() const {
  * This will raise an exception if the workspace index does not exist in the TimeSplitter.
  */
 TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
-
-  std::cout << "NUMBER OF ITEMS IN ROI MAP: " << m_roi_map.size() << std::endl;
-
-#if 1
-  if (!validTargetTimeVectors) {
-    std::cout << "***REBUILDING PARTIAL TIME SPLITTER VECTORS***"
-              << "\n";
-    rebuildTargetTimeVectors();
+  if (!validCachedPartialTimeROIs) {
+    rebuildCachedPartialTimeROIs();
   }
-
   // convert indexes less than NO_TARGET to NO_TARGET
   const int effectiveIndex = std::max<int>(workspaceIndex, NO_TARGET);
-  return TimeROI(m_targetTimeVectors[effectiveIndex]);
-#endif
-
-#if 0
-  auto start = std::chrono::system_clock::now();
-  TimeROI output;
-  // convert indexes less than NO_TARGET to NO_TARGET
-  const int effectiveIndex = std::max<int>(workspaceIndex, NO_TARGET);
-  using map_value_type = std::map<DateAndTime, int>::value_type;
-  auto indexFinder = [effectiveIndex](const map_value_type &value) { return value.second == effectiveIndex; };
-  auto iter = m_roi_map.begin();
-  int n = 0;
-  while ((iter = std::find_if(iter, m_roi_map.end(), indexFinder)) != m_roi_map.end()) {
-    const auto startTime = iter->first;
-    if (++iter != m_roi_map.end()) { // if the next iterator is the end, there is nothing to add
-      const auto stopTime = iter->first;
-      output.addROI(startTime, stopTime);
-    }
-    if (effectiveIndex == 0 && n % 10000 == 0)
-      std::cout << "TimeSplitter::getTimeROI iteration: " << n << std::endl;
-    n++;
-  }
-
-  // error check that something is there
-  // ignore index being empty is ok
-  if (effectiveIndex >= 0 && output.useAll()) { // useAll==true means the ROI is empty
-    std::stringstream msg;
-    msg << "No regions exist for workspace index " << workspaceIndex;
-  }
-
-  auto stop = std::chrono::system_clock::now();
-  std::chrono::duration<double> elapsed_seconds = stop - start;
-  elapsed_time_case_10 += elapsed_seconds.count();
-
-  return output;
-#endif
+  return m_cachedPartialTimeROIs[effectiveIndex];
 }
 
 /**
