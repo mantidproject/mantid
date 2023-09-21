@@ -66,13 +66,16 @@ class FittingPresenter(object):
     def fit_done(self, fit_props):
         # triggered in the fit property browser
         self.enable_view()
-        self.plot_widget.set_final_state_progress_bar(fit_props)
-        self.plot_widget.fit_completed(
-            fit_props,
-            self.data_widget.presenter.get_loaded_ws_list(),
-            self.data_widget.presenter.get_active_ws_list(),
-            self.data_widget.presenter.get_log_ws_group_name(),
-        )
+        if fit_props:
+            self.plot_widget.set_final_state_progress_bar(fit_props)
+            self.plot_widget.fit_completed(
+                fit_props,
+                self.data_widget.presenter.get_loaded_ws_list(),
+                self.data_widget.presenter.get_active_ws_list(),
+                self.data_widget.presenter.get_log_ws_group_name(),
+            )
+        else:
+            self.plot_widget.set_final_state_progress_bar(None, status="Failed, invalid fit.")
 
     def disable_view(self, _=None, fit_all=False):
         self.data_widget.view.setEnabled(False)
