@@ -1778,7 +1778,6 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const Ma
     return;
   }
 
-  // If the sizes are the same, then the "resize" command will NOT clear the
   // original values.
   bool mustFill = (Y.size() == x_size - 1);
   // Clear the Y data, assign all to 0.
@@ -1866,7 +1865,6 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const Ma
 template <class T>
 void EventList::histogramForWeightsHelper(const std::vector<T> &events, const double step, const MantidVec &X,
                                           MantidVec &Y, MantidVec &E) {
-  // For slight speed=up.
   size_t x_size = X.size();
 
   if (x_size <= 1) {
@@ -1875,25 +1873,9 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const do
     return;
   }
 
-  // If the sizes are the same, then the "resize" command will NOT clear the
-  // original values.
-  bool mustFill = (Y.size() == x_size - 1);
-  // Clear the Y data, assign all to 0.
   Y.resize(x_size - 1, 0.0);
-  // Clear the Error data, assign all to 0.
-  // Note: Errors will be squared until the last step.
   E.resize(x_size - 1, 0.0);
 
-  if (mustFill) {
-    // We must make sure the starting point is 0.0
-    std::fill(Y.begin(), Y.end(), 0.0);
-    std::fill(E.begin(), E.end(), 0.0);
-  }
-
-  //---------------------- Histogram without weights
-  //---------------------------------
-
-  // Do we even have any events to do?
   if (events.empty())
     return;
 
