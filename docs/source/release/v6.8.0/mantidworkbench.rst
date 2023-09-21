@@ -41,10 +41,11 @@ New features
 - Entering an invalid value into either colour bar limit text box will cause the outline to change to red.
 - Integer ticks/grid lines are now used if possible for hkl-axes.
 - Autoscaling types are now added to slice viewer to help quickly rescale color limits based on statistical variation in the data
-  1. Min/Max -> (minimum, maximum as before)
-  2. 3-Sigma -> mean ± 3 x standard deviation
-  3. 1.5-Interquartile Range -> 25th, 75th-quartile ± 1.5 x interquartile range
-  4. 1.5-Median Absolute Deviation -> median ± 1.5 x median absolute deviation
+
+  1. Min/Max (minimum, maximum as before)
+  2. 3-Sigma (mean ± 3 x standard deviation)
+  3. 1.5-Interquartile Range (25th, 75th-quartile ± 1.5 x interquartile range)
+  4. 1.5-Median Absolute Deviation (median ± 1.5 x median absolute deviation)
 
 Bugfixes
 ############
