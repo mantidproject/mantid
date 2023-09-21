@@ -13,8 +13,8 @@ New Features
 
 Bugfixes
 --------
-- The data analysis GUI will no longer crash when using plot guess if the sample data contains NAN's.
-- Fix bug when choosing the EISFDiffSphereAlkyl algorithm in the F(Q) fit tab of the Indirect - Data Analysis window.
+- The data analysis GUI will no longer crash when using plot guess if the sample data contains NANs.
+- Fix bug when choosing the :ref:`EISFDiffSphereAlkyl <func-EISFDiffSphereAlkyl>` algorithm in the F(Q) fit tab of the Indirect - Data Analysis window.
 
 
 Algorithms
@@ -42,6 +42,6 @@ Bugfixes
   units have changed since Vasp 5 from atomic units to THz; this
   format is now detected and an appropriate frequency conversion
   factor is used.
-- Fixed a bin edge error and exception raised when performing an elastic reduction for a single scan with (:ref:`elastic <algm-ElasticEMUauReduction>`).
+- Fixed a bin edge error and exception raised when performing an elastic reduction for a single scan with (:ref:`ElasticEMUauReduction <algm-ElasticEMUauReduction>`).
 
 :ref:`Release 6.8.0 <v6.8.0>`
