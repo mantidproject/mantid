@@ -11,7 +11,7 @@ GIT_BRANCH = git_branch_name()
 // Only Publish one of the nightly builds by default. BRANCH_TO_PUBLISH is a global
 // environment variable set in the Jenkins system configuration global properties.
 PUBLISH_PACKAGES_DEFAULT = (GIT_BRANCH == "${BRANCH_TO_PUBLISH}")
-PR_RUN = params.get('PR_RUN', false)
+PR_RUN = params?.PR_RUN ?: false
 
 switch(GIT_BRANCH) {
   case ['main', 'release-next']:
