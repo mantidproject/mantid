@@ -11,7 +11,7 @@ Frequency Domain Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/FDA/Bugfixes
+
 
 
 Muon Analysis
@@ -19,7 +19,7 @@ Muon Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/Muon_Analysis/Bugfixes
+- Fixed crash in the muon analysis GUI fitting interface when plotting a guess with multiple fitting functions.
 
 
 Muon Analysis and Frequency Domain Analysis
@@ -27,7 +27,7 @@ Muon Analysis and Frequency Domain Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/MA_FDA/Bugfixes
+
 
 
 ALC
@@ -35,7 +35,7 @@ ALC
 
 Bugfixes
 ############
-.. amalgamate:: Muon/ALC/Bugfixes
+
 
 
 Elemental Analysis
@@ -43,7 +43,7 @@ Elemental Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/Elemental_Analysis/Bugfixes
+
 
 
 Algorithms
@@ -51,6 +51,6 @@ Algorithms
 
 Bugfixes
 ############
-.. amalgamate:: Muon/Algorithms/Bugfixes
+
 
 :ref:`Release 6.8.0 <v6.8.0>`
