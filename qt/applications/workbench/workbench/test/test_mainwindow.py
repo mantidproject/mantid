@@ -182,15 +182,6 @@ class MainWindowTest(unittest.TestCase):
             "Direct": ["DGS_Reduction.py", "DGSPlanner.py", "PyChop.py", "MSlice.py", "ALFView"],
         }
 
-        # with patch(
-        #     "workbench.app.mainwindow.ConfigService",
-        #     new={
-        #         "interfaces.categories.hidden": "",
-        #     },
-        # ):
-        #     self.main_window._discover_python_interfaces = Mock(return_value=(example_interfaces, {}))
-        #     self.main_window._discover_cpp_interfaces = Mock()
-
         with (
             patch("workbench.app.mainwindow.ConfigService", new={"interfaces.categories.hidden": ""}),
             patch("workbench.app.mainwindow.gather_interface_names") as mock_gather_interfaces,
@@ -219,9 +210,6 @@ class MainWindowTest(unittest.TestCase):
         interface_dir = os.path.dirname(mantidqtinterfaces.__file__)
         interfaces = {"category": ["interface.py"]}
 
-        # self.main_window._discover_python_interfaces = Mock(return_value=(interfaces, {}))
-        # self.main_window._discover_cpp_interfaces = Mock()
-
         with (
             patch("workbench.app.mainwindow.ConfigService", new={"interfaces.categories.hidden": ""}),
             patch("workbench.app.mainwindow.gather_interface_names") as mock_gather_interfaces,
@@ -233,22 +221,10 @@ class MainWindowTest(unittest.TestCase):
             self.main_window.populate_interfaces_menu()
 
             mock_gather_interfaces.assert_called_with(interface_dir)
-        # _discover_python_interfaces.assert_called_with(interface_dir)
-        # _discover_cpp_interfaces.assert_called_with(interfaces)
 
     def test_that_populate_interfaces_menu_ignores_hidden_interfaces(self):
-        # self.main_window._discover_python_interfaces = Mock(
-        #     return_value=({"category1": ["interface1.py"], "category2": ["interface2.py"]}, {})
-        # )
-        # self.main_window._discover_cpp_interfaces = Mock()
         self.main_window.interfaces_menu = Mock()
         ConfigService_dict = {"interfaces.categories.hidden": "category1;category2"}
-
-        # with patch.object(self.main_window, "interfaces_menu") as mock_interfaces_menu:
-        #     with patch("workbench.app.mainwindow.ConfigService", new=ConfigService_dict):
-        #         self.main_window.populate_interfaces_menu()
-        #
-        #     mock_interfaces_menu.addMenu.assert_not_called()
 
         with (
             patch.object(self.main_window, "interfaces_menu") as mock_interfaces_menu,
