@@ -16,6 +16,6 @@ Bugfixes
 - ROI Detector IDs that have been entered into the :ref:`Experiment Settings tab<refl_exp_instrument_settings>` lookup table should now be picked up when reducing a run on the :ref:`Preview tab <refl_preview>` with no region selected from the instrument view plot.
 - The row state on the :ref:`Runs tab <refl_runs>` is now reset when settings are updated in the :ref:`Experiment Settings tab<refl_exp_instrument_settings>` lookup table by using the Apply button on the :ref:`Preview tab <refl_preview>`.
 - :ref:`algm-ReflectometryReductionOneAuto` no longer throws an error when attempting to run a reduction that applies both a background subtraction and a polarization correction.
-- Corrects the Q resolution calculation for the custom and TXT file formats output by :ref:`algm-SaveReflectometryAscii` so that it matches the calculation described in the documentation.
+- The Q resolution calculation for the custom and TXT file formats output by :ref:`algm-SaveReflectometryAscii` has been corrected so that it matches the calculation described in the documentation.
 
 :ref:`Release 6.8.0 <v6.8.0>`

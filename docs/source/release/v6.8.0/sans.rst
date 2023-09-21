@@ -7,7 +7,7 @@ SANS Changes
 
 New Features
 ------------
-- ``Background Workspace`` and ``Scale Factor`` can now be given on the ISIS SANS Interface.
+- ``Background Workspace`` and ``Scale Factor`` can now be given on the ISIS SANS Interface by checking the ``Scaled Background Subtraction`` checkbox.
   See :ref:`ISIS_SANS_scaled_background-ref` for more details.
 - Algorithms :ref:`algm-SANSTubeCalibration` and :ref:`algm-SANSTubeMerge` have been added for calibrating the Sans2d instrument at ISIS.
 
