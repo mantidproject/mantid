@@ -1778,6 +1778,7 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const Ma
     return;
   }
 
+  // If the sizes are the same, then the "resize" command will NOT clear the
   // original values.
   bool mustFill = (Y.size() == x_size - 1);
   // Clear the Y data, assign all to 0.
@@ -1883,7 +1884,7 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const do
   const auto xmax = X.back();
 
   double divisor, offset;
-  boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double, const double);
+  boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double, const double); // function pointer
 
   if (step < 0) {
     findBin = findLogBin;
@@ -1896,7 +1897,7 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const do
   }
 
   for (const T &ev : events) {
-    double tof = ev.tof();
+    const double tof = ev.tof();
     if (tof < xmin || tof >= xmax)
       continue;
 
@@ -2027,7 +2028,7 @@ void EventList::generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E
 void EventList::generateHistogram(const double step, const MantidVec &X, MantidVec &Y, MantidVec &E,
                                   bool skipError) const {
   // if events are already sorted, use faster sorted histogram method
-  if (isSortedByTof())
+  if (isSortedByTof() || empty())
     return generateHistogram(X, Y, E, skipError);
 
   switch (eventType) {
@@ -2299,7 +2300,8 @@ boost::optional<size_t> EventList::findLogBin(const MantidVec &X, const double t
   return findExactBin(X, tof, static_cast<size_t>(log(tof) / divisor - offset));
 }
 
-/** Find the exact bin which a TOF falls in starting from the provided estimated one.
+/** Find the exact bin which a TOF falls in starting from the provided estimated one. Estimated bin is expected to be
+ * within 1 of the correct bin
  *
  * @param X :: The x bins
  * @param tof :: TOF of the event we are trying to bin
@@ -2309,10 +2311,9 @@ boost::optional<size_t> EventList::findExactBin(const MantidVec &X, const double
   if (n_bin >= X.size())
     return boost::none;
 
-  while (tof < X[n_bin])
+  if (tof < X[n_bin])
     n_bin--;
-
-  while (tof >= X[n_bin + 1])
+  else if (tof >= X[n_bin + 1])
     n_bin++;
 
   return n_bin;
@@ -2350,7 +2351,7 @@ void EventList::generateCountsHistogram(const double step, const MantidVec &X, M
   const auto xmax = X.back();
 
   double divisor, offset;
-  boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double, const double);
+  boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double, const double); // function pointer
 
   if (step < 0) {
     findBin = findLogBin;
@@ -2363,7 +2364,7 @@ void EventList::generateCountsHistogram(const double step, const MantidVec &X, M
   }
 
   for (const TofEvent &ev : this->events) {
-    double tof = ev.tof();
+    const double tof = ev.tof();
     if (tof < xmin || tof >= xmax)
       continue;
 
