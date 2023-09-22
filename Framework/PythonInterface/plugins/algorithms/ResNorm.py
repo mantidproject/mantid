@@ -59,12 +59,12 @@ class ResNorm(PythonAlgorithm):
         self.declareProperty(name="Save", defaultValue=False, doc="Switch Save result to nxs file Off/On")
 
     def PyExec(self):
-        from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
+        from mantid.utils.pip import package_installed
 
-        if is_supported_f2py_platform():
-            import IndirectBayes as Main
+        if not package_installed("quasielasticbayes"):
+            return
 
-        run_f2py_compatibility_test()
+        import IndirectBayes as Main
 
         self.log().information("ResNorm input")
         inType = self.getPropertyValue("InputType")
