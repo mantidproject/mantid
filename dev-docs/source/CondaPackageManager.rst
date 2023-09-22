@@ -14,11 +14,32 @@ our policy towards using pip packages (it is strongly discouraged).
 Useful Conda Guides
 -------------------
 
-Tips for finding a broken dependency
-------------------------------------
+Finding a broken dependency
+---------------------------
 
-Fixing a dependency issue
--------------------------
+The nightly pipelines can sometimes fail for obscure reasons, seemingly unrelated to the changes made within
+Mantid. In this case, it is probable that a Conda dependency has had an update, and the new update is "Broken"
+(if its a minor or patch update) or no longer compatible with Mantid (if it is a major update).
+
+To find the dependency which has changed, you can run the ``tools/Jenkins/dependency_spotter.py`` script. This
+script takes two build numbers, and optionally the OS label, the pipeline name, and the name of the file to
+compare. It will then output the changes in Conda package versions used in the two builds, if there are any. An
+few examples on how to use it:
+
+.. code-block:: sh
+
+  python dependency_spotter.py -f 593 -s 598
+  python dependency_spotter.py -f 593 -s 598 -os win-64
+  python dependency_spotter.py -f 593 -s 598 --pipeline main_nightly_deployment_prototype
+
+Another useful command for investigating the dependencies of specific packages is `conda search <https://docs.conda.io/projects/conda/en/latest/commands/search.html>`_. To find the dependencies of a package:
+
+.. code-block:: sh
+
+  conda search -i <package_name>
+
+Fixing a broken dependency
+--------------------------
 
 After identifying the Conda dependency and version which is causing the unwanted behaviour, there are several
 options we can take to fix the issue. The following options are in order of preference:
