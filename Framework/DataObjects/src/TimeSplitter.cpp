@@ -553,7 +553,8 @@ void TimeSplitter::splitEventVec(const std::function<DateAndTime(const EventType
   // initialize the iterator over the splitter
   // it assumes the splitter keys (DateAndTime objects) are sorted by increasing time.
   auto itSplitter = m_roi_map.cbegin(); // iterator over the splitter
-  DateAndTime stop = itSplitter->first; // first splitter boundary. Discard events with times < stop
+  DateAndTime stop = itSplitter->first; // first splitter boundary. events before this go to NO_TARGET
+
   int destination = TimeSplitter::NO_TARGET;
 
   // is there an EventList mapped to the destination index?
@@ -562,23 +563,21 @@ void TimeSplitter::splitEventVec(const std::function<DateAndTime(const EventType
   auto itEvent = events.cbegin(); // initialize iterator over the events
   const auto itEventEnd = events.cend();
 
-  const auto m_roi_map_cend = m_roi_map.cend();
+  const auto itSplitterEnd = m_roi_map.cend();
   // iterate over all events. For each event try finding its destination event list, a.k.a. partial.
   // If the partial is found, append the event to it. It is assumed events are sorted by either pulse time or tof
-  while (itEvent != itEventEnd) {
+  while (itEvent != itEventEnd && itSplitter != itSplitterEnd) {
     // Check if we need to advance the splitter and therefore select a different partial event list
     const auto eventTime = timeCalc(*itEvent);
     if (eventTime >= stop) {
       // advance to the new stopping boundary, and find the new destination index
-      while (itSplitter != m_roi_map_cend && eventTime >= itSplitter->first) {
+      while (itSplitter != itSplitterEnd && eventTime >= itSplitter->first) {
         itSplitter++;
       }
+
       // determine the new stop time
-      if (itSplitter == m_roi_map_cend) {
-        stop = DateAndTime::maximum(); // a.k.a stopping boundary at an "infinite" time
-      } else {
-        stop = itSplitter->first;
-      }
+      stop = (itSplitter == itSplitterEnd) ? DateAndTime::maximum() : itSplitter->first;
+
       // determine the new destination
       if (itSplitter == m_roi_map.cbegin()) {
         destination = -1;
@@ -593,7 +592,7 @@ void TimeSplitter::splitEventVec(const std::function<DateAndTime(const EventType
 
     // loop over events up to the end of the roi
     const bool shouldAppend = (partial != partials.end());
-    while (timeCalc(*itEvent) < stop && itEvent != itEventEnd) {
+    while (itEvent != itEventEnd && timeCalc(*itEvent) < stop) {
       if (shouldAppend)
         partial->second->addEventQuickly(*itEvent); // emplaces a copy of *itEvent in partial
       // advance event iterator
