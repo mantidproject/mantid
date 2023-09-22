@@ -193,14 +193,21 @@ class FittingDataPresenter(object):
                 self.model.update_bgsub_status(loaded_ws_name, is_sub)
                 if is_sub:
                     bg_params = self.view.read_bg_params_from_table(row)
-                    self.model.create_or_update_bgsub_ws(loaded_ws_name, bg_params)
+                    if not self.model.create_or_update_bgsub_ws(loaded_ws_name, bg_params):
+                        self._revert_bg_sub_table_values(loaded_ws_name, row)
                 if is_plotted:
                     self._update_plotted_ws_with_sub_state(loaded_ws_name, is_sub)
             elif col > 3:
                 if is_sub:
                     # bg params changed - revaluate background
                     bg_params = self.view.read_bg_params_from_table(row)
-                    self.model.create_or_update_bgsub_ws(loaded_ws_name, bg_params)
+                    if not self.model.create_or_update_bgsub_ws(loaded_ws_name, bg_params):
+                        self._revert_bg_sub_table_values(loaded_ws_name, row)
+
+    def _revert_bg_sub_table_values(self, loaded_ws_name, row):
+        original_bg_params = self.model.get_bg_params()[loaded_ws_name]
+        self.view.set_table_column(row, 4, original_bg_params[1])
+        self.view.set_table_column(row, 5, original_bg_params[2])
 
     def _update_plotted_ws_with_sub_state(self, ws_name, is_sub):
         ws = self.model.get_loaded_workspaces()[ws_name]

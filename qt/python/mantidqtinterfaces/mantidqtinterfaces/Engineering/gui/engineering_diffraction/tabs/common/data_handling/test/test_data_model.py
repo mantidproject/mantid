@@ -207,6 +207,34 @@ class TestFittingDataModel(unittest.TestCase):
         bg_params = [True, -1, 800, False]
         assertRaisesNothing(self, self.model.create_or_update_bgsub_ws, "name1", bg_params)
 
+    @patch(data_model_path + ".DeleteWorkspace")
+    @patch(data_model_path + ".Minus")
+    def test_do_background_subtraction_invalid_params(self, mock_minus, mock_delete_ws):
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws)
+        self.model.estimate_background = mock.MagicMock(return_value=(mock.MagicMock(), False))
+        bg_params = [True, -10, -10, False]
+
+        success = self.model.create_or_update_bgsub_ws("name1", bg_params)
+
+        self.assertFalse(success)
+        mock_minus.assert_not_called()
+        mock_delete_ws.assert_not_called()
+
+    @patch(data_model_path + ".EnggEstimateFocussedBackground", side_effect=ValueError("mocked error"))
+    @patch(data_model_path + ".SetUncertainties")
+    @patch(data_model_path + ".Minus")
+    @patch(data_model_path + ".logger")
+    def test_estimate_background_raises_error_with_invalid_params(
+        self, patch_logger, patch_minus, patch_uncertainties, patch_eng_estimate_focused_bg
+    ):
+        ws, success = self.model.estimate_background("name1", -10, -10, True)
+        self.assertFalse(success)
+        patch_eng_estimate_focused_bg.assert_called_once_with(
+            InputWorkspace="name1", OutputWorkspace="name1_bg", NIterations=-10, XWindow=-10, ApplyFilterSG=True
+        )
+        patch_uncertainties.assert_called_once()
+        patch_minus.assert_called_once()
+
     @patch(output_sample_log_path + ".RenameWorkspace")
     @patch(output_sample_log_path + ".ADS")
     @patch(output_sample_log_path + ".DeleteTableRows")
