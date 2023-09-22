@@ -574,19 +574,15 @@ void TimeSplitter::splitEventVec(const std::function<DateAndTime(const EventType
 
   // iterate over all events. For each event try finding its destination event list, a.k.a. partial.
   // If the partial is found, append the event to it. It is assumed events are sorted by (possibly corrected) time
-  int destination;
   while (itEvent != itEventEnd && itSplitter != itSplitterEnd) {
-    // events before the splitter have been processed
-    destination = itSplitter->second; // previous splitter has the destination
-
     // Check if we need to advance the splitter and therefore select a different partial event list
     const auto eventTime = timeCalc(*itEvent);
     // advance to the new stopping boundary, and update the destination index as we go
     while (itSplitter != itSplitterEnd && eventTime >= itSplitter->first) {
-      destination = itSplitter->second;
-      itSplitter++;
+      itSplitter++; // gets to a new stopping point
     }
-
+    // previous splitter has the destination
+    const int destination = (std::prev(itSplitter))->second;
     // determine the new stop time
     const auto stop = (itSplitter == itSplitterEnd) ? DateAndTime::maximum() : itSplitter->first;
 
