@@ -60,7 +60,7 @@ def _discover_registers_to_run(interface_dir: str) -> Dict[str, List[str]]:
 
 
 def _discover_cpp_interfaces(interfaces: Dict[str, List[str]]):
-    """Return a dictionary mapping a category to a set of named C++ interfaces"""
+    """Add C++ interfaces to passed dictionary"""
     cpp_interface_factory = UserSubWindowFactory.Instance()
     interface_names = cpp_interface_factory.keys()
     for name in interface_names:

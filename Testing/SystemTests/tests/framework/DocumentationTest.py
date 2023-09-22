@@ -61,12 +61,21 @@ FIT_FUNCTIONS_WITH_NO_DOCS = [
     "VesuvioResolution.rst",
 ]
 # This should be empty
-INTERFACES_WITH_NO_DOCS = []
+INTERFACES_WITH_NO_DOCS = [
+    "Shiver.rst",  # externally imported
+    "SNAPRed.rst",  # externally imported
+    "ORNL SANS.rst",  # information is in concepts/ORNL_SANS_Reduction.rst
+    "Powder Diffraction Reduction.rst",  # reduction application
+    "DGS Reduction.rst",  # reduction application
+    "Direct Data Analysis.rst",  # opens Inelastic Data Analysis
+    "Indirect Data Analysis.rst",  # opens Inelastic Data Analysis
+    "HFIR 4Circle Reduction.rst",
+]
 
 
 def _file_exists_under_dir(dir_path: Path, file_name: str) -> bool:
     """
-    Search for file name in hte given directory and all its subdirectories
+    Search for file name in the given directory and all its subdirectories
     :param dir_path: directory to search under
     :param file_name: name of the file
     :return: bool, true if file found
@@ -134,7 +143,6 @@ class InterfaceDocumentationTest(MantidSystemTest):
 
     def runTest(self):
         interfaces = _get_interface_names()
-        print(interfaces)
         self.assertGreaterThan(len(interfaces), 0, msg="No interfaces found")
         missing = []
 
