@@ -95,8 +95,8 @@ class FittingDataPresenter(object):
             self.model.replace_workspace(name, workspace)
             self._repopulate_table()
 
-    def restore_table(self):  # used when the interface is being restored from a save or crash
-        self._repopulate_table()
+    def restore_table(self, clear_plotted=True):  # used when the interface is being restored from a save or crash
+        self._repopulate_table(clear_plotted)
 
     def _start_load_worker(self, filenames):
         """
@@ -126,13 +126,15 @@ class FittingDataPresenter(object):
         # subtract background - has to be done post repopulation, can't change default in _add_row_to_table
         [self.view.set_item_checkstate(self.row_numbers[wsname], 3, True) for wsname in wsnames]
 
-    def _repopulate_table(self):
+    def _repopulate_table(self, clear_plotted=True):
         """
         Populate the table with the information from the loaded workspaces.
         Will also handle any workspaces that need to be plotted.
         """
         workspaces_to_be_plotted = self.plotted.copy()
-        self.plotted.clear()
+
+        if clear_plotted:
+            self.plotted.clear()
 
         self._remove_all_table_rows()
         self.row_numbers.clear()
