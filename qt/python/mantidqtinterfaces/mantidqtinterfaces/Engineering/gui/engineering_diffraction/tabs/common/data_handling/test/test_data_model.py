@@ -341,7 +341,9 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(output_sample_log_path + ".ADS")
     @patch(output_sample_log_path + ".SampleLogsGroupWorkspace.update_log_group_name")
     @patch(output_sample_log_path + ".AverageLogData")
-    def test_add_log_to_table_not_already_averaged(self, mock_avglogs, mock_update_logname, mock_ads, mock_writerow):
+    def test_add_log_to_table_not_already_averaged_proton_charge_log_exists(
+        self, mock_avglogs, mock_update_logname, mock_ads, mock_writerow
+    ):
         self._setup_model_log_workspaces()
         mock_ads.retrieve = lambda ws_name: [ws for ws in self.model._sample_logs_workspace_group._log_workspaces if ws.name() == ws_name][
             0
@@ -356,6 +358,31 @@ class TestFittingDataModel(unittest.TestCase):
         mock_writerow.assert_any_call(self.model._sample_logs_workspace_group._log_workspaces[1], [1.0, 1.0], 3)
         mock_avglogs.assert_called_with("name1", LogName="LogName", FixZero=False)
         mock_update_logname.assert_called_once()
+
+    @patch(output_sample_log_path + ".write_table_row")
+    @patch(output_sample_log_path + ".ADS")
+    @patch(output_sample_log_path + ".SampleLogsGroupWorkspace.update_log_group_name")
+    @patch(output_sample_log_path + ".AverageLogData")
+    def test_add_log_to_table_not_already_averaged_proton_charge_log_not_exist(
+        self, mock_avglogs, mock_update_logname, mock_ads, mock_writerow
+    ):
+        self.mock_run.getLogData()[1].name = "prt_chrg"  # formerly "proton_charge"
+        self.mock_run.getProperty().filtered_value = [1, 2]  # log time series to be averaged
+        self._setup_model_log_workspaces()
+        mock_ads.retrieve = lambda ws_name: [ws for ws in self.model._sample_logs_workspace_group._log_workspaces if ws.name() == ws_name][
+            0
+        ]
+        self.model._sample_logs_workspace_group._log_values = {"name1": {}}
+        self.model._sample_logs_workspace_group._log_names = ["LogName"]
+
+        self.model._sample_logs_workspace_group.add_log_to_table("name1", self.mock_ws, 3)
+
+        expected_avg_stdev = [1.5, 0.5]
+        self.assertEqual(self.model._sample_logs_workspace_group._log_values["name1"]["LogName"], expected_avg_stdev)
+        mock_writerow.assert_any_call(self.model._sample_logs_workspace_group._log_workspaces[1], expected_avg_stdev, 3)
+        mock_avglogs.assert_not_called()
+        mock_update_logname.assert_called_once()
+        self.mock_run.getLogData()[1].name = "proton_charge"  # reset
 
     @patch(output_sample_log_path + ".write_table_row")
     @patch(output_sample_log_path + ".ADS")
