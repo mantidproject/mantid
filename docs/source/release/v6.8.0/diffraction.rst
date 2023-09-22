@@ -18,13 +18,13 @@ New features
 - Expose the OffsetData parameter in the Powder Diffraction Reduction gui
 - :ref:`PDCalibration <algm-PDCalibration>` has two new parameters, ``StartWorkspaceIndex`` and ``StopWorkspaceIndex``, which limit which spectra are calibrated
 - :ref:`PowderReduceP2D <algm-PowderReduceP2D>` has been adapted to work with SNAP measuring data.
-- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>`, when it calls :ref:`LoadDiffCal <algm-LoadDiffCal>`, it will pass through the `TMin` parameter. In the case of non-zero `TZERO` values existing in the calibration constant, the implementation of current PR will suppress the warning message about minimum TOF value shfit.
+- :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>`, when it calls :ref:`LoadDiffCal <algm-LoadDiffCal>`, it will pass through the ``TMin`` parameter. In the case of non-zero ``TZERO`` values existing in the calibration constant, the warning message about minimum TOF value shift will now be suppressed.
 
 Bugfixes
 ############
 - Fixed bug in absolute unit normalisation in ISIS powder reduction where the vanadium workspace shape was used instead of the sample.
-- Raise errors in absolute normalisation due to lack of sample/vanadium shape and material in ISIS powder reduction
-- Raise an error in POLARIS (ISIS) powder reduction script if user tries to creta a vanadium workspace without correcting for absorption and multiple scattering.
+- When performing an ISIS powder reduction, errors are raised in absolute normalisation when sample/vanadium shape and material are not provided.
+- Raise an error in POLARIS (ISIS) powder reduction script if user tries to create a vanadium workspace without correcting for absorption and multiple scattering.
 - Exposed ``MSEvents`` parameter of :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` to users of ISIS powder reduction scripts (parameter ``mayers_mult_scat_events`` in the instrument settings).
 - Fix type conversion bug producing an error in the cross-corellation functionality of the powder diffraction calibration scripts used in :ref:`powder diffraction calibration <Powder Diffraction Calibration>`.
 - Fixed bug in ISIS powder reduction for workspaces being overwritten when focussing using individual batching mode (this affected POLARIS and GEM)
@@ -35,7 +35,7 @@ Engineering Diffraction
 
 New features
 ############
-- Added new SNAPRed menu item for Diffraction interfaces
+- Added new ``SNAPRed`` menu item for Diffraction interfaces
 
 
 Single Crystal Diffraction
@@ -48,7 +48,7 @@ New features
 - Add parameter ``MinIntensOverSigma`` in :ref:`SaveReflections <algm-SaveReflections>` to filter peaks to export by Intensity/Sigma
 - Support saving :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>` with GSAS format in :ref:`SaveReflections <algm-SaveReflections>` (calls :ref:`SaveHKLCW <algm-SaveHKLCW>`)
 - New parameter in :ref:`SaveIsawUB <algm-SaveIsawUB>` to rotate the UB by the goniometer matrix.
-- New algorithm to load gaussian cube files for volumetric data into a 3D :ref:`MDHistoWorkspace <MDHistoWorkspace>`
+- New algorithm :ref:`LoadGaussCube <algm-LoadGaussCube>` to load gaussian cube files for volumetric data into a 3D :ref:`MDHistoWorkspace <MDHistoWorkspace>`
 - :ref:`LoadWANDSCD <algm-LoadWANDSCD>` with grouping option has been sped up
 - Constant wavelength HFIR DEMAND instrument has been added to DGSPlanner
 - New algorithm :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` to find single-crystal Bragg peaks in instruments with :ref:`RectangularDetectors <RectangularDetector>` (such as SXD).
