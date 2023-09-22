@@ -320,10 +320,8 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
 
   while (itROI != itROIEnd && itValue != itValueEnd) {
     if (denseROIs) {
-      // For dense TimeROIs, or sparse values, the last used value might be many ROI regions away from the the current
-      // ROI. Work out that difference to save time. Be careful, however, not to overdo it, because the last used value
-      // might be in an ROI "ignore" region together with more values, in which case advancing ROI could miss one or
-      // more of those values.
+      // For efficiency, fast-forward the ROI towards the current value. Be careful not to overstep that value,
+      // because it might be in an ROI "ignore" region together with one or more following values.
       while (std::distance(itROI, itROIEnd) >= 2 && *(std::next(itROI)) < itValue->time() &&
              *(std::next(itROI, 2)) <= itValue->time())
         std::advance(itROI, 2);
