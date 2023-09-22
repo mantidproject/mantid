@@ -7,6 +7,7 @@
 # pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
 from mantid.api import AlgorithmFactory, WorkspaceGroupProperty, Progress
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
+from mantid.utils.pip import import_pip_package
 from mantid import logger
 from IndirectCommon import GetThetaQ
 from mantid.api import AnalysisDataService as ADS
@@ -18,20 +19,7 @@ from numpy import ndarray
 import numpy as np
 import multiprocessing
 
-try:
-    import quickBayes  # noqa: F401
-except (Exception, Warning):
-    import subprocess
-
-    print(
-        subprocess.Popen(
-            "python -m pip install -U quickBayes==1.0.0b15",
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            stdin=subprocess.PIPE,
-        ).communicate()
-    )
+quickBayes = import_pip_package("quickBayes")
 
 
 class BayesStretch2(QuickBayesTemplate):
@@ -76,19 +64,15 @@ class BayesStretch2(QuickBayesTemplate):
 
     # Cannot make static as it prevents it being mocked later
     def QSEFixFunction(self, bg_function, elastic_peak, r_x, r_y, start_x, end_x):
-        from quickBayes.functions.qse_fixed import QSEFixFunction
-
-        return QSEFixFunction(bg_function=bg_function, elastic_peak=elastic_peak, r_x=r_x, r_y=r_y, start_x=start_x, end_x=end_x)
+        return quickBayes.functions.qse_fixed.QSEFixFunction(
+            bg_function=bg_function, elastic_peak=elastic_peak, r_x=r_x, r_y=r_y, start_x=start_x, end_x=end_x
+        )
 
     def QSEGridSearch(self):
-        from quickBayes.workflow.qse_search import QSEGridSearch
-
-        return QSEGridSearch()
+        return quickBayes.workflow.qse_search.QSEGridSearch()
 
     def parallel(self, items, function, N):
-        from quickBayes.utils.parallel import parallel
-
-        return parallel(items=items, function=function, N=N)
+        return quickBayes.utils.parallel.parallel(items=items, function=function, N=N)
 
     def do_one_spec(self, spec, data):
         sx = data["sample"].readX(spec)
@@ -131,9 +115,7 @@ class BayesStretch2(QuickBayesTemplate):
 
     @staticmethod
     def get_background_function(BG_str):
-        from quickBayes.utils.general import get_background_function
-
-        return get_background_function(BG_str)
+        return quickBayes.utils.general.get_background_function(BG_str)
 
     def calculate(self, sample_ws, report_progress, res_list, N):
         data = {}
@@ -284,6 +266,9 @@ class BayesStretch2(QuickBayesTemplate):
         return slice_group
 
     def PyExec(self):
+        if quickBayes is None:
+            return
+
         self.log().information("BayesStretch input")
 
         # get sample data

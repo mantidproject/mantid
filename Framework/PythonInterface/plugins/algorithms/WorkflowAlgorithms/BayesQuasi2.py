@@ -8,6 +8,7 @@
 
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress
 from mantid.kernel import StringListValidator, Direction
+from mantid.utils.pip import import_pip_package
 from mantid import logger
 from IndirectCommon import GetThetaQ
 
@@ -17,20 +18,7 @@ import numpy as np
 
 from quickBayesHelper import QuickBayesTemplate
 
-try:
-    import quickBayes  # noqa: F401
-except (Exception, Warning):
-    import subprocess
-
-    print(
-        subprocess.Popen(
-            "python -m pip install -U quickBayes==1.0.0b15",
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            stdin=subprocess.PIPE,
-        ).communicate()
-    )
+quickBayes = import_pip_package("quickBayes")
 
 
 class BayesQuasi2(QuickBayesTemplate):
@@ -221,31 +209,24 @@ class BayesQuasi2(QuickBayesTemplate):
 
     # Cannot make static as it prevents it being mocked later
     def QLData(self):
-        from quickBayes.workflow.QlData import QLData
-
-        return QLData
+        return quickBayes.workflow.QlData.QLData
 
     def QlDataFunction(self):
-        from quickBayes.functions.qldata_function import QlDataFunction
-
-        return QlDataFunction
+        return quickBayes.functions.qldata_function.QlDataFunction
 
     def QSEFunction(self):
-        from quickBayes.functions.qse_function import QSEFunction
-
-        return QSEFunction
+        return quickBayes.functions.qse_function.QSEFunction
 
     def QlStretchedExp(self):
-        from quickBayes.workflow.QSE import QlStretchedExp
-
-        return QlStretchedExp
+        return quickBayes.workflow.QSE.QlStretchedExp
 
     def get_background_function(self, bg_str):
-        from quickBayes.utils.general import get_background_function
-
-        return get_background_function(bg_str)
+        return quickBayes.utils.general.get_background_function(bg_str)
 
     def PyExec(self):
+        if quickBayes is None:
+            return
+
         self.log().information("BayesQuasi input")
         program = self.getPropertyValue("Program")
 
