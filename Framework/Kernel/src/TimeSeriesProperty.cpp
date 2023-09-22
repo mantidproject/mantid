@@ -310,12 +310,8 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
 
   auto itValue{m_values.begin()};
   const auto itValueEnd{m_values.end()}; // last value overall, exclusive
-  auto itBeginUseValue{itValue};         // first value to use per ROI region, inclusive
-  auto itEndUseValue{itValue};           // last value to use per ROI region, exclusive
   auto itLastValueUsed{itValue};         // last value used overall
 
-  // std::cout << "NUMBER OF VALUES: " << m_values.size() << " NUMBER OF ROI BOUNDARIES: " << roiTimes.size() <<
-  // std::endl;
   bool denseROIs = roiTimes.size() > m_values.size();
 
   while (itROI != itROIEnd && itValue != itValueEnd) {
@@ -331,7 +327,7 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
     while (itValue != itValueEnd && itValue->time() < (*itROI))
       itValue++;
     // Include the value immediately preceding the first value in the ROI "use" region.
-    itBeginUseValue = itValue == m_values.begin() ? itValue : std::prev(itValue);
+    auto itBeginUseValue = itValue == m_values.begin() ? itValue : std::prev(itValue);
     // To avoid copying the same value more than once, make sure the new starting point is past the last value used.
     if (!filteredData.empty()) {
       itBeginUseValue = std::max(itBeginUseValue, std::next(itLastValueUsed));
@@ -341,7 +337,7 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
     while (itValue != itValueEnd && itValue->time() < *(std::next(itROI)))
       itValue++;
     // Include the current value, therefore, advance itEndUseValue, because the values are copied as [begin,end).
-    itEndUseValue = itValue == itValueEnd ? itValue : std::next(itValue);
+    auto itEndUseValue = itValue == itValueEnd ? itValue : std::next(itValue);
 
     // Copy all [begin,end) values and mark the last value copied.
     if (itBeginUseValue < itEndUseValue) {
@@ -1827,7 +1823,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
   sortIfNecessary();
 
   // cache the original size so the number removed can be reported
-  const auto origSize = this->size();
+  const auto origSize{m_size};
 
   // remove the first n-repeats
   // taken from
@@ -1840,7 +1836,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
   countSize();
 
   // log how many values were removed
-  const auto numremoved = origSize - this->size();
+  const auto numremoved = origSize - m_size;
   if (numremoved > 0)
     g_log.notice() << "Log \"" << this->name() << "\" has " << numremoved << " entries removed due to duplicated time. "
                    << "\n";
