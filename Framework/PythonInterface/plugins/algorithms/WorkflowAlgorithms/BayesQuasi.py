@@ -9,18 +9,19 @@
 import os
 import numpy as np
 
-from IndirectImport import is_supported_f2py_platform, import_f2py
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, WorkspaceGroupProperty, Progress
 from mantid.kernel import StringListValidator, Direction
+from mantid.utils.pip import import_pip_package
 import mantid.simpleapi as s_api
 from mantid import config, logger
 from IndirectCommon import *
 
 
-if is_supported_f2py_platform():
-    QLr = import_f2py("QLres")
-    QLd = import_f2py("QLdata")
-    Qse = import_f2py("QLse")
+quasielasticbayes = import_pip_package("quasielasticbayes")
+if quasielasticbayes is not None:
+    QLr = quasielasticbayes.QLres
+    QLd = quasielasticbayes.QLdata
+    Qse = quasielasticbayes.QLse
 
 
 class BayesQuasi(PythonAlgorithm):
@@ -141,7 +142,8 @@ class BayesQuasi(PythonAlgorithm):
 
     # pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
-        self.check_platform_support()
+        if quasielasticbayes is None:
+            return
 
         from IndirectBayes import CalcErange, GetXYE
 
@@ -409,15 +411,6 @@ class BayesQuasi(PythonAlgorithm):
         if self._program == "QL":
             s_api.SortXAxis(InputWorkspace=probWS, OutputWorkspace=probWS, EnableLogging=False)
             self.setProperty("OutputWorkspaceProb", probWS)
-
-    def check_platform_support(self):
-        if not is_supported_f2py_platform():
-            unsupported_msg = (
-                "This algorithm can only be run on valid platforms."
-                + " please view the algorithm documentation to see"
-                + " what platforms are currently supported"
-            )
-            raise RuntimeError(unsupported_msg)
 
     def check_energy_range_for_zeroes(self, first_data_point, last_data_point):
         if first_data_point > self._e_min:

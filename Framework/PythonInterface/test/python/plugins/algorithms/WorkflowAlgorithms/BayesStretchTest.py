@@ -8,10 +8,9 @@ import unittest
 import platform
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
-from IndirectImport import is_supported_f2py_platform
+from mantid.utils.pip import package_installed
 
-
-if is_supported_f2py_platform():
+if package_installed("quasielasticbayes"):
 
     class BayesStretchTest(unittest.TestCase):
         _res_ws = None
