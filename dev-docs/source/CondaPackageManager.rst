@@ -11,8 +11,38 @@ Mantid uses `Conda <https://docs.conda.io/en/latest/>`_ as its package managemen
 developer overview on how we use the Conda package manager, including tips on how to debug dependency issues, and
 our policy towards using pip packages (it is strongly discouraged).
 
-Useful Conda Guides
--------------------
+Creating Environments
+---------------------
+
+Creating an empty environment:
+
+.. code-block:: sh
+
+  conda create --name myenv
+
+Creating a Python environment:
+
+.. code-block:: sh
+
+  conda create --name myenv python=3.10
+
+Creating an environment from file:
+
+.. code-block:: sh
+
+  conda create --name myenv -f mantid-developer-<OS>.yml
+
+Creating an environment from package:
+
+.. code-block:: sh
+
+  conda create --name myenv -c mantid mantidworkbench
+
+Creating an in-place environment:
+
+.. code-block:: sh
+
+  conda create --prefix $PWD/myenv python=3.10
 
 Finding a broken dependency
 ---------------------------
