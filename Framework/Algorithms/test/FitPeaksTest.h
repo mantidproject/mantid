@@ -18,6 +18,7 @@
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 
 using Mantid::Algorithms::FitPeaks;
@@ -32,6 +33,11 @@ using namespace std;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Points;
+
+namespace {
+/// static Logger definition
+Logger g_log("FitPeaksTest");
+} // namespace
 
 class FitPeaksTest : public CxxTest::TestSuite {
 private:
@@ -64,6 +70,7 @@ public:
    * @brief test_singlePeaksPartialSpectra
    */
   void test_singlePeaksPartialSpectra() {
+    g_log.notice() << "TEST SINGLE PEAKS PARTIAL SPECTRA";
     // Generate input workspace
     const std::string data_ws_name("Test1Data");
     generateTestDataGaussian(data_ws_name);
@@ -76,14 +83,14 @@ public:
     // create a 1-value peak index vector for peak (0) at X=5
     std::vector<int> peak_index_vec;
     peak_index_vec.emplace_back(0);
-    const std::string ws_name("peakcenter1");
-    const std::string peak_center_ws_name = genPeakCenterWorkspace(peak_index_vec, ws_name);
+    const std::string peak_center_ws_name = genPeakCenterWorkspace(peak_index_vec, "peakcenter1");
     const std::string fit_window_ws_name = genFitWindowWorkspace(peak_index_vec, "peakwindow1");
 
     // Initialize FitPeak
     FitPeaks fitpeaks;
 
     fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
     TS_ASSERT(fitpeaks.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
@@ -98,7 +105,7 @@ public:
     fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3");
     fitpeaks.setProperty("MaxFitIterations", 200);
 
-    fitpeaks.execute();
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
     TS_ASSERT(fitpeaks.isExecuted());
     if (fitpeaks.isExecuted()) {
       // check output workspaces
@@ -129,10 +136,81 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** similar to above, but fitting only spectrum 2, not starting at 0
+   * @brief test_singlePeaksPartialSpectrum2
+   */
+  void test_singlePeaksPartialSpectrum2() {
+    g_log.notice() << "TEST SINGLE PEAKS PARTIAL SPECTRA";
+    // Generate input workspace
+    const std::string data_ws_name("Test1Data");
+    generateTestDataGaussian(data_ws_name);
+
+    // Generate peak and background parameters
+    std::vector<string> peakparnames;
+    std::vector<double> peakparvalues;
+    createBackToBackExponentialParameters(peakparnames, peakparvalues);
+
+    // create a 1-value peak index vector for peak (0) at X=5
+    std::vector<int> peak_index_vec;
+    peak_index_vec.emplace_back(0);
+    const std::string peak_center_ws_name = genPeakCenterWorkspace(peak_index_vec, "peakcenter2");
+    const std::string fit_window_ws_name = genFitWindowWorkspace(peak_index_vec, "peakwindow2");
+
+    // Initialize FitPeak
+    FitPeaks fitpeaks;
+
+    fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 2));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCentersWorkspace", peak_center_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitPeakWindowWorkspace", fit_window_ws_name))
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3");
+    fitpeaks.setProperty("MaxFitIterations", 200);
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (fitpeaks.isExecuted()) {
+      // check output workspaces
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
+
+      // about the parameters
+      API::MatrixWorkspace_sptr peak_params_ws =
+          std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PeakPositionsWS3"));
+      TS_ASSERT(peak_params_ws);
+      // 2 spectra
+      TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 1);
+      // 1 peak
+      TS_ASSERT_EQUALS(peak_params_ws->histogram(0).x().size(), 1);
+
+      // clean algorithm-generated workspaces
+      API::AnalysisDataService::Instance().remove("PeakPositionsWS3");
+      API::AnalysisDataService::Instance().remove("PeakParametersWS3");
+      API::AnalysisDataService::Instance().remove("FittedPeaksWS3");
+    }
+
+    // clean
+    API::AnalysisDataService::Instance().remove(fit_window_ws_name);
+    API::AnalysisDataService::Instance().remove(peak_center_ws_name);
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /**
    * @brief test_multiPeaksMultiSpectra
    */
   void test_multiPeaksMultiSpectra() {
+    g_log.notice() << "TEST MULTIPLE PEAKS PARTIAL SPECTRA";
     // run serially so values don't depend on no. cores etc.
     FrameworkManager::Instance().setNumOMPThreads(1);
 
@@ -148,6 +226,7 @@ public:
     FitPeaks fitpeaks;
 
     fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
     TS_ASSERT(fitpeaks.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
@@ -165,7 +244,7 @@ public:
     fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS");
     fitpeaks.setProperty("ConstrainPeakPositions", false);
 
-    fitpeaks.execute();
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
 
     // check result
     TS_ASSERT(fitpeaks.isExecuted());
@@ -232,6 +311,7 @@ public:
    * @brief test_effectivePeakParameters
    */
   void test_effectivePeakParameters() {
+    g_log.notice() << "TEST EFFECTIVE PEAK PARAMS";
     // run serially so values don't depend on no. cores etc.
     FrameworkManager::Instance().setNumOMPThreads(1);
 
@@ -247,6 +327,7 @@ public:
     FitPeaks fitpeaks;
 
     fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
     TS_ASSERT(fitpeaks.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
@@ -265,7 +346,7 @@ public:
     fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS");
     fitpeaks.setProperty("ConstrainPeakPositions", false);
 
-    fitpeaks.execute();
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
 
     // check result
     TS_ASSERT(fitpeaks.isExecuted());
@@ -336,6 +417,7 @@ public:
    * @brief test_NoSignaleWorkspace2D
    */
   void test_NoSignaleWorkspace2D() {
+    g_log.notice() << "TEST NO SIGNAL WORKSPACE 2D";
     // load file to workspace
     std::string input_ws_name("PG3_733");
 
@@ -348,8 +430,8 @@ public:
 
     // Initialize FitPeak
     FitPeaks fit_peaks_alg;
-
     fit_peaks_alg.initialize();
+    fit_peaks_alg.setRethrows(true);
     TS_ASSERT(fit_peaks_alg.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("InputWorkspace", input_ws_name));
@@ -369,7 +451,7 @@ public:
     fit_peaks_alg.setProperty("OutputWorkspace", peak_pos_ws_name);
     fit_peaks_alg.setProperty("OutputPeakParametersWorkspace", peak_param_ws_name);
 
-    fit_peaks_alg.execute();
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.execute());
     TS_ASSERT(fit_peaks_alg.isExecuted());
     if (!fit_peaks_alg.isExecuted())
       return;
@@ -411,6 +493,7 @@ public:
    * @brief Later_test_HighBackgroundPeaks
    */
   void test_HighBackgroundPeaks() {
+    g_log.notice() << "TEST HIGH BACKGROUND";
     // load file to workspace
     std::string input_ws_name("PG3_733");
 
@@ -423,8 +506,8 @@ public:
 
     // Initialize FitPeak
     FitPeaks fit_peaks_alg;
-
     fit_peaks_alg.initialize();
+    fit_peaks_alg.setRethrows(true);
     TS_ASSERT(fit_peaks_alg.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.setProperty("InputWorkspace", input_ws_name));
@@ -446,7 +529,7 @@ public:
     fit_peaks_alg.setProperty("OutputPeakParametersWorkspace", peak_param_ws_name);
     fit_peaks_alg.setProperty("FittedPeaksWorkspace", output_ws_name);
 
-    fit_peaks_alg.execute();
+    TS_ASSERT_THROWS_NOTHING(fit_peaks_alg.execute());
     TS_ASSERT(fit_peaks_alg.isExecuted());
     if (!fit_peaks_alg.isExecuted())
       return;
@@ -496,6 +579,7 @@ public:
    * 2. fit 1 peak at d = 1.0758
    */
   void test_singlePeakMultiSpectraBackToBackExp() {
+    g_log.notice() << "TEST SINGLE PEAK MULTI SPECTRA BACK TO BACK";
     // Generate input workspace
     std::string input_ws_name = generateTestDataBackToBackExponential();
     // Specify output workspaces names
@@ -521,6 +605,7 @@ public:
     FitPeaks fitpeaks;
 
     fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
     TS_ASSERT(fitpeaks.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", input_ws_name));
@@ -539,7 +624,7 @@ public:
     fitpeaks.setProperty("OutputPeakParametersWorkspace", param_ws_name);
     fitpeaks.setProperty("FittedPeaksWorkspace", model_ws_name);
 
-    fitpeaks.execute();
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
     TS_ASSERT(fitpeaks.isExecuted());
 
     // check output workspaces
@@ -595,6 +680,7 @@ public:
    * exponential convoluted with Gaussian
    */
   void test_multiPeaksMultiSpectraBackToBackExp() {
+    g_log.notice() << "TEST MULTIPEAKS MULTI SPECTRA BACK TO BACK";
     // Generate input workspace
     std::string input_ws_name = generateTestDataBackToBackExponential();
     API::MatrixWorkspace_sptr input_ws =
@@ -617,6 +703,7 @@ public:
     FitPeaks fitpeaks;
 
     fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
     TS_ASSERT(fitpeaks.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", input_ws_name));
@@ -636,7 +723,7 @@ public:
     fitpeaks.setProperty("OutputPeakParametersWorkspace", param_ws_name);
     fitpeaks.setProperty("FittedPeaksWorkspace", model_ws_name);
 
-    fitpeaks.execute();
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
     TS_ASSERT(fitpeaks.isExecuted());
 
     // Verify the existence of output workspaces
@@ -720,6 +807,7 @@ public:
    * file and guesses the parameters for A,B rather than providing them
    */
   void test_multiPeaksMultiSpectraBackToBackExp_with_Param_xml() {
+    g_log.notice() << "TEST MULTI PEAKS SPECTRA BACK TO BACK WITH PARAM XML";
     // run serially so values don't depend on no. cores etc.
     FrameworkManager::Instance().setNumOMPThreads(1);
 
@@ -748,6 +836,7 @@ public:
     FitPeaks fitpeaks;
 
     fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
     TS_ASSERT(fitpeaks.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", input_ws_name));
@@ -765,7 +854,7 @@ public:
     fitpeaks.setProperty("OutputPeakParametersWorkspace", param_ws_name);
     fitpeaks.setProperty("FittedPeaksWorkspace", model_ws_name);
 
-    fitpeaks.execute();
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
     TS_ASSERT(fitpeaks.isExecuted());
 
     // Verify the existence of output workspaces
@@ -833,6 +922,7 @@ public:
    * @brief test_outputFitError
    */
   void test_outputFitError() {
+    g_log.notice() << "TEST OUTPUT FIT ERROR";
     // set up parameters with starting value
     std::vector<string> peakparnames;
     std::vector<double> peakparvalues;
@@ -845,6 +935,7 @@ public:
     FitPeaks fitpeaks;
 
     fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
     TS_ASSERT(fitpeaks.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
@@ -865,7 +956,7 @@ public:
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS");
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setPropertyValue("OutputParameterFitErrorsWorkspace", "FitErrorsWS"));
 
-    fitpeaks.execute();
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
 
     // check result
     TS_ASSERT(fitpeaks.isExecuted());
@@ -915,6 +1006,7 @@ public:
    * @brief test_notEnoughPeakDataPoints
    */
   void test_notEnoughPeakDataPoints() {
+    g_log.notice() << "TEST INSUFFICIENT DATA POINTS";
     // generate an input workspace
     const std::string data_ws_name("data_nepdp");
     generateTestDataGaussian(data_ws_name, 1 /*spectra*/, 20 /*data points*/, 1 /*peaks*/, 0.5 /*resolution*/);
@@ -936,6 +1028,7 @@ public:
     // initialize FitPeaks
     FitPeaks fitpeaks;
     fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
     TS_ASSERT(fitpeaks.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
@@ -950,7 +1043,7 @@ public:
     fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3");
     fitpeaks.setProperty("MaxFitIterations", 200);
 
-    fitpeaks.execute();
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
     TS_ASSERT(fitpeaks.isExecuted());
     if (fitpeaks.isExecuted()) {
       // check output workspaces
@@ -983,6 +1076,7 @@ public:
    * @brief test_signalToNoiseRatio
    */
   void test_signalToNoiseRatio() {
+    g_log.notice() << "TEST SIGNAL TO NOISE";
     // create a simple workspace
     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         static_cast<int>(1 /*num_specs*/), static_cast<int>(400 /*num_data_points*/));
@@ -1025,6 +1119,7 @@ public:
     // initialize FitPeaks
     FitPeaks fitpeaks;
     fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
     TS_ASSERT(fitpeaks.isInitialized());
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
@@ -1041,7 +1136,7 @@ public:
     fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3");
     fitpeaks.setProperty("MaxFitIterations", 200);
 
-    fitpeaks.execute();
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
     TS_ASSERT(fitpeaks.isExecuted());
     if (fitpeaks.isExecuted()) {
       // check output workspaces
@@ -1102,11 +1197,9 @@ public:
         std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(
             nhist, nbins, ishist, xval, yval, eval, dxval, maskedws));
 
-    for (size_t i = 0; i < center_ws->getNumberHistograms(); ++i) {
-      for (size_t j = 0; j < peak_index_vec.size(); ++j) {
-        const int peak_index = peak_index_vec[j];
-        const double peak_center = peak_index == 0 ? 5.0 : 10.0;
-        center_ws->dataX(i)[j] = peak_center;
+    for (std::size_t i = 0; i < center_ws->getNumberHistograms(); ++i) {
+      for (std::size_t j = 0; j < peak_index_vec.size(); ++j) {
+        center_ws->dataX(i)[j] = (peak_index_vec[j] == 0 ? 5.0 : 10.0);
       }
     }
 
@@ -1126,21 +1219,22 @@ public:
    * @param halfwidth :: halfwidth of fit window
    */
   std::string genFitWindowWorkspace(std::vector<int> &peak_index_vec, const std::string &workspace_name,
-                                    const size_t num_specs = 3, const double halfwidth = 2.0) {
+                                    const std::size_t num_specs = 3, const double halfwidth = 2.0) {
     // create an empty workspace containing up to 3 spectra
     const size_t num_peaks = peak_index_vec.size();
-    MatrixWorkspace_sptr center_ws = std::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::create2DWorkspace(num_specs, num_peaks * 2));
-    for (size_t i = 0; i < center_ws->getNumberHistograms(); ++i) {
-      for (size_t j = 0; j < peak_index_vec.size(); ++j) {
-        const int peak_index = peak_index_vec[j];
-        const double peak_center = peak_index == 0 ? 5.0 : 10.0;
-        center_ws->dataX(i)[j * 2] = peak_center - halfwidth;
-        center_ws->dataX(i)[j * 2 + 1] = peak_center + halfwidth;
+    MatrixWorkspace_sptr window_ws = std::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceCreationHelper::create2DWorkspacePoints(num_specs, num_peaks * 2));
+
+    for (std::size_t i = 0; i < window_ws->getNumberHistograms(); ++i) {
+      for (std::size_t j = 0; j < num_peaks; ++j) {
+        const double peak_center = (peak_index_vec[j] == 0 ? 5.0 : 10.0);
+        window_ws->dataX(i)[j * 2] = peak_center - halfwidth;
+        window_ws->dataX(i)[j * 2 + 1] = peak_center + halfwidth;
       }
+      TS_ASSERT(window_ws->dataX(i).size() == num_peaks * 2);
     }
 
-    AnalysisDataService::Instance().addOrReplace(workspace_name, center_ws);
+    AnalysisDataService::Instance().addOrReplace(workspace_name, window_ws);
 
     return workspace_name;
   }

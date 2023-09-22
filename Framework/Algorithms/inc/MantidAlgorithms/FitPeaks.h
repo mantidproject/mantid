@@ -282,7 +282,8 @@ private:
   /// Designed peak positions and tolerance
   std::vector<double> m_peakCenters;
   API::MatrixWorkspace_const_sptr m_peakCenterWorkspace;
-  size_t m_numPeaksToFit;
+  // the number of peaks to fit in all spectra
+  std::size_t m_numPeaksToFit;
   bool m_uniformPeakPositions;
 
   /// flag to estimate peak width from
@@ -290,11 +291,12 @@ private:
 
   //--------- Fitting range -----------------------------------------
   /// start index
-  size_t m_startWorkspaceIndex;
+  std::size_t m_startWorkspaceIndex;
   /// stop index (workspace index of the last spectrum included)
-  size_t m_stopWorkspaceIndex;
-  /// flag whether the peak center workspace has only a subset of spectra to fit
-  bool m_partialSpectra;
+  std::size_t m_stopWorkspaceIndex;
+  // total number of spectra to be fit
+  std::size_t m_numSpectraToFit;
+  // tolerances for fitting peak positions
   std::vector<double> m_peakPosTolerances;
 
   /// Flag for observing peak width: there are 3 states (1) no estimation (2)
@@ -306,7 +308,6 @@ private:
   std::vector<std::vector<double>> m_peakWindowVector;
   API::MatrixWorkspace_const_sptr m_peakWindowWorkspace;
   bool m_uniformPeakWindows;
-  bool m_partialWindowSpectra;
   /// flag to calcualte peak fit window from instrument resolution
   bool m_calculateWindowInstrument;
 
