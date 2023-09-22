@@ -44,8 +44,9 @@ Fixing a broken dependency
 After identifying the Conda dependency and version which is causing the unwanted behaviour, there are several
 options we can take to fix the issue. The following options are in order of preference:
 
-1. Raise an issue in the dependencies feedstock repository with a minimum reproducible example. If appropriate,
-   request that they mark the package version as "Broken". See `Removing broken packages <https://conda-forge.org/docs/maintainer/updating_pkgs.html#maint-fix-broken-packages>`_ to understand this procedure.
+1. Raise an issue in the dependencies `feedstock <https://conda-forge.org/docs/maintainer/adding_pkgs.html#feedstock-repository-structure>`_
+   repository with a minimum reproducible example. If appropriate, request that they mark the package version as
+   "Broken". See `Removing broken packages <https://conda-forge.org/docs/maintainer/updating_pkgs.html#maint-fix-broken-packages>`_ to understand this procedure.
 
 2. If we need a fix urgently, you can consider pinning the package in question. This is not an ideal solution,
    and so you should also open an issue to un-pin the package in future. When pinning a package, consider
