@@ -263,6 +263,54 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
+  // test that the algorithm will faill in absolute/relative mode using offsets <= -1
+  void test_failure_negative_DIFC() {
+    /**
+     * In absolute/relative mode, the DIFC is updated as
+     *   DIFC_new = DIFC_old / (1 + offset)
+     * If offset <= -1, this produces negative DIFC_new, which lead to unphysical d-spacings
+     * Make sure an error is thrown if this would happen.
+     */
+
+    ConvertDiffCal alg_useprev, alg_noprev;
+    std::string new_calibration_table_name("updated_calibration_table");
+    // test failure using previous calibration values
+    TS_ASSERT_THROWS_NOTHING(alg_useprev.initialize());
+    TS_ASSERT(alg_useprev.isInitialized());
+    alg_useprev.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg_useprev.setPropertyValue("OutputWorkspace", new_calibration_table_name));
+    TS_ASSERT_THROWS_NOTHING(alg_useprev.setProperty("OffsetMode", "Relative"));
+    TS_ASSERT_THROWS_NOTHING(alg_useprev.setProperty("BinWidth", 1.0)); // will be unused
+
+    // test failure if no previous calibration values
+    TS_ASSERT_THROWS_NOTHING(alg_noprev.initialize());
+    TS_ASSERT(alg_noprev.isInitialized());
+    alg_noprev.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg_noprev.setPropertyValue("OutputWorkspace", new_calibration_table_name));
+    TS_ASSERT_THROWS_NOTHING(alg_noprev.setProperty("OffsetMode", "Relative"));
+    TS_ASSERT_THROWS_NOTHING(alg_noprev.setProperty("BinWidth", 1.0)); // will be unused
+
+    // test failure if offset = -1.0
+    std::list<class fake_entry> fake_entries_1{fake_entry(0, fake_entry::offset, -1.0),
+                                               fake_entry(0, fake_entry::calibration, 2.0)};
+    class fake_workspaces fake_workspaces_1 = generate_test_data(fake_entries_1);
+    TS_ASSERT_THROWS_NOTHING(alg_useprev.setProperty("OffsetsWorkspace", fake_workspaces_1.offsets));
+    TS_ASSERT_THROWS_NOTHING(alg_useprev.setProperty("PreviousCalibration", fake_workspaces_1.calibration_table));
+    TS_ASSERT_THROWS(alg_useprev.execute(), const std::logic_error &);
+    TS_ASSERT_THROWS_NOTHING(alg_noprev.setProperty("OffsetsWorkspace", fake_workspaces_1.offsets));
+    TS_ASSERT_THROWS(alg_noprev.execute(), const std::logic_error &);
+
+    // test failure if offset < -1.0
+    std::list<class fake_entry> fake_entries_2{fake_entry(0, fake_entry::offset, -2.0),
+                                               fake_entry(0, fake_entry::calibration, 2.0)};
+    class fake_workspaces fake_workspaces_2 = generate_test_data(fake_entries_2);
+    TS_ASSERT_THROWS_NOTHING(alg_useprev.setProperty("OffsetsWorkspace", fake_workspaces_2.offsets));
+    TS_ASSERT_THROWS_NOTHING(alg_useprev.setProperty("PreviousCalibration", fake_workspaces_2.calibration_table));
+    TS_ASSERT_THROWS(alg_useprev.execute(), const std::logic_error &);
+    TS_ASSERT_THROWS_NOTHING(alg_noprev.setProperty("OffsetsWorkspace", fake_workspaces_2.offsets));
+    TS_ASSERT_THROWS(alg_noprev.execute(), const std::logic_error &);
+  }
+
   // test with 'OffsetMode' set to 'Signed'
   void test_signed_offset() {
     /**
@@ -280,6 +328,68 @@ public:
       fake_entries.emplace_back(offsetEntry);
       fake_entries.emplace_back(calEntry);
       expected_results[i] = std::pow(2, i - 1);
+    }
+
+    /* generate fake workspaces */
+    class fake_workspaces fake_workspaces = generate_test_data(fake_entries);
+
+    ConvertDiffCal alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetsWorkspace", fake_workspaces.offsets));
+    std::string new_calibration_table_name("updated_calibration_table");
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", new_calibration_table_name));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OffsetMode", "Signed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinWidth", 1.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PreviousCalibration", fake_workspaces.calibration_table));
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    Workspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<Workspace>(new_calibration_table_name));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    auto updated_calibration_table = std::dynamic_pointer_cast<ITableWorkspace>(ws);
+    TS_ASSERT(updated_calibration_table);
+
+    /* Get detector_ids */
+    auto detector_id_column = updated_calibration_table->getColumn(COLUMNS::DETID);
+    int correct_size = 10;
+    TS_ASSERT_EQUALS(detector_id_column->size(), correct_size);
+    auto difc_column = updated_calibration_table->getColumn(COLUMNS::DIFC);
+    TS_ASSERT_EQUALS(difc_column->size(), correct_size);
+
+    for (int i = 0; i < LEN_TEST; i++) {
+      TS_ASSERT_EQUALS(detector_id_column->toDouble(i), i);
+    }
+
+    /* check difc: */
+    for (int i = 0; i < LEN_TEST; i++) {
+      TS_ASSERT_EQUALS(difc_column->toDouble(i), expected_results[i])
+    }
+  }
+
+  // test in 'Signed' offset mode with large negative offsets
+  void test_signed_offset_large_negative() {
+    /**
+     * With the binwidth set to 1, offset = -2, result should quadruple original DIFC values
+     *    DIFC_new = DIFC_old * (1+|DX|)^{-offset} = DIFC_old * (2)^{--2} = DIFC_old * 4.
+     * Setup a test dataset with powers of two as DIFC for easier verification
+     */
+    const int LEN_TEST = 10;
+    std::list<class fake_entry> fake_entries;
+    std::array<double, LEN_TEST> expected_results;
+
+    for (int i = 0; i < LEN_TEST; i++) {
+      fake_entry offsetEntry(i, fake_entry::offset, -2.);
+      fake_entry calEntry(i, fake_entry::calibration, std::pow(2, i));
+      fake_entries.emplace_back(offsetEntry);
+      fake_entries.emplace_back(calEntry);
+      expected_results[i] = std::pow(2, i + 2);
     }
 
     /* generate fake workspaces */
