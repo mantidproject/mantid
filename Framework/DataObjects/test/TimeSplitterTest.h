@@ -24,11 +24,17 @@ using Mantid::API::TableRow;
 using Mantid::DataObjects::EventList;
 using Mantid::DataObjects::EventSortType;
 using Mantid::DataObjects::TimeSplitter;
+using Mantid::Kernel::Logger;
 using Mantid::Kernel::SplittingInterval;
 using Mantid::Kernel::SplittingIntervalVec;
 using Mantid::Kernel::TimeROI;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
+
+namespace {
+/// static Logger definition
+Logger g_log("TimeSplitter");
+} // namespace
 
 namespace {
 const DateAndTime ONE("2023-01-01T11:00:00");
@@ -181,6 +187,7 @@ public:
   static void destroySuite(TimeSplitterTest *suite) { delete suite; }
 
   void test_valueAtTime() {
+    g_log.notice("\ntest_valueAtTime...");
     // to start everything is either in 0th output or masked
     TimeSplitter splitter(TWO, FOUR);
     TS_ASSERT_EQUALS(splitter.valueAtTime(ONE), TimeSplitter::NO_TARGET);
@@ -263,6 +270,7 @@ public:
   }
 
   void test_emptySplitter() {
+    g_log.notice("\ntest_emptySplitter...");
     TimeSplitter splitter;
     TS_ASSERT_EQUALS(splitter.valueAtTime(DateAndTime("2023-01-01T11:00:00")), TimeSplitter::NO_TARGET);
     TS_ASSERT_EQUALS(splitter.numRawValues(), 0);
@@ -270,6 +278,7 @@ public:
   }
 
   void test_addAdjacentROI() {
+    g_log.notice("\ntest_addAdjacentROI...");
     // append to ROI with touching boundary
     TimeSplitter splitter;
     splitter.addROI(ONE, TWO, 1);
@@ -286,6 +295,7 @@ public:
   }
 
   void test_gap() {
+    g_log.notice("\ntest_gap...");
     TimeSplitter splitter;
     // create a splitter with a gap
     splitter.addROI(ONE, TWO, 0);
@@ -317,7 +327,7 @@ public:
   }
 
   void test_getTimeROI() {
-
+    g_log.notice("\ntest_getTimeROI...");
     // start with empty TimeSplitter
     TimeSplitter splitter;
     TS_ASSERT(splitter.getTimeROI(TimeSplitter::NO_TARGET).useAll());
@@ -330,17 +340,16 @@ public:
     splitter.addROI(ONE, THREE, 1);
     TS_ASSERT(splitter.getTimeROI(TimeSplitter::NO_TARGET).useAll());
     TS_ASSERT(splitter.getTimeROI(0).useAll());
-    TS_ASSERT(splitter.getTimeROI(0).useAll());
     roi = splitter.getTimeROI(1);
     TS_ASSERT(!roi.useAll());
     TS_ASSERT_EQUALS(roi.numBoundaries(), 2);
 
     // add the same output index, but with a gap from the previous
     splitter.addROI(FOUR, FIVE, 1);
-    roi = splitter.getTimeROI(TimeSplitter::NO_TARGET - 1); // intentionally trying a "big" negative for ignore filter
+    roi =
+        splitter.getTimeROI(TimeSplitter::NO_TARGET - 1); // intentionally trying a "bigger" negative for ignore filter
     TS_ASSERT(!roi.useAll());
     TS_ASSERT_EQUALS(roi.numBoundaries(), 2);
-    TS_ASSERT(splitter.getTimeROI(0).useAll());
     TS_ASSERT(splitter.getTimeROI(0).useAll());
     roi = splitter.getTimeROI(1);
     TS_ASSERT(!roi.useAll());
@@ -348,6 +357,7 @@ public:
   }
 
   void test_toSplitters() {
+    g_log.notice("\ntest_toSplitters...");
     TimeSplitter splitter;
     splitter.addROI(ONE, TWO, 1);
     splitter.addROI(TWO, THREE, 2);
@@ -373,6 +383,7 @@ public:
    * @brief test_timeSplitterFromMatrixWorkspaceAbsoluteTimes
    */
   void test_timeSplitterFromMatrixWorkspaceAbsoluteTimes() {
+    g_log.notice("\ntest_timeSplitterFromMatrixWorkspaceAbsoluteTimes...");
     TimeSplitter splitter;
     splitter.addROI(DateAndTime(0, 0), DateAndTime(10, 0), 0);
     splitter.addROI(DateAndTime(10, 0), DateAndTime(15, 0), 3);
@@ -412,6 +423,7 @@ public:
    * @brief test_timeSplitterFromMatrixWorkspaceRelativeTimes
    */
   void test_timeSplitterFromMatrixWorkspaceRelativeTimes() {
+    g_log.notice("\ntest_timeSplitterFromMatrixWorkspaceRelativeTimes...");
     TimeSplitter splitter;
     int64_t offset_ns{TWO.totalNanoseconds()};
     splitter.addROI(DateAndTime(0) + offset_ns, DateAndTime(10, 0) + offset_ns, 1);
@@ -433,10 +445,9 @@ public:
   }
 
   void test_timeSplitterFromMatrixWorkspaceError() {
+    g_log.notice("\ntest_timeSplitterFromMatrixWorkspaceError...");
     // Testing the case where an X value in the MatrixWorkspace is negative.
-
     Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3);
-
     auto &X = ws->dataX(0);
     auto &Y = ws->dataY(0);
     X[0] = -5.0;
@@ -455,14 +466,15 @@ public:
    * @brief test_timeSplitterFromTableWorkspaceAbsoluteTimes
    */
   void test_timeSplitterFromTableWorkspaceAbsoluteTimes() {
-    auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
+    g_log.notice("\ntest_timeSplitterFromTableWorkspaceAbsoluteTimes...");
 
-    // by design, a table workspace used for event filtering must have 3 columns
+    auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
+    // a table workspace used for event filtering must have 3 columns
     tws->addColumn("double", "start");
     tws->addColumn("double", "stop");
     tws->addColumn("str", "target"); // to be used as a suffix of the output workspace name
 
-    // by design, all times in the table must be in seconds
+    // all times in the table must be in seconds
     const double time1_s{1.0e-5};
     const double time2_s{1.5e-5};
     const double time3_s{2.0e-5};
@@ -511,9 +523,10 @@ public:
    * @brief test_timeSplitterFromTableWorkspaceRelativeTimes
    */
   void test_timeSplitterFromTableWorkspaceRelativeTimes() {
-    auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
+    g_log.notice("\ntest_timeSplitterFromTableWorkspaceRelativeTimes...");
 
-    // by design, a table workspace used for event filtering must have 3 columns
+    auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
+    // a table workspace used for event filtering must have 3 columns
     tws->addColumn("double", "start");
     tws->addColumn("double", "stop");
     tws->addColumn("str", "target"); // to be used as a suffix of the output workspace name
@@ -579,14 +592,15 @@ public:
    * @brief test_timeSplitterFromTableWorkspaceRelativeTimes
    */
   void test_timeSplitterFromTableWorkspaceWithNonNumericTargets() {
-    auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
+    g_log.notice("\ntest_timeSplitterFromTableWorkspaceWithNonNumericTargets...");
 
-    // by design, a table workspace used for event filtering must have 3 columns
+    auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
+    // a table workspace used for event filtering must have 3 columns
     tws->addColumn("double", "start");
     tws->addColumn("double", "stop");
     tws->addColumn("str", "target"); // to be used as a suffix of the output workspace name
 
-    // by design, all times in the table must be in seconds
+    // all times in the table must be in seconds
     const double time1_s{1.0e-5};
     const double time2_s{1.5e-5};
     const double time3_s{2.0e-5};
@@ -653,6 +667,8 @@ public:
    * @brief test_timeSplitterFromSplittersWorkspace
    */
   void test_timeSplitterFromSplittersWorkspace() {
+    g_log.notice("\ntest_timeSplitterFromSplittersWorkspace...");
+
     // create time objects for testing. All input times are in nanoseconds.
     DateAndTime time1(10000);
     DateAndTime time2(15000);
@@ -689,6 +705,7 @@ public:
   }
   // Verify keys in TimeSplitter::m_roi_map are sorted
   void test_keysSorted() {
+    g_log.notice("\ntest_keysSorted...");
     TimeSplitter splitter;
     splitter.addROI(FIVE, SIX, 0);
     splitter.addROI(THREE, FOUR, 0);
@@ -715,6 +732,7 @@ public:
   }
 
   void test_splitEventList() {
+    g_log.notice("\ntest_splitEventList...");
     DateAndTime startTime{TWO};
     // Generate the events. Six events, the first at "2023-Jan-01 12:00:00" and then every 30 seconds. The last
     // event happening at "2023-Jan-01 12:02:30".
@@ -784,6 +802,7 @@ public:
 
   // This test aims to test a TimeSplitter containing a splitter that will end up holding no events
   void test_splitEventListLeapingTimes() {
+    g_log.notice("\ntest_splitEventListLeapingTimes...");
     // Generate the events. Six events, the first at "2023-Jan-01 12:00:00" and then every 30 seconds. The last
     // event happening at "2023-Jan-01 12:02:30".
     DateAndTime startTime{TWO};

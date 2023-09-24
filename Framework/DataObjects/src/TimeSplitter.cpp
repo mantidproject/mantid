@@ -328,6 +328,9 @@ void TimeSplitter::rebuildCachedPartialTimeROIs() {
   auto start = std::chrono::system_clock::now();
   resetCachedPartialTimeROIs();
 
+  if (m_roi_map.empty())
+    return;
+
   std::map<int, std::vector<DateAndTime>> partialTimeVectors;
 
   int target{NO_TARGET};
@@ -410,7 +413,8 @@ std::set<int> TimeSplitter::outputWorkspaceIndices() const {
 
 /**
  * Returns a Mantid::Kernel::TimeROI for the requested workspace index.
- * This will raise an exception if the workspace index does not exist in the TimeSplitter.
+ * If the workspace index does not exist in the TimeSplitter, the returned TimeROI will be empty,
+ * meaning any time datapoint will pass through the given ROI filter.
  */
 TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
   if (!validCachedPartialTimeROIs) {
@@ -418,6 +422,10 @@ TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
   }
   // convert indexes less than NO_TARGET to NO_TARGET
   const int effectiveIndex = std::max<int>(workspaceIndex, NO_TARGET);
+
+  if (m_cachedPartialTimeROIs.count(effectiveIndex) == 0)
+    return TimeROI();
+
   return m_cachedPartialTimeROIs[effectiveIndex];
 }
 

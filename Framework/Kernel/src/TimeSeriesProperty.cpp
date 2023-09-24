@@ -312,32 +312,54 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
   const auto itValueEnd{m_values.end()}; // last value overall, exclusive
   auto itLastValueUsed{itValue};         // last value used overall
 
-  bool denseROIs = roiTimes.size() > m_values.size();
-
+  bool denseROIs = roiTimes.size() / 2 > m_values.size();
   while (itROI != itROIEnd && itValue != itValueEnd) {
     if (denseROIs) {
-      // For efficiency, fast-forward the ROI towards the current value. Be careful not to overstep that value,
-      // because it might be in an ROI "ignore" region together with one or more following values.
-      while (std::distance(itROI, itROIEnd) >= 2 && *(std::next(itROI)) < itValue->time() &&
+      // If there are more ROI "use" regions than time values, try speeding up the algorithm by fast-forwarding the
+      // current "use" region towards the current time value. Be careful not to overstep that value, because it might
+      // be in an ROI "ignore" region together with one or more following values.
+      while (std::distance(itROI, itROIEnd) > 2 && *(std::next(itROI)) < itValue->time() &&
              *(std::next(itROI, 2)) <= itValue->time())
         std::advance(itROI, 2);
     }
 
-    // Find the first value in the current ROI "use" region
+    // Try finding the first value past the beginning of the current ROI "use" region.
     while (itValue != itValueEnd && itValue->time() < (*itROI))
       itValue++;
-    // Include the value immediately preceding the first value in the ROI "use" region.
-    auto itBeginUseValue = itValue == m_values.begin() ? itValue : std::prev(itValue);
-    // To avoid copying the same value more than once, make sure the new starting point is past the last value used.
+
+    // For each possible case, calculate the [begin,end) range of values to use
+    auto itBeginUseValue{itValue};
+    auto itEndUseValue{itValue};
+    // If there are no values past the current ROI "use" region, get the previous value
+    if (itValue == itValueEnd) {
+      itBeginUseValue =
+          std::prev(itValue); // std::prev is safe, because "m_values is empty" case has already been treated above
+      itEndUseValue = itValueEnd;
+    }
+    // If the value is inside the current ROI "use" region, look for other values in the same ROI "use" region
+    else if (itValue->time() < *(std::next(itROI))) {
+      // First, try including a value immediately preceding the first value in the ROI "use" region.
+      itBeginUseValue = itValue == m_values.begin() ? itValue : std::prev(itValue);
+      // Now try finding the first value past the end of the current ROI "use" region.
+      while (itValue != itValueEnd && itValue->time() < *(std::next(itROI)))
+        itValue++;
+      // Include the current value, therefore, advance itEndUseValue, because the values are copied as [begin,end).
+      itEndUseValue = itValue == itValueEnd ? itValue : std::next(itValue);
+    }
+    // If we are at the last ROI "use" region or the value is not past the beginning of the next ROI "use" region, keep
+    // it for the current ROI "use" region
+    else if (std::distance(itROI, itROIEnd) == 2 ||
+             (std::distance(itROI, itROIEnd) > 2 && itValue->time() < *(std::next(itROI, 2)))) {
+      // Try including the value immediately preceding the current value
+      itBeginUseValue = itValue == m_values.begin() ? itValue : std::prev(itValue);
+      itEndUseValue = std::next(itValue);
+    }
+
+    // To avoid copying a value already copied for the previuous ROI, make sure the new starting point is past the last
+    // value used.
     if (!filteredData.empty()) {
       itBeginUseValue = std::max(itBeginUseValue, std::next(itLastValueUsed));
     }
-
-    // Find the first value past the current ROI "use" region.
-    while (itValue != itValueEnd && itValue->time() < *(std::next(itROI)))
-      itValue++;
-    // Include the current value, therefore, advance itEndUseValue, because the values are copied as [begin,end).
-    auto itEndUseValue = itValue == itValueEnd ? itValue : std::next(itValue);
 
     // Copy all [begin,end) values and mark the last value copied.
     if (itBeginUseValue < itEndUseValue) {
