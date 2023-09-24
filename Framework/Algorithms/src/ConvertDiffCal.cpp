@@ -116,6 +116,8 @@ std::map<std::string, std::string> ConvertDiffCal::validateInputs() {
   return result;
 }
 
+namespace { // anonymous namespace to enscope the below functions
+
 /**
  * @throws std::logic_error if there is more than one detector id
  * for the spectrum.
@@ -133,25 +135,8 @@ detid_t getDetID(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t inde
   return (*(detIDs.begin()));
 }
 
-/**
- * @throws std::logic_error if the offset found is non-physical.
- * @param offsetsWS
- * @param detid
- * @return The offset value or zero if not specified.
- */
-double getOffset(const OffsetsWorkspace_const_sptr &offsetsWS, const detid_t detid) {
-  const double offset = offsetsWS->getValue(detid, 0.0);
-  if (offset <= -1.) { // non-physical
-    std::stringstream msg;
-    msg << "Encountered offset of " << offset << " which converts data to negative d-spacing for detectorID " << detid
-        << "\n";
-    throw std::logic_error(msg.str());
-  }
-  return offset;
-}
-
 /** Calculate the DIFC for values not found from previous calibration
- *
+ * @throws in relative or absolute, throws logic error if offset <= -1
  * @param offsetsWS :: Offset Workspace used in calculations
  * @param index :: Index being calculated
  * @param spectrumInfo :: Spectrum info used
@@ -162,7 +147,7 @@ double getOffset(const OffsetsWorkspace_const_sptr &offsetsWS, const detid_t det
 double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t index,
                      const Mantid::API::SpectrumInfo &spectrumInfo, const double binWidth, OFFSETMODE offsetMode) {
   const detid_t detid = getDetID(offsetsWS, index);
-  const double offset = getOffset(offsetsWS, detid);
+  const double offset = offsetsWS->getValue(detid, 0.0);
   double twotheta;
   try {
     twotheta = spectrumInfo.twoTheta(index);
@@ -184,13 +169,35 @@ double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t 
   return newDIFC;
 }
 
-double updateSignedDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t index, const double oldDIFC,
-                        const double binWidth) {
-  const detid_t detid = getDetID(offsetsWS, index);
-  const double offset = getOffset(offsetsWS, detid);
-  const double newDIFC = oldDIFC * pow(1.0 + fabs(binWidth), -1.0 * offset);
-  return newDIFC;
+/**
+ * @throws std::logic_error if the offset would lead to non-physical d-spacing.
+ * @param offset the offset, which is checked for physicality
+ * @param oldDIFC the prior value of DIFC, to be updated
+ * @param unused not used, for function template conformity
+ * @return The updated value of DIFC, if physical
+ */
+double updateAbsoluteDIFC(const double offset, const double oldDIFC, const double unused) {
+  UNUSED_ARG(unused);
+  if (offset <= -1.) { // non-physical
+    std::stringstream msg;
+    msg << "Encountered offset of " << offset << " which converts data to negative d-spacing from old DIFC " << oldDIFC
+        << "\n";
+    throw std::logic_error(msg.str());
+  }
+  return oldDIFC / (1.0 + offset);
 }
+
+/**
+ * @param offset the offset
+ * @param oldDIFC the prior value of DIFC, to be updated
+ * @param binWidth the binwidth that was used
+ * @return The updated value of DIFC when using signed offsets and logarithmic binning
+ */
+double updateSignedDIFC(const double offset, const double oldDIFC, const double binWidth) {
+  return oldDIFC * pow(1.0 + fabs(binWidth), -1.0 * offset);
+}
+
+} // end anonymous namespace
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
@@ -234,6 +241,16 @@ void ConvertDiffCal::exec() {
 
   const Mantid::API::SpectrumInfo &spectrumInfo = offsetsWS->spectrumInfo();
   Mantid::Geometry::DetectorInfo const &d_info = offsetsWS->detectorInfo();
+
+  // set the function to use for updating the DIFC value
+  // setting here avoids branching inside the for loop
+  std::function<double(const double, const double, const double)> newDIFC;
+  if (offsetMode == OffsetMode::SIGNED_OFFSET) {
+    newDIFC = updateSignedDIFC;
+  } else {
+    newDIFC = updateAbsoluteDIFC;
+  }
+
   for (size_t i = 0; i < numberOfSpectra; ++i) {
 
     /* obtain detector id for this spectra */
@@ -242,7 +259,7 @@ void ConvertDiffCal::exec() {
     /* obtain the mask */
     if (!d_info.isMasked(internal_index)) {
       /* find the detector id's offset value in the offset workspace */
-      double new_offset_value = offsetsWS->getValue(detector_id);
+      double new_offset_value = offsetsWS->getValue(detector_id, 0.0);
 
       /* search for it in the table */
       auto iter = id_to_row.find(detector_id);
@@ -253,11 +270,7 @@ void ConvertDiffCal::exec() {
         int row_to_update = iter->second;
 
         double &difc_value_to_update = configWksp->cell<double>(row_to_update, 1);
-        if (offsetMode == OffsetMode::SIGNED_OFFSET) {
-          difc_value_to_update = updateSignedDIFC(offsetsWS, i, difc_value_to_update, binWidth);
-        } else {
-          difc_value_to_update = difc_value_to_update / (1.0 + new_offset_value);
-        }
+        difc_value_to_update = newDIFC(new_offset_value, difc_value_to_update, binWidth);
       }
 
       /* value was not found in PreviousCalibration - calculate from experiment's geometry */
