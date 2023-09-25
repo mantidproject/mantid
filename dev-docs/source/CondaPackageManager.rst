@@ -104,4 +104,5 @@ different systems or mechanisms. Including pip packages in our dependencies woul
 The other solution we considered was installing our pip dependencies downstream within our DAaaS workspace
 configuration repository. We decided against this because it feels like bad practise to have a formalised
 way of installing dependencies of a software in a way which is completely detached. The prevailing message is
-this: please only use Conda packages.
+this: please only use Conda packages. We provide :ref:`pip install instructions <pip-install-ref>` for users if
+they would like to take the risk.
