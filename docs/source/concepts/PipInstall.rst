@@ -38,6 +38,8 @@ For these reasons, Mantid does not install any ``pip`` dependencies automaticall
 a PyPi package for your workflow, you can install the package manually. Note that you do so at
 your own risk.
 
+.. _pip-install-ref:
+
 How to extend Mantid with a Pip install?
 ----------------------------------------
 
@@ -52,5 +54,7 @@ The second way is via the Python script editor window in Workbench:
    rv = subprocess.run([sys.executable, '-m', 'pip', 'install', '--user', '<insert_package_name>'], capture_output=True)
    print(rv.stdout.decode())
    print(rv.stderr.decode())
+
+Mantid has to be restarted for the changes to take effect. Please note that the script above requires Python 3.7 or higher.
 
 .. categories:: Concepts
