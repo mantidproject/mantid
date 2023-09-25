@@ -1232,7 +1232,7 @@ public:
     return;
   }
 
-  void notest_tableSplitterHuge() {
+  void test_tableSplitterHuge() {
     g_log.notice("\ntest_tableSplitterHuge...");
 
     // Load event workspace
