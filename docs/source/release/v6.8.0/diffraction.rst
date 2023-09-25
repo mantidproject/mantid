@@ -28,6 +28,7 @@ Bugfixes
 - Exposed ``MSEvents`` parameter of :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>` to users of ISIS powder reduction scripts (parameter ``mayers_mult_scat_events`` in the instrument settings).
 - Fix type conversion bug producing an error in the cross-corellation functionality of the powder diffraction calibration scripts used in :ref:`powder diffraction calibration <Powder Diffraction Calibration>`.
 - Fixed bug in ISIS powder reduction for workspaces being overwritten when focussing using individual batching mode (this affected POLARIS and GEM)
+- Fixed bug in :ref:`PDCalibration <algm-PDCalibration>` which was not using the user-input peak windows unless they were pre-sorted, it is no longer necessary to pre-sort peak centers and windows.
 
 
 Engineering Diffraction
