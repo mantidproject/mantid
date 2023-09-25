@@ -4,7 +4,7 @@ Pip Install
 ===========
 
 What is Pip?
------------
+------------
 
 ``pip`` is a package manager for Python that is primarily used for installing Python packages
 from the Python Package Index (PyPI) and other package repositories. It is the default package
