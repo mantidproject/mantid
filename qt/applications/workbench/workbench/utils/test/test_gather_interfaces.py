@@ -15,7 +15,7 @@ class GatherInterfacesTest(TestCase):
     @patch("workbench.utils.gather_interfaces.logger")
     @patch("os.path.exists")
     def test_python_interfaces_are_discovered_correctly(self, mock_os_path_exists, _):
-        interfaces = ["Muon/Frequency_Domain_Analysis.py", "ILL/Drill.py"]
+        interfaces = ["Muon/Frequency_Domain_Analysis.py", "ILL/DrILL.py"]
         interfaces_str = " ".join(interfaces)  # config service returns them as a whole string.
         mock_os_path_exists.return_value = lambda path: path in interfaces
 
@@ -23,7 +23,7 @@ class GatherInterfacesTest(TestCase):
             returned_interfaces = gather_interface_names("")
             registration_files = get_registers_to_run("")
 
-        expected_interfaces = {"Muon": ["Frequency_Domain_Analysis.py"], "ILL": ["Drill.py"]}
+        expected_interfaces = {"Muon": ["Frequency_Domain_Analysis.py"], "ILL": ["DrILL.py"]}
         self.assertDictEqual(expected_interfaces, returned_interfaces)
         self.assertDictEqual({}, registration_files)
 
