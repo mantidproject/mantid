@@ -19,7 +19,7 @@ def package_installed(package_name: str) -> bool:
     if not is_installed:
         logger.warning(
             f"The '{package_name}' pip package is not installed. Follow these instructions to pip install the package:\n"
-            f"    <documentation link here>"
+            f"    https://docs.mantidproject.org/nightly/concepts/PipInstall.html"
         )
     return is_installed
 
