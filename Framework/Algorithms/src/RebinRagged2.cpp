@@ -6,9 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAlgorithms/RebinRagged2.h"
+#include "MantidHistogramData/Rebin.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -70,22 +74,24 @@ std::map<std::string, std::string> RebinRagged::validateInputs() {
     errors["Delta"] = "All must be nonzero";
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  const auto numSpec = inputWS->getNumberHistograms();
+  const auto histnumber = inputWS->getNumberHistograms();
 
   if (numDelta == 0)
     errors["Delta"] = "Must specify binning";
-  else if (!(numDelta == 1 || numDelta == numSpec))
+  else if (!(numDelta == 1 || numDelta == histnumber))
     errors["Delta"] =
-        "Must specify for each spetra (" + std::to_string(numDelta) + "!=" + std::to_string(numSpec) + ")";
+        "Must specify for each spetra (" + std::to_string(numDelta) + "!=" + std::to_string(histnumber) + ")";
 
-  if (numMin > 1 && numMin != numSpec)
+  if (numMin > 1 && numMin != histnumber)
     errors["XMin"] =
-        "Must specify min for each spectra (" + std::to_string(numMin) + "!=" + std::to_string(numSpec) + ")";
+        "Must specify min for each spectra (" + std::to_string(numMin) + "!=" + std::to_string(histnumber) + ")";
 
-  if (numMax > 1 && numMax != numSpec)
+  if (numMax > 1 && numMax != histnumber)
     errors["XMax"] =
-        "Must specify max for each spectra (" + std::to_string(numMax) + "!=" + std::to_string(numSpec) + ")";
+        "Must specify max for each spectra (" + std::to_string(numMax) + "!=" + std::to_string(histnumber) + ")";
 
+  if (!inputWS->isHistogramData())
+    errors["InputWorkspace"] = "Only works with histogram data, not point data";
   return errors;
 }
 
@@ -102,7 +108,7 @@ void RebinRagged::exec() {
   bool inPlace = (inputWS == outputWS);
 
   // workspace independent determination of length
-  const auto numSpec = inputWS->getNumberHistograms();
+  const auto histnumber = inputWS->getNumberHistograms();
 
   std::vector<double> xmins = getProperty("XMin");
   std::vector<double> xmaxs = getProperty("XMax");
@@ -122,22 +128,33 @@ void RebinRagged::exec() {
     return;
   }
 
-  extend_value(numSpec, xmins);
-  extend_value(numSpec, xmaxs);
-  extend_value(numSpec, deltas);
+  extend_value(histnumber, xmins);
+  extend_value(histnumber, xmaxs);
+  extend_value(histnumber, deltas);
+
+  // replace NaN and infinity with X min/max
+  for (size_t hist = 0; hist < histnumber; hist++) {
+    const auto inX = inputWS->x(hist);
+    if (!std::isfinite(xmins[hist]))
+      xmins[hist] = inX.front();
+    if (!std::isfinite(xmaxs[hist]))
+      xmaxs[hist] = inX.back();
+  }
+
+  const bool dist = inputWS->isDistribution();
 
   // Now, determine if the input workspace is an EventWorkspace
   EventWorkspace_const_sptr eventInputWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
   if (eventInputWS) {
-
+    //------- EventWorkspace as input -------------------------------------
     if (preserveEvents) {
       if (!inPlace) {
         outputWS = inputWS->clone();
       }
       auto eventOutputWS = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
-      for (size_t i = 0; i < numSpec; i++) {
+      for (size_t i = 0; i < histnumber; i++) {
         auto xmin = xmins[i];
         auto xmax = xmaxs[i];
         const auto delta = deltas[i];
@@ -156,9 +173,50 @@ void RebinRagged::exec() {
     } else {
       throw Kernel::Exception::NotImplementedError("TODO: event to histogram");
     }
-  } else {
-    throw Kernel::Exception::NotImplementedError("TODO: histgmra");
-  }
+  } // END ---- EventWorkspace
+
+  else
+
+  { //------- Workspace2D or other MatrixWorkspace ---------------------------
+
+    // make output Workspace the same type is the input, but with new length of
+    // signal array
+    outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS, histnumber, inputWS->histogram(0));
+
+    // Copy over the 'vertical' axis
+    if (inputWS->axes() > 1)
+      outputWS->replaceAxis(1, std::unique_ptr<Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
+
+    Progress prog(this, 0.0, 1.0, histnumber);
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
+    for (size_t hist = 0; hist < histnumber; ++hist) {
+      PARALLEL_START_INTERRUPT_REGION
+      auto xmin = xmins[hist];
+      auto xmax = xmaxs[hist];
+      const auto delta = deltas[hist];
+
+      const auto inX = inputWS->x(hist);
+      if (!std::isfinite(xmin))
+        xmin = inX.front();
+      if (!std::isfinite(xmax))
+        xmax = inX.back();
+
+      HistogramData::BinEdges XValues_new(0);
+      static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData()));
+
+      outputWS->setHistogram(hist, HistogramData::rebin(inputWS->histogram(hist), XValues_new));
+      prog.report(name());
+      PARALLEL_END_INTERRUPT_REGION
+    }
+    PARALLEL_CHECK_INTERRUPT_REGION
+    outputWS->setDistribution(dist);
+
+    // Copy the units over too.
+    for (int i = 0; i < outputWS->axes(); ++i) {
+      outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
+    }
+
+  } // END ---- Workspace2D
 
   setProperty("OutputWorkspace", outputWS);
 }
@@ -186,11 +244,11 @@ bool RebinRagged::use_simple_rebin(std::vector<double> xmins, std::vector<double
   return true;
 }
 
-void RebinRagged::extend_value(size_t numSpec, std::vector<double> &array) {
+void RebinRagged::extend_value(size_t histnumber, std::vector<double> &array) {
   if (array.size() == 0) {
-    array.resize(numSpec, std::numeric_limits<double>::quiet_NaN());
+    array.resize(histnumber, std::numeric_limits<double>::quiet_NaN());
   } else if (array.size() == 1) {
-    array.resize(numSpec, array[0]);
+    array.resize(histnumber, array[0]);
   }
 }
 } // namespace Algorithms
