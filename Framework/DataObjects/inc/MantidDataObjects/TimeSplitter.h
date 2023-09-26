@@ -56,8 +56,8 @@ public:
   /// this is to aid in testing and not intended for use elsewhere
   std::size_t numRawValues() const;
   /// Split a list of events according to Pulse time or Pulse + TOF time
-  void splitEventList(const EventList &events, std::map<int, EventList *> &partials, bool pulseTof = false,
-                      bool tofCorrect = false, double factor = 1.0, double shift = 0.0) const;
+  void splitEventList(const EventList &events, std::map<int, EventList *> &partials, const bool pulseTof = false,
+                      const bool tofCorrect = false, const double factor = 1.0, const double shift = 0.0) const;
   /// Print the (destination index | DateAndTime boundary) pairs of this splitter.
   std::string debugPrint() const;
   void rebuildCachedPartialTimeROIs();
@@ -67,8 +67,8 @@ private:
   void clearAndReplace(const DateAndTime &start, const DateAndTime &stop, const int value);
   /// Distribute a list of events by comparing a vector of times against the splitter boundaries.
   template <typename EventType>
-  void splitEventVec(const std::vector<EventType> &events, std::map<int, EventList *> &partials, bool pulseTof,
-                     bool tofCorrect, double factor, double shift) const;
+  void splitEventVec(const std::vector<EventType> &events, std::map<int, EventList *> &partials, const bool pulseTof,
+                     const bool tofCorrect, const double factor, const double shift) const;
   template <typename EventType>
   void splitEventVec(const std::function<DateAndTime(const EventType &)> &timeCalc,
                      const std::vector<EventType> &events, std::map<int, EventList *> &partials) const;
