@@ -1022,18 +1022,16 @@ void FilterEvents::filterEvents(double progressamount) {
     PARALLEL_START_INTERRUPT_REGION
     if (!m_vecSkip[iws]) {                                      // Filter the non-skipped
       std::map<int, DataObjects::EventList *> partialEvenLists; // event lists receiving the events from input list
-      PARALLEL_CRITICAL(build_elist) {
-        for (auto &ws : m_outputWorkspacesMap) {
-          int index = ws.first;
-          auto &partialEventList = ws.second->getSpectrum(iws);
-          partialEvenLists.emplace(index, &partialEventList);
-        }
-        const DataObjects::EventList &inputEventList = m_eventWS->getSpectrum(iws); // input event list
-        const bool pulseTof{!m_filterByPulseTime};                                  // split by pulse-time + TOF ?
-        const bool tofCorrect{m_tofCorrType != NoneCorrect}; // apply corrections to the TOF values?
-        m_timeSplitter.splitEventList(inputEventList, partialEvenLists, pulseTof, tofCorrect, m_detTofFactors[iws],
-                                      m_detTofOffsets[iws]);
+      for (auto &ws : m_outputWorkspacesMap) {
+        const int index = ws.first;
+        auto &partialEventList = ws.second->getSpectrum(iws);
+        partialEvenLists.emplace(index, &partialEventList);
       }
+      const DataObjects::EventList &inputEventList = m_eventWS->getSpectrum(iws); // input event list
+      const bool pulseTof{!m_filterByPulseTime};                                  // split by pulse-time + TOF ?
+      const bool tofCorrect{m_tofCorrType != NoneCorrect}; // apply corrections to the TOF values?
+      m_timeSplitter.splitEventList(inputEventList, partialEvenLists, pulseTof, tofCorrect, m_detTofFactors[iws],
+                                    m_detTofOffsets[iws]);
     }
     PARALLEL_END_INTERRUPT_REGION
   }
