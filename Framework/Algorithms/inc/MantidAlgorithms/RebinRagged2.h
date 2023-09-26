@@ -20,10 +20,14 @@ public:
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
+  const std::vector<std::string> seeAlso() const override { return {"Rebin", "ResampleX"}; }
 
 private:
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
+  static bool use_simple_rebin(std::vector<double> xmins, std::vector<double> xmaxs, std::vector<double> deltas);
+  static void extend_value(size_t numSpec, std::vector<double> &array);
 };
 
 } // namespace Algorithms
