@@ -70,7 +70,7 @@ private:
   void splitEventVec(const std::vector<EventType> &events, std::map<int, EventList *> &partials, const bool pulseTof,
                      const bool tofCorrect, const double factor, const double shift) const;
   template <typename EventType>
-  void splitEventVec(const std::function<DateAndTime(const EventType &)> &timeCalc,
+  void splitEventVec(const std::function<const DateAndTime(const EventType &)> &timeCalc,
                      const std::vector<EventType> &events, std::map<int, EventList *> &partials) const;
 
   void resetCachedPartialTimeROIs();

@@ -541,7 +541,7 @@ void TimeSplitter::splitEventVec(const std::vector<EventType> &events, std::map<
                                  const bool pulseTof, const bool tofCorrect, const double factor,
                                  const double shift) const {
   // determine the right functnio for getting the "pulse time" for the event
-  std::function<DateAndTime(const EventType &)> timeCalc;
+  std::function<const DateAndTime(const EventType &)> timeCalc;
   if (pulseTof) {
     if (tofCorrect) {
       timeCalc = [factor, shift](const EventType &event) { return event.pulseTOFTimeAtSample(factor, shift); };
@@ -557,7 +557,7 @@ void TimeSplitter::splitEventVec(const std::vector<EventType> &events, std::map<
 }
 
 template <typename EventType>
-void TimeSplitter::splitEventVec(const std::function<DateAndTime(const EventType &)> &timeCalc,
+void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const EventType &)> &timeCalc,
                                  const std::vector<EventType> &events, std::map<int, EventList *> &partials) const {
   // initialize the iterator over the splitter
   // it assumes the splitter keys (DateAndTime objects) are sorted by increasing time.
