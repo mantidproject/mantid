@@ -1,3 +1,5 @@
+.. _sample_transmission_calculator:
+
 Sample Transmission Calculator
 ==============================
 
