@@ -1,3 +1,5 @@
+.. _tof_converter:
+
 Time of Flight Converter
 ========================
 

@@ -35,7 +35,7 @@ New features
 Bugfixes
 ############
 - Fixed bug in ``mantid.kernel.LogFilter`` usage case from the tutorial site
-- fixed bug in ``TimeSplitter`` where workspace rows with zero-length time were corrupting the time intervals map.
+- Fixed bug in ``TimeSplitter`` where workspace rows with zero-length time were corrupting the time intervals map.
 - Fixed bug in ``TimeSplitter.addROI()`` when the ROI starts at the beginning of the ``TimeSplitter`` object.
 - It is now possible to use the archive on macOS once it has been mounted. Follow the archive mounting instructions here: https://developer.mantidproject.org/GettingStarted/GettingStarted.html#osx
 
@@ -45,9 +45,9 @@ Python
 
 New features
 ############
-- Upgraded to Python 3.10
-- :ref:`SNSPowderReduction <algm-SNSPowderReduction>`, can now perform linear interpolation for temperature of two empty container background runs using new :ref:`InterpolateBackground <algm-InterpolateBackground>` algorithm
-- New algorithm available, :ref:`InterpolateBackground <algm-InterpolateBackground>`, used to perform linear interpolation for temperature of two background runs
+- Upgraded to Python 3.10.
+- :ref:`SNSPowderReduction <algm-SNSPowderReduction>`, can now perform linear interpolation for temperature of two empty container background runs using new :ref:`InterpolateBackground <algm-InterpolateBackground>` algorithm.
+- New algorithm available, :ref:`InterpolateBackground <algm-InterpolateBackground>`, used to perform linear interpolation for temperature of two background runs.
 - Drop support for numpy v1.21 because it's no longer maintained.
 
 

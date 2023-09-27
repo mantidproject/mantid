@@ -17,10 +17,10 @@ Bugfixes
 - Fix bug that left a tab open with the old file name in the script editor when using 'Save Script as'
 - Catch unhandled exception when attempting to generate a plot script from an unsupported plot.
 - Fix bug that would open a duplicate tab if a file was already open. Now it will select the existing tab with the file.
-- Small bug fixes and usability improvements to the Sample Transmission Calculator. Axes are now labelled and error feedback is improved.
+- Small bug fixes and usability improvements to the :ref:`sample_transmission_calculator`. Axes are now labelled and error feedback is improved.
 - Improved right-click behaviour in the table view (e.g. "Show Data") when right-clicking on a row/column header.
-- Fix bug in the Sample Logs Viewer that causes crash when the selected workspace is modified or deleted
-- Fix some minor usability bugs and improve the layout of the TOF Converter window. It can now take an input value from any single valued workspace. It no longer requires a scattering angle to convert between momentum transfer and d-spacing.
+- Fix bug in the Sample Logs Viewer that causes crash when the selected workspace is modified or deleted.
+- Fix some minor usability bugs and improve the layout of the :ref:`tof_converter` window. It can now take an input value from any single valued workspace. It no longer requires a scattering angle to convert between momentum transfer and d-spacing.
 - An implicit conversion warning which sometimes appears when opening Sample logs has been fixed.
 
 
@@ -40,7 +40,7 @@ New features
 ############
 - Entering an invalid value into either colour bar limit text box will cause the outline to change to red.
 - Integer ticks/grid lines are now used if possible for hkl-axes.
-- Autoscaling types are now added to slice viewer to help quickly rescale color limits based on statistical variation in the data
+- Autoscaling types are now added to slice viewer to help quickly rescale color limits based on statistical variation in the data.
 
   1. Min/Max (minimum, maximum as before)
   2. 3-Sigma (mean ± 3 x standard deviation)
@@ -50,7 +50,7 @@ New features
 Bugfixes
 ############
 - Entering particular values (i.e 0,111) into the colour bar limit text boxes, will no longer cause an error.
-- Resolved issue with projection matrix calcluation using basis vectors with non-q dimensions
+- Resolved issue with projection matrix calcluation using basis vectors with non-q dimensions.
 
 
 :ref:`Release 6.8.0 <v6.8.0>`
