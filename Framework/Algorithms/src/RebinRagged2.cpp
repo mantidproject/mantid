@@ -13,6 +13,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -27,6 +28,7 @@ using namespace Kernel;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_const_sptr;
+using HistogramData::HistogramBuilder;
 
 //----------------------------------------------------------------------------------------------
 
@@ -154,24 +156,66 @@ void RebinRagged::exec() {
       }
       auto eventOutputWS = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
-      for (size_t i = 0; i < histnumber; i++) {
-        auto xmin = xmins[i];
-        auto xmax = xmaxs[i];
-        const auto delta = deltas[i];
-
-        const auto inX = eventInputWS->x(i);
-        if (!std::isfinite(xmin))
-          xmin = inX.front();
-        if (!std::isfinite(xmax))
-          xmax = inX.back();
+      for (size_t hist = 0; hist < histnumber; hist++) {
+        auto xmin = xmins[hist];
+        auto xmax = xmaxs[hist];
+        const auto delta = deltas[hist];
 
         HistogramData::BinEdges XValues_new(0);
         static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData()));
-        EventList &el = eventOutputWS->getSpectrum(i);
+        EventList &el = eventOutputWS->getSpectrum(hist);
         el.setHistogram(XValues_new);
       }
     } else {
-      throw Kernel::Exception::NotImplementedError("TODO: event to histogram");
+      //--------- not preserving Events
+      g_log.information() << "Creating a Workspace2D from the EventWorkspace " << eventInputWS->getName() << ".\n";
+
+      outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS, histnumber, inputWS->histogram(0));
+
+      Progress prog(this, 0.0, 1.0, histnumber);
+
+      // Go through all the histograms and set the data
+      PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
+      for (size_t hist = 0; hist < histnumber; ++hist) {
+        PARALLEL_START_INTERRUPT_REGION
+        auto xmin = xmins[hist];
+        auto xmax = xmaxs[hist];
+        const auto delta = deltas[hist];
+
+        // Get a const event list reference. eventInputWS->dataY() doesn't work.
+        const EventList &el = eventInputWS->getSpectrum(hist);
+
+        HistogramData::BinEdges XValues_new(0);
+        static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData()));
+
+        MantidVec y_data, e_data;
+        // The EventList takes care of histogramming.
+        el.generateHistogram(XValues_new.rawData(), y_data, e_data);
+
+        // Create and set the output histogram
+        HistogramBuilder builder;
+        builder.setX(XValues_new.rawData());
+        builder.setY(y_data);
+        builder.setE(e_data);
+        builder.setDistribution(dist);
+        outputWS->setHistogram(hist, builder.build());
+
+        prog.report();
+        PARALLEL_END_INTERRUPT_REGION
+      }
+      PARALLEL_CHECK_INTERRUPT_REGION
+
+      // Copy all the axes
+      for (int i = 1; i < inputWS->axes(); i++) {
+        outputWS->replaceAxis(i, std::unique_ptr<Axis>(inputWS->getAxis(i)->clone(outputWS.get())));
+        outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
+      }
+
+      // Copy the units over too.
+      for (int i = 0; i < outputWS->axes(); ++i)
+        outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
+      outputWS->setYUnit(eventInputWS->YUnit());
+      outputWS->setYUnitLabel(eventInputWS->YUnitLabel());
     }
   } // END ---- EventWorkspace
 
@@ -179,8 +223,7 @@ void RebinRagged::exec() {
 
   { //------- Workspace2D or other MatrixWorkspace ---------------------------
 
-    // make output Workspace the same type is the input, but with new length of
-    // signal array
+    // make output Workspace the same type as the input
     outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS, histnumber, inputWS->histogram(0));
 
     // Copy over the 'vertical' axis
@@ -188,6 +231,7 @@ void RebinRagged::exec() {
       outputWS->replaceAxis(1, std::unique_ptr<Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
 
     Progress prog(this, 0.0, 1.0, histnumber);
+
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
     for (size_t hist = 0; hist < histnumber; ++hist) {
       PARALLEL_START_INTERRUPT_REGION
@@ -195,17 +239,11 @@ void RebinRagged::exec() {
       auto xmax = xmaxs[hist];
       const auto delta = deltas[hist];
 
-      const auto inX = inputWS->x(hist);
-      if (!std::isfinite(xmin))
-        xmin = inX.front();
-      if (!std::isfinite(xmax))
-        xmax = inX.back();
-
       HistogramData::BinEdges XValues_new(0);
       static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData()));
 
       outputWS->setHistogram(hist, HistogramData::rebin(inputWS->histogram(hist), XValues_new));
-      prog.report(name());
+      prog.report();
       PARALLEL_END_INTERRUPT_REGION
     }
     PARALLEL_CHECK_INTERRUPT_REGION
