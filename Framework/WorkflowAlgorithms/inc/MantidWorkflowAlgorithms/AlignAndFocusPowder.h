@@ -101,7 +101,6 @@ private:
   double tmin{0.0};
   double tmax{0.0};
   bool m_preserveEvents{false};
-  void doSortEvents(const Mantid::API::Workspace_sptr &ws);
   void compressEventsOutputWS(const double compressEventsTolerance, const double wallClockTolerance);
   bool shouldCompressUnfocused(const double compressTolerance, const double tofmin, const double tofmax,
                                const bool hasWallClockTolerance);

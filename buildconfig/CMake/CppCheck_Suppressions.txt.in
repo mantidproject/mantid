@@ -197,8 +197,8 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Utils.h:195
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/EventList.h:144
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:959
 identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1055
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:3840
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:3841
+shadowFunction:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4053
+shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:4054
 derefInvalidIterator:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1520
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/OrientedLattice.cpp:234
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/NiggliCell.cpp:233
