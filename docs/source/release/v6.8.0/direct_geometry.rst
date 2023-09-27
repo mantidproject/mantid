@@ -20,11 +20,12 @@ MSlice
 
 New features
 ############
+- Upgraded Python from version 3.8 to 3.10.
 
-
-Bugfixes
-############
-
+BugFixes
+########
+- Stopped storing GDOS cuts in the ADS.
+- Fixed a bug that caused incorrect error propagation in GDOS intensity corrections.
 
 
 :ref:`Release 6.8.0 <v6.8.0>`
