@@ -13,10 +13,6 @@ from mantid.utils.pip import import_pip_package
 import os
 import numpy as np
 
-quasielasticbayes = import_pip_package("quasielasticbayes")
-if quasielasticbayes is not None:
-    Que = quasielasticbayes.Quest
-
 
 class BayesStretch(PythonAlgorithm):
     _sam_name = None
@@ -109,8 +105,11 @@ class BayesStretch(PythonAlgorithm):
 
     # pylint: disable=too-many-locals
     def PyExec(self):
+        quasielasticbayes = import_pip_package("quasielasticbayes", show_warning=True)
         if quasielasticbayes is None:
             return
+
+        Que = quasielasticbayes.Quest
 
         from IndirectBayes import CalcErange, GetXYE
         from IndirectCommon import CheckXrange, CheckAnalysersOrEFixed, getEfixed, GetThetaQ, CheckHistZero

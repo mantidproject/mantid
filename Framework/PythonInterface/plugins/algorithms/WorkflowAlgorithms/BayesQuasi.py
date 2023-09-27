@@ -17,13 +17,6 @@ from mantid import config, logger
 from IndirectCommon import *
 
 
-quasielasticbayes = import_pip_package("quasielasticbayes")
-if quasielasticbayes is not None:
-    QLr = quasielasticbayes.QLres
-    QLd = quasielasticbayes.QLdata
-    Qse = quasielasticbayes.QLse
-
-
 class BayesQuasi(PythonAlgorithm):
     _program = None
     _samWS = None
@@ -142,8 +135,13 @@ class BayesQuasi(PythonAlgorithm):
 
     # pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
+        quasielasticbayes = import_pip_package("quasielasticbayes", show_warning=True)
         if quasielasticbayes is None:
             return
+
+        QLr = quasielasticbayes.QLres
+        QLd = quasielasticbayes.QLdata
+        Qse = quasielasticbayes.QLse
 
         from IndirectBayes import CalcErange, GetXYE
 

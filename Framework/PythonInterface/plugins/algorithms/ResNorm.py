@@ -61,7 +61,7 @@ class ResNorm(PythonAlgorithm):
     def PyExec(self):
         from mantid.utils.pip import package_installed
 
-        if not package_installed("quasielasticbayes"):
+        if not package_installed("quasielasticbayes", show_warning=True):
             return
 
         import IndirectBayes as Main

@@ -8,7 +8,7 @@
 
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress
 from mantid.kernel import StringListValidator, Direction
-from mantid.utils.pip import import_pip_package
+from mantid.utils.pip import import_pip_package, package_installed
 from mantid import logger
 from IndirectCommon import GetThetaQ
 
@@ -224,7 +224,7 @@ class BayesQuasi2(QuickBayesTemplate):
         return quickBayes.utils.general.get_background_function(bg_str)
 
     def PyExec(self):
-        if quickBayes is None:
+        if not package_installed("quickBayes", show_warning=True):
             return
 
         self.log().information("BayesQuasi input")

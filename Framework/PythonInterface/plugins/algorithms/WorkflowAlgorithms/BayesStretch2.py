@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
 from mantid.api import AlgorithmFactory, WorkspaceGroupProperty, Progress
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
-from mantid.utils.pip import import_pip_package
+from mantid.utils.pip import import_pip_package, package_installed
 from mantid import logger
 from IndirectCommon import GetThetaQ
 from mantid.api import AnalysisDataService as ADS
@@ -266,7 +266,7 @@ class BayesStretch2(QuickBayesTemplate):
         return slice_group
 
     def PyExec(self):
-        if quickBayes is None:
+        if not package_installed("quickBayes", show_warning=True):
             return
 
         self.log().information("BayesStretch input")
