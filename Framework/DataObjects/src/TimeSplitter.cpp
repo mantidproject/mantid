@@ -589,6 +589,12 @@ void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const Eve
     }
   }
 
+  // advance to the splitter that would include this event
+  itSplitter = m_roi_map.lower_bound(timeCalc(*itEvent));
+  // then go back by one to insure the event is included
+  if (itSplitter != m_roi_map.cbegin())
+    itSplitter--;
+
   // iterate over all events. For each event try finding its destination event list, a.k.a. partial.
   // If the partial is found, append the event to it. It is assumed events are sorted by (possibly corrected) time
   while (itEvent != itEventEnd && itSplitter != itSplitterEnd) {
