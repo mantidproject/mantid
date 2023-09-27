@@ -8,7 +8,7 @@
 
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress
 from mantid.kernel import StringListValidator, Direction
-from mantid.utils.pip import import_pip_package, package_installed
+from mantid.utils.pip import package_installed
 from mantid import logger
 from IndirectCommon import GetThetaQ
 
@@ -17,8 +17,6 @@ from numpy import ndarray
 import numpy as np
 
 from quickBayesHelper import QuickBayesTemplate
-
-quickBayes = import_pip_package("quickBayes")
 
 
 class BayesQuasi2(QuickBayesTemplate):
@@ -209,19 +207,29 @@ class BayesQuasi2(QuickBayesTemplate):
 
     # Cannot make static as it prevents it being mocked later
     def QLData(self):
-        return quickBayes.workflow.QlData.QLData
+        from quickBayes.workflow.QlData import QLData
+
+        return QLData
 
     def QlDataFunction(self):
-        return quickBayes.functions.qldata_function.QlDataFunction
+        from quickBayes.functions.qldata_function import QlDataFunction
+
+        return QlDataFunction
 
     def QSEFunction(self):
-        return quickBayes.functions.qse_function.QSEFunction
+        from quickBayes.functions.qse_function import QSEFunction
+
+        return QSEFunction
 
     def QlStretchedExp(self):
-        return quickBayes.workflow.QSE.QlStretchedExp
+        from quickBayes.workflow.QSE import QlStretchedExp
+
+        return QlStretchedExp
 
     def get_background_function(self, bg_str):
-        return quickBayes.utils.general.get_background_function(bg_str)
+        from quickBayes.utils.general import get_background_function
+
+        return get_background_function(bg_str)
 
     def PyExec(self):
         if not package_installed("quickBayes", show_warning=True):

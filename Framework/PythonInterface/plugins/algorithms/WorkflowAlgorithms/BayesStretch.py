@@ -9,7 +9,6 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspacePropert
 from mantid.kernel import StringListValidator, Direction
 import mantid.simpleapi as s_api
 from mantid import config, logger
-from mantid.utils.pip import import_pip_package
 import os
 import numpy as np
 
@@ -105,11 +104,10 @@ class BayesStretch(PythonAlgorithm):
 
     # pylint: disable=too-many-locals
     def PyExec(self):
-        quasielasticbayes = import_pip_package("quasielasticbayes", show_warning=True)
-        if quasielasticbayes is None:
+        if not package_installed("quasielasticbayes", show_warning=True):
             raise RuntimeError("Please install 'quasielasticbayes' missing dependency")
 
-        Que = quasielasticbayes.Quest
+        from quasielasticbayes import Quest as Que
 
         from IndirectBayes import CalcErange, GetXYE
         from IndirectCommon import CheckXrange, CheckAnalysersOrEFixed, getEfixed, GetThetaQ, CheckHistZero

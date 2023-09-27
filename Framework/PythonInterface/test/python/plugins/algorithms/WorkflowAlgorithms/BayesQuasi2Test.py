@@ -9,16 +9,16 @@ import unittest
 from mantid.simpleapi import Load, DeleteWorkspace, CreateWorkspace, CompareWorkspaces, GroupWorkspaces
 import numpy as np
 from mantid import AnalysisDataService
-from mantid.utils.pip import import_pip_package
+from mantid.utils.pip import package_installed
 from BayesQuasi2 import BayesQuasi2
 
 from unittest import mock
 
-quickBayes = import_pip_package("quickBayes")
-if quickBayes is not None:
-    FitEngine = quickBayes.fitting.fit_engine.FitEngine
-    QLData = quickBayes.workflow.QlData.QLData
-    QlDataFunction = quickBayes.functions.qldata_function.QlDataFunction
+
+if package_installed("quickBayes"):
+    from quickBayes.fitting.fit_engine import FitEngine
+    from quickBayes.workflow.QlData import QLData
+    from quickBayes.functions.qldata_function import QlDataFunction
 
     SAMPLE_NAME = "__BayesStretchTest_Sample"
     RES_NAME = "__BayesStretchTest_Resolution"

@@ -11,7 +11,7 @@ import numpy as np
 
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, WorkspaceGroupProperty, Progress
 from mantid.kernel import StringListValidator, Direction
-from mantid.utils.pip import import_pip_package
+from mantid.utils.pip import package_installed
 import mantid.simpleapi as s_api
 from mantid import config, logger
 from IndirectCommon import *
@@ -135,13 +135,12 @@ class BayesQuasi(PythonAlgorithm):
 
     # pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
-        quasielasticbayes = import_pip_package("quasielasticbayes", show_warning=True)
-        if quasielasticbayes is None:
+        if not package_installed("quasielasticbayes", show_warning=True):
             raise RuntimeError("Please install 'quasielasticbayes' missing dependency")
 
-        QLr = quasielasticbayes.QLres
-        QLd = quasielasticbayes.QLdata
-        Qse = quasielasticbayes.QLse
+        from quasielasticbayes import QLres as QLr
+        from quasielasticbayes import QLdata as QLd
+        from quasielasticbayes import QLse as Qse
 
         from IndirectBayes import CalcErange, GetXYE
 

@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
 from mantid.api import AlgorithmFactory, WorkspaceGroupProperty, Progress
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
-from mantid.utils.pip import import_pip_package, package_installed
+from mantid.utils.pip import package_installed
 from mantid import logger
 from IndirectCommon import GetThetaQ
 from mantid.api import AnalysisDataService as ADS
@@ -18,8 +18,6 @@ from functools import partial
 from numpy import ndarray
 import numpy as np
 import multiprocessing
-
-quickBayes = import_pip_package("quickBayes")
 
 
 class BayesStretch2(QuickBayesTemplate):
@@ -64,15 +62,19 @@ class BayesStretch2(QuickBayesTemplate):
 
     # Cannot make static as it prevents it being mocked later
     def QSEFixFunction(self, bg_function, elastic_peak, r_x, r_y, start_x, end_x):
-        return quickBayes.functions.qse_fixed.QSEFixFunction(
-            bg_function=bg_function, elastic_peak=elastic_peak, r_x=r_x, r_y=r_y, start_x=start_x, end_x=end_x
-        )
+        from quickBayes.functions.qse_fixed import QSEFixFunction
+
+        return QSEFixFunction(bg_function=bg_function, elastic_peak=elastic_peak, r_x=r_x, r_y=r_y, start_x=start_x, end_x=end_x)
 
     def QSEGridSearch(self):
-        return quickBayes.workflow.qse_search.QSEGridSearch()
+        from quickBayes.workflow.qse_search import QSEGridSearch
+
+        return QSEGridSearch()
 
     def parallel(self, items, function, N):
-        return quickBayes.utils.parallel.parallel(items=items, function=function, N=N)
+        from quickBayes.utils.parallel import parallel
+
+        return parallel(items=items, function=function, N=N)
 
     def do_one_spec(self, spec, data):
         sx = data["sample"].readX(spec)
@@ -115,7 +117,9 @@ class BayesStretch2(QuickBayesTemplate):
 
     @staticmethod
     def get_background_function(BG_str):
-        return quickBayes.utils.general.get_background_function(BG_str)
+        from quickBayes.utils.general import get_background_function
+
+        return get_background_function(BG_str)
 
     def calculate(self, sample_ws, report_progress, res_list, N):
         data = {}

@@ -9,15 +9,15 @@ import unittest
 from mantid.simpleapi import Load, DeleteWorkspace, CreateWorkspace, CompareWorkspaces, GroupWorkspaces
 import numpy as np
 from mantid import AnalysisDataService
-from mantid.utils.pip import import_pip_package
+from mantid.utils.pip import package_installed
 from BayesStretch2 import BayesStretch2
 
 from unittest import mock
 
-quickBayes = import_pip_package("quasielasticbayes")
-if quickBayes is not None:
-    QSEFixFunction = quickBayes.functions.qse_fixed.QSEFixFunction
-    QSEGridSearch = quickBayes.workflow.qse_search.QSEGridSearch
+
+if package_installed("quickBayes"):
+    from quickBayes.functions.qse_fixed import QSEFixFunction
+    from quickBayes.workflow.qse_search import QSEGridSearch
 
     SAMPLE_NAME = "__BayesStretchTest_Sample"
     RES_NAME = "__BayesStretchTest_Resolution"
