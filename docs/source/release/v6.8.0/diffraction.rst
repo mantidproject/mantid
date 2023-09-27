@@ -10,7 +10,7 @@ Powder Diffraction
 
 New features
 ############
-.. amalgamate:: Diffraction/Powder/New_features
+ - add new staging server
 
 Bugfixes
 ############
