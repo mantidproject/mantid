@@ -62,7 +62,7 @@ class ResNorm(PythonAlgorithm):
         from mantid.utils.pip import package_installed
 
         if not package_installed("quasielasticbayes", show_warning=True):
-            return
+            raise RuntimeError("Please install 'quasielasticbayes' missing dependency")
 
         import IndirectBayes as Main
 

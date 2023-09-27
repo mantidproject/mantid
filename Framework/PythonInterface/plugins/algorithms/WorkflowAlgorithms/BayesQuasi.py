@@ -137,7 +137,7 @@ class BayesQuasi(PythonAlgorithm):
     def PyExec(self):
         quasielasticbayes = import_pip_package("quasielasticbayes", show_warning=True)
         if quasielasticbayes is None:
-            return
+            raise RuntimeError("Please install 'quasielasticbayes' missing dependency")
 
         QLr = quasielasticbayes.QLres
         QLd = quasielasticbayes.QLdata

@@ -225,7 +225,7 @@ class BayesQuasi2(QuickBayesTemplate):
 
     def PyExec(self):
         if not package_installed("quickBayes", show_warning=True):
-            return
+            raise RuntimeError("Please install 'quickBayes' missing dependency")
 
         self.log().information("BayesQuasi input")
         program = self.getPropertyValue("Program")
