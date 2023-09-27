@@ -274,7 +274,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::setName(const std::strin
 
 /**
  * Fill in the supplied vector of time series data according to the input TimeROI. Include all time values
- * within ROI regions defined as [roi_start,roi_end), plus the values immediately before and after each ROI region,
+ * within ROI regions defined as [roi_start,roi_end], plus the values immediately before and after each ROI region,
  * if available.
  * @param timeROI :: time region of interest, i.e. time boundaries used to determine which values should be included in
  * the filtered data vector
@@ -302,15 +302,14 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
     filteredData.push_back(m_values.front());
     return;
   }
-
   // Get all ROI time boundaries. Every other value is start/stop of an ROI "use" region.
   const std::vector<Types::Core::DateAndTime> &roiTimes = timeROI.getAllTimes();
   auto itROI{roiTimes.begin()};
   const auto itROIEnd{roiTimes.end()};
 
   auto itValue{m_values.begin()};
-  const auto itValueEnd{m_values.end()}; // last value overall, exclusive
-  auto itLastValueUsed{itValue};         // last value used overall
+  const auto itValueEnd{m_values.end()};
+  auto itLastValueUsed{itValue}; // last value used up to the moment
 
   bool denseROIs = roiTimes.size() / 2 > m_values.size();
   while (itROI != itROIEnd && itValue != itValueEnd) {
@@ -327,23 +326,23 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
     while (itValue != itValueEnd && itValue->time() < (*itROI))
       itValue++;
 
-    // For each possible case, calculate the [begin,end) range of values to use
+    // Calculate the [begin,end) range of values to use
     auto itBeginUseValue{itValue};
     auto itEndUseValue{itValue};
     // If there are no values past the current ROI "use" region, get the previous value
     if (itValue == itValueEnd) {
       itBeginUseValue =
-          std::prev(itValue); // std::prev is safe, because "m_values is empty" case has already been treated above
+          std::prev(itValue); // std::prev is safe here, because "m_values is empty" case has already been treated above
       itEndUseValue = itValueEnd;
     }
     // If the value is inside the current ROI "use" region, look for other values in the same ROI "use" region
-    else if (itValue->time() < *(std::next(itROI))) {
+    else if (itValue->time() <= *(std::next(itROI))) {
       // First, try including a value immediately preceding the first value in the ROI "use" region.
       itBeginUseValue = itValue == m_values.begin() ? itValue : std::prev(itValue);
       // Now try finding the first value past the end of the current ROI "use" region.
-      while (itValue != itValueEnd && itValue->time() < *(std::next(itROI)))
+      while (itValue != itValueEnd && itValue->time() <= *(std::next(itROI)))
         itValue++;
-      // Include the current value, therefore, advance itEndUseValue, because the values are copied as [begin,end).
+      // Include the current value, therefore, advance itEndUseValue, because std::copy works as [begin,end).
       itEndUseValue = itValue == itValueEnd ? itValue : std::next(itValue);
     }
     // If we are at the last ROI "use" region or the value is not past the beginning of the next ROI "use" region, keep
