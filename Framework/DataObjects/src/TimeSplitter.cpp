@@ -13,9 +13,12 @@
 
 static double elapsed_time_case_1{0.0};
 static double elapsed_time_case_2{0.0};
-static double elapsed_time_case_4{0.0};
+// static double elapsed_time_case_4{0.0};
 static double elapsed_time_case_5{0.0};
 // static double elapsed_time_case_10{0.0};
+static std::chrono::time_point<std::chrono::system_clock> splitEventsVec_firstEntrance;
+static int splitEventsVec_call_count{0};
+static std::chrono::time_point<std::chrono::system_clock> splitEventsVec_lastEntrance;
 
 namespace Mantid {
 using API::EventType;
@@ -498,7 +501,9 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
 
   {
     // split the events
-    auto start = std::chrono::system_clock::now();
+    if (++splitEventsVec_call_count == 1)
+      splitEventsVec_firstEntrance = std::chrono::system_clock::now();
+
     switch (events.getEventType()) {
     case EventType::TOF:
       this->splitEventVec(events.getEvents(), partials, pulseTof, tofCorrect, factor, shift);
@@ -509,9 +514,12 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
     default:
       throw std::runtime_error("Unhandled event type");
     }
-    auto stop = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = stop - start;
-    elapsed_time_case_4 += elapsed_seconds.count();
+
+    std::chrono::time_point<std::chrono::system_clock> stop = std::chrono::system_clock::now();
+    if (splitEventsVec_call_count == 1)
+      splitEventsVec_lastEntrance = stop;
+    else if (stop > splitEventsVec_lastEntrance)
+      splitEventsVec_lastEntrance = stop;
   }
 
   // set the sort order on the EventLists since we know the sorting already
@@ -621,7 +629,10 @@ void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const Eve
 
 double TimeSplitter::getTime1() { return elapsed_time_case_1; }
 double TimeSplitter::getTime2() { return elapsed_time_case_2; }
-double TimeSplitter::getTime4() { return elapsed_time_case_4; }
+double TimeSplitter::getTime4() {
+  std::chrono::duration<double> elapsed_seconds = splitEventsVec_lastEntrance - splitEventsVec_firstEntrance;
+  return elapsed_seconds.count();
+}
 double TimeSplitter::getTime5() { return elapsed_time_case_5; }
 // double TimeSplitter::getTime10() { return elapsed_time_case_10; }
 } // namespace DataObjects
