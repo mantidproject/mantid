@@ -190,7 +190,7 @@ void RebinRagged::exec() {
 
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
-        el.generateHistogram(XValues_new.rawData(), y_data, e_data);
+        el.generateHistogram(delta, XValues_new.rawData(), y_data, e_data);
 
         // Create and set the output histogram
         HistogramBuilder builder;
