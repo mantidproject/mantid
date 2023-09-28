@@ -52,6 +52,7 @@ Ionic Diffusion Test
 	- **f1.Asym:** ``0.155``
 	- **f1.Delta:** ``0.389``
 	- **f1.Nu:** ``0.474``
+- Tick ``Plot Difference`` check box
 - In the plotting window click the ``External Plot`` button
 - You should get a plot that looks like the following:
 
