@@ -291,6 +291,10 @@ void FilterEvents::exec() {
   else
     progressamount = 0.7;
 
+  // sort the input events here so tbb can better parallelize the tasks
+  const auto sortType = m_filterByPulseTime ? EventSortType::PULSETIME_SORT : EventSortType::PULSETIMETOF_SORT;
+  m_eventWS->sortAll(sortType, nullptr);
+
   std::cout << "START EVENT FILTERING" << std::endl;
   filterEvents(progressamount);
   std::cout << "FINISHED EVENT FILTERING" << std::endl;
