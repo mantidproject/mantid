@@ -97,7 +97,7 @@ void ALCPeakFittingModel::fitPeaks(IFunction_const_sptr peaks) {
   }
   try {
     // Calling .get() on a future will throw any exceptions from the future thread.
-    auto tmp = result.get();
+    result.get();
   } catch (const std::exception &e) {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
     emit errorInModel(msg);

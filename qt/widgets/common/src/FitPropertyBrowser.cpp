@@ -1641,7 +1641,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
       QCoreApplication::processEvents();
     }
     // Calling .get() on a future will throw any exceptions that threw on the future thread
-    auto tmp = result.get();
+    result.get();
     emit algorithmFinished(QString());
 
   } catch (const std::exception &e) {
