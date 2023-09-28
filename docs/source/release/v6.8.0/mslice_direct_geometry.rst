@@ -9,4 +9,4 @@ BugFixes
 ########
 - Stopped storing GDOS cuts in the ADS.
 - Fixed a bug that caused an incorrect error propagation in GDOS intensity corrections.
-- Fixed several bugs with script generation regarding mslice cut plots.
+- Fixed several bugs with script generation regarding cut plots.
