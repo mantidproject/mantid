@@ -292,11 +292,19 @@ void FilterEvents::exec() {
     progressamount = 0.7;
 
   // sort the input events here so tbb can better parallelize the tasks
-  const auto sortType = m_filterByPulseTime ? EventSortType::PULSETIME_SORT : EventSortType::PULSETIMETOF_SORT;
-  m_eventWS->sortAll(sortType, nullptr);
+  {
+    const auto startTime = std::chrono::high_resolution_clock::now();
+    const auto sortType = m_filterByPulseTime ? EventSortType::PULSETIME_SORT : EventSortType::PULSETIMETOF_SORT;
+    m_eventWS->sortAll(sortType, nullptr);
+    addTimer("sortEvents", startTime, std::chrono::high_resolution_clock::now());
+  }
 
   std::cout << "START EVENT FILTERING" << std::endl;
-  filterEvents(progressamount);
+  {
+    const auto startTime = std::chrono::high_resolution_clock::now();
+    filterEvents(progressamount);
+    addTimer("filterEvents", startTime, std::chrono::high_resolution_clock::now());
+  }
   std::cout << "FINISHED EVENT FILTERING" << std::endl;
 
   // Optional to group detector
