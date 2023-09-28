@@ -27,7 +27,7 @@ New features
 
 Bugfixes
 ############
-- Abins now delegates parsing of CASTEP .phonon files to the Euphonic library.
+- :ref:`Abins <algm-Abins>` now delegates parsing of CASTEP .phonon files to the Euphonic library.
   This gives more robust handling of data files containing Gamma-points with
   LO-TO splitting; the legacy parser skips past other q-points to find these points,
   leading to an unpredictable loss of information. Whereas the previous parser favours
@@ -38,7 +38,7 @@ Bugfixes
 - The Abins GAUSSIAN parser now reads "Standard Orientation"
   positions. This does not affect results but prevents errors when
   "Input Orientation" data is missing from the .log file.
-- Support vasprun.xml files from Vasp 6 in Abins/Abins2D. The data
+- Support vasprun.xml files from Vasp 6 in Abins/:ref:`Abins2D <algm-Abins2D>`. The data
   units have changed since Vasp 5 from atomic units to THz; this
   format is now detected and an appropriate frequency conversion
   factor is used.
