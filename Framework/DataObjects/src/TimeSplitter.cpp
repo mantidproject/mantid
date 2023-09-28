@@ -440,7 +440,7 @@ SplittingIntervalVec TimeSplitter::toSplitters(const bool includeNoTarget) const
   while (std::next(startIt) != m_roi_map.end()) {
     /// invoke constructor SplittingInterval(DateAndTime &start, DateAndTime &stop, int index)
     if (includeNoTarget || startIt->second != NO_TARGET)
-      output.push_back({startIt->first, std::next(startIt)->first, startIt->second});
+      output.emplace_back(startIt->first, std::next(startIt)->first, startIt->second);
     std::advance(startIt, 1);
   }
   return output;
