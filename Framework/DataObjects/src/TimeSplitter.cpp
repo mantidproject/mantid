@@ -12,10 +12,7 @@
 #include "MantidKernel/TimeROI.h"
 
 static double elapsed_time_case_1{0.0};
-static double elapsed_time_case_2{0.0};
-// static double elapsed_time_case_4{0.0};
 static double elapsed_time_case_5{0.0};
-// static double elapsed_time_case_10{0.0};
 static std::chrono::time_point<std::chrono::system_clock> splitEventsVec_firstEntrance;
 static int splitEventsVec_call_count{0};
 static std::chrono::time_point<std::chrono::system_clock> splitEventsVec_lastEntrance;
@@ -474,29 +471,23 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
     throw std::invalid_argument("EventList::splitEventList() called on an EventList "
                                 "that no longer has time information.");
 
-  // Initialize the detector ID's and event type of the destination event lists
-  events.initializePartials(partials);
-
   if (this->empty())
     return;
 
-  // sort the list in-place
-  EventSortType sortOrder; // this will be used to set order on outputs
-  if (pulseTof) {
-    // this sorting is preserved under linear transformation tof --> factor*tof+shift with factor>0
+  // sort the input EventList in-place
+  const EventSortType sortOrder = pulseTof ? EventSortType::PULSETIMETOF_SORT
+                                           : EventSortType::PULSETIME_SORT; // this will be used to set order on outputs
+  {
     auto start = std::chrono::system_clock::now();
-    events.sortPulseTimeTOF();
-    sortOrder = EventSortType::PULSETIMETOF_SORT;
+    if (pulseTof) {
+      // this sorting is preserved under linear transformation tof --> factor*tof+shift with factor>0
+      events.sortPulseTimeTOF();
+    } else {
+      events.sortPulseTime();
+    }
     auto stop = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = stop - start;
     elapsed_time_case_1 += elapsed_seconds.count();
-  } else {
-    auto start = std::chrono::system_clock::now();
-    events.sortPulseTime();
-    sortOrder = EventSortType::PULSETIME_SORT;
-    auto stop = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = stop - start;
-    elapsed_time_case_2 += elapsed_seconds.count();
   }
 
   {
@@ -634,7 +625,6 @@ void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const Eve
 }
 
 double TimeSplitter::getTime1() { return elapsed_time_case_1; }
-double TimeSplitter::getTime2() { return elapsed_time_case_2; }
 double TimeSplitter::getTime4() {
   std::chrono::duration<double> elapsed_seconds = splitEventsVec_lastEntrance - splitEventsVec_firstEntrance;
   return elapsed_seconds.count();
