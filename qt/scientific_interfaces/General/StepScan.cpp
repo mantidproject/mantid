@@ -290,7 +290,7 @@ bool StepScan::mergeRuns() {
     addScanIndex->setProperty("LogType", "Number Series");
     addScanIndex->setProperty("LogText", Strings::toString(i + 1));
     auto result = addScanIndex->executeAsync();
-    while (!result.available()) {
+    while (result.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
       QApplication::processEvents();
     }
     if (!addScanIndex->isExecuted())
@@ -310,7 +310,7 @@ bool StepScan::mergeRuns() {
   const std::string summedWSName = "__summed_multifiles";
   merge->setPropertyValue("OutputWorkspace", summedWSName);
   auto result = merge->executeAsync();
-  while (!result.available()) {
+  while (result.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
     QApplication::processEvents();
   }
   if (!merge->isExecuted())
@@ -497,7 +497,7 @@ void StepScan::runStepScanAlg() {
     stepScan->setPropertyValue("InputWorkspace", m_inputWSName);
     ScopedStatusText _merging(this->m_uiForm.statusText, "Analyzing scan...");
     auto result = stepScan->executeAsync();
-    while (!result.available()) {
+    while (result.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
       QApplication::processEvents();
     }
     algSuccessful = stepScan->isExecuted();
@@ -548,7 +548,7 @@ bool StepScan::runStepScanAlgLive(const std::string &stepScanProperties) {
     Poco::Thread::sleep(100);
   }
   auto result = startLiveData->executeAsync();
-  while (!result.available()) {
+  while (result.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
     QApplication::processEvents();
   }
   if (!startLiveData->isExecuted())

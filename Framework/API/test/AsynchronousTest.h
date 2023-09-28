@@ -98,10 +98,10 @@ public:
     AsyncAlgorithm alg;
     setupTest(alg);
     auto result = alg.executeAsync();
-    TS_ASSERT(!result.available())
+    TS_ASSERT(result.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
     result.wait();
     generalChecks(alg, true, true, true, false);
-    TS_ASSERT(result.available())
+    TS_ASSERT(result.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
     TS_ASSERT_EQUALS(count, NO_OF_LOOPS)
     TS_ASSERT_EQUALS(alg.result, NO_OF_LOOPS - 1)
   }
@@ -133,10 +133,10 @@ public:
     setupTest(alg);
     alg.setPropertyValue("InputWorkspace", "groupWS");
     auto result = alg.executeAsync();
-    TS_ASSERT(!result.available())
+    TS_ASSERT(result.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
     result.wait();
     generalChecks(alg, true, true, true, false);
-    TS_ASSERT(result.available())
+    TS_ASSERT(result.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
     // There are 2 * NO_OF_LOOPS because there are two child workspaces
     TS_ASSERT_EQUALS(count, NO_OF_LOOPS * 2)
     // The parent algorithm is not executed directly, so the result remains 0

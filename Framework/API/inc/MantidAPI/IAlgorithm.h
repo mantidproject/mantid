@@ -12,10 +12,10 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidKernel/IPropertyManager.h"
+#include <future>
 
 namespace Poco {
 class AbstractObserver;
-template <class T> class ActiveResult;
 } // namespace Poco
 
 namespace Mantid {
@@ -111,7 +111,7 @@ public:
   virtual bool execute() = 0;
 
   /// Asynchronous execution of the algorithm.
-  virtual Poco::ActiveResult<bool> executeAsync() = 0;
+  virtual std::future<bool> executeAsync() = 0;
 
   /// Execute as a Child Algorithm, with try/catch
   virtual void executeAsChildAlg() = 0;

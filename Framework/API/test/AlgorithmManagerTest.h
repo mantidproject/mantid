@@ -166,7 +166,7 @@ public:
     Aptr = AlgorithmManager::Instance().create("AlgTest", -1);
 
     m_notificationValue = 0;
-    Poco::ActiveResult<bool> resA = Aptr->executeAsync();
+    std::future<bool> resA = Aptr->executeAsync();
     resA.wait();
     TSM_ASSERT_EQUALS("Notification was received.", m_notificationValue, 12345);
 

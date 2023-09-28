@@ -74,7 +74,7 @@ public:
   /** Disallow if you detect another MonitorLiveData thread with the same */
   void test_DontAllowTwoAlgorithmsWithSameOutput() {
     IAlgorithm_sptr alg1 = makeAlgo("fake1");
-    Poco::ActiveResult<bool> res1 = alg1->executeAsync();
+    std::future<bool> res1 = alg1->executeAsync();
     while (!alg1->isRunning()) {
       Poco::Thread::sleep(10); // give it some time to start
     }
@@ -85,14 +85,14 @@ public:
 
     // Abort the thread.
     alg1->cancel();
-    res1.wait(10000);
+    res1.wait_for(std::chrono::seconds(10));
   }
 
   /** Disallow if you detect another MonitorLiveData thread with the
    * AccumulationWorkspace name */
   void test_DontAllowTwoAlgorithmsWithSameAccumulationWorkspace() {
     IAlgorithm_sptr alg1 = makeAlgo("fake1", "accum1");
-    Poco::ActiveResult<bool> res1 = alg1->executeAsync();
+    std::future<bool> res1 = alg1->executeAsync();
     while (!alg1->isRunning()) {
       Poco::Thread::sleep(10); // give it some time to start
     }
@@ -103,19 +103,19 @@ public:
 
     // Abort the thread.
     alg1->cancel();
-    res1.wait(10000);
+    res1.wait_for(std::chrono::seconds(10));
   }
 
   /** Disallow if you detect another MonitorLiveData thread with the same */
   void test_Allow_AnotherAlgo_IfTheOtherIsFinished() {
     // Start and stop one algorithm
     IAlgorithm_sptr alg1 = makeAlgo("fake1");
-    Poco::ActiveResult<bool> res1 = alg1->executeAsync();
+    std::future<bool> res1 = alg1->executeAsync();
     while (!alg1->isRunning()) {
       Poco::Thread::sleep(10); // give it some time to start
     }
     alg1->cancel();
-    res1.wait(10000);
+    res1.wait_for(std::chrono::seconds(10));
 
     // This algorithm if OK because the other is not still running
     IAlgorithm_sptr alg2 = makeAlgo("fake1");
@@ -131,8 +131,8 @@ public:
 
     // Run this algorithm
     IAlgorithm_sptr alg1 = makeAlgo("fake1", "", "Add", "Stop", "0.1");
-    Poco::ActiveResult<bool> res1 = alg1->executeAsync();
-    TS_ASSERT_THROWS_NOTHING(res1.wait(6000));
+    std::future<bool> res1 = alg1->executeAsync();
+    TS_ASSERT_THROWS_NOTHING(res1.wait_for(std::chrono::seconds(6)));
 
     TSM_ASSERT("The algorithm should have exited by itself.", !alg1->isRunning());
     TSM_ASSERT("The algorithm should have exited by itself.", alg1->isExecuted());
@@ -140,7 +140,7 @@ public:
     // Manually stop it so the test finishes, in case of failure
     if (alg1->isRunning()) {
       alg1->cancel();
-      res1.wait(1000);
+      res1.wait_for(std::chrono::seconds(1));
       return;
     }
 
@@ -154,7 +154,7 @@ public:
    * chunk number.
    * @return false if test failed*/
   bool runAlgoUntilChunk(const std::shared_ptr<MonitorLiveData> &alg1, size_t stopAtChunk) {
-    Poco::ActiveResult<bool> res1 = alg1->executeAsync();
+    std::future<bool> res1 = alg1->executeAsync();
     Poco::Thread::sleep(50);
     while (alg1->m_chunkNumber < stopAtChunk)
       Poco::Thread::sleep(5);

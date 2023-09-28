@@ -66,6 +66,7 @@ public:
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FrameworkManagerImpl>;
+  std::future<bool> _downloadInstrumentFiles;
 
   /// Private Constructor
   FrameworkManagerImpl();

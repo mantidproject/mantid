@@ -143,24 +143,19 @@ void MantidTreeModel::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) { execu
 
 bool MantidTreeModel::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, const bool wait) {
   if (wait) {
-    Poco::ActiveResult<bool> result(alg->executeAsync());
-    while (!result.available()) {
+    std::future<bool> result(alg->executeAsync());
+    while (result.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
       QCoreApplication::processEvents();
     }
     result.wait();
 
     try {
-      return result.data();
+      return result.get();
     } catch (Poco::NullPointerException &) {
       return false;
     }
   } else {
-    try {
-      alg->executeAsync();
-    } catch (Poco::NoThreadAvailableException &) {
-      g_log.error() << "No thread was available to run the " << alg->name() << " algorithm in the background.\n";
-      return false;
-    }
+    alg->executeAsync();
     return true;
   }
 }

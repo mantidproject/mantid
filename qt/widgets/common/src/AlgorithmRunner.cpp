@@ -45,7 +45,7 @@ void AlgorithmRunner::cancelRunningAlgorithm() {
       m_asyncAlg->cancel();
     }
     if (m_asyncResult) {
-      m_asyncResult->tryWait(1000);
+      m_asyncResult->wait_for(std::chrono::seconds(1));
       delete m_asyncResult;
       m_asyncResult = nullptr;
     }
@@ -76,7 +76,7 @@ void AlgorithmRunner::startAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
   alg->addObserver(m_progressObserver);
   // Start asynchronous execution
   m_asyncAlg = alg;
-  m_asyncResult = new Poco::ActiveResult<bool>(m_asyncAlg->executeAsync());
+  m_asyncResult = new std::future<bool>(m_asyncAlg->executeAsync());
 }
 
 /// Get back a pointer to the running algorithm

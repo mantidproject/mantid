@@ -132,7 +132,7 @@ std::shared_ptr<Workspace> FileEventDataListener::extractData() {
 
   // If the loading of the chunk isn't finished, then we need to wait
   m_chunkload->wait();
-  if (!m_chunkload->data()) {
+  if (!m_chunkload->get()) {
     throw std::runtime_error(m_loaderName + " failed for some reason with file '" + m_filename + "'.");
   }
   // The loading succeeded: get the workspace from the ADS.
@@ -181,7 +181,7 @@ void FileEventDataListener::loadChunk() {
   }
   m_loader->setPropertyValue("OutputWorkspace",
                              m_tempWSname); // Goes into 'hidden' workspace
-  m_chunkload = std::make_unique<Poco::ActiveResult<bool>>(m_loader->executeAsync());
+  m_chunkload = std::make_unique<std::future<bool>>(m_loader->executeAsync());
 }
 
 } // namespace Mantid::LiveData

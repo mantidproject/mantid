@@ -57,7 +57,7 @@ private:
   /// that can
 
   /// Future that holds the result of the latest call to LoadEventPreNexus
-  std::unique_ptr<Poco::ActiveResult<bool>> m_chunkload;
+  std::unique_ptr<std::future<bool>> m_chunkload;
   void loadChunk();
   /// Shared pointer to the correct file loader instance - it needs to be kept
   /// alive.

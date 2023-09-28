@@ -35,6 +35,7 @@
 #include <json/json.h>
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <map>
 #include <memory>
@@ -1585,17 +1586,16 @@ private:
 /**
  * Asynchronous execution
  */
-Poco::ActiveResult<bool> Algorithm::executeAsync() {
-  m_executeAsync =
-      std::make_unique<Poco::ActiveMethod<bool, Poco::Void, Algorithm>>(this, &Algorithm::executeAsyncImpl);
-  return (*m_executeAsync)(Poco::Void());
+std::future<bool> Algorithm::executeAsync() {
+  auto fut = std::async(std::launch::async, std::bind(&Algorithm::executeAsyncImpl, this));
+  return fut;
 }
 
 /**Callback when an algorithm is executed asynchronously
  * @param i :: Unused argument
  * @return true if executed successfully.
  */
-bool Algorithm::executeAsyncImpl(const Poco::Void & /*unused*/) {
+bool Algorithm::executeAsyncImpl() {
   AsyncFlagHolder running(m_runningAsync);
   return this->execute();
 }

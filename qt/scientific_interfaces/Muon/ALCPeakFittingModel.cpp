@@ -91,12 +91,15 @@ void ALCPeakFittingModel::fitPeaks(IFunction_const_sptr peaks) {
   fit->setProperty("OutputCompositeMembers", true);
 
   // Execute async so we can show progress bar
-  Poco::ActiveResult<bool> result(fit->executeAsync());
-  while (!result.available()) {
+  std::future<bool> result(fit->executeAsync());
+  while (result.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
     QCoreApplication::processEvents();
   }
-  if (!result.error().empty()) {
-    QString msg = "Fit algorithm failed.\n\n" + QString(result.error().c_str()) + "\n";
+  try {
+    // Calling .get() on a future will throw any exceptions from the future thread.
+    auto tmp = result.get();
+  } catch (const std::exception &e) {
+    QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
     emit errorInModel(msg);
   }
 

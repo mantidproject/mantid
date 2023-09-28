@@ -72,13 +72,11 @@ void ALCBaselineModellingModel::fit(IFunction_const_sptr function, const std::ve
   fit->setProperty("CreateOutput", true);
 
   // Run async so that progress can be shown
-  Poco::ActiveResult<bool> result(fit->executeAsync());
-  while (!result.available()) {
+  std::future<bool> result(fit->executeAsync());
+  while (result.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
     QCoreApplication::processEvents();
   }
-  if (!result.error().empty()) {
-    throw std::runtime_error(result.error());
-  }
+  result.get();
 
   MatrixWorkspace_sptr fitOutput = fit->getProperty("OutputWorkspace");
   m_parameterTable = fit->getProperty("OutputParameters");

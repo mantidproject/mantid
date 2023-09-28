@@ -62,7 +62,7 @@ protected:
 
   /// For the asynchronous call in dynamic rebinning. Holds the result of
   /// asyncExecute() algorithm call
-  Poco::ActiveResult<bool> *m_asyncResult;
+  std::future<bool> *m_asyncResult;
 
   /// Reference to the algorithm executing asynchronously.
   Mantid::API::IAlgorithm_sptr m_asyncAlg;

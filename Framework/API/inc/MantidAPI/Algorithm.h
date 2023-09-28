@@ -231,7 +231,7 @@ public:
   void setRethrows(const bool rethrow) override;
 
   /** @name Asynchronous Execution */
-  Poco::ActiveResult<bool> executeAsync() override;
+  std::future<bool> executeAsync() override;
 
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver &observer) const override;
@@ -461,7 +461,7 @@ private:
 
   bool executeInternal();
 
-  bool executeAsyncImpl(const Poco::Void &i);
+  bool executeAsyncImpl();
 
   bool doCallProcessGroups(Mantid::Types::Core::DateAndTime &start_time);
 
