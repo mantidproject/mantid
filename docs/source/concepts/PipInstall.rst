@@ -46,11 +46,23 @@ How to extend Mantid with a Pip install?
 There are two ways you can ``pip`` install a package for use in Mantid. The first way is via
 the command line:
 
+.. code-block:: sh
+
+   # Activate your environment. On IDAaaS you can activate one of the following, depending on which
+   # specific major version you want to use, or the nightly:
+   conda activate /opt/mantidworkbench6.7  # Or
+   conda activate /opt/mantidworkbenchnightly
+
+   # Remember to change the <insert_package_name>
+   pip install <insert_package_name>
+
 The second way is via the Python script editor window in Workbench:
 
 .. code-block:: python
 
    import subprocess, sys
+
+   # Remember to change the <insert_package_name>
    rv = subprocess.run([sys.executable, '-m', 'pip', 'install', '--user', '<insert_package_name>'], capture_output=True)
    print(rv.stdout.decode())
    print(rv.stderr.decode())
