@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAlgorithms/MaskBins.h"
 #include "MantidAlgorithms/RebinRagged2.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 
@@ -18,6 +19,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 
 using Mantid::Algorithms::CreateSampleWorkspace;
+using Mantid::Algorithms::MaskBins;
 using Mantid::Algorithms::RebinRagged;
 
 class RebinRagged2Test : public CxxTest::TestSuite {
@@ -251,5 +253,79 @@ public:
         for (const auto y : Y)
           TS_ASSERT_EQUALS(y, 14)
     }
+  }
+
+  void test_bin_mask_propagation() {
+    // based on the MaskBin usage example and expected output from RebinRagged Version=1
+
+    CreateSampleWorkspace createSampleWorkspaceAlgo;
+    createSampleWorkspaceAlgo.setChild(true);
+    createSampleWorkspaceAlgo.initialize();
+    createSampleWorkspaceAlgo.setPropertyValue("WorkspaceType", "Histogram");
+    createSampleWorkspaceAlgo.setPropertyValue("OutputWorkspace", "_unused_for_child");
+    createSampleWorkspaceAlgo.setProperty("BankPixelWidth", 1);
+    createSampleWorkspaceAlgo.setProperty("XMax", 100.);
+    createSampleWorkspaceAlgo.setProperty("BinWidth", 10.);
+    createSampleWorkspaceAlgo.execute();
+    MatrixWorkspace_sptr ws = createSampleWorkspaceAlgo.getProperty("OutputWorkspace");
+
+    MaskBins maskBins;
+    maskBins.setChild(true);
+    maskBins.initialize();
+    maskBins.setProperty("InputWorkspace", ws);
+    maskBins.setPropertyValue("OutputWorkspace", "_unused_for_child");
+    maskBins.setProperty("XMin", 16.);
+    maskBins.setProperty("XMax", 32.);
+    maskBins.execute();
+    ws = maskBins.getProperty("OutputWorkspace");
+
+    // check bin mask before RebinRagged
+
+    TS_ASSERT_EQUALS(ws->readX(0).size(), 11);
+    TS_ASSERT_EQUALS(ws->readX(1).size(), 11);
+
+    auto hist0BinMasked = ws->maskedBinsIndices(0);
+    auto hist1BinMasked = ws->maskedBinsIndices(1);
+
+    TS_ASSERT_EQUALS(hist0BinMasked.size(), 3);
+    TS_ASSERT_EQUALS(hist1BinMasked.size(), 3);
+
+    for (size_t i = 0; i < 3; i++) {
+      TS_ASSERT_EQUALS(hist0BinMasked[i], i + 1);
+      TS_ASSERT_EQUALS(hist1BinMasked[i], i + 1);
+    }
+
+    std::vector<double> xmins = {-20., 20.};
+    std::vector<double> deltas = {10.};
+
+    RebinRagged alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMin", xmins));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Delta", deltas));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr result = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(result->getNumberHistograms(), 2);
+
+    TS_ASSERT_EQUALS(result->readX(0).size(), 13);
+    TS_ASSERT_EQUALS(result->readX(1).size(), 9);
+
+    hist0BinMasked = result->maskedBinsIndices(0);
+    hist1BinMasked = result->maskedBinsIndices(1);
+
+    TS_ASSERT_EQUALS(hist0BinMasked.size(), 3);
+    TS_ASSERT_EQUALS(hist1BinMasked.size(), 2);
+
+    for (size_t i = 0; i < 3; i++)
+      TS_ASSERT_EQUALS(hist0BinMasked[i], i + 3);
+
+    for (size_t i = 0; i < 2; i++)
+      TS_ASSERT_EQUALS(hist1BinMasked[i], i);
   }
 };

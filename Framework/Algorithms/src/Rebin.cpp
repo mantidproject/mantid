@@ -411,7 +411,7 @@ void Rebin::exec() {
     for (int i = 0; i < histnumber; ++i) {
       if (inputWS->hasMaskedBins(i)) // Does the current spectrum have any masked bins?
       {
-        this->propagateMasks(inputWS, outputWS, i);
+        this->propagateMasks(inputWS, outputWS, i, ignoreBinErrors);
       }
     }
     // Copy the units over too.
@@ -443,7 +443,7 @@ void Rebin::exec() {
  *  @param hist ::    The index of the current histogram
  */
 void Rebin::propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS, const API::MatrixWorkspace_sptr &outputWS,
-                           int hist) {
+                           const int hist, const bool ignoreErrors) {
   // Not too happy with the efficiency of this way of doing it, but it's a lot
   // simpler to use the
   // existing rebin algorithm to distribute the weights than to re-implement it
@@ -476,7 +476,6 @@ void Rebin::propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS, const
                     FrequencyStandardDeviations(errSize, 0));
   // Use rebin function to redistribute the weights. Note that distribution flag
   // is set
-  bool ignoreErrors = getProperty(PropertyNames::IGNR_BIN_ERR);
 
   try {
     auto newHist = HistogramData::rebin(oldHist, outputWS->binEdges(hist));

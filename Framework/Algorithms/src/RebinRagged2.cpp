@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAlgorithms/RebinRagged2.h"
-#include "MantidHistogramData/Rebin.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistoWorkspace.h"
@@ -14,6 +13,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/HistogramBuilder.h"
+#include "MantidHistogramData/Rebin.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -249,6 +249,16 @@ void RebinRagged::exec() {
     PARALLEL_CHECK_INTERRUPT_REGION
     outputWS->setDistribution(dist);
 
+    // Now propagate any masking correctly to the output workspace
+    // More efficient to have this in a separate loop because
+    // MatrixWorkspace::maskBins blocks multi-threading
+    for (size_t hist = 0; hist < histnumber; ++hist) {
+      if (inputWS->hasMaskedBins(hist)) // Does the current spectrum have any masked bins?
+      {
+        outputWS->setUnmaskedBins(hist);
+        this->propagateMasks(inputWS, outputWS, static_cast<int>(hist));
+      }
+    }
     // Copy the units over too.
     for (int i = 0; i < outputWS->axes(); ++i) {
       outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
