@@ -11,6 +11,7 @@ set(LIB_SRCS
     src/ErrorbarContainer.cpp
     src/Figure.cpp
     src/FigureCanvasQt.cpp
+    src/FigureEventFilter.cpp
     src/Line2D.cpp
     src/MantidAxes.cpp
     src/MantidColorMap.cpp
@@ -22,7 +23,9 @@ set(LIB_SRCS
     src/SingleMarker.cpp
 )
 
-set(MOC_HEADERS inc/MantidQtWidgets/MplCpp/ColorbarWidget.h inc/MantidQtWidgets/MplCpp/FigureCanvasQt.h)
+set(MOC_HEADERS inc/MantidQtWidgets/MplCpp/ColorbarWidget.h inc/MantidQtWidgets/MplCpp/FigureCanvasQt.h
+                inc/MantidQtWidgets/MplCpp/FigureEventFilter.h
+)
 
 set(NOMOC_HEADERS
     inc/MantidQtWidgets/MplCpp/Artist.h
