@@ -1592,7 +1592,6 @@ std::future<bool> Algorithm::executeAsync() {
 }
 
 /**Callback when an algorithm is executed asynchronously
- * @param i :: Unused argument
  * @return true if executed successfully.
  */
 bool Algorithm::executeAsyncImpl() {
