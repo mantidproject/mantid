@@ -1,0 +1,1 @@
+- Fix bug where mantid would cause a segmentation fault on Linux if it exited while instrument files were still being downloaded.
