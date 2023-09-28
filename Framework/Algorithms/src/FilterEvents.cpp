@@ -297,6 +297,8 @@ void FilterEvents::exec() {
     const auto sortType = m_filterByPulseTime ? EventSortType::PULSETIME_SORT : EventSortType::PULSETIMETOF_SORT;
     m_eventWS->sortAll(sortType, nullptr);
     addTimer("sortEvents", startTime, std::chrono::high_resolution_clock::now());
+    std::chrono::duration<double> elapsed_seconds = std::chrono::high_resolution_clock::now() - startTime;
+    std::cout << "Time (s) spent in sorting events " << elapsed_seconds.count() << "\n";
   }
 
   std::cout << "START EVENT FILTERING" << std::endl;
@@ -304,6 +306,8 @@ void FilterEvents::exec() {
     const auto startTime = std::chrono::high_resolution_clock::now();
     filterEvents(progressamount);
     addTimer("filterEvents", startTime, std::chrono::high_resolution_clock::now());
+    std::chrono::duration<double> elapsed_seconds = std::chrono::high_resolution_clock::now() - startTime;
+    std::cout << "Time (s) spent in filtering events " << elapsed_seconds.count() << "\n";
   }
   std::cout << "FINISHED EVENT FILTERING" << std::endl;
 
@@ -1038,12 +1042,12 @@ void FilterEvents::filterEvents(double progressamount) {
     if (!m_vecSkip[iws]) {                                                        // Filter the non-skipped
       const DataObjects::EventList &inputEventList = m_eventWS->getSpectrum(iws); // input event list
       std::map<int, DataObjects::EventList *> partialEvenLists; // event lists receiving the events from input list
-      for (auto &ws : m_outputWorkspacesMap) {
-        const int index = ws.first;
-        auto &partialEventList = ws.second->getSpectrum(iws);
-        partialEvenLists.emplace(index, &partialEventList);
-      }
-      if (!inputEventList.empty()) { // nothing to split if there aren't events
+      if (!inputEventList.empty()) {                            // nothing to split if there aren't events
+        for (auto &ws : m_outputWorkspacesMap) {
+          const int index = ws.first;
+          auto &partialEventList = ws.second->getSpectrum(iws);
+          partialEvenLists.emplace(index, &partialEventList);
+        }
         m_timeSplitter.splitEventList(inputEventList, partialEvenLists, pulseTof, tofCorrect, m_detTofFactors[iws],
                                       m_detTofOffsets[iws]);
       }
@@ -1061,8 +1065,7 @@ void FilterEvents::filterEvents(double progressamount) {
   std::cout << "TOTAL NUMBER OF SPLITTERS: " << m_timeSplitter.numRawValues() << "\n";
   std::cout << "Time (s) spent in FilterEvents::filterEvents:" << elapsed_seconds.count() << "\n";
 
-  std::cout << "Cumulative time (s) spent in events.sortPulseTimeTOF: " << TimeSplitter::getTime1() << std::endl;
-  std::cout << "Cumulative time (s) spent in events.sortPulseTime(): " << TimeSplitter::getTime2() << std::endl;
+  std::cout << "Cumulative time (s) spent in EventList sorting: " << TimeSplitter::getTime1() << std::endl;
   std::cout << "Cumulative time (s) spent in TS::splitEventVec(s): " << TimeSplitter::getTime4() << std::endl;
   std::cout << "Cumulative time (s) spent in TS::rebuildCachedPartialTimeROIs (s): " << TimeSplitter::getTime5()
             << std::endl;
