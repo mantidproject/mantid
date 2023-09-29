@@ -756,6 +756,9 @@ public:
     std::map<int, EventList *> partials = this->instantiatePartials(destinations);
 
     splitter.splitEventList(events, partials);
+    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 4);
+    TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 2);
+    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 0);
     // Check the pulse times of the events landing in the partials
     std::vector<std::string> expected{"2023-Jan-01 12:00:00", "2023-Jan-01 12:00:00", "2023-Jan-01 12:01:00",
                                       "2023-Jan-01 12:01:00"};
@@ -772,6 +775,9 @@ public:
     intervals = {90.0, 90.0, 60.0};
     splitter = this->generateSplitter(startTime, intervals, destinations);
     splitter.splitEventList(events, partials, pulseTof);
+    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 3);
+    TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 3);
+    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 0);
     expected = {"2023-Jan-01 12:00:00", "2023-Jan-01 12:00:30", "2023-Jan-01 12:01:00"};
     TS_ASSERT_EQUALS(timesToStr(partials[0], EventSortType::PULSETIMETOF_SORT), expected);
     expected = {"2023-Jan-01 12:01:30", "2023-Jan-01 12:02:00", "2023-Jan-01 12:02:30"};
@@ -786,6 +792,9 @@ public:
     double factor{1.0};
     double shift{30.0 * 1.0E6}; // add 30 seconds to each TOF, in units of micro-seconds
     splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
+    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 2);
+    TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 3);
+    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 1);
     expected = {"2023-Jan-01 12:00:30", "2023-Jan-01 12:01:00"};
     TS_ASSERT_EQUALS(timesToStr(partials[0], EventSortType::TIMEATSAMPLE_SORT, factor, shift), expected);
     expected = {"2023-Jan-01 12:01:30", "2023-Jan-01 12:02:00", "2023-Jan-01 12:02:30"};
@@ -800,6 +809,9 @@ public:
     factor = 0.5; // shrink TOF by half
     shift = 0.0;
     splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
+    TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 4);
+    TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 2);
+    TS_ASSERT_EQUALS(partials[TimeSplitter::NO_TARGET]->getNumberEvents(), 0);
     expected = {"2023-Jan-01 12:00:00", "2023-Jan-01 12:00:15", "2023-Jan-01 12:01:00", "2023-Jan-01 12:01:15"};
     TS_ASSERT_EQUALS(timesToStr(partials[0], EventSortType::TIMEATSAMPLE_SORT, factor, shift), expected);
     expected = {"2023-Jan-01 12:02:00", "2023-Jan-01 12:02:15"};
