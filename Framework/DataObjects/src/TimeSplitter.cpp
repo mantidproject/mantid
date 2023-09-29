@@ -624,6 +624,9 @@ void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const Eve
       // advance event iterator
       itEvent++;
     }
+
+    // increment to the next interval
+    itSplitter++;
   }
 
   // copy all events after last splitter to NO_TARGET -- TODO -- IS THIS NECESSARY?
