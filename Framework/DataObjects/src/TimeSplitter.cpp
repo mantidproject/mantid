@@ -558,10 +558,13 @@ void TimeSplitter::splitEventVec(const std::vector<EventType> &events, std::map<
 template <typename EventType>
 void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const EventType &)> &timeCalc,
                                  const std::vector<EventType> &events, std::map<int, EventList *> &partials) const {
+  // TODO should connect to OutputUnfilteredEvents
+  // get a copy of the splitters as a vector
+  const auto splittersVec = this->toSplitters(true);
+
   // initialize the iterator over the splitter
-  // it assumes the splitter keys (DateAndTime objects) are sorted by increasing time.
-  auto itSplitter = m_roi_map.cbegin(); // iterator over the splitter
-  const auto itSplitterEnd = m_roi_map.cend();
+  auto itSplitter = splittersVec.cbegin();
+  const auto itSplitterEnd = splittersVec.cend();
 
   // initialize iterator over the events
   auto itEvent = events.cbegin();
@@ -570,7 +573,7 @@ void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const Eve
   // copy all events before first splitter to NO_TARGET
   auto partial = partials.find(TimeSplitter::NO_TARGET);
   {
-    const auto &stop = itSplitter->first; // first splitter boundary. events before this go to NO_TARGET
+    const auto stop = itSplitter->start();
     const bool shouldAppend = (partial != partials.end());
     while (itEvent != itEventEnd && timeCalc(*itEvent) < stop) {
       if (shouldAppend)
@@ -580,25 +583,34 @@ void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const Eve
     }
   }
 
-  // advance to the splitter that would include this event
-  itSplitter = m_roi_map.lower_bound(timeCalc(*itEvent));
-  // then go back by one to insure the event is included
-  if (itSplitter != m_roi_map.cbegin())
-    itSplitter--;
-
   // iterate over all events. For each event try finding its destination event list, a.k.a. partial.
   // If the partial is found, append the event to it. It is assumed events are sorted by (possibly corrected) time
   while (itEvent != itEventEnd && itSplitter != itSplitterEnd) {
     // Check if we need to advance the splitter and therefore select a different partial event list
     const auto eventTime = timeCalc(*itEvent);
     // advance to the new stopping boundary, and update the destination index as we go
-    while (itSplitter != itSplitterEnd && eventTime >= itSplitter->first) {
-      itSplitter++; // gets to a new stopping point
+    if (eventTime > itSplitter->stop()) {
+      // first try next splitter
+      itSplitter++;
+      if (itSplitter == itSplitterEnd)
+        break;
+
+      // then try lower_bound
+      if (itSplitter->stop() < eventTime) {
+        itSplitter =
+            std::lower_bound(itSplitter, itSplitterEnd, timeCalc(*itEvent),
+                             [](const auto &splitter, const auto &eventTime) { return splitter.start() < eventTime; });
+        // may need to go back one
+        if (itSplitter != itSplitterEnd && itSplitter->start() > eventTime)
+          itSplitter = std::prev(itSplitter);
+      }
     }
-    // previous splitter has the destination
-    const int destination = (std::prev(itSplitter))->second;
-    // determine the new stop time
-    const auto stop = (itSplitter == itSplitterEnd) ? DateAndTime::maximum() : itSplitter->first;
+    if (itSplitter == itSplitterEnd)
+      break;
+
+    // determine the new stop time and destination
+    const int destination = itSplitter->index();
+    const auto stop = itSplitter->stop();
 
     // find the new partial to add to
     partial = partials.find(destination);
