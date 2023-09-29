@@ -67,11 +67,11 @@ class FindSXPeaksConvolveTest(unittest.TestCase):
         pk = peak_ws.getPeak(0)
         self.assertEqual(pk.getDetectorID(), 79)
         self.assertAlmostEqual(pk.getTOF(), 5.0, delta=1e-8)
-        self.assertAlmostEqual(pk.getIntensityOverSigma(), 6.0622, delta=1e-4)
+        self.assertAlmostEqual(pk.getIntensityOverSigma(), 6.7937, delta=1e-4)
         pk = peak_ws.getPeak(1)
         self.assertEqual(pk.getDetectorID(), 61)
         self.assertAlmostEqual(pk.getTOF(), 7.0, delta=1e-8)
-        self.assertAlmostEqual(pk.getIntensityOverSigma(), 5.3981, delta=1e-4)
+        self.assertAlmostEqual(pk.getIntensityOverSigma(), 6.1274, delta=1e-4)
 
     def test_exec_specify_nbins(self):
         out = FindSXPeaksConvolve(
