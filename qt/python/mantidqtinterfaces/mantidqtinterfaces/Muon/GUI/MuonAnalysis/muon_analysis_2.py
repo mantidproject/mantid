@@ -132,7 +132,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.setup_tabs()
         self.plot_widget.insert_plot_panes()
 
-        self.help_widget = HelpWidget("Muon Analysis 2")
+        self.help_widget = HelpWidget("Muon Analysis")
 
         central_widget = QtWidgets.QWidget()
         vertical_layout = QtWidgets.QVBoxLayout()
@@ -227,7 +227,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.set_tab_warning(TAB_ORDER.index(tab_name), message)
 
     def setup_disable_notifier(self):
-
         self.disable_notifier.add_subscriber(self.home_tab.home_tab_widget.disable_observer)
 
         self.disable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.disable_tab_observer)
@@ -245,7 +244,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.disable_notifier.add_subscriber(self.seq_fitting_tab.seq_fitting_tab_presenter.disable_tab_observer)
 
     def setup_enable_notifier(self):
-
         self.enable_notifier.add_subscriber(self.home_tab.home_tab_widget.enable_observer)
 
         self.enable_notifier.add_subscriber(self.corrections_tab.corrections_tab_view.enable_tab_observer)
@@ -400,7 +398,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.context.data_context.instrumentNotifier.add_subscriber(observer)
 
     def setup_group_calculation_enable_notifier(self):
-
         self.grouping_tab_widget.group_tab_presenter.enable_editing_notifier.add_subscriber(self.enable_observer)
 
         self.corrections_tab.corrections_tab_presenter.enable_editing_notifier.add_subscriber(self.enable_observer)
@@ -410,7 +407,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.phase_tab.phase_table_presenter.enable_editing_notifier.add_subscriber(self.enable_observer)
 
     def setup_group_calculation_disabler_notifier(self):
-
         self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(self.disable_observer)
 
         self.corrections_tab.corrections_tab_presenter.disable_editing_notifier.add_subscriber(self.disable_observer)

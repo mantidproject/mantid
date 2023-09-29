@@ -709,7 +709,9 @@ void StepScan::checkForVaryingLogs(const std::string &wsName) {
   }
 }
 
-void StepScan::helpClicked() { HelpWindow::showCustomInterface(QStringLiteral("Step Scan Analysis")); }
+void StepScan::helpClicked() {
+  HelpWindow::showCustomInterface(QStringLiteral("Step Scan Analysis"), QString("general"));
+}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
