@@ -110,15 +110,14 @@ class SampleLogsGroupWorkspace(object):
         ]
         write_table_row(ADS.retrieve(self._run_info_name), row, irow)
         # add log data - loop over existing log workspaces not logs in settings as these might have changed
-        currentRunLogs = [l.name for l in run.getLogData()]
         nullLogValue = full(2, nan)  # default nan if can't read/average log data
         if run.getProtonCharge() > 0:
             for log in self._log_names:
                 avg, stdev = nullLogValue
                 if log in self._log_values[ws_name]:
                     avg, stdev = self._log_values[ws_name][log]  # already averaged
-                elif log in currentRunLogs:
-                    if "proton_charge" in currentRunLogs:
+                elif run.hasProperty(log):
+                    if run.hasProperty("proton_charge"):
                         avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
                     else:
                         # average filtered log values (excludes setup time)

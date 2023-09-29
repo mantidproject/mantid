@@ -28,13 +28,9 @@ class TestFittingDataModel(unittest.TestCase):
         self.mock_inst.getFullName.return_value = "instrument"
         mock_prop = mock.MagicMock()
         mock_prop.value = "bank 1"  # bank-id
-        mock_log_data = [mock.MagicMock(), mock.MagicMock()]
-        mock_log_data[0].name = "LogName"
-        mock_log_data[1].name = "proton_charge"
         self.mock_run = mock.MagicMock()
         self.mock_run.getProtonCharge.return_value = 1.0
         self.mock_run.getProperty.return_value = mock_prop
-        self.mock_run.getLogData.return_value = mock_log_data
         self.mock_ws = mock.MagicMock()
         self.mock_ws.getNumberHistograms.return_value = 1
         self.mock_ws.getRun.return_value = self.mock_run
@@ -366,7 +362,7 @@ class TestFittingDataModel(unittest.TestCase):
     def test_add_log_to_table_not_already_averaged_proton_charge_log_not_exist(
         self, mock_avglogs, mock_update_logname, mock_ads, mock_writerow
     ):
-        self.mock_run.getLogData()[1].name = "prt_chrg"  # formerly "proton_charge"
+        self.mock_run.hasProperty.side_effect = lambda log_name: log_name != "proton_charge"  # log in ws but no proton_charge
         self.mock_run.getProperty().filtered_value = [1, 2]  # log time series to be averaged
         self._setup_model_log_workspaces()
         mock_ads.retrieve = lambda ws_name: [ws for ws in self.model._sample_logs_workspace_group._log_workspaces if ws.name() == ws_name][
@@ -382,7 +378,6 @@ class TestFittingDataModel(unittest.TestCase):
         mock_writerow.assert_any_call(self.model._sample_logs_workspace_group._log_workspaces[1], expected_avg_stdev, 3)
         mock_avglogs.assert_not_called()
         mock_update_logname.assert_called_once()
-        self.mock_run.getLogData()[1].name = "proton_charge"  # reset
 
     @patch(output_sample_log_path + ".write_table_row")
     @patch(output_sample_log_path + ".ADS")
@@ -395,7 +390,7 @@ class TestFittingDataModel(unittest.TestCase):
         ]
         self.model._sample_logs_workspace_group._log_values = {"name1": {}}
         self.model._sample_logs_workspace_group._log_names = ["LogName"]
-        self.mock_run.getLogData.return_value = [self.mock_run.getLogData()[1]]  # only proton_charge
+        self.mock_run.hasProperty.return_value = False  # log not in ws
 
         self.model._sample_logs_workspace_group.add_log_to_table("name1", self.mock_ws, 3)
 
