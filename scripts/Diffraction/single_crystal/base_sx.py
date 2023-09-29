@@ -116,6 +116,10 @@ class BaseSX(ABC):
         self.runs[str(run)]["MD"] = BaseSX.retrieve(ws_md).name()
 
     def set_sample(self, **kwargs):
+        default_material = {"NumberDensityUnit": "Formula Units"}
+        if "Material" in kwargs:
+            # if no material in kwargs then setting this would produce an error in SetSample later
+            kwargs["Material"] = {**default_material, **kwargs["Material"]}
         self.sample_dict = kwargs
 
     def set_goniometer_axes(self, *args):
