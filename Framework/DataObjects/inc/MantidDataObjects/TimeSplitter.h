@@ -34,14 +34,19 @@ public:
   static double getTime2();
   static double getTime4();
   static double getTime5();
+  static double getTime6();
   // static double getTime10();
 
   static constexpr int NO_TARGET{-1}; // no target (a.k.a. destination) workspace for filtered out events
   TimeSplitter() = default;
+  TimeSplitter(const TimeSplitter &other);
+  TimeSplitter &operator=(const TimeSplitter &other);
+
   TimeSplitter(const DateAndTime &start, const DateAndTime &stop, const int value = DEFAULT_TARGET);
   TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const DateAndTime &offset = DateAndTime::GPS_EPOCH);
   TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &offset = DateAndTime::GPS_EPOCH);
   TimeSplitter(const SplittersWorkspace_sptr &sws);
+
   const std::map<DateAndTime, int> &getSplittersMap() const;
   std::string getWorkspaceIndexName(const int workspaceIndex, const int numericalShift = 0);
   /// Find the destination index for an event with a given time
@@ -50,9 +55,8 @@ public:
   /// Check if the TimeSplitter is empty
   bool empty() const;
   std::set<int> outputWorkspaceIndices() const;
-  Kernel::TimeROI getTimeROI(const int workspaceIndex);
-  /// Cast to to vector of SplittingInterval objects
-  Kernel::SplittingIntervalVec toSplitters(const bool includeNoTarget = true) const;
+  Kernel::TimeROI getTimeROI(const int workspaceIndex) const;
+  const Kernel::SplittingIntervalVec &getSplittingIntervals(const bool includeNoTarget = true) const;
   /// this is to aid in testing and not intended for use elsewhere
   std::size_t numRawValues() const;
   /// Split a list of events according to Pulse time or Pulse + TOF time
@@ -60,7 +64,6 @@ public:
                       const bool tofCorrect = false, const double factor = 1.0, const double shift = 0.0) const;
   /// Print the (destination index | DateAndTime boundary) pairs of this splitter.
   std::string debugPrint() const;
-  void rebuildCachedPartialTimeROIs();
 
 private:
   static constexpr int DEFAULT_TARGET{0};
@@ -73,15 +76,28 @@ private:
   void splitEventVec(const std::function<const DateAndTime(const EventType &)> &timeCalc,
                      const std::vector<EventType> &events, std::map<int, EventList *> &partials) const;
 
-  void resetCachedPartialTimeROIs();
+  void resetCache();
+  void resetCachedPartialTimeROIs() const;
+  void resetCachedSplittingIntervals() const;
 
+  void rebuildCachedPartialTimeROIs() const;
+  void rebuildCachedSplittingIntervals(const bool includeNoTarget = true) const;
+
+private:
   std::map<DateAndTime, int> m_roi_map;
   // These 2 maps are complementary to each other
   std::map<std::string, int> m_name_index_map;
   std::map<int, std::string> m_index_name_map;
 
-  std::map<int, Kernel::TimeROI> m_cachedPartialTimeROIs;
-  bool validCachedPartialTimeROIs{false};
+  mutable std::map<int, Kernel::TimeROI> m_cachedPartialTimeROIs;
+  mutable Kernel::SplittingIntervalVec m_cachedSplittingIntervals;
+
+  mutable bool validCachedPartialTimeROIs{false};
+  mutable bool validCachedSplittingIntervals_All{false};
+  mutable bool validCachedSplittingIntervals_WithValidTargets{false};
+
+  mutable std::mutex m_partialROIMutex;
+  mutable std::mutex m_splittingIntervalMutex;
 };
 } // namespace DataObjects
 } // namespace Mantid

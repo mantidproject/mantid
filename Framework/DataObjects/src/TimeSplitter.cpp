@@ -13,6 +13,7 @@
 
 static double elapsed_time_case_1{0.0};
 static double elapsed_time_case_5{0.0};
+static double elapsed_time_case_6{0.0};
 static std::chrono::time_point<std::chrono::system_clock> splitEventsVec_firstEntrance;
 static int splitEventsVec_call_count{0};
 static std::chrono::time_point<std::chrono::system_clock> splitEventsVec_lastEntrance;
@@ -37,6 +38,36 @@ void assertIncreasing(const DateAndTime &start, const DateAndTime &stop) {
 Kernel::Logger g_log("TimeSplitter");
 
 } // namespace
+
+TimeSplitter::TimeSplitter(const TimeSplitter &other) {
+  m_roi_map = other.m_roi_map;
+
+  m_name_index_map = other.m_name_index_map;
+  m_index_name_map = other.m_index_name_map;
+
+  m_cachedPartialTimeROIs = other.m_cachedPartialTimeROIs;
+  m_cachedSplittingIntervals = other.m_cachedSplittingIntervals;
+
+  validCachedPartialTimeROIs = other.validCachedPartialTimeROIs;
+  validCachedSplittingIntervals_All = other.validCachedSplittingIntervals_All;
+  validCachedSplittingIntervals_WithValidTargets = other.validCachedSplittingIntervals_WithValidTargets;
+}
+
+TimeSplitter &TimeSplitter::operator=(const TimeSplitter &other) {
+  m_roi_map = other.m_roi_map;
+
+  m_name_index_map = other.m_name_index_map;
+  m_index_name_map = other.m_index_name_map;
+
+  m_cachedPartialTimeROIs = other.m_cachedPartialTimeROIs;
+  m_cachedSplittingIntervals = other.m_cachedSplittingIntervals;
+
+  validCachedPartialTimeROIs = other.validCachedPartialTimeROIs;
+  validCachedSplittingIntervals_All = other.validCachedSplittingIntervals_All;
+  validCachedSplittingIntervals_WithValidTargets = other.validCachedSplittingIntervals_WithValidTargets;
+
+  return *this;
+}
 
 TimeSplitter::TimeSplitter(const DateAndTime &start, const DateAndTime &stop, const int value) {
   clearAndReplace(start, stop, value);
@@ -226,7 +257,7 @@ std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const 
 }
 
 void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, const int value) {
-  resetCachedPartialTimeROIs();
+  resetCache();
 
   // If start time == stop time, the map will be corrupted.
   if (start == stop)
@@ -313,22 +344,34 @@ void TimeSplitter::clearAndReplace(const DateAndTime &start, const DateAndTime &
     m_roi_map.insert({start, value});
     m_roi_map.insert({stop, NO_TARGET});
   }
-  resetCachedPartialTimeROIs();
+  resetCache();
 }
 
-// Target time vectors must be reset every time the ROI map is modified.
-void TimeSplitter::resetCachedPartialTimeROIs() {
+void TimeSplitter::resetCache() {
+  resetCachedPartialTimeROIs();
+  resetCachedSplittingIntervals();
+}
+
+void TimeSplitter::resetCachedPartialTimeROIs() const {
   if (validCachedPartialTimeROIs) {
     m_cachedPartialTimeROIs.clear();
     validCachedPartialTimeROIs = false;
   }
 }
 
-void TimeSplitter::rebuildCachedPartialTimeROIs() {
+void TimeSplitter::resetCachedSplittingIntervals() const {
+  if (validCachedSplittingIntervals_All || validCachedSplittingIntervals_WithValidTargets) {
+    m_cachedSplittingIntervals.clear();
+    validCachedSplittingIntervals_All = false;
+    validCachedSplittingIntervals_WithValidTargets = false;
+  }
+}
+
+void TimeSplitter::rebuildCachedPartialTimeROIs() const {
   auto start = std::chrono::system_clock::now();
   resetCachedPartialTimeROIs();
 
-  if (m_roi_map.empty())
+  if (empty())
     return;
 
   std::map<int, std::vector<DateAndTime>> partialTimeVectors;
@@ -362,6 +405,31 @@ void TimeSplitter::rebuildCachedPartialTimeROIs() {
   auto stop = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = stop - start;
   elapsed_time_case_5 += elapsed_seconds.count();
+}
+
+void TimeSplitter::rebuildCachedSplittingIntervals(const bool includeNoTarget) const {
+  auto start = std::chrono::system_clock::now();
+
+  resetCachedSplittingIntervals();
+
+  if (empty())
+    return;
+
+  auto startIt = m_roi_map.cbegin();
+  const auto iterEnd = m_roi_map.cend();
+  while (std::next(startIt) != iterEnd) {
+    // invoke constructor SplittingInterval(DateAndTime &start, DateAndTime &stop, int index)
+    if (includeNoTarget || startIt->second != NO_TARGET)
+      m_cachedSplittingIntervals.emplace_back(startIt->first, std::next(startIt)->first, startIt->second);
+    std::advance(startIt, 1);
+  }
+
+  validCachedSplittingIntervals_All = includeNoTarget;
+  validCachedSplittingIntervals_WithValidTargets = !includeNoTarget;
+
+  auto stop = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = stop - start;
+  elapsed_time_case_6 += elapsed_seconds.count();
 }
 
 /**
@@ -416,7 +484,9 @@ std::set<int> TimeSplitter::outputWorkspaceIndices() const {
  * If the workspace index does not exist in the TimeSplitter, the returned TimeROI will be empty,
  * meaning any time datapoint will pass through the given ROI filter.
  */
-TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
+TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) const {
+  std::lock_guard<std::mutex> lock(m_partialROIMutex);
+
   if (!validCachedPartialTimeROIs) {
     rebuildCachedPartialTimeROIs();
   }
@@ -429,22 +499,15 @@ TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) {
   return m_cachedPartialTimeROIs[effectiveIndex];
 }
 
-/**
- * Cast to a vector of SplittingInterval objects
- */
-SplittingIntervalVec TimeSplitter::toSplitters(const bool includeNoTarget) const {
-  std::vector<SplittingInterval> output;
-  if (this->empty())
-    return output;
-  auto startIt = m_roi_map.cbegin();
-  const auto iterEnd = m_roi_map.cend();
-  while (std::next(startIt) != iterEnd) {
-    /// invoke constructor SplittingInterval(DateAndTime &start, DateAndTime &stop, int index)
-    if (includeNoTarget || startIt->second != NO_TARGET)
-      output.emplace_back(startIt->first, std::next(startIt)->first, startIt->second);
-    std::advance(startIt, 1);
+const Kernel::SplittingIntervalVec &TimeSplitter::getSplittingIntervals(const bool includeNoTarget) const {
+  std::lock_guard<std::mutex> lock(m_splittingIntervalMutex);
+
+  if ((includeNoTarget && !validCachedSplittingIntervals_All) ||
+      (!includeNoTarget && !validCachedSplittingIntervals_WithValidTargets)) {
+    rebuildCachedSplittingIntervals(includeNoTarget);
   }
-  return output;
+
+  return m_cachedSplittingIntervals;
 }
 
 std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
@@ -561,7 +624,7 @@ void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const Eve
                                  const std::vector<EventType> &events, std::map<int, EventList *> &partials) const {
   // TODO should connect to OutputUnfilteredEvents
   // get a copy of the splitters as a vector
-  const auto splittersVec = this->toSplitters(true);
+  const auto splittersVec = getSplittingIntervals(true);
 
   // initialize the iterator over the splitter
   auto itSplitter = splittersVec.cbegin();
@@ -646,6 +709,7 @@ double TimeSplitter::getTime4() {
   return elapsed_seconds.count();
 }
 double TimeSplitter::getTime5() { return elapsed_time_case_5; }
+double TimeSplitter::getTime6() { return elapsed_time_case_6; }
 // double TimeSplitter::getTime10() { return elapsed_time_case_10; }
 } // namespace DataObjects
 } // namespace Mantid

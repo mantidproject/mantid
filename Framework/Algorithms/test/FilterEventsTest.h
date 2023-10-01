@@ -1253,6 +1253,7 @@ public:
     Mantid::DataHandling::LoadNexusProcessed loader;
     std::string splitter_ws_filename{"/SNS/users/r1e/for_Pete/splitter_table_25s.nxs"};
     // std::string splitter_ws_filename{"/SNS/users/r1e/for_Pete/splitter_table.nxs"};
+    std::cout << "SPLITTER WORKSPACE FILE: " << splitter_ws_filename << std::endl;
     std::string splitter_ws_name{"huge_ws"};
 
     loader.initialize();
@@ -1282,11 +1283,19 @@ public:
     filter.setProperty("OutputUnfilteredEvents", true);
     filter.execute();
 
+    // For 25s file
     std::map<std::string, size_t> output_workspaces{{"FilteredWS_unfiltered", 1278707},
                                                     {"FilteredWS_on_off", 2028},
                                                     {"FilteredWS_off_off", 2184},
                                                     {"FilteredWS_off_on", 0},
                                                     {"FilteredWS_on_on", 0}};
+
+    // For 250s file
+    // std::map<std::string, size_t> output_workspaces{{"FilteredWS_unfiltered", 1240593},
+    //                                                 {"FilteredWS_on_off", 20909},
+    //                                                 {"FilteredWS_off_off", 21417},
+    //                                                 {"FilteredWS_off_on", 0},
+    //                                                 {"FilteredWS_on_on", 0}};
 
     size_t total_events{0};
     for (auto output_ws : output_workspaces) {
@@ -1295,14 +1304,14 @@ public:
             std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(output_ws.first));
         size_t number_of_events = partial_event_ws->getNumberEvents();
         std::cout << "Partial workspace \"" << output_ws.first << "\":" << number_of_events << " events\n";
-        TS_ASSERT(number_of_events == output_ws.second);
+        TS_ASSERT_EQUALS(number_of_events, output_ws.second);
         total_events += number_of_events;
       } else
         std::cout << "Workspace \"" << output_ws.first << "\" not found."
                   << "\n";
     }
     std::cout << "Total number of events in all partial workspaces: " << total_events << "\n";
-    TS_ASSERT(total_events == 1282919);
+    TS_ASSERT_EQUALS(total_events, 1282919);
 
     // clean-up?
   }

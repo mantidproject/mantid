@@ -586,19 +586,13 @@ TimeROI FilterEvents::partialROI(const int &index) {
  */
 void FilterEvents::parseInputSplitters() {
   if (m_splittersWorkspace) {
-    m_timeSplitter = TimeSplitter(m_splittersWorkspace);
-    std::cout << "\nSPLITTERS WORKSPACE CASE "
-              << "\n";
+    m_timeSplitter = TimeSplitter{m_splittersWorkspace};
   } else if (m_splitterTableWorkspace) {
     m_timeSplitter =
         TimeSplitter(m_splitterTableWorkspace, m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime::GPS_EPOCH);
-    // std::cout << "\nSPLITTER TABLE WORKSPACE CASE"
-    //          << "\n";
   } else {
     m_timeSplitter =
         TimeSplitter(m_matrixSplitterWS, m_isSplittersRelativeTime ? m_filterStartTime : DateAndTime::GPS_EPOCH);
-    std::cout << "\nMATRIX SPLITTER WORKSPACE CASE"
-              << "\n";
   }
 
   m_targetWorkspaceIndexSet = m_timeSplitter.outputWorkspaceIndices();
@@ -1067,9 +1061,9 @@ void FilterEvents::filterEvents(double progressamount) {
 
   std::cout << "Cumulative time (s) spent in EventList sorting: " << TimeSplitter::getTime1() << std::endl;
   std::cout << "Cumulative time (s) spent in TS::splitEventVec(s): " << TimeSplitter::getTime4() << std::endl;
-  std::cout << "Cumulative time (s) spent in TS::rebuildCachedPartialTimeROIs (s): " << TimeSplitter::getTime5()
+  std::cout << "Cumulative time (s) spent in TS::rebuildCachedPartialTimeROIs: " << TimeSplitter::getTime5()
             << std::endl;
-  // std::cout << "Cumulative time (s) spent in TS::getTimeROI (s): " << TimeSplitter::getTime10() << std::endl;
+  std::cout << "Cumulative time (s) spent in TS::rebuildCachedSplittingIntervals: " << TimeSplitter::getTime6()
+            << std::endl;
 }
-
 } // namespace Mantid::Algorithms

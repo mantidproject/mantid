@@ -304,11 +304,11 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
   }
   // Get all ROI time boundaries. Every other value is start/stop of an ROI "use" region.
   const std::vector<Types::Core::DateAndTime> &roiTimes = timeROI.getAllTimes();
-  auto itROI{roiTimes.begin()};
-  const auto itROIEnd{roiTimes.end()};
+  auto itROI{roiTimes.cbegin()};
+  const auto itROIEnd{roiTimes.cend()};
 
-  auto itValue{m_values.begin()};
-  const auto itValueEnd{m_values.end()};
+  auto itValue{m_values.cbegin()};
+  const auto itValueEnd{m_values.cend()};
   auto itLastValueUsed{itValue}; // last value used up to the moment
 
   bool denseROIs = roiTimes.size() / 2 > m_values.size();

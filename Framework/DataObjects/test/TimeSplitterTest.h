@@ -362,13 +362,13 @@ public:
     splitter.addROI(ONE, TWO, 1);
     splitter.addROI(TWO, THREE, 2);
     splitter.addROI(FOUR, FIVE, 3); // a gap with the previous ROI
-    const SplittingIntervalVec splitVec = splitter.toSplitters(true);
+    const SplittingIntervalVec splitVec = splitter.getSplittingIntervals(true);
     TS_ASSERT_EQUALS(splitVec.size(), 4);
     TS_ASSERT(splitVec[0] == SplittingInterval(ONE, TWO, 1));
     TS_ASSERT(splitVec[1] == SplittingInterval(TWO, THREE, 2));
     TS_ASSERT(splitVec[2] == SplittingInterval(THREE, FOUR, TimeSplitter::NO_TARGET));
     TS_ASSERT(splitVec[3] == SplittingInterval(FOUR, FIVE, 3));
-    const SplittingIntervalVec splitVecNoTarget = splitter.toSplitters(false);
+    const SplittingIntervalVec splitVecNoTarget = splitter.getSplittingIntervals(false);
     TS_ASSERT_EQUALS(splitVecNoTarget.size(), 3);
     TS_ASSERT(splitVecNoTarget[0] == SplittingInterval(ONE, TWO, 1));
     TS_ASSERT(splitVecNoTarget[1] == SplittingInterval(TWO, THREE, 2));
