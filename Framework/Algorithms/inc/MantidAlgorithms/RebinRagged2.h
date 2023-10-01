@@ -28,7 +28,7 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   static bool use_simple_rebin(std::vector<double> xmins, std::vector<double> xmaxs, std::vector<double> deltas);
-  static void extend_value(size_t numSpec, std::vector<double> &array);
+  static void extend_value(int numSpec, std::vector<double> &array);
   const std::string workspaceMethodName() const override { return ""; } // Override the one from Rebin to ignore us
 };
 

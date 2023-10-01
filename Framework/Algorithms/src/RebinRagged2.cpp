@@ -76,24 +76,29 @@ std::map<std::string, std::string> RebinRagged::validateInputs() {
     errors["Delta"] = "All must be nonzero";
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  const auto histnumber = inputWS->getNumberHistograms();
 
-  if (numDelta == 0)
-    errors["Delta"] = "Must specify binning";
-  else if (!(numDelta == 1 || numDelta == histnumber))
-    errors["Delta"] =
-        "Must specify for each spetra (" + std::to_string(numDelta) + "!=" + std::to_string(histnumber) + ")";
+  if (inputWS) {
+    const auto histnumber = inputWS->getNumberHistograms();
 
-  if (numMin > 1 && numMin != histnumber)
-    errors["XMin"] =
-        "Must specify min for each spectra (" + std::to_string(numMin) + "!=" + std::to_string(histnumber) + ")";
+    if (numDelta == 0)
+      errors["Delta"] = "Must specify binning";
+    else if (!(numDelta == 1 || numDelta == histnumber))
+      errors["Delta"] =
+          "Must specify for each spetra (" + std::to_string(numDelta) + "!=" + std::to_string(histnumber) + ")";
 
-  if (numMax > 1 && numMax != histnumber)
-    errors["XMax"] =
-        "Must specify max for each spectra (" + std::to_string(numMax) + "!=" + std::to_string(histnumber) + ")";
+    if (numMin > 1 && numMin != histnumber)
+      errors["XMin"] =
+          "Must specify min for each spectra (" + std::to_string(numMin) + "!=" + std::to_string(histnumber) + ")";
 
-  if (!inputWS->isHistogramData())
-    errors["InputWorkspace"] = "Only works with histogram data, not point data";
+    if (numMax > 1 && numMax != histnumber)
+      errors["XMax"] =
+          "Must specify max for each spectra (" + std::to_string(numMax) + "!=" + std::to_string(histnumber) + ")";
+
+    if (!inputWS->isHistogramData())
+      errors["InputWorkspace"] = "Only works with histogram data, not point data";
+  } else
+    errors["InputWorkspace"] = "InputWorkspace is not a MatrixWorkspace";
+
   return errors;
 }
 
@@ -110,7 +115,7 @@ void RebinRagged::exec() {
   bool inPlace = (inputWS == outputWS);
 
   // workspace independent determination of length
-  const auto histnumber = inputWS->getNumberHistograms();
+  const auto histnumber = static_cast<int>(inputWS->getNumberHistograms());
 
   std::vector<double> xmins = getProperty("XMin");
   std::vector<double> xmaxs = getProperty("XMax");
@@ -135,7 +140,7 @@ void RebinRagged::exec() {
   extend_value(histnumber, deltas);
 
   // replace NaN and infinity with X min/max
-  for (size_t hist = 0; hist < histnumber; hist++) {
+  for (int hist = 0; hist < histnumber; hist++) {
     const auto inX = inputWS->x(hist);
     if (!std::isfinite(xmins[hist]))
       xmins[hist] = inX.front();
@@ -156,7 +161,7 @@ void RebinRagged::exec() {
       }
       auto eventOutputWS = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
-      for (size_t hist = 0; hist < histnumber; hist++) {
+      for (int hist = 0; hist < histnumber; hist++) {
         auto xmin = xmins[hist];
         auto xmax = xmaxs[hist];
         const auto delta = deltas[hist];
@@ -176,7 +181,7 @@ void RebinRagged::exec() {
 
       // Go through all the histograms and set the data
       PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-      for (size_t hist = 0; hist < histnumber; ++hist) {
+      for (int hist = 0; hist < histnumber; ++hist) {
         PARALLEL_START_INTERRUPT_REGION
         auto xmin = xmins[hist];
         auto xmax = xmaxs[hist];
@@ -233,7 +238,7 @@ void RebinRagged::exec() {
     Progress prog(this, 0.0, 1.0, histnumber);
 
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-    for (size_t hist = 0; hist < histnumber; ++hist) {
+    for (int hist = 0; hist < histnumber; ++hist) {
       PARALLEL_START_INTERRUPT_REGION
       auto xmin = xmins[hist];
       auto xmax = xmaxs[hist];
@@ -252,7 +257,7 @@ void RebinRagged::exec() {
     // Now propagate any masking correctly to the output workspace
     // More efficient to have this in a separate loop because
     // MatrixWorkspace::maskBins blocks multi-threading
-    for (size_t hist = 0; hist < histnumber; ++hist) {
+    for (int hist = 0; hist < histnumber; ++hist) {
       if (inputWS->hasMaskedBins(hist)) // Does the current spectrum have any masked bins?
       {
         outputWS->setUnmaskedBins(hist);
@@ -292,7 +297,7 @@ bool RebinRagged::use_simple_rebin(std::vector<double> xmins, std::vector<double
   return true;
 }
 
-void RebinRagged::extend_value(size_t histnumber, std::vector<double> &array) {
+void RebinRagged::extend_value(int histnumber, std::vector<double> &array) {
   if (array.size() == 0) {
     array.resize(histnumber, std::numeric_limits<double>::quiet_NaN());
   } else if (array.size() == 1) {

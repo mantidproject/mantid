@@ -441,6 +441,7 @@ void Rebin::exec() {
  *  @param inputWS ::  The input workspace
  *  @param outputWS :: The output workspace
  *  @param hist ::    The index of the current histogram
+ *  @param ignoreErrors :: If to ignore bin errors
  */
 void Rebin::propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS, const API::MatrixWorkspace_sptr &outputWS,
                            const int hist, const bool ignoreErrors) {
