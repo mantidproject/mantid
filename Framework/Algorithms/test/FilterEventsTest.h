@@ -1252,6 +1252,7 @@ public:
     // Load splitter workspace
     Mantid::DataHandling::LoadNexusProcessed loader;
     std::string splitter_ws_filename{"/SNS/users/r1e/for_Pete/splitter_table_25s.nxs"};
+    // std::string splitter_ws_filename{"/SNS/users/r1e/for_Pete/splitter_table_250s.nxs"};
     // std::string splitter_ws_filename{"/SNS/users/r1e/for_Pete/splitter_table.nxs"};
     std::cout << "SPLITTER WORKSPACE FILE: " << splitter_ws_filename << std::endl;
     std::string splitter_ws_name{"huge_ws"};
@@ -1290,7 +1291,7 @@ public:
                                                     {"FilteredWS_off_on", 0},
                                                     {"FilteredWS_on_on", 0}};
 
-    // For 250s file
+    // // For 250s file
     // std::map<std::string, size_t> output_workspaces{{"FilteredWS_unfiltered", 1240593},
     //                                                 {"FilteredWS_on_off", 20909},
     //                                                 {"FilteredWS_off_off", 21417},
