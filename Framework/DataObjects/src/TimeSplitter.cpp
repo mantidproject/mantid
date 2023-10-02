@@ -280,17 +280,17 @@ void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, con
   } else if ((stop < firstTime) || (start > lastTime)) {
     // the new ROI lies outside the whole of the existing TimeSplitter, thus just add it
     if (value > NO_TARGET) { // only add non-ignore values
-      m_roi_map.insert({start, value});
-      m_roi_map.insert({stop, NO_TARGET});
+      m_roi_map.emplace(start, value);
+      m_roi_map.emplace(stop, NO_TARGET);
     }
   } else if (start == lastTime) { // the new ROI starts at the end of the existing TimeSplitter
     if (value > NO_TARGET) {      // only add non-ignore values
       m_roi_map.rbegin()->second = value;
-      m_roi_map.insert({stop, NO_TARGET});
+      m_roi_map.emplace(stop, NO_TARGET);
     }
   } else if (stop == firstTime) { // the new ROI ends at the start of the existing TimeSplitter
     if (value > NO_TARGET) {      // only add non-ignore values
-      m_roi_map.insert({start, value});
+      m_roi_map.emplace(start, value);
     }
   } else { // the new ROI either overlaps or is inside the existing TimeSplitter
     // do the interesting version
@@ -319,7 +319,7 @@ void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, con
     // put in the new elements
     if ((value > NO_TARGET) || (!atStart)) {
       if (value != this->valueAtTime(start)) {
-        m_roi_map.insert({start, value});
+        m_roi_map.emplace(start, value);
       }
     }
 
@@ -329,7 +329,7 @@ void TimeSplitter::addROI(const DateAndTime &start, const DateAndTime &stop, con
       m_roi_map.erase(stopIterator);
     }
     if (value != stopValue) {
-      m_roi_map.insert({stop, stopValue});
+      m_roi_map.emplace(stop, stopValue);
     }
 
     // verify this ends with NO_TARGET
