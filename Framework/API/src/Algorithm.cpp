@@ -468,7 +468,7 @@ void Algorithm::lockWorkspaces() {
  */
 void Algorithm::unlockWorkspaces() {
   // Do not lock workspace for child algos
-  if (this->isChild())
+  if (m_isChildAlgorithm)
     return;
   auto &debugLog = g_log.debug();
   for (auto &ws : m_writeLockedWorkspaces) {
