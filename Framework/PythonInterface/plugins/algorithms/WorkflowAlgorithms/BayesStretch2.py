@@ -260,6 +260,12 @@ class BayesStretch2(QuickBayesTemplate):
             VerticalAxisValues=axis_names,
         )
 
+    def set_label(self, ws_str, label, unit):
+        ws = ADS.retrieve(ws_str)
+        axis = ws.getAxis(0)
+        axis.setUnit("Label").setLabel(label, unit)
+        return ws_str
+
     def make_results(
         self,
         beta_list,
@@ -277,8 +283,12 @@ class BayesStretch2(QuickBayesTemplate):
         :param name: the name of the output worksapce
         :return group workspaces with the FWHM and beta slices
         """
-        beta = self.make_slice_ws(slice_list=beta_list, x_data=x_data, x_unit=x_unit, name=f"{name}_Stretch_Beta")
-        FWHM = self.make_slice_ws(slice_list=FWHM_list, x_data=x_data, x_unit=x_unit, name=f"{name}_Stretch_FWHM")
+        beta = self.make_slice_ws(slice_list=beta_list, x_data=x_data, x_unit="", name=f"{name}_Stretch_Beta")
+        FWHM = self.make_slice_ws(slice_list=FWHM_list, x_data=x_data, x_unit="FWHM", name=f"{name}_Stretch_FWHM")
+
+        FWHM = self.set_label(FWHM, "FWHM", "eV")
+        beta = self.set_label(beta, "beta", "")
+
         slice_group = self.group_ws([beta, FWHM], name)
 
         return slice_group

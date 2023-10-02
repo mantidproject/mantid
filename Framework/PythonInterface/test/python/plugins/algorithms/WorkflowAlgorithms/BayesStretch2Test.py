@@ -121,8 +121,12 @@ class BayesStretch2Test(unittest.TestCase):
         def slice(slice_list, x_data, x_unit, name):
             return slice_list
 
+        def set_label(ws_str, label, unit):
+            return ws_str
+
         self._alg.make_slice_ws = mock.Mock(side_effect=slice)
         self._alg.group_ws = mock.Mock(return_value="group")
+        self._alg.set_label = mocl.Mock(side_effect=set_label)
 
         beta_list = [(1, 2), (3, 4)]
         FWHM_list = [(5, 6), (7, 8)]
@@ -149,6 +153,8 @@ class BayesStretch2Test(unittest.TestCase):
             x_unit="MomentumTransfer",
             name="test_Stretch_FWHM",
         )
+        self.assert_mock_called_with(self._alg.make_slice_ws, N_calls=2, call_number=2, ws_str="test_Stretch_Beta", label="beta", unit="")
+        self.assert_mock_called_with(self._alg.make_slice_ws, N_calls=2, call_number=1, ws_str="test_Stretch_FWHM", label="FWHM", unit="eV")
 
     def test_do_one_spec(self):
         data = {
