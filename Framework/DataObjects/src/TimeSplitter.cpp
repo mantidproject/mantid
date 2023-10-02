@@ -422,13 +422,11 @@ void TimeSplitter::rebuildCachedSplittingIntervals(const bool includeNoTarget) c
   if (empty())
     return;
 
-  auto startIt = m_roi_map.cbegin();
   const auto iterEnd = m_roi_map.cend();
-  while (std::next(startIt) != iterEnd) {
+  for (auto startIt = m_roi_map.cbegin(); startIt != iterEnd; ++startIt) {
     // invoke constructor SplittingInterval(DateAndTime &start, DateAndTime &stop, int index)
     if (includeNoTarget || startIt->second != NO_TARGET)
       m_cachedSplittingIntervals.emplace_back(startIt->first, std::next(startIt)->first, startIt->second);
-    std::advance(startIt, 1);
   }
 
   validCachedSplittingIntervals_All = includeNoTarget;
@@ -632,7 +630,7 @@ void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const Eve
                                  const std::vector<EventType> &events, std::map<int, EventList *> &partials) const {
   // TODO should connect to OutputUnfilteredEvents
   // get a copy of the splitters as a vector
-  const auto splittersVec = getSplittingIntervals(true);
+  const auto &splittersVec = getSplittingIntervals(true);
 
   // initialize the iterator over the splitter
   auto itSplitter = splittersVec.cbegin();
