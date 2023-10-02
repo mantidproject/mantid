@@ -79,7 +79,7 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
   # Silence issues with deprecated allocator methods in boost regex
   add_definitions(-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
 
-  find_package(Poco 1.4.6 REQUIRED)
+  find_package(Poco 1.11.7 REQUIRED)
   add_definitions(-DPOCO_ENABLE_CPP11)
   find_package(TBB REQUIRED)
   find_package(OpenSSL REQUIRED)
