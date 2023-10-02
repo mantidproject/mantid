@@ -773,6 +773,7 @@ public:
     // --------------------
     bool pulseTof{true};
     intervals = {90.0, 90.0, 60.0};
+    partials = this->instantiatePartials(destinations); // splitting doesn't initialize partials
     splitter = this->generateSplitter(startTime, intervals, destinations);
     splitter.splitEventList(events, partials, pulseTof);
     TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 3);
@@ -790,7 +791,8 @@ public:
     // --------------------
     bool tofCorrect{true};
     double factor{1.0};
-    double shift{30.0 * 1.0E6}; // add 30 seconds to each TOF, in units of micro-seconds
+    double shift{30.0 * 1.0E6};                         // add 30 seconds to each TOF, in units of micro-seconds
+    partials = this->instantiatePartials(destinations); // splitting doesn't initialize partials
     splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
     TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 2);
     TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 3);
@@ -808,6 +810,7 @@ public:
     // --------------------
     factor = 0.5; // shrink TOF by half
     shift = 0.0;
+    partials = this->instantiatePartials(destinations); // splitting doesn't initialize partials
     splitter.splitEventList(events, partials, pulseTof, tofCorrect, factor, shift);
     TS_ASSERT_EQUALS(partials[0]->getNumberEvents(), 4);
     TS_ASSERT_EQUALS(partials[1]->getNumberEvents(), 2);
