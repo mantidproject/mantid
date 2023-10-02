@@ -149,9 +149,12 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
 
     // get the target name; it may or may not represent an integer
     std::string target_name = col_target->cell<std::string>(ii);
-    // get the target workspace index. If target name represents an integer, that integer automatically becomes the
-    // workspace index. If target name is a non-numeric string, we will assign a unique index to it.
-    if (noninteger_target_names_count > 0) {
+
+    const auto targetIter = m_name_index_map.find(target_name);
+    if (targetIter == m_name_index_map.end()) {
+      // Try converting to integer or create an index
+      // If target name represents an integer, that integer automatically becomes the
+      // workspace index. If target name is a non-numeric string, we will assign a unique index to it.
       try {
         target_index = std::stoi(target_name);
         m_name_index_map[target_name] = target_index;
@@ -172,16 +175,7 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
         }
       }
     } else {
-      // explain what is going on
-      if (m_name_index_map.count(target_name) == 0) {
-        target_index = max_target_index;
-        m_name_index_map[target_name] = target_index;
-        m_index_name_map[target_index] = target_name;
-        max_target_index++;
-      } else {
-        target_index = m_name_index_map[target_name];
-        assert(m_index_name_map[target_index] == target_name);
-      }
+      target_index = targetIter->second;
     }
 
     // if this row's time interval intersects an interval already in the splitter, no separate ROI will be created
@@ -193,6 +187,10 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
   }
 
   std::cout << "NUMBER OF ZERO-WIDTH SPLITTER INTERVALS: " << number_of_zero_width_intervals << std::endl;
+  std::cout << "NUMBER OF TARGETS: " << m_name_index_map.size() << "\n";
+  for (const auto &info : m_name_index_map)
+    std::cout << info.first << " and " << info.second << "\n";
+  std::cout << "NUMBER OF NO_TARGET NAMES: " << notarget_names_count << "\n";
 
   // Verify that the input target names are either all numeric or all non-numeric. The exception is a name "-1", i.e. no
   // target specified. That name is ok to mix with non-numeric names.
