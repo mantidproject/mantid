@@ -121,18 +121,19 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
 
   int target_index{NO_TARGET};
   int max_target_index{0};
-  size_t noninteger_target_names_count{0};
-  size_t notarget_names_count{0}; // count "-1" targets
-
   size_t number_of_zero_width_intervals(0);
 
   std::cout << "Creating a time splitter from a table workspace. Total number of rows: " << tws->rowCount()
             << std::endl;
 
-  for (size_t ii = 0; ii < tws->rowCount(); ii++) {
+  // can't mix label types except for NO_TARGET
+  bool has_target_name_numeric = false;
+  bool has_target_name_nonnumeric = false;
+
+  for (size_t row = 0; row < tws->rowCount(); row++) {
     // by design, the times in the table must be in seconds
-    const double timeStart_s{tws->cell_cast<double>(ii, COL_START)};
-    const double timeStop_s{tws->cell_cast<double>(ii, COL_STOP)};
+    const double timeStart_s{tws->cell_cast<double>(row, COL_START)};
+    const double timeStop_s{tws->cell_cast<double>(row, COL_STOP)};
 
     if (timeStart_s == timeStop_s) {
       number_of_zero_width_intervals++;
@@ -148,7 +149,7 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
     const Types::Core::DateAndTime timeStop = offset + timeStop_s;
 
     // get the target name; it may or may not represent an integer
-    std::string target_name = col_target->cell<std::string>(ii);
+    std::string target_name = col_target->cell<std::string>(row);
 
     const auto targetIter = m_name_index_map.find(target_name);
     if (targetIter == m_name_index_map.end()) {
@@ -159,10 +160,10 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
         target_index = std::stoi(target_name);
         m_name_index_map[target_name] = target_index;
         m_index_name_map[target_index] = target_name;
-        if (target_index == NO_TARGET)
-          notarget_names_count++;
+        if (target_index != NO_TARGET)
+          has_target_name_numeric = true;
       } catch (std::invalid_argument &) { // a non-integer string
-        noninteger_target_names_count++;
+        has_target_name_nonnumeric = true;
 
         if (m_name_index_map.count(target_name) == 0) {
           target_index = max_target_index;
@@ -180,7 +181,7 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
 
     // if this row's time interval intersects an interval already in the splitter, no separate ROI will be created
     if ((target_index != NO_TARGET) && (valueAtTime(timeStart) != NO_TARGET || valueAtTime(timeStop) != NO_TARGET)) {
-      g_log.warning() << "Workspace row " << ii << " may be overwritten in conversion to TimeSplitter" << '\n';
+      g_log.warning() << "Workspace row " << row << " may be overwritten in conversion to TimeSplitter" << '\n';
     }
 
     addROI(timeStart, timeStop, target_index);
@@ -189,17 +190,12 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
   std::cout << "NUMBER OF ZERO-WIDTH SPLITTER INTERVALS: " << number_of_zero_width_intervals << std::endl;
   std::cout << "NUMBER OF TARGETS: " << m_name_index_map.size() << "\n";
   for (const auto &info : m_name_index_map)
-    std::cout << info.first << " and " << info.second << "\n";
-  std::cout << "NUMBER OF NO_TARGET NAMES: " << notarget_names_count << "\n";
+    std::cout << info.first << " with index " << info.second << "\n";
 
   // Verify that the input target names are either all numeric or all non-numeric. The exception is a name "-1", i.e. no
   // target specified. That name is ok to mix with non-numeric names.
-  // if (noninteger_target_names_count != 0 && noninteger_target_names_count != tws->rowCount() - notarget_names_count)
-  // {
-  if (noninteger_target_names_count != 0 &&
-      noninteger_target_names_count != tws->rowCount() - notarget_names_count - number_of_zero_width_intervals) {
+  if (has_target_name_numeric && has_target_name_nonnumeric)
     throw std::runtime_error("Valid splitter targets cannot be a mix of numeric and non-numeric names.");
-  }
 }
 
 TimeSplitter::TimeSplitter(const SplittersWorkspace_sptr &sws) {
