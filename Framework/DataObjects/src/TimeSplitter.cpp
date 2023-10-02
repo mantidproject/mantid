@@ -432,11 +432,13 @@ void TimeSplitter::rebuildCachedSplittingIntervals(const bool includeNoTarget) c
   if (empty())
     return;
 
+  auto startIt = m_roi_map.cbegin();
   const auto iterEnd = m_roi_map.cend();
-  for (auto startIt = m_roi_map.cbegin(); startIt != iterEnd; ++startIt) {
+  while (std::next(startIt) != iterEnd) {
     // invoke constructor SplittingInterval(DateAndTime &start, DateAndTime &stop, int index)
     if (includeNoTarget || startIt->second != NO_TARGET)
       m_cachedSplittingIntervals.emplace_back(startIt->first, std::next(startIt)->first, startIt->second);
+    std::advance(startIt, 1);
   }
 
   validCachedSplittingIntervals_All = includeNoTarget;
