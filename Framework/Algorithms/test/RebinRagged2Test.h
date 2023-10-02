@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/ConvertToPointData.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/MaskBins.h"
 #include "MantidAlgorithms/RebinRagged2.h"
@@ -18,6 +19,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 
+using Mantid::Algorithms::ConvertToPointData;
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::MaskBins;
 using Mantid::Algorithms::RebinRagged;
@@ -327,5 +329,66 @@ public:
 
     for (size_t i = 0; i < 2; i++)
       TS_ASSERT_EQUALS(hist1BinMasked[i], i);
+  }
+
+  void test_point_data() {
+    std::vector<double> xmins(200, 2600.);
+    xmins[11] = 3000.;
+    std::vector<double> xmaxs(200, 6200.);
+    xmaxs[12] = 5000.;
+    std::vector<double> deltas(200, 400.);
+    deltas[13] = 600.;
+
+    CreateSampleWorkspace createSampleWorkspaceAlgo;
+    createSampleWorkspaceAlgo.setChild(true);
+    createSampleWorkspaceAlgo.initialize();
+    createSampleWorkspaceAlgo.setPropertyValue("OutputWorkspace", "_unused_for_child");
+    createSampleWorkspaceAlgo.execute();
+    MatrixWorkspace_sptr ws = createSampleWorkspaceAlgo.getProperty("OutputWorkspace");
+
+    ConvertToPointData ctpd;
+    ctpd.setChild(true);
+    ctpd.initialize();
+    ctpd.setProperty("InputWorkspace", ws);
+    ctpd.setProperty("OutputWorkspace", "_unused_for_child");
+    ctpd.execute();
+
+    ws = ctpd.getProperty("OutputWorkspace");
+
+    RebinRagged alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMin", xmins));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", xmaxs));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Delta", deltas));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr result = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT(!ws->isHistogramData());     // check input is still point data
+    TS_ASSERT(!result->isHistogramData()); // check output is point data
+    TS_ASSERT_EQUALS(result->getNumberHistograms(), 200);
+
+    for (size_t i = 0; i < result->getNumberHistograms(); i++) {
+      const auto X = result->readX(i);
+      if (i == 11)
+        TS_ASSERT_EQUALS(X.size(), 8)
+      else if (i == 12 || i == 13)
+        TS_ASSERT_EQUALS(X.size(), 6)
+      else
+        TS_ASSERT_EQUALS(X.size(), 9)
+
+      const auto Y = result->readY(i);
+      if (i == 13)
+        for (const auto y : Y)
+          TS_ASSERT_DELTA(y, 0.9, 1e-9)
+      else
+        for (const auto y : Y)
+          TS_ASSERT_DELTA(y, 0.6, 1e-9)
+    }
   }
 };

@@ -93,9 +93,6 @@ std::map<std::string, std::string> RebinRagged::validateInputs() {
     if (numMax > 1 && numMax != histnumber)
       errors["XMax"] =
           "Must specify max for each spectra (" + std::to_string(numMax) + "!=" + std::to_string(histnumber) + ")";
-
-    if (!inputWS->isHistogramData())
-      errors["InputWorkspace"] = "Only works with histogram data, not point data";
   } else
     errors["InputWorkspace"] = "InputWorkspace is not a MatrixWorkspace";
 
@@ -227,6 +224,22 @@ void RebinRagged::exec() {
   else
 
   { //------- Workspace2D or other MatrixWorkspace ---------------------------
+    const bool isHist = inputWS->isHistogramData();
+
+    if (!isHist) {
+      // convert input to histogram
+      inputWS = inputWS->clone();
+      for (int hist = 0; hist < histnumber; ++hist) {
+        HistogramBuilder builder;
+        builder.setX(inputWS->histogram(hist).binEdges().rawData());
+        builder.setY(inputWS->readY(hist));
+        builder.setE(inputWS->readE(hist));
+        if (inputWS->hasDx(dist))
+          builder.setDx(inputWS->readDx(hist));
+        builder.setDistribution(dist);
+        inputWS->setHistogram(hist, builder.build());
+      }
+    }
 
     // make output Workspace the same type as the input
     outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS, histnumber, inputWS->histogram(0));
@@ -269,6 +282,19 @@ void RebinRagged::exec() {
       outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
     }
 
+    if (!isHist) {
+      // convert output to point data
+      for (int hist = 0; hist < histnumber; ++hist) {
+        HistogramBuilder builder;
+        builder.setX(outputWS->histogram(hist).points().rawData());
+        builder.setY(outputWS->readY(hist));
+        builder.setE(outputWS->readE(hist));
+        if (outputWS->hasDx(hist))
+          builder.setDx(outputWS->readDx(hist));
+        builder.setDistribution(dist);
+        outputWS->setHistogram(hist, builder.build());
+      }
+    }
   } // END ---- Workspace2D
 
   setProperty("OutputWorkspace", outputWS);
