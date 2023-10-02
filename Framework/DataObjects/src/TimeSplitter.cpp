@@ -114,9 +114,10 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
   }
 
   // by design, there should be 3 columns, e.g. "start", "stop", "target", although the exact names are not enforced
-  API::Column_sptr col_start = tws->getColumn(0);
-  API::Column_sptr col_stop = tws->getColumn(1);
-  API::Column_sptr col_target = tws->getColumn(2);
+  const std::size_t COL_START{0};
+  const std::size_t COL_STOP{1};
+  const std::size_t COL_TARGET{2};
+  API::Column_sptr col_target = tws->getColumn(COL_TARGET);
 
   int target_index{NO_TARGET};
   int max_target_index{0};
@@ -130,8 +131,8 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
 
   for (size_t ii = 0; ii < tws->rowCount(); ii++) {
     // by design, the times in the table must be in seconds
-    double timeStart_s{col_start->toDouble(ii)};
-    double timeStop_s{col_stop->toDouble(ii)};
+    const double timeStart_s{tws->cell_cast<double>(ii, COL_START)};
+    const double timeStop_s{tws->cell_cast<double>(ii, COL_STOP)};
 
     if (timeStart_s == timeStop_s) {
       number_of_zero_width_intervals++;
@@ -141,13 +142,10 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
     if (timeStart_s < 0 || timeStop_s < 0) {
       throw std::runtime_error("All times in TableWorkspace must be >= 0 to construct TimeSplitter.");
     }
-    Types::Core::DateAndTime timeStart(timeStart_s, 0.0 /*ns*/);
-    Types::Core::DateAndTime timeStop(timeStop_s, 0.0 /*ns*/);
 
-    // make the times absolute
-    int64_t offset_ns{offset.totalNanoseconds()};
-    timeStart += offset_ns;
-    timeStop += offset_ns;
+    // create start/stop based from the supplied offset time
+    const Types::Core::DateAndTime timeStart = offset + timeStart_s;
+    const Types::Core::DateAndTime timeStop = offset + timeStop_s;
 
     // get the target name; it may or may not represent an integer
     std::string target_name = col_target->cell<std::string>(ii);
@@ -628,8 +626,7 @@ void TimeSplitter::splitEventVec(const std::vector<EventType> &events, std::map<
 template <typename EventType>
 void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const EventType &)> &timeCalc,
                                  const std::vector<EventType> &events, std::map<int, EventList *> &partials) const {
-  // TODO should connect to OutputUnfilteredEvents
-  // get a copy of the splitters as a vector
+  // get a reference of the splitters as a vector
   const auto &splittersVec = getSplittingIntervals(true);
 
   // initialize the iterator over the splitter
