@@ -35,7 +35,7 @@ public:
   static double getTime4();
   static double getTime5();
   static double getTime6();
-  // static double getTime10();
+  static double getTime7();
 
   static constexpr int NO_TARGET{-1}; // no target (a.k.a. destination) workspace for filtered out events
   TimeSplitter() = default;

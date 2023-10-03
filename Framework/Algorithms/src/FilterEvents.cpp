@@ -1065,5 +1065,6 @@ void FilterEvents::filterEvents(double progressamount) {
             << std::endl;
   std::cout << "Cumulative time (s) spent in TS::rebuildCachedSplittingIntervals: " << TimeSplitter::getTime6()
             << std::endl;
+  std::cout << "Cumulative time (s) spent in TS::TS(TableWorkspace) " << TimeSplitter::getTime7() << std::endl;
 }
 } // namespace Mantid::Algorithms

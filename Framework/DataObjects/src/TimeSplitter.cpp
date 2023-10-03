@@ -14,6 +14,7 @@
 static double elapsed_time_case_1{0.0};
 static double elapsed_time_case_5{0.0};
 static double elapsed_time_case_6{0.0};
+static double elapsed_time_case_7{0.0};
 static std::chrono::time_point<std::chrono::system_clock> splitEventsVec_firstEntrance;
 static int splitEventsVec_call_count{0};
 static std::chrono::time_point<std::chrono::system_clock> splitEventsVec_lastEntrance;
@@ -109,6 +110,8 @@ TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const Da
 }
 
 TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &offset) {
+  auto start = std::chrono::system_clock::now();
+
   if (tws->columnCount() != 3) {
     throw std::runtime_error("Table workspace used for event filtering must have 3 columns.");
   }
@@ -196,6 +199,10 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
   // target specified. That name is ok to mix with non-numeric names.
   if (has_target_name_numeric && has_target_name_nonnumeric)
     throw std::runtime_error("Valid splitter targets cannot be a mix of numeric and non-numeric names.");
+
+  auto stop = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = stop - start;
+  elapsed_time_case_7 += elapsed_seconds.count();
 }
 
 TimeSplitter::TimeSplitter(const SplittersWorkspace_sptr &sws) {
@@ -721,6 +728,6 @@ double TimeSplitter::getTime4() {
 }
 double TimeSplitter::getTime5() { return elapsed_time_case_5; }
 double TimeSplitter::getTime6() { return elapsed_time_case_6; }
-// double TimeSplitter::getTime10() { return elapsed_time_case_10; }
+double TimeSplitter::getTime7() { return elapsed_time_case_7; }
 } // namespace DataObjects
 } // namespace Mantid
