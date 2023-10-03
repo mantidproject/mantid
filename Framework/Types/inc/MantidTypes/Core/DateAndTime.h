@@ -36,7 +36,6 @@ using time_duration = boost::posix_time::time_duration;
 
 // Make the compiler pack the data size aligned to 1-byte, to use as little
 // space as possible
-#pragma pack(push, 1)
 class MANTID_TYPES_DLL DateAndTime {
 public:
   DateAndTime();
@@ -135,7 +134,6 @@ private:
   /// Min allowed nanoseconds in the time; -2^62+1
   static constexpr int64_t MIN_NANOSECONDS = -4611686018427387903LL;
 };
-#pragma pack(pop)
 
 /** Default, empty constructor */
 inline DateAndTime::DateAndTime() : _nanoseconds(0) {}
@@ -168,12 +166,12 @@ inline DateAndTime DateAndTime::operator+(const double sec) const {
  */
 inline int64_t DateAndTime::nanosecondsFromSeconds(double sec) {
   const double nano = sec * 1e9;
-  constexpr auto minimum = static_cast<double>(MIN_NANOSECONDS);
-  constexpr auto maximum = static_cast<double>(MAX_NANOSECONDS);
+  constexpr auto time_min = static_cast<double>(MIN_NANOSECONDS);
+  constexpr auto time_max = static_cast<double>(MAX_NANOSECONDS);
   // Use these limits to avoid integer overflows
-  if (nano > maximum)
+  if (nano > time_max)
     return MAX_NANOSECONDS;
-  else if (nano < minimum)
+  else if (nano < time_min)
     return MIN_NANOSECONDS;
   else
     return int64_t(nano);
