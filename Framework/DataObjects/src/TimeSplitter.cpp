@@ -456,13 +456,18 @@ void TimeSplitter::rebuildCachedSplittingIntervals(const bool includeNoTarget) c
  * @return : the destination index associated to a
  */
 int TimeSplitter::valueAtTime(const DateAndTime &time) const {
+  // empty means exclude everything
   if (m_roi_map.empty())
     return NO_TARGET;
-  if (time < m_roi_map.begin()->first)
+
+  // before the beginning is excluded
+  if (time < m_roi_map.cbegin()->first)
     return NO_TARGET;
 
   // this method can be used when the object is in an unusual state and doesn't
   // end with NO_TARGET
+  if (time >= m_roi_map.crbegin()->first)
+    return m_roi_map.crbegin()->second;
 
   // find location that is greater than or equal to the requested time and give
   // back previous value
