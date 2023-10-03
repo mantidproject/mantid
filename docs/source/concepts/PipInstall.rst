@@ -44,7 +44,7 @@ How to extend Mantid with a Pip install?
 ----------------------------------------
 
 There are two ways you can ``pip`` install a package for use in Mantid. The first way is via
-the command line:
+the command line (recommended for IDAaaS users):
 
 .. code-block:: sh
 
@@ -56,7 +56,7 @@ the command line:
    # Remember to change the <insert_package_name>
    pip install <insert_package_name>
 
-The second way is via the Python script editor window in Workbench:
+The second way is via the Python script editor window in Workbench (recommended for Windows, Linux and MacOS):
 
 .. code-block:: python
 
