@@ -12,6 +12,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidKernel/IPropertyManager.h"
+#include <future>
 
 namespace Poco {
 class AbstractObserver;
@@ -112,6 +113,10 @@ public:
 
   /// Asynchronous execution of the algorithm.
   virtual Poco::ActiveResult<bool> executeAsync() = 0;
+
+  /// Asynchronous execution - if the returned future object goes out of scope then
+  /// that is equivalent to calling .join() on a thread.
+  virtual std::future<bool> executeAsyncFuture() = 0;
 
   /// Execute as a Child Algorithm, with try/catch
   virtual void executeAsChildAlg() = 0;

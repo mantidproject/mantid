@@ -380,7 +380,7 @@ void FrameworkManagerImpl::updateInstrumentDefinitions() {
   try {
     auto algDownloadInstrument = Mantid::API::AlgorithmManager::Instance().create("DownloadInstrument");
     algDownloadInstrument->setAlgStartupLogging(false);
-    algDownloadInstrument->executeAsync();
+    m_downloadInstrumentAlg = algDownloadInstrument->executeAsyncFuture();
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "DowndloadInstrument algorithm is not available - cannot "
                      "update instrument definitions.\n";
@@ -392,7 +392,7 @@ void FrameworkManagerImpl::checkIfNewerVersionIsAvailable() {
   try {
     auto algCheckVersion = Mantid::API::AlgorithmManager::Instance().create("CheckMantidVersion");
     algCheckVersion->setAlgStartupLogging(false);
-    algCheckVersion->executeAsync();
+    m_checkVersionAlg = algCheckVersion->executeAsyncFuture();
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "CheckMantidVersion algorithm is not available - cannot "
                      "check if a newer version is available.\n";

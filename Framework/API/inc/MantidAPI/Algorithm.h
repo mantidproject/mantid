@@ -7,6 +7,7 @@
 #pragma once
 
 #include <atomic>
+#include <future>
 #include <memory>
 
 #include "MantidAPI/DllConfig.h"
@@ -232,6 +233,7 @@ public:
 
   /** @name Asynchronous Execution */
   Poco::ActiveResult<bool> executeAsync() override;
+  std::future<bool> executeAsyncFuture() override;
 
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver &observer) const override;

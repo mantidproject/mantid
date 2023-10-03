@@ -11,6 +11,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <future>
 #include <memory>
 
 namespace Mantid {
@@ -65,6 +66,8 @@ public:
   bool deleteWorkspace(const std::string &wsName);
 
 private:
+  std::future<bool> m_downloadInstrumentAlg;
+  std::future<bool> m_checkVersionAlg;
   friend struct Mantid::Kernel::CreateUsingNew<FrameworkManagerImpl>;
 
   /// Private Constructor
