@@ -126,7 +126,7 @@ class BayesStretch2Test(unittest.TestCase):
 
         self._alg.make_slice_ws = mock.Mock(side_effect=slice)
         self._alg.group_ws = mock.Mock(return_value="group")
-        self._alg.set_label = mocl.Mock(side_effect=set_label)
+        self._alg.set_label = mock.Mock(side_effect=set_label)
 
         beta_list = [(1, 2), (3, 4)]
         FWHM_list = [(5, 6), (7, 8)]
