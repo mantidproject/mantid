@@ -9,9 +9,11 @@
 #include "MantidQtWidgets/MplCpp/Colors.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/Figure.h"
+#include "MantidQtWidgets/MplCpp/FigureEventFilter.h"
 #include "MantidQtWidgets/MplCpp/ScalarMappable.h"
 #include "ui_Colorbar.h"
 
+#include <memory>
 #include <tuple>
 
 namespace MantidQt {
@@ -80,6 +82,7 @@ private: // data
   Ui::Colorbar m_ui;
   FigureCanvasQt *m_canvas{nullptr};
   ScalarMappable m_mappable;
+  std::unique_ptr<FigureEventFilter> m_eventFilter;
 };
 
 } // namespace MplCpp
