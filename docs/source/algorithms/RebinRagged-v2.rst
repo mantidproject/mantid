@@ -36,8 +36,7 @@ This particular use-case, which uses the input workspace's binning, could be don
     RebinRagged(InputWorkspace=NOM_91796, OutputWorkspace='cropped',
                         Xmin=[0.67, 1.20, 2.42, 3.70, 4.12, 0.39],
                         Delta=0.02,
-                        Xmax=[10.20, 20.8, nan, nan, nan, 9.35],
-                        Version=1)
+                        Xmax=[10.20, 20.8, nan, nan, nan, 9.35])
 
 
 .. categories::

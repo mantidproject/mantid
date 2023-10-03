@@ -8,7 +8,6 @@
 #include "MantidHistogramData/Exception.h"
 #include "MantidHistogramData/Rebin.h"
 
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -345,18 +344,6 @@ void Rebin::exec() {
         PARALLEL_END_INTERRUPT_REGION
       }
       PARALLEL_CHECK_INTERRUPT_REGION
-
-      // Copy all the axes
-      for (int i = 1; i < inputWS->axes(); i++) {
-        outputWS->replaceAxis(i, std::unique_ptr<Axis>(inputWS->getAxis(i)->clone(outputWS.get())));
-        outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
-      }
-
-      // Copy the units over too.
-      for (int i = 0; i < outputWS->axes(); ++i)
-        outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
-      outputWS->setYUnit(eventInputWS->YUnit());
-      outputWS->setYUnitLabel(eventInputWS->YUnitLabel());
     }
 
     // Assign it to the output workspace property
@@ -381,9 +368,6 @@ void Rebin::exec() {
     // signal array
     outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS, histnumber, XValues_new);
 
-    // Copy over the 'vertical' axis
-    if (inputWS->axes() > 1)
-      outputWS->replaceAxis(1, std::unique_ptr<Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
     bool ignoreBinErrors = getProperty(PropertyNames::IGNR_BIN_ERR);
 
     Progress prog(this, 0.0, 1.0, histnumber);
@@ -411,12 +395,8 @@ void Rebin::exec() {
     for (int i = 0; i < histnumber; ++i) {
       if (inputWS->hasMaskedBins(i)) // Does the current spectrum have any masked bins?
       {
-        this->propagateMasks(inputWS, outputWS, i);
+        this->propagateMasks(inputWS, outputWS, i, ignoreBinErrors);
       }
-    }
-    // Copy the units over too.
-    for (int i = 0; i < outputWS->axes(); ++i) {
-      outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
     }
 
     if (!isHist) {
@@ -441,9 +421,10 @@ void Rebin::exec() {
  *  @param inputWS ::  The input workspace
  *  @param outputWS :: The output workspace
  *  @param hist ::    The index of the current histogram
+ *  @param ignoreErrors :: If to ignore bin errors
  */
 void Rebin::propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS, const API::MatrixWorkspace_sptr &outputWS,
-                           int hist) {
+                           const int hist, const bool ignoreErrors) {
   // Not too happy with the efficiency of this way of doing it, but it's a lot
   // simpler to use the
   // existing rebin algorithm to distribute the weights than to re-implement it
@@ -476,7 +457,6 @@ void Rebin::propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS, const
                     FrequencyStandardDeviations(errSize, 0));
   // Use rebin function to redistribute the weights. Note that distribution flag
   // is set
-  bool ignoreErrors = getProperty(PropertyNames::IGNR_BIN_ERR);
 
   try {
     auto newHist = HistogramData::rebin(oldHist, outputWS->binEdges(hist));
