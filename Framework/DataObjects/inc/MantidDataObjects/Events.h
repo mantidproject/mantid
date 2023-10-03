@@ -144,13 +144,18 @@ public:
 
   double operator()() const;
   double tof() const;
-  Mantid::Types::Core::DateAndTime pulseTime() const;
+  const Mantid::Types::Core::DateAndTime &pulseTime() const;
+  Mantid::Types::Core::DateAndTime pulseTOFTime() const;
+  Mantid::Types::Core::DateAndTime pulseTOFTimeAtSample(const double &factor, const double &shift) const;
   double weight() const;
   double error() const;
   double errorSquared() const;
 
   /// Output a string representation of the event to a stream
   friend std::ostream &operator<<(std::ostream &os, const WeightedEvent &event);
+
+private:
+  inline static const Mantid::Types::Core::DateAndTime UNSET_DATEANDTIME = Mantid::Types::Core::DateAndTime(0);
 };
 #pragma pack(pop)
 
@@ -182,10 +187,17 @@ inline double WeightedEventNoTime::operator()() const { return m_tof; }
 /// Return the time-of-flight of the neutron, as a double.
 inline double WeightedEventNoTime::tof() const { return m_tof; }
 
-/** Return the pulse time; this returns 0 since this
- *  type of Event has no time associated.
- */
-inline Types::Core::DateAndTime WeightedEventNoTime::pulseTime() const { return 0; }
+/// Return the pulse time; this returns 0 since this type of Event has no time associated.
+inline const Types::Core::DateAndTime &WeightedEventNoTime::pulseTime() const { return UNSET_DATEANDTIME; }
+/// Return the pulse time; this returns 0 since this type of Event has no time associated.
+inline Types::Core::DateAndTime WeightedEventNoTime::pulseTOFTime() const { return UNSET_DATEANDTIME; }
+/// Return the pulse time; this returns 0 since this type of Event has no time associated.
+inline Types::Core::DateAndTime WeightedEventNoTime::pulseTOFTimeAtSample(const double &factor,
+                                                                          const double &shift) const {
+  UNUSED_ARG(factor);
+  UNUSED_ARG(shift);
+  return 0;
+}
 
 /// Return the weight of the neutron, as a double (it is saved as a float).
 inline double WeightedEventNoTime::weight() const { return m_weight; }
