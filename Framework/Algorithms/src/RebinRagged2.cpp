@@ -120,7 +120,7 @@ void RebinRagged::exec() {
 
   if (use_simple_rebin(xmins, xmaxs, deltas)) {
     g_log.information("Using Rebin instead");
-    auto rebin = createChildAlgorithm("Rebin");
+    auto rebin = createChildAlgorithm("Rebin", 0.0, 1.0);
     rebin->setProperty("InputWorkspace", inputWS);
     rebin->setProperty("PreserveEvents", preserveEvents);
     const std::vector<double> params = {xmins[0], deltas[0], xmaxs[0]};
