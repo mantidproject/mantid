@@ -9,7 +9,6 @@
 #include "MantidQtWidgets/MplCpp/Colors.h"
 #include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
-#include "MantidQtWidgets/MplCpp/FigureEventFilter.h"
 #include "MantidQtWidgets/MplCpp/MantidColorMap.h"
 
 #include <QComboBox>
@@ -48,10 +47,11 @@ QStringList NORM_OPTS = {"Linear", "SymmetricLog10", "Power"};
  * @param parent A pointer to the parent widget
  */
 ColorbarWidget::ColorbarWidget(QWidget *parent)
-    : QWidget(parent), m_ui(), m_mappable(Normalize(0, 1), getCMap(defaultCMapName())) {
+    : QWidget(parent), m_ui(), m_mappable(Normalize(0, 1), getCMap(defaultCMapName())),
+      m_eventFilter(std::make_unique<FigureEventFilter>()) {
   initLayout();
   connectSignals();
-  m_canvas->installEventFilterToMplCanvas(new FigureEventFilter());
+  m_canvas->installEventFilterToMplCanvas(m_eventFilter.get());
 }
 
 /**
