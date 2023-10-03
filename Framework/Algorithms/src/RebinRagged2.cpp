@@ -7,10 +7,10 @@
 
 #include "MantidAlgorithms/RebinRagged2.h"
 
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidHistogramData/Rebin.h"
@@ -172,7 +172,7 @@ void RebinRagged::exec() {
       //--------- not preserving Events
       g_log.information() << "Creating a Workspace2D from the EventWorkspace " << eventInputWS->getName() << ".\n";
 
-      outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS, histnumber, inputWS->histogram(0));
+      outputWS = DataObjects::create<DataObjects::Workspace2D>(*inputWS);
 
       Progress prog(this, 0.0, 1.0, histnumber);
 
@@ -206,18 +206,6 @@ void RebinRagged::exec() {
         PARALLEL_END_INTERRUPT_REGION
       }
       PARALLEL_CHECK_INTERRUPT_REGION
-
-      // Copy all the axes
-      for (int i = 1; i < inputWS->axes(); i++) {
-        outputWS->replaceAxis(i, std::unique_ptr<Axis>(inputWS->getAxis(i)->clone(outputWS.get())));
-        outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
-      }
-
-      // Copy the units over too.
-      for (int i = 0; i < outputWS->axes(); ++i)
-        outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
-      outputWS->setYUnit(eventInputWS->YUnit());
-      outputWS->setYUnitLabel(eventInputWS->YUnitLabel());
     }
   } // END ---- EventWorkspace
 
@@ -242,11 +230,7 @@ void RebinRagged::exec() {
     }
 
     // make output Workspace the same type as the input
-    outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS, histnumber, inputWS->histogram(0));
-
-    // Copy over the 'vertical' axis
-    if (inputWS->axes() > 1)
-      outputWS->replaceAxis(1, std::unique_ptr<Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
+    outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS);
 
     Progress prog(this, 0.0, 1.0, histnumber);
 
@@ -274,12 +258,8 @@ void RebinRagged::exec() {
       if (inputWS->hasMaskedBins(hist)) // Does the current spectrum have any masked bins?
       {
         outputWS->setUnmaskedBins(hist);
-        this->propagateMasks(inputWS, outputWS, static_cast<int>(hist));
+        this->propagateMasks(inputWS, outputWS, hist);
       }
-    }
-    // Copy the units over too.
-    for (int i = 0; i < outputWS->axes(); ++i) {
-      outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
     }
 
     if (!isHist) {

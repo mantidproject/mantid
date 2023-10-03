@@ -8,7 +8,6 @@
 #include "MantidHistogramData/Exception.h"
 #include "MantidHistogramData/Rebin.h"
 
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -345,18 +344,6 @@ void Rebin::exec() {
         PARALLEL_END_INTERRUPT_REGION
       }
       PARALLEL_CHECK_INTERRUPT_REGION
-
-      // Copy all the axes
-      for (int i = 1; i < inputWS->axes(); i++) {
-        outputWS->replaceAxis(i, std::unique_ptr<Axis>(inputWS->getAxis(i)->clone(outputWS.get())));
-        outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
-      }
-
-      // Copy the units over too.
-      for (int i = 0; i < outputWS->axes(); ++i)
-        outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
-      outputWS->setYUnit(eventInputWS->YUnit());
-      outputWS->setYUnitLabel(eventInputWS->YUnitLabel());
     }
 
     // Assign it to the output workspace property
@@ -381,9 +368,6 @@ void Rebin::exec() {
     // signal array
     outputWS = DataObjects::create<API::HistoWorkspace>(*inputWS, histnumber, XValues_new);
 
-    // Copy over the 'vertical' axis
-    if (inputWS->axes() > 1)
-      outputWS->replaceAxis(1, std::unique_ptr<Axis>(inputWS->getAxis(1)->clone(outputWS.get())));
     bool ignoreBinErrors = getProperty(PropertyNames::IGNR_BIN_ERR);
 
     Progress prog(this, 0.0, 1.0, histnumber);
@@ -413,10 +397,6 @@ void Rebin::exec() {
       {
         this->propagateMasks(inputWS, outputWS, i, ignoreBinErrors);
       }
-    }
-    // Copy the units over too.
-    for (int i = 0; i < outputWS->axes(); ++i) {
-      outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
     }
 
     if (!isHist) {
