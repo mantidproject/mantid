@@ -11,8 +11,6 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/FilterEvents.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
@@ -23,6 +21,11 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#if 0
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#endif
 
 #include <random>
 
@@ -1232,7 +1235,8 @@ public:
     return;
   }
 
-  void notest_tableSplitterHuge() {
+  void test_tableSplitterHuge() {
+#if 0
     g_log.notice("\ntest_tableSplitterHuge...");
 
     // Load event workspace
@@ -1322,6 +1326,7 @@ public:
     TS_ASSERT_EQUALS(total_events, 1282919);
 
     // clean-up?
+#endif
   }
 
   /** test for the case that the input workspace name is same as output base
