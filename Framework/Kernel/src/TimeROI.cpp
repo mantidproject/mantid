@@ -424,56 +424,6 @@ void TimeROI::update_union(const TimeROI &other) {
   }
 }
 
-#if 0
-void TimeROI::update_intersection(const TimeROI &other){
-  // exit early if the two TimeROI are identical
-  if (*this == other)
-    return;
-
-  if (other.useAll() || this->useAll()) {
-    // empty out this environment
-    m_roi.clear();
-    return;
-  }
-
-  // NEW IMPLEMENTATION STARTS HERE
-
-  const std::vector<Kernel::TimeInterval>& vec1 = toTimeIntervals();
-  const std::vector<Kernel::TimeInterval>& vec2 = other.toTimeIntervals();
-
-  TimeROI output;
-
-  // i and j indexes for vec1 and vec2 respectively
-  size_t i{0}, j{0};
-
-  // Sizes of the two vectors
-  size_t n{vec1.size()}, m{vec2.size()};
-
-  // Loop through all intervals unless one of the interval gets exhausted
-  while (i < n && j < m) {
-    // Left bound for intersecting segment
-    DateAndTime l = std::max(vec1[i].start(), vec2[j].start());
-
-    // Right bound for intersecting segment
-    DateAndTime r = std::min(vec1[i].stop(), vec2[j].stop());
-
-    // If segment is valid, include it
-    //if (l <= r)
-    if (l < r)  //  IS THIS CORRECT?
-      output.addROI(l,r);
-
-    // If i-th interval's right bound is smaller, increment i else increment j
-    if (vec1[i].stop() < vec2[j].stop())
-        i++;
-    else
-        j++;
-  }
-
-  *this = output;
-}
-#endif
-
-#if 1
 /**
  * Updates the TimeROI values with the intersection with another TimeROI.
  * See https://en.wikipedia.org/wiki/Intersection for the intersection theory.
@@ -524,7 +474,6 @@ void TimeROI::update_intersection(const TimeROI &other) {
 
   m_roi = std::move(output.m_roi);
 }
-#endif
 
 /**
  * If this is empty, replace it with the supplied TimeROI, otherwise calculate the intersection.
