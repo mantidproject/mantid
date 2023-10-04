@@ -285,7 +285,6 @@ class BayesStretch2(QuickBayesTemplate):
         """
         beta = self.make_slice_ws(slice_list=beta_list, x_data=x_data, x_unit=x_unit, name=f"{name}_Stretch_Beta")
         FWHM = self.make_slice_ws(slice_list=FWHM_list, x_data=x_data, x_unit="FWHM", name=f"{name}_Stretch_FWHM")
-
         FWHM = self.set_label(FWHM, "FWHM", "eV")
         beta = self.set_label(beta, "beta", "")
 
