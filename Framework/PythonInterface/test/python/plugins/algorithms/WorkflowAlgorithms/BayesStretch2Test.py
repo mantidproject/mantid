@@ -153,7 +153,7 @@ class BayesStretch2Test(unittest.TestCase):
             x_unit="FWHM",
             name="test_Stretch_FWHM",
         )
-        self.assert_mock_called_with(self._alg.make_slice_ws, N_calls=2, call_number=2, ws_str="test_Stretch_Beta", label="beta", unit="")
+        self.assert_mock_called_with(self._alg.make_slice_ws, N_calls=2, call_number=2, ws_str="test_Stretch_Beta", label="beta", unit=x_unit)
         self.assert_mock_called_with(self._alg.make_slice_ws, N_calls=2, call_number=1, ws_str="test_Stretch_FWHM", label="FWHM", unit="eV")
 
     def test_do_one_spec(self):
