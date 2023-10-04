@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#define RUN_BIG_TEST 1
+
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/SpectrumInfo.h"
@@ -22,7 +24,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#if 0
+#ifdef RUN_BIG_TEST
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #endif
@@ -1236,7 +1238,7 @@ public:
   }
 
   void test_tableSplitterHuge() {
-#if 0
+#ifdef RUN_BIG_TEST
     g_log.notice("\ntest_tableSplitterHuge...");
 
     // Load event workspace
