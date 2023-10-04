@@ -152,8 +152,10 @@ void BatchAlgorithmRunner::executeBatchAsync() {
  *
  * @param algorithm The algorithm to execute asynchronously
  */
-void BatchAlgorithmRunner::executeAlgorithmAsync(const IConfiguredAlgorithm_sptr &algorithm) {
-  setQueue({algorithm});
+void BatchAlgorithmRunner::executeAlgorithmAsync(IConfiguredAlgorithm_sptr algorithm) {
+  std::deque<IConfiguredAlgorithm_sptr> algorithmDeque;
+  algorithmDeque.emplace_back(std::move(algorithm));
+  setQueue(std::move(algorithmDeque));
   executeBatchAsync();
 }
 

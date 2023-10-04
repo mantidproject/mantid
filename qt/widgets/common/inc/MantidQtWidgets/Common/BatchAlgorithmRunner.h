@@ -106,7 +106,7 @@ public:
   /// Starts the batch executing and returns immediately
   void executeBatchAsync();
   /// Starts a single algorithm and returns immediately
-  void executeAlgorithmAsync(const IConfiguredAlgorithm_sptr &algorithm);
+  void executeAlgorithmAsync(IConfiguredAlgorithm_sptr algorithm);
   /// Request to cancel processing the batch
   void cancelBatch();
 
