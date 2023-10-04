@@ -12,7 +12,7 @@ namespace MantidQt::Widgets::MplCpp {
 
 bool FigureEventFilter::eventFilter(QObject *obj, QEvent *ev) {
   if (ev->type() == QEvent::Resize) {
-    auto const resizeEvent = static_cast<QResizeEvent *>(ev);
+    auto &&resizeEvent = static_cast<QResizeEvent *>(ev);
     if (resizeEvent->size().isEmpty()) {
       // The resize is negative or zero and will cause an exception, so stop processing the event
       return true;
