@@ -35,8 +35,6 @@ unusedPrivateFunction
 // ----------- New list of suppressions after updating to cppcheck 2.10.3 -------------
 // - If the line number changes then update it here, or resolve the defect and remove from list
 
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Types/inc/MantidTypes/Core/DateAndTime.h:171
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Types/inc/MantidTypes/Core/DateAndTime.h:172
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:138
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:139
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:296
