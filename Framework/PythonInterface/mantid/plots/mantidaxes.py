@@ -958,7 +958,7 @@ class MantidAxes(Axes):
                 for col in artist_orig.collections:
                     col.remove()
             if hasattr(artist_orig, "colorbar_cid"):
-                artist_orig.callbacksSM.disconnect(artist_orig.colorbar_cid)
+                artist_orig.callbacks.disconnect(artist_orig.colorbar_cid)
         # If the colormap has been overridden then it needs to be passed in at
         # creation time
         if "colors" not in kwargs:
@@ -1270,7 +1270,7 @@ class MantidAxes(Axes):
         cb = colorbar
         cb.mappable = mappable
         mappable.colorbar = cb
-        mappable.colorbar_cid = mappable.callbacksSM.connect("changed", cb.update_normal)
+        mappable.colorbar_cid = mappable.callbacks.connect("changed", cb.update_normal)
         cb.update_normal(mappable)
 
     def _remove_matching_curve_from_creation_args(self, workspace_name, workspace_index, spec_num):
