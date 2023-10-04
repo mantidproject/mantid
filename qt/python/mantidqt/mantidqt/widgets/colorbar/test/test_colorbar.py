@@ -90,6 +90,52 @@ class ColorbarWidgetTest(TestCase):
             self.assertEqual(c_min, expected_c_min)
             self.assertEqual(c_max, 99)
 
+    def test_colorbar_limits_min_max(self):
+        self.widget.autoscale.setChecked(True)
+        self.widget.autotype.setCurrentIndex(0)
+
+        vmin, vmax = self.widget._calculate_auto_color_limits(self.data)
+
+        self.assertEqual(vmin, 0.0)
+        self.assertEqual(vmax, 99.0)
+
+    def test_colorbar_limits_min_max_lognorm(self):
+        self.widget.autoscale.setChecked(True)
+        self.widget.autotype.setCurrentIndex(0)
+        self.widget.norm.setCurrentIndex(1)
+
+        vmin, vmax = self.widget._calculate_auto_color_limits(self.data)
+
+        self.assertEqual(vmin, 0.0099)
+        self.assertEqual(vmax, 99.0)
+
+    def test_colorbar_limits_3sigma(self):
+        self.widget.autoscale.setChecked(True)
+        self.widget.autotype.setCurrentIndex(1)
+
+        vmin, vmax = self.widget._calculate_auto_color_limits(self.data)
+
+        self.assertEqual(vmin, 0.0)
+        self.assertEqual(vmax, 99.0)
+
+    def test_colorbar_limits_15interquartile(self):
+        self.widget.autoscale.setChecked(True)
+        self.widget.autotype.setCurrentIndex(2)
+
+        vmin, vmax = self.widget._calculate_auto_color_limits(self.data)
+
+        self.assertEqual(vmin, 0.0)
+        self.assertEqual(vmax, 99.0)
+
+    def test_colorbar_limits_15median(self):
+        self.widget.autoscale.setChecked(True)
+        self.widget.autotype.setCurrentIndex(3)
+
+        vmin, vmax = self.widget._calculate_auto_color_limits(self.data)
+
+        self.assertEqual(vmin, 12.0)
+        self.assertEqual(vmax, 87.0)
+
     def test_invalid_cmax_range_is_reset(self):
         image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
 
