@@ -35,9 +35,6 @@ unusedPrivateFunction
 // ----------- New list of suppressions after updating to cppcheck 2.10.3 -------------
 // - If the line number changes then update it here, or resolve the defect and remove from list
 
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:138
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:139
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:296
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:351
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:372
 cppcheckError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IValidator.h:125

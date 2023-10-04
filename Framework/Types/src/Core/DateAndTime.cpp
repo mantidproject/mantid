@@ -135,11 +135,11 @@ DateAndTime::DateAndTime(const boost::posix_time::ptime &_ptime) : _nanoseconds(
  */
 DateAndTime::DateAndTime(const double seconds, const double nanoseconds) {
   double nano = seconds * 1.e9 + nanoseconds;
-  constexpr auto minimum = static_cast<double>(MIN_NANOSECONDS);
-  constexpr auto maximum = static_cast<double>(MAX_NANOSECONDS);
-  if (nano > maximum)
+  constexpr auto time_min = static_cast<double>(MIN_NANOSECONDS);
+  constexpr auto time_max = static_cast<double>(MAX_NANOSECONDS);
+  if (nano > time_max)
     _nanoseconds = MAX_NANOSECONDS;
-  else if (nano < minimum)
+  else if (nano < time_min)
     _nanoseconds = MIN_NANOSECONDS;
   else
     _nanoseconds = static_cast<int64_t>(nano);
@@ -293,8 +293,8 @@ std::tm DateAndTime::to_localtime_tm() const {
  */
 std::time_t DateAndTime::to_localtime_t() const {
   std::tm as_tm = this->to_tm();
-  std::time_t to_time_t = mktime(&as_tm);
-  return to_time_t;
+  std::time_t as_time_t = mktime(&as_tm);
+  return as_time_t;
 }
 
 //------------------------------------------------------------------------------------------------
