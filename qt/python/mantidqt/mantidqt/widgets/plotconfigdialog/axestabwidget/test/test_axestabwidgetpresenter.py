@@ -29,10 +29,10 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         ax.set_title(cls.title)
         cls.x_label = "X"
         ax.set_xlabel(cls.x_label)
-        cls.x_scale = "Linear"
+        cls.x_scale = "linear"
         cls.y_label = "Y"
         ax.set_ylabel(cls.y_label)
-        cls.y_scale = "Log"
+        cls.y_scale = "log"
         ax.set_yscale(cls.y_scale)
         cls.canvas_color = (1.0, 1.0, 0.0, 1.0)
         ax.set_facecolor(cls.canvas_color)
