@@ -9,13 +9,12 @@ import platform
 import numpy as np
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup
-from IndirectImport import is_supported_f2py_platform
+from mantid.utils.pip import package_installed
 
 
-if is_supported_f2py_platform():
+if package_installed("quasielasticbayes"):
 
     class BayesQuasiTest(unittest.TestCase):
-
         _res_ws = None
         _sample_ws = None
         _resnorm_ws = None
