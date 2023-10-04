@@ -18,7 +18,7 @@ New features
 
 Bugfixes
 ############
-- Fixed bug in :ref:`UnGroupWorksapce <algm-UnGroupWorkspace>` where the algorithm history would not be added to the workspaces being ungrouped.
+- Fixed bug in :ref:`UnGroupWorkspace <algm-UnGroupWorkspace>` where the algorithm history would not be added to the workspaces being ungrouped.
 - :ref:`ExtractSpectra <algm-ExtractSpectra>` no longer sorts events when doing x-range trimming. The algorithm that extracts the events does not require it. This will likely move execution time of workflows from ExtractSpectra to elsewhere, but the overall execution may be reduced.
 - Fix for the :ref:`LoadEMU <algm-LoadEMU>` and :ref:`LoadPLN <algm-LoadPLN>` loader to capture all the environment parameters in the datafile.
 - :ref:`MaskBTP <algm-MaskBTP>` can now mask BIOSANS data containing the midrange detector.

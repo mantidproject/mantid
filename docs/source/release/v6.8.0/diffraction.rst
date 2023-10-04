@@ -50,10 +50,14 @@ New features
 - Support saving :ref:`LeanElasticPeaksWorkspace <LeanElasticPeaksWorkspace>` with GSAS format in :ref:`SaveReflections <algm-SaveReflections>` (calls :ref:`SaveHKLCW <algm-SaveHKLCW>`)
 - New parameter in :ref:`SaveIsawUB <algm-SaveIsawUB>` to rotate the UB by the goniometer matrix.
 - New algorithm :ref:`LoadGaussCube <algm-LoadGaussCube>` to load gaussian cube files for volumetric data into a 3D :ref:`MDHistoWorkspace <MDHistoWorkspace>`
-- :ref:`LoadWANDSCD <algm-LoadWANDSCD>` with grouping option has been sped up
-- Constant wavelength HFIR DEMAND instrument has been added to DGSPlanner
-- New algorithm :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` to find single-crystal Bragg peaks in instruments with :ref:`RectangularDetectors <RectangularDetector>` (such as SXD).
+- :ref:`LoadWANDSCD <algm-LoadWANDSCD>` with grouping option has been sped up- New algorithm :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` to find single-crystal Bragg peaks in instruments with :ref:`RectangularDetectors <RectangularDetector>` (such as SXD).
 - ISIS single crystal reduction class for SXD now supports defining a file extension when loading data (previously available for WISH class - in both cases the argument to ``load_run`` has been renamed to ``file_ext``)
+- Constant wavelength HFIR DEMAND instrument has been added to :ref:`dgsplanner-ref`
+
+.. image:: ../../images/6_8_release/Diffraction/DEMAND_DGSPlanner.png
+    :align: center
+    :width: 300
+    :alt: Instrument view showing the calculated dTOF/TOF resolution for the SNAP instrument (SNS) using the EstimateResolutionDiffraction algorithm.
 
 Bugfixes
 ############
