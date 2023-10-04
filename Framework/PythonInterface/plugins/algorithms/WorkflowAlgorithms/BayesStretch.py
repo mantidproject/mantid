@@ -5,16 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
-from IndirectImport import is_supported_f2py_platform, import_f2py, run_f2py_compatibility_test
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, Progress
 from mantid.kernel import StringListValidator, Direction
 import mantid.simpleapi as s_api
 from mantid import config, logger
 import os
 import numpy as np
-
-if is_supported_f2py_platform():
-    Que = import_f2py("Quest")
 
 
 class BayesStretch(PythonAlgorithm):
@@ -108,7 +104,10 @@ class BayesStretch(PythonAlgorithm):
 
     # pylint: disable=too-many-locals
     def PyExec(self):
-        run_f2py_compatibility_test()
+        if not package_installed("quasielasticbayes", show_warning=True):
+            raise RuntimeError("Please install 'quasielasticbayes' missing dependency")
+
+        from quasielasticbayes import Quest as Que
 
         from IndirectBayes import CalcErange, GetXYE
         from IndirectCommon import CheckXrange, CheckAnalysersOrEFixed, getEfixed, GetThetaQ, CheckHistZero

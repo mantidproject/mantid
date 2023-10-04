@@ -443,15 +443,7 @@ optimization of parameters using a non-linear least squares cost function. For m
 The GOFit package contains `three optimization algorithms <https://github.com/ralna/GOFit/blob/master/docs/algorithms.md>`_ called ``regularisation``, ``multistart`` and
 ``alternating``. Please note that the fitting process for ``multistart`` and ``alternating`` can be slow due to the residuals being evaluated in python.
 
-Before you can use the GOFit package in Mantid, you will need to ``pip install gofit`` into your environment because it is an external dependency. Alternatively, run the
-following code in the Mantid workbench script window::
-
-    import subprocess, sys
-    rv = subprocess.run([sys.executable, '-m', 'pip', 'install', '--user', 'gofit'], capture_output=True)
-    print(rv.stdout.decode())
-    print(rv.stderr.decode())
-
-Mantid has to be restarted for the changes to take effect. Please note that the script above requires Python 3.7 or higher.
+Before you can use the GOFit package in Mantid, you will need to ``pip install gofit`` into your environment because it is an external dependency. See the :ref:`pip install instructions <pip-install-ref>` for Mantid.
 
 Once installed, it should be possible to import the package and perform a fit using the ``regularisation`` algorithm by passing a GOFit callable into the Crystal Field API::
 
