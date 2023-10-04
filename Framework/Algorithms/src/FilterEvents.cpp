@@ -268,8 +268,6 @@ void FilterEvents::exec() {
   progress(m_progress, "Create Output Workspaces.");
   createOutputWorkspaces();
 
-  LogManager::reportTiming();
-
   TimeROI::reportTiming();
 
   TimeSeriesProperty<double>::reportTiming();

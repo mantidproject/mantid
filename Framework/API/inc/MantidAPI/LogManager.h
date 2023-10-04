@@ -46,9 +46,6 @@ namespace API {
 */
 class MANTID_API_DLL LogManager {
 public:
-  static void reportTiming();
-
-public:
   // Gets the correct log name for the matching invalid values log for a given
   // log name
   static std::string getInvalidValuesFilterLogName(const std::string &logName);
