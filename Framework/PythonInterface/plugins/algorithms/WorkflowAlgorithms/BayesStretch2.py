@@ -7,6 +7,7 @@
 # pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
 from mantid.api import AlgorithmFactory, WorkspaceGroupProperty, Progress
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
+from mantid.utils.pip import package_installed
 from mantid import logger
 from IndirectCommon import GetThetaQ
 from mantid.api import AnalysisDataService as ADS
@@ -17,21 +18,6 @@ from functools import partial
 from numpy import ndarray
 import numpy as np
 import multiprocessing
-
-try:
-    import quickBayes  # noqa: F401
-except (Exception, Warning):
-    import subprocess
-
-    print(
-        subprocess.Popen(
-            "python -m pip install -U quickBayes==1.0.0b15",
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            stdin=subprocess.PIPE,
-        ).communicate()
-    )
 
 
 class BayesStretch2(QuickBayesTemplate):
@@ -293,6 +279,9 @@ class BayesStretch2(QuickBayesTemplate):
         return slice_group
 
     def PyExec(self):
+        if not package_installed("quickBayes", show_warning=True):
+            raise RuntimeError("Please install 'quickBayes' missing dependency")
+
         self.log().information("BayesStretch input")
 
         # get sample data
