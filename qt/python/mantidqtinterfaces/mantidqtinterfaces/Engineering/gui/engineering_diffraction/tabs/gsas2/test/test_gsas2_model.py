@@ -544,7 +544,7 @@ class TestGSAS2Model(unittest.TestCase):
         ][0]
         self.model._sample_logs_workspace_group._log_values = {"name1": {}}
         self.model._sample_logs_workspace_group._log_names = ["LogName"]
-        self.mock_run.getLogData.return_value = [self.mock_run.getLogData()[1]]  # only proton_charge
+        self.mock_run.hasProperty.return_value = False  # log not in ws
 
         self.model._sample_logs_workspace_group.add_log_to_table("name1", self.mock_ws, 3)
 
