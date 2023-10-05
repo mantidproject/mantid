@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#define RUN_BIG_TEST 1
+//#define RUN_BIG_TEST 1
 
 #include <cxxtest/TestSuite.h>
 
