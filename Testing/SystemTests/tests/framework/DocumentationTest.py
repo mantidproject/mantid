@@ -28,7 +28,6 @@ ALGORITHMS_WITH_NO_DOCS = [
     "LoadEMUHdf-v1.rst",
     "LoadILLLagrange-v1.rst",
     "LoadILLSALSA-v1.rst",
-    "MagnetismReflectometryReduction-v1.rst",
     "OrderWorkspaceHistory-v1.rst",
     "PatchBBY-v1.rst",
     "RefinePowderInstrumentParameters-v2.rst",
