@@ -49,7 +49,7 @@ New features
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>`, can now perform linear interpolation for temperature of two empty container background runs using new :ref:`InterpolateBackground <algm-InterpolateBackground>` algorithm.
 - New algorithm available, :ref:`InterpolateBackground <algm-InterpolateBackground>`, used to perform linear interpolation for temperature of two background runs.
 - Drop support for numpy v1.21 because it's no longer maintained.
-
+- Added a new documentation page on how to extend Mantid with a :ref:`pip install <pip-install-ref>`.
 
 
 MantidWorkbench
