@@ -20,7 +20,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantid.api import AnalysisDataService as ADS
 
 from os import path
-from numpy import full, nan, max
+from numpy import full, nan, max, mean, std
 
 
 def write_table_row(ws_table, row, irow):
@@ -110,20 +110,25 @@ class SampleLogsGroupWorkspace(object):
         ]
         write_table_row(ADS.retrieve(self._run_info_name), row, irow)
         # add log data - loop over existing log workspaces not logs in settings as these might have changed
-        currentRunLogs = [l.name for l in run.getLogData()]
         nullLogValue = full(2, nan)  # default nan if can't read/average log data
-        if run.getProtonCharge() > 0 and "proton_charge" in currentRunLogs:
+        if run.getProtonCharge() > 0:
             for log in self._log_names:
+                avg, stdev = nullLogValue
                 if log in self._log_values[ws_name]:
                     avg, stdev = self._log_values[ws_name][log]  # already averaged
-                elif log in currentRunLogs:
-                    avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
-                else:
-                    avg, stdev = nullLogValue
+                elif run.hasProperty(log):
+                    if run.hasProperty("proton_charge"):
+                        avg, stdev = AverageLogData(ws_name, LogName=log, FixZero=False)
+                    else:
+                        # average filtered log values (excludes setup time)
+                        log_series = run.getProperty(log)
+                        avg = mean(log_series.filtered_value)
+                        stdev = std(log_series.filtered_value)
+                        logger.warning(f"{ws.name()} does not contain a proton charge log - an unweighted average has been performed.")
                 self._log_values[ws_name][log] = [avg, stdev]  # update model dict (even if nan)
         else:
             self._log_values[ws_name] = {log: nullLogValue for log in self._log_names}
-            logger.warning(f"{ws.name()} does not contain a proton charge log - log values cannot be averaged.")
+            logger.warning(f"{ws.name()} appears to be empty with zero integrated proton charge.")
 
         # write log values to table (nan if log could not be averaged)
         for log, avg_and_stdev in self._log_values[ws_name].items():
