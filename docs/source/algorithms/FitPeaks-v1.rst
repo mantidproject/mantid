@@ -137,7 +137,6 @@ There are two input parameters that are associated with fitting window.
 * FitWindowBoundaryList
 * FitPeakWindowWorkspace
 
-
 If either of these is defined, then a peak's range to fit (i.e., x-min and
 x-max) is confined by this window.
 
@@ -146,10 +145,12 @@ have a lower and upper bound, meaning each window list must be twice as long as 
 
 If the windows are specified using FitWindowBoundaryList, then the same set of windows will
 be used on all spectra to be fit in the workspace.
-In this case window information will be retried from **m_peakWindowVector**.
+In this case window information will be retrieved from **FitWindowBoundaryList**.
 If the windows are specified using FitPeakWindowWorkspace, then at each workspace index to be fit, the x-values
 must define a list of fit windows to use.
-In this case window information will be retried from **m_peakWindowWorkspace**.
+In this case window information will be retried from **FitPeakWindowWorkspace**.
+If neither is given, but the input workspace is in d-spacing, then instrument resolutions will be used to estimate
+the peak widths, instead.
 
 Tolerance on Fitting Peaks Positions
 ####################################
