@@ -1290,19 +1290,32 @@ public:
     filter.setProperty("OutputUnfilteredEvents", true);
     filter.execute();
 
-    // // For 25s file
-    // std::map<std::string, size_t> output_workspaces{{"FilteredWS_unfiltered", 1278707},
-    //                                                 {"FilteredWS_on_off", 2028},
-    //                                                 {"FilteredWS_off_off", 2184},
-    //                                                 {"FilteredWS_off_on", 0},
-    //                                                 {"FilteredWS_on_on", 0}};
+    /*
+    // For 25s file
+    std::map<std::string, size_t> output_workspaces{{"FilteredWS_unfiltered", 1278707},
+                                                    {"FilteredWS_on_off", 2028},
+                                                    {"FilteredWS_off_off", 2184},
+                                                    {"FilteredWS_off_on", 0},
+                                                    {"FilteredWS_on_on", 0}};
+    */
 
-    // // For 250s file
-    // std::map<std::string, size_t> output_workspaces{{"FilteredWS_unfiltered", 1240593},
-    //                                                 {"FilteredWS_on_off", 20909},
-    //                                                 {"FilteredWS_off_off", 21417},
-    //                                                 {"FilteredWS_off_on", 0},
-    //                                                 {"FilteredWS_on_on", 0}};
+    /*
+    // For 250s file
+   std::map<std::string, size_t> output_workspaces{{"FilteredWS_unfiltered", 1240593},
+                                                   {"FilteredWS_on_off", 20909},
+                                                   {"FilteredWS_off_off", 21417},
+                                                   {"FilteredWS_off_on", 0},
+                                                   {"FilteredWS_on_on", 0}};
+    */
+
+    /*
+    // For 3000s file
+    std::map<std::string, size_t> output_workspaces{{"FilteredWS_unfiltered", 774366},
+                                                    {"FilteredWS_on_off", 251826},
+                                                    {"FilteredWS_off_off", 256727},
+                                                    {"FilteredWS_off_on", 1}, // check
+                                                    {"FilteredWS_on_on", 2}}; // check
+    */
 
     // For the full file
     std::map<std::string, size_t> output_workspaces{{"FilteredWS_unfiltered", 0},
@@ -1325,7 +1338,7 @@ public:
                   << "\n";
     }
     std::cout << "Total number of events in all partial workspaces: " << total_events << "\n";
-    TS_ASSERT_EQUALS(total_events, 1282919);
+    TS_ASSERT_EQUALS(total_events, event_ws->getNumberEvents()); // all should be accounted for
 
     // clean-up?
 #endif
