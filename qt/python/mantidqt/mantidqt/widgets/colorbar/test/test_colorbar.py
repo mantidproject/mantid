@@ -91,6 +91,9 @@ class ColorbarWidgetTest(TestCase):
             self.assertEqual(c_max, 99)
 
     def test_colorbar_limits_min_max(self):
+        image = plt.imshow(self.data * np.nan, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
         self.widget.autoscale.setChecked(True)
         self.widget.autotype.setCurrentIndex(0)
 
@@ -100,6 +103,9 @@ class ColorbarWidgetTest(TestCase):
         self.assertEqual(vmax, 99.0)
 
     def test_colorbar_limits_min_max_lognorm(self):
+        image = plt.imshow(self.data * np.nan, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
         self.widget.autoscale.setChecked(True)
         self.widget.autotype.setCurrentIndex(0)
         self.widget.norm.setCurrentIndex(1)
@@ -110,6 +116,9 @@ class ColorbarWidgetTest(TestCase):
         self.assertEqual(vmax, 99.0)
 
     def test_colorbar_limits_3sigma(self):
+        image = plt.imshow(self.data * np.nan, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
         self.widget.autoscale.setChecked(True)
         self.widget.autotype.setCurrentIndex(1)
 
@@ -119,6 +128,9 @@ class ColorbarWidgetTest(TestCase):
         self.assertEqual(vmax, 99.0)
 
     def test_colorbar_limits_15interquartile(self):
+        image = plt.imshow(self.data * np.nan, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
         self.widget.autoscale.setChecked(True)
         self.widget.autotype.setCurrentIndex(2)
 
@@ -128,6 +140,9 @@ class ColorbarWidgetTest(TestCase):
         self.assertEqual(vmax, 99.0)
 
     def test_colorbar_limits_15median(self):
+        image = plt.imshow(self.data * np.nan, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
         self.widget.autoscale.setChecked(True)
         self.widget.autotype.setCurrentIndex(3)
 
