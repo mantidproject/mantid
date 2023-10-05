@@ -53,7 +53,7 @@ New features
 
 .. image:: ../../images/6_8_release/MantidWorkbench/SliceviewerAutoscaleOptions.png
     :align: center
-    :width: 300
+    :width: 500
     :alt: Improved layout for :ref:`tof_converter` interface
 
 Bugfixes

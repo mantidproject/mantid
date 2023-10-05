@@ -4,9 +4,9 @@
 Mantid 6.8.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/6_8_release/Python_v3p10.png
    :class: screenshot
-   :width: 385px
+   :width: 285px
    :align: right
 
 .. contents:: Table of Contents
@@ -15,10 +15,11 @@ Mantid 6.8.0 Release Notes
 We are proud to announce version 6.8.0 of Mantid.
 
 This release includes a wide array of updates, bugfixes, and new features.
+
 Notably the version of python has been upgraded to 3.10 which produces better error messages and has new features such as ``match-case`` syntax with structural pattern matching.
 See https://docs.python.org/3/whatsnew/3.10.html#summary-release-highlights for a summary and more details.
 
-In addition to many improvements we would like to highlight the following:
+We would like to highlight the following improvements:
 
 - Autoscaling options have been added to the :ref:`slice viewer <sliceviewer>` to help quickly rescale color limits based on statistical variation in the data (e.g. mean +/- 3 sigma).
 - New algorithms :ref:`BayesQuasi2 <algm-BayesQuasi2>` and :ref:`BayesStretch2 <algm-BayesStretch2>` based on the quickBayes package (these replace the now deprecated :ref:`BayesQuasi <algm-BayesQuasi>` and :ref:`BayesStretch <algm-BayesStretch>` algorithms).
