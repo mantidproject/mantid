@@ -168,7 +168,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCentersWorkspace", peak_center_ws_name));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitPeakWindowWorkspace", fit_window_ws_name))
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitPeakWindowWorkspace", fit_window_ws_name));
 
     fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
@@ -210,7 +210,7 @@ public:
    * @brief test_multiPeaksMultiSpectra
    */
   void test_multiPeaksMultiSpectra() {
-    g_log.notice() << "TEST MULTIPLE PEAKS PARTIAL SPECTRA";
+    g_log.notice() << "TEST MULTIPLE PEAKS MULTI SPECTRA";
     // run serially so values don't depend on no. cores etc.
     FrameworkManager::Instance().setNumOMPThreads(1);
 

@@ -144,10 +144,6 @@ private:
   /// index for fast access
   void convertParametersNameToIndex();
 
-  /// methods to retrieve fit range and peak centers
-  std::vector<double> getExpectedPeakPositions(size_t wi);
-  std::pair<double, double> getPeakFitWindow(size_t wi, size_t ipeak);
-
   /// suites of method to fit peaks
   std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fitPeaks();
 
@@ -282,9 +278,15 @@ private:
   /// Designed peak positions and tolerance
   std::vector<double> m_peakCenters;
   API::MatrixWorkspace_const_sptr m_peakCenterWorkspace;
-  // the number of peaks to fit in all spectra
+  /// the number of peaks to fit in all spectra
   std::size_t m_numPeaksToFit;
   bool m_uniformPeakPositions;
+
+  std::function<std::vector<double>(std::size_t const &)> m_getExpectedPeakPositions;
+  std::function<std::pair<double, double>(std::size_t const &, std::size_t const &)> m_getPeakFitWindow;
+  void checkWorkspaceIndices(std::size_t const &);
+  void checkPeakIndices(std::size_t const &, std::size_t const &);
+  void checkPeakWindowEdgeOrder(double const &, double const &);
 
   /// flag to estimate peak width from
   double m_peakWidthPercentage;
@@ -294,9 +296,9 @@ private:
   std::size_t m_startWorkspaceIndex;
   /// stop index (workspace index of the last spectrum included)
   std::size_t m_stopWorkspaceIndex;
-  // total number of spectra to be fit
+  /// total number of spectra to be fit
   std::size_t m_numSpectraToFit;
-  // tolerances for fitting peak positions
+  /// tolerances for fitting peak positions
   std::vector<double> m_peakPosTolerances;
 
   /// Flag for observing peak width: there are 3 states (1) no estimation (2)
@@ -307,9 +309,6 @@ private:
   /// peak windows
   std::vector<std::vector<double>> m_peakWindowVector;
   API::MatrixWorkspace_const_sptr m_peakWindowWorkspace;
-  bool m_uniformPeakWindows;
-  /// flag to calcualte peak fit window from instrument resolution
-  bool m_calculateWindowInstrument;
 
   /// input peak parameters' names
   std::vector<std::string> m_peakParamNames;
