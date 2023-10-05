@@ -37,6 +37,7 @@ Engineering Diffraction
 New features
 ############
 - Added new ``SNAPRed`` menu item for Diffraction interfaces
+- :ref:`ISIS Engineering Diffraction UI<Engineering_Diffraction-ref>` fitting tab will perform an unweighted average of log values if the proton_charge log doesn't exist in workspace.
 
 
 Single Crystal Diffraction
