@@ -103,7 +103,7 @@ public:
    * */
   inline void addEventQuickly(const Types::Event::TofEvent &event) {
     this->events.emplace_back(event);
-    this->order = UNSORTED;
+    this->setSortOrder(UNSORTED);
   }
 
   // --------------------------------------------------------------------------
@@ -113,7 +113,7 @@ public:
    * */
   inline void addEventQuickly(const WeightedEvent &event) {
     this->weightedEvents.emplace_back(event);
-    this->order = UNSORTED;
+    this->setSortOrder(UNSORTED);
   }
 
   // --------------------------------------------------------------------------
@@ -123,7 +123,7 @@ public:
    * */
   inline void addEventQuickly(const WeightedEventNoTime &event) {
     this->weightedEventsNoTime.emplace_back(event);
-    this->order = UNSORTED;
+    this->setSortOrder(UNSORTED);
   }
 
   Mantid::API::EventType getEventType() const override;

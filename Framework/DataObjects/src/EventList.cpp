@@ -851,12 +851,20 @@ const std::vector<WeightedEventNoTime> &EventList::getWeightedEventsNoTime() con
 void EventList::clear(const bool removeDetIDs) {
   if (mru)
     mru->deleteIndex(this);
-  this->events.clear();
-  std::vector<TofEvent>().swap(this->events); // STL Trick to release memory
-  this->weightedEvents.clear();
-  std::vector<WeightedEvent>().swap(this->weightedEvents); // STL Trick to release memory
-  this->weightedEventsNoTime.clear();
-  std::vector<WeightedEventNoTime>().swap(this->weightedEventsNoTime); // STL Trick to release memory
+  if (!this->empty()) {
+    if (!this->events.empty()) {
+      this->events.clear();
+      std::vector<TofEvent>().swap(this->events); // STL Trick to release memory
+    }
+    if (!this->weightedEvents.empty()) {
+      this->weightedEvents.clear();
+      std::vector<WeightedEvent>().swap(this->weightedEvents); // STL Trick to release memory
+    }
+    if (!this->weightedEventsNoTime.empty()) {
+      this->weightedEventsNoTime.clear();
+      std::vector<WeightedEventNoTime>().swap(this->weightedEventsNoTime); // STL Trick to release memory
+    }
+  }
   if (removeDetIDs)
     this->clearDetectorIDs();
 }
@@ -866,15 +874,15 @@ void EventList::clear(const bool removeDetIDs) {
  * Memory is freed.
  * */
 void EventList::clearUnused() {
-  if (eventType != TOF) {
+  if (eventType != TOF && (!this->events.empty())) {
     this->events.clear();
     std::vector<TofEvent>().swap(this->events); // STL Trick to release memory
   }
-  if (eventType != WEIGHTED) {
+  if (eventType != WEIGHTED && (!this->weightedEvents.empty())) {
     this->weightedEvents.clear();
     std::vector<WeightedEvent>().swap(this->weightedEvents); // STL Trick to release memory
   }
-  if (eventType != WEIGHTED_NOTIME) {
+  if (eventType != WEIGHTED_NOTIME && (!this->weightedEventsNoTime.empty())) {
     this->weightedEventsNoTime.clear();
     std::vector<WeightedEventNoTime>().swap(this->weightedEventsNoTime); // STL Trick to release memory
   }
@@ -2996,10 +3004,7 @@ std::vector<Mantid::Types::Core::DateAndTime> EventList::getPulseTimes() const {
 
 /// Get the Pulse-time + TOF for each event in this EventList
 std::vector<DateAndTime> EventList::getPulseTOFTimes() const {
-  auto timeCalc = [](const auto &event) {
-    constexpr double microToNano{1000.0}; // time unit conversion
-    return event.pulseTime() + static_cast<int64_t>(event.tof() * microToNano);
-  };
+  auto timeCalc = [](const auto &event) { return event.pulseTOFTime(); };
   return eventTimesCalculator(timeCalc);
 }
 
@@ -3008,10 +3013,7 @@ std::vector<DateAndTime> EventList::getPulseTOFTimes() const {
  * @param shift : shift the TOF (after rescaling) by this time, in microseconds
  */
 std::vector<DateAndTime> EventList::getPulseTOFTimesAtSample(const double &factor, const double &shift) const {
-  auto timeCalc = [&](const auto &event) {
-    constexpr double microToNano{1000.0}; // time unit conversion
-    return event.pulseTime() + static_cast<int64_t>((factor * event.tof() + shift) * microToNano);
-  };
+  auto timeCalc = [factor, shift](const auto &event) { return event.pulseTOFTimeAtSample(factor, shift); };
   return eventTimesCalculator(timeCalc);
 }
 
@@ -4050,15 +4052,15 @@ void EventList::initializePartials(std::map<int, EventList *> partials) const {
 
   // collect the state from events which is to be transferred to the partials
   bool removeDetIDs{true};
-  const auto histogram = this->getHistogram();
-  const auto eventType = this->getEventType();
+  const auto histogramLocal = this->getHistogram();
+  const auto eventTypeLocal = this->getEventType();
 
   // lambda expression initializing one partial
   auto initPartial = [&](EventList *partial) {
     partial->clear(removeDetIDs);
     partial->copyInfoFrom(*this);
-    partial->setHistogram(histogram);
-    partial->switchTo(eventType);
+    partial->setHistogram(histogramLocal);
+    partial->switchTo(eventTypeLocal);
   };
 
   // iterate over the partials
