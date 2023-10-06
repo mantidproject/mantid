@@ -15,10 +15,9 @@ Description
 
 Provides the Fourier Transform of the Symmetrized Stretched Exponential Function
 
-.. math:: S(Q,E) = Height \int_{-\infty}^{\infty} dt/h \cdot e^{-i2\pi (E-Centre)t/h} \cdot e^{-|\frac{t}{Tau}|^{Beta}} )
+.. math:: S(Q,E) = Height \int_{-\infty}^{\infty} dt/h \cdot e^{-i2\pi (E-Centre)t/h} \cdot e^{-|\frac{t}{Tau}|^{Beta}}
 
-with :math:`h` Planck's constant. If the energy units of energy are micro-eV, then tau is expressed in pico-seconds. If E-units are micro-eV then
-tau is expressed in nano-seconds.
+with :math:`h` Planck's constant. If the energy units of energy are milli-eV, then tau is expressed in pico-seconds. If E-units are micro-eV then tau is expressed in nano-seconds.
 
 Properties:
 
