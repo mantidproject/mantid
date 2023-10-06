@@ -4,19 +4,27 @@
 Mantid 6.8.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/6_8_release/Python_v3p10.png
    :class: screenshot
-   :width: 385px
+   :width: 285px
    :align: right
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 6.8.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+This release includes a wide array of updates, bugfixes, and new features.
+
+Notably the version of python has been upgraded to 3.10 which produces better error messages and has new features such as ``match-case`` syntax with structural pattern matching.
+See https://docs.python.org/3/whatsnew/3.10.html#summary-release-highlights for a summary and more details.
+
+We would like to highlight the following improvements:
+
+- Autoscaling options have been added to the :ref:`SliceViewer <sliceviewer>` to help quickly rescale color limits based on statistical variation in the data (e.g. mean +/- 3 sigma).
+- New algorithms :ref:`BayesQuasi2 <algm-BayesQuasi2>` and :ref:`BayesStretch2 <algm-BayesStretch2>` based on the quickBayes package (these replace the now deprecated :ref:`BayesQuasi <algm-BayesQuasi>` and :ref:`BayesStretch <algm-BayesStretch>` algorithms).
+- New algorithm :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` to find single-crystal Bragg peaks in instruments with :ref:`RectangularDetectors <RectangularDetector>` (such as SXD).
+- Algorithms :ref:`algm-SANSTubeCalibration` and :ref:`algm-SANSTubeMerge` have been added for calibrating the Sans2d instrument at ISIS.
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
