@@ -71,6 +71,8 @@ TimeROI::TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::D
 
 TimeROI::TimeROI(const Kernel::TimeSeriesProperty<bool> *filter) { this->replaceROI(filter); }
 
+TimeROI::TimeROI(const std::vector<Types::Core::DateAndTime> &times) : m_roi{times} {}
+
 void TimeROI::addROI(const std::string &startTime, const std::string &stopTime) {
   this->addROI(DateAndTime(startTime), DateAndTime(stopTime));
 }
@@ -185,13 +187,15 @@ void TimeROI::addMask(const Types::Core::DateAndTime &startTime, const Types::Co
   } else {
     g_log.debug("TimeROI::addMask cutting notch in existing ROI");
     // create rois for before and after the mask
-    TimeInterval use_before(m_roi.front(), startTime);
-    TimeInterval use_after(stopTime, m_roi.back());
+    const TimeInterval use_before(m_roi.front(), startTime);
+    const TimeInterval use_after(stopTime, m_roi.back());
 
     // loop through all current splitters and get new intersections
     std::vector<TimeInterval> output;
     TimeInterval intersection;
-    for (const auto &interval : this->toTimeIntervals()) {
+    const std::size_t roiSize = this->numBoundaries();
+    for (std::size_t i = 0; i < roiSize; i += 2) {
+      const TimeInterval interval(this->m_roi[i], this->m_roi[i + 1]);
       intersection = use_before.intersection(interval);
       if (intersection.isValid()) {
         output.push_back(intersection);
@@ -274,8 +278,8 @@ bool TimeROI::valueAtTime(const Types::Core::DateAndTime &time) const {
   if (time < m_roi.front() || time >= m_roi.back())
     return ROI_IGNORE;
 
-  // get the first ROI time boundary greater than the input time. Note that ROI is a series of alternating ROI_USE and
-  // ROI_IGNORE values.
+  // get the first ROI time boundary greater than the input time. Note that an ROI is a series of alternating ROI_USE
+  // and ROI_IGNORE values.
   const auto iterUpper = std::upper_bound(m_roi.cbegin(), m_roi.cend(), time);
   if (std::distance(m_roi.cbegin(), iterUpper) % 2 == 0)
     return ROI_IGNORE;
@@ -393,6 +397,13 @@ void TimeROI::replaceROI(const TimeROI &other) {
     m_roi.assign(other.m_roi.cbegin(), other.m_roi.cend());
 }
 
+/// This assumes that the supplied vector is sorted in increasing order of time
+void TimeROI::replaceROI(const std::vector<Types::Core::DateAndTime> &roi) {
+  m_roi.clear();
+  if (!roi.empty())
+    m_roi.assign(roi.cbegin(), roi.cend());
+}
+
 /**
  * Updates the TimeROI values with the union with another TimeROI.
  * See https://en.wikipedia.org/wiki/Union_(set_theory) for more details
@@ -424,28 +435,28 @@ void TimeROI::update_intersection(const TimeROI &other) {
   if (other.useAll() || this->useAll()) {
     // empty out this environment
     m_roi.clear();
-  } else {
-    // remove everything before the other starts
-    if (m_roi.front() < other.m_roi.front()) {
-      this->addMask(m_roi.front(), other.m_roi.front());
-    }
+    return;
+  }
 
-    // add the spaces between the other's splitting intervals
-    const std::size_t LOOP_MAX = std::size_t(other.m_roi.size() - 1);
-    for (std::size_t i = 1; i < LOOP_MAX; i += 2) {
-      this->addMask(other.m_roi[i], other.m_roi[i + 1]);
-    }
+  // remove everything before the other starts
+  if (m_roi.front() < other.m_roi.front()) {
+    this->addMask(m_roi.front(), other.m_roi.front());
+  }
 
-    // remove everything after other finishes
-    if (m_roi.back() > other.m_roi.back()) {
-      this->addMask(other.m_roi.back(), m_roi.back());
-    }
+  // add the spaces between the other's splitting intervals
+  const std::size_t LOOP_MAX = std::size_t(other.m_roi.size() - 1);
+  for (std::size_t i = 1; i < LOOP_MAX; i += 2) {
+    this->addMask(other.m_roi[i], other.m_roi[i + 1]);
+  }
 
-    // if the TimeROI became empty it is because there is no overlap
-    // reset the value to INVALID_ROI
-    if (this->empty()) {
-      this->replaceROI(USE_NONE);
-    }
+  // remove everything after other finishes
+  if (m_roi.back() > other.m_roi.back()) {
+    this->addMask(other.m_roi.back(), m_roi.back());
+  }
+
+  // if the TimeROI became empty it is because there is no overlap reset the value to INVALID_ROI
+  if (this->empty()) {
+    this->replaceROI(USE_NONE);
   }
 }
 
