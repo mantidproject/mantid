@@ -120,10 +120,14 @@ if package_installed("quickBayes"):
 
         def test_make_results(self):
             def slice(slice_list, x_data, x_unit, name):
-                return slice_list
+                return name
+
+            def set_label(ws_str, label, unit):
+                return ws_str
 
             self._alg.make_slice_ws = mock.Mock(side_effect=slice)
             self._alg.group_ws = mock.Mock(return_value="group")
+            self._alg.set_label = mock.Mock(side_effect=set_label)
 
             beta_list = [(1, 2), (3, 4)]
             FWHM_list = [(5, 6), (7, 8)]
@@ -147,9 +151,13 @@ if package_installed("quickBayes"):
                 call_number=2,
                 slice_list=FWHM_list,
                 x_data=x_data,
-                x_unit="MomentumTransfer",
+                x_unit="FWHM",
                 name="test_Stretch_FWHM",
             )
+            self.assert_mock_called_with(
+                self._alg.set_label, N_calls=2, call_number=2, ws_str="test_Stretch_Beta", label="beta", unit="MomentumTransfer"
+            )
+            self.assert_mock_called_with(self._alg.set_label, N_calls=2, call_number=1, ws_str="test_Stretch_FWHM", label="FWHM", unit="eV")
 
         def test_do_one_spec(self):
             data = {
