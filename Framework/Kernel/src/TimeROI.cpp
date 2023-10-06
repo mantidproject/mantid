@@ -12,9 +12,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeROI.h"
 
-static double elapsed_time_case_1{0.0};
-static double elapsed_time_case_2{0.0};
-
 namespace Mantid {
 namespace Kernel {
 
@@ -485,17 +482,9 @@ void TimeROI::update_intersection(const TimeROI &other) {
  */
 void TimeROI::update_or_replace_intersection(const TimeROI &other) {
   if (this->useAll()) {
-    auto start = std::chrono::system_clock::now();
     this->replaceROI(other);
-    auto stop = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = stop - start;
-    elapsed_time_case_1 += elapsed_seconds.count();
   } else if (!other.useAll()) {
-    auto start = std::chrono::system_clock::now();
     this->update_intersection(other);
-    auto stop = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = stop - start;
-    elapsed_time_case_2 += elapsed_seconds.count();
   }
 }
 
@@ -653,13 +642,6 @@ void TimeROI::saveNexus(::NeXus::File *file) const {
 
   // save things to to disk
   tsp.saveProperty(file);
-}
-
-void TimeROI::reportTiming() {
-  std::cout << "Cumulative time (s) spent in TimeROI::replaceROI, which was called from "
-               "TimeROI::update_or_replace_intersection: "
-            << elapsed_time_case_1 << "\n";
-  std::cout << "Cumulative time (s) spent in  TimeROI::update_intersection: " << elapsed_time_case_2 << "\n";
 }
 
 } // namespace Kernel

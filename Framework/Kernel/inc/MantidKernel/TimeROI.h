@@ -21,8 +21,6 @@ public:
   static const std::string NAME;
   static const TimeROI USE_NONE;
 
-  static void reportTiming();
-
   TimeROI();
   TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
   TimeROI(const Kernel::TimeSeriesProperty<bool> *filter);
