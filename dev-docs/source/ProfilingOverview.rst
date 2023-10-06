@@ -8,11 +8,12 @@ Profiling Overview
    :local:
 
 Profiling can mean a few different things, so here are the current ways!
+Many of these work only on certain platforms and this document will note the limitations.
+Tools that are noted as being supported in linux are likely to work in osx as well.
+Most of these approaches are specific to a single language.
 
-Profiling with Valgrind
------------------------
-
-This option is Linux only. See :doc:`ProfilingWithValgrind` for details.
+Profiling in Python
+===================
 
 Profiling with cProfile
 -----------------------
@@ -46,12 +47,31 @@ To use Yappi instead of cProfile simple append `--yappi` to the list of argument
 
 KCachegrind can be used to view profiling data, see :doc:`ProfilingWithValgrind` for more details on usage.
 
+Profiling in C++
+================
 
-Profiling an algorithm
-----------------------
+Mantid's Algorithm Profiler
+---------------------------
 
 On Linux, the build can be configured to generate algorithm profiling information. See :doc:`AlgorithmProfiler <AlgorithmProfiler>` for details.
 
+Mantid's Timer class
+--------------------
+
+`MantidKernel/Timer <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h>`_ allows for very quick measurements of time of suspect code.
+It works on every operating system and does not require special compile flags.
+
+.. code:: C
+
+   Mantid::Kernel::Timer timer();
+   // do something expensive
+   std::cout << "did step 1 in " << timer << "\n";
+   // do something else expensive - the timer still accumulates
+   std::cout << "did step 2 after " << timer << " from start\n";
+
+   timer.reset(); // reset the timer to zero
+   // do something else
+   std::cout << "step 3 took " << timer << "\n";
 
 Other Profiling Tools
 ---------------------
@@ -60,6 +80,8 @@ Other Profiling Tools
 
 Linux
 #####
+
+:doc:`ProfilingWithValgrind` for details on using this tool
 
 `Callgrind/KCachegrind <http://kcachegrind.sourceforge.net/cgi-bin/show.cgi/KcacheGrindIndex>`__
 
