@@ -8,17 +8,16 @@ Work flows algorithm profiling
 Summary
 ^^^^^^^
 
-Due to the need of investigation of algorithms performance issues, the proper method
-is introduced. It consists two to parts: special mantid build and analytical tool.
+Due to the need of investigation of algorithms performance issues, the proper method is introduced.
+It consists two to parts: special mantid build and analytical tool.
 Available for Linux only.
 
 Mantid build
 ^^^^^^^^^^^^
 
-To build mantid version with profiling functionality enabled run ``cmake`` with the additional option
-``-DPROFILE_ALGORITHM_LINUX=ON``. Built in such a way mantid creates a dump file ``algotimeregister.out``
-in the running directory. This file contains the time stamps for start and finish of executed algorithms with
-~nanosecond precision in a very simple text format.
+To build mantid version with profiling functionality enabled run ``cmake`` with the additional option ``-DPROFILE_ALGORITHM_LINUX=ON``.
+Built in such a way mantid creates a dump file ``algotimeregister.out`` in the running directory.
+This file contains the time stamps for start and finish of executed algorithms with ~nanosecond precision in a very simple text format.
 
 Adding more detailed information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -44,8 +43,7 @@ An example of this can be found in `FilterEvents.cpp <https://github.com/mantidp
 Analysing tool
 ^^^^^^^^^^^^^^
 
-The `mantid-profiler project <https://github.com/mantidproject/mantid-profiler>`_ provides the nice graphical
-tool to interpret the information contained in the dumped file.
+The `mantid-profiler project <https://github.com/mantidproject/mantid-profiler>`_ provides the nice graphical tool to interpret the information contained in the dumped file.
 The project has more detiled instructions, but in general
 
 .. code-block:: sh
