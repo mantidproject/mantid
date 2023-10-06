@@ -29,7 +29,8 @@ Bugfixes
 - Fix type conversion bug producing an error in the cross-corellation functionality of the powder diffraction calibration scripts used in :ref:`powder diffraction calibration <Powder Diffraction Calibration>`.
 - Fixed bug in ISIS powder reduction for workspaces being overwritten when focussing using individual batching mode (this affected POLARIS and GEM)
 - Fixed bug in :ref:`PDCalibration <algm-PDCalibration>` which was not using the user-input peak windows unless they were pre-sorted, it is no longer necessary to pre-sort peak centers and windows.
-
+- Fixed way :ref:`FitPeaks <algm-FitPeaks>` uses workspace indices in ``PeakCentersWorkspace`` and ``FitPeakWindowWorkspace``, to correspond to the same spectrum workspace indices in the input workspace, even when using ``StartWorkspaceIndex`` and ``StopWorkspaceIndex``.  This fixes the issue with :ref:`PDCalibration <algm-PDCalibration>`.
+- Fixed bug in :ref:`FitPeaks <algm-FitPeaks>` which assumed the zeroeth workspace index defined the largest number of peaks to attempt to fit in all spectra.
 
 Engineering Diffraction
 -----------------------
