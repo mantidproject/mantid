@@ -46,8 +46,8 @@ void throwIfAnyPropertiesInvalid(IAlgorithm_sptr alg, Mantid::API::IAlgorithmRun
 namespace MantidQt::API {
 
 BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
-    : QObject(parent), m_stopOnFailure(true), m_cancelRequested(false), m_notificationCenter(),
-      m_batchCompleteObserver(*this, &BatchAlgorithmRunner::handleBatchComplete),
+    : QObject(parent), m_algorithms(), m_currentAlgorithm(), m_stopOnFailure(true), m_cancelRequested(false),
+      m_notificationCenter(), m_batchCompleteObserver(*this, &BatchAlgorithmRunner::handleBatchComplete),
       m_batchCancelledObserver(*this, &BatchAlgorithmRunner::handleBatchCancelled),
       m_algorithmStartedObserver(*this, &BatchAlgorithmRunner::handleAlgorithmStarted),
       m_algorithmCompleteObserver(*this, &BatchAlgorithmRunner::handleAlgorithmComplete),
