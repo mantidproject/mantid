@@ -25,6 +25,14 @@ Bugfixes
 - The progress bar for :ref:`LoadMD <algm-LoadMD>` now includes loading experiment information.
 
 
+Fit Functions
+-------------
+
+Bugfixes
+############
+- An inconsistency in the E units when compared to Tau has been fixed in the documentation for the :ref:`StretchedExpFT <func-StretchedExpFT>` function.
+
+
 Data Objects
 ------------
 
