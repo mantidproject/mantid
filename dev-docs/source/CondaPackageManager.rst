@@ -9,12 +9,12 @@ Conda Package Manager
 
 Mantid uses `Conda <https://docs.conda.io/en/latest/>`_ as its package management system. This document gives a
 developer overview on how we use the Conda package manager, including tips on how to debug dependency issues, and
-our policy towards using pip packages (it is strongly discouraged).
+our policy towards using ``pip`` packages (it is strongly discouraged).
 
 Creating Environments
 ---------------------
 
-Creating an empty environment:
+Creating an empty environment called ``myenv``:
 
 .. code-block:: sh
 
@@ -48,12 +48,12 @@ Finding a broken dependency
 ---------------------------
 
 The nightly pipelines can sometimes fail for obscure reasons, seemingly unrelated to the changes made within
-Mantid. In this case, it is probable that a Conda dependency has had an update, and the new update is "Broken"
-(if its a minor or patch update) or no longer compatible with Mantid (if it is a major update).
+Mantid. In this case, it is probable that a Conda dependency has updated, and the new update is "Broken"
+(if it is a minor or patch update) or no longer compatible with Mantid (if it is a major update).
 
 To find the dependency which has changed, you can run the ``tools/Jenkins/dependency_spotter.py`` script. This
-script takes two build numbers, and optionally the OS label, the pipeline name, and the name of the file to
-compare. It will then output the changes in Conda package versions used in the two builds, if there are any. An
+script takes two Jenkins build numbers, and optionally the OS label, the pipeline name, and the name of the file to
+compare. It will then output the changes in Conda package versions used in the two builds, if there are any. A
 few examples on how to use it:
 
 .. code-block:: sh

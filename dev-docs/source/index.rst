@@ -160,7 +160,7 @@ Tools
    Guide for setting up an environment to perform a benchmark of Mantid fitting minimizers.
 
 :doc:`CondaPackageManager`
-   Guide on how to use the Conda package manager in Mantid, including tips and a pip policy.
+   Guide on how to use the Conda package manager in Mantid, including tips and a ``pip`` policy.
 
 =======
 Testing
