@@ -60,6 +60,8 @@ class SampleTransmissionCalculatorModel(object):
                                 validation["histogram"] = "Histogram must be greater than zero."
                             if bin_list[2 + 2 * i] <= bin_list[0 + 2 * i]:
                                 validation["histogram"] = "Upper histogram edge must be greater than the lower bin."
+                            if bin_list[1 + 2 * i] > bin_list[2 + 2 * i]:
+                                validation["histogram"] = "Width cannot be greater than the upper bin."
                     else:
                         validation["histogram"] = (
                             "Histogram requires an odd number of values. It uses the same format as the Rebin algorithm, "
