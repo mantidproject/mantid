@@ -21,7 +21,7 @@ See https://docs.python.org/3/whatsnew/3.10.html#summary-release-highlights for 
 
 We would like to highlight the following improvements:
 
-- Autoscaling options have been added to the :ref:`slice viewer <sliceviewer>` to help quickly rescale color limits based on statistical variation in the data (e.g. mean +/- 3 sigma).
+- Autoscaling options have been added to the :ref:`SliceViewer <sliceviewer>` to help quickly rescale color limits based on statistical variation in the data (e.g. mean +/- 3 sigma).
 - New algorithms :ref:`BayesQuasi2 <algm-BayesQuasi2>` and :ref:`BayesStretch2 <algm-BayesStretch2>` based on the quickBayes package (these replace the now deprecated :ref:`BayesQuasi <algm-BayesQuasi>` and :ref:`BayesStretch <algm-BayesStretch>` algorithms).
 - New algorithm :ref:`FindSXPeaksConvolve <algm-FindSXPeaksConvolve>` to find single-crystal Bragg peaks in instruments with :ref:`RectangularDetectors <RectangularDetector>` (such as SXD).
 - Algorithms :ref:`algm-SANSTubeCalibration` and :ref:`algm-SANSTubeMerge` have been added for calibrating the Sans2d instrument at ISIS.

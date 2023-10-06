@@ -12,7 +12,7 @@ New Features
 
 Bugfixes
 --------
-- Avoided a bug when attempting to drag and drop a single binned workspace onto an open plot. This action is now rejected an a warning logged.
+- Avoided a bug when attempting to drag and drop a single binned workspace onto an open plot. This action is now rejected and a warning logged.
 - Fixed a bug which was causing the plot script generator button to not be shown on tiled plots with a non-square number of plots.
 - Fix bug that left a tab open with the old file name in the script editor when using 'Save Script as'
 - Catch unhandled exception when attempting to generate a plot script from an unsupported plot.
@@ -59,7 +59,7 @@ New features
 Bugfixes
 ############
 - Entering particular values (i.e 0,111) into the colour bar limit text boxes, will no longer cause an error.
-- Resolved issue with projection matrix calcluation using basis vectors with non-q dimensions.
+- Resolved issue with projection matrix calclulation using basis vectors with non-q dimensions.
 
 
 :ref:`Release 6.8.0 <v6.8.0>`
