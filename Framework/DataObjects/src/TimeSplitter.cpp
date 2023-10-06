@@ -624,6 +624,7 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
  * @param shift : shift the TOF values after rescaling, in units of microseconds.
  */
 template <typename EventType>
+
 void TimeSplitter::splitEventVec(const std::vector<EventType> &events, std::map<int, EventList *> &partials,
                                  const bool pulseTof, const bool tofCorrect, const double factor,
                                  const double shift) const {
@@ -643,6 +644,7 @@ void TimeSplitter::splitEventVec(const std::vector<EventType> &events, std::map<
   this->splitEventVec(timeCalc, events, partials);
 }
 
+#if 0
 template <typename EventType>
 void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const EventType &)> &timeCalc,
                                  const std::vector<EventType> &events, std::map<int, EventList *> &partials) const {
@@ -713,6 +715,76 @@ void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const Eve
 
     // increment to the next interval
     itSplitter++;
+  }
+
+  // copy all events after last splitter to NO_TARGET -- TODO -- IS THIS NECESSARY?
+  if (itEvent != itEventEnd) {
+    partial = partials.find(TimeSplitter::NO_TARGET);
+    if (partial != partials.end()) {
+      for (; itEvent != itEventEnd; ++itEvent) {
+        partial->second->addEventQuickly(*itEvent); // emplaces a copy of *itEvent in partial
+      }
+    }
+  }
+}
+#endif
+
+template <typename EventType>
+void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const EventType &)> &timeCalc,
+                                 const std::vector<EventType> &events, std::map<int, EventList *> &partials) const {
+  // initialize the iterator over the splitter
+  // it assumes the splitter keys (DateAndTime objects) are sorted by increasing time.
+  auto itSplitter = m_roi_map.cbegin(); // iterator over the splitter
+  const auto itSplitterEnd = m_roi_map.cend();
+
+  // initialize iterator over the events
+  auto itEvent = events.cbegin();
+  const auto itEventEnd = events.cend();
+
+  // copy all events before first splitter to NO_TARGET
+  auto partial = partials.find(TimeSplitter::NO_TARGET);
+  {
+    const auto &stop = itSplitter->first; // first splitter boundary. events before this go to NO_TARGET
+    const bool shouldAppend = (partial != partials.end());
+    while (itEvent != itEventEnd && timeCalc(*itEvent) < stop) {
+      if (shouldAppend)
+        partial->second->addEventQuickly(*itEvent); // emplaces a copy of *itEvent in partial
+      // advance event iterator
+      itEvent++;
+    }
+  }
+
+  // advance to the splitter that would include this event
+  itSplitter = m_roi_map.lower_bound(timeCalc(*itEvent));
+  // then go back by one to insure the event is included
+  if (itSplitter != m_roi_map.cbegin())
+    itSplitter--;
+
+  // iterate over all events. For each event try finding its destination event list, a.k.a. partial.
+  // If the partial is found, append the event to it. It is assumed events are sorted by (possibly corrected) time
+  while (itEvent != itEventEnd && itSplitter != itSplitterEnd) {
+    // Check if we need to advance the splitter and therefore select a different partial event list
+    const auto eventTime = timeCalc(*itEvent);
+    // advance to the new stopping boundary, and update the destination index as we go
+    while (itSplitter != itSplitterEnd && eventTime >= itSplitter->first) {
+      itSplitter++; // gets to a new stopping point
+    }
+    // previous splitter has the destination
+    const int destination = (std::prev(itSplitter))->second;
+    // determine the new stop time
+    const auto stop = (itSplitter == itSplitterEnd) ? DateAndTime::maximum() : itSplitter->first;
+
+    // find the new partial to add to
+    partial = partials.find(destination);
+
+    // loop over events up to the end of the roi
+    const bool shouldAppend = (partial != partials.end());
+    while (itEvent != itEventEnd && timeCalc(*itEvent) < stop) {
+      if (shouldAppend)
+        partial->second->addEventQuickly(*itEvent); // emplaces a copy of *itEvent in partial
+      // advance event iterator
+      itEvent++;
+    }
   }
 
   // copy all events after last splitter to NO_TARGET -- TODO -- IS THIS NECESSARY?
