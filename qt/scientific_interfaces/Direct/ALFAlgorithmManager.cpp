@@ -189,11 +189,11 @@ void ALFAlgorithmManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr
   }
 }
 
-void ALFAlgorithmManager::executeAlgorithm(Mantid::API::IAlgorithm_sptr const &algorithm,
+void ALFAlgorithmManager::executeAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
                                            std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) {
   API::IConfiguredAlgorithm_sptr configuredAlg =
       std::make_shared<API::ConfiguredAlgorithm>(std::move(algorithm), std::move(properties));
-  m_jobRunner->executeAlgorithm(configuredAlg);
+  m_jobRunner->executeAlgorithm(std::move(configuredAlg));
 }
 
 void ALFAlgorithmManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) {

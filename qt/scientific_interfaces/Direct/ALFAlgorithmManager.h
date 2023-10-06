@@ -74,7 +74,7 @@ public:
   void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
 
 private:
-  void executeAlgorithm(Mantid::API::IAlgorithm_sptr const &algorithm,
+  void executeAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
                         std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties);
 
   void notifyLoadComplete(Mantid::API::IAlgorithm_sptr const &algorithm);
