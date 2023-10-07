@@ -6,6 +6,15 @@ Direct Geometry Changes
    :local:
 
 
+ALFView
+-------
+
+
+Bugfixes
+############
+- An unreliable crash when loading a Sample run number has been fixed.
+
+
 CrystalField
 -------------
 
