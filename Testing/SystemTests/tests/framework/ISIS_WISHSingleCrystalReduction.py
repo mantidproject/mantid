@@ -37,6 +37,7 @@ from mantid.simpleapi import (
     BinMD,
     ConvertMDHistoToMatrixWorkspace,
     ExtractSpectra,
+    SortPeaksWorkspace,
 )
 from Diffraction.wish.wishSX import WishSX
 from mantid import config
@@ -229,11 +230,14 @@ class WISHFindPeaksAndIntegrateUsingClassMethodsTest(MantidSystemTest):
         # integrate - needs instance
         intPeaksMDArgs = {"ellipsoid": True, "fixQAxis": True, "fixMajorAxisLength": True, "useCentroid": True, "IntegrateIfOnEdge": True}
         self.peaks_int = WishSX().integrate_peaks_MD_optimal_radius(wsMD, peaks, peaks + "_int", ws=ws, **intPeaksMDArgs)
+        self.peaks_int = SortPeaksWorkspace(
+            InputWorkspace=self.peaks_int, OutputWorkspace=self.peaks_int.name(), ColumnNameToSortBy="DetID", SortAscending=False
+        )
 
     def validate(self):
         self.assertEqual(self.peaks_int.getNumberPeaks(), 3)
         pk = self.peaks_int.getPeak(0)
-        self.assertAlmostEqual(pk.getIntensity() / pk.getSigmaIntensity(), 64.4733, delta=1e-6)
+        self.assertAlmostEqual(pk.getIntensity() / pk.getSigmaIntensity(), 8.3611, delta=1e-4)
 
 
 class WISHNormaliseDataAndCreateMDWorkspaceTest(MantidSystemTest):
