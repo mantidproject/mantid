@@ -93,6 +93,8 @@ public:
     // this fails fast, due to the rebin param property validator
     Rebin rebin;
     rebin.initialize();
+    TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{0, 2, 1}));
+    TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{-1.0, 2, 0}));
     TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{-1.0, -1.0, 10.0}));
     TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{100.0, -1.0, 10.0}));
     TS_ASSERT_THROWS_ANYTHING(rebin.setProperty("Params", std::vector<double>{100.0, 1.0, 10.0}));
