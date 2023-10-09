@@ -17,7 +17,6 @@
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
-namespace {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
@@ -61,15 +60,13 @@ public:
   MOCK_CONST_METHOD0(getFacility, std::string());
 };
 
-GNU_DIAG_ON_SUGGEST_OVERRIDE
-
 class MockIndirectSettings : public IIndirectSettings {
 public:
   MOCK_METHOD0(notifyApplySettings, void());
   MOCK_METHOD0(notifyCloseSettings, void());
 };
 
-} // namespace
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class IndirectSettingsPresenterTest : public CxxTest::TestSuite {
 public:

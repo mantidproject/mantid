@@ -356,5 +356,4 @@ shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlo
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlotOptionsView.cpp:106
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlotOptionsView.cpp:111
 unusedScopedObject:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlotOptionsView.cpp:188
-constVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectSettings.cpp:34
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FqFitAddWorkspaceDialog.cpp:71

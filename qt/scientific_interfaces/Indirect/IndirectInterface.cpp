@@ -19,7 +19,7 @@ IndirectInterface::IndirectInterface(QWidget *parent) : UserSubWindow(parent) {}
 void IndirectInterface::initLayout() {
   // Needed to initially apply the settings loaded on the settings GUI
   applySettings();
-};
+}
 
 void IndirectInterface::help() {
   HelpWindow::showCustomInterface(QString::fromStdString(documentationPage()), QString("indirect"));
