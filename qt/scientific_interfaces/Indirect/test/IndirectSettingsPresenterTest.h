@@ -19,16 +19,12 @@ using namespace testing;
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIIndirectSettingsView : public IIndirectSettingsView {
+class MockIndirectSettingsView : public IIndirectSettingsView {
 public:
-  /// Signals
-  void emitOkClicked() { emit okClicked(); }
-
-  void emitApplyClicked() { emit applyClicked(); }
-
-  void emitCancelClicked() { emit cancelClicked(); }
-
   /// Public methods
+  MOCK_METHOD0(getView, QWidget *());
+  MOCK_METHOD1(subscribePresenter, void(IndirectSettingsPresenter *));
+
   MOCK_METHOD1(setInterfaceSettingsVisible, void(bool visible));
   MOCK_METHOD1(setInterfaceGroupBoxTitle, void(QString const &title));
 
@@ -72,16 +68,18 @@ public:
   static void destroySuite(IndirectSettingsPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_view = new NiceMock<MockIIndirectSettingsView>();
-    m_model = new NiceMock<MockIndirectSettingsModel>();
-    m_presenter = std::make_unique<IndirectSettingsPresenter>(m_model, m_view);
+    m_view = std::make_unique<NiceMock<MockIndirectSettingsView>>();
+    auto model = std::make_unique<NiceMock<MockIndirectSettingsModel>>();
+    m_model = model.get();
+    m_presenter = std::make_unique<IndirectSettingsPresenter>(std::move(model), m_view.get());
   }
 
   void tearDown() override {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
 
-    m_presenter.reset(); /// The view and model are destructed here
+    m_presenter.reset(); /// The model is destructed here
+    m_view.reset();
   }
 
   ///----------------------------------------------------------------------
@@ -98,12 +96,12 @@ public:
 
   void test_that_the_okClicked_signal_will_attempt_to_save_the_settings() {
     checkForSavingOfSettings();
-    m_view->emitOkClicked();
+    m_presenter->notifyOkClicked();
   }
 
   void test_that_the_applyClicked_signal_will_attempt_to_save_the_settings() {
     checkForSavingOfSettings();
-    m_view->emitApplyClicked();
+    m_presenter->notifyApplyClicked();
   }
 
   void test_that_the_applyClicked_signal_will_disable_the_settings_buttons_while_it_is_applying_the_changes() {
@@ -115,7 +113,7 @@ public:
     EXPECT_CALL(*m_view, setOkEnabled(true)).Times(1).After(disableOk);
     EXPECT_CALL(*m_view, setCancelEnabled(true)).Times(1).After(disableCancel);
 
-    m_view->emitApplyClicked();
+    m_presenter->notifyApplyClicked();
   }
 
 private:
@@ -141,7 +139,7 @@ private:
     EXPECT_CALL(*m_model, setFacility(facility)).Times(1).After(expectation);
   }
 
-  MockIIndirectSettingsView *m_view;
-  MockIndirectSettingsModel *m_model;
+  std::unique_ptr<NiceMock<MockIndirectSettingsView>> m_view;
+  NiceMock<MockIndirectSettingsModel> *m_model;
   std::unique_ptr<IndirectSettingsPresenter> m_presenter;
 };

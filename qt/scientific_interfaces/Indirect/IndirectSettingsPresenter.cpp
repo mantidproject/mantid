@@ -10,39 +10,27 @@
 namespace MantidQt::CustomInterfaces {
 using namespace IndirectSettingsHelper;
 
-IndirectSettingsPresenter::IndirectSettingsPresenter(QWidget *parent)
-    : QObject(nullptr), m_model(std::make_unique<IndirectSettingsModel>()),
-      m_view(std::make_unique<IndirectSettingsView>(parent)) {
-  setUpPresenter();
-}
-
-IndirectSettingsPresenter::IndirectSettingsPresenter(IndirectSettingsModel *model, IIndirectSettingsView *view)
-    : QObject(nullptr), m_model(model), m_view(view) {
-  setUpPresenter();
-}
-
-void IndirectSettingsPresenter::setUpPresenter() {
-  connect(m_view.get(), SIGNAL(okClicked()), this, SLOT(applyAndCloseSettings()));
-  connect(m_view.get(), SIGNAL(applyClicked()), this, SLOT(applyChanges()));
-  connect(m_view.get(), SIGNAL(cancelClicked()), this, SLOT(closeDialog()));
-
+IndirectSettingsPresenter::IndirectSettingsPresenter(std::unique_ptr<IndirectSettingsModel> model,
+                                                     IIndirectSettingsView *view)
+    : QObject(nullptr), m_model(std::move(model)), m_view(view) {
+  m_view->subscribePresenter(this);
   loadSettings();
 }
 
-IIndirectSettingsView *IndirectSettingsPresenter::getView() { return m_view.get(); }
+QWidget *IndirectSettingsPresenter::getView() { return m_view->getView(); }
 
-void IndirectSettingsPresenter::applyAndCloseSettings() {
+void IndirectSettingsPresenter::notifyOkClicked() {
   saveSettings();
-  closeDialog();
+  emit closeSettings();
 }
 
-void IndirectSettingsPresenter::applyChanges() {
+void IndirectSettingsPresenter::notifyApplyClicked() {
   setApplyingChanges(true);
   saveSettings();
   setApplyingChanges(false);
 }
 
-void IndirectSettingsPresenter::closeDialog() { emit closeSettings(); }
+void IndirectSettingsPresenter::notifyCancelClicked() { emit closeSettings(); }
 
 void IndirectSettingsPresenter::loadSettings() {
   m_view->setSelectedFacility(QString::fromStdString(m_model->getFacility()));

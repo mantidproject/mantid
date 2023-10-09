@@ -19,7 +19,8 @@ IndirectSettings::IndirectSettings(QWidget *parent) : MantidQt::API::UserSubWind
 QIcon IndirectSettings::icon() { return Icons::getIcon(SETTINGS_ICON); }
 
 void IndirectSettings::initLayout() {
-  m_presenter = std::make_unique<IndirectSettingsPresenter>(this);
+  auto model = std::make_unique<IndirectSettingsModel>();
+  m_presenter = std::make_unique<IndirectSettingsPresenter>(std::move(model), new IndirectSettingsView(this));
 
   auto centralWidget = m_uiForm.centralWidget->layout();
   centralWidget->addWidget(m_presenter->getView());
