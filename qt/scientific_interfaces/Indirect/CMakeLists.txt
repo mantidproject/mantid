@@ -68,7 +68,6 @@ set(MOC_FILES
     IndirectPlotOptionsView.h
     IndirectSassena.h
     IndirectSettings.h
-    IndirectSettingsPresenter.h
     IndirectSettingsView.h
     IndirectSimulation.h
     IndirectSimulationTab.h
@@ -91,6 +90,7 @@ set(INC_FILES
     IndirectDataValidationHelper.h
     IndirectPlotOptionsModel.h
     IndirectSettingsHelper.h
+    IndirectSettingsPresenter.h
     Notifier.h
     Reduction/ISISEnergyTransferData.h
     Reduction/ISISEnergyTransferValidator.h

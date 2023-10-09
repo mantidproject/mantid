@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysis.h"
+#include "IndirectSettings.h"
 
 #include "IndirectDataAnalysisConvFitTab.h"
 #include "IndirectDataAnalysisFqFitTab.h"
@@ -51,8 +52,7 @@ void IndirectDataAnalysis::initLayout() {
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
 
-  // Needed to initially apply the settings loaded on the settings GUI
-  applySettings(getInterfaceSettings());
+  IndirectInterface::initLayout();
 }
 
 std::string IndirectDataAnalysis::documentationPage() const { return "Inelastic Data Analysis"; }

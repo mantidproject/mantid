@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSettingsPresenter.h"
+#include "IndirectSettings.h"
 #include "IndirectSettingsHelper.h"
 
 namespace MantidQt::CustomInterfaces {
@@ -12,16 +13,18 @@ using namespace IndirectSettingsHelper;
 
 IndirectSettingsPresenter::IndirectSettingsPresenter(std::unique_ptr<IndirectSettingsModel> model,
                                                      IIndirectSettingsView *view)
-    : QObject(nullptr), m_model(std::move(model)), m_view(view) {
+    : m_model(std::move(model)), m_view(view) {
   m_view->subscribePresenter(this);
   loadSettings();
 }
 
 QWidget *IndirectSettingsPresenter::getView() { return m_view->getView(); }
 
+void IndirectSettingsPresenter::subscribeParent(IIndirectSettings *parent) { m_parent = parent; }
+
 void IndirectSettingsPresenter::notifyOkClicked() {
   saveSettings();
-  emit closeSettings();
+  m_parent->notifyCloseSettings();
 }
 
 void IndirectSettingsPresenter::notifyApplyClicked() {
@@ -30,7 +33,7 @@ void IndirectSettingsPresenter::notifyApplyClicked() {
   setApplyingChanges(false);
 }
 
-void IndirectSettingsPresenter::notifyCancelClicked() { emit closeSettings(); }
+void IndirectSettingsPresenter::notifyCancelClicked() { m_parent->notifyCloseSettings(); }
 
 void IndirectSettingsPresenter::loadSettings() {
   m_view->setSelectedFacility(QString::fromStdString(m_model->getFacility()));
@@ -45,7 +48,7 @@ void IndirectSettingsPresenter::saveSettings() {
   setRestrictInputDataByName(m_view->isRestrictInputByNameChecked());
   setExternalPlotErrorBars(m_view->isPlotErrorBarsChecked());
 
-  emit applySettings();
+  m_parent->notifyApplySettings();
 }
 
 void IndirectSettingsPresenter::setApplyingChanges(bool applyingChanges) {

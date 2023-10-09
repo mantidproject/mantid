@@ -12,29 +12,23 @@
 
 #include <memory>
 
-#include <QObject>
-#include <QVariant>
-
 namespace MantidQt {
 namespace CustomInterfaces {
+class IIndirectSettings;
 
-class MANTIDQT_INDIRECT_DLL IndirectSettingsPresenter : public QObject {
-  Q_OBJECT
+class MANTIDQT_INDIRECT_DLL IndirectSettingsPresenter {
 
 public:
   explicit IndirectSettingsPresenter(std::unique_ptr<IndirectSettingsModel> model, IIndirectSettingsView *view);
 
   QWidget *getView();
+  void subscribeParent(IIndirectSettings *parent);
 
   void loadSettings();
 
   void notifyOkClicked();
   void notifyApplyClicked();
   void notifyCancelClicked();
-
-signals:
-  void closeSettings();
-  void applySettings();
 
 private:
   void saveSettings();
@@ -43,6 +37,7 @@ private:
 
   std::unique_ptr<IndirectSettingsModel> m_model;
   IIndirectSettingsView *m_view;
+  IIndirectSettings *m_parent;
 };
 
 } // namespace CustomInterfaces

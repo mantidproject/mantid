@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectInterface.h"
+#include "IndirectSettings.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
@@ -13,7 +14,12 @@ using namespace MantidQt::API;
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectInterface::IndirectInterface(QWidget *parent) : UserSubWindow(parent), m_settings() {}
+IndirectInterface::IndirectInterface(QWidget *parent) : UserSubWindow(parent) {}
+
+void IndirectInterface::initLayout() {
+  // Needed to initially apply the settings loaded on the settings GUI
+  applySettings();
+};
 
 void IndirectInterface::help() {
   HelpWindow::showCustomInterface(QString::fromStdString(documentationPage()), QString("indirect"));
@@ -21,30 +27,17 @@ void IndirectInterface::help() {
 
 void IndirectInterface::settings() {
   auto subWindow = InterfaceManager().createSubWindow("Settings", this);
-  m_settings = dynamic_cast<IndirectSettings *>(subWindow);
-  connect(m_settings, SIGNAL(applySettings()), this, SLOT(applySettings()));
-  connect(m_settings, SIGNAL(closeSettings()), this, SLOT(closeSettings()));
+  auto settingsWindow = dynamic_cast<IndirectSettings *>(subWindow);
+  settingsWindow->connectInterface(this);
 
-  m_settings->loadSettings();
-  m_settings->setWindowModality(Qt::WindowModal);
-  m_settings->show();
+  settingsWindow->loadSettings();
+  settingsWindow->setWindowModality(Qt::WindowModal);
+  settingsWindow->show();
 }
 
-void IndirectInterface::applySettings() { applySettings(getInterfaceSettings()); }
+void IndirectInterface::applySettings() { applySettings(IndirectSettings::getSettings()); }
 
 void IndirectInterface::applySettings(std::map<std::string, QVariant> const &settings) { UNUSED_ARG(settings); }
-
-void IndirectInterface::closeSettings() {
-  disconnect(m_settings, SIGNAL(applySettings()), this, SLOT(applySettings()));
-  disconnect(m_settings, SIGNAL(closeSettings()), this, SLOT(closeSettings()));
-
-  if (auto settingsWindow = m_settings->window())
-    settingsWindow->close();
-
-  m_settings = nullptr;
-}
-
-std::map<std::string, QVariant> IndirectInterface::getInterfaceSettings() const { return m_settings->getSettings(); }
 
 void IndirectInterface::manageUserDirectories() { ManageUserDirectories::openManageUserDirectories(); }
 

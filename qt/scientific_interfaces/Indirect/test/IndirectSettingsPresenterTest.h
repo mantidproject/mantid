@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "IndirectSettings.h"
 #include "IndirectSettingsPresenter.h"
 
 #include "MantidKernel/WarningSuppressions.h"
@@ -16,6 +17,7 @@
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
+namespace {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
@@ -61,6 +63,14 @@ public:
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
+class MockIndirectSettings : public IIndirectSettings {
+public:
+  MOCK_METHOD0(notifyApplySettings, void());
+  MOCK_METHOD0(notifyCloseSettings, void());
+};
+
+} // namespace
+
 class IndirectSettingsPresenterTest : public CxxTest::TestSuite {
 public:
   static IndirectSettingsPresenterTest *createSuite() { return new IndirectSettingsPresenterTest(); }
@@ -72,6 +82,9 @@ public:
     auto model = std::make_unique<NiceMock<MockIndirectSettingsModel>>();
     m_model = model.get();
     m_presenter = std::make_unique<IndirectSettingsPresenter>(std::move(model), m_view.get());
+
+    m_parent = std::make_unique<NiceMock<MockIndirectSettings>>();
+    m_presenter->subscribeParent(m_parent.get());
   }
 
   void tearDown() override {
@@ -80,6 +93,7 @@ public:
 
     m_presenter.reset(); /// The model is destructed here
     m_view.reset();
+    m_parent.reset();
   }
 
   ///----------------------------------------------------------------------
@@ -142,4 +156,6 @@ private:
   std::unique_ptr<NiceMock<MockIndirectSettingsView>> m_view;
   NiceMock<MockIndirectSettingsModel> *m_model;
   std::unique_ptr<IndirectSettingsPresenter> m_presenter;
+
+  std::unique_ptr<NiceMock<MockIndirectSettings>> m_parent;
 };
