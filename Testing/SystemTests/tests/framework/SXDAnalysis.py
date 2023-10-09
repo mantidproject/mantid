@@ -96,7 +96,8 @@ class SXDProcessSampleData(systemtesting.MantidSystemTest):
         sxd = SXD(vanadium_runno=23769, empty_runno=23768)
         sxd.van_ws = LoadNexus(Filename="SXD23779_processed_vanadium.nxs", OutputWorkspace="SXD23779_vanadium")
         sxd.set_sample(
-            Geometry={"Shape": "CSG", "Value": sxd.sphere_shape}, Material={"ChemicalFormula": "Na Cl", "SampleNumberDensity": 0.0223}
+            Geometry={"Shape": "CSG", "Value": sxd.sphere_shape},
+            Material={"ChemicalFormula": "Na Cl", "SampleNumberDensity": 0.0223, "NumberDensityUnit": "Atoms"},
         )
         sxd.set_goniometer_axes([0, 1, 0, 1])  # ccw rotation around vertical
         runno = 23767
