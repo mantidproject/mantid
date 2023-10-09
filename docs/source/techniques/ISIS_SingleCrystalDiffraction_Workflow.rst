@@ -54,10 +54,11 @@ SXD Workflow
 1. Detector Calibration
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The positions of the SXD detector panels are calibrated - typically using NaCl (standard sample) data.
+The positions of the SXD detector panels require calibration - typically using an NaCl crystal (standard sample).
 The updated positions are stored in an .xml file, the path to the file is returned by `calibrate_sxd_panels`.
 
 ..  code-block:: python
+
   sxd = SXD()
   wsname = sxd.load_run(32863)
   peaks_ws = sxd.find_sx_peaks(wsname,  nstd=8)
@@ -83,17 +84,18 @@ Once the detectors have been calibrated a sequence of runs can be reduced.
 a. Setting up the SXD object
 ============================
 
-In order to reduce a sequence a run an instance of the ``SXD`` class needs to be initiated with a vanadium and empty
+In order to reduce a sequence of runs, an instance of the ``SXD`` class needs to be initiated with a vanadium and empty
 run number and optionally the detector calibration file from :ref:`sxd-detector_calibration-ref`.
 
-If sample absorption is to be corrected for the sample shape/geometry and material can be set using ``set_sample``
+If sample absorption is to be corrected for, the sample shape/geometry and material can be set using ``set_sample``
 as in :ref:`algm-SetSample` - note the default units for the number density are `formula units per cubic Angstrom`.
 
-Typically each run in a sequence corresponds to different sample orientations, in which case it is necessary to set the
+Typically each run in a sequence corresponds to a different sample orientation, in which case it is necessary to set the
 goniometer axes using ``set_goniometer`` as defined in :ref:`algm-SetGoniometer`.
 The goniometer angles are provided later.
 
 ..  code-block:: python
+
     sxd = SXD(vanadium_runno=32857, empty_runno=32856, detcal_path=detcal_path)
     sxd.set_sample(Geometry={'Shape': 'CSG', 'Value': sxd.sphere_shape},
                    Material={'ChemicalFormula': 'Na Cl', 'SampleNumberDensity': 0.0223})
