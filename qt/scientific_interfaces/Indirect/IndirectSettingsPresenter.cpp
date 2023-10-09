@@ -27,15 +27,6 @@ void IndirectSettingsPresenter::setUpPresenter() {
   connect(m_view.get(), SIGNAL(cancelClicked()), this, SLOT(closeDialog()));
 
   loadSettings();
-
-  // Temporary until better validation is used when loading data into interfaces
-  setDefaultRestrictData();
-}
-
-void IndirectSettingsPresenter::setDefaultRestrictData() const {
-  auto const isisFacility = m_model->getFacility() == "ISIS";
-  if (isisFacility)
-    setRestrictInputDataByName(isisFacility);
 }
 
 IIndirectSettingsView *IndirectSettingsPresenter::getView() { return m_view.get(); }
