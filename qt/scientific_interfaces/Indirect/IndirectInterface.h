@@ -31,6 +31,7 @@ protected:
 
 private slots:
   void applySettings();
+  void closeSettings();
 
 private:
   virtual void initLayout() override{};
@@ -38,7 +39,7 @@ private:
 
   virtual void applySettings(std::map<std::string, QVariant> const &settings);
 
-  std::unique_ptr<IndirectSettings> m_settings;
+  IndirectSettings *m_settings;
 };
 
 } // namespace CustomInterfaces

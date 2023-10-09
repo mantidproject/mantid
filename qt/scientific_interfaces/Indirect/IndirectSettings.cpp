@@ -25,7 +25,7 @@ void IndirectSettings::initLayout() {
   centralWidget->addWidget(m_presenter->getView());
 
   connect(m_presenter.get(), SIGNAL(applySettings()), this, SIGNAL(applySettings()));
-  connect(m_presenter.get(), SIGNAL(closeSettings()), this, SLOT(closeSettings()));
+  connect(m_presenter.get(), SIGNAL(closeSettings()), this, SIGNAL(closeSettings()));
 }
 
 void IndirectSettings::otherUserSubWindowCreated(QPointer<UserSubWindow> window) { connectIndirectInterface(window); }
@@ -48,10 +48,5 @@ std::map<std::string, QVariant> IndirectSettings::getSettings() const {
 }
 
 void IndirectSettings::loadSettings() { m_presenter->loadSettings(); }
-
-void IndirectSettings::closeSettings() {
-  if (auto settingsWindow = window())
-    settingsWindow->close();
-}
 
 } // namespace MantidQt::CustomInterfaces

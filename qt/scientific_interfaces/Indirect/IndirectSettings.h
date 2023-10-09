@@ -41,8 +41,6 @@ public:
 
 signals:
   void applySettings();
-
-private slots:
   void closeSettings();
 
 private:
