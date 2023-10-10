@@ -10,7 +10,6 @@
 #include "IndirectFitPlotView.h"
 
 #include "DllConfig.h"
-#include "LazyAsyncRunner.h"
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
 namespace MantidQt {
@@ -53,8 +52,6 @@ public slots:
   void updateGuess();
   void updateGuessAvailability();
 
-  void enablePlotGuessInSeparateWindow();
-  void disablePlotGuessInSeparateWindow();
   void disableSpectrumPlotSelection();
 
 signals:
@@ -87,7 +84,6 @@ private:
   void plotFit(Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum);
   void plotDifference(Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum);
   void plotGuess(Mantid::API::MatrixWorkspace_sptr workspace);
-  void plotGuessInSeparateWindow(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void plotLines();
   void updatePlotRange(const std::pair<double, double> &range);
   void clearGuess();
@@ -101,8 +97,6 @@ private:
   std::unique_ptr<IndirectFitPlotModel> m_model;
   IIndirectFitPlotView *m_view;
 
-  bool m_plotGuessInSeparateWindow;
-  QtLazyAsyncRunner<std::function<void()>> m_plotExternalGuessRunner;
   std::unique_ptr<Widgets::MplCpp::ExternalPlotter> m_plotter;
 };
 
