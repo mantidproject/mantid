@@ -30,8 +30,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-size_t getNumberOfSpecificFunctionContained(const std::string &functionName, const IFunction *compositeFunction);
-
 class MANTIDQT_INDIRECT_DLL IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
@@ -140,8 +138,6 @@ private slots:
 
 signals:
   void functionChanged();
-  void parameterChanged(const Mantid::API::IFunction *fun);
-  void customBoolChanged(const QString &key, bool value);
 };
 
 } // namespace IDA
