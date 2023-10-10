@@ -50,14 +50,6 @@ std::string RebinParamsValidator::checkValidity(const std::vector<double> &value
     }
   }
 
-  // Width can't be greater than max - min
-  if (value.size() >= 3) {
-    for (size_t i = 0; i < value.size() - 2; i += 2) {
-      if (value[i] + value[i + 1] > value[i + 2])
-        return "Width cannot be greater than max - min";
-    }
-  }
-
   // bin boundary values must be in increasing order
   double previous = value[0];
   for (size_t i = 2; i < value.size(); i += 2) {
