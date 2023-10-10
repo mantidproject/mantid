@@ -10,16 +10,7 @@
 #include "IndirectFunctionBrowser/IqtTemplateBrowser.h"
 #include "IqtFitModel.h"
 
-#include "MantidQtWidgets/Common/UserInputValidator.h"
-
-#include "MantidQtWidgets/Plotting/RangeSelector.h"
-
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
-
-#include <boost/algorithm/string/predicate.hpp>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -49,9 +40,7 @@ IndirectDataAnalysisIqtFitTab::IndirectDataAnalysisIqtFitTab(QWidget *parent)
   setEditResultVisible(true);
 }
 
-void IndirectDataAnalysisIqtFitTab::setupFitTab() {
-  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-}
+void IndirectDataAnalysisIqtFitTab::setupFitTab() { connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab())); }
 
 EstimationDataSelector IndirectDataAnalysisIqtFitTab::getEstimationDataSelector() const {
   return
@@ -83,12 +72,6 @@ std::string IndirectDataAnalysisIqtFitTab::getFitTypeString() const {
 
   return functionType;
 }
-
-void IndirectDataAnalysisIqtFitTab::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
-  IndirectFitAnalysisTab::setupFit(fitAlgorithm);
-}
-
-void IndirectDataAnalysisIqtFitTab::runClicked() { runTab(); }
 
 void IndirectDataAnalysisIqtFitTab::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");

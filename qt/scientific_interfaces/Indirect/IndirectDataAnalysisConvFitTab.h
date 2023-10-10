@@ -32,7 +32,6 @@ protected:
 
 private:
   void setupFitTab() override;
-  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
   EstimationDataSelector getEstimationDataSelector() const override;
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   std::string getFitTypeString() const override;
@@ -40,9 +39,6 @@ private:
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
   // ShortHand Naming for fit functions
   std::unordered_map<std::string, std::string> m_fitStrings;
-
-protected slots:
-  void runClicked();
 };
 
 } // namespace IDA

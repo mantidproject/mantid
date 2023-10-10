@@ -38,9 +38,6 @@ private:
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
-
-protected slots:
-  void runClicked();
 };
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -11,17 +11,10 @@
 #include "IDAFunctionParameterEstimation.h"
 
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidQtWidgets/Common/UserInputValidator.h"
-
-#include <boost/algorithm/string/join.hpp>
 
 #include <string>
 
@@ -60,9 +53,7 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
   setEditResultVisible(false);
 }
 
-void IndirectDataAnalysisFqFitTab::setupFitTab() {
-  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-}
+void IndirectDataAnalysisFqFitTab::setupFitTab() { connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab())); }
 
 std::string IndirectDataAnalysisFqFitTab::getFitTypeString() const {
   if (!m_fittingModel->getFitFunction() || m_fittingModel->getFitFunction()->nFunctions() == 0) {
@@ -76,8 +67,6 @@ std::string IndirectDataAnalysisFqFitTab::getFitTypeString() const {
     return "UserDefinedCompositeFunction";
   }
 }
-
-void IndirectDataAnalysisFqFitTab::runClicked() { runTab(); }
 
 void IndirectDataAnalysisFqFitTab::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");

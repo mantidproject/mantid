@@ -67,7 +67,7 @@ protected:
   void setAlgorithmProperties(const Mantid::API::IAlgorithm_sptr &fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
-  virtual void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
   virtual void setRunIsRunning(bool running) = 0;
   virtual void setRunEnabled(bool enable) = 0;

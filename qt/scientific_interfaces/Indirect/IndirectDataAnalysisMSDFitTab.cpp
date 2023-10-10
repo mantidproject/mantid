@@ -13,11 +13,7 @@
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
-
-#include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 using namespace Mantid::API;
 
@@ -65,11 +61,7 @@ IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
   respondToFunctionChanged();
 }
 
-void IndirectDataAnalysisMSDFitTab::setupFitTab() {
-  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-}
-
-void IndirectDataAnalysisMSDFitTab::runClicked() { runTab(); }
+void IndirectDataAnalysisMSDFitTab::setupFitTab() { connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab())); }
 
 void IndirectDataAnalysisMSDFitTab::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");

@@ -10,16 +10,7 @@
 #include "IndirectFitPlotView.h"
 #include "IndirectFunctionBrowser/ConvTemplateBrowser.h"
 
-#include "MantidQtWidgets/Common/UserInputValidator.h"
-
-#include "MantidQtWidgets/Plotting/RangeSelector.h"
-
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidGeometry/Instrument.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -74,11 +65,7 @@ void IndirectDataAnalysisConvFitTab::setupFitTab() {
   m_properties["InstrumentResolution"] = m_dblManager->addProperty("InstrumentResolution");
 
   // Post Plot and Save
-  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-}
-
-void IndirectDataAnalysisConvFitTab::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
-  IndirectFitAnalysisTab::setupFit(fitAlgorithm);
+  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab()));
 }
 
 EstimationDataSelector IndirectDataAnalysisConvFitTab::getEstimationDataSelector() const {
@@ -119,8 +106,6 @@ std::string IndirectDataAnalysisConvFitTab::getFitTypeString() const {
 
   return fitType;
 }
-
-void IndirectDataAnalysisConvFitTab::runClicked() { runTab(); }
 
 void IndirectDataAnalysisConvFitTab::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");

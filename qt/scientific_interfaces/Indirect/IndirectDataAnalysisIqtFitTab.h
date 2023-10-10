@@ -47,10 +47,6 @@ private:
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
   QString m_tiedParameter;
-
-protected slots:
-  void runClicked();
-  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

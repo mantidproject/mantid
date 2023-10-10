@@ -42,9 +42,6 @@ private:
 protected:
   void setRunIsRunning(bool running) override;
   void setRunEnabled(bool enable) override;
-
-protected slots:
-  void runClicked();
 };
 } // namespace IDA
 } // namespace CustomInterfaces
