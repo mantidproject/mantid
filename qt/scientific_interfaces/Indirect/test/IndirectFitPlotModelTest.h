@@ -29,9 +29,6 @@ namespace {
 
 auto &ads_instance = Mantid::API::AnalysisDataService::Instance();
 
-/// The name of the conjoined input and guess workspaces
-std::string const INPUT_AND_GUESS_NAME = "__QENSInputAndGuess";
-
 // Resolution
 const std::vector<std::pair<std::string, size_t>>
     exampleResolution(1, std::make_pair<std::string, size_t>("irs26173_graphite_002_res", 0));
@@ -137,24 +134,6 @@ public:
     FunctionModelSpectra const storedSpectra = m_model->getSpectra(WorkspaceID(0));
 
     TS_ASSERT_EQUALS(storedSpectra, spectra);
-  }
-
-  void test_that_appendGuessToInput_returns_a_workspace_that_is_the_combination_of_the_input_and_guess_workspaces() {
-    m_activeFunction = getFunction(getFitFunctionString("Name"), 1);
-    m_model->setFitFunction(m_activeFunction);
-    auto const guess = m_model->getGuessWorkspace();
-
-    auto const resultWorkspace = m_model->appendGuessToInput(guess);
-
-    TS_ASSERT(AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME));
-    TS_ASSERT_EQUALS(resultWorkspace->getAxis(1)->label(0), "Sample");
-    TS_ASSERT_EQUALS(resultWorkspace->getAxis(1)->label(1), "Guess");
-    /// Only two spectra because the guessWorkspace will only ever have one
-    /// spectra, and then spectra are extracted from the input workspace
-    /// between
-    /// m_activeSpectrum and m_activeSpectrum and so only 1 spectrum is
-    /// extracted. 1 + 1 = 2
-    TS_ASSERT_EQUALS(resultWorkspace->getNumberHistograms(), 2);
   }
 
   void test_that_getActiveWorkspaceID_returns_the_index_which_it_has_been_set_to() {
@@ -297,21 +276,6 @@ public:
     m_model->setFitFunction(m_activeFunction);
     auto const background = 0.0;
     TS_ASSERT_EQUALS(m_model->getFirstBackgroundLevel().get(), background);
-  }
-
-  void test_that_deleteExternalGuessWorkspace_removes_the_guess_workspace_from_the_ADS() {
-    m_activeFunction = getFunction(getFitFunctionString("Name"), 1);
-    m_model->setFitFunction(m_activeFunction);
-    auto const guess = m_model->getGuessWorkspace();
-    (void)m_model->appendGuessToInput(guess);
-
-    TS_ASSERT(AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME));
-    m_model->deleteExternalGuessWorkspace();
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME));
-  }
-
-  void test_that_deleteExternalGuessWorkspace_does_not_throw_if_the_guess_workspace_does_not_exist() {
-    TS_ASSERT_THROWS_NOTHING(m_model->deleteExternalGuessWorkspace());
   }
 
   MatrixWorkspace_sptr m_workspace;

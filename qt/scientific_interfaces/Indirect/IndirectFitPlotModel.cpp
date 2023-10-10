@@ -20,10 +20,6 @@
 namespace {
 using namespace Mantid::API;
 
-// The name of the conjoined input and guess workspaces -- required for
-// creating an external guess plot.
-const std::string INPUT_AND_GUESS_NAME = "__QENSInputAndGuess";
-
 IFunction_sptr firstFunctionWithParameter(IFunction_sptr function, const std::string &category,
                                           const std::string &parameterName);
 
@@ -89,7 +85,7 @@ using namespace Mantid::API;
 
 IndirectFitPlotModel::IndirectFitPlotModel() : m_activeWorkspaceID{0}, m_activeWorkspaceIndex{0} {}
 
-IndirectFitPlotModel::~IndirectFitPlotModel() { deleteExternalGuessWorkspace(); }
+IndirectFitPlotModel::~IndirectFitPlotModel() {}
 
 void IndirectFitPlotModel::setActiveIndex(WorkspaceID workspaceID) { m_activeWorkspaceID = workspaceID; }
 
@@ -102,11 +98,6 @@ void IndirectFitPlotModel::setFitFunction(Mantid::API::MultiDomainFunction_sptr 
 void IndirectFitPlotModel::setFittingData(std::vector<IndirectFitData> *fittingData) { m_fittingData = fittingData; }
 
 void IndirectFitPlotModel::setFitOutput(IIndirectFitOutput *fitOutput) { m_fitOutput = fitOutput; }
-
-void IndirectFitPlotModel::deleteExternalGuessWorkspace() {
-  if (AnalysisDataService::Instance().doesExist(INPUT_AND_GUESS_NAME))
-    deleteWorkspace(INPUT_AND_GUESS_NAME);
-}
 
 MatrixWorkspace_sptr IndirectFitPlotModel::getWorkspace() const {
   if (m_activeWorkspaceID < m_fittingData->size())
@@ -264,12 +255,6 @@ boost::optional<ResultLocationNew> IndirectFitPlotModel::getResultLocation(Works
   return boost::none;
 }
 
-MatrixWorkspace_sptr IndirectFitPlotModel::appendGuessToInput(const MatrixWorkspace_sptr &guessWorkspace) const {
-  const auto range = getGuessRange();
-  return createInputAndGuessWorkspace(getWorkspace(), guessWorkspace, static_cast<int>(m_activeWorkspaceIndex.value),
-                                      range.first, range.second);
-}
-
 std::pair<double, double> IndirectFitPlotModel::getGuessRange() const {
   std::pair<double, double> range;
   if (getResultWorkspace()) {
@@ -279,25 +264,6 @@ std::pair<double, double> IndirectFitPlotModel::getGuessRange() const {
   }
   adjustRange(range);
   return range;
-}
-
-MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(const MatrixWorkspace_sptr &inputWS,
-                                                                        const MatrixWorkspace_sptr &guessWorkspace,
-                                                                        int spectrum, double startX,
-                                                                        double endX) const {
-  guessWorkspace->setInstrument(inputWS->getInstrument());
-  guessWorkspace->replaceAxis(0, std::unique_ptr<Axis>(inputWS->getAxis(0)->clone(guessWorkspace.get())));
-  guessWorkspace->setDistribution(inputWS->isDistribution());
-
-  auto extracted = extractSpectra(inputWS, spectrum, spectrum, startX, endX);
-  auto inputAndGuess = appendSpectra(extracted, guessWorkspace);
-  AnalysisDataService::Instance().addOrReplace(INPUT_AND_GUESS_NAME, inputAndGuess);
-
-  auto axis = std::make_unique<TextAxis>(2);
-  axis->setLabel(0, "Sample");
-  axis->setLabel(1, "Guess");
-  inputAndGuess->replaceAxis(1, std::move(axis));
-  return inputAndGuess;
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::createGuessWorkspace(const MatrixWorkspace_sptr &inputWorkspace,
