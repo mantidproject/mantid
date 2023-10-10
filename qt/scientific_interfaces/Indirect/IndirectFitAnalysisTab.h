@@ -97,6 +97,7 @@ private:
   void setPDFWorkspace(std::string const &workspaceName);
   void updateParameterEstimationData();
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog) = 0;
+  virtual std::string getFitTypeString() const = 0;
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
@@ -135,9 +136,6 @@ private slots:
   void respondToPlotSpectrumChanged();
   void respondToFwhmChanged(double);
   void respondToBackgroundChanged(double value);
-
-signals:
-  void functionChanged();
 };
 
 } // namespace IDA

@@ -66,11 +66,9 @@ IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
 
   setEditResultVisible(false);
   respondToFunctionChanged();
-  fitFunctionChanged();
 }
 
 void IndirectDataAnalysisMSDFitTab::setupFitTab() {
-  connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 }
 
@@ -107,8 +105,6 @@ EstimationDataSelector IndirectDataAnalysisMSDFitTab::getEstimationDataSelector(
     return DataForParameterEstimation{{x[first], x[m]}, {y[first], y[m]}};
   };
 }
-
-void IndirectDataAnalysisMSDFitTab::fitFunctionChanged() { m_msdFittingModel->setFitTypeString(getFitTypeString()); }
 
 std::string IndirectDataAnalysisMSDFitTab::getFitTypeString() const {
   // This function attempts to work out which fit type is being done. It will

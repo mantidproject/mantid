@@ -34,7 +34,7 @@ protected:
 private:
   void setupFitTab() override;
   EstimationDataSelector getEstimationDataSelector() const override;
-  std::string getFitTypeString() const;
+  std::string getFitTypeString() const override;
   IDAFunctionParameterEstimation createParameterEstimation() const;
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
 
@@ -43,7 +43,6 @@ private:
 
 protected slots:
   void runClicked();
-  void fitFunctionChanged();
 };
 } // namespace IDA
 } // namespace CustomInterfaces

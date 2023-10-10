@@ -668,7 +668,7 @@ void IndirectFitAnalysisTab::respondToFunctionChanged() {
   m_fittingModel->removeFittingData();
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateFit();
-  emit functionChanged();
+  m_fittingModel->setFitTypeString(getFitTypeString());
 }
 
 void IndirectFitAnalysisTab::addDataToModel(IAddWorkspaceDialog const *dialog) {

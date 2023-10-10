@@ -54,7 +54,6 @@ IndirectDataAnalysisIqtFitTab::IndirectDataAnalysisIqtFitTab(QWidget *parent)
 
 void IndirectDataAnalysisIqtFitTab::setupFitTab() {
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
 }
 
 EstimationDataSelector IndirectDataAnalysisIqtFitTab::getEstimationDataSelector() const {
@@ -74,8 +73,6 @@ void IndirectDataAnalysisIqtFitTab::addDataToModel(IAddWorkspaceDialog const *di
     m_iqtFittingModel->addDefaultParameters();
   }
 }
-
-void IndirectDataAnalysisIqtFitTab::fitFunctionChanged() { m_iqtFittingModel->setFitTypeString(getFitTypeString()); }
 
 std::string IndirectDataAnalysisIqtFitTab::getFitTypeString() const {
   const auto numberOfExponential = getNumberOfCustomFunctions("ExpDecay");

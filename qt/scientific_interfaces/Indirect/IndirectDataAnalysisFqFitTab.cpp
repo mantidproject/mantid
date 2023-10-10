@@ -62,11 +62,6 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
 
 void IndirectDataAnalysisFqFitTab::setupFitTab() {
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(this, SIGNAL(functionChanged()), this, SLOT(updateModelFitTypeString()));
-}
-
-void IndirectDataAnalysisFqFitTab::updateModelFitTypeString() {
-  m_FqFittingModel->setFitTypeString(getFitTypeString());
 }
 
 std::string IndirectDataAnalysisFqFitTab::getFitTypeString() const {

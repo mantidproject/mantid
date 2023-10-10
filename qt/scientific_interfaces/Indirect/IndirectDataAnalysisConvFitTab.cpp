@@ -79,7 +79,6 @@ void IndirectDataAnalysisConvFitTab::setupFitTab() {
 
   // Post Plot and Save
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
 }
 
 void IndirectDataAnalysisConvFitTab::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
@@ -99,8 +98,6 @@ void IndirectDataAnalysisConvFitTab::addDataToModel(IAddWorkspaceDialog const *d
     m_convFittingModel->addDefaultParameters();
   }
 }
-
-void IndirectDataAnalysisConvFitTab::fitFunctionChanged() { m_convFittingModel->setFitTypeString(getFitTypeString()); }
 
 /**
  * Generate a string to describe the fit type selected by the user.
