@@ -7,7 +7,6 @@
 #pragma once
 
 #include "IndirectFitAnalysisTab.h"
-#include "MSDFitModel.h"
 #include "ui_IndirectFitTab.h"
 
 #include "MantidAPI/IFunction.h"
@@ -39,7 +38,6 @@ private:
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
-  MSDFitModel *m_msdFittingModel;
 
 protected slots:
   void runClicked();

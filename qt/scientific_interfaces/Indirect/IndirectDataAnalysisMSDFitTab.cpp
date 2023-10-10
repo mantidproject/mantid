@@ -7,6 +7,7 @@
 #include "IndirectDataAnalysisMSDFitTab.h"
 #include "IDAFunctionParameterEstimation.h"
 #include "IndirectAddWorkspaceDialog.h"
+#include "MSDFitModel.h"
 
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 
@@ -17,8 +18,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
-
-#include <QFileInfo>
 
 using namespace Mantid::API;
 
@@ -50,11 +49,9 @@ IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
     : IndirectFitAnalysisTab(new MSDFitModel, parent), m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
 
-  m_msdFittingModel = dynamic_cast<MSDFitModel *>(getFittingModel());
-
   m_uiForm->dockArea->setFitDataView(new IndirectFitDataView(m_uiForm->dockArea));
-  setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(m_msdFittingModel->getFitDataModel(),
-                                                                 m_uiForm->dockArea->m_fitDataView));
+  setFitDataPresenter(
+      std::make_unique<IndirectFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   auto parameterEstimation = createParameterEstimation();
@@ -157,7 +154,7 @@ IDAFunctionParameterEstimation IndirectDataAnalysisMSDFitTab::createParameterEst
 void IndirectDataAnalysisMSDFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
   if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
     m_dataPresenter->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
-    m_msdFittingModel->addDefaultParameters();
+    m_fittingModel->addDefaultParameters();
   }
 }
 

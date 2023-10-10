@@ -21,9 +21,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 
-#include <QDoubleValidator>
-#include <QMenu>
-
 using namespace Mantid;
 using namespace Mantid::API;
 
@@ -39,7 +36,6 @@ namespace MantidQt::CustomInterfaces::IDA {
 IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
     : IndirectFitAnalysisTab(new ConvFitModel, parent), m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
-  m_convFittingModel = dynamic_cast<ConvFitModel *>(getFittingModel());
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(new ConvTemplateBrowser);
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
@@ -47,7 +43,7 @@ IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
 
   m_uiForm->dockArea->setFitDataView(new ConvFitDataView(m_uiForm->dockArea));
   auto dataPresenter =
-      std::make_unique<ConvFitDataPresenter>(m_convFittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
+      std::make_unique<ConvFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
   setFitDataPresenter(std::move(dataPresenter));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
 
@@ -95,7 +91,7 @@ void IndirectDataAnalysisConvFitTab::addDataToModel(IAddWorkspaceDialog const *d
   if (const auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {
     m_dataPresenter->addWorkspace(convDialog->workspaceName(), convDialog->workspaceIndices());
     m_dataPresenter->setResolution(convDialog->resolutionName());
-    m_convFittingModel->addDefaultParameters();
+    m_fittingModel->addDefaultParameters();
   }
 }
 

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ConvFitModel.h"
 #include "IndirectFitAnalysisTab.h"
 #include "ParameterEstimation.h"
 
@@ -39,7 +38,6 @@ private:
   std::string getFitTypeString() const override;
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
-  ConvFitModel *m_convFittingModel;
   // ShortHand Naming for fit functions
   std::unordered_map<std::string, std::string> m_fitStrings;
 

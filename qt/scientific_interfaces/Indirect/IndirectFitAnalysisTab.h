@@ -74,6 +74,7 @@ protected:
   void setEditResultVisible(bool visible);
   std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
   std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
+  std::unique_ptr<IndirectFittingModel> m_fittingModel;
   IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
   WorkspaceID m_activeWorkspaceID;
   WorkspaceIndex m_activeSpectrumIndex;
@@ -99,7 +100,6 @@ private:
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog) = 0;
   virtual std::string getFitTypeString() const = 0;
 
-  std::unique_ptr<IndirectFittingModel> m_fittingModel;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
 

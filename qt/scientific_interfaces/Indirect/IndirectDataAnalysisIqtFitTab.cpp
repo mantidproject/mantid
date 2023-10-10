@@ -8,6 +8,7 @@
 #include "IndirectAddWorkspaceDialog.h"
 #include "IndirectFitPlotView.h"
 #include "IndirectFunctionBrowser/IqtTemplateBrowser.h"
+#include "IqtFitModel.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -17,8 +18,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-
-#include <QMenu>
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -37,11 +36,9 @@ namespace MantidQt::CustomInterfaces::IDA {
 IndirectDataAnalysisIqtFitTab::IndirectDataAnalysisIqtFitTab(QWidget *parent)
     : IndirectFitAnalysisTab(new IqtFitModel, parent), m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
-  m_iqtFittingModel = dynamic_cast<IqtFitModel *>(getFittingModel());
-
   m_uiForm->dockArea->setFitDataView(new IndirectFitDataView(m_uiForm->dockArea));
-  setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(m_iqtFittingModel->getFitDataModel(),
-                                                                 m_uiForm->dockArea->m_fitDataView));
+  setFitDataPresenter(
+      std::make_unique<IndirectFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   auto templateBrowser = new IqtTemplateBrowser;
@@ -70,7 +67,7 @@ EstimationDataSelector IndirectDataAnalysisIqtFitTab::getEstimationDataSelector(
 void IndirectDataAnalysisIqtFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
   if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
     m_dataPresenter->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
-    m_iqtFittingModel->addDefaultParameters();
+    m_fittingModel->addDefaultParameters();
   }
 }
 

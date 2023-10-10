@@ -7,6 +7,7 @@
 #include "IndirectDataAnalysisFqFitTab.h"
 #include "FQFitConstants.h"
 #include "FqFitDataPresenter.h"
+#include "FqFitModel.h"
 #include "IDAFunctionParameterEstimation.h"
 
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
@@ -40,13 +41,12 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
     : IndirectFitAnalysisTab(new FqFitModel, parent), m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
 
-  m_FqFittingModel = dynamic_cast<FqFitModel *>(getFittingModel());
   auto parameterEstimation = createParameterEstimation();
   auto templateBrowser = new SingleFunctionTemplateBrowser(
       widthFits, std::make_unique<IDAFunctionParameterEstimation>(parameterEstimation));
 
   m_uiForm->dockArea->setFitDataView(new FqFitDataView(m_uiForm->dockArea));
-  setFitDataPresenter(std::make_unique<FqFitDataPresenter>(m_FqFittingModel->getFitDataModel(),
+  setFitDataPresenter(std::make_unique<FqFitDataPresenter>(m_fittingModel->getFitDataModel(),
                                                            m_uiForm->dockArea->m_fitDataView, templateBrowser));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   m_plotPresenter->setXBounds({0.0, 2.0});
@@ -65,11 +65,11 @@ void IndirectDataAnalysisFqFitTab::setupFitTab() {
 }
 
 std::string IndirectDataAnalysisFqFitTab::getFitTypeString() const {
-  if (!m_FqFittingModel->getFitFunction() || m_FqFittingModel->getFitFunction()->nFunctions() == 0) {
+  if (!m_fittingModel->getFitFunction() || m_fittingModel->getFitFunction()->nFunctions() == 0) {
     return "NoCurrentFunction";
   }
 
-  auto fun = m_FqFittingModel->getFitFunction()->getFunction(0);
+  auto fun = m_fittingModel->getFitFunction()->getFunction(0);
   if (fun->nFunctions() == 0) {
     return fun->name();
   } else {
@@ -116,7 +116,7 @@ void IndirectDataAnalysisFqFitTab::addDataToModel(IAddWorkspaceDialog const *dia
   if (const auto fqFitDialog = dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
     m_dataPresenter->addWorkspace(fqFitDialog->workspaceName(), fqFitDialog->parameterType(),
                                   fqFitDialog->parameterNameIndex());
-    m_FqFittingModel->addDefaultParameters();
+    m_fittingModel->addDefaultParameters();
     setActiveWorkspaceIDToCurrentWorkspace(fqFitDialog);
     setModelSpectrum(fqFitDialog->parameterNameIndex(), fqFitDialog->parameterType());
     m_activeWorkspaceID = m_dataPresenter->getNumberOfWorkspaces();
@@ -129,7 +129,7 @@ void IndirectDataAnalysisFqFitTab::setActiveWorkspaceIDToCurrentWorkspace(IAddWo
   //  indirectFittingModel get table workspace index
   const auto wsName = dialog->workspaceName().append("_HWHM");
   // This a vector of workspace names currently loaded
-  auto wsVector = m_FqFittingModel->getFitDataModel()->getWorkspaceNames();
+  auto wsVector = m_fittingModel->getFitDataModel()->getWorkspaceNames();
   // this is an iterator pointing to the current wsName in wsVector
   auto wsIt = std::find(wsVector.begin(), wsVector.end(), wsName);
   // this is the index of the workspace.

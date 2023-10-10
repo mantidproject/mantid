@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "FqFitModel.h"
 #include "IndirectFitAnalysisTab.h"
 #include "ui_IndirectFitTab.h"
 
@@ -39,7 +38,6 @@ private:
   void setModelSpectrum(int index, const std::string &paramType);
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
-  FqFitModel *m_FqFittingModel;
 
 protected:
   void setRunIsRunning(bool running) override;
