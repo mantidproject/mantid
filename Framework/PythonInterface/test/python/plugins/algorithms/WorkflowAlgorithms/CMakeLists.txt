@@ -48,7 +48,6 @@ set(TEST_PY_FILES
     IqtFitSequentialTest.py
     ISISIndirectDiffractionReductionTest.py
     ISISIndirectEnergyTransferTest.py
-    ISISIndirectEnergyTransferWrapperTest.py
     LagrangeILLReductionTest.py
     LoadWANDTest.py
     MatchAndMergeWorkspacesTest.py
