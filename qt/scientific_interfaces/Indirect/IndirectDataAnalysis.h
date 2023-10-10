@@ -35,14 +35,9 @@ class IndirectDataAnalysisTab;
  * The IndirectDataAnalysis class is the main class that handles the interface
  *and controls
  * its tabs.
- *
- * Is a friend to the IndirectDataAnalysisTab class.
  */
 class IndirectDataAnalysis : public IndirectInterface {
   Q_OBJECT
-
-  /// Allow IndirectDataAnalysisTab to have access.
-  friend class IndirectDataAnalysisTab;
 
 public:
   /// The name of the interface as registered into the factory

@@ -72,9 +72,6 @@ public:
   void filterInputData(bool filter);
 
 protected:
-  /// Function to run a string as python code
-  void runPythonScript(const QString &pyInput);
-
   /// Retrieve input workspace
   Mantid::API::MatrixWorkspace_sptr getInputWorkspace() const;
 
@@ -128,8 +125,6 @@ private:
   virtual void setFileExtensionsByName(bool filter) = 0;
   virtual void setBrowserWorkspace(){};
 
-  /// A pointer to the parent (friend) IndirectDataAnalysis object.
-  IndirectDataAnalysis *m_parent;
   Mantid::API::MatrixWorkspace_sptr m_inputWorkspace;
   std::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
   int m_selectedSpectrum;
