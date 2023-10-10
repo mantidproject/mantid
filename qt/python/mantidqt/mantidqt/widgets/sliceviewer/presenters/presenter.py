@@ -187,6 +187,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             range=dimensions.get_slicerange(),
             qflags=dimensions.qflags,
             axes_angles=axes_angles,
+            proj_matrix=self.get_proj_matrix(),
         )
 
     def get_proj_matrix(self):
