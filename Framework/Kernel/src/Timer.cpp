@@ -61,16 +61,14 @@ std::ostream &operator<<(std::ostream &out, const Timer &obj) {
 }
 
 //------------------------------------------------------------------------
-/** Constructor
- * Instantiates the object and starts the timer
+/** Instantiate the object and start the timer
  * @param name :: custom name of the code block
- * @param out :: stream to output the elapsed time
+ * @param out :: stream to output the elapsed wall-clock time
  */
 CodeBlockTimer::CodeBlockTimer(const std::string &name, std::ostream &out)
     : name(name), out(out), start(std::chrono::system_clock::now()) {}
 
-/** Destructor
- * Calculates and outputs the elapsed time
+/** Calculate and output the elapsed wall-clock time
  */
 CodeBlockTimer::~CodeBlockTimer() {
   const auto stop = std::chrono::system_clock::now();
@@ -79,14 +77,13 @@ CodeBlockTimer::~CodeBlockTimer() {
 }
 
 //------------------------------------------------------------------------
-/** Constructor
- * Instantiates the object and starts the timer
- * @param accumulator :: a persistent object keeping track of the total elapsed time
+/** Instantiate the object and start the timer
+ * @param accumulator :: a persistent object keeping track of the total elapsed wall-clock time
  */
 CodeBlockTimerMultipleUse::CodeBlockTimerMultipleUse(CodeBlockTimerMultipleUse::TimeAccumulator &accumulator)
     : accumulator(accumulator), start(std::chrono::system_clock::now()) {}
-/** Destructor
- * Calculates the elapsed time and updates the time accumulator
+
+/** Calculate the elapsed wall-clock time and update the time accumulator
  */
 CodeBlockTimerMultipleUse::~CodeBlockTimerMultipleUse() {
   const auto stop = std::chrono::system_clock::now();
@@ -95,20 +92,28 @@ CodeBlockTimerMultipleUse::~CodeBlockTimerMultipleUse() {
 }
 
 //------------------------------------------------------------------------
-/** Constructor
- * Instantiates the object
+/** Instantiate the object
  * @param name :: custom name of the code block
  */
 CodeBlockTimerMultipleUse::TimeAccumulator::TimeAccumulator(const std::string &name) : name(name) {}
 
-/** Constructor
- * Instantiates the object
- * @param name :: custom name of the code block
+/** Reset the elapsed wall-clock time
+ */
+void CodeBlockTimerMultipleUse::TimeAccumulator::reset() { elapsed_s = 0.0; }
+
+/** Increment the elapsed wall-clock time
+ * @param time_s :: elapsed time (seconds) to add
  */
 void CodeBlockTimerMultipleUse::TimeAccumulator::incrementElapsed(const double time_s) { elapsed_s += time_s; }
 
+/** Return the elapsed time
+ * @return :: elapsed time
+ */
 double CodeBlockTimerMultipleUse::TimeAccumulator::getElapsed() const { return elapsed_s; }
 
+/** Output the elapsed time
+ * @param out :: stream to output the elapsed time
+ */
 void CodeBlockTimerMultipleUse::TimeAccumulator::outputElapsed(std::ostream &out) const {
   out << "Cumulative elapsed time (s) in \"" << name << "\": " << elapsed_s << '\n';
 }

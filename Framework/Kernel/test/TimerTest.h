@@ -16,30 +16,35 @@
 
 class TimerTest : public CxxTest::TestSuite {
 public:
-  void testTimer() {
-    // Instantiating the object starts the timer
-    Mantid::Kernel::Timer timer;
+  void sleepSec(const int sec) {
 #if defined _WIN64
-    Sleep(200);
-    TS_ASSERT_LESS_THAN(0.18, timer.elapsed());
+    Sleep(sec);
 #elif defined _WIN32
     // 32-bit windows doesn't seem to have brilliant resolution
     // as the Sleep(200) can quite often cause the elapsed
     // time to be less than 0.19 seconds!
-    Sleep(200);
-    TS_ASSERT_LESS_THAN(0.18, timer.elapsed());
+    Sleep(sec);
 #else
-    usleep(200000);
-    TS_ASSERT_LESS_THAN(0.18, timer.elapsed());
+    usleep(sec * 1000);
 #endif
+  }
 
-// Calling elapsed above should reset the timer
-#ifdef _WIN32
-    Sleep(100);
+  void testTimer() {
+    // Instantiating the object starts the timer
+    Mantid::Kernel::Timer timer;
+    sleepSec(200);
+    TS_ASSERT_LESS_THAN(0.18, timer.elapsed());
+    // Calling elapsed above should reset the timer
+    sleepSec(100);
     TS_ASSERT_LESS_THAN(0.08, timer.elapsed());
-#else
-    usleep(100000);
-    TS_ASSERT_LESS_THAN(0.08, timer.elapsed());
-#endif
+  }
+
+  void testCodeBlockTimer() {
+    std::ostringstream out;
+    {
+      Mantid::Kernel::CodeBlockTimer("test_timer", out);
+      sleepSec(200);
+    }
+    // TS_ASSERT
   }
 };

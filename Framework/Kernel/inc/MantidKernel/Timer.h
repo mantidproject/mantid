@@ -61,6 +61,7 @@ public:
     TimeAccumulator(const std::string &name);
 
   public:
+    void reset();
     void incrementElapsed(const double time_s);
     double getElapsed() const;
     void outputElapsed(std::ostream &out) const;
