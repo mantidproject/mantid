@@ -40,50 +40,42 @@ private:
 
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const Timer &);
 
-} // namespace Kernel
-} // namespace Mantid
-
-namespace {
-class CumulativeTimer {
+class MANTID_KERNEL_DLL CodeBlockTimer {
 public:
-  CumulativeTimer(const std::string &timer_name) { name = timer_name; }
-
-public:
-  void incrementTimeSpent(const double time_s) { total_time_spent_s += time_s; }
-  void reportTiming() { std::cout << "Cumulative time (s) spent in " << name << ": " << total_time_spent_s << "\n"; }
+  CodeBlockTimer() = delete;
+  CodeBlockTimer(const std::string &name, std::ostream &output);
+  ~CodeBlockTimer();
 
 private:
   std::string name;
-  double total_time_spent_s = 0.0;
-};
-
-// std::shared_ptr<CumulativeTimer> copyAndFilterProperties_Timer =
-//     std::make_shared<CumulativeTimer>("LogManager::CopyAndFilterProperties");
-// std::shared_ptr<CumulativeTimer> cloneInTimeROI_Timer =
-// std::make_shared<CumulativeTimer>("LogManager::cloneInTimeROI"); std::shared_ptr<CumulativeTimer> setTimeROI_Timer =
-// std::make_shared<CumulativeTimer>("LogManager::setTimeROI"); std::shared_ptr<CumulativeTimer>
-// clearSingleValueCache_Timer =
-//     std::make_shared<CumulativeTimer>("LogManager::clearSingleValueCache");
-// std::shared_ptr<CumulativeTimer> m_manager_cloneInTimeROI_Timer =
-//     std::make_shared<CumulativeTimer>("m_manager->cloneInTimeROI");
-// std::shared_ptr<CumulativeTimer> outputTimeROI_update_or_replace_intersection_Timer =
-//     std::make_shared<CumulativeTimer>("outputTimeROI_update_or_replace_intersection_Timer");
-
-// The constructor saves the start time, the destructor calculates the elapsed time
-class CodeBlockTimer {
-public:
-  CodeBlockTimer(std::shared_ptr<CumulativeTimer> cumulativeTimer) {
-    cumulative_timer = cumulativeTimer;
-    start = std::chrono::system_clock::now();
-  }
-  ~CodeBlockTimer() {
-    std::chrono::time_point<std::chrono::system_clock> stop = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = stop - start;
-    cumulative_timer->incrementTimeSpent(elapsed_seconds.count());
-  }
-
-private:
-  std::shared_ptr<CumulativeTimer> cumulative_timer;
+  std::ostream &out;
   std::chrono::time_point<std::chrono::system_clock> start;
 };
-} // namespace
+
+class MANTID_KERNEL_DLL CodeBlockTimerMultipleUse {
+public:
+  CodeBlockTimerMultipleUse() = delete;
+  class TimeAccumulator {
+  public:
+    TimeAccumulator() = delete;
+    TimeAccumulator(const std::string &name);
+
+  public:
+    void incrementElapsed(const double time_s);
+    double getElapsed() const;
+    void outputElapsed(std::ostream &out) const;
+
+  private:
+    std::string name;
+    double elapsed_s{0.0};
+  };
+  CodeBlockTimerMultipleUse(TimeAccumulator &accumulator);
+  ~CodeBlockTimerMultipleUse();
+
+private:
+  TimeAccumulator &accumulator;
+  std::chrono::time_point<std::chrono::system_clock> start;
+};
+
+} // namespace Kernel
+} // namespace Mantid

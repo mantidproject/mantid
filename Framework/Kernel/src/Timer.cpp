@@ -60,4 +60,57 @@ std::ostream &operator<<(std::ostream &out, const Timer &obj) {
   return out;
 }
 
+//------------------------------------------------------------------------
+/** Constructor
+ * Instantiates the object and starts the timer
+ * @param name :: custom name of the code block
+ * @param out :: stream to output the elapsed time
+ */
+CodeBlockTimer::CodeBlockTimer(const std::string &name, std::ostream &out)
+    : name(name), out(out), start(std::chrono::system_clock::now()) {}
+
+/** Destructor
+ * Calculates and outputs the elapsed time
+ */
+CodeBlockTimer::~CodeBlockTimer() {
+  const auto stop = std::chrono::system_clock::now();
+  const std::chrono::duration<double> elapsed = stop - start;
+  out << "Elapsed time (s) in \"" << name << "\": " << elapsed.count() << '\n';
+}
+
+//------------------------------------------------------------------------
+/** Constructor
+ * Instantiates the object and starts the timer
+ * @param accumulator :: a persistent object keeping track of the total elapsed time
+ */
+CodeBlockTimerMultipleUse::CodeBlockTimerMultipleUse(CodeBlockTimerMultipleUse::TimeAccumulator &accumulator)
+    : accumulator(accumulator), start(std::chrono::system_clock::now()) {}
+/** Destructor
+ * Calculates the elapsed time and updates the time accumulator
+ */
+CodeBlockTimerMultipleUse::~CodeBlockTimerMultipleUse() {
+  const auto stop = std::chrono::system_clock::now();
+  const std::chrono::duration<double> elapsed = stop - start;
+  accumulator.incrementElapsed(elapsed.count());
+}
+
+//------------------------------------------------------------------------
+/** Constructor
+ * Instantiates the object
+ * @param name :: custom name of the code block
+ */
+CodeBlockTimerMultipleUse::TimeAccumulator::TimeAccumulator(const std::string &name) : name(name) {}
+
+/** Constructor
+ * Instantiates the object
+ * @param name :: custom name of the code block
+ */
+void CodeBlockTimerMultipleUse::TimeAccumulator::incrementElapsed(const double time_s) { elapsed_s += time_s; }
+
+double CodeBlockTimerMultipleUse::TimeAccumulator::getElapsed() const { return elapsed_s; }
+
+void CodeBlockTimerMultipleUse::TimeAccumulator::outputElapsed(std::ostream &out) const {
+  out << "Cumulative elapsed time (s) in \"" << name << "\": " << elapsed_s << '\n';
+}
+
 } // namespace Mantid::Kernel
