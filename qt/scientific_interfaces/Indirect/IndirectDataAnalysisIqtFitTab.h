@@ -35,12 +35,7 @@ public:
 
   bool hasResolution() const override { return false; }
 
-protected:
-  void setRunIsRunning(bool running) override;
-  void setRunEnabled(bool enable) override;
-
 private:
-  void setupFitTab() override;
   std::string getFitTypeString() const override;
   EstimationDataSelector getEstimationDataSelector() const override;
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;

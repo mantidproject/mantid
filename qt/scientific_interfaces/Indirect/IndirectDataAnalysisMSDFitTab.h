@@ -26,12 +26,7 @@ public:
 
   bool hasResolution() const override { return false; }
 
-protected:
-  void setRunIsRunning(bool running) override;
-  void setRunEnabled(bool enable) override;
-
 private:
-  void setupFitTab() override;
   EstimationDataSelector getEstimationDataSelector() const override;
   std::string getFitTypeString() const override;
   IDAFunctionParameterEstimation createParameterEstimation() const;

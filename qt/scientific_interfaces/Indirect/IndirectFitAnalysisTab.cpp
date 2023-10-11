@@ -68,10 +68,10 @@ size_t IndirectFitAnalysisTab::getNumberOfSpecificFunctionContained(const std::s
 }
 
 IndirectFitAnalysisTab::IndirectFitAnalysisTab(IndirectFittingModel *model, QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_fittingModel(model) {}
+    : IndirectDataAnalysisTab(parent), m_fittingModel(model), m_runButton() {}
 
 void IndirectFitAnalysisTab::setup() {
-  setupFitTab();
+  connect(m_runButton, SIGNAL(clicked()), this, SLOT(runTab()));
   updateResultOptions();
 
   connect(m_outOptionsPresenter.get(), SIGNAL(plotSpectra()), this, SLOT(plotSelectedSpectra()));
@@ -132,6 +132,12 @@ void IndirectFitAnalysisTab::setFitPropertyBrowser(IndirectFitPropertyBrowser *b
   browser->init();
   m_fitPropertyBrowser = browser;
 }
+
+void IndirectFitAnalysisTab::setRunButton(QPushButton *runButton) { m_runButton = runButton; }
+
+void IndirectFitAnalysisTab::setRunIsRunning(bool running) { m_runButton->setText(running ? "Running..." : "Run"); }
+
+void IndirectFitAnalysisTab::setRunEnabled(bool enable) { m_runButton->setEnabled(enable); }
 
 void IndirectFitAnalysisTab::setFileExtensionsByName(bool filter) {
   auto const tab = getTabName();

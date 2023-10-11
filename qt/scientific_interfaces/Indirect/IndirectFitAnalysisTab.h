@@ -54,6 +54,7 @@ public:
   virtual bool hasResolution() const = 0;
 
 protected:
+  void setRunButton(QPushButton *runButton);
   IndirectFittingModel *getFittingModel() const;
   void run() override;
   void setSampleWSSuffixes(const QStringList &suffices);
@@ -69,8 +70,8 @@ protected:
   void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
-  virtual void setRunIsRunning(bool running) = 0;
-  virtual void setRunEnabled(bool enable) = 0;
+  void setRunIsRunning(bool running);
+  void setRunEnabled(bool enable);
   void setEditResultVisible(bool visible);
   std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
   std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
@@ -82,7 +83,6 @@ protected:
 private:
   void setup() override;
   bool validate() override;
-  virtual void setupFitTab() = 0;
   virtual EstimationDataSelector getEstimationDataSelector() const = 0;
   void connectPlotPresenter();
   void connectFitPropertyBrowser();
@@ -102,6 +102,7 @@ private:
 
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
+  QPushButton *m_runButton;
 
 protected slots:
   void setModelFitFunction();

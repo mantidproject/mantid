@@ -56,18 +56,10 @@ IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
   m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(MSDFIT_HIDDEN_PROPS);
+  setRunButton(m_uiForm->pbRun);
 
   setEditResultVisible(false);
-  respondToFunctionChanged();
 }
-
-void IndirectDataAnalysisMSDFitTab::setupFitTab() { connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab())); }
-
-void IndirectDataAnalysisMSDFitTab::setRunIsRunning(bool running) {
-  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-}
-
-void IndirectDataAnalysisMSDFitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
 EstimationDataSelector IndirectDataAnalysisMSDFitTab::getEstimationDataSelector() const {
 

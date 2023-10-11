@@ -29,7 +29,6 @@ public:
   bool hasResolution() const override { return false; }
 
 private:
-  void setupFitTab() override;
   EstimationDataSelector getEstimationDataSelector() const override;
   std::string getFitTypeString() const override;
   IDAFunctionParameterEstimation createParameterEstimation() const;
@@ -38,10 +37,6 @@ private:
   void setModelSpectrum(int index, const std::string &paramType);
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
-
-protected:
-  void setRunIsRunning(bool running) override;
-  void setRunEnabled(bool enable) override;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

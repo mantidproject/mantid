@@ -49,11 +49,10 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
   templateBrowser->updateAvailableFunctions(availableFits.at(DataType::ALL));
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
   m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(FQFIT_HIDDEN_PROPS);
+  setRunButton(m_uiForm->pbRun);
 
   setEditResultVisible(false);
 }
-
-void IndirectDataAnalysisFqFitTab::setupFitTab() { connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab())); }
 
 std::string IndirectDataAnalysisFqFitTab::getFitTypeString() const {
   if (!m_fittingModel->getFitFunction() || m_fittingModel->getFitFunction()->nFunctions() == 0) {
@@ -67,12 +66,6 @@ std::string IndirectDataAnalysisFqFitTab::getFitTypeString() const {
     return "UserDefinedCompositeFunction";
   }
 }
-
-void IndirectDataAnalysisFqFitTab::setRunIsRunning(bool running) {
-  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-}
-
-void IndirectDataAnalysisFqFitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
 EstimationDataSelector IndirectDataAnalysisFqFitTab::getEstimationDataSelector() const {
   return [](const std::vector<double> &x, const std::vector<double> &y,

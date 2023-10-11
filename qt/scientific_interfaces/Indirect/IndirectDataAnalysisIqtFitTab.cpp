@@ -36,11 +36,10 @@ IndirectDataAnalysisIqtFitTab::IndirectDataAnalysisIqtFitTab(QWidget *parent)
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
   m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(IQTFIT_HIDDEN_PROPS);
+  setRunButton(m_uiForm->pbRun);
 
   setEditResultVisible(true);
 }
-
-void IndirectDataAnalysisIqtFitTab::setupFitTab() { connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab())); }
 
 EstimationDataSelector IndirectDataAnalysisIqtFitTab::getEstimationDataSelector() const {
   return
@@ -72,11 +71,5 @@ std::string IndirectDataAnalysisIqtFitTab::getFitTypeString() const {
 
   return functionType;
 }
-
-void IndirectDataAnalysisIqtFitTab::setRunIsRunning(bool running) {
-  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-}
-
-void IndirectDataAnalysisIqtFitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
 } // namespace MantidQt::CustomInterfaces::IDA
