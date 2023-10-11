@@ -56,7 +56,8 @@ void clear(AlgorithmManagerImpl *self) {
 }
 
 void shutdown(AlgorithmManagerImpl *self) {
-  ReleaseGlobalInterpreterLock releaseGIL;
+  // See comment above for clear()
+  // ReleaseGlobalInterpreterLock releaseGIL;
   return self->shutdown();
 }
 
