@@ -10,13 +10,6 @@
 #include "IndirectInterface.h"
 #include "IndirectTab.h"
 
-#include "MantidKernel/ConfigService.h"
-#include <Poco/NObserver.h>
-
-class DoubleEditorFactory;
-class QtCheckBoxFactory;
-class QtStringPropertyManager;
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
