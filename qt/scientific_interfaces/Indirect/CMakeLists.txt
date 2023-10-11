@@ -28,13 +28,13 @@ set(SRC_FILES
     IndirectDataAnalysisFqFitTab.cpp
     IndirectDataAnalysisIqtFitTab.cpp
     IndirectDataAnalysisMSDFitTab.cpp
+    IndirectDataAnalysisTab.cpp
     IndirectDataReduction.cpp
     IndirectDataReductionTab.cpp
     IndirectDataValidationHelper.cpp
     IndirectDiffractionReduction.cpp
     IndirectDockWidgetArea.cpp
     IndirectEditResultsDialog.cpp
-    IndirectFitAnalysisTab.cpp
     IndirectFitData.cpp
     IndirectFitDataModel.cpp
     IndirectFitDataPresenter.cpp
@@ -134,12 +134,12 @@ set(MOC_FILES
     IndirectDataAnalysisFqFitTab.h
     IndirectDataAnalysisIqtFitTab.h
     IndirectDataAnalysisMSDFitTab.h
+    IndirectDataAnalysisTab.h
     IndirectDataReduction.h
     IndirectDataReductionTab.h
     IndirectDockWidgetArea.h
     IndirectDiffractionReduction.h
     IndirectEditResultsDialog.h
-    IndirectFitAnalysisTab.h
     IndirectFitDataPresenter.h
     IndirectFitDataView.h
     IndirectFitOutputOptionsPresenter.h

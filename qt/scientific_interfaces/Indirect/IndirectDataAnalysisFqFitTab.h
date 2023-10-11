@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectFitAnalysisTab.h"
+#include "IndirectDataAnalysisTab.h"
 #include "ui_IndirectFitTab.h"
 
 #include "IFQFitObserver.h"
@@ -18,7 +18,7 @@ namespace CustomInterfaces {
 namespace IDA {
 class IDAFunctionParameterEstimation;
 
-class DLLExport IndirectDataAnalysisFqFitTab : public IndirectFitAnalysisTab {
+class DLLExport IndirectDataAnalysisFqFitTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:

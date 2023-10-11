@@ -29,7 +29,7 @@ enum IDATabChoice { MSD_FIT, IQT_FIT, CONV_FIT, FQ_FIT };
 static const unsigned int NUM_DECIMALS = 6;
 
 // Forward Declaration
-class IndirectFitAnalysisTab;
+class IndirectDataAnalysisTab;
 
 /**
  * The IndirectDataAnalysis class is the main class that handles the interface
@@ -66,7 +66,7 @@ private:
   QString m_settingsGroup;
 
   /// Map of unsigned int (TabChoice enum values) to tabs.
-  std::map<unsigned int, IndirectFitAnalysisTab *> m_tabs;
+  std::map<unsigned int, IndirectDataAnalysisTab *> m_tabs;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

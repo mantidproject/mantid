@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectFitAnalysisTab.h"
+#include "IndirectDataAnalysisTab.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -25,7 +25,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IndirectDataAnalysisIqtFitTab : public IndirectFitAnalysisTab {
+class DLLExport IndirectDataAnalysisIqtFitTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:

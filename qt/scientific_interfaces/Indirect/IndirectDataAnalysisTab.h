@@ -30,12 +30,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectFitAnalysisTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL IndirectDataAnalysisTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectFitAnalysisTab(IndirectFittingModel *model, QWidget *parent = nullptr);
-  virtual ~IndirectFitAnalysisTab() override = default;
+  IndirectDataAnalysisTab(IndirectFittingModel *model, QWidget *parent = nullptr);
+  virtual ~IndirectDataAnalysisTab() override = default;
 
   void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
   void setPlotView(IIndirectFitPlotView *view);

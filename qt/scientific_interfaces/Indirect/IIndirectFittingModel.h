@@ -19,7 +19,7 @@ using namespace MantidWidgets;
 extern std::unordered_map<FittingMode, std::string> fitModeToName;
 /*
     IIndirectFitData - Specifies an interface for updating, querying and
-   accessing the raw data in IndirectFitAnalysisTabs
+   accessing the raw data in IndirectDataAnalysisTabs
 */
 class MANTIDQT_INDIRECT_DLL IIndirectFittingModel {
 public:

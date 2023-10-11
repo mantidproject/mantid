@@ -31,7 +31,7 @@ std::vector<std::string> FQFIT_HIDDEN_PROPS =
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
 IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
-    : IndirectFitAnalysisTab(new FqFitModel, parent), m_uiForm(new Ui::IndirectFitTab) {
+    : IndirectDataAnalysisTab(new FqFitModel, parent), m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
 
   auto parameterEstimation = createParameterEstimation();
