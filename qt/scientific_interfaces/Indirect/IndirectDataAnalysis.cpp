@@ -15,8 +15,7 @@ namespace MantidQt::CustomInterfaces::IDA {
 DECLARE_SUBWINDOW(IndirectDataAnalysis)
 
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
-    : IndirectInterface(parent), m_settingsGroup("CustomInterfaces/IndirectAnalysis/"), m_valInt(nullptr),
-      m_valDbl(nullptr), m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange) {
+    : IndirectInterface(parent), m_settingsGroup("CustomInterfaces/IndirectAnalysis/") {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
@@ -38,38 +37,15 @@ void IndirectDataAnalysis::applySettings(std::map<std::string, QVariant> const &
 }
 
 /**
- * @param :: the detected close event
- */
-void IndirectDataAnalysis::closeEvent(QCloseEvent * /*unused*/) {
-  Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
-}
-
-/**
- * Handles a change in directory.
- *
- * @param pNf :: notification
- */
-void IndirectDataAnalysis::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
-  std::string key = pNf->key();
-
-  if (key == "defaultsave.directory")
-    loadSettings();
-}
-
-/**
  * Initialised the layout of the interface.  MUST be called.
  */
 void IndirectDataAnalysis::initLayout() {
-  // Connect Poco Notification Observer
-  Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
-
   // Set up all tabs
   for (auto &tab : m_tabs) {
     tab.second->setupTab();
     connect(tab.second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
   }
 
-  connect(m_uiForm.twIDATabs, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this, SLOT(exportTabPython()));
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
@@ -78,33 +54,6 @@ void IndirectDataAnalysis::initLayout() {
   // Needed to initially apply the settings loaded on the settings GUI
   applySettings(getInterfaceSettings());
 }
-
-/**
- * Allow Python to be called locally.
- */
-void IndirectDataAnalysis::initLocalPython() { loadSettings(); }
-
-/**
- * Load the settings saved for this interface.
- */
-void IndirectDataAnalysis::loadSettings() {
-  auto const saveDir = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
-
-  QSettings settings;
-  settings.beginGroup(m_settingsGroup + "ProcessedFiles");
-
-  settings.setValue("last_directory", QString::fromStdString(saveDir));
-
-  for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
-    tab->second->loadTabSettings(settings);
-  }
-  settings.endGroup();
-}
-
-/**
- * Sets the active workspace in the selected tab
- */
-void IndirectDataAnalysis::tabChanged(int) {}
 
 std::string IndirectDataAnalysis::documentationPage() const { return "Inelastic Data Analysis"; }
 
