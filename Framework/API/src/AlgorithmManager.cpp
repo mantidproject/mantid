@@ -11,6 +11,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/ConfigService.h"
+#include <thread>
 
 namespace Mantid::API {
 namespace {
@@ -185,5 +186,10 @@ size_t AlgorithmManagerImpl::removeFinishedAlgorithms() {
   return theCompletedInstances.size();
 }
 
-void AlgorithmManagerImpl::shutdown() { clear(); }
+void AlgorithmManagerImpl::shutdown() {
+  cancelAll();
+  while (runningInstances().size() > 0) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+}
 } // namespace Mantid::API
