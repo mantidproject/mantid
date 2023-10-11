@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataAnalysisTab.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitOutputOptionsPresenter.h"
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFitPropertyBrowser.h"
 #include "IndirectFittingModel.h"
+#include "IndirectTab.h"
 
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 
@@ -30,7 +30,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectFitAnalysisTab : public IndirectDataAnalysisTab {
+class MANTIDQT_INDIRECT_DLL IndirectFitAnalysisTab : public IndirectTab {
   Q_OBJECT
 
 public:
@@ -52,6 +52,7 @@ public:
 
   virtual std::string getTabName() const = 0;
   virtual bool hasResolution() const = 0;
+  void setFileExtensionsByName(bool filter);
 
 protected:
   void setRunButton(QPushButton *runButton);
@@ -61,7 +62,6 @@ protected:
   void setSampleFBSuffixes(const QStringList &suffices);
   void setResolutionWSSuffixes(const QStringList &suffices);
   void setResolutionFBSuffixes(const QStringList &suffices);
-  void setFileExtensionsByName(bool filter) override;
   void setSampleSuffixes(std::string const &tab, bool filter);
   void setResolutionSuffixes(std::string const &tab, bool filter);
 

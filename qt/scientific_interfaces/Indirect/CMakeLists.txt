@@ -28,7 +28,6 @@ set(SRC_FILES
     IndirectDataAnalysisFqFitTab.cpp
     IndirectDataAnalysisIqtFitTab.cpp
     IndirectDataAnalysisMSDFitTab.cpp
-    IndirectDataAnalysisTab.cpp
     IndirectDataReduction.cpp
     IndirectDataReductionTab.cpp
     IndirectDataValidationHelper.cpp
@@ -135,7 +134,6 @@ set(MOC_FILES
     IndirectDataAnalysisFqFitTab.h
     IndirectDataAnalysisIqtFitTab.h
     IndirectDataAnalysisMSDFitTab.h
-    IndirectDataAnalysisTab.h
     IndirectDataReduction.h
     IndirectDataReductionTab.h
     IndirectDockWidgetArea.h
