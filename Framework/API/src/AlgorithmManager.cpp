@@ -191,5 +191,6 @@ void AlgorithmManagerImpl::shutdown() {
   while (runningInstances().size() > 0) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
+  clear();
 }
 } // namespace Mantid::API
