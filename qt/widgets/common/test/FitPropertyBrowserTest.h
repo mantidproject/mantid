@@ -8,11 +8,14 @@
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h"
 #include <QApplication>
+#include <QSignalSpy>
 #include <QString>
 #include <QTimer>
 #include <cxxtest/TestSuite.h>
@@ -200,6 +203,17 @@ public:
     heightProperty = f0Handler->getParameterProperty(QString("Height"));
     height = heightProperty->valueText().toDouble();
     TS_ASSERT_EQUALS(height, 12);
+  }
+
+  void test_fit_error_handled_and_failed_signal_emmitted() {
+    QSignalSpy algFailedSpy(m_fitPropertyBrowser.get(), &MantidQt::MantidWidgets::FitPropertyBrowser::algorithmFailed);
+    auto ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 5, 5, 5);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("test_ws_name", ws);
+    m_fitPropertyBrowser->init();
+    m_fitPropertyBrowser->createCompositeFunction("name=UserFunction;");
+    m_fitPropertyBrowser->setWorkspaceName("test_ws_name");
+    m_fitPropertyBrowser->fit();
+    TS_ASSERT_EQUALS(algFailedSpy.count(), 1);
   }
 
 private:
