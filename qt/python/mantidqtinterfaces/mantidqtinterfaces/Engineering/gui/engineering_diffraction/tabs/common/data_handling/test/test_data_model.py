@@ -218,7 +218,7 @@ class TestFittingDataModel(unittest.TestCase):
 
         self.assertFalse(success)
         mock_minus.assert_not_called()
-        mock_delete_ws.assert_not_called()
+        mock_delete_ws.assert_called()
 
     @patch(data_model_path + ".EnggEstimateFocussedBackground", side_effect=ValueError("mocked error"))
     @patch(data_model_path + ".SetUncertainties")

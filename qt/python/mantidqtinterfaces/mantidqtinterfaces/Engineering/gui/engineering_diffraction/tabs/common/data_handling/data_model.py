@@ -180,7 +180,7 @@ class FittingDataModel(object):
                 bgsub_ws = Minus(LHSWorkspace=ws, RHSWorkspace=background, OutputWorkspace=bgsub_ws_name)
                 self._data_workspaces[ws_name].bgsub_ws = bgsub_ws
                 self._data_workspaces[ws_name].bgsub_ws_name = bgsub_ws_name
-                DeleteWorkspace(background)
+            DeleteWorkspace(background)
         else:
             logger.notice("Background workspace already calculated")
         return success_estimate_bg
@@ -198,8 +198,10 @@ class FittingDataModel(object):
         except (ValueError, RuntimeError) as e:
             # ValueError when Niter not positive integer, RuntimeError when Window too small
             logger.error("Error on arguments supplied to EnggEstimateFocusedBackground: " + str(e))
-            ws_bg = SetUncertainties(InputWorkspace=ws_name)  # copy data and zero errors
-            ws_bg = Minus(LHSWorkspace=ws_bg, RHSWorkspace=ws_bg)  # workspace of zeros with same num spectra
+            ws_bg = SetUncertainties(InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg")  # copy data and zero errors
+            ws_bg = Minus(
+                LHSWorkspace=ws_bg, RHSWorkspace=ws_bg, OutputWorkspace=ws_name + "_bg"
+            )  # workspace of zeros with same num spectra
             success = False
         return ws_bg, success
 

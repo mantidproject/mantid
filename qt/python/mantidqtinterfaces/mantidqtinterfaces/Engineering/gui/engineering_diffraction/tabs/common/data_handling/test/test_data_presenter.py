@@ -381,51 +381,52 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.model.get_loaded_workspaces.return_value = {"name1": self.ws1, "name2": self.ws2}
         self.model.estimate_background.return_value = self.ws2, True
 
-    def test_handle_table_cell_changed_invalid_bg_params_on_niter(self):
+    def _setup_fitting_table_rows_for_invalid_bg_params(self, table_ws_names, changing_ws, original_bg_params, new_bg_params):
         self.presenter.row_numbers = data_presenter.TwoWayRowDict()
-        self.presenter.row_numbers["WS_Name1"] = 0
-        self.presenter.row_numbers["WS_Name2"] = 1
-        self.view.read_bg_params_from_table.return_value = [True, -100, 200, True]
+        for ws_index, ws in enumerate(table_ws_names):
+            self.presenter.row_numbers[ws] = ws_index
+        self.view.read_bg_params_from_table.return_value = new_bg_params
+        self.model.get_bg_params.return_value = {changing_ws: original_bg_params}
         self.view.get_item_checked.return_value = True
         self.model.create_or_update_bgsub_ws.return_value = False
+
+    def test_handle_table_cell_changed_invalid_bg_params_on_niter(self):
         original_bg_params = [True, 50, 600, True]
-        self.model.get_bg_params.return_value = {"WS_Name2": original_bg_params}
+        self._setup_fitting_table_rows_for_invalid_bg_params(
+            table_ws_names=["WS_Name1", "WS_Name2"],
+            changing_ws="WS_Name2",
+            original_bg_params=original_bg_params,
+            new_bg_params=[True, -100, 200, True],
+        )
 
         self.presenter._handle_table_cell_changed(1, 4)
-
         self.assertEqual(2, self.view.set_table_column.call_count)
         calls = [mock.call(1, 4, original_bg_params[1]), mock.call(1, 5, original_bg_params[2])]
         self.view.set_table_column.assert_has_calls(calls, any_order=False)
 
     def test_handle_table_cell_changed_invalid_bg_params_on_xwindow(self):
-        self.presenter.row_numbers = data_presenter.TwoWayRowDict()
-        self.presenter.row_numbers["WS_Name1"] = 0
-        self.presenter.row_numbers["WS_Name2"] = 1
-        self.view.read_bg_params_from_table.return_value = [True, 50, -200, True]
-        self.view.get_item_checked.return_value = True
-        self.model.create_or_update_bgsub_ws.return_value = False
         original_bg_params = [True, 50, 600, True]
-        self.model.get_bg_params.return_value = {"WS_Name2": original_bg_params}
-
+        self._setup_fitting_table_rows_for_invalid_bg_params(
+            table_ws_names=["WS_Name1", "WS_Name2"],
+            changing_ws="WS_Name2",
+            original_bg_params=original_bg_params,
+            new_bg_params=[True, 50, -200, True],
+        )
         self.presenter._handle_table_cell_changed(1, 5)
-
         self.assertEqual(2, self.view.set_table_column.call_count)
         calls = [mock.call(1, 4, original_bg_params[1]), mock.call(1, 5, original_bg_params[2])]
         self.view.set_table_column.assert_has_calls(calls, any_order=False)
 
     def test_handle_table_cell_changed_invalid_bg_params_on_subtract_bg(self):
-        self.presenter.row_numbers = data_presenter.TwoWayRowDict()
-        self.presenter.row_numbers["WS_Name1"] = 0
-        self.presenter.row_numbers["WS_Name2"] = 1
-        self.view.read_bg_params_from_table.return_value = [True, -50, -200, True]
-        self.view.get_item_checked.return_value = True
-        self.model.create_or_update_bgsub_ws.return_value = False
         original_bg_params = [False, 50, 600, True]
-        self.model.get_bg_params.return_value = {"WS_Name2": original_bg_params}
+        self._setup_fitting_table_rows_for_invalid_bg_params(
+            table_ws_names=["WS_Name1", "WS_Name2"],
+            changing_ws="WS_Name2",
+            original_bg_params=original_bg_params,
+            new_bg_params=[True, -50, -200, True],
+        )
         self.presenter._update_plotted_ws_with_sub_state = mock.MagicMock()
-
         self.presenter._handle_table_cell_changed(1, 3)
-
         self.assertEqual(2, self.view.set_table_column.call_count)
         calls = [mock.call(1, 4, original_bg_params[1]), mock.call(1, 5, original_bg_params[2])]
         self.view.set_table_column.assert_has_calls(calls, any_order=False)
