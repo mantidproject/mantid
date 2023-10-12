@@ -97,14 +97,10 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.direct_ei_grid.addWidget(self.direct_ei_label)
         self.direct_ei_input = QtWidgets.QLineEdit("55", self.direct_ei)
         self.direct_ei_input.setToolTip("Incident Energy in meV")
-        comma_sep_floats_regex_str = r"^(\s*\+?[0-9]*\.?[0-9]*)(\s*,\s*\+?[0-9]*\.?[0-9]*)+\s*$"
-        comma_sep_floats_validator = QRegExpValidator(QRegExp(comma_sep_floats_regex_str))
+        comma_sep_postv_floats_regex_str = r"^(\s*\+?[0-9]*\.?[0-9]*)(\s*,\s*\+?[0-9]*\.?[0-9]*)+\s*$"
+        comma_sep_floats_validator = QRegExpValidator(QRegExp(comma_sep_postv_floats_regex_str))
         self.direct_ei_input.setValidator(comma_sep_floats_validator)
         self.direct_ei_grid.addWidget(self.direct_ei_input)
-        # self.emptyfield_msgbox = QtWidgets.QMessageBox()
-        # self.emptyfield_msgbox.setText("Invalid input has been provided for Ei or Emin! Please try again")
-        # self.ei_msgbox = QtWidgets.QMessageBox()
-        # self.ei_msgbox.setText("Ei cannot be negative! Please try again")
         self.ei_emin_msgbox = QtWidgets.QMessageBox()
         self.ei_emin_msgbox.setText("Emin must be less than the values provided for Ei! Please try again")
         self.direct_grid.addWidget(self.direct_ei)
@@ -135,10 +131,10 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.direct_s2.setLayout(self.direct_s2_grid)
         self.direct_s2_label = QtWidgets.QLabel("s2", self.direct_s2)
         self.direct_s2_grid.addWidget(self.direct_s2_label)
-        self.direct_s2_input = QtWidgets.QLineEdit("30", self.direct_s2)
+        self.s2 = 30
+        self.direct_s2_input = QtWidgets.QLineEdit(str(self.s2), self.direct_s2)
         self.direct_s2_input.setValidator(QDoubleValidator())
         self.direct_s2_input.setToolTip("Scattering angle of middle of the HYSPEC detector bank.")
-        # self.direct_s2_input.textChanged[str].connect(self.onS2Changed)
         self.direct_s2_input.editingFinished.connect(self.onS2Changed)
         self.direct_s2_grid.addWidget(self.direct_s2_input)
         self.direct_grid.addWidget(self.direct_s2)
@@ -344,16 +340,12 @@ class QECoverageGUI(QtWidgets.QWidget):
             self.onIndirectInstActivated(self.indirect_inst_box.currentText())
 
     def onS2Changed(self):
-        # try:       # Double enforced be QDoubleValidator, blank space taken care of from editingFinished
-        s2 = float(self.direct_s2_input.text())
-        # except ValueError:
-        #     self.direct_s2_input.setText("0")
-        #     s2 = 0
+        self.s2 = float(self.direct_s2_input.text())
 
-        if abs(s2) <= 30:
-            self.tthlims = [0, abs(s2) + 30]
+        if abs(self.s2) <= 30:
+            self.tthlims = [0, abs(self.s2) + 30]
         else:
-            self.tthlims = [abs(s2) - 30, abs(s2) + 30]
+            self.tthlims = [abs(self.s2) - 30, abs(self.s2) + 30]
 
     def onClickDirectPlot(self):
         overplot = self.direct_plotover.isChecked()
@@ -369,39 +361,14 @@ class QECoverageGUI(QtWidgets.QWidget):
             Emin = float(self.direct_emin_input.text())
         except ValueError:
             Emin = -max(ei_vec) / 2
-            self.direct_emin_input.setText(str(Emin))  # Changed ei_vec[0] to max(ei_vec)
+            self.direct_emin_input.setText(str(Emin))
 
         if min(ei_vec) <= Emin:
             self.ei_emin_msgbox.show()
             Emin = min(ei_vec) - 1
             self.direct_emin_input.setText(str(Emin))
 
-        # eierr = "-----------------------------------------------------------------------------------\n"
-        # eierr += "Error: Invalid input Ei. This must be a number or a comma-separated list of numbers\n"
-        # eierr += "-----------------------------------------------------------------------------------\n"
-        # ei_vec = []
-        # if "," not in ei_str:
-        #     try:
-        #         ei_vec.append(float(ei_str))
-        #         ei_vec = self.direct_input_check(ei_vec)
-        #
-        #     except ValueError:
-        #         self.emptyfield_msgbox.show()
-        #         raise ValueError(eierr)
-        #
-        # else:
-        #     try:
-        #         ei_vec = [float(val) for val in ei_str.split(",")]
-        #         ei_vec = self.direct_input_check(ei_vec)
-        #
-        #     except ValueError:
-        #         self.emptyfield_msgbox.show()
-        #         raise ValueError(eierr)
-
-        # try:
-        #     Emin = float(self.direct_emin_input.text())
-        # except ValueError:
-        #     Emin = -max(ei_vec)
+        self.direct_s2_input.setText(str(self.s2))
 
         qe = calcQE(ei_vec, self.tthlims, emin=Emin)
 
@@ -452,52 +419,6 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.axes.set_ylabel("Energy Transfer (meV)")
         self.axes.legend()
         self.canvas.draw()
-
-    def direct_input_check(self, ei_vec):
-        if len(ei_vec) > 0:
-            # ei_str = ""
-            # update_ei_str = False
-            # insert_comma = True
-            #
-            # for ei in ei_vec:
-            #     # if ei is equal to last value in ei_vec
-            #     if ei_vec[len(ei_vec) - 1] == ei:
-            #         insert_comma = False
-            #
-            #     if ei < 0:
-            #         update_ei_str = True
-            #         self.ei_msgbox.show()
-            #         ei = abs(ei)
-            #
-            #         ei_int = int(ei)
-            #         if insert_comma:
-            #             ei_str += str(ei_int) + ", "
-            #         else:
-            #             ei_str += str(ei_int)
-            #
-            #     else:
-            #         ei_int = int(ei)
-            #         if insert_comma:
-            #             ei_str += str(ei_int) + ", "
-            #         else:
-            #             ei_str += str(ei_int)
-
-            # if update_ei_str:
-            #     self.direct_ei_input.setText(ei_str)
-            #     ei_vec = [float(val) for val in ei_str.split(",")]
-
-            if self.direct_emin_input.text() == "":
-                self.direct_emin_input.setText(str((ei_vec[0] / 2) * -1))
-
-            # reset min_emin according to list provided
-            min_emin = float(self.direct_emin_input.text())
-            minimum = min(ei_vec)
-            if minimum <= min_emin:
-                self.ei_emin_msgbox.show()
-                renew_val = str(minimum - 1)
-                self.direct_emin_input.setText(renew_val)
-
-        return ei_vec
 
     def indirect_input_check(self, ana):
         Emax_min = 0
