@@ -351,6 +351,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             return
         if names_to_overlay or names_overlayed:
             self._create_peaks_presenter_if_necessary().overlay_peaksworkspaces(names_to_overlay)
+            self.view.data_view.on_resize()
         else:
             self.view.peaks_view.hide()
 
