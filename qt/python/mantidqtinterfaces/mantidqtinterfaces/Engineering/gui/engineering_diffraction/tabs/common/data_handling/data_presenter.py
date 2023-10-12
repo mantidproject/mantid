@@ -8,6 +8,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantid.simpleapi import logger
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
+from mantid.api import AnalysisDataService as ADS
 
 
 class FittingDataPresenter(object):
@@ -94,8 +95,8 @@ class FittingDataPresenter(object):
             self.model.replace_workspace(name, workspace)
             self._repopulate_table()
 
-    def restore_table(self):  # used when the interface is being restored from a save or crash
-        self._repopulate_table()
+    def restore_table(self, clear_plotted=True):  # used when the interface is being restored from a save or crash
+        self._repopulate_table(clear_plotted)
 
     def _start_load_worker(self, filenames):
         """
@@ -119,16 +120,22 @@ class FittingDataPresenter(object):
         wsnames = self.model.get_last_added()
         if self.view.get_add_to_plot():
             self.plotted.update(wsnames)
+
         self._repopulate_table()
 
         # subtract background - has to be done post repopulation, can't change default in _add_row_to_table
         [self.view.set_item_checkstate(self.row_numbers[wsname], 3, True) for wsname in wsnames]
 
-    def _repopulate_table(self):
+    def _repopulate_table(self, clear_plotted=True):
         """
         Populate the table with the information from the loaded workspaces.
         Will also handle any workspaces that need to be plotted.
         """
+        workspaces_to_be_plotted = self.plotted.copy()
+
+        if clear_plotted:
+            self.plotted.clear()
+
         self._remove_all_table_rows()
         self.row_numbers.clear()
         self.all_plots_removed_notifier.notify_subscribers()
@@ -140,7 +147,7 @@ class FittingDataPresenter(object):
                 if bank == 0:
                     bank = "cropped"
                 active_ws_name = self.model.get_active_ws_name(name)
-                plotted = active_ws_name in self.plotted
+                plotted = active_ws_name in workspaces_to_be_plotted
                 self._add_row_to_table(name, i, run_no, bank, plotted, *self.model.get_bg_params()[name])
             except RuntimeError:
                 self._add_row_to_table(name, i)
@@ -183,8 +190,15 @@ class FittingDataPresenter(object):
                 ws = self.model.get_active_ws(loaded_ws_name)
                 ws_name = self.model.get_active_ws_name(loaded_ws_name)
                 if is_plotted:
-                    self.plot_added_notifier.notify_subscribers(ws)
-                    self.plotted.add(ws_name)
+                    if len(self.plotted) > 0:
+                        if ADS.retrieve(next(iter(self.plotted))).getXDimension().name == ws.getXDimension().name:
+                            self.plot_added_notifier.notify_subscribers(ws)
+                            self.plotted.add(ws_name)
+                        else:
+                            self.view.set_item_checkstate(row, col, False)
+                    else:
+                        self.plot_added_notifier.notify_subscribers(ws)
+                        self.plotted.add(ws_name)
                 else:
                     self.plot_removed_notifier.notify_subscribers(ws)
                     self.plotted.discard(ws_name)
