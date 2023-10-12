@@ -17,7 +17,7 @@ Python Interface File Naming
 
 Python interface files, found in ``qt/python/mantidqtinterfaces/mantidqtinterfaces``, should be named with each word starting with a capital letter and underscores between the words.
 For example ``Engineering_Diffraction.py``. The corresponding documentation page, found somewhere within ``docs/source/interfaces``, should have the same name but with the underscores replaced with spaces (and a different file extension).
-For example ``diffraction/Engineering Diffraction.rst``. This should be followed so that documentation can be programmatically searched for, in order to check interfaces aren't added without the accompanying doc file.
+For example ``diffraction/Engineering Diffraction.rst``. This should be followed so that documentation can be programmatically searched for, in order to check interfaces aren't added without the accompanying documentation file.
 
 The ``interface`` Directive
 ===========================
