@@ -542,7 +542,7 @@ public:
   void test_loading_data_with_three_periods_but_only_two_histograms_gives_expected_period_counts_property() {
     LoadMuonNexusV2 loader;
     loader.initialize();
-    loader.setPropertyValue("Filename", "HIFI00183810");
+    loader.setPropertyValue("Filename", "HIFI00183810.nxs");
     loader.setPropertyValue("OutputWorkspace", "outWS");
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());

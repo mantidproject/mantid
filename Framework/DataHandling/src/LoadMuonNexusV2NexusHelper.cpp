@@ -283,16 +283,10 @@ std::string LoadMuonNexusV2NexusHelper::getPeriodOutput(const int &numPeriods) c
 
 std::string LoadMuonNexusV2NexusHelper::getPeriodTotalCounts() const {
   NXClass periodClass = m_entry.openNXGroup(NeXusEntry::PERIOD);
-
   NXFloat countsData = periodClass.openNXFloat(NeXusEntry::PERIODCOUNTS);
   countsData.load();
 
-  std::vector<double> countsVector;
-  countsVector.reserve(countsData.size());
-  for (int i = 0; i < countsData.size(); ++i) {
-    countsVector.push_back(countsData[i]);
-  }
-  return convertVectorToString(countsVector);
+  return convertVectorToString(countsData.vecBuffer());
 }
 
 } // namespace Mantid::DataHandling
