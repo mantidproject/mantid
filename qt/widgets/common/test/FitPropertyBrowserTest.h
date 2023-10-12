@@ -54,7 +54,10 @@ public:
     m_fitPropertyBrowser = std::make_unique<MantidQt::MantidWidgets::FitPropertyBrowser>();
   }
 
-  void tearDown() override { m_fitPropertyBrowser.reset(); }
+  void tearDown() override {
+    m_fitPropertyBrowser.reset();
+    Mantid::API::AnalysisDataService::Instance().clear();
+  }
 
   // This is a very specific test for a bug that is now fixed to prevent regression
   void test_FunctionFactory_notification_is_released() {
