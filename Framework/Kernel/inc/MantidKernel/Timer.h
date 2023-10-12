@@ -52,8 +52,25 @@ private:
   std::chrono::time_point<std::chrono::system_clock> start;
 };
 
-class TimeAccumulator;
 class MANTID_KERNEL_DLL CodeBlockCumulativeTimer {
+public:
+  class MANTID_KERNEL_DLL TimeAccumulator {
+  public:
+    TimeAccumulator() = delete;
+    TimeAccumulator(const std::string &name);
+
+  public:
+    void reset();
+    void incrementElapsed(const double time_s);
+    double getElapsed() const;
+    size_t getNumberOfEntrances() const;
+
+  private:
+    std::string name;
+    double elapsed_s{0.0};
+    size_t number_of_entrances{0};
+  };
+
 public:
   CodeBlockCumulativeTimer() = delete;
   CodeBlockCumulativeTimer(TimeAccumulator &accumulator);
@@ -62,23 +79,6 @@ public:
 private:
   TimeAccumulator &accumulator;
   std::chrono::time_point<std::chrono::system_clock> start;
-};
-
-class TimeAccumulator {
-public:
-  TimeAccumulator() = delete;
-  TimeAccumulator(const std::string &name);
-
-public:
-  void reset();
-  void incrementElapsed(const double time_s);
-  double getElapsed() const;
-  size_t getNumberOfEntrances() const;
-
-private:
-  std::string name;
-  double elapsed_s{0.0};
-  size_t number_of_entrances{0};
 };
 
 } // namespace Kernel

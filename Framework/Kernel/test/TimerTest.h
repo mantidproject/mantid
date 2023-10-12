@@ -33,7 +33,7 @@ public:
 #endif
   }
 
-  void sleep_ms_with_timer(const int ms, TimeAccumulator &timeAccumulator) {
+  void sleep_ms_with_timer(const int ms, CodeBlockCumulativeTimer::TimeAccumulator &timeAccumulator) {
     CodeBlockCumulativeTimer timer{timeAccumulator};
     sleep_ms(ms);
   }
@@ -85,7 +85,7 @@ public:
     const int number_of_sleep_calls{4};
 
     // Call sleep function a few times with the time accumulator
-    TimeAccumulator ta{"test_timer"};
+    CodeBlockCumulativeTimer::TimeAccumulator ta{"test_timer"};
     for (size_t i = 0; i < number_of_sleep_calls; i++)
       sleep_ms_with_timer(sleepTime_ms, ta);
 
