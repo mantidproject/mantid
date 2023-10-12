@@ -52,9 +52,9 @@ private:
   std::chrono::time_point<std::chrono::system_clock> start;
 };
 
-class MANTID_KERNEL_DLL CodeBlockTimerMultipleUse {
+class MANTID_KERNEL_DLL CodeBlockCumulativeTimer {
 public:
-  CodeBlockTimerMultipleUse() = delete;
+  CodeBlockCumulativeTimer() = delete;
   class TimeAccumulator {
   public:
     TimeAccumulator() = delete;
@@ -64,14 +64,15 @@ public:
     void reset();
     void incrementElapsed(const double time_s);
     double getElapsed() const;
-    void outputElapsed(std::ostream &out) const;
+    size_t getNumberOfEntrances() const;
 
   private:
     std::string name;
     double elapsed_s{0.0};
+    size_t number_of_entrances{0};
   };
-  CodeBlockTimerMultipleUse(TimeAccumulator &accumulator);
-  ~CodeBlockTimerMultipleUse();
+  CodeBlockCumulativeTimer(TimeAccumulator &accumulator);
+  ~CodeBlockCumulativeTimer();
 
 private:
   TimeAccumulator &accumulator;

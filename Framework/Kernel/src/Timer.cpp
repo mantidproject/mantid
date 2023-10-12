@@ -68,7 +68,7 @@ std::ostream &operator<<(std::ostream &out, const Timer &obj) {
 CodeBlockTimer::CodeBlockTimer(const std::string &name, std::ostream &out)
     : name(name), out(out), start(std::chrono::system_clock::now()) {}
 
-/** Calculate and output the elapsed wall-clock time
+/** Calculate and output the elapsed wall-clock time in seconds
  */
 CodeBlockTimer::~CodeBlockTimer() {
   const auto stop = std::chrono::system_clock::now();
@@ -80,12 +80,12 @@ CodeBlockTimer::~CodeBlockTimer() {
 /** Instantiate the object and start the timer
  * @param accumulator :: a persistent object keeping track of the total elapsed wall-clock time
  */
-CodeBlockTimerMultipleUse::CodeBlockTimerMultipleUse(CodeBlockTimerMultipleUse::TimeAccumulator &accumulator)
+CodeBlockCumulativeTimer::CodeBlockCumulativeTimer(CodeBlockCumulativeTimer::TimeAccumulator &accumulator)
     : accumulator(accumulator), start(std::chrono::system_clock::now()) {}
 
-/** Calculate the elapsed wall-clock time and update the time accumulator
+/** Calculate the elapsed wall-clock time (seconds) and update the time accumulator
  */
-CodeBlockTimerMultipleUse::~CodeBlockTimerMultipleUse() {
+CodeBlockCumulativeTimer::~CodeBlockCumulativeTimer() {
   const auto stop = std::chrono::system_clock::now();
   const std::chrono::duration<double> elapsed = stop - start;
   accumulator.incrementElapsed(elapsed.count());
@@ -95,27 +95,30 @@ CodeBlockTimerMultipleUse::~CodeBlockTimerMultipleUse() {
 /** Instantiate the object
  * @param name :: custom name of the code block
  */
-CodeBlockTimerMultipleUse::TimeAccumulator::TimeAccumulator(const std::string &name) : name(name) {}
+CodeBlockCumulativeTimer::TimeAccumulator::TimeAccumulator(const std::string &name) : name(name) {}
 
-/** Reset the elapsed wall-clock time
+/** Reset the elapsed wall-clock time and number of times the code block was entered
  */
-void CodeBlockTimerMultipleUse::TimeAccumulator::reset() { elapsed_s = 0.0; }
-
-/** Increment the elapsed wall-clock time
- * @param time_s :: elapsed time (seconds) to add
- */
-void CodeBlockTimerMultipleUse::TimeAccumulator::incrementElapsed(const double time_s) { elapsed_s += time_s; }
-
-/** Return the elapsed time
- * @return :: elapsed time
- */
-double CodeBlockTimerMultipleUse::TimeAccumulator::getElapsed() const { return elapsed_s; }
-
-/** Output the elapsed time
- * @param out :: stream to output the elapsed time
- */
-void CodeBlockTimerMultipleUse::TimeAccumulator::outputElapsed(std::ostream &out) const {
-  out << "Cumulative elapsed time (s) in \"" << name << "\": " << elapsed_s << '\n';
+void CodeBlockCumulativeTimer::TimeAccumulator::reset() {
+  elapsed_s = 0.0;
+  number_of_entrances = 0;
 }
 
+/** Increment the elapsed wall-clock time and number of times the code block was entered
+ * @param time_s :: elapsed time (seconds) to add
+ */
+void CodeBlockCumulativeTimer::TimeAccumulator::incrementElapsed(const double time_s) {
+  elapsed_s += time_s;
+  number_of_entrances++;
+}
+
+/** Return the total elapsed wall-clock time
+ * @return :: elapsed time in seconds
+ */
+double CodeBlockCumulativeTimer::TimeAccumulator::getElapsed() const { return elapsed_s; }
+
+/** Return the number of times the code block was entered
+ * @return :: number of entrances
+ */
+size_t CodeBlockCumulativeTimer::TimeAccumulator::getNumberOfEntrances() const { return number_of_entrances; }
 } // namespace Mantid::Kernel
