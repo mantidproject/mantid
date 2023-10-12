@@ -33,7 +33,7 @@ public:
 #endif
   }
 
-  void sleep_ms_with_timer(const int ms, CodeBlockCumulativeTimer::TimeAccumulator &timeAccumulator) {
+  void sleep_ms_with_timer(const int ms, TimeAccumulator &timeAccumulator) {
     CodeBlockCumulativeTimer timer{timeAccumulator};
     sleep_ms(ms);
   }
@@ -85,7 +85,17 @@ public:
     const int number_of_sleep_calls{4};
 
     // Call sleep function a few times with the time accumulator
-    CodeBlockCumulativeTimer::TimeAccumulator ta{"test_timer"};
+    TimeAccumulator ta{"test_timer"};
+    for (size_t i = 0; i < number_of_sleep_calls; i++)
+      sleep_ms_with_timer(sleepTime_ms, ta);
+
+    // Test elapsed time and number of entrances
+    double elapsed_s = ta.getElapsed();
+    TS_ASSERT_LESS_THAN(number_of_sleep_calls * sleepTime_ms * minTimeFactor, elapsed_s * s2ms);
+    TS_ASSERT_EQUALS(ta.getNumberOfEntrances(), number_of_sleep_calls);
+
+    // Now reset the accumulator and repeat the test
+    ta.reset();
     for (size_t i = 0; i < number_of_sleep_calls; i++)
       sleep_ms_with_timer(sleepTime_ms, ta);
 

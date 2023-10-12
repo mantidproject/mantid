@@ -80,7 +80,7 @@ CodeBlockTimer::~CodeBlockTimer() {
 /** Instantiate the object and start the timer
  * @param accumulator :: a persistent object keeping track of the total elapsed wall-clock time
  */
-CodeBlockCumulativeTimer::CodeBlockCumulativeTimer(CodeBlockCumulativeTimer::TimeAccumulator &accumulator)
+CodeBlockCumulativeTimer::CodeBlockCumulativeTimer(TimeAccumulator &accumulator)
     : accumulator(accumulator), start(std::chrono::system_clock::now()) {}
 
 /** Calculate the elapsed wall-clock time (seconds) and update the time accumulator
@@ -95,11 +95,11 @@ CodeBlockCumulativeTimer::~CodeBlockCumulativeTimer() {
 /** Instantiate the object
  * @param name :: custom name of the code block
  */
-CodeBlockCumulativeTimer::TimeAccumulator::TimeAccumulator(const std::string &name) : name(name) {}
+TimeAccumulator::TimeAccumulator(const std::string &name) : name(name) {}
 
 /** Reset the elapsed wall-clock time and number of times the code block was entered
  */
-void CodeBlockCumulativeTimer::TimeAccumulator::reset() {
+void TimeAccumulator::reset() {
   elapsed_s = 0.0;
   number_of_entrances = 0;
 }
@@ -107,7 +107,7 @@ void CodeBlockCumulativeTimer::TimeAccumulator::reset() {
 /** Increment the elapsed wall-clock time and number of times the code block was entered
  * @param time_s :: elapsed time (seconds) to add
  */
-void CodeBlockCumulativeTimer::TimeAccumulator::incrementElapsed(const double time_s) {
+void TimeAccumulator::incrementElapsed(const double time_s) {
   elapsed_s += time_s;
   number_of_entrances++;
 }
@@ -115,10 +115,10 @@ void CodeBlockCumulativeTimer::TimeAccumulator::incrementElapsed(const double ti
 /** Return the total elapsed wall-clock time
  * @return :: elapsed time in seconds
  */
-double CodeBlockCumulativeTimer::TimeAccumulator::getElapsed() const { return elapsed_s; }
+double TimeAccumulator::getElapsed() const { return elapsed_s; }
 
 /** Return the number of times the code block was entered
  * @return :: number of entrances
  */
-size_t CodeBlockCumulativeTimer::TimeAccumulator::getNumberOfEntrances() const { return number_of_entrances; }
+size_t TimeAccumulator::getNumberOfEntrances() const { return number_of_entrances; }
 } // namespace Mantid::Kernel
