@@ -5,6 +5,7 @@ set(TEST_PY_FILES
     engineering_diffraction/tabs/common/test/test_vanadium_corrections.py
     engineering_diffraction/tabs/common/data_handling/test/test_data_model.py
     engineering_diffraction/tabs/common/data_handling/test/test_data_presenter.py
+    engineering_diffraction/tabs/common/test/test_rb_number_validator.py
     # Cropping
     engineering_diffraction/tabs/common/cropping/test/test_cropping_model.py
     engineering_diffraction/tabs/common/cropping/test/test_cropping_presenter.py

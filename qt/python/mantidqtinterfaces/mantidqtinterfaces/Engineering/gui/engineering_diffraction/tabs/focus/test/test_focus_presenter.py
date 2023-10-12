@@ -46,6 +46,36 @@ class FocusPresenterTest(unittest.TestCase):
         mock_worker.assert_not_called()
         mock_setting.assert_not_called()
 
+    @patch("PyQt5.QtWidgets.QMessageBox.warning")
+    def test_validate_method_when_rb_number_is_invalid(self, mock_qmessage_box_warning):
+        self.view.is_searching.return_value = False
+        self.view.get_focus_valid.return_value = True
+        self.view.get_vanadium_valid.return_value = True
+        self.presenter.current_calibration.is_valid.return_value = True
+        self.presenter.current_calibration.get_instrument.return_value = self.presenter.instrument
+        self.presenter.rb_num = r" invalid%RB#NumberVal "
+        self.presenter.rb_number_validator = mock.MagicMock()
+        self.presenter.rb_number_validator.validate_rb_number.return_value = False
+
+        self.assertFalse(self.presenter._validate())
+        mock_qmessage_box_warning.assert_called_once_with(
+            unittest.mock.ANY, "Engineering Diffraction - Error", "Please enter a valid value for the RB Number"
+        )
+
+    @patch("PyQt5.QtWidgets.QMessageBox.warning")
+    def test_validate_method_when_rb_number_is_valid(self, mock_qmessage_box_warning):
+        self.view.is_searching.return_value = False
+        self.view.get_focus_valid.return_value = True
+        self.view.get_vanadium_valid.return_value = True
+        self.presenter.current_calibration.is_valid.return_value = True
+        self.presenter.current_calibration.get_instrument.return_value = self.presenter.instrument
+        self.presenter.rb_num = r"validRBNumber"
+        self.presenter.rb_number_validator = mock.MagicMock()
+        self.presenter.rb_number_validator.validate_rb_number.return_value = True
+
+        self.assertTrue(self.presenter._validate())
+        mock_qmessage_box_warning.assert_not_called()
+
     def test_controls_disabled_disables_both(self):
         self.presenter.set_focus_controls_enabled(False)
 

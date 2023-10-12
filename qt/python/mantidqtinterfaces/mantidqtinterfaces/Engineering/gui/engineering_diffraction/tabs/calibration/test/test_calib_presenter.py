@@ -275,6 +275,32 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.assertEqual(a.get_sample(), b.get_sample())
         self.assertEqual(a.get_instrument(), b.get_instrument())
 
+    @patch("PyQt5.QtWidgets.QMessageBox.warning")
+    def test_validate_method_when_rb_number_is_invalid(self, mock_qmessage_box_warning):
+        self.view.is_searching.return_value = False
+        self.view.get_sample_valid.return_value = True
+        self.view.get_crop_checked.return_value = False
+        self.presenter.rb_num = r" invalidRBNumber$# "
+        self.presenter.rb_number_validator = mock.MagicMock()
+        self.presenter.rb_number_validator.validate_rb_number.return_value = False
+
+        self.assertFalse(self.presenter._validate())
+        mock_qmessage_box_warning.assert_called_once_with(
+            unittest.mock.ANY, "Engineering Diffraction - Error", "Please enter a valid value for the RB Number"
+        )
+
+    @patch("PyQt5.QtWidgets.QMessageBox.warning")
+    def test_validate_method_when_rb_number_is_valid(self, mock_qmessage_box_warning):
+        self.view.is_searching.return_value = False
+        self.view.get_sample_valid.return_value = True
+        self.view.get_crop_checked.return_value = False
+        self.presenter.rb_num = r"validRBNumber"
+        self.presenter.rb_number_validator = mock.MagicMock()
+        self.presenter.rb_number_validator.validate_rb_number.return_value = True
+
+        self.assertTrue(self.presenter._validate())
+        mock_qmessage_box_warning.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

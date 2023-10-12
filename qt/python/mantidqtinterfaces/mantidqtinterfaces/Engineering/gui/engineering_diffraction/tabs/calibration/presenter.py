@@ -16,6 +16,7 @@ from Engineering.EnggUtils import GROUP
 from mantidqt.utils.asynchronous import AsyncTask
 from mantid.simpleapi import logger
 from mantidqt.utils.observer_pattern import Observable, GenericObservable
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_number_validator import RBNumberValidator
 
 
 class CalibrationPresenter(object):
@@ -32,6 +33,7 @@ class CalibrationPresenter(object):
         # Main Window State Variables
         self.instrument = "ENGINX"
         self.rb_num = None
+        self.rb_number_validator = RBNumberValidator()
 
         # Cropping Options
         self.cropping_widget = CroppingPresenter(parent=self.view, view=self.view.get_cropping_widget())
@@ -140,6 +142,10 @@ class CalibrationPresenter(object):
                 return False
             if self.cropping_widget.get_custom_spectra_enabled() and not self.cropping_widget.is_spectra_valid():
                 create_error_message(self.view, "Check custom spectra are valid.")
+                return False
+        if self.rb_num:
+            if not self.rb_number_validator.validate_rb_number(self.rb_num):
+                create_error_message(self.view, "Please enter a valid value for the RB Number")
                 return False
         return True
 

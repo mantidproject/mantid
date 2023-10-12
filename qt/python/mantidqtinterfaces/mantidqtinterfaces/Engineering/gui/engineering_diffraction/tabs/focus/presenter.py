@@ -16,8 +16,8 @@ from Engineering.common.calibration_info import CalibrationInfo
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantid.kernel import logger
-
 from qtpy.QtWidgets import QMessageBox
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_number_validator import RBNumberValidator
 
 
 class FocusPresenter(object):
@@ -39,6 +39,7 @@ class FocusPresenter(object):
         self.current_calibration = CalibrationInfo()
         self.instrument = "ENGINX"
         self.rb_num = None
+        self.rb_number_validator = RBNumberValidator()
 
         last_van_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX, "last_vanadium_run")
         if last_van_path:
@@ -114,6 +115,10 @@ class FocusPresenter(object):
                 "The instrument for the current calibration is: " + self.current_calibration.get_instrument(),
             )
             return False
+        if self.rb_num:
+            if not self.rb_number_validator.validate_rb_number(self.rb_num):
+                create_error_message(self.view, "Please enter a valid value for the RB Number")
+                return False
         return True
 
     def _number_of_files_warning(self, paths):
