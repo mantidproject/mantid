@@ -100,7 +100,7 @@ public:
       sleep_ms_with_timer(sleepTime_ms, ta);
 
     // Test elapsed time and number of entrances
-    double elapsed_s = ta.getElapsed();
+    elapsed_s = ta.getElapsed();
     TS_ASSERT_LESS_THAN(number_of_sleep_calls * sleepTime_ms * minTimeFactor, elapsed_s * s2ms);
     TS_ASSERT_EQUALS(ta.getNumberOfEntrances(), number_of_sleep_calls);
   }
