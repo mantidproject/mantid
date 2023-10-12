@@ -281,13 +281,15 @@ std::string LoadMuonNexusV2NexusHelper::getPeriodOutput(const int &numPeriods) c
   return convertVectorToString(getIntVector(numPeriods, NeXusEntry::PERIODOUTPUT));
 }
 
-std::string LoadMuonNexusV2NexusHelper::getPeriodTotalCounts(const int &numPeriods) const {
+std::string LoadMuonNexusV2NexusHelper::getPeriodTotalCounts() const {
   NXClass periodClass = m_entry.openNXGroup(NeXusEntry::PERIOD);
 
   NXFloat countsData = periodClass.openNXFloat(NeXusEntry::PERIODCOUNTS);
-  std::vector<double> countsVector;
   countsData.load();
-  for (int i = 0; i < numPeriods; ++i) {
+
+  std::vector<double> countsVector;
+  countsVector.reserve(countsData.size());
+  for (int i = 0; i < countsData.size(); ++i) {
     countsVector.push_back(countsData[i]);
   }
   return convertVectorToString(countsVector);

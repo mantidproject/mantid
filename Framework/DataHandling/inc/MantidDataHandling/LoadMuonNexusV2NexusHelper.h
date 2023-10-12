@@ -55,7 +55,7 @@ public:
   std::string getPeriodFramesRequested(const int &numPeriods) const;
   std::string getPeriodRawFrames(const int &numPeriods) const;
   std::string getPeriodOutput(const int &numPeriods) const;
-  std::string getPeriodTotalCounts(const int &numPeriods) const;
+  std::string getPeriodTotalCounts() const;
 
 private:
   const NeXus::NXEntry &m_entry;
