@@ -233,6 +233,7 @@ class SuperplotPresenter:
         axes = figure.gca()
         axes.relim()
         axes.autoscale()
+        self._update_plot()
 
     def on_drop(self, name):
         """
