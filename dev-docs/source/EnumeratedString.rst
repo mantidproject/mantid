@@ -19,7 +19,7 @@ would be something like the following:
 
 However, this is not allowed under C++.
 
-The ``EnumeratedString`` objects allow for binding an ``enum class`` to a C-style static array of strings, allowing for much
+The ``EnumeratedString`` objects allow for binding an ``enum`` or ``enum class`` to a vector of strings, allowing for much
 of the same behavior.  This allows for easy-to-read ``if`` and ``switch`` statements, as well as easy conversions and assignments
 with strings from the allowed set.  This further adds an additional layer of validation for string properties, in additon to the
 ``StringListValidator`` used in the property declaration.
@@ -69,6 +69,11 @@ Notice that the final element of the ``enum`` is called :code:`enum_count`.  Thi
 number of elements inside the ``enum``, and used for verifying compatibility with the vector of strings.  A compiler error
 will be triggered if this is not included.
 
+Further, the ``enum`` *must* have elements in order from 0 to :code:`enum_count`.  That is, you *CANNOT* set them like so:
+.. code-block:: cpp
+   enum class CakeTypeEnum : char {LEMON='l', BUNDT='b', POUND='p', enum_count=3}; // NOT ALLOWED
+as this will break validation features inside the class.
+
 Notice the use of the reference operator, :code:`&cakeTypeNames`, and *not* :code:`cakeTypeNames`.
 
 In the above code, a :code:`CAKETYPE` object can be created either from a :code:`CakeTypeEnum`, or from one of the strings
@@ -104,7 +109,7 @@ An example of where this might be used inside an algorithm is shown below:
 
    void BakeCake::exec() {
       // this will assign cakeType from the string property
-      CAKETYPE cakeType = getProperty("CakeType");
+      CAKETYPE cakeType = getPropertyValue("CakeType");
 
       // logic can branch on cakeType comparing to the enum
       switch(cakeType){
