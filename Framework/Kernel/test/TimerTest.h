@@ -33,8 +33,8 @@ public:
 #endif
   }
 
-  void sleep_ms_with_timer(const int ms, CodeBlockCumulativeTimer::TimeAccumulator &timeAccumulator) {
-    CodeBlockCumulativeTimer timer{timeAccumulator};
+  void sleep_ms_with_timer(const int ms, CodeBlockMultipleTimer::TimeAccumulator &timeAccumulator) {
+    CodeBlockMultipleTimer timer{timeAccumulator};
     sleep_ms(ms);
   }
 
@@ -77,15 +77,16 @@ public:
     TS_ASSERT_LESS_THAN(sleepTime_ms * minTimeFactor, elapsed_s * s2ms);
   }
 
-  // Call sleep function multiple times and measure the elapsed time
-  void testCodeBlockCumulativeTimer() {
+  // Call sleep function multiple times and measure the total elapsed time
+  void testCodeBlockMultipleTimer() {
+    const std::string timer_name{"test_timer"};
     const int sleepTime_ms{200};
     const double minTimeFactor{
         0.9}; // The measured elapsed time is expected to be at least this portion of the input sleep time
     const int number_of_sleep_calls{4};
 
-    // Call sleep function a few times with the time accumulator
-    CodeBlockCumulativeTimer::TimeAccumulator ta{"test_timer"};
+    // Call sleep function a few times with time accumulator
+    CodeBlockMultipleTimer::TimeAccumulator ta{timer_name};
     for (size_t i = 0; i < number_of_sleep_calls; i++)
       sleep_ms_with_timer(sleepTime_ms, ta);
 
@@ -94,7 +95,15 @@ public:
     TS_ASSERT_LESS_THAN(number_of_sleep_calls * sleepTime_ms * minTimeFactor, elapsed_s * s2ms);
     TS_ASSERT_EQUALS(ta.getNumberOfEntrances(), number_of_sleep_calls);
 
-    // Now reset the accumulator and repeat the test
+    // Test stream output
+    std::ostringstream out;
+    ta.report(out);
+    std::ostringstream expected_out;
+    expected_out << "Elapsed time (s) in \"" << timer_name << "\": " << elapsed_s
+                 << " Number of entrances: " << number_of_sleep_calls << '\n';
+    TS_ASSERT_EQUALS(expected_out.str(), out.str());
+
+    // Reset the accumulator and repeat the test
     ta.reset();
     for (size_t i = 0; i < number_of_sleep_calls; i++)
       sleep_ms_with_timer(sleepTime_ms, ta);
@@ -103,6 +112,14 @@ public:
     elapsed_s = ta.getElapsed();
     TS_ASSERT_LESS_THAN(number_of_sleep_calls * sleepTime_ms * minTimeFactor, elapsed_s * s2ms);
     TS_ASSERT_EQUALS(ta.getNumberOfEntrances(), number_of_sleep_calls);
+
+    // Test stream output
+    out.str("");
+    ta.report(out);
+    expected_out.str("");
+    expected_out << "Elapsed time (s) in \"" << timer_name << "\": " << elapsed_s
+                 << " Number of entrances: " << number_of_sleep_calls << '\n';
+    TS_ASSERT_EQUALS(expected_out.str(), out.str());
   }
 
 private:
