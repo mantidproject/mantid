@@ -102,19 +102,6 @@ class ColorbarWidgetTest(TestCase):
         self.assertEqual(vmin, 0.0)
         self.assertEqual(vmax, 99.0)
 
-    def test_colorbar_limits_min_max_lognorm(self):
-        image = plt.imshow(self.data * np.nan, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
-
-        self.widget.set_mappable(image)
-        self.widget.autoscale.setChecked(True)
-        self.widget.autotype.setCurrentIndex(0)
-        self.widget.norm.setCurrentIndex(1)
-
-        vmin, vmax = self.widget._calculate_auto_color_limits(self.data)
-
-        self.assertEqual(vmin, 0.0099)
-        self.assertEqual(vmax, 99.0)
-
     def test_colorbar_limits_3sigma(self):
         image = plt.imshow(self.data * np.nan, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
 
@@ -150,6 +137,45 @@ class ColorbarWidgetTest(TestCase):
 
         self.assertEqual(vmin, 12.0)
         self.assertEqual(vmax, 87.0)
+
+    def test_colorbar_limits_min_max_lognorm(self):
+        image = plt.imshow(self.data * np.nan, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+        self.widget.autotype.setCurrentIndex(0)
+        self.widget.norm.setCurrentIndex(1)
+
+        vmin, vmax = self.widget._calculate_auto_color_limits(self.data)
+
+        self.assertEqual(vmin, 0.0099)
+        self.assertEqual(vmax, 99.0)
+
+    def test_colorbar_limits_min_max_symmetric_log10(self):
+        image = plt.imshow(self.data * np.nan, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+        self.widget.autotype.setCurrentIndex(0)
+        self.widget.norm.setCurrentIndex(2)
+
+        vmin, vmax = self.widget._calculate_auto_color_limits(self.data)
+
+        self.assertEqual(vmin, 0.0)
+        self.assertEqual(vmax, 99.0)
+
+    def test_colorbar_limits_min_max_power(self):
+        image = plt.imshow(self.data * np.nan, cmap="plasma", norm=Normalize(vmin=None, vmax=None))
+
+        self.widget.set_mappable(image)
+        self.widget.autoscale.setChecked(True)
+        self.widget.autotype.setCurrentIndex(0)
+        self.widget.norm.setCurrentIndex(3)
+
+        vmin, vmax = self.widget._calculate_auto_color_limits(self.data)
+
+        self.assertEqual(vmin, 0.0)
+        self.assertEqual(vmax, 99.0)
 
     def test_invalid_cmax_range_is_reset(self):
         image = plt.imshow(self.data, cmap="plasma", norm=SymLogNorm(1e-8, vmin=None, vmax=None))
