@@ -149,7 +149,11 @@ class CurvesTabWidgetPresenter:
             # When a curve is redrawn it is moved to the back of the list of curves so here it is moved back to its previous
             # position. This is so that the correct offset is applied to the curve if the plot is a waterfall plot, but it
             # also just makes sense for the curve order to remain unchanged.
-            ax.lines.insert(curve_index, ax.lines.pop())
+            # ax.lines.insert(curve_index, ax.lines.pop())
+            lines_to_remove = ax.get_lines()[curve_index:]
+            map(lambda l: l.remove(), lines_to_remove)
+            ax.add_line(lines_to_remove.pop())
+            map(lambda l: ax.add_line(l), lines_to_remove)
 
         if waterfall:
             # Set the waterfall offsets to what they were previously.
