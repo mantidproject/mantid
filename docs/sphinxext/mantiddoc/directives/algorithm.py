@@ -11,11 +11,6 @@ REDIRECT_TEMPLATE = "redirect.html"
 
 DEPRECATE_USE_ALG_RE = re.compile(r"Use\s(([A-Z][a-zA-Z0-9]+)\s(version ([0-9])+)?)\s*instead.")
 
-# Maximum height in pixels a screenshot image
-# Any higher than this an an obvious gap starts to appear between the "Properties" header
-# and the rest
-SCREENSHOT_MAX_HEIGHT = 250
-
 # --------------------------------------------------------------------------
 
 
@@ -28,14 +23,9 @@ class AlgorithmDirective(AlgorithmBaseDirective):
        the highest version of the algorithm being processed then a both
        a versioned link is created and a non-versioned link
      - A title
-     - A screenshot of the algorithm
      - Table of contents
 
     If the algorithms is deprecated then a warning is inserted.
-
-    It requires a SCREENSHOTS_DIR environment variable to be set to the
-    directory where a screenshot should be generated. If it is not set then
-    a RuntimeError occurs
     """
 
     required_arguments, optional_arguments = 0, 0
