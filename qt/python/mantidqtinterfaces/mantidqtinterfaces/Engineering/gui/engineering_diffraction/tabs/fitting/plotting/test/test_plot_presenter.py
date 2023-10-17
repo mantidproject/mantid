@@ -241,6 +241,10 @@ class FittingPlotPresenterTest(unittest.TestCase):
         self.presenter._on_worker_error(error_message)
         mock_logger.assert_not_called()
 
+    def test_toggle_legend(self):
+        self.presenter.toggle_legend()
+        self.view.update_figure.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()

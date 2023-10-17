@@ -139,6 +139,9 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     def set_slot_for_seq_fit(self, presenter_func):
         self.toolbar.sig_seq_fit_clicked.connect(presenter_func)
 
+    def set_slot_for_legend_toggled(self, presenter_func):
+        self.toolbar.sig_toggle_legend.connect(presenter_func)
+
     def show_cancel_button(self, show: bool):
         self.cancel_button.setVisible(show)
         self.cancel_button.setEnabled(show)
@@ -169,7 +172,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
 
     def update_figure(self):
         self.toolbar.update()
-        self.update_legend(self.get_axes()[0])
+        self.update_legend(self.get_axes()[0], self.toolbar.get_show_legend_value())
         self.update_axes_position()
         self.figure.canvas.draw()
         self.update_fitbrowser()
@@ -209,10 +212,11 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         except:
             pass  # name may not be available if ws has just been deleted
 
-    def update_legend(self, ax):
+    def update_legend(self, ax, show_legend):
         if ax.get_lines():
             ax.make_legend()
             ax.get_legend().set_title("")
+            ax.get_legend().set_visible(show_legend)
         else:
             if ax.get_legend():
                 ax.get_legend().remove()
