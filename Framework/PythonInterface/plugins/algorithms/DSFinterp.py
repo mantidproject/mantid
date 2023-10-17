@@ -18,10 +18,11 @@ from mantid.kernel import (
     EnabledWhenProperty,
     PropertyCriterion,
 )
+from mantid.utils.deprecator import deprecated_algorithm
 
 
+@deprecated_algorithm(new_name=None, deprecation_date="2023-10-01")
 class DSFinterp(PythonAlgorithm):
-
     channelgroup = None
 
     def category(self):
