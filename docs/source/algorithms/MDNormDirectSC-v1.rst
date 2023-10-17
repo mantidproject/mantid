@@ -63,10 +63,10 @@ Usage
             )
     normalized=histoData/histoNorm
     histoShape=histoNorm.getSignalArray().shape
-    print "The normalization workspace shape is (%d, %d)" % histoShape
-    print "Out of those elements, "+str(nonzero(histoNorm.getSignalArray())[0].size)+" are nonzero"
+    print("The normalization workspace shape is (%d, %d)" % histoShape)
+    print("Out of those elements, "+str(nonzero(histoNorm.getSignalArray())[0].size)+" are nonzero")
 
-.. code-block:: python
+.. code-block:: none
 
     The normalization workspace shape is (100, 100)
     Out of those elements, 6712 are nonzero
@@ -79,4 +79,3 @@ The output would look like:
 .. categories::
 
 .. sourcelink::
-

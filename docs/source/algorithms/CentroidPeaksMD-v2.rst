@@ -29,19 +29,15 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
 The example shows how applying centroid peaks changes the peak posisions previously calculated by
 FindPeaksMD algorithm.
 
-
 .. code-block:: python
    :linenos:
 
-   #.. testcode:: exCentroidPeaksMD
-
    def print_WSDifference(pTWS1,pTWS2,nRows):
-          ''' Method to print difference between two table workspaces before and after applying CentroidPeaks '''
+          '''Method to print difference between two table workspaces before and after applying CentroidPeaks'''
           # columns to compare
           tab_names=['RunNumber','DetID','Energy','DSpacing','QLab','QSample']
           common = tab_names[0:2];
-       long = tab_names[-2:];
-
+          long = tab_names[-2:];
 
           for name in tab_names:
               if name in common :
@@ -72,7 +68,6 @@ FindPeaksMD algorithm.
 
               print("|\n ")
 
-
    # load test workspace
    Load(Filename=r'TOPAZ_3132_event.nxs',OutputWorkspace='TOPAZ_3132_event',LoadMonitors='1')
 
@@ -89,13 +84,10 @@ FindPeaksMD algorithm.
    print_WSDifference(peaks,peaks2,10)
 
 
-   **Output:**
+**Output:**
 
-.. code-block:: python
+.. code-block:: none
    :linenos:
-
-   #.. testoutput:: exCentroidPeaksMD
-
 
    |  RunNumber  |      DetID  | old Energy | new Energy  | old DSpaci | new DSpaci  |FindPeaksMD found (old):   QLab |IntegrEllipsoids (new):    QLab  |FindPeaksMD found (old):QSample |IntegrEllipsoids (new): QSample  |
    |       3132  |    1124984  |       8.49 |      10.39  |       2.02 |       1.93  |      [1.57771,1.21779,2.37854] |       [1.9157,1.15022,2.37669]  |  [2.99396,0.815958,0.00317344] |    [3.13041,0.861402,0.316416]  |

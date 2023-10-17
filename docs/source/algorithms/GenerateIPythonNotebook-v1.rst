@@ -37,7 +37,7 @@ Usage
     ws = RenameWorkspace(ws, OutputWorkspace="MyTestWorkspace")
 
     notebook_text = GenerateIPythonNotebook(ws)
-    print notebook_text.strip()
+    print(notebook_text.strip())
 
 **Example - generate a python notebook giving a range of start times:**
 
@@ -59,7 +59,7 @@ Usage
 
     # Generate a notebook with a given start time
     notebook_text = GenerateIPythonNotebook(ws, StartTimestamp=str(from_time))
-    print notebook_text.strip()
+    print(notebook_text.strip())
 
 **Example - generate a python notebook and save it to file:**
 
@@ -77,7 +77,7 @@ Usage
     GenerateIPythonNotebook(ws, Filename=path)
 
     with open (path, 'r') as notebook:
-      print notebook.read().strip()
+      print(notebook.read().strip())
 
 .. categories::
 

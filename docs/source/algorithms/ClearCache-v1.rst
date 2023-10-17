@@ -32,7 +32,7 @@ Usage
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
    ... files were removed
 

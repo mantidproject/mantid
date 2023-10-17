@@ -36,13 +36,13 @@ Usage
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
-    The number of investigations returned was: 3
+   The number of investigations returned was: 3
 
-    The title of the investigation is: CAL_ALF_14/02/2014 15:37:05
-    The title of the investigation is: CAL_ALF_18/11/2013 15:03:48
-    The title of the investigation is: CAL_ALF_19/11/2013 11:59:56
+   The title of the investigation is: CAL_ALF_14/02/2014 15:37:05
+   The title of the investigation is: CAL_ALF_18/11/2013 15:03:48
+   The title of the investigation is: CAL_ALF_19/11/2013 11:59:56
 
 **Example - paging results returned.**
 
@@ -59,9 +59,9 @@ Output:
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
-     The number of search results returned was: 109
+   The number of search results returned was: 109
 
 .. categories::
 

@@ -15,10 +15,11 @@ heuristic formula for the correction is stored in the instrument
 definition file. Below is shown the entry in the instrument file for the
 VISION beamline:
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
-  <!-- formula for t0 calculation. See http://muparser.sourceforge.net/mup_features.html#idDef2 for available operators-->
-  <parameter name="t0_formula" type="string">
+  <!-- formula for t0 calculation. See http://muparser.sourceforge.net/mup_features.html#idDef2 for available operators -->
+  <parameter name="t0_formula" type="string">
     <value val="(incidentEnergy < 34.7332) ? 37.011296*incidentEnergy^(-0.052874) : (incidentEnergy < 88.7556) ? 124.267307*incidentEnergy^(-0.394282) : (incidentEnergy < 252.471) ? 963.775145*incidentEnergy^(-0.850919) : (incidentEnergy < 420.145) ? 33.225834*incidentEnergy^(-0.242105) : (incidentEnergy < 100000.0) ? 120.569231*incidentEnergy^(-0.455477) : 0.0" />
   </parameter>
 

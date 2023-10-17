@@ -150,19 +150,19 @@ Usage
 .. code-block:: python
    :linenos:
 
-    Load(Filename='/SNS/MANDI/IPTS-8776/0/5921/NeXus/MANDI_5921_event.nxs', OutputWorkspace='MANDI_5921_event')
-    MANDI_5921_md = ConvertToMD(InputWorkspace='MANDI_5921_event',  QDimensions='Q3D', dEAnalysisMode='Elastic',
-                             Q3DFrames='Q_lab', QConversionScales='Q in A^-1',
-                             MinValues='-5, -5, -5', Maxvalues='5, 5, 5', MaxRecursionDepth=10,
-                             LorentzCorrection=False)
-    LoadIsawPeaks(Filename='/SNS/MANDI/shared/ProfileFitting/demo_5921.integrate', OutputWorkspace='peaks_ws')
+   Load(Filename='/SNS/MANDI/IPTS-8776/0/5921/NeXus/MANDI_5921_event.nxs', OutputWorkspace='MANDI_5921_event')
+   MANDI_5921_md = ConvertToMD(InputWorkspace='MANDI_5921_event',  QDimensions='Q3D', dEAnalysisMode='Elastic',
+                              Q3DFrames='Q_lab', QConversionScales='Q in A^-1',
+                              MinValues='-5, -5, -5', Maxvalues='5, 5, 5', MaxRecursionDepth=10,
+                              LorentzCorrection=False)
+   LoadIsawPeaks(Filename='/SNS/MANDI/shared/ProfileFitting/demo_5921.integrate', OutputWorkspace='peaks_ws')
 
-    IntegratePeaksProfileFitting(OutputPeaksWorkspace='peaks_ws_out', OutputParamsWorkspace='params_ws',
-            InputWorkspace='MANDI_5921_md', PeaksWorkspace='peaks_ws',
-            UBFile='/SNS/MANDI/shared/ProfileFitting/demo_5921.mat', MinpplFrac=0.9, MaxpplFrac=1.1,
-            ModeratorCoefficientsFile='/SNS/MANDI/shared/ProfileFitting/franz_coefficients_2017.dat',
-            StrongPeakParamsFile='/SNS/MANDI/shared/ProfileFitting/strongPeakParams_beta_lac_mut_mbvg.pkl',
-            peakNumber=30)
+   IntegratePeaksProfileFitting(OutputPeaksWorkspace='peaks_ws_out', OutputParamsWorkspace='params_ws',
+                                InputWorkspace='MANDI_5921_md', PeaksWorkspace='peaks_ws',
+                                UBFile='/SNS/MANDI/shared/ProfileFitting/demo_5921.mat', MinpplFrac=0.9, MaxpplFrac=1.1,
+                                ModeratorCoefficientsFile='/SNS/MANDI/shared/ProfileFitting/franz_coefficients_2017.dat',
+                                StrongPeakParamsFile='/SNS/MANDI/shared/ProfileFitting/strongPeakParams_beta_lac_mut_mbvg.pkl',
+                                peakNumber=30)
 
 
 

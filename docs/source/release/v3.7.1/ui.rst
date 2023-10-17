@@ -80,7 +80,7 @@ Instrument View
        # and have a time of flight between 10,000 and 20,000
        try:
            simpleapi.FakeISISEventDAE(NPeriods=1,NSpectra=100,Rate=20,NEvents=1000)
-        except RuntimeError:
+       except RuntimeError:
            pass
 
    def captureLive():
@@ -93,26 +93,26 @@ Instrument View
                                AccumulationMethod='Add', PreserveEvents=True)
 
 
-    #--------------------------------------------------------------------------------------------------
-    InstrumentWidget = mpy.MantidQt.MantidWidgets.InstrumentWidget
-    app = PyQt4.QtGui.QApplication(sys.argv)
+   #--------------------------------------------------------------------------------------------------
+   InstrumentWidget = mpy.MantidQt.MantidWidgets.InstrumentWidget
+   app = PyQt4.QtGui.QApplication(sys.argv)
 
-    eventThread = Thread(target = startFakeEventDAE)
-    eventThread.start()
+   eventThread = Thread(target = startFakeEventDAE)
+   eventThread.start()
 
-    while not eventThread.is_alive():
-        time.sleep(2) # give it a small amount of time to get ready
+   while not eventThread.is_alive():
+       time.sleep(2) # give it a small amount of time to get ready
 
-    facility = ConfigService.getFacility()
-    try:
-        captureLive()
+   facility = ConfigService.getFacility()
+   try:
+       captureLive()
 
-        iw = InstrumentWidget("wsOut")
-        iw.show()
-        app.exec_()
-    finally:
-        # put back the facility
-        ConfigService.setFacility(facility)
+       iw = InstrumentWidget("wsOut")
+       iw.show()
+       app.exec_()
+   finally:
+       # put back the facility
+       ConfigService.setFacility(facility)
 
 
 Scripting Window

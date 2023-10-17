@@ -271,7 +271,7 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
 
 .. .. testoutput:: exIntegrateEllipsoids
 
-.. code-block:: python
+.. code-block:: none
    :linenos:
 
    | RunNumbe | DetID    | h        | k        | l        | Waveleng | Energy   | TOF      | DSpacing | Intens   | SigInt   | BinCount | BankName | Row      | Col      | QLab     | QSample  | PeakNumb |

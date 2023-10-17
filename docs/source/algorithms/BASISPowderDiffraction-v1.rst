@@ -62,7 +62,7 @@ Usage
     BASISPowderDiffraction(RunNumbers='74799',
                            OutputWorkspace='powder',
                            BackgroundRuns='75527',
-                           OutputBackground='background'
+                           OutputBackground='background',
                            VanadiumRuns='64642')
 .. figure:: /images/BASISPowderDiffraction.png
 
@@ -101,5 +101,3 @@ monitor counts for the last step.
 .. categories::
 
 .. sourcelink::
-
-

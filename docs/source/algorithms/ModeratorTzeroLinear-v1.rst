@@ -21,6 +21,7 @@ in units of microsec/Angstrom and Intercept :math:`b` is in units
 of microsec. Below is the example XML code included in BASIS beamline
 parameters file.
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
     <!-- Moderator Tzero/LambdaZero Parameters  -->

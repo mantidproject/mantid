@@ -46,11 +46,10 @@ to ``mock.Mock``.
 A test is shown below:
 
 .. code-block:: python
-    :dedent: 4
 
-            def test_doSomething(self):
-                self.presenter.handleButton()
-                self.view.getValue.assert_called_once()
+   def test_doSomething(self):
+       self.presenter.handleButton()
+       self.view.getValue.assert_called_once()
 
 We call the ``handleButton`` function and then use ``assert_called_once``
 to ensure that the method from the view is called the correct number of

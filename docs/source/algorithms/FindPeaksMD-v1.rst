@@ -191,11 +191,8 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
 
 **Output:**
 
-.. code-block:: python
+.. code-block:: none
    :linenos:
-
-
-   #.. testoutput:: exFindPeaksMD
 
    | RunNumbe | DetID    | h        | k        | l        | Waveleng | Energy   | TOF      | DSpacing | Intens   | SigInt   | BinCount | BankName | Row      | Col      | QLab     | QSample  | PeakNumb |
    | 3132     | 1124984  |      0.0 |      0.0 |      0.0 |      3.1 |      8.5 |  14482.3 |      2.0 |      0.0 |      0.0 |   1668.0 | bank17   |    120.0 |     42.0 | [1.57771,1.21779,2.37854] | [2.99396,0.815958,0.00317344] | 1        |

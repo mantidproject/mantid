@@ -28,7 +28,7 @@ Usage
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
     The session ID is: b931877c-3cfb-460e-9e88-ed4257020477
 
