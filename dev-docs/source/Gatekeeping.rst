@@ -4,7 +4,7 @@
 Gatekeeping a Pull Request
 ==========================
 
-The final step in our :ref:`development workflow <GitWorkflow>` after a :ref:`pull request has been reviewed <ReviewingAPullRequest>` is gatekeeping. This is second review stage where a senior developer / code owner does a final check of the work before merging it to the ``main`` branch.
+The final step in our :ref:`development workflow <GitWorkflow>` after a :ref:`pull request has been reviewed <ReviewingAPullRequest>` is gatekeeping. This is second review stage where a senior developer / code owner does a final check of the work before merging it to the ``main`` or ``release-next`` branch.
 
 Purpose
 =======
@@ -19,7 +19,7 @@ This document offers some guidance for gatekeepers as to what to look for and so
 With great power comes great responsibility
 ===========================================
 
-*Be very careful not to push to* ``main``
+*Be very careful not to push to* ``main`` or ``release-next``
 
 * When you are made a gatekeeper on the project you will be given **full, unprotected access to the** ``main`` **branch**. This means you lose the normal protection that stops you being able to push directly to the ``main`` branch - you therefore need to be careful at all times that you do not accidentally push to ``main``, e.g. when you are using Git in your terminal or Git GUI.
 * You should be enough of a Git expert to know the implications of directly pushing to a branch, including being able to overwrite a branch completely with the history of another branch, which of course would be pretty catastrophic if done to ``main``. You should have solid working practices with Git that ensure you are never likely to do this. Working on a fork is recommended, and some of the :ref:`recommended config <GitConfig>` regarding default behaviour for ``git push`` will also help (although recent versions of Git are much safer by default in this regard so in reality you are unlikely to have problems).
@@ -35,7 +35,7 @@ Performing a merge on Github
 * This button should be green if all checks have passed and there is an approved review. The button will be red if this is not the case but you have the power to override it and merge anyway - it is not recommended to do this but very occasionally may be needed if e.g. it is urgent and being held up by an unreliable test you are certain is unrelated. If you do need to do this, make sure you add a clear comment describing why.
 * Occasionally you might want to use ``Squash and merge`` from the drop-down menu, but typically this is only done if the developer specifically asked for it (although feel free to ask the developer if you can squash if you think that's more appropriate).
 * When you click the button you will get the chance to edit the commit message before committing. Typically we leave the commit title as per the default text so it is clear it is a merge, and paste the PR title into the body of the commit message. (Any other useful information can also be added here.)
-* Click ``Confirm merge`` to merge the commit to the ``main`` branch.
+* Click ``Confirm merge`` to merge the commit to the destination branch.
 * If a PR is approved but still finishing its CI checks then the button will read ``Enable auto merge``. Feel free to use this if you are happy for the PR to be automatically merged once it passes all the CI checks.
 
 
@@ -56,10 +56,21 @@ Tips
 * Be aware that other gatekeepers may be looking at PRs at the same time as you, so if you think you will be spending any significant time doing your review, assign yourself as a reviewer and/or put a comment on it so that other gatekeepers know not to look at it (particularly if you think you might need to ask for changes, because another gatekeeper might merge it in the meantime!).
 
 
+Destination branch
+------------------
+
+*Be aware of where we are in the development/release cycle*
+
+* Check that the destination branch is correct. During development sprints, the destination branch should be ``main``. During the release period, it may be ``main`` or ``release-next`` - ensure you are familiar with the release process and know the differences.
+* Be more picky in the run up to release freeze - if large or risky changes are being made very close to release, question whether they can wait till the next release.
+* The milestone should be set appropriately for the destination branch. If either doesn't look correct, query it.
+* Use extra caution when merging into ``release-next``, particularly after release freeze when we should only be merging things that are critical and are considered "safe" fixes. The later we get into the release sprint, the more picky we need to be. If a PR can wait till the next release, get the developer to change the destination branch to ``main``.
+* If we are on very close to releasing, further merges to ``release-next`` may miss the build and be lost entirely. Check with the release manager.
+
+
 General checks
 --------------
 
-* Check that the destination branch and milestone are correct.
 * Check that the PR description and testing instructions are clear.
 * Check that the reviewer seems to have done a thorough job on the functional testing and code review - feel free to ask if not clear.
 * Check that everything has been added/updated if applicable, e.g. release notes, unit tests, system tests, documentation, developer documentation, unscripted testing documentation.
