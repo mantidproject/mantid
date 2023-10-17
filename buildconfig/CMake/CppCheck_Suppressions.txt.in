@@ -63,7 +63,7 @@ unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Quat.cpp:687
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:128
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:129
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:180
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:99
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Parallel/inc/MantidParallel/IO/EventDataPartitioner.h:86
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/VMD.cpp:428
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/VMD.cpp:536
