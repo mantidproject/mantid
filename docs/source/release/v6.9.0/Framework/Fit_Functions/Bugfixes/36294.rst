@@ -1,0 +1,1 @@
+- Fit Function :ref:`DSFinterp1DFit <func-DSFinterp1DFit>` which is not registered because of a missing dependency has been marked for deprecation.
