@@ -28,33 +28,27 @@ def get_interface_dir() -> AnyStr:
 
 
 def _discover_python_interfaces(interface_dir) -> Dict[str, List[str]]:
-    """Return a dictionary mapping a category to a set of named Python interfaces"""
-    items = ConfigService["mantidqt.python_interfaces"].split()
-    # detect the python interfaces
     interfaces = {}
-    for item in items:
-        key, script_name = item.split("/")
+    for category, script_name in [interface.split("/") for interface in ConfigService["mantidqt.python_interfaces"].split()]:
         if not os.path.exists(os.path.join(interface_dir, script_name)):
-            logger.warning('Failed to find script "{}" in "{}"'.format(script_name, interface_dir))
+            logger.warning(f'Failed to find script "{script_name}" in "{interface_dir}"')
             continue
-        interfaces.setdefault(key, []).append(script_name)
+        interfaces.setdefault(category, []).append(script_name)
 
     return interfaces
 
 
 def _discover_registers_to_run(interface_dir: str) -> Dict[str, List[str]]:
-    items = ConfigService["mantidqt.python_interfaces"].split()
     try:
         register_items = ConfigService["mantidqt.python_interfaces_io_registry"].split()
     except KeyError:
         return {}
 
     registers_to_run = {}
-    for item in items:
-        key, script_name = item.split("/")
+    for category, script_name in [interface.split("/") for interface in ConfigService["mantidqt.python_interfaces"].split()]:
         reg_name = script_name[:-3] + "_register.py"
         if reg_name in register_items and os.path.exists(os.path.join(interface_dir, reg_name)):
-            registers_to_run.setdefault(key, []).append(reg_name)
+            registers_to_run.setdefault(category, []).append(reg_name)
 
     return registers_to_run
 
@@ -68,14 +62,33 @@ def _discover_cpp_interfaces(interfaces: Dict[str, List[str]]):
         if len(categories) == 0:
             categories = ["General"]
         for category in categories:
-            if category in interfaces.keys():
-                interfaces[category].append(name)
-            else:
-                interfaces[category] = [name]
+            interfaces.setdefault(category, []).append(name)
 
 
 def gather_interface_names(python_interface_dir: str = get_interface_dir()) -> Dict[str, List[str]]:
+    """
+    Returns a dictionary where keys are the interface categories and
+    values are lists of interface names in each category
+    """
     interfaces = _discover_python_interfaces(python_interface_dir)
+    _discover_cpp_interfaces(interfaces)
+    return interfaces
+
+
+def gather_python_interface_names(python_interface_dir: str = get_interface_dir()) -> Dict[str, List[str]]:
+    """
+    Returns a dictionary where keys are the interface categories and
+    values are lists of interface names in each category
+    """
+    return _discover_python_interfaces(python_interface_dir)
+
+
+def gather_cpp_interface_names() -> Dict[str, List[str]]:
+    """
+    Returns a dictionary where keys are the interface categories and
+    values are lists of interface names in each category
+    """
+    interfaces = {}
     _discover_cpp_interfaces(interfaces)
     return interfaces
 
