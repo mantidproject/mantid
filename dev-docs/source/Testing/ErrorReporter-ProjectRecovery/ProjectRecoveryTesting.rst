@@ -85,7 +85,7 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory=<path-to-test>
+   testing_directory='<path-to-test>'
    # <path-to-test> is the location of a directory for saving workspaces for comparison later
    # e.g. C:\Users\abc1234\Desktop\test_proj_rec\
    CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='0Rebinned')
@@ -104,7 +104,7 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory=<path-to-test>
+   testing_directory='<path-to-test>'
    SaveCSV(InputWorkspace='299Clone', Filename=testing_directory +'Clone_r.csv')
 
 - Compare the contents of `Clone.csv` and `Clone_r.csv`, they should be the same
@@ -118,7 +118,7 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory=<path-to-test>
+   testing_directory='<path-to-test>'
    Load(Filename=r'SXD23767.raw', OutputWorkspace='SXD23767')
    ConvertToDiffractionMDWorkspace(InputWorkspace='SXD23767', OutputWorkspace='SXD23767_MD', OneEventPerBin=False, SplitThreshold=30)
    DeleteWorkspace("SXD23767")
@@ -162,7 +162,7 @@ Project Recovery test
 
 .. code-block:: python
 
-    testing_directory=<path-to-test>
+    testing_directory='<path-to-test>'
     SaveCSV('Clone_matrix' , testing_directory + '/method_test_r.csv')
     SaveCSV('long4_matrix', testing_directory + '/test_binary_operators_r.csv')
 

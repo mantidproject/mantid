@@ -77,6 +77,7 @@ standard workpace, then this step can be skipped. Simply omitting the
 .. code-block:: python
 
    def validate(self):
+       pass
 
 method from the system test is sufficient.
 
@@ -155,6 +156,7 @@ Additional assertions can be used as the basis for your own comparison
 tests. The following assertions are already implemented in the base
 class.
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: python
 
    def assertTrue(self, value, msg=""):

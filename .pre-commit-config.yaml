@@ -39,6 +39,17 @@ repos:
     - id: cmake-format
     #- id: cmake-lint <- not ready yet
 
+  - repo: https://github.com/rstcheck/rstcheck
+    rev: v6.2.0
+    hooks:
+      - id: rstcheck
+        additional_dependencies: [sphinx]
+        args: ["--config", ".rstcheck.project.cfg"]
+        exclude: |
+          (?x)^(
+          ^docs/source/.*
+          )$
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.0.291
     # ruff must appear before black in the list of hooks
