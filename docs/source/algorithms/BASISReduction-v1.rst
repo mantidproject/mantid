@@ -117,7 +117,7 @@ point on, the reduction process continues using :math:`S'_s` in place of :math:`
 Saving NXSPE files
 ==================
 NXSPE files are suitable for intensity visualization in :math:`\vec{Q}` space with
-[MSLICE](http://mslice.isis.rl.ac.uk/Main_Page). When using this program, make
+`MSLICE <http://mslice.isis.rl.ac.uk/Main_Page>`_. When using this program, make
 sure you select the *inverse* geometry.
 
 .. image:: /images/BASISReduction_NXSPE.png

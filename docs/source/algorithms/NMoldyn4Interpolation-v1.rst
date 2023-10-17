@@ -44,7 +44,7 @@ set**
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
     No. of Q-values in simulation = 8
     No. of Q-values in reference = 11

@@ -312,7 +312,7 @@ available in `Mantid system tests repository
 
 .. .. testoutput:: exIntegrateEllipsoidsTwoStep
 
-.. code-block:: python
+.. code-block:: none
    :linenos:
 
    | RunNumbe | DetID    | h        | k        | l        | Waveleng | Energy   | TOF      | DSpacing | Intens   | SigInt   | BinCount | BankName | Row      | Col      | QLab     | QSample  | PeakNumb |
