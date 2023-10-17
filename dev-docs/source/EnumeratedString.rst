@@ -70,8 +70,11 @@ number of elements inside the ``enum``, and used for verifying compatibility wit
 will be triggered if this is not included.
 
 Further, the ``enum`` *must* have elements in order from 0 to :code:`enum_count`.  That is, you *CANNOT* set them like so:
+
 .. code-block:: cpp
+
    enum class CakeTypeEnum : char {LEMON='l', BUNDT='b', POUND='p', enum_count=3}; // NOT ALLOWED
+
 as this will break validation features inside the class.
 
 Notice the use of the reference operator, :code:`&cakeTypeNames`, and *not* :code:`cakeTypeNames`.
