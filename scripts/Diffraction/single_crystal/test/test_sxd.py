@@ -284,6 +284,19 @@ class SXDTest(unittest.TestCase):
             # check bank1 moved in all workspaces
             self.assertAlmostEqual(0.0, ws.getInstrument().getComponentByName("bank1").getPos()[0], delta=1e-10)
 
+    def test_undo_calibration_xml(self):
+        # clone workspaces
+        ws_clone3 = CloneWorkspace(self.ws)
+        # move bank1 component to (0,0,0) and store new location in calibration xml file
+        MoveInstrumentComponent(Workspace=ws_clone3, ComponentName="bank1", RelativePosition=False, EnableLogging=False)
+        peaks3 = CreatePeaksWorkspace(InstrumentWorkspace=ws_clone3, NumberOfPeaks=0, OutputWorkspace="peaks3")
+
+        self.sxd.undo_calibration(ws_clone3, peaks_ws=peaks3)
+
+        for ws in [ws_clone3, peaks3]:
+            # check bank1 is no longer at 0
+            self.assertAlmostEqual(0.13, ws.getInstrument().getComponentByName("bank1").getPos()[0], delta=1e-2)
+
     # --- helper funcs ---
 
     def _make_peaks_detids(self, detids=[6113], tofs=None, wsname="peaks_detids"):
