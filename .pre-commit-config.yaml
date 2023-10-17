@@ -47,7 +47,16 @@ repos:
         args: ["--config", ".rstcheck.project.cfg"]
         exclude: |
           (?x)^(
-          ^docs/source/.*
+          ^docs/source/index.rst$| # this has a value filled in by cmake
+          ^docs/source/algorithms/.*|
+          ^docs/source/api/.*|
+          ^docs/source/concepts/.*|
+          ^docs/source/fitting/.*|
+          ^docs/source/interfaces/.*|
+          ^docs/source/plotting/.*|
+          ^docs/source/techniques/.*|
+          ^docs/source/tutorials/.*|
+          ^docs/source/workbench/.*|
           )$
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
