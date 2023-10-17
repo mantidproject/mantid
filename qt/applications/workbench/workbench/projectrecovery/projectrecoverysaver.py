@@ -51,7 +51,6 @@ ALGS_TO_IGNORE = [
     "SaveIsawUB",
     "SaveLauenorm",
     "SaveMD",
-    "SaveMDWorkspaceToVTK",
     "SaveMask",
     "SaveNISTDAT",
     "SaveNXSPE",
