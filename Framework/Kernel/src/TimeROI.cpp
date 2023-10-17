@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
+#define NEW_UPDATE_INTERSECTION 1
+
 #include <iostream>
 #include <limits>
 #include <sstream>
@@ -404,6 +406,58 @@ void TimeROI::replaceROI(const std::vector<Types::Core::DateAndTime> &roi) {
     m_roi.assign(roi.cbegin(), roi.cend());
 }
 
+#ifdef NEW_UPDATE_INTERSECTION
+/**
+ * Updates the TimeROI values with the intersection with another TimeROI.
+ * See https://en.wikipedia.org/wiki/Intersection for the theory.
+ * The algorithm is adapted from https://www.geeksforgeeks.org/find-intersection-of-intervals-given-by-two-lists/
+ *
+ * Intersection with an empty TimeROI will clear out this one.
+ */
+void TimeROI::update_intersection(const TimeROI &other) {
+  // exit early if the two TimeROI are identical
+  if (*this == other)
+    return;
+
+  if (other.useAll() || this->useAll()) {
+    // empty out this environment
+    m_roi.clear();
+    return;
+  }
+
+  TimeROI output;
+  auto it1 = m_roi.cbegin();
+  auto it2 = other.m_roi.cbegin();
+
+  while (it1 != m_roi.end() && it2 != other.m_roi.end()) {
+    // Left bound for intersecting segment
+    const DateAndTime &leftBound = std::max(*it1, *it2);
+
+    // Right bound for intersecting segment
+    auto it1_next = std::next(it1);
+    auto it2_next = std::next(it2);
+    const DateAndTime &rightBound = std::min(*it1_next, *it2_next);
+
+    // If segment is valid, include it
+    if (leftBound < rightBound) {
+      output.m_roi.emplace_back(leftBound);
+      output.m_roi.emplace_back(rightBound);
+    }
+
+    // If it1 right bound is smaller, increment it1; else increment it2
+    if (*it1_next < *it2_next)
+      std::advance(it1, 2);
+    else
+      std::advance(it2, 2);
+  }
+
+  if (output.empty())
+    output.replaceROI(USE_NONE);
+
+  m_roi = std::move(output.m_roi);
+}
+#endif
+
 /**
  * Updates the TimeROI values with the union with another TimeROI.
  * See https://en.wikipedia.org/wiki/Union_(set_theory) for more details
@@ -421,6 +475,7 @@ void TimeROI::update_union(const TimeROI &other) {
   }
 }
 
+#ifndef NEW_UPDATE_INTERSECTION
 /**
  * Updates the TimeROI values with the intersection with another TimeROI.
  * See https://en.wikipedia.org/wiki/Intersection for the intersection theory.
@@ -471,7 +526,7 @@ void TimeROI::update_intersection(const TimeROI &other) {
 
   m_roi = std::move(output.m_roi);
 }
-
+#endif
 /**
  * If this is empty, replace it with the supplied TimeROI, otherwise calculate the intersection.
  * Supplying an empty TimeROI will have no effect.
