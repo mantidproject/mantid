@@ -31,8 +31,8 @@ void QtJobRunner::setAlgorithmQueue(std::deque<IConfiguredAlgorithm_sptr> algori
 
 void QtJobRunner::executeAlgorithmQueue() { m_batchAlgoRunner.executeBatchAsync(); }
 
-void QtJobRunner::executeAlgorithm(IConfiguredAlgorithm_sptr &algorithm) {
-  m_batchAlgoRunner.executeAlgorithmAsync(algorithm);
+void QtJobRunner::executeAlgorithm(IConfiguredAlgorithm_sptr algorithm) {
+  m_batchAlgoRunner.executeAlgorithmAsync(std::move(algorithm));
 }
 
 void QtJobRunner::cancelAlgorithmQueue() { m_batchAlgoRunner.cancelBatch(); }

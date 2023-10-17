@@ -26,6 +26,8 @@ Workspace groups can be created in a more flexible way in the Python script wind
 
 .. testcode:: CreatingWorkspaceGroups
 
+    from mantid.simpleapi import *
+
     ws1 = CreateSampleWorkspace()
     ws2 = CreateSampleWorkspace()
     ws3 = CreateSampleWorkspace()
@@ -70,7 +72,10 @@ the group should then appear in the ADS with the given name. Using direct instan
 
 .. testcode:: CreatingWorkspaceGroupsInstantiated
 
+    from mantid.simpleapi import *
     from mantid.api import WorkspaceGroup
+
+    mtd.clear()
 
     ws1 = CreateSampleWorkspace()
     ws2 = CreateSampleWorkspace()
@@ -97,7 +102,10 @@ Alternatively, workspace group objects can be fed workspaces which are not in th
 
 .. testcode:: CreatingWorkspaceGroupsNoADS
 
+    from mantid.simpleapi import *
     from mantid.api import WorkspaceGroup
+
+    mtd.clear()
 
     ws1 = WorkspaceFactory.create("Workspace2D", 2, 2, 2)
     ws2 = WorkspaceFactory.create("Workspace2D", 2, 2, 2)
@@ -135,6 +143,7 @@ If you want to check if a variable points to something that is a Workspace Group
 
 .. testcode:: CheckGroupWorkspace
 
+    from mantid.simpleapi import *
     from mantid.api import WorkspaceGroup
 
     ws1 = CreateSampleWorkspace()
@@ -155,6 +164,8 @@ Looping over all of the members of a group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. testcode:: GroupWorkspaceMembers
+
+    from mantid.simpleapi import *
 
     ws1 = CreateSampleWorkspace()
     ws2 = CreateSampleWorkspace()
@@ -186,6 +197,8 @@ You can pass workspace groups into any algorithm and Mantid will run that algori
 
 .. testcode:: CheckGroupWorkspace
 
+    from mantid.simpleapi import *
+
     ws1 = CreateSampleWorkspace()
     ws2 = CreateSampleWorkspace()
     wsGroup = GroupWorkspaces("ws1,ws2")
@@ -211,6 +224,8 @@ Final words of warning:
 
 .. testcode:: Iterative Deletion of Grouped Workspaces
 
+    from mantid.simpleapi import *
+
     ws1 = CreateSampleWorkspace()
     ws2 = CreateSampleWorkspace()
     wsGroup = GroupWorkspaces("ws1,ws2")
@@ -223,6 +238,8 @@ otherwise indexing will be confused by each deletion.
 - To Delete an entire group, just run:
 
 .. testcode:: Delete Entire Workspace
+
+    from mantid.simpleapi import *
 
     ws1 = CreateSampleWorkspace()
     ws2 = CreateSampleWorkspace()

@@ -8,27 +8,37 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataHandling/LoadCalFile.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadCalFile.h"
-#include "MantidDataObjects/GroupingWorkspace.h"
-
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+
+namespace {
+/// static Logger definition
+Logger g_log("LoadCalFileTest");
+} // namespace
 
 class LoadCalFileTest : public CxxTest::TestSuite {
 public:
   void test_Init() {
+    g_log.notice("\ntest_Init...");
+
     LoadCalFile alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
 
   void test_exec() {
+    g_log.notice("\ntest_exec...");
+
     // Name of the output workspace.
     std::string outWSName("LoadCalFileTest");
 
@@ -116,6 +126,8 @@ public:
   }
 
   void testLoadCalFilePerformance() {
+    g_log.notice("\ntestLoadCalFilePerformance...");
+
     for (int i = 0; i < numberOfIterations; i++) {
       TS_ASSERT_THROWS_NOTHING(loadAlgPtrArray[i]->execute());
     }

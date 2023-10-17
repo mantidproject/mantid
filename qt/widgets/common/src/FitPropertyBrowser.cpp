@@ -1641,7 +1641,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
       QCoreApplication::processEvents();
     }
     if (!result.error().empty()) {
-      emit algorithmFinished(QString());
+      emit algorithmFailed();
     }
   } catch (const std::exception &e) {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";

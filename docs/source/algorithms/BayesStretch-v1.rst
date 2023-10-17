@@ -25,8 +25,8 @@ Usage
 .. testcode:: BayesStretchExample
 
     # Check OS support for F2Py (Windows only)
-    from IndirectImport import is_supported_f2py_platform
-    if is_supported_f2py_platform():
+    from mantid.utils.pip import package_installed
+    if package_installed("quasielasticbayes"):
         # Load in test data
         sample_ws = Load('irs26176_graphite002_red.nxs')
         resolution_ws = Load('irs26173_graphite002_red.nxs')

@@ -93,16 +93,7 @@ void ProjectMD::copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
     outws->addExperimentInfo(info);
   }
 }
-/**
- * This looks stupid but:
- *    - ws->getIndexMultiplier() is not in the interface but only in the
- * implementation
- *      of MDHistoWorkspace. Use would require some shitty casting
- *    - From the docs it is not clear if MDHistoWorkspace is in C or F77 storage
- * order.
- *      The documentation actually suggest F77, the code too?
- *  This isolates this from the storage order concern.
- */
+
 unsigned int ProjectMD::calcIndex(const IMDHistoWorkspace_sptr &ws, int dim[]) {
   size_t idx = 0;
   switch (ws->getNumDims()) {

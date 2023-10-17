@@ -151,7 +151,6 @@ void DiffractionFocussing2::exec() {
       return;
     } else {
       // get the full d-spacing range
-      m_eventW->sortAll(DataObjects::TOF_SORT, nullptr);
       m_matrixInputW->getXMinMax(eventXMin, eventXMax);
     }
   }
@@ -175,6 +174,8 @@ void DiffractionFocussing2::exec() {
   MantidVec weights_default(1, 1.0), emptyVec(1, 0.0), EOutDummy(nPoints);
 
   Progress prog(this, 0.2, 1.0, static_cast<int>(totalHistProcess) + nGroups);
+
+  EventWorkspace_const_sptr eventInputWS = std::dynamic_pointer_cast<const EventWorkspace>(m_matrixInputW);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_matrixInputW, *out))
   for (int outWorkspaceIndex = 0; outWorkspaceIndex < static_cast<int>(m_validGroups.size()); outWorkspaceIndex++) {
@@ -210,20 +211,27 @@ void DiffractionFocussing2::exec() {
       const auto &inSpec = m_matrixInputW->getSpectrum(inWorkspaceIndex);
       // Get reference to its old X,Y,and E.
       auto &Xin = inSpec.x();
-      auto &Yin = inSpec.y();
-      auto &Ein = inSpec.e();
-      outSpec.addDetectorIDs(inSpec.getDetectorIDs());
 
-      try {
-        // TODO This should be implemented in Histogram as rebin
-        Mantid::Kernel::VectorHelper::rebinHistogram(Xin.rawData(), Yin.rawData(), Ein.rawData(), Xout.rawData(), Yout,
-                                                     Eout, true);
-      } catch (...) {
-        // Should never happen because Xout is constructed to envelop all of the
-        // Xin vectors
-        std::ostringstream mess;
-        mess << "Error in rebinning process for spectrum:" << inWorkspaceIndex;
-        throw std::runtime_error(mess.str());
+      if (eventInputWS) {
+        const EventList &el = eventInputWS->getSpectrum(inWorkspaceIndex);
+        outSpec.addDetectorIDs(el.getDetectorIDs());
+        el.generateHistogram(group2xstep.at(group), Xout.rawData(), Yout, Eout);
+      } else {
+        auto &Yin = inSpec.y();
+        auto &Ein = inSpec.e();
+        outSpec.addDetectorIDs(inSpec.getDetectorIDs());
+
+        try {
+          // TODO This should be implemented in Histogram as rebin
+          Mantid::Kernel::VectorHelper::rebinHistogram(Xin.rawData(), Yin.rawData(), Ein.rawData(), Xout.rawData(),
+                                                       Yout, Eout, true);
+        } catch (...) {
+          // Should never happen because Xout is constructed to envelop all of the
+          // Xin vectors
+          std::ostringstream mess;
+          mess << "Error in rebinning process for spectrum:" << inWorkspaceIndex;
+          throw std::runtime_error(mess.str());
+        }
       }
 
       // Check for masked bins in this spectrum
@@ -284,8 +292,9 @@ void DiffractionFocussing2::exec() {
     std::vector<double> widths(Xout.size());
     std::adjacent_difference(Xout.begin(), Xout.end(), widths.begin());
 
-    // Take the square root of the errors
-    std::transform(Eout.begin(), Eout.end(), Eout.begin(), static_cast<double (*)(double)>(sqrt));
+    // Take the square root of the errors, for EventWorkspace generateHistogram already gives sqrt of errors
+    if (!eventInputWS)
+      std::transform(Eout.begin(), Eout.end(), Eout.begin(), static_cast<double (*)(double)>(sqrt));
 
     // Multiply the data and errors by the bin widths because the rebin
     // function, when used
@@ -590,6 +599,7 @@ void DiffractionFocussing2::determineRebinParameters() {
 
     HistogramData::BinEdges xnew(xPoints, HistogramData::LogarithmicGenerator(Xmin, step));
     group2xvector[gpit->first] = xnew; // Register this vector in the map
+    group2xstep[gpit->first] = -step;
   }
   // Not needed anymore
   udet2group.clear();

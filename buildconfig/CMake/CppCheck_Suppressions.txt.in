@@ -35,11 +35,6 @@ unusedPrivateFunction
 // ----------- New list of suppressions after updating to cppcheck 2.10.3 -------------
 // - If the line number changes then update it here, or resolve the defect and remove from list
 
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Types/inc/MantidTypes/Core/DateAndTime.h:171
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Types/inc/MantidTypes/Core/DateAndTime.h:172
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:138
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:139
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:296
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:351
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/Types/src/Core/DateAndTime.cpp:372
 cppcheckError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IValidator.h:125
@@ -80,7 +75,7 @@ variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/UserStringParser.cpp:158
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:128
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:129
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:180
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:95
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Parallel/inc/MantidParallel/IO/EventDataPartitioner.h:86
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/VMD.cpp:428
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/VMD.cpp:536
@@ -195,11 +190,9 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Utils.h:125
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Utils.h:165
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Utils.h:195
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/EventList.h:144
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:959
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1055
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:3840
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:3841
-derefInvalidIterator:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1520
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:967
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1063
+derefInvalidIterator:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1528
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/OrientedLattice.cpp:234
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/NiggliCell.cpp:233
 constVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ScalarUtils.cpp:149
@@ -443,11 +436,11 @@ cstyleCast:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/Python/CodeExecution.cpp:87
 cstyleCast:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/Python/CodeExecution.cpp:90
 unusedStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/Python/CodeExecution.cpp:20
 unusedStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/Python/CodeExecution.cpp:21
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:78
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:82
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:188
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:208
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:232
+shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:80
+shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:84
+shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:190
+shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:210
+shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:234
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/inc/MantidQtWidgets/Plotting/PreviewPlot.h:45
 constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/BankTextureBuilder.cpp:326
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/MiniPlotMpl.cpp:154

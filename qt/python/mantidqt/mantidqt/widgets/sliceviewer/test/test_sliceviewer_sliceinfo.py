@@ -9,7 +9,7 @@
 import unittest
 
 # 3rd party
-from numpy import full, radians, sin
+from numpy import full, radians, sin, eye
 
 # local imports
 from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
@@ -158,6 +158,37 @@ class SliceInfoTest(unittest.TestCase):
             qflags=(True, True, True, True),
         )
 
+    def test_slicepoint_proj_matrix(self):
+        info = make_sliceinfo(proj_matrix=[[1.0, 0.0, 1.0], [1.0, 0.0, -1.0], [0.0, 1.0, 0.0]])
+
+        ## point to HKL
+
+        # HKL=[0,0,1]
+        HKL = info.inverse_transform([0, 1, 0])
+        self.assertEqual(HKL[0], 0)
+        self.assertEqual(HKL[1], 0)
+        self.assertEqual(HKL[2], 1)
+
+        # HKL=[1,1,0]
+        HKL = info.inverse_transform([1, 0, 0])
+        self.assertEqual(HKL[0], 1)
+        self.assertEqual(HKL[1], 1)
+        self.assertEqual(HKL[2], 0)
+
+        ## HKL to point
+
+        # HKL=[0,0,1]
+        point = info.transform([0, 0, 1])
+        self.assertEqual(point[0], 0)
+        self.assertEqual(point[1], 1)
+        self.assertEqual(point[2], 0)
+
+        # HKL=[1,1,0]
+        point = info.transform([1, 1, 0])
+        self.assertEqual(point[0], 1)
+        self.assertEqual(point[1], 0)
+        self.assertEqual(point[2], 0)
+
 
 def make_sliceinfo(
     point=(None, None, 0.5),
@@ -165,8 +196,9 @@ def make_sliceinfo(
     dimrange=(None, None, (-15, 15)),
     qflags=[True, True, True],
     axes_angles=full((3, 3), radians(90)),
+    proj_matrix=eye(3),
 ):
-    return SliceInfo(point=point, transpose=transpose, range=dimrange, qflags=qflags, axes_angles=axes_angles)
+    return SliceInfo(point=point, transpose=transpose, range=dimrange, qflags=qflags, axes_angles=axes_angles, proj_matrix=proj_matrix)
 
 
 if __name__ == "__main__":

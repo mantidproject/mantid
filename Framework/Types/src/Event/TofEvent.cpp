@@ -8,6 +8,10 @@
 
 using std::ostream;
 
+namespace {
+constexpr double MICRO_SEC_TO_NANO{1000.0};
+}
+
 namespace Mantid::Types::Event {
 /** Comparison operator.
  * @param rhs: the other TofEvent to compare.
@@ -37,6 +41,16 @@ bool TofEvent::equals(const TofEvent &rhs, const double tolTof, const int64_t to
     return false;
   // then it is just if the pulse-times are equal
   return (this->m_pulsetime.equals(rhs.m_pulsetime, tolPulse));
+}
+
+/// Get the Pulse-time + TOF for each event in this EventList
+Mantid::Types::Core::DateAndTime TofEvent::pulseTOFTime() const {
+  return this->pulseTime() + static_cast<int64_t>(this->tof() * MICRO_SEC_TO_NANO);
+}
+
+/// Get the Pulse-time + time-of-flight of the neutron up to the sample, for each event in this EventList
+Mantid::Types::Core::DateAndTime TofEvent::pulseTOFTimeAtSample(const double &factor, const double &shift) const {
+  return this->pulseTime() + static_cast<int64_t>((factor * this->tof() + shift) * MICRO_SEC_TO_NANO);
 }
 
 /** Output a string representation of the event to a stream

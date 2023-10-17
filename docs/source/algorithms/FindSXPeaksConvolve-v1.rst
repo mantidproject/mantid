@@ -31,7 +31,7 @@ factor 1.25 along each dimension (such that there are approximately the same num
 background shell). The integral of the kernel and background shell together is zero.
 
 The integrated intensity is evaluated by convolution of the signal array with the kernel and the square of the error on
-the integrated intensity is determined by convolution of the squared error array with the absolute value of the kernel.
+the integrated intensity is determined by convolution of the squared error array with the squared value of the kernel.
 
 The threshold for peak detection is given by ``ThresholdIoverSigma`` which is the cutoff ratio of intensity/sigma (i.e.
 a valid peak would be expected to have intensity/sigma > 3). Stronger peaks will have a larger intensity/sigma.
@@ -54,7 +54,7 @@ Usage
 
 .. testoutput:: exampleFindSXPeaksConvolve
 
-    Found 313 peaks
+    Found 323 peaks
 
 
 .. categories::

@@ -170,7 +170,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             # perform convolutions to integrate kernel/shoebox
             # pad with nearest so don't get peaks at edge when -ve values go outside data extent
             yconv = convolve(input=y, weights=kernel, mode="nearest")
-            econv = np.sqrt(convolve(input=e**2, weights=abs(kernel), mode="nearest"))
+            econv = np.sqrt(convolve(input=e**2, weights=kernel**2, mode="nearest"))
             with np.errstate(divide="ignore", invalid="ignore"):
                 intens_over_sig = yconv / econv  # ignore 0/0 which produces NaN (recall NaN > x = False)
 

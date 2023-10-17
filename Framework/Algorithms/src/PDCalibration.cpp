@@ -1167,12 +1167,8 @@ std::set<detid_t> PDCalibration::detIdsForTable() {
     return detids;
 
   // get the indices to loop over
-  std::size_t startIndex = 0;
-  if (!isDefault("StartWorkspaceIndex"))
-    startIndex = static_cast<std::size_t>(m_startWorkspaceIndex);
-  std::size_t stopIndex = m_uncalibratedWS->getNumberHistograms();
-  if (!isDefault("StopWorkspaceIndex"))
-    stopIndex = static_cast<std::size_t>(m_stopWorkspaceIndex);
+  std::size_t startIndex = static_cast<std::size_t>(m_startWorkspaceIndex);
+  std::size_t stopIndex = static_cast<std::size_t>(m_stopWorkspaceIndex);
 
   for (std::size_t i = startIndex; i <= stopIndex; ++i) {
     const auto detidsForSpectrum = m_uncalibratedWS->getSpectrum(i).getDetectorIDs();
@@ -1229,39 +1225,33 @@ void PDCalibration::createCalTableFromExisting() {
 
   m_hasDasIds = hasDasIDs(calibrationTableOld);
 
-  const auto includedDetids = detIdsForTable();
-  const bool limitDetids = !includedDetids.empty();
-
-  // generate the map of detid -> row
-  API::ColumnVector<int> detIDs = calibrationTableOld->getVector("detid");
-  const size_t numDets = detIDs.size();
-  std::size_t rowNum = 0;
-  for (size_t i = 0; i < numDets; ++i) {
-    // only add rows for detids that exist in input workspace
-    if ((!limitDetids) || (includedDetids.count(detIDs[i]) > 0))
-      m_detidToRow[static_cast<detid_t>(detIDs[i])] = rowNum++;
-  }
-
   // create a new workspace
   this->createCalTableHeader();
 
-  // copy over the values
-  for (std::size_t rowNum = 0; rowNum < calibrationTableOld->rowCount(); ++rowNum) {
-    API::TableRow newRow = m_calibrationTable->appendRow();
+  const auto includedDetids = detIdsForTable();
+  const bool useAllDetids = includedDetids.empty();
 
-    newRow << calibrationTableOld->getRef<int>("detid", rowNum);
-    newRow << calibrationTableOld->getRef<double>("difc", rowNum);
-    newRow << calibrationTableOld->getRef<double>("difa", rowNum);
-    newRow << calibrationTableOld->getRef<double>("tzero", rowNum);
-    if (m_hasDasIds)
-      newRow << calibrationTableOld->getRef<int>("dasid", rowNum);
+  // generate the map of detid -> row
+  API::ColumnVector<int> detIDs = calibrationTableOld->getVector("detid");
+  std::size_t rowNum = 0;
+  for (std::size_t i = 0; i < detIDs.size(); ++i) {
+    // only add rows for detids that exist in input workspace
+    if ((useAllDetids) || (includedDetids.count(detIDs[i]) > 0)) {
+      m_detidToRow[static_cast<detid_t>(detIDs[i])] = rowNum++;
+      API::TableRow newRow = m_calibrationTable->appendRow();
+      int detid = calibrationTableOld->getRef<int>("detid", i);
+      double difc = calibrationTableOld->getRef<double>("difc", i);
+      double difa = calibrationTableOld->getRef<double>("difa", i);
+      double tzero = calibrationTableOld->getRef<double>("tzero", i);
 
-    // adjust tofmin and tofmax for this pixel
-    const auto tofMinMax = getTOFminmax(calibrationTableOld->getRef<double>("difc", rowNum),
-                                        calibrationTableOld->getRef<double>("difa", rowNum),
-                                        calibrationTableOld->getRef<double>("tzero", rowNum));
-    newRow << tofMinMax[0]; // tofmin
-    newRow << tofMinMax[1]; // tofmax
+      newRow << detid << difc << difa << tzero;
+      if (m_hasDasIds)
+        newRow << calibrationTableOld->getRef<int>("dasid", i);
+
+      // adjust tofmin and tofmax for this pixel
+      const auto tofMinMax = getTOFminmax(difc, difa, tzero);
+      newRow << tofMinMax[0] << tofMinMax[1]; // tofmin/tofmax
+    }
   }
 }
 
@@ -1286,25 +1276,24 @@ void PDCalibration::createCalTableNew() {
   const detid2index_map allDetectors = difcWS->getDetectorIDToWorkspaceIndexMap(false);
 
   const auto includedDetids = detIdsForTable();
-  const bool limitDetids = !includedDetids.empty();
+  const bool useAllDetids = includedDetids.empty();
 
   // copy over the values
-  auto it = allDetectors.begin();
   size_t i = 0;
-  for (; it != allDetectors.end(); ++it) {
+  for (auto it = allDetectors.begin(); it != allDetectors.end(); ++it) {
     const detid_t detID = it->first;
     // only add rows for detids that exist in input workspace
-    if (limitDetids && (includedDetids.count(detID) == 0))
-      continue;
-    m_detidToRow[detID] = i++;
-    const size_t wi = it->second;
-    API::TableRow newRow = m_calibrationTable->appendRow();
-    newRow << detID;
-    newRow << difcWS->y(wi)[0];
-    newRow << 0.;      // difa
-    newRow << 0.;      // tzero
-    newRow << 0.;      // tofmin
-    newRow << DBL_MAX; // tofmax
+    if (useAllDetids || (includedDetids.count(detID) > 0)) {
+      m_detidToRow[detID] = i++;
+      const size_t wi = it->second;
+      API::TableRow newRow = m_calibrationTable->appendRow();
+      newRow << detID;
+      newRow << difcWS->y(wi)[0];
+      newRow << 0.;      // difa
+      newRow << 0.;      // tzero
+      newRow << 0.;      // tofmin
+      newRow << DBL_MAX; // tofmax
+    }
   }
 }
 
@@ -1433,6 +1422,7 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace
   // center, in d-spacing units
   const auto windowsInDSpacing = dSpacingWindows(m_peaksInDspacing, peakWindow);
 
+  g_log.information() << "DSPACING WINDOWS\n";
   for (std::size_t i = 0; i < m_peaksInDspacing.size(); ++i) {
     g_log.information() << "[" << i << "] " << windowsInDSpacing[2 * i] << " < " << m_peaksInDspacing[i] << " < "
                         << windowsInDSpacing[2 * i + 1] << std::endl;
@@ -1444,14 +1434,16 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace
   MatrixWorkspace_sptr peak_pos_ws = create<Workspace2D>(numspec, Points(numpeaks));
   MatrixWorkspace_sptr peak_window_ws = create<Workspace2D>(numspec, Points(numpeaks * 2));
 
-  const auto NUM_HIST = static_cast<int64_t>(dataws->getNumberHistograms());
+  const auto NUM_HIST = m_stopWorkspaceIndex - m_startWorkspaceIndex + 1;
   API::Progress prog(this, 0., .2, NUM_HIST);
 
+  g_log.information() << "TOF WINDOWS\n";
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-  for (int64_t iws = 0; iws < static_cast<int64_t>(NUM_HIST); ++iws) {
+  for (int64_t iiws = m_startWorkspaceIndex; iiws <= static_cast<int64_t>(m_stopWorkspaceIndex); iiws++) {
     PARALLEL_START_INTERRUPT_REGION
+    std::size_t iws = static_cast<std::size_t>(iiws);
     // calculatePositionWindowInTOF
-    PDCalibration::FittedPeaks peaks(dataws, static_cast<size_t>(iws));
+    PDCalibration::FittedPeaks peaks(dataws, iws);
     // toTof is a function that converts from d-spacing to TOF for a particular
     // pixel
     auto [difc, difa, tzero] = getDSpacingToTof(peaks.detid);
@@ -1460,6 +1452,11 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace
     peak_pos_ws->setPoints(iws, peaks.inTofPos);
     peak_window_ws->setPoints(iws, peaks.inTofWindows);
     prog.report();
+
+    for (std::size_t i = 0; i < peaks.inTofPos.size(); i++) {
+      g_log.information() << "[" << iws << "," << i << "] " << peaks.inTofWindows[2 * i] << " < " << peaks.inTofPos[i]
+                          << " < " << peaks.inTofWindows[2 * i + 1] << std::endl;
+    }
 
     PARALLEL_END_INTERRUPT_REGION
   }

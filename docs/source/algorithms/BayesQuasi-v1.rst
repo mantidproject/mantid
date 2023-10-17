@@ -38,8 +38,8 @@ Usage
 .. testcode:: BayesQuasiExample
 
     # Check OS support for F2Py
-    from IndirectImport import is_supported_f2py_platform
-    if is_supported_f2py_platform():
+    from mantid.utils.pip import package_installed
+    if package_installed("quasielasticbayes"):
         # Load in test data
         sampleWs = Load('irs26176_graphite002_red.nxs')
         resWs = Load('irs26173_graphite002_red.nxs')

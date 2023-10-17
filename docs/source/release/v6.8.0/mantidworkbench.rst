@@ -12,7 +12,7 @@ New Features
 
 Bugfixes
 --------
-- Avoided a bug when attempting to drag and drop a single binned workspace onto an open plot. This action is now rejected an a warning logged.
+- Avoided a bug when attempting to drag and drop a single binned workspace onto an open plot. This action is now rejected and a warning logged.
 - Fixed a bug which was causing the plot script generator button to not be shown on tiled plots with a non-square number of plots.
 - Fix bug that left a tab open with the old file name in the script editor when using 'Save Script as'
 - Catch unhandled exception when attempting to generate a plot script from an unsupported plot.
@@ -20,9 +20,13 @@ Bugfixes
 - Small bug fixes and usability improvements to the :ref:`sample_transmission_calculator`. Axes are now labelled and error feedback is improved.
 - Improved right-click behaviour in the table view (e.g. "Show Data") when right-clicking on a row/column header.
 - Fix bug in the Sample Logs Viewer that causes crash when the selected workspace is modified or deleted.
-- Fix some minor usability bugs and improve the layout of the :ref:`tof_converter` window. It can now take an input value from any single valued workspace. It no longer requires a scattering angle to convert between momentum transfer and d-spacing.
 - An implicit conversion warning which sometimes appears when opening Sample logs has been fixed.
+- Fix some minor usability bugs and improve the layout of the :ref:`tof_converter` window. It can now take an input value from any single valued workspace. It no longer requires a scattering angle to convert between momentum transfer and d-spacing.
 
+.. image:: ../../images/6_8_release/MantidWorkbench/TOFConverterUI.png
+    :align: center
+    :width: 300
+    :alt: Improved layout for :ref:`tof_converter` interface
 
 InstrumentViewer
 ----------------
@@ -47,10 +51,15 @@ New features
   3. 1.5-Interquartile Range (25th, 75th-quartile ± 1.5 x interquartile range)
   4. 1.5-Median Absolute Deviation (median ± 1.5 x median absolute deviation)
 
+.. image:: ../../images/6_8_release/MantidWorkbench/SliceviewerAutoscaleOptions.png
+    :align: center
+    :width: 500
+    :alt: Improved layout for :ref:`tof_converter` interface
+
 Bugfixes
 ############
 - Entering particular values (i.e 0,111) into the colour bar limit text boxes, will no longer cause an error.
-- Resolved issue with projection matrix calcluation using basis vectors with non-q dimensions.
+- Resolved issue with projection matrix calclulation using basis vectors with non-q dimensions.
 
 
 :ref:`Release 6.8.0 <v6.8.0>`

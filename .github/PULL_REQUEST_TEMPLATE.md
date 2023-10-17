@@ -52,7 +52,7 @@ Please comment on the points listed below ([full description](http://developer.m
 - Are the unit tests small and test the class in isolation?
 - If there is GUI work does it follow the [GUI standards](http://developer.mantidproject.org/Standards/GUIStandards.html)?
 - If there are changes in the release notes then do they describe the changes appropriately?
-- Are the release notes saved in a separate file, using Issue or PR number for file name and in the correct location?
+- Do the release notes conform to the [release notes guide](https://developer.mantidproject.org/Standards/ReleaseNotesGuide.html)?
 
 ##### Functional Tests #####
 

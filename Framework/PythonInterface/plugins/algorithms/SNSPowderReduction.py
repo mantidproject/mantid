@@ -633,7 +633,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
                 # remove container run
                 api.RebinToWorkspace(WorkspaceToRebin=can_run_ws_name, WorkspaceToMatch=sam_ws_name, OutputWorkspace=can_run_ws_name)
-                api.Scale(InputWorkspace=can_run_ws_name, OutputWorkspace=can_run_ws_name, Factor=self._containerScaleFactor)
+                if samRunIndex == 0:
+                    api.Scale(InputWorkspace=can_run_ws_name, OutputWorkspace=can_run_ws_name, Factor=self._containerScaleFactor)
                 api.Minus(LHSWorkspace=sam_ws_name, RHSWorkspace=can_run_ws_name, OutputWorkspace=sam_ws_name)
                 # compress event if the sample run workspace is EventWorkspace
                 if is_event_workspace(sam_ws_name) and self.COMPRESS_TOL_TOF > 0.0:
