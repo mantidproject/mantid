@@ -46,6 +46,8 @@ Here is an example using the ``SXD`` class that finds peaks and then removes dup
   # use another static method to remove duplicates by hkl index
   SXD.remove_duplicate_peaks_by_hkl(peaks_ws)
 
+.. _isis-single-crystal-diffraction-sxd-ref:
+
 SXD Workflow
 ------------
 
@@ -173,6 +175,8 @@ The reduction proceeds as follows:
 
     # save combined table
     sxd.save_all_peaks(PEAK_TYPE.FOUND, INTEGRATION_TYPE.SKEW, save_dir=save_dir, save_format=fmt)
+
+.. _isis-single-crystal-diffraction-wish-ref:
 
 WISH Workflow
 -------------
