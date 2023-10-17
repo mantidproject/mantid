@@ -274,7 +274,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::setName(const std::strin
 
 /**
  * Fill in the supplied vector of time series data according to the input TimeROI. Include all time values
- * within ROI regions defined as [roi_start,roi_end], plus the values immediately before and after each ROI region,
+ * within ROI regions, defined as [roi_start,roi_end], plus the values immediately before and after each ROI region,
  * if available.
  * @param timeROI :: time region of interest, i.e. time boundaries used to determine which values should be included in
  * the filtered data vector
@@ -304,31 +304,24 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
   }
   // Get all ROI time boundaries. Every other value is start/stop of an ROI "use" region.
   const std::vector<Types::Core::DateAndTime> &roiTimes = timeROI.getAllTimes();
-  auto itROI{roiTimes.cbegin()};
-  const auto itROIEnd{roiTimes.cend()};
+  auto itROI = roiTimes.cbegin();
+  const auto itROIEnd = roiTimes.cend();
 
-  auto itValue{m_values.cbegin()};
-  const auto itValueEnd{m_values.cend()};
-  auto itLastValueUsed{itValue}; // last value used up to the moment
+  auto itValue = m_values.cbegin();
+  const auto itValueEnd = m_values.cend();
+  auto itLastValueUsed = itValue; // last value used up to the moment
 
-  bool denseROIs = roiTimes.size() / 2 > m_values.size();
   while (itROI != itROIEnd && itValue != itValueEnd) {
-    if (denseROIs) {
-      // If there are more ROI "use" regions than time values, try speeding up the algorithm by fast-forwarding the
-      // current "use" region towards the current time value. Be careful not to overstep that value, because it might
-      // be in an ROI "ignore" region together with one or more following values.
-      while (std::distance(itROI, itROIEnd) > 2 && *(std::next(itROI)) < itValue->time() &&
-             *(std::next(itROI, 2)) <= itValue->time())
-        std::advance(itROI, 2);
-    }
-
-    // Try finding the first value past the beginning of the current ROI "use" region.
-    while (itValue != itValueEnd && itValue->time() < (*itROI))
-      itValue++;
-
-    // Calculate the [begin,end) range of values to use
-    auto itBeginUseValue{itValue};
-    auto itEndUseValue{itValue};
+    // Try fast-forwarding the current ROI "use" region towards the current time value. Note, the current value might
+    // be in an ROI "ignore" region together with one or more following values.
+    while (std::distance(itROI, itROIEnd) > 2 && *(std::next(itROI, 2)) <= itValue->time())
+      std::advance(itROI, 2);
+    // Try finding the first value equal or past the beginning of the current ROI "use" region.
+    itValue = std::lower_bound(itValue, itValueEnd, *itROI,
+                               [](const auto &value, const auto &roi_time) { return value.time() < roi_time; });
+    // Calculate a [begin,end) range for the values to use
+    auto itBeginUseValue = itValue;
+    auto itEndUseValue = itValue;
     // If there are no values past the current ROI "use" region, get the previous value
     if (itValue == itValueEnd) {
       itBeginUseValue =
@@ -346,21 +339,19 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
       itEndUseValue = itValue == itValueEnd ? itValue : std::next(itValue);
     }
     // If we are at the last ROI "use" region or the value is not past the beginning of the next ROI "use" region, keep
-    // it for the current ROI "use" region
+    // it for the current ROI "use" region.
     else if (std::distance(itROI, itROIEnd) == 2 ||
              (std::distance(itROI, itROIEnd) > 2 && itValue->time() < *(std::next(itROI, 2)))) {
       // Try including the value immediately preceding the current value
       itBeginUseValue = itValue == m_values.begin() ? itValue : std::prev(itValue);
       itEndUseValue = std::next(itValue);
     }
-
-    // To avoid copying a value already copied for the previuous ROI, make sure the new starting point is past the last
-    // value used.
+    // Do not use a value already copied for the previous ROI
     if (!filteredData.empty()) {
       itBeginUseValue = std::max(itBeginUseValue, std::next(itLastValueUsed));
     }
 
-    // Copy all [begin,end) values and mark the last value copied.
+    // Copy all [begin,end) values and mark the last value copied
     if (itBeginUseValue < itEndUseValue) {
       std::copy(itBeginUseValue, itEndUseValue, std::back_inserter(filteredData));
       itLastValueUsed = std::prev(itEndUseValue);

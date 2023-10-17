@@ -409,7 +409,7 @@ void TimeROI::replaceROI(const std::vector<Types::Core::DateAndTime> &roi) {
 #ifdef NEW_UPDATE_INTERSECTION
 /**
  * Updates the TimeROI values with the intersection with another TimeROI.
- * See https://en.wikipedia.org/wiki/Intersection for the theory.
+ * See https://en.wikipedia.org/wiki/Intersection for the intersection theory.
  * The algorithm is adapted from https://www.geeksforgeeks.org/find-intersection-of-intervals-given-by-two-lists/
  *
  * Intersection with an empty TimeROI will clear out this one.
@@ -434,8 +434,8 @@ void TimeROI::update_intersection(const TimeROI &other) {
     const DateAndTime &leftBound = std::max(*it1, *it2);
 
     // Right bound for intersecting segment
-    auto it1_next = std::next(it1);
-    auto it2_next = std::next(it2);
+    const auto it1_next = std::next(it1);
+    const auto it2_next = std::next(it2);
     const DateAndTime &rightBound = std::min(*it1_next, *it2_next);
 
     // If segment is valid, include it
