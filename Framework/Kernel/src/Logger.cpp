@@ -464,4 +464,315 @@ void Logger::setLevelOffset(int level) { m_levelOffset = level; }
  */ /// Gets the Logger's log offset level.
 int Logger::getLevelOffset() const { return m_levelOffset; }
 
+/*
+ * SPDLOGGER
+ */
+/** Constructor
+ * @param name :: The class name invoking this logger
+ */
+SpdLogger::SpdLogger(const std::string &name) : m_log(spdlog::get(name)), m_levelOffset(0), m_enabled(true) {
+  if (!m_log) {
+    m_log = spdlog::stdout_color_mt(name);
+  }
+}
+
+/**
+ * @param name The new name
+ */
+void SpdLogger::setName(const std::string &name) {
+  m_log = spdlog::get(name);
+  if (!m_log) {
+    m_log = spdlog::stdout_color_mt(name);
+  }
+}
+
+/** Returns true if the log is enabled
+ *
+ *  @retval true - logging is enabled
+ *  @retval false - all messages are ignored.
+ */
+bool SpdLogger::getEnabled() const { return m_enabled; }
+
+/** set if the logging is enabled
+ *
+ *  @param enabled ::  true - logging is enabled, false - all messages are
+ *ignored.
+ */
+void SpdLogger::setEnabled(const bool enabled) { m_enabled = enabled; }
+
+void SpdLogger::fatal(const std::string &msg) { m_log->critical(msg); }
+void SpdLogger::error(const std::string &msg) { m_log->error(msg); }
+void SpdLogger::warning(const std::string &msg) { m_log->warn(msg); }
+void SpdLogger::notice(const std::string &msg) {
+  m_log->info(msg);
+} // Spdlog doesn't have a "notice" level, using "info" instead
+void SpdLogger::information(const std::string &msg) { m_log->info(msg); }
+void SpdLogger::debug(const std::string &msg) { m_log->debug(msg); }
+
+/** Returns true if at least the given log level is set.
+ *  @param level :: The logging level it is best to use the Logger::Priority
+ * enum (7=debug, 6=information, 4=warning, 3=error, 2=critical, 1=fatal)
+ *  @return true if at least the given log level is set.
+ */
+bool SpdLogger::is(int level) const { return m_log->level() <= static_cast<spdlog::level::level_enum>(level); }
+
+void SpdLogger::setLevel(int level) { m_log->set_level(static_cast<spdlog::level::level_enum>(fixLevel(level))); }
+
+void SpdLogger::setLevel(const std::string &level) {
+  spdlog::level::level_enum logLevel = spdlog::level::from_str(level);
+  m_log->set_level(logLevel);
+}
+
+int SpdLogger::getLevel() const { return static_cast<int>(m_log->level()); }
+
+std::string SpdLogger::getLevelName() const {
+  auto level = spdlog::level::to_string_view(m_log->level());
+  return std::string(level.data(), level.size());
+}
+
+///** This class implements an ostream interface to the Logger for fatal messages.
+// *
+// * The stream's buffer appends all characters written to it
+// * to a string. As soon as a CR or LF (std::endl) is written,
+// * the string is sent to the Logger.
+// * @returns an std::ostream reference.
+// */
+// std::ostream &Logger::fatal() { return getLogStream(Priority::PRIO_FATAL); }
+//
+///** This class implements an ostream interface to the Logger for error messages.
+// *
+// * The stream's buffer appends all characters written to it
+// * to a string. As soon as a CR or LF (std::endl) is written,
+// * the string is sent to the Logger.
+// * @returns an std::ostream reference.
+// */
+// std::ostream &Logger::error() { return getLogStream(Priority::PRIO_ERROR); }
+//
+///** This class implements an ostream interface to the Logger for warning
+// *messages.
+// *
+// * The stream's buffer appends all characters written to it
+// * to a string. As soon as a CR or LF (std::endl) is written,
+// * the string is sent to the Logger.
+// * @returns an std::ostream reference.
+// */
+// std::ostream &Logger::warning() { return getLogStream(Priority::PRIO_WARNING); }
+//
+///** This class implements an ostream interface to the Logger for notice
+// *messages.
+// *
+// * The stream's buffer appends all characters written to it
+// * to a string. As soon as a CR or LF (std::endl) is written,
+// * the string is sent to the Logger.
+// * @returns an std::ostream reference.
+// */
+// std::ostream &Logger::notice() { return getLogStream(Priority::PRIO_NOTICE); }
+//
+///** This class implements an ostream interface to the Logger for information
+// *messages.
+// *
+// * The stream's buffer appends all characters written to it
+// * to a string. As soon as a CR or LF (std::endl) is written,
+// * the string is sent to the Logger.
+// * @returns an std::ostream reference.
+// */
+// std::ostream &Logger::information() { return getLogStream(Priority::PRIO_INFORMATION); }
+//
+///** This class implements an ostream interface to the Logger for debug messages.
+// *
+// * The stream's buffer appends all characters written to it
+// * to a string. As soon as a CR or LF (std::endl) is written,
+// * the string is sent to the Logger.
+// * @returns an std::ostream reference.
+// */
+// std::ostream &Logger::debug() { return getLogStream(Priority::PRIO_DEBUG); }
+//
+///**
+// * accumulates a message to the buffer
+// * @param msg the log message
+// */
+// void Logger::accumulate(const std::string &msg) { m_logStream->accumulate(msg); }
+//
+///**
+// * Flushes the accumulated message to the current channel
+// */
+// void Logger::flush() { log(m_logStream->flush(), Priority(getLevel())); }
+//
+///**
+// * Flushes the accumulated message to the given priority
+// * @param priority the log level priority
+// */
+// void Logger::flush(Priority priority) { log(m_logStream->flush(), priority); }
+//
+///// flushes the accumulated message with debug priority
+// void Logger::flushDebug() { flush(Poco::Message::PRIO_DEBUG); }
+//
+///// flushes the accumulated message with information priority
+// void Logger::flushInformation() { flush(Poco::Message::PRIO_INFORMATION); }
+//
+///// flushes the accumulated message with notice priority
+// void Logger::flushNotice() { flush(Poco::Message::PRIO_NOTICE); }
+//
+///// flushes the accumulated message with warning priority
+// void Logger::flushWarning() { flush(Poco::Message::PRIO_WARNING); }
+//
+///// flushes the accumulated message with error priority
+// void Logger::flushError() { flush(Poco::Message::PRIO_ERROR); }
+//
+///// flushes the accumulated message with fatal priority
+// void Logger::flushFatal() { flush(Poco::Message::PRIO_FATAL); }
+//
+///// flushes the accumulated messages without logging them
+// void Logger::purge() { m_logStream->flush(); }
+//
+///** Shuts down the logging framework and releases all Loggers.
+// * Static method.
+// */
+// void Logger::shutdown() {
+//  try {
+//    // Release the POCO loggers
+//    Poco::Logger::shutdown();
+//  } catch (std::exception &e) {
+//    // failures in logging are not allowed to throw exceptions out of the
+//    // logging class
+//    std::cerr << e.what();
+//  }
+//}
+//
+///** Sets the log level for all Loggers created so far, including the root
+// * logger.
+// * @param level :: the priority level to set for the loggers
+// */
+// void Logger::setLevelForAll(const int level) {
+//  const int levelActual = fixLevel(level);
+//
+//  try {
+//    // "" is the root logger
+//    Poco::Logger::setLevel("", levelActual);
+//  } catch (std::exception &e) {
+//    // failures in logging are not allowed to throw exceptions out of the
+//    // logging class
+//    std::cerr << e.what();
+//  }
+//}
+//
+// void Logger::setLevelForAll(const std::string &level) {
+//  int intLevel = toLevel(level);
+//  setLevelForAll(intLevel);
+//}
+//
+///**
+// * @param message :: The message to log
+// * @param priority :: The priority level
+// */
+// void Logger::log(const std::string &message, const Logger::Priority &priority) {
+//  if (!m_enabled)
+//    return;
+//
+//  try {
+//    switch (applyLevelOffset(priority)) {
+//    case Poco::Message::PRIO_FATAL:
+//      m_log->fatal(message);
+//      break;
+//    case Poco::Message::PRIO_CRITICAL:
+//      m_log->critical(message);
+//      break;
+//    case Poco::Message::PRIO_ERROR:
+//      m_log->error(message);
+//      break;
+//    case Poco::Message::PRIO_WARNING:
+//      m_log->warning(message);
+//      break;
+//    case Poco::Message::PRIO_NOTICE:
+//      m_log->notice(message);
+//      break;
+//    case Poco::Message::PRIO_INFORMATION:
+//      m_log->information(message);
+//      break;
+//    case Poco::Message::PRIO_DEBUG:
+//      m_log->debug(message);
+//      break;
+//    case Poco::Message::PRIO_TRACE:
+//      m_log->trace(message);
+//      break;
+//    default:
+//      break;
+//    }
+//  } catch (std::exception &e) {
+//    // Failures in logging are not allowed to throw exceptions out of the
+//    // logging class
+//    std::cerr << "Error in logging framework: " << e.what();
+//  }
+//}
+//
+///**
+// * Log a given message at a given priority
+// * @param priority :: The priority level
+// * @return :: the stream
+// */
+// std::ostream &Logger::getLogStream(const Logger::Priority &priority) {
+//  if (!m_enabled)
+//    return NULL_STREAM;
+//
+//  switch (applyLevelOffset(priority)) {
+//  case Poco::Message::PRIO_FATAL:
+//    return m_logStream->fatal();
+//    break;
+//  case Poco::Message::PRIO_CRITICAL:
+//    return m_logStream->critical();
+//    break;
+//  case Poco::Message::PRIO_ERROR:
+//    return m_logStream->error();
+//    break;
+//  case Poco::Message::PRIO_WARNING:
+//    return m_logStream->warning();
+//    break;
+//  case Poco::Message::PRIO_NOTICE:
+//    return m_logStream->notice();
+//    break;
+//  case Poco::Message::PRIO_INFORMATION:
+//    return m_logStream->information();
+//    break;
+//  case Poco::Message::PRIO_DEBUG:
+//    return m_logStream->debug();
+//    break;
+//  default:
+//    return NULL_STREAM;
+//  }
+//}
+//
+///**
+// * Adjust a log priority level based off the m_levelOffset
+// * @param proposedLevel :: The proposed level
+// * @returns The offseted level
+// */
+// Logger::Priority Logger::applyLevelOffset(Logger::Priority proposedLevel) {
+//  int retVal = proposedLevel;
+//  // fast exit if offset is 0
+//  if (m_levelOffset == 0) {
+//    return proposedLevel;
+//  } else {
+//    retVal += m_levelOffset;
+//    if (retVal < static_cast<int>(Priority::PRIO_FATAL)) {
+//      retVal = Priority::PRIO_FATAL;
+//    } else if (retVal > static_cast<int>(Priority::PRIO_TRACE)) {
+//      retVal = Priority::PRIO_TRACE;
+//    }
+//  }
+//  // Logger::Priority p(retVal);
+//  return static_cast<Logger::Priority>(retVal);
+//}
+//
+///**
+// * Sets the Logger's log offset level.
+// * @param level :: The  level offset to use
+// */
+// void Logger::setLevelOffset(int level) { m_levelOffset = level; }
+//
+///**
+// * Gets the Logger's log offset level.
+// * @returns The offset level
+// */ /// Gets the Logger's log offset level.
+// int Logger::getLevelOffset() const { return m_levelOffset; }
+
 } // namespace Mantid::Kernel
