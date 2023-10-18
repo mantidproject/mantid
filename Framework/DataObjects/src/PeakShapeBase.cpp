@@ -27,14 +27,14 @@ Kernel::SpecialCoordinateSystem PeakShapeBase::frame() const { return m_frame; }
  * @param root : Ref to root value to write to
  */
 void PeakShapeBase::buildCommon(Json::Value &root) const {
-  Json::Value shape(this->shapeName());
-  Json::Value algorithmName(this->algorithmName());
-  Json::Value algorithmVersion(this->algorithmVersion());
-  Json::Value frame(this->frame());
-  root["shape"] = shape;
-  root["algorithm_name"] = algorithmName;
-  root["algorithm_version"] = algorithmVersion;
-  root["frame"] = frame;
+  Json::Value shapeJson(this->shapeName());
+  Json::Value algorithmNameJson(this->algorithmName());
+  Json::Value algorithmVersionJson(this->algorithmVersion());
+  Json::Value frameJson(this->frame());
+  root["shape"] = shapeJson;
+  root["algorithm_name"] = algorithmNameJson;
+  root["algorithm_version"] = algorithmVersionJson;
+  root["frame"] = frameJson;
 }
 
 /**

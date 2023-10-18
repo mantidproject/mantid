@@ -425,7 +425,7 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(std::vector<SplittingInterval> 
   DateAndTime start, stop;
 
   for (size_t i = 0; i < m_values.size(); ++i) {
-    const DateAndTime lastTime = t;
+    const DateAndTime lastGoodTime = t;
     // The new entry
     t = m_values[i].time();
     TYPE val = m_values[i].value();
@@ -446,7 +446,7 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(std::vector<SplittingInterval> 
         // End of the good section. Add tolerance to the LAST GOOD time if
         // boundaries are centred.
         // Otherwise, use the first 'bad' time.
-        stop = centre ? lastTime + tol : t;
+        stop = centre ? lastGoodTime + tol : t;
         split.emplace_back(start, stop, 0);
         // Reset the number of good ones, for next time
         numgood = 0;
@@ -721,18 +721,18 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<TimeInte
 
     // Get the log value and index at the start time of the filter
     int index;
-    double value = static_cast<double>(getSingleValue(time.start(), index));
+    double currentValue = static_cast<double>(getSingleValue(time.start(), index));
     DateAndTime startTime = time.start();
 
     while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
       ++index;
-      numerator += DateAndTime::secondsFromDuration(m_values[index].time() - startTime) * value;
+      numerator += DateAndTime::secondsFromDuration(m_values[index].time() - startTime) * currentValue;
       startTime = m_values[index].time();
-      value = static_cast<double>(m_values[index].value());
+      currentValue = static_cast<double>(m_values[index].value());
     }
 
     // Now close off with the end of the current filter range
-    numerator += DateAndTime::secondsFromDuration(time.stop() - startTime) * value;
+    numerator += DateAndTime::secondsFromDuration(time.stop() - startTime) * currentValue;
   }
 
   if (totalTime > 0) {
@@ -768,7 +768,7 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<TimeInterva
   auto real_size = realSize();
   for (const auto &time : intervals) {
     int index;
-    auto value = static_cast<double>(getSingleValue(time.start(), index));
+    auto currentValue = static_cast<double>(getSingleValue(time.start(), index));
     DateAndTime startTime = time.start();
     while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
       index++;
@@ -782,10 +782,10 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<TimeInterva
       if (duration > 0.) {
         weighted_sum += duration;
 
-        mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
-        s += duration * (value - mean_prev) * (value - mean_current);
+        mean_current = mean_prev + (duration / weighted_sum) * (currentValue - mean_prev);
+        s += duration * (currentValue - mean_prev) * (currentValue - mean_current);
       }
-      value = static_cast<double>(m_values[index].value());
+      currentValue = static_cast<double>(m_values[index].value());
     }
 
     // Now close off with the end of the current filter range
@@ -794,8 +794,8 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<TimeInterva
       weighted_sum += duration;
       mean_prev = mean_current;
 
-      mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
-      s += duration * (value - mean_prev) * (value - mean_current);
+      mean_current = mean_prev + (duration / weighted_sum) * (currentValue - mean_prev);
+      s += duration * (currentValue - mean_prev) * (currentValue - mean_current);
     }
   }
   variance = s / weighted_sum;
@@ -1214,10 +1214,10 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::durationInSeconds(cons
     return std::numeric_limits<double>::quiet_NaN();
   if (roi && !roi->useAll()) {
     Kernel::TimeROI seriesSpan(*roi);
-    const auto firstTime = this->firstTime();
+    const auto thisFirstTime = this->firstTime();
     // remove everything before the start time
-    if (firstTime > DateAndTime::GPS_EPOCH) {
-      seriesSpan.addMask(DateAndTime::GPS_EPOCH, firstTime);
+    if (thisFirstTime > DateAndTime::GPS_EPOCH) {
+      seriesSpan.addMask(DateAndTime::GPS_EPOCH, thisFirstTime);
     }
     return seriesSpan.durationInSeconds();
   } else {
@@ -1377,9 +1377,9 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::clear() {
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::clearOutdated() {
   if (realSize() > 1) {
-    auto lastValue = m_values.back();
+    auto lastValueInVec = m_values.back();
     clear();
-    m_values.emplace_back(lastValue);
+    m_values.emplace_back(lastValueInVec);
     m_size = 1;
   }
 }
@@ -1479,13 +1479,13 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::getSingleValue(const Typ
   sortIfNecessary();
 
   // 2.
-  TYPE value;
+  TYPE valueAtTime;
   if (t < m_values[0].time()) {
     // 1. Out side of lower bound
-    value = m_values[0].value();
+    valueAtTime = m_values[0].value();
   } else if (t >= m_values.back().time()) {
     // 2. Out side of upper bound
-    value = m_values.back().value();
+    valueAtTime = m_values.back().value();
   } else {
     // 3. Within boundary
     int index = this->findIndex(t);
@@ -1503,10 +1503,10 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::getSingleValue(const Typ
       throw std::logic_error(errss.str());
     }
 
-    value = m_values[static_cast<size_t>(index)].value();
+    valueAtTime = m_values[static_cast<size_t>(index)].value();
   }
 
-  return value;
+  return valueAtTime;
 } // END-DEF getSinglevalue()
 
 /** Returns the value at a particular time
@@ -1526,14 +1526,14 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const Types::Core::DateAndTime &t,
   sortIfNecessary();
 
   // 2.
-  TYPE value;
+  TYPE valueAtTime;
   if (t < m_values[0].time()) {
     // 1. Out side of lower bound
-    value = m_values[0].value();
+    valueAtTime = m_values[0].value();
     index = 0;
   } else if (t >= m_values.back().time()) {
     // 2. Out side of upper bound
-    value = m_values.back().value();
+    valueAtTime = m_values.back().value();
     index = int(m_values.size()) - 1;
   } else {
     // 3. Within boundary
@@ -1552,10 +1552,10 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const Types::Core::DateAndTime &t,
       throw std::logic_error(errss.str());
     }
 
-    value = m_values[static_cast<size_t>(index)].value();
+    valueAtTime = m_values[static_cast<size_t>(index)].value();
   }
 
-  return value;
+  return valueAtTime;
 } // END-DEF getSinglevalue()
 
 /** Returns n-th valid time interval, in a very inefficient way.
@@ -1640,18 +1640,18 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
   // 2. Sort and apply filter
   sortIfNecessary();
 
-  TYPE value;
+  TYPE nthValue;
 
   // 3. Situation 1:  No filter
   if (static_cast<size_t>(n) < m_values.size()) {
     const auto entry = m_values[static_cast<std::size_t>(n)];
-    value = entry.value();
+    nthValue = entry.value();
   } else {
     const auto entry = m_values[static_cast<std::size_t>(m_size) - 1];
-    value = entry.value();
+    nthValue = entry.value();
   }
 
-  return value;
+  return nthValue;
 }
 
 /** Returns n-th time, or the last time if fewer than n entries.
@@ -2028,11 +2028,11 @@ template <> void TimeSeriesProperty<bool>::saveProperty(::NeXus::File *file) {
 }
 
 template <typename TYPE> void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
-  auto value = this->valuesAsVector();
-  if (value.empty())
+  auto values = this->valuesAsVector();
+  if (values.empty())
     return;
   file->makeGroup(this->name(), "NXlog", 1);
-  file->writeData("value", value);
+  file->writeData("value", values);
   file->openData("value");
   file->putAttr("units", this->units());
   file->closeData();

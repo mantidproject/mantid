@@ -177,12 +177,12 @@ void DetectorInfo::merge(const DetectorInfo &other, const std::vector<bool> &mer
   for (size_t timeIndex = 0; timeIndex < other.scanCount(); ++timeIndex) {
     if (!merge[timeIndex])
       continue;
-    auto &isMasked = m_isMasked.access();
+    auto &isMaskedVec = m_isMasked.access();
     auto &positions = m_positions.access();
     auto &rotations = m_rotations.access();
     const size_t indexStart = other.linearIndex({0, timeIndex});
     size_t indexEnd = indexStart + size();
-    isMasked.insert(isMasked.end(), other.m_isMasked->begin() + indexStart, other.m_isMasked->begin() + indexEnd);
+    isMaskedVec.insert(isMaskedVec.end(), other.m_isMasked->begin() + indexStart, other.m_isMasked->begin() + indexEnd);
     positions.insert(positions.end(), other.m_positions->begin() + indexStart, other.m_positions->begin() + indexEnd);
     rotations.insert(rotations.end(), other.m_rotations->begin() + indexStart, other.m_rotations->begin() + indexEnd);
   }

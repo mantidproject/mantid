@@ -137,8 +137,8 @@ bool ComponentInfo::isDetector(const size_t componentIndex) const {
 }
 
 bool ComponentInfo::hasValidShape(const size_t componentIndex) const {
-  const auto *shape = (*m_shapes)[componentIndex].get();
-  return shape != nullptr && shape->hasValidShape();
+  const auto *shapeAtIndex = (*m_shapes)[componentIndex].get();
+  return shapeAtIndex != nullptr && shapeAtIndex->hasValidShape();
 }
 
 Kernel::V3D ComponentInfo::position(const size_t componentIndex) const {
@@ -253,13 +253,13 @@ double ComponentInfo::solidAngle(const size_t componentIndex, const Kernel::V3D 
     throw Kernel::Exception::NullPointerException("ComponentInfo::solidAngle", "shape");
   // This is the observer position in the shape's coordinate system.
   const Kernel::V3D relativeObserver = toShapeFrame(observer, *m_componentInfo, componentIndex);
-  const Kernel::V3D scaleFactor = this->scaleFactor(componentIndex);
-  if ((scaleFactor - Kernel::V3D(1.0, 1.0, 1.0)).norm() < 1e-12)
+  const Kernel::V3D scaleFactorAtIndex = this->scaleFactor(componentIndex);
+  if ((scaleFactorAtIndex - Kernel::V3D(1.0, 1.0, 1.0)).norm() < 1e-12)
     return shape(componentIndex).solidAngle(relativeObserver);
   else {
     // This function will scale the object shape when calculating the solid
     // angle.
-    return shape(componentIndex).solidAngle(relativeObserver, scaleFactor);
+    return shape(componentIndex).solidAngle(relativeObserver, scaleFactorAtIndex);
   }
 }
 
@@ -339,14 +339,14 @@ BoundingBox ComponentInfo::componentBoundingBox(const size_t index, const Boundi
     BoundingBox absoluteBB = s.getBoundingBox();
 
     // modify in place for speed
-    const Eigen::Vector3d scaleFactor = m_componentInfo->scaleFactor(index);
+    const Eigen::Vector3d scaleFactorAtIndex = m_componentInfo->scaleFactor(index);
     // Scale
-    absoluteBB.xMin() *= scaleFactor[0];
-    absoluteBB.xMax() *= scaleFactor[0];
-    absoluteBB.yMin() *= scaleFactor[1];
-    absoluteBB.yMax() *= scaleFactor[1];
-    absoluteBB.zMin() *= scaleFactor[2];
-    absoluteBB.zMax() *= scaleFactor[2];
+    absoluteBB.xMin() *= scaleFactorAtIndex[0];
+    absoluteBB.xMax() *= scaleFactorAtIndex[0];
+    absoluteBB.yMin() *= scaleFactorAtIndex[1];
+    absoluteBB.yMax() *= scaleFactorAtIndex[1];
+    absoluteBB.zMin() *= scaleFactorAtIndex[2];
+    absoluteBB.zMax() *= scaleFactorAtIndex[2];
     // Rotate
     (this->rotation(index))
         .rotateBB(absoluteBB.xMin(), absoluteBB.yMin(), absoluteBB.zMin(), absoluteBB.xMax(), absoluteBB.yMax(),

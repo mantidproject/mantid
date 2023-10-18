@@ -76,17 +76,17 @@ std::map<specnum_t, V3D> WorkspaceNearestNeighbours::neighboursInRadius(const sp
     result = defaultNeighbours(spectrum);
   } else if (radius > m_cutoff && m_radius != radius) {
     // We might have to see how efficient this ends up being.
-    int neighbours = m_noNeighbours + 1;
+    int numberOfNeighbours = m_noNeighbours + 1;
     while (true) {
       try {
-        const_cast<WorkspaceNearestNeighbours *>(this)->build(neighbours);
+        const_cast<WorkspaceNearestNeighbours *>(this)->build(numberOfNeighbours);
       } catch (std::invalid_argument &) {
         break;
       }
       if (radius < m_cutoff)
         break;
       else
-        neighbours += 1;
+        numberOfNeighbours += 1;
     }
   }
   m_radius = radius;

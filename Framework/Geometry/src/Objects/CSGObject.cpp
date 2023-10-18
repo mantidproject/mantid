@@ -1520,7 +1520,7 @@ double CSGObject::volume() const {
     // Here, the volume is calculated by the triangular method.
     // We use one of the vertices (vectors[0]) as the reference
     // point.
-    double volume = 0.0;
+    double volumeTri = 0.0;
     // Vertices. Name codes follow flb = front-left-bottom etc.
     const Kernel::V3D &flb = vectors[0];
     const Kernel::V3D &flt = vectors[1];
@@ -1532,19 +1532,19 @@ double CSGObject::volume() const {
     const Kernel::V3D brt = frt + blb - flb;
     // Normals point out, follow right-handed rule when
     // defining the triangle faces.
-    volume += flb.scalar_prod(flt.cross_prod(blb));
-    volume += blb.scalar_prod(flt.cross_prod(blt));
-    volume += flb.scalar_prod(frb.cross_prod(flt));
-    volume += frb.scalar_prod(frt.cross_prod(flt));
-    volume += flb.scalar_prod(blb.cross_prod(frb));
-    volume += blb.scalar_prod(brb.cross_prod(frb));
-    volume += frb.scalar_prod(brb.cross_prod(frt));
-    volume += brb.scalar_prod(brt.cross_prod(frt));
-    volume += flt.scalar_prod(frt.cross_prod(blt));
-    volume += frt.scalar_prod(brt.cross_prod(blt));
-    volume += blt.scalar_prod(brt.cross_prod(blb));
-    volume += brt.scalar_prod(brb.cross_prod(blb));
-    return volume / 6;
+    volumeTri += flb.scalar_prod(flt.cross_prod(blb));
+    volumeTri += blb.scalar_prod(flt.cross_prod(blt));
+    volumeTri += flb.scalar_prod(frb.cross_prod(flt));
+    volumeTri += frb.scalar_prod(frt.cross_prod(flt));
+    volumeTri += flb.scalar_prod(blb.cross_prod(frb));
+    volumeTri += blb.scalar_prod(brb.cross_prod(frb));
+    volumeTri += frb.scalar_prod(brb.cross_prod(frt));
+    volumeTri += brb.scalar_prod(brt.cross_prod(frt));
+    volumeTri += flt.scalar_prod(frt.cross_prod(blt));
+    volumeTri += frt.scalar_prod(brt.cross_prod(blt));
+    volumeTri += blt.scalar_prod(brt.cross_prod(blb));
+    volumeTri += brt.scalar_prod(brb.cross_prod(blb));
+    return volumeTri / 6;
   }
   case detail::ShapeInfo::GeometryShape::SPHERE:
     return 4.0 / 3.0 * M_PI * radius * radius * radius;
@@ -1573,16 +1573,16 @@ double CSGObject::monteCarloVolume() const {
   // Warm up statistics.
   for (int i = 0; i < 10; ++i) {
     const auto seed = rnEngine();
-    const double volume = singleShotMonteCarloVolume(singleShotIterations, seed);
-    accumulate(volume);
+    const double volumeMc = singleShotMonteCarloVolume(singleShotIterations, seed);
+    accumulate(volumeMc);
   }
   const double relativeErrorTolerance = 1e-3;
   double currentMean;
   double currentError;
   do {
     const auto seed = rnEngine();
-    const double volume = singleShotMonteCarloVolume(singleShotIterations, seed);
-    accumulate(volume);
+    const double volumeMc = singleShotMonteCarloVolume(singleShotIterations, seed);
+    accumulate(volumeMc);
     currentMean = mean(accumulate);
     currentError = error_of<tag::mean>(accumulate);
     if (std::isnan(currentError)) {
@@ -2056,13 +2056,13 @@ boost::optional<Kernel::V3D> CSGObject::generatePointInObject(Kernel::PseudoRand
   const size_t bruteForceAttempts{std::min(static_cast<size_t>(5), maxAttempts)};
   point = RandomPoint::bounded(*this, rng, activeRegion, bruteForceAttempts);
   if (!point) {
-    detail::ShapeInfo::GeometryShape shape;
+    detail::ShapeInfo::GeometryShape shapeGeometry;
     std::vector<Kernel::V3D> shapeVectors;
     double radius;
     double height;
     double innerRadius;
-    GetObjectGeom(shape, shapeVectors, innerRadius, radius, height);
-    switch (shape) {
+    GetObjectGeom(shapeGeometry, shapeVectors, innerRadius, radius, height);
+    switch (shapeGeometry) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
       point = RandomPoint::bounded<RandomPoint::inCuboid>(m_handler->shapeInfo(), rng, activeRegion,
                                                           maxAttempts - bruteForceAttempts);
