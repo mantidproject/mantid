@@ -512,6 +512,7 @@ target_link_libraries(
          Poco::NetSSL
          GSL::gsl
          OpenSSL::SSL
+         spdlog::spdlog
          ${HDF5_LIBRARIES}
          ${HDF5_HL_LIBRARIES}
   PRIVATE ${NETWORK_LIBRARIES} span
