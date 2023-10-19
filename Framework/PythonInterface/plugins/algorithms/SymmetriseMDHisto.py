@@ -63,6 +63,13 @@ class SymmetriseMDHisto(PythonAlgorithm):
         else:
             issues["Spacegroup"] = "Please only provide one of Spacegroup or Pointgroup."
         # check workspace has same extent and binning along all axes
+        ws = self.getProperty("InputWorkspace").value
+        lo, hi, nbins = _get_dim_extents_and_nbins(ws, 0)
+        if not np.isclose(lo, -hi):
+            issues["InputWorkspace"] = "Workspace must have have dimensions centered on 0 (i.e. min = -max)."
+        for idim in range(1, ws.getNumDims()):
+            if not all(np.isclose(_get_dim_extents_and_nbins(ws, idim), [lo, hi, nbins])):
+                issues["InputWorkspace"] = "Workspace must have same binning along all dimensions."
 
         return issues
 
@@ -112,6 +119,11 @@ class SymmetriseMDHisto(PythonAlgorithm):
             alg.setProperty(prop, value)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
+
+
+def _get_dim_extents_and_nbins(ws, idim):
+    dim = ws.getDimension(idim)
+    return dim.getMinimum(), dim.getMaximum(), dim.getNBins()
 
 
 AlgorithmFactory.subscribe(SymmetriseMDHisto)
