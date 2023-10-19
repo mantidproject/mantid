@@ -47,9 +47,9 @@ public:
   ~CodeBlockTimer();
 
 private:
-  std::string name;
-  std::ostream &out;
-  std::chrono::time_point<std::chrono::system_clock> start;
+  std::string m_name;
+  std::ostream &m_out;
+  std::chrono::time_point<std::chrono::system_clock> m_start;
 };
 
 class MANTID_KERNEL_DLL CodeBlockMultipleTimer {
@@ -61,15 +61,15 @@ public:
 
   public:
     void reset();
-    void increment(const double time_s);
+    void increment(const double time_sec);
     double getElapsed() const;
     size_t getNumberOfEntrances() const;
-    void report(std::ostream &out) const;
+    std::string toString() const;
 
   private:
-    std::string name;
-    double elapsed_s{0.0};
-    size_t number_of_entrances{0};
+    std::string m_name;
+    double m_elapsed_sec{0.0};
+    size_t m_number_of_entrances{0};
   };
 
 public:
@@ -78,9 +78,10 @@ public:
   ~CodeBlockMultipleTimer();
 
 private:
-  TimeAccumulator &accumulator;
-  std::chrono::time_point<std::chrono::system_clock> start;
+  TimeAccumulator &m_accumulator;
+  std::chrono::time_point<std::chrono::system_clock> m_start;
 };
 
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const CodeBlockMultipleTimer::TimeAccumulator &);
 } // namespace Kernel
 } // namespace Mantid

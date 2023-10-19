@@ -62,19 +62,19 @@ public:
     }
 
     // Parse the timer output and find the elapsed time
-    // Example of the timer output: "Elapsed time (s) in "test_timer": 0.200135\n"
+    // Example of the timer output: "Elapsed time (sec) in "test_timer": 0.200135\n"
     const std::string str_output{out.str()};
-    const std::regex str_expr{"Elapsed time \\(s\\) in \"(.*)\": ([0-9]+(\\.[0-9]+)?)\\n$"};
+    const std::regex str_expr{"Elapsed time \\(sec\\) in \"(.*)\": ([0-9]+(\\.[0-9]+)?)\\n$"};
     std::smatch sm;
     std::regex_match(str_output, sm, str_expr);
-    // Expected pattern matches for a timer output "Elapsed time (s) in "test_timer": 0.200135\n"
-    // Match 0: "Elapsed time (s) in "test_timer": 0.200135\n"
+    // Expected pattern matches for a timer output "Elapsed time (sec) in "test_timer": 0.200135\n"
+    // Match 0: "Elapsed time (sec) in "test_timer": 0.200135\n"
     // Match 1: "test_timer"
     // Match 2: "0.200135"
     // Match 3: ".200135"
     TS_ASSERT_LESS_THAN(2, sm.size());
-    double elapsed_s = stof(sm.str(2));
-    TS_ASSERT_LESS_THAN(sleepTime_ms * minTimeFactor, elapsed_s * s2ms);
+    double elapsed_sec = stof(sm.str(2));
+    TS_ASSERT_LESS_THAN(sleepTime_ms * minTimeFactor, elapsed_sec * sec2msec);
   }
 
   // Call sleep function multiple times and measure the total elapsed time
@@ -91,15 +91,15 @@ public:
       sleep_ms_with_timer(sleepTime_ms, ta);
 
     // Test elapsed time and number of entrances
-    double elapsed_s = ta.getElapsed();
-    TS_ASSERT_LESS_THAN(number_of_sleep_calls * sleepTime_ms * minTimeFactor, elapsed_s * s2ms);
+    double elapsed_sec = ta.getElapsed();
+    TS_ASSERT_LESS_THAN(number_of_sleep_calls * sleepTime_ms * minTimeFactor, elapsed_sec * sec2msec);
     TS_ASSERT_EQUALS(ta.getNumberOfEntrances(), number_of_sleep_calls);
 
     // Test stream output
     std::ostringstream out;
-    ta.report(out);
+    out << ta << '\n';
     std::ostringstream expected_out;
-    expected_out << "Elapsed time (s) in \"" << timer_name << "\": " << elapsed_s
+    expected_out << "Elapsed time (sec) in \"" << timer_name << "\": " << elapsed_sec
                  << " Number of entrances: " << number_of_sleep_calls << '\n';
     TS_ASSERT_EQUALS(expected_out.str(), out.str());
 
@@ -109,19 +109,19 @@ public:
       sleep_ms_with_timer(sleepTime_ms, ta);
 
     // Test elapsed time and number of entrances
-    elapsed_s = ta.getElapsed();
-    TS_ASSERT_LESS_THAN(number_of_sleep_calls * sleepTime_ms * minTimeFactor, elapsed_s * s2ms);
+    elapsed_sec = ta.getElapsed();
+    TS_ASSERT_LESS_THAN(number_of_sleep_calls * sleepTime_ms * minTimeFactor, elapsed_sec * sec2msec);
     TS_ASSERT_EQUALS(ta.getNumberOfEntrances(), number_of_sleep_calls);
 
     // Test stream output
     out.str("");
-    ta.report(out);
+    out << ta << '\n';
     expected_out.str("");
-    expected_out << "Elapsed time (s) in \"" << timer_name << "\": " << elapsed_s
+    expected_out << "Elapsed time (sec) in \"" << timer_name << "\": " << elapsed_sec
                  << " Number of entrances: " << number_of_sleep_calls << '\n';
     TS_ASSERT_EQUALS(expected_out.str(), out.str());
   }
 
 private:
-  const int s2ms{1000}; // time conversion factor
+  const int sec2msec{1000}; // time conversion factor
 };

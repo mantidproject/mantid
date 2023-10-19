@@ -66,14 +66,14 @@ std::ostream &operator<<(std::ostream &out, const Timer &obj) {
  * @param out :: stream to output the elapsed wall-clock time
  */
 CodeBlockTimer::CodeBlockTimer(const std::string &name, std::ostream &out)
-    : name(name), out(out), start(std::chrono::system_clock::now()) {}
+    : m_name(name), m_out(out), m_start(std::chrono::system_clock::now()) {}
 
-/** Calculate and output the elapsed wall-clock time in seconds
+/** Calculate and output to a stream the elapsed wall-clock time (sec)
  */
 CodeBlockTimer::~CodeBlockTimer() {
   const auto stop = std::chrono::system_clock::now();
-  const std::chrono::duration<double> elapsed = stop - start;
-  out << "Elapsed time (s) in \"" << name << "\": " << elapsed.count() << '\n';
+  const std::chrono::duration<double> elapsed = stop - m_start;
+  m_out << "Elapsed time (sec) in \"" << m_name << "\": " << elapsed.count() << '\n';
 }
 
 //------------------------------------------------------------------------
@@ -81,49 +81,64 @@ CodeBlockTimer::~CodeBlockTimer() {
  * @param accumulator :: a persistent object keeping track of the total elapsed wall-clock time
  */
 CodeBlockMultipleTimer::CodeBlockMultipleTimer(CodeBlockMultipleTimer::TimeAccumulator &accumulator)
-    : accumulator(accumulator), start(std::chrono::system_clock::now()) {}
+    : m_accumulator(accumulator), m_start(std::chrono::system_clock::now()) {}
 
 /** Calculate the elapsed wall-clock time (seconds) and update the time accumulator
  */
 CodeBlockMultipleTimer::~CodeBlockMultipleTimer() {
   const auto stop = std::chrono::system_clock::now();
-  const std::chrono::duration<double> elapsed = stop - start;
-  accumulator.increment(elapsed.count());
+  const std::chrono::duration<double> elapsed = stop - m_start;
+  m_accumulator.increment(elapsed.count());
 }
 
 //------------------------------------------------------------------------
 /** Instantiate the object
  * @param name :: custom name of the code block
  */
-CodeBlockMultipleTimer::TimeAccumulator::TimeAccumulator(const std::string &name) : name(name) {}
+CodeBlockMultipleTimer::TimeAccumulator::TimeAccumulator(const std::string &name) : m_name(name) {}
 
 /** Reset the elapsed wall-clock time and number of times the code block was entered
  */
 void CodeBlockMultipleTimer::TimeAccumulator::reset() {
-  elapsed_s = 0.0;
-  number_of_entrances = 0;
+  m_elapsed_sec = 0.0;
+  m_number_of_entrances = 0;
 }
 
 /** Increment the elapsed wall-clock time and number of times the code block was entered
- * @param time_s :: elapsed time (seconds) to add
+ * @param time_sec :: elapsed time (seconds) to add
  */
-void CodeBlockMultipleTimer::TimeAccumulator::increment(const double time_s) {
-  elapsed_s += time_s;
-  number_of_entrances++;
+void CodeBlockMultipleTimer::TimeAccumulator::increment(const double time_sec) {
+  m_elapsed_sec += time_sec;
+  m_number_of_entrances++;
 }
 
 /** Return the total elapsed wall-clock time
  * @return :: elapsed time in seconds
  */
-double CodeBlockMultipleTimer::TimeAccumulator::getElapsed() const { return elapsed_s; }
+double CodeBlockMultipleTimer::TimeAccumulator::getElapsed() const { return m_elapsed_sec; }
 
 /** Return the number of times the code block was entered
  * @return :: number of entrances
  */
-size_t CodeBlockMultipleTimer::TimeAccumulator::getNumberOfEntrances() const { return number_of_entrances; }
+size_t CodeBlockMultipleTimer::TimeAccumulator::getNumberOfEntrances() const { return m_number_of_entrances; }
 
-void CodeBlockMultipleTimer::TimeAccumulator::report(std::ostream &out) const {
-  out << "Elapsed time (s) in \"" << name << "\": " << elapsed_s << " Number of entrances: " << number_of_entrances
-      << '\n';
+/** Return the timing summary as a string
+ * @return :: timing summary
+ */
+std::string CodeBlockMultipleTimer::TimeAccumulator::toString() const {
+  std::ostringstream out;
+  out << "Elapsed time (sec) in \"" << m_name << "\": " << m_elapsed_sec
+      << " Number of entrances: " << m_number_of_entrances;
+  return out.str();
+}
+
+/** Output timing summary to a stream
+ * @param out :: stream to output the timing summary
+ * @param ta :: time accumulator keeping the timing summary
+ * @return :: stream to output the timing summary
+ */
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &out, const CodeBlockMultipleTimer::TimeAccumulator &ta) {
+  out << ta.toString();
+  return out;
 }
 } // namespace Mantid::Kernel
