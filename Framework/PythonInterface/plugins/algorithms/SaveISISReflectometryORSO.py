@@ -14,7 +14,6 @@ class Prop:
     INPUT_WS = "InputWorkspace"
     WRITE_RESOLUTION = "WriteResolution"
     RESOLUTION = "Resolution"
-    THETA = "ThetaIn"
     FILENAME = "Filename"
 
 
@@ -27,6 +26,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     _ISIS_DOI_PREFIX = "10.5286/ISIS.E.RB"
     _RB_NUM_LOGS = ("rb_proposal", "experiment_identifier")
     _INVALID_HEADER_COMMENT = "Mantid@ISIS output may not be fully ORSO compliant"
+    _REDUCTION_ALG = "ReflectometryReductionOneAuto"
+    _REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
+    _STITCH_ALG = "Stitch1DMany"
+    _REBIN_ALG = "Rebin"
 
     def category(self):
         return "Reflectometry\\ISIS"
@@ -61,15 +64,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         )
 
         self.declareProperty(
-            name=Prop.THETA,
-            defaultValue=Property.EMPTY_DBL,
-            direction=Direction.Input,
-            doc="Angle in degrees to use for calculating the resolution. "
-            f"This value is only used if {Prop.WRITE_RESOLUTION} is set to True "
-            f"and nothing has been provided for the {Prop.RESOLUTION} parameter.",
-        )
-
-        self.declareProperty(
             FileProperty(Prop.FILENAME, "", FileAction.Save, MantidORSOSaver.FILE_EXT), doc="File path to save the .ort file to"
         )
 
@@ -88,16 +82,17 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         orso_saver.save_orso_ascii()
 
     def _create_dataset(self, ws, dataset_name=None):
-        data_columns = self._create_data_columns(ws)
-        dataset = MantidORSODataset(dataset_name, data_columns, ws)
+        reduction_hist = self._get_reduction_alg_history(ws)
+        data_columns = self._create_data_columns(ws, reduction_hist)
+        dataset = self._create_dataset_with_mandatory_header(ws, dataset_name, reduction_hist, data_columns)
         self._add_optional_header_info(dataset, ws)
         return dataset
 
-    def _create_data_columns(self, ws):
+    def _create_data_columns(self, ws, reduction_history):
         """
         Set up the column headers and data values
         """
-        resolution = self._get_resolution(ws)
+        resolution = self._get_resolution(ws, reduction_history)
 
         alg = self.createChildAlgorithm("ConvertToPointData", InputWorkspace=ws, OutputWorkspace="pointData")
         alg.execute()
@@ -112,9 +107,22 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         return data_columns
 
+    def _create_dataset_with_mandatory_header(self, ws, dataset_name, reduction_history, data_columns):
+        """
+        Create a dataset with the data columns and the mandatory information populated in the header
+        """
+        return MantidORSODataset(
+            dataset_name,
+            data_columns,
+            ws,
+            reduction_timestamp=self._get_reduction_timestamp(reduction_history),
+            creator_name=self.name(),
+            creator_affiliation=MantidORSODataset.SOFTWARE_NAME,
+        )
+
     def _add_optional_header_info(self, dataset, ws):
         """
-        Populate the non_mandatory data in the header
+        Populate the non_mandatory information in the header
         """
         run = ws.getRun()
         rb_number, doi = self._get_rb_number_and_doi(run)
@@ -134,27 +142,61 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 return rb_num, f"{self._ISIS_DOI_PREFIX}{rb_num}"
         return None, None
 
-    def _get_resolution(self, ws):
+    def _get_resolution(self, ws, reduction_history):
         if not self.getProperty(Prop.WRITE_RESOLUTION).value:
             return None
 
         if not self.getProperty(Prop.RESOLUTION).isDefault:
             return self.getProperty(Prop.RESOLUTION).value
 
-        # Attempt to calculate the resolution if it hasn't been passed in
-        try:
-            alg = self.createChildAlgorithm("NRCalculateSlitResolution", Workspace=ws)
-            alg.setLogging(False)
-            if not self.getProperty(Prop.THETA).isDefault:
-                alg.setProperty("TwoTheta", 2 * self.getProperty(Prop.THETA).value)
-            alg.execute()
-            resolution = alg.getProperty("Resolution").value
-            self.log().notice(f"Resolution for {ws.name()} calculated as {resolution}")
-        except RuntimeError:
-            self.log().warning(f"Unable to calculate resolution for {ws.name()}")
+        # Attempt to get the resolution from the workspace history if it hasn't been passed in
+        history = ws.getHistory()
+        if not history.empty():
+            for history in reversed(history.getAlgorithmHistories()):
+                if history.name() == self._STITCH_ALG:
+                    # The absolute value of the stitch parameter is the resolution
+                    return abs(float(history.getPropertyValue("Params")))
+
+            if reduction_history:
+                rebin_alg = reduction_history.getChildHistories()[-1]
+                if rebin_alg.name() == self._REBIN_ALG:
+                    rebin_params = rebin_alg.getPropertyValue("Params").split(",")
+                    if len(rebin_params) == 3:
+                        # The absolute value of the middle rebin parameter is the resolution
+                        return abs(float(rebin_params[1]))
+
+        self.log().warning("Unable to find resolution from workspace history.")
+        return None
+
+    @staticmethod
+    def _get_reduction_timestamp(reduction_history):
+        """
+        Get the reduction algorithm execution date, which is in UTC, and convert it to a
+        datetime object expressed in local time
+        """
+        if not reduction_history:
             return None
 
-        return resolution
+        return MantidORSODataset.create_local_datetime_from_utc_string(reduction_history.executionDate().toISO8601String())
+
+    def _get_reduction_alg_history(self, ws):
+        """
+        Find the first occurrence of the reduction algorithm in the workspace history, otherwise return None
+        """
+        ws_history = ws.getHistory()
+        if ws_history.empty():
+            return None
+
+        for history in reversed(ws_history.getAlgorithmHistories()):
+            if history.name() == self._REDUCTION_ALG:
+                return history
+
+            if history.name() == self._REDUCTION_WORKFLOW_ALG:
+                for child_history in reversed(history.getChildHistories()):
+                    if child_history.name() == self._REDUCTION_ALG:
+                        return child_history
+
+        return None
 
 
 # Register algorithm with Mantid

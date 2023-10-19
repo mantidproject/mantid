@@ -8,6 +8,7 @@ import os
 import unittest
 import tempfile
 import numpy as np
+from datetime import datetime, timezone
 
 from mantid.simpleapi import (
     CreateSampleWorkspace,
@@ -18,6 +19,9 @@ from mantid.simpleapi import (
     DeleteLog,
 )
 from mantid.api import AnalysisDataService
+from mantid.kernel import version
+from mantid.utils.reflectometry.orso_helper import MantidORSODataset
+from testhelpers import assertRaisesNothing, create_algorithm
 
 
 class SaveISISReflectometryORSOTest(unittest.TestCase):
@@ -28,19 +32,25 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     _LOG_RB_NUMBER = "rb_proposal"
     _LOG_EXP_IDENTIFIER = "experiment_identifier"
-    _LOG_THETA = "Theta"
     _INVALID_HEADER_COMMENT = "Mantid@ISIS output may not be fully ORSO compliant"
+    _SAVE_ALG = "SaveISISReflectometryORSO"
+    _REDUCTION_ALG = "ReflectometryReductionOneAuto"
+    _REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
 
     def setUp(self):
-        """
-        Create the workspace and then ad logs to it so that it has the appropriate properties for
-        the SaveReflectometryORSO algorithm to read and save out.
-        """
         self._rb_number = str(123456)
         self._resolution = 0.05
         self._filename = "ORSO_save_test.ort"
         self._temp_dir = tempfile.TemporaryDirectory()
         self._output_filename = os.path.join(self._temp_dir.name, self._filename)
+        # The optional ISIS header entries that are not taken from the ws history
+        # and that will usually be saved out from the test workspace produced by _create_sample_workspace
+        self._header_entries_for_sample_ws = [
+            f"proposalID: '{self._rb_number}'",
+            f"doi: 10.5286/ISIS.E.RB{self._rb_number}",
+            "facility: ISIS",
+            f"creator:\n#     name: {self._SAVE_ALG}\n#     affiliation: {MantidORSODataset.SOFTWARE_NAME}\n#",
+        ]
 
     def tearDown(self):
         """
@@ -53,36 +63,45 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         ws = self._create_sample_workspace()
         SaveISISReflectometryORSO(InputWorkspace=ws, Resolution=self._resolution, Filename=self._output_filename)
 
-        header_values_to_check = [f"proposalID: '{self._rb_number}'", f"doi: 10.5286/ISIS.E.RB{self._rb_number}", "facility: ISIS"]
+        self._check_file_contents(self._header_entries_for_sample_ws, ws, self._resolution)
 
-        self._check_file_contents(header_values_to_check, ws, self._resolution)
+    def test_create_file_from_workspace_with_reduction_history(self):
+        # Check that relevant information is extracted from the history produced by the ISIS Reflectometry reduction
+        resolution = 0.02
+        reduced_ws = self._get_ws_from_reduction("INTER13460", resolution, "IvsQ_binned_13460")
+        SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
 
-    def test_create_file_with_no_resolution_provided_calculates_default_using_theta_log(self):
+        header_values_to_check = self._get_header_values_expected_from_reduced_ws_history(reduced_ws)
+
+        self._check_file_contents(header_values_to_check, reduced_ws, resolution)
+
+    def test_create_file_for_period_data_workspace_with_reduction_history(self):
+        # The history produced for the ISIS Reflectometry reduction is slightly different for period data, so
+        # check that we can extract relevant information from this
+        resolution = 0.02
+        reduced_ws = self._get_ws_from_reduction("POLREF14966", resolution, "IvsQ_binned_14966_1")
+
+        SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
+
+        header_values_to_check = self._get_header_values_expected_from_reduced_ws_history(reduced_ws)
+
+        self._check_file_contents(header_values_to_check, reduced_ws, resolution)
+
+    def test_create_file_from_workspace_with_no_reduction_history(self):
         ws = LoadNexus("INTER13460")
-        theta = ws.getRun().getProperty(self._LOG_THETA).lastValue()
-        resolution = NRCalculateSlitResolution(Workspace=ws, TwoTheta=2 * theta)
 
-        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
-
-        self._check_data_in_file(ws, resolution)
-
-    def test_create_file_with_no_resolution_provided_calculates_default_using_theta_provided(self):
-        ws = LoadNexus("INTER13460")
-        DeleteLog(ws, self._LOG_THETA)
-        theta = 2.3
-        resolution = NRCalculateSlitResolution(Workspace=ws, TwoTheta=2 * theta)
-
-        SaveISISReflectometryORSO(InputWorkspace=ws, ThetaIn=theta, Filename=self._output_filename)
-
-        self._check_data_in_file(ws, resolution)
-
-    def test_create_file_with_resolution_calculation_error_omits_resolution_column(self):
-        # This workspace will cause NRCalculateSlitResolution to throw an error because it doesn't have the required
-        # slit instrument components
-        ws = self._create_sample_workspace()
         SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
 
         self._check_data_in_file(ws, None)
+
+    def test_create_file_for_workspace_with_empty_history(self):
+        # The TOF workspace created from the ISIS Reflectometry reduction does not have any history
+        input_ws = self._get_ws_from_reduction("INTER13460", 0.02, "TOF_13460")
+        assert input_ws.getHistory().empty()
+
+        SaveISISReflectometryORSO(InputWorkspace=input_ws, Filename=self._output_filename)
+
+        self._check_data_in_file(input_ws, None)
 
     def test_create_file_with_write_resolution_set_to_false_omits_resolution_column(self):
         ws = self._create_sample_workspace()
@@ -94,10 +113,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         ws = self._create_sample_workspace(rb_num_log_name="")
         SaveISISReflectometryORSO(InputWorkspace=ws, Resolution=self._resolution, Filename=self._output_filename)
 
-        excluded_values = [
-            f"proposalID: '{self._rb_number}'",
-            f"doi: 10.5286/ISIS.E.RB{self._rb_number}",
-        ]
+        excluded_values = [self._header_entries_for_sample_ws[0], self._header_entries_for_sample_ws[1]]
 
         self._check_file_header(None, excluded_values)
 
@@ -105,9 +121,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         ws = self._create_sample_workspace(rb_num_log_name=self._LOG_EXP_IDENTIFIER)
         SaveISISReflectometryORSO(InputWorkspace=ws, Resolution=self._resolution, Filename=self._output_filename)
 
-        included_values = [f"proposalID: '{self._rb_number}'", f"doi: 10.5286/ISIS.E.RB{self._rb_number}", "facility: ISIS"]
-
-        self._check_file_header(included_values)
+        self._check_file_header(self._header_entries_for_sample_ws)
 
     def test_comment_added_to_top_of_file(self):
         # The comment is needed until we are able to output all the mandatory information required by the standard
@@ -116,13 +130,51 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._check_file_header([self._INVALID_HEADER_COMMENT])
 
-    def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, theta=None):
+    def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER):
         ws = CreateSampleWorkspace()
         if rb_num_log_name:
             ws.mutableRun().addProperty(rb_num_log_name, self._rb_number, True)
-        if theta is not None:
-            ws.mutableRun().addProperty(self._LOG_THETA, theta, True)
         return ws
+
+    def _get_ws_from_reduction(self, input_run, resolution, reduced_ws_name):
+        args = {
+            "InputRunList": input_run,
+            "ProcessingInstructions": "4",
+            "ThetaIn": 0.5,
+            "WavelengthMin": 2,
+            "WavelengthMax": 5,
+            "I0MonitorIndex": 1,
+            "MomentumTransferStep": resolution,
+        }
+        alg = create_algorithm("ReflectometryISISLoadAndProcess", **args)
+        assertRaisesNothing(self, alg.execute)
+        return AnalysisDataService.retrieve(reduced_ws_name)
+
+    def _get_header_values_expected_from_reduced_ws_history(self, reduced_ws):
+        expected_header_values = []
+        history = self._get_reduction_history_for_reduced_ws(reduced_ws)
+        self.assertIsNotNone(history)
+
+        # Get the reduction timestamp from the history, in local time
+        datetime_utc = datetime.strptime(history.executionDate().toISO8601String().split(".")[0], "%Y-%m-%dT%H:%M:%S")
+        reduction_datetime = datetime_utc.replace(tzinfo=timezone.utc).astimezone(tz=None)
+        expected_header_values.append(
+            f"reduction:\n#   software: {{name: {MantidORSODataset.SOFTWARE_NAME}, version: {version()}}}\n#   timestamp: {reduction_datetime.isoformat()}\n#"
+        )
+
+        return expected_header_values
+
+    def _get_reduction_history_for_reduced_ws(self, reduced_ws):
+        for history in reversed(reduced_ws.getHistory().getAlgorithmHistories()):
+            if history.name() == self._REDUCTION_ALG:
+                return history
+
+            if history.name() == self._REDUCTION_WORKFLOW_ALG:
+                for child_history in reversed(history.getChildHistories()):
+                    if child_history.name() == self._REDUCTION_ALG:
+                        return child_history
+
+        return None
 
     def _check_file_contents(self, header_values_to_check, ws, resolution, excluded_header_values=None):
         self._check_file_header(header_values_to_check, excluded_header_values)
