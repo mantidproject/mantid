@@ -8,7 +8,7 @@
 import unittest
 from unittest.mock import call, patch
 
-from mantidqtinterfaces.dns_powder_tof.scripts.dnstof import convert_to_de, get_sqw, load_data, pre_load_data
+from mantidqtinterfaces.dns_powder_tof.scripts.md_powder_tof import convert_to_de, get_sqw, load_data, pre_load_data
 from mantidqtinterfaces.dns_powder_tof.helpers.helpers_for_testing import get_fake_tof_binning
 
 
