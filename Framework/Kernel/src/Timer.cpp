@@ -128,7 +128,7 @@ size_t CodeBlockMultipleTimer::TimeAccumulator::getNumberOfEntrances() const { r
 std::string CodeBlockMultipleTimer::TimeAccumulator::toString() const {
   std::ostringstream out;
   out << "Elapsed time (sec) in \"" << m_name << "\": " << m_elapsed_sec
-      << " Number of entrances: " << m_number_of_entrances;
+      << "; Number of entrances: " << m_number_of_entrances;
   return out.str();
 }
 

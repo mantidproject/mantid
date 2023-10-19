@@ -100,7 +100,7 @@ public:
     out << ta << '\n';
     std::ostringstream expected_out;
     expected_out << "Elapsed time (sec) in \"" << timer_name << "\": " << elapsed_sec
-                 << " Number of entrances: " << number_of_sleep_calls << '\n';
+                 << "; Number of entrances: " << number_of_sleep_calls << '\n';
     TS_ASSERT_EQUALS(expected_out.str(), out.str());
 
     // Reset the accumulator and repeat the test
@@ -118,7 +118,7 @@ public:
     out << ta << '\n';
     expected_out.str("");
     expected_out << "Elapsed time (sec) in \"" << timer_name << "\": " << elapsed_sec
-                 << " Number of entrances: " << number_of_sleep_calls << '\n';
+                 << "; Number of entrances: " << number_of_sleep_calls << '\n';
     TS_ASSERT_EQUALS(expected_out.str(), out.str());
   }
 
