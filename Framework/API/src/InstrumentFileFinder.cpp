@@ -294,7 +294,7 @@ void InstrumentFileFinder::getValidFromTo(const std::string &IDFfilename, std::s
 
   try {
     pParser.parse(IDFfilename);
-  } catch (DummyException &e) {
+  } catch (const DummyException &e) {
     outValidFrom = e.m_validFrom;
     outValidTo = e.m_validTo;
   } catch (...) {

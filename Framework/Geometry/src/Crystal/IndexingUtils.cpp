@@ -1488,7 +1488,7 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions, const 
   V3D temp;
   std::vector<V3D> temp_dirs_2;
 
-  for (auto &temp_dir : temp_dirs) {
+  for (const auto &temp_dir : temp_dirs) {
     GetMagFFT(q_vectors, temp_dir, N_FFT_STEPS, projections, index_factor, magnitude_fft);
 
     double position = GetFirstMaxIndex(magnitude_fft, HALF_FFT_STEPS, threshold);

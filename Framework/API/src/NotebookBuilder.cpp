@@ -107,7 +107,7 @@ const std::string NotebookBuilder::buildAlgorithmString(const AlgorithmHistory_c
   std::string prop;
 
   auto props = algHistory->getProperties();
-  for (auto &propIter : props) {
+  for (const auto &propIter : props) {
     prop = buildPropertyString(propIter);
     if (prop.length() > 0) {
       properties << prop << ", ";

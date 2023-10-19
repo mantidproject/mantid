@@ -1786,10 +1786,10 @@ void CSGObject::calcBoundingBoxByGeometry() {
   switch (type) {
   case detail::ShapeInfo::GeometryShape::CUBOID: {
     // Points as defined in IDF XML
-    auto &lfb = vectors[0]; // Left-Front-Bottom
-    auto &lft = vectors[1]; // Left-Front-Top
-    auto &lbb = vectors[2]; // Left-Back-Bottom
-    auto &rfb = vectors[3]; // Right-Front-Bottom
+    const auto &lfb = vectors[0]; // Left-Front-Bottom
+    const auto &lft = vectors[1]; // Left-Front-Top
+    const auto &lbb = vectors[2]; // Left-Back-Bottom
+    const auto &rfb = vectors[3]; // Right-Front-Bottom
 
     // Calculate and add missing corner points to vectors
     auto lbt = lft + (lbb - lfb); // Left-Back-Top
@@ -1834,8 +1834,8 @@ void CSGObject::calcBoundingBoxByGeometry() {
   } break;
   case detail::ShapeInfo::GeometryShape::CYLINDER: {
     // Center-point of base and normalized axis based on IDF XML
-    auto &base = vectors[0];
-    auto &axis = vectors[1];
+    const auto &base = vectors[0];
+    const auto &axis = vectors[1];
     auto top = base + (axis * height); // Center-point of other end
 
     // How much of the radius must be considered for each axis
@@ -1856,8 +1856,8 @@ void CSGObject::calcBoundingBoxByGeometry() {
   } break;
 
   case detail::ShapeInfo::GeometryShape::CONE: {
-    auto &tip = vectors[0];            // Tip-point of cone
-    auto &axis = vectors[1];           // Normalized axis
+    const auto &tip = vectors[0];      // Tip-point of cone
+    const auto &axis = vectors[1];     // Normalized axis
     auto base = tip + (axis * height); // Center of base
 
     // How much of the radius must be considered for each axis
