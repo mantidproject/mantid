@@ -19,7 +19,6 @@ from mantid import logger
 
 
 class DSFinterp1DFit(IFunction1D):
-
     _RegressionTypes = None
     _minWindow = None
     _InputWorkspaces = None
@@ -184,6 +183,7 @@ try:
     import dsfinterp  # noqa
 
     FunctionFactory.subscribe(DSFinterp1DFit)
+    logger.warning("As of 2023-10-01, DSFinterp1DFit is officially deprecated and will be removed in Mantid 6.10")
 except ImportError:
     logger.debug(
         "Failed to subscribe fit function DSFinterp1DFit. "
