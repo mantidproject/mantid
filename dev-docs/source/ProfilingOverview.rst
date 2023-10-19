@@ -81,6 +81,8 @@ Other Profiling Tools
 Linux
 #####
 
+:doc:`ProfilingWithPerf` for details on perf and intel's vtune
+
 :doc:`ProfilingWithValgrind` for details on using this tool
 
 `Callgrind/KCachegrind <http://kcachegrind.sourceforge.net/cgi-bin/show.cgi/KcacheGrindIndex>`__
