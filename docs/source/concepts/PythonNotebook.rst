@@ -38,13 +38,13 @@ In Python or a Jupyter Notebook, accessing parts of the Mantid framework should 
 
 Run a python script:
 
-.. code-block:: python
+.. code-block:: none
 
    /path/to/python script.py
 
 Run a notebook:
 
-.. code-block:: python
+.. code-block:: none
 
    /path/to/python -m notebook "Downloads\Introduction to using Mantid with IPython Notebook.ipynb"
 

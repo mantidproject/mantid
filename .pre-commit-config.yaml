@@ -48,7 +48,7 @@ repos:
         exclude: |
           (?x)^(
           ^docs/source/index.rst$| # this has a value filled in by something
-          ^docs/source/concepts/.*|
+          ^docs/source/concepts/FittingMinimizersComparisonDetailed.rst| # strange ranking tags
           ^docs/source/fitting/.*|
           ^docs/source/techniques/.*|
           ^docs/source/tutorials/.*|
