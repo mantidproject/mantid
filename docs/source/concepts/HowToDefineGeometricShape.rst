@@ -79,6 +79,7 @@ Examples
 Defining a sphere
 ~~~~~~~~~~~~~~~~~
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <sphere id="some-sphere">
@@ -97,6 +98,7 @@ any shapes defined.
 Defining a ball with a hole through it along the x-axis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <cylinder id="stick">
@@ -257,6 +259,7 @@ Cuboid
 
 Here the dimensions are used to define a 2m x 4m x 0.2m cuboid with its centre at (10,10,10).
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <cuboid id="some-cuboid">
@@ -333,6 +336,7 @@ Here the dimensions are used to define a 2m x 4m x 0.2m cuboid with its centre a
 
 In the next example, four points are used to describe a 2m x 0.8m x 0.4m cuboid with the its centre at the origin.
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <cuboid id="shape">
@@ -469,6 +473,7 @@ Use the ``rotate`` tag to rotate a shape **individually around its centre** (or 
 The shape is rotated by an angle in degrees around the x,y and z axes in that order. To rotate a
 cuboid 90° clockwise around x and 45° anti-clockwise around y:
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <cuboid id="stick">
@@ -484,6 +489,7 @@ cuboid 90° clockwise around x and 45° anti-clockwise around y:
 Use the ``rotate-all`` tag to rotate a combined shape **about the origin**. To rotate the unison of a
 sphere on the end of a cylinder (by 90° clockwise around x and 45° anti-clockwise around y):
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <cylinder id="stick">
@@ -532,6 +538,7 @@ tend to not display properly.
 
 A custom bounding-box can be added to shapes using the following notation:
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <hexahedron id="shape">

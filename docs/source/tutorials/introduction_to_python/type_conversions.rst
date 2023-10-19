@@ -38,12 +38,7 @@ Printing
 
 .. code:: python
 
-   # this now means the next print statement will continue from where this
-   # left the cursor
-   # In python 2 (in this case you cannot include the brackets)
-   print 'The meaning of life is ... ',
-   # the equivalent in python 3 is
-   #print('The meaning of life is ... ', end=' ')
+   print('The meaning of life is ... ', end=' ')
 
 -  The comma can also be used to print several things to the screen on
    one line separated by a space:
@@ -52,11 +47,7 @@ Printing
 
    x = 5
    y = 6
-   # Python 2
-   print "X,Y:",str(x),str(y)   # prints 'X,Y: 5 6' with a newline
-   #print("X,Y:",str(x),str(y))   # prints '('X,Y:', '5', '6')' with a newline
-   # Python 3
-   #print ("X,Y:",str(x),str(y))  # prints 'X,Y: 5 6' with a newline
+   print ("X,Y:",str(x),str(y))  # prints 'X,Y: 5 6' with a newline
 
 -  As above printing other types is then simple with the ``str()``
    function:

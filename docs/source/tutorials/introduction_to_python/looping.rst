@@ -12,6 +12,7 @@ For ... else
 
 -  The syntax to loop with a ``for`` statement is
 
+.. rstcheck: ignore-next-code-block
 .. code:: python
 
    for ''target'' in sequence:

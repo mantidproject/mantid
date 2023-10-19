@@ -56,7 +56,7 @@ The peak functions (shapes):
 File Formats
 ############
 
-*  The legacy ascii/csv format: [ENGINX_full_pixel_calibration_vana194547_ceria193749.csv](https://github.com/mantidproject/mantid/blob/master/scripts/Engineering/calib/ENGINX_full_pixel_calibration_vana194547_ceria193749.csv)
+*  The legacy ascii/csv format: `ENGINX_full_pixel_calibration_vana194547_ceria193749.csv <https://github.com/mantidproject/mantid/blob/v6.0.0/scripts/Engineering/calib/ENGINX_full_pixel_calibration_vana194547_ceria193749.csv>`_
    This can get very large and cumbersome to deal with for instruments with many detectors.
 *  The :ref:`HDF format<DiffractionCalibrationWorkspace>`.
    This is that is more compact and is increasingly being used.

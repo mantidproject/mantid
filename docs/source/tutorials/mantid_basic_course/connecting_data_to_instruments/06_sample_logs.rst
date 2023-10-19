@@ -25,7 +25,7 @@ To access these:
 - Right-clicking on a log (e.g. SampleTemp) you can produce a normal workbench plot of the selected log, or print its
   values to the Messages Box:
 
-.. code-block:: python
+.. code-block:: none
 
     # SampleTemp
     2010-Mar-25 16:09:27.620000000  279.904

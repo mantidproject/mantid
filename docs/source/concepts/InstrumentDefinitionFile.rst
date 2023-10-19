@@ -206,12 +206,13 @@ which must be included. An example is
 
 .. code-block:: xml
 
-      <instrument xmlns="http://schema.mantidproject.org/IDF/1.0"
-                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                  xsi:schemaLocation="http://schema.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
-                  name="ARCS"
-                  valid-from="1900-01-31 23:59:59"
-                  valid-to="2100-01-31 23:59:59">
+   <instrument xmlns="http://schema.mantidproject.org/IDF/1.0"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://schema.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+               name="ARCS"
+               valid-from="1900-01-31 23:59:59"
+               valid-to="2100-01-31 23:59:59">
+   </instrument>
 
 Of the attributes in the example above
 
@@ -249,6 +250,7 @@ two things
 
 Here is an example
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <component type="slit" name="bob">
@@ -310,6 +312,7 @@ distances and convert time-of-flight to, for instance, d-spacing. An
 example of specifying a Source and SamplePos is shown below
 
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <component type="neutron moderator"> <location z="-10.0"/> </component>
@@ -356,6 +359,7 @@ important reason to insist on this.
 The <idlist> element and the idlist attribute of the elements is used to assign
 detector IDs. The notation for using idlist is
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <component type="monitor" idlist="monitor-id-list">
@@ -391,6 +395,7 @@ Creating Grid (Voxel) Banks
 
 There is a shortcut way to create 3D arrays of detector pixels. These pixels represent volumetric detectors. Here is an example how to do this:
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
     <component type="block"  idstart="1" idfillorder="zxy">
@@ -462,6 +467,7 @@ Creating Rectangular Area Detectors
 There is a shortcut way to create 2D arrays of detector pixels. Here is
 an example of how to do it:
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
     <component type="panel"  idstart="1000" idfillbyfirst="y" idstepbyrow="300">
@@ -551,6 +557,7 @@ of producing detectors with regular topology and geometry. The StructuredDetecto
 provides a way of producing detectors with regular topology and irregular geometry. It
 can be thought of as a warped RectangularDetector:
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
     <component name="DetectorBank" type="fan" idstart="0" idfillfirst="y" idstepbyrow="100" idstep="1">
@@ -746,6 +753,7 @@ pixels are known with respect to the sample to be at r="1" and with
 t="-1", t="0" and t="1". One option is to describe this bank/pixels
 structure as
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <component type="bank">
@@ -763,6 +771,7 @@ structure as
 However a better option for this case is to use nested translations as
 demonstrated below
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <component type="bank">
@@ -815,8 +824,14 @@ example of a <facing> element is
 .. code-block:: xml
 
       <facing x="0.0" y="0.0" z="0.0"/>
-      or
+
+
+or
+
+.. code-block:: xml
+
       <facing r="0.0" t="0.0" p="0.0"/>
+
 
 In addition if the <components-are-facing> is set under <defaults>,
 i.e. by default any component in the IDF will be rotated to face a
@@ -921,6 +936,7 @@ the y variable
 
 The above one line of XML is shorthand notation for
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <location y="1.0" name="det0"/>
@@ -948,6 +964,7 @@ describes a list of detectors aligned in a semi-circle:
 
 The above one line of XML is shorthand notation for
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <location r="0.5" t="0"   rot="0"   axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
@@ -1106,6 +1123,7 @@ Accessing <parameter>
 Parameters are by default accessed recursively.
 Demonstrated with an example:
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <component type="dummy">
@@ -1287,6 +1305,7 @@ defined using the notation in the an example below. Note that if more
 than one component e.g. have the name 'bank\_90degnew' then the
 specified parameters are applied to all such components.
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
     <component type="bank" name="bank_90degnew">
@@ -1332,6 +1351,7 @@ complicated shapes, as for example is the case for the ISIS POLARIS
 instrument. This tag combining components into one shape as demonstrated
 below:
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
     <component type="adjusted cuboid">
@@ -1399,6 +1419,7 @@ Note the above geometric shape can alternatively be defined with the XML
 (Mantid behind the scene translates the above XML to the XML below
 before proceeding):
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
     <component type="adjusted cuboid">
@@ -1592,6 +1613,7 @@ The following features are now deprecated and should no longer be used.
 The following notation to mark a detector as a
 monitor is now deprecated:
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <component type="monitor" idlist="monitor">
@@ -1606,6 +1628,7 @@ monitor is now deprecated:
 
 The above XML should be replaced with
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
       <component type="monitor" idlist="monitor">

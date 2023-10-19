@@ -44,7 +44,7 @@ Then, as mentioned in the tooltip in the image above, 1 of the 2 entries that oc
 was invalid at ``[5.0]``. When filtered, this leaves one valid entry ``[7.0]``, which is focussed on in the Filtered
 plot and the filtered statistics.
 
-.. code-block:: python
+.. code-block:: none
 
     # cryo_temp1
     2015-Mar-17 12:55:12  3
