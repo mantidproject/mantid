@@ -47,7 +47,7 @@ class MRGetTheta(PythonAlgorithm):
         use_sangle = self.getProperty("UseSANGLE").value
 
         if use_sangle:
-            if "SampleAngle" in ws.getRun():
+            if "SampleAngle" in _w.getRun():
                 theta = self.read_log(_w, "SampleAngle", target_units="rad", assumed_units="deg")
             else:
                 theta = self.read_log(_w, "SANGLE", target_units="rad", assumed_units="deg")
