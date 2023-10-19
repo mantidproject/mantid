@@ -89,7 +89,8 @@ def pre_load_data(bank_position, prefix, p, data):
     """
     ws_list = []
     for rn in data[bank_position]:
-        in_file = f"{data['path']}_{rn:06d}.d_dat"
+        star_pattern = "*" * len(str(rn))
+        in_file = data["path"].replace(star_pattern, str(rn))
         ws_name = f"ws_{rn:06d}"
         if p["wavelength"] > 0:
             LoadDNSLegacy(in_file, Normalization="no", ElasticChannel=p["e_channel"], Wavelength=p["wavelength"], OutputWorkspace=ws_name)

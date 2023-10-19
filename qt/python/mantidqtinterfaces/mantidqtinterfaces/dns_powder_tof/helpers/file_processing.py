@@ -37,7 +37,7 @@ def return_filelist(data_dir):
     if not os.path.isdir(data_dir):
         return []
     for file_name in sorted(os.listdir(data_dir)):
-        if re.match(r".*?_[0-9]+.d_dat", file_name):
+        if re.match(r".*d_dat", file_name):
             filelist.append(file_name)
     return filelist
 

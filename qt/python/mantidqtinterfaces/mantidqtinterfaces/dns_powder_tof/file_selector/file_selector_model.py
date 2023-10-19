@@ -56,8 +56,8 @@ class DNSFileSelectorModel(DNSObsModel):
 
     def _get_start_end_file_numbers(self):
         if self.all_datafiles:
-            start = int(self.all_datafiles[0].split("_")[-2][:-2])
-            end = int(self.all_datafiles[-1].split("_")[-2][:-2])
+            start = sorted(self.all_datafiles)[0]
+            end = sorted(self.all_datafiles)[-1]
             return [start, end]
         return [0, 0]
 
