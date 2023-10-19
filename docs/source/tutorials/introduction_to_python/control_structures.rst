@@ -82,6 +82,7 @@ Gives the output:
 -  Here we show an example of incorrect indentation and the subsequent
    error,
 
+.. rstcheck: ignore-next-code-block
 .. code:: python
 
    if x == 5:

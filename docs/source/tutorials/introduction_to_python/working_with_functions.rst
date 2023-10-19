@@ -67,6 +67,8 @@ more useful.
 -  Note that explicitly specifying an argument name forces all arguments
    that follow it to also have their name specified, e.g.
 
+
+.. rstcheck: ignore-next-code-block
 .. code:: python
 
    def foo(A, B, C, D, E):

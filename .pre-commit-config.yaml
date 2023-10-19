@@ -50,8 +50,7 @@ repos:
           ^docs/source/index.rst$| # this has a value filled in by something
           ^docs/source/concepts/FittingMinimizersComparisonDetailed.rst| # strange ranking tags
           ^docs/source/fitting/.*|
-          ^docs/source/techniques/.*|
-          ^docs/source/tutorials/.*|
+          ^docs/source/techniques/.*
           )$
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
