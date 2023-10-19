@@ -35,10 +35,12 @@ public:
 
     // test constructor from enumerator
     COOLGUY dude1(CoolGuys::Fred);
+    TS_ASSERT_EQUALS(dude1, "Frederic");
     TS_ASSERT_EQUALS(dude1, CoolGuys(0));
     TS_ASSERT_EQUALS(dude1, CoolGuys::Fred);
     TS_ASSERT_EQUALS(dude1, coolGuyNames[0]);
     TS_ASSERT_DIFFERS(dude1, CoolGuys::Bill);
+    TS_ASSERT_DIFFERS(dude1, "Jeremy");
 
     // test constructor from string name
     COOLGUY dude2(coolGuyNames[1]);
@@ -211,7 +213,7 @@ public:
     // try removing enum_count -- should give a compiler error
     enum class Letters : size_t { a, b, enum_count };
     static const std::vector<std::string> letters{"a", "b"};
-    enum Graphia : size_t { alpha, beta, enum_count };
+    enum class Graphia : size_t { alpha, beta, enum_count };
     static const std::vector<std::string> graphia{"alpha", "beta"};
     EnumeratedString<Letters, &letters> l1("a");
     EnumeratedString<Graphia, &graphia> l2("alpha");
@@ -232,8 +234,8 @@ public:
   void testSwitchAndIf() {
     g_log.notice("\ntestSwitchAndIf...");
 
-    const size_t index = 3;
-    CAKE tasty = Cakes(index), scrumptious = Cakes(index);
+    const char index = 3;
+    CAKE tasty = Cakes(index);
 
     // test enumerated string against string
     if (tasty == cakeNames[index]) {
@@ -259,6 +261,29 @@ public:
       break;
     default:
       TS_FAIL("EnumeratedString in 'SWITCH' failed to match to enumerated value");
+    }
+  }
+
+  void testUnderlyingType() {
+    g_log.notice("\ntestUnderlyingType...");
+
+    // use a non-class enum to compare against chars
+    enum LetterA : char { a, enum_count };
+    static const std::vector<std::string> letterA = {"a"};
+    typedef EnumeratedString<LetterA, &letterA> LETTERA;
+    LETTERA a1 = a;                // note that a is in namespace, vars cannot be named this
+    TS_ASSERT_EQUALS(a1, a);       // compare against enum
+    TS_ASSERT_EQUALS(a1, "a");     // compares against string
+    TS_ASSERT_EQUALS(a1, 0);       // compare against literal
+    TS_ASSERT_EQUALS(a1, '\x00');  // char literal at 0
+    TS_ASSERT_DIFFERS(a1, 'a');    // Letters::a corresponds to 0, not to 'a'= 97
+    TS_ASSERT_DIFFERS(a1, '\x01'); // char literal at 1
+    TS_ASSERT_DIFFERS(a1, 1);
+    switch (a1) {
+    case '\x00':
+      break;
+    default:
+      TS_FAIL("EnumeratedString in 'SWITCH' failed to match to underlying type");
     }
   }
 

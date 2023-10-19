@@ -107,7 +107,7 @@ class GeneralSettings(object):
             font_string = CONF.get(GeneralProperties.FONT.value, type=str).split(",")
             if len(font_string) > 2:
                 font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
-        font_dialog = self.view.create_font_dialog(self.parent, font)
+        font_dialog = self.view.create_font_dialog(self.view, font)
         font_dialog.fontSelected.connect(self.action_font_selected)
 
     def action_font_selected(self, font):

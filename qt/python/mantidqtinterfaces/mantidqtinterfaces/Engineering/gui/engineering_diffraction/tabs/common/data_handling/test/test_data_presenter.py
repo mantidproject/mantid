@@ -43,6 +43,17 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.ws3 = mock.MagicMock()
         self.ws3.getAxis.return_value = mock_axis_d
 
+    def _setup_fitting_table_rows(self, ws_names, active_ws_xunit=None):
+        self.presenter.row_numbers = data_presenter.TwoWayRowDict()
+        for iws, ws_name in enumerate(ws_names):
+            self.presenter.row_numbers[ws_name] = iws
+        if active_ws_xunit is not None:
+            ws = mock.MagicMock()
+            ws.getXDimension().name = active_ws_xunit
+            return ws
+        else:
+            return None
+
     @patch(dir_path + ".data_presenter.AsyncTask")
     def test_worker_started_correctly(self, mock_worker):
         self.view.is_searching.return_value = False
@@ -249,10 +260,7 @@ class FittingDataPresenterTest(unittest.TestCase):
             model_dict.pop(loaded_ws_name, "")
             return model_dict.values()
 
-        self.presenter.row_numbers = data_presenter.TwoWayRowDict()
-        self.presenter.row_numbers["name1"] = 0
-        self.presenter.row_numbers["name2"] = 1
-        self.presenter.row_numbers["name3"] = 2
+        self._setup_fitting_table_rows(["name1", "name2", "name3"])
         model_dict = {"name1": self.ws1, "name2": self.ws2, "name3": self.ws3}
         self.model.get_loaded_workspaces.return_value = model_dict
         self.model.delete_workspace.side_effect = removeWorkspaceIfPresent
@@ -277,9 +285,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         mocked_table_item = mock.MagicMock()
         self.view.get_item_checked.side_effect = _get_item_checked_mock
         self.view.get_table_item.return_value = mocked_table_item
-        self.presenter.row_numbers = data_presenter.TwoWayRowDict()
-        self.presenter.row_numbers["name1"] = 0
-        self.presenter.row_numbers["name2"] = 1
+        self._setup_fitting_table_rows(["name1", "name2"])
         self.model.get_active_ws.return_value = self.ws1
         self.model.get_active_ws_name.return_value = "name1"
         self.presenter.plot_added_notifier = mock.MagicMock()
@@ -291,11 +297,72 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.presenter.plot_added_notifier.notify_subscribers.assert_any_call(self.ws1)
         self.assertEqual(0, self.presenter.plot_removed_notifier.notify_subscribers.call_count)
 
+    @patch(dir_path + ".data_presenter.ADS")
+    def test_handle_table_cell_changed_ticked_to_plot_on_dspacing_when_tof_plotted(self, ads_patch):
+        self.view.get_item_checked.side_effect = _get_item_checked_mock
+        ws2 = self._setup_fitting_table_rows(
+            ["TOF_WS_Name1", "dSpacing_WS_Name1"],
+            "dSpacing",
+        )
+        self.model.get_active_ws.return_value = ws2
+        self.presenter.plot_added_notifier = mock.MagicMock()
+        self.presenter.plot_removed_notifier = mock.MagicMock()
+        self.presenter.plotted.add("TOF_WS_Name1")
+        ads_patch.retrieve().getXDimension().name = "TOF"
+
+        self.presenter._handle_table_cell_changed(1, 2)  # tick the 2nd dSpacing row to be plotted
+
+        self.assertEqual(1, self.view.set_item_checkstate.call_count)
+        self.assertEqual(0, self.presenter.plot_added_notifier.notify_subscribers.call_count)
+        self.assertEqual(1, len(self.presenter.plotted))
+        self.assertEqual("TOF_WS_Name1", next(iter(self.presenter.plotted)))
+        self.view.set_item_checkstate.assert_called_once_with(1, 2, False)
+
+    @patch(dir_path + ".data_presenter.ADS")
+    def test_handle_table_cell_changed_ticked_to_plot_on_tof_when_tof_plotted(self, ads_patch):
+        self.view.get_item_checked.side_effect = _get_item_checked_mock
+        ws2 = self._setup_fitting_table_rows(["TOF_WS_Name1", "TOF_WS_Name2"], "TOF")
+        self.model.get_active_ws.return_value = ws2
+        self.model.get_active_ws_name.return_value = "TOF_WS_Name2"
+        self.presenter.plot_added_notifier = mock.MagicMock()
+        self.presenter.plot_removed_notifier = mock.MagicMock()
+        self.presenter.plotted.add("TOF_WS_Name1")
+        ads_patch.retrieve().getXDimension().name = "TOF"
+
+        self.presenter._handle_table_cell_changed(1, 2)  # tick the 2nd TOF row to be plotted
+
+        self.assertEqual(0, self.view.set_item_checkstate.call_count)
+        self.assertEqual(1, self.presenter.plot_added_notifier.notify_subscribers.call_count)
+        self.assertEqual(2, len(self.presenter.plotted))
+
+    @patch(dir_path + ".data_presenter.logger")
+    @patch(dir_path + ".data_presenter.ADS")
+    def test_loading_new_dspacing_file_with_ticked_to_plot_when_tof_plotted(self, ads_patch, mock_logger):
+        self.presenter.plotted = {"TOF_WS_Name1"}
+        ws1 = mock.MagicMock()
+        ws1.getXDimension().name = "TOF"
+        ws2 = mock.MagicMock()
+        ws2.getXDimension().name = "dSpacing"
+        self.model.get_sample_log_from_ws.return_value = "bankOrRunNumber"
+        self.model.get_last_added.return_value = ["dSpacing_WS_Name1"]
+        model_dict = {"TOF_WS_Name1": ws1, "dSpacing_WS_Name1": ws2}
+        self.model.get_loaded_workspaces.return_value = model_dict
+        self.view.get_add_to_plot.return_value = True
+
+        self.model.get_active_ws_name.side_effect = lambda name: name
+        self.model.get_active_ws.side_effect = lambda name: model_dict.get(name, None)
+        self.presenter.plot_added_notifier = mock.MagicMock()
+        self.presenter.all_plots_removed_notifier = mock.MagicMock()
+        self.presenter._add_row_to_table = mock.MagicMock()
+
+        self.presenter._on_worker_success("info")
+
+        self.assertEqual(2, self.presenter._add_row_to_table.call_count)
+        self.assertEqual(0, len(self.presenter.plotted))
+
     def test_handle_table_cell_changed_checkbox_unticked(self):
         self.view.get_item_checked.return_value = False
-        self.presenter.row_numbers = data_presenter.TwoWayRowDict()
-        self.presenter.row_numbers["name1"] = 0
-        self.presenter.row_numbers["name2"] = 1
+        self._setup_fitting_table_rows(["name1", "name2"])
         self.model.get_active_ws.return_value = self.ws1
         self.model.get_active_ws_name.return_value = "name1"
         self.presenter.plot_added_notifier = mock.MagicMock()
@@ -311,9 +378,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         mocked_table_item = mock.MagicMock()
         mocked_table_item.checkState.return_value = 2
         self.view.get_table_item.return_value = mocked_table_item
-        self.presenter.row_numbers = data_presenter.TwoWayRowDict()
-        self.presenter.row_numbers["name1"] = 0
-        self.presenter.row_numbers["name2"] = 1
+        self._setup_fitting_table_rows(["name1", "name2"])
         self.model.get_active_ws.return_value = self.ws1
         self.model.get_active_ws_name.return_value = "name1"
         self.presenter.plot_added_notifier = mock.MagicMock()
@@ -361,9 +426,7 @@ class FittingDataPresenterTest(unittest.TestCase):
 
     def test_inspect_bg_button_enables_and_disables(self):
         self.view.get_item_checked.return_value = False
-        self.presenter.row_numbers = data_presenter.TwoWayRowDict()
-        self.presenter.row_numbers["name1"] = 0
-        self.presenter.row_numbers["name2"] = 1
+        self._setup_fitting_table_rows(["name1", "name2"])
         self.view.get_selected_rows.return_value = self.presenter.row_numbers
         self.presenter._handle_selection_changed()
         self.view.set_inspect_bg_button_enabled.assert_called_with(True)
@@ -375,9 +438,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         mocked_table_item = mock.MagicMock()
         mocked_table_item.checkState.return_value = True
         self.view.get_table_item.return_value = mocked_table_item
-        self.presenter.row_numbers = data_presenter.TwoWayRowDict()
-        self.presenter.row_numbers["name1"] = 0
-        self.presenter.row_numbers["name2"] = 1
+        self._setup_fitting_table_rows(["name1", "name2"])
         self.model.get_loaded_workspaces.return_value = {"name1": self.ws1, "name2": self.ws2}
         self.model.estimate_background.return_value = self.ws2
 
