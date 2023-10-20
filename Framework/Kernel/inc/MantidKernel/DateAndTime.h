@@ -31,9 +31,9 @@ public:
   TimeInterval(const std::string &from, const std::string &to);
 
   /// Beginning of the interval
-  Types::Core::DateAndTime start() const { return m_start; }
+  const Types::Core::DateAndTime &start() const { return m_start; }
   /// End of the interval
-  Types::Core::DateAndTime stop() const { return m_stop; }
+  const Types::Core::DateAndTime &stop() const { return m_stop; }
   /// True if the interval is not empty
   bool isValid() const { return m_stop > m_start; }
 
