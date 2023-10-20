@@ -268,8 +268,6 @@ void FilterEvents::exec() {
   progress(m_progress, "Create Output Workspaces.");
   createOutputWorkspaces();
 
-  TimeSeriesProperty<double>::reportTiming();
-
   // Optional import corrections
   m_progress = 0.20;
   progress(m_progress, "Importing TOF corrections. ");
@@ -293,19 +291,10 @@ void FilterEvents::exec() {
     const auto sortType = m_filterByPulseTime ? EventSortType::PULSETIME_SORT : EventSortType::PULSETIMETOF_SORT;
     m_eventWS->sortAll(sortType, nullptr);
     addTimer("sortEvents", startTime, std::chrono::high_resolution_clock::now());
-    std::chrono::duration<double> elapsed_seconds = std::chrono::high_resolution_clock::now() - startTime;
-    std::cout << "Time (s) spent in sorting events " << elapsed_seconds.count() << "\n";
   }
 
-  std::cout << "START EVENT FILTERING" << std::endl;
-  {
-    const auto startTime = std::chrono::high_resolution_clock::now();
-    filterEvents(progressamount);
-    addTimer("filterEvents", startTime, std::chrono::high_resolution_clock::now());
-    std::chrono::duration<double> elapsed_seconds = std::chrono::high_resolution_clock::now() - startTime;
-    std::cout << "Time (s) spent in filtering events " << elapsed_seconds.count() << "\n";
-  }
-  std::cout << "FINISHED EVENT FILTERING" << std::endl;
+  // filter the events
+  filterEvents(progressamount);
 
   // Optional to group detector
   groupOutputWorkspace();
@@ -342,7 +331,6 @@ void FilterEvents::exec() {
  */
 void FilterEvents::examineEventWS() {
   size_t numhist = m_eventWS->getNumberHistograms();
-  std::cout << "\nNUMBER OF HISTOGRAMS: " << numhist << "\n";
   m_vecSkip.resize(numhist, false);
 
   // check whether any detector is skipped
@@ -550,13 +538,9 @@ void FilterEvents::groupOutputWorkspace() {
  * TimeSplitter(0.0, 1.0, NO_TARGET) is ill-defined, as {(0.0, NO_TARGET), (1.0, NO_TARGET)} is meaningless.
  */
 TimeROI FilterEvents::partialROI(const int &index) {
-  std::cout << "FilterEvents::partialROI index: " << index << std::endl;
   TimeROI roi{m_timeSplitter.getTimeROI(index)};
 
-  std::cout << "ROI: BOUNDARIES: " << roi.numBoundaries() << std::endl;
-
   if (index == TimeSplitter::NO_TARGET) {
-    std::cout << "FilterEvents::partialROI case TimeSplitter::NO_TARGET " << std::endl;
     const auto splittingBoundaries = m_timeSplitter.getSplittersMap();
 
     const auto firstSplitter = splittingBoundaries.begin();
@@ -592,12 +576,6 @@ void FilterEvents::parseInputSplitters() {
   }
 
   m_targetWorkspaceIndexSet = m_timeSplitter.outputWorkspaceIndices();
-
-  std::cout << "NUMBER OF WORKSPACE INDEXES IN TARGET SET: " << m_targetWorkspaceIndexSet.size() << "\n";
-  for (auto itr = m_targetWorkspaceIndexSet.begin(); itr != m_targetWorkspaceIndexSet.end(); itr++) {
-    std::cout << *itr << " ";
-  }
-  std::cout << "\n";
 
   // For completeness, make sure we have a special workspace index for unfiltered events
   m_targetWorkspaceIndexSet.insert(TimeSplitter::NO_TARGET);
@@ -667,14 +645,10 @@ void FilterEvents::createOutputWorkspaces() {
       static_cast<double>(m_targetWorkspaceIndexSet.size()); // total number of progress steps expected
   double progress_step_current{0.};                          // current number of progress steps
   const auto originalROI = m_eventWS->run().getTimeROI();
-  std::cout << "ORIGINAL ROI: BOUNDARIES: " << originalROI.numBoundaries() << std::endl;
-  std::cout << "ORIGINAL ROI: REGIONS: " << originalROI.numberOfRegions() << std::endl;
 
   const bool outputUnfiltered = getProperty("OutputUnfilteredEvents");
-  std::cout << "OUTPUT UNFILTERED EVENTS: " << outputUnfiltered << std::endl;
 
   for (auto const wsindex : m_targetWorkspaceIndexSet) {
-    std::cout << "WSINDEX: " << wsindex << std::endl;
     // Generate new workspace name
     bool add2output = true;
     std::stringstream wsname;
@@ -709,8 +683,6 @@ void FilterEvents::createOutputWorkspaces() {
       if (!outputUnfiltered)
         add2output = false;
     }
-
-    std::cout << "WSNAME: " << wsname.str() << std::endl;
 
     //
     // instantiate one of the output filtered workspaces
@@ -785,10 +757,6 @@ void FilterEvents::createOutputWorkspaces() {
 
   // copy the logs over
   const auto startTimeLogs = std::chrono::high_resolution_clock::now();
-
-  std::cout << "FilterEvents::createOutputWorkspaces NUMBER OF ENTRIES IN  m_outputWorkspacesMap: "
-            << m_outputWorkspacesMap.size() << std::endl;
-
   for (auto &outputIter : m_outputWorkspacesMap) {
     // Endow the output workspace with a TimeROI
     TimeROI roi = this->partialROI(outputIter.first);
@@ -1047,20 +1015,6 @@ void FilterEvents::filterEvents(double progressamount) {
   PARALLEL_CHECK_INTERRUPT_REGION
   progress(0.1 + progressamount, "Splitting logs");
   addTimer("filterEventsMethod", startTime, std::chrono::high_resolution_clock::now());
-
-  const auto stopTime = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> elapsed_seconds = stopTime - startTime;
-
-  std::cout << "TOTAL NUMBER OF INPUT EVENTS: " << m_eventWS->getNumberEvents() << "\n";
-  std::cout << "TOTAL NUMBER OF SPLITTERS: " << m_timeSplitter.numRawValues() << "\n";
-  std::cout << "Time (s) spent in FilterEvents::filterEvents:" << elapsed_seconds.count() << "\n";
-
-  std::cout << "Cumulative time (s) spent in EventList sorting: " << TimeSplitter::getTime1() << std::endl;
-  std::cout << "Cumulative time (s) spent in TS::splitEventVec(s): " << TimeSplitter::getTime4() << std::endl;
-  std::cout << "Cumulative time (s) spent in TS::rebuildCachedPartialTimeROIs: " << TimeSplitter::getTime5()
-            << std::endl;
-  std::cout << "Cumulative time (s) spent in TS::rebuildCachedSplittingIntervals: " << TimeSplitter::getTime6()
-            << std::endl;
-  std::cout << "Cumulative time (s) spent in TS::TS(TableWorkspace) " << TimeSplitter::getTime7() << std::endl;
 }
+
 } // namespace Mantid::Algorithms
