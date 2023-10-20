@@ -137,6 +137,7 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeomet
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDGridBox.h:247
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentInfoBankHelpers.cpp:113
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/FitParameter.cpp:54
+variableScope:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/Goniometer.cpp:113
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/Goniometer.cpp:148
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/Goniometer.cpp:254
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentHelper.cpp:63
