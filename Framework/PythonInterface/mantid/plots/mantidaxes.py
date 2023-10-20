@@ -1122,7 +1122,7 @@ class MantidAxes(Axes):
         for i in range(len(self.get_lines())):
             datafunctions.convert_single_line_to_waterfall(self, i, x_offset, y_offset)
 
-        if x_offset == 0 and y_offset == 0:
+        if x_offset == 0 and y_offset == 0 and self.is_waterfall():
             self.set_waterfall_fill(False)
             logger.information("x and y offset have been set to zero so the plot is no longer a waterfall plot.")
 
