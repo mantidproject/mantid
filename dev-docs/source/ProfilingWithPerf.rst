@@ -1,3 +1,7 @@
+.. note::
+
+   These tools generally require ``sudo`` permissions to configure the system to allow them to get information.
+
 Profiling with perf
 ===================
 
@@ -15,7 +19,7 @@ Much of this information was originally gained from `Nick Tompson's Performance 
 Install and configure
 ---------------------
 
-To install perf on ubuntu one needs
+To install perf on ubuntu one needs (this is `inspired from here <https://www.howtoforge.com/how-to-install-perf-performance-analysis-tool-on-ubuntu-20-04/>`_)
 
 .. code-block:: sh
 
@@ -39,6 +43,8 @@ Any debug symbols that are found will aid in understanding the output.
    sudo chown `whoami` /sys/kernel/debug/tracing/uprobe_events
    sudo chmod a+rw /sys/kernel/debug/tracing/uprobe_events
 
+Python 3.12 will have `native support for perf <https://docs.python.org/3.12/howto/perf_profiling.html>`_.
+
 Running perf
 ------------
 
@@ -59,3 +65,33 @@ The report can also be viewed `FlameGraph <https://github.com/brendangregg/Flame
 .. code-block:: sh
 
    perf script | ~/code/FlameGraph/stackcollapse-perf.pl | ~/code/FlameGraph/flamegraph.pl > flame.svg
+
+Profiling with Intel's VTune
+============================
+
+Intel's VTune profiler (`download link <https://www.intel.com/content/www/us/en/developer/tools/oneapi/vtune-profiler-download.html>`_ and `install instructions <https://www.intel.com/content/www/us/en/docs/vtune-profiler/installation-guide/2023-0/package-managers.html>`_) is part of the one-api suite of software that is available for open source projects.
+This is part of the same suite that provides TBB (threaded building blocks) that are used in mantid.
+After installing, one must configure (these `instructions are for ubuntu <https://www.intel.com/content/www/us/en/docs/vtune-profiler/user-guide/2023-0/linux-targets.html>`_) using the command
+
+.. code-block:: sh
+
+   sudo sysctl -w kernel.yama.ptrace_scope=0
+
+This needs to be done at every system reboot, but can be configured in sysctl to be a permanent option as well.
+Finally, the environment settings for vtune are in ``/opt/intel/oneapi/vtune/latest/vtune-vars.sh`` and the gui can be started using ``vtune-gui``.
+
+From the welcome screen, you will want to "Configure Analysis" (the play button).
+
+.. figure:: images/vtune_configure.png
+   :alt: Example configuration
+
+This example takes advantage of how cxxtestgen works by running the command
+
+.. code-block:: sh
+
+   bin/AlgorithmsTest FilterEventsTest test_tableSplitterHuge
+
+which runs The ``test_tableSplitterHuge`` test of the ``FilterEventsTest`` suite, in the ``AlgorithmsTest`` binary.
+It is suggested that one selects "User-Mode Sampling" to avoid seeing kernel methods and get the flame graph visualization.
+Once the analysis is completed, you will see the summary.
+It is recommended that you start with the "Flame Graph" and "Top-down Tree" visualizations first.
