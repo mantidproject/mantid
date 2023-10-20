@@ -223,9 +223,9 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         lines = []
         ascii, nexus = self._check_if_to_save(paths)
         if ascii:
-            lines += ["SaveAscii('data1_dE_S', '" f"{paths['export_dir']}" "/data1_dE_S.csv', " "WriteSpectrumID=False)"]
+            lines += [f"SaveAscii('data1_dE_S', '{paths['export_dir']}/data1_dE_S.csv', WriteSpectrumID=False)"]
         if nexus:
-            lines += ["SaveNexus('data1_dE_S', '" f"{paths['export_dir']}/data1_dE_S.csv', )" ""]
+            lines += [f"SaveNexus('data1_dE_S', '{paths['export_dir']}/data1_dE_S.nxs')"]
         return lines
 
     @staticmethod
