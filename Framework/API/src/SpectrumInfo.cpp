@@ -247,8 +247,8 @@ void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit, const Kernel
       }
     }
 
-    std::vector<detid_t> warnDetIds;
     try {
+      std::vector<detid_t> warnDetIds;
       std::set<std::string> diffConstUnits = {"dSpacing", "MomentumTransfer", "Empty"};
       if ((emode == Kernel::DeltaEMode::Elastic) &&
           (diffConstUnits.count(inputUnit.unitID()) || diffConstUnits.count(outputUnit.unitID()))) {

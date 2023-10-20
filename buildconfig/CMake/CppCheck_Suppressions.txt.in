@@ -60,7 +60,6 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/T
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ThreadScheduler.h:278
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TopicInfo.cpp:43
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Quat.cpp:687
-variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/UserStringParser.cpp:158
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:128
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:129
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:180
@@ -68,7 +67,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Parallel/inc/MantidParallel/IO/EventDataPartitioner.h:86
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/VMD.cpp:428
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/VMD.cpp:536
-variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:58
 constParameter:${CMAKE_SOURCE_DIR}/build/_deps/span-src/include/tcb/span.hpp:323
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Matrix.cpp:128
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Matrix.cpp:943
@@ -84,10 +82,8 @@ unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Nearest
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/Expression.cpp:120
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/API/src/NumericAxis.cpp:154
 variableScope:${CMAKE_SOURCE_DIR}/Framework/API/src/NotebookBuilder.cpp:107
-variableScope:${CMAKE_SOURCE_DIR}/Framework/API/src/NotebookBuilder.cpp:157
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:156
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/API/src/ISpectrum.cpp:167
-variableScope:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectrumInfo.cpp:250
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:455
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:457
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:474
@@ -141,7 +137,6 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeomet
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDGridBox.h:247
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentInfoBankHelpers.cpp:113
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/FitParameter.cpp:54
-variableScope:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/Goniometer.cpp:108
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/Goniometer.cpp:148
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/Goniometer.cpp:254
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentHelper.cpp:63

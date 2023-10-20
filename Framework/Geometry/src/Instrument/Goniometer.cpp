@@ -105,12 +105,12 @@ std::string Goniometer::axesInfo() {
   } else {
     std::stringstream info;
     std::vector<GoniometerAxis>::iterator it;
-    std::string strCW("CW"), strCCW("CCW"), sense;
 
     if (motors.empty()) {
       info << "No axis is found\n";
     } else {
       info << "Name \t Direction \t Sense \t Angle \n";
+      std::string strCW("CW"), strCCW("CCW"), sense;
       for (it = motors.begin(); it < motors.end(); ++it) {
         sense = ((*it).sense == CCW) ? strCCW : strCW;
         double angle = ((*it).angleunit == angDegrees) ? ((*it).angle) : ((*it).angle * rad2deg);
