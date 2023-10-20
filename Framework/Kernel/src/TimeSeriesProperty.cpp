@@ -17,8 +17,6 @@
 #include <boost/regex.hpp>
 #include <numeric>
 
-static double elapsed_time_case_1{0.0};
-
 namespace Mantid {
 using namespace Types::Core;
 namespace Kernel {
@@ -26,10 +24,6 @@ namespace {
 /// static Logger definition
 Logger g_log("TimeSeriesProperty");
 } // namespace
-
-template <typename TYPE> void TimeSeriesProperty<TYPE>::reportTiming() {
-  std::cout << "Cumulative time (s) spent in TimeSeriesProperty::cloneInTimeROI (s): " << elapsed_time_case_1 << "\n";
-}
 
 /**
  * Constructor
@@ -79,18 +73,11 @@ TimeSeriesProperty<TYPE>::TimeSeriesProperty(const Property *const p)
  * the copy.
  */
 template <typename TYPE> Property *TimeSeriesProperty<TYPE>::cloneInTimeROI(const TimeROI &timeROI) const {
-
-  auto start = std::chrono::system_clock::now();
-
   auto filteredTS = new TimeSeriesProperty<TYPE>(this);
 
   createFilteredData(timeROI, filteredTS->m_values);
 
   filteredTS->m_size = static_cast<int>(filteredTS->m_values.size());
-
-  auto stop = std::chrono::system_clock::now();
-  std::chrono::duration<double> elapsed_seconds = stop - start;
-  elapsed_time_case_1 += elapsed_seconds.count();
 
   return filteredTS;
 }
