@@ -11,14 +11,6 @@
 #include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeROI.h"
 
-static double elapsed_time_case_1{0.0};
-static double elapsed_time_case_5{0.0};
-static double elapsed_time_case_6{0.0};
-static double elapsed_time_case_7{0.0};
-static std::chrono::time_point<std::chrono::system_clock> splitEventsVec_firstEntrance;
-static int splitEventsVec_call_count{0};
-static std::chrono::time_point<std::chrono::system_clock> splitEventsVec_lastEntrance;
-
 namespace Mantid {
 using API::EventType;
 using Kernel::SplittingInterval;
@@ -110,8 +102,6 @@ TimeSplitter::TimeSplitter(const Mantid::API::MatrixWorkspace_sptr &ws, const Da
 }
 
 TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &offset) {
-  auto start = std::chrono::system_clock::now();
-
   if (tws->columnCount() != 3) {
     throw std::runtime_error("Table workspace used for event filtering must have 3 columns.");
   }
@@ -126,8 +116,8 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
   int max_target_index{0};
   size_t number_of_zero_width_intervals(0);
 
-  std::cout << "Creating a time splitter from a table workspace. Total number of rows: " << tws->rowCount()
-            << std::endl;
+  g_log.information() << "Creating a time splitter from a table workspace. Total number of rows: " << tws->rowCount()
+                      << "\n";
 
   // can't mix label types except for NO_TARGET
   bool has_target_name_numeric = false;
@@ -190,19 +180,10 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
     addROI(timeStart, timeStop, target_index);
   }
 
-  std::cout << "NUMBER OF ZERO-WIDTH SPLITTER INTERVALS: " << number_of_zero_width_intervals << std::endl;
-  std::cout << "NUMBER OF TARGETS: " << m_name_index_map.size() << "\n";
-  for (const auto &info : m_name_index_map)
-    std::cout << info.first << " with index " << info.second << "\n";
-
   // Verify that the input target names are either all numeric or all non-numeric. The exception is a name "-1", i.e. no
   // target specified. That name is ok to mix with non-numeric names.
   if (has_target_name_numeric && has_target_name_nonnumeric)
     throw std::runtime_error("Valid splitter targets cannot be a mix of numeric and non-numeric names.");
-
-  auto stop = std::chrono::system_clock::now();
-  std::chrono::duration<double> elapsed_seconds = stop - start;
-  elapsed_time_case_7 += elapsed_seconds.count();
 }
 
 TimeSplitter::TimeSplitter(const SplittersWorkspace_sptr &sws) {
@@ -381,8 +362,6 @@ void TimeSplitter::resetCachedSplittingIntervals() const {
 }
 
 void TimeSplitter::rebuildCachedPartialTimeROIs() const {
-  auto start = std::chrono::system_clock::now();
-
   std::lock_guard<std::recursive_mutex> lock(m_partialROIMutex);
 
   resetCachedPartialTimeROIs();
@@ -418,14 +397,9 @@ void TimeSplitter::rebuildCachedPartialTimeROIs() const {
   }
 
   validCachedPartialTimeROIs = true;
-  auto stop = std::chrono::system_clock::now();
-  std::chrono::duration<double> elapsed_seconds = stop - start;
-  elapsed_time_case_5 += elapsed_seconds.count();
 }
 
 void TimeSplitter::rebuildCachedSplittingIntervals(const bool includeNoTarget) const {
-  auto start = std::chrono::system_clock::now();
-
   std::lock_guard<std::recursive_mutex> lock(m_splittingIntervalMutex);
 
   resetCachedSplittingIntervals();
@@ -444,10 +418,6 @@ void TimeSplitter::rebuildCachedSplittingIntervals(const bool includeNoTarget) c
 
   validCachedSplittingIntervals_All = includeNoTarget;
   validCachedSplittingIntervals_WithValidTargets = !includeNoTarget;
-
-  auto stop = std::chrono::system_clock::now();
-  std::chrono::duration<double> elapsed_seconds = stop - start;
-  elapsed_time_case_6 += elapsed_seconds.count();
 }
 
 /**
@@ -565,40 +535,23 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
   // sort the input EventList in-place
   const EventSortType sortOrder = pulseTof ? EventSortType::PULSETIMETOF_SORT
                                            : EventSortType::PULSETIME_SORT; // this will be used to set order on outputs
-  {
-    auto start = std::chrono::system_clock::now();
-    if (pulseTof) {
-      // this sorting is preserved under linear transformation tof --> factor*tof+shift with factor>0
-      events.sortPulseTimeTOF();
-    } else {
-      events.sortPulseTime();
-    }
-    auto stop = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = stop - start;
-    elapsed_time_case_1 += elapsed_seconds.count();
+  if (pulseTof) {
+    // this sorting is preserved under linear transformation tof --> factor*tof+shift with factor>0
+    events.sortPulseTimeTOF();
+  } else {
+    events.sortPulseTime();
   }
 
-  {
-    // split the events
-    if (++splitEventsVec_call_count == 1)
-      splitEventsVec_firstEntrance = std::chrono::system_clock::now();
-
-    switch (events.getEventType()) {
-    case EventType::TOF:
-      this->splitEventVec(events.getEvents(), partials, pulseTof, tofCorrect, factor, shift);
-      break;
-    case EventType::WEIGHTED:
-      this->splitEventVec(events.getWeightedEvents(), partials, pulseTof, tofCorrect, factor, shift);
-      break;
-    default:
-      throw std::runtime_error("Unhandled event type");
-    }
-
-    std::chrono::time_point<std::chrono::system_clock> stop = std::chrono::system_clock::now();
-    if (splitEventsVec_call_count == 1)
-      splitEventsVec_lastEntrance = stop;
-    else if (stop > splitEventsVec_lastEntrance)
-      splitEventsVec_lastEntrance = stop;
+  // split the events
+  switch (events.getEventType()) {
+  case EventType::TOF:
+    this->splitEventVec(events.getEvents(), partials, pulseTof, tofCorrect, factor, shift);
+    break;
+  case EventType::WEIGHTED:
+    this->splitEventVec(events.getWeightedEvents(), partials, pulseTof, tofCorrect, factor, shift);
+    break;
+  default:
+    throw std::runtime_error("Unhandled event type");
   }
 
   // set the sort order on the EventLists since we know the sorting already
@@ -628,7 +581,7 @@ template <typename EventType>
 void TimeSplitter::splitEventVec(const std::vector<EventType> &events, std::map<int, EventList *> &partials,
                                  const bool pulseTof, const bool tofCorrect, const double factor,
                                  const double shift) const {
-  // determine the right functnio for getting the "pulse time" for the event
+  // determine the right function for getting the "pulse time" for the event
   std::function<const DateAndTime(const EventType &)> timeCalc;
   if (pulseTof) {
     if (tofCorrect) {
@@ -727,13 +680,5 @@ void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const Eve
   }
 }
 
-double TimeSplitter::getTime1() { return elapsed_time_case_1; }
-double TimeSplitter::getTime4() {
-  std::chrono::duration<double> elapsed_seconds = splitEventsVec_lastEntrance - splitEventsVec_firstEntrance;
-  return elapsed_seconds.count();
-}
-double TimeSplitter::getTime5() { return elapsed_time_case_5; }
-double TimeSplitter::getTime6() { return elapsed_time_case_6; }
-double TimeSplitter::getTime7() { return elapsed_time_case_7; }
 } // namespace DataObjects
 } // namespace Mantid
