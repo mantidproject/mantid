@@ -248,10 +248,10 @@ void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit, const Kernel
     }
 
     try {
-      std::vector<detid_t> warnDetIds;
       std::set<std::string> diffConstUnits = {"dSpacing", "MomentumTransfer", "Empty"};
       if ((emode == Kernel::DeltaEMode::Elastic) &&
           (diffConstUnits.count(inputUnit.unitID()) || diffConstUnits.count(outputUnit.unitID()))) {
+        std::vector<detid_t> warnDetIds;
         auto diffConstsMap = diffractometerConstants(wsIndex, warnDetIds);
         pmap.insert(diffConstsMap.begin(), diffConstsMap.end());
         if (warnDetIds.size() > 0) {
