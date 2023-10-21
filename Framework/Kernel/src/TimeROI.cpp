@@ -423,7 +423,8 @@ void TimeROI::update_union(const TimeROI &other) {
 
 /**
  * Updates the TimeROI values with the intersection with another TimeROI.
- * See https://en.wikipedia.org/wiki/Intersection for more details
+ * See https://en.wikipedia.org/wiki/Intersection for the intersection theory.
+ * The algorithm is adapted from https://www.geeksforgeeks.org/find-intersection-of-intervals-given-by-two-lists/
  *
  * Intersection with an empty TimeROI will clear out this one.
  */
@@ -438,26 +439,37 @@ void TimeROI::update_intersection(const TimeROI &other) {
     return;
   }
 
-  // remove everything before the other starts
-  if (m_roi.front() < other.m_roi.front()) {
-    this->addMask(m_roi.front(), other.m_roi.front());
-  }
+  TimeROI output;
+  auto it1 = m_roi.cbegin();
+  auto it2 = other.m_roi.cbegin();
 
-  // add the spaces between the other's splitting intervals
-  const std::size_t LOOP_MAX = std::size_t(other.m_roi.size() - 1);
-  for (std::size_t i = 1; i < LOOP_MAX; i += 2) {
-    this->addMask(other.m_roi[i], other.m_roi[i + 1]);
-  }
+  while (it1 != m_roi.end() && it2 != other.m_roi.end()) {
+    // Left bound for intersecting segment
+    const DateAndTime &leftBound = std::max(*it1, *it2);
 
-  // remove everything after other finishes
-  if (m_roi.back() > other.m_roi.back()) {
-    this->addMask(other.m_roi.back(), m_roi.back());
+    // Right bound for intersecting segment
+    const auto it1_next = std::next(it1);
+    const auto it2_next = std::next(it2);
+    const DateAndTime &rightBound = std::min(*it1_next, *it2_next);
+
+    // If segment is valid, include it
+    if (leftBound < rightBound) {
+      output.m_roi.emplace_back(leftBound);
+      output.m_roi.emplace_back(rightBound);
+    }
+
+    // If it1 right bound is smaller, increment it1; else increment it2
+    if (*it1_next < *it2_next)
+      std::advance(it1, 2);
+    else
+      std::advance(it2, 2);
   }
 
   // if the TimeROI became empty it is because there is no overlap reset the value to INVALID_ROI
-  if (this->empty()) {
-    this->replaceROI(USE_NONE);
-  }
+  if (output.empty())
+    output.replaceROI(USE_NONE);
+
+  m_roi = std::move(output.m_roi);
 }
 
 /**
