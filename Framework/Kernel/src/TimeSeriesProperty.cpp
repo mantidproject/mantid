@@ -29,15 +29,20 @@ Logger g_log("TimeSeriesProperty");
  * This assumes there is at least two values.
  * This is written to return early in case there are any non-matches.
  */
-template <typename TYPE> bool allValuesAreSame(const std::vector<TimeValueUnit<TYPE>> &values) {
+template <typename TYPE>
+bool allValuesAreSame(const std::vector<TimeValueUnit<TYPE>> &values, const std::string &name) {
   const auto &first_value = values.front().value();
   const std::size_t num_values = values.size();
   for (std::size_t i = 1; i < num_values; ++i) {
     if (first_value != values[i].value())
       return false;
   }
+
   // getting this far means they are all equal
-  return true;
+  // but p-charge should never report back that the values are all the same
+  // because that would remove values inappropriately.
+  // This will almost never be the case for a real measurement.
+  return name != "proton_charge";
 }
 } // namespace
 
@@ -292,7 +297,7 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
   if (m_values.empty()) {
     // nothing to copy
     return;
-  } else if (m_values.size() == 1 || allValuesAreSame(m_values)) {
+  } else if (m_values.size() == 1 || allValuesAreSame(m_values, this->name())) {
     // copy the first value
     // if they are all the same, none of the others matter
     filteredData.push_back(m_values.front());
