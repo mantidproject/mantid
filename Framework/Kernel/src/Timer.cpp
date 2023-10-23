@@ -50,7 +50,7 @@ void Timer::reset() { m_start = std::chrono::high_resolution_clock::now(); }
 /// Convert the elapsed time (without reseting) to a string.
 std::string Timer::str() const {
   std::stringstream buffer;
-  buffer << this->elapsed_no_reset() << "s";
+  buffer << this->elapsed_no_reset() << " sec";
   return buffer.str();
 }
 

@@ -73,11 +73,11 @@ float CPUTimer::CPUfraction(bool doReset) {
   return static_cast<float>((cpuTime / wallTime));
 }
 
-/// Convert the elapsed time (without reseting) to a string.
+/// Convert the elapsed time to a string. Reset the elapsed time before returning the string.
 std::string CPUTimer::str() {
   std::stringstream buffer;
-  buffer << std::fixed << std::setw(7) << std::setprecision(4) << m_wallClockTime.elapsed_no_reset() << " s, CPU "
-         << std::setprecision(2) << this->CPUfraction(false);
+  buffer << std::fixed << std::setw(7) << std::setprecision(4) << m_wallClockTime.elapsed_no_reset()
+         << " sec, CPU Fraction " << std::setprecision(2) << this->CPUfraction(false);
   this->reset();
   return buffer.str();
 }
