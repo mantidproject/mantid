@@ -133,6 +133,7 @@ identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/E
 derefInvalidIterator:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1528
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/OrientedLattice.cpp:234
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/NiggliCell.cpp:233
+constVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ScalarUtils.cpp:389
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/UnitCell.h:212
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MDGridBox.h:247
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentInfoBankHelpers.cpp:113
@@ -187,6 +188,7 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeomet
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Surfaces/Plane.cpp:424
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:631
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument.cpp:644
+constVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/RenderingHelpersOpenGL.cpp:204
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/HistogramData/src/Histogram.cpp:159
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Indexing/src/IndexInfo.cpp:227
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Indexing/src/SpectrumNumberTranslator.cpp:135
