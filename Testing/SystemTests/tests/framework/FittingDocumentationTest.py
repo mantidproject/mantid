@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from DocumentationTest import path_to_docs, DocumentationTestBase
+from DocumentationTest import PATH_TO_DOCS, DocumentationTestBase
 from mantid.api import FunctionFactory
 
-FIT_DOCS_PATH = path_to_docs / "fitting/fitfunctions"
+FIT_DOCS_PATH = PATH_TO_DOCS / "fitting/fitfunctions"
 
 # This should be empty
 FIT_FUNCTIONS_WITH_NO_DOCS = [

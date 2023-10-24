@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from DocumentationTest import path_to_docs, DocumentationTestBase
+from DocumentationTest import PATH_TO_DOCS, DocumentationTestBase
 from mantid.api import AlgorithmFactory
 
-ALG_DOCS_PATH = path_to_docs / "algorithms"
+ALG_DOCS_PATH = PATH_TO_DOCS / "algorithms"
 
 # This should be empty
 ALGORITHMS_WITH_NO_DOCS = [

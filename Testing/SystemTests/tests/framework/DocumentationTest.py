@@ -11,7 +11,7 @@ from typing import List
 
 from systemtesting import MantidSystemTest
 
-path_to_docs = (Path(__file__).resolve() / "../../../../../docs/source").resolve()
+PATH_TO_DOCS = (Path(__file__).resolve() / "../../../../../docs/source").resolve()
 
 
 class DocumentationTestBase(MantidSystemTest, metaclass=ABCMeta):
@@ -37,7 +37,7 @@ class DocumentationTestBase(MantidSystemTest, metaclass=ABCMeta):
         return len(found_files) > 0
 
     def runTest(self):
-        self.assertGreaterThan(len(self._files), 0, msg="No interfaces found")
+        self.assertGreaterThan(len(self._files), 0, msg=f"No {self._test_type} interfaces found")
         missing = []
 
         for file_name_options in self._files:

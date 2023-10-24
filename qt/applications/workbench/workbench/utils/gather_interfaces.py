@@ -15,6 +15,7 @@ from typing import AnyStr, List, Dict
 
 from mantid.kernel import ConfigService, logger
 from mantidqt.usersubwindowfactory import UserSubWindowFactory
+from mantidqt.interfacemanager import InterfaceManager
 
 
 def get_interface_dir() -> AnyStr:
@@ -55,6 +56,8 @@ def _discover_registers_to_run(interface_dir: str) -> Dict[str, List[str]]:
 
 def _discover_cpp_interfaces(interfaces: Dict[str, List[str]]):
     """Add C++ interfaces to passed dictionary"""
+    # need to initialise this so cpp interfaces are registered
+    InterfaceManager()
     cpp_interface_factory = UserSubWindowFactory.Instance()
     interface_names = cpp_interface_factory.keys()
     for name in interface_names:

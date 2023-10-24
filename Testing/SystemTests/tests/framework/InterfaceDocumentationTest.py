@@ -7,12 +7,11 @@
 
 from typing import Dict, List
 
-from DocumentationTest import path_to_docs, DocumentationTestBase
+from DocumentationTest import PATH_TO_DOCS, DocumentationTestBase
 from mantid.kernel import ConfigService
 from workbench.utils.gather_interfaces import gather_interface_names
-from mantidqt.interfacemanager import InterfaceManager
 
-INTERFACES_DOCS_PATH = path_to_docs / "interfaces"
+INTERFACES_DOCS_PATH = PATH_TO_DOCS / "interfaces"
 
 # This should be empty
 INTERFACES_WITH_NO_DOCS = [
@@ -28,8 +27,6 @@ INTERFACES_WITH_NO_DOCS = [
 
 
 def _get_interface_names() -> Dict[str, List[str]]:
-    # need to initialise this so cpp interfaces are registered
-    InterfaceManager()
     interfaces = gather_interface_names()
     hidden_interfaces = ConfigService["interfaces.categories.hidden"].split(";")
     interface_names = {key: names for key, names in interfaces.items() if key not in hidden_interfaces}
