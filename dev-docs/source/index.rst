@@ -118,6 +118,7 @@ Tools
 
    ToolsOverview
    ProfilingOverview
+   ProfilingWithPerf
    ProfilingWithValgrind
    FlowchartCreation
    VisualStudioBuildImpact
