@@ -259,6 +259,37 @@ which is equivalent to::
     cf.peaks.ties({'f1.Sigma': 'f0.Sigma', 'f2.Sigma': 'f0.Sigma', 'f3.Sigma': 'f0.Sigma'})
 
 
+Adding an External or Molecular Field
+-------------------------------------
+
+The constructor for the `CrystalField` interface accepts arguments for when an external and/or molecular field is present.
+The molecular and external magnetic fields contribute to the total Hamiltonian:
+
+.. math::
+  & H = H_{\mathrm{CEF}} + H_{\mathrm{EXT}} + H_{\mathrm{MOL}} \\
+   \\
+  & H_{\mathrm{EXT}} = g_J \mu_B \mathbf{J}\cdot\mathbf{B}_{\mathrm{EXT}} \\
+  & H_{\mathrm{MOL}} = 2 (g_J - 1) \mu_B \mathbf{J}\cdot\mathbf{B}_{\mathrm{MOL}}
+
+where :math:`H_{CEF}` is the Hamiltonian for the Crystal Electric Field, :math:`H_{EXT}` is the Hamiltonian for the External Magnetic Field and :math:`H_{MOL}` is the Hamiltonian for the Molecular Magnetic Field.
+
+To pass the external magnetic field going through the sample into the CrystalField constructor, use the keyword arguments `BextX`, `BextY`, `BexZ`, for a magnetic field in the X, Y and Z direction.
+Likewise, to pass the magnetic field due to molecular interactions use the the arguments `BmolX`, `BmolY` and `BmolZ`.
+Both the external and molecular field options are measured in Tesla.
+All of these parameters can also be set up by `ties` and `constraints`::
+
+  # Using the keyword argument
+  cf = CrystalField('Ce', 'C2v', B20=0.37737, BextX=10, BextY=11, BextZ=12, BmolX=100, BmolY=200, BmolZ=300)
+
+  # Using ties
+  cf = CrystalField('Ce', 'C2v', B20=0.37737, BmolX=100, BmolY=200, BmolZ=300
+  # External field should always be tied before fitting
+  cf.tie(BextX=10, BextY=11, BextZ=12)
+
+Note that external and molecular parameters set in the constructor are varied by the fit by default, so should be tied before fitting.
+This is especially important for the external field as this is a constant of a particular measurement.
+
+
 Setting Resolution Model
 ------------------------
 
