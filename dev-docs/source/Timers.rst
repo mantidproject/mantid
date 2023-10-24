@@ -1,7 +1,7 @@
 Mantid Timers
 =============
 
-This page provides an introduction into measuring execution time in the Mantid C++ code.
+This page provides an introduction to measuring execution time in the Mantid C++ code.
 
 .. contents:: Context
    :local:
@@ -9,12 +9,14 @@ This page provides an introduction into measuring execution time in the Mantid C
 Wall-clock timers
 ------------------------
 Wall-clock time is the `total` time elapsed during execution of code instructions. Mantid wall-clock timer classes
-are based on the `std::chrono::high_resolution_clock <https://en.cppreference.com/w/cpp/chrono/high_resolution_clock>`_ class.
+are based on the `std::chrono::high_resolution_clock <https://en.cppreference.com/w/cpp/chrono/high_resolution_clock>`__ class.
+
+.. _Timer:
 
 Class Timer
 ~~~~~~~~~~~
 
-`MantidKernel/Timer <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h>`_
+`MantidKernel/Timer <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h>`__
 works like a stop-watch. You need to instantiate it before the code being profiled begins and then output its elapsed time right
 after the code ends. You can also reset the timer between time measurements, if necessary. An example is given below.
 
@@ -35,10 +37,12 @@ after the code ends. You can also reset the timer between time measurements, if 
     did step 2 after 60 sec
     step 3 took 5 sec
 
+.. _CodeBlockTimer:
+
 Class CodeBlockTimer
 ~~~~~~~~~~~~~~~~~~~~
 
-`MantidKernel/CodeBlockTimer <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h>`_ is
+`MantidKernel/CodeBlockTimer <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h>`__ is
 designed for timing a block of C++ code inside curly braces, i.e. inside a scope. You just need to instantiate
 a timer object on the stack at the start of the scope and provide an output stream. When the timer goes out of scope,
 it automatically outputs the elapsed time to the stream. An example is given below.
@@ -60,15 +64,17 @@ it automatically outputs the elapsed time to the stream. An example is given bel
 
 The above example shows how to time a whole function. You can, however, break a function into smaller blocks of code using curly
 braces and time each code block separately. Note, when a code block is executed multiple times, `CodeBlockTimer` will output the elapsed
-time for each execution. If you don't want to have multiple lines of output and are interested in the total elapsed time, use :ref:`CodeBlockMultipleTimer <Class CodeBlockMultipleTimer>`.
+time for each execution. If you don't want to have multiple lines of output and are interested in the total elapsed time, use :ref:`CodeBlockMultipleTimer <CodeBlockMultipleTimer>`.
+
+.. _CodeBlockMultipleTimer:
 
 Class CodeBlockMultipleTimer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`MantidKernel/CodeBlockMultipleTimer <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h>`_ is designed
-for timing a block of code that is called multiple times. Similar to :ref:`CodeBlockTimer <Class CodeBlockTimer>`, it needs to be instantiated on the stack at the
-start of the scope. The constructor takes in a `MantidKernel/CodeBlockMultipleTimer::TimeAccumulator <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h>`_
-object. Unlike the timer that gets destroyed at the end of the scope, the time accumulator has to be persistent. One possibility is to declare it
+`MantidKernel/CodeBlockMultipleTimer <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h>`__ is designed
+for timing a block of code that is called multiple times. Similar to :ref:`CodeBlockTimer <CodeBlockTimer>`, it needs to be instantiated on the stack at the
+start of the scope. The constructor takes in a `MantidKernel/CodeBlockMultipleTimer::TimeAccumulator <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h>`__
+object. Unlike the timer, which gets destroyed at the end of the scope, the time accumulator has to be persistent. One possibility is to declare it
 with a static linkage in the same compilation unit and provide an accessor function. Every time the timer goes out of scope, it automatically updates the time accumulator.
 The time accumulator can later be accessed to report the total elapsed time. In the example below Algorithm B calls a method on Algorithm A several times and outputs the total time elapsed in that method.
 
@@ -117,9 +123,9 @@ time spent waiting for disk, network or other resources, e.g. I/O operations.
 Class CPUTimer
 ~~~~~~~~~~~~~~
 
-`MantidKernel/CPUTimer <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/CPUTimer.h>`_
+`MantidKernel/CPUTimer <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/CPUTimer.h>`__
 measures both CPU time and wall-clock time. The CPU time measurement utilizes
-`std::clock() <https://en.cppreference.com/w/cpp/chrono/c/clock>`_ function. The wall-clock time measurement uses :ref:`Timer <Class Timer>` class.
+`std::clock() <https://en.cppreference.com/w/cpp/chrono/c/clock>`__ function. The wall-clock time measurement uses :ref:`Timer <Timer>` class.
 The output includes the wall-clock time and the ratio of the CPU time to the wall-clock time. Note, since CPU time and wall-clock time are measured
 with different accuracy, it is possible to have a ratio greater than 0.
 A code example is given below.

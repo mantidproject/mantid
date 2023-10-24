@@ -118,6 +118,7 @@ Tools
 
    ToolsOverview
    ProfilingOverview
+   Timers
    ProfilingWithValgrind
    FlowchartCreation
    VisualStudioBuildImpact
@@ -133,6 +134,9 @@ Tools
 
 :doc:`ProfilingOverview`
    There are a few different ways to profile Mantid code.
+
+:doc:`Timers`
+   Describes different ways of timing Mantid C++ code.
 
 :doc:`FlowchartCreation`
    Describes how to create a flow chart with dot.

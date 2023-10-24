@@ -87,4 +87,4 @@ Windows
 Timing C++ code
 ---------------
 
-Please refer to :doc:`Mantid Timers <Timers>` for an introduction into measuring execution time in the Mantid C++ code.
+Please refer to :doc:`Mantid Timers <Timers>` for an introduction to measuring execution time in the Mantid C++ code.
