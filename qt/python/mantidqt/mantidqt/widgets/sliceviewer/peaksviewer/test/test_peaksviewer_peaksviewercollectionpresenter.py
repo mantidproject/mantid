@@ -236,7 +236,6 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
         # will throw an exception since those operations act on the child
         # presenter. Hence if nothing happens here it's working as expected.
         presenter.add_delete_peak([1, 2, 3])
-        pass
 
 
 if __name__ == "__main__":
