@@ -32,12 +32,13 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         if self.param_dict:
             data_path = self.param_dict["paths"]["data_dir"]
+            pol_table = self.param_dict["paths"]["polarisation_table"]
             file_number_range = [start, end]
             number_of_files, loaded, datafiles, file_number_range_filtered = self.model.set_datafiles_to_load(
                 data_path, file_number_range, filtered, watcher
             )
             self.view.open_progress_dialog(number_of_files)
-            self.model.read_all(datafiles, data_path, loaded, watcher)
+            self.model.read_all(datafiles, data_path, loaded, pol_table, watcher)
 
     def _read_standard(self, self_call=False):
         """
@@ -45,8 +46,9 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         data_path = self.param_dict["paths"]["data_dir"]
         standard_path = self.param_dict["paths"]["standards_dir"]
+        pol_table = self.param_dict["paths"]["polarisation_table"]
         if standard_path:
-            standard_found = self.model.read_standard(standard_path)
+            standard_found = self.model.read_standard(standard_path, pol_table)
             self._filter_standard()
             if not standard_found and not self_call:
                 if self.model.try_unzip(data_path, standard_path):

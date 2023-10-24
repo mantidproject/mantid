@@ -9,6 +9,7 @@
 Model for DNS path panel.
 """
 
+import mantid.simpleapi as api
 import glob
 import os
 from os.path import expanduser
@@ -23,13 +24,13 @@ class DNSPathModel(DNSObsModel):
         return os.getcwd()
 
     @staticmethod
-    def get_user_and_proposal_number(dir_name):
+    def get_user_and_proposal_number(dir_name, dns_polarisation_table):
         try:
             first_filename = next(glob.iglob(f"{dir_name}/*.d_dat"))
         except StopIteration:
             return ["", ""]
-        dns_file = DNSFile("", first_filename)
-        if dns_file["new_format"]:
+        dns_file = DNSFile("", first_filename, dns_polarisation_table)
+        if dns_file["new_format"] or dns_file["legacy_format"]:
             return [dns_file["users"], dns_file["proposal"]]
         return ["", ""]
 
@@ -43,3 +44,21 @@ class DNSPathModel(DNSObsModel):
         if path:
             return path
         return expanduser("~")
+
+    @staticmethod
+    def get_dns_legacy_polarisation_table():
+        """
+        Read the polarisation table from IDF.
+        """
+        polarisation_table = []
+        tmp = api.LoadEmptyInstrument(InstrumentName="DNS")
+        instrument = tmp.getInstrument()
+        api.DeleteWorkspace(tmp)
+
+        for polarisation in ["x", "y", "z"]:
+            currents = instrument.getStringParameter(f"{polarisation}_currents")[0].split(";")
+            for current in currents:
+                row = {"polarisation": f"{polarisation}7"}
+                row["C_a"], row["C_b"], row["C_c"], row["C_z"] = [float(c) for c in current.split(",")]
+                polarisation_table.append(row)
+        return polarisation_table

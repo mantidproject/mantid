@@ -15,6 +15,7 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_observer import DNSOb
 class DNSPathPresenter(DNSObserver):
     def __init__(self, name=None, parent=None, view=None, model=None):
         super().__init__(parent=parent, name=name, view=view, model=model)
+        self._load_polarisation_table()
         self.view.sig_data_path_set.connect(self._data_path_set)
         self.view.sig_data_dir_editing_finished.connect(self._data_path_editing_finished)
 
@@ -24,6 +25,10 @@ class DNSPathPresenter(DNSObserver):
             # if launches from commandline, set path to current working
             # directory
             self.view.set_data_path(self.model.get_current_directory())
+
+    def _load_polarisation_table(self):
+        own_dict = self.get_option_dict()
+        own_dict["polarisation_table"] = self.model.get_dns_legacy_polarisation_table()
 
     def _data_path_editing_finished(self):
         own_dict = self.get_option_dict()
@@ -37,7 +42,8 @@ class DNSPathPresenter(DNSObserver):
         self._set_user_prop_from_datafile(dir_name)
 
     def _set_user_prop_from_datafile(self, dir_name):
-        user, prop_nb = self.model.get_user_and_proposal_number(dir_name)
+        own_dict = self.get_option_dict()
+        user, prop_nb = self.model.get_user_and_proposal_number(dir_name, own_dict["polarisation_table"])
         if prop_nb or user:
             self.view.set_prop_number(prop_nb)
             self.view.set_user(user)
