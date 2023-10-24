@@ -384,7 +384,7 @@ ScriptInfo ScriptRepositoryImpl::info(const std::string &input_path) {
   std::string path = convertPath(input_path);
   ScriptInfo info;
   try {
-    RepositoryEntry &entry = repo.at(path);
+    const RepositoryEntry &entry = repo.at(path);
     info.author = entry.author;
     info.pub_date = entry.pub_date;
     info.auto_update = entry.auto_update;
@@ -401,7 +401,7 @@ const std::string &ScriptRepositoryImpl::description(const std::string &input_pa
   ensureValidRepository();
   std::string path = convertPath(input_path);
   try {
-    RepositoryEntry &entry = repo.at(path);
+    const RepositoryEntry &entry = repo.at(path);
     return entry.description;
   } catch (const std::out_of_range &ex) {
     std::stringstream ss;
@@ -756,7 +756,7 @@ SCRIPTSTATUS ScriptRepositoryImpl::fileStatus(const std::string &input_path) {
   // g_log.debug() << "Attempt to ask for the status of "<< file_path <<
   // '\n';
   try {
-    RepositoryEntry &entry = repo.at(file_path);
+    const RepositoryEntry &entry = repo.at(file_path);
     return entry.status;
   } catch (const std::out_of_range &ex) {
     std::stringstream ss;
@@ -1262,7 +1262,7 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path, bool opti
   for (auto it = repo.rbegin(); it != repo.rend(); ++it) {
     // for every entry, it takes the path and RepositoryEntry
     std::string entryPath = it->first;
-    RepositoryEntry &entry = it->second;
+    const RepositoryEntry &entry = it->second;
     if (entryPath.compare(0, path.size(), path) == 0 && entry.status != REMOTE_ONLY && entry.status != LOCAL_ONLY)
       filesToUpdate.emplace_back(entryPath);
   }

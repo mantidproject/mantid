@@ -1147,7 +1147,7 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
  */
 double Integrate3DEvents::detectorQ(const std::vector<V3D> &E1Vec, const V3D &QLabFrame, const std::vector<double> &r) {
   double quot = 1.0;
-  for (auto &E1 : E1Vec) {
+  for (const auto &E1 : E1Vec) {
     V3D distv = QLabFrame - E1 * (QLabFrame.scalar_prod(E1)); // distance to the trajectory as a vector
     double quot0 = distv.norm() / *(std::min_element(r.begin(), r.end()));
     if (quot0 < quot) {

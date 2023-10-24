@@ -146,7 +146,7 @@ std::vector<ConventionalCell> ScalarUtils::GetCells(const DblMatrix &UB, const s
     UB_list.emplace_back(UB);
   }
 
-  for (auto &k : UB_list) {
+  for (const auto &k : UB_list) {
     std::vector<ConventionalCell> temp = GetCellsUBOnly(k, cell_type, centering, allowPermutations);
 
     for (auto &cell : temp)
@@ -363,10 +363,10 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(const DblMatrix &UB, double fa
   // >= 90 and all angles < 90.  An angle
   // near 90 degrees may be mis-categorized
   // due to errors in the data.
-  double alpha = b_vec.angle(c_vec) * 180.0 / M_PI;
-  double beta = c_vec.angle(a_vec) * 180.0 / M_PI;
-  double gamma = a_vec.angle(b_vec) * 180.0 / M_PI;
-  double angles[4] = {90.0, gamma, beta, alpha};
+  const double alpha = b_vec.angle(c_vec) * 180.0 / M_PI;
+  const double beta = c_vec.angle(a_vec) * 180.0 / M_PI;
+  const double gamma = a_vec.angle(b_vec) * 180.0 / M_PI;
+  const double angles[4] = {90.0, gamma, beta, alpha};
 
   for (size_t row = 0; row < 4; row++) {
     if (fabs(angles[row] - 90.0) < angle_tolerance) // if nearly 90,
@@ -382,10 +382,11 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(const DblMatrix &UB, double fa
       m_b_temp = b_temp * (-1.0);
       m_c_temp = c_temp * (-1.0);
 
-      V3D permutations[6][3] = {{a_temp, b_temp, c_temp},   {m_a_temp, c_temp, b_temp}, {b_temp, c_temp, a_temp},
-                                {m_b_temp, a_temp, c_temp}, {c_temp, a_temp, b_temp},   {m_c_temp, b_temp, a_temp}};
+      const V3D permutations[6][3] = {{a_temp, b_temp, c_temp}, {m_a_temp, c_temp, b_temp},
+                                      {b_temp, c_temp, a_temp}, {m_b_temp, a_temp, c_temp},
+                                      {c_temp, a_temp, b_temp}, {m_c_temp, b_temp, a_temp}};
 
-      for (auto &permutation : permutations) {
+      for (const auto &permutation : permutations) {
         a = permutation[0];
         b = permutation[1];
         c = permutation[2];

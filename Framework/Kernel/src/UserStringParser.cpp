@@ -155,8 +155,8 @@ void UserStringParser::Tokenize(const std::string &input, const std::string &del
  *@returns true if the input is valid
  */
 bool UserStringParser::isValidStepSeparator(const std::string &input, const std::vector<std::string> &tokens) {
-  std::string step_separator;
   if (tokens.size() == 3) {
+    std::string step_separator;
     std::string step = tokens[2];
 
     std::string::size_type index = input.rfind(step);

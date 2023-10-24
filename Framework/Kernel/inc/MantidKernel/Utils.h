@@ -122,7 +122,7 @@ inline void SetUpIndexMaker(const size_t numDims, size_t *out, const size_t *ind
  * @param index_maker :: result of SetUpIndexMaker()
  * @return the linear index into the array
  */
-inline size_t GetLinearIndex(const size_t numDims, size_t *index, size_t *index_maker) {
+inline size_t GetLinearIndex(const size_t numDims, const size_t *index, const size_t *index_maker) {
   size_t out = 0;
   for (size_t d = 0; d < numDims; d++)
     out += index[d] * index_maker[d];
@@ -162,7 +162,7 @@ inline void GetIndicesFromLinearIndex(const size_t numDims, const size_t linear_
  *each dimension.
  * @return true if the end of the loop was reached; false otherwise.
  */
-inline bool Increment(const size_t numDims, size_t *index, size_t *index_max, size_t *index_min) {
+inline bool Increment(const size_t numDims, size_t *index, const size_t *index_max, const size_t *index_min) {
   size_t d = 0;
   while (d < numDims) {
     // Add one to the index in this dimension
@@ -192,7 +192,7 @@ inline bool Increment(const size_t numDims, size_t *index, size_t *index_max, si
  *index in each dimension
  * @return true if the end of the loop was reached; false otherwise.
  */
-inline bool Increment(const size_t numDims, size_t *index, size_t *index_max) {
+inline bool Increment(const size_t numDims, size_t *index, const size_t *index_max) {
   size_t d = 0;
   while (d < numDims) {
     // Add one to the index in this dimension

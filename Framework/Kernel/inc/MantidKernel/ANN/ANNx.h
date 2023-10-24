@@ -165,29 +165,29 @@ public:
     sd = sdd;
   }
 
-  ANNbool in(ANNpoint q) const // is q inside halfspace?
+  ANNbool in(const ANNpoint q) const // is q inside halfspace?
   {
     return (ANNbool)((q[cd] - cv) * sd >= 0);
   }
 
-  ANNbool out(ANNpoint q) const // is q outside halfspace?
+  ANNbool out(const ANNpoint q) const // is q outside halfspace?
   {
     return (ANNbool)((q[cd] - cv) * sd < 0);
   }
 
-  ANNdist dist(ANNpoint q) const // (squared) distance from q
+  ANNdist dist(const ANNpoint q) const // (squared) distance from q
   {
     return (ANNdist)ANN_POW(q[cd] - cv);
   }
 
-  void setLowerBound(int d, ANNpoint p) // set to lower bound at p[i]
+  void setLowerBound(const int d, const ANNpoint p) // set to lower bound at p[i]
   {
     cd = d;
     cv = p[d];
     sd = +1;
   }
 
-  void setUpperBound(int d, ANNpoint p) // set to upper bound at p[i]
+  void setUpperBound(const int d, const ANNpoint p) // set to upper bound at p[i]
   {
     cd = d;
     cv = p[d];

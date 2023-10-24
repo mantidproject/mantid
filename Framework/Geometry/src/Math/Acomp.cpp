@@ -1107,7 +1107,7 @@ component)
   std::vector<BnId> DNFobj;
   if (!getDNFobject(keyNumbers, DNFobj)) {
     if (makePI(DNFobj)) {
-      for (auto &obj : DNFobj) {
+      for (const auto &obj : DNFobj) {
         Acomp Aitem(1); // make an intersection and add components
         Aitem.addUnit(keyNumbers, obj);
         Parts.emplace_back(Aitem);

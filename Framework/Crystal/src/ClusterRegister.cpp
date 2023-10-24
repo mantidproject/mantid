@@ -104,9 +104,9 @@ public:
    */
   std::list<std::shared_ptr<CompositeCluster>> makeCompositeClusters() {
     std::list<std::shared_ptr<CompositeCluster>> composites;
-    for (auto &labelSet : m_groups) {
+    for (const auto &labelSet : m_groups) {
       auto composite = std::make_shared<CompositeCluster>();
-      for (auto j : labelSet) {
+      for (const auto j : labelSet) {
         std::shared_ptr<ICluster> &cluster = m_register[j];
         composite->add(cluster);
       }

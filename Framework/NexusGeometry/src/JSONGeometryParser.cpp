@@ -405,11 +405,11 @@ void JSONGeometryParser::extractDetectorContent() {
     std::vector<double> x;
     std::vector<double> y;
     std::vector<double> z;
-    std::vector<uint32_t> cylinders;
-    std::vector<uint32_t> faces;
-    std::vector<Eigen::Vector3d> vertices;
-    std::vector<uint32_t> windingOrder;
-    bool isOffGeometry = false;
+    std::vector<uint32_t> cylindersVec;
+    std::vector<uint32_t> facesVec;
+    std::vector<Eigen::Vector3d> verticesVec;
+    std::vector<uint32_t> windingOrderVec;
+    bool isOffGeometryShape = false;
 
     auto children = (*detector)[CHILDREN];
 
@@ -423,7 +423,7 @@ void JSONGeometryParser::extractDetectorContent() {
       else if (child[NAME] == Z_PIXEL_OFFSET)
         extractDatasetValues<double>(child, z);
       else if (child[NAME] == PIXEL_SHAPE)
-        extractShapeInformation(child, cylinders, faces, vertices, windingOrder, isOffGeometry);
+        extractShapeInformation(child, cylindersVec, facesVec, verticesVec, windingOrderVec, isOffGeometryShape);
       else if (child[NAME] == DEPENDS_ON)
         verifyDependency(*m_root, child);
       else if (validateNXAttribute(child[ATTRIBUTES], NX_TRANSFORMATIONS)) {
@@ -432,26 +432,26 @@ void JSONGeometryParser::extractDetectorContent() {
         extractTransformations(child, m_translations.back(), m_orientations.back());
       }
     }
-    auto name = (*detector)[NAME].asString();
+    auto nameDetector = (*detector)[NAME].asString();
     if (detIDs.empty())
-      throw std::invalid_argument("No detector ids found in " + name + ".");
+      throw std::invalid_argument("No detector ids found in " + nameDetector + ".");
     if (x.empty())
-      throw std::invalid_argument("No x_pixel_offsets found in " + name + ".");
+      throw std::invalid_argument("No x_pixel_offsets found in " + nameDetector + ".");
     if (y.empty())
-      throw std::invalid_argument("No y_pixel_offsets found in " + name + ".");
-    if (!validateShapeInformation(isOffGeometry, vertices, cylinders, faces, windingOrder))
-      throw std::invalid_argument("Insufficient pixel shape information found in " + name + ".");
+      throw std::invalid_argument("No y_pixel_offsets found in " + nameDetector + ".");
+    if (!validateShapeInformation(isOffGeometryShape, verticesVec, cylindersVec, facesVec, windingOrderVec))
+      throw std::invalid_argument("Insufficient pixel shape information found in " + nameDetector + ".");
 
-    m_detectorBankNames.emplace_back(name);
+    m_detectorBankNames.emplace_back(nameDetector);
     m_detIDs.emplace_back(std::move(detIDs));
     m_x.emplace_back(std::move(x));
     m_y.emplace_back(std::move(y));
     m_z.emplace_back(std::move(z));
-    m_isOffGeometry.emplace_back(isOffGeometry);
-    m_pixelShapeCylinders.emplace_back(std::move(cylinders));
-    m_pixelShapeVertices.emplace_back(std::move(vertices));
-    m_pixelShapeFaces.emplace_back(std::move(faces));
-    m_pixelShapeWindingOrder.emplace_back(std::move(windingOrder));
+    m_isOffGeometry.emplace_back(isOffGeometryShape);
+    m_pixelShapeCylinders.emplace_back(std::move(cylindersVec));
+    m_pixelShapeVertices.emplace_back(std::move(verticesVec));
+    m_pixelShapeFaces.emplace_back(std::move(facesVec));
+    m_pixelShapeWindingOrder.emplace_back(std::move(windingOrderVec));
   }
 }
 
@@ -462,11 +462,11 @@ void JSONGeometryParser::extractMonitorContent() {
   int monitorID = -1;
   for (const auto &monitor : m_jsonMonitors) {
     const auto &children = (*monitor)[CHILDREN];
-    auto name = (*monitor)[NAME].asString();
+    auto nameMonitor = (*monitor)[NAME].asString();
     if (children.empty())
-      throw std::invalid_argument("Full monitor definition for " + name + " missing in JSON provided.");
+      throw std::invalid_argument("Full monitor definition for " + nameMonitor + " missing in JSON provided.");
     Monitor mon;
-    mon.componentName = name;
+    mon.componentName = nameMonitor;
     /* For monitors with no detector ID we create dummy IDs starting from -1 and
      * decreasing. */
     mon.detectorID = monitorID--;

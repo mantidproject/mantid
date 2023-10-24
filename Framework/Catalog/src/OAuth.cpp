@@ -37,16 +37,16 @@ OAuthToken OAuthToken::fromJSONStream(std::istream &tokenStringStream) {
     Json::Value full_token;
     tokenStringStream >> full_token;
 
-    const auto tokenType = full_token["token_type"].asString();
-    const auto expiresIn = static_cast<unsigned int>(full_token["expires_in"].asUInt());
-    const auto accessToken = full_token["access_token"].asString();
-    const auto scope = full_token["scope"].asString();
+    const auto tokenTypeStr = full_token["token_type"].asString();
+    const auto expiresInUint = static_cast<unsigned int>(full_token["expires_in"].asUInt());
+    const auto accessTokenStr = full_token["access_token"].asString();
+    const auto scopeStr = full_token["scope"].asString();
 
     const auto parsedRefreshToken = full_token["refresh_token"].asString();
-    const boost::optional<std::string> refreshToken =
+    const boost::optional<std::string> refreshTokenStr =
         parsedRefreshToken == "" ? boost::none : boost::optional<std::string>(parsedRefreshToken);
 
-    return OAuthToken(tokenType, expiresIn, accessToken, scope, refreshToken);
+    return OAuthToken(tokenTypeStr, expiresInUint, accessTokenStr, scopeStr, refreshTokenStr);
   } catch (...) {
     throw TokenParsingError("Unable to parse authentication token!");
   }
