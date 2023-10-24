@@ -83,6 +83,8 @@ Changes
 
   - :doc:`Indirect Geometry <indirect_geometry>`
 
+  - :doc:`Inelastic <inelastic>`
+
 Full Change Listings
 --------------------
 
@@ -106,6 +108,7 @@ TECH_DOCS = [
     "diffraction.rst",
     "direct_geometry.rst",
     "indirect_geometry.rst",
+    "inelastic.rst",
     "muon.rst",
     "sans.rst",
     "reflectometry.rst",
@@ -117,13 +120,14 @@ MANTID_DOI = "`doi: 10.5286/SOFTWARE/MANTID{version_maj_min} <https://dx.doi.org
 # Lists to help create the subfolders
 level1 = ["Diffraction", "Direct_Geometry", "Framework", "Muon"]
 # For upper level folders that will require Bugfixes, Improvements and New features as sub directories
-level1Upper = ["Workbench", "Reflectometry", "SANS", "Indirect"]
+level1Upper = ["Workbench", "Reflectometry", "SANS", "Indirect", "Inelastic"]
 
 diffraction = ["Powder", "Single_Crystal", "Engineering"]
 framework = ["Algorithms", "Data_Objects", "Fit_Functions", "Python"]
 workbench = ["InstrumentViewer", "SliceViewer"]
 direct = ["General", "CrystalField", "MSlice"]
 indirect = ["Algorithms"]
+inelastic = ["Algorithms"]
 muon = ["FDA", "Muon_Analysis", "MA_FDA", "ALC", "Elemental_Analysis", "Algorithms"]
 
 subfolders = ["Bugfixes", "New_features"]
@@ -210,6 +214,7 @@ def makeReleaseNoteDirectories(HigherLevel):
     makeSubDirectoriesFromList(workbench, "Workbench", HigherLevel)
     makeSubDirectoriesFromList(direct, "Direct_Geometry", HigherLevel)
     makeSubDirectoriesFromList(indirect, "Indirect", HigherLevel)
+    makeSubDirectoriesFromList(inelastic, "Inelastic", HigherLevel)
     makeSubDirectoriesFromList(muon, "Muon", HigherLevel)
 
 
