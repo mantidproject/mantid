@@ -172,7 +172,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
 
     def update_figure(self):
         self.toolbar.update()
-        self.update_legend(self.get_axes()[0], self.toolbar.get_show_legend_value())
+        self.update_legend(self.get_axes()[0])
         self.update_axes_position()
         self.figure.canvas.draw()
         self.update_fitbrowser()
@@ -212,11 +212,11 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         except:
             pass  # name may not be available if ws has just been deleted
 
-    def update_legend(self, ax, show_legend):
+    def update_legend(self, ax):
         if ax.get_lines():
             ax.make_legend()
             ax.get_legend().set_title("")
-            ax.get_legend().set_visible(show_legend)
+            ax.get_legend().set_visible(self.toolbar.get_show_legend_value())
         else:
             if ax.get_legend():
                 ax.get_legend().remove()
