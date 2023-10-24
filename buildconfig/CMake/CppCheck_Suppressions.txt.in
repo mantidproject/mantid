@@ -71,7 +71,6 @@ variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:58
 constParameter:${CMAKE_SOURCE_DIR}/build/_deps/span-src/include/tcb/span.hpp:323
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Matrix.cpp:128
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Matrix.cpp:943
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeSeriesProperty.cpp:1831
 accessForwarded:${CMAKE_SOURCE_DIR}/Framework/HistogramData/inc/MantidHistogramData/Histogram.h:279
 accessForwarded:${CMAKE_SOURCE_DIR}/Framework/HistogramData/inc/MantidHistogramData/Histogram.h:291
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/RectangularBeamProfile.cpp:86
