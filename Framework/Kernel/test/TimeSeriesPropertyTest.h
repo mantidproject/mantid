@@ -538,7 +538,7 @@ public:
 
     // e1. TimeROI right boundary is equal to the first value - keep both, b/c for log value copying purposes we treat
     // TimeROI region as [inclusive,inclusive]
-    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_2e...");
+    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_2e1...");
     times = {DateAndTime("2007-11-30T16:17:40"), DateAndTime("2007-11-30T16:18:45")};
     tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_e1", times, values);
     times_expected = {times[0], times[1]};
