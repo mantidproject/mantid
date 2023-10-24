@@ -5,7 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include "GUI/Common/IFileHandler.h"
 #include "IAsciiSaver.h"
+#include "ISaveAlgorithmRunner.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include <string>
@@ -14,9 +16,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
-class AsciiSaver : public IAsciiSaver {
+class MANTIDQT_ISISREFLECTOMETRY_DLL AsciiSaver : public IAsciiSaver {
+
 public:
-  static Mantid::API::IAlgorithm_sptr getSaveAlgorithm();
+  AsciiSaver(std::unique_ptr<ISaveAlgorithmRunner> saveAlgRunner, IFileHandler *fileHandler);
   static std::string extensionForFormat(NamedFormat format);
 
   bool isValidSaveDirectory(std::string const &filePath) const override;
@@ -24,10 +27,12 @@ public:
             std::vector<std::string> const &logParameters, FileFormatOptions const &inputParameters) const override;
 
 private:
-  Mantid::API::IAlgorithm_sptr setUpSaveAlgorithm(std::string const &saveDirectory,
-                                                  const Mantid::API::Workspace_sptr &workspace,
-                                                  std::vector<std::string> const &logParameters,
-                                                  FileFormatOptions const &fileFormat) const;
+  std::unique_ptr<ISaveAlgorithmRunner> m_saveAlgRunner;
+  IFileHandler *m_fileHandler;
+
+  void runSaveAsciiAlgorithm(std::string const &savePath, std::string const &extension,
+                             const Mantid::API::Workspace_sptr &workspace,
+                             std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const;
 
   std::string assembleSavePath(std::string const &saveDirectory, std::string const &prefix, std::string const &name,
                                std::string const &extension) const;
