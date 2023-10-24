@@ -34,7 +34,8 @@ cProfile can only profile the current thread, this makes it useful for diagnosin
 
 `Yappi (Yet Another Python Profiler) <https://pypi.org/project/yappi/>`_ is multithreading aware. cProfile which will show everything up to the exec, or run call. Yappi will profile the thread and show any slow points within the separate thread.
 
-*Note: This will not with QThreads and may crash or be unable to profile inside. It is recommended you migrate workers by inheriting from IQtAsync, see async_qt_adaptor.py for details.  Using native threading enables tooling, makes testing simple and produces readable stack traces.*
+*Note: This will not work with QThreads and may crash or be unable to profile inside. It is recommended you migrate workers by inheriting from IQtAsync, see ``async_qt_adaptor.py`` for details.
+Using native threading enables tooling, makes testing simple and produces readable stack traces.*
 
 To use Yappi instead of cProfile simple append `--yappi` to the list of arguments after profile, e.g.:
 
