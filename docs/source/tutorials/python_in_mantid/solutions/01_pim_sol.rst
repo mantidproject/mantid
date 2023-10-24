@@ -103,7 +103,7 @@ Right-click in the Messages toolbox and check that the log level is set to "Noti
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
     Number of Events Before = 22065736
     Number of Events After = 555305
@@ -139,7 +139,6 @@ For point 5., you are expected to open the docs page for :ref:`algm-ConvertUnits
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
     The corrected value in spectrum number 6, bin 4 is 278.85 compared to 0.95
-

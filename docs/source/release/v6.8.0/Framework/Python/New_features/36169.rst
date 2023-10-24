@@ -1,0 +1,1 @@
+- Added a new documentation page on how to extend Mantid with a :ref:`pip install <pip-install-ref>`.

@@ -28,11 +28,11 @@ namespace Mantid::Kernel {
  * @throws std::runtime_error if an error is occurred while reading the stream
  */
 bool FileDescriptor::isAscii(const std::string &filename, const size_t nbytes) {
-  std::ifstream data(filename.c_str(), std::ios::in | std::ios::binary);
-  if (!data) {
+  std::ifstream dataStream(filename.c_str(), std::ios::in | std::ios::binary);
+  if (!dataStream) {
     throw std::invalid_argument("FileDescriptor::isAscii() - Unable to open file '" + filename + "'");
   }
-  return FileDescriptor::isAscii(data, nbytes);
+  return FileDescriptor::isAscii(dataStream, nbytes);
 }
 
 /**
@@ -81,8 +81,8 @@ bool FileDescriptor::isAscii(std::istream &data, const size_t nbytes) {
  */
 bool FileDescriptor::isAscii(FILE *file, const size_t nbytes) {
   // read the data and reset the seek index back to the beginning
-  auto data = new char[nbytes];
-  char *pend = &data[fread(data, 1, nbytes, file)];
+  auto dataArray = new char[nbytes];
+  char *pend = &dataArray[fread(dataArray, 1, nbytes, file)];
   int retval = fseek(file, 0, SEEK_SET);
   if (retval < 0)
     throw std::runtime_error("FileDescriptor::isAscii - Cannot change position "
@@ -91,14 +91,14 @@ bool FileDescriptor::isAscii(FILE *file, const size_t nbytes) {
   // Call it a binary file if we find a non-ascii character in the
   // first nbytes bytes of the file.
   bool result = true;
-  for (char *p = data; p < pend; ++p) {
+  for (char *p = dataArray; p < pend; ++p) {
     auto ch = static_cast<unsigned long>(*p);
     if (!(ch <= 0x7F)) {
       result = false;
       break;
     }
   }
-  delete[] data;
+  delete[] dataArray;
 
   return result;
 }

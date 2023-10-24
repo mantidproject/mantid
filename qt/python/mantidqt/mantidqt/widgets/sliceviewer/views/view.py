@@ -46,8 +46,6 @@ class SliceViewerView(QWidget, ObservingView):
         self._splitter.addWidget(self._data_view)
         self._splitter.setCollapsible(0, False)
         self._splitter.splitterMoved.connect(self._data_view.on_resize)
-        #  peaks viewer off by default
-        self._peaks_view = None
         # config the splitter appearance
         splitterStyleStr = """QSplitter::handle{
             border: 1px solid gray;
@@ -62,6 +60,11 @@ class SliceViewerView(QWidget, ObservingView):
         layout.addWidget(self._splitter)
         self.setLayout(layout)
         self.refresh_queued = False
+
+        self._peaks_view = PeaksViewerCollectionView(MplPainter(self.data_view), self.presenter)
+        self.add_widget_to_splitter(self._peaks_view)
+        #  peaks viewer off by default
+        self._peaks_view.hide()
 
         # connect up additional peaks signals
         self.data_view.mpl_toolbar.peaksOverlayClicked.connect(self.peaks_overlay_clicked)
@@ -79,10 +82,6 @@ class SliceViewerView(QWidget, ObservingView):
 
     @property
     def peaks_view(self) -> PeaksViewerCollectionView:
-        """Lazily instantiates PeaksViewer and returns it"""
-        if self._peaks_view is None:
-            self._peaks_view = PeaksViewerCollectionView(MplPainter(self.data_view), self.presenter)
-            self.add_widget_to_splitter(self._peaks_view)
         return self._peaks_view
 
     def add_widget_to_splitter(self, widget):

@@ -33,7 +33,7 @@ Usage
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
     The number of instruments at ISIS is: 38
 

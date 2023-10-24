@@ -399,12 +399,12 @@ void ONCat::sendAPIRequest(const std::string &uri, const QueryParameters &queryP
                    return queryParameter.first + "=" + queryParameter.second;
                  });
   const auto queryString = boost::algorithm::join(queryStringParts, "&");
-  const auto url = queryString.size() == 0 ? uri : uri + "?" + queryString;
+  const auto requestUrl = queryString.size() == 0 ? uri : uri + "?" + queryString;
 
-  g_log.debug() << "About to make a call to the following ONCat URL: " << url;
+  g_log.debug() << "About to make a call to the following ONCat URL: " << requestUrl;
 
   try {
-    m_internetHelper->sendRequest(url, response);
+    m_internetHelper->sendRequest(requestUrl, response);
   } catch (InternetError &ie) {
     if (ie.errorCode() == HTTPResponse::HTTP_UNAUTHORIZED) {
       std::string errorMessage;

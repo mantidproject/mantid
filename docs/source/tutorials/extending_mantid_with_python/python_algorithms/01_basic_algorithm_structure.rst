@@ -11,20 +11,20 @@ The basic layout should look like:
 .. code-block:: python
    :linenos:
 
-    from mantid.api import AlgorithmFactory, PythonAlgorithm
+   from mantid.api import AlgorithmFactory, PythonAlgorithm
 
-    class HelloWorld(PythonAlgorithm):
+   class HelloWorld(PythonAlgorithm):
 
-        def PyInit(self):
-            # Declare properties
-            pass
+       def PyInit(self):
+           # Declare properties
+           pass
 
-        def PyExec(self):
-            # Run the algorithm
-            pass
+       def PyExec(self):
+           # Run the algorithm
+           pass
 
-    # Register algorithm with Mantid
-    AlgorithmFactory.subscribe(HelloWorld)
+   # Register algorithm with Mantid
+   AlgorithmFactory.subscribe(HelloWorld)
 
 The super class is ``PythonAlgorithm`` (alias to :class:`Algorithm <mantid.api.Algorithm>`), which provides a hook to allow Mantid to interact with it without knowing about it beforehand.
 
@@ -41,12 +41,12 @@ To change this include the ``category()`` function in the definition, i.e.
 .. code-block:: python
    :linenos:
 
-    from mantid.api import AlgorithmFactory, PythonAlgorithm
+   from mantid.api import AlgorithmFactory, PythonAlgorithm
 
-    class HelloWorld(PythonAlgorithm):
+   class HelloWorld(PythonAlgorithm):
 
-        def category(self):
-            return 'MyTools'
+       def category(self):
+           return 'MyTools'
 
        # The rest is the same as above
 
@@ -59,14 +59,14 @@ i.e. The following code defines that the algorithm should be stored in Useful->T
 .. code-block:: python
    :linenos:
 
-    from mantid.api import AlgorithmFactory, PythonAlgorithm
+   from mantid.api import AlgorithmFactory, PythonAlgorithm
 
-    class HelloWorld(PythonAlgorithm):
+   class HelloWorld(PythonAlgorithm):
 
-        def category(self):
-            return 'Useful\\Tools;MyTools'
+       def category(self):
+          return 'Useful\\Tools;MyTools'
 
-        # The rest is the same as above
+       # The rest is the same as above
 
 
 You are highly encouraged to stay to the list of :ref:`existing categories <Algorithms List>`.

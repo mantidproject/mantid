@@ -111,9 +111,10 @@ One of only one of the following will be taken.
 
 * A :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>`
 
-  * Number of spectra shall be the same as the number of spectra of the workspace containing peaks to fit for.  Or the number of spectra is the same as the number of spectra of the input workspace.
-  * X value is the index of the peak.
-  * Y value is the position of the peaks to fit.
+  * At each workspace index, a "spectrum" in the form of predicted peak centers is defined.
+  * The workspace index for each spectrum corresponds to the workspace index in the input workspace.
+  * X value is position in d-spacing of each reference peak.
+  * Y value is unused.
   * Peak centers are stored in ``m_peakCenterWorkspace``.
   * Spectra can be a subset of all spectra because ``FitPeaks`` can work on partial spectra.
 
@@ -136,24 +137,20 @@ There are two input parameters that are associated with fitting window.
 * FitWindowBoundaryList
 * FitPeakWindowWorkspace
 
-
-If FitWindows is defined, then a peak's range to fit (i.e., x-min and
+If either of these is defined, then a peak's range to fit (i.e., x-min and
 x-max) is confined by this window.
 
-If FitWindows is defined, starting peak centres are NOT user's input,
-but found by highest value within peak window. (Is this correct???)
+The fit windows must correspond to a peak center.  For each peak center, the window list must
+have a lower and upper bound, meaning each window list must be twice as long as the corresponding center list.
 
-
-Further down the road, here are the fitting setup that can be affected.
-
-* Peak positions are uniform among all spectra
-
-  - Peak window information will be retrieved from **m_peakWindowVector**
-
-* Peak positions are different among spectra.
-
-  - Peak windown information will be retrieved from **m_peakWindowWorkspace**
-
+If the windows are specified using FitWindowBoundaryList, then the same set of windows will
+be used on all spectra to be fit in the workspace.
+In this case window information will be retrieved from **FitWindowBoundaryList**.
+If the windows are specified using FitPeakWindowWorkspace, then at each workspace index to be fit, the x-values
+must define a list of fit windows to use.
+In this case window information will be retried from **FitPeakWindowWorkspace**.
+If neither is given, but the input workspace is in d-spacing, then instrument resolutions will be used to estimate
+the peak widths, instead.
 
 Tolerance on Fitting Peaks Positions
 ####################################
@@ -226,7 +223,7 @@ Estimate peak range
 *Estimate-peak-range* requires inputs including expected peak center, fit window and estimated right and left FWHM.
 It will output the left and right boundary of the peak such that the background can be fit by excluding the peak.
 
-1. Peak range is defined as :math:`x_0 \pm 6 \cdot w`, where *w* is half of FWHM for either left or right half of peak.
+1. Peak range is defined as :math:`x_0 \pm 3 \cdot FWHM`, for either left or right half of peak.
 
 2. Check the number of background points out of peak range at the left and right side respectively.
    It is required to have at least 3 background points at either side, i.e., :math:`min(3, \frac{i_{x0} - i_{min}}{6})` for left side.
@@ -279,7 +276,8 @@ OutputWorkspace
 
 It is a :py:obj:`MatrixWorkspace <mantid.api.MatrixWorkspace>` containing the peak positions expected and fitted.
 
-* The output workspace has *N* spectra corresponding to the spectra that are specified by user via ``MinimumWorkspaceIndex`` and ``MaximumWorkspaceIndex``.
+* The output workspace has *N* spectra corresponding to the spectra that are specified by user via ``StartWorkspaceIndex`` and ``StopWorkspaceIndex``.
+* These spectra are in order from 0 to *N*.
 * If there are *m* peaks that are required to fit for, then each spectrum in the output workspace has *m* data points.
 * In each spectrum, *x(i)* is the expected position of *i-th* peak; *y(i)* is the fitted position of *i-th* peak; and *e(i)* is the cost from fitting.
 * There are several cases that the fitting could fail.  A negative peak position *y(i)* combined with *e(i)* equal to *DBL_MAX* denote such failure.

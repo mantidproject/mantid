@@ -15,7 +15,7 @@ matplotlib.use("agg")
 
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 from mantidqt.utils.qt.testing import start_qapplication
-from mantid.simpleapi import CreatePeaksWorkspace, CreateMDWorkspace, SetUB, mtd
+from mantid.simpleapi import CreatePeaksWorkspace, CreateMDWorkspace, SetUB, mtd, AddSampleLog
 import numpy as np
 from qtpy.QtWidgets import QApplication
 
@@ -206,6 +206,55 @@ class AddDeletePeaksTest(unittest.TestCase):
         self.assertAlmostEqual(peak.getH(), 1.5, delta=1e-10)
         self.assertAlmostEqual(peak.getK(), 1.5, delta=1e-10)
         self.assertAlmostEqual(peak.getL(), 3, delta=1e-10)
+
+    def test_HH0_00L(self):
+        md = CreateMDWorkspace(
+            Dimensions=3, Extents="-5,5,-5,5,-5,5", Names="[H,H,0],[0,0,L],[H,-H,0]", Units="r.l.u.,r.l.u.,r.l.u.", Frames="HKL,HKL,HKL"
+        )
+
+        AddSampleLog(md, LogName="sample")
+        md.getExperimentInfo(0).run().addProperty("W_MATRIX", [1.0, 0.0, 1.0, 1.0, 0.0, -1.0, 0.0, 1.0, 0.0], True)
+
+        pw_name = "peaks_add_delete_test"
+        SetUB(md, 5, 5, 5)
+        CreatePeaksWorkspace(InstrumentWorkspace=md, OutputType="LeanElasticPeak", NUmberOfPeaks=0, OutputWorkspace=pw_name)
+
+        self.assertEqual(mtd[pw_name].getNumberPeaks(), 0)
+
+        sliceViewer = SliceViewer(md)
+
+        # overlay_peaks_workspaces
+        sliceViewer._create_peaks_presenter_if_necessary().overlay_peaksworkspaces([pw_name])
+
+        # click the "Add Peaks" button
+        sliceViewer.view.peaks_view.peak_actions_view.ui.add_peaks_button.click()
+
+        # click on 2 different points on the canvas
+        sliceViewer.canvas_clicked(Mock(inaxes=True, xdata=2.0, ydata=0.0))  # should add a peak at HKL=(2, 2, 0)
+        sliceViewer.canvas_clicked(Mock(inaxes=True, xdata=0.0, ydata=2.0))  # should add a peak at HKL=(0, 0, 2)
+
+        # peaks should be added
+        self.assertEqual(mtd[pw_name].getNumberPeaks(), 2)
+
+        # (2, 2, 0)
+        peak = mtd[pw_name].getPeak(0)
+        q_sample = peak.getQSampleFrame()
+        self.assertAlmostEqual(q_sample[0], np.pi * 4 / 5, delta=1e-10)
+        self.assertAlmostEqual(q_sample[1], 0, delta=1e-10)
+        self.assertAlmostEqual(q_sample[2], np.pi * 4 / 5, delta=1e-10)
+        self.assertAlmostEqual(peak.getH(), 2, delta=1e-10)
+        self.assertAlmostEqual(peak.getK(), 2, delta=1e-10)
+        self.assertAlmostEqual(peak.getL(), 0, delta=1e-10)
+
+        # (0, 0, 2)
+        peak = mtd[pw_name].getPeak(1)
+        q_sample = peak.getQSampleFrame()
+        self.assertAlmostEqual(q_sample[0], 0, delta=1e-10)
+        self.assertAlmostEqual(q_sample[1], np.pi * 4 / 5, delta=1e-10)
+        self.assertAlmostEqual(q_sample[2], 0, delta=1e-10)
+        self.assertAlmostEqual(peak.getH(), 0, delta=1e-10)
+        self.assertAlmostEqual(peak.getK(), 0, delta=1e-10)
+        self.assertAlmostEqual(peak.getL(), 2, delta=1e-10)
 
 
 if __name__ == "__main__":

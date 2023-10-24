@@ -118,7 +118,7 @@ Tools
 
    ToolsOverview
    ProfilingOverview
-   Timers
+   ProfilingWithPerf
    ProfilingWithValgrind
    FlowchartCreation
    VisualStudioBuildImpact
@@ -128,6 +128,7 @@ Tools
    Eclipse
    WindowsSubsystemForLinux
    ObtainingABenchmarkForMantidFitting
+   CondaPackageManager
 
 :doc:`ToolsOverview`
    Describes ``class_maker``, ``valgrind`` and related tools.
@@ -161,6 +162,9 @@ Tools
 
 :doc:`ObtainingABenchmarkForMantidFitting`
    Guide for setting up an environment to perform a benchmark of Mantid fitting minimizers.
+
+:doc:`CondaPackageManager`
+   Guide on how to use the Conda package manager in Mantid, including tips and a ``pip`` policy.
 
 =======
 Testing

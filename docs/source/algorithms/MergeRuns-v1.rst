@@ -80,6 +80,7 @@ Matrix Workspaces.
 Time Series and List merges. This means these merge types can not be used together
 for a given sample log.
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: xml
 
     <parameter name="sample_logs_sum" type="string">

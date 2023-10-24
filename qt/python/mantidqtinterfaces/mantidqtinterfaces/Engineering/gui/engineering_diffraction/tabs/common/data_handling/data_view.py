@@ -187,6 +187,9 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         else:
             self.get_table_item(row, col).setCheckState(QtCore.Qt.Unchecked)
 
+    def set_table_column(self, row, col, value):
+        self.get_table_item(row, col).setData(QtCore.Qt.EditRole, int(value))
+
     def update_file_filter(self, region, xunit):
         self.proxy_model.text_filter = "*"
         if region == "1 (North)":

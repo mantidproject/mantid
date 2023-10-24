@@ -503,9 +503,9 @@ std::vector<double> Quat::getRotation(bool check_normalisation, bool throw_on_er
 /**
  * Converts the GL Matrix into Quat
  */
-void Quat::setQuat(double mat[16]) {
+void Quat::setQuat(const double mat[16]) {
   double tr, s, q[4];
-  int nxt[3] = {1, 2, 0};
+  const int nxt[3] = {1, 2, 0};
   tr = mat[0] + mat[5] + mat[10];
   if (tr > 0.0) {
     s = sqrt(tr + 1.0);

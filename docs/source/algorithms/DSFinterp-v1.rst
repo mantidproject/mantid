@@ -6,6 +6,8 @@
 
 .. properties::
 
+.. note:: As of 2023-10-01, this algorithm is officially deprecated and will be removed in Mantid 6.10
+
 Description
 -----------
 

@@ -85,18 +85,19 @@ another sub-heading (e.g. Powder Diffraction, Algorithms, MSlice), you need to d
 - Add ``New_features`` and ``Bugfixes`` directories within your new directory. The automated script only works with these directories.
 - Update the top level release note file with your new heading and sub-headings. For each subheading you need to add an ``amalgamate`` statement with a link to each new directory to ensure the notes will be visible for users. For this example it may look something like this
 
-.. code-block:: python
+.. rstcheck: ignore-next-code-block
+.. code-block:: rst
 
-	Algorithms
-	----------
+   Algorithms
+   ----------
 
-	New features
-	############
-	.. amalgamate:: Workbench/Algorithm/New_features
+   New features
+   ############
+   .. amalgamate:: Workbench/Algorithm/New_features
 
-	Bugfixes
-	############
-	.. amalgamate:: Workbench/Algorithm/Bugfixes
+   Bugfixes
+   ############
+   .. amalgamate:: Workbench/Algorithm/Bugfixes
 
 
 Once all the directories are in place you can add your release note as a separate file as outlined above.

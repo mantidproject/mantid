@@ -46,15 +46,18 @@ void throwIfAnyPropertiesInvalid(IAlgorithm_sptr alg, Mantid::API::IAlgorithmRun
 namespace MantidQt::API {
 
 BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
-    : QObject(parent), m_stopOnFailure(true), m_cancelRequested(false), m_notificationCenter(),
-      m_batchCompleteObserver(*this, &BatchAlgorithmRunner::handleBatchComplete),
+    : QObject(parent), m_algorithms(), m_currentAlgorithm(), m_stopOnFailure(true), m_cancelRequested(false),
+      m_notificationCenter(), m_batchCompleteObserver(*this, &BatchAlgorithmRunner::handleBatchComplete),
       m_batchCancelledObserver(*this, &BatchAlgorithmRunner::handleBatchCancelled),
       m_algorithmStartedObserver(*this, &BatchAlgorithmRunner::handleAlgorithmStarted),
       m_algorithmCompleteObserver(*this, &BatchAlgorithmRunner::handleAlgorithmComplete),
       m_algorithmErrorObserver(*this, &BatchAlgorithmRunner::handleAlgorithmError),
       m_executeAsync(this, &BatchAlgorithmRunner::executeBatchAsyncImpl) {}
 
-BatchAlgorithmRunner::~BatchAlgorithmRunner() { removeAllObservers(); }
+BatchAlgorithmRunner::~BatchAlgorithmRunner() {
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
+  removeAllObservers();
+}
 
 void BatchAlgorithmRunner::addAllObservers() {
   m_notificationCenter.addObserver(m_batchCompleteObserver);
@@ -113,13 +116,17 @@ void BatchAlgorithmRunner::setQueue(std::deque<IConfiguredAlgorithm_sptr> algori
   for (auto &algorithm : algorithms)
     g_log.debug() << algorithm->algorithm()->name() << "\n";
 
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   m_algorithms = std::move(algorithms);
 }
 
 /**
  * Removes all algorithms from the queue.
  */
-void BatchAlgorithmRunner::clearQueue() { m_algorithms.clear(); }
+void BatchAlgorithmRunner::clearQueue() {
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
+  m_algorithms.clear();
+}
 
 /**
  * Returns the number of algorithms in the queue.
@@ -152,8 +159,10 @@ void BatchAlgorithmRunner::executeBatchAsync() {
  *
  * @param algorithm The algorithm to execute asynchronously
  */
-void BatchAlgorithmRunner::executeAlgorithmAsync(const IConfiguredAlgorithm_sptr &algorithm) {
-  setQueue({algorithm});
+void BatchAlgorithmRunner::executeAlgorithmAsync(IConfiguredAlgorithm_sptr algorithm) {
+  std::deque<IConfiguredAlgorithm_sptr> algorithmDeque;
+  algorithmDeque.emplace_back(std::move(algorithm));
+  setQueue(std::move(algorithmDeque));
   executeBatchAsync();
 }
 
@@ -161,7 +170,7 @@ void BatchAlgorithmRunner::executeAlgorithmAsync(const IConfiguredAlgorithm_sptr
  * Cancel execution of remaining queued items
  */
 void BatchAlgorithmRunner::cancelBatch() {
-  std::lock_guard<std::mutex> lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   // If the queue is empty, notify straight away that the batch has been
   // cancelled. Otherwise, set a flag so that it will be cancelled after the
   // current algorithm finishes processing
@@ -178,14 +187,14 @@ void BatchAlgorithmRunner::cancelBatch() {
  * Reset state ready for executing a new batch
  */
 void BatchAlgorithmRunner::resetState() {
-  std::lock_guard<std::mutex> lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   removeAllObservers();
   clearQueue();
   m_cancelRequested = false;
 }
 
 bool BatchAlgorithmRunner::cancelRequested() {
-  std::lock_guard<std::mutex> lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   return m_cancelRequested;
 }
 
@@ -193,8 +202,9 @@ bool BatchAlgorithmRunner::cancelRequested() {
  * Implementation of sequential algorithm scheduler.
  */
 bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void & /*unused*/) {
-  bool errorFlag = false;
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
+  bool errorFlag = false;
   for (auto &it : m_algorithms) {
     if (cancelRequested()) {
       g_log.information("Stopping batch algorithm execution: cancelled");

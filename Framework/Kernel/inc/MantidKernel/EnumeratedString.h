@@ -8,6 +8,7 @@
 #include <boost/algorithm/string.hpp>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace Mantid {
@@ -38,6 +39,9 @@ class EnumeratedString {
    *
    * @tparam an optional pointer to a statically defined string comparator.
    */
+
+  static_assert(std::is_enum_v<E>); // cause a compiler error if E is not an enum
+
 public:
   EnumeratedString() { ensureCompatibleSize(); }
 

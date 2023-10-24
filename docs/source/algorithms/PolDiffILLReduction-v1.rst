@@ -432,35 +432,31 @@ Output:
 
 .. code-block:: python
 
-    vanadium_mass = 8.535
-    sample_formula_mass = 137.33 * 2.0 + 54.93 + 127.6 + 15.999 * 6.0
-    sample_mass = 7.83
-    vanadium_dictionary = {'SampleMass': vanadium_mass, 'FormulaUnits': 1, 'FormulaUnitMass': 50.942}
-    sample_dictionary = {'SampleMass': sample_mass, 'FormulaUnits': 1, 'FormulaUnitMass': sample_formula_mass,
-                             'KiXAngle': 45.0, 'OmegaShift': 52.5}
-    calibration_file = "D7_YIG_calibration.xml"
+   vanadium_mass = 8.535
+   sample_formula_mass = 137.33 * 2.0 + 54.93 + 127.6 + 15.999 * 6.0
+   sample_mass = 7.83
+   vanadium_dictionary = {'SampleMass': vanadium_mass, 'FormulaUnits': 1, 'FormulaUnitMass': 50.942}
+   sample_dictionary = {'SampleMass': sample_mass, 'FormulaUnits': 1, 'FormulaUnitMass': sample_formula_mass,
+                        'KiXAngle': 45.0, 'OmegaShift': 52.5}
+   calibration_file = "D7_YIG_calibration.xml"
 
-    # Empty container for quartz and vanadium
-    PolDiffILLReduction(
-        Run='450747:450748',
-            OutputWorkspace='container_ws',
-            ProcessAs='Empty'
-   )
+   # Empty container for quartz and vanadium
+   PolDiffILLReduction(Run='450747:450748',
+                       OutputWorkspace='container_ws',
+		       ProcessAs='Empty')
 
    # Empty container for bank position 1 (bt1), tth=79.5
    PolDiffILLReduction(
        Run='397406:397407',
        OutputTreatment='AveragePol',
        OutputWorkspace='container_bt1_ws',
-       ProcessAs='Empty'
-   )
+       ProcessAs='Empty')
    # empty container for bt2, tth=75
    PolDiffILLReduction(
        Run='397397:397398',
        OutputTreatment='AveragePol',
        OutputWorkspace='container_bt2_ws',
-       ProcessAs='Empty'
-   )
+       ProcessAs='Empty')
 
    PolDiffILLReduction(
        Run='450769:450770',
@@ -468,8 +464,7 @@ Output:
        EmptyContainerWorkspace='container_ws',
        Transmission='0.9',
        OutputTreatment='AveragePol',
-       ProcessAs='Quartz'
-   )
+       ProcessAs='Quartz')
 
    PolDiffILLReduction(
        Run='450835:450836',
@@ -483,8 +478,7 @@ Output:
        SampleAndEnvironmentProperties=vanadium_dictionary,
        AbsoluteNormalisation=True,
        InstrumentCalibration=calibration_file,
-       ProcessAs='Vanadium'
-   )
+       ProcessAs='Vanadium')
 
    # bank position 1, tth=79.5
    PolDiffILLReduction(
@@ -498,8 +492,7 @@ Output:
        SampleAndEnvironmentProperties=sample_dictionary,
        MeasurementTechnique='SingleCrystal',
        InstrumentCalibration=calibration_file,
-       ProcessAs='Sample'
-   )
+       ProcessAs='Sample')
    # bank position 2, tth=75
    PolDiffILLReduction(
        Run='400287:400288',
@@ -512,8 +505,7 @@ Output:
        SampleAndEnvironmentProperties=sample_dictionary,
        MeasurementTechnique='SingleCrystal',
        InstrumentCalibration=calibration_file,
-       ProcessAs='Sample'
-   )
+       ProcessAs='Sample')
    appended_ws = 'appended_ws'
    AppendSpectra(InputWorkspace1='bt1', InputWorkspace2='bt2',
    OutputWorkspace=appended_ws)
@@ -611,7 +603,7 @@ Output:
 		ProcessAs='Sample',
 		FrameOverlapCorrection=True,
 		DetectorEnergyEfficiencyCorrection=True,
-		ConvertToEnergy=True
+		ConvertToEnergy=True,
 		ClearCache=True
    )
 

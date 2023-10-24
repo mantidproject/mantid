@@ -115,6 +115,7 @@ private:
   std::vector<int> groupAtWorkspaceIndex;
   /// Map from the group number to the group's X vector
   std::map<int, HistogramData::BinEdges> group2xvector;
+  std::map<int, double> group2xstep;
   /// Map from the group number to the group's summed weight vector
   group2vectormap group2wgtvector;
   /// The number of (used) groups

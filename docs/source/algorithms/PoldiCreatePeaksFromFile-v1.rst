@@ -80,7 +80,7 @@ The following usage example takes up the file showed above and passes it to the 
 
 The script produces a WorkspaceGroup which contains a table with reflections for each compound in the file:
 
-.. code-block:: python
+.. code-block:: none
 
     Number of loaded compounds: 2
     Compound 1: Iron_FCC has 11 reflections in the resolution range.

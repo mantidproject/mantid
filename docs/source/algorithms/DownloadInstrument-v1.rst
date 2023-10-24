@@ -78,7 +78,7 @@ Usage
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
    The number of files updated was ...
 

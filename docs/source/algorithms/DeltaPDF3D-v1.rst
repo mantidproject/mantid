@@ -219,7 +219,7 @@ The fill value should be about the background level
 
 .. code-block:: python
 
-   DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft4',IntermediateWorkspace='int4'
+   DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft4',IntermediateWorkspace='int4',
               Method='Punch and fill',Size=0.3,CropSphere=True,SphereMax=3,Convolution=True, WindowFunction='None')
    print("The value at [1,0,0] is {:.4f}".format(mtd['fft4'].signalAt(1866)))
    print("The value at [0,1,0] is {:.4f}".format(mtd['fft4'].signalAt(2226)))

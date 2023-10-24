@@ -24,7 +24,7 @@ CleanupList &cleanupList() {
 /// clear the list once it has called all the functions
 void cleanupSingletons() {
   auto &deleters = cleanupList();
-  for (auto &deleter : deleters) {
+  for (const auto &deleter : deleters) {
     deleter();
   }
   deleters.clear();

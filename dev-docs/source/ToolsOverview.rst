@@ -168,7 +168,7 @@ Use
 
 - Having added ``mantid`` to your Python path ``wiki2rst`` is run by:
 
-.. code::
+.. code:: sh
 
     python wiki2rst.py -o <output_file.rst> <url_extension>
 

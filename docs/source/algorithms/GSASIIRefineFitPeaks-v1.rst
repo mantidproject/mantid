@@ -161,7 +161,7 @@ Output:
                             InstrumentFile='template_ENGINX_241391_236516_North_bank.prm',
                             PhaseInfoFiles='Fe-alpha.cif,Fe-gamma.cif',
                             PathToGSASII='/home/user/g2conda/GSASII',
-                            SaveGSASIIProjectFile='example_gsas2_project.gpx',
+                            SaveGSASIIProjectFile='example_gsas2_project.gpx')
    print("Weighted profile R-factor (Rwp): {0:.5f}".format(rwp))
    print("Lattice parameters, a: {a}, b: {b}, c: {c}, alpha: {alpha}, beta: {beta}, gamma: {gamma}, "
          "Volume: {volume:.3f}".format(**lattice_params.row(0)))

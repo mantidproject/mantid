@@ -30,11 +30,11 @@ Usage
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
-    The number of investigations in 'My data' is: 1
+   The number of investigations in 'My data' is: 1
 
-    The title of the investigation is: Mantid Test Investigation
+   The title of the investigation is: Mantid Test Investigation
 
 .. categories::
 

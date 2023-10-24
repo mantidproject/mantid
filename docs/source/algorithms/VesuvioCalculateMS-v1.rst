@@ -25,7 +25,7 @@ Usage
 
    runs = "" # fill in run numbers here
    ip_file = "" # fill in IP file here
-   data = LoadVesuvio(Filename=, SpectrumList=spectra,
+   data = LoadVesuvio(Filename="my-file", SpectrumList=spectra,
                       Mode="SingleDifference", InstrumentParFile=ip_file)
    # Cut it down to the typical range
    data = CropWorkspace(raw_ws,XMin=50.0,XMax=562.0)

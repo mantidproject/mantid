@@ -618,5 +618,5 @@ class SliceViewerDataView(QWidget):
             self.conf.set(POWERSCALE, exponent)
 
     def on_resize(self):
-        if not self.line_plots_active:
+        if not self.line_plots_active and self.ax:
             self.ax.figure.tight_layout()  # tight_layout doesn't work with LinePlots enabled atm

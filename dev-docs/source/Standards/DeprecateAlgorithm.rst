@@ -51,7 +51,7 @@ Christmas day in 2020, and inform that ``MyNewAlg`` should be used in place of `
 
     @deprecated_algorithm('MyNewAlg', '2020-12-25')
     class MyOldAlg(PythonAlgorithm):
-        # continued with class definition
+        pass # continued with class definition
 
 If there is no other algorithm to be used in place of ``MyOlAlg``, then an empty string or ``None`` must be
 passed, e.g ``@deprecated_algorithm(None, '2020-12-25')``

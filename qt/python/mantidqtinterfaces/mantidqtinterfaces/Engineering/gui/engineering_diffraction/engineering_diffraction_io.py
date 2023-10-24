@@ -84,8 +84,10 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
             fit_data_widget = presenter.fitting_presenter.data_widget
             fit_data_widget.model.restore_files(ws_names)
             fit_data_widget.presenter.plotted = set(obj_dic["plotted_workspaces"])
-            fit_data_widget.presenter.restore_table()
-
+            fit_data_widget.presenter.restore_table(clear_plotted=False)  # Note: clear_plotted=False would avoid
+            # presenter.plotted being cleared. Since the slot for presenter._handle_table_cell_changed was defined to
+            # use QtCore.Qt.QueuedConnection, during unit tests _handle_table_cell_changed callback is not getting
+            # triggered to restore presenter.plotted variable
             fit_plot_widget = presenter.fitting_presenter.plot_widget
             fit_results = obj_dic.get("fit_results", None)
             if fit_results is not None:

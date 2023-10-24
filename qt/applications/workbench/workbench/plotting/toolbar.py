@@ -145,6 +145,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
 
     def on_home_clicked(self):
         self.sig_home_clicked.emit()
+        self.home()
         self.push_current()
 
     def waterfall_conversion(self, is_waterfall):

@@ -33,3 +33,4 @@ creation is outlined in :ref:`issue_tracking`.
    SANSGUI/ISISSANSGUITests
    DirectInelastic/ALFViewTests
    DirectInelastic/MSliceTestGuide
+   General/SampleTransmissionCalculatorTestGuide

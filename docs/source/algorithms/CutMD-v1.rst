@@ -115,6 +115,7 @@ When calling createWorkspace inside of algorithms like CutMD, the
 OutputWorkspace name must be provided, or createWorkspace will not know what to
 call the created workspace:
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: python
 
    #Good:

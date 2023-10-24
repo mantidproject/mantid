@@ -171,22 +171,26 @@ class FittingDataModel(object):
         ws = self._data_workspaces[ws_name].loaded_ws
         ws_bg = self._data_workspaces[ws_name].bgsub_ws
         ws_bg_params = self._data_workspaces[ws_name].bg_params
+        success_estimate_bg = True
         if not ws_bg or ws_bg_params == [] or bg_params[1:] != ws_bg_params[1:]:
-            background = self.estimate_background(ws_name, *bg_params[1:])
-            self._data_workspaces[ws_name].bg_params = bg_params
-            bgsub_ws_name = ws_name + "_bgsub"
-            bgsub_ws = Minus(LHSWorkspace=ws, RHSWorkspace=background, OutputWorkspace=bgsub_ws_name)
-            self._data_workspaces[ws_name].bgsub_ws = bgsub_ws
-            self._data_workspaces[ws_name].bgsub_ws_name = bgsub_ws_name
+            background, success_estimate_bg = self.estimate_background(ws_name, *bg_params[1:])
+            if success_estimate_bg:
+                self._data_workspaces[ws_name].bg_params = bg_params
+                bgsub_ws_name = ws_name + "_bgsub"
+                bgsub_ws = Minus(LHSWorkspace=ws, RHSWorkspace=background, OutputWorkspace=bgsub_ws_name)
+                self._data_workspaces[ws_name].bgsub_ws = bgsub_ws
+                self._data_workspaces[ws_name].bgsub_ws_name = bgsub_ws_name
             DeleteWorkspace(background)
         else:
             logger.notice("Background workspace already calculated")
+        return success_estimate_bg
 
     def update_bgsub_status(self, ws_name, status):
         if self._data_workspaces[ws_name].bg_params:
             self._data_workspaces[ws_name].bg_params[0] = status
 
     def estimate_background(self, ws_name, niter, xwindow, doSGfilter):
+        success = True
         try:
             ws_bg = EnggEstimateFocussedBackground(
                 InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg", NIterations=niter, XWindow=xwindow, ApplyFilterSG=doSGfilter
@@ -194,9 +198,12 @@ class FittingDataModel(object):
         except (ValueError, RuntimeError) as e:
             # ValueError when Niter not positive integer, RuntimeError when Window too small
             logger.error("Error on arguments supplied to EnggEstimateFocusedBackground: " + str(e))
-            ws_bg = SetUncertainties(InputWorkspace=ws_name)  # copy data and zero errors
-            ws_bg = Minus(LHSWorkspace=ws_bg, RHSWorkspace=ws_bg)  # workspace of zeros with same num spectra
-        return ws_bg
+            ws_bg = SetUncertainties(InputWorkspace=ws_name, OutputWorkspace=ws_name + "_bg")  # copy data and zero errors
+            ws_bg = Minus(
+                LHSWorkspace=ws_bg, RHSWorkspace=ws_bg, OutputWorkspace=ws_name + "_bg"
+            )  # workspace of zeros with same num spectra
+            success = False
+        return ws_bg, success
 
     def plot_background_figure(self, ws_name):
         def on_draw(event):

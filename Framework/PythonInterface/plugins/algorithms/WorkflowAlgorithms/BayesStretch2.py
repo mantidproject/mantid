@@ -7,6 +7,7 @@
 # pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
 from mantid.api import AlgorithmFactory, WorkspaceGroupProperty, Progress
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
+from mantid.utils.pip import package_installed
 from mantid import logger
 from IndirectCommon import GetThetaQ
 from mantid.api import AnalysisDataService as ADS
@@ -17,21 +18,6 @@ from functools import partial
 from numpy import ndarray
 import numpy as np
 import multiprocessing
-
-try:
-    import quickBayes  # noqa: F401
-except (Exception, Warning):
-    import subprocess
-
-    print(
-        subprocess.Popen(
-            "python -m pip install -U quickBayes==1.0.0b15",
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            stdin=subprocess.PIPE,
-        ).communicate()
-    )
 
 
 class BayesStretch2(QuickBayesTemplate):
@@ -260,6 +246,12 @@ class BayesStretch2(QuickBayesTemplate):
             VerticalAxisValues=axis_names,
         )
 
+    def set_label(self, ws_str, label, unit):
+        ws = ADS.retrieve(ws_str)
+        axis = ws.getAxis(0)
+        axis.setUnit("Label").setLabel(label, unit)
+        return ws_str
+
     def make_results(
         self,
         beta_list,
@@ -278,12 +270,18 @@ class BayesStretch2(QuickBayesTemplate):
         :return group workspaces with the FWHM and beta slices
         """
         beta = self.make_slice_ws(slice_list=beta_list, x_data=x_data, x_unit=x_unit, name=f"{name}_Stretch_Beta")
-        FWHM = self.make_slice_ws(slice_list=FWHM_list, x_data=x_data, x_unit=x_unit, name=f"{name}_Stretch_FWHM")
+        FWHM = self.make_slice_ws(slice_list=FWHM_list, x_data=x_data, x_unit="FWHM", name=f"{name}_Stretch_FWHM")
+        FWHM = self.set_label(ws_str=FWHM, label="FWHM", unit="eV")
+        beta = self.set_label(ws_str=beta, label="beta", unit="")
+
         slice_group = self.group_ws([beta, FWHM], name)
 
         return slice_group
 
     def PyExec(self):
+        if not package_installed("quickBayes", show_warning=True):
+            raise RuntimeError("Please install 'quickBayes' missing dependency")
+
         self.log().information("BayesStretch input")
 
         # get sample data

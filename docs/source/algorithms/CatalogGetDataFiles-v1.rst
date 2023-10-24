@@ -31,7 +31,7 @@ Usage
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
     The number of datafiles in this investigation is: 22
 

@@ -261,36 +261,36 @@ template <typename... T> void Histogram::setBinEdges(T &&...data) & {
  however, a size check ensures that the Histogram stays valid, i.e., that x and
  y lengths are consistent. */
 template <typename... T> void Histogram::setPoints(T &&...data) & {
-  Points points(std::forward<T>(data)...);
-  checkSize(points);
+  Points newPoints(std::forward<T>(data)...);
+  checkSize(newPoints);
   if (selfAssignmentX(data...))
     return;
   m_xMode = XMode::Points;
-  m_x = points.cowData();
+  m_x = newPoints.cowData();
 }
 
 /// Sets the Histogram's point variances.
 template <typename... T> void Histogram::setPointVariances(T &&...data) & {
-  PointVariances points(std::forward<T>(data)...);
-  if (points)
-    checkSize(points);
+  PointVariances variances(std::forward<T>(data)...);
+  if (variances)
+    checkSize(variances);
   // No sensible self assignment is possible, we do not store variances, so if
   // anyone tries to set our current data as variances it must be an error.
   if (selfAssignmentDx(data...))
     throw std::logic_error("Histogram::setPointVariances: Attempt to "
                            "self-assign standard deviations as variance.");
   // Convert variances to standard deviations before storing it.
-  m_dx = PointStandardDeviations(std::move(points)).cowData();
+  m_dx = PointStandardDeviations(std::move(variances)).cowData();
 }
 
 /// Sets the Histogram's point standard deviations.
 template <typename... T> void Histogram::setPointStandardDeviations(T &&...data) & {
-  PointStandardDeviations points(std::forward<T>(data)...);
-  if (points)
-    checkSize(points);
+  PointStandardDeviations standardDeviations(std::forward<T>(data)...);
+  if (standardDeviations)
+    checkSize(standardDeviations);
   if (selfAssignmentDx(data...))
     return;
-  m_dx = points.cowData();
+  m_dx = standardDeviations.cowData();
 }
 
 /** Sets the Histogram's counts.
@@ -300,35 +300,35 @@ template <typename... T> void Histogram::setPointStandardDeviations(T &&...data)
  y lengths are consistent. */
 template <typename... T> void Histogram::setCounts(T &&...data) & {
   checkAndSetYModeCounts();
-  Counts counts(std::forward<T>(data)...);
-  checkSize(counts);
+  Counts newCounts(std::forward<T>(data)...);
+  checkSize(newCounts);
   if (selfAssignmentY(data...))
     return;
-  m_y = counts.cowData();
+  m_y = newCounts.cowData();
 }
 
 /// Sets the Histogram's count variances.
 template <typename... T> void Histogram::setCountVariances(T &&...data) & {
   checkAndSetYModeCounts();
-  CountVariances counts(std::forward<T>(data)...);
-  checkSize(counts);
+  CountVariances variances(std::forward<T>(data)...);
+  checkSize(variances);
   // No sensible self assignment is possible, we do not store variances, so if
   // anyone tries to set our current data as variances it must be an error.
   if (selfAssignmentE(data...))
     throw std::logic_error("Histogram::setCountVariances: Attempt to "
                            "self-assign standard deviations as variance.");
   // Convert variances to standard deviations before storing it.
-  m_e = CountStandardDeviations(std::move(counts)).cowData();
+  m_e = CountStandardDeviations(std::move(variances)).cowData();
 }
 
 /// Sets the Histogram's count standard deviations.
 template <typename... T> void Histogram::setCountStandardDeviations(T &&...data) & {
   checkAndSetYModeCounts();
-  CountStandardDeviations counts(std::forward<T>(data)...);
-  checkSize(counts);
+  CountStandardDeviations standardDeviations(std::forward<T>(data)...);
+  checkSize(standardDeviations);
   if (selfAssignmentE(data...))
     return;
-  m_e = counts.cowData();
+  m_e = standardDeviations.cowData();
 }
 
 /** Sets the Histogram's frequencies.
@@ -338,31 +338,31 @@ template <typename... T> void Histogram::setCountStandardDeviations(T &&...data)
  that x and y lengths are consistent. */
 template <typename... T> void Histogram::setFrequencies(T &&...data) & {
   checkAndSetYModeFrequencies();
-  Frequencies frequencies(std::forward<T>(data)...);
-  checkSize(frequencies);
+  Frequencies newFrequencies(std::forward<T>(data)...);
+  checkSize(newFrequencies);
   if (selfAssignmentY(data...))
     return;
-  m_y = frequencies.cowData();
+  m_y = newFrequencies.cowData();
 }
 
 /// Sets the Histogram's frequency variances.
 template <typename... T> void Histogram::setFrequencyVariances(T &&...data) & {
   checkAndSetYModeFrequencies();
-  FrequencyVariances frequencies(std::forward<T>(data)...);
-  checkSize(frequencies);
+  FrequencyVariances variances(std::forward<T>(data)...);
+  checkSize(variances);
   if (selfAssignmentE(data...))
     return;
-  m_e = FrequencyStandardDeviations(std::move(frequencies)).cowData();
+  m_e = FrequencyStandardDeviations(std::move(variances)).cowData();
 }
 
 /// Sets the Histogram's frequency standard deviations.
 template <typename... T> void Histogram::setFrequencyStandardDeviations(T &&...data) & {
   checkAndSetYModeFrequencies();
-  FrequencyStandardDeviations frequencies(std::forward<T>(data)...);
-  checkSize(frequencies);
+  FrequencyStandardDeviations standardDeviations(std::forward<T>(data)...);
+  checkSize(standardDeviations);
   if (selfAssignmentE(data...))
     return;
-  m_e = frequencies.cowData();
+  m_e = standardDeviations.cowData();
 }
 
 template <> MANTID_HISTOGRAMDATA_DLL void Histogram::checkSize(const BinEdges &data) const;

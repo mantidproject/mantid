@@ -107,7 +107,7 @@ const std::string NotebookBuilder::buildAlgorithmString(const AlgorithmHistory_c
   std::string prop;
 
   auto props = algHistory->getProperties();
-  for (auto &propIter : props) {
+  for (const auto &propIter : props) {
     prop = buildPropertyString(propIter);
     if (prop.length() > 0) {
       properties << prop << ", ";
@@ -153,12 +153,11 @@ const std::string NotebookBuilder::buildAlgorithmString(const AlgorithmHistory_c
 const std::string NotebookBuilder::buildPropertyString(const PropertyHistory_const_sptr &propHistory) {
   using Mantid::Kernel::Direction;
 
-  // Create a vector of all non workspace property type names
-  std::vector<std::string> nonWorkspaceTypes{"number", "boolean", "string"};
-
   std::string prop;
   // No need to specify value for default properties
   if (!propHistory->isDefault()) {
+    // Create a vector of all non workspace property type names
+    std::vector<std::string> nonWorkspaceTypes{"number", "boolean", "string"};
     // Do not give values to output properties other than workspace properties
     if (find(nonWorkspaceTypes.begin(), nonWorkspaceTypes.end(), propHistory->type()) != nonWorkspaceTypes.end() &&
         propHistory->direction() == Direction::Output) {
