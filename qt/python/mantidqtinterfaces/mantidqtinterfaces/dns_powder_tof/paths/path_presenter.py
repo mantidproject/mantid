@@ -21,10 +21,15 @@ class DNSPathPresenter(DNSObserver):
 
         self.view.sig_clear_cache.connect(self._clear_cache)
         self.view.sig_file_dialog_requested.connect(self._file_dialog_requested)
+        self.view.sig_data_path_changed.connect(self._data_path_changed)
         if not self.view.within_mantid:
             # if launches from commandline, set path to current working
             # directory
             self.view.set_data_path(self.model.get_current_directory())
+
+    def _data_path_changed(self):
+        new_path = self.view.get_path("data_dir")
+        self._data_path_set(new_path)
 
     def _load_polarisation_table(self):
         own_dict = self.get_option_dict()
@@ -50,6 +55,7 @@ class DNSPathPresenter(DNSObserver):
             self.view.set_asterisk(hide=True)
         else:
             self.view.set_asterisk(hide=False)
+            self.view._clear_user_and_proposal_number()
             self.view.show_status_message("No DNS .d_dat file found in Data Directory", 30)
 
     def _clear_cache(self):
