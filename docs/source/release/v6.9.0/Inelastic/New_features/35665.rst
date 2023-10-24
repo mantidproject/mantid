@@ -1,0 +1,1 @@
+- Moved 'Data Analysis' interface from Indirect and Direct interface menus into Inelastic interface menu.
