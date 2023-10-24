@@ -28,7 +28,7 @@
 
 # Use versioningit to compute version number to match conda-build
 execute_process(
-  COMMAND "${Python_EXECUTABLE}" -c "import setup;print(setup.get_version())"
+  COMMAND "${Python_EXECUTABLE}" -m versioningit
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   OUTPUT_VARIABLE _version_str
   ERROR_VARIABLE _error
@@ -36,13 +36,13 @@ execute_process(
 )
 
 # Expect format defined as in comments above. Major.Minor.Patch(.Patch)(.devN|rcN)(+abc)
-if(_version_str MATCHES "([0-9]+)\\.([0-9]+)\\.([0-9]+(\\.[0-9]+)*)(\\.dev[0-9]+|rc[0-9]+)?(\\+[A-Za-z0-9.]+)?")
+if(_version_str MATCHES "([0-9]+)\\.([0-9]+)\\.([0-9]+(\\.[0-9]+)*)(rc[0-9]+)?(\\.dev[0-9]+)?(\\+[A-Za-z0-9.]+)?")
   # Version components
   set(VERSION_MAJOR ${CMAKE_MATCH_1})
   set(VERSION_MINOR ${CMAKE_MATCH_2})
   set(VERSION_PATCH ${CMAKE_MATCH_3})
   # Ignore group 4 because it's contained within group 3.
-  set(VERSION_TWEAK ${CMAKE_MATCH_5}${CMAKE_MATCH_6})
+  set(VERSION_TWEAK ${CMAKE_MATCH_5}${CMAKE_MATCH_6}${CMAKE_MATCH_7})
 else()
   message(FATAL_ERROR "Error extracting version elements from: ${_version_str}\n${_error}")
 endif()
