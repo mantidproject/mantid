@@ -83,3 +83,8 @@ Windows
 
 -  Start/stop recording of program using a button
 -  Not as detailed or flexible as callgrind
+
+Timing C++ code
+---------------
+
+Please refer to :doc:`Mantid Timers <Timers>` for an introduction into measuring execution time in the Mantid C++ code.

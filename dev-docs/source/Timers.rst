@@ -15,7 +15,7 @@ Class Timer
 ~~~~~~~~~~~
 
 `MantidKernel/Timer <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h>`_
-works like a stop-watch. You need to instantiate it before the code being profiled begins and have it output the results right
+works like a stop-watch. You need to instantiate it before the code being profiled begins and then output its elapsed time right
 after the code ends. You can also reset the timer between time measurements, if necessary. An example is given below.
 
 .. code-block:: cpp
@@ -58,15 +58,15 @@ it automatically outputs the elapsed time to the stream. An example is given bel
 
     Output: Elapsed time (sec) in "MyAlgorithm::doSomething": 5
 
-The above example shows how to time a whole function. One can, however, break a function into smaller blocks of code using curly
+The above example shows how to time a whole function. You can, however, break a function into smaller blocks of code using curly
 braces and time each code block separately. Note, when a code block is executed multiple times, `CodeBlockTimer` will output the elapsed
-time for each execution. If you don't want to have multiple lines of output and are interested in the total elapsed time, use `CodeBlockMultipleTimer`.
+time for each execution. If you don't want to have multiple lines of output and are interested in the total elapsed time, use :ref:`CodeBlockMultipleTimer <Class CodeBlockMultipleTimer>`.
 
 Class CodeBlockMultipleTimer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 `MantidKernel/CodeBlockMultipleTimer <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h>`_ is designed
-for timing a block of code that is called multiple times. Similar to `CodeBlockTimer`, it needs to be instantiated on the stack at the
+for timing a block of code that is called multiple times. Similar to :ref:`CodeBlockTimer <Class CodeBlockTimer>`, it needs to be instantiated on the stack at the
 start of the scope. The constructor takes in a `MantidKernel/CodeBlockMultipleTimer::TimeAccumulator <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h>`_
 object. Unlike the timer that gets destroyed at the end of the scope, the time accumulator has to be persistent. One possibility is to declare it
 with a static linkage in the same compilation unit and provide an accessor function. Every time the timer goes out of scope, it automatically updates the time accumulator.
@@ -119,8 +119,8 @@ Class CPUTimer
 
 `MantidKernel/CPUTimer <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/CPUTimer.h>`_
 measures both CPU time and wall-clock time. The CPU time measurement utilizes
-`std::clock() <https://en.cppreference.com/w/cpp/chrono/c/clock>`_ function. The wall-clock time measurement uses `MantidKernel/Timer` class.
-The output includes wall-clock time and the ratio of CPU time to wall-clock time. Note, since CPU time and wall-clock time are measured
+`std::clock() <https://en.cppreference.com/w/cpp/chrono/c/clock>`_ function. The wall-clock time measurement uses :ref:`Timer <Class Timer>` class.
+The output includes the wall-clock time and the ratio of the CPU time to the wall-clock time. Note, since CPU time and wall-clock time are measured
 with different accuracy, it is possible to have a ratio greater than 0.
 A code example is given below.
 
