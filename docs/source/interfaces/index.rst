@@ -22,6 +22,7 @@ Interfaces
    general/*
    ILL/*
    indirect/*
+   inelastic/*
    isis_sans/*
    muon/*
    reflectometry/*
