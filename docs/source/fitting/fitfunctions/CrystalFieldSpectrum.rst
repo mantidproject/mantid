@@ -17,6 +17,18 @@ Any other parameters that need fixing has to be tied explicitly. Peak centres an
 field parameters with the :ref:`CrystalFieldPeaks <func-CrystalFieldPeaks>` function. Any other peak parameter can be set using
 the "f-index-dot-name" syntax (see :ref:`CompositeFunction <func-CompositeFunction>` for more details).
 
+The fit can also consider external and molecular magnetic fields (eg. `BextX=10`, `BmolY=12`), measured in Tesla.
+The contributions of the external and molecular fields to the total Hamiltonian is defined by:
+
+.. math::
+  & H = H_{\mathrm{CEF}} + H_{\mathrm{EXT}} + H_{\mathrm{MOL}} \\
+   \\
+  & H_{\mathrm{EXT}} = g_J \mu_B \mathbf{J}\cdot\mathbf{B}_{\mathrm{EXT}} \\
+  & H_{\mathrm{MOL}} = 2 (g_J - 1) \mu_B \mathbf{J}\cdot\mathbf{B}_{\mathrm{MOL}}
+
+Note that the external and molecular field parameters need to be fixed by the user, as they are not fixed by default.
+The external field parameter should always be fixed, as this is a constant from a particular measurement.
+
 The `x`-axis is given in meV, and the intensity (`y`-axis) is in milibarn per steradian per meV.
 
 .. code::
