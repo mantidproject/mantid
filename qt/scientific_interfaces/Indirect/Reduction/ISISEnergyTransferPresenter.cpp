@@ -82,29 +82,17 @@ void IETPresenter::setInstrumentDefault() {
   if (validateInstrumentDetails()) {
     InstrumentData instrumentDetails = getInstrumentData();
     m_view->setInstrumentDefault(instrumentDetails);
-    if (instrumentDetails.getInstrument() == "OSIRIS" || instrumentDetails.getInstrument() == "IRIS") {
-      m_view->setBackgroundSectionVisible(false);
-      m_view->setPlotTimeSectionVisible(false);
-      m_view->setPlottingOptionsVisible(false);
-      m_view->setScaleFactorVisible(false);
-      m_view->setAclimaxSaveVisible(false);
-      m_view->setNXSPEVisible(false);
-      m_view->setFoldMultipleFramesVisible(false);
-      m_view->setOutputInCm1Visible(false);
-      m_view->setGroupOutputDropdownVisible(false);
-      m_view->setGrouptOutputCheckBoxVisible(true);
-    } else {
-      m_view->setBackgroundSectionVisible(true);
-      m_view->setPlotTimeSectionVisible(true);
-      m_view->setPlottingOptionsVisible(true);
-      m_view->setScaleFactorVisible(true);
-      m_view->setAclimaxSaveVisible(true);
-      m_view->setNXSPEVisible(true);
-      m_view->setFoldMultipleFramesVisible(true);
-      m_view->setOutputInCm1Visible(true);
-      m_view->setGroupOutputDropdownVisible(true);
-      m_view->setGrouptOutputCheckBoxVisible(false);
-    }
+    bool const irisOrOsiris = instrumentDetails.getInstrument() == "OSIRIS" || instrumentDetails.getInstrument() == "IRIS";
+    m_view->setBackgroundSectionVisible(!irisOrOsiris);
+    m_view->setPlotTimeSectionVisible(!irisOrOsiris);
+    m_view->setPlottingOptionsVisible(!irisOrOsiris);
+    m_view->setScaleFactorVisible(!irisOrOsiris);
+    m_view->setAclimaxSaveVisible(!irisOrOsiris);
+    m_view->setNXSPEVisible(!irisOrOsiris);
+    m_view->setFoldMultipleFramesVisible(!irisOrOsiris);
+    m_view->setOutputInCm1Visible(!irisOrOsiris);
+    m_view->setGroupOutputDropdownVisible(!irisOrOsiris);
+    m_view->setGrouptOutputCheckBoxVisible(irisOrOsiris);
   }
 }
 
