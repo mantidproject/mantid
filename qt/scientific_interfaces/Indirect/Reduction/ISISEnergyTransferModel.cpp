@@ -141,8 +141,8 @@ std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::str
   return instrument + inputText + "_" + analyser + "_" + reflection + "_Reduced";
 }
 
-std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData instData,
-                                      IETRunData runData) {
+std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
+                                      InstrumentData const &instData, IETRunData const &runData) {
   auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransferWrapper");
   reductionAlg->initialize();
 
@@ -183,13 +183,13 @@ std::pair<std::string, std::string> IETModel::createGrouping(const IETGroupingDa
   }
 }
 
-std::string IETModel::getDetectorGroupingString(int spectraMin, int spectraMax, int nGroups) {
+std::string IETModel::getDetectorGroupingString(int const spectraMin, int const spectraMax, int const nGroups) {
   const unsigned int nSpectra = 1 + spectraMax - spectraMin;
   return createDetectorGroupingString(static_cast<std::size_t>(nSpectra), static_cast<std::size_t>(nGroups),
                                       static_cast<std::size_t>(spectraMin));
 }
 
-std::vector<std::string> IETModel::validatePlotData(IETPlotData plotParams) {
+std::vector<std::string> IETModel::validatePlotData(IETPlotData const &plotParams) {
   std::vector<std::string> errors;
 
   const std::string inputFiles = plotParams.getInputData().getInputFiles();
@@ -216,8 +216,8 @@ std::vector<std::string> IETModel::validatePlotData(IETPlotData plotParams) {
   return errors;
 }
 
-void IETModel::plotRawFile(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData instData,
-                           IETPlotData plotParams) {
+void IETModel::plotRawFile(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData const &instData,
+                           IETPlotData const &plotParams) {
   using Mantid::specnum_t;
 
   const std::string inputFiles = plotParams.getInputData().getInputFiles();
@@ -285,7 +285,7 @@ void IETModel::plotRawFile(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
   batchAlgoRunner->executeBatchAsync();
 }
 
-void IETModel::saveWorkspace(std::string const &workspaceName, IETSaveData saveTypes) {
+void IETModel::saveWorkspace(std::string const &workspaceName, IETSaveData const &saveTypes) {
   if (saveTypes.getNexus())
     save("SaveNexusProcessed", workspaceName, workspaceName + ".nxs");
   if (saveTypes.getSPE())

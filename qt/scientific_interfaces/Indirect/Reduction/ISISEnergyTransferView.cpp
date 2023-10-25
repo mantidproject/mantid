@@ -42,7 +42,7 @@ IETView::IETView(IETViewSubscriber *subscriber, QWidget *parent) : m_subscriber(
 
 IETView::~IETView() {}
 
-IETRunData IETView::getRunData() {
+IETRunData IETView::getRunData() const {
   IETInputData inputDetails(m_uiForm.dsRunFiles->getFilenames().join(",").toStdString(),
                             m_uiForm.dsRunFiles->getText().toStdString(), m_uiForm.ckSumFiles->isChecked(),
                             m_uiForm.ckLoadLogFiles->isChecked(), m_uiForm.ckUseCalib->isChecked(),
@@ -73,7 +73,7 @@ IETRunData IETView::getRunData() {
   return runParams;
 }
 
-IETPlotData IETView::getPlotData() {
+IETPlotData IETView::getPlotData() const {
   IETInputData inputDetails(m_uiForm.dsRunFiles->getFilenames().join(",").toStdString(),
                             m_uiForm.dsRunFiles->getText().toStdString(), m_uiForm.ckSumFiles->isChecked(),
                             m_uiForm.ckLoadLogFiles->isChecked(), m_uiForm.ckUseCalib->isChecked(),
@@ -90,7 +90,7 @@ IETPlotData IETView::getPlotData() {
   return plotParams;
 }
 
-IETSaveData IETView::getSaveData() {
+IETSaveData IETView::getSaveData() const {
   IETSaveData saveTypes(m_uiForm.ckSaveNexus->isChecked(), m_uiForm.ckSaveSPE->isChecked(),
                         m_uiForm.ckSaveNXSPE->isChecked(), m_uiForm.ckSaveASCII->isChecked(),
                         m_uiForm.ckSaveAclimax->isChecked(), m_uiForm.ckSaveDaveGrp->isChecked());
@@ -98,27 +98,27 @@ IETSaveData IETView::getSaveData() {
   return saveTypes;
 }
 
-std::string IETView::getCustomGrouping() { return m_uiForm.leCustomGroups->text().toStdString(); }
+std::string IETView::getCustomGrouping() const { return m_uiForm.leCustomGroups->text().toStdString(); }
 
-std::string IETView::getGroupOutputOption() { return m_uiForm.cbGroupOutput->currentText().toStdString(); }
+std::string IETView::getGroupOutputOption() const { return m_uiForm.cbGroupOutput->currentText().toStdString(); }
 
-bool IETView::getGroupOutputCheckbox() { return m_uiForm.ckGroupOutput->isChecked(); }
+bool IETView::getGroupOutputCheckbox() const { return m_uiForm.ckGroupOutput->isChecked(); }
 
-IndirectPlotOptionsView *IETView::getPlotOptionsView() { return m_uiForm.ipoPlotOptions; }
+IndirectPlotOptionsView *IETView::getPlotOptionsView() const { return m_uiForm.ipoPlotOptions; }
 
-std::string IETView::getFirstFilename() { return m_uiForm.dsRunFiles->getFirstFilename().toStdString(); }
+std::string IETView::getFirstFilename() const { return m_uiForm.dsRunFiles->getFirstFilename().toStdString(); }
 
-bool IETView::isRunFilesValid() { return m_uiForm.dsRunFiles->isValid(); }
+bool IETView::isRunFilesValid() const { return m_uiForm.dsRunFiles->isValid(); }
 
-void IETView::validateCalibrationFileType(UserInputValidator &uiv) {
+void IETView::validateCalibrationFileType(UserInputValidator &uiv) const {
   validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration", DataType::Calib);
 }
 
-void IETView::validateRebinString(UserInputValidator &uiv) {
+void IETView::validateRebinString(UserInputValidator &uiv) const {
   uiv.checkFieldIsNotEmpty("Rebin string", m_uiForm.leRebinString, m_uiForm.valRebinString);
 }
 
-bool IETView::showRebinWidthPrompt() {
+bool IETView::showRebinWidthPrompt() const {
   const char *text = "The Binning width is currently negative, this suggests "
                      "you wish to use logarithmic binning.\n"
                      " Do you want to use Logarithmic Binning?";
@@ -130,7 +130,7 @@ bool IETView::showRebinWidthPrompt() {
 
 void IETView::showSaveCustomGroupingDialog(std::string const &customGroupingOutput,
                                            std::string const &defaultGroupingFilename,
-                                           std::string const &saveDirectory) {
+                                           std::string const &saveDirectory) const {
   QHash<QString, QString> props;
   props["InputWorkspace"] = QString::fromStdString(customGroupingOutput);
   props["OutputFile"] = QString::fromStdString(saveDirectory + defaultGroupingFilename);
@@ -144,22 +144,31 @@ void IETView::showSaveCustomGroupingDialog(std::string const &customGroupingOutp
   dialog->activateWindow();
 }
 
-void IETView::displayWarning(std::string const &message) {
+void IETView::displayWarning(std::string const &message) const {
   QMessageBox::warning(nullptr, "", QString::fromStdString(message));
 }
 
 void IETView::setBackgroundSectionVisible(bool visible) { m_uiForm.gbBackgroundRemoval->setVisible(visible); }
+
 void IETView::setPlotTimeSectionVisible(bool visible) { m_uiForm.gbPlotTime->setVisible(visible); }
+
 void IETView::setPlottingOptionsVisible(bool visible) { m_uiForm.fPlottingOptions->setVisible(visible); }
+
 void IETView::setScaleFactorVisible(bool visible) {
   m_uiForm.ckScaleMultiplier->setVisible(visible);
   m_uiForm.spScaleMultiplier->setVisible(visible);
 }
+
 void IETView::setAclimaxSaveVisible(bool visible) { m_uiForm.ckSaveAclimax->setVisible(visible); }
+
 void IETView::setNXSPEVisible(bool visible) { m_uiForm.ckSaveNXSPE->setVisible(visible); }
+
 void IETView::setFoldMultipleFramesVisible(bool visible) { m_uiForm.ckFold->setVisible(visible); }
+
 void IETView::setOutputInCm1Visible(bool visible) { m_uiForm.ckCm1Units->setVisible(visible); }
+
 void IETView::setGrouptOutputCheckBoxVisible(bool visible) { m_uiForm.ckGroupOutput->setVisible(visible); }
+
 void IETView::setGroupOutputDropdownVisible(bool visible) { m_uiForm.cbGroupOutput->setVisible(visible); }
 
 void IETView::setDetailedBalance(double detailedBalance) { m_uiForm.spDetailedBalance->setValue(detailedBalance); }
@@ -282,10 +291,15 @@ void IETView::updateRunButton(bool enabled, std::string const &enableOutputButto
 }
 
 void IETView::showMessageBox(const QString &message) { m_subscriber->notifyNewMessage(message); }
+
 void IETView::saveClicked() { m_subscriber->notifySaveClicked(); }
+
 void IETView::runClicked() { m_subscriber->notifyRunClicked(); }
+
 void IETView::plotRawClicked() { m_subscriber->notifyPlotRawClicked(); }
+
 void IETView::saveCustomGroupingClicked() { m_subscriber->notifySaveCustomGroupingClicked(); }
+
 void IETView::pbRunFinished() { m_subscriber->notifyRunFinished(); }
 
 void IETView::handleDataReady() {
