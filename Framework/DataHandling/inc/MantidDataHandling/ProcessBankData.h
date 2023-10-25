@@ -68,21 +68,21 @@ private:
   /// Progress reporting
   API::Progress *prog;
   /// event pixel ID array
-  std::shared_ptr<std::vector<uint32_t>> event_id;
+  const std::shared_ptr<std::vector<uint32_t>> event_id;
   /// event TOF array
-  std::shared_ptr<std::vector<float>> event_time_of_flight;
+  const std::shared_ptr<std::vector<float>> event_time_of_flight;
   /// # of events in arrays
   size_t numEvents;
   /// index of the first event from event_index
   size_t startAt;
   /// vector of event index (length of # of pulses)
-  std::shared_ptr<std::vector<uint64_t>> event_index;
+  const std::shared_ptr<std::vector<uint64_t>> event_index;
   /// Pulse times for this bank
-  std::shared_ptr<BankPulseTimes> thisBankPulseTimes;
+  const std::shared_ptr<BankPulseTimes> thisBankPulseTimes;
   /// Flag for simulated data
   bool have_weight;
   /// event weights array
-  std::shared_ptr<std::vector<float>> event_weight;
+  const std::shared_ptr<std::vector<float>> event_weight;
   /// Minimum pixel id
   detid_t m_min_id;
   /// Maximum pixel id

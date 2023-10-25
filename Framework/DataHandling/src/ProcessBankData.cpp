@@ -59,7 +59,7 @@ inline size_t getPulseIndex(const size_t event_index, const size_t last_pulse_in
 /** Run the data processing
  * FIXME/TODO - split run() into readable methods
  */
-void ProcessBankData::run() { // override {
+void ProcessBankData::run() {
   // Local tof limits
   double my_shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   double my_longest_tof = 0.;
@@ -116,10 +116,11 @@ void ProcessBankData::run() { // override {
 
   const double TOF_MIN = alg->filter_tof_min;
   const double TOF_MAX = alg->filter_tof_max;
+  const bool NO_TOF_FILTERING = !(alg->filter_tof_range);
 
   for (std::size_t pulseIndex = getPulseIndex(startAt, 0, event_index); pulseIndex < NUM_PULSES; pulseIndex++) {
     // Save the pulse time at this index for creating those events
-    const auto pulsetime = thisBankPulseTimes->pulseTimes[pulseIndex];
+    const auto &pulsetime = thisBankPulseTimes->pulseTimes[pulseIndex];
     const int logPeriodNumber = thisBankPulseTimes->periodNumbers[pulseIndex];
     const int periodIndex = logPeriodNumber - 1;
 
@@ -142,12 +143,12 @@ void ProcessBankData::run() { // override {
     for (std::size_t eventIndex = firstEventIndex; eventIndex < lastEventIndex; ++eventIndex) {
       // We cached a pointer to the vector<tofEvent> -> so retrieve it and add
       // the event
-      const detid_t detId = (*event_id)[eventIndex];
+      const detid_t &detId = (*event_id)[eventIndex];
       if (detId >= m_min_id && detId <= m_max_id) {
         // Create the tofevent
         const auto tof = static_cast<double>((*event_time_of_flight)[eventIndex]);
         // this is fancy for check if value is in range
-        if ((tof - TOF_MIN) * (tof - TOF_MAX) <= 0.) {
+        if ((NO_TOF_FILTERING) || ((tof - TOF_MIN) * (tof - TOF_MAX) <= 0.)) {
           // Handle simulated data if present
           if (have_weight) {
             auto *eventVector = m_loader.weightedEventVectors[periodIndex][detId];
@@ -176,8 +177,7 @@ void ProcessBankData::run() { // override {
             // tof limits from things observed here
             if (tof > my_longest_tof) {
               my_longest_tof = tof;
-            }
-            if (tof < my_shortest_tof) {
+            } else if (tof < my_shortest_tof) {
               my_shortest_tof = tof;
             }
           } else
