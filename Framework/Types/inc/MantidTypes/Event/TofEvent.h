@@ -62,7 +62,7 @@ public:
 
   /// Constructor, specifying the time of flight in microseconds and the frame
   /// id
-  TofEvent(double tof, const Core::DateAndTime pulsetime);
+  TofEvent(double tof, const Core::DateAndTime &pulsetime);
 
   /// Empty constructor
   TofEvent();
@@ -104,7 +104,7 @@ inline TofEvent::TofEvent(const double tof) : m_tof(tof), m_pulsetime(0) {}
  * @param tof :: time of flight, in microseconds
  * @param pulsetime :: absolute pulse time of the neutron.
  */
-inline TofEvent::TofEvent(const double tof, const Core::DateAndTime pulsetime) : m_tof(tof), m_pulsetime(pulsetime) {}
+inline TofEvent::TofEvent(const double tof, const Core::DateAndTime &pulsetime) : m_tof(tof), m_pulsetime(pulsetime) {}
 
 /// Empty constructor
 inline TofEvent::TofEvent() : m_tof(0), m_pulsetime(0) {}
