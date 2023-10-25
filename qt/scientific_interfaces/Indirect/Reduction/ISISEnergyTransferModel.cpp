@@ -359,8 +359,8 @@ double IETModel::loadDetailedBalance(std::string const &filename) {
   return detailedBalance;
 }
 
-std::vector<std::string> IETModel::groupWorkspaces(std::string groupName, std::string instrument,
-                                                   std::string groupOption, bool shouldGroup) {
+std::vector<std::string> IETModel::groupWorkspaces(std::string const &groupName, std::string const &instrument,
+                                                   std::string const &groupOption, bool const shouldGroup) {
   std::vector<std::string> outputWorkspaces;
 
   if (doesExistInADS(groupName)) {
