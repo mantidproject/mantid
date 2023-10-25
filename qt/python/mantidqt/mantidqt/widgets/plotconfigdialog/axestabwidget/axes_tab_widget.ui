@@ -7,14 +7,8 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>525</height>
+    <height>536</height>
    </rect>
-  </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
@@ -107,23 +101,32 @@
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::Expanding</enum>
-     </property>
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>40</height>
+       <height>15</height>
       </size>
      </property>
     </spacer>
    </item>
    <item>
-    <widget class="QGroupBox" name="propertiesBox">
+    <widget class="QGroupBox" name="groupBox_3">
      <property name="styleSheet">
-      <string notr="true">QGroupBox{ border:1px solid grey; border-radius: 0px; margin: 0px; padding:0px;}</string>
+      <string notr="true">QGroupBox {padding: 10px; margin: 5px;}</string>
      </property>
-     <layout class="QVBoxLayout" name="property_layout">
+     <property name="title">
+      <string/>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
@@ -170,17 +173,14 @@
        </layout>
       </item>
       <item>
-       <spacer name="verticalSpacer_2">
+       <spacer name="verticalSpacer_4">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
-          <height>20</height>
+          <height>10</height>
          </size>
         </property>
        </spacer>
@@ -221,6 +221,22 @@
            <property name="rightMargin">
             <number>6</number>
            </property>
+           <item row="2" column="1">
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>60</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label_3">
              <property name="text">
@@ -230,6 +246,22 @@
               <number>0</number>
              </property>
             </widget>
+           </item>
+           <item row="1" column="1">
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>60</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
            <item row="1" column="2">
             <widget class="QLineEdit" name="label_line_edit">
@@ -263,68 +295,6 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="2">
-            <widget class="QComboBox" name="scale_combo_box">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <item>
-              <property name="text">
-               <string>Linear</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Log</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Symlog</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Logit</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <spacer name="horizontalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Fixed</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>60</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="2" column="1">
-            <spacer name="horizontalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Fixed</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>60</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
            <item row="3" column="0" colspan="3">
             <widget class="QGroupBox" name="groupBox_2">
              <property name="sizePolicy">
@@ -335,7 +305,7 @@
              </property>
              <property name="styleSheet">
               <string notr="true">QGroupBox {padding: 5px; margin: 5px;}
-   QGroupBox:title {subcontrol-origin: margin; subcontrol-position: top left; padding: 5px; color: grey; left:20px; top:-10px; }</string>
+QGroupBox:title {subcontrol-origin: margin; subcontrol-position: top left; padding: 5px; color: grey; left:20px; top:-10px; }</string>
              </property>
              <property name="title">
               <string>Limits</string>
@@ -435,6 +405,36 @@
              </layout>
             </widget>
            </item>
+           <item row="2" column="2">
+            <widget class="QComboBox" name="scale_combo_box">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <item>
+              <property name="text">
+               <string>Linear</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Log</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Symlog</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Logit</string>
+              </property>
+             </item>
+            </widget>
+           </item>
           </layout>
          </item>
         </layout>
@@ -444,9 +444,6 @@
        <spacer name="verticalSpacer_3">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -458,6 +455,9 @@
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <property name="topMargin">
+         <number>0</number>
+        </property>
         <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
