@@ -20,6 +20,7 @@ class DNSFileSelectorPresenter(DNSObserver):
         self.view = view
         self._old_data_set = set()
         self._standard_data_counter = 0
+        self._sample_data_path = ""
 
         # connect signals
         self._attach_signal_slots()
@@ -196,7 +197,17 @@ class DNSFileSelectorPresenter(DNSObserver):
             if not_found:
                 print(f"Of {len(file_numbers)} loaded checked " f"file numbers {not_found} were not found " "in list of datafiles")
 
+    def _clear_data_trees(self):
+        self.model.sample_data_tree_model.clear_scans()
+        self.model.standard_data_tree_model.clear_scans()
+
     def tab_got_focus(self):
+        sample_data_dir = self.param_dict["paths"]["data_dir"]
+        if self._sample_data_path != sample_data_dir:
+            self._clear_data_trees()
+            self._standard_data_counter = 0
+            self._sample_data_path = sample_data_dir
+
         standard_path = self.param_dict["paths"]["standards_dir"]
         # The first time that the standard data path is provided
         # and the user clicks on the file selector tab, then the
