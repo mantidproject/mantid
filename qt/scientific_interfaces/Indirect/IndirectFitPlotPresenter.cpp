@@ -29,8 +29,7 @@ struct HoldRedrawing {
 using namespace Mantid::API;
 
 IndirectFitPlotPresenter::IndirectFitPlotPresenter(IIndirectFitPlotView *view)
-    : m_model(new IndirectFitPlotModel()), m_view(view), m_plotGuessInSeparateWindow(false),
-      m_plotter(std::make_unique<ExternalPlotter>()) {
+    : m_model(new IndirectFitPlotModel()), m_view(view), m_plotter(std::make_unique<ExternalPlotter>()) {
   connect(m_view, SIGNAL(selectedFitDataChanged(WorkspaceID)), this, SLOT(handleSelectedFitDataChanged(WorkspaceID)));
 
   connect(m_view, SIGNAL(plotSpectrumChanged(WorkspaceIndex)), this, SLOT(handlePlotSpectrumChanged(WorkspaceIndex)));
@@ -120,17 +119,6 @@ void IndirectFitPlotPresenter::setHWHMMaximum(double minimum) {
 
 void IndirectFitPlotPresenter::setHWHMMinimum(double maximum) {
   m_view->setHWHMMinimum(m_model->calculateHWHMMinimum(maximum));
-}
-
-void IndirectFitPlotPresenter::enablePlotGuessInSeparateWindow() {
-  m_plotGuessInSeparateWindow = true;
-  const auto inputAndGuess = m_model->appendGuessToInput(m_model->getGuessWorkspace());
-  m_plotter->plotSpectra(inputAndGuess->getName(), "0-1", IndirectSettingsHelper::externalPlotErrorBars());
-}
-
-void IndirectFitPlotPresenter::disablePlotGuessInSeparateWindow() {
-  m_plotGuessInSeparateWindow = false;
-  m_model->deleteExternalGuessWorkspace();
 }
 
 void IndirectFitPlotPresenter::appendLastDataToSelection(std::vector<std::string> displayNames) {
@@ -285,21 +273,14 @@ void IndirectFitPlotPresenter::plotGuess(bool doPlotGuess) {
     const auto guessWorkspace = m_model->getGuessWorkspace();
     if (guessWorkspace->x(0).size() >= 2) {
       plotGuess(guessWorkspace);
-      if (m_plotGuessInSeparateWindow)
-        plotGuessInSeparateWindow(guessWorkspace);
     }
-  } else if (m_plotGuessInSeparateWindow)
-    plotGuessInSeparateWindow(m_model->getGuessWorkspace());
-  else
+  } else {
     clearGuess();
+  }
 }
 
 void IndirectFitPlotPresenter::plotGuess(Mantid::API::MatrixWorkspace_sptr workspace) {
   m_view->plotInTopPreview("Guess", std::move(workspace), WorkspaceIndex{0}, Qt::green);
-}
-
-void IndirectFitPlotPresenter::plotGuessInSeparateWindow(const Mantid::API::MatrixWorkspace_sptr &workspace) {
-  m_plotExternalGuessRunner.addCallback([this, workspace]() { m_model->appendGuessToInput(workspace); });
 }
 
 void IndirectFitPlotPresenter::clearGuess() {

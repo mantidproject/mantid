@@ -183,7 +183,6 @@ set(MOC_FILES
     InelasticDataManipulationTab.h
     ISISCalibration.h
     ISISDiagnostics.h
-    LazyAsyncRunner.h
     Quasi.h
     ResNorm.h
     Stretch.h
