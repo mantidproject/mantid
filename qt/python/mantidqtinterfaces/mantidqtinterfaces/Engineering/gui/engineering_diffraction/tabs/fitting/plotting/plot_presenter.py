@@ -46,6 +46,7 @@ class FittingPlotPresenter(object):
         self.view.set_slot_for_fit_toggled(self.fit_toggle)
         self.view.set_slot_for_serial_fit(self.do_serial_fit)
         self.view.set_slot_for_seq_fit(self.do_seq_fit)
+        self.view.set_slot_for_legend_toggled()
 
     def add_workspace_to_plot(self, ws):
         axes = self.view.get_axes()
