@@ -34,6 +34,9 @@ private:
                              const Mantid::API::Workspace_sptr &workspace,
                              std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const;
 
+  void runSaveORSOAlgorithm(std::string const &savePath, const Mantid::API::Workspace_sptr &workspace,
+                            FileFormatOptions const &fileFormat) const;
+
   std::string assembleSavePath(std::string const &saveDirectory, std::string const &prefix, std::string const &name,
                                std::string const &extension) const;
 

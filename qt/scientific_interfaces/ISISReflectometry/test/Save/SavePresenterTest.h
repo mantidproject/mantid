@@ -385,58 +385,45 @@ public:
   void testCustomOptionsEnabledForCustomFormat() {
     auto presenter = makePresenter();
     expectFileFormat(NamedFormat::Custom);
+    expectQResolutionEnabled();
     expectCustomOptionsEnabled();
     presenter.notifySettingsChanged();
     verifyAndClear();
   }
 
-  void testLogListEnabledForILLCosmosFormat() {
-    auto presenter = makePresenter();
-    expectFileFormat(NamedFormat::ILLCosmos);
-    expectLogListEnabled();
-    presenter.notifySettingsChanged();
-    verifyAndClear();
-  }
+  void testLogListEnabledForILLCosmosFormat() { checkLogListStateForFileFormat(NamedFormat::ILLCosmos, true); }
 
   void testCustomOptionsDisabledForILLCosmosFormat() {
-    auto presenter = makePresenter();
-    expectFileFormat(NamedFormat::ILLCosmos);
-    expectCustomOptionsDisabled();
-    presenter.notifySettingsChanged();
-    verifyAndClear();
+    checkCustomOptionsStateForFileFormat(NamedFormat::ILLCosmos, false);
   }
 
-  void testLogListDisabledForANSTOFormat() {
-    auto presenter = makePresenter();
-    expectFileFormat(NamedFormat::ANSTO);
-    expectLogListDisabled();
-    presenter.notifySettingsChanged();
-    verifyAndClear();
+  void testQResolutionDisabledForILLCosmosFormat() {
+    checkQResolutionStateForFileFormat(NamedFormat::ILLCosmos, false);
   }
 
-  void testCustomOptionsDisabledForANSTOFormat() {
-    auto presenter = makePresenter();
-    expectFileFormat(NamedFormat::ANSTO);
-    expectCustomOptionsDisabled();
-    presenter.notifySettingsChanged();
-    verifyAndClear();
-  }
+  void testLogListDisabledForANSTOFormat() { checkLogListStateForFileFormat(NamedFormat::ANSTO, false); }
 
-  void testLogListDisabledForThreeColumnFormat() {
-    auto presenter = makePresenter();
-    expectFileFormat(NamedFormat::ThreeColumn);
-    expectLogListDisabled();
-    presenter.notifySettingsChanged();
-    verifyAndClear();
-  }
+  void testCustomOptionsDisabledForANSTOFormat() { checkCustomOptionsStateForFileFormat(NamedFormat::ANSTO, false); }
+
+  void testQResolutionDisabledForANSTOFormat() { checkQResolutionStateForFileFormat(NamedFormat::ANSTO, false); }
+
+  void testLogListDisabledForThreeColumnFormat() { checkLogListStateForFileFormat(NamedFormat::ThreeColumn, false); }
 
   void testCustomOptionsDisabledForThreeColumnFormat() {
-    auto presenter = makePresenter();
-    expectFileFormat(NamedFormat::ThreeColumn);
-    expectCustomOptionsDisabled();
-    presenter.notifySettingsChanged();
-    verifyAndClear();
+    checkCustomOptionsStateForFileFormat(NamedFormat::ThreeColumn, false);
   }
+
+  void testQResolutionDisabledForThreeColumnFormat() {
+    checkQResolutionStateForFileFormat(NamedFormat::ThreeColumn, false);
+  }
+
+  void testLogListDisabledForORSOAsciiFormat() { checkLogListStateForFileFormat(NamedFormat::ORSOAscii, false); }
+
+  void testCustomOptionsDisabledForORSOAsciiFormat() {
+    checkCustomOptionsStateForFileFormat(NamedFormat::ORSOAscii, false);
+  }
+
+  void testQResolutionEnabledForORSOAsciiFormat() { checkQResolutionStateForFileFormat(NamedFormat::ORSOAscii, true); }
 
 private:
   SavePresenter makePresenter() {
@@ -566,16 +553,51 @@ private:
 
   void expectLogListDisabled() { EXPECT_CALL(m_view, disableLogList()).Times(1); }
 
+  void expectQResolutionEnabled() { EXPECT_CALL(m_view, enableQResolutionCheckBox()).Times(1); }
+
+  void expectQResolutionDisabled() { EXPECT_CALL(m_view, disableQResolutionCheckBox()).Times(1); }
+
   void expectCustomOptionsEnabled() {
     EXPECT_CALL(m_view, enableHeaderCheckBox()).Times(1);
-    EXPECT_CALL(m_view, enableQResolutionCheckBox()).Times(1);
     EXPECT_CALL(m_view, enableSeparatorButtonGroup()).Times(1);
   }
 
   void expectCustomOptionsDisabled() {
     EXPECT_CALL(m_view, disableHeaderCheckBox()).Times(1);
-    EXPECT_CALL(m_view, disableQResolutionCheckBox()).Times(1);
     EXPECT_CALL(m_view, disableSeparatorButtonGroup()).Times(1);
+  }
+
+  void checkQResolutionStateForFileFormat(NamedFormat format, bool isEnabled) {
+    auto presenter = makePresenter();
+    expectFileFormat(format);
+    if (isEnabled)
+      expectQResolutionEnabled();
+    else
+      expectQResolutionDisabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void checkLogListStateForFileFormat(NamedFormat format, bool isEnabled) {
+    auto presenter = makePresenter();
+    expectFileFormat(format);
+    if (isEnabled)
+      expectLogListEnabled();
+    else
+      expectLogListDisabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void checkCustomOptionsStateForFileFormat(NamedFormat format, bool isEnabled) {
+    auto presenter = makePresenter();
+    expectFileFormat(format);
+    if (isEnabled)
+      expectCustomOptionsEnabled();
+    else
+      expectCustomOptionsDisabled();
+    presenter.notifySettingsChanged();
+    verifyAndClear();
   }
 
   NiceMock<MockSaveView> m_view;

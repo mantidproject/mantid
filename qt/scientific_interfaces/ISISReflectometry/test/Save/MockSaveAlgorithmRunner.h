@@ -16,5 +16,7 @@ public:
   MOCK_CONST_METHOD7(runSaveAsciiAlgorithm,
                      void(const Mantid::API::Workspace_sptr &, std::string const &, std::string const &,
                           std::vector<std::string> const &, const bool &, const bool &, std::string const &));
+  MOCK_CONST_METHOD3(runSaveORSOAlgorithm,
+                     void(const Mantid::API::Workspace_sptr &, std::string const &, const bool &));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

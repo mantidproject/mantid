@@ -21,5 +21,8 @@ public:
                              std::string const &extension, std::vector<std::string> const &logParameters,
                              const bool &includeHeader, const bool &includeQResolution,
                              std::string const &separator) const override;
+
+  void runSaveORSOAlgorithm(const Mantid::API::Workspace_sptr &workspace, std::string const &savePath,
+                            const bool &includeQResolution) const override;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

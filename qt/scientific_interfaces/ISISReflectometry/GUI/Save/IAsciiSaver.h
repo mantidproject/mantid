@@ -15,7 +15,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos };
+enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos, ORSOAscii };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL FileFormatOptions {
 public:
