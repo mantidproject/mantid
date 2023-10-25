@@ -85,7 +85,8 @@ class DNSFileSelectorModel(DNSObsModel):
                 self.sample_data_tree_model.setup_model_data([dns_file])
         self.old_data_set = set(self.all_datafiles)
         self._add_number_of_files_per_scan()
-        self._save_filelist(data_path)
+        if datafiles:
+            self._save_filelist(data_path)
 
     def read_standard(self, standard_path, polarisation_table):
         """
