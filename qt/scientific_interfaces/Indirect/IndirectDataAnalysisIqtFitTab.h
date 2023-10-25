@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectFitAnalysisTab.h"
-#include "IqtFitModel.h"
+#include "IndirectDataAnalysisTab.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -26,7 +25,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class DLLExport IndirectDataAnalysisIqtFitTab : public IndirectFitAnalysisTab {
+class DLLExport IndirectDataAnalysisIqtFitTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
@@ -36,24 +35,13 @@ public:
 
   bool hasResolution() const override { return false; }
 
-protected:
-  void setRunIsRunning(bool running) override;
-  void setRunEnabled(bool enable) override;
-
 private:
-  void setupFitTab() override;
-  std::string getFitTypeString() const;
+  std::string getFitTypeString() const override;
   EstimationDataSelector getEstimationDataSelector() const override;
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
-  IqtFitModel *m_iqtFittingModel;
   QString m_tiedParameter;
-
-protected slots:
-  void runClicked();
-  void fitFunctionChanged();
-  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

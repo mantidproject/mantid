@@ -23,7 +23,7 @@ using IndirectFitDataCollectionType = IndexCollectionType<WorkspaceID, std::uniq
 
 /*
    IIndirectFitDataModel - Specifies an interface for updating, querying and
-   accessing the raw data in IndirectFitAnalysisTabs
+   accessing the raw data in IndirectDataAnalysisTabs
 */
 class MANTIDQT_INDIRECT_DLL IIndirectFitDataModel {
 public:

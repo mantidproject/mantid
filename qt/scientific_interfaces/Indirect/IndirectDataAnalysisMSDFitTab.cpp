@@ -7,18 +7,13 @@
 #include "IndirectDataAnalysisMSDFitTab.h"
 #include "IDAFunctionParameterEstimation.h"
 #include "IndirectAddWorkspaceDialog.h"
+#include "MSDFitModel.h"
 
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
-
-#include "MantidQtWidgets/Plotting/RangeSelector.h"
-
-#include <QFileInfo>
 
 using namespace Mantid::API;
 
@@ -47,14 +42,12 @@ auto msdFunctionStrings =
                                                "Sigma>0)"}});
 
 IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
-    : IndirectFitAnalysisTab(new MSDFitModel, parent), m_uiForm(new Ui::IndirectFitTab) {
+    : IndirectDataAnalysisTab(new MSDFitModel, parent), m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
 
-  m_msdFittingModel = dynamic_cast<MSDFitModel *>(getFittingModel());
-
   m_uiForm->dockArea->setFitDataView(new IndirectFitDataView(m_uiForm->dockArea));
-  setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(m_msdFittingModel->getFitDataModel(),
-                                                                 m_uiForm->dockArea->m_fitDataView));
+  setFitDataPresenter(
+      std::make_unique<IndirectFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   auto parameterEstimation = createParameterEstimation();
@@ -63,24 +56,10 @@ IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
   m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(MSDFIT_HIDDEN_PROPS);
+  setRunButton(m_uiForm->pbRun);
 
   setEditResultVisible(false);
-  respondToFunctionChanged();
-  fitFunctionChanged();
 }
-
-void IndirectDataAnalysisMSDFitTab::setupFitTab() {
-  connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
-  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-}
-
-void IndirectDataAnalysisMSDFitTab::runClicked() { runTab(); }
-
-void IndirectDataAnalysisMSDFitTab::setRunIsRunning(bool running) {
-  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-}
-
-void IndirectDataAnalysisMSDFitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
 EstimationDataSelector IndirectDataAnalysisMSDFitTab::getEstimationDataSelector() const {
 
@@ -107,8 +86,6 @@ EstimationDataSelector IndirectDataAnalysisMSDFitTab::getEstimationDataSelector(
     return DataForParameterEstimation{{x[first], x[m]}, {y[first], y[m]}};
   };
 }
-
-void IndirectDataAnalysisMSDFitTab::fitFunctionChanged() { m_msdFittingModel->setFitTypeString(getFitTypeString()); }
 
 std::string IndirectDataAnalysisMSDFitTab::getFitTypeString() const {
   // This function attempts to work out which fit type is being done. It will
@@ -161,7 +138,7 @@ IDAFunctionParameterEstimation IndirectDataAnalysisMSDFitTab::createParameterEst
 void IndirectDataAnalysisMSDFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
   if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
     m_dataPresenter->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
-    m_msdFittingModel->addDefaultParameters();
+    m_fittingModel->addDefaultParameters();
   }
 }
 

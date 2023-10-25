@@ -10,13 +10,6 @@
 #include "IndirectInterface.h"
 #include "IndirectTab.h"
 
-#include "MantidKernel/ConfigService.h"
-#include <Poco/NObserver.h>
-
-class DoubleEditorFactory;
-class QtCheckBoxFactory;
-class QtStringPropertyManager;
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -35,14 +28,9 @@ class IndirectDataAnalysisTab;
  * The IndirectDataAnalysis class is the main class that handles the interface
  *and controls
  * its tabs.
- *
- * Is a friend to the IndirectDataAnalysisTab class.
  */
-class IndirectDataAnalysis : public IndirectInterface {
+class IndirectDataAnalysis final : public IndirectInterface {
   Q_OBJECT
-
-  /// Allow IndirectDataAnalysisTab to have access.
-  friend class IndirectDataAnalysisTab;
 
 public:
   /// The name of the interface as registered into the factory
@@ -55,19 +43,8 @@ public:
 private:
   /// Initialize the layout
   void initLayout() override;
-  /// Initialize Python-dependent sections
-  void initLocalPython() override;
-  /// Load the settings of the interface (and child tabs).
-  void loadSettings();
-
-  /// Called upon a close event.
-  void closeEvent(QCloseEvent * /*unused*/) override;
-  /// handle POCO event
-  void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
 private slots:
-  /// Sets the active workspace in the selected tab
-  void tabChanged(int index);
   /// Called when the user clicks the Py button
   void exportTabPython();
 
@@ -80,13 +57,6 @@ private:
   Ui::IndirectDataAnalysis m_uiForm;
   /// The settings group
   QString m_settingsGroup;
-  /// Integer validator
-  QIntValidator *m_valInt;
-  /// Double validator
-  QDoubleValidator *m_valDbl;
-
-  /// Change Observer for ConfigService (monitors user directories)
-  Poco::NObserver<IndirectDataAnalysis, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
 
   /// Map of unsigned int (TabChoice enum values) to tabs.
   std::map<unsigned int, IndirectDataAnalysisTab *> m_tabs;

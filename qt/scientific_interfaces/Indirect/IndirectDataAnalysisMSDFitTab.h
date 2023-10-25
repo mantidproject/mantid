@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectFitAnalysisTab.h"
-#include "MSDFitModel.h"
+#include "IndirectDataAnalysisTab.h"
 #include "ui_IndirectFitTab.h"
 
 #include "MantidAPI/IFunction.h"
@@ -17,7 +16,7 @@ namespace CustomInterfaces {
 namespace IDA {
 class IDAFunctionParameterEstimation;
 
-class DLLExport IndirectDataAnalysisMSDFitTab : public IndirectFitAnalysisTab {
+class DLLExport IndirectDataAnalysisMSDFitTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
@@ -27,23 +26,13 @@ public:
 
   bool hasResolution() const override { return false; }
 
-protected:
-  void setRunIsRunning(bool running) override;
-  void setRunEnabled(bool enable) override;
-
 private:
-  void setupFitTab() override;
   EstimationDataSelector getEstimationDataSelector() const override;
-  std::string getFitTypeString() const;
+  std::string getFitTypeString() const override;
   IDAFunctionParameterEstimation createParameterEstimation() const;
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
-  MSDFitModel *m_msdFittingModel;
-
-protected slots:
-  void runClicked();
-  void fitFunctionChanged();
 };
 } // namespace IDA
 } // namespace CustomInterfaces

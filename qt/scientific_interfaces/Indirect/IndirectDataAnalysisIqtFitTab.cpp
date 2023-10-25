@@ -8,19 +8,9 @@
 #include "IndirectAddWorkspaceDialog.h"
 #include "IndirectFitPlotView.h"
 #include "IndirectFunctionBrowser/IqtTemplateBrowser.h"
+#include "IqtFitModel.h"
 
-#include "MantidQtWidgets/Common/UserInputValidator.h"
-
-#include "MantidQtWidgets/Plotting/RangeSelector.h"
-
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
-
-#include <QMenu>
-
-#include <boost/algorithm/string/predicate.hpp>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -35,26 +25,20 @@ std::vector<std::string> IQTFIT_HIDDEN_PROPS =
 namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectDataAnalysisIqtFitTab::IndirectDataAnalysisIqtFitTab(QWidget *parent)
-    : IndirectFitAnalysisTab(new IqtFitModel, parent), m_uiForm(new Ui::IndirectFitTab) {
+    : IndirectDataAnalysisTab(new IqtFitModel, parent), m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
-  m_iqtFittingModel = dynamic_cast<IqtFitModel *>(getFittingModel());
-
   m_uiForm->dockArea->setFitDataView(new IndirectFitDataView(m_uiForm->dockArea));
-  setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(m_iqtFittingModel->getFitDataModel(),
-                                                                 m_uiForm->dockArea->m_fitDataView));
+  setFitDataPresenter(
+      std::make_unique<IndirectFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   auto templateBrowser = new IqtTemplateBrowser;
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
   setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
   m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(IQTFIT_HIDDEN_PROPS);
+  setRunButton(m_uiForm->pbRun);
 
   setEditResultVisible(true);
-}
-
-void IndirectDataAnalysisIqtFitTab::setupFitTab() {
-  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
 }
 
 EstimationDataSelector IndirectDataAnalysisIqtFitTab::getEstimationDataSelector() const {
@@ -71,11 +55,9 @@ EstimationDataSelector IndirectDataAnalysisIqtFitTab::getEstimationDataSelector(
 void IndirectDataAnalysisIqtFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
   if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
     m_dataPresenter->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
-    m_iqtFittingModel->addDefaultParameters();
+    m_fittingModel->addDefaultParameters();
   }
 }
-
-void IndirectDataAnalysisIqtFitTab::fitFunctionChanged() { m_iqtFittingModel->setFitTypeString(getFitTypeString()); }
 
 std::string IndirectDataAnalysisIqtFitTab::getFitTypeString() const {
   const auto numberOfExponential = getNumberOfCustomFunctions("ExpDecay");
@@ -89,17 +71,5 @@ std::string IndirectDataAnalysisIqtFitTab::getFitTypeString() const {
 
   return functionType;
 }
-
-void IndirectDataAnalysisIqtFitTab::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
-  IndirectFitAnalysisTab::setupFit(fitAlgorithm);
-}
-
-void IndirectDataAnalysisIqtFitTab::runClicked() { runTab(); }
-
-void IndirectDataAnalysisIqtFitTab::setRunIsRunning(bool running) {
-  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
-}
-
-void IndirectDataAnalysisIqtFitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
 } // namespace MantidQt::CustomInterfaces::IDA

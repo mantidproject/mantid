@@ -35,7 +35,6 @@ set(SRC_FILES
     IndirectDiffractionReduction.cpp
     IndirectDockWidgetArea.cpp
     IndirectEditResultsDialog.cpp
-    IndirectFitAnalysisTab.cpp
     IndirectFitData.cpp
     IndirectFitDataModel.cpp
     IndirectFitDataPresenter.cpp
@@ -141,7 +140,6 @@ set(MOC_FILES
     IndirectDockWidgetArea.h
     IndirectDiffractionReduction.h
     IndirectEditResultsDialog.h
-    IndirectFitAnalysisTab.h
     IndirectFitDataPresenter.h
     IndirectFitDataView.h
     IndirectFitOutputOptionsPresenter.h

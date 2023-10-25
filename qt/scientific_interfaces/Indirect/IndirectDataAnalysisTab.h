@@ -6,152 +6,137 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataAnalysis.h"
-#include "IndirectPlotOptionsPresenter.h"
+#include "IndirectFitDataPresenter.h"
+#include "IndirectFitOutputOptionsPresenter.h"
+#include "IndirectFitPlotPresenter.h"
+#include "IndirectFitPropertyBrowser.h"
+#include "IndirectFittingModel.h"
 #include "IndirectTab.h"
 
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidQtWidgets/Common/FunctionModelDataset.h"
+
+#include <boost/optional.hpp>
+
+#include <QtCore>
 
 #include <memory>
+#include <type_traits>
 
-class QSettings;
-class QString;
-
-namespace MantidQt {
-namespace MantidWidgets {
-class RangeSelector;
-}
-} // namespace MantidQt
-
-// Suppress a warning coming out of code that isn't ours
-#if defined(__INTEL_COMPILER)
-#pragma warning disable 1125
-#elif defined(__GNUC__)
-#if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6)
-#pragma GCC diagnostic push
-#endif
-#pragma GCC diagnostic ignored "-Woverloaded-virtual"
-#endif
-#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-#if defined(__INTEL_COMPILER)
-#pragma warning enable 1125
-#elif defined(__GNUC__)
-#if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6)
-#pragma GCC diagnostic pop
-#endif
-#endif
+#include <QList>
+#include <QPair>
+#include <QString>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
 class MANTIDQT_INDIRECT_DLL IndirectDataAnalysisTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  /// Constructor
-  IndirectDataAnalysisTab(QWidget *parent = nullptr);
+  IndirectDataAnalysisTab(IndirectFittingModel *model, QWidget *parent = nullptr);
   virtual ~IndirectDataAnalysisTab() override = default;
 
-  /// Set the presenter for the output plotting options
-  void setOutputPlotOptionsPresenter(std::unique_ptr<IndirectPlotOptionsPresenter> presenter);
-  /// Set the active workspaces used in the plotting options
-  void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
-  /// Clear the workspaces held by the output plotting options
-  void clearOutputPlotOptionsWorkspaces();
+  void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
+  void setPlotView(IIndirectFitPlotView *view);
+  void setOutputOptionsView(IIndirectFitOutputOptionsView *view);
+  void setFitPropertyBrowser(IndirectFitPropertyBrowser *browser);
+  WorkspaceID getSelectedDataIndex() const;
+  WorkspaceIndex getSelectedSpectrum() const;
+  bool isRangeCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
+  size_t getNumberOfCustomFunctions(const std::string &functionName) const;
+  void setConvolveMembers(bool convolveMembers);
 
-  /// Loads the tab's settings.
-  void loadTabSettings(const QSettings &settings);
+  static size_t getNumberOfSpecificFunctionContained(const std::string &functionName,
+                                                     const IFunction *compositeFunction);
 
-  /// Prevent loading of data with incorrect naming
-  void filterInputData(bool filter);
+  virtual std::string getTabName() const = 0;
+  virtual bool hasResolution() const = 0;
+  void setFileExtensionsByName(bool filter);
 
 protected:
-  /// Function to run a string as python code
-  void runPythonScript(const QString &pyInput);
+  void setRunButton(QPushButton *runButton);
+  IndirectFittingModel *getFittingModel() const;
+  void run() override;
+  void setSampleWSSuffixes(const QStringList &suffices);
+  void setSampleFBSuffixes(const QStringList &suffices);
+  void setResolutionWSSuffixes(const QStringList &suffices);
+  void setResolutionFBSuffixes(const QStringList &suffices);
+  void setSampleSuffixes(std::string const &tab, bool filter);
+  void setResolutionSuffixes(std::string const &tab, bool filter);
 
-  /// Retrieve input workspace
-  Mantid::API::MatrixWorkspace_sptr getInputWorkspace() const;
+  void setAlgorithmProperties(const Mantid::API::IAlgorithm_sptr &fitAlgorithm) const;
+  void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+  void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
+  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
 
-  /// Set input workspace
-  void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
-
-  /// Retrieve preview plot workspace
-  Mantid::API::MatrixWorkspace_sptr getPreviewPlotWorkspace();
-
-  /// Set preview plot workspace
-  void setPreviewPlotWorkspace(const Mantid::API::MatrixWorkspace_sptr &previewPlotWorkspace);
-
-  /// Retrieve the selected spectrum
-  int getSelectedSpectrum() const;
-
-  /// Retrieve the selected minimum spectrum
-  int getMinimumSpectrum() const;
-
-  /// Retrieve the selected maximum spectrum
-  int getMaximumSpectrum() const;
-
-  void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
-
-  void clearAndPlotInput(MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-                         MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
-
-  void updatePlot(const std::string &outputWSName, size_t index, MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
-
-  void updatePlot(const Mantid::API::WorkspaceGroup_sptr &workspaceGroup, size_t index,
-                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
-
-  void updatePlot(const Mantid::API::WorkspaceGroup_sptr &outputWS,
-                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
-
-  void updatePlot(const std::string &workspaceName, MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
-
-  void updatePlot(const Mantid::API::MatrixWorkspace_sptr &outputWS,
-                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
-
-  /// DoubleEditorFactory
-  DoubleEditorFactory *m_dblEdFac;
-  /// QtCheckBoxFactory
-  QtCheckBoxFactory *m_blnEdFac;
+  void setRunIsRunning(bool running);
+  void setRunEnabled(bool enable);
+  void setEditResultVisible(bool visible);
+  std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
+  std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
+  std::unique_ptr<IndirectFittingModel> m_fittingModel;
+  IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
+  WorkspaceID m_activeWorkspaceID;
+  WorkspaceIndex m_activeSpectrumIndex;
 
 private:
-  virtual void setFileExtensionsByName(bool filter) = 0;
-  virtual void setBrowserWorkspace(){};
+  void setup() override;
+  bool validate() override;
+  virtual EstimationDataSelector getEstimationDataSelector() const = 0;
+  void connectPlotPresenter();
+  void connectFitPropertyBrowser();
+  void connectDataPresenter();
+  void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
+  void plotSpectrum(std::string const &workspaceName, std::size_t const &index);
+  std::string getOutputBasename() const;
+  Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
+  std::vector<std::string> getFitParameterNames() const;
+  QList<MantidWidgets::FunctionModelDataset> getDatasets() const;
+  void enableFitButtons(bool enable);
+  void enableOutputOptions(bool enable);
+  void setPDFWorkspace(std::string const &workspaceName);
+  void updateParameterEstimationData();
+  virtual void addDataToModel(IAddWorkspaceDialog const *dialog) = 0;
+  virtual std::string getFitTypeString() const = 0;
 
-  /// A pointer to the parent (friend) IndirectDataAnalysis object.
-  IndirectDataAnalysis *m_parent;
-  Mantid::API::MatrixWorkspace_sptr m_inputWorkspace;
-  std::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
-  int m_selectedSpectrum;
-  int m_minSpectrum;
-  int m_maxSpectrum;
-  std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
+  std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
+  Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
+  QPushButton *m_runButton;
 
 protected slots:
-  /// Slot that can be called when a user edits an input.
-  void inputChanged();
+  void setModelFitFunction();
+  void setModelStartX(double startX);
+  void setModelEndX(double endX);
+  void tableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
+  void tableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
+  void handleStartXChanged(double startX);
+  void handleEndXChanged(double endX);
+  void updateFitOutput(bool error);
+  void updateSingleFitOutput(bool error);
+  void fitAlgorithmComplete(bool error);
+  void singleFit();
+  void singleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum);
+  void executeFit();
+  void updateParameterValues();
+  void updateParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters);
+  void updateFitBrowserParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters =
+                                           std::unordered_map<std::string, ParameterValue>());
+  void updateFitBrowserParameterValuesFromAlg();
+  void updateFitStatus();
+  void updateDataReferences();
+  void updateResultOptions();
+  void respondToFunctionChanged();
 
-  /// Plots the current preview data
-  void plotCurrentPreview();
-
-  /// Sets the selected spectrum
-  virtual void setSelectedSpectrum(int spectrum);
-
-  /// Sets the maximum spectrum
-  void setMaximumSpectrum(int spectrum);
-
-  /// Sets the minimum spectrum
-  void setMinimumSpectrum(int spectrum);
+private slots:
+  void plotSelectedSpectra();
+  void respondToSingleResolutionLoaded();
+  void respondToDataChanged();
+  void respondToDataAdded(IAddWorkspaceDialog const *dialog);
+  void respondToDataRemoved();
+  void respondToPlotSpectrumChanged();
+  void respondToFwhmChanged(double);
+  void respondToBackgroundChanged(double value);
 };
 
 } // namespace IDA

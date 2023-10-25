@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "FqFitModel.h"
-#include "IndirectFitAnalysisTab.h"
+#include "IndirectDataAnalysisTab.h"
 #include "ui_IndirectFitTab.h"
 
 #include "IFQFitObserver.h"
@@ -19,7 +18,7 @@ namespace CustomInterfaces {
 namespace IDA {
 class IDAFunctionParameterEstimation;
 
-class DLLExport IndirectDataAnalysisFqFitTab : public IndirectFitAnalysisTab {
+class DLLExport IndirectDataAnalysisFqFitTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
@@ -30,24 +29,14 @@ public:
   bool hasResolution() const override { return false; }
 
 private:
-  void setupFitTab() override;
   EstimationDataSelector getEstimationDataSelector() const override;
-  std::string getFitTypeString() const;
+  std::string getFitTypeString() const override;
   IDAFunctionParameterEstimation createParameterEstimation() const;
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   void setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
   void setModelSpectrum(int index, const std::string &paramType);
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
-  FqFitModel *m_FqFittingModel;
-
-protected:
-  void setRunIsRunning(bool running) override;
-  void setRunEnabled(bool enable) override;
-
-protected slots:
-  void runClicked();
-  void updateModelFitTypeString();
 };
 } // namespace IDA
 } // namespace CustomInterfaces

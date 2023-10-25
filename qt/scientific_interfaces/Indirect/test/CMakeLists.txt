@@ -6,8 +6,8 @@ set(TEST_FILES
     FqFitDataPresenterTest.h
     FqFitModelTest.h
     IDAFunctionParameterEstimationTest.h
+    IndirectDataAnalysisTabTest.h
     IndirectDataValidationHelperTest.h
-    IndirectFitAnalysisTabTest.h
     IndirectFitDataPresenterTest.h
     IndirectFitDataTest.h
     IndirectFitDataModelTest.h
