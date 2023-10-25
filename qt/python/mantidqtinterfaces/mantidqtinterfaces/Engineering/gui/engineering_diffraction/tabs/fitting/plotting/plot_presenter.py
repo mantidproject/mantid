@@ -46,7 +46,7 @@ class FittingPlotPresenter(object):
         self.view.set_slot_for_fit_toggled(self.fit_toggle)
         self.view.set_slot_for_serial_fit(self.do_serial_fit)
         self.view.set_slot_for_seq_fit(self.do_seq_fit)
-        self.view.set_slot_for_legend_toggled(self.toggle_legend)
+        self.view.set_slot_for_legend_toggled()
 
     def add_workspace_to_plot(self, ws):
         axes = self.view.get_axes()
@@ -102,9 +102,6 @@ class FittingPlotPresenter(object):
 
     def do_seq_fit(self):
         self.fit_all_started_notifier.notify_subscribers(True)
-
-    def toggle_legend(self):
-        self.view.update_figure()
 
     def do_fit_all_async(self, ws_names_list, do_sequential=True):
         previous_fit_browser = self.view.read_fitprop_from_browser()
