@@ -186,7 +186,7 @@ In Mantid we define these two fields as:
   & H_{\mathrm{MOL}} = 2 (g_J - 1) \mu_B \mathbf{J}\cdot\mathbf{B}_{\mathrm{MOL}}
 
 where :math:`g_J` is the Lande g-factor, :math:`\mu_B` is the Bohr magneton, :math:`\mathbf{B}` is the magnetic field vector (in Tesla in Mantid) and :math:`\mathbf{J}` is the total angular momentum operator vector.
-This definition follows the `FOCUS manual <https://epubs.stfc.ac.uk/manifestation/5723/RAL-TR-95-023.pdf>`_, found in reference `[Buckmaster72]`_.
+This definition follows the `FOCUS manual <https://epubs.stfc.ac.uk/manifestation/5723/RAL-TR-95-023.pdf>`_.
 
 
 Symmetry considerations

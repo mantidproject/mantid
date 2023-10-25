@@ -9,25 +9,15 @@ CrystalFieldSpectrum
 Description
 -----------
 
-This function calculates a spectrum of a crystal electric field acting upon a rare earth ion. It is a part of crystal field computation
-in Mantid and under active development. More documentation will follow as the development progresses.
+This function calculates a spectrum of a crystal electric field acting upon a rare earth ion.
+It is a part of crystal field computation in Mantid and under active development.
+Please consult :ref:`Crystal Field Theory <Crystal Field Theory>` for the theoretical background.
+More documentation will follow as the development progresses.
 
 Here is an example of how to fit function's parameters to a spectrum. All parameters disallowed by symmetry are fixed automatically.
 Any other parameters that need fixing has to be tied explicitly. Peak centres and intensities are also fixed and computed from the
 field parameters with the :ref:`CrystalFieldPeaks <func-CrystalFieldPeaks>` function. Any other peak parameter can be set using
 the "f-index-dot-name" syntax (see :ref:`CompositeFunction <func-CompositeFunction>` for more details).
-
-The fit can also consider external and molecular magnetic fields (eg. `BextX=10`, `BmolY=12`), measured in Tesla.
-The contributions of the external and molecular fields to the total Hamiltonian is defined by:
-
-.. math::
-  & H = H_{\mathrm{CEF}} + H_{\mathrm{EXT}} + H_{\mathrm{MOL}} \\
-   \\
-  & H_{\mathrm{EXT}} = g_J \mu_B \mathbf{J}\cdot\mathbf{B}_{\mathrm{EXT}} \\
-  & H_{\mathrm{MOL}} = 2 (g_J - 1) \mu_B \mathbf{J}\cdot\mathbf{B}_{\mathrm{MOL}}
-
-Note that the external and molecular field parameters need to be fixed by the user, as they are not fixed by default.
-The external field parameter should always be fixed, as this is a constant from a particular measurement.
 
 The `x`-axis is given in meV, and the intensity (`y`-axis) is in milibarn per steradian per meV.
 
