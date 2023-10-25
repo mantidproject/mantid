@@ -353,7 +353,9 @@ class PeaksViewerCollectionPresenter:
     #
     def add_delete_peak(self, pos):
         presenter_active = self.child_presenter(self._actions_view.active_peaksworkspace)
-        if self._actions_view.adding_mode_on:
+        if presenter_active is None:
+            logger.debug("PeaksViewer: No active peak presenter")
+        elif self._actions_view.adding_mode_on:
             logger.debug(f"PeaksViewer: Adding peak position {pos}")
             presenter_active.add_peak(pos)
         elif self._actions_view.erasing_mode_on:
