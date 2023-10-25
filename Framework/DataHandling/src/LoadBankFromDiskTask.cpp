@@ -44,10 +44,16 @@ LoadBankFromDiskTask::LoadBankFromDiskTask(DefaultEventLoader &loader, std::stri
                                            API::Progress *prog, std::shared_ptr<std::mutex> ioMutex,
                                            Kernel::ThreadScheduler &scheduler, std::vector<int> framePeriodNumbers)
     : m_loader(loader), entry_name(std::move(entry_name)), entry_type(std::move(entry_type)), prog(prog),
-      scheduler(scheduler), m_loadError(false), m_oldNexusFileNames(oldNeXusFileNames), m_have_weight(false),
+      scheduler(scheduler), m_loadError(false), m_have_weight(false),
       m_framePeriodNumbers(std::move(framePeriodNumbers)) {
   setMutex(ioMutex);
   m_cost = static_cast<double>(numEvents);
+
+  // some field names changed over time
+  m_timeOfFlightFieldName = oldNeXusFileNames ? "event_time_of_flight" : "event_time_offset";
+  m_detIdFieldName = oldNeXusFileNames ? "event_pixel_id" : "event_id";
+
+  // detector id range
   m_min_id = std::numeric_limits<uint32_t>::max();
   m_max_id = 0;
 }
@@ -130,8 +136,7 @@ std::unique_ptr<std::vector<uint64_t>> LoadBankFromDiskTask::loadEventIndex(::Ne
 void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file, int64_t &start_event, int64_t &stop_event,
                                           const std::vector<uint64_t> &event_index) {
   // Get the list of pixel ID's
-  const std::string key = m_oldNexusFileNames ? "event_pixel_id" : "event_id";
-  file.openData(key);
+  file.openData(m_detIdFieldName);
 
   // By default, use all available indices
   start_event = event_index[0];
@@ -178,11 +183,9 @@ std::unique_ptr<std::vector<uint32_t>> LoadBankFromDiskTask::loadEventId(::NeXus
     m_loadError = true;
   }
 
-  const std::string key = m_oldNexusFileNames ? "event_pixel_id" : "event_id";
-
   if (!m_loadError) {
     Mantid::NeXus::NeXusIOHelper::readNexusSlab<uint32_t, Mantid::NeXus::NeXusIOHelper::PreventNarrowing>(
-        *(event_id.get()), file, key, m_loadStart, m_loadSize);
+        *(event_id.get()), file, m_detIdFieldName, m_loadStart, m_loadSize);
     file.closeData();
 
     // determine the range of pixel ids
@@ -220,8 +223,7 @@ std::unique_ptr<std::vector<uint32_t>> LoadBankFromDiskTask::loadEventId(::NeXus
  */
 std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   // Get the list of event_time_of_flight's
-  const std::string key = m_oldNexusFileNames ? "event_time_of_flight" : "event_time_offset";
-  file.openData(key);
+  file.openData(m_timeOfFlightFieldName);
 
   // This is the data size
   ::NeXus::Info id_info = file.getInfo();
@@ -247,7 +249,7 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(::NeXus::File 
   // template argument.
   // the memory is allocated earlier in the function
   Mantid::NeXus::NeXusIOHelper::readNexusSlab<float, Mantid::NeXus::NeXusIOHelper::AllowNarrowing>(
-      *(event_time_of_flight.get()), file, key, m_loadStart, m_loadSize);
+      *(event_time_of_flight.get()), file, m_timeOfFlightFieldName, m_loadStart, m_loadSize);
   std::string tof_unit;
   file.getAttr("units", tof_unit);
   file.closeData();

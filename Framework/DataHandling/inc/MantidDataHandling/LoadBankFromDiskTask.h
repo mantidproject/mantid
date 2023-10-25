@@ -60,8 +60,9 @@ private:
   std::shared_ptr<BankPulseTimes> thisBankPulseTimes;
   /// Did we get an error in loading
   bool m_loadError;
-  /// Old names in the file?
-  bool m_oldNexusFileNames;
+  // Old names in the file are different
+  std::string m_detIdFieldName;
+  std::string m_timeOfFlightFieldName;
   /// Index to load start at in the file
   std::vector<int64_t> m_loadStart;
   /// How much to load in the file
