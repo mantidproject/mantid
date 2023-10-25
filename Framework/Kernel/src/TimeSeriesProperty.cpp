@@ -84,7 +84,7 @@ TimeSeriesProperty<TYPE>::TimeSeriesProperty(const Property *const p)
 
 /**
  * Create a partial copy of this object according to a TimeROI. The partially cloned object
- * should include all time values enclosed by the ROI regions, each defined as [roi_start,roi_end],
+ * should include all time values enclosed by the ROI regions, each defined as [roi_begin,roi_end],
  * plus the values immediately before and after an ROI region, if available.
  * @param timeROI :: time region of interest, i.e. time boundaries used to determine which values should be included in
  * the copy.
@@ -278,7 +278,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::setName(const std::strin
 
 /**
  * Fill in the supplied vector of time series data according to the input TimeROI. Include all time values
- * within ROI regions, defined as [roi_start,roi_end], plus the values immediately before and after each ROI region,
+ * within ROI regions, defined as [roi_begin,roi_end], plus the values immediately before and after each ROI region,
  * if available.
  * @param timeROI :: time region of interest, i.e. time boundaries used to determine which values should be included in
  * the filtered data vector
@@ -385,7 +385,7 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
 }
 
 /**
- * Remove time values outside of TimeROI regions each defined as [roi_start,roi_stop].
+ * Remove time values outside of TimeROI regions each defined as [roi_begin,roi_end].
  * However, keep the values immediately before and after each ROI region, if available.
  * @param timeROI :: a series of time regions used to determine which values to remove or to keep
  */
