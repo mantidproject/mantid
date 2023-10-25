@@ -56,24 +56,6 @@ Mantid's Algorithm Profiler
 
 On Linux, the build can be configured to generate algorithm profiling information. See :doc:`AlgorithmProfiler <AlgorithmProfiler>` for details.
 
-Mantid's Timer class
---------------------
-
-`MantidKernel/Timer <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/Timer.h>`_ allows for very quick measurements of time of suspect code.
-It works on every operating system and does not require special compile flags.
-
-.. code:: C
-
-   Mantid::Kernel::Timer timer();
-   // do something expensive
-   std::cout << "did step 1 in " << timer << "\n";
-   // do something else expensive - the timer still accumulates
-   std::cout << "did step 2 after " << timer << " from start\n";
-
-   timer.reset(); // reset the timer to zero
-   // do something else
-   std::cout << "step 3 took " << timer << "\n";
-
 Other Profiling Tools
 ---------------------
 
@@ -109,7 +91,7 @@ Windows
 -  Start/stop recording of program using a button
 -  Not as detailed or flexible as callgrind
 
-Timing C++ code
----------------
+Timing in C++
+-------------
 
-Please refer to :doc:`Mantid Timers <Timers>` for an introduction to measuring execution time in the Mantid C++ code.
+Please refer to :doc:`Mantid Timers <Timers>` for an introduction to measuring execution time of the Mantid C++ code.

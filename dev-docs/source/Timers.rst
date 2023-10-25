@@ -1,7 +1,7 @@
 Mantid Timers
 =============
 
-This page provides an introduction to measuring execution time in the Mantid C++ code.
+This page provides an introduction to measuring execution time of the Mantid C++ code.
 
 .. contents:: Context
    :local:

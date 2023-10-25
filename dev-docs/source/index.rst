@@ -118,6 +118,7 @@ Tools
 
    ToolsOverview
    ProfilingOverview
+   Timers
    ProfilingWithPerf
    ProfilingWithValgrind
    FlowchartCreation
