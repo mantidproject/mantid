@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-//#define RUN_BIG_TEST 1
-
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/SpectrumInfo.h"
@@ -23,11 +21,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-
-#ifdef RUN_BIG_TEST
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
-#endif
 
 #include <random>
 
@@ -1235,113 +1228,6 @@ public:
     }
 
     return;
-  }
-
-  void test_tableSplitterHuge() {
-#ifdef RUN_BIG_TEST
-    g_log.notice("\ntest_tableSplitterHuge...");
-
-    // Load event workspace
-    std::string event_ws_filename{"REF_M_40380"};
-    std::string event_ws_name{"event_ws"};
-
-    Mantid::DataHandling::LoadEventNexus leLoader;
-    leLoader.initialize();
-    leLoader.setProperty("Filename", event_ws_filename);
-    leLoader.setProperty("OutputWorkspace", event_ws_name);
-    leLoader.execute();
-
-    auto event_ws = std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(event_ws_name));
-
-    std::cout << "Total number of events: " << event_ws->getNumberEvents() << "\n";
-
-    // Load splitter workspace
-    Mantid::DataHandling::LoadNexusProcessed loader;
-    // std::string splitter_ws_filename{"/SNS/users/r1e/for_Pete/splitter_table_25s.nxs"};
-    // std::string splitter_ws_filename{"/SNS/users/r1e/for_Pete/splitter_table_250s.nxs"};
-    std::string splitter_ws_filename{"/SNS/users/r1e/for_Pete/splitter_table.nxs"};
-    std::cout << "SPLITTER WORKSPACE FILE: " << splitter_ws_filename << std::endl;
-    std::string splitter_ws_name{"huge_ws"};
-
-    loader.initialize();
-    loader.setProperty("Filename", splitter_ws_filename);
-    loader.setProperty("OutputWorkspace", splitter_ws_name);
-    loader.execute();
-
-    auto splitter_ws = std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
-        AnalysisDataService::Instance().retrieve(splitter_ws_name));
-
-    FilterEvents filter;
-    filter.initialize();
-
-    // Set properties
-    filter.setProperty("InputWorkspace", event_ws);
-    filter.setProperty("OutputWorkspaceBaseName", "FilteredWS");
-    filter.setProperty("SplitterWorkspace", splitter_ws);
-    filter.setProperty("RelativeTime", true);
-    filter.setProperty("GroupWorkspaces", true);
-    filter.setProperty("FilterByPulseTime", false);
-    filter.setProperty("OutputWorkspaceIndexedFrom1", false);
-    filter.setProperty("CorrectionToSample", "None");
-    filter.setProperty("SpectrumWithoutDetector", "Skip");
-    filter.setProperty("SplitSampleLogs", true);
-    filter.setProperty("ExcludeSpecifiedLogs", true);
-    filter.setProperty("OutputTOFCorrectionWorkspace", "_tmp");
-    filter.setProperty("OutputUnfilteredEvents", true);
-    filter.execute();
-
-    /*
-    // For 25s file
-    std::map<std::string, size_t> output_workspaces{{"FilteredWS_unfiltered", 1278707},
-                                                    {"FilteredWS_on_off", 2028},
-                                                    {"FilteredWS_off_off", 2184},
-                                                    {"FilteredWS_off_on", 0},
-                                                    {"FilteredWS_on_on", 0}};
-    */
-
-    /*
-    // For 250s file
-   std::map<std::string, size_t> output_workspaces{{"FilteredWS_unfiltered", 1240593},
-                                                   {"FilteredWS_on_off", 20909},
-                                                   {"FilteredWS_off_off", 21417},
-                                                   {"FilteredWS_off_on", 0},
-                                                   {"FilteredWS_on_on", 0}};
-    */
-
-    /*
-    // For 3000s file
-    std::map<std::string, size_t> output_workspaces{{"FilteredWS_unfiltered", 774366},
-                                                    {"FilteredWS_on_off", 251826},
-                                                    {"FilteredWS_off_off", 256727},
-                                                    {"FilteredWS_off_on", 1}, // check
-                                                    {"FilteredWS_on_on", 2}}; // check
-    */
-
-    // For the full file
-    std::map<std::string, size_t> output_workspaces{{"FilteredWS_unfiltered", 0},
-                                                    {"FilteredWS_on_off", 635929},
-                                                    {"FilteredWS_off_off", 646987},
-                                                    {"FilteredWS_off_on", 1},
-                                                    {"FilteredWS_on_on", 2}};
-
-    size_t total_events{0};
-    for (auto output_ws : output_workspaces) {
-      if (AnalysisDataService::Instance().doesExist(output_ws.first)) {
-        auto partial_event_ws =
-            std::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(output_ws.first));
-        size_t number_of_events = partial_event_ws->getNumberEvents();
-        std::cout << "Partial workspace \"" << output_ws.first << "\":" << number_of_events << " events\n";
-        TS_ASSERT_EQUALS(number_of_events, output_ws.second);
-        total_events += number_of_events;
-      } else
-        std::cout << "Workspace \"" << output_ws.first << "\" not found."
-                  << "\n";
-    }
-    std::cout << "Total number of events in all partial workspaces: " << total_events << "\n";
-    TS_ASSERT_EQUALS(total_events, event_ws->getNumberEvents()); // all should be accounted for
-
-    // clean-up?
-#endif
   }
 
   /** test for the case that the input workspace name is same as output base

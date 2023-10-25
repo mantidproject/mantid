@@ -114,7 +114,6 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
 
   int target_index{NO_TARGET};
   int max_target_index{0};
-  size_t number_of_zero_width_intervals(0);
 
   g_log.information() << "Creating a time splitter from a table workspace. Total number of rows: " << tws->rowCount()
                       << "\n";
@@ -127,11 +126,6 @@ TimeSplitter::TimeSplitter(const TableWorkspace_sptr &tws, const DateAndTime &of
     // by design, the times in the table must be in seconds
     const double timeStart_s{tws->cell_cast<double>(row, COL_START)};
     const double timeStop_s{tws->cell_cast<double>(row, COL_STOP)};
-
-    if (timeStart_s == timeStop_s) {
-      number_of_zero_width_intervals++;
-      continue;
-    }
 
     if (timeStart_s < 0 || timeStop_s < 0) {
       throw std::runtime_error("All times in TableWorkspace must be >= 0 to construct TimeSplitter.");
