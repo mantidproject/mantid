@@ -127,7 +127,7 @@ Class CPUTimer
 measures both CPU time and wall-clock time. The CPU time measurement utilizes
 `std::clock() <https://en.cppreference.com/w/cpp/chrono/c/clock>`__ function. The wall-clock time measurement uses :ref:`Timer <Timer>` class.
 The output includes the wall-clock time and the ratio of the CPU time to the wall-clock time. Note, since CPU time and wall-clock time are measured
-with different accuracy, it is possible to have a ratio greater than 0.
+with different accuracy, it is possible to have a ratio greater than 1.
 A code example is given below.
 
 .. code-block:: cpp
