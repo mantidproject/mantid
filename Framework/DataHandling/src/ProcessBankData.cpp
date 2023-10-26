@@ -56,6 +56,38 @@ inline size_t getPulseIndex(const size_t event_index, const size_t last_pulse_in
 }
 } // namespace
 
+/*
+ * Pre-counting the events per pixel ID allows for allocating the proper amount of memory in each output event vector
+ */
+void ProcessBankData::preCountAndReserveMem() {
+  // ---- Pre-counting events per pixel ID ----
+  std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
+  for (size_t i = 0; i < numEvents; i++) {
+    const auto thisId = static_cast<detid_t>((*event_id)[i]);
+    if (!(thisId < m_min_id || thisId > m_max_id)) // or allows for skipping out early
+      counts[thisId - m_min_id]++;
+  }
+
+  // Now we pre-allocate (reserve) the vectors of events in each pixel
+  // counted
+  auto &outputWS = m_loader.m_ws;
+  const auto *alg = m_loader.alg;
+  const size_t numEventLists = outputWS.getNumberHistograms();
+  for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
+    const auto pixelIndex = pixID - m_min_id; // index from zero
+    if (counts[pixelIndex] > 0) {
+      const size_t wi = getWorkspaceIndexFromPixelID(pixID);
+      // Find the workspace index corresponding to that pixel ID
+      // Allocate it
+      if (wi < numEventLists) {
+        outputWS.reserveEventListAt(wi, counts[pixelIndex]);
+      }
+      if ((wi % 20 == 0) && alg->getCancel())
+        return; // User cancellation
+    }
+  }
+}
+
 /** Run the data processing
  * FIXME/TODO - split run() into readable methods
  */
@@ -69,32 +101,10 @@ void ProcessBankData::run() {
 
   prog->report(entry_name + ": precount");
   // ---- Pre-counting events per pixel ID ----
-  auto &outputWS = m_loader.m_ws;
-  auto *alg = m_loader.alg;
   if (m_loader.precount) {
-
-    std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
-    for (size_t i = 0; i < numEvents; i++) {
-      const auto thisId = detid_t((*event_id)[i]);
-      if (thisId >= m_min_id && thisId <= m_max_id)
-        counts[thisId - m_min_id]++;
-    }
-
-    // Now we pre-allocate (reserve) the vectors of events in each pixel
-    // counted
-    const size_t numEventLists = outputWS.getNumberHistograms();
-    for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
-      if (counts[pixID - m_min_id] > 0) {
-        size_t wi = getWorkspaceIndexFromPixelID(pixID);
-        // Find the workspace index corresponding to that pixel ID
-        // Allocate it
-        if (wi < numEventLists) {
-          outputWS.reserveEventListAt(wi, counts[pixID - m_min_id]);
-        }
-        if (alg->getCancel())
-          return; // User cancellation
-      }
-    }
+    this->preCountAndReserveMem();
+    if (m_loader.alg->getCancel())
+      return; // User cancellation
   }
 
   // Default pulse time (if none are found)
@@ -107,12 +117,13 @@ void ProcessBankData::run() {
   const auto NUM_PULSES = thisBankPulseTimes->pulseTimes.size();
   prog->report(entry_name + ": filling events");
 
+  auto *alg = m_loader.alg;
+
   // Will we need to compress?
   const bool compress = (alg->compressTolerance >= 0);
 
   // Which detector IDs were touched?
-  std::vector<bool> usedDetIds;
-  usedDetIds.assign(m_max_id - m_min_id + 1, false);
+  std::vector<bool> usedDetIds(m_max_id - m_min_id + 1, false);
 
   const double TOF_MIN = alg->filter_tof_min;
   const double TOF_MAX = alg->filter_tof_max;
@@ -144,7 +155,7 @@ void ProcessBankData::run() {
       // We cached a pointer to the vector<tofEvent> -> so retrieve it and add
       // the event
       const detid_t &detId = (*event_id)[eventIndex];
-      if (detId >= m_min_id && detId <= m_max_id) {
+      if ((detId - m_min_id) * (detId - m_max_id) <= 0) { // detId >= m_min_id && detId <= m_max_id) {
         // Create the tofevent
         const auto tof = static_cast<double>((*event_time_of_flight)[eventIndex]);
         // this is fancy for check if value is in range
@@ -184,18 +195,21 @@ void ProcessBankData::run() {
             badTofs++;
 
           // Track all the touched wi
-          usedDetIds[detId - m_min_id] = true;
+          const auto detidIndex = detId - m_min_id;
+          if (!usedDetIds[detidIndex])
+            usedDetIds[detidIndex] = true;
         } // valid time-of-flight
 
       } // valid detector IDs
     }   // for events in pulse
-    // check if cancelled after each pulse
-    if (alg->getCancel())
+    // check if cancelled after each 100s of pulses (assumes 60Hz)
+    if ((pulseIndex % 6000 == 0) && alg->getCancel())
       return;
   } // for pulses
 
   //------------ Compress Events (or set sort order) ------------------
   // Do it on all the detector IDs we touched
+  auto &outputWS = m_loader.m_ws;
   const size_t numEventLists = outputWS.getNumberHistograms();
   for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
     if (usedDetIds[pixID - m_min_id]) {
