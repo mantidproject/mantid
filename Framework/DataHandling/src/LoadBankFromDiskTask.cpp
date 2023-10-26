@@ -443,10 +443,10 @@ void LoadBankFromDiskTask::run() {
   const auto startAt = static_cast<size_t>(m_loadStart[0]);
 
   // convert things to shared_arrays to share between tasks
-  std::shared_ptr<std::vector<uint32_t>> event_id_shrd(event_id.release());
-  std::shared_ptr<std::vector<float>> event_time_of_flight_shrd(event_time_of_flight.release());
-  std::shared_ptr<std::vector<float>> event_weight_shrd(event_weight.release());
-  std::shared_ptr<std::vector<uint64_t>> event_index_shrd(event_index.release());
+  std::shared_ptr<std::vector<uint32_t>> event_id_shrd(std::move(event_id));
+  std::shared_ptr<std::vector<float>> event_time_of_flight_shrd(std::move(event_time_of_flight));
+  std::shared_ptr<std::vector<float>> event_weight_shrd(std::move(event_weight));
+  std::shared_ptr<std::vector<uint64_t>> event_index_shrd(std::move(event_index));
 
   std::shared_ptr<Task> newTask1 = std::make_shared<ProcessBankData>(
       m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
