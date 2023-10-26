@@ -82,7 +82,8 @@ void IETPresenter::setInstrumentDefault() {
   if (validateInstrumentDetails()) {
     InstrumentData instrumentDetails = getInstrumentData();
     m_view->setInstrumentDefault(instrumentDetails);
-    bool const irisOrOsiris = instrumentDetails.getInstrument() == "OSIRIS" || instrumentDetails.getInstrument() == "IRIS";
+    bool const irisOrOsiris =
+        instrumentDetails.getInstrument() == "OSIRIS" || instrumentDetails.getInstrument() == "IRIS";
     m_view->setBackgroundSectionVisible(!irisOrOsiris);
     m_view->setPlotTimeSectionVisible(!irisOrOsiris);
     m_view->setPlottingOptionsVisible(!irisOrOsiris);
