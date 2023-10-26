@@ -405,23 +405,6 @@ void TimeROI::replaceROI(const std::vector<Types::Core::DateAndTime> &roi) {
 }
 
 /**
- * Updates the TimeROI values with the union with another TimeROI.
- * See https://en.wikipedia.org/wiki/Union_(set_theory) for more details
- *
- * Union with an empty TimeROI will do nothing.
- */
-void TimeROI::update_union(const TimeROI &other) {
-  // exit early if the two TimeROI are identical
-  if (*this == other)
-    return;
-
-  // add all the intervals from the other
-  for (const auto &interval : other.toTimeIntervals()) {
-    this->addROI(interval.start(), interval.stop());
-  }
-}
-
-/**
  * Updates the TimeROI values with the intersection with another TimeROI.
  * See https://en.wikipedia.org/wiki/Intersection for the intersection theory.
  * The algorithm is adapted from https://www.geeksforgeeks.org/find-intersection-of-intervals-given-by-two-lists/
@@ -465,11 +448,27 @@ void TimeROI::update_intersection(const TimeROI &other) {
       std::advance(it2, 2);
   }
 
-  // if the TimeROI became empty it is because there is no overlap reset the value to INVALID_ROI
   if (output.empty())
     output.replaceROI(USE_NONE);
 
   m_roi = std::move(output.m_roi);
+}
+
+/**
+ * Updates the TimeROI values with the union with another TimeROI.
+ * See https://en.wikipedia.org/wiki/Union_(set_theory) for more details
+ *
+ * Union with an empty TimeROI will do nothing.
+ */
+void TimeROI::update_union(const TimeROI &other) {
+  // exit early if the two TimeROI are identical
+  if (*this == other)
+    return;
+
+  // add all the intervals from the other
+  for (const auto &interval : other.toTimeIntervals()) {
+    this->addROI(interval.start(), interval.stop());
+  }
 }
 
 /**
