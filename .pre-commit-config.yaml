@@ -24,14 +24,15 @@ repos:
         exclude: conda/recipes/mantid/meta.yaml|conda/recipes/mantidqt/meta.yaml|conda/recipes/mantiddocs/meta.yaml|conda/recipes/mantidworkbench/meta.yaml
 
   - repo: https://github.com/mantidproject/pre-commit-hooks.git
-    rev: 82e4b72a17c058d99f510771e3f531fb98c3fe73
+    rev: 5e10ad00eb90592103cb9903b3f9e76b06066a77
     hooks:
       - id: clang-format
         exclude: Testing/Tools/cxxtest|tools
       - id: cmake-missing-pytest-files
         # Exclude sphinx / template file
         exclude: test_doctest.py|python_export_maker.py
-
+      - id: mantid-release-note-check
+        files: docs\/source\/release\/v\d\.\d\.\d\/.*\/.*\.rst
 
   - repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.13
