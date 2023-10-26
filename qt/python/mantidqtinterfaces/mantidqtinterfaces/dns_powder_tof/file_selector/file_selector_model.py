@@ -26,7 +26,7 @@ from mantidqtinterfaces.dns_powder_tof.helpers.file_processing import (
 class DNSFileSelectorModel(DNSObsModel):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.update_progress = parent.update_progress
+        self._update_progress = parent.update_progress
         # Qt tree models
         self.sample_data_tree_model = DNSTreeModel()
         self.standard_data_tree_model = DNSTreeModel()
@@ -77,7 +77,7 @@ class DNSFileSelectorModel(DNSObsModel):
         self.loading_canceled = False
         self._clear_scans_if_not_sequential(watcher)
         for i, filename in enumerate(datafiles):
-            self.update_progress(i, len(datafiles))
+            self._update_progress(i, len(datafiles))
             if self.loading_canceled:
                 break
             dns_file = self._load_file_from_cache_or_new(loaded, filename, data_path, pol_table)
@@ -87,6 +87,7 @@ class DNSFileSelectorModel(DNSObsModel):
         self._add_number_of_files_per_scan()
         if datafiles:
             self._save_filelist(data_path)
+            self._update_progress(len(datafiles), len(datafiles))
 
     def read_standard(self, standard_path, polarisation_table):
         """

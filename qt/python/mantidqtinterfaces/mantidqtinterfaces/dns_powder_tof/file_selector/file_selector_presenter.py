@@ -159,9 +159,8 @@ class DNSFileSelectorPresenter(DNSObserver):
 
     # model can access this function
     # have no idea how to do this otherwise
-    def update_progress(self, i, end):
-        if i % 100 == 0 or i >= end - 1:
-            self.view.set_progress(i + 1)
+    def update_progress(self, iteration, iteration_max):
+        self.view.set_progress(iteration, iteration_max)
 
     def _right_click(self, index):
         """
@@ -235,7 +234,12 @@ class DNSFileSelectorPresenter(DNSObserver):
     def _format_view(self):
         self.num_columns = self.model.get_active_model_column_count()
         self.view.set_first_column_spanned(self.model.get_scan_range())
-        self.view.expand_all()
+        # expand all only in the case when the total number of files
+        # to display is less than 151 (more files to expand might take
+        # significant time to process)
+        file_count = self.model.get_number_of_files_in_treeview()
+        if file_count <= 150:
+            self.view.expand_all()
         self.view.adjust_treeview_columns_width(self.num_columns)
 
     def _sample_data_clicked(self):
