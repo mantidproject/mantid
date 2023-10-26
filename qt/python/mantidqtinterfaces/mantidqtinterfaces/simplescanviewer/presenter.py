@@ -98,7 +98,7 @@ class SimpleScanViewerPresenter:
         """
         Open the help window for this interface.
         """
-        show_interface_help("SimpleScanViewer", self.assistant_process, area="ILL")
+        show_interface_help("Simple Scan Viewer", self.assistant_process, area="ILL")
 
     def on_file_selected(self, file_path: str):
         """

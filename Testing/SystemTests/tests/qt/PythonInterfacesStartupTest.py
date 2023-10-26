@@ -4,11 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from itertools import chain
 import os
 import systemtesting
 
-from mantid.kernel import ConfigService
 from mantidqt.utils.qt.testing import get_application
+from workbench.utils.gather_interfaces import gather_python_interface_names
 
 from qtpy.QtCore import QCoreApplication, QSettings
 
@@ -39,7 +40,7 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
         import mantidqtinterfaces
 
         self._interface_directory = os.path.dirname(mantidqtinterfaces.__file__)
-        self._interface_scripts = [interface.split("/")[1] for interface in ConfigService.getString("mantidqt.python_interfaces").split()]
+        self._interface_scripts = set(chain.from_iterable(gather_python_interface_names().values()))
 
     def runTest(self):
         if len(self._interface_scripts) == 0:

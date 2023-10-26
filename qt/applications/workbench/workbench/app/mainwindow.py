@@ -34,13 +34,13 @@ from mantidqt.widgets.scriptrepository import ScriptRepositoryView
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 from mantidqt.utils.qt import add_actions, create_action, widget_updates_disabled
 from mantidqt.project.project import Project
-from mantidqt.usersubwindowfactory import UserSubWindowFactory
 
 from workbench.config import CONF
 from workbench.plotting.globalfiguremanager import GlobalFigureManager
 from workbench.utils.windowfinder import find_all_windows_that_are_savable
 from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads
 from workbench.utils.io import input_qinputdialog
+from workbench.utils.gather_interfaces import gather_interface_names, get_registers_to_run, get_interface_dir
 from workbench.projectrecovery.projectrecovery import ProjectRecovery
 from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
@@ -62,16 +62,6 @@ def _get_splash_image():
     return QPixmap(":/images/MantidSplashScreen_4k.png").scaled(
         int(width * splash_screen_scaling), int(height * splash_screen_scaling), Qt.KeepAspectRatio, Qt.SmoothTransformation
     )
-
-
-def _get_interface_dir():
-    """
-    Returns the path to the directory containing the mantidqt interfaces launch scripts
-    This is the path to the mantidqtinterfaces package
-    """
-    import mantidqtinterfaces
-
-    return os.path.dirname(mantidqtinterfaces.__file__)
 
 
 SPLASH = QSplashScreen(_get_splash_image(), Qt.WindowStaysOnTopHint)
@@ -383,10 +373,9 @@ class MainWindow(QMainWindow):
     def populate_interfaces_menu(self):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
         self.interfaces_menu.clear()
-        interface_dir = _get_interface_dir()
-
-        self.interface_list, registers_to_run = self._discover_python_interfaces(interface_dir)
-        self._discover_cpp_interfaces(self.interface_list)
+        interface_dir = get_interface_dir()
+        self.interface_list = gather_interface_names(interface_dir)
+        registers_to_run = get_registers_to_run()
         hidden_interfaces = ConfigService["interfaces.categories.hidden"].split(";")
 
         keys = list(self.interface_list.keys())
@@ -424,44 +413,6 @@ class MainWindow(QMainWindow):
             logger.warning(warnings.formatwarning(*args, **kwargs))
 
         warnings.showwarning = to_mantid_warning
-
-    def _discover_python_interfaces(self, interface_dir):
-        """Return a dictionary mapping a category to a set of named Python interfaces"""
-        items = ConfigService["mantidqt.python_interfaces"].split()
-        try:
-            register_items = ConfigService["mantidqt.python_interfaces_io_registry"].split()
-        except KeyError:
-            register_items = []
-        # detect the python interfaces
-        interfaces = {}
-        registers_to_run = {}
-        for item in items:
-            key, scriptname = item.split("/")
-            reg_name = scriptname[:-3] + "_register.py"
-            if reg_name in register_items and os.path.exists(os.path.join(interface_dir, reg_name)):
-                registers_to_run.setdefault(key, []).append(reg_name)
-            if not os.path.exists(os.path.join(interface_dir, scriptname)):
-                logger.warning('Failed to find script "{}" in "{}"'.format(scriptname, interface_dir))
-                continue
-            interfaces.setdefault(key, []).append(scriptname)
-
-        return interfaces, registers_to_run
-
-    def _discover_cpp_interfaces(self, interfaces):
-        """Return a dictionary mapping a category to a set of named C++ interfaces"""
-        cpp_interface_factory = UserSubWindowFactory.Instance()
-        interface_names = cpp_interface_factory.keys()
-        for name in interface_names:
-            categories = cpp_interface_factory.categories(name)
-            if len(categories) == 0:
-                categories = ["General"]
-            for category in categories:
-                if category in interfaces.keys():
-                    interfaces[category].append(name)
-                else:
-                    interfaces[category] = [name]
-
-        return interfaces
 
     def add_dockwidget(self, plugin):
         """Create a dockwidget around a plugin and add the dock to window"""
