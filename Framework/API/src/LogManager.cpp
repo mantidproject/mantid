@@ -282,7 +282,7 @@ void LogManager::filterByTime(const Types::Core::DateAndTime start, const Types:
 /**
  * Create a partial copy of this object such that every time series property is cloned according to the input TimeROI.
  * A partially cloned time series property should include all time values enclosed by the ROI regions,
- * each defined as [roi_start,roi_end), plus the values immediately before and after an ROI region, if available.
+ * each defined as [roi_begin,roi_end], plus the values immediately before and after an ROI region, if available.
  * Properties that are not time series will be cloned with no changes.
  * @param timeROI :: a series of time regions used to determine which time series values should be included in the copy.
  */
@@ -313,7 +313,7 @@ void LogManager::copyAndFilterProperties(const LogManager &other, const Kernel::
 
 /**
  * For time series properties, remove time values outside of this object's TimeROI.
- * Each TimeROI region is defined as [roi_start,roi_stop). However, keep the values
+ * Each TimeROI region is defined as [roi_begin,roi_end]. However, keep the values
  * immediately before and after each timeROI region, if available.
  */
 void LogManager::removeDataOutsideTimeROI() {

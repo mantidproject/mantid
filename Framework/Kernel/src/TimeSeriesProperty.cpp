@@ -24,25 +24,21 @@ namespace {
 /// static Logger definition
 Logger g_log("TimeSeriesProperty");
 
-/*
- * Returns true if all values in the TimeSeriesProperty are the same.
- * This assumes there is at least two values.
- * This is written to return early in case there are any non-matches.
+/**
+ * Check if all values in the input time vector are the same.
+ * This assumes there are at least two values.
+ * @param values :: a vector of time values.
+ * @return :: false if there is at least one non-match, true otherwise.
  */
-template <typename TYPE>
-bool allValuesAreSame(const std::vector<TimeValueUnit<TYPE>> &values, const std::string &name) {
-  const auto &first_value = values.front().value();
+template <typename TYPE> bool allValuesAreSame(const std::vector<TimeValueUnit<TYPE>> &values) {
   const std::size_t num_values = values.size();
+  assert(num_values > 1);
+  const auto &first_value = values.front().value();
   for (std::size_t i = 1; i < num_values; ++i) {
     if (first_value != values[i].value())
       return false;
   }
-
-  // getting this far means they are all equal
-  // but p-charge should never report back that the values are all the same
-  // because that would remove values inappropriately.
-  // This will almost never be the case for a real measurement.
-  return name != "proton_charge";
+  return true;
 }
 } // namespace
 
@@ -88,7 +84,7 @@ TimeSeriesProperty<TYPE>::TimeSeriesProperty(const Property *const p)
 
 /**
  * Create a partial copy of this object according to a TimeROI. The partially cloned object
- * should include all time values enclosed by the ROI regions, each defined as [roi_start,roi_end),
+ * should include all time values enclosed by the ROI regions, each defined as [roi_begin,roi_end],
  * plus the values immediately before and after an ROI region, if available.
  * @param timeROI :: time region of interest, i.e. time boundaries used to determine which values should be included in
  * the copy.
@@ -282,7 +278,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::setName(const std::strin
 
 /**
  * Fill in the supplied vector of time series data according to the input TimeROI. Include all time values
- * within ROI regions, defined as [roi_start,roi_end], plus the values immediately before and after each ROI region,
+ * within ROI regions, defined as [roi_begin,roi_end], plus the values immediately before and after each ROI region,
  * if available.
  * @param timeROI :: time region of interest, i.e. time boundaries used to determine which values should be included in
  * the filtered data vector
@@ -293,24 +289,41 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
                                                   std::vector<TimeValueUnit<TYPE>> &filteredData) const {
   filteredData.clear();
 
-  // these special cases can skip the complicated logic
+  // Expediently treat a few special cases
+
+  // Nothing to copy
   if (m_values.empty()) {
-    // nothing to copy
     return;
-  } else if (m_values.size() == 1 || allValuesAreSame(m_values, this->name())) {
-    // copy the first value
-    // if they are all the same, none of the others matter
-    filteredData.push_back(m_values.front());
-    return;
-  } else if (timeROI.useAll()) {
-    // copy everything
-    std::copy(m_values.cbegin(), m_values.cend(), std::back_inserter(filteredData));
-    return;
-  } else if (timeROI.useNone()) {
-    // copy the first value only
+  }
+
+  // Copy the only value
+  if (m_values.size() == 1) {
     filteredData.push_back(m_values.front());
     return;
   }
+
+  // Copy the first value only, if all values are the same
+  // Exclude "proton_charge" logs from consideration, because in a real measurement those values can't be the same,
+  // Removing some of them just because they are equal will cause wrong total proton charge results.
+  if (allValuesAreSame(m_values) && this->name() != "proton_charge") {
+    filteredData.push_back(m_values.front());
+    return;
+  }
+
+  // Copy everything
+  if (timeROI.useAll()) {
+    std::copy(m_values.cbegin(), m_values.cend(), std::back_inserter(filteredData));
+    return;
+  }
+
+  // Copy the first value only
+  if (timeROI.useNone()) {
+    filteredData.push_back(m_values.front());
+    return;
+  }
+
+  // Now treat the general case
+
   // Get all ROI time boundaries. Every other value is start/stop of an ROI "use" region.
   const std::vector<Types::Core::DateAndTime> &roiTimes = timeROI.getAllTimes();
   auto itROI = roiTimes.cbegin();
@@ -372,7 +385,7 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
 }
 
 /**
- * Remove time values outside of TimeROI regions each defined as [roi_start,roi_stop).
+ * Remove time values outside of TimeROI regions each defined as [roi_begin,roi_end].
  * However, keep the values immediately before and after each ROI region, if available.
  * @param timeROI :: a series of time regions used to determine which values to remove or to keep
  */
