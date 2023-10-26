@@ -104,32 +104,6 @@ class TestGSAS2Presenter(unittest.TestCase):
         self.view.get_load_parameters.return_value = ["inst", "phase", "data"]
         self.assertEqual(self.presenter.get_limits_if_same_load_parameters(), [18000, 50000])
 
-    @patch("PyQt5.QtWidgets.QMessageBox.warning")
-    def test_validate_when_rb_number_is_invalid(self, mock_qmessage_box_warning):
-        self.presenter.rb_num = r" invalidRBNumber$# "
-        self.presenter.rb_number_validator = mock.MagicMock()
-        self.presenter.rb_number_validator.validate_rb_number.return_value = False
-        self.assertFalse(self.presenter._validate())
-        mock_qmessage_box_warning.assert_called_once_with(
-            unittest.mock.ANY, "Engineering Diffraction - Error", "Please enter a valid value for the RB Number"
-        )
-
-    @patch("PyQt5.QtWidgets.QMessageBox.warning")
-    def test_validate_when_rb_number_is_valid(self, mock_qmessage_box_warning):
-        self.presenter.rb_num = r"validRBNumber"
-        self.presenter.rb_number_validator = mock.MagicMock()
-        self.presenter.rb_number_validator.validate_rb_number.return_value = True
-        self.assertTrue(self.presenter._validate())
-        mock_qmessage_box_warning.assert_not_called()
-
-    @patch("PyQt5.QtWidgets.QMessageBox.warning")
-    def test_validate_when_rb_number_is_not_set(self, mock_qmessage_box_warning):
-        self.presenter.rb_num = r""
-        self.presenter.rb_number_validator = mock.MagicMock()
-        self.presenter.rb_number_validator.validate_rb_number.return_value = True
-        self.assertTrue(self.presenter._validate())
-        mock_qmessage_box_warning.assert_not_called()
-
 
 if __name__ == "__main__":
     unittest.main()

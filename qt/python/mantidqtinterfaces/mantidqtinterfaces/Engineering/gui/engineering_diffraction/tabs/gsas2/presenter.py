@@ -7,8 +7,6 @@
 
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.fitting_ads_observer import FittingADSObserver
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.rb_number_validator import RBNumberValidator
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import create_error_message
 
 
 class GSAS2Presenter(object):
@@ -17,7 +15,6 @@ class GSAS2Presenter(object):
         self.view = view
 
         self.rb_num = None
-        self.rb_number_validator = RBNumberValidator()
         self.instrument = "ENGINX"
         self.current_plot_index = None
         self.latest_load_parameters = None
@@ -31,16 +28,7 @@ class GSAS2Presenter(object):
         self.view.set_refine_clicked(self.on_refine_clicked)
         self.view.number_output_histograms_combobox.currentTextChanged.connect(self.on_plot_index_changed)
 
-    def _validate(self):
-        if self.rb_num:
-            if not self.rb_number_validator.validate_rb_number(self.rb_num):
-                create_error_message(self.view, "Please enter a valid value for the RB Number")
-                return False
-        return True
-
     def on_refine_clicked(self):
-        if not self._validate():
-            return
         self.clear_plot()
         load_params = self.view.get_load_parameters()
         project_name = self.view.get_project_name()

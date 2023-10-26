@@ -1,1 +1,0 @@
-- Validate the value present in the RB Number box in Engineering Diffraction GUI prior to creating the custom directory structure to write the artifacts in Calibration, Focus, and GSAS II tabs.
