@@ -58,8 +58,8 @@ class SymmetriseMDHisto(PythonAlgorithm):
             if not SpaceGroupFactory.isSubscribedSymbol(spgr_sym):
                 issues["Spacegroup"] = "Not a valid spacegroup symbol."
         elif ptgr_sym and not spgr_sym:
-            if not PointGroupFactory.isSubscribedSymbol(ptgr_sym):
-                issues["Spacegroup"] = "Not a valid spacegroup symbol."
+            if not PointGroupFactory.isSubscribed(ptgr_sym):
+                issues["Pointgroup"] = "Not a valid spacegroup symbol."
         else:
             issues["Spacegroup"] = "Please only provide one of Spacegroup or Pointgroup."
         # check workspace has same extent and binning along all axes
@@ -93,7 +93,6 @@ class SymmetriseMDHisto(PythonAlgorithm):
         npix = np.zeros(signal.shape, dtype=int)
         inonzero = abs(signal) > 1e-10
         npix[inonzero] = 1
-
         for sym_op in laue_ptgr.getSymmetryOperations():
             transformed = sym_op.transformHKL([1, 2, 3])
             ws_out = self.child_alg("PermuteMD", InputWorkspace=ws, Axes=[int(abs(iax)) - 1 for iax in transformed])
@@ -107,7 +106,6 @@ class SymmetriseMDHisto(PythonAlgorithm):
         # set symmetrised signal in ws
         inonzero = abs(npix) > 0
         signal[inonzero] = signal[inonzero] / npix[inonzero]
-
         ws_out.setSignalArray(signal)
 
         # assign output
