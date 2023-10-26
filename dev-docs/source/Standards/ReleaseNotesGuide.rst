@@ -217,6 +217,16 @@ This is the basic directory structure that is available to you for release notes
 	  + New features
 	  + Bugfixes
 
+* Inelastic (Main Heading)
+
+  - New features
+  - Bugfixes
+
+  - Algorithms (Sub-heading)
+
+          + New features
+          + Bugfixes
+
 * Mantid Workbench (Main Heading)
 
   - New features

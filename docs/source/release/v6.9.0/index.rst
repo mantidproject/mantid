@@ -71,6 +71,8 @@ Changes
 
   - :doc:`Indirect Geometry <indirect_geometry>`
 
+  - :doc:`Inelastic <inelastic>`
+
 Full Change Listings
 --------------------
 
