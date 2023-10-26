@@ -178,6 +178,7 @@ Testing
    DebuggingUnitTests
    UnitTestGoodPractice
    ReviewingAPullRequest
+   Gatekeeping
    WritingPerformanceTests
    SystemTests
    DataFilesForTesting
@@ -195,6 +196,9 @@ Testing
 
 :doc:`ReviewingAPullRequest`
    What to do when reviewing an individual contribution to mantid.
+
+:doc:`Gatekeeping`
+   Things to consider when merging a pull request to the main production branch.
 
 :doc:`WritingPerformanceTests`
    A walk through of how to write a performance test.
