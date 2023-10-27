@@ -92,19 +92,26 @@ LoadMuonStrategy::getLoadedDetectorsFromWorkspace(const DataObjects::Workspace2D
  * @param grouping :: Vector containing corresponding grouping
  * @return Detector Grouping Table create using the data
  */
-DataObjects::TableWorkspace_sptr
+std::optional<DataObjects::TableWorkspace_sptr>
 LoadMuonStrategy::createDetectorGroupingTable(const std::vector<detid_t> &detectorsLoaded,
-                                              const std::vector<detid_t> &grouping) const {
-  auto detectorGroupingTable = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
-      API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
-  detectorGroupingTable->addColumn("vector_int", "Detectors");
+                                              const std::optional<std::vector<detid_t>> &grouping) const {
+  if (!grouping) {
+    return std::nullopt;
+  }
+  auto groupingIDs = *grouping;
+  if (detectorsLoaded.size() != groupingIDs.size()) {
+    return std::nullopt;
+  }
 
   std::map<detid_t, std::vector<detid_t>> groupingMap;
   for (size_t i = 0; i < detectorsLoaded.size(); ++i) {
     // Add detector ID to the list of group detectors. Detector ID is always
-    groupingMap[grouping[i]].emplace_back(detectorsLoaded[i]);
+    groupingMap[groupingIDs[i]].emplace_back(detectorsLoaded[i]);
   }
 
+  auto detectorGroupingTable = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+      API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
+  detectorGroupingTable->addColumn("vector_int", "Detectors");
   for (auto &group : groupingMap) {
     if (group.first != 0) { // Skip 0 group
       API::TableRow newRow = detectorGroupingTable->appendRow();
