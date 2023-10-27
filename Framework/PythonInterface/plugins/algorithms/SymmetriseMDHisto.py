@@ -77,7 +77,10 @@ class SymmetriseMDHisto(PythonAlgorithm):
         for idim in range(1, ws.getNumDims()):
             if not all(np.isclose(_get_dim_extents_and_nbins(ws, idim), [lo, hi, nbins])):
                 issues["InputWorkspace"] = "Workspace must have same binning along all dimensions."
-
+        # check errors exist if WeightedAverage==True (would produce all NaNs in signal)
+        if self.getProperty("WeightedAverage").value:
+            if not ws.getErrorArraySquared().any():
+                issues["WeightedAverage"] = "Cannot perform weighted average on data with no errors."
         return issues
 
     def PyExec(self):
