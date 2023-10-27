@@ -61,7 +61,7 @@ public:
   void setNXSPEVisible(bool visible);
   void setFoldMultipleFramesVisible(bool visible);
   void setOutputInCm1Visible(bool visible);
-  void setGrouptOutputCheckBoxVisible(bool visible);
+  void setGroupOutputCheckBoxVisible(bool visible);
   void setGroupOutputDropdownVisible(bool visible);
 
   void setDetailedBalance(double detailedBalance);

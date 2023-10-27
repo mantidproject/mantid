@@ -167,7 +167,7 @@ void IETView::setFoldMultipleFramesVisible(bool visible) { m_uiForm.ckFold->setV
 
 void IETView::setOutputInCm1Visible(bool visible) { m_uiForm.ckCm1Units->setVisible(visible); }
 
-void IETView::setGrouptOutputCheckBoxVisible(bool visible) { m_uiForm.ckGroupOutput->setVisible(visible); }
+void IETView::setGroupOutputCheckBoxVisible(bool visible) { m_uiForm.ckGroupOutput->setVisible(visible); }
 
 void IETView::setGroupOutputDropdownVisible(bool visible) { m_uiForm.cbGroupOutput->setVisible(visible); }
 

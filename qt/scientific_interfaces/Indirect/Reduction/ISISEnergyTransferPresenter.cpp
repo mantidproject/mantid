@@ -93,7 +93,7 @@ void IETPresenter::setInstrumentDefault() {
     m_view->setFoldMultipleFramesVisible(!irisOrOsiris);
     m_view->setOutputInCm1Visible(!irisOrOsiris);
     m_view->setGroupOutputDropdownVisible(!irisOrOsiris);
-    m_view->setGrouptOutputCheckBoxVisible(irisOrOsiris);
+    m_view->setGroupOutputCheckBoxVisible(irisOrOsiris);
   }
 }
 
