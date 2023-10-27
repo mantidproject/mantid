@@ -97,10 +97,13 @@ std::optional<DataObjects::TableWorkspace_sptr>
 LoadMuonStrategy::createDetectorGroupingTable(const std::vector<detid_t> &detectorsLoaded,
                                               const std::optional<std::vector<detid_t>> &grouping) const {
   if (!grouping) {
+    m_logger.information("No grouping information is provided in the Nexus file");
     return std::nullopt;
   }
   auto groupingIDs = *grouping;
   if (detectorsLoaded.size() != groupingIDs.size()) {
+    m_logger.information() << "The number of groupings in the provided Nexus file (" << groupingIDs.size()
+                           << ") does not match the number of loaded detectors (" << detectorsLoaded.size() << ").";
     return std::nullopt;
   }
 
