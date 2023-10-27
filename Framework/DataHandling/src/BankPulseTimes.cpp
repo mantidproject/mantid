@@ -16,13 +16,19 @@ using namespace Mantid::Kernel;
 /// The first period
 const unsigned int BankPulseTimes::FirstPeriod = 1;
 
+namespace {
+// these values are simliar to those in EventList::EventSortType
+enum PulseSorting { UNKNOWN, UNSORTED, PULSETIME_SORT };
+} // namespace
+
 //----------------------------------------------------------------------------------------------
 /** Constructor. Loads the pulse times from the bank entry of the file
  *
  * @param file :: nexus file open in the right bank entry
  * @param pNumbers :: Period numbers to index into. Index via frame/pulse
  */
-BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &pNumbers) : periodNumbers(pNumbers) {
+BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &pNumbers)
+    : periodNumbers(pNumbers), m_sorting_info(PulseSorting::UNKNOWN) {
   file.openData("event_time_zero");
   // Read the offset (time zero)
   // If the offset is not present, use Unix epoch
@@ -63,8 +69,20 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &pNum
   // periodNumbers containers
   if (pulseTimes.size() != pNumbers.size()) {
     periodNumbers = std::vector<int>(pulseTimes.size(), FirstPeriod);
-    ;
   }
+}
+
+bool BankPulseTimes::arePulseTimesIncreasing() const {
+  if (m_sorting_info == PulseSorting::UNKNOWN) {
+    // only allow one thread to check sorting at a time
+    // others can get the value without interference
+    std::scoped_lock<std::mutex> _lock(m_sortingMutex);
+    if (std::is_sorted(pulseTimes.cbegin(), pulseTimes.cend()))
+      m_sorting_info = PulseSorting::PULSETIME_SORT;
+    else
+      m_sorting_info = PulseSorting::UNSORTED;
+  }
+  return m_sorting_info == PulseSorting::PULSETIME_SORT;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -73,7 +91,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &pNum
  *  @param times
  */
 BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times) {
-  if (times.size() == 0)
+  if (times.empty())
     return;
 
   pulseTimes = times;

@@ -107,9 +107,7 @@ void ProcessBankData::run() {
       return; // User cancellation
   }
 
-  // Default pulse time (if none are found)
-  const bool pulsetimesincreasing =
-      std::is_sorted(thisBankPulseTimes->pulseTimes.cbegin(), thisBankPulseTimes->pulseTimes.cend());
+  // this assumes that pulse indices are sorted
   if (!std::is_sorted(event_index->cbegin(), event_index->cend()))
     throw std::runtime_error("Event index is not sorted");
 
@@ -207,6 +205,10 @@ void ProcessBankData::run() {
       return;
   } // for pulses
 
+  // Default pulse time (if none are found)
+  const auto pulseSortingType =
+      thisBankPulseTimes->arePulseTimesIncreasing() ? DataObjects::PULSETIME_SORT : DataObjects::UNSORTED;
+
   //------------ Compress Events (or set sort order) ------------------
   // Do it on all the detector IDs we touched
   auto &outputWS = m_loader.m_ws;
@@ -217,20 +219,17 @@ void ProcessBankData::run() {
       size_t wi = getWorkspaceIndexFromPixelID(pixID);
       if (wi < numEventLists) {
         auto &el = outputWS.getSpectrum(wi);
+        // set the sort order based on what is known
+        el.setSortOrder(pulseSortingType);
+        // compress events if requested
         if (compress)
           el.compressEvents(alg->compressTolerance, &el);
-        else {
-          if (pulsetimesincreasing)
-            el.setSortOrder(DataObjects::PULSETIME_SORT);
-          else
-            el.setSortOrder(DataObjects::UNSORTED);
-        }
       }
     }
   }
   prog->report(entry_name + ": filled events");
 
-  alg->getLogger().debug() << entry_name << (pulsetimesincreasing ? " had " : " DID NOT have ")
+  alg->getLogger().debug() << entry_name << (thisBankPulseTimes->arePulseTimesIncreasing() ? " had " : " DID NOT have ")
                            << "monotonically increasing pulse times\n";
 
   // Join back up the tof limits to the global ones
