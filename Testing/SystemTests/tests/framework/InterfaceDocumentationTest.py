@@ -20,8 +20,6 @@ INTERFACES_WITH_NO_DOCS = [
     "ORNL SANS.rst",  # information is in concepts/ORNL_SANS_Reduction.rst
     "Powder Diffraction Reduction.rst",  # reduction application
     "DGS Reduction.rst",  # reduction application
-    "Direct Data Analysis.rst",  # opens Inelastic Data Analysis
-    "Indirect Data Analysis.rst",  # opens Inelastic Data Analysis
     "HFIR 4Circle Reduction.rst",
 ]
 
