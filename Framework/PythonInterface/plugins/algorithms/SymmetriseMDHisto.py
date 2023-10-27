@@ -135,6 +135,15 @@ class SymmetriseMDHisto(PythonAlgorithm):
         else:
             # weights is the number of bins that contributed to each bin in the symmetrised sum - i.e. average is a mean
             error_sq[inonzero] = error_sq[inonzero] / weights[inonzero]
+
+        # if there is a bin at origin reset signal and error to avoid duplicate counting in sum
+        nbins = signal.shape[0]
+        if not nbins % 2:
+            icen = nbins // 2
+            signal[icen, icen, icen] = ws.getSignalArray()[icen, icen, icen].copy()
+            error_sq[icen, icen, icen] = ws.getErrorSquaredArray()[icen, icen, icen].copy()
+
+        # set data on workspace
         ws_out.setSignalArray(signal)
         ws_out.setErrorSquaredArray(error_sq)
 
