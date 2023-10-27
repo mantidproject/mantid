@@ -109,13 +109,43 @@ class SampleTransmissionCalculatorModelTest(unittest.TestCase):
         validation = self.model.validate(input_dict)
         self.assertEqual(validation, {"histogram": "Upper histogram edge must be greater than the lower bin."})
 
-    def test_validate_histogram_width_greater_than_min(self):
+    def test_validate_histogram_width_greater_than_min_single(self):
         input_dict = {
             "binning_type": 0,
             "single_low": 1.0,
             "single_width": 10.0,
             "single_high": 5.0,
             "multiple_bin": "0.0,0.1,20.0",
+            "chemical_formula": "C",
+            "density_type": "Number Density",
+            "density": 0.1,
+            "thickness": 0.1,
+        }
+        validation = self.model.validate(input_dict)
+        self.assertEqual(validation, {"histogram": "Width cannot be greater than the upper bin."})
+
+    def test_validate_histogram_width_greater_than_min_multiple(self):
+        input_dict = {
+            "binning_type": 1,
+            "single_low": 1.0,
+            "single_width": 1.0,
+            "single_high": 5.0,
+            "multiple_bin": "-1,5,2",
+            "chemical_formula": "C",
+            "density_type": "Number Density",
+            "density": 0.1,
+            "thickness": 0.1,
+        }
+        validation = self.model.validate(input_dict)
+        self.assertEqual(validation, {"histogram": "Width cannot be greater than the upper bin."})
+
+    def test_validate_histogram_width_greater_than_min_multiple_different_widths(self):
+        input_dict = {
+            "binning_type": 1,
+            "single_low": 1.0,
+            "single_width": 1.0,
+            "single_high": 5.0,
+            "multiple_bin": "0,1,2,2,3",
             "chemical_formula": "C",
             "density_type": "Number Density",
             "density": 0.1,
