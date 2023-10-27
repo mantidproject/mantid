@@ -679,7 +679,7 @@ class MantidAxesTest(unittest.TestCase):
         xy_pixels = self.ax.transAxes.transform((0, 0)) + (0.5, 0.5)
         bottom_left_corner = MouseEvent("motion_notify_event", self.fig.canvas, x=xy_pixels[0], y=xy_pixels[1])
 
-        self.assertEqual(image.get_extent(), (10.0, 30.0, 9.0, 3.0))
+        self.assertEqual(image.get_extent(), [10.0, 30.0, 9.0, 3.0])
         self.assertEqual(image.get_cursor_data(bottom_left_corner), 3.0)
 
     def test_imshow_with_origin_lower(self):
@@ -689,7 +689,7 @@ class MantidAxesTest(unittest.TestCase):
         xy_pixels = self.ax.transAxes.transform((0, 0)) + (0.5, 0.5)
         bottom_left_corner = MouseEvent("motion_notify_event", self.fig.canvas, x=xy_pixels[0], y=xy_pixels[1])
 
-        self.assertEqual(image.get_extent(), (10.0, 30.0, 3.0, 9.0))
+        self.assertEqual(image.get_extent(), [10.0, 30.0, 3.0, 9.0])
         self.assertEqual(image.get_cursor_data(bottom_left_corner), 2.0)
 
     def test_rename_workspace_relabels_curve_if_default_label(self):
