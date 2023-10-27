@@ -55,10 +55,13 @@ class DNSPathModel(DNSObsModel):
         instrument = tmp.getInstrument()
         api.DeleteWorkspace(tmp)
 
-        for polarisation in ["x", "y", "z"]:
+        # polarisation names are taken from the IDF "DNS_parameters.xml"
+        dns_polarisations_list = ["x", "y", "z", "off", "zero_field", "z_high", "minus_x", "minus_y", "minus_z"]
+
+        for polarisation in dns_polarisations_list:
             currents = instrument.getStringParameter(f"{polarisation}_currents")[0].split(";")
             for current in currents:
-                row = {"polarisation": f"{polarisation}7"}
+                row = {"polarisation": f"{polarisation}"}
                 row["C_a"], row["C_b"], row["C_c"], row["C_z"] = [float(c) for c in current.split(",")]
                 polarisation_table.append(row)
         return polarisation_table

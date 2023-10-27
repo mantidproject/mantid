@@ -249,7 +249,10 @@ class DNSFile(ObjectDict):
         }
         for row in polarisation_table:
             if self.currents_match(row, coil_currents, tolerance):
-                return row["polarisation"] + "_" + flip_flag
+                if row["polarisation"] not in ["zero_field", "off"]:
+                    return row["polarisation"] + "_" + flip_flag
+                else:
+                    return row["polarisation"]
         return polarisation
 
     def currents_match(self, dict1, dict2, tolerance):
