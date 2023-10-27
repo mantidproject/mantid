@@ -74,7 +74,6 @@ Workspace_sptr SinglePeriodLoadMuonStrategy::loadDetectorGrouping() const {
   if (table) {
     return *table;
   } else {
-    m_logger.information("Loading grouping information from IDF");
     return loadDefaultDetectorGrouping(m_workspace);
   }
 }

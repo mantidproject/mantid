@@ -76,7 +76,6 @@ Workspace_sptr MultiPeriodLoadMuonStrategy::loadDetectorGrouping() const {
     auto table = createDetectorGroupingTable(m_detectors, grouping);
     // if any of the tables are empty we'll load grouping from the IDF
     if (!table) {
-      m_logger.information("Loading grouping information from IDF");
       return loadDefaultDetectorGrouping(*std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(i)));
     }
     tableGroup->addWorkspace(*table);

@@ -48,6 +48,7 @@ LoadMuonStrategy::LoadMuonStrategy(Kernel::Logger &g_log, std::string filename, 
  */
 API::Workspace_sptr
 LoadMuonStrategy::loadDefaultDetectorGrouping(const DataObjects::Workspace2D &localWorkspace) const {
+  m_logger.information("Loading grouping information from IDF");
 
   auto instrument = localWorkspace.getInstrument();
   auto &run = localWorkspace.run();
