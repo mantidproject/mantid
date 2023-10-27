@@ -32,7 +32,7 @@ requirements:
   host:
     - python {{ python }}
     - setuptools
-    - sphinx {{ sphinx }}
+    - sphinx
     - sphinx_bootstrap_theme {{ sphinx_bootstrap_theme }}
     - mantidqt {{ version }}
     - versioningit

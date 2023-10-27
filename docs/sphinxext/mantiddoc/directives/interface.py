@@ -103,11 +103,11 @@ class InterfaceDirective(BaseDirective):
             caption = "Enable screenshots using DOCS_SCREENSHOTS in CMake"
 
         if align is not None:
-            self.add_rst(
-                f".. figure:: {path}\n" f"   :class: screenshot\n" f"   :width: {width}px\n" f"   :align: {align}\n\n" f"   {caption}\n\n"
+            self.add_rst_list(
+                [f".. figure:: {path}", "   :class: screenshot", f"   :width: {width}px", f"   :align: {align}\n", "", f"   {caption}", ""]
             )
         else:
-            self.add_rst(f".. figure:: {path}\n" f"   :class: screenshot\n" f"   :width: {width}px\n\n" f"   {caption}\n\n")
+            self.add_rst_list([f".. figure:: {path}", "   :class: screenshot", f"   :width: {width}px\n", "", f"   {caption}", ""])
 
 
 # ------------------------------------------------------------------------------------------------------------

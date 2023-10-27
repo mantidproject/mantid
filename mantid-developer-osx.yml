@@ -49,7 +49,6 @@ dependencies:
   # Needed only for development
   - black  # may be out of sync with pre-commit
   - cppcheck==2.10.3
-  - pygments==2.11.2 # Had to pin back to 2.11 due to cppcheck error which is only fixed in cppcheck>=2.8
   - pre-commit>=2.12.0
   - libcxx
   - joblib

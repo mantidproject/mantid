@@ -124,7 +124,6 @@ class AlgorithmDirective(AlgorithmBaseDirective):
           picture (Screenshot): A Screenshot object
         """
         env = self.state.document.settings.env
-        format_str = ".. figure:: %s\n" "   :class: screenshot\n" "   :width: %dpx\n" "   :align: right\n\n" "   %s\n\n"
 
         # Sphinx assumes that an absolute path is actually relative to the directory containing the
         # conf.py file and a relative path is relative to the directory where the current rst file
@@ -152,7 +151,9 @@ class AlgorithmDirective(AlgorithmBaseDirective):
             width = 200
             caption = "Enable screenshots using DOCS_SCREENSHOTS in CMake"
 
-        self.add_rst(format_str % (path, width, caption))
+        self.add_rst_list(
+            [f".. figure:: {path}", "   :class: screenshot", f"   :width: {width}px", "   :align: right", "", f"   {caption}", ""]
+        )
 
     def _insert_deprecation_warning(self):
         """
