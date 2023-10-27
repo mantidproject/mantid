@@ -325,7 +325,7 @@ void TimeSplitter::resetCache() {
 }
 
 void TimeSplitter::resetCachedPartialTimeROIs() const {
-  std::lock_guard<std::recursive_mutex> lock(m_partialROIMutex);
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   if (m_validCachedPartialTimeROIs) {
     m_cachedPartialTimeROIs.clear();
     m_validCachedPartialTimeROIs = false;
@@ -333,7 +333,7 @@ void TimeSplitter::resetCachedPartialTimeROIs() const {
 }
 
 void TimeSplitter::resetCachedSplittingIntervals() const {
-  std::lock_guard<std::recursive_mutex> lock(m_splittingIntervalMutex);
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   if (m_validCachedSplittingIntervals_All || m_validCachedSplittingIntervals_WithValidTargets) {
     m_cachedSplittingIntervals.clear();
     m_validCachedSplittingIntervals_All = false;
@@ -342,7 +342,7 @@ void TimeSplitter::resetCachedSplittingIntervals() const {
 }
 
 void TimeSplitter::rebuildCachedPartialTimeROIs() const {
-  std::lock_guard<std::recursive_mutex> lock(m_partialROIMutex);
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
   resetCachedPartialTimeROIs();
 
@@ -380,7 +380,7 @@ void TimeSplitter::rebuildCachedPartialTimeROIs() const {
 }
 
 void TimeSplitter::rebuildCachedSplittingIntervals(const bool includeNoTarget) const {
-  std::lock_guard<std::recursive_mutex> lock(m_splittingIntervalMutex);
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
   resetCachedSplittingIntervals();
 
@@ -458,7 +458,7 @@ std::set<int> TimeSplitter::outputWorkspaceIndices() const {
  * meaning any time datapoint will pass through the given ROI filter.
  */
 TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) const {
-  std::lock_guard<std::recursive_mutex> lock(m_partialROIMutex);
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
   if (!m_validCachedPartialTimeROIs) {
     rebuildCachedPartialTimeROIs();
@@ -473,7 +473,7 @@ TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) const {
 }
 
 const Kernel::SplittingIntervalVec &TimeSplitter::getSplittingIntervals(const bool includeNoTarget) const {
-  std::lock_guard<std::recursive_mutex> lock(m_splittingIntervalMutex);
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
   if ((includeNoTarget && !m_validCachedSplittingIntervals_All) ||
       (!includeNoTarget && !m_validCachedSplittingIntervals_WithValidTargets)) {
