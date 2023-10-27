@@ -43,6 +43,7 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
         import mantidqtinterfaces
 
         self._interface_directory = os.path.dirname(mantidqtinterfaces.__file__)
+        # The order of the scripts in this iterable is random
         self._interface_scripts = set(chain.from_iterable(gather_python_interface_names().values()))
 
     def runTest(self):
