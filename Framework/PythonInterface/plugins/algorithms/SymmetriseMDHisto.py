@@ -44,6 +44,13 @@ class SymmetriseMDHisto(PythonAlgorithm):
             doc="Spacegroup Hermann–Mauguin symbol used to determine the point group of the Laue class.",
         )
 
+        self.declareProperty(
+            name="WeightedAverage",
+            defaultValue=False,
+            direction=Direction.Input,
+            doc="Perform average weighted by the error squared.",
+        )
+
         enable_spacegroup = EnabledWhenProperty("Pointgroup", PropertyCriterion.IsDefault)
         self.setPropertySettings("Spacegroup", enable_spacegroup)
         enable_pointgroup = EnabledWhenProperty("Spacegroup", PropertyCriterion.IsDefault)
@@ -78,6 +85,7 @@ class SymmetriseMDHisto(PythonAlgorithm):
         ws = self.getProperty("InputWorkspace").value
         spgr_sym = self.getProperty("Spacegroup").value
         ptgr_sym = self.getProperty("Pointgroup").value
+        weighted_average = self.getProperty("WeightedAverage").value
 
         # get point group of Laue class
         if spgr_sym:
@@ -88,25 +96,44 @@ class SymmetriseMDHisto(PythonAlgorithm):
             ptgr = PointGroupFactory.createPointGroup(ptgr_sym)
             laue_ptgr = PointGroupFactory.createPointGroup(ptgr.getLauePointGroupSymbol())
 
-        # symmetrise data
-        signal = ws.getSignalArray().copy()
-        npix = np.zeros(signal.shape, dtype=int)
-        inonzero = abs(signal) > 1e-10
-        npix[inonzero] = 1
+        # setup data array (note symmetry operations include identity so start sums from 0)
+        signal = np.zeros(3 * [ws.getDimension(0).getNBins()])
+        weights = np.zeros(signal.shape)
+        if not weighted_average:
+            error_sq = np.zeros(signal.shape)
+
         for sym_op in laue_ptgr.getSymmetryOperations():
             transformed = sym_op.transformHKL([1, 2, 3])
             ws_out = self.child_alg("PermuteMD", InputWorkspace=ws, Axes=[int(abs(iax)) - 1 for iax in transformed])
             # could call TransformMD with Scaling=np.sign(transformed) but it's actually slower!
             signs = np.sign(transformed)
             signal_tmp = ws_out.getSignalArray().copy()[:: int(signs[0]), :: int(signs[1]), :: int(signs[2])]
-            npix_tmp = abs(signal_tmp) > 1e-10
-            signal += signal_tmp
-            npix += npix_tmp
+            error_sq_tmp = ws_out.getErrorSquaredArray().copy()[:: int(signs[0]), :: int(signs[1]), :: int(signs[2])]
+            if weighted_average:
+                with np.errstate(divide="ignore", invalid="ignore"):
+                    weights_tmp = 1.0 / error_sq_tmp
+                weights_tmp[~np.isfinite(weights)] = 0
+                signal_tmp *= weights_tmp
+            else:
+                error_sq += error_sq_tmp
+                weights_tmp = (abs(signal_tmp) > 1e-10).astype(int)  #  number of non-empty bins
 
-        # set symmetrised signal in ws
-        inonzero = abs(npix) > 0
-        signal[inonzero] = signal[inonzero] / npix[inonzero]
+            signal += signal_tmp
+            weights += weights_tmp
+
+        # normalise signal and errors by weights
+        inonzero = abs(weights) > 0
+        signal[inonzero] = signal[inonzero] / weights[inonzero]
+        if weighted_average:
+            # in this case the weights = sum_i[1/error_i^2]
+            with np.errstate(divide="ignore", invalid="ignore"):
+                error_sq = 1.0 / weights
+            error_sq[~np.isfinite(error_sq)] = 0
+        else:
+            # weights is the number of bins that contributed to each bin in the symmetrised sum - i.e. average is a mean
+            error_sq[inonzero] = error_sq[inonzero] / weights[inonzero]
         ws_out.setSignalArray(signal)
+        ws_out.setErrorSquaredArray(error_sq)
 
         # assign output
         self.setProperty("OutputWorkspace", ws_out)
