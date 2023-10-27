@@ -34,30 +34,16 @@ Kernel::Logger g_log("TimeSplitter");
 
 TimeSplitter::TimeSplitter(const TimeSplitter &other) {
   m_roi_map = other.m_roi_map;
-
   m_name_index_map = other.m_name_index_map;
   m_index_name_map = other.m_index_name_map;
-
-  m_cachedPartialTimeROIs = other.m_cachedPartialTimeROIs;
-  m_cachedSplittingIntervals = other.m_cachedSplittingIntervals;
-
-  validCachedPartialTimeROIs = other.validCachedPartialTimeROIs;
-  validCachedSplittingIntervals_All = other.validCachedSplittingIntervals_All;
-  validCachedSplittingIntervals_WithValidTargets = other.validCachedSplittingIntervals_WithValidTargets;
 }
 
 TimeSplitter &TimeSplitter::operator=(const TimeSplitter &other) {
   m_roi_map = other.m_roi_map;
-
   m_name_index_map = other.m_name_index_map;
   m_index_name_map = other.m_index_name_map;
 
-  m_cachedPartialTimeROIs = other.m_cachedPartialTimeROIs;
-  m_cachedSplittingIntervals = other.m_cachedSplittingIntervals;
-
-  validCachedPartialTimeROIs = other.validCachedPartialTimeROIs;
-  validCachedSplittingIntervals_All = other.validCachedSplittingIntervals_All;
-  validCachedSplittingIntervals_WithValidTargets = other.validCachedSplittingIntervals_WithValidTargets;
+  resetCache();
 
   return *this;
 }
@@ -340,18 +326,18 @@ void TimeSplitter::resetCache() {
 
 void TimeSplitter::resetCachedPartialTimeROIs() const {
   std::lock_guard<std::recursive_mutex> lock(m_partialROIMutex);
-  if (validCachedPartialTimeROIs) {
+  if (m_validCachedPartialTimeROIs) {
     m_cachedPartialTimeROIs.clear();
-    validCachedPartialTimeROIs = false;
+    m_validCachedPartialTimeROIs = false;
   }
 }
 
 void TimeSplitter::resetCachedSplittingIntervals() const {
   std::lock_guard<std::recursive_mutex> lock(m_splittingIntervalMutex);
-  if (validCachedSplittingIntervals_All || validCachedSplittingIntervals_WithValidTargets) {
+  if (m_validCachedSplittingIntervals_All || m_validCachedSplittingIntervals_WithValidTargets) {
     m_cachedSplittingIntervals.clear();
-    validCachedSplittingIntervals_All = false;
-    validCachedSplittingIntervals_WithValidTargets = false;
+    m_validCachedSplittingIntervals_All = false;
+    m_validCachedSplittingIntervals_WithValidTargets = false;
   }
 }
 
@@ -390,7 +376,7 @@ void TimeSplitter::rebuildCachedPartialTimeROIs() const {
     m_cachedPartialTimeROIs[vec.first] = TimeROI(vec.second);
   }
 
-  validCachedPartialTimeROIs = true;
+  m_validCachedPartialTimeROIs = true;
 }
 
 void TimeSplitter::rebuildCachedSplittingIntervals(const bool includeNoTarget) const {
@@ -410,8 +396,8 @@ void TimeSplitter::rebuildCachedSplittingIntervals(const bool includeNoTarget) c
     std::advance(startIt, 1);
   }
 
-  validCachedSplittingIntervals_All = includeNoTarget;
-  validCachedSplittingIntervals_WithValidTargets = !includeNoTarget;
+  m_validCachedSplittingIntervals_All = includeNoTarget;
+  m_validCachedSplittingIntervals_WithValidTargets = !includeNoTarget;
 }
 
 /**
@@ -474,7 +460,7 @@ std::set<int> TimeSplitter::outputWorkspaceIndices() const {
 TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) const {
   std::lock_guard<std::recursive_mutex> lock(m_partialROIMutex);
 
-  if (!validCachedPartialTimeROIs) {
+  if (!m_validCachedPartialTimeROIs) {
     rebuildCachedPartialTimeROIs();
   }
   // convert indexes less than NO_TARGET to NO_TARGET
@@ -489,8 +475,8 @@ TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) const {
 const Kernel::SplittingIntervalVec &TimeSplitter::getSplittingIntervals(const bool includeNoTarget) const {
   std::lock_guard<std::recursive_mutex> lock(m_splittingIntervalMutex);
 
-  if ((includeNoTarget && !validCachedSplittingIntervals_All) ||
-      (!includeNoTarget && !validCachedSplittingIntervals_WithValidTargets)) {
+  if ((includeNoTarget && !m_validCachedSplittingIntervals_All) ||
+      (!includeNoTarget && !m_validCachedSplittingIntervals_WithValidTargets)) {
     rebuildCachedSplittingIntervals(includeNoTarget);
   }
 
@@ -498,6 +484,8 @@ const Kernel::SplittingIntervalVec &TimeSplitter::getSplittingIntervals(const bo
 }
 
 std::size_t TimeSplitter::numRawValues() const { return m_roi_map.size(); }
+const std::map<std::string, int> &TimeSplitter::getNameTargetMap() const { return m_name_index_map; }
+const std::map<int, std::string> &TimeSplitter::getTargetNameMap() const { return m_index_name_map; }
 
 // ------------------------------------------------------------------------
 // SPLITTING EVENTS METHODS

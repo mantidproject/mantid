@@ -645,9 +645,7 @@ void FilterEvents::createOutputWorkspaces() {
       static_cast<double>(m_targetWorkspaceIndexSet.size()); // total number of progress steps expected
   double progress_step_current{0.};                          // current number of progress steps
   const auto originalROI = m_eventWS->run().getTimeROI();
-
   const bool outputUnfiltered = getProperty("OutputUnfilteredEvents");
-
   for (auto const wsindex : m_targetWorkspaceIndexSet) {
     // Generate new workspace name
     bool add2output = true;

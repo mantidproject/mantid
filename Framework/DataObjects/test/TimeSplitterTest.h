@@ -180,6 +180,25 @@ private:
     return obtained;
   };
 
+  // A helper method to create a table workspace for testing
+  std::shared_ptr<Mantid::DataObjects::TableWorkspace>
+  createTableWorkspace(const std::map<std::pair<double, double>, std::string> &splittingIntervals) {
+    auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(splittingIntervals.size() /*rows*/);
+
+    // a table workspace used for event filtering must have 3 columns
+    tws->addColumn("double", "start");
+    tws->addColumn("double", "stop");
+    tws->addColumn("str", "target"); // to be used as a suffix of the output workspace name
+
+    TableRow row = tws->getFirstRow();
+    for (const auto iter : splittingIntervals) {
+      row << iter.first.first << iter.first.second << iter.second;
+      row.next();
+    }
+
+    return tws;
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -468,13 +487,8 @@ public:
   void test_timeSplitterFromTableWorkspaceAbsoluteTimes() {
     g_log.notice("\ntest_timeSplitterFromTableWorkspaceAbsoluteTimes...");
 
-    auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
-    // a table workspace used for event filtering must have 3 columns
-    tws->addColumn("double", "start");
-    tws->addColumn("double", "stop");
-    tws->addColumn("str", "target"); // to be used as a suffix of the output workspace name
-
-    // all times in the table must be in seconds
+    // Create a small table workspace with some targets
+    // By design, for a table workspace all times must be in seconds
     const double time1_s{1.0e-5};
     const double time2_s{1.5e-5};
     const double time3_s{2.0e-5};
@@ -482,14 +496,13 @@ public:
     const double time5_s{4.0e-5};
     const double time6_s{5.0e-5};
 
-    TableRow row = tws->getFirstRow();
-    row << time1_s << time2_s << "1";
-    row.next();
-    row << time3_s << time4_s << "3";
-    row.next();
-    row << time5_s << time6_s << std::to_string(TimeSplitter::NO_TARGET);
+    std::map<std::pair<double, double>, std::string> splittingIntervals{
+        {{time1_s, time2_s}, "1"},
+        {{time3_s, time4_s}, "3"},
+        {{time5_s, time6_s}, std::to_string(TimeSplitter::NO_TARGET)}};
+    auto tws = createTableWorkspace(splittingIntervals);
 
-    // create a TimeSplitter object from the table
+    // Create a time splitter from the table workspace
     TimeSplitter workspaceDerivedSplitter(tws, DateAndTime(0, 0));
 
     // build a reference time splitter
@@ -525,13 +538,8 @@ public:
   void test_timeSplitterFromTableWorkspaceRelativeTimes() {
     g_log.notice("\ntest_timeSplitterFromTableWorkspaceRelativeTimes...");
 
-    auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
-    // a table workspace used for event filtering must have 3 columns
-    tws->addColumn("double", "start");
-    tws->addColumn("double", "stop");
-    tws->addColumn("str", "target"); // to be used as a suffix of the output workspace name
-
-    // by design, all times in the table must be in seconds
+    // Create a small table workspace with some targets
+    // By design, for a table workspace all times must be in seconds
     const double time1_s{1.0e-5};
     const double time2_s{1.5e-5};
     const double time3_s{2.0e-5};
@@ -539,14 +547,13 @@ public:
     const double time5_s{4.0e-5};
     const double time6_s{5.0e-5};
 
-    TableRow row = tws->getFirstRow();
-    row << time1_s << time2_s << "1";
-    row.next();
-    row << time3_s << time4_s << "3";
-    row.next();
-    row << time5_s << time6_s << std::to_string(TimeSplitter::NO_TARGET);
+    std::map<std::pair<double, double>, std::string> splittingIntervals{
+        {{time1_s, time2_s}, "1"},
+        {{time3_s, time4_s}, "3"},
+        {{time5_s, time6_s}, std::to_string(TimeSplitter::NO_TARGET)}};
+    auto tws = createTableWorkspace(splittingIntervals);
 
-    // create a TimeSplitter object from the table. By design, the table user must know whether
+    // create a TimeSplitter object from the table. By design, the table owner must know whether
     // the table holds absolute or relative times. In the latter case the user must specify
     // a time offset to be used with the table.
     DateAndTime offset(THREE);
@@ -594,13 +601,8 @@ public:
   void test_timeSplitterFromTableWorkspaceWithNonNumericTargets() {
     g_log.notice("\ntest_timeSplitterFromTableWorkspaceWithNonNumericTargets...");
 
-    auto tws = std::make_shared<Mantid::DataObjects::TableWorkspace>(3 /*rows*/);
-    // a table workspace used for event filtering must have 3 columns
-    tws->addColumn("double", "start");
-    tws->addColumn("double", "stop");
-    tws->addColumn("str", "target"); // to be used as a suffix of the output workspace name
-
-    // all times in the table must be in seconds
+    // Create a small table workspace with some targets
+    // By design, for a table workspace all times must be in seconds
     const double time1_s{1.0e-5};
     const double time2_s{1.5e-5};
     const double time3_s{2.0e-5};
@@ -608,12 +610,11 @@ public:
     const double time5_s{4.0e-5};
     const double time6_s{5.0e-5};
 
-    TableRow row = tws->getFirstRow();
-    row << time1_s << time2_s << "A";
-    row.next();
-    row << time3_s << time4_s << std::to_string(TimeSplitter::NO_TARGET);
-    row.next();
-    row << time5_s << time6_s << "B";
+    std::map<std::pair<double, double>, std::string> splittingIntervals{
+        {{time1_s, time2_s}, "A"},
+        {{time3_s, time4_s}, std::to_string(TimeSplitter::NO_TARGET)},
+        {{time5_s, time6_s}, "B"}};
+    auto tws = createTableWorkspace(splittingIntervals);
 
     // create a TimeSplitter object from the table. By design, the table user must know whether
     // the table holds absolute or relative times. In the latter case the user must specify
@@ -621,9 +622,9 @@ public:
     DateAndTime offset(THREE);
     TimeSplitter workspaceDerivedSplitter(tws, offset);
 
-    // build a reference time splitter
+    // build the reference time splitter
 
-    // create all time objects and offset them
+    // first create all time objects and offset them
     DateAndTime time1_abs(time1_s, 0.0);
     DateAndTime time2_abs(time2_s, 0.0);
     DateAndTime time3_abs(time3_s, 0.0);
@@ -639,7 +640,7 @@ public:
     time5_abs += offset_ns;
     time6_abs += offset_ns;
 
-    // build the reference splitter by adding ROIs
+    // now build the reference splitter by adding ROIs
     TimeSplitter referenceSplitter;
     referenceSplitter.addROI(time1_abs, time2_abs, 0);
     referenceSplitter.addROI(time3_abs, time4_abs, TimeSplitter::NO_TARGET);
@@ -862,5 +863,44 @@ public:
     TS_ASSERT(timesToStr(partials[3], EventSortType::PULSETIMETOF_SORT) == expected);
     expected = {"2023-Jan-01 12:02:30"};
     TS_ASSERT(timesToStr(partials[TimeSplitter::NO_TARGET], EventSortType::PULSETIMETOF_SORT) == expected);
+  }
+
+  void test_copyAndAssignment() {
+    // Create a small table workspace with some targets
+    // By design, for a table workspace all times must be in seconds
+    const double time1_s{1.0e-5};
+    const double time2_s{1.5e-5};
+    const double time3_s{2.0e-5};
+    const double time4_s{3.0e-5};
+    const double time5_s{4.0e-5};
+    const double time6_s{5.0e-5};
+
+    std::map<std::pair<double, double>, std::string> splittingIntervals{
+        {{time1_s, time2_s}, "A"},
+        {{time3_s, time4_s}, std::to_string(TimeSplitter::NO_TARGET)},
+        {{time5_s, time6_s}, "B"}};
+    auto tws = createTableWorkspace(splittingIntervals);
+
+    // Create a time splitter from the table workspace
+    TimeSplitter splitter1(tws, DateAndTime(0, 0));
+
+    // Copy splitter1 to splitter2
+    TimeSplitter splitter2(splitter1);
+
+    // Compare splitter maps
+    TS_ASSERT_EQUALS(splitter2.getSplittersMap(), splitter1.getSplittersMap())
+    // Compare "name:target" and "target:name" maps
+    TS_ASSERT_EQUALS(splitter2.getNameTargetMap(), splitter1.getNameTargetMap())
+    TS_ASSERT_EQUALS(splitter2.getTargetNameMap(), splitter1.getTargetNameMap())
+
+    // Assign splitter1 to splitter3
+    TimeSplitter splitter3;
+    splitter3 = splitter1;
+
+    // Compare splitter maps
+    TS_ASSERT_EQUALS(splitter3.getSplittersMap(), splitter1.getSplittersMap())
+    // Compare "name:target" and "target:name" maps
+    TS_ASSERT_EQUALS(splitter3.getNameTargetMap(), splitter1.getNameTargetMap())
+    TS_ASSERT_EQUALS(splitter3.getTargetNameMap(), splitter1.getTargetNameMap())
   }
 };

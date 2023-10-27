@@ -49,8 +49,12 @@ public:
   std::set<int> outputWorkspaceIndices() const;
   Kernel::TimeROI getTimeROI(const int workspaceIndex) const;
   const Kernel::SplittingIntervalVec &getSplittingIntervals(const bool includeNoTarget = true) const;
-  /// this is to aid in testing and not intended for use elsewhere
+
+  /// these methods are to aid in testing and not intended for use elsewhere
   std::size_t numRawValues() const;
+  const std::map<std::string, int> &getNameTargetMap() const;
+  const std::map<int, std::string> &getTargetNameMap() const;
+
   /// Split a list of events according to Pulse time or Pulse + TOF time
   void splitEventList(const EventList &events, std::map<int, EventList *> &partials, const bool pulseTof = false,
                       const bool tofCorrect = false, const double factor = 1.0, const double shift = 0.0) const;
@@ -84,9 +88,9 @@ private:
   mutable std::map<int, Kernel::TimeROI> m_cachedPartialTimeROIs;
   mutable Kernel::SplittingIntervalVec m_cachedSplittingIntervals;
 
-  mutable bool validCachedPartialTimeROIs{false};
-  mutable bool validCachedSplittingIntervals_All{false};
-  mutable bool validCachedSplittingIntervals_WithValidTargets{false};
+  mutable bool m_validCachedPartialTimeROIs{false};
+  mutable bool m_validCachedSplittingIntervals_All{false};
+  mutable bool m_validCachedSplittingIntervals_WithValidTargets{false};
 
   mutable std::recursive_mutex m_partialROIMutex;
   mutable std::recursive_mutex m_splittingIntervalMutex;
