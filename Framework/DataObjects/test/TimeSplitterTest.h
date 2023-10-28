@@ -191,7 +191,7 @@ private:
     tws->addColumn("str", "target"); // to be used as a suffix of the output workspace name
 
     TableRow row = tws->getFirstRow();
-    for (const auto iter : splittingIntervals) {
+    for (const auto &iter : splittingIntervals) {
       row << iter.first.first << iter.first.second << iter.second;
       row.next();
     }
