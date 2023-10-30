@@ -153,7 +153,7 @@ void ProcessBankData::run() {
       // We cached a pointer to the vector<tofEvent> -> so retrieve it and add
       // the event
       const detid_t &detId = (*event_id)[eventIndex];
-      if ((detId - m_min_id) * (detId - m_max_id) <= 0) { // detId >= m_min_id && detId <= m_max_id) {
+      if (detId >= m_min_id && detId <= m_max_id) {
         // Create the tofevent
         const auto tof = static_cast<double>((*event_time_of_flight)[eventIndex]);
         // this is fancy for check if value is in range
