@@ -19,7 +19,7 @@ python:
   - 3.10
 
 boost:
-  - 1.77
+  - 1.78
 
 # We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
 numpy:
