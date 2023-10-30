@@ -100,17 +100,26 @@ class SymmetriseMDHisto(PythonAlgorithm):
             laue_ptgr = PointGroupFactory.createPointGroup(ptgr.getLauePointGroupSymbol())
 
         # setup data array (note symmetry operations include identity so start sums from 0)
-        signal = np.zeros(3 * [ws.getDimension(0).getNBins()])
+        nbins = ws.getDimension(0).getNBins()
+        signal = np.zeros(3 * [nbins])
         weights = np.zeros(signal.shape)
         if not weighted_average:
             error_sq = np.zeros(signal.shape)
 
+        bin_index = np.arange(signal.size).reshape(signal.shape)
+        bin_at_zero = nbins % 2  # odd number of bins implies bin center at 0 along each axis
         for sym_op in laue_ptgr.getSymmetryOperations():
             transformed = sym_op.transformHKL([1, 2, 3])
             axes = [int(abs(iax)) - 1 for iax in transformed]
             iflip = np.flatnonzero(np.asarray(transformed) < 0)
             signal_tmp = np.flip(np.transpose(ws.getSignalArray().copy(), axes=axes), axis=iflip)
             error_sq_tmp = np.flip(np.transpose(ws.getErrorSquaredArray().copy(), axes=axes), axis=iflip)
+            if sym_op.getIdentifier() != "x,y,z" and bin_at_zero:
+                # zero bins invariant to symmetry operation (if not identity operation)
+                transformed_bin_index = np.flip(np.transpose(bin_index, axes=axes), axis=iflip)
+                i_invariant = transformed_bin_index == bin_index
+                signal_tmp[i_invariant] = 0
+                error_sq_tmp[i_invariant] = 0
             if weighted_average:
                 with np.errstate(divide="ignore", invalid="ignore"):
                     weights_tmp = 1.0 / error_sq_tmp
@@ -133,13 +142,6 @@ class SymmetriseMDHisto(PythonAlgorithm):
         else:
             # weights is the number of bins that contributed to each bin in the symmetrised sum - i.e. average is a mean
             error_sq[inonzero] = error_sq[inonzero] / weights[inonzero]
-
-        # if there is a bin at origin reset error to avoid duplicate counting in sum if weighted_average
-        # note in both weighted and unweighted average the signal at the origin is unchanged from original value
-        nbins = signal.shape[0]
-        if weighted_average and nbins % 2:
-            icen = nbins // 2
-            error_sq[icen, icen, icen] = ws.getErrorSquaredArray()[icen, icen, icen].copy()
 
         # set data on workspace
         ws_out = self.child_alg("CloneWorkspace", InputWorkspace=ws)
