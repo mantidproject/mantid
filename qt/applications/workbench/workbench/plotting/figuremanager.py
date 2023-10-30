@@ -17,7 +17,7 @@ from functools import wraps
 import matplotlib
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.collections import LineCollection
+from matplotlib.collections import LineCollection, PathCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtGui import QImage
@@ -553,6 +553,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         for col in self.canvas.figure.get_axes()[0].collections:
             if isinstance(col, LineCollection):
                 col.set_color(colour.name())
+            elif isinstance(col, PathCollection):
+                col.set_edgecolor(colour.name())
 
         self.canvas.draw()
 
