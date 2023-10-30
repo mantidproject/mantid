@@ -107,11 +107,10 @@ class SymmetriseMDHisto(PythonAlgorithm):
 
         for sym_op in laue_ptgr.getSymmetryOperations():
             transformed = sym_op.transformHKL([1, 2, 3])
-            ws_out = self.child_alg("PermuteMD", InputWorkspace=ws, Axes=[int(abs(iax)) - 1 for iax in transformed])
-            # could call TransformMD with Scaling=np.sign(transformed) but it's actually slower!
-            signs = np.sign(transformed)
-            signal_tmp = ws_out.getSignalArray().copy()[:: int(signs[0]), :: int(signs[1]), :: int(signs[2])]
-            error_sq_tmp = ws_out.getErrorSquaredArray().copy()[:: int(signs[0]), :: int(signs[1]), :: int(signs[2])]
+            axes = [int(abs(iax)) - 1 for iax in transformed]
+            iflip = np.flatnonzero(np.asarray(transformed) < 0)
+            signal_tmp = np.flip(np.transpose(ws.getSignalArray().copy(), axes=axes), axis=iflip)
+            error_sq_tmp = np.flip(np.transpose(ws.getErrorSquaredArray().copy(), axes=axes), axis=iflip)
             if weighted_average:
                 with np.errstate(divide="ignore", invalid="ignore"):
                     weights_tmp = 1.0 / error_sq_tmp
@@ -119,7 +118,7 @@ class SymmetriseMDHisto(PythonAlgorithm):
                 signal_tmp *= weights_tmp
             else:
                 error_sq += error_sq_tmp
-                weights_tmp = (abs(signal_tmp) > 1e-10).astype(int)  #  number of non-empty bins
+                weights_tmp = (abs(signal_tmp) > 1e-10).astype(int)  # number of non-empty bins
             signal += signal_tmp
             weights += weights_tmp
 
@@ -143,6 +142,7 @@ class SymmetriseMDHisto(PythonAlgorithm):
             error_sq[icen, icen, icen] = ws.getErrorSquaredArray()[icen, icen, icen].copy()
 
         # set data on workspace
+        ws_out = self.child_alg("CloneWorkspace", InputWorkspace=ws)
         ws_out.setSignalArray(signal)
         ws_out.setErrorSquaredArray(error_sq)
 
