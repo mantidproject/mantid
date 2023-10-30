@@ -133,16 +133,16 @@ void IETModel::setOutputProperties(IAlgorithm_sptr const &reductionAlg, IETOutpu
   reductionAlg->setProperty("OutputWorkspace", outputGroupName);
 }
 
-std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::string const &inputFiles) {
+std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::string const &inputText) {
   std::string instrument = instData.getInstrument();
   std::string analyser = instData.getAnalyser();
   std::string reflection = instData.getReflection();
 
-  return instrument + inputFiles + "_" + analyser + "_" + reflection + "_Reduced";
+  return instrument + inputText + "_" + analyser + "_" + reflection + "_Reduced";
 }
 
-std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData instData,
-                                      IETRunData runData) {
+std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
+                                      InstrumentData const &instData, IETRunData const &runData) {
   auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransferWrapper");
   reductionAlg->initialize();
 
@@ -154,7 +154,7 @@ std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batch
   setAnalysisProperties(reductionAlg, runData.getAnalysisData());
   setGroupingProperties(reductionAlg, runData.getGroupingData(), runData.getConversionData());
 
-  std::string outputGroupName = getOuputGroupName(instData, runData.getInputData().getInputFiles());
+  std::string outputGroupName = getOuputGroupName(instData, runData.getInputData().getInputText());
   setOutputProperties(reductionAlg, runData.getOutputData(), outputGroupName);
 
   batchAlgoRunner->addAlgorithm(reductionAlg);
@@ -183,13 +183,13 @@ std::pair<std::string, std::string> IETModel::createGrouping(const IETGroupingDa
   }
 }
 
-std::string IETModel::getDetectorGroupingString(int spectraMin, int spectraMax, int nGroups) {
+std::string IETModel::getDetectorGroupingString(int const spectraMin, int const spectraMax, int const nGroups) {
   const unsigned int nSpectra = 1 + spectraMax - spectraMin;
   return createDetectorGroupingString(static_cast<std::size_t>(nSpectra), static_cast<std::size_t>(nGroups),
                                       static_cast<std::size_t>(spectraMin));
 }
 
-std::vector<std::string> IETModel::validatePlotData(IETPlotData plotParams) {
+std::vector<std::string> IETModel::validatePlotData(IETPlotData const &plotParams) {
   std::vector<std::string> errors;
 
   const std::string inputFiles = plotParams.getInputData().getInputFiles();
@@ -216,8 +216,8 @@ std::vector<std::string> IETModel::validatePlotData(IETPlotData plotParams) {
   return errors;
 }
 
-void IETModel::plotRawFile(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData instData,
-                           IETPlotData plotParams) {
+void IETModel::plotRawFile(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData const &instData,
+                           IETPlotData const &plotParams) {
   using Mantid::specnum_t;
 
   const std::string inputFiles = plotParams.getInputData().getInputFiles();
@@ -285,7 +285,7 @@ void IETModel::plotRawFile(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
   batchAlgoRunner->executeBatchAsync();
 }
 
-void IETModel::saveWorkspace(std::string const &workspaceName, IETSaveData saveTypes) {
+void IETModel::saveWorkspace(std::string const &workspaceName, IETSaveData const &saveTypes) {
   if (saveTypes.getNexus())
     save("SaveNexusProcessed", workspaceName, workspaceName + ".nxs");
   if (saveTypes.getSPE())
@@ -359,19 +359,26 @@ double IETModel::loadDetailedBalance(std::string const &filename) {
   return detailedBalance;
 }
 
-std::vector<std::string> IETModel::groupWorkspaces(std::string groupName, std::string groupOption) {
+std::vector<std::string> IETModel::groupWorkspaces(std::string const &groupName, std::string const &instrument,
+                                                   std::string const &groupOption, bool const shouldGroup) {
   std::vector<std::string> outputWorkspaces;
 
   if (doesExistInADS(groupName)) {
     if (auto const outputGroup = getADSWorkspaceGroup(groupName)) {
       outputWorkspaces = outputGroup->getNames();
 
-      if (groupOption == IETGroupOption::UNGROUPED) {
-        ungroupWorkspace(outputGroup->getName());
-      } else if (groupOption == IETGroupOption::SAMPLECHANGERGROUPED) {
-        groupWorkspaceBySampleChanger(outputGroup->getName());
-        // If we are grouping by sample we want to ungroup the reduced group leaving only the sample grouped
-        ungroupWorkspace(outputGroup->getName());
+      if (instrument == "OSIRIS") {
+        if (!shouldGroup) {
+          ungroupWorkspace(outputGroup->getName());
+        }
+      } else {
+        if (groupOption == IETGroupOption::UNGROUPED) {
+          ungroupWorkspace(outputGroup->getName());
+        } else if (groupOption == IETGroupOption::SAMPLECHANGERGROUPED) {
+          groupWorkspaceBySampleChanger(outputGroup->getName());
+          // If we are grouping by sample we want to ungroup the reduced group leaving only the sample grouped
+          ungroupWorkspace(outputGroup->getName());
+        }
       }
     }
   }

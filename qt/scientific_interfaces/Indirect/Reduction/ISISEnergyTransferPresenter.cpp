@@ -82,6 +82,18 @@ void IETPresenter::setInstrumentDefault() {
   if (validateInstrumentDetails()) {
     InstrumentData instrumentDetails = getInstrumentData();
     m_view->setInstrumentDefault(instrumentDetails);
+    bool const irisOrOsiris =
+        instrumentDetails.getInstrument() == "OSIRIS" || instrumentDetails.getInstrument() == "IRIS";
+    m_view->setBackgroundSectionVisible(!irisOrOsiris);
+    m_view->setPlotTimeSectionVisible(!irisOrOsiris);
+    m_view->setPlottingOptionsVisible(!irisOrOsiris);
+    m_view->setScaleFactorVisible(!irisOrOsiris);
+    m_view->setAclimaxSaveVisible(!irisOrOsiris);
+    m_view->setNXSPEVisible(!irisOrOsiris);
+    m_view->setFoldMultipleFramesVisible(!irisOrOsiris);
+    m_view->setOutputInCm1Visible(!irisOrOsiris);
+    m_view->setGroupOutputDropdownVisible(!irisOrOsiris);
+    m_view->setGroupOutputCheckBoxVisible(irisOrOsiris);
   }
 }
 
@@ -149,7 +161,9 @@ void IETPresenter::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
   if (!error) {
-    m_outputWorkspaces = m_model->groupWorkspaces(m_outputGroupName, m_view->getGroupOutputOption());
+    InstrumentData instrumentData = getInstrumentData();
+    m_outputWorkspaces = m_model->groupWorkspaces(m_outputGroupName, instrumentData.getInstrument(),
+                                                  m_view->getGroupOutputOption(), m_view->getGroupOutputCheckbox());
     m_pythonExportWsName = m_outputWorkspaces[0];
 
     if (m_outputWorkspaces.size() != 0) {

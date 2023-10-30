@@ -37,13 +37,14 @@ public:
 
   std::vector<std::string> validateRunData(IETRunData const &runData, std::size_t const &defaultSpectraMin,
                                            std::size_t const &defaultSpectraMax);
-  std::vector<std::string> validatePlotData(IETPlotData plotData);
+  std::vector<std::string> validatePlotData(IETPlotData const &plotData);
 
-  std::string runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData instData,
-                              IETRunData runParams);
-  void plotRawFile(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData instData, IETPlotData plotData);
+  std::string runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData const &instData,
+                              IETRunData const &runParams);
+  void plotRawFile(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData const &instData,
+                   IETPlotData const &plotData);
 
-  void saveWorkspace(std::string const &workspaceName, IETSaveData saveData);
+  void saveWorkspace(std::string const &workspaceName, IETSaveData const &saveData);
   void saveDaveGroup(std::string const &workspaceName, std::string const &outputName);
   void saveAclimax(std::string const &workspaceName, std::string const &outputName,
                    std::string const &xUnits = "DeltaE_inWavenumber");
@@ -53,12 +54,13 @@ public:
   std::pair<std::string, std::string> createGrouping(IETGroupingData const &groupingData,
                                                      IETConversionData const &conversionParams);
 
-  std::string getDetectorGroupingString(int spectraMin, int spectraMax, int nGroups);
+  std::string getDetectorGroupingString(int const spectraMin, int const spectraMax, int const nGroups);
   void createGroupingWorkspace(std::string const &instrumentName, std::string const &analyser,
                                std::string const &customGrouping, std::string const &outputName);
   double loadDetailedBalance(std::string const &filename);
 
-  std::vector<std::string> groupWorkspaces(std::string groupName, std::string groupOption);
+  std::vector<std::string> groupWorkspaces(std::string const &groupName, std::string const &instrument,
+                                           std::string const &groupOption, bool const shouldGroup);
   void ungroupWorkspace(std::string const &workspaceName);
   void groupWorkspaceBySampleChanger(std::string const &workspaceName);
 };
