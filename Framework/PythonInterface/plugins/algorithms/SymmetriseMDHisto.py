@@ -79,7 +79,7 @@ class SymmetriseMDHisto(PythonAlgorithm):
                 issues["InputWorkspace"] = "Workspace must have same binning along all dimensions."
         # check errors exist if WeightedAverage==True (would produce all NaNs in signal)
         if self.getProperty("WeightedAverage").value:
-            if not ws.getErrorArraySquared().any():
+            if not ws.getErrorSquaredArray().any():
                 issues["WeightedAverage"] = "Cannot perform weighted average on data with no errors."
         return issues
 
@@ -115,12 +115,11 @@ class SymmetriseMDHisto(PythonAlgorithm):
             if weighted_average:
                 with np.errstate(divide="ignore", invalid="ignore"):
                     weights_tmp = 1.0 / error_sq_tmp
-                weights_tmp[~np.isfinite(weights)] = 0
+                weights_tmp[~np.isfinite(weights_tmp)] = 0
                 signal_tmp *= weights_tmp
             else:
                 error_sq += error_sq_tmp
                 weights_tmp = (abs(signal_tmp) > 1e-10).astype(int)  #  number of non-empty bins
-
             signal += signal_tmp
             weights += weights_tmp
 
