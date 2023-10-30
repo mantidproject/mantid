@@ -12,7 +12,7 @@ Description
 This algorithm is used to generate a background for HFIR monochromatic diffraction data. This algorithm wraps
 `Scipy.ndimage.percentile_filter <https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.percentile_filter.html>`_
 to generate the background for the input workspace. In the case that BackgroundWindowSize is -1,
-`Numpy.percentile <https://numpy.org/doc/stable/reference/generated/numpy.percentile.html>` is used to generate the background as
+`Numpy.percentile <https://numpy.org/doc/stable/reference/generated/numpy.percentile.html>`_ is used to generate the background as
 it is much faster.
 
 

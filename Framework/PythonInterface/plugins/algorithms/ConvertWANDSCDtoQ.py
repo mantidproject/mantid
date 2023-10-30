@@ -38,8 +38,8 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             "Workspace containing the UB matrix to use",
         )
         self.declareProperty(
-            WorkspaceProperty("BackgroundWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
-            "An optional input background workspace",
+            IMDHistoWorkspaceProperty("BackgroundWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            "An optional Background Workspace",
         )
         self.declareProperty("Wavelength", 1.488, validator=FloatBoundedValidator(0.0), doc="Wavelength to set the workspace")
         self.declareProperty("S1Offset", 0.0, doc="Offset to apply (in degrees) to the s1 of the input workspace")
@@ -92,7 +92,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             "SymmetryOperations",
             "",
             direction=Direction.Input,
-            doc="space group name, point group name, or list individual symmetries used to perform the symmetrization",
+            doc="Space Group name, Point Group name, or list individual Symmetries used to perform the symmetrization",
         )
         self.declareProperty(
             WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output), "Output Workspace"
