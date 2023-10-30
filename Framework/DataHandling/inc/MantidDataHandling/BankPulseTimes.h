@@ -45,6 +45,9 @@ public:
   std::vector<int> periodNumbers;
 
 private:
+  template <typename ValueType>
+  void readData(::NeXus::File &file, int64_t numValues, Mantid::Types::Core::DateAndTime &start);
+
   mutable int8_t m_sorting_info;
   mutable std::mutex m_sortingMutex;
 };
