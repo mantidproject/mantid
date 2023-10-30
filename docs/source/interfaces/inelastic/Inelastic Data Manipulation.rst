@@ -353,7 +353,7 @@ Elwin Example Workflow
 ~~~~~~~~~~~~~~~~~~~~~~
 The Elwin tab operates on ``_red`` and ``_sqw`` files. The files used in this workflow can
 be produced using the run numbers 104371-104375 on the
-:doc:`Indirect Data Reduction <Indirect Data Reduction>` interface in the ISIS Energy
+:ref:`Indirect Data Reduction <interface-indirect-data-reduction>` interface in the ISIS Energy
 Transfer tab. The instrument used to produce these files is OSIRIS, the analyser is graphite
 and the reflection is 002.
 
@@ -451,7 +451,7 @@ I(Q, t) Example Workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~
 The I(Q, t) tab allows ``_red`` and ``_sqw`` for it's sample file, and allows ``_red``, ``_sqw`` and
 ``_res`` for the resolution file. The sample file used in this workflow can be produced using the run
-number 26176 on the :doc:`Indirect Data Reduction <Indirect Data Reduction>` interface in the ISIS
+number 26176 on the :ref:`Indirect Data Reduction <interface-indirect-data-reduction>` interface in the ISIS
 Energy Transfer tab. The resolution file is created in the ISIS Calibration tab using the run number
 26173. The instrument used to produce these files is IRIS, the analyser is graphite
 and the reflection is 002.
