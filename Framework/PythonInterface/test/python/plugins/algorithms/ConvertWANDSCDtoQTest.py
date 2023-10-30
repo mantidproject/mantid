@@ -4,7 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import ConvertWANDSCDtoQ, CreateMDHistoWorkspace, CreateSingleValuedWorkspace, SetUB, mtd, SetGoniometer
+from mantid.simpleapi import (
+    ConvertWANDSCDtoQ,
+    CreateMDHistoWorkspace,
+    CreateSingleValuedWorkspace,
+    SetUB,
+    mtd,
+    SetGoniometer,
+    HFIRGenerateGoniometerIndependentBackground,
+)
 from mantid.kernel import FloatTimeSeriesProperty
 import unittest
 import numpy as np
@@ -220,7 +228,6 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         ConvertWANDSCDtoQTest_out.delete()
 
     def test_errorbar_scale_NormaliseBy(self):
-
         ConvertWANDSCDtoQTest_None = ConvertWANDSCDtoQ(
             "ConvertWANDSCDtoQTest_data",
             NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
@@ -256,6 +263,58 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         Test_Time_sig = np.sqrt(ConvertWANDSCDtoQTest_Time.getErrorSquaredArray())
 
         self.assertAlmostEqual(np.nanmax(Test_None_intens / Test_None_sig), np.nanmax(Test_Time_intens / Test_Time_sig))
+
+    def test_with_background(self):
+        HFIRGenerateGoniometerIndependentBackground("ConvertWANDSCDtoQTest_data", OutputWorkspace="ConvertWANDSCDtoQTest_background")
+        ConvertWANDSCDtoQTest_Bkg = ConvertWANDSCDtoQ(
+            "ConvertWANDSCDtoQTest_data",
+            NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
+            BackgroundWorkspace="ConvertWANDSCDtoQTest_background",
+            Frame="HKL",
+            KeepTemporaryWorkspaces=True,
+            NormaliseBy="None",
+            BinningDim0="-8.08,8.08,101",
+            BinningDim1="-8.08,8.08,101",
+            BinningDim2="-8.08,8.08,101",
+            Uproj="1,1,0",
+            Vproj="1,-1,0",
+            Wproj="0,0,1",
+        )
+
+        self.assertTrue(mtd.doesExist("ConvertWANDSCDtoQTest_Bkg_data"))
+        self.assertTrue(mtd.doesExist("ConvertWANDSCDtoQTest_Bkg_normalization"))
+        self.assertTrue(mtd.doesExist("ConvertWANDSCDtoQTest_Bkg_background_data"))
+        self.assertTrue(mtd.doesExist("ConvertWANDSCDtoQTest_Bkg_background_normalization"))
+
+    def test_with_symmetry(self):
+        ConvertWANDSCDtoQTest_no_sym = ConvertWANDSCDtoQ(
+            "ConvertWANDSCDtoQTest_data",
+            NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
+            Frame="HKL",
+            BinningDim0="-8.08,8.08,101",
+            BinningDim1="-8.08,8.08,101",
+            BinningDim2="-8.08,8.08,101",
+            Uproj="-1,0,0",
+            Vproj="0,-1,0",
+            Wproj="0,0,-1",
+        )
+
+        ConvertWANDSCDtoQTest_sym = ConvertWANDSCDtoQ(
+            "ConvertWANDSCDtoQTest_data",
+            NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
+            Frame="HKL",
+            SymmetryOperations="-x,-y,-z",
+            BinningDim0="-8.08,8.08,101",
+            BinningDim1="-8.08,8.08,101",
+            BinningDim2="-8.08,8.08,101",
+            Uproj="1,0,0",
+            Vproj="0,1,0",
+            Wproj="0,0,1",
+        )
+
+        s = ConvertWANDSCDtoQTest_sym.getSignalArray()
+        n = ConvertWANDSCDtoQTest_no_sym.getSignalArray()
+        self.assertTrue(np.array_equal(s, n, equal_nan=True))
 
 
 if __name__ == "__main__":
