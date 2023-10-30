@@ -651,7 +651,7 @@ void TimeSplitter::splitEventVec(const std::function<const DateAndTime(const Eve
     itSplitter++;
   }
 
-  // copy all events after last splitter to NO_TARGET -- TODO -- IS THIS NECESSARY?
+  // copy all events after last splitter to NO_TARGET
   if (itEvent != itEventEnd) {
     partial = partials.find(TimeSplitter::NO_TARGET);
     if (partial != partials.end()) {
