@@ -14,6 +14,29 @@
 
 using namespace Mantid::API;
 
+namespace {
+
+IAlgorithm_sptr calculateFlatBackgroundAlgorithm(double const startX, double const endX,
+                                                 std::string const &outputWorkspace) {
+  auto algorithm = AlgorithmManager::Instance().create("CalculateFlatBackground");
+  algorithm->initialize();
+  algorithm->setProperty("Mode", "Mean");
+  algorithm->setProperty("StartX", startX);
+  algorithm->setProperty("EndX", endX);
+  algorithm->setProperty("OutputWorkspace", outputWorkspace);
+  return algorithm;
+}
+
+IAlgorithm_sptr groupDetectorsAlgorithm(std::vector<int> const &detectorList, std::string const &outputWorkspace) {
+  auto algorithm = AlgorithmManager::Instance().create("GroupDetectors");
+  algorithm->initialize();
+  algorithm->setProperty("DetectorList", detectorList);
+  algorithm->setProperty("OutputWorkspace", outputWorkspace);
+  return algorithm;
+}
+
+} // namespace
+
 namespace MantidQt::CustomInterfaces {
 IETModel::IETModel() {}
 
@@ -248,37 +271,20 @@ void IETModel::plotRawFile(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
 
   auto backgroundData = plotParams.getBackgroundData();
   if (backgroundData.getRemoveBackground()) {
-    std::vector<double> range;
-    range.emplace_back(backgroundData.getBackgroundStart());
-    range.emplace_back(backgroundData.getBackgroundEnd());
-
-    IAlgorithm_sptr calcBackAlg = AlgorithmManager::Instance().create("CalculateFlatBackground");
-    calcBackAlg->initialize();
-    calcBackAlg->setProperty("OutputWorkspace", name + "_bg");
-    calcBackAlg->setProperty("Mode", "Mean");
-    calcBackAlg->setProperty("StartX", range[0]);
-    calcBackAlg->setProperty("EndX", range[1]);
+    auto calcBackAlg = calculateFlatBackgroundAlgorithm(backgroundData.getBackgroundStart(),
+                                                        backgroundData.getBackgroundEnd(), name + "_bg");
     batchAlgoRunner->addAlgorithm(calcBackAlg, std::make_unique<Mantid::API::AlgorithmRuntimeProps>(*inputFromRebin));
 
     auto inputFromCalcBG = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
     inputFromCalcBG->setPropertyValue("InputWorkspace", name + "_bg");
 
-    IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().create("GroupDetectors");
-    groupAlg->initialize();
-    groupAlg->setProperty("OutputWorkspace", name + "_grp");
-    groupAlg->setProperty("DetectorList", detectorList);
+    auto groupAlg = groupDetectorsAlgorithm(detectorList, name + "_grp");
     batchAlgoRunner->addAlgorithm(groupAlg, std::move(inputFromCalcBG));
 
-    IAlgorithm_sptr rawGroupAlg = AlgorithmManager::Instance().create("GroupDetectors");
-    rawGroupAlg->initialize();
-    rawGroupAlg->setProperty("OutputWorkspace", name + "_grp_raw");
-    rawGroupAlg->setProperty("DetectorList", detectorList);
+    auto rawGroupAlg = groupDetectorsAlgorithm(detectorList, name + "_grp_raw");
     batchAlgoRunner->addAlgorithm(rawGroupAlg, std::move(inputFromRebin));
   } else {
-    IAlgorithm_sptr rawGroupAlg = AlgorithmManager::Instance().create("GroupDetectors");
-    rawGroupAlg->initialize();
-    rawGroupAlg->setProperty("OutputWorkspace", name + "_grp");
-    rawGroupAlg->setProperty("DetectorList", detectorList);
+    auto rawGroupAlg = groupDetectorsAlgorithm(detectorList, name + "_grp");
     batchAlgoRunner->addAlgorithm(rawGroupAlg, std::move(inputFromRebin));
   }
 
