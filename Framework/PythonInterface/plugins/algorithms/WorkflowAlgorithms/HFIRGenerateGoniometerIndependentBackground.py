@@ -18,7 +18,7 @@ class HFIRGenerateGoniometerIndependentBackground(PythonAlgorithm):
         return "Diffraction\\Reduction;Diffraction\\Utility"
 
     def summary(self):
-        return "Interpolates the background temperature for two empty container runs."
+        return "Generates a background from a 3 dimensional MDHistoWorkspace."
 
     def version(self):
         return 1
