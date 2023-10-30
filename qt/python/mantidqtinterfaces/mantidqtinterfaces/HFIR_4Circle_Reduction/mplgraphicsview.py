@@ -1195,7 +1195,7 @@ class Qt4MplCanvas(FigureCanvas):
 
             for i_r in range(1, len(r)):
                 # remove the un-defined extra lines
-                self.axes.lines.remove(r[i_r])
+                r[i_r].remove()
         # END-IF-ELSE
 
         if annotation_list is not None and len(annotation_list) == len(vec_y):
@@ -1378,7 +1378,7 @@ class Qt4MplCanvas(FigureCanvas):
                 continue
             if isinstance(plot, tuple) is False:
                 try:
-                    self.axes.lines.remove(plot)
+                    plot.remove()
                 except ValueError as e:
                     print(
                         "[Error] Plot %s is not in axes.lines which has %d lines. Error message: %s"
@@ -1569,7 +1569,7 @@ class Qt4MplCanvas(FigureCanvas):
 
         if plot_key in self._lineDict:
             try:
-                self.axes.lines.remove(self._lineDict[plot_key])
+                self._lineDict[plot_key].remove()
             except ValueError as r_error:
                 error_message = "Unable to remove to 1D line %s (ID=%d) due to %s." % (
                     str(self._lineDict[plot_key]),
