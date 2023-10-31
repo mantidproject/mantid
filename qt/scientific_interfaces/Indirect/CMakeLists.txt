@@ -103,6 +103,7 @@ set(SRC_FILES
     Reduction/ISISEnergyTransferModel.cpp
     Reduction/ISISEnergyTransferView.cpp
     Reduction/ISISEnergyTransferPresenter.cpp
+    Reduction/ReductionAlgorithmUtils.cpp
 )
 
 set(MOC_FILES
@@ -219,6 +220,7 @@ set(INC_FILES
     Reduction/ISISEnergyTransferValidator.h
     Reduction/ISISEnergyTransferModelUtils.h
     Reduction/ISISEnergyTransferModel.h
+    Reduction/ReductionAlgorithmUtils.h
 )
 
 set(UI_FILES

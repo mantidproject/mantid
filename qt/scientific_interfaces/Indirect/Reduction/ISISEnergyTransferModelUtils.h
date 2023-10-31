@@ -14,6 +14,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
 
+#include <filesystem>
+
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
@@ -30,13 +32,6 @@ WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
 }
 
-MantidQt::API::IConfiguredAlgorithm_sptr configureAlgorithm(std::string const &algorithmName,
-                                                            std::unique_ptr<IAlgorithmRuntimeProps> properties,
-                                                            bool const validatePropsPreExec = true) {
-  return std::make_unique<MantidQt::API::ConfiguredAlgorithm>(AlgorithmManager::Instance().create(algorithmName),
-                                                              std::move(properties), validatePropsPreExec);
-}
-
 IAlgorithm_sptr loadAlgorithm(std::string const &filename, std::string const &outputName) {
   auto loader = AlgorithmManager::Instance().create("Load");
   loader->initialize();
@@ -50,6 +45,18 @@ void deleteWorkspace(std::string const &name) {
   deleter->initialize();
   deleter->setProperty("Workspace", name);
   deleter->execute();
+}
+
+std::tuple<std::string, std::string> parseInputFiles(std::string const &inputFiles) {
+  std::string rawFile = inputFiles.substr(0, inputFiles.find(',')); // getting the name of the first file
+  std::filesystem::path rawFileInfo(rawFile);
+  return {rawFile, rawFileInfo.filename().string()};
+}
+
+std::vector<int> createDetectorList(int const spectraMin, int const spectraMax) {
+  std::vector<int> detectorList(spectraMax - spectraMin + 1);
+  std::iota(detectorList.begin(), detectorList.end(), spectraMin);
+  return detectorList;
 }
 
 std::string createRangeString(std::size_t const &from, std::size_t const &to) {
