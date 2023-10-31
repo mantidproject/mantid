@@ -17,6 +17,7 @@ from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties, curve_has_errors, remove_curve_from_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
+from mantid.kernel import logger
 
 
 class CurvesTabWidgetPresenter:
@@ -204,7 +205,10 @@ class CurvesTabWidgetPresenter:
         ax = self.get_selected_ax()
         # Update the legend and redraw
         FigureErrorsManager.update_limits_and_legend(ax, self.legend_props)
-        ax.figure.canvas.draw()
+        try:
+            ax.figure.canvas.draw()
+        except ValueError as ex:
+            logger.error("Error redrawing figure canvas: \n" + str(ex))
 
         # Remove the curve from the curve selection list
         if self.remove_selected_curve_list_entry():
