@@ -31,9 +31,10 @@ WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
 }
 
 MantidQt::API::IConfiguredAlgorithm_sptr configureAlgorithm(std::string const &algorithmName,
-                                                            std::unique_ptr<IAlgorithmRuntimeProps> properties) {
+                                                            std::unique_ptr<IAlgorithmRuntimeProps> properties,
+                                                            bool const validatePropsPreExec = true) {
   return std::make_unique<MantidQt::API::ConfiguredAlgorithm>(AlgorithmManager::Instance().create(algorithmName),
-                                                              std::move(properties));
+                                                              std::move(properties), validatePropsPreExec);
 }
 
 IAlgorithm_sptr loadAlgorithm(std::string const &filename, std::string const &outputName) {

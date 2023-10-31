@@ -23,10 +23,9 @@ std::tuple<std::string, std::string> parseInputFiles(std::string const &inputFil
   return {rawFile, rawFileInfo.filename().string()};
 }
 
-MantidQt::API::IConfiguredAlgorithm_sptr loadRawConfiguredAlg(std::string const &filename,
-                                                              std::string const &instrument, int const spectraMin,
-                                                              int const spectraMax,
-                                                              std::string const &outputWorkspace) {
+MantidQt::API::IConfiguredAlgorithm_sptr loadConfiguredAlg(std::string const &filename, std::string const &instrument,
+                                                           int const spectraMin, int const spectraMax,
+                                                           std::string const &outputWorkspace) {
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   AlgorithmProperties::update("Filename", filename, *properties);
   AlgorithmProperties::update("OutputWorkspace", outputWorkspace, *properties);
@@ -35,7 +34,7 @@ MantidQt::API::IConfiguredAlgorithm_sptr loadRawConfiguredAlg(std::string const 
     AlgorithmProperties::update("SpectrumMin", std::to_string(spectraMin), *properties);
     AlgorithmProperties::update("SpectrumMax", std::to_string(spectraMax), *properties);
   }
-  return MantidQt::CustomInterfaces::configureAlgorithm("LoadRaw", std::move(properties));
+  return MantidQt::CustomInterfaces::configureAlgorithm("Load", std::move(properties), false);
 }
 
 MantidQt::API::IConfiguredAlgorithm_sptr calculateFlatBackgroundConfiguredAlg(std::string const &inputWorkspace,
@@ -280,7 +279,7 @@ IETModel::plotRawAlgorithmQueue(std::string const &rawFile, std::string const &b
                                 std::string const &instrumentName, int const spectraMin, int const spectraMax,
                                 IETBackgroundData const &backgroundData) const {
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithmDeque;
-  algorithmDeque.emplace_back(loadRawConfiguredAlg(rawFile, instrumentName, spectraMin, spectraMax, basename));
+  algorithmDeque.emplace_back(loadConfiguredAlg(rawFile, instrumentName, spectraMin, spectraMax, basename));
 
   std::vector<int> detectorList;
   for (auto i = spectraMin; i <= spectraMax; i++)
