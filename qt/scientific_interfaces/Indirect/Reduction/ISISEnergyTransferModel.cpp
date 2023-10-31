@@ -17,9 +17,16 @@ using namespace Mantid::API;
 
 namespace {
 
-std::unique_ptr<AlgorithmRuntimeProps> loadRawProperties(std::string const &filename, std::string const &instrument,
-                                                         int const spectraMin, int const spectraMax,
-                                                         std::string const &outputWorkspace) {
+std::tuple<std::string, std::string> parseInputFiles(std::string const &inputFiles) {
+  std::string rawFile = inputFiles.substr(0, inputFiles.find(',')); // getting the name of the first file
+  std::filesystem::path rawFileInfo(rawFile);
+  return {rawFile, rawFileInfo.filename().string()};
+}
+
+MantidQt::API::IConfiguredAlgorithm_sptr loadRawConfiguredAlg(std::string const &filename,
+                                                              std::string const &instrument, int const spectraMin,
+                                                              int const spectraMax,
+                                                              std::string const &outputWorkspace) {
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   AlgorithmProperties::update("Filename", filename, *properties);
   AlgorithmProperties::update("OutputWorkspace", outputWorkspace, *properties);
@@ -28,29 +35,29 @@ std::unique_ptr<AlgorithmRuntimeProps> loadRawProperties(std::string const &file
     AlgorithmProperties::update("SpectrumMin", std::to_string(spectraMin), *properties);
     AlgorithmProperties::update("SpectrumMax", std::to_string(spectraMax), *properties);
   }
-  return properties;
+  return MantidQt::CustomInterfaces::configureAlgorithm("LoadRaw", std::move(properties));
 }
 
-std::unique_ptr<AlgorithmRuntimeProps> calculateFlatBackgroundProperties(std::string const &inputWorkspace,
-                                                                         double const startX, double const endX,
-                                                                         std::string const &outputWorkspace) {
+MantidQt::API::IConfiguredAlgorithm_sptr calculateFlatBackgroundConfiguredAlg(std::string const &inputWorkspace,
+                                                                              double const startX, double const endX,
+                                                                              std::string const &outputWorkspace) {
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
   AlgorithmProperties::update("Mode", "Mean", *properties);
   AlgorithmProperties::update("StartX", startX, *properties);
   AlgorithmProperties::update("EndX", endX, *properties);
   AlgorithmProperties::update("OutputWorkspace", outputWorkspace, *properties);
-  return properties;
+  return MantidQt::CustomInterfaces::configureAlgorithm("CalculateFlatBackground", std::move(properties));
 }
 
-std::unique_ptr<AlgorithmRuntimeProps> groupDetectorsProperties(std::string const &inputWorkspace,
-                                                                std::vector<int> const &detectorList,
-                                                                std::string const &outputWorkspace) {
+MantidQt::API::IConfiguredAlgorithm_sptr groupDetectorsConfiguredAlg(std::string const &inputWorkspace,
+                                                                     std::vector<int> const &detectorList,
+                                                                     std::string const &outputWorkspace) {
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
   AlgorithmProperties::update("DetectorList", detectorList, *properties);
   AlgorithmProperties::update("OutputWorkspace", outputWorkspace, *properties);
-  return properties;
+  return MantidQt::CustomInterfaces::configureAlgorithm("GroupDetectors", std::move(properties));
 }
 
 } // namespace
@@ -259,46 +266,34 @@ std::vector<std::string> IETModel::validatePlotData(IETPlotData const &plotParam
 
 std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> IETModel::plotRawFile(InstrumentData const &instData,
                                                                            IETPlotData const &plotParams) {
-  const std::string inputFiles = plotParams.getInputData().getInputFiles();
+  auto const [rawFile, basename] = parseInputFiles(plotParams.getInputData().getInputFiles());
 
-  int spectraMin = plotParams.getConversionData().getSpectraMin();
-  int spectraMax = plotParams.getConversionData().getSpectraMax();
+  auto const spectraMin = plotParams.getConversionData().getSpectraMin();
+  auto const spectraMax = plotParams.getConversionData().getSpectraMax();
 
-  std::string rawFile = inputFiles.substr(0, inputFiles.find(',')); // getting the name of the first file
-  std::filesystem::path rawFileInfo(rawFile);
-  std::string name = rawFileInfo.filename().string();
+  return plotRawAlgorithmQueue(rawFile, basename, instData.getInstrument(), spectraMin, spectraMax,
+                               plotParams.getBackgroundData());
+}
 
+std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
+IETModel::plotRawAlgorithmQueue(std::string const &rawFile, std::string const &basename,
+                                std::string const &instrumentName, int const spectraMin, int const spectraMax,
+                                IETBackgroundData const &backgroundData) const {
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithmDeque;
-
-  auto loadProps = loadRawProperties(rawFile, instData.getInstrument(), spectraMin, spectraMax, name);
-  auto loadAlg = configureAlgorithm("LoadRaw", std::move(loadProps));
-  algorithmDeque.emplace_back(std::move(loadAlg));
+  algorithmDeque.emplace_back(loadRawConfiguredAlg(rawFile, instrumentName, spectraMin, spectraMax, basename));
 
   std::vector<int> detectorList;
   for (auto i = spectraMin; i <= spectraMax; i++)
     detectorList.emplace_back(i);
 
-  auto backgroundData = plotParams.getBackgroundData();
   if (backgroundData.getRemoveBackground()) {
-
-    auto properties3 = calculateFlatBackgroundProperties(name, backgroundData.getBackgroundStart(),
-                                                         backgroundData.getBackgroundEnd(), name + "_bg");
-    auto alg1 = configureAlgorithm("CalculateFlatBackground", std::move(properties3));
-
-    auto properties = groupDetectorsProperties(name + "_bg", detectorList, name + "_grp");
-    auto alg2 = configureAlgorithm("GroupDetectors", std::move(properties));
-
-    auto properties2 = groupDetectorsProperties(name, detectorList, name + "_grp_raw");
-    auto alg3 = configureAlgorithm("GroupDetectors", std::move(properties2));
-
-    algorithmDeque.emplace_back(std::move(alg1));
-    algorithmDeque.emplace_back(std::move(alg2));
-    algorithmDeque.emplace_back(std::move(alg3));
+    algorithmDeque.emplace_back(calculateFlatBackgroundConfiguredAlg(
+        basename, backgroundData.getBackgroundStart(), backgroundData.getBackgroundEnd(), basename + "_bg"));
+    algorithmDeque.emplace_back(groupDetectorsConfiguredAlg(basename + "_bg", detectorList, basename + "_grp"));
+    algorithmDeque.emplace_back(groupDetectorsConfiguredAlg(basename, detectorList, basename + "_grp_raw"));
 
   } else {
-    auto properties = groupDetectorsProperties(name, detectorList, name + "_grp");
-    auto alg1 = configureAlgorithm("GroupDetectors", std::move(properties));
-    algorithmDeque.emplace_back(std::move(alg1));
+    algorithmDeque.emplace_back(groupDetectorsConfiguredAlg(basename, detectorList, basename + "_grp"));
   }
   return algorithmDeque;
 }

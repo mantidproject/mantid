@@ -63,6 +63,11 @@ public:
                                            std::string const &groupOption, bool const shouldGroup);
   void ungroupWorkspace(std::string const &workspaceName);
   void groupWorkspaceBySampleChanger(std::string const &workspaceName);
+
+private:
+  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
+  plotRawAlgorithmQueue(std::string const &rawFile, std::string const &basename, std::string const &instrumentName,
+                        int const spectraMin, int const spectraMax, IETBackgroundData const &backgroundData) const;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
