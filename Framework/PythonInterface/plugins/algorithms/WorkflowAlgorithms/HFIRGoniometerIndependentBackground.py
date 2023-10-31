@@ -13,7 +13,7 @@ import numpy as np
 import scipy.ndimage
 
 
-class HFIRGenerateGoniometerIndependentBackground(PythonAlgorithm):
+class HFIRGoniometerIndependentBackground(PythonAlgorithm):
     def category(self):
         return "Diffraction\\Reduction;Diffraction\\Utility"
 
@@ -83,4 +83,4 @@ class HFIRGenerateGoniometerIndependentBackground(PythonAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(HFIRGenerateGoniometerIndependentBackground)
+AlgorithmFactory.subscribe(HFIRGoniometerIndependentBackground)

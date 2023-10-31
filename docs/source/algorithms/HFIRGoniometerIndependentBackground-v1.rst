@@ -37,7 +37,7 @@ Usage
 
 
    # Perform the background interpolation
-   outputWS = HFIRGenerateGoniometerIndependentBackground(workspace, BackgroundWindowSize=10)
+   outputWS = HFIRGoniometerIndependentBackground(workspace, BackgroundWindowSize=10)
 
    # Check output
    print("Shape of the resulting Signal is: {}".format(outputWS.getSignalArray().shape))

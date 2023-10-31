@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
-from mantid.simpleapi import DeleteWorkspace, HFIRGenerateGoniometerIndependentBackground, CreateMDHistoWorkspace
+from mantid.simpleapi import DeleteWorkspace, HFIRGoniometerIndependentBackground, CreateMDHistoWorkspace
 import numpy as np
 import scipy.ndimage
 
 
-class HFIRGenerateGoniometerIndependentBackgroundTest(unittest.TestCase):
+class HFIRGoniometerIndependentBackgroundTest(unittest.TestCase):
     def setUp(self):
         self.signal = np.random.random((100, 100, 100))
         _max = self.signal.max()
@@ -35,9 +35,8 @@ class HFIRGenerateGoniometerIndependentBackgroundTest(unittest.TestCase):
         signal = self.workspace.getSignalArray().copy()
         expected = scipy.ndimage.percentile_filter(signal, 50, size=(1, 1, 25), mode="nearest")
 
-        outputWS = HFIRGenerateGoniometerIndependentBackground(self.workspace, BackgroundLevel=50, BackgroundWindowSize=25)
+        outputWS = HFIRGoniometerIndependentBackground(self.workspace, BackgroundLevel=50, BackgroundWindowSize=25)
         result = outputWS.getSignalArray().copy()
-        print(result.shape)
         self.assertTrue(np.array_equal(expected, result))
 
     def test_generate_background_np(self):
@@ -45,9 +44,8 @@ class HFIRGenerateGoniometerIndependentBackgroundTest(unittest.TestCase):
         bkg = np.percentile(signal, 50, axis=2)
         expected = np.repeat(bkg[:, :, np.newaxis], signal.shape[2], axis=2)
 
-        outputWS = HFIRGenerateGoniometerIndependentBackground(self.workspace, BackgroundLevel=50, BackgroundWindowSize=-1)
+        outputWS = HFIRGoniometerIndependentBackground(self.workspace, BackgroundLevel=50, BackgroundWindowSize=-1)
         result = outputWS.getSignalArray().copy()
-        print(result.shape)
         self.assertTrue(np.array_equal(expected, result))
 
 

@@ -236,7 +236,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/FindPeaksAutomatic.py
     algorithms/WorkflowAlgorithms/FitGaussianPeaks.py
     algorithms/WorkflowAlgorithms/FlatPlatePaalmanPingsCorrection.py
-    algorithms/WorkflowAlgorithms/HFIRGenerateGoniometerIndependentBackground.py
+    algorithms/WorkflowAlgorithms/HFIRGoniometerIndependentBackground.py
     algorithms/WorkflowAlgorithms/HFIRSANSReduction.py
     algorithms/WorkflowAlgorithms/ILL_utilities.py
     algorithms/WorkflowAlgorithms/ISISIndirectDiffractionReduction.py

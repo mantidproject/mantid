@@ -11,7 +11,7 @@ from mantid.simpleapi import (
     SetUB,
     mtd,
     SetGoniometer,
-    HFIRGenerateGoniometerIndependentBackground,
+    HFIRGoniometerIndependentBackground,
 )
 from mantid.kernel import FloatTimeSeriesProperty
 import unittest
@@ -265,7 +265,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         self.assertAlmostEqual(np.nanmax(Test_None_intens / Test_None_sig), np.nanmax(Test_Time_intens / Test_Time_sig))
 
     def test_with_background(self):
-        HFIRGenerateGoniometerIndependentBackground("ConvertWANDSCDtoQTest_data", OutputWorkspace="ConvertWANDSCDtoQTest_background")
+        HFIRGoniometerIndependentBackground("ConvertWANDSCDtoQTest_data", OutputWorkspace="ConvertWANDSCDtoQTest_background")
         ConvertWANDSCDtoQTest_Bkg = ConvertWANDSCDtoQ(
             "ConvertWANDSCDtoQTest_data",
             NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
