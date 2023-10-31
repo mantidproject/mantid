@@ -17,6 +17,20 @@ using namespace Mantid::API;
 
 namespace {
 
+std::unique_ptr<AlgorithmRuntimeProps> loadRawProperties(std::string const &filename, std::string const &instrument,
+                                                         int const spectraMin, int const spectraMax,
+                                                         std::string const &outputWorkspace) {
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  AlgorithmProperties::update("Filename", filename, *properties);
+  AlgorithmProperties::update("OutputWorkspace", outputWorkspace, *properties);
+  if (instrument == "TFXA") {
+    AlgorithmProperties::update("LoadLogFiles", false, *properties);
+    AlgorithmProperties::update("SpectrumMin", std::to_string(spectraMin), *properties);
+    AlgorithmProperties::update("SpectrumMax", std::to_string(spectraMax), *properties);
+  }
+  return properties;
+}
+
 std::unique_ptr<AlgorithmRuntimeProps> calculateFlatBackgroundProperties(std::string const &inputWorkspace,
                                                                          double const startX, double const endX,
                                                                          std::string const &outputWorkspace) {
@@ -254,21 +268,16 @@ std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> IETModel::plotRawFile(Instr
   std::filesystem::path rawFileInfo(rawFile);
   std::string name = rawFileInfo.filename().string();
 
-  auto loadAlg = loadAlgorithm(rawFile, name);
-  if (instData.getInstrument() != "TOSCA") {
-    if (loadAlg->existsProperty("LoadLogFiles")) {
-      loadAlg->setProperty("LoadLogFiles", false);
-    }
-    loadAlg->setPropertyValue("SpectrumMin", std::to_string(spectraMin));
-    loadAlg->setPropertyValue("SpectrumMax", std::to_string(spectraMax));
-  }
-  loadAlg->execute();
+  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithmDeque;
+
+  auto loadProps = loadRawProperties(rawFile, instData.getInstrument(), spectraMin, spectraMax, name);
+  auto loadAlg = configureAlgorithm("LoadRaw", std::move(loadProps));
+  algorithmDeque.emplace_back(std::move(loadAlg));
 
   std::vector<int> detectorList;
   for (auto i = spectraMin; i <= spectraMax; i++)
     detectorList.emplace_back(i);
 
-  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithmDeque;
   auto backgroundData = plotParams.getBackgroundData();
   if (backgroundData.getRemoveBackground()) {
 
