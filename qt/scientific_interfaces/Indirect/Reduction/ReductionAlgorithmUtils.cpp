@@ -7,6 +7,9 @@
 #include "ReductionAlgorithmUtils.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
+#include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
 
 namespace MantidQt::CustomInterfaces {
 
@@ -27,8 +30,8 @@ MantidQt::API::IConfiguredAlgorithm_sptr loadConfiguredAlg(std::string const &fi
   AlgorithmProperties::update("OutputWorkspace", outputWorkspace, *properties);
   if (instrument == "TFXA") {
     AlgorithmProperties::update("LoadLogFiles", false, *properties);
-    AlgorithmProperties::update("SpectrumMin", std::to_string(detectorList.front()), *properties);
-    AlgorithmProperties::update("SpectrumMax", std::to_string(detectorList.back()), *properties);
+    AlgorithmProperties::update("SpectrumMin", detectorList.front(), *properties);
+    AlgorithmProperties::update("SpectrumMax", detectorList.back(), *properties);
   }
   return configureAlgorithm("Load", std::move(properties), false);
 }
@@ -50,7 +53,7 @@ MantidQt::API::IConfiguredAlgorithm_sptr groupDetectorsConfiguredAlg(std::string
                                                                      std::string const &outputWorkspace) {
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
-  AlgorithmProperties::update("DetectorList", detectorList, *properties);
+  AlgorithmProperties::update("DetectorList", detectorList, *properties, false);
   AlgorithmProperties::update("OutputWorkspace", outputWorkspace, *properties);
   return configureAlgorithm("GroupDetectors", std::move(properties));
 }
