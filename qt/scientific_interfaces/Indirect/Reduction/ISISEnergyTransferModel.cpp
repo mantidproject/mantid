@@ -24,15 +24,15 @@ std::tuple<std::string, std::string> parseInputFiles(std::string const &inputFil
 }
 
 MantidQt::API::IConfiguredAlgorithm_sptr loadConfiguredAlg(std::string const &filename, std::string const &instrument,
-                                                           int const spectraMin, int const spectraMax,
+                                                           std::vector<int> const &detectorList,
                                                            std::string const &outputWorkspace) {
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   AlgorithmProperties::update("Filename", filename, *properties);
   AlgorithmProperties::update("OutputWorkspace", outputWorkspace, *properties);
   if (instrument == "TFXA") {
     AlgorithmProperties::update("LoadLogFiles", false, *properties);
-    AlgorithmProperties::update("SpectrumMin", std::to_string(spectraMin), *properties);
-    AlgorithmProperties::update("SpectrumMax", std::to_string(spectraMax), *properties);
+    AlgorithmProperties::update("SpectrumMin", std::to_string(detectorList.front()), *properties);
+    AlgorithmProperties::update("SpectrumMax", std::to_string(detectorList.back()), *properties);
   }
   return MantidQt::CustomInterfaces::configureAlgorithm("Load", std::move(properties), false);
 }
@@ -270,20 +270,19 @@ std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> IETModel::plotRawFile(Instr
   auto const spectraMin = plotParams.getConversionData().getSpectraMin();
   auto const spectraMax = plotParams.getConversionData().getSpectraMax();
 
-  return plotRawAlgorithmQueue(rawFile, basename, instData.getInstrument(), spectraMin, spectraMax,
+  std::vector<int> detectorList(spectraMax - spectraMin + 1);
+  std::iota(detectorList.begin(), detectorList.end(), spectraMin);
+
+  return plotRawAlgorithmQueue(rawFile, basename, instData.getInstrument(), detectorList,
                                plotParams.getBackgroundData());
 }
 
 std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
 IETModel::plotRawAlgorithmQueue(std::string const &rawFile, std::string const &basename,
-                                std::string const &instrumentName, int const spectraMin, int const spectraMax,
+                                std::string const &instrumentName, std::vector<int> const &detectorList,
                                 IETBackgroundData const &backgroundData) const {
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithmDeque;
-  algorithmDeque.emplace_back(loadConfiguredAlg(rawFile, instrumentName, spectraMin, spectraMax, basename));
-
-  std::vector<int> detectorList;
-  for (auto i = spectraMin; i <= spectraMax; i++)
-    detectorList.emplace_back(i);
+  algorithmDeque.emplace_back(loadConfiguredAlg(rawFile, instrumentName, detectorList, basename));
 
   if (backgroundData.getRemoveBackground()) {
     algorithmDeque.emplace_back(calculateFlatBackgroundConfiguredAlg(
