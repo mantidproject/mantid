@@ -17,7 +17,7 @@ from matplotlib.container import ErrorbarContainer
 from mantid.plots.utility import MantidAxType
 
 from unittest.mock import Mock, patch
-from mantid.simpleapi import CreateWorkspace, AddTimeSeriesLog
+from mantid.simpleapi import CreateWorkspace, AddTimeSeriesLog, CreateMDHistoWorkspace
 from workbench.plotting.plotscriptgenerator.lines import (
     _get_plot_command_kwargs_from_line2d,
     _get_errorbar_specific_plot_kwargs,
@@ -63,6 +63,16 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
         cls.test_ws = CreateWorkspace(
             DataX=[10, 20, 30, 10, 20, 30], DataY=[2, 3, 4, 5], DataE=[1, 2, 3, 4], NSpec=2, OutputWorkspace="test_ws"
         )
+        cls.test_mdhisto_ws = CreateMDHistoWorkspace(
+            SignalInput="1,1,1",
+            ErrorInput="1,1,1",
+            Dimensionality=1,
+            Extents="0,2",
+            NumberOfBins="3",
+            Names="X",
+            Units="arb",
+            OutputWorkspace="test_mdhisto_ws",
+        )
 
     def setUp(self):
         fig = plt.figure()
@@ -83,6 +93,13 @@ class PlotScriptGeneratorLinesTest(unittest.TestCase):
         line = self.ax.plot(self.test_ws, **kwargs)[0]
         output = generate_plot_command(line)
         expected_command = "plot({}, {})".format(self.test_ws.name(), convert_args_to_string(None, kwargs))
+        self.assertEqual(expected_command, output)
+
+    def test_generate_plot_command_correct_arguments_for_mdhisto(self):
+        kwargs = copy(LINE2D_KWARGS)
+        line = self.ax.plot(self.test_mdhisto_ws, **kwargs)[0]
+        output = generate_plot_command(line)
+        expected_command = "plot({}, {})".format(self.test_mdhisto_ws.name(), convert_args_to_string(None, kwargs))
         self.assertEqual(expected_command, output)
 
     def test_generate_plot_command_returns_correct_string_for_sample_log(self):
