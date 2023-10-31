@@ -24,6 +24,14 @@ switch(GIT_BRANCH) {
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'nightly'
     PLATFORM_CHOICES = ['all']
     break
+  case 'ornl-next':
+    PACKAGE_SUFFIX_DEFAULT = 'Nightly'
+    ANACONDA_CHANNEL_LABEL_DEFAULT = 'nightly'
+    PLATFORM_CHOICES = ['linux-64']
+    PUBLISH_TO_GITHUB_DEFAULT = false
+    PUBLISH_TO_ANACONDA_DEFAULT = true
+    ANACONDA_CHANNEL_DEFAULT = 'mantid-ornl'
+    break
   default:
     PACKAGE_SUFFIX_DEFAULT = 'Unstable'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'unstable'
