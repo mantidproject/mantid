@@ -62,6 +62,8 @@ bool overlaps(const TimeInterval &left, const TimeInterval &right) {
 const std::string TimeROI::NAME = "Kernel_TimeROI";
 /// Constant for TimeROI where no time is used
 const TimeROI TimeROI::USE_NONE{DateAndTime::GPS_EPOCH - DateAndTime::ONE_SECOND, DateAndTime::GPS_EPOCH};
+/// Constant for TimeROI where any time is used
+const TimeROI TimeROI::USE_ALL{};
 
 TimeROI::TimeROI() {}
 

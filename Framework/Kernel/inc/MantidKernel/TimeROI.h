@@ -20,6 +20,7 @@ public:
   /// the underlying property needs a name
   static const std::string NAME;
   static const TimeROI USE_NONE;
+  static const TimeROI USE_ALL;
 
   TimeROI();
   TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);

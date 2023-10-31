@@ -319,11 +319,14 @@ void TimeSplitter::clearAndReplace(const DateAndTime &start, const DateAndTime &
   resetCache();
 }
 
+// Invalidate all cached "views" on the class implementation, i.e. m_roi_map.
+// Every time m_roi_map changes, the cached "views" need to be invalidated.
 void TimeSplitter::resetCache() {
   resetCachedPartialTimeROIs();
   resetCachedSplittingIntervals();
 }
 
+// Invalidate cached partial TimeROIs, so that the next call to getTimeROI() would trigger their rebuild.
 void TimeSplitter::resetCachedPartialTimeROIs() const {
   std::lock_guard<std::recursive_mutex> lock(m_mutex);
   if (m_validCachedPartialTimeROIs) {
@@ -332,6 +335,7 @@ void TimeSplitter::resetCachedPartialTimeROIs() const {
   }
 }
 
+// Invalidate cached splitting intervals, so that the next call to getSplittingIntervals() would trigger their rebuild
 void TimeSplitter::resetCachedSplittingIntervals() const {
   std::lock_guard<std::recursive_mutex> lock(m_mutex);
   if (m_validCachedSplittingIntervals_All || m_validCachedSplittingIntervals_WithValidTargets) {
@@ -341,6 +345,8 @@ void TimeSplitter::resetCachedSplittingIntervals() const {
   }
 }
 
+// Rebuild and mark as valid a cached map of partial TimeROIs. The getTimeROI() method will then use that map to quickly
+// look up and return a TimeROI.
 void TimeSplitter::rebuildCachedPartialTimeROIs() const {
   std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
@@ -379,6 +385,8 @@ void TimeSplitter::rebuildCachedPartialTimeROIs() const {
   m_validCachedPartialTimeROIs = true;
 }
 
+// Rebuild and mark as valid a cached vector of splitting intervals. The getSplittingIntervals() method will then return
+// that cached vector without building it.
 void TimeSplitter::rebuildCachedSplittingIntervals(const bool includeNoTarget) const {
   std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
@@ -402,8 +410,8 @@ void TimeSplitter::rebuildCachedSplittingIntervals(const bool includeNoTarget) c
 
 /**
  * Find the destination index for an event with a given time.
- * @param time : the time of the event
- * @return : the destination index associated to a
+ * @param time : event time
+ * @return : the destination index associated to the event time
  */
 int TimeSplitter::valueAtTime(const DateAndTime &time) const {
   // empty means exclude everything
@@ -453,11 +461,16 @@ std::set<int> TimeSplitter::outputWorkspaceIndices() const {
 }
 
 /**
- * Returns a Mantid::Kernel::TimeROI for the requested workspace index.
+ * Returns a TimeROI for the requested workspace index.
  * If the workspace index does not exist in the TimeSplitter, the returned TimeROI will be empty,
  * meaning any time datapoint will pass through the given ROI filter.
+ * For efficiency, the first call to this method, after TimeSplitter is built, will trigger calculation of _all_
+ * TimeROIs. The following calls to this method will look up and return the corresponding TimeROI without spending time
+ * on building it.
+ * @param workspaceIndex : target, a.k.a. partial workspace, or destination, index, for which to get a TimeROI.
+ * @return : TimeROI for the input target
  */
-TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) const {
+const TimeROI &TimeSplitter::getTimeROI(const int workspaceIndex) const {
   std::lock_guard<std::recursive_mutex> lock(m_mutex);
 
   if (!m_validCachedPartialTimeROIs) {
@@ -467,11 +480,18 @@ TimeROI TimeSplitter::getTimeROI(const int workspaceIndex) const {
   const int effectiveIndex = std::max<int>(workspaceIndex, NO_TARGET);
 
   if (m_cachedPartialTimeROIs.count(effectiveIndex) == 0)
-    return TimeROI();
+    return TimeROI::USE_ALL;
 
   return m_cachedPartialTimeROIs[effectiveIndex];
 }
 
+/**
+ * Returns a vector of splitting intervals corresponding to the m_roi_map.
+ * For efficiency, the actual vector calculation should be done only on demand ("lazy") and only when the current vector
+ * is invalid.
+ * @param includeNoTarget : if true/false, the calculated vector will/will not include intervals with NO_TARGET.
+ * @return : a reference to the vector of splitting intervals
+ */
 const Kernel::SplittingIntervalVec &TimeSplitter::getSplittingIntervals(const bool includeNoTarget) const {
   std::lock_guard<std::recursive_mutex> lock(m_mutex);
 

@@ -47,7 +47,7 @@ public:
   /// Check if the TimeSplitter is empty
   bool empty() const;
   std::set<int> outputWorkspaceIndices() const;
-  Kernel::TimeROI getTimeROI(const int workspaceIndex) const;
+  const Kernel::TimeROI &getTimeROI(const int workspaceIndex) const;
   const Kernel::SplittingIntervalVec &getSplittingIntervals(const bool includeNoTarget = true) const;
 
   /// these methods are to aid in testing and not intended for use elsewhere
@@ -92,8 +92,6 @@ private:
   mutable bool m_validCachedSplittingIntervals_All{false};
   mutable bool m_validCachedSplittingIntervals_WithValidTargets{false};
 
-  // mutable std::recursive_mutex m_partialROIMutex;
-  // mutable std::recursive_mutex m_splittingIntervalMutex;
   mutable std::recursive_mutex m_mutex;
 };
 } // namespace DataObjects
