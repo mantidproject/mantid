@@ -7,6 +7,9 @@
 // Determine default values of parameters. Some are based on the branch.
 ANACONDA_CHANNEL_DEFAULT = 'mantid'
 GITHUB_RELEASES_REPO_DEFAULT = 'mantidproject/mantid'
+// The github tag is usually only specified for release candidates. If it's left blank
+// a nightly tag is generated.
+GITHUB_RELEASES_TAG_DEFAULT = ''
 GIT_BRANCH = git_branch_name()
 // Only Publish one of main or release-next by default. BRANCH_TO_PUBLISH is a global
 // environment variable set in the Jenkins system configuration global properties.
@@ -19,13 +22,11 @@ switch(GIT_BRANCH) {
   case ['main', 'release-next']:
     PACKAGE_SUFFIX_DEFAULT = 'Nightly'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'nightly'
-    GITHUB_RELEASES_TAG_DEFAULT = ''
     PLATFORM_CHOICES = ['all']
     break
   default:
     PACKAGE_SUFFIX_DEFAULT = 'Unstable'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'unstable'
-    GITHUB_RELEASES_TAG_DEFAULT = ''
     PLATFORM_CHOICES = ['none', 'all', 'linux-64', 'win-64', 'osx-64']
     break
 }
