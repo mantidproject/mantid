@@ -672,6 +672,62 @@ class MantidAxesTest(unittest.TestCase):
         # There should still be only two filled areas (one for each line)
         self.assertEqual(len(datafunctions.get_waterfall_fills(ax)), 2)
 
+    def test_increasing_waterfall_x_offset_will_autoscale_x_axis(self):
+        fig, ax = plt.subplots(subplot_kw={"projection": "mantid"})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot
+        ax.set_waterfall(True, x_offset=20)
+        x_high = ax.get_xlim()[1]
+
+        # Increase x offset
+        ax.update_waterfall(x_offset=40, y_offset=ax.waterfall_y_offset)
+
+        self.assertGreater(ax.get_xlim()[1], x_high)
+
+    def test_decreasing_waterfall_x_offset_will_autoscale_x_axis(self):
+        fig, ax = plt.subplots(subplot_kw={"projection": "mantid"})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot
+        ax.set_waterfall(True, x_offset=40)
+        x_high = ax.get_xlim()[1]
+
+        # Decrease x offset
+        ax.update_waterfall(x_offset=20, y_offset=ax.waterfall_y_offset)
+
+        self.assertLess(ax.get_xlim()[1], x_high)
+
+    def test_increasing_waterfall_y_offset_will_autoscale_y_axis(self):
+        fig, ax = plt.subplots(subplot_kw={"projection": "mantid"})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot
+        ax.set_waterfall(True, y_offset=20)
+        y_high = ax.get_ylim()[1]
+
+        # Increase y off set
+        ax.update_waterfall(x_offset=ax.waterfall_x_offset, y_offset=40)
+
+        self.assertGreater(ax.get_ylim()[1], y_high)
+
+    def test_decreasing_waterfall_y_offset_will_autoscale_y_axis(self):
+        fig, ax = plt.subplots(subplot_kw={"projection": "mantid"})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot
+        ax.set_waterfall(True, y_offset=40)
+        y_high = ax.get_ylim()[1]
+
+        # Decrease y off set
+        ax.update_waterfall(x_offset=ax.waterfall_x_offset, y_offset=20)
+
+        self.assertLess(ax.get_ylim()[1], y_high)
+
     def test_imshow_with_origin_upper(self):
         image = self.ax.imshow(self.ws2d_histo, origin="upper")
 
