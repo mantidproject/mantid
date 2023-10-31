@@ -9,6 +9,7 @@
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.simpleapi import DeleteWorkspace, ExtractSpectra, Rebin, SumSpectra, Transpose
 import numpy as np
+from mantid.dataobjects import EventWorkspace
 
 
 def on_except_leave_ads_unchanged(func):
@@ -60,7 +61,13 @@ def extract_matrix_cuts_spectra_axis(
     roi = _extract_roi_spectra_axis(workspace, xmin, xmax, ymin, ymax, tmp_crop_region, log_algorithm_calls)
     # perform ycut first so xcut can reuse tmp workspace for rebinning if necessary
     if ycut_name:
-        Rebin(InputWorkspace=roi, OutputWorkspace=ycut_name, Params=[xmin, xmax - xmin, xmax], EnableLogging=log_algorithm_calls)
+        Rebin(
+            InputWorkspace=roi,
+            OutputWorkspace=ycut_name,
+            Params=[xmin, xmax - xmin, xmax],
+            EnableLogging=log_algorithm_calls,
+            PreserveEvents=False,
+        )
         Transpose(InputWorkspace=ycut_name, OutputWorkspace=ycut_name, EnableLogging=log_algorithm_calls)
 
     if xcut_name:
@@ -105,7 +112,13 @@ def extract_cuts_matrix(
 
     # perform ycut first so xcut can reuse tmp workspace for rebinning if necessary
     if ycut_name:
-        Rebin(InputWorkspace=roi, OutputWorkspace=ycut_name, Params=[xmin, xmax - xmin, xmax], EnableLogging=log_algorithm_calls)
+        Rebin(
+            InputWorkspace=roi,
+            OutputWorkspace=ycut_name,
+            Params=[xmin, xmax - xmin, xmax],
+            EnableLogging=log_algorithm_calls,
+            PreserveEvents=False,
+        )
         Transpose(InputWorkspace=ycut_name, OutputWorkspace=ycut_name, EnableLogging=log_algorithm_calls)
 
     if xcut_name:
@@ -152,6 +165,14 @@ def extract_roi_matrix(
         raise RuntimeError("Unknown vertical axis type")
 
     if transpose:
+        if isinstance(roi, EventWorkspace):
+            Rebin(
+                InputWorkspace=roi_name,
+                OutputWorkspace=roi_name,
+                Params=[roi.getTofMin(), roi.getTofMax() - roi.getTofMin(), roi.getTofMax()],
+                EnableLogging=log_algorithm_calls,
+                PreserveEvents=False,
+            )
         roi = Transpose(InputWorkspace=roi_name, OutputWorkspace=roi_name)
 
     return roi
@@ -176,6 +197,7 @@ def _extract_roi_spectra_axis(
     :param log_algorithm_calls: Log the algorithm call or be silent
     """
     indexmin, indexmax = _index_range_spectraaxis(workspace, ymin, ymax)
+    xmin, xmax = _adjust_xmin_xmax_for_event_workspace(workspace, xmin, xmax, indexmin)
     return _extract_region(workspace, xmin, xmax, indexmin, indexmax, roi_name, log_algorithm_calls)
 
 
@@ -198,6 +220,25 @@ def _extract_roi_numeric_axis(
     return _extract_region(workspace, xmin, xmax, indexmin, indexmax, roi_name, log_algorithm_calls)
 
 
+def _adjust_xmin_xmax_for_event_workspace(workspace, xmin, xmax, ws_index_min):
+    """ "
+    This method adjusts the xmin and xmax values to the edges of the corresponding bin for EventWorkspaces when xmin and xmax are equal
+    :param workspace: A MatrixWorkspace with a vertical SpectraAxis
+    :param xmin: X min for bounded region. Can be None indicating use data xmin
+    :param xmax: X max for bounded region. Can be None indicating use data xmax
+    :param ws_index_min: minimum Y index for bounded region
+    """
+    if not isinstance(workspace, EventWorkspace):
+        return xmin, xmax
+
+    if xmin == xmax and xmin is not None:
+        x_data = workspace.readX(ws_index_min)
+        bin_index_to_xmin = workspace.yIndexOfX(xmin, ws_index_min)
+        return x_data[bin_index_to_xmin], x_data[bin_index_to_xmin + 1]
+    else:
+        return xmin, xmax
+
+
 def _extract_region(
     workspace: MatrixWorkspace, xmin: float, xmax: float, indexmin: int, indexmax: int, name: str, log_algorithm_calls: bool = True
 ):
@@ -206,8 +247,8 @@ def _extract_region(
     :param workspace: A MatrixWorkspace with a vertical SpectraAxis
     :param xmin: X min for bounded region
     :param xmax: X max for bounded region
-    :param ymin: Y min for bounded region
-    :param ymax: Y max for bounded region
+    :param indexmin: minimum Y index for bounded region
+    :param indexmax: maximum Y index for bounded region
     :param name: A name for the workspace
     """
     if not workspace.isCommonBins():
@@ -267,4 +308,4 @@ def _rebin_to_common_grid(workspace: MatrixWorkspace, xmin: float, xmax: float, 
         params = [delta]
     else:
         params = [xmin, delta, xmax]
-    return Rebin(InputWorkspace=workspace, OutputWorkspace=workspace, Params=params, EnableLogging=log_algorithm_calls)
+    return Rebin(InputWorkspace=workspace, OutputWorkspace=workspace, Params=params, EnableLogging=log_algorithm_calls, PreserveEvent=False)
