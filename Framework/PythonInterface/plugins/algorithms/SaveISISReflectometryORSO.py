@@ -7,7 +7,7 @@
 from mantid.utils.reflectometry.orso_helper import *
 
 from mantid.kernel import Direction, Property
-from mantid.api import AlgorithmFactory, WorkspaceProperty, FileProperty, FileAction, PythonAlgorithm, PropertyMode
+from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, FileProperty, FileAction, PythonAlgorithm, PropertyMode
 
 
 class Prop:
@@ -30,6 +30,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     _REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
     _STITCH_ALG = "Stitch1DMany"
     _REBIN_ALG = "Rebin"
+    _Q_UNIT = "MomentumTransfer"
 
     def category(self):
         return "Reflectometry\\ISIS"
@@ -44,7 +45,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            WorkspaceProperty(name=Prop.INPUT_WS, defaultValue="", direction=Direction.Input, optional=PropertyMode.Mandatory),
+            MatrixWorkspaceProperty(name=Prop.INPUT_WS, defaultValue="", direction=Direction.Input, optional=PropertyMode.Mandatory),
             doc="The workspace containing the processed reflectivity data to save",
         )
 
@@ -66,6 +67,18 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         self.declareProperty(
             FileProperty(Prop.FILENAME, "", FileAction.Save, MantidORSOSaver.FILE_EXT), doc="File path to save the .ort file to"
         )
+
+    def validateInputs(self):
+        """Return a dictionary containing issues found in properties."""
+        issues = dict()
+
+        ws = self.getProperty(Prop.INPUT_WS).value
+        if ws and not self._is_momentum_transfer_ws(ws):
+            issues[Prop.INPUT_WS] = f"{Prop.INPUT_WS} must have units of {self._Q_UNIT}"
+        return issues
+
+    def _is_momentum_transfer_ws(self, ws):
+        return ws.getAxis(0).getUnit().unitID() == self._Q_UNIT
 
     def PyExec(self):
         ws = self.getProperty(Prop.INPUT_WS).value

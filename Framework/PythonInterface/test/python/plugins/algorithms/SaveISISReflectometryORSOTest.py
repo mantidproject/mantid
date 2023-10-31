@@ -36,6 +36,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _SAVE_ALG = "SaveISISReflectometryORSO"
     _REDUCTION_ALG = "ReflectometryReductionOneAuto"
     _REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
+    _Q_UNIT = "MomentumTransfer"
 
     def setUp(self):
         self._rb_number = str(123456)
@@ -89,6 +90,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     def test_create_file_from_workspace_with_no_reduction_history(self):
         ws = LoadNexus("INTER13460")
+        self._set_units_as_momentum_transfer(ws)
 
         SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
 
@@ -98,6 +100,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         # The TOF workspace created from the ISIS Reflectometry reduction does not have any history
         input_ws = self._get_ws_from_reduction("INTER13460", 0.02, "TOF_13460")
         assert input_ws.getHistory().empty()
+        self._set_units_as_momentum_transfer(input_ws)
 
         SaveISISReflectometryORSO(InputWorkspace=input_ws, Filename=self._output_filename)
 
@@ -123,6 +126,11 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._check_file_header(self._header_entries_for_sample_ws)
 
+    def test_input_ws_must_be_in_correct_units(self):
+        ws = CreateSampleWorkspace()
+        with self.assertRaisesRegex(RuntimeError, "must have units of"):
+            SaveISISReflectometryORSO(InputWorkspace=ws, WriteResolution=False, Filename=self._output_filename)
+
     def test_comment_added_to_top_of_file(self):
         # The comment is needed until we are able to output all the mandatory information required by the standard
         ws = self._create_sample_workspace()
@@ -132,9 +140,13 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER):
         ws = CreateSampleWorkspace()
+        self._set_units_as_momentum_transfer(ws)
         if rb_num_log_name:
             ws.mutableRun().addProperty(rb_num_log_name, self._rb_number, True)
         return ws
+
+    def _set_units_as_momentum_transfer(self, ws):
+        ws.getAxis(0).setUnit(self._Q_UNIT)
 
     def _get_ws_from_reduction(self, input_run, resolution, reduced_ws_name):
         args = {
@@ -147,6 +159,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             "MomentumTransferStep": resolution,
         }
         alg = create_algorithm("ReflectometryISISLoadAndProcess", **args)
+        alg.setRethrows(True)
         assertRaisesNothing(self, alg.execute)
         return AnalysisDataService.retrieve(reduced_ws_name)
 
