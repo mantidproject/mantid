@@ -52,6 +52,7 @@ dict getRegisteredAlgorithms(AlgorithmFactoryImpl const *const self, bool includ
   for (const auto &key : keys) {
     std::pair<std::string, int> algInfo;
     {
+      // We need to release the GIL here to prevent a deadlock when using Python log channels
       ReleaseGlobalInterpreterLock releaseGIL;
       algInfo = self->decodeName(key);
     }

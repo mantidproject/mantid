@@ -63,6 +63,7 @@ void updatePythonPaths() {
 FrameworkManagerImpl &instance() {
   // start the framework (if necessary)
   auto &frameworkMgr = []() -> auto & {
+    // We need to release the GIL here to prevent a deadlock when using Python log channels
     ReleaseGlobalInterpreterLock releaseGIL;
     return FrameworkManager::Instance();
   }
