@@ -14,7 +14,6 @@ our custom window.
 # std imports
 
 import matplotlib
-from mpl_toolkits.axes_grid1.axes_divider import make_axes_area_auto_adjustable
 import numpy as np
 
 # local imports
@@ -357,10 +356,7 @@ def plot_surface(workspaces, fig=None):
 
         surface = ax.plot_surface(ws, cmap=ConfigService.getString("plots.images.Colormap"))
         ax.set_title(ws.name())
-        # Stops colour bar colliding with the plot. Also prevents the plot being pushed off the windows when resizing.
-        # "Top" direction is excluded since the title provides a buffer
-        make_axes_area_auto_adjustable(ax, pad=0, adjust_dirs=["left", "right", "bottom"])
-        fig.colorbar(surface, ax=[ax])
+        fig.colorbar(surface, pad=0.15)
         fig.show()
 
     return fig
