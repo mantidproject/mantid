@@ -40,10 +40,12 @@ private:
   size_t m_specCount = -1;
   std::vector<int> m_specNums;
   std::vector<std::vector<FindPeaksConvolve::PeakResult>> m_peakResults;
-  size_t m_maxPeakCount;
+  std::atomic<size_t> m_maxPeakCount;
 
   bool m_createIntermediateWorkspaces;
   bool m_findHighestDatapointInPeak;
+  double m_iOverSigmaThreshold;
+  bool m_performBinaryClosing;
 
   void init() override;
   void exec() override;
@@ -59,10 +61,12 @@ private:
   size_t getKernelBinCount(const HistogramData::HistogramX *xData) const;
   Eigen::VectorXd centreBinsXData(const size_t dataIndex, const size_t kernelSize,
                                   const HistogramData::HistogramX *xData);
-  void FindPeaksConvolve::extractPeaks(const size_t dataIndex, const Tensor1D &iOverSigma, const EigenMap_const &xData,
-                                       const TensorMap_const &yData, const size_t peakExtentBinNumber);
-  size_t FindPeaksConvolve::findPeakInRawData(const int xIndex, const TensorMap_const &yData,
-                                              size_t peakExtentBinNumber);
+  void extractPeaks(const size_t dataIndex, const Tensor1D &iOverSigma, const EigenMap_const &xData,
+                    const TensorMap_const &yData, const size_t peakExtentBinNumber);
+  std::vector<std::pair<const int, const double>> filterDataForSignificantPoints(const Tensor1D &iOverSigma);
+  size_t findPeakInRawData(const int xIndex, const TensorMap_const &yData, size_t peakExtentBinNumber);
+  void FindPeaksConvolve::storePeakResults(const size_t dataIndex,
+                                           std::vector<FindPeaksConvolve::PeakResult> &peakCentres);
   Eigen::VectorXd generateNormalPDF(const size_t peakExtentBinNumber);
   void createIntermediateWorkspaces(const size_t dataIndex, const Tensor1D &kernel, const Tensor1D &iOverSigma,
                                     const EigenMap_const *xData);

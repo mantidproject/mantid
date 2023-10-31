@@ -9,29 +9,28 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAlgorithms/FindPeaksConvolve.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
-#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::FindPeaksConvolve;
 
 namespace {
 /// Load focussed data file - from FindPeaksTest
 void loadNexusProcessed(const std::string &filename, const std::string &wsname) {
-  Mantid::DataHandling::LoadNexusProcessed loader;
-  loader.initialize();
-  loader.setProperty("Filename", filename);
-  loader.setProperty("OutputWorkspace", wsname);
-  loader.execute();
-  TS_ASSERT(loader.isExecuted());
-  TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(wsname));
+  if (!Mantid::API::AnalysisDataService::Instance().doesExist(wsname)) {
+    Mantid::DataHandling::LoadNexusProcessed loader;
+    loader.initialize();
+    loader.setProperty("Filename", filename);
+    loader.setProperty("OutputWorkspace", wsname);
+    loader.execute();
+    TS_ASSERT(loader.isExecuted());
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(wsname));
+  }
 }
 
 Mantid::API::Algorithm_sptr set_up_alg(const std::string &input_ws_name, const std::string &output_ws_name) {
   auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("FindPeaksConvolve");
-  // auto alg = Mantid::API::Algorithm::createAlgorithm("FindPeaksConvolve");
   // Don't put output in ADS by default
   alg->setChild(true);
   TS_ASSERT_THROWS_NOTHING(alg->initialize());
@@ -41,8 +40,22 @@ Mantid::API::Algorithm_sptr set_up_alg(const std::string &input_ws_name, const s
   return alg;
 }
 
-const std::string INPUT_TEST_WS_NAME = "FindPeaksTest_peaksWS"; // Data reused from FindPeaksTest
-const std::string OUTPUT_TEST_WS_NAME = "FindPeaksConvolve_final_output";
+void assert_peak_centres_equal(const Mantid::API::ITableWorkspace_sptr &resultWs,
+                               std::vector<double> &expectedPeakCentres) {
+  const auto colNames = resultWs->getColumnNames();
+  for (int i = resultWs->columnCount() - 1; i >= 0; i--) {
+    std::string colName{colNames[i]};
+    if (colName.find("PeakCentre") != std::string::npos) {
+      double cellValue{resultWs->Double(0, i)};
+      TS_ASSERT_DELTA(expectedPeakCentres.back(), cellValue, 0.01);
+      expectedPeakCentres.pop_back();
+    }
+  }
+  TS_ASSERT(expectedPeakCentres.size() == 0);
+}
+
+const std::string INPUT_TEST_WS_NAME = "FindPeaksConvolveTest_input";
+const std::string OUTPUT_TEST_WS_NAME = "FindPeaksConvolveTest_output";
 } // anonymous namespace
 
 class FindPeaksConvolveTest : public CxxTest::TestSuite {
@@ -54,36 +67,93 @@ public:
 
   void setUp() override {
     // Load data file into ADS once
-    if (!Mantid::API::AnalysisDataService::Instance().doesExist(INPUT_TEST_WS_NAME)) {
-      loadNexusProcessed("focussed.nxs", INPUT_TEST_WS_NAME);
-    }
+    loadNexusProcessed("ENGINX_277208_focused_bank_2.nxs", INPUT_TEST_WS_NAME);
+    loadNexusProcessed("VesuvioCalibSpec177.nxs", INPUT_TEST_WS_NAME + "_noisy");
   }
 
   void test_exec() {
-    // auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
-    int64_t nhist = 1;
-    int64_t nbins = 17;
-    bool ishist = false;
-    double xval(0), yval(0), eval(0), dxval(1);
-    std::string wsName = "test_ws";
-
-    Mantid::API::MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        WorkspaceCreationHelper::create2DWorkspaceWithValuesAndXerror(nhist, nbins, ishist, xval, yval, eval, dxval));
-    std::vector<double> yValues{1, 1, 1, 1, 1.5, 2, 3, 5, 8, 5, 3, 2, 1.5, 1, 1, 1, 1};
-
-    for (std::size_t j = 0; j < yValues.size(); ++j) {
-      ws->dataY(0)[j] = yValues[j];
-      ws->dataX(0)[j] = j;
-      ws->dataE(0)[j] = 1;
-    }
-
-    Mantid::API::AnalysisDataService::Instance().add(wsName, ws);
-
-    auto alg = set_up_alg(wsName, OUTPUT_TEST_WS_NAME);
-    alg->setProperty("EstimatedPeakExtent", "5");
+    auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
+    alg->setProperty("EstimatedPeakExtent", "100");
+    alg->setProperty("IOversigmaThreshold", "3");
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
+
+    std::vector<double> expectedPeakCentres{16179.53, 16873.24, 17391.53, 18188.9,  19584.29,
+                                            20636.82, 21553.79, 22678.08, 22973.11, 24527.98,
+                                            27151.32, 31784.04, 41272.73, 43098.7,  46997.84};
+    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
+    assert_peak_centres_equal(resultWs, expectedPeakCentres);
   }
 
-  void test_Something() { TS_FAIL("You forgot to write a test!"); }
+  void test_execPeakExtentNBins() {
+    auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
+    alg->setProperty("EstimatedPeakExtentNBins", "25");
+    alg->setProperty("IOversigmaThreshold", "3");
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+
+    std::vector<double> expectedPeakCentres{16179.53, 16873.24, 17391.53, 18188.9,  19584.29,
+                                            20636.82, 21553.79, 22678.08, 22973.11, 24527.98,
+                                            27151.32, 31784.04, 41272.73, 43098.7,  46997.84};
+    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
+    assert_peak_centres_equal(resultWs, expectedPeakCentres);
+  }
+
+  void test_execHighestDataPoint() {
+    auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
+    alg->setProperty("EstimatedPeakExtent", "100");
+    alg->setProperty("IOversigmaThreshold", "3");
+    alg->setProperty("FindHighestDataPointInPeak", true);
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+
+    std::vector<double> expectedPeakCentres{16179.53, 16873.24, 17391.53, 18188.9,  19584.29,
+                                            20636.82, 21553.79, 22678.08, 22973.11, 24527.98,
+                                            27151.32, 31784.04, 41280.7,  43098.7,  46997.84};
+    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
+    assert_peak_centres_equal(resultWs, expectedPeakCentres);
+  }
+
+  void test_execNoisyData() {
+    auto alg = set_up_alg(INPUT_TEST_WS_NAME + "_noisy", OUTPUT_TEST_WS_NAME);
+    alg->setProperty("EstimatedPeakExtent", "400");
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+
+    std::vector<double> expectedPeakCentres{2706.06, 3540.81, 4188.21, 4717.19, 5635.71, 6780.36, 7932.37};
+    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
+    assert_peak_centres_equal(resultWs, expectedPeakCentres);
+  }
+
+  void test_execNoisyDataLargeKernelWithBinaryClosing() {
+    auto alg = set_up_alg(INPUT_TEST_WS_NAME + "_noisy", OUTPUT_TEST_WS_NAME);
+    alg->setProperty("EstimatedPeakExtent", "500");
+    alg->setProperty("IOversigmaThreshold", "5");
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+
+    std::vector<double> expectedPeakCentres{2788.43, 3505.61, 5635.71, 7932.37};
+    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
+    assert_peak_centres_equal(resultWs, expectedPeakCentres);
+  }
+
+  void test_execNoisyDataLargeKernelNoBinaryClosing() {
+    auto alg = set_up_alg(INPUT_TEST_WS_NAME + "_noisy", OUTPUT_TEST_WS_NAME);
+    alg->setProperty("EstimatedPeakExtent", "500");
+    alg->setProperty("IOversigmaThreshold", "5");
+    alg->setProperty("PerformBinaryClosing", false);
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+
+    std::vector<double> expectedPeakCentres{2788.43, 3505.61, 5635.71, 6780.36, 7932.37};
+    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
+    assert_peak_centres_equal(resultWs, expectedPeakCentres);
+  }
+
+  void test_execSpecifyPeakExtentAndBins() {
+    auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
+    alg->setProperty("EstimatedPeakExtent", "100");
+    alg->setProperty("EstimatedPeakExtentNBins", "100");
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
 };

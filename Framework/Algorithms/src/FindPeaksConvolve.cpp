@@ -54,7 +54,7 @@ void FindPeaksConvolve::init() {
   declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "", Kernel::Direction::Input),
                   "An input workspace.");
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "An output workspace.");
   declareProperty("CreateIntermediateWorkspaces", false, "Output workspaces showing intermediate working steps");
   declareProperty("WorkspaceIndex", EMPTY_INT(), m_validators["mustBeNonNegative"],
@@ -131,6 +131,9 @@ void FindPeaksConvolve::storeClassProperties() {
   m_inputDataWS = getProperty("InputWorkspace");
   m_createIntermediateWorkspaces = getProperty("CreateIntermediateWorkspaces");
   m_findHighestDatapointInPeak = getProperty("FindHighestDataPointInPeak");
+  m_iOverSigmaThreshold = getProperty("IOversigmaThreshold");
+  m_performBinaryClosing = getProperty("PerformBinaryClosing");
+
   int wsIndex = getProperty("WorkspaceIndex");
   if (wsIndex == EMPTY_INT()) {
     m_specCount = static_cast<int>(m_inputDataWS->getNumberHistograms());
@@ -144,13 +147,13 @@ void FindPeaksConvolve::storeClassProperties() {
 }
 
 void FindPeaksConvolve::performConvolution(const size_t dataIndex) {
-  const HistogramData::HistogramX *xData{&m_inputDataWS->x(dataIndex)};
+  const auto specNum{m_specNums[dataIndex]};
+  const HistogramData::HistogramX *xData{&m_inputDataWS->x(specNum)};
   const auto kernelBinCount{getKernelBinCount(xData)};
   const Tensor1D kernel{createKernel(kernelBinCount, dataIndex)};
 
-  const auto specNum{m_specNums[dataIndex]};
   const auto binCount{m_inputDataWS->getNumberBins(specNum)};
-  const double paddingSize = (kernelBinCount * 1.5 - 2) / 2;
+  const double paddingSize = (std::ceil(kernelBinCount * 1.5) - 2) / 2;
   const TensorMap_const yData{&m_inputDataWS->y(specNum).front(), binCount};
   Eigen::array<std::pair<double, double>, 1> paddings{std::make_pair(std::ceil(paddingSize), std::floor(paddingSize))};
   const auto yData_padded{yData.pad(paddings)};
@@ -160,7 +163,7 @@ void FindPeaksConvolve::performConvolution(const size_t dataIndex) {
   const auto eData{TensorMap_const{&m_inputDataWS->e(specNum).front(), binCount}.pad(paddings)};
   const Tensor1D eConvOutput{eData.square().convolve(kernel.square(), dims).sqrt()};
 
-  const Tensor1D smoothKernel{createSmoothKernel(kernelBinCount / 2)};
+  const Tensor1D smoothKernel{createSmoothKernel(static_cast<size_t>(std::ceil(kernelBinCount / 2.0)))};
   const Tensor1D iOverSigConvOutput{(yConvOutput / eConvOutput).convolve(smoothKernel, dims)};
 
   EigenMap_const *xDataPostConv;
@@ -222,22 +225,11 @@ Eigen::VectorXd FindPeaksConvolve::centreBinsXData(const size_t dataIndex, const
 
 void FindPeaksConvolve::extractPeaks(const size_t dataIndex, const Tensor1D &iOverSigma, const EigenMap_const &xData,
                                      const TensorMap_const &yData, const size_t peakExtentBinNumber) {
-  double iOverSigmaThreshold = getProperty("IOversigmaThreshold");
-  bool performBinaryClosing = getProperty("PerformBinaryClosing");
-  std::vector<std::pair<const int, const double>> closedData;
-  for (auto i{0}; i < iOverSigma.size(); i++) {
-    if (iOverSigma(i) > iOverSigmaThreshold) {
-      closedData.emplace_back(i, iOverSigma(i));
-    } else if (iOverSigma(i) <= 0 || !performBinaryClosing) {
-      closedData.emplace_back(i, 0);
-    }
-  }
-  closedData.emplace_back(closedData.size(), 0); // Guarentee data region close
-
+  auto filteredData = filterDataForSignificantPoints(iOverSigma);
   int dataPointCount{0};
   std::pair<int, double> dataRegionMax{0, 0.0};
   std::vector<FindPeaksConvolve::PeakResult> peakCentres;
-  for (const auto &dataPoint : closedData) {
+  for (const auto &dataPoint : filteredData) {
     if (dataPoint.second != 0) {
       if (dataPointCount == 0) {
         dataRegionMax = dataPoint;
@@ -259,7 +251,11 @@ void FindPeaksConvolve::extractPeaks(const size_t dataIndex, const Tensor1D &iOv
       }
     }
   }
+  storePeakResults(dataIndex, peakCentres);
+}
 
+void FindPeaksConvolve::storePeakResults(const size_t dataIndex,
+                                         std::vector<FindPeaksConvolve::PeakResult> &peakCentres) {
   const size_t peakCount = peakCentres.size();
   if (peakCount) {
     if (peakCount > m_maxPeakCount) {
@@ -267,6 +263,20 @@ void FindPeaksConvolve::extractPeaks(const size_t dataIndex, const Tensor1D &iOv
     }
     m_peakResults[dataIndex] = std::move(peakCentres);
   }
+}
+
+std::vector<std::pair<const int, const double>>
+FindPeaksConvolve::filterDataForSignificantPoints(const Tensor1D &iOverSigma) {
+  std::vector<std::pair<const int, const double>> closedData;
+  for (auto i{0}; i < iOverSigma.size(); i++) {
+    if (iOverSigma(i) > m_iOverSigmaThreshold) {
+      closedData.emplace_back(i, iOverSigma(i));
+    } else if (iOverSigma(i) <= 0 || !m_performBinaryClosing) {
+      closedData.emplace_back(i, 0);
+    }
+  }
+  closedData.emplace_back(closedData.size(), 0); // Guarentee data region close
+  return closedData;
 }
 
 size_t FindPeaksConvolve::findPeakInRawData(const int xIndex, const TensorMap_const &yData,
@@ -280,7 +290,8 @@ size_t FindPeaksConvolve::findPeakInRawData(const int xIndex, const TensorMap_co
     startAdj = -sliceStart;
     adjPeakExtentBinNumber = peakExtentBinNumber - startAdj;
     sliceStart = 0;
-  } else if (sliceStart + adjPeakExtentBinNumber > yData.size() - 1) {
+  }
+  if (sliceStart + adjPeakExtentBinNumber > yData.size() - 1) {
     adjPeakExtentBinNumber = static_cast<size_t>(yData.size()) - sliceStart;
   }
 
@@ -345,7 +356,7 @@ void FindPeaksConvolve::outputResults() {
     const auto spec = std::move(m_peakResults[i]);
     if (!spec.empty()) {
       API::TableRow row{table->appendRow()};
-      row << i;
+      row << m_specNums[i];
       for (const auto &peak : spec) {
         row << peak.centre << peak.height << peak.iOverSigma;
       }
