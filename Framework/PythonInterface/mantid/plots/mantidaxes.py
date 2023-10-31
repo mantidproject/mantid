@@ -1137,10 +1137,10 @@ class MantidAxes(Axes):
 
         datafunctions.set_waterfall_toolbar_options_enabled(self)
 
+        self.relim()
         if not self.waterfall_has_fill():
             # The mpl ax.fill method already makes an autoscale request for us,
             # so we only need to do this if waterfall_update_fill hasn't been called
-            self.relim()
             self.autoscale()
 
         self.get_figure().canvas.draw()
