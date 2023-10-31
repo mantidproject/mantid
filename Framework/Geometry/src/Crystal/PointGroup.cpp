@@ -116,8 +116,10 @@ std::string PointGroup::getLauePointGroupSymbol() const {
       // Hexagonal
       if (m_symbolHM == "3" || m_symbolHM == "-3") {
         return "-3";
+      } else if (m_symbolHM.substr(1) == "1") {
+        return "-31m";
       } else {
-        return "-3m"; // not sure this works for -31m which is equivilent but different axis convention
+        return "-3m1";
       }
     }
   case CrystalSystem::Cubic:
