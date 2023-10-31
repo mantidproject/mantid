@@ -8,9 +8,12 @@
 ANACONDA_CHANNEL_DEFAULT = 'mantid'
 GITHUB_RELEASES_REPO_DEFAULT = 'mantidproject/mantid'
 GIT_BRANCH = git_branch_name()
-// Only Publish one of the nightly builds by default. BRANCH_TO_PUBLISH is a global
+// Only Publish one of main or release-next by default. BRANCH_TO_PUBLISH is a global
 // environment variable set in the Jenkins system configuration global properties.
 PUBLISH_PACKAGES_DEFAULT = (GIT_BRANCH == "${BRANCH_TO_PUBLISH}")
+// Allow the freedom to specify GitHub and Anaconda publishing separately.
+PUBLISH_TO_ANACONDA_DEFAULT = PUBLISH_PACKAGES_DEFAULT
+PUBLISH_TO_GITHUB_DEFAULT = PUBLISH_PACKAGES_DEFAULT
 
 switch(GIT_BRANCH) {
   case ['main', 'release-next']:
@@ -42,8 +45,10 @@ pipeline {
               description: 'Choose a platform to build just this standalone package')
       string(name: 'PACKAGE_SUFFIX', defaultValue: PACKAGE_SUFFIX_DEFAULT,
              description: 'A string to append to the standalone package name')
-      booleanParam(name: 'PUBLISH_PACKAGES', defaultValue: PUBLISH_PACKAGES_DEFAULT,
-                   description: 'If true, publish the packages to Anaconda channel & GitHub')
+      booleanParam(name: 'PUBLISH_TO_ANACONDA', defaultValue: PUBLISH_TO_ANACONDA_DEFAULT,
+                   description: 'If true, publish the packages to the specified Anaconda channel')
+      booleanParam(name: 'PUBLISH_TO_GITHUB', defaultValue: PUBLISH_TO_GITHUB_DEFAULT,
+                   description: 'If true, publish the packages to GitHub')
       string(name: 'ANACONDA_CHANNEL', defaultValue: ANACONDA_CHANNEL_DEFAULT,
              description: 'The Anaconda channel to accept the package')
       string(name: 'ANACONDA_CHANNEL_LABEL', defaultValue: ANACONDA_CHANNEL_LABEL_DEFAULT,
@@ -66,7 +71,7 @@ pipeline {
       agent { label 'linux-64' }
       steps {
         script {
-          if(env.PUBLISH_PACKAGES == 'true') {
+          if(env.PUBLISH_TO_ANACONDA == 'true') {
             if(!env.ANACONDA_CHANNEL_LABEL.trim()) {
               error("You must specify an Anaconda label to publish packages.")
             }
@@ -317,7 +322,7 @@ pipeline {
       when {
         beforeAgent true
         beforeOptions true
-        expression { env.PUBLISH_PACKAGES == 'true' }
+        expression { env.PUBLISH_TO_ANACONDA == 'true' }
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
       options {
@@ -348,7 +353,7 @@ pipeline {
         beforeAgent true
         beforeOptions true
         allOf {
-            expression { env.PUBLISH_PACKAGES == 'true' }
+            expression { env.PUBLISH_TO_ANACONDA == 'true' }
             expression { env.ANACONDA_CHANNEL_LABEL != '' }
         }
       }
@@ -367,7 +372,7 @@ pipeline {
         beforeAgent true
         beforeOptions true
         allOf {
-          expression { env.PUBLISH_PACKAGES == 'true' }
+          expression { env.PUBLISH_TO_GITHUB == 'true' }
           expression { env.GITHUB_RELEASES_REPO.trim() != '' }
         }
       }
