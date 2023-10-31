@@ -17,6 +17,9 @@ PUBLISH_PACKAGES_DEFAULT = (GIT_BRANCH == "${BRANCH_TO_PUBLISH}")
 // Allow the freedom to specify GitHub and Anaconda publishing separately.
 PUBLISH_TO_ANACONDA_DEFAULT = PUBLISH_PACKAGES_DEFAULT
 PUBLISH_TO_GITHUB_DEFAULT = PUBLISH_PACKAGES_DEFAULT
+// If required, switch off the mantiddocs conda package build. This is deliberately not listed in the
+// pipeline parameters because it's only switched off for ornl-next anaconda publishing.
+BUILD_MANTIDDOCS_PACKAGE = true
 
 switch(GIT_BRANCH) {
   case ['main', 'release-next']:
@@ -31,6 +34,7 @@ switch(GIT_BRANCH) {
     PUBLISH_TO_GITHUB_DEFAULT = false
     PUBLISH_TO_ANACONDA_DEFAULT = true
     ANACONDA_CHANNEL_DEFAULT = 'mantid-ornl'
+    BUILD_MANTIDDOCS_PACKAGE = false
     break
   default:
     PACKAGE_SUFFIX_DEFAULT = 'Unstable'
@@ -200,7 +204,11 @@ pipeline {
             // in parallel
             package_conda('linux-64', 'base')
             archive_conda_packages('linux-64')
-            archive_conda_packages('noarch')
+            script {
+              if(env.BUILD_MANTIDDOCS_PACKAGE) {
+                archive_conda_packages('noarch')
+              }
+            }
           }
           post {
             always {
@@ -477,7 +485,7 @@ def package_conda_options(platform, base_or_workbench) {
   package_flags = ""
   if(base_or_workbench == 'base') {
     docs_flags = ""
-    if(platform.startsWith('linux')) {
+    if(platform.startsWith('linux') && BUILD_MANTIDDOCS_PACKAGE) {
       docs_flags = "--build-docs"
     }
     package_flags = "--build-mantid --build-qt ${docs_flags}"
