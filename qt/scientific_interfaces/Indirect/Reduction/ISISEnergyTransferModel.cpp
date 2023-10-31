@@ -243,8 +243,8 @@ std::vector<std::string> IETModel::validatePlotData(IETPlotData const &plotParam
   return errors;
 }
 
-void IETModel::plotRawFile(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData const &instData,
-                           IETPlotData const &plotParams) {
+std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> IETModel::plotRawFile(InstrumentData const &instData,
+                                                                           IETPlotData const &plotParams) {
   const std::string inputFiles = plotParams.getInputData().getInputFiles();
 
   int spectraMin = plotParams.getConversionData().getSpectraMin();
@@ -268,24 +268,30 @@ void IETModel::plotRawFile(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
   for (auto i = spectraMin; i <= spectraMax; i++)
     detectorList.emplace_back(i);
 
+  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithmDeque;
   auto backgroundData = plotParams.getBackgroundData();
   if (backgroundData.getRemoveBackground()) {
+
     auto properties3 = calculateFlatBackgroundProperties(name, backgroundData.getBackgroundStart(),
                                                          backgroundData.getBackgroundEnd(), name + "_bg");
-    batchAlgoRunner->addAlgorithm(AlgorithmManager::Instance().create("CalculateFlatBackground"),
-                                  std::move(properties3));
+    auto alg1 = configureAlgorithm("CalculateFlatBackground", std::move(properties3));
 
     auto properties = groupDetectorsProperties(name + "_bg", detectorList, name + "_grp");
-    batchAlgoRunner->addAlgorithm(AlgorithmManager::Instance().create("GroupDetectors"), std::move(properties));
+    auto alg2 = configureAlgorithm("GroupDetectors", std::move(properties));
 
     auto properties2 = groupDetectorsProperties(name, detectorList, name + "_grp_raw");
-    batchAlgoRunner->addAlgorithm(AlgorithmManager::Instance().create("GroupDetectors"), std::move(properties2));
+    auto alg3 = configureAlgorithm("GroupDetectors", std::move(properties2));
+
+    algorithmDeque.emplace_back(std::move(alg1));
+    algorithmDeque.emplace_back(std::move(alg2));
+    algorithmDeque.emplace_back(std::move(alg3));
+
   } else {
     auto properties = groupDetectorsProperties(name, detectorList, name + "_grp");
-    batchAlgoRunner->addAlgorithm(AlgorithmManager::Instance().create("GroupDetectors"), std::move(properties));
+    auto alg1 = configureAlgorithm("GroupDetectors", std::move(properties));
+    algorithmDeque.emplace_back(std::move(alg1));
   }
-
-  batchAlgoRunner->executeBatchAsync();
+  return algorithmDeque;
 }
 
 void IETModel::saveWorkspace(std::string const &workspaceName, IETSaveData const &saveTypes) {

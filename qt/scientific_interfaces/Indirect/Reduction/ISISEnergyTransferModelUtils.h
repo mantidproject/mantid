@@ -12,6 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
 
 using namespace Mantid::API;
 
@@ -27,6 +28,12 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
 
 WorkspaceGroup_sptr getADSWorkspaceGroup(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
+}
+
+MantidQt::API::IConfiguredAlgorithm_sptr configureAlgorithm(std::string const &algorithmName,
+                                                            std::unique_ptr<IAlgorithmRuntimeProps> properties) {
+  return std::make_unique<MantidQt::API::ConfiguredAlgorithm>(AlgorithmManager::Instance().create(algorithmName),
+                                                              std::move(properties));
 }
 
 IAlgorithm_sptr loadAlgorithm(std::string const &filename, std::string const &outputName) {

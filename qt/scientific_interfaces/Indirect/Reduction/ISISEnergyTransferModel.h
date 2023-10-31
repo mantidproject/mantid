@@ -41,8 +41,8 @@ public:
 
   std::string runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData const &instData,
                               IETRunData const &runParams);
-  void plotRawFile(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData const &instData,
-                   IETPlotData const &plotData);
+  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> plotRawFile(InstrumentData const &instData,
+                                                                   IETPlotData const &plotData);
 
   void saveWorkspace(std::string const &workspaceName, IETSaveData const &saveData);
   void saveDaveGroup(std::string const &workspaceName, std::string const &outputName);
