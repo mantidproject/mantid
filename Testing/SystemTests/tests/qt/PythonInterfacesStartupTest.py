@@ -13,6 +13,8 @@ from workbench.utils.gather_interfaces import gather_python_interface_names
 
 from qtpy.QtCore import QCoreApplication, QSettings
 
+ORGANIZATION_NAME = " "
+
 INSTRUMENT_SWITCHER = {"DGS_Reduction.py": "ARCS", "ORNL_SANS.py": "EQSANS", "Powder_Diffraction_Reduction.py": "NOM"}
 
 APP_NAME_SWITCHER = {"DGS_Reduction.py": "python", "ORNL_SANS.py": "python", "Powder_Diffraction_Reduction.py": "python"}
@@ -21,12 +23,13 @@ APP_NAME_SWITCHER = {"DGS_Reduction.py": "python", "ORNL_SANS.py": "python", "Po
 def set_instrument(interface_script_name):
     instrument = INSTRUMENT_SWITCHER.get(interface_script_name, None)
     if instrument is not None:
-        QSettings().setValue("instrument_name", instrument)
+        app_name = APP_NAME_SWITCHER.get(interface_script_name, "mantid")
+        QSettings(ORGANIZATION_NAME, app_name).setValue("instrument_name", instrument)
 
 
 def set_application_name(interface_script_name):
     app_name = APP_NAME_SWITCHER.get(interface_script_name, "mantid")
-    QCoreApplication.setOrganizationName(" ")
+    QCoreApplication.setOrganizationName(ORGANIZATION_NAME)
     QCoreApplication.setApplicationName(app_name)
 
 
@@ -40,6 +43,7 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
         import mantidqtinterfaces
 
         self._interface_directory = os.path.dirname(mantidqtinterfaces.__file__)
+        # The order of the scripts in this iterable is random
         self._interface_scripts = set(chain.from_iterable(gather_python_interface_names().values()))
 
     def runTest(self):
