@@ -592,16 +592,17 @@ void TimeSplitter::splitEventList(const EventList &events, std::map<int, EventLi
 }
 
 /**
- * Distribute a list of events by comparing a vector of times against the splitter boundaries.
+ * Distribute a list of events by comparing event times against the splitter boundaries.
  *
- * Each event in `events` has a corresponding time in `times`, which we use to find a destination index
- * in the TimeSplitter object. The destination index is the key to find the target event list
- * in the partials map.
+ * For each event in `events` we calculate the event time using a timeCalc function. The function definition
+ * depends on the input flags (pulseTof, tofCorrect) and input parameters (factor, shift).
+ * The calculated time is then used to find a destination index for the event in the TimeSplitter object.
+ * The destination index, in turn, is the key to find the target event list in the partials map.
  *
  * @tparam EventType : one of EventType::TOF or EventType::WEIGHTED
  * @param events : list of input events
- * @param partials : target list of partial event lists, associated to the different destination indexes
- * @param pulseTof : if True, split according to Pulse + TOF time, otherwise split by Pulse time
+ * @param partials : target list of partial event lists associated with different destination indexes
+ * @param pulseTof : if true, split according to Pulse + TOF time, otherwise split by Pulse time
  * @param tofCorrect : rescale and shift the TOF values (factor*TOF + shift)
  * @param factor : rescale the TOF values by a dimensionless factor.
  * @param shift : shift the TOF values after rescaling, in units of microseconds.
