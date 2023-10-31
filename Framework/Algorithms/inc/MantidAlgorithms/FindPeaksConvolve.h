@@ -50,7 +50,6 @@ private:
 
   void initiateValidators();
   std::pair<std::string, int> secondaryValidation() const;
-  const std::string validatePeakPositionInput() const;
   const std::string validatePeakExtentInput() const;
   void storeClassProperties();
 

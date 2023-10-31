@@ -59,20 +59,6 @@ public:
     }
   }
 
-  void test_peak_number_and_position_mismatch() {
-    auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
-    alg->setProperty("NumberOfPeaks", "3");
-    alg->setProperty("PeakPositions", "1, 2, 3, 4");
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument)
-  }
-
-  void test_FWHM_specific_and_range_both_specified() {
-    auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
-    alg->setProperty("EstimatedPeakExtent", "15");
-    alg->setProperty("PeakExtentRange", "10,20");
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument)
-  }
-
   void test_exec() {
     // auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
     int64_t nhist = 1;

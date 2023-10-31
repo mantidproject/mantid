@@ -60,23 +60,10 @@ void FindPeaksConvolve::init() {
   declareProperty("WorkspaceIndex", EMPTY_INT(), m_validators["mustBeNonNegative"],
                   "If set, only this spectrum will be searched for peaks "
                   "(otherwise all are)");
-  declareProperty("NumberOfPeaks", EMPTY_INT(), m_validators["mustBeNonNegative"],
-                  "If set, the algorithm will attempt to find the input number of peaks");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("PeakPositions"),
-                  "Optional: enter a comma-separated list of the expected "
-                  "X-position of the centre of the peaks. Only peaks within a tolerance "
-                  "of these positions will be fitted.");
-  declareProperty("PeakPositionTolerance", EMPTY_DBL(), m_validators["mustBeGreaterThanZero"],
-                  "Tolerance on the found peaks' positions against the input "
-                  "peak positions.");
   declareProperty("EstimatedPeakExtent", EMPTY_DBL(), m_validators["mustBeGreaterThanZero"],
                   "Estimated PeakExtent of the peaks to be found");
-  // EstimatedPeakExtentNBins needs a minimum of
   declareProperty("EstimatedPeakExtentNBins", EMPTY_INT(), m_validators["mustBeGreaterThanOne"],
                   "Optional: Estimated PeakExtent of the peaks to be found in number of bins");
-  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>("PeakExtentRange"),
-                  "Optional: comma-separated min and max values of the range of Peak Extents "
-                  "to evaluate <min, max>");
   declareProperty("IOversigmaThreshold", 2.0, m_validators["mustBeGreaterThanZero"],
                   "Minimum Signal/Noise ratio for a peak to be considered significant");
   declareProperty("PerformBinaryClosing", true,
@@ -121,27 +108,12 @@ std::pair<std::string, int> FindPeaksConvolve::secondaryValidation() const {
   std::string err_str{};
   int err_code{0};
 
-  err_str += validatePeakPositionInput();
   err_str += validatePeakExtentInput();
 
   if (err_str != "") {
     err_code = 1;
   }
   return std::make_pair(err_str, err_code);
-}
-
-const std::string FindPeaksConvolve::validatePeakPositionInput() const {
-  std::string err_str{};
-  const int numberOfPeaks = getProperty("NumberOfPeaks");
-  const std::vector<double> peakPositions = getProperty("PeakPositions");
-  const size_t peakPositionsSize{peakPositions.size()};
-
-  if ((numberOfPeaks != EMPTY_INT() && peakPositionsSize != 0) &&
-      (static_cast<size_t>(numberOfPeaks) != peakPositionsSize)) {
-    err_str += "Specified number of peaks and peak positions differ: " + std::to_string(numberOfPeaks) +
-               "!=" + std::to_string(peakPositionsSize);
-  }
-  return err_str;
 }
 
 const std::string FindPeaksConvolve::validatePeakExtentInput() const {
@@ -152,15 +124,6 @@ const std::string FindPeaksConvolve::validatePeakExtentInput() const {
     err_str += "Peak Extent has been given in x units and in number of bins. Please specify one or the other. ";
   }
 
-  const std::vector<double> peakExtentRange = getProperty("PeakExtentRange");
-  const size_t peakExtentRangeSize{peakExtentRange.size()};
-  if ((peakExtent != EMPTY_DBL() || peakExtentNBins != EMPTY_INT()) && peakExtentRangeSize) {
-    err_str += "Specific and Peak Extent range specified. Please specify one or the other. ";
-  }
-
-  // if (peakExtent >= ) {
-  //  err_str += "Peak extent range cannot be greater than xdata range. ";
-  //}
   return err_str;
 }
 
