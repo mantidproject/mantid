@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/BankPulseTimes.h"
-#include "MantidNexus/NexusIOHelper.h"
 
 #include <nexus/NeXusFile.hpp>
 #include <numeric>
@@ -43,7 +42,8 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &pNum
 
   // number of pulse times
   const auto dataInfo = file.getInfo();
-  const int64_t numValues = Mantid::NeXus::NeXusIOHelper::vectorVolume(dataInfo.dims);
+  const int64_t numValues =
+      std::accumulate(dataInfo.dims.cbegin(), dataInfo.dims.cend(), int64_t{1}, std::multiplies<>());
   if (numValues == 0)
     throw std::runtime_error("event_time_zero field has no data!");
 
