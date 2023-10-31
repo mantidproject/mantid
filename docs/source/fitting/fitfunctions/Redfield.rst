@@ -24,7 +24,7 @@ where,
 :math:`\tau' is the muon spin correlation time, in microseconds, with expression given as :math:`\tau = \frac{1}{f}`
 where :math:`f` is the frequency of fluctuation at muon sites.
 
-And :math:'\gamma_\mu' is the gyromagnetic ratio of the muon spin, given in units of :math:'[rad]x\frac{MHz}{Gauss}'
+And :math:`\gamma_\mu` is the gyromagnetic ratio of the muon spin, given in units of :math:`[rad]x\frac{MHz}{Gauss}`
 .. plot::
 
     from mantid.simpleapi import FunctionWrapper
