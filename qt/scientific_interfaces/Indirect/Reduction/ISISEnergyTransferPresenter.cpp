@@ -185,7 +185,7 @@ void IETPresenter::notifyPlotRawClicked() {
     disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
 
-    m_batchAlgoRunner->setQueue(m_model->plotRawFile(instrumentData, plotParams));
+    m_batchAlgoRunner->setQueue(m_model->plotRawAlgorithmQueue(instrumentData, plotParams));
     m_batchAlgoRunner->executeBatchAsync();
   } else {
     m_view->setPlotTimeIsPlotting(false);

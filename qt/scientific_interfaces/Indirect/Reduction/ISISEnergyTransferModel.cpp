@@ -263,8 +263,8 @@ std::vector<std::string> IETModel::validatePlotData(IETPlotData const &plotParam
   return errors;
 }
 
-std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> IETModel::plotRawFile(InstrumentData const &instData,
-                                                                           IETPlotData const &plotParams) {
+std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
+IETModel::plotRawAlgorithmQueue(InstrumentData const &instData, IETPlotData const &plotParams) const {
   auto const [rawFile, basename] = parseInputFiles(plotParams.getInputData().getInputFiles());
 
   auto const spectraMin = plotParams.getConversionData().getSpectraMin();
@@ -289,7 +289,6 @@ IETModel::plotRawAlgorithmQueue(std::string const &rawFile, std::string const &b
         basename, backgroundData.getBackgroundStart(), backgroundData.getBackgroundEnd(), basename + "_bg"));
     algorithmDeque.emplace_back(groupDetectorsConfiguredAlg(basename + "_bg", detectorList, basename + "_grp"));
     algorithmDeque.emplace_back(groupDetectorsConfiguredAlg(basename, detectorList, basename + "_grp_raw"));
-
   } else {
     algorithmDeque.emplace_back(groupDetectorsConfiguredAlg(basename, detectorList, basename + "_grp"));
   }
