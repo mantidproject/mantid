@@ -9,16 +9,18 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/MultiThreaded.h"
 
+#include <algorithm>
 #include <boost/math/distributions/normal.hpp>
 #include <cmath>
-#include <ppl.h>
 
 namespace {
 Mantid::Kernel::Logger g_log("FindPeaksConvolve");
@@ -83,8 +85,10 @@ void FindPeaksConvolve::exec() {
   if (validation_res.second != 0) {
     throw std::invalid_argument("Validation error: " + validation_res.first);
   }
-
-  concurrency::parallel_for(size_t(0), m_specCount, [&](size_t i) { performConvolution(i); });
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputDataWS))
+  for (int i = 0; i < static_cast<int>(m_specCount); i++) {
+    performConvolution(i);
+  }
   outputResults();
 }
 
@@ -150,10 +154,10 @@ void FindPeaksConvolve::performConvolution(const size_t dataIndex) {
   const auto specNum{m_specNums[dataIndex]};
   const HistogramData::HistogramX *xData{&m_inputDataWS->x(specNum)};
   const auto kernelBinCount{getKernelBinCount(xData)};
-  const Tensor1D kernel{createKernel(kernelBinCount, dataIndex)};
+  const Tensor1D kernel{createKernel(static_cast<int>(kernelBinCount))};
 
   const auto binCount{m_inputDataWS->getNumberBins(specNum)};
-  const double paddingSize = (std::ceil(kernelBinCount * 1.5) - 2) / 2;
+  const double paddingSize = (std::ceil(static_cast<double>(kernelBinCount) * 1.5) - 2) / 2;
   const TensorMap_const yData{&m_inputDataWS->y(specNum).front(), binCount};
   Eigen::array<std::pair<double, double>, 1> paddings{std::make_pair(std::ceil(paddingSize), std::floor(paddingSize))};
   const auto yData_padded{yData.pad(paddings)};
@@ -163,29 +167,30 @@ void FindPeaksConvolve::performConvolution(const size_t dataIndex) {
   const auto eData{TensorMap_const{&m_inputDataWS->e(specNum).front(), binCount}.pad(paddings)};
   const Tensor1D eConvOutput{eData.square().convolve(kernel.square(), dims).sqrt()};
 
-  const Tensor1D smoothKernel{createSmoothKernel(static_cast<size_t>(std::ceil(kernelBinCount / 2.0)))};
+  const Tensor1D smoothKernel{
+      createSmoothKernel(static_cast<size_t>(std::ceil(static_cast<double>(kernelBinCount) / 2.0)))};
   const Tensor1D iOverSigConvOutput{(yConvOutput / eConvOutput).convolve(smoothKernel, dims)};
 
-  EigenMap_const *xDataPostConv;
+  std::unique_ptr<EigenMap_const> xDataPostConv;
   Eigen::VectorXd xDataCentredBins;
-  if (xData->size() != yData.size()) {
-    xDataCentredBins = centreBinsXData(dataIndex, kernelBinCount, xData);
-    xDataPostConv = &EigenMap_const{xDataCentredBins.data(), xDataCentredBins.size()};
+  if (xData->size() != static_cast<size_t>(yData.size())) {
+    xDataCentredBins = centreBinsXData(xData);
+    xDataPostConv = std::make_unique<EigenMap_const>(EigenMap_const{xDataCentredBins.data(), xDataCentredBins.size()});
   } else {
-    xDataPostConv = &EigenMap_const(&xData->front(), xData->size());
+    xDataPostConv = std::make_unique<EigenMap_const>(EigenMap_const(&xData->front(), xData->size()));
   }
   extractPeaks(dataIndex, iOverSigConvOutput, *xDataPostConv, yData, kernelBinCount / 2);
 
   if (m_createIntermediateWorkspaces) {
-    createIntermediateWorkspaces(dataIndex, kernel, iOverSigConvOutput, xDataPostConv);
+    createIntermediateWorkspaces(dataIndex, kernel, iOverSigConvOutput, *xDataPostConv);
   }
 }
 
-Tensor1D FindPeaksConvolve::createKernel(const size_t binCount, const size_t dataIndex) {
+Tensor1D FindPeaksConvolve::createKernel(const int binCount) {
   Tensor1D kernel(binCount);
-  for (auto i{0}; i < binCount; i++) {
+  for (int i{0}; i < binCount; i++) {
     // consider if these 0.25/0.75 values should be inputs
-    if (i < std::ceil(binCount * 0.25) || i >= binCount * 0.75) {
+    if (i < std::ceil(binCount) * 0.25 || i >= binCount * 0.75) {
       kernel.data()[i] = -1;
     } else {
       kernel.data()[i] = 1;
@@ -196,8 +201,8 @@ Tensor1D FindPeaksConvolve::createKernel(const size_t binCount, const size_t dat
 
 Tensor1D FindPeaksConvolve::createSmoothKernel(const size_t kernelSize) {
   Tensor1D kernel(kernelSize);
-  for (auto i{0}; i < kernelSize; i++) {
-    kernel.data()[i] = 1.0 / kernelSize;
+  for (size_t i{0}; i < kernelSize; i++) {
+    kernel.data()[i] = 1.0 / static_cast<double>(kernelSize);
   }
   return kernel;
 }
@@ -216,8 +221,7 @@ size_t FindPeaksConvolve::getKernelBinCount(const HistogramData::HistogramX *xDa
   }
 }
 
-Eigen::VectorXd FindPeaksConvolve::centreBinsXData(const size_t dataIndex, const size_t kernelSize,
-                                                   const HistogramData::HistogramX *xData) {
+Eigen::VectorXd FindPeaksConvolve::centreBinsXData(const HistogramData::HistogramX *xData) {
   Eigen::VectorXd xDataVec{0.5 * (EigenMap_const(&xData->front(), xData->size() - 1) +
                                   EigenMap_const(&xData->front() + 1, xData->size() - 1))};
   return xDataVec;
@@ -282,7 +286,7 @@ FindPeaksConvolve::filterDataForSignificantPoints(const Tensor1D &iOverSigma) {
 size_t FindPeaksConvolve::findPeakInRawData(const int xIndex, const TensorMap_const &yData,
                                             size_t peakExtentBinNumber) {
   peakExtentBinNumber = (peakExtentBinNumber % 2 == 0) ? peakExtentBinNumber + 1 : peakExtentBinNumber;
-  int sliceStart{xIndex - static_cast<int>(std::floor(peakExtentBinNumber / 2.0))};
+  int sliceStart{xIndex - static_cast<int>(std::floor(static_cast<double>(peakExtentBinNumber) / 2.0))};
   size_t adjPeakExtentBinNumber{peakExtentBinNumber};
   int startAdj{0};
 
@@ -291,41 +295,41 @@ size_t FindPeaksConvolve::findPeakInRawData(const int xIndex, const TensorMap_co
     adjPeakExtentBinNumber = peakExtentBinNumber - startAdj;
     sliceStart = 0;
   }
-  if (sliceStart + adjPeakExtentBinNumber > yData.size() - 1) {
+  if (sliceStart + adjPeakExtentBinNumber > static_cast<size_t>(yData.size()) - 1) {
     adjPeakExtentBinNumber = static_cast<size_t>(yData.size()) - sliceStart;
   }
 
   Eigen::VectorXd::Index maxIndex;
   if (m_findHighestDatapointInPeak) {
     const auto unweightedYData = EigenMap_const(yData.data() + sliceStart, adjPeakExtentBinNumber);
-    const double max_val = unweightedYData.maxCoeff(&maxIndex);
+    unweightedYData.maxCoeff(&maxIndex);
   } else {
-    Eigen::VectorXd pdf{generateNormalPDF(peakExtentBinNumber)};
+    Eigen::VectorXd pdf{generateNormalPDF(static_cast<int>(peakExtentBinNumber))};
     const auto weightedYData = EigenMap_const(yData.data() + sliceStart, adjPeakExtentBinNumber)
                                    .cwiseProduct(EigenMap_const(pdf.data() + startAdj, adjPeakExtentBinNumber));
-    const double max_val = weightedYData.maxCoeff(&maxIndex);
+    weightedYData.maxCoeff(&maxIndex);
   }
   return static_cast<size_t>(maxIndex) + sliceStart;
 }
 
-Eigen::VectorXd FindPeaksConvolve::generateNormalPDF(const size_t peakExtentBinNumber) {
+Eigen::VectorXd FindPeaksConvolve::generateNormalPDF(const int peakExtentBinNumber) {
   // assert vector has odd size.
   Eigen::VectorXd pdf{peakExtentBinNumber};
   boost::math::normal_distribution<> dist(0.0, peakExtentBinNumber / 2.0); // assures 2 stddevs in the resultant vector
-  const size_t meanIdx{peakExtentBinNumber / 2};
-  for (auto i{0}; i < peakExtentBinNumber; ++i) {
-    int x{i - static_cast<int>(meanIdx)};
+  const int meanIdx{peakExtentBinNumber / 2};
+  for (int i{0}; i < peakExtentBinNumber; ++i) {
+    int x{i - meanIdx};
     pdf(i) = boost::math::pdf(dist, x);
   }
   return pdf;
 }
 
 void FindPeaksConvolve::createIntermediateWorkspaces(const size_t dataIndex, const Tensor1D &kernel,
-                                                     const Tensor1D &iOverSigma, const EigenMap_const *xData) {
+                                                     const Tensor1D &iOverSigma, const EigenMap_const &xData) {
   API::Algorithm_sptr alg{createChildAlgorithm("CreateWorkspace")};
 
   alg->setProperty("OutputWorkspace", "iOverSigma");
-  alg->setProperty("DataX", std::vector<double>(xData->data(), xData->data() + xData->rows()));
+  alg->setProperty("DataX", std::vector<double>(xData.data(), xData.data() + xData.rows()));
   alg->setProperty("DataY", std::vector<double>(iOverSigma.data(), iOverSigma.data() + iOverSigma.size()));
   alg->execute();
   API::MatrixWorkspace_sptr algOutput = alg->getProperty("OutputWorkspace");
@@ -345,14 +349,14 @@ void FindPeaksConvolve::createIntermediateWorkspaces(const size_t dataIndex, con
 void FindPeaksConvolve::outputResults() {
   API::ITableWorkspace_sptr table{API::WorkspaceFactory::Instance().createTable("TableWorkspace")};
   table->addColumn("int", "SpecIndex");
-  for (auto i{0}; i < m_maxPeakCount; i++) {
+  for (size_t i{0}; i < m_maxPeakCount; i++) {
     table->addColumn("double", "PeakCentre_" + std::to_string(i));
     table->addColumn("double", "PeakHeight_" + std::to_string(i));
     table->addColumn("double", "PeakIOverSigma_" + std::to_string(i));
   }
 
   std::string noPeaksStr{""};
-  for (auto i{0}; i < m_peakResults.size(); i++) {
+  for (size_t i{0}; i < m_peakResults.size(); i++) {
     const auto spec = std::move(m_peakResults[i]);
     if (!spec.empty()) {
       API::TableRow row{table->appendRow()};

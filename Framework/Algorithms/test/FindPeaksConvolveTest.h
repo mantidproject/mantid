@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAlgorithms/FindPeaksConvolve.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
@@ -43,7 +44,7 @@ Mantid::API::Algorithm_sptr set_up_alg(const std::string &input_ws_name, const s
 void assert_peak_centres_equal(const Mantid::API::ITableWorkspace_sptr &resultWs,
                                std::vector<double> &expectedPeakCentres) {
   const auto colNames = resultWs->getColumnNames();
-  for (int i = resultWs->columnCount() - 1; i >= 0; i--) {
+  for (int i = static_cast<int>(resultWs->columnCount()) - 1; i >= 0; i--) {
     std::string colName{colNames[i]};
     if (colName.find("PeakCentre") != std::string::npos) {
       double cellValue{resultWs->Double(0, i)};
@@ -154,6 +155,6 @@ public:
     auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
     alg->setProperty("EstimatedPeakExtent", "100");
     alg->setProperty("EstimatedPeakExtentNBins", "100");
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument &);
   }
 };

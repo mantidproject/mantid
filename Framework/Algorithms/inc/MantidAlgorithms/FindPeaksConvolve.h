@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidHistogramData/Histogram.h"
 
 #include "Eigen/../unsupported/Eigen/CXX11/Tensor"
 #include "Eigen/Core"
@@ -56,20 +57,18 @@ private:
   void storeClassProperties();
 
   void performConvolution(const size_t dataIndex);
-  Tensor1D createKernel(const size_t binCount, const size_t dataIndex);
+  Tensor1D createKernel(const int binCount);
   Tensor1D createSmoothKernel(const size_t kernelSize);
   size_t getKernelBinCount(const HistogramData::HistogramX *xData) const;
-  Eigen::VectorXd centreBinsXData(const size_t dataIndex, const size_t kernelSize,
-                                  const HistogramData::HistogramX *xData);
+  Eigen::VectorXd centreBinsXData(const HistogramData::HistogramX *xData);
   void extractPeaks(const size_t dataIndex, const Tensor1D &iOverSigma, const EigenMap_const &xData,
                     const TensorMap_const &yData, const size_t peakExtentBinNumber);
   std::vector<std::pair<const int, const double>> filterDataForSignificantPoints(const Tensor1D &iOverSigma);
   size_t findPeakInRawData(const int xIndex, const TensorMap_const &yData, size_t peakExtentBinNumber);
-  void FindPeaksConvolve::storePeakResults(const size_t dataIndex,
-                                           std::vector<FindPeaksConvolve::PeakResult> &peakCentres);
-  Eigen::VectorXd generateNormalPDF(const size_t peakExtentBinNumber);
+  void storePeakResults(const size_t dataIndex, std::vector<FindPeaksConvolve::PeakResult> &peakCentres);
+  Eigen::VectorXd generateNormalPDF(const int peakExtentBinNumber);
   void createIntermediateWorkspaces(const size_t dataIndex, const Tensor1D &kernel, const Tensor1D &iOverSigma,
-                                    const EigenMap_const *xData);
+                                    const EigenMap_const &xData);
   void outputResults();
 };
 
