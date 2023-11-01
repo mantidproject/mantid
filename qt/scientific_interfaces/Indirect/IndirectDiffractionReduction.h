@@ -83,6 +83,7 @@ private:
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
   std::vector<std::string> m_plotWorkspaces;
   std::string m_groupingWsName;
+  std::string m_groupingComponent;
 
   std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
 };
