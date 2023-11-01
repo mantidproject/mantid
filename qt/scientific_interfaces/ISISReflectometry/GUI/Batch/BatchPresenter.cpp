@@ -139,7 +139,11 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
   if (m_savePresenter->shouldAutosave()) {
     auto const workspaces =
         m_jobManager->algorithmOutputWorkspacesToSave(algorithm, m_savePresenter->shouldAutosaveGroupRows());
-    m_savePresenter->saveWorkspaces(workspaces);
+    try {
+      m_savePresenter->saveWorkspaces(workspaces);
+    } catch (...) {
+      // The exception will be logged, we just want to prevent a crash
+    }
   }
 }
 

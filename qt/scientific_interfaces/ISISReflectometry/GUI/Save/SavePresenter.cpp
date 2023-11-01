@@ -15,7 +15,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "Poco/File.h"
-#include "Poco/Path.h"
 
 #include <boost/regex.hpp>
 
@@ -268,7 +267,9 @@ void SavePresenter::saveSelectedWorkspaces() {
   } else {
     try {
       saveWorkspaces(wkspNames);
-    } catch (std::exception &e) {
+    } catch (std::runtime_error const &e) {
+      m_view->cannotSaveWorkspaces(e.what());
+    } catch (std::exception const &e) {
       m_view->cannotSaveWorkspaces(e.what());
     } catch (...) {
       m_view->cannotSaveWorkspaces();

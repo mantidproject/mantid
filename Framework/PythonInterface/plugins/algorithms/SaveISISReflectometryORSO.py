@@ -96,7 +96,13 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         # Write the file to disk in the ORSO ASCII format
         if Path(orso_saver.filename).is_file():
             self.log().warning("File already exists and will be overwritten")
-        orso_saver.save_orso_ascii()
+
+        try:
+            orso_saver.save_orso_ascii()
+        except OSError as e:
+            raise RuntimeError(
+                f"Error writing ORSO file. Check that the filepath is valid and does not contain any invalid characters.\n{e}"
+            )
 
     def _create_dataset(self, ws, dataset_name=None):
         reduction_hist = self._get_reduction_alg_history(ws)
