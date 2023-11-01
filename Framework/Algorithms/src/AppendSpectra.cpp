@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AppendSpectra.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
@@ -106,7 +107,7 @@ void AppendSpectra::exec() {
   setProperty("OutputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(output));
 }
 
-/** If there is an overlap in spectrum numbers between ws1 and ws2,
+/** If there is an overlap in spectrum numbers between ws1 and ws2 or the y axis is a bin edges axis,
  * then the spectrum numbers are reset as a simple 1-1 correspondence
  * with the workspace index.
  *
@@ -124,25 +125,29 @@ void AppendSpectra::fixSpectrumNumbers(const MatrixWorkspace &ws1, const MatrixW
   specnum_t ws2max;
   getMinMax(ws2, ws2min, ws2max);
 
-  // is everything possibly ok?
-  if (ws2min > ws1max)
+  const int yAxisNum = 1;
+  auto outputYAxis = output.getAxis(yAxisNum);
+  const bool spectraAreNotOverlapping = ws2min > ws1max;
+  const bool notYBinEdgeAxis = dynamic_cast<BinEdgeAxis *>(outputYAxis) != nullptr;
+  if (spectraAreNotOverlapping && notYBinEdgeAxis)
     return;
 
   auto indexInfo = output.indexInfo();
   indexInfo.setSpectrumNumbers(0, static_cast<int32_t>(output.getNumberHistograms() - 1));
   output.setIndexInfo(indexInfo);
 
-  const int yAxisNum = 1;
   const auto yAxisWS1 = ws1.getAxis(yAxisNum);
   const auto yAxisWS2 = ws2.getAxis(yAxisNum);
-  auto outputYAxis = output.getAxis(yAxisNum);
   const auto ws1len = ws1.getNumberHistograms();
 
   const bool isTextAxis = yAxisWS1->isText() && yAxisWS2->isText();
   const bool isNumericAxis = yAxisWS1->isNumeric() && yAxisWS2->isNumeric();
+  bool isBinEdgeAxis =
+      dynamic_cast<BinEdgeAxis *>(yAxisWS1) != nullptr && dynamic_cast<BinEdgeAxis *>(yAxisWS2) != nullptr;
 
   auto outputTextAxis = dynamic_cast<TextAxis *>(outputYAxis);
-  for (size_t i = 0; i < output.getNumberHistograms(); ++i) {
+  const auto ouputlen = output.getNumberHistograms() + (isBinEdgeAxis ? 1 : 0);
+  for (size_t i = 0; i < ouputlen; ++i) {
     if (isTextAxis) {
       // check if we're outside the spectra of the first workspace
       const std::string inputLabel = i < ws1len ? yAxisWS1->label(i) : yAxisWS2->label(i - ws1len);
