@@ -24,7 +24,6 @@ class PlotConfigDialogPresenter:
             self.view = view
         else:
             self.view = PlotConfigDialogView(parent)
-        self.view.show()
 
         self.tab_widget_presenters = [None, None, None, None]
         self.tab_widget_views = [None, None, None, None]
@@ -53,6 +52,7 @@ class PlotConfigDialogPresenter:
             self.tab_widget_views[2] = (images_tab.view, "Images")
 
         self._add_tab_widget_views()
+        self.view.show()
 
         # Signals
         self.view.ok_button.clicked.connect(self.apply_properties_and_exit)
