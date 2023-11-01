@@ -50,6 +50,7 @@ void AppendSpectra::init() {
                   "The name of the output workspace");
 
   declareProperty("MergeLogs", false, "Whether to combine the logs of the two input workspaces");
+  declareProperty("CopyNumericAxis", false, "Whether to copy y axis numberic values from old workspaces");
 }
 
 /** Execute the algorithm.
@@ -125,17 +126,21 @@ void AppendSpectra::fixSpectrumNumbers(const MatrixWorkspace &ws1, const MatrixW
   specnum_t ws2max;
   getMinMax(ws2, ws2min, ws2max);
 
-  const int yAxisNum = 1;
-  auto outputYAxis = output.getAxis(yAxisNum);
-  const bool spectraAreNotOverlapping = ws2min > ws1max;
-  const bool notYBinEdgeAxis = dynamic_cast<BinEdgeAxis *>(outputYAxis) != nullptr;
-  if (spectraAreNotOverlapping && notYBinEdgeAxis)
-    return;
+  auto isNumeric = output.getAxis(1)->isNumeric();
+  const bool copyNumericAxis = getProperty("CopyNumericAxis");
 
-  auto indexInfo = output.indexInfo();
-  indexInfo.setSpectrumNumbers(0, static_cast<int32_t>(output.getNumberHistograms() - 1));
-  output.setIndexInfo(indexInfo);
+  if (ws2min < ws1max) {
+    auto indexInfo = output.indexInfo();
+    indexInfo.setSpectrumNumbers(0, static_cast<int32_t>(output.getNumberHistograms() - 1));
+    output.setIndexInfo(indexInfo);
 
+    copyYAxis(ws1, ws2, output);
+  } else if (isNumeric && copyNumericAxis) {
+    copyYAxis(ws1, ws2, output);
+  }
+}
+
+void AppendSpectra::copyYAxis(const MatrixWorkspace &ws1, const MatrixWorkspace &ws2, MatrixWorkspace &output) {
   const auto yAxisWS1 = ws1.getAxis(yAxisNum);
   const auto yAxisWS2 = ws2.getAxis(yAxisNum);
   const auto ws1len = ws1.getNumberHistograms();
@@ -144,7 +149,6 @@ void AppendSpectra::fixSpectrumNumbers(const MatrixWorkspace &ws1, const MatrixW
   const bool isNumericAxis = yAxisWS1->isNumeric() && yAxisWS2->isNumeric();
   bool isBinEdgeAxis =
       dynamic_cast<BinEdgeAxis *>(yAxisWS1) != nullptr && dynamic_cast<BinEdgeAxis *>(yAxisWS2) != nullptr;
-
   auto outputTextAxis = dynamic_cast<TextAxis *>(outputYAxis);
   const auto ouputlen = output.getNumberHistograms() + (isBinEdgeAxis ? 1 : 0);
   for (size_t i = 0; i < ouputlen; ++i) {
