@@ -374,7 +374,7 @@ void TimeSplitter::rebuildCachedPartialTimeROIs() const {
 
   if (it->second != NO_TARGET) {
     std::ostringstream err;
-    err << "Open-ended time interval is invalid in event filtering. Time interval: " << it->first << " - ?,"
+    err << "Open-ended time interval is invalid in event filtering: " << it->first << " - ?,"
         << " target index: " << it->second << std::endl;
     throw std::runtime_error(err.str());
   }

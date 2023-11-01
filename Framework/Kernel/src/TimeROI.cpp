@@ -140,7 +140,7 @@ void TimeROI::addROI(const std::time_t &startTime, const std::time_t &stopTime) 
  * addROI.
  */
 void TimeROI::appendROIFast(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) {
-  if (m_roi.size() > 0 && m_roi.back() == startTime)
+  if (!m_roi.empty() && m_roi.back() == startTime)
     m_roi.back() = stopTime; // grow existent region
   else {                     // add new region
     m_roi.push_back(startTime);
