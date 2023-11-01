@@ -24,6 +24,10 @@ class MantidORSOSaver:
         self._comment = comment
         self._datasets = []
 
+    @property
+    def filename(self):
+        return self._filename
+
     def add_dataset(self, dataset):
         self._datasets.append(dataset.dataset)
 
@@ -84,7 +88,10 @@ class MantidORSODataset:
         if not run.hasProperty(self._RUN_START_LOG):
             return None
 
-        return self._create_datetime_from_string(run.getProperty(self._RUN_START_LOG).value)
+        try:
+            return self._create_datetime_from_string(run.getProperty(self._RUN_START_LOG).value)
+        except ValueError:
+            return None
 
     @classmethod
     def _create_datetime_from_string(cls, str_datetime):

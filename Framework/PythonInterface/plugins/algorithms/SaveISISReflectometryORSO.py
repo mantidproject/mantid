@@ -9,6 +9,8 @@ from mantid.utils.reflectometry.orso_helper import *
 from mantid.kernel import Direction, Property
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, FileProperty, FileAction, PythonAlgorithm, PropertyMode
 
+from pathlib import Path
+
 
 class Prop:
     INPUT_WS = "InputWorkspace"
@@ -89,9 +91,11 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         orso_saver = MantidORSOSaver(self.getProperty(Prop.FILENAME).value, self._INVALID_HEADER_COMMENT)
 
         # Create the file contents
-        orso_saver.add_dataset(self._create_dataset(ws))
+        orso_saver.add_dataset(self._create_dataset(ws, ws.name()))
 
         # Write the file to disk in the ORSO ASCII format
+        if Path(orso_saver.filename).is_file():
+            self.log().warning("File already exists and will be overwritten")
         orso_saver.save_orso_ascii()
 
     def _create_dataset(self, ws, dataset_name=None):
@@ -181,8 +185,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         self.log().warning("Unable to find resolution from workspace history.")
         return None
 
-    @staticmethod
-    def _get_reduction_timestamp(reduction_history):
+    def _get_reduction_timestamp(self, reduction_history):
         """
         Get the reduction algorithm execution date, which is in UTC, and convert it to a
         datetime object expressed in local time
@@ -190,7 +193,13 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         if not reduction_history:
             return None
 
-        return MantidORSODataset.create_local_datetime_from_utc_string(reduction_history.executionDate().toISO8601String())
+        try:
+            return MantidORSODataset.create_local_datetime_from_utc_string(reduction_history.executionDate().toISO8601String())
+        except ValueError:
+            self.log().warning(
+                "Could not parse reduction timestamp into required format - this information will be excluded from the file."
+            )
+            return None
 
     def _get_reduction_alg_history(self, ws):
         """

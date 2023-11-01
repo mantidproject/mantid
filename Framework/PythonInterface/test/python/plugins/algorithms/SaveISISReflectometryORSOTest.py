@@ -175,6 +175,8 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             f"reduction:\n#   software: {{name: {MantidORSODataset.SOFTWARE_NAME}, version: {version()}}}\n#   timestamp: {reduction_datetime.isoformat()}\n#"
         )
 
+        expected_header_values.append(f"data_set: {reduced_ws.name()}")
+
         return expected_header_values
 
     def _get_reduction_history_for_reduced_ws(self, reduced_ws):
