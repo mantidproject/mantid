@@ -355,10 +355,7 @@ void TimeSplitter::rebuildCachedPartialTimeROIs() const {
   if (empty())
     return;
 
-  // Loop over m_roi_map and build vectors of time boundaries for all targets.
-  // Save the results in a temporary map.
-  std::map<int, std::vector<DateAndTime>> partialTimeVectors;
-
+  // Loop over m_roi_map and build all partial TimeROIs
   int target{NO_TARGET};
   DateAndTime intervalStart, intervalStop;
   auto it = m_roi_map.cbegin();
@@ -367,43 +364,19 @@ void TimeSplitter::rebuildCachedPartialTimeROIs() const {
     intervalStop = std::next(it)->first;
     target = it->second;
 
-    if (partialTimeVectors.count(target) > 0) {
-      if (partialTimeVectors[target].back() == intervalStart)
-        partialTimeVectors[target].back() = intervalStop; // merge adjacent splitting intervals
-      else {                                              // add a new splitting interval
-        partialTimeVectors[target].push_back(intervalStart);
-        partialTimeVectors[target].push_back(intervalStop);
-      }
-    } else { // add the first splitting interval for this target
-      partialTimeVectors[target] = std::vector<DateAndTime>();
-      partialTimeVectors[target].push_back(intervalStart);
-      partialTimeVectors[target].push_back(intervalStop);
+    if (m_cachedPartialTimeROIs.count(target) > 0) {
+      m_cachedPartialTimeROIs[target].appendROIFast(intervalStart, intervalStop);
+    } else {
+      m_cachedPartialTimeROIs[target] = TimeROI();
+      m_cachedPartialTimeROIs[target].appendROIFast(intervalStart, intervalStop);
     }
   }
 
-  // Handle a potential use case with an open-ended ROI region
   if (it->second != NO_TARGET) {
-    intervalStart = it->first;
-    intervalStop = DateAndTime::maximum();
-    target = it->second;
-
-    if (partialTimeVectors.count(target) > 0) {
-      if (partialTimeVectors[target].back() == intervalStart)
-        partialTimeVectors[target].back() = intervalStop; // merge adjacent splitting intervals
-      else {                                              // add a new splitting interval
-        partialTimeVectors[target].push_back(intervalStart);
-        partialTimeVectors[target].push_back(intervalStop);
-      }
-    } else { // add the first splitting interval for this target
-      partialTimeVectors[target] = std::vector<DateAndTime>();
-      partialTimeVectors[target].push_back(intervalStart);
-      partialTimeVectors[target].push_back(intervalStop);
-    }
-  }
-
-  // Save all results in a class member - map of partial TimeROIs.
-  for (auto item : partialTimeVectors) {
-    m_cachedPartialTimeROIs[item.first] = TimeROI(item.second);
+    std::ostringstream err;
+    err << "Open-ended time interval is invalid in event filtering. Time interval: " << it->first << " - ?,"
+        << " target index: " << it->second << std::endl;
+    throw std::runtime_error(err.str());
   }
 
   m_validCachedPartialTimeROIs = true;
@@ -428,9 +401,12 @@ void TimeSplitter::rebuildCachedSplittingIntervals(const bool includeNoTarget) c
     std::advance(it, 1);
   }
 
-  // Handle a potential use case with an open-ended ROI region
-  if (it->second != NO_TARGET)
-    m_cachedSplittingIntervals.emplace_back(it->first, DateAndTime::maximum(), it->second);
+  if (it->second != NO_TARGET) {
+    std::ostringstream err;
+    err << "Open-ended time interval is invalid in event filtering: " << it->first << " - ?,"
+        << " target index: " << it->second << std::endl;
+    throw std::runtime_error(err.str());
+  }
 
   m_validCachedSplittingIntervals_All = includeNoTarget;
   m_validCachedSplittingIntervals_WithValidTargets = !includeNoTarget;

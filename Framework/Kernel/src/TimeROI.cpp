@@ -73,8 +73,6 @@ TimeROI::TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::D
 
 TimeROI::TimeROI(const Kernel::TimeSeriesProperty<bool> *filter) { this->replaceROI(filter); }
 
-TimeROI::TimeROI(const std::vector<Types::Core::DateAndTime> &times) : m_roi{times} {}
-
 void TimeROI::addROI(const std::string &startTime, const std::string &stopTime) {
   this->addROI(DateAndTime(startTime), DateAndTime(stopTime));
 }
@@ -135,6 +133,19 @@ void TimeROI::addROI(const Types::Core::DateAndTime &startTime, const Types::Cor
 
 void TimeROI::addROI(const std::time_t &startTime, const std::time_t &stopTime) {
   this->addROI(DateAndTime(startTime), DateAndTime(stopTime));
+}
+
+/**
+ * Append a new region to TimeROI fast. Use this method only when there is no need for the comprehensive logic of
+ * addROI.
+ */
+void TimeROI::appendROIFast(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) {
+  if (m_roi.size() > 0 && m_roi.back() == startTime)
+    m_roi.back() = stopTime; // grow existent region
+  else {                     // add new region
+    m_roi.push_back(startTime);
+    m_roi.push_back(stopTime);
+  }
 }
 
 void TimeROI::addMask(const std::string &startTime, const std::string &stopTime) {
