@@ -48,7 +48,7 @@ ConfigService["CheckMantidVersion.OnStartup"] = "{CheckMantidVersion}"
 ConfigService["UpdateInstrumentDefinitions.OnStartup"] = "{UpdateInstrumentDefinitions}"
 
 import mantid.simpleapi
-time.sleep(1)
+time.sleep(10)
 """
 
 TEST_SCRIPT_NAME = "pythonloggingtestscript.py"
