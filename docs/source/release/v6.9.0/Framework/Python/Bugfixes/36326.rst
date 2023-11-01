@@ -1,0 +1,1 @@
+- Fix a deadlock that occured when using debug level logging and PythonStdoutChannel or PythonLoggingChannel

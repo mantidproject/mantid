@@ -14,6 +14,7 @@
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/UninstallTrace.h"
 
 #include <boost/python/class.hpp>
@@ -32,6 +33,7 @@ using Mantid::API::IFunction;
 using Mantid::API::IPeakFunction;
 using Mantid::API::MultiDomainFunction;
 using Mantid::PythonInterface::PythonObjectInstantiator;
+using Mantid::PythonInterface::ReleaseGlobalInterpreterLock;
 using Mantid::PythonInterface::UninstallTrace;
 
 using namespace boost::python;
@@ -80,7 +82,12 @@ namespace {
  * FunctionFactory class
  */
 PyObject *getFunctionNames(FunctionFactoryImpl const *const self) {
-  const auto &names = self->getFunctionNames<Mantid::API::IFunction>();
+  std::vector<std::string> names;
+  {
+    // We need to release the GIL here to prevent a deadlock when using Python log channels
+    ReleaseGlobalInterpreterLock releaseGIL;
+    names = self->getFunctionNames<Mantid::API::IFunction>();
+  }
 
   PyObject *registered = PyList_New(0);
   for (const auto &name : names) {
