@@ -349,13 +349,6 @@ pipeline {
        }
       environment {
         ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}")
-
-        // if branch is ornl-next, use the ornl credientials instead
-        // TODO: switch to ornl-next after testing
-        if(GIT_BRANCH == 'nightly_pipeline_ornl-next') {
-          ANACONDA_TOKEN = credentials("${anaconda-token-ornl}")
-        }
-
       }
       steps {
         checkoutSource("${GIT_SHA}")
