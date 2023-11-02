@@ -31,6 +31,14 @@ Python::Object cmModule() {
 }
 
 /**
+ * @return A reference to the matplotlib.colormaps dict
+ */
+Python::Dict colormaps() {
+  Python::Object mpl{Python::NewRef(PyImport_ImportModule("matplotlib"))};
+  return Python::Dict(mpl.attr("colormaps"));
+}
+
+/**
  * @param name The name of a possible colormap
  * @return True if the map is known, false otherwise
  */
@@ -38,6 +46,8 @@ bool cmapExists(const QString &name) {
   try {
     getCMap(name);
     return true;
+  } catch (std::invalid_argument &) {
+    return false;
   } catch (PythonException &) {
     return false;
   }
@@ -51,7 +61,12 @@ bool cmapExists(const QString &name) {
 Colormap getCMap(const QString &name) {
   try {
     GlobalInterpreterLock lock;
-    return cmModule().attr("get_cmap")(name.toLatin1().constData());
+    const auto cmap = colormaps().get(name.toLatin1().constData());
+    if (!cmap.is_none()) {
+      return cmap;
+    } else {
+      throw std::invalid_argument(name.toStdString() + " is not a valid color map name.");
+    }
   } catch (Python::ErrorAlreadySet &) {
     throw PythonException();
   }

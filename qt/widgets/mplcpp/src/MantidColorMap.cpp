@@ -71,7 +71,7 @@ QString MantidColorMap::defaultColorMap() { return defaultCMapName(); }
  * match the existing interface in Plotting.
  * @param name The name of a colormap
  * @return The same name passed to the function if it exists
- * @throws std::runtime_error if the colomap does not exist
+ * @throws std::invalid_argument if the colomap does not exist
  */
 QString MantidColorMap::exists(const QString &name) {
   getCMap(name); // throws if it does not exist
