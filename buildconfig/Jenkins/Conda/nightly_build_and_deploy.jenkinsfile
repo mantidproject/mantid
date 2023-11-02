@@ -27,8 +27,7 @@ switch(GIT_BRANCH) {
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'nightly'
     PLATFORM_CHOICES = ['all']
     break
-  // Change this back to 'ornl-next' after testing is complete.
-  case 'nightly_pipeline_ornl-next':
+  case 'ornl-next':
     PACKAGE_SUFFIX_DEFAULT = 'Nightly'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'nightly'
     PLATFORM_CHOICES = ['linux-64']
@@ -198,7 +197,7 @@ pipeline {
             // Clean up conda-bld before we start to avoid any
             // confusion with old packages
             dir('conda-bld') {
-               deleteDir()
+              deleteDir()
             }
             checkoutSource("${GIT_SHA}")
             // Build the base set of packages (ones not required for mantidworkbench)
@@ -235,7 +234,7 @@ pipeline {
             // Clean up conda-bld before we start to avoid any
             // confusion with old packages
             dir('conda-bld') {
-               deleteDir()
+              deleteDir()
             }
             checkoutSource("${GIT_SHA}")
             // Build the base set of packages (ones not required for mantidworkbench)
@@ -267,7 +266,7 @@ pipeline {
             // Clean up conda-bld before we start to avoid any
             // confusion with old packages
             dir('conda-bld') {
-               deleteDir()
+              deleteDir()
             }
             checkoutSource("${GIT_SHA}")
             // Build the base set of packages (ones not required for mantidworkbench)
@@ -299,7 +298,7 @@ pipeline {
               anyOf {
                   expression { env.BUILD_PACKAGE == "${PLATFORM}" }
                   expression { env.BUILD_PACKAGE == 'all' }
-               }
+              }
             }
             agent { label "${PLATFORM}" }
             options {
@@ -346,7 +345,7 @@ pipeline {
       options {
         timestamps ()
         retry(3)
-       }
+      }
       environment {
         ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}")
       }
@@ -381,7 +380,7 @@ pipeline {
       steps {
         checkoutSource("${GIT_SHA}")
         sh "${CISCRIPT_DIR}/delete-old-packages.sh ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
-         "--channel ${ANACONDA_CHANNEL} --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench"
+          "--channel ${ANACONDA_CHANNEL} --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench"
       }
     }
 
@@ -398,7 +397,7 @@ pipeline {
       options {
         timestamps ()
         retry(3)
-       }
+      }
       environment {
         GITHUB_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
       }
