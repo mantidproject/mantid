@@ -276,7 +276,7 @@ public:
     parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
     parameters.hasDx = true;
-    parameters.geometry = Sample::FLAT_PLATE;
+    parameters.geometry = "FlatPlate";
     parameters.beamHeight = 23;
     parameters.beamWidth = 12;
     parameters.sampleThickness = 6;
@@ -431,13 +431,8 @@ private:
     auto &&sampleIn = wsIn->mutableSample();
     auto &&sampleOut = wsOut->mutableSample();
 
-    if (sampleIn.getGeometryFlag() == 0) {
-      TSM_ASSERT_EQUALS("Should load the geometry flag from the sample or Disc.",
-                        Sample::getGeometryFlagFromString(Sample::DISC), sampleOut.getGeometryFlag());
-    } else {
-      TSM_ASSERT_EQUALS("Should load the geometry flag from the sample.", sampleIn.getGeometryFlag(),
-                        sampleOut.getGeometryFlag());
-    }
+    TSM_ASSERT_EQUALS("Should load the geometry flag from the sample.", sampleIn.getGeometryFlag(),
+                      sampleOut.getGeometryFlag());
     TSM_ASSERT_EQUALS("Should load the height of the aperture.", sampleIn.getHeight(), sampleOut.getHeight());
     TSM_ASSERT_EQUALS("Should load the width of the aperture.", sampleIn.getWidth(), sampleOut.getWidth());
     TSM_ASSERT_EQUALS("Should load the thickness of the sample.", sampleIn.getThickness(), sampleOut.getThickness());

@@ -128,7 +128,17 @@ Mantid::API::MatrixWorkspace_sptr provide1DWorkspace(NXcanSASTestParameters &par
 
   // Set Sample info
   auto &&sample = ws->mutableSample();
-  sample.setGeometryFlag(Mantid::API::Sample::getGeometryFlagFromString(parameters.geometry));
+  auto geometry = parameters.geometry;
+  boost::to_lower(geometry);
+  if (geometry == "cylinder") {
+    sample.setGeometryFlag(1);
+  }
+  if (geometry == "flat plate" || geometry == "flatplate") {
+    sample.setGeometryFlag(2);
+  }
+  if (geometry == "disc") {
+    sample.setGeometryFlag(3);
+  }
   sample.setHeight(parameters.beamHeight);
   sample.setWidth(parameters.beamWidth);
   sample.setThickness(parameters.sampleThickness);

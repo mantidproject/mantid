@@ -26,6 +26,7 @@
 #include <H5Cpp.h>
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
+#include <boost/algorithm/string.hpp>
 #include <nexus/NeXusFile.hpp>
 #include <type_traits>
 
@@ -170,8 +171,15 @@ void loadSample(H5::Group &entry, const Mantid::API::MatrixWorkspace_sptr &works
       sample.setWidth(width.front());
     }
     auto &&geometry = Mantid::DataHandling::H5Util::readString(apertureGroup, sasInstrumentApertureShape);
-    if (auto &&geometryFlag = Sample::getGeometryFlagFromString(geometry)) {
-      sample.setGeometryFlag(geometryFlag);
+    boost::to_lower(geometry);
+    if (geometry == "cylinder") {
+      sample.setGeometryFlag(1);
+    }
+    if (geometry == "flat plate" || geometry == "flatplate") {
+      sample.setGeometryFlag(2);
+    }
+    if (geometry == "disc") {
+      sample.setGeometryFlag(3);
     }
   }
 
