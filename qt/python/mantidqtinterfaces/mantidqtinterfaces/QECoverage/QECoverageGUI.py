@@ -8,6 +8,7 @@
 from mantidqt.gui_helper import show_interface_help
 import numpy as np
 import mantid
+from mantid.kernel import logger
 from qtpy import QtWidgets, QtCore
 from qtpy.QtGui import QDoubleValidator, QRegExpValidator
 from qtpy.QtCore import QRegExp
@@ -96,13 +97,12 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.direct_ei_label = QtWidgets.QLabel("Ei", self.direct_ei)
         self.direct_ei_grid.addWidget(self.direct_ei_label)
         self.direct_ei_input = QtWidgets.QLineEdit("55", self.direct_ei)
-        self.direct_ei_input.setToolTip("Incident Energy in meV")
+        ei_tip = "Incident Energy in meV.\nAccepts several comma separated values.\nNo negative values allowed."
+        self.direct_ei_input.setToolTip(ei_tip)
         comma_sep_postv_floats_regex_str = r"^(\s*\+?[0-9]*\.?[0-9]*)(\s*,\s*\+?[0-9]*\.?[0-9]*)+\s*$"
         comma_sep_floats_validator = QRegExpValidator(QRegExp(comma_sep_postv_floats_regex_str))
         self.direct_ei_input.setValidator(comma_sep_floats_validator)
         self.direct_ei_grid.addWidget(self.direct_ei_input)
-        self.ei_emin_msgbox = QtWidgets.QMessageBox()
-        self.ei_emin_msgbox.setText("Emin must be less than the values provided for Ei! Please try again")
         self.direct_grid.addWidget(self.direct_ei)
         self.emaxfield_msgbox = QtWidgets.QMessageBox()
         self.direct_plotover = QtWidgets.QCheckBox("Plot Over", self.tab_direct)
@@ -354,19 +354,23 @@ class QECoverageGUI(QtWidgets.QWidget):
 
         try:
             ei_vec = [float(val) for val in ei_str.split(",")]
-        except ValueError:  # Fails on empty string and '+'
+        except ValueError:
+            msg = "\nEi provided was invalid, Ei should be a positive float or " "a sequence of positive floats separated by commas"
+            logger.warning(msg)
             return
 
         try:
             Emin = float(self.direct_emin_input.text())
+            if min(ei_vec) <= Emin:
+                raise ValueError
         except ValueError:
             Emin = -max(ei_vec) / 2
             self.direct_emin_input.setText(str(Emin))
-
-        if min(ei_vec) <= Emin:
-            self.ei_emin_msgbox.show()
-            Emin = min(ei_vec) - 1
-            self.direct_emin_input.setText(str(Emin))
+            msg = (
+                "\nEmin provided was either invalid or bigger than minimum value of Ei , "
+                "automatically changed value to Emin = -max(Ei) / 2"
+            )
+            logger.warning(msg)
 
         self.direct_s2_input.setText(str(self.s2))
 
