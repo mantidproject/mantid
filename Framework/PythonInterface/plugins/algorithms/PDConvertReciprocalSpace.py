@@ -15,7 +15,12 @@ from mantid.api import (
 )
 from mantid.kernel import Direction, StringListValidator, logger
 
-from pystog.converter import Converter
+try:
+    from pystog.converter import Converter as StogConverter
+except ImportError:
+    logger.information("Install https://github.com/neutrons/pystog to enable PDConvertReciprocalSpace")
+    logger.information("https://anaconda.org/neutrons/pystog")
+    StogConverter = None
 
 SQ = "S(Q)"
 FQ = "F(Q)"
@@ -99,7 +104,7 @@ class PDConvertReciprocalSpace(PythonAlgorithm):
         if from_quantity == to_quantity:
             logger.warning("The input and output functions are the same. Nothing to be done")
             return
-        c = Converter()
+        c = StogConverter()
         transformation = {
             SQ: {FQ: c.S_to_F, FKQ: c.S_to_FK, DCS: c.S_to_DCS},
             FQ: {SQ: c.F_to_S, FKQ: c.F_to_FK, DCS: c.F_to_DCS},
@@ -129,5 +134,6 @@ class PDConvertReciprocalSpace(PythonAlgorithm):
             output_ws.setE(sp_num, new_e)
 
 
-# Register algorithm with Mantid.
-AlgorithmFactory.subscribe(PDConvertReciprocalSpace)
+# Register algorithm with Mantid if pystog is found
+if StogConverter:
+    AlgorithmFactory.subscribe(PDConvertReciprocalSpace)
