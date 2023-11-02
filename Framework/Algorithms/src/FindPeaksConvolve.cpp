@@ -191,9 +191,9 @@ Tensor1D FindPeaksConvolve::createKernel(const int binCount) {
   for (int i{0}; i < binCount; i++) {
     // consider if these 0.25/0.75 values should be inputs
     if (i < std::ceil(binCount) * 0.25 || i >= binCount * 0.75) {
-      kernel.data()[i] = -1;
+      kernel.data()[i] = -1.0;
     } else {
-      kernel.data()[i] = 1;
+      kernel.data()[i] = 1.0;
     }
   }
   return kernel;
@@ -279,7 +279,7 @@ FindPeaksConvolve::filterDataForSignificantPoints(const Tensor1D &iOverSigma) {
       closedData.emplace_back(i, 0);
     }
   }
-  closedData.emplace_back(closedData.size(), 0); // Guarentee data region close
+  closedData.emplace_back(static_cast<int>(closedData.size()), 0); // Guarentee data region close
   return closedData;
 }
 
