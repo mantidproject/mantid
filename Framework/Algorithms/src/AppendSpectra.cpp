@@ -141,8 +141,10 @@ void AppendSpectra::fixSpectrumNumbers(const MatrixWorkspace &ws1, const MatrixW
 }
 
 void AppendSpectra::copyYAxis(const MatrixWorkspace &ws1, const MatrixWorkspace &ws2, MatrixWorkspace &output) {
+  const auto yAxisNum = 1;
   const auto yAxisWS1 = ws1.getAxis(yAxisNum);
   const auto yAxisWS2 = ws2.getAxis(yAxisNum);
+  const auto outputYAxis = output.getAxis(yAxisNum);
   const auto ws1len = ws1.getNumberHistograms();
 
   const bool isTextAxis = yAxisWS1->isText() && yAxisWS2->isText();
