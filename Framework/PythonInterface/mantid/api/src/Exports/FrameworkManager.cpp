@@ -8,7 +8,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
-#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/import.hpp>
@@ -22,7 +21,6 @@ using Mantid::API::FrameworkManager;
 using Mantid::API::FrameworkManagerImpl;
 using Mantid::Kernel::ConfigService;
 using namespace boost::python;
-using Mantid::PythonInterface::ReleaseGlobalInterpreterLock;
 
 namespace {
 
@@ -62,12 +60,7 @@ void updatePythonPaths() {
  */
 FrameworkManagerImpl &instance() {
   // start the framework (if necessary)
-  auto &frameworkMgr = []() -> auto & {
-    // We need to release the GIL here to prevent a deadlock when using Python log channels
-    ReleaseGlobalInterpreterLock releaseGIL;
-    return FrameworkManager::Instance();
-  }
-  ();
+  auto &frameworkMgr = FrameworkManager::Instance();
   std::call_once(INIT_FLAG, []() {
     INSTANCE_CALLED = true;
     declareCPPAlgorithms();

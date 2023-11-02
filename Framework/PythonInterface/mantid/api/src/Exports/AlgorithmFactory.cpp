@@ -10,7 +10,6 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/PythonObjectInstantiator.h"
-#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/UninstallTrace.h"
 
 #include <boost/python/class.hpp>
@@ -28,7 +27,6 @@
 using namespace Mantid::API;
 using namespace boost::python;
 using Mantid::PythonInterface::PythonObjectInstantiator;
-using Mantid::PythonInterface::ReleaseGlobalInterpreterLock;
 using Mantid::PythonInterface::UninstallTrace;
 
 GET_POINTER_SPECIALIZATION(AlgorithmFactoryImpl)
@@ -50,12 +48,7 @@ dict getRegisteredAlgorithms(AlgorithmFactoryImpl const *const self, bool includ
   const auto keys = self->getKeys(includeHidden);
   dict inventory;
   for (const auto &key : keys) {
-    std::pair<std::string, int> algInfo;
-    {
-      // We need to release the GIL here to prevent a deadlock when using Python log channels
-      ReleaseGlobalInterpreterLock releaseGIL;
-      algInfo = self->decodeName(key);
-    }
+    auto algInfo = self->decodeName(key);
     object name(handle<>(to_python_value<const std::string &>()(algInfo.first)));
     object ver(handle<>(to_python_value<const int &>()(algInfo.second)));
     // There seems to be no way to "promote" the return of .get to a list
