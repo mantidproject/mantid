@@ -52,7 +52,8 @@ const std::string SaveDiffCal::summary() const { return "Saves a calibration fil
 /** Initialize the algorithm's properties.
  */
 void SaveDiffCal::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("CalibrationWorkspace", "", Direction::Input),
+  declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>("CalibrationWorkspace", "", Direction::Input,
+                                                                       PropertyMode::Optional),
                   "An output workspace.");
 
   declareProperty(std::make_unique<WorkspaceProperty<GroupingWorkspace>>("GroupingWorkspace", "", Direction::Input,
@@ -71,9 +72,7 @@ std::map<std::string, std::string> SaveDiffCal::validateInputs() {
   std::map<std::string, std::string> result;
 
   ITableWorkspace_const_sptr calibrationWS = getProperty("CalibrationWorkspace");
-  if (!bool(calibrationWS)) {
-    result["CalibrationWorkspace"] = "Cannot save empty table";
-  } else {
+  if (bool(calibrationWS)) {
     size_t numRows = calibrationWS->rowCount();
     if (numRows == 0) {
       result["CalibrationWorkspace"] = "Cannot save empty table";
@@ -87,9 +86,24 @@ std::map<std::string, std::string> SaveDiffCal::validateInputs() {
         result["MaskWorkspace"] = "Must have equal or less number of spectra as the table has rows";
       }
     }
+  } else {
+    GroupingWorkspace_const_sptr groupingWS = getProperty("GroupingWorkspace");
+    MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
+
+    if ((!groupingWS) && (!maskWS)) {
+      const std::string msg("Failed to supply any input workspace");
+      result["CalibrationWorkspace"] = msg;
+      result["GroupingWorkspace"] = msg;
+      result["MaskWorkspace"] = msg;
+    }
   }
 
   return result;
+}
+
+void SaveDiffCal::writeDoubleFieldZeros(H5::Group &group, const std::string &name) {
+  std::vector<double> zeros(m_numValues, 0.);
+  H5Util::writeArray1D(group, name, zeros);
 }
 
 /**
@@ -103,6 +117,20 @@ void SaveDiffCal::writeDoubleFieldFromTable(H5::Group &group, const std::string 
   auto column = m_calibrationWS->getColumn(name);
   // Retrieve only the first m_numValues, not necessarily the whole column
   auto data = column->numeric_fill<>(m_numValues);
+
+  // if the field is optional, check if it is all zeros
+  if (name != "difc") {
+    bool allZeros = true;
+    for (const auto &value : data) {
+      if (value != 0.) {
+        allZeros = false;
+        break;
+      }
+    }
+    if (allZeros)
+      return; // don't write the field
+  }
+
   H5Util::writeArray1D(group, name, data);
 }
 
@@ -118,6 +146,22 @@ void SaveDiffCal::writeIntFieldFromTable(H5::Group &group, const std::string &na
   // Retrieve only the first m_numValues, not necessarily the whole column
   auto data = column->numeric_fill<int32_t>(m_numValues);
   H5Util::writeArray1D(group, name, data);
+}
+
+void SaveDiffCal::writeDetIdsfromSVWS(H5::Group &group, const std::string &name,
+                                      const DataObjects::SpecialWorkspace2D_const_sptr &ws) {
+  if (!bool(ws))
+    throw std::runtime_error("Encountered null pointer in SaveDiffCal::writeDetIdsfromSVWS which should be impossible");
+
+  std::vector<int32_t> values;
+  for (size_t i = 0; i < m_numValues; ++i) {
+    const auto &detids = ws->getSpectrum(i).getDetectorIDs();
+    for (const auto &detid : detids) {
+      values.push_back(static_cast<int32_t>(detid));
+    }
+  }
+
+  H5Util::writeArray1D(group, name, values);
 }
 
 /**
@@ -169,9 +213,30 @@ void SaveDiffCal::generateDetidToIndex() {
   }
 }
 
+void SaveDiffCal::generateDetidToIndex(const DataObjects::SpecialWorkspace2D_const_sptr &ws) {
+  if (!bool(ws))
+    throw std::runtime_error(
+        "Encountered null pointer in SaveDiffCal::generateDetidToIndex which should be impossible");
+
+  m_detidToIndex.clear();
+
+  std::size_t index = 0;
+  for (size_t i = 0; i < m_numValues; ++i) {
+    const auto &detids = ws->getSpectrum(i).getDetectorIDs();
+    for (const auto &detid : detids) {
+      m_detidToIndex[static_cast<detid_t>(detid)] = index;
+      index++;
+    }
+  }
+}
+
 bool SaveDiffCal::tableHasColumn(const std::string &ColumnName) const {
-  const std::vector<std::string> names = m_calibrationWS->getColumnNames();
-  return std::any_of(names.cbegin(), names.cend(), [&ColumnName](const auto &name) { return name == ColumnName; });
+  if (m_calibrationWS) {
+    const std::vector<std::string> names = m_calibrationWS->getColumnNames();
+    return std::any_of(names.cbegin(), names.cend(), [&ColumnName](const auto &name) { return name == ColumnName; });
+  } else {
+    return false;
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -179,17 +244,25 @@ bool SaveDiffCal::tableHasColumn(const std::string &ColumnName) const {
  */
 void SaveDiffCal::exec() {
   m_calibrationWS = getProperty("CalibrationWorkspace");
-  this->generateDetidToIndex();
-
   GroupingWorkspace_sptr groupingWS = getProperty("GroupingWorkspace");
-  if (bool(groupingWS) && groupingWS->isDetectorIDMappingEmpty())
-    groupingWS->buildDetectorIDMapping();
-
   MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
+
+  if (m_calibrationWS) {
+    m_numValues = m_calibrationWS->rowCount();
+    this->generateDetidToIndex();
+  } else if (groupingWS) {
+    m_numValues = groupingWS->getNumberHistograms();
+    this->generateDetidToIndex(groupingWS);
+  } else if (maskWS) {
+    m_numValues = maskWS->getNumberHistograms();
+    this->generateDetidToIndex(maskWS);
+  }
+
+  if (groupingWS && groupingWS->isDetectorIDMappingEmpty())
+    groupingWS->buildDetectorIDMapping();
 
   // initialize `m_numValues` as the minimum of (CalibrationWorkspace_row_count,
   // GroupingWorkspace_histogram_count, MaskWorkspace_histogram_count)
-  m_numValues = m_calibrationWS->rowCount();
   if (bool(groupingWS) && groupingWS->getNumberHistograms() < m_numValues) {
     m_numValues = groupingWS->getNumberHistograms();
   }
@@ -209,11 +282,25 @@ void SaveDiffCal::exec() {
 
   // write the d-spacing to TOF conversion parameters for the selected pixels
   // as datasets under the NXentry group
-  this->writeDoubleFieldFromTable(calibrationGroup, "difc");
-  this->writeDoubleFieldFromTable(calibrationGroup, "difa");
-  this->writeDoubleFieldFromTable(calibrationGroup, "tzero");
+  if (m_calibrationWS) {
+    this->writeDoubleFieldFromTable(calibrationGroup, "difc");
+    this->writeDoubleFieldFromTable(calibrationGroup, "difa");
+    this->writeDoubleFieldFromTable(calibrationGroup, "tzero");
+  } else {
+    writeDoubleFieldZeros(calibrationGroup, "difc");
+    // LoadDiffCal will set difa and tzero to zero if they are missing
+  }
 
-  this->writeIntFieldFromTable(calibrationGroup, "detid");
+  // add the detid from which ever of these exists
+  if (m_calibrationWS) {
+    this->writeIntFieldFromTable(calibrationGroup, "detid");
+  } else if (groupingWS) {
+    this->writeDetIdsfromSVWS(calibrationGroup, "detid", groupingWS);
+  } else if (maskWS) {
+    this->writeDetIdsfromSVWS(calibrationGroup, "detid", maskWS);
+  }
+
+  // the dasid is a legacy column that is not used by mantid but should be written if it exists
   if (this->tableHasColumn("dasid")) // optional field
     this->writeIntFieldFromTable(calibrationGroup, "dasid");
   else

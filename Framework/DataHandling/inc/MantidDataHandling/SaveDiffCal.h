@@ -33,11 +33,16 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
 
+  void writeDoubleFieldZeros(H5::Group &group, const std::string &name);
+
   void writeDoubleFieldFromTable(H5::Group &group, const std::string &name);
   void writeIntFieldFromTable(H5::Group &group, const std::string &name);
+  void writeDetIdsfromSVWS(H5::Group &group, const std::string &name,
+                           const DataObjects::SpecialWorkspace2D_const_sptr &ws);
   void writeIntFieldFromSVWS(H5::Group &group, const std::string &name,
                              const DataObjects::SpecialWorkspace2D_const_sptr &ws);
   void generateDetidToIndex();
+  void generateDetidToIndex(const DataObjects::SpecialWorkspace2D_const_sptr &ws);
   bool tableHasColumn(const std::string &ColumnName) const;
 
   // minimum of (CalibrationWorkspace_row_count,
