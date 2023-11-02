@@ -328,7 +328,6 @@ void TimeSplitter::resetCache() {
 
 // Invalidate cached partial TimeROIs, so that the next call to getTimeROI() would trigger their rebuild.
 void TimeSplitter::resetCachedPartialTimeROIs() const {
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   if (m_validCachedPartialTimeROIs) {
     m_cachedPartialTimeROIs.clear();
     m_validCachedPartialTimeROIs = false;
@@ -337,7 +336,6 @@ void TimeSplitter::resetCachedPartialTimeROIs() const {
 
 // Invalidate cached splitting intervals, so that the next call to getSplittingIntervals() would trigger their rebuild
 void TimeSplitter::resetCachedSplittingIntervals() const {
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   if (m_validCachedSplittingIntervals_All || m_validCachedSplittingIntervals_WithValidTargets) {
     m_cachedSplittingIntervals.clear();
     m_validCachedSplittingIntervals_All = false;
@@ -348,8 +346,6 @@ void TimeSplitter::resetCachedSplittingIntervals() const {
 // Rebuild and mark as valid a cached map of partial TimeROIs. The getTimeROI() method will then use that map to quickly
 // look up and return a TimeROI.
 void TimeSplitter::rebuildCachedPartialTimeROIs() const {
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
-
   resetCachedPartialTimeROIs();
 
   if (empty())
@@ -385,8 +381,6 @@ void TimeSplitter::rebuildCachedPartialTimeROIs() const {
 // Rebuild and mark as valid a cached vector of splitting intervals. The getSplittingIntervals() method will then return
 // that cached vector without building it.
 void TimeSplitter::rebuildCachedSplittingIntervals(const bool includeNoTarget) const {
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
-
   resetCachedSplittingIntervals();
 
   if (empty())
@@ -475,7 +469,7 @@ std::set<int> TimeSplitter::outputWorkspaceIndices() const {
  * @return : TimeROI for the input target
  */
 const TimeROI &TimeSplitter::getTimeROI(const int workspaceIndex) const {
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
+  std::lock_guard<std::mutex> lock(m_mutex);
 
   if (!m_validCachedPartialTimeROIs) {
     rebuildCachedPartialTimeROIs();
@@ -497,7 +491,7 @@ const TimeROI &TimeSplitter::getTimeROI(const int workspaceIndex) const {
  * @return : a reference to the vector of splitting intervals
  */
 const Kernel::SplittingIntervalVec &TimeSplitter::getSplittingIntervals(const bool includeNoTarget) const {
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
+  std::lock_guard<std::mutex> lock(m_mutex);
 
   if ((includeNoTarget && !m_validCachedSplittingIntervals_All) ||
       (!includeNoTarget && !m_validCachedSplittingIntervals_WithValidTargets)) {

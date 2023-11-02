@@ -92,7 +92,7 @@ private:
   mutable bool m_validCachedSplittingIntervals_All{false};
   mutable bool m_validCachedSplittingIntervals_WithValidTargets{false};
 
-  mutable std::recursive_mutex m_mutex;
+  mutable std::mutex m_mutex;
 };
 } // namespace DataObjects
 } // namespace Mantid
