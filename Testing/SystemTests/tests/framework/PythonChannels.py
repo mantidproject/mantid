@@ -24,6 +24,7 @@ import os
 import sys
 import time
 import unittest
+import platform
 import subprocess
 import systemtesting
 from multiprocessing import Process
@@ -100,23 +101,23 @@ class PythonLoggingTests(unittest.TestCase):
 
 
 class PythonChannelTest(systemtesting.MantidSystemTest):
-    def __init__(self):
-        super().__init__()
-        self._success = False
-        self._server = Process(target=run_server)
-        self._server.start()
-
     def cleanup(self):
         self._server.terminate()
         os.remove(TEST_SCRIPT_NAME)
 
+    def skipTests(self):
+        # skip if OSX because multiprocessing uses `spawn` instead of `fork` which causes this test to fail
+        return platform.system() == "Darwin"
+
     def runTest(self):
+        self._server = Process(target=run_server)
+        self._server.start()
         suite = unittest.TestSuite()
         suite.addTest(unittest.makeSuite(PythonLoggingTests, "test"))
         runner = unittest.TextTestRunner()
         try:
             self.assertTrue(runner.run(suite).wasSuccessful())
         except:
-            # Make sure cleanup does run
+            # Make sure cleanup does run if exception raised
             self.cleanup()
             raise
