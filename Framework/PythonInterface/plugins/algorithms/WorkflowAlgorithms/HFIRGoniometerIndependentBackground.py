@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, IMDHistoWorkspaceProperty
-from mantid.kernel import Direction, FloatBoundedValidator, IntBoundedValidator, StringListValidator
+from mantid.kernel import Direction, FloatBoundedValidator, IntBoundedValidator, StringListValidator, Property
 from mantid.simpleapi import CloneWorkspace
 
 import numpy as np
@@ -37,7 +37,7 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
         )
         self.declareProperty(
             name="BackgroundWindowSize",
-            defaultValue=None,
+            defaultValue=Property.EMPTY_INT,
             direction=Direction.Input,
             doc="Background Window Size, only applies to the rotation axis, assumes the detectors are already \
               grouped. Integer value or -1 for All values",
@@ -68,11 +68,11 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
         bkg_level = self.getProperty("BackgroundLevel").value
         bkg_size = self.getProperty("BackgroundWindowSize").value
 
-        if bkg_size:
-            bkg = scipy.ndimage.percentile_filter(signal, bkg_level, size=(1, 1, bkg_size), mode="nearest")
-        else:
+        if bkg_size == Property.EMPTY_INT:
             percent = np.percentile(signal, bkg_level, axis=2)
             bkg = np.repeat(percent[:, :, np.newaxis], signal.shape[2], axis=2)
+        else:
+            bkg = scipy.ndimage.percentile_filter(signal, bkg_level, size=(1, 1, bkg_size), mode="nearest")
 
         outputWS = self.getPropertyValue("OutputWorkspace")
         outputWS = CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=outputWS)
