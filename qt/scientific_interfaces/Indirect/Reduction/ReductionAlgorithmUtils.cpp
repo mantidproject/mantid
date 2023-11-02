@@ -41,7 +41,7 @@ MantidQt::API::IConfiguredAlgorithm_sptr calculateFlatBackgroundConfiguredAlg(st
                                                                               std::string const &outputWorkspace) {
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   AlgorithmProperties::update("InputWorkspace", inputWorkspace, *properties);
-  AlgorithmProperties::update("Mode", "Mean", *properties);
+  AlgorithmProperties::update("Mode", std::string("Mean"), *properties);
   AlgorithmProperties::update("StartX", startX, *properties);
   AlgorithmProperties::update("EndX", endX, *properties);
   AlgorithmProperties::update("OutputWorkspace", outputWorkspace, *properties);
