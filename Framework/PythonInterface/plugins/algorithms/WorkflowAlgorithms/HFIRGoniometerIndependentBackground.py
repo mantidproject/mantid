@@ -37,11 +37,11 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
         )
         self.declareProperty(
             name="BackgroundWindowSize",
-            defaultValue=-1,
+            defaultValue=None,
             direction=Direction.Input,
             doc="Background Window Size, only applies to the rotation axis, assumes the detectors are already \
               grouped. Integer value or -1 for All values",
-            validator=IntBoundedValidator(lower=-1),
+            validator=IntBoundedValidator(lower=1),
         )
         self.declareProperty(
             name="FilterMode",
@@ -68,12 +68,11 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
         bkg_level = self.getProperty("BackgroundLevel").value
         bkg_size = self.getProperty("BackgroundWindowSize").value
 
-        if bkg_size == -1:
+        if bkg_size:
+            bkg = scipy.ndimage.percentile_filter(signal, bkg_level, size=(1, 1, bkg_size), mode="nearest")
+        else:
             percent = np.percentile(signal, bkg_level, axis=2)
             bkg = np.repeat(percent[:, :, np.newaxis], signal.shape[2], axis=2)
-
-        else:
-            bkg = scipy.ndimage.percentile_filter(signal, bkg_level, size=(1, 1, bkg_size), mode="nearest")
 
         outputWS = self.getPropertyValue("OutputWorkspace")
         outputWS = CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=outputWS)

@@ -39,6 +39,12 @@ ConvertWANDSCDtoQ and combine the results. They will have names
 is provided, "ws_background_data" and "ws_background_normalization" will also
 be outputted.
 
+If a temporary workspace is provided for data, normalization, background data, or background
+normalization, KeepTemporaryWorkspaces will be assumed 'True' and the provided workspace will
+accumulate the results. If an output name is provided along with a temporary workspace for any of these
+workspaces, the name will only be applied to the outputted workspace and not the temporary
+accumulated workspace.
+
 If SymmetryOperations are provided, the output workspace will be the sum of
 each Symmetry Operation applied to the input workspace. More information about
 Symmetry Operations can be found :ref:`here <Symmetry Groups>`

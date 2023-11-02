@@ -7,6 +7,7 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceProperty, Progress, IMDHistoWorkspaceProperty, mtd
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayLengthValidator, StringListValidator, FloatBoundedValidator
 from mantid.geometry import SpaceGroupFactory, PointGroupFactory, SymmetryOperationFactory
+from mantid.simpleapi import PlusMD
 from mantid import config
 from mantid import logger
 import numpy as np
@@ -93,6 +94,52 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             "",
             direction=Direction.Input,
             doc="Space Group name, Point Group name, or list individual Symmetries used to perform the symmetrization",
+        )
+        self.declareProperty(
+            IMDHistoWorkspaceProperty("TemporaryDataWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            "An (optional) input MDHistoWorkspace used to accumulate data from multiple MDEventWorkspaces."
+            "If unspecified a blank MDHistoWorkspace will be created",
+        )
+        self.declareProperty(
+            IMDHistoWorkspaceProperty("TemporaryNormalizationWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            "An (optional) input MDHistoWorkspace used to accumulate normalization data from multiple MDEventWorkspaces."
+            "If unspecified a blank MDHistoWorkspace will be created",
+        )
+        self.declareProperty(
+            IMDHistoWorkspaceProperty("TemporaryBackgroundDataWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input),
+            "An (optional) input MDHistoWorkspace used to accumulate background data from multiple MDEventWorkspaces."
+            "If unspecified but BackgroundWorkspace is specified, a blank MDHistoWorkspace will be created",
+        )
+        self.declareProperty(
+            IMDHistoWorkspaceProperty(
+                "TemporaryBackgroundNormalizationWorkspace", "", optional=PropertyMode.Optional, direction=Direction.Input
+            ),
+            "An (optional) input MDHistoWorkspace used to accumulate background normalization data from multiple MDEventWorkspaces."
+            "If unspecified but BackgroundWorkspace is specified, a blank MDHistoWorkspace will be created",
+        )
+        self.declareProperty(
+            "OutputDataWorkspace",
+            "",
+            direction=Direction.Input,
+            doc="Name for the Output Data Workspace",
+        )
+        self.declareProperty(
+            "OutputNormalizationWorkspace",
+            "",
+            direction=Direction.Input,
+            doc="Name for the Output Normalization Workspace",
+        )
+        self.declareProperty(
+            "OutputBackgroundDataWorkspace",
+            "",
+            direction=Direction.Input,
+            doc="Name for the Output Background Workspace",
+        )
+        self.declareProperty(
+            "OutputBackgroundNormalizationWorkspace",
+            "",
+            direction=Direction.Input,
+            doc="Name for the Output Background Normalization Workspace",
         )
         self.declareProperty(
             WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output), "Output Workspace"
@@ -198,6 +245,14 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         inWS = self.getProperty("InputWorkspace").value
         normWS = self.getProperty("NormalisationWorkspace").value
         bkgWS = self.getProperty("BackgroundWorkspace").value
+        tempData = self.getProperty("TemporaryDataWorkspace").value
+        tempNorm = self.getProperty("TemporaryNormalizationWorkspace").value
+        tempBkgData = self.getProperty("TemporaryBackgroundDataWorkspace").value
+        tempBkgNorm = self.getProperty("TemporaryBackgroundNormalizationWorkspace").value
+
+        keep_temp = self.getProperty("KeepTemporaryWorkspaces").value
+        if bool(tempData) or bool(tempNorm) or bool(tempBkgData) or bool(tempBkgNorm):
+            keep_temp = True
 
         _norm = bool(normWS)
         _bkg = bool(bkgWS)
@@ -229,7 +284,8 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         number_of_runs = data_array.shape[2]
 
-        progress = Progress(self, 0.0, 1.0, number_of_runs + 4)
+        progress_end = len(sym_ops) * number_of_runs + 12
+        progress = Progress(self, 0.0, 1.0, progress_end)
 
         normaliseBy = self.getProperty("NormaliseBy").value
         if normaliseBy == "Monitor":
@@ -277,6 +333,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         W = np.eye(3)
         UBW = np.eye(3)
+        UB = np.eye(3)
         if self.getProperty("Frame").value == "HKL":
             W[:, 0] = self.getProperty("Uproj").value
             W[:, 1] = self.getProperty("Vproj").value
@@ -379,11 +436,11 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             S[:, 0] = sym_op.transformHKL([1, 0, 0])
             S[:, 1] = sym_op.transformHKL([0, 1, 0])
             S[:, 2] = sym_op.transformHKL([0, 0, 1])
-            UBW = np.dot(UBW, S)
+            UBSW = np.linalg.multi_dot([UB, S, W])
             for n in range(number_of_runs):
                 R = inWS.getExperimentInfo(0).run().getGoniometer(n).getR()
                 R = np.dot(s1offset, R)
-                RUBW = np.dot(R, UBW)
+                RUBW = np.dot(R, UBSW)
                 q = np.round(np.dot(np.linalg.inv(RUBW), qlab.T) / bin_size - offset).astype(int)
                 q_index = np.ravel_multi_index(q, (dim0_bins + 2, dim1_bins + 2, dim2_bins + 2), mode="clip")
                 q_uniq, inverse = np.unique(q_index, return_inverse=True)
@@ -417,7 +474,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             if _bkg:
                 output_bkg += _output_bkg
 
-        if self.getProperty("KeepTemporaryWorkspaces").value:
+        if keep_temp:
             # Create data workspace
             progress.report("Creating data MDHistoWorkspace")
             createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
@@ -431,7 +488,10 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             createWS_alg.setProperty("Frames", frames)
             createWS_alg.execute()
             outWS_data = createWS_alg.getProperty("OutputWorkspace").value
-            mtd.addOrReplace(self.getPropertyValue("OutputWorkspace") + "_data", outWS_data)
+            if self.getProperty("OutputDataWorkspace").value:
+                mtd.addOrReplace(self.getProperty("OutputDataWorkspace").value, outWS_data)
+            else:
+                mtd.addOrReplace(self.getPropertyValue("OutputWorkspace") + "_data", outWS_data)
 
             # Create normalisation workspace
             progress.report("Creating norm MDHistoWorkspace")
@@ -445,11 +505,15 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             createWS_alg.setProperty("Units", units)
             createWS_alg.setProperty("Frames", frames)
             createWS_alg.execute()
-            mtd.addOrReplace(self.getPropertyValue("OutputWorkspace") + "_normalization", createWS_alg.getProperty("OutputWorkspace").value)
+            outWS_norm = createWS_alg.getProperty("OutputWorkspace").value
+            if self.getProperty("OutputNormalizationWorkspace").value:
+                mtd.addOrReplace(self.getProperty("OutputNormalizationWorkspace").value, outWS_norm)
+            else:
+                mtd.addOrReplace(self.getPropertyValue("OutputWorkspace") + "_normalization", outWS_norm)
 
             if _bkg:
                 # Create background data workspace
-                progress.report("Creating data MDHistoWorkspace")
+                progress.report("Creating background data MDHistoWorkspace")
                 createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
                 createWS_alg.setProperty("SignalInput", output_bkg[1:-1, 1:-1, 1:-1].ravel("F"))
                 createWS_alg.setProperty("ErrorInput", np.sqrt(output_bkg[1:-1, 1:-1, 1:-1].ravel("F")))
@@ -460,11 +524,14 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                 createWS_alg.setProperty("Units", units)
                 createWS_alg.setProperty("Frames", frames)
                 createWS_alg.execute()
-                outWS_data = createWS_alg.getProperty("OutputWorkspace").value
-                mtd.addOrReplace(self.getPropertyValue("OutputWorkspace") + "_background_data", outWS_data)
+                outWS_bkg = createWS_alg.getProperty("OutputWorkspace").value
+                if self.getProperty("OutputBackgroundDataWorkspace").value:
+                    mtd.addOrReplace(self.getProperty("OutputBackgroundDataWorkspace").value, outWS_bkg)
+                else:
+                    mtd.addOrReplace(self.getPropertyValue("OutputWorkspace") + "_background_data", outWS_bkg)
 
                 # Create background normalisation workspace
-                progress.report("Creating data MDHistoWorkspace")
+                progress.report("Creating background normalization MDHistoWorkspace")
                 createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
                 createWS_alg.setProperty("SignalInput", output_norm_bkg[1:-1, 1:-1, 1:-1].ravel("F"))
                 createWS_alg.setProperty("ErrorInput", np.sqrt(output_norm_bkg[1:-1, 1:-1, 1:-1].ravel("F")))
@@ -475,8 +542,11 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
                 createWS_alg.setProperty("Units", units)
                 createWS_alg.setProperty("Frames", frames)
                 createWS_alg.execute()
-                outWS_data = createWS_alg.getProperty("OutputWorkspace").value
-                mtd.addOrReplace(self.getPropertyValue("OutputWorkspace") + "_background_normalization", outWS_data)
+                outWS_bkgNorm = createWS_alg.getProperty("OutputWorkspace").value
+                if self.getProperty("OutputBackgroundNormalizationWorkspace").value:
+                    mtd.addOrReplace(self.getProperty("OutputBackgroundNormalizationWorkspace").value, outWS_bkgNorm)
+                else:
+                    mtd.addOrReplace(self.getPropertyValue("OutputWorkspace") + "_background_normalization", outWS_bkgNorm)
 
         old_settings = np.seterr(divide="ignore", invalid="ignore")  # Ignore RuntimeWarning: invalid value encountered in true_divide
         output /= output_norm_data  # We often divide by zero here and we get NaN's, this is desired behaviour
@@ -510,10 +580,23 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         except NameError:
             pass
 
-        if self.getProperty("KeepTemporaryWorkspaces").value:
+        if keep_temp:
             outWS_data.copyExperimentInfos(outWS)
 
-        progress.report()
+            if bool(tempData):
+                progress.report("Accumulating Data Workspace")
+                PlusMD(LHSWorkspace=outWS_data, RHSWorkspace=tempData, OutputWorkspace=tempData)
+            if bool(tempNorm):
+                progress.report("Accumulating Normalization Workspace")
+                PlusMD(LHSWorkspace=outWS_norm, RHSWorkspace=tempNorm, OutputWorkspace=tempNorm)
+            if bool(tempBkgData):
+                progress.report("Accumulating Background Data Workspace")
+                PlusMD(LHSWorkspace=outWS_bkg, RHSWorkspace=tempBkgData, OutputWorkspace=tempBkgData)
+            if bool(tempBkgNorm):
+                progress.report("Accumulating Background Normalization Workspace")
+                PlusMD(LHSWorkspace=outWS_bkgNorm, RHSWorkspace=tempBkgNorm, OutputWorkspace=tempBkgNorm)
+
+        progress.report(progress_end, "Done")
         self.setProperty("OutputWorkspace", outWS)
 
 

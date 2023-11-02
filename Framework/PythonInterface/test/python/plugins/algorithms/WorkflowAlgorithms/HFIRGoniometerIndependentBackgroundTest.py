@@ -44,7 +44,7 @@ class HFIRGoniometerIndependentBackgroundTest(unittest.TestCase):
         bkg = np.percentile(signal, 50, axis=2)
         expected = np.repeat(bkg[:, :, np.newaxis], signal.shape[2], axis=2)
 
-        outputWS = HFIRGoniometerIndependentBackground(self.workspace, BackgroundLevel=50, BackgroundWindowSize=-1)
+        outputWS = HFIRGoniometerIndependentBackground(self.workspace)
         result = outputWS.getSignalArray().copy()
         self.assertTrue(np.array_equal(expected, result))
 
