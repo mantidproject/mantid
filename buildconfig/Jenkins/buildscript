@@ -13,7 +13,6 @@
 shopt -s nocasematch
 
 SCRIPT_DIR=$(dirname "$0")
-XVFB_SERVER_NUM=101
 ULIMIT_CORE_ORIG=$(ulimit -c)
 
 ###############################################################################
@@ -32,8 +31,6 @@ function run_with_xvfb {
         # Use -noreset because of an X Display bug caused by a race condition in xvfb: https://gitlab.freedesktop.org/xorg/xserver/-/issues/1102
         xvfb-run -e /dev/stderr --server-args="-core -noreset -screen 0 640x480x24" \
         --auto-servernum $@
-	# Remove Xvfb X server lock files after running
-        rm -f /tmp/.X${XVFB_SERVER_NUM}-lock
     else
         eval $@
     fi
