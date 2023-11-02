@@ -238,8 +238,8 @@ unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/E
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/Goniometer.cpp:30
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Algorithm.cpp:74
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/InstrumentFileFinder.cpp:36
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmFactory.cpp:155
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmManager.cpp:121
+unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmFactory.cpp:148
+unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmManager.cpp:115
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc/MantidPythonInterface/core/DataServiceExporter.h:153
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/ITableWorkspace.cpp:251
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/MatrixWorkspace.cpp:65
