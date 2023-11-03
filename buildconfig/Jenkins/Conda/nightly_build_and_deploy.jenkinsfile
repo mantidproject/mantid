@@ -204,11 +204,7 @@ pipeline {
             // in parallel
             package_conda('linux-64', 'base')
             archive_conda_packages('linux-64')
-            script {
-              if(env.BUILD_MANTIDDOCS_PACKAGE) {
-                archive_conda_packages('noarch')
-              }
-            }
+            archive_conda_packages('noarch')
           }
           post {
             always {
@@ -549,10 +545,13 @@ def prerelease_option() {
 }
 
 def archive_conda_packages(platform) {
-  archiveArtifacts artifacts: "**/conda-bld/${platform}/*.tar.bz2",
-    allowEmptyArchive: false,
-    fingerprint: true,
-    onlyIfSuccessful: true
+  // Only archive the mantiddocs package if it was built.
+  if(platform != 'noarch' || BUILD_MANTIDDOCS_PACKAGE) {
+    archiveArtifacts artifacts: "**/conda-bld/${platform}/*.tar.bz2",
+      allowEmptyArchive: false,
+      fingerprint: true,
+      onlyIfSuccessful: true
+  }
 }
 
 def archive_standalone_package(platform) {
