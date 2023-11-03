@@ -148,6 +148,10 @@ void SaveDiffCal::writeIntFieldFromTable(H5::Group &group, const std::string &na
   H5Util::writeArray1D(group, name, data);
 }
 
+/*
+ * Mantid::DataObjects::WorkspaceSingleValue/SpecialWorkspace2D is a parent to both GroupingWorkspace
+ * and MaskWorkspace
+ */
 void SaveDiffCal::writeDetIdsfromSVWS(H5::Group &group, const std::string &name,
                                       const DataObjects::SpecialWorkspace2D_const_sptr &ws) {
   if (!bool(ws))
@@ -167,6 +171,9 @@ void SaveDiffCal::writeDetIdsfromSVWS(H5::Group &group, const std::string &name,
 /**
  * Create a dataset under a given group with a given name
  * Use GroupingWorkspace or MaskWorkspace to retrieve the data.
+ *
+ * Mantid::DataObjects::WorkspaceSingleValue/SpecialWorkspace2D is a parent to both GroupingWorkspace
+ * and MaskWorkspace
  *
  * @param group :: group parent to the dataset
  * @param name :: column name of the workspace, and name of the dataset
@@ -247,6 +254,10 @@ void SaveDiffCal::exec() {
   GroupingWorkspace_sptr groupingWS = getProperty("GroupingWorkspace");
   MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
 
+  // Get a starting number of values to work with that will be refined below
+  // Also initialize the mapping of detid to row number to make getting information
+  // from the table faster.
+  // THE ORDER OF THE IF/ELSE TREE MATTERS
   if (m_calibrationWS) {
     m_numValues = m_calibrationWS->rowCount();
     this->generateDetidToIndex();
@@ -262,7 +273,8 @@ void SaveDiffCal::exec() {
     groupingWS->buildDetectorIDMapping();
 
   // initialize `m_numValues` as the minimum of (CalibrationWorkspace_row_count,
-  // GroupingWorkspace_histogram_count, MaskWorkspace_histogram_count)
+  // GroupingWorkspace_histogram_count, MaskWorkspace_histogram_count).
+  // This will skip any workspaces that are missing.
   if (bool(groupingWS) && groupingWS->getNumberHistograms() < m_numValues) {
     m_numValues = groupingWS->getNumberHistograms();
   }
