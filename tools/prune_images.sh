@@ -9,12 +9,12 @@ IMAGE_DIRECTORY=$PWD"/docs/source/images"
 
 if [ "$1" = "--dry-run" ]; then
     delete_file() {
-        echo \'$1$2\' would be deleted, but this is a dry-run
+        echo \'$1\' would be deleted, but this is a dry-run
     }
 else
     delete_file() {
-	find $IMAGE_DIRECTORY -type f -name "$1$2" -exec rm {} \;
-        echo \'$1$2\' has been deleted
+	find $IMAGE_DIRECTORY -type f -name "$1" -exec rm {} \;
+        echo \'$1\' has been deleted
     }
 fi
 
@@ -22,10 +22,10 @@ fi
 remove_unused_images() {
     extension=$1
     while IFS= read -r -d $'\0' filepath; do
-        filename=$(basename "$filepath" $extension)
+        filename=$(basename "$filepath")
         count=$(git grep -o $filename | wc -l)
 	if [ $count -eq 0 ]; then
-	    delete_file $filename $extension
+	    delete_file $filename
 	fi
     done < <(find "$IMAGE_DIRECTORY" -type f -name "*$extension" -print0)
 }
