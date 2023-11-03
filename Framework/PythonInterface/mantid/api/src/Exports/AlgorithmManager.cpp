@@ -47,6 +47,12 @@ IAlgorithm_sptr create(AlgorithmManagerImpl *self, const std::string &algName, c
   return self->create(algName, version);
 }
 
+std::shared_ptr<Algorithm> createUnmanaged(AlgorithmManagerImpl *self, const std::string &algName,
+                                           const int &version = -1) {
+  ReleaseGlobalInterpreterLock releaseGIL;
+  return self->createUnmanaged(algName, version);
+}
+
 void clear(AlgorithmManagerImpl *self) {
   /// TODO We should release the GIL here otherwise we risk deadlock (see issue #33895). However, doing so causes
   /// test failures because it exposes an unreleated bug to do with the way we handle shared_ptrs to Python objects
@@ -119,7 +125,7 @@ GNU_DIAG_OFF("unused-local-typedef")
 GNU_DIAG_OFF("conversion")
 /// Define overload generators
 BOOST_PYTHON_FUNCTION_OVERLOADS(create_overloads, create, 2, 3)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads, AlgorithmManagerImpl::createUnmanaged, 1, 2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(createUnmanaged_overloads, createUnmanaged, 2, 3)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
@@ -129,7 +135,7 @@ void export_AlgorithmManager() {
 
   class_<AlgorithmManagerImpl, boost::noncopyable>("AlgorithmManagerImpl", no_init)
       .def("create", &create, create_overloads((arg("name"), arg("version")), "Creates a managed algorithm."))
-      .def("createUnmanaged", &AlgorithmManagerImpl::createUnmanaged,
+      .def("createUnmanaged", &createUnmanaged,
            createUnmanaged_overloads((arg("name"), arg("version")), "Creates an unmanaged algorithm."))
       .def("size", &AlgorithmManagerImpl::size, arg("self"), "Returns the number of managed algorithms")
       .def("getAlgorithm", &getAlgorithm, (arg("self"), arg("id_holder")),
