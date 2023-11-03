@@ -80,7 +80,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
     _SAVED_INPUT_DATA_PREFIX = "tubeCalibSaved_"
     _TUBE_PLOT_WS = "__TubePlot"
     _FIT_DATA_WS = "__FittedData"
-    _C_VALUES_WS = "cvalues"
+    _C_VALUES_WS_PREFIX = "cvalues_"
     _SCALED_WS_SUFFIX = "_scaled"
     _CAL_TABLE_ID_COL = "Detector ID"
     _CAL_TABLE_POS_COL = "Detector Position"
@@ -301,7 +301,9 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             meanCvalue.append(meanC)
 
         self._apply_calibration(result, caltable)
-        cvalues = self._create_workspace(data_x=list(diagnostic_output.keys()), data_y=meanCvalue, output_ws_name=self._C_VALUES_WS)
+        cvalues = self._create_workspace(
+            data_x=list(diagnostic_output.keys()), data_y=meanCvalue, output_ws_name=f"{self._C_VALUES_WS_PREFIX}{self._detector_name}"
+        )
 
         self._save_calibrated_ws_as_nexus(result)
 
