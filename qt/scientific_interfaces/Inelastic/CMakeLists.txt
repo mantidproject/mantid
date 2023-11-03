@@ -26,7 +26,7 @@ set(MOC_FILES
     Analysis/IndirectDataAnalysisIqtFitTab.h
     Analysis/IndirectDataAnalysisConvFitTab.h
     Analysis/IndirectDataAnalysisFqFitTab.h
-    Analysis/FqFitAddWorkspacedialog.h
+    Analysis/FqFitAddWorkspaceDialog.h
     Analysis/FqFitDataPresenter.h
     Analysis/FqFitDataView.h
 )
