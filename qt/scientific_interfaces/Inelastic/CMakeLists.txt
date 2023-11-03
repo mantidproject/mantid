@@ -8,7 +8,7 @@ set(SRC_FILES
     Analysis/IndirectDataAnalysisIqtFitTab.cpp
     Analysis/IndirectDataAnalysisConvFitTab.cpp
     Analysis/IndirectDataAnalysisFqFitTab.cpp
-    Analysis/FqFitAddWorkspacedialog.cpp
+    Analysis/FqFitAddWorkspaceDialog.cpp
     Analysis/FqFitDataPresenter.cpp
     Analysis/FqFitDataView.cpp
     Analysis/FqFitModel.cpp
