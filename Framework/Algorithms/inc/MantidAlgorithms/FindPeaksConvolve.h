@@ -10,11 +10,15 @@
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
 
-// Disable warning 4554 which is inherent in the Eigen::Tensor library.
+// Disable warning 4554 on windows which is inherent in the Eigen::Tensor library.
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4554)
 #include "Eigen/../unsupported/Eigen/CXX11/Tensor"
 #pragma warning(pop)
+#else
+#include "Eigen/../unsupported/Eigen/CXX11/Tensor"
+#endif
 
 #include "Eigen/Core"
 
