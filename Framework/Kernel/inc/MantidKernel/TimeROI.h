@@ -20,11 +20,11 @@ public:
   /// the underlying property needs a name
   static const std::string NAME;
   static const TimeROI USE_NONE;
+  static const TimeROI USE_ALL;
 
   TimeROI();
   TimeROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
   TimeROI(const Kernel::TimeSeriesProperty<bool> *filter);
-  TimeROI(const std::vector<Types::Core::DateAndTime> &times);
 
   double durationInSeconds() const;
   double durationInSeconds(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime) const;
@@ -38,6 +38,7 @@ public:
   void addROI(const std::string &startTime, const std::string &stopTime);
   void addROI(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
   void addROI(const std::time_t &startTime, const std::time_t &stopTime);
+  void appendROIFast(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
   void addMask(const std::string &startTime, const std::string &stopTime);
   void addMask(const Types::Core::DateAndTime &startTime, const Types::Core::DateAndTime &stopTime);
   void addMask(const std::time_t &startTime, const std::time_t &stopTime);
