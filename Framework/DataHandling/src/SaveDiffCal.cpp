@@ -255,31 +255,23 @@ void SaveDiffCal::exec() {
   MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
 
   // Get a starting number of values to work with that will be refined below
-  // Also initialize the mapping of detid to row number to make getting information
-  // from the table faster.
   // THE ORDER OF THE IF/ELSE TREE MATTERS
+  m_numValues = std::numeric_limits<std::size_t>::max();
+  if (m_calibrationWS)
+    m_numValues = std::min(m_numValues, m_calibrationWS->rowCount());
+  if (groupingWS)
+    m_numValues = std::min(m_numValues, groupingWS->getNumberHistograms());
+  if (maskWS)
+    m_numValues = std::min(m_numValues, maskWS->getNumberHistograms());
+
+  // Initialize the mapping of detid to row number to make getting information
+  // from the table faster. ORDER MATTERS
   if (m_calibrationWS) {
-    m_numValues = m_calibrationWS->rowCount();
     this->generateDetidToIndex();
   } else if (groupingWS) {
-    m_numValues = groupingWS->getNumberHistograms();
     this->generateDetidToIndex(groupingWS);
   } else if (maskWS) {
-    m_numValues = maskWS->getNumberHistograms();
     this->generateDetidToIndex(maskWS);
-  }
-
-  if (groupingWS && groupingWS->isDetectorIDMappingEmpty())
-    groupingWS->buildDetectorIDMapping();
-
-  // initialize `m_numValues` as the minimum of (CalibrationWorkspace_row_count,
-  // GroupingWorkspace_histogram_count, MaskWorkspace_histogram_count).
-  // This will skip any workspaces that are missing.
-  if (bool(groupingWS) && groupingWS->getNumberHistograms() < m_numValues) {
-    m_numValues = groupingWS->getNumberHistograms();
-  }
-  if (bool(maskWS) && maskWS->getNumberHistograms() < m_numValues) {
-    m_numValues = maskWS->getNumberHistograms();
   }
 
   // delete the file if it already exists
