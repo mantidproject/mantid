@@ -29,7 +29,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL FqFitDataPresenter : public IndirectFitDataPresenter {
+class MANTIDQT_INELASTIC_DLL FqFitDataPresenter : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
   FqFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view,

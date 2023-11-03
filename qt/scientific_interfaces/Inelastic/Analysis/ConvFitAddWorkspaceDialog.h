@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
 #include "IAddWorkspaceDialog.h"
 #include "ui_ConvFitAddWorkspaceDialog.h"
 

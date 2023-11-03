@@ -12,12 +12,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL MSDFitModel : public IndirectFittingModel {
+class FqFitModel : public IndirectFittingModel {
 public:
-  MSDFitModel();
+  FqFitModel();
 
 private:
   std::string getResultXAxisUnit() const override;
+  std::string getResultLogName() const override;
 };
 
 } // namespace IDA

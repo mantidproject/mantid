@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllConfig.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitOutputOptionsPresenter.h"
 #include "IndirectFitPlotPresenter.h"
@@ -30,7 +31,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IndirectDataAnalysisTab : public IndirectTab {
+class IndirectDataAnalysisTab : public IndirectTab {
   Q_OBJECT
 
 public:

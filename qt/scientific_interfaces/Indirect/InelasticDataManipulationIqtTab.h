@@ -14,7 +14,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 using namespace Mantid::API;
-class DLLExport InelasticDataManipulationIqtTab : public InelasticDataManipulationTab {
+class MANTIDQT_INDIRECT_DLL InelasticDataManipulationIqtTab : public InelasticDataManipulationTab {
   Q_OBJECT
 
 public:

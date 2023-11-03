@@ -14,7 +14,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IndirectInterface : public MantidQt::API::UserSubWindow {
+class MANTIDQT_INDIRECT_DLL IndirectInterface : public MantidQt::API::UserSubWindow {
   Q_OBJECT
 
 public:

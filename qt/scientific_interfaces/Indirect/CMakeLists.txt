@@ -4,16 +4,9 @@ set(SRC_FILES
     CalculatePaalmanPings.cpp
     ContainerSubtraction.cpp
     CorrectionsTab.cpp
-    ConvFitAddWorkspaceDialog.cpp
-    ConvFitDataPresenter.cpp
-    ConvFitDataView.cpp
     ConvFitModel.cpp
     DensityOfStates.cpp
     FitStatusWidget.cpp
-    FqFitAddWorkspaceDialog.cpp
-    FqFitDataPresenter.cpp
-    FqFitDataView.cpp
-    FqFitModel.cpp
     FunctionTemplateBrowser.cpp
     IDAFunctionParameterEstimation.cpp
     ILLEnergyTransfer.cpp
@@ -23,12 +16,6 @@ set(SRC_FILES
     IndirectBayes.cpp
     IndirectBayesTab.cpp
     IndirectCorrections.cpp
-    IndirectDataAnalysis.cpp
-    IndirectDataAnalysisConvFitTab.cpp
-    IndirectDataAnalysisFqFitTab.cpp
-    IndirectDataAnalysisIqtFitTab.cpp
-    IndirectDataAnalysisMSDFitTab.cpp
-    IndirectDataAnalysisTab.cpp
     IndirectDataReduction.cpp
     IndirectDataReductionTab.cpp
     IndirectDataValidationHelper.cpp
@@ -94,8 +81,6 @@ set(SRC_FILES
     InelasticDataManipulationSymmetriseTab.cpp
     InelasticDataManipulationSymmetriseTabView.cpp
     InelasticDataManipulationSymmetriseTabModel.cpp
-    IqtFitModel.cpp
-    MSDFitModel.cpp
     Quasi.cpp
     ResNorm.cpp
     Stretch.cpp
@@ -110,14 +95,8 @@ set(MOC_FILES
     ApplyAbsorptionCorrections.h
     CalculatePaalmanPings.h
     ContainerSubtraction.h
-    ConvFitAddWorkspaceDialog.h
-    ConvFitDataPresenter.h
-    ConvFitDataView.h
     CorrectionsTab.h
     DensityOfStates.h
-    FqFitAddWorkspaceDialog.h
-    FqFitDataPresenter.h
-    FqFitDataView.h
     FunctionTemplateBrowser.h
     IAddWorkspaceDialog.h
     IIndirectFitDataView.h
@@ -129,12 +108,6 @@ set(MOC_FILES
     IndirectBayes.h
     IndirectBayesTab.h
     IndirectCorrections.h
-    IndirectDataAnalysis.h
-    IndirectDataAnalysisConvFitTab.h
-    IndirectDataAnalysisFqFitTab.h
-    IndirectDataAnalysisIqtFitTab.h
-    IndirectDataAnalysisMSDFitTab.h
-    IndirectDataAnalysisTab.h
     IndirectDataReduction.h
     IndirectDataReductionTab.h
     IndirectDockWidgetArea.h
@@ -193,7 +166,7 @@ set(MOC_FILES
 
 set(INC_FILES
     ConvFitModel.h
-    FqFitModel.h
+    DllConfig.h
     IIndirectFitDataModel.h
     IndirectDataValidationHelper.h
     IndirectFitData.h
@@ -211,8 +184,6 @@ set(INC_FILES
     InelasticDataManipulationMomentsTabModel.h
     InelasticDataManipulationSqwTabModel.h
     InelasticDataManipulationSymmetriseTabModel.h
-    IqtFitModel.h
-    MSDFitModel.h
     Notifier.h
     IFQFitObserver.h
     Reduction/ISISEnergyTransferData.h
@@ -226,9 +197,7 @@ set(UI_FILES
     ApplyAbsorptionCorrections.ui
     CalculatePaalmanPings.ui
     ContainerSubtraction.ui
-    ConvFitAddWorkspaceDialog.ui
     DensityOfStates.ui
-    FqFitAddWorkspaceDialog.ui
     ILLEnergyTransfer.ui
     ISISCalibration.ui
     ISISDiagnostics.ui
@@ -236,7 +205,6 @@ set(UI_FILES
     IndirectAddWorkspaceDialog.ui
     IndirectBayes.ui
     IndirectCorrections.ui
-    IndirectDataAnalysis.ui
     IndirectDataReduction.ui
     IndirectDiffractionReduction.ui
     IndirectEditResultsDialog.ui

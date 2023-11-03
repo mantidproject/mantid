@@ -38,8 +38,8 @@ namespace IDA {
 using namespace Mantid::API;
 using namespace MantidWidgets;
 
-class FunctionTemplateBrowser;
-class FitStatusWidget;
+class MANTIDQT_INDIRECT_DLL FunctionTemplateBrowser;
+class MANTIDQT_INDIRECT_DLL FitStatusWidget;
 
 class MANTIDQT_INDIRECT_DLL IndirectFitPropertyBrowser : public QDockWidget {
   Q_OBJECT

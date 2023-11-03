@@ -7,32 +7,41 @@
 #pragma once
 
 #include "IndirectDataAnalysisTab.h"
+
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "ui_IndirectFitTab.h"
 
-#include "MantidAPI/IFunction.h"
+#include <memory>
+
+namespace Mantid {
+namespace API {
+class IFunction;
+class CompositeFunction;
+} // namespace API
+} // namespace Mantid
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class IDAFunctionParameterEstimation;
 
-class DLLExport IndirectDataAnalysisMSDFitTab : public IndirectDataAnalysisTab {
+class MANTIDQT_INELASTIC_DLL IndirectDataAnalysisIqtFitTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  IndirectDataAnalysisMSDFitTab(QWidget *parent = nullptr);
+  IndirectDataAnalysisIqtFitTab(QWidget *parent = nullptr);
 
-  std::string getTabName() const override { return "MSDFit"; }
+  std::string getTabName() const override { return "IqtFit"; }
 
   bool hasResolution() const override { return false; }
 
 private:
-  EstimationDataSelector getEstimationDataSelector() const override;
   std::string getFitTypeString() const override;
-  IDAFunctionParameterEstimation createParameterEstimation() const;
+  EstimationDataSelector getEstimationDataSelector() const override;
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
+  QString m_tiedParameter;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

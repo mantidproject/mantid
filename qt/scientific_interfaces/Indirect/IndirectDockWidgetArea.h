@@ -16,7 +16,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class IndirectDockWidgetArea : public QMainWindow {
+class MANTIDQT_INDIRECT_DLL IndirectDockWidgetArea : public QMainWindow {
   Q_OBJECT
 
 public:

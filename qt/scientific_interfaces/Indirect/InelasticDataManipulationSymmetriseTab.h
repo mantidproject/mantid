@@ -39,7 +39,7 @@ namespace CustomInterfaces {
   @author Dan Nixon
   @date 23/07/2014
 */
-class DLLExport InelasticDataManipulationSymmetriseTab : public InelasticDataManipulationTab {
+class MANTIDQT_INDIRECT_DLL InelasticDataManipulationSymmetriseTab : public InelasticDataManipulationTab {
   Q_OBJECT
 
 public:

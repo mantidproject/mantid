@@ -37,7 +37,7 @@ class IndirectDataReduction;
   This class defines common functionality of tabs used in the Indirect Data
   Manipulation interface.
 */
-class DLLExport InelasticDataManipulationTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL InelasticDataManipulationTab : public IndirectTab {
   Q_OBJECT
 
 public:

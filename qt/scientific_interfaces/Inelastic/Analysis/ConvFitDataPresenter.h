@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ConvFitDataView.h"
+#include "Analysis/ConvFitDataView.h"
 #include "ConvFitModel.h"
 #include "IndirectFitDataPresenter.h"
 
@@ -15,8 +15,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 class ConvFitAddWorkspaceDialog;
-
-class MANTIDQT_INDIRECT_DLL ConvFitDataPresenter : public IndirectFitDataPresenter {
+class MANTIDQT_INELASTIC_DLL ConvFitDataPresenter : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
   ConvFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);

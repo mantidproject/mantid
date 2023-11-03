@@ -12,17 +12,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL IqtFitModel : public IndirectFittingModel {
+class MSDFitModel : public IndirectFittingModel {
 public:
-  IqtFitModel();
-  void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) override;
+  MSDFitModel();
 
 private:
-  Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
-  Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const override;
-  std::unordered_map<std::string, ParameterValue> createDefaultParameters(WorkspaceID workspaceID) const override;
-
-  bool m_constrainIntensities;
+  std::string getResultXAxisUnit() const override;
 };
 
 } // namespace IDA

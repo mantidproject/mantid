@@ -35,7 +35,7 @@ class CorrectionsTab;
  *
  * Is a friend to the CorrectionsTab class.
  */
-class IndirectCorrections : public IndirectInterface {
+class MANTIDQT_INDIRECT_DLL IndirectCorrections : public IndirectInterface {
   Q_OBJECT
 
   /// Allow CorrectionsTab to have access.

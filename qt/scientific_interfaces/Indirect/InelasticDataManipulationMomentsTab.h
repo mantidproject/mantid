@@ -24,7 +24,7 @@ namespace CustomInterfaces {
   @author Samuel Jackson
   @date 13/08/2013
 */
-class DLLExport InelasticDataManipulationMomentsTab : public InelasticDataManipulationTab {
+class MANTIDQT_INDIRECT_DLL InelasticDataManipulationMomentsTab : public InelasticDataManipulationTab {
   Q_OBJECT
 
 public:

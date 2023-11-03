@@ -18,7 +18,7 @@ namespace CustomInterfaces {
 namespace IDA {
 class IDAFunctionParameterEstimation;
 
-class DLLExport IndirectDataAnalysisFqFitTab : public IndirectDataAnalysisTab {
+class MANTIDQT_INELASTIC_DLL IndirectDataAnalysisFqFitTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:

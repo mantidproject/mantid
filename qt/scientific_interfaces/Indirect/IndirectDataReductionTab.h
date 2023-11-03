@@ -40,7 +40,7 @@ class IndirectDataReduction;
   @author Samuel Jackson
   @date 13/08/2013
 */
-class DLLExport IndirectDataReductionTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL IndirectDataReductionTab : public IndirectTab {
   Q_OBJECT
 
 public:

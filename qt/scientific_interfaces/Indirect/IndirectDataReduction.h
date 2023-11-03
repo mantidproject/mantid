@@ -33,7 +33,7 @@ mode is defined in the instrument definition file using the "deltaE-mode".
 @author Michael Whitty
 */
 
-class IndirectDataReduction : public IndirectInterface {
+class MANTIDQT_INDIRECT_DLL IndirectDataReduction : public IndirectInterface {
   Q_OBJECT
 
 public:

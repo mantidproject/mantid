@@ -23,7 +23,7 @@ namespace CustomInterfaces {
 namespace IDA {
 using namespace MantidWidgets;
 
-class DLLExport IndirectFitPlotModel {
+class MANTIDQT_INDIRECT_DLL IndirectFitPlotModel {
 public:
   IndirectFitPlotModel();
   ~IndirectFitPlotModel();

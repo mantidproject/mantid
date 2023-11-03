@@ -15,7 +15,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class IndirectDiffractionReduction : public IndirectInterface {
+class MANTIDQT_INDIRECT_DLL IndirectDiffractionReduction : public IndirectInterface {
   Q_OBJECT
 
 public:

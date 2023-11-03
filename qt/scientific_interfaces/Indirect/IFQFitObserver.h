@@ -9,7 +9,7 @@
 #include <map>
 #include <string>
 
-class IFQFitObserver {
+class MANTIDQT_INDIRECT_DLL IFQFitObserver {
 public:
   virtual ~IFQFitObserver() = default;
   virtual void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings) = 0;

@@ -20,7 +20,7 @@ namespace CustomInterfaces {
   @author Dan Nixon
   @date 23/07/2014
 */
-class DLLExport InelasticDataManipulationSqwTab : public InelasticDataManipulationTab {
+class MANTIDQT_INDIRECT_DLL InelasticDataManipulationSqwTab : public InelasticDataManipulationTab {
   Q_OBJECT
 
 public:
