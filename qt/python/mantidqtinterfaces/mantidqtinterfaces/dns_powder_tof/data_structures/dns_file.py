@@ -20,7 +20,7 @@ class DNSFile(ObjectDict):
     This is a dictionary, but can also be accessed like attributes.
     """
 
-    def __init__(self, data_path, filename, dns_polarisation_table=[]):
+    def __init__(self, data_path, filename, dns_polarisation_table):
         super().__init__()
         self.new_format = False
         self.legacy_format = False
@@ -34,7 +34,6 @@ class DNSFile(ObjectDict):
             self.read_new_format(filename, txt)
         elif txt[0].startswith("# DNS Data") and len(txt) == 128:
             self.legacy_format = True
-            # my_table = self.get_dns_legacy_polarisation_table()
             self.read_legacy_format(filename, txt)
         del txt
 
@@ -121,12 +120,12 @@ class DNSFile(ObjectDict):
         self["selector_speed"] = float(0.0)
 
         self["field"] = self.determine_polarisation(self.polarisation_table)
-        self["counts"] = np.zeros((24, self["tof_channels"]), dtype=int)  # for python 2 use long
+        self["counts"] = np.zeros((24, self["tof_channels"]), dtype=int)
         for ch in range(24):
             self["counts"][ch, :] = txt[64 + ch].split()[1:]
 
     def determine_polarisation(self, polarisation_table, tolerance=0.1):
-        polarisation = []
+        polarisation = "unknown"
         if abs(self.flipper_z_compensation_current) > tolerance:
             flip_flag = "sf"
         else:
@@ -137,6 +136,11 @@ class DNSFile(ObjectDict):
             "C_c": self.c_coil_current,
             "C_z": self.z_coil_current,
         }
+        # this part is needed when polarisation table is loaded from an xml file
+        table_element = polarisation_table[0]
+        if isinstance(table_element, str):
+            polarisation_table = self.format_xml_input_table(polarisation_table)
+
         for row in polarisation_table:
             if self.currents_match(row, coil_currents, tolerance):
                 if row["polarisation"] not in ["zero_field", "off"]:
@@ -151,3 +155,8 @@ class DNSFile(ObjectDict):
             if np.fabs(dict1[key] - dict2[key]) > tolerance:
                 return False
         return True
+
+    def format_xml_input_table(self, table):
+        formatted_table = [",".join(x) for x in zip(table[0::5], table[1::5], table[2::5], table[3::5], table[4::5])]
+        stripped_table = [eval(x) for x in formatted_table]
+        return stripped_table

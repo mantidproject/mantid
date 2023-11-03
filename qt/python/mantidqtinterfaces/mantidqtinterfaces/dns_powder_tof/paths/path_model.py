@@ -23,16 +23,20 @@ class DNSPathModel(DNSObsModel):
     def get_current_directory():
         return os.getcwd()
 
-    @staticmethod
-    def get_user_and_proposal_number(dir_name, dns_polarisation_table):
+    def get_user_and_proposal_number(self, dir_name, load_polarisation_table):
         try:
             first_filename = next(glob.iglob(f"{dir_name}/*.d_dat"))
         except StopIteration:
-            return ["", ""]
+            return ["", "", []]
+        if load_polarisation_table:
+            dns_polarisation_table = self.get_dns_legacy_polarisation_table()
+            self.save_polarisation_table(dns_polarisation_table)
+        else:
+            dns_polarisation_table = self.get_preloaded_polarisation_table()
         dns_file = DNSFile("", first_filename, dns_polarisation_table)
         if dns_file["new_format"] or dns_file["legacy_format"]:
-            return [dns_file["users"], dns_file["proposal"]]
-        return ["", ""]
+            return [dns_file["users"], dns_file["proposal"], dns_polarisation_table]
+        return ["", "", []]
 
     @staticmethod
     def clear_cache(path):
@@ -65,3 +69,9 @@ class DNSPathModel(DNSObsModel):
                 row["C_a"], row["C_b"], row["C_c"], row["C_z"] = [float(c) for c in current.split(",")]
                 polarisation_table.append(row)
         return polarisation_table
+
+    def save_polarisation_table(self, table):
+        self._polarisation_table = table
+
+    def get_preloaded_polarisation_table(self):
+        return self._polarisation_table

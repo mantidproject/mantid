@@ -33,7 +33,10 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         if self.param_dict:
             data_path = self.param_dict["paths"]["data_dir"]
-            pol_table = self.param_dict["paths"]["polarisation_table"]
+            if "polarisation_table" in self.param_dict["paths"]:
+                pol_table = self.param_dict["paths"]["polarisation_table"]
+            else:
+                pol_table = []
             file_number_range = [start, end]
             number_of_files, loaded, datafiles, file_number_range_filtered = self.model.set_datafiles_to_load(
                 data_path, file_number_range, filtered, watcher
@@ -47,8 +50,11 @@ class DNSFileSelectorPresenter(DNSObserver):
         """
         data_path = self.param_dict["paths"]["data_dir"]
         standard_path = self.param_dict["paths"]["standards_dir"]
-        pol_table = self.param_dict["paths"]["polarisation_table"]
         if standard_path:
+            if "polarisation_table" in self.param_dict["paths"]:
+                pol_table = self.param_dict["paths"]["polarisation_table"]
+            else:
+                pol_table = []
             standard_found = self.model.read_standard(standard_path, pol_table)
             self._filter_standard()
             if not standard_found and not self_call:
