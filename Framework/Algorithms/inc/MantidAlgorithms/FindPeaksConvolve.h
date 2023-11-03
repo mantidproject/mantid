@@ -55,7 +55,7 @@ private:
   bool m_createIntermediateWorkspaces;
   bool m_findHighestDatapointInPeak;
   double m_iOverSigmaThreshold;
-  bool m_performBinaryClosing;
+  bool m_mergeNearbyPeaks;
 
   void init() override;
   void exec() override;

@@ -75,7 +75,7 @@ public:
   void test_exec() {
     auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
     alg->setProperty("EstimatedPeakExtent", "100");
-    alg->setProperty("IOversigmaThreshold", "3");
+    alg->setProperty("IOverSigmaThreshold", "3");
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
 
@@ -89,7 +89,7 @@ public:
   void test_execPeakExtentNBins() {
     auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
     alg->setProperty("EstimatedPeakExtentNBins", "25");
-    alg->setProperty("IOversigmaThreshold", "3");
+    alg->setProperty("IOverSigmaThreshold", "3");
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
 
@@ -103,7 +103,7 @@ public:
   void test_execHighestDataPoint() {
     auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
     alg->setProperty("EstimatedPeakExtent", "100");
-    alg->setProperty("IOversigmaThreshold", "3");
+    alg->setProperty("IOverSigmaThreshold", "3");
     alg->setProperty("FindHighestDataPointInPeak", true);
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
@@ -126,10 +126,10 @@ public:
     assert_peak_centres_equal(resultWs, expectedPeakCentres);
   }
 
-  void test_execNoisyDataLargeKernelWithBinaryClosing() {
+  void test_execNoisyDataLargeKernelWithMergePeaks() {
     auto alg = set_up_alg(INPUT_TEST_WS_NAME + "_noisy", OUTPUT_TEST_WS_NAME);
     alg->setProperty("EstimatedPeakExtent", "500");
-    alg->setProperty("IOversigmaThreshold", "5");
+    alg->setProperty("IOverSigmaThreshold", "5");
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
 
@@ -138,11 +138,11 @@ public:
     assert_peak_centres_equal(resultWs, expectedPeakCentres);
   }
 
-  void test_execNoisyDataLargeKernelNoBinaryClosing() {
+  void test_execNoisyDataLargeKernelNoMergePeaks() {
     auto alg = set_up_alg(INPUT_TEST_WS_NAME + "_noisy", OUTPUT_TEST_WS_NAME);
     alg->setProperty("EstimatedPeakExtent", "500");
-    alg->setProperty("IOversigmaThreshold", "5");
-    alg->setProperty("PerformBinaryClosing", false);
+    alg->setProperty("IOverSigmaThreshold", "5");
+    alg->setProperty("MergeNearbyPeaks", false);
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
 
@@ -155,6 +155,11 @@ public:
     auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
     alg->setProperty("EstimatedPeakExtent", "100");
     alg->setProperty("EstimatedPeakExtentNBins", "100");
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument &);
+  }
+
+  void test_execSpecifyNoPeakExtentAndBins() {
+    auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument &);
   }
 };

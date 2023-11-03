@@ -66,9 +66,9 @@ void FindPeaksConvolve::init() {
                   "Estimated PeakExtent of the peaks to be found");
   declareProperty("EstimatedPeakExtentNBins", EMPTY_INT(), m_validators["mustBeGreaterThanOne"],
                   "Optional: Estimated PeakExtent of the peaks to be found in number of bins");
-  declareProperty("IOversigmaThreshold", 2.0, m_validators["mustBeGreaterThanZero"],
+  declareProperty("IOverSigmaThreshold", 3.0, m_validators["mustBeGreaterThanZero"],
                   "Minimum Signal/Noise ratio for a peak to be considered significant");
-  declareProperty("PerformBinaryClosing", true,
+  declareProperty("MergeNearbyPeaks", true,
                   "Attempt to remove inflections in the data, where a local"
                   " minima/maxima occurs which is not signficiant enough to be considered a peak");
   declareProperty("FindHighestDataPointInPeak", false,
@@ -126,8 +126,9 @@ const std::string FindPeaksConvolve::validatePeakExtentInput() const {
   const int peakExtentNBins = getProperty("EstimatedPeakExtentNBins");
   if (peakExtent != EMPTY_DBL() && peakExtentNBins != EMPTY_INT()) {
     err_str += "Peak Extent has been given in x units and in number of bins. Please specify one or the other. ";
+  } else if (peakExtent == EMPTY_DBL() && peakExtentNBins == EMPTY_INT()) {
+    err_str += "You must specify either peakExtent or peakExtentNBins. ";
   }
-
   return err_str;
 }
 
@@ -135,8 +136,8 @@ void FindPeaksConvolve::storeClassProperties() {
   m_inputDataWS = getProperty("InputWorkspace");
   m_createIntermediateWorkspaces = getProperty("CreateIntermediateWorkspaces");
   m_findHighestDatapointInPeak = getProperty("FindHighestDataPointInPeak");
-  m_iOverSigmaThreshold = getProperty("IOversigmaThreshold");
-  m_performBinaryClosing = getProperty("PerformBinaryClosing");
+  m_iOverSigmaThreshold = getProperty("IOverSigmaThreshold");
+  m_mergeNearbyPeaks = getProperty("MergeNearbyPeaks");
 
   int wsIndex = getProperty("WorkspaceIndex");
   if (wsIndex == EMPTY_INT()) {
@@ -157,6 +158,9 @@ void FindPeaksConvolve::performConvolution(const size_t dataIndex) {
   const Tensor1D kernel{createKernel(static_cast<int>(kernelBinCount))};
 
   const auto binCount{m_inputDataWS->getNumberBins(specNum)};
+  // Edge handling is performed by padding the input data with 0 values. Each convolution requires a padding of kernel
+  // size + 1. The 1st conv is performed with a kernel of size n, the second size n/2. The resultant pad is split either
+  // side of the data.
   const double paddingSize = (std::ceil(static_cast<double>(kernelBinCount) * 1.5) - 2) / 2;
   const TensorMap_const yData{&m_inputDataWS->y(specNum).front(), binCount};
   Eigen::array<std::pair<double, double>, 1> paddings{std::make_pair(std::ceil(paddingSize), std::floor(paddingSize))};
@@ -189,7 +193,8 @@ void FindPeaksConvolve::performConvolution(const size_t dataIndex) {
 Tensor1D FindPeaksConvolve::createKernel(const int binCount) {
   Tensor1D kernel(binCount);
   for (int i{0}; i < binCount; i++) {
-    // consider if these 0.25/0.75 values should be inputs
+    // create integrating shoebox kernel with central positive region & negative background shell with ~the same
+    // elements in each.
     if (i < std::ceil(binCount) * 0.25 || i >= binCount * 0.75) {
       kernel.data()[i] = -1.0;
     } else {
@@ -275,7 +280,7 @@ FindPeaksConvolve::filterDataForSignificantPoints(const Tensor1D &iOverSigma) {
   for (auto i{0}; i < iOverSigma.size(); i++) {
     if (iOverSigma(i) > m_iOverSigmaThreshold) {
       closedData.emplace_back(i, iOverSigma(i));
-    } else if (iOverSigma(i) <= 0 || !m_performBinaryClosing) {
+    } else if (iOverSigma(i) <= 0 || !m_mergeNearbyPeaks) {
       closedData.emplace_back(i, 0);
     }
   }
