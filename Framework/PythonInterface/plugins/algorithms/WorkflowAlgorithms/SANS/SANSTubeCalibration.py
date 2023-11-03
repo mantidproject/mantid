@@ -433,6 +433,13 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         tube_side_num = tube_id // 2  # Round down to get integer name for tube
         return self._detector_name + "-detector/" + side + str(tube_side_num)
 
+    @staticmethod
+    def _get_tube_module_and_number(tube_id):
+        """Get the tube module and number based on the id given"""
+        module = int(tube_id / DetectorInfo.NUM_TUBES_PER_MODULE) + 1
+        tube_num = tube_id % DetectorInfo.NUM_TUBES_PER_MODULE
+        return module, tube_num
+
     def _get_tube_data(self, tube_id, ws):
         """Return an array of all counts for the given tube"""
         tube_name = self._get_tube_name(tube_id)
@@ -962,8 +969,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         diagnostic_workspaces = []
 
         first_pixel_pos = TubeSide.get_first_pixel_position(tube_id)
-        module = int(tube_id / DetectorInfo.NUM_TUBES_PER_MODULE) + 1
-        tube_num = tube_id % DetectorInfo.NUM_TUBES_PER_MODULE
+        module, tube_num = self._get_tube_module_and_number(tube_id)
         ws_suffix = f"{tube_id}_{module}_{tube_num}"
 
         diagnostic_workspaces.append(self._rename_workspace(self._FIT_DATA_WS, f"Fit{ws_suffix}"))
@@ -1007,7 +1013,8 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             cvalue = cvalues.dataY(0)[i]
             if cvalue > threshold:
                 all_cvalues_ok = False
-                self.log().notice(f"Tube {cvalues.dataX(0)[i]} has cvalue {cvalue}")
+                module, tube_num = self._get_tube_module_and_number(cvalues.dataX(0)[i])
+                self.log().notice(f"Module {module}, tube {tube_num} has cvalue {cvalue}")
 
         if all_cvalues_ok:
             self.log().notice(f"CValues for all tubes were below threshold {threshold}")
