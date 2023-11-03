@@ -29,7 +29,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
 
         S = np.fromfunction(peaks, (32, 240, 100))
 
-        ConvertWANDSCDtoQTest_data = CreateMDHistoWorkspace(
+        ConvertWANDSCDtoQTest_gold = CreateMDHistoWorkspace(
             Dimensionality=3,
             Extents="0.5,32.5,0.5,240.5,0.5,100.5",
             SignalInput=S.ravel("F"),
@@ -41,23 +41,23 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
 
         ConvertWANDSCDtoQTest_dummy = CreateSingleValuedWorkspace()
 
-        ConvertWANDSCDtoQTest_data.addExperimentInfo(ConvertWANDSCDtoQTest_dummy)
+        ConvertWANDSCDtoQTest_gold.addExperimentInfo(ConvertWANDSCDtoQTest_dummy)
 
         log = FloatTimeSeriesProperty("s1")
         for t, v in zip(range(100), np.arange(0, 50, 0.5)):
             log.addValue(t, v)
-        ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run()["s1"] = log
-        ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty("duration", [60.0] * 100, True)
-        ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty("monitor_count", [120000.0] * 100, True)
-        ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty(
+        ConvertWANDSCDtoQTest_gold.getExperimentInfo(0).run()["s1"] = log
+        ConvertWANDSCDtoQTest_gold.getExperimentInfo(0).run().addProperty("duration", [60.0] * 100, True)
+        ConvertWANDSCDtoQTest_gold.getExperimentInfo(0).run().addProperty("monitor_count", [120000.0] * 100, True)
+        ConvertWANDSCDtoQTest_gold.getExperimentInfo(0).run().addProperty(
             "twotheta", list(np.linspace(np.pi * 2 / 3, 0, 240).repeat(32)), True
         )
-        ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty(
+        ConvertWANDSCDtoQTest_gold.getExperimentInfo(0).run().addProperty(
             "azimuthal", list(np.tile(np.linspace(-0.15, 0.15, 32), 240)), True
         )
 
-        SetUB(ConvertWANDSCDtoQTest_data, 5, 5, 7, 90, 90, 120, u=[-1, 0, 1], v=[1, 0, 1])
-        SetGoniometer(ConvertWANDSCDtoQTest_data, Axis0="s1,0,1,0,1", Average=False)
+        SetUB(ConvertWANDSCDtoQTest_gold, 5, 5, 7, 90, 90, 120, u=[-1, 0, 1], v=[1, 0, 1])
+        SetGoniometer(ConvertWANDSCDtoQTest_gold, Axis0="s1,0,1,0,1", Average=False)
 
         # Create Normalisation workspace
         S = np.ones((32, 240, 1))
@@ -81,7 +81,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         [
             mtd.remove(ws)
             for ws in [
-                "ConvertWANDSCDtoQTest_data",
+                "ConvertWANDSCDtoQTest_gold",
                 "ConvertWANDSCDtoQTest_dummy" "ConvertWANDSCDtoQTest_norm",
                 "ConvertWANDSCDtoQTest_dummy2",
             ]
@@ -89,7 +89,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
 
     def test_Q(self):
         ConvertWANDSCDtoQTest_out = ConvertWANDSCDtoQ(
-            "ConvertWANDSCDtoQTest_data",
+            "ConvertWANDSCDtoQTest_gold",
             BinningDim0="-8.08,8.08,101",
             BinningDim1="-0.88,0.88,11",
             BinningDim2="-8.08,8.08,101",
@@ -129,7 +129,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
 
     def test_Q_norm(self):
         ConvertWANDSCDtoQTest_out = ConvertWANDSCDtoQ(
-            "ConvertWANDSCDtoQTest_data",
+            "ConvertWANDSCDtoQTest_gold",
             NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
             BinningDim0="-8.08,8.08,101",
             BinningDim1="-0.88,0.88,11",
@@ -144,7 +144,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
 
     def test_COP(self):
         ConvertWANDSCDtoQTest_out = ConvertWANDSCDtoQ(
-            "ConvertWANDSCDtoQTest_data",
+            "ConvertWANDSCDtoQTest_gold",
             BinningDim0="-8.08,8.08,101",
             BinningDim1="-1.68,1.68,21",
             BinningDim2="-8.08,8.08,101",
@@ -152,7 +152,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         )
 
         ConvertWANDSCDtoQTest_cop = ConvertWANDSCDtoQ(
-            "ConvertWANDSCDtoQTest_data",
+            "ConvertWANDSCDtoQTest_gold",
             BinningDim0="-8.08,8.08,101",
             BinningDim1="-1.68,1.68,21",
             BinningDim2="-8.08,8.08,101",
@@ -181,7 +181,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
 
     def test_HKL_norm_and_KeepTemporary(self):
         ConvertWANDSCDtoQTest_out = ConvertWANDSCDtoQ(
-            "ConvertWANDSCDtoQTest_data",
+            "ConvertWANDSCDtoQTest_gold",
             NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
             Frame="HKL",
             KeepTemporaryWorkspaces=True,
@@ -229,7 +229,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
 
     def test_errorbar_scale_NormaliseBy(self):
         ConvertWANDSCDtoQTest_None = ConvertWANDSCDtoQ(
-            "ConvertWANDSCDtoQTest_data",
+            "ConvertWANDSCDtoQTest_gold",
             NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
             Frame="HKL",
             KeepTemporaryWorkspaces=True,
@@ -246,7 +246,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         Test_None_sig = np.sqrt(ConvertWANDSCDtoQTest_None.getErrorSquaredArray())
 
         ConvertWANDSCDtoQTest_Time = ConvertWANDSCDtoQ(
-            "ConvertWANDSCDtoQTest_data",
+            "ConvertWANDSCDtoQTest_gold",
             NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
             Frame="HKL",
             KeepTemporaryWorkspaces=True,
@@ -265,9 +265,9 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         self.assertAlmostEqual(np.nanmax(Test_None_intens / Test_None_sig), np.nanmax(Test_Time_intens / Test_Time_sig))
 
     def test_with_background(self):
-        HFIRGoniometerIndependentBackground("ConvertWANDSCDtoQTest_data", OutputWorkspace="ConvertWANDSCDtoQTest_background")
+        HFIRGoniometerIndependentBackground("ConvertWANDSCDtoQTest_gold", OutputWorkspace="ConvertWANDSCDtoQTest_background")
         ConvertWANDSCDtoQTest_Bkg = ConvertWANDSCDtoQ(
-            "ConvertWANDSCDtoQTest_data",
+            "ConvertWANDSCDtoQTest_gold",
             NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
             BackgroundWorkspace="ConvertWANDSCDtoQTest_background",
             Frame="HKL",
@@ -288,7 +288,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
 
     def test_with_symmetry(self):
         ConvertWANDSCDtoQTest_no_sym = ConvertWANDSCDtoQ(
-            "ConvertWANDSCDtoQTest_data",
+            "ConvertWANDSCDtoQTest_gold",
             NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
             Frame="HKL",
             BinningDim0="-8.08,8.08,101",
@@ -300,7 +300,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         )
 
         ConvertWANDSCDtoQTest_sym = ConvertWANDSCDtoQ(
-            "ConvertWANDSCDtoQTest_data",
+            "ConvertWANDSCDtoQTest_gold",
             NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
             Frame="HKL",
             SymmetryOperations="-x,-y,-z",

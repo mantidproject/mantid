@@ -67,12 +67,13 @@ class HFIRGoniometerIndependentBackground(PythonAlgorithm):
 
         bkg_level = self.getProperty("BackgroundLevel").value
         bkg_size = self.getProperty("BackgroundWindowSize").value
+        filter_mode = self.getProperty("FilterMode").value
 
         if bkg_size == Property.EMPTY_INT:
             percent = np.percentile(signal, bkg_level, axis=2)
             bkg = np.repeat(percent[:, :, np.newaxis], signal.shape[2], axis=2)
         else:
-            bkg = scipy.ndimage.percentile_filter(signal, bkg_level, size=(1, 1, bkg_size), mode="nearest")
+            bkg = scipy.ndimage.percentile_filter(signal, bkg_level, size=(1, 1, bkg_size), mode=filter_mode)
 
         outputWS = self.getPropertyValue("OutputWorkspace")
         outputWS = CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=outputWS)
