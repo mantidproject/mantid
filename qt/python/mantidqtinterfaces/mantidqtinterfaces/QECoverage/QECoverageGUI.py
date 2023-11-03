@@ -102,6 +102,9 @@ class QECoverageGUI(QtWidgets.QWidget):
         comma_sep_postv_floats_regex_str = r"^(\s*\+?[0-9]*\.?[0-9]*)(\s*,\s*\+?[0-9]*\.?[0-9]*)+\s*$"
         comma_sep_floats_validator = QRegExpValidator(QRegExp(comma_sep_postv_floats_regex_str))
         self.direct_ei_input.setValidator(comma_sep_floats_validator)
+        self.invalid_ei_msg = (
+            "\nEi provided was invalid, Ei should be a positive float or a sequence of positive floats separated by commas"
+        )
         self.direct_ei_grid.addWidget(self.direct_ei_input)
         self.direct_grid.addWidget(self.direct_ei)
         self.emaxfield_msgbox = QtWidgets.QMessageBox()
@@ -121,6 +124,9 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.direct_emin_input = QtWidgets.QLineEdit("-10", self.direct_emin)
         self.direct_emin_input.setValidator(QDoubleValidator())
         self.direct_emin_input.setToolTip("Minimum energy transfer to plot down to.")
+        self.invalid_emin_msg = (
+            "\nEmin provided was either invalid or bigger than minimum value of Ei , " "automatically changed value to Emin = -max(Ei) / 2"
+        )
         self.direct_emin_grid.addWidget(self.direct_emin_input)
         self.direct_grid.addWidget(self.direct_emin)
         self.direct_plotbtn = QtWidgets.QPushButton("Plot Q-E", self.tab_direct)
@@ -355,8 +361,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         try:
             ei_vec = [float(val) for val in ei_str.split(",")]
         except ValueError:
-            msg = "\nEi provided was invalid, Ei should be a positive float or " "a sequence of positive floats separated by commas"
-            logger.warning(msg)
+            logger.warning(self.invalid_ei_msg)
             return
 
         try:
@@ -366,11 +371,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         except ValueError:
             Emin = -max(ei_vec) / 2
             self.direct_emin_input.setText(str(Emin))
-            msg = (
-                "\nEmin provided was either invalid or bigger than minimum value of Ei , "
-                "automatically changed value to Emin = -max(Ei) / 2"
-            )
-            logger.warning(msg)
+            logger.warning(self.invalid_ei_msg)
 
         self.direct_s2_input.setText(str(self.s2))
 
