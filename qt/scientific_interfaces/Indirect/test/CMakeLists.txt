@@ -1,12 +1,8 @@
 # Testing
 set(TEST_FILES
-    ConvFitDataPresenterTest.h
     ConvFitModelTest.h
     ConvFunctionModelTest.h
-    FqFitDataPresenterTest.h
-    FqFitModelTest.h
     IDAFunctionParameterEstimationTest.h
-    IndirectDataAnalysisTabTest.h
     IndirectDataValidationHelperTest.h
     IndirectFitDataPresenterTest.h
     IndirectFitDataTest.h
@@ -27,7 +23,6 @@ set(TEST_FILES
     InelasticDataManipulationMomentsTabModelTest.h
     InelasticDataManipulationSqwTabModelTest.h
     InelasticDataManipulationSymmetriseTabModelTest.h
-    IqtFitModelTest.h
     ISISEnergyTransferModelTest.h
     ISISEnergyTransferModelUtilsTest.h
 )

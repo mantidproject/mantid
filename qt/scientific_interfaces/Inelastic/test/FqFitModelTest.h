@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "FqFitModel.h"
+#include "Analysis/FqFitModel.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"

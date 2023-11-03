@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "ConvFitDataPresenter.h"
+#include "Analysis/ConvFitDataPresenter.h"
 #include "ConvFitModel.h"
 #include "IIndirectFitDataView.h"
 

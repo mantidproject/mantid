@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataAnalysisTab.h"
+#include "Analysis/IndirectDataAnalysisTab.h"
 #include "MantidAPI/FunctionFactory.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>

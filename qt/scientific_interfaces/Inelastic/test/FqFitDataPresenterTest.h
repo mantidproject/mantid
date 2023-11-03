@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "FqFitDataPresenter.h"
-#include "FqFitModel.h"
+#include "Analysis/FqFitDataPresenter.h"
+#include "Analysis/FqFitModel.h"
 #include "IndirectFitDataView.h"
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 
