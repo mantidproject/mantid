@@ -274,6 +274,9 @@ void SaveDiffCal::exec() {
     this->generateDetidToIndex(maskWS);
   }
 
+  if (groupingWS && groupingWS->isDetectorIDMappingEmpty())
+    groupingWS->buildDetectorIDMapping();
+
   // delete the file if it already exists
   std::string filename = getProperty("Filename");
   if (Poco::File(filename).exists()) {
