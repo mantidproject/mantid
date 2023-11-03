@@ -180,6 +180,9 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         ConvertWANDSCDtoQTest_cop.delete()
 
     def test_HKL_norm_and_KeepTemporary(self):
+        SetUB("ConvertWANDSCDtoQTest_gold", 5, 5, 7, 90, 90, 120, u=[-1, 0, 1], v=[1, 0, 1])
+        SetGoniometer("ConvertWANDSCDtoQTest_gold", Axis0="s1,0,1,0,1", Average=False)
+
         ConvertWANDSCDtoQTest_out = ConvertWANDSCDtoQ(
             "ConvertWANDSCDtoQTest_gold",
             NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
@@ -228,6 +231,9 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         ConvertWANDSCDtoQTest_out.delete()
 
     def test_errorbar_scale_NormaliseBy(self):
+        SetUB("ConvertWANDSCDtoQTest_gold", 5, 5, 7, 90, 90, 120, u=[-1, 0, 1], v=[1, 0, 1])
+        SetGoniometer("ConvertWANDSCDtoQTest_gold", Axis0="s1,0,1,0,1", Average=False)
+
         ConvertWANDSCDtoQTest_None = ConvertWANDSCDtoQ(
             "ConvertWANDSCDtoQTest_gold",
             NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
