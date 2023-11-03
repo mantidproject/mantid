@@ -333,17 +333,18 @@ void FindPeaksConvolve::createIntermediateWorkspaces(const size_t dataIndex, con
   alg->setProperty("DataY", std::vector<double>(iOverSigma.data(), iOverSigma.data() + iOverSigma.size()));
   alg->execute();
   API::MatrixWorkspace_sptr algOutput = alg->getProperty("OutputWorkspace");
-  API::AnalysisDataService::Instance().add("iOverSigma" + std::to_string(dataIndex), algOutput);
+  API::AnalysisDataService::Instance().addOrReplace(
+      m_inputDataWS->getName() + "_iOverSigma_" + std::to_string(m_specNums[dataIndex]), algOutput);
 
   std::vector<double> xKernelData(kernel.size());
   std::iota(std::begin(xKernelData), std::end(xKernelData), 0.0);
   alg->resetProperties();
-  alg->setProperty("OutputWorkspace", "kernelWorkspace");
+  alg->setProperty("OutputWorkspace", "kernel");
   alg->setProperty("DataX", std::move(xKernelData));
   alg->setProperty("DataY", std::vector<double>(kernel.data(), kernel.data() + kernel.size()));
-  alg->execute();
   API::MatrixWorkspace_sptr algKernelOutput = alg->getProperty("OutputWorkspace");
-  API::AnalysisDataService::Instance().add("kernelWorkspace" + std::to_string(dataIndex), algKernelOutput);
+  API::AnalysisDataService::Instance().addOrReplace(
+      m_inputDataWS->getName() + "_kernel_" + std::to_string(m_specNums[dataIndex]), algKernelOutput);
 }
 
 void FindPeaksConvolve::outputResults() {
