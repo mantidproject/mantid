@@ -36,7 +36,7 @@ AlgorithmManagerImpl &instance() {
     PyRun_SimpleString("import atexit\n"
                        "def cleanupAlgorithmManager():\n"
                        "    from mantid.api import AlgorithmManager\n"
-                       "    AlgorithmManager.clear()\n"
+                       "    AlgorithmManager.shutdown()\n"
                        "atexit.register(cleanupAlgorithmManager)");
   });
   return mgr;
@@ -53,6 +53,12 @@ void clear(AlgorithmManagerImpl *self) {
   /// (see #33924). Fixing that is not trivial, so I am reverting this change until it can be resolved properly.
   // ReleaseGlobalInterpreterLock releaseGIL;
   return self->clear();
+}
+
+void shutdown(AlgorithmManagerImpl *self) {
+  // See comment above for clear()
+  // ReleaseGlobalInterpreterLock releaseGIL;
+  return self->shutdown();
 }
 
 void cancelAll(AlgorithmManagerImpl *self) {
@@ -133,6 +139,7 @@ void export_AlgorithmManager() {
            "Returns a list of managed algorithm instances that are "
            "currently executing")
       .def("clear", &clear, arg("self"), "Clears the current list of managed algorithms")
+      .def("shutdown", &shutdown, arg("self"), "Cancels all running algorithms and waits for them to exit")
       .def("cancelAll", &cancelAll, arg("self"), "Requests that all currently running algorithms be cancelled")
       .def("Instance", instance, return_value_policy<reference_existing_object>(),
            "Return a reference to the singleton instance")
