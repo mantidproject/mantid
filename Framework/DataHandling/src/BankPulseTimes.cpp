@@ -70,7 +70,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &pNum
 template <typename ValueType>
 void BankPulseTimes::readData(::NeXus::File &file, int64_t numValues, Mantid::Types::Core::DateAndTime &start) {
   std::vector<int64_t> indexStart{0};
-  std::vector<int64_t> indexStep{std::min(numValues, static_cast<int64_t>(3600 * 60))}; // 1 hour at 60Hz
+  std::vector<int64_t> indexStep{std::min(numValues, static_cast<int64_t>(12 * 3600 * 60))}; // 12 hour at 60Hz
 
   // getSlab needs the data allocated already
   std::vector<ValueType> rawData(indexStep[0]);
