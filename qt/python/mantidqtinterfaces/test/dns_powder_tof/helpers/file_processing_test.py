@@ -44,31 +44,31 @@ class DNSfile_processingTest(unittest.TestCase):
         filtered = filter_filenames(self.filenames, 787464, 788057)
         self.assertEqual(filtered, [])
 
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "os.listdir")
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "os.path.isdir")
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.os.listdir")
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.os.path.isdir")
     def test_return_filelist(self, mock_is_dir, mock_listdir):
-        mock_listdir.return_value = self.filenames + ["a.d_dat", "123.d_dat"]
+        mock_listdir.return_value = self.filenames + ["nano123.d_dat", "a.ddat", "123.txt"]
         mock_is_dir.return_value = True
-        filelist = return_filelist("a")
-        self.assertEqual(filelist, self.filenames)
+        filelist = return_filelist(mock_listdir.return_value)
+        self.assertEqual(filelist, sorted(self.filenames + ["nano123.d_dat"]))
         mock_is_dir.return_value = False
-        filelist = return_filelist("a")
+        filelist = return_filelist(mock_listdir.return_value)
         self.assertEqual(filelist, [])
 
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "os.path.getmtime", new=mock_mtime)
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "glob.glob")
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "os.path.isdir")
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.os.path.getmtime", new=mock_mtime)
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.glob.glob")
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.os.path.isdir")
     def test_return_standard_zip(self, mock_is_dir, mock_glob):
         mock_is_dir.return_value = False
         mock_glob.return_value = ["standard.zip", "standard123.zip"]
-        testv = return_standard_zip("a")
-        self.assertEqual(testv, "")
+        test_v = return_standard_zip("a")
+        self.assertEqual(test_v, "")
         mock_is_dir.return_value = True
-        testv = return_standard_zip("a")
-        self.assertEqual(testv, "standard.zip")
+        test_v = return_standard_zip("a")
+        self.assertEqual(test_v, "standard.zip")
 
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "zipfile.ZipFile")
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "return_standard_zip")
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.zipfile.ZipFile")
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.return_standard_zip")
     def test_unzip_latest_standard(self, mock_return_standard, mock_zip):
         mock_extract = mock_zip.return_value.__enter__.return_value.extractall
         mock_return_standard.return_value = "standard.zip"
@@ -83,51 +83,51 @@ class DNSfile_processingTest(unittest.TestCase):
         self.assertEqual(mock_return_standard.call_count, 2)
 
     @staticmethod
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "create_dir")
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "os.path.dirname")
-    def test_create_dir_from_filename(mock_dirname, mock_cdir):
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.create_dir")
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.os.path.dirname")
+    def test_create_dir_from_filename(mock_dir_name, mock_cdir):
         create_dir_from_filename("123")
-        mock_dirname.assert_called_once_with("123")
-        mock_cdir.assert_called_once_with(mock_dirname.return_value)
+        mock_dir_name.assert_called_once_with("123")
+        mock_cdir.assert_called_once_with(mock_dir_name.return_value)
 
     @staticmethod
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "os.makedirs")
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "os.path.exists")
-    def test_create_dir(mock_path, mock_mdir):
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.os.makedirs")
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.os.path.exists")
+    def test_create_dir(mock_path, mock_make_dir):
         mock_path.return_value = True
         create_dir("a")
-        mock_mdir.assert_not_called()
+        mock_make_dir.assert_not_called()
         mock_path.return_value = False
         create_dir("a")
-        mock_mdir.assert_called_once_with("a")
+        mock_make_dir.assert_called_once_with("a")
 
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "open")
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.open")
     def test_save_txt(self, mock_open):
         mock_write = mock_open.return_value.__enter__.return_value.write
-        testv = save_txt(txt="abc", filename="123.dat", current_dir=None)
-        self.assertEqual(testv, ["123.dat", "123.dat"])
+        test_v = save_txt(txt="abc", filename="123.dat", current_dir=None)
+        self.assertEqual(test_v, ["123.dat", "123.dat"])
         mock_open.assert_called_once_with("123.dat", "w", encoding="utf8")
         mock_write.assert_called_once_with("abc")
-        testv = save_txt(txt="abc", filename="123.dat", current_dir="d")
-        self.assertEqual(testv, ["123.dat", "d/123.dat"])
+        test_v = save_txt(txt="abc", filename="123.dat", current_dir="d")
+        self.assertEqual(test_v, ["123.dat", "d/123.dat"])
 
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "open")
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.open")
     def test_load_txt(self, mock_open):
-        mock_read = mock_open.return_value.__enter__.return_value.readlines
+        mock_read = mock_open.return_value.__enter__.return_value.read
         mock_read.return_value = "hzu"
-        testv = load_txt(filename="123.dat", current_dir=None)
+        test_v = load_txt(filename="123.dat", current_dir=None)
         mock_open.assert_called_once_with("123.dat", "r", encoding="utf8")
         mock_read.assert_called_once()
         mock_open.reset_mock()
         mock_read.rset_mock()
-        testv = load_txt(filename="123.dat", current_dir="d")
+        test_v = load_txt(filename="123.dat", current_dir="d")
         mock_open.assert_called_once_with("d/123.dat", "r", encoding="utf8")
-        self.assertEqual(testv, "hzu")
+        self.assertEqual(test_v, "hzu")
 
     @staticmethod
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "subprocess.call")
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "sys")
-    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing." "os.path.exists")
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.subprocess.call")
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.sys")
+    @patch("mantidqtinterfaces.dns_powder_tof.helpers.file_processing.os.path.exists")
     def test_open_editor(mock_path_exist, mock_sys, mock_subprocess):
         mock_path_exist.return_value = False
         mock_sys.platform = "win32"
@@ -147,13 +147,13 @@ class DNSfile_processingTest(unittest.TestCase):
         open_editor("123.d_dat", current_dir="d")
         mock_subprocess.assert_called_with(["open", "d/123.d_dat"])
         mock_subprocess.reset_mock()
-        mock_sys.platform = "nonesense"
+        mock_sys.platform = "nonsense"
         open_editor("123.d_dat", current_dir="d")
         mock_subprocess.assert_not_called()
 
     def test_get_path_and_prefix(self):
-        testv = get_path_and_prefix("C:/abc/123.d_dat")
-        self.assertEqual(testv, ("C:/abc", "123.d_dat"))
+        test_v = get_path_and_prefix("C:/abc/123.d_dat")
+        self.assertEqual(test_v, ("C:/abc", "123.d_dat"))
 
 
 if __name__ == "__main__":

@@ -160,7 +160,7 @@ def get_dataset():
     return new_list
 
 
-def dns_file(_dummy, filename):
+def dns_file(_dummy, filename, _pol_table):
     elm = [dataset for dataset in dataset_dic if dataset["filename"] == filename][0]
     dataset = ObjectDict()
     for key, value in elm.items():

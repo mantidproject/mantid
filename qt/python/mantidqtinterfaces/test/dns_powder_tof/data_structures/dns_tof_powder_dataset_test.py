@@ -52,7 +52,7 @@ class DNSTofDatasetTest(unittest.TestCase):
     def test_format_dataset(self):
         test_v = self.ds.format_dataset()
         self.assertEqual(
-            test_v, "{\n    '4p1K_map': {'path': '" + os.path.join("C:/123", "service") + "',\n               " "  -9.00: [788058]},\n}"
+            test_v, "{\n    '4p1K_map': {'path': '" + "C:/123/service_******.d_dat" + "',\n                 -9.00: [788058]},\n}"
         )
 
     def test__get_nb_banks(self):
@@ -94,7 +94,7 @@ class DNSTofDatasetTest(unittest.TestCase):
         entry = self.full_data[0]
         path = "123"
         test_v = dns_tof_powder_dataset._get_data_path(entry, path)
-        self.assertEqual(test_v, os.path.join("123", "service"))
+        self.assertEqual(test_v, "123/service_******.d_dat")
 
     def test__convert_list_to_range(self):
         test_v = dns_tof_powder_dataset._convert_list_to_range(get_fake_tof_data_dic())
@@ -118,7 +118,7 @@ class DNSTofDatasetTest(unittest.TestCase):
         path = "a"
         test_v = self.ds.create_dataset(data, path)
         self.assertIsInstance(test_v, dict)
-        self.assertEqual(test_v, {"4p1K_map": {-9.0: "[788058]", "path": os.path.join("a", "service")}})
+        self.assertEqual(test_v, {"4p1K_map": {-9.0: "[788058]", "path": "a/service_******.d_dat"}})
 
     def test__create_new_datatype(self):
         entry = self.full_data[0]
@@ -129,7 +129,7 @@ class DNSTofDatasetTest(unittest.TestCase):
         dns_tof_powder_dataset._create_new_datatype(dataset, datatype, det_rot, entry, path)
         self.assertTrue("xv" in dataset)
         self.assertEqual(dataset["xv"][-5], [788058])
-        self.assertEqual(dataset["xv"]["path"], os.path.join("C:/123", "service"))
+        self.assertEqual(dataset["xv"]["path"], os.path.join("C:/123", "service_" + "*" * len("788058") + ".d_dat"))
 
     def test__get_closest_bank_key(self):
         test_v = dns_tof_powder_dataset._get_closest_bank_key({0: 1, 2: 1}, 0.1)
