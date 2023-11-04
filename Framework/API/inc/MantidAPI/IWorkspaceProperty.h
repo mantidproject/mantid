@@ -13,6 +13,12 @@
 
 namespace Mantid {
 namespace API {
+
+/// Enumeration for a mandatory/optional property
+struct PropertyMode {
+  enum Type { Mandatory, Optional };
+};
+
 /** An interface that is implemented by WorkspaceProperty.
     Used for non templated workspace operations.
 
@@ -28,6 +34,8 @@ public:
   virtual void clear() = 0;
   /// Get a pointer to the workspace
   virtual Workspace_sptr getWorkspace() const = 0;
+  /// Set the property mode as Mandatory or Optional
+  virtual void setPropertyMode(const PropertyMode::Type &optional) = 0;
   /// Is the input workspace property optional (can be blank)?
   virtual bool isOptional() const = 0;
   /// Will the workspace be locked when starting an algorithm?

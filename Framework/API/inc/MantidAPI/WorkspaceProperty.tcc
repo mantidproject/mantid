@@ -190,6 +190,13 @@ std::string WorkspaceProperty<TYPE>::setDataItem(const std::shared_ptr<Kernel::D
   return isValid();
 }
 
+/** Set the property mode of the property e.g. Mandatory or Optional
+ *  @param optional :: Property mode Mandatory or Optional
+ */
+template <typename TYPE> void WorkspaceProperty<TYPE>::setPropertyMode(const PropertyMode::Type &optional) {
+  m_optional = optional;
+}
+
 /** Checks whether the entered workspace is valid.
  *  To be valid, in addition to satisfying the conditions of any validators,
  *  an output property must not have an empty name and an input one must point
