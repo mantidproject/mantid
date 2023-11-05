@@ -333,8 +333,9 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         W = np.eye(3)
         UBW = np.eye(3)
-        UB = np.eye(3)
+        _hkl = False
         if self.getProperty("Frame").value == "HKL":
+            _hkl = True
             W[:, 0] = self.getProperty("Uproj").value
             W[:, 1] = self.getProperty("Vproj").value
             W[:, 2] = self.getProperty("Wproj").value
@@ -436,7 +437,10 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             S[:, 0] = sym_op.transformHKL([1, 0, 0])
             S[:, 1] = sym_op.transformHKL([0, 1, 0])
             S[:, 2] = sym_op.transformHKL([0, 0, 1])
-            UBSW = np.linalg.multi_dot([UB, S, W])
+            if _hkl:
+                UBSW = np.linalg.multi_dot([UB, S, W])
+            else:
+                UBSW = S
             for n in range(number_of_runs):
                 R = inWS.getExperimentInfo(0).run().getGoniometer(n).getR()
                 R = np.dot(s1offset, R)
