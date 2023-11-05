@@ -138,6 +138,12 @@ void FindPeaksConvolve::storeClassProperties() {
   m_findHighestDatapointInPeak = getProperty("FindHighestDataPointInPeak");
   m_iOverSigmaThreshold = getProperty("IOverSigmaThreshold");
   m_mergeNearbyPeaks = getProperty("MergeNearbyPeaks");
+  // can we assume all spectra are either centred or not?
+  if (m_inputDataWS->x(0).size() != m_inputDataWS->y(0).size()) {
+    m_centreBins = true;
+  } else {
+    m_centreBins = false;
+  }
 
   int wsIndex = getProperty("WorkspaceIndex");
   if (wsIndex == EMPTY_INT()) {
@@ -175,18 +181,10 @@ void FindPeaksConvolve::performConvolution(const size_t dataIndex) {
       createSmoothKernel(static_cast<size_t>(std::ceil(static_cast<double>(kernelBinCount) / 2.0)))};
   const Tensor1D iOverSigConvOutput{(yConvOutput / eConvOutput).convolve(smoothKernel, dims)};
 
-  std::unique_ptr<EigenMap_const> xDataPostConv;
-  Eigen::VectorXd xDataCentredBins;
-  if (xData->size() != static_cast<size_t>(yData.size())) {
-    xDataCentredBins = centreBinsXData(xData);
-    xDataPostConv = std::make_unique<EigenMap_const>(EigenMap_const{xDataCentredBins.data(), xDataCentredBins.size()});
-  } else {
-    xDataPostConv = std::make_unique<EigenMap_const>(EigenMap_const(&xData->front(), xData->size()));
-  }
-  extractPeaks(dataIndex, iOverSigConvOutput, *xDataPostConv, yData, kernelBinCount / 2);
+  extractPeaks(dataIndex, iOverSigConvOutput, xData, yData, kernelBinCount / 2);
 
   if (m_createIntermediateWorkspaces) {
-    createIntermediateWorkspaces(dataIndex, kernel, iOverSigConvOutput, *xDataPostConv);
+    createIntermediateWorkspaces(dataIndex, kernel, iOverSigConvOutput, xData);
   }
 }
 
@@ -232,8 +230,9 @@ Eigen::VectorXd FindPeaksConvolve::centreBinsXData(const HistogramData::Histogra
   return xDataVec;
 }
 
-void FindPeaksConvolve::extractPeaks(const size_t dataIndex, const Tensor1D &iOverSigma, const EigenMap_const &xData,
-                                     const TensorMap_const &yData, const size_t peakExtentBinNumber) {
+void FindPeaksConvolve::extractPeaks(const size_t dataIndex, const Tensor1D &iOverSigma,
+                                     const HistogramData::HistogramX *xData, const TensorMap_const &yData,
+                                     const size_t peakExtentBinNumber) {
   int dataPointCount{0};
   std::pair<int, double> dataRegionMax{0, 0.0};
   std::vector<FindPeaksConvolve::PeakResult> peakCentres;
@@ -250,8 +249,8 @@ void FindPeaksConvolve::extractPeaks(const size_t dataIndex, const Tensor1D &iOv
     } else if (iOverSigma(i) <= 0 || !m_mergeNearbyPeaks || i == iOverSigma.size() - 1) {
       if (dataPointCount >= 2) {
         size_t rawPeakIndex{findPeakInRawData(dataRegionMax.first, yData, peakExtentBinNumber)};
-        peakCentres.push_back(
-            FindPeaksConvolve::PeakResult{xData[rawPeakIndex], yData.data()[rawPeakIndex], dataRegionMax.second});
+        peakCentres.push_back(FindPeaksConvolve::PeakResult{getXDataValue(xData, rawPeakIndex),
+                                                            yData.data()[rawPeakIndex], dataRegionMax.second});
       }
       if (dataPointCount > 0) {
         dataPointCount = 0;
@@ -260,6 +259,14 @@ void FindPeaksConvolve::extractPeaks(const size_t dataIndex, const Tensor1D &iOv
     }
   }
   storePeakResults(dataIndex, peakCentres);
+}
+
+double FindPeaksConvolve::getXDataValue(const HistogramData::HistogramX *xData, const size_t xIndex) {
+  if (m_centreBins) {
+    return (xData->rawData()[xIndex] + xData->rawData()[xIndex + 1]) / 2;
+  } else {
+    return xData->rawData()[xIndex];
+  }
 }
 
 void FindPeaksConvolve::storePeakResults(const size_t dataIndex,
@@ -315,11 +322,21 @@ Eigen::VectorXd FindPeaksConvolve::generateNormalPDF(const int peakExtentBinNumb
 }
 
 void FindPeaksConvolve::createIntermediateWorkspaces(const size_t dataIndex, const Tensor1D &kernel,
-                                                     const Tensor1D &iOverSigma, const EigenMap_const &xData) {
+                                                     const Tensor1D &iOverSigma,
+                                                     const HistogramData::HistogramX *xData) {
+  std::unique_ptr<EigenMap_const> xDataMap;
+  Eigen::VectorXd xDataCentredBins;
+  if (m_centreBins) {
+    xDataCentredBins = centreBinsXData(xData);
+    xDataMap = std::make_unique<EigenMap_const>(EigenMap_const{xDataCentredBins.data(), xDataCentredBins.size()});
+  } else {
+    xDataMap = std::make_unique<EigenMap_const>(EigenMap_const(&xData->front(), xData->size()));
+  }
+
   API::Algorithm_sptr alg{createChildAlgorithm("CreateWorkspace")};
 
   alg->setProperty("OutputWorkspace", "iOverSigma");
-  alg->setProperty("DataX", std::vector<double>(xData.data(), xData.data() + xData.rows()));
+  alg->setProperty("DataX", std::vector<double>(xDataMap->data(), xDataMap->data() + xDataMap->rows()));
   alg->setProperty("DataY", std::vector<double>(iOverSigma.data(), iOverSigma.data() + iOverSigma.size()));
   alg->execute();
   API::MatrixWorkspace_sptr algOutput = alg->getProperty("OutputWorkspace");

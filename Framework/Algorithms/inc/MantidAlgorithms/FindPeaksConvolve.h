@@ -56,6 +56,7 @@ private:
   bool m_findHighestDatapointInPeak;
   double m_iOverSigmaThreshold;
   bool m_mergeNearbyPeaks;
+  bool m_centreBins;
 
   void init() override;
   void exec() override;
@@ -69,14 +70,15 @@ private:
   Tensor1D createKernel(const int binCount);
   Tensor1D createSmoothKernel(const size_t kernelSize);
   size_t getKernelBinCount(const HistogramData::HistogramX *xData) const;
+  double getXDataValue(const HistogramData::HistogramX *xData, const size_t xIndex);
   Eigen::VectorXd centreBinsXData(const HistogramData::HistogramX *xData);
-  void extractPeaks(const size_t dataIndex, const Tensor1D &iOverSigma, const EigenMap_const &xData,
+  void extractPeaks(const size_t dataIndex, const Tensor1D &iOverSigma, const HistogramData::HistogramX *xData,
                     const TensorMap_const &yData, const size_t peakExtentBinNumber);
   size_t findPeakInRawData(const int xIndex, const TensorMap_const &yData, size_t peakExtentBinNumber);
   void storePeakResults(const size_t dataIndex, std::vector<FindPeaksConvolve::PeakResult> &peakCentres);
   Eigen::VectorXd generateNormalPDF(const int peakExtentBinNumber);
   void createIntermediateWorkspaces(const size_t dataIndex, const Tensor1D &kernel, const Tensor1D &iOverSigma,
-                                    const EigenMap_const &xData);
+                                    const HistogramData::HistogramX *xData);
   void outputResults();
 };
 
