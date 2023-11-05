@@ -491,6 +491,7 @@ set(TEST_FILES
     WorkspaceNearestNeighboursTest.h
     WorkspaceOpOverloadsTest.h
     WorkspacePropertyTest.h
+    WorkspacePropertyUtilsTest.h
     WorkspaceUnitValidatorTest.h
 )
 

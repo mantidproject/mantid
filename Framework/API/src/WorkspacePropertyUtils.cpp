@@ -36,7 +36,8 @@ void setPropertyModeForWorkspaceProperties(Mantid::Kernel::Property *prop,
 namespace Mantid {
 namespace API {
 
-void setPropertyModeForWorkspaceProperty(Mantid::Kernel::Property *prop, const PropertyMode::Type &optional) {
+void MANTID_API_DLL setPropertyModeForWorkspaceProperty(Mantid::Kernel::Property *prop,
+                                                        const PropertyMode::Type &optional) {
   setPropertyModeForWorkspaceProperties<API::Workspace, API::MatrixWorkspace, API::HistoWorkspace, API::WorkspaceGroup,
                                         API::IEventWorkspace, API::IMDHistoWorkspace, API::IPeaksWorkspace,
                                         API::ITableWorkspace>(prop, optional);

@@ -6,14 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DllConfig.h"
+
 #include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/Property.h"
 
 namespace Mantid {
 namespace API {
 
-void setPropertyModeForWorkspaceProperty(Mantid::Kernel::Property *prop, const PropertyMode::Type &optional);
+MANTID_API_DLL void setPropertyModeForWorkspaceProperty(Mantid::Kernel::Property *prop,
+                                                        const PropertyMode::Type &optional);
 
 }
 } // namespace Mantid
