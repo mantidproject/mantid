@@ -234,21 +234,20 @@ Eigen::VectorXd FindPeaksConvolve::centreBinsXData(const HistogramData::Histogra
 
 void FindPeaksConvolve::extractPeaks(const size_t dataIndex, const Tensor1D &iOverSigma, const EigenMap_const &xData,
                                      const TensorMap_const &yData, const size_t peakExtentBinNumber) {
-  auto filteredData = filterDataForSignificantPoints(iOverSigma);
   int dataPointCount{0};
   std::pair<int, double> dataRegionMax{0, 0.0};
   std::vector<FindPeaksConvolve::PeakResult> peakCentres;
-  for (const auto &dataPoint : filteredData) {
-    if (dataPoint.second != 0) {
+  for (auto i{0}; i < iOverSigma.size(); i++) {
+    if (iOverSigma(i) > m_iOverSigmaThreshold) {
       if (dataPointCount == 0) {
-        dataRegionMax = dataPoint;
+        dataRegionMax = std::make_pair(i, iOverSigma(i));
       } else {
-        if (dataPoint.second > dataRegionMax.second) {
-          dataRegionMax = dataPoint;
+        if (iOverSigma.data()[i] > dataRegionMax.second) {
+          dataRegionMax = {i, iOverSigma(i)};
         }
       }
       dataPointCount++;
-    } else {
+    } else if (iOverSigma(i) <= 0 || !m_mergeNearbyPeaks || i == iOverSigma.size() - 1) {
       if (dataPointCount >= 2) {
         size_t rawPeakIndex{findPeakInRawData(dataRegionMax.first, yData, peakExtentBinNumber)};
         peakCentres.push_back(
@@ -272,20 +271,6 @@ void FindPeaksConvolve::storePeakResults(const size_t dataIndex,
     }
     m_peakResults[dataIndex] = std::move(peakCentres);
   }
-}
-
-std::vector<std::pair<const int, const double>>
-FindPeaksConvolve::filterDataForSignificantPoints(const Tensor1D &iOverSigma) {
-  std::vector<std::pair<const int, const double>> closedData;
-  for (auto i{0}; i < iOverSigma.size(); i++) {
-    if (iOverSigma(i) > m_iOverSigmaThreshold) {
-      closedData.emplace_back(i, iOverSigma(i));
-    } else if (iOverSigma(i) <= 0 || !m_mergeNearbyPeaks) {
-      closedData.emplace_back(i, 0);
-    }
-  }
-  closedData.emplace_back(static_cast<int>(closedData.size()), 0); // Guarentee data region close
-  return closedData;
 }
 
 size_t FindPeaksConvolve::findPeakInRawData(const int xIndex, const TensorMap_const &yData,

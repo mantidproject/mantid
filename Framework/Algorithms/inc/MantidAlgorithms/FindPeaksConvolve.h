@@ -72,7 +72,6 @@ private:
   Eigen::VectorXd centreBinsXData(const HistogramData::HistogramX *xData);
   void extractPeaks(const size_t dataIndex, const Tensor1D &iOverSigma, const EigenMap_const &xData,
                     const TensorMap_const &yData, const size_t peakExtentBinNumber);
-  std::vector<std::pair<const int, const double>> filterDataForSignificantPoints(const Tensor1D &iOverSigma);
   size_t findPeakInRawData(const int xIndex, const TensorMap_const &yData, size_t peakExtentBinNumber);
   void storePeakResults(const size_t dataIndex, std::vector<FindPeaksConvolve::PeakResult> &peakCentres);
   Eigen::VectorXd generateNormalPDF(const int peakExtentBinNumber);
