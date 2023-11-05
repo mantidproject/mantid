@@ -349,6 +349,7 @@ void FindPeaksConvolve::createIntermediateWorkspaces(const size_t dataIndex, con
   alg->setProperty("OutputWorkspace", "kernel");
   alg->setProperty("DataX", std::move(xKernelData));
   alg->setProperty("DataY", std::vector<double>(kernel.data(), kernel.data() + kernel.size()));
+  alg->execute();
   API::MatrixWorkspace_sptr algKernelOutput = alg->getProperty("OutputWorkspace");
   API::AnalysisDataService::Instance().addOrReplace(
       m_inputDataWS->getName() + "_kernel_" + std::to_string(m_specNums[dataIndex]), algKernelOutput);

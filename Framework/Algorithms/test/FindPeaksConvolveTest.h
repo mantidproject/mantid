@@ -100,6 +100,22 @@ public:
     assert_peak_centres_equal(resultWs, expectedPeakCentres);
   }
 
+  void test_execCreateIntermediateWorkspaces() {
+    auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
+    alg->setProperty("EstimatedPeakExtentNBins", "25");
+    alg->setProperty("IOverSigmaThreshold", "3");
+    alg->setProperty("CreateIntermediateWorkspaces", true);
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+    size_t matches{0};
+    for (const auto &name : Mantid::API::AnalysisDataService::Instance().getObjectNames()) {
+      if (name == "FindPeaksConvolveTest_input_iOverSigma_0" || name == "FindPeaksConvolveTest_input_kernel_0") {
+        matches++;
+      }
+    }
+    TS_ASSERT(matches == 2);
+  }
+
   void test_execHighestDataPoint() {
     auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
     alg->setProperty("EstimatedPeakExtent", "100");
