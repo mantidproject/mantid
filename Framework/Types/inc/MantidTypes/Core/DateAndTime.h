@@ -89,6 +89,8 @@ public:
   DateAndTime operator-(const int64_t nanosec) const;
   DateAndTime &operator-=(const int64_t nanosec);
 
+  DateAndTime operator+(const uint64_t nanosec) const;
+
   DateAndTime operator+(const time_duration &td) const;
   DateAndTime &operator+=(const time_duration &td);
   DateAndTime operator-(const time_duration &td) const;
@@ -151,6 +153,10 @@ inline DateAndTime::DateAndTime(const int64_t total_nanoseconds)
  * @return modified DateAndTime.
  */
 inline DateAndTime DateAndTime::operator+(const int64_t nanosec) const { return DateAndTime(_nanoseconds + nanosec); }
+
+inline DateAndTime DateAndTime::operator+(const uint64_t nanosec) const {
+  return DateAndTime(_nanoseconds + static_cast<int64_t>(nanosec));
+}
 
 /** + operator to add time.
  * @param sec :: duration to add
