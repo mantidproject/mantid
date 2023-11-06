@@ -7,9 +7,9 @@
 #pragma once
 #include <string>
 
+#include "Analysis/IIndirectFitDataModel.h"
+#include "Analysis/IndirectFitData.h"
 #include "DllConfig.h"
-#include "IIndirectFitDataModel.h"
-#include "IndirectFitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"

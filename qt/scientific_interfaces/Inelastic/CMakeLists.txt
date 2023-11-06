@@ -1,5 +1,6 @@
 set(SRC_FILES
     Analysis/ConvFitAddWorkspaceDialog.cpp
+    Analysis/ConvFitModel.cpp
     Analysis/ConvFitDataView.cpp
     Analysis/ConvFitDataPresenter.cpp
     Analysis/IndirectDataAnalysis.cpp
@@ -14,6 +15,51 @@ set(SRC_FILES
     Analysis/FqFitModel.cpp
     Analysis/IqtFitModel.cpp
     Analysis/MSDFitModel.cpp
+    Analysis/IDAFunctionParameterEstimation.cpp
+    Analysis/FitStatusWidget.cpp
+    Analysis/FunctionTemplateBrowser.cpp
+    Analysis/IndirectDockWidgetArea.cpp
+    Analysis/IndirectEditResultsDialog.cpp
+    Analysis/IndirectFitData.cpp
+    Analysis/IndirectFitDataModel.cpp
+    Analysis/IndirectFitDataPresenter.cpp
+    Analysis/IndirectFitDataView.cpp
+    Analysis/IndirectFitOutput.cpp
+    Analysis/IndirectFitOutputOptionsModel.cpp
+    Analysis/IndirectFitOutputOptionsPresenter.cpp
+    Analysis/IndirectFitOutputOptionsView.cpp
+    Analysis/IndirectFitPlotModel.cpp
+    Analysis/IndirectFitPlotPresenter.cpp
+    Analysis/IndirectFitPlotView.cpp
+    Analysis/IndirectFitPropertyBrowser.cpp
+    Analysis/IndirectFittingModel.cpp
+    IndirectFunctionBrowser/ConvTypes.cpp
+    IndirectFunctionBrowser/ConvFunctionModel.cpp
+    IndirectFunctionBrowser/ConvTemplateBrowser.cpp
+    IndirectFunctionBrowser/ConvTemplatePresenter.cpp
+    IndirectFunctionBrowser/IqtFunctionModel.cpp
+    IndirectFunctionBrowser/IqtTemplateBrowser.cpp
+    IndirectFunctionBrowser/IqtTemplatePresenter.cpp
+    IndirectFunctionBrowser/SingleFunctionTemplateModel.cpp
+    IndirectFunctionBrowser/SingleFunctionTemplateBrowser.cpp
+    IndirectFunctionBrowser/SingleFunctionTemplatePresenter.cpp
+    Manipulation/InelasticDataManipulation.cpp
+    Manipulation/InelasticDataManipulationElwinTab.cpp
+    Manipulation/InelasticDataManipulationElwinTabModel.cpp
+    Manipulation/InelasticDataManipulationElwinTabView.cpp
+    Manipulation/InelasticDataManipulationIqtTab.cpp
+    Manipulation/InelasticDataManipulationIqtTabView.cpp
+    Manipulation/InelasticDataManipulationIqtTabModel.cpp
+    Manipulation/InelasticDataManipulationMomentsTab.cpp
+    Manipulation/InelasticDataManipulationMomentsTabModel.cpp
+    Manipulation/InelasticDataManipulationMomentsTabView.cpp
+    Manipulation/InelasticDataManipulationTab.cpp
+    Manipulation/InelasticDataManipulationSqwTab.cpp
+    Manipulation/InelasticDataManipulationSqwTabModel.cpp
+    Manipulation/InelasticDataManipulationSqwTabView.cpp
+    Manipulation/InelasticDataManipulationSymmetriseTab.cpp
+    Manipulation/InelasticDataManipulationSymmetriseTabView.cpp
+    Manipulation/InelasticDataManipulationSymmetriseTabModel.cpp
 )
 
 set(MOC_FILES
@@ -29,11 +75,85 @@ set(MOC_FILES
     Analysis/FqFitAddWorkspaceDialog.h
     Analysis/FqFitDataPresenter.h
     Analysis/FqFitDataView.h
+    Analysis/FitStatusWidget.h
+    Analysis/FunctionTemplateBrowser.h
+    Analysis/IIndirectFitDataView.h
+    Analysis/IIndirectFitOutputOptionsView.h
+    Analysis/IIndirectFitPlotView.h
+    Analysis/IndirectDockWidgetArea.h
+    Analysis/IndirectEditResultsDialog.h
+    Analysis/IndirectFitDataPresenter.h
+    Analysis/IndirectFitDataView.h
+    Analysis/IndirectFitOutputOptionsPresenter.h
+    Analysis/IndirectFitOutputOptionsView.h
+    Analysis/IndirectFitPlotView.h
+    Analysis/IndirectFitPlotPresenter.h
+    Analysis/IndirectFitPropertyBrowser.h
+    IndirectFunctionBrowser/ConvTemplateBrowser.h
+    IndirectFunctionBrowser/ConvTemplatePresenter.h
+    IndirectFunctionBrowser/IqtTemplateBrowser.h
+    IndirectFunctionBrowser/IqtTemplatePresenter.h
+    IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h
+    IndirectFunctionBrowser/SingleFunctionTemplatePresenter.h
+    Manipulation/InelasticDataManipulation.h
+    Manipulation/InelasticDataManipulationElwinTab.h
+    Manipulation/InelasticDataManipulationElwinTabView.h
+    Manipulation/InelasticDataManipulationIqtTab.h
+    Manipulation/InelasticDataManipulationIqtTabView.h
+    Manipulation/InelasticDataManipulationMomentsTab.h
+    Manipulation/InelasticDataManipulationMomentsTabView.h
+    Manipulation/InelasticDataManipulationSqwTab.h
+    Manipulation/InelasticDataManipulationSqwTabView.h
+    Manipulation/InelasticDataManipulationSymmetriseTab.h
+    Manipulation/InelasticDataManipulationSymmetriseTabView.h
+    Manipulation/InelasticDataManipulationTab.h
 )
 
-set(INC_FILES DllConfig.h PrecompiledHeader.h Analysis/FqFitModel.h Analysis/IqtFitModel.h Analysis/MSDFitModel.h)
+set(INC_FILES
+    DllConfig.h
+    PrecompiledHeader.h
+    Analysis/IDAFunctionParameterEstimation.h
+    Analysis/FqFitModel.h
+    Analysis/IFQFitObserver.h
+    Analysis/IqtFitModel.h
+    Analysis/MSDFitModel.h
+    Analysis/ConvFitModel.h
+    Analysis/FQFitConstants.h
+    Analysis/IIndirectFitDataModel.h
+    Analysis/IndirectFitDataModel.h
+    Analysis/IIndirectFitOutput.h
+    Analysis/IIndirectFitOutputOptionsModel.h
+    Analysis/IIndirectFittingModel.h
+    Analysis/IndirectFitData.h
+    Analysis/IndirectFitOutput.h
+    Analysis/IndirectFitOutputOptionsModel.h
+    Analysis/IndirectFitPlotModel.h
+    Analysis/IndirectFittingModel.h
+    Analysis/ParameterEstimation.h
+    IndirectFunctionBrowser/ConvFunctionModel.h
+    Manipulation/InelasticDataManipulationElwinTabModel.h
+    Manipulation/InelasticDataManipulationIqtTabModel.h
+    Manipulation/InelasticDataManipulationMomentsTabModel.h
+    Manipulation/InelasticDataManipulationSqwTabModel.h
+    Manipulation/InelasticDataManipulationSymmetriseTabModel.h
+)
 
-set(UI_FILES Analysis/ConvFitAddWorkspaceDialog.ui Analysis/FqFitAddWorkspaceDialog.ui Analysis/IndirectDataAnalysis.ui)
+set(UI_FILES
+    Analysis/ConvFitAddWorkspaceDialog.ui
+    Analysis/FqFitAddWorkspaceDialog.ui
+    Analysis/IndirectDataAnalysis.ui
+    Analysis/IndirectEditResultsDialog.ui
+    Analysis/IndirectFitDataView.ui
+    Analysis/IndirectFitOutputOptions.ui
+    Analysis/IndirectFitTab.ui
+    Analysis/IndirectSpectrumSelector.ui
+    Manipulation/InelasticDataManipulation.ui
+    Manipulation/InelasticDataManipulationElwinTab.ui
+    Manipulation/InelasticDataManipulationIqtTab.ui
+    Manipulation/InelasticDataManipulationMomentsTab.ui
+    Manipulation/InelasticDataManipulationSqwTab.ui
+    Manipulation/InelasticDataManipulationSymmetriseTab.ui
+)
 
 set(RES_FILES ../Indirect/IndirectInterfaceResources.qrc)
 

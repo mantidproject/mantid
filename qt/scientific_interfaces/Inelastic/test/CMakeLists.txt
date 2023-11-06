@@ -1,6 +1,28 @@
 # Testing
-set(TEST_FILES IqtFitModelTest.h FqFitModelTest.h FqFitDataPresenterTest.h ConvFitDataPresenterTest.h
-               IndirectDataAnalysisTabTest.h
+set(TEST_FILES
+    ConvFitModelTest.h
+    ConvFunctionModelTest.h
+    IDAFunctionParameterEstimationTest.h
+    IqtFitModelTest.h
+    FqFitModelTest.h
+    FqFitDataPresenterTest.h
+    ConvFitDataPresenterTest.h
+    IndirectDataAnalysisTabTest.h
+    IndirectFitDataPresenterTest.h
+    IndirectFitDataTest.h
+    IndirectFitDataModelTest.h
+    IndirectFitOutputTest.h
+    IndirectFitOutputOptionsModelTest.h
+    IndirectFitOutputOptionsPresenterTest.h
+    IndirectFitPlotModelTest.h
+    IndirectFitPlotPresenterTest.h
+    IndirectFitPropertyBrowserTest.h
+    IndirectFittingModelTest.h
+    InelasticDataManipulationElwinTabModelTest.h
+    InelasticDataManipulationIqtTabModelTest.h
+    InelasticDataManipulationMomentsTabModelTest.h
+    InelasticDataManipulationSqwTabModelTest.h
+    InelasticDataManipulationSymmetriseTabModelTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesInelasticTestInitialization.h)

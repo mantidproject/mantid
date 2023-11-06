@@ -5,10 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "ui_IndirectDataAnalysis.h"
-
+#include "DllConfig.h"
 #include "IndirectInterface.h"
 #include "IndirectTab.h"
+#include "ui_IndirectDataAnalysis.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -29,7 +29,7 @@ class IndirectDataAnalysisTab;
  *and controls
  * its tabs.
  */
-class IndirectDataAnalysis final : public IndirectInterface {
+class MANTIDQT_INELASTIC_DLL IndirectDataAnalysis final : public IndirectInterface {
   Q_OBJECT
 
 public:
