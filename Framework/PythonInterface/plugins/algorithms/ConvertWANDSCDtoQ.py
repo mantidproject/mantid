@@ -332,13 +332,15 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             bkg_data_array = bkgWS.getSignalArray()
 
         W = np.eye(3)
+        W[:, 0] = self.getProperty("Uproj").value
+        W[:, 1] = self.getProperty("Vproj").value
+        W[:, 2] = self.getProperty("Wproj").value
+
         UBW = np.eye(3)
         _hkl = False
         if self.getProperty("Frame").value == "HKL":
             _hkl = True
-            W[:, 0] = self.getProperty("Uproj").value
-            W[:, 1] = self.getProperty("Vproj").value
-            W[:, 2] = self.getProperty("Wproj").value
+
             ubWS = self.getProperty("UBWorkspace").value
             if ubWS:
                 try:
@@ -440,7 +442,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             if _hkl:
                 UBSW = np.linalg.multi_dot([UB, S, W])
             else:
-                UBSW = S
+                UBSW = np.dot(S, W)
             for n in range(number_of_runs):
                 R = inWS.getExperimentInfo(0).run().getGoniometer(n).getR()
                 R = np.dot(s1offset, R)
