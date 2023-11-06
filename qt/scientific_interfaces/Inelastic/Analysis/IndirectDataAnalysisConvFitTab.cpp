@@ -7,8 +7,8 @@
 #include "IndirectDataAnalysisConvFitTab.h"
 #include "ConvFitAddWorkspaceDialog.h"
 #include "ConvFitDataPresenter.h"
+#include "FunctionBrowser/ConvTemplateBrowser.h"
 #include "IndirectFitPlotView.h"
-#include "IndirectFunctionBrowser/ConvTemplateBrowser.h"
 
 #include "MantidAPI/FunctionFactory.h"
 

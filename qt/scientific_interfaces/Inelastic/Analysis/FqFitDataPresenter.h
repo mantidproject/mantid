@@ -8,9 +8,9 @@
 
 #include "FqFitAddWorkspaceDialog.h"
 #include "FqFitDataView.h"
+#include "FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "IFQFitObserver.h"
 #include "IndirectFitDataPresenter.h"
-#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "Notifier.h"
 
 #include <QComboBox>

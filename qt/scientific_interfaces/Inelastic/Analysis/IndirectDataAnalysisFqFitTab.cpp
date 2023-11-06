@@ -10,7 +10,7 @@
 #include "FqFitModel.h"
 #include "IDAFunctionParameterEstimation.h"
 
-#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
+#include "FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"

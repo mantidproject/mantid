@@ -113,7 +113,6 @@ set(UI_FILES
     IndirectCorrections.ui
     IndirectDataReduction.ui
     IndirectDiffractionReduction.ui
-    IndirectFitPreviewPlot.ui
     IndirectInstrumentConfig.ui
     IndirectInterfaceSettings.ui
     IndirectMolDyn.ui

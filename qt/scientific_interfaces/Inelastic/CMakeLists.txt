@@ -33,16 +33,16 @@ set(SRC_FILES
     Analysis/IndirectFitPlotView.cpp
     Analysis/IndirectFitPropertyBrowser.cpp
     Analysis/IndirectFittingModel.cpp
-    IndirectFunctionBrowser/ConvTypes.cpp
-    IndirectFunctionBrowser/ConvFunctionModel.cpp
-    IndirectFunctionBrowser/ConvTemplateBrowser.cpp
-    IndirectFunctionBrowser/ConvTemplatePresenter.cpp
-    IndirectFunctionBrowser/IqtFunctionModel.cpp
-    IndirectFunctionBrowser/IqtTemplateBrowser.cpp
-    IndirectFunctionBrowser/IqtTemplatePresenter.cpp
-    IndirectFunctionBrowser/SingleFunctionTemplateModel.cpp
-    IndirectFunctionBrowser/SingleFunctionTemplateBrowser.cpp
-    IndirectFunctionBrowser/SingleFunctionTemplatePresenter.cpp
+    Analysis/FunctionBrowser/ConvTypes.cpp
+    Analysis/FunctionBrowser/ConvFunctionModel.cpp
+    Analysis/FunctionBrowser/ConvTemplateBrowser.cpp
+    Analysis/FunctionBrowser/ConvTemplatePresenter.cpp
+    Analysis/FunctionBrowser/IqtFunctionModel.cpp
+    Analysis/FunctionBrowser/IqtTemplateBrowser.cpp
+    Analysis/FunctionBrowser/IqtTemplatePresenter.cpp
+    Analysis/FunctionBrowser/SingleFunctionTemplateModel.cpp
+    Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.cpp
+    Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp
     Manipulation/InelasticDataManipulation.cpp
     Manipulation/InelasticDataManipulationElwinTab.cpp
     Manipulation/InelasticDataManipulationElwinTabModel.cpp
@@ -89,12 +89,12 @@ set(MOC_FILES
     Analysis/IndirectFitPlotView.h
     Analysis/IndirectFitPlotPresenter.h
     Analysis/IndirectFitPropertyBrowser.h
-    IndirectFunctionBrowser/ConvTemplateBrowser.h
-    IndirectFunctionBrowser/ConvTemplatePresenter.h
-    IndirectFunctionBrowser/IqtTemplateBrowser.h
-    IndirectFunctionBrowser/IqtTemplatePresenter.h
-    IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h
-    IndirectFunctionBrowser/SingleFunctionTemplatePresenter.h
+    Analysis/FunctionBrowser/ConvTemplateBrowser.h
+    Analysis/FunctionBrowser/ConvTemplatePresenter.h
+    Analysis/FunctionBrowser/IqtTemplateBrowser.h
+    Analysis/FunctionBrowser/IqtTemplatePresenter.h
+    Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h
+    Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.h
     Manipulation/InelasticDataManipulation.h
     Manipulation/InelasticDataManipulationElwinTab.h
     Manipulation/InelasticDataManipulationElwinTabView.h
@@ -130,7 +130,7 @@ set(INC_FILES
     Analysis/IndirectFitPlotModel.h
     Analysis/IndirectFittingModel.h
     Analysis/ParameterEstimation.h
-    IndirectFunctionBrowser/ConvFunctionModel.h
+    Analysis/FunctionBrowser/ConvFunctionModel.h
     Manipulation/InelasticDataManipulationElwinTabModel.h
     Manipulation/InelasticDataManipulationIqtTabModel.h
     Manipulation/InelasticDataManipulationMomentsTabModel.h
@@ -144,6 +144,7 @@ set(UI_FILES
     Analysis/IndirectDataAnalysis.ui
     Analysis/IndirectEditResultsDialog.ui
     Analysis/IndirectFitDataView.ui
+    Analysis/IndirectFitPreviewPlot.ui
     Analysis/IndirectFitOutputOptions.ui
     Analysis/IndirectFitTab.ui
     Analysis/IndirectSpectrumSelector.ui

@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "IndirectFunctionBrowser/ConvFunctionModel.h"
+#include "Analysis/FunctionBrowser/ConvFunctionModel.h"
 #include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::API;

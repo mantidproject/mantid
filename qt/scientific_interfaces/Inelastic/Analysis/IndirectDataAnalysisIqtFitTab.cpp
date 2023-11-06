@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisIqtFitTab.h"
+#include "FunctionBrowser/IqtTemplateBrowser.h"
 #include "IndirectAddWorkspaceDialog.h"
 #include "IndirectFitPlotView.h"
-#include "IndirectFunctionBrowser/IqtTemplateBrowser.h"
 #include "IqtFitModel.h"
 
 #include "MantidAPI/FunctionFactory.h"

@@ -11,8 +11,8 @@
 
 #include "Analysis/FqFitDataPresenter.h"
 #include "Analysis/FqFitModel.h"
+#include "Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "IndirectFitDataView.h"
-#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"

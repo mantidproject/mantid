@@ -9,7 +9,7 @@
 #include "IndirectAddWorkspaceDialog.h"
 #include "MSDFitModel.h"
 
-#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
+#include "FunctionBrowser/SingleFunctionTemplateBrowser.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 

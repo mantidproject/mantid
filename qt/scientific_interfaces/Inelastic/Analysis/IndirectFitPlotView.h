@@ -24,7 +24,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 // Used for painting an Icon onto the handle of the splitter on workbench
-class MANTIDQT_INELASTIC_DLL SplitterHandle : public QSplitterHandle {
+class SplitterHandle : public QSplitterHandle {
 public:
   SplitterHandle(QIcon icon, Qt::Orientation orientation, QSplitter *parent = nullptr)
       : QSplitterHandle(orientation, parent), m_icon(std::move(icon)) {}
@@ -41,7 +41,7 @@ private:
   QIcon m_icon;
 };
 
-class MANTIDQT_INELASTIC_DLL Splitter : public QSplitter {
+class Splitter : public QSplitter {
 public:
   Splitter(QIcon icon, QWidget *parent = nullptr) : QSplitter(parent), m_icon(std::move(icon)) {}
 
