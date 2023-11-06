@@ -87,6 +87,16 @@ public:
     return wksp;
   }
 
+  void test_no_wksp() {
+    // test that not supplying any workspaces is a problem
+    SaveDiffCal alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", FILENAME));
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    TS_ASSERT(!alg.isExecuted());
+  }
+
   void test_no_cal_wksp() {
     Instrument_sptr inst = createInstrument();
     GroupingWorkspace_sptr groupWS = createGrouping(inst);
@@ -98,8 +108,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", groupWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaskWorkspace", maskWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", FILENAME));
-    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
-    TS_ASSERT(!alg.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // confirm that it exists
+    std::string filename = alg.getPropertyValue("Filename");
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // cleanup
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
   }
 
   void test_empty_cal_wksp() {
