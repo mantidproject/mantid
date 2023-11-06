@@ -12,6 +12,8 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/Logger.h"
 
+#include <optional>
+
 namespace Mantid {
 namespace DataHandling {
 class LoadMuonNexusV2NexusHelper;
@@ -40,8 +42,9 @@ public:
 
 protected:
   // Create grouping table
-  DataObjects::TableWorkspace_sptr createDetectorGroupingTable(const std::vector<detid_t> &specToLoad,
-                                                               const std::vector<detid_t> &grouping) const;
+  std::optional<DataObjects::TableWorkspace_sptr>
+  createDetectorGroupingTable(const std::vector<detid_t> &specToLoad,
+                              const std::optional<std::vector<detid_t>> &grouping) const;
   // Create deadtimes table
   DataObjects::TableWorkspace_sptr createDeadTimeTable(const std::vector<detid_t> &detectorsLoaded,
                                                        const std::vector<double> &deadTimes) const;
