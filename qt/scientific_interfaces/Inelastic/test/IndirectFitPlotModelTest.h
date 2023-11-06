@@ -9,9 +9,9 @@
 #include <cxxtest/TestSuite.h>
 #include <utility>
 
-#include "ConvFitModel.h"
-#include "IndirectFitOutput.h"
-#include "IndirectFitPlotModel.h"
+#include "Analysis/ConvFitModel.h"
+#include "Analysis/IndirectFitOutput.h"
+#include "Analysis/IndirectFitPlotModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"

@@ -10,8 +10,8 @@
 #include <gmock/gmock.h>
 
 #include "Analysis/ConvFitDataPresenter.h"
-#include "ConvFitModel.h"
-#include "IIndirectFitDataView.h"
+#include "Analysis/ConvFitModel.h"
+#include "Analysis/IIndirectFitDataView.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"

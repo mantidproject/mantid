@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "IDAFunctionParameterEstimation.h"
+#include "Analysis/IDAFunctionParameterEstimation.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 

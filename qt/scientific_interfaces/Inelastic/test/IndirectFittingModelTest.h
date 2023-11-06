@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <utility>
 
-#include "IndirectFittingModel.h"
+#include "Analysis/IndirectFittingModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"

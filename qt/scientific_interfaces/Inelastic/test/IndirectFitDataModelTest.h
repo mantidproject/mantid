@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataAnalysisTab.h"
-#include "IndirectFitDataModel.h"
+#include "Analysis/IndirectDataAnalysisTab.h"
+#include "Analysis/IndirectFitDataModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"

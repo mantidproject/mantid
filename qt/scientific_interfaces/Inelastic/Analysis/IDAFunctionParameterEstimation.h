@@ -13,7 +13,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class IDAFunctionParameterEstimation {
+class MANTIDQT_INELASTIC_DLL IDAFunctionParameterEstimation {
   using EstimationFunction =
       std::function<void(::Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData)>;
 

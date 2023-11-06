@@ -7,7 +7,7 @@
 #pragma once
 
 #include "IndirectDataValidationHelper.h"
-#include "InelasticDataManipulationSqwTabModel.h"
+#include "Manipulation/InelasticDataManipulationSqwTabModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>

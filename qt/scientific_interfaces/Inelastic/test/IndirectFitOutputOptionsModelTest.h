@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "IndirectFitOutputOptionsModel.h"
+#include "Analysis/IndirectFitOutputOptionsModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"

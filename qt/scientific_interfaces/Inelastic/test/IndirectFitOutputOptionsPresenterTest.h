@@ -9,10 +9,10 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IIndirectFitOutputOptionsModel.h"
-#include "IIndirectFitOutputOptionsView.h"
-#include "IndirectFitOutputOptionsPresenter.h"
-#include "IndirectFitOutputOptionsView.h"
+#include "Analysis/IIndirectFitOutputOptionsModel.h"
+#include "Analysis/IIndirectFitOutputOptionsView.h"
+#include "Analysis/IndirectFitOutputOptionsPresenter.h"
+#include "Analysis/IndirectFitOutputOptionsView.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"

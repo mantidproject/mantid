@@ -7,7 +7,7 @@
 #pragma once
 
 #include "IndirectDataValidationHelper.h"
-#include "InelasticDataManipulationIqtTabModel.h"
+#include "Manipulation/InelasticDataManipulationIqtTabModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"

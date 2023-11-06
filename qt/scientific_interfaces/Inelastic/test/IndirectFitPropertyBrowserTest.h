@@ -10,8 +10,9 @@
 #include <gmock/gmock.h>
 #include <utility>
 
-#include "FunctionTemplateBrowser.h"
-#include "IndirectFitPropertyBrowser.h"
+#include "Analysis/FunctionTemplateBrowser.h"
+#include "Analysis/IndirectFitPropertyBrowser.h"
+#include "Analysis/ParameterEstimation.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -24,7 +25,6 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
-#include "ParameterEstimation.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

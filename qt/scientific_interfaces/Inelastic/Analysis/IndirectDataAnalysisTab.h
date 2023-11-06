@@ -31,7 +31,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class IndirectDataAnalysisTab : public IndirectTab {
+class MANTIDQT_INELASTIC_DLL IndirectDataAnalysisTab : public IndirectTab {
   Q_OBJECT
 
 public:

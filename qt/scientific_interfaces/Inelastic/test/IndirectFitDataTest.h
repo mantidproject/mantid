@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "IndirectFitData.h"
+#include "Analysis/IndirectFitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/Workspace2D.h"
