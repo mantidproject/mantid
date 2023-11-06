@@ -155,20 +155,12 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             else:
                 nbins = self.getProperty("NBins").value
 
-            # make a kernel with background subtraction shell of approx. same number of elements as peak region
-            nrows_bg = max(1, nrows // 8)  # padding either side of e.g. nrows for bg shell
-            ncols_bg = max(1, ncols // 8)
-            nbins_bg = max(1, nbins // 8)
-            kernel = np.zeros((nrows + 2 * nrows_bg, ncols + 2 * ncols_bg, nbins + 2 * nbins_bg))
-            kernel[nrows_bg:-nrows_bg, ncols_bg:-ncols_bg, nbins_bg:-nbins_bg] = 1
-            bg_mask = np.logical_not(kernel)
-            kernel[bg_mask] = -(nrows * ncols * nbins) / bg_mask.sum()  # such that kernel.sum() = 0
-
             # get data in detector coords
             peak_data = array_converter.get_peak_data(dummy_pk, detid, bank.getName(), bank.xpixels(), bank.ypixels(), 1, 1)
             _, y, e = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
             # perform convolutions to integrate kernel/shoebox
             # pad with nearest so don't get peaks at edge when -ve values go outside data extent
+            kernel = make_kernel(nrows, ncols, nbins)
             yconv = convolve(input=y, weights=kernel, mode="nearest")
             econv = np.sqrt(convolve(input=e**2, weights=kernel**2, mode="nearest"))
             with np.errstate(divide="ignore", invalid="ignore"):
@@ -208,8 +200,11 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
                 # remove peaks on edge if required
                 do_add_peak = True
                 if remove_on_edge:
+                    nrows_bg = kernel.shape[0] - nrows
+                    ncols_bg = kernel.shape[1] - ncols
+                    nbins_bg = kernel.shape[0] - nbins
                     for idim, (index, nbg) in enumerate([(irow_max, nrows_bg), (icol_max, ncols_bg), (itof_max, nbins_bg)]):
-                        if not 2 * nbg <= index <= y.shape[idim] - 2 * nbg - 1:
+                        if not nbg <= index <= y.shape[idim] - nbg - 1:
                             do_add_peak = False
                             break
                 if do_add_peak:
@@ -245,6 +240,18 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             return alg.getProperty("OutputWorkspace").value
         else:
             return None
+
+
+def make_kernel(nrows, ncols, nbins):
+    # make a kernel with background subtraction shell of approx. same number of elements as peak region
+    nrows_bg = max(1, nrows // 16)  # padding either side of e.g. nrows for bg shell
+    ncols_bg = max(1, ncols // 16)
+    nbins_bg = max(1, nbins // 16)
+    kernel = np.zeros((nrows + 2 * nrows_bg, ncols + 2 * ncols_bg, nbins + 2 * nbins_bg))
+    kernel[nrows_bg:-nrows_bg, ncols_bg:-ncols_bg, nbins_bg:-nbins_bg] = 1
+    bg_mask = np.logical_not(kernel)
+    kernel[bg_mask] = -(nrows * ncols * nbins) / bg_mask.sum()  # such that kernel.sum() = 0
+    return kernel
 
 
 # register algorithm with mantid
