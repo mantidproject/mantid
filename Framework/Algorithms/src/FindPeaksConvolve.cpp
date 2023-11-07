@@ -178,31 +178,37 @@ void FindPeaksConvolve::storeClassProperties() {
 void FindPeaksConvolve::performConvolution(const size_t dataIndex) {
   const auto specNum{m_specNums[dataIndex]};
   const HistogramData::HistogramX *xData{&m_inputDataWS->x(specNum)};
-  const auto kernelBinCount{getKernelBinCount(xData, dataIndex)};
-  const Tensor1D kernel{createKernel(static_cast<int>(kernelBinCount))};
+  std::pair<const size_t, const bool> kernelBinCount{getKernelBinCount(xData)};
+  if (kernelBinCount.second) {
+    g_log.error("The kernel size for spectrum " + std::to_string(m_specNums[dataIndex]) +
+                " exceeds the range of the x axis. Please reduce the peak extent.");
+  } else {
+    const Tensor1D kernel{createKernel(static_cast<int>(kernelBinCount.first))};
 
-  const auto binCount{m_inputDataWS->getNumberBins(specNum)};
-  // Edge handling is performed by padding the input data with 0 values. Each convolution requires a padding of kernel
-  // size + 1. The 1st conv is performed with a kernel of size n, the second size n/2. The resultant pad is split either
-  // side of the data.
-  const double paddingSize = (std::ceil(static_cast<double>(kernelBinCount) * 1.5) - 2) / 2;
-  const TensorMap_const yData{&m_inputDataWS->y(specNum).front(), binCount};
-  Eigen::array<std::pair<double, double>, 1> paddings{std::make_pair(std::ceil(paddingSize), std::floor(paddingSize))};
-  const auto yData_padded{yData.pad(paddings)};
-  const Eigen::array<ptrdiff_t, 1> dims({0});
-  const Tensor1D yConvOutput{yData_padded.convolve(kernel, dims)};
+    const auto binCount{m_inputDataWS->getNumberBins(specNum)};
+    // Edge handling is performed by padding the input data with 0 values. Each convolution requires a padding of kernel
+    // size + 1. The 1st conv is performed with a kernel of size n, the second size n/2. The resultant pad is split
+    // either side of the data.
+    const double paddingSize = (std::ceil(static_cast<double>(kernelBinCount.first) * 1.5) - 2) / 2;
+    const TensorMap_const yData{&m_inputDataWS->y(specNum).front(), binCount};
+    Eigen::array<std::pair<double, double>, 1> paddings{
+        std::make_pair(std::ceil(paddingSize), std::floor(paddingSize))};
+    const auto yData_padded{yData.pad(paddings)};
+    const Eigen::array<ptrdiff_t, 1> dims({0});
+    const Tensor1D yConvOutput{yData_padded.convolve(kernel, dims)};
 
-  const auto eData{TensorMap_const{&m_inputDataWS->e(specNum).front(), binCount}.pad(paddings)};
-  const Tensor1D eConvOutput{eData.square().convolve(kernel.square(), dims).sqrt()};
+    const auto eData{TensorMap_const{&m_inputDataWS->e(specNum).front(), binCount}.pad(paddings)};
+    const Tensor1D eConvOutput{eData.square().convolve(kernel.square(), dims).sqrt()};
 
-  const Tensor1D smoothKernel{
-      createSmoothKernel(static_cast<size_t>(std::ceil(static_cast<double>(kernelBinCount) / 2.0)))};
-  const Tensor1D iOverSigConvOutput{(yConvOutput / eConvOutput).convolve(smoothKernel, dims)};
+    const Tensor1D smoothKernel{
+        createSmoothKernel(static_cast<size_t>(std::ceil(static_cast<double>(kernelBinCount.first) / 2.0)))};
+    const Tensor1D iOverSigConvOutput{(yConvOutput / eConvOutput).convolve(smoothKernel, dims)};
 
-  extractPeaks(dataIndex, iOverSigConvOutput, xData, yData, kernelBinCount / 2);
+    extractPeaks(dataIndex, iOverSigConvOutput, xData, yData, kernelBinCount.first / 2);
 
-  if (m_createIntermediateWorkspaces) {
-    createIntermediateWorkspaces(dataIndex, kernel, iOverSigConvOutput, xData);
+    if (m_createIntermediateWorkspaces) {
+      createIntermediateWorkspaces(dataIndex, kernel, iOverSigConvOutput, xData);
+    }
   }
 }
 
@@ -228,10 +234,10 @@ Tensor1D FindPeaksConvolve::createSmoothKernel(const size_t kernelSize) const {
   return kernel;
 }
 
-size_t FindPeaksConvolve::getKernelBinCount(const HistogramData::HistogramX *xData, const size_t dataIndex) const {
-  // What is the minimum number of data points this works for - add validation
+std::pair<size_t, bool> FindPeaksConvolve::getKernelBinCount(const HistogramData::HistogramX *xData) const {
   const double peakExtent = getProperty("EstimatedPeakExtent");
   const int peakExtentNBins = getProperty("EstimatedPeakExtentNBins");
+  bool sizeError{false};
 
   size_t kernelBinCount{0};
   if (peakExtent != EMPTY_DBL()) {
@@ -242,10 +248,9 @@ size_t FindPeaksConvolve::getKernelBinCount(const HistogramData::HistogramX *xDa
     kernelBinCount = static_cast<size_t>(peakExtentNBins);
   }
   if (kernelBinCount > xData->size()) {
-    g_log.warning("The kernel size for spectrum " + std::to_string(m_specNums[dataIndex]) +
-                  " exceeds the range of the x axis. It is advised to reduce the peak extent.");
+    sizeError = true;
   }
-  return kernelBinCount;
+  return std::make_pair(kernelBinCount, sizeError);
 }
 
 Eigen::VectorXd FindPeaksConvolve::centreBinsXData(const HistogramData::HistogramX *xData) const {
@@ -402,7 +407,7 @@ void FindPeaksConvolve::outputResults() {
     }
   }
   if (noPeaksStr != "") {
-    g_log.notice("No peaks found for spectrum index: " + noPeaksStr);
+    g_log.warning("No peaks found for spectrum index: " + noPeaksStr);
   }
   setProperty("OutputWorkspace", table);
 }
