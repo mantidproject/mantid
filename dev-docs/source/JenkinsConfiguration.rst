@@ -177,10 +177,9 @@ Print the Value of an Environment Variable on All Nodes
 Remove directories across multiple nodes
 ----------------------------------------
 
+The example here will remove the build directories from pull request build and test jobs.
+Useful, for example, when a dependency change requires a clean build.
 It is advised to ensure nothing is running and pause the build queue.
-
-Pull Requests
-^^^^^^^^^^^^^
 
 .. code-block:: groovy
 
@@ -189,7 +188,7 @@ Pull Requests
     nodes = Jenkins.instance.slaves
 
     JOB_PREFIX = "pull_requests-"
-    suffixes = ["win7", "osx", "ubuntu", "ubuntu-python3", "rhel7"];
+    suffixes = ["conda-linux", "conda-osx", "conda-windows"];
 
     for (node in nodes) {
       for (suffix in suffixes) {
