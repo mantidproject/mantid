@@ -13,30 +13,29 @@ namespace IndirectDataValidationHelper {
 
 enum DataType { Red, Sqw, Calib, Corrections };
 
-MANTIDQT_INDIRECT_DLL bool validateDataIsOneOf(MantidQt::CustomInterfaces::UserInputValidator &uiv,
-                                               MantidQt::MantidWidgets::DataSelector *dataSelector,
-                                               std::string const &inputType, DataType const &primaryType,
-                                               std::vector<DataType> const &otherTypes, bool silent = false);
+DLLExport bool validateDataIsOneOf(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+                                   MantidQt::MantidWidgets::DataSelector *dataSelector, std::string const &inputType,
+                                   DataType const &primaryType, std::vector<DataType> const &otherTypes,
+                                   bool silent = false);
 
-MANTIDQT_INDIRECT_DLL bool validateDataIsOfType(MantidQt::CustomInterfaces::UserInputValidator &uiv,
-                                                MantidQt::MantidWidgets::DataSelector *dataSelector,
-                                                std::string const &inputType, DataType const &type,
-                                                bool silent = false);
+DLLExport bool validateDataIsOfType(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+                                    MantidQt::MantidWidgets::DataSelector *dataSelector, std::string const &inputType,
+                                    DataType const &type, bool silent = false);
 
-MANTIDQT_INDIRECT_DLL bool validateDataIsAReducedFile(MantidQt::CustomInterfaces::UserInputValidator &uiv,
-                                                      MantidQt::MantidWidgets::DataSelector *dataSelector,
-                                                      std::string const &inputType, bool silent = false);
+DLLExport bool validateDataIsAReducedFile(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+                                          MantidQt::MantidWidgets::DataSelector *dataSelector,
+                                          std::string const &inputType, bool silent = false);
 
-MANTIDQT_INDIRECT_DLL bool validateDataIsASqwFile(MantidQt::CustomInterfaces::UserInputValidator &uiv,
-                                                  MantidQt::MantidWidgets::DataSelector *dataSelector,
-                                                  std::string const &inputType, bool silent = false);
+DLLExport bool validateDataIsASqwFile(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+                                      MantidQt::MantidWidgets::DataSelector *dataSelector, std::string const &inputType,
+                                      bool silent = false);
 
-MANTIDQT_INDIRECT_DLL bool validateDataIsACalibrationFile(MantidQt::CustomInterfaces::UserInputValidator &uiv,
-                                                          MantidQt::MantidWidgets::DataSelector *dataSelector,
-                                                          std::string const &inputType, bool silent = false);
+DLLExport bool validateDataIsACalibrationFile(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+                                              MantidQt::MantidWidgets::DataSelector *dataSelector,
+                                              std::string const &inputType, bool silent = false);
 
-MANTIDQT_INDIRECT_DLL bool validateDataIsACorrectionsFile(MantidQt::CustomInterfaces::UserInputValidator &uiv,
-                                                          MantidQt::MantidWidgets::DataSelector *dataSelector,
-                                                          std::string const &inputType, bool silent = false);
+DLLExport bool validateDataIsACorrectionsFile(MantidQt::CustomInterfaces::UserInputValidator &uiv,
+                                              MantidQt::MantidWidgets::DataSelector *dataSelector,
+                                              std::string const &inputType, bool silent = false);
 
 } // namespace IndirectDataValidationHelper

@@ -41,8 +41,8 @@ mtd_add_qt_tests(
             Mantid::PythonInterfaceCore
             ${PYTHON_LIBRARIES}
   QT5_LINK_LIBS Qt5::OpenGL Qt5::Concurrent
-  MTD_QT_LINK_LIBS MantidScientificInterfacesIndirect MantidScientificInterfacesInelastic MantidQtWidgetsCommon
-                   MantidQtWidgetsPlotting MantidQtWidgetsMplCpp
+  MTD_QT_LINK_LIBS MantidScientificInterfacesInelastic MantidQtWidgetsCommon MantidQtWidgetsPlotting
+                   MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES GUITests
 )
 
