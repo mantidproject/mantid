@@ -27,7 +27,7 @@ switch(GIT_BRANCH) {
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'nightly'
     PLATFORM_CHOICES = ['all']
     break
-  case 'ornl-next':
+  case ['ornl-next', 'ornl-qa', 'ornl']:
     PACKAGE_SUFFIX_DEFAULT = 'Nightly'
     ANACONDA_CHANNEL_LABEL_DEFAULT = 'nightly'
     PLATFORM_CHOICES = ['linux-64']
