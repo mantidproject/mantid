@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllConfig.h"
+
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
