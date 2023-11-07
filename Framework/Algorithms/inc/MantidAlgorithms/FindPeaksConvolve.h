@@ -70,7 +70,7 @@ private:
   void performConvolution(const size_t dataIndex);
   Tensor1D createKernel(const int binCount) const;
   Tensor1D createSmoothKernel(const size_t kernelSize) const;
-  size_t getKernelBinCount(const HistogramData::HistogramX *xData) const;
+  size_t getKernelBinCount(const HistogramData::HistogramX *xData, const size_t dataIndex) const;
   double getXDataValue(const HistogramData::HistogramX *xData, const size_t xIndex) const;
   Eigen::VectorXd centreBinsXData(const HistogramData::HistogramX *xData) const;
   void extractPeaks(const size_t dataIndex, const Tensor1D &iOverSigma, const HistogramData::HistogramX *xData,

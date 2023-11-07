@@ -139,7 +139,7 @@ const std::string FindPeaksConvolve::validateWorkspaceIndexInput() const {
   } else {
     const int startWSIndex = m_specNums.front();
     const int endWSIndex = m_specNums.back();
-    int specCount = m_inputDataWS->getNumberHistograms();
+    int specCount = static_cast<int>(m_inputDataWS->getNumberHistograms());
     if (startWSIndex > specCount - 1 || endWSIndex > specCount - 1) {
       err_str += "Specified Workspace indicies out of range. ";
     }
@@ -178,7 +178,7 @@ void FindPeaksConvolve::storeClassProperties() {
 void FindPeaksConvolve::performConvolution(const size_t dataIndex) {
   const auto specNum{m_specNums[dataIndex]};
   const HistogramData::HistogramX *xData{&m_inputDataWS->x(specNum)};
-  const auto kernelBinCount{getKernelBinCount(xData)};
+  const auto kernelBinCount{getKernelBinCount(xData, dataIndex)};
   const Tensor1D kernel{createKernel(static_cast<int>(kernelBinCount))};
 
   const auto binCount{m_inputDataWS->getNumberBins(specNum)};
@@ -228,18 +228,24 @@ Tensor1D FindPeaksConvolve::createSmoothKernel(const size_t kernelSize) const {
   return kernel;
 }
 
-size_t FindPeaksConvolve::getKernelBinCount(const HistogramData::HistogramX *xData) const {
+size_t FindPeaksConvolve::getKernelBinCount(const HistogramData::HistogramX *xData, const size_t dataIndex) const {
   // What is the minimum number of data points this works for - add validation
   const double peakExtent = getProperty("EstimatedPeakExtent");
   const int peakExtentNBins = getProperty("EstimatedPeakExtentNBins");
 
+  size_t kernelBinCount{0};
   if (peakExtent != EMPTY_DBL()) {
     const double x1{xData->rawData()[static_cast<size_t>(std::floor((xData->size() - 1) / 2))]};
     const double x2{xData->rawData()[static_cast<size_t>(std::floor((xData->size() - 1) / 2)) + 1]};
-    return static_cast<size_t>(std::floor(peakExtent * 2 / (x2 - x1)));
+    kernelBinCount = static_cast<size_t>(std::floor(peakExtent * 2 / (x2 - x1)));
   } else {
-    return static_cast<size_t>(peakExtentNBins);
+    kernelBinCount = static_cast<size_t>(peakExtentNBins);
   }
+  if (kernelBinCount > xData->size()) {
+    g_log.warning("The kernel size for spectrum " + std::to_string(m_specNums[dataIndex]) +
+                  " exceeds the range of the x axis. It is advised to reduce the peak extent.");
+  }
+  return kernelBinCount;
 }
 
 Eigen::VectorXd FindPeaksConvolve::centreBinsXData(const HistogramData::HistogramX *xData) const {
