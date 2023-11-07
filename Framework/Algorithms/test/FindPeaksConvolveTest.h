@@ -70,6 +70,7 @@ public:
     // Load data file into ADS once
     loadNexusProcessed("ENGINX_277208_focused_bank_2.nxs", INPUT_TEST_WS_NAME);
     loadNexusProcessed("VesuvioCalibSpec177.nxs", INPUT_TEST_WS_NAME + "_noisy");
+    loadNexusProcessed("focussed.nxs", INPUT_TEST_WS_NAME + "_focussed");
   }
 
   void test_exec() {
@@ -177,5 +178,39 @@ public:
   void test_execSpecifyNoPeakExtentAndBins() {
     auto alg = set_up_alg(INPUT_TEST_WS_NAME, OUTPUT_TEST_WS_NAME);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument &);
+  }
+
+  void test_execIndexEndLessThanIndexStart() {
+    auto alg = set_up_alg(INPUT_TEST_WS_NAME + "_focussed", OUTPUT_TEST_WS_NAME + "_focussed");
+    alg->setProperty("EstimatedPeakExtent", "0.2");
+    alg->setProperty("StartWorkspaceIndex", "2");
+    alg->setProperty("EndWorkspaceIndex", "1");
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument &);
+  }
+
+  void test_execIndexOutOfRange() {
+    auto alg = set_up_alg(INPUT_TEST_WS_NAME + "_focussed", OUTPUT_TEST_WS_NAME + "_focussed");
+    alg->setProperty("EstimatedPeakExtent", "0.2");
+    alg->setProperty("StartWorkspaceIndex", "20");
+    alg->setProperty("EndWorkspaceIndex", "21");
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument &);
+  }
+
+  void test_execValidRange() {
+    auto alg = set_up_alg(INPUT_TEST_WS_NAME + "_focussed", OUTPUT_TEST_WS_NAME + "_focussed");
+    alg->setProperty("EstimatedPeakExtent", "0.2");
+    alg->setProperty("StartWorkspaceIndex", "1");
+    alg->setProperty("EndWorkspaceIndex", "2");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(resultWs->rowCount(), 2);
+  }
+
+  void test_execNoRange() {
+    auto alg = set_up_alg(INPUT_TEST_WS_NAME + "_focussed", OUTPUT_TEST_WS_NAME + "_focussed");
+    alg->setProperty("EstimatedPeakExtent", "0.2");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(resultWs->rowCount(), 6);
   }
 };

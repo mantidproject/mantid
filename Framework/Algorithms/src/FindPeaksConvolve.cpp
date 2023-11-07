@@ -59,9 +59,8 @@ void FindPeaksConvolve::init() {
       std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "An output workspace.");
   declareProperty("CreateIntermediateWorkspaces", false, "Output workspaces showing intermediate working steps");
-  declareProperty("WorkspaceIndex", EMPTY_INT(), m_validators["mustBeNonNegative"],
-                  "If set, only this spectrum will be searched for peaks "
-                  "(otherwise all are)");
+  declareProperty("StartWorkspaceIndex", EMPTY_INT(), m_validators["mustBeNonNegative"]);
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), m_validators["mustBeNonNegative"]);
   declareProperty("EstimatedPeakExtent", EMPTY_DBL(), m_validators["mustBeGreaterThanZero"],
                   "Estimated PeakExtent of the peaks to be found");
   declareProperty("EstimatedPeakExtentNBins", EMPTY_INT(), m_validators["mustBeGreaterThanOne"],
@@ -113,6 +112,7 @@ std::pair<std::string, int> FindPeaksConvolve::secondaryValidation() const {
   int err_code{0};
 
   err_str += validatePeakExtentInput();
+  err_str += validateWorkspaceIndexInput();
 
   if (err_str != "") {
     err_code = 1;
@@ -132,6 +132,21 @@ const std::string FindPeaksConvolve::validatePeakExtentInput() const {
   return err_str;
 }
 
+const std::string FindPeaksConvolve::validateWorkspaceIndexInput() const {
+  std::string err_str{};
+  if (m_specNums.empty()) {
+    err_str += "If both specified, EndWorkspaceIndex must be greater than StartWorkspaceIndex. ";
+  } else {
+    const int startWSIndex = m_specNums.front();
+    const int endWSIndex = m_specNums.back();
+    int specCount = m_inputDataWS->getNumberHistograms();
+    if (startWSIndex > specCount - 1 || endWSIndex > specCount - 1) {
+      err_str += "Specified Workspace indicies out of range. ";
+    }
+  }
+  return err_str;
+}
+
 void FindPeaksConvolve::storeClassProperties() {
   m_inputDataWS = getProperty("InputWorkspace");
   m_createIntermediateWorkspaces = getProperty("CreateIntermediateWorkspaces");
@@ -145,15 +160,18 @@ void FindPeaksConvolve::storeClassProperties() {
     m_centreBins = false;
   }
 
-  int wsIndex = getProperty("WorkspaceIndex");
-  if (wsIndex == EMPTY_INT()) {
-    m_specCount = static_cast<int>(m_inputDataWS->getNumberHistograms());
-    m_specNums.resize(m_specCount);
-    std::iota(std::begin(m_specNums), std::end(m_specNums), 0);
-  } else {
-    m_specCount = 1;
-    m_specNums.push_back(wsIndex);
+  int startWSIndex = getProperty("StartWorkspaceIndex");
+  int endWSIndex = getProperty("EndWorkspaceIndex");
+  int specCount = static_cast<int>(m_inputDataWS->getNumberHistograms());
+  if (startWSIndex == EMPTY_INT()) {
+    startWSIndex = 0;
   }
+  if (endWSIndex == EMPTY_INT()) {
+    endWSIndex = specCount - 1;
+  }
+  m_specCount = endWSIndex - startWSIndex + 1;
+  m_specNums.resize(m_specCount);
+  std::iota(std::begin(m_specNums), std::end(m_specNums), startWSIndex);
   m_peakResults.resize(m_specCount);
 }
 
@@ -188,7 +206,7 @@ void FindPeaksConvolve::performConvolution(const size_t dataIndex) {
   }
 }
 
-Tensor1D FindPeaksConvolve::createKernel(const int binCount) {
+Tensor1D FindPeaksConvolve::createKernel(const int binCount) const {
   Tensor1D kernel(binCount);
   for (int i{0}; i < binCount; i++) {
     // create integrating shoebox kernel with central positive region & negative background shell with ~the same
@@ -202,7 +220,7 @@ Tensor1D FindPeaksConvolve::createKernel(const int binCount) {
   return kernel;
 }
 
-Tensor1D FindPeaksConvolve::createSmoothKernel(const size_t kernelSize) {
+Tensor1D FindPeaksConvolve::createSmoothKernel(const size_t kernelSize) const {
   Tensor1D kernel(kernelSize);
   for (size_t i{0}; i < kernelSize; i++) {
     kernel.data()[i] = 1.0 / static_cast<double>(kernelSize);
@@ -224,7 +242,7 @@ size_t FindPeaksConvolve::getKernelBinCount(const HistogramData::HistogramX *xDa
   }
 }
 
-Eigen::VectorXd FindPeaksConvolve::centreBinsXData(const HistogramData::HistogramX *xData) {
+Eigen::VectorXd FindPeaksConvolve::centreBinsXData(const HistogramData::HistogramX *xData) const {
   Eigen::VectorXd xDataVec{0.5 * (EigenMap_const(&xData->front(), xData->size() - 1) +
                                   EigenMap_const(&xData->front() + 1, xData->size() - 1))};
   return xDataVec;
@@ -261,7 +279,7 @@ void FindPeaksConvolve::extractPeaks(const size_t dataIndex, const Tensor1D &iOv
   storePeakResults(dataIndex, peakCentres);
 }
 
-double FindPeaksConvolve::getXDataValue(const HistogramData::HistogramX *xData, const size_t xIndex) {
+double FindPeaksConvolve::getXDataValue(const HistogramData::HistogramX *xData, const size_t xIndex) const {
   if (m_centreBins) {
     return (xData->rawData()[xIndex] + xData->rawData()[xIndex + 1]) / 2;
   } else {
@@ -281,7 +299,7 @@ void FindPeaksConvolve::storePeakResults(const size_t dataIndex,
 }
 
 size_t FindPeaksConvolve::findPeakInRawData(const int xIndex, const TensorMap_const &yData,
-                                            size_t peakExtentBinNumber) {
+                                            size_t peakExtentBinNumber) const {
   peakExtentBinNumber = (peakExtentBinNumber % 2 == 0) ? peakExtentBinNumber + 1 : peakExtentBinNumber;
   int sliceStart{xIndex - static_cast<int>(std::floor(static_cast<double>(peakExtentBinNumber) / 2.0))};
   size_t adjPeakExtentBinNumber{peakExtentBinNumber};
@@ -309,7 +327,7 @@ size_t FindPeaksConvolve::findPeakInRawData(const int xIndex, const TensorMap_co
   return static_cast<size_t>(maxIndex) + sliceStart;
 }
 
-Eigen::VectorXd FindPeaksConvolve::generateNormalPDF(const int peakExtentBinNumber) {
+Eigen::VectorXd FindPeaksConvolve::generateNormalPDF(const int peakExtentBinNumber) const {
   // assert vector has odd size.
   Eigen::VectorXd pdf{peakExtentBinNumber};
   boost::math::normal_distribution<> dist(0.0, peakExtentBinNumber / 2.0); // assures 2 stddevs in the resultant vector

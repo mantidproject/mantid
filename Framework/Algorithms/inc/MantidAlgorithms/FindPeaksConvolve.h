@@ -64,19 +64,20 @@ private:
   void initiateValidators();
   std::pair<std::string, int> secondaryValidation() const;
   const std::string validatePeakExtentInput() const;
+  const std::string validateWorkspaceIndexInput() const;
   void storeClassProperties();
 
   void performConvolution(const size_t dataIndex);
-  Tensor1D createKernel(const int binCount);
-  Tensor1D createSmoothKernel(const size_t kernelSize);
+  Tensor1D createKernel(const int binCount) const;
+  Tensor1D createSmoothKernel(const size_t kernelSize) const;
   size_t getKernelBinCount(const HistogramData::HistogramX *xData) const;
-  double getXDataValue(const HistogramData::HistogramX *xData, const size_t xIndex);
-  Eigen::VectorXd centreBinsXData(const HistogramData::HistogramX *xData);
+  double getXDataValue(const HistogramData::HistogramX *xData, const size_t xIndex) const;
+  Eigen::VectorXd centreBinsXData(const HistogramData::HistogramX *xData) const;
   void extractPeaks(const size_t dataIndex, const Tensor1D &iOverSigma, const HistogramData::HistogramX *xData,
                     const TensorMap_const &yData, const size_t peakExtentBinNumber);
-  size_t findPeakInRawData(const int xIndex, const TensorMap_const &yData, size_t peakExtentBinNumber);
+  size_t findPeakInRawData(const int xIndex, const TensorMap_const &yData, size_t peakExtentBinNumber) const;
   void storePeakResults(const size_t dataIndex, std::vector<FindPeaksConvolve::PeakResult> &peakCentres);
-  Eigen::VectorXd generateNormalPDF(const int peakExtentBinNumber);
+  Eigen::VectorXd generateNormalPDF(const int peakExtentBinNumber) const;
   void createIntermediateWorkspaces(const size_t dataIndex, const Tensor1D &kernel, const Tensor1D &iOverSigma,
                                     const HistogramData::HistogramX *xData);
   void outputResults();
