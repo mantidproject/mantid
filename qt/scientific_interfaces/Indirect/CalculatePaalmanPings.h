@@ -17,7 +17,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class DLLExport CalculatePaalmanPings : public CorrectionsTab {
+class MANTIDQT_INDIRECT_DLL CalculatePaalmanPings : public CorrectionsTab {
   Q_OBJECT
 
 public:

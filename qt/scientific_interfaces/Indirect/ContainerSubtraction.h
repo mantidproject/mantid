@@ -11,7 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class DLLExport ContainerSubtraction : public CorrectionsTab {
+class MANTIDQT_INDIRECT_DLL ContainerSubtraction : public CorrectionsTab {
   Q_OBJECT
 
 public:

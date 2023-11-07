@@ -19,7 +19,7 @@ namespace CustomInterfaces {
   @author Dan Nixon
   @date 23/07/2014
 */
-class DLLExport ISISCalibration : public IndirectDataReductionTab {
+class MANTIDQT_INDIRECT_DLL ISISCalibration : public IndirectDataReductionTab {
   Q_OBJECT
 
 public:

@@ -11,7 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class DLLExport DensityOfStates : public IndirectSimulationTab {
+class MANTIDQT_INDIRECT_DLL DensityOfStates : public IndirectSimulationTab {
   Q_OBJECT
 
 public:

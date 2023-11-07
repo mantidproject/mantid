@@ -11,7 +11,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class DLLExport IndirectMolDyn : public IndirectSimulationTab {
+class MANTIDQT_INDIRECT_DLL IndirectMolDyn : public IndirectSimulationTab {
   Q_OBJECT
 
 public:
