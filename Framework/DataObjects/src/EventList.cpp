@@ -852,7 +852,7 @@ void EventList::clear(const bool removeDetIDs) {
   if (mru) {
     try {
       mru->deleteIndex(this);
-    } catch (const std::runtime_error &e) {
+    } catch (const std::runtime_error &) {
       // this is an ignorable error
     }
   }
