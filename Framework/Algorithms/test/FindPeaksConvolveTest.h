@@ -11,6 +11,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/FindPeaksConvolve.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 
@@ -41,8 +42,10 @@ Mantid::API::Algorithm_sptr set_up_alg(const std::string &input_ws_name, const s
   return alg;
 }
 
-void assert_peak_centres_equal(const Mantid::API::ITableWorkspace_sptr &resultWs,
+void assert_peak_centres_equal(const Mantid::API::WorkspaceGroup_sptr &groupWs,
                                std::vector<double> &expectedPeakCentres) {
+  Mantid::API::ITableWorkspace_sptr resultWs =
+      std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(groupWs->getItem("PeakCentre"));
   const auto colNames = resultWs->getColumnNames();
   for (int i = static_cast<int>(resultWs->columnCount()) - 1; i >= 0; i--) {
     std::string colName{colNames[i]};
@@ -83,7 +86,7 @@ public:
     std::vector<double> expectedPeakCentres{16179.53, 16873.24, 17391.53, 18188.9,  19584.29,
                                             20636.82, 21553.79, 22678.08, 22973.11, 24527.98,
                                             27151.32, 31784.04, 41272.73, 43098.7,  46997.84};
-    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
+    const Mantid::API::WorkspaceGroup_sptr resultWs = alg->getProperty("OutputWorkspace");
     assert_peak_centres_equal(resultWs, expectedPeakCentres);
   }
 
@@ -97,7 +100,7 @@ public:
     std::vector<double> expectedPeakCentres{16179.53, 16873.24, 17391.53, 18188.9,  19584.29,
                                             20636.82, 21553.79, 22678.08, 22973.11, 24527.98,
                                             27151.32, 31784.04, 41272.73, 43098.7,  46997.84};
-    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
+    const Mantid::API::WorkspaceGroup_sptr resultWs = alg->getProperty("OutputWorkspace");
     assert_peak_centres_equal(resultWs, expectedPeakCentres);
   }
 
@@ -128,7 +131,7 @@ public:
     std::vector<double> expectedPeakCentres{16179.53, 16873.24, 17391.53, 18188.9,  19584.29,
                                             20636.82, 21553.79, 22678.08, 22973.11, 24527.98,
                                             27151.32, 31784.04, 41280.7,  43098.7,  46997.84};
-    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
+    const Mantid::API::WorkspaceGroup_sptr resultWs = alg->getProperty("OutputWorkspace");
     assert_peak_centres_equal(resultWs, expectedPeakCentres);
   }
 
@@ -139,7 +142,7 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     std::vector<double> expectedPeakCentres{2706.06, 3540.81, 4188.21, 4717.19, 5635.71, 6780.36, 7932.37};
-    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
+    const Mantid::API::WorkspaceGroup_sptr resultWs = alg->getProperty("OutputWorkspace");
     assert_peak_centres_equal(resultWs, expectedPeakCentres);
   }
 
@@ -151,7 +154,7 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     std::vector<double> expectedPeakCentres{2788.43, 3505.61, 5635.71, 7932.37};
-    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
+    const Mantid::API::WorkspaceGroup_sptr resultWs = alg->getProperty("OutputWorkspace");
     assert_peak_centres_equal(resultWs, expectedPeakCentres);
   }
 
@@ -164,7 +167,8 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     std::vector<double> expectedPeakCentres{2788.43, 3505.61, 5635.71, 6780.36, 7932.37};
-    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    const Mantid::API::WorkspaceGroup_sptr resultWs = alg->getProperty("OutputWorkspace");
     assert_peak_centres_equal(resultWs, expectedPeakCentres);
   }
 
@@ -202,15 +206,19 @@ public:
     alg->setProperty("StartWorkspaceIndex", "1");
     alg->setProperty("EndWorkspaceIndex", "2");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
-    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(resultWs->rowCount(), 2);
+    const Mantid::API::WorkspaceGroup_sptr resultWs = alg->getProperty("OutputWorkspace");
+    Mantid::API::ITableWorkspace_sptr item =
+        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(resultWs->getItem("PeakCentre"));
+    TS_ASSERT_EQUALS(item->rowCount(), 2);
   }
 
   void test_execNoRange() {
     auto alg = set_up_alg(INPUT_TEST_WS_NAME + "_focussed", OUTPUT_TEST_WS_NAME + "_focussed");
     alg->setProperty("EstimatedPeakExtent", "0.2");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
-    const Mantid::API::ITableWorkspace_sptr resultWs = alg->getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(resultWs->rowCount(), 6);
+    const Mantid::API::WorkspaceGroup_sptr resultWs = alg->getProperty("OutputWorkspace");
+    Mantid::API::ITableWorkspace_sptr item =
+        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(resultWs->getItem("PeakCentre"));
+    TS_ASSERT_EQUALS(item->rowCount(), 6);
   }
 };

@@ -12,6 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/IValidator.h"
@@ -56,7 +57,7 @@ void FindPeaksConvolve::init() {
   declareProperty(std::make_unique<API::WorkspaceProperty<>>("InputWorkspace", "", Kernel::Direction::Input),
                   "An input workspace.");
   declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
+      std::make_unique<API::WorkspaceProperty<API::WorkspaceGroup>>("OutputWorkspace", "", Kernel::Direction::Output),
       "An output workspace.");
   declareProperty("CreateIntermediateWorkspaces", false, "Output workspaces showing intermediate working steps");
   declareProperty("StartWorkspaceIndex", EMPTY_INT(), m_validators["mustBeNonNegative"]);
@@ -363,7 +364,6 @@ void FindPeaksConvolve::createIntermediateWorkspaces(const size_t dataIndex, con
   }
 
   API::Algorithm_sptr alg{createChildAlgorithm("CreateWorkspace")};
-
   alg->setProperty("OutputWorkspace", "iOverSigma");
   alg->setProperty("DataX", std::vector<double>(xDataMap->data(), xDataMap->data() + xDataMap->rows()));
   alg->setProperty("DataY", std::vector<double>(iOverSigma.data(), iOverSigma.data() + iOverSigma.size()));
@@ -385,22 +385,28 @@ void FindPeaksConvolve::createIntermediateWorkspaces(const size_t dataIndex, con
 }
 
 void FindPeaksConvolve::outputResults() {
-  API::ITableWorkspace_sptr table{API::WorkspaceFactory::Instance().createTable("TableWorkspace")};
-  table->addColumn("int", "SpecIndex");
-  for (size_t i{0}; i < m_maxPeakCount; i++) {
-    table->addColumn("double", "PeakCentre_" + std::to_string(i));
-    table->addColumn("double", "PeakHeight_" + std::to_string(i));
-    table->addColumn("double", "PeakIOverSigma_" + std::to_string(i));
+  const std::vector<std::string> outputTblNames{"PeakCentre", "PeakYPosition", "PeakIOverSigma"};
+  std::unordered_map<std::string, API::ITableWorkspace_sptr> outputTbls;
+  for (const auto &name : outputTblNames) {
+    auto tbl = outputTbls.emplace(name, API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
+    tbl.first->second->addColumn("int", "SpecIndex");
+    for (size_t i{0}; i < m_maxPeakCount; i++) {
+      tbl.first->second->addColumn("double", name + "_" + std::to_string(i));
+    }
+    API::AnalysisDataService::Instance().addOrReplace(name, tbl.first->second);
   }
 
   std::string noPeaksStr{""};
   for (size_t i{0}; i < m_peakResults.size(); i++) {
     const auto spec = std::move(m_peakResults[i]);
     if (!spec.empty()) {
-      API::TableRow row{table->appendRow()};
-      row << m_specNums[i];
-      for (const auto &peak : spec) {
-        row << peak.centre << peak.height << peak.iOverSigma;
+      for (const auto &name : outputTblNames) {
+        auto tbl = outputTbls.find(name);
+        API::TableRow row{tbl->second->appendRow()};
+        row << m_specNums[i];
+        for (const auto &peak : spec) {
+          row << peak.getAttribute(name);
+        }
       }
     } else {
       noPeaksStr += std::to_string(i) + ", ";
@@ -409,6 +415,25 @@ void FindPeaksConvolve::outputResults() {
   if (noPeaksStr != "") {
     g_log.warning("No peaks found for spectrum index: " + noPeaksStr);
   }
-  setProperty("OutputWorkspace", table);
+
+  API::Algorithm_sptr alg{createChildAlgorithm("GroupWorkspaces")};
+  alg->initialize();
+  alg->setProperty("InputWorkspaces", outputTblNames);
+  alg->setProperty("OutputWorkspace", "GroupResults");
+  alg->execute();
+  API::WorkspaceGroup_sptr groupWs = alg->getProperty("OutputWorkspace");
+  setProperty("OutputWorkspace", groupWs);
+}
+
+const double FindPeaksConvolve::PeakResult::getAttribute(const std::string &attrString) const {
+  if (attrString == "PeakCentre") {
+    return centre;
+  } else if (attrString == "PeakYPosition") {
+    return height;
+  } else if (attrString == "PeakIOverSigma") {
+    return iOverSigma;
+  } else {
+    return -1.0;
+  }
 }
 } // namespace Mantid::Algorithms

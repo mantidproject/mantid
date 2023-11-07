@@ -43,6 +43,7 @@ private:
     const double centre;
     const double height;
     const double iOverSigma;
+    const double getAttribute(const std::string &attrString) const;
   };
 
   std::unordered_map<std::string, Kernel::IValidator_sptr> m_validators;
@@ -81,6 +82,7 @@ private:
   void createIntermediateWorkspaces(const size_t dataIndex, const Tensor1D &kernel, const Tensor1D &iOverSigma,
                                     const HistogramData::HistogramX *xData);
   void outputResults();
+  void outputResultsTable(const std::string &resultHeader);
 };
 
 } // namespace Mantid::Algorithms
