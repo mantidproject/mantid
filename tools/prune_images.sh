@@ -3,7 +3,7 @@
 # Description: This script can be used to prune the images stored in the /docs/source/images directory.
 #              It will delete any images which are not referenced anywhere else in the Mantid repo.
 #
-# Usage: ./prune_images.sh --dry-run
+# Usage: ./tools/prune_images.sh --dry-run
 IMAGE_DIRECTORY=$PWD"/docs/source/images"
 
 
