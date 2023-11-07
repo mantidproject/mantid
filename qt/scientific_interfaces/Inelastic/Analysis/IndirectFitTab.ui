@@ -102,13 +102,13 @@
   <customwidget>
    <class>MantidQt::CustomInterfaces::IDA::IndirectFitOutputOptionsView</class>
    <extends>QWidget</extends>
-   <header>IndirectFitOutputOptionsView.h</header>
+   <header>Analysis/IndirectFitOutputOptionsView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MantidQt::CustomInterfaces::IDA::IndirectDockWidgetArea</class>
    <extends>QWidget</extends>
-   <header>IndirectDockWidgetArea.h</header>
+   <header>Analysis/IndirectDockWidgetArea.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
