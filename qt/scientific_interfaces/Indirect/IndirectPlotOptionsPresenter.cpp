@@ -50,21 +50,12 @@ IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(IndirectPlotOptionsVi
     : QObject(nullptr), m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceReplaced), m_view(view), m_model(model) {
   setupPresenter(plotType, fixedIndices);
-  m_view->subscribePresenter(this);
 }
 
 IndirectPlotOptionsPresenter::~IndirectPlotOptionsPresenter() { watchADS(false); }
 
 void IndirectPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, std::string const &fixedIndices) {
   watchADS(true);
-
-  connect(m_view, SIGNAL(selectedUnitChanged(std::string const &)), this, SLOT(unitChanged(std::string const &)));
-  connect(m_view, SIGNAL(selectedIndicesChanged(std::string const &)), this, SLOT(indicesChanged(std::string const &)));
-
-  connect(m_view, SIGNAL(plotSpectraClicked()), this, SLOT(plotSpectra()));
-  connect(m_view, SIGNAL(plotBinsClicked()), this, SLOT(plotBins()));
-  connect(m_view, SIGNAL(plotContourClicked()), this, SLOT(plotContour()));
-  connect(m_view, SIGNAL(plotTiledClicked()), this, SLOT(plotTiled()));
 
   m_view->setIndicesRegex(QString::fromStdString(Regexes::WORKSPACE_INDICES));
   m_view->setPlotType(plotType, m_model->availableActions());
@@ -73,6 +64,7 @@ void IndirectPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, st
 
   m_plotType = plotType;
   setOptionsEnabled(false);
+  m_view->subscribePresenter(this);
 }
 
 void IndirectPlotOptionsPresenter::watchADS(bool on) {
@@ -151,20 +143,20 @@ void IndirectPlotOptionsPresenter::setUnit(std::string const &unit) {
 void IndirectPlotOptionsPresenter::setIndices() {
   auto const selectedIndices = m_view->selectedIndices().toStdString();
   if (auto const indices = m_model->indices())
-    indicesChanged(indices.get());
+    notifySelectedIndicesChanged(indices.get());
   else if (!selectedIndices.empty())
-    indicesChanged(selectedIndices);
+    notifySelectedIndicesChanged(selectedIndices);
   else
-    indicesChanged("0");
+    notifySelectedIndicesChanged("0");
 }
 
 void IndirectPlotOptionsPresenter::notifyWorkspaceChanged(std::string const &workspaceName) {
   setWorkspace(workspaceName);
 }
 
-void IndirectPlotOptionsPresenter::unitChanged(std::string const &unit) { setUnit(unit); }
+void IndirectPlotOptionsPresenter::notifySelectedUnitChanged(std::string const &unit) { setUnit(unit); }
 
-void IndirectPlotOptionsPresenter::indicesChanged(std::string const &indices) {
+void IndirectPlotOptionsPresenter::notifySelectedIndicesChanged(std::string const &indices) {
   auto const formattedIndices = m_model->formatIndices(indices);
   m_view->setIndices(QString::fromStdString(formattedIndices));
   m_view->setIndicesErrorLabelVisible(!m_model->setIndices(formattedIndices));
@@ -173,7 +165,7 @@ void IndirectPlotOptionsPresenter::indicesChanged(std::string const &indices) {
     m_view->addIndicesSuggestion(QString::fromStdString(formattedIndices));
 }
 
-void IndirectPlotOptionsPresenter::plotSpectra() {
+void IndirectPlotOptionsPresenter::notifyPlotSpectraClicked() {
   if (validateWorkspaceSize(MantidAxis::Spectrum)) {
     setPlotting(true);
     m_model->plotSpectra();
@@ -181,7 +173,7 @@ void IndirectPlotOptionsPresenter::plotSpectra() {
   }
 }
 
-void IndirectPlotOptionsPresenter::plotBins() {
+void IndirectPlotOptionsPresenter::notifyPlotBinsClicked() {
   if (validateWorkspaceSize(MantidAxis::Bin)) {
     auto const indicesString = m_view->selectedIndices().toStdString();
     if (m_model->validateIndices(indicesString, MantidAxis::Bin)) {
@@ -194,13 +186,13 @@ void IndirectPlotOptionsPresenter::plotBins() {
   }
 }
 
-void IndirectPlotOptionsPresenter::plotContour() {
+void IndirectPlotOptionsPresenter::notifyPlotContourClicked() {
   setPlotting(true);
   m_model->plotContour();
   setPlotting(false);
 }
 
-void IndirectPlotOptionsPresenter::plotTiled() {
+void IndirectPlotOptionsPresenter::notifyPlotTiledClicked() {
   if (validateWorkspaceSize(MantidAxis::Spectrum)) {
     setPlotting(true);
     m_model->plotTiled();

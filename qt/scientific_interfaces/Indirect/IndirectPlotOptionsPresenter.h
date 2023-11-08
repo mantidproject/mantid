@@ -23,6 +23,12 @@ namespace CustomInterfaces {
 class MANTIDQT_INDIRECT_DLL IIndirectPlotOptionsPresenter {
 public:
   virtual void notifyWorkspaceChanged(std::string const &workspaceName) = 0;
+  virtual void notifySelectedUnitChanged(std::string const &unit) = 0;
+  virtual void notifySelectedIndicesChanged(std::string const &indices) = 0;
+  virtual void notifyPlotSpectraClicked() = 0;
+  virtual void notifyPlotBinsClicked() = 0;
+  virtual void notifyPlotContourClicked() = 0;
+  virtual void notifyPlotTiledClicked() = 0;
 };
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public QObject, IIndirectPlotOptionsPresenter {
@@ -39,19 +45,17 @@ public:
   ~IndirectPlotOptionsPresenter() override;
 
   void notifyWorkspaceChanged(std::string const &workspaceName) override;
+  void notifySelectedUnitChanged(std::string const &unit) override;
+  void notifySelectedIndicesChanged(std::string const &indices) override;
+  void notifyPlotSpectraClicked() override;
+  void notifyPlotBinsClicked() override;
+  void notifyPlotContourClicked() override;
+  void notifyPlotTiledClicked() override;
 
   void setPlotType(PlotWidget const &plotType);
 
   void setWorkspaces(std::vector<std::string> const &workspaces);
   void clearWorkspaces();
-
-private slots:
-  void unitChanged(std::string const &unit);
-  void indicesChanged(std::string const &indices);
-  void plotSpectra();
-  void plotBins();
-  void plotContour();
-  void plotTiled();
 
 private:
   void setupPresenter(PlotWidget const &plotType, std::string const &fixedIndices);

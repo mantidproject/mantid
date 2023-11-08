@@ -60,23 +60,15 @@ public:
 
   virtual void displayWarning(QString const &message);
 
-signals:
-  void selectedUnitChanged(std::string const &unit);
-  void selectedIndicesChanged(std::string const &indices);
-  void plotSpectraClicked();
-  void plotBinsClicked();
-  void plotContourClicked();
-  void plotTiledClicked();
-
 private slots:
   void notifySelectedWorkspaceChanged(QString const &workspaceName);
-  void emitSelectedUnitChanged(QString const &unit);
-  void emitSelectedIndicesChanged();
-  void emitSelectedIndicesChanged(QString const &indices);
-  void emitPlotSpectraClicked();
-  void emitPlotBinsClicked();
-  void emitPlotContourClicked();
-  void emitPlotTiledClicked();
+  void notifySelectedUnitChanged(QString const &unit);
+  void notifySelectedIndicesChanged();
+  void notifySelectedIndicesChanged(QString const &indices);
+  void notifyPlotSpectraClicked();
+  void notifyPlotBinsClicked();
+  void notifyPlotContourClicked();
+  void notifyPlotTiledClicked();
 
 private:
   void setupView();

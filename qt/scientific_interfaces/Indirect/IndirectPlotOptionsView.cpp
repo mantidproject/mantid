@@ -77,13 +77,13 @@ void IndirectPlotOptionsView::setupView() {
           SLOT(notifySelectedWorkspaceChanged(QString const &)));
 
   connect(m_plotOptions->cbPlotUnit, SIGNAL(currentTextChanged(QString const &)), this,
-          SLOT(emitSelectedUnitChanged(QString const &)));
+          SLOT(notifySelectedUnitChanged(QString const &)));
 
-  connect(m_plotOptions->leIndices, SIGNAL(editingFinished()), this, SLOT(emitSelectedIndicesChanged()));
+  connect(m_plotOptions->leIndices, SIGNAL(editingFinished()), this, SLOT(notifySelectedIndicesChanged()));
   connect(m_plotOptions->leIndices, SIGNAL(textEdited(QString const &)), this,
-          SLOT(emitSelectedIndicesChanged(QString const &)));
+          SLOT(notifySelectedIndicesChanged(QString const &)));
 
-  connect(m_plotOptions->pbPlotSpectra, SIGNAL(clicked()), this, SLOT(emitPlotSpectraClicked()));
+  connect(m_plotOptions->pbPlotSpectra, SIGNAL(clicked()), this, SLOT(notifyPlotSpectraClicked()));
 
   setIndicesErrorLabelVisible(false);
 
@@ -99,40 +99,40 @@ void IndirectPlotOptionsView::notifySelectedWorkspaceChanged(QString const &work
   m_presenter->notifyWorkspaceChanged(workspaceName.toStdString());
 }
 
-void IndirectPlotOptionsView::emitSelectedUnitChanged(QString const &unit) {
+void IndirectPlotOptionsView::notifySelectedUnitChanged(QString const &unit) {
   if (!unit.isEmpty()) {
-    emit selectedUnitChanged(displayStrToUnitId.at(unit.toStdString()));
+    m_presenter->notifySelectedUnitChanged(displayStrToUnitId.at(unit.toStdString()));
   }
 }
 
-void IndirectPlotOptionsView::emitSelectedIndicesChanged() {
-  emit selectedIndicesChanged(selectedIndices().toStdString());
+void IndirectPlotOptionsView::notifySelectedIndicesChanged() {
+  m_presenter->notifySelectedIndicesChanged(selectedIndices().toStdString());
 }
 
-void IndirectPlotOptionsView::emitSelectedIndicesChanged(QString const &spectra) {
+void IndirectPlotOptionsView::notifySelectedIndicesChanged(QString const &spectra) {
   if (spectra.isEmpty()) {
-    emit selectedIndicesChanged(spectra.toStdString());
+    m_presenter->notifySelectedIndicesChanged(spectra.toStdString());
   }
 }
 
-void IndirectPlotOptionsView::emitPlotSpectraClicked() {
-  emitSelectedIndicesChanged();
-  emit plotSpectraClicked();
+void IndirectPlotOptionsView::notifyPlotSpectraClicked() {
+  notifySelectedIndicesChanged();
+  m_presenter->notifyPlotSpectraClicked();
 }
 
-void IndirectPlotOptionsView::emitPlotBinsClicked() {
-  emitSelectedIndicesChanged();
-  emit plotBinsClicked();
+void IndirectPlotOptionsView::notifyPlotBinsClicked() {
+  notifySelectedIndicesChanged();
+  m_presenter->notifyPlotBinsClicked();
 }
 
-void IndirectPlotOptionsView::emitPlotContourClicked() {
-  emitSelectedIndicesChanged();
-  emit plotContourClicked();
+void IndirectPlotOptionsView::notifyPlotContourClicked() {
+  notifySelectedIndicesChanged();
+  m_presenter->notifyPlotContourClicked();
 }
 
-void IndirectPlotOptionsView::emitPlotTiledClicked() {
-  emitSelectedIndicesChanged();
-  emit plotTiledClicked();
+void IndirectPlotOptionsView::notifyPlotTiledClicked() {
+  notifySelectedIndicesChanged();
+  m_presenter->notifyPlotTiledClicked();
 }
 
 void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
@@ -148,10 +148,10 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
   auto plotTiledAction = new QAction(getAction(availableActions, "Plot Tiled"), this);
   plotTiledAction->setIcon(plotTiledIcon());
 
-  connect(plotSpectraAction, SIGNAL(triggered()), this, SLOT(emitPlotSpectraClicked()));
-  connect(plotBinAction, SIGNAL(triggered()), this, SLOT(emitPlotBinsClicked()));
-  connect(plotContourAction, SIGNAL(triggered()), this, SLOT(emitPlotContourClicked()));
-  connect(plotTiledAction, SIGNAL(triggered()), this, SLOT(emitPlotTiledClicked()));
+  connect(plotSpectraAction, SIGNAL(triggered()), this, SLOT(notifyPlotSpectraClicked()));
+  connect(plotBinAction, SIGNAL(triggered()), this, SLOT(notifyPlotBinsClicked()));
+  connect(plotContourAction, SIGNAL(triggered()), this, SLOT(notifyPlotContourClicked()));
+  connect(plotTiledAction, SIGNAL(triggered()), this, SLOT(notifyPlotTiledClicked()));
 
   m_plotOptions->tbPlot->setVisible(true);
   m_plotOptions->pbPlotSpectra->setVisible(true);
