@@ -56,6 +56,7 @@ IndirectPlotOptionsPresenter::~IndirectPlotOptionsPresenter() { watchADS(false);
 
 void IndirectPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, std::string const &fixedIndices) {
   watchADS(true);
+  m_view->subscribePresenter(this);
 
   m_view->setIndicesRegex(QString::fromStdString(Regexes::WORKSPACE_INDICES));
   m_view->setPlotType(plotType, m_model->availableActions());
@@ -64,7 +65,6 @@ void IndirectPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, st
 
   m_plotType = plotType;
   setOptionsEnabled(false);
-  m_view->subscribePresenter(this);
 }
 
 void IndirectPlotOptionsPresenter::watchADS(bool on) {
