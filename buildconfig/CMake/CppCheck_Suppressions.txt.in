@@ -128,9 +128,9 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWor
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Utils.h:165
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Utils.h:195
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/EventList.h:144
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:967
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1063
-derefInvalidIterator:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1528
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:972
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1068
+derefInvalidIterator:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1533
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/OrientedLattice.cpp:234
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/NiggliCell.cpp:233
 constVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ScalarUtils.cpp:389
