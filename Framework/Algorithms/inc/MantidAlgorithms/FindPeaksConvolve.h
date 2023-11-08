@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
 
@@ -81,8 +82,15 @@ private:
   Eigen::VectorXd generateNormalPDF(const int peakExtentBinNumber) const;
   void createIntermediateWorkspaces(const size_t dataIndex, const Tensor1D &kernel, const Tensor1D &iOverSigma,
                                     const HistogramData::HistogramX *xData);
+  void outputIntermediateWorkspace(const size_t dataIndex, const std::string &wsName, const std::vector<double> &xData,
+                                   const std::vector<double> &yData);
   void outputResults();
   void outputResultsTable(const std::string &resultHeader);
+  std::unordered_map<std::string, API::ITableWorkspace_sptr>
+  createOutputTables(const std::vector<std::string> &outputTblNames);
+  std::string populateOutputWorkspaces(const std::vector<std::string> &outputTblNames,
+                                       const std::unordered_map<std::string, API::ITableWorkspace_sptr> &outputTbls);
+  API::WorkspaceGroup_sptr groupOutputWorkspaces(const std::vector<std::string> &outputTblNames);
 };
 
 } // namespace Mantid::Algorithms

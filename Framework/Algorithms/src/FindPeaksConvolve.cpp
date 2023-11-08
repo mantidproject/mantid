@@ -12,7 +12,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/IValidator.h"
@@ -363,29 +362,45 @@ void FindPeaksConvolve::createIntermediateWorkspaces(const size_t dataIndex, con
     xDataMap = std::make_unique<EigenMap_const>(EigenMap_const(&xData->front(), xData->size()));
   }
 
-  API::Algorithm_sptr alg{createChildAlgorithm("CreateWorkspace")};
-  alg->setProperty("OutputWorkspace", "iOverSigma");
-  alg->setProperty("DataX", std::vector<double>(xDataMap->data(), xDataMap->data() + xDataMap->rows()));
-  alg->setProperty("DataY", std::vector<double>(iOverSigma.data(), iOverSigma.data() + iOverSigma.size()));
-  alg->execute();
-  API::MatrixWorkspace_sptr algOutput = alg->getProperty("OutputWorkspace");
-  API::AnalysisDataService::Instance().addOrReplace(
-      m_inputDataWS->getName() + "_iOverSigma_" + std::to_string(m_specNums[dataIndex]), algOutput);
+  outputIntermediateWorkspace(dataIndex, "iOverSigma",
+                              std::vector<double>(xDataMap->data(), xDataMap->data() + xDataMap->rows()),
+                              std::vector<double>(iOverSigma.data(), iOverSigma.data() + iOverSigma.size()));
 
   std::vector<double> xKernelData(kernel.size());
   std::iota(std::begin(xKernelData), std::end(xKernelData), 0.0);
-  alg->resetProperties();
-  alg->setProperty("OutputWorkspace", "kernel");
-  alg->setProperty("DataX", std::move(xKernelData));
-  alg->setProperty("DataY", std::vector<double>(kernel.data(), kernel.data() + kernel.size()));
+
+  outputIntermediateWorkspace(dataIndex, "kernel", std::move(xKernelData),
+                              std::vector<double>(kernel.data(), kernel.data() + kernel.size()));
+}
+
+void FindPeaksConvolve::outputIntermediateWorkspace(const size_t dataIndex, const std::string &wsName,
+                                                    const std::vector<double> &xData,
+                                                    const std::vector<double> &yData) {
+  API::Algorithm_sptr alg{createChildAlgorithm("CreateWorkspace")};
+  alg->setProperty("OutputWorkspace", wsName);
+  alg->setProperty("DataX", xData);
+  alg->setProperty("DataY", yData);
   alg->execute();
-  API::MatrixWorkspace_sptr algKernelOutput = alg->getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr algOutput = alg->getProperty("OutputWorkspace");
   API::AnalysisDataService::Instance().addOrReplace(
-      m_inputDataWS->getName() + "_kernel_" + std::to_string(m_specNums[dataIndex]), algKernelOutput);
+      m_inputDataWS->getName() + "_" + wsName + "_" + std::to_string(m_specNums[dataIndex]), algOutput);
 }
 
 void FindPeaksConvolve::outputResults() {
   const std::vector<std::string> outputTblNames{"PeakCentre", "PeakYPosition", "PeakIOverSigma"};
+  std::unordered_map<std::string, API::ITableWorkspace_sptr> outputTbls{createOutputTables(outputTblNames)};
+
+  std::string noPeaksStr{populateOutputWorkspaces(outputTblNames, outputTbls)};
+  if (noPeaksStr != "") {
+    g_log.warning("No peaks found for spectrum index: " + noPeaksStr);
+  }
+
+  API::WorkspaceGroup_sptr groupWs{groupOutputWorkspaces(outputTblNames)};
+  setProperty("OutputWorkspace", groupWs);
+}
+
+std::unordered_map<std::string, API::ITableWorkspace_sptr>
+FindPeaksConvolve::createOutputTables(const std::vector<std::string> &outputTblNames) {
   std::unordered_map<std::string, API::ITableWorkspace_sptr> outputTbls;
   for (const auto &name : outputTblNames) {
     auto tbl = outputTbls.emplace(name, API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
@@ -395,7 +410,22 @@ void FindPeaksConvolve::outputResults() {
     }
     API::AnalysisDataService::Instance().addOrReplace(name, tbl.first->second);
   }
+  return outputTbls;
+}
 
+API::WorkspaceGroup_sptr FindPeaksConvolve::groupOutputWorkspaces(const std::vector<std::string> &outputTblNames) {
+  API::Algorithm_sptr alg{createChildAlgorithm("GroupWorkspaces")};
+  alg->initialize();
+  alg->setProperty("InputWorkspaces", outputTblNames);
+  alg->setProperty("OutputWorkspace", "GroupResults");
+  alg->execute();
+  API::WorkspaceGroup_sptr groupWs = alg->getProperty("OutputWorkspace");
+  return groupWs;
+}
+
+std::string FindPeaksConvolve::populateOutputWorkspaces(
+    const std::vector<std::string> &outputTblNames,
+    const std::unordered_map<std::string, API::ITableWorkspace_sptr> &outputTbls) {
   std::string noPeaksStr{""};
   for (size_t i{0}; i < m_peakResults.size(); i++) {
     const auto spec = std::move(m_peakResults[i]);
@@ -412,17 +442,7 @@ void FindPeaksConvolve::outputResults() {
       noPeaksStr += std::to_string(i) + ", ";
     }
   }
-  if (noPeaksStr != "") {
-    g_log.warning("No peaks found for spectrum index: " + noPeaksStr);
-  }
-
-  API::Algorithm_sptr alg{createChildAlgorithm("GroupWorkspaces")};
-  alg->initialize();
-  alg->setProperty("InputWorkspaces", outputTblNames);
-  alg->setProperty("OutputWorkspace", "GroupResults");
-  alg->execute();
-  API::WorkspaceGroup_sptr groupWs = alg->getProperty("OutputWorkspace");
-  setProperty("OutputWorkspace", groupWs);
+  return noPeaksStr;
 }
 
 const double FindPeaksConvolve::PeakResult::getAttribute(const std::string &attrString) const {
