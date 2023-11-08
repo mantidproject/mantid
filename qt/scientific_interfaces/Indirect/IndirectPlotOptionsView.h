@@ -61,7 +61,6 @@ public:
   virtual void displayWarning(QString const &message);
 
 signals:
-  void selectedWorkspaceChanged(std::string const &workspaceName);
   void selectedUnitChanged(std::string const &unit);
   void selectedIndicesChanged(std::string const &indices);
   void plotSpectraClicked();
@@ -70,7 +69,7 @@ signals:
   void plotTiledClicked();
 
 private slots:
-  void emitSelectedWorkspaceChanged(QString const &workspaceName);
+  void notifySelectedWorkspaceChanged(QString const &workspaceName);
   void emitSelectedUnitChanged(QString const &unit);
   void emitSelectedIndicesChanged();
   void emitSelectedIndicesChanged(QString const &indices);

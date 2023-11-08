@@ -38,7 +38,7 @@ public:
                                PlotWidget const &plotType = PlotWidget::Spectra, std::string const &fixedIndices = "");
   ~IndirectPlotOptionsPresenter() override;
 
-  void notifyWorkspaceChanged(std::string const &workspaceName) override{};
+  void notifyWorkspaceChanged(std::string const &workspaceName) override;
 
   void setPlotType(PlotWidget const &plotType);
 
@@ -46,7 +46,6 @@ public:
   void clearWorkspaces();
 
 private slots:
-  void workspaceChanged(std::string const &workspaceName);
   void unitChanged(std::string const &unit);
   void indicesChanged(std::string const &indices);
   void plotSpectra();

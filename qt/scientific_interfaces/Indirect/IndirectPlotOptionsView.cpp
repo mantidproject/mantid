@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectPlotOptionsView.h"
+#include "IndirectPlotOptionsPresenter.h"
 
 #include "MantidQtIcons/Icon.h"
 
@@ -73,7 +74,7 @@ IndirectPlotOptionsView::~IndirectPlotOptionsView() = default;
 
 void IndirectPlotOptionsView::setupView() {
   connect(m_plotOptions->cbWorkspace, SIGNAL(currentTextChanged(QString const &)), this,
-          SLOT(emitSelectedWorkspaceChanged(QString const &)));
+          SLOT(notifySelectedWorkspaceChanged(QString const &)));
 
   connect(m_plotOptions->cbPlotUnit, SIGNAL(currentTextChanged(QString const &)), this,
           SLOT(emitSelectedUnitChanged(QString const &)));
@@ -94,8 +95,8 @@ void IndirectPlotOptionsView::setupView() {
 
 void IndirectPlotOptionsView::subscribePresenter(IIndirectPlotOptionsPresenter *presenter) { m_presenter = presenter; }
 
-void IndirectPlotOptionsView::emitSelectedWorkspaceChanged(QString const &workspaceName) {
-  emit selectedWorkspaceChanged(workspaceName.toStdString());
+void IndirectPlotOptionsView::notifySelectedWorkspaceChanged(QString const &workspaceName) {
+  m_presenter->notifyWorkspaceChanged(workspaceName.toStdString());
 }
 
 void IndirectPlotOptionsView::emitSelectedUnitChanged(QString const &unit) {

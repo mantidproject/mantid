@@ -58,8 +58,6 @@ IndirectPlotOptionsPresenter::~IndirectPlotOptionsPresenter() { watchADS(false);
 void IndirectPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, std::string const &fixedIndices) {
   watchADS(true);
 
-  connect(m_view, SIGNAL(selectedWorkspaceChanged(std::string const &)), this,
-          SLOT(workspaceChanged(std::string const &)));
   connect(m_view, SIGNAL(selectedUnitChanged(std::string const &)), this, SLOT(unitChanged(std::string const &)));
   connect(m_view, SIGNAL(selectedIndicesChanged(std::string const &)), this, SLOT(indicesChanged(std::string const &)));
 
@@ -121,14 +119,14 @@ void IndirectPlotOptionsPresenter::onWorkspaceReplaced(WorkspaceBeforeReplaceNot
   if (auto const newWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
     auto const newName = newWorkspace->getName();
     if (newName == m_view->selectedWorkspace().toStdString())
-      workspaceChanged(newName);
+      notifyWorkspaceChanged(newName);
   }
 }
 
 void IndirectPlotOptionsPresenter::setWorkspaces(std::vector<std::string> const &workspaces) {
   auto const workspaceNames = m_model->getAllWorkspaceNames(workspaces);
   m_view->setWorkspaces(workspaceNames);
-  workspaceChanged(workspaceNames.front());
+  notifyWorkspaceChanged(workspaceNames.front());
 }
 
 void IndirectPlotOptionsPresenter::setWorkspace(std::string const &plotWorkspace) {
@@ -160,7 +158,9 @@ void IndirectPlotOptionsPresenter::setIndices() {
     indicesChanged("0");
 }
 
-void IndirectPlotOptionsPresenter::workspaceChanged(std::string const &workspaceName) { setWorkspace(workspaceName); }
+void IndirectPlotOptionsPresenter::notifyWorkspaceChanged(std::string const &workspaceName) {
+  setWorkspace(workspaceName);
+}
 
 void IndirectPlotOptionsPresenter::unitChanged(std::string const &unit) { setUnit(unit); }
 
