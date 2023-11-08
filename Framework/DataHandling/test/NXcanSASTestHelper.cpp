@@ -132,11 +132,9 @@ Mantid::API::MatrixWorkspace_sptr provide1DWorkspace(NXcanSASTestParameters &par
   boost::to_lower(geometry);
   if (geometry == "cylinder") {
     sample.setGeometryFlag(1);
-  }
-  if (geometry == "flat plate" || geometry == "flatplate") {
+  } else if (geometry == "flat plate" || geometry == "flatplate") {
     sample.setGeometryFlag(2);
-  }
-  if (geometry == "disc") {
+  } else if (geometry == "disc") {
     sample.setGeometryFlag(3);
   }
   sample.setHeight(parameters.beamHeight);

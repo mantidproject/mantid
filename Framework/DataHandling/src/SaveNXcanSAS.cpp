@@ -795,7 +795,7 @@ void SaveNXcanSAS::init() {
   declareProperty("CanScatterRunNumber", "", "The run number for the can scatter workspace. Optional.");
   declareProperty("CanDirectRunNumber", "", "The run number for the can direct workspace. Optional.");
 
-  std::vector<std::string> const geometryOptions{"Cylinder", "FlatPlate", "Disc", "Unknown"};
+  std::vector<std::string> const geometryOptions{"Cylinder", "FlatPlate", "Flat plate", "Disc", "Unknown"};
   declareProperty("Geometry", "Unknown", std::make_shared<Kernel::StringListValidator>(geometryOptions),
                   "The geometry type of the collimation.");
   declareProperty("SampleHeight", 0.0,

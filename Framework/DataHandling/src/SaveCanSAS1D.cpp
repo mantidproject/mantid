@@ -100,10 +100,7 @@ void SaveCanSAS1D::init() {
 
   // Collimation information
   std::vector<std::string> collimationGeometry{
-      "Cylinder",
-      "Flat plate",
-      "Disc",
-      "Unknown",
+      "Cylinder", "FlatPlate", "Flat plate", "Disc", "Unknown",
   };
   declareProperty("Geometry", "Unknown", std::make_shared<Kernel::StringListValidator>(collimationGeometry),
                   "The geometry type of the collimation.");
