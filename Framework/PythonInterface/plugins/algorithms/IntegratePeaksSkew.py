@@ -266,7 +266,7 @@ class PeakData:
                 if len(xvals) > signal.shape[-1]:
                     xvals = 0.5 * (xvals[:-1] + xvals[1:])  # convert to bin centers
                 xcens[irow, icol, :] = xvals
-        return xcens, signal, errors
+        return xcens, signal, errors**2, ispecs
 
     def get_roi_on_detector(self, detids):
         isort = np.argsort(detids.flatten())

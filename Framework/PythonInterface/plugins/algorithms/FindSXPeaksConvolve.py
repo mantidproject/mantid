@@ -157,12 +157,12 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
 
             # get data in detector coords
             peak_data = array_converter.get_peak_data(dummy_pk, detid, bank.getName(), bank.xpixels(), bank.ypixels(), 1, 1)
-            _, y, e = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
+            _, y, esq, _ = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
             # perform convolutions to integrate kernel/shoebox
             # pad with nearest so don't get peaks at edge when -ve values go outside data extent
             kernel = make_kernel(nrows, ncols, nbins)
             yconv = convolve(input=y, weights=kernel, mode="nearest")
-            econv = np.sqrt(convolve(input=e**2, weights=kernel**2, mode="nearest"))
+            econv = np.sqrt(convolve(input=esq, weights=kernel**2, mode="nearest"))
             with np.errstate(divide="ignore", invalid="ignore"):
                 intens_over_sig = yconv / econv  # ignore 0/0 which produces NaN (recall NaN > x = False)
 
