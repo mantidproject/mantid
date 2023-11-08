@@ -143,7 +143,7 @@ std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::str
 
 std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
                                       InstrumentData const &instData, IETRunData const &runData) {
-  auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransferWrapper");
+  auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
   reductionAlg->initialize();
 
   setInstrumentProperties(reductionAlg, instData);
