@@ -25,16 +25,13 @@ std::vector<std::string> IQTFIT_HIDDEN_PROPS =
 namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectDataAnalysisIqtFitTab::IndirectDataAnalysisIqtFitTab(QWidget *parent)
-    : IndirectDataAnalysisTab(new IqtFitModel, parent) {
+    : IndirectDataAnalysisTab(new IqtFitModel, new IqtTemplateBrowser, IQTFIT_HIDDEN_PROPS, parent) {
   m_uiForm->dockArea->setFitDataView(new IndirectFitDataView(m_uiForm->dockArea));
   setFitDataPresenter(
       std::make_unique<IndirectFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-  auto templateBrowser = new IqtTemplateBrowser;
-  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
-  setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
-  m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(IQTFIT_HIDDEN_PROPS);
+
   setRunButton(m_uiForm->pbRun);
 
   setEditResultVisible(true);

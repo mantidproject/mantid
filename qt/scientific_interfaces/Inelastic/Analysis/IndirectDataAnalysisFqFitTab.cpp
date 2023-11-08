@@ -31,22 +31,20 @@ std::vector<std::string> FQFIT_HIDDEN_PROPS =
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
 IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
-    : IndirectDataAnalysisTab(new FqFitModel, parent) {
-  auto parameterEstimation = createParameterEstimation();
-  auto templateBrowser = new SingleFunctionTemplateBrowser(
-      widthFits, std::make_unique<IDAFunctionParameterEstimation>(parameterEstimation));
+    : IndirectDataAnalysisTab(
+          new FqFitModel,
+          new SingleFunctionTemplateBrowser(
+              widthFits, std::make_unique<IDAFunctionParameterEstimation>(createParameterEstimation())),
+          FQFIT_HIDDEN_PROPS, parent) {
+  // m_fitPropertyBrowser->updateAvailableFunctions(availableFits.at(DataType::ALL));
 
   m_uiForm->dockArea->setFitDataView(new FqFitDataView(m_uiForm->dockArea));
-  setFitDataPresenter(std::make_unique<FqFitDataPresenter>(m_fittingModel->getFitDataModel(),
-                                                           m_uiForm->dockArea->m_fitDataView, templateBrowser));
+  setFitDataPresenter(
+      std::make_unique<FqFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   m_plotPresenter->setXBounds({0.0, 2.0});
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
 
-  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
-  templateBrowser->updateAvailableFunctions(availableFits.at(DataType::ALL));
-  setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
-  m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(FQFIT_HIDDEN_PROPS);
   setRunButton(m_uiForm->pbRun);
 
   setEditResultVisible(false);

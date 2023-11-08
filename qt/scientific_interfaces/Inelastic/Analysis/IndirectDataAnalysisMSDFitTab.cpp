@@ -42,18 +42,17 @@ auto msdFunctionStrings =
                                                "Sigma>0)"}});
 
 IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
-    : IndirectDataAnalysisTab(new MSDFitModel, parent) {
+    : IndirectDataAnalysisTab(
+          new MSDFitModel,
+          new SingleFunctionTemplateBrowser(
+              msdFunctionStrings, std::make_unique<IDAFunctionParameterEstimation>(createParameterEstimation())),
+          MSDFIT_HIDDEN_PROPS, parent) {
   m_uiForm->dockArea->setFitDataView(new IndirectFitDataView(m_uiForm->dockArea));
   setFitDataPresenter(
       std::make_unique<IndirectFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-  auto parameterEstimation = createParameterEstimation();
-  auto templateBrowser = new SingleFunctionTemplateBrowser(
-      msdFunctionStrings, std::make_unique<IDAFunctionParameterEstimation>(parameterEstimation));
-  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
-  setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
-  m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(MSDFIT_HIDDEN_PROPS);
+
   setRunButton(m_uiForm->pbRun);
 
   setEditResultVisible(false);

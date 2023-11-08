@@ -139,12 +139,10 @@ public:
     m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
 
     m_dataTable = createEmptyTableWidget(6, 5);
-    m_SingleFunctionTemplateBrowser = std::make_unique<SingleFunctionTemplateBrowserMock>();
 
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
 
-    m_presenter = std::make_unique<FqFitDataPresenter>(std::move(m_model.get()), std::move(m_view.get()),
-                                                       m_SingleFunctionTemplateBrowser.get());
+    m_presenter = std::make_unique<FqFitDataPresenter>(std::move(m_model.get()), std::move(m_view.get()));
     m_workspace = createWorkspaceWithTextAxis(6, getTextAxisLabels());
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
   }
@@ -201,7 +199,6 @@ public:
 
 private:
   std::unique_ptr<QTableWidget> m_dataTable;
-  std::unique_ptr<SingleFunctionTemplateBrowserMock> m_SingleFunctionTemplateBrowser;
 
   std::unique_ptr<MockFqFitDataView> m_view;
   std::unique_ptr<MockIndirectFitDataModel> m_model;

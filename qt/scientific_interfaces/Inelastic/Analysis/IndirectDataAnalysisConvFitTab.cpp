@@ -25,11 +25,8 @@ std::vector<std::string> CONVFIT_HIDDEN_PROPS = std::vector<std::string>(
 namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
-    : IndirectDataAnalysisTab(new ConvFitModel, parent) {
+    : IndirectDataAnalysisTab(new ConvFitModel, new ConvTemplateBrowser, CONVFIT_HIDDEN_PROPS, parent) {
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(new ConvTemplateBrowser);
-  setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
-  m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(CONVFIT_HIDDEN_PROPS);
 
   m_uiForm->dockArea->setFitDataView(new ConvFitDataView(m_uiForm->dockArea));
   auto dataPresenter =

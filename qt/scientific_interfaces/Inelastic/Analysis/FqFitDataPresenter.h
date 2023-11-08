@@ -32,8 +32,7 @@ namespace IDA {
 class MANTIDQT_INELASTIC_DLL FqFitDataPresenter : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  FqFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view,
-                     IFQFitObserver *SingleFunctionTemplateBrowser);
+  FqFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
   void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) override;
   void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) override;
   void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true) override;
@@ -61,7 +60,6 @@ private:
   std::string m_activeParameterType;
   WorkspaceID m_activeWorkspaceID;
 
-  Notifier<IFQFitObserver> m_notifier;
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 

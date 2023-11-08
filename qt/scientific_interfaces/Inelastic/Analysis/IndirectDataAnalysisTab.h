@@ -36,13 +36,13 @@ class MANTIDQT_INELASTIC_DLL IndirectDataAnalysisTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectDataAnalysisTab(IndirectFittingModel *model, QWidget *parent = nullptr);
+  IndirectDataAnalysisTab(IndirectFittingModel *model, FunctionTemplateBrowser *templateBrowser,
+                          std::vector<std::string> const &hiddenProperties, QWidget *parent = nullptr);
   virtual ~IndirectDataAnalysisTab() override = default;
 
   void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
   void setPlotView(IIndirectFitPlotView *view);
   void setOutputOptionsView(IIndirectFitOutputOptionsView *view);
-  void setFitPropertyBrowser(IndirectFitPropertyBrowser *browser);
   WorkspaceID getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
   bool isRangeCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;

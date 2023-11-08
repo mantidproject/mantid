@@ -67,9 +67,15 @@ size_t IndirectDataAnalysisTab::getNumberOfSpecificFunctionContained(const std::
   }
 }
 
-IndirectDataAnalysisTab::IndirectDataAnalysisTab(IndirectFittingModel *model, QWidget *parent)
+IndirectDataAnalysisTab::IndirectDataAnalysisTab(IndirectFittingModel *model, FunctionTemplateBrowser *templateBrowser,
+                                                 std::vector<std::string> const &hiddenProperties, QWidget *parent)
     : IndirectTab(parent), m_fittingModel(model), m_runButton(), m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
+
+  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->init();
+  m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(hiddenProperties);
+  m_fitPropertyBrowser = m_uiForm->dockArea->m_fitPropertyBrowser;
 }
 
 void IndirectDataAnalysisTab::setup() {
@@ -128,11 +134,6 @@ void IndirectDataAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
 
 void IndirectDataAnalysisTab::setOutputOptionsView(IIndirectFitOutputOptionsView *view) {
   m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(view);
-}
-
-void IndirectDataAnalysisTab::setFitPropertyBrowser(IndirectFitPropertyBrowser *browser) {
-  browser->init();
-  m_fitPropertyBrowser = browser;
 }
 
 void IndirectDataAnalysisTab::setRunButton(QPushButton *runButton) { m_runButton = runButton; }
