@@ -8,7 +8,6 @@
 #include "MantidAlgorithms/FindPeaksConvolve.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -445,7 +444,7 @@ std::string FindPeaksConvolve::populateOutputWorkspaces(
   return noPeaksStr;
 }
 
-const double FindPeaksConvolve::PeakResult::getAttribute(const std::string &attrString) const {
+double FindPeaksConvolve::PeakResult::getAttribute(const std::string &attrString) const {
   if (attrString == "PeakCentre") {
     return centre;
   } else if (attrString == "PeakYPosition") {

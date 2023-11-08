@@ -10,8 +10,6 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/FindPeaksConvolve.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 

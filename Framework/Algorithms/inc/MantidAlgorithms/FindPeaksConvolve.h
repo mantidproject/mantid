@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
@@ -30,7 +31,8 @@ typedef Eigen::Map<const Eigen::VectorXd> EigenMap_const;
 
 namespace Mantid::Algorithms {
 
-/** FindPeaksConvolve : TODO: DESCRIPTION
+/** FindPeaksConvolve : Finds peak centres using convolution with a shoebox kernel to approximate the second derivative,
+ * taking maxima above an I/Sigma threshold. Algorithm designed by Richard Waite and implemented by Mial Lewis.
  */
 class MANTID_ALGORITHMS_DLL FindPeaksConvolve : public API::Algorithm {
 public:
@@ -44,7 +46,7 @@ private:
     const double centre;
     const double height;
     const double iOverSigma;
-    const double getAttribute(const std::string &attrString) const;
+    double getAttribute(const std::string &attrString) const;
   };
 
   std::unordered_map<std::string, Kernel::IValidator_sptr> m_validators;
