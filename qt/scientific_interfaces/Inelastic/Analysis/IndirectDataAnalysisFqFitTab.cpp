@@ -35,13 +35,9 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
           new FqFitModel,
           new SingleFunctionTemplateBrowser(
               widthFits, std::make_unique<IDAFunctionParameterEstimation>(createParameterEstimation())),
-          FQFIT_HIDDEN_PROPS, parent) {
+          new FqFitDataView, FQFIT_HIDDEN_PROPS, parent) {
   // m_fitPropertyBrowser->updateAvailableFunctions(availableFits.at(DataType::ALL));
 
-  m_uiForm->dockArea->setFitDataView(new FqFitDataView(m_uiForm->dockArea));
-  setFitDataPresenter(
-      std::make_unique<FqFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView));
-  setPlotView(m_uiForm->dockArea->m_fitPlotView);
   m_plotPresenter->setXBounds({0.0, 2.0});
 }
 

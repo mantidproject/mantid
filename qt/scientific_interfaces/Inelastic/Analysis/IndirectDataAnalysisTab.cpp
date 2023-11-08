@@ -68,6 +68,7 @@ size_t IndirectDataAnalysisTab::getNumberOfSpecificFunctionContained(const std::
 }
 
 IndirectDataAnalysisTab::IndirectDataAnalysisTab(IndirectFittingModel *model, FunctionTemplateBrowser *templateBrowser,
+                                                 IndirectFitDataView *fitDataView,
                                                  std::vector<std::string> const &hiddenProperties, QWidget *parent)
     : IndirectTab(parent), m_fittingModel(model), m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
@@ -76,6 +77,11 @@ IndirectDataAnalysisTab::IndirectDataAnalysisTab(IndirectFittingModel *model, Fu
   m_uiForm->dockArea->m_fitPropertyBrowser->init();
   m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(hiddenProperties);
   m_fitPropertyBrowser = m_uiForm->dockArea->m_fitPropertyBrowser;
+
+  fitDataView->setParent(m_uiForm->dockArea);
+  m_uiForm->dockArea->setFitDataView(fitDataView);
+  setupFitDataPresenter();
+  setupPlotView();
 
   m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(m_uiForm->ovOutputOptionsView);
 }
@@ -123,12 +129,13 @@ void IndirectDataAnalysisTab::connectFitPropertyBrowser() {
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(respondToFunctionChanged()));
 }
 
-void IndirectDataAnalysisTab::setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter) {
-  m_dataPresenter = std::move(presenter);
+void IndirectDataAnalysisTab::setupFitDataPresenter() {
+  m_dataPresenter =
+      std::make_unique<IndirectFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
 }
 
-void IndirectDataAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
-  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(view);
+void IndirectDataAnalysisTab::setupPlotView() {
+  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(m_uiForm->dockArea->m_fitPlotView);
   m_plotPresenter->setFittingData(m_dataPresenter->getFittingData());
   m_plotPresenter->setFitOutput(m_fittingModel->getFitOutput());
   m_plotPresenter->updatePlots();

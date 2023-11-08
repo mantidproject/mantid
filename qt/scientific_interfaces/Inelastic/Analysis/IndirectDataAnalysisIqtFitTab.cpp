@@ -25,12 +25,8 @@ std::vector<std::string> IQTFIT_HIDDEN_PROPS =
 namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectDataAnalysisIqtFitTab::IndirectDataAnalysisIqtFitTab(QWidget *parent)
-    : IndirectDataAnalysisTab(new IqtFitModel, new IqtTemplateBrowser, IQTFIT_HIDDEN_PROPS, parent) {
-  m_uiForm->dockArea->setFitDataView(new IndirectFitDataView(m_uiForm->dockArea));
-  setFitDataPresenter(
-      std::make_unique<IndirectFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView));
-  setPlotView(m_uiForm->dockArea->m_fitPlotView);
-}
+    : IndirectDataAnalysisTab(new IqtFitModel, new IqtTemplateBrowser, new IndirectFitDataView, IQTFIT_HIDDEN_PROPS,
+                              parent) {}
 
 EstimationDataSelector IndirectDataAnalysisIqtFitTab::getEstimationDataSelector() const {
   return
