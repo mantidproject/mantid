@@ -22,6 +22,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IIndirectPlotOptionsPresenter;
+
 enum PlotWidget { Spectra, SpectraBin, SpectraContour, SpectraTiled, SpectraUnit, SpectraContourUnit };
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsView : public API::MantidWidget {
@@ -30,6 +32,8 @@ class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsView : public API::MantidWidget {
 public:
   IndirectPlotOptionsView(QWidget *parent = nullptr);
   virtual ~IndirectPlotOptionsView() override;
+
+  void subscribePresenter(IIndirectPlotOptionsPresenter *presenter);
 
   virtual void setPlotType(PlotWidget const &plotType, std::map<std::string, std::string> const &availableActions);
   virtual void setWorkspaceComboBoxEnabled(bool enable);
@@ -84,6 +88,8 @@ private:
   std::unique_ptr<QStringListModel> m_suggestionsModel;
   std::unique_ptr<QCompleter> m_completer;
   std::unique_ptr<Ui::IndirectPlotOptions> m_plotOptions;
+
+  IIndirectPlotOptionsPresenter *m_presenter;
 };
 
 } // namespace CustomInterfaces

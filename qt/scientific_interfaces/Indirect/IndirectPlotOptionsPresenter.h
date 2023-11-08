@@ -20,7 +20,12 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public QObject {
+class MANTIDQT_INDIRECT_DLL IIndirectPlotOptionsPresenter {
+public:
+  virtual void notifyWorkspaceChanged(std::string const &workspaceName) = 0;
+};
+
+class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public QObject, IIndirectPlotOptionsPresenter {
   Q_OBJECT
 
 public:
@@ -32,6 +37,8 @@ public:
   IndirectPlotOptionsPresenter(IndirectPlotOptionsView *view, IndirectPlotOptionsModel *model,
                                PlotWidget const &plotType = PlotWidget::Spectra, std::string const &fixedIndices = "");
   ~IndirectPlotOptionsPresenter() override;
+
+  void notifyWorkspaceChanged(std::string const &workspaceName) override{};
 
   void setPlotType(PlotWidget const &plotType);
 

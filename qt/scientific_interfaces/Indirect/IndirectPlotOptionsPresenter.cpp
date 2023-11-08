@@ -50,6 +50,7 @@ IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(IndirectPlotOptionsVi
     : QObject(nullptr), m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceReplaced), m_view(view), m_model(model) {
   setupPresenter(plotType, fixedIndices);
+  m_view->subscribePresenter(this);
 }
 
 IndirectPlotOptionsPresenter::~IndirectPlotOptionsPresenter() { watchADS(false); }

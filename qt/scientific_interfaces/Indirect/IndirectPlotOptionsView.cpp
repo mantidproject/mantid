@@ -92,6 +92,8 @@ void IndirectPlotOptionsView::setupView() {
   m_plotOptions->leIndices->setCompleter(m_completer.get());
 }
 
+void IndirectPlotOptionsView::subscribePresenter(IIndirectPlotOptionsPresenter *presenter) { m_presenter = presenter; }
+
 void IndirectPlotOptionsView::emitSelectedWorkspaceChanged(QString const &workspaceName) {
   emit selectedWorkspaceChanged(workspaceName.toStdString());
 }
