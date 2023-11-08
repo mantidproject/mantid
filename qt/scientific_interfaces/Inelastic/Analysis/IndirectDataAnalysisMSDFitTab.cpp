@@ -11,14 +11,9 @@
 
 #include "FunctionBrowser/SingleFunctionTemplateBrowser.h"
 
-#include "MantidQtWidgets/Common/UserInputValidator.h"
-
-#include "MantidAPI/FunctionFactory.h"
-
 using namespace Mantid::API;
 
 namespace {
-Mantid::Kernel::Logger g_log("MSDFit");
 std::vector<std::string> MSDFIT_HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
@@ -27,13 +22,7 @@ const std::string MSDGAUSSFUNC{"MsdGauss"};
 const std::string MSDPETERSFUNC{"MsdPeters"};
 const std::string MSDYIFUNC{"MsdYi"};
 
-} // namespace
-
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
-
-auto msdFunctionStrings =
+auto MSD_FUNCTION_STRINGS =
     std::map<std::string, std::string>({{"None", ""},
                                         {"Gauss", "name=MsdGauss,Height=1,Msd=0.05,constraints=(Height>0, Msd>0)"},
                                         {"Peters", "name=MsdPeters,Height=1,Msd=0.05,Beta=1,constraints=(Height>0, "
@@ -41,11 +30,17 @@ auto msdFunctionStrings =
                                         {"Yi", "name=MsdYi,Height=1,Msd=0.05,Sigma=1,constraints=(Height>0, Msd>0, "
                                                "Sigma>0)"}});
 
+} // namespace
+
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace IDA {
+
 IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
     : IndirectDataAnalysisTab(
           new MSDFitModel,
           new SingleFunctionTemplateBrowser(
-              msdFunctionStrings, std::make_unique<IDAFunctionParameterEstimation>(createParameterEstimation())),
+              MSD_FUNCTION_STRINGS, std::make_unique<IDAFunctionParameterEstimation>(createParameterEstimation())),
           new IndirectFitDataView, MSDFIT_HIDDEN_PROPS, parent) {}
 
 EstimationDataSelector IndirectDataAnalysisMSDFitTab::getEstimationDataSelector() const {

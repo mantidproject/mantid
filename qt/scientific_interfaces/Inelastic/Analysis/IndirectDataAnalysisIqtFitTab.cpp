@@ -10,13 +10,9 @@
 #include "IndirectFitPlotView.h"
 #include "IqtFitModel.h"
 
-#include "MantidAPI/FunctionFactory.h"
-
-using namespace Mantid;
 using namespace Mantid::API;
 
 namespace {
-Mantid::Kernel::Logger g_log("IqtFit");
 std::vector<std::string> IQTFIT_HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
@@ -29,14 +25,14 @@ IndirectDataAnalysisIqtFitTab::IndirectDataAnalysisIqtFitTab(QWidget *parent)
                               parent) {}
 
 EstimationDataSelector IndirectDataAnalysisIqtFitTab::getEstimationDataSelector() const {
-  return
-      [](const MantidVec &x, const MantidVec &y, const std::pair<double, double> range) -> DataForParameterEstimation {
-        (void)range;
-        size_t const n = 4;
-        if (y.size() < n + 1)
-          return DataForParameterEstimation{{}, {}};
-        return DataForParameterEstimation{{x[0], x[n]}, {y[0], y[n]}};
-      };
+  return [](const Mantid::MantidVec &x, const Mantid::MantidVec &y,
+            const std::pair<double, double> range) -> DataForParameterEstimation {
+    (void)range;
+    size_t const n = 4;
+    if (y.size() < n + 1)
+      return DataForParameterEstimation{{}, {}};
+    return DataForParameterEstimation{{x[0], x[n]}, {y[0], y[n]}};
+  };
 }
 
 std::string IndirectDataAnalysisIqtFitTab::getFitTypeString() const {

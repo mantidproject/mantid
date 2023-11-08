@@ -10,16 +10,29 @@
 #include "FunctionBrowser/ConvTemplateBrowser.h"
 #include "IndirectFitPlotView.h"
 
-#include "MantidAPI/FunctionFactory.h"
-
-using namespace Mantid;
 using namespace Mantid::API;
 
 namespace {
-Mantid::Kernel::Logger g_log("ConvFit");
 
 std::vector<std::string> CONVFIT_HIDDEN_PROPS = std::vector<std::string>(
     {"CreateOutput", "LogValue", "PassWSIndexToFunction", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
+
+auto FUNCTION_STRINGS = std::unordered_map<std::string, std::string>({{"Lorentzian", "L"},
+                                                                      {"StretchedExpFT", "SFT"},
+                                                                      {"TeixeiraWaterSQE", "TxWater"},
+                                                                      {"FickDiffusionSQE", "FickDiff"},
+                                                                      {"ChudleyElliotSQE", "ChudElliot"},
+                                                                      {"HallRossSQE", "HallRoss"},
+                                                                      {"DiffRotDiscreteCircle", "DC"},
+                                                                      {"ElasticDiffRotDiscreteCircle", "EDC"},
+                                                                      {"InelasticDiffRotDiscreteCircle", "IDC"},
+                                                                      {"DiffSphere", "DS"},
+                                                                      {"ElasticDiffSphere", "EDS"},
+                                                                      {"InelasticDiffSphere", "IDS"},
+                                                                      {"IsoRotDiff", "IRD"},
+                                                                      {"ElasticIsoRotDiff", "EIRD"},
+                                                                      {"InelasticIsoRotDiff", "IIRD"}});
+
 } // namespace
 
 namespace MantidQt::CustomInterfaces::IDA {
@@ -28,29 +41,11 @@ IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
     : IndirectDataAnalysisTab(new ConvFitModel, new ConvTemplateBrowser, new ConvFitDataView, CONVFIT_HIDDEN_PROPS,
                               parent) {
   setConvolveMembers(true);
-
-  // Initialise fitTypeStrings
-  m_fitStrings["Lorentzian"] = "L";
-  m_fitStrings["StretchedExpFT"] = "SFT";
-  m_fitStrings["TeixeiraWaterSQE"] = "TxWater";
-  m_fitStrings["FickDiffusionSQE"] = "FickDiff";
-  m_fitStrings["ChudleyElliotSQE"] = "ChudElliot";
-  m_fitStrings["HallRossSQE"] = "HallRoss";
-  m_fitStrings["DiffRotDiscreteCircle"] = "DC";
-  m_fitStrings["ElasticDiffRotDiscreteCircle"] = "EDC";
-  m_fitStrings["InelasticDiffRotDiscreteCircle"] = "IDC";
-  m_fitStrings["DiffSphere"] = "DS";
-  m_fitStrings["ElasticDiffSphere"] = "EDS";
-  m_fitStrings["InelasticDiffSphere"] = "IDS";
-  m_fitStrings["IsoRotDiff"] = "IRD";
-  m_fitStrings["ElasticIsoRotDiff"] = "EIRD";
-  m_fitStrings["InelasticIsoRotDiff"] = "IIRD";
 }
 
 EstimationDataSelector IndirectDataAnalysisConvFitTab::getEstimationDataSelector() const {
-  return [](const MantidVec &, const MantidVec &, const std::pair<double, double>) -> DataForParameterEstimation {
-    return DataForParameterEstimation{};
-  };
+  return [](const Mantid::MantidVec &, const Mantid::MantidVec &,
+            const std::pair<double, double>) -> DataForParameterEstimation { return DataForParameterEstimation{}; };
 }
 
 void IndirectDataAnalysisConvFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
@@ -72,7 +67,7 @@ void IndirectDataAnalysisConvFitTab::addDataToModel(IAddWorkspaceDialog const *d
  */
 std::string IndirectDataAnalysisConvFitTab::getFitTypeString() const {
   std::string fitType;
-  for (auto fitFunctionName : m_fitStrings) {
+  for (auto fitFunctionName : FUNCTION_STRINGS) {
     auto occurances = getNumberOfCustomFunctions(fitFunctionName.first);
     if (occurances > 0) {
       fitType += std::to_string(occurances) + fitFunctionName.second;

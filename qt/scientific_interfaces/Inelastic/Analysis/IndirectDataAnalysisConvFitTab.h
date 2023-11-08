@@ -30,9 +30,6 @@ private:
   EstimationDataSelector getEstimationDataSelector() const override;
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   std::string getFitTypeString() const override;
-
-  // ShortHand Naming for fit functions
-  std::unordered_map<std::string, std::string> m_fitStrings;
 };
 
 } // namespace IDA
