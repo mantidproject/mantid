@@ -12,7 +12,6 @@
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "ui_IndirectFitTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -32,7 +31,6 @@ private:
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   std::string getFitTypeString() const override;
 
-  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
   // ShortHand Naming for fit functions
   std::unordered_map<std::string, std::string> m_fitStrings;
 };

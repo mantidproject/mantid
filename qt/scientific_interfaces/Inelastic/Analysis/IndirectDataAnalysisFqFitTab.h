@@ -7,7 +7,6 @@
 #pragma once
 
 #include "IndirectDataAnalysisTab.h"
-#include "ui_IndirectFitTab.h"
 
 #include "IFQFitObserver.h"
 #include "MantidAPI/IFunction.h"
@@ -35,8 +34,6 @@ private:
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   void setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
   void setModelSpectrum(int index, const std::string &paramType);
-
-  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

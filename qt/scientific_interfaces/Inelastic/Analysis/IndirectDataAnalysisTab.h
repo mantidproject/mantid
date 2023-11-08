@@ -13,6 +13,7 @@
 #include "IndirectFitPropertyBrowser.h"
 #include "IndirectFittingModel.h"
 #include "IndirectTab.h"
+#include "ui_IndirectFitTab.h"
 
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 
@@ -80,6 +81,8 @@ protected:
   IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
   WorkspaceID m_activeWorkspaceID;
   WorkspaceIndex m_activeSpectrumIndex;
+
+  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
 
 private:
   void setup() override;

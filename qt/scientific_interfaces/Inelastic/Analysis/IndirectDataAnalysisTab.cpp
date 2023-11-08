@@ -68,7 +68,9 @@ size_t IndirectDataAnalysisTab::getNumberOfSpecificFunctionContained(const std::
 }
 
 IndirectDataAnalysisTab::IndirectDataAnalysisTab(IndirectFittingModel *model, QWidget *parent)
-    : IndirectTab(parent), m_fittingModel(model), m_runButton() {}
+    : IndirectTab(parent), m_fittingModel(model), m_runButton(), m_uiForm(new Ui::IndirectFitTab) {
+  m_uiForm->setupUi(parent);
+}
 
 void IndirectDataAnalysisTab::setup() {
   connect(m_runButton, SIGNAL(clicked()), this, SLOT(runTab()));

@@ -10,7 +10,6 @@
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "ui_IndirectFitTab.h"
 
 #include <memory>
 
@@ -40,7 +39,6 @@ private:
   EstimationDataSelector getEstimationDataSelector() const override;
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
 
-  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
   QString m_tiedParameter;
 };
 } // namespace IDA

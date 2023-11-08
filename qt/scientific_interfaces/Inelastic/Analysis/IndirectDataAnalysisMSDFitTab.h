@@ -7,7 +7,6 @@
 #pragma once
 
 #include "IndirectDataAnalysisTab.h"
-#include "ui_IndirectFitTab.h"
 
 #include "MantidAPI/IFunction.h"
 
@@ -31,8 +30,6 @@ private:
   std::string getFitTypeString() const override;
   IDAFunctionParameterEstimation createParameterEstimation() const;
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
-
-  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
