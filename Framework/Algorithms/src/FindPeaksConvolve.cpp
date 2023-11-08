@@ -91,7 +91,7 @@ void FindPeaksConvolve::exec() {
 }
 
 void FindPeaksConvolve::initiateValidators() {
-  m_validators.reserve(2); // Update depending upon number of validators.
+  m_validators.reserve(3); // Update depending upon number of validators.
 
   auto mustBeNonNegative{std::make_shared<Kernel::BoundedValidator<int>>()};
   mustBeNonNegative->setLower(0);
@@ -309,7 +309,7 @@ void FindPeaksConvolve::storePeakResults(const size_t dataIndex,
 }
 
 size_t FindPeaksConvolve::findPeakInRawData(const int xIndex, const TensorMap_const &yData,
-                                            size_t peakExtentBinNumber) const {
+                                            size_t peakExtentBinNumber) {
   peakExtentBinNumber = (peakExtentBinNumber % 2 == 0) ? peakExtentBinNumber + 1 : peakExtentBinNumber;
   int sliceStart{xIndex - static_cast<int>(std::floor(static_cast<double>(peakExtentBinNumber) / 2.0))};
   size_t adjPeakExtentBinNumber{peakExtentBinNumber};
@@ -329,24 +329,25 @@ size_t FindPeaksConvolve::findPeakInRawData(const int xIndex, const TensorMap_co
     const auto unweightedYData = EigenMap_const(yData.data() + sliceStart, adjPeakExtentBinNumber);
     unweightedYData.maxCoeff(&maxIndex);
   } else {
-    Eigen::VectorXd pdf{generateNormalPDF(static_cast<int>(peakExtentBinNumber))};
+    generateNormalPDF(static_cast<int>(peakExtentBinNumber));
     const auto weightedYData = EigenMap_const(yData.data() + sliceStart, adjPeakExtentBinNumber)
-                                   .cwiseProduct(EigenMap_const(pdf.data() + startAdj, adjPeakExtentBinNumber));
+                                   .cwiseProduct(EigenMap_const(m_pdf.data() + startAdj, adjPeakExtentBinNumber));
     weightedYData.maxCoeff(&maxIndex);
   }
   return static_cast<size_t>(maxIndex) + sliceStart;
 }
 
-Eigen::VectorXd FindPeaksConvolve::generateNormalPDF(const int peakExtentBinNumber) const {
-  // assert vector has odd size.
-  Eigen::VectorXd pdf{peakExtentBinNumber};
-  boost::math::normal_distribution<> dist(0.0, peakExtentBinNumber / 2.0); // assures 2 stddevs in the resultant vector
-  const int meanIdx{peakExtentBinNumber / 2};
-  for (int i{0}; i < peakExtentBinNumber; ++i) {
-    int x{i - meanIdx};
-    pdf(i) = boost::math::pdf(dist, x);
+void FindPeaksConvolve::generateNormalPDF(const int peakExtentBinNumber) {
+  if (m_pdf.size() == 0) {
+    m_pdf.resize(peakExtentBinNumber);
+    boost::math::normal_distribution<> dist(0.0,
+                                            peakExtentBinNumber / 2.0); // assures 2 stddevs in the resultant vector
+    const int meanIdx{peakExtentBinNumber / 2};
+    for (int i{0}; i < peakExtentBinNumber; ++i) {
+      int x{i - meanIdx};
+      m_pdf(i) = boost::math::pdf(dist, x);
+    }
   }
-  return pdf;
 }
 
 void FindPeaksConvolve::createIntermediateWorkspaces(const size_t dataIndex, const Tensor1D &kernel,
@@ -356,9 +357,9 @@ void FindPeaksConvolve::createIntermediateWorkspaces(const size_t dataIndex, con
   Eigen::VectorXd xDataCentredBins;
   if (m_centreBins) {
     xDataCentredBins = centreBinsXData(xData);
-    xDataMap = std::make_unique<EigenMap_const>(EigenMap_const{xDataCentredBins.data(), xDataCentredBins.size()});
+    xDataMap = std::make_unique<EigenMap_const>(xDataCentredBins.data(), xDataCentredBins.size());
   } else {
-    xDataMap = std::make_unique<EigenMap_const>(EigenMap_const(&xData->front(), xData->size()));
+    xDataMap = std::make_unique<EigenMap_const>(&xData->front(), xData->size());
   }
 
   outputIntermediateWorkspace(dataIndex, "iOverSigma",

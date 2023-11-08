@@ -61,6 +61,7 @@ private:
   double m_iOverSigmaThreshold;
   bool m_mergeNearbyPeaks;
   bool m_centreBins;
+  Eigen::VectorXd m_pdf;
 
   void init() override;
   void exec() override;
@@ -79,9 +80,9 @@ private:
   Eigen::VectorXd centreBinsXData(const HistogramData::HistogramX *xData) const;
   void extractPeaks(const size_t dataIndex, const Tensor1D &iOverSigma, const HistogramData::HistogramX *xData,
                     const TensorMap_const &yData, const size_t peakExtentBinNumber);
-  size_t findPeakInRawData(const int xIndex, const TensorMap_const &yData, size_t peakExtentBinNumber) const;
+  size_t findPeakInRawData(const int xIndex, const TensorMap_const &yData, size_t peakExtentBinNumber);
   void storePeakResults(const size_t dataIndex, std::vector<FindPeaksConvolve::PeakResult> &peakCentres);
-  Eigen::VectorXd generateNormalPDF(const int peakExtentBinNumber) const;
+  void generateNormalPDF(const int peakExtentBinNumber);
   void createIntermediateWorkspaces(const size_t dataIndex, const Tensor1D &kernel, const Tensor1D &iOverSigma,
                                     const HistogramData::HistogramX *xData);
   void outputIntermediateWorkspace(const size_t dataIndex, const std::string &wsName, const std::vector<double> &xData,
