@@ -172,8 +172,8 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
             labels, nlabels = label(pk_mask)  # identify contiguous nearest-neighbour connected regions
             # identify labels of peaks above min size
             min_size = int(min_frac_size * kernel.size)
-            nbins = sum_labels(pk_mask, labels, range(1, nlabels + 1))
-            ilabels = np.flatnonzero(nbins > min_size) + 1
+            npixels = sum_labels(pk_mask, labels, range(1, nlabels + 1))
+            ilabels = np.flatnonzero(npixels > min_size) + 1
 
             # find index of maximum in I/sigma for each valid peak (label index in ilabels)
             imaxs = maximum_position(intens_over_sig, labels, ilabels)
@@ -202,7 +202,7 @@ class FindSXPeaksConvolve(DataProcessorAlgorithm):
                 if remove_on_edge:
                     nrows_bg = kernel.shape[0] - nrows
                     ncols_bg = kernel.shape[1] - ncols
-                    nbins_bg = kernel.shape[0] - nbins
+                    nbins_bg = kernel.shape[2] - nbins
                     for idim, (index, nbg) in enumerate([(irow_max, nrows_bg), (icol_max, ncols_bg), (itof_max, nbins_bg)]):
                         if not nbg <= index <= y.shape[idim] - nbg - 1:
                             do_add_peak = False
