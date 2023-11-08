@@ -35,7 +35,6 @@ public:
   bool hasResolution() const override { return false; }
 
 private:
-  std::string getFitTypeString() const override;
   EstimationDataSelector getEstimationDataSelector() const override;
 
   QString m_tiedParameter;

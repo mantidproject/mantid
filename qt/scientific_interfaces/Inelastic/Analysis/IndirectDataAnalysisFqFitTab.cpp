@@ -95,19 +95,6 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
   m_plotPresenter->setXBounds({0.0, 2.0});
 }
 
-std::string IndirectDataAnalysisFqFitTab::getFitTypeString() const {
-  if (!m_fittingModel->getFitFunction() || m_fittingModel->getFitFunction()->nFunctions() == 0) {
-    return "NoCurrentFunction";
-  }
-
-  auto fun = m_fittingModel->getFitFunction()->getFunction(0);
-  if (fun->nFunctions() == 0) {
-    return fun->name();
-  } else {
-    return "UserDefinedCompositeFunction";
-  }
-}
-
 EstimationDataSelector IndirectDataAnalysisFqFitTab::getEstimationDataSelector() const {
   return [](const std::vector<double> &x, const std::vector<double> &y,
             const std::pair<double, double> range) -> DataForParameterEstimation {

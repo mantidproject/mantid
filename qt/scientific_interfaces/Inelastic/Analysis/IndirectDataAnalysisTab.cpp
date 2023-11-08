@@ -30,6 +30,34 @@ namespace {
 /// Logger
 Mantid::Kernel::Logger g_log("IndirectDataAnalysisTab");
 
+auto FUNCTION_STRINGS = std::unordered_map<std::string, std::string>({{"ExpDecay", "E"},
+                                                                      {"StretchExp", "S"},
+                                                                      {"Lorentzian", "L"},
+                                                                      {"StretchedExpFT", "SFT"},
+                                                                      {"TeixeiraWater", "TxWater"},
+                                                                      {"TeixeiraWaterSQE", "TxWater"},
+                                                                      {"FickDiffusionSQE", "FickDiff"},
+                                                                      {"ChudleyElliotSQE", "ChudElliot"},
+                                                                      {"HallRoss", "HallRoss"},
+                                                                      {"HallRossSQE", "HallRoss"},
+                                                                      {"DiffRotDiscreteCircle", "DC"},
+                                                                      {"ElasticDiffRotDiscreteCircle", "EDC"},
+                                                                      {"InelasticDiffRotDiscreteCircle", "IDC"},
+                                                                      {"DiffSphere", "DS"},
+                                                                      {"ElasticDiffSphere", "EDS"},
+                                                                      {"InelasticDiffSphere", "IDS"},
+                                                                      {"IsoRotDiff", "IRD"},
+                                                                      {"ElasticIsoRotDiff", "EIRD"},
+                                                                      {"InelasticIsoRotDiff", "IIRD"},
+                                                                      {"MsdGauss", "Gauss"},
+                                                                      {"MsdPeters", "Peters"},
+                                                                      {"MsdYi", "Yi"},
+                                                                      {"FickDiffusion", "FickDiffusion"},
+                                                                      {"ChudleyElliot", "ChudleyElliot"},
+                                                                      {"EISFDiffCylinder", "EISFDiffCylinder"},
+                                                                      {"EISFDiffSphere", "EISFDiffSphere"},
+                                                                      {"EISFDiffSphereAlkyl", "EISFDiffSphereAlkyl"}});
+
 bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }
@@ -690,6 +718,27 @@ void IndirectDataAnalysisTab::addDataToModel(IAddWorkspaceDialog const *dialog) 
     m_dataPresenter->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
     m_fittingModel->addDefaultParameters();
   }
+}
+
+std::string IndirectDataAnalysisTab::getFitTypeString() const {
+  auto const multiDomainFunction = m_fittingModel->getFitFunction();
+  if (!multiDomainFunction || multiDomainFunction->nFunctions() == 0) {
+    return "NoCurrentFunction";
+  }
+
+  std::string fitType{""};
+  for (auto fitFunctionName : FUNCTION_STRINGS) {
+    auto occurances = getNumberOfCustomFunctions(fitFunctionName.first);
+    if (occurances > 0) {
+      fitType += std::to_string(occurances) + fitFunctionName.second;
+    }
+  }
+
+  if (getNumberOfCustomFunctions("DeltaFunction") > 0) {
+    fitType += "Delta";
+  }
+
+  return fitType;
 }
 
 } // namespace IDA

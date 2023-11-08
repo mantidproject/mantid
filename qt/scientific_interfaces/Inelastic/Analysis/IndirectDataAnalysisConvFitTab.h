@@ -29,7 +29,6 @@ public:
 private:
   EstimationDataSelector getEstimationDataSelector() const override;
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
-  std::string getFitTypeString() const override;
 };
 
 } // namespace IDA

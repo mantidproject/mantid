@@ -27,7 +27,6 @@ public:
 
 private:
   EstimationDataSelector getEstimationDataSelector() const override;
-  std::string getFitTypeString() const override;
   IDAFunctionParameterEstimation createParameterEstimation() const;
 };
 } // namespace IDA

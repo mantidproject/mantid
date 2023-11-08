@@ -69,28 +69,6 @@ EstimationDataSelector IndirectDataAnalysisMSDFitTab::getEstimationDataSelector(
   };
 }
 
-std::string IndirectDataAnalysisMSDFitTab::getFitTypeString() const {
-  // This function attempts to work out which fit type is being done. It will
-  // currently only recognise the three default types.
-  const auto numberOfGauss = getNumberOfCustomFunctions("MsdGauss");
-  const auto numberOfPeters = getNumberOfCustomFunctions("MsdPeters");
-  const auto numberOfYi = getNumberOfCustomFunctions("MsdYi");
-
-  if (numberOfGauss + numberOfPeters + numberOfYi != 1) {
-    return "UserDefined";
-  }
-
-  if (numberOfGauss == 1)
-    return "Gauss";
-
-  if (numberOfPeters == 1)
-    return "Peters";
-
-  if (numberOfYi == 1)
-    return "Yi";
-
-  return "UserDefined";
-}
 // Create parameter estimation functions
 // These function rely on the data returned from getEstimationDataSelector,
 // which should be appropriately configured.

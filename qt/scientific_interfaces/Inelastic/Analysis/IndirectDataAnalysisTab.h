@@ -101,7 +101,7 @@ private:
   void setPDFWorkspace(std::string const &workspaceName);
   void updateParameterEstimationData();
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
-  virtual std::string getFitTypeString() const = 0;
+  std::string getFitTypeString() const;
 
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;

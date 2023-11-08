@@ -35,17 +35,4 @@ EstimationDataSelector IndirectDataAnalysisIqtFitTab::getEstimationDataSelector(
   };
 }
 
-std::string IndirectDataAnalysisIqtFitTab::getFitTypeString() const {
-  const auto numberOfExponential = getNumberOfCustomFunctions("ExpDecay");
-  const auto numberOfStretched = getNumberOfCustomFunctions("StretchExp");
-  std::string functionType{""};
-  if (numberOfExponential > 0)
-    functionType += std::to_string(numberOfExponential) + "E";
-
-  if (numberOfStretched > 0)
-    functionType += std::to_string(numberOfStretched) + "S";
-
-  return functionType;
-}
-
 } // namespace MantidQt::CustomInterfaces::IDA

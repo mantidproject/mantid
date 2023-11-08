@@ -17,22 +17,6 @@ namespace {
 std::vector<std::string> CONVFIT_HIDDEN_PROPS = std::vector<std::string>(
     {"CreateOutput", "LogValue", "PassWSIndexToFunction", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
-auto FUNCTION_STRINGS = std::unordered_map<std::string, std::string>({{"Lorentzian", "L"},
-                                                                      {"StretchedExpFT", "SFT"},
-                                                                      {"TeixeiraWaterSQE", "TxWater"},
-                                                                      {"FickDiffusionSQE", "FickDiff"},
-                                                                      {"ChudleyElliotSQE", "ChudElliot"},
-                                                                      {"HallRossSQE", "HallRoss"},
-                                                                      {"DiffRotDiscreteCircle", "DC"},
-                                                                      {"ElasticDiffRotDiscreteCircle", "EDC"},
-                                                                      {"InelasticDiffRotDiscreteCircle", "IDC"},
-                                                                      {"DiffSphere", "DS"},
-                                                                      {"ElasticDiffSphere", "EDS"},
-                                                                      {"InelasticDiffSphere", "IDS"},
-                                                                      {"IsoRotDiff", "IRD"},
-                                                                      {"ElasticIsoRotDiff", "EIRD"},
-                                                                      {"InelasticIsoRotDiff", "IIRD"}});
-
 } // namespace
 
 namespace MantidQt::CustomInterfaces::IDA {
@@ -54,31 +38,6 @@ void IndirectDataAnalysisConvFitTab::addDataToModel(IAddWorkspaceDialog const *d
     m_dataPresenter->setResolution(convDialog->resolutionName());
     m_fittingModel->addDefaultParameters();
   }
-}
-
-/**
- * Generate a string to describe the fit type selected by the user.
- * Used when naming the resultant workspaces.
- *
- * Assertions used to guard against any future changes that don't take
- * workspace naming into account.
- *
- * @returns the generated string.
- */
-std::string IndirectDataAnalysisConvFitTab::getFitTypeString() const {
-  std::string fitType;
-  for (auto fitFunctionName : FUNCTION_STRINGS) {
-    auto occurances = getNumberOfCustomFunctions(fitFunctionName.first);
-    if (occurances > 0) {
-      fitType += std::to_string(occurances) + fitFunctionName.second;
-    }
-  }
-
-  if (getNumberOfCustomFunctions("DeltaFunction") > 0) {
-    fitType += "Delta";
-  }
-
-  return fitType;
 }
 
 } // namespace MantidQt::CustomInterfaces::IDA
