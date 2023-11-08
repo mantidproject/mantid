@@ -91,7 +91,7 @@ def load_txt(filename, current_dir=None):
     else:
         current_path = filename
     with open(current_path, "r", encoding="utf8") as my_file:
-        txt = my_file.readlines()
+        txt = my_file.read()
     return txt
 
 
