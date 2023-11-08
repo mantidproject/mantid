@@ -35,7 +35,7 @@ std::string const WORKSPACE_INDICES = "(" + NATURAL_OR_RANGE + "(" + COMMA + NAT
 namespace MantidQt::CustomInterfaces {
 
 IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
-    IndirectPlotOptionsView *view, PlotWidget const &plotType, std::string const &fixedIndices,
+    IIndirectPlotOptionsView *view, PlotWidget const &plotType, std::string const &fixedIndices,
     boost::optional<std::map<std::string, std::string>> const &availableActions)
     : QObject(nullptr), m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceReplaced), m_view(view),
@@ -44,7 +44,7 @@ IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
 }
 
 /// Used by the unit tests so that m_plotter can be mocked
-IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(IndirectPlotOptionsView *view,
+IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(IIndirectPlotOptionsView *view,
                                                            IndirectPlotOptionsModel *model, PlotWidget const &plotType,
                                                            std::string const &fixedIndices)
     : QObject(nullptr), m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),

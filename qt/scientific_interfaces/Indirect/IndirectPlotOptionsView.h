@@ -26,39 +26,69 @@ class IIndirectPlotOptionsPresenter;
 
 enum PlotWidget { Spectra, SpectraBin, SpectraContour, SpectraTiled, SpectraUnit, SpectraContourUnit };
 
-class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsView : public API::MantidWidget {
+class MANTIDQT_INDIRECT_DLL IIndirectPlotOptionsView {
+public:
+  virtual void subscribePresenter(IIndirectPlotOptionsPresenter *presenter) = 0;
+
+  virtual void setPlotType(PlotWidget const &plotType, std::map<std::string, std::string> const &availableActions) = 0;
+  virtual void setWorkspaceComboBoxEnabled(bool enable) = 0;
+  virtual void setUnitComboBoxEnabled(bool enable) = 0;
+  virtual void setIndicesLineEditEnabled(bool enable) = 0;
+  virtual void setPlotButtonEnabled(bool enable) = 0;
+  virtual void setPlotButtonText(QString const &text) = 0;
+
+  virtual void setIndicesRegex(QString const &regex) = 0;
+
+  virtual QString selectedWorkspace() const = 0;
+  virtual void setWorkspaces(std::vector<std::string> const &workspaces) = 0;
+
+  virtual int numberOfWorkspaces() const = 0;
+
+  virtual void removeWorkspace(QString const &workspaceName) = 0;
+  virtual void clearWorkspaces() = 0;
+
+  virtual QString selectedIndices() const = 0;
+  virtual void setIndices(QString const &indices) = 0;
+  virtual void setIndicesErrorLabelVisible(bool visible) = 0;
+
+  virtual void addIndicesSuggestion(QString const &spectra) = 0;
+
+  virtual void displayWarning(QString const &message) = 0;
+};
+
+class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsView final : public API::MantidWidget, public IIndirectPlotOptionsView {
   Q_OBJECT
 
 public:
   IndirectPlotOptionsView(QWidget *parent = nullptr);
   virtual ~IndirectPlotOptionsView() override;
 
-  void subscribePresenter(IIndirectPlotOptionsPresenter *presenter);
+  void subscribePresenter(IIndirectPlotOptionsPresenter *presenter) override;
 
-  virtual void setPlotType(PlotWidget const &plotType, std::map<std::string, std::string> const &availableActions);
-  virtual void setWorkspaceComboBoxEnabled(bool enable);
-  virtual void setUnitComboBoxEnabled(bool enable);
-  virtual void setIndicesLineEditEnabled(bool enable);
-  virtual void setPlotButtonEnabled(bool enable);
-  void setPlotButtonText(QString const &text);
+  void setPlotType(PlotWidget const &plotType, std::map<std::string, std::string> const &availableActions) override;
+  void setWorkspaceComboBoxEnabled(bool enable) override;
+  void setUnitComboBoxEnabled(bool enable) override;
+  void setIndicesLineEditEnabled(bool enable) override;
+  void setPlotButtonEnabled(bool enable) override;
+  void setPlotButtonText(QString const &text) override;
 
-  virtual void setIndicesRegex(QString const &regex);
+  void setIndicesRegex(QString const &regex) override;
 
-  QString selectedWorkspace() const;
-  virtual void setWorkspaces(std::vector<std::string> const &workspaces);
+  QString selectedWorkspace() const override;
+  void setWorkspaces(std::vector<std::string> const &workspaces) override;
 
-  virtual int numberOfWorkspaces() const;
+  int numberOfWorkspaces() const override;
 
-  void removeWorkspace(QString const &workspaceName);
-  virtual void clearWorkspaces();
+  void removeWorkspace(QString const &workspaceName) override;
+  void clearWorkspaces() override;
 
-  QString selectedIndices() const;
-  virtual void setIndices(QString const &indices);
-  virtual void setIndicesErrorLabelVisible(bool visible);
+  QString selectedIndices() const override;
+  void setIndices(QString const &indices) override;
+  void setIndicesErrorLabelVisible(bool visible) override;
 
-  virtual void addIndicesSuggestion(QString const &spectra);
+  void addIndicesSuggestion(QString const &spectra) override;
 
-  virtual void displayWarning(QString const &message);
+  void displayWarning(QString const &message) override;
 
 private slots:
   void notifySelectedWorkspaceChanged(QString const &workspaceName);

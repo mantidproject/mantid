@@ -31,16 +31,16 @@ public:
   virtual void notifyPlotTiledClicked() = 0;
 };
 
-class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public QObject, IIndirectPlotOptionsPresenter {
+class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public QObject, public IIndirectPlotOptionsPresenter {
   Q_OBJECT
 
 public:
   IndirectPlotOptionsPresenter(
-      IndirectPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
+      IIndirectPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
       std::string const &fixedIndices = "",
       boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
   /// Used by the unit tests so that the view and model can be mocked
-  IndirectPlotOptionsPresenter(IndirectPlotOptionsView *view, IndirectPlotOptionsModel *model,
+  IndirectPlotOptionsPresenter(IIndirectPlotOptionsView *view, IndirectPlotOptionsModel *model,
                                PlotWidget const &plotType = PlotWidget::Spectra, std::string const &fixedIndices = "");
   ~IndirectPlotOptionsPresenter() override;
 
@@ -77,7 +77,7 @@ private:
   Poco::NObserver<IndirectPlotOptionsPresenter, Mantid::API::WorkspacePreDeleteNotification> m_wsRemovedObserver;
   Poco::NObserver<IndirectPlotOptionsPresenter, Mantid::API::WorkspaceBeforeReplaceNotification> m_wsReplacedObserver;
 
-  IndirectPlotOptionsView *m_view;
+  IIndirectPlotOptionsView *m_view;
   std::unique_ptr<IndirectPlotOptionsModel> m_model;
   PlotWidget m_plotType;
 };
