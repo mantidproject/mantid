@@ -37,7 +37,7 @@ namespace MantidQt::CustomInterfaces {
 IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
     IIndirectPlotOptionsView *view, PlotWidget const &plotType, std::string const &fixedIndices,
     boost::optional<std::map<std::string, std::string>> const &availableActions)
-    : QObject(nullptr), m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
+    : m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceReplaced), m_view(view),
       m_model(std::make_unique<IndirectPlotOptionsModel>(availableActions)) {
   setupPresenter(plotType, fixedIndices);
@@ -47,7 +47,7 @@ IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(
 IndirectPlotOptionsPresenter::IndirectPlotOptionsPresenter(IIndirectPlotOptionsView *view,
                                                            IndirectPlotOptionsModel *model, PlotWidget const &plotType,
                                                            std::string const &fixedIndices)
-    : QObject(nullptr), m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
+    : m_wsRemovedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceRemoved),
       m_wsReplacedObserver(*this, &IndirectPlotOptionsPresenter::onWorkspaceReplaced), m_view(view), m_model(model) {
   setupPresenter(plotType, fixedIndices);
 }

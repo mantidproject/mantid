@@ -15,8 +15,6 @@
 
 #include <Poco/NObserver.h>
 
-#include <QObject>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -31,8 +29,7 @@ public:
   virtual void notifyPlotTiledClicked() = 0;
 };
 
-class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public QObject, public IIndirectPlotOptionsPresenter {
-  Q_OBJECT
+class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public IIndirectPlotOptionsPresenter {
 
 public:
   IndirectPlotOptionsPresenter(
@@ -42,7 +39,7 @@ public:
   /// Used by the unit tests so that the view and model can be mocked
   IndirectPlotOptionsPresenter(IIndirectPlotOptionsView *view, IndirectPlotOptionsModel *model,
                                PlotWidget const &plotType = PlotWidget::Spectra, std::string const &fixedIndices = "");
-  ~IndirectPlotOptionsPresenter() override;
+  ~IndirectPlotOptionsPresenter();
 
   void notifyWorkspaceChanged(std::string const &workspaceName) override;
   void notifySelectedUnitChanged(std::string const &unit) override;
