@@ -44,8 +44,6 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   m_plotPresenter->setXBounds({0.0, 2.0});
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-
-  setEditResultVisible(false);
 }
 
 std::string IndirectDataAnalysisFqFitTab::getFitTypeString() const {

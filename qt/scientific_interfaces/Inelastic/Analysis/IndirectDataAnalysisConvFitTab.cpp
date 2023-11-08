@@ -34,7 +34,6 @@ IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
   setFitDataPresenter(std::move(dataPresenter));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
 
-  setEditResultVisible(true);
   setConvolveMembers(true);
 
   // Initialise fitTypeStrings

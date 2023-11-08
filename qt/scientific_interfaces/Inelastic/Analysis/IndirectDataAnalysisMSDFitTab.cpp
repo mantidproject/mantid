@@ -52,8 +52,6 @@ IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
       std::make_unique<IndirectFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-
-  setEditResultVisible(false);
 }
 
 EstimationDataSelector IndirectDataAnalysisMSDFitTab::getEstimationDataSelector() const {
