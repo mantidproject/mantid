@@ -122,13 +122,6 @@ IDAFunctionParameterEstimation IndirectDataAnalysisMSDFitTab::createParameterEst
   return parameterEstimation;
 }
 
-void IndirectDataAnalysisMSDFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
-    m_dataPresenter->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
-    m_fittingModel->addDefaultParameters();
-  }
-}
-
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

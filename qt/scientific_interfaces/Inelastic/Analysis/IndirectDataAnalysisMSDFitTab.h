@@ -29,7 +29,6 @@ private:
   EstimationDataSelector getEstimationDataSelector() const override;
   std::string getFitTypeString() const override;
   IDAFunctionParameterEstimation createParameterEstimation() const;
-  void addDataToModel(IAddWorkspaceDialog const *dialog) override;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

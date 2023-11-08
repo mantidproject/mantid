@@ -37,7 +37,6 @@ public:
 private:
   std::string getFitTypeString() const override;
   EstimationDataSelector getEstimationDataSelector() const override;
-  void addDataToModel(IAddWorkspaceDialog const *dialog) override;
 
   QString m_tiedParameter;
 };
