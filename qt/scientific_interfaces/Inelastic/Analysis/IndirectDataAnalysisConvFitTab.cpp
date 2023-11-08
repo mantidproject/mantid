@@ -33,7 +33,6 @@ IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
       std::make_unique<ConvFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
   setFitDataPresenter(std::move(dataPresenter));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
-  setRunButton(m_uiForm->pbRun);
 
   setEditResultVisible(true);
   setConvolveMembers(true);

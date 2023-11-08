@@ -45,8 +45,6 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
   m_plotPresenter->setXBounds({0.0, 2.0});
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
 
-  setRunButton(m_uiForm->pbRun);
-
   setEditResultVisible(false);
 }
 

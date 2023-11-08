@@ -57,7 +57,6 @@ public:
   void setFileExtensionsByName(bool filter);
 
 protected:
-  void setRunButton(QPushButton *runButton);
   IndirectFittingModel *getFittingModel() const;
   void run() override;
   void setSampleWSSuffixes(const QStringList &suffices);
@@ -106,7 +105,6 @@ private:
 
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
-  QPushButton *m_runButton;
 
 protected slots:
   void setModelFitFunction();

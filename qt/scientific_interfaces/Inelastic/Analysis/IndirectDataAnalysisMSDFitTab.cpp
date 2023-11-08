@@ -53,8 +53,6 @@ IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
 
-  setRunButton(m_uiForm->pbRun);
-
   setEditResultVisible(false);
 }
 

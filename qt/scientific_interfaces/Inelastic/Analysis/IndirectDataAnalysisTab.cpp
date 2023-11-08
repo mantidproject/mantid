@@ -69,7 +69,7 @@ size_t IndirectDataAnalysisTab::getNumberOfSpecificFunctionContained(const std::
 
 IndirectDataAnalysisTab::IndirectDataAnalysisTab(IndirectFittingModel *model, FunctionTemplateBrowser *templateBrowser,
                                                  std::vector<std::string> const &hiddenProperties, QWidget *parent)
-    : IndirectTab(parent), m_fittingModel(model), m_runButton(), m_uiForm(new Ui::IndirectFitTab) {
+    : IndirectTab(parent), m_fittingModel(model), m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
 
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
@@ -79,7 +79,7 @@ IndirectDataAnalysisTab::IndirectDataAnalysisTab(IndirectFittingModel *model, Fu
 }
 
 void IndirectDataAnalysisTab::setup() {
-  connect(m_runButton, SIGNAL(clicked()), this, SLOT(runTab()));
+  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab()));
   updateResultOptions();
 
   connect(m_outOptionsPresenter.get(), SIGNAL(plotSpectra()), this, SLOT(plotSelectedSpectra()));
@@ -136,11 +136,11 @@ void IndirectDataAnalysisTab::setOutputOptionsView(IIndirectFitOutputOptionsView
   m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(view);
 }
 
-void IndirectDataAnalysisTab::setRunButton(QPushButton *runButton) { m_runButton = runButton; }
+void IndirectDataAnalysisTab::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
+}
 
-void IndirectDataAnalysisTab::setRunIsRunning(bool running) { m_runButton->setText(running ? "Running..." : "Run"); }
-
-void IndirectDataAnalysisTab::setRunEnabled(bool enable) { m_runButton->setEnabled(enable); }
+void IndirectDataAnalysisTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
 void IndirectDataAnalysisTab::setFileExtensionsByName(bool filter) {
   auto const tab = getTabName();
