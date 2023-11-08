@@ -69,12 +69,11 @@ class MultiPythonFileInterpreter(QWidget):
         # Object to monitor file changes
         self.file_watcher = QFileSystemWatcher()
         self.file_watcher.fileChanged.connect(self.file_changed_event)
-        # When monitor_files_changing is True, then any files that are detected
-        # as modified by the QFileSystemWatcher will be added to the set. We
-        # need to disable the file monitoring when we want to save the file so
-        # we don't get notified about our own save.
+        # We need to disable/ignore the file monitoring when we want to save the file so
+        # we don't get notified about our own save. Hence we have a counter that keeps
+        # track of events to ignore.
         self.files_changed_unhandled = set()
-        self.monitor_files_changing = True
+        self.file_watcher_events_to_ignore = 0
 
     def _tab_title_and_tooltip(self, filename):
         """Create labels for the tab title and tooltip from a filename"""
@@ -107,7 +106,9 @@ class MultiPythonFileInterpreter(QWidget):
         self.on_completion_change()
 
     def file_changed_event(self, filename):
-        if self.monitor_files_changing:
+        if self.file_watcher_events_to_ignore > 0:
+            self.file_watcher_events_to_ignore -= 1
+        else:
             self.files_changed_unhandled.add(filename)
 
     @property
@@ -385,29 +386,25 @@ class MultiPythonFileInterpreter(QWidget):
             self.close_tab(0)  # close default empty script
 
     def save_current_file(self):
-        """Save the current file"""
-        self.monitor_files_changing = False
-        try:
-            self.current_editor().save(force_save=True)
-            self.add_file_to_watcher(self.current_editor().filename)
-        finally:
-            self.monitor_files_changing = True
+        self.file_watcher_events_to_ignore += 1
+        self.current_editor().save(force_save=True)
+        self.add_file_to_watcher(self.current_editor().filename)
 
     def save_current_file_as(self):
         previous_filename = self.current_editor().filename
         current_editor_before_saving = self.current_editor()
-        self.monitor_files_changing = False
-        try:
-            saved, filename = self.current_editor().save_as()
-            self.add_file_to_watcher(filename)
-        finally:
-            self.monitor_files_changing = True
-        if saved:
+        saved, filename = self.current_editor().save_as()
+        if not saved:
+            return
+        self.add_file_to_watcher(filename)
+        if previous_filename != filename:
             self.open_file_in_new_tab(filename)
             tab_index = self._tabs.indexOf(current_editor_before_saving)
             self.close_tab(tab_index)
             if previous_filename:
                 self.sig_file_name_changed.emit(previous_filename, filename)
+        else:
+            self.file_watcher_events_to_ignore += 1
 
     def spaces_to_tabs_current(self):
         self.current_editor().replace_spaces_with_tabs()
