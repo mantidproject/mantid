@@ -26,8 +26,6 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
     : IndirectDataAnalysisTab(new ConvFitModel, new ConvTemplateBrowser, CONVFIT_HIDDEN_PROPS, parent) {
-  setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-
   m_uiForm->dockArea->setFitDataView(new ConvFitDataView(m_uiForm->dockArea));
   auto dataPresenter =
       std::make_unique<ConvFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);

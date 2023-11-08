@@ -43,7 +43,6 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
       std::make_unique<FqFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   m_plotPresenter->setXBounds({0.0, 2.0});
-  setOutputOptionsView(m_uiForm->ovOutputOptionsView);
 }
 
 std::string IndirectDataAnalysisFqFitTab::getFitTypeString() const {

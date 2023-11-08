@@ -76,6 +76,8 @@ IndirectDataAnalysisTab::IndirectDataAnalysisTab(IndirectFittingModel *model, Fu
   m_uiForm->dockArea->m_fitPropertyBrowser->init();
   m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(hiddenProperties);
   m_fitPropertyBrowser = m_uiForm->dockArea->m_fitPropertyBrowser;
+
+  m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(m_uiForm->ovOutputOptionsView);
 }
 
 void IndirectDataAnalysisTab::setup() {
@@ -130,10 +132,6 @@ void IndirectDataAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
   m_plotPresenter->setFittingData(m_dataPresenter->getFittingData());
   m_plotPresenter->setFitOutput(m_fittingModel->getFitOutput());
   m_plotPresenter->updatePlots();
-}
-
-void IndirectDataAnalysisTab::setOutputOptionsView(IIndirectFitOutputOptionsView *view) {
-  m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(view);
 }
 
 void IndirectDataAnalysisTab::setRunIsRunning(bool running) {
