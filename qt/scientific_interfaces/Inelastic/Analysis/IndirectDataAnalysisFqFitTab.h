@@ -21,9 +21,6 @@ public:
   std::string getTabName() const override { return "FQFit"; }
 
   bool hasResolution() const override { return false; }
-
-private:
-  EstimationDataSelector getEstimationDataSelector() const override;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

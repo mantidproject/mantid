@@ -90,7 +90,6 @@ private:
   void setup() override;
   bool validate() override;
   void setupPlotView();
-  virtual EstimationDataSelector getEstimationDataSelector() const = 0;
   void connectPlotPresenter();
   void connectFitPropertyBrowser();
   void connectDataPresenter();

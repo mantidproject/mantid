@@ -554,7 +554,7 @@ void IndirectDataAnalysisTab::setPDFWorkspace(std::string const &workspaceName) 
 
 void IndirectDataAnalysisTab::updateParameterEstimationData() {
   m_fitPropertyBrowser->updateParameterEstimationData(
-      m_dataPresenter->getDataForParameterEstimation(getEstimationDataSelector()));
+      m_dataPresenter->getDataForParameterEstimation(m_fitPropertyBrowser->getEstimationDataSelector()));
   const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(), getSelectedSpectrum());
   // If we haven't fit the data yet we may update the guess
   if (!isFit) {

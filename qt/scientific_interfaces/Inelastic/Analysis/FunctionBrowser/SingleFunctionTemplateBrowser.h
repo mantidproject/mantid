@@ -51,6 +51,7 @@ public:
   void updateParameterDescriptions(const QMap<int, std::string> &parameterNames);
   void setErrorsEnabled(bool enabled) override;
   void clear() override;
+  EstimationDataSelector getEstimationDataSelector() const override;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
   void estimateFunctionParameters() override;
   void setBackgroundA0(double) override;

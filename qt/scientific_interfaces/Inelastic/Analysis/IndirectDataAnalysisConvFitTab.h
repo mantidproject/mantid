@@ -25,9 +25,6 @@ public:
   std::string getTabName() const override { return "ConvFit"; }
 
   bool hasResolution() const override { return true; }
-
-private:
-  EstimationDataSelector getEstimationDataSelector() const override;
 };
 
 } // namespace IDA

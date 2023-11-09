@@ -18,9 +18,4 @@ IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
   setConvolveMembers(true);
 }
 
-EstimationDataSelector IndirectDataAnalysisConvFitTab::getEstimationDataSelector() const {
-  return [](const Mantid::MantidVec &, const Mantid::MantidVec &,
-            const std::pair<double, double>) -> DataForParameterEstimation { return DataForParameterEstimation{}; };
-}
-
 } // namespace MantidQt::CustomInterfaces::IDA

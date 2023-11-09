@@ -114,6 +114,10 @@ void SingleFunctionTemplatePresenter::setDatasets(const QList<FunctionModelDatas
 
 void SingleFunctionTemplatePresenter::setErrorsEnabled(bool enabled) { m_view->setErrorsEnabled(enabled); }
 
+EstimationDataSelector SingleFunctionTemplatePresenter::getEstimationDataSelector() const {
+  return m_model.getEstimationDataSelector();
+}
+
 void SingleFunctionTemplatePresenter::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_model.updateParameterEstimationData(std::move(data));
   updateView();

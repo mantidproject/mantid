@@ -180,6 +180,10 @@ bool IqtTemplatePresenter::canTieIntensities() const {
   return (m_model.hasStretchExponential() || m_model.getNumberOfExponentials() > 0) && m_model.hasBackground();
 }
 
+EstimationDataSelector IqtTemplatePresenter::getEstimationDataSelector() const {
+  return m_model.getEstimationDataSelector();
+}
+
 void IqtTemplatePresenter::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_model.updateParameterEstimationData(std::move(data));
 }

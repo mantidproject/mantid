@@ -56,6 +56,7 @@ public:
   void setCurrentDataset(int i);
   void setDatasets(const QList<FunctionModelDataset> &datasets);
   void setErrorsEnabled(bool enabled);
+  EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void estimateFunctionParameters();
 

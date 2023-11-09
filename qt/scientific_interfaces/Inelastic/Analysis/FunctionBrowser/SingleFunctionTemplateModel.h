@@ -41,6 +41,7 @@ public:
   int getEnumIndex();
   void setGlobal(const QString &name, bool isGlobal);
 
+  EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
 
   void estimateFunctionParameters();

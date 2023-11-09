@@ -323,6 +323,10 @@ void ConvTemplateBrowser::setParameterValueQuiet(ParamID id, double value, doubl
   m_parameterManager->setError(prop, error);
 }
 
+EstimationDataSelector ConvTemplateBrowser::getEstimationDataSelector() const {
+  return m_presenter.getEstimationDataSelector();
+}
+
 void ConvTemplateBrowser::updateParameterEstimationData(DataForParameterEstimationCollection &&) {}
 
 void ConvTemplateBrowser::estimateFunctionParameters() {}

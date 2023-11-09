@@ -294,6 +294,10 @@ void IqtTemplateBrowser::clear() {
   removeExponentialOne();
 }
 
+EstimationDataSelector IqtTemplateBrowser::getEstimationDataSelector() const {
+  return m_presenter.getEstimationDataSelector();
+}
+
 void IqtTemplateBrowser::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_presenter.updateParameterEstimationData(std::move(data));
 }

@@ -54,6 +54,7 @@ public:
   void setErrorsEnabled(bool enabled);
   void tieIntensities(bool on);
   bool canTieIntensities() const;
+  EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void setBackgroundA0(double value);
 

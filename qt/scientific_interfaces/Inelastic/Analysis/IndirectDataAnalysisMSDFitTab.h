@@ -24,10 +24,6 @@ public:
   std::string getTabName() const override { return "MSDFit"; }
 
   bool hasResolution() const override { return false; }
-
-private:
-  EstimationDataSelector getEstimationDataSelector() const override;
-  IDAFunctionParameterEstimation createParameterEstimation() const;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -54,6 +54,7 @@ public:
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void setBackgroundA0(double value);
   void setQValues(const std::vector<double> &qValues);
+  EstimationDataSelector getEstimationDataSelector() const;
 
 signals:
   void functionStructureChanged();

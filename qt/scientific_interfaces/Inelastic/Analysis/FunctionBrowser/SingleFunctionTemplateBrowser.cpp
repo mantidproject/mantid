@@ -169,6 +169,10 @@ void SingleFunctionTemplateBrowser::clear() {
   m_parameterNames.clear();
 }
 
+EstimationDataSelector SingleFunctionTemplateBrowser::getEstimationDataSelector() const {
+  return m_presenter.getEstimationDataSelector();
+}
+
 void SingleFunctionTemplateBrowser::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_presenter.updateParameterEstimationData(std::move(data));
 }

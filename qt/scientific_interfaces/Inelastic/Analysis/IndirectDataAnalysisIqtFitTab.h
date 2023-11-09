@@ -35,8 +35,6 @@ public:
   bool hasResolution() const override { return false; }
 
 private:
-  EstimationDataSelector getEstimationDataSelector() const override;
-
   QString m_tiedParameter;
 };
 } // namespace IDA

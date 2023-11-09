@@ -288,4 +288,8 @@ void ConvTemplatePresenter::viewChangedParameterValue(const QString &parName, do
   emit functionStructureChanged();
 }
 
+EstimationDataSelector ConvTemplatePresenter::getEstimationDataSelector() const {
+  return m_model.getEstimationDataSelector();
+}
+
 } // namespace MantidQt::CustomInterfaces::IDA
