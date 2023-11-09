@@ -122,7 +122,7 @@ set(INC_FILES
     Analysis/IqtFitModel.h
     Analysis/MSDFitModel.h
     Analysis/ConvFitModel.h
-    Analysis/FQFitConstants.h
+    Analysis/FitTabConstants.h
     Analysis/IIndirectFitDataModel.h
     Analysis/IndirectFitDataModel.h
     Analysis/IIndirectFitOutput.h

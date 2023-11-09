@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FqTemplateBrowser.h"
 
-#include "Analysis/FQFitConstants.h"
+#include "Analysis/FitTabConstants.h"
 #include "Analysis/IDAFunctionParameterEstimation.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -87,7 +87,7 @@ IDAFunctionParameterEstimation createParameterEstimation() {
 namespace MantidQt::CustomInterfaces::IDA {
 
 FqTemplateBrowser::FqTemplateBrowser()
-    : SingleFunctionTemplateBrowser(widthFits,
+    : SingleFunctionTemplateBrowser(FqFit::WIDTH_FITS,
                                     std::make_unique<IDAFunctionParameterEstimation>(createParameterEstimation())) {}
 
 } // namespace MantidQt::CustomInterfaces::IDA

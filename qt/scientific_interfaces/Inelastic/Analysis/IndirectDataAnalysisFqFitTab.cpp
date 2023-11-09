@@ -5,28 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisFqFitTab.h"
-#include "FQFitConstants.h"
+#include "FitTabConstants.h"
 #include "FqFitDataPresenter.h"
 #include "FqFitModel.h"
 
 #include "FunctionBrowser/FqTemplateBrowser.h"
 
-#include <string>
-
-using namespace Mantid::API;
-
-namespace {
-
-std::vector<std::string> FQFIT_HIDDEN_PROPS =
-    std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
-                              "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
-
-} // namespace
-
 namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
-    : IndirectDataAnalysisTab(new FqFitModel, new FqTemplateBrowser, new FqFitDataView, FQFIT_HIDDEN_PROPS, parent) {
+    : IndirectDataAnalysisTab(new FqFitModel, new FqTemplateBrowser, new FqFitDataView, FqFit::HIDDEN_PROPS, parent) {
   // m_fitPropertyBrowser->updateAvailableFunctions(availableFits.at(DataType::ALL));
 
   setupFitDataPresenter<FqFitDataPresenter>();

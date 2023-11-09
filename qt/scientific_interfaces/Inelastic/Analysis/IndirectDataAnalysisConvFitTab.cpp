@@ -6,21 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisConvFitTab.h"
 #include "ConvFitDataPresenter.h"
+#include "FitTabConstants.h"
 #include "FunctionBrowser/ConvTemplateBrowser.h"
-
-using namespace Mantid::API;
-
-namespace {
-
-std::vector<std::string> CONVFIT_HIDDEN_PROPS = std::vector<std::string>(
-    {"CreateOutput", "LogValue", "PassWSIndexToFunction", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
-
-} // namespace
 
 namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
-    : IndirectDataAnalysisTab(new ConvFitModel, new ConvTemplateBrowser, new ConvFitDataView, CONVFIT_HIDDEN_PROPS,
+    : IndirectDataAnalysisTab(new ConvFitModel, new ConvTemplateBrowser, new ConvFitDataView, ConvFit::HIDDEN_PROPS,
                               parent) {
   setupFitDataPresenter<ConvFitDataPresenter>();
   setConvolveMembers(true);
