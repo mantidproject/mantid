@@ -291,8 +291,6 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         ws = self.getProperty("InputWorkspace").value
         peaks = self.getProperty("PeaksWorkspace").value
         # shoebox dimensions
-        nrows = self.getProperty("NRows").value
-        ncols = self.getProperty("NCols").value
         get_nbins_from_b2bexp_params = self.getProperty("GetNBinsFromBackToBackParams").value
         nfwhm = self.getProperty("NFWHM").value
         nshoebox = self.getProperty("NShoeboxInWindow").value
@@ -321,6 +319,8 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             pk_tof = peak.getTOF()
 
             # get shoebox kernel for initial integration
+            nrows = self.getProperty("NRows").value  # get these inside loop as overwritten if shoebox optimised
+            ncols = self.getProperty("NCols").value
             ispec = ws.getIndicesFromDetectorIDs([detid])[0]
             itof = ws.binIndexOf(pk_tof, ispec)
             bin_width = np.diff(ws.readX(ispec)[itof : itof + 2])[0]  # used later to scale intensity
@@ -347,7 +347,6 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 int(np.clip(itof - nshoebox * kernel.shape[-1] // 2, a_min=0, a_max=len(x))),
                 int(np.clip(itof + nshoebox * kernel.shape[-1] // 2, a_min=0, a_max=len(x))),
             )
-
             x = x[tof_slice]
             y = y[:, :, tof_slice]
             esq = esq[:, :, tof_slice]
