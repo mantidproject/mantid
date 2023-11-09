@@ -61,7 +61,7 @@ class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsView final : public API::MantidWi
 
 public:
   IndirectPlotOptionsView(QWidget *parent = nullptr);
-  virtual ~IndirectPlotOptionsView() override;
+  ~IndirectPlotOptionsView() = default;
 
   void subscribePresenter(IIndirectPlotOptionsPresenter *presenter) override;
 

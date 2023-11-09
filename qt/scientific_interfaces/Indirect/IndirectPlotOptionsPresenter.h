@@ -29,7 +29,7 @@ public:
   virtual void notifyPlotTiledClicked() = 0;
 };
 
-class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public IIndirectPlotOptionsPresenter {
+class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter final : public IIndirectPlotOptionsPresenter {
 
 public:
   IndirectPlotOptionsPresenter(

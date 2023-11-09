@@ -42,7 +42,7 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIndirectPlotOptionsView : public IIndirectPlotOptionsView {
+class MockIndirectPlotOptionsView final : public IIndirectPlotOptionsView {
 public:
   MOCK_METHOD1(subscribePresenter, void(IIndirectPlotOptionsPresenter *));
 
@@ -75,7 +75,7 @@ public:
 };
 
 /// Mock object to mock an IndirectTab
-class MockIndirectPlotOptionsModel : public IndirectPlotOptionsModel {
+class MockIndirectPlotOptionsModel final : public IndirectPlotOptionsModel {
 public:
   /// Public Methods
   MOCK_METHOD1(setWorkspace, bool(std::string const &workspaceName));
@@ -105,8 +105,8 @@ public:
   static void destroySuite(IndirectPlotOptionsPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_view = std::make_unique<NiceMock<MockIndirectPlotOptionsView>>();
-    m_model = new NiceMock<MockIndirectPlotOptionsModel>();
+    m_view = std::make_unique<MockIndirectPlotOptionsView>();
+    m_model = new MockIndirectPlotOptionsModel();
 
     m_presenter = std::make_unique<IndirectPlotOptionsPresenter>(m_view.get(), m_model);
   }
@@ -131,8 +131,8 @@ public:
 
   void test_that_the_expected_setup_is_performed_when_instantiating_the_presenter() {
     tearDown();
-    m_view = std::make_unique<NiceMock<MockIndirectPlotOptionsView>>();
-    m_model = new NiceMock<MockIndirectPlotOptionsModel>();
+    m_view = std::make_unique<MockIndirectPlotOptionsView>();
+    m_model = new MockIndirectPlotOptionsModel();
 
     EXPECT_CALL(*m_view, setIndicesRegex(_)).Times(1);
     EXPECT_CALL(*m_view, setPlotType(PlotWidget::Spectra, constructActions(boost::none))).Times(1);
