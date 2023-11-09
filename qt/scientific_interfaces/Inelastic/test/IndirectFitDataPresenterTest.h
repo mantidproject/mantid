@@ -61,6 +61,7 @@ public:
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
   MOCK_METHOD2(addTableEntry, void(size_t row, FitDataRow newRow));
+  MOCK_METHOD3(updateNumCellEntry, void(double numEntry, size_t row, size_t column));
   MOCK_CONST_METHOD0(workspaceIndexColumn, int());
   MOCK_CONST_METHOD0(startXColumn, int());
   MOCK_CONST_METHOD0(endXColumn, int());

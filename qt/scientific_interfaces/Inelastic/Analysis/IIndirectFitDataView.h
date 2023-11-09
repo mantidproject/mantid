@@ -39,6 +39,7 @@ public:
 
   virtual UserInputValidator &validate(UserInputValidator &validator) = 0;
   virtual void addTableEntry(size_t row, FitDataRow newRow) = 0;
+  virtual void updateNumCellEntry(double numEntry, size_t row, size_t column) = 0;
   virtual int workspaceIndexColumn() const = 0;
   virtual int startXColumn() const = 0;
   virtual int endXColumn() const = 0;

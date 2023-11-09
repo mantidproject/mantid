@@ -31,6 +31,7 @@ public:
 
   UserInputValidator &validate(UserInputValidator &validator) override;
   virtual void addTableEntry(size_t row, FitDataRow newRow) override;
+  virtual void updateNumCellEntry(double numEntry, size_t row, size_t column) override;
   virtual int workspaceIndexColumn() const override;
   virtual int startXColumn() const override;
   virtual int endXColumn() const override;

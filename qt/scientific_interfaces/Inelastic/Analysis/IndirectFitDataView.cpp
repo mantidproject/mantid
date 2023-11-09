@@ -49,7 +49,7 @@ public:
   }
 };
 
-QString makeNumber(double d) { return QString::number(d, 'g', 6); }
+QString makeNumber(double d) { return QString::number(d, 'f', 6); }
 
 QStringList defaultHeaders() {
   QStringList headers;
@@ -125,6 +125,15 @@ void IndirectFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
   cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.exclude));
   setCell(std::move(cell), row, excludeColumn());
 }
+
+void IndirectFitDataView::updateNumCellEntry(double numEntry, size_t row, size_t column) {
+  QTableWidgetItem *selectedItem;
+  selectedItem = m_uiForm->tbFitData->item(static_cast<int>(row), static_cast<int>(column));
+  if ((!selectedItem->isSelected())) {
+    return;
+  }
+  selectedItem->setText(makeNumber(numEntry));
+};
 
 bool IndirectFitDataView::isTableEmpty() const { return m_uiForm->tbFitData->rowCount() == 0; }
 

@@ -203,12 +203,45 @@ void IndirectFitDataPresenter::handleCellChanged(int row, int column) {
   }
 
   if (m_view->startXColumn() == column) {
-    setModelStartXAndEmit(m_view->getText(row, column).toDouble(), row);
+    setTableStartXAndEmit(m_view->getText(row, column), row, column);
   } else if (m_view->endXColumn() == column) {
-    setModelEndXAndEmit(m_view->getText(row, column).toDouble(), row);
+    setTableEndXAndEmit(m_view->getText(row, column), row, column);
   } else if (m_view->excludeColumn() == column) {
     setModelExcludeAndEmit(m_view->getText(row, column).toStdString(), row);
   }
+}
+
+void IndirectFitDataPresenter::setTableStartXAndEmit(QString currentCellStr, int row, int column) {
+  bool ok;
+  double X;
+  auto subIndices = m_model->getSubIndices(row);
+  auto FitRange = m_model->getFittingRange(row);
+  auto spectra = m_model->getSpectra(row);
+
+  X = currentCellStr.toDouble(&ok);
+  if (!ok) {
+    X = FitRange.first;
+  };
+
+  m_model->setStartX(X, subIndices.first, subIndices.second);
+  m_view->updateNumCellEntry(m_model->getFittingRange(row).first, row, column);
+  emit startXChanged(m_model->getFittingRange(row).first, subIndices.first, subIndices.second);
+}
+
+void IndirectFitDataPresenter::setTableEndXAndEmit(QString currentCellStr, int row, int column) {
+  bool ok;
+  double X;
+  auto subIndices = m_model->getSubIndices(row);
+  auto FitRange = m_model->getFittingRange(row);
+
+  X = currentCellStr.toDouble(&ok);
+  if (!ok) {
+    X = FitRange.second;
+  };
+
+  m_model->setEndX(X, subIndices.first, subIndices.second);
+  m_view->updateNumCellEntry(m_model->getFittingRange(row).second, row, column);
+  emit endXChanged(m_model->getFittingRange(row).second, subIndices.first, subIndices.second);
 }
 
 void IndirectFitDataPresenter::setModelStartXAndEmit(double startX, FitDomainIndex row) {
