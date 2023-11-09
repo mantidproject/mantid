@@ -111,8 +111,7 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
             QApplication.instance().processEvents()
         file_changed_event_mock.assert_called_once()
 
-    @patch("mantidqt.widgets.codeeditor.multifileinterpreter.MultiPythonFileInterpreter.file_changed_event", autospec=True)
-    def test_saving_file_adds_events_to_ignore_list(self, file_changed_event_mock):
+    def test_saving_file_adds_events_to_ignore_list(self):
         widget = MultiPythonFileInterpreter()
         with tempfile.TemporaryDirectory() as temp_dir:
             filename = os.path.join(temp_dir, "test_saving_file_adds_events_to_ignore_list")
@@ -124,7 +123,7 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
             editor.editor.setText("New text")
             widget.save_current_file()
             QApplication.instance().processEvents()
-            self.assertEqual(1, widget.file_watcher_events_to_ignore, "Saving the file should generate some events to ignore")
+            self.assertEqual(0, len(widget.files_changed_unhandled), "Saving the file should not generate events")
 
 
 if __name__ == "__main__":

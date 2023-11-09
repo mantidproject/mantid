@@ -72,8 +72,8 @@ class MultiPythonFileInterpreter(QWidget):
         # We need to disable/ignore the file monitoring when we want to save the file so
         # we don't get notified about our own save. Hence we have a counter that keeps
         # track of events to ignore.
-        self.files_changed_unhandled = set()
-        self.file_watcher_events_to_ignore = 0
+        self.files_changed_unhandled = {}
+        self.files_that_we_have_changed = {}
 
     def _tab_title_and_tooltip(self, filename):
         """Create labels for the tab title and tooltip from a filename"""
@@ -106,10 +106,11 @@ class MultiPythonFileInterpreter(QWidget):
         self.on_completion_change()
 
     def file_changed_event(self, filename):
-        if self.file_watcher_events_to_ignore > 0:
-            self.file_watcher_events_to_ignore -= 1
-        else:
-            self.files_changed_unhandled.add(filename)
+        timestamp = osp.getmtime(filename) if osp.exists(filename) else None
+        duplicate_notfication = filename in self.files_changed_unhandled and self.files_changed_unhandled[filename] == timestamp
+        our_modification = filename in self.files_that_we_have_changed and self.files_that_we_have_changed[filename] == timestamp
+        if not duplicate_notfication and not our_modification:
+            self.files_changed_unhandled[filename] = timestamp
 
     @property
     def editor_count(self):
@@ -227,7 +228,7 @@ class MultiPythonFileInterpreter(QWidget):
             if filename in self.file_watcher.files():
                 self.file_watcher.removePath(filename)
             if filename in self.files_changed_unhandled:
-                self.files_changed_unhandled.remove(filename)
+                self.files_changed_unhandled.pop(filename, None)
             # note: this does not close the widget, that is why we manually close it
             self._tabs.removeTab(idx)
             widget.close()
@@ -386,9 +387,10 @@ class MultiPythonFileInterpreter(QWidget):
             self.close_tab(0)  # close default empty script
 
     def save_current_file(self):
-        self.file_watcher_events_to_ignore += 1
         self.current_editor().save(force_save=True)
-        self.add_file_to_watcher(self.current_editor().filename)
+        filename = self.current_editor().filename
+        self.add_file_to_watcher(filename)
+        self.files_that_we_have_changed[filename] = osp.getmtime(filename)
 
     def save_current_file_as(self):
         previous_filename = self.current_editor().filename
@@ -403,8 +405,7 @@ class MultiPythonFileInterpreter(QWidget):
             self.close_tab(tab_index)
             if previous_filename:
                 self.sig_file_name_changed.emit(previous_filename, filename)
-        else:
-            self.file_watcher_events_to_ignore += 1
+        self.files_that_we_have_changed[filename] = osp.getmtime(filename)
 
     def spaces_to_tabs_current(self):
         self.current_editor().replace_spaces_with_tabs()
@@ -457,7 +458,7 @@ class MultiPythonFileInterpreter(QWidget):
         if file not in self.files_changed_unhandled:
             return
 
-        self.files_changed_unhandled.remove(file)
+        self.files_changed_unhandled.pop(file, None)
         if osp.isfile(file):
             reload_button = QMessageBox.question(
                 self,
