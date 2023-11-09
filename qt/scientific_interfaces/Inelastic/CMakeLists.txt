@@ -37,6 +37,7 @@ set(SRC_FILES
     Analysis/FunctionBrowser/ConvFunctionModel.cpp
     Analysis/FunctionBrowser/ConvTemplateBrowser.cpp
     Analysis/FunctionBrowser/ConvTemplatePresenter.cpp
+    Analysis/FunctionBrowser/FqTemplateBrowser.cpp
     Analysis/FunctionBrowser/IqtFunctionModel.cpp
     Analysis/FunctionBrowser/IqtTemplateBrowser.cpp
     Analysis/FunctionBrowser/IqtTemplatePresenter.cpp
@@ -91,6 +92,7 @@ set(MOC_FILES
     Analysis/IndirectFitPropertyBrowser.h
     Analysis/FunctionBrowser/ConvTemplateBrowser.h
     Analysis/FunctionBrowser/ConvTemplatePresenter.h
+    Analysis/FunctionBrowser/FqTemplateBrowser.h
     Analysis/FunctionBrowser/IqtTemplateBrowser.h
     Analysis/FunctionBrowser/IqtTemplatePresenter.h
     Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h

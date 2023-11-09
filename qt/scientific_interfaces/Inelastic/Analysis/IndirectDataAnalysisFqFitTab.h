@@ -8,14 +8,9 @@
 
 #include "IndirectDataAnalysisTab.h"
 
-#include "IFQFitObserver.h"
-#include "MantidAPI/IFunction.h"
-#include "MantidAPI/TextAxis.h"
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class IDAFunctionParameterEstimation;
 
 class MANTIDQT_INELASTIC_DLL IndirectDataAnalysisFqFitTab : public IndirectDataAnalysisTab {
   Q_OBJECT
@@ -29,7 +24,6 @@ public:
 
 private:
   EstimationDataSelector getEstimationDataSelector() const override;
-  IDAFunctionParameterEstimation createParameterEstimation() const;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

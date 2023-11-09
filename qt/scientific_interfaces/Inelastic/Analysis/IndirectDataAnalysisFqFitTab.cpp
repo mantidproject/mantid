@@ -8,88 +8,25 @@
 #include "FQFitConstants.h"
 #include "FqFitDataPresenter.h"
 #include "FqFitModel.h"
-#include "IDAFunctionParameterEstimation.h"
 
-#include "FunctionBrowser/SingleFunctionTemplateBrowser.h"
-#include "MantidAPI/IFunction.h"
-#include "MantidAPI/MultiDomainFunction.h"
-#include "MantidKernel/PhysicalConstants.h"
+#include "FunctionBrowser/FqTemplateBrowser.h"
 
 #include <string>
 
 using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces::IDA;
 
 namespace {
-constexpr double HBAR = Mantid::PhysicalConstants::h / Mantid::PhysicalConstants::meV * 1e12 / (2 * M_PI);
 
 std::vector<std::string> FQFIT_HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
-
-void estimateChudleyElliot(::Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData) {
-
-  auto y = estimationData.y;
-  auto x = estimationData.x;
-  if (x.size() != 2 || y.size() != 2) {
-    return;
-  }
-
-  double L = 1.5;
-  double tau = (HBAR / y[1]) * (1 - sin(x[1] * L) / (L * x[1]));
-
-  function->setParameter("L", L);
-  function->setParameter("Tau", tau);
-}
-void estimateHallRoss(::Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData) {
-
-  auto y = estimationData.y;
-  auto x = estimationData.x;
-  if (x.size() != 2 || y.size() != 2) {
-    return;
-  }
-
-  double L = 0.2;
-  double tau = (HBAR / y[1]) * (1 - exp((-x[1] * x[1] * L * L) / 2));
-
-  function->setParameter("L", L);
-  function->setParameter("Tau", tau);
-}
-void estimateTeixeiraWater(::Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData) {
-
-  auto y = estimationData.y;
-  auto x = estimationData.x;
-  if (x.size() != 2 || y.size() != 2) {
-    return;
-  }
-
-  double L = 1.5;
-  double QL = x[1] * L;
-  double tau = (HBAR / y[1]) * ((QL * QL) / (6 + QL * QL));
-
-  function->setParameter("L", L);
-  function->setParameter("Tau", tau);
-}
-void estimateFickDiffusion(::Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData) {
-  auto y = estimationData.y;
-  auto x = estimationData.x;
-  if (x.size() != 2 || y.size() != 2) {
-    return;
-  }
-
-  function->setParameter("D", y[1] / (x[1] * x[1]));
-}
 
 } // namespace
 
 namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
-    : IndirectDataAnalysisTab(
-          new FqFitModel,
-          new SingleFunctionTemplateBrowser(
-              widthFits, std::make_unique<IDAFunctionParameterEstimation>(createParameterEstimation())),
-          new FqFitDataView, FQFIT_HIDDEN_PROPS, parent) {
+    : IndirectDataAnalysisTab(new FqFitModel, new FqTemplateBrowser, new FqFitDataView, FQFIT_HIDDEN_PROPS, parent) {
   // m_fitPropertyBrowser->updateAvailableFunctions(availableFits.at(DataType::ALL));
 
   setupFitDataPresenter<FqFitDataPresenter>();
@@ -121,17 +58,6 @@ EstimationDataSelector IndirectDataAnalysisFqFitTab::getEstimationDataSelector()
 
     return DataForParameterEstimation{{x[first], x[m]}, {y[first], y[m]}};
   };
-}
-
-IDAFunctionParameterEstimation IndirectDataAnalysisFqFitTab::createParameterEstimation() const {
-
-  IDAFunctionParameterEstimation parameterEstimation;
-  parameterEstimation.addParameterEstimationFunction("ChudleyElliot", estimateChudleyElliot);
-  parameterEstimation.addParameterEstimationFunction("HallRoss", estimateHallRoss);
-  parameterEstimation.addParameterEstimationFunction("TeixeiraWater", estimateTeixeiraWater);
-  parameterEstimation.addParameterEstimationFunction("FickDiffusion", estimateFickDiffusion);
-
-  return parameterEstimation;
 }
 
 } // namespace MantidQt::CustomInterfaces::IDA
