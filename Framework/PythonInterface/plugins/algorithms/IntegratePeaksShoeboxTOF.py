@@ -354,7 +354,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     status = PEAK_STATUS.ON_EDGE
                     intens, sigma = 0.0, 0.0
 
-            if status == PEAK_STATUS.WEAK and weak_peak_strategy == "NearestStrongPeak":
+            if status == PEAK_STATUS.WEAK and do_optimise_shoebox and weak_peak_strategy == "NearestStrongPeak":
                 ipk_weak.append(ipk)  # store pk index (and pos FWHM?)
             else:
                 set_peak_intensity(peak, intens, sigma, bin_width, do_lorz_cor)
