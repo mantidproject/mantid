@@ -41,4 +41,16 @@ Bugfixes
 .. amalgamate:: Direct_Geometry/MSlice/Bugfixes
 
 
+DNS_Reduction
+-------------
+
+New features
+############
+.. amalgamate:: Direct_Geometry/DNS_Reduction/New_features
+
+Bugfixes
+############
+.. amalgamate:: Direct_Geometry/DNS_Reduction/Bugfixes
+
+
 :ref:`Release 6.9.0 <v6.9.0>`
