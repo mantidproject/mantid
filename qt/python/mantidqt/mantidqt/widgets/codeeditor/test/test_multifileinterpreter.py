@@ -11,7 +11,9 @@ import os.path
 import tempfile
 import unittest
 
+from qtpy.QtWidgets import QApplication
 from unittest import mock
+from unittest.mock import patch
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
@@ -94,6 +96,35 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
         # 'Save Script as' should close the original tab with the old name, and leave you with a tab with the new name.
         self.assertEqual(2, widget.editor_count)
         self.assertFalse(widget.current_editor().editor.isModified(), msg="Tab should be marked as not modified")
+
+    @patch("mantidqt.widgets.codeeditor.multifileinterpreter.MultiPythonFileInterpreter.file_changed_event", autospec=True)
+    def test_file_modified_externally_generates_event(self, file_changed_event_mock):
+        widget = MultiPythonFileInterpreter()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            filename = os.path.join(temp_dir, "test_file_modified_externally")
+            with open(filename, "w") as f:
+                f.write("Test")
+            with mock.patch("mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename", lambda s: filename):
+                widget.open_file_in_new_tab(filename)
+            with open(filename, "w") as f:
+                f.write("File changed")
+            QApplication.instance().processEvents()
+        file_changed_event_mock.assert_called_once()
+
+    @patch("mantidqt.widgets.codeeditor.multifileinterpreter.MultiPythonFileInterpreter.file_changed_event", autospec=True)
+    def test_saving_file_adds_events_to_ignore_list(self, file_changed_event_mock):
+        widget = MultiPythonFileInterpreter()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            filename = os.path.join(temp_dir, "test_saving_file_adds_events_to_ignore_list")
+            with open(filename, "w") as f:
+                f.write("Test")
+            with mock.patch("mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename", lambda s: filename):
+                widget.open_file_in_new_tab(filename)
+            editor = widget.current_editor()
+            editor.editor.setText("New text")
+            widget.save_current_file()
+            QApplication.instance().processEvents()
+            self.assertEqual(1, widget.file_watcher_events_to_ignore, "Saving the file should generate some events to ignore")
 
 
 if __name__ == "__main__":
