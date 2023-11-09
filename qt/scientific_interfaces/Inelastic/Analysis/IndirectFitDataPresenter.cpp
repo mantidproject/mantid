@@ -216,7 +216,6 @@ void IndirectFitDataPresenter::setTableStartXAndEmit(QString currentCellStr, int
   double X;
   auto subIndices = m_model->getSubIndices(row);
   auto FitRange = m_model->getFittingRange(row);
-  auto spectra = m_model->getSpectra(row);
 
   X = currentCellStr.toDouble(&ok);
   if (!ok) {
