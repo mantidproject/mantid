@@ -41,6 +41,7 @@ set(SRC_FILES
     Analysis/FunctionBrowser/IqtFunctionModel.cpp
     Analysis/FunctionBrowser/IqtTemplateBrowser.cpp
     Analysis/FunctionBrowser/IqtTemplatePresenter.cpp
+    Analysis/FunctionBrowser/MSDTemplateBrowser.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp
@@ -95,6 +96,7 @@ set(MOC_FILES
     Analysis/FunctionBrowser/FqTemplateBrowser.h
     Analysis/FunctionBrowser/IqtTemplateBrowser.h
     Analysis/FunctionBrowser/IqtTemplatePresenter.h
+    Analysis/FunctionBrowser/MSDTemplateBrowser.h
     Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.h
     Manipulation/InelasticDataManipulation.h
