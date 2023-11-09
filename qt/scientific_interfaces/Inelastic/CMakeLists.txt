@@ -3,12 +3,9 @@ set(SRC_FILES
     Analysis/ConvFitModel.cpp
     Analysis/ConvFitDataView.cpp
     Analysis/ConvFitDataPresenter.cpp
+    Analysis/DataAnalysisTabFactory.cpp
     Analysis/IndirectDataAnalysis.cpp
     Analysis/IndirectDataAnalysisTab.cpp
-    Analysis/IndirectDataAnalysisMSDFitTab.cpp
-    Analysis/IndirectDataAnalysisIqtFitTab.cpp
-    Analysis/IndirectDataAnalysisConvFitTab.cpp
-    Analysis/IndirectDataAnalysisFqFitTab.cpp
     Analysis/FqFitAddWorkspaceDialog.cpp
     Analysis/FqFitDataPresenter.cpp
     Analysis/FqFitDataView.cpp
@@ -70,10 +67,6 @@ set(MOC_FILES
     Analysis/ConvFitDataPresenter.h
     Analysis/IndirectDataAnalysis.h
     Analysis/IndirectDataAnalysisTab.h
-    Analysis/IndirectDataAnalysisMSDFitTab.h
-    Analysis/IndirectDataAnalysisIqtFitTab.h
-    Analysis/IndirectDataAnalysisConvFitTab.h
-    Analysis/IndirectDataAnalysisFqFitTab.h
     Analysis/FqFitAddWorkspaceDialog.h
     Analysis/FqFitDataPresenter.h
     Analysis/FqFitDataView.h
@@ -116,6 +109,7 @@ set(MOC_FILES
 set(INC_FILES
     DllConfig.h
     PrecompiledHeader.h
+    Analysis/DataAnalysisTabFactory.h
     Analysis/IDAFunctionParameterEstimation.h
     Analysis/FqFitModel.h
     Analysis/IFQFitObserver.h

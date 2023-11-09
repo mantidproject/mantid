@@ -96,9 +96,11 @@ size_t IndirectDataAnalysisTab::getNumberOfSpecificFunctionContained(const std::
 }
 
 IndirectDataAnalysisTab::IndirectDataAnalysisTab(IndirectFittingModel *model, FunctionTemplateBrowser *templateBrowser,
-                                                 IndirectFitDataView *fitDataView,
+                                                 IndirectFitDataView *fitDataView, std::string const &tabName,
+                                                 bool const hasResolution,
                                                  std::vector<std::string> const &hiddenProperties, QWidget *parent)
-    : IndirectTab(parent), m_fittingModel(model), m_uiForm(new Ui::IndirectFitTab) {
+    : IndirectTab(parent), m_fittingModel(model), m_uiForm(new Ui::IndirectFitTab), m_tabName(tabName),
+      m_hasResolution(hasResolution) {
   m_uiForm->setupUi(parent);
 
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);

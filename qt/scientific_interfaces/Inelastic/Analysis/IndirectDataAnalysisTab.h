@@ -37,9 +37,15 @@ class MANTIDQT_INELASTIC_DLL IndirectDataAnalysisTab : public IndirectTab {
 
 public:
   IndirectDataAnalysisTab(IndirectFittingModel *model, FunctionTemplateBrowser *templateBrowser,
-                          IndirectFitDataView *fitDataView, std::vector<std::string> const &hiddenProperties,
-                          QWidget *parent = nullptr);
+                          IndirectFitDataView *fitDataView, std::string const &tabName, bool const hasResolution,
+                          std::vector<std::string> const &hiddenProperties, QWidget *parent = nullptr);
   virtual ~IndirectDataAnalysisTab() override = default;
+
+  template <typename FitDataPresenter> void setupFitDataPresenter() {
+    m_dataPresenter =
+        std::make_unique<FitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
+    setupPlotView();
+  }
 
   WorkspaceID getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
@@ -50,16 +56,11 @@ public:
   static size_t getNumberOfSpecificFunctionContained(const std::string &functionName,
                                                      const IFunction *compositeFunction);
 
-  virtual std::string getTabName() const = 0;
-  virtual bool hasResolution() const = 0;
+  std::string getTabName() const noexcept { return m_tabName; }
+  bool hasResolution() const noexcept { return m_hasResolution; }
   void setFileExtensionsByName(bool filter);
 
 protected:
-  template <typename FitDataPresenter> void setupFitDataPresenter() {
-    m_dataPresenter =
-        std::make_unique<FitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
-    setupPlotView();
-  }
   IndirectFittingModel *getFittingModel() const;
   void run() override;
   void setSampleWSSuffixes(const QStringList &suffices);
@@ -104,6 +105,9 @@ private:
   void setPDFWorkspace(std::string const &workspaceName);
   void updateParameterEstimationData();
   std::string getFitTypeString() const;
+
+  std::string m_tabName;
+  bool m_hasResolution;
 
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
