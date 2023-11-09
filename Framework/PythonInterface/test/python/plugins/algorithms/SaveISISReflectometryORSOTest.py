@@ -40,7 +40,6 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     def setUp(self):
         self._rb_number = str(123456)
-        self._resolution = 0.05
         self._filename = "ORSO_save_test.ort"
         self._temp_dir = tempfile.TemporaryDirectory()
         self._output_filename = os.path.join(self._temp_dir.name, self._filename)
@@ -59,12 +58,6 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         """
         AnalysisDataService.clear()
         self._temp_dir.cleanup()
-
-    def test_create_file_with_resolution_provided(self):
-        ws = self._create_sample_workspace()
-        SaveISISReflectometryORSO(InputWorkspace=ws, Resolution=self._resolution, Filename=self._output_filename)
-
-        self._check_file_contents(self._header_entries_for_sample_ws, ws, self._resolution)
 
     def test_create_file_from_workspace_with_reduction_history(self):
         # Check that relevant information is extracted from the history produced by the ISIS Reflectometry reduction
@@ -108,13 +101,13 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     def test_create_file_with_write_resolution_set_to_false_omits_resolution_column(self):
         ws = self._create_sample_workspace()
-        SaveISISReflectometryORSO(InputWorkspace=ws, WriteResolution=False, Resolution=self._resolution, Filename=self._output_filename)
+        SaveISISReflectometryORSO(InputWorkspace=ws, WriteResolution=False, Filename=self._output_filename)
 
         self._check_data_in_file(ws, None)
 
     def test_file_excludes_proposal_id_and_doi_if_logs_missing(self):
         ws = self._create_sample_workspace(rb_num_log_name="")
-        SaveISISReflectometryORSO(InputWorkspace=ws, Resolution=self._resolution, Filename=self._output_filename)
+        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
 
         excluded_values = [self._header_entries_for_sample_ws[0], self._header_entries_for_sample_ws[1]]
 
@@ -122,7 +115,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     def test_file_includes_proposal_id_and_doi_for_alternative_rb_num_log(self):
         ws = self._create_sample_workspace(rb_num_log_name=self._LOG_EXP_IDENTIFIER)
-        SaveISISReflectometryORSO(InputWorkspace=ws, Resolution=self._resolution, Filename=self._output_filename)
+        SaveISISReflectometryORSO(InputWorkspace=ws, Filename=self._output_filename)
 
         self._check_file_header(self._header_entries_for_sample_ws)
 

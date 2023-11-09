@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.utils.reflectometry.orso_helper import *
 
-from mantid.kernel import Direction, Property
+from mantid.kernel import Direction
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, FileProperty, FileAction, PythonAlgorithm, PropertyMode
 
 from pathlib import Path
@@ -15,7 +15,6 @@ from pathlib import Path
 class Prop:
     INPUT_WS = "InputWorkspace"
     WRITE_RESOLUTION = "WriteResolution"
-    RESOLUTION = "Resolution"
     FILENAME = "Filename"
 
 
@@ -56,14 +55,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             defaultValue=True,
             direction=Direction.Input,
             doc="Whether to compute resolution values and write them as the fourth data column.",
-        )
-
-        self.declareProperty(
-            name=Prop.RESOLUTION,
-            defaultValue=Property.EMPTY_DBL,
-            direction=Direction.Input,
-            doc="Logarithmic resolution used to process the reflectometry data."
-            f"This value is only used if {Prop.WRITE_RESOLUTION} is set to True.",
         )
 
         self.declareProperty(
@@ -168,9 +159,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     def _get_resolution(self, ws, reduction_history):
         if not self.getProperty(Prop.WRITE_RESOLUTION).value:
             return None
-
-        if not self.getProperty(Prop.RESOLUTION).isDefault:
-            return self.getProperty(Prop.RESOLUTION).value
 
         # Attempt to get the resolution from the workspace history if it hasn't been passed in
         history = ws.getHistory()
