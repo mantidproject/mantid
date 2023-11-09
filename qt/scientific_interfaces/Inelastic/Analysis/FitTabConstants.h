@@ -13,26 +13,38 @@
 namespace MantidQt::CustomInterfaces::IDA {
 
 namespace MSDFit {
+static const auto TAB_NAME = "MSDFit";
+static const auto HAS_RESOLUTION = false;
 static const auto HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
-}
+} // namespace MSDFit
 
 namespace IqtFit {
+static const auto TAB_NAME = "IqtFit";
+static const auto HAS_RESOLUTION = false;
 static const auto HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
-}
+} // namespace IqtFit
 
 namespace ConvFit {
+static const auto TAB_NAME = "ConvFit";
+static const auto HAS_RESOLUTION = true;
 static const auto HIDDEN_PROPS = std::vector<std::string>(
     {"CreateOutput", "LogValue", "PassWSIndexToFunction", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
-}
+} // namespace ConvFit
 
 namespace FqFit {
+static const auto TAB_NAME = "FQFit";
+static const auto HAS_RESOLUTION = false;
+static const auto HIDDEN_PROPS =
+    std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
+                              "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
+
 enum class DataType {
   WIDTH,
   EISF,
@@ -69,9 +81,6 @@ static const std::map<std::string, std::string> ALL_FITS{
 static const std::unordered_map<DataType, std::map<std::string, std::string>> availableFits{
     {{DataType::WIDTH, WIDTH_FITS}, {DataType::EISF, EISF_FITS}, {DataType::ALL, ALL_FITS}}};
 
-static const auto HIDDEN_PROPS =
-    std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
-                              "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 } // namespace FqFit
 
 } // namespace MantidQt::CustomInterfaces::IDA
