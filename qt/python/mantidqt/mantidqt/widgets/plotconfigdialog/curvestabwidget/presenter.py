@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-import warnings
 
 from matplotlib.lines import Line2D
 
@@ -144,13 +143,16 @@ class CurvesTabWidgetPresenter:
         else:
             errorbar_cap_lines = []
 
-        # TODO: Accessing the ax.lines property is deprecated in mpl 3.5. It must be removed by mpl 3.7.
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            # When a curve is redrawn it is moved to the back of the list of curves so here it is moved back to its previous
-            # position. This is so that the correct offset is applied to the curve if the plot is a waterfall plot, but it
-            # also just makes sense for the curve order to remain unchanged.
-            ax.lines.insert(curve_index, ax.lines.pop())
+        # When a curve is redrawn it is moved to the back of the list of curves so here it is moved back to its previous
+        # position. This is so that the correct offset is applied to the curve if the plot is a waterfall plot, but it
+        # also just makes sense for the curve order to remain unchanged.
+        # Since mpl 3.7 made ax.lines immutable, we have to do this workaround.
+        lines_to_remove = ax.get_lines()[curve_index:]
+        for line in lines_to_remove:
+            line.remove()
+        ax.add_line(lines_to_remove.pop())
+        for line in lines_to_remove:
+            ax.add_line(line)
 
         if waterfall:
             # Set the waterfall offsets to what they were previously.

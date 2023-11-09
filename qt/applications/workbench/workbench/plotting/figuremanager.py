@@ -525,12 +525,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         for cap in errorbar_cap_lines:
             ax.add_line(cap)
 
-        """ArtistList will become an immutable tuple in matplotlib 3.7 which will prevent iterating through line_fill"""
-        for line_fill in fills:
+        for line_fill in reversed(fills):
             if line_fill not in ax.collections:
                 ax.add_collection(line_fill)
 
-        ax.collections.reverse()
         ax.update_waterfall(x, y)
 
         if ax.get_legend():
