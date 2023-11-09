@@ -28,7 +28,6 @@ public:
 
 private:
   EstimationDataSelector getEstimationDataSelector() const override;
-  void addDataToModel(IAddWorkspaceDialog const *dialog) override;
 };
 
 } // namespace IDA

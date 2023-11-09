@@ -203,6 +203,26 @@ FqFitDataPresenter::FqFitDataPresenter(IIndirectFitDataModel *model, IIndirectFi
   connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveWorkspaceID()));
 }
 
+bool FqFitDataPresenter::addWorkspace(IAddWorkspaceDialog const *dialog) {
+  if (const auto fqFitDialog = dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
+    addWorkspace(fqFitDialog->workspaceName(), fqFitDialog->parameterType(), fqFitDialog->parameterNameIndex());
+    setActiveWorkspaceIDToCurrentWorkspace(fqFitDialog);
+
+    auto const parameterIndex = fqFitDialog->parameterNameIndex();
+    if (parameterIndex < 0) {
+      throw std::runtime_error("No valid parameter was selected.");
+    } else if (fqFitDialog->parameterType() == "Width") {
+      setActiveWidth(static_cast<std::size_t>(parameterIndex), m_activeWorkspaceID, false);
+    } else {
+      setActiveEISF(static_cast<std::size_t>(parameterIndex), m_activeWorkspaceID, false);
+    }
+
+    updateActiveWorkspaceID(getNumberOfWorkspaces());
+    return true;
+  }
+  return false;
+}
+
 void FqFitDataPresenter::addWorkspace(const std::string &workspaceName, const std::string &paramType,
                                       const int &spectrum_index) {
   auto workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);

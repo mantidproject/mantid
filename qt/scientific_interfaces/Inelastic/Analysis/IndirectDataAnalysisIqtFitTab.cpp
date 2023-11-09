@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisIqtFitTab.h"
 #include "FunctionBrowser/IqtTemplateBrowser.h"
-#include "IndirectAddWorkspaceDialog.h"
-#include "IndirectFitPlotView.h"
 #include "IqtFitModel.h"
 
 using namespace Mantid::API;

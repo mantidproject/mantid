@@ -665,7 +665,9 @@ void IndirectDataAnalysisTab::respondToDataChanged() {
 }
 
 void IndirectDataAnalysisTab::respondToDataAdded(IAddWorkspaceDialog const *dialog) {
-  addDataToModel(dialog);
+  if (m_dataPresenter->addWorkspace(dialog)) {
+    m_fittingModel->addDefaultParameters();
+  }
   updateDataReferences();
   auto displayNames = m_dataPresenter->createDisplayNames();
   m_plotPresenter->appendLastDataToSelection(displayNames);
@@ -704,13 +706,6 @@ void IndirectDataAnalysisTab::respondToFunctionChanged() {
   m_plotPresenter->updatePlots();
   m_plotPresenter->updateFit();
   m_fittingModel->setFitTypeString(getFitTypeString());
-}
-
-void IndirectDataAnalysisTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
-    m_dataPresenter->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
-    m_fittingModel->addDefaultParameters();
-  }
 }
 
 std::string IndirectDataAnalysisTab::getFitTypeString() const {

@@ -30,9 +30,6 @@ public:
 private:
   EstimationDataSelector getEstimationDataSelector() const override;
   IDAFunctionParameterEstimation createParameterEstimation() const;
-  void addDataToModel(IAddWorkspaceDialog const *dialog) override;
-  void setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
-  void setModelSpectrum(int index, const std::string &paramType);
 };
 } // namespace IDA
 } // namespace CustomInterfaces

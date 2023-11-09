@@ -49,6 +49,14 @@ std::vector<IndirectFitData> *IndirectFitDataPresenter::getFittingData() { retur
 
 IIndirectFitDataView const *IndirectFitDataPresenter::getView() const { return m_view; }
 
+bool IndirectFitDataPresenter::addWorkspace(IAddWorkspaceDialog const *dialog) {
+  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
+    addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
+    return true;
+  }
+  return false;
+}
+
 void IndirectFitDataPresenter::addWorkspace(const std::string &workspaceName, const std::string &spectra) {
   m_model->addWorkspace(workspaceName, spectra);
 }

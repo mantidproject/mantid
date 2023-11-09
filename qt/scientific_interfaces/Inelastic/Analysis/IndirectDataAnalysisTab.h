@@ -104,7 +104,6 @@ private:
   void enableOutputOptions(bool enable);
   void setPDFWorkspace(std::string const &workspaceName);
   void updateParameterEstimationData();
-  virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
   std::string getFitTypeString() const;
 
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;

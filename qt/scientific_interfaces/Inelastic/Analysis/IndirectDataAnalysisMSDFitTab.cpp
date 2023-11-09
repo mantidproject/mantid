@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisMSDFitTab.h"
 #include "IDAFunctionParameterEstimation.h"
-#include "IndirectAddWorkspaceDialog.h"
 #include "MSDFitModel.h"
 
 #include "FunctionBrowser/SingleFunctionTemplateBrowser.h"

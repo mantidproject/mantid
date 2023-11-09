@@ -5,10 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisConvFitTab.h"
-#include "ConvFitAddWorkspaceDialog.h"
 #include "ConvFitDataPresenter.h"
 #include "FunctionBrowser/ConvTemplateBrowser.h"
-#include "IndirectFitPlotView.h"
 
 using namespace Mantid::API;
 
@@ -31,14 +29,6 @@ IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
 EstimationDataSelector IndirectDataAnalysisConvFitTab::getEstimationDataSelector() const {
   return [](const Mantid::MantidVec &, const Mantid::MantidVec &,
             const std::pair<double, double>) -> DataForParameterEstimation { return DataForParameterEstimation{}; };
-}
-
-void IndirectDataAnalysisConvFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {
-    m_dataPresenter->addWorkspace(convDialog->workspaceName(), convDialog->workspaceIndices());
-    m_dataPresenter->setResolution(convDialog->resolutionName());
-    m_fittingModel->addDefaultParameters();
-  }
 }
 
 } // namespace MantidQt::CustomInterfaces::IDA
