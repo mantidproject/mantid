@@ -92,6 +92,7 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
           new FqFitDataView, FQFIT_HIDDEN_PROPS, parent) {
   // m_fitPropertyBrowser->updateAvailableFunctions(availableFits.at(DataType::ALL));
 
+  setupFitDataPresenter<FqFitDataPresenter>();
   m_plotPresenter->setXBounds({0.0, 2.0});
 }
 

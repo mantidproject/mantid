@@ -55,6 +55,11 @@ public:
   void setFileExtensionsByName(bool filter);
 
 protected:
+  template <typename FitDataPresenter> void setupFitDataPresenter() {
+    m_dataPresenter =
+        std::make_unique<FitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
+    setupPlotView();
+  }
   IndirectFittingModel *getFittingModel() const;
   void run() override;
   void setSampleWSSuffixes(const QStringList &suffices);
@@ -84,7 +89,6 @@ protected:
 private:
   void setup() override;
   bool validate() override;
-  void setupFitDataPresenter();
   void setupPlotView();
   virtual EstimationDataSelector getEstimationDataSelector() const = 0;
   void connectPlotPresenter();

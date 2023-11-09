@@ -24,6 +24,7 @@ namespace MantidQt::CustomInterfaces::IDA {
 IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
     : IndirectDataAnalysisTab(new ConvFitModel, new ConvTemplateBrowser, new ConvFitDataView, CONVFIT_HIDDEN_PROPS,
                               parent) {
+  setupFitDataPresenter<ConvFitDataPresenter>();
   setConvolveMembers(true);
 }
 

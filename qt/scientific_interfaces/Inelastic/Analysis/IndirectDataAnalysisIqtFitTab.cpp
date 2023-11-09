@@ -22,7 +22,9 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectDataAnalysisIqtFitTab::IndirectDataAnalysisIqtFitTab(QWidget *parent)
     : IndirectDataAnalysisTab(new IqtFitModel, new IqtTemplateBrowser, new IndirectFitDataView, IQTFIT_HIDDEN_PROPS,
-                              parent) {}
+                              parent) {
+  setupFitDataPresenter<IndirectFitDataPresenter>();
+}
 
 EstimationDataSelector IndirectDataAnalysisIqtFitTab::getEstimationDataSelector() const {
   return [](const Mantid::MantidVec &x, const Mantid::MantidVec &y,

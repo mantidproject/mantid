@@ -108,8 +108,6 @@ IndirectDataAnalysisTab::IndirectDataAnalysisTab(IndirectFittingModel *model, Fu
 
   fitDataView->setParent(m_uiForm->dockArea);
   m_uiForm->dockArea->setFitDataView(fitDataView);
-  setupFitDataPresenter();
-  setupPlotView();
 
   m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(m_uiForm->ovOutputOptionsView);
 }
@@ -155,11 +153,6 @@ void IndirectDataAnalysisTab::connectPlotPresenter() {
 
 void IndirectDataAnalysisTab::connectFitPropertyBrowser() {
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(respondToFunctionChanged()));
-}
-
-void IndirectDataAnalysisTab::setupFitDataPresenter() {
-  m_dataPresenter =
-      std::make_unique<IndirectFitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
 }
 
 void IndirectDataAnalysisTab::setupPlotView() {

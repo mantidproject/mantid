@@ -41,7 +41,9 @@ IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
           new MSDFitModel,
           new SingleFunctionTemplateBrowser(
               MSD_FUNCTION_STRINGS, std::make_unique<IDAFunctionParameterEstimation>(createParameterEstimation())),
-          new IndirectFitDataView, MSDFIT_HIDDEN_PROPS, parent) {}
+          new IndirectFitDataView, MSDFIT_HIDDEN_PROPS, parent) {
+  setupFitDataPresenter<IndirectFitDataPresenter>();
+}
 
 EstimationDataSelector IndirectDataAnalysisMSDFitTab::getEstimationDataSelector() const {
 
