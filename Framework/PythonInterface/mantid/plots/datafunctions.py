@@ -1272,7 +1272,6 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
 
     if image.colorbar:
         colorbar = image.colorbar
-        label = colorbar.ax.get_ylabel()
         locator = None
         if scale == LogNorm:
             locator = LogLocator(subs=np.arange(1, 10))
@@ -1282,7 +1281,6 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
                     "Minor ticks on colorbar scale cannot be shown " "as the range between min value and max value is too large"
                 )
             colorbar.set_ticks(locator)
-        colorbar.set_label(label)
 
 
 def add_colorbar_label(colorbar, axes):
