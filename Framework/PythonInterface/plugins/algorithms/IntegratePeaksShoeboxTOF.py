@@ -144,7 +144,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             name="NRows",
             defaultValue=5,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=2),
+            validator=IntBoundedValidator(lower=3),
             doc="Number of row components in the detector to use in the convolution kernel. "
             "For WISH row components correspond to pixels along a single tube.",
         )
@@ -152,15 +152,15 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             name="NCols",
             defaultValue=5,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=2),
+            validator=IntBoundedValidator(lower=3),
             doc="Number of column components in the detector to use in the convolution kernel. "
             "For WISH column components correspond to tubes.",
         )
         self.declareProperty(
             name="NBins",
-            defaultValue=10,
+            defaultValue=11,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=2),
+            validator=IntBoundedValidator(lower=3),
             doc="Number of TOF bins to use in the convolution kernel.",
         )
         self.declareProperty(
@@ -189,6 +189,8 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             validator=FloatBoundedValidator(lower=2.0),
             doc="Extent of window in TOF and detector row and column as a multiple of the shoebox length along each dimension.",
         )
+        for prop in ["NRows", "NCols", "NBins", "GetNBinsFromBackToBackParams", "NFWHM", "NShoeboxInWindow"]:
+            self.setPropertyGroup(prop, "Shoebox Dimensions")
         # shoebox optimisation
         self.declareProperty(
             name="OptimiseShoebox",
@@ -208,11 +210,16 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         )
         self.declareProperty(
             name="WeakPeakThreshold",
-            defaultValue=10.0,
+            defaultValue=0.0,
             direction=Direction.Input,
             validator=FloatBoundedValidator(lower=0.0),
             doc="Intenisty/Sigma threshold below which a peak is considered weak.",
         )
+        optimise_shoebox_enabled = EnabledWhenProperty("OptimiseShoebox", PropertyCriterion.IsDefault)
+        self.setPropertySettings("WeakPeakStrategy", optimise_shoebox_enabled)
+        self.setPropertySettings("WeakPeakThreshold", optimise_shoebox_enabled)
+        for prop in ["OptimiseShoebox", "WeakPeakStrategy", "WeakPeakThreshold"]:
+            self.setPropertyGroup(prop, "Shoebox Optimisation")
         # peak validation
         self.declareProperty(
             name="IntegrateIfOnEdge",
@@ -235,11 +242,11 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             validator=IntBoundedValidator(lower=1),
             doc="Shoeboxes containing detectors NColsEdge from the detector edge are defined as on the edge.",
         )
-        # plotting
-        self.declareProperty(
-            FileProperty("OutputFile", "", FileAction.OptionalSave, ".pdf"),
-            "Optional file path in which to write diagnostic plots (note this will slow the " "execution of algorithm).",
-        )
+        edge_check_enabled = EnabledWhenProperty("IntegrateIfOnEdge", PropertyCriterion.IsDefault)
+        self.setPropertySettings("NRowsEdge", edge_check_enabled)
+        self.setPropertySettings("NColsEdge", edge_check_enabled)
+        for prop in ["IntegrateIfOnEdge", "NRowsEdge", "NColsEdge"]:
+            self.setPropertyGroup(prop, "Edge Checking")
         # Corrections
         self.declareProperty(
             name="LorentzCorrection",
@@ -249,6 +256,12 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             "sin(theta)^2 / lambda^4 - do not do this if the data have already been corrected.",
         )
         self.setPropertyGroup("LorentzCorrection", "Corrections")
+        # plotting
+        self.declareProperty(
+            FileProperty("OutputFile", "", FileAction.OptionalSave, ".pdf"),
+            "Optional file path in which to write diagnostic plots (note this will slow the " "execution of algorithm).",
+        )
+        self.setPropertyGroup("OutputFile", "Plotting")
 
     def PyExec(self):
         # get input
