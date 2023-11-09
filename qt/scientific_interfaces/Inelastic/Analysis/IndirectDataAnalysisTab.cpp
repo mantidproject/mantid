@@ -157,10 +157,13 @@ void IndirectDataAnalysisTab::connectFitPropertyBrowser() {
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(respondToFunctionChanged()));
 }
 
-void IndirectDataAnalysisTab::setupPlotView() {
+void IndirectDataAnalysisTab::setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds) {
   m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(m_uiForm->dockArea->m_fitPlotView);
   m_plotPresenter->setFittingData(m_dataPresenter->getFittingData());
   m_plotPresenter->setFitOutput(m_fittingModel->getFitOutput());
+  if (xPlotBounds) {
+    m_plotPresenter->setXBounds(*xPlotBounds);
+  }
   m_plotPresenter->updatePlots();
 }
 

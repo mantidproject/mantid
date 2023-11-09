@@ -44,6 +44,7 @@ static const auto HAS_RESOLUTION = false;
 static const auto HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
+static const auto X_BOUNDS = std::pair<double, double>{0.0, 2.0};
 
 enum class DataType {
   WIDTH,

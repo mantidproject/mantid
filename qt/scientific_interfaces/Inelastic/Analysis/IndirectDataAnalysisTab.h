@@ -22,6 +22,7 @@
 #include <QtCore>
 
 #include <memory>
+#include <optional>
 #include <type_traits>
 
 #include <QList>
@@ -41,10 +42,11 @@ public:
                           std::vector<std::string> const &hiddenProperties, QWidget *parent = nullptr);
   virtual ~IndirectDataAnalysisTab() override = default;
 
-  template <typename FitDataPresenter> void setupFitDataPresenter() {
+  template <typename FitDataPresenter>
+  void setUpTab(std::optional<std::pair<double, double>> const &xPlotBounds = std::nullopt) {
     m_dataPresenter =
         std::make_unique<FitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
-    setupPlotView();
+    setupPlotView(xPlotBounds);
   }
 
   WorkspaceID getSelectedDataIndex() const;
@@ -90,7 +92,7 @@ protected:
 private:
   void setup() override;
   bool validate() override;
-  void setupPlotView();
+  void setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds);
   void connectPlotPresenter();
   void connectFitPropertyBrowser();
   void connectDataPresenter();
