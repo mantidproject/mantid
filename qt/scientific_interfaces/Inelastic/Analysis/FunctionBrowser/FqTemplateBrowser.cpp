@@ -87,7 +87,7 @@ IDAFunctionParameterEstimation createParameterEstimation() {
 namespace MantidQt::CustomInterfaces::IDA {
 
 FqTemplateBrowser::FqTemplateBrowser()
-    : SingleFunctionTemplateBrowser(FqFit::WIDTH_FITS,
+    : SingleFunctionTemplateBrowser(FqFit::ALL_FITS,
                                     std::make_unique<IDAFunctionParameterEstimation>(createParameterEstimation())) {}
 
 } // namespace MantidQt::CustomInterfaces::IDA

@@ -15,8 +15,6 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
     : IndirectDataAnalysisTab(new FqFitModel, new FqTemplateBrowser, new FqFitDataView, FqFit::HIDDEN_PROPS, parent) {
-  // m_fitPropertyBrowser->updateAvailableFunctions(availableFits.at(DataType::ALL));
-
   setupFitDataPresenter<FqFitDataPresenter>();
   m_plotPresenter->setXBounds({0.0, 2.0});
 }
