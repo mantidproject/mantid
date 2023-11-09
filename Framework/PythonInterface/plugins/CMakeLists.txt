@@ -93,6 +93,7 @@ set(PYTHON_PLUGINS
     algorithms/InelasticEMUauReduction.py
     algorithms/IntegratePeaksProfileFitting.py
     algorithms/IntegratePeaksSkew.py
+    algorithms/IntegratePeaksShoeboxTOF.py
     algorithms/LRAutoReduction.py
     algorithms/LRDirectBeamSort.py
     algorithms/LRPeakSelection.py
