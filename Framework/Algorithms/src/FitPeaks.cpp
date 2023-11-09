@@ -81,7 +81,7 @@ const std::string OUTPUT_WKSP_PARAMS("OutputPeakParametersWorkspace");
 const std::string OUTPUT_WKSP_PARAM_ERRS("OutputParameterFitErrorsWorkspace");
 const std::string RAW_PARAMS("RawPeakParameters");
 const std::string PEAK_MIN_SIGNAL_TO_NOISE_RATIO("MinimumSignalToNoiseRatio");
-
+const std::string PEAK_MIN_TOTAL_COUNT("MinimumPeakTotalCount");
 } // namespace PropertyNames
 } // namespace
 
@@ -257,8 +257,8 @@ std::string PeakFitPreCheckResult::getReport() const {
 
 //----------------------------------------------------------------------------------------------
 FitPeaks::FitPeaks()
-    : m_fitPeaksFromRight(true), m_fitIterations(50), m_numPeaksToFit(0), m_minPeakHeight(20.),
-      m_minSignalToNoiseRatio(0.), m_peakPosTolCase234(false) {}
+    : m_fitPeaksFromRight(true), m_fitIterations(50), m_numPeaksToFit(0), m_minPeakHeight(0.),
+      m_minSignalToNoiseRatio(0.), m_minPeakTotalCount(0.), m_peakPosTolCase234(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** initialize the properties
@@ -393,10 +393,8 @@ void FitPeaks::init() {
                   "If there is only one value given, then ");
 
   declareProperty(PropertyNames::PEAK_MIN_HEIGHT, 0.,
-                  "Minimum peak height such that all the fitted peaks with "
-                  "height under this value will be excluded. The same property is used "
-                  "for pre-checking peaks before fitting, such that all the peaks with the total Y-count "
-                  "under this value will be excluded.");
+                  "Used for validating peaks after fitting. If a peak's fitted height is under this value, "
+                  "the peak will be marked as error.");
 
   declareProperty(PropertyNames::CONSTRAIN_PEAK_POS, true,
                   "If true peak position will be constrained by estimated positions "
@@ -432,6 +430,10 @@ void FitPeaks::init() {
                   "Minimum signal-to-noise ratio such that all the peaks with "
                   "signal-to-noise ratio under this value will be excluded."
                   "Note, the algorithm will not exclude a peak for which the noise cannot be estimated.");
+
+  declareProperty("PropertyNames::PEAK_MIN_TOTAL_COUNT", 0.,
+                  "Used for validating peaks before fitting. If the total peak Y-value count "
+                  "is under this value, the peak will be excluded from fitting and calibration.");
 
   const std::string addoutgrp("Analysis");
   setPropertyGroup(PropertyNames::OUTPUT_WKSP_PARAMS, addoutgrp);
@@ -907,12 +909,30 @@ void FitPeaks::processInputPeakTolerance() {
                              "peaks to fit are inconsistent.");
   }
 
-  // minimum peak height: set default to zero
+  // set minimum peak height to 0 (default value) if not specified
   m_minPeakHeight = getProperty(PropertyNames::PEAK_MIN_HEIGHT);
-  if (isEmpty(m_minPeakHeight) || m_minPeakHeight < 0.)
+  bool specifiedMinPeakHeight = !isEmpty(m_minPeakHeight);
+  if (specifiedMinPeakHeight || m_minPeakHeight < 0.)
     m_minPeakHeight = 0.;
 
-  // if the signal-to-noise threshold is not specified, set it to zero so it has no effect
+  // set minimum peak total count to 0 (default value) if not specified
+  m_minPeakTotalCount = getProperty(PropertyNames::PEAK_MIN_TOTAL_COUNT);
+  bool specifiedMinPeakTotalCount = !isEmpty(m_minPeakTotalCount);
+  if (specifiedMinPeakTotalCount || m_minPeakTotalCount < 0.)
+    m_minPeakTotalCount = 0.;
+
+  // warn the user if only PEAK_MIN_HEIGHT is specified, because historically
+  // PEAK_MIN_HEIGHT also functioned as the current PEAK_MIN_TOTAL_COUNT property.
+  if (specifiedMinPeakHeight && !specifiedMinPeakTotalCount) {
+    std::ostringstream os;
+    os << "PDCalibration property " << PropertyNames::PEAK_MIN_HEIGHT
+       << " is used for validating peaks after fitting. "
+          "Consider also validating peaks before fitting using "
+       << PropertyNames::PEAK_MIN_TOTAL_COUNT << " property\n";
+    logNoOffset(4 /*warning*/, os.str());
+  }
+
+  // set signal-to-noise threshold to zero (default value) if not specified
   m_minSignalToNoiseRatio = getProperty(PropertyNames::PEAK_MIN_SIGNAL_TO_NOISE_RATIO);
   if (isEmpty(m_minSignalToNoiseRatio) || m_minSignalToNoiseRatio < 0.)
     m_minSignalToNoiseRatio = 0.;
@@ -1123,14 +1143,12 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
                                 const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result) {
   assert(fit_result->getNumberPeaks() == m_numPeaksToFit);
   pre_check_result->setNumberOfSubmittedSpectrumPeaks(m_numPeaksToFit);
-  if (m_minPeakHeight >= 0.) {
-    // if spectrum contains a very weak signal, do not proceed and return
-    if (numberCounts(wi) <= m_minPeakHeight) {
-      for (size_t i = 0; i < m_numPeaksToFit; ++i)
-        fit_result->setBadRecord(i, -1.);
-      pre_check_result->setNumberOfSpectrumPeaksWithLowCount(m_numPeaksToFit);
-      return; // don't do anything
-    }
+  // if the whole spectrum has low count, do not fit any peaks for that spectrum
+  if (m_minPeakTotalCount >= 0. && numberCounts(wi) <= m_minPeakTotalCount) {
+    for (size_t i = 0; i < m_numPeaksToFit; ++i)
+      fit_result->setBadRecord(i, -1.);
+    pre_check_result->setNumberOfSpectrumPeaksWithLowCount(m_numPeaksToFit);
+    return;
   }
 
   // Set up sub algorithm Fit for peak and background
@@ -1644,7 +1662,7 @@ double FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter
   }
 
   // check the number of counts in the peak window
-  if (m_minPeakHeight >= 0.0 && numberCounts(wi, fitwindow) <= m_minPeakHeight) {
+  if (m_minPeakTotalCount >= 0.0 && numberCounts(wi, fitwindow) <= m_minPeakTotalCount) {
     pre_check_result->setNumberOfIndividualPeaksWithLowCount(1);
     return cost;
   }
