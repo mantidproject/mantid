@@ -47,7 +47,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(
             MatrixWorkspaceProperty(name=Prop.INPUT_WS, defaultValue="", direction=Direction.Input, optional=PropertyMode.Mandatory),
-            doc="The workspace containing the processed reflectivity data to save",
+            doc="The workspace containing the reduced reflectivity data to save.",
         )
 
         self.declareProperty(
