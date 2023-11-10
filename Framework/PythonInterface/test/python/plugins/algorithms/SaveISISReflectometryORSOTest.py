@@ -10,6 +10,7 @@ import tempfile
 import numpy as np
 from datetime import datetime, timezone
 
+from mantid import config
 from mantid.simpleapi import (
     CreateSampleWorkspace,
     SaveISISReflectometryORSO,
@@ -39,6 +40,13 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _Q_UNIT = "MomentumTransfer"
 
     def setUp(self):
+        self._oldFacility = config["default.facility"]
+        if self._oldFacility.strip() == "":
+            self._oldFacility = "TEST_LIVE"
+        self._oldInstrument = config["default.instrument"]
+        config["default.facility"] = "ISIS"
+        config["default.instrument"] = "INTER"
+
         self._rb_number = str(123456)
         self._filename = "ORSO_save_test.ort"
         self._temp_dir = tempfile.TemporaryDirectory()
@@ -57,6 +65,8 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         Delete any workspaces created and remove the temp directory
         """
         AnalysisDataService.clear()
+        config["default.facility"] = self._oldFacility
+        config["default.instrument"] = self._oldInstrument
         self._temp_dir.cleanup()
 
     def test_create_file_from_workspace_with_reduction_history(self):

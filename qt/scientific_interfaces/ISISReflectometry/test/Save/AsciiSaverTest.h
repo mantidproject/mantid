@@ -114,12 +114,14 @@ private:
   }
 
   std::string expectedSavePath(const std::string &wsName, const NamedFormat format) {
-    auto savePath = m_saveDirectory + "\\" + m_prefix + wsName;
+    auto savePath = Poco::Path(m_saveDirectory);
 
     if (format == NamedFormat::Custom)
-      savePath = savePath + ".dat";
+      savePath.append(m_prefix + wsName + std::string(".dat"));
+    else
+      savePath.append(m_prefix + wsName);
 
-    return Poco::Path(savePath).toString();
+    return savePath.toString();
   }
 
   void expectSaveAsciiAlgorithmCalled(MockSaveAlgorithmRunner &mockSaveAlgorithmRunner, const std::string &wsName,

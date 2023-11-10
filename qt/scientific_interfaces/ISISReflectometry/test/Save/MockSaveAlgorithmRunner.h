@@ -9,6 +9,8 @@
 #include "../../../ISISReflectometry/GUI/Save/ISaveAlgorithmRunner.h"
 #include <gmock/gmock.h>
 
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class MockSaveAlgorithmRunner : public ISaveAlgorithmRunner {
@@ -20,3 +22,4 @@ public:
                      void(const Mantid::API::Workspace_sptr &, std::string const &, const bool &));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
+GNU_DIAG_ON_SUGGEST_OVERRIDE
