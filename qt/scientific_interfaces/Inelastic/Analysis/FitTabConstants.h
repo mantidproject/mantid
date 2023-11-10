@@ -12,6 +12,35 @@
 
 namespace MantidQt::CustomInterfaces::IDA {
 
+static const auto FUNCTION_STRINGS =
+    std::unordered_map<std::string, std::string>({{"ExpDecay", "E"},
+                                                  {"StretchExp", "S"},
+                                                  {"Lorentzian", "L"},
+                                                  {"StretchedExpFT", "SFT"},
+                                                  {"TeixeiraWater", "TxWater"},
+                                                  {"TeixeiraWaterSQE", "TxWater"},
+                                                  {"FickDiffusionSQE", "FickDiff"},
+                                                  {"ChudleyElliotSQE", "ChudElliot"},
+                                                  {"HallRoss", "HallRoss"},
+                                                  {"HallRossSQE", "HallRoss"},
+                                                  {"DiffRotDiscreteCircle", "DC"},
+                                                  {"ElasticDiffRotDiscreteCircle", "EDC"},
+                                                  {"InelasticDiffRotDiscreteCircle", "IDC"},
+                                                  {"DiffSphere", "DS"},
+                                                  {"ElasticDiffSphere", "EDS"},
+                                                  {"InelasticDiffSphere", "IDS"},
+                                                  {"IsoRotDiff", "IRD"},
+                                                  {"ElasticIsoRotDiff", "EIRD"},
+                                                  {"InelasticIsoRotDiff", "IIRD"},
+                                                  {"MsdGauss", "Gauss"},
+                                                  {"MsdPeters", "Peters"},
+                                                  {"MsdYi", "Yi"},
+                                                  {"FickDiffusion", "FickDiffusion"},
+                                                  {"ChudleyElliot", "ChudleyElliot"},
+                                                  {"EISFDiffCylinder", "EISFDiffCylinder"},
+                                                  {"EISFDiffSphere", "EISFDiffSphere"},
+                                                  {"EISFDiffSphereAlkyl", "EISFDiffSphereAlkyl"}});
+
 namespace MSDFit {
 static const auto TAB_NAME = "MSDFit";
 static const auto HAS_RESOLUTION = false;
