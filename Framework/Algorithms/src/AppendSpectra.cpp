@@ -50,7 +50,8 @@ void AppendSpectra::init() {
                   "The name of the output workspace");
 
   declareProperty("MergeLogs", false, "Whether to combine the logs of the two input workspaces");
-  declareProperty("CopyNumericAxis", false, "Whether to copy y axis numberic values from old workspaces");
+  declareProperty("AppendYAxisLabels", false,
+                  "Whether to append y axis labels; this is done automatically if there is spectra overlap");
 }
 
 /** Execute the algorithm.
@@ -126,21 +127,19 @@ void AppendSpectra::fixSpectrumNumbers(const MatrixWorkspace &ws1, const MatrixW
   specnum_t ws2max;
   getMinMax(ws2, ws2min, ws2max);
 
-  auto isNumeric = output.getAxis(1)->isNumeric();
-  const bool copyNumericAxis = getProperty("CopyNumericAxis");
-
-  if (ws2min < ws1max) {
+  const bool appendYAxis = getProperty("AppendYAxisLabels");
+  if (ws2min <= ws1max) {
     auto indexInfo = output.indexInfo();
     indexInfo.setSpectrumNumbers(0, static_cast<int32_t>(output.getNumberHistograms() - 1));
     output.setIndexInfo(indexInfo);
 
-    copyYAxis(ws1, ws2, output);
-  } else if (isNumeric && copyNumericAxis) {
-    copyYAxis(ws1, ws2, output);
+    appendYAxisLabels(ws1, ws2, output);
+  } else if (appendYAxis) {
+    appendYAxisLabels(ws1, ws2, output);
   }
 }
 
-void AppendSpectra::copyYAxis(const MatrixWorkspace &ws1, const MatrixWorkspace &ws2, MatrixWorkspace &output) {
+void AppendSpectra::appendYAxisLabels(const MatrixWorkspace &ws1, const MatrixWorkspace &ws2, MatrixWorkspace &output) {
   const auto yAxisNum = 1;
   const auto yAxisWS1 = ws1.getAxis(yAxisNum);
   const auto yAxisWS2 = ws2.getAxis(yAxisNum);
