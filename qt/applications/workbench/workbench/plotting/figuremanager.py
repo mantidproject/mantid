@@ -301,9 +301,26 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
+        self._set_up_axes_title_change_callbacks()
 
         if self.toolbar:
             self.toolbar.set_buttons_visibility(self.canvas.figure)
+
+    def _set_up_axes_title_change_callbacks(self):
+        # This enables us to use the plot tile as the window title
+        for ax in self.canvas.figure.get_axes():
+            # probably this whole feedback loop should only happen if there is just one plot
+            # (this could still mean 2 axes because of color bars)
+            ax.title.add_callback(self._axes_title_changed_callback)
+
+    def _axes_title_changed_callback(self, title_artist):
+        title_text = title_artist.get_text()
+        if not title_text:
+            return
+        title_text_with_number = title_text + "-" + str(self.num)
+        current_title_text = self.window.windowTitle()
+        if current_title_text not in {title_text_with_number, title_text}:
+            self.set_window_title(title_text)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -439,6 +456,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # For the workbench we also keep the label in sync, this is
         # to allow getting a handle as plt.figure('Figure Name')
         self.canvas.figure.set_label(title)
+
+    def set_axes_title(self, title):
+        first_ax = self.canvas.figure.get_axes()[0]
+        if first_ax.title.get_text():
+            first_ax.set_title(title)
 
     def fig_visibility_changed(self):
         """
