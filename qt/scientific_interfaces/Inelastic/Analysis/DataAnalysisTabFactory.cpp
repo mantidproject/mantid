@@ -44,6 +44,7 @@ IndirectDataAnalysisTab *DataAnalysisTabFactory::makeConvFitTab(int const index)
       new IndirectDataAnalysisTab(new ConvFitModel, new ConvTemplateBrowser, new ConvFitDataView, ConvFit::TAB_NAME,
                                   ConvFit::HAS_RESOLUTION, ConvFit::HIDDEN_PROPS, m_tabWidget->widget(index));
   tab->setUpTab<ConvFitDataPresenter>();
+  tab->setConvolveMembers(true);
   return tab;
 }
 
