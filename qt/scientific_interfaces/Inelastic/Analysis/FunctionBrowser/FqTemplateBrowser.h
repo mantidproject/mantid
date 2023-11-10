@@ -7,13 +7,12 @@
 #pragma once
 
 #include "Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h"
-#include "DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL FqTemplateBrowser : public SingleFunctionTemplateBrowser {
+class FqTemplateBrowser : public SingleFunctionTemplateBrowser {
   Q_OBJECT
 
 public:
