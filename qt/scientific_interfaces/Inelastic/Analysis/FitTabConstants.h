@@ -19,6 +19,13 @@ static const auto HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
 
+static const auto ALL_FITS =
+    std::map<std::string, std::string>({{"None", ""},
+                                        {"Gauss", "name=MsdGauss,Height=1,Msd=0.05,constraints=(Height>0, Msd>0)"},
+                                        {"Peters", "name=MsdPeters,Height=1,Msd=0.05,Beta=1,constraints=(Height>0, "
+                                                   "Msd>0, Beta>0)"},
+                                        {"Yi", "name=MsdYi,Height=1,Msd=0.05,Sigma=1,constraints=(Height>0, Msd>0, "
+                                               "Sigma>0)"}});
 } // namespace MSDFit
 
 namespace IqtFit {
@@ -27,7 +34,6 @@ static const auto HAS_RESOLUTION = false;
 static const auto HIDDEN_PROPS =
     std::vector<std::string>({"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
                               "OutputCompositeMembers", "OutputWorkspace", "Output", "PeakRadius", "PlotParameter"});
-
 } // namespace IqtFit
 
 namespace ConvFit {
@@ -52,32 +58,28 @@ enum class DataType {
   ALL,
 };
 
-static const std::map<std::string, std::string> WIDTH_FITS{
+static const auto WIDTH_FITS = std::map<std::string, std::string>(
     {{"None", ""},
-     {std::string("ChudleyElliot"), std::string("name=ChudleyElliot, Tau=1, L=1.5, constraints=(Tau>0, L>0)")},
-     {std::string("HallRoss"), std::string("name=Hallross, Tau=1, L=0.2, constraints=(Tau>0, L>0)")},
-     {std::string("FickDiffusion"), std::string("name=FickDiffusion, D=1, constraints=(D>0)")},
-     {std::string("TeixeiraWater"), std::string("name=TeixeiraWater, Tau=1, L=1.5, constraints=(Tau>0, L>0)")}}};
+     {"ChudleyElliot", "name=ChudleyElliot, Tau=1, L=1.5, constraints=(Tau>0, L>0)"},
+     {"HallRoss", "name=Hallross, Tau=1, L=0.2, constraints=(Tau>0, L>0)"},
+     {"FickDiffusion", "name=FickDiffusion, D=1, constraints=(D>0)"},
+     {"TeixeiraWater", "name=TeixeiraWater, Tau=1, L=1.5, constraints=(Tau>0, L>0)"}});
 
-static const std::map<std::string, std::string> EISF_FITS{
+static const auto EISF_FITS = std::map<std::string, std::string>(
     {{"None", ""},
-     {std::string("EISFDiffCylinder"),
-      std::string("name=EISFDiffCylinder, A=1, R=1, L=2, constraints=(A>0, R>0, L>0)")},
-     {std::string("EISFDiffSphere"), std::string("name=EISFDiffSphere, A=1, R=1, constraints=(A>0, R>0)")},
-     {std::string("EISFDiffSphereAlkyl"), std::string("name=EISFDiffSphereAlkyl, A=1, Rmin=1, Rmax=2, "
-                                                      "constraints=(A>0, Rmin>0, Rmax>0)")}}};
+     {"EISFDiffCylinder", "name=EISFDiffCylinder, A=1, R=1, L=2, constraints=(A>0, R>0, L>0)"},
+     {"EISFDiffSphere", "name=EISFDiffSphere, A=1, R=1, constraints=(A>0, R>0)"},
+     {"EISFDiffSphereAlkyl", "name=EISFDiffSphereAlkyl, A=1, Rmin=1, Rmax=2, constraints=(A>0, Rmin>0, Rmax>0)"}});
 
-static const std::map<std::string, std::string> ALL_FITS{
+static const auto ALL_FITS = std::map<std::string, std::string>(
     {{"None", ""},
-     {std::string("ChudleyElliot"), std::string("name=ChudleyElliot, Tau=1, L=1.5, constraints=(Tau>0, L>0)")},
-     {std::string("HallRoss"), std::string("name=Hallross, Tau=1, L=0.2, constraints=(Tau>0, L>0)")},
-     {std::string("FickDiffusion"), std::string("name=FickDiffusion, D=1, constraints=(D>0)")},
-     {std::string("TeixeiraWater"), std::string("name=TeixeiraWater, Tau=1, L=1.5, constraints=(Tau>0, L>0)")},
-     {std::string("EISFDiffCylinder"),
-      std::string("name=EISFDiffCylinder, A=1, R=1, L=2, constraints=(A>0, R>0, L>0)")},
-     {std::string("EISFDiffSphere"), std::string("name=EISFDiffSphere, A=1, R=1, constraints=(A>0, R>0)")},
-     {std::string("EISFDiffSphereAlkyl"), std::string("name=EISFDiffSphereAlkyl, A=1, Rmin=1, Rmax=2, "
-                                                      "constraints=(A>0, Rmin>0, Rmax>0)")}}};
+     {"ChudleyElliot", "name=ChudleyElliot, Tau=1, L=1.5, constraints=(Tau>0, L>0)"},
+     {"HallRoss", "name=Hallross, Tau=1, L=0.2, constraints=(Tau>0, L>0)"},
+     {"FickDiffusion", "name=FickDiffusion, D=1, constraints=(D>0)"},
+     {"TeixeiraWater", "name=TeixeiraWater, Tau=1, L=1.5, constraints=(Tau>0, L>0)"},
+     {"EISFDiffCylinder", "name=EISFDiffCylinder, A=1, R=1, L=2, constraints=(A>0, R>0, L>0)"},
+     {"EISFDiffSphere", "name=EISFDiffSphere, A=1, R=1, constraints=(A>0, R>0)"},
+     {"EISFDiffSphereAlkyl", "name=EISFDiffSphereAlkyl, A=1, Rmin=1, Rmax=2, constraints=(A>0, Rmin>0, Rmax>0)"}});
 
 static const std::unordered_map<DataType, std::map<std::string, std::string>> availableFits{
     {{DataType::WIDTH, WIDTH_FITS}, {DataType::EISF, EISF_FITS}, {DataType::ALL, ALL_FITS}}};
