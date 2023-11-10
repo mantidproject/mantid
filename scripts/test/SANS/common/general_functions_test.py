@@ -10,13 +10,24 @@ from mantid.api import AnalysisDataService, FrameworkManager
 from mantid.kernel import V3D, Quat
 from unittest import mock
 from sans.common.constants import SANS2D, LOQ, LARMOR
-from sans.common.enums import ReductionMode, ReductionDimensionality, OutputParts, SANSInstrument, DetectorType, SANSFacility, DataType
+from sans.common.enums import (
+    ReductionMode,
+    ReductionDimensionality,
+    OutputParts,
+    SANSInstrument,
+    SANSDetector,
+    DetectorType,
+    SANSFacility,
+    DataType,
+)
 from sans.common.general_functions import (
     quaternion_to_angle_and_axis,
     create_managed_non_child_algorithm,
     create_unmanaged_algorithm,
     get_standard_output_workspace_name,
     sanitise_instrument_name,
+    get_detector_types_from_instrument,
+    get_detector_names_from_instrument,
     get_reduced_can_workspace_from_ads,
     write_hash_into_reduced_can_workspace,
     convert_instrument_and_detector_type_to_bank_name,
@@ -646,6 +657,25 @@ class SANSEventSliceParsing(unittest.TestCase):
         input_range = "1,2,a,3"
         with self.assertRaises(ValueError):
             parse_event_slice_setting(input_range)
+
+    def test_get_detector_types_from_instrument_both(self):
+        self.assertEqual([DetectorType.HAB, DetectorType.LAB], get_detector_types_from_instrument(SANSInstrument.SANS2D))
+        self.assertEqual([DetectorType.HAB, DetectorType.LAB], get_detector_types_from_instrument(SANSInstrument.LOQ))
+
+    def test_get_detector_types_from_instrument_low_only(self):
+        self.assertEqual([DetectorType.LAB], get_detector_types_from_instrument(SANSInstrument.LARMOR))
+        self.assertEqual([DetectorType.LAB], get_detector_types_from_instrument(SANSInstrument.ZOOM))
+
+    def test_get_detector_types_from_instrument_none(self):
+        self.assertEqual([], get_detector_types_from_instrument(SANSInstrument.NO_INSTRUMENT))
+
+    def test_get_detector_names_from_instrument(self):
+        self.assertEqual([SANSDetector.LOQ_HAB.value, SANSDetector.LOQ_LAB.value], get_detector_names_from_instrument(SANSInstrument.LOQ))
+        self.assertEqual(
+            [SANSDetector.SANS2D_HAB.value, SANSDetector.SANS2D_LAB.value], get_detector_names_from_instrument(SANSInstrument.SANS2D)
+        )
+        self.assertEqual([SANSDetector.ZOOM_LAB.value], get_detector_names_from_instrument(SANSInstrument.ZOOM))
+        self.assertEqual([SANSDetector.LARMOR_LAB.value], get_detector_names_from_instrument(SANSInstrument.LARMOR))
 
 
 if __name__ == "__main__":

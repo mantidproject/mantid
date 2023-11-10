@@ -14,6 +14,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -25,6 +26,7 @@
 #include <H5Cpp.h>
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
+#include <boost/algorithm/string.hpp>
 #include <nexus/NeXusFile.hpp>
 #include <type_traits>
 
@@ -125,6 +127,68 @@ void loadLogs(H5::Group &entry, const Mantid::API::MatrixWorkspace_sptr &workspa
   auto title = Mantid::DataHandling::H5Util::readString(entry, sasEntryTitle);
   if (!title.empty()) {
     workspace->setTitle(title);
+  }
+}
+
+// ----- SAMPLE
+
+namespace {
+std::optional<H5::Group> getAperture(H5::Group &entry) {
+  try {
+    return entry.openGroup(sasInstrumentGroupName).openGroup(sasInstrumentApertureGroupName);
+  } catch (H5::GroupIException &) {
+  } catch (H5::FileIException &) {
+  }
+  return std::nullopt;
+}
+
+std::optional<H5::Group> getSample(H5::Group &entry) {
+  try {
+    return entry.openGroup(sasInstrumentSampleGroupAttr);
+  } catch (H5::GroupIException &) {
+  } catch (H5::FileIException &) {
+  }
+  return std::nullopt;
+}
+} // namespace
+
+void loadSample(H5::Group &entry, const Mantid::API::MatrixWorkspace_sptr &workspace) {
+  auto &&sample = workspace->mutableSample();
+
+  // Load Height, Width, and Geometry from the aperture group and save to Sample object.
+
+  if (auto &&maybeApertureGroup = getAperture(entry)) {
+    auto &&apertureGroup = *maybeApertureGroup;
+
+    auto &&height =
+        Mantid::DataHandling::H5Util::readArray1DCoerce<double>(apertureGroup, sasInstrumentApertureGapHeight);
+    if (!height.empty()) {
+      sample.setHeight(height.front());
+    }
+    auto &&width =
+        Mantid::DataHandling::H5Util::readArray1DCoerce<double>(apertureGroup, sasInstrumentApertureGapWidth);
+    if (!width.empty()) {
+      sample.setWidth(width.front());
+    }
+    auto &&geometry = Mantid::DataHandling::H5Util::readString(apertureGroup, sasInstrumentApertureShape);
+    boost::to_lower(geometry);
+    if (geometry == "cylinder") {
+      sample.setGeometryFlag(1);
+    } else if (geometry == "flat plate" || geometry == "flatplate") {
+      sample.setGeometryFlag(2);
+    } else if (geometry == "disc") {
+      sample.setGeometryFlag(3);
+    } else {
+      sample.setGeometryFlag(0);
+    }
+  }
+
+  // Load thickness from the sample group and save to the Sample object.
+  if (auto &&maybeSampleGroup = getSample(entry)) {
+    auto &&sampleGroup = *maybeSampleGroup;
+    auto &&thickness =
+        Mantid::DataHandling::H5Util::readArray1DCoerce<double>(sampleGroup, sasInstrumentSampleThickness);
+    sample.setThickness(thickness.front());
   }
 }
 
@@ -509,6 +573,10 @@ void LoadNXcanSAS::exec() {
   // Load the logs
   progress.report("Loading logs.");
   loadLogs(entry, ws);
+
+  // Load sample info
+  progress.report("Loading sample.");
+  loadSample(entry, ws);
 
   // Load instrument
   progress.report("Loading instrument.");

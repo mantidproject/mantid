@@ -18,6 +18,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MDUnit.h"
@@ -237,7 +238,8 @@ void addDetectors(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wor
  * @param detectorNames: the names of the detectors to store
  */
 void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
-                   const std::string &radiationSource, const std::vector<std::string> &detectorNames) {
+                   const std::string &radiationSource, const std::string &geometry, double beamHeight, double beamWidth,
+                   const std::vector<std::string> &detectorNames) {
   // Setup instrument
   const std::string sasInstrumentNameForGroup = sasInstrumentGroupName;
   auto instrument = Mantid::DataHandling::H5Util::createGroupCanSAS(group, sasInstrumentNameForGroup,
@@ -254,9 +256,44 @@ void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wo
                                                                 sasInstrumentSourceClassAttr);
   Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceRadiation, radiationSource);
 
+  // Setup Aperture
+  const std::string sasApertureName = sasInstrumentApertureGroupName;
+  auto aperture = Mantid::DataHandling::H5Util::createGroupCanSAS(
+      instrument, sasApertureName, nxInstrumentApertureClassAttr, sasInstrumentApertureClassAttr);
+
+  Mantid::DataHandling::H5Util::write(aperture, sasInstrumentApertureShape, geometry);
+
+  std::map<std::string, std::string> beamSizeAttrs;
+  beamSizeAttrs.insert(std::make_pair(sasUnitAttr, sasBeamAndSampleSizeUnitAttrValue));
+  if (beamHeight != 0) {
+    Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(aperture, sasInstrumentApertureGapHeight,
+                                                                      beamHeight, beamSizeAttrs);
+  }
+  if (beamWidth != 0) {
+    Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(aperture, sasInstrumentApertureGapWidth,
+                                                                      beamWidth, beamSizeAttrs);
+  }
+
   // Add IDF information
   auto idf = getIDF(workspace);
   Mantid::DataHandling::H5Util::write(instrument, sasInstrumentIDF, idf);
+}
+
+//------- SASsample
+
+void addSample(H5::Group &group, const double &sampleThickness) {
+  if (sampleThickness == 0) {
+    return;
+  }
+  std::string const sasSampleNameForGroup = sasInstrumentSampleGroupAttr;
+
+  auto sample = Mantid::DataHandling::H5Util::createGroupCanSAS(
+      group, sasSampleNameForGroup, nxInstrumentSampleClassAttr, sasInstrumentSampleClassAttr);
+
+  std::map<std::string, std::string> sampleThicknessAttrs;
+  sampleThicknessAttrs.insert(std::make_pair(sasUnitAttr, sasBeamAndSampleSizeUnitAttrValue));
+  Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(sample, sasInstrumentSampleThickness,
+                                                                    sampleThickness, sampleThicknessAttrs);
 }
 
 //------- SASprocess
@@ -722,26 +759,25 @@ void SaveNXcanSAS::init() {
   declareProperty(std::make_unique<Mantid::API::FileProperty>("Filename", "", API::FileProperty::Save, ".h5"),
                   "The name of the .h5 file to save");
 
-  std::vector<std::string> radiation_source{"Spallation Neutron Source",
-                                            "Pulsed Reactor Neutron Source",
-                                            "Reactor Neutron Source",
-                                            "Synchrotron X-ray Source",
-                                            "Pulsed Muon Source",
-                                            "Rotating Anode X-ray",
-                                            "Fixed Tube X-ray",
-                                            "neutron",
-                                            "x-ray",
-                                            "muon",
-                                            "electron"};
+  std::vector<std::string> radiationSourceOptions{"Spallation Neutron Source",
+                                                  "Pulsed Reactor Neutron Source",
+                                                  "Reactor Neutron Source",
+                                                  "Synchrotron X-ray Source",
+                                                  "Pulsed Muon Source",
+                                                  "Rotating Anode X-ray",
+                                                  "Fixed Tube X-ray",
+                                                  "neutron",
+                                                  "x-ray",
+                                                  "muon",
+                                                  "electron"};
   declareProperty("RadiationSource", "Spallation Neutron Source",
-                  std::make_shared<Kernel::StringListValidator>(radiation_source), "The type of radiation used.");
+                  std::make_shared<Kernel::StringListValidator>(radiationSourceOptions), "The type of radiation used.");
   declareProperty("DetectorNames", "",
                   "Specify in a comma separated list, which detectors to store "
                   "information about; \nwhere each name must match a name "
                   "given for a detector in the [[IDF|instrument definition "
                   "file (IDF)]]. \nIDFs are located in the instrument "
                   "sub-directory of the Mantid install directory.");
-
   declareProperty(
       std::make_unique<API::WorkspaceProperty<>>("Transmission", "", Kernel::Direction::Input, PropertyMode::Optional,
                                                  std::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
@@ -758,6 +794,16 @@ void SaveNXcanSAS::init() {
   declareProperty("SampleDirectRunNumber", "", "The run number for the sample direct workspace. Optional.");
   declareProperty("CanScatterRunNumber", "", "The run number for the can scatter workspace. Optional.");
   declareProperty("CanDirectRunNumber", "", "The run number for the can direct workspace. Optional.");
+
+  std::vector<std::string> const geometryOptions{"Cylinder", "FlatPlate", "Flat plate", "Disc", "Unknown"};
+  declareProperty("Geometry", "Unknown", std::make_shared<Kernel::StringListValidator>(geometryOptions),
+                  "The geometry type of the collimation.");
+  declareProperty("SampleHeight", 0.0,
+                  "The height of the collimation element in mm. If specified as 0 it will not be recorded.");
+  declareProperty("SampleWidth", 0.0,
+                  "The width of the collimation element in mm. If specified as 0 it will not be recorded.");
+  declareProperty("SampleThickness", 0.0,
+                  "The thickness of the sample in mm. If specified as 0 it will not be recorded.");
 }
 
 std::map<std::string, std::string> SaveNXcanSAS::validateInputs() {
@@ -790,14 +836,18 @@ std::map<std::string, std::string> SaveNXcanSAS::validateInputs() {
 }
 
 void SaveNXcanSAS::exec() {
-  Mantid::API::MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
-  std::string filename = getPropertyValue("Filename");
+  Mantid::API::MatrixWorkspace_sptr &&workspace = getProperty("InputWorkspace");
+  std::string &&filename = getPropertyValue("Filename");
 
-  std::string radiationSource = getPropertyValue("RadiationSource");
-  std::string detectorNames = getPropertyValue("DetectorNames");
+  std::string &&radiationSource = getPropertyValue("RadiationSource");
+  std::string &&geometry = getProperty("Geometry");
+  double &&beamHeight = getProperty("SampleHeight");
+  double &&beamWidth = getProperty("SampleWidth");
+  double &&sampleThickness = getProperty("SampleThickness");
+  std::string &&detectorNames = getPropertyValue("DetectorNames");
 
-  Mantid::API::MatrixWorkspace_sptr transmissionSample = getProperty("Transmission");
-  Mantid::API::MatrixWorkspace_sptr transmissionCan = getProperty("TransmissionCan");
+  Mantid::API::MatrixWorkspace_sptr &&transmissionSample = getProperty("Transmission");
+  Mantid::API::MatrixWorkspace_sptr &&transmissionCan = getProperty("TransmissionCan");
 
   // Remove the file if it already exists
   if (Poco::File(filename).exists()) {
@@ -827,7 +877,11 @@ void SaveNXcanSAS::exec() {
   // Add the instrument information
   progress.report("Adding instrument information.");
   const auto detectors = splitDetectorNames(detectorNames);
-  addInstrument(sasEntry, workspace, radiationSource, detectors);
+  addInstrument(sasEntry, workspace, radiationSource, geometry, beamHeight, beamWidth, detectors);
+
+  // Add the sample information
+  progress.report("Adding sample information.");
+  addSample(sasEntry, sampleThickness);
 
   // Get additional run numbers
   const auto sampleTransmissionRun = getPropertyValue("SampleTransmissionRunNumber");
