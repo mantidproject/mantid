@@ -24,34 +24,46 @@ namespace MantidQt::CustomInterfaces::IDA {
 DataAnalysisTabFactory::DataAnalysisTabFactory(QTabWidget *tabWidget) : m_tabWidget(tabWidget) {}
 
 IndirectDataAnalysisTab *DataAnalysisTabFactory::makeMSDFitTab(int const index) const {
-  auto tab =
-      new IndirectDataAnalysisTab(new MSDFitModel, new MSDTemplateBrowser, new IndirectFitDataView, MSDFit::TAB_NAME,
-                                  MSDFit::HAS_RESOLUTION, MSDFit::HIDDEN_PROPS, m_tabWidget->widget(index));
-  tab->setUpTab<IndirectFitDataPresenter>();
+  auto tab = new IndirectDataAnalysisTab(MSDFit::TAB_NAME, MSDFit::HAS_RESOLUTION, m_tabWidget->widget(index));
+  tab->setupFittingModel<MSDFitModel>();
+  tab->setupFitPropertyBrowser<MSDTemplateBrowser>(MSDFit::HIDDEN_PROPS);
+  tab->setupFitDataView<IndirectFitDataView>();
+  tab->setupOutputOptionsPresenter();
+  tab->setUpFitDataPresenter<IndirectFitDataPresenter>();
+  tab->setupPlotView();
   return tab;
 }
 
 IndirectDataAnalysisTab *DataAnalysisTabFactory::makeIqtFitTab(int const index) const {
-  auto tab =
-      new IndirectDataAnalysisTab(new IqtFitModel, new IqtTemplateBrowser, new IndirectFitDataView, IqtFit::TAB_NAME,
-                                  IqtFit::HAS_RESOLUTION, IqtFit::HIDDEN_PROPS, m_tabWidget->widget(index));
-  tab->setUpTab<IndirectFitDataPresenter>();
+  auto tab = new IndirectDataAnalysisTab(IqtFit::TAB_NAME, IqtFit::HAS_RESOLUTION, m_tabWidget->widget(index));
+  tab->setupFittingModel<IqtFitModel>();
+  tab->setupFitPropertyBrowser<IqtTemplateBrowser>(IqtFit::HIDDEN_PROPS);
+  tab->setupFitDataView<IndirectFitDataView>();
+  tab->setupOutputOptionsPresenter();
+  tab->setUpFitDataPresenter<IndirectFitDataPresenter>();
+  tab->setupPlotView();
   return tab;
 }
 
 IndirectDataAnalysisTab *DataAnalysisTabFactory::makeConvFitTab(int const index) const {
-  auto tab =
-      new IndirectDataAnalysisTab(new ConvFitModel, new ConvTemplateBrowser, new ConvFitDataView, ConvFit::TAB_NAME,
-                                  ConvFit::HAS_RESOLUTION, ConvFit::HIDDEN_PROPS, m_tabWidget->widget(index));
-  tab->setUpTab<ConvFitDataPresenter>();
-  tab->setConvolveMembers(true);
+  auto tab = new IndirectDataAnalysisTab(ConvFit::TAB_NAME, ConvFit::HAS_RESOLUTION, m_tabWidget->widget(index));
+  tab->setupFittingModel<ConvFitModel>();
+  tab->setupFitPropertyBrowser<ConvTemplateBrowser>(ConvFit::HIDDEN_PROPS, true);
+  tab->setupFitDataView<ConvFitDataView>();
+  tab->setupOutputOptionsPresenter();
+  tab->setUpFitDataPresenter<ConvFitDataPresenter>();
+  tab->setupPlotView();
   return tab;
 }
 
 IndirectDataAnalysisTab *DataAnalysisTabFactory::makeFqFitTab(int const index) const {
-  auto tab = new IndirectDataAnalysisTab(new FqFitModel, new FqTemplateBrowser, new FqFitDataView, FqFit::TAB_NAME,
-                                         FqFit::HAS_RESOLUTION, FqFit::HIDDEN_PROPS, m_tabWidget->widget(index));
-  tab->setUpTab<FqFitDataPresenter>(FqFit::X_BOUNDS);
+  auto tab = new IndirectDataAnalysisTab(FqFit::TAB_NAME, FqFit::HAS_RESOLUTION, m_tabWidget->widget(index));
+  tab->setupFittingModel<FqFitModel>();
+  tab->setupFitPropertyBrowser<FqTemplateBrowser>(FqFit::HIDDEN_PROPS);
+  tab->setupFitDataView<FqFitDataView>();
+  tab->setupOutputOptionsPresenter();
+  tab->setUpFitDataPresenter<FqFitDataPresenter>();
+  tab->setupPlotView(FqFit::X_BOUNDS);
   return tab;
 }
 

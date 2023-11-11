@@ -67,21 +67,9 @@ size_t IndirectDataAnalysisTab::getNumberOfSpecificFunctionContained(const std::
   }
 }
 
-IndirectDataAnalysisTab::IndirectDataAnalysisTab(IndirectFittingModel *model, FunctionTemplateBrowser *templateBrowser,
-                                                 IndirectFitDataView *fitDataView, std::string const &tabName,
-                                                 bool const hasResolution,
-                                                 std::vector<std::string> const &hiddenProperties, QWidget *parent)
-    : IndirectTab(parent), m_fittingModel(model), m_uiForm(new Ui::IndirectFitTab), m_tabName(tabName),
-      m_hasResolution(hasResolution) {
+IndirectDataAnalysisTab::IndirectDataAnalysisTab(std::string const &tabName, bool const hasResolution, QWidget *parent)
+    : IndirectTab(parent), m_uiForm(new Ui::IndirectFitTab), m_tabName(tabName), m_hasResolution(hasResolution) {
   m_uiForm->setupUi(parent);
-
-  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
-  m_uiForm->dockArea->m_fitPropertyBrowser->init();
-  m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(hiddenProperties);
-  m_fitPropertyBrowser = m_uiForm->dockArea->m_fitPropertyBrowser;
-
-  fitDataView->setParent(m_uiForm->dockArea);
-  m_uiForm->dockArea->setFitDataView(fitDataView);
 
   m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(m_uiForm->ovOutputOptionsView);
 }

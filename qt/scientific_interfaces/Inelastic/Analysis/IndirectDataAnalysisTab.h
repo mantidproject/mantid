@@ -37,17 +37,34 @@ class MANTIDQT_INELASTIC_DLL IndirectDataAnalysisTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectDataAnalysisTab(IndirectFittingModel *model, FunctionTemplateBrowser *templateBrowser,
-                          IndirectFitDataView *fitDataView, std::string const &tabName, bool const hasResolution,
-                          std::vector<std::string> const &hiddenProperties, QWidget *parent = nullptr);
+  IndirectDataAnalysisTab(std::string const &tabName, bool const hasResolution, QWidget *parent = nullptr);
   virtual ~IndirectDataAnalysisTab() override = default;
 
-  template <typename FitDataPresenter>
-  void setUpTab(std::optional<std::pair<double, double>> const &xPlotBounds = std::nullopt) {
+  template <typename FittingModel> void setupFittingModel() { m_fittingModel = std::make_unique<FittingModel>(); }
+
+  template <typename TemplateBrowser>
+  void setupFitPropertyBrowser(std::vector<std::string> const &hiddenProperties, bool const convolveMembers = false) {
+    m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(new TemplateBrowser());
+    m_uiForm->dockArea->m_fitPropertyBrowser->init();
+    m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(hiddenProperties);
+    m_fitPropertyBrowser = m_uiForm->dockArea->m_fitPropertyBrowser;
+    setConvolveMembers(convolveMembers);
+  }
+
+  template <typename FitDataView> void setupFitDataView() {
+    m_uiForm->dockArea->setFitDataView(new FitDataView(m_uiForm->dockArea));
+  }
+
+  void setupOutputOptionsPresenter() {
+    m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(m_uiForm->ovOutputOptionsView);
+  }
+
+  template <typename FitDataPresenter> void setUpFitDataPresenter() {
     m_dataPresenter =
         std::make_unique<FitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
-    setupPlotView(xPlotBounds);
   }
+
+  void setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds = std::nullopt);
 
   WorkspaceID getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
@@ -92,7 +109,6 @@ protected:
 private:
   void setup() override;
   bool validate() override;
-  void setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds);
   void connectPlotPresenter();
   void connectFitPropertyBrowser();
   void connectDataPresenter();
