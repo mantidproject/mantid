@@ -6,17 +6,16 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h"
+#include "Analysis/FunctionBrowser/SingleFunctionTemplateModel.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class FqTemplateBrowser : public SingleFunctionTemplateBrowser {
-  Q_OBJECT
+class MSDFunctionModel : public SingleFunctionTemplateModel {
 
 public:
-  FqTemplateBrowser();
+  MSDFunctionModel();
 };
 
 } // namespace IDA

@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "FqTemplateBrowser.h"
+#include "FqFunctionModel.h"
 
 #include "Analysis/FitTabConstants.h"
 #include "Analysis/IDAFunctionParameterEstimation.h"
@@ -48,7 +48,9 @@ auto const estimators = std::unordered_map<std::string, IDAFunctionParameterEsti
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-FqTemplateBrowser::FqTemplateBrowser()
-    : SingleFunctionTemplateBrowser(FqFit::ALL_FITS, std::make_unique<IDAFunctionParameterEstimation>(estimators)) {}
+FqFunctionModel::FqFunctionModel()
+    : SingleFunctionTemplateModel(std::make_unique<IDAFunctionParameterEstimation>(estimators)) {
+  updateAvailableFunctions(FqFit::ALL_FITS);
+}
 
 } // namespace MantidQt::CustomInterfaces::IDA

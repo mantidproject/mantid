@@ -34,11 +34,11 @@ set(SRC_FILES
     Analysis/FunctionBrowser/ConvFunctionModel.cpp
     Analysis/FunctionBrowser/ConvTemplateBrowser.cpp
     Analysis/FunctionBrowser/ConvTemplatePresenter.cpp
-    Analysis/FunctionBrowser/FqTemplateBrowser.cpp
+    Analysis/FunctionBrowser/FqFunctionModel.cpp
     Analysis/FunctionBrowser/IqtFunctionModel.cpp
     Analysis/FunctionBrowser/IqtTemplateBrowser.cpp
     Analysis/FunctionBrowser/IqtTemplatePresenter.cpp
-    Analysis/FunctionBrowser/MSDTemplateBrowser.cpp
+    Analysis/FunctionBrowser/MSDFunctionModel.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp
@@ -86,10 +86,8 @@ set(MOC_FILES
     Analysis/IndirectFitPropertyBrowser.h
     Analysis/FunctionBrowser/ConvTemplateBrowser.h
     Analysis/FunctionBrowser/ConvTemplatePresenter.h
-    Analysis/FunctionBrowser/FqTemplateBrowser.h
     Analysis/FunctionBrowser/IqtTemplateBrowser.h
     Analysis/FunctionBrowser/IqtTemplatePresenter.h
-    Analysis/FunctionBrowser/MSDTemplateBrowser.h
     Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.h
     Manipulation/InelasticDataManipulation.h
@@ -128,6 +126,8 @@ set(INC_FILES
     Analysis/IndirectFittingModel.h
     Analysis/ParameterEstimation.h
     Analysis/FunctionBrowser/ConvFunctionModel.h
+    Analysis/FunctionBrowser/FqFunctionModel.h
+    Analysis/FunctionBrowser/MSDFunctionModel.h
     Manipulation/InelasticDataManipulationElwinTabModel.h
     Manipulation/InelasticDataManipulationIqtTabModel.h
     Manipulation/InelasticDataManipulationMomentsTabModel.h

@@ -28,8 +28,7 @@ class IDAFunctionParameterEstimation;
 class MANTIDQT_INELASTIC_DLL SingleFunctionTemplateBrowser : public FunctionTemplateBrowser {
   Q_OBJECT
 public:
-  explicit SingleFunctionTemplateBrowser(const std::map<std::string, std::string> &functionInitialisationStrings,
-                                         std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation,
+  explicit SingleFunctionTemplateBrowser(std::unique_ptr<SingleFunctionTemplateModel> functionModel,
                                          QWidget *parent = nullptr);
   virtual ~SingleFunctionTemplateBrowser() = default;
   void setFunction(const QString &funStr) override;

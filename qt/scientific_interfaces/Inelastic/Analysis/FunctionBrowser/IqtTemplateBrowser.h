@@ -27,7 +27,7 @@ namespace IDA {
 class MANTIDQT_INELASTIC_DLL IqtTemplateBrowser : public FunctionTemplateBrowser {
   Q_OBJECT
 public:
-  explicit IqtTemplateBrowser(QWidget *parent = nullptr);
+  explicit IqtTemplateBrowser(std::unique_ptr<IqtFunctionModel> functionModel, QWidget *parent = nullptr);
   void addExponentialOne();
   void removeExponentialOne();
   void addExponentialTwo();

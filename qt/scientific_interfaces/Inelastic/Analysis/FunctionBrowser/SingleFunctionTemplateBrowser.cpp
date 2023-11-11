@@ -35,11 +35,9 @@ namespace MantidQt::CustomInterfaces::IDA {
  * Constructor
  * @param parent :: The parent widget.
  */
-SingleFunctionTemplateBrowser::SingleFunctionTemplateBrowser(
-    const std::map<std::string, std::string> &functionInitialisationStrings,
-    std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation, QWidget *parent)
-    : FunctionTemplateBrowser(parent),
-      m_presenter(this, functionInitialisationStrings, std::move(parameterEstimation)) {
+SingleFunctionTemplateBrowser::SingleFunctionTemplateBrowser(std::unique_ptr<SingleFunctionTemplateModel> functionModel,
+                                                             QWidget *parent)
+    : FunctionTemplateBrowser(parent), m_presenter(this, std::move(functionModel)) {
   connect(&m_presenter, SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
 }
 

@@ -31,7 +31,7 @@ class ConvTemplateBrowser;
 class MANTIDQT_INELASTIC_DLL ConvTemplatePresenter : public QObject {
   Q_OBJECT
 public:
-  explicit ConvTemplatePresenter(ConvTemplateBrowser *view);
+  explicit ConvTemplatePresenter(ConvTemplateBrowser *view, std::unique_ptr<ConvFunctionModel> functionModel);
   void setSubType(size_t subTypeIndex, int typeIndex);
   void setDeltaFunction(bool);
   void setTempCorrection(bool);
@@ -77,7 +77,7 @@ private:
   void setLocalParameterTie(const QString &parName, int i, const QString &tie);
   void updateViewParameterNames();
   ConvTemplateBrowser *m_view;
-  ConvFunctionModel m_model;
+  std::unique_ptr<ConvFunctionModel> m_model;
   EditLocalParameterDialog *m_editLocalParameterDialog;
 };
 
