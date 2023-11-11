@@ -7,7 +7,6 @@
 #pragma once
 
 #include "Analysis/FunctionTemplateBrowser.h"
-#include "Analysis/IFQFitObserver.h"
 #include "DllConfig.h"
 #include "SingleFunctionTemplatePresenter.h"
 
@@ -26,14 +25,13 @@ class IDAFunctionParameterEstimation;
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INELASTIC_DLL SingleFunctionTemplateBrowser : public FunctionTemplateBrowser, public IFQFitObserver {
+class MANTIDQT_INELASTIC_DLL SingleFunctionTemplateBrowser : public FunctionTemplateBrowser {
   Q_OBJECT
 public:
   explicit SingleFunctionTemplateBrowser(const std::map<std::string, std::string> &functionInitialisationStrings,
                                          std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation,
                                          QWidget *parent = nullptr);
   virtual ~SingleFunctionTemplateBrowser() = default;
-  void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings) override;
   void setFunction(const QString &funStr) override;
   IFunction_sptr getGlobalFunction() const override;
   IFunction_sptr getFunction() const override;

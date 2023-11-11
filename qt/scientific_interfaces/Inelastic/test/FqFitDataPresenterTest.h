@@ -116,10 +116,6 @@ public:
   MOCK_CONST_METHOD1(getExcludeRegionVector, std::vector<double>(FitDomainIndex index));
 };
 
-class SingleFunctionTemplateBrowserMock : public IFQFitObserver {
-  MOCK_METHOD1(updateAvailableFunctions, void(const std::map<std::string, std::string> &functionInitialisationStrings));
-};
-
 /// Mock object to mock the model
 class MockFqFitModel : public FqFitModel {};
 

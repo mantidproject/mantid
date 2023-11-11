@@ -7,7 +7,6 @@
 #pragma once
 
 #include "Analysis/IDAFunctionParameterEstimation.h"
-#include "Analysis/IFQFitObserver.h"
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
 #include "SingleFunctionTemplateModel.h"

@@ -43,11 +43,6 @@ SingleFunctionTemplateBrowser::SingleFunctionTemplateBrowser(
   connect(&m_presenter, SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
 }
 
-void SingleFunctionTemplateBrowser::updateAvailableFunctions(
-    const std::map<std::string, std::string> &functionInitialisationStrings) {
-  m_presenter.updateAvailableFunctions(functionInitialisationStrings);
-}
-
 void SingleFunctionTemplateBrowser::createProperties() {
   m_parameterManager->blockSignals(true);
   m_boolManager->blockSignals(true);

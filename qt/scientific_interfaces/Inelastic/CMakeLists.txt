@@ -112,7 +112,6 @@ set(INC_FILES
     Analysis/DataAnalysisTabFactory.h
     Analysis/IDAFunctionParameterEstimation.h
     Analysis/FqFitModel.h
-    Analysis/IFQFitObserver.h
     Analysis/IqtFitModel.h
     Analysis/MSDFitModel.h
     Analysis/ConvFitModel.h
