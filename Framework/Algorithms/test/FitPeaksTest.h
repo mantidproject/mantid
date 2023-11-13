@@ -1263,10 +1263,11 @@ public:
       // 1 peak fitted
       const auto &fitted_positions_0 = peak_params_ws->histogram(0).y();
       TS_ASSERT_EQUALS(fitted_positions_0.size(), 1);
-      // if the "minimum peak height" check fails in estimatePeakParameters before fitting, FitPeaks sets the peak
-      // position to -4. if the "minimum peak height" check fails after fitting, FitPeaks sets the peak position to -3.
-      bool expected_peak_error = fitted_positions_0[0] == -4 || fitted_positions_0[0] == -3;
-      TS_ASSERT(expected_peak_error);
+
+      // If the "minimum peak height" check fails in estimatePeakParameters before fitting, FitPeaks sets the peak
+      // position to -4. If the check fails after fitting, the peak position is set to -3.
+      // In this particular test the check fails in estimatePeakParameters.
+      TS_ASSERT_DELTA(fitted_positions_0[0], -4, 0);
 
       // clean algorithm-generated workspaces
       API::AnalysisDataService::Instance().remove("PeakPositionsWS3");

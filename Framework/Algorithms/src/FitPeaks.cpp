@@ -930,8 +930,8 @@ void FitPeaks::processInputPeakTolerance() {
   if (m_minPeakHeight > 0 && m_minPeakTotalCount == 0) {
     std::ostringstream os;
     os << "PDCalibration property " << PropertyNames::PEAK_MIN_HEIGHT
-       << " is used for validating peaks after fitting. "
-          "Consider validating peaks before fitting as well using "
+       << " is used for checking peak height only. "
+          "Consider checking peak window total count as well using "
        << PropertyNames::PEAK_MIN_TOTAL_COUNT << ".\n";
     logNoOffset(4 /*warning*/, os.str());
   }
