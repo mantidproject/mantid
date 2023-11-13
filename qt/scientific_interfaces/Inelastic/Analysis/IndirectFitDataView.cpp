@@ -13,6 +13,8 @@
 
 using namespace Mantid::API;
 
+constexpr auto NUMERICAL_PRECISION = 6;
+
 namespace {
 
 namespace Regexes {
@@ -25,7 +27,7 @@ const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
 const QString MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
 } // namespace Regexes
 
-QString makeNumber(double d) { return QString::number(d, 'f', 6); }
+QString makeNumber(double d) { return QString::number(d, 'f', NUMERICAL_PRECISION); }
 
 class ExcludeRegionDelegate : public QItemDelegate {
 public:
@@ -58,14 +60,14 @@ class NumericInputDelegate : public QStyledItemDelegate {
 public:
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const override {
 
-    auto lineEdit = std::make_unique<QLineEdit>(parent);
-    auto validator = std::make_unique<QDoubleValidator>(parent);
+    auto lineEdit = new QLineEdit(parent);
+    auto validator = new QDoubleValidator(parent);
 
-    validator->setDecimals(6);
+    validator->setDecimals(NUMERICAL_PRECISION);
     validator->setNotation(QDoubleValidator::StandardNotation);
-    lineEdit->setValidator(validator.release());
+    lineEdit->setValidator(validator);
 
-    return lineEdit.release();
+    return lineEdit;
   }
 
   void setEditorData(QWidget *editor, const QModelIndex &index) const override {
@@ -112,12 +114,9 @@ void IndirectFitDataView::setHorizontalHeaders(const QStringList &headers) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(0, QHeaderView::Stretch);
 
-  m_uiForm->tbFitData->setItemDelegateForColumn(headers.indexOf("StartX"),
-                                                std::make_unique<NumericInputDelegate>().release());
-  m_uiForm->tbFitData->setItemDelegateForColumn(headers.indexOf("EndX"),
-                                                std::make_unique<NumericInputDelegate>().release());
-  m_uiForm->tbFitData->setItemDelegateForColumn(headers.size() - 1,
-                                                std::make_unique<ExcludeRegionDelegate>().release());
+  m_uiForm->tbFitData->setItemDelegateForColumn(startXColumn(), std::make_unique<NumericInputDelegate>().release());
+  m_uiForm->tbFitData->setItemDelegateForColumn(endXColumn(), std::make_unique<NumericInputDelegate>().release());
+  m_uiForm->tbFitData->setItemDelegateForColumn(excludeColumn(), std::make_unique<ExcludeRegionDelegate>().release());
 
   m_uiForm->tbFitData->verticalHeader()->setVisible(false);
 }
