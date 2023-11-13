@@ -110,7 +110,8 @@ class DNSDatasetTest(unittest.TestCase):
 
     def test_create_dataset(self):
         test_v = create_dataset(self.full_data, "C:/123")
-        self.assertEqual(test_v, {"4p1K_map": {"z_nsf": [788058], "path": "C:/123/service_******.d_dat"}})
+        star_pattern = "*" * len(str(self.full_data[0]["file_number"]))
+        self.assertEqual(test_v, {"4p1K_map": {"z_nsf": [788058], "path": os.path.join("C:/123", f"service_{star_pattern}.d_dat")}})
         test_v = create_dataset(self.standard_data, "C:/123")
         self.assertEqual(
             test_v,
