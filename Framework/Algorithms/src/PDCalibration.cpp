@@ -239,8 +239,9 @@ void PDCalibration::init() {
                   "center value, in d-spacing or TOF units.");
 
   declareProperty("MinimumPeakHeight", 2.,
-                  "Used for validating peaks after fitting. If the fitted height is under this value, "
-                  "the peak will be excluded from calibration.");
+                  "Used for validating peaks before and after fitting. If a peak's observed/estimated or "
+                  "fitted height is under this value, "
+                  "the peak will be marked as error.");
 
   declareProperty("MaxChiSq", 100., "Maximum chisq value for individual peak fit allowed. (Default: 100)");
 
