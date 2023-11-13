@@ -6,8 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitDataView.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
+#include <QDoubleValidator>
 #include <QItemDelegate>
 #include <QRegExpValidator>
+#include <QStyledItemDelegate>
 
 using namespace Mantid::API;
 
@@ -22,6 +24,8 @@ const QString REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
 const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
 const QString MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
 } // namespace Regexes
+
+QString makeNumber(double d) { return QString::number(d, 'f', 6); }
 
 class ExcludeRegionDelegate : public QItemDelegate {
 public:
@@ -49,7 +53,26 @@ public:
   }
 };
 
-QString makeNumber(double d) { return QString::number(d, 'f', 6); }
+class NumericInputDelegate : public QStyledItemDelegate {
+
+public:
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const override {
+
+    auto lineEdit = std::make_unique<QLineEdit>(parent);
+    auto validator = std::make_unique<QDoubleValidator>(parent);
+
+    validator->setDecimals(6);
+    validator->setNotation(QDoubleValidator::StandardNotation);
+    lineEdit->setValidator(validator.release());
+
+    return lineEdit.release();
+  }
+
+  void setEditorData(QWidget *editor, const QModelIndex &index) const override {
+    const auto value = index.model()->data(index, Qt::EditRole).toDouble();
+    static_cast<QLineEdit *>(editor)->setText(makeNumber(value));
+  }
+};
 
 QStringList defaultHeaders() {
   QStringList headers;
@@ -88,8 +111,14 @@ void IndirectFitDataView::setHorizontalHeaders(const QStringList &headers) {
 
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(0, QHeaderView::Stretch);
+
+  m_uiForm->tbFitData->setItemDelegateForColumn(headers.indexOf("StartX"),
+                                                std::make_unique<NumericInputDelegate>().release());
+  m_uiForm->tbFitData->setItemDelegateForColumn(headers.indexOf("EndX"),
+                                                std::make_unique<NumericInputDelegate>().release());
   m_uiForm->tbFitData->setItemDelegateForColumn(headers.size() - 1,
                                                 std::make_unique<ExcludeRegionDelegate>().release());
+
   m_uiForm->tbFitData->verticalHeader()->setVisible(false);
 }
 
@@ -129,9 +158,6 @@ void IndirectFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
 void IndirectFitDataView::updateNumCellEntry(double numEntry, size_t row, size_t column) {
   QTableWidgetItem *selectedItem;
   selectedItem = m_uiForm->tbFitData->item(static_cast<int>(row), static_cast<int>(column));
-  if ((!selectedItem->isSelected())) {
-    return;
-  }
   selectedItem->setText(makeNumber(numEntry));
 };
 

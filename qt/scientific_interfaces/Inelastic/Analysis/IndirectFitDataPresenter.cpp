@@ -203,40 +203,24 @@ void IndirectFitDataPresenter::handleCellChanged(int row, int column) {
   }
 
   if (m_view->startXColumn() == column) {
-    setTableStartXAndEmit(m_view->getText(row, column), row, column);
+    setTableStartXAndEmit(m_view->getText(row, column).toDouble(), row, column);
   } else if (m_view->endXColumn() == column) {
-    setTableEndXAndEmit(m_view->getText(row, column), row, column);
+    setTableEndXAndEmit(m_view->getText(row, column).toDouble(), row, column);
   } else if (m_view->excludeColumn() == column) {
     setModelExcludeAndEmit(m_view->getText(row, column).toStdString(), row);
   }
 }
 
-void IndirectFitDataPresenter::setTableStartXAndEmit(QString currentCellStr, int row, int column) {
-  bool ok;
-  double X;
+void IndirectFitDataPresenter::setTableStartXAndEmit(double X, int row, int column) {
   auto subIndices = m_model->getSubIndices(row);
-  auto FitRange = m_model->getFittingRange(row);
-
-  X = currentCellStr.toDouble(&ok);
-  if (!ok) {
-    X = FitRange.first;
-  };
 
   m_model->setStartX(X, subIndices.first, subIndices.second);
   m_view->updateNumCellEntry(m_model->getFittingRange(row).first, row, column);
   emit startXChanged(m_model->getFittingRange(row).first, subIndices.first, subIndices.second);
 }
 
-void IndirectFitDataPresenter::setTableEndXAndEmit(QString currentCellStr, int row, int column) {
-  bool ok;
-  double X;
+void IndirectFitDataPresenter::setTableEndXAndEmit(double X, int row, int column) {
   auto subIndices = m_model->getSubIndices(row);
-  auto FitRange = m_model->getFittingRange(row);
-
-  X = currentCellStr.toDouble(&ok);
-  if (!ok) {
-    X = FitRange.second;
-  };
 
   m_model->setEndX(X, subIndices.first, subIndices.second);
   m_view->updateNumCellEntry(m_model->getFittingRange(row).second, row, column);
@@ -245,12 +229,14 @@ void IndirectFitDataPresenter::setTableEndXAndEmit(QString currentCellStr, int r
 
 void IndirectFitDataPresenter::setModelStartXAndEmit(double startX, FitDomainIndex row) {
   auto subIndices = m_model->getSubIndices(row);
+
   m_model->setStartX(startX, subIndices.first, subIndices.second);
   emit startXChanged(startX, subIndices.first, subIndices.second);
 }
 
 void IndirectFitDataPresenter::setModelEndXAndEmit(double endX, FitDomainIndex row) {
   auto subIndices = m_model->getSubIndices(row);
+
   m_model->setEndX(endX, subIndices.first, subIndices.second);
   emit endXChanged(endX, subIndices.first, subIndices.second);
 }
