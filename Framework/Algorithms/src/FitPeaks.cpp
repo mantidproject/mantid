@@ -1724,11 +1724,9 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
 
   // Estimate peak profile parameter
   peak_function->setCentre(expected_peak_center); // set expected position first
-  // int result = estimatePeakParameters(histogram, peak_index_window, peak_function, bkgd_function,
-  // estimate_peak_width,
-  //                                     m_peakWidthEstimateApproach, m_peakWidthPercentage, m_minPeakHeight);
   int result = estimatePeakParameters(histogram, peak_index_window, peak_function, bkgd_function, estimate_peak_width,
-                                      m_peakWidthEstimateApproach, m_peakWidthPercentage, 0);
+                                      m_peakWidthEstimateApproach, m_peakWidthPercentage, m_minPeakHeight);
+
   if (result != GOOD) {
     peak_function->setCentre(expected_peak_center);
     if (result == NOSIGNAL || result == LOWPEAK) {
