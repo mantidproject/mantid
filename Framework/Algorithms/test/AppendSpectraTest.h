@@ -135,7 +135,7 @@ public:
 
   void test_event_workspaces_with_multiple_appends() { doTypeAndParamsTest(true, false, 3); }
 
-  void test_event_workspaces_with_merging_logs_and_multiple_appends() { (true, true, 3); }
+  void test_event_workspaces_with_merging_logs_and_multiple_appends() { doTypeAndParamsTest(true, true, 3); }
 
   void test_2D_workspaces() { doTypeAndParamsTest(false); }
 
@@ -409,11 +409,11 @@ private:
     size_t i, j;
 
     for (i = 0; i < ws1num; ++i) {
-      ws1Values[i] = i;
+      ws1Values[i] = static_cast<double>(i);
     }
 
     for (j = i; j < (ws1num + ws2num); j++) {
-      ws2Values[j - ws1num] = j - (isBinEdges ? 1 : 0);
+      ws2Values[j - ws1num] = static_cast<double>(j - (isBinEdges ? 1 : 0));
     }
 
     std::unique_ptr<API::NumericAxis> ws1Axis;
