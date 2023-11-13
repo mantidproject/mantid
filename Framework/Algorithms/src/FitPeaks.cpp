@@ -393,7 +393,8 @@ void FitPeaks::init() {
                   "If there is only one value given, then ");
 
   declareProperty(PropertyNames::PEAK_MIN_HEIGHT, 0.,
-                  "Used for validating peaks after fitting. If a peak's fitted height is under this value, "
+                  "Used by FitPeaks for validating peaks before and after fitting. If a peak's observed/estimated or "
+                  "fitted height is under this value, "
                   "the peak will be marked as error.");
 
   declareProperty(PropertyNames::CONSTRAIN_PEAK_POS, true,
@@ -431,7 +432,7 @@ void FitPeaks::init() {
                   "signal-to-noise ratio under this value will be excluded."
                   "Note, the algorithm will not exclude a peak for which the noise cannot be estimated.");
 
-  declareProperty("PropertyNames::PEAK_MIN_TOTAL_COUNT", 0.,
+  declareProperty(PropertyNames::PEAK_MIN_TOTAL_COUNT, 0.,
                   "Used for validating peaks before fitting. If the total peak Y-value count "
                   "is under this value, the peak will be excluded from fitting and calibration.");
 
@@ -909,33 +910,31 @@ void FitPeaks::processInputPeakTolerance() {
                              "peaks to fit are inconsistent.");
   }
 
-  // set minimum peak height to 0 (default value) if not specified
+  // set minimum peak height to 0 (default value) if not specified or invalid
   m_minPeakHeight = getProperty(PropertyNames::PEAK_MIN_HEIGHT);
-  bool specifiedMinPeakHeight = !isEmpty(m_minPeakHeight);
-  if (specifiedMinPeakHeight || m_minPeakHeight < 0.)
+  if (isEmpty(m_minPeakHeight) || m_minPeakHeight < 0.)
     m_minPeakHeight = 0.;
 
-  // set minimum peak total count to 0 (default value) if not specified
+  // set minimum peak total count to 0 (default value) if not specified or invalid
   m_minPeakTotalCount = getProperty(PropertyNames::PEAK_MIN_TOTAL_COUNT);
-  bool specifiedMinPeakTotalCount = !isEmpty(m_minPeakTotalCount);
-  if (specifiedMinPeakTotalCount || m_minPeakTotalCount < 0.)
+  if (isEmpty(m_minPeakTotalCount) || m_minPeakTotalCount < 0.)
     m_minPeakTotalCount = 0.;
 
-  // warn the user if only PEAK_MIN_HEIGHT is specified, because historically
-  // PEAK_MIN_HEIGHT also functioned as the current PEAK_MIN_TOTAL_COUNT property.
-  if (specifiedMinPeakHeight && !specifiedMinPeakTotalCount) {
-    std::ostringstream os;
-    os << "PDCalibration property " << PropertyNames::PEAK_MIN_HEIGHT
-       << " is used for validating peaks after fitting. "
-          "Consider also validating peaks before fitting using "
-       << PropertyNames::PEAK_MIN_TOTAL_COUNT << " property\n";
-    logNoOffset(4 /*warning*/, os.str());
-  }
-
-  // set signal-to-noise threshold to zero (default value) if not specified
+  // set signal-to-noise threshold to zero (default value) if not specified or invalid
   m_minSignalToNoiseRatio = getProperty(PropertyNames::PEAK_MIN_SIGNAL_TO_NOISE_RATIO);
   if (isEmpty(m_minSignalToNoiseRatio) || m_minSignalToNoiseRatio < 0.)
     m_minSignalToNoiseRatio = 0.;
+
+  // Historically PEAK_MIN_HEIGHT also functioned (erroneously) as the PEAK_MIN_TOTAL_COUNT property.
+  // Therefore, warn the user if PEAK_MIN_HEIGHT is active, but PEAK_MIN_TOTAL_COUNT isn't.
+  if (m_minPeakHeight > 0 && m_minPeakTotalCount == 0) {
+    std::ostringstream os;
+    os << "PDCalibration property " << PropertyNames::PEAK_MIN_HEIGHT
+       << " is used for validating peaks after fitting. "
+          "Consider validating peaks before fitting as well using "
+       << PropertyNames::PEAK_MIN_TOTAL_COUNT << ".\n";
+    logNoOffset(4 /*warning*/, os.str());
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1725,8 +1724,11 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
 
   // Estimate peak profile parameter
   peak_function->setCentre(expected_peak_center); // set expected position first
+  // int result = estimatePeakParameters(histogram, peak_index_window, peak_function, bkgd_function,
+  // estimate_peak_width,
+  //                                     m_peakWidthEstimateApproach, m_peakWidthPercentage, m_minPeakHeight);
   int result = estimatePeakParameters(histogram, peak_index_window, peak_function, bkgd_function, estimate_peak_width,
-                                      m_peakWidthEstimateApproach, m_peakWidthPercentage, m_minPeakHeight);
+                                      m_peakWidthEstimateApproach, m_peakWidthPercentage, 0);
   if (result != GOOD) {
     peak_function->setCentre(expected_peak_center);
     if (result == NOSIGNAL || result == LOWPEAK) {
