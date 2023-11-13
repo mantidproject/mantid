@@ -393,7 +393,7 @@ void FitPeaks::init() {
                   "If there is only one value given, then ");
 
   declareProperty(PropertyNames::PEAK_MIN_HEIGHT, 0.,
-                  "Used by FitPeaks for validating peaks before and after fitting. If a peak's observed/estimated or "
+                  "Used for validating peaks before and after fitting. If a peak's observed/estimated or "
                   "fitted height is under this value, "
                   "the peak will be marked as error.");
 
