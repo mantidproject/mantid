@@ -158,7 +158,7 @@ void IndirectFitDataView::updateNumCellEntry(double numEntry, size_t row, size_t
   QTableWidgetItem *selectedItem;
   selectedItem = m_uiForm->tbFitData->item(static_cast<int>(row), static_cast<int>(column));
   selectedItem->setText(makeNumber(numEntry));
-};
+}
 
 bool IndirectFitDataView::isTableEmpty() const { return m_uiForm->tbFitData->rowCount() == 0; }
 
