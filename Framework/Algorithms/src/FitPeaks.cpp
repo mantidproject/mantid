@@ -382,7 +382,7 @@ void FitPeaks::init() {
   declareProperty(PropertyNames::BACKGROUND_Z_SCORE, EMPTY_DBL(), os.str());
 
   declareProperty(PropertyNames::HIGH_BACKGROUND, true,
-                  "Flag whether the input data has high background compared to peaks' heights.");
+                  "Flag whether the input data has high background compared to peak heights.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::POSITION_TOL),
                   "List of tolerance on fitted peak positions against given peak positions."
