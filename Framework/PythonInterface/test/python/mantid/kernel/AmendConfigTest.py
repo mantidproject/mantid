@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.kernel import ConfigService
-from mantid.testing import amend_config
+from mantid.kernel import ConfigService, amend_config
 
 
 class AmendConfigTest(unittest.TestCase):

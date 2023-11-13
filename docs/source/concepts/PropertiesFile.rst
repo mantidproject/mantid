@@ -54,6 +54,8 @@ General properties
 |                                  | will use one thread per logical core available.  |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
 
+.. _Facility Properties:
+
 Facility and instrument properties
 **********************************
 
@@ -74,6 +76,8 @@ Facility and instrument properties
 |                              | ``Inelastic`` the convention is ki-kf.  For        | or ``Inelastic``    |
 |                              | ``Crystallography`` the convention is kf-ki.       |                     |
 +------------------------------+----------------------------------------------------+---------------------+
+
+.. _Directory Properties:
 
 Directory Properties
 ********************
@@ -369,5 +373,25 @@ To get access to, e.g. data saving path property from a C++ program one has to i
 .. testcode:: properties
 
   path = ConfigService.getString("defaultsave.directory")
+
+
+Modifying User Properties at Run Time
+**************************************
+
+:ref:`amend_config <Amend Config>` is a context manager that allows you to temporarily modify configuration settings
+related to a facility, instrument, data directory, or any additional keyword arguments. It ensures that the changes are
+only applied temporarily within the context and then restored to their original state when the context exits.
+
+.. code-block:: python
+
+  from mantid.kernel import amend_config
+
+  temp_config = {"logging.loggers.root.level": "debug", "defaultsave.directory": "/path/to/save"}
+  with amend_config(facility="SNS", instrument="REF_L", **temp_config):
+      # Code to be executed with temporary configuration
+      do_something_with_custom_data()
+
+  # Outside the block, the original configuration is restored.
+
 
 .. categories:: Concepts

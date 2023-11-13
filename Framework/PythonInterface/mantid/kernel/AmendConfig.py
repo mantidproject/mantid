@@ -10,7 +10,7 @@ from copy import deepcopy
 from typing import Union
 
 from mantid.kernel import ConfigService
-from mantid import logger
+from . import logger
 
 
 @contextmanager
@@ -18,16 +18,22 @@ def amend_config(
     facility: str = None, instrument: str = None, data_dir: Union[str, list] = None, prepend_datadir: bool = True, **kwargs
 ) -> None:
     r"""
-    Context manager to safely modify Mantid Configuration Service while
+
+    Context manager to safely modify :ref:`Mantid Configuration Service <Config Service>` while
     the function is executed.
 
-    Parameters
-    ----------
-    :param facility:        ``string`` Sets the value for `default.facility`
-    :param instrument:      ``string`` Sets the value for `default.instrument`
-    :param data_dir:        ``string`` Sets the value for `datasearch.directories`
-    :param prepend_datadir: ``bool`` Default 'True', if `False` the `datasearch.directories` will be replaced with the value of `data_dir`
-    :param kwargs:          ``dict`` Dictionary of named keyword arguments
+
+    facility : string
+        Sets the value for :ref:`default.facility <Facility Properties>` *Changing the facility also changes the instrument
+        to the default instrument for the facility. It is recommended to provide an instrument with a facility*
+    instrument : string
+        Sets the value for :ref:`default.instrument <Facility Properties>`
+    data_dir : string
+        Sets the value for :ref:`datasearch.directories <Directory Properties>`
+    prepend_datadir : bool
+        Default `True`, if `False` the ``datasearch.directories`` will be replaced with the value of ``data_dir``
+    kwargs
+        Dictionary of any named keyword arguments from :ref:`Mantid Properties <Properties File>`
     """
     modified_keys = list()
     backup = dict()
@@ -44,13 +50,13 @@ def amend_config(
         config.setFacility(facility)
         modified_keys.append(DEFAULT_FACILITY)
         modified_keys.append(DEFAULT_INSTRUMENT)
-    logger.information(f"testing.amend_config: using default.facility {config[DEFAULT_FACILITY]}")
+    logger.information(f"kernel.amend_config: using default.facility {config[DEFAULT_FACILITY]}")
 
     if instrument:
         config[DEFAULT_INSTRUMENT] = instrument
         if DEFAULT_INSTRUMENT not in modified_keys:
             modified_keys.append(DEFAULT_INSTRUMENT)
-    logger.information(f"testing.amend_config: using default.instrument {config[DEFAULT_INSTRUMENT]}")
+    logger.information(f"kernel.amend_config: using default.instrument {config[DEFAULT_INSTRUMENT]}")
 
     if data_dir is not None:
         data_dirs = (
