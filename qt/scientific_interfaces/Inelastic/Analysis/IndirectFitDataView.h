@@ -46,7 +46,7 @@ protected:
   void setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, size_t column);
 
 private:
-  QStringList HeaderLabels;
+  QStringList m_HeaderLabels;
   void setHorizontalHeaders(const QStringList &headers);
 };
 

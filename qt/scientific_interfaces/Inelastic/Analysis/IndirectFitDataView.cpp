@@ -110,7 +110,7 @@ QTableWidget *IndirectFitDataView::getDataTable() const { return m_uiForm->tbFit
 void IndirectFitDataView::setHorizontalHeaders(const QStringList &headers) {
   m_uiForm->tbFitData->setColumnCount(headers.size());
   m_uiForm->tbFitData->setHorizontalHeaderLabels(headers);
-  HeaderLabels = headers;
+  m_HeaderLabels = headers;
 
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -163,7 +163,7 @@ void IndirectFitDataView::updateNumCellEntry(double numEntry, size_t row, size_t
 
 bool IndirectFitDataView::isTableEmpty() const { return m_uiForm->tbFitData->rowCount() == 0; }
 
-int IndirectFitDataView::getColumnIndexFromName(QString ColName) { return HeaderLabels.indexOf(ColName); }
+int IndirectFitDataView::getColumnIndexFromName(QString ColName) { return m_HeaderLabels.indexOf(ColName); }
 
 void IndirectFitDataView::clearTable() { m_uiForm->tbFitData->setRowCount(0); }
 
