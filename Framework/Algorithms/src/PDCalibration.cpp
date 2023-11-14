@@ -287,8 +287,7 @@ void PDCalibration::init() {
 
   declareProperty("MinimumPeakTotalCount", 0.,
                   "Used for validating peaks before fitting. If the total peak Y-value count "
-                  "is under this value, the peak will be excluded from fitting and calibration. "
-                  "The recommended value is 20.");
+                  "is under this value, the peak will be excluded from fitting and calibration.");
 
   // make group for Input properties
   std::string inputGroup("Input Options");
