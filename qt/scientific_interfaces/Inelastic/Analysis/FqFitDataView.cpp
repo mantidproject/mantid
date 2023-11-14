@@ -32,14 +32,6 @@ FqFitDataView::FqFitDataView(const QStringList &headers, QWidget *parent) : Indi
   header->setSectionResizeMode(1, QHeaderView::Stretch);
 }
 
-int FqFitDataView::workspaceIndexColumn() const { return 2; }
-
-int FqFitDataView::startXColumn() const { return 3; }
-
-int FqFitDataView::endXColumn() const { return 4; }
-
-int FqFitDataView::excludeColumn() const { return 5; }
-
 void FqFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
   IndirectFitDataView::addTableEntry(row, newRow);
 

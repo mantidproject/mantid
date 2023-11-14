@@ -110,13 +110,14 @@ QTableWidget *IndirectFitDataView::getDataTable() const { return m_uiForm->tbFit
 void IndirectFitDataView::setHorizontalHeaders(const QStringList &headers) {
   m_uiForm->tbFitData->setColumnCount(headers.size());
   m_uiForm->tbFitData->setHorizontalHeaderLabels(headers);
+  HeaderLabels = headers;
 
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(0, QHeaderView::Stretch);
 
-  m_uiForm->tbFitData->setItemDelegateForColumn(headers.indexOf("StartX"), new NumericInputDelegate);
-  m_uiForm->tbFitData->setItemDelegateForColumn(headers.indexOf("EndX"), new NumericInputDelegate);
-  m_uiForm->tbFitData->setItemDelegateForColumn(headers.size() - 1, new ExcludeRegionDelegate);
+  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("StartX"), new NumericInputDelegate);
+  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("EndX"), new NumericInputDelegate);
+  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("Mask X Range"), new ExcludeRegionDelegate);
 
   m_uiForm->tbFitData->verticalHeader()->setVisible(false);
 }
@@ -142,16 +143,16 @@ void IndirectFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
 
   cell = std::make_unique<QTableWidgetItem>(QString::number(newRow.workspaceIndex));
   cell->setFlags(flags);
-  setCell(std::move(cell), row, workspaceIndexColumn());
+  setCell(std::move(cell), row, getColumnIndexFromName("WS Index"));
 
   cell = std::make_unique<QTableWidgetItem>(makeNumber(newRow.startX));
-  setCell(std::move(cell), row, startXColumn());
+  setCell(std::move(cell), row, getColumnIndexFromName("StartX"));
 
   cell = std::make_unique<QTableWidgetItem>(makeNumber(newRow.endX));
-  setCell(std::move(cell), row, endXColumn());
+  setCell(std::move(cell), row, getColumnIndexFromName("EndX"));
 
   cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.exclude));
-  setCell(std::move(cell), row, excludeColumn());
+  setCell(std::move(cell), row, getColumnIndexFromName("Mask X Range"));
 }
 
 void IndirectFitDataView::updateNumCellEntry(double numEntry, size_t row, size_t column) {
@@ -162,13 +163,7 @@ void IndirectFitDataView::updateNumCellEntry(double numEntry, size_t row, size_t
 
 bool IndirectFitDataView::isTableEmpty() const { return m_uiForm->tbFitData->rowCount() == 0; }
 
-int IndirectFitDataView::workspaceIndexColumn() const { return 1; }
-
-int IndirectFitDataView::startXColumn() const { return 2; }
-
-int IndirectFitDataView::endXColumn() const { return 3; }
-
-int IndirectFitDataView::excludeColumn() const { return 4; }
+int IndirectFitDataView::getColumnIndexFromName(QString ColName) { return HeaderLabels.indexOf(ColName); }
 
 void IndirectFitDataView::clearTable() { m_uiForm->tbFitData->setRowCount(0); }
 

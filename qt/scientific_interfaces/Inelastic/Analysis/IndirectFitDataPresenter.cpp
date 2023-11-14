@@ -202,11 +202,11 @@ void IndirectFitDataPresenter::handleCellChanged(int row, int column) {
     return;
   }
 
-  if (m_view->startXColumn() == column) {
+  if (m_view->getColumnIndexFromName("StartX") == column) {
     setTableStartXAndEmit(m_view->getText(row, column).toDouble(), row, column);
-  } else if (m_view->endXColumn() == column) {
+  } else if (m_view->getColumnIndexFromName("EndX") == column) {
     setTableEndXAndEmit(m_view->getText(row, column).toDouble(), row, column);
-  } else if (m_view->excludeColumn() == column) {
+  } else if (m_view->getColumnIndexFromName("Mask X Range") == column) {
     setModelExcludeAndEmit(m_view->getText(row, column).toStdString(), row);
   }
 }
