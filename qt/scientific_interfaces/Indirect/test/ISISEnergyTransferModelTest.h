@@ -613,7 +613,7 @@ public:
     TS_ASSERT_EQUALS(errors.size(), 0);
   }
 
-  void test_plotRawAlgorithmQueue_returns_two_algorithms_if_remove_background_is_false() {
+  void testPlotRawAlgorithmQueueReturnsTwoAlgorithmsIfRemoveBackgroundIsFalse() {
     IETInputData inputData;
     IETConversionData conversionData;
     IETBackgroundData backgroundData(false);
@@ -625,7 +625,7 @@ public:
     TS_ASSERT_EQUALS(2, algorithmQueue.size());
   }
 
-  void test_plotRawAlgorithmQueue_returns_four_algorithms_if_remove_background_is_true() {
+  void testPlotRawAlgorithmQueueReturnsFourAlgorithmsIfRemoveBackgroundIsTrue() {
     IETInputData inputData;
     IETConversionData conversionData;
     IETBackgroundData backgroundData(true, 1, 4);
