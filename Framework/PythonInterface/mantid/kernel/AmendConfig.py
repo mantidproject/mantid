@@ -28,12 +28,39 @@ def amend_config(
         to the default instrument for the facility. It is recommended to provide an instrument with a facility*
     instrument : string
         Sets the value for :ref:`default.instrument <Facility Properties>`
-    data_dir : string
+    data_dir : string, list
         Sets the value for :ref:`datasearch.directories <Directory Properties>`
     prepend_datadir : bool
         Default `True`, if `False` the ``datasearch.directories`` will be replaced with the value of ``data_dir``
     kwargs
         Dictionary of any named keyword arguments from :ref:`Mantid Properties <Properties File>`
+
+
+    **Example Usage**
+
+
+    .. code-block:: python
+
+        from mantid.kernel import amend_config
+
+        with amend_config(facility="FacilityA", instrument="InstrumentX"):
+            # Inside this block, configuration for FacilityA and InstrumentX is active.
+            perform_custom_operation()
+
+        # Outside the block, the original configuration is restored.
+
+        with amend_config(data_dir="/custom/data"):
+            # Configuration with a custom data directory.
+            do_something_with_custom_data()
+
+        # Original configuration is restored again.
+
+        temp_config = {"Notifications.Enabled": "On", "logging.loggers.root.level": "debug"}
+        with amend_config(**temp_config):
+            # Configuration with dictionary of properties
+            do_something_else()
+
+        # Original configuration is restored again.
     """
     modified_keys = list()
     backup = dict()
