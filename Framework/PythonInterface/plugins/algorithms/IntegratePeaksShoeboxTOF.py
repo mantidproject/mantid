@@ -35,12 +35,21 @@ class PEAK_STATUS(Enum):
     NO_PEAK = "No peak detected."
 
 
+class WeakPeak:
+    def __init__(self, ipk, ispec, tof, tof_fwhm, ipks_near):
+        self.ipk = ipk
+        self.ispec = ispec  # spectrum at center of kernel that corresponds to max I/sigma from convolution
+        self.tof = tof  # TOF at center of kernel that corresponds to max I/sigma from convolution
+        self.tof_fwhm = tof_fwhm
+        self.ipks_near = ipks_near
+
+
 class ShoeboxResult:
     """
     This class is used to hold data and integration parameters for single-crystal Bragg peaks
     """
 
-    def __init__(self, ipk, pk, x, y, peak_shape, ipos, ipk_pos, status):
+    def __init__(self, ipk, pk, x, y, peak_shape, ipos, ipk_pos, status, strong_peak=None, ipk_strong=None):
         self.peak_shape = list(peak_shape)
         self.kernel_shape = list(get_kernel_shape(*self.peak_shape)[0])
         self.ipos = list(ipos)
@@ -48,6 +57,7 @@ class ShoeboxResult:
         self.labels = ["Row", "Col", "TOF"]
         self.ysum = []
         self.extents = []
+        self.status = status
         # integrate y over each dim
         for idim in range(len(peak_shape)):
             self.ysum.append(y.sum(axis=idim))
@@ -69,6 +79,8 @@ class ShoeboxResult:
             rf"d={d} $\AA$"
             f"\n{status.value}"
         )
+        if strong_peak is not None and ipk_strong is not None:
+            self.title = f"{self.title} (shoebox taken from ipk={ipk_strong} {np.round(strong_peak.getHKL(), 2)})"
 
     def plot_integrated_peak(self, fig, axes, norm_func, rect_func):
         for iax, ax in enumerate(axes):
@@ -311,8 +323,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         peaks = self.exec_child_alg("CloneWorkspace", InputWorkspace=peaks, OutputWorkspace="out_peaks")
 
         array_converter = InstrumentArrayConverter(ws)
-        ipk_weak = []
-        results = np.empty(peaks.getNumberPeaks(), dtype=ShoeboxResult)
+        weak_peaks_list = []
+        ipks_strong = []
+        results = np.full(peaks.getNumberPeaks(), None)
         for ipk, peak in enumerate(peaks):
             detid = peak.getDetectorID()
             bank_name = peaks.column("BankName")[ipk]
@@ -328,8 +341,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 fwhm = get_fwhm_from_back_to_back_params(peak, ws, detid)
 
                 nbins = max(3, int(nfwhm * fwhm / bin_width)) if fwhm is not None else self.getProperty("NBins").value
-                if not nbins % 2:
-                    nbins += 1  # force to be odd
+                nbins = round_up_to_odd_number(nbins)
             else:
                 nbins = self.getProperty("NBins").value
             kernel = make_kernel(nrows, ncols, nbins)
@@ -338,25 +350,14 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             peak_data = array_converter.get_peak_data(
                 peak, detid, bank_name, nshoebox * kernel.shape[0], nshoebox * kernel.shape[1], nrows_edge, ncols_edge
             )
-            x, y, esq, ispecs = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
-            x = x[peak_data.irow, peak_data.icol, :]  # take x at peak centre, should be same for all detectors
-
-            # crop data array to TOF region of peak using shoebox dimension
-            itof = ws.yIndexOfX(pk_tof, ispec)  # need index in y now (note x values are points even if were edges)
-            tof_slice = slice(
-                int(np.clip(itof - nshoebox * kernel.shape[-1] // 2, a_min=0, a_max=len(x))),
-                int(np.clip(itof + nshoebox * kernel.shape[-1] // 2, a_min=0, a_max=len(x))),
-            )
-            x = x[tof_slice]
-            y = y[:, :, tof_slice]
-            esq = esq[:, :, tof_slice]
+            x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, ispec, kernel, nshoebox)
 
             # perform initial integration
             intens_over_sig = convolve_shoebox(y, esq, kernel)
 
             # identify best shoebox position near peak
             ix = np.argmin(abs(x - pk_tof))
-            ipos = find_nearest_peak_in_data(intens_over_sig, ispecs, x, ws, peaks, ipk, peak_data.irow, peak_data.icol, ix)
+            ipos = find_nearest_peak_in_data_window(intens_over_sig, ispecs, x, ws, peaks, ipk, peak_data.irow, peak_data.icol, ix)
 
             # perform final integration if required
             det_edges = peak_data.det_edges if not integrate_on_edge else None
@@ -365,49 +366,94 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 intens, sigma = 0.0, 0.0
             else:
                 # integrate at that position (without smoothing I/sigma)
-                intens, sigma = integrate_shoebox_at_pos(y, esq, kernel, ipos, det_edges)
-                if np.isfinite(sigma):
-                    status = PEAK_STATUS.STRONG if intens / sigma > weak_peak_threshold else PEAK_STATUS.WEAK
-                    if status == PEAK_STATUS.STRONG and do_optimise_shoebox:
-                        kernel, (nrows, ncols, nbins) = optimise_shoebox(y, esq, kernel.shape, ipos)
-                        # re-integrate but this time check for overlap with edge
-                        intens, sigma = integrate_shoebox_at_pos(y, esq, kernel, ipos, det_edges)
-                else:
-                    status = PEAK_STATUS.ON_EDGE
-                    intens, sigma = 0.0, 0.0
+                intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+                if status == PEAK_STATUS.STRONG and do_optimise_shoebox:
+                    kernel, (nrows, ncols, nbins) = optimise_shoebox(y, esq, kernel.shape, ipos)
+                    # re-integrate but this time check for overlap with edge
+                    intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
 
             if status == PEAK_STATUS.WEAK and do_optimise_shoebox and weak_peak_strategy == "NearestStrongPeak":
-                ipk_weak.append(ipk)  # store pk index (and pos FWHM?)
+                # look for possible strong peaks at any TOF in the window (won't know if strong until all pks integrated)
+                ipks_near, _ = find_ipks_in_window(ws, peaks, ispecs, ipk)
+                weak_peaks_list.append(WeakPeak(ipk, ispecs[ipos[0], ipos[1]], x[ipos[-1]], fwhm, ipks_near))
             else:
+                if status == PEAK_STATUS.STRONG:
+                    ipks_strong.append(ipk)
                 set_peak_intensity(peak, intens, sigma, bin_width, do_lorz_cor)
                 if output_file:
                     # save result for plotting
                     results[ipk] = ShoeboxResult(ipk, peak, x, y, [nrows, ncols, nbins], ipos, [peak_data.irow, peak_data.icol, ix], status)
-        # loop over weak peaks
-        #   look for peaks with detectors in ispec window
-        #   if no peaks found
-        #   look for nearest strong peak
+
+        if len(ipks_strong):
+            # set function for calculating distance metric between peaks
+            # if know back to back params then can scale TOF extent by ratio of FWHM
+            # otherwise just look for peak closest in QLab
+            calc_dist_func = calc_angle_between_peaks if get_nbins_from_b2bexp_params else calc_dQsq_between_peaks
+
+            for weak_pk in weak_peaks_list:
+                # get peak
+                ipk = weak_pk.ipk
+                peak = peaks.getPeak(ipk)
+                bank_name = peaks.column("BankName")[ipk]
+                pk_tof = peak.getTOF()
+                # find nearest strong peak to get shoebox dimensions from
+                ipks_near_strong = []
+                for ipk_near in weak_pk.ipks_near:
+                    if results[ipk_near].status == PEAK_STATUS.STRONG:
+                        ipks_near_strong.append(ipk_near)
+                if not ipks_near_strong:
+                    # no peaks in detector window at any TOF, look in all table
+                    ipks_near_strong = ipks_strong
+                # loop over strong peaks and find nearest peak
+                ipk_strong = None
+                dist_min = np.inf
+                for ipk_near in ipks_near_strong:
+                    dist = calc_dist_func(peak, peaks.getPeak(ipk_near))
+                    if dist < dist_min:
+                        ipk_strong = ipk_near
+                strong_pk = peaks.getPeak(ipk_strong)
+
+                # get peak shape and make kernel
+                nrows, ncols, nbins = results[ipk_strong].peak_shape
+                if get_nbins_from_b2bexp_params:
+                    # scale TOF extent by ratio of fwhm
+                    strong_pk_fwhm = get_fwhm_from_back_to_back_params(strong_pk, ws, strong_pk.getDetectorID())
+                    nbins = max(3, int(nbins * (weak_pk.tof_fwhm / strong_pk_fwhm)))
+                    nbins = round_up_to_odd_number(nbins)
+                kernel = make_kernel(nrows, ncols, nbins)
+                # get data array in peak region (keep same window size, nshoebox, for plotting)
+                peak_data = array_converter.get_peak_data(
+                    peak, peak.getDetectorID(), bank_name, nshoebox * kernel.shape[0], nshoebox * kernel.shape[1], nrows_edge, ncols_edge
+                )
+                x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, ispec, kernel, nshoebox)
+                # integrate at previously found ipos
+                ipos = [*np.argwhere(ispecs == weak_pk.ispec)[0], np.argmin(abs(x - weak_pk.tof))]
+                det_edges = peak_data.det_edges if not integrate_on_edge else None
+                intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+                set_peak_intensity(peak, intens, sigma, bin_width, do_lorz_cor)
+                if output_file:
+                    # save result for plotting
+                    results[ipk] = ShoeboxResult(
+                        ipk,
+                        peak,
+                        x,
+                        y,
+                        [nrows, ncols, nbins],
+                        ipos,
+                        [peak_data.irow, peak_data.icol, np.argmin(abs(x - pk_tof))],
+                        status,
+                        strong_peak=strong_pk,
+                        ipk_strong=ipk_strong,
+                    )
+        elif weak_peak_strategy == "NearestStrongPeak":
+            raise ValueError(
+                f"No peaks found with I/sigma > WeakPeakThreshold ({weak_peak_threshold}) - can't "
+                f"estimate shoebox dimension for weak peaks. Try reducing WeakPeakThreshold or set "
+                f"WeakPeakStrategy to Fix"
+            )
 
         # plot output
-        if output_file:
-            from matplotlib.pyplot import subplots, close
-            from matplotlib.patches import Rectangle
-            from matplotlib.colors import LogNorm
-            from matplotlib.backends.backend_pdf import PdfPages
-
-            try:
-                with PdfPages(output_file) as pdf:
-                    for result in results:
-                        fig, axes = subplots(1, 3, figsize=(12, 5), subplot_kw={"projection": "mantid"})
-                        fig.subplots_adjust(wspace=0.3)  # ensure plenty space between subplots (want to avoid slow tight_layout)
-                        result.plot_integrated_peak(fig, axes, LogNorm, Rectangle)
-                        pdf.savefig(fig)
-                        close(fig)
-            except OSError:
-                raise RuntimeError(
-                    f"OutputFile ({output_file}) could not be opened - please check it is not open by "
-                    f"another programme and that the user has permission to write to that directory."
-                )
+        plot_integration_reuslts(output_file, results)
 
         # assign output
         self.setProperty("OutputWorkspace", peaks)
@@ -424,6 +470,58 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             return None
 
 
+def round_up_to_odd_number(number):
+    if not number % 2:
+        number += 1
+    return number
+
+
+def plot_integration_reuslts(output_file, results):
+    # import inside this function as not allowed to import at point algorithms are registered
+    from matplotlib.pyplot import subplots, close
+    from matplotlib.patches import Rectangle
+    from matplotlib.colors import LogNorm
+    from matplotlib.backends.backend_pdf import PdfPages
+
+    try:
+        with PdfPages(output_file) as pdf:
+            for result in results:
+                if result:
+                    fig, axes = subplots(1, 3, figsize=(12, 5), subplot_kw={"projection": "mantid"})
+                    fig.subplots_adjust(wspace=0.3)  # ensure plenty space between subplots (want to avoid slow tight_layout)
+                    result.plot_integrated_peak(fig, axes, LogNorm, Rectangle)
+                    pdf.savefig(fig)
+                    close(fig)
+    except OSError:
+        raise RuntimeError(
+            f"OutputFile ({output_file}) could not be opened - please check it is not open by "
+            f"another programme and that the user has permission to write to that directory."
+        )
+
+
+def calc_angle_between_peaks(pk1, pk2):
+    return abs(pk1.getQLabFrame().angle(pk2.getQLabFrame()))
+
+
+def calc_dQsq_between_peaks(pk1, pk2):
+    return (pk1.getQLabFrame() - pk2.getQLabFrame()).norm2()
+
+
+def get_and_clip_data_arrays(ws, peak_data, pk_tof, ispec, kernel, nshoebox):
+    x, y, esq, ispecs = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
+    x = x[peak_data.irow, peak_data.icol, :]  # take x at peak centre, should be same for all detectors
+    # crop data array to TOF region of peak using shoebox dimension
+    itof = ws.yIndexOfX(pk_tof, ispec)  # need index in y now (note x values are points even if were edges)
+    tof_slice = slice(
+        int(np.clip(itof - nshoebox * kernel.shape[-1] // 2, a_min=0, a_max=len(x))),
+        int(np.clip(itof + nshoebox * kernel.shape[-1] // 2, a_min=0, a_max=len(x))),
+    )
+    x = x[tof_slice]
+    y = y[:, :, tof_slice]
+    esq = esq[:, :, tof_slice]
+    return x, y, esq, ispecs
+
+
 def convolve_shoebox(y, esq, kernel):
     yconv = convolve(input=y, weights=kernel, mode="nearest")
     econv = np.sqrt(convolve(input=esq, weights=kernel**2, mode="nearest"))
@@ -434,12 +532,10 @@ def convolve_shoebox(y, esq, kernel):
     return intens_over_sig
 
 
-def find_nearest_peak_in_data(data, ispecs, x, ws, peaks, ipk, irow, icol, ix):
-    tofs = peaks.column("TOF")
-    ispecs_peaks = ws.getIndicesFromDetectorIDs([int(p.getDetectorID()) for p in peaks])
-    ipks_near = np.flatnonzero(np.logical_and.reduce((tofs >= x.min(), tofs <= x.max(), np.isin(ispecs_peaks, ispecs))))
-    ipks_near = np.delete(ipks_near, np.where(ipks_near == ipk))  # remove the peak of interest
+def find_nearest_peak_in_data_window(data, ispecs, x, ws, peaks, ipk, irow, icol, ix):
+    ipks_near, ispecs_peaks = find_ipks_in_window(ws, peaks, ispecs, ipk, tof_min=x.min(), tof_max=x.max())
     if len(ipks_near) > 0:
+        tofs = peaks.column("TOF")
         # get position of nearby peaks in data array in fractional coords
         shape = np.array(data.shape)
         pos_near = [np.array(*np.where(ispecs == ispecs_peaks[ii]), np.array(np.argmin(x - tofs[ii]))) / shape for ii in ipks_near]
@@ -464,13 +560,27 @@ def find_nearest_peak_in_data(data, ispecs, x, ws, peaks, ipk, irow, icol, ix):
         return np.unravel_index(np.argmax(data), data.shape)
 
 
-def integrate_shoebox_at_pos(y, esq, kernel, ipos, det_edges=None):
+def find_ipks_in_window(ws, peaks, ispecs, ipk, tof_min=None, tof_max=None):
+    ispecs_peaks = ws.getIndicesFromDetectorIDs([int(p.getDetectorID()) for p in peaks])
+    ipks_near = np.isin(ispecs_peaks, ispecs)
+    if tof_min and tof_max:
+        tofs = peaks.column("TOF")
+        ipks_near = np.logical_and.reduce((tofs >= tof_min, tofs <= tof_max, ipks_near))
+    ipks_near = np.flatnonzero(ipks_near)  # convert to index
+    ipks_near = np.delete(ipks_near, np.where(ipks_near == ipk))  # remove the peak of interest
+    return ipks_near, ispecs_peaks
+
+
+def integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges=None):
     slices = tuple([slice(ii - shape // 2, ii + shape // 2 + 1) for ii, shape in zip(ipos, kernel.shape)])
-    intens, sigma = 2 * [np.nan]
     if det_edges is None or not det_edges[slices[:-1]].any():
         intens = np.sum(y[slices] * kernel)
         sigma = np.sqrt(np.sum(esq[slices] * (kernel**2)))
-    return intens, sigma
+        status = PEAK_STATUS.STRONG if intens / sigma > weak_peak_threshold else PEAK_STATUS.WEAK
+    else:
+        status = PEAK_STATUS.ON_EDGE
+        intens, sigma = 0.0, 0.0
+    return intens, sigma, status
 
 
 def optimise_shoebox(y, esq, current_shape, ipos):
@@ -490,7 +600,7 @@ def optimise_shoebox(y, esq, current_shape, ipos):
         for ncols in lengths[1]:
             for nbins in lengths[2]:
                 kernel = make_kernel(nrows, ncols, nbins)
-                intens, sigma = integrate_shoebox_at_pos(y, esq, kernel, ipos)
+                intens, sigma, _ = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold=0.0)
                 i_over_sig = intens / sigma
                 if i_over_sig > best_i_over_sig:
                     best_i_over_sig = i_over_sig
