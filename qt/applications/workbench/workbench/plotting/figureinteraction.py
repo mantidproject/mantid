@@ -111,6 +111,8 @@ class FigureInteraction(object):
         self.valid_lines = VALID_LINE_STYLE
         self.valid_colors = VALID_COLORS
         self.default_marker_name = "marker"
+        self.double_click_event = None
+        self.marker_selected_in_double_click_event = None
 
     @property
     def nevents(self):
@@ -169,13 +171,13 @@ class FigureInteraction(object):
             else:
                 self._show_markers_menu(marker_selected, event)
         elif event.dblclick and event.button == canvas.buttond.get(Qt.LeftButton):
-            if not marker_selected:
-                if not self._show_axis_editor(event):
-                    # Don't run inside 3D+ plots, as there is already matplotlib behaviour here.
-                    if not hasattr(event.inaxes, "zaxis"):
-                        self._show_plot_options(event)
-            elif len(marker_selected) == 1:
-                self._edit_marker(marker_selected[0])
+            # Double-clicking will open a dialog depending on where the mouse event is located. However, if the dialog
+            # is opened here, mpl will not process the mouse release event after the dialog closes, and will not end any
+            # panning/zooming/rotating drag events that are in progress. Therefore, we store the event data to use in
+            # the mouse release callback.
+            self.double_click_event = event
+            self.marker_selected_in_double_click_event = marker_selected
+
         elif event.button == canvas.buttond.get(Qt.MiddleButton):
             if self.toolbar_manager.is_zoom_active():
                 self.toolbar_manager.emit_sig_home_clicked()
@@ -215,6 +217,12 @@ class FigureInteraction(object):
 
             self.stop_markers(x_pos, y_pos)
 
+        # If the mouse is released after a double click event, check whether we need to open a settings dialog.
+        if self.double_click_event:
+            self._open_double_click_dialog(self.double_click_event, self.marker_selected_in_double_click_event)
+            self.marker_selected_in_double_click_event = None
+            self.double_click_event = None
+
     def on_leave(self, event):
         """
         When leaving the axis or canvas, restore cursor to default one
@@ -240,6 +248,19 @@ class FigureInteraction(object):
                 marker.set_move_cursor(None, x_pos, y_pos)
                 marker.add_all_annotations()
             marker.mouse_move_stop()
+
+    def _open_double_click_dialog(self, event, marker_selected=None):
+        """
+        Opens a settings dialog based on the event location.
+        @param event: the object representing the double click event
+        """
+        if not marker_selected:
+            if not self._show_axis_editor(event):
+                # Don't run inside 3D+ plots, as there is already matplotlib behaviour here.
+                if not hasattr(event.inaxes, "zaxis"):
+                    self._show_plot_options(event)
+        elif len(marker_selected) == 1:
+            self._edit_marker(marker_selected[0])
 
     def _show_axis_editor(self, event):
         """
@@ -281,7 +302,7 @@ class FigureInteraction(object):
                 elif ax.zaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in ax.get_zticklabels()):
                     move_and_show(ZAxisEditor(canvas, ax))
             elif ax.get_legend() is not None and ax.get_legend().contains(event)[0]:
-                # We have to set the legend as non draggable else we hold onto the legend
+                # We have to set the legend as non-draggable else we hold onto the legend
                 # until the mouse button is clicked again
                 legend_set_draggable(ax.get_legend(), False)
                 legend_texts = ax.get_legend().get_texts()
@@ -303,6 +324,10 @@ class FigureInteraction(object):
         return action_taken
 
     def _show_plot_options(self, event):
+        """
+        Opens the plot settings dialog and switches to the curves tab.
+        @param event: the object representing the mouse event
+        """
         if not event.inaxes:
             return
 
