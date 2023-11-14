@@ -114,9 +114,9 @@ void IndirectFitDataView::setHorizontalHeaders(const QStringList &headers) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(0, QHeaderView::Stretch);
 
-  m_uiForm->tbFitData->setItemDelegateForColumn(startXColumn(), std::make_unique<NumericInputDelegate>().release());
-  m_uiForm->tbFitData->setItemDelegateForColumn(endXColumn(), std::make_unique<NumericInputDelegate>().release());
-  m_uiForm->tbFitData->setItemDelegateForColumn(excludeColumn(), std::make_unique<ExcludeRegionDelegate>().release());
+  m_uiForm->tbFitData->setItemDelegateForColumn(headers.indexOf("StartX"), new NumericInputDelegate);
+  m_uiForm->tbFitData->setItemDelegateForColumn(headers.indexOf("EndX"), new NumericInputDelegate);
+  m_uiForm->tbFitData->setItemDelegateForColumn(headers.size() - 1, new ExcludeRegionDelegate);
 
   m_uiForm->tbFitData->verticalHeader()->setVisible(false);
 }
