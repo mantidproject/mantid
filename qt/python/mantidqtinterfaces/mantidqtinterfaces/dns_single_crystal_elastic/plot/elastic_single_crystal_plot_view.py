@@ -10,83 +10,76 @@ DNS Widget to plot elastic single_crystal data
 from mantidqt.utils.qt import load_ui
 
 from matplotlib.backends.backend_qt5agg import FigureCanvas
-from matplotlib.backends.backend_qt5agg import \
-    NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QSizePolicy
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view \
-    import DNSView
-from mantidqtinterfaces.dns_single_crystal_elastic.plot.dialogs.dialogs import (
-    DNSdxdyDialog,
-    DNSOmegaOffsetDialog)
-from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_menu \
-    import DNSElasticSCPlotOptionsMenu, DNSElasticSCPlotViewMenu, \
-    set_mdi_icons, set_up_colormap_selector
-from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_plot \
-    import DNSScPlot
-from mantidqtinterfaces.dns_single_crystal_elastic.plot. \
-    elastic_single_crystal_plot_datalist import DNSDatalist
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.dialogs.dialogs import DNSdxdyDialog, DNSOmegaOffsetDialog
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_menu import (
+    DNSElasticSCPlotOptionsMenu,
+    DNSElasticSCPlotViewMenu,
+    set_mdi_icons,
+    set_up_colormap_selector,
+)
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_plot import DNSScPlot
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_datalist import DNSDatalist
 
 
 class DNSElasticSCPlotView(DNSView):
     """
-       DNS Widget to plot elastic single crystal data
+    DNS Widget to plot elastic single crystal data
     """
-    NAME = 'Plotting'
+
+    NAME = "Plotting"
 
     def __init__(self, parent):
         super().__init__(parent)
-        _content = load_ui(__file__,
-                           'elastic_single_crystal_plot.ui',
-                           baseinstance=self)
+        _content = load_ui(__file__, "elastic_single_crystal_plot.ui", baseinstance=self)
 
         self._map = {
-            'datalist': _content.lV_datalist,
-            'down': _content.tB_down,
-            'up': _content.tB_up,
-            'grid': _content.tB_grid,
-            'linestyle': _content.tB_linestyle,
-            'crystal_axes': _content.tB_crystal_axes,
-            'x_range': _content.lE_x_range,
-            'y_range': _content.lE_y_range,
-            'z_range': _content.lE_z_range,
-            'colormap': _content.combB_colormap,
-            'projections': _content.tB_projections,
-            'log_scale': _content.tB_log,
-            'invert_cb': _content.tB_invert_cb,
-            'save_data': _content.tB_save_data,
-            'fontsize': _content.sB_fontsize
+            "datalist": _content.lV_datalist,
+            "down": _content.tB_down,
+            "up": _content.tB_up,
+            "grid": _content.tB_grid,
+            "linestyle": _content.tB_linestyle,
+            "crystal_axes": _content.tB_crystal_axes,
+            "x_range": _content.lE_x_range,
+            "y_range": _content.lE_y_range,
+            "z_range": _content.lE_z_range,
+            "colormap": _content.combB_colormap,
+            "projections": _content.tB_projections,
+            "log_scale": _content.tB_log,
+            "invert_cb": _content.tB_invert_cb,
+            "save_data": _content.tB_save_data,
+            "fontsize": _content.sB_fontsize,
         }
-        # Change Toolbutton Icons to mdi icons
+        # Change Tool button Icons to mdi icons
         set_mdi_icons(self._map)
         # Colormap Selector
         set_up_colormap_selector(self._map)
 
         # datalist
-        self.datalist = DNSDatalist(self, self._map['datalist'])
-        self._map['down'].clicked.connect(self.datalist.down)
-        self._map['up'].clicked.connect(self.datalist.up)
+        self.datalist = DNSDatalist(self, self._map["datalist"])
+        self._map["down"].clicked.connect(self.datalist.down)
+        self._map["up"].clicked.connect(self.datalist.up)
         self.datalist.sig_datalist_changed.connect(self._something_changed)
 
         # Connecting Signals
-        self._map['fontsize'].editingFinished.connect(
-            self._change_fontsize)
-        self._map['grid'].clicked.connect(self._change_grid)
-        self._map['log_scale'].clicked.connect(self._change_log)
-        self._map['linestyle'].clicked.connect(self._change_linestyle)
-        self._map['projections'].clicked.connect(self._toggle_projections)
+        self._map["fontsize"].editingFinished.connect(self._change_fontsize)
+        self._map["grid"].clicked.connect(self._change_grid)
+        self._map["log_scale"].clicked.connect(self._change_log)
+        self._map["linestyle"].clicked.connect(self._change_linestyle)
+        self._map["projections"].clicked.connect(self._toggle_projections)
         # self._map['save_data'].clicked.connect(self.save_data)
-        self._map['x_range'].returnPressed.connect(self._manual_lim_changed)
-        self._map['y_range'].returnPressed.connect(self._manual_lim_changed)
-        self._map['z_range'].returnPressed.connect(self._manual_lim_changed)
-        self._map['colormap'].currentIndexChanged.connect(
-            self._change_colormap)
-        self._map['crystal_axes'].clicked.connect(
-            self._change_crystal_axes)
-        self._map['invert_cb'].clicked.connect(self._change_colormap)
+        self._map["x_range"].returnPressed.connect(self._manual_lim_changed)
+        self._map["y_range"].returnPressed.connect(self._manual_lim_changed)
+        self._map["z_range"].returnPressed.connect(self._manual_lim_changed)
+        self._map["colormap"].currentIndexChanged.connect(self._change_colormap)
+        self._map["crystal_axes"].clicked.connect(self._change_crystal_axes)
+        self._map["invert_cb"].clicked.connect(self._change_colormap)
 
         # Setting up custom menu for sc plot options and views
         self.views_menu = DNSElasticSCPlotViewMenu()
@@ -165,16 +158,12 @@ class DNSElasticSCPlotView(DNSView):
     # dialogs
     def change_dxdy(self):
         if self.initial_values:
-            dxdy_dialog = DNSdxdyDialog(parent=self,
-                                        dx=self.initial_values['dx'],
-                                        dy=self.initial_values['dy'])
+            dxdy_dialog = DNSdxdyDialog(parent=self, dx=self.initial_values["dx"], dy=self.initial_values["dy"])
             dxdy_dialog.exec_()
 
     def change_omegaoffset(self):
         if self.initial_values:
-            oo_dialog = DNSOmegaOffsetDialog(parent=self,
-                                             omegaoffset=self.initial_values[
-                                                 'oof'])
+            oo_dialog = DNSOmegaOffsetDialog(parent=self, omegaoffset=self.initial_values["oof"])
             oo_dialog.exec_()
 
     # gui options
@@ -185,12 +174,10 @@ class DNSElasticSCPlotView(DNSView):
         return self.views_menu.get_value()
 
     def connect_resize(self):
-        self.canvas.mpl_connect('resize_event', self.single_crystal_plot.onresize)
+        self.canvas.mpl_connect("resize_event", self.single_crystal_plot.onresize)
 
     def set_initial_oof_dxdy(self, off, dx, dy):
-        self.initial_values = {'oof': off,
-                               'dx': dx,
-                               'dy': dy}
+        self.initial_values = {"oof": off, "dx": dx, "dy": dy}
 
     def draw(self):
         self.canvas.draw()
