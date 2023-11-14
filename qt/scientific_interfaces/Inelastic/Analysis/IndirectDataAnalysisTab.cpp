@@ -628,7 +628,7 @@ void IndirectDataAnalysisTab::respondToDataChanged() {
 }
 
 void IndirectDataAnalysisTab::respondToDataAdded(IAddWorkspaceDialog const *dialog) {
-  if (m_dataPresenter->addWorkspace(dialog)) {
+  if (m_dataPresenter->addWorkspaceFromDialog(dialog)) {
     m_fittingModel->addDefaultParameters();
   }
   updateDataReferences();

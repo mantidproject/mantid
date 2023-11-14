@@ -30,6 +30,7 @@ public:
   IDAFunctionParameterEstimationTest() {
     m_fitFunction = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
       (void)x;
+      (void)y;
       return std::unordered_map<std::string, double>{{"A0", 2.0}, {"A1", 3.0}};
     };
   }

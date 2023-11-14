@@ -203,7 +203,7 @@ FqFitDataPresenter::FqFitDataPresenter(IIndirectFitDataModel *model, IIndirectFi
   connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveWorkspaceID()));
 }
 
-bool FqFitDataPresenter::addWorkspace(IAddWorkspaceDialog const *dialog) {
+bool FqFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) {
   if (const auto fqFitDialog = dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
     addWorkspace(fqFitDialog->workspaceName(), fqFitDialog->parameterType(), fqFitDialog->parameterNameIndex());
     setActiveWorkspaceIDToCurrentWorkspace(fqFitDialog);

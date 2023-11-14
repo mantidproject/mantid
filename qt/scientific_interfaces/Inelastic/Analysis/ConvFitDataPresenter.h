@@ -20,7 +20,7 @@ class MANTIDQT_INELASTIC_DLL ConvFitDataPresenter : public IndirectFitDataPresen
 public:
   ConvFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
 
-  bool addWorkspace(IAddWorkspaceDialog const *dialog) override;
+  bool addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) override;
 
 signals:
   void modelResolutionAdded(std::string const &name, WorkspaceID const &workspaceID);

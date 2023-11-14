@@ -32,7 +32,7 @@ class MANTIDQT_INELASTIC_DLL FqFitDataPresenter : public IndirectFitDataPresente
   Q_OBJECT
 public:
   FqFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
-  bool addWorkspace(IAddWorkspaceDialog const *dialog) override;
+  bool addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) override;
   void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) override;
   void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) override;
   void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true) override;
