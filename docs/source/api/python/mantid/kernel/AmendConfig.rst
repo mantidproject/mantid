@@ -6,6 +6,6 @@
 
 .. module:`mantid.kernel`
 
-.. autoclass:: mantid.kernel.amend_config
+.. automodule:: mantid.kernel.AmendConfig
    :members:
 
