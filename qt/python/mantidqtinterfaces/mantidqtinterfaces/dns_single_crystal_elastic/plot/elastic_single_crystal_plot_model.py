@@ -11,6 +11,7 @@ DNS single crystal elastic plot tab model of DNS reduction GUI.
 """
 
 import numpy as np
+
 import mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers as helper
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import DNSObsModel
 from mantidqtinterfaces.dns_single_crystal_elastic.data_structures.dns_single_crystal_map import DNSScMap
@@ -20,9 +21,9 @@ from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_h
 
 class DNSElasticSCPlotModel(DNSObsModel):
     """
-    Model for DNS plot calculations
-    converts data from omega twotheta into qx,qy and hkl1, hkl2
-    creates hull of dnsdata, to filter points
+    Model for DNS plot calculations. It converts data from (omega, 2theta)
+    space into (q_x, q_y) and (n_x, n_y). Also, creates hull of DNS data
+    to filter points.
     """
 
     def __init__(self, parent):
@@ -84,15 +85,15 @@ class DNSElasticSCPlotModel(DNSObsModel):
         mesh_name = axis_type + "_mesh"
         self._single_crystal_map.triangulate(mesh_name=mesh_name, switch=switch)
         self._single_crystal_map.mask_triangles(mesh_name=mesh_name)
-        tri_refi, z_refi = self._single_crystal_map.interpolate_triangulation(interpolate)
-        self._data.tiang = tri_refi
-        self._data.ztiang = z_refi
+        triangulator_refiner, z_refiner = self._single_crystal_map.interpolate_triangulation(interpolate)
+        self._data.triang = triangulator_refiner
+        self._data.z_triang = z_refiner
         # this is important to get the limits
         x, y, z = getattr(self._single_crystal_map, mesh_name)
         self._data.x = x
         self._data.y = y
         self._data.z = z
-        return tri_refi, z_refi
+        return triangulator_refiner, z_refiner
 
     def get_xy_dy_ratio(self):
         return self._single_crystal_map.dx / self._single_crystal_map.dy
@@ -164,3 +165,10 @@ class DNSElasticSCPlotModel(DNSObsModel):
 
     def get_dx_dy(self):
         return self._single_crystal_map["dx"], self._single_crystal_map["dy"]
+
+    def prepare_data_for_saving(self):
+        x = self._data.x.flatten()
+        y = self._data.y.flatten()
+        z = self._data.z.flatten()
+        data_combined = np.array(list(zip(x, y, z)))
+        return data_combined
