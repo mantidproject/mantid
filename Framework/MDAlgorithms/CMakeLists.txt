@@ -118,8 +118,6 @@ set(SRC_FILES
     src/XorMD.cpp
 )
 
-# set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp )
-
 set(INC_FILES
     inc/MantidMDAlgorithms/AccumulateMD.h
     inc/MantidMDAlgorithms/AndMD.h
@@ -359,11 +357,6 @@ if(COVERAGE)
     set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(MDAlgorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
 
 # Use a precompiled header where they are supported
 enable_precompiled_headers(inc/MantidMDAlgorithms/PrecompiledHeader.h SRC_FILES)

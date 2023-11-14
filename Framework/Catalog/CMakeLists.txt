@@ -12,11 +12,6 @@ if(COVERAGE)
   endforeach(loop_var)
 endif()
 
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(Catalog SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
-
 # Add ssl dependency
 include_directories(${OPENSSL_INCLUDE_DIR})
 add_definitions(-DWITH_OPENSSL -DWITH_NONAMESPACES)

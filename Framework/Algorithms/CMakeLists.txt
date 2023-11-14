@@ -698,15 +698,6 @@ set(INC_FILES
     inc/MantidAlgorithms/XrayAbsorptionCorrection.h
 )
 
-set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp src/FFTSmooth.cpp src/FFTSmooth2.cpp src/FilterBadPulses.cpp
-                           src/SetUncertainties.cpp
-)
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(Algorithms SRC_FILES C_SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
-
 set(TEST_FILES
     AddAbsorptionWeightedPathLengthsTest.h
     AddLogDerivativeTest.h
