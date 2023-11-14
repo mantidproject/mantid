@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectBayes.h"
+#include "IndirectSettings.h"
 #include "Quasi.h"
 #include "ResNorm.h"
 #include "Stretch.h"
@@ -41,8 +42,7 @@ void IndirectBayes::initLayout() {
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
 
-  // Needed to initially apply the settings loaded on the settings GUI
-  applySettings(getInterfaceSettings());
+  IndirectInterface::initLayout();
 }
 
 /**

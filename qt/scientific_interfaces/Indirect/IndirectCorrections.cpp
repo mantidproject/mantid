@@ -9,6 +9,7 @@
 #include "ApplyAbsorptionCorrections.h"
 #include "CalculatePaalmanPings.h"
 #include "ContainerSubtraction.h"
+#include "IndirectSettings.h"
 
 namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectCorrections)
@@ -66,8 +67,7 @@ void IndirectCorrections::initLayout() {
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
 
-  // Needed to initially apply the settings loaded on the settings GUI
-  applySettings(getInterfaceSettings());
+  IndirectInterface::initLayout();
 }
 
 /**

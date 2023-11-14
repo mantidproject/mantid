@@ -5,27 +5,32 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSettingsView.h"
+#include "IndirectSettingsPresenter.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 namespace MantidQt::CustomInterfaces {
 
 IndirectSettingsView::IndirectSettingsView(QWidget *parent)
-    : IIndirectSettingsView(parent), m_uiForm(std::make_unique<Ui::IndirectInterfaceSettings>()) {
+    : QWidget(parent), m_presenter(), m_uiForm(std::make_unique<Ui::IndirectInterfaceSettings>()) {
   m_uiForm->setupUi(this);
 
-  connect(m_uiForm->pbOk, SIGNAL(clicked()), this, SLOT(emitOkClicked()));
-  connect(m_uiForm->pbApply, SIGNAL(clicked()), this, SLOT(emitApplyClicked()));
-  connect(m_uiForm->pbCancel, SIGNAL(clicked()), this, SLOT(emitCancelClicked()));
+  connect(m_uiForm->pbOk, SIGNAL(clicked()), this, SLOT(notifyOkClicked()));
+  connect(m_uiForm->pbApply, SIGNAL(clicked()), this, SLOT(notifyApplyClicked()));
+  connect(m_uiForm->pbCancel, SIGNAL(clicked()), this, SLOT(notifyCancelClicked()));
 
   connect(m_uiForm->pbHelp, SIGNAL(clicked()), this, SLOT(openHelp()));
 }
 
-void IndirectSettingsView::emitOkClicked() { emit okClicked(); }
+QWidget *IndirectSettingsView::getView() { return this; }
 
-void IndirectSettingsView::emitApplyClicked() { emit applyClicked(); }
+void IndirectSettingsView::subscribePresenter(IndirectSettingsPresenter *presenter) { m_presenter = presenter; }
 
-void IndirectSettingsView::emitCancelClicked() { emit cancelClicked(); }
+void IndirectSettingsView::notifyOkClicked() { m_presenter->notifyOkClicked(); }
+
+void IndirectSettingsView::notifyApplyClicked() { m_presenter->notifyApplyClicked(); }
+
+void IndirectSettingsView::notifyCancelClicked() { m_presenter->notifyCancelClicked(); }
 
 void IndirectSettingsView::openHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(QString("Indirect Settings"), QString("indirect"));
