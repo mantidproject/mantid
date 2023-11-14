@@ -83,8 +83,11 @@ public:
 private:
   // Overridden Algorithm methods
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
   void cleanup();
+
+  void getGroupingWorkspace();
 
   std::size_t setupGroupToWSIndices();
 
@@ -98,10 +101,10 @@ private:
   int validateSpectrumInGroup(size_t wi);
 
   /// Shared pointer to the input workspace
-  API::MatrixWorkspace_const_sptr m_matrixInputW;
+  API::MatrixWorkspace_sptr m_matrixInputW;
 
   /// Grouping workspace with groups to build
-  Mantid::DataObjects::GroupingWorkspace_sptr groupWS;
+  Mantid::DataObjects::GroupingWorkspace_sptr m_groupWS;
 
   /// Shared pointer to the event workspace
   DataObjects::EventWorkspace_const_sptr m_eventW;
