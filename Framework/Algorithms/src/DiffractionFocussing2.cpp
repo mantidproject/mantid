@@ -79,6 +79,19 @@ std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
     issues["GroupingWorkspace"] = msg;
   }
 
+  // validate input workspace
+  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  // Validate UnitID (spacing)
+  const std::string unitid = inputWS->getAxis(0)->unit()->unitID();
+  if (unitid == "TOF") {
+    g_log.error(
+        "Support for TOF data in DiffractionFocussing is deprecated (on 29/04/21) - use GroupDetectors instead)");
+  } else if (unitid != "dSpacing" && unitid != "MomentumTransfer" && unitid != "TOF") {
+    std::stringstream msg;
+    msg << "UnitID " << unitid << " is not a supported spacing";
+    issues["InputWorkspace"] = msg.str();
+  }
+
   return issues;
 }
 
@@ -110,19 +123,6 @@ void DiffractionFocussing2::exec() {
   m_matrixInputW = getProperty("InputWorkspace");
   nPoints = static_cast<int>(m_matrixInputW->blocksize());
   nHist = static_cast<int>(m_matrixInputW->getNumberHistograms());
-
-  // Validate UnitID (spacing)
-  Axis *axis = m_matrixInputW->getAxis(0);
-  std::string unitid = axis->unit()->unitID();
-  if (unitid != "dSpacing" && unitid != "MomentumTransfer" && unitid != "TOF") {
-    g_log.error() << "UnitID " << unitid << " is not a supported spacing\n";
-    throw std::invalid_argument("Workspace Invalid Spacing/UnitID");
-  }
-  if (unitid == "TOF") {
-    g_log.error()
-        << "Support for TOF data in DiffractionFocussing is deprecated (on 29/04/21) - use GroupDetectors instead)"
-        << std::endl;
-  }
 
   this->getGroupingWorkspace();
 
