@@ -317,7 +317,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         if self.toolbar:
             self.toolbar.destroy()
 
-        self._ads_observer.observeAll(False)
         self._ads_observer = None
         # disconnect window events before calling GlobalFigureManager.destroy. window.close is not guaranteed to
         # delete the object and do this for us. On macOS it was observed that closing the figure window
