@@ -71,10 +71,10 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         plot_list = self.view.datalist.get_checked_plots()
         if not plot_list:
             return
-        self._plot_param.plotname = plot_list[0]
+        self._plot_param.plot_name = plot_list[0]
         self._change_fontsize(draw=False)
         generated_dict = self.param_dict["elastic_single_crystal_script_generator"]
-        data_array = generated_dict["data_arrays"][self._plot_param.plotname]
+        data_array = generated_dict["data_arrays"][self._plot_param.plot_name]
         options = self.param_dict["elastic_single_crystal_options"]
         self.model.create_single_crystal_map(data_array, options, initial_values)
         self._change_grid_state(draw=False, change=False)
@@ -255,7 +255,6 @@ class DNSElasticSCPlotPresenter(DNSObserver):
 
     def _home_button_clicked(self):
         self.view.single_crystal_plot.disconnect_ylim_change()
-
         # The color bar gets tiny if you zoom out with home button in log scale.
         # Redrawing color bar fixes the problem.
         own_dict = self.view.get_state()
