@@ -169,12 +169,18 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         rear = self.get_val("rear_centre", det_config_dict)
         front = self.get_val("front_centre", det_config_dict)
         all = self.get_val("all_centre", det_config_dict)
-        if (front or rear) and all:
-            raise ValueError("front_centre, rear_centre and all_centre were all specified together.")
 
-        update_translations(DetectorType.LAB, next((i for i in [rear, all] if i), None))
-        if DetectorType.HAB.value in self.move.detectors:
-            update_translations(DetectorType.HAB, next((i for i in [front, all] if i), None))
+        if self.reduction_mode.reduction_mode is ReductionMode.LAB:
+            update_translations(DetectorType.LAB, rear)
+        elif self.reduction_mode.reduction_mode is ReductionMode.HAB:
+            update_translations(DetectorType.HAB, front)
+        elif self.reduction_mode.reduction_mode in [ReductionMode.ALL, ReductionMode.MERGED]:
+            if self.instrument is SANSInstrument.LOQ:
+                update_translations(DetectorType.LAB, rear)
+                update_translations(DetectorType.HAB, front)
+            else:
+                update_translations(DetectorType.LAB, all)
+                update_translations(DetectorType.HAB, all)
 
     def _parse_detector(self):
         detector_dict = self.get_val("detector")
