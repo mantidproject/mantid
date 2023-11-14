@@ -382,16 +382,4 @@ Modifying User Properties at Run Time
 related to a facility, instrument, data directory, or any additional keyword arguments. It ensures that the changes are
 only applied temporarily within the context and then restored to their original state when the context exits.
 
-.. code-block:: python
-
-  from mantid.kernel import amend_config
-
-  temp_config = {"logging.loggers.root.level": "debug", "defaultsave.directory": "/path/to/save"}
-  with amend_config(facility="SNS", instrument="REF_L", **temp_config):
-      # Code to be executed with temporary configuration
-      do_something_with_custom_data()
-
-  # Outside the block, the original configuration is restored.
-
-
 .. categories:: Concepts
