@@ -4,7 +4,7 @@ channels:
   - conda-forge
 
 dependencies:
-  - boost=1.77.* # Also pulls in boost-cpp. 1.78 clashes with icu version from Qt
+  - boost=1.78.* # Also pulls in boost-cpp. Use the same version as conda-forge
   - ccache
   - cmake=3.19.*|>=3.21.0 # Avoid bug in 3.20.* with updating external projects
   - doxygen>=1.9.*
@@ -19,13 +19,13 @@ dependencies:
   - libopenblas!=0.3.23,!=0.3.24 # v0.3.23 causes a hang for the system tests on OSX, v0.3.24 causing unit test failure - investigation needed.
   - librdkafka>=1.6.0
   - muparser>=2.3.2
-  - matplotlib=3.6.*
+  - matplotlib=3.7.*
   - nexus=4.4.*
   - ninja>=1.10.2
   - numpy>=1.22,<1.25
   - occt
   - pip>=21.0.1
-  - poco=1.12.1|>=1.12.5 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning. It's resolved on their devel branch so should be fine after 1.12.4
+  - poco=1.12.1|>=1.12.6 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning. It's resolved on their devel branch but not yet included in a release, as of 1.12.5.
   - psutil>=5.8.0
   - pycifrw==4.4.1 # Force to 4.4.1 as later versions cause issues with loading CIF files
   - pyqt>=5.15,<6
@@ -49,7 +49,6 @@ dependencies:
   # Needed only for development
   - black  # may be out of sync with pre-commit
   - cppcheck==2.10.3
-  - pygments==2.11.2 # Had to pin back to 2.11 due to cppcheck error which is only fixed in cppcheck>=2.8
   - pre-commit>=2.12.0
   - libcxx
   - joblib
