@@ -70,8 +70,6 @@ size_t IndirectDataAnalysisTab::getNumberOfSpecificFunctionContained(const std::
 IndirectDataAnalysisTab::IndirectDataAnalysisTab(std::string const &tabName, bool const hasResolution, QWidget *parent)
     : IndirectTab(parent), m_uiForm(new Ui::IndirectFitTab), m_tabName(tabName), m_hasResolution(hasResolution) {
   m_uiForm->setupUi(parent);
-
-  m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(m_uiForm->ovOutputOptionsView);
 }
 
 void IndirectDataAnalysisTab::setup() {
