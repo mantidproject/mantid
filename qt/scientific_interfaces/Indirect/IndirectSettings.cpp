@@ -48,11 +48,6 @@ void IndirectSettings::notifyCloseSettings() {
     settingsWindow->close();
 }
 
-// void IndirectSettings::otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) {
-//  for (auto const &window : windows)
-//    connectIndirectInterface(window);
-//}
-
 void IndirectSettings::loadSettings() { m_presenter->loadSettings(); }
 
 } // namespace MantidQt::CustomInterfaces
