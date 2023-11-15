@@ -199,14 +199,7 @@ def get_fake_tof_binning():  # matches data 1,2 above
     }
 
 
-def get_fake_elastic_single_crystal_binning():  # matches data 1,2 above
-    return {
-        'twoTheta': (0, 1, 2),
-        'Omega': (3, 4, 5),
-    }
-
-
-def get_fileselector_param_dict():
+def get_file_selector_param_dict():
     return {
         "paths": {
             "data_dir": "C:/data",
@@ -238,7 +231,8 @@ def get_fake_tof_options():
     return tof_opt
 
 
-def get_fake_elastic_single_crystal_options():
+# OKcomment: not used anywhere
+def get_fake_elastic_sc_options():
     el_opt = {
         "a": 2,
         "b": 3,
