@@ -4,12 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.utils.reflectometry.orso_helper import *
+from mantid.utils.reflectometry.orso_helper import MantidORSODataColumns, MantidORSODataset, MantidORSOSaver
 
 from mantid.kernel import Direction
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, FileProperty, FileAction, PythonAlgorithm, PropertyMode
 
 from pathlib import Path
+from typing import Optional, Tuple, Union
 
 
 class Prop:
@@ -70,7 +71,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             issues[Prop.INPUT_WS] = f"{Prop.INPUT_WS} must have units of {self._Q_UNIT}"
         return issues
 
-    def _is_momentum_transfer_ws(self, ws):
+    def _is_momentum_transfer_ws(self, ws) -> bool:
         return ws.getAxis(0).getUnit().unitID() == self._Q_UNIT
 
     def PyExec(self):
@@ -95,14 +96,14 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 f"Error writing ORSO file. Check that the filepath is valid and does not contain any invalid characters.\n{e}"
             )
 
-    def _create_dataset(self, ws, dataset_name=None):
+    def _create_dataset(self, ws, dataset_name: str = None) -> MantidORSODataset:
         reduction_hist = self._get_reduction_alg_history(ws)
         data_columns = self._create_data_columns(ws, reduction_hist)
         dataset = self._create_dataset_with_mandatory_header(ws, dataset_name, reduction_hist, data_columns)
         self._add_optional_header_info(dataset, ws)
         return dataset
 
-    def _create_data_columns(self, ws, reduction_history):
+    def _create_data_columns(self, ws, reduction_history) -> MantidORSODataColumns:
         """
         Set up the column headers and data values
         """
@@ -121,7 +122,9 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         return data_columns
 
-    def _create_dataset_with_mandatory_header(self, ws, dataset_name, reduction_history, data_columns):
+    def _create_dataset_with_mandatory_header(
+        self, ws, dataset_name: str, reduction_history, data_columns: MantidORSODataColumns
+    ) -> MantidORSODataset:
         """
         Create a dataset with the data columns and the mandatory information populated in the header
         """
@@ -134,7 +137,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             creator_affiliation=MantidORSODataset.SOFTWARE_NAME,
         )
 
-    def _add_optional_header_info(self, dataset, ws):
+    def _add_optional_header_info(self, dataset: MantidORSODataset, ws) -> None:
         """
         Populate the non_mandatory information in the header
         """
@@ -144,7 +147,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         dataset.set_proposal_id(rb_number)
         dataset.set_doi(doi)
 
-    def _get_rb_number_and_doi(self, run):
+    def _get_rb_number_and_doi(self, run) -> Union[Tuple[str, str], Tuple[None, None]]:
         """
         Check if the experiment RB number can be found in the workspace logs.
         This can be stored under different log names depending on whether time slicing was performed.
@@ -156,7 +159,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 return rb_num, f"{self._ISIS_DOI_PREFIX}{rb_num}"
         return None, None
 
-    def _get_resolution(self, ws, reduction_history):
+    def _get_resolution(self, ws, reduction_history) -> Optional[float]:
         if not self.getProperty(Prop.WRITE_RESOLUTION).value:
             return None
 

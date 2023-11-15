@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 from datetime import datetime, timezone
+from typing import Optional, Union, List
 import re
 from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, Measurement
 from orsopy.fileio import Reduction, Software
@@ -19,19 +20,19 @@ from enum import Enum
 class MantidORSOSaver:
     FILE_EXT = ".ort"
 
-    def __init__(self, filename, comment=None):
+    def __init__(self, filename: str, comment: str = None) -> None:
         self._filename = filename if filename.endswith(self.FILE_EXT) else f"{filename}{self.FILE_EXT}"
         self._comment = comment
         self._datasets = []
 
     @property
-    def filename(self):
+    def filename(self) -> str:
         return self._filename
 
-    def add_dataset(self, dataset):
+    def add_dataset(self, dataset: "MantidORSODataset") -> None:
         self._datasets.append(dataset.dataset)
 
-    def save_orso_ascii(self):
+    def save_orso_ascii(self) -> None:
         save_orso(datasets=self._datasets, fname=self._filename, comment=self._comment)
 
 
@@ -42,26 +43,36 @@ class MantidORSODataset:
     _RUN_START_LOG = "run_start"
     _DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
-    def __init__(self, dataset_name, data_columns, ws, reduction_timestamp, creator_name, creator_affiliation):
+    def __init__(
+        self,
+        dataset_name: str,
+        data_columns: "MantidORSODataColumns",
+        ws,
+        reduction_timestamp: datetime,
+        creator_name: str,
+        creator_affiliation: str,
+    ) -> None:
         self._data_columns = data_columns
         self._header = None
 
         self._create_mandatory_header(ws, dataset_name, reduction_timestamp, creator_name, creator_affiliation)
 
     @property
-    def dataset(self):
+    def dataset(self) -> OrsoDataset:
         return OrsoDataset(info=self._header, data=self._data_columns.data)
 
-    def set_facility(self, facility):
+    def set_facility(self, facility: str) -> None:
         self._header.data_source.experiment.facility = facility
 
-    def set_proposal_id(self, proposal_id):
+    def set_proposal_id(self, proposal_id: str) -> None:
         self._header.data_source.experiment.proposalID = proposal_id
 
-    def set_doi(self, doi):
+    def set_doi(self, doi: str) -> None:
         self._header.data_source.experiment.doi = doi
 
-    def _create_mandatory_header(self, ws, dataset_name, reduction_timestamp, creator_name, creator_affiliation):
+    def _create_mandatory_header(
+        self, ws, dataset_name: str, reduction_timestamp: datetime, creator_name: str, creator_affiliation: str
+    ) -> None:
         owner = Person(name=None, affiliation=None)
 
         run = ws.getRun()
@@ -84,7 +95,7 @@ class MantidORSODataset:
 
         self._header = Orso(data_source, reduction, self._data_columns.header_info, dataset_name)
 
-    def _get_exp_start_time(self, run):
+    def _get_exp_start_time(self, run) -> Optional[datetime]:
         if not run.hasProperty(self._RUN_START_LOG):
             return None
 
@@ -94,18 +105,18 @@ class MantidORSODataset:
             return None
 
     @classmethod
-    def _create_datetime_from_string(cls, str_datetime):
+    def _create_datetime_from_string(cls, str_datetime: str) -> datetime:
         return datetime.strptime(cls._parse_datetime_string(str_datetime), cls._DATETIME_FORMAT)
 
     @classmethod
-    def _parse_datetime_string(cls, str_datetime):
+    def _parse_datetime_string(cls, str_datetime: str) -> str:
         match = re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", str_datetime)
         if match is None:
             raise ValueError(f"Cannot parse datetime string {str_datetime} into required format {cls._DATETIME_FORMAT}")
         return match.group()
 
     @classmethod
-    def create_local_datetime_from_utc_string(cls, str_utc_datetime):
+    def create_local_datetime_from_utc_string(cls, str_utc_datetime: str) -> datetime:
         """
         Takes a datetime string in UTC and returns a datetime object in local time
         """
@@ -139,10 +150,10 @@ class MantidORSODataColumns:
 
     def __init__(
         self,
-        q_data,
-        reflectivity_data,
-        reflectivity_error=None,
-        q_resolution=None,
+        q_data: np.ndarray,
+        reflectivity_data: np.ndarray,
+        reflectivity_error: Optional[np.ndarray] = None,
+        q_resolution: Optional[np.ndarray] = None,
         q_unit: Unit = Unit.Angstrom,
         r_error_value_is: ErrorValue = ErrorValue.Sigma,
         q_error_value_is: ErrorValue = ErrorValue.Sigma,
@@ -165,32 +176,32 @@ class MantidORSODataColumns:
             )
 
     @property
-    def header_info(self):
+    def header_info(self) -> List[Union[Column, ErrorColumn]]:
         return self._header_info
 
     @property
-    def data(self):
+    def data(self) -> np.ndarray:
         return np.array(self._data).T
 
-    def add_column(self, name, unit, physical_quantity, data):
+    def add_column(self, name: str, unit, physical_quantity: str, data: np.ndarray) -> None:
         # The third and fourth strongly recommended columns are required if further columns are to be added
         self._ensure_recommended_columns_are_present(data)
         self._add_column(name, unit, physical_quantity, data)
 
-    def add_error_column(self, error_of, error_type: ErrorType, value_is: ErrorValue, data):
+    def add_error_column(self, error_of: str, error_type: ErrorType, value_is: ErrorValue, data: np.ndarray) -> None:
         # The third and fourth strongly recommended columns are required if further columns are to be added
         self._ensure_recommended_columns_are_present(data)
         self._add_error_column(error_of, error_type, value_is, data)
 
-    def _add_column(self, name, unit, physical_quantity, data):
+    def _add_column(self, name: str, unit, physical_quantity: str, data: np.ndarray) -> None:
         self._header_info.append(Column(name=name, unit=unit, physical_quantity=physical_quantity))
         self._data.append(data)
 
-    def _add_error_column(self, error_of, error_type: ErrorType, value_is: ErrorValue, data):
+    def _add_error_column(self, error_of: str, error_type: ErrorType, value_is: ErrorValue, data: np.ndarray) -> None:
         self._header_info.append(ErrorColumn(error_of=error_of, error_type=error_type.value, value_is=value_is.value))
         self._data.append(data)
 
-    def _ensure_recommended_columns_are_present(self, data):
+    def _ensure_recommended_columns_are_present(self, data: np.ndarray) -> None:
         """Checks if the third and fourth strongly recommended columns are present and, if not, adds them with nan values"""
 
         if self._should_add_reflectivity_error_column():
@@ -206,22 +217,18 @@ class MantidORSODataColumns:
                 error_of=self.LABEL_Q, error_type=self.ErrorType.Resolution, value_is=self.ErrorValue.Sigma, data=np.full(len(data), np.nan)
             )
 
-    def _should_add_reflectivity_error_column(self):
+    def _should_add_reflectivity_error_column(self) -> bool:
         # Check that we have only two columns and that the second is the one expected before the reflectivity error
-        if (
+        return (
             len(self._header_info) == 2
             and isinstance(self._header_info[1], Column)
             and self._header_info[1].name == self.LABEL_REFLECTIVITY
-        ):
-            return True
-        return False
+        )
 
-    def _should_add_resolution_column(self):
+    def _should_add_resolution_column(self) -> bool:
         # Check that we have only three columns and that the third is the one expected before the resolution
-        if (
+        return (
             len(self._header_info) == 3
             and isinstance(self._header_info[2], ErrorColumn)
             and self._header_info[2].error_of == self.LABEL_REFLECTIVITY
-        ):
-            return True
-        return False
+        )

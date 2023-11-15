@@ -18,94 +18,108 @@ from orsopy.fileio.base import Column, ErrorColumn
 class MantidORSODataColumnsTest(unittest.TestCase):
     def test_four_columns_created_if_all_data_supplied(self):
         col_length = 5
-        data = [1, 2, 3, 4]
+        col_values = [1, 2, 3, 4]
 
         columns = MantidORSODataColumns(
-            np.full(col_length, data[0]), np.full(col_length, data[1]), np.full(col_length, data[2]), np.full(col_length, data[3])
+            np.full(col_length, col_values[0]),
+            np.full(col_length, col_values[1]),
+            np.full(col_length, col_values[2]),
+            np.full(col_length, col_values[3]),
         )
 
-        self._check_default_header(columns, data)
-        self._check_column_data(columns, data, col_length)
+        self._check_default_header(columns, len(col_values))
+        self._check_column_data(columns, col_values, col_length)
 
     def test_three_columns_created_if_resolution_not_supplied(self):
         col_length = 5
-        data = [1, 2, 3]
+        col_values = [1, 2, 3]
 
-        columns = MantidORSODataColumns(np.full(col_length, data[0]), np.full(col_length, data[1]), np.full(col_length, data[2]))
+        columns = MantidORSODataColumns(
+            np.full(col_length, col_values[0]), np.full(col_length, col_values[1]), np.full(col_length, col_values[2])
+        )
 
-        self._check_default_header(columns, data)
-        self._check_column_data(columns, data, col_length)
+        self._check_default_header(columns, len(col_values))
+        self._check_column_data(columns, col_values, col_length)
 
     def test_columns_with_different_units_and_error_value_types(self):
         col_length = 5
-        data = [1, 2, 3, 4]
+        col_values = [1, 2, 3, 4]
 
         columns = MantidORSODataColumns(
-            np.full(col_length, data[0]),
-            np.full(col_length, data[1]),
-            np.full(col_length, data[2]),
-            np.full(col_length, data[3]),
+            np.full(col_length, col_values[0]),
+            np.full(col_length, col_values[1]),
+            np.full(col_length, col_values[2]),
+            np.full(col_length, col_values[3]),
             q_unit=MantidORSODataColumns.Unit.Nm,
             r_error_value_is=MantidORSODataColumns.ErrorValue.FWHM,
             q_error_value_is=MantidORSODataColumns.ErrorValue.FWHM,
         )
 
         self._check_default_header(
-            columns, data, MantidORSODataColumns.Unit.Nm, MantidORSODataColumns.ErrorValue.FWHM, MantidORSODataColumns.ErrorValue.FWHM
+            columns,
+            len(col_values),
+            MantidORSODataColumns.Unit.Nm,
+            MantidORSODataColumns.ErrorValue.FWHM,
+            MantidORSODataColumns.ErrorValue.FWHM,
         )
-        self._check_column_data(columns, data, col_length)
+        self._check_column_data(columns, col_values, col_length)
 
     def test_adding_additional_columns(self):
         col_length = 5
-        data = [1, 2, 3, 4, 5, 6]
+        col_values = [1, 2, 3, 4, 5, 6]
 
         extra_col = ["test_1", "degree", "incident_angle"]
         extra_error_col = ["test_error", MantidORSODataColumns.ErrorType.Uncertainty, MantidORSODataColumns.ErrorValue.FWHM]
 
         columns = MantidORSODataColumns(
-            np.full(col_length, data[0]), np.full(col_length, data[1]), np.full(col_length, data[2]), np.full(col_length, data[3])
+            np.full(col_length, col_values[0]),
+            np.full(col_length, col_values[1]),
+            np.full(col_length, col_values[2]),
+            np.full(col_length, col_values[3]),
         )
-        columns.add_column(extra_col[0], extra_col[1], extra_col[2], np.full(col_length, data[4]))
-        columns.add_error_column(extra_error_col[0], extra_error_col[1], extra_error_col[2], np.full(col_length, data[5]))
+        columns.add_column(extra_col[0], extra_col[1], extra_col[2], np.full(col_length, col_values[4]))
+        columns.add_error_column(extra_error_col[0], extra_error_col[1], extra_error_col[2], np.full(col_length, col_values[5]))
 
-        self._check_default_header(columns, data)
+        self._check_default_header(columns, len(col_values))
         header = columns.header_info
         self._check_column_header(header[4], extra_col[0], extra_col[1], extra_col[2])
         self._check_error_column_header(header[5], extra_error_col[0], extra_error_col[1], extra_error_col[2])
-        self._check_column_data(columns, data, col_length)
+        self._check_column_data(columns, col_values, col_length)
 
     def test_adding_additional_column_with_no_resolution(self):
         col_length = 5
-        data = [1, 2, 3, np.nan, 5]
+        col_values = [1, 2, 3, np.nan, 5]
 
         extra_col = ["test_1", "degree", "incident_angle"]
 
-        columns = MantidORSODataColumns(np.full(col_length, data[0]), np.full(col_length, data[1]), np.full(col_length, data[2]))
-        columns.add_column(extra_col[0], extra_col[1], extra_col[2], np.full(col_length, data[4]))
+        columns = MantidORSODataColumns(
+            np.full(col_length, col_values[0]), np.full(col_length, col_values[1]), np.full(col_length, col_values[2])
+        )
+        columns.add_column(extra_col[0], extra_col[1], extra_col[2], np.full(col_length, col_values[4]))
 
-        self._check_default_header(columns, data)
+        self._check_default_header(columns, len(col_values))
         header = columns.header_info
         self._check_column_header(header[4], extra_col[0], extra_col[1], extra_col[2])
-        self._check_column_data(columns, data, col_length)
+        self._check_column_data(columns, col_values, col_length)
 
     def test_adding_additional_column_with_no_reflectivity_error(self):
         col_length = 5
-        data = [1, 2, np.nan, np.nan, 5]
+        col_values = [1, 2, np.nan, np.nan, 5]
 
         extra_col = ["test_1", "degree", "incident_angle"]
 
-        columns = MantidORSODataColumns(np.full(col_length, data[0]), np.full(col_length, data[1]))
-        columns.add_column(extra_col[0], extra_col[1], extra_col[2], np.full(col_length, data[4]))
+        columns = MantidORSODataColumns(np.full(col_length, col_values[0]), np.full(col_length, col_values[1]))
+        columns.add_column(extra_col[0], extra_col[1], extra_col[2], np.full(col_length, col_values[4]))
 
-        self._check_default_header(columns, data)
+        self._check_default_header(columns, len(col_values))
         header = columns.header_info
         self._check_column_header(header[4], extra_col[0], extra_col[1], extra_col[2])
-        self._check_column_data(columns, data, col_length)
+        self._check_column_data(columns, col_values, col_length)
 
     def _check_default_header(
         self,
         columns,
-        sample_data,
+        num_columns_expected,
         q_unit=MantidORSODataColumns.Unit.Angstrom,
         r_error_is=MantidORSODataColumns.ErrorValue.Sigma,
         q_error_is=MantidORSODataColumns.ErrorValue.Sigma,
@@ -113,8 +127,7 @@ class MantidORSODataColumnsTest(unittest.TestCase):
         header = columns.header_info
         self.assertIsNotNone(header)
 
-        num_columns = len(sample_data)
-        self.assertEqual(num_columns, len(header), "Incorrect number of column headers")
+        self.assertEqual(num_columns_expected, len(header), "Incorrect number of column headers")
 
         self._check_column_header(header[0], MantidORSODataColumns.LABEL_Q, q_unit.value, MantidORSODataColumns.QUANTITY_Q)
         self._check_column_header(header[1], MantidORSODataColumns.LABEL_REFLECTIVITY, None, MantidORSODataColumns.QUANTITY_REFLECTIVITY)
@@ -122,7 +135,7 @@ class MantidORSODataColumnsTest(unittest.TestCase):
         self._check_error_column_header(
             header[2], MantidORSODataColumns.LABEL_REFLECTIVITY, MantidORSODataColumns.ErrorType.Uncertainty, r_error_is
         )
-        if num_columns >= 4:
+        if num_columns_expected >= 4:
             self._check_error_column_header(
                 header[3], MantidORSODataColumns.LABEL_Q, MantidORSODataColumns.ErrorType.Resolution, q_error_is
             )
@@ -139,23 +152,23 @@ class MantidORSODataColumnsTest(unittest.TestCase):
         self.assertEqual(error_is.value, column.error_type)
         self.assertEqual(value_is.value, column.value_is)
 
-    def _check_column_data(self, columns, sample_data, col_length):
+    def _check_column_data(self, columns, col_values, col_length):
         """Checks the data returned from the MantidORSODataColumns class.
 
         :param columns: the columns object to check.
-        :param sample_data: a list containing the first value we expect to find in each column of the data.
+        :param col_values: a list containing the first value we expect to find in each column of the data.
         :param col_length: the number of values we expect to find in each column (this will be the same for all columns).
         """
 
         data = columns.data
         self.assertIsNotNone(data)
         # Check the number of columns
-        self.assertEqual(len(sample_data), len(data[0]), "Incorrect number of data columns")
+        self.assertEqual(len(col_values), len(data[0]), "Incorrect number of data columns")
         # Check the number of values in a column
         self.assertEqual(col_length, len(data), "Incorrect number of values in the data columns")
 
         # Check that each column contains the expected sample value
-        for i, value in enumerate(sample_data):
+        for i, value in enumerate(col_values):
             if np.isnan(value):
                 self.assertTrue(np.isnan(data[0][i]), "Incorrect value in data column")
             else:
