@@ -52,6 +52,65 @@ class FigureManagerWorkbenchTest(unittest.TestCase):
         fig_mgr = FigureManagerWorkbench(canvas, 1)
         self.assertEqual(fig_mgr.get_window_title(), "Figure 1")
 
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_ax_callback_set_up(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        fig = MagicMock()
+        fig.bbox.max = [1, 1]
+        canvas = MantidFigureCanvas(fig)
+        fig_mgr = FigureManagerWorkbench(canvas, 1)
+        with (
+            patch("workbench.plotting.figuremanager.FigureManagerWorkbench._axes_that_are_not_colour_bars") as plot_axes_mock,
+            patch("workbench.plotting.figuremanager.FigureManagerWorkbench._axes_title_changed_callback") as callback_mock,
+        ):
+            ax = MagicMock()
+            plot_axes_mock.return_value = [ax]
+            fig_mgr.show()
+            ax.title.add_callback.assert_called_once_with(callback_mock)
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_ax_callback_will_set_window_title_with_new_title(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        fig = MagicMock()
+        fig.bbox.max = [1, 1]
+        canvas = MantidFigureCanvas(fig)
+        fig_mgr = FigureManagerWorkbench(canvas, 1)
+        mock_title_artist = MagicMock()
+        mock_title_artist.get_text.return_value = "new title"
+        with patch("workbench.plotting.figuremanager.FigureManagerWorkbench.set_window_title") as set_window_title_mock:
+            fig_mgr._axes_title_changed_callback(mock_title_artist)
+            set_window_title_mock.assert_called_once_with("new title")
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_ax_callback_will_not_set_window_title_with_current_title(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        fig = MagicMock()
+        fig.bbox.max = [1, 1]
+        canvas = MantidFigureCanvas(fig)
+        fig_mgr = FigureManagerWorkbench(canvas, 1)
+        mock_title_artist = MagicMock()
+        mock_title_artist.get_text.return_value = "Figure 1"
+        with patch("workbench.plotting.figuremanager.FigureManagerWorkbench.set_window_title") as set_window_title_mock:
+            fig_mgr._axes_title_changed_callback(mock_title_artist)
+            set_window_title_mock.assert_not_called()
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_ax_callback_will_not_set_window_title_with_current_title_without_number(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        fig = MagicMock()
+        fig.bbox.max = [1, 1]
+        canvas = MantidFigureCanvas(fig)
+        fig_mgr = FigureManagerWorkbench(canvas, 1)
+        mock_title_artist = MagicMock()
+        mock_title_artist.get_text.return_value = "EMU00000"
+        with (
+            patch("workbench.plotting.figuremanager.FigureManagerWorkbench.set_window_title") as set_window_title_mock,
+            patch("workbench.plotting.figuremanager.FigureManagerWorkbench.get_window_title") as get_window_title_mock,
+        ):
+            get_window_title_mock.return_value = "EMU00000-1"
+            fig_mgr._axes_title_changed_callback(mock_title_artist)
+            set_window_title_mock.assert_not_called()
+
     def test_reverse_axes_lines(self):
         fig, ax = plt.subplots(subplot_kw={"projection": "mantid"})
         spec2 = ax.plot(self.ws2d_histo, "rs", specNum=2, linewidth=6)
