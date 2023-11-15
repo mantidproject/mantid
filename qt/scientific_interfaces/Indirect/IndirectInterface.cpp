@@ -26,8 +26,7 @@ void IndirectInterface::help() {
 }
 
 void IndirectInterface::settings() {
-  auto subWindow = InterfaceManager().createSubWindow("Settings", this);
-  auto settingsWindow = dynamic_cast<IndirectSettings *>(subWindow);
+  auto settingsWindow = new IndirectSettings(this);
   settingsWindow->connectInterface(this);
 
   settingsWindow->loadSettings();

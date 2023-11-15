@@ -11,11 +11,11 @@
 #include "IndirectSettingsPresenter.h"
 
 #include "DllConfig.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 
 #include <map>
 #include <memory>
 
+#include <QMainWindow>
 #include <QVariant>
 
 class QIcon;
@@ -31,7 +31,7 @@ public:
   virtual void notifyCloseSettings() = 0;
 };
 
-class MANTIDQT_INDIRECT_DLL IndirectSettings : public MantidQt::API::UserSubWindow, public IIndirectSettings {
+class MANTIDQT_INDIRECT_DLL IndirectSettings : public QMainWindow, public IIndirectSettings {
   Q_OBJECT
 
 public:
@@ -40,12 +40,9 @@ public:
 
   void connectInterface(IndirectInterface *interface);
 
-  static std::string name() { return "Settings"; }
-  static QString categoryInfo() { return "Indirect"; }
   static QIcon icon();
   static std::map<std::string, QVariant> getSettings();
 
-  void initLayout() override;
   void loadSettings();
 
   void notifyApplySettings() override;
@@ -55,10 +52,10 @@ signals:
   void applySettings();
 
 private:
-  void otherUserSubWindowCreated(QPointer<UserSubWindow> window) override;
-  void otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) override;
+  // void otherUserSubWindowCreated(QPointer<UserSubWindow> window) override;
+  // void otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) override;
 
-  void connectIndirectInterface(const QPointer<UserSubWindow> &window);
+  // void connectIndirectInterface(const QPointer<UserSubWindow> &window);
 
   std::unique_ptr<IndirectSettingsPresenter> m_presenter;
   Ui::IndirectSettings m_uiForm;
