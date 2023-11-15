@@ -13,15 +13,14 @@ constexpr auto SETTINGS_ICON = "mdi.settings";
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectSettings::IndirectSettings(QWidget *parent) : QMainWindow(parent) {
-  m_uiForm.setupUi(this);
-
+IndirectSettings::IndirectSettings(QWidget *parent) : QWidget(parent) {
   auto model = std::make_unique<IndirectSettingsModel>();
   m_presenter = std::make_unique<IndirectSettingsPresenter>(std::move(model), new IndirectSettingsView(this));
   m_presenter->subscribeParent(this);
 
-  auto centralWidget = m_uiForm.centralWidget->layout();
-  centralWidget->addWidget(m_presenter->getView());
+  auto layout = new QGridLayout();
+  layout->addWidget(m_presenter->getView());
+  setLayout(layout);
 }
 
 void IndirectSettings::connectInterface(IndirectInterface *indirectInterface) {

@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ui_IndirectSettings.h"
-
 #include "IndirectSettingsPresenter.h"
 
 #include "DllConfig.h"
@@ -15,8 +13,8 @@
 #include <map>
 #include <memory>
 
-#include <QMainWindow>
 #include <QVariant>
+#include <QWidget>
 
 class QIcon;
 
@@ -31,7 +29,7 @@ public:
   virtual void notifyCloseSettings() = 0;
 };
 
-class MANTIDQT_INDIRECT_DLL IndirectSettings : public QMainWindow, public IIndirectSettings {
+class MANTIDQT_INDIRECT_DLL IndirectSettings : public QWidget, public IIndirectSettings {
   Q_OBJECT
 
 public:
@@ -58,7 +56,6 @@ private:
   // void connectIndirectInterface(const QPointer<UserSubWindow> &window);
 
   std::unique_ptr<IndirectSettingsPresenter> m_presenter;
-  Ui::IndirectSettings m_uiForm;
 };
 
 } // namespace CustomInterfaces

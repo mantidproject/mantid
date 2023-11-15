@@ -30,6 +30,7 @@ void IndirectInterface::settings() {
   settingsWindow->connectInterface(this);
 
   settingsWindow->loadSettings();
+  settingsWindow->setWindowFlag(Qt::Window);
   settingsWindow->setWindowModality(Qt::WindowModal);
   settingsWindow->show();
 }
