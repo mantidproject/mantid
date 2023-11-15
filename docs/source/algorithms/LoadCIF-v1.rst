@@ -77,9 +77,9 @@ The following script loads a CIF-file and prints the space group of the crystal 
 
 The output is:
 
-.. code-block:: python
+.. code-block:: none
 
-    Space group: F d -3 m
+   Space group: F d -3 m
 
 .. categories::
 

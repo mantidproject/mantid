@@ -538,6 +538,38 @@ public:
       testGroupingVec.emplace_back(i);
     TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(1, 0), testGroupingVec);
   }
+
+  void test_loading_data_with_three_periods_but_only_two_histograms_gives_expected_period_counts_property() {
+    LoadMuonNexusV2 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "HIFI00183810.nxs");
+    loader.setPropertyValue("OutputWorkspace", "outWS");
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    auto const output = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outWS");
+    auto const workspace2D = std::dynamic_pointer_cast<Workspace2D>(output->getItem(0));
+    auto const &run = workspace2D->run();
+
+    TS_ASSERT_EQUALS("5.033640;5.026534", run.getProperty("total_counts_period")->value());
+  }
+
+  void test_loading_detector_grouping_table_when_grouping_info_is_empty_will_load_default_group_from_IDF() {
+    LoadMuonNexusV2 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "ARGUS00073601.nxs");
+    loader.setPropertyValue("DetectorGroupingTable", "detector_grouping");
+    loader.setPropertyValue("DeadTimeTable", "deadtime_table");
+    loader.setPropertyValue("OutputWorkspace", "outWS");
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    auto const detTable = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("detector_grouping");
+    // When the grouping info is not provided, it should load the grouping from the IDF. The IDF has two groups.
+    TS_ASSERT_EQUALS(2, detTable->rowCount());
+  }
 };
 
 //------------------------------------------------------------------------------

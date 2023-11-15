@@ -48,3 +48,5 @@ The ``@mantidproject/gatekeepers`` group is who is meant to merge pull requests 
 * Green tick on the last build indicating all automated testing has succeeded
 * Adequate tests, both success and failure cases have been performed
 * There is comment on the code being reviewed
+
+See the :ref:`guidance for gatekeepers <Gatekeeping>` for more information.

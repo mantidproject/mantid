@@ -55,7 +55,7 @@ Improved
 - :ref:`ExportTimeSeriesLog <algm-ExportTimeSeriesLog>` now can export the first derivative of the sample log as an opotion.
 - :ref:`ExportTimeSeriesLog <algm-ExportTimeSeriesLog>` now add information of exported log to the output work, which
   :ref:`AddSampleLog <algm-AddSampleLog>` can retrieve automatically.
-- ``ThreadPool`` now respects the value of ``OMP_NUM_THREADS`` environment variable (documented in [gcc](https://gcc.gnu.org/onlinedocs/libgomp/OMP_005fNUM_005fTHREADS.html))
+- ``ThreadPool`` now respects the value of ``OMP_NUM_THREADS`` environment variable (documented in `gcc <https://gcc.gnu.org/onlinedocs/libgomp/OMP_005fNUM_005fTHREADS.html>`_)
 - Improved parallel scaling of :ref:`MDNormSCD <algm-MDNormSCD>` with > 4 cores.
 
 .. figure:: ../../images/MDNormSCDv3.10.png

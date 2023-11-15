@@ -78,6 +78,7 @@ class PeaksViewerModelTest(unittest.TestCase):
         slice_info.slicepoint = [0.5, None, None]
         slice_info.z_index = 0
         slice_info.adjust_index_for_preceding_nonq_dims.side_effect = lambda index: index
+        slice_info.transform.side_effect = lambda pos: [pos[1], pos[2], pos[0]]
 
         slicepoint = model.slicepoint(0, slice_info, SpecialCoordinateSystem.QSample)
 

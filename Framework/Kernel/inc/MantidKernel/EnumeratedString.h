@@ -5,9 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
 #include <boost/algorithm/string.hpp>
+#include <sstream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace Mantid {
@@ -38,6 +39,9 @@ class EnumeratedString {
    *
    * @tparam an optional pointer to a statically defined string comparator.
    */
+
+  static_assert(std::is_enum_v<E>); // cause a compiler error if E is not an enum
+
 public:
   EnumeratedString() { ensureCompatibleSize(); }
 
@@ -46,7 +50,7 @@ public:
     this->operator=(e);
   }
 
-  EnumeratedString(const std::string s) {
+  EnumeratedString(const std::string &s) {
     ensureCompatibleSize();
     this->operator=(s);
   }
@@ -59,12 +63,12 @@ public:
 
   // assign the object either by the enum, or by string
   EnumeratedString &operator=(E e) {
-    if (size_t(e) < names->size() && size_t(e) >= 0) {
+    if (int(e) >= 0 && size_t(e) < names->size()) {
       value = e;
       name = names->at(size_t(e));
     } else {
       std::stringstream msg;
-      msg << "Invalid enumerator " << size_t(e) << " for enumerated string " << typeid(E).name();
+      msg << "Invalid enumerator " << int(e) << " for enumerated string " << typeid(E).name();
       throw std::runtime_error(msg.str());
     }
     return *this;
@@ -92,8 +96,8 @@ public:
   bool operator==(const char *s) const { return (*stringComparator)(name, std::string(s)); }
   bool operator!=(const char *s) const { return !(*stringComparator)(name, std::string(s)); }
 
-  bool operator==(const EnumeratedString es) const { return value == es.value; }
-  bool operator!=(const EnumeratedString es) const { return value != es.value; }
+  bool operator==(const EnumeratedString &es) const { return value == es.value; }
+  bool operator!=(const EnumeratedString &es) const { return value != es.value; }
 
   const char *c_str() const { return name.c_str(); }
   static size_t size() { return names->size(); }

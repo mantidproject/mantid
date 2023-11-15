@@ -128,6 +128,7 @@ void DownloadInstrument::exec() {
       g_log.information() << "Downloading \"" << itMap.second << "\" from \"" << itMap.first << "\"\n";
     }
     doDownloadFile(itMap.first, itMap.second);
+    interruption_point();
   }
 
   setProperty("FileDownloadCount", static_cast<int>(fileMap.size()));

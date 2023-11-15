@@ -110,7 +110,7 @@ class CutRepresentation:
             lines_to_clear.extend([self.start, self.end])  # normally don't delete these as artist data kept updated
         for line in lines_to_clear:
             if line in self.ax.lines:
-                self.ax.lines.remove(line)
+                line.remove()
 
     def on_press(self, event):
         if self.is_valid_event(event):

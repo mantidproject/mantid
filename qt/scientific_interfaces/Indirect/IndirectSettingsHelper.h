@@ -5,16 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
+#include "DllConfig.h"
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IndirectSettingsHelper {
 
-void setRestrictInputDataByName(bool restricted);
-void setExternalPlotErrorBars(bool errorBars);
+MANTIDQT_INDIRECT_DLL void setRestrictInputDataByName(bool restricted);
+MANTIDQT_INDIRECT_DLL void setExternalPlotErrorBars(bool errorBars);
 
-bool restrictInputDataByName();
-bool externalPlotErrorBars();
+MANTIDQT_INDIRECT_DLL bool restrictInputDataByName();
+MANTIDQT_INDIRECT_DLL bool externalPlotErrorBars();
 
 } // namespace IndirectSettingsHelper
 } // namespace CustomInterfaces

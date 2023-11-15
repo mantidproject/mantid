@@ -287,6 +287,24 @@ def convert_to_shape(shape_flag):
     return shape
 
 
+def convert_to_flag(shape_string):
+    """
+    Converts a shape flag to a shape object.
+
+    :param shape_flag: a geometry flag which can be 1, 2 or 3
+    :return: a shape object
+    """
+    if shape_string == SampleShape.CYLINDER:
+        shape = 1
+    elif shape_string == SampleShape.FLAT_PLATE:
+        shape = 2
+    elif shape_string == SampleShape.DISC:
+        shape = 3
+    else:
+        shape = None
+    return shape
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for ISIS Nexus
 # ----------------------------------------------------------------------------------------------------------------------

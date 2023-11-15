@@ -204,6 +204,18 @@ class SXDTest(unittest.TestCase):
         for ws in [self.ws, self.peaks]:
             ClearUB(Workspace=ws)
 
+    def test_set_sample_with_material(self):
+        self.sxd.set_sample(
+            Geometry={"Shape": "CSG", "Value": self.sxd.sphere_shape}, Material={"ChemicalFormula": "C2 H4", "SampleNumberDensity": 0.02}
+        )
+
+        self.assertEqual(self.sxd.sample_dict["Material"]["NumberDensityUnit"], "Formula Units")
+
+    def test_set_sample_without_material(self):
+        self.sxd.set_sample(Geometry={"Shape": "CSG", "Value": self.sxd.sphere_shape})
+
+        self.assertFalse("Material" in self.sxd.sample_dict)
+
     #  --- methods specific to SXD class ---
 
     @patch("Diffraction.single_crystal.base_sx.mantid.SetGoniometer")

@@ -35,7 +35,7 @@ Usage
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
     File Exists: True
 
@@ -57,11 +57,10 @@ Output:
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
     File Exists: True
 
 .. categories::
 
 .. sourcelink::
-

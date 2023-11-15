@@ -1,0 +1,1 @@
+- Line Colour selection button is reenabled in the toolbar of contour plots.

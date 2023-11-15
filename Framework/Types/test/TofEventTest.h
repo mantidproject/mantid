@@ -10,6 +10,7 @@
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
 using std::size_t;
@@ -44,9 +45,11 @@ public:
     TofEvent e2 = TofEvent(e);
     TS_ASSERT_EQUALS(e2.tof(), 123);
     TS_ASSERT_EQUALS(e2.pulseTime(), 456);
+    TS_ASSERT_EQUALS(e2.pulseTOFTime(), DateAndTime(0., 123456.));
 
     TofEvent e3 = TofEvent(890.234, 321);
     TS_ASSERT_EQUALS(e3.tof(), 890.234);
     TS_ASSERT_EQUALS(e3.pulseTime(), 321);
+    TS_ASSERT_EQUALS(e3.pulseTOFTime(), DateAndTime(0., 890234. + 321.));
   }
 };

@@ -56,10 +56,42 @@ inline size_t getPulseIndex(const size_t event_index, const size_t last_pulse_in
 }
 } // namespace
 
+/*
+ * Pre-counting the events per pixel ID allows for allocating the proper amount of memory in each output event vector
+ */
+void ProcessBankData::preCountAndReserveMem() {
+  // ---- Pre-counting events per pixel ID ----
+  std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
+  for (size_t i = 0; i < numEvents; i++) {
+    const auto thisId = static_cast<detid_t>((*event_id)[i]);
+    if (!(thisId < m_min_id || thisId > m_max_id)) // or allows for skipping out early
+      counts[thisId - m_min_id]++;
+  }
+
+  // Now we pre-allocate (reserve) the vectors of events in each pixel
+  // counted
+  auto &outputWS = m_loader.m_ws;
+  const auto *alg = m_loader.alg;
+  const size_t numEventLists = outputWS.getNumberHistograms();
+  for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
+    const auto pixelIndex = pixID - m_min_id; // index from zero
+    if (counts[pixelIndex] > 0) {
+      const size_t wi = getWorkspaceIndexFromPixelID(pixID);
+      // Find the workspace index corresponding to that pixel ID
+      // Allocate it
+      if (wi < numEventLists) {
+        outputWS.reserveEventListAt(wi, counts[pixelIndex]);
+      }
+      if ((wi % 20 == 0) && alg->getCancel())
+        return; // User cancellation
+    }
+  }
+}
+
 /** Run the data processing
  * FIXME/TODO - split run() into readable methods
  */
-void ProcessBankData::run() { // override {
+void ProcessBankData::run() {
   // Local tof limits
   double my_shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   double my_longest_tof = 0.;
@@ -69,37 +101,13 @@ void ProcessBankData::run() { // override {
 
   prog->report(entry_name + ": precount");
   // ---- Pre-counting events per pixel ID ----
-  auto &outputWS = m_loader.m_ws;
-  auto *alg = m_loader.alg;
   if (m_loader.precount) {
-
-    std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
-    for (size_t i = 0; i < numEvents; i++) {
-      const auto thisId = detid_t((*event_id)[i]);
-      if (thisId >= m_min_id && thisId <= m_max_id)
-        counts[thisId - m_min_id]++;
-    }
-
-    // Now we pre-allocate (reserve) the vectors of events in each pixel
-    // counted
-    const size_t numEventLists = outputWS.getNumberHistograms();
-    for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
-      if (counts[pixID - m_min_id] > 0) {
-        size_t wi = getWorkspaceIndexFromPixelID(pixID);
-        // Find the workspace index corresponding to that pixel ID
-        // Allocate it
-        if (wi < numEventLists) {
-          outputWS.reserveEventListAt(wi, counts[pixID - m_min_id]);
-        }
-        if (alg->getCancel())
-          return; // User cancellation
-      }
-    }
+    this->preCountAndReserveMem();
+    if (m_loader.alg->getCancel())
+      return; // User cancellation
   }
 
-  // Default pulse time (if none are found)
-  const bool pulsetimesincreasing =
-      std::is_sorted(thisBankPulseTimes->pulseTimes.cbegin(), thisBankPulseTimes->pulseTimes.cend());
+  // this assumes that pulse indices are sorted
   if (!std::is_sorted(event_index->cbegin(), event_index->cend()))
     throw std::runtime_error("Event index is not sorted");
 
@@ -107,19 +115,21 @@ void ProcessBankData::run() { // override {
   const auto NUM_PULSES = thisBankPulseTimes->pulseTimes.size();
   prog->report(entry_name + ": filling events");
 
+  auto *alg = m_loader.alg;
+
   // Will we need to compress?
   const bool compress = (alg->compressTolerance >= 0);
 
   // Which detector IDs were touched?
-  std::vector<bool> usedDetIds;
-  usedDetIds.assign(m_max_id - m_min_id + 1, false);
+  std::vector<bool> usedDetIds(m_max_id - m_min_id + 1, false);
 
   const double TOF_MIN = alg->filter_tof_min;
   const double TOF_MAX = alg->filter_tof_max;
+  const bool NO_TOF_FILTERING = !(alg->filter_tof_range);
 
   for (std::size_t pulseIndex = getPulseIndex(startAt, 0, event_index); pulseIndex < NUM_PULSES; pulseIndex++) {
     // Save the pulse time at this index for creating those events
-    const auto pulsetime = thisBankPulseTimes->pulseTimes[pulseIndex];
+    const auto &pulsetime = thisBankPulseTimes->pulseTimes[pulseIndex];
     const int logPeriodNumber = thisBankPulseTimes->periodNumbers[pulseIndex];
     const int periodIndex = logPeriodNumber - 1;
 
@@ -142,12 +152,12 @@ void ProcessBankData::run() { // override {
     for (std::size_t eventIndex = firstEventIndex; eventIndex < lastEventIndex; ++eventIndex) {
       // We cached a pointer to the vector<tofEvent> -> so retrieve it and add
       // the event
-      const detid_t detId = (*event_id)[eventIndex];
+      const detid_t &detId = (*event_id)[eventIndex];
       if (detId >= m_min_id && detId <= m_max_id) {
         // Create the tofevent
         const auto tof = static_cast<double>((*event_time_of_flight)[eventIndex]);
         // this is fancy for check if value is in range
-        if ((tof - TOF_MIN) * (tof - TOF_MAX) <= 0.) {
+        if ((NO_TOF_FILTERING) || ((tof - TOF_MIN) * (tof - TOF_MAX) <= 0.)) {
           // Handle simulated data if present
           if (have_weight) {
             auto *eventVector = m_loader.weightedEventVectors[periodIndex][detId];
@@ -176,26 +186,32 @@ void ProcessBankData::run() { // override {
             // tof limits from things observed here
             if (tof > my_longest_tof) {
               my_longest_tof = tof;
-            }
-            if (tof < my_shortest_tof) {
+            } else if (tof < my_shortest_tof) {
               my_shortest_tof = tof;
             }
           } else
             badTofs++;
 
           // Track all the touched wi
-          usedDetIds[detId - m_min_id] = true;
+          const auto detidIndex = detId - m_min_id;
+          if (!usedDetIds[detidIndex])
+            usedDetIds[detidIndex] = true;
         } // valid time-of-flight
 
       } // valid detector IDs
     }   // for events in pulse
-    // check if cancelled after each pulse
-    if (alg->getCancel())
+    // check if cancelled after each 100s of pulses (assumes 60Hz)
+    if ((pulseIndex % 6000 == 0) && alg->getCancel())
       return;
   } // for pulses
 
+  // Default pulse time (if none are found)
+  const auto pulseSortingType =
+      thisBankPulseTimes->arePulseTimesIncreasing() ? DataObjects::PULSETIME_SORT : DataObjects::UNSORTED;
+
   //------------ Compress Events (or set sort order) ------------------
   // Do it on all the detector IDs we touched
+  auto &outputWS = m_loader.m_ws;
   const size_t numEventLists = outputWS.getNumberHistograms();
   for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
     if (usedDetIds[pixID - m_min_id]) {
@@ -203,20 +219,17 @@ void ProcessBankData::run() { // override {
       size_t wi = getWorkspaceIndexFromPixelID(pixID);
       if (wi < numEventLists) {
         auto &el = outputWS.getSpectrum(wi);
+        // set the sort order based on what is known
+        el.setSortOrder(pulseSortingType);
+        // compress events if requested
         if (compress)
           el.compressEvents(alg->compressTolerance, &el);
-        else {
-          if (pulsetimesincreasing)
-            el.setSortOrder(DataObjects::PULSETIME_SORT);
-          else
-            el.setSortOrder(DataObjects::UNSORTED);
-        }
       }
     }
   }
   prog->report(entry_name + ": filled events");
 
-  alg->getLogger().debug() << entry_name << (pulsetimesincreasing ? " had " : " DID NOT have ")
+  alg->getLogger().debug() << entry_name << (thisBankPulseTimes->arePulseTimesIncreasing() ? " had " : " DID NOT have ")
                            << "monotonically increasing pulse times\n";
 
   // Join back up the tof limits to the global ones

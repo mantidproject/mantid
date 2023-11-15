@@ -61,6 +61,8 @@ public:
   const std::string category() const override { return "DataHandling\\Instrument"; }
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
+  static std::string retrieveValidInstrumentFilenameExtension(const std::string &filename);
+  static std::vector<std::string> getValidInstrumentFilenameExtensions();
 
 private:
   /// Overwrites Algorithm method.
@@ -69,6 +71,7 @@ private:
   void exec() override;
 
   API::MatrixWorkspace_sptr runLoadInstrument(const std::string &filename, const std::string &instrumentname);
+  API::MatrixWorkspace_sptr runLoadIDFFromNexus(const std::string &filename);
 };
 
 } // namespace DataHandling

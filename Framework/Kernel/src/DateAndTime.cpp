@@ -40,10 +40,10 @@ TimeInterval::TimeInterval(const std::string &from, const std::string &to) {
 }
 
 bool TimeInterval::overlaps(const TimeInterval *other) const {
-  const auto thisBegin = this->start();
-  const auto thisEnd = this->stop();
-  const auto otherBegin = other->start();
-  const auto otherEnd = other->stop();
+  const auto &thisBegin = this->start();
+  const auto &thisEnd = this->stop();
+  const auto &otherBegin = other->start();
+  const auto &otherEnd = other->stop();
 
   return ((otherBegin < thisEnd) && (otherBegin >= thisBegin)) || ((otherEnd < thisEnd) && (otherEnd >= thisBegin)) ||
          ((thisBegin < otherEnd) && (thisBegin >= otherBegin)) || ((thisEnd < otherEnd) && (thisEnd >= otherBegin));

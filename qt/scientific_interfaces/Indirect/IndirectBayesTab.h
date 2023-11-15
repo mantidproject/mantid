@@ -43,7 +43,7 @@ static const unsigned int NUM_DECIMALS = 6;
 /// precision for integer properties in bayes tabs
 static const unsigned int INT_DECIMALS = 0;
 
-class DLLExport IndirectBayesTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL IndirectBayesTab : public IndirectTab {
   Q_OBJECT
 
 public:

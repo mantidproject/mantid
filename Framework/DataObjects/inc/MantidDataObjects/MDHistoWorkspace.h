@@ -335,7 +335,7 @@ public:
    * @param index :: array of indexes, length = number of dimensions
    * @return linear index into m_signals
    */
-  size_t getLinearIndex(size_t *index) const {
+  size_t getLinearIndex(const size_t *index) const {
     size_t nd = this->getNumDims();
     size_t out = index[0];
     for (size_t d = 1; d < nd; d++)

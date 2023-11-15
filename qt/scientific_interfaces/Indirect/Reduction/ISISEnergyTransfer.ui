@@ -432,19 +432,18 @@
       <property name="sizeConstraint">
        <enum>QLayout::SetDefaultConstraint</enum>
       </property>
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="ckDetailedBalance">
-        <property name="text">
-         <string>Detailed Balance</string>
+      <item row="0" column="2">
+       <spacer name="horizontalSpacer_0">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QCheckBox" name="ckScaleMultiplier">
-        <property name="text">
-         <string>Scale by factor:</string>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
         </property>
-       </widget>
+       </spacer>
       </item>
       <item row="0" column="1">
        <widget class="QDoubleSpinBox" name="spDetailedBalance">
@@ -468,19 +467,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <spacer name="horizontalSpacer_0">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
       <item row="0" column="5">
        <widget class="QDoubleSpinBox" name="spScaleMultiplier">
         <property name="enabled">
@@ -497,6 +483,20 @@
         </property>
         <property name="value">
          <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="ckDetailedBalance">
+        <property name="text">
+         <string>Detailed Balance</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QCheckBox" name="ckScaleMultiplier">
+        <property name="text">
+         <string>Scale by factor:</string>
         </property>
        </widget>
       </item>
@@ -1056,6 +1056,19 @@
          </spacer>
         </item>
         <item>
+         <widget class="QCheckBox" name="ckGroupOutput">
+          <property name="text">
+           <string>Group Output Workspace</string>
+          </property>
+          <property name="visible">
+           <bool>false</bool>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QComboBox" name="cbGroupOutput">
           <property name="editable">
            <bool>false</bool>
@@ -1110,7 +1123,7 @@
        </layout>
       </item>
       <item row="1" column="0">
-       <widget class="QFrame" name="frame">
+       <widget class="QFrame" name="fPlottingOptions">
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>

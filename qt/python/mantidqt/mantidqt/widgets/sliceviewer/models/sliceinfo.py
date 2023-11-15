@@ -43,7 +43,8 @@ class SliceInfo:
         transpose: bool,
         range: DimensionRangeCollection,
         qflags: Sequence[bool],
-        axes_angles: Optional[np.ndarray] = None
+        axes_angles: Optional[np.ndarray] = None,
+        proj_matrix=np.eye(3)
     ):
         assert len(point) == len(qflags)
         assert 3 >= sum(1 for i in filter(lambda x: x is True, qflags)), "A maximum of 3 spatial dimensions can be specified"
@@ -52,6 +53,7 @@ class SliceInfo:
         self._slicevalue_z, self._slicewidth_z = (None,) * 2
         self._display_x, self._display_y, self._display_z = (None,) * 3
         self.i_non_q = np.array([idim for idim, qflag in enumerate(qflags) if not qflag])
+        self.proj_matrix = np.asarray(proj_matrix)
 
         # initialise attributes
         self._init_display_indices(transpose, qflags)
@@ -90,6 +92,7 @@ class SliceInfo:
         and Z is the out of place coordinate
         :param point: A 3D point in the slice frame
         """
+        point = np.linalg.inv(self.proj_matrix).dot(point)
         px = point[self.adjust_index_for_preceding_nonq_dims(self._display_x)]
         py = point[self.adjust_index_for_preceding_nonq_dims(self._display_y)]
         pz = point[self.adjust_index_for_preceding_nonq_dims(self._display_z)]
@@ -106,7 +109,7 @@ class SliceInfo:
         data_point[self.adjust_index_for_preceding_nonq_dims(self._display_x)] = x
         data_point[self.adjust_index_for_preceding_nonq_dims(self._display_y)] = y
         data_point[self.adjust_index_for_preceding_nonq_dims(self._display_z)] = point[2]
-        return data_point
+        return self.proj_matrix.dot(data_point)
 
     # private api
     def _init_display_indices(self, transpose: bool, qflags: Sequence[bool]):

@@ -105,7 +105,7 @@ It is also useful to have your terminals in CLion to run with this environment:
 
 #. In your ``home`` directory create a file named ``.clionrc`` and open in your favourite text editor, adding these lines:
 
-   .. code-block::
+   .. code-block:: sh
 
       source ~/.bashrc
       source ~/mambaforge/bin/activate mantid-developer

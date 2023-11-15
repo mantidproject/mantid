@@ -646,7 +646,7 @@ std::vector<SXPeak> FindMaxReduceStrategy::getFinalPeaks(const std::vector<std::
   // For each peak groupf find one peak
   // Currently we select the peak with the largest signal (this strategy could
   // be changed to something like a weighted mean or similar)
-  for (auto &group : peakGroups) {
+  for (const auto &group : peakGroups) {
     SXPeak *maxPeak = nullptr;
     double maxIntensity = std::numeric_limits<double>::min();
     for (auto *element : group) {

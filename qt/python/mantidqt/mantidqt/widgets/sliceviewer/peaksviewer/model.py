@@ -118,8 +118,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         frame_to_slice_fn = self._frame_to_slice_fn(frame)
         peak = self.ws.getPeak(selected_index)
         slicepoint = slice_info.slicepoint
-        iz_peak = slice_info.adjust_index_for_preceding_nonq_dims(slice_info.z_index)
-        slicepoint[slice_info.z_index] = getattr(peak, frame_to_slice_fn)()[iz_peak]
+        slicepoint[slice_info.z_index] = slice_info.transform(getattr(peak, frame_to_slice_fn)())[2]
 
         return slicepoint
 

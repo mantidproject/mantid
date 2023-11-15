@@ -135,7 +135,7 @@ Usage
     MoveInstrumentComponent(
         Workspace='cws',
         ComponentName='moderator',
-        'X'=0, 'Y'=0, 'Z'=dL1,
+        X=0, Y=0, Z=dL1,
         RelativePosition=true,
     )
 
@@ -175,7 +175,7 @@ Usage
     MoveInstrumentComponent(
         Workspace='pws',
         ComponentName='moderator',
-        'X'=0, 'Y'=0, 'Z'=-dL1,
+        X=0, Y=0, Z=-dL1,
         RelativePosition=true,
     )
 

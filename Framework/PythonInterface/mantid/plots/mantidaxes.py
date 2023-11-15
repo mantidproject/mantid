@@ -236,6 +236,10 @@ class MantidAxes(Axes):
                     if artist == ws_artist:
                         return ws_artists.is_normalized
 
+    def get_is_mdhisto_workspace_for_artist(self, artist) -> bool:
+        workspace, _ = self.get_artists_workspace_and_workspace_index(artist)
+        return (workspace is not None) and workspace.isMDHistoWorkspace()
+
     def track_workspace_artist(
         self,
         workspace,
@@ -958,7 +962,7 @@ class MantidAxes(Axes):
                 for col in artist_orig.collections:
                     col.remove()
             if hasattr(artist_orig, "colorbar_cid"):
-                artist_orig.callbacksSM.disconnect(artist_orig.colorbar_cid)
+                artist_orig.callbacks.disconnect(artist_orig.colorbar_cid)
         # If the colormap has been overridden then it needs to be passed in at
         # creation time
         if "colors" not in kwargs:
@@ -1122,7 +1126,7 @@ class MantidAxes(Axes):
         for i in range(len(self.get_lines())):
             datafunctions.convert_single_line_to_waterfall(self, i, x_offset, y_offset)
 
-        if x_offset == 0 and y_offset == 0:
+        if x_offset == 0 and y_offset == 0 and self.is_waterfall():
             self.set_waterfall_fill(False)
             logger.information("x and y offset have been set to zero so the plot is no longer a waterfall plot.")
 
@@ -1136,6 +1140,13 @@ class MantidAxes(Axes):
             self.add_line(cap)
 
         datafunctions.set_waterfall_toolbar_options_enabled(self)
+
+        self.relim()
+        if not self.waterfall_has_fill():
+            # The mpl ax.fill method already makes an autoscale request for us,
+            # so we only need to do this if waterfall_update_fill hasn't been called
+            self.autoscale()
+
         self.get_figure().canvas.draw()
 
     def set_waterfall(self, state, x_offset=None, y_offset=None, fill=False):
@@ -1270,7 +1281,7 @@ class MantidAxes(Axes):
         cb = colorbar
         cb.mappable = mappable
         mappable.colorbar = cb
-        mappable.colorbar_cid = mappable.callbacksSM.connect("changed", cb.update_normal)
+        mappable.colorbar_cid = mappable.callbacks.connect("changed", cb.update_normal)
         cb.update_normal(mappable)
 
     def _remove_matching_curve_from_creation_args(self, workspace_name, workspace_index, spec_num):

@@ -54,7 +54,10 @@ BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
       m_algorithmErrorObserver(*this, &BatchAlgorithmRunner::handleAlgorithmError),
       m_executeAsync(this, &BatchAlgorithmRunner::executeBatchAsyncImpl) {}
 
-BatchAlgorithmRunner::~BatchAlgorithmRunner() { removeAllObservers(); }
+BatchAlgorithmRunner::~BatchAlgorithmRunner() {
+  std::lock_guard<std::recursive_mutex> lock(m_mutex);
+  removeAllObservers();
+}
 
 void BatchAlgorithmRunner::addAllObservers() {
   m_notificationCenter.addObserver(m_batchCompleteObserver);

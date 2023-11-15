@@ -62,7 +62,7 @@ public:
 
   /// Constructor, specifying the time of flight in microseconds and the frame
   /// id
-  TofEvent(double tof, const Core::DateAndTime pulsetime);
+  TofEvent(double tof, const Core::DateAndTime &pulsetime);
 
   /// Empty constructor
   TofEvent();
@@ -83,7 +83,9 @@ public:
 
   double operator()() const;
   double tof() const;
-  Mantid::Types::Core::DateAndTime pulseTime() const;
+  const Mantid::Types::Core::DateAndTime &pulseTime() const;
+  Mantid::Types::Core::DateAndTime pulseTOFTime() const;
+  Mantid::Types::Core::DateAndTime pulseTOFTimeAtSample(const double &factor, const double &shift) const;
   double weight() const;
   double error() const;
   double errorSquared() const;
@@ -102,7 +104,7 @@ inline TofEvent::TofEvent(const double tof) : m_tof(tof), m_pulsetime(0) {}
  * @param tof :: time of flight, in microseconds
  * @param pulsetime :: absolute pulse time of the neutron.
  */
-inline TofEvent::TofEvent(const double tof, const Core::DateAndTime pulsetime) : m_tof(tof), m_pulsetime(pulsetime) {}
+inline TofEvent::TofEvent(const double tof, const Core::DateAndTime &pulsetime) : m_tof(tof), m_pulsetime(pulsetime) {}
 
 /// Empty constructor
 inline TofEvent::TofEvent() : m_tof(0), m_pulsetime(0) {}
@@ -120,7 +122,7 @@ inline double TofEvent::operator()() const { return m_tof; }
 inline double TofEvent::tof() const { return m_tof; }
 
 /// Return the pulse time
-inline Core::DateAndTime TofEvent::pulseTime() const { return m_pulsetime; }
+inline const Core::DateAndTime &TofEvent::pulseTime() const { return m_pulsetime; }
 
 /// Return the weight of the event - exactly 1.0 always
 inline double TofEvent::weight() const { return 1.0; }

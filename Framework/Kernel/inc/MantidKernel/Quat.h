@@ -86,7 +86,7 @@ public:
   // if the mod(quat) is indeed == 1 and throws otherwise.
   std::vector<double> getRotation(bool check_normalisation = false, bool throw_on_errors = false) const;
   //! Convert GL Matrix into Quat
-  void setQuat(double mat[16]);
+  void setQuat(const double mat[16]);
   //! Convert usual 3D rotation matrix into quat; Will throw if matirix is not
   // rotational;
   void setQuat(const Matrix<double> &rMat);

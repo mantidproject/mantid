@@ -228,8 +228,6 @@ def plot(
         legend = ax.get_legend()
         if legend is not None:
             legend.set_visible(show_legend)
-            # Stop legend interfering with the tight layout
-            legend.set_in_layout(False)
 
     # Can't have a waterfall plot with only one line.
     if len(nums) * len(workspaces) == 1 and waterfall:

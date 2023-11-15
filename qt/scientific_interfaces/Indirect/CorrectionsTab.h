@@ -60,7 +60,7 @@ private:
   double m_numberDensity;
 };
 
-class DLLExport CorrectionsTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL CorrectionsTab : public IndirectTab {
   Q_OBJECT
 
 public:

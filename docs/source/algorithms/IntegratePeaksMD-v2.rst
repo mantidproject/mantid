@@ -236,7 +236,7 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
 
 .. .. testoutput:: exIntegratePeaksMD
 
-.. code-block:: python
+.. code-block:: none
    :linenos:
 
 

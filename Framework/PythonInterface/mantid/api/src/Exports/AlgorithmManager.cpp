@@ -36,7 +36,7 @@ AlgorithmManagerImpl &instance() {
     PyRun_SimpleString("import atexit\n"
                        "def cleanupAlgorithmManager():\n"
                        "    from mantid.api import AlgorithmManager\n"
-                       "    AlgorithmManager.clear()\n"
+                       "    AlgorithmManager.shutdown()\n"
                        "atexit.register(cleanupAlgorithmManager)");
   });
   return mgr;
@@ -47,12 +47,24 @@ IAlgorithm_sptr create(AlgorithmManagerImpl *self, const std::string &algName, c
   return self->create(algName, version);
 }
 
+std::shared_ptr<Algorithm> createUnmanaged(AlgorithmManagerImpl *self, const std::string &algName,
+                                           const int &version = -1) {
+  ReleaseGlobalInterpreterLock releaseGIL;
+  return self->createUnmanaged(algName, version);
+}
+
 void clear(AlgorithmManagerImpl *self) {
   /// TODO We should release the GIL here otherwise we risk deadlock (see issue #33895). However, doing so causes
   /// test failures because it exposes an unreleated bug to do with the way we handle shared_ptrs to Python objects
   /// (see #33924). Fixing that is not trivial, so I am reverting this change until it can be resolved properly.
   // ReleaseGlobalInterpreterLock releaseGIL;
   return self->clear();
+}
+
+void shutdown(AlgorithmManagerImpl *self) {
+  // See comment above for clear()
+  // ReleaseGlobalInterpreterLock releaseGIL;
+  return self->shutdown();
 }
 
 void cancelAll(AlgorithmManagerImpl *self) {
@@ -113,7 +125,7 @@ GNU_DIAG_OFF("unused-local-typedef")
 GNU_DIAG_OFF("conversion")
 /// Define overload generators
 BOOST_PYTHON_FUNCTION_OVERLOADS(create_overloads, create, 2, 3)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads, AlgorithmManagerImpl::createUnmanaged, 1, 2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(createUnmanaged_overloads, createUnmanaged, 2, 3)
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
@@ -123,7 +135,7 @@ void export_AlgorithmManager() {
 
   class_<AlgorithmManagerImpl, boost::noncopyable>("AlgorithmManagerImpl", no_init)
       .def("create", &create, create_overloads((arg("name"), arg("version")), "Creates a managed algorithm."))
-      .def("createUnmanaged", &AlgorithmManagerImpl::createUnmanaged,
+      .def("createUnmanaged", &createUnmanaged,
            createUnmanaged_overloads((arg("name"), arg("version")), "Creates an unmanaged algorithm."))
       .def("size", &AlgorithmManagerImpl::size, arg("self"), "Returns the number of managed algorithms")
       .def("getAlgorithm", &getAlgorithm, (arg("self"), arg("id_holder")),
@@ -133,6 +145,7 @@ void export_AlgorithmManager() {
            "Returns a list of managed algorithm instances that are "
            "currently executing")
       .def("clear", &clear, arg("self"), "Clears the current list of managed algorithms")
+      .def("shutdown", &shutdown, arg("self"), "Cancels all running algorithms and waits for them to exit")
       .def("cancelAll", &cancelAll, arg("self"), "Requests that all currently running algorithms be cancelled")
       .def("Instance", instance, return_value_policy<reference_existing_object>(),
            "Return a reference to the singleton instance")

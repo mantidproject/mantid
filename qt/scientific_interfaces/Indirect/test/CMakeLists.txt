@@ -1,33 +1,10 @@
 # Testing
 set(TEST_FILES
-    ConvFitDataPresenterTest.h
-    ConvFitModelTest.h
-    ConvFunctionModelTest.h
-    FqFitDataPresenterTest.h
-    FqFitModelTest.h
-    IDAFunctionParameterEstimationTest.h
     IndirectDataValidationHelperTest.h
-    IndirectFitAnalysisTabTest.h
-    IndirectFitDataPresenterTest.h
-    IndirectFitDataTest.h
-    IndirectFitDataModelTest.h
-    IndirectFitOutputTest.h
-    IndirectFitOutputOptionsModelTest.h
-    IndirectFitOutputOptionsPresenterTest.h
-    IndirectFitPlotModelTest.h
-    IndirectFitPlotPresenterTest.h
-    IndirectFitPropertyBrowserTest.h
-    IndirectFittingModelTest.h
     IndirectPlotOptionsModelTest.h
     IndirectPlotOptionsPresenterTest.h
     IndirectSettingsModelTest.h
     IndirectSettingsPresenterTest.h
-    InelasticDataManipulationElwinTabModelTest.h
-    InelasticDataManipulationIqtTabModelTest.h
-    InelasticDataManipulationMomentsTabModelTest.h
-    InelasticDataManipulationSqwTabModelTest.h
-    InelasticDataManipulationSymmetriseTabModelTest.h
-    IqtFitModelTest.h
     ISISEnergyTransferModelTest.h
     ISISEnergyTransferModelUtilsTest.h
 )

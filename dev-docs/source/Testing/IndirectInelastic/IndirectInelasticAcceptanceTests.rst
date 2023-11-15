@@ -6,6 +6,10 @@ Indirect Inelastic Testing
 .. contents::
    :local:
 
+*Prerequisites*
+
+- Download the `ISIS Sample Data <http://download.mantidproject.org>`_
+
 Data reduction
 --------------
 
@@ -21,7 +25,7 @@ Data reduction
 #. Open ``Interfaces`` > ``Indirect`` > ``Data reduction``
 #. Make sure ``Instrument`` is set to ``IRIS``
 #. Go to the ``ISIS calibration``
-#. Enter ``Run number`` 26173
+#. Enter ``Input Runs`` 26173
 #. Click ``Run``
 #. This should generate a workspace with ``_calib`` at the end, delete this workspace
 #. Change the ``Scale by factor`` value to 0.5
@@ -32,10 +36,10 @@ Data reduction
 #. This should generate a workspace with ``_res`` at the end
 #. In the ``Output`` options, select the ``_res`` workspace and click ``Plot Spectra``. This should produce a spectrum plot.
 #. Then select the ``_calib`` workspace and use the down arrow to click ``Plot Bins``. This should produce a bin plot.
-#. Enter ``Run number`` 55878-55879 and check ``Sum Files``
+#. Enter ``Input Runs`` 55878-55879 and check ``Sum Files``
 #. Click ``Run``, this should produce a ``_calib`` workspace
 #. Make sure that you keep the ``_calib`` workspace, it is needed for the next test
-#. Enter ``Run number`` 59057-59059 and check ``Sum Files``
+#. Enter ``Input Runs`` 59057-59059 and check ``Sum Files``
 #. Set ``Reflection`` to 004
 #. This should produce a new ``_calib`` workspace, with ``004`` in the name.
 #. Before moving on, set ``Reflection`` to 002
@@ -48,7 +52,7 @@ Data reduction
 #. Make sure ``Instrument`` is set to ``IRIS``
 #. Make sure the tab is set to ``ISIS Energy Transfer``
 #. Check the ``Sum Files`` box
-#. In the ``Run files`` box enter ``26184-26185``
+#. In the ``Input Runs`` box enter ``26184-26185``
 #. Click ``Run``
 #. Check the ``Use Calib File`` box
 #. Change ``File`` to ``Workspace`` and choose the ``_calib`` workspace previously created (55878 from the previous test)
@@ -62,7 +66,7 @@ Data reduction
 #. In the main GUI right-click on the ``iris26184_multi_graphite002_red`` workspace
 #. Choose ``Plot spectrum``, note the number of spectra, should be 6
 #. Choose ``Plot All``, this should result in a plot of all 6 spectra
-#. Go to the ``S(Q, W)`` tab
+#. Open ``Interfaces`` > ``Inelastic`` > ``Data Manipulation`` and go to the ``S(Q, W)`` tab
 #. Change ``File`` to ``Workspace`` and load the ``_red`` workspace just created
 #. ``Q-Low`` and ``Q-High`` should be automatically updated to the y axis range of the contour plot.
 #. ``E-Low`` and ``E-High`` should be automatically updated to the x axis range of the contour plot.
@@ -86,7 +90,8 @@ Data analysis Elwin
 
 --------------
 
-#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
+#. Go to the ``Elwin`` tab
 #. Enter ``irs26176_graphite002_red.nxs`` in ``Input file``
 #. Click ``Run`` - this should produce 3 new workspaces ``_elf``, ``_eq`` and ``_eq2``
 #. Now in ``Input file`` choose browse, navigate to the ISIS-Sample data and select the two files above simultaneously, by using shift key
@@ -94,7 +99,7 @@ Data analysis Elwin
 #. Click ``Run``
 #. This should result in three new workspaces again, this time with file ranges as their name
 #. In the main GUI right-click on ``irs26174-26176_graphite002_red_elwin_eq2`` and choose ``Plot Spectrum``, choose ``Plot All``
-#. This should plot two lines of :math:`ln((meV))^{-1}` vs :math:`Q`
+#. This should plot two lines of :math:`ln((meV))^{-1}` vs :math:`Q2`
 #. Right-click on the ``irs26176_graphite002_elwin_eq`` workspace and ``Save Nexus``; save to a location of your choice; you will use this file in the next test
 
 Data analysis MSD
@@ -133,8 +138,8 @@ Data analysis I(Q, T)
 
 --------------
 
-#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
-#. Go to the ``I(Q, T)`` tab
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Manipulation``
+#. Go to the ``Iqt`` tab
 #. Load the ``irs26176_graphite002_red.nxs`` file from the sample data
 #. Load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data
 #. Click ``Run``
@@ -200,7 +205,7 @@ Data analysis Conv Fit
 #. Click ``Run``; the plot should update and new workspaces are created in the main Mantid GUI
 #. Try the various ``Plot`` options in the interface
 
-   (a)  ``Output`` drop-down set to All and click ``Plot`` - should give 4 separate plots
+   (a)  ``Output`` drop-down set to All and click ``Plot`` - should give 5 separate plots
    (b)  ``Plot Current Preview`` - should result in a plot with three datasets
    (c)  Enable the ``Plot Guess`` checkbox - should not change anything, but should not break anything either!
 

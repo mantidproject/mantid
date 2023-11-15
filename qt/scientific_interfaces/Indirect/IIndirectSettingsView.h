@@ -8,18 +8,17 @@
 
 #include "DllConfig.h"
 
-#include <QObject>
 #include <QWidget>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+class IndirectSettingsPresenter;
 
-class MANTIDQT_INDIRECT_DLL IIndirectSettingsView : public QWidget {
-  Q_OBJECT
+class MANTIDQT_INDIRECT_DLL IIndirectSettingsView {
 
 public:
-  IIndirectSettingsView(QWidget *parent = nullptr) : QWidget(parent){};
-  virtual ~IIndirectSettingsView(){};
+  virtual QWidget *getView() = 0;
+  virtual void subscribePresenter(IndirectSettingsPresenter *presenter) = 0;
 
   virtual void setSelectedFacility(QString const &text) = 0;
   virtual QString getSelectedFacility() const = 0;
@@ -34,11 +33,6 @@ public:
   virtual void setApplyEnabled(bool enable) = 0;
   virtual void setOkEnabled(bool enable) = 0;
   virtual void setCancelEnabled(bool enable) = 0;
-
-signals:
-  void okClicked();
-  void applyClicked();
-  void cancelClicked();
 };
 
 } // namespace CustomInterfaces

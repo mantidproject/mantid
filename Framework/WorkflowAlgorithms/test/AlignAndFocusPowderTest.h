@@ -173,10 +173,10 @@ public:
     // Test the output
     // [465] 1942.1284, 2415.9
     TS_ASSERT_DELTA(m_outWS->x(0)[465], 1942.1284, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->y(0)[465], 2415.9, 0.1);
+    TS_ASSERT_DELTA(m_outWS->y(0)[465], 2498, 0.1);
     // [974] 15076.563463: 60043.5
     TS_ASSERT_DELTA(m_outWS->x(0)[974], 15076.563463, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->y(0)[974], 60043.5, 0.1);
+    TS_ASSERT_DELTA(m_outWS->y(0)[974], 59802, 0.1);
     AnalysisDataService::Instance().remove(m_outputWS);
   }
 

@@ -754,14 +754,6 @@ void AlignAndFocusPowder::exec() {
       if (m_processLowResTOF)
         m_lowResW = rebin(m_lowResW);
     } else if (!m_delta_ragged.empty()) {
-      // to speed up RebinRagged later, sort events once here
-      // making RebinRagged faster when preserveEvents=False would be better
-      if (!m_preserveEvents) {
-        doSortEvents(m_outputW);
-        if (m_processLowResTOF)
-          doSortEvents(m_lowResW);
-      }
-
       m_outputW = rebinRagged(m_outputW, true);
       if (m_processLowResTOF)
         m_lowResW = rebinRagged(m_lowResW, true);
@@ -1189,21 +1181,6 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename, const std:
       AnalysisDataService::Instance().addOrReplace(name, m_maskWS);
       this->setPropertyValue(PropertyNames::MASK_WKSP, name);
     }
-  }
-}
-
-//----------------------------------------------------------------------------------------------
-/** Perform SortEvents on the output workspaces
- * but only if they are EventWorkspaces.
- *
- * @param ws :: any Workspace. Does nothing if not EventWorkspace.
- */
-void AlignAndFocusPowder::doSortEvents(const Mantid::API::Workspace_sptr &ws) {
-  if (auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws)) {
-    Algorithm_sptr alg = this->createChildAlgorithm("SortEvents");
-    alg->setProperty("InputWorkspace", eventWS);
-    alg->setPropertyValue("SortBy", "X Value");
-    alg->executeAsChildAlg();
   }
 }
 

@@ -628,7 +628,7 @@ Material::ChemicalFormula Material::parseChemicalFormula(const std::string &chem
   tokenizer tokens(chemicalSymbol, " -", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   for (const auto &atom : tokens) {
     try {
-      std::string name;
+      std::string atomName;
       float numberAtoms = 1;
       uint16_t aNumber = 0;
 
@@ -648,20 +648,20 @@ Material::ChemicalFormula Material::parseChemicalFormula(const std::string &chem
           numberAtoms = boost::lexical_cast<float>(numberAtomsStr);
 
         // split up the atom and isotope number
-        name = atom.substr(1, end - 1);
-        str_pair temp = getAtomName(name);
+        atomName = atom.substr(1, end - 1);
+        str_pair temp = getAtomName(atomName);
 
-        name = temp.first;
+        atomName = temp.first;
         aNumber = boost::lexical_cast<uint16_t>(temp.second);
       } else // for non-isotopes
       {
         str_pair temp = getAtomName(atom);
-        name = temp.first;
+        atomName = temp.first;
         if (!temp.second.empty())
           numberAtoms = boost::lexical_cast<float>(temp.second);
       }
 
-      CF.emplace_back(getAtom(name, aNumber), static_cast<double>(numberAtoms));
+      CF.emplace_back(getAtom(atomName, aNumber), static_cast<double>(numberAtoms));
     } catch (boost::bad_lexical_cast &e) {
       std::stringstream msg;
       msg << "While trying to parse atom \"" << atom << "\" encountered bad_lexical_cast: " << e.what();

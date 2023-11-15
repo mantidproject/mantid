@@ -266,19 +266,19 @@ double UnitCell::errorvolume() const {
   double V = volume();
   double delta_V_alphaV = 0.0;
   if (erroralpha() > 0.0) {
-    double alpha1 = alpha() - 0.5 * erroralpha();
-    double Va1 = UnitCell(a(), b(), c(), alpha1, beta(), gamma()).volume();
-    double alpha2 = alpha() + 0.5 * erroralpha();
-    double Va2 = UnitCell(a(), b(), c(), alpha2, beta(), gamma()).volume();
+    double alphaMinus = alpha() - 0.5 * erroralpha();
+    double Va1 = UnitCell(a(), b(), c(), alphaMinus, beta(), gamma()).volume();
+    double alphaPlus = alpha() + 0.5 * erroralpha();
+    double Va2 = UnitCell(a(), b(), c(), alphaPlus, beta(), gamma()).volume();
     delta_V_alphaV = (Va2 - Va1) / V;
   }
 
   double delta_V_betaV = 0.0;
   if (errorbeta() > 0.0) {
-    double beta1 = beta() - 0.5 * errorbeta();
-    double Va1 = UnitCell(a(), b(), c(), alpha(), beta1, gamma()).volume();
-    double beta2 = beta() + 0.5 * errorbeta();
-    double Va2 = UnitCell(a(), b(), c(), alpha(), beta2, gamma()).volume();
+    double betaMinus = beta() - 0.5 * errorbeta();
+    double Va1 = UnitCell(a(), b(), c(), alpha(), betaMinus, gamma()).volume();
+    double betaPlus = beta() + 0.5 * errorbeta();
+    double Va2 = UnitCell(a(), b(), c(), alpha(), betaPlus, gamma()).volume();
     delta_V_betaV = (Va2 - Va1) / V;
   }
 

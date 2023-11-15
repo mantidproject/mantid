@@ -23,28 +23,22 @@ namespace Kernel {
 namespace {
 /// static Logger definition
 Logger g_log("TimeSeriesProperty");
-} // namespace
 
-namespace {
-//----------------------------------------------------------------------------------------------
-/** Convert time range boundaries to vector index boundaries
- * @param elems :: vector of time series data
- * @param range_left :: time range left boundary
- * @param range_right :: time range right boundary
- * @param left_index :: (output) left index boundary
- * @param right_index :: (output) right index boundary
+/**
+ * Check if all values in the input time vector are the same.
+ * This assumes there are at least two values.
+ * @param values :: a vector of time values.
+ * @return :: false if there is at least one non-match, true otherwise.
  */
-template <typename TYPE>
-void timeRangeToIndexBounds(std::vector<TimeValueUnit<TYPE>> &elems, const DateAndTime &left, const DateAndTime right,
-                            std::size_t &left_index, std::size_t &right_index) {
-  const auto left_iter = std::lower_bound(elems.cbegin() + left_index, elems.cend(), left,
-                                          [](const auto &left, const auto &right) { return left.time() < right; });
-  const auto right_iter = std::upper_bound(left_iter, elems.cend(), right,
-                                           [](const auto &left, const auto &right) { return left < right.time(); });
-
-  left_index = std::distance(elems.cbegin(), left_iter);
-  right_index = std::distance(elems.cbegin(), right_iter);
-  right_index = std::min(right_index, elems.size() - 1);
+template <typename TYPE> bool allValuesAreSame(const std::vector<TimeValueUnit<TYPE>> &values) {
+  const std::size_t num_values = values.size();
+  assert(num_values > 1);
+  const auto &first_value = values.front().value();
+  for (std::size_t i = 1; i < num_values; ++i) {
+    if (first_value != values[i].value())
+      return false;
+  }
+  return true;
 }
 } // namespace
 
@@ -90,14 +84,18 @@ TimeSeriesProperty<TYPE>::TimeSeriesProperty(const Property *const p)
 
 /**
  * Create a partial copy of this object according to a TimeROI. The partially cloned object
- * should include all time values enclosed by the ROI regions, each defined as [roi_start,roi_end),
+ * should include all time values enclosed by the ROI regions, each defined as [roi_begin,roi_end],
  * plus the values immediately before and after an ROI region, if available.
- * @param timeROI :: a series of time regions used to determine which values should be included in the copy.
+ * @param timeROI :: time region of interest, i.e. time boundaries used to determine which values should be included in
+ * the copy.
  */
 template <typename TYPE> Property *TimeSeriesProperty<TYPE>::cloneInTimeROI(const TimeROI &timeROI) const {
   auto filteredTS = new TimeSeriesProperty<TYPE>(this);
+
   createFilteredData(timeROI, filteredTS->m_values);
+
   filteredTS->m_size = static_cast<int>(filteredTS->m_values.size());
+
   return filteredTS;
 }
 
@@ -280,10 +278,10 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::setName(const std::strin
 
 /**
  * Fill in the supplied vector of time series data according to the input TimeROI. Include all time values
- * within ROI regions defined as [roi_start,roi_end), plus the values immediately before and after an ROI region,
+ * within ROI regions, defined as [roi_begin,roi_end], plus the values immediately before and after each ROI region,
  * if available.
- * @param timeROI :: a series of time regions used to determine which values should be included in the filtered data
- * vector
+ * @param timeROI :: time region of interest, i.e. time boundaries used to determine which values should be included in
+ * the filtered data vector
  * @param filteredData :: (output) a vector of TimeValueUnit pairs to be filled in
  */
 template <typename TYPE>
@@ -291,58 +289,103 @@ void TimeSeriesProperty<TYPE>::createFilteredData(const TimeROI &timeROI,
                                                   std::vector<TimeValueUnit<TYPE>> &filteredData) const {
   filteredData.clear();
 
-  // these special cases can skip the complicated logic
+  // Expediently treat a few special cases
+
+  // Nothing to copy
   if (m_values.empty()) {
-    // nothing to copy
     return;
-  } else if (m_values.size() == 1) {
-    // copy everything
-    filteredData.push_back(m_values.front());
-    return;
-  } else if (timeROI.useAll()) {
-    // copy everything
-    std::copy(m_values.cbegin(), m_values.cend(), std::back_inserter(filteredData));
-    return;
-  } else if (timeROI.useNone()) {
-    // copy the first value only
+  }
+
+  // Copy the only value
+  if (m_values.size() == 1) {
     filteredData.push_back(m_values.front());
     return;
   }
 
-  std::size_t lastIndexCopied{0};
-  for (const auto &splitter : timeROI.toTimeIntervals()) {
-    // convert ROI time interval to indexes wrt m_values
-    std::size_t index_start{lastIndexCopied};
-    std::size_t index_stop{0};
-    timeRangeToIndexBounds(m_values, splitter.start(), splitter.stop(), index_start, index_stop);
+  // Copy the first value only, if all values are the same
+  // Exclude "proton_charge" logs from consideration, because in a real measurement those values can't be the same,
+  // Removing some of them just because they are equal will cause wrong total proton charge results.
+  if (allValuesAreSame(m_values) && this->name() != "proton_charge") {
+    filteredData.push_back(m_values.front());
+    return;
+  }
 
-    // by design, we need to keep the last datapoint before a use region and the first datapoint after a use region, if
-    // any of those datapoints are available. Since the index interval for the use region is obtained using
-    // std::lower_bound() and std::upper_bound(), index_stop must already be correct, as long as we treat it
-    // inclusively, but index_start needs to be adjusted if possible.
-    if (index_start > 0)
-      index_start--;
+  // Copy everything
+  if (timeROI.useAll()) {
+    std::copy(m_values.cbegin(), m_values.cend(), std::back_inserter(filteredData));
+    return;
+  }
 
-    // handle potential overlaps between successive index intervals, so we don't copy the same datapoints twice
+  // Copy the first value only
+  if (timeROI.useNone()) {
+    filteredData.push_back(m_values.front());
+    return;
+  }
+
+  // Now treat the general case
+
+  // Get all ROI time boundaries. Every other value is start/stop of an ROI "use" region.
+  const std::vector<Types::Core::DateAndTime> &roiTimes = timeROI.getAllTimes();
+  auto itROI = roiTimes.cbegin();
+  const auto itROIEnd = roiTimes.cend();
+
+  auto itValue = m_values.cbegin();
+  const auto itValueEnd = m_values.cend();
+  auto itLastValueUsed = itValue; // last value used up to the moment
+
+  while (itROI != itROIEnd && itValue != itValueEnd) {
+    // Try fast-forwarding the current ROI "use" region towards the current time value. Note, the current value might
+    // be in an ROI "ignore" region together with one or more following values.
+    while (std::distance(itROI, itROIEnd) > 2 && *(std::next(itROI, 2)) <= itValue->time())
+      std::advance(itROI, 2);
+    // Try finding the first value equal or past the beginning of the current ROI "use" region.
+    itValue = std::lower_bound(itValue, itValueEnd, *itROI,
+                               [](const auto &value, const auto &roi_time) { return value.time() < roi_time; });
+    // Calculate a [begin,end) range for the values to use
+    auto itBeginUseValue = itValue;
+    auto itEndUseValue = itValue;
+    // If there are no values past the current ROI "use" region, get the previous value
+    if (itValue == itValueEnd) {
+      itBeginUseValue =
+          std::prev(itValue); // std::prev is safe here, because "m_values is empty" case has already been treated above
+      itEndUseValue = itValueEnd;
+    }
+    // If the value is inside the current ROI "use" region, look for other values in the same ROI "use" region
+    else if (itValue->time() <= *(std::next(itROI))) {
+      // First, try including a value immediately preceding the first value in the ROI "use" region.
+      itBeginUseValue = itValue == m_values.begin() ? itValue : std::prev(itValue);
+      // Now try finding the first value past the end of the current ROI "use" region.
+      while (itValue != itValueEnd && itValue->time() <= *(std::next(itROI)))
+        itValue++;
+      // Include the current value, therefore, advance itEndUseValue, because std::copy works as [begin,end).
+      itEndUseValue = itValue == itValueEnd ? itValue : std::next(itValue);
+    }
+    // If we are at the last ROI "use" region or the value is not past the beginning of the next ROI "use" region, keep
+    // it for the current ROI "use" region.
+    else if (std::distance(itROI, itROIEnd) == 2 ||
+             (std::distance(itROI, itROIEnd) > 2 && itValue->time() < *(std::next(itROI, 2)))) {
+      // Try including the value immediately preceding the current value
+      itBeginUseValue = itValue == m_values.begin() ? itValue : std::prev(itValue);
+      itEndUseValue = std::next(itValue);
+    }
+    // Do not use a value already copied for the previous ROI
     if (!filteredData.empty()) {
-      index_start = std::max(index_start, lastIndexCopied + 1);
-      if (index_start > index_stop)
-        continue;
+      itBeginUseValue = std::max(itBeginUseValue, std::next(itLastValueUsed));
     }
 
-    // copy datapoints within the ROI index interval
-    if (index_stop + 1 == m_values.size()) {
-      std::copy(m_values.cbegin() + index_start, m_values.cend(), std::back_inserter(filteredData));
-    } else {
-      std::copy(m_values.cbegin() + index_start, m_values.cbegin() + index_stop + 1, std::back_inserter(filteredData));
+    // Copy all [begin,end) values and mark the last value copied
+    if (itBeginUseValue < itEndUseValue) {
+      std::copy(itBeginUseValue, itEndUseValue, std::back_inserter(filteredData));
+      itLastValueUsed = std::prev(itEndUseValue);
     }
 
-    lastIndexCopied = index_stop;
+    // Move to the next ROI "use" region
+    std::advance(itROI, 2);
   }
 }
 
 /**
- * Remove time values outside of TimeROI regions each defined as [roi_start,roi_stop).
+ * Remove time values outside of TimeROI regions each defined as [roi_begin,roi_end].
  * However, keep the values immediately before and after each ROI region, if available.
  * @param timeROI :: a series of time regions used to determine which values to remove or to keep
  */
@@ -425,7 +468,7 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(std::vector<SplittingInterval> 
   DateAndTime start, stop;
 
   for (size_t i = 0; i < m_values.size(); ++i) {
-    const DateAndTime lastTime = t;
+    const DateAndTime lastGoodTime = t;
     // The new entry
     t = m_values[i].time();
     TYPE val = m_values[i].value();
@@ -446,7 +489,7 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(std::vector<SplittingInterval> 
         // End of the good section. Add tolerance to the LAST GOOD time if
         // boundaries are centred.
         // Otherwise, use the first 'bad' time.
-        stop = centre ? lastTime + tol : t;
+        stop = centre ? lastGoodTime + tol : t;
         split.emplace_back(start, stop, 0);
         // Reset the number of good ones, for next time
         numgood = 0;
@@ -721,18 +764,18 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(const std::vector<TimeInte
 
     // Get the log value and index at the start time of the filter
     int index;
-    double value = static_cast<double>(getSingleValue(time.start(), index));
+    double currentValue = static_cast<double>(getSingleValue(time.start(), index));
     DateAndTime startTime = time.start();
 
     while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
       ++index;
-      numerator += DateAndTime::secondsFromDuration(m_values[index].time() - startTime) * value;
+      numerator += DateAndTime::secondsFromDuration(m_values[index].time() - startTime) * currentValue;
       startTime = m_values[index].time();
-      value = static_cast<double>(m_values[index].value());
+      currentValue = static_cast<double>(m_values[index].value());
     }
 
     // Now close off with the end of the current filter range
-    numerator += DateAndTime::secondsFromDuration(time.stop() - startTime) * value;
+    numerator += DateAndTime::secondsFromDuration(time.stop() - startTime) * currentValue;
   }
 
   if (totalTime > 0) {
@@ -768,7 +811,7 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<TimeInterva
   auto real_size = realSize();
   for (const auto &time : intervals) {
     int index;
-    auto value = static_cast<double>(getSingleValue(time.start(), index));
+    auto currentValue = static_cast<double>(getSingleValue(time.start(), index));
     DateAndTime startTime = time.start();
     while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
       index++;
@@ -782,10 +825,10 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<TimeInterva
       if (duration > 0.) {
         weighted_sum += duration;
 
-        mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
-        s += duration * (value - mean_prev) * (value - mean_current);
+        mean_current = mean_prev + (duration / weighted_sum) * (currentValue - mean_prev);
+        s += duration * (currentValue - mean_prev) * (currentValue - mean_current);
       }
-      value = static_cast<double>(m_values[index].value());
+      currentValue = static_cast<double>(m_values[index].value());
     }
 
     // Now close off with the end of the current filter range
@@ -794,8 +837,8 @@ TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(const std::vector<TimeInterva
       weighted_sum += duration;
       mean_prev = mean_current;
 
-      mean_current = mean_prev + (duration / weighted_sum) * (value - mean_prev);
-      s += duration * (value - mean_prev) * (value - mean_current);
+      mean_current = mean_prev + (duration / weighted_sum) * (currentValue - mean_prev);
+      s += duration * (currentValue - mean_prev) * (currentValue - mean_current);
     }
   }
   variance = s / weighted_sum;
@@ -1214,10 +1257,10 @@ template <typename TYPE> double TimeSeriesProperty<TYPE>::durationInSeconds(cons
     return std::numeric_limits<double>::quiet_NaN();
   if (roi && !roi->useAll()) {
     Kernel::TimeROI seriesSpan(*roi);
-    const auto firstTime = this->firstTime();
+    const auto thisFirstTime = this->firstTime();
     // remove everything before the start time
-    if (firstTime > DateAndTime::GPS_EPOCH) {
-      seriesSpan.addMask(DateAndTime::GPS_EPOCH, firstTime);
+    if (thisFirstTime > DateAndTime::GPS_EPOCH) {
+      seriesSpan.addMask(DateAndTime::GPS_EPOCH, thisFirstTime);
     }
     return seriesSpan.durationInSeconds();
   } else {
@@ -1377,9 +1420,9 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::clear() {
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::clearOutdated() {
   if (realSize() > 1) {
-    auto lastValue = m_values.back();
+    auto lastValueInVec = m_values.back();
     clear();
-    m_values.emplace_back(lastValue);
+    m_values.emplace_back(lastValueInVec);
     m_size = 1;
   }
 }
@@ -1479,13 +1522,13 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::getSingleValue(const Typ
   sortIfNecessary();
 
   // 2.
-  TYPE value;
+  TYPE valueAtTime;
   if (t < m_values[0].time()) {
     // 1. Out side of lower bound
-    value = m_values[0].value();
+    valueAtTime = m_values[0].value();
   } else if (t >= m_values.back().time()) {
     // 2. Out side of upper bound
-    value = m_values.back().value();
+    valueAtTime = m_values.back().value();
   } else {
     // 3. Within boundary
     int index = this->findIndex(t);
@@ -1503,10 +1546,10 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::getSingleValue(const Typ
       throw std::logic_error(errss.str());
     }
 
-    value = m_values[static_cast<size_t>(index)].value();
+    valueAtTime = m_values[static_cast<size_t>(index)].value();
   }
 
-  return value;
+  return valueAtTime;
 } // END-DEF getSinglevalue()
 
 /** Returns the value at a particular time
@@ -1526,14 +1569,14 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const Types::Core::DateAndTime &t,
   sortIfNecessary();
 
   // 2.
-  TYPE value;
+  TYPE valueAtTime;
   if (t < m_values[0].time()) {
     // 1. Out side of lower bound
-    value = m_values[0].value();
+    valueAtTime = m_values[0].value();
     index = 0;
   } else if (t >= m_values.back().time()) {
     // 2. Out side of upper bound
-    value = m_values.back().value();
+    valueAtTime = m_values.back().value();
     index = int(m_values.size()) - 1;
   } else {
     // 3. Within boundary
@@ -1552,10 +1595,10 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const Types::Core::DateAndTime &t,
       throw std::logic_error(errss.str());
     }
 
-    value = m_values[static_cast<size_t>(index)].value();
+    valueAtTime = m_values[static_cast<size_t>(index)].value();
   }
 
-  return value;
+  return valueAtTime;
 } // END-DEF getSinglevalue()
 
 /** Returns n-th valid time interval, in a very inefficient way.
@@ -1640,18 +1683,18 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
   // 2. Sort and apply filter
   sortIfNecessary();
 
-  TYPE value;
+  TYPE nthValue;
 
   // 3. Situation 1:  No filter
   if (static_cast<size_t>(n) < m_values.size()) {
     const auto entry = m_values[static_cast<std::size_t>(n)];
-    value = entry.value();
+    nthValue = entry.value();
   } else {
     const auto entry = m_values[static_cast<std::size_t>(m_size) - 1];
-    value = entry.value();
+    nthValue = entry.value();
   }
 
-  return value;
+  return nthValue;
 }
 
 /** Returns n-th time, or the last time if fewer than n entries.
@@ -1814,7 +1857,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
   sortIfNecessary();
 
   // cache the original size so the number removed can be reported
-  const auto origSize = this->size();
+  const auto origSize{m_size};
 
   // remove the first n-repeats
   // taken from
@@ -1827,7 +1870,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
   countSize();
 
   // log how many values were removed
-  const auto numremoved = origSize - this->size();
+  const auto numremoved = origSize - m_size;
   if (numremoved > 0)
     g_log.notice() << "Log \"" << this->name() << "\" has " << numremoved << " entries removed due to duplicated time. "
                    << "\n";
@@ -2028,11 +2071,11 @@ template <> void TimeSeriesProperty<bool>::saveProperty(::NeXus::File *file) {
 }
 
 template <typename TYPE> void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
-  auto value = this->valuesAsVector();
-  if (value.empty())
+  auto values = this->valuesAsVector();
+  if (values.empty())
     return;
   file->makeGroup(this->name(), "NXlog", 1);
-  file->writeData("value", value);
+  file->writeData("value", values);
   file->openData("value");
   file->putAttr("units", this->units());
   file->closeData();

@@ -52,6 +52,21 @@ class ToolBarTest(unittest.TestCase):
         self.assertTrue(self._is_button_enabled(fig, "waterfall_fill_area"))
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_line_color_selection_buttons_correctly_enabled_for_contour_wireframe_plots(self, mock_qappthread):
+        """Checks that line_colour selection button is correctly enabled for wireframe and contour plots"""
+        mock_qappthread.return_value = mock_qappthread
+
+        plot_types = ["wireframe", "contour"]
+        for plot_type in plot_types:
+            ws = CreateSampleWorkspace()
+            plot_function = getattr(functions, f"plot_{plot_type}", None)
+            self.assertIsNotNone(plot_function)
+            fig = plot_function([ws])
+
+            # line_colour button should be enabled for contour and wireframe plots
+            self.assertTrue(self._is_button_enabled(fig, "line_colour"))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_button_unchecked_for_plot_with_no_grid(self, mock_qappthread):
         mock_qappthread.return_value = mock_qappthread
 

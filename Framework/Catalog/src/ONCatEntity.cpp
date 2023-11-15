@@ -46,15 +46,15 @@ ONCatEntity ONCatEntity::fromJSONStream(std::istream &streamContent) {
     throw MalformedRepresentationError(je.what());
   }
 
-  const auto id = content->get("id", "").asString();
-  const auto type = content->get("type", "").asString();
+  const auto idStr = content->get("id", "").asString();
+  const auto typeStr = content->get("type", "").asString();
 
-  if (id == "" || type == "") {
+  if (idStr == "" || typeStr == "") {
     throw MalformedRepresentationError("Expected \"id\" and \"type\" attributes from ONCat API, but these "
                                        "were not found.");
   }
 
-  return ONCatEntity(id, type, std::move(content));
+  return ONCatEntity(idStr, typeStr, std::move(content));
 }
 
 std::vector<ONCatEntity> ONCatEntity::vectorFromJSONStream(std::istream &streamContent) {
@@ -73,15 +73,15 @@ std::vector<ONCatEntity> ONCatEntity::vectorFromJSONStream(std::istream &streamC
   std::vector<ONCatEntity> entities;
 
   for (const auto &subContent : *content) {
-    const auto id = subContent.get("id", "").asString();
-    const auto type = subContent.get("type", "").asString();
+    const auto idStr = subContent.get("id", "").asString();
+    const auto typeStr = subContent.get("type", "").asString();
 
-    if (id == "" || type == "") {
+    if (idStr == "" || typeStr == "") {
       throw MalformedRepresentationError("Expected \"id\" and \"type\" attributes from ONCat API, but these "
                                          "were not found.");
     }
 
-    entities.emplace_back(ONCatEntity(id, type, std::make_unique<Content>(subContent)));
+    entities.emplace_back(ONCatEntity(idStr, typeStr, std::make_unique<Content>(subContent)));
   }
 
   return entities;

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.simpleapi import Load, DeleteWorkspace, CreateWorkspace, CompareWorkspaces, GroupWorkspaces
+from mantid.simpleapi import Load, CreateWorkspace, CompareWorkspaces, GroupWorkspaces
 import numpy as np
 from mantid import AnalysisDataService
 from mantid.utils.pip import package_installed
@@ -34,19 +34,22 @@ if package_installed("quickBayes"):
         Going to test each method in isolation.
         """
 
+        @classmethod
+        def setUpClass(cls):
+            cls._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace=RES_NAME)
+            cls._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace=SAMPLE_NAME)
+            cls._N_hist = 1
+
         def setUp(self):
-            self._res_ws = Load(Filename="irs26173_graphite002_res.nxs", OutputWorkspace=RES_NAME)
-            self._sample_ws = Load(Filename="irs26176_graphite002_red.nxs", OutputWorkspace=SAMPLE_NAME)
             self._alg = BayesStretch2()
             self._alg.initialize()
-            self._N_hist = 1
 
-        def tearDown(self):
+        @classmethod
+        def tearDownClass(cls):
             """
             Remove workspaces from ADS.
             """
-            DeleteWorkspace(self._sample_ws)
-            DeleteWorkspace(self._res_ws)
+            AnalysisDataService.clear()
 
         def assert_mock_called_with(self, mock_object, N_calls, call_number, **kargs):
             self.assertEqual(N_calls, mock_object.call_count)
@@ -89,7 +92,6 @@ if package_installed("quickBayes"):
                 unit = axis.getUnit()
                 self.assertEqual(unit.caption(), label[i])
                 np.testing.assert_equal(axis.extractValues(), axis_values[i])
-            DeleteWorkspace(ws)
 
         def test_make_slice_ws(self):
             x = np.linspace(0.8, 1.0, 3)
@@ -116,7 +118,6 @@ if package_installed("quickBayes"):
                 unit = axis.getUnit()
                 self.assertEqual(unit.caption(), label[i])
                 np.testing.assert_equal(axis.extractValues(), axis_values[i])
-            DeleteWorkspace(ws)
 
         def test_make_results(self):
             def slice(slice_list, x_data, x_unit, name):
@@ -134,7 +135,7 @@ if package_installed("quickBayes"):
             x_data = [9]
 
             self._alg.make_results(beta_list, FWHM_list, x_data, "MomentumTransfer", "test")
-            self._alg.group_ws.assert_called_once_with([beta_list, FWHM_list], "test")
+            self._alg.group_ws.assert_called_once_with(["test_Stretch_Beta", "test_Stretch_FWHM"], "test")
 
             self.assert_mock_called_with(
                 self._alg.make_slice_ws,
@@ -154,9 +155,7 @@ if package_installed("quickBayes"):
                 x_unit="FWHM",
                 name="test_Stretch_FWHM",
             )
-            self.assert_mock_called_with(
-                self._alg.set_label, N_calls=2, call_number=2, ws_str="test_Stretch_Beta", label="beta", unit="MomentumTransfer"
-            )
+            self.assert_mock_called_with(self._alg.set_label, N_calls=2, call_number=2, ws_str="test_Stretch_Beta", label="beta", unit="")
             self.assert_mock_called_with(self._alg.set_label, N_calls=2, call_number=1, ws_str="test_Stretch_FWHM", label="FWHM", unit="eV")
 
         def test_do_one_spec(self):

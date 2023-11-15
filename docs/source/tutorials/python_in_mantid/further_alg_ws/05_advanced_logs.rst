@@ -40,7 +40,7 @@ It can be useful to access different properties from the Sample Logs, or add to 
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
     ### Original Sample Logs ###
     Number of Entries: 2
@@ -125,7 +125,7 @@ out as it occurred before the status log was set to RUNNING. For more informatio
 
 Output:
 
-.. code-block:: python
+.. code-block:: none
 
     Dictionary of Invalid Logs: {'cryo_temp1': 1, 'cryo_temp2': -1}
     Invalid Log 1: cryo_temp1

@@ -103,7 +103,7 @@ public:
    * */
   inline void addEventQuickly(const Types::Event::TofEvent &event) {
     this->events.emplace_back(event);
-    this->order = UNSORTED;
+    this->setSortOrder(UNSORTED);
   }
 
   // --------------------------------------------------------------------------
@@ -113,7 +113,7 @@ public:
    * */
   inline void addEventQuickly(const WeightedEvent &event) {
     this->weightedEvents.emplace_back(event);
-    this->order = UNSORTED;
+    this->setSortOrder(UNSORTED);
   }
 
   // --------------------------------------------------------------------------
@@ -123,7 +123,7 @@ public:
    * */
   inline void addEventQuickly(const WeightedEventNoTime &event) {
     this->weightedEventsNoTime.emplace_back(event);
-    this->order = UNSORTED;
+    this->setSortOrder(UNSORTED);
   }
 
   Mantid::API::EventType getEventType() const override;
@@ -205,6 +205,8 @@ public:
                          EventList *destination);
   // get EventType declaration
   void generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E, bool skipError = false) const override;
+  void generateHistogram(const double step, const MantidVec &X, MantidVec &Y, MantidVec &E,
+                         bool skipError = false) const;
   void generateHistogramPulseTime(const MantidVec &X, MantidVec &Y, MantidVec &E,
                                   bool skipError = false) const override;
 
@@ -352,6 +354,13 @@ private:
                                                                      const double &tofOffset) const;
 
   void generateCountsHistogram(const MantidVec &X, MantidVec &Y) const;
+  void generateCountsHistogram(const double step, const MantidVec &X, MantidVec &Y) const;
+
+  static boost::optional<size_t> findLinearBin(const MantidVec &X, const double tof, const double divisor,
+                                               const double offset);
+  static boost::optional<size_t> findLogBin(const MantidVec &X, const double tof, const double divisor,
+                                            const double offset);
+  static boost::optional<size_t> findExactBin(const MantidVec &X, const double tof, size_t n_bin);
 
   void generateCountsHistogramPulseTime(const MantidVec &X, MantidVec &Y) const;
 
@@ -378,6 +387,9 @@ private:
 
   template <class T>
   static void histogramForWeightsHelper(const std::vector<T> &events, const MantidVec &X, MantidVec &Y, MantidVec &E);
+  template <class T>
+  static void histogramForWeightsHelper(const std::vector<T> &events, const double step, const MantidVec &X,
+                                        MantidVec &Y, MantidVec &E);
   template <class T>
   static void integrateHelper(std::vector<T> &events, const double minX, const double maxX, const bool entireRange,
                               double &sum, double &error);

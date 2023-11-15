@@ -13,7 +13,7 @@ import os
 import traceback
 from mantidqt.gui_helper import get_qapplication
 from qtpy.QtWidgets import QAction, QDialog, QFileDialog, QMainWindow, QMessageBox
-from qtpy.QtCore import QFile, QFileInfo, QSettings
+from qtpy.QtCore import QCoreApplication, QFile, QFileInfo, QSettings
 from mantid.kernel import Logger
 
 # Check whether Mantid is available
@@ -65,7 +65,7 @@ class ReductionGUI(QMainWindow):
             QMessageBox.warning(self, "WARNING", message)
 
         # Application settings
-        settings = QSettings()
+        settings = QSettings(QCoreApplication.organizationName(), QCoreApplication.applicationName())
 
         # Name handle for the instrument
         if instrument is None:

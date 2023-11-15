@@ -20,6 +20,7 @@ For all other information, see :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowd
 
 In broad terms, the following pseudo-code describes the general concept of this algorithm:
 
+.. rstcheck: ignore-next-code-block
 .. code-block:: python
 
    for filename in filenames:

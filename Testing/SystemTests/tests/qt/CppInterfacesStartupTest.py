@@ -5,10 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
+from itertools import chain
 
 from mantidqt.interfacemanager import InterfaceManager
-from mantidqt.usersubwindowfactory import UserSubWindowFactory
 from mantidqt.utils.qt.testing import get_application
+from workbench.utils.gather_interfaces import gather_cpp_interface_names
 
 from qtpy.QtCore import Qt
 
@@ -28,7 +29,7 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
 
         self._app = get_application()
         self._interface_manager = InterfaceManager()
-        self._cpp_interface_names = UserSubWindowFactory.Instance().keys()
+        self._cpp_interface_names = set(chain.from_iterable(gather_cpp_interface_names().values()))
 
     def runTest(self):
         if len(self._cpp_interface_names) == 0:

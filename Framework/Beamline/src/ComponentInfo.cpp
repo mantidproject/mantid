@@ -641,7 +641,7 @@ void ComponentInfo::merge(const ComponentInfo &other) {
 
 std::vector<bool> ComponentInfo::buildMergeIndices(const ComponentInfo &other) const {
   checkSizes(other);
-  std::vector<bool> merge(other.m_scanIntervals.size(), true);
+  std::vector<bool> mergeIndices(other.m_scanIntervals.size(), true);
   for (size_t t1 = 0; t1 < other.m_scanIntervals.size(); ++t1) {
     for (size_t t2 = 0; t2 < m_scanIntervals.size(); ++t2) {
       const auto interval1 = other.m_scanIntervals[t1];
@@ -651,13 +651,13 @@ std::vector<bool> ComponentInfo::buildMergeIndices(const ComponentInfo &other) c
           checkIdenticalIntervals(other, std::pair<size_t, size_t>(compIndex, t1),
                                   std::pair<size_t, size_t>(compIndex, t2));
         }
-        merge[t1] = false;
+        mergeIndices[t1] = false;
       } else if ((interval1.first < interval2.second) && (interval1.second > interval2.first)) {
         failMerge("scan intervals overlap but not identical");
       }
     }
   }
-  return merge;
+  return mergeIndices;
 }
 
 void ComponentInfo::checkSizes(const ComponentInfo &other) const {

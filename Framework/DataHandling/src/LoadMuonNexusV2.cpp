@@ -295,7 +295,7 @@ void LoadMuonNexusV2::loadPeriodInfo(Workspace &workspace) {
   auto requested = m_nexusLoader->getPeriodFramesRequested(numberOfPeriods);
   auto rawFrames = m_nexusLoader->getPeriodRawFrames(numberOfPeriods);
   auto output = m_nexusLoader->getPeriodOutput(numberOfPeriods);
-  auto counts = m_nexusLoader->getPeriodTotalCounts(numberOfPeriods);
+  auto counts = m_nexusLoader->getPeriodTotalCounts();
   // put values into workspaces
   auto workspaceGroup = dynamic_cast<WorkspaceGroup *>(&workspace);
   if (workspaceGroup) {

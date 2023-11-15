@@ -16,7 +16,7 @@ For example
 
 produces
 
-.. code-block:: python
+.. code-block:: none
 
     Help on function Rebin in module mantid.simpleapi:
 

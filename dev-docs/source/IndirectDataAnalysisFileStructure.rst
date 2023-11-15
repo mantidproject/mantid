@@ -13,7 +13,7 @@ Fit Tab structure
 =================
 
 The QENS fit tabs in Inelastic Data analysis have this general structure. Different tabs will feature different derived
-classes for the IndirectFitAnalysisTab, FitDataView, FunctionTemplateBrowser, and the AddWorkspaceDialog
+classes for the IndirectDataAnalysisTab, FitDataView, FunctionTemplateBrowser, and the AddWorkspaceDialog
 
 .. figure::  images/QENS/IndirectFitTabStructure.png
    :width: 400px
@@ -33,10 +33,10 @@ IndirectFitData is controlled by IndirectFitDataModel, but is sometimes read by 
 The IndirectFitPlotModel also contains a pointer to the active fit function and the IndirectFitOutput from the
 IndirectFittingModel, again should only ever READ FROM THESE OBJECTS only the IndirectFittingModel should control it.
 
-IndirectFitAnalysisTab
-----------------------
+IndirectDataAnalysisTab
+-----------------------
 
-The IndirectFitAnalysisTab is the master container for each IDA tab (Fit Tab), contained in this are the individual
+The IndirectDataAnalysisTab is the master container for each IDA tab, contained in this are the individual
 tabs IndirectFittingModel and View, as well as the sub widgets that make up the interface. Each Tab contains:
 - an IndirectFitDataInterface that manages the input of data to the tab
 - an IndirectFitPlot that contains two mini-plots: one for the data, and one for the fit difference.

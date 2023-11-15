@@ -73,7 +73,7 @@ protected:
   void exec() override;
 
   void propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS, const API::MatrixWorkspace_sptr &outputWS,
-                      int hist);
+                      const int hist, const bool IgnoreBinErrors = false);
 };
 
 } // namespace Algorithms

@@ -11,6 +11,7 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidNexus/NexusClasses.h"
 
+#include <optional>
 #include <vector>
 
 namespace Mantid {
@@ -29,8 +30,8 @@ public:
   // Loads the good frame data from the nexus file
   NeXus::NXInt loadGoodFramesDataFromNexus(bool isFileMultiPeriod);
   // Loads the grouping data from the nexus file
-  std::vector<detid_t> loadDetectorGroupingFromNexus(const std::vector<detid_t> &loadedDetectors,
-                                                     bool isFileMultiPeriod, int periodNumber);
+  std::optional<std::vector<detid_t>> loadDetectorGroupingFromNexus(const std::vector<detid_t> &loadedDetectors,
+                                                                    bool isFileMultiPeriod, int periodNumber);
   // Load the orientation from the nexus entry
   std::string loadMainFieldDirectionFromNexus();
   // Load deadtime information
@@ -55,7 +56,7 @@ public:
   std::string getPeriodFramesRequested(const int &numPeriods) const;
   std::string getPeriodRawFrames(const int &numPeriods) const;
   std::string getPeriodOutput(const int &numPeriods) const;
-  std::string getPeriodTotalCounts(const int &numPeriods) const;
+  std::string getPeriodTotalCounts() const;
 
 private:
   const NeXus::NXEntry &m_entry;

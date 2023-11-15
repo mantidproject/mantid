@@ -187,6 +187,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             range=dimensions.get_slicerange(),
             qflags=dimensions.qflags,
             axes_angles=axes_angles,
+            proj_matrix=self.get_proj_matrix(),
         )
 
     def get_proj_matrix(self):
@@ -351,6 +352,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             return
         if names_to_overlay or names_overlayed:
             self._create_peaks_presenter_if_necessary().overlay_peaksworkspaces(names_to_overlay)
+            self.view.data_view.on_resize()
         else:
             self.view.peaks_view.hide()
 

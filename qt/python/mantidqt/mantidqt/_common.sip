@@ -921,45 +921,15 @@ public:
     QStringList getGlobalParameters() const;
     void setGlobalParameters(const QStringList &globals);
     void clear();
-    void updateParameters(SIP_PYOBJECT);
+    void updateParameters(SIP_PYOBJECT) throw(std::exception);
     %MethodCode
-    try{
       auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
       sipCpp->updateParameters(*function);
-      }
-      catch (std::invalid_argument &sipExceptionRef)
-      {
-         const char *detail = sipExceptionRef.what();
-         SIP_BLOCK_THREADS
-         PyErr_SetString(PyExc_ValueError, detail);
-         SIP_UNBLOCK_THREADS
-         return NULL;
-      }
-      catch (...)
-      {
-         sipRaiseUnknownException();
-         return NULL;
-      }
     %End
-    void updateMultiDatasetParameters(SIP_PYOBJECT);
+    void updateMultiDatasetParameters(SIP_PYOBJECT) throw(std::exception);
     %MethodCode
-    try{
       auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
       sipCpp->updateMultiDatasetParameters(*function);
-      }
-      catch (std::invalid_argument &sipExceptionRef)
-      {
-         const char *detail = sipExceptionRef.what();
-         SIP_BLOCK_THREADS
-         PyErr_SetString(PyExc_ValueError, detail);
-         SIP_UNBLOCK_THREADS
-         return NULL;
-      }
-      catch (...)
-      {
-         sipRaiseUnknownException();
-         return NULL;
-      }
     %End
     SIP_PYOBJECT getFunction();
     %MethodCode
@@ -1057,35 +1027,12 @@ class ImageInfoWidget : public QTableWidget {
 %End
 public:
     ImageInfoWidget(QWidget *parent = nullptr);
-    void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString>& extraValues);
+    void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString>& extraValues) throw(std::exception);
+    void setWorkspace(SIP_PYOBJECT) throw(std::exception);
     %MethodCode
-    try {
-      sipCpp->cursorAt(a0, a1, a2, *a3);
-    } catch(const std::exception & exc) {
-      SIP_BLOCK_THREADS
-      PyErr_SetString(PyExc_RuntimeError, exc.what());
-      SIP_UNBLOCK_THREADS
-      return NULL;
-    } catch(...) {
-      sipRaiseUnknownException();
-      return NULL;
-    }
-    %End
-    void setWorkspace(SIP_PYOBJECT);
-    %MethodCode
-    try {
       using boost::python::extract;
       using Mantid::PythonInterface::ExtractSharedPtr;
       sipCpp->setWorkspace(ExtractSharedPtr<Mantid::API::Workspace>(a0)());
-    } catch(const std::exception & exc) {
-      SIP_BLOCK_THREADS
-      PyErr_SetString(PyExc_RuntimeError, exc.what());
-      SIP_UNBLOCK_THREADS
-      return NULL;
-    } catch(...) {
-      sipRaiseUnknownException();
-      return NULL;
-    }
     %End
 };
 
@@ -1098,35 +1045,12 @@ class ImageInfoWidgetMini : public QLabel {
 %End
 public:
     ImageInfoWidgetMini(QWidget *parent = nullptr);
-    void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString>& extraValues);
+    void cursorAt(const double x, const double y, const double signal, const QMap<QString, QString>& extraValues) throw(std::exception);
+    void setWorkspace(SIP_PYOBJECT) throw(std::exception);
     %MethodCode
-    try {
-      sipCpp->cursorAt(a0, a1, a2, *a3);
-    } catch(const std::exception & exc) {
-      SIP_BLOCK_THREADS
-      PyErr_SetString(PyExc_RuntimeError, exc.what());
-      SIP_UNBLOCK_THREADS
-      return NULL;
-    } catch(...) {
-      sipRaiseUnknownException();
-      return NULL;
-    }
-    %End
-    void setWorkspace(SIP_PYOBJECT);
-    %MethodCode
-    try {
       using boost::python::extract;
       using Mantid::PythonInterface::ExtractSharedPtr;
       sipCpp->setWorkspace(ExtractSharedPtr<Mantid::API::Workspace>(a0)());
-    } catch(const std::exception & exc) {
-      SIP_BLOCK_THREADS
-      PyErr_SetString(PyExc_RuntimeError, exc.what());
-      SIP_UNBLOCK_THREADS
-      return NULL;
-    } catch(...) {
-      sipRaiseUnknownException();
-      return NULL;
-    }
     %End
 };
 
@@ -1230,20 +1154,10 @@ public:
     void clear();
     void setWidgetTitleRuns(const std::string &title);
     bool isEmpty() const ;
-    void addInfo(SIP_PYOBJECT);
+    void addInfo(SIP_PYOBJECT) throw(std::exception);
     %MethodCode
-    try {
       using boost::python::extract;
       using Mantid::PythonInterface::ExtractSharedPtr;
       sipCpp->addInfo(ExtractSharedPtr<Mantid::API::Workspace>(a0)());
-    } catch(const std::exception & exc) {
-      SIP_BLOCK_THREADS
-      PyErr_SetString(PyExc_RuntimeError, exc.what());
-      SIP_UNBLOCK_THREADS
-      return NULL;
-    } catch(...) {
-      sipRaiseUnknownException();
-      return NULL;
-    }
     %End
 };

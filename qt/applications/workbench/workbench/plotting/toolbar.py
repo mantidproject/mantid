@@ -7,7 +7,7 @@
 #    This file is part of the mantid workbench.
 #
 #
-from matplotlib.collections import LineCollection
+from matplotlib.collections import LineCollection, PathCollection
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 from mantid.plots import MantidAxes
@@ -145,6 +145,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
 
     def on_home_clicked(self):
         self.sig_home_clicked.emit()
+        self.home()
         self.push_current()
 
     def waterfall_conversion(self, is_waterfall):
@@ -241,8 +242,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
 
         # For contour and wireframe plots, add a toolbar option to change the colour of the lines.
         if figure_type(fig) in [FigureType.Wireframe, FigureType.Contour]:
-            if any(isinstance(col, LineCollection) for col in fig.get_axes()[0].collections):
-                self.set_up_color_selector_toolbar_button(fig)
+            self.set_up_color_selector_toolbar_button(fig)
 
         if figure_type(fig) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
             self.adjust_for_3d_plots()
@@ -277,7 +277,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
     @classmethod
     def _is_colorbar(cls, ax):
         """Determine whether an axes object is a colorbar"""
-        return not hasattr(ax, "get_subplotspec") or hasattr(ax, "_colorbar")
+        return hasattr(ax, "_colorbar")
 
     def set_up_color_selector_toolbar_button(self, fig):
         # check if the action is already in the toolbar
@@ -292,10 +292,16 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         else:
             a.setToolTip("Set the colour of the contour lines.")
 
-        line_collection = next(col for col in fig.get_axes()[0].collections if isinstance(col, LineCollection))
-        initial_colour = convert_color_to_hex(line_collection.get_color()[0])
+        for col in fig.get_axes()[0].collections:
+            if isinstance(col, LineCollection):
+                current_ax_colour = col.get_color()
+                break
+            elif isinstance(col, PathCollection):
+                current_ax_colour = col.get_edgecolor()
+                break
 
-        colour_dialog = QtWidgets.QColorDialog(QtGui.QColor(initial_colour))
+        # initial QColorDialog colour
+        colour_dialog = QtWidgets.QColorDialog(QtGui.QColor(convert_color_to_hex(current_ax_colour)))
         colour_dialog.setOption(QtWidgets.QColorDialog.NoButtons)
         colour_dialog.setOption(QtWidgets.QColorDialog.DontUseNativeDialog)
         colour_dialog.currentColorChanged.connect(self.change_line_collection_colour)

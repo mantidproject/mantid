@@ -10,6 +10,7 @@ import os
 import re
 from mantid.api import AlgorithmFactory, AlgorithmManager, FunctionFactory
 from mantiddoc import get_logger
+from typing import List
 
 ALG_DOCNAME_RE = re.compile(r"^([A-Z][a-zA-Z0-9]+)-v([0-9][0-9]*)$")
 FIT_DOCNAME_RE = re.compile(r"^([A-Z][a-zA-Z0-9]+)$")
@@ -86,10 +87,21 @@ class BaseDirective(Directive):
         Args:
           text (str): reST to track
         """
+        self.initialise_rst_lines()
+        self.rst_lines.extend(statemachine.string2lines(text))
+
+    def add_rst_list(self, text: List[str]):
+        """
+        Appends given list of strings. It is NOT inserted into the
+        document until commit_rst() is called
+        :param text: List of strings, each item in the list will be a line
+        """
+        self.initialise_rst_lines()
+        self.rst_lines.extend(text)
+
+    def initialise_rst_lines(self):
         if self.rst_lines is None:
             self.rst_lines = []
-
-        self.rst_lines.extend(statemachine.string2lines(text))
 
     def commit_rst(self):
         """

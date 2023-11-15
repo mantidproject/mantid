@@ -27,8 +27,8 @@ int SplittingInterval::index() const { return m_index; }
 /// And operator. Return the smallest time interval where both intervals are
 /// TRUE.
 SplittingInterval SplittingInterval::operator&(const SplittingInterval &b) const {
-  const auto begin = std::max(this->start(), b.start());
-  const auto end = std::min(this->stop(), b.stop());
+  const auto &begin = std::max(this->start(), b.start());
+  const auto &end = std::min(this->stop(), b.stop());
 
   return SplittingInterval(begin, end, this->index());
 }
@@ -41,8 +41,8 @@ SplittingInterval SplittingInterval::operator|(const SplittingInterval &b) const
                                 "operator to non-overlapping "
                                 "SplittingInterval's.");
 
-  const auto begin = std::min(this->start(), b.start());
-  const auto end = std::max(this->stop(), b.stop());
+  const auto &begin = std::min(this->start(), b.start());
+  const auto &end = std::max(this->stop(), b.stop());
 
   return SplittingInterval(begin, end, this->index());
 }
@@ -156,7 +156,7 @@ SplittingIntervalVec removeFilterOverlap(const SplittingIntervalVec &a) {
   auto it = a.cbegin();
   while (it != a.cend()) {
     // All following intervals will start at or after this one
-    DateAndTime start = it->start();
+    const DateAndTime &start = it->start();
     DateAndTime stop = it->stop();
 
     // Keep looking for the next interval where there is a gap (start > old

@@ -32,25 +32,37 @@ public:
   IETView(IETViewSubscriber *subscriber, QWidget *parent = nullptr);
   ~IETView();
 
-  IETRunData getRunData();
-  IETPlotData getPlotData();
-  IETSaveData getSaveData();
+  IETRunData getRunData() const;
+  IETPlotData getPlotData() const;
+  IETSaveData getSaveData() const;
 
-  std::string getCustomGrouping();
+  std::string getCustomGrouping() const;
 
-  std::string getGroupOutputOption();
-  IndirectPlotOptionsView *getPlotOptionsView();
+  std::string getGroupOutputOption() const;
+  IndirectPlotOptionsView *getPlotOptionsView() const;
+  bool getGroupOutputCheckbox() const;
 
-  std::string getFirstFilename();
+  std::string getFirstFilename() const;
 
-  bool isRunFilesValid();
-  void validateCalibrationFileType(UserInputValidator &uiv);
-  void validateRebinString(UserInputValidator &uiv);
+  bool isRunFilesValid() const;
+  void validateCalibrationFileType(UserInputValidator &uiv) const;
+  void validateRebinString(UserInputValidator &uiv) const;
 
-  bool showRebinWidthPrompt();
+  bool showRebinWidthPrompt() const;
   void showSaveCustomGroupingDialog(std::string const &customGroupingOutput, std::string const &defaultGroupingFilename,
-                                    std::string const &saveDirectory);
-  void displayWarning(std::string const &message);
+                                    std::string const &saveDirectory) const;
+  void displayWarning(std::string const &message) const;
+
+  void setBackgroundSectionVisible(bool visible);
+  void setPlotTimeSectionVisible(bool visible);
+  void setPlottingOptionsVisible(bool visible);
+  void setScaleFactorVisible(bool visible);
+  void setAclimaxSaveVisible(bool visible);
+  void setNXSPEVisible(bool visible);
+  void setFoldMultipleFramesVisible(bool visible);
+  void setOutputInCm1Visible(bool visible);
+  void setGroupOutputCheckBoxVisible(bool visible);
+  void setGroupOutputDropdownVisible(bool visible);
 
   void setDetailedBalance(double detailedBalance);
   void setRunFilesEnabled(bool enable);

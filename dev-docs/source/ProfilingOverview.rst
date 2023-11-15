@@ -8,11 +8,12 @@ Profiling Overview
    :local:
 
 Profiling can mean a few different things, so here are the current ways!
+Many of these work only on certain platforms and this document will note the limitations.
+Tools that are noted as being supported in linux are likely to work in osx as well.
+Most of these approaches are specific to a single language.
 
-Profiling with Valgrind
------------------------
-
-This option is Linux only. See :doc:`ProfilingWithValgrind` for details.
+Profiling in Python
+===================
 
 Profiling with cProfile
 -----------------------
@@ -33,7 +34,8 @@ cProfile can only profile the current thread, this makes it useful for diagnosin
 
 `Yappi (Yet Another Python Profiler) <https://pypi.org/project/yappi/>`_ is multithreading aware. cProfile which will show everything up to the exec, or run call. Yappi will profile the thread and show any slow points within the separate thread.
 
-*Note: This will not with QThreads and may crash or be unable to profile inside. It is recommended you migrate workers by inheriting from IQtAsync, see async_qt_adaptor.py for details.  Using native threading enables tooling, makes testing simple and produces readable stack traces.*
+*Note: This will not work with QThreads and may crash or be unable to profile inside. It is recommended you migrate workers by inheriting from IQtAsync, see ``async_qt_adaptor.py`` for details.
+Using native threading enables tooling, makes testing simple and produces readable stack traces.*
 
 To use Yappi instead of cProfile simple append `--yappi` to the list of arguments after profile, e.g.:
 
@@ -46,12 +48,13 @@ To use Yappi instead of cProfile simple append `--yappi` to the list of argument
 
 KCachegrind can be used to view profiling data, see :doc:`ProfilingWithValgrind` for more details on usage.
 
+Profiling in C++
+================
 
-Profiling an algorithm
-----------------------
+Mantid's Algorithm Profiler
+---------------------------
 
 On Linux, the build can be configured to generate algorithm profiling information. See :doc:`AlgorithmProfiler <AlgorithmProfiler>` for details.
-
 
 Other Profiling Tools
 ---------------------
@@ -60,6 +63,10 @@ Other Profiling Tools
 
 Linux
 #####
+
+:doc:`ProfilingWithPerf` for details on perf and intel's vtune
+
+:doc:`ProfilingWithValgrind` for details on using this tool
 
 `Callgrind/KCachegrind <http://kcachegrind.sourceforge.net/cgi-bin/show.cgi/KcacheGrindIndex>`__
 
@@ -83,3 +90,8 @@ Windows
 
 -  Start/stop recording of program using a button
 -  Not as detailed or flexible as callgrind
+
+Timing in C++
+-------------
+
+Please refer to :doc:`Mantid Timers <Timers>` for an introduction to measuring execution time of the Mantid C++ code.

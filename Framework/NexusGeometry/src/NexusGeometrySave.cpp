@@ -519,7 +519,7 @@ SpectraMappings makeMappings(const Geometry::ComponentInfo &compInfo, const deti
   mappings.number_spec = detector_count_map.size();
   size_t specCounter = 0;
   size_t detCounter = 0;
-  for (auto &pair : detector_count_map) {
+  for (const auto &pair : detector_count_map) {
     // using sort order of map to ensure we are ordered by lowest to highest
     // spectrum index
     mappings.detector_count[specCounter] = (pair.second); // Counts

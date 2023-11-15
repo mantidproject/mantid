@@ -23,7 +23,13 @@
 #include <vector>
 
 using namespace Mantid::Kernel;
+using Mantid::Kernel::Logger;
 using Mantid::Types::Core::DateAndTime;
+
+namespace {
+/// static Logger definition
+Logger g_tspt_log("TimeSeriesPropertyTest");
+} // namespace
 
 class TimeSeriesPropertyStatisticsTest : public CxxTest::TestSuite {
 
@@ -460,6 +466,7 @@ public:
     std::vector<double> values_expected;
 
     // 1. TimeSeriesProperty with a single value should have no changes after filtering
+    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_1...");
     times = {DateAndTime("2007-11-30T16:19:00")};
     times_expected = times;
     values = {1.};
@@ -473,6 +480,7 @@ public:
     values = {1., 2.};
     values_expected = values;
     // a. TimeROI entirely between those values - no changes
+    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_2a...");
     times = {DateAndTime("2007-11-30T16:00:00"), DateAndTime("2007-11-30T20:00:00")};
     times_expected = times;
     tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_a", times, values);
@@ -483,6 +491,7 @@ public:
     // b. TimeROI entirely includes the values - no changes
 
     // b1. First roi entirely includes the values
+    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_2b1...");
     times = {DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T16:17:35")};
     times_expected = times;
     tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_b1", times, values);
@@ -491,6 +500,7 @@ public:
     TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // b2. First roi includes first value, second roi includes second value
+    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_2b2...");
     times = {DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T18:15:00")};
     times_expected = times;
     tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_b2", times, values);
@@ -499,6 +509,7 @@ public:
     TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // c. TimeROI includes first value and not second - no changes
+    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_2c...");
     times = {DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T16:18:25")};
     times_expected = times;
     tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_c", times, values);
@@ -507,6 +518,7 @@ public:
     TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // d. TimeROI includes second value and not first - no changes
+    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_2d...");
     times = {DateAndTime("2007-11-30T16:17:00"), DateAndTime("2007-11-30T16:18:10")};
     times_expected = times;
     tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_d", times, values);
@@ -515,6 +527,7 @@ public:
     TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
     // e. TimeROI is before both values - keep first
+    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_2e...");
     times = {DateAndTime("2007-11-30T16:18:35"), DateAndTime("2007-11-30T16:18:45")};
     tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_e", times, values);
     times_expected = {times[0]};
@@ -523,7 +536,19 @@ public:
     tsp_input->removeDataOutsideTimeROI(roi);
     TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
+    // e1. TimeROI right boundary is equal to the first value - keep both, b/c for log value copying purposes we treat
+    // TimeROI region as [inclusive,inclusive]
+    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_2e1...");
+    times = {DateAndTime("2007-11-30T16:17:40"), DateAndTime("2007-11-30T16:18:45")};
+    tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_e1", times, values);
+    times_expected = {times[0], times[1]};
+    values_expected = {values[0], values[1]};
+    tsp_expected = std::make_unique<TimeSeriesProperty<double>>("two_values_e1", times_expected, values_expected);
+    tsp_input->removeDataOutsideTimeROI(roi);
+    TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
+
     // f. TimeROI is after both values - keep second
+    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_2f...");
     times = {DateAndTime("2007-11-30T16:16:10"), DateAndTime("2007-11-30T16:16:45")};
     tsp_input = std::make_unique<TimeSeriesProperty<double>>("two_values_f", times, values);
     times_expected = {times[1]};   // second time
@@ -535,7 +560,8 @@ public:
     // 3. TimeSeriesProperty with three values
     values = {1., 2., 3.};
 
-    // a0 TimeROI entirely between the values - no changes
+    // a. TimeROI entirely between the values - no changes
+    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_3a...");
     times = {DateAndTime("2007-11-30T16:17:05"), DateAndTime("2007-11-30T16:18:00"),
              DateAndTime("2007-11-30T16:18:45")};
     tsp_input = std::make_unique<TimeSeriesProperty<double>>("three_values_a0", times, values);
@@ -545,7 +571,8 @@ public:
     tsp_input->removeDataOutsideTimeROI(roi);
     TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
-    // a. TimeROI includes first value only - keep the first two
+    // b. TimeROI includes first value only - keep the first two
+    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_3b...");
     times = {DateAndTime("2007-11-30T16:17:15"), DateAndTime("2007-11-30T16:18:30"),
              DateAndTime("2007-11-30T16:18:45")};
     tsp_input = std::make_unique<TimeSeriesProperty<double>>("three_values_a", times, values);
@@ -555,7 +582,8 @@ public:
     tsp_input->removeDataOutsideTimeROI(roi);
     TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
-    // b. TimeROI includes second value only - no changes
+    // c. TimeROI includes second value only - no changes
+    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_3c...");
     times = {DateAndTime("2007-11-30T16:17:00"), DateAndTime("2007-11-30T16:17:15"),
              DateAndTime("2007-11-30T16:18:30")};
     tsp_input = std::make_unique<TimeSeriesProperty<double>>("three_values_b", times, values);
@@ -565,7 +593,8 @@ public:
     tsp_input->removeDataOutsideTimeROI(roi);
     TS_ASSERT_EQUALS(*tsp_input, *tsp_expected);
 
-    // c. TimeROI includes third value only - keep the last two
+    // d. TimeROI includes third value only - keep the last two
+    g_tspt_log.notice("\ntest_removeDataOutsideTimeROI_case_3d...");
     times = {DateAndTime("2007-11-30T16:17:00"), DateAndTime("2007-11-30T16:17:05"),
              DateAndTime("2007-11-30T16:18:20")};
     tsp_input = std::make_unique<TimeSeriesProperty<double>>("three_values_c", times, values);

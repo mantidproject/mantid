@@ -26,7 +26,7 @@ This will vary based on your default instrument.
 
 .. code-block:: python
 
-      print GetIPTS(12345)
+      print(GetIPTS(12345))
 
 Output:
 
@@ -41,7 +41,7 @@ result for everyone.
 
 .. code-block:: python
 
-      print GetIPTS(Instrument='NOM', RunNumber=12345)
+      print(GetIPTS(Instrument='NOM', RunNumber=12345))
 
 Output:
 

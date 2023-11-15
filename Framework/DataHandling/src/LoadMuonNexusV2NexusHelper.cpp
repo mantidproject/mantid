@@ -88,26 +88,30 @@ NXInt LoadMuonNexusV2NexusHelper::loadGoodFramesDataFromNexus(bool isFileMultiPe
 // The method implemented here assumes that once implemented
 // each detector will map to a single group. If this is not the case,
 // the method will need to be altered.
-std::vector<detid_t>
+std::optional<std::vector<detid_t>>
 LoadMuonNexusV2NexusHelper::loadDetectorGroupingFromNexus(const std::vector<detid_t> &detectorsLoaded,
                                                           bool isFileMultiPeriod, int periodNumber) {
+  // Open nexus entry
+  NXClass detectorGroup = m_entry.openNXGroup(NeXusEntry::DETECTOR);
+  if (!detectorGroup.containsDataSet(NeXusEntry::GROUPING)) {
+    return std::nullopt;
+  }
+
   // We cast the numLoadedDetectors to an int, which is the index type used for
   // Nexus Data sets. As detectorsLoaded is derived from a nexus entry we
   // can be certain we won't overflow the integer type.
   int numLoadedDetectors = static_cast<int>(detectorsLoaded.size());
   std::vector<detid_t> grouping;
   grouping.reserve(numLoadedDetectors);
-  // Open nexus entry
-  NXClass detectorGroup = m_entry.openNXGroup(NeXusEntry::DETECTOR);
-  if (detectorGroup.containsDataSet(NeXusEntry::GROUPING)) {
-    NXInt groupingData = detectorGroup.openNXInt(NeXusEntry::GROUPING);
-    groupingData.load();
-    int groupingOffset = !isFileMultiPeriod ? 0 : (numLoadedDetectors) * (periodNumber - 1);
-    std::transform(detectorsLoaded.cbegin(), detectorsLoaded.cend(), std::back_inserter(grouping),
-                   [&groupingData, groupingOffset](const auto detectorNumber) {
-                     return groupingData[detectorNumber - 1 + groupingOffset];
-                   });
-  }
+
+  NXInt groupingData = detectorGroup.openNXInt(NeXusEntry::GROUPING);
+  groupingData.load();
+  int groupingOffset = !isFileMultiPeriod ? 0 : (numLoadedDetectors) * (periodNumber - 1);
+  std::transform(detectorsLoaded.cbegin(), detectorsLoaded.cend(), std::back_inserter(grouping),
+                 [&groupingData, groupingOffset](const auto detectorNumber) {
+                   return groupingData[detectorNumber - 1 + groupingOffset];
+                 });
+
   return grouping;
 }
 std::string LoadMuonNexusV2NexusHelper::loadMainFieldDirectionFromNexus() {
@@ -281,16 +285,12 @@ std::string LoadMuonNexusV2NexusHelper::getPeriodOutput(const int &numPeriods) c
   return convertVectorToString(getIntVector(numPeriods, NeXusEntry::PERIODOUTPUT));
 }
 
-std::string LoadMuonNexusV2NexusHelper::getPeriodTotalCounts(const int &numPeriods) const {
+std::string LoadMuonNexusV2NexusHelper::getPeriodTotalCounts() const {
   NXClass periodClass = m_entry.openNXGroup(NeXusEntry::PERIOD);
-
   NXFloat countsData = periodClass.openNXFloat(NeXusEntry::PERIODCOUNTS);
-  std::vector<double> countsVector;
   countsData.load();
-  for (int i = 0; i < numPeriods; ++i) {
-    countsVector.push_back(countsData[i]);
-  }
-  return convertVectorToString(countsVector);
+
+  return convertVectorToString(countsData.vecBuffer());
 }
 
 } // namespace Mantid::DataHandling

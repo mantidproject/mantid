@@ -107,7 +107,7 @@ Appending to sys.path
 Another way to make modules available for import is to append their
 directory paths onto *sys.path* within your python session.
 
-.. code:: python
+.. code:: none
 
    python
    >>> import sys

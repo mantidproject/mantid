@@ -1,0 +1,1 @@
+- Fix unhandled exception thrown when attempting to remove a curve from a plot that has a badly formatted label.

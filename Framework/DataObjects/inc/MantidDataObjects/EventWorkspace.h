@@ -142,7 +142,6 @@ public:
 
   // Sort all event lists. Uses a parallelized algorithm
   void sortAll(EventSortType sortType, Mantid::API::Progress *prog) const;
-  void sortAllOld(EventSortType sortType, Mantid::API::Progress *prog) const;
 
   void getIntegratedSpectra(std::vector<double> &out, const double minX, const double maxX,
                             const bool entireRange) const override;

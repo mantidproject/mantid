@@ -16,12 +16,12 @@ Project Recovery test
   Further instructions can be found on the
   :ref:`Project Recovery concepts page <Project Recovery>`.
 - Download the ISIS sample dataset from the `Downloads page <http://download.mantidproject.org/>`_.
-- `TOPAZ_3132_event.nxs` - available in ``/Testing/Data/SystemTest/``, get this by building the `SystemTestData` target.
-  It should be in ``ExternalData/Testing/Data/SystemTest/``
-- The files `INTER000*` are in the ISIS sample data
+- The files ``INTER000*`` and ``SXD23767.raw`` are in the ISIS sample data.
 - Include the directory containing the test files in your Managed User Directories.
-- Set up a save directory to store output for comparison, referred to as ``testing_directory`` below
-- Note that if you have error reporting enabled, simply select ``Do not share information`` in the Error Reporter dialog
+- Set your facility to ISIS.
+- Set up a save directory to store output for comparison, referred to as ``testing_directory`` below.
+- Note that if you have error reporting enabled, simply select ``Do not share information`` in the Error Reporter dialog.
+- Restart Workbench to ensure all changes are applied.
 
 
 **Time required 15 - 30  minutes**
@@ -85,7 +85,7 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory=<path-to-test>
+   testing_directory='<path-to-test>'
    # <path-to-test> is the location of a directory for saving workspaces for comparison later
    # e.g. C:\Users\abc1234\Desktop\test_proj_rec\
    CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='0Rebinned')
@@ -104,7 +104,7 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory=<path-to-test>
+   testing_directory='<path-to-test>'
    SaveCSV(InputWorkspace='299Clone', Filename=testing_directory +'Clone_r.csv')
 
 - Compare the contents of `Clone.csv` and `Clone_r.csv`, they should be the same
@@ -118,13 +118,14 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory=<path-to-test>
-   Load(Filename= 'TOPAZ_3132_event.nxs', OutputWorkspace='TOPAZ_3132_event', LoadMonitors='1')
-   ConvertToMD(InputWorkspace='TOPAZ_3132_event', QDimensions='Q3D', dEAnalysisMode='Elastic', Q3DFrames='Q_sample', LorentzCorrection='1', OutputWorkspace='TOPAZ_3132_md',\
-   MinValues='-25,-25,-25', MaxValues='25,25,25', SplitInto='2', SplitThreshold='50', MaxRecursionDepth='13', MinRecursionDepth='7')
-   DeleteWorkspace("TOPAZ_3132_event")
-   multi_d = RenameWorkspace('TOPAZ_3132_md')
-   peaks=FindPeaksMD(InputWorkspace='multi_d', PeakDistanceThreshold='0.37680', MaxPeaks='50', DensityThresholdFactor='100', OutputWorkspace='TOPAZ_3132_peaks')
+   testing_directory='<path-to-test>'
+   Load(Filename=r'SXD23767.raw', OutputWorkspace='SXD23767')
+   ConvertToDiffractionMDWorkspace(InputWorkspace='SXD23767', OutputWorkspace='SXD23767_MD', OneEventPerBin=False, SplitThreshold=30)
+   DeleteWorkspace("SXD23767")
+   multi_d = RenameWorkspace('SXD23767_MD')
+   peaks = FindPeaksMD(InputWorkspace='multi_d', PeakDistanceThreshold=0.4, MaxPeaks=10,
+           PeakFindingStrategy='NumberOfEventsNormalization', SignalThresholdFactor=10,
+           OutputType='Peak', OutputWorkspace='SingleCrystalPeakTable', EdgePixels=1)
 
    long1=CreateMDHistoWorkspace(Dimensionality=2, Extents='-3,3,-10,10', SignalInput=range(0,10000), ErrorInput=range(0,10000),\
                            NumberOfBins='100,100', Names='Dim1,Dim2', Units='MomentumTransfer, EnergyTransfer')
@@ -161,7 +162,7 @@ Project Recovery test
 
 .. code-block:: python
 
-    testing_directory=<path-to-test>
+    testing_directory='<path-to-test>'
     SaveCSV('Clone_matrix' , testing_directory + '/method_test_r.csv')
     SaveCSV('long4_matrix', testing_directory + '/test_binary_operators_r.csv')
 
@@ -180,6 +181,7 @@ Project Recovery test
 - Change Plot type from individual to `Tiled`, and again click `Plot all`
 - In the workspace window right-click the ``Rename2`` workspace and select `Show Data`
 - In the top toolbar, navigate to ``Interfaces > Reflectometry`` and open the ``ISIS Reflectometry`` interface
+- In the top toolbar, navigate to ``Interfaces > Diffraction`` and open the ``Engineering Diffraction`` interface.
 
 .. image:: ../../images/reporter-test-4.png
 
@@ -267,7 +269,7 @@ Project Recovery test
 - Restart MantidWorkbench
 - Choose ``Only open in script editor``
 - Mantid should open a script named ``ordered_recovery.py`` in the script editor
-- This should contain only the ``Load`` command and no previous history (to see full history, right-click on the
+- This should contain only the ``Load`` command and no previous history (to see full history, run the script, right-click on the
   workspace and select ``Show History``)
 
 Finally, test out a few ideas of your own. Note that some more niche aspects of plotting are not saved, such as 3D plots,

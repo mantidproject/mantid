@@ -662,11 +662,11 @@ calculation for a *Can* data set could be:
 
 .. code-block:: python
 
-  {FitId.general: fit_general(start=1.0,
-                              stop=3.0,
-                              fit_type=FitType.Polynomial,
-                              data_type=DataType.Can,
-                              polynomial_order=2)
+   {FitId.general: fit_general(start=1.0,
+                               stop=3.0,
+                               fit_type=FitType.Polynomial,
+                               data_type=DataType.Can,
+                               polynomial_order=2)}
 
 This entry is added to the general user input dictionary. Note that for some of the
 input values, enums from *enums.py* are used, e.g. *FitType.Polynomial*. This approach is

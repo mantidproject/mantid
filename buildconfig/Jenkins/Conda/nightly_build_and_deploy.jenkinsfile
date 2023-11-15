@@ -407,9 +407,18 @@ pipeline {
           selector: specific('${BUILD_NUMBER}'),
           target: 'standalone-packages',
           flatten: true
-        // Single quotes are required for token variables to avoid them leaking
+        // Copy conda packages and create a tarball to upload to the github release for backup.
+        copyArtifacts filter: '**/conda-bld/**/*.tar.bz2',
+          fingerprintArtifacts: true,
+          projectName: '${JOB_NAME}',
+          selector: specific('${BUILD_NUMBER}'),
+          target: 'conda-packages',
+          flatten: true
+        sh 'tar -cvf conda-packages.tar ${WORKSPACE}/conda-packages/'
+        // Publish to github. Single quotes are required for token variables to avoid them leaking
         sh "${CISCRIPT_DIR}/publish-to-github ${WORKSPACE}" + ' ${GITHUB_TOKEN} ' +\
-          "${GITHUB_RELEASES_REPO} ${generate_git_tag()} ${GIT_SHA} ${prerelease_option()} ${WORKSPACE}/standalone-packages/*"
+          "${GITHUB_RELEASES_REPO} ${generate_git_tag()} ${GIT_SHA} ${prerelease_option()} " +\
+          "${WORKSPACE}/standalone-packages/* ${WORKSPACE}/conda-packages.tar"
       }
     }
   }

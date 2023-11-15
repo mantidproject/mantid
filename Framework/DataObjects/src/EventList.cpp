@@ -849,14 +849,27 @@ const std::vector<WeightedEventNoTime> &EventList::getWeightedEventsNoTime() con
  * associated detector ID's.
  * */
 void EventList::clear(const bool removeDetIDs) {
-  if (mru)
-    mru->deleteIndex(this);
-  this->events.clear();
-  std::vector<TofEvent>().swap(this->events); // STL Trick to release memory
-  this->weightedEvents.clear();
-  std::vector<WeightedEvent>().swap(this->weightedEvents); // STL Trick to release memory
-  this->weightedEventsNoTime.clear();
-  std::vector<WeightedEventNoTime>().swap(this->weightedEventsNoTime); // STL Trick to release memory
+  if (mru) {
+    try {
+      mru->deleteIndex(this);
+    } catch (const std::runtime_error &) {
+      // this is an ignorable error
+    }
+  }
+  if (!this->empty()) {
+    if (!this->events.empty()) {
+      this->events.clear();
+      std::vector<TofEvent>().swap(this->events); // STL Trick to release memory
+    }
+    if (!this->weightedEvents.empty()) {
+      this->weightedEvents.clear();
+      std::vector<WeightedEvent>().swap(this->weightedEvents); // STL Trick to release memory
+    }
+    if (!this->weightedEventsNoTime.empty()) {
+      this->weightedEventsNoTime.clear();
+      std::vector<WeightedEventNoTime>().swap(this->weightedEventsNoTime); // STL Trick to release memory
+    }
+  }
   if (removeDetIDs)
     this->clearDetectorIDs();
 }
@@ -866,15 +879,15 @@ void EventList::clear(const bool removeDetIDs) {
  * Memory is freed.
  * */
 void EventList::clearUnused() {
-  if (eventType != TOF) {
+  if (eventType != TOF && (!this->events.empty())) {
     this->events.clear();
     std::vector<TofEvent>().swap(this->events); // STL Trick to release memory
   }
-  if (eventType != WEIGHTED) {
+  if (eventType != WEIGHTED && (!this->weightedEvents.empty())) {
     this->weightedEvents.clear();
     std::vector<WeightedEvent>().swap(this->weightedEvents); // STL Trick to release memory
   }
-  if (eventType != WEIGHTED_NOTIME) {
+  if (eventType != WEIGHTED_NOTIME && (!this->weightedEventsNoTime.empty())) {
     this->weightedEventsNoTime.clear();
     std::vector<WeightedEventNoTime>().swap(this->weightedEventsNoTime); // STL Trick to release memory
   }
@@ -1850,6 +1863,70 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events, const Ma
 }
 
 // --------------------------------------------------------------------------
+/** Generates both the Y and E (error) histograms
+ * for an EventList with WeightedEvents.
+ *
+ * This histograms without sorting the events first by using the bin step size to estimate the bin number. This only
+ * works for logarithmic or linear binning.
+ *
+ * @param events: vector of events (with weights)
+ * @param step: bin step size
+ * @param X: X-bins supplied
+ * @param Y: counts returned
+ * @param E: errors returned
+ * @throw runtime_error if the EventList does not have weighted events
+ */
+template <class T>
+void EventList::histogramForWeightsHelper(const std::vector<T> &events, const double step, const MantidVec &X,
+                                          MantidVec &Y, MantidVec &E) {
+  size_t x_size = X.size();
+
+  if (x_size <= 1) {
+    // X was not set. Return an empty array.
+    Y.resize(0, 0);
+    return;
+  }
+
+  Y.resize(x_size - 1, 0.0);
+  E.resize(x_size - 1, 0.0);
+
+  if (events.empty())
+    return;
+
+  const auto xmin = X.front();
+  const auto xmax = X.back();
+
+  double divisor, offset;
+  boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double, const double); // function pointer
+
+  if (step < 0) {
+    findBin = findLogBin;
+    divisor = log1p(abs(step)); // use this to do change of base
+    offset = log(xmin) / divisor;
+  } else {
+    findBin = findLinearBin;
+    divisor = step;
+    offset = xmin / divisor;
+  }
+
+  for (const T &ev : events) {
+    const double tof = ev.tof();
+    if (tof < xmin || tof >= xmax)
+      continue;
+
+    boost::optional<size_t> n_bin = findBin(X, tof, divisor, offset);
+
+    if (n_bin) {
+      Y[n_bin.get()] += ev.weight();
+      E[n_bin.get()] += ev.errorSquared();
+    }
+  }
+
+  // Now do the sqrt of all errors
+  std::transform(E.cbegin(), E.cend(), E.begin(), static_cast<double (*)(double)>(sqrt));
+}
+
+// --------------------------------------------------------------------------
 /** Generates both the Y and E (error) histograms w.r.t Pulse Time
  * for an EventList with or without WeightedEvents.
  *
@@ -1942,6 +2019,44 @@ void EventList::generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E
 
   case WEIGHTED_NOTIME:
     histogramForWeightsHelper(this->weightedEventsNoTime, X, Y, E);
+    break;
+  }
+}
+
+// --------------------------------------------------------------------------
+/** Generates both the Y and E (error) histograms w.r.t TOF
+ * for an EventList with or without WeightedEvents.
+ *
+ * This calculates histogram without sorting the events by using the step size to estimate the bin number. This has been
+ * made to only work for logarithmic or linear binning. This falls back to using the sorted histogram method if the
+ * events are already sorted, as that will be faster.
+ *
+ * @param step: bin step size
+ * @param X: x-bins supplied
+ * @param Y: counts returned
+ * @param E: errors returned
+ * @param skipError: skip calculating the error. This has no effect for weighted
+ *        events; you can just ignore the returned E vector.
+ */
+void EventList::generateHistogram(const double step, const MantidVec &X, MantidVec &Y, MantidVec &E,
+                                  bool skipError) const {
+  // if events are already sorted, use faster sorted histogram method
+  if (isSortedByTof() || empty())
+    return generateHistogram(X, Y, E, skipError);
+
+  switch (eventType) {
+  case TOF:
+    this->generateCountsHistogram(step, X, Y);
+    if (!skipError)
+      this->generateErrorsHistogram(Y, E);
+    break;
+
+  case WEIGHTED:
+    histogramForWeightsHelper(this->weightedEvents, step, X, Y, E);
+    break;
+
+  case WEIGHTED_NOTIME:
+    histogramForWeightsHelper(this->weightedEventsNoTime, step, X, Y, E);
     break;
   }
 }
@@ -2160,6 +2275,117 @@ void EventList::generateCountsHistogram(const MantidVec &X, MantidVec &Y) const 
       ++Y[bin];
     }
   } // end if (there are any events to histogram)
+}
+
+/** Find the bin which this TOF value falls in with linear binning, assumes TOF is in range of X
+ *
+ * bin_number =  (tof - xmin) / step
+ *
+ * @param X :: The x bins
+ * @param tof :: TOF of the event we are trying to bin
+ * @param divisor :: pre-calculated divisor
+ * @param offset :: pre-calculated offset
+ */
+boost::optional<size_t> EventList::findLinearBin(const MantidVec &X, const double tof, const double divisor,
+                                                 const double offset) {
+  return findExactBin(X, tof, static_cast<size_t>(tof / divisor - offset));
+}
+
+/** Find the bin which this TOF value falls in with log binning, assumes TOF is in range of X
+ *
+ * formula to get bin_number from TOF
+ *
+ * bin_number = log_{abs(step) + 1}(tof/xmin) (that is log base abs(step)+1)
+ *
+ * rewritten as
+ *
+ * bin_number = log(tof)/log(abs(step)+1) - log(xmin)/log(abs(step)+1)
+ *
+ * or bin_number = log(tof)/divisor - offset, where divisor and offset are precalulated
+ *
+ * @param X :: The x bins
+ * @param tof :: TOF of the event we are trying to bin
+ * @param divisor :: pre-calculated divisor
+ * @param offset :: pre-calculated offset
+ */
+boost::optional<size_t> EventList::findLogBin(const MantidVec &X, const double tof, const double divisor,
+                                              const double offset) {
+  return findExactBin(X, tof, static_cast<size_t>(log(tof) / divisor - offset));
+}
+
+/** Find the exact bin which a TOF falls in starting from the provided estimated one. Estimated bin is expected to be
+ * within 1 of the correct bin
+ *
+ * @param X :: The x bins
+ * @param tof :: TOF of the event we are trying to bin
+ * @param n_bin :: starting estiamted bin number
+ */
+boost::optional<size_t> EventList::findExactBin(const MantidVec &X, const double tof, size_t n_bin) {
+  if (n_bin >= X.size())
+    return boost::none;
+
+  if (tof < X[n_bin])
+    n_bin--;
+  else if (tof >= X[n_bin + 1])
+    n_bin++;
+
+  return n_bin;
+}
+
+// --------------------------------------------------------------------------
+/** Fill a histogram given specified histogram bounds. Does not modify
+ * the eventlist (const method).
+ *
+ * This histogram without sorting the events by using the step size to estimate the bin number. This only works for
+ * logarithmic or linear binning.
+ *
+ * @param step :: bin step size
+ * @param X :: The x bins
+ * @param Y :: The generated counts histogram
+ */
+void EventList::generateCountsHistogram(const double step, const MantidVec &X, MantidVec &Y) const {
+  // For slight speed=up.
+  size_t x_size = X.size();
+
+  if (x_size <= 1) {
+    // X was not set. Return an empty array.
+    Y.resize(0, 0);
+    return;
+  }
+
+  // Clear the Y data, assign all to 0.
+  Y.resize(x_size - 1, 0);
+
+  // Do we even have any events to do?
+  if (this->events.empty())
+    return;
+
+  const auto xmin = X.front();
+  const auto xmax = X.back();
+
+  double divisor, offset;
+  boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double, const double); // function pointer
+
+  if (step < 0) {
+    findBin = findLogBin;
+    divisor = log1p(abs(step)); // use this to do change of base
+    offset = log(xmin) / divisor;
+  } else {
+    findBin = findLinearBin;
+    divisor = step;
+    offset = xmin / divisor;
+  }
+
+  for (const TofEvent &ev : this->events) {
+    const double tof = ev.tof();
+    if (tof < xmin || tof >= xmax)
+      continue;
+
+    const boost::optional<size_t> n_bin = findBin(X, tof, divisor, offset);
+
+    if (n_bin)
+      Y[n_bin.get()]++;
+  }
 }
 
 // --------------------------------------------------------------------------
@@ -2783,10 +3009,7 @@ std::vector<Mantid::Types::Core::DateAndTime> EventList::getPulseTimes() const {
 
 /// Get the Pulse-time + TOF for each event in this EventList
 std::vector<DateAndTime> EventList::getPulseTOFTimes() const {
-  auto timeCalc = [](const auto &event) {
-    constexpr double microToNano{1000.0}; // time unit conversion
-    return event.pulseTime() + static_cast<int64_t>(event.tof() * microToNano);
-  };
+  auto timeCalc = [](const auto &event) { return event.pulseTOFTime(); };
   return eventTimesCalculator(timeCalc);
 }
 
@@ -2795,10 +3018,7 @@ std::vector<DateAndTime> EventList::getPulseTOFTimes() const {
  * @param shift : shift the TOF (after rescaling) by this time, in microseconds
  */
 std::vector<DateAndTime> EventList::getPulseTOFTimesAtSample(const double &factor, const double &shift) const {
-  auto timeCalc = [&](const auto &event) {
-    constexpr double microToNano{1000.0}; // time unit conversion
-    return event.pulseTime() + static_cast<int64_t>((factor * event.tof() + shift) * microToNano);
-  };
+  auto timeCalc = [factor, shift](const auto &event) { return event.pulseTOFTimeAtSample(factor, shift); };
   return eventTimesCalculator(timeCalc);
 }
 
@@ -3837,15 +4057,15 @@ void EventList::initializePartials(std::map<int, EventList *> partials) const {
 
   // collect the state from events which is to be transferred to the partials
   bool removeDetIDs{true};
-  const auto histogram = this->getHistogram();
-  const auto eventType = this->getEventType();
+  const auto histogramLocal = this->getHistogram();
+  const auto eventTypeLocal = this->getEventType();
 
   // lambda expression initializing one partial
   auto initPartial = [&](EventList *partial) {
     partial->clear(removeDetIDs);
     partial->copyInfoFrom(*this);
-    partial->setHistogram(histogram);
-    partial->switchTo(eventType);
+    partial->setHistogram(histogramLocal);
+    partial->switchTo(eventTypeLocal);
   };
 
   // iterate over the partials

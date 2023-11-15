@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<diagram program="umlet" version="14.3.0">
+<diagram program="umlet" version="15.0.0">
   <zoom_level>9</zoom_level>
   <element>
     <id>UMLClass</id>
@@ -31,17 +31,6 @@
     <coordinates>
       <x>189</x>
       <y>369</y>
-      <w>27</w>
-      <h>72</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;60.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>189</x>
-      <y>450</y>
       <w>27</w>
       <h>72</h>
     </coordinates>
@@ -92,17 +81,6 @@
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>110.0;10.0;110.0;40.0;10.0;40.0</additional_attributes>
-  </element>
-  <element>
-    <id>UMLClass</id>
-    <coordinates>
-      <x>99</x>
-      <y>504</y>
-      <w>207</w>
-      <h>36</h>
-    </coordinates>
-    <panel_attributes>IndirectFitAnalysisTab</panel_attributes>
-    <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
@@ -161,12 +139,12 @@
     <id>Relation</id>
     <coordinates>
       <x>189</x>
-      <y>531</y>
+      <y>450</y>
       <w>81</w>
-      <h>99</h>
+      <h>180</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;</panel_attributes>
-    <additional_attributes>70.0;90.0;10.0;90.0;10.0;10.0</additional_attributes>
+    <additional_attributes>70.0;180.0;10.0;180.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
@@ -1148,14 +1126,14 @@ belongs to</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1089</x>
+      <x>1071</x>
       <y>936</y>
-      <w>369</w>
+      <w>387</w>
       <h>351</h>
     </coordinates>
     <panel_attributes>lt=&lt;.
 belongs to</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;370.0;390.0;370.0</additional_attributes>
+    <additional_attributes>30.0;10.0;30.0;370.0;410.0;370.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
@@ -1196,7 +1174,7 @@ is controlled by</panel_attributes>
     <coordinates>
       <x>2178</x>
       <y>585</y>
-      <w>126</w>
+      <w>108</w>
       <h>135</h>
     </coordinates>
     <panel_attributes>lt=.
@@ -1219,7 +1197,7 @@ is controlled by</panel_attributes>
     <coordinates>
       <x>2178</x>
       <y>720</y>
-      <w>117</w>
+      <w>108</w>
       <h>153</h>
     </coordinates>
     <panel_attributes>lt=.
@@ -1231,7 +1209,7 @@ can be read by</panel_attributes>
     <coordinates>
       <x>900</x>
       <y>990</y>
-      <w>162</w>
+      <w>144</w>
       <h>90</h>
     </coordinates>
     <panel_attributes>lt=.
@@ -1266,7 +1244,7 @@ Is created by</panel_attributes>
     <coordinates>
       <x>567</x>
       <y>99</y>
-      <w>90</w>
+      <w>81</w>
       <h>99</h>
     </coordinates>
     <panel_attributes>lt=&lt;.
@@ -1278,7 +1256,7 @@ belongs to</panel_attributes>
     <coordinates>
       <x>1296</x>
       <y>747</y>
-      <w>117</w>
+      <w>108</w>
       <h>126</h>
     </coordinates>
     <panel_attributes>lt=.

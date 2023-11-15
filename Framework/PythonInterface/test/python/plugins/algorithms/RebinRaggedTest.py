@@ -28,6 +28,7 @@ class RebinRaggedTest(unittest.TestCase):
             XMin=[0.67, 1.20, 2.42, 3.70, 4.12, 0.39],
             Delta=0.02,  # original data bin size
             XMax=[10.20, 20.8, np_nan, math_nan, np_nan, 9.35],
+            Version=1,
         )
 
         self.assertTrue(alg_test.isExecuted())
@@ -47,6 +48,7 @@ class RebinRaggedTest(unittest.TestCase):
             OutputWorkspace="NOM_91796_banks",
             Delta=0.04,  # double original data bin size
             XMax=[10.20, 20.8, np_inf, math_nan, np_nan, 9.35],
+            Version=1,
         )
 
         self.assertTrue(alg_test.isExecuted())
@@ -69,7 +71,7 @@ class RebinRaggedTest(unittest.TestCase):
 
         ws = api.CreateSampleWorkspace(OutputWorkspace="RebinRagged_hist", WorkspaceType="Histogram")
 
-        rebinned = api.RebinRagged(ws, XMin=xmins, XMax=xmaxs, Delta=deltas)
+        rebinned = api.RebinRagged(ws, XMin=xmins, XMax=xmaxs, Delta=deltas, Version=1)
 
         self.assertEqual(rebinned.getNumberHistograms(), 200)
         for i in range(rebinned.getNumberHistograms()):
@@ -103,7 +105,7 @@ class RebinRaggedTest(unittest.TestCase):
         ws = api.CreateSampleWorkspace(OutputWorkspace="RebinRagged_events", WorkspaceType="Event")
         orig_y = ws.readY(0)
 
-        rebinned = api.RebinRagged(ws, XMin=xmins, XMax=xmaxs, Delta=deltas)
+        rebinned = api.RebinRagged(ws, XMin=xmins, XMax=xmaxs, Delta=deltas, Version=1)
 
         self.assertEqual(rebinned.getNumberHistograms(), 200)
         for i in range(rebinned.getNumberHistograms()):

@@ -12,14 +12,14 @@ Description
 This algorithm loads processed HDF5 files produced by LAMP software at the ILL. Only 1D and 2D data are supported. The output is a point data workspace.
 The input file must have a tree structure similar to:
 
-.. code-block:: python
+.. code-block:: none
 
-  entry1
-    |___data1
-          |__DATA
-          |__PARAMETERS
-          |__X
-          |__Y
+   entry1
+     |___data1
+           |__DATA
+           |__PARAMETERS
+           |__X
+           |__Y
 
 Usage
 -----

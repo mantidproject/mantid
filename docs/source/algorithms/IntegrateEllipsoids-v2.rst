@@ -288,7 +288,7 @@ file is available in `Mantid system tests repository <https://github.com/mantidp
 
 **Output:**
 
-.. code-block:: python
+.. code-block:: none
    :linenos:
 
    | RunNumbe | DetID    | h        | k        | l        | Waveleng | Energy   | TOF      | DSpacing | Intens   | SigInt   | BinCount | BankName | Row      | Col      | QLab     | QSample  | PeakNumb |
@@ -352,4 +352,3 @@ The first peak is a satellite peak, which was integrated using the satellite pea
 
 .. sourcelink::
    :filename: IntegrateEllipsoidsV1
-

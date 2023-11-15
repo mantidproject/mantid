@@ -40,5 +40,48 @@ private:
 
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const Timer &);
 
+class MANTID_KERNEL_DLL CodeBlockTimer {
+public:
+  CodeBlockTimer() = delete;
+  CodeBlockTimer(const std::string &name, std::ostream &output);
+  ~CodeBlockTimer();
+
+private:
+  std::string m_name;
+  std::ostream &m_out;
+  std::chrono::time_point<std::chrono::system_clock> m_start;
+};
+
+class MANTID_KERNEL_DLL CodeBlockMultipleTimer {
+public:
+  class MANTID_KERNEL_DLL TimeAccumulator {
+  public:
+    TimeAccumulator() = delete;
+    TimeAccumulator(const std::string &name);
+
+  public:
+    void reset();
+    void increment(const double time_sec);
+    double getElapsed() const;
+    size_t getNumberOfEntrances() const;
+    std::string toString() const;
+
+  private:
+    std::string m_name;
+    double m_elapsed_sec{0.0};
+    size_t m_number_of_entrances{0};
+  };
+
+public:
+  CodeBlockMultipleTimer() = delete;
+  CodeBlockMultipleTimer(TimeAccumulator &accumulator);
+  ~CodeBlockMultipleTimer();
+
+private:
+  TimeAccumulator &m_accumulator;
+  std::chrono::time_point<std::chrono::system_clock> m_start;
+};
+
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const CodeBlockMultipleTimer::TimeAccumulator &);
 } // namespace Kernel
 } // namespace Mantid

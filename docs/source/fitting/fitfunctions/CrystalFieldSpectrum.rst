@@ -9,8 +9,10 @@ CrystalFieldSpectrum
 Description
 -----------
 
-This function calculates a spectrum of a crystal electric field acting upon a rare earth ion. It is a part of crystal field computation
-in Mantid and under active development. More documentation will follow as the development progresses.
+This function calculates a spectrum of a crystal electric field acting upon a rare earth ion.
+It is a part of crystal field computation in Mantid and under active development.
+Please consult :ref:`Crystal Field Theory <Crystal Field Theory>` for the theoretical background.
+More documentation will follow as the development progresses.
 
 Here is an example of how to fit function's parameters to a spectrum. All parameters disallowed by symmetry are fixed automatically.
 Any other parameters that need fixing has to be tied explicitly. Peak centres and intensities are also fixed and computed from the

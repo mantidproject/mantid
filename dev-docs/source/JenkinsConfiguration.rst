@@ -177,33 +177,9 @@ Print the Value of an Environment Variable on All Nodes
 Remove directories across multiple nodes
 ----------------------------------------
 
+The example here will remove the build directories from pull request build and test jobs.
+Useful, for example, when a dependency change requires a clean build.
 It is advised to ensure nothing is running and pause the build queue.
-
-Master Incremental
-^^^^^^^^^^^^^^^^^^
-
-.. code-block:: groovy
-
-    import hudson.model.*
-
-    nodes = Jenkins.instance.slaves
-
-    JOBNAME = "master_incremental"
-
-
-    for (node in nodes) {
-      labels = ["osx-10.10-build", "rhel6-build", "rhel7-build", "ubuntu-14.04-build", "ubuntu-16.04-build", "win7"];
-      for (nodeLabel in labels) {
-        FilePath fp = node.createPath(node.getRootPath().toString() + File.separator + "workspace" + File.separator + JOBNAME + File.separator + "label" + File.separator + nodeLabel + File.separator + "build");
-        if(fp!=null && fp.exists()) {
-          println(fp.toString())
-          fp.deleteRecursive()
-        }
-      }
-    }
-
-Pull Requests
-^^^^^^^^^^^^^
 
 .. code-block:: groovy
 
@@ -212,7 +188,7 @@ Pull Requests
     nodes = Jenkins.instance.slaves
 
     JOB_PREFIX = "pull_requests-"
-    suffixes = ["win7", "osx", "ubuntu", "ubuntu-python3", "rhel7"];
+    suffixes = ["conda-linux", "conda-osx", "conda-windows"];
 
     for (node in nodes) {
       for (suffix in suffixes) {

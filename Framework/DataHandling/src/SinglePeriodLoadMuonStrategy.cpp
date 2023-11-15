@@ -67,16 +67,12 @@ void SinglePeriodLoadMuonStrategy::loadGoodFrames() {
  * @returns :: Grouping table
  */
 Workspace_sptr SinglePeriodLoadMuonStrategy::loadDetectorGrouping() const {
-
-  auto grouping = m_nexusLoader.loadDetectorGroupingFromNexus(m_detectors, m_isFileMultiPeriod, m_entryNumber);
-  TableWorkspace_sptr table = createDetectorGroupingTable(m_detectors, grouping);
-
-  if (table->rowCount() != 0) {
-    return table;
-  } else {
-    m_logger.notice("Loading grouping information from IDF");
-    return loadDefaultDetectorGrouping(m_workspace);
+  auto const grouping = m_nexusLoader.loadDetectorGroupingFromNexus(m_detectors, m_isFileMultiPeriod, m_entryNumber);
+  auto const table = createDetectorGroupingTable(m_detectors, grouping);
+  if (table && (*table)->rowCount() != 0) {
+    return *table;
   }
+  return loadDefaultDetectorGrouping(m_workspace);
 }
 /**
  * Loads deadtime table from nexus file

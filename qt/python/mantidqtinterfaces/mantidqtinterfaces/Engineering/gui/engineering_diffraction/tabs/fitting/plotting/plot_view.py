@@ -139,6 +139,13 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     def set_slot_for_seq_fit(self, presenter_func):
         self.toolbar.sig_seq_fit_clicked.connect(presenter_func)
 
+    def set_slot_for_legend_toggled(self):
+        self.toolbar.sig_toggle_legend.connect(self.toggle_legend)
+
+    def toggle_legend(self):
+        self.update_legend(self.get_axes()[0])
+        self.figure.canvas.draw()
+
     def show_cancel_button(self, show: bool):
         self.cancel_button.setVisible(show)
         self.cancel_button.setEnabled(show)
@@ -213,6 +220,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         if ax.get_lines():
             ax.make_legend()
             ax.get_legend().set_title("")
+            ax.get_legend().set_visible(self.toolbar.get_show_legend_value())
         else:
             if ax.get_legend():
                 ax.get_legend().remove()
