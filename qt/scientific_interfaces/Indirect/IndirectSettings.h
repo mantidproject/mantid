@@ -19,8 +19,11 @@
 class QIcon;
 
 namespace MantidQt {
+namespace API {
+class UserSubWindow;
+}
+
 namespace CustomInterfaces {
-class IndirectInterface;
 
 class MANTIDQT_INDIRECT_DLL IIndirectSettings {
 
@@ -36,7 +39,7 @@ public:
   IndirectSettings(QWidget *parent = nullptr);
   ~IndirectSettings() = default;
 
-  void connectInterface(IndirectInterface *interface);
+  void connectExistingInterfaces(QList<QPointer<MantidQt::API::UserSubWindow>> &windows);
 
   static QIcon icon();
   static std::map<std::string, QVariant> getSettings();
@@ -50,11 +53,6 @@ signals:
   void applySettings();
 
 private:
-  // void otherUserSubWindowCreated(QPointer<UserSubWindow> window) override;
-  // void otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) override;
-
-  // void connectIndirectInterface(const QPointer<UserSubWindow> &window);
-
   std::unique_ptr<IndirectSettingsPresenter> m_presenter;
 };
 

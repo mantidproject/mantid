@@ -26,13 +26,13 @@ void IndirectInterface::help() {
 }
 
 void IndirectInterface::settings() {
-  auto settingsWindow = new IndirectSettings(this);
-  settingsWindow->connectInterface(this);
+  auto settingsWidget = new IndirectSettings(this);
+  settingsWidget->connectExistingInterfaces(InterfaceManager::existingInterfaces());
 
-  settingsWindow->loadSettings();
-  settingsWindow->setWindowFlag(Qt::Window);
-  settingsWindow->setWindowModality(Qt::WindowModal);
-  settingsWindow->show();
+  settingsWidget->loadSettings();
+  settingsWidget->setWindowFlag(Qt::Window);
+  settingsWidget->setWindowModality(Qt::WindowModal);
+  settingsWidget->show();
 }
 
 void IndirectInterface::applySettings() { applySettings(IndirectSettings::getSettings()); }

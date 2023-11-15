@@ -111,6 +111,9 @@ public:
    */
   static void registerHelpWindowFactory(Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *factory);
 
+  /// Returns a list of existing UserSubWindows
+  static QList<QPointer<UserSubWindow>> &existingInterfaces();
+
   /// The keys associated with UserSubWindow classes
   QStringList getUserSubWindowKeys() const;
 

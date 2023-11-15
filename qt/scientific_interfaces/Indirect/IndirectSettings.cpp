@@ -8,6 +8,7 @@
 #include "IndirectInterface.h"
 #include "IndirectSettingsHelper.h"
 #include "MantidQtIcons/Icon.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 
 constexpr auto SETTINGS_ICON = "mdi.settings";
 
@@ -23,8 +24,12 @@ IndirectSettings::IndirectSettings(QWidget *parent) : QWidget(parent) {
   setLayout(layout);
 }
 
-void IndirectSettings::connectInterface(IndirectInterface *indirectInterface) {
-  connect(this, SIGNAL(applySettings()), indirectInterface, SLOT(applySettings()));
+void IndirectSettings::connectExistingInterfaces(QList<QPointer<MantidQt::API::UserSubWindow>> &windows) {
+  for (auto const &window : windows) {
+    if (auto indirectInterface = dynamic_cast<IndirectInterface *>(window.data())) {
+      connect(this, SIGNAL(applySettings()), indirectInterface, SLOT(applySettings()));
+    }
+  }
 }
 
 QIcon IndirectSettings::icon() { return Icons::getIcon(SETTINGS_ICON); }
@@ -43,17 +48,9 @@ void IndirectSettings::notifyCloseSettings() {
     settingsWindow->close();
 }
 
-// void IndirectSettings::otherUserSubWindowCreated(QPointer<UserSubWindow> window) { connectIndirectInterface(window);
-// }
-//
 // void IndirectSettings::otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) {
 //  for (auto const &window : windows)
 //    connectIndirectInterface(window);
-//}
-//
-// void IndirectSettings::connectIndirectInterface(const QPointer<UserSubWindow> &window) {
-//  if (auto indirectInterface = dynamic_cast<IndirectInterface *>(window.data()))
-//    connectInterface(indirectInterface);
 //}
 
 void IndirectSettings::loadSettings() { m_presenter->loadSettings(); }
