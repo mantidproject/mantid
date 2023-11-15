@@ -285,8 +285,8 @@ void PDCalibration::init() {
       std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>("DiagnosticWorkspaces", "", Direction::Output),
       "Workspaces to promote understanding of calibration results");
 
-  declareProperty("MinimumPeakTotalCount", 0.,
-                  "Used for validating peaks before fitting. If the total peak Y-value count "
+  declareProperty("MinimumPeakTotalCount", EMPTY_DBL(),
+                  "Used for validating peaks before fitting. If the total peak window Y-value count "
                   "is under this value, the peak will be excluded from fitting and calibration.");
 
   // make group for Input properties

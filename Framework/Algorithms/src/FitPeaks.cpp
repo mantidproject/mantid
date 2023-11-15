@@ -432,8 +432,8 @@ void FitPeaks::init() {
                   "signal-to-noise ratio under this value will be excluded."
                   "Note, the algorithm will not exclude a peak for which the noise cannot be estimated.");
 
-  declareProperty(PropertyNames::PEAK_MIN_TOTAL_COUNT, 0.,
-                  "Used for validating peaks before fitting. If the total peak Y-value count "
+  declareProperty(PropertyNames::PEAK_MIN_TOTAL_COUNT, EMPTY_DBL(),
+                  "Used for validating peaks before fitting. If the total peak window Y-value count "
                   "is under this value, the peak will be excluded from fitting and calibration.");
 
   const std::string addoutgrp("Analysis");
@@ -910,31 +910,26 @@ void FitPeaks::processInputPeakTolerance() {
                              "peaks to fit are inconsistent.");
   }
 
-  // set minimum peak height to 0 (default value) if not specified or invalid
+  // set the minimum peak height to 0 (default value) if not specified or invalid
   m_minPeakHeight = getProperty(PropertyNames::PEAK_MIN_HEIGHT);
   if (isEmpty(m_minPeakHeight) || m_minPeakHeight < 0.)
     m_minPeakHeight = 0.;
 
-  // set minimum peak total count to 0 (default value) if not specified or invalid
+  // PEAK_MIN_HEIGHT used to function as both "peak height" and "total count" checker.
+  // Now the "total count" is checked by PEAK_MIN_TOTAL_COUNT, so set it accordingly.
   m_minPeakTotalCount = getProperty(PropertyNames::PEAK_MIN_TOTAL_COUNT);
-  if (isEmpty(m_minPeakTotalCount) || m_minPeakTotalCount < 0.)
-    m_minPeakTotalCount = 0.;
+  if (m_minPeakHeight > 0 && isEmpty(m_minPeakTotalCount))
+    m_minPeakTotalCount = m_minPeakHeight;
+  else {
+    // set the minimum peak total count to 0 if not specified or invalid
+    if (isEmpty(m_minPeakTotalCount) || m_minPeakTotalCount < 0.)
+      m_minPeakTotalCount = 0.;
+  }
 
-  // set signal-to-noise threshold to zero (default value) if not specified or invalid
+  // set the signal-to-noise threshold to zero (default value) if not specified or invalid
   m_minSignalToNoiseRatio = getProperty(PropertyNames::PEAK_MIN_SIGNAL_TO_NOISE_RATIO);
   if (isEmpty(m_minSignalToNoiseRatio) || m_minSignalToNoiseRatio < 0.)
     m_minSignalToNoiseRatio = 0.;
-
-  // Historically PEAK_MIN_HEIGHT also functioned (erroneously) as the PEAK_MIN_TOTAL_COUNT property.
-  // Therefore, warn the user if PEAK_MIN_HEIGHT is active, but PEAK_MIN_TOTAL_COUNT isn't.
-  if (m_minPeakHeight > 0 && m_minPeakTotalCount == 0) {
-    std::ostringstream os;
-    os << "PDCalibration property " << PropertyNames::PEAK_MIN_HEIGHT
-       << " is used for checking peak height only. "
-          "Consider checking peak window total count as well using "
-       << PropertyNames::PEAK_MIN_TOTAL_COUNT << ".\n";
-    logNoOffset(4 /*warning*/, os.str());
-  }
 }
 
 //----------------------------------------------------------------------------------------------
