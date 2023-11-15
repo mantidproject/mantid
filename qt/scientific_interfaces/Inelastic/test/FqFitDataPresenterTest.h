@@ -9,10 +9,12 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "Analysis/FqFitAddWorkspaceDialog.h"
 #include "Analysis/FqFitDataPresenter.h"
 #include "Analysis/FqFitModel.h"
 #include "Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "Analysis/IndirectFitDataView.h"
+#include "IndirectAddWorkspaceDialog.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
@@ -160,6 +162,11 @@ public:
     TS_ASSERT(m_presenter);
     TS_ASSERT(m_model);
     TS_ASSERT(m_view);
+  }
+
+  void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_fqfit() {
+    auto dialog = new IndirectAddWorkspaceDialog(nullptr);
+    TS_ASSERT(!m_presenter->addWorkspaceFromDialog(dialog));
   }
 
   void test_addWorkspace_does_not_throw_with_width() {
