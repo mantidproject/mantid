@@ -215,7 +215,7 @@ class InstrumentArrayConverter:
         """
         bank = self.inst.getComponentByName(bank_name)
         row, col = peak.getRow(), peak.getCol()
-        drows, dcols = nrows // 2, ncols // 2
+        drows, dcols = int(nrows) // 2, int(ncols) // 2
         detids, det_edges, irow_peak, icol_peak = self.get_detid_array(bank, detid, row, col, drows, dcols, nrows_edge, ncols_edge)
         peak_data = PeakData(irow_peak, icol_peak, det_edges, detids, peak, self.ws)
         return peak_data
