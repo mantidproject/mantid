@@ -148,6 +148,16 @@ void IETView::displayWarning(std::string const &message) const {
   QMessageBox::warning(nullptr, "", QString::fromStdString(message));
 }
 
+void IETView::setCalibVisible(bool visible) {
+  m_uiForm.ckUseCalib->setVisible(visible);
+  m_uiForm.dsCalibrationFile->setVisible(visible);
+}
+
+void IETView::setEfixedVisible(bool visible) {
+  m_uiForm.spEfixed->setVisible(visible);
+  m_uiForm.lbEfixed->setVisible(visible);
+}
+
 void IETView::setBackgroundSectionVisible(bool visible) { m_uiForm.gbBackgroundRemoval->setVisible(visible); }
 
 void IETView::setPlotTimeSectionVisible(bool visible) { m_uiForm.gbPlotTime->setVisible(visible); }

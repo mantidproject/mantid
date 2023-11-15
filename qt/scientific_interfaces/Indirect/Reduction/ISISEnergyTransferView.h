@@ -53,6 +53,8 @@ public:
                                     std::string const &saveDirectory) const;
   void displayWarning(std::string const &message) const;
 
+  void setCalibVisible(bool visible);
+  void setEfixedVisible(bool visible);
   void setBackgroundSectionVisible(bool visible);
   void setPlotTimeSectionVisible(bool visible);
   void setPlottingOptionsVisible(bool visible);
