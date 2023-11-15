@@ -1581,7 +1581,7 @@ public:
     return;
   }
 
-  void createGaussParameters(vector<string> &parnames, vector<double> &parvalues, const double peakCenter = 10.0) {
+  void createGaussParameters(vector<string> &parnames, vector<double> &parvalues) {
     parnames.clear();
     parvalues.clear();
 
@@ -1592,7 +1592,7 @@ public:
     parvalues.emplace_back(0.1);
 
     parnames.emplace_back("PeakCentre");
-    parvalues.emplace_back(peakCenter);
+    parvalues.emplace_back(10.0);
   }
 
   //----------------------------------------------------------------------------------------------
