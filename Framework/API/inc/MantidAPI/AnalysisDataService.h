@@ -98,7 +98,7 @@ public:
   /// workspace object is renamed
   virtual void rename(const std::string &oldName, const std::string &newName);
   /// Overridden remove member to delete its name held by the workspace itself
-  virtual void remove(const std::string &name);
+  virtual Workspace_sptr remove(const std::string &name);
   /// Random generated unique workspace name
   const std::string uniqueName(const int n = 5, const std::string &prefix = "", const std::string &suffix = "");
   /// Random generated unique hidden workspace name

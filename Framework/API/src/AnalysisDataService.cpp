@@ -154,8 +154,9 @@ void AnalysisDataServiceImpl::rename(const std::string &oldName, const std::stri
  * Overridden remove member to delete its name held by the workspace itself.
  * It is important to do if the workspace isn't deleted after removal.
  * @param name The name of a workspace to remove.
+ * @return The workspace being removed from the ADS
  */
-void AnalysisDataServiceImpl::remove(const std::string &name) {
+Workspace_sptr AnalysisDataServiceImpl::remove(const std::string &name) {
   Workspace_sptr ws;
   try {
     ws = retrieve(name);
@@ -166,6 +167,7 @@ void AnalysisDataServiceImpl::remove(const std::string &name) {
   if (ws) {
     ws->setName("");
   }
+  return ws;
 }
 
 /**
