@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS script helpers for elastic powder reduction
+DNS script helpers for reduction of single crystal elastic data.
 """
 
 # pylint: disable=unused-import
@@ -19,24 +20,25 @@ from mantid.simpleapi import (BinMD, CreateSingleValuedWorkspace, DivideMD,
 
 
 def load_all(data_dict, binning, params, standard=False):
-    """Loading of multiple DNS files given in a dictionary to workspaces
     """
-    workspacenames = {}
-    for samplename, fields in data_dict.items():
-        workspacenames[samplename] = []
-        path = data_dict[samplename]['path']
-        for fieldname, filenumbers in fields.items():
-            if fieldname != 'path':
-                workspacename = "_".join((samplename, fieldname))
-                workspacenames[samplename].append(workspacename)
-                load_binned(workspacename, binning, params, path, filenumbers,
+    Loading of multiple DNS files given in a dictionary to workspaces.
+    """
+    workspace_names = {}
+    for sample_name, fields in data_dict.items():
+        workspace_names[sample_name] = []
+        path = data_dict[sample_name]['path']
+        for field_name, file_numbers in fields.items():
+            if field_name != 'path':
+                workspace_name = "_".join((sample_name, field_name))
+                workspace_names[sample_name].append(workspace_name)
+                load_binned(workspace_name, binning, params, path, file_numbers,
                             standard)
-    return workspacenames
+    return workspace_names
 
 
-def load_binned(workspacename, binning, params, path, filenumbers, standard):
-    # pylint: disable=too-many-arguments
-    """Loading of multiple DNS datafiles into a single workspace
+def load_binned(workspace_name, binning, params, path, file_numbers, standard):
+    """
+    Loading of multiple DNS datafiles into a single workspace.
     """
     ad0 = f"Theta,{binning['twoTheta'][0] / 2.0}," \
           f"{binning['twoTheta'][1] / 2.0}," \
@@ -44,17 +46,17 @@ def load_binned(workspacename, binning, params, path, filenumbers, standard):
     ad1 = f"Omega,{binning['Omega'][0]}," \
           f"{binning['Omega'][1]}," \
           f"{binning['Omega'][2]}"
-    filepaths = [f"{path}_{number:06d}.d_dat" for number in list(filenumbers)]
+    filepaths = [f"{path}_{number:06d}.d_dat" for number in list(file_numbers)]
     filepaths = ', '.join(filepaths)
-    normname = "_".join((workspacename, 'norm'))
-    if workspacename.endswith('_sf'):
-        fieldname = workspacename[-4:]
+    norm_name = "_".join((workspace_name, 'norm'))
+    if workspace_name.endswith('_sf'):
+        field_name = workspace_name[-4:]
     else:
-        fieldname = workspacename[-5:]
+        field_name = workspace_name[-5:]
     if not standard:
         LoadDNSSCD(FileNames=filepaths,
-                   OutputWorkspace=workspacename,
-                   NormalizationWorkspace=normname,
+                   OutputWorkspace=workspace_name,
+                   NormalizationWorkspace=norm_name,
                    Normalization=params['norm_to'],
                    a=params['a'],
                    b=params['b'],
@@ -66,11 +68,11 @@ def load_binned(workspacename, binning, params, path, filenumbers, standard):
                    HKL1=params['hkl1'],
                    HKL2=params['hkl2'],
                    LoadAs='raw',
-                   SaveHuberTo=f'huber_{fieldname}')
+                   SaveHuberTo=f'huber_{field_name}')
     else:
         LoadDNSSCD(FileNames=filepaths,
-                   OutputWorkspace=workspacename,
-                   NormalizationWorkspace=normname,
+                   OutputWorkspace=workspace_name,
+                   NormalizationWorkspace=norm_name,
                    Normalization=params['norm_to'],
                    a=params['a'],
                    b=params['b'],
@@ -82,24 +84,24 @@ def load_binned(workspacename, binning, params, path, filenumbers, standard):
                    HKL1=params['hkl1'],
                    HKL2=params['hkl2'],
                    LoadAs='raw',
-                   LoadHuberFrom=f'huber_{fieldname}')
-    BinMD(InputWorkspace=workspacename,
-          OutputWorkspace=workspacename,
+                   LoadHuberFrom=f'huber_{field_name}')
+    BinMD(InputWorkspace=workspace_name,
+          OutputWorkspace=workspace_name,
           AxisAligned=True,
           AlignedDim0=ad0,
           AlignedDim1=ad1)
 
-    BinMD(InputWorkspace=normname,
-          OutputWorkspace=normname,
+    BinMD(InputWorkspace=norm_name,
+          OutputWorkspace=norm_name,
           AxisAligned=True,
           AlignedDim0=ad0,
           AlignedDim1=ad1)
 
-    return mtd[workspacename]
+    return mtd[workspace_name]
 
 
-def vanadium_correction(workspacename,
-                        vanaset=None,
+def vanadium_correction(workspace_name,
+                        vana_set=None,
                         ignore_vana_fields=False,
                         sum_vana_sf_nsf=False):
     # pylint: disable=too-many-locals
@@ -109,41 +111,41 @@ def vanadium_correction(workspacename,
     factor based on vanadium data
 
     Key-Arguments
-    vanaset = used Vanadium data, if not given fields matching sample are used
+    vana_set = used Vanadium data, if not given fields matching sample are used
     ignore_vana_fields = if True fields of vanadium files will be ignored
     sum_vana_sf_nsf ) if True SF and NSF channels of vanadium are summed
     """
     vana_sum = None
     vana_sum_norm = None
-    workspacenorm = '_'.join((workspacename, 'norm'))
-    if workspacename.endswith('_sf'):
-        fieldname = workspacename[-4:]
+    workspace_norm = '_'.join((workspace_name, 'norm'))
+    if workspace_name.endswith('_sf'):
+        field_name = workspace_name[-4:]
     else:
-        fieldname = workspacename[-5:]
+        field_name = workspace_name[-5:]
     if ignore_vana_fields:
-        if vanaset:
-            vanalist = []
-            normlist = []
-            for field in vanaset:
+        if vana_set:
+            vana_list = []
+            norm_list = []
+            for field in vana_set:
                 if field != 'path':
-                    vananame = '_'.join(('vana', field))
-                    vananorm = '_'.join((vananame, 'norm'))
+                    vana_name = '_'.join(('vana', field))
+                    vana_norm = '_'.join((vana_name, 'norm'))
                     try:
-                        vana = mtd[vananame]
-                        vana_norm = mtd[vananorm]
+                        vana = mtd[vana_name]
+                        vana_norm = mtd[vana_norm]
                     except KeyError:
-                        raise_error(f'No vanadium file for field {fieldname}.')
-                        return mtd[workspacename]
-                    vanalist.append(vana)
-                    normlist.append(vana_norm)
-            vana_sum = sum(vanalist)
-            vana_sum_norm = sum(normlist)
+                        raise_error(f'No vanadium file for field {field_name}.')
+                        return mtd[workspace_name]
+                    vana_list.append(vana)
+                    norm_list.append(vana_norm)
+            vana_sum = sum(vana_list)
+            vana_sum_norm = sum(norm_list)
         else:
             raise_error(
                 'Need to give vanadium dataset explicit if you want all'
                 ' vandium files to be added.')
     elif sum_vana_sf_nsf:
-        polarization = fieldname.split('_')[0]
+        polarization = field_name.split('_')[0]
         vana_nsf = '_'.join(('vana', polarization, 'nsf'))
         vana_sf = '_'.join(('vana', polarization, 'sf'))
         vana_nsf_norm = '_'.join((vana_nsf, 'norm'))
@@ -155,7 +157,7 @@ def vanadium_correction(workspacename,
             raise_error(
                 f'No vanadium file for {polarization}_sf . You can choose to'
                 f' ignore vanadium fields in the options.')
-            return mtd[workspacename]
+            return mtd[workspace_name]
         try:
             vana_nsf = mtd[vana_nsf]
             vana_nsf_norm = mtd[vana_nsf_norm]
@@ -163,19 +165,19 @@ def vanadium_correction(workspacename,
             raise_error(
                 f'No vanadium file for {polarization}_nsf. You can choose to'
                 f' ignore vanadium fields in the options.')
-            return mtd[workspacename]
+            return mtd[workspace_name]
         vana_sum = vana_sf + vana_nsf
         vana_sum_norm = vana_sf_norm + vana_nsf_norm
     else:
-        vananame = '_'.join(('vana', fieldname))
-        vananorm = '_'.join((vananame, 'norm'))
+        vana_name = '_'.join(('vana', field_name))
+        vana_norm = '_'.join((vana_name, 'norm'))
         try:
-            vana_sum = mtd[vananame]
-            vana_sum_norm = mtd[vananorm]
+            vana_sum = mtd[vana_name]
+            vana_sum_norm = mtd[vana_norm]
         except KeyError:
-            raise_error(f'No vanadium file for {fieldname}. You can choose to '
+            raise_error(f'No vanadium file for {field_name}. You can choose to '
                         f'ignore vanadium fields in the options.')
-            return mtd[workspacename]
+            return mtd[workspace_name]
     # common code, which will be run regardless of the case
 
     sum_signal = np.nan_to_num(vana_sum.getSignalArray())
@@ -195,6 +197,6 @@ def vanadium_correction(workspacename,
     coef_u = vana_sum / vana_total
     coef_norm = vana_sum_norm / vana_total_norm
     coef = coef_u / coef_norm
-    MultiplyMD(coef, workspacenorm, OutputWorkspace=workspacenorm)
-    DivideMD(workspacename, workspacenorm, OutputWorkspace=workspacename)
-    return mtd[workspacename]
+    MultiplyMD(coef, workspace_norm, OutputWorkspace=workspace_norm)
+    DivideMD(workspace_name, workspace_norm, OutputWorkspace=workspace_name)
+    return mtd[workspace_name]
