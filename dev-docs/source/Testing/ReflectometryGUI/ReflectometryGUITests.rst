@@ -30,6 +30,14 @@ Loading batch files
 - The decimal values should be shown to 2 decimal places as per the Options that we set.
 - Re-open the same batch file. You should not be prompted with any warnings (unless you changed anything).
 
+Adding and deleting batch tabs
+------------------------------
+
+- The interface should open with two batch tabs created by default.
+- Click the cross on any tab to delete it.
+- Check that if all batch tabs are deleted from the interface then a new one is automatically added.
+- Check that you can create a new batch tab using the menu ``Batch->New`` option.
+
 Changing the Default instrument
 -------------------------------
 
