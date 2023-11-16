@@ -14,6 +14,8 @@
 #include "MantidKernel/Instantiator.h"
 
 #include <QHash>
+#include <QList>
+#include <QPointer>
 #include <QString>
 #include <QStringList>
 

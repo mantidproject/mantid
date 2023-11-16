@@ -23,7 +23,6 @@
 #include "MantidKernel/Logger.h"
 
 #include <Poco/Environment.h>
-#include <QPointer>
 #include <QStringList>
 
 using namespace MantidQt::API;
@@ -193,11 +192,11 @@ void InterfaceManager::notifyExistingInterfaces(UserSubWindow *newWindow) {
 }
 
 QList<QPointer<UserSubWindow>> &InterfaceManager::existingInterfaces() {
-  static QList<QPointer<UserSubWindow>> existingInterfaces;
-  existingInterfaces.erase(std::remove_if(existingInterfaces.begin(), existingInterfaces.end(),
+  static QList<QPointer<UserSubWindow>> existingSubWindows;
+  existingSubWindows.erase(std::remove_if(existingSubWindows.begin(), existingSubWindows.end(),
                                           [](QPointer<UserSubWindow> &window) { return window.isNull(); }),
-                           existingInterfaces.end());
-  return existingInterfaces;
+                           existingSubWindows.end());
+  return existingSubWindows;
 }
 
 /**
