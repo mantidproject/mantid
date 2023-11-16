@@ -381,9 +381,9 @@ void DiffractionFocussing2::execEvent() {
     EventList &groupEL = out->getSpectrum(0);
     const std::vector<size_t> &indices = this->m_wsIndices[0];
 
-    int chunkSize = 200;
+    constexpr int chunkSize{200};
 
-    int end = (totalHistProcess / chunkSize) + 1;
+    const int end = (totalHistProcess / chunkSize) + 1;
 
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int wiChunk = 0; wiChunk < end; wiChunk++) {
@@ -634,35 +634,55 @@ void DiffractionFocussing2::getGroupingWorkspace() {
  * @return the total number of input histograms that will be read.
  */
 size_t DiffractionFocussing2::setupGroupToWSIndices() {
+  // clear out objects that are configured here
+  m_validGroups.clear();
+  m_wsIndices.clear();
+
+  // initialize the vector of valid group numbers
+  const auto groups = m_groupWS->getGroupIDs(false);
+  std::transform(groups.cbegin(), groups.cend(), std::back_inserter(m_validGroups),
+                 [](const auto &group) { return static_cast<Indexing::SpectrumNumber>(group); });
+
   // set up the mapping of group to input workspace index
-  std::vector<std::vector<std::size_t>> wsIndices;
-  wsIndices.reserve(this->nGroups + 1);
-  auto nHist_st = static_cast<size_t>(nHist);
-  for (size_t wi = 0; wi < nHist_st; wi++) {
-    // wi is the workspace index (of the input)
-    const int group = groupAtWorkspaceIndex[wi];
-    if (group < 1) // Not in a group, or invalid group #
-      continue;
-
-    // resize the ws_indices if it is not big enough
-    if (wsIndices.size() < static_cast<size_t>(group + 1)) {
-      wsIndices.resize(group + 1);
+  std::map<int, std::vector<std::size_t>> wsIndices2; // (*(std::max_element(groups.begin(), groups.end())));
+  //  wsIndices2.reserve(*(std::max_element(groups.begin(), groups.end())));
+  for (size_t groupIndex = 0; groupIndex < this->m_validGroups.size(); groupIndex++) {
+    const int groupNum = static_cast<int>(m_validGroups[groupIndex]);
+    if (groupNum >= 0) {
+      const auto detids = m_groupWS->getDetectorIDsOfGroup(groupNum);
+      if (detids.empty())
+        continue; // nothing more to do
+      const auto indices = m_matrixInputW->getIndicesFromDetectorIDs(detids);
+      wsIndices2[groupNum] = indices;
     }
-
-    // Also record a list of workspace indices
-    wsIndices[group].emplace_back(wi);
   }
 
-  // initialize a vector of the valid group numbers
-  size_t totalHistProcess = 0;
-  for (const auto &item : group2xvector) {
-    const auto group = item.first;
-    m_validGroups.emplace_back(group);
-    totalHistProcess += wsIndices[group].size();
-  }
+  // remove empty groups
+  m_validGroups.erase(std::remove_if(m_validGroups.begin(), m_validGroups.end(),
+                                     [wsIndices2](const auto &group) {
+                                       const auto groupID = static_cast<int>(group);
+                                       const auto ele = wsIndices2.find(groupID);
+                                       if (ele == wsIndices2.end())
+                                         return true; // not found means empty
+                                       else
+                                         return ele->second.empty();
+                                     }),
+                      m_validGroups.end());
 
+  // copy over the useful wsIndices
   std::transform(m_validGroups.cbegin(), m_validGroups.cend(), std::back_inserter(m_wsIndices),
-                 [&wsIndices](const auto &group) { return wsIndices[static_cast<int>(group)]; });
+                 [&wsIndices2](const auto &group) { return wsIndices2[static_cast<int>(group)]; });
+
+  // add up the total number of spectra to be processed as return value
+  const size_t totalHistProcess = std::accumulate(m_validGroups.cbegin(), m_validGroups.cend(), static_cast<size_t>(0),
+                                                  [wsIndices2](const size_t accum, const auto group) {
+                                                    const auto groupID = static_cast<int>(group);
+                                                    const auto ele = wsIndices2.find(groupID);
+                                                    if (ele == wsIndices2.end())
+                                                      return accum; // not found means empty
+                                                    else
+                                                      return accum + ele->second.size();
+                                                  });
 
   return totalHistProcess;
 }
