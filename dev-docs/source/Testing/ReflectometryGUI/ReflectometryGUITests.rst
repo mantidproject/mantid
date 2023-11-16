@@ -177,7 +177,7 @@ Preview tab
 ---------------
 
 - Go to the Reduction Preview tab.
-- Type ``INTER45455`` into the ``Run`` input. Set the ``Angle`` to ``1`` and click ``Load``. The instrument view plot should display the data on a detector with four banks. If the plot shows only a single bank then check that you have added the path to your unit test data to your Mantid user directories (see set up instructions). Note, with this dataset, we expect an error "Detector with ID..." to be thrown at this stage.
+- Type ``INTER45455`` into the ``Run`` input. Set the ``Angle`` to ``1`` and click ``Load``. The instrument view plot should display the data on a detector with four banks. Note, with this dataset, we expect an error "Detector with ID..." to be thrown at this stage.
 - Go to the drop-down underneath the color scale next to the second (slice viewer) plot and select ``SymmetricLog10``. This should allow you to see the counts on the slice viewer plot more clearly. You should see what appear as roughly four horizontal lines of data on the plot.
 - Going back to the instrument view plot, click the rectangle-select button above it and draw a single region that selects all detector banks. The selected detector segments should be summed and the result plotted on the slice viewer, appearing as a single line of data.
 - Reduce the size of your original region on the instrument view and check that multiple regions can be added to the plot. Check that when moving and resizing regions, the slice viewer plot is updated.
