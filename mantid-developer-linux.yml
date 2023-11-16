@@ -48,6 +48,7 @@ dependencies:
   - toml>=0.10.2
   - versioningit>=2.1
   - joblib
+  - orsopy
 
   # Not Windows, OpenGL implementation:
   - mesalib>=18.0.0
