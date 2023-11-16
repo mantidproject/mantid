@@ -32,14 +32,6 @@ ConvFitDataView::ConvFitDataView(const QStringList &headers, QWidget *parent) : 
   header->setSectionResizeMode(1, QHeaderView::Stretch);
 }
 
-int ConvFitDataView::workspaceIndexColumn() const { return 2; }
-
-int ConvFitDataView::startXColumn() const { return 3; }
-
-int ConvFitDataView::endXColumn() const { return 4; }
-
-int ConvFitDataView::excludeColumn() const { return 5; }
-
 void ConvFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
   IndirectFitDataView::addTableEntry(row, newRow);
 
