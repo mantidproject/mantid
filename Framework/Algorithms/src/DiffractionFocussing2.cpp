@@ -102,8 +102,6 @@ std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
 void DiffractionFocussing2::cleanup() {
   // Clear maps and vectors to free up memory.
   udet2group.clear();
-  groupAtWorkspaceIndex.clear();
-  std::vector<int>().swap(groupAtWorkspaceIndex);
   group2xvector.clear();
   this->m_validGroups.clear();
   this->m_wsIndices.clear();
@@ -135,7 +133,6 @@ void DiffractionFocussing2::exec() {
   // std::cout << "(2) nGroups " << nGroups << "\n";
 
   // This finds the rebin parameters (used in both versions)
-  // It also initializes the groupAtWorkspaceIndex[] array.
   determineRebinParameters();
 
   size_t totalHistProcess = this->setupGroupToWSIndices();
@@ -420,6 +417,7 @@ void DiffractionFocussing2::execEvent() {
     for (int iGroup = 0; iGroup < nValidGroups; iGroup++) {
       PARALLEL_START_INTERRUPT_REGION
       const std::vector<size_t> &indices = this->m_wsIndices[iGroup];
+
       for (auto wi : indices) {
         // In workspace index iGroup, put what was in the OLD workspace index wi
         EventList &inputEL = eventInputW->getSpectrum(wi);
@@ -517,7 +515,6 @@ int DiffractionFocussing2::validateSpectrumInGroup(size_t wi) {
  *  as the input spectra.
  *
  * The X vectors are saved in group2xvector.
- * It also initializes the groupAtWorkspaceIndex[] array.
  *
  */
 void DiffractionFocussing2::determineRebinParameters() {
@@ -532,26 +529,19 @@ void DiffractionFocussing2::determineRebinParameters() {
   const double BIGGEST = std::numeric_limits<double>::max();
 
   // whether or not to bother checking for a mask
-  bool checkForMask = false;
-  Geometry::Instrument_const_sptr instrument = m_matrixInputW->getInstrument();
-  if (instrument != nullptr) {
+  bool checkForMask = true;
+  if (Geometry::Instrument_const_sptr instrument = m_matrixInputW->getInstrument()) {
     checkForMask = ((instrument->getSource() != nullptr) && (instrument->getSample() != nullptr));
   }
   const auto &spectrumInfo = m_matrixInputW->spectrumInfo();
 
-  groupAtWorkspaceIndex.resize(nHist);
-  for (int wi = 0; wi < nHist; wi++) //  Iterate over all histograms to find X boundaries for each group
-  {
+  for (int wi = 0; wi < nHist; wi++) { //  Iterate over all histograms to find X boundaries for each group
     const int group = validateSpectrumInGroup(static_cast<size_t>(wi));
-    groupAtWorkspaceIndex[wi] = group;
     if (group == -1)
       continue;
 
-    if (checkForMask) {
-      if (spectrumInfo.isMasked(wi)) {
-        groupAtWorkspaceIndex[wi] = -1;
-        continue;
-      }
+    if (checkForMask && spectrumInfo.isMasked(wi)) {
+      continue;
     }
     gpit = group2minmax.find(group);
 

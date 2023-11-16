@@ -107,12 +107,8 @@ private:
   Mantid::DataObjects::GroupingWorkspace_sptr m_groupWS;
 
   // This map needs to be ordered to process the groups in order.
-  /// typedef for the storage of each group's X vector
-  using group2vectormap = std::map<int, std::shared_ptr<MantidVec>>;
   /// Map from udet to group
   std::vector<int> udet2group;
-  /// The list of group numbers
-  std::vector<int> groupAtWorkspaceIndex;
   /// Map from the group number to the group's X vector
   std::map<int, HistogramData::BinEdges> group2xvector;
   std::map<int, double> group2xstep;
