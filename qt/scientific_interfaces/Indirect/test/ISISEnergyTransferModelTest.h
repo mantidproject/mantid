@@ -613,6 +613,30 @@ public:
     TS_ASSERT_EQUALS(errors.size(), 0);
   }
 
+  void testPlotRawAlgorithmQueueReturnsTwoAlgorithmsIfRemoveBackgroundIsFalse() {
+    IETInputData inputData;
+    IETConversionData conversionData;
+    IETBackgroundData backgroundData(false);
+
+    IETPlotData plotData(inputData, conversionData, backgroundData);
+    InstrumentData instData("TFXA", "graphite", "004");
+
+    auto const algorithmQueue = m_model->plotRawAlgorithmQueue(instData, plotData);
+    TS_ASSERT_EQUALS(2, algorithmQueue.size());
+  }
+
+  void testPlotRawAlgorithmQueueReturnsFourAlgorithmsIfRemoveBackgroundIsTrue() {
+    IETInputData inputData;
+    IETConversionData conversionData;
+    IETBackgroundData backgroundData(true, 1, 4);
+
+    IETPlotData plotData(inputData, conversionData, backgroundData);
+    InstrumentData instData("TFXA", "graphite", "004");
+
+    auto const algorithmQueue = m_model->plotRawAlgorithmQueue(instData, plotData);
+    TS_ASSERT_EQUALS(4, algorithmQueue.size());
+  }
+
 private:
   std::unique_ptr<IETModel> makeModel() { return std::make_unique<IETModel>(); }
   IAlgorithm_sptr makeReductionAlgorithm() { return AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer"); }

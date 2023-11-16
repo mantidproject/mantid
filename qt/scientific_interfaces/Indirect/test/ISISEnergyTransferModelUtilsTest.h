@@ -73,4 +73,32 @@ public:
     TS_ASSERT_EQUALS(loadSampleLog("iris26184_multi_graphite002_red", {"nchannels", "nspectra", "sample"}, 300.0),
                      2000.0);
   }
+
+  void testParseInputFilesDoesNotThrowWhenProvidedAnInvalidString() {
+    TS_ASSERT_THROWS_NOTHING(parseInputFiles("  "));
+    TS_ASSERT_THROWS_NOTHING(parseInputFiles("  ,"));
+    TS_ASSERT_THROWS_NOTHING(parseInputFiles(",C:/path/to/file2.raw"));
+  }
+
+  void testParseInputFilesReturnsThePathAndFilenameOfTheFirstFile() {
+    auto const [rawFile, basename] = parseInputFiles("C:/path/to/file.raw,C:/path/to/file2.raw");
+
+    TS_ASSERT_EQUALS(rawFile, "C:/path/to/file.raw");
+    TS_ASSERT_EQUALS(basename, "file.raw");
+  }
+
+  void testCreateDetectorListReturnsAVectorWithOneValueWhenMinAndMaxAreEqual() {
+    auto const detectorList = createDetectorList(3, 3);
+
+    TS_ASSERT_EQUALS(1, detectorList.size());
+    TS_ASSERT_EQUALS(3, detectorList[0]);
+  }
+
+  void testCreateDetectorListReturnsAVectorWithTheExpectedMinAndMaxValues() {
+    auto const detectorList = createDetectorList(5, 9);
+
+    TS_ASSERT_EQUALS(5, detectorList.size());
+    TS_ASSERT_EQUALS(5, detectorList.front());
+    TS_ASSERT_EQUALS(9, detectorList.back());
+  }
 };
