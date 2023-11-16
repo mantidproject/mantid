@@ -28,7 +28,7 @@ namespace CustomInterfaces {
         @author Samuel Jackson, STFC
 */
 
-class DLLExport IndirectSimulationTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL IndirectSimulationTab : public IndirectTab {
   Q_OBJECT
 
 public:

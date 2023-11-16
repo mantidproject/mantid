@@ -18,32 +18,32 @@ ZERO_ERROR_DEFAULT = 1e6
 file_format_with_append = namedtuple("file_format_with_append", "file_format, append_file_format_name")
 
 
-def save_to_file(workspace, file_format, file_name, transmission_workspaces, additional_run_numbers):
+def save_to_file(workspace, file_format, file_name, additional_properties, additional_run_numbers):
     """
     Save a workspace to a file.
 
     :param workspace: the workspace to save.
     :param file_format: the selected file format type.
     :param file_name: the file name.
-    :param transmission_workspaces: a dict of additional save algorithm inputs
+    :param additional_properties: a dict of additional save algorithm inputs
             e.g. Transmission and TransmissionCan for SaveCanSAS1D-v2
     :param additional_run_numbers: a dict of workspace type to run number. Used in SaveNXCanSAS only.
     :return:
     """
     save_options = {"InputWorkspace": workspace}
-    save_alg = get_save_strategy(file_format, file_name, save_options, transmission_workspaces, additional_run_numbers)
+    save_alg = get_save_strategy(file_format, file_name, save_options, additional_properties, additional_run_numbers)
     save_alg.setRethrows(True)
     save_alg.execute()
 
 
-def get_save_strategy(file_format_bundle, file_name, save_options, transmission_workspaces, additional_run_numbers):
+def get_save_strategy(file_format_bundle, file_name, save_options, additional_properties, additional_run_numbers):
     """
     Provide a save strategy based on the selected file format
 
     :param file_format_bundle: the selected file_format_bundle
     :param file_name: the name of the file
     :param save_options: the save options such as file name and input workspace
-    :param transmission_workspaces: a dict of additional inputs for SaveCanSAS algorithm
+    :param additional_properties: a dict of additional inputs for SaveCanSAS algorithm
     :param additional_run_numbers: a dict of workspace type to run number
     :return: a handle to a save algorithm
     """
@@ -54,12 +54,12 @@ def get_save_strategy(file_format_bundle, file_name, save_options, transmission_
     elif file_format is SaveType.CAN_SAS:
         file_name = get_file_name(file_format_bundle, file_name, "", ".xml")
         save_name = "SaveCanSAS1D"
-        save_options.update(transmission_workspaces)
+        save_options.update(additional_properties)
         save_options.update(additional_run_numbers)
     elif file_format is SaveType.NX_CAN_SAS:
         file_name = get_file_name(file_format_bundle, file_name, "_nxcansas", ".h5")
         save_name = "SaveNXcanSAS"
-        save_options.update(transmission_workspaces)
+        save_options.update(additional_properties)
         save_options.update(additional_run_numbers)
     elif file_format is SaveType.NIST_QXY:
         file_name = get_file_name(file_format_bundle, file_name, "_nistqxy", ".dat")

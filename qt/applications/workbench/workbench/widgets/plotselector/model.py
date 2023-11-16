@@ -136,6 +136,7 @@ class PlotSelectorModel(object):
             raise ValueError("Error renaming, could not find a plot with the number {}.".format(plot_number))
 
         figure_manager.set_window_title(new_name)
+        figure_manager.set_axes_title(new_name)
 
     # ------------------------ Plot Closing -------------------------
 

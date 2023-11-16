@@ -8,6 +8,7 @@
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Property.h"
+#include <mutex>
 
 namespace NeXus {
 class File;
@@ -28,6 +29,9 @@ public:
   /// Constructor with vector of DateAndTime
   BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times);
 
+  /// Threadsafe method to access cached information about sorting
+  bool arePulseTimesIncreasing() const;
+
   /// Equals
   bool equals(size_t otherNumPulse, const std::string &otherStartTime);
 
@@ -39,4 +43,11 @@ public:
 
   /// Vector of period numbers corresponding to each pulse
   std::vector<int> periodNumbers;
+
+private:
+  template <typename ValueType>
+  void readData(::NeXus::File &file, int64_t numValues, Mantid::Types::Core::DateAndTime &start);
+
+  mutable int8_t m_sorting_info;
+  mutable std::mutex m_sortingMutex;
 };

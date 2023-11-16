@@ -236,11 +236,11 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/FindPeaksAutomatic.py
     algorithms/WorkflowAlgorithms/FitGaussianPeaks.py
     algorithms/WorkflowAlgorithms/FlatPlatePaalmanPingsCorrection.py
+    algorithms/WorkflowAlgorithms/HFIRGoniometerIndependentBackground.py
     algorithms/WorkflowAlgorithms/HFIRSANSReduction.py
     algorithms/WorkflowAlgorithms/ILL_utilities.py
     algorithms/WorkflowAlgorithms/ISISIndirectDiffractionReduction.py
     algorithms/WorkflowAlgorithms/ISISIndirectEnergyTransfer.py
-    algorithms/WorkflowAlgorithms/ISISIndirectEnergyTransferWrapper.py
     algorithms/WorkflowAlgorithms/IndirectAnnulusAbsorption.py
     algorithms/WorkflowAlgorithms/IndirectAnnulusAbsorption2.py
     algorithms/WorkflowAlgorithms/IndirectCalibration.py

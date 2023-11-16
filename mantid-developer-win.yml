@@ -4,7 +4,7 @@ channels:
   - conda-forge
 
 dependencies:
-  - boost=1.77.* # Also pulls in boost-cpp. 1.78 clashes with icu version from Qt
+  - boost=1.78.* # Also pulls in boost-cpp. Use the same version as conda-forge
   - ccache
   - cmake>=3.21.0,<3.27.0 # Avoid bug in 3.20.* and 3.27.* with updating external projects
   - conda-wrappers
@@ -19,14 +19,14 @@ dependencies:
   - librdkafka>=1.6.0
   - lib3mf # windows only
   - muparser>=2.3.2
-  - matplotlib=3.6.*
+  - matplotlib=3.7.*
   - nexus=4.4.*
   - ninja>=1.10.2
   - numpy>=1.22,<1.25
   - occt
   - conda-wrappers
   - pip>=21.0.1
-  - poco=1.12.1|>=1.12.5 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning. It's resolved on their devel branch so should be fine after 1.12.4
+  - poco=1.12.1|>=1.12.6 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning. It's resolved on their devel branch but not yet included in a release, as of 1.12.5.
   - psutil>=5.8.0
   - pycifrw==4.4.1 # Force to 4.4.1 as later versions cause issues with loading CIF files
   - pyqt>=5.15,<6
@@ -35,7 +35,7 @@ dependencies:
   - pyyaml>=5.4.1
   - qscintilla2
   - qt=5.15.8 # Avoid unexpected qt upgrades
-  - qtconsole!=5.4.2 # 5.4.2 crashes the jupyter console. Bug was fixed in 5.4.3
+  - qtconsole>5.4.2,!=5.5.0 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
   - qtpy>=1.9.0
   - requests>=2.25.1
   - scipy>=1.10.0
@@ -50,4 +50,3 @@ dependencies:
   - cppcheck==2.10.3
   - pre-commit==2.15 # Had to pin back to 2.15 as we can't handle changes made here (https://github.com/pre-commit/pre-commit/pull/2065 added in 2.16) on windows yet.
   - joblib
-

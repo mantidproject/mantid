@@ -24,6 +24,7 @@ public:
 
   MOCK_METHOD(Mantid::API::IAlgorithm_sptr, algorithm, (), (const, override));
   MOCK_METHOD((const Mantid::API::IAlgorithmRuntimeProps &), getAlgorithmRuntimeProps, (), (const, noexcept, override));
+  MOCK_METHOD((bool), validatePropsPreExec, (), (const, override, noexcept));
 
 private:
   std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> m_runtimeProps;

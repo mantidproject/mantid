@@ -327,6 +327,7 @@ private:
 
   // Criteria for rejecting non-peaks or weak peaks from fitting
   double m_minSignalToNoiseRatio;
+  double m_minPeakTotalCount;
 
   /// flag for high background
   bool m_highBackground;

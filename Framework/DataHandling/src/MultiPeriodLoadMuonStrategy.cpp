@@ -72,14 +72,13 @@ Workspace_sptr MultiPeriodLoadMuonStrategy::loadDetectorGrouping() const {
   WorkspaceGroup_sptr tableGroup = std::make_shared<WorkspaceGroup>();
   for (int i = 0; i < m_workspaceGroup.getNumberOfEntries(); ++i) {
     int periodNumber = i + 1;
-    auto grouping = m_nexusLoader.loadDetectorGroupingFromNexus(m_detectors, MULTIPERIODSLOADED, periodNumber);
-    TableWorkspace_sptr table = createDetectorGroupingTable(m_detectors, grouping);
+    auto const grouping = m_nexusLoader.loadDetectorGroupingFromNexus(m_detectors, MULTIPERIODSLOADED, periodNumber);
+    auto const table = createDetectorGroupingTable(m_detectors, grouping);
     // if any of the tables are empty we'll load grouping from the IDF
-    if (table->rowCount() == 0) {
-      m_logger.notice("Loading grouping information from IDF");
+    if (!table || (*table)->rowCount() == 0) {
       return loadDefaultDetectorGrouping(*std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(i)));
     }
-    tableGroup->addWorkspace(table);
+    tableGroup->addWorkspace(*table);
   }
   return tableGroup;
 }

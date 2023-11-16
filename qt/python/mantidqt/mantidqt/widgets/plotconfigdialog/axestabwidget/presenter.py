@@ -53,7 +53,6 @@ class AxesTabWidgetPresenter:
         ax = self.get_selected_ax()
         self.set_ax_title(ax, self.current_view_props["title"])
         self._apply_properties_to_axes(ax)
-        self.update_view()
 
     def apply_all_properties(self):
         """Update the axes with the user inputted properties"""
@@ -62,7 +61,6 @@ class AxesTabWidgetPresenter:
         for ax in self.axes_names_dict.values():
             self._apply_properties_to_axes(ax)
             ax.figure.canvas.draw()
-        self.update_view()
 
     def _apply_properties_to_axes(self, ax):
         """Apply current properties to given set of axes"""

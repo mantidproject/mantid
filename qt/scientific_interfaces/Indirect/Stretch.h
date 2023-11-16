@@ -12,7 +12,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class DLLExport Stretch : public IndirectBayesTab {
+class MANTIDQT_INDIRECT_DLL Stretch : public IndirectBayesTab {
   Q_OBJECT
 
 public:

@@ -250,8 +250,8 @@ void PDCalibration::init() {
                   "in PeakPositions by this factor.");
 
   declareProperty("MinimumPeakHeight", 2.,
-                  "Used for validating peaks after fitting. If the fitted height is under this value, "
-                  "the peak will be excluded from calibration.");
+                  "Used for validating peaks before and after fitting. If a peak's observed/estimated or "
+                  "fitted height is under this value, the peak will be marked as error.");
 
   declareProperty("MaxChiSq", 100.,
                   "Used for validating peaks after fitting. If the chi-squared value is higher than this value, "
@@ -296,6 +296,10 @@ void PDCalibration::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>("DiagnosticWorkspaces", "", Direction::Output),
       "Auxiliary workspaces containing extended information on the calibration results.");
+
+  declareProperty("MinimumPeakTotalCount", EMPTY_DBL(),
+                  "Used for validating peaks before fitting. If the total peak window Y-value count "
+                  "is under this value, the peak will be excluded from fitting and calibration.");
 
   declareProperty("MinimumPeakTotalCount", EMPTY_DBL(),
                   "Used for validating peaks before fitting. If the total peak window Y-value count "
@@ -462,6 +466,7 @@ void PDCalibration::exec() {
   }
 
   const double minPeakHeight = getProperty("MinimumPeakHeight");
+  const double minPeakTotalCount = getProperty("MinimumPeakTotalCount");
   const double minSignalToNoiseRatio = getProperty("MinimumSignalToNoiseRatio");
   const double maxChiSquared = getProperty("MaxChiSq");
 
@@ -546,6 +551,7 @@ void PDCalibration::exec() {
   algFitPeaks->setProperty("FitPeakWindowWorkspace", tof_peak_window_ws);
   algFitPeaks->setProperty("PeakWidthPercent", peak_width_percent);
   algFitPeaks->setProperty("MinimumPeakHeight", minPeakHeight);
+  algFitPeaks->setProperty("MinimumPeakTotalCount", minPeakTotalCount);
   algFitPeaks->setProperty("MinimumSignalToNoiseRatio", minSignalToNoiseRatio);
   // some fitting strategy
   algFitPeaks->setProperty("FitFromRight", true);

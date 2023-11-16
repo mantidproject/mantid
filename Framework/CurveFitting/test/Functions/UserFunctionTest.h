@@ -76,4 +76,26 @@ public:
     TS_ASSERT(categories.size() == 1);
     TS_ASSERT(categories[0] == "General");
   }
+
+  void test_setAttribute_will_reevaluate_function_if_it_has_changed() {
+    UserFunction fun;
+    fun.setAttribute("Formula", UserFunction::Attribute("a*x"));
+    fun.setParameter("a", 1.1);
+
+    fun.setAttribute("Formula", UserFunction::Attribute("a*x+b"));
+
+    // Check that the 'a' parameter has been reset
+    TS_ASSERT_EQUALS(0.0, fun.getParameter("a"));
+  }
+
+  void test_setAttribute_will_not_reevaluate_function_if_the_function_has_not_changed() {
+    UserFunction fun;
+    fun.setAttribute("Formula", UserFunction::Attribute("a*x"));
+    fun.setParameter("a", 1.1);
+
+    fun.setAttribute("Formula", UserFunction::Attribute("a*x"));
+
+    // Check that the 'a' parameter has not been reset
+    TS_ASSERT_EQUALS(1.1, fun.getParameter("a"));
+  }
 };

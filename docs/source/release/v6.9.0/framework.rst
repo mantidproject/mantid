@@ -52,6 +52,18 @@ Bugfixes
 .. amalgamate:: Framework/Python/Bugfixes
 
 
+Dependencies
+------------------
+
+New features
+############
+.. amalgamate:: Framework/Dependencies/New_features
+
+Bugfixes
+############
+.. amalgamate:: Framework/Dependencies/Bugfixes
+
+
 MantidWorkbench
 ---------------
 

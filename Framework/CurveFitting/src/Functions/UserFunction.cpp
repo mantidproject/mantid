@@ -59,9 +59,11 @@ double *UserFunction::AddVariable(const char *varName, void *pufun) {
  * expression string
  */
 void UserFunction::setAttribute(const std::string &attName, const Attribute &value) {
+  auto const reevaluateFormula = attName == "Formula" && m_formula != value.value();
+
   IFunction::setAttribute(attName, value);
 
-  if (attName != "Formula") {
+  if (!reevaluateFormula) {
     return;
   }
 
