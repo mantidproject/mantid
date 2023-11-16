@@ -677,7 +677,7 @@ class FigureInteractionTest(unittest.TestCase):
         mock_y_editor.assert_called_once()
 
     @mock.patch("workbench.plotting.figureinteraction.XAxisEditor")
-    def test_click_x_axes_tick_lable_launches_x_axes_editor(self, mock_x_editor):
+    def test_click_x_axes_tick_label_launches_x_axes_editor(self, mock_x_editor):
         self.interactor.canvas.figure = MagicMock()
         axes = self._create_axes_for_axes_editor_test(mouse_over="xaxis_tick")
         self.interactor.canvas.figure.get_axes.return_value = axes
@@ -686,7 +686,7 @@ class FigureInteractionTest(unittest.TestCase):
         mock_x_editor.assert_called_once()
 
     @mock.patch("workbench.plotting.figureinteraction.YAxisEditor")
-    def test_click_y_axes_tick_lable_launches_y_axes_editor(self, mock_y_editor):
+    def test_click_y_axes_tick_label_launches_y_axes_editor(self, mock_y_editor):
         self.interactor.canvas.figure = MagicMock()
         axes = self._create_axes_for_axes_editor_test(mouse_over="yaxis_tick")
         self.interactor.canvas.figure.get_axes.return_value = axes
