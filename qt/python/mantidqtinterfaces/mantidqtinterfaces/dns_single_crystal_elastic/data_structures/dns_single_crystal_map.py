@@ -17,7 +17,7 @@ from matplotlib.tri import LinearTriInterpolator, UniformTriRefiner
 import mantidqtinterfaces.dns_powder_tof.helpers.file_processing as file_helper
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import \
     ObjectDict
-from mantidqtinterfaces.dns_sc_elastic.plot.elastic_sc_helpers import \
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers import \
     angle_to_q, get_hkl_float_array
 
 

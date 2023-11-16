@@ -11,7 +11,7 @@ from qtpy.QtCore import Signal
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QActionGroup, QMenu
 
-from mantidqtinterfaces.dns_sc_elastic.plot.colormaps.matplotcolors \
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.colormaps.matplotcolors \
     import colormaps
 
 

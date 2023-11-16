@@ -24,7 +24,7 @@ class DNSElasticSCOptionsView(DNSView):
     def __init__(self, parent):
         super().__init__(parent)
         self._content = load_ui(__file__,
-                                'elastic_sc_options.ui',
+                                'elastic_single_crystal_options.ui',
                                 baseinstance=self)
         self._map = {
             # 'multiple_scattering': self._content.dSB_multiple_scattering,
@@ -34,11 +34,11 @@ class DNSElasticSCOptionsView(DNSView):
             'sum_vana_sf_nsf': self._content.cB_sum_vana_sf_nsf,
             'ignore_vana_fields': self._content.cB_ignore_vana_fields,
             'separation': self._content.gB_separation,
-            'det_efficency': self._content.cB_det_efficency,
+            'det_efficiency': self._content.cB_det_efficiency,
             'flipping_ratio': self._content.cB_flipping_ratio,
             'separation_xyz': self._content.rB_separation_xyz,
-            'substract_background_from_sample':
-                self._content.cB_substract_background_from_sample,
+            'subtract_background_from_sample':
+                self._content.cB_subtract_background_from_sample,
             'corrections': self._content.gB_corrections,
             'background_factor': self._content.dSB_background_factor,
             'norm_monitor': self._content.rB_norm_monitor,
@@ -71,9 +71,9 @@ class DNSElasticSCOptionsView(DNSView):
             self._get_wavelength)
         self._map['automatic_binning'].stateChanged.connect(
             self._disable_automatic_binning)
-        self._map['det_efficency'].stateChanged.connect(
-            self._disable_sub_det_efficency)
-        self._map['substract_background_from_sample'].stateChanged.connect(
+        self._map['det_efficiency'].stateChanged.connect(
+            self._disable_sub_det_efficiency)
+        self._map['subtract_background_from_sample'].stateChanged.connect(
             self._disable_sub_sample_back)
         self._map['interpolate_standard'].stateChanged.connect(
             self._disable_filter_standard)
@@ -105,7 +105,7 @@ class DNSElasticSCOptionsView(DNSView):
         self._map['omega_max'].setEnabled(not state)
         self._map['omega_nbin'].setEnabled(not state)
 
-    def _disable_sub_det_efficency(self, state):
+    def _disable_sub_det_efficiency(self, state):
         self._map['ignore_vana_fields'].setEnabled(state)
         self._map['sum_vana_sf_nsf'].setEnabled(state)
         # self._map['sum_vana_det_pos'].setEnabled(state)

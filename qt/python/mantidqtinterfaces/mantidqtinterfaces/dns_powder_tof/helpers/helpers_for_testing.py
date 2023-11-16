@@ -199,7 +199,7 @@ def get_fake_tof_binning():  # matches data 1,2 above
     }
 
 
-def get_fake_elastic_sc_binning():  # matches data 1,2 above
+def get_fake_elastic_single_crystal_binning():  # matches data 1,2 above
     return {
         'twoTheta': (0, 1, 2),
         'Omega': (3, 4, 5),
@@ -238,8 +238,7 @@ def get_fake_tof_options():
     return tof_opt
 
 
-# OKcomment: not used anywhere
-def get_fake_elastic_sc_options():
+def get_fake_elastic_single_crystal_options():
     el_opt = {
         "a": 2,
         "b": 3,

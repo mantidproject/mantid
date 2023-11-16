@@ -54,10 +54,10 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
     def script_maker(self, options, paths, file_selector=None):
         self._script = []
         # shortcuts for options
-        self._vanac = options['corrections'] and options['det_efficency']
+        self._vanac = options['corrections'] and options['det_efficiency']
         self._nicrc = options['corrections'] and options['flipping_ratio']
         self._sampb = (options['corrections']
-                       and options['substract_background_from_sample'])
+                       and options['subtract_background_from_sample'])
         self._backfac = options['background_factor']
         self._ign_vana = str(options['ignore_vana_fields'])
         self._sum_sfnsf = str(options['sum_vana_sf_nsf'])
@@ -89,17 +89,17 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         self._add_lines_to_script(self._get_nicrc_lines())
         return self._script, ''
 
-    def _setup_sample_data(self, paths, fselector):
-        self._sample_data = DNSDataset(data=fselector['full_data'],
+    def _setup_sample_data(self, paths, f_selector):
+        self._sample_data = DNSDataset(data=f_selector['full_data'],
                                        path=paths['data_dir'],
-                                       issample=True)
+                                       is_sample=True)
         self._plotlist = self._sample_data.create_plotlist()
 
-    def _setup_standard_data(self, paths, fselector):
+    def _setup_standard_data(self, paths, f_selector):
         if self._corrections:
-            self._standard_data = DNSDataset(data=fselector['standard_data'],
+            self._standard_data = DNSDataset(data=f_selector['standard_data'],
                                              path=paths['standards_dir'],
-                                             issample=False,
+                                             is_sample=False,
                                              fields=self._sample_data.fields)
 
     def _interpolate_standard(self):
@@ -121,13 +121,13 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
     @staticmethod
     def _get_header_lines():
         lines = [
-            'from mantidqtinterfaces.dns_sc_elastic.scripts.'
-            'md_sc_elastic import load_all',
-            'from mantidqtinterfaces.dns_sc_elastic.scripts.'
-            'md_sc_elastic import '
-            'vanadium_correction, fliping_ratio_correction',
-            'from mantidqtinterfaces.dns_sc_elastic.scripts.'
-            'md_sc_elastic import background_substraction',
+            'from mantidqtinterfaces.dns_single_crystal_elastic.scripts.'
+            'md_single_crystal_elastic import load_all',
+            'from mantidqtinterfaces.dns_single_crystal_elastic.scripts.'
+            'md_single_crystal_elastic import '
+            'vanadium_correction, flipping_ratio_correction',
+            'from mantidqtinterfaces.dns_single_crystal_elastic.scripts.'
+            'md_single_crystal_elastic import background_substraction',
             'from mantid.simpleapi import ConvertMDHistoToMatrixWorkspace,'
             ' mtd',
             'from mantid.simpleapi import SaveAscii, SaveNexus', ''
@@ -188,15 +188,15 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         lines = []
         if self._vanac or self._nicrc:
             lines = [
-                "# substract background from vanadium and nicr",
+                "# subtract background from vanadium and nicr",
                 "for sample, workspacelist in wss_standard.items(): "
                 "\n    for workspace in workspacelist:"
-                "\n        background_substraction(workspace)", ""
+                "\n        background_subtraction(workspace)", ""
             ]
         return lines
 
     def _return_sample_bg_string(self):
-        return f"{self._spac}background_substraction(workspace, " \
+        return f"{self._spac}background_subtraction(workspace, " \
                f"factor={self._backfac})"
 
     def _return_sample_vanac_strinf(self):
@@ -218,7 +218,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         lines = []
         if self._nicrc:
             lines = [f"{self._loop}{self._spac}"
-                     "fliping_ratio_correction(workspace)"]
+                     "flipping_ratio_correction(workspace)"]
         return lines
 
     def get_plotlist(self):

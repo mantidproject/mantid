@@ -26,7 +26,7 @@ class DNSElasticSCOptionsPresenter(DNSCommonOptionsPresenter):
     def process_commandline_request(self, cloptions):
         self.view.set_single_state_by_name('use_dx_dy', True)
         for command in [
-            'dx', 'dy', 'omega_offset', 'hkl1', 'hkl2', 'det_efficency',
+            'dx', 'dy', 'omega_offset', 'hkl1', 'hkl2', 'det_efficiency',
             'flipping_ratio'
         ]:
             if command in cloptions:

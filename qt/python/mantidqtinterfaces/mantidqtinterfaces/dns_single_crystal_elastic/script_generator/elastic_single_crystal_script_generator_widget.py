@@ -12,10 +12,10 @@ from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget \
     import DNSWidget
 from mantidqtinterfaces.dns_powder_tof.script_generator.\
     common_script_generator_view import DNSScriptGeneratorView
-from mantidqtinterfaces.dns_sc_elastic.script_generator.\
-    elastic_sc_script_generator_model import DNSElasticSCScriptGeneratorModel
-from mantidqtinterfaces.dns_sc_elastic.script_generator.\
-    elastic_sc_script_generator_presenter import \
+from mantidqtinterfaces.dns_single_crystal_elastic.script_generator.\
+    elastic_single_crystal_script_generator_model import DNSElasticSCScriptGeneratorModel
+from mantidqtinterfaces.dns_single_crystal_elastic.script_generator.\
+    elastic_single_crystal_script_generator_presenter import \
     DNSElasticSCScriptGeneratorPresenter
 # yapf: enable
 

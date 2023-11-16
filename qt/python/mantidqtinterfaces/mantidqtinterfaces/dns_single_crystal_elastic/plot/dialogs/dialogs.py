@@ -1,6 +1,6 @@
 from qtpy.QtWidgets import QProxyStyle, QStyle
 
-from mantidqtinterfaces.dns_sc_elastic.data_structures.dns_dialog import DNSDialog
+from mantidqtinterfaces.dns_single_crystal_elastic.data_structures.dns_dialog import DNSDialog
 
 
 class SpinboxNorepeatStyle(QProxyStyle):  # turn off auto repeat on spinbox

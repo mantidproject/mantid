@@ -60,31 +60,31 @@ def get_z_min_max(z, xlim=None, ylim=None, plotx=None, ploty=None):
     return zmin, zmax, pzmin
 
 
-def get_hkl_intensity_from_cursor(sc_map, axis_type, x, y):
+def get_hkl_intensity_from_cursor(single_crystal_map, axis_type, x, y):
     if axis_type['switch']:  # switch axes
         x, y = y, x
-    hkl1 = sc_map.hkl1.split(',')
-    hkl2 = sc_map.hkl2.split(',')
-    dx = sc_map.dx
-    dy = sc_map.dy
+    hkl1 = single_crystal_map.hkl1.split(',')
+    hkl2 = single_crystal_map.hkl2.split(',')
+    dx = single_crystal_map.dx
+    dy = single_crystal_map.dy
     if axis_type['type'] == 'tthomega':  # ttheta omega
-        qx, qy = angle_to_q(ttheta=x, omega=y, wavelength=sc_map.wavelength)
+        qx, qy = angle_to_q(ttheta=x, omega=y, wavelength=single_crystal_map.wavelength)
         hklx = hkl_to_hklx(hkl1, qx, dx)
         hkly = hkl_to_hklx(hkl2, qy, dy)
-        pos_q = closest_mesh_point(sc_map.ttheta_mesh, sc_map.omega_mesh, x, y)
+        pos_q = closest_mesh_point(single_crystal_map.ttheta_mesh, single_crystal_map.omega_mesh, x, y)
     elif axis_type['type'] == 'qxqy':  # qx qy
         qx, qy = x, y
         hklx = hkl_to_hklx(hkl1, qx, dx)
         hkly = hkl_to_hklx(hkl2, qy, dy)
-        pos_q = closest_mesh_point(sc_map.qx_mesh, sc_map.qy_mesh, qx, qy)
+        pos_q = closest_mesh_point(single_crystal_map.qx_mesh, single_crystal_map.qy_mesh, qx, qy)
     elif axis_type['type'] == 'hkl':  # hkl
         qx = hklxy_to_q(x, dx)
         qy = hklxy_to_q(y, dy)
         hklx = hkl_to_hklx(hkl1, x=x)
         hkly = hkl_to_hklx(hkl2, x=y)
-        pos_q = closest_mesh_point(sc_map.qx_mesh, sc_map.qy_mesh, qx, qy)
-    z = sc_map.z_mesh.flatten()[pos_q]
-    error = sc_map.error_mesh.flatten()[pos_q]
+        pos_q = closest_mesh_point(single_crystal_map.qx_mesh, single_crystal_map.qy_mesh, qx, qy)
+    z = single_crystal_map.z_mesh.flatten()[pos_q]
+    error = single_crystal_map.error_mesh.flatten()[pos_q]
     hkl = hkl_xy_to_hkl(hklx, hkly)
     return [hkl[0], hkl[1], hkl[2], z, error]
 
