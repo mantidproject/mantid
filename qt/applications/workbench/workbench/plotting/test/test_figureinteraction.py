@@ -655,6 +655,7 @@ class FigureInteractionTest(unittest.TestCase):
 
         interactor._show_axis_editor = MagicMock()
         interactor.on_mouse_button_press(mouse_event)
+        interactor.on_mouse_button_release(event=MagicMock())
         interactor._show_axis_editor.assert_called_once()
 
     @mock.patch("workbench.plotting.figureinteraction.XAxisEditor")
