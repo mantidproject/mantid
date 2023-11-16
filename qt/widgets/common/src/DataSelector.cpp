@@ -228,6 +228,9 @@ void DataSelector::autoLoadFile(const QString &filepath) {
  */
 void DataSelector::handleAutoLoadComplete(bool error) {
   if (!error) {
+    if (m_alwaysLoadAsGroup) {
+      AnalysisDataService::Instance().makeGroup(getWsNameFromFiles().toStdString());
+    }
 
     // emit that we got a valid workspace/file to work with
     emit dataReady(getWsNameFromFiles());
