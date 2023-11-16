@@ -647,6 +647,35 @@ class FigureInteractionTest(unittest.TestCase):
         interactor.on_mouse_button_release(mouse_event)
         interactor._add_all_marker_annotations.assert_called_once()
 
+    def test_open_double_click_dialog_called_on_mouse_release(self):
+        """
+        The logic for opening dialogs by double-clicking is inside the mouse release callback.
+        """
+        fig_manager = self._create_mock_fig_manager_to_accept_left_click()
+        fig_manager.fit_browser.tool = None
+        interactor = FigureInteraction(fig_manager)
+        mouse_event = self._create_mock_double_left_click()
+
+        interactor._open_double_click_dialog = MagicMock()
+        interactor.on_mouse_button_press(mouse_event)
+        interactor.on_mouse_button_release(event=MagicMock())
+
+        interactor._open_double_click_dialog.assert_called_once()
+
+    def test_open_double_click_dialog_not_called_on_mouse_release_when_no_double_click(self):
+        """
+        The function that opens the settings dialogs after a double click should not
+        be called if there wasn't a double click.
+        """
+        fig_manager = self._create_mock_fig_manager_to_accept_left_click()
+        fig_manager.fit_browser.tool = None
+        interactor = FigureInteraction(fig_manager)
+
+        interactor._open_double_click_dialog = MagicMock()
+        interactor.on_mouse_button_release(event=MagicMock())
+
+        interactor._open_double_click_dialog.assert_not_called()
+
     def test_double_left_click_calls_show_axis_editor(self):
         fig_manager = self._create_mock_fig_manager_to_accept_left_click()
         fig_manager.fit_browser.tool = None
