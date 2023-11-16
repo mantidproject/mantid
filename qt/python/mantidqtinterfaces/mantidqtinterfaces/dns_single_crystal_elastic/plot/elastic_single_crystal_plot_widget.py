@@ -9,11 +9,11 @@ DNS Elastic SC Plot widget
 """
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget \
     import DNSWidget
-from mantidqtinterfaces.dns_sc_elastic.plot.elastic_single_crystal_plot_model \
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_model \
     import DNSElasticSCPlotModel
-from mantidqtinterfaces.dns_sc_elastic.plot.\
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.\
     elastic_single_crystal_plot_presenter import DNSElasticSCPlotPresenter
-from mantidqtinterfaces.dns_sc_elastic.plot.elastic_single_crystal_plot_view \
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_view \
     import DNSElasticSCPlotView
 
 

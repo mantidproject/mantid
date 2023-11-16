@@ -9,14 +9,14 @@
 DNS elastic powder plot presenter
 """
 import numpy as np
-import mantidqtinterfaces.dns_sc_elastic.plot.elastic_sc_helpers as helper
+import mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers as helper
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model \
     import DNSObsModel
-from mantidqtinterfaces.dns_sc_elastic.data_structures.dns_sc_map \
+from mantidqtinterfaces.dns_single_crystal_elastic.data_structures.dns_single_crystal_map \
     import DNSScMap
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict \
     import ObjectDict
-from mantidqtinterfaces.dns_sc_elastic.plot.elastic_sc_helpers \
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers \
     import get_hkl_intensity_from_cursor
 
 
@@ -29,7 +29,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self._sc_map = None
+        self._single_crystal_map = None
 
         self._data = ObjectDict()
         self._data.x = None
@@ -41,7 +41,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self._data.triang = None
         self._data.ztriang = None
 
-    def create_sc_map(self, data_array, options, initial_values=None):
+    def create_single_crystal_map(self, data_array, options, initial_values=None):
         ttheta = data_array['ttheta']
         omega = data_array['omega']
         z_mesh = data_array['intensity']
@@ -55,12 +55,12 @@ class DNSElasticSCPlotModel(DNSObsModel):
                      }
         if initial_values is not None:
             parameter.update(initial_values)
-        self._sc_map = DNSScMap(ttheta=ttheta,
-                                omega=omega,
-                                z_mesh=z_mesh,
-                                error_mesh=error,
-                                parameter=parameter)
-        return self._sc_map
+        self._single_crystal_map = DNSScMap(ttheta=ttheta,
+                                            omega=omega,
+                                            z_mesh=z_mesh,
+                                            error_mesh=error,
+                                            parameter=parameter)
+        return self._single_crystal_map
 
     def has_data(self):
         return self._data.x is not None
@@ -77,10 +77,10 @@ class DNSElasticSCPlotModel(DNSObsModel):
         newmeshname = axistype + '_mesh_intp'
         oldmeshname = axistype + '_mesh'
         if interpolate:
-            self._sc_map.interpolate_quad_mesh(interpolate)
-            x, y, z = getattr(self._sc_map, newmeshname)
+            self._single_crystal_map.interpolate_quad_mesh(interpolate)
+            x, y, z = getattr(self._single_crystal_map, newmeshname)
         else:
-            x, y, z = getattr(self._sc_map, oldmeshname)
+            x, y, z = getattr(self._single_crystal_map, oldmeshname)
         self._data.x = x
         self._data.y = y
         self._data.z = z
@@ -88,20 +88,20 @@ class DNSElasticSCPlotModel(DNSObsModel):
 
     def get_interpolated_triangulation(self, interpolate, axistype, switch):
         meshname = axistype + '_mesh'
-        self._sc_map.triangulate(meshname=meshname, switch=switch)
-        self._sc_map.mask_triangles(meshname=meshname)
-        tri_refi, z_refi = self._sc_map.interpolate_triangulation(interpolate)
+        self._single_crystal_map.triangulate(meshname=meshname, switch=switch)
+        self._single_crystal_map.mask_triangles(meshname=meshname)
+        tri_refi, z_refi = self._single_crystal_map.interpolate_triangulation(interpolate)
         self._data.tiang = tri_refi
         self._data.ztiang = z_refi
         # this is important to get the limits
-        x, y, z = getattr(self._sc_map, meshname)
+        x, y, z = getattr(self._single_crystal_map, meshname)
         self._data.x = x
         self._data.y = y
         self._data.z = z
         return tri_refi, z_refi
 
     def get_xy_dy_ratio(self):
-        return self._sc_map.dx / self._sc_map.dy
+        return self._single_crystal_map.dx / self._single_crystal_map.dy
 
     def get_aspect_ratio(self, axis_type):
         if axis_type['fix_aspect']:
@@ -113,9 +113,9 @@ class DNSElasticSCPlotModel(DNSObsModel):
 
     def get_axis_labels(self, axis_type, crystal_axes, switch=False):
         if crystal_axes:
-            return self._sc_map.get_crystal_axis_names()
-        hkl1 = self._sc_map.hkl1
-        hkl2 = self._sc_map.hkl2
+            return self._single_crystal_map.get_crystal_axis_names()
+        hkl1 = self._single_crystal_map.hkl1
+        hkl2 = self._single_crystal_map.hkl2
         axis_labels = {
             'tthomega': ['2 Theta (deg)', 'Omega (deg)'],
             'qxqy': ['qx (Ang^-1)', 'qy (Ang^-1)'],
@@ -130,7 +130,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         return labels
 
     def get_changing_hkl_components(self):
-        return self._sc_map.get_changing_hkl_components()
+        return self._single_crystal_map.get_changing_hkl_components()
 
     def get_format_coord(self, axis_type):
         # adds z and hkl label to cursor position
@@ -138,7 +138,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         # from the view
         def format_coord(x, y):
             h, k, l, z, error = get_hkl_intensity_from_cursor(
-                self._sc_map, axis_type, x, y)
+                self._single_crystal_map, axis_type, x, y)
             return (f'x={x: 2.4f}, y={y: 2.4f}, hkl=({h: 2.2f},'
                     f'{k: 2.2f},{l: 2.2f}),'
                     f' Intensity={z: 10.2f} ± {error:10.2f}')
@@ -174,7 +174,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         return x, y, z
 
     def get_omegaoffset(self):
-        return self._sc_map['omegaoffset']
+        return self._single_crystal_map['omegaoffset']
 
     def get_dx_dy(self):
-        return self._sc_map['dx'], self._sc_map['dy']
+        return self._single_crystal_map['dx'], self._single_crystal_map['dy']

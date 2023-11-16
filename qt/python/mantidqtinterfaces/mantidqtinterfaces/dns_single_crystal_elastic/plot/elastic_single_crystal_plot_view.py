@@ -19,15 +19,15 @@ from qtpy.QtWidgets import QSizePolicy
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view \
     import DNSView
-from mantidqtinterfaces.dns_sc_elastic.plot.dialogs.dialogs import (
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.dialogs.dialogs import (
     DNSdxdyDialog,
     DNSOmegaOffsetDialog)
-from mantidqtinterfaces.dns_sc_elastic.plot.elastic_single_crystal_plot_menu \
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_menu \
     import DNSElasticSCPlotOptionsMenu, DNSElasticSCPlotViewMenu, \
     set_mdi_icons, set_up_colormap_selector
-from mantidqtinterfaces.dns_sc_elastic.plot.elastic_single_crystal_plot_plot \
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_plot \
     import DNSScPlot
-from mantidqtinterfaces.dns_sc_elastic.plot. \
+from mantidqtinterfaces.dns_single_crystal_elastic.plot. \
     elastic_single_crystal_plot_datalist import DNSDatalist
 
 
@@ -102,7 +102,7 @@ class DNSElasticSCPlotView(DNSView):
         _content.plot_layout.insertWidget(2, canvas)
         canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.canvas = canvas
-        self.sc_plot = DNSScPlot(self, self.canvas.figure, None)
+        self.single_crystal_plot = DNSScPlot(self, self.canvas.figure, None)
         self.initial_values = None
 
     # Signals
@@ -179,13 +179,13 @@ class DNSElasticSCPlotView(DNSView):
 
     # gui options
     def create_subfigure(self, gridhelper=None):
-        self.sc_plot = DNSScPlot(self, self.canvas.figure, gridhelper)
+        self.single_crystal_plot = DNSScPlot(self, self.canvas.figure, gridhelper)
 
     def get_axis_type(self):
         return self.views_menu.get_value()
 
     def connect_resize(self):
-        self.canvas.mpl_connect('resize_event', self.sc_plot.onresize)
+        self.canvas.mpl_connect('resize_event', self.single_crystal_plot.onresize)
 
     def set_initial_oof_dxdy(self, off, dx, dy):
         self.initial_values = {'oof': off,

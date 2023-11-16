@@ -10,11 +10,11 @@ DNS Elastic SC Options widget
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget \
     import DNSWidget
-from mantidqtinterfaces.dns_sc_elastic.options.elastic_sc_options_model \
+from mantidqtinterfaces.dns_single_crystal_elastic.options.elastic_single_crystal_options_model \
     import DNSElasticSCOptionsModel
-from mantidqtinterfaces.dns_sc_elastic.options.elastic_sc_options_presenter \
+from mantidqtinterfaces.dns_single_crystal_elastic.options.elastic_single_crystal_options_presenter \
     import DNSElasticSCOptionsPresenter
-from mantidqtinterfaces.dns_sc_elastic.options.elastic_sc_options_view import \
+from mantidqtinterfaces.dns_single_crystal_elastic.options.elastic_single_crystal_options_view import \
     DNSElasticSCOptionsView
 
 

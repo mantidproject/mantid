@@ -10,7 +10,7 @@ DNS Options Presenter - Tab of DNS Reduction GUI
 
 from mantidqtinterfaces.dns_powder_elastic.helpers.converters import \
     convert_hkl_string_to_float
-from mantidqtinterfaces.dns_sc_elastic.helpers.converters import \
+from mantidqtinterfaces.dns_single_crystal_elastic.helpers.converters import \
     d_spacing_from_lattice
 
 from mantidqtinterfaces.dns_powder_tof.options.common_options_model import \
