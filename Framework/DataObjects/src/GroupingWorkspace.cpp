@@ -94,7 +94,7 @@ void GroupingWorkspace::makeDetectorIDToGroupVector(std::vector<int> &detIDToGro
   }
 }
 
-std::vector<int> GroupingWorkspace::getGroupIDs() const {
+std::vector<int> GroupingWorkspace::getGroupIDs(const bool allowInvalid) const {
   // collect all the group numbers
   std::set<int> groupIDs;
   for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
@@ -102,7 +102,15 @@ std::vector<int> GroupingWorkspace::getGroupIDs() const {
     auto group = this->translateToGroupID(static_cast<int>(this->y(wi).front()));
     groupIDs.insert(group);
   }
+  // copy the sorted set to the output vector
   std::vector<int> output(groupIDs.begin(), groupIDs.end());
+
+  // values less than zero are considered invalid
+  if (!allowInvalid) {
+    output.erase(std::remove_if(output.begin(), output.end(), [](const auto &value) { return value < 0; }),
+                 output.end());
+  }
+
   return output;
 }
 
