@@ -427,9 +427,9 @@ void FitPeaks::init() {
       "Used for validating peaks before fitting. If the signal-to-noise ratio is under this value, "
       "the peak will be marked as error. This does not apply to peaks for which the noise cannot be estimated.");
 
-  declareProperty(PropertyNames::PEAK_MIN_TOTAL_COUNT, 0.,
-                  "Used for validating peaks before fitting. If the total peak Y-count "
-                  "is under this value, the peak will be marked as error.");
+  declareProperty(PropertyNames::PEAK_MIN_TOTAL_COUNT, EMPTY_DBL(),
+                  "Used for validating peaks before fitting. If the total peak window Y-value count "
+                  "is under this value, the peak will be excluded from fitting and calibration.");
 
   const std::string addoutgrp("Analysis");
   setPropertyGroup(PropertyNames::OUTPUT_WKSP_PARAMS, addoutgrp);
