@@ -301,10 +301,6 @@ void PDCalibration::init() {
                   "Used for validating peaks before fitting. If the total peak window Y-value count "
                   "is under this value, the peak will be excluded from fitting and calibration.");
 
-  declareProperty("MinimumPeakTotalCount", EMPTY_DBL(),
-                  "Used for validating peaks before fitting. If the total peak window Y-value count "
-                  "is under this value, the peak will be excluded from fitting and calibration.");
-
   // make group for Input properties
   std::string inputGroup("Input Options");
   setPropertyGroup("InputWorkspace", inputGroup);

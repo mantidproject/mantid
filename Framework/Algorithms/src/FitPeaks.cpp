@@ -431,10 +431,6 @@ void FitPeaks::init() {
                   "Used for validating peaks before fitting. If the total peak window Y-value count "
                   "is under this value, the peak will be excluded from fitting and calibration.");
 
-  declareProperty(PropertyNames::PEAK_MIN_TOTAL_COUNT, EMPTY_DBL(),
-                  "Used for validating peaks before fitting. If the total peak window Y-value count "
-                  "is under this value, the peak will be excluded from fitting and calibration.");
-
   const std::string addoutgrp("Analysis");
   setPropertyGroup(PropertyNames::OUTPUT_WKSP_PARAMS, addoutgrp);
   setPropertyGroup(PropertyNames::OUTPUT_WKSP_MODEL, addoutgrp);
