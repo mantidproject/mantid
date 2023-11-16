@@ -123,7 +123,7 @@ level1 = ["Diffraction", "Direct_Geometry", "Framework", "Muon"]
 level1Upper = ["Workbench", "Reflectometry", "SANS", "Indirect", "Inelastic"]
 
 diffraction = ["Powder", "Single_Crystal", "Engineering"]
-framework = ["Algorithms", "Data_Objects", "Fit_Functions", "Python"]
+framework = ["Algorithms", "Data_Objects", "Dependencies", "Fit_Functions", "Python"]
 workbench = ["InstrumentViewer", "SliceViewer"]
 direct = ["General", "CrystalField", "MSlice"]
 indirect = ["Algorithms"]

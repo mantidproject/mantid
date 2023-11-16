@@ -12,7 +12,7 @@ import os
 class CompilationDirective(BaseDirective):
 
     """
-    Obtains the summary for a given algorithm based on it's name.
+    Obtains the summary for a given algorithm based on its name.
     """
 
     required_arguments, optional_arguments = 1, 1
@@ -20,7 +20,7 @@ class CompilationDirective(BaseDirective):
     def run(self):
         """
         The main entry point that docutils calls.
-        It calls self.execute to do the main work.
+        It calls self.execute() to do the main work.
         Derived classes should override execute() and insert
         whatever rst they require with self.add_rst()
         """

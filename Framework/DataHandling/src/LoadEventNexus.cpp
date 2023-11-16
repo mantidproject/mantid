@@ -1533,8 +1533,10 @@ void LoadEventNexus::setTimeFilters(const bool monitors) {
     // Nothing specified. Include everything
     filter_tof_min = -1e20;
     filter_tof_max = +1e20;
+    filter_tof_range = false;
   } else if ((filter_tof_min != EMPTY_DBL()) && (filter_tof_max != EMPTY_DBL())) {
     // Both specified. Keep these values
+    filter_tof_range = true;
   } else {
     std::string msg("You must specify both min & max or neither TOF filters");
     if (monitors)

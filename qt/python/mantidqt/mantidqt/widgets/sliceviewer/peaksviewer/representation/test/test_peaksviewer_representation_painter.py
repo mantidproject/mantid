@@ -18,7 +18,6 @@ from mantidqt.widgets.sliceviewer.peaksviewer.representation.painter import MplP
 
 
 class MplPainterTest(unittest.TestCase):
-
     # --------------- success tests -----------------
     def test_remove_calls_remove_on_artist(self):
         painter = MplPainter(MagicMock())
@@ -79,7 +78,7 @@ class MplPainterTest(unittest.TestCase):
         painter.shell(x, y, outer_radius, thick)
 
         painter.axes.add_patch.assert_called_once()
-        self._verify_patch(patch=painter.axes.add_patch.call_args[0][0], nvertices=100, alpha=None)
+        self._verify_patch(patch=painter.axes.add_patch.call_args[0][0], nvertices=99, alpha=None)
 
     def test_bbox_returns_ll_and_ur_of_containing_box(self):
         artist, view, axes, bbox, inv_trans = (MagicMock(),) * 5

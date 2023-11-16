@@ -68,8 +68,8 @@ github_release_cmd create $RELEASES_TAG_NAME --title "$title" --notes "$notes" -
 # there is a minor lag in creating the release - wait before we upload
 sleep 1
 
-# Provide a custom label that is a fixed string to better describe
-# which package users should select
+# Provide a custom label for the standalone installers that is a fixed string to better describe
+# which package users should select.
 for asset in "$@"; do
     if [[ $asset == *.exe ]]; then
       label=MantidWorkbench-Windows
@@ -77,7 +77,13 @@ for asset in "$@"; do
       label=MantidWorkbench-macOS
     elif [[ $asset == *.tar.xz ]]; then
       label=MantidWorkbench-Linux
-      else
+    # Conda packages are uploaded to the release as a backup for the packages stored on anaconda,
+    # they do not need to be relabeled.
+    elif [[ $asset == *conda-packages.tar ]]; then
+      echo "Uploading $asset to $RELEASES_TAG_NAME tag under $RELEASES_REPO"
+      github_release_cmd upload --clobber $RELEASES_TAG_NAME "$asset"
+      continue
+    else
       echo "Unknown asset type found \"${asset}\" Skipping upload."
       continue
     fi

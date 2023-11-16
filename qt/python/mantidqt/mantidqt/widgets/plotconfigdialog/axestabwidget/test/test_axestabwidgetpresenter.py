@@ -29,10 +29,11 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         ax.set_title(cls.title)
         cls.x_label = "X"
         ax.set_xlabel(cls.x_label)
-        cls.x_scale = "Linear"
+        cls.x_scale = "linear"
+        ax.set_xscale(cls.x_scale)
         cls.y_label = "Y"
         ax.set_ylabel(cls.y_label)
-        cls.y_scale = "Log"
+        cls.y_scale = "log"
         ax.set_yscale(cls.y_scale)
         cls.canvas_color = (1.0, 1.0, 0.0, 1.0)
         ax.set_facecolor(cls.canvas_color)
@@ -223,7 +224,7 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         new_view_mock = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)", get_axis=lambda: "x", get_properties=lambda: {})
         ax = self.fig.get_axes()[0]
         setters = ["set_title", "set_lower_limit", "set_upper_limit", "set_label", "set_scale"]
-        expected_vals = [self.title, ax.get_xlim()[0], ax.get_xlim()[1], self.x_label, self.x_scale]
+        expected_vals = [self.title, ax.get_xlim()[0], ax.get_xlim()[1], self.x_label, self.x_scale.capitalize()]
         with mock.patch.object(presenter, "view", new_view_mock):
             presenter.update_view()
             for setter, value in zip(setters, expected_vals):

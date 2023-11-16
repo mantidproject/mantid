@@ -8,6 +8,7 @@
 #include "DensityOfStates.h"
 #include "IndirectMolDyn.h"
 #include "IndirectSassena.h"
+#include "IndirectSettings.h"
 #include "MantidKernel/ConfigService.h"
 
 namespace MantidQt::CustomInterfaces {

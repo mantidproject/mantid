@@ -147,6 +147,8 @@ public:
   double filter_tof_min;
   /// Filter by a maximum time-of-flight
   double filter_tof_max;
+  /// Tof range is being filtered
+  bool filter_tof_range;
 
   /// Minimum spectrum to load
   int32_t m_specMin;

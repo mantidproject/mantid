@@ -4,18 +4,7 @@ set(SRC_FILES
     CalculatePaalmanPings.cpp
     ContainerSubtraction.cpp
     CorrectionsTab.cpp
-    ConvFitAddWorkspaceDialog.cpp
-    ConvFitDataPresenter.cpp
-    ConvFitDataView.cpp
-    ConvFitModel.cpp
     DensityOfStates.cpp
-    FitStatusWidget.cpp
-    FqFitAddWorkspaceDialog.cpp
-    FqFitDataPresenter.cpp
-    FqFitDataView.cpp
-    FqFitModel.cpp
-    FunctionTemplateBrowser.cpp
-    IDAFunctionParameterEstimation.cpp
     ILLEnergyTransfer.cpp
     ISISCalibration.cpp
     ISISDiagnostics.cpp
@@ -23,41 +12,10 @@ set(SRC_FILES
     IndirectBayes.cpp
     IndirectBayesTab.cpp
     IndirectCorrections.cpp
-    IndirectDataAnalysis.cpp
-    IndirectDataAnalysisConvFitTab.cpp
-    IndirectDataAnalysisFqFitTab.cpp
-    IndirectDataAnalysisIqtFitTab.cpp
-    IndirectDataAnalysisMSDFitTab.cpp
-    IndirectDataAnalysisTab.cpp
     IndirectDataReduction.cpp
     IndirectDataReductionTab.cpp
     IndirectDataValidationHelper.cpp
     IndirectDiffractionReduction.cpp
-    IndirectDockWidgetArea.cpp
-    IndirectEditResultsDialog.cpp
-    IndirectFitData.cpp
-    IndirectFitDataModel.cpp
-    IndirectFitDataPresenter.cpp
-    IndirectFitDataView.cpp
-    IndirectFitOutputOptionsModel.cpp
-    IndirectFitOutputOptionsPresenter.cpp
-    IndirectFitOutputOptionsView.cpp
-    IndirectFitPlotModel.cpp
-    IndirectFitPlotPresenter.cpp
-    IndirectFitPlotView.cpp
-    IndirectFitPropertyBrowser.cpp
-    IndirectFittingModel.cpp
-    IndirectFitOutput.cpp
-    IndirectFunctionBrowser/ConvTypes.cpp
-    IndirectFunctionBrowser/ConvFunctionModel.cpp
-    IndirectFunctionBrowser/ConvTemplateBrowser.cpp
-    IndirectFunctionBrowser/ConvTemplatePresenter.cpp
-    IndirectFunctionBrowser/IqtFunctionModel.cpp
-    IndirectFunctionBrowser/IqtTemplateBrowser.cpp
-    IndirectFunctionBrowser/IqtTemplatePresenter.cpp
-    IndirectFunctionBrowser/SingleFunctionTemplateModel.cpp
-    IndirectFunctionBrowser/SingleFunctionTemplateBrowser.cpp
-    IndirectFunctionBrowser/SingleFunctionTemplatePresenter.cpp
     IndirectInstrumentConfig.cpp
     IndirectInterface.cpp
     IndirectMolDyn.cpp
@@ -77,25 +35,6 @@ set(SRC_FILES
     IndirectToolsTab.cpp
     IndirectTransmission.cpp
     IndirectTransmissionCalc.cpp
-    InelasticDataManipulation.cpp
-    InelasticDataManipulationElwinTab.cpp
-    InelasticDataManipulationElwinTabModel.cpp
-    InelasticDataManipulationElwinTabView.cpp
-    InelasticDataManipulationIqtTab.cpp
-    InelasticDataManipulationIqtTabView.cpp
-    InelasticDataManipulationIqtTabModel.cpp
-    InelasticDataManipulationMomentsTab.cpp
-    InelasticDataManipulationMomentsTabModel.cpp
-    InelasticDataManipulationMomentsTabView.cpp
-    InelasticDataManipulationTab.cpp
-    InelasticDataManipulationSqwTab.cpp
-    InelasticDataManipulationSqwTabModel.cpp
-    InelasticDataManipulationSqwTabView.cpp
-    InelasticDataManipulationSymmetriseTab.cpp
-    InelasticDataManipulationSymmetriseTabView.cpp
-    InelasticDataManipulationSymmetriseTabModel.cpp
-    IqtFitModel.cpp
-    MSDFitModel.cpp
     Quasi.cpp
     ResNorm.cpp
     Stretch.cpp
@@ -103,6 +42,7 @@ set(SRC_FILES
     Reduction/ISISEnergyTransferModel.cpp
     Reduction/ISISEnergyTransferView.cpp
     Reduction/ISISEnergyTransferPresenter.cpp
+    Reduction/ReductionAlgorithmUtils.cpp
 )
 
 set(MOC_FILES
@@ -110,48 +50,18 @@ set(MOC_FILES
     ApplyAbsorptionCorrections.h
     CalculatePaalmanPings.h
     ContainerSubtraction.h
-    ConvFitAddWorkspaceDialog.h
-    ConvFitDataPresenter.h
-    ConvFitDataView.h
     CorrectionsTab.h
     DensityOfStates.h
-    FqFitAddWorkspaceDialog.h
-    FqFitDataPresenter.h
-    FqFitDataView.h
-    FunctionTemplateBrowser.h
     IAddWorkspaceDialog.h
-    IIndirectFitDataView.h
-    IIndirectFitOutputOptionsView.h
-    IIndirectFitPlotView.h
     IIndirectSettingsView.h
     ILLEnergyTransfer.h
     IndirectAddWorkspaceDialog.h
     IndirectBayes.h
     IndirectBayesTab.h
     IndirectCorrections.h
-    IndirectDataAnalysis.h
-    IndirectDataAnalysisConvFitTab.h
-    IndirectDataAnalysisFqFitTab.h
-    IndirectDataAnalysisIqtFitTab.h
-    IndirectDataAnalysisMSDFitTab.h
-    IndirectDataAnalysisTab.h
     IndirectDataReduction.h
     IndirectDataReductionTab.h
-    IndirectDockWidgetArea.h
     IndirectDiffractionReduction.h
-    IndirectEditResultsDialog.h
-    IndirectFitDataPresenter.h
-    IndirectFitDataView.h
-    IndirectFitOutputOptionsPresenter.h
-    IndirectFitOutputOptionsView.h
-    IndirectFitPlotPresenter.h
-    IndirectFitPlotView.h
-    IndirectFunctionBrowser/ConvTemplateBrowser.h
-    IndirectFunctionBrowser/ConvTemplatePresenter.h
-    IndirectFunctionBrowser/IqtTemplateBrowser.h
-    IndirectFunctionBrowser/IqtTemplatePresenter.h
-    IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h
-    IndirectFunctionBrowser/SingleFunctionTemplatePresenter.h
     IndirectInstrumentConfig.h
     IndirectInterface.h
     IndirectMolDyn.h
@@ -159,7 +69,6 @@ set(MOC_FILES
     IndirectPlotOptionsView.h
     IndirectSassena.h
     IndirectSettings.h
-    IndirectSettingsPresenter.h
     IndirectSettingsView.h
     IndirectSimulation.h
     IndirectSimulationTab.h
@@ -168,57 +77,27 @@ set(MOC_FILES
     IndirectToolsTab.h
     IndirectTransmissionCalc.h
     IndirectTransmission.h
-    IndirectFitPropertyBrowser.h
-    InelasticDataManipulation.h
-    InelasticDataManipulationElwinTab.h
-    InelasticDataManipulationElwinTabView.h
-    InelasticDataManipulationIqtTab.h
-    InelasticDataManipulationIqtTabView.h
-    InelasticDataManipulationMomentsTab.h
-    InelasticDataManipulationMomentsTabView.h
-    InelasticDataManipulationSqwTab.h
-    InelasticDataManipulationSqwTabView.h
-    InelasticDataManipulationSymmetriseTab.h
-    InelasticDataManipulationSymmetriseTabView.h
-    InelasticDataManipulationTab.h
     ISISCalibration.h
     ISISDiagnostics.h
     Quasi.h
     ResNorm.h
     Stretch.h
-    FitStatusWidget.h
     Reduction/ISISEnergyTransferView.h
     Reduction/ISISEnergyTransferPresenter.h
 )
 
 set(INC_FILES
-    ConvFitModel.h
-    FqFitModel.h
-    IIndirectFitDataModel.h
+    DllConfig.h
     IndirectDataValidationHelper.h
-    IndirectFitData.h
-    IndirectFitDataModel.h
-    IndirectFitOutputOptionsModel.h
-    IndirectFitPlotModel.h
-    IndirectFitPlotPresenter.h
-    IndirectFittingModel.h
-    IndirectFitOutput.h
-    IndirectFunctionBrowser/ConvFunctionModel.h
     IndirectPlotOptionsModel.h
     IndirectSettingsHelper.h
-    InelasticDataManipulationElwinTabModel.h
-    InelasticDataManipulationIqtTabModel.h
-    InelasticDataManipulationMomentsTabModel.h
-    InelasticDataManipulationSqwTabModel.h
-    InelasticDataManipulationSymmetriseTabModel.h
-    IqtFitModel.h
-    MSDFitModel.h
+    IndirectSettingsPresenter.h
     Notifier.h
-    IFQFitObserver.h
     Reduction/ISISEnergyTransferData.h
     Reduction/ISISEnergyTransferValidator.h
     Reduction/ISISEnergyTransferModelUtils.h
     Reduction/ISISEnergyTransferModel.h
+    Reduction/ReductionAlgorithmUtils.h
 )
 
 set(UI_FILES
@@ -226,9 +105,7 @@ set(UI_FILES
     ApplyAbsorptionCorrections.ui
     CalculatePaalmanPings.ui
     ContainerSubtraction.ui
-    ConvFitAddWorkspaceDialog.ui
     DensityOfStates.ui
-    FqFitAddWorkspaceDialog.ui
     ILLEnergyTransfer.ui
     ISISCalibration.ui
     ISISDiagnostics.ui
@@ -236,28 +113,15 @@ set(UI_FILES
     IndirectAddWorkspaceDialog.ui
     IndirectBayes.ui
     IndirectCorrections.ui
-    IndirectDataAnalysis.ui
     IndirectDataReduction.ui
     IndirectDiffractionReduction.ui
-    IndirectEditResultsDialog.ui
-    IndirectFitDataView.ui
-    IndirectFitOutputOptions.ui
-    IndirectFitPreviewPlot.ui
-    IndirectFitTab.ui
     IndirectInstrumentConfig.ui
     IndirectInterfaceSettings.ui
     IndirectMolDyn.ui
-    InelasticDataManipulation.ui
-    InelasticDataManipulationElwinTab.ui
-    InelasticDataManipulationIqtTab.ui
-    InelasticDataManipulationMomentsTab.ui
-    InelasticDataManipulationSqwTab.ui
-    InelasticDataManipulationSymmetriseTab.ui
     IndirectPlotOptions.ui
     IndirectSassena.ui
     IndirectSettings.ui
     IndirectSimulation.ui
-    IndirectSpectrumSelector.ui
     IndirectTools.ui
     IndirectTransmission.ui
     IndirectTransmissionCalc.ui

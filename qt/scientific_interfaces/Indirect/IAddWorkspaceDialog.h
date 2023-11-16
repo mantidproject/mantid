@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllConfig.h"
 #include <QDialog>
 #include <QObject>
 
@@ -13,7 +14,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class IAddWorkspaceDialog : public QDialog {
+class MANTIDQT_INDIRECT_DLL IAddWorkspaceDialog : public QDialog {
   Q_OBJECT
 public:
   IAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {}

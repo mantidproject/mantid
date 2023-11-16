@@ -26,11 +26,11 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::CustomInterfaces;
 
-class ISISIndirectEnergyTransferWrapper : public Algorithm {
+class ISISIndirectEnergyTransfer : public Algorithm {
 public:
-  const std::string name() const override { return "ISISIndirectEnergyTransferWrapper"; };
+  const std::string name() const override { return "ISISIndirectEnergyTransfer"; };
   int version() const override { return 1; };
-  const std::string summary() const override { return "ISISIndirectEnergyTransferWrapper Mock algorithm"; };
+  const std::string summary() const override { return "ISISIndirectEnergyTransfer Mock algorithm"; };
 
 private:
   void init() override {
@@ -118,7 +118,7 @@ private:
   };
 };
 
-DECLARE_ALGORITHM(ISISIndirectEnergyTransferWrapper)
+DECLARE_ALGORITHM(ISISIndirectEnergyTransfer)
 
 class ISISEnergyTransferModelTest : public CxxTest::TestSuite {
 public:
@@ -613,11 +613,33 @@ public:
     TS_ASSERT_EQUALS(errors.size(), 0);
   }
 
+  void testPlotRawAlgorithmQueueReturnsTwoAlgorithmsIfRemoveBackgroundIsFalse() {
+    IETInputData inputData;
+    IETConversionData conversionData;
+    IETBackgroundData backgroundData(false);
+
+    IETPlotData plotData(inputData, conversionData, backgroundData);
+    InstrumentData instData("TFXA", "graphite", "004");
+
+    auto const algorithmQueue = m_model->plotRawAlgorithmQueue(instData, plotData);
+    TS_ASSERT_EQUALS(2, algorithmQueue.size());
+  }
+
+  void testPlotRawAlgorithmQueueReturnsFourAlgorithmsIfRemoveBackgroundIsTrue() {
+    IETInputData inputData;
+    IETConversionData conversionData;
+    IETBackgroundData backgroundData(true, 1, 4);
+
+    IETPlotData plotData(inputData, conversionData, backgroundData);
+    InstrumentData instData("TFXA", "graphite", "004");
+
+    auto const algorithmQueue = m_model->plotRawAlgorithmQueue(instData, plotData);
+    TS_ASSERT_EQUALS(4, algorithmQueue.size());
+  }
+
 private:
   std::unique_ptr<IETModel> makeModel() { return std::make_unique<IETModel>(); }
-  IAlgorithm_sptr makeReductionAlgorithm() {
-    return AlgorithmManager::Instance().create("ISISIndirectEnergyTransferWrapper");
-  }
+  IAlgorithm_sptr makeReductionAlgorithm() { return AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer"); }
 
   std::unique_ptr<IETModel> m_model;
   IAlgorithm_sptr m_reductionAlg;

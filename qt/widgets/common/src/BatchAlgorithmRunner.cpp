@@ -247,7 +247,9 @@ bool BatchAlgorithmRunner::executeAlgo(const IConfiguredAlgorithm_sptr &algorith
   try {
     m_currentAlgorithm = algorithm->algorithm();
     auto const &props = algorithm->getAlgorithmRuntimeProps();
-    throwIfAnyPropertiesInvalid(m_currentAlgorithm, props);
+    if (algorithm->validatePropsPreExec()) {
+      throwIfAnyPropertiesInvalid(m_currentAlgorithm, props);
+    }
 
     // Assign the properties to be set at runtime
     m_currentAlgorithm->updatePropertyValues(props);

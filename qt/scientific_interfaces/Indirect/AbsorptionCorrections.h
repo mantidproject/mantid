@@ -17,7 +17,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class DLLExport AbsorptionCorrections : public CorrectionsTab {
+class MANTIDQT_INDIRECT_DLL AbsorptionCorrections : public CorrectionsTab {
   Q_OBJECT
 
 public:

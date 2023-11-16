@@ -24,7 +24,7 @@ the interface window and
 @author Samuel Jackson, STFC
 */
 
-class DLLExport IndirectTools : public IndirectInterface {
+class MANTIDQT_INDIRECT_DLL IndirectTools : public IndirectInterface {
   Q_OBJECT
 
 public: // public constants and enums

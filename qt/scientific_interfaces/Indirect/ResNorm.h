@@ -13,7 +13,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class DLLExport ResNorm : public IndirectBayesTab {
+class MANTIDQT_INDIRECT_DLL ResNorm : public IndirectBayesTab {
   Q_OBJECT
 
 public:

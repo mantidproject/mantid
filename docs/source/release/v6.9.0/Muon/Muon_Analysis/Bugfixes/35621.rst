@@ -1,0 +1,1 @@
+- Fixed a bug where the parameters for a UserFunction after a simultaneous fit were not being updated.

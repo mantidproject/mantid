@@ -48,6 +48,7 @@ LoadMuonStrategy::LoadMuonStrategy(Kernel::Logger &g_log, std::string filename, 
  */
 API::Workspace_sptr
 LoadMuonStrategy::loadDefaultDetectorGrouping(const DataObjects::Workspace2D &localWorkspace) const {
+  m_logger.information("Loading grouping information from IDF");
 
   auto instrument = localWorkspace.getInstrument();
   auto &run = localWorkspace.run();
@@ -92,19 +93,29 @@ LoadMuonStrategy::getLoadedDetectorsFromWorkspace(const DataObjects::Workspace2D
  * @param grouping :: Vector containing corresponding grouping
  * @return Detector Grouping Table create using the data
  */
-DataObjects::TableWorkspace_sptr
+std::optional<DataObjects::TableWorkspace_sptr>
 LoadMuonStrategy::createDetectorGroupingTable(const std::vector<detid_t> &detectorsLoaded,
-                                              const std::vector<detid_t> &grouping) const {
-  auto detectorGroupingTable = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
-      API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
-  detectorGroupingTable->addColumn("vector_int", "Detectors");
+                                              const std::optional<std::vector<detid_t>> &grouping) const {
+  if (!grouping) {
+    m_logger.information("No grouping information is provided in the Nexus file");
+    return std::nullopt;
+  }
+  auto groupingIDs = *grouping;
+  if (detectorsLoaded.size() != groupingIDs.size()) {
+    m_logger.information() << "The number of groupings in the provided Nexus file (" << groupingIDs.size()
+                           << ") does not match the number of loaded detectors (" << detectorsLoaded.size() << ").";
+    return std::nullopt;
+  }
 
   std::map<detid_t, std::vector<detid_t>> groupingMap;
   for (size_t i = 0; i < detectorsLoaded.size(); ++i) {
     // Add detector ID to the list of group detectors. Detector ID is always
-    groupingMap[grouping[i]].emplace_back(detectorsLoaded[i]);
+    groupingMap[groupingIDs[i]].emplace_back(detectorsLoaded[i]);
   }
 
+  auto detectorGroupingTable = std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+      API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
+  detectorGroupingTable->addColumn("vector_int", "Detectors");
   for (auto &group : groupingMap) {
     if (group.first != 0) { // Skip 0 group
       API::TableRow newRow = detectorGroupingTable->appendRow();

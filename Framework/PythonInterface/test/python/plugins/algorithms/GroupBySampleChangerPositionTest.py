@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods,invalid-name
 import unittest
-from mantid.simpleapi import ISISIndirectEnergyTransferWrapper, GroupBySampleChangerPosition, AnalysisDataServiceImpl
+from mantid.simpleapi import ISISIndirectEnergyTransfer, GroupBySampleChangerPosition, AnalysisDataServiceImpl
 
 
 class GroupBySampleChangerPositionTest(unittest.TestCase):
@@ -15,7 +15,7 @@ class GroupBySampleChangerPositionTest(unittest.TestCase):
         Sanity test to ensure the most basic reduction actually completes.
         """
 
-        wks = ISISIndirectEnergyTransferWrapper(
+        wks = ISISIndirectEnergyTransfer(
             InputFiles="IRS26176.RAW", Instrument="IRIS", Analyser="graphite", Reflection="002", SpectraRange=[3, 53]
         )
         GroupBySampleChangerPosition(InputWorkspace=wks, OutputGroupPrefix="Prefix", OutputGroupSuffix="Suffix")
@@ -31,7 +31,7 @@ class GroupBySampleChangerPositionTest(unittest.TestCase):
         Sanity test to ensure the most basic reduction actually completes.
         """
 
-        wks = ISISIndirectEnergyTransferWrapper(
+        wks = ISISIndirectEnergyTransfer(
             InputFiles="IRS94297.nxs, IRS94298.nxs, IRS94299.nxs",
             Instrument="IRIS",
             Analyser="graphite",
