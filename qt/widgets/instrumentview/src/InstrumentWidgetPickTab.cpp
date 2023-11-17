@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 #include "MantidQtWidgets/InstrumentView/CollapsiblePanel.h"
+#include "MantidQtWidgets/InstrumentView/CollapsibleStack2.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
@@ -114,6 +115,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget,
 
   // set up the rebin tab
   m_rebin = new QWidget(this);
+  m_rebin->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   QGridLayout *rebinLayout = new QGridLayout(m_rebin);
   m_rebinParams = new QLineEdit(m_rebin);
   m_rebinParams->setToolTip("The parameters to use for the new binning, a comma separated list of first bin boundary, "
@@ -206,10 +208,17 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget,
   m_savePlotToWorkspace = new QAction("Save plot to workspace", this);
   connect(m_savePlotToWorkspace, SIGNAL(triggered()), this, SLOT(savePlotToWorkspace()));
 
-  CollapsibleStack *panelStack = new CollapsibleStack(this);
+  /*CollapsibleStack *panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
   m_plotPanel = panelStack->addPanel("Name", m_plot);
   m_rebinPanel = panelStack->addPanel("Rebin", m_rebin);
+  m_rebinPanel->collapseCaption();
+  collapsePlotPanel();*/
+
+  CollapsingStack *panelStack = new CollapsingStack(this);
+  m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
+  m_plotPanel = panelStack->addPanel("Name", m_plot);
+  m_rebinPanel = panelStack->addPanel("Rebin", m_rebin, true);
   m_rebinPanel->collapseCaption();
   collapsePlotPanel();
 

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidQtWidgets/InstrumentView/CollapsibleStack2.h"
 #include "MantidQtWidgets/InstrumentView/GLDisplay.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
 #include "MantidQtWidgets/InstrumentView/MiniPlot.h"
@@ -192,10 +193,10 @@ private:
   /// displayed curves
   QAction *m_savePlotToWorkspace; ///< Save data plotted on the miniplot into a MatrixWorkspace
 
-  CollapsiblePanel *m_plotPanel;
+  CollapsingPanel *m_plotPanel;
   QTextEdit *m_selectionInfoDisplay; ///< Text control for displaying selection information
-  CollapsiblePanel *m_infoPanel;
-  CollapsiblePanel *m_rebinPanel;
+  CollapsingPanel *m_infoPanel;
+  CollapsingPanel *m_rebinPanel;
   SelectionType m_selectionType;
   mutable bool m_freezePlot;
 
