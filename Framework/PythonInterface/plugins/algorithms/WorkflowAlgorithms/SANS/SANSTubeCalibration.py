@@ -11,6 +11,7 @@ import os.path
 from pathlib import Path
 import sys
 from enum import Enum
+from typing import Tuple
 
 import numpy as np
 
@@ -450,7 +451,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         return self._detector_name + "-detector/" + side + str(tube_side_num)
 
     @staticmethod
-    def _get_tube_module_and_number(tube_id):
+    def _get_tube_module_and_number(tube_id: int) -> Tuple[int, int]:
         """Get the tube module and number based on the id given"""
         module = int(tube_id / DetectorInfo.NUM_TUBES_PER_MODULE) + 1
         tube_num = tube_id % DetectorInfo.NUM_TUBES_PER_MODULE
@@ -1029,7 +1030,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         for i in range(len(cvalues.dataY(0))):
             cvalue = cvalues.dataY(0)[i]
             if cvalue > threshold:
-                module, tube_num = self._get_tube_module_and_number(cvalues.dataX(0)[i])
+                module, tube_num = self._get_tube_module_and_number(int(cvalues.dataX(0)[i]))
                 msg = f"Module {module}, tube {tube_num} has cvalue {cvalue}"
                 cvalues_above_threshold.append(msg + "\n")
                 self.log().notice(msg)
