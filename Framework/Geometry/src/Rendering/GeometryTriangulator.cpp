@@ -43,9 +43,6 @@ GNU_DIAG_OFF("cast-qual")
 #include <TopoDS.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
-#include <gp_Pln.hxx>
-#include <gp_Pnt.hxx>
-#include <gp_Trsf.hxx>
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("cast-qual")
 
