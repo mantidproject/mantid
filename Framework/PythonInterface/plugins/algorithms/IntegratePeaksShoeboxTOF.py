@@ -32,6 +32,7 @@ class PEAK_STATUS(Enum):
     WEAK = "Weak peak"
     STRONG = "Strong peak"
     ON_EDGE = "Peak mask is on the detector edge"
+    ON_EDGE_INTEGRATED = "Peak mask is on the detector edge"
     NO_PEAK = "No peak detected."
 
 
@@ -335,7 +336,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             nrows = self.getProperty("NRows").value  # get these inside loop as overwritten if shoebox optimised
             ncols = self.getProperty("NCols").value
             ispec = ws.getIndicesFromDetectorIDs([detid])[0]
-            itof = ws.binIndexOf(pk_tof, ispec)
+            itof = ws.yIndexOfX(pk_tof, ispec)  # np.clip try/catch
             bin_width = np.diff(ws.readX(ispec)[itof : itof + 2])[0]  # used later to scale intensity
             if get_nbins_from_b2bexp_params:
                 fwhm = get_fwhm_from_back_to_back_params(peak, ws, detid)
@@ -572,14 +573,43 @@ def find_ipks_in_window(ws, peaks, ispecs, ipk, tof_min=None, tof_max=None):
 
 
 def integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges=None):
-    slices = tuple([slice(ii - shape // 2, ii + shape // 2 + 1) for ii, shape in zip(ipos, kernel.shape)])
-    if det_edges is None or not det_edges[slices[:-1]].any():
-        intens = np.sum(y[slices] * kernel)
-        sigma = np.sqrt(np.sum(esq[slices] * (kernel**2)))
-        status = PEAK_STATUS.STRONG if intens / sigma > weak_peak_threshold else PEAK_STATUS.WEAK
-    else:
+    slices = tuple(
+        [
+            slice(
+                np.clip(ii - kernel.shape[idim] // 2, a_min=0, a_max=y.shape[idim]),
+                np.clip(ii + kernel.shape[idim] // 2 + 1, a_min=0, a_max=y.shape[idim]),
+            )
+            for idim, ii in enumerate(ipos)
+        ]
+    )
+
+    status = PEAK_STATUS.NO_PEAK
+    if det_edges is not None and det_edges[slices[:-1]].any():
         status = PEAK_STATUS.ON_EDGE
         intens, sigma = 0.0, 0.0
+    else:
+        if y[slices].size != kernel.size:
+            # peak is partially on edge, but we continue to integrate with a partial kernel
+            status = PEAK_STATUS.ON_EDGE_INTEGRATED  # don't want to optimise weak peak shoeboxes using edge peaks
+            kernel_slices = []
+            for idim in range(len(ipos)):
+                # start/stop indices in kernel (by default all elements)
+                istart, iend = 2 * [None]
+                # get index in y where kernel starts
+                iy_start = ipos[idim] - kernel.shape[idim] // 2
+                if iy_start < 0:
+                    istart = -iy_start  # chop of ii elements at the begninning of the kernel along this dimension
+                elif iy_start > y.shape[idim] - kernel.shape[idim]:
+                    iend = y.shape[idim] - iy_start  # include only up to number of elements remaining in y
+                kernel_slices.append(slice(istart, iend))
+            kernel = kernel[tuple(kernel_slices)]
+            # re-normalise the shell to have integral = 0
+            inegative = kernel > 0
+            kernel[inegative] = -np.sum(kernel[~inegative]) / np.sum(inegative)
+        intens = np.sum(y[slices] * kernel)
+        sigma = np.sqrt(np.sum(esq[slices] * (kernel**2)))
+        if status == PEAK_STATUS.NO_PEAK:
+            status = PEAK_STATUS.STRONG if intens / sigma > weak_peak_threshold else PEAK_STATUS.WEAK
     return intens, sigma, status
 
 
