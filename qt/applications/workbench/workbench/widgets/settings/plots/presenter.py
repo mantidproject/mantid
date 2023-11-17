@@ -17,6 +17,7 @@ from workbench.plotting.style import VALID_LINE_STYLE, VALID_DRAW_STYLE
 from qtpy.QtCore import Qt
 
 from enum import Enum
+import sys
 
 
 class PlotProperties(Enum):
@@ -137,18 +138,26 @@ class PlotSettings(object):
 
         self.view.axes_line_width.setValue(axes_line_width)
 
+        float_max = sys.float_info.max
+        self.view.x_min.setRange(-float_max, float_max)
         if x_min_str:
             self.view.x_min.setEnabled(True)
             self.view.x_min.setValue(float(x_min_str))
             self.view.x_min_box.setChecked(True)
+
+        self.view.x_max.setRange(-float_max, float_max)
         if x_max_str:
             self.view.x_max.setEnabled(True)
             self.view.x_max.setValue(float(x_max_str))
             self.view.x_max_box.setChecked(True)
+
+        self.view.y_min.setRange(-float_max, float_max)
         if y_min_str:
             self.view.y_min.setEnabled(True)
             self.view.y_min.setValue(float(y_min_str))
             self.view.y_min_box.setChecked(True)
+
+        self.view.y_max.setRange(-float_max, float_max)
         if y_max_str:
             self.view.y_max.setEnabled(True)
             self.view.y_max.setValue(float(y_max_str))
