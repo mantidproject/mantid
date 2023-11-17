@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 """
-System test for GenerateEventsFilter followed by FilterEvents. GenerateEventsFilter creates a SplitterWorkspace
+System test for GenerateEventsFilter followed by FilterEvents. GenerateEventsFilter creates a SplittersWorkspace
 with a high first target index. FilterEvents then shifts all target indexes down so that the output workspace names start from "_1".
 """
 
