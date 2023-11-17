@@ -47,12 +47,15 @@ class FilterEventsWithHighFirstIndexSplitter(systemtesting.MantidSystemTest):
         )
 
         total_events = mtd["load_tmp"].getNumberEvents()
-        DeleteWorkspace("load_tmp")
         self.assertEqual(total_events, 1368485)
         sum_events = 0
         for i in [1, 2, 3]:
             partial_ws_name = "EQSANS_104088" + "_" + str(i)
             event_count = mtd[partial_ws_name].getNumberEvents()
             sum_events += event_count
-            DeleteWorkspace(partial_ws_name)
         self.assertEqual(total_events, sum_events)
+        DeleteWorkspace("load_tmp")
+        DeleteWorkspace("info")
+        DeleteWorkspace("filter")
+        DeleteWorkspace("EQSANS_104088")
+        DeleteWorkspace("TOFCorrectWS")
