@@ -29,7 +29,7 @@ DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
                            std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>> rotations,
                            const std::vector<size_t> &monitorIndices)
     : DetectorInfo(std::move(positions), std::move(rotations)) {
-  for (const auto i : monitorIndices)
+  for (const auto &i : monitorIndices)
     m_isMonitor.access().at(i) = true;
 }
 
