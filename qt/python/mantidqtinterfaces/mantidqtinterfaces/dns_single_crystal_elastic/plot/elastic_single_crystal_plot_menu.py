@@ -199,7 +199,7 @@ class AxesMenu(QMenu):
             self.parent.sig_replot.emit('fix_aspect')
 
     def get_value(self):
-        axis_list = {0: 'tthomega', 1: 'qxqy', 2: 'hkl'}
+        axis_list = {0: 'two_theta_and_omega', 1: 'qxqy', 2: 'hkl'}
         index = self.qag.actions().index(self.qag.checkedAction())
         atype = axis_list[index]
         switch = self.ac_switch_axis.isChecked()
