@@ -284,11 +284,9 @@ void FitPeaks::init() {
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(PropertyNames::START_WKSP_INDEX, 0, mustBePositive, "Starting workspace index for fit");
-  declareProperty(PropertyNames::STOP_WKSP_INDEX, EMPTY_INT(),
-                  "Last workspace index to fit (which is included). "
-                  "If a value larger than the workspace index of last spectrum, "
-                  "then the workspace index of last spectrum is used.");
-
+  declareProperty(
+      PropertyNames::STOP_WKSP_INDEX, EMPTY_INT(),
+      "Last workspace index for fit is the smaller of this value and the workspace index of last spectrum.");
   // properties about peak positions to fit
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::PEAK_CENTERS),
                   "List of peak centers to use as initial guess for fit.");
@@ -384,9 +382,7 @@ void FitPeaks::init() {
   declareProperty(PropertyNames::BACKGROUND_Z_SCORE, EMPTY_DBL(), os.str());
 
   declareProperty(PropertyNames::HIGH_BACKGROUND, true,
-                  "Flag whether the data has high background comparing to "
-                  "peaks' intensities. "
-                  "For example, vanadium peaks usually have high background.");
+                  "Flag whether the input data has high background compared to peak heights.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::POSITION_TOL),
                   "List of tolerance on fitted peak positions against given peak positions."
@@ -394,8 +390,7 @@ void FitPeaks::init() {
 
   declareProperty(PropertyNames::PEAK_MIN_HEIGHT, 0.,
                   "Used for validating peaks before and after fitting. If a peak's observed/estimated or "
-                  "fitted height is under this value, "
-                  "the peak will be marked as error.");
+                  "fitted height is under this value, the peak will be marked as error.");
 
   declareProperty(PropertyNames::CONSTRAIN_PEAK_POS, true,
                   "If true peak position will be constrained by estimated positions "
@@ -427,10 +422,10 @@ void FitPeaks::init() {
                   "parameters. true generates a table with peak function "
                   "parameters");
 
-  declareProperty(PropertyNames::PEAK_MIN_SIGNAL_TO_NOISE_RATIO, 0.,
-                  "Minimum signal-to-noise ratio such that all the peaks with "
-                  "signal-to-noise ratio under this value will be excluded."
-                  "Note, the algorithm will not exclude a peak for which the noise cannot be estimated.");
+  declareProperty(
+      PropertyNames::PEAK_MIN_SIGNAL_TO_NOISE_RATIO, 0.,
+      "Used for validating peaks before fitting. If the signal-to-noise ratio is under this value, "
+      "the peak will be marked as error. This does not apply to peaks for which the noise cannot be estimated.");
 
   declareProperty(PropertyNames::PEAK_MIN_TOTAL_COUNT, EMPTY_DBL(),
                   "Used for validating peaks before fitting. If the total peak window Y-value count "
@@ -1751,8 +1746,6 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
     std::stringstream peak_center_constraint;
     peak_center_constraint << (peak_center - 0.5 * peak_width) << " < f0." << peak_function->getCentreParameterName()
                            << " < " << (peak_center + 0.5 * peak_width);
-
-    // set up a constraint on peak height
     fit->setProperty("Constraints", peak_center_constraint.str());
   }
 

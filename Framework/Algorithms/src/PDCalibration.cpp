@@ -179,40 +179,46 @@ const std::string PDCalibration::category() const { return "Diffraction\\Calibra
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string PDCalibration::summary() const {
-  return "Calibrate the detector pixels and create a calibration table";
+  return "This algorithm determines the diffractometer constants that convert diffraction spectra "
+         "from time-of-flight (TOF) to d-spacing. The results are output to a calibration table.";
 }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void PDCalibration::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::InOut),
-                  "Input signal workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
+                  "Input workspace containing spectra as a function of TOF measured on a standard sample.");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive, "Starting workspace index for fit");
-  declareProperty("StopWorkspaceIndex", EMPTY_INT(),
-                  "Last workspace index to fit (which is included). "
-                  "If a value larger than the workspace index of last spectrum, "
-                  "then the workspace index of last spectrum is used.");
+  declareProperty(
+      "StopWorkspaceIndex", EMPTY_INT(),
+      "Last workspace index for fit is the smaller of this value and the workspace index of last spectrum.");
 
-  declareProperty(std::make_unique<ArrayProperty<double>>("TofBinning", std::make_shared<RebinParamsValidator>()),
-                  "Min, Step, and Max of time-of-flight bins. "
-                  "Logarithmic binning is used if Step is negative.");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("TofBinning", std::make_shared<RebinParamsValidator>()),
+      "Min, Step, and Max of TOF bins. "
+      "Logarithmic binning is used if Step is negative. Chosen binning should ensure sufficient datapoints across "
+      "the peaks to be fitted, considering the number of parameters required by PeakFunction and BackgroundType.");
 
   const std::vector<std::string> exts2{".h5", ".cal"};
   declareProperty(std::make_unique<FileProperty>("PreviousCalibrationFile", "", FileProperty::OptionalLoad, exts2),
-                  "Previous calibration file");
+                  "An existent file to be loaded into a calibration table, which is used for converting PeakPositions "
+                  "from d-spacing to TOF.");
   declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "PreviousCalibrationTable", "", Direction::Input, API::PropertyMode::Optional),
-                  "Previous calibration table. This overrides results from previous file.");
+                  "An existent calibration table used for converting PeakPositions from d-spacing to TOF. "
+                  "This property has precedence over PreviousCalibrationFile.");
 
   // properties about peak positions to fit
   std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian", "Lorentzian", "PseudoVoigt",
                                      "IkedaCarpenterPV"};
-  declareProperty("PeakFunction", "Gaussian", std::make_shared<StringListValidator>(peaktypes));
+  declareProperty("PeakFunction", "Gaussian", std::make_shared<StringListValidator>(peaktypes),
+                  "Function to fit input peaks.");
   vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
-  declareProperty("BackgroundType", "Linear", std::make_shared<StringListValidator>(bkgdtypes), "Type of Background.");
+  declareProperty("BackgroundType", "Linear", std::make_shared<StringListValidator>(bkgdtypes),
+                  "Function to fit input peaks background.");
 
   auto peaksValidator = std::make_shared<CompositeValidator>();
   auto mustBePosArr = std::make_shared<Kernel::ArrayBoundedValidator<double>>();
@@ -220,7 +226,8 @@ void PDCalibration::init() {
   peaksValidator->add(mustBePosArr);
   peaksValidator->add(std::make_shared<MandatoryValidator<std::vector<double>>>());
   declareProperty(std::make_unique<ArrayProperty<double>>("PeakPositions", peaksValidator),
-                  "Comma delimited d-space positions of reference peaks.");
+                  "Comma-delimited positions (d-spacing) of reference peaks. Care should be taken to avoid using peaks "
+                  "whose predicted positions are too close considering their peak windows.");
 
   auto windowValidator = std::make_shared<CompositeValidator>();
   windowValidator->add(mustBePosArr);
@@ -229,61 +236,66 @@ void PDCalibration::init() {
   windowValidator->add(lengthValidator);
   windowValidator->add(std::make_shared<MandatoryValidator<std::vector<double>>>());
   declareProperty(std::make_unique<ArrayProperty<double>>("PeakWindow", "0.1", windowValidator),
-                  "Window over which to fit a peak in d-spacing (if a single value is supplied it will used as half "
-                  "the window width for all peaks, otherwise a comma delimited list of boundaries).");
+                  "Width of the window (d-spacing) over which to fit a peak. If a single value is supplied, it will be "
+                  "used as half "
+                  "the window width for all peaks. Otherwise, the expected input is a comma-delimited list of 2*N "
+                  "window boundaries, "
+                  "where N is the number of values in PeakPositions. The order of the window boundaries should match "
+                  "the order in PeakPositions.");
 
   auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(1e-3);
   declareProperty("PeakWidthPercent", EMPTY_DBL(), min,
-                  "The estimated peak width as a percent of the peak"
-                  "center value, in d-spacing or TOF units.");
+                  "Used for estimating peak width (an initial parameter for peak fitting) by multiplying peak's value "
+                  "in PeakPositions by this factor.");
 
   declareProperty("MinimumPeakHeight", 2.,
                   "Used for validating peaks before and after fitting. If a peak's observed/estimated or "
-                  "fitted height is under this value, "
-                  "the peak will be marked as error.");
+                  "fitted height is under this value, the peak will be marked as error.");
 
-  declareProperty("MaxChiSq", 100., "Maximum chisq value for individual peak fit allowed. (Default: 100)");
+  declareProperty("MaxChiSq", 100.,
+                  "Used for validating peaks after fitting. If the chi-squared value is higher than this value, "
+                  "the peak will be excluded from calibration. The recommended value is between 2 and 10.");
 
   declareProperty("ConstrainPeakPositions", false,
-                  "If true, peak centers will be constrained by estimated positions "
-                  "(highest Y value position) and "
-                  "the peak width will either be estimated by observation or calculated.");
+                  "If true, a peak center being fit will be constrained by the estimated peak position "
+                  "+/- 0.5 * \"estimated peak width\", where the estimated peak position is the highest Y-value "
+                  "position in the window, "
+                  " and the estimated peak width is FWHM calculated over the window data.");
 
   declareProperty("HighBackground", false,
-                  "Flag whether the data has high background comparing to "
-                  "peaks' intensities. "
-                  "For example, vanadium peaks usually have high background.");
+                  "Flag whether the input data has high background compared to peaks' heights. "
+                  "This option is recommended for data with peak-to-background ratios under ~5.");
 
   declareProperty("MinimumSignalToNoiseRatio", 0.,
-                  "Minimum signal-to-noise ratio such that all the peaks with "
-                  "signal-to-noise ratio under this value will be excluded."
-                  "Note, the algorithm will not exclude a peak for which the noise cannot be estimated.");
+                  "Used for validating peaks before fitting. If the signal-to-noise ratio is under this value, "
+                  "the peak will be excluded from fitting and calibration. This check does not apply to peaks for "
+                  "which the noise cannot be estimated. "
+                  "The minimum recommended value is 12.");
 
   std::vector<std::string> modes{"DIFC", "DIFC+TZERO", "DIFC+TZERO+DIFA"};
   declareProperty("CalibrationParameters", "DIFC", std::make_shared<StringListValidator>(modes),
-                  "Select calibration parameters to fit.");
+                  "Select which diffractometer constants (GSAS convention) to determine.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("TZEROrange"),
-                  "Range for allowable TZERO from calibration (default is all)");
+                  "Range for allowable calibrated TZERO value. Default: no restriction.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("DIFArange"),
-                  "Range for allowable DIFA from calibration (default "
-                  "is all)");
+                  "Range for allowable calibrated DIFA value. Default: no restriction.");
 
   declareProperty("UseChiSq", false,
-                  "By default the square of the peak height is used as weights "
-                  "in the least-squares fit to find the diffractometer "
-                  "constants, if UseChiSq is true then the inverse square of "
-                  "the error on the fitted peak centres will be used instead.");
+                  "Defines the weighting scheme used in the least-squares fit of the extracted peak centers "
+                  "that determines the diffractometer constants. If true, the peak weight will be "
+                  "the inverse square of the error on the fitted peak center. If false, the peak weight will be "
+                  "the square of the fitted peak height.");
 
   declareProperty(
       std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("OutputCalibrationTable", "", Direction::Output),
-      "Output table workspace containing the calibration");
+      "Output table workspace containing the calibration.");
 
   declareProperty(
       std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>("DiagnosticWorkspaces", "", Direction::Output),
-      "Workspaces to promote understanding of calibration results");
+      "Auxiliary workspaces containing extended information on the calibration results.");
 
   declareProperty("MinimumPeakTotalCount", EMPTY_DBL(),
                   "Used for validating peaks before fitting. If the total peak window Y-value count "
@@ -503,7 +515,7 @@ void PDCalibration::exec() {
   }
   auto NUMHIST = m_stopWorkspaceIndex - m_startWorkspaceIndex + 1;
 
-  // A pair of workspaces, one containing the nominal peak centers in TOF units,
+  // Create a pair of workspaces, one containing the nominal peak centers in TOF units,
   // the other containing the left and right fitting ranges around each nominal
   // peak center, also in TOF units. This for each pixel of the instrument
   auto matrix_pair = createTOFPeakCenterFitWindowWorkspaces(m_uncalibratedWS, peakWindow);
@@ -1407,9 +1419,9 @@ API::ITableWorkspace_sptr PDCalibration::sortTableWorkspace(API::ITableWorkspace
 }
 
 /**
- *  A pair of workspaces, one containing the nominal peak centers in TOF units,
+ *  Create a pair of workspaces, one containing the nominal peak centers in TOF units,
  *  the other containing the left and right fitting ranges around each nominal
- *  peak center, also in TOF units
+ *  peak center, also in TOF units.
  *
  *  Because each pixel has a different set of difc, difa, and tzero values,
  *  the position of the nominal peak centers (and the fitting ranges)
@@ -1417,8 +1429,8 @@ API::ITableWorkspace_sptr PDCalibration::sortTableWorkspace(API::ITableWorkspace
  *  calculated for each pixel.
  *
  *  @param dataws :: input signal workspace
- *  @param peakWindow:: A vector of boundaries in d-sapcing (if only one element this is half the width of the window
- * for all peaks) left and right of the nominal peak center to look for the peak
+ *  @param peakWindow:: A vector of boundaries in d-spacing (if the vector has only one element this is half the width
+ * of the window for all peaks) left and right of the nominal peak center to look for the peak
  */
 std::pair<API::MatrixWorkspace_sptr, API::MatrixWorkspace_sptr>
 PDCalibration::createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace_sptr &dataws,
