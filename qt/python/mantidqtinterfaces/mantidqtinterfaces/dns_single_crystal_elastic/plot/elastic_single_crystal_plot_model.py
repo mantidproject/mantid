@@ -55,7 +55,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
                      }
         if initial_values is not None:
             parameter.update(initial_values)
-        self._single_crystal_map = DNSScMap(ttheta=ttheta,
+        self._single_crystal_map = DNSScMap(two_theta=ttheta,
                                             omega=omega,
                                             z_mesh=z_mesh,
                                             error_mesh=error,
@@ -74,7 +74,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         return xprojection, yprojection
 
     def get_interpolated_quadmesh(self, interpolate, axistype):
-        newmeshname = axistype + '_mesh_intp'
+        newmeshname = axistype + '_mesh_interpolated'
         oldmeshname = axistype + '_mesh'
         if interpolate:
             self._single_crystal_map.interpolate_quad_mesh(interpolate)
@@ -88,8 +88,8 @@ class DNSElasticSCPlotModel(DNSObsModel):
 
     def get_interpolated_triangulation(self, interpolate, axistype, switch):
         meshname = axistype + '_mesh'
-        self._single_crystal_map.triangulate(meshname=meshname, switch=switch)
-        self._single_crystal_map.mask_triangles(meshname=meshname)
+        self._single_crystal_map.triangulate(mesh_name=meshname, switch=switch)
+        self._single_crystal_map.mask_triangles(mesh_name=meshname)
         tri_refi, z_refi = self._single_crystal_map.interpolate_triangulation(interpolate)
         self._data.tiang = tri_refi
         self._data.ztiang = z_refi
@@ -117,7 +117,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         hkl1 = self._single_crystal_map.hkl1
         hkl2 = self._single_crystal_map.hkl2
         axis_labels = {
-            'tthomega': ['2 Theta (deg)', 'Omega (deg)'],
+            'two_theta_and_omega': ['2 Theta (deg)', 'Omega (deg)'],
             'qxqy': ['qx (Ang^-1)', 'qy (Ang^-1)'],
             'hkl': [
                 f'{hkl1} (r.l.u.)',
@@ -174,7 +174,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         return x, y, z
 
     def get_omegaoffset(self):
-        return self._single_crystal_map['omegaoffset']
+        return self._single_crystal_map['omega_offset']
 
     def get_dx_dy(self):
         return self._single_crystal_map['dx'], self._single_crystal_map['dy']

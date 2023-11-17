@@ -17,7 +17,7 @@ class SpinboxNorepeatStyle(QProxyStyle):  # turn off auto repeat on spinbox
 class DNSOmegaOffsetDialog(DNSDialog):
     def __init__(self, parent, omegaoffset):
         super().__init__(filen=__file__,
-                         ui='/omegaoffset.ui')
+                         ui='/omega_offset.ui')
         self._content.dSB_omegaoffset.setStyle(SpinboxNorepeatStyle())
         self._initialomegaoffset = omegaoffset
         self._content.dSB_omegaoffset.setValue(self._initialomegaoffset)
