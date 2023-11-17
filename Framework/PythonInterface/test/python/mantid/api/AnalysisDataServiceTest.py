@@ -218,6 +218,25 @@ class AnalysisDataServiceTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             str(workspaces[0])
 
+    def test_unique_name(self):
+        ws_name = mtd.unique_name()
+        self.assertEqual(5, len(ws_name))
+
+        prefix = "un_test_"
+        ws_name = mtd.unique_name(7, prefix)
+        self.assertEqual(len(prefix) + 7, len(ws_name))
+        self.assertTrue(ws_name.startswith(prefix))
+
+        suffix = "_test_ws"
+        ws_name = mtd.unique_name(3, suffix=suffix)
+        self.assertEqual(len(suffix) + 3, len(ws_name))
+        self.assertTrue(ws_name.endswith(suffix))
+
+    def test_hidden_name(self):
+        ws_name = mtd.unique_hidden_name()
+        self.assertEqual(11, len(ws_name))
+        self.assertTrue(ws_name.startswith("__"))
+
 
 if __name__ == "__main__":
     unittest.main()

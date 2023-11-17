@@ -85,5 +85,10 @@ void export_AnalysisDataService() {
       .def("addToGroup", &AnalysisDataServiceImpl::addToGroup, (arg("groupName"), arg("wsName")),
            "Add a workspace in the ADS to a group in the ADS")
       .def("removeFromGroup", &AnalysisDataServiceImpl::removeFromGroup, (arg("groupName"), arg("wsName")),
-           "Remove a workspace from a group in the ADS");
+           "Remove a workspace from a group in the ADS")
+      .def("unique_name", &AnalysisDataServiceImpl::uniqueName,
+           (arg("self"), arg("n") = 5, arg("prefx") = "", arg("suffix") = ""),
+           "Return a randomly generated unique name for a workspace.")
+      .def("unique_hidden_name", &AnalysisDataServiceImpl::uniqueHiddenName, arg("self"),
+           "Return a randomly generated unique hidden workspace name.");
 }

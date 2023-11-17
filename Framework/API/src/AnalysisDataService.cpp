@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include <iostream>
 #include <iterator>
+#include <random>
 #include <sstream>
 
 namespace Mantid::API {
@@ -166,6 +168,54 @@ void AnalysisDataServiceImpl::remove(const std::string &name) {
     ws->setName("");
   }
 }
+
+/**
+ * @brief random lowercase letter used for generating workspace name in
+ * unique_name and unique_hidden_name
+ * @return Random Char
+ */
+char AnalysisDataServiceImpl::getRandomLowercaseLetter() {
+  static const std::string alphabet = "abcdefghijklmnopqrstuvwxyz";
+  static std::random_device rd;
+  static std::mt19937 gen(rd());
+  static std::uniform_int_distribution<> dis(0, int(alphabet.size() - 1));
+  return alphabet[dis(gen)];
+}
+
+/**
+ * @brief generate a unique name that will not collide with any other workspace name
+ * @param n Size of the sequence (must be a positive number)
+ * @param prefix String to prefix the random name
+ * @param suffix String to suffix the random name
+ * @return String (prefix + n*random char + suffix)
+ */
+const std::string AnalysisDataServiceImpl::uniqueName(const int n, const std::string &prefix,
+                                                      const std::string &suffix) {
+  if (n <= 0) {
+    throw std::invalid_argument("n must be a positive number");
+  }
+  auto randomNameGenerator = [n]() {
+    std::string name;
+    for (int i = 0; i < n; ++i) {
+      name += getRandomLowercaseLetter();
+    }
+    return name;
+  };
+
+  std::string wsName = "";
+  do {
+    wsName = randomNameGenerator();
+    std::cout << "wsname: " << wsName << "\n";
+  } while (doesExist(wsName));
+
+  return prefix + wsName + suffix;
+}
+
+/**
+ * @brief generate a unique hidden name to be used as a temporary workspace
+ * @return String ("__" + 9*random char)
+ */
+const std::string AnalysisDataServiceImpl::uniqueHiddenName() { return AnalysisDataServiceImpl::uniqueName(9, "__"); }
 
 /**
  * @brief Given a list of names retrieve the corresponding workspace handles
