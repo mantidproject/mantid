@@ -50,9 +50,9 @@ class DNSElasticSCPlotView(DNSView):
             'grid': _content.tB_grid,
             'linestyle': _content.tB_linestyle,
             'crystal_axes': _content.tB_crystal_axes,
-            'xrange': _content.lE_xrange,
-            'yrange': _content.lE_yrange,
-            'zrange': _content.lE_zrange,
+            'x_range': _content.lE_x_range,
+            'y_range': _content.lE_y_range,
+            'z_range': _content.lE_z_range,
             'colormap': _content.combB_colormap,
             'projections': _content.tB_projections,
             'log_scale': _content.tB_log,
@@ -79,9 +79,9 @@ class DNSElasticSCPlotView(DNSView):
         self._map['linestyle'].clicked.connect(self._change_linestyle)
         self._map['projections'].clicked.connect(self._toggle_projections)
         # self._map['save_data'].clicked.connect(self.save_data)
-        self._map['xrange'].returnPressed.connect(self._manual_lim_changed)
-        self._map['yrange'].returnPressed.connect(self._manual_lim_changed)
-        self._map['zrange'].returnPressed.connect(self._manual_lim_changed)
+        self._map['x_range'].returnPressed.connect(self._manual_lim_changed)
+        self._map['y_range'].returnPressed.connect(self._manual_lim_changed)
+        self._map['z_range'].returnPressed.connect(self._manual_lim_changed)
         self._map['colormap'].currentIndexChanged.connect(
             self._change_colormap)
         self._map['crystal_axes'].clicked.connect(

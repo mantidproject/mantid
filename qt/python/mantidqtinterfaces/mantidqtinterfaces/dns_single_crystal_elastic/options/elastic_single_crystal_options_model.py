@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-DNS Options Presenter - Tab of DNS Reduction GUI
+DNS single crystal elastic options tab model of DNS reduction GUI.
 """
 
 from mantidqtinterfaces.dns_powder_elastic.helpers.converters import \

@@ -29,6 +29,6 @@ class DNSElasticSCScriptGeneratorPresenter(DNSScriptGeneratorPresenter):
         self.own_dict['script_path'] = self._script_path
         self.own_dict['script_number'] = self._script_number
         self.own_dict['script_text'] = self._script_text
-        self.own_dict['plotlist'] = self._plotlist
+        self.own_dict['plot_list'] = self._plotlist
         self.own_dict['data_arrays'] = self._data_arrays
         return self.own_dict

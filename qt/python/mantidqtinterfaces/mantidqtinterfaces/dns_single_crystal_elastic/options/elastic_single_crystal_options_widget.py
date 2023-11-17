@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS Elastic SC Options widget
+DNS single crystal elastic options widget of DNS reduction GUI.
 """
 
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget \
@@ -19,6 +20,7 @@ from mantidqtinterfaces.dns_single_crystal_elastic.options.elastic_single_crysta
 
 
 class DNSElasticSCOptionsWidget(DNSWidget):
+
     def __init__(self, name, parent):
         super().__init__(name, parent)
         self.view = DNSElasticSCOptionsView(parent=parent.view)

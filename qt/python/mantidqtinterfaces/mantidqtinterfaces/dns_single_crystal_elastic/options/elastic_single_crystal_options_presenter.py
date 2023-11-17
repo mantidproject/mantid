@@ -14,6 +14,7 @@ from mantidqtinterfaces.dns_powder_tof.options.common_options_presenter \
 
 
 class DNSElasticSCOptionsPresenter(DNSCommonOptionsPresenter):
+
     def __init__(self, name=None, parent=None, view=None, model=None):
         super().__init__(parent=parent, name=name, view=view, model=model)
         # connect signals
@@ -29,7 +30,7 @@ class DNSElasticSCOptionsPresenter(DNSCommonOptionsPresenter):
 
     def _set_auto_two_theta_binning(self):
         """
-        Getting binning parameters from selected sample data.
+        Getting two theta binning parameters from selected sample data.
         """
         if self.param_dict['file_selector']['full_data']:
             sample_data = self.param_dict['file_selector']['full_data']
@@ -41,7 +42,7 @@ class DNSElasticSCOptionsPresenter(DNSCommonOptionsPresenter):
 
     def _set_auto_omega_binning(self):
         """
-        Getting binning parameters from selected sample data.
+        Getting omega binning parameters from selected sample data.
         """
         if self.param_dict['file_selector']['full_data']:
             sample_data = self.param_dict['file_selector']['full_data']

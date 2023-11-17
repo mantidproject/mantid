@@ -42,7 +42,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self._data.ztriang = None
 
     def create_single_crystal_map(self, data_array, options, initial_values=None):
-        ttheta = data_array['two_theta_array']
+        two_theta = data_array['two_theta_array']
         omega = data_array['omega_array']
         z_mesh = data_array['intensity']
         error = data_array['error']
@@ -55,7 +55,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
                      }
         if initial_values is not None:
             parameter.update(initial_values)
-        self._single_crystal_map = DNSScMap(two_theta=ttheta,
+        self._single_crystal_map = DNSScMap(two_theta=two_theta,
                                             omega=omega,
                                             z_mesh=z_mesh,
                                             error_mesh=error,
