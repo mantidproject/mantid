@@ -113,7 +113,9 @@ protected:
   API::MatrixWorkspace_sptr integrateWS(const API::MatrixWorkspace_sptr &ws);
   void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) const;
   void prepareSampleBeamGeometry(const API::MatrixWorkspace_sptr &inputWS);
-  std::shared_ptr<Geometry::CSGObject> createCollimatorCorridorShape(const Kernel::V3D &detPos);
+  std::shared_ptr<Geometry::CSGObject> createCollimatorCorridorShape(const Kernel::V3D &samplePos,
+                                                                     const Kernel::V3D &detPos,
+                                                                     const Mantid::Geometry::BoundingBox &detectorBbox);
 
 private:
   void init() override;
@@ -121,14 +123,20 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   std::tuple<double, double> new_vector(const Kernel::Material &material, double k, bool specialSingleScatterCalc);
-  std::tuple<std::vector<double>, std::vector<double>>
-  simulatePaths(const int nEvents, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-                const ComponentWorkspaceMappings &componentWorkspaces, const double kinc,
-                const std::vector<double> &wValues, const Kernel::V3D &detPos, bool specialSingleScatterCalc);
+  std::tuple<std::vector<double>, std::vector<double>> simulatePaths(const int nEvents, const int nScatters, 
+                                                                    Kernel::PseudoRandomNumberGenerator &rng,
+                                                                    ComponentWorkspaceMappings &componentWorkspaces, 
+                                                                    const double kinc, const std::vector<double> &wValues,
+                                                                    bool specialSingleScatterCalc, 
+                                                                    const Mantid::Geometry::DetectorInfo &detectorInfo,
+                                                                    const int64_t &histogramIndex);
   std::tuple<bool, std::vector<double>> scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
                                                 const ComponentWorkspaceMappings &componentWorkspaces,
                                                 const double kinc, const std::vector<double> &wValues,
-                                                const Kernel::V3D &detPos, bool specialSingleScatterCalc);
+                                                bool specialSingleScatterCalc,
+                                                const Mantid::Geometry::DetectorInfo &detectorInfo,
+                                                const int64_t &histogramIndex);
+
   Geometry::Track start_point(Kernel::PseudoRandomNumberGenerator &rng);
   Geometry::Track generateInitialTrack(Kernel::PseudoRandomNumberGenerator &rng);
   void inc_xyz(Geometry::Track &track, double vl);

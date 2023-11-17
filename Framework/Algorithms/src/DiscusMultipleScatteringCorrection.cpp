@@ -184,6 +184,10 @@ void DiscusMultipleScatteringCorrection::init() {
                   "Enable normalization of supplied structure factor(s). May be required when running a calculation "
                   "involving more than one material where the normalization of the default S(Q)=1 structure factor "
                   "doesn't match the normalization of a supplied non-isotropic structure factor");
+  declareProperty("RadialCollimator", false,
+                  "Enable use of a radial collimator that assign zero weights to tracks where the final scatter "
+                  "is not in a position that allows the final track segment to pass through the collimator corridor "
+                  "which spans from the guage volume toward the each detector");
 }
 
 /**
@@ -335,6 +339,18 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
       issues["SimulateEnergiesIndependently"] =
           "SimulateEnergiesIndependently is only applicable to inelastic direct geometry calculations. Different "
           "energy transfer bins are always simulated separately for indirect geometry";
+  }
+
+  const bool radialCollimator = getProperty("RadialCollimator");
+  if (radialCollimator) {
+    auto numberOfHist = inputWS->getNumberHistograms();
+    for (auto histIdx = 0; histIdx < numberOfHist; ++histIdx) {
+      const auto detector = inputWS->getDetector(histIdx);
+      if (!detector->shape()) {
+        issues["RadialCollimator"] = "RadialCollimator is only applicable when each detector has a valid shape";
+        break;
+      }
+    }
   }
 
   return issues;
@@ -580,6 +596,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   enableParallelFor = enableParallelFor && Kernel::threadSafe(*noAbsOutputWS);
 
   const auto &spectrumInfo = instrumentWS.spectrumInfo();
+  const auto &detectorInfo = instrumentWS.detectorInfo();
 
   PARALLEL_FOR_IF(enableParallelFor)
   for (int64_t i = 0; i < static_cast<int64_t>(nhists); ++i) { // signed int for openMP loop
@@ -602,7 +619,7 @@ void DiscusMultipleScatteringCorrection::exec() {
       const size_t nsteps = std::max(static_cast<size_t>(1), nSimulationPoints - 1);
       const size_t xStepSize = nbins == 1 ? 1 : (nbins - 1) / nsteps;
 
-      const auto detPos = spectrumInfo.position(i);
+      // const auto detPos = spectrumInfo.position(i);
 
       // create copy of the SQ workspaces vector and fully copy any members that will be modified
       auto componentWorkspaces = m_SQWSs;
@@ -629,7 +646,9 @@ void DiscusMultipleScatteringCorrection::exec() {
           prepareCumulativeProbForQ(kinc, componentWorkspaces);
 
         auto [weights, weightsErrors] =
-            simulatePaths(nSingleScatterEvents, 1, rng, componentWorkspaces, kinc, wValues, detPos, true);
+            // simulatePaths(nSingleScatterEvents, 1, rng, componentWorkspaces, kinc, wValues, detPos, true,
+            // detectorBbox);
+            simulatePaths(nSingleScatterEvents, 1, rng, componentWorkspaces, kinc, wValues, true, detectorInfo, i);
         if (std::get<1>(kInW[bin]) == -1) {
           noAbsSimulationWS->getSpectrum(i).mutableY() += weights;
           noAbsSimulationWS->getSpectrum(i).mutableE() += weightsErrors;
@@ -642,7 +661,8 @@ void DiscusMultipleScatteringCorrection::exec() {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
           std::tie(weights, weightsErrors) =
-              simulatePaths(nEvents, ne + 1, rng, componentWorkspaces, kinc, wValues, detPos, false);
+              // simulatePaths(nEvents, ne + 1, rng, componentWorkspaces, kinc, wValues, detPos, false, detectorBbox);
+              simulatePaths(nEvents, ne + 1, rng, componentWorkspaces, kinc, wValues, false, detectorInfo, i);
           if (std::get<1>(kInW[bin]) == -1.0) {
             simulationWSs[ne]->getSpectrum(i).mutableY() += weights;
             simulationWSs[ne]->getSpectrum(i).mutableE() += weightsErrors;
@@ -1356,8 +1376,8 @@ GNU_DIAG_OFF("free-nonheap-object")
  */
 std::tuple<std::vector<double>, std::vector<double>> DiscusMultipleScatteringCorrection::simulatePaths(
     const int nPaths, const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-    const ComponentWorkspaceMappings &componentWorkspaces, const double kinc, const std::vector<double> &wValues,
-    const Kernel::V3D &detPos, bool specialSingleScatterCalc) {
+    ComponentWorkspaceMappings &componentWorkspaces, const double kinc, const std::vector<double> &wValues,
+    bool specialSingleScatterCalc, const Mantid::Geometry::DetectorInfo &detectorInfo, const int64_t &histogramIndex) {
   // countZeroWeights for debugging and analysis of where importance sampling may help
   std::vector<int> countZeroWeights(wValues.size(), 0);
   std::vector<double> sumOfWeights(wValues.size(), 0.);
@@ -1366,7 +1386,9 @@ std::tuple<std::vector<double>, std::vector<double>> DiscusMultipleScatteringCor
 
   for (int ie = 0; ie < nPaths; ie++) {
     auto [success, weights] =
-        scatter(nScatters, rng, componentWorkspaces, kinc, wValues, detPos, specialSingleScatterCalc);
+        // scatter(nScatters, rng, componentWorkspaces, kinc, wValues, detPos, specialSingleScatterCalc, detectorBbox);
+        scatter(nScatters, rng, componentWorkspaces, kinc, wValues, specialSingleScatterCalc, detectorInfo,
+                histogramIndex);
     if (success) {
       std::transform(weights.begin(), weights.end(), sumOfWeights.begin(), sumOfWeights.begin(), std::plus<double>());
       std::transform(weights.begin(), weights.end(), countZeroWeights.begin(), countZeroWeights.begin(),
@@ -1413,11 +1435,11 @@ GNU_DIAG_ON("free-nonheap-object")
  * @return A tuple containing a success/fail boolean and the calculated weights
  * across the n-1 multiple scatters
  */
-std::tuple<bool, std::vector<double>>
-DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
-                                            const ComponentWorkspaceMappings &componentWorkspaces, const double kinc,
-                                            const std::vector<double> &wValues, const Kernel::V3D &detPos,
-                                            bool specialSingleScatterCalc) {
+std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatter(
+    const int nScatters, Kernel::PseudoRandomNumberGenerator &rng,
+    const ComponentWorkspaceMappings &componentWorkspaces, const double kinc, const std::vector<double> &wValues,
+    bool specialSingleScatterCalc, const Mantid::Geometry::DetectorInfo &detectorInfo, const int64_t &histogramIndex) {
+
   double weight = 1;
 
   auto track = start_point(rng);
@@ -1458,10 +1480,16 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
         new_vector(shapeObjectWithScatter->material(), k, specialSingleScatterCalc);
   }
 
-  bool considerGaugeVolume = true; // eventually check if m_inputWS->run().hasProperty("GaugeVolume") is populated
-  if (considerGaugeVolume) {
-    auto collimatorCorridor = createCollimatorCorridorShape(detPos);
-    // is the final scatter point inside the collimatorCorridor shape?
+  const auto &detPos = detectorInfo.position(histogramIndex);
+  bool considerCollimator = getProperty("RadialCollimator");
+  if (considerCollimator) {
+    const auto &samplePos = detectorInfo.samplePosition();
+    Mantid::Geometry::BoundingBox detectorBbox;
+    const auto &detector = detectorInfo.detector(histogramIndex);
+    detector.getBoundingBox(detectorBbox);
+
+    auto collimatorCorridor = createCollimatorCorridorShape(samplePos, detPos, detectorBbox);
+    // checking if the final scatter point inside the collimatorCorridor shape
     if (!collimatorCorridor->isValid(track.startPoint()))
       return {true, std::vector<double>(wValues.size(), 0.)};
   }
@@ -1524,21 +1552,25 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
   return {true, weights};
 }
 
+/*
+ * construct cuboid corridor with axis passing through gauge volume centre and detPos
+ */
 std::shared_ptr<Geometry::CSGObject>
-DiscusMultipleScatteringCorrection::createCollimatorCorridorShape(const V3D &detPos) {
-  // construct cuboid with axis passing through gauge volume centre and detPos
-  Kernel::V3D gaugeVolCentre(0., 0., 0.); // hard code this for now to test
-  // gaugeVolumeCentre = gaugeVolume.centrePoint()
+DiscusMultipleScatteringCorrection::createCollimatorCorridorShape(const Kernel::V3D &samplePos, const V3D &detPos,
+                                                                  const Mantid::Geometry::BoundingBox &detectorBbox) {
+  Kernel::V3D gaugeVolCentre = samplePos;
+  const auto detBboxWidth = detectorBbox.width();
+  double width = detBboxWidth.norm();
   auto fromDetToGaugeVolCentre = gaugeVolCentre - detPos;
   // make the cuboid height twice the  distance from detector to gauge volume centre to make sure it passes all way
   // through sample
-  auto corridorHeight = 2 * fromDetToGaugeVolCentre.norm();
+  auto corridorLength = 2 * fromDetToGaugeVolCentre.norm();
 
   std::ostringstream shapeXMLStr;
   shapeXMLStr << "<cuboid id='\"collimator-corridor\">"
-              << "<width val=\"1.0\">" // TODO: decide on width
-              << "<height val=\"" << corridorHeight << "\">"
-              << "<depth val=\"1.0\">" // TODO: decide on height
+              << "<width val=\"" << width << "\">"
+              << "<height val=\"" << corridorLength << "\">"
+              << "<depth val=\"" << width << "\">"
               << "<axis x=\"" << fromDetToGaugeVolCentre.X() << "\" y=\"" << fromDetToGaugeVolCentre.Y() << "\" z=\""
               << fromDetToGaugeVolCentre.Z() << "\">"
               << "<centre x=\"" << gaugeVolCentre.X() << "\" y=\"" << gaugeVolCentre.Y() << "\" z=\""
