@@ -275,7 +275,7 @@ void PDCalibration::init() {
 
   std::vector<std::string> modes{"DIFC", "DIFC+TZERO", "DIFC+TZERO+DIFA"};
   declareProperty("CalibrationParameters", "DIFC", std::make_shared<StringListValidator>(modes),
-                  "Select which diffractometer contants (GSAS convention) to determine.");
+                  "Select which diffractometer constants (GSAS convention) to determine.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("TZEROrange"),
                   "Range for allowable calibrated TZERO value. Default: no restriction.");
