@@ -65,7 +65,7 @@ namespace MantidQt::CustomInterfaces {
 IndirectPlotOptionsView::IndirectPlotOptionsView(QWidget *parent)
     : API::MantidWidget(parent), m_suggestionsModel(std::make_unique<QStringListModel>(indicesSuggestions())),
       m_completer(std::make_unique<QCompleter>(m_suggestionsModel.get(), this)),
-      m_plotOptions(new Ui::IndirectPlotOptions) {
+      m_plotOptions(new Ui::IndirectPlotOptions), m_presenter() {
   m_plotOptions->setupUi(this);
   setupView();
 }
