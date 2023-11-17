@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectPlotOptionsView.h"
+#include "IndirectPlotOptionsPresenter.h"
 
 #include "MantidQtIcons/Icon.h"
 
@@ -64,25 +65,23 @@ namespace MantidQt::CustomInterfaces {
 IndirectPlotOptionsView::IndirectPlotOptionsView(QWidget *parent)
     : API::MantidWidget(parent), m_suggestionsModel(std::make_unique<QStringListModel>(indicesSuggestions())),
       m_completer(std::make_unique<QCompleter>(m_suggestionsModel.get(), this)),
-      m_plotOptions(new Ui::IndirectPlotOptions) {
+      m_plotOptions(new Ui::IndirectPlotOptions), m_presenter() {
   m_plotOptions->setupUi(this);
   setupView();
 }
 
-IndirectPlotOptionsView::~IndirectPlotOptionsView() = default;
-
 void IndirectPlotOptionsView::setupView() {
   connect(m_plotOptions->cbWorkspace, SIGNAL(currentTextChanged(QString const &)), this,
-          SLOT(emitSelectedWorkspaceChanged(QString const &)));
+          SLOT(notifySelectedWorkspaceChanged(QString const &)));
 
   connect(m_plotOptions->cbPlotUnit, SIGNAL(currentTextChanged(QString const &)), this,
-          SLOT(emitSelectedUnitChanged(QString const &)));
+          SLOT(notifySelectedUnitChanged(QString const &)));
 
-  connect(m_plotOptions->leIndices, SIGNAL(editingFinished()), this, SLOT(emitSelectedIndicesChanged()));
+  connect(m_plotOptions->leIndices, SIGNAL(editingFinished()), this, SLOT(notifySelectedIndicesChanged()));
   connect(m_plotOptions->leIndices, SIGNAL(textEdited(QString const &)), this,
-          SLOT(emitSelectedIndicesChanged(QString const &)));
+          SLOT(notifySelectedIndicesChanged(QString const &)));
 
-  connect(m_plotOptions->pbPlotSpectra, SIGNAL(clicked()), this, SLOT(emitPlotSpectraClicked()));
+  connect(m_plotOptions->pbPlotSpectra, SIGNAL(clicked()), this, SLOT(notifyPlotSpectraClicked()));
 
   setIndicesErrorLabelVisible(false);
 
@@ -92,44 +91,46 @@ void IndirectPlotOptionsView::setupView() {
   m_plotOptions->leIndices->setCompleter(m_completer.get());
 }
 
-void IndirectPlotOptionsView::emitSelectedWorkspaceChanged(QString const &workspaceName) {
-  emit selectedWorkspaceChanged(workspaceName.toStdString());
+void IndirectPlotOptionsView::subscribePresenter(IIndirectPlotOptionsPresenter *presenter) { m_presenter = presenter; }
+
+void IndirectPlotOptionsView::notifySelectedWorkspaceChanged(QString const &workspaceName) {
+  m_presenter->handleWorkspaceChanged(workspaceName.toStdString());
 }
 
-void IndirectPlotOptionsView::emitSelectedUnitChanged(QString const &unit) {
+void IndirectPlotOptionsView::notifySelectedUnitChanged(QString const &unit) {
   if (!unit.isEmpty()) {
-    emit selectedUnitChanged(displayStrToUnitId.at(unit.toStdString()));
+    m_presenter->handleSelectedUnitChanged(displayStrToUnitId.at(unit.toStdString()));
   }
 }
 
-void IndirectPlotOptionsView::emitSelectedIndicesChanged() {
-  emit selectedIndicesChanged(selectedIndices().toStdString());
+void IndirectPlotOptionsView::notifySelectedIndicesChanged() {
+  m_presenter->handleSelectedIndicesChanged(selectedIndices().toStdString());
 }
 
-void IndirectPlotOptionsView::emitSelectedIndicesChanged(QString const &spectra) {
+void IndirectPlotOptionsView::notifySelectedIndicesChanged(QString const &spectra) {
   if (spectra.isEmpty()) {
-    emit selectedIndicesChanged(spectra.toStdString());
+    m_presenter->handleSelectedIndicesChanged(spectra.toStdString());
   }
 }
 
-void IndirectPlotOptionsView::emitPlotSpectraClicked() {
-  emitSelectedIndicesChanged();
-  emit plotSpectraClicked();
+void IndirectPlotOptionsView::notifyPlotSpectraClicked() {
+  notifySelectedIndicesChanged();
+  m_presenter->handlePlotSpectraClicked();
 }
 
-void IndirectPlotOptionsView::emitPlotBinsClicked() {
-  emitSelectedIndicesChanged();
-  emit plotBinsClicked();
+void IndirectPlotOptionsView::notifyPlotBinsClicked() {
+  notifySelectedIndicesChanged();
+  m_presenter->handlePlotBinsClicked();
 }
 
-void IndirectPlotOptionsView::emitPlotContourClicked() {
-  emitSelectedIndicesChanged();
-  emit plotContourClicked();
+void IndirectPlotOptionsView::notifyPlotContourClicked() {
+  notifySelectedIndicesChanged();
+  m_presenter->handlePlotContourClicked();
 }
 
-void IndirectPlotOptionsView::emitPlotTiledClicked() {
-  emitSelectedIndicesChanged();
-  emit plotTiledClicked();
+void IndirectPlotOptionsView::notifyPlotTiledClicked() {
+  notifySelectedIndicesChanged();
+  m_presenter->handlePlotTiledClicked();
 }
 
 void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
@@ -145,10 +146,10 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
   auto plotTiledAction = new QAction(getAction(availableActions, "Plot Tiled"), this);
   plotTiledAction->setIcon(plotTiledIcon());
 
-  connect(plotSpectraAction, SIGNAL(triggered()), this, SLOT(emitPlotSpectraClicked()));
-  connect(plotBinAction, SIGNAL(triggered()), this, SLOT(emitPlotBinsClicked()));
-  connect(plotContourAction, SIGNAL(triggered()), this, SLOT(emitPlotContourClicked()));
-  connect(plotTiledAction, SIGNAL(triggered()), this, SLOT(emitPlotTiledClicked()));
+  connect(plotSpectraAction, SIGNAL(triggered()), this, SLOT(notifyPlotSpectraClicked()));
+  connect(plotBinAction, SIGNAL(triggered()), this, SLOT(notifyPlotBinsClicked()));
+  connect(plotContourAction, SIGNAL(triggered()), this, SLOT(notifyPlotContourClicked()));
+  connect(plotTiledAction, SIGNAL(triggered()), this, SLOT(notifyPlotTiledClicked()));
 
   m_plotOptions->tbPlot->setVisible(true);
   m_plotOptions->pbPlotSpectra->setVisible(true);

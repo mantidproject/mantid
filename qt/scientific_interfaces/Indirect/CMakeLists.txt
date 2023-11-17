@@ -65,7 +65,6 @@ set(MOC_FILES
     IndirectInstrumentConfig.h
     IndirectInterface.h
     IndirectMolDyn.h
-    IndirectPlotOptionsPresenter.h
     IndirectPlotOptionsView.h
     IndirectSassena.h
     IndirectSettings.h
@@ -90,6 +89,7 @@ set(INC_FILES
     DllConfig.h
     IndirectDataValidationHelper.h
     IndirectPlotOptionsModel.h
+    IndirectPlotOptionsPresenter.h
     IndirectSettingsHelper.h
     IndirectSettingsPresenter.h
     Notifier.h
