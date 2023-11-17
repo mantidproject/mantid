@@ -20,13 +20,13 @@ namespace CustomInterfaces {
 
 class MANTIDQT_INDIRECT_DLL IIndirectPlotOptionsPresenter {
 public:
-  virtual void notifyWorkspaceChanged(std::string const &workspaceName) = 0;
-  virtual void notifySelectedUnitChanged(std::string const &unit) = 0;
-  virtual void notifySelectedIndicesChanged(std::string const &indices) = 0;
-  virtual void notifyPlotSpectraClicked() = 0;
-  virtual void notifyPlotBinsClicked() = 0;
-  virtual void notifyPlotContourClicked() = 0;
-  virtual void notifyPlotTiledClicked() = 0;
+  virtual void handleWorkspaceChanged(std::string const &workspaceName) = 0;
+  virtual void handleSelectedUnitChanged(std::string const &unit) = 0;
+  virtual void handleSelectedIndicesChanged(std::string const &indices) = 0;
+  virtual void handlePlotSpectraClicked() = 0;
+  virtual void handlePlotBinsClicked() = 0;
+  virtual void handlePlotContourClicked() = 0;
+  virtual void handlePlotTiledClicked() = 0;
 };
 
 class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter final : public IIndirectPlotOptionsPresenter {
@@ -41,13 +41,13 @@ public:
                                PlotWidget const &plotType = PlotWidget::Spectra, std::string const &fixedIndices = "");
   ~IndirectPlotOptionsPresenter();
 
-  void notifyWorkspaceChanged(std::string const &workspaceName) override;
-  void notifySelectedUnitChanged(std::string const &unit) override;
-  void notifySelectedIndicesChanged(std::string const &indices) override;
-  void notifyPlotSpectraClicked() override;
-  void notifyPlotBinsClicked() override;
-  void notifyPlotContourClicked() override;
-  void notifyPlotTiledClicked() override;
+  void handleWorkspaceChanged(std::string const &workspaceName) override;
+  void handleSelectedUnitChanged(std::string const &unit) override;
+  void handleSelectedIndicesChanged(std::string const &indices) override;
+  void handlePlotSpectraClicked() override;
+  void handlePlotBinsClicked() override;
+  void handlePlotContourClicked() override;
+  void handlePlotTiledClicked() override;
 
   void setPlotType(PlotWidget const &plotType);
 

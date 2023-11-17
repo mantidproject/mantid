@@ -111,14 +111,14 @@ void IndirectPlotOptionsPresenter::onWorkspaceReplaced(WorkspaceBeforeReplaceNot
   if (auto const newWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
     auto const newName = newWorkspace->getName();
     if (newName == m_view->selectedWorkspace().toStdString())
-      notifyWorkspaceChanged(newName);
+      handleWorkspaceChanged(newName);
   }
 }
 
 void IndirectPlotOptionsPresenter::setWorkspaces(std::vector<std::string> const &workspaces) {
   auto const workspaceNames = m_model->getAllWorkspaceNames(workspaces);
   m_view->setWorkspaces(workspaceNames);
-  notifyWorkspaceChanged(workspaceNames.front());
+  handleWorkspaceChanged(workspaceNames.front());
 }
 
 void IndirectPlotOptionsPresenter::setWorkspace(std::string const &plotWorkspace) {
@@ -143,20 +143,20 @@ void IndirectPlotOptionsPresenter::setUnit(std::string const &unit) {
 void IndirectPlotOptionsPresenter::setIndices() {
   auto const selectedIndices = m_view->selectedIndices().toStdString();
   if (auto const indices = m_model->indices())
-    notifySelectedIndicesChanged(indices.get());
+    handleSelectedIndicesChanged(indices.get());
   else if (!selectedIndices.empty())
-    notifySelectedIndicesChanged(selectedIndices);
+    handleSelectedIndicesChanged(selectedIndices);
   else
-    notifySelectedIndicesChanged("0");
+    handleSelectedIndicesChanged("0");
 }
 
-void IndirectPlotOptionsPresenter::notifyWorkspaceChanged(std::string const &workspaceName) {
+void IndirectPlotOptionsPresenter::handleWorkspaceChanged(std::string const &workspaceName) {
   setWorkspace(workspaceName);
 }
 
-void IndirectPlotOptionsPresenter::notifySelectedUnitChanged(std::string const &unit) { setUnit(unit); }
+void IndirectPlotOptionsPresenter::handleSelectedUnitChanged(std::string const &unit) { setUnit(unit); }
 
-void IndirectPlotOptionsPresenter::notifySelectedIndicesChanged(std::string const &indices) {
+void IndirectPlotOptionsPresenter::handleSelectedIndicesChanged(std::string const &indices) {
   auto const formattedIndices = m_model->formatIndices(indices);
   m_view->setIndices(QString::fromStdString(formattedIndices));
   m_view->setIndicesErrorLabelVisible(!m_model->setIndices(formattedIndices));
@@ -165,7 +165,7 @@ void IndirectPlotOptionsPresenter::notifySelectedIndicesChanged(std::string cons
     m_view->addIndicesSuggestion(QString::fromStdString(formattedIndices));
 }
 
-void IndirectPlotOptionsPresenter::notifyPlotSpectraClicked() {
+void IndirectPlotOptionsPresenter::handlePlotSpectraClicked() {
   if (validateWorkspaceSize(MantidAxis::Spectrum)) {
     setPlotting(true);
     m_model->plotSpectra();
@@ -173,7 +173,7 @@ void IndirectPlotOptionsPresenter::notifyPlotSpectraClicked() {
   }
 }
 
-void IndirectPlotOptionsPresenter::notifyPlotBinsClicked() {
+void IndirectPlotOptionsPresenter::handlePlotBinsClicked() {
   if (validateWorkspaceSize(MantidAxis::Bin)) {
     auto const indicesString = m_view->selectedIndices().toStdString();
     if (m_model->validateIndices(indicesString, MantidAxis::Bin)) {
@@ -186,13 +186,13 @@ void IndirectPlotOptionsPresenter::notifyPlotBinsClicked() {
   }
 }
 
-void IndirectPlotOptionsPresenter::notifyPlotContourClicked() {
+void IndirectPlotOptionsPresenter::handlePlotContourClicked() {
   setPlotting(true);
   m_model->plotContour();
   setPlotting(false);
 }
 
-void IndirectPlotOptionsPresenter::notifyPlotTiledClicked() {
+void IndirectPlotOptionsPresenter::handlePlotTiledClicked() {
   if (validateWorkspaceSize(MantidAxis::Spectrum)) {
     setPlotting(true);
     m_model->plotTiled();

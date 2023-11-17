@@ -94,43 +94,43 @@ void IndirectPlotOptionsView::setupView() {
 void IndirectPlotOptionsView::subscribePresenter(IIndirectPlotOptionsPresenter *presenter) { m_presenter = presenter; }
 
 void IndirectPlotOptionsView::notifySelectedWorkspaceChanged(QString const &workspaceName) {
-  m_presenter->notifyWorkspaceChanged(workspaceName.toStdString());
+  m_presenter->handleWorkspaceChanged(workspaceName.toStdString());
 }
 
 void IndirectPlotOptionsView::notifySelectedUnitChanged(QString const &unit) {
   if (!unit.isEmpty()) {
-    m_presenter->notifySelectedUnitChanged(displayStrToUnitId.at(unit.toStdString()));
+    m_presenter->handleSelectedUnitChanged(displayStrToUnitId.at(unit.toStdString()));
   }
 }
 
 void IndirectPlotOptionsView::notifySelectedIndicesChanged() {
-  m_presenter->notifySelectedIndicesChanged(selectedIndices().toStdString());
+  m_presenter->handleSelectedIndicesChanged(selectedIndices().toStdString());
 }
 
 void IndirectPlotOptionsView::notifySelectedIndicesChanged(QString const &spectra) {
   if (spectra.isEmpty()) {
-    m_presenter->notifySelectedIndicesChanged(spectra.toStdString());
+    m_presenter->handleSelectedIndicesChanged(spectra.toStdString());
   }
 }
 
 void IndirectPlotOptionsView::notifyPlotSpectraClicked() {
   notifySelectedIndicesChanged();
-  m_presenter->notifyPlotSpectraClicked();
+  m_presenter->handlePlotSpectraClicked();
 }
 
 void IndirectPlotOptionsView::notifyPlotBinsClicked() {
   notifySelectedIndicesChanged();
-  m_presenter->notifyPlotBinsClicked();
+  m_presenter->handlePlotBinsClicked();
 }
 
 void IndirectPlotOptionsView::notifyPlotContourClicked() {
   notifySelectedIndicesChanged();
-  m_presenter->notifyPlotContourClicked();
+  m_presenter->handlePlotContourClicked();
 }
 
 void IndirectPlotOptionsView::notifyPlotTiledClicked() {
   notifySelectedIndicesChanged();
-  m_presenter->notifyPlotTiledClicked();
+  m_presenter->handlePlotTiledClicked();
 }
 
 void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,

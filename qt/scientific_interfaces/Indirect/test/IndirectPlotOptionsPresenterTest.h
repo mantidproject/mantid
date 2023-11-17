@@ -148,7 +148,7 @@ public:
 
   void test_that_notifyWorkspaceChanged_set_the_workspace_stored_by_the_model() {
     EXPECT_CALL(*m_model, setWorkspace(WORKSPACE_NAME)).Times(1);
-    m_presenter->notifyWorkspaceChanged(WORKSPACE_NAME);
+    m_presenter->handleWorkspaceChanged(WORKSPACE_NAME);
   }
 
   void test_that_the_view_widgets_are_enabled_when_the_workspace_being_set_in_the_model_is_valid() {
@@ -156,7 +156,7 @@ public:
 
     setExpectationsForWidgetEnabling(true);
 
-    m_presenter->notifyWorkspaceChanged(WORKSPACE_NAME);
+    m_presenter->handleWorkspaceChanged(WORKSPACE_NAME);
   }
 
   void test_that_the_view_widgets_are_disabled_when_the_workspace_being_set_in_the_model_is_invalid() {
@@ -164,7 +164,7 @@ public:
 
     setExpectationsForWidgetEnabling(false);
 
-    m_presenter->notifyWorkspaceChanged(WORKSPACE_NAME);
+    m_presenter->handleWorkspaceChanged(WORKSPACE_NAME);
   }
 
   void test_that_the_indices_are_formatted_when_they_are_changed_before_being_set_in_the_view_and_model() {
@@ -176,7 +176,7 @@ public:
     EXPECT_CALL(*m_model, setIndices(WORKSPACE_INDICES)).Times(1);
     EXPECT_CALL(*m_view, setIndicesErrorLabelVisible(false)).Times(1);
 
-    m_presenter->notifySelectedIndicesChanged(WORKSPACE_INDICES);
+    m_presenter->handleSelectedIndicesChanged(WORKSPACE_INDICES);
   }
 
   void test_that_the_indicesErrorLabel_is_set_to_visible_when_the_indices_are_invalid() {
@@ -187,7 +187,7 @@ public:
     EXPECT_CALL(*m_model, setIndices(WORKSPACE_INDICES)).Times(1);
     EXPECT_CALL(*m_view, setIndicesErrorLabelVisible(true)).Times(1);
 
-    m_presenter->notifySelectedIndicesChanged(WORKSPACE_INDICES);
+    m_presenter->handleSelectedIndicesChanged(WORKSPACE_INDICES);
   }
 
   void test_that_a_new_indice_suggestion_is_set_when_the_formatted_indices_are_not_empty() {
@@ -196,7 +196,7 @@ public:
     EXPECT_CALL(*m_model, formatIndices(WORKSPACE_INDICES)).Times(1);
     EXPECT_CALL(*m_view, addIndicesSuggestion(QString::fromStdString(WORKSPACE_INDICES))).Times(1);
 
-    m_presenter->notifySelectedIndicesChanged(WORKSPACE_INDICES);
+    m_presenter->handleSelectedIndicesChanged(WORKSPACE_INDICES);
   }
 
   void test_that_a_new_indice_suggestion_is_not_set_when_the_formatted_indices_are_empty() {
@@ -205,7 +205,7 @@ public:
     EXPECT_CALL(*m_model, formatIndices("")).Times(1);
     EXPECT_CALL(*m_view, addIndicesSuggestion(QString::fromStdString(""))).Times(0);
 
-    m_presenter->notifySelectedIndicesChanged("");
+    m_presenter->handleSelectedIndicesChanged("");
   }
 
   void test_that_the_plotSpectraClicked_signal_will_attempt_to_plot_the_spectra() {
@@ -213,7 +213,7 @@ public:
     EXPECT_CALL(*m_model, plotSpectra()).Times(1);
     setExpectationsForWidgetEnabling(true);
 
-    m_presenter->notifyPlotSpectraClicked();
+    m_presenter->handlePlotSpectraClicked();
   }
 
   void test_that_the_plotBinsClicked_signal_will_attempt_to_plot_the_bins_when_the_bin_indices_are_valid() {
@@ -223,7 +223,7 @@ public:
     EXPECT_CALL(*m_model, plotBins(_)).Times(1);
     setExpectationsForWidgetEnabling(true);
 
-    m_presenter->notifyPlotBinsClicked();
+    m_presenter->handlePlotBinsClicked();
   }
 
   void test_that_the_plotBinsClicked_signal_will_display_a_warning_message_if_the_bin_indices_are_invalid() {
@@ -231,7 +231,7 @@ public:
 
     EXPECT_CALL(*m_view, displayWarning(QString("Plot Bins failed: Invalid bin indices provided."))).Times(1);
 
-    m_presenter->notifyPlotBinsClicked();
+    m_presenter->handlePlotBinsClicked();
   }
 
   void test_that_the_plotContourClicked_signal_will_attempt_to_plot_a_contour() {
@@ -239,7 +239,7 @@ public:
     EXPECT_CALL(*m_model, plotContour()).Times(1);
     setExpectationsForWidgetEnabling(true);
 
-    m_presenter->notifyPlotContourClicked();
+    m_presenter->handlePlotContourClicked();
   }
 
   void test_that_the_plotTiledClicked_signal_will_attempt_to_plot_tiled_spectra() {
@@ -247,7 +247,7 @@ public:
     EXPECT_CALL(*m_model, plotTiled()).Times(1);
     setExpectationsForWidgetEnabling(true);
 
-    m_presenter->notifyPlotTiledClicked();
+    m_presenter->handlePlotTiledClicked();
   }
 
   ///----------------------------------------------------------------------
