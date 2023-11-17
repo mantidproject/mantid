@@ -204,8 +204,8 @@ std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const 
 
   std::string target_name = m_index_name_map[workspaceIndex];
 
-  // If numericalShift > 0, the caller will get back a shifted index.
-  // This is needed for supporting FilterEvents property OutputWorkspaceIndexedFrom1.
+  // If numericalShift is not zero, the "_index" suffix of the name will be shifted.
+  // This is needed to support FilterEvents property OutputWorkspaceIndexedFrom1.
   if (numericalShift != 0) {
     // If this TimeSplitter was built from a TableWorkspace, targets could be non-numeric, in which case a numeric
     // shift wouldn't make sense.
