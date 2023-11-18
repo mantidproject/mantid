@@ -201,10 +201,9 @@ const std::string AnalysisDataServiceImpl::uniqueName(const int n, const std::st
     return name;
   };
 
-  std::string wsName = "";
   // limit of (n * 10 * size of alphabet) to avoid infinite loop in case we can't find name that doesn't collide
   for (int i = 0; i < (n * 260); i++) {
-    wsName = prefix + randomNameGenerator() + suffix;
+    std::string wsName = prefix + randomNameGenerator() + suffix;
     if (!doesExist(wsName)) {
       return wsName;
     }
