@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include <iostream>
 #include <iterator>
 #include <random>
 #include <sstream>
@@ -203,12 +202,14 @@ const std::string AnalysisDataServiceImpl::uniqueName(const int n, const std::st
   };
 
   std::string wsName = "";
-  do {
-    wsName = randomNameGenerator();
-    std::cout << "wsname: " << wsName << "\n";
-  } while (doesExist(wsName));
-
-  return prefix + wsName + suffix;
+  // limit of (n * 10 * size of alphabet) to avoid infinite loop in case we can't find name that doesn't collide
+  for (int i = 0; i < (n * 260); i++) {
+    wsName = prefix + randomNameGenerator() + suffix;
+    if (!doesExist(wsName)) {
+      return wsName;
+    }
+  }
+  throw std::runtime_error("Unable to generate unique workspace of length " + std::to_string(n));
 }
 
 /**

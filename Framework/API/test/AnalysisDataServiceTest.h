@@ -501,6 +501,23 @@ public:
     TS_ASSERT_THROWS(ads.uniqueName(-4), const std::invalid_argument &);
   }
 
+  void test_unique_name_no_collision() {
+    for (char letter = 'a'; letter <= 'z'; letter++) {
+      if (letter == 'c') {
+        continue;
+      }
+      std::string wsName = "unique_" + std::string(1, letter);
+      auto ws = addToADS(wsName);
+    }
+    auto objects = ads.getObjects();
+    TS_ASSERT_EQUALS(25, objects.size()); // make sure we have all expected workspaces
+
+    TS_ASSERT_EQUALS("unique_c", ads.uniqueName(1, "unique_"));
+    auto ws = addToADS("unique_c");
+
+    TS_ASSERT_THROWS(ads.uniqueName(1, "unique_"), std::runtime_error &);
+  }
+
   void test_unique_hidden_name() {
     auto hiddenName = ads.uniqueHiddenName();
     TS_ASSERT_EQUALS(11, hiddenName.size())

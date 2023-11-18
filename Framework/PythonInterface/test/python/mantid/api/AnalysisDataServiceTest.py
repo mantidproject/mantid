@@ -237,6 +237,21 @@ class AnalysisDataServiceTest(unittest.TestCase):
         self.assertEqual(11, len(ws_name))
         self.assertTrue(ws_name.startswith("__"))
 
+    def test_unique_name_collision(self):
+        import string
+        from mantid.simpleapi import CreateSampleWorkspace
+
+        for letter in string.ascii_lowercase:
+            if letter == "c":
+                continue
+            CreateSampleWorkspace(OutputWorkspace=f"unique_{letter}")
+
+        self.assertEqual("unique_c", mtd.unique_name(1, "unique_"))
+        CreateSampleWorkspace(OutputWorkspace="unique_c")
+
+        with self.assertRaises(RuntimeError):
+            mtd.unique_name(1, "unique_")
+
 
 if __name__ == "__main__":
     unittest.main()

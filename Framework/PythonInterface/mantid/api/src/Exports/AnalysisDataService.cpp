@@ -87,8 +87,12 @@ void export_AnalysisDataService() {
       .def("removeFromGroup", &AnalysisDataServiceImpl::removeFromGroup, (arg("groupName"), arg("wsName")),
            "Remove a workspace from a group in the ADS")
       .def("unique_name", &AnalysisDataServiceImpl::uniqueName,
-           (arg("self"), arg("n") = 5, arg("prefx") = "", arg("suffix") = ""),
-           "Return a randomly generated unique name for a workspace.")
+           (arg("self"), arg("n") = 5, arg("prefix") = "", arg("suffix") = ""),
+           ""
+           "Return a randomly generated unique name for a workspace \
+           `n` : length of string of random numbers, `prefix` : String to be prepended to the generated string, \
+           `suffix` : String to be appended to the generated string, `returns` : (prefix + n*random characters + suffix) "
+           "")
       .def("unique_hidden_name", &AnalysisDataServiceImpl::uniqueHiddenName, arg("self"),
            "Return a randomly generated unique hidden workspace name.");
 }
