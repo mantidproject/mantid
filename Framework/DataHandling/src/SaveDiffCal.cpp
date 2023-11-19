@@ -250,109 +250,114 @@ bool SaveDiffCal::tableHasColumn(const std::string &ColumnName) const {
 /** Execute the algorithm.
  */
 void SaveDiffCal::exec() {
-  m_calibrationWS = getProperty("CalibrationWorkspace");
-  GroupingWorkspace_sptr groupingWS = getProperty("GroupingWorkspace");
-  MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
+  try {
+    m_calibrationWS = getProperty("CalibrationWorkspace");
+    GroupingWorkspace_sptr groupingWS = getProperty("GroupingWorkspace");
+    MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
 
-  // Get a starting number of values to work with that will be refined below
-  // THE ORDER OF THE IF/ELSE TREE MATTERS
-  m_numValues = std::numeric_limits<std::size_t>::max();
-  if (m_calibrationWS)
-    m_numValues = std::min(m_numValues, m_calibrationWS->rowCount());
-  if (groupingWS)
-    m_numValues = std::min(m_numValues, groupingWS->getNumberHistograms());
-  if (maskWS)
-    m_numValues = std::min(m_numValues, maskWS->getNumberHistograms());
+    // Get a starting number of values to work with that will be refined below
+    // THE ORDER OF THE IF/ELSE TREE MATTERS
+    m_numValues = std::numeric_limits<std::size_t>::max();
+    if (m_calibrationWS)
+      m_numValues = std::min(m_numValues, m_calibrationWS->rowCount());
+    if (groupingWS)
+      m_numValues = std::min(m_numValues, groupingWS->getNumberHistograms());
+    if (maskWS)
+      m_numValues = std::min(m_numValues, maskWS->getNumberHistograms());
 
-  // Initialize the mapping of detid to row number to make getting information
-  // from the table faster. ORDER MATTERS
-  if (m_calibrationWS) {
-    this->generateDetidToIndex();
-  } else if (groupingWS) {
-    this->generateDetidToIndex(groupingWS);
-  } else if (maskWS) {
-    this->generateDetidToIndex(maskWS);
-  }
-
-  if (groupingWS && groupingWS->isDetectorIDMappingEmpty())
-    groupingWS->buildDetectorIDMapping();
-
-  // delete the file if it already exists
-  std::string filename = getProperty("Filename");
-  if (Poco::File(filename).exists()) {
-    Poco::File(filename).remove();
-  }
-
-  H5File file(filename, H5F_ACC_EXCL);
-
-  auto calibrationGroup = H5Util::createGroupNXS(file, "calibration", "NXentry");
-
-  // write the d-spacing to TOF conversion parameters for the selected pixels
-  // as datasets under the NXentry group
-  if (m_calibrationWS) {
-    this->writeDoubleFieldFromTable(calibrationGroup, "difc");
-    this->writeDoubleFieldFromTable(calibrationGroup, "difa");
-    this->writeDoubleFieldFromTable(calibrationGroup, "tzero");
-  } else {
-    writeDoubleFieldZeros(calibrationGroup, "difc");
-    // LoadDiffCal will set difa and tzero to zero if they are missing
-  }
-
-  // add the detid from which ever of these exists
-  if (m_calibrationWS) {
-    this->writeIntFieldFromTable(calibrationGroup, "detid");
-  } else if (groupingWS) {
-    this->writeDetIdsfromSVWS(calibrationGroup, "detid", groupingWS);
-  } else if (maskWS) {
-    this->writeDetIdsfromSVWS(calibrationGroup, "detid", maskWS);
-  }
-
-  // the dasid is a legacy column that is not used by mantid but should be written if it exists
-  if (this->tableHasColumn("dasid")) // optional field
-    this->writeIntFieldFromTable(calibrationGroup, "dasid");
-  else
-    g_log.information("Not writing out values for \"dasid\"");
-
-  this->writeIntFieldFromSVWS(calibrationGroup, "group", groupingWS);
-  this->writeIntFieldFromSVWS(calibrationGroup, "use", maskWS);
-
-  // check if the input calibration table has an "offset" field
-  if (this->tableHasColumn("offset")) // optional field
-    this->writeDoubleFieldFromTable(calibrationGroup, "offset");
-  else
-    g_log.information("Not writing out values for \"offset\"");
-
-  // get the instrument information only if a GroupingWorkspace or
-  // MaskWorkspace is supplied by the user
-  std::string instrumentName;
-  std::string instrumentSource;
-  if (bool(groupingWS)) {
-    instrumentName = groupingWS->getInstrument()->getName();
-    instrumentSource = groupingWS->getInstrument()->getFilename();
-  }
-  if (bool(maskWS)) {
-    if (instrumentName.empty()) {
-      instrumentName = maskWS->getInstrument()->getName();
+    // Initialize the mapping of detid to row number to make getting information
+    // from the table faster. ORDER MATTERS
+    if (m_calibrationWS) {
+      this->generateDetidToIndex();
+    } else if (groupingWS) {
+      this->generateDetidToIndex(groupingWS);
+    } else if (maskWS) {
+      this->generateDetidToIndex(maskWS);
     }
-    if (instrumentSource.empty()) {
-      instrumentSource = maskWS->getInstrument()->getFilename();
+
+    if (groupingWS && groupingWS->isDetectorIDMappingEmpty())
+      groupingWS->buildDetectorIDMapping();
+
+    // delete the file if it already exists
+    std::string filename = getProperty("Filename");
+    if (Poco::File(filename).exists()) {
+      Poco::File(filename).remove();
     }
-  }
-  if (!instrumentSource.empty()) {
-    instrumentSource = Poco::Path(instrumentSource).getFileName();
-  }
 
-  // add the instrument information
-  auto instrumentGroup = calibrationGroup.createGroup("instrument");
-  H5Util::writeStrAttribute(instrumentGroup, "NX_class", "NXinstrument");
-  if (!instrumentName.empty()) {
-    H5Util::write(instrumentGroup, "name", instrumentName);
-  }
-  if (!instrumentSource.empty()) {
-    H5Util::write(instrumentGroup, "instrument_source", instrumentSource);
-  }
+    H5File file(filename, H5F_ACC_EXCL);
 
-  file.close();
+    auto calibrationGroup = H5Util::createGroupNXS(file, "calibration", "NXentry");
+
+    // write the d-spacing to TOF conversion parameters for the selected pixels
+    // as datasets under the NXentry group
+    if (m_calibrationWS) {
+      this->writeDoubleFieldFromTable(calibrationGroup, "difc");
+      this->writeDoubleFieldFromTable(calibrationGroup, "difa");
+      this->writeDoubleFieldFromTable(calibrationGroup, "tzero");
+    } else {
+      writeDoubleFieldZeros(calibrationGroup, "difc");
+      // LoadDiffCal will set difa and tzero to zero if they are missing
+    }
+
+    // add the detid from which ever of these exists
+    if (m_calibrationWS) {
+      this->writeIntFieldFromTable(calibrationGroup, "detid");
+    } else if (groupingWS) {
+      this->writeDetIdsfromSVWS(calibrationGroup, "detid", groupingWS);
+    } else if (maskWS) {
+      this->writeDetIdsfromSVWS(calibrationGroup, "detid", maskWS);
+    }
+
+    // the dasid is a legacy column that is not used by mantid but should be written if it exists
+    if (this->tableHasColumn("dasid")) // optional field
+      this->writeIntFieldFromTable(calibrationGroup, "dasid");
+    else
+      g_log.information("Not writing out values for \"dasid\"");
+
+    this->writeIntFieldFromSVWS(calibrationGroup, "group", groupingWS);
+    this->writeIntFieldFromSVWS(calibrationGroup, "use", maskWS);
+
+    // check if the input calibration table has an "offset" field
+    if (this->tableHasColumn("offset")) // optional field
+      this->writeDoubleFieldFromTable(calibrationGroup, "offset");
+    else
+      g_log.information("Not writing out values for \"offset\"");
+
+    // get the instrument information only if a GroupingWorkspace or
+    // MaskWorkspace is supplied by the user
+    std::string instrumentName;
+    std::string instrumentSource;
+    if (bool(groupingWS)) {
+      instrumentName = groupingWS->getInstrument()->getName();
+      instrumentSource = groupingWS->getInstrument()->getFilename();
+    }
+    if (bool(maskWS)) {
+      if (instrumentName.empty()) {
+        instrumentName = maskWS->getInstrument()->getName();
+      }
+      if (instrumentSource.empty()) {
+        instrumentSource = maskWS->getInstrument()->getFilename();
+      }
+    }
+    if (!instrumentSource.empty()) {
+      instrumentSource = Poco::Path(instrumentSource).getFileName();
+    }
+
+    // add the instrument information
+    auto instrumentGroup = calibrationGroup.createGroup("instrument");
+    H5Util::writeStrAttribute(instrumentGroup, "NX_class", "NXinstrument");
+    if (!instrumentName.empty()) {
+      H5Util::write(instrumentGroup, "name", instrumentName);
+    }
+    if (!instrumentSource.empty()) {
+      H5Util::write(instrumentGroup, "instrument_source", instrumentSource);
+    }
+
+    file.close();
+  } catch (const H5::Exception &x) {
+    // Other mantid handlers do not catch H5::Exception
+    throw std::runtime_error(x.getDetailMsg());
+  }
 }
 
 } // namespace Mantid::DataHandling
