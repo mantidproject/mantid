@@ -46,11 +46,16 @@ namespace Mantid::Algorithms {
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
+using Mantid::API::AnalysisDataService;
 using Mantid::API::FileProperty;
 using Mantid::API::MatrixWorkspace;
+using Mantid::API::MatrixWorkspace_const_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::PropertyMode;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::EventWorkspace;
+using Mantid::DataObjects::MaskWorkspace;
+using Mantid::DataObjects::MaskWorkspace_const_sptr;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::Geometry::Instrument_const_sptr;
 using Mantid::Kernel::ArrayBoundedValidator;
@@ -58,6 +63,7 @@ using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::Logger;
 using Mantid::Kernel::MandatoryValidator;
 using Mantid::Kernel::RebinParamsValidator;
 using Mantid::Kernel::StringListValidator;
@@ -189,6 +195,10 @@ const std::string PDCalibration::summary() const {
 void PDCalibration::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input workspace containing spectra as a function of TOF measured on a standard sample.");
+  declareProperty(std::make_unique<WorkspaceProperty<MaskWorkspace>>("MaskWorkspace", "", Direction::Output),
+                  "Mask workspace (optional input, output):"
+                  "  if mask workspace already exists, incoming masked detectors will be combined"
+                  "  with any additional outgoing masked detectors");
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive, "Starting workspace index for fit");
@@ -251,7 +261,7 @@ void PDCalibration::init() {
 
   declareProperty("MinimumPeakHeight", 2.,
                   "Used for validating peaks before and after fitting. If a peak's observed/estimated or "
-                  "fitted height is under this value, the peak will be marked as error.");
+                  "fitted height is under this value, the peak will be marked as an error.");
 
   declareProperty("MaxChiSq", 100.,
                   "Used for validating peaks after fitting. If the chi-squared value is higher than this value, "
@@ -336,6 +346,19 @@ void PDCalibration::init() {
 
 std::map<std::string, std::string> PDCalibration::validateInputs() {
   std::map<std::string, std::string> messages;
+
+  // 'MaskWorkspace' cannot be set to its default value previously,
+  //   because of the dependence on the 'OutputCalibrationTable' property value.
+  if (isDefault("MaskWorkspace"))
+    setPropertyValue("MaskWorkspace", getPropertyValue("OutputCalibrationTable") + "_mask");
+  MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
+  if (maskWS) {
+    MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+    // detectors which are monitors are not included in the mask
+    if (!(maskWS->getNumberHistograms() == inputWS->getInstrument()->getNumberDetectors(true))) {
+      messages["MaskWorkspace"] = "incoming mask workspace must have one spectrum per detector";
+    }
+  }
 
   vector<double> tzeroRange = getProperty("TZEROrange");
   if (!tzeroRange.empty()) {
@@ -495,16 +518,15 @@ void PDCalibration::exec() {
   }
   createInformationWorkspaces();
 
-  // Initialize the mask workspace, will all detectors masked by default
-  std::string maskWSName = getPropertyValue("OutputCalibrationTable");
-  maskWSName += "_mask";
-  declareProperty(std::make_unique<WorkspaceProperty<>>("MaskWorkspace", maskWSName, Direction::Output),
-                  "An output workspace containing the mask");
+  // Use the incoming mask workspace, or start with a new one if the workspace does not exist.
+  MaskWorkspace_sptr maskWS = getProperty("MaskWorkspace");
+  if (!maskWS) {
+    maskWS = std::make_shared<MaskWorkspace>(m_uncalibratedWS->getInstrument());
+    setProperty("MaskWorkspace", maskWS);
+  }
 
-  MaskWorkspace_sptr maskWS = std::make_shared<DataObjects::MaskWorkspace>(m_uncalibratedWS->getInstrument());
-  for (size_t i = 0; i < maskWS->getNumberHistograms(); ++i) // REMOVE
-    maskWS->setMaskedIndex(i, true);                         // mask everything to start
-  setProperty("MaskWorkspace", maskWS);
+  // Include any incoming masked detector flags in the mask-workspace values.
+  maskWS->combineFromDetectorMasks(m_uncalibratedWS->detectorInfo());
 
   const std::string peakFunction = getProperty("PeakFunction");
   const double WIDTH_TO_FWHM = getWidthToFWHM(peakFunction);
@@ -622,8 +644,10 @@ void PDCalibration::exec() {
    for (int wkspIndex = m_startWorkspaceIndex; wkspIndex <= m_stopWorkspaceIndex; ++wkspIndex) {
      PARALLEL_START_INTERRUPT_REGION
      if ((isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) || !spectrumInfo.hasDetectors(wkspIndex) ||
-         spectrumInfo.isMonitor(wkspIndex)) {
+         spectrumInfo.isMonitor(wkspIndex) ||
+         maskWS->isMasked(m_uncalibratedWS->getSpectrum(wkspIndex).getDetectorIDs())) {
        prog.report();
+       g_log.debug() << "FULLY masked spectrum, index: " << wkspIndex << std::endl;
        continue;
      }
 
@@ -687,21 +711,26 @@ void PDCalibration::exec() {
 
        // check chi-square
        if (chi2 > maxChiSquared || chi2 < 0.) {
+         g_log.debug("failure to fit: chi2 > maximum");
          continue; // peak fit deemed as failure
        }
 
        // rule out of peak with wrong position. `centre` should be within its
        // left and right window ranges
        if (peaks.inTofWindows[2 * peakIndex] >= centre || peaks.inTofWindows[2 * peakIndex + 1] <= centre) {
+         g_log.debug("failure to fit: peak center is out-of-range");
          continue; // peak fit deemed as failure
        }
 
        // check height: make sure 0 is smaller than 0
        if (height < minPeakHeight + 1.E-15) {
+         g_log.debug("failure to fit: peak height is less than minimum");
          continue; // peak fit deemed as failure
        }
 
        // the peak fit was a success. Collect info
+       g_log.getLogStream(Logger::Priority::PRIO_TRACE) << "successful fit: peak centered at " << centre << std::endl;
+
        d_vec.emplace_back(m_peaksInDspacing[peakIndex]);
        tof_vec.emplace_back(centre);
        if (!useChiSq) {
@@ -714,10 +743,17 @@ void PDCalibration::exec() {
        height_vec_full[peakIndex] = height;
      }
 
-     // mask a detector if less than two peaks were fitted successfully
-     maskWS->setMasked(peaks.detid, d_vec.size() < 2);
+     if (d_vec.size() < 2) {
+       // If less than two peaks were fitted successfully,
+       //   mask the detectors to indicate failure.
+       maskWS->setMasked(peaks.detid, true);
 
-     if (d_vec.size() < 2) { // not enough peaks were found
+       g_log.debug() << "MASKING:\n";
+       for (const auto &det : peaks.detid) {
+         g_log.debug() << "  " << det << "\n";
+       }
+       g_log.debug() << std::endl;
+
        continue;
      } else {
        // obtain difc, difa, and t0 by fitting the nominal peak center
@@ -768,6 +804,9 @@ void PDCalibration::exec() {
    // sort the calibration tables by increasing detector ID
    m_calibrationTable = sortTableWorkspace(m_calibrationTable);
    setProperty("OutputCalibrationTable", m_calibrationTable);
+
+   // Align the detector mask flags of the mask workspace with the workspace values:
+   maskWS->combineToDetectorMasks();
 
    // fix-up the diagnostic workspaces
    m_peakPositionTable = sortTableWorkspace(m_peakPositionTable);
@@ -1039,6 +1078,7 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std:
 vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres,
                                               const std::vector<double> &windows_in) {
 
+  assert(windows_in.size() == 1 || windows_in.size() / 2 == centres.size());
   const std::size_t numPeaks = centres.size();
 
   // assumes distance between peaks can be used for window sizes
