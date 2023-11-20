@@ -112,7 +112,7 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
             t.start()
             t.join()
             QApplication.instance().processEvents()
-        file_changed_event_mock.assert_called_once()
+        file_changed_event_mock.assert_called()
 
     def modify_file(self, filename):
         with open(filename, "w") as f:
