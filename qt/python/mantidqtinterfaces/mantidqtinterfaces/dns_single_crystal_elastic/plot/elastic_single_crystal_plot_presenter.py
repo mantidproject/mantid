@@ -328,7 +328,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             column_headers = np.array([["q_x (1/A)", "q_y (1/A)", "Intensity"]])
         elif axis_labels == "hkl":
             column_headers = np.array([["n_x", "n_y", "Intensity"]])
-        elif axis_labels == "two_theta_and_omega":
+        elif axis_labels == "angular":
             column_headers = np.array([["2\u03B8 (deg)", "\u03C9 (deg)", "Intensity"]])
         return column_headers
 
