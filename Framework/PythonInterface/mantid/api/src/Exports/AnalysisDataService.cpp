@@ -88,11 +88,13 @@ void export_AnalysisDataService() {
            "Remove a workspace from a group in the ADS")
       .def("unique_name", &AnalysisDataServiceImpl::uniqueName,
            (arg("self"), arg("n") = 5, arg("prefix") = "", arg("suffix") = ""),
-           ""
-           "Return a randomly generated unique name for a workspace \
-           `n` : length of string of random numbers, `prefix` : String to be prepended to the generated string, \
-           `suffix` : String to be appended to the generated string, `returns` : (prefix + n*random characters + suffix) "
-           "")
+           "Return a randomly generated unique name for a workspace\n"
+           "\n"
+           ":param str n: length of string of random numbers\n"
+           ":param str prefix: String to be prepended to the generated string\n"
+           ":param str suffix: String to be appended to the generated string\n"
+           ":return: prefix + n*random characters + suffix\n"
+           ":rtype: str\n")
       .def("unique_hidden_name", &AnalysisDataServiceImpl::uniqueHiddenName, arg("self"),
            "Return a randomly generated unique hidden workspace name.");
 }
