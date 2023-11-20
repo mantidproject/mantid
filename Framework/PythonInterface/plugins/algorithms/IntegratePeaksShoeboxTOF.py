@@ -547,7 +547,7 @@ def convolve_shoebox(y, esq, kernel):
     return intens_over_sig
 
 
-def find_nearest_peak_in_data_window(data, ispecs, x, ws, peaks, ipk, irow, icol, ix):
+def find_nearest_peak_in_data_window(data, ispecs, x, ws, peaks, ipk, irow, icol, ix, threshold=2.5):
     ipks_near, ispecs_peaks = find_ipks_in_window(ws, peaks, ispecs, ipk, tof_min=x.min(), tof_max=x.max())
     if len(ipks_near) > 0:
         tofs = peaks.column("TOF")
@@ -562,16 +562,17 @@ def find_nearest_peak_in_data_window(data, ispecs, x, ws, peaks, ipk, irow, icol
         pk_pos = np.array([irow, icol, ix]) / np.array(data.shape)
         imax_nearest = None
         for ibin in isort:
-            # calc distance to predicted peak position
-            bin_pos = np.array(ibin) / shape
-            pk_dist_sq = np.sum((pk_pos - bin_pos) ** 2)
-            for pos in pos_near:
-                if np.sum((pos - bin_pos) ** 2) > pk_dist_sq:
-                    imax_nearest = ibin
-                    break
-            else:
-                continue  # executed if inner loop did not break (i.e. pixel closer to nearby peak than this peak)
-            break  # execute if inner loop did break and else branch ignored (i.e. found bin closest to this peak)
+            if data[ibin] > threshold:
+                # calc distance to predicted peak position
+                bin_pos = np.array(ibin) / shape
+                pk_dist_sq = np.sum((pk_pos - bin_pos) ** 2)
+                for pos in pos_near:
+                    if np.sum((pos - bin_pos) ** 2) > pk_dist_sq:
+                        imax_nearest = ibin
+                        break
+                else:
+                    continue  # executed if inner loop did not break (i.e. pixel closer to nearby peak than this peak)
+                break  # execute if inner loop did break and else branch ignored (i.e. found bin closest to this peak)
         return imax_nearest  # could be None if no peak found
     else:
         # no nearby peaks - return position of maximum in data
