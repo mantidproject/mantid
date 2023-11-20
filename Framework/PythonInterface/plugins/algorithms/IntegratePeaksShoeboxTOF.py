@@ -543,11 +543,17 @@ def convolve_shoebox(y, esq, kernel):
     with np.errstate(divide="ignore", invalid="ignore"):
         intens_over_sig = yconv / econv
     intens_over_sig[~np.isfinite(intens_over_sig)] = 0
-    intens_over_sig = convolve(intens_over_sig, weights=np.ones(3 * [3]) / (3**3), mode="constant")  # 0 pad
+    ndim = len(y.shape)
+    intens_over_sig = convolve(intens_over_sig, weights=np.ones(ndim * [ndim]) / (ndim**3), mode="constant")  # 0 pad
+    # zero edges where convolution is invalid
+    edge_mask = np.ones(intens_over_sig.shape, dtype=bool)
+    center_slice = tuple(slice(nedge, -nedge) for nedge in (np.asarray(kernel.shape) - 1) // 2)
+    edge_mask[center_slice] = False
+    intens_over_sig[edge_mask] = 0
     return intens_over_sig
 
 
-def find_nearest_peak_in_data_window(data, ispecs, x, ws, peaks, ipk, irow, icol, ix, threshold=2.5):
+def find_nearest_peak_in_data_window(data, ispecs, x, ws, peaks, ipk, irow, icol, ix, threshold=2):
     ipks_near, ispecs_peaks = find_ipks_in_window(ws, peaks, ispecs, ipk, tof_min=x.min(), tof_max=x.max())
     if len(ipks_near) > 0:
         tofs = peaks.column("TOF")
