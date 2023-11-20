@@ -39,8 +39,6 @@ set(SRC_FILES
     src/WorkflowAlgorithmHelpers.cpp
 )
 
-set(SRC_UNITY_IGNORE_FILES)
-
 set(INC_FILES
     inc/MantidWorkflowAlgorithms/AlignAndFocusPowder.h
     inc/MantidWorkflowAlgorithms/ComputeSensitivity.h
@@ -101,11 +99,6 @@ if(COVERAGE)
     set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(WorkflowAlgorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
 
 # Use a precompiled header where they are supported
 enable_precompiled_headers(inc/MantidWorkflowAlgorithms/PrecompiledHeader.h SRC_FILES)
