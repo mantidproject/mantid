@@ -82,21 +82,26 @@ void IETPresenter::setInstrumentDefault() {
   if (validateInstrumentDetails()) {
     InstrumentData instrumentDetails = getInstrumentData();
     m_view->setInstrumentDefault(instrumentDetails);
+    bool const iris = instrumentDetails.getInstrument() == "IRIS";
+    bool const osiris = instrumentDetails.getInstrument() == "OSIRIS";
     bool const irisOrOsiris =
         instrumentDetails.getInstrument() == "OSIRIS" || instrumentDetails.getInstrument() == "IRIS";
     bool const toscaOrTfxa =
         instrumentDetails.getInstrument() == "TOSCA" || instrumentDetails.getInstrument() == "TFXA";
 
+    m_view->setGroupOutputCheckBoxVisible(osiris);
+    m_view->setGroupOutputDropdownVisible(iris);
+
     m_view->setBackgroundSectionVisible(!irisOrOsiris);
     m_view->setPlotTimeSectionVisible(!irisOrOsiris);
-    m_view->setPlottingOptionsVisible(!irisOrOsiris);
-    m_view->setScaleFactorVisible(!irisOrOsiris && !toscaOrTfxa);
+    m_view->setScaleFactorVisible(!irisOrOsiris);
     m_view->setAclimaxSaveVisible(!irisOrOsiris);
-    m_view->setNXSPEVisible(!irisOrOsiris);
     m_view->setFoldMultipleFramesVisible(!irisOrOsiris);
     m_view->setOutputInCm1Visible(!irisOrOsiris);
-    m_view->setGroupOutputDropdownVisible(!irisOrOsiris && !toscaOrTfxa);
-    m_view->setGroupOutputCheckBoxVisible(irisOrOsiris);
+
+    m_idrUI->showAnalyserAndReflectionOptions(!toscaOrTfxa);
+    m_view->setSPEVisible(!toscaOrTfxa);
+    m_view->setAnalysisSectionVisible(!toscaOrTfxa);
     m_view->setCalibVisible(!toscaOrTfxa);
     m_view->setEfixedVisible(!toscaOrTfxa);
   }
