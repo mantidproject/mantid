@@ -57,10 +57,11 @@ public:
   void setEfixedVisible(bool visible);
   void setBackgroundSectionVisible(bool visible);
   void setPlotTimeSectionVisible(bool visible);
+  void setAnalysisSectionVisible(bool visible);
   void setPlottingOptionsVisible(bool visible);
   void setScaleFactorVisible(bool visible);
   void setAclimaxSaveVisible(bool visible);
-  void setNXSPEVisible(bool visible);
+  void setSPEVisible(bool visible);
   void setFoldMultipleFramesVisible(bool visible);
   void setOutputInCm1Visible(bool visible);
   void setGroupOutputCheckBoxVisible(bool visible);

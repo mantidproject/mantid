@@ -979,16 +979,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="ckSaveNXSPE">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>NXSPE</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QCheckBox" name="ckSaveASCII">
           <property name="enabled">
            <bool>false</bool>

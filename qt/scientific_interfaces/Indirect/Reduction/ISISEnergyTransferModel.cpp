@@ -290,8 +290,6 @@ void IETModel::saveWorkspace(std::string const &workspaceName, IETSaveData const
     save("SaveNexusProcessed", workspaceName, workspaceName + ".nxs");
   if (saveTypes.getSPE())
     save("SaveSPE", workspaceName, workspaceName + ".spe");
-  if (saveTypes.getNXSPE())
-    save("SaveNXSPE", workspaceName, workspaceName + ".nxspe");
   if (saveTypes.getASCII())
     save("SaveAscii", workspaceName, workspaceName + ".dat", 2);
   if (saveTypes.getAclimax())

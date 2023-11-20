@@ -92,8 +92,8 @@ IETPlotData IETView::getPlotData() const {
 
 IETSaveData IETView::getSaveData() const {
   IETSaveData saveTypes(m_uiForm.ckSaveNexus->isChecked(), m_uiForm.ckSaveSPE->isChecked(),
-                        m_uiForm.ckSaveNXSPE->isChecked(), m_uiForm.ckSaveASCII->isChecked(),
-                        m_uiForm.ckSaveAclimax->isChecked(), m_uiForm.ckSaveDaveGrp->isChecked());
+                        m_uiForm.ckSaveASCII->isChecked(), m_uiForm.ckSaveAclimax->isChecked(),
+                        m_uiForm.ckSaveDaveGrp->isChecked());
 
   return saveTypes;
 }
@@ -162,6 +162,8 @@ void IETView::setBackgroundSectionVisible(bool visible) { m_uiForm.gbBackgroundR
 
 void IETView::setPlotTimeSectionVisible(bool visible) { m_uiForm.gbPlotTime->setVisible(visible); }
 
+void IETView::setAnalysisSectionVisible(bool visible) { m_uiForm.gbAnalysis->setVisible(visible); }
+
 void IETView::setPlottingOptionsVisible(bool visible) { m_uiForm.fPlottingOptions->setVisible(visible); }
 
 void IETView::setScaleFactorVisible(bool visible) {
@@ -171,7 +173,7 @@ void IETView::setScaleFactorVisible(bool visible) {
 
 void IETView::setAclimaxSaveVisible(bool visible) { m_uiForm.ckSaveAclimax->setVisible(visible); }
 
-void IETView::setNXSPEVisible(bool visible) { m_uiForm.ckSaveNXSPE->setVisible(visible); }
+void IETView::setSPEVisible(bool visible) { m_uiForm.ckSaveSPE->setVisible(visible); }
 
 void IETView::setFoldMultipleFramesVisible(bool visible) { m_uiForm.ckFold->setVisible(visible); }
 
@@ -200,7 +202,6 @@ void IETView::setSaveEnabled(bool enable) {
   m_uiForm.ckSaveASCII->setEnabled(enable);
   m_uiForm.ckSaveDaveGrp->setEnabled(enable);
   m_uiForm.ckSaveNexus->setEnabled(enable);
-  m_uiForm.ckSaveNXSPE->setEnabled(enable);
   m_uiForm.ckSaveSPE->setEnabled(enable);
 }
 
