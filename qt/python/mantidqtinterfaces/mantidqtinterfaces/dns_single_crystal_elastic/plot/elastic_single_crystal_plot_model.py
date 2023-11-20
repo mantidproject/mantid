@@ -112,7 +112,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
         hkl1 = self._single_crystal_map.hkl1
         hkl2 = self._single_crystal_map.hkl2
         axis_labels = {
-            "two_theta_and_omega": ["2\u03B8 (deg)", "\u03C9 (deg)"],
+            "angular": ["2\u03B8 (deg)", "\u03C9 (deg)"],
             "qxqy": [r"$q_{x} \ (\AA^{-1})$", r"$q_{y} \ (\AA^{-1})$"],
             "hkl": [f"[{hkl1}] (r.l.u.)", f"[{hkl2}] (r.l.u.)"],
         }

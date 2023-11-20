@@ -70,7 +70,7 @@ def get_hkl_intensity_from_cursor(single_crystal_map, axis_type, x, y):
     hkl2 = single_crystal_map.hkl2.split(",")
     dx = single_crystal_map.dx
     dy = single_crystal_map.dy
-    if axis_type["type"] == "two_theta_and_omega":  # two_theta omega
+    if axis_type["type"] == "angular":  # two_theta omega
         qx, qy = angle_to_q(two_theta=x, omega=y, wavelength=single_crystal_map.wavelength)
         hklx = hkl_to_hklx(hkl1, qx, dx)
         hkly = hkl_to_hklx(hkl2, qy, dy)
