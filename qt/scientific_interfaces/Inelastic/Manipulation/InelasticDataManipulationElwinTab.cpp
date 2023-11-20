@@ -561,7 +561,6 @@ void InelasticDataManipulationElwinTab::checkLoadedFiles() {
   if (validate()) {
     newInputFiles();
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
-    updateIntegrationRange();
   }
 }
 
@@ -593,6 +592,7 @@ MatrixWorkspace_sptr InelasticDataManipulationElwinTab::getInputWorkspace() cons
  */
 void InelasticDataManipulationElwinTab::setInputWorkspace(MatrixWorkspace_sptr inputWorkspace) {
   m_inputWorkspace = std::move(inputWorkspace);
+  updateIntegrationRange();
 }
 
 /**
