@@ -53,7 +53,7 @@ class ShoeboxResult:
     def __init__(self, ipk, pk, x, y, peak_shape, ipos, ipk_pos, intens_over_sig, status, strong_peak=None, ipk_strong=None):
         self.peak_shape = list(peak_shape)
         self.kernel_shape = list(get_kernel_shape(*self.peak_shape)[0])
-        self.ipos = list(ipos)
+        self.ipos = list(ipos) if ipos is not None else ipos
         self.ipos_pk = list(ipk_pos)
         self.labels = ["Row", "Col", "TOF"]
         self.ysum = []
@@ -92,7 +92,8 @@ class ShoeboxResult:
             )  # , extent=np.flip(extents, axis=0).flatten())
             im.set_norm(norm_func())
             # plot shoebox
-            self.plot_shoebox(iax, ax, rect_func)
+            if self.ipos is not None:
+                self.plot_shoebox(iax, ax, rect_func)
             # plot peak position
             cen = self.ipos_pk.copy()
             cen.pop(iax)
@@ -552,17 +553,20 @@ def find_nearest_peak_in_data_window(data, ispecs, x, ws, peaks, ipk, irow, icol
         tofs = peaks.column("TOF")
         # get position of nearby peaks in data array in fractional coords
         shape = np.array(data.shape)
-        pos_near = [np.array(*np.where(ispecs == ispecs_peaks[ii]), np.array(np.argmin(x - tofs[ii]))) / shape for ii in ipks_near]
-        # sort data in descending order and select strongest peak nearest to pk (in fractional coordinates)
+        pos_near = [
+            np.r_[np.argwhere(ispecs == ispecs_peaks[ii])[0], np.argmin(abs(x - tofs[ipk_near]))] / shape
+            for ii, ipk_near in enumerate(ipks_near)
+        ]
+        # sort data in descending order and select strongest data point nearest to pk (in fractional coordinates)
         isort = list(zip(*np.unravel_index(np.argsort(-data, axis=None), data.shape)))
         pk_pos = np.array([irow, icol, ix]) / np.array(data.shape)
         imax_nearest = None
         for ibin in isort:
-            # calc distance to pk pos
+            # calc distance to predicted peak position
             bin_pos = np.array(ibin) / shape
-            pk_dist_sq = np.sum(pk_pos - bin_pos)
+            pk_dist_sq = np.sum((pk_pos - bin_pos) ** 2)
             for pos in pos_near:
-                if np.sum(pos - bin_pos) > pk_dist_sq:
+                if np.sum((pos - bin_pos) ** 2) > pk_dist_sq:
                     imax_nearest = ibin
                     break
             else:
