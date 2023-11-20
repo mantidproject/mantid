@@ -15,7 +15,6 @@ import scipy
 from matplotlib import path
 from matplotlib import tri
 from matplotlib.tri import LinearTriInterpolator, UniformTriRefiner
-import mantidqtinterfaces.dns_powder_tof.helpers.file_processing as file_helper
 from mantidqtinterfaces.dns_powder_tof.data_structures.object_dict import ObjectDict
 from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers import angle_to_q, get_hkl_float_array
 
@@ -132,32 +131,6 @@ class DNSScMap(ObjectDict):
             interpolated[:, 5] = self.hkly_mesh_interpolated.flatten()
             interpolated[:, 6] = self.z_mesh_interpolated.flatten()
         return [non_interpolated, interpolated]
-
-    def save_ascii(self, filename):
-        if filename.endswith(".txt"):
-            filename = filename[0:-4]
-        not_interpolated_filename = filename + "_no_interp.txt"
-        interpolated_filename = filename + "_interp.txt"
-        file_helper.create_dir_from_filename(not_interpolated_filename)
-        not_interpolated, interpolated = self.create_np_array()
-        header = " 2theta, omega, qx,      qy ,      hklx,     hkly,         Intensity,          Error"
-        np.savetxt(
-            not_interpolated_filename,
-            not_interpolated,
-            fmt="%7.3f %7.3f %8.5f %8.5f %9.5f %9.5f %15.5f %15.5f",
-            delimiter=" ",
-            newline="\n",
-            header=header,
-        )
-        if self.rectangular_grid:
-            np.savetxt(
-                interpolated_filename,
-                interpolated,
-                fmt="%7.3f %7.3f %8.5f %8.5f %9.5f %9.5f %15.5f",
-                delimiter=" ",
-                newline="\n",
-                header=header[0:-16],
-            )
 
     def _get_z_mesh_interpolation(self):
         f = scipy.interpolate.RectBivariateSpline(self.two_theta, self.omega, self.z_mesh, kx=1, ky=1)
