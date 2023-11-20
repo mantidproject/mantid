@@ -5,17 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantiddoc.directives.base import AlgorithmBaseDirective  # pylint: disable=unused-import
-import os
 import re
 
 REDIRECT_TEMPLATE = "redirect.html"
 
 DEPRECATE_USE_ALG_RE = re.compile(r"Use\s(([A-Z][a-zA-Z0-9]+)\s(version ([0-9])+)?)\s*instead.")
-
-# Maximum height in pixels a screenshot image
-# Any higher than this an an obvious gap starts to appear between the "Properties" header
-# and the rest
-SCREENSHOT_MAX_HEIGHT = 250
 
 # --------------------------------------------------------------------------
 
@@ -29,14 +23,9 @@ class AlgorithmDirective(AlgorithmBaseDirective):
        the highest version of the algorithm being processed then a both
        a versioned link is created and a non-versioned link
      - A title
-     - A screenshot of the algorithm
      - Table of contents
 
     If the algorithms is deprecated then a warning is inserted.
-
-    It requires a SCREENSHOTS_DIR environment variable to be set to the
-    directory where a screenshot should be generated. If it is not set then
-    a RuntimeError occurs
     """
 
     required_arguments, optional_arguments = 0, 0
@@ -46,8 +35,6 @@ class AlgorithmDirective(AlgorithmBaseDirective):
         Called by Sphinx when the ..algorithm:: directive is encountered
         """
         self._insert_pagetitle()
-        picture = self._create_screenshot()
-        self._insert_screenshot_link(picture)
         self._insert_toc()
         self._insert_deprecation_warning()
 
@@ -86,74 +73,6 @@ class AlgorithmDirective(AlgorithmBaseDirective):
         Outputs a title for the page
         """
         self.add_rst(".. contents:: Table of Contents\n    :local:\n")
-
-    def _create_screenshot(self):
-        """
-        Creates a screenshot for the named algorithm in the directory provided
-        by the SCREENSHOTS_DIR environment variable.
-
-        The file will be named "algorithmname-vX_dlg.png", e.g. Rebin-v1_dlg.png
-
-        Returns:
-          screenshot: A mantiddoc.tools.Screenshot object
-        """
-        screenshots_dir = self.screenshots_dir
-        if screenshots_dir is None:
-            return []
-
-        # Generate image
-        from mantiddoc.tools.screenshot import algorithm_screenshot
-
-        try:
-            picture = algorithm_screenshot(self.algorithm_name(), screenshots_dir, version=self.algorithm_version())
-        except RuntimeError as exc:
-            env = self.state.document.settings.env
-            env.warn(env.docname, "Unable to generate screenshot for '%s' - %s" % (self.algorithm_name(), str(exc)))
-            picture = None
-
-        return picture
-
-    def _insert_screenshot_link(self, picture):
-        """
-        Outputs an image link with a custom :class: style. The filename is
-        extracted from the path given and then a relative link to the
-        directory specified by the SCREENSHOTS_DIR environment variable from
-        the root source directory is formed.
-
-        Args:
-          picture (Screenshot): A Screenshot object
-        """
-        env = self.state.document.settings.env
-
-        # Sphinx assumes that an absolute path is actually relative to the directory containing the
-        # conf.py file and a relative path is relative to the directory where the current rst file
-        # is located.
-        if picture:
-            screenshots_dir, filename = os.path.split(picture.imgpath)
-            # Find the width of the image
-            width, height = picture.width, picture.height
-
-            if height > SCREENSHOT_MAX_HEIGHT:
-                aspect_ratio = float(width) / height
-                width = int(SCREENSHOT_MAX_HEIGHT * aspect_ratio)
-            # endif
-
-            # relative path to image
-            rel_path = os.path.relpath(screenshots_dir, env.srcdir)
-            # This is a href link so is expected to be in unix style
-            rel_path = rel_path.replace("\\", "/")
-            # stick a "/" as the first character so Sphinx computes relative location from source directory
-            path = "/" + rel_path + "/" + filename
-            caption = "**" + self.algorithm_name() + "** dialog."
-        else:
-            # use stock not found image
-            path = "/images/ImageNotFound.png"
-            width = 200
-            caption = "Enable screenshots using DOCS_SCREENSHOTS in CMake"
-
-        self.add_rst_list(
-            [f".. figure:: {path}", "   :class: screenshot", f"   :width: {width}px", "   :align: right", "", f"   {caption}", ""]
-        )
 
     def _insert_deprecation_warning(self):
         """
