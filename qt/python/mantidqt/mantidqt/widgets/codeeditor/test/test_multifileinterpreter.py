@@ -9,13 +9,10 @@
 #
 import os.path
 import tempfile
-import time
 import unittest
-from threading import Thread
 
 from qtpy.QtWidgets import QApplication
 from unittest import mock
-from unittest.mock import patch
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
@@ -99,29 +96,29 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
         self.assertEqual(2, widget.editor_count)
         self.assertFalse(widget.current_editor().editor.isModified(), msg="Tab should be marked as not modified")
 
-    @patch("mantidqt.widgets.codeeditor.multifileinterpreter.MultiPythonFileInterpreter.file_changed_event", autospec=True)
-    def test_file_modified_externally_generates_event(self, file_changed_event_mock):
+    def test_file_added_to_watcher_on_opening_tab(self):
         widget = MultiPythonFileInterpreter()
         with tempfile.TemporaryDirectory() as temp_dir:
-            filename = os.path.join(temp_dir, "test_file_modified_externally")
+            filename = os.path.join(temp_dir, "test_file_added_to_watcher_on_opening_tab")
             with open(filename, "w") as f:
                 f.write("Test")
             with mock.patch("mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename", lambda s: filename):
                 widget.open_file_in_new_tab(filename)
-            t = Thread(target=self.modify_file, args=(filename,))
-            t.start()
-            t.join()
-            QApplication.instance().processEvents()
-        file_changed_event_mock.assert_called()
+            watcher_files = widget.file_watcher.files()
+            self.assertEqual(1, len(watcher_files), "Should be one file being watched")
+            self.assertEqual(filename, watcher_files[0], "Single file being watched should be the correct file")
 
-    def modify_file(self, filename):
-        with open(filename, "w") as f:
-            f.write("File changed")
-        # Macs seem to require a little bit of time before being able to detect
-        # external changes to a file. Without this sleep the QFileSystemWatcher
-        # won't call the callback for when a file is modified. We sleep on a
-        # separate thread so as to not block the file watcher thread.
-        time.sleep(1)
+    def test_file_removed_from_watcher_on_closing_tab(self):
+        widget = MultiPythonFileInterpreter()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            filename = os.path.join(temp_dir, "test_file_removed_from_watcher_on_closing_tab")
+            with open(filename, "w") as f:
+                f.write("Test")
+            with mock.patch("mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename", lambda s: filename):
+                widget.open_file_in_new_tab(filename)
+            widget.close_all()
+            files = widget.file_watcher.files()
+            self.assertEqual(0, len(files), "Tab is closed so should be removed from the file watcher")
 
     def test_saving_file_adds_events_to_ignore_list(self):
         widget = MultiPythonFileInterpreter()
