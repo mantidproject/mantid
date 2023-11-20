@@ -22,7 +22,8 @@ from mantid.kernel import (
     PropertyCriterion,
 )
 import numpy as np
-from scipy.ndimage import convolve
+from scipy.ndimage import uniform_filter
+from scipy.signal import convolve
 from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
 from FindSXPeaksConvolve import make_kernel, get_kernel_shape
 from enum import Enum
@@ -538,13 +539,12 @@ def get_and_clip_data_arrays(ws, peak_data, pk_tof, ispec, kernel, nshoebox):
 
 
 def convolve_shoebox(y, esq, kernel):
-    yconv = convolve(input=y, weights=kernel, mode="nearest")
-    econv = np.sqrt(convolve(input=esq, weights=kernel**2, mode="nearest"))
+    yconv = convolve(y, kernel, mode="same")
+    econv = np.sqrt(convolve(esq, kernel**2, mode="same"))
     with np.errstate(divide="ignore", invalid="ignore"):
         intens_over_sig = yconv / econv
     intens_over_sig[~np.isfinite(intens_over_sig)] = 0
-    ndim = len(y.shape)
-    intens_over_sig = convolve(intens_over_sig, weights=np.ones(ndim * [ndim]) / (ndim**3), mode="constant")  # 0 pad
+    intens_over_sig = uniform_filter(intens_over_sig, size=len(y.shape))
     # zero edges where convolution is invalid
     edge_mask = np.ones(intens_over_sig.shape, dtype=bool)
     center_slice = tuple(slice(nedge, -nedge) for nedge in (np.asarray(kernel.shape) - 1) // 2)
@@ -637,15 +637,15 @@ def integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edge
     return intens, sigma, status
 
 
-def optimise_shoebox(y, esq, current_shape, ipos):
+def optimise_shoebox(y, esq, current_shape, ipos, max_nsteps=25):
     # find limits of kernel size from data size
     lengths = []
     for idim, length in enumerate(y.shape):
         max_length = 2 * min(ipos[idim], length - ipos[idim]) + 1
-        min_length = max(3, current_shape[idim] // 2)
-        if not min_length % 2:
-            min_length += 1  # force odd
-        lengths.append(np.arange(min_length, max_length - 2 * max(1, max_length // 16), 2))
+        min_length = round_up_to_odd_number(max(3, current_shape[idim] // 2))
+        step = int(max_length - min_length) // max_nsteps
+        step = max(2, step + step % 2)
+        lengths.append(np.arange(min_length, max_length - 2 * max(1, max_length // 16), step))
     # loop over all possible kernel sizes
     best_peak_shape = None
     best_kernel = None
