@@ -435,8 +435,13 @@ std::string FindPeaksConvolve::populateOutputWorkspaces(
         auto tbl = outputTbls.find(name);
         API::TableRow row{tbl->second->appendRow()};
         row << m_specNums[i];
-        for (const auto &peak : spec) {
-          row << peak.getAttribute(name);
+        for (size_t peak_i{0}; peak_i < m_maxPeakCount; peak_i++) {
+          if (peak_i < spec.size()) {
+            auto peak = spec[peak_i];
+            row << peak.getAttribute(name);
+          } else {
+            row << std::nan("");
+          }
         }
       }
     } else {
