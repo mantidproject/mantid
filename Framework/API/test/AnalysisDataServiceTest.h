@@ -488,6 +488,42 @@ public:
     TS_ASSERT_THROWS(ads.addToGroup("ws1", "ws1"), const std::runtime_error &);
   }
 
+  void test_unique_name() {
+    auto unique_name = ads.uniqueName();
+    TS_ASSERT_EQUALS(5, unique_name.size());
+
+    const std::string prefix = "testPrefix_";
+    auto uniqueWithPrefix = ads.uniqueName(4, prefix);
+
+    TS_ASSERT_EQUALS(4 + prefix.size(), uniqueWithPrefix.size());
+    TS_ASSERT_EQUALS(prefix, uniqueWithPrefix.substr(0, prefix.size()));
+
+    TS_ASSERT_THROWS(ads.uniqueName(-4), const std::invalid_argument &);
+  }
+
+  void test_unique_name_no_collision() {
+    for (char letter = 'a'; letter <= 'z'; letter++) {
+      if (letter == 'c') {
+        continue;
+      }
+      std::string wsName = "unique_" + std::string(1, letter);
+      auto ws = addToADS(wsName);
+    }
+    auto objects = ads.getObjects();
+    TS_ASSERT_EQUALS(25, objects.size()); // make sure we have all expected workspaces
+
+    TS_ASSERT_EQUALS("unique_c", ads.uniqueName(1, "unique_"));
+    auto ws = addToADS("unique_c");
+
+    TS_ASSERT_THROWS(ads.uniqueName(1, "unique_"), std::runtime_error &);
+  }
+
+  void test_unique_hidden_name() {
+    auto hiddenName = ads.uniqueHiddenName();
+    TS_ASSERT_EQUALS(11, hiddenName.size())
+    TS_ASSERT_EQUALS("__", hiddenName.substr(0, 2))
+  }
+
 private:
   /// If replace=true then usea addOrReplace
   void doAddingOnInvalidNameTests(bool replace) {
