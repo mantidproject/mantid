@@ -201,7 +201,8 @@ void FindPeaksConvolve::performConvolution(const size_t dataIndex) {
 
     const Tensor1D smoothKernel{
         createSmoothKernel(static_cast<size_t>(std::ceil(static_cast<double>(kernelBinCount.first) / 2.0)))};
-    const Tensor1D iOverSigConvOutput{(yConvOutput / eConvOutput).convolve(smoothKernel, dims)};
+    Tensor1D iOverSig{(yConvOutput / eConvOutput).unaryExpr([](double val) { return std::isfinite(val) ? val : 0.0; })};
+    const Tensor1D iOverSigConvOutput{iOverSig.convolve(smoothKernel, dims)};
 
     extractPeaks(dataIndex, iOverSigConvOutput, xData, yData, kernelBinCount.first / 2);
 
