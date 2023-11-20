@@ -30,8 +30,8 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
     actions["Plot Spectra"] = "Plot Spectra";
   if (actions.find("Plot Bins") == actions.end())
     actions["Plot Bins"] = "Plot Bins";
-  if (actions.find("Plot Contour") == actions.end())
-    actions["Plot Contour"] = "Plot Contour";
+  if (actions.find("Open Slice Viewer") == actions.end())
+    actions["Open Slice Viewer"] = "Open Slice Viewer";
   if (actions.find("Plot Tiled") == actions.end())
     actions["Plot Tiled"] = "Plot Tiled";
   return actions;
@@ -45,7 +45,6 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockIndirectPlotOptionsView final : public IIndirectPlotOptionsView {
 public:
   MOCK_METHOD1(subscribePresenter, void(IIndirectPlotOptionsPresenter *));
-
   MOCK_METHOD2(setPlotType,
                void(PlotWidget const &plotType, std::map<std::string, std::string> const &availableActions));
 
@@ -92,7 +91,7 @@ public:
 
   MOCK_METHOD0(plotSpectra, void());
   MOCK_METHOD1(plotBins, void(std::string const &binIndices));
-  MOCK_METHOD0(plotContour, void());
+  MOCK_METHOD0(showSliceViewer, void());
   MOCK_METHOD0(plotTiled, void());
 };
 
@@ -234,12 +233,12 @@ public:
     m_presenter->handlePlotBinsClicked();
   }
 
-  void test_that_the_plotContourClicked_signal_will_attempt_to_plot_a_contour() {
+  void test_that_the_showSliceViewerClicked_signal_will_attempt_to_show_slice_viewer() {
     setExpectationsForWidgetEnabling(false);
-    EXPECT_CALL(*m_model, plotContour()).Times(1);
+    EXPECT_CALL(*m_model, showSliceViewer()).Times(1);
     setExpectationsForWidgetEnabling(true);
 
-    m_presenter->handlePlotContourClicked();
+    m_presenter->handleShowSliceViewerClicked();
   }
 
   void test_that_the_plotTiledClicked_signal_will_attempt_to_plot_tiled_spectra() {

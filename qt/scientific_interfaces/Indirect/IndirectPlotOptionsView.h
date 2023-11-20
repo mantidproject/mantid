@@ -97,8 +97,9 @@ private slots:
   void notifySelectedIndicesChanged(QString const &indices);
   void notifyPlotSpectraClicked();
   void notifyPlotBinsClicked();
-  void notifyPlotContourClicked();
+  void notifyShowSliceViewerClicked();
   void notifyPlotTiledClicked();
+
 
 private:
   void setupView();

@@ -57,7 +57,6 @@ IndirectPlotOptionsPresenter::~IndirectPlotOptionsPresenter() { watchADS(false);
 void IndirectPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, std::string const &fixedIndices) {
   watchADS(true);
   m_view->subscribePresenter(this);
-
   m_view->setIndicesRegex(QString::fromStdString(Regexes::WORKSPACE_INDICES));
   m_view->setPlotType(plotType, m_model->availableActions());
   m_view->setIndices(QString::fromStdString(fixedIndices));
@@ -186,9 +185,10 @@ void IndirectPlotOptionsPresenter::handlePlotBinsClicked() {
   }
 }
 
-void IndirectPlotOptionsPresenter::handlePlotContourClicked() {
+
+void IndirectPlotOptionsPresenter::handleShowSliceViewerClicked() {
   setPlotting(true);
-  m_model->plotContour();
+  m_model->showSliceViewer();
   setPlotting(false);
 }
 

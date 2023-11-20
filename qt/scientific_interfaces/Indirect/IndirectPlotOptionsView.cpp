@@ -54,7 +54,7 @@ QString getAction(std::map<std::string, std::string> const &actions, std::string
 
 QIcon plotCurveIcon() { return MantidQt::Icons::getIcon("mdi.chart-line"); }
 
-QIcon plotContourIcon() { return MantidQt::Icons::getIcon("mdi.chart-scatterplot-hexbin"); }
+QIcon showSliceViewerIcon() { return MantidQt::Icons::getIcon("mdi.chart-scatterplot-hexbin"); }
 
 QIcon plotTiledIcon() { return MantidQt::Icons::getIcon("mdi.chart-line-stacked"); }
 
@@ -123,9 +123,9 @@ void IndirectPlotOptionsView::notifyPlotBinsClicked() {
   m_presenter->handlePlotBinsClicked();
 }
 
-void IndirectPlotOptionsView::notifyPlotContourClicked() {
+void IndirectPlotOptionsView::notifyShowSliceViewerClicked() {
   notifySelectedIndicesChanged();
-  m_presenter->handlePlotContourClicked();
+  m_presenter->handleShowSliceViewerClicked();
 }
 
 void IndirectPlotOptionsView::notifyPlotTiledClicked() {
@@ -141,14 +141,15 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
   plotSpectraAction->setIcon(plotCurveIcon());
   auto plotBinAction = new QAction(getAction(availableActions, "Plot Bins"), this);
   plotBinAction->setIcon(plotCurveIcon());
-  auto plotContourAction = new QAction(getAction(availableActions, "Plot Contour"), this);
-  plotContourAction->setIcon(plotContourIcon());
+  auto showSliceViewerAction = new QAction(getAction(availableActions, "Open Slice Viewer"), this);
+  showSliceViewerAction->setIcon(showSliceViewerIcon());
   auto plotTiledAction = new QAction(getAction(availableActions, "Plot Tiled"), this);
   plotTiledAction->setIcon(plotTiledIcon());
 
+
   connect(plotSpectraAction, SIGNAL(triggered()), this, SLOT(notifyPlotSpectraClicked()));
   connect(plotBinAction, SIGNAL(triggered()), this, SLOT(notifyPlotBinsClicked()));
-  connect(plotContourAction, SIGNAL(triggered()), this, SLOT(notifyPlotContourClicked()));
+  connect(showSliceViewerAction, SIGNAL(triggered()), this, SLOT(notifyShowSliceViewerClicked()));
   connect(plotTiledAction, SIGNAL(triggered()), this, SLOT(notifyPlotTiledClicked()));
 
   m_plotOptions->tbPlot->setVisible(true);
@@ -168,7 +169,7 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
   case PlotWidget::SpectraContour:
     m_plotOptions->pbPlotSpectra->setVisible(false);
     plotMenu->addAction(plotSpectraAction);
-    plotMenu->addAction(plotContourAction);
+    plotMenu->addAction(showSliceViewerAction);
     break;
   case PlotWidget::SpectraTiled:
     m_plotOptions->pbPlotSpectra->setVisible(false);
@@ -183,7 +184,7 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
     m_plotOptions->pbPlotSpectra->setVisible(false);
     m_plotOptions->cbPlotUnit->setVisible(true);
     plotMenu->addAction(plotSpectraAction);
-    plotMenu->addAction(plotContourAction);
+    plotMenu->addAction(showSliceViewerAction);
     break;
   default:
     std::runtime_error("Plot option not found. Plot types are Spectra, "

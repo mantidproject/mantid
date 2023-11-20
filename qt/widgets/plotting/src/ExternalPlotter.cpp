@@ -4,12 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/MplCpp/Plot.h"
-#include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
 #include <QHash>
 #include <QString>
@@ -195,6 +194,18 @@ void ExternalPlotter::plotBins(std::string const &workspaceName, std::string con
 void ExternalPlotter::plotContour(std::string const &workspaceName) {
   if (validate(workspaceName))
     pcolormesh(QStringList(QString::fromStdString(workspaceName)));
+}
+
+/**
+ * Produces an external call to slice viewer on the target workspace
+ *
+ * @param workspaceName The name of the workspace to use in slice viewer
+ */
+void ExternalPlotter::showSliceViewer(std::string const &workspaceName) {
+  if (validate(workspaceName)) {
+    auto workspace = AnalysisDataService::Instance().retrieveWS<Workspace>(workspaceName);
+    sliceviewer(workspace);
+  }
 }
 
 /**

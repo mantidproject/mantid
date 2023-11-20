@@ -25,7 +25,7 @@ public:
   virtual void handleSelectedIndicesChanged(std::string const &indices) = 0;
   virtual void handlePlotSpectraClicked() = 0;
   virtual void handlePlotBinsClicked() = 0;
-  virtual void handlePlotContourClicked() = 0;
+  virtual void handleShowSliceViewerClicked() = 0;
   virtual void handlePlotTiledClicked() = 0;
 };
 
@@ -46,7 +46,7 @@ public:
   void handleSelectedIndicesChanged(std::string const &indices) override;
   void handlePlotSpectraClicked() override;
   void handlePlotBinsClicked() override;
-  void handlePlotContourClicked() override;
+  void handleShowSliceViewerClicked() override;
   void handlePlotTiledClicked() override;
 
   void setPlotType(PlotWidget const &plotType);
