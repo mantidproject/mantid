@@ -9,7 +9,9 @@
 #
 import os.path
 import tempfile
+import time
 import unittest
+from threading import Thread
 
 from qtpy.QtWidgets import QApplication
 from unittest import mock
@@ -106,10 +108,20 @@ class MultiPythonFileInterpreterTest(unittest.TestCase, QtWidgetFinder):
                 f.write("Test")
             with mock.patch("mantidqt.widgets.codeeditor.interpreter.EditorIO.ask_for_filename", lambda s: filename):
                 widget.open_file_in_new_tab(filename)
-            with open(filename, "w") as f:
-                f.write("File changed")
+            t = Thread(target=self.modify_file, args=(filename,))
+            t.start()
+            t.join()
             QApplication.instance().processEvents()
         file_changed_event_mock.assert_called_once()
+
+    def modify_file(self, filename):
+        with open(filename, "w") as f:
+            f.write("File changed")
+        # Macs seem to require a little bit of time before being able to detect
+        # external changes to a file. Without this sleep the QFileSystemWatcher
+        # won't call the callback for when a file is modified. We sleep on a
+        # separate thread so as to not block the file watcher thread.
+        time.sleep(1)
 
     def test_saving_file_adds_events_to_ignore_list(self):
         widget = MultiPythonFileInterpreter()
