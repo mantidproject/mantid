@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "BayesFittingTab.h"
 #include "DllConfig.h"
-#include "IndirectBayesTab.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "ui_ResNorm.h"

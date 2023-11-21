@@ -5,10 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "ui_IndirectBayes.h"
+#include "ui_BayesFitting.h"
 
+#include "BayesFittingTab.h"
 #include "DllConfig.h"
-#include "IndirectBayesTab.h"
 #include "IndirectInterface.h"
 
 #include "MantidKernel/ConfigService.h"
