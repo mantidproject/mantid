@@ -331,12 +331,6 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>56</height>
-      </size>
-     </property>
      <property name="title">
       <string>Output Options</string>
      </property>
@@ -380,11 +374,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::API::FileFinderWidget</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/DataSelector.h</header>
@@ -393,6 +382,12 @@
    <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>
    <extends>QWidget</extends>
    <header>IndirectPlotOptionsView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::API::FileFinderWidget</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
