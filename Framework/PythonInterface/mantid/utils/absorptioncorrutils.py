@@ -92,7 +92,7 @@ def __get_cache_name(
     if cache_dirs:
         # generate the property string for hashing
         try:
-            height_val_tmp = ws.run()["BL11A:CS:ITEMS:HeightInContainer"].lastValue()
+            height_val_tmp = ws.run().getTimeAveragedValue("BL11A:CS:ITEMS:HeightInContainer")
         except (RuntimeError, AttributeError) as _:
             height_val_tmp = ws.run()["BL11A:CS:ITEMS:HeightInContainer"].value
         property_string = [
