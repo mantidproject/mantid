@@ -78,7 +78,7 @@ public:
   void setReflection(const QString &reflectionName);
 
   /// Controls where to show analyser and reflection options or not
-  void IndirectInstrumentConfig::showAnalyserAndReflectionOptions(bool visible);
+  void showAnalyserAndReflectionOptions(bool visible);
 
 public slots:
   /// Called when an instrument configuration is selected
