@@ -64,8 +64,8 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
     actions["Plot Spectra"] = "Plot Spectra";
   if (actions.find("Plot Bins") == actions.end())
     actions["Plot Bins"] = "Plot Bins";
-  if (actions.find("Plot Contour") == actions.end())
-    actions["Plot Contour"] = "Plot Contour";
+  if (actions.find("Open Slice Viewer") == actions.end())
+    actions["Open Slice Viewer"] = "Open Slice Viewer";
   if (actions.find("Plot Tiled") == actions.end())
     actions["Plot Tiled"] = "Plot Tiled";
   return actions;
@@ -345,7 +345,7 @@ public:
     m_plotter = new NiceMock<MockExternalPlotter>();
     m_model = std::make_unique<IndirectPlotOptionsModel>(m_plotter, actions);
 
-    actions["Plot Contour"] = "Plot Contour";
+    actions["Open Slice viewer"] = "Open Slice Viewer";
     actions["Plot Tiled"] = "Plot Tiled";
     TS_ASSERT_EQUALS(m_model->availableActions(), actions);
   }
