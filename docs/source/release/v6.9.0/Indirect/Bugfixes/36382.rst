@@ -1,0 +1,1 @@
+- A bug where the ``Run`` and ``Ouput Options`` appeared squished on Indirect interfaces has been fixed.
