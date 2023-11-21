@@ -146,7 +146,6 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
   auto plotTiledAction = new QAction(getAction(availableActions, "Plot Tiled"), this);
   plotTiledAction->setIcon(plotTiledIcon());
 
-
   connect(plotSpectraAction, SIGNAL(triggered()), this, SLOT(notifyPlotSpectraClicked()));
   connect(plotBinAction, SIGNAL(triggered()), this, SLOT(notifyPlotBinsClicked()));
   connect(showSliceViewerAction, SIGNAL(triggered()), this, SLOT(notifyShowSliceViewerClicked()));

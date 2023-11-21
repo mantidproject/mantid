@@ -185,7 +185,6 @@ void IndirectPlotOptionsPresenter::handlePlotBinsClicked() {
   }
 }
 
-
 void IndirectPlotOptionsPresenter::handleShowSliceViewerClicked() {
   setPlotting(true);
   m_model->showSliceViewer();
