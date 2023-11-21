@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/InstrumentView/CollapsibleStack2.h"
+#include "MantidQtWidgets/InstrumentView/CollapsibleStack.h"
 
 #include <QFontMetrics>
 #include <QMouseEvent>
@@ -13,14 +13,14 @@
 
 namespace MantidQt::MantidWidgets {
 
-CollapsingPanelLabel::CollapsingPanelLabel(const QString &caption, CollapsingPanel *parent)
+CollapsiblePanelLabel::CollapsiblePanelLabel(const QString &caption, CollapsiblePanel *parent)
     : QLabel(caption, dynamic_cast<QWidget *>(parent)), m_parentPanel(parent) {
   setFrameStyle(QFrame::WinPanel);
   setFrameShadow(QFrame::Raised);
   setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 }
 
-void CollapsingPanelLabel::mousePressEvent(QMouseEvent *e) {
+void CollapsiblePanelLabel::mousePressEvent(QMouseEvent *e) {
   if (e->buttons() & Qt::LeftButton) {
     emit collapseOrExpand();
   } else {
@@ -28,7 +28,7 @@ void CollapsingPanelLabel::mousePressEvent(QMouseEvent *e) {
   }
 }
 
-void CollapsingPanelLabel::paintEvent(QPaintEvent *e) {
+void CollapsiblePanelLabel::paintEvent(QPaintEvent *e) {
   QLabel::paintEvent(e);
   QPainter painter(this);
   QFontMetrics fm(font());
@@ -53,17 +53,17 @@ void CollapsingPanelLabel::paintEvent(QPaintEvent *e) {
   }
 }
 
-CollapsingPanel::CollapsingPanel(const QString &caption, QWidget *parent)
+CollapsiblePanel::CollapsiblePanel(const QString &caption, QWidget *parent)
     : QWidget(parent), m_isCollapsed(false), m_widget(nullptr), m_isFixed(false), m_maxHeight(QWIDGETSIZE_MAX) {
   m_layout = new QVBoxLayout(this);
-  m_label = new CollapsingPanelLabel(caption, this);
+  m_label = new CollapsiblePanelLabel(caption, this);
   m_layout->addWidget(m_label);
   m_layout->setMargin(0);
   setLayout(m_layout);
   connect(m_label, SIGNAL(collapseOrExpand()), this, SLOT(collapsedOrExpanded()));
 }
 
-void CollapsingPanel::setWidget(QWidget *widget, const bool fixedHeight) {
+void CollapsiblePanel::setWidget(QWidget *widget, const bool fixedHeight) {
   m_widget = widget;
   m_widget->setParent(this);
   m_layout->addWidget(m_widget);
@@ -73,9 +73,9 @@ void CollapsingPanel::setWidget(QWidget *widget, const bool fixedHeight) {
   }
 }
 
-void CollapsingPanel::setCaption(const QString &caption) { m_label->setText(caption); }
+void CollapsiblePanel::setCaption(const QString &caption) { m_label->setText(caption); }
 
-void CollapsingPanel::collapsedOrExpanded() {
+void CollapsiblePanel::collapsedOrExpanded() {
   if (m_isCollapsed) {
     expandCaption();
   } else {
@@ -83,25 +83,25 @@ void CollapsingPanel::collapsedOrExpanded() {
   }
 }
 
-bool CollapsingPanel::isCollapsed() const { return m_isCollapsed; }
+bool CollapsiblePanel::isCollapsed() const { return m_isCollapsed; }
 
-bool CollapsingPanel::isFixed() const { return m_isFixed; }
+bool CollapsiblePanel::isFixed() const { return m_isFixed; }
 
-void CollapsingPanel::collapseCaption() {
+void CollapsiblePanel::collapseCaption() {
   m_isCollapsed = true;
   emit collapsed();
 }
 
-void CollapsingPanel::expandCaption() {
+void CollapsiblePanel::expandCaption() {
   m_isCollapsed = false;
   emit expanded();
 }
 
-QWidget *CollapsingPanel::getWidget() const { return m_widget; }
+QWidget *CollapsiblePanel::getWidget() const { return m_widget; }
 
-CollapsingPanelLabel *CollapsingPanel::getLabel() const { return m_label; }
+CollapsiblePanelLabel *CollapsiblePanel::getLabel() const { return m_label; }
 
-void CollapsingPanel::setFixedHeight(const int height) {
+void CollapsiblePanel::setFixedHeight(const int height) {
   if (height < m_maxHeight) {
     QWidget::setFixedHeight(height);
   } else {
@@ -109,7 +109,7 @@ void CollapsingPanel::setFixedHeight(const int height) {
   }
 }
 
-CollapsingStack::CollapsingStack(QWidget *parent) : QWidget(parent) {
+CollapsibleStack::CollapsibleStack(QWidget *parent) : QWidget(parent) {
   m_splitterLayout = new QSplitter(Qt::Vertical, this);
   m_splitterLayout->setContentsMargins(0, 0, 0, 0);
   m_splitterLayout->setChildrenCollapsible(false);
@@ -125,8 +125,8 @@ CollapsingStack::CollapsingStack(QWidget *parent) : QWidget(parent) {
  * @param widget :: Inner widget for the panel
  * @param fixedHeight :: Bool value, if true the widget will not expand and be fixed at the height of its size hint
  */
-CollapsingPanel *CollapsingStack::addPanel(const QString &caption, QWidget *widget, const bool fixedHeight) {
-  auto *panel = new CollapsingPanel(caption, this);
+CollapsiblePanel *CollapsibleStack::addPanel(const QString &caption, QWidget *widget, const bool fixedHeight) {
+  auto *panel = new CollapsiblePanel(caption, this);
   panel->setWidget(widget, fixedHeight);
   m_splitterLayout->addWidget(panel);
 
@@ -135,24 +135,24 @@ CollapsingPanel *CollapsingStack::addPanel(const QString &caption, QWidget *widg
   return panel;
 }
 
-void CollapsingStack::panelCollapsed() {
-  auto *panel = dynamic_cast<CollapsingPanel *>(sender());
+void CollapsibleStack::panelCollapsed() {
+  auto *panel = dynamic_cast<CollapsiblePanel *>(sender());
   panel->getWidget()->hide();
   int labelHeight = panel->getLabel()->height();
   panel->setFixedHeight(labelHeight);
   updateStretch();
 }
 
-void CollapsingStack::panelExpanded() {
-  auto *panel = dynamic_cast<CollapsingPanel *>(sender());
+void CollapsibleStack::panelExpanded() {
+  auto *panel = dynamic_cast<CollapsiblePanel *>(sender());
   panel->getWidget()->show();
   panel->setFixedHeight(QWIDGETSIZE_MAX); // If you set fixed height to QWIDGETSIZE_MAX it unfixes the height
   updateStretch();
 }
 
-bool CollapsingStack::allCollapsedOrFixed() const {
+bool CollapsibleStack::allCollapsedOrFixed() const {
   for (auto *p : m_splitterLayout->children()) {
-    const auto *panel = dynamic_cast<CollapsingPanel *>(p);
+    const auto *panel = dynamic_cast<CollapsiblePanel *>(p);
     if (panel && !panel->isCollapsed() && !panel->isFixed()) {
       return false;
     }
@@ -160,7 +160,7 @@ bool CollapsingStack::allCollapsedOrFixed() const {
   return true;
 }
 
-void CollapsingStack::updateStretch() {
+void CollapsibleStack::updateStretch() {
   int n = m_baseLayout->count();
   if (allCollapsedOrFixed()) {
     if (n == 1) {

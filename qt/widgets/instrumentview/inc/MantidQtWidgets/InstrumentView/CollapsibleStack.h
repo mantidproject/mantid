@@ -14,32 +14,32 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class CollapsingStack;
-class CollapsingPanel;
+class CollapsibleStack;
+class CollapsiblePanel;
 
-class CollapsingPanelLabel : public QLabel {
+class CollapsiblePanelLabel : public QLabel {
   Q_OBJECT
 public:
-  CollapsingPanelLabel(const QString &caption, CollapsingPanel *parent);
+  CollapsiblePanelLabel(const QString &caption, CollapsiblePanel *parent);
   void mousePressEvent(QMouseEvent *e) override;
   void paintEvent(QPaintEvent *event) override;
 signals:
   void collapseOrExpand();
 
 private:
-  CollapsingPanel *m_parentPanel;
+  CollapsiblePanel *m_parentPanel;
 };
 
-class CollapsingPanel : public QWidget {
+class CollapsiblePanel : public QWidget {
   Q_OBJECT
 public:
-  CollapsingPanel(const QString &caption, QWidget *parent);
+  CollapsiblePanel(const QString &caption, QWidget *parent);
   void setWidget(QWidget *widget, const bool fixedHeight);
   void setCaption(const QString &caption);
   bool isCollapsed() const;
   bool isFixed() const;
   QWidget *getWidget() const;
-  CollapsingPanelLabel *getLabel() const;
+  CollapsiblePanelLabel *getLabel() const;
   void collapseCaption();
   void expandCaption();
   void setFixedHeight(const int height);
@@ -53,17 +53,17 @@ private slots:
 private:
   QWidget *m_widget;
   QVBoxLayout *m_layout;
-  CollapsingPanelLabel *m_label;
+  CollapsiblePanelLabel *m_label;
   bool m_isCollapsed;
   int m_maxHeight;
   int m_isFixed;
 };
 
-class CollapsingStack : public QWidget {
+class CollapsibleStack : public QWidget {
   Q_OBJECT
 public:
-  CollapsingStack(QWidget *parent);
-  CollapsingPanel *addPanel(const QString &caption, QWidget *widget, const bool fixedHeight = false);
+  CollapsibleStack(QWidget *parent);
+  CollapsiblePanel *addPanel(const QString &caption, QWidget *widget, const bool fixedHeight = false);
 private slots:
   void panelCollapsed();
   void panelExpanded();
