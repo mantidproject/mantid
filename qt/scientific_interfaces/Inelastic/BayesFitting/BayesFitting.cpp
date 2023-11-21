@@ -93,7 +93,7 @@ void BayesFitting::applySettings(std::map<std::string, QVariant> const &settings
   }
 }
 
-std::string BayesFitting::documentationPage() const { return "Indirect Bayes"; }
+std::string BayesFitting::documentationPage() const { return "Inelastic Bayes Fitting"; }
 
 BayesFitting::~BayesFitting() = default;
 
