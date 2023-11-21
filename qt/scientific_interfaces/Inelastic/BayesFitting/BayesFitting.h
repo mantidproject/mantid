@@ -37,7 +37,7 @@ public: // public constructor, destructor and functions
   /// Destructor
   ~BayesFitting() override;
   /// Interface name
-  static std::string name() { return "Bayes fitting"; }
+  static std::string name() { return "Bayes Fitting"; }
   // This interface's categories.
   static QString categoryInfo() { return "Inelastic"; }
   void initLayout() override;
