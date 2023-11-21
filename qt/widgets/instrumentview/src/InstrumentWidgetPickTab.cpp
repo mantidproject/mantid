@@ -114,7 +114,6 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget,
 
   // set up the rebin tab
   m_rebin = new QWidget(this);
-  m_rebin->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   QGridLayout *rebinLayout = new QGridLayout(m_rebin);
   m_rebinParams = new QLineEdit(m_rebin);
   m_rebinParams->setToolTip("The parameters to use for the new binning, a comma separated list of first bin boundary, "
