@@ -120,7 +120,6 @@ set(UI_FILES
     IndirectMolDyn.ui
     IndirectPlotOptions.ui
     IndirectSassena.ui
-    IndirectSettings.ui
     IndirectSimulation.ui
     IndirectTools.ui
     IndirectTransmission.ui

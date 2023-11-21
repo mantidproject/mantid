@@ -14,6 +14,8 @@
 #include "MantidKernel/Instantiator.h"
 
 #include <QHash>
+#include <QList>
+#include <QPointer>
 #include <QString>
 #include <QStringList>
 
@@ -110,6 +112,9 @@ public:
    * @param factory the factory instance
    */
   static void registerHelpWindowFactory(Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *factory);
+
+  /// Returns a list of existing UserSubWindows
+  static QList<QPointer<UserSubWindow>> &existingInterfaces();
 
   /// The keys associated with UserSubWindow classes
   QStringList getUserSubWindowKeys() const;
