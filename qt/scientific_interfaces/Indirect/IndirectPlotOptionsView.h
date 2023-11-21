@@ -100,7 +100,6 @@ private slots:
   void notifyShowSliceViewerClicked();
   void notifyPlotTiledClicked();
 
-
 private:
   void setupView();
   QValidator *createValidator(QString const &regex);
