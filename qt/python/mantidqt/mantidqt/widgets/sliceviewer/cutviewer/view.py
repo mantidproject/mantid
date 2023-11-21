@@ -176,6 +176,19 @@ class CutViewerView(QWidget):
         self.figure_layout.addWidget(toolbar)
         self.figure_layout.addWidget(self.figure.canvas)
         self.layout.addLayout(self.figure_layout)
+        self.figure.canvas.mpl_connect("draw_event", self._on_figure_canvas_draw)
+        self._is_drawing = False
+
+    # When the figure redraws after e.g. the user changing an axis to log, then
+    # for this view to see the update it requires an extra draw(). This method
+    # is connected to the draw event, so we need to check we're only drawing once
+    # and not causing a stack overflow.
+    def _on_figure_canvas_draw(self, _):
+        if self._is_drawing:
+            self._is_drawing = False
+            return
+        self._is_drawing = True
+        self.figure.canvas.draw()
 
     def _init_slice_table(self):
         for icol in range(self.table.columnCount()):
