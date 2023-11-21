@@ -8,24 +8,24 @@
 
 namespace MantidQt::CustomInterfaces {
 
-IndirectBayesTab::IndirectBayesTab(QWidget *parent) : IndirectTab(parent), m_propTree(new QtTreePropertyBrowser()) {
+BayesFittingTab::BayesFittingTab(QWidget *parent) : IndirectTab(parent), m_propTree(new QtTreePropertyBrowser()) {
   m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
 }
 
-IndirectBayesTab::~IndirectBayesTab() { m_propTree->unsetFactoryForManager(m_dblManager); }
+BayesFittingTab::~BayesFittingTab() { m_propTree->unsetFactoryForManager(m_dblManager); }
 
 /**
  * Prevents the loading of data with incorrect naming if passed true
  *
  * @param filter :: true if you want to allow filtering
  */
-void IndirectBayesTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
+void BayesFittingTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
-void IndirectBayesTab::setFileExtensionsByName(bool filter) { (void)filter; }
+void BayesFittingTab::setFileExtensionsByName(bool filter) { (void)filter; }
 
-void IndirectBayesTab::updateProperties(QtProperty *prop, double val) {
+void BayesFittingTab::updateProperties(QtProperty *prop, double val) {
   (void)prop;
   (void)val;
 }
@@ -37,8 +37,8 @@ void IndirectBayesTab::updateProperties(QtProperty *prop, double val) {
  * @param treeWidget :: The tree widget to format
  * @param properties :: The properties within the tree widget
  */
-void IndirectBayesTab::formatTreeWidget(QtTreePropertyBrowser *treeWidget,
-                                        QMap<QString, QtProperty *> const &properties) const {
+void BayesFittingTab::formatTreeWidget(QtTreePropertyBrowser *treeWidget,
+                                       QMap<QString, QtProperty *> const &properties) const {
   treeWidget->setIndentation(0);
   for (auto const &item : properties)
     treeWidget->setBackgroundColor(treeWidget->topLevelItem(item), QColor(246, 246, 246));

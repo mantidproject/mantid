@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectBayes</class>
- <widget class="QMainWindow" name="IndirectBayes">
+ <class>BayesFitting</class>
+ <widget class="QMainWindow" name="BayesFitting">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QTabWidget" name="indirectBayesTabs">
+     <widget class="QTabWidget" name="BayesFittingTabs">
       <property name="currentIndex">
        <number>0</number>
       </property>

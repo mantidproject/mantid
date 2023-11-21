@@ -14,13 +14,13 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INELASTIC_DLL ResNorm : public IndirectBayesTab {
+class MANTIDQT_INELASTIC_DLL ResNorm : public BayesFittingTab {
   Q_OBJECT
 
 public:
   ResNorm(QWidget *parent = nullptr);
 
-  // Inherited methods from IndirectBayesTab
+  // Inherited methods from BayesFittingTab
   void setup() override;
   bool validate() override;
   void run() override;
