@@ -6,13 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllConfig.h"
 #include "IndirectBayesTab.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "ui_Stretch.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL Stretch : public IndirectBayesTab {
+class MANTIDQT_INELASTIC_DLL Stretch : public IndirectBayesTab {
   Q_OBJECT
 
 public:

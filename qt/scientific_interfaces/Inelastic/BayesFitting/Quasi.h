@@ -6,18 +6,17 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllConfig.h"
 #include "IndirectBayesTab.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "ui_ResNorm.h"
+#include "ui_Quasi.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL ResNorm : public IndirectBayesTab {
+class MANTIDQT_INELASTIC_DLL Quasi : public IndirectBayesTab {
   Q_OBJECT
 
 public:
-  ResNorm(QWidget *parent = nullptr);
+  Quasi(QWidget *parent = nullptr);
 
   // Inherited methods from IndirectBayesTab
   void setup() override;
@@ -27,39 +26,35 @@ public:
   void loadSettings(const QSettings &settings) override;
 
 private slots:
-  /// Handle completion of the algorithm
-  void handleAlgorithmComplete(bool error);
-  /// Handle when the vanadium input is ready
-  void handleVanadiumInputReady(const QString &filename);
-  /// Handle when the resolution input is ready
-  void handleResolutionInputReady(const QString &filename);
   /// Slot for when the min range on the range selector changes
   void minValueChanged(double min);
   /// Slot for when the min range on the range selector changes
   void maxValueChanged(double max);
   /// Slot to update the guides when the range properties change
   void updateProperties(QtProperty *prop, double val) override;
-  /// Slot to handle the preview spectrum being changed
+  /// Slot to handle when a new sample file is available
+  void handleSampleInputReady(const QString &filename);
+  /// Slot to handle when a new resolution file is available
+  void handleResolutionInputReady(const QString &wsName);
+  /// slot to handle when the user changes the program to be used
+  void handleProgramChange(int index);
+  /// Slot to handle setting a new preview spectrum
   void previewSpecChanged(int value);
-  /// Slots to handle plot and save
+  /// Handles updating spectra in mini plot
+  void updateMiniPlot();
+  /// Handles what happen after the algorithm is run
+  void algorithmComplete(bool error);
+
   void runClicked();
-  void saveClicked();
   void plotClicked();
   void plotCurrentPreview();
+  void saveClicked();
 
 private:
-  void setFileExtensionsByName(bool filter) override;
+  void displayMessageAndRun(std::string const &saveDirectory);
+  int displaySaveDirectoryMessage();
 
-  void processLogs();
-  void addAdditionalLogs(const Mantid::API::WorkspaceGroup_sptr &resultGroup) const;
-  void addAdditionalLogs(const Mantid::API::Workspace_sptr &resultWorkspace) const;
-  std::map<std::string, std::string> getAdditionalLogStrings() const;
-  std::map<std::string, std::string> getAdditionalLogNumbers() const;
-  double getDoubleManagerProperty(QString const &propName) const;
-  void copyLogs(const Mantid::API::MatrixWorkspace_sptr &resultWorkspace,
-                const Mantid::API::WorkspaceGroup_sptr &resultGroup) const;
-  void copyLogs(const Mantid::API::MatrixWorkspace_sptr &resultWorkspace,
-                const Mantid::API::Workspace_sptr &workspace) const;
+  void setFileExtensionsByName(bool filter) override;
 
   void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);
@@ -71,7 +66,9 @@ private:
   /// Current preview spectrum
   int m_previewSpec;
   /// The ui form
-  Ui::ResNorm m_uiForm;
+  Ui::Quasi m_uiForm;
+  /// alg
+  Mantid::API::IAlgorithm_sptr m_QuasiAlg;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -7,6 +7,7 @@
 #pragma once
 #include "ui_IndirectBayes.h"
 
+#include "DllConfig.h"
 #include "IndirectBayesTab.h"
 #include "IndirectInterface.h"
 
@@ -23,7 +24,7 @@ window.
 @author Samuel Jackson, STFC
 */
 
-class MANTIDQT_INDIRECT_DLL IndirectBayes : public IndirectInterface {
+class MANTIDQT_INELASTIC_DLL IndirectBayes : public IndirectInterface {
   Q_OBJECT
 
 public: // public constants and enums

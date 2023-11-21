@@ -43,6 +43,11 @@ set(SRC_FILES
     Analysis/FunctionBrowser/SingleFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp
+    BayesFitting/IndirectBayes.cpp
+    BayesFitting/IndirectBayesTab.cpp
+    BayesFitting/Quasi.cpp
+    BayesFitting/ResNorm.cpp
+    BayesFitting/Stretch.cpp
     Manipulation/InelasticDataManipulation.cpp
     Manipulation/InelasticDataManipulationElwinTab.cpp
     Manipulation/InelasticDataManipulationElwinTabModel.cpp
@@ -95,6 +100,11 @@ set(MOC_FILES
     Analysis/FunctionBrowser/IqtTemplatePresenter.h
     Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.h
+    BayesFitting/IndirectBayes.h
+    BayesFitting/IndirectBayesTab.h
+    BayesFitting/Quasi.h
+    BayesFitting/ResNorm.h
+    BayesFitting/Stretch.h
     Manipulation/InelasticDataManipulation.h
     Manipulation/InelasticDataManipulationElwinTab.h
     Manipulation/InelasticDataManipulationElwinTabView.h
@@ -148,6 +158,10 @@ set(UI_FILES
     Analysis/IndirectFitOutputOptions.ui
     Analysis/IndirectFitTab.ui
     Analysis/IndirectSpectrumSelector.ui
+    BayesFitting/IndirectBayes.ui
+    BayesFitting/Quasi.ui
+    BayesFitting/ResNorm.ui
+    BayesFitting/Stretch.ui
     Manipulation/InelasticDataManipulation.ui
     Manipulation/InelasticDataManipulationElwinTab.ui
     Manipulation/InelasticDataManipulationIqtTab.ui
