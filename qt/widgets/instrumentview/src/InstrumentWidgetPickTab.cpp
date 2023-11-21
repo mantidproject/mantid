@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
-#include "MantidQtWidgets/InstrumentView/CollapsiblePanel.h"
 #include "MantidQtWidgets/InstrumentView/CollapsibleStack2.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -207,13 +206,6 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget,
   connect(m_storeCurve, SIGNAL(triggered()), this, SLOT(storeCurve()));
   m_savePlotToWorkspace = new QAction("Save plot to workspace", this);
   connect(m_savePlotToWorkspace, SIGNAL(triggered()), this, SLOT(savePlotToWorkspace()));
-
-  /*CollapsibleStack *panelStack = new CollapsibleStack(this);
-  m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
-  m_plotPanel = panelStack->addPanel("Name", m_plot);
-  m_rebinPanel = panelStack->addPanel("Rebin", m_rebin);
-  m_rebinPanel->collapseCaption();
-  collapsePlotPanel();*/
 
   CollapsingStack *panelStack = new CollapsingStack(this);
   m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
