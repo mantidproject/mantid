@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QTabWidget" name="BayesFittingTabs">
+     <widget class="QTabWidget" name="bayesFittingTabs">
       <property name="currentIndex">
        <number>0</number>
       </property>

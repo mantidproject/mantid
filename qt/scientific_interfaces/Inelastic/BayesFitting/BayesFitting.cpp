@@ -24,9 +24,9 @@ BayesFitting::BayesFitting(QWidget *parent)
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   // insert each tab into the interface on creation
-  m_bayesTabs.emplace(RES_NORM, new ResNorm(m_uiForm.BayesFittingTabs->widget(RES_NORM)));
-  m_bayesTabs.emplace(QUASI, new Quasi(m_uiForm.BayesFittingTabs->widget(QUASI)));
-  m_bayesTabs.emplace(STRETCH, new Stretch(m_uiForm.BayesFittingTabs->widget(STRETCH)));
+  m_bayesTabs.emplace(RES_NORM, new ResNorm(m_uiForm.bayesFittingTabs->widget(RES_NORM)));
+  m_bayesTabs.emplace(QUASI, new Quasi(m_uiForm.bayesFittingTabs->widget(QUASI)));
+  m_bayesTabs.emplace(STRETCH, new Stretch(m_uiForm.bayesFittingTabs->widget(STRETCH)));
 }
 
 void BayesFitting::initLayout() {
