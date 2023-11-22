@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 20223 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -101,13 +101,7 @@ QWidget *CollapsiblePanel::getWidget() const { return m_widget; }
 
 CollapsiblePanelLabel *CollapsiblePanel::getLabel() const { return m_label; }
 
-void CollapsiblePanel::setFixedHeight(const int height) {
-  if (height < m_maxHeight) {
-    QWidget::setFixedHeight(height);
-  } else {
-    QWidget::setFixedHeight(m_maxHeight);
-  }
-}
+void CollapsiblePanel::setFixedHeight(const int height) { QWidget::setFixedHeight(std::min(height, m_maxHeight)); }
 
 CollapsibleStack::CollapsibleStack(QWidget *parent) : QWidget(parent) {
   m_splitterLayout = new QSplitter(Qt::Vertical, this);
@@ -166,10 +160,8 @@ void CollapsibleStack::updateStretch() {
     if (n == 1) {
       m_baseLayout->addStretch();
     }
-  } else {
-    if (n == 2) { // n == 2 implies that a stretch has been added
-      m_baseLayout->removeItem(m_baseLayout->itemAt(1));
-    }
+  } else if (n == 2) { // n == 2 implies that a stretch has been added
+    m_baseLayout->removeItem(m_baseLayout->itemAt(1));
   }
 }
 } // namespace MantidQt::MantidWidgets
