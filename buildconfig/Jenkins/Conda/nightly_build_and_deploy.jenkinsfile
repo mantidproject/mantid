@@ -361,13 +361,13 @@ pipeline {
       }
     }
 
-    stage ('Delete old non-main packages from Anaconda') {
+    stage ('Delete old nightly packages from Anaconda') {
       when {
         beforeAgent true
         beforeOptions true
         allOf {
             expression { env.PUBLISH_TO_ANACONDA == 'true' }
-            expression { env.ANACONDA_CHANNEL_LABEL != '' }
+            expression { env.ANACONDA_CHANNEL_LABEL.trim() == 'nightly' }
         }
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
