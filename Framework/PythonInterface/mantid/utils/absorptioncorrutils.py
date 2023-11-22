@@ -93,8 +93,9 @@ def __get_cache_name(
         # generate the property string for hashing
         try:
             height_val_tmp = ws.run().getTimeAveragedValue("BL11A:CS:ITEMS:HeightInContainer")
-        except (RuntimeError, AttributeError) as _:
-            height_val_tmp = ws.run()["BL11A:CS:ITEMS:HeightInContainer"].value
+        except RuntimeError as e:
+            raise RuntimeError("Currently only configured for POWGEN") from e
+
         property_string = [
             f"{key}={val}"
             for key, val in {
