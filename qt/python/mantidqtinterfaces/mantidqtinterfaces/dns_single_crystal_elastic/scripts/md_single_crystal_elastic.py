@@ -40,7 +40,7 @@ def load_binned(workspace_name, binning, params, path, file_numbers, standard):
     """
     ad0 = f"Theta,{binning['two_theta_binning'][0] / 2.0},{binning['two_theta_binning'][1] / 2.0},{binning['two_theta_binning'][2]}"
     ad1 = f"Omega,{binning['omega_binning'][0]},{binning['omega_binning'][1]},{binning['omega_binning'][2]}"
-    filepaths = [f"{path}_{number:06d}.d_dat" for number in list(file_numbers)]
+    filepaths = [path.replace("*" * len(str(number)), str(number)) for number in list(file_numbers)]
     filepaths = ", ".join(filepaths)
     norm_name = "_".join((workspace_name, "norm"))
     if workspace_name.endswith("_sf"):
