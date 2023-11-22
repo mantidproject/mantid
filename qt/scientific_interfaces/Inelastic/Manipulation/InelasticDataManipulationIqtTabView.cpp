@@ -135,7 +135,6 @@ void InelasticDataManipulationIqtTabView::setup() {
   // signals / slots & validators
   connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this, SIGNAL(sampDataReady(const QString &)));
   connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this, SIGNAL(resDataReady(const QString &)));
-  connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this, SLOT(updateDisplayedBinParameters()));
   connect(m_uiForm.spIterations, SIGNAL(valueChanged(int)), this, SIGNAL(iterationsChanged(int)));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SIGNAL(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SIGNAL(saveClicked()));
