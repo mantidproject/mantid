@@ -8,6 +8,7 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, Progress
 from mantid.kernel import StringListValidator, Direction
 import mantid.simpleapi as s_api
+from mantid.utils.pip import package_installed
 from mantid import config, logger
 import os
 import numpy as np
