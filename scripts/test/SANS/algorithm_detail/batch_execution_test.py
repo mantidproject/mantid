@@ -319,8 +319,9 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             "CanScatterRunNumber": "7",
             "CanDirectRunNumber": "8",
         }
+        additional_metadata = {}
 
-        save_workspace_to_file(ws_name, [], filename, additional_run_numbers)
+        save_workspace_to_file(ws_name, [], filename, additional_run_numbers, additional_metadata)
 
         expected_options = {
             "InputWorkspace": ws_name,
@@ -335,13 +336,33 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
 
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
+    def test_that_save_workspace_to_file_includes_metadata_in_options(self, mock_alg_manager):
+        ws_name = "wsName"
+        filename = "fileName"
+        additional_run_numbers = {}
+        additional_metadata = {"BackgroundSubtractionWorkspace": "tobesubtracted", "BackgroundSubtractionScaleFactor": "1.25"}
+
+        save_workspace_to_file(ws_name, [], filename, additional_run_numbers, additional_metadata)
+
+        expected_options = {
+            "InputWorkspace": ws_name,
+            "Filename": filename,
+            "Transmission": "",
+            "TransmissionCan": "",
+            "BackgroundSubtractionWorkspace": "tobesubtracted",
+            "BackgroundSubtractionScaleFactor": "1.25",
+        }
+        mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
+
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
     def test_that_save_workspace_to_file_can_set_file_types(self, mock_alg_manager):
         ws_name = "wsName"
         filename = "fileName"
         additional_run_numbers = {}
+        additional_metadata = {}
         file_types = [SaveType.NEXUS, SaveType.CAN_SAS, SaveType.NX_CAN_SAS, SaveType.NIST_QXY, SaveType.RKH, SaveType.CSV]
 
-        save_workspace_to_file(ws_name, file_types, filename, additional_run_numbers)
+        save_workspace_to_file(ws_name, file_types, filename, additional_run_numbers, additional_metadata)
 
         expected_options = {
             "InputWorkspace": ws_name,
@@ -362,6 +383,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         ws_name = "wsName"
         filename = "fileName"
         additional_run_numbers = {}
+        additional_metadata = {}
         file_types = []
         transmission_name = "transName"
         transmission_can_name = "transCanName"
@@ -371,6 +393,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             file_types,
             filename,
             additional_run_numbers,
+            additional_metadata,
             transmission_name=transmission_name,
             transmission_can_name=transmission_can_name,
         )
