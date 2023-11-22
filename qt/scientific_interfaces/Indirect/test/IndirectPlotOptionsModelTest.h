@@ -345,7 +345,7 @@ public:
     m_plotter = new NiceMock<MockExternalPlotter>();
     m_model = std::make_unique<IndirectPlotOptionsModel>(m_plotter, actions);
 
-    actions["Open Slice viewer"] = "Open Slice Viewer";
+    actions["Open Slice Viewer"] = "Open Slice Viewer";
     actions["Plot Tiled"] = "Plot Tiled";
     TS_ASSERT_EQUALS(m_model->availableActions(), actions);
   }
