@@ -165,7 +165,7 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
     plotMenu->addAction(plotSpectraAction);
     plotMenu->addAction(plotBinAction);
     break;
-  case PlotWidget::SpectraContour:
+  case PlotWidget::SpectraSlice:
     m_plotOptions->pbPlotSpectra->setVisible(false);
     plotMenu->addAction(plotSpectraAction);
     plotMenu->addAction(showSliceViewerAction);
@@ -179,7 +179,7 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
     m_plotOptions->tbPlot->setVisible(false);
     m_plotOptions->cbPlotUnit->setVisible(true);
     break;
-  case PlotWidget::SpectraContourUnit:
+  case PlotWidget::SpectraSliceUnit:
     m_plotOptions->pbPlotSpectra->setVisible(false);
     m_plotOptions->cbPlotUnit->setVisible(true);
     plotMenu->addAction(plotSpectraAction);
@@ -187,7 +187,7 @@ void IndirectPlotOptionsView::setPlotType(PlotWidget const &plotType,
     break;
   default:
     std::runtime_error("Plot option not found. Plot types are Spectra, "
-                       "SpectraContour or SpectraTiled.");
+                       "SpectraSliced or SpectraTiled.");
   }
   m_plotOptions->tbPlot->setMenu(plotMenu);
   m_plotOptions->tbPlot->setDefaultAction(plotSpectraAction);

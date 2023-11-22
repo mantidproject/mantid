@@ -34,7 +34,7 @@ InelasticDataManipulationSqwTab::InelasticDataManipulationSqwTab(QWidget *parent
     : InelasticDataManipulationTab(parent), m_model(std::make_unique<InelasticDataManipulationSqwTabModel>()),
       m_view(std::make_unique<InelasticDataManipulationSqwTabView>(parent)) {
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraContour));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSlice));
   connectSignals();
 }
 

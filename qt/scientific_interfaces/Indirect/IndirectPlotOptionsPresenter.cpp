@@ -134,7 +134,7 @@ void IndirectPlotOptionsPresenter::clearWorkspaces() {
 }
 
 void IndirectPlotOptionsPresenter::setUnit(std::string const &unit) {
-  if (m_plotType == PlotWidget::SpectraUnit || m_plotType == PlotWidget::SpectraContourUnit) {
+  if (m_plotType == PlotWidget::SpectraUnit || m_plotType == PlotWidget::SpectraSliceUnit) {
     m_model->setUnit(unit);
   }
 }

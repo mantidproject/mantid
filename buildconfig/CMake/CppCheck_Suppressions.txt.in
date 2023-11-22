@@ -342,7 +342,7 @@ constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/BankTextureBuild
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/MiniPlotMpl.cpp:154
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/MiniPlotMpl.cpp:164
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/MiniPlotMpl.cpp:325
-unusedScopedObject:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/src/ExternalPlotter.cpp:46
+unusedScopedObject:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/src/ExternalPlotter.cpp:47
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/Shape2D.h:300
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/Shape2D.h:352
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/Shape2D.h:394

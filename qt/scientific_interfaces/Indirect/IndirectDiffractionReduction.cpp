@@ -813,7 +813,7 @@ void IndirectDiffractionReduction::manualGroupingToggled(int state) {
     m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraUnit);
     break;
   case Qt::Checked:
-    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraContourUnit);
+    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraSliceUnit);
     break;
   default:
     return;

@@ -73,7 +73,7 @@ Data reduction
 #. Click ``Run``. An ``_sqw`` workspace should be created.
 #. Check ``Rebin in energy``
 #. Click ``Run``
-#. Within the ``Output`` section, click the down arrow on the ``Plot Spectra`` button and then select ``Plot Contour``, this should result in a 2D contour plot
+#. Within the ``Output`` section, click the down arrow on the ``Plot Spectra`` button and then select ``Open Slice Viewer``, this should open a slice viewer window.
 #. Click ``Manage User Directories`` and set the default save location
 #. Click ``Save Result``
 #. Check that the ``.nxs`` file was created in the correct location
