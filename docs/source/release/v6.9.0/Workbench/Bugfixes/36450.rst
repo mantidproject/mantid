@@ -1,0 +1,1 @@
+- The splash screen will no longer insist on being on top of every window.
