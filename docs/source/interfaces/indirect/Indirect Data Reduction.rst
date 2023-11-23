@@ -138,8 +138,8 @@ Run
 Plot Spectra
   If enabled, it will plot the selected workspace indices in the selected output workspace.
 
-Plot Contour
-  If enabled, it will plot the selected output workspace as a contour plot.
+Open Slice Viewer
+  If enabled, it will open the slice viewer for the selected output workspace.
 
 Group Output
   This will place the output reduced files from a reduction into a group workspace.

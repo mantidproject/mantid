@@ -40,11 +40,13 @@ std::vector<std::string> splitStringBy(std::string const &str, std::string const
 }
 
 template <typename T> T convertToT(std::string const &num) {
-  if (std::is_same<T, std::size_t>::value)
+  if (std::is_same<T, std::size_t>::value) {
     return static_cast<std::size_t>(std::stoi(num));
-  else if (std::is_same<T, int>::value)
+  } else if (std::is_same<T, int>::value) {
     return std::stoi(num);
-  std::runtime_error("Could not convert std::string to std::size_t or int type.");
+  } else {
+    throw std::runtime_error("Could not convert std::string to std::size_t or int type.");
+  }
 }
 
 template <typename T> void addToIndicesVector(std::vector<T> &indicesVec, T const &startIndex, T const &endIndex) {
@@ -195,6 +197,18 @@ void ExternalPlotter::plotBins(std::string const &workspaceName, std::string con
 void ExternalPlotter::plotContour(std::string const &workspaceName) {
   if (validate(workspaceName))
     pcolormesh(QStringList(QString::fromStdString(workspaceName)));
+}
+
+/**
+ * Produces an external call to slice viewer on the target workspace
+ *
+ * @param workspaceName The name of the workspace to use in slice viewer
+ */
+void ExternalPlotter::showSliceViewer(std::string const &workspaceName) {
+  if (validate(workspaceName)) {
+    auto workspace = AnalysisDataService::Instance().retrieveWS<Workspace>(workspaceName);
+    sliceviewer(workspace);
+  }
 }
 
 /**

@@ -24,7 +24,7 @@ namespace CustomInterfaces {
 
 class IIndirectPlotOptionsPresenter;
 
-enum PlotWidget { Spectra, SpectraBin, SpectraContour, SpectraTiled, SpectraUnit, SpectraContourUnit };
+enum PlotWidget { Spectra, SpectraBin, SpectraSlice, SpectraTiled, SpectraUnit, SpectraSliceUnit };
 
 class MANTIDQT_INDIRECT_DLL IIndirectPlotOptionsView {
 public:
@@ -97,7 +97,7 @@ private slots:
   void notifySelectedIndicesChanged(QString const &indices);
   void notifyPlotSpectraClicked();
   void notifyPlotBinsClicked();
-  void notifyPlotContourClicked();
+  void notifyShowSliceViewerClicked();
   void notifyPlotTiledClicked();
 
 private:

@@ -64,8 +64,8 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
     actions["Plot Spectra"] = "Plot Spectra";
   if (actions.find("Plot Bins") == actions.end())
     actions["Plot Bins"] = "Plot Bins";
-  if (actions.find("Plot Contour") == actions.end())
-    actions["Plot Contour"] = "Plot Contour";
+  if (actions.find("Open Slice Viewer") == actions.end())
+    actions["Open Slice Viewer"] = "Open Slice Viewer";
   if (actions.find("Plot Tiled") == actions.end())
     actions["Plot Tiled"] = "Plot Tiled";
   return actions;
@@ -91,7 +91,7 @@ public:
   MOCK_METHOD3(plotSpectra,
                void(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars));
   MOCK_METHOD3(plotBins, void(std::string const &workspaceName, std::string const &binIndices, bool errorBars));
-  MOCK_METHOD1(plotContour, void(std::string const &workspaceName));
+  MOCK_METHOD1(showSliceViewer, void(std::string const &workspaceName));
   MOCK_METHOD3(plotTiled, void(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars));
 };
 
@@ -272,13 +272,13 @@ public:
     m_model->plotBins(WORKSPACE_INDICES);
   }
 
-  void test_that_plotContour_will_call_the_plotter_plotContour_method_when_a_valid_workspace_has_been_set() {
+  void test_that_showSliceViewer_will_call_the_plotter_showSliceViewer_method_when_a_valid_workspace_has_been_set() {
     m_ads.addOrReplace(WORKSPACE_NAME, createMatrixWorkspace(5, 5));
     m_model->setWorkspace(WORKSPACE_NAME);
 
-    EXPECT_CALL(*m_plotter, plotContour(WORKSPACE_NAME)).Times(1);
+    EXPECT_CALL(*m_plotter, showSliceViewer(WORKSPACE_NAME)).Times(1);
 
-    m_model->plotContour();
+    m_model->showSliceViewer();
   }
 
   void test_that_plotTiled_will_call_the_plotter_plotTiled_method_when_a_valid_workspace_and_indices_have_been_set() {
@@ -345,7 +345,7 @@ public:
     m_plotter = new NiceMock<MockExternalPlotter>();
     m_model = std::make_unique<IndirectPlotOptionsModel>(m_plotter, actions);
 
-    actions["Plot Contour"] = "Plot Contour";
+    actions["Open Slice Viewer"] = "Open Slice Viewer";
     actions["Plot Tiled"] = "Plot Tiled";
     TS_ASSERT_EQUALS(m_model->availableActions(), actions);
   }
