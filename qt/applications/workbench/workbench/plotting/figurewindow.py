@@ -35,7 +35,7 @@ def _validate_workspaces(names: List[str]) -> List[bool]:
     for name in names:
         result = False
         ws = ads.retrieve(name)
-        if type(ws) == WorkspaceGroup:
+        if isinstance(ws, WorkspaceGroup):
             return _validate_workspaces(ws.getNames())
         try:
             result = ws.blocksize() > 1
