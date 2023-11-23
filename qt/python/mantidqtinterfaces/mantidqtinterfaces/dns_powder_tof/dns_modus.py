@@ -48,6 +48,11 @@ class DNSModus:
                 "xml_dump",
                 "plot_elastic_powder",
             ],
+            'sc_elastic': [
+                'paths', 'file_selector', 'elastic_sc_options',
+                'elastic_sc_script_generator', 'xml_dump',
+                'plot_elastic_sc'
+            ],
         }
         # Yapf: disable
         self._widget_map = {
