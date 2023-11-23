@@ -1,40 +1,76 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jul 10 14:08:05 2019
-
-@author: thomasm
-"""
-
-# import numpy as np
-# import matplotlib.pyplot as plt
-# import matplotlib.cm as colormaps
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
 
 colormaps = [
-    u'afmhot', u'autumn', u'binary', u'Blues', u'bone', u'BrBG', u'brg',
-    u'BuGn', u'BuPu', u'bwr', u'cividis', u'CMRmap', u'cool', u'coolwarm',
-    u'copper', u'cubehelix', u'Dark2', u'gist_earth', u'gist_gray',
-    u'gist_heat', u'gist_ncar', u'gist_rainbow', u'gist_stern', u'gist_yarg',
-    u'GnBu', u'gnuplot', u'gnuplot2', u'gray', u'Greens', u'Greys', u'hot',
-    u'hsv', u'inferno', u'jet', u'magma', u'nipy_spectral', u'ocean',
-    u'Oranges', u'OrRd', u'pink', u'PiYG', u'plasma', u'PRGn', u'PuBu',
-    u'PuBuGn', u'PuOr', u'PuRd', u'Purples', u'rainbow', u'RdBu', u'RdGy',
-    u'RdPu', u'RdYlBu', u'RdYlGn', u'Reds', u'seismic', u'Spectral', u'spring',
-    u'summer', u'terrain', u'viridis', u'winter', u'Wistia', u'YlGn',
-    u'YlGnBu', u'YlOrBr', u'YlOrRd'
+    "afmhot",
+    "autumn",
+    "binary",
+    "Blues",
+    "bone",
+    "BrBG",
+    "brg",
+    "BuGn",
+    "BuPu",
+    "bwr",
+    "cividis",
+    "CMRmap",
+    "cool",
+    "coolwarm",
+    "copper",
+    "cubehelix",
+    "Dark2",
+    "gist_earth",
+    "gist_gray",
+    "gist_heat",
+    "gist_ncar",
+    "gist_rainbow",
+    "gist_stern",
+    "gist_yarg",
+    "GnBu",
+    "gnuplot",
+    "gnuplot2",
+    "gray",
+    "Greens",
+    "Greys",
+    "hot",
+    "hsv",
+    "inferno",
+    "jet",
+    "magma",
+    "nipy_spectral",
+    "ocean",
+    "Oranges",
+    "OrRd",
+    "pink",
+    "PiYG",
+    "plasma",
+    "PRGn",
+    "PuBu",
+    "PuBuGn",
+    "PuOr",
+    "PuRd",
+    "Purples",
+    "rainbow",
+    "RdBu",
+    "RdGy",
+    "RdPu",
+    "RdYlBu",
+    "RdYlGn",
+    "Reds",
+    "seismic",
+    "Spectral",
+    "spring",
+    "summer",
+    "terrain",
+    "viridis",
+    "winter",
+    "Wistia",
+    "YlGn",
+    "YlGnBu",
+    "YlOrBr",
+    "YlOrRd",
 ]
-
-# def create_images():
-#    gradient = np.linspace(0, 1, 256)
-#    gradient = np.vstack((gradient, gradient))
-#    #colormaps=[m for m in colormaps.cmap_d.keys() if not m.endswith("_r")]
-#    # this returns a mix of unicode and string
-#    #colormaps.sort(key=unicode.lower)
-#    fig = plt.figure(frameon=False)
-#    fig.set_size_inches(20, 1)
-#    ax = plt.Axes(fig, [0., 0., 1., 1.])
-#    ax.set_axis_off()
-#    fig.add_axes(ax)
-#    print(colormaps)
-#    for m in colormaps:
-#        ax.imshow(gradient, cmap=plt.get_cmap(m), aspect='auto')
-#        fig.savefig(m + '.png', dpi=15)
