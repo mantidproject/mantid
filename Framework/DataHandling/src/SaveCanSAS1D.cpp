@@ -98,6 +98,13 @@ void SaveCanSAS1D::init() {
                   "file (IDF)]]. \nIDFs are located in the instrument "
                   "sub-directory of the Mantid install directory.");
 
+  declareProperty(
+      "BackgroundSubtractionWorkspace", "",
+      "The name of the workspace used in the scaled background subtraction, to be included in the metadata. Optional.");
+  declareProperty(
+      "BackgroundSubtractionScaleFactor", "",
+      "The scale factor used in the scaled background subtraction, to be included in the metadata. Optional.");
+
   // Collimation information
   std::vector<std::string> collimationGeometry{
       "Cylinder", "FlatPlate", "Flat plate", "Disc", "Unknown",

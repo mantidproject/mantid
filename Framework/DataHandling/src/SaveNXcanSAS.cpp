@@ -795,6 +795,13 @@ void SaveNXcanSAS::init() {
   declareProperty("CanScatterRunNumber", "", "The run number for the can scatter workspace. Optional.");
   declareProperty("CanDirectRunNumber", "", "The run number for the can direct workspace. Optional.");
 
+  declareProperty(
+      "BackgroundSubtractionWorkspace", "",
+      "The name of the workspace used in the scaled background subtraction, to be included in the metadata. Optional.");
+  declareProperty(
+      "BackgroundSubtractionScaleFactor", "",
+      "The scale factor used in the scaled background subtraction, to be included in the metadata. Optional.");
+
   std::vector<std::string> const geometryOptions{"Cylinder", "FlatPlate", "Flat plate", "Disc", "Unknown"};
   declareProperty("Geometry", "Unknown", std::make_shared<Kernel::StringListValidator>(geometryOptions),
                   "The geometry type of the collimation.");
