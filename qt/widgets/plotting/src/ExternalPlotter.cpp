@@ -40,11 +40,13 @@ std::vector<std::string> splitStringBy(std::string const &str, std::string const
 }
 
 template <typename T> T convertToT(std::string const &num) {
-  if (std::is_same<T, std::size_t>::value)
+  if (std::is_same<T, std::size_t>::value) {
     return static_cast<std::size_t>(std::stoi(num));
-  else if (std::is_same<T, int>::value)
+  } else if (std::is_same<T, int>::value) {
     return std::stoi(num);
-  std::runtime_error("Could not convert std::string to std::size_t or int type.");
+  } else {
+    throw std::runtime_error("Could not convert std::string to std::size_t or int type.");
+  }
 }
 
 template <typename T> void addToIndicesVector(std::vector<T> &indicesVec, T const &startIndex, T const &endIndex) {
