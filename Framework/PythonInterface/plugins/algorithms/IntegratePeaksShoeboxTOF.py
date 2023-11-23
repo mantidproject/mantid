@@ -373,7 +373,8 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     # integrate at that position (without smoothing I/sigma)
                     intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
                     if status == PEAK_STATUS.STRONG and do_optimise_shoebox:
-                        kernel, (nrows, ncols, nbins) = optimise_shoebox(y, esq, kernel.shape, ipos)
+                        ipos, (nrows, ncols, nbins) = optimise_shoebox(y, esq, (nrows, ncols, nbins), ipos)
+                        kernel = make_kernel(nrows, ncols, nbins)
                         # re-integrate but this time check for overlap with edge
                         intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
 
@@ -538,18 +539,19 @@ def get_and_clip_data_arrays(ws, peak_data, pk_tof, ispec, kernel, nshoebox):
     return x, y, esq, ispecs
 
 
-def convolve_shoebox(y, esq, kernel):
-    yconv = convolve(y, kernel, mode="same")
-    econv = np.sqrt(convolve(esq, kernel**2, mode="same"))
+def convolve_shoebox(y, esq, kernel, mode="same", do_smooth=True):
+    yconv = convolve(y, kernel, mode=mode)
+    econv = np.sqrt(convolve(esq, kernel**2, mode=mode))
     with np.errstate(divide="ignore", invalid="ignore"):
         intens_over_sig = yconv / econv
     intens_over_sig[~np.isfinite(intens_over_sig)] = 0
     intens_over_sig = uniform_filter(intens_over_sig, size=len(y.shape))
     # zero edges where convolution is invalid
-    edge_mask = np.ones(intens_over_sig.shape, dtype=bool)
-    center_slice = tuple(slice(nedge, -nedge) for nedge in (np.asarray(kernel.shape) - 1) // 2)
-    edge_mask[center_slice] = False
-    intens_over_sig[edge_mask] = 0
+    if mode == "same":
+        edge_mask = np.ones(intens_over_sig.shape, dtype=bool)
+        center_slice = tuple(slice(nedge, -nedge) for nedge in (np.asarray(kernel.shape) - 1) // 2)
+        edge_mask[center_slice] = False
+        intens_over_sig[edge_mask] = 0
     return intens_over_sig
 
 
@@ -637,30 +639,44 @@ def integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edge
     return intens, sigma, status
 
 
-def optimise_shoebox(y, esq, current_shape, ipos, max_nsteps=25):
-    # find limits of kernel size from data size
-    lengths = []
-    for idim, length in enumerate(y.shape):
-        max_length = 2 * min(ipos[idim], length - ipos[idim]) + 1
-        min_length = round_up_to_odd_number(max(3, current_shape[idim] // 2))
-        step = int(max_length - min_length) // max_nsteps
-        step = max(2, step + step % 2)
-        lengths.append(np.arange(min_length, max_length - 2 * max(1, max_length // 16), step))
-    # loop over all possible kernel sizes
-    best_peak_shape = None
-    best_kernel = None
-    best_i_over_sig = -np.inf  # null value
-    for nrows in lengths[0]:
-        for ncols in lengths[1]:
-            for nbins in lengths[2]:
-                kernel = make_kernel(nrows, ncols, nbins)
-                intens, sigma, _ = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold=0.0)
-                i_over_sig = intens / sigma
-                if i_over_sig > best_i_over_sig:
-                    best_i_over_sig = i_over_sig
-                    best_peak_shape = (nrows, ncols, nbins)
-                    best_kernel = kernel
-    return best_kernel, best_peak_shape
+def optimise_shoebox(y, esq, peak_shape, ipos, nfail_max=2):
+    best_peak_shape = list(peak_shape)
+    best_ipos = list(ipos)
+    for idim in range(3)[::-1]:
+        nfailed = 0
+        max_intens_over_sig = -np.inf
+        this_peak_shape = best_peak_shape.copy()
+        this_peak_shape[idim] = min(1, round_up_to_odd_number(peak_shape[idim] // 2) - 2)
+        while True:
+            # make kernel
+            this_peak_shape[idim] = this_peak_shape[idim] + 2
+            kernel = make_kernel(*this_peak_shape)
+            # get slice the size of kernel along all other dims centered on best ipos from other dims
+            slices = [
+                slice(np.clip(ii - kernel.shape[idim] // 2, 0, y.shape[idim]), np.clip(ii + kernel.shape[idim] // 2 + 1, 0, y.shape[idim]))
+                for idim, ii in enumerate(best_ipos)
+            ]
+            # incl. elements along dim that give valid convolution in initial peak region
+            slices[idim] = slice(
+                np.clip(ipos[idim] - peak_shape[idim] // 2 - kernel.shape[idim] // 2, 0, y.shape[idim]),
+                np.clip(ipos[idim] + peak_shape[idim] // 2 + kernel.shape[idim] // 2 + 1, 0, y.shape[idim]),
+            )
+            slices = tuple(slices)
+            if y[slices].shape[idim] <= kernel.shape[idim]:
+                # no valid convolution region
+                break
+            this_intens_over_sig = np.squeeze(convolve_shoebox(y[slices], esq[slices], kernel, mode="valid"))
+            imax = np.argmax(this_intens_over_sig)
+            if this_intens_over_sig[imax] > max_intens_over_sig:
+                max_intens_over_sig = this_intens_over_sig[imax]
+                best_ipos[idim] = imax + max(ipos[idim] - peak_shape[idim] // 2, kernel.shape[idim] // 2)
+                best_peak_shape[idim] = this_peak_shape[idim]
+                nfailed = 0
+            else:
+                nfailed += 1
+                if not nfailed < nfail_max:
+                    break
+    return best_ipos, best_peak_shape
 
 
 def set_peak_intensity(pk, intens, sigma, do_lorz_cor):
