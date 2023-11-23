@@ -52,11 +52,11 @@ private slots:
 
 private:
   QWidget *m_widget;
+  bool m_isCollapsed;
+  int m_isFixed;
+  int m_maxHeight;
   QVBoxLayout *m_layout;
   CollapsiblePanelLabel *m_label;
-  bool m_isCollapsed;
-  int m_maxHeight;
-  int m_isFixed;
 };
 
 class CollapsibleStack : public QWidget {
