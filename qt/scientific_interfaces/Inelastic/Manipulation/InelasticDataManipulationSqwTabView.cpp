@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationSqwTabView.h"
 #include "IndirectDataValidationHelper.h"
+#include "InelasticDataManipulationSqwTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -32,22 +33,22 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-InelasticDataManipulationSqwTabView::InelasticDataManipulationSqwTabView(QWidget *parent) {
+InelasticDataManipulationSqwTabView::InelasticDataManipulationSqwTabView(QWidget *parent) : m_presenter() {
   m_uiForm.setupUi(parent);
 
   m_uiForm.rqwPlot2D->setCanvasColour(QColor(240, 240, 240));
 
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SIGNAL(dataReady(QString const &)));
-  connect(m_uiForm.spQLow, SIGNAL(valueChanged(double)), this, SIGNAL(qLowChanged(double)));
-  connect(m_uiForm.spQWidth, SIGNAL(valueChanged(double)), this, SIGNAL(qWidthChanged(double)));
-  connect(m_uiForm.spQHigh, SIGNAL(valueChanged(double)), this, SIGNAL(qHighChanged(double)));
-  connect(m_uiForm.spELow, SIGNAL(valueChanged(double)), this, SIGNAL(eLowChanged(double)));
-  connect(m_uiForm.spEWidth, SIGNAL(valueChanged(double)), this, SIGNAL(eWidthChanged(double)));
-  connect(m_uiForm.spEHigh, SIGNAL(valueChanged(double)), this, SIGNAL(eHighChanged(double)));
-  connect(m_uiForm.ckRebinInEnergy, SIGNAL(stateChanged(int)), this, SIGNAL(rebinEChanged(int)));
+  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SLOT(notifyDataReady(QString const &)));
+  connect(m_uiForm.spQLow, SIGNAL(valueChanged(double)), this, SLOT(notifyQLowChanged(double)));
+  connect(m_uiForm.spQWidth, SIGNAL(valueChanged(double)), this, SLOT(notifyQWidthChanged(double)));
+  connect(m_uiForm.spQHigh, SIGNAL(valueChanged(double)), this, SLOT(notifyQHighChanged(double)));
+  connect(m_uiForm.spELow, SIGNAL(valueChanged(double)), this, SLOT(notifyELowChanged(double)));
+  connect(m_uiForm.spEWidth, SIGNAL(valueChanged(double)), this, SLOT(notifyEWidthChanged(double)));
+  connect(m_uiForm.spEHigh, SIGNAL(valueChanged(double)), this, SLOT(notifyEHighChanged(double)));
+  connect(m_uiForm.ckRebinInEnergy, SIGNAL(stateChanged(int)), this, SLOT(notifyRebinEChanged(int)));
 
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SIGNAL(runClicked()));
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SIGNAL(saveClicked()));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(notifyRunClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
   // Allows empty workspace selector when initially selected
   m_uiForm.dsInput->isOptional(true);
 
@@ -59,6 +60,8 @@ InelasticDataManipulationSqwTabView::InelasticDataManipulationSqwTabView(QWidget
 /** Destructor
  */
 InelasticDataManipulationSqwTabView::~InelasticDataManipulationSqwTabView() {}
+
+void InelasticDataManipulationSqwTabView::subscribePresenter(ISqwPresenter *presenter) { m_presenter = presenter; }
 
 IndirectPlotOptionsView *InelasticDataManipulationSqwTabView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
 
@@ -79,6 +82,28 @@ bool InelasticDataManipulationSqwTabView::validate() {
     showMessageBox(errorMessage);
   return errorMessage.isEmpty();
 }
+
+void InelasticDataManipulationSqwTabView::notifyDataReady(QString const &dataName) {
+  m_presenter->handleDataReady(dataName.toStdString());
+}
+
+void InelasticDataManipulationSqwTabView::notifyQLowChanged(double value) { m_presenter->handleQLowChanged(value); }
+
+void InelasticDataManipulationSqwTabView::notifyQWidthChanged(double value) { m_presenter->handleQWidthChanged(value); }
+
+void InelasticDataManipulationSqwTabView::notifyQHighChanged(double value) { m_presenter->handleQHighChanged(value); }
+
+void InelasticDataManipulationSqwTabView::notifyELowChanged(double value) { m_presenter->handleELowChanged(value); }
+
+void InelasticDataManipulationSqwTabView::notifyEWidthChanged(double value) { m_presenter->handleEWidthChanged(value); }
+
+void InelasticDataManipulationSqwTabView::notifyEHighChanged(double value) { m_presenter->handleEHighChanged(value); }
+
+void InelasticDataManipulationSqwTabView::notifyRebinEChanged(int value) { m_presenter->handleRebinEChanged(value); }
+
+void InelasticDataManipulationSqwTabView::notifyRunClicked() { m_presenter->handleRunClicked(); }
+
+void InelasticDataManipulationSqwTabView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
 
 void InelasticDataManipulationSqwTabView::updateRunButton(bool enabled, std::string const &enableOutputButtons,
                                                           QString const &message, QString const &tooltip) {

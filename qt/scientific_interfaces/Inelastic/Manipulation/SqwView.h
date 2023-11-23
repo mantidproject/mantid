@@ -21,12 +21,16 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class ISqwPresenter;
+
 class MANTIDQT_INELASTIC_DLL SqwView : public QWidget, public ISqwView {
   Q_OBJECT
 
 public:
   SqwView(QWidget *perent = nullptr);
   ~SqwView();
+
+  void subscribePresenter(ISqwPresenter *presenter) override;
 
   IndirectPlotOptionsView *getPlotOptions() override;
   void setFBSuffixes(QStringList suffix) override;
@@ -69,6 +73,7 @@ private:
   std::map<QString, QtTreePropertyBrowser *> m_propTrees;
   /// Internal list of the properties
   QMap<QString, QtProperty *> m_properties;
+  ISqwPresenter *m_presenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

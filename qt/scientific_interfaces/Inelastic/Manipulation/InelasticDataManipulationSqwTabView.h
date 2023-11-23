@@ -18,12 +18,16 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class ISqwPresenter;
+
 class MANTIDQT_INELASTIC_DLL InelasticDataManipulationSqwTabView : public QWidget, public ISqwView {
   Q_OBJECT
 
 public:
   InelasticDataManipulationSqwTabView(QWidget *perent = nullptr);
   ~InelasticDataManipulationSqwTabView();
+
+  void subscribePresenter(ISqwPresenter *presenter) override;
 
   IndirectPlotOptionsView *getPlotOptions() override;
   void setFBSuffixes(QStringList suffix) override;
@@ -38,21 +42,23 @@ public:
 
 signals:
   void valueChanged(QtProperty *, double);
-  void dataReady(QString const &);
-  void qLowChanged(double);
-  void qWidthChanged(double);
-  void qHighChanged(double);
-  void eLowChanged(double);
-  void eWidthChanged(double);
-  void eHighChanged(double);
-  void rebinEChanged(int);
-  void runClicked();
-  void saveClicked();
   void showMessageBox(const QString &message);
 
 public slots:
   void updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
                        QString const &tooltip);
+
+private slots:
+  void notifyDataReady(QString const &dataName);
+  void notifyQLowChanged(double value);
+  void notifyQWidthChanged(double value);
+  void notifyQHighChanged(double value);
+  void notifyELowChanged(double value);
+  void notifyEWidthChanged(double value);
+  void notifyEHighChanged(double value);
+  void notifyRebinEChanged(int value);
+  void notifyRunClicked();
+  void notifySaveClicked();
 
 private:
   void setQRange(std::tuple<double, double> const &axisRange);
@@ -65,6 +71,7 @@ private:
   std::map<QString, QtTreePropertyBrowser *> m_propTrees;
   /// Internal list of the properties
   QMap<QString, QtProperty *> m_properties;
+  ISqwPresenter *m_presenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

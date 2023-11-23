@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SqwView.h"
 #include "IndirectDataValidationHelper.h"
+#include "InelasticDataManipulationSqwTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -61,6 +62,8 @@ SqwView::SqwView(QWidget *parent) {
 /** Destructor
  */
 SqwView::~SqwView() {}
+
+void SqwView::subscribePresenter(ISqwPresenter *presenter) { m_presenter = presenter; }
 
 IndirectPlotOptionsView *SqwView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
 

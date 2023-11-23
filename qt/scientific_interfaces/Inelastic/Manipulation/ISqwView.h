@@ -19,10 +19,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 class IndirectPlotOptionsView;
+class ISqwPresenter;
 
 class MANTIDQT_INELASTIC_DLL ISqwView {
 
 public:
+  virtual void subscribePresenter(ISqwPresenter *presenter) = 0;
+
   virtual IndirectPlotOptionsView *getPlotOptions() = 0;
   virtual void setFBSuffixes(QStringList suffix) = 0;
   virtual void setWSSuffixes(QStringList suffix) = 0;
