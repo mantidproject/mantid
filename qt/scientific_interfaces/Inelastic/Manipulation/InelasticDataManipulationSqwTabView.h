@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "ISqwView.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
@@ -17,23 +18,23 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL InelasticDataManipulationSqwTabView : public QWidget {
+class MANTIDQT_INELASTIC_DLL InelasticDataManipulationSqwTabView : public QWidget, public ISqwView {
   Q_OBJECT
 
 public:
   InelasticDataManipulationSqwTabView(QWidget *perent = nullptr);
   ~InelasticDataManipulationSqwTabView();
 
-  IndirectPlotOptionsView *getPlotOptions();
-  void setFBSuffixes(QStringList suffix);
-  void setWSSuffixes(QStringList suffix);
-  std::tuple<double, double> getQRangeFromPlot();
-  std::tuple<double, double> getERangeFromPlot();
-  std::string getDataName();
-  void plotRqwContour(Mantid::API::MatrixWorkspace_sptr rqwWorkspace);
-  void setDefaultQAndEnergy();
-  void setSaveEnabled(bool enabled);
-  bool validate();
+  IndirectPlotOptionsView *getPlotOptions() override;
+  void setFBSuffixes(QStringList suffix) override;
+  void setWSSuffixes(QStringList suffix) override;
+  std::tuple<double, double> getQRangeFromPlot() override;
+  std::tuple<double, double> getERangeFromPlot() override;
+  std::string getDataName() override;
+  void plotRqwContour(Mantid::API::MatrixWorkspace_sptr rqwWorkspace) override;
+  void setDefaultQAndEnergy() override;
+  void setSaveEnabled(bool enabled) override;
+  bool validate() override;
 
 signals:
   void valueChanged(QtProperty *, double);
