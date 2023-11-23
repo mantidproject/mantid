@@ -1,3 +1,10 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2023 ISIS Rutherford Appleton Laboratory UKRI,
+#     NScD Oak Ridge National Laboratory, European Spallation Source
+#     & Institut Laue - Langevin
+# SPDX - License - Identifier: GPL - 3.0 +
+
 from qtpy.QtWidgets import QProxyStyle, QStyle
 
 from mantidqtinterfaces.dns_single_crystal_elastic.data_structures.dns_dialog import DNSDialog
