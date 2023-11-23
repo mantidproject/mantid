@@ -50,7 +50,8 @@ function delete_package() {
 
   file_url="https://api.anaconda.org/package/$channel/$package_name/files"
   echo Get from url: $file_url
-  all_packages=$(curl -s -X GET $file_url)
+  # Exclude from deletion packages with a label of "main" or "rc"
+  all_packages=$(curl -s -X GET $file_url | jq 'map(select(.labels != ["main"] and .labels != ["rc"]))')
 
   latest_version=$(echo $all_packages | jq -r '.[-1].version')
   echo Latest Version: $latest_version
