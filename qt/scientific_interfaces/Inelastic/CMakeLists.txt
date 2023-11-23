@@ -60,6 +60,7 @@ set(SRC_FILES
     Manipulation/InelasticDataManipulationSymmetriseTab.cpp
     Manipulation/InelasticDataManipulationSymmetriseTabView.cpp
     Manipulation/InelasticDataManipulationSymmetriseTabModel.cpp
+    Manipulation/SqwView.cpp
 )
 
 set(MOC_FILES
@@ -107,6 +108,7 @@ set(MOC_FILES
     Manipulation/InelasticDataManipulationSymmetriseTab.h
     Manipulation/InelasticDataManipulationSymmetriseTabView.h
     Manipulation/InelasticDataManipulationTab.h
+    Manipulation/SqwView.h
 )
 
 set(INC_FILES
@@ -183,7 +185,7 @@ mtd_add_qt_library(
             Qt5::Concurrent
             Qt5::Xml
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp MantidQtIcons
-                   MantidScientificInterfacesIndirect
+                   MantidScientificInterfacesIndirect MantidQtWidgetsRegionSelector
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../Frameworks @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"
