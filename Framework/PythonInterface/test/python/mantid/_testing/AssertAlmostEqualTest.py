@@ -8,7 +8,7 @@
 import unittest
 from unittest import mock
 from mantid.testing import assert_almost_equal
-from mantid.simpleapi import CreateWorkspace, CompareWorkspaces
+from mantid.simpleapi import CreateWorkspace
 
 
 class AssertAlmostEqualTest(unittest.TestCase):

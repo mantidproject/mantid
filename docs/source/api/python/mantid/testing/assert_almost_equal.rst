@@ -7,7 +7,7 @@
 This is a Python function for testing if two modules are within a tolerance
 
 
-.. module:`mantid.testing.assert_almost_equal`
+.. module:`mantid.testing`
 
 .. automodule:: mantid.testing.assert_almost_equal
     :members:
