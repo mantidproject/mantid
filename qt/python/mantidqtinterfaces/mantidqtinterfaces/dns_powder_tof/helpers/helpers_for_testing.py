@@ -199,7 +199,14 @@ def get_fake_tof_binning():  # matches data 1,2 above
     }
 
 
-def get_file_selector_param_dict():
+def get_fake_elastic_sc_binning():  # matches data 1,2 above
+    return {
+        'twoTheta': (0, 1, 2),
+        'Omega': (3, 4, 5),
+    }
+
+
+def get_fileselector_param_dict():
     return {
         "paths": {
             "data_dir": "C:/data",

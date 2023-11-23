@@ -101,7 +101,7 @@ class DNSReductionGUIView(QMainWindow):
         show_interface_help("direct/dns_reduction/DNS Reduction", QProcess(self))
 
     def add_submenu(self, subview):
-        for menu in subview.menues:
+        for menu in subview.menus:
             submenu = self.menu.insertMenu(self.ui.menuHelp.menuAction(), menu)
             self.subview_menus.append(submenu)
 
