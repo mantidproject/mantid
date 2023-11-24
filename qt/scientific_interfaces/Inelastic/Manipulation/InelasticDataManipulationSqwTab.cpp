@@ -36,14 +36,9 @@ InelasticDataManipulationSqwTab::InelasticDataManipulationSqwTab(QWidget *parent
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSlice));
-  connectSignals();
 }
 
 void InelasticDataManipulationSqwTab::setup() {}
-
-void InelasticDataManipulationSqwTab::connectSignals() {
-  // connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sqwAlgDone(bool)));
-}
 
 /**
  * Handles the event of data being loaded. Validates the loaded data.
@@ -88,13 +83,13 @@ void InelasticDataManipulationSqwTab::run() {
  *
  * @param error If the algorithm chain failed
  */
-// void InelasticDataManipulationSqwTab::sqwAlgDone(bool error) {
-//  if (!error) {
-//    setOutputPlotOptionsWorkspaces({m_model->getOutputWorkspace()});
-//    m_view->setSaveEnabled(true);
-// }
-// m_view->updateRunButton(true, error ? "disable" : "enable");
-//}
+void InelasticDataManipulationSqwTab::runComplete(bool error) {
+  if (!error) {
+    setOutputPlotOptionsWorkspaces({m_model->getOutputWorkspace()});
+    m_view->setSaveEnabled(true);
+  }
+  m_view->updateRunButton(true, error ? "disable" : "enable");
+}
 
 /**
  * Plots the data as a contour plot

@@ -37,8 +37,8 @@ public:
   virtual void setSaveEnabled(bool enabled) = 0;
   virtual bool validate() = 0;
   virtual void showMessageBox(const std::string &message) const = 0;
-  virtual void updateRunButton(bool enabled, std::string const &enableOutputButtons, std::string const &message,
-                               std::string const &tooltip) = 0;
+  virtual void updateRunButton(bool const enabled, std::string const &enableOutputButtons = "unchanged",
+                               std::string const &message = "Run", std::string const &tooltip = "") = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

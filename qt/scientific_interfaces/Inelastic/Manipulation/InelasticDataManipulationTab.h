@@ -63,8 +63,11 @@ signals:
   void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
                        QString message = "Run", QString tooltip = "");
 
-private slots:
-  void tabExecutionComplete(bool error);
+protected slots:
+  virtual void tabExecutionComplete(bool error);
+
+protected:
+  virtual void runComplete(bool error) { (void)error; };
 
 private:
   virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };

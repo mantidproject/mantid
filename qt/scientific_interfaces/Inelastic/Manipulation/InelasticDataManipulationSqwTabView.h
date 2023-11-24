@@ -40,8 +40,8 @@ public:
   void setSaveEnabled(bool enabled) override;
   bool validate() override;
   void showMessageBox(const std::string &message) const override;
-  void updateRunButton(bool enabled, std::string const &enableOutputButtons, std::string const &message,
-                       std::string const &tooltip) override;
+  void updateRunButton(bool const enabled, std::string const &enableOutputButtons = "unchanged",
+                       std::string const &message = "Run", std::string const &tooltip = "") override;
 
 signals:
   void valueChanged(QtProperty *, double);

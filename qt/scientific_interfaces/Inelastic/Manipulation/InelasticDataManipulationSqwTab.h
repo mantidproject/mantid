@@ -64,8 +64,10 @@ public:
   void handleRunClicked() override;
   void handleSaveClicked() override;
 
+protected:
+  void runComplete(bool error) override;
+
 private:
-  void connectSignals();
   void plotRqwContour();
   void setFileExtensionsByName(bool filter) override;
 
