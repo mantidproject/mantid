@@ -21,7 +21,7 @@ class DNSElasticSCScriptGeneratorPresenter(DNSScriptGeneratorPresenter):
         self._data_arrays = {}
 
     def _finish_script_run(self):
-        self._plotlist, self._data_arrays = self.model.get_plotlist()
+        self._plotlist, self._data_arrays = self.model.get_plot_list()
 
     def get_option_dict(self):
         if self.view is not None:
