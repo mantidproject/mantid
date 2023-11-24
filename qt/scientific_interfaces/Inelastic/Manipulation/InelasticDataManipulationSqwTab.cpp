@@ -43,9 +43,6 @@ void InelasticDataManipulationSqwTab::setup() {}
 
 void InelasticDataManipulationSqwTab::connectSignals() {
   // connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sqwAlgDone(bool)));
-
-  // connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), m_view,
-  //        SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 }
 
 /**
@@ -81,6 +78,8 @@ void InelasticDataManipulationSqwTab::run() {
   m_model->setupSofQWAlgorithm(m_batchAlgoRunner);
   m_model->setupAddSampleLogAlgorithm(m_batchAlgoRunner);
 
+  m_view->updateRunButton(false, "disable", "Running...", "Running Sqw...");
+
   m_batchAlgoRunner->executeBatch();
 }
 
@@ -94,6 +93,7 @@ void InelasticDataManipulationSqwTab::run() {
 //    setOutputPlotOptionsWorkspaces({m_model->getOutputWorkspace()});
 //    m_view->setSaveEnabled(true);
 // }
+// m_view->updateRunButton(true, error ? "disable" : "enable");
 //}
 
 /**

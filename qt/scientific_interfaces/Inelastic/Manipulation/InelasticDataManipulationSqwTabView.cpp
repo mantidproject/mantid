@@ -106,10 +106,10 @@ void InelasticDataManipulationSqwTabView::notifyRunClicked() { m_presenter->hand
 void InelasticDataManipulationSqwTabView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
 
 void InelasticDataManipulationSqwTabView::updateRunButton(bool enabled, std::string const &enableOutputButtons,
-                                                          QString const &message, QString const &tooltip) {
+                                                          std::string const &message, std::string const &tooltip) {
   setRunEnabled(enabled);
-  m_uiForm.pbRun->setText(message);
-  m_uiForm.pbRun->setToolTip(tooltip);
+  m_uiForm.pbRun->setText(QString::fromStdString(message));
+  m_uiForm.pbRun->setToolTip(QString::fromStdString(tooltip));
   if (enableOutputButtons != "unchanged")
     setSaveEnabled(enableOutputButtons == "enable");
 }
