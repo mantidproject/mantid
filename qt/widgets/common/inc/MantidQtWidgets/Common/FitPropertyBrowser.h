@@ -321,9 +321,11 @@ public slots:
   void clearBrowser();
   void setPeakToolOn(bool on);
   void findPeaks();
+  void findPeaksConvolve();
   virtual void executeFitMenu(const QString & /*item*/);
   void executeDisplayMenu(const QString & /*item*/);
   void executeSetupMenu(const QString & /*item*/);
+  void executePeakFindingAlgMenu(const QString & /*item*/);
   void executeSetupManageMenu(const QString & /*item*/);
   void workspaceDoubleClicked(QListWidgetItem *item);
   void executeCustomSetupRemove(const QString &name);

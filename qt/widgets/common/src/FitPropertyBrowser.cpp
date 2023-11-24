@@ -25,9 +25,13 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FilenameDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/FormulaDialogEditor.h"
@@ -388,8 +392,12 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   m_setupActionCustomSetup = new QAction("Custom Setup", this);
   QAction *setupActionManageSetup = new QAction("Manage Setup", this);
   setupActionManageSetup->setObjectName("action_ManageSetup");
+  QAction *setupActionPeakFindingAlgs = new QAction("Peak Finding Algorithms", this);
+  setupActionPeakFindingAlgs->setObjectName("action_PeakFindingAlgs");
   QAction *setupActionFindPeaks = new QAction("Find Peaks", this);
   setupActionFindPeaks->setObjectName("action_FindPeaks");
+  QAction *setupActionFindPeaksConvolve = new QAction("Find Peaks Convolve", this);
+  setupActionFindPeaksConvolve->setObjectName("action_FindPeaksConvolve");
   QAction *setupActionClearFit = new QAction("Clear Model", this);
   setupActionClearFit->setObjectName("action_ClearModel");
 
@@ -429,17 +437,28 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   // empty menu for now, so set it disabled to avoid confusing users
   m_setupActionRemove->setEnabled(false);
 
+  QSignalMapper *PeakFindingAlgMapper = new QSignalMapper(this);
+  PeakFindingAlgMapper->setMapping(setupActionFindPeaks, "FindPeaks");
+  PeakFindingAlgMapper->setMapping(setupActionFindPeaksConvolve, "FindPeaksConvolve");
+  connect(setupActionFindPeaks, SIGNAL(triggered()), PeakFindingAlgMapper, SLOT(map()));
+  connect(setupActionFindPeaksConvolve, SIGNAL(triggered()), PeakFindingAlgMapper, SLOT(map()));
+  connect(PeakFindingAlgMapper, SIGNAL(mapped(const QString &)), this,
+          SLOT(executePeakFindingAlgMenu(const QString &)));
+
   QSignalMapper *setupMapper = new QSignalMapper(this);
   setupMapper->setMapping(setupActionClearFit, "ClearFit");
-  setupMapper->setMapping(setupActionFindPeaks, "FindPeaks");
   connect(setupActionClearFit, SIGNAL(triggered()), setupMapper, SLOT(map()));
-  connect(setupActionFindPeaks, SIGNAL(triggered()), setupMapper, SLOT(map()));
   connect(setupMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeSetupMenu(const QString &)));
+
+  QMenu *setupSubMenuPeakFindingAgls = new QMenu(this);
+  setupSubMenuPeakFindingAgls->addAction(setupActionFindPeaks);
+  setupSubMenuPeakFindingAgls->addAction(setupActionFindPeaksConvolve);
+  setupActionPeakFindingAlgs->setMenu(setupSubMenuPeakFindingAgls);
 
   setupMenu->addAction(m_setupActionCustomSetup);
   setupMenu->addAction(setupActionManageSetup);
   setupMenu->addSeparator();
-  setupMenu->addAction(setupActionFindPeaks);
+  setupMenu->addAction(setupActionPeakFindingAlgs);
   setupMenu->addSeparator();
   setupMenu->addAction(setupActionClearFit);
   btnSetup->setMenu(setupMenu);
@@ -642,11 +661,16 @@ void FitPropertyBrowser::executeDisplayMenu(const QString &item) {
   }
 }
 
+void FitPropertyBrowser::executePeakFindingAlgMenu(const QString &item) {
+  if (item == "FindPeaks")
+    findPeaks();
+  if (item == "FindPeaksConvolve")
+    findPeaksConvolve();
+}
+
 void FitPropertyBrowser::executeSetupMenu(const QString &item) {
   if (item == "ClearFit")
     clear();
-  if (item == "FindPeaks")
-    findPeaks();
 }
 
 void FitPropertyBrowser::executeSetupManageMenu(const QString &item) {
@@ -2755,6 +2779,81 @@ void FitPropertyBrowser::findPeaks() {
           Mantid::API::FunctionFactory::Instance().createFunction(defaultPeakType()));
       if (!f)
         break;
+      f->setMatrixWorkspace(inputWS, workspaceIndex(), startX(), endX());
+      f->setCentre(centre[i]);
+      f->setFwhm(width[i]);
+      f->setHeight(height[i]);
+      addFunction(f->asString());
+    }
+  } catch (...) {
+    QApplication::restoreOverrideCursor();
+    throw;
+  }
+
+  QApplication::restoreOverrideCursor();
+}
+
+void FitPropertyBrowser::findPeaksConvolve() {
+  std::string wsName = workspaceName();
+  if (wsName.empty()) {
+    QMessageBox::critical(this, "Mantid - Error", "Workspace name is not set");
+    return;
+  }
+
+  std::string peakListName = wsName + "_PeakList_tmp";
+
+  int FWHM = 0;
+  QString setting =
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksFWHM"));
+  FWHM = setting.isEmpty() ? 7 : setting.toInt();
+  double peakExtent{FWHM * (6.0 / 2.355)}; // Approx convert from FWHM to peak extent, assuming gaussian
+
+  QHash<QString, QString> defaultValues;
+  defaultValues["InputWorkspace"] = QString::fromStdString(wsName);
+  defaultValues["OutputWorkspace"] = QString::fromStdString(peakListName);
+  defaultValues["StartWorkspaceIndex"] = QString::number(workspaceIndex());
+  defaultValues["EndWorkspaceIndex"] = QString::number(workspaceIndex());
+  defaultValues["EstimatedPeakExtent"] = QString::number(peakExtent);
+  QStringList enabledParams{"EstimatedPeakExtent"};
+  QStringList disabledParams{"InputWorkspace", "OutputWorkspace", "StartWorkspaceIndex", "EndWorkspaceIndex"};
+  API::InterfaceManager interfaceMgr;
+  auto dlg = interfaceMgr.createDialogFromName("FindPeaksConvolve", -1, nullptr, false, defaultValues, QString(),
+                                               enabledParams, disabledParams);
+  dlg->setShowKeepOpen(false);
+  dlg->disableExitButton();
+  dlg->setObserveFinish(true);
+
+  try {
+    dlg->show();
+    QEventLoop loop;
+    connect(dlg, SIGNAL(algCompletedSignal()), &loop, SLOT(quit()));
+    loop.exec();
+
+    Mantid::API::WorkspaceGroup_sptr groupWs = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(peakListName));
+    Mantid::API::ITableWorkspace_sptr ws =
+        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(groupWs->getItem("PeakCentre"));
+
+    clear();
+
+    std::vector<double> centre;
+    centre.reserve(ws->columnCount());
+    Mantid::API::MatrixWorkspace_sptr inputWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()));
+
+    for (size_t i{1}; i < ws->columnCount(); i++) {
+      centre.emplace_back(ws->Double(0, i));
+    }
+    std::vector<double> width(centre.size(), FWHM);
+    std::vector<double> height(centre.size(), 0); // is the y position a better value here?
+    for (size_t i = 0; i < centre.size(); ++i) {
+      if (centre[i] < startX() || centre[i] > endX())
+        continue;
+      auto f = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
+          Mantid::API::FunctionFactory::Instance().createFunction(defaultPeakType()));
+      if (!f)
+        break;
+
       f->setMatrixWorkspace(inputWS, workspaceIndex(), startX(), endX());
       f->setCentre(centre[i]);
       f->setFwhm(width[i]);

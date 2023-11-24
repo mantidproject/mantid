@@ -260,6 +260,10 @@ public:
   void addEnabledAndDisableLists(const QStringList &enabled, const QStringList &disabled);
   /// Add an AlgorithmObserver to the algorithm
   void addAlgorithmObserver(Mantid::API::AlgorithmObserver *observer);
+  /// Disable the exit button
+  void disableExitButton();
+  /// Observe Associated Algorithm is Finished
+  void setObserveFinish(const bool on);
 
 protected:
   /** @name Member variables. */
@@ -298,6 +302,8 @@ protected:
   bool m_isInitialized;
   /// Flag if the input should be parsed automatically on initialization
   bool m_autoParseOnInit;
+  /// Flag if the finish has already been observed
+  bool m_finishObserved;
 
   /// A list of labels to use as validation markers
   QHash<QString, QLabel *> m_validators;
