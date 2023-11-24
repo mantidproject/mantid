@@ -37,11 +37,10 @@ public:
   std::string getDataName() const override;
   void plotRqwContour(Mantid::API::MatrixWorkspace_sptr rqwWorkspace) override;
   void setDefaultQAndEnergy() override;
-  void setSaveEnabled(bool const enabled) override;
   bool validate() override;
   void showMessageBox(std::string const &message) const override;
-  void updateRunButton(bool const enabled, std::string const &enableOutputButtons = "unchanged",
-                       std::string const &message = "Run", std::string const &tooltip = "") override;
+  void setRunButtonText(std::string const &runText) override;
+  void setEnableOutputOptions(bool const enable) override;
 
 private slots:
   void notifyDataReady(QString const &dataName);
@@ -59,7 +58,6 @@ private:
   void setQRange(std::tuple<double, double> const &axisRange);
   void setEnergyRange(std::tuple<double, double> const &axisRange);
 
-  void setRunEnabled(bool const enabled);
   Ui::InelasticDataManipulationSqwTab m_uiForm;
 
   /// Tree of the properties

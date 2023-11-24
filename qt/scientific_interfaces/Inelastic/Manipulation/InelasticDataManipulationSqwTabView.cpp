@@ -109,18 +109,15 @@ void InelasticDataManipulationSqwTabView::notifyRunClicked() { m_presenter->hand
 
 void InelasticDataManipulationSqwTabView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
 
-void InelasticDataManipulationSqwTabView::updateRunButton(bool enabled, std::string const &enableOutputButtons,
-                                                          std::string const &message, std::string const &tooltip) {
-  setRunEnabled(enabled);
-  m_uiForm.pbRun->setText(QString::fromStdString(message));
-  m_uiForm.pbRun->setToolTip(QString::fromStdString(tooltip));
-  if (enableOutputButtons != "unchanged")
-    setSaveEnabled(enableOutputButtons == "enable");
+void InelasticDataManipulationSqwTabView::setRunButtonText(std::string const &runText) {
+  m_uiForm.pbRun->setText(QString::fromStdString(runText));
+  m_uiForm.pbRun->setEnabled(runText == "Run");
 }
 
-void InelasticDataManipulationSqwTabView::setRunEnabled(bool const enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
-void InelasticDataManipulationSqwTabView::setSaveEnabled(bool const enabled) { m_uiForm.pbSave->setEnabled(enabled); }
+void InelasticDataManipulationSqwTabView::setEnableOutputOptions(bool const enable) {
+  m_uiForm.ipoPlotOptions->setEnabled(enable);
+  m_uiForm.pbSave->setEnabled(enable);
+}
 
 void InelasticDataManipulationSqwTabView::plotRqwContour(MatrixWorkspace_sptr rqwWorkspace) {
   m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);

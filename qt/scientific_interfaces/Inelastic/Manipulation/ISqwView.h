@@ -34,11 +34,10 @@ public:
   virtual std::string getDataName() const = 0;
   virtual void plotRqwContour(Mantid::API::MatrixWorkspace_sptr rqwWorkspace) = 0;
   virtual void setDefaultQAndEnergy() = 0;
-  virtual void setSaveEnabled(bool const enabled) = 0;
   virtual bool validate() = 0;
   virtual void showMessageBox(std::string const &message) const = 0;
-  virtual void updateRunButton(bool const enabled, std::string const &enableOutputButtons = "unchanged",
-                               std::string const &message = "Run", std::string const &tooltip = "") = 0;
+  virtual void setRunButtonText(std::string const &runText) = 0;
+  virtual void setEnableOutputOptions(bool const enable) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
