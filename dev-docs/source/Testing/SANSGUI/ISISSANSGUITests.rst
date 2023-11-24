@@ -116,7 +116,7 @@ Processing
 #. In the workspaces list, there should be a series of new workspaces; four
    group workspaces and four 1D workspaces.
 #. Check your default save directory. For each reduction two banks (HAB/main) should
-   be saved. In total there should be 8 workspaces (4 .xml and 4 .nxs) saved.
+   be saved. In total there should be 8 workspaces (4 CanSAS ``.xml`` and 4 NXcanSAS ``.h5``) saved.
 #. Double-click the 1D workspaces and you should get a single line plot.
 #. Clear the newly created files and workspaces to make the next test easier
 #. Change the contents of the first cell in the first row to ``74045`` and click
