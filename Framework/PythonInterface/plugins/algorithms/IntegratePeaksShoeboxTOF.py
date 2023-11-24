@@ -12,6 +12,7 @@ from mantid.api import (
     WorkspaceUnitValidator,
     FileProperty,
     FileAction,
+    Progress,
 )
 from mantid.kernel import (
     Direction,
@@ -329,7 +330,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         weak_peaks_list = []
         ipks_strong = []
         results = np.full(peaks.getNumberPeaks(), None)
+        prog_reporter = Progress(self, start=0.0, end=1.0, nreports=peaks.getNumberPeaks())
         for ipk, peak in enumerate(peaks):
+            prog_reporter.report("Integrating")
             status = PEAK_STATUS.NO_PEAK
             intens, sigma = 0.0, 0.0
 
@@ -463,7 +466,8 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
 
         # plot output
         if output_file:
-            plot_integration_reuslts(output_file, results)
+            prog_reporter.resetNumSteps(int(len(results) - np.sum(results is None)), start=0.0, end=1.0)
+            plot_integration_reuslts(output_file, results, prog_reporter)
 
         # assign output
         self.setProperty("OutputWorkspace", peaks)
@@ -486,7 +490,7 @@ def round_up_to_odd_number(number):
     return number
 
 
-def plot_integration_reuslts(output_file, results):
+def plot_integration_reuslts(output_file, results, prog_reporter):
     # import inside this function as not allowed to import at point algorithms are registered
     from matplotlib.pyplot import subplots, close
     from matplotlib.patches import Rectangle
@@ -497,6 +501,7 @@ def plot_integration_reuslts(output_file, results):
         with PdfPages(output_file) as pdf:
             for result in results:
                 if result:
+                    prog_reporter.report("Plotting")
                     fig, axes = subplots(1, 3, figsize=(12, 5), subplot_kw={"projection": "mantid"})
                     fig.subplots_adjust(wspace=0.3)  # ensure plenty space between subplots (want to avoid slow tight_layout)
                     result.plot_integrated_peak(fig, axes, LogNorm, Rectangle)
