@@ -80,7 +80,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         self._add_lines_to_script(self._get_sample_data_lines())
         self._add_lines_to_script(self._get_standard_data_lines())
         self._add_lines_to_script(self._get_param_lines(options))
-        self._add_lines_to_script(self._get_binning_lines())
+        self._add_lines_to_script(self._get_binning_lines(options))
         self._add_lines_to_script(self._get_load_data_lines())
         self._add_lines_to_script(self._get_bg_corr_lines())
         self._add_lines_to_script(self._get_vanac_lines())
@@ -137,27 +137,27 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         return ['']
 
     def _get_param_lines(self, options):
-
-        return ["", f"params = {{'a' : {options['a']}, "
-                    f"\n          'b' : {options['b']},"
-                    f"\n          'c' : {options['c']},"
-                    f"\n          'alpha' : {options['alpha']},"
-                    f"\n          'beta'  : {options['beta']},"
-                    f"\n          'gamma' : {options['gamma']},"
-                    f"\n          'hkl1'  : '{options['hkl1']}',"
-                    f"\n          'hkl2'  : '{options['hkl2']}',"
-                    f"\n          'omega_offset' : {options['omega_offset']},"
-                    f"\n          'norm_to' : '{self._norm}',"
-                    f"\n          'dx' : '{options['dx']:7.4f}',"
-                    f"\n          'dy' : '{options['dx']:7.4f}',"
+        return ["", f"params = {{'a': {options['a']}, "
+                    f"\n          'b': {options['b']},"
+                    f"\n          'c': {options['c']},"
+                    f"\n          'alpha': {options['alpha']},"
+                    f"\n          'beta': {options['beta']},"
+                    f"\n          'gamma': {options['gamma']},"
+                    f"\n          'hkl1': '{options['hkl1']}',"
+                    f"\n          'hkl2': '{options['hkl2']}',"
+                    f"\n          'omega_offset': {options['omega_offset']},"
+                    f"\n          'norm_to': '{self._norm}',"
+                    f"\n          'dx': '{options['dx']}',"
+                    f"\n          'dy': '{options['dx']}',"
                     "}", ""]
 
-    def _get_binning_lines(self):
+    def _get_binning_lines(self, options):
+        bin_edge_min = options['two_theta_min'] - options['two_theta_bin_size'] / 2
+        bin_edge_max = options['two_theta_max'] + options['two_theta_bin_size'] / 2
+        num_bins = int(round((bin_edge_max - bin_edge_min) / options['two_theta_bin_size']))
+        binning = [bin_edge_min, bin_edge_max, num_bins]
         lines = [
-            f"binning = {{'twoTheta' : ["
-            f"{self._sample_data.ttheta.bin_edge_min:.3f},"
-            f" {self._sample_data.ttheta.bin_edge_max:.3f},"
-            f" {self._sample_data.ttheta.nbins:d}],\n"
+            f"binning = {{'twoTheta': {binning},\n"
             f"           'Omega':  ["
             f"{self._sample_data.omega.bin_edge_min:.3f},"
             f" {self._sample_data.omega.bin_edge_max:.3f},"
@@ -193,7 +193,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _return_sample_vanac_strinf(self):
         return f"{self._spacing}vanadium_correction(workspace, " \
-               " vanaset=standard_data['vana'], " \
+               " vana_set=standard_data['vana'], " \
                f"ignore_vana_fields={self._ignore_vana}, " \
                f"sum_vana_sf_nsf={self._sum_sf_nsf})"
 
