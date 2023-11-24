@@ -4,8 +4,9 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-Common Presenter for DNS Script generators
+DNS script generator model for elastic single crystal data.
 """
 
 from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset import \
@@ -22,28 +23,25 @@ from mantid.simpleapi import mtd
 
 class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
     # pylint: disable=too-many-instance-attributes
-    # having the options as instance attribues, is much better readable
+    # having the options as instance attributes, is much better readable
     # none of them are public
-    """
-    Common Model for DNS Script generators
-    """
 
     def __init__(self, parent):
         super().__init__(parent)
         self._data_arrays = {}
         self._script = []
-        self._plotlist = []
+        self._plot_list = []
         self._sample_data = None
         self._standard_data = None
         self._loop = None
-        self._spac = None
-        self._vanac = None
-        self._nicrc = None
-        self._sampb = None
-        self._backfac = None
-        self._ign_vana = None
-        self._sum_sfnsf = None
-        self._nonmag = None
+        self._spacing = None
+        self._vana_correction = None
+        self._nicr_correction = None
+        self._sample_background_correction = None
+        self._background_factor = None
+        self._ignore_vana = None
+        self._sum_sf_nsf = None
+        self._non_magnetic = None
         self._xyz = None
         self._corrections = None
         self._export_path = None
@@ -53,22 +51,23 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def script_maker(self, options, paths, file_selector=None):
         self._script = []
-        # shortcuts for options
-        self._vanac = options['corrections'] and options['det_efficiency']
-        self._nicrc = options['corrections'] and options['flipping_ratio']
-        self._sampb = (options['corrections']
-                       and options['subtract_background_from_sample'])
-        self._backfac = options['background_factor']
-        self._ign_vana = str(options['ignore_vana_fields'])
-        self._sum_sfnsf = str(options['sum_vana_sf_nsf'])
-        self._xyz = options["separation"] and options['separation_xyz']
-        self._nonmag = options["separation"] and options['separation_coh_inc']
 
-        self._corrections = (self._sampb or self._vanac or self._nicrc)
-        self._export_path = paths["export_dir"]
-        self._ascii = (paths["ascii"] and paths["export"]
+        # shortcuts for options
+        self._vana_correction = options['corrections'] and options['det_efficiency']
+        self._nicr_correction = options['corrections'] and options['flipping_ratio']
+        self._sample_background_correction = (options['corrections']
+                                              and options['subtract_background_from_sample'])
+        self._background_factor = options['background_factor']
+        self._ignore_vana = str(options['ignore_vana_fields'])
+        self._sum_sf_nsf = str(options['sum_vana_sf_nsf'])
+        self._non_magnetic = options['separation'] and options['separation_coh_inc']
+        self._xyz = options['separation'] and options['separation_xyz']
+        self._corrections = (self._sample_background_correction or self._vana_correction
+                             or self._nicr_correction)
+        self._export_path = paths['export_dir']
+        self._ascii = (paths['ascii'] and paths['export']
                        and bool(self._export_path))
-        self._nexus = (paths["nexus"] and paths["export"]
+        self._nexus = (paths['nexus'] and paths['export']
                        and bool(self._export_path))
         self._norm = get_normalisation(options)
 
@@ -88,28 +87,28 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         self._add_lines_to_script(self._get_nicrc_lines())
         return self._script, ''
 
-    def _setup_sample_data(self, paths, f_selector):
-        self._sample_data = DNSElasticDataset(data=f_selector['full_data'],
+    def _setup_sample_data(self, paths, file_selector):
+        self._sample_data = DNSElasticDataset(data=file_selector['full_data'],
                                               path=paths['data_dir'],
                                               is_sample=True)
-        self._plotlist = self._sample_data.create_subtract()
+        self._plot_list = self._sample_data.create_subtract()
 
-    def _setup_standard_data(self, paths, f_selector):
+    def _setup_standard_data(self, paths, file_selector):
         if self._corrections:
-            self._standard_data = DNSElasticDataset(data=f_selector['standard_data'],
+            self._standard_data = DNSElasticDataset(data=file_selector['standard_data_tree_model'],
                                                     path=paths['standards_dir'],
                                                     is_sample=False,
-                                                    fields=self._sample_data.fields)
+                                                    banks=self._sample_data['banks'])
 
     def _set_loop(self):
         if len(self._sample_data.keys()) == 1:
             self._loop = "for workspace in wss_sample" \
                          f"['{list(self._sample_data.keys())[0]}']:"
-            self._spac = "\n" + " " * 4
+            self._spacing = "\n" + " " * 4
         else:
             self._loop = "for sample, workspacelist in wss_sample.items(): " \
                          "\n    for workspace in workspacelist:"
-            self._spac = "\n" + " " * 8
+            self._spacing = "\n" + " " * 8
 
     @staticmethod
     def _get_header_lines():
@@ -179,7 +178,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _get_bg_corr_lines(self):
         lines = []
-        if self._vanac or self._nicrc:
+        if self._vana_correction or self._nicr_correction:
             lines = [
                 "# subtract background from vanadium and nicr",
                 "for sample, workspacelist in wss_standard.items(): "
@@ -189,37 +188,37 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         return lines
 
     def _return_sample_bg_string(self):
-        return f"{self._spac}background_subtraction(workspace, " \
-               f"factor={self._backfac})"
+        return f"{self._spacing}background_subtraction(workspace, " \
+               f"factor={self._background_factor})"
 
     def _return_sample_vanac_strinf(self):
-        return f"{self._spac}vanadium_correction(workspace, " \
+        return f"{self._spacing}vanadium_correction(workspace, " \
                " vanaset=standard_data['vana'], " \
-               f"ignore_vana_fields={self._ign_vana}, " \
-               f"sum_vana_sf_nsf={self._sum_sfnsf})"
+               f"ignore_vana_fields={self._ignore_vana}, " \
+               f"sum_vana_sf_nsf={self._sum_sf_nsf})"
 
     def _get_vanac_lines(self):
         backgroundstring = self._return_sample_bg_string()
         vanacstring = self._return_sample_vanac_strinf()
         lines = []
-        if self._sampb or self._vanac:
+        if self._sample_background_correction or self._vana_correction:
             lines = ["# correct sample data",
                      f"{self._loop}{backgroundstring}{vanacstring}"]
         return lines
 
     def _get_nicrc_lines(self):
         lines = []
-        if self._nicrc:
-            lines = [f"{self._loop}{self._spac}"
+        if self._nicr_correction:
+            lines = [f"{self._loop}{self._spacing}"
                      "flipping_ratio_correction(workspace)"]
         return lines
 
     def get_plotlist(self):
-        for plot in self._plotlist:
+        for plot in self._plot_list:
             self._data_arrays[plot] = {
                 'ttheta': self._sample_data.ttheta.range,
                 'omega': self._sample_data.omega.range,
                 'intensity': mtd[plot].getSignalArray(),
                 'error': np.sqrt(mtd[plot].getErrorSquaredArray())
             }
-        return self._plotlist, self._data_arrays
+        return self._plot_list, self._data_arrays
