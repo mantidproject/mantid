@@ -58,15 +58,11 @@ class ShoeboxResult:
         self.ipos_pk = list(ipk_pos)
         self.labels = ["Row", "Col", "TOF"]
         self.ysum = []
-        self.extents = []
+        self.xmin, self.xmax = np.round(x[0], 1), np.round(x[-1], 1)
         self.status = status
         # integrate y over each dim
         for idim in range(len(peak_shape)):
             self.ysum.append(y.sum(axis=idim))
-            if idim < 2:
-                self.extents.append([0, y.shape[idim]])
-            else:
-                self.extents.append([x[0], x[-1]])
         # extract peak properties
         intens_over_sig = np.round(intens_over_sig, 1)
         hkl = np.round(pk.getHKL(), 2)
@@ -86,11 +82,7 @@ class ShoeboxResult:
 
     def plot_integrated_peak(self, fig, axes, norm_func, rect_func):
         for iax, ax in enumerate(axes):
-            extents = self.extents.copy()
-            extents.pop(iax)
-            im = ax.imshow(
-                self.ysum[iax], aspect=self.ysum[iax].shape[1] / self.ysum[iax].shape[0]
-            )  # , extent=np.flip(extents, axis=0).flatten())
+            im = ax.imshow(self.ysum[iax], aspect=self.ysum[iax].shape[1] / self.ysum[iax].shape[0])
             im.set_norm(norm_func())
             # plot shoebox
             if self.ipos is not None:
@@ -104,6 +96,14 @@ class ShoeboxResult:
             labels.pop(iax)
             ax.set_xlabel(labels[1])
             ax.set_ylabel(labels[0])
+        # overwrite axes tick labels for TOF axes
+        nticks = 4
+        xticklabels = nticks * [""]
+        xticklabels[0] = str(self.xmin)
+        xticklabels[-1] = str(self.xmax)
+        for ax in axes[:-1]:
+            ax.set_xticks(np.linspace(*ax.get_xlim(), nticks))
+            ax.set_xticklabels(xticklabels)
         # set title
         fig.suptitle(self.title)
 
