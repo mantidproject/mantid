@@ -59,7 +59,7 @@ void InelasticDataManipulationSqwTab::handleDataReady(std::string const &dataNam
       double eFixed = getEFixed(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName));
       m_model->setEFixed(eFixed);
     } catch (std::runtime_error const &ex) {
-      emit showMessageBox(ex.what());
+      m_view->showMessageBox(ex.what());
       return;
     }
     plotRqwContour();
@@ -72,7 +72,7 @@ bool InelasticDataManipulationSqwTab::validate() {
   auto const errorMessage = uiv.generateErrorMessage();
   // Show an error message if needed
   if (!errorMessage.isEmpty())
-    emit showMessageBox(errorMessage);
+    m_view->showMessageBox(errorMessage.toStdString());
   return errorMessage.isEmpty();
 }
 
@@ -108,7 +108,7 @@ void InelasticDataManipulationSqwTab::plotRqwContour() {
       m_view->plotRqwContour(rqwWorkspace);
   } catch (std::exception const &ex) {
     g_log.warning(ex.what());
-    showMessageBox("Invalid file. Please load a valid reduced workspace.");
+    m_view->showMessageBox("Invalid file. Please load a valid reduced workspace.");
   }
 }
 

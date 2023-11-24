@@ -79,7 +79,7 @@ bool InelasticDataManipulationSqwTabView::validate() {
 
   auto const errorMessage = uiv.generateErrorMessage();
   if (!errorMessage.isEmpty())
-    showMessageBox(errorMessage);
+    showMessageBox(errorMessage.toStdString());
   return errorMessage.isEmpty();
 }
 
@@ -145,6 +145,10 @@ std::tuple<double, double> InelasticDataManipulationSqwTabView::getQRangeFromPlo
 
 std::tuple<double, double> InelasticDataManipulationSqwTabView::getERangeFromPlot() {
   return m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom);
+}
+
+void InelasticDataManipulationSqwTabView::showMessageBox(const std::string &message) const {
+  QMessageBox::information(parentWidget(), this->windowTitle(), QString::fromStdString(message));
 }
 
 } // namespace MantidQt::CustomInterfaces

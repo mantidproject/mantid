@@ -39,10 +39,10 @@ public:
   void setDefaultQAndEnergy() override;
   void setSaveEnabled(bool enabled) override;
   bool validate() override;
+  void showMessageBox(const std::string &message) const override;
 
 signals:
   void valueChanged(QtProperty *, double);
-  void showMessageBox(const QString &message);
 
 public slots:
   void updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
