@@ -77,8 +77,9 @@ User files
 #. Change some values on the ``Beam Centre`` tab. Re-load the user file. The inputs in the ``Centre Position``
    section should revert to their original values, apart from the ``Detector`` combobox.
    The inputs in the ``Options`` section (such as the radius limits) should not revert.
-#. Ensure that you can load the old style ``MaskFile.txt`` user file from the
-   sample data.
+#. Ensure that you can load the old style ``MaskFile.txt`` user file from the sample data. Note: In order to see this
+   file, you may need to change the settings in the file browser window to look for ``.txt`` files instead of ``.TOML``
+   files.
 #. In the table on the ``Runs`` tab, under the ``User File`` column, enter
    ``MaskFile.toml`` in one row and ``MaskFile.txt`` in the other row. Click
    ``Process All``. After some seconds, the rows should turn green to indicate
