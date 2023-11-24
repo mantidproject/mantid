@@ -449,18 +449,10 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 if output_file:
                     # save result for plotting
                     i_over_sig = intens / sigma if sigma > 0 else 0.0
+                    peak_shape = [nrows, ncols, nbins]
+                    ipos_predicted = [peak_data.irow, peak_data.icol, np.argmin(abs(x - pk_tof))]
                     results[ipk] = ShoeboxResult(
-                        ipk,
-                        peak,
-                        x,
-                        y,
-                        [nrows, ncols, nbins],
-                        ipos,
-                        [peak_data.irow, peak_data.icol, np.argmin(abs(x - pk_tof))],
-                        i_over_sig,
-                        status,
-                        strong_peak=strong_pk,
-                        ipk_strong=ipk_strong,
+                        ipk, peak, x, y, peak_shape, ipos, ipos_predicted, i_over_sig, status, strong_peak=strong_pk, ipk_strong=ipk_strong
                     )
         elif weak_peak_strategy == "NearestStrongPeak":
             raise ValueError(
@@ -539,10 +531,10 @@ def get_and_clip_data_arrays(ws, peak_data, pk_tof, ispec, kernel, nshoebox):
     return x, y, esq, ispecs
 
 
-def convolve_shoebox(y, esq, kernel, mode="same", do_smooth=True):
+def convolve_shoebox(y, esq, kernel, mode="same"):
     yconv = convolve(y, kernel, mode=mode)
-    econv = np.sqrt(convolve(esq, kernel**2, mode=mode))
     with np.errstate(divide="ignore", invalid="ignore"):
+        econv = np.sqrt(convolve(esq, kernel**2, mode=mode))
         intens_over_sig = yconv / econv
     intens_over_sig[~np.isfinite(intens_over_sig)] = 0
     intens_over_sig = uniform_filter(intens_over_sig, size=len(y.shape))
