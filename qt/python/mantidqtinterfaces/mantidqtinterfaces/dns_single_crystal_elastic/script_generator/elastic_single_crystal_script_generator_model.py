@@ -89,8 +89,8 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
             self._add_lines_to_script(self._get_param_lines(options))
             self._add_lines_to_script(self._get_binning_lines(options))
             self._add_lines_to_script(self._get_load_data_lines())
-            self._add_lines_to_script(self._get_bg_corr_lines())
-            self._add_lines_to_script(self._get_vanac_lines())
+            self._add_lines_to_script(self._get_background_correction_lines())
+            self._add_lines_to_script(self._get_vana_correction_lines())
             self._add_lines_to_script(self._get_nicrc_lines())
         return self._script, error_message
 
@@ -183,7 +183,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         lines += ['']
         return lines
 
-    def _get_bg_corr_lines(self):
+    def _get_background_correction_lines(self):
         lines = []
         if self._vana_correction or self._nicr_correction:
             lines = [
@@ -194,23 +194,23 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
             ]
         return lines
 
-    def _return_sample_bg_string(self):
+    def _return_sample_background_string(self):
         return f"{self._spacing}background_subtraction(workspace, " \
                f"factor={self._background_factor})"
 
-    def _return_sample_vanac_strinf(self):
+    def _return_sample_vana_correction_string(self):
         return f"{self._spacing}vanadium_correction(workspace, " \
                " vana_set=standard_data['vana'], " \
                f"ignore_vana_fields={self._ignore_vana}, " \
                f"sum_vana_sf_nsf={self._sum_sf_nsf})"
 
-    def _get_vanac_lines(self):
-        backgroundstring = self._return_sample_bg_string()
-        vanacstring = self._return_sample_vanac_strinf()
+    def _get_vana_correction_lines(self):
+        background_string = self._return_sample_background_string()
+        vana_correction_string = self._return_sample_vana_correction_string()
         lines = []
         if self._sample_background_correction or self._vana_correction:
             lines = ["# correct sample data",
-                     f"{self._loop}{backgroundstring}{vanacstring}"]
+                     f"{self._loop}{background_string}{vana_correction_string}"]
         return lines
 
     def _get_nicrc_lines(self):
@@ -220,7 +220,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
                      "flipping_ratio_correction(workspace)"]
         return lines
 
-    def get_plotlist(self):
+    def get_plot_list(self):
         for plot in self._plot_list:
             self._data_arrays[plot] = {
                 'ttheta': self._sample_data.ttheta.range,
