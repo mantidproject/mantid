@@ -29,22 +29,19 @@ public:
 
   void subscribePresenter(ISqwPresenter *presenter) override;
 
-  IndirectPlotOptionsView *getPlotOptions() override;
-  void setFBSuffixes(QStringList suffix) override;
-  void setWSSuffixes(QStringList suffix) override;
-  std::tuple<double, double> getQRangeFromPlot() override;
-  std::tuple<double, double> getERangeFromPlot() override;
-  std::string getDataName() override;
+  IndirectPlotOptionsView *getPlotOptions() const override;
+  void setFBSuffixes(QStringList const &suffix) override;
+  void setWSSuffixes(QStringList const &suffix) override;
+  std::tuple<double, double> getQRangeFromPlot() const override;
+  std::tuple<double, double> getERangeFromPlot() const override;
+  std::string getDataName() const override;
   void plotRqwContour(Mantid::API::MatrixWorkspace_sptr rqwWorkspace) override;
   void setDefaultQAndEnergy() override;
-  void setSaveEnabled(bool enabled) override;
+  void setSaveEnabled(bool const enabled) override;
   bool validate() override;
-  void showMessageBox(const std::string &message) const override;
+  void showMessageBox(std::string const &message) const override;
   void updateRunButton(bool const enabled, std::string const &enableOutputButtons = "unchanged",
                        std::string const &message = "Run", std::string const &tooltip = "") override;
-
-signals:
-  void valueChanged(QtProperty *, double);
 
 private slots:
   void notifyDataReady(QString const &dataName);
@@ -62,7 +59,7 @@ private:
   void setQRange(std::tuple<double, double> const &axisRange);
   void setEnergyRange(std::tuple<double, double> const &axisRange);
 
-  void setRunEnabled(bool enabled);
+  void setRunEnabled(bool const enabled);
   Ui::InelasticDataManipulationSqwTab m_uiForm;
 
   /// Tree of the properties

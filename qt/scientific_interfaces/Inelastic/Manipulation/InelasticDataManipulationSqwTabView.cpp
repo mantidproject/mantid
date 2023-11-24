@@ -63,15 +63,19 @@ InelasticDataManipulationSqwTabView::~InelasticDataManipulationSqwTabView() {}
 
 void InelasticDataManipulationSqwTabView::subscribePresenter(ISqwPresenter *presenter) { m_presenter = presenter; }
 
-IndirectPlotOptionsView *InelasticDataManipulationSqwTabView::getPlotOptions() { return m_uiForm.ipoPlotOptions; }
+IndirectPlotOptionsView *InelasticDataManipulationSqwTabView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 
-std::string InelasticDataManipulationSqwTabView::getDataName() {
+std::string InelasticDataManipulationSqwTabView::getDataName() const {
   return m_uiForm.dsInput->getCurrentDataName().toStdString();
 }
 
-void InelasticDataManipulationSqwTabView::setFBSuffixes(QStringList suffix) { m_uiForm.dsInput->setFBSuffixes(suffix); }
+void InelasticDataManipulationSqwTabView::setFBSuffixes(QStringList const &suffix) {
+  m_uiForm.dsInput->setFBSuffixes(suffix);
+}
 
-void InelasticDataManipulationSqwTabView::setWSSuffixes(QStringList suffix) { m_uiForm.dsInput->setWSSuffixes(suffix); }
+void InelasticDataManipulationSqwTabView::setWSSuffixes(QStringList const &suffix) {
+  m_uiForm.dsInput->setWSSuffixes(suffix);
+}
 
 bool InelasticDataManipulationSqwTabView::validate() {
   UserInputValidator uiv;
@@ -114,9 +118,9 @@ void InelasticDataManipulationSqwTabView::updateRunButton(bool enabled, std::str
     setSaveEnabled(enableOutputButtons == "enable");
 }
 
-void InelasticDataManipulationSqwTabView::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void InelasticDataManipulationSqwTabView::setRunEnabled(bool const enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void InelasticDataManipulationSqwTabView::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
+void InelasticDataManipulationSqwTabView::setSaveEnabled(bool const enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void InelasticDataManipulationSqwTabView::plotRqwContour(MatrixWorkspace_sptr rqwWorkspace) {
   m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
@@ -139,15 +143,15 @@ void InelasticDataManipulationSqwTabView::setEnergyRange(std::tuple<double, doub
   m_uiForm.spEHigh->setValue(energyRange.second);
 }
 
-std::tuple<double, double> InelasticDataManipulationSqwTabView::getQRangeFromPlot() {
+std::tuple<double, double> InelasticDataManipulationSqwTabView::getQRangeFromPlot() const {
   return m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::YLeft);
 }
 
-std::tuple<double, double> InelasticDataManipulationSqwTabView::getERangeFromPlot() {
+std::tuple<double, double> InelasticDataManipulationSqwTabView::getERangeFromPlot() const {
   return m_uiForm.rqwPlot2D->getAxisRange(MantidWidgets::AxisID::XBottom);
 }
 
-void InelasticDataManipulationSqwTabView::showMessageBox(const std::string &message) const {
+void InelasticDataManipulationSqwTabView::showMessageBox(std::string const &message) const {
   QMessageBox::information(parentWidget(), this->windowTitle(), QString::fromStdString(message));
 }
 
