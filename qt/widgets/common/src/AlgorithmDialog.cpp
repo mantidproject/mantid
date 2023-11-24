@@ -50,7 +50,7 @@ AlgorithmDialog::AlgorithmDialog(QWidget *parent)
       m_forScript(false), m_python_arguments(), m_enabled(), m_disabled(), m_strMessage(""), m_keepOpen(false),
       m_msgAvailable(false), m_isInitialized(false), m_autoParseOnInit(true), m_validators(), m_noValidation(),
       m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker(), m_keepOpenCheckBox(nullptr), m_okButton(nullptr),
-      m_exitButton(nullptr), m_observers(), m_btnTimer(), m_statusTracked(false), m_finishObserved(false) {
+      m_exitButton(nullptr), m_observers(), m_btnTimer(), m_statusTracked(false) {
   m_btnTimer.setSingleShot(true);
 }
 
@@ -738,7 +738,7 @@ void AlgorithmDialog::executeAlgorithmAsync() {
     }
 
     // Only need to observe finish events if we are staying open
-    if (m_finishObserved || (m_keepOpenCheckBox && m_keepOpenCheckBox->isChecked())) {
+    if (m_keepOpenCheckBox && m_keepOpenCheckBox->isChecked()) {
       this->observeFinish(algToExec);
       this->observeError(algToExec);
       m_statusTracked = true;
@@ -1072,4 +1072,3 @@ void AlgorithmDialog::algorithmCompleted() {
  * Prevent dialog from being attached multiple times.
  *
  */
-void AlgorithmDialog::setObserveFinish(const bool on) { m_finishObserved = on; }

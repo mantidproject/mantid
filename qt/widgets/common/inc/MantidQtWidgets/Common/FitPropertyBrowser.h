@@ -8,6 +8,7 @@
 
 #include "DllOption.h"
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
 
 #include <QDockWidget>
@@ -49,6 +50,7 @@ class QPushButton;
 class QSignalMapper;
 class QTreeWidget;
 class QVBoxLayout;
+class QObject;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -701,6 +703,19 @@ private:
   friend class SetAttribute;
   friend class SetAttributeProperty;
   friend class SequentialFitDialog;
+};
+
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmFinishObserver : public QObject, public Mantid::API::AlgorithmObserver {
+  Q_OBJECT
+signals:
+  /// Emitted when alg completes
+  void algCompletedSignal();
+
+protected:
+  void finishHandle(const Mantid::API::IAlgorithm *alg) override {
+    UNUSED_ARG(alg);
+    emit algCompletedSignal();
+  }
 };
 
 } // namespace MantidWidgets

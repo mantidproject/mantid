@@ -2821,12 +2821,13 @@ void FitPropertyBrowser::findPeaksConvolve() {
                                                enabledParams, disabledParams);
   dlg->setShowKeepOpen(false);
   dlg->disableExitButton();
-  dlg->setObserveFinish(true);
+  AlgorithmFinishObserver obs;
+  dlg->addAlgorithmObserver(&obs);
 
   try {
     dlg->show();
     QEventLoop loop;
-    connect(dlg, SIGNAL(algCompletedSignal()), &loop, SLOT(quit()));
+    connect(&obs, SIGNAL(algCompletedSignal()), &loop, SLOT(quit()));
     loop.exec();
 
     Mantid::API::WorkspaceGroup_sptr groupWs = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
