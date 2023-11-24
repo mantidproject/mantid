@@ -462,7 +462,8 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             )
 
         # plot output
-        plot_integration_reuslts(output_file, results)
+        if output_file:
+            plot_integration_reuslts(output_file, results)
 
         # assign output
         self.setProperty("OutputWorkspace", peaks)
