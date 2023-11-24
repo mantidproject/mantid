@@ -36,6 +36,7 @@ public:
   virtual void setDefaultQAndEnergy() = 0;
   virtual void setSaveEnabled(bool enabled) = 0;
   virtual bool validate() = 0;
+  virtual void showMessageBox(const std::string &message) const = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

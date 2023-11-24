@@ -60,7 +60,6 @@ set(SRC_FILES
     Manipulation/InelasticDataManipulationSymmetriseTab.cpp
     Manipulation/InelasticDataManipulationSymmetriseTabView.cpp
     Manipulation/InelasticDataManipulationSymmetriseTabModel.cpp
-    Manipulation/SqwView.cpp
 )
 
 set(MOC_FILES
@@ -108,7 +107,6 @@ set(MOC_FILES
     Manipulation/InelasticDataManipulationSymmetriseTab.h
     Manipulation/InelasticDataManipulationSymmetriseTabView.h
     Manipulation/InelasticDataManipulationTab.h
-    Manipulation/SqwView.h
 )
 
 set(INC_FILES
