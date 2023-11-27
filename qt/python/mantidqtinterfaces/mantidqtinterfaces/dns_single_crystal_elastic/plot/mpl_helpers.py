@@ -15,9 +15,9 @@ def get_log_norm(log, zlim):
     return colors.Normalize(vmin=zlim[0], vmax=zlim[1])
 
 
-def get_cmap(colormapname):
-    return cm.get_cmap(name=colormapname, lut=None)
+def get_cmap(colormap_name):
+    return cm.get_cmap(name=colormap_name, lut=None)
 
 
 def get_shading(axis_type):
-    return axis_type['shading']
+    return axis_type["shading"]

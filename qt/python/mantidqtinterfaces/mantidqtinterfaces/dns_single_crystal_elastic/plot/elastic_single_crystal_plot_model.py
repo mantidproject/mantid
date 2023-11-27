@@ -5,9 +5,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS elastic powder plot presenter
+DNS single crystal elastic plot tab model of DNS reduction GUI.
 """
+
 import numpy as np
 import mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_helpers as helper
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_obs_model import DNSObsModel
@@ -31,11 +33,11 @@ class DNSElasticSCPlotModel(DNSObsModel):
         self._data.x = None
         self._data.y = None
         self._data.z = None
-        self._data.zmin = None
-        self._data.zmax = None
-        self._data.pzmin = None
+        self._data.z_min = None
+        self._data.z_max = None
+        self._data.pz_min = None
         self._data.triang = None
-        self._data.ztriang = None
+        self._data.z_triang = None
 
     def create_single_crystal_map(self, data_array, options, initial_values=None):
         two_theta = data_array["two_theta_array"]
@@ -61,32 +63,32 @@ class DNSElasticSCPlotModel(DNSObsModel):
     def get_projections(self, xlim, ylim):
         limits = np.append(xlim, ylim)
         x, y, z = helper.filter_flattened_meshes(self._data.x, self._data.y, self._data.z, limits)
-        xprojection = helper.get_projection(x, z)
-        yprojection = helper.get_projection(y, z)
-        return xprojection, yprojection
+        x_projection = helper.get_projection(x, z)
+        y_projection = helper.get_projection(y, z)
+        return x_projection, y_projection
 
-    def get_interpolated_quadmesh(self, interpolate, axistype):
-        newmeshname = axistype + "_mesh_interpolated"
-        oldmeshname = axistype + "_mesh"
+    def get_interpolated_quadmesh(self, interpolate, axis_type):
+        new_mesh_name = axis_type + "_mesh_interpolated"
+        old_mesh_name = axis_type + "_mesh"
         if interpolate:
             self._single_crystal_map.interpolate_quad_mesh(interpolate)
-            x, y, z = getattr(self._single_crystal_map, newmeshname)
+            x, y, z = getattr(self._single_crystal_map, new_mesh_name)
         else:
-            x, y, z = getattr(self._single_crystal_map, oldmeshname)
+            x, y, z = getattr(self._single_crystal_map, old_mesh_name)
         self._data.x = x
         self._data.y = y
         self._data.z = z
         return x, y, z
 
-    def get_interpolated_triangulation(self, interpolate, axistype, switch):
-        meshname = axistype + "_mesh"
-        self._single_crystal_map.triangulate(mesh_name=meshname, switch=switch)
-        self._single_crystal_map.mask_triangles(mesh_name=meshname)
+    def get_interpolated_triangulation(self, interpolate, axis_type, switch):
+        mesh_name = axis_type + "_mesh"
+        self._single_crystal_map.triangulate(mesh_name=mesh_name, switch=switch)
+        self._single_crystal_map.mask_triangles(mesh_name=mesh_name)
         tri_refi, z_refi = self._single_crystal_map.interpolate_triangulation(interpolate)
         self._data.tiang = tri_refi
         self._data.ztiang = z_refi
         # this is important to get the limits
-        x, y, z = getattr(self._single_crystal_map, meshname)
+        x, y, z = getattr(self._single_crystal_map, mesh_name)
         self._data.x = x
         self._data.y = y
         self._data.z = z
@@ -127,19 +129,19 @@ class DNSElasticSCPlotModel(DNSObsModel):
         # from the view
         def format_coord(x, y):
             h, k, l, z, error = get_hkl_intensity_from_cursor(self._single_crystal_map, axis_type, x, y)
-            return f"x={x: 2.4f}, y={y: 2.4f}, hkl=({h: 2.2f}," f"{k: 2.2f},{l: 2.2f})," f" Intensity={z: 10.2f} ± {error:10.2f}"
+            return f"x = {x: 2.4f}, y = {y: 2.4f}, hkl = ({h: 2.2f}, {k: 2.2f}, {l: 2.2f}),\n Intensity = {z: 6.4f} ± {error:6.4f}"
 
         return format_coord
 
     @staticmethod
-    def get_mlimits(*args):
+    def get_m_limits(*args):
         return [helper.string_range_to_float(arg) for arg in args]
 
     @staticmethod
-    def get_mzlimit(arg):
+    def get_mz_limit(arg):
         return helper.string_range_to_float(arg)
 
-    def get_data_zmin_max(self, xlim=None, ylim=None):
+    def get_data_z_min_max(self, xlim=None, ylim=None):
         return helper.get_z_min_max(self._data.z, xlim, ylim, self._data.x, self._data.y)
 
     def get_data_xy_lim(self, switch):
@@ -157,7 +159,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
             return nx, ny, nz
         return x, y, z
 
-    def get_omegaoffset(self):
+    def get_omega_offset(self):
         return self._single_crystal_map["omega_offset"]
 
     def get_dx_dy(self):

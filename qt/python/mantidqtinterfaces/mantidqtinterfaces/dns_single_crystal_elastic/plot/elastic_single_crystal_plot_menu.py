@@ -5,6 +5,10 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+"""
+DNS single crystal elastic plot tab menu of DNS reduction GUI.
+"""
+
 import os
 
 from mantidqt import icons
@@ -42,7 +46,7 @@ class DNSElasticSCPlotOptionsMenu(QMenu):
         action_dx_dy = self.addAction("Change d-spacings")
 
         # connections
-        action_omega_offset.triggered.connect(parent.change_omegaoffset)
+        action_omega_offset.triggered.connect(parent.change_omega_offset)
         action_dx_dy.triggered.connect(parent.change_dxdy)
 
 

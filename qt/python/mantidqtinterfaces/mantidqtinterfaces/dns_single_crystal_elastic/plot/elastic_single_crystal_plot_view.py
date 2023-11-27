@@ -4,9 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-DNS Widget to plot elastic single_crystal data
+DNS single crystal elastic plot tab view of DNS reduction GUI.
 """
+
 from mantidqt.utils.qt import load_ui
 
 from matplotlib.backends.backend_qt5agg import FigureCanvas
@@ -56,9 +58,9 @@ class DNSElasticSCPlotView(DNSView):
             "save_data": _content.tB_save_data,
             "fontsize": _content.sB_fontsize,
         }
-        # Change Tool button Icons to mdi icons
+        # change tool button icons to mdi icons
         set_mdi_icons(self._map)
-        # Colormap Selector
+        # colormap selector
         set_up_colormap_selector(self._map)
 
         # datalist
@@ -67,21 +69,10 @@ class DNSElasticSCPlotView(DNSView):
         self._map["up"].clicked.connect(self.datalist.up)
         self.datalist.sig_datalist_changed.connect(self._something_changed)
 
-        # Connecting Signals
-        self._map["fontsize"].editingFinished.connect(self._change_fontsize)
-        self._map["grid"].clicked.connect(self._change_grid)
-        self._map["log_scale"].clicked.connect(self._change_log)
-        self._map["linestyle"].clicked.connect(self._change_linestyle)
-        self._map["projections"].clicked.connect(self._toggle_projections)
-        # self._map['save_data'].clicked.connect(self.save_data)
-        self._map["x_range"].returnPressed.connect(self._manual_lim_changed)
-        self._map["y_range"].returnPressed.connect(self._manual_lim_changed)
-        self._map["z_range"].returnPressed.connect(self._manual_lim_changed)
-        self._map["colormap"].currentIndexChanged.connect(self._change_colormap)
-        self._map["crystal_axes"].clicked.connect(self._change_crystal_axes)
-        self._map["invert_cb"].clicked.connect(self._change_colormap)
+        # connecting signals
+        self._attach_signal_slots()
 
-        # Setting up custom menu for sc plot options and views
+        # setting up custom menu for sc plot options and views
         self.views_menu = DNSElasticSCPlotViewMenu()
         options_menu = DNSElasticSCPlotOptionsMenu(self)
         self.menus = []
@@ -100,7 +91,7 @@ class DNSElasticSCPlotView(DNSView):
 
     # Signals
     sig_plot = Signal()
-    sig_update_omegaoffset = Signal(float)
+    sig_update_omega_offset = Signal(float)
     sig_update_dxdy = Signal(float, float)
     sig_calculate_projection = Signal(bool)
     sig_save_data = Signal()
@@ -161,10 +152,10 @@ class DNSElasticSCPlotView(DNSView):
             dxdy_dialog = DNSdxdyDialog(parent=self, dx=self.initial_values["dx"], dy=self.initial_values["dy"])
             dxdy_dialog.exec_()
 
-    def change_omegaoffset(self):
+    def change_omega_offset(self):
         if self.initial_values:
-            oo_dialog = DNSOmegaOffsetDialog(parent=self, omegaoffset=self.initial_values["oof"])
-            oo_dialog.exec_()
+            omega_offset_dialog = DNSOmegaOffsetDialog(parent=self, omega_offset=self.initial_values["oof"])
+            omega_offset_dialog.exec_()
 
     # gui options
     def create_subfigure(self, gridhelper=None):
@@ -174,10 +165,24 @@ class DNSElasticSCPlotView(DNSView):
         return self.views_menu.get_value()
 
     def connect_resize(self):
-        self.canvas.mpl_connect("resize_event", self.single_crystal_plot.onresize)
+        self.canvas.mpl_connect("resize_event", self.single_crystal_plot.on_resize)
 
-    def set_initial_oof_dxdy(self, off, dx, dy):
+    def set_initial_omega_offset_dx_dy(self, off, dx, dy):
         self.initial_values = {"oof": off, "dx": dx, "dy": dy}
 
     def draw(self):
         self.canvas.draw()
+
+    def _attach_signal_slots(self):
+        self._map["fontsize"].editingFinished.connect(self._change_fontsize)
+        self._map["grid"].clicked.connect(self._change_grid)
+        self._map["log_scale"].clicked.connect(self._change_log)
+        self._map["linestyle"].clicked.connect(self._change_linestyle)
+        self._map["projections"].clicked.connect(self._toggle_projections)
+        self._map["save_data"].clicked.connect(self._save_data)
+        self._map["x_range"].returnPressed.connect(self._manual_lim_changed)
+        self._map["y_range"].returnPressed.connect(self._manual_lim_changed)
+        self._map["z_range"].returnPressed.connect(self._manual_lim_changed)
+        self._map["colormap"].currentIndexChanged.connect(self._change_colormap)
+        self._map["crystal_axes"].clicked.connect(self._change_crystal_axes)
+        self._map["invert_cb"].clicked.connect(self._change_colormap)
