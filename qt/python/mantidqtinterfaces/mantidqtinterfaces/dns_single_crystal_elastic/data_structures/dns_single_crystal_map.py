@@ -53,7 +53,7 @@ def _get_unique(omega_mesh, two_theta_mesh):
 
 
 def _get_q_mesh(omega_mesh, two_theta_mesh, wavelength):
-    return angle_to_q(ttheta=two_theta_mesh,
+    return angle_to_q(two_theta=two_theta_mesh,
                       omega=omega_mesh,
                       wavelength=wavelength)
 

@@ -5,20 +5,21 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-Helper functions for DNS simulation calculations
+Helper functions for DNS single crystal calculations.
 """
 
 import numpy as np
 from numpy import cos, pi, radians, sin
 
 
-def get_hkl_float_array(hklstring):
-    return np.asarray([float(x) for x in hklstring.split(',')])
+def get_hkl_float_array(hkl_string):
+    return np.asarray([float(x) for x in hkl_string.split(',')])
 
 
-def angle_to_q(ttheta, omega, wavelength):  # should work with np arrays
-    tt = radians(ttheta)
+def angle_to_q(two_theta, omega, wavelength):  # should work with np arrays
+    tt = radians(two_theta)
     w = radians(omega)
     two_pi_over_lambda = 2.0 * pi / wavelength
     qx = (cos(-w) - cos(-w + tt)) * two_pi_over_lambda
@@ -26,38 +27,38 @@ def angle_to_q(ttheta, omega, wavelength):  # should work with np arrays
     return qx, qy
 
 
-def filter_flattend_meshs(x, y, z, limits):
+def filter_flattened_meshes(x, y, z, limits):
     if x is None:
         return [y, y, z]
-    minx, maxx, miny, maxy = limits
+    min_x, max_x, min_y, max_y = limits
     x = x.flatten()
     y = y.flatten()
     z = z.flatten()
-    filtered = np.logical_and(np.logical_and(minx < x, x < maxx),
-                              np.logical_and(miny < y, y < maxy))
+    filtered = np.logical_and(np.logical_and(min_x < x, x < max_x),
+                              np.logical_and(min_y < y, y < max_y))
     x = x[filtered]
     y = y[filtered]
     z = z[filtered]
     return [x, y, z]
 
 
-def get_z_min_max(z, xlim=None, ylim=None, plotx=None, ploty=None):
-    fz = z.flatten()
+def get_z_min_max(z, xlim=None, ylim=None, plot_x=None, plot_y=None):
+    flatten_z = z.flatten()
     if xlim is not None and ylim is not None:
-        fploty = ploty.flatten()
-        fplotx = plotx.flatten()
-        fz = fz[np.logical_and(
-            np.logical_and(xlim[1] > fplotx, xlim[0] < fplotx),
-            np.logical_and(ylim[1] > fploty, ylim[0] < fploty))]
-    if fz.size != 0:
-        zmax = fz.max()
-        zmin = fz.min()
-        pzmin = min(i for i in fz if i > 0)
+        flatten_plot_y = plot_y.flatten()
+        flatten_plot_x = plot_x.flatten()
+        flatten_z = flatten_z[np.logical_and(
+                np.logical_and(xlim[1] > flatten_plot_x, xlim[0] < flatten_plot_x),
+                np.logical_and(ylim[1] > flatten_plot_y, ylim[0] < flatten_plot_y))]
+    if flatten_z.size != 0:
+        z_max = flatten_z.max()
+        z_min = flatten_z.min()
+        pz_min = min(i for i in flatten_z if i > 0)
     else:
-        zmax = 0
-        zmin = 0
-        pzmin = 0
-    return zmin, zmax, pzmin
+        z_max = 0
+        z_min = 0
+        pz_min = 0
+    return z_min, z_max, pz_min
 
 
 def get_hkl_intensity_from_cursor(single_crystal_map, axis_type, x, y):
@@ -68,7 +69,7 @@ def get_hkl_intensity_from_cursor(single_crystal_map, axis_type, x, y):
     dx = single_crystal_map.dx
     dy = single_crystal_map.dy
     if axis_type['type'] == 'two_theta_and_omega':  # two_theta omega
-        qx, qy = angle_to_q(ttheta=x, omega=y, wavelength=single_crystal_map.wavelength)
+        qx, qy = angle_to_q(two_theta=x, omega=y, wavelength=single_crystal_map.wavelength)
         hklx = hkl_to_hklx(hkl1, qx, dx)
         hkly = hkl_to_hklx(hkl2, qy, dy)
         pos_q = closest_mesh_point(single_crystal_map.two_theta_mesh, single_crystal_map.omega_mesh, x, y)
@@ -78,8 +79,8 @@ def get_hkl_intensity_from_cursor(single_crystal_map, axis_type, x, y):
         hkly = hkl_to_hklx(hkl2, qy, dy)
         pos_q = closest_mesh_point(single_crystal_map.qx_mesh, single_crystal_map.qy_mesh, qx, qy)
     elif axis_type['type'] == 'hkl':  # hkl
-        qx = hklxy_to_q(x, dx)
-        qy = hklxy_to_q(y, dy)
+        qx = hkl_xy_to_q(x, dx)
+        qy = hkl_xy_to_q(y, dy)
         hklx = hkl_to_hklx(hkl1, x=x)
         hkly = hkl_to_hklx(hkl2, x=y)
         pos_q = closest_mesh_point(single_crystal_map.qx_mesh, single_crystal_map.qy_mesh, qx, qy)
@@ -100,28 +101,28 @@ def closest_mesh_point(x_mesh, y_mesh, x, y):
 def hkl_to_hklx(hkl, q=None, d=None, x=None):
     if d is None:
         return [x * float(a) for a in hkl]
-    return [q_to_hklxy(q, d) * float(a) for a in hkl]
+    return [q_to_hkl_xy(q, d) * float(a) for a in hkl]
 
 
 def hkl_xy_to_hkl(hklx, hkly):
     return [hklx[0] + hkly[0], hklx[1] + hkly[1], hklx[2] + hkly[2]]
 
 
-def hklxy_to_q(hkl, d):
+def hkl_xy_to_q(hkl, d):
     return hkl / d * 2.0 * np.pi
 
 
-def stringrange_to_float(stringrange):
-    if stringrange.count(':') != 1:
+def string_range_to_float(string_range):
+    if string_range.count(':') != 1:
         return [None, None]
     try:
-        mmin, mmax = [float(x) for x in stringrange.split(':')]
+        m_min, m_max = [float(x) for x in string_range.split(':')]
     except ValueError:
         return [None, None]
-    return [mmin, mmax]
+    return [m_min, m_max]
 
 
-def q_to_hklxy(q, d):
+def q_to_hkl_xy(q, d):
     return q * d / 2.0 / np.pi
 
 
