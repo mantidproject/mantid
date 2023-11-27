@@ -4,25 +4,26 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
+"""
+Functions to generate non-orthogonal grid in hkl.
+"""
+
 import numpy as np
-from mpl_toolkits.axisartist.grid_finder import (FixedLocator,
-                                                 FormatterPrettyPrint,
-                                                 MaxNLocator)
-from mpl_toolkits.axisartist.grid_helper_curvelinear import \
-    GridHelperCurveLinear
+from mpl_toolkits.axisartist.grid_finder import FixedLocator, FormatterPrettyPrint, MaxNLocator
+from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 
 
-# functions to generate non orthogal grid in hkl
-def get_grid_fromatter(gridstate):
-    if gridstate == 0:
-        locator = MaxNLocator(nbins='auto', steps=[1, 2, 3, 4, 5])
+def get_grid_formatter(grid_state):
+    if grid_state == 0:
+        locator = MaxNLocator(nbins="auto", steps=[1, 2, 3, 4, 5])
     else:
-        locator = FixedLocator(np.arange(-30, 30, 1 / gridstate))
+        locator = FixedLocator(np.arange(-30, 30, 1 / grid_state))
     tick_formatter = FormatterPrettyPrint()
     return locator, tick_formatter
 
 
-def get_gridhelper_arguments(a, b, c, d, switch):
+def get_grid_helper_arguments(a, b, c, d, switch):
     def tr(x, y):
         if switch:
             x, y = y, x
@@ -46,20 +47,16 @@ def get_gridhelper_arguments(a, b, c, d, switch):
     return [inv_tr, tr]
 
 
-def get_gridhelper(gridhelper, gridstate, a, b, c, d, switch):
+def get_grid_helper(grid_helper, grid_state, a, b, c, d, switch):
     # pylint: disable=too-many-arguments
-    locator, tick_formatter = get_grid_fromatter(gridstate)
-    inv_tr, tr = get_gridhelper_arguments(a, b, c, d, switch)
-    if gridhelper is None:
-        gridhelper = GridHelperCurveLinear((inv_tr, tr),
-                                           grid_locator1=locator,
-                                           grid_locator2=locator,
-                                           tick_formatter1=tick_formatter,
-                                           tick_formatter2=tick_formatter)
+    locator, tick_formatter = get_grid_formatter(grid_state)
+    inv_tr, tr = get_grid_helper_arguments(a, b, c, d, switch)
+    if grid_helper is None:
+        grid_helper = GridHelperCurveLinear(
+            (inv_tr, tr), grid_locator1=locator, grid_locator2=locator, tick_formatter1=tick_formatter, tick_formatter2=tick_formatter
+        )
     else:
-        gridhelper.update_grid_finder((inv_tr, tr),
-                                      grid_locator1=locator,
-                                      grid_locator2=locator,
-                                      tick_formatter1=tick_formatter,
-                                      tick_formatter2=tick_formatter)
-    return gridhelper
+        grid_helper.update_grid_finder(
+            (inv_tr, tr), grid_locator1=locator, grid_locator2=locator, tick_formatter1=tick_formatter, tick_formatter2=tick_formatter
+        )
+    return grid_helper

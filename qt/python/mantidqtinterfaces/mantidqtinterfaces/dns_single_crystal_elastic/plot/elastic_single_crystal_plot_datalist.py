@@ -4,16 +4,15 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 """
-sub widget for dns single crystal plot view
-handling the list of plot files
+Sub widget for DNS single crystal elastic plot view handling of the list of plot files.
 """
 
 from qtpy.QtCore import QObject
 from qtpy.QtCore import Signal
 
-from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_plot_list \
-    import DNSPlotListModel
+from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_plot_list import DNSPlotListModel
 
 
 class DNSDatalist(QObject):

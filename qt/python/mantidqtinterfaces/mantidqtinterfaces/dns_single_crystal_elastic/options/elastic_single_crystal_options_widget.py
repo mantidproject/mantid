@@ -9,23 +9,15 @@
 DNS single crystal elastic options widget of DNS reduction GUI.
 """
 
-from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget \
-    import DNSWidget
-from mantidqtinterfaces.dns_single_crystal_elastic.options.elastic_single_crystal_options_model \
-    import DNSElasticSCOptionsModel
-from mantidqtinterfaces.dns_single_crystal_elastic.options.elastic_single_crystal_options_presenter \
-    import DNSElasticSCOptionsPresenter
-from mantidqtinterfaces.dns_single_crystal_elastic.options.elastic_single_crystal_options_view import \
-    DNSElasticSCOptionsView
+from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget import DNSWidget
+from mantidqtinterfaces.dns_single_crystal_elastic.options.elastic_single_crystal_options_model import DNSElasticSCOptionsModel
+from mantidqtinterfaces.dns_single_crystal_elastic.options.elastic_single_crystal_options_presenter import DNSElasticSCOptionsPresenter
+from mantidqtinterfaces.dns_single_crystal_elastic.options.elastic_single_crystal_options_view import DNSElasticSCOptionsView
 
 
 class DNSElasticSCOptionsWidget(DNSWidget):
-
     def __init__(self, name, parent):
         super().__init__(name, parent)
         self.view = DNSElasticSCOptionsView(parent=parent.view)
         self.model = DNSElasticSCOptionsModel(parent=self)
-        self.presenter = DNSElasticSCOptionsPresenter(parent=self,
-                                                      view=self.view,
-                                                      model=self.model,
-                                                      name=name)
+        self.presenter = DNSElasticSCOptionsPresenter(parent=self, view=self.view, model=self.model, name=name)
