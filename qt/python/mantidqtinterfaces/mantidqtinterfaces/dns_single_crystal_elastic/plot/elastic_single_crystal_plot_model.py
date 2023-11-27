@@ -67,7 +67,7 @@ class DNSElasticSCPlotModel(DNSObsModel):
 
     def get_projections(self, xlim, ylim):
         limits = np.append(xlim, ylim)
-        x, y, z = helper.filter_flattend_meshs(
+        x, y, z = helper.filter_flattened_meshes(
             self._data.x, self._data.y, self._data.z, limits)
         xprojection = helper.get_projection(x, z)
         yprojection = helper.get_projection(y, z)
@@ -147,11 +147,11 @@ class DNSElasticSCPlotModel(DNSObsModel):
 
     @staticmethod
     def get_mlimits(*args):
-        return [helper.stringrange_to_float(arg) for arg in args]
+        return [helper.string_range_to_float(arg) for arg in args]
 
     @staticmethod
     def get_mzlimit(arg):
-        return helper.stringrange_to_float(arg)
+        return helper.string_range_to_float(arg)
 
     def get_data_zmin_max(self, xlim=None, ylim=None):
         return helper.get_z_min_max(
