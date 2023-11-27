@@ -54,7 +54,7 @@ void CollapsiblePanelLabel::paintEvent(QPaintEvent *e) {
 }
 
 CollapsiblePanel::CollapsiblePanel(const QString &caption, QWidget *parent)
-    : QWidget(parent) m_widget(nullptr), m_isCollapsed(false), m_isFixed(false), m_maxHeight(QWIDGETSIZE_MAX) {
+    : QWidget(parent), m_widget(nullptr), m_isCollapsed(false), m_isFixed(false), m_maxHeight(QWIDGETSIZE_MAX) {
   m_layout = new QVBoxLayout(this);
   m_label = new CollapsiblePanelLabel(caption, this);
   m_layout->addWidget(m_label);
