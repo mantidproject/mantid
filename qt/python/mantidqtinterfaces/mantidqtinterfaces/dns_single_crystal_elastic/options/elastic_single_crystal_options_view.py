@@ -60,7 +60,6 @@ class DNSElasticSCOptionsView(DNSView):
             'omega_min': self._content.dSB_omega_min,
             'omega_max': self._content.dSB_omega_max,
             'omega_nbin': self._content.sB_omega_nbins,
-            'interpolate_standard': self._content.cB_interpolate_standard,
             'filter_standard': self._content.cB_filter_standard,
             'use_dx_dy': self._content.cB_use_dx_dy,
             'dx': self._content.dSB_dx,
@@ -75,8 +74,6 @@ class DNSElasticSCOptionsView(DNSView):
             self._disable_sub_det_efficiency)
         self._map['subtract_background_from_sample'].stateChanged.connect(
             self._disable_sub_sample_back)
-        self._map['interpolate_standard'].stateChanged.connect(
-            self._disable_filter_standard)
         self._map['use_dx_dy'].stateChanged.connect(self._disable_lattice)
 
     # Signals

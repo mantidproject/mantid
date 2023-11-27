@@ -101,12 +101,6 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
                                                     is_sample=False,
                                                     fields=self._sample_data.fields)
 
-    def _interpolate_standard(self):
-        self._standard_data.interpolate_standard(
-            banks=self._sample_data.banks,
-            script_name=self._sample_data.script_name,
-            parent=self)
-
     def _set_loop(self):
         if len(self._sample_data.keys()) == 1:
             self._loop = "for workspace in wss_sample" \
