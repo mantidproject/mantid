@@ -179,11 +179,14 @@ Processing
 #. Check the ``Scaled Background Subtraction`` checkbox.
 #. In the ``BackgroundWorkspace`` column, enter the name of the merged workspace you took note of before.
 #. In the ``ScaleFactor`` column, enter ``0.9``.
+#. Ensure that save outputs ``CanSAS (1D)`` and ``NXcanSAS (1D/2D)`` are ticked.
 #. Select this new row and click ``Process Selected``.
 #. When it completes, two output files should have been created with ``bgsub_test`` in the name. One, which is the
    normal output data. Another with the scaled subtraction, which should have ``_bgsub`` appended to the name.
 #. Right click on each of these and select ``Show Data``. The subtracted workspace's values should be 10% of the of the
    unsubtracted workspace's values.
+#. Check that your save location contains files for both the background subtracted workspace and the normal reduction
+   output.
 
 Beam centre finder
 ##################
