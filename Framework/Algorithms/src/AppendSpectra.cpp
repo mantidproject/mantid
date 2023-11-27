@@ -146,8 +146,18 @@ void AppendSpectra::appendYAxisLabels(const MatrixWorkspace &ws1, const MatrixWo
   const auto outputYAxis = output.getAxis(yAxisNum);
   const auto ws1len = ws1.getNumberHistograms();
 
+  const bool isSpectra = yAxisWS1->isSpectra() && yAxisWS2->isSpectra();
   const bool isTextAxis = yAxisWS1->isText() && yAxisWS2->isText();
   const bool isNumericAxis = yAxisWS1->isNumeric() && yAxisWS2->isNumeric();
+
+  if (!isSpectra && !isTextAxis && !isNumericAxis) {
+    const std::string message(
+        "Y-Axis type mistmach. Ensure that the Y-axis types in both workspaces match. The Y-axis should be set to the "
+        "same type in each workspace, whether it be Numeric, Spectra, or Text.");
+
+    throw std::invalid_argument(message);
+  }
+
   bool isBinEdgeAxis =
       dynamic_cast<BinEdgeAxis *>(yAxisWS1) != nullptr && dynamic_cast<BinEdgeAxis *>(yAxisWS2) != nullptr;
   auto outputTextAxis = dynamic_cast<TextAxis *>(outputYAxis);
