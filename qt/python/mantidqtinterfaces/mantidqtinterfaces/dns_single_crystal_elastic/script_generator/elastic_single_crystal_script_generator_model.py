@@ -93,7 +93,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         self._sample_data = DNSDataset(data=f_selector['full_data'],
                                        path=paths['data_dir'],
                                        is_sample=True)
-        self._plotlist = self._sample_data.create_plotlist()
+        self._plotlist = self._sample_data.create_subtract()
 
     def _setup_standard_data(self, paths, f_selector):
         if self._corrections:
