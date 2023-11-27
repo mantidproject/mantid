@@ -46,7 +46,8 @@ Note that when spectra numbers do not overlap,
 it doesn't automatically imply that y-axis values are carried over from previous workspaces.
 To address this, use the 'AppendYAxisLabels' option.
 This will combine y-axis values from two input workspaces into the new output workspace,
-arranging them in the order of the first workspace followed by the second.
+arranging them in the order of the first workspace followed by the second. In addition, the axes
+should have the same type.
 
 .. seealso:: :ref:`algm-ConjoinWorkspaces` for joining parts of the same workspace.
 

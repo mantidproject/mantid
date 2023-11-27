@@ -38,7 +38,7 @@ public:
   void test_algorithm_execution() {
     std::string top = "top";
     std::string bottom = "bottom";
-    setupRealWorkspaces(top, bottom);
+    createNonOverlappingWorkspaces(top, bottom);
 
     // Get the two input workspaces for later
     MatrixWorkspace_sptr in1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(top);
@@ -76,7 +76,7 @@ public:
   void test_algorithm_execution_with_multiple_appends() {
     std::string top = "top";
     std::string bottom = "bottom";
-    setupRealWorkspaces(top, bottom);
+    createNonOverlappingWorkspaces(top, bottom);
 
     // Get the two input workspaces for later
     MatrixWorkspace_sptr in1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(top);
@@ -84,7 +84,7 @@ public:
 
     // Now it should succeed
     auto appendSpectra = Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
-    doAppendSpectraWithWorkspacesTest(appendSpectra, top, bottom, top, false, false, 2);
+    doAppendSpectraWithWorkspacesTest(appendSpectra, top, bottom, top, false, false, false, 2);
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(top));
@@ -293,6 +293,10 @@ public:
 
   void test_append_y_axis_with_bin_edges_axis_disabled() { doAppendWorkspacesWithNumericAxisTest(false, true, false); }
 
+  void test_append_y_axis_with_different_y_axis_type() {
+    doAppendWorkspacesWithNumericAxisTest(false, false, false, true);
+  }
+
 private:
   void doTypeAndParamsTest(bool event, bool combineLogs = false, int number = 1) {
     const std::string ws1Name = "AppendSpectraTest_grp1";
@@ -324,7 +328,7 @@ private:
     AnalysisDataService::Instance().addOrReplace(ws2Name, ws2);
 
     auto appendSpectra = Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
-    doAppendSpectraWithWorkspacesTest(appendSpectra, ws1Name, ws2Name, ws1Name, false, combineLogs, number);
+    doAppendSpectraWithWorkspacesTest(appendSpectra, ws1Name, ws2Name, ws1Name, false, false, combineLogs, number);
 
     TS_ASSERT_THROWS_NOTHING(
         out = std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws1Name));)
@@ -352,8 +356,8 @@ private:
 
   void doAppendSpectraWithWorkspacesTest(IAlgorithm_sptr appendSpectra, const std::string &inputWorkspace1,
                                          const std::string &inputWorkspace2, const std::string &outputWorkspace,
-                                         const bool appendYAxis = false, const bool combineLogs = false,
-                                         const int number = 1) {
+                                         const bool shoudThrow = false, const bool appendYAxis = false,
+                                         const bool combineLogs = false, const int number = 1) {
     if (!appendSpectra->isInitialized())
       appendSpectra->initialize();
     TS_ASSERT_THROWS_NOTHING(appendSpectra->setRethrows(true));
@@ -363,39 +367,47 @@ private:
     TS_ASSERT_THROWS_NOTHING(appendSpectra->setProperty("Number", number));
     TS_ASSERT_THROWS_NOTHING(appendSpectra->setProperty("MergeLogs", combineLogs));
     TS_ASSERT_THROWS_NOTHING(appendSpectra->setProperty("OutputWorkspace", outputWorkspace));
-    TS_ASSERT_THROWS_NOTHING(appendSpectra->execute());
-    TS_ASSERT(appendSpectra->isExecuted());
+
+    if (shoudThrow) {
+      TS_ASSERT_THROWS_ANYTHING(appendSpectra->execute());
+    } else {
+      TS_ASSERT_THROWS_NOTHING(appendSpectra->execute());
+      TS_ASSERT(appendSpectra->isExecuted());
+    }
   }
 
-  void doAppendWorkspacesWithNumericAxisTest(bool appendYAxis, bool isBinEdgeAxis, bool overlapped) {
-    std::string inputWorkspace2;
-    std::string inputWorkspace1;
+  void doAppendWorkspacesWithNumericAxisTest(bool appendYAxis, bool isBinEdgeAxis, bool overlappedWS,
+                                             bool differentTypes = false) {
+    const std::string inputWorkspace1 = "top";
+    const std::string inputWorkspace2 = "bottom";
     std::string outputWorkspace = "appended";
 
-    if (overlapped) {
-      inputWorkspace1 = "weRebinned1";
-      inputWorkspace2 = "weRebinned2";
+    if (overlappedWS || differentTypes) {
       createWorkspaceWithAxisAndLabel(inputWorkspace1, "Time", "1.0");
-      createWorkspaceWithAxisAndLabel(inputWorkspace2, "Time", "1.0");
+      createWorkspaceWithAxisAndLabel(inputWorkspace2, differentTypes ? "Text" : "Time", "1.0");
     } else {
-      inputWorkspace1 = "top";
-      inputWorkspace2 = "bottom";
-      setupRealWorkspaces(inputWorkspace1, inputWorkspace2);
+      createNonOverlappingWorkspaces(inputWorkspace1, inputWorkspace2);
     }
 
     MatrixWorkspace_sptr inputWS1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWorkspace1);
     MatrixWorkspace_sptr inputWS2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWorkspace2);
 
-    appendNumericAxis(inputWS1, inputWS2, isBinEdgeAxis);
+    if (!differentTypes) {
+      appendNumericAxis(inputWS1, inputWS2, isBinEdgeAxis);
+    }
 
     auto appendSpectra = Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
-    doAppendSpectraWithWorkspacesTest(appendSpectra, inputWorkspace1, inputWorkspace2, outputWorkspace, appendYAxis);
+    doAppendSpectraWithWorkspacesTest(appendSpectra, inputWorkspace1, inputWorkspace2, outputWorkspace, differentTypes,
+                                      appendYAxis);
 
-    bool isNotOverlappedAndDisabledAppend = !appendYAxis && !overlapped;
-    MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWorkspace);
-    auto outputAxis = outputWS->getAxis(1);
-    for (size_t i = 1; i < outputWS->getNumberHistograms(); ++i) {
-      TS_ASSERT_EQUALS(outputAxis->getValue(i), isNotOverlappedAndDisabledAppend ? 0 : i);
+    if (!differentTypes) {
+      bool isNotOverlappedAndDisabledAppend = !appendYAxis && !overlappedWS;
+      MatrixWorkspace_const_sptr outputWS =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWorkspace);
+      auto outputAxis = outputWS->getAxis(1);
+      for (size_t i = 1; i < outputWS->getNumberHistograms(); ++i) {
+        TS_ASSERT_EQUALS(outputAxis->getValue(i), isNotOverlappedAndDisabledAppend ? 0 : i);
+      }
     }
   }
 
@@ -469,7 +481,7 @@ private:
     TS_ASSERT(rebin->isExecuted());
   }
 
-  void setupRealWorkspaces(std::string ws1, std::string ws2) {
+  void createNonOverlappingWorkspaces(std::string ws1, std::string ws2) {
     IAlgorithm *loader;
     loader = new Mantid::DataHandling::LoadRaw3;
     loader->initialize();
