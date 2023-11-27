@@ -46,7 +46,7 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         ws = (energyBins[1:] + energyBins[:-1]) / 2.0
         if len(qs) > 1:
             qs = (qs[:-1] + qs[1:]) / 2.0
-        g = qs**-2 * np.exp(2 * msd * qs**2) * (1.0 - np.exp(-ws * constants.e * 1e-3 / constants.k / temperature)) * ws
+        g = qs**-2 * np.exp(msd * qs**2) * (1.0 - np.exp(-ws * constants.e * 1e-3 / constants.k / temperature)) * ws
         return g
 
     def computeFromTwoTheta(self, twoThetas, energyBins, msd=0.0, temperature=300.0):
@@ -58,7 +58,7 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         Ei = EFixed * constants.e * 1e-3
         Ef = (EFixed - ws) * constants.e * 1e-3
         qs = np.sqrt(2.0 * constants.m_n / constants.hbar**2 * ((Ei + Ef) - 2.0 * np.sqrt(Ei * Ef) * np.cos(twoTheta))) * 1e-10
-        g = qs**-2 * np.exp(2 * msd * qs**2) * (1.0 - np.exp(-ws * constants.e * 1e-3 / constants.k / temperature)) * ws
+        g = qs**-2 * np.exp(msd * qs**2) * (1.0 - np.exp(-ws * constants.e * 1e-3 / constants.k / temperature)) * ws
         return g
 
     def convertToWavenumber(self, ws):
