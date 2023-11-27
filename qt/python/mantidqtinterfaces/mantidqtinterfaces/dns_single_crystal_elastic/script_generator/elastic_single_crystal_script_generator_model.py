@@ -105,7 +105,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
     def _interpolate_standard(self):
         self._standard_data.interpolate_standard(
             banks=self._sample_data.banks,
-            scriptname=self._sample_data.scriptname,
+            script_name=self._sample_data.script_name,
             parent=self)
 
     def _set_loop(self):
