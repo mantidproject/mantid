@@ -122,21 +122,18 @@ class BeamCentrePresenter(object):
         """
         Copies rear / front positions from an external model
         """
-        rear_pos_1 = getattr(state_model, "rear_pos_1")
-        rear_pos_2 = getattr(state_model, "rear_pos_2")
+        self._beam_centre_model.rear_pos_1 = getattr(state_model, "rear_pos_1")
+        self._beam_centre_model.rear_pos_2 = getattr(state_model, "rear_pos_2")
 
-        self._beam_centre_model.rear_pos_1 = rear_pos_1
-        self._beam_centre_model.rear_pos_2 = rear_pos_2
-
-        self._beam_centre_model.front_pos_1 = getattr(state_model, "front_pos_1") if getattr(state_model, "front_pos_1") else rear_pos_1
-        self._beam_centre_model.front_pos_2 = getattr(state_model, "front_pos_2") if getattr(state_model, "front_pos_2") else rear_pos_2
+        self._beam_centre_model.front_pos_1 = getattr(state_model, "front_pos_1")
+        self._beam_centre_model.front_pos_2 = getattr(state_model, "front_pos_2")
 
     def update_centre_positions(self):
         rear_pos_1 = self._beam_centre_model.rear_pos_1
         rear_pos_2 = self._beam_centre_model.rear_pos_2
 
-        front_pos_1 = self._beam_centre_model.front_pos_1 if self._beam_centre_model.front_pos_1 != "" else rear_pos_1
-        front_pos_2 = self._beam_centre_model.front_pos_2 if self._beam_centre_model.front_pos_2 != "" else rear_pos_2
+        front_pos_1 = self._beam_centre_model.front_pos_1
+        front_pos_2 = self._beam_centre_model.front_pos_2
 
         self._view.rear_pos_1 = self._round(rear_pos_1)
         self._view.rear_pos_2 = self._round(rear_pos_2)

@@ -156,16 +156,6 @@ set(SRC_FILES
     src/WorkspaceUnitValidator.cpp
 )
 
-set(SRC_UNITY_IGNORE_FILES
-    src/CompositeFunction.cpp
-    src/IDataFileChecker.cpp
-    src/MatrixWorkspace.cpp
-    src/IEventWorkspace.cpp
-    src/IFunctionMD.cpp
-    src/IPeakFunction.cpp
-    src/IPowderDiffPeakFunction.cpp
-)
-
 set(INC_FILES
     inc/MantidAPI/ADSValidator.h
     inc/MantidAPI/Algorithm.h
@@ -499,11 +489,6 @@ if(COVERAGE)
     set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(API SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
 
 # Have to link to winsock and bcrypt library on Windows
 if(WIN32)

@@ -7,6 +7,7 @@ set(TEST_FILES
     IndirectSettingsPresenterTest.h
     ISISEnergyTransferModelTest.h
     ISISEnergyTransferModelUtilsTest.h
+    ReductionAlgorithmUtilsTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesIndirectTestInitialization.h)

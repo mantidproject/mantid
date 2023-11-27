@@ -36,7 +36,7 @@ using MantidQt::API::BatchAlgorithmRunner;
 
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent)
     : IndirectInterface(parent), m_valDbl(nullptr), m_settingsGroup("CustomInterfaces/DEMON"),
-      m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
+      m_batchAlgoRunner(new BatchAlgorithmRunner(parent)), m_groupingComponent() {}
 
 IndirectDiffractionReduction::~IndirectDiffractionReduction() { saveSettings(); }
 
@@ -478,14 +478,12 @@ void IndirectDiffractionReduction::createGroupingWorkspace(const std::string &ou
   auto instrumentConfig = m_uiForm.iicInstrumentConfiguration;
   auto const numberOfGroups = m_uiForm.spNumberGroups->value();
   auto const instrument = instrumentConfig->getInstrumentName().toStdString();
-  auto const analyser = instrumentConfig->getAnalyserName().toStdString();
-  auto const componentName = analyser == "diffraction" ? "bank" : analyser;
 
   auto groupingAlg = AlgorithmManager::Instance().create("CreateGroupingWorkspace");
   groupingAlg->initialize();
   groupingAlg->setProperty("FixedGroupCount", numberOfGroups);
   groupingAlg->setProperty("InstrumentName", instrument);
-  groupingAlg->setProperty("ComponentName", componentName);
+  groupingAlg->setProperty("ComponentName", m_groupingComponent);
   groupingAlg->setProperty("OutputWorkspace", outputWsName);
 
   m_batchAlgoRunner->addAlgorithm(groupingAlg);
@@ -558,6 +556,9 @@ void IndirectDiffractionReduction::instrumentSelected(const QString &instrumentN
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName.toStdString(), reflectionName.toStdString());
   Instrument_const_sptr instrument = instWorkspace->getInstrument();
+
+  auto const bankComponent = instrument->getComponentByName("bank");
+  m_groupingComponent = bankComponent ? "bank" : "diffraction";
 
   // Get default spectra range
   double specMin = instrument->getNumberParameter("spectra-min")[0];
@@ -813,7 +814,7 @@ void IndirectDiffractionReduction::manualGroupingToggled(int state) {
     m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraUnit);
     break;
   case Qt::Checked:
-    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraContourUnit);
+    m_plotOptionsPresenter->setPlotType(PlotWidget::SpectraSliceUnit);
     break;
   default:
     return;

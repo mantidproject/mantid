@@ -634,11 +634,6 @@ if(COVERAGE)
   endforeach(loop_var)
 endif()
 
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(DataHandling SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
-
 if(WIN32)
   set(ENABLE_LIB3MF ON)
 endif()

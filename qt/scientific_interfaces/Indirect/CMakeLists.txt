@@ -42,6 +42,7 @@ set(SRC_FILES
     Reduction/ISISEnergyTransferModel.cpp
     Reduction/ISISEnergyTransferView.cpp
     Reduction/ISISEnergyTransferPresenter.cpp
+    Reduction/ReductionAlgorithmUtils.cpp
 )
 
 set(MOC_FILES
@@ -64,7 +65,6 @@ set(MOC_FILES
     IndirectInstrumentConfig.h
     IndirectInterface.h
     IndirectMolDyn.h
-    IndirectPlotOptionsPresenter.h
     IndirectPlotOptionsView.h
     IndirectSassena.h
     IndirectSettings.h
@@ -89,6 +89,7 @@ set(INC_FILES
     DllConfig.h
     IndirectDataValidationHelper.h
     IndirectPlotOptionsModel.h
+    IndirectPlotOptionsPresenter.h
     IndirectSettingsHelper.h
     IndirectSettingsPresenter.h
     Notifier.h
@@ -96,6 +97,7 @@ set(INC_FILES
     Reduction/ISISEnergyTransferValidator.h
     Reduction/ISISEnergyTransferModelUtils.h
     Reduction/ISISEnergyTransferModel.h
+    Reduction/ReductionAlgorithmUtils.h
 )
 
 set(UI_FILES
@@ -118,7 +120,6 @@ set(UI_FILES
     IndirectMolDyn.ui
     IndirectPlotOptions.ui
     IndirectSassena.ui
-    IndirectSettings.ui
     IndirectSimulation.ui
     IndirectTools.ui
     IndirectTransmission.ui

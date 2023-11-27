@@ -54,6 +54,8 @@ General properties
 |                                  | will use one thread per logical core available.  |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
 
+.. _Facility Properties:
+
 Facility and instrument properties
 **********************************
 
@@ -74,6 +76,8 @@ Facility and instrument properties
 |                              | ``Inelastic`` the convention is ki-kf.  For        | or ``Inelastic``    |
 |                              | ``Crystallography`` the convention is kf-ki.       |                     |
 +------------------------------+----------------------------------------------------+---------------------+
+
+.. _Directory Properties:
 
 Directory Properties
 ********************
@@ -294,6 +298,14 @@ Plotting Settings
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.yAxesScale``             |The default y scale on 1d plots                                   |``Linear``, ``Log``  |
 +---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.x_min``                  |The default minimum x range                                       |``10``               |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.x_max``                  |The default maximum x range                                       |``1000``             |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.y_min``                  |The default minimum y range                                       |``10``               |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.y_max``                  |The default maximum y range                                       |``1000``             |
++---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.axesLineWidth``          |The default width of the lines that make the axes                 |``1``                |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.enableGrid``             |The default y scale on 1d plots                                   |``Linear``, ``Log``  |
@@ -369,5 +381,14 @@ To get access to, e.g. data saving path property from a C++ program one has to i
 .. testcode:: properties
 
   path = ConfigService.getString("defaultsave.directory")
+
+
+Modifying User Properties at Run Time
+**************************************
+
+:ref:`amend_config <Amend Config>` is a context manager that allows you to temporarily modify configuration settings
+related to a facility, instrument, data directory, or any additional keyword arguments. It ensures that the changes are
+only applied temporarily within the context and then restored to their original state when the context exits.
+
 
 .. categories:: Concepts

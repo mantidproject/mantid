@@ -34,7 +34,7 @@ IETPresenter::IETPresenter(IndirectDataReduction *idrUI, QWidget *parent)
       m_view(std::make_unique<IETView>(this, parent)) {
 
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptionsView(), PlotWidget::SpectraContour));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptionsView(), PlotWidget::SpectraSlice));
 
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
 
@@ -185,7 +185,8 @@ void IETPresenter::notifyPlotRawClicked() {
     disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
 
-    m_model->plotRawFile(m_batchAlgoRunner, instrumentData, plotParams);
+    m_batchAlgoRunner->setQueue(m_model->plotRawAlgorithmQueue(instrumentData, plotParams));
+    m_batchAlgoRunner->executeBatchAsync();
   } else {
     m_view->setPlotTimeIsPlotting(false);
     for (auto const &error : errors) {

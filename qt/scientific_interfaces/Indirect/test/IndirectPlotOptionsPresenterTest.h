@@ -30,8 +30,8 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
     actions["Plot Spectra"] = "Plot Spectra";
   if (actions.find("Plot Bins") == actions.end())
     actions["Plot Bins"] = "Plot Bins";
-  if (actions.find("Plot Contour") == actions.end())
-    actions["Plot Contour"] = "Plot Contour";
+  if (actions.find("Open Slice Viewer") == actions.end())
+    actions["Open Slice Viewer"] = "Open Slice Viewer";
   if (actions.find("Plot Tiled") == actions.end())
     actions["Plot Tiled"] = "Plot Tiled";
   return actions;
@@ -42,35 +42,29 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockIndirectPlotOptionsView : public IndirectPlotOptionsView {
+class MockIndirectPlotOptionsView final : public IIndirectPlotOptionsView {
 public:
-  void emitSelectedWorkspaceChanged(std::string const &workspaceName) { emit selectedWorkspaceChanged(workspaceName); }
-
-  void emitSelectedIndicesChanged(std::string const &indices) { emit selectedIndicesChanged(indices); }
-
-  void emitPlotSpectraClicked() { emit plotSpectraClicked(); }
-
-  void emitPlotBinsClicked() { emit plotBinsClicked(); }
-
-  void emitPlotContourClicked() { emit plotContourClicked(); }
-
-  void emitPlotTiledClicked() { emit plotTiledClicked(); }
-
-  /// Public Methods
+  MOCK_METHOD1(subscribePresenter, void(IIndirectPlotOptionsPresenter *));
   MOCK_METHOD2(setPlotType,
                void(PlotWidget const &plotType, std::map<std::string, std::string> const &availableActions));
 
   MOCK_METHOD1(setIndicesRegex, void(QString const &regex));
 
+  MOCK_CONST_METHOD0(selectedWorkspace, QString());
   MOCK_METHOD1(setWorkspaces, void(std::vector<std::string> const &workspaces));
+
+  MOCK_METHOD1(removeWorkspace, void(QString const &workspaceName));
   MOCK_METHOD0(clearWorkspaces, void());
 
+  MOCK_CONST_METHOD0(selectedIndices, QString());
   MOCK_METHOD1(setIndices, void(QString const &indices));
   MOCK_METHOD1(setIndicesErrorLabelVisible, void(bool visible));
 
   MOCK_METHOD1(setWorkspaceComboBoxEnabled, void(bool enable));
+  MOCK_METHOD1(setUnitComboBoxEnabled, void(bool enable));
   MOCK_METHOD1(setIndicesLineEditEnabled, void(bool enable));
   MOCK_METHOD1(setPlotButtonEnabled, void(bool enable));
+  MOCK_METHOD1(setPlotButtonText, void(QString const &text));
 
   MOCK_CONST_METHOD0(numberOfWorkspaces, int());
 
@@ -80,7 +74,7 @@ public:
 };
 
 /// Mock object to mock an IndirectTab
-class MockIndirectPlotOptionsModel : public IndirectPlotOptionsModel {
+class MockIndirectPlotOptionsModel final : public IndirectPlotOptionsModel {
 public:
   /// Public Methods
   MOCK_METHOD1(setWorkspace, bool(std::string const &workspaceName));
@@ -97,7 +91,7 @@ public:
 
   MOCK_METHOD0(plotSpectra, void());
   MOCK_METHOD1(plotBins, void(std::string const &binIndices));
-  MOCK_METHOD0(plotContour, void());
+  MOCK_METHOD0(showSliceViewer, void());
   MOCK_METHOD0(plotTiled, void());
 };
 
@@ -110,8 +104,8 @@ public:
   static void destroySuite(IndirectPlotOptionsPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_view = std::make_unique<NiceMock<MockIndirectPlotOptionsView>>();
-    m_model = new NiceMock<MockIndirectPlotOptionsModel>();
+    m_view = std::make_unique<MockIndirectPlotOptionsView>();
+    m_model = new MockIndirectPlotOptionsModel();
 
     m_presenter = std::make_unique<IndirectPlotOptionsPresenter>(m_view.get(), m_model);
   }
@@ -136,8 +130,8 @@ public:
 
   void test_that_the_expected_setup_is_performed_when_instantiating_the_presenter() {
     tearDown();
-    m_view = std::make_unique<NiceMock<MockIndirectPlotOptionsView>>();
-    m_model = new NiceMock<MockIndirectPlotOptionsModel>();
+    m_view = std::make_unique<MockIndirectPlotOptionsView>();
+    m_model = new MockIndirectPlotOptionsModel();
 
     EXPECT_CALL(*m_view, setIndicesRegex(_)).Times(1);
     EXPECT_CALL(*m_view, setPlotType(PlotWidget::Spectra, constructActions(boost::none))).Times(1);
@@ -151,9 +145,9 @@ public:
   /// Unit Tests that test the signals emitted from the view
   ///----------------------------------------------------------------------
 
-  void test_that_the_workspace_stored_by_the_model_is_changed_when_it_is_altered_in_the_view() {
+  void test_that_notifyWorkspaceChanged_set_the_workspace_stored_by_the_model() {
     EXPECT_CALL(*m_model, setWorkspace(WORKSPACE_NAME)).Times(1);
-    m_view->emitSelectedWorkspaceChanged(WORKSPACE_NAME);
+    m_presenter->handleWorkspaceChanged(WORKSPACE_NAME);
   }
 
   void test_that_the_view_widgets_are_enabled_when_the_workspace_being_set_in_the_model_is_valid() {
@@ -161,7 +155,7 @@ public:
 
     setExpectationsForWidgetEnabling(true);
 
-    m_view->emitSelectedWorkspaceChanged(WORKSPACE_NAME);
+    m_presenter->handleWorkspaceChanged(WORKSPACE_NAME);
   }
 
   void test_that_the_view_widgets_are_disabled_when_the_workspace_being_set_in_the_model_is_invalid() {
@@ -169,7 +163,7 @@ public:
 
     setExpectationsForWidgetEnabling(false);
 
-    m_view->emitSelectedWorkspaceChanged(WORKSPACE_NAME);
+    m_presenter->handleWorkspaceChanged(WORKSPACE_NAME);
   }
 
   void test_that_the_indices_are_formatted_when_they_are_changed_before_being_set_in_the_view_and_model() {
@@ -181,7 +175,7 @@ public:
     EXPECT_CALL(*m_model, setIndices(WORKSPACE_INDICES)).Times(1);
     EXPECT_CALL(*m_view, setIndicesErrorLabelVisible(false)).Times(1);
 
-    m_view->emitSelectedIndicesChanged(WORKSPACE_INDICES);
+    m_presenter->handleSelectedIndicesChanged(WORKSPACE_INDICES);
   }
 
   void test_that_the_indicesErrorLabel_is_set_to_visible_when_the_indices_are_invalid() {
@@ -192,7 +186,7 @@ public:
     EXPECT_CALL(*m_model, setIndices(WORKSPACE_INDICES)).Times(1);
     EXPECT_CALL(*m_view, setIndicesErrorLabelVisible(true)).Times(1);
 
-    m_view->emitSelectedIndicesChanged(WORKSPACE_INDICES);
+    m_presenter->handleSelectedIndicesChanged(WORKSPACE_INDICES);
   }
 
   void test_that_a_new_indice_suggestion_is_set_when_the_formatted_indices_are_not_empty() {
@@ -201,7 +195,7 @@ public:
     EXPECT_CALL(*m_model, formatIndices(WORKSPACE_INDICES)).Times(1);
     EXPECT_CALL(*m_view, addIndicesSuggestion(QString::fromStdString(WORKSPACE_INDICES))).Times(1);
 
-    m_view->emitSelectedIndicesChanged(WORKSPACE_INDICES);
+    m_presenter->handleSelectedIndicesChanged(WORKSPACE_INDICES);
   }
 
   void test_that_a_new_indice_suggestion_is_not_set_when_the_formatted_indices_are_empty() {
@@ -210,7 +204,7 @@ public:
     EXPECT_CALL(*m_model, formatIndices("")).Times(1);
     EXPECT_CALL(*m_view, addIndicesSuggestion(QString::fromStdString(""))).Times(0);
 
-    m_view->emitSelectedIndicesChanged("");
+    m_presenter->handleSelectedIndicesChanged("");
   }
 
   void test_that_the_plotSpectraClicked_signal_will_attempt_to_plot_the_spectra() {
@@ -218,7 +212,7 @@ public:
     EXPECT_CALL(*m_model, plotSpectra()).Times(1);
     setExpectationsForWidgetEnabling(true);
 
-    m_view->emitPlotSpectraClicked();
+    m_presenter->handlePlotSpectraClicked();
   }
 
   void test_that_the_plotBinsClicked_signal_will_attempt_to_plot_the_bins_when_the_bin_indices_are_valid() {
@@ -228,7 +222,7 @@ public:
     EXPECT_CALL(*m_model, plotBins(_)).Times(1);
     setExpectationsForWidgetEnabling(true);
 
-    m_view->emitPlotBinsClicked();
+    m_presenter->handlePlotBinsClicked();
   }
 
   void test_that_the_plotBinsClicked_signal_will_display_a_warning_message_if_the_bin_indices_are_invalid() {
@@ -236,15 +230,15 @@ public:
 
     EXPECT_CALL(*m_view, displayWarning(QString("Plot Bins failed: Invalid bin indices provided."))).Times(1);
 
-    m_view->emitPlotBinsClicked();
+    m_presenter->handlePlotBinsClicked();
   }
 
-  void test_that_the_plotContourClicked_signal_will_attempt_to_plot_a_contour() {
+  void test_that_the_showSliceViewerClicked_signal_will_attempt_to_show_slice_viewer() {
     setExpectationsForWidgetEnabling(false);
-    EXPECT_CALL(*m_model, plotContour()).Times(1);
+    EXPECT_CALL(*m_model, showSliceViewer()).Times(1);
     setExpectationsForWidgetEnabling(true);
 
-    m_view->emitPlotContourClicked();
+    m_presenter->handleShowSliceViewerClicked();
   }
 
   void test_that_the_plotTiledClicked_signal_will_attempt_to_plot_tiled_spectra() {
@@ -252,7 +246,7 @@ public:
     EXPECT_CALL(*m_model, plotTiled()).Times(1);
     setExpectationsForWidgetEnabling(true);
 
-    m_view->emitPlotTiledClicked();
+    m_presenter->handlePlotTiledClicked();
   }
 
   ///----------------------------------------------------------------------

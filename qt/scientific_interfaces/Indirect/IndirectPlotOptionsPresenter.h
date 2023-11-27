@@ -15,37 +15,44 @@
 
 #include <Poco/NObserver.h>
 
-#include <QObject>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter : public QObject {
-  Q_OBJECT
+class MANTIDQT_INDIRECT_DLL IIndirectPlotOptionsPresenter {
+public:
+  virtual void handleWorkspaceChanged(std::string const &workspaceName) = 0;
+  virtual void handleSelectedUnitChanged(std::string const &unit) = 0;
+  virtual void handleSelectedIndicesChanged(std::string const &indices) = 0;
+  virtual void handlePlotSpectraClicked() = 0;
+  virtual void handlePlotBinsClicked() = 0;
+  virtual void handleShowSliceViewerClicked() = 0;
+  virtual void handlePlotTiledClicked() = 0;
+};
+
+class MANTIDQT_INDIRECT_DLL IndirectPlotOptionsPresenter final : public IIndirectPlotOptionsPresenter {
 
 public:
   IndirectPlotOptionsPresenter(
-      IndirectPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
+      IIndirectPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
       std::string const &fixedIndices = "",
       boost::optional<std::map<std::string, std::string>> const &availableActions = boost::none);
   /// Used by the unit tests so that the view and model can be mocked
-  IndirectPlotOptionsPresenter(IndirectPlotOptionsView *view, IndirectPlotOptionsModel *model,
+  IndirectPlotOptionsPresenter(IIndirectPlotOptionsView *view, IndirectPlotOptionsModel *model,
                                PlotWidget const &plotType = PlotWidget::Spectra, std::string const &fixedIndices = "");
-  ~IndirectPlotOptionsPresenter() override;
+  ~IndirectPlotOptionsPresenter();
+
+  void handleWorkspaceChanged(std::string const &workspaceName) override;
+  void handleSelectedUnitChanged(std::string const &unit) override;
+  void handleSelectedIndicesChanged(std::string const &indices) override;
+  void handlePlotSpectraClicked() override;
+  void handlePlotBinsClicked() override;
+  void handleShowSliceViewerClicked() override;
+  void handlePlotTiledClicked() override;
 
   void setPlotType(PlotWidget const &plotType);
 
   void setWorkspaces(std::vector<std::string> const &workspaces);
   void clearWorkspaces();
-
-private slots:
-  void workspaceChanged(std::string const &workspaceName);
-  void unitChanged(std::string const &unit);
-  void indicesChanged(std::string const &indices);
-  void plotSpectra();
-  void plotBins();
-  void plotContour();
-  void plotTiled();
 
 private:
   void setupPresenter(PlotWidget const &plotType, std::string const &fixedIndices);
@@ -67,7 +74,7 @@ private:
   Poco::NObserver<IndirectPlotOptionsPresenter, Mantid::API::WorkspacePreDeleteNotification> m_wsRemovedObserver;
   Poco::NObserver<IndirectPlotOptionsPresenter, Mantid::API::WorkspaceBeforeReplaceNotification> m_wsReplacedObserver;
 
-  IndirectPlotOptionsView *m_view;
+  IIndirectPlotOptionsView *m_view;
   std::unique_ptr<IndirectPlotOptionsModel> m_model;
   PlotWidget m_plotType;
 };

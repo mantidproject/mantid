@@ -16,7 +16,7 @@ dependencies:
   - hdf5>=1.12,<1.13
   - jemalloc>=5.2.1
   - jsoncpp>=1.9.4,<2
-  - libopenblas!=0.3.23,!=0.3.24 # v0.3.23 causes a hang for the system tests on OSX, v0.3.24 causing unit test failure - investigation needed.
+  - libopenblas!=0.3.23,!=0.3.24,!=0.3.25 # v0.3.23 causes a hang for the system tests on OSX, v0.3.24 causing unit test failure - investigation needed, v0.3.25 causing a system test failure.
   - librdkafka>=1.6.0
   - muparser>=2.3.2
   - matplotlib=3.7.*
@@ -35,7 +35,7 @@ dependencies:
   - pyyaml>=5.4.1
   - qscintilla2
   - qt=5.15.8 # Avoid unexpected qt upgrades
-  - qtconsole!=5.4.2 # 5.4.2 crashes the jupyter console. Bug was fixed in 5.4.3
+  - qtconsole>5.4.2,!=5.5.0 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
   - qtpy>=1.9.0
   - requests>=2.25.1
   - scipy>=1.10.0

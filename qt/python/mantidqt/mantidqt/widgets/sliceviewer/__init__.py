@@ -9,12 +9,15 @@
 #
 # Can be launch from python by _e.g_
 #
+# Uncomment this line if called from jupyter notebook
+##%matplotlib nbagg
 #
-# from mantidqt.widgets.sliceviewer.presenter import SliceViewer
+# from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 # from mantid.simpleapi import LoadMD
 # from qtpy.QtWidgets import QApplication
+#
 # ws = LoadMD('ExternalData/Testing/SystemTests/tests/analysis/reference/ConvertWANDSCDtoQTest_HKL.nxs')
 # app = QApplication([])
 # window = SliceViewer(ws)
-# window.show()
+# window.view.show()
 # app.exec_()

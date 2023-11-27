@@ -176,8 +176,8 @@ Run
 Plot Spectra
   If enabled, it will plot the selected workspace indices in the selected output workspace.
 
-Plot Contour
-  If enabled, it will plot the selected output workspace as a contour plot.
+Open Slice Viewer
+  If enabled, it will open the slice viewer for the selected output workspace.
 
 Save Result
   If enabled the result will be saved as a NeXus file in the default save directory.
@@ -209,8 +209,8 @@ produce this file is IRIS, the analyser is graphite and the reflection is 002. S
 6. Enter a list of workspace indices in the output options (e.g. 0-2,4,6-7) and then click
    **Plot Spectra** to plot spectra from the output workspace.
 
-6. Click the down arrow on the **Plot Spectra** button, and select **Plot Contour**. This will
-   produce a contour plot of the output workspace.
+6. Click the down arrow on the **Plot Spectra** button, and select **Open Slice Viewer**. This will
+   open a slice viewer window for the output workspace.
 
 7. Choose a default save directory and then click **Save Result** to save the output workspace.
    The _sqw file is used in the :ref:`moments-example-workflow`.

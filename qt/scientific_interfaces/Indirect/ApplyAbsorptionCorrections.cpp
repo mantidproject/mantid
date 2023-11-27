@@ -36,7 +36,7 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : Correc
   m_spectra = 0;
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraContour));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSlice));
 
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(newSample(const QString &)));
   connect(m_uiForm.dsContainer, SIGNAL(dataReady(const QString &)), this, SLOT(newContainer(const QString &)));
@@ -425,18 +425,17 @@ bool ApplyAbsorptionCorrections::validate() {
   // Check input not empty
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
   uiv.checkDataSelectorIsValid("Corrections", m_uiForm.dsCorrections);
+  // Validate the container workspace
+  if (m_uiForm.ckUseCan->isChecked())
+    validateDataIsOneOf(uiv, m_uiForm.dsContainer, "Container", DataType::Red, {DataType::Sqw});
+
+  // Validate the sample workspace
+  validateDataIsOneOf(uiv, m_uiForm.dsSample, "Sample", DataType::Red, {DataType::Sqw});
+
+  // Validate the corrections workspace
+  validateDataIsOfType(uiv, m_uiForm.dsCorrections, "Corrections", DataType::Corrections);
 
   if (uiv.isAllInputValid()) {
-    // Validate the sample workspace
-    validateDataIsOneOf(uiv, m_uiForm.dsSample, "Sample", DataType::Red, {DataType::Sqw});
-
-    // Validate the container workspace
-    if (m_uiForm.ckUseCan->isChecked())
-      validateDataIsOneOf(uiv, m_uiForm.dsContainer, "Container", DataType::Red, {DataType::Sqw});
-
-    // Validate the corrections workspace
-    validateDataIsOfType(uiv, m_uiForm.dsCorrections, "Corrections", DataType::Corrections);
-
     // Check sample has the same number of Histograms as each of the workspaces in the corrections group
     m_correctionsGroupName = m_uiForm.dsCorrections->getCurrentDataName().toStdString();
     if (AnalysisDataService::Instance().doesExist(m_correctionsGroupName)) {

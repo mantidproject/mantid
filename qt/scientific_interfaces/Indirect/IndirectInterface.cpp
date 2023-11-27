@@ -26,13 +26,13 @@ void IndirectInterface::help() {
 }
 
 void IndirectInterface::settings() {
-  auto subWindow = InterfaceManager().createSubWindow("Settings", this);
-  auto settingsWindow = dynamic_cast<IndirectSettings *>(subWindow);
-  settingsWindow->connectInterface(this);
+  auto settingsWidget = new IndirectSettings(this);
+  settingsWidget->connectExistingInterfaces(InterfaceManager::existingInterfaces());
 
-  settingsWindow->loadSettings();
-  settingsWindow->setWindowModality(Qt::WindowModal);
-  settingsWindow->show();
+  settingsWidget->loadSettings();
+  settingsWidget->setWindowFlag(Qt::Window);
+  settingsWidget->setWindowModality(Qt::WindowModal);
+  settingsWidget->show();
 }
 
 void IndirectInterface::applySettings() { applySettings(IndirectSettings::getSettings()); }

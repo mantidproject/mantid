@@ -236,6 +236,10 @@ class MantidAxes(Axes):
                     if artist == ws_artist:
                         return ws_artists.is_normalized
 
+    def get_is_mdhisto_workspace_for_artist(self, artist) -> bool:
+        workspace, _ = self.get_artists_workspace_and_workspace_index(artist)
+        return (workspace is not None) and workspace.isMDHistoWorkspace()
+
     def track_workspace_artist(
         self,
         workspace,

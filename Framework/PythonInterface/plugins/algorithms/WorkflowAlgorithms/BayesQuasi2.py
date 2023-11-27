@@ -276,8 +276,11 @@ class BayesQuasi2(QuickBayesTemplate):
             if N_res_hist == 1:
                 prog = "QSe"  # res file
                 res_list = self.duplicate_res(res_ws=res_ws, N=N)
+            elif N_res_hist == N:
+                prog = "QSe"  # data file
+                res_list = self.unique_res(res_ws=res_ws, N=N)
             else:
-                raise ValueError("Stretched Exp ONLY works with RES file")
+                raise ValueError("RES file needs to have either 1 or the same number of histograms as sample.")
             ws_list, results, results_errors, sample_logs = self.calculate(
                 sample_ws=sample_ws,
                 report_progress=report_progress,

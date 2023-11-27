@@ -1133,6 +1133,8 @@ class RunTabPresenter(PresenterCommon):
             # Beam Centre
             self._beam_centre_presenter.set_on_state_model("rear_pos_1", state_model)
             self._beam_centre_presenter.set_on_state_model("rear_pos_2", state_model)
+            self._beam_centre_presenter.set_on_state_model("front_pos_1", state_model)
+            self._beam_centre_presenter.set_on_state_model("front_pos_2", state_model)
         except (RuntimeError, ValueError) as e:
             self.display_warning_box(title="Invalid Settings Entered", text=str(e), detailed_text=str(e))
 
