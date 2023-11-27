@@ -504,21 +504,28 @@ void AlignAndFocusPowder::exec() {
   if (xmin >= 0. || xmax > 0.) {
     getTofRange(m_outputW, tofmin, tofmax);
 
-    g_log.information() << "running CropWorkspace(TOFmin=" << xmin << ", TOFmax=" << xmax << ") started at "
-                        << Types::Core::DateAndTime::getCurrentTime() << "\n";
     API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
     cropAlg->setProperty("InputWorkspace", m_outputW);
     cropAlg->setProperty("OutputWorkspace", m_outputW);
+    bool setxmin = false;
     if ((xmin >= 0.) && (xmin > tofmin)) {
       cropAlg->setProperty("Xmin", xmin);
       tofmin = xmin; // increase value
+      setxmin = true;
     }
+    bool setxmax = false;
     if ((xmax > 0.) && (xmax < tofmax)) {
       cropAlg->setProperty("Xmax", xmax);
       tofmax = xmax;
+      setxmax = true;
     }
-    cropAlg->executeAsChildAlg();
-    m_outputW = cropAlg->getProperty("OutputWorkspace");
+    // only run if either xmin or xmax was set
+    if (setxmin || setxmax) {
+      g_log.information() << "running CropWorkspace(TOFmin=" << xmin << ", TOFmax=" << xmax << ") started at "
+                          << Types::Core::DateAndTime::getCurrentTime() << "\n";
+      cropAlg->executeAsChildAlg();
+      m_outputW = cropAlg->getProperty("OutputWorkspace");
+    }
   }
   m_progress->report();
 
