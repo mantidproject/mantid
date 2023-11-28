@@ -425,7 +425,11 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         # BEGIN_FOR: located_global_xMin&xMax
         output_workspaces = list()
         for n, in_wksp in enumerate(input_workspaces):
-            temp_val = mtd[in_wksp].run().getTimeAveragedValue("HB2C:SE:SampleTemp")
+            try:
+                temp_val = mtd[in_wksp].run().getTimeAveragedValue("HB2C:SE:SampleTemp")
+            except RuntimeError as _:
+                temp_val = 300.0
+
             if temp_val == 0.0:
                 temp_val = 300.0
             temp_val = "{:.1F}".format(temp_val).replace(".", "p")
