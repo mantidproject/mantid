@@ -5,16 +5,17 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from re import findall, sub
 from itertools import chain
 from numpy import full, nan, max, array, vstack
 from collections import defaultdict
 
+from mantid import FunctionFactory
 from mantid.api import TextAxis
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams
 from mantid.simpleapi import logger, CreateEmptyTableWorkspace, GroupWorkspaces, CreateWorkspace
 from mantid.api import AnalysisDataService as ADS
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs import write_table_row
+from mantid.api import CompositeFunction
 
 
 class FittingPlotModel(object):
@@ -57,11 +58,15 @@ class FittingPlotModel(object):
         for fit_prop in fit_props:
             wsname = fit_prop["properties"]["InputWorkspace"]
             self._fit_results[wsname] = {"model": fit_prop["properties"]["Function"], "status": fit_prop["status"]}
-            self._fit_results[wsname]["results"] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2,E2],...] }
-            fnames = [x.split("=")[-1] for x in findall("name=[^,]*", fit_prop["properties"]["Function"])]
-            # get num params for each function (first elem empty as str begins with 'name=')
-            # need to remove ties and constraints which are enclosed in ()
-            nparams = [s.count("=") for s in sub(r"=\([^)]*\)", "", fit_prop["properties"]["Function"]).split("name=")[1:]]
+            self._fit_results[wsname]["results"] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2, E2],...] }
+            fit_functions = FunctionFactory.createInitialized(fit_prop["properties"]["Function"])
+            if isinstance(fit_functions, CompositeFunction):
+                fnames = [func.name() for func in fit_functions]
+                nparams = [func.nParams() for func in fit_functions]
+            else:
+                fnames = [fit_functions.name()]
+                nparams = [fit_functions.nParams()]
+
             params_dict = ADS.retrieve(fit_prop["properties"]["Output"] + "_Parameters").toDict()
             # loop over rows in output workspace to get value and error for each parameter
             istart = 0
@@ -80,11 +85,37 @@ class FittingPlotModel(object):
                             self._fit_results[wsname]["results"][key_d].append([dcen, dcen_er])
                         except (ValueError, RuntimeError) as e:
                             logger.warning(f"Unable to output {key_d} parameters for TOF={params_dict['Value'][irow]}: " + str(e))
+                self._calculate_fwhm_values(
+                    ws_name=wsname, func_name=fname, numb_func_params=nparams[ifunc], params_dict=params_dict, params_start_index=istart
+                )
                 istart += nparams[ifunc]
             # append the cost function value (in this case always chisq/DOF) as don't let user change cost func
             # always last row in parameters table
             self._fit_results[wsname]["costFunction"] = params_dict["Value"][-1]
         self.create_fit_tables(loaded_ws_list, active_ws_list, log_workspace_name)
+
+    def _calculate_fwhm_values(self, ws_name, func_name, numb_func_params, params_dict, params_start_index):
+        if func_name in FunctionFactory.getPeakFunctionNames():
+            try:
+                peak_func = FunctionFactory.Instance().createPeakFunction(func_name)
+                set_param_count = 0
+                for param_index in range(0, numb_func_params):
+                    param_name = (params_dict["Name"][params_start_index + param_index]).split(".")[-1]
+                    param_val = params_dict["Value"][params_start_index + param_index]
+                    if peak_func.hasParameter(param_name) and peak_func.getParameterIndex(param_name) == param_index:
+                        peak_func.setParameter(param_index, param_val)
+                        set_param_count += 1
+                key_fwhm = func_name + "_fwhm"
+                if peak_func.nParams() == set_param_count:
+                    self._fit_results[ws_name]["results"][key_fwhm].append([peak_func.fwhm(), 0.0])
+                else:
+                    logger.warning(
+                        f"Unable to output {key_fwhm} params for {ws_name}, fail to set all required func parames of {func_name}"
+                    )
+            except (ValueError, RuntimeError):
+                logger.warning(
+                    f"Unable to output {key_fwhm} parameters for workspace={ws_name} due to failure to create peak function {func_name}"
+                )
 
     def _convert_TOF_to_d(self, tof, ws_name):
         diff_consts = self._get_diff_constants(ws_name)
