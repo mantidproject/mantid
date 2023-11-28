@@ -201,11 +201,12 @@ RangeSelector *PreviewPlot::getRangeSelector(const QString &name) const {
  * @param type The type of the single selector
  * @return The single selector
  */
-SingleSelector *PreviewPlot::addSingleSelector(const QString &name, SingleSelector::SelectType type, double position) {
+SingleSelector *PreviewPlot::addSingleSelector(const QString &name, SingleSelector::SelectType type, double position,
+                                               PlotLineStyle style) {
   if (m_singleSelectors.contains(name))
     throw std::runtime_error("SingleSelector already exists on PreviewPlot.");
 
-  m_singleSelectors[name] = new MantidWidgets::SingleSelector(this, type, position);
+  m_singleSelectors[name] = new MantidWidgets::SingleSelector(this, type, position, style);
   return m_singleSelectors[name];
 }
 

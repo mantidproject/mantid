@@ -30,12 +30,12 @@ void InelasticDataManipulationSymmetriseTabModel::setupPreviewAlgorithm(
 
   if (!m_isPositiveReflect) {
     reflectNegativeToPositive();
-  }
+  };
   // Run the algorithm on the preview spectrum only, these outputs are only for plotting in the preview window and are
   // not accessed by users directly.
   IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");
   symmetriseAlg->initialize();
-  symmetriseAlg->setProperty("InputWorkspace", m_isPositiveReflect ? m_inputWorkspace : m_reflctedInputWorkspace);
+  symmetriseAlg->setProperty("InputWorkspace", m_isPositiveReflect ? m_inputWorkspace : m_reflectedInputWorkspace);
   symmetriseAlg->setProperty("XMin", m_eMin);
   symmetriseAlg->setProperty("XMax", m_eMax);
   symmetriseAlg->setProperty("SpectraRange", spectraRange);
@@ -57,7 +57,7 @@ std::string InelasticDataManipulationSymmetriseTabModel::setupSymmetriseAlgorith
 
   IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");
   symmetriseAlg->initialize();
-  symmetriseAlg->setProperty("InputWorkspace", m_isPositiveReflect ? m_inputWorkspace : m_reflctedInputWorkspace);
+  symmetriseAlg->setProperty("InputWorkspace", m_isPositiveReflect ? m_inputWorkspace : m_reflectedInputWorkspace);
   symmetriseAlg->setProperty("XMin", m_eMin);
   symmetriseAlg->setProperty("XMax", m_eMax);
   symmetriseAlg->setProperty("OutputWorkspace", outputWorkspace);
@@ -73,19 +73,19 @@ void InelasticDataManipulationSymmetriseTabModel::reflectNegativeToPositive() {
   scaleXAlg->setProperty("InputWorkspace", m_inputWorkspace);
   scaleXAlg->setProperty("Operation", "Multiply");
   scaleXAlg->setProperty("Factor", -1.0);
-  scaleXAlg->setProperty("OutputWorkspace", m_reflctedInputWorkspace);
+  scaleXAlg->setProperty("OutputWorkspace", m_reflectedInputWorkspace);
   scaleXAlg->execute();
 
   IAlgorithm_sptr sortXAxisAlg = AlgorithmManager::Instance().create("SortXAxis");
   sortXAxisAlg->initialize();
-  sortXAxisAlg->setProperty("InputWorkspace", m_reflctedInputWorkspace);
-  sortXAxisAlg->setProperty("OutputWorkspace", m_reflctedInputWorkspace);
+  sortXAxisAlg->setProperty("InputWorkspace", m_reflectedInputWorkspace);
+  sortXAxisAlg->setProperty("OutputWorkspace", m_reflectedInputWorkspace);
   sortXAxisAlg->execute();
 }
 
 void InelasticDataManipulationSymmetriseTabModel::setWorkspaceName(QString workspaceName) {
   m_inputWorkspace = workspaceName.toStdString();
-  m_reflctedInputWorkspace = m_inputWorkspace + "_reflected";
+  m_reflectedInputWorkspace = m_inputWorkspace + "_reflected";
   // the last 4 characters in the workspace name are '_red' the ouput weorkspace name is inserting '_sym' before that
   // '_red'
   m_positiveOutputWorkspace =
@@ -99,5 +99,7 @@ void InelasticDataManipulationSymmetriseTabModel::setEMin(double value) { m_eMin
 void InelasticDataManipulationSymmetriseTabModel::setEMax(double value) { m_eMax = value; }
 
 void InelasticDataManipulationSymmetriseTabModel::setIsPositiveReflect(bool value) { m_isPositiveReflect = value; }
+
+bool InelasticDataManipulationSymmetriseTabModel::getIsPositiveReflect() { return m_isPositiveReflect; }
 
 } // namespace MantidQt::CustomInterfaces
