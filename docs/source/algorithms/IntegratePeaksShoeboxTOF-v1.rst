@@ -1,0 +1,89 @@
+.. algorithm::
+
+.. summary::
+
+.. relatedalgorithms::
+
+.. properties::
+
+Description
+-----------
+
+This is an algorithm to integrate single-crystal Bragg peaks in a :ref:`MatrixWorkspace <MatrixWorkspace>` by
+summing up counts in a shoebox of size ``NRows`` and ``NCols`` on the detector and ``NBins`` along the Time-of-flight
+(TOF) direction which can be specified in one of two ways:
+
+1. Provide ``NBins`` - number of TOF bins in the kernel
+
+2. Setting ``GetNBinsFromBackToBackParams=True`` and providing ``NFWHM`` - in which case ``NBins``  will be NFWHM x FWHM
+   of a :ref:`BackToBackExponential <func-BackToBackExponential>` peak at the center of each detector panel/bank at the
+   middle of the spectrum.
+
+Note to use method 2, back-to-back exponential coefficients must be defined in the Parameters.xml file for the
+instrument.
+
+The integration requires a background shell with negative weights, there are approximately the same number of bins in
+the background shell as in the peak region.
+
+The algorithm proceeds as follows:
+
+1. Take a window of the data, ``NShoeboxInWindow`` the size of the shoebox (``NRows`` x ``NCols`` x ``NBins``)
+
+2. Convolve the shoebox kernel with the data in the window to find the position with largest Intensity/sigma
+   (closest to the predicted peak position than to any other peaks in the table).
+
+3. Integrate using the shoebox at the optimal position
+
+4. If the peak is strong (Intensity/sigma < ``WeakPeakThreshold``) and ``OptimiseShoebox=True`` then optimise the shoebox
+   dimensions to maximise Intensity/sigma
+
+5. If the peak is weak, it can be integrated using the initial shoebox (``WeakPeakStrategy="Fix"``) or using the
+   shoebox dimensions from the nearest strong peak (``WeakPeakStrategy="NearestStrongPeak"``)
+
+When looking for the nearest strong peaks for ``WeakPeakStrategy="NearestStrongPeak"``, the algorithm first checks for
+peaks in detector IDs in the data window around the peak, if one isn't found the nearest peak search depends on the
+parameter ``GetNBinsFromBackToBackParams``.
+
+1. If ``GetNBinsFromBackToBackParams=True`` then the closest peak is defined as the one with the smallest angle between
+   QLab vectors and the TOF extent of the shoebox is scaled by the ratio of the FWHM of the weak and strong peak.
+
+2. If ``GetNBinsFromBackToBackParams=False`` then then the closest peak is defined as the one nearest in QLab.
+
+Optionally if ``OutputFile`` is provided a pdf can be output that shows the shoebox kernel and the data integrated along
+each dimension like so
+
+.. figure:: ../images/IntegratePeaksShoeboxTOF_OutputFile.png
+    :align: center
+    :width: 50%
+    :alt: (Left) Found fractional TOF window and estimated curves at 4 different wavelengths from linear fit shown on
+          (Right)
+
+
+Usage
+-----
+
+**Example - IntegratePeaksShoeboxTOF**
+
+.. testcode:: exampleIntegratePeaksShoeboxTOF
+
+    from mantid.simpleapi import *
+
+    Load(Filename="SXD23767.raw", OutputWorkspace="SXD23767")
+    CreatePeaksWorkspace(InstrumentWorkspace="SXD23767", NumberOfPeaks=0, OutputWorkspace="peaks")
+    AddPeak(PeaksWorkspace="peaks", RunWorkspace="SXD23767", TOF=8303.3735339704781, DetectorID=7646)
+
+    peaks_out = IntegratePeaksShoeboxTOF(InputWorkspace="SXD23767", PeaksWorkspace="peaks",
+                                         GetNBinsFromBackToBackParams=True, WeakPeakThreshold=0.0, LorentzCorrection=False)
+
+    print(f"I/sigma = {peaks_out.getPeak(0).getIntensityOverSigma():.2f}")
+
+**Output:**
+
+.. testoutput:: exampleIntegratePeaksShoeboxTOF
+
+    I/sigma = 100.49
+
+
+.. categories::
+
+.. sourcelink::
