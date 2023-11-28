@@ -97,9 +97,9 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             )
 
     def _create_dataset(self, ws, dataset_name: str = None) -> MantidORSODataset:
-        reduction_hist = self._get_reduction_alg_history(ws)
-        data_columns = self._create_data_columns(ws, reduction_hist)
-        dataset = self._create_dataset_with_mandatory_header(ws, dataset_name, reduction_hist, data_columns)
+        reduction_history = self._get_reduction_alg_history(ws)
+        data_columns = self._create_data_columns(ws, reduction_history)
+        dataset = self._create_dataset_with_mandatory_header(ws, dataset_name, reduction_history, data_columns)
         self._add_optional_header_info(dataset, ws)
         return dataset
 
