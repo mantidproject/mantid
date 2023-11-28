@@ -384,6 +384,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 if status == PEAK_STATUS.WEAK and do_optimise_shoebox and weak_peak_strategy == "NearestStrongPeak":
                     # look for possible strong peaks at any TOF in the window (won't know if strong until all pks integrated)
                     ipks_near, _ = find_ipks_in_window(ws, peaks, ispecs, ipk)
+                    fwhm = fwhm if get_nbins_from_b2bexp_params else None  # not calculated but not going to be used
                     weak_peaks_list.append(WeakPeak(ipk, ispecs[ipos[0], ipos[1]], x[ipos[-1]], fwhm, ipks_near))
                 else:
                     if status == PEAK_STATUS.STRONG:
@@ -400,11 +401,6 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             set_peak_intensity(peak, intens, sigma, do_lorz_cor)
 
         if len(ipks_strong):
-            # set function for calculating distance metric between peaks
-            # if know back to back params then can scale TOF extent by ratio of FWHM
-            # otherwise just look for peak closest in QLab
-            calc_dist_func = calc_angle_between_peaks if get_nbins_from_b2bexp_params else calc_dQsq_between_peaks
-
             for weak_pk in weak_peaks_list:
                 # get peak
                 ipk = weak_pk.ipk
@@ -415,26 +411,30 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 ipks_near_strong = []
                 for ipk_near in weak_pk.ipks_near:
                     if results[ipk_near].status == PEAK_STATUS.STRONG:
-                        ipks_near_strong.append(ipk_near)
+                        ipks_near_strong.append(int(ipk_near))
                 if not ipks_near_strong:
                     # no peaks in detector window at any TOF, look in all table
                     ipks_near_strong = ipks_strong
                 # loop over strong peaks and find nearest peak
                 ipk_strong = None
-                dist_min = np.inf
+                angle_min = np.inf
                 for ipk_near in ipks_near_strong:
-                    dist = calc_dist_func(peak, peaks.getPeak(ipk_near))
-                    if dist < dist_min:
+                    angle = calc_angle_between_peaks(peak, peaks.getPeak(ipk_near))
+                    if angle < angle_min:
+                        angle_min = angle
                         ipk_strong = ipk_near
                 strong_pk = peaks.getPeak(ipk_strong)
-
                 # get peak shape and make kernel
                 nrows, ncols, nbins = results[ipk_strong].peak_shape
+                # scale TOF extent
                 if get_nbins_from_b2bexp_params:
                     # scale TOF extent by ratio of fwhm
                     strong_pk_fwhm = get_fwhm_from_back_to_back_params(strong_pk, ws, strong_pk.getDetectorID())
-                    nbins = max(3, int(nbins * (weak_pk.tof_fwhm / strong_pk_fwhm)))
-                    nbins = round_up_to_odd_number(nbins)
+                    ratio = weak_pk.tof_fwhm / strong_pk_fwhm
+                else:
+                    # scale assuming dTOF/TOF = const
+                    ratio = pk_tof / strong_pk.getTOF()
+                nbins = max(3, round_up_to_odd_number(int(nbins * ratio)))
                 kernel = make_kernel(nrows, ncols, nbins)
                 # get data array in peak region (keep same window size, nshoebox, for plotting)
                 peak_data = array_converter.get_peak_data(
@@ -467,7 +467,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         # plot output
         if output_file:
             prog_reporter.resetNumSteps(int(len(results) - np.sum(results is None)), start=0.0, end=1.0)
-            plot_integration_reuslts(output_file, results, prog_reporter)
+            plot_integration_results(output_file, results, prog_reporter)
 
         # assign output
         self.setProperty("OutputWorkspace", peaks)
@@ -490,7 +490,7 @@ def round_up_to_odd_number(number):
     return number
 
 
-def plot_integration_reuslts(output_file, results, prog_reporter):
+def plot_integration_results(output_file, results, prog_reporter):
     # import inside this function as not allowed to import at point algorithms are registered
     from matplotlib.pyplot import subplots, close
     from matplotlib.patches import Rectangle
@@ -516,10 +516,6 @@ def plot_integration_reuslts(output_file, results, prog_reporter):
 
 def calc_angle_between_peaks(pk1, pk2):
     return abs(pk1.getQLabFrame().angle(pk2.getQLabFrame()))
-
-
-def calc_dQsq_between_peaks(pk1, pk2):
-    return (pk1.getQLabFrame() - pk2.getQLabFrame()).norm2()
 
 
 def get_and_clip_data_arrays(ws, peak_data, pk_tof, ispec, kernel, nshoebox):

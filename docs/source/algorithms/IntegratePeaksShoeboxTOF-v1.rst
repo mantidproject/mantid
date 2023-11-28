@@ -41,13 +41,10 @@ The algorithm proceeds as follows:
    shoebox dimensions from the nearest strong peak (``WeakPeakStrategy="NearestStrongPeak"``)
 
 When looking for the nearest strong peaks for ``WeakPeakStrategy="NearestStrongPeak"``, the algorithm first checks for
-peaks in detector IDs in the data window around the peak, if one isn't found the nearest peak search depends on the
-parameter ``GetNBinsFromBackToBackParams``.
-
-1. If ``GetNBinsFromBackToBackParams=True`` then the closest peak is defined as the one with the smallest angle between
-   QLab vectors and the TOF extent of the shoebox is scaled by the ratio of the FWHM of the weak and strong peak.
-
-2. If ``GetNBinsFromBackToBackParams=False`` then then the closest peak is defined as the one nearest in QLab.
+peaks in detector IDs in the data window around the peak, before looking at the whole peak table.
+The closest peak is defined as the one with the smallest angle between the QLab vectors of the two peaks. The TOF extent
+of the shoebox is scaled by the ratio of the FWHM of the weak and strong peak if ``GetNBinsFromBackToBackParams=True``,
+otherwise it is scaled by the ratio of TOF (i.e. assumes dTOF/TOF resolution is the same for both peaks).
 
 Optionally if ``OutputFile`` is provided a pdf can be output that shows the shoebox kernel and the data integrated along
 each dimension like so
