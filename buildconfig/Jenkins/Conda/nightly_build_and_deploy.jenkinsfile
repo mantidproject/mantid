@@ -170,8 +170,10 @@ pipeline {
           agent { label 'osx-64' }
           options { timestamps () }
           steps {
-            checkoutSource("${GIT_SHA}")
-            build_and_test('osx-64')
+            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+              checkoutSource("${GIT_SHA}")
+              build_and_test('osx-64')
+            }
           }
           post {
             always {
@@ -267,8 +269,10 @@ pipeline {
             checkoutSource("${GIT_SHA}")
             // Build the base set of packages (ones not required for mantidworkbench)
             // in parallel
-            package_conda('osx-64', 'base')
-            archive_conda_packages('osx-64')
+            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+              package_conda('osx-64', 'base')
+              archive_conda_packages('osx-64')
+            }
           }
           post {
             always {
@@ -316,10 +320,19 @@ pipeline {
                 target: './',
                 flatten: false
 
-              package_conda("${PLATFORM}", "workbench")
-              archive_conda_packages("${PLATFORM}")
-              package_standalone()
-              archive_standalone_package("${PLATFORM}")
+              if ("${PLATFORM}" == 'osx-64') {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                  package_conda("${PLATFORM}", "workbench")
+                  archive_conda_packages("${PLATFORM}")
+                  package_standalone()
+                  archive_standalone_package("${PLATFORM}")
+                }
+              } else {
+                package_conda("${PLATFORM}", "workbench")
+                archive_conda_packages("${PLATFORM}")
+                package_standalone()
+                archive_standalone_package("${PLATFORM}")
+              }
             }
             post {
               always {
