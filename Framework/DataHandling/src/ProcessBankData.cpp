@@ -92,6 +92,9 @@ void ProcessBankData::preCountAndReserveMem() {
  * FIXME/TODO - split run() into readable methods
  */
 void ProcessBankData::run() {
+  // timer for performance
+  Mantid::Kernel::Timer timer;
+
   // Local tof limits
   double my_shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   double my_longest_tof = 0.;
@@ -247,7 +250,8 @@ void ProcessBankData::run() {
   }
 
 #ifndef _WIN32
-  alg->getLogger().debug() << "Time to process " << entry_name << " " << m_timer << "\n";
+  if (alg->getLogger().isDebug())
+    alg->getLogger().debug() << "Time to ProcessBankData " << entry_name << " " << timer << "\n";
 #endif
 } // END-OF-RUN()
 

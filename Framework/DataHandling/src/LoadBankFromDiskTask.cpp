@@ -305,6 +305,9 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadEventWeights(::NeX
 }
 
 void LoadBankFromDiskTask::run() {
+  // timer for performance
+  Mantid::Kernel::Timer timer;
+
   // These give the limits in each file as to which events we actually load
   // (when filtering by time).
   m_loadStart.resize(1, 0);
@@ -458,6 +461,11 @@ void LoadBankFromDiskTask::run() {
         thisBankPulseTimes, m_have_weight, event_weight_shrd, (mid_id + 1), m_max_id);
     scheduler.push(newTask2);
   }
+
+#ifndef _WIN32
+  if (m_loader.alg->getLogger().isDebug())
+    m_loader.alg->getLogger().debug() << "Time to LoadBankFromDisk " << entry_name << " " << timer << "\n";
+#endif
 }
 
 /**

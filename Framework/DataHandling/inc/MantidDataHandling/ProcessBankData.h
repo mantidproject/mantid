@@ -88,8 +88,6 @@ private:
   detid_t m_min_id;
   /// Maximum pixel id
   detid_t m_max_id;
-  /// timer for performance
-  Mantid::Kernel::Timer m_timer;
 }; // ENDDEF-CLASS ProcessBankData
 } // namespace DataHandling
 } // namespace Mantid
