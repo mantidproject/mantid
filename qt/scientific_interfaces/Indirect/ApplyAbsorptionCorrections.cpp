@@ -187,7 +187,7 @@ void ApplyAbsorptionCorrections::run() {
 
   // get Sample Workspace
   auto const sampleWs = getADSWorkspace(m_sampleWorkspaceName);
-  absCorProps->setProperty("SampleWorkspace", sampleWs);
+  absCorProps->setProperty("SampleWorkspace", m_sampleWorkspaceName);
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
   // Get Can and Clone
