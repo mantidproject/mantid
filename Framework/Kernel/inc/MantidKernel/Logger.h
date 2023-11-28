@@ -134,6 +134,9 @@ public:
   /// Returns true if at least the given log level is set.
   bool is(int level) const;
 
+  /// Returns true if log level is at least debug
+  bool isDebug() const;
+
   /// Sets the log level for all Loggers created so far, including the root
   /// logger.
   static void setLevelForAll(const int level);

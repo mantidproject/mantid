@@ -75,27 +75,34 @@ public:
   void test_setLevel() {
     TS_ASSERT_EQUALS(log.getLevel(), 5);
     TS_ASSERT_EQUALS(log.getLevelName(), "notice");
+    TS_ASSERT(!log.isDebug());
 
     log.setLevel(1);
     TS_ASSERT_EQUALS(log.getLevel(), 1);
     TS_ASSERT_EQUALS(log.getLevelName(), "fatal");
+    TS_ASSERT(!log.isDebug());
 
     log.setLevel("NoTiCe"); // wacky case to make sure set is case insensitive
     TS_ASSERT_EQUALS(log.getLevel(), 5);
     TS_ASSERT_EQUALS(log.getLevelName(), "notice");
+    TS_ASSERT(!log.isDebug());
 
     log.setLevel("dEbUg"); // wacky case to make sure set is case insensitive
     TS_ASSERT_EQUALS(log.getLevel(), 7);
     TS_ASSERT_EQUALS(log.getLevelName(), "debug");
+    TS_ASSERT(log.isDebug());
 
     log.setLevel(-1); // value too low
     TS_ASSERT_EQUALS(log.getLevel(), 0);
+    TS_ASSERT(!log.isDebug());
 
     log.setLevel(42); // value too high
     TS_ASSERT_EQUALS(log.getLevel(), 8);
+    TS_ASSERT(log.isDebug());
 
     log.setLevelForAll(4);
     TS_ASSERT_EQUALS(log.getLevel(), 4);
+    TS_ASSERT(!log.isDebug());
 
     // put the log back in it's nominal state
     log.setLevel(5);
