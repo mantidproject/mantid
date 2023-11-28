@@ -748,6 +748,7 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
  * expected periods
  * @param nexusfilename :: the filename of the run to load
  * @param status :: will contain any status message. Empty if no problems.
+ * @return Number of periods with data
  */
 int LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog,
                                              std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
