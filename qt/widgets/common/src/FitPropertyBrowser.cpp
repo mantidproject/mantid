@@ -20,7 +20,6 @@
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
@@ -663,9 +662,9 @@ void FitPropertyBrowser::executeDisplayMenu(const QString &item) {
 
 void FitPropertyBrowser::executePeakFindingAlgMenu(const QString &item) {
   if (item == "FindPeaks")
-    findPeaks();
+    findPeaks(std::make_unique<FindPeakNormalStrategy>());
   if (item == "FindPeaksConvolve")
-    findPeaksConvolve();
+    findPeaks(std::make_unique<FindPeakConvolveStrategy>());
 }
 
 void FitPropertyBrowser::executeSetupMenu(const QString &item) {
@@ -2732,31 +2731,20 @@ void FitPropertyBrowser::sequentialFit() {
   }
 }
 
-void FitPropertyBrowser::findPeaks() {
-  std::string wsName = workspaceName();
+void FitPropertyBrowser::findPeaks(std::unique_ptr<FindPeakStrategyGeneric> findPeakStrategy) {
+  std::string wsName{workspaceName()};
   if (wsName.empty()) {
     QMessageBox::critical(this, "Mantid - Error", "Workspace name is not set");
     return;
   }
 
   std::string peakListName = wsName + "_PeakList_tmp";
-
-  int FWHM, Tolerance;
   QString setting =
       QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksFWHM"));
-  FWHM = setting.isEmpty() ? 7 : setting.toInt();
+  int FWHM{setting.isEmpty() ? 7 : setting.toInt()};
 
-  setting =
-      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksTolerance"));
-  Tolerance = setting.isEmpty() ? 4 : setting.toInt();
-
-  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("FindPeaks");
-  alg->initialize();
-  alg->setPropertyValue("InputWorkspace", wsName);
-  alg->setProperty("WorkspaceIndex", workspaceIndex());
-  alg->setPropertyValue("PeaksList", peakListName);
-  alg->setProperty("FWHM", FWHM);
-  alg->setProperty("Tolerance", Tolerance);
+  AlgorithmFinishObserver obs;
+  findPeakStrategy->initialise(wsName, workspaceIndex(), peakListName, FWHM, &obs);
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -2764,91 +2752,10 @@ void FitPropertyBrowser::findPeaks() {
       Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()));
 
   try {
-    alg->execute();
-    Mantid::API::ITableWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(peakListName));
-
+    findPeakStrategy->execute();
     clear();
-    Mantid::API::ColumnVector<double> centre = ws->getVector("centre");
-    Mantid::API::ColumnVector<double> width = ws->getVector("width");
-    Mantid::API::ColumnVector<double> height = ws->getVector("height");
-    for (size_t i = 0; i < centre.size(); ++i) {
-      if (centre[i] < startX() || centre[i] > endX())
-        continue;
-      auto f = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
-          Mantid::API::FunctionFactory::Instance().createFunction(defaultPeakType()));
-      if (!f)
-        break;
-      f->setMatrixWorkspace(inputWS, workspaceIndex(), startX(), endX());
-      f->setCentre(centre[i]);
-      f->setFwhm(width[i]);
-      f->setHeight(height[i]);
-      addFunction(f->asString());
-    }
-  } catch (...) {
-    QApplication::restoreOverrideCursor();
-    throw;
-  }
-
-  QApplication::restoreOverrideCursor();
-}
-
-void FitPropertyBrowser::findPeaksConvolve() {
-  std::string wsName = workspaceName();
-  if (wsName.empty()) {
-    QMessageBox::critical(this, "Mantid - Error", "Workspace name is not set");
-    return;
-  }
-
-  std::string peakListName = wsName + "_PeakList_tmp";
-
-  int FWHM = 0;
-  QString setting =
-      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksFWHM"));
-  FWHM = setting.isEmpty() ? 7 : setting.toInt();
-  double peakExtent{FWHM * (6.0 / 2.355)}; // Approx convert from FWHM to peak extent, assuming gaussian
-
-  QHash<QString, QString> defaultValues;
-  defaultValues["InputWorkspace"] = QString::fromStdString(wsName);
-  defaultValues["OutputWorkspace"] = QString::fromStdString(peakListName);
-  defaultValues["StartWorkspaceIndex"] = QString::number(workspaceIndex());
-  defaultValues["EndWorkspaceIndex"] = QString::number(workspaceIndex());
-  defaultValues["EstimatedPeakExtent"] = QString::number(peakExtent);
-  QStringList enabledParams{"EstimatedPeakExtent"};
-  QStringList disabledParams{"InputWorkspace", "OutputWorkspace", "StartWorkspaceIndex", "EndWorkspaceIndex"};
-  API::InterfaceManager interfaceMgr;
-  auto dlg = interfaceMgr.createDialogFromName("FindPeaksConvolve", -1, nullptr, false, defaultValues, QString(),
-                                               enabledParams, disabledParams);
-  dlg->setShowKeepOpen(false);
-  dlg->disableExitButton();
-  AlgorithmFinishObserver obs;
-  dlg->addAlgorithmObserver(&obs);
-
-  try {
-    dlg->show();
-    QEventLoop loop;
-    connect(&obs, SIGNAL(algCompletedSignal()), &loop, SLOT(quit()));
-    loop.exec();
-
-    Mantid::API::WorkspaceGroup_sptr groupWs = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(peakListName));
-    Mantid::API::ITableWorkspace_sptr ws =
-        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(groupWs->getItem("PeakCentre"));
-
-    clear();
-
-    std::vector<double> centre;
-    centre.reserve(ws->columnCount());
-    Mantid::API::MatrixWorkspace_sptr inputWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()));
-
-    for (size_t i{1}; i < ws->columnCount(); i++) {
-      centre.emplace_back(ws->Double(0, i));
-    }
-    std::vector<double> width(centre.size(), FWHM);
-    std::vector<double> height(centre.size(), 0); // is the y position a better value here?
-    for (size_t i = 0; i < centre.size(); ++i) {
-      if (centre[i] < startX() || centre[i] > endX())
+    for (size_t i = 0; i < findPeakStrategy->peakNumber(); ++i) {
+      if (findPeakStrategy->getPeakCentre(i) < startX() || findPeakStrategy->getPeakCentre(i) > endX())
         continue;
       auto f = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
           Mantid::API::FunctionFactory::Instance().createFunction(defaultPeakType()));
@@ -2856,9 +2763,9 @@ void FitPropertyBrowser::findPeaksConvolve() {
         break;
 
       f->setMatrixWorkspace(inputWS, workspaceIndex(), startX(), endX());
-      f->setCentre(centre[i]);
-      f->setFwhm(width[i]);
-      f->setHeight(height[i]);
+      f->setCentre(findPeakStrategy->getPeakCentre(i));
+      f->setFwhm(findPeakStrategy->getPeakWidth(i));
+      f->setHeight(findPeakStrategy->getPeakHeight(i));
       addFunction(f->asString());
     }
   } catch (...) {
@@ -3465,6 +3372,77 @@ QStringList FitPropertyBrowser::getPeakPrefixes() const {
     }
   }
   return peaks;
+}
+
+void FindPeakConvolveStrategy::initialise(const std::string &wsName, const int workspaceIndex,
+                                          const std::string &peakListName, const int FWHM,
+                                          AlgorithmFinishObserver *obs) {
+  m_peakListName = peakListName;
+  double peakExtent{FWHM * (6.0 / 2.355)}; // Approx convert from FWHM to peak extent, assuming gaussian
+  QHash<QString, QString> defaultValues;
+  defaultValues["InputWorkspace"] = QString::fromStdString(wsName);
+  defaultValues["OutputWorkspace"] = QString::fromStdString(m_peakListName);
+  defaultValues["StartWorkspaceIndex"] = QString::number(workspaceIndex);
+  defaultValues["EndWorkspaceIndex"] = QString::number(workspaceIndex);
+  defaultValues["EstimatedPeakExtent"] = QString::number(peakExtent);
+  QStringList enabledParams{"EstimatedPeakExtent"};
+  QStringList disabledParams{"InputWorkspace", "OutputWorkspace", "StartWorkspaceIndex", "EndWorkspaceIndex"};
+  API::InterfaceManager interfaceMgr;
+  m_dlg = std::unique_ptr<MantidQt::API::AlgorithmDialog>(interfaceMgr.createDialogFromName(
+      "FindPeaksConvolve", -1, nullptr, false, defaultValues, QString(), enabledParams, disabledParams));
+  m_dlg->setShowKeepOpen(false);
+  m_dlg->disableExitButton();
+  m_obs = obs;
+  m_dlg->addAlgorithmObserver(m_obs);
+}
+
+void FindPeakNormalStrategy::initialise(const std::string &wsName, const int workspaceIndex,
+                                        const std::string &peakListName, const int FWHM, AlgorithmFinishObserver *obs) {
+  UNUSED_ARG(obs);
+  m_peakListName = peakListName;
+  QString setting =
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksTolerance"));
+  int Tolerance{setting.isEmpty() ? 4 : setting.toInt()};
+
+  m_alg = Mantid::API::AlgorithmManager::Instance().create("FindPeaks");
+  m_alg->initialize();
+  m_alg->setPropertyValue("InputWorkspace", wsName);
+  m_alg->setProperty("WorkspaceIndex", workspaceIndex);
+  m_alg->setPropertyValue("PeaksList", m_peakListName);
+  m_alg->setProperty("FWHM", FWHM);
+  m_alg->setProperty("Tolerance", Tolerance);
+}
+
+void FindPeakConvolveStrategy::execute() {
+  m_dlg->show();
+  QEventLoop loop;
+  connect(m_obs, SIGNAL(algCompletedSignal()), &loop, SLOT(quit()));
+  loop.exec();
+
+  Mantid::API::WorkspaceGroup_sptr groupWs = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(m_peakListName));
+  Mantid::API::ITableWorkspace_sptr ws =
+      std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(groupWs->getItem("PeakCentre"));
+
+  m_peakCentres = new std::vector<double>();
+  m_peakCentres->reserve(ws->columnCount());
+  for (size_t i{1}; i < ws->columnCount(); i++) {
+    m_peakCentres->push_back(ws->Double(0, i));
+  }
+  // Change to unique_ptr - this leaks
+  m_peakWidths = new std::vector<double>(m_peakCentres->size(), m_FWHM);
+  m_peakHeights = new std::vector<double>(m_peakCentres->size(), 0); // is the y position a better value here?
+}
+
+void FindPeakNormalStrategy::execute() {
+  m_alg->execute();
+  Mantid::API::ITableWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(m_peakListName));
+
+  // change to unique ptr - this leaks
+  m_peakCentres = new Mantid::API::ColumnVector<double>(ws->getVector("centre"));
+  m_peakWidths = new Mantid::API::ColumnVector<double>(ws->getVector("width"));
+  m_peakHeights = new Mantid::API::ColumnVector<double>(ws->getVector("height"));
 }
 
 } // namespace MantidWidgets

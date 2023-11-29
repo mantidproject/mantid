@@ -20,7 +20,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/IWorkspaceFitControl.h"
 #include "MantidQtWidgets/Common/SelectFunctionDialog.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
@@ -54,6 +56,66 @@ class QObject;
 
 namespace MantidQt {
 namespace MantidWidgets {
+
+class AlgorithmFinishObserver : public QObject, public Mantid::API::AlgorithmObserver {
+  Q_OBJECT
+signals:
+  /// Emitted when alg completes
+  void algCompletedSignal();
+
+protected:
+  void finishHandle(const Mantid::API::IAlgorithm *alg) override {
+    UNUSED_ARG(alg);
+    emit algCompletedSignal();
+  }
+};
+
+class FindPeakStrategyGeneric {
+public:
+  virtual void initialise(const std::string &wsName, const int workspaceIndex, const std::string &peakListName,
+                          const int FWHM, AlgorithmFinishObserver *obs) = 0;
+  virtual void execute() = 0;
+  virtual size_t peakNumber() const = 0;
+  virtual double getPeakCentre(const size_t peakIndex) const = 0;
+  virtual double getPeakHeight(const size_t peakIndex) const = 0;
+  virtual double getPeakWidth(const size_t peakIndex) const = 0;
+};
+
+template <typename T> class FindPeakStrategy : public FindPeakStrategyGeneric {
+  size_t peakNumber() const override { return m_peakCentres->size(); };
+  double getPeakCentre(const size_t peakIndex) const override { return m_peakCentres->operator[](peakIndex); };
+  double getPeakHeight(const size_t peakIndex) const override { return m_peakHeights->operator[](peakIndex); };
+  double getPeakWidth(const size_t peakIndex) const override { return m_peakWidths->operator[](peakIndex); };
+
+protected:
+  std::string m_peakListName;
+  T *m_peakCentres;
+  T *m_peakHeights;
+  T *m_peakWidths;
+};
+
+class FindPeakConvolveStrategy : public QObject, public FindPeakStrategy<std::vector<double>> {
+  Q_OBJECT
+public:
+  void initialise(const std::string &wsName, const int workspaceIndex, const std::string &peakListName, const int FWHM,
+                  AlgorithmFinishObserver *obs) override;
+  void execute() override;
+
+private:
+  std::unique_ptr<MantidQt::API::AlgorithmDialog> m_dlg;
+  int m_FWHM;
+  AlgorithmFinishObserver *m_obs;
+};
+
+class FindPeakNormalStrategy : public FindPeakStrategy<Mantid::API::ColumnVector<double>> {
+public:
+  void initialise(const std::string &wsName, const int workspaceIndex, const std::string &peakListName, const int FWHM,
+                  AlgorithmFinishObserver *obs) override;
+  void execute() override;
+
+private:
+  Mantid::API::IAlgorithm_sptr m_alg;
+};
 
 class PropertyHandler;
 class SelectFunctionDialog;
@@ -307,6 +369,7 @@ public:
   std::string getCentreParameterNameOf(const QString &prefix);
   bool isParameterExplicitlySetOf(const QString &prefix, const std::string &param);
   QStringList getPeakPrefixes() const;
+  void findPeaks(std::unique_ptr<FindPeakStrategyGeneric> findPeakStrategy);
 
   // Emits a signal for when the sequential fit has finished
 
@@ -322,8 +385,6 @@ public slots:
   virtual void clear();
   void clearBrowser();
   void setPeakToolOn(bool on);
-  void findPeaks();
-  void findPeaksConvolve();
   virtual void executeFitMenu(const QString & /*item*/);
   void executeDisplayMenu(const QString & /*item*/);
   void executeSetupMenu(const QString & /*item*/);
@@ -703,19 +764,6 @@ private:
   friend class SetAttribute;
   friend class SetAttributeProperty;
   friend class SequentialFitDialog;
-};
-
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmFinishObserver : public QObject, public Mantid::API::AlgorithmObserver {
-  Q_OBJECT
-signals:
-  /// Emitted when alg completes
-  void algCompletedSignal();
-
-protected:
-  void finishHandle(const Mantid::API::IAlgorithm *alg) override {
-    UNUSED_ARG(alg);
-    emit algCompletedSignal();
-  }
 };
 
 } // namespace MantidWidgets
