@@ -56,16 +56,12 @@ public:
     m_uiForm->dockArea->setFitDataView(new FitDataView(m_uiForm->dockArea));
   }
 
-  void setupOutputOptionsPresenter(bool const editResults = false) {
-    m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(m_uiForm->ovOutputOptionsView);
-    m_outOptionsPresenter->setEditResultVisible(editResults);
-  }
-
   template <typename FitDataPresenter> void setUpFitDataPresenter() {
     m_dataPresenter =
         std::make_unique<FitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
   }
 
+  void setupOutputOptionsPresenter(bool const editResults = false);
   void setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds = std::nullopt);
 
   WorkspaceID getSelectedDataIndex() const;

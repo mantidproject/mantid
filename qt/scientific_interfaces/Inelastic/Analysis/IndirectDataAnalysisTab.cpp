@@ -115,6 +115,11 @@ void IndirectDataAnalysisTab::connectFitPropertyBrowser() {
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(respondToFunctionChanged()));
 }
 
+void IndirectDataAnalysisTab::setupOutputOptionsPresenter(bool const editResults) {
+  m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(m_uiForm->ovOutputOptionsView);
+  m_outOptionsPresenter->setEditResultVisible(editResults);
+}
+
 void IndirectDataAnalysisTab::setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds) {
   m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(m_uiForm->dockArea->m_fitPlotView);
   m_plotPresenter->setFittingData(m_dataPresenter->getFittingData());
