@@ -101,7 +101,7 @@ EstimationDataSelector SingleFunctionTemplateModel::getEstimationDataSelector() 
     // Find data thats within range
     double xmin = range.first;
     double xmax = range.second;
-    if (fabs(xmin - xmax) < 1e-5) {
+    if (xmax - xmin < 1e-5) {
       return DataForParameterEstimation{};
     }
 
