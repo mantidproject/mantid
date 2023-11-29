@@ -81,12 +81,7 @@ public:
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS));
-    if (!output) { // *** DEBUG ***
-      std::cout << "'OutputWorkspace' not in properties" << std::endl;
-      TS_ASSERT(false);
-      return;
-    }
-    //  return;
+    TS_ASSERT(output);
 
     TS_ASSERT_DELTA(output->y(0)[0], -0.0196, 0.0001);
 
@@ -125,12 +120,7 @@ public:
 
     OffsetsWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(outputWS));
-    if (!output) { // *** DEBUG ***
-      std::cout << "'OutputWorkspace' not in properties" << std::endl;
-      TS_ASSERT(false);
-      return;
-    }
-    //  return;
+    TS_ASSERT(output);
 
     TS_ASSERT_DELTA(output->getValue(1), -0.0196, 0.0001);
     TS_ASSERT_EQUALS(output->getValue(1), output->getValue(2));
@@ -173,12 +163,7 @@ public:
 
     OffsetsWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(outputWS));
-    if (!output) { // *** DEBUG ***
-      std::cout << "'OutputWorkspace' not in properties" << std::endl;
-      TS_ASSERT(false);
-      return;
-    }
-    // return
+    TS_ASSERT(output);
 
     TS_ASSERT_DELTA(output->y(0)[0], 2.4803, 0.0001);
 
@@ -218,12 +203,7 @@ public:
 
     OffsetsWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(outputWS));
-    if (!output) { // *** DEBUG ***
-      std::cout << "'OutputWorkspace' not in properties" << std::endl;
-      TS_ASSERT(false);
-      return;
-    }
-    //  return;
+    TS_ASSERT(output);
 
     TS_ASSERT_DELTA(output->y(0)[0], -1.0, 0.01);
 
@@ -263,12 +243,7 @@ public:
 
     OffsetsWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(outputWS));
-    if (!output) { // *** DEBUG ***
-      std::cout << "'OutputWorkspace' not in properties" << std::endl;
-      TS_ASSERT(false);
-      return;
-    }
-    // return
+    TS_ASSERT(output);
 
     TS_ASSERT_DELTA(output->y(0)[0], -0.11074, 0.0001);
 
@@ -310,12 +285,7 @@ public:
 
     OffsetsWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(outputWS));
-    if (!output) { // *** DEBUG ***
-      std::cout << "'OutputWorkspace' not in properties" << std::endl;
-      TS_ASSERT(false);
-      return;
-    }
-    // return
+    TS_ASSERT(output);
 
     TS_ASSERT_DELTA(output->y(0)[0], 2.38925, 0.0001);
 
@@ -356,12 +326,7 @@ public:
 
     OffsetsWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(outputWS));
-    if (!output) { // *** DEBUG ***
-      std::cout << "'OutputWorkspace' not in properties" << std::endl;
-      TS_ASSERT(false);
-      return;
-    }
-    // return
+    TS_ASSERT(output);
 
     TS_ASSERT_DELTA(output->y(0)[0], -6.22677, 0.01);
 
