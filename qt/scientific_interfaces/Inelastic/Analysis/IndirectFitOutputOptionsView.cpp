@@ -20,8 +20,6 @@ IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
   connect(m_outputOptions->pbPlot, SIGNAL(clicked()), this, SLOT(emitPlotClicked()));
   connect(m_outputOptions->pbSave, SIGNAL(clicked()), this, SLOT(emitSaveClicked()));
   connect(m_outputOptions->pbEditResult, SIGNAL(clicked()), this, SLOT(emitEditResultClicked()));
-
-  m_outputOptions->pbEditResult->setVisible(false);
 }
 
 IndirectFitOutputOptionsView::~IndirectFitOutputOptionsView() = default;

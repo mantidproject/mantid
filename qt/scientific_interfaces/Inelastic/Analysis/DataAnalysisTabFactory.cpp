@@ -41,7 +41,7 @@ IndirectDataAnalysisTab *DataAnalysisTabFactory::makeIqtFitTab(int const index) 
   tab->setupFittingModel<IqtFitModel>();
   tab->setupFitPropertyBrowser<IqtTemplateBrowser, IqtFunctionModel>(IqtFit::HIDDEN_PROPS);
   tab->setupFitDataView<IndirectFitDataView>();
-  tab->setupOutputOptionsPresenter();
+  tab->setupOutputOptionsPresenter(true);
   tab->setUpFitDataPresenter<IndirectFitDataPresenter>();
   tab->setupPlotView();
   return tab;
@@ -52,7 +52,7 @@ IndirectDataAnalysisTab *DataAnalysisTabFactory::makeConvFitTab(int const index)
   tab->setupFittingModel<ConvFitModel>();
   tab->setupFitPropertyBrowser<ConvTemplateBrowser, ConvFunctionModel>(ConvFit::HIDDEN_PROPS, true);
   tab->setupFitDataView<ConvFitDataView>();
-  tab->setupOutputOptionsPresenter();
+  tab->setupOutputOptionsPresenter(true);
   tab->setUpFitDataPresenter<ConvFitDataPresenter>();
   tab->setupPlotView();
   return tab;

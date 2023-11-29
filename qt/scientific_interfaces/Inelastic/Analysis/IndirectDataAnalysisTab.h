@@ -56,8 +56,9 @@ public:
     m_uiForm->dockArea->setFitDataView(new FitDataView(m_uiForm->dockArea));
   }
 
-  void setupOutputOptionsPresenter() {
+  void setupOutputOptionsPresenter(bool const editResults = false) {
     m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(m_uiForm->ovOutputOptionsView);
+    m_outOptionsPresenter->setEditResultVisible(editResults);
   }
 
   template <typename FitDataPresenter> void setUpFitDataPresenter() {
