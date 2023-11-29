@@ -196,7 +196,7 @@ This example shows how to load data with specific file extension and perform an 
     from Diffraction.wish.wishSX import WishSX
 
     # integration parameters
-    intPeaksMDArgs = {'ellipsoid': True, 'fixQAxis': True, 'fixMajorAxisLength': True, 'useCentroid': True}
+    intPeaksMDArgs = {'ellipsoid': True, 'fixQAxis': True, 'fixMajorAxisLength': True, 'useCentroid': True, 'MaskEdgeTubes': False}
 
     ws = WishSX.load_run(run, file_ext=".s01")
     # convert data to Q for integration
@@ -244,7 +244,7 @@ in the UB optimisation.
     a, b, c, alpha, beta, gamma = 12.2738, 12.2738, 12.2738, 90.0, 90.0, 90.0
 
     # integration parameters
-    intPeaksMDArgs = {'ellipsoid': True, 'fixQAxis': True, 'fixMajorAxisLength': True, 'useCentroid': True}
+    intPeaksMDArgs = {'ellipsoid': True, 'fixQAxis': True, 'fixMajorAxisLength': True, 'useCentroid': True, 'MaskEdgeTubes': False}
 
     # goniometer angles (one for each run)
     omegas = [7.0, 50.0, 153.0]
@@ -397,7 +397,7 @@ b. Q Integration (with satellites)
 
     save_dir = "/babylon/Public/UserName"
     # integration parameters
-    intPeaksMDArgs = {'ellipsoid': True, 'fixQAxis': True, 'fixMajorAxisLength': True, 'useCentroid': True}
+    intPeaksMDArgs = {'ellipsoid': True, 'fixQAxis': True, 'fixMajorAxisLength': True, 'useCentroid': True, 'MaskEdgeTubes': False}
 
     for run in range(42730, 42733):
         wish.process_data([run])
