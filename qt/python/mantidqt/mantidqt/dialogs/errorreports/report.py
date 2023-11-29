@@ -170,6 +170,11 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         else:
             self.fullShareButton.setEnabled(True)
 
+        # Requiring email address to submit error report
+        if not self.input_email:
+            self.fullShareButton.setEnabled(False)
+            self.nonIDShareButton.setEnabled(False)
+
     def display_message_box(self, title, message, details):
         msg = QMessageBox(self)
         msg.setIcon(QMessageBox.Warning)
