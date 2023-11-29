@@ -98,10 +98,10 @@ else
   if [ ! -f ${JAR_FILE_TMP} ]; then
     echo "Downloading agent jar file to ${JAR_FILE_TMP}"
     if [ $(command -v curl) ]; then
-      echo "curl --location -o ${JAR_FILE_TMP} ${JENKINS_REPO_URL}/${JAR_FILE}"
-      curl -o ${JAR_FILE_TMP} ${JENKINS_REPO_URL}/${JAR_FILE}
+      echo "curl --location -o ${JAR_FILE_TMP} ${JENKINS_REPO_URL}/${JAR_VERSION}/${JAR_FILE}"
+      curl --location -o ${JAR_FILE_TMP} ${JENKINS_REPO_URL}/${JAR_VERSION}/${JAR_FILE}
     else
-      echo "Need curl to download ${JENKINS_REPO_URL}/${JAR_FILE}"
+      echo "Need curl to download ${JENKINS_REPO_URL}/${JAR_VERSION}/${JAR_FILE}"
       exit -1
     fi
   fi
