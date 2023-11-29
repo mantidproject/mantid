@@ -59,7 +59,6 @@ public:
   void setPlotTimeSectionVisible(bool visible);
   void setAnalysisSectionVisible(bool visible);
   void setPlottingOptionsVisible(bool visible);
-  void setScaleFactorVisible(bool visible);
   void setAclimaxSaveVisible(bool visible);
   void setSPEVisible(bool visible);
   void setFoldMultipleFramesVisible(bool visible);

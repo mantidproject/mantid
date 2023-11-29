@@ -58,8 +58,7 @@ IETRunData IETView::getRunData() const {
   IETBackgroundData backgroundDetails(m_uiForm.ckBackgroundRemoval->isChecked(), m_uiForm.spBackgroundStart->value(),
                                       m_uiForm.spBackgroundEnd->value());
 
-  IETAnalysisData analysisDetails(m_uiForm.ckDetailedBalance->isChecked(), m_uiForm.spDetailedBalance->value(),
-                                  m_uiForm.ckScaleMultiplier->isChecked(), m_uiForm.spScaleMultiplier->value());
+  IETAnalysisData analysisDetails(m_uiForm.ckDetailedBalance->isChecked(), m_uiForm.spDetailedBalance->value());
 
   IETRebinData rebinDetails(!m_uiForm.ckDoNotRebin->isChecked(), m_uiForm.cbRebinType->currentText().toStdString(),
                             m_uiForm.spRebinLow->value(), m_uiForm.spRebinHigh->value(), m_uiForm.spRebinWidth->value(),
@@ -165,11 +164,6 @@ void IETView::setPlotTimeSectionVisible(bool visible) { m_uiForm.gbPlotTime->set
 void IETView::setAnalysisSectionVisible(bool visible) { m_uiForm.gbAnalysis->setVisible(visible); }
 
 void IETView::setPlottingOptionsVisible(bool visible) { m_uiForm.fPlottingOptions->setVisible(visible); }
-
-void IETView::setScaleFactorVisible(bool visible) {
-  m_uiForm.ckScaleMultiplier->setVisible(visible);
-  m_uiForm.spScaleMultiplier->setVisible(visible);
-}
 
 void IETView::setAclimaxSaveVisible(bool visible) { m_uiForm.ckSaveAclimax->setVisible(visible); }
 

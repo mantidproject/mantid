@@ -49,7 +49,6 @@ private:
     declareProperty("RebinString", "");
 
     declareProperty("DetailedBalance", 0.0);
-    declareProperty("ScaleFactor", 1.0);
 
     declareProperty("UnitX", "DeltaE");
     declareProperty("FoldMultipleFrames", false);
@@ -78,7 +77,6 @@ private:
     outputWS->addColumn("str", "RebinString");
 
     outputWS->addColumn("double", "DetailedBalance");
-    outputWS->addColumn("double", "ScaleFactor");
 
     outputWS->addColumn("str", "UnitX");
     outputWS->addColumn("bool", "FoldMultipleFrames");
@@ -102,7 +100,6 @@ private:
     auto backgroundRange = getPropertyValue("BackgroundRange");
     auto rebinString = getPropertyValue("RebinString");
     auto detailedBalance = std::stod(getProperty("DetailedBalance"));
-    auto scaleFactor = std::stod(getProperty("ScaleFactor"));
     auto unitX = getPropertyValue("UnitX");
     auto foldMultipleFrames = getPropertyValue("FoldMultipleFrames") == "1";
     auto outputWorkspace = getPropertyValue("OutputWorkspace");
@@ -111,8 +108,8 @@ private:
     auto mapFile = getPropertyValue("MapFile");
 
     newRow << instrument << analyser << reflection << inputFiles << sumFiles << loadLogFiles << calibrationWorkspace
-           << eFixed << spectraRange << backgroundRange << rebinString << detailedBalance << scaleFactor << unitX
-           << foldMultipleFrames << outputWorkspace << groupingMethod << groupingString << mapFile;
+           << eFixed << spectraRange << backgroundRange << rebinString << detailedBalance << unitX << foldMultipleFrames
+           << outputWorkspace << groupingMethod << groupingString << mapFile;
 
     Mantid::API::AnalysisDataService::Instance().addOrReplace("outputWS", outputWS);
   };
@@ -261,22 +258,20 @@ public:
     auto model = makeModel();
     auto reductionAlgorithm = makeReductionAlgorithm();
 
-    IETAnalysisData analysisData(true, 2.5, true, 2.0);
+    IETAnalysisData analysisData(true, 2.5);
     model->setAnalysisProperties(reductionAlgorithm, analysisData);
 
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("DetailedBalance"), "2.5");
-    TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("ScaleFactor"), "2");
   }
 
   void testSetAnalysisPropertiesWithPropsDisabled() {
     auto model = makeModel();
     auto reductionAlgorithm = makeReductionAlgorithm();
 
-    IETAnalysisData analysisData(false, 2.5, false, 2.0);
+    IETAnalysisData analysisData(false, 2.5);
     model->setAnalysisProperties(reductionAlgorithm, analysisData);
 
     TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("DetailedBalance"), "0");
-    TS_ASSERT_EQUALS(reductionAlgorithm->getPropertyValue("ScaleFactor"), "1");
   }
 
   void testSetOutputPropertiesWithPropsEnabled() {
@@ -369,7 +364,7 @@ public:
     IETConversionData conversionData(1.0, 1, 2);
     IETGroupingData groupingData(IETGroupingType::DEFAULT, 2, "map_file");
     IETBackgroundData backgroundData(true, 0, 1);
-    IETAnalysisData analysisData(true, 2.5, true, 2.0);
+    IETAnalysisData analysisData(true, 2.5);
     IETRebinData rebinData(true, "Multiple", 0.0, 0.0, 0.0, "1,2");
     IETOutputData outputData(false, false);
 
@@ -405,15 +400,14 @@ public:
       TS_ASSERT_EQUALS(outputWS->getColumn(10)->name(), "RebinString");
 
       TS_ASSERT_EQUALS(outputWS->getColumn(11)->name(), "DetailedBalance");
-      TS_ASSERT_EQUALS(outputWS->getColumn(12)->name(), "ScaleFactor");
 
-      TS_ASSERT_EQUALS(outputWS->getColumn(13)->name(), "UnitX");
-      TS_ASSERT_EQUALS(outputWS->getColumn(14)->name(), "FoldMultipleFrames");
-      TS_ASSERT_EQUALS(outputWS->getColumn(15)->name(), "OutputWorkspace");
+      TS_ASSERT_EQUALS(outputWS->getColumn(12)->name(), "UnitX");
+      TS_ASSERT_EQUALS(outputWS->getColumn(13)->name(), "FoldMultipleFrames");
+      TS_ASSERT_EQUALS(outputWS->getColumn(14)->name(), "OutputWorkspace");
 
-      TS_ASSERT_EQUALS(outputWS->getColumn(16)->name(), "GroupingMethod");
-      TS_ASSERT_EQUALS(outputWS->getColumn(17)->name(), "GroupingString");
-      TS_ASSERT_EQUALS(outputWS->getColumn(18)->name(), "MapFile");
+      TS_ASSERT_EQUALS(outputWS->getColumn(15)->name(), "GroupingMethod");
+      TS_ASSERT_EQUALS(outputWS->getColumn(16)->name(), "GroupingString");
+      TS_ASSERT_EQUALS(outputWS->getColumn(17)->name(), "MapFile");
     }
   }
 

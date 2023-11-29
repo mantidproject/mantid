@@ -106,9 +106,6 @@ void IETModel::setAnalysisProperties(IAlgorithm_sptr const &reductionAlg, IETAna
   if (analysisData.getUseDetailedBalance()) {
     reductionAlg->setProperty("DetailedBalance", analysisData.getDetailedBalance());
   }
-  if (analysisData.getUseScaleFactor()) {
-    reductionAlg->setProperty("ScaleFactor", analysisData.getScaleFactor());
-  }
 }
 
 void IETModel::setGroupingProperties(IAlgorithm_sptr const &reductionAlg, IETGroupingData const &groupingData,

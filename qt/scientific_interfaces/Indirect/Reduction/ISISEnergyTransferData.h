@@ -119,21 +119,15 @@ private:
 
 class IETAnalysisData {
 public:
-  IETAnalysisData(const bool &useDetailedBalance = false, const double &detailedBalance = 0.0,
-                  const bool &useScaleFactor = false, const double &scaleFactor = 0.0)
-      : m_useDetailedBalance(useDetailedBalance), m_detailedBalance(detailedBalance), m_useScaleFactor(useScaleFactor),
-        m_scaleFactor(scaleFactor) {}
+  IETAnalysisData(const bool &useDetailedBalance = false, const double &detailedBalance = 0.0)
+      : m_useDetailedBalance(useDetailedBalance), m_detailedBalance(detailedBalance) {}
 
   bool getUseDetailedBalance() const { return m_useDetailedBalance; }
   double getDetailedBalance() const { return m_detailedBalance; }
-  bool getUseScaleFactor() const { return m_useScaleFactor; }
-  double getScaleFactor() const { return m_scaleFactor; }
 
 private:
   bool m_useDetailedBalance;
   double m_detailedBalance;
-  bool m_useScaleFactor;
-  double m_scaleFactor;
 };
 
 class IETRebinData {

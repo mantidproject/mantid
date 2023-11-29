@@ -94,7 +94,6 @@ void IETPresenter::setInstrumentDefault() {
 
     m_view->setBackgroundSectionVisible(!irisOrOsiris);
     m_view->setPlotTimeSectionVisible(!irisOrOsiris);
-    m_view->setScaleFactorVisible(!irisOrOsiris);
     m_view->setAclimaxSaveVisible(!irisOrOsiris);
     m_view->setFoldMultipleFramesVisible(!irisOrOsiris);
     m_view->setOutputInCm1Visible(!irisOrOsiris);
