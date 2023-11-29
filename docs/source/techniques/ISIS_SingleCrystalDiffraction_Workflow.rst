@@ -232,7 +232,12 @@ matrix. The UBs are then loaded in the subsequent reduction, which then doesn't 
 the predicted peak positions are integrated (in contrast to SXD where the found peaks are integrated)..
 
 Here is an example that finds peaks, integrates them in Q-space and filters by I/sigma to only use the strongest peaks
-in the UB optimisation.
+in the UB optimisation. The data were collected using the WISH goniometer with 2 axes of rotation (phi and omega), in
+this case a positive angle (omega) correposnds to a counter-clockwise rotation around the vertical axis as viewed from
+the top - i.e. the goniometer axis is ``Axis0=str(omegas[irun])+',0,1,0,1'``.
+For data collected in the Newport with only a vertical axis of rotation a positive angle corresponds to a clockwise
+rotation and the correct goniometer axis is ``Axis0=str(omegas[irun])+',0,1,0,-1'`` (note the sign of the last number
+has changed).
 
 ..  code-block:: python
 
@@ -256,6 +261,7 @@ in the UB optimisation.
         ws = WishSX.load_run(run)
         SetGoniometer(Workspace=ws, Axis0=str(omegas[irun])+',0,1,0,1',
                       Axis1=str(phis[irun]) + ',1,1,0,1')
+        # SetGoniometer(Workspace=ws, Axis0=str(omegas[irun])+',0,1,0,-1') # if using newport
         # convert data to Q for integration
         WishSX.mask_detector_edges(ws, nedge=16, ntubes=2)
         wsMD = WishSX.convert_ws_to_MD(ws, frame="Q (lab frame)")
