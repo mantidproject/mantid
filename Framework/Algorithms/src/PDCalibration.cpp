@@ -323,7 +323,6 @@ void PDCalibration::init() {
   setPropertyGroup("TofBinning", inputGroup);
   setPropertyGroup("PreviousCalibrationFile", inputGroup);
   setPropertyGroup("PreviousCalibrationTable", inputGroup);
-  setPropertyGroup("MaskWorkspace", inputGroup);
 
   std::string funcgroup("Function Types");
   setPropertyGroup("PeakFunction", funcgroup);
