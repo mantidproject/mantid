@@ -184,7 +184,7 @@ def write_test(subproject, classname, filename, args):
   void test_exec()
   {{
     // Create test input if necessary
-    MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
+    MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using MantidFrameworkTestHelpers/WorkspaceCreationHelper.h --
 
     {algname} alg;
     // Don't put output in ADS by default
@@ -306,7 +306,6 @@ Output:
 
 
 def generate(subproject, classname, overwrite, args):
-
     # Directory at base of subproject
     basedir, header_folder = find_basedir(args.project, subproject)
 
@@ -353,7 +352,6 @@ def generate(subproject, classname, overwrite, args):
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(description="Utility to create Mantid class files: header, source and test. " "version " + VERSION)
     parser.add_argument("subproject", metavar="SUBPROJECT", type=str, help="The subproject under Framework/; e.g. Kernel")
     parser.add_argument("classname", metavar="CLASSNAME", type=str, help="Name of the class to create")

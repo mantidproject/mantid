@@ -1,7 +1,7 @@
 #!/bin/sh
 #####################################################################
-# Starts the Jenkins slave process if it is not already running.
-# It also downloads the slave.jar to /tmp if it does not already
+# Starts the Jenkins agent process if it is not already running.
+# It also downloads the remoting-<version>.jar to /tmp if it does not already
 # exist.
 #
 # The variables in the User configuration section below
@@ -14,19 +14,19 @@
 # Run "crontab -e" under the user that will connect to jenkins and add
 # a line such as
 #
-# 0,5 * * * * <downloaded path>/jenkins-slave.sh nodename secret
+# 0,5 * * * * <downloaded path>/jenkins-agent.sh nodename secret
 #
 # If you have installed a newer version of Java then this can be used
 # by specifying the JAVA environment variable on the line above, e.g.
 #
-# 0,5 * * * * env JAVA=<full-path-to-java-executable> <downloaded path>/jenkins-slave.sh nodename secret
+# 0,5 * * * * env JAVA=<full-path-to-java-executable> <downloaded path>/jenkins-agent.sh nodename secret
 #
 # Note that for the Adoptium Java releases the java path is usually something
 # like /Library/Java/JavaVirtualMachines/temurin-11.jre/Contents/Home/bin/java
 # It may also be necessary to customize the PATH for the crontab entry if
 # other software has been installed in /usr/local for example,
 #
-# 0,5 * * * * env PATH=<path1>:<path2>:$PATH JAVA=<full-path-to-java-executable> <downloaded path>/jenkins-slave.sh nodename secret
+# 0,5 * * * * env PATH=<path1>:<path2>:$PATH JAVA=<full-path-to-java-executable> <downloaded path>/jenkins-agent.sh nodename secret
 #####################################################################
 # User configuration
 #####################################################################
@@ -44,10 +44,15 @@ SECRET=${2}
 #####################################################################
 # Constants
 #####################################################################
-# URL of jnlp file for slave
-SLAVE_AGENT_URL="${JENKINS_URL}/computer/${NODE_NAME}/slave-agent.jnlp"
-# name of the slave jar - full path is determined later
-JAR_FILE=agent.jar
+# URL of jnlp file for agent
+AGENT_URL="${JENKINS_URL}/computer/${NODE_NAME}/jenkins-agent.jnlp"
+# version number of the agent jar
+JAR_VERSION=4.13
+# name of the agent jar - full path is determined later
+JAR_FILE=remoting-${JAR_VERSION}.jar
+# URL to jenkins rpeo
+JENKINS_REPO_URL=https://repo.jenkins-ci.org/artifactory/releases/org/jenkins-ci/main/remoting
+
 # Some versions of cron don't set the USER environment variable
 # required by vnc
 [ -z "$USER" ] && export USER=$(whoami)
@@ -62,10 +67,10 @@ JAR_FILE=agent.jar
 # exit if it is already running
 RUNNING=$(ps u -U $(whoami) | grep java | grep ${JAR_FILE})
 if [ ! -z "${RUNNING}" ]; then
-  echo "Slave process is already running"
+  echo "Agent process is already running"
   exit 0
 else
-  echo "Slave process is not running"
+  echo "Agent process is not running"
 fi
 
 # error out if there isn't a node name and secret
@@ -91,12 +96,12 @@ elif [ -f ${HOME}/Jenkins/${JAR_FILE} ]; then
 else
   JAR_FILE_TMP=/tmp/${JAR_FILE}
   if [ ! -f ${JAR_FILE_TMP} ]; then
-    echo "Downloading slave jar file to ${JAR_FILE_TMP}"
+    echo "Downloading agent jar file to ${JAR_FILE_TMP}"
     if [ $(command -v curl) ]; then
-      echo "curl --location -o ${JAR_FILE_TMP} ${JENKINS_URL}/jnlpJars/${JAR_FILE}"
-      curl -o ${JAR_FILE_TMP} ${JENKINS_URL}/jnlpJars/${JAR_FILE}
+      echo "curl --location -o ${JAR_FILE_TMP} ${JENKINS_REPO_URL}/${JAR_FILE}"
+      curl -o ${JAR_FILE_TMP} ${JENKINS_REPO_URL}/${JAR_FILE}
     else
-      echo "Need curl to download ${JENKINS_URL}/jnlpJars/${JAR_FILE}"
+      echo "Need curl to download ${JENKINS_REPO_URL}/${JAR_FILE}"
       exit -1
     fi
   fi
@@ -107,6 +112,6 @@ echo "starting ..."
 if [ -z "${JAVA}" ]; then
   JAVA=`which java`
 fi
-JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -jnlpUrl ${SLAVE_AGENT_URL} -secret ${SECRET}"
+JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -jnlpUrl ${AGENT_URL} -secret ${SECRET}"
 echo "${JAVA} ${JAVA_ARGS}"
 ${JAVA} ${JAVA_ARGS}
