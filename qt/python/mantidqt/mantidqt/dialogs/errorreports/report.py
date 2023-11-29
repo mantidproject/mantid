@@ -79,6 +79,9 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.input_free_text.textChanged.connect(self.set_plain_text_length_lable)
         self.input_free_text.textChanged.connect(self.set_button_status)
 
+        self.email_notice_expanded_text.hide()
+        self.email_notice_button.clicked.connect(self.expand_or_hide_email_notice_text)
+
         self.privacy_policy_label.linkActivated.connect(self.launch_privacy_policy)
 
         #  The options on what to do after closing the window (exit/continue)
@@ -107,8 +110,9 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         if self.saved_name or self.saved_email:
             self.input_name_line_edit.setText(self.saved_name)
             self.input_email_line_edit.setText(self.saved_email)
-            self.nonIDShareButton.setEnabled(True)
             self.rememberContactInfoCheckbox.setChecked(True)
+
+        self.set_button_status()
 
     def quit(self):
         self.quit_signal.emit()
@@ -193,6 +197,14 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
 
     def set_report_callback(self, callback):
         self.action.connect(callback)
+
+    def expand_or_hide_email_notice_text(self):
+        if self.email_notice_expanded_text.isVisible():
+            self.email_notice_expanded_text.hide()
+            self.email_notice_button.setText("Read More")
+        else:
+            self.email_notice_expanded_text.show()
+            self.email_notice_button.setText("Read Less")
 
     @property
     def input_name(self):
