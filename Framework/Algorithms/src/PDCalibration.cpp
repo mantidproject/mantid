@@ -36,7 +36,6 @@
 #include "MantidKernel/Unit.h"
 
 #include <algorithm>
-#include <cassert>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
 #include <limits>
@@ -195,10 +194,7 @@ const std::string PDCalibration::summary() const {
 void PDCalibration::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input workspace containing spectra as a function of TOF measured on a standard sample.");
-  declareProperty(std::make_unique<WorkspaceProperty<MaskWorkspace>>("MaskWorkspace", "", Direction::Output),
-                  "Mask workspace (optional input, output):"
-                  "  if mask workspace already exists, incoming masked detectors will be combined"
-                  "  with any additional outgoing masked detectors");
+
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive, "Starting workspace index for fit");
@@ -303,6 +299,14 @@ void PDCalibration::init() {
       std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("OutputCalibrationTable", "", Direction::Output),
       "Output table workspace containing the calibration.");
 
+  // Mantid's python API _requires_ a non empty-string name for any Output workspace, even when 'PropertyMode::Optional'
+  // is specified.
+  declareProperty(std::make_unique<WorkspaceProperty<MaskWorkspace>>("MaskWorkspace", "_empty_", Direction::Output,
+                                                                     PropertyMode::Optional),
+                  "Mask workspace (optional input / output workspace):"
+                  "  when specified, if the workspace already exists, any incoming masked detectors will be combined"
+                  "  with any additional outgoing masked detectors detected by the algorithm");
+
   declareProperty(
       std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>("DiagnosticWorkspaces", "", Direction::Output),
       "Auxiliary workspaces containing extended information on the calibration results.");
@@ -319,6 +323,7 @@ void PDCalibration::init() {
   setPropertyGroup("TofBinning", inputGroup);
   setPropertyGroup("PreviousCalibrationFile", inputGroup);
   setPropertyGroup("PreviousCalibrationTable", inputGroup);
+  setPropertyGroup("MaskWorkspace", inputGroup);
 
   std::string funcgroup("Function Types");
   setPropertyGroup("PeakFunction", funcgroup);
@@ -347,15 +352,13 @@ void PDCalibration::init() {
 std::map<std::string, std::string> PDCalibration::validateInputs() {
   std::map<std::string, std::string> messages;
 
-  // 'MaskWorkspace' cannot be set to its default value previously,
-  //   because of the dependence on the 'OutputCalibrationTable' property value.
-  if (isDefault("MaskWorkspace"))
-    setPropertyValue("MaskWorkspace", getPropertyValue("OutputCalibrationTable") + "_mask");
-  MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
-  if (maskWS) {
+  if (MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace")) {
     MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+
     // detectors which are monitors are not included in the mask
-    if (!(maskWS->getNumberHistograms() == inputWS->getInstrument()->getNumberDetectors(true))) {
+    if (maskWS->getInstrument()->getNumberDetectors(true) != inputWS->getInstrument()->getNumberDetectors(true)) {
+      messages["MaskWorkspace"] = "incoming mask workspace must have the same instrument as the input workspace";
+    } else if (maskWS->getNumberHistograms() != inputWS->getInstrument()->getNumberDetectors(true)) {
       messages["MaskWorkspace"] = "incoming mask workspace must have one spectrum per detector";
     }
   }
@@ -518,13 +521,18 @@ void PDCalibration::exec() {
   }
   createInformationWorkspaces();
 
-  // Use the incoming mask workspace, or start with a new one if the workspace does not exist.
-  MaskWorkspace_sptr maskWS = getProperty("MaskWorkspace");
-  if (!maskWS) {
-    maskWS = std::make_shared<MaskWorkspace>(m_uncalibratedWS->getInstrument());
-    setProperty("MaskWorkspace", maskWS);
+  // Use the incoming mask workspace, or start a new one if the workspace does not exist.
+  MaskWorkspace_sptr maskWS;
+  if (!isDefault("MaskWorkspace")) {
+    maskWS = getProperty("MaskWorkspace");
   }
-
+  if (!maskWS) {
+    g_log.debug() << "[PDCalibration]: CREATING new MaskWorkspace.\n";
+    // A new mask is completely cleared at creation.
+    maskWS = std::make_shared<MaskWorkspace>(m_uncalibratedWS->getInstrument());
+  } else {
+    g_log.debug() << "[PDCalibration]: Using EXISTING MaskWorkspace.\n";
+  }
   // Include any incoming masked detector flags in the mask-workspace values.
   maskWS->combineFromDetectorMasks(m_uncalibratedWS->detectorInfo());
 
@@ -647,7 +655,7 @@ void PDCalibration::exec() {
          spectrumInfo.isMonitor(wkspIndex) ||
          maskWS->isMasked(m_uncalibratedWS->getSpectrum(wkspIndex).getDetectorIDs())) {
        prog.report();
-       g_log.debug() << "FULLY masked spectrum, index: " << wkspIndex << std::endl;
+       g_log.debug() << "FULLY masked spectrum, index: " << wkspIndex << "\n";
        continue;
      }
 
@@ -729,7 +737,7 @@ void PDCalibration::exec() {
        }
 
        // the peak fit was a success. Collect info
-       g_log.getLogStream(Logger::Priority::PRIO_TRACE) << "successful fit: peak centered at " << centre << std::endl;
+       g_log.getLogStream(Logger::Priority::PRIO_TRACE) << "successful fit: peak centered at " << centre << "\n";
 
        d_vec.emplace_back(m_peaksInDspacing[peakIndex]);
        tof_vec.emplace_back(centre);
@@ -744,15 +752,15 @@ void PDCalibration::exec() {
      }
 
      if (d_vec.size() < 2) {
-       // If less than two peaks were fitted successfully,
-       //   mask the detectors to indicate failure.
+       // If less than two peaks were fitted successfully, indicate failure by
+       //   masking all of the detectors contributing to the spectrum.
        maskWS->setMasked(peaks.detid, true);
 
        g_log.debug() << "MASKING:\n";
        for (const auto &det : peaks.detid) {
          g_log.debug() << "  " << det << "\n";
        }
-       g_log.debug() << std::endl;
+       g_log.debug() << "\n";
 
        continue;
      } else {
@@ -805,8 +813,12 @@ void PDCalibration::exec() {
    m_calibrationTable = sortTableWorkspace(m_calibrationTable);
    setProperty("OutputCalibrationTable", m_calibrationTable);
 
-   // Align the detector mask flags of the mask workspace with the workspace values:
-   maskWS->combineToDetectorMasks();
+   // Return the mask workspace only if it was specified as a parameter.
+   if (!isDefault("MaskWorkspace")) {
+     // Align the detector mask flags of the mask workspace with the workspace values:
+     maskWS->combineToDetectorMasks();
+     setProperty("MaskWorkspace", maskWS);
+   }
 
    // fix-up the diagnostic workspaces
    m_peakPositionTable = sortTableWorkspace(m_peakPositionTable);
@@ -1078,11 +1090,16 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std:
 vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres,
                                               const std::vector<double> &windows_in) {
 
-  assert(windows_in.size() == 1 || windows_in.size() / 2 == centres.size());
+  if (!(windows_in.size() == 1 || windows_in.size() / 2 == centres.size()))
+    throw std::logic_error("the peak-window vector must contain either a single peak-width value, or a pair of values "
+                           "for each peak center specified");
+
   const std::size_t numPeaks = centres.size();
 
   // assumes distance between peaks can be used for window sizes
-  assert(numPeaks >= 2);
+  if (!(numPeaks >= 2))
+    throw std::logic_error("at least two peak centres must be specified: the distance between these centres will be "
+                           "used to estimate the peak widths");
 
   vector<double> windows_out(2 * numPeaks);
   double left;
@@ -1483,7 +1500,7 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace
   g_log.information() << "DSPACING WINDOWS\n";
   for (std::size_t i = 0; i < m_peaksInDspacing.size(); ++i) {
     g_log.information() << "[" << i << "] " << windowsInDSpacing[2 * i] << " < " << m_peaksInDspacing[i] << " < "
-                        << windowsInDSpacing[2 * i + 1] << std::endl;
+                        << windowsInDSpacing[2 * i + 1] << "\n";
   }
 
   // create workspaces for nominal peak centers and fit ranges
@@ -1513,7 +1530,7 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace
 
     for (std::size_t i = 0; i < peaks.inTofPos.size(); i++) {
       g_log.information() << "[" << iws << "," << i << "] " << peaks.inTofWindows[2 * i] << " < " << peaks.inTofPos[i]
-                          << " < " << peaks.inTofWindows[2 * i + 1] << std::endl;
+                          << " < " << peaks.inTofWindows[2 * i + 1] << "\n";
     }
 
     PARALLEL_END_INTERRUPT_REGION

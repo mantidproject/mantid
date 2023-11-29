@@ -663,7 +663,8 @@ public:
 
   /**
    * Verify that the optional mask workspace input parameter is properly treated:
-   *   -- parameter not present: default mask is created and exists in the ADS.
+   *   when the parameter is specified, but the mask workspace does not exist,
+   *      a mask workspace will be created, and will exist in the ADS after exit.
    */
   void test_mask_is_created() {
     PDCalibration alg;
@@ -707,7 +708,8 @@ public:
   }
   /**
    * Verify that the optional mask workspace input parameter is properly treated:
-   *   -- parameter is present: default mask should not be created.
+   *   when the parameter is specified and the workspace already exists,
+   *     no new mask workspace will be created.
    */
   void test_input_mask_is_used() {
     PDCalibration alg;
@@ -716,6 +718,14 @@ public:
     const std::string uniquePrefix = "test_IMIU";
     auto [inputWSName, maskWSName, diagnosticWSName, outputWSName, dValues, cleanup] =
         maskTestsInitialization(alg, uniquePrefix);
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(maskWSName));
+    // Set the mask-workspace title to a random string:
+    const std::string maskWSTitle("42601ecc-b7ab-426f-874e-c39662a8a295");
+    MaskWorkspace_sptr mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    mask->setTitle(maskWSTitle);
+    TS_ASSERT(mask->getTitle() == maskWSTitle);
+
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -739,8 +749,9 @@ public:
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
     checkDSpacing(diagnosticWSName + "_dspacing", dValues);
 
-    MaskWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
     TS_ASSERT(mask);
+    TS_ASSERT(mask->getTitle() == maskWSTitle);
     TS_ASSERT_EQUALS(mask->getNumberMasked(), 0);
 
     cleanup();
