@@ -749,7 +749,7 @@ public:
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
     checkDSpacing(diagnosticWSName + "_dspacing", dValues);
 
-    mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName));
     TS_ASSERT(mask);
     TS_ASSERT(mask->getTitle() == maskWSTitle);
     TS_ASSERT_EQUALS(mask->getNumberMasked(), 0);

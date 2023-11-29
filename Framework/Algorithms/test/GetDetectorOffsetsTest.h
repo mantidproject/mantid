@@ -497,16 +497,22 @@ public:
     auto [input, maskWSName, expectedPeakFitLocations, exampleFailingSpectrum] =
         maskTestInitilization(offsets, uniquePrefix);
 
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(maskWSName));
+    // Set the mask-workspace title to a random string:
+    const std::string maskWSTitle("f09ab021-8101-4720-bdc5-5758fc8be4f6");
+    MaskWorkspace_sptr mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    mask->setTitle(maskWSTitle);
+    TS_ASSERT(mask->getTitle() == maskWSTitle);
+
     TS_ASSERT_THROWS_NOTHING(offsets.setProperty("InputWorkspace", input));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("MaskWorkspace", maskWSName));
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("OutputWorkspace", outputWSName));
     TS_ASSERT_THROWS_NOTHING(offsets.execute());
     TS_ASSERT(offsets.isExecuted());
 
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist(uniquePrefix + "_cal_mask"));
-    MaskWorkspace_const_sptr mask;
     TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName));
     TS_ASSERT(mask);
+    TS_ASSERT(mask->getTitle() == maskWSTitle);
     TS_ASSERT_EQUALS(mask->getNumberMasked(), 0);
 
     AnalysisDataService::Instance().remove(outputWSName);
