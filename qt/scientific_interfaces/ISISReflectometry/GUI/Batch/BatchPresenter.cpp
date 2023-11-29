@@ -18,6 +18,10 @@
 #include "Reduction/RowExceptions.h"
 #include <memory>
 
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry Batch Presenter");
+} // namespace
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
@@ -141,8 +145,12 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
         m_jobManager->algorithmOutputWorkspacesToSave(algorithm, m_savePresenter->shouldAutosaveGroupRows());
     try {
       m_savePresenter->saveWorkspaces(workspaces);
+    } catch (std::runtime_error const &e) {
+      g_log.error(e.what());
+    } catch (std::exception const &e) {
+      g_log.error(e.what());
     } catch (...) {
-      // The exception will be logged, we just want to prevent a crash
+      g_log.error("Unknown error while saving workspaces.");
     }
   }
 }
