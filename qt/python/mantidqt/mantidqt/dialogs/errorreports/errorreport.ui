@@ -297,19 +297,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="nonIDShareButton">
-       <property name="focusPolicy">
-        <enum>Qt::ClickFocus</enum>
-       </property>
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Information about your system architecture and mantid version are shared as well as a hashed user ID. For a full list see the privacy policy linked above.&lt;/p&gt;&lt;p&gt;The additional info box entered above is also shared, but the name and email are not.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="text">
-        <string>Share non-identifiable information</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="noShareButton">
        <property name="focusPolicy">
         <enum>Qt::ClickFocus</enum>

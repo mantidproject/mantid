@@ -89,7 +89,6 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
 
         #  These are the options along the bottom
         self.fullShareButton.clicked.connect(self.fullShare)
-        self.nonIDShareButton.clicked.connect(self.nonIDShare)
         self.noShareButton.clicked.connect(self.noShare)
 
         self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowStaysOnTopHint)
@@ -118,13 +117,10 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.quit_signal.emit()
 
     def fullShare(self):
-        self.action.emit(self.continue_working, 0, self.input_name, self.input_email, self.input_text)
-
-    def nonIDShare(self):
-        self.action.emit(self.continue_working, 1, self.input_name, self.input_email, self.input_text)
+        self.action.emit(self.continue_working, True, self.input_name, self.input_email, self.input_text)
 
     def noShare(self):
-        self.action.emit(self.continue_working, 2, self.input_name, self.input_email, self.input_text)
+        self.action.emit(self.continue_working, False, self.input_name, self.input_email, self.input_text)
 
     def close_reporter(self, status):
         if status == 201 or status == -1:
@@ -161,23 +157,11 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.interface_manager.showWebPage(link)
 
     def set_button_status(self):
-        if not self.input_name and not self.input_email:
-            self.nonIDShareButton.setEnabled(True)
-        elif self.input_name == self.saved_name and self.input_email == self.saved_email:
-            self.nonIDShareButton.setEnabled(True)
-        else:
-            self.nonIDShareButton.setEnabled(False)
-
-        if len(self.input_text) > PLAIN_TEXT_MAX_LENGTH:
+        # Requiring email address to submit error report
+        if not self.input_email or len(self.input_text) > PLAIN_TEXT_MAX_LENGTH:
             self.fullShareButton.setEnabled(False)
-            self.nonIDShareButton.setEnabled(False)
         else:
             self.fullShareButton.setEnabled(True)
-
-        # Requiring email address to submit error report
-        if not self.input_email:
-            self.fullShareButton.setEnabled(False)
-            self.nonIDShareButton.setEnabled(False)
 
     def display_message_box(self, title, message, details):
         msg = QMessageBox(self)
