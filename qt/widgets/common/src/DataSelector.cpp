@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Exception.h"
 
 #include <QFileInfo>
@@ -228,8 +229,15 @@ void DataSelector::autoLoadFile(const QString &filepath) {
  */
 void DataSelector::handleAutoLoadComplete(bool error) {
   if (!error) {
-    if (m_alwaysLoadAsGroup) {
-      AnalysisDataService::Instance().makeGroup(getWsNameFromFiles().toStdString());
+    auto &ads = AnalysisDataService::Instance();
+    auto workspaceName = getWsNameFromFiles().toStdString();
+
+    if (m_alwaysLoadAsGroup && !ads.retrieveWS<WorkspaceGroup>(workspaceName)) {
+      const auto groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+      groupAlg->initialize();
+      groupAlg->setProperty("InputWorkspaces", workspaceName);
+      groupAlg->setProperty("OutputWorkspace", workspaceName);
+      groupAlg->execute();
     }
 
     // emit that we got a valid workspace/file to work with
