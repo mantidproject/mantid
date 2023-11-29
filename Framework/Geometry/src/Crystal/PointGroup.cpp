@@ -129,6 +129,7 @@ std::string PointGroup::getLauePointGroupSymbol() const {
       return "m-3m";
     }
   }
+  return "-1"; // never used but required for gcc warning
 }
 
 /**
