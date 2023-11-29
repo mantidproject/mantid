@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GetDetectorOffsets.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -55,10 +54,15 @@ void GetDetectorOffsets::init() {
                   "generated OffsetsWorkspace.");
   declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace containing the offsets.");
-  declareProperty(std::make_unique<WorkspaceProperty<MaskWorkspace>>("MaskWorkspace", "", Direction::Output),
-                  "Mask workspace (optional input workspace, output workspace):"
-                  "  if workspace exists, incoming masked detectors will be combined"
-                  "  with any additional outgoing masked detectors");
+
+  // Mantid's python API _requires_ a non empty-string name for any Output workspace, even when 'PropertyMode::Optional'
+  // is specified.
+  declareProperty(std::make_unique<WorkspaceProperty<MaskWorkspace>>("MaskWorkspace", "_empty_", Direction::Output,
+                                                                     PropertyMode::Optional),
+                  "Mask workspace (optional input / output workspace):"
+                  "  when specified, if the workspace already exists, any incoming masked detectors will be combined"
+                  "  with any additional outgoing masked detectors detected by the algorithm");
+
   // Only keep peaks
   declareProperty("PeakFunction", "Gaussian",
                   std::make_shared<StringListValidator>(FunctionFactory::Instance().getFunctionNames<IPeakFunction>()),
@@ -95,14 +99,11 @@ std::map<std::string, std::string> GetDetectorOffsets::validateInputs() {
     return result;
   }
 
-  // It's somewhat "iffy" to set this here, but it cannot be set as a default value previously,
-  //   because it's dependent on the "OutputWorkspace" property value.
-  if (isDefault("MaskWorkspace"))
-    setPropertyValue("MaskWorkspace", getPropertyValue("OutputWorkspace") + "_mask");
-  MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
-  if (maskWS) {
+  if (MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace")) {
     // detectors which are monitors are not included in the mask
-    if (!(maskWS->getNumberHistograms() == inputWS->getInstrument()->getNumberDetectors(true))) {
+    if (maskWS->getInstrument()->getNumberDetectors(true) != inputWS->getInstrument()->getNumberDetectors(true)) {
+      result["MaskWorkspace"] = "incoming mask workspace must have the same instrument as the input workspace";
+    } else if (maskWS->getNumberHistograms() != inputWS->getInstrument()->getNumberDetectors(true)) {
       result["MaskWorkspace"] = "incoming mask workspace must have one spectrum per detector";
     }
   }
@@ -150,13 +151,16 @@ void GetDetectorOffsets::exec() {
     outputW->mutableY(di) = 0.0; // calls detail::FixedLengthVector::assign
 
   // Use the incoming mask workspace, or start a new one if the workspace does not exist.
-  MaskWorkspace_sptr maskWS = getProperty("MaskWorkspace");
+  MaskWorkspace_sptr maskWS;
+  if (!isDefault("MaskWorkspace")) {
+    maskWS = getProperty("MaskWorkspace");
+  }
   if (!maskWS) {
-    g_log.debug() << "[GetDetectorOffsets]: CREATING new MaskWorkspace." << std::endl;
+    g_log.debug() << "[GetDetectorOffsets]: CREATING new MaskWorkspace.\n";
+    // A new mask is completely cleared at creation.
     maskWS = std::make_shared<MaskWorkspace>(inputW->getInstrument());
-    setProperty("MaskWorkspace", maskWS);
   } else {
-    g_log.debug() << "[GetDetectorOffsets]: Using EXISTING MaskWorkspace." << std::endl;
+    g_log.debug() << "[GetDetectorOffsets]: Using EXISTING MaskWorkspace.\n";
   }
   // Include any incoming masked detector flags in the mask-workspace values.
   maskWS->combineFromDetectorMasks(inputW->detectorInfo());
@@ -178,7 +182,7 @@ void GetDetectorOffsets::exec() {
     bool spectrumIsMasked = false;
     if (std::abs(offset) > m_maxOffset) {
       g_log.debug() << "[GetDetectorOffsets]: fit failure: offset: " << std::abs(offset)
-                    << " is greater than maximum allowed: " << m_maxOffset << "." << std::endl;
+                    << " is greater than maximum allowed: " << m_maxOffset << ".\n";
       spectrumIsMasked = true;
     }
 
@@ -206,15 +210,19 @@ void GetDetectorOffsets::exec() {
 
   if (g_log.getLevel() >= Logger::Priority::PRIO_TRACE) {
     auto &trace(g_log.getLogStream(Logger::Priority::PRIO_TRACE));
-    trace << "[GetDetectorOffsets]: Computed offsets:" << std::endl;
+    trace << "[GetDetectorOffsets]: Computed offsets:\n" << std::endl;
     for (size_t ns = 0; ns < inputW->getNumberHistograms(); ++ns) {
       const auto dets = inputW->getSpectrum(ns).getDetectorIDs();
       for (const auto &det : dets)
-        trace << "  " << outputW->getValue(det) << (maskWS->isMasked(det) ? "*" : "") << std::endl;
+        trace << "  " << outputW->getValue(det) << (maskWS->isMasked(det) ? "*" : "") << "\n";
     }
   }
   // Return the output
   setProperty("OutputWorkspace", outputW);
+
+  // Only return the mask workspace if it was specified.
+  if (!isDefault("MaskWorkspace"))
+    setProperty("MaskWorkspace", maskWS);
 
   // Also save to .cal file, if requested
   std::string filename = getProperty("GroupingFileName");
@@ -235,6 +243,8 @@ void GetDetectorOffsets::exec() {
  *  @return The calculated offset value
  */
 double GetDetectorOffsets::fitSpectra(const int64_t s) {
+  const double FIT_FAILURE = DBL_MAX;
+
   // Find point of peak centre
   const auto &yValues = inputW->y(s);
   auto it = std::max_element(yValues.cbegin(), yValues.cend());
@@ -246,7 +256,7 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
   // Return if peak of Cross Correlation is nan (Happens when spectra is zero)
   // Pixel with large offset will be masked
   if (std::isnan(peakHeight))
-    return (DBL_MAX);
+    return (FIT_FAILURE);
 
   IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
 
@@ -293,8 +303,8 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
   std::string fitStatus = fit_alg->getProperty("OutputStatus");
   // Pixel with large offset will be masked
   if (fitStatus != "success") {
-    g_log.debug() << "[GetDetectorOffsets]: Fit algorithm failure: " << fitStatus << std::endl;
-    return (DBL_MAX);
+    g_log.debug() << "[GetDetectorOffsets]: Fit algorithm failure: " << fitStatus << "\n";
+    return (FIT_FAILURE);
   }
 
   // std::vector<double> params = fit_alg->getProperty("Parameters");
