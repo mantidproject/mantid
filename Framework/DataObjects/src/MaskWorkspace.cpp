@@ -247,6 +247,9 @@ void MaskWorkspace::copyFrom(std::shared_ptr<const SpecialWorkspace2D> sourcews)
 
 /// Ensure that the detector mask flags include the values from this workspace.
 void MaskWorkspace::combineToDetectorMasks(DetectorInfo &detectors) const {
+  if (!hasInstrument())
+    throw std::logic_error("MaskWorkspace has no instrument");
+
   // detectors which are monitors are not included in the mask
   const auto &detids = getInstrument()->getDetectorIDs(true);
   const size_t N_spectra(getNumberHistograms());
@@ -295,6 +298,9 @@ namespace Mantid::DataObjects {
 
 /// Ensure that this workspace includes the values from the detector mask flags.
 void MaskWorkspace::combineFromDetectorMasks(const DetectorInfo &detectors) {
+  if (!hasInstrument())
+    throw std::logic_error("MaskWorkspace has no instrument");
+
   // detectors which are monitors are not included in the mask
   const auto &detids = getInstrument()->getDetectorIDs(true);
   const size_t N_spectra(getNumberHistograms());
@@ -324,6 +330,9 @@ void MaskWorkspace::combineFromDetectorMasks(const DetectorInfo &detectors) {
 
 /// Test consistency between the values from this workspace and the detector mask flags.
 bool MaskWorkspace::isConsistentWithDetectorMasks(const DetectorInfo &detectors) const {
+  if (!hasInstrument())
+    throw std::logic_error("MaskWorkspace has no instrument");
+
   // detectors which are monitors are not included in the mask
   const auto &detids = getInstrument()->getDetectorIDs(true);
   const size_t N_spectra(getNumberHistograms());
