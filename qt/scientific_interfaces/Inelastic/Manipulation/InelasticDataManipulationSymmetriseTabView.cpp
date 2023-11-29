@@ -24,7 +24,7 @@ constexpr auto NUMERICAL_PRECISION = 2;
 
 namespace {
 
-QString makeNumber(double value) { return QString::number(value, 'g', NUMERICAL_PRECISION); };
+QString makeNumber(double value) { return QString::number(value, 'g', NUMERICAL_PRECISION); }
 
 QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
   auto const xValues = workspace->x(0);
@@ -289,7 +289,6 @@ void InelasticDataManipulationSymmetriseTabView::plotNewData(QString const &work
 
   // Set the preview range to the maximum absolute X value
   auto const axisRange = getXRangeFromWorkspace(sampleWS);
-  double symmRange = std::max(fabs(axisRange.first), fabs(axisRange.second));
 
   // Set some default (and valid) values for E range
   resetEDefaults(m_enumManager->value(m_properties["ReflectType"]) == 0, axisRange);
