@@ -111,6 +111,7 @@ void GroupWorkspaces::addToGroup(const std::string &globExpression) {
 /**
  * Add a list of names to the new group
  * @param names The list of names to add from the ADS
+ * @param outputName The name to give the group workspace
  */
 void GroupWorkspaces::addToGroup(const std::vector<std::string> &names, const std::string &outputName) {
 
