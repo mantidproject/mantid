@@ -163,7 +163,7 @@ class FittingPlotModelTest(unittest.TestCase):
         mock_conv_tof_to_d.return_value = 1.0
         mock_conv_tof_e.return_value = 0.5
         mock_table_return_values = {
-            "Name": ["f2.A0", "f2.Phi", "f2.Nu", "Cost function value"],
+            "Name": ["A0", "Phi", "Nu", "Cost function value"],
             "Value": [1.3, 0.01, 0.1, 1.7],
             "Error": [0.5, 0.4, 4.5, 0.0],
         }
@@ -192,7 +192,7 @@ class FittingPlotModelTest(unittest.TestCase):
         mock_conv_tof_to_d.return_value = 1.0
         mock_conv_tof_e.return_value = 0.5
         mock_table_return_values = {
-            "Name": ["f0.Height", "f0.Centre", "f0.Radius", "Cost function value"],
+            "Name": ["Height", "Centre", "Radius", "Cost function value"],
             "Value": [16.0, 38613.0, 0.65, 1.7],
             "Error": [nan, nan, 0.0, 0.0],
         }
