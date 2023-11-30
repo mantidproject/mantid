@@ -30,7 +30,7 @@ void InelasticDataManipulationSymmetriseTabModel::setupPreviewAlgorithm(
 
   if (!m_isPositiveReflect) {
     reflectNegativeToPositive();
-  };
+  }
   // Run the algorithm on the preview spectrum only, these outputs are only for plotting in the preview window and are
   // not accessed by users directly.
   IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise");

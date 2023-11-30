@@ -28,7 +28,7 @@ QString makeNumber(double value) { return QString::number(value, 'g', NUMERICAL_
 
 QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
   auto const xValues = workspace->x(0);
-  return QPair(xValues.front(), xValues.back());
+  return QPair<double, double>(xValues.front(), xValues.back());
 }
 } // namespace
 
@@ -198,14 +198,16 @@ void InelasticDataManipulationSymmetriseTabView::xRangeHighChanged(double value)
  */
 void InelasticDataManipulationSymmetriseTabView::resetEDefaults(bool isPositive, QPair<double, double> range) {
   auto rangeESelector = m_uiForm.ppRawPlot->getRangeSelector("rangeE");
-  auto rangeReflect = isPositive ? QPair(0.0, range.second) : QPair(range.first, 0.0);
-  auto rangeInitial =
-      isPositive ? QPair(0.1 * range.second, 0.9 * range.second) : QPair(0.9 * range.first, 0.1 * range.first);
 
+  // Set Selector range values
+  auto rangeReflect = isPositive ? QPair(0.0, range.second) : QPair(range.first, 0.0);
   rangeESelector->setBounds(rangeReflect.first, rangeReflect.second);
   m_dblManager->setRange(m_properties["Ehigh"], rangeReflect.first, rangeReflect.second);
   m_dblManager->setRange(m_properties["Elow"], rangeReflect.first, rangeReflect.second);
 
+  // Set Initial selector range values
+  auto rangeInitial =
+      isPositive ? QPair(0.1 * range.second, 0.9 * range.second) : QPair(0.9 * range.first, 0.1 * range.first);
   rangeESelector->setRange(rangeInitial.first, rangeInitial.second);
   m_dblManager->setValue(m_properties["Ehigh"], rangeInitial.second);
   m_dblManager->setValue(m_properties["Elow"], rangeInitial.first);

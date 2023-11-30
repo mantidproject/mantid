@@ -79,7 +79,7 @@ void InelasticDataManipulationSymmetriseTab::run() {
   // Handle algorithm completion signal
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
-  // Execute algorithm on separated thread
+  // Execute the algorithm on a separated thread
   m_batchAlgoRunner->executeBatchAsync();
 }
 
