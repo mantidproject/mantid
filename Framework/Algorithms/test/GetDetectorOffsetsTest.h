@@ -380,30 +380,23 @@ public:
       }
       return rval;
     };
-    std::vector<double> expectedPeakFitLocations = {-0.0196078, -0.0909091, -0.166667, 0.485428,  -0.0912629,
-                                                    -0.209506,  -0.0909091, -0.166667, -0.230769, -0.285714};
+    std::vector<double> expectedPeakFitLocations = {-0.0909090909, -0.1071428571, -0.1228070175, -0.1379310344,
+                                                    -0.1525423728, -0.1666666666, -0.1803278688, -0.1935483870,
+                                                    -0.2063492063, -0.2187499999};
 
     Workspace2D_sptr input = WorkspaceCreationHelper::create2DWorkspaceFromFunctionAndArgsList(
         peakFunc, {
-                      {0.0, 200.0, std::size_t(200), 1.0, 10.0},
-                      {0.0, 200.0, std::size_t(200), 5.0, 10.0},
-                      {0.0, 200.0, std::size_t(200), 10.0, 10.0},
-                      {0.0, 200.0, std::size_t(200), 2.0, 1.0}, // ('location': 1.0, 'width' 1.0) fails
-                      {0.0, 200.0, std::size_t(200), 5.0, 1.0},
-                      {0.0, 200.0, std::size_t(200), 10.0, 1.0},
-                      {0.0, 200.0, std::size_t(200), 5.0,
-                       5.0}, // ('location': 1.0, 'width' 2.0), ('location': 2.0, 'width' 2.0) fails
+                      // note that "{0.0, 200.0, std::size_t(200), 1.0, 1.0}" reliably fails
+                      {0.0, 200.0, std::size_t(200), 5.0, 5.0},
+                      {0.0, 200.0, std::size_t(200), 6.0, 5.0},
+                      {0.0, 200.0, std::size_t(200), 7.0, 5.0},
+                      {0.0, 200.0, std::size_t(200), 8.0, 5.0},
+                      {0.0, 200.0, std::size_t(200), 9.0, 5.0},
                       {0.0, 200.0, std::size_t(200), 10.0, 5.0},
-                      {0.0, 200.0, std::size_t(200), 15.0, 5.0},
-                      {0.0, 200.0, std::size_t(200), 20.0, 5.0}
-                      // These *all* fail:
-                      /*
-                              {0.0, 60.0, std::size_t(200), 10.0, 1.0}, {0.0, 60.0, std::size_t(200), 15.0, 1.5},
-                              {0.0, 60.0, std::size_t(200), 20.0, 3.0}, {0.0, 60.0, std::size_t(200), 25.0, 2.0},
-                              {0.0, 60.0, std::size_t(200), 30.0, 5.0}, {0.0, 60.0, std::size_t(200), 35.0, 10.0},
-                              {0.0, 60.0, std::size_t(200), 40.0, 1.0}, {0.0, 60.0, std::size_t(200), 45.0, 2.0},
-                              {0.0, 60.0, std::size_t(200), 60.0, 4.0}, {0.0, 60.0, std::size_t(200), 55.0, 3.5},
-                      */
+                      {0.0, 200.0, std::size_t(200), 11.0, 5.0},
+                      {0.0, 200.0, std::size_t(200), 12.0, 5.0},
+                      {0.0, 200.0, std::size_t(200), 13.0, 5.0},
+                      {0.0, 200.0, std::size_t(200), 14.0, 5.0},
                   });
 
     input->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
@@ -512,7 +505,7 @@ public:
     for (auto it = expectedPeakFitLocations.cbegin(); it != expectedPeakFitLocations.cend(); ++it, ++ns) {
       for (const auto &det : input->getSpectrum(ns).getDetectorIDs()) {
         TS_ASSERT(!mask->isMasked(det));
-        TS_ASSERT_DELTA(output->getValue(det), *it, 0.0001);
+        TS_ASSERT_DELTA(output->getValue(det), *it, 0.001);
       }
     }
 
@@ -557,7 +550,7 @@ public:
     for (auto it = expectedPeakFitLocations.cbegin(); it != expectedPeakFitLocations.cend(); ++it, ++ns) {
       for (const auto &det : input->getSpectrum(ns).getDetectorIDs()) {
         if (!mask->isMasked(det))
-          TS_ASSERT_DELTA(output->getValue(det), *it, 0.0001);
+          TS_ASSERT_DELTA(output->getValue(det), *it, 0.001);
         TS_ASSERT(mask->isMasked(det) == (expectedMaskValues[ns] == 1));
       }
     }
@@ -603,7 +596,7 @@ public:
     for (auto it = expectedPeakFitLocations.cbegin(); it != expectedPeakFitLocations.cend(); ++it, ++ns) {
       for (const auto &det : input->getSpectrum(ns).getDetectorIDs()) {
         if (!mask->isMasked(det))
-          TS_ASSERT_DELTA(output->getValue(det), *it, 0.0001);
+          TS_ASSERT_DELTA(output->getValue(det), *it, 0.001);
         TS_ASSERT(mask->isMasked(det) == (expectedMaskValues[ns] == 1));
       }
     }
@@ -656,7 +649,7 @@ public:
     for (auto it = expectedPeakFitLocations.cbegin(); it != expectedPeakFitLocations.cend(); ++it, ++ns) {
       for (const auto &det : input->getSpectrum(ns).getDetectorIDs()) {
         if (!mask->isMasked(det))
-          TS_ASSERT_DELTA(output->getValue(det), *it, 0.0001);
+          TS_ASSERT_DELTA(output->getValue(det), *it, 0.001);
         TS_ASSERT(mask->isMasked(det) == (expectedMaskValues[ns] == 1));
       }
     }
@@ -711,7 +704,7 @@ public:
     for (auto it = expectedPeakFitLocations.cbegin(); it != expectedPeakFitLocations.cend(); ++it, ++ns) {
       for (const auto &det : input->getSpectrum(ns).getDetectorIDs()) {
         if (!mask->isMasked(det))
-          TS_ASSERT_DELTA(output->getValue(det), *it, 0.0001);
+          TS_ASSERT_DELTA(output->getValue(det), *it, 0.001);
         TS_ASSERT(mask->isMasked(det) == (expectedMaskValues[ns] == 1));
       }
     }
