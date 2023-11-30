@@ -109,7 +109,7 @@ private:
   MantidQt::API::AlgorithmDialog *m_dlg; // Non-owning
 };
 
-class FindPeakNormalStrategy : public FindPeakStrategy<Mantid::API::ColumnVector<double>> {
+class FindPeakDefaultStrategy : public FindPeakStrategy<Mantid::API::ColumnVector<double>> {
 public:
   void initialise(const std::string &wsName, const int workspaceIndex, const std::string &peakListName, const int FWHM,
                   AlgorithmFinishObserver *obs) override;
@@ -372,6 +372,8 @@ public:
   bool isParameterExplicitlySetOf(const QString &prefix, const std::string &param);
   QStringList getPeakPrefixes() const;
   void findPeaks(std::unique_ptr<FindPeakStrategyGeneric> findPeakStrategy);
+  bool createAndAddFunction(const Mantid::API::MatrixWorkspace_sptr inputWS, const int peakIndex,
+                            std::unique_ptr<FindPeakStrategyGeneric> &findPeakStrategy);
 
   // Emits a signal for when the sequential fit has finished
 

@@ -662,7 +662,7 @@ void FitPropertyBrowser::executeDisplayMenu(const QString &item) {
 
 void FitPropertyBrowser::executePeakFindingAlgMenu(const QString &item) {
   if (item == "FindPeaks")
-    findPeaks(std::make_unique<FindPeakNormalStrategy>());
+    findPeaks(std::make_unique<FindPeakDefaultStrategy>());
   if (item == "FindPeaksConvolve")
     findPeaks(std::make_unique<FindPeakConvolveStrategy>());
 }
@@ -2755,18 +2755,12 @@ void FitPropertyBrowser::findPeaks(std::unique_ptr<FindPeakStrategyGeneric> find
     findPeakStrategy->execute();
     clear();
     for (size_t i = 0; i < findPeakStrategy->peakNumber(); ++i) {
-      if (findPeakStrategy->getPeakCentre(i) < startX() || findPeakStrategy->getPeakCentre(i) > endX())
+      if (findPeakStrategy->getPeakCentre(i) < startX() || findPeakStrategy->getPeakCentre(i) > endX()) {
         continue;
-      auto f = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
-          Mantid::API::FunctionFactory::Instance().createFunction(defaultPeakType()));
-      if (!f)
+      }
+      if (!createAndAddFunction(inputWS, i, findPeakStrategy)) {
         break;
-
-      f->setMatrixWorkspace(inputWS, workspaceIndex(), startX(), endX());
-      f->setCentre(findPeakStrategy->getPeakCentre(i));
-      f->setFwhm(findPeakStrategy->getPeakWidth(i));
-      f->setHeight(findPeakStrategy->getPeakHeight(i));
-      addFunction(f->asString());
+      }
     }
   } catch (...) {
     QApplication::restoreOverrideCursor();
@@ -3300,6 +3294,22 @@ QString FitPropertyBrowser::addFunction(const QString &fnName) {
   return addFunction(fnName.toStdString())->functionPrefix();
 }
 
+bool FitPropertyBrowser::createAndAddFunction(const Mantid::API::MatrixWorkspace_sptr inputWS, const int peakIndex,
+                                              std::unique_ptr<FindPeakStrategyGeneric> &findPeakStrategy) {
+  bool validFn = false;
+  auto f = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
+      Mantid::API::FunctionFactory::Instance().createFunction(defaultPeakType()));
+  if (f) {
+    validFn = true;
+    f->setMatrixWorkspace(inputWS, workspaceIndex(), startX(), endX());
+    f->setCentre(findPeakStrategy->getPeakCentre(peakIndex));
+    f->setFwhm(findPeakStrategy->getPeakWidth(peakIndex));
+    f->setHeight(findPeakStrategy->getPeakHeight(peakIndex));
+    addFunction(f->asString());
+  }
+  return validFn;
+}
+
 PropertyHandler *FitPropertyBrowser::getPeakHandler(const QString &prefix) {
   if (prefix.isEmpty())
     throw std::runtime_error("Peak function prefix cannot be empty");
@@ -3378,15 +3388,15 @@ void FindPeakConvolveStrategy::initialise(const std::string &wsName, const int w
                                           const std::string &peakListName, const int FWHM,
                                           AlgorithmFinishObserver *obs) {
   m_peakListName = peakListName;
-  double peakExtent{FWHM * (6.0 / 2.355)}; // Approx convert from FWHM to peak extent, assuming gaussian
+  const double peakExtent{FWHM * (6.0 / 2.355)}; // Approx convert from FWHM to peak extent, assuming gaussian
   QHash<QString, QString> defaultValues;
   defaultValues["InputWorkspace"] = QString::fromStdString(wsName);
   defaultValues["OutputWorkspace"] = QString::fromStdString(m_peakListName);
   defaultValues["StartWorkspaceIndex"] = QString::number(workspaceIndex);
   defaultValues["EndWorkspaceIndex"] = QString::number(workspaceIndex);
   defaultValues["EstimatedPeakExtent"] = QString::number(peakExtent);
-  QStringList enabledParams{"EstimatedPeakExtent"};
-  QStringList disabledParams{"InputWorkspace", "OutputWorkspace", "StartWorkspaceIndex", "EndWorkspaceIndex"};
+  const QStringList enabledParams{"EstimatedPeakExtent"};
+  const QStringList disabledParams{"InputWorkspace", "OutputWorkspace", "StartWorkspaceIndex", "EndWorkspaceIndex"};
   API::InterfaceManager interfaceMgr;
   m_dlg = interfaceMgr.createDialogFromName("FindPeaksConvolve", -1, nullptr, false, defaultValues, QString(),
                                             enabledParams, disabledParams);
@@ -3394,23 +3404,6 @@ void FindPeakConvolveStrategy::initialise(const std::string &wsName, const int w
   m_dlg->disableExitButton();
   m_obs = obs;
   m_dlg->addAlgorithmObserver(m_obs);
-}
-
-void FindPeakNormalStrategy::initialise(const std::string &wsName, const int workspaceIndex,
-                                        const std::string &peakListName, const int FWHM, AlgorithmFinishObserver *obs) {
-  UNUSED_ARG(obs);
-  m_peakListName = peakListName;
-  QString setting =
-      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksTolerance"));
-  int Tolerance{setting.isEmpty() ? 4 : setting.toInt()};
-
-  m_alg = Mantid::API::AlgorithmManager::Instance().create("FindPeaks");
-  m_alg->initialize();
-  m_alg->setPropertyValue("InputWorkspace", wsName);
-  m_alg->setProperty("WorkspaceIndex", workspaceIndex);
-  m_alg->setPropertyValue("PeaksList", m_peakListName);
-  m_alg->setProperty("FWHM", FWHM);
-  m_alg->setProperty("Tolerance", Tolerance);
 }
 
 void FindPeakConvolveStrategy::execute() {
@@ -3433,7 +3426,7 @@ void FindPeakConvolveStrategy::execute() {
   m_peakHeights = std::make_unique<std::vector<double>>(m_peakCentres->size(), 0); // y pos?
 }
 
-void FindPeakNormalStrategy::execute() {
+void FindPeakDefaultStrategy::execute() {
   m_alg->execute();
   Mantid::API::ITableWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(m_peakListName));
@@ -3441,6 +3434,24 @@ void FindPeakNormalStrategy::execute() {
   m_peakCentres = std::make_unique<Mantid::API::ColumnVector<double>>(ws->getVector("centre"));
   m_peakWidths = std::make_unique<Mantid::API::ColumnVector<double>>(ws->getVector("width"));
   m_peakHeights = std::make_unique<Mantid::API::ColumnVector<double>>(ws->getVector("height"));
+}
+
+void FindPeakDefaultStrategy::initialise(const std::string &wsName, const int workspaceIndex,
+                                         const std::string &peakListName, const int FWHM,
+                                         AlgorithmFinishObserver *obs) {
+  UNUSED_ARG(obs);
+  m_peakListName = peakListName;
+  const QString setting =
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksTolerance"));
+  const int Tolerance{setting.isEmpty() ? 4 : setting.toInt()};
+
+  m_alg = Mantid::API::AlgorithmManager::Instance().create("FindPeaks");
+  m_alg->initialize();
+  m_alg->setPropertyValue("InputWorkspace", wsName);
+  m_alg->setProperty("WorkspaceIndex", workspaceIndex);
+  m_alg->setPropertyValue("PeaksList", m_peakListName);
+  m_alg->setProperty("FWHM", FWHM);
+  m_alg->setProperty("Tolerance", Tolerance);
 }
 
 } // namespace MantidWidgets
