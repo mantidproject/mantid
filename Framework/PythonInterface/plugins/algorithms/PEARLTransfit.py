@@ -19,7 +19,7 @@
 # 'Remote determination of sample temperature by neutron resonance spectroscopy' - Nuclear Instruments and Methods in
 # Physics Research A 547 (2005) 601-615
 # -----------------------------------------------------------------------
-from mantid.kernel import Direction, StringListValidator
+from mantid.kernel import Direction, StringListValidator, EnabledWhenProperty, PropertyCriterion
 from mantid.api import PythonAlgorithm, MultipleFileProperty, AlgorithmFactory, mtd
 from mantid.simpleapi import (
     LoadRaw,
@@ -158,6 +158,29 @@ class PEARLTransfit(PythonAlgorithm):
             doc="Estimate background parameters from data.",
         )
 
+        self.declareProperty(
+            name="Bg0guessFraction",
+            defaultValue=0.84,
+            direction=Direction.Input,
+            doc="Starting guess for constant term of polynomial background is calculated as Bg0guessScaleFactor*y0 where"
+            "y0 is the intensity in the first bin of the data to be fitted.",
+        )
+        self.declareProperty(
+            name="Bg1guess",
+            defaultValue=0.0173252,
+            direction=Direction.Input,
+            doc="Starting guess for linear term of polynomial background.",
+        )
+        self.declareProperty(
+            name="Bg2guess",
+            defaultValue=0.0000004,
+            direction=Direction.Input,
+            doc="Starting guess for quadratic term of polynomial background.",
+        )
+        enable_bg_params = EnabledWhenProperty("EstimateBackground", PropertyCriterion.IsNotDefault)
+        for prop in ["Bg0guessFraction", "Bg1guess", "Bg2guess"]:
+            self.setPropertySettings(prop, enable_bg_params)
+
     def validateFileInputs(self, filesList):
         # MultipleFileProperty returns a list of list(s) of files, or a list containing a single (string) file
         # Condense into one list of file(s) in either case
@@ -222,9 +245,9 @@ class PEARLTransfit(PythonAlgorithm):
                 bg1guess, bg0guess = estimate_linear_background_and_peak_position(wsBgGuess.readX(0), wsBgGuess.readY(0))
                 bg2guess = 0.0
             else:
-                bg0guess = 0.84 * wsBgGuess.readY(0)[0]
-                bg1guess = 0.0173252
-                bg2guess = 0.0000004
+                bg0guess = self.getProperty("Bg0guessFraction").value * wsBgGuess.readY(0)[0]
+                bg1guess = self.getProperty("Bg1guess").value
+                bg2guess = self.getProperty("Bg2guess").value
             # New Voigt function as from Igor pro function
             Fit(
                 Function="name=PEARLTransVoigt,Position="
