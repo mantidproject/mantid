@@ -218,6 +218,17 @@ void IqtFunctionModel::tieIntensities(bool on) {
   }
 }
 
+EstimationDataSelector IqtFunctionModel::getEstimationDataSelector() const {
+  return [](const Mantid::MantidVec &x, const Mantid::MantidVec &y,
+            const std::pair<double, double> range) -> DataForParameterEstimation {
+    (void)range;
+    size_t const n = 4;
+    if (y.size() < n + 1)
+      return DataForParameterEstimation{{}, {}};
+    return DataForParameterEstimation{{x[0], x[n]}, {y[0], y[n]}};
+  };
+}
+
 void IqtFunctionModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
 }

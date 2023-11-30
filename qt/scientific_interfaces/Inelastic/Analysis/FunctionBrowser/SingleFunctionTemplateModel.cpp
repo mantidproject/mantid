@@ -95,6 +95,31 @@ void SingleFunctionTemplateModel::setFitType(const QString &type) {
 
 QString SingleFunctionTemplateModel::getFitType() { return m_fitType; }
 
+EstimationDataSelector SingleFunctionTemplateModel::getEstimationDataSelector() const {
+  return [](const std::vector<double> &x, const std::vector<double> &y,
+            const std::pair<double, double> range) -> DataForParameterEstimation {
+    // Find data thats within range
+    double xmin = range.first;
+    double xmax = range.second;
+    if (xmax - xmin < 1e-5) {
+      return DataForParameterEstimation{};
+    }
+
+    const auto startItr =
+        std::find_if(x.cbegin(), x.cend(), [xmin](const double &val) -> bool { return val >= (xmin - 1e-5); });
+    const auto endItr = std::find_if(x.cbegin(), x.cend(), [xmax](const double &val) -> bool { return val > xmax; });
+
+    if (std::distance(startItr, endItr - 1) < 2)
+      return DataForParameterEstimation{};
+
+    size_t first = std::distance(x.cbegin(), startItr);
+    size_t end = std::distance(x.cbegin(), endItr);
+    size_t m = first + (end - first) / 2;
+
+    return DataForParameterEstimation{{x[first], x[m]}, {y[first], y[m]}};
+  };
+}
+
 void SingleFunctionTemplateModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
 }

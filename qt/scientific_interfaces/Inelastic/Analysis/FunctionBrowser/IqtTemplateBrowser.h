@@ -27,7 +27,7 @@ namespace IDA {
 class MANTIDQT_INELASTIC_DLL IqtTemplateBrowser : public FunctionTemplateBrowser {
   Q_OBJECT
 public:
-  explicit IqtTemplateBrowser(QWidget *parent = nullptr);
+  explicit IqtTemplateBrowser(std::unique_ptr<IqtFunctionModel> functionModel, QWidget *parent = nullptr);
   void addExponentialOne();
   void removeExponentialOne();
   void addExponentialTwo();
@@ -64,6 +64,7 @@ public:
   void updateParameterDescriptions(const QMap<int, std::string> &parameterNames); // override;
   void setErrorsEnabled(bool enabled) override;
   void clear() override;
+  EstimationDataSelector getEstimationDataSelector() const override;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
   void estimateFunctionParameters() override;
   void setBackgroundA0(double value) override;

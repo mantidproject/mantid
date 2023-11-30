@@ -31,7 +31,7 @@ class IqtTemplateBrowser;
 class MANTIDQT_INELASTIC_DLL IqtTemplatePresenter : public QObject {
   Q_OBJECT
 public:
-  explicit IqtTemplatePresenter(IqtTemplateBrowser *view);
+  explicit IqtTemplatePresenter(IqtTemplateBrowser *view, std::unique_ptr<IqtFunctionModel> functionModel);
   void setNumberOfExponentials(int);
   void setStretchExponential(bool);
   void setBackground(const QString &name);
@@ -54,6 +54,7 @@ public:
   void setErrorsEnabled(bool enabled);
   void tieIntensities(bool on);
   bool canTieIntensities() const;
+  EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void setBackgroundA0(double value);
 
@@ -79,7 +80,7 @@ private:
   void updateViewParameterNames();
   void updateView();
   IqtTemplateBrowser *m_view;
-  IqtFunctionModel m_model;
+  std::unique_ptr<IqtFunctionModel> m_model;
   EditLocalParameterDialog *m_editLocalParameterDialog;
 };
 

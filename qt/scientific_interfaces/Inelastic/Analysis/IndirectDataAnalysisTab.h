@@ -13,6 +13,7 @@
 #include "IndirectFitPropertyBrowser.h"
 #include "IndirectFittingModel.h"
 #include "IndirectTab.h"
+#include "ui_IndirectFitTab.h"
 
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 
@@ -21,6 +22,7 @@
 #include <QtCore>
 
 #include <memory>
+#include <optional>
 #include <type_traits>
 
 #include <QList>
@@ -35,13 +37,33 @@ class MANTIDQT_INELASTIC_DLL IndirectDataAnalysisTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectDataAnalysisTab(IndirectFittingModel *model, QWidget *parent = nullptr);
+  IndirectDataAnalysisTab(std::string const &tabName, bool const hasResolution, QWidget *parent = nullptr);
   virtual ~IndirectDataAnalysisTab() override = default;
 
-  void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
-  void setPlotView(IIndirectFitPlotView *view);
-  void setOutputOptionsView(IIndirectFitOutputOptionsView *view);
-  void setFitPropertyBrowser(IndirectFitPropertyBrowser *browser);
+  template <typename FittingModel> void setupFittingModel() { m_fittingModel = std::make_unique<FittingModel>(); }
+
+  template <typename TemplateBrowser, typename FunctionModel>
+  void setupFitPropertyBrowser(std::vector<std::string> const &hiddenProperties, bool const convolveMembers = false) {
+    auto functionModel = std::make_unique<FunctionModel>();
+    m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(new TemplateBrowser(std::move(functionModel)));
+    m_uiForm->dockArea->m_fitPropertyBrowser->init();
+    m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(hiddenProperties);
+    m_fitPropertyBrowser = m_uiForm->dockArea->m_fitPropertyBrowser;
+    setConvolveMembers(convolveMembers);
+  }
+
+  template <typename FitDataView> void setupFitDataView() {
+    m_uiForm->dockArea->setFitDataView(new FitDataView(m_uiForm->dockArea));
+  }
+
+  template <typename FitDataPresenter> void setUpFitDataPresenter() {
+    m_dataPresenter =
+        std::make_unique<FitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
+  }
+
+  void setupOutputOptionsPresenter(bool const editResults = false);
+  void setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds = std::nullopt);
+
   WorkspaceID getSelectedDataIndex() const;
   WorkspaceIndex getSelectedSpectrum() const;
   bool isRangeCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
@@ -51,12 +73,11 @@ public:
   static size_t getNumberOfSpecificFunctionContained(const std::string &functionName,
                                                      const IFunction *compositeFunction);
 
-  virtual std::string getTabName() const = 0;
-  virtual bool hasResolution() const = 0;
+  std::string getTabName() const noexcept { return m_tabName; }
+  bool hasResolution() const noexcept { return m_hasResolution; }
   void setFileExtensionsByName(bool filter);
 
 protected:
-  void setRunButton(QPushButton *runButton);
   IndirectFittingModel *getFittingModel() const;
   void run() override;
   void setSampleWSSuffixes(const QStringList &suffices);
@@ -81,10 +102,11 @@ protected:
   WorkspaceID m_activeWorkspaceID;
   WorkspaceIndex m_activeSpectrumIndex;
 
+  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
+
 private:
   void setup() override;
   bool validate() override;
-  virtual EstimationDataSelector getEstimationDataSelector() const = 0;
   void connectPlotPresenter();
   void connectFitPropertyBrowser();
   void connectDataPresenter();
@@ -98,12 +120,13 @@ private:
   void enableOutputOptions(bool enable);
   void setPDFWorkspace(std::string const &workspaceName);
   void updateParameterEstimationData();
-  virtual void addDataToModel(IAddWorkspaceDialog const *dialog) = 0;
-  virtual std::string getFitTypeString() const = 0;
+  std::string getFitTypeString() const;
+
+  std::string m_tabName;
+  bool m_hasResolution;
 
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
-  QPushButton *m_runButton;
 
 protected slots:
   void setModelFitFunction();

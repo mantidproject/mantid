@@ -3,12 +3,9 @@ set(SRC_FILES
     Analysis/ConvFitModel.cpp
     Analysis/ConvFitDataView.cpp
     Analysis/ConvFitDataPresenter.cpp
+    Analysis/DataAnalysisTabFactory.cpp
     Analysis/IndirectDataAnalysis.cpp
     Analysis/IndirectDataAnalysisTab.cpp
-    Analysis/IndirectDataAnalysisMSDFitTab.cpp
-    Analysis/IndirectDataAnalysisIqtFitTab.cpp
-    Analysis/IndirectDataAnalysisConvFitTab.cpp
-    Analysis/IndirectDataAnalysisFqFitTab.cpp
     Analysis/FqFitAddWorkspaceDialog.cpp
     Analysis/FqFitDataPresenter.cpp
     Analysis/FqFitDataView.cpp
@@ -37,9 +34,11 @@ set(SRC_FILES
     Analysis/FunctionBrowser/ConvFunctionModel.cpp
     Analysis/FunctionBrowser/ConvTemplateBrowser.cpp
     Analysis/FunctionBrowser/ConvTemplatePresenter.cpp
+    Analysis/FunctionBrowser/FqFunctionModel.cpp
     Analysis/FunctionBrowser/IqtFunctionModel.cpp
     Analysis/FunctionBrowser/IqtTemplateBrowser.cpp
     Analysis/FunctionBrowser/IqtTemplatePresenter.cpp
+    Analysis/FunctionBrowser/MSDFunctionModel.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplateModel.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.cpp
     Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp
@@ -68,10 +67,6 @@ set(MOC_FILES
     Analysis/ConvFitDataPresenter.h
     Analysis/IndirectDataAnalysis.h
     Analysis/IndirectDataAnalysisTab.h
-    Analysis/IndirectDataAnalysisMSDFitTab.h
-    Analysis/IndirectDataAnalysisIqtFitTab.h
-    Analysis/IndirectDataAnalysisConvFitTab.h
-    Analysis/IndirectDataAnalysisFqFitTab.h
     Analysis/FqFitAddWorkspaceDialog.h
     Analysis/FqFitDataPresenter.h
     Analysis/FqFitDataView.h
@@ -112,13 +107,13 @@ set(MOC_FILES
 set(INC_FILES
     DllConfig.h
     PrecompiledHeader.h
+    Analysis/DataAnalysisTabFactory.h
     Analysis/IDAFunctionParameterEstimation.h
     Analysis/FqFitModel.h
-    Analysis/IFQFitObserver.h
     Analysis/IqtFitModel.h
     Analysis/MSDFitModel.h
     Analysis/ConvFitModel.h
-    Analysis/FQFitConstants.h
+    Analysis/FitTabConstants.h
     Analysis/IIndirectFitDataModel.h
     Analysis/IndirectFitDataModel.h
     Analysis/IIndirectFitOutput.h
@@ -131,6 +126,8 @@ set(INC_FILES
     Analysis/IndirectFittingModel.h
     Analysis/ParameterEstimation.h
     Analysis/FunctionBrowser/ConvFunctionModel.h
+    Analysis/FunctionBrowser/FqFunctionModel.h
+    Analysis/FunctionBrowser/MSDFunctionModel.h
     Manipulation/InelasticDataManipulationElwinTabModel.h
     Manipulation/InelasticDataManipulationIqtTabModel.h
     Manipulation/InelasticDataManipulationMomentsTabModel.h

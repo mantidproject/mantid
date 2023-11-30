@@ -86,6 +86,7 @@ public:
   void setBackground(BackgroundType bgType);
   void removeBackground();
   bool hasBackground() const;
+  EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void setQValues(const std::vector<double> &qValues);

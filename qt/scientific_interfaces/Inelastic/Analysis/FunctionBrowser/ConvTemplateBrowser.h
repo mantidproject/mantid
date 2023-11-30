@@ -29,7 +29,7 @@ using namespace ConvTypes;
 class MANTIDQT_INELASTIC_DLL ConvTemplateBrowser : public FunctionTemplateBrowser {
   Q_OBJECT
 public:
-  explicit ConvTemplateBrowser(QWidget *parent = nullptr);
+  explicit ConvTemplateBrowser(std::unique_ptr<ConvFunctionModel> functionModel, QWidget *parent = nullptr);
   void setFunction(const QString &funStr) override;
   IFunction_sptr getGlobalFunction() const override;
   IFunction_sptr getFunction() const override;
@@ -47,6 +47,7 @@ public:
   void updateParameterNames(const QMap<int, QString> &parameterNames) override;
   void setErrorsEnabled(bool enabled) override;
   void clear() override;
+  EstimationDataSelector getEstimationDataSelector() const override;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data) override;
   void estimateFunctionParameters() override;
 

@@ -14,17 +14,22 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 class MANTIDQT_INELASTIC_DLL IDAFunctionParameterEstimation {
-  using EstimationFunction =
-      std::function<void(::Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData)>;
 
 public:
-  void addParameterEstimationFunction(std::string functionName, EstimationFunction function);
-  void estimateFunctionParameters(::Mantid::API::IFunction_sptr &function,
+  using ParameterEstimateSetter =
+      std::function<void(Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData)>;
+  using ParameterEstimator =
+      std::function<std::unordered_map<std::string, double>(Mantid::MantidVec const &, Mantid::MantidVec const &)>;
+
+  IDAFunctionParameterEstimation(std::unordered_map<std::string, ParameterEstimator> estimators);
+  void addParameterEstimationFunction(std::string const &functionName, ParameterEstimateSetter function);
+  void estimateFunctionParameters(Mantid::API::IFunction_sptr &function,
                                   const DataForParameterEstimation &estimationData);
 
 private:
-  std::map<std::string, EstimationFunction> m_funcMap;
+  std::map<std::string, ParameterEstimateSetter> m_funcMap;
 };
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

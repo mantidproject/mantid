@@ -9,9 +9,11 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "Analysis/ConvFitAddWorkspaceDialog.h"
 #include "Analysis/ConvFitDataPresenter.h"
 #include "Analysis/ConvFitModel.h"
 #include "Analysis/IIndirectFitDataView.h"
+#include "IndirectAddWorkspaceDialog.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
@@ -158,6 +160,16 @@ public:
   void test_that_the_data_table_is_the_size_specified() {
     TS_ASSERT_EQUALS(m_dataTable->rowCount(), 6);
     TS_ASSERT_EQUALS(m_dataTable->columnCount(), 6);
+  }
+
+  void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_convfit() {
+    auto dialog = new IndirectAddWorkspaceDialog(nullptr);
+    TS_ASSERT(!m_presenter->addWorkspaceFromDialog(dialog));
+  }
+
+  void test_addWorkspaceFromDialog_returns_true_for_a_valid_dialog() {
+    auto dialog = new ConvFitAddWorkspaceDialog(nullptr);
+    TS_ASSERT(m_presenter->addWorkspaceFromDialog(dialog));
   }
 
   void test_updateTableFromModel_clears_table_and_adds_new_row_for_each_entry() {

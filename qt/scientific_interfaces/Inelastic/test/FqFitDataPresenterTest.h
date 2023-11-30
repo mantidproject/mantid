@@ -9,10 +9,12 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "Analysis/FqFitAddWorkspaceDialog.h"
 #include "Analysis/FqFitDataPresenter.h"
 #include "Analysis/FqFitModel.h"
 #include "Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "Analysis/IndirectFitDataView.h"
+#include "IndirectAddWorkspaceDialog.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
@@ -116,10 +118,6 @@ public:
   MOCK_CONST_METHOD1(getExcludeRegionVector, std::vector<double>(FitDomainIndex index));
 };
 
-class SingleFunctionTemplateBrowserMock : public IFQFitObserver {
-  MOCK_METHOD1(updateAvailableFunctions, void(const std::map<std::string, std::string> &functionInitialisationStrings));
-};
-
 /// Mock object to mock the model
 class MockFqFitModel : public FqFitModel {};
 
@@ -139,12 +137,10 @@ public:
     m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
 
     m_dataTable = createEmptyTableWidget(6, 5);
-    m_SingleFunctionTemplateBrowser = std::make_unique<SingleFunctionTemplateBrowserMock>();
 
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
 
-    m_presenter = std::make_unique<FqFitDataPresenter>(std::move(m_model.get()), std::move(m_view.get()),
-                                                       m_SingleFunctionTemplateBrowser.get());
+    m_presenter = std::make_unique<FqFitDataPresenter>(std::move(m_model.get()), std::move(m_view.get()));
     m_workspace = createWorkspaceWithTextAxis(6, getTextAxisLabels());
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
   }
@@ -166,6 +162,11 @@ public:
     TS_ASSERT(m_presenter);
     TS_ASSERT(m_model);
     TS_ASSERT(m_view);
+  }
+
+  void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_fqfit() {
+    auto dialog = new IndirectAddWorkspaceDialog(nullptr);
+    TS_ASSERT(!m_presenter->addWorkspaceFromDialog(dialog));
   }
 
   void test_addWorkspace_does_not_throw_with_width() {
@@ -201,7 +202,6 @@ public:
 
 private:
   std::unique_ptr<QTableWidget> m_dataTable;
-  std::unique_ptr<SingleFunctionTemplateBrowserMock> m_SingleFunctionTemplateBrowser;
 
   std::unique_ptr<MockFqFitDataView> m_view;
   std::unique_ptr<MockIndirectFitDataModel> m_model;

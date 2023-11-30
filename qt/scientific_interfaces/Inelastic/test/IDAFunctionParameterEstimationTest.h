@@ -16,46 +16,46 @@ using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces::IDA;
 
 namespace {
-DataForParameterEstimation createEstimationData() {
-  std::vector<double> x(10, 1);
-  std::vector<double> y(10, 0.981);
+DataForParameterEstimation createEstimationData(int const size) {
+  std::vector<double> x(size, 1);
+  std::vector<double> y(size, 0.981);
 
   return DataForParameterEstimation{x, y};
 }
 
-void estimationFunctionForLinearBackground(IFunction_sptr &function, const DataForParameterEstimation &) {
-
-  function->setParameter("A0", 2.00);
-  function->setParameter("A1", 3.00);
-}
 } // namespace
 
 class IDAFunctionParameterEstimationTest : public CxxTest::TestSuite {
 public:
-  IDAFunctionParameterEstimationTest() { m_estimationData = createEstimationData(); }
+  IDAFunctionParameterEstimationTest() {
+    m_fitFunction = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
+      (void)x;
+      (void)y;
+      return std::unordered_map<std::string, double>{{"A0", 2.0}, {"A1", 3.0}};
+    };
+  }
 
-  void test_estimateFunctionParameters_does_nothing_if_fit_esimate_does_not_exist() {
-    IDAFunctionParameterEstimation parameterEstimation;
+  void test_estimateFunctionParameters_does_nothing_if_estimate_data_is_too_small() {
+    IDAFunctionParameterEstimation parameterEstimation({{"LinearBackground", m_fitFunction}});
     auto fun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=0,A1=0");
     auto funCopy = fun->clone();
 
-    parameterEstimation.estimateFunctionParameters(fun, m_estimationData);
+    parameterEstimation.estimateFunctionParameters(fun, createEstimationData(1));
 
     TS_ASSERT_EQUALS(fun->getParameter("A0"), funCopy->getParameter("A0"))
     TS_ASSERT_EQUALS(fun->getParameter("A1"), funCopy->getParameter("A1"))
   }
 
   void test_estimateFunctionParameters_correctly_updates_function() {
-    IDAFunctionParameterEstimation parameterEstimation;
+    IDAFunctionParameterEstimation parameterEstimation({{"LinearBackground", m_fitFunction}});
     auto fun = FunctionFactory::Instance().createInitialized("name=LinearBackground,A0=0,A1=0");
-    parameterEstimation.addParameterEstimationFunction("LinearBackground", estimationFunctionForLinearBackground);
 
-    parameterEstimation.estimateFunctionParameters(fun, m_estimationData);
+    parameterEstimation.estimateFunctionParameters(fun, createEstimationData(2));
 
     TS_ASSERT_EQUALS(fun->getParameter("A0"), 2.00)
     TS_ASSERT_EQUALS(fun->getParameter("A1"), 3.00)
   }
 
 private:
-  DataForParameterEstimation m_estimationData;
+  IDAFunctionParameterEstimation::ParameterEstimator m_fitFunction;
 };

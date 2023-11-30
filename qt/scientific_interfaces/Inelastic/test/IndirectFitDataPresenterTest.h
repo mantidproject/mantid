@@ -15,6 +15,7 @@
 #include "Analysis/IndirectFitDataView.h"
 #include "Analysis/IndirectFittingModel.h"
 #include "Analysis/ParameterEstimation.h"
+#include "IndirectAddWorkspaceDialog.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
@@ -50,6 +51,18 @@ private:
   std::string m_str;
   double m_dbl;
 };
+
+class FakeDialog : public IAddWorkspaceDialog {
+
+public:
+  FakeDialog() : IAddWorkspaceDialog(nullptr) {}
+  virtual std::string workspaceName() const override { return "Name"; }
+  virtual void setWSSuffices(const QStringList &suffices) override { (void)suffices; }
+  virtual void setFBSuffices(const QStringList &suffices) override { (void)suffices; }
+
+  virtual void updateSelectedSpectra() override {}
+};
+
 } // namespace
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
@@ -186,6 +199,16 @@ public:
   ///----------------------------------------------------------------------
   /// Unit Tests that test the signals, methods and slots of the presenter
   ///----------------------------------------------------------------------
+
+  void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_indirect() {
+    auto dialog = new FakeDialog();
+    TS_ASSERT(!m_presenter->addWorkspaceFromDialog(dialog));
+  }
+
+  void test_addWorkspaceFromDialog_returns_true_for_a_valid_dialog() {
+    auto dialog = new IndirectAddWorkspaceDialog(nullptr);
+    TS_ASSERT(m_presenter->addWorkspaceFromDialog(dialog));
+  }
 
   void test_addWorkspace_with_spectra_calls_to_model() {
     EXPECT_CALL(*m_model, addWorkspace("WorkspaceName", "0-3")).Times(Exactly(1));

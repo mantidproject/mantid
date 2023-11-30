@@ -328,6 +328,10 @@ void IndirectFitPropertyBrowser::setErrorsEnabled(bool enabled) {
   m_templateBrowser->setErrorsEnabled(enabled);
 }
 
+EstimationDataSelector IndirectFitPropertyBrowser::getEstimationDataSelector() const {
+  return m_templateBrowser->getEstimationDataSelector();
+}
+
 void IndirectFitPropertyBrowser::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_templateBrowser->updateParameterEstimationData(std::move(data));
 }
