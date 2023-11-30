@@ -38,7 +38,6 @@ from mantid.simpleapi import (
 from os import path
 from scipy import constants
 import numpy as np
-from itertools import combinations
 
 
 class PEARLTransfit(PythonAlgorithm):
@@ -242,7 +241,7 @@ class PEARLTransfit(PythonAlgorithm):
             # For guessing initial background values, read in y-data and use starting value as value for b0
             wsBgGuess = mtd[fileName_monitor]
             if estimate_backround:
-                bg1guess, bg0guess = estimate_linear_background_and_peak_position(wsBgGuess.readX(0), wsBgGuess.readY(0))
+                bg1guess, bg0guess = estimate_linear_background(wsBgGuess.readX(0), wsBgGuess.readY(0))
                 bg2guess = 0.0
             else:
                 bg0guess = self.getProperty("Bg0guessFraction").value * wsBgGuess.readY(0)[0]
@@ -447,13 +446,15 @@ class PEARLTransfit(PythonAlgorithm):
         RenameWorkspace(InputWorkspace=outputWS, OutputWorkspace=outputWSName)
 
 
-def estimate_linear_background_and_peak_position(x, y):
-    # calculate intercept and slope for every pair of points in the data
-    ipairs = np.asarray(list(combinations(range(len(y)), 2)))
-    gradients = np.squeeze(np.diff(y[ipairs], axis=1) / np.diff(x[ipairs], axis=1))
-    intercepts = y[ipairs[:, 0]] - gradients * x[ipairs[:, 0]]
-    # take median as the initial guess
-    return np.median(gradients), np.median(intercepts)
+def estimate_linear_background(x, y, nbg=3):
+    if len(y) < 2 * nbg:
+        # not expected as trying to fit a function with 7 parameters
+        return 2 * [0.0]
+    dy = y[:nbg].mean() - y[-nbg:].mean()
+    dx = x[:nbg].mean() - x[-nbg:].mean()
+    gradient = dy / dx
+    slope = y[:nbg].mean() - gradient * x[:nbg].mean()
+    return gradient, slope
 
 
 AlgorithmFactory.subscribe(PEARLTransfit)
