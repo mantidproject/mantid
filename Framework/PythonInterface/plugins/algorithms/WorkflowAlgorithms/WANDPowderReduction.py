@@ -427,7 +427,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         for n, in_wksp in enumerate(input_workspaces):
             try:
                 temp_val = mtd[in_wksp].run().getTimeAveragedValue("HB2C:SE:SampleTemp")
-            except RuntimeError as _:
+            except RuntimeError:
                 temp_val = 300.0
 
             if temp_val == 0.0:
