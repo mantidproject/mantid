@@ -383,7 +383,7 @@ public:
           Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>("outputWS");
 
       TS_ASSERT_EQUALS(outputWS->rowCount(), 1);
-      TS_ASSERT_EQUALS(outputWS->columnCount(), 19);
+      TS_ASSERT_EQUALS(outputWS->columnCount(), 18);
 
       TS_ASSERT_EQUALS(outputWS->getColumn(0)->name(), "Instrument");
       TS_ASSERT_EQUALS(outputWS->getColumn(1)->name(), "Analyser");
