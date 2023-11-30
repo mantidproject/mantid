@@ -144,7 +144,7 @@ void AppendSpectra::appendYAxisLabels(const MatrixWorkspace &ws1, const MatrixWo
   const auto yAxisWS1 = ws1.getAxis(yAxisNum);
   const auto yAxisWS2 = ws2.getAxis(yAxisNum);
   const auto outputYAxis = output.getAxis(yAxisNum);
-  const auto ws1len = ws1.getNumberHistograms();
+  const auto ws1Len = ws1.getNumberHistograms();
 
   const bool isSpectra = yAxisWS1->isSpectra() && yAxisWS2->isSpectra();
   const bool isTextAxis = yAxisWS1->isText() && yAxisWS2->isText();
@@ -152,7 +152,7 @@ void AppendSpectra::appendYAxisLabels(const MatrixWorkspace &ws1, const MatrixWo
 
   if (!isSpectra && !isTextAxis && !isNumericAxis) {
     const std::string message(
-        "Y-Axis type mistmach. Ensure that the Y-axis types in both workspaces match. The Y-axis should be set to the "
+        "Y-Axis type mismatch. Ensure that the Y-axis types in both workspaces match. The Y-axis should be set to the "
         "same type in each workspace, whether it be Numeric, Spectra, or Text.");
 
     throw std::invalid_argument(message);
@@ -161,16 +161,16 @@ void AppendSpectra::appendYAxisLabels(const MatrixWorkspace &ws1, const MatrixWo
   bool isBinEdgeAxis =
       dynamic_cast<BinEdgeAxis *>(yAxisWS1) != nullptr && dynamic_cast<BinEdgeAxis *>(yAxisWS2) != nullptr;
   auto outputTextAxis = dynamic_cast<TextAxis *>(outputYAxis);
-  const auto ouputlen = output.getNumberHistograms() + (isBinEdgeAxis ? 1 : 0);
-  for (size_t i = 0; i < ouputlen; ++i) {
+  const auto outputLen = output.getNumberHistograms() + (isBinEdgeAxis ? 1 : 0);
+  for (size_t i = 0; i < outputLen; ++i) {
     if (isTextAxis) {
       // check if we're outside the spectra of the first workspace
-      const std::string inputLabel = i < ws1len ? yAxisWS1->label(i) : yAxisWS2->label(i - ws1len);
+      const std::string inputLabel = i < ws1Len ? yAxisWS1->label(i) : yAxisWS2->label(i - ws1Len);
       outputTextAxis->setLabel(i, !inputLabel.empty() ? inputLabel : "");
 
     } else if (isNumericAxis) {
       // check if we're outside the spectra of the first workspace
-      const double inputVal = i < ws1len ? yAxisWS1->getValue(i) : yAxisWS2->getValue(i - ws1len);
+      const double inputVal = i < ws1Len ? yAxisWS1->getValue(i) : yAxisWS2->getValue(i - ws1Len);
       outputYAxis->setValue(i, inputVal);
     }
   }
