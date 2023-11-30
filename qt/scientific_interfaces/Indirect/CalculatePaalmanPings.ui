@@ -119,12 +119,6 @@
        </item>
        <item>
         <widget class="QGroupBox" name="corrDetails">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>93</height>
-          </size>
-         </property>
          <property name="toolTip">
           <string>Correction computation details. By default will be set automatically from the instrument parameters of the input workspace. Modify to override.</string>
          </property>
@@ -692,12 +686,6 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>97</height>
-          </size>
-         </property>
          <property name="title">
           <string>Sample Details</string>
          </property>
@@ -979,12 +967,6 @@
         <widget class="QGroupBox" name="gbCanDetails">
          <property name="enabled">
           <bool>false</bool>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>97</height>
-          </size>
          </property>
          <property name="title">
           <string>Container Details</string>
