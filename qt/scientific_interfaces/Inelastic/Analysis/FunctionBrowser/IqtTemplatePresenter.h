@@ -56,6 +56,7 @@ public:
   bool canTieIntensities() const;
   EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void estimateFunctionParameters();
   void setBackgroundA0(double value);
 
 signals:

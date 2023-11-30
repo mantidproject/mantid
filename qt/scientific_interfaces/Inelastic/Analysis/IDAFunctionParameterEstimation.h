@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunction.h"
 #include "ParameterEstimation.h"
 
@@ -27,6 +28,9 @@ public:
                                   const DataForParameterEstimation &estimationData);
 
 private:
+  void estimateSingleFunctionParameters(Mantid::API::IFunction_sptr &function,
+                                        const DataForParameterEstimation &estimationData);
+
   std::map<std::string, ParameterEstimateSetter> m_funcMap;
 };
 

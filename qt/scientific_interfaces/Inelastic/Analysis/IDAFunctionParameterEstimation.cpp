@@ -44,6 +44,21 @@ void IDAFunctionParameterEstimation::addParameterEstimationFunction(std::string 
 // parameters in-place.
 void IDAFunctionParameterEstimation::estimateFunctionParameters(Mantid::API::IFunction_sptr &function,
                                                                 const DataForParameterEstimation &estimationData) {
+  if (!function) {
+    return;
+  }
+
+  if (auto composite = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(function)) {
+    for (auto i = 0u; i < composite->nFunctions(); ++i) {
+      estimateSingleFunctionParameters(composite->getFunction(i), estimationData);
+    }
+  } else {
+    estimateSingleFunctionParameters(function, estimationData);
+  }
+}
+
+void IDAFunctionParameterEstimation::estimateSingleFunctionParameters(
+    Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData) {
   if (function) {
     std::string functionName = function->name();
     if (m_funcMap.find(functionName) != m_funcMap.end()) {

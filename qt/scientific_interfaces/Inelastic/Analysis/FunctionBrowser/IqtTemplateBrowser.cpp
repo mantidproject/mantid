@@ -303,7 +303,7 @@ void IqtTemplateBrowser::updateParameterEstimationData(DataForParameterEstimatio
   m_presenter.updateParameterEstimationData(std::move(data));
 }
 
-void IqtTemplateBrowser::estimateFunctionParameters() {}
+void IqtTemplateBrowser::estimateFunctionParameters() { m_presenter.estimateFunctionParameters(); }
 
 void IqtTemplateBrowser::setBackgroundA0(double value) { m_presenter.setBackgroundA0(value); }
 
