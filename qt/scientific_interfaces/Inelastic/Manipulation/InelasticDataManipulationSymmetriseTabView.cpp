@@ -199,7 +199,7 @@ void InelasticDataManipulationSymmetriseTabView::xRangeHighChanged(double value)
 void InelasticDataManipulationSymmetriseTabView::resetEDefaults(bool isPositive, QPair<double, double> range) {
   auto rangeESelector = m_uiForm.ppRawPlot->getRangeSelector("rangeE");
 
-  // Set Selector range values
+  // Set Selector range boundaries
   auto rangeReflect = isPositive ? QPair(0.0, range.second) : QPair(range.first, 0.0);
   rangeESelector->setBounds(rangeReflect.first, rangeReflect.second);
   m_dblManager->setRange(m_properties["Ehigh"], rangeReflect.first, rangeReflect.second);
