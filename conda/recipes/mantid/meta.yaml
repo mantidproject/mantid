@@ -48,9 +48,9 @@ requirements:
     - numpy {{ numpy }}
     - occt
     - python {{ python }}
-    - poco {{ poco }}
     - setuptools
     - tbb-devel {{ tbb }}
+    - poco {{ poco }}
     - pip
     - openssl {{ openssl }}
     - versioningit
