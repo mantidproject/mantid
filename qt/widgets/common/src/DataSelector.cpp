@@ -56,6 +56,17 @@ void loadFile(std::string const &filename, std::string const &workspaceName) {
   loadAlg->execute();
 }
 
+void makeGroup(std::string const &workspaceName) {
+  auto const &ads = AnalysisDataService::Instance();
+  if (!ads.retrieveWS<WorkspaceGroup>(workspaceName)) {
+    const auto groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    groupAlg->initialize();
+    groupAlg->setProperty("InputWorkspaces", workspaceName);
+    groupAlg->setProperty("OutputWorkspace", workspaceName);
+    groupAlg->execute();
+  }
+}
+
 } // namespace
 
 namespace MantidQt::MantidWidgets {
@@ -229,15 +240,8 @@ void DataSelector::autoLoadFile(const QString &filepath) {
  */
 void DataSelector::handleAutoLoadComplete(bool error) {
   if (!error) {
-    auto &ads = AnalysisDataService::Instance();
-    auto workspaceName = getWsNameFromFiles().toStdString();
-
-    if (m_alwaysLoadAsGroup && !ads.retrieveWS<WorkspaceGroup>(workspaceName)) {
-      const auto groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
-      groupAlg->initialize();
-      groupAlg->setProperty("InputWorkspaces", workspaceName);
-      groupAlg->setProperty("OutputWorkspace", workspaceName);
-      groupAlg->execute();
+    if (m_alwaysLoadAsGroup) {
+      makeGroup(getWsNameFromFiles().toStdString());
     }
 
     // emit that we got a valid workspace/file to work with
