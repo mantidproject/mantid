@@ -79,9 +79,11 @@ public:
   virtual double getPeakCentre(const size_t peakIndex) const = 0;
   virtual double getPeakHeight(const size_t peakIndex) const = 0;
   virtual double getPeakWidth(const size_t peakIndex) const = 0;
+  virtual ~FindPeakStrategyGeneric(){};
 };
 
 template <typename T> class FindPeakStrategy : public FindPeakStrategyGeneric {
+public:
   size_t peakNumber() const override { return m_peakCentres->size(); };
   double getPeakCentre(const size_t peakIndex) const override { return m_peakCentres->operator[](peakIndex); };
   double getPeakHeight(const size_t peakIndex) const override { return m_peakHeights->operator[](peakIndex); };
@@ -102,7 +104,7 @@ public:
   void execute() override;
 
 private:
-  std::unique_ptr<MantidQt::API::AlgorithmDialog> m_dlg;
+  MantidQt::API::AlgorithmDialog *m_dlg;
   int m_FWHM;
   AlgorithmFinishObserver *m_obs;
 };

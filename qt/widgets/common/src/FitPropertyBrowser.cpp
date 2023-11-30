@@ -3388,8 +3388,8 @@ void FindPeakConvolveStrategy::initialise(const std::string &wsName, const int w
   QStringList enabledParams{"EstimatedPeakExtent"};
   QStringList disabledParams{"InputWorkspace", "OutputWorkspace", "StartWorkspaceIndex", "EndWorkspaceIndex"};
   API::InterfaceManager interfaceMgr;
-  m_dlg = std::unique_ptr<MantidQt::API::AlgorithmDialog>(interfaceMgr.createDialogFromName(
-      "FindPeaksConvolve", -1, nullptr, false, defaultValues, QString(), enabledParams, disabledParams));
+  m_dlg = interfaceMgr.createDialogFromName("FindPeaksConvolve", -1, nullptr, false, defaultValues, QString(),
+                                            enabledParams, disabledParams);
   m_dlg->setShowKeepOpen(false);
   m_dlg->disableExitButton();
   m_obs = obs;
