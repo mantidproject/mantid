@@ -91,9 +91,9 @@ public:
 
 protected:
   std::string m_peakListName;
-  T *m_peakCentres;
-  T *m_peakHeights;
-  T *m_peakWidths;
+  std::unique_ptr<T> m_peakCentres;
+  std::unique_ptr<T> m_peakHeights;
+  std::unique_ptr<T> m_peakWidths;
 };
 
 class FindPeakConvolveStrategy : public QObject, public FindPeakStrategy<std::vector<double>> {

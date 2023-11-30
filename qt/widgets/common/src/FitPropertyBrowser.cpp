@@ -3424,14 +3424,14 @@ void FindPeakConvolveStrategy::execute() {
   Mantid::API::ITableWorkspace_sptr ws =
       std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(groupWs->getItem("PeakCentre"));
 
-  m_peakCentres = new std::vector<double>();
+  m_peakCentres = std::make_unique<std::vector<double>>();
   m_peakCentres->reserve(ws->columnCount());
   for (size_t i{1}; i < ws->columnCount(); i++) {
     m_peakCentres->push_back(ws->Double(0, i));
   }
-  // Change to unique_ptr - this leaks
-  m_peakWidths = new std::vector<double>(m_peakCentres->size(), m_FWHM);
-  m_peakHeights = new std::vector<double>(m_peakCentres->size(), 0); // is the y position a better value here?
+  m_peakWidths = std::make_unique<std::vector<double>>(m_peakCentres->size(), m_FWHM);
+  m_peakHeights =
+      std::make_unique<std::vector<double>>(m_peakCentres->size(), 0); // is the y position a better value here?
 }
 
 void FindPeakNormalStrategy::execute() {
@@ -3439,10 +3439,9 @@ void FindPeakNormalStrategy::execute() {
   Mantid::API::ITableWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(m_peakListName));
 
-  // change to unique ptr - this leaks
-  m_peakCentres = new Mantid::API::ColumnVector<double>(ws->getVector("centre"));
-  m_peakWidths = new Mantid::API::ColumnVector<double>(ws->getVector("width"));
-  m_peakHeights = new Mantid::API::ColumnVector<double>(ws->getVector("height"));
+  m_peakCentres = std::make_unique<Mantid::API::ColumnVector<double>>(ws->getVector("centre"));
+  m_peakWidths = std::make_unique<Mantid::API::ColumnVector<double>>(ws->getVector("width"));
+  m_peakHeights = std::make_unique<Mantid::API::ColumnVector<double>>(ws->getVector("height"));
 }
 
 } // namespace MantidWidgets
