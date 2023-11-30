@@ -23,21 +23,21 @@ std::map<IqtFunctionModel::ParamID, QString> g_paramName{{IqtFunctionModel::Para
                                                          {IqtFunctionModel::ParamID::STRETCH_STRETCHING, "Stretching"},
                                                          {IqtFunctionModel::ParamID::BG_A0, "A0"}};
 
-auto const exponential1 = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
+auto const expDecay1 = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
   auto lifeTime = (x[1] - x[0]) / (log(y[0]) - log(y[1]));
-  if (!(lifeTime > 0))
+  if (lifeTime <= 0)
     lifeTime = 1.0;
 
   auto const height = y[0] * exp(x[0] / lifeTime);
   return std::unordered_map<std::string, double>{{"Height", height}, {"Lifetime", lifeTime}};
 };
 
-auto const exponential2 = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
+auto const expDecay2 = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
   auto const heightName1 = "Height";
   auto const lifeTimeName1 = "Lifetime";
 
   auto lifeTime = (x[1] - x[0]) / (log(y[0]) - log(y[1]));
-  if (!(lifeTime > 0))
+  if (lifeTime <= 0)
     lifeTime = 1.0;
 
   auto const height = y[0] * exp(x[0] / lifeTime);
@@ -48,8 +48,8 @@ auto const exponential2 = [](Mantid::MantidVec const &x, Mantid::MantidVec const
   return std::unordered_map<std::string, double>{{"Height", 0.1 * height}, {"Lifetime", 2.0 * lifeTime}};
 };
 
-auto const estimators =
-    std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{{"ExpDecay", exponential1}};
+auto const estimators = std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{
+    {"ExpDecay", expDecay1}, {"StretchExp", expDecay1}};
 
 } // namespace
 
@@ -210,9 +210,7 @@ void IqtFunctionModel::setStretchExponential(bool on) {
   m_model.setFunctionString(buildFunctionString());
   m_model.setGlobalParameters(makeGlobalList());
   setCurrentValues(oldValues);
-  if (on) {
-    estimateStretchExpParameters();
-  }
+  estimateFunctionParameters();
 }
 
 bool IqtFunctionModel::hasStretchExponential() const { return m_hasStretchExponential; }
@@ -570,26 +568,6 @@ std::string IqtFunctionModel::buildStretchExpFunctionString() const {
 
 std::string IqtFunctionModel::buildBackgroundFunctionString() const {
   return "name=FlatBackground,A0=0,constraints=(A0>0)";
-}
-
-void IqtFunctionModel::estimateStretchExpParameters() {
-  auto const heightName = getParameterName(ParamID::STRETCH_HEIGHT);
-  auto const lifeTimeName = getParameterName(ParamID::STRETCH_LIFETIME);
-  auto const stretchingName = getParameterName(ParamID::STRETCH_STRETCHING);
-  if (!heightName || !lifeTimeName || !stretchingName)
-    return;
-  assert(getNumberDomains() == static_cast<int>(m_estimationData.size()));
-  for (auto i = 0; i < getNumberDomains(); ++i) {
-    auto const &x = m_estimationData[i].x;
-    auto const &y = m_estimationData[i].y;
-    auto lifeTime = (x[1] - x[0]) / (log(y[0]) - log(y[1]));
-    if (lifeTime <= 0)
-      lifeTime = 1.0;
-    auto const height = y[0] * exp(x[0] / lifeTime);
-    setLocalParameterValue(*heightName, i, height);
-    setLocalParameterValue(*lifeTimeName, i, lifeTime);
-    setLocalParameterValue(*stretchingName, i, 1.0);
-  }
 }
 
 QString IqtFunctionModel::buildFunctionString() const {
