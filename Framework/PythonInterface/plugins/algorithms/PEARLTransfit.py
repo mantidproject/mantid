@@ -220,9 +220,11 @@ class PEARLTransfit(PythonAlgorithm):
             wsBgGuess = mtd[fileName_monitor]
             if estimate_backround:
                 bg1guess, bg0guess = estimate_linear_background_and_peak_position(wsBgGuess.readX(0), wsBgGuess.readY(0))
+                bg2guess = 0.0
             else:
-                bg0guess = 0.86 * wsBgGuess.readY(0)[0]
-                bg1guess = 0.0063252
+                bg0guess = 0.84 * wsBgGuess.readY(0)[0]
+                bg1guess = 0.0173252
+                bg2guess = 0.0000004
             # New Voigt function as from Igor pro function
             Fit(
                 Function="name=PEARLTransVoigt,Position="
@@ -235,7 +237,9 @@ class PEARLTransfit(PythonAlgorithm):
                 + str(bg0guess)
                 + ",Bg1="
                 + str(bg1guess)
-                + ",Bg2=0,constraints=(1<LorentzianFWHM,"
+                + ",Bg2="
+                + str(bg2guess)
+                + ",constraints=(1<LorentzianFWHM,"
                 + str(width_300)
                 + "<GaussianFWHM)",
                 InputWorkspace=fileName_monitor,
