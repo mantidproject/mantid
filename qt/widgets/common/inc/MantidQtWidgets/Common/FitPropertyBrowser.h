@@ -104,9 +104,9 @@ public:
   void execute() override;
 
 private:
-  MantidQt::API::AlgorithmDialog *m_dlg;
   int m_FWHM;
-  AlgorithmFinishObserver *m_obs;
+  AlgorithmFinishObserver *m_obs;        // Non-owning
+  MantidQt::API::AlgorithmDialog *m_dlg; // Non-owning
 };
 
 class FindPeakNormalStrategy : public FindPeakStrategy<Mantid::API::ColumnVector<double>> {

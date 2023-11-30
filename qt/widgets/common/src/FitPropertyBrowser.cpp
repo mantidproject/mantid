@@ -3430,8 +3430,7 @@ void FindPeakConvolveStrategy::execute() {
     m_peakCentres->push_back(ws->Double(0, i));
   }
   m_peakWidths = std::make_unique<std::vector<double>>(m_peakCentres->size(), m_FWHM);
-  m_peakHeights =
-      std::make_unique<std::vector<double>>(m_peakCentres->size(), 0); // is the y position a better value here?
+  m_peakHeights = std::make_unique<std::vector<double>>(m_peakCentres->size(), 0); // y pos?
 }
 
 void FindPeakNormalStrategy::execute() {
