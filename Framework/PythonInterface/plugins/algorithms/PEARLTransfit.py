@@ -38,6 +38,7 @@ from mantid.simpleapi import (
 from os import path
 from scipy import constants
 import numpy as np
+from itertools import combinations
 
 
 class PEARLTransfit(PythonAlgorithm):
@@ -150,6 +151,12 @@ class PEARLTransfit(PythonAlgorithm):
             direction=Direction.Input,
             doc="True/False - provides more verbose output of procedure for debugging purposes",
         )
+        self.declareProperty(
+            name="EstimateBackground",
+            defaultValue=True,
+            direction=Direction.Input,
+            doc="Estimate background parameters from data.",
+        )
 
     def validateFileInputs(self, filesList):
         # MultipleFileProperty returns a list of list(s) of files, or a list containing a single (string) file
@@ -181,6 +188,7 @@ class PEARLTransfit(PythonAlgorithm):
         endE = self.ResParamsDict[foilType + "_endE"]
         refTemp = float(self.getProperty("ReferenceTemp").value)
         isDebug = self.getProperty("Debug").value
+        estimate_backround = self.getProperty("EstimateBackground").value
 
         if not isCalib:
             if "S_fit_Parameters" not in mtd:
@@ -210,7 +218,11 @@ class PEARLTransfit(PythonAlgorithm):
             fileName_monitor = fnNoExt + "_monitor"
             # For guessing initial background values, read in y-data and use starting value as value for b0
             wsBgGuess = mtd[fileName_monitor]
-            bg0guess = 0.86 * wsBgGuess.readY(0)[0]
+            if estimate_backround:
+                bg1guess, bg0guess = estimate_linear_background_and_peak_position(wsBgGuess.readX(0), wsBgGuess.readY(0))
+            else:
+                bg0guess = 0.86 * wsBgGuess.readY(0)[0]
+                bg1guess = 0.0063252
             # New Voigt function as from Igor pro function
             Fit(
                 Function="name=PEARLTransVoigt,Position="
@@ -221,7 +233,9 @@ class PEARLTransfit(PythonAlgorithm):
                 + str(width_300)
                 + ",Amplitude=1.6,Bg0="
                 + str(bg0guess)
-                + ",Bg1=0.0063252,Bg2=0,constraints=(1<LorentzianFWHM,"
+                + ",Bg1="
+                + str(bg1guess)
+                + ",Bg2=0,constraints=(1<LorentzianFWHM,"
                 + str(width_300)
                 + "<GaussianFWHM)",
                 InputWorkspace=fileName_monitor,
@@ -404,6 +418,15 @@ class PEARLTransfit(PythonAlgorithm):
         outputWS = CreateWorkspace(DataX=xData_out, DataY=yData_out, NSpec=1, UnitX="meV")
         CropWorkspace(InputWorkspace=outputWS, OutputWorkspace=outputWS, XMin=1000 * startE, XMax=1000 * endE)
         RenameWorkspace(InputWorkspace=outputWS, OutputWorkspace=outputWSName)
+
+
+def estimate_linear_background_and_peak_position(x, y):
+    # calculate intercept and slope for every pair of points in the data
+    ipairs = np.asarray(list(combinations(range(len(y)), 2)))
+    gradients = np.squeeze(np.diff(y[ipairs], axis=1) / np.diff(x[ipairs], axis=1))
+    intercepts = y[ipairs[:, 0]] - gradients * x[ipairs[:, 0]]
+    # take median as the initial guess
+    return np.median(gradients), np.median(intercepts)
 
 
 AlgorithmFactory.subscribe(PEARLTransfit)
