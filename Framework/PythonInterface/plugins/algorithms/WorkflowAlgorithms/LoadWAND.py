@@ -152,7 +152,7 @@ class LoadWAND(DataProcessorAlgorithm):
                 except RuntimeError:
                     temp_val = 300.0
 
-                if temp_val == 0.0:
+                if temp_val == 0.0 or np.isnan(temp_val):
                     temp_val = 300.0
                 temp_val = "{:.1F}".format(temp_val).replace(".", "p")
                 outName = outWS + "_" + str(mtd["__tmp_load"].getRunNumber()) + f"_T{temp_val}K"
