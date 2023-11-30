@@ -9,6 +9,23 @@
 
 #include <math.h>
 
+namespace {
+
+std::string nameForParameterEstimator(Mantid::API::CompositeFunction_sptr const &composite,
+                                      Mantid::API::IFunction_sptr &function, std::size_t const functionIndex) {
+  auto functionName = function->name();
+  if (composite) {
+    // functionIndex returns the index of the first function with the given name. If the index is different,
+    // we know that this is not the first function with this name in the composite function
+    if (composite->functionIndex(functionName) != functionIndex) {
+      functionName += "N";
+    }
+  }
+  return functionName;
+}
+
+} // namespace
+
 namespace MantidQt::CustomInterfaces::IDA {
 
 IDAFunctionParameterEstimation::ParameterEstimateSetter
@@ -50,19 +67,20 @@ void IDAFunctionParameterEstimation::estimateFunctionParameters(Mantid::API::IFu
 
   if (auto composite = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(function)) {
     for (auto i = 0u; i < composite->nFunctions(); ++i) {
-      estimateSingleFunctionParameters(composite->getFunction(i), estimationData);
+      estimateSingleFunctionParameters(composite, composite->getFunction(i), estimationData, i);
     }
   } else {
-    estimateSingleFunctionParameters(function, estimationData);
+    estimateSingleFunctionParameters(nullptr, function, estimationData);
   }
 }
 
 void IDAFunctionParameterEstimation::estimateSingleFunctionParameters(
-    Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData) {
+    Mantid::API::CompositeFunction_sptr const &composite, Mantid::API::IFunction_sptr &function,
+    const DataForParameterEstimation &estimationData, std::size_t const functionIndex) {
   if (function) {
-    std::string functionName = function->name();
-    if (m_funcMap.find(functionName) != m_funcMap.end()) {
-      m_funcMap[functionName](function, estimationData);
+    auto const parameterEstimatorName = nameForParameterEstimator(composite, function, functionIndex);
+    if (m_funcMap.find(parameterEstimatorName) != m_funcMap.end()) {
+      m_funcMap[parameterEstimatorName](function, estimationData);
     }
   }
 }

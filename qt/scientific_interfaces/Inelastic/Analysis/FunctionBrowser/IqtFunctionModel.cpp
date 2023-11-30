@@ -9,7 +9,9 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
+
 #include <map>
+#include <tuple>
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
@@ -23,33 +25,29 @@ std::map<IqtFunctionModel::ParamID, QString> g_paramName{{IqtFunctionModel::Para
                                                          {IqtFunctionModel::ParamID::STRETCH_STRETCHING, "Stretching"},
                                                          {IqtFunctionModel::ParamID::BG_A0, "A0"}};
 
-auto const expDecay1 = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
+std::tuple<double, double> calculateLifetimeAndHeight(Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
   auto lifeTime = (x[1] - x[0]) / (log(y[0]) - log(y[1]));
   if (lifeTime <= 0)
     lifeTime = 1.0;
-
   auto const height = y[0] * exp(x[0] / lifeTime);
-  return std::unordered_map<std::string, double>{{"Height", height}, {"Lifetime", lifeTime}};
+  return {lifeTime, height};
+}
+
+auto const expDecay = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
+  auto const [lifetime, height] = calculateLifetimeAndHeight(x, y);
+  return std::unordered_map<std::string, double>{{"Height", height}, {"Lifetime", lifetime}};
 };
 
-auto const expDecay2 = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
-  auto const heightName1 = "Height";
-  auto const lifeTimeName1 = "Lifetime";
+auto const expDecayN = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
+  auto const [lifetime, height] = calculateLifetimeAndHeight(x, y);
 
-  auto lifeTime = (x[1] - x[0]) / (log(y[0]) - log(y[1]));
-  if (lifeTime <= 0)
-    lifeTime = 1.0;
-
-  auto const height = y[0] * exp(x[0] / lifeTime);
-
-  //  arbitrarily initialise small additional exp with 10% of amplitude and
-  //  double the lifetime (if the lifetime is too short it will correlate
-  //  with any constant background.
-  return std::unordered_map<std::string, double>{{"Height", 0.1 * height}, {"Lifetime", 2.0 * lifeTime}};
+  // Initialise small additional exp with 10% of amplitude and double the lifetime (if the lifetime is
+  // too short it will correlate with any constant background)
+  return std::unordered_map<std::string, double>{{"Height", 0.1 * height}, {"Lifetime", 2.0 * lifetime}};
 };
 
 auto const estimators = std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{
-    {"ExpDecay", expDecay1}, {"StretchExp", expDecay1}};
+    {"ExpDecay", expDecay}, {"ExpDecayN", expDecayN}, {"StretchExp", expDecay}};
 
 } // namespace
 

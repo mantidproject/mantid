@@ -28,8 +28,10 @@ public:
                                   const DataForParameterEstimation &estimationData);
 
 private:
-  void estimateSingleFunctionParameters(Mantid::API::IFunction_sptr &function,
-                                        const DataForParameterEstimation &estimationData);
+  void estimateSingleFunctionParameters(Mantid::API::CompositeFunction_sptr const &composite,
+                                        Mantid::API::IFunction_sptr &function,
+                                        const DataForParameterEstimation &estimationData,
+                                        std::size_t const functionIndex = 0u);
 
   std::map<std::string, ParameterEstimateSetter> m_funcMap;
 };
