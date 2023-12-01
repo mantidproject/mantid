@@ -32,9 +32,7 @@
 
 #include <gmock/gmock.h>
 
-#include <functional>
 #include <string>
-#include <tuple>
 #include <vector>
 
 namespace Mantid {
