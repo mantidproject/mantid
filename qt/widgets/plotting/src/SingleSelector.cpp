@@ -18,6 +18,9 @@ QHash<QString, QVariant> defaultLineKwargs(PlotLineStyle style) {
   case PlotLineStyle::Solid:
     kwargs.insert("line_style", QString("-"));
     break;
+  case PlotLineStyle::Dotted:
+    kwargs.insert("line_style", QString(":"));
+    break;
   default:
     // Dash
     kwargs.insert("line_style", QString("--"));

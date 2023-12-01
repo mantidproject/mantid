@@ -14,7 +14,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 class PreviewPlot;
-enum PlotLineStyle { Dash, Solid };
+enum PlotLineStyle { Dash, Dotted, Solid };
 
 /**
  * Displays a line for selecting a value on a previewplot in MPL
