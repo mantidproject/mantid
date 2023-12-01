@@ -1767,17 +1767,17 @@ bool FitPowderDiffPeaks::fitOverlappedPeaks(vector<BackToBackExponential_sptr> p
   }
   g_log.information() << "[DB1034] " << peakInfo.str();
 
-  stringstream datass;
-  datass << "Partial workspace for peaks: \n";
+  stringstream peakWSData;
+  peakWSData << "Partial workspace for peaks: \n";
   for (size_t i = 0; i < peaksws->x(0).size(); ++i)
-    datass << peaksws->x(1)[i] << "\t\t" << peaksws->y(1)[i] << "\t\t" << peaksws->e(1)[i] << "\t\t" << peaksws->y(0)[i]
-           << '\n';
-  g_log.information() << "[DB1042] " << datass.str();
+    peakWSData << peaksws->x(1)[i] << "\t\t" << peaksws->y(1)[i] << "\t\t" << peaksws->e(1)[i] << "\t\t"
+               << peaksws->y(0)[i] << '\n';
+  g_log.information() << "[DB1042] " << peakWSData.str();
 
   // 5. Estimate peak height according to pre-set peak value
   estimatePeakHeightsLeBail(peaksws, 1, peaks);
 
-  // 6. Set bundaries
+  // 6. Set boundaries
   setOverlappedPeaksConstraints(peaks);
 
   // 7. Set up the composite function
