@@ -615,7 +615,7 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove("ikeda_cal");
   }
 
-  const auto maskTestsInitialization(IPropertyManager &algorithmProperties, const std::string &uniquePrefix) {
+  auto maskTestsInitialization(IPropertyManager &algorithmProperties, const std::string &uniquePrefix) {
     // In order to avoid collisions in the AnalysisDataService, which is *shared* by all tests,
     //   any workspaces that will be modified must be unique to the current test.
     const std::string inputWSName = uniquePrefix + "_input";
