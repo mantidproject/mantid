@@ -100,6 +100,6 @@ void InelasticDataManipulationSymmetriseTabModel::setEMax(double value) { m_eMax
 
 void InelasticDataManipulationSymmetriseTabModel::setIsPositiveReflect(bool value) { m_isPositiveReflect = value; }
 
-bool InelasticDataManipulationSymmetriseTabModel::getIsPositiveReflect() { return m_isPositiveReflect; }
+bool InelasticDataManipulationSymmetriseTabModel::getIsPositiveReflect() const { return m_isPositiveReflect; }
 
 } // namespace MantidQt::CustomInterfaces

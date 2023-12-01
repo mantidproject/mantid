@@ -26,10 +26,15 @@ namespace {
 
 QString makeNumber(double value) { return QString::number(value, 'g', NUMERICAL_PRECISION); }
 
+QPair<double, double> makeQPair(std::tuple<double, double> &axisRange) {
+  return QPair<double, double>(std::get<0>(axisRange), std::get<1>(axisRange));
+}
+
 QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
   auto const xValues = workspace->x(0);
   return QPair<double, double>(xValues.front(), xValues.back());
 }
+
 } // namespace
 
 using MantidQt::MantidWidgets::AxisID;
@@ -104,6 +109,14 @@ InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseT
                                                              MantidWidgets::PlotLineStyle::Solid);
   centreMarkRaw->setColour(Qt::red);
   centreMarkRaw->disconnectMouseSignals();
+
+  // Horizontal Marker Lines
+  auto horzMarkFirst = m_uiForm.ppRawPlot->addSingleSelector("horzMarkFirst", MantidWidgets::SingleSelector::YSINGLE,
+                                                             0.1, MantidWidgets::PlotLineStyle::Dotted);
+  horzMarkFirst->setColour(Qt::blue);
+  auto horzMarkSecond = m_uiForm.ppRawPlot->addSingleSelector("horzMarkSecond", MantidWidgets::SingleSelector::YSINGLE,
+                                                              0.5, MantidWidgets::PlotLineStyle::Dotted);
+  horzMarkSecond->setColour(Qt::darkBlue);
 
   // Indicators for negative and positive X range values on X axis
   // The user can use these to move the X range
@@ -321,6 +334,29 @@ void InelasticDataManipulationSymmetriseTabView::updateMiniPlots() {
   auto const axisRange = getXRangeFromWorkspace(input);
   m_uiForm.ppPreviewPlot->setAxisRange(axisRange, AxisID::XBottom);
   m_uiForm.ppPreviewPlot->replot();
+
+  // Update bounds for horizontal markers
+  auto verticalRange = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
+  updateHorizontalMarkers(makeQPair(verticalRange));
+}
+
+/**
+ * Updates limits for horizontal markers when user loads new spectra
+ *
+ * @param Y range for current workspace
+ *
+ */
+void InelasticDataManipulationSymmetriseTabView::updateHorizontalMarkers(QPair<double, double> yrange) {
+  auto horzMarkFirst = m_uiForm.ppRawPlot->getSingleSelector("horzMarkFirst");
+  auto horzMarkSecond = m_uiForm.ppRawPlot->getSingleSelector("horzMarkSecond");
+
+  horzMarkFirst->setBounds(yrange.first, yrange.second);
+  horzMarkSecond->setBounds(yrange.first, yrange.second);
+
+  double windowRange = yrange.second - yrange.first;
+  double markerSeparation = 0.1;
+  horzMarkFirst->setPosition(yrange.first + windowRange * markerSeparation);
+  horzMarkSecond->setPosition(yrange.second - windowRange * markerSeparation);
 }
 
 /**
@@ -366,9 +402,11 @@ void InelasticDataManipulationSymmetriseTabView::setRawPlotWatchADS(bool watchAD
   m_uiForm.ppRawPlot->watchADS(watchADS);
 }
 
-double InelasticDataManipulationSymmetriseTabView::getElow() { return m_dblManager->value(m_properties["Elow"]); }
+double InelasticDataManipulationSymmetriseTabView::getElow() const { return m_dblManager->value(m_properties["Elow"]); }
 
-double InelasticDataManipulationSymmetriseTabView::getEhigh() { return m_dblManager->value(m_properties["Ehigh"]); }
+double InelasticDataManipulationSymmetriseTabView::getEhigh() const {
+  return m_dblManager->value(m_properties["Ehigh"]);
+}
 
 double InelasticDataManipulationSymmetriseTabView::getPreviewSpec() {
   return m_dblManager->value(m_properties["PreviewSpec"]);

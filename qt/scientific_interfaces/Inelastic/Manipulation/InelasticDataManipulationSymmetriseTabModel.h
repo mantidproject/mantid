@@ -29,7 +29,7 @@ public:
   void setEMin(double value);
   void setEMax(double value);
   void setIsPositiveReflect(bool value);
-  bool getIsPositiveReflect();
+  bool getIsPositiveReflect() const;
 
 private:
   std::string m_inputWorkspace;

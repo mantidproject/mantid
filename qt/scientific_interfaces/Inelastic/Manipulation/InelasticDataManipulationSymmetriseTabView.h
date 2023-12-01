@@ -32,8 +32,8 @@ public:
   void updateMiniPlots();
   bool validate();
   void setRawPlotWatchADS(bool watchADS);
-  double getElow();
-  double getEhigh();
+  double getElow() const;
+  double getEhigh() const;
   double getPreviewSpec();
   QString getInputName();
   void previewAlgDone();
@@ -59,6 +59,8 @@ private slots:
 
 private:
   void resetEDefaults(bool isPositive, QPair<double, double> range);
+  void updateHorizontalMarkers(QPair<double, double> yrange);
+
   Ui::InelasticDataManipulationSymmetriseTab m_uiForm;
 
   /// Tree of the properties
