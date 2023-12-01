@@ -7,10 +7,9 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidHistogramData/Histogram.h"
 
 // Disable warning 4554 on windows which is inherent in the Eigen::Tensor library.
 #ifdef _MSC_VER
@@ -28,6 +27,8 @@ typedef Eigen::Tensor<double, 1> Tensor1D;
 typedef Eigen::TensorMap<const Eigen::Tensor<double, 1>> TensorMap_const;
 typedef Eigen::TensorMap<Eigen::Tensor<double, 1>> TensorMap;
 typedef Eigen::Map<const Eigen::VectorXd> EigenMap_const;
+
+const Mantid::HistogramData::HistogramX;
 
 namespace Mantid::Algorithms {
 
