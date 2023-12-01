@@ -66,6 +66,9 @@ signals:
 private slots:
   void tabExecutionComplete(bool error);
 
+protected:
+  virtual void runComplete(bool error) { (void)error; };
+
 private:
   virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };
 

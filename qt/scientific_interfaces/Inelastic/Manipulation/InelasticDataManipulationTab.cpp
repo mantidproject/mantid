@@ -71,6 +71,7 @@ void InelasticDataManipulationTab::tabExecutionComplete(bool error) {
   UNUSED_ARG(error);
   if (m_tabRunning) {
     m_tabRunning = false;
+    runComplete(error);
     auto const enableOutputButtons = error == false ? "enable" : "disable";
     emit updateRunButton(true, enableOutputButtons);
   }

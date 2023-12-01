@@ -143,6 +143,7 @@ set(INC_FILES
     Manipulation/InelasticDataManipulationMomentsTabModel.h
     Manipulation/InelasticDataManipulationSqwTabModel.h
     Manipulation/InelasticDataManipulationSymmetriseTabModel.h
+    Manipulation/ISqwView.h
 )
 
 set(UI_FILES

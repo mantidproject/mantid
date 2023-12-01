@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "ISqwView.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
@@ -17,53 +18,53 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL InelasticDataManipulationSqwTabView : public QWidget {
+class ISqwPresenter;
+
+class MANTIDQT_INELASTIC_DLL InelasticDataManipulationSqwTabView : public QWidget, public ISqwView {
   Q_OBJECT
 
 public:
   InelasticDataManipulationSqwTabView(QWidget *perent = nullptr);
   ~InelasticDataManipulationSqwTabView();
 
-  IndirectPlotOptionsView *getPlotOptions();
-  void setFBSuffixes(QStringList suffix);
-  void setWSSuffixes(QStringList suffix);
-  std::tuple<double, double> getQRangeFromPlot();
-  std::tuple<double, double> getERangeFromPlot();
-  std::string getDataName();
-  void plotRqwContour(Mantid::API::MatrixWorkspace_sptr rqwWorkspace);
-  void setDefaultQAndEnergy();
-  void setSaveEnabled(bool enabled);
-  bool validate();
+  void subscribePresenter(ISqwPresenter *presenter) override;
 
-signals:
-  void valueChanged(QtProperty *, double);
-  void dataReady(QString const &);
-  void qLowChanged(double);
-  void qWidthChanged(double);
-  void qHighChanged(double);
-  void eLowChanged(double);
-  void eWidthChanged(double);
-  void eHighChanged(double);
-  void rebinEChanged(int);
-  void runClicked();
-  void saveClicked();
-  void showMessageBox(const QString &message);
+  IndirectPlotOptionsView *getPlotOptions() const override;
+  void setFBSuffixes(QStringList const &suffix) override;
+  void setWSSuffixes(QStringList const &suffix) override;
+  std::tuple<double, double> getQRangeFromPlot() const override;
+  std::tuple<double, double> getERangeFromPlot() const override;
+  std::string getDataName() const override;
+  void plotRqwContour(Mantid::API::MatrixWorkspace_sptr rqwWorkspace) override;
+  void setDefaultQAndEnergy() override;
+  bool validate() override;
+  void showMessageBox(std::string const &message) const override;
+  void setRunButtonText(std::string const &runText) override;
+  void setEnableOutputOptions(bool const enable) override;
 
-public slots:
-  void updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                       QString const &tooltip);
+private slots:
+  void notifyDataReady(QString const &dataName);
+  void notifyQLowChanged(double value);
+  void notifyQWidthChanged(double value);
+  void notifyQHighChanged(double value);
+  void notifyELowChanged(double value);
+  void notifyEWidthChanged(double value);
+  void notifyEHighChanged(double value);
+  void notifyRebinEChanged(int value);
+  void notifyRunClicked();
+  void notifySaveClicked();
 
 private:
   void setQRange(std::tuple<double, double> const &axisRange);
   void setEnergyRange(std::tuple<double, double> const &axisRange);
 
-  void setRunEnabled(bool enabled);
   Ui::InelasticDataManipulationSqwTab m_uiForm;
 
   /// Tree of the properties
   std::map<QString, QtTreePropertyBrowser *> m_propTrees;
   /// Internal list of the properties
   QMap<QString, QtProperty *> m_properties;
+  ISqwPresenter *m_presenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
