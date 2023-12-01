@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllConfig.h"
 #include "IndirectTab.h"
+
 #include <QSettings>
 
 // Suppress a warning coming out of code that isn't ours
@@ -30,8 +32,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 /**
-This class defines a abstract base class for the different tabs of the Indirect
-Bayes interface.
+This class defines a abstract base class for the different tabs of the
+Bayes Fitting interface.
 Any joint functionality shared between each of the tabs should be implemented
 here as well as defining shared member functions.
 
@@ -43,12 +45,12 @@ static const unsigned int NUM_DECIMALS = 6;
 /// precision for integer properties in bayes tabs
 static const unsigned int INT_DECIMALS = 0;
 
-class MANTIDQT_INDIRECT_DLL IndirectBayesTab : public IndirectTab {
+class MANTIDQT_INELASTIC_DLL BayesFittingTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectBayesTab(QWidget *parent = nullptr);
-  ~IndirectBayesTab() override;
+  BayesFittingTab(QWidget *parent = nullptr);
+  ~BayesFittingTab() override;
 
   /// Base methods implemented in derived classes
   virtual void loadSettings(const QSettings &settings) = 0;

@@ -1,7 +1,7 @@
-﻿.. _interface-indirect-bayes:
+﻿.. _interface-inelastic-bayes-fitting:
 
-Indirect Bayes
-==============
+Inelastic Bayes Fitting
+=======================
 
 .. contents:: Table of Contents
   :local:
@@ -221,4 +221,4 @@ Plot Contour
 Save Result
   Saves the result in the default save directory.
 
-.. categories:: Interfaces Indirect
+.. categories:: Interfaces Inelastic

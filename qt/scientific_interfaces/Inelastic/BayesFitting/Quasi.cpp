@@ -19,7 +19,7 @@ Mantid::Kernel::Logger g_log("Quasi");
 
 namespace MantidQt::CustomInterfaces {
 
-Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
+Quasi::Quasi(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
 
   // Create range selector

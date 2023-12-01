@@ -6,19 +6,19 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectBayesTab.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "ui_Stretch.h"
+#include "BayesFittingTab.h"
+#include "DllConfig.h"
+#include "ui_Quasi.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL Stretch : public IndirectBayesTab {
+class MANTIDQT_INELASTIC_DLL Quasi : public BayesFittingTab {
   Q_OBJECT
 
 public:
-  Stretch(QWidget *parent = nullptr);
+  Quasi(QWidget *parent = nullptr);
 
-  // Inherited methods from IndirectBayesTab
+  // Inherited methods from BayesFittingTab
   void setup() override;
   bool validate() override;
   void run() override;
@@ -34,41 +34,41 @@ private slots:
   void updateProperties(QtProperty *prop, double val) override;
   /// Slot to handle when a new sample file is available
   void handleSampleInputReady(const QString &filename);
-  /// Save the workspaces produces from the algorithm
-  void saveWorkspaces();
+  /// Slot to handle when a new resolution file is available
+  void handleResolutionInputReady(const QString &wsName);
+  /// slot to handle when the user changes the program to be used
+  void handleProgramChange(int index);
+  /// Slot to handle setting a new preview spectrum
+  void previewSpecChanged(int value);
+  /// Handles updating spectra in mini plot
+  void updateMiniPlot();
+  /// Handles what happen after the algorithm is run
+  void algorithmComplete(bool error);
 
   void runClicked();
-  void plotWorkspaces();
-  void plotContourClicked();
-  void algorithmComplete(const bool &error);
+  void plotClicked();
   void plotCurrentPreview();
-  void previewSpecChanged(int value);
+  void saveClicked();
 
 private:
-  void setFileExtensionsByName(bool filter) override;
-
-  void populateContourWorkspaceComboBox();
   void displayMessageAndRun(std::string const &saveDirectory);
   int displaySaveDirectoryMessage();
 
+  void setFileExtensionsByName(bool filter) override;
+
   void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);
-  void setPlotContourEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
-  void setPlotContourIsPlotting(bool plotting);
 
   /// Current preview spectrum
   int m_previewSpec;
-  // The ui form
-  Ui::Stretch m_uiForm;
-  // Output Names
-  std::string m_fitWorkspaceName;
-  std::string m_contourWorkspaceName;
-  // state of plot and save when algorithm is run
-  bool m_save;
+  /// The ui form
+  Ui::Quasi m_uiForm;
+  /// alg
+  Mantid::API::IAlgorithm_sptr m_QuasiAlg;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

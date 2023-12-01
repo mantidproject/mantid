@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectBayes.h"
+#include "BayesFitting.h"
 #include "IndirectSettings.h"
 #include "Quasi.h"
 #include "ResNorm.h"
@@ -13,10 +13,10 @@
 using namespace MantidQt::CustomInterfaces;
 
 namespace MantidQt::CustomInterfaces {
-DECLARE_SUBWINDOW(IndirectBayes)
+DECLARE_SUBWINDOW(BayesFitting)
 
-IndirectBayes::IndirectBayes(QWidget *parent)
-    : IndirectInterface(parent), m_changeObserver(*this, &IndirectBayes::handleDirectoryChange) {
+BayesFitting::BayesFitting(QWidget *parent)
+    : IndirectInterface(parent), m_changeObserver(*this, &BayesFitting::handleDirectoryChange) {
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
@@ -24,14 +24,14 @@ IndirectBayes::IndirectBayes(QWidget *parent)
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
   // insert each tab into the interface on creation
-  m_bayesTabs.emplace(RES_NORM, new ResNorm(m_uiForm.indirectBayesTabs->widget(RES_NORM)));
-  m_bayesTabs.emplace(QUASI, new Quasi(m_uiForm.indirectBayesTabs->widget(QUASI)));
-  m_bayesTabs.emplace(STRETCH, new Stretch(m_uiForm.indirectBayesTabs->widget(STRETCH)));
+  m_bayesTabs.emplace(RES_NORM, new ResNorm(m_uiForm.bayesFittingTabs->widget(RES_NORM)));
+  m_bayesTabs.emplace(QUASI, new Quasi(m_uiForm.bayesFittingTabs->widget(QUASI)));
+  m_bayesTabs.emplace(STRETCH, new Stretch(m_uiForm.bayesFittingTabs->widget(STRETCH)));
 }
 
-void IndirectBayes::initLayout() {
+void BayesFitting::initLayout() {
   // Connect each tab to the actions available in this GUI
-  std::map<unsigned int, IndirectBayesTab *>::iterator iter;
+  std::map<unsigned int, BayesFittingTab *>::iterator iter;
   for (iter = m_bayesTabs.begin(); iter != m_bayesTabs.end(); ++iter) {
     connect(iter->second, SIGNAL(showMessageBox(const QString &)), this, SLOT(showMessageBox(const QString &)));
   }
@@ -48,7 +48,7 @@ void IndirectBayes::initLayout() {
 /**
  * @param :: the detected close event
  */
-void IndirectBayes::closeEvent(QCloseEvent * /*unused*/) {
+void BayesFitting::closeEvent(QCloseEvent * /*unused*/) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 
@@ -57,7 +57,7 @@ void IndirectBayes::closeEvent(QCloseEvent * /*unused*/) {
  *
  * @param pNf :: notification
  */
-void IndirectBayes::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
+void BayesFitting::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
   std::string key = pNf->key();
 
   if (key == "defaultsave.directory")
@@ -70,7 +70,7 @@ void IndirectBayes::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotific
  * This includes setting the default browsing directory to be the default save
  *directory.
  */
-void IndirectBayes::loadSettings() {
+void BayesFitting::loadSettings() {
   QSettings settings;
   QString settingsGroup = "CustomInterfaces/IndirectAnalysis/";
   QString saveDir =
@@ -79,7 +79,7 @@ void IndirectBayes::loadSettings() {
   settings.beginGroup(settingsGroup + "ProcessedFiles");
   settings.setValue("last_directory", saveDir);
 
-  std::map<unsigned int, IndirectBayesTab *>::iterator iter;
+  std::map<unsigned int, BayesFittingTab *>::iterator iter;
   for (iter = m_bayesTabs.begin(); iter != m_bayesTabs.end(); ++iter) {
     iter->second->loadSettings(settings);
   }
@@ -87,14 +87,14 @@ void IndirectBayes::loadSettings() {
   settings.endGroup();
 }
 
-void IndirectBayes::applySettings(std::map<std::string, QVariant> const &settings) {
+void BayesFitting::applySettings(std::map<std::string, QVariant> const &settings) {
   for (auto tab = m_bayesTabs.begin(); tab != m_bayesTabs.end(); ++tab) {
     tab->second->filterInputData(settings.at("RestrictInput").toBool());
   }
 }
 
-std::string IndirectBayes::documentationPage() const { return "Indirect Bayes"; }
+std::string BayesFitting::documentationPage() const { return "Inelastic Bayes Fitting"; }
 
-IndirectBayes::~IndirectBayes() = default;
+BayesFitting::~BayesFitting() = default;
 
 } // namespace MantidQt::CustomInterfaces

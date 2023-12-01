@@ -34,7 +34,7 @@ ITableWorkspace_sptr getADSTableWorkspace(std::string const &workspaceName) {
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
+ResNorm::ResNorm(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
 
   // Create range selector

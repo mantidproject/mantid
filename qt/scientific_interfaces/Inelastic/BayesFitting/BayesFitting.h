@@ -5,9 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "ui_IndirectBayes.h"
+#include "ui_BayesFitting.h"
 
-#include "IndirectBayesTab.h"
+#include "BayesFittingTab.h"
+#include "DllConfig.h"
 #include "IndirectInterface.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -16,14 +17,14 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 /**
-This class defines the Indirect Bayes interface. It handles the creation of the
+This class defines the Bayes Fitting interface. It handles the creation of the
 interface window and handles the interaction between the child tabs on the
 window.
 
 @author Samuel Jackson, STFC
 */
 
-class MANTIDQT_INDIRECT_DLL IndirectBayes : public IndirectInterface {
+class MANTIDQT_INELASTIC_DLL BayesFitting : public IndirectInterface {
   Q_OBJECT
 
 public: // public constants and enums
@@ -32,13 +33,13 @@ public: // public constants and enums
 
 public: // public constructor, destructor and functions
   /// Default Constructor
-  IndirectBayes(QWidget *parent = nullptr);
+  BayesFitting(QWidget *parent = nullptr);
   /// Destructor
-  ~IndirectBayes() override;
+  ~BayesFitting() override;
   /// Interface name
-  static std::string name() { return "Bayes"; }
+  static std::string name() { return "Bayes Fitting"; }
   // This interface's categories.
-  static QString categoryInfo() { return "Indirect"; }
+  static QString categoryInfo() { return "Inelastic"; }
   void initLayout() override;
 
 private:
@@ -54,11 +55,11 @@ private:
   void loadSettings();
 
   /// Map of tabs indexed by position on the window
-  std::map<unsigned int, IndirectBayesTab *> m_bayesTabs;
+  std::map<unsigned int, BayesFittingTab *> m_bayesTabs;
   /// Change Observer for ConfigService (monitors user directories)
-  Poco::NObserver<IndirectBayes, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+  Poco::NObserver<BayesFitting, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
   /// Main interface window
-  Ui::IndirectBayes m_uiForm;
+  Ui::BayesFitting m_uiForm;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

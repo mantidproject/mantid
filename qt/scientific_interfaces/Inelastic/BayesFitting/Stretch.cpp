@@ -32,7 +32,7 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-Stretch::Stretch(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0), m_save(false) {
+Stretch::Stretch(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0), m_save(false) {
   m_uiForm.setupUi(parent);
 
   // Create range selector
