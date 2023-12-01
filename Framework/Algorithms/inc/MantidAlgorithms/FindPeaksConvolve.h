@@ -28,7 +28,9 @@ typedef Eigen::TensorMap<const Eigen::Tensor<double, 1>> TensorMap_const;
 typedef Eigen::TensorMap<Eigen::Tensor<double, 1>> TensorMap;
 typedef Eigen::Map<const Eigen::VectorXd> EigenMap_const;
 
-class Mantid::HistogramData::HistogramX;
+namespace Mantid::HistogramData {
+class HistogramX;
+}
 
 namespace Mantid::Algorithms {
 
