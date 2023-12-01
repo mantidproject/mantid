@@ -1,7 +1,7 @@
-.. _direct_inelastic_testing:
+.. _inelastic_data_manipulation_testing:
 
-Direct Inelastic Testing
-==========================
+Inelastic Data Manipulation Testing
+===================================
 
 .. contents::
    :local:
@@ -10,8 +10,8 @@ Direct Inelastic Testing
 
 - Download the `ISIS Sample Data <http://download.mantidproject.org>`_
 
-Data analysis Elwin
--------------------
+Elwin tab
+---------
 
 *Preparation*
 
@@ -32,9 +32,8 @@ Data analysis Elwin
 #. In the main GUI right-click on ``MAR27691-27698_graphite002_red_elwin_eq2`` and choose ``Plot Spectrum``, choose ``Plot All``
 #. This should plot two lines of :math:`ln(Counts(microAmp.hour))^{-1}` vs :math:`Q2`
 
-
-Data analysis I(Q, T)
-----------------------
+I(Q, T) tab
+-----------
 
 *Preparation*
 
