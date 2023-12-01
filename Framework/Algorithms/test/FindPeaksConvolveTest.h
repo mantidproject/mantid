@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/FindPeaksConvolve.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidHistogramData/Histogram.h"
 
 using Mantid::Algorithms::FindPeaksConvolve;
 

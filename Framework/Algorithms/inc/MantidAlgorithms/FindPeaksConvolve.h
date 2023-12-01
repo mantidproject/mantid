@@ -28,7 +28,7 @@ typedef Eigen::TensorMap<const Eigen::Tensor<double, 1>> TensorMap_const;
 typedef Eigen::TensorMap<Eigen::Tensor<double, 1>> TensorMap;
 typedef Eigen::Map<const Eigen::VectorXd> EigenMap_const;
 
-const Mantid::HistogramData::HistogramX;
+class Mantid::HistogramData::HistogramX;
 
 namespace Mantid::Algorithms {
 
@@ -63,6 +63,8 @@ private:
   bool m_mergeNearbyPeaks;
   bool m_centreBins;
   Eigen::VectorXd m_pdf;
+  std::vector<std::string> m_intermediateWsNames;
+  std::mutex mtx;
 
   void init() override;
   void exec() override;
@@ -84,9 +86,10 @@ private:
   size_t findPeakInRawData(const int xIndex, const TensorMap_const &yData, size_t peakExtentBinNumber);
   void storePeakResults(const size_t dataIndex, std::vector<FindPeaksConvolve::PeakResult> &peakCentres);
   void generateNormalPDF(const int peakExtentBinNumber);
-  void createIntermediateWorkspaces(const size_t dataIndex, const Tensor1D &kernel, const Tensor1D &iOverSigma,
-                                    const HistogramData::HistogramX *xData);
-  void outputIntermediateWorkspace(const size_t dataIndex, const std::string &wsName, const std::vector<double> &xData,
+  std::vector<std::string> createIntermediateWorkspaces(const size_t dataIndex, const Tensor1D &kernel,
+                                                        const Tensor1D &iOverSigma,
+                                                        const HistogramData::HistogramX *xData);
+  void outputIntermediateWorkspace(const std::string &wsName, const std::vector<double> &xData,
                                    const std::vector<double> &yData);
   void outputResults();
   void outputResultsTable(const std::string &resultHeader);
@@ -94,7 +97,8 @@ private:
   createOutputTables(const std::vector<std::string> &outputTblNames);
   std::string populateOutputWorkspaces(const std::vector<std::string> &outputTblNames,
                                        const std::unordered_map<std::string, API::ITableWorkspace_sptr> &outputTbls);
-  API::WorkspaceGroup_sptr groupOutputWorkspaces(const std::vector<std::string> &outputTblNames);
+  API::WorkspaceGroup_sptr groupOutputWorkspaces(const std::string &outputName,
+                                                 const std::vector<std::string> &outputTblNames);
 };
 
 } // namespace Mantid::Algorithms

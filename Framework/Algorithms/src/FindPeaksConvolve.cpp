@@ -210,7 +210,9 @@ void FindPeaksConvolve::performConvolution(const size_t dataIndex) {
     extractPeaks(dataIndex, iOverSigConvOutput, xData, yData, kernelBinCount.first / 2);
 
     if (m_createIntermediateWorkspaces) {
-      createIntermediateWorkspaces(dataIndex, kernel, iOverSigConvOutput, xData);
+      auto wsNames = createIntermediateWorkspaces(dataIndex, kernel, iOverSigConvOutput, xData);
+      std::lock_guard<std::mutex> lock(mtx);
+      m_intermediateWsNames.insert(m_intermediateWsNames.end(), wsNames.cbegin(), wsNames.cend());
     }
   }
 }
@@ -354,9 +356,9 @@ void FindPeaksConvolve::generateNormalPDF(const int peakExtentBinNumber) {
   }
 }
 
-void FindPeaksConvolve::createIntermediateWorkspaces(const size_t dataIndex, const Tensor1D &kernel,
-                                                     const Tensor1D &iOverSigma,
-                                                     const HistogramData::HistogramX *xData) {
+std::vector<std::string> FindPeaksConvolve::createIntermediateWorkspaces(const size_t dataIndex, const Tensor1D &kernel,
+                                                                         const Tensor1D &iOverSigma,
+                                                                         const HistogramData::HistogramX *xData) {
   std::unique_ptr<EigenMap_const> xDataMap;
   Eigen::VectorXd xDataCentredBins;
   if (m_centreBins) {
@@ -366,28 +368,30 @@ void FindPeaksConvolve::createIntermediateWorkspaces(const size_t dataIndex, con
     xDataMap = std::make_unique<EigenMap_const>(&xData->front(), xData->size());
   }
 
-  outputIntermediateWorkspace(dataIndex, "iOverSigma",
+  const std::string iOverSigmaOutputName =
+      m_inputDataWS->getName() + "_" + "iOverSigma" + "_" + std::to_string(m_specNums[dataIndex]);
+  outputIntermediateWorkspace(iOverSigmaOutputName,
                               std::vector<double>(xDataMap->data(), xDataMap->data() + xDataMap->rows()),
                               std::vector<double>(iOverSigma.data(), iOverSigma.data() + iOverSigma.size()));
 
   std::vector<double> xKernelData(kernel.size());
   std::iota(std::begin(xKernelData), std::end(xKernelData), 0.0);
-
-  outputIntermediateWorkspace(dataIndex, "kernel", std::move(xKernelData),
+  const std::string kernelOutputName =
+      m_inputDataWS->getName() + "_" + "kernel" + "_" + std::to_string(m_specNums[dataIndex]);
+  outputIntermediateWorkspace(kernelOutputName, std::move(xKernelData),
                               std::vector<double>(kernel.data(), kernel.data() + kernel.size()));
+  return std::vector<std::string>{iOverSigmaOutputName, kernelOutputName};
 }
 
-void FindPeaksConvolve::outputIntermediateWorkspace(const size_t dataIndex, const std::string &wsName,
-                                                    const std::vector<double> &xData,
+void FindPeaksConvolve::outputIntermediateWorkspace(const std::string &outputWsName, const std::vector<double> &xData,
                                                     const std::vector<double> &yData) {
   API::Algorithm_sptr alg{createChildAlgorithm("CreateWorkspace")};
-  alg->setProperty("OutputWorkspace", wsName);
+  alg->setProperty("OutputWorkspace", outputWsName);
   alg->setProperty("DataX", xData);
   alg->setProperty("DataY", yData);
   alg->execute();
   API::MatrixWorkspace_sptr algOutput = alg->getProperty("OutputWorkspace");
-  API::AnalysisDataService::Instance().addOrReplace(
-      m_inputDataWS->getName() + "_" + wsName + "_" + std::to_string(m_specNums[dataIndex]), algOutput);
+  API::AnalysisDataService::Instance().addOrReplace(outputWsName, algOutput);
 }
 
 void FindPeaksConvolve::outputResults() {
@@ -399,8 +403,18 @@ void FindPeaksConvolve::outputResults() {
     g_log.warning("No peaks found for spectrum index: " + noPeaksStr);
   }
 
-  API::WorkspaceGroup_sptr groupWs{groupOutputWorkspaces(outputTblNames)};
+  API::WorkspaceGroup_sptr groupWs{groupOutputWorkspaces("resultsOutput", outputTblNames)};
   setProperty("OutputWorkspace", groupWs);
+
+  if (m_intermediateWsNames.size() > 0) {
+    std::sort(m_intermediateWsNames.begin(), m_intermediateWsNames.end(),
+              [](const std::string &a, const std::string &b) {
+                return std::stoi(a.substr(a.find_last_of("_") + 1, a.size())) <
+                       std::stoi(b.substr(b.find_last_of("_") + 1, b.size()));
+              });
+    auto groupedOutput = groupOutputWorkspaces("IntermediateWorkspaces", m_intermediateWsNames);
+    API::AnalysisDataService::Instance().addOrReplace("IntermediateWorkspaces", groupedOutput);
+  }
 }
 
 std::unordered_map<std::string, API::ITableWorkspace_sptr>
@@ -417,11 +431,12 @@ FindPeaksConvolve::createOutputTables(const std::vector<std::string> &outputTblN
   return outputTbls;
 }
 
-API::WorkspaceGroup_sptr FindPeaksConvolve::groupOutputWorkspaces(const std::vector<std::string> &outputTblNames) {
+API::WorkspaceGroup_sptr FindPeaksConvolve::groupOutputWorkspaces(const std::string &outputName,
+                                                                  const std::vector<std::string> &outputTblNames) {
   API::Algorithm_sptr alg{createChildAlgorithm("GroupWorkspaces")};
   alg->initialize();
   alg->setProperty("InputWorkspaces", outputTblNames);
-  alg->setProperty("OutputWorkspace", "GroupResults");
+  alg->setProperty("OutputWorkspace", outputName);
   alg->execute();
   API::WorkspaceGroup_sptr groupWs = alg->getProperty("OutputWorkspace");
   return groupWs;
