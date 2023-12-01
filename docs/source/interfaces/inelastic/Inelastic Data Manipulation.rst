@@ -105,7 +105,7 @@ Preview
 ~~~~~~~
 
 The preview section shows what a given spectra in the input will look like after
-it has been symmetrised and gives an idea of how well the value of :math:`Elow` fits the
+it has been symmetrised and gives an idea of how well the value of :math:`E_{low}` fits the
 curve on both sides of the peak.
 
 Negative Y
