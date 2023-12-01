@@ -1757,15 +1757,15 @@ bool FitPowderDiffPeaks::fitOverlappedPeaks(vector<BackToBackExponential_sptr> p
   estimateBackgroundCoarse(peaksws, backgroundfunction, 0, 2, 1);
 
   // [DB] Debug output
-  stringstream piss;
-  piss << peaks.size() << "-Peaks Group Information: \n";
+  stringstream peakInfo;
+  peakInfo << peaks.size() << "-Peaks Group Information: \n";
   for (size_t ipk = 0; ipk < tofpeakpairs.size(); ++ipk) {
     BackToBackExponential_sptr tmppeak = tofpeakpairs[ipk].second;
-    piss << "Peak " << ipk << "  @ TOF = " << tmppeak->centre() << ", A = " << tmppeak->getParameter("A")
-         << ", B = " << tmppeak->getParameter("B") << ", S = " << tmppeak->getParameter("S")
-         << ", FWHM = " << tmppeak->fwhm() << '\n';
+    peakInfo << "Peak " << ipk << "  @ TOF = " << tmppeak->centre() << ", A = " << tmppeak->getParameter("A")
+             << ", B = " << tmppeak->getParameter("B") << ", S = " << tmppeak->getParameter("S")
+             << ", FWHM = " << tmppeak->fwhm() << '\n';
   }
-  g_log.information() << "[DB1034] " << piss.str();
+  g_log.information() << "[DB1034] " << peakInfo.str();
 
   stringstream datass;
   datass << "Partial workspace for peaks: \n";
