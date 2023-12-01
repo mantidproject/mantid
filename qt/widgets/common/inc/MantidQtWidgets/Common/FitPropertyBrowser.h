@@ -372,7 +372,7 @@ public:
   bool isParameterExplicitlySetOf(const QString &prefix, const std::string &param);
   QStringList getPeakPrefixes() const;
   void findPeaks(std::unique_ptr<FindPeakStrategyGeneric> findPeakStrategy);
-  bool createAndAddFunction(const Mantid::API::MatrixWorkspace_sptr inputWS, const int peakIndex,
+  bool createAndAddFunction(const Mantid::API::MatrixWorkspace_sptr inputWS, const size_t peakIndex,
                             std::unique_ptr<FindPeakStrategyGeneric> &findPeakStrategy);
 
   // Emits a signal for when the sequential fit has finished

@@ -3294,7 +3294,7 @@ QString FitPropertyBrowser::addFunction(const QString &fnName) {
   return addFunction(fnName.toStdString())->functionPrefix();
 }
 
-bool FitPropertyBrowser::createAndAddFunction(const Mantid::API::MatrixWorkspace_sptr inputWS, const int peakIndex,
+bool FitPropertyBrowser::createAndAddFunction(const Mantid::API::MatrixWorkspace_sptr inputWS, const size_t peakIndex,
                                               std::unique_ptr<FindPeakStrategyGeneric> &findPeakStrategy) {
   bool validFn = false;
   auto f = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
@@ -3388,7 +3388,8 @@ void FindPeakConvolveStrategy::initialise(const std::string &wsName, const int w
                                           const std::string &peakListName, const int FWHM,
                                           AlgorithmFinishObserver *obs) {
   m_peakListName = peakListName;
-  const double peakExtent{FWHM * (6.0 / 2.355)}; // Approx convert from FWHM to peak extent, assuming gaussian
+  m_FWHM = FWHM;
+  const double peakExtent{m_FWHM * (6.0 / 2.355)}; // Approx convert from FWHM to peak extent, assuming gaussian
   QHash<QString, QString> defaultValues;
   defaultValues["InputWorkspace"] = QString::fromStdString(wsName);
   defaultValues["OutputWorkspace"] = QString::fromStdString(m_peakListName);
@@ -3414,16 +3415,23 @@ void FindPeakConvolveStrategy::execute() {
 
   Mantid::API::WorkspaceGroup_sptr groupWs = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
       Mantid::API::AnalysisDataService::Instance().retrieve(m_peakListName));
-  Mantid::API::ITableWorkspace_sptr ws =
-      std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(groupWs->getItem("PeakCentre"));
 
+  Mantid::API::ITableWorkspace_sptr peakCentreWs =
+      std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(groupWs->getItem("PeakCentre"));
   m_peakCentres = std::make_unique<std::vector<double>>();
-  m_peakCentres->reserve(ws->columnCount());
-  for (size_t i{1}; i < ws->columnCount(); i++) {
-    m_peakCentres->push_back(ws->Double(0, i));
+  m_peakCentres->reserve(peakCentreWs->columnCount());
+  for (size_t i{1}; i < peakCentreWs->columnCount(); i++) {
+    m_peakCentres->push_back(peakCentreWs->Double(0, i));
+  }
+
+  Mantid::API::ITableWorkspace_sptr peakHeightWs =
+      std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(groupWs->getItem("PeakYPosition"));
+  m_peakHeights = std::make_unique<std::vector<double>>();
+  m_peakHeights->reserve(peakHeightWs->columnCount());
+  for (size_t i{1}; i < peakHeightWs->columnCount(); i++) {
+    m_peakHeights->push_back(peakHeightWs->Double(0, i));
   }
   m_peakWidths = std::make_unique<std::vector<double>>(m_peakCentres->size(), m_FWHM);
-  m_peakHeights = std::make_unique<std::vector<double>>(m_peakCentres->size(), 0); // y pos?
 }
 
 void FindPeakDefaultStrategy::execute() {
