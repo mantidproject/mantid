@@ -320,7 +320,7 @@ void IndirectDataAnalysisTab::updateFitBrowserParameterValues(
     const std::unordered_map<std::string, ParameterValue> &params) {
   IFunction_sptr fun = m_fittingModel->getFitFunction();
   if (fun) {
-    for (auto pair : params) {
+    for (auto const &pair : params) {
       fun->setParameter(pair.first, pair.second.value);
     }
     if (fun->getNumberDomains() > 1) {
