@@ -55,6 +55,7 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : Correc
   m_uiForm.dsSample->isOptional(true);
   m_uiForm.dsContainer->isOptional(true);
   m_uiForm.dsCorrections->isOptional(true);
+  m_uiForm.dsCorrections->setAlwaysLoadAsGroup(true);
 
   m_uiForm.spPreviewSpec->setMinimum(0);
   m_uiForm.spPreviewSpec->setMaximum(0);
@@ -186,7 +187,7 @@ void ApplyAbsorptionCorrections::run() {
 
   // get Sample Workspace
   auto const sampleWs = getADSWorkspace(m_sampleWorkspaceName);
-  absCorProps->setProperty("SampleWorkspace", sampleWs);
+  absCorProps->setProperty("SampleWorkspace", m_sampleWorkspaceName);
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
   // Get Can and Clone

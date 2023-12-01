@@ -180,6 +180,19 @@ public:
     // Remove should not throw but give a warning in the log file, changed by
     // LCC 05/2008
     TS_ASSERT_THROWS_NOTHING(ads.remove("ttttt"));
+    TS_ASSERT(!ads.remove("ttttt"));
+  }
+
+  void testRemoveReturnsTheWorkspaceSptr() {
+    const std::string name("MySpace");
+    addToADS(name);
+    auto const workspace = ads.remove(name);
+    TS_ASSERT(workspace);
+    TS_ASSERT_EQUALS("MockWorkspace", workspace->id());
+
+    TS_ASSERT_THROWS_NOTHING(ads.remove("ttttt"));
+    // Should return a nullptr as the workspace does not exist
+    TS_ASSERT(!ads.remove("ttttt"));
   }
 
   void testRetrieve() {
