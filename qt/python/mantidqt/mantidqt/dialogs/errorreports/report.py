@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import re
 
 from qtpy import QtCore, QtGui, QtWidgets
 from qtpy.QtCore import Signal, QSettings
@@ -74,6 +75,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
             self.requestTextBrowser.insertHtml(msg)
 
         self.input_name_line_edit.textChanged.connect(self.set_button_status)
+        self.input_email_line_edit.textChanged.connect(self.toggle_valid_email)
         self.input_email_line_edit.textChanged.connect(self.set_button_status)
         self.input_free_text.textChanged.connect(self.set_plain_text_edit_field)
         self.input_free_text.textChanged.connect(self.set_plain_text_length_lable)
@@ -81,6 +83,16 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
 
         self.email_notice_expanded_text.hide()
         self.email_notice_button.clicked.connect(self.expand_or_hide_email_notice_text)
+
+        # https://stackabuse.com/python-validate-email-address-with-regular-expressions-regex/
+        self.email_regex = re.compile(
+            r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@"
+            r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])"
+        )
+        self.valid_email = False
+
+        # setting the border colour in self.toggle_valid_email was making the height slightly less for some reason
+        self.input_email_line_edit.setFixedHeight(self.input_email_line_edit.sizeHint().height())
 
         self.privacy_policy_label.linkActivated.connect(self.launch_privacy_policy)
 
@@ -111,6 +123,7 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
             self.input_email_line_edit.setText(self.saved_email)
             self.rememberContactInfoCheckbox.setChecked(True)
 
+        self.toggle_valid_email()
         self.set_button_status()
 
     def quit(self):
@@ -156,9 +169,15 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     def launch_privacy_policy(self, link):
         self.interface_manager.showWebPage(link)
 
+    def toggle_valid_email(self):
+        self.valid_email = re.fullmatch(self.email_regex, self.input_email)
+        if not self.valid_email:
+            self.input_email_line_edit.setStyleSheet("border: 1px solid red")
+        else:
+            self.input_email_line_edit.setStyleSheet("border: 1px solid gray")
+
     def set_button_status(self):
-        # Requiring email address to submit error report
-        if not self.input_email or len(self.input_text) > PLAIN_TEXT_MAX_LENGTH:
+        if not self.valid_email or len(self.input_text) > PLAIN_TEXT_MAX_LENGTH:
             self.fullShareButton.setEnabled(False)
         else:
             self.fullShareButton.setEnabled(True)
