@@ -1,7 +1,7 @@
-.. _indirect_inelastic_testing:
+.. _indirect_data_reduction_testing:
 
-Indirect Inelastic Testing
-==========================
+Indirect Data Reduction Testing
+===============================
 
 .. contents::
    :local:
