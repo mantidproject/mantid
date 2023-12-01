@@ -457,4 +457,13 @@ void IndirectDataReduction::filterUiForFacility(const QString &facility) {
   m_uiForm.iicInstrumentConfiguration->setDisabledInstruments(disabledInstruments);
 }
 
+/**
+ * Controls the visiblity of analyser and reflection options
+ *
+ * @param visible whether to show the options or not
+ */
+void IndirectDataReduction::showAnalyserAndReflectionOptions(bool visible) {
+  m_uiForm.iicInstrumentConfiguration->showAnalyserAndReflectionOptions(visible);
+}
+
 } // namespace MantidQt::CustomInterfaces

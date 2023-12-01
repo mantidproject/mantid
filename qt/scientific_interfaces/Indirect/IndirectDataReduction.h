@@ -62,6 +62,8 @@ public:
   std::vector<std::pair<std::string, std::vector<std::string>>> getInstrumentModes();
   QMap<QString, QString> getInstrumentDetails();
 
+  void showAnalyserAndReflectionOptions(bool visible);
+
 signals:
   /// Emitted when the instrument setup is changed
   void newInstrumentConfiguration();

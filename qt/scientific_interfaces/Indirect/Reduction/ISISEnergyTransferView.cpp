@@ -58,8 +58,7 @@ IETRunData IETView::getRunData() const {
   IETBackgroundData backgroundDetails(m_uiForm.ckBackgroundRemoval->isChecked(), m_uiForm.spBackgroundStart->value(),
                                       m_uiForm.spBackgroundEnd->value());
 
-  IETAnalysisData analysisDetails(m_uiForm.ckDetailedBalance->isChecked(), m_uiForm.spDetailedBalance->value(),
-                                  m_uiForm.ckScaleMultiplier->isChecked(), m_uiForm.spScaleMultiplier->value());
+  IETAnalysisData analysisDetails(m_uiForm.ckDetailedBalance->isChecked(), m_uiForm.spDetailedBalance->value());
 
   IETRebinData rebinDetails(!m_uiForm.ckDoNotRebin->isChecked(), m_uiForm.cbRebinType->currentText().toStdString(),
                             m_uiForm.spRebinLow->value(), m_uiForm.spRebinHigh->value(), m_uiForm.spRebinWidth->value(),
@@ -92,8 +91,8 @@ IETPlotData IETView::getPlotData() const {
 
 IETSaveData IETView::getSaveData() const {
   IETSaveData saveTypes(m_uiForm.ckSaveNexus->isChecked(), m_uiForm.ckSaveSPE->isChecked(),
-                        m_uiForm.ckSaveNXSPE->isChecked(), m_uiForm.ckSaveASCII->isChecked(),
-                        m_uiForm.ckSaveAclimax->isChecked(), m_uiForm.ckSaveDaveGrp->isChecked());
+                        m_uiForm.ckSaveASCII->isChecked(), m_uiForm.ckSaveAclimax->isChecked(),
+                        m_uiForm.ckSaveDaveGrp->isChecked());
 
   return saveTypes;
 }
@@ -148,20 +147,27 @@ void IETView::displayWarning(std::string const &message) const {
   QMessageBox::warning(nullptr, "", QString::fromStdString(message));
 }
 
+void IETView::setCalibVisible(bool visible) {
+  m_uiForm.ckUseCalib->setVisible(visible);
+  m_uiForm.dsCalibrationFile->setVisible(visible);
+}
+
+void IETView::setEfixedVisible(bool visible) {
+  m_uiForm.spEfixed->setVisible(visible);
+  m_uiForm.lbEfixed->setVisible(visible);
+}
+
 void IETView::setBackgroundSectionVisible(bool visible) { m_uiForm.gbBackgroundRemoval->setVisible(visible); }
 
 void IETView::setPlotTimeSectionVisible(bool visible) { m_uiForm.gbPlotTime->setVisible(visible); }
 
-void IETView::setPlottingOptionsVisible(bool visible) { m_uiForm.fPlottingOptions->setVisible(visible); }
+void IETView::setAnalysisSectionVisible(bool visible) { m_uiForm.gbAnalysis->setVisible(visible); }
 
-void IETView::setScaleFactorVisible(bool visible) {
-  m_uiForm.ckScaleMultiplier->setVisible(visible);
-  m_uiForm.spScaleMultiplier->setVisible(visible);
-}
+void IETView::setPlottingOptionsVisible(bool visible) { m_uiForm.fPlottingOptions->setVisible(visible); }
 
 void IETView::setAclimaxSaveVisible(bool visible) { m_uiForm.ckSaveAclimax->setVisible(visible); }
 
-void IETView::setNXSPEVisible(bool visible) { m_uiForm.ckSaveNXSPE->setVisible(visible); }
+void IETView::setSPEVisible(bool visible) { m_uiForm.ckSaveSPE->setVisible(visible); }
 
 void IETView::setFoldMultipleFramesVisible(bool visible) { m_uiForm.ckFold->setVisible(visible); }
 
@@ -190,7 +196,6 @@ void IETView::setSaveEnabled(bool enable) {
   m_uiForm.ckSaveASCII->setEnabled(enable);
   m_uiForm.ckSaveDaveGrp->setEnabled(enable);
   m_uiForm.ckSaveNexus->setEnabled(enable);
-  m_uiForm.ckSaveNXSPE->setEnabled(enable);
   m_uiForm.ckSaveSPE->setEnabled(enable);
 }
 

@@ -53,12 +53,14 @@ public:
                                     std::string const &saveDirectory) const;
   void displayWarning(std::string const &message) const;
 
+  void setCalibVisible(bool visible);
+  void setEfixedVisible(bool visible);
   void setBackgroundSectionVisible(bool visible);
   void setPlotTimeSectionVisible(bool visible);
+  void setAnalysisSectionVisible(bool visible);
   void setPlottingOptionsVisible(bool visible);
-  void setScaleFactorVisible(bool visible);
   void setAclimaxSaveVisible(bool visible);
-  void setNXSPEVisible(bool visible);
+  void setSPEVisible(bool visible);
   void setFoldMultipleFramesVisible(bool visible);
   void setOutputInCm1Visible(bool visible);
   void setGroupOutputCheckBoxVisible(bool visible);

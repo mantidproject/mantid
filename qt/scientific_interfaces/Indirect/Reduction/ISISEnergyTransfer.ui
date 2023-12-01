@@ -467,36 +467,10 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="5">
-       <widget class="QDoubleSpinBox" name="spScaleMultiplier">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="decimals">
-         <number>5</number>
-        </property>
-        <property name="maximum">
-         <double>99.989999999999995</double>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-        <property name="value">
-         <double>1.000000000000000</double>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0">
        <widget class="QCheckBox" name="ckDetailedBalance">
         <property name="text">
          <string>Detailed Balance</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QCheckBox" name="ckScaleMultiplier">
-        <property name="text">
-         <string>Scale by factor:</string>
         </property>
        </widget>
       </item>
@@ -975,16 +949,6 @@
           </property>
           <property name="text">
            <string>NeXus</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="ckSaveNXSPE">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>NXSPE</string>
           </property>
          </widget>
         </item>

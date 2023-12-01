@@ -106,9 +106,6 @@ void IETModel::setAnalysisProperties(IAlgorithm_sptr const &reductionAlg, IETAna
   if (analysisData.getUseDetailedBalance()) {
     reductionAlg->setProperty("DetailedBalance", analysisData.getDetailedBalance());
   }
-  if (analysisData.getUseScaleFactor()) {
-    reductionAlg->setProperty("ScaleFactor", analysisData.getScaleFactor());
-  }
 }
 
 void IETModel::setGroupingProperties(IAlgorithm_sptr const &reductionAlg, IETGroupingData const &groupingData,
@@ -252,8 +249,6 @@ void IETModel::saveWorkspace(std::string const &workspaceName, IETSaveData const
     save("SaveNexusProcessed", workspaceName, workspaceName + ".nxs");
   if (saveTypes.getSPE())
     save("SaveSPE", workspaceName, workspaceName + ".spe");
-  if (saveTypes.getNXSPE())
-    save("SaveNXSPE", workspaceName, workspaceName + ".nxspe");
   if (saveTypes.getASCII())
     save("SaveAscii", workspaceName, workspaceName + ".dat", 2);
   if (saveTypes.getAclimax())
