@@ -11,13 +11,14 @@
 
 namespace {
 
-std::string nameForParameterEstimator(Mantid::API::CompositeFunction_sptr const &composite,
-                                      Mantid::API::IFunction_sptr &function, std::size_t const functionIndex) {
+std::string nameForParameterEstimator(Mantid::API::IFunction_sptr &function,
+                                      std::optional<Mantid::API::CompositeFunction_sptr> composite,
+                                      std::optional<std::size_t> functionIndex) {
   auto functionName = function->name();
-  if (composite) {
+  if (composite && functionIndex) {
     // functionIndex returns the index of the first function with the given name. If the index is different,
     // we know that this is not the first function with this name in the composite function
-    if (composite->functionIndex(functionName) != functionIndex) {
+    if ((*composite)->functionIndex(functionName) != *functionIndex) {
       functionName += "N";
     }
   }
@@ -67,18 +68,19 @@ void IDAFunctionParameterEstimation::estimateFunctionParameters(Mantid::API::IFu
 
   if (auto composite = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(function)) {
     for (auto i = 0u; i < composite->nFunctions(); ++i) {
-      estimateSingleFunctionParameters(composite, composite->getFunction(i), estimationData, i);
+      auto function = composite->getFunction(i);
+      estimateSingleFunctionParameters(function, estimationData, composite, i);
     }
   } else {
-    estimateSingleFunctionParameters(nullptr, function, estimationData);
+    estimateSingleFunctionParameters(function, estimationData);
   }
 }
 
 void IDAFunctionParameterEstimation::estimateSingleFunctionParameters(
-    Mantid::API::CompositeFunction_sptr const &composite, Mantid::API::IFunction_sptr &function,
-    const DataForParameterEstimation &estimationData, std::size_t const functionIndex) {
+    Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData,
+    std::optional<Mantid::API::CompositeFunction_sptr> composite, std::optional<std::size_t> functionIndex) {
   if (function) {
-    auto const parameterEstimatorName = nameForParameterEstimator(composite, function, functionIndex);
+    auto const parameterEstimatorName = nameForParameterEstimator(function, composite, functionIndex);
     if (m_funcMap.find(parameterEstimatorName) != m_funcMap.end()) {
       m_funcMap[parameterEstimatorName](function, estimationData);
     }

@@ -11,6 +11,8 @@
 #include "MantidAPI/IFunction.h"
 #include "ParameterEstimation.h"
 
+#include <optional>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -28,10 +30,10 @@ public:
                                   const DataForParameterEstimation &estimationData);
 
 private:
-  void estimateSingleFunctionParameters(Mantid::API::CompositeFunction_sptr const &composite,
-                                        Mantid::API::IFunction_sptr &function,
+  void estimateSingleFunctionParameters(Mantid::API::IFunction_sptr &function,
                                         const DataForParameterEstimation &estimationData,
-                                        std::size_t const functionIndex = 0u);
+                                        std::optional<Mantid::API::CompositeFunction_sptr> composite = std::nullopt,
+                                        std::optional<std::size_t> functionIndex = std::nullopt);
 
   std::map<std::string, ParameterEstimateSetter> m_funcMap;
 };
