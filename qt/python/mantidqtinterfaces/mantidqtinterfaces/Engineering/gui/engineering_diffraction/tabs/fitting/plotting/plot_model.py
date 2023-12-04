@@ -66,7 +66,6 @@ class FittingPlotModel(object):
             else:
                 fnames = [fit_functions.name()]
                 nparams = [fit_functions.nParams()]
-
             params_dict = ADS.retrieve(fit_prop["properties"]["Output"] + "_Parameters").toDict()
             # loop over rows in output workspace to get value and error for each parameter
             istart = 0
@@ -85,37 +84,28 @@ class FittingPlotModel(object):
                             self._fit_results[wsname]["results"][key_d].append([dcen, dcen_er])
                         except (ValueError, RuntimeError) as e:
                             logger.warning(f"Unable to output {key_d} parameters for TOF={params_dict['Value'][irow]}: " + str(e))
-                self._calculate_fwhm_values(
-                    ws_name=wsname, func_name=fname, numb_func_params=nparams[ifunc], params_dict=params_dict, params_start_index=istart
-                )
                 istart += nparams[ifunc]
             # append the cost function value (in this case always chisq/DOF) as don't let user change cost func
             # always last row in parameters table
             self._fit_results[wsname]["costFunction"] = params_dict["Value"][-1]
+            self._calculate_fwhm_values(wsname, fit_functions)
         self.create_fit_tables(loaded_ws_list, active_ws_list, log_workspace_name)
 
-    def _calculate_fwhm_values(self, ws_name, func_name, numb_func_params, params_dict, params_start_index):
-        if func_name in FunctionFactory.getPeakFunctionNames():
-            try:
-                peak_func = FunctionFactory.Instance().createPeakFunction(func_name)
-                set_param_count = 0
-                for param_index in range(0, numb_func_params):
-                    param_name = (params_dict["Name"][params_start_index + param_index]).split(".")[-1]
-                    param_val = params_dict["Value"][params_start_index + param_index]
-                    if peak_func.hasParameter(param_name) and peak_func.getParameterIndex(param_name) == param_index:
-                        peak_func.setParameter(param_index, param_val)
-                        set_param_count += 1
-                key_fwhm = func_name + "_fwhm"
-                if peak_func.nParams() == set_param_count:
-                    self._fit_results[ws_name]["results"][key_fwhm].append([peak_func.fwhm(), 0.0])
-                else:
-                    logger.warning(
-                        f"Unable to output {key_fwhm} params for {ws_name}, fail to set all required func parames of {func_name}"
-                    )
-            except (ValueError, RuntimeError):
-                logger.warning(
-                    f"Unable to output {key_fwhm} parameters for workspace={ws_name} due to failure to create peak function {func_name}"
-                )
+    def _setup_peak_func_and_extract_fwhm(self, ws_name, peak_func_names, fit_func):
+        fit_func_name = fit_func.name()
+        if fit_func_name in peak_func_names:
+            peak_func = FunctionFactory.Instance().createPeakFunction(fit_func_name)
+            [peak_func.setParameter(i_param, fit_func.getParameterValue(i_param)) for i_param in range(fit_func.nParams())]
+            key_fwhm = fit_func_name + "_fwhm"
+            self._fit_results[ws_name]["results"][key_fwhm].append([peak_func.fwhm(), 0.0])
+
+    def _calculate_fwhm_values(self, ws_name, fit_functions):
+        peak_func_names = FunctionFactory.getPeakFunctionNames()
+        if isinstance(fit_functions, CompositeFunction):
+            for func in fit_functions:
+                self._setup_peak_func_and_extract_fwhm(ws_name, peak_func_names, func)
+        else:
+            self._setup_peak_func_and_extract_fwhm(ws_name, peak_func_names, fit_functions)
 
     def _convert_TOF_to_d(self, tof, ws_name):
         diff_consts = self._get_diff_constants(ws_name)
