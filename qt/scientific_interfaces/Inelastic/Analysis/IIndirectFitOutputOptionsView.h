@@ -7,7 +7,9 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
+
+#include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -15,13 +17,9 @@ namespace IDA {
 
 class IIndirectFitOutputOptionsPresenter;
 
-class MANTIDQT_INELASTIC_DLL IIndirectFitOutputOptionsView : public API::MantidWidget {
-  Q_OBJECT
+class MANTIDQT_INELASTIC_DLL IIndirectFitOutputOptionsView {
 
 public:
-  IIndirectFitOutputOptionsView(QWidget *parent = nullptr) : API::MantidWidget(parent){};
-  virtual ~IIndirectFitOutputOptionsView(){};
-
   virtual void subscribePresenter(IIndirectFitOutputOptionsPresenter *presenter) = 0;
 
   virtual void setGroupWorkspaceComboBoxVisible(bool visible) = 0;
@@ -40,8 +38,8 @@ public:
   virtual std::string getSelectedWorkspace() const = 0;
   virtual std::string getSelectedPlotType() const = 0;
 
-  virtual void setPlotText(QString const &text) = 0;
-  virtual void setSaveText(QString const &text) = 0;
+  virtual void setPlotText(std::string const &text) = 0;
+  virtual void setSaveText(std::string const &text) = 0;
 
   virtual void setPlotExtraOptionsEnabled(bool enable) = 0;
   virtual void setPlotEnabled(bool enable) = 0;

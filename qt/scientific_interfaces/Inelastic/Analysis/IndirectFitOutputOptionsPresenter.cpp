@@ -30,7 +30,7 @@ IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(IIndirectFi
 IndirectFitOutputOptionsPresenter::~IndirectFitOutputOptionsPresenter() = default;
 
 void IndirectFitOutputOptionsPresenter::setUpPresenter() {
-  connect(m_view, SIGNAL(plotClicked()), this, SIGNAL(plotSpectra()));
+  // connect(m_view, SIGNAL(plotClicked()), this, SIGNAL(plotSpectra()));
 }
 
 void IndirectFitOutputOptionsPresenter::setMultiWorkspaceOptionsVisible(bool visible) {
@@ -135,24 +135,9 @@ std::vector<SpectrumToPlot> IndirectFitOutputOptionsPresenter::getSpectraToPlot(
 
 void IndirectFitOutputOptionsPresenter::setEditResultVisible(bool visible) { m_view->setEditResultVisible(visible); }
 
-void IndirectFitOutputOptionsPresenter::handleEditResultClicked() {
-  m_editResultsDialog = getEditResultsDialog(m_view->parentWidget());
-  m_editResultsDialog->setWorkspaceSelectorSuffices({"_Result"});
-  m_editResultsDialog->show();
-  connect(m_editResultsDialog.get(), SIGNAL(replaceSingleFitResult()), this, SLOT(replaceSingleFitResult()));
-  connect(m_editResultsDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeEditResultDialog()));
-}
-
-std::unique_ptr<IndirectEditResultsDialog>
-IndirectFitOutputOptionsPresenter::getEditResultsDialog(QWidget *parent) const {
-  return std::make_unique<IndirectEditResultsDialog>(parent);
-}
-
-void IndirectFitOutputOptionsPresenter::replaceSingleFitResult() {
-  auto const inputName = m_editResultsDialog->getSelectedInputWorkspaceName();
-  auto const singleBinName = m_editResultsDialog->getSelectedSingleFitWorkspaceName();
-  auto const outputName = m_editResultsDialog->getOutputWorkspaceName();
-
+void IndirectFitOutputOptionsPresenter::handleReplaceSingleFitResult(std::string const &inputName,
+                                                                     std::string const &singleBinName,
+                                                                     std::string const &outputName) {
   setEditingResult(true);
   replaceSingleFitResult(inputName, singleBinName, outputName);
   setEditingResult(false);
@@ -169,17 +154,9 @@ void IndirectFitOutputOptionsPresenter::replaceSingleFitResult(std::string const
 }
 
 void IndirectFitOutputOptionsPresenter::setEditingResult(bool editing) {
-  m_editResultsDialog->setReplaceFitResultText(editing ? "Processing..." : "Replace Fit Result");
-  m_editResultsDialog->setReplaceFitResultEnabled(!editing);
   setPlotEnabled(!editing);
   setEditResultEnabled(!editing);
   setSaveEnabled(!editing);
-}
-
-void IndirectFitOutputOptionsPresenter::closeEditResultDialog() {
-  disconnect(m_editResultsDialog.get(), SIGNAL(replaceSingleFitResult()), this, SLOT(replaceSingleFitResult()));
-  disconnect(m_editResultsDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeEditResultDialog()));
-  m_editResultsDialog->close();
 }
 
 void IndirectFitOutputOptionsPresenter::displayWarning(std::string const &message) { m_view->displayWarning(message); }

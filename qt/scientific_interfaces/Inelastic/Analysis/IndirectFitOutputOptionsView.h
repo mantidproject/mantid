@@ -18,8 +18,10 @@ namespace CustomInterfaces {
 namespace IDA {
 
 class IIndirectFitOutputOptionsPresenter;
+class IndirectEditResultsDialog;
 
-class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsView final : public IIndirectFitOutputOptionsView {
+class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsView final : public API::MantidWidget,
+                                                                  public IIndirectFitOutputOptionsView {
   Q_OBJECT
 
 public:
@@ -44,8 +46,8 @@ public:
   std::string getSelectedWorkspace() const override;
   std::string getSelectedPlotType() const override;
 
-  void setPlotText(QString const &text) override;
-  void setSaveText(QString const &text) override;
+  void setPlotText(std::string const &text) override;
+  void setSaveText(std::string const &text) override;
 
   void setPlotExtraOptionsEnabled(bool enable) override;
   void setPlotEnabled(bool enable) override;
@@ -60,9 +62,12 @@ private slots:
   void notifyGroupWorkspaceChanged(QString const &group);
   void notifyPlotClicked();
   void notifySaveClicked();
-  void notifyEditResultClicked();
+  void notifyReplaceSingleFitResult();
+  void handleEditResultClicked();
+  void handleCloseEditResultDialog();
 
 private:
+  IndirectEditResultsDialog *m_editResultsDialog;
   std::unique_ptr<Ui::IndirectFitOutputOptions> m_outputOptions;
   IIndirectFitOutputOptionsPresenter *m_presenter;
 };

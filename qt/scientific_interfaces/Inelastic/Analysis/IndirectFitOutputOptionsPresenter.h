@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectEditResultsDialog.h"
 #include "IndirectFitOutputOptionsModel.h"
 #include "IndirectFitOutputOptionsView.h"
 
@@ -24,7 +23,8 @@ public:
   virtual void handleGroupWorkspaceChanged(std::string const &selectedGroup) = 0;
   virtual void handlePlotClicked() = 0;
   virtual void handleSaveClicked() = 0;
-  virtual void handleEditResultClicked() = 0;
+  virtual void handleReplaceSingleFitResult(std::string const &inputName, std::string const &singleBinName,
+                                            std::string const &outputName) = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsPresenter final : public QObject,
@@ -59,14 +59,11 @@ public:
   void handleGroupWorkspaceChanged(std::string const &selectedGroup) override;
   void handlePlotClicked() override;
   void handleSaveClicked() override;
-  void handleEditResultClicked() override;
+  void handleReplaceSingleFitResult(std::string const &inputName, std::string const &singleBinName,
+                                    std::string const &outputName) override;
 
 signals:
   void plotSpectra();
-
-private slots:
-  void replaceSingleFitResult();
-  void closeEditResultDialog();
 
 private:
   void setUpPresenter();
@@ -74,7 +71,6 @@ private:
   void plotResult(std::string const &selectedGroup);
   void setSaving(bool saving);
 
-  std::unique_ptr<IndirectEditResultsDialog> getEditResultsDialog(QWidget *parent) const;
   void setEditingResult(bool editing);
 
   void replaceSingleFitResult(std::string const &inputName, std::string const &singleBinName,
@@ -82,7 +78,6 @@ private:
 
   void displayWarning(std::string const &message);
 
-  std::unique_ptr<IndirectEditResultsDialog> m_editResultsDialog;
   std::unique_ptr<IIndirectFitOutputOptionsModel> m_model;
   IIndirectFitOutputOptionsView *m_view;
 };
