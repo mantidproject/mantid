@@ -77,6 +77,8 @@ public:
   bool hasResolution() const noexcept { return m_hasResolution; }
   void setFileExtensionsByName(bool filter);
 
+  void plotSelectedSpectra();
+
 protected:
   IndirectFittingModel *getFittingModel() const;
   void run() override;
@@ -153,7 +155,6 @@ protected slots:
   void respondToFunctionChanged();
 
 private slots:
-  void plotSelectedSpectra();
   void respondToSingleResolutionLoaded();
   void respondToDataChanged();
   void respondToDataAdded(IAddWorkspaceDialog const *dialog);

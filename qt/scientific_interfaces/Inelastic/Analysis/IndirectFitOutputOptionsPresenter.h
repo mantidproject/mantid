@@ -12,11 +12,11 @@
 #include "DllConfig.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include <QObject>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
+class IndirectDataAnalysisTab;
 
 class MANTIDQT_INELASTIC_DLL IIndirectFitOutputOptionsPresenter {
 public:
@@ -27,13 +27,10 @@ public:
                                             std::string const &outputName) = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsPresenter final : public QObject,
-                                                                       public IIndirectFitOutputOptionsPresenter {
-  Q_OBJECT
+class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsPresenter final : public IIndirectFitOutputOptionsPresenter {
 public:
-  IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsView *view);
+  IndirectFitOutputOptionsPresenter(IndirectDataAnalysisTab *tab, IIndirectFitOutputOptionsView *view);
   IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsModel *model, IIndirectFitOutputOptionsView *view);
-  ~IndirectFitOutputOptionsPresenter() override;
 
   void setMultiWorkspaceOptionsVisible(bool visible);
 
@@ -62,12 +59,7 @@ public:
   void handleReplaceSingleFitResult(std::string const &inputName, std::string const &singleBinName,
                                     std::string const &outputName) override;
 
-signals:
-  void plotSpectra();
-
 private:
-  void setUpPresenter();
-
   void plotResult(std::string const &selectedGroup);
   void setSaving(bool saving);
 
@@ -78,8 +70,9 @@ private:
 
   void displayWarning(std::string const &message);
 
-  std::unique_ptr<IIndirectFitOutputOptionsModel> m_model;
+  IndirectDataAnalysisTab *m_tab;
   IIndirectFitOutputOptionsView *m_view;
+  std::unique_ptr<IIndirectFitOutputOptionsModel> m_model;
 };
 
 } // namespace IDA

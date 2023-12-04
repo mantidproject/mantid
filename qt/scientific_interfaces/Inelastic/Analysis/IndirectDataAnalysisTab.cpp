@@ -76,8 +76,6 @@ void IndirectDataAnalysisTab::setup() {
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab()));
   updateResultOptions();
 
-  connect(m_outOptionsPresenter.get(), SIGNAL(plotSpectra()), this, SLOT(plotSelectedSpectra()));
-
   connectDataPresenter();
   connectPlotPresenter();
   connectFitPropertyBrowser();
@@ -116,7 +114,7 @@ void IndirectDataAnalysisTab::connectFitPropertyBrowser() {
 }
 
 void IndirectDataAnalysisTab::setupOutputOptionsPresenter(bool const editResults) {
-  m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(m_uiForm->ovOutputOptionsView);
+  m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(this, m_uiForm->ovOutputOptionsView);
   m_outOptionsPresenter->setEditResultVisible(editResults);
 }
 

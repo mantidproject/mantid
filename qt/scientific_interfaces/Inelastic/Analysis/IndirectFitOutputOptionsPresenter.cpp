@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitOutputOptionsPresenter.h"
+#include "IndirectDataAnalysisTab.h"
 
 #include <utility>
 
@@ -12,25 +13,18 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsView *view)
-    : QObject(nullptr), m_model(std::make_unique<IndirectFitOutputOptionsModel>()), m_view(view) {
+IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(IndirectDataAnalysisTab *tab,
+                                                                     IIndirectFitOutputOptionsView *view)
+    : m_tab(tab), m_view(view), m_model(std::make_unique<IndirectFitOutputOptionsModel>()) {
   setMultiWorkspaceOptionsVisible(false);
-  setUpPresenter();
   m_view->subscribePresenter(this);
 }
 
 IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsModel *model,
                                                                      IIndirectFitOutputOptionsView *view)
-    : QObject(nullptr), m_model(model), m_view(view) {
+    : m_model(model), m_view(view) {
   setMultiWorkspaceOptionsVisible(false);
-  setUpPresenter();
   m_view->subscribePresenter(this);
-}
-
-IndirectFitOutputOptionsPresenter::~IndirectFitOutputOptionsPresenter() = default;
-
-void IndirectFitOutputOptionsPresenter::setUpPresenter() {
-  // connect(m_view, SIGNAL(plotClicked()), this, SIGNAL(plotSpectra()));
 }
 
 void IndirectFitOutputOptionsPresenter::setMultiWorkspaceOptionsVisible(bool visible) {
@@ -78,6 +72,7 @@ void IndirectFitOutputOptionsPresenter::handlePlotClicked() {
   setPlotting(true);
   try {
     plotResult(m_view->getSelectedGroupWorkspace());
+    m_tab->plotSelectedSpectra();
   } catch (std::runtime_error const &ex) {
     displayWarning(ex.what());
   }
