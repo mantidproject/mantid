@@ -14,27 +14,23 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsView *view)
     : QObject(nullptr), m_model(std::make_unique<IndirectFitOutputOptionsModel>()), m_view(view) {
+  setMultiWorkspaceOptionsVisible(false);
   setUpPresenter();
+  m_view->subscribePresenter(this);
 }
 
 IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsModel *model,
                                                                      IIndirectFitOutputOptionsView *view)
     : QObject(nullptr), m_model(model), m_view(view) {
+  setMultiWorkspaceOptionsVisible(false);
   setUpPresenter();
+  m_view->subscribePresenter(this);
 }
 
 IndirectFitOutputOptionsPresenter::~IndirectFitOutputOptionsPresenter() = default;
 
 void IndirectFitOutputOptionsPresenter::setUpPresenter() {
-  setMultiWorkspaceOptionsVisible(false);
-
-  connect(m_view, SIGNAL(groupWorkspaceChanged(std::string const &)), this,
-          SLOT(setAvailablePlotOptions(std::string const &)));
-
-  connect(m_view, SIGNAL(plotClicked()), this, SLOT(plotResult()));
   connect(m_view, SIGNAL(plotClicked()), this, SIGNAL(plotSpectra()));
-  connect(m_view, SIGNAL(saveClicked()), this, SLOT(saveResult()));
-  connect(m_view, SIGNAL(editResultClicked()), this, SLOT(editResult()));
 }
 
 void IndirectFitOutputOptionsPresenter::setMultiWorkspaceOptionsVisible(bool visible) {
@@ -43,7 +39,7 @@ void IndirectFitOutputOptionsPresenter::setMultiWorkspaceOptionsVisible(bool vis
   m_view->setWorkspaceComboBoxVisible(false);
 }
 
-void IndirectFitOutputOptionsPresenter::setAvailablePlotOptions(std::string const &selectedGroup) {
+void IndirectFitOutputOptionsPresenter::handleGroupWorkspaceChanged(std::string const &selectedGroup) {
   auto const resultSelected = m_model->isResultGroupSelected(selectedGroup);
   setPlotTypes(selectedGroup);
   m_view->setWorkspaceComboBoxVisible(!resultSelected);
@@ -78,7 +74,7 @@ void IndirectFitOutputOptionsPresenter::setPlotTypes(std::string const &selected
 
 void IndirectFitOutputOptionsPresenter::removePDFWorkspace() { m_model->removePDFWorkspace(); }
 
-void IndirectFitOutputOptionsPresenter::plotResult() {
+void IndirectFitOutputOptionsPresenter::handlePlotClicked() {
   setPlotting(true);
   try {
     plotResult(m_view->getSelectedGroupWorkspace());
@@ -94,7 +90,7 @@ void IndirectFitOutputOptionsPresenter::plotResult(std::string const &selectedGr
     m_model->plotPDF(m_view->getSelectedWorkspace(), m_view->getSelectedPlotType());
 }
 
-void IndirectFitOutputOptionsPresenter::saveResult() {
+void IndirectFitOutputOptionsPresenter::handleSaveClicked() {
   setSaving(true);
   try {
     m_model->saveResult();
@@ -139,7 +135,7 @@ std::vector<SpectrumToPlot> IndirectFitOutputOptionsPresenter::getSpectraToPlot(
 
 void IndirectFitOutputOptionsPresenter::setEditResultVisible(bool visible) { m_view->setEditResultVisible(visible); }
 
-void IndirectFitOutputOptionsPresenter::editResult() {
+void IndirectFitOutputOptionsPresenter::handleEditResultClicked() {
   m_editResultsDialog = getEditResultsDialog(m_view->parentWidget());
   m_editResultsDialog->setWorkspaceSelectorSuffices({"_Result"});
   m_editResultsDialog->show();

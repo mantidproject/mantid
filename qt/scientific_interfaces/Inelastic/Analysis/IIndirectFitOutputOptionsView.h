@@ -13,12 +13,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+class IIndirectFitOutputOptionsPresenter;
+
 class MANTIDQT_INELASTIC_DLL IIndirectFitOutputOptionsView : public API::MantidWidget {
   Q_OBJECT
 
 public:
   IIndirectFitOutputOptionsView(QWidget *parent = nullptr) : API::MantidWidget(parent){};
   virtual ~IIndirectFitOutputOptionsView(){};
+
+  virtual void subscribePresenter(IIndirectFitOutputOptionsPresenter *presenter) = 0;
 
   virtual void setGroupWorkspaceComboBoxVisible(bool visible) = 0;
   virtual void setWorkspaceComboBoxVisible(bool visible) = 0;
@@ -47,12 +51,6 @@ public:
   virtual void setEditResultVisible(bool visible) = 0;
 
   virtual void displayWarning(std::string const &message) = 0;
-
-signals:
-  void groupWorkspaceChanged(std::string const &group);
-  void plotClicked();
-  void saveClicked();
-  void editResultClicked();
 };
 
 } // namespace IDA

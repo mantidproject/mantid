@@ -19,7 +19,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsPresenter : public QObject {
+class MANTIDQT_INELASTIC_DLL IIndirectFitOutputOptionsPresenter {
+public:
+  virtual void handleGroupWorkspaceChanged(std::string const &selectedGroup) = 0;
+  virtual void handlePlotClicked() = 0;
+  virtual void handleSaveClicked() = 0;
+  virtual void handleEditResultClicked() = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsPresenter final : public QObject,
+                                                                       public IIndirectFitOutputOptionsPresenter {
   Q_OBJECT
 public:
   IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsView *view);
@@ -47,14 +56,15 @@ public:
 
   void setEditResultVisible(bool visible);
 
+  void handleGroupWorkspaceChanged(std::string const &selectedGroup) override;
+  void handlePlotClicked() override;
+  void handleSaveClicked() override;
+  void handleEditResultClicked() override;
+
 signals:
   void plotSpectra();
 
 private slots:
-  void setAvailablePlotOptions(std::string const &selectedGroup);
-  void plotResult();
-  void saveResult();
-  void editResult();
   void replaceSingleFitResult();
   void closeEditResultDialog();
 

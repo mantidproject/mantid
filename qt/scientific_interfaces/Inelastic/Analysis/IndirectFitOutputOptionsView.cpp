@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitOutputOptionsView.h"
+#include "IndirectFitOutputOptionsPresenter.h"
 
 #include <QMessageBox>
 
@@ -15,24 +16,28 @@ IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
   m_outputOptions->setupUi(this);
 
   connect(m_outputOptions->cbGroupWorkspace, SIGNAL(currentIndexChanged(QString const &)), this,
-          SLOT(emitGroupWorkspaceChanged(QString const &)));
+          SLOT(notifyGroupWorkspaceChanged(QString const &)));
 
-  connect(m_outputOptions->pbPlot, SIGNAL(clicked()), this, SLOT(emitPlotClicked()));
-  connect(m_outputOptions->pbSave, SIGNAL(clicked()), this, SLOT(emitSaveClicked()));
-  connect(m_outputOptions->pbEditResult, SIGNAL(clicked()), this, SLOT(emitEditResultClicked()));
+  connect(m_outputOptions->pbPlot, SIGNAL(clicked()), this, SLOT(notifyPlotClicked()));
+  connect(m_outputOptions->pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
+  connect(m_outputOptions->pbEditResult, SIGNAL(clicked()), this, SLOT(notifyEditResultClicked()));
 }
 
 IndirectFitOutputOptionsView::~IndirectFitOutputOptionsView() = default;
 
-void IndirectFitOutputOptionsView::emitGroupWorkspaceChanged(QString const &group) {
-  emit groupWorkspaceChanged(group.toStdString());
+void IndirectFitOutputOptionsView::subscribePresenter(IIndirectFitOutputOptionsPresenter *presenter) {
+  m_presenter = presenter;
 }
 
-void IndirectFitOutputOptionsView::emitPlotClicked() { emit plotClicked(); }
+void IndirectFitOutputOptionsView::notifyGroupWorkspaceChanged(QString const &group) {
+  m_presenter->handleGroupWorkspaceChanged(group.toStdString());
+}
 
-void IndirectFitOutputOptionsView::emitSaveClicked() { emit saveClicked(); }
+void IndirectFitOutputOptionsView::notifyPlotClicked() { m_presenter->handlePlotClicked(); }
 
-void IndirectFitOutputOptionsView::emitEditResultClicked() { emit editResultClicked(); }
+void IndirectFitOutputOptionsView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
+
+void IndirectFitOutputOptionsView::notifyEditResultClicked() { m_presenter->handleEditResultClicked(); }
 
 void IndirectFitOutputOptionsView::setGroupWorkspaceComboBoxVisible(bool visible) {
   m_outputOptions->cbGroupWorkspace->setVisible(visible);
