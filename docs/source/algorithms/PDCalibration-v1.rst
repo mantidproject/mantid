@@ -39,8 +39,7 @@ If more than one constant is requested, the result that has the lowest
 <https://en.wikipedia.org/wiki/Reduced_chi-squared_statistic>`_ is
 returned. This favors using less parameters.
 
-A mask workspace is created, named with the ``OutputCalibrationTable`` parameter + ``_mask``,
-with uncalibrated pixels masked.
+When not specified using the ``MaskWorkspace`` parameter, the default name for the mask workspace will be the ``OutputCalibrationTable`` parameter + ``_mask``.  If the mask workspace already exists, its masked values will be combined with those from any uncalibrated pixels detected during the algorithm's execution.
 
 The resulting calibration table can be saved with
 :ref:`algm-SaveDiffCal`, loaded with :ref:`algm-LoadDiffCal` and

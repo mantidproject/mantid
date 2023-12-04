@@ -177,7 +177,7 @@ struct ReturnOne {
 
 /**
  * Creates a 2D workspace from taking the function values from the input
- * function. The type must define operator()()
+ * function. The function type must define operator()(double, int)
  * @param yFunc :: A function to use for the y values
  * @param nSpec :: The number of spectra
  * @param x0 :: The start of the x range
@@ -215,7 +215,7 @@ Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceFromFunction(fT yFunc, in
   return ws;
 }
 
-/// Add random noise to the signalcreate2DWorkspaceWithFullInstrument
+/// Add random noise to a 2D workspace.
 void addNoise(const Mantid::API::MatrixWorkspace_sptr &ws, double noise, const double lower = -0.5,
               const double upper = 0.5);
 

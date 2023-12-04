@@ -21,7 +21,10 @@
 #include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataHandling/RotateInstrumentComponent.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableColumn.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Unit.h"
 
 using Mantid::Algorithms::ChangeBinOffset;
@@ -35,10 +38,17 @@ using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_const_sptr;
+using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::DataHandling::GroupDetectors2;
 using Mantid::DataHandling::MoveInstrumentComponent;
 using Mantid::DataHandling::RotateInstrumentComponent;
+using Mantid::DataObjects::EventWorkspace;
+using Mantid::DataObjects::EventWorkspace_sptr;
+using Mantid::DataObjects::MaskWorkspace;
+using Mantid::DataObjects::MaskWorkspace_const_sptr;
+using Mantid::DataObjects::MaskWorkspace_sptr;
+using Mantid::Kernel::IPropertyManager;
 
 namespace {
 // -- constants for creating the input event workspace
@@ -191,6 +201,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaskWorkspace", prefix + "_mask"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
@@ -218,7 +229,7 @@ public:
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
 
-    MatrixWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(prefix + "cal_mask");
+    MatrixWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(prefix + "_mask");
     // 0 is keep
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_155)[0], 0);
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_195)[0], 0);
@@ -226,7 +237,7 @@ public:
     checkDSpacing(prefix + "diag_dspacing", dValues);
 
     Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal");
-    Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal_mask");
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "_mask");
   }
 
   void test_exec_difc_tzero() {
@@ -245,6 +256,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaskWorkspace", prefix + "_mask"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
@@ -273,7 +285,7 @@ public:
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
     TS_ASSERT_DELTA(calTable->cell<double>(index, 3), TZERO, 0.1);    // tzero
 
-    MatrixWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(prefix + "cal_mask");
+    MatrixWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(prefix + "_mask");
 
     // 0 is keep
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_155)[0], 0);
@@ -282,7 +294,7 @@ public:
     checkDSpacing(prefix + "diag_dspacing", dValues);
 
     Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal");
-    Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal_mask");
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "_mask");
   }
 
   void test_exec_difc_tzero_difa() {
@@ -304,6 +316,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaskWorkspace", prefix + "_mask"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
@@ -333,7 +346,7 @@ public:
     TS_ASSERT_DELTA(calTable->cell<double>(index, 2), DIFA, 0.01);    // difa
     TS_ASSERT_DELTA(calTable->cell<double>(index, 3), TZERO, 0.1);    // tzero
 
-    MatrixWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(prefix + "cal_mask");
+    MatrixWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(prefix + "_mask");
 
     // 0 is keep
     TS_ASSERT_EQUALS(mask->y(WKSPINDEX_155)[0], 0);
@@ -342,7 +355,7 @@ public:
     checkDSpacing(prefix + "diag_dspacing", dValues);
 
     Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal");
-    Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal_mask");
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "_mask");
   }
 
   // Crop workspace so that final peak is evaluated over a range that includes
@@ -378,6 +391,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaskWorkspace", prefix + "_mask"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", std::to_string(TOF_BINNING[0]) + "," +
                                                                std::to_string(TOF_BINNING[1]) + "," + xmax));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
@@ -406,6 +420,9 @@ public:
     TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal");
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "_mask");
   }
 
   void test_exec_fit_diff_constants_with_chisq() {
@@ -420,6 +437,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "PDCalibrationTest_WS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaskWorkspace", prefix + "_mask"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
@@ -450,6 +468,9 @@ public:
     TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
     TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal");
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "_mask");
   }
 
   void test_exec_grouped_detectors() {
@@ -462,6 +483,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "PDCalibrationTest_WS_grouped"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaskWorkspace", prefix + "_mask"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", TOF_BINNING));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
@@ -480,6 +502,9 @@ public:
     TS_ASSERT_DELTA(calTable->cell<double>(index + 1, 1), calTable->cell<double>(index, 1), 1E-5); // det 101
     TS_ASSERT_DELTA(calTable->cell<double>(index + 2, 1), calTable->cell<double>(index, 1), 1E-5); // det 102
     TS_ASSERT_DELTA(calTable->cell<double>(index + 3, 1), calTable->cell<double>(index, 1), 1E-5); // det 103
+
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal");
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "_mask");
   }
 
   void test_exec_grouped_detectors_limit_spectra() {
@@ -492,6 +517,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "PDCalibrationTest_WS_grouped"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaskWorkspace", prefix + "_mask"));
     // selecting only the pixel that was grouped
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartWorkspaceIndex", 0));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StopWorkspaceIndex", 0));
@@ -515,9 +541,15 @@ public:
     TS_ASSERT_DELTA(calTable->cell<double>(index + 1, 1), calTable->cell<double>(index, 1), 1E-5); // det 101
     TS_ASSERT_DELTA(calTable->cell<double>(index + 2, 1), calTable->cell<double>(index, 1), 1E-5); // det 102
     TS_ASSERT_DELTA(calTable->cell<double>(index + 3, 1), calTable->cell<double>(index, 1), 1E-5); // det 103
+
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "cal");
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "_mask");
   }
 
   void test_exec_ikeda_carpenter() {
+
+    const std::string prefix{"PDCalibration_ikeda_carpenter"};
+
     // test the algorithm using the IkedaCarpenterPV peak function
     const double ref_difc = 2208.287616521762;
 
@@ -563,6 +595,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaskWorkspace", prefix + "_mask"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TofBinning", std::vector<double>{1, 1, 16666}));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakFunction", "IkedaCarpenterPV"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
@@ -576,6 +609,401 @@ public:
     Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
     std::vector<int> detIDs = col0->data();
     TS_ASSERT_DELTA(calTable->cell<double>(0, 1), ref_difc, 1E-2 * ref_difc);
+
+    Mantid::API::AnalysisDataService::Instance().remove("ws");
+    Mantid::API::AnalysisDataService::Instance().remove(prefix + "_mask");
+    Mantid::API::AnalysisDataService::Instance().remove("ikeda_cal");
+  }
+
+  auto maskTestsInitialization(IPropertyManager &algorithmProperties, const std::string &uniquePrefix) {
+    // In order to avoid collisions in the AnalysisDataService, which is *shared* by all tests,
+    //   any workspaces that will be modified must be unique to the current test.
+    const std::string inputWSName = uniquePrefix + "_input";
+    const std::string maskWSName = uniquePrefix + "_mask";
+    const std::string diagnosticWSName = uniquePrefix + "_diag";
+    const std::string outputWSName = uniquePrefix + "_cal";
+
+    // Create a unique clone of the input workspace:
+    //    this should be a clone of: either of "PDCalibrationTest_WS_grouped", or "PDCalibrationTest_WS", as
+    MatrixWorkspace_const_sptr input_ =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("PDCalibrationTest_WS");
+    MatrixWorkspace_sptr input = input_->clone();
+    AnalysisDataService::Instance().add(inputWSName, input);
+
+    // Create a compatible mask workspace with one spectrum per detector:
+    MaskWorkspace_sptr mask = std::make_shared<MaskWorkspace>(input->getInstrument());
+    AnalysisDataService::Instance().add(maskWSName, mask);
+
+    // Note: this section duplicates setup from "test_exec_difc".
+
+    // setup the peak postions based on transformation from detID=155
+    std::vector<double> dValues = convertPosToD(DIFC_155);
+
+    TS_ASSERT_THROWS_NOTHING(algorithmProperties.setProperty("InputWorkspace", inputWSName));
+    TS_ASSERT_THROWS_NOTHING(algorithmProperties.setPropertyValue("MaskWorkspace", maskWSName));
+    TS_ASSERT_THROWS_NOTHING(algorithmProperties.setProperty("TofBinning", TOF_BINNING));
+    TS_ASSERT_THROWS_NOTHING(algorithmProperties.setPropertyValue("OutputCalibrationTable", outputWSName));
+    TS_ASSERT_THROWS_NOTHING(algorithmProperties.setPropertyValue("DiagnosticWorkspaces", diagnosticWSName));
+    TS_ASSERT_THROWS_NOTHING(algorithmProperties.setProperty("PeakPositions", dValues));
+
+    auto cleanup = [=]() {
+      AnalysisDataService::Instance().remove(inputWSName);
+      AnalysisDataService::Instance().remove(maskWSName);
+      AnalysisDataService::Instance().remove(diagnosticWSName + "_fitparam");
+      AnalysisDataService::Instance().remove(diagnosticWSName + "_fitted");
+      AnalysisDataService::Instance().remove(diagnosticWSName + "_fiterrors");
+      AnalysisDataService::Instance().remove(diagnosticWSName + "_dspacing");
+      AnalysisDataService::Instance().remove(diagnosticWSName + "_width");
+      AnalysisDataService::Instance().remove(diagnosticWSName + "_height");
+      AnalysisDataService::Instance().remove(diagnosticWSName + "_resolution");
+      AnalysisDataService::Instance().remove(outputWSName);
+    };
+    return std::make_tuple(inputWSName, maskWSName, diagnosticWSName, outputWSName, dValues, cleanup);
+  }
+
+  /**
+   * Verify that the optional mask workspace input parameter is properly treated:
+   *   when the parameter is specified, but the mask workspace does not exist,
+   *      a mask workspace will be created, and will exist in the ADS after exit.
+   */
+  void test_mask_is_created() {
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    const std::string uniquePrefix = "test_MIC";
+    auto [inputWSName, maskWSName, diagnosticWSName, outputWSName, dValues, cleanup] =
+        maskTestsInitialization(alg, uniquePrefix);
+
+    // Ensure incoming mask workspace doesn't exist.
+    AnalysisDataService::Instance().remove(maskWSName);
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist(maskWSName));
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    ITableWorkspace_sptr calTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outputWSName);
+    TS_ASSERT(calTable);
+
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
+    // since the wksp was calculated in TOF, all DIFC end up being the same
+    size_t index = std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+
+    index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 195);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+    checkDSpacing(diagnosticWSName + "_dspacing", dValues);
+
+    MaskWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    TS_ASSERT_EQUALS(mask->getNumberMasked(), 0);
+
+    cleanup();
+  }
+  /**
+   * Verify that the optional mask workspace input parameter is properly treated:
+   *   when the parameter is specified and the workspace already exists,
+   *     no new mask workspace will be created.
+   */
+  void test_input_mask_is_used() {
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    const std::string uniquePrefix = "test_IMIU";
+    auto [inputWSName, maskWSName, diagnosticWSName, outputWSName, dValues, cleanup] =
+        maskTestsInitialization(alg, uniquePrefix);
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(maskWSName));
+    // Set the mask-workspace title to a random string:
+    const std::string maskWSTitle("42601ecc-b7ab-426f-874e-c39662a8a295");
+    MaskWorkspace_sptr mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    mask->setTitle(maskWSTitle);
+    TS_ASSERT(mask->getTitle() == maskWSTitle);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    ITableWorkspace_sptr calTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outputWSName);
+    TS_ASSERT(calTable);
+
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
+    // since the wksp was calculated in TOF, all DIFC end up being the same
+    size_t index = std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+
+    index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 195);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+    checkDSpacing(diagnosticWSName + "_dspacing", dValues);
+
+    TS_ASSERT_THROWS_NOTHING(mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName));
+    TS_ASSERT(mask);
+    TS_ASSERT(mask->getTitle() == maskWSTitle);
+    TS_ASSERT_EQUALS(mask->getNumberMasked(), 0);
+
+    cleanup();
+  }
+
+  /**
+   * Verify that no spectra in the mask test input workspace will be masked in normal circumstances.
+   */
+  void test_none_are_masked() {
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    const std::string uniquePrefix = "test_NAM";
+    auto [inputWSName, maskWSName, diagnosticWSName, outputWSName, dValues, cleanup] =
+        maskTestsInitialization(alg, uniquePrefix);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    ITableWorkspace_sptr calTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outputWSName);
+    TS_ASSERT(calTable);
+
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
+    // since the wksp was calculated in TOF, all DIFC end up being the same
+    size_t index = std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+
+    index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 195);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+    checkDSpacing(diagnosticWSName + "_dspacing", dValues);
+
+    MaskWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    TS_ASSERT_EQUALS(mask->getNumberMasked(), 0);
+
+    cleanup();
+  }
+
+  /**
+   * Verify that failing spectra are masked: specific input spectra are zeroed.
+   */
+  void test_failures_are_masked() {
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    const std::string uniquePrefix = "test_FAM";
+    auto [inputWSName, maskWSName, diagnosticWSName, outputWSName, dValues, cleanup] =
+        maskTestsInitialization(alg, uniquePrefix);
+
+    const std::set<size_t> spectraToFail{1, 27, 35, 36, 54, 88, 99};
+    EventWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWSName);
+    for (std::size_t idx : spectraToFail) {
+      inputWS->getSpectrum(idx).multiply(0.0);
+    }
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    ITableWorkspace_sptr calTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outputWSName);
+    TS_ASSERT(calTable);
+
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
+    // since the wksp was calculated in TOF, all DIFC end up being the same
+    size_t index = std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+
+    index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 195);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+    checkDSpacing(diagnosticWSName + "_dspacing", dValues);
+
+    MaskWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    TS_ASSERT(mask);
+    TS_ASSERT_EQUALS(mask->getNumberMasked(), spectraToFail.size());
+    for (std::size_t idx : spectraToFail)
+      TS_ASSERT(mask->isMaskedIndex(idx));
+
+    cleanup();
+  }
+
+  /**
+   * Verify that masked incoming spectra stay masked: regardless of whether PDCalibration would otherwise succeed
+   *   in fitting the spectra.
+   */
+  void test_masked_stay_masked() {
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    const std::string uniquePrefix = "test_MSM";
+    auto [inputWSName, maskWSName, diagnosticWSName, outputWSName, dValues, cleanup] =
+        maskTestsInitialization(alg, uniquePrefix);
+
+    const std::set<size_t> spectraToMask{3, 24, 38, 43, 60, 85, 96};
+    MaskWorkspace_sptr inputMaskWS = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    for (std::size_t idx : spectraToMask) {
+      inputMaskWS->setMaskedIndex(idx, true);
+    }
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    ITableWorkspace_sptr calTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outputWSName);
+    TS_ASSERT(calTable);
+
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
+    // since the wksp was calculated in TOF, all DIFC end up being the same
+    size_t index = std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+
+    index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 195);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+    checkDSpacing(diagnosticWSName + "_dspacing", dValues);
+
+    MaskWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    TS_ASSERT(mask);
+    TS_ASSERT_EQUALS(mask->getNumberMasked(), spectraToMask.size());
+    for (std::size_t idx : spectraToMask)
+      TS_ASSERT(mask->isMaskedIndex(idx));
+
+    cleanup();
+  }
+
+  /**
+   * Verify that masks for incoming spectra are combined with masks for failing spectra, in the output mask workspace
+   */
+  void test_masks_are_combined() {
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    const std::string uniquePrefix = "test_MAC";
+    auto [inputWSName, maskWSName, diagnosticWSName, outputWSName, dValues, cleanup] =
+        maskTestsInitialization(alg, uniquePrefix);
+
+    const std::set<size_t> spectraToMask{3, 24, 38, 43, 60, 85, 96};
+    MaskWorkspace_sptr inputMaskWS = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    for (std::size_t idx : spectraToMask) {
+      inputMaskWS->setMaskedIndex(idx, true);
+    }
+    const std::set<size_t> spectraToFail{1, 27, 35, 36, 54, 88, 99};
+    EventWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWSName);
+    for (std::size_t idx : spectraToFail) {
+      inputWS->getSpectrum(idx).multiply(0.0);
+    }
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    ITableWorkspace_sptr calTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outputWSName);
+    TS_ASSERT(calTable);
+
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
+    // since the wksp was calculated in TOF, all DIFC end up being the same
+    size_t index = std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+
+    index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 195);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+    checkDSpacing(diagnosticWSName + "_dspacing", dValues);
+
+    MaskWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    TS_ASSERT(mask);
+    TS_ASSERT_EQUALS(mask->getNumberMasked(), spectraToMask.size() + spectraToFail.size());
+    for (std::size_t idx : spectraToMask)
+      TS_ASSERT(mask->isMaskedIndex(idx));
+    for (std::size_t idx : spectraToFail)
+      TS_ASSERT(mask->isMaskedIndex(idx));
+
+    cleanup();
+  }
+
+  /**
+   * Verify that the output offsets and mask workspaces are have detector mask flags which are consistent with the mask
+   * values.
+   */
+  void test_masks_are_consistent_with_detector_flags() {
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    const std::string uniquePrefix = "test_MACWDF";
+    auto [inputWSName, maskWSName, diagnosticWSName, outputWSName, dValues, cleanup] =
+        maskTestsInitialization(alg, uniquePrefix);
+
+    const std::set<size_t> spectraToMask{3, 24, 38, 43, 60, 85, 96};
+    MaskWorkspace_sptr inputMaskWS = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    for (std::size_t idx : spectraToMask) {
+      inputMaskWS->setMaskedIndex(idx, true);
+    }
+    const std::set<size_t> spectraToFail{1, 27, 35, 36, 54, 88, 99};
+    EventWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWSName);
+    for (std::size_t idx : spectraToFail) {
+      inputWS->getSpectrum(idx).multiply(0.0);
+    }
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    ITableWorkspace_sptr calTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outputWSName);
+    TS_ASSERT(calTable);
+
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
+    // since the wksp was calculated in TOF, all DIFC end up being the same
+    size_t index = std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+
+    index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 195);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+    checkDSpacing(diagnosticWSName + "_dspacing", dValues);
+
+    MaskWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    TS_ASSERT(mask);
+    TS_ASSERT_EQUALS(mask->getNumberMasked(), spectraToMask.size() + spectraToFail.size());
+    TS_ASSERT(mask->isConsistentWithDetectorMasks());
+
+    cleanup();
   }
 };
 
@@ -600,6 +1028,7 @@ public:
     createSampleWS();
     pdc.initialize();
     pdc.setProperty("InputWorkspace", "PDCalibrationTest_WS");
+    pdc.setProperty("MaskWorkspace", "outputWS_mask");
     pdc.setProperty("TofBinning", TOF_BINNING);
     pdc.setPropertyValue("OutputCalibrationTable", "outputWS");
     pdc.setPropertyValue("DiagnosticWorkspaces", "diag");
@@ -608,6 +1037,7 @@ public:
 
   void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().remove("outputWS");
+    Mantid::API::AnalysisDataService::Instance().remove("outputWS_mask");
     Mantid::API::AnalysisDataService::Instance().remove("diag");
   }
 

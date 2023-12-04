@@ -112,7 +112,7 @@ def cc_calibrate_groups(
 
     :param data_ws: Input calibration raw data (in TOF), assumed to already be correctly masked
     :param group_ws: grouping workspace, e.g. output from LoadDetectorsGroupingFile
-    :param output_basename: Optional name to use for temporay and output workspace
+    :param output_basename: Optional name to use for temporary and output workspace
     :param previous_calibration: Optional previous diffcal workspace
     :param Step: step size for binning of data and input for GetDetectorOffsets, default 0.001
     :param DReference: Derefernce parameter for GetDetectorOffsets, default 1.2615
@@ -357,6 +357,7 @@ def pdcalibration_groups(
             PeakWindow=PeakWindow,
             PeakWidthPercent=PeakWidthPercent,
             OutputCalibrationTable=f"{output_basename}_pd_diffcal",
+            MaskWorkspace=f"{output_basename}_pd_diffcal_mask",
             DiagnosticWorkspaces=f"{output_basename}_pd_diag",
         )
         if to_skip:
@@ -444,6 +445,7 @@ def pdcalib_for_powgen(
         PeakWindow=PeakWindow,
         PeakWidthPercent=PeakWidthPercent,
         OutputCalibrationTable="PDCalib",
+        MaskWorkspace="PDCalib_mask",
         DiagnosticWorkspaces="diag",
     )
     PDCalibration(
@@ -455,6 +457,7 @@ def pdcalib_for_powgen(
         PeakWindow=PeakWindow,
         PeakWidthPercent=PeakWidthPercent / 2.0,
         OutputCalibrationTable="PDCalib",
+        MaskWorkspace="PDCalib_mask",
         DiagnosticWorkspaces="diag",
     )
     PDCalibration(
@@ -466,6 +469,7 @@ def pdcalib_for_powgen(
         PeakWindow=PeakWindow,
         PeakWidthPercent=PeakWidthPercent / 2.0,
         OutputCalibrationTable=OutPDCalib,
+        MaskWorkspace="PDCalib_mask",
         DiagnosticWorkspaces=OutPDCalibDiag,
     )
     DeleteWorkspace("PDCalib")
