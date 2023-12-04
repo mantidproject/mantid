@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "IMomentsView.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
@@ -16,45 +17,50 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL InelasticDataManipulationMomentsTabView : public QWidget {
+class IMomentsPresenter;
+
+class MANTIDQT_INELASTIC_DLL InelasticDataManipulationMomentsTabView : public QWidget, public IMomentsView {
   Q_OBJECT
 
 public:
-  InelasticDataManipulationMomentsTabView(QWidget *perent = nullptr);
+  InelasticDataManipulationMomentsTabView(QWidget *parent = nullptr);
   ~InelasticDataManipulationMomentsTabView();
 
-  void setupProperties();
-  IndirectPlotOptionsView *getPlotOptions();
-  std::string getDataName();
-  bool validate();
-  void plotNewData(QString const &filename);
+  void subscribePresenter(IMomentsPresenter *presenter) override;
+
+  void setupProperties() override;
+  IndirectPlotOptionsView *getPlotOptions() const override;
+  std::string getDataName() const override;
+
+  bool validate() override;
+
+  void setFBSuffixes(QStringList const &suffix) override;
+  void setWSSuffixes(QStringList const &suffix) override;
+
   /// Function to set the range limits of the plot
-  void setPlotPropertyRange(const QPair<double, double> &bounds);
+  void setPlotPropertyRange(const QPair<double, double> &bounds) override;
   /// Function to set the range selector on the mini plot
-  void setRangeSelector(const QPair<double, double> &bounds,
-                        const boost::optional<QPair<double, double>> &range = boost::none);
+  void setRangeSelector(const QPair<double, double> &bounds) override;
   /// Sets the min of the range selector if it is less than the max
-  void setRangeSelectorMin(double newValue);
+  void setRangeSelectorMin(double newValue) override;
   /// Sets the max of the range selector if it is more than the min
-  void setRangeSelectorMax(double newValue);
-  void replot();
-  void plotOutput(QString outputWorkspace);
-  void setFBSuffixes(QStringList const suffix);
-  void setWSSuffixes(QStringList const suffix);
+  void setRangeSelectorMax(double newValue) override;
+  void plotNewData(std::string const &filename) override;
+  void replot() override;
+  void plotOutput(QString outputWorkspace) override;
 
-signals:
-  void valueChanged(QtProperty *, double);
-  void dataReady(QString const &);
-  void scaleChanged(int);
-  void scaleValueChanged(double);
-  void runClicked();
-  void saveClicked();
-  void showMessageBox(const QString &message);
+  void showMessageBox(const std::string &message) const override;
 
-public slots:
-  void rangeChanged(double min, double max);
-  void updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                       QString const &tooltip);
+private slots:
+  void notifyDataReady(QString const &);
+  void notifyValueChanged(QtProperty *, double);
+
+  void notifyScaleChanged(int);
+  void notifyScaleValueChanged(double);
+  void notifyRangeChanged(double, double);
+
+  void notifyRunClicked();
+  void notifySaveClicked();
 
 private:
   MantidWidgets::RangeSelector *getRangeSelector();
@@ -66,6 +72,7 @@ private:
   QMap<QString, QtProperty *> m_properties;
   DoubleEditorFactory *m_dblEdFac;
   QtDoublePropertyManager *m_dblManager;
+  IMomentsPresenter *m_presenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
