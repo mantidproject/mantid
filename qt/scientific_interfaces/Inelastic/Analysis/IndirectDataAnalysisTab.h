@@ -33,7 +33,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL IndirectDataAnalysisTab : public IndirectTab {
+class MANTIDQT_INELASTIC_DLL IIndirectDataAnalysisTab {
+public:
+  virtual void plotSelectedSpectra() = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL IndirectDataAnalysisTab : public IndirectTab, public IIndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
@@ -77,7 +82,7 @@ public:
   bool hasResolution() const noexcept { return m_hasResolution; }
   void setFileExtensionsByName(bool filter);
 
-  void plotSelectedSpectra();
+  void plotSelectedSpectra() override;
 
 protected:
   IndirectFittingModel *getFittingModel() const;

@@ -10,6 +10,7 @@
 
 #include "DllConfig.h"
 #include "IIndirectFitOutputOptionsView.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <memory>
 
@@ -26,7 +27,6 @@ class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsView final : public API::Ma
 
 public:
   IndirectFitOutputOptionsView(QWidget *parent = nullptr);
-  virtual ~IndirectFitOutputOptionsView() override;
 
   void subscribePresenter(IIndirectFitOutputOptionsPresenter *presenter) override;
 

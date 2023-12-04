@@ -24,8 +24,6 @@ IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
   connect(m_outputOptions->pbEditResult, SIGNAL(clicked()), this, SLOT(handleEditResultClicked()));
 }
 
-IndirectFitOutputOptionsView::~IndirectFitOutputOptionsView() = default;
-
 void IndirectFitOutputOptionsView::subscribePresenter(IIndirectFitOutputOptionsPresenter *presenter) {
   m_presenter = presenter;
 }

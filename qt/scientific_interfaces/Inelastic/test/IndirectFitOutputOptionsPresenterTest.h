@@ -34,14 +34,9 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 /// Mock object to mock the view
 class MockIndirectFitOutputOptionsView : public IIndirectFitOutputOptionsView {
 public:
-  /// Signals
-  void emitGroupWorkspaceChanged(std::string const &group) { emit groupWorkspaceChanged(group); }
-
-  void emitPlotClicked() { emit plotClicked(); }
-
-  void emitSaveClicked() { emit saveClicked(); }
-
   /// Public Methods
+  MOCK_METHOD1(subscribePresenter, void(IIndirectFitOutputOptionsPresenter *presenter));
+
   MOCK_METHOD1(setGroupWorkspaceComboBoxVisible, void(bool visible));
   MOCK_METHOD1(setWorkspaceComboBoxVisible, void(bool visible));
 
@@ -58,8 +53,8 @@ public:
   MOCK_CONST_METHOD0(getSelectedWorkspace, std::string());
   MOCK_CONST_METHOD0(getSelectedPlotType, std::string());
 
-  MOCK_METHOD1(setPlotText, void(QString const &text));
-  MOCK_METHOD1(setSaveText, void(QString const &text));
+  MOCK_METHOD1(setPlotText, void(std::string const &text));
+  MOCK_METHOD1(setSaveText, void(std::string const &text));
 
   MOCK_METHOD1(setPlotExtraOptionsEnabled, void(bool enable));
   MOCK_METHOD1(setPlotEnabled, void(bool enable));
@@ -154,7 +149,7 @@ public:
   ///----------------------------------------------------------------------
 
   void
-  test_that_the_groupWorkspaceChanged_signal_will_check_the_group_selected_before_setting_the_workspace_combobox_visibility() {
+  test_that_handleGroupWorkspaceChanged_will_check_the_group_selected_before_setting_the_workspace_combobox_visibility() {
     std::string const selectedGroup("Result Group");
     auto const isResultGroup(true);
 
@@ -163,11 +158,10 @@ public:
     EXPECT_CALL(*m_model, isResultGroupSelected(selectedGroup)).Times(1).WillOnce(Return(isResultGroup));
     EXPECT_CALL(*m_view, setWorkspaceComboBoxVisible(!isResultGroup)).Times(1);
 
-    m_view->emitGroupWorkspaceChanged(selectedGroup);
+    m_presenter->handleGroupWorkspaceChanged(selectedGroup);
   }
 
-  void
-  test_that_the_groupWorkspaceChanged_signal_will_check_the_resultGroup_plottablity_before_calling_setPlotEnabled() {
+  void test_that_handleFroupWorkspaceChanged_will_check_the_resultGroup_plottablity_before_calling_setPlotEnabled() {
     std::string const selectedGroup("Result Group");
     auto const isPlottable(true);
 
@@ -177,10 +171,10 @@ public:
     EXPECT_CALL(*m_model, isSelectedGroupPlottable(selectedGroup)).Times(1).WillOnce(Return(isPlottable));
     EXPECT_CALL(*m_view, setPlotEnabled(isPlottable)).Times(1);
 
-    m_view->emitGroupWorkspaceChanged(selectedGroup);
+    m_presenter->handleGroupWorkspaceChanged(selectedGroup);
   }
 
-  void test_that_the_groupWorkspaceChanged_signal_will_check_the_pdfGroup_plottablity_before_calling_setPlotEnabled() {
+  void test_that_handleGroupWorkspaceChanged_will_check_the_pdfGroup_plottablity_before_calling_setPlotEnabled() {
     std::string const selectedGroup("PDF Group");
     auto const isPlottable(true);
 
@@ -191,10 +185,10 @@ public:
     EXPECT_CALL(*m_model, isSelectedGroupPlottable(selectedGroup)).Times(1).WillOnce(Return(isPlottable));
     EXPECT_CALL(*m_view, setPlotEnabled(isPlottable)).Times(1);
 
-    m_view->emitGroupWorkspaceChanged(selectedGroup);
+    m_presenter->handleGroupWorkspaceChanged(selectedGroup);
   }
 
-  void test_that_the_groupWorkspaceChanged_signal_will_try_and_set_the_plot_types_in_the_plot_types_combobox() {
+  void test_that_handleGroupWorkspaceChanged_will_try_and_set_the_plot_types_in_the_plot_types_combobox() {
     std::string const selectedGroup("Result Group");
     auto const parameters(getThreeParameters());
 
@@ -204,10 +198,10 @@ public:
     EXPECT_CALL(*m_model, getWorkspaceParameters(selectedGroup)).Times(1).WillOnce(Return(parameters));
     EXPECT_CALL(*m_view, setAvailablePlotTypes(parameters)).Times(1);
 
-    m_view->emitGroupWorkspaceChanged(selectedGroup);
+    m_presenter->handleGroupWorkspaceChanged(selectedGroup);
   }
 
-  void test_that_the_plotClicked_signal_will_invoke_plotResult_if_the_selected_group_is_the_result_group() {
+  void test_that_handlePlotClicked_will_invoke_plotResult_if_the_selected_group_is_the_result_group() {
     std::string const selectedGroup("Result Group");
     std::string const plotType("All");
 
@@ -220,10 +214,10 @@ public:
     getSelectedWorkspace += EXPECT_CALL(*m_model, isResultGroupSelected(selectedGroup)).Times(1);
     EXPECT_CALL(*m_model, plotResult(plotType)).Times(1).After(getSelectedWorkspace);
 
-    m_view->emitPlotClicked();
+    m_presenter->handlePlotClicked();
   }
 
-  void test_that_the_plotClicked_signal_will_invoke_plotPDF_if_the_selected_group_is_the_pdf_group() {
+  void test_that_handlePlotClicked_will_invoke_plotPDF_if_the_selected_group_is_the_pdf_group() {
     std::string const selectedGroup("PDF Group");
     std::string const plotType("All");
 
@@ -236,28 +230,28 @@ public:
     getSelectedWorkspace += EXPECT_CALL(*m_model, isResultGroupSelected(selectedGroup)).Times(1);
     EXPECT_CALL(*m_model, plotPDF("", plotType)).Times(1).After(getSelectedWorkspace);
 
-    m_view->emitPlotClicked();
+    m_presenter->handlePlotClicked();
   }
 
-  void test_that_the_saveClicked_signal_will_try_to_disable_and_then_enable_the_save_and_plot_buttons() {
+  void test_that_handleSaveClicked_will_try_to_disable_and_then_enable_the_save_and_plot_buttons() {
     auto const selectedGroup("Result Group");
 
     ON_CALL(*m_view, getSelectedGroupWorkspace()).WillByDefault(Return(selectedGroup));
     ON_CALL(*m_model, isSelectedGroupPlottable(selectedGroup)).WillByDefault(Return(true));
 
-    ExpectationSet buttonEnabling = EXPECT_CALL(*m_view, setSaveText(QString("Saving..."))).Times(1);
+    ExpectationSet buttonEnabling = EXPECT_CALL(*m_view, setSaveText("Saving...")).Times(1);
     buttonEnabling += EXPECT_CALL(*m_view, setPlotEnabled(false)).Times(1);
     buttonEnabling += EXPECT_CALL(*m_view, setSaveEnabled(false)).Times(1);
-    buttonEnabling += EXPECT_CALL(*m_view, setSaveText(QString("Save Result"))).Times(1);
+    buttonEnabling += EXPECT_CALL(*m_view, setSaveText("Save Result")).Times(1);
     buttonEnabling += EXPECT_CALL(*m_view, setPlotEnabled(true)).Times(1);
     EXPECT_CALL(*m_view, setSaveEnabled(true)).Times(1).After(buttonEnabling);
 
-    m_view->emitSaveClicked();
+    m_presenter->handleSaveClicked();
   }
 
-  void test_that_the_saveClicked_signal_will_invoke_saveResult_in_the_model() {
+  void test_that_handleSaveClicked_will_invoke_saveResult_in_the_model() {
     EXPECT_CALL(*m_model, saveResult()).Times(1);
-    m_view->emitSaveClicked();
+    m_presenter->handleSaveClicked();
   }
 
   ///----------------------------------------------------------------------
@@ -324,7 +318,7 @@ public:
   void test_that_setPlotting_will_attempt_to_set_the_plot_button_text_and_disable_all_buttons_when_passed_true() {
     auto const isPlotting(true);
 
-    EXPECT_CALL(*m_view, setPlotText(QString("Plotting..."))).Times(1);
+    EXPECT_CALL(*m_view, setPlotText("Plotting...")).Times(1);
     EXPECT_CALL(*m_view, setPlotEnabled(!isPlotting)).Times(1);
     EXPECT_CALL(*m_view, setEditResultEnabled(!isPlotting)).Times(1);
     EXPECT_CALL(*m_view, setSaveEnabled(!isPlotting)).Times(1);
@@ -339,7 +333,7 @@ public:
     ON_CALL(*m_view, getSelectedGroupWorkspace()).WillByDefault(Return(selectedGroup));
     ON_CALL(*m_model, isSelectedGroupPlottable(selectedGroup)).WillByDefault(Return(true));
 
-    EXPECT_CALL(*m_view, setPlotText(QString("Plot"))).Times(1);
+    EXPECT_CALL(*m_view, setPlotText("Plot")).Times(1);
     EXPECT_CALL(*m_view, setPlotEnabled(!isPlotting)).Times(1);
     EXPECT_CALL(*m_view, setEditResultEnabled(!isPlotting)).Times(1);
     EXPECT_CALL(*m_view, setSaveEnabled(!isPlotting)).Times(1);
