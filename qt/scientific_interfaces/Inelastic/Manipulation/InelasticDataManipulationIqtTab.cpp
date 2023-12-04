@@ -105,6 +105,7 @@ void InelasticDataManipulationIqtTab::runClicked() {
 bool InelasticDataManipulationIqtTab::validate() { return m_view->validate(); }
 
 void InelasticDataManipulationIqtTab::handleResDataReady(const QString &resWorkspace) {
+  m_view->updateDisplayedBinParameters();
   m_model->setResWorkspace(resWorkspace.toStdString());
 }
 
