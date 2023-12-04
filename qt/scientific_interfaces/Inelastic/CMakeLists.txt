@@ -84,7 +84,6 @@ set(MOC_FILES
     Analysis/IndirectEditResultsDialog.h
     Analysis/IndirectFitDataPresenter.h
     Analysis/IndirectFitDataView.h
-    Analysis/IndirectFitOutputOptionsPresenter.h
     Analysis/IndirectFitOutputOptionsView.h
     Analysis/IndirectFitPlotView.h
     Analysis/IndirectFitPlotPresenter.h
@@ -132,6 +131,7 @@ set(INC_FILES
     Analysis/IndirectFitData.h
     Analysis/IndirectFitOutput.h
     Analysis/IndirectFitOutputOptionsModel.h
+    Analysis/IndirectFitOutputOptionsPresenter.h
     Analysis/IndirectFitPlotModel.h
     Analysis/IndirectFittingModel.h
     Analysis/ParameterEstimation.h
