@@ -47,7 +47,7 @@ public:
   void setRangeSelectorMax(double newValue) override;
   void plotNewData(std::string const &filename) override;
   void replot() override;
-  void plotOutput(QString outputWorkspace) override;
+  void plotOutput(std::string const &outputWorkspace) override;
 
   void showMessageBox(const std::string &message) const override;
 

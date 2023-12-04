@@ -103,7 +103,7 @@ void InelasticDataManipulationMomentsTab::runComplete(bool error) {
 
   setOutputPlotOptionsWorkspaces({m_model->getOutputWorkspace()});
 
-  m_view->plotOutput(QString::fromStdString(m_model->getOutputWorkspace()));
+  m_view->plotOutput(m_model->getOutputWorkspace());
   m_view->getPlotOptions()->setIndicesLineEditEnabled(true);
 }
 
