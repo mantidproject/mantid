@@ -38,7 +38,7 @@ public:
 };
 
 /// Mock object to mock the view
-class MockIndirectFitOutputOptionsView : public IIndirectFitOutputOptionsView {
+class MockIndirectFitOutputOptionsView final : public IIndirectFitOutputOptionsView {
 public:
   /// Public Methods
   MOCK_METHOD1(subscribePresenter, void(IIndirectFitOutputOptionsPresenter *presenter));
@@ -117,7 +117,7 @@ public:
 
   void setUp() override {
     m_tab = std::make_unique<NiceMock<MockIndirectDataAnalysisTab>>();
-    m_view = std::make_unique<NiceMock<MockIndirectFitOutputOptionsView>>();
+    m_view = std::make_unique<MockIndirectFitOutputOptionsView>();
     auto model = std::make_unique<NiceMock<MockIndirectFitOutputOptionsModel>>();
     m_model = model.get();
 
