@@ -1165,8 +1165,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     bool precount = getProperty("Precount");
     int chunk = getProperty("ChunkNumber");
     int totalChunks = getProperty("TotalChunks");
+    const auto startTime = std::chrono::high_resolution_clock::now();
     DefaultEventLoader::load(this, *m_ws, haveWeights, event_id_is_spec, bankNames, periodLog->valuesAsVector(),
                              classType, bankNumEvents, oldNeXusFileNames, precount, chunk, totalChunks);
+    addTimer("loadEvents", startTime, std::chrono::high_resolution_clock::now());
   }
 
   // Info reporting
