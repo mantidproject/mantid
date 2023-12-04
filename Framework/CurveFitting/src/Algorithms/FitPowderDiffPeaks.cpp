@@ -1757,27 +1757,27 @@ bool FitPowderDiffPeaks::fitOverlappedPeaks(vector<BackToBackExponential_sptr> p
   estimateBackgroundCoarse(peaksws, backgroundfunction, 0, 2, 1);
 
   // [DB] Debug output
-  stringstream piss;
-  piss << peaks.size() << "-Peaks Group Information: \n";
+  stringstream peakInfo;
+  peakInfo << peaks.size() << "-Peaks Group Information: \n";
   for (size_t ipk = 0; ipk < tofpeakpairs.size(); ++ipk) {
     BackToBackExponential_sptr tmppeak = tofpeakpairs[ipk].second;
-    piss << "Peak " << ipk << "  @ TOF = " << tmppeak->centre() << ", A = " << tmppeak->getParameter("A")
-         << ", B = " << tmppeak->getParameter("B") << ", S = " << tmppeak->getParameter("S")
-         << ", FWHM = " << tmppeak->fwhm() << '\n';
+    peakInfo << "Peak " << ipk << "  @ TOF = " << tmppeak->centre() << ", A = " << tmppeak->getParameter("A")
+             << ", B = " << tmppeak->getParameter("B") << ", S = " << tmppeak->getParameter("S")
+             << ", FWHM = " << tmppeak->fwhm() << '\n';
   }
-  g_log.information() << "[DB1034] " << piss.str();
+  g_log.information() << "[DB1034] " << peakInfo.str();
 
-  stringstream datass;
-  datass << "Partial workspace for peaks: \n";
+  stringstream peakWSData;
+  peakWSData << "Partial workspace for peaks: \n";
   for (size_t i = 0; i < peaksws->x(0).size(); ++i)
-    datass << peaksws->x(1)[i] << "\t\t" << peaksws->y(1)[i] << "\t\t" << peaksws->e(1)[i] << "\t\t" << peaksws->y(0)[i]
-           << '\n';
-  g_log.information() << "[DB1042] " << datass.str();
+    peakWSData << peaksws->x(1)[i] << "\t\t" << peaksws->y(1)[i] << "\t\t" << peaksws->e(1)[i] << "\t\t"
+               << peaksws->y(0)[i] << '\n';
+  g_log.information() << "[DB1042] " << peakWSData.str();
 
   // 5. Estimate peak height according to pre-set peak value
   estimatePeakHeightsLeBail(peaksws, 1, peaks);
 
-  // 6. Set bundaries
+  // 6. Set boundaries
   setOverlappedPeaksConstraints(peaks);
 
   // 7. Set up the composite function
