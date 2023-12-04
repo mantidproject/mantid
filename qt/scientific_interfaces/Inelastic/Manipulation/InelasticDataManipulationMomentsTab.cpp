@@ -78,7 +78,7 @@ void InelasticDataManipulationMomentsTab::plotNewData(std::string const &filenam
  * @param propName :: The property being updated
  * @param val :: The new value for the property
  */
-void InelasticDataManipulationMomentsTab::handleValueChanged(std::string &propName, double value) {
+void InelasticDataManipulationMomentsTab::handleValueChanged(std::string const &propName, double value) {
   if (propName == "EMin") {
     m_model->setEMin(value);
   } else if (propName == "EMax") {

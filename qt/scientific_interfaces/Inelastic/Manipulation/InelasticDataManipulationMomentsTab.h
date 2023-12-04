@@ -25,7 +25,7 @@ public:
 
   virtual void handleScaleChanged(bool state) = 0;
   virtual void handleScaleValueChanged(double const value) = 0;
-  virtual void handleValueChanged(std::string &propName, double value) = 0;
+  virtual void handleValueChanged(std::string const &propName, double value) = 0;
 
   virtual void handleRunClicked() = 0;
   virtual void handleSaveClicked() = 0;
@@ -52,13 +52,13 @@ public:
 
   void handleScaleChanged(bool state) override;
   void handleScaleValueChanged(double const value) override;
-  void handleValueChanged(std::string &propName, double value) override;
+  void handleValueChanged(std::string const &propName, double value) override;
 
   void handleRunClicked() override;
   void handleSaveClicked() override;
 
 protected:
-  void runComplete(bool error);
+  void runComplete(bool error) override;
 
 private:
   void plotNewData(std::string const &filename);
