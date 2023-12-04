@@ -29,8 +29,8 @@ public:
 
 class MANTIDQT_INELASTIC_DLL IndirectFitOutputOptionsPresenter final : public IIndirectFitOutputOptionsPresenter {
 public:
-  IndirectFitOutputOptionsPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitOutputOptionsView *view);
-  IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsModel *model, IIndirectFitOutputOptionsView *view);
+  IndirectFitOutputOptionsPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitOutputOptionsView *view,
+                                    std::unique_ptr<IIndirectFitOutputOptionsModel> model);
 
   void setMultiWorkspaceOptionsVisible(bool visible);
 

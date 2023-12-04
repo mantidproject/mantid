@@ -13,16 +13,10 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(IIndirectDataAnalysisTab *tab,
-                                                                     IIndirectFitOutputOptionsView *view)
-    : m_tab(tab), m_view(view), m_model(std::make_unique<IndirectFitOutputOptionsModel>()) {
-  setMultiWorkspaceOptionsVisible(false);
-  m_view->subscribePresenter(this);
-}
-
-IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsModel *model,
-                                                                     IIndirectFitOutputOptionsView *view)
-    : m_model(model), m_view(view) {
+IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
+    IIndirectDataAnalysisTab *tab, IIndirectFitOutputOptionsView *view,
+    std::unique_ptr<IIndirectFitOutputOptionsModel> model)
+    : m_tab(tab), m_view(view), m_model(std::move(model)) {
   setMultiWorkspaceOptionsVisible(false);
   m_view->subscribePresenter(this);
 }

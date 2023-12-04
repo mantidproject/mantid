@@ -11,6 +11,7 @@
 
 #include "Analysis/IIndirectFitOutputOptionsModel.h"
 #include "Analysis/IIndirectFitOutputOptionsView.h"
+#include "Analysis/IndirectDataAnalysisTab.h"
 #include "Analysis/IndirectFitOutputOptionsPresenter.h"
 #include "Analysis/IndirectFitOutputOptionsView.h"
 
@@ -30,6 +31,11 @@ std::vector<std::string> getThreeParameters() { return {"Amplitude", "HWHM", "Pe
 } // namespace
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
+class MockIndirectDataAnalysisTab : public IIndirectDataAnalysisTab {
+public:
+  MOCK_METHOD0(plotSelectedSpectra, void());
+};
 
 /// Mock object to mock the view
 class MockIndirectFitOutputOptionsView : public IIndirectFitOutputOptionsView {
@@ -110,19 +116,20 @@ public:
   static void destroySuite(IndirectFitOutputOptionsPresenterTest *suite) { delete suite; }
 
   void setUp() override {
+    m_tab = std::make_unique<NiceMock<MockIndirectDataAnalysisTab>>();
     m_view = std::make_unique<NiceMock<MockIndirectFitOutputOptionsView>>();
-    m_model = std::make_unique<NiceMock<MockIndirectFitOutputOptionsModel>>();
+    auto model = std::make_unique<NiceMock<MockIndirectFitOutputOptionsModel>>();
+    m_model = model.get();
 
-    m_presenter = std::make_unique<IndirectFitOutputOptionsPresenter>(m_model.get(), m_view.get());
+    m_presenter = std::make_unique<IndirectFitOutputOptionsPresenter>(m_tab.get(), m_view.get(), std::move(model));
   }
 
   void tearDown() override {
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
 
     m_view.reset();
     m_presenter.reset(); /// The model is destructed by the presenter
-    m_model.release();
   }
 
   ///----------------------------------------------------------------------
@@ -385,7 +392,8 @@ public:
   }
 
 private:
+  std::unique_ptr<NiceMock<MockIndirectDataAnalysisTab>> m_tab;
   std::unique_ptr<MockIndirectFitOutputOptionsView> m_view;
-  std::unique_ptr<MockIndirectFitOutputOptionsModel> m_model;
+  NiceMock<MockIndirectFitOutputOptionsModel> *m_model;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_presenter;
 };

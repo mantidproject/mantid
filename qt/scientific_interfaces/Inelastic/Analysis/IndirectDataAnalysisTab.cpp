@@ -114,7 +114,9 @@ void IndirectDataAnalysisTab::connectFitPropertyBrowser() {
 }
 
 void IndirectDataAnalysisTab::setupOutputOptionsPresenter(bool const editResults) {
-  m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(this, m_uiForm->ovOutputOptionsView);
+  auto model = std::make_unique<IndirectFitOutputOptionsModel>();
+  m_outOptionsPresenter =
+      std::make_unique<IndirectFitOutputOptionsPresenter>(this, m_uiForm->ovOutputOptionsView, std::move(model));
   m_outOptionsPresenter->setEditResultVisible(editResults);
 }
 
