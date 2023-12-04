@@ -339,9 +339,9 @@ shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:210
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/ColorbarWidget.cpp:234
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/inc/MantidQtWidgets/Plotting/PreviewPlot.h:45
 constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/BankTextureBuilder.cpp:326
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/MiniPlotMpl.cpp:154
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/MiniPlotMpl.cpp:164
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/MiniPlotMpl.cpp:325
+shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/MiniPlotMpl.cpp:156
+shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/MiniPlotMpl.cpp:166
+shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/MiniPlotMpl.cpp:327
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/Shape2D.h:300
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/Shape2D.h:352
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/Shape2D.h:394
