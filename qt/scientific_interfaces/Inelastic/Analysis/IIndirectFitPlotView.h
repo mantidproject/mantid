@@ -86,9 +86,6 @@ public slots:
   virtual void clearBottomPreview() = 0;
   virtual void clearPreviews() = 0;
   virtual void setHWHMRange(double minimum, double maximum) = 0;
-
-signals:
-  void backgroundChanged(double /*_t1*/);
 };
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -49,10 +49,6 @@ MultiDomainFunction_sptr getFunctionWithWorkspaceName(std::string const &workspa
 /// Mock object to mock the view
 class MockIndirectFitPlotView : public IIndirectFitPlotView {
 public:
-  /// Signals
-  void emitBackgroundChanged(double value) { emit backgroundChanged(value); }
-
-  /// Public methods
   MOCK_METHOD1(subscribePresenter, void(IIndirectFitPlotPresenter *presenter));
 
   MOCK_METHOD1(watchADS, void(bool watch));

@@ -283,7 +283,7 @@ void IndirectFitPlotView::addBackgroundRangeSelector() {
   backRangeSelector->setLowerBound(0.0);
   backRangeSelector->setUpperBound(10.0);
 
-  connect(backRangeSelector, SIGNAL(valueChanged(double)), this, SIGNAL(backgroundChanged(double)));
+  connect(backRangeSelector, SIGNAL(valueChanged(double)), this, SLOT(notifyBackgroundChanged(double)));
   connect(backRangeSelector, SIGNAL(resetScientificBounds()), this, SLOT(setBackgroundBounds()));
 }
 
@@ -369,5 +369,7 @@ void IndirectFitPlotView::notifyHWHMMaximumChanged(double value) { m_presenter->
 void IndirectFitPlotView::notifyFWHMChanged(double minimum, double maximum) {
   m_presenter->handleFWHMChanged(minimum, maximum);
 }
+
+void IndirectFitPlotView::notifyBackgroundChanged(double value) { m_presenter->handleBackgroundChanged(value); }
 
 } // namespace MantidQt::CustomInterfaces::IDA

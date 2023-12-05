@@ -32,12 +32,6 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IIndirectFitPlotView *view,
                                                    std::unique_ptr<IndirectFitPlotModel> model)
     : m_view(view), m_model(std::move(model)), m_plotter(std::make_unique<ExternalPlotter>()) {
   m_view->subscribePresenter(this);
-
-  connect(m_view, SIGNAL(backgroundChanged(double)), this, SIGNAL(backgroundChanged(double)));
-
-  // updatePlots();
-  // updateRangeSelectors();
-  // updateAvailableSpectra();
 }
 
 void IndirectFitPlotPresenter::handleSelectedFitDataChanged(WorkspaceID workspaceID) {
@@ -316,6 +310,8 @@ void IndirectFitPlotPresenter::handleFitSingleSpectrum() {
 void IndirectFitPlotPresenter::handleFWHMChanged(double minimum, double maximum) {
   emit fwhmChanged(maximum - minimum);
 }
+
+void IndirectFitPlotPresenter::handleBackgroundChanged(double value) { emit backgroundChanged(value); }
 
 void IndirectFitPlotPresenter::emitSelectedFitDataChanged() {
   const auto index = m_view->getSelectedDataIndex();

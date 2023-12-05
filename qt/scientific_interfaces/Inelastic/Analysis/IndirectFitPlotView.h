@@ -134,7 +134,9 @@ private slots:
 
   void notifyHWHMMinimumChanged(double value);
   void notifyHWHMMaximumChanged(double value);
+
   void notifyFWHMChanged(double minimum, double maximum);
+  void notifyBackgroundChanged(double value);
 
 private:
   void createSplitterWithPlots();

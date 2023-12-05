@@ -32,6 +32,7 @@ public:
   virtual void handleHWHMMaximumChanged(double minimum) = 0;
 
   virtual void handleFWHMChanged(double minimum, double maximum) = 0;
+  virtual void handleBackgroundChanged(double value) = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL IndirectFitPlotPresenter : public QObject, public IIndirectFitPlotPresenter {
@@ -68,6 +69,7 @@ public:
   void handleHWHMMaximumChanged(double minimum) override;
 
   void handleFWHMChanged(double minimum, double maximum) override;
+  void handleBackgroundChanged(double value) override;
 
 public slots:
   void setStartX(double /*startX*/);
@@ -94,10 +96,6 @@ signals:
   void fwhmChanged(double /*_t1*/);
   void backgroundChanged(double /*_t1*/);
 
-private slots:
-  void setActiveIndex(WorkspaceID workspaceID);
-  void updateFitRangeSelector();
-
 private:
   void disableAllDataSelection();
   void enableAllDataSelection();
@@ -113,7 +111,9 @@ private:
   void updateHWHMSelector();
   void setHWHM(double value);
   void updateBackgroundSelector();
+  void updateFitRangeSelector();
   void emitSelectedFitDataChanged();
+  void setActiveIndex(WorkspaceID workspaceID);
 
   void plotSpectrum(WorkspaceIndex spectrum) const;
 
