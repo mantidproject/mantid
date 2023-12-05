@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotView.h"
+#include "IndirectFitPlotPresenter.h"
 
 #include "MantidQtIcons/Icon.h"
 
@@ -31,17 +32,17 @@ namespace MantidQt::CustomInterfaces::IDA {
 using namespace MantidWidgets;
 
 IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
-    : IIndirectFitPlotView(parent), m_plotForm(new Ui::IndirectFitPreviewPlot) {
+    : IIndirectFitPlotView(parent), m_plotForm(new Ui::IndirectFitPreviewPlot), m_presenter() {
   m_plotForm->setupUi(this);
 
-  connect(m_plotForm->cbDataSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(emitSelectedFitDataChanged(int)));
-  connect(m_plotForm->spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(emitDelayedPlotSpectrumChanged()));
+  connect(m_plotForm->cbDataSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedFitDataChanged(int)));
+  connect(m_plotForm->spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(notifyDelayedPlotSpectrumChanged()));
 
   connect(m_plotForm->cbPlotSpectrum, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(emitPlotSpectrumChanged(const QString &)));
-  connect(m_plotForm->ckPlotGuess, SIGNAL(stateChanged(int)), this, SLOT(emitPlotGuessChanged(int)));
-  connect(m_plotForm->pbPlotPreview, SIGNAL(clicked()), this, SIGNAL(plotCurrentPreview()));
-  connect(m_plotForm->pbFitSingle, SIGNAL(clicked()), this, SIGNAL(fitSelectedSpectrum()));
+          SLOT(notifyPlotSpectrumChanged(const QString &)));
+  connect(m_plotForm->ckPlotGuess, SIGNAL(stateChanged(int)), this, SLOT(notifyPlotGuessChanged(int)));
+  connect(m_plotForm->pbPlotPreview, SIGNAL(clicked()), this, SLOT(notifyPlotCurrentPreview()));
+  connect(m_plotForm->pbFitSingle, SIGNAL(clicked()), this, SLOT(notifyFitSelectedSpectrum()));
 
   // Create a Splitter and place two plots within the splitter layout
   createSplitterWithPlots();
@@ -50,6 +51,8 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
   addBackgroundRangeSelector();
   addHWHMRangeSelector();
 }
+
+void IndirectFitPlotView::subscribePresenter(IIndirectFitPlotPresenter *presenter) { m_presenter = presenter; }
 
 void IndirectFitPlotView::createSplitterWithPlots() {
   createSplitter();
@@ -253,16 +256,16 @@ void IndirectFitPlotView::setHWHMRange(double minimum, double maximum) {
   selector->setRange(minimum, maximum);
 }
 
-void IndirectFitPlotView::setHWHMMaximum(double minimum) {
+void IndirectFitPlotView::setHWHMMinimum(double minimum) {
   auto selector = m_topPlot->getRangeSelector("HWHM");
   QSignalBlocker blocker(selector);
-  selector->setMaximum(minimum);
+  selector->setMinimum(minimum);
 }
 
-void IndirectFitPlotView::setHWHMMinimum(double maximum) {
+void IndirectFitPlotView::setHWHMMaximum(double maximum) {
   auto selector = m_topPlot->getRangeSelector("HWHM");
   QSignalBlocker blocker(selector);
-  selector->setMinimum(maximum);
+  selector->setMaximum(maximum);
 }
 
 void IndirectFitPlotView::addFitRangeSelector() {
@@ -297,9 +300,9 @@ void IndirectFitPlotView::addHWHMRangeSelector() {
   hwhmRangeSelector->setRange(0.0, 0.0);
   hwhmRangeSelector->setVisible(false);
 
-  connect(hwhmRangeSelector, SIGNAL(minValueChanged(double)), this, SIGNAL(hwhmMinimumChanged(double)));
-  connect(hwhmRangeSelector, SIGNAL(maxValueChanged(double)), this, SIGNAL(hwhmMaximumChanged(double)));
-  connect(hwhmRangeSelector, SIGNAL(selectionChanged(double, double)), this, SIGNAL(hwhmChanged(double, double)));
+  connect(hwhmRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(notifyHWHMMinimumChanged(double)));
+  connect(hwhmRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(notifyHWHMMaximumChanged(double)));
+  connect(hwhmRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyFWHMChanged(double, double)));
 }
 
 void IndirectFitPlotView::setBackgroundRangeVisible(bool visible) {
@@ -324,28 +327,43 @@ void IndirectFitPlotView::displayMessage(const std::string &message) const {
   QMessageBox::information(parentWidget(), "MantidPlot - Warning", QString::fromStdString(message));
 }
 
-void IndirectFitPlotView::emitSelectedFitDataChanged(int index) {
+void IndirectFitPlotView::notifySelectedFitDataChanged(int index) {
   if (index >= 0)
-    emit selectedFitDataChanged(WorkspaceID{static_cast<size_t>(index)});
+    m_presenter->handleSelectedFitDataChanged(WorkspaceID{static_cast<size_t>(index)});
 }
 
 // Required due to a bug in qt causing the valueChanged signal to be emitted
 // twice due to the long amount of time taken to complete the necessary actions
-void IndirectFitPlotView::emitDelayedPlotSpectrumChanged() {
+void IndirectFitPlotView::notifyDelayedPlotSpectrumChanged() {
   QTimer::singleShot(150, this, SLOT(emitPlotSpectrumChanged()));
 }
 
-void IndirectFitPlotView::emitPlotSpectrumChanged() {
-  emit plotSpectrumChanged(WorkspaceIndex{boost::numeric_cast<size_t>(m_plotForm->spPlotSpectrum->value())});
+void IndirectFitPlotView::notifyPlotSpectrumChanged() {
+  m_presenter->handlePlotSpectrumChanged(
+      WorkspaceIndex{boost::numeric_cast<size_t>(m_plotForm->spPlotSpectrum->value())});
 }
 
-void IndirectFitPlotView::emitPlotSpectrumChanged(const QString &spectrum) {
+void IndirectFitPlotView::notifyPlotSpectrumChanged(const QString &spectrum) {
   bool successState{false};
   int spectrumInt = spectrum.toInt(&successState);
   if (successState)
-    emit plotSpectrumChanged(WorkspaceIndex{static_cast<size_t>(spectrumInt)});
+    m_presenter->handlePlotSpectrumChanged(WorkspaceIndex{static_cast<size_t>(spectrumInt)});
 }
 
-void IndirectFitPlotView::emitPlotGuessChanged(int doPlotGuess) { emit plotGuessChanged(doPlotGuess == Qt::Checked); }
+void IndirectFitPlotView::notifyPlotGuessChanged(int doPlotGuess) {
+  m_presenter->handlePlotGuess(doPlotGuess == Qt::Checked);
+}
+
+void IndirectFitPlotView::notifyPlotCurrentPreview() { m_presenter->handlePlotCurrentPreview(); }
+
+void IndirectFitPlotView::notifyFitSelectedSpectrum() { m_presenter->handleFitSingleSpectrum(); }
+
+void IndirectFitPlotView::notifyHWHMMinimumChanged(double value) { m_presenter->handleHWHMMinimumChanged(value); }
+
+void IndirectFitPlotView::notifyHWHMMaximumChanged(double value) { m_presenter->handleHWHMMaximumChanged(value); }
+
+void IndirectFitPlotView::notifyFWHMChanged(double minimum, double maximum) {
+  m_presenter->handleFWHMChanged(minimum, maximum);
+}
 
 } // namespace MantidQt::CustomInterfaces::IDA

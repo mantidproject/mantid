@@ -17,7 +17,21 @@ namespace CustomInterfaces {
 namespace IDA {
 using namespace MantidWidgets;
 
-class MANTIDQT_INELASTIC_DLL IndirectFitPlotPresenter : public QObject {
+class MANTIDQT_INELASTIC_DLL IIndirectFitPlotPresenter {
+public:
+  virtual void handleSelectedFitDataChanged(WorkspaceID workspaceID) = 0;
+  virtual void handlePlotSpectrumChanged(WorkspaceIndex spectrum) = 0;
+  virtual void handlePlotCurrentPreview() = 0;
+  virtual void handlePlotGuess(bool doPlotGuess) = 0;
+  virtual void handleFitSingleSpectrum() = 0;
+
+  virtual void handleHWHMMinimumChanged(double maximum) = 0;
+  virtual void handleHWHMMaximumChanged(double minimum) = 0;
+
+  virtual void handleFWHMChanged(double minimum, double maximum) = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL IndirectFitPlotPresenter : public QObject, public IIndirectFitPlotPresenter {
   Q_OBJECT
 
 public:
@@ -37,6 +51,17 @@ public:
   void setFitSingleSpectrumEnabled(bool enable);
 
   void setXBounds(std::pair<double, double> const &bounds);
+
+  void handleSelectedFitDataChanged(WorkspaceID workspaceID) override;
+  void handlePlotSpectrumChanged(WorkspaceIndex spectrum) override;
+  void handlePlotCurrentPreview() override;
+  void handlePlotGuess(bool doPlotGuess) override;
+  void handleFitSingleSpectrum() override;
+
+  void handleHWHMMinimumChanged(double maximum) override;
+  void handleHWHMMaximumChanged(double minimum) override;
+
+  void handleFWHMChanged(double minimum, double maximum) override;
 
 public slots:
   void setStartX(double /*startX*/);
@@ -65,15 +90,7 @@ signals:
 
 private slots:
   void setActiveIndex(WorkspaceID workspaceID);
-  void setHWHMMaximum(double minimum);
-  void setHWHMMinimum(double maximum);
-  void plotGuess(bool doPlotGuess);
   void updateFitRangeSelector();
-  void plotCurrentPreview();
-  void emitFitSingleSpectrum();
-  void emitFWHMChanged(double minimum, double maximum);
-  void handleSelectedFitDataChanged(WorkspaceID workspaceID);
-  void handlePlotSpectrumChanged(WorkspaceIndex spectrum);
 
 private:
   void disableAllDataSelection();

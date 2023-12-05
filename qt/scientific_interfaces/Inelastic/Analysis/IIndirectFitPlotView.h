@@ -18,12 +18,16 @@ namespace CustomInterfaces {
 namespace IDA {
 using namespace MantidWidgets;
 
+class IIndirectFitPlotPresenter;
+
 class MANTIDQT_INELASTIC_DLL IIndirectFitPlotView : public API::MantidWidget {
   Q_OBJECT
 
 public:
   IIndirectFitPlotView(QWidget *parent = nullptr) : API::MantidWidget(parent){};
   virtual ~IIndirectFitPlotView(){};
+
+  virtual void subscribePresenter(IIndirectFitPlotPresenter *presenter) = 0;
 
   virtual void watchADS(bool watch) = 0;
 
@@ -74,25 +78,18 @@ public:
   virtual void allowRedraws(bool state) = 0;
   virtual void redrawPlots() = 0;
 
+  virtual void setHWHMMinimum(double minimum) = 0;
+  virtual void setHWHMMaximum(double maximum) = 0;
+
 public slots:
   virtual void clearTopPreview() = 0;
   virtual void clearBottomPreview() = 0;
   virtual void clearPreviews() = 0;
   virtual void setHWHMRange(double minimum, double maximum) = 0;
-  virtual void setHWHMMaximum(double minimum) = 0;
-  virtual void setHWHMMinimum(double maximum) = 0;
 
 signals:
-  void selectedFitDataChanged(WorkspaceID /*_t1*/);
-  void plotCurrentPreview();
-  void plotSpectrumChanged(WorkspaceIndex /*_t1*/);
-  void plotGuessChanged(bool /*_t1*/);
-  void fitSelectedSpectrum();
   void startXChanged(double /*_t1*/);
   void endXChanged(double /*_t1*/);
-  void hwhmMinimumChanged(double /*_t1*/);
-  void hwhmMaximumChanged(double /*_t1*/);
-  void hwhmChanged(double /*_t1*/, double /*_t2*/);
   void backgroundChanged(double /*_t1*/);
 };
 } // namespace IDA

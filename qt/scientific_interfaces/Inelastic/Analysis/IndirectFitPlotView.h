@@ -58,6 +58,8 @@ public:
   IndirectFitPlotView(QWidget *parent = nullptr);
   virtual ~IndirectFitPlotView() override;
 
+  void subscribePresenter(IIndirectFitPlotPresenter *presenter) override;
+
   void watchADS(bool watch) override;
 
   WorkspaceIndex getSelectedSpectrum() const override;
@@ -107,22 +109,29 @@ public:
   void allowRedraws(bool state) override;
   void redrawPlots() override;
 
+  void setHWHMMinimum(double minimum) override;
+  void setHWHMMaximum(double maximum) override;
+
 public slots:
   void clearTopPreview() override;
   void clearBottomPreview() override;
   void clearPreviews() override;
   void setHWHMRange(double minimum, double maximum) override;
-  void setHWHMMaximum(double minimum) override;
-  void setHWHMMinimum(double maximum) override;
 
 private slots:
   void setBackgroundBounds();
 
-  void emitDelayedPlotSpectrumChanged();
-  void emitPlotSpectrumChanged();
-  void emitPlotSpectrumChanged(const QString &spectrum);
-  void emitSelectedFitDataChanged(int /*index*/);
-  void emitPlotGuessChanged(int /*doPlotGuess*/);
+  void notifyDelayedPlotSpectrumChanged();
+  void notifyPlotSpectrumChanged();
+  void notifyPlotSpectrumChanged(const QString &spectrum);
+  void notifySelectedFitDataChanged(int /*index*/);
+  void notifyPlotGuessChanged(int /*doPlotGuess*/);
+  void notifyPlotCurrentPreview();
+  void notifyFitSelectedSpectrum();
+
+  void notifyHWHMMinimumChanged(double value);
+  void notifyHWHMMaximumChanged(double value);
+  void notifyFWHMChanged(double minimum, double maximum);
 
 private:
   void createSplitterWithPlots();
@@ -144,6 +153,7 @@ private:
   std::unique_ptr<MantidQt::MantidWidgets::PreviewPlot> m_topPlot;
   std::unique_ptr<MantidQt::MantidWidgets::PreviewPlot> m_bottomPlot;
   std::unique_ptr<QSplitter> m_splitter;
+  IIndirectFitPlotPresenter *m_presenter;
 };
 
 } // namespace IDA

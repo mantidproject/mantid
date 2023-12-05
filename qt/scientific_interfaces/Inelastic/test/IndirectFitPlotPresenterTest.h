@@ -50,25 +50,15 @@ MultiDomainFunction_sptr getFunctionWithWorkspaceName(std::string const &workspa
 class MockIndirectFitPlotView : public IIndirectFitPlotView {
 public:
   /// Signals
-  void emitSelectedFitDataChanged(WorkspaceID workspaceID) { emit selectedFitDataChanged(workspaceID); }
-
-  void emitPlotCurrentPreview() { emit plotCurrentPreview(); }
-
-  void emitPlotSpectrumChanged(WorkspaceIndex spectrum) { emit plotSpectrumChanged(spectrum); }
-
-  void emitPlotGuessChanged(bool doPlotGuess) { emit plotGuessChanged(doPlotGuess); }
-
   void emitStartXChanged(double startX) { emit startXChanged(startX); }
 
   void emitEndXChanged(double endX) { emit endXChanged(endX); }
 
-  void emitHWHMMinimumChanged(double minimum) { emit hwhmMinimumChanged(minimum); }
-
-  void emitHWHMMaximumChanged(double maximum) { emit hwhmMaximumChanged(maximum); }
-
   void emitBackgroundChanged(double value) { emit backgroundChanged(value); }
 
   /// Public methods
+  MOCK_METHOD1(subscribePresenter, void(IIndirectFitPlotPresenter *presenter));
+
   MOCK_METHOD1(watchADS, void(bool watch));
   MOCK_METHOD0(disableSpectrumPlotSelection, void());
 
@@ -120,14 +110,15 @@ public:
 
   MOCK_CONST_METHOD1(displayMessage, void(std::string const &message));
 
+  MOCK_METHOD1(setHWHMMinimum, void(double minimum));
+  MOCK_METHOD1(setHWHMMaximum, void(double maximum));
+
   /// Public Slots
   MOCK_METHOD0(clearTopPreview, void());
   MOCK_METHOD0(clearBottomPreview, void());
   MOCK_METHOD0(clearPreviews, void());
 
   MOCK_METHOD2(setHWHMRange, void(double minimum, double maximum));
-  MOCK_METHOD1(setHWHMMinimum, void(double minimum));
-  MOCK_METHOD1(setHWHMMaximum, void(double maximum));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
@@ -161,7 +152,8 @@ public:
 
   void tearDown() override {
     AnalysisDataService::Instance().clear();
-    // TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view.get()));
+
     m_presenter.reset();
     m_view.reset();
   }
@@ -193,84 +185,84 @@ public:
   /// Unit Tests that test the signals (only the view emits signals here)
   ///----------------------------------------------------------------------
 
-  void test_that_the_selectedFitDataChanged_signal_will_set_the_activeIndex() {
-    m_view->emitSelectedFitDataChanged(WorkspaceID(1));
+  void test_that_handleSelectedFitDataChanged_will_set_the_activeIndex() {
+    m_presenter->handleSelectedFitDataChanged(WorkspaceID(1));
     TS_ASSERT_EQUALS(m_presenter->getActiveWorkspaceIndex(), 0);
   }
 
-  void test_that_the_selectedFitDataChanged_signal_will_set_the_available_spectra() {
+  void test_that_handleSelectedFitDataChanged_will_set_the_available_spectra() {
 
     EXPECT_CALL(*m_view, setAvailableSpectra(WorkspaceIndex(0), WorkspaceIndex(5))).Times(1);
 
-    m_view->emitSelectedFitDataChanged(WorkspaceID(0));
+    m_presenter->handleSelectedFitDataChanged(WorkspaceID(0));
   }
 
-  void test_that_selectedFitDataChanged_signal_will_enable_selectors_when_workspace_presenter() {
+  void test_that_handleSelectedFitDataChanged_will_enable_selectors_when_workspace_presenter() {
     EXPECT_CALL(*m_view, enableSpectrumSelection(true)).Times(1);
     EXPECT_CALL(*m_view, enableFitRangeSelection(true)).Times(1);
 
-    m_view->emitSelectedFitDataChanged(WorkspaceID(0));
+    m_presenter->handleSelectedFitDataChanged(WorkspaceID(0));
   }
 
-  void test_that_the_selectedFitDataChanged_signal_will_disable_selectors_when_there_is_no_workspace() {
+  void test_that_handleSelectedFitDataChanged_will_disable_selectors_when_there_is_no_workspace() {
     m_fittingData->clear();
 
     EXPECT_CALL(*m_view, enableSpectrumSelection(false)).Times(1);
     EXPECT_CALL(*m_view, enableFitRangeSelection(false)).Times(1);
 
-    m_view->emitSelectedFitDataChanged(WorkspaceID(0));
+    m_presenter->handleSelectedFitDataChanged(WorkspaceID(0));
   }
 
-  void test_that_the_selectedFitDataChanged_signal_will_clear_the_plots_when_there_is_no_input_workspace() {
+  void test_that_handleSelectedFitDataChanged_will_clear_the_plots_when_there_is_no_input_workspace() {
     EXPECT_CALL(*m_view, clearPreviews()).Times(1);
-    m_view->emitSelectedFitDataChanged(WorkspaceID(0));
+    m_presenter->handleSelectedFitDataChanged(WorkspaceID(0));
   }
 
-  void test_that_the_selectedFitDataChanged_signal_will_set_the_minimum_and_maximum_of_the_fit_range() {
+  void test_that_handleSelectedFitDataChanged_will_set_the_minimum_and_maximum_of_the_fit_range() {
     m_fittingData->at(0).setStartX(1.0);
     m_fittingData->at(0).setEndX(2.0);
     EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(1);
     EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(1);
 
-    m_view->emitSelectedFitDataChanged(WorkspaceID(0));
+    m_presenter->handleSelectedFitDataChanged(WorkspaceID(0));
   }
 
-  void test_that_the_plotSpectrumChanged_signal_will_set_the_active_spectrum() {
-    m_view->emitPlotSpectrumChanged(2);
+  void test_that_handlePlotSpectrumChanged_will_set_the_active_spectrum() {
+    m_presenter->handlePlotSpectrumChanged(2);
     TS_ASSERT_EQUALS(m_presenter->getActiveWorkspaceIndex(), 2);
   }
 
-  void test_that_the_plotSpectrumChanged_signal_will_plot_the_input_when_there_is_only_an_input_workspace() {
+  void test_that_handlePlotSpectrumChanged_will_plot_the_input_when_there_is_only_an_input_workspace() {
     EXPECT_CALL(*m_view, clearPreviews()).Times(1);
 
-    m_view->emitPlotSpectrumChanged(WorkspaceIndex(0));
+    m_presenter->handlePlotSpectrumChanged(WorkspaceIndex(0));
   }
 
-  void test_that_the_plotSpectrumChanged_signal_will_clear_the_plots_when_there_is_no_input_workspace() {
+  void test_that_handlePlotSpectrumChanged_will_clear_the_plots_when_there_is_no_input_workspace() {
     EXPECT_CALL(*m_view, clearPreviews()).Times(1);
 
-    m_view->emitPlotSpectrumChanged(WorkspaceIndex(0));
+    m_presenter->handlePlotSpectrumChanged(WorkspaceIndex(0));
   }
 
-  void test_that_the_plotSpectrumChanged_signal_will_set_the_minimum_and_maximum_of_the_fit_range() {
+  void test_that_handlePlotSpectrumChanged_will_set_the_minimum_and_maximum_of_the_fit_range() {
     m_fittingData->at(0).setStartX(1.0);
     m_fittingData->at(0).setEndX(2.0);
     EXPECT_CALL(*m_view, setFitRangeMinimum(1.0)).Times(1);
     EXPECT_CALL(*m_view, setFitRangeMaximum(2.0)).Times(1);
 
-    m_view->emitPlotSpectrumChanged(WorkspaceIndex(0));
+    m_presenter->handlePlotSpectrumChanged(WorkspaceIndex(0));
   }
 
-  void test_that_the_plotCurrentPreview_signal_will_display_an_error_message_if_there_is_no_input_workspace() {
+  void test_that_handlePlotCurrentPreview_will_display_an_error_message_if_there_is_no_input_workspace() {
     std::string const message("Workspace not found - data may not be loaded.");
     m_fittingData->clear();
 
     EXPECT_CALL(*m_view, displayMessage(message)).Times(1);
 
-    m_view->emitPlotCurrentPreview();
+    m_presenter->handlePlotCurrentPreview();
   }
 
-  void test_that_the_plotGuessChanged_signal_will_not_clear_the_guess_plot_when_passed_true() {
+  void test_that_handlePlotGuess_will_not_clear_the_guess_plot_when_passed_true() {
     WorkspaceID const index(0);
     std::string const workspaceName("WorkspaceName");
     auto const fitFunction = getFunctionWithWorkspaceName(workspaceName);
@@ -278,25 +270,25 @@ public:
 
     EXPECT_CALL(*m_view, removeFromTopPreview(QString::fromStdString("Guess"))).Times(0);
 
-    m_view->emitPlotGuessChanged(true);
+    m_presenter->handlePlotGuess(true);
   }
 
-  void test_that_the_plotGuessChanged_signal_will_clear_the_plot_when_passed_false() {
+  void test_that_handlePlotGuess_will_clear_the_plot_when_passed_false() {
     WorkspaceID const index(0);
 
     EXPECT_CALL(*m_view, removeFromTopPreview(QString::fromStdString("Guess"))).Times(1);
 
-    m_view->emitPlotGuessChanged(false);
+    m_presenter->handlePlotGuess(false);
   }
 
-  void test_that_the_hwhmMaximumChanged_signal_will_set_the_hwhm_minimum() {
+  void test_that_handleHWHMMinimumChanged_will_set_the_hwhm_minimum() {
     EXPECT_CALL(*m_view, setHWHMMinimum(-2.0)).Times(1);
-    m_view->emitHWHMMaximumChanged(2.0);
+    m_presenter->handleHWHMMinimumChanged(2.0);
   }
 
-  void test_that_the_hwhmMinimumChanged_signal_will_set_the_hwhm_maximum() {
+  void test_that_handleHWHMMaximumChanged_will_set_the_hwhm_maximum() {
     EXPECT_CALL(*m_view, setHWHMMaximum(-2.0)).Times(1);
-    m_view->emitHWHMMinimumChanged(2.0);
+    m_presenter->handleHWHMMaximumChanged(2.0);
   }
 
   ///----------------------------------------------------------------------
@@ -312,12 +304,12 @@ public:
   }
 
   void test_that_isCurrentlySelected_returns_true_if_the_index_and_spectrum_given_are_selected() {
-    m_view->emitSelectedFitDataChanged(2);
+    m_presenter->handleSelectedFitDataChanged(2);
     TS_ASSERT(m_presenter->isCurrentlySelected(2, 0));
   }
 
   void test_that_isCurrentlySelected_returns_false_if_the_index_and_spectrum_given_are_not_selected() {
-    m_view->emitSelectedFitDataChanged(2);
+    m_presenter->handleSelectedFitDataChanged(2);
     TS_ASSERT(!m_presenter->isCurrentlySelected(0, 0));
   }
 
