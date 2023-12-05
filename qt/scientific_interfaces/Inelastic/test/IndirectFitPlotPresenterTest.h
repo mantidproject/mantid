@@ -50,10 +50,6 @@ MultiDomainFunction_sptr getFunctionWithWorkspaceName(std::string const &workspa
 class MockIndirectFitPlotView : public IIndirectFitPlotView {
 public:
   /// Signals
-  void emitStartXChanged(double startX) { emit startXChanged(startX); }
-
-  void emitEndXChanged(double endX) { emit endXChanged(endX); }
-
   void emitBackgroundChanged(double value) { emit backgroundChanged(value); }
 
   /// Public methods

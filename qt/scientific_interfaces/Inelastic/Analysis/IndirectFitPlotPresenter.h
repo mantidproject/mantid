@@ -25,6 +25,9 @@ public:
   virtual void handlePlotGuess(bool doPlotGuess) = 0;
   virtual void handleFitSingleSpectrum() = 0;
 
+  virtual void handleStartXChanged(double value) = 0;
+  virtual void handleEndXChanged(double value) = 0;
+
   virtual void handleHWHMMinimumChanged(double maximum) = 0;
   virtual void handleHWHMMaximumChanged(double minimum) = 0;
 
@@ -57,6 +60,9 @@ public:
   void handlePlotCurrentPreview() override;
   void handlePlotGuess(bool doPlotGuess) override;
   void handleFitSingleSpectrum() override;
+
+  void handleStartXChanged(double value) override;
+  void handleEndXChanged(double value) override;
 
   void handleHWHMMinimumChanged(double maximum) override;
   void handleHWHMMaximumChanged(double minimum) override;

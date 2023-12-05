@@ -129,6 +129,9 @@ private slots:
   void notifyPlotCurrentPreview();
   void notifyFitSelectedSpectrum();
 
+  void notifyStartXChanged(double value);
+  void notifyEndXChanged(double value);
+
   void notifyHWHMMinimumChanged(double value);
   void notifyHWHMMaximumChanged(double value);
   void notifyFWHMChanged(double minimum, double maximum);

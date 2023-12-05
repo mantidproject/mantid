@@ -88,8 +88,6 @@ public slots:
   virtual void setHWHMRange(double minimum, double maximum) = 0;
 
 signals:
-  void startXChanged(double /*_t1*/);
-  void endXChanged(double /*_t1*/);
   void backgroundChanged(double /*_t1*/);
 };
 } // namespace IDA

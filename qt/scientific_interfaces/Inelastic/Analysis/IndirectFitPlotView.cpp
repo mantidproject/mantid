@@ -272,8 +272,8 @@ void IndirectFitPlotView::addFitRangeSelector() {
   auto fitRangeSelector = m_topPlot->addRangeSelector("FitRange");
   fitRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
 
-  connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this, SIGNAL(startXChanged(double)));
-  connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this, SIGNAL(endXChanged(double)));
+  connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(notifyStartXChanged(double)));
+  connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(notifyEndXChanged(double)));
 }
 
 void IndirectFitPlotView::addBackgroundRangeSelector() {
@@ -357,6 +357,10 @@ void IndirectFitPlotView::notifyPlotGuessChanged(int doPlotGuess) {
 void IndirectFitPlotView::notifyPlotCurrentPreview() { m_presenter->handlePlotCurrentPreview(); }
 
 void IndirectFitPlotView::notifyFitSelectedSpectrum() { m_presenter->handleFitSingleSpectrum(); }
+
+void IndirectFitPlotView::notifyStartXChanged(double value) { m_presenter->handleStartXChanged(value); }
+
+void IndirectFitPlotView::notifyEndXChanged(double value) { m_presenter->handleEndXChanged(value); }
 
 void IndirectFitPlotView::notifyHWHMMinimumChanged(double value) { m_presenter->handleHWHMMinimumChanged(value); }
 

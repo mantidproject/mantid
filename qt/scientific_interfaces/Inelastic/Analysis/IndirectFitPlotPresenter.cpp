@@ -33,9 +33,6 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IIndirectFitPlotView *view,
     : m_view(view), m_model(std::move(model)), m_plotter(std::make_unique<ExternalPlotter>()) {
   m_view->subscribePresenter(this);
 
-  connect(m_view, SIGNAL(startXChanged(double)), this, SIGNAL(startXChanged(double)));
-  connect(m_view, SIGNAL(endXChanged(double)), this, SIGNAL(endXChanged(double)));
-
   connect(m_view, SIGNAL(backgroundChanged(double)), this, SIGNAL(backgroundChanged(double)));
 
   // updatePlots();
@@ -101,6 +98,10 @@ void IndirectFitPlotPresenter::updateRangeSelectors() {
   updateBackgroundSelector();
   updateHWHMSelector();
 }
+
+void IndirectFitPlotPresenter::handleStartXChanged(double value) { emit startXChanged(value); }
+
+void IndirectFitPlotPresenter::handleEndXChanged(double value) { emit endXChanged(value); }
 
 void IndirectFitPlotPresenter::handleHWHMMaximumChanged(double minimum) {
   m_view->setHWHMMaximum(m_model->calculateHWHMMaximum(minimum));
