@@ -77,8 +77,11 @@ User files
 #. Change some values on the ``Beam Centre`` tab. Re-load the user file. The inputs in the ``Centre Position``
    section should revert to their original values, apart from the ``Detector`` combobox.
    The inputs in the ``Options`` section (such as the radius limits) should not revert.
-#. Ensure that you can load the old style ``MaskFile.txt`` user file from the
-   sample data.
+#. Ensure that you can load the old style ``MaskFile.txt`` user file from the sample data.
+
+   - **Note:** In order to see this file, you may need to change the settings in the file browser window to look for
+     ``.txt`` files instead of ``.TOML`` files.
+
 #. In the table on the ``Runs`` tab, under the ``User File`` column, enter
    ``MaskFile.toml`` in one row and ``MaskFile.txt`` in the other row. Click
    ``Process All``. After some seconds, the rows should turn green to indicate
@@ -115,7 +118,7 @@ Processing
 #. In the workspaces list, there should be a series of new workspaces; four
    group workspaces and four 1D workspaces.
 #. Check your default save directory. For each reduction two banks (HAB/main) should
-   be saved. In total there should be 8 workspaces (4 .xml and 4 .nxs) saved.
+   be saved. In total there should be 8 workspaces (4 CanSAS ``.xml`` and 4 NXcanSAS ``.h5``) saved.
 #. Double-click the 1D workspaces and you should get a single line plot.
 #. Clear the newly created files and workspaces to make the next test easier
 #. Change the contents of the first cell in the first row to ``74045`` and click
@@ -176,11 +179,14 @@ Processing
 #. Check the ``Scaled Background Subtraction`` checkbox.
 #. In the ``BackgroundWorkspace`` column, enter the name of the merged workspace you took note of before.
 #. In the ``ScaleFactor`` column, enter ``0.9``.
+#. Ensure that save outputs ``CanSAS (1D)`` and ``NXcanSAS (1D/2D)`` are ticked.
 #. Select this new row and click ``Process Selected``.
 #. When it completes, two output files should have been created with ``bgsub_test`` in the name. One, which is the
    normal output data. Another with the scaled subtraction, which should have ``_bgsub`` appended to the name.
 #. Right click on each of these and select ``Show Data``. The subtracted workspace's values should be 10% of the of the
    unsubtracted workspace's values.
+#. Check that your save location contains files for both the background subtracted workspace and the normal reduction
+   output.
 
 Beam centre finder
 ##################
