@@ -146,8 +146,9 @@ public:
     /// Presenter takes an IndirectFittingModel. This means the
     /// IndirectFittingModel is mocked instead - which is a good
     /// substitute anyway
+    auto model = std::make_unique<IndirectFitPlotModel>();
     m_view = std::make_unique<NiceMock<MockIndirectFitPlotView>>();
-    m_presenter = std::make_unique<IndirectFitPlotPresenter>(std::move(m_view.get()));
+    m_presenter = std::make_unique<IndirectFitPlotPresenter>(m_view.get(), std::move(model));
 
     m_workspace = createWorkspaceWithInstrument(6, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);

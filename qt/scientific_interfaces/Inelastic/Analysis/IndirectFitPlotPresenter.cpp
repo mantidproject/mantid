@@ -28,8 +28,9 @@ struct HoldRedrawing {
 
 using namespace Mantid::API;
 
-IndirectFitPlotPresenter::IndirectFitPlotPresenter(IIndirectFitPlotView *view)
-    : m_model(new IndirectFitPlotModel()), m_view(view), m_plotter(std::make_unique<ExternalPlotter>()) {
+IndirectFitPlotPresenter::IndirectFitPlotPresenter(IIndirectFitPlotView *view,
+                                                   std::unique_ptr<IndirectFitPlotModel> model)
+    : m_view(view), m_model(std::move(model)), m_plotter(std::make_unique<ExternalPlotter>()) {
   connect(m_view, SIGNAL(selectedFitDataChanged(WorkspaceID)), this, SLOT(handleSelectedFitDataChanged(WorkspaceID)));
 
   connect(m_view, SIGNAL(plotSpectrumChanged(WorkspaceIndex)), this, SLOT(handlePlotSpectrumChanged(WorkspaceIndex)));

@@ -21,7 +21,7 @@ class MANTIDQT_INELASTIC_DLL IndirectFitPlotPresenter : public QObject {
   Q_OBJECT
 
 public:
-  IndirectFitPlotPresenter(IIndirectFitPlotView *view);
+  IndirectFitPlotPresenter(IIndirectFitPlotView *view, std::unique_ptr<IndirectFitPlotModel> model);
 
   void watchADS(bool watch);
 
