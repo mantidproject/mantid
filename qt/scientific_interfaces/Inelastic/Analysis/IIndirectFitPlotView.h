@@ -7,11 +7,8 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
-
-#include <QObject>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -20,13 +17,8 @@ using namespace MantidWidgets;
 
 class IIndirectFitPlotPresenter;
 
-class MANTIDQT_INELASTIC_DLL IIndirectFitPlotView : public API::MantidWidget {
-  Q_OBJECT
-
+class MANTIDQT_INELASTIC_DLL IIndirectFitPlotView {
 public:
-  IIndirectFitPlotView(QWidget *parent = nullptr) : API::MantidWidget(parent){};
-  virtual ~IIndirectFitPlotView(){};
-
   virtual void subscribePresenter(IIndirectFitPlotPresenter *presenter) = 0;
 
   virtual void watchADS(bool watch) = 0;

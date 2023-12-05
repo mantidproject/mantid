@@ -32,7 +32,7 @@ namespace MantidQt::CustomInterfaces::IDA {
 using namespace MantidWidgets;
 
 IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
-    : IIndirectFitPlotView(parent), m_plotForm(new Ui::IndirectFitPreviewPlot), m_presenter() {
+    : API::MantidWidget(parent), m_plotForm(new Ui::IndirectFitPreviewPlot), m_presenter() {
   m_plotForm->setupUi(this);
 
   connect(m_plotForm->cbDataSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedFitDataChanged(int)));
@@ -205,7 +205,10 @@ void IndirectFitPlotView::setNameInDataSelection(const std::string &dataName, Wo
   m_plotForm->cbDataSelection->setItemText(static_cast<int>(workspaceID.value), QString::fromStdString(dataName));
 }
 
-void IndirectFitPlotView::clearDataSelection() { m_plotForm->cbDataSelection->clear(); }
+void IndirectFitPlotView::clearDataSelection() {
+  QSignalBlocker blocker(m_plotForm->cbDataSelection);
+  m_plotForm->cbDataSelection->clear();
+}
 
 void IndirectFitPlotView::plotInTopPreview(const QString &name, Mantid::API::MatrixWorkspace_sptr workspace,
                                            WorkspaceIndex spectrum, Qt::GlobalColor colour) {

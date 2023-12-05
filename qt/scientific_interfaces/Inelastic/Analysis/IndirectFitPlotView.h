@@ -11,6 +11,7 @@
 #include "DllConfig.h"
 #include "IIndirectFitPlotView.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 
 #include <QIcon>
@@ -51,12 +52,12 @@ private:
   QIcon m_icon;
 };
 
-class MANTIDQT_INELASTIC_DLL IndirectFitPlotView : public IIndirectFitPlotView {
+class MANTIDQT_INELASTIC_DLL IndirectFitPlotView : public API::MantidWidget, public IIndirectFitPlotView {
   Q_OBJECT
 
 public:
   IndirectFitPlotView(QWidget *parent = nullptr);
-  virtual ~IndirectFitPlotView() override;
+  virtual ~IndirectFitPlotView();
 
   void subscribePresenter(IIndirectFitPlotPresenter *presenter) override;
 
