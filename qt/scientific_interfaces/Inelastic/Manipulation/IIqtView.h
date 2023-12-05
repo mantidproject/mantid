@@ -18,7 +18,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class IndirectPlotOptionsView;
+class OutputPlotOptionsView;
 class IIqtPresenter;
 
 class MANTIDQT_INELASTIC_DLL IIqtView {
@@ -26,7 +26,7 @@ class MANTIDQT_INELASTIC_DLL IIqtView {
 public:
   virtual void subscribePresenter(IIqtPresenter *presenter) = 0;
 
-  virtual IndirectPlotOptionsView *getPlotOptions() const = 0;
+  virtual OutputPlotOptionsView *getPlotOptions() const = 0;
   virtual void plotInput(Mantid::API::MatrixWorkspace_sptr inputWS, int spectrum) = 0;
   virtual void setPreviewSpectrumMaximum(int value) = 0;
   virtual void updateDisplayedBinParameters() = 0;

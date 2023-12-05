@@ -24,35 +24,97 @@ namespace {
 Mantid::Kernel::Logger g_log("Iqt");
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
-InelasticDataManipulationIqtTab::InelasticDataManipulationIqtTab(QWidget *parent)
-    : InelasticDataManipulationTab(parent), m_view(std::make_unique<InelasticDataManipulationIqtTabView>(parent)),
+namespace MantidQt {
+namespace CustomInterfaces {
+
+InelasticDataManipulationIqtTab::InelasticDataManipulationIqtTab(QWidget *parent, IIqtView *view)
+    : InelasticDataManipulationTab(parent), m_view(view),
       m_model(std::make_unique<InelasticDataManipulationIqtTabModel>()), m_iqtResFileType(), m_selectedSpectrum(0) {
+  m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraTiled));
 }
 
-InelasticDataManipulationIqtTab::~InelasticDataManipulationIqtTab() {}
+void InelasticDataManipulationIqtTab::setup() { m_view->setup(); }
 
-void InelasticDataManipulationIqtTab::setup() {
-  // signals / slots & validators
-  connect(m_view.get(), SIGNAL(sampDataReady(const QString &)), this, SLOT(plotInput(const QString &)));
-  connect(m_view.get(), SIGNAL(resDataReady(const QString &)), this, SLOT(handleResDataReady(const QString &)));
-  connect(m_view.get(), SIGNAL(iterationsChanged(int)), this, SLOT(handleIterationsChanged(int)));
-  connect(m_view.get(), SIGNAL(errorsClicked(int)), this, SLOT(handleErrorsClicked(int)));
-  connect(m_view.get(), SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(handleValueChanged(QtProperty *, double)));
+void InelasticDataManipulationIqtTab::handleSampDataReady(const std::string &wsname) {
+  MatrixWorkspace_sptr workspace;
+  try {
+    workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname);
+    setInputWorkspace(workspace);
+  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+    m_view->showMessageBox("Unable to retrieve workspace: " + wsname);
+    m_view->setPreviewSpectrumMaximum(0);
+    return;
+  }
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+  m_view->setPreviewSpectrumMaximum(static_cast<int>(getInputWorkspace()->getNumberHistograms()) - 1);
+  m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
+  m_view->setRangeSelectorDefault(getInputWorkspace(), getXRangeFromWorkspace(getInputWorkspace()));
+  m_view->updateDisplayedBinParameters();
+}
 
-  connect(m_view.get(), SIGNAL(showMessageBox(const QString &)), this, SIGNAL(showMessageBox(const QString &)));
-  connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
-  connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
-  connect(m_view.get(), SIGNAL(plotCurrentPreview()), this, SLOT(plotCurrentPreview()));
+void InelasticDataManipulationIqtTab::handleResDataReady(const std::string &resWorkspace) {
+  m_view->updateDisplayedBinParameters();
+  m_model->setResWorkspace(resWorkspace);
+}
 
-  connect(m_view.get(), SIGNAL(previewSpectrumChanged(int)), this, SLOT(handlePreviewSpectrumChanged(int)));
+void InelasticDataManipulationIqtTab::handleIterationsChanged(int iterations) {
+  m_model->setNIterations(std::to_string(iterations));
+}
 
-  m_view->setup();
+void InelasticDataManipulationIqtTab::handleRunClicked() {
+  clearOutputPlotOptionsWorkspaces();
+  runTab();
+}
+/**
+ * Handle saving of workspace
+ */
+void InelasticDataManipulationIqtTab::handleSaveClicked() {
+  checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Plots the current preview workspace, if none is set, plots
+ * the selected spectrum of the current input workspace.
+ */
+void InelasticDataManipulationIqtTab::handlePlotCurrentPreview() {
+  auto previewWs = getPreviewPlotWorkspace();
+  auto inputWs = getInputWorkspace();
+  auto index = boost::numeric_cast<size_t>(m_selectedSpectrum);
+  auto const errorBars = SettingsHelper::externalPlotErrorBars();
+
+  // Check a workspace has been selected
+  if (previewWs) {
+
+    if (inputWs && previewWs->getName() == inputWs->getName()) {
+      m_plotter->plotSpectra(previewWs->getName(), std::to_string(index), errorBars);
+    } else {
+      m_plotter->plotSpectra(previewWs->getName(), "0-2", errorBars);
+    }
+  } else if (inputWs && index < inputWs->getNumberHistograms()) {
+    m_plotter->plotSpectra(inputWs->getName(), std::to_string(index), errorBars);
+  } else
+    m_view->showMessageBox("Workspace not found - data may not be loaded.");
+}
+
+void InelasticDataManipulationIqtTab::handleErrorsClicked(int state) { m_model->setCalculateErrors(state); }
+
+void InelasticDataManipulationIqtTab::handleValueChanged(std::string const &propName, double value) {
+  if (propName == "ELow") {
+    m_model->setEnergyMin(value);
+  } else if (propName == "EHigh") {
+    m_model->setEnergyMax(value);
+  } else if (propName == "SampleBinning") {
+    m_model->setNumBins(value);
+  }
+}
+
+void InelasticDataManipulationIqtTab::handlePreviewSpectrumChanged(int spectra) {
+  setSelectedSpectrum(spectra);
+  m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
 }
 
 void InelasticDataManipulationIqtTab::run() {
@@ -62,8 +124,9 @@ void InelasticDataManipulationIqtTab::run() {
   m_view->updateDisplayedBinParameters();
 
   // Construct the result workspace for Python script export
-  QString const sampleName = QString::fromStdString(m_view->getSampleName());
-  m_pythonExportWsName = sampleName.left(sampleName.lastIndexOf("_")).toStdString() + "_iqt";
+  std::string sampleName = m_view->getSampleName();
+  m_pythonExportWsName = sampleName.replace(sampleName.find_last_of("_"), sampleName.size(), "_iqt");
+  // m_pythonExportWsName = sampleName.left(sampleName.find_last_of("_")). + "_iqt";
   m_model->setupTransformToIqt(m_batchAlgoRunner, m_pythonExportWsName);
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -73,27 +136,13 @@ void InelasticDataManipulationIqtTab::run() {
  *
  * @param error If the algorithm failed
  */
-void InelasticDataManipulationIqtTab::algorithmComplete(bool error) {
+void InelasticDataManipulationIqtTab::runComplete(bool error) {
   m_view->setWatchADS(true);
   setRunIsRunning(false);
   if (error)
     m_view->setSaveResultEnabled(false);
   else
     setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
-}
-
-/**
- * Handle saving of workspace
- */
-void InelasticDataManipulationIqtTab::saveClicked() {
-  checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
-  addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
-  m_batchAlgoRunner->executeBatchAsync();
-}
-
-void InelasticDataManipulationIqtTab::runClicked() {
-  clearOutputPlotOptionsWorkspaces();
-  runTab();
 }
 
 /**
@@ -104,32 +153,6 @@ void InelasticDataManipulationIqtTab::runClicked() {
  */
 bool InelasticDataManipulationIqtTab::validate() { return m_view->validate(); }
 
-void InelasticDataManipulationIqtTab::handleResDataReady(const QString &resWorkspace) {
-  m_view->updateDisplayedBinParameters();
-  m_model->setResWorkspace(resWorkspace.toStdString());
-}
-
-void InelasticDataManipulationIqtTab::handleIterationsChanged(int iterations) {
-  m_model->setNIterations(std::to_string(iterations));
-}
-
-void InelasticDataManipulationIqtTab::handleValueChanged(QtProperty *prop, double value) {
-  if (prop->propertyName() == "ELow") {
-    m_model->setEnergyMin(value);
-  } else if (prop->propertyName() == "EHigh") {
-    m_model->setEnergyMax(value);
-  } else if (prop->propertyName() == "SampleBinning") {
-    m_model->setNumBins(value);
-  }
-}
-
-void InelasticDataManipulationIqtTab::handleErrorsClicked(int state) { m_model->setCalculateErrors(state); }
-
-void InelasticDataManipulationIqtTab::handlePreviewSpectrumChanged(int spectra) {
-  setSelectedSpectrum(spectra);
-  m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
-}
-
 void InelasticDataManipulationIqtTab::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Iqt");
@@ -137,23 +160,6 @@ void InelasticDataManipulationIqtTab::setFileExtensionsByName(bool filter) {
   m_view->setSampleWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
   m_view->setResolutionFBSuffixes(filter ? getResolutionFBSuffixes(tabName) : getExtensions(tabName));
   m_view->setResolutionWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
-}
-
-void InelasticDataManipulationIqtTab::plotInput(const QString &wsname) {
-  MatrixWorkspace_sptr workspace;
-  try {
-    workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
-    setInputWorkspace(workspace);
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    showMessageBox(QString("Unable to retrieve workspace: " + wsname));
-    m_view->setPreviewSpectrumMaximum(0);
-    return;
-  }
-
-  m_view->setPreviewSpectrumMaximum(static_cast<int>(getInputWorkspace()->getNumberHistograms()) - 1);
-  m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
-  m_view->setRangeSelectorDefault(getInputWorkspace(), getXRangeFromWorkspace(getInputWorkspace()));
-  m_view->updateDisplayedBinParameters();
 }
 
 void InelasticDataManipulationIqtTab::setButtonsEnabled(bool enabled) {
@@ -198,30 +204,6 @@ void InelasticDataManipulationIqtTab::setInputWorkspace(MatrixWorkspace_sptr inp
 }
 
 /**
- * Plots the current preview workspace, if none is set, plots
- * the selected spectrum of the current input workspace.
- */
-void InelasticDataManipulationIqtTab::plotCurrentPreview() {
-  auto previewWs = getPreviewPlotWorkspace();
-  auto inputWs = getInputWorkspace();
-  auto index = boost::numeric_cast<size_t>(m_selectedSpectrum);
-  auto const errorBars = SettingsHelper::externalPlotErrorBars();
-
-  // Check a workspace has been selected
-  if (previewWs) {
-
-    if (inputWs && previewWs->getName() == inputWs->getName()) {
-      m_plotter->plotSpectra(previewWs->getName(), std::to_string(index), errorBars);
-    } else {
-      m_plotter->plotSpectra(previewWs->getName(), "0-2", errorBars);
-    }
-  } else if (inputWs && index < inputWs->getNumberHistograms()) {
-    m_plotter->plotSpectra(inputWs->getName(), std::to_string(index), errorBars);
-  } else
-    showMessageBox("Workspace not found - data may not be loaded.");
-}
-
-/**
  * Retrieves the workspace containing the data to be displayed in
  * the preview plot.
  *
@@ -241,5 +223,5 @@ MatrixWorkspace_sptr InelasticDataManipulationIqtTab::getPreviewPlotWorkspace() 
 void InelasticDataManipulationIqtTab::setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace) {
   m_previewPlotWorkspace = previewPlotWorkspace;
 }
-
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace CustomInterfaces
+} // namespace MantidQt
