@@ -80,12 +80,9 @@ public:
 
   virtual void setHWHMMinimum(double minimum) = 0;
   virtual void setHWHMMaximum(double maximum) = 0;
-
-public slots:
-  virtual void clearTopPreview() = 0;
-  virtual void clearBottomPreview() = 0;
-  virtual void clearPreviews() = 0;
   virtual void setHWHMRange(double minimum, double maximum) = 0;
+
+  virtual void clearPreviews() = 0;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -111,12 +111,9 @@ public:
 
   void setHWHMMinimum(double minimum) override;
   void setHWHMMaximum(double maximum) override;
-
-public slots:
-  void clearTopPreview() override;
-  void clearBottomPreview() override;
-  void clearPreviews() override;
   void setHWHMRange(double minimum, double maximum) override;
+
+  void clearPreviews() override;
 
 private slots:
   void setBackgroundBounds();
@@ -153,6 +150,9 @@ private:
   void addFitRangeSelector();
   void addBackgroundRangeSelector();
   void addHWHMRangeSelector();
+
+  void clearTopPreview();
+  void clearBottomPreview();
 
   std::unique_ptr<Ui::IndirectFitPreviewPlot> m_plotForm;
   std::unique_ptr<MantidQt::MantidWidgets::PreviewPlot> m_topPlot;

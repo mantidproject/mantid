@@ -104,13 +104,9 @@ public:
 
   MOCK_METHOD1(setHWHMMinimum, void(double minimum));
   MOCK_METHOD1(setHWHMMaximum, void(double maximum));
-
-  /// Public Slots
-  MOCK_METHOD0(clearTopPreview, void());
-  MOCK_METHOD0(clearBottomPreview, void());
-  MOCK_METHOD0(clearPreviews, void());
-
   MOCK_METHOD2(setHWHMRange, void(double minimum, double maximum));
+
+  MOCK_METHOD0(clearPreviews, void());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
