@@ -57,6 +57,7 @@ std::tuple<bool, float, int, int> calculateBinParameters(std::string const &wsNa
     toIqt->setProperty("EnergyMax", energyMax);
     toIqt->setProperty("BinReductionFactor", binReductionFactor);
     toIqt->setProperty("DryRun", true);
+    toIqt->setLogging(false);
     toIqt->execute();
     propsTable = toIqt->getProperty("ParameterWorkspace");
     // the algorithm can create output even if it failed...
@@ -64,6 +65,7 @@ std::tuple<bool, float, int, int> calculateBinParameters(std::string const &wsNa
     deleter->initialize();
     deleter->setChild(true);
     deleter->setProperty("Workspace", paramTableName);
+    deleter->setLogging(false);
     deleter->execute();
   } catch (std::exception &) {
     return std::make_tuple(false, 0.0f, 0, 0);
