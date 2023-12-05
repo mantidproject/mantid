@@ -84,9 +84,6 @@ public:
   void handleFWHMChanged(double minimum, double maximum) override;
   void handleBackgroundChanged(double value) override;
 
-public slots:
-  void updatePlotSpectrum(WorkspaceIndex spectrum);
-
 signals:
   void selectedFitDataChanged(WorkspaceID /*_t1*/);
   void plotSpectrumChanged();

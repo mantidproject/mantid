@@ -80,11 +80,6 @@ void IndirectFitPlotPresenter::setFittingData(std::vector<IndirectFitData> *fitt
 
 void IndirectFitPlotPresenter::setFitOutput(IIndirectFitOutput *fitOutput) { m_model->setFitOutput(fitOutput); }
 
-void IndirectFitPlotPresenter::updatePlotSpectrum(WorkspaceIndex spectrum) {
-  setActiveSpectrum(spectrum);
-  updatePlots();
-}
-
 void IndirectFitPlotPresenter::updateRangeSelectors() {
   updateBackgroundSelector();
   updateHWHMSelector();

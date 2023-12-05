@@ -325,14 +325,6 @@ public:
     m_presenter->setEndX(3.0);
   }
 
-  void test_updatePlotSpectrum_calls_correct_slots() {
-    EXPECT_CALL(*m_view, setPlotSpectrum(WorkspaceIndex{3})).Times(1);
-    EXPECT_CALL(*m_view, clearPreviews()).Times(1);
-    m_presenter->updatePlotSpectrum(WorkspaceIndex{3});
-
-    TS_ASSERT_EQUALS(m_presenter->getSelectedDomainIndex(), FitDomainIndex{3});
-  }
-
   void test_that_updateRangeSelectors_will_update_the_background_selector() {
     auto const fitFunction = getFunctionWithWorkspaceName("WorkspaceName");
     m_presenter->setFitFunction(fitFunction);
