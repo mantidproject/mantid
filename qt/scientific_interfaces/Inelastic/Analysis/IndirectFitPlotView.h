@@ -105,7 +105,6 @@ public:
   void setHWHMRangeVisible(bool visible) override;
 
   void displayMessage(const std::string &message) const override;
-  void disableSpectrumPlotSelection() override;
 
   void allowRedraws(bool state) override;
   void redrawPlots() override;

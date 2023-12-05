@@ -65,7 +65,6 @@ public:
   virtual void setHWHMRangeVisible(bool visible) = 0;
 
   virtual void displayMessage(const std::string &message) const = 0;
-  virtual void disableSpectrumPlotSelection() = 0;
 
   virtual void allowRedraws(bool state) = 0;
   virtual void redrawPlots() = 0;

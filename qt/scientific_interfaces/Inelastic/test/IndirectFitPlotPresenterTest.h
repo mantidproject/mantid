@@ -52,7 +52,6 @@ public:
   MOCK_METHOD1(subscribePresenter, void(IIndirectFitPlotPresenter *presenter));
 
   MOCK_METHOD1(watchADS, void(bool watch));
-  MOCK_METHOD0(disableSpectrumPlotSelection, void());
 
   MOCK_CONST_METHOD0(getSelectedSpectrum, WorkspaceIndex());
   MOCK_CONST_METHOD0(getSelectedSpectrumIndex, FitDomainIndex());

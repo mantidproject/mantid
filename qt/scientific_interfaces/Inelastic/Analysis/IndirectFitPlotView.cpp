@@ -162,11 +162,6 @@ void IndirectFitPlotView::setPlotSpectrum(WorkspaceIndex spectrum) {
   m_plotForm->cbPlotSpectrum->setCurrentIndex(index);
 }
 
-void IndirectFitPlotView::disableSpectrumPlotSelection() {
-  m_plotForm->spPlotSpectrum->setEnabled(false);
-  m_plotForm->cbPlotSpectrum->setEnabled(false);
-}
-
 void IndirectFitPlotView::setBackgroundLevel(double value) {
   auto selector = m_topPlot->getSingleSelector("Background");
   QSignalBlocker blocker(selector);

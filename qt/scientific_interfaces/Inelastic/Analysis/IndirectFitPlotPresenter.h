@@ -85,8 +85,6 @@ public slots:
   void updateGuess();
   void updateGuessAvailability();
 
-  void disableSpectrumPlotSelection();
-
 signals:
   void selectedFitDataChanged(WorkspaceID /*_t1*/);
   void plotSpectrumChanged();

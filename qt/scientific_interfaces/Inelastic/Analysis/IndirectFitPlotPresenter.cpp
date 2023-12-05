@@ -66,8 +66,6 @@ void IndirectFitPlotPresenter::setActiveSpectrum(WorkspaceIndex spectrum) {
   m_view->setPlotSpectrum(spectrum);
 }
 
-void IndirectFitPlotPresenter::disableSpectrumPlotSelection() { m_view->disableSpectrumPlotSelection(); }
-
 void IndirectFitPlotPresenter::setStartX(double startX) { m_view->setFitRangeMinimum(startX); }
 
 void IndirectFitPlotPresenter::setEndX(double endX) { m_view->setFitRangeMaximum(endX); }
