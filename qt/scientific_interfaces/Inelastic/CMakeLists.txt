@@ -184,6 +184,7 @@ set(INC_FILES
     Manipulation/IMomentsView.h
     Manipulation/ISymmetriseView.h
     Manipulation/IElwinView.h
+    Manipulation/IIqtView.h
 )
 
 set(UI_FILES
