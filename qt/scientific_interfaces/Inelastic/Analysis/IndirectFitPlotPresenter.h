@@ -56,6 +56,19 @@ public:
 
   void setXBounds(std::pair<double, double> const &bounds);
 
+  void setActiveSpectrum(WorkspaceIndex spectrum);
+  void updateRangeSelectors();
+
+  void setStartX(double value);
+  void setEndX(double value);
+  void appendLastDataToSelection(std::vector<std::string> displayNames);
+  void updateDataSelection(std::vector<std::string> displayNames);
+  void updateAvailableSpectra();
+  void updatePlots();
+  void updateFit();
+  void updateGuess();
+  void updateGuessAvailability();
+
   void handleSelectedFitDataChanged(WorkspaceID workspaceID) override;
   void handlePlotSpectrumChanged(WorkspaceIndex spectrum) override;
   void handlePlotCurrentPreview() override;
@@ -72,18 +85,7 @@ public:
   void handleBackgroundChanged(double value) override;
 
 public slots:
-  void setStartX(double /*startX*/);
-  void setEndX(double /*endX*/);
-  void setActiveSpectrum(WorkspaceIndex spectrum);
   void updatePlotSpectrum(WorkspaceIndex spectrum);
-  void updateRangeSelectors();
-  void appendLastDataToSelection(std::vector<std::string> displayNames);
-  void updateDataSelection(std::vector<std::string> displayNames);
-  void updateAvailableSpectra();
-  void updatePlots();
-  void updateFit();
-  void updateGuess();
-  void updateGuessAvailability();
 
 signals:
   void selectedFitDataChanged(WorkspaceID /*_t1*/);

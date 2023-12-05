@@ -66,9 +66,9 @@ void IndirectFitPlotPresenter::setActiveSpectrum(WorkspaceIndex spectrum) {
   m_view->setPlotSpectrum(spectrum);
 }
 
-void IndirectFitPlotPresenter::setStartX(double startX) { m_view->setFitRangeMinimum(startX); }
+void IndirectFitPlotPresenter::setStartX(double value) { m_view->setFitRangeMinimum(value); }
 
-void IndirectFitPlotPresenter::setEndX(double endX) { m_view->setFitRangeMaximum(endX); }
+void IndirectFitPlotPresenter::setEndX(double value) { m_view->setFitRangeMaximum(value); }
 
 void IndirectFitPlotPresenter::setXBounds(std::pair<double, double> const &bounds) {
   m_view->setFitRangeBounds(bounds);
