@@ -84,11 +84,8 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.email_notice_expanded_text.hide()
         self.email_notice_button.clicked.connect(self.expand_or_hide_email_notice_text)
 
-        # https://stackabuse.com/python-validate-email-address-with-regular-expressions-regex/
-        self.email_regex = re.compile(
-            r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@"
-            r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])"
-        )
+        # https://emailregex.com/
+        self.email_regex = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
         self.valid_email = False
 
         # setting the border colour in self.toggle_valid_email was making the height slightly less for some reason
