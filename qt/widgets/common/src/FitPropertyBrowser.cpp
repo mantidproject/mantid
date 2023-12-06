@@ -193,8 +193,8 @@ void FitPropertyBrowser::init() {
   m_intManager->setValue(m_peakRadius, settings.value("Peak Radius", 0).toInt());
 
   m_plotDiff = m_boolManager->addProperty("Plot Difference");
-  bool plotDiff = settings.value("Plot Difference", QVariant(true)).toBool();
-  m_boolManager->setValue(m_plotDiff, plotDiff);
+  bool plotDiffSetting = settings.value("Plot Difference", QVariant(true)).toBool();
+  m_boolManager->setValue(m_plotDiff, plotDiffSetting);
 
   m_excludeRange = m_stringManager->addProperty("Exclude Range");
   m_excludeRange->setToolTip("A list of pairs of real numbers which define the region to exclude");
@@ -531,8 +531,8 @@ void FitPropertyBrowser::addFitResultWorkspacesToTableWidget() {
 
   auto noOfItems = m_wsListWidget->count();
   if (noOfItems != 0 && !m_hideWsListWidget) {
-    auto height = m_wsListWidget->sizeHintForRow(0) * (noOfItems + 1) + 2 * m_wsListWidget->frameWidth();
-    m_wsListWidget->setMaximumHeight(height);
+    auto widgetHeight = m_wsListWidget->sizeHintForRow(0) * (noOfItems + 1) + 2 * m_wsListWidget->frameWidth();
+    m_wsListWidget->setMaximumHeight(widgetHeight);
     m_workspaceLabel->show();
     m_wsListWidget->show();
   }
@@ -1712,9 +1712,9 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   // update Quality string
   if (m_displayActionQuality->isChecked()) {
     double quality = alg->getProperty("OutputChi2overDoF");
-    std::string costFunction = alg->getProperty("CostFunction");
+    std::string costFunctionStr = alg->getProperty("CostFunction");
     std::shared_ptr<Mantid::API::ICostFunction> costfun =
-        Mantid::API::CostFunctionFactory::Instance().create(costFunction);
+        Mantid::API::CostFunctionFactory::Instance().create(costFunctionStr);
     status = (status == "success") ? "success" : "failed";
     emit changeWindowTitle(QString("Fit Function (") + costfun->shortName().c_str() + " = " + QString::number(quality) +
                            ", " + status + ")");
@@ -3045,10 +3045,7 @@ void FitPropertyBrowser::addWorkspaceIndexToBrowser() {
 /**
  * Do the fit.
  */
-void FitPropertyBrowser::fit() {
-  int maxIterations = m_intManager->value(m_maxIterations);
-  doFit(maxIterations);
-}
+void FitPropertyBrowser::fit() { doFit(m_intManager->value(m_maxIterations)); }
 
 /**
  * Function to toggle the visibility of the settings browser
@@ -3093,10 +3090,10 @@ void FitPropertyBrowser::columnChanged(QtProperty *prop) {
       if (i < 0 || i >= static_cast<int>(tws->rowCount()) || tws->rowCount() == 0)
         return;
       auto col = tws->getColumn(static_cast<size_t>(i));
-      const double startX = col->toDouble(0);
-      const double endX = col->toDouble(tws->rowCount() - 1);
-      m_doubleManager->setValue(m_startX, startX);
-      m_doubleManager->setValue(m_endX, endX);
+      const double startXVal = col->toDouble(0);
+      const double endXVal = col->toDouble(tws->rowCount() - 1);
+      m_doubleManager->setValue(m_startX, startXVal);
+      m_doubleManager->setValue(m_endX, endXVal);
     } catch (...) {
       // do nothing
     }

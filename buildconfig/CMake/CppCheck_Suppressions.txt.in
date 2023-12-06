@@ -1447,14 +1447,6 @@ shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MessageDisplay.cpp:424
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MessageDisplay.cpp:151
 cppcheckError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:0
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/OptionsPropertyWidget.cpp:53
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:196
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:519
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1695
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:2748
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:2750
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3051
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3098
-shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3099
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1016
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1127
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1428
