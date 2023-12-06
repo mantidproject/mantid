@@ -1497,6 +1497,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyWidget.cp
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyWidgetFactory.cpp:43
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyWidgetFactory.cpp:44
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ScriptEditor.h:70
+templateRecursion:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SliceMD.cpp:300
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ScriptRepositoryView.cpp:113
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:446
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:537
