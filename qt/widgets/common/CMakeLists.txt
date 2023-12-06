@@ -23,6 +23,7 @@ set(SRC_FILES
     src/FitDomain.cpp
     src/FitOptionsBrowser.cpp
     src/FitPropertyBrowser.cpp
+    src/FitPropertyBrowserFindPeaksExt.cpp
     src/FitScriptGeneratorDataTable.cpp
     src/FitScriptGeneratorModel.cpp
     src/FitScriptGeneratorPresenter.cpp
@@ -171,6 +172,7 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/FindReplaceDialog.h
     inc/MantidQtWidgets/Common/FitOptionsBrowser.h
     inc/MantidQtWidgets/Common/FitPropertyBrowser.h
+    inc/MantidQtWidgets/Common/FitPropertyBrowserFindPeaksExt.h
     inc/MantidQtWidgets/Common/FitScriptGeneratorDataTable.h
     inc/MantidQtWidgets/Common/FitScriptGeneratorView.h
     inc/MantidQtWidgets/Common/FitScriptOptionsBrowser.h
@@ -397,6 +399,7 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/FindReplaceDialog.h
     inc/MantidQtWidgets/Common/FindDialog.h
     inc/MantidQtWidgets/Common/FitPropertyBrowser.h
+    inc/MantidQtWidgets/Common/FitPropertyBrowserFindPeaksExt.h
     inc/MantidQtWidgets/Common/FitOptionsBrowser.h
     inc/MantidQtWidgets/Common/FitScriptGeneratorDataTable.h
     inc/MantidQtWidgets/Common/FitScriptGeneratorView.h
