@@ -214,6 +214,11 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             if Path(cvalues_filepath).is_file():
                 issues[Prop.CVALUE_FILE] = "The CValues file already exists"
 
+        input_ws_save_dir = self.getProperty(Prop.SAVE_INPUT_WS).value
+        if input_ws_save_dir:
+            if not Path(input_ws_save_dir).is_dir():
+                issues[Prop.SAVE_INPUT_WS] = "The directory for saving the integrated input workspaces does not exist."
+
         return issues
 
     def PyExec(self):
