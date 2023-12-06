@@ -1067,8 +1067,3 @@ void AlgorithmDialog::algorithmCompleted() {
   if (m_okButton)
     m_okButton->setEnabled(true);
 }
-
-/**Ensures that the finish of the associated algorithm is observed.
- * Prevent dialog from being attached multiple times.
- *
- */
