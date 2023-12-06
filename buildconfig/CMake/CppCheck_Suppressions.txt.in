@@ -1452,7 +1452,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowse
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1428
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:2166
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:2235
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:2268
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:2485
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:2959
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3121

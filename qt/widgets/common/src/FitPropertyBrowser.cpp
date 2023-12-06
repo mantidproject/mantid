@@ -2285,7 +2285,7 @@ void FitPropertyBrowser::hasConstraints(QtProperty *parProp, bool &hasTie, bool 
   hasTie = false;
   hasBounds = false;
   QList<QtProperty *> subs = parProp->subProperties();
-  for (auto &sub : subs) {
+  for (const auto &sub : subs) {
     if (sub->propertyName() == "Tie") {
       hasTie = true;
     }
