@@ -29,7 +29,7 @@ namespace CustomInterfaces {
 
 InelasticDataManipulationIqtTab::InelasticDataManipulationIqtTab(QWidget *parent, IIqtView *view)
     : InelasticDataManipulationTab(parent), m_view(view),
-      m_model(std::make_unique<InelasticDataManipulationIqtTabModel>()), m_iqtResFileType(), m_selectedSpectrum(0) {
+      m_model(std::make_unique<InelasticDataManipulationIqtTabModel>()), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraTiled));

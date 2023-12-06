@@ -68,7 +68,6 @@ private:
   IIqtView *m_view;
   std::unique_ptr<InelasticDataManipulationIqtTabModel> m_model;
 
-  bool m_iqtResFileType;
   int m_selectedSpectrum;
 
   /// Retrieve input workspace
