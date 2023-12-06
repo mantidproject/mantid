@@ -65,6 +65,9 @@ private:
   void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
 
+  IIqtView *m_view;
+  std::unique_ptr<InelasticDataManipulationIqtTabModel> m_model;
+
   bool m_iqtResFileType;
   int m_selectedSpectrum;
 
@@ -73,9 +76,6 @@ private:
   MatrixWorkspace_sptr getPreviewPlotWorkspace();
   std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
   MatrixWorkspace_sptr m_inputWorkspace;
-
-  IIqtView *m_view;
-  std::unique_ptr<InelasticDataManipulationIqtTabModel> m_model;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

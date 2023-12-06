@@ -74,6 +74,9 @@ private:
                            double newValue);
 
   Ui::InelasticDataManipulationIqtTab m_uiForm;
+
+  // Presenter
+  IIqtPresenter *m_presenter;
   QtTreePropertyBrowser *m_iqtTree;
   /// Internal list of the properties
   QMap<QString, QtProperty *> m_properties;
@@ -81,8 +84,6 @@ private:
   QtDoublePropertyManager *m_dblManager;
   /// Double editor factory for the properties browser
   DoubleEditorFactory *m_dblEdFac;
-  // Presenter
-  IIqtPresenter *m_presenter;
 };
 
 } // namespace CustomInterfaces
