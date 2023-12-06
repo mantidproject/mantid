@@ -58,7 +58,7 @@ try:
             logger.debug(f"created {name} workspace")
             return name
 
-        return _temp_workspace()
+        return _temp_workspace
 
 except ImportError:
     logger.debug("Pytest not installed, pytest fixtures are unavailable")
