@@ -18,9 +18,9 @@ namespace DataObjects {
  * Specifically, by GroupingWorkspace, MaskWorkspace and
  * OffsetsWorkspace.
  *
- * The workspace has a single pixel per detector, and this cannot
- * be changed.
- *
+ * When created from an instrument, the workspace has a single pixel per detector, and this cannot
+ * be changed.  When created from a matrix workspace, the workspace will have a single pixel
+ * per source-workspace spectrum, and will share any instrument information with the source workspace.
  */
 
 class BinaryOperator {

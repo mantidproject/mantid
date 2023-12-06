@@ -60,6 +60,7 @@ public:
   MOCK_METHOD1(updateParameterNames, void(const QMap<int, QString> &parameterNames));
   MOCK_METHOD1(setErrorsEnabled, void(bool enabled));
   MOCK_METHOD0(clear, void());
+  MOCK_CONST_METHOD0(getEstimationDataSelector, EstimationDataSelector());
   MOCK_METHOD1(updateParameterEstimationData, void(DataForParameterEstimationCollection &&data));
   MOCK_METHOD0(estimateFunctionParameters, void());
   MOCK_METHOD1(setBackgroundA0, void(double value));

@@ -177,7 +177,7 @@ class StateGuiModel(ModelCommon):
     @undo_selective_view_scaling
     def front_pos_2(self, value):
         if DetectorType.HAB.value in self._all_states.move.detectors:
-            self._all_states.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = value
+            self._all_states.move.detectors[DetectorType.HAB.value].sample_centre_pos2 = value
 
     # ==================================================================================================================
     # ==================================================================================================================

@@ -7,10 +7,10 @@
 #include "ISISEnergyTransferModel.h"
 #include "ISISEnergyTransferModelUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
-#include <filesystem>
+#include "ReductionAlgorithmUtils.h"
 
 using namespace Mantid::API;
 
@@ -106,9 +106,6 @@ void IETModel::setAnalysisProperties(IAlgorithm_sptr const &reductionAlg, IETAna
   if (analysisData.getUseDetailedBalance()) {
     reductionAlg->setProperty("DetailedBalance", analysisData.getDetailedBalance());
   }
-  if (analysisData.getUseScaleFactor()) {
-    reductionAlg->setProperty("ScaleFactor", analysisData.getScaleFactor());
-  }
 }
 
 void IETModel::setGroupingProperties(IAlgorithm_sptr const &reductionAlg, IETGroupingData const &groupingData,
@@ -143,7 +140,7 @@ std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::str
 
 std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
                                       InstrumentData const &instData, IETRunData const &runData) {
-  auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransferWrapper");
+  auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
   reductionAlg->initialize();
 
   setInstrumentProperties(reductionAlg, instData);
@@ -216,73 +213,35 @@ std::vector<std::string> IETModel::validatePlotData(IETPlotData const &plotParam
   return errors;
 }
 
-void IETModel::plotRawFile(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, InstrumentData const &instData,
-                           IETPlotData const &plotParams) {
-  using Mantid::specnum_t;
+std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
+IETModel::plotRawAlgorithmQueue(InstrumentData const &instData, IETPlotData const &plotParams) const {
+  auto const [rawFile, basename] = parseInputFiles(plotParams.getInputData().getInputFiles());
 
-  const std::string inputFiles = plotParams.getInputData().getInputFiles();
+  auto const data = plotParams.getConversionData();
+  auto const detectorList = createDetectorList(data.getSpectraMin(), data.getSpectraMax());
 
-  int spectraMin = plotParams.getConversionData().getSpectraMin();
-  int spectraMax = plotParams.getConversionData().getSpectraMax();
+  return plotRawAlgorithmQueue(rawFile, basename, instData.getInstrument(), detectorList,
+                               plotParams.getBackgroundData());
+}
 
-  std::string rawFile = inputFiles.substr(0, inputFiles.find(',')); // getting the name of the first file
-  std::filesystem::path rawFileInfo(rawFile);
-  std::string name = rawFileInfo.filename().string();
+std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
+IETModel::plotRawAlgorithmQueue(std::string const &rawFile, std::string const &basename,
+                                std::string const &instrumentName, std::vector<int> const &detectorList,
+                                IETBackgroundData const &backgroundData) const {
+  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithmDeque;
+  algorithmDeque.emplace_back(loadConfiguredAlg(rawFile, instrumentName, detectorList, basename));
 
-  auto loadAlg = loadAlgorithm(rawFile, name);
-  if (instData.getInstrument() != "TOSCA") {
-    if (loadAlg->existsProperty("LoadLogFiles")) {
-      loadAlg->setProperty("LoadLogFiles", false);
-    }
-    loadAlg->setPropertyValue("SpectrumMin", std::to_string(spectraMin));
-    loadAlg->setPropertyValue("SpectrumMax", std::to_string(spectraMax));
-  }
-  loadAlg->execute();
-
-  auto inputFromRebin = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
-  inputFromRebin->setPropertyValue("InputWorkspace", name);
-
-  std::vector<specnum_t> detectorList;
-  for (specnum_t i = spectraMin; i <= spectraMax; i++)
-    detectorList.emplace_back(i);
-
-  auto backgroundData = plotParams.getBackgroundData();
   if (backgroundData.getRemoveBackground()) {
-    std::vector<double> range;
-    range.emplace_back(backgroundData.getBackgroundStart());
-    range.emplace_back(backgroundData.getBackgroundEnd());
+    auto const bgStart = backgroundData.getBackgroundStart();
+    auto const bgEnd = backgroundData.getBackgroundEnd();
 
-    IAlgorithm_sptr calcBackAlg = AlgorithmManager::Instance().create("CalculateFlatBackground");
-    calcBackAlg->initialize();
-    calcBackAlg->setProperty("OutputWorkspace", name + "_bg");
-    calcBackAlg->setProperty("Mode", "Mean");
-    calcBackAlg->setProperty("StartX", range[0]);
-    calcBackAlg->setProperty("EndX", range[1]);
-    batchAlgoRunner->addAlgorithm(calcBackAlg, std::make_unique<Mantid::API::AlgorithmRuntimeProps>(*inputFromRebin));
-
-    auto inputFromCalcBG = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
-    inputFromCalcBG->setPropertyValue("InputWorkspace", name + "_bg");
-
-    IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().create("GroupDetectors");
-    groupAlg->initialize();
-    groupAlg->setProperty("OutputWorkspace", name + "_grp");
-    groupAlg->setProperty("DetectorList", detectorList);
-    batchAlgoRunner->addAlgorithm(groupAlg, std::move(inputFromCalcBG));
-
-    IAlgorithm_sptr rawGroupAlg = AlgorithmManager::Instance().create("GroupDetectors");
-    rawGroupAlg->initialize();
-    rawGroupAlg->setProperty("OutputWorkspace", name + "_grp_raw");
-    rawGroupAlg->setProperty("DetectorList", detectorList);
-    batchAlgoRunner->addAlgorithm(rawGroupAlg, std::move(inputFromRebin));
+    algorithmDeque.emplace_back(calculateFlatBackgroundConfiguredAlg(basename, bgStart, bgEnd, basename + "_bg"));
+    algorithmDeque.emplace_back(groupDetectorsConfiguredAlg(basename + "_bg", detectorList, basename + "_grp"));
+    algorithmDeque.emplace_back(groupDetectorsConfiguredAlg(basename, detectorList, basename + "_grp_raw"));
   } else {
-    IAlgorithm_sptr rawGroupAlg = AlgorithmManager::Instance().create("GroupDetectors");
-    rawGroupAlg->initialize();
-    rawGroupAlg->setProperty("OutputWorkspace", name + "_grp");
-    rawGroupAlg->setProperty("DetectorList", detectorList);
-    batchAlgoRunner->addAlgorithm(rawGroupAlg, std::move(inputFromRebin));
+    algorithmDeque.emplace_back(groupDetectorsConfiguredAlg(basename, detectorList, basename + "_grp"));
   }
-
-  batchAlgoRunner->executeBatchAsync();
+  return algorithmDeque;
 }
 
 void IETModel::saveWorkspace(std::string const &workspaceName, IETSaveData const &saveTypes) {
@@ -290,8 +249,6 @@ void IETModel::saveWorkspace(std::string const &workspaceName, IETSaveData const
     save("SaveNexusProcessed", workspaceName, workspaceName + ".nxs");
   if (saveTypes.getSPE())
     save("SaveSPE", workspaceName, workspaceName + ".spe");
-  if (saveTypes.getNXSPE())
-    save("SaveNXSPE", workspaceName, workspaceName + ".nxspe");
   if (saveTypes.getASCII())
     save("SaveAscii", workspaceName, workspaceName + ".dat", 2);
   if (saveTypes.getAclimax())

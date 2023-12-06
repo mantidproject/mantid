@@ -29,8 +29,10 @@ def set_matplotlib_backend():
     correct matplotlib widgets."""
     backend = matplotlib.get_backend()
     if backend.startswith("module://"):
-        if backend.endswith("workbench") or backend.endswith("qt5agg"):
-            backend = "Qt5Agg"
+        for suffix in ["workbench", "qt5agg", "backend_interagg"]:
+            if backend.endswith(suffix):
+                backend = "Qt5Agg"
+                break
     else:
         from qtpy import PYQT5
 

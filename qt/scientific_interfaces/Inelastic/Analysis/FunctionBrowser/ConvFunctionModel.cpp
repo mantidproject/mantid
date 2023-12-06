@@ -246,6 +246,11 @@ void ConvFunctionModel::removeBackground() {
 
 bool ConvFunctionModel::hasBackground() const { return m_backgroundType != BackgroundType::None; }
 
+EstimationDataSelector ConvFunctionModel::getEstimationDataSelector() const {
+  return [](const Mantid::MantidVec &, const Mantid::MantidVec &,
+            const std::pair<double, double>) -> DataForParameterEstimation { return DataForParameterEstimation{}; };
+}
+
 void ConvFunctionModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
 }

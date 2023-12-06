@@ -370,6 +370,7 @@ public:
   MockBatchJobAlgorithm() {}
   MOCK_CONST_METHOD0(algorithm, Mantid::API::IAlgorithm_sptr());
   MOCK_METHOD((const Mantid::API::IAlgorithmRuntimeProps &), getAlgorithmRuntimeProps, (), (const, override, noexcept));
+  MOCK_METHOD((bool), validatePropsPreExec, (), (const, override, noexcept));
   MOCK_METHOD0(item, Item *());
   MOCK_METHOD0(updateItem, void());
   MOCK_CONST_METHOD0(outputWorkspaceNames, std::vector<std::string>());

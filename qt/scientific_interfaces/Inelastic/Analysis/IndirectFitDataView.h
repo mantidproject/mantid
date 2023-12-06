@@ -31,10 +31,8 @@ public:
 
   UserInputValidator &validate(UserInputValidator &validator) override;
   virtual void addTableEntry(size_t row, FitDataRow newRow) override;
-  virtual int workspaceIndexColumn() const override;
-  virtual int startXColumn() const override;
-  virtual int endXColumn() const override;
-  virtual int excludeColumn() const override;
+  virtual void updateNumCellEntry(double numEntry, size_t row, size_t column) override;
+  virtual int getColumnIndexFromName(QString ColName) override;
   void clearTable() override;
   QString getText(int row, int column) const override;
   QModelIndexList getSelectedIndexes() const override;
@@ -48,6 +46,7 @@ protected:
   void setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, size_t column);
 
 private:
+  QStringList m_HeaderLabels;
   void setHorizontalHeaders(const QStringList &headers);
 };
 

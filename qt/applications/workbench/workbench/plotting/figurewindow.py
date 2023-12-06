@@ -20,7 +20,7 @@ from qtpy.QtWidgets import QMainWindow
 # local imports
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.widgets.observers.observing_view import ObservingView
-from mantid.api import AnalysisDataServiceImpl
+from mantid.api import AnalysisDataServiceImpl, WorkspaceGroup
 import mantid.kernel
 
 
@@ -35,6 +35,8 @@ def _validate_workspaces(names: List[str]) -> List[bool]:
     for name in names:
         result = False
         ws = ads.retrieve(name)
+        if isinstance(ws, WorkspaceGroup):
+            return _validate_workspaces(ws.getNames())
         try:
             result = ws.blocksize() > 1
         except RuntimeError:

@@ -15,16 +15,20 @@
 #include <memory>
 
 #include <QObject>
+#include <QWidget>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+class IndirectSettingsPresenter;
 
-class MANTIDQT_INDIRECT_DLL IndirectSettingsView : public IIndirectSettingsView {
+class MANTIDQT_INDIRECT_DLL IndirectSettingsView final : public QWidget, public IIndirectSettingsView {
   Q_OBJECT
 
 public:
   explicit IndirectSettingsView(QWidget *parent = nullptr);
-  virtual ~IndirectSettingsView() override = default;
+
+  QWidget *getView() override;
+  void subscribePresenter(IndirectSettingsPresenter *presenter) override;
 
   void setSelectedFacility(QString const &text) override;
   QString getSelectedFacility() const override;
@@ -41,12 +45,13 @@ public:
   void setCancelEnabled(bool enable) override;
 
 private slots:
-  void emitOkClicked();
-  void emitApplyClicked();
-  void emitCancelClicked();
+  void notifyOkClicked();
+  void notifyApplyClicked();
+  void notifyCancelClicked();
   void openHelp();
 
 private:
+  IndirectSettingsPresenter *m_presenter;
   std::unique_ptr<Ui::IndirectInterfaceSettings> m_uiForm;
 };
 

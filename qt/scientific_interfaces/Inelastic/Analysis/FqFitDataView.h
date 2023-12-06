@@ -23,10 +23,6 @@ class MANTIDQT_INELASTIC_DLL FqFitDataView : public IndirectFitDataView {
 public:
   FqFitDataView(QWidget *parent = nullptr);
   void addTableEntry(size_t row, FitDataRow newRow) override;
-  int workspaceIndexColumn() const override;
-  int startXColumn() const override;
-  int endXColumn() const override;
-  int excludeColumn() const override;
 
 protected:
   FqFitDataView(const QStringList &headers, QWidget *parent = nullptr);

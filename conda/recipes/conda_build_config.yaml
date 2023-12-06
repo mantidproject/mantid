@@ -26,7 +26,11 @@ numpy:
   - 1.22.*
 
 matplotlib:
-  - 3.6.*
+  - 3.7.*
+
+# mantidqt host environment cannot resolve with openssl 3.2.0, there appears to be a conflict with qt-main 5.15.8
+openssl:
+  - 3.1.4
 
 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning.
 # It's resolved on their devel branch but not yet included in a release, as of 1.12.5.
@@ -50,9 +54,9 @@ pyqt:
 qt_main:
   - 5.15.8
 
-# 5.4.2 crashes the jupyter console. The bug was fixed in 5.4.3.
+# 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
 qtconsole:
-  - '!=5.4.2'
+  - '>5.4.2,!=5.5.0'
 
 qscintilla2:
   - 2.13
@@ -66,13 +70,9 @@ hdf5:
 gsl:
   - 2.7
 
-# v0.3.23 causes a hang on osx for some systemtests, v0.3.24 causes a unit test failure that needs investigation.
+# v0.3.23 causes a hang on osx for some systemtests, v0.3.24 causes a unit test failure that needs investigation, v0.3.25 causes a system test failure on linux
 libopenblas:
-  - '!=0.3.23,!=0.3.24'
-
-# 8.2 causing segfaults in jupyter unit tests and doc builds.
-readline:
-  - <8.2
+  - '!=0.3.23,!=0.3.24,!=0.3.25'
 
 euphonic:
   - '>=1.2.1,<2.0'

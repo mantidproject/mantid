@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/MplCpp/Plot.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidPythonInterface/core/CallMethod.h"
 #include "MantidPythonInterface/core/Converters/ToPyList.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
@@ -17,6 +18,7 @@
 #include <utility>
 
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::Workspace_sptr;
 using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;
 
@@ -28,6 +30,10 @@ namespace {
  * @returns The mantidqt.plotting.functions module
  */
 Python::Object functionsModule() { return Python::NewRef(PyImport_ImportModule("mantidqt.plotting.functions")); }
+
+Python::Object sviewerModule() {
+  return Python::NewRef(PyImport_ImportModule("mantidqt.widgets.sliceviewer.presenters.presenter"));
+}
 
 /**
  * Construct a Python list from a vector of strings
@@ -153,6 +159,18 @@ Python::Object pcolormesh(const QStringList &workspaces, boost::optional<Python:
     if (fig)
       kwargs["fig"] = fig.get();
     return functionsModule().attr("pcolormesh")(*args, **kwargs);
+  } catch (Python::ErrorAlreadySet &) {
+    throw PythonException();
+  }
+}
+
+Python::Object sliceviewer(const Workspace_sptr &workspace) {
+  GlobalInterpreterLock lock;
+  try {
+    const Python::Object py_workspace = Python::NewRef(Python::ToPythonValue<Workspace_sptr>()(workspace));
+    const Python::Object args = Python::NewRef(Py_BuildValue("(O)", py_workspace.ptr()));
+    auto sw = sviewerModule().attr("SliceViewer")(*args);
+    return sw.attr("show_view")();
   } catch (Python::ErrorAlreadySet &) {
     throw PythonException();
   }

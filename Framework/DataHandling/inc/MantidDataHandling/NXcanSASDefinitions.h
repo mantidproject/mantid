@@ -80,6 +80,14 @@ const std::string nxInstrumentSourceClassAttr = "NXsource";
 const std::string sasInstrumentSourceGroupName = "sassource";
 const std::string sasInstrumentSourceRadiation = "type";
 
+const std::string sasInstrumentApertureClassAttr = "SASaperture";
+const std::string nxInstrumentApertureClassAttr = "NXaperture";
+
+const std::string sasInstrumentApertureGroupName = "sasaperture";
+const std::string sasInstrumentApertureShape = "shape";
+const std::string sasInstrumentApertureGapWidth = "x_gap";
+const std::string sasInstrumentApertureGapHeight = "y_gap";
+
 const std::string sasInstrumentCollimationClassAttr = "SAScollimation";
 const std::string nxInstrumentCollimationClassAttr = "NXcollimator";
 
@@ -98,6 +106,9 @@ const std::string nxInstrumentSampleClassAttr = "NXsample";
 
 const std::string sasInstrumentSampleGroupAttr = "sassample";
 const std::string sasInstrumentSampleId = "ID";
+const std::string sasInstrumentSampleThickness = "thickness";
+
+const std::string sasBeamAndSampleSizeUnitAttrValue = "mm";
 
 const std::string sasInstrumentIDF = "idf";
 

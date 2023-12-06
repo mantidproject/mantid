@@ -849,8 +849,13 @@ const std::vector<WeightedEventNoTime> &EventList::getWeightedEventsNoTime() con
  * associated detector ID's.
  * */
 void EventList::clear(const bool removeDetIDs) {
-  if (mru)
-    mru->deleteIndex(this);
+  if (mru) {
+    try {
+      mru->deleteIndex(this);
+    } catch (const std::runtime_error &) {
+      // this is an ignorable error
+    }
+  }
   if (!this->empty()) {
     if (!this->events.empty()) {
       this->events.clear();

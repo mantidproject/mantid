@@ -9,8 +9,6 @@ set(SRC_FILES
     ISISCalibration.cpp
     ISISDiagnostics.cpp
     IndirectAddWorkspaceDialog.cpp
-    IndirectBayes.cpp
-    IndirectBayesTab.cpp
     IndirectCorrections.cpp
     IndirectDataReduction.cpp
     IndirectDataReductionTab.cpp
@@ -35,13 +33,11 @@ set(SRC_FILES
     IndirectToolsTab.cpp
     IndirectTransmission.cpp
     IndirectTransmissionCalc.cpp
-    Quasi.cpp
-    ResNorm.cpp
-    Stretch.cpp
     Reduction/ISISEnergyTransferValidator.cpp
     Reduction/ISISEnergyTransferModel.cpp
     Reduction/ISISEnergyTransferView.cpp
     Reduction/ISISEnergyTransferPresenter.cpp
+    Reduction/ReductionAlgorithmUtils.cpp
 )
 
 set(MOC_FILES
@@ -55,8 +51,6 @@ set(MOC_FILES
     IIndirectSettingsView.h
     ILLEnergyTransfer.h
     IndirectAddWorkspaceDialog.h
-    IndirectBayes.h
-    IndirectBayesTab.h
     IndirectCorrections.h
     IndirectDataReduction.h
     IndirectDataReductionTab.h
@@ -64,11 +58,9 @@ set(MOC_FILES
     IndirectInstrumentConfig.h
     IndirectInterface.h
     IndirectMolDyn.h
-    IndirectPlotOptionsPresenter.h
     IndirectPlotOptionsView.h
     IndirectSassena.h
     IndirectSettings.h
-    IndirectSettingsPresenter.h
     IndirectSettingsView.h
     IndirectSimulation.h
     IndirectSimulationTab.h
@@ -79,9 +71,6 @@ set(MOC_FILES
     IndirectTransmission.h
     ISISCalibration.h
     ISISDiagnostics.h
-    Quasi.h
-    ResNorm.h
-    Stretch.h
     Reduction/ISISEnergyTransferView.h
     Reduction/ISISEnergyTransferPresenter.h
 )
@@ -90,12 +79,15 @@ set(INC_FILES
     DllConfig.h
     IndirectDataValidationHelper.h
     IndirectPlotOptionsModel.h
+    IndirectPlotOptionsPresenter.h
     IndirectSettingsHelper.h
+    IndirectSettingsPresenter.h
     Notifier.h
     Reduction/ISISEnergyTransferData.h
     Reduction/ISISEnergyTransferValidator.h
     Reduction/ISISEnergyTransferModelUtils.h
     Reduction/ISISEnergyTransferModel.h
+    Reduction/ReductionAlgorithmUtils.h
 )
 
 set(UI_FILES
@@ -109,7 +101,6 @@ set(UI_FILES
     ISISDiagnostics.ui
     Reduction/ISISEnergyTransfer.ui
     IndirectAddWorkspaceDialog.ui
-    IndirectBayes.ui
     IndirectCorrections.ui
     IndirectDataReduction.ui
     IndirectDiffractionReduction.ui
@@ -118,14 +109,10 @@ set(UI_FILES
     IndirectMolDyn.ui
     IndirectPlotOptions.ui
     IndirectSassena.ui
-    IndirectSettings.ui
     IndirectSimulation.ui
     IndirectTools.ui
     IndirectTransmission.ui
     IndirectTransmissionCalc.ui
-    Quasi.ui
-    ResNorm.ui
-    Stretch.ui
 )
 
 set(RES_FILES IndirectInterfaceResources.qrc)

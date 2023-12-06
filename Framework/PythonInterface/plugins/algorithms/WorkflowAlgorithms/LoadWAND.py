@@ -147,7 +147,15 @@ class LoadWAND(DataProcessorAlgorithm):
             if len(runs) == 1:
                 RenameWorkspace("__tmp_load", outWS, EnableLogging=False)
             else:
-                outName = outWS + "_" + str(mtd["__tmp_load"].getRunNumber())
+                try:
+                    temp_val = mtd["__tmp_load"].run().getTimeAveragedValue("HB2C:SE:SampleTemp")
+                except RuntimeError:
+                    temp_val = 300.0
+
+                if temp_val == 0.0 or np.isnan(temp_val):
+                    temp_val = 300.0
+                temp_val = "{:.1F}".format(temp_val).replace(".", "p")
+                outName = outWS + "_" + str(mtd["__tmp_load"].getRunNumber()) + f"_T{temp_val}K"
                 group_names.append(outName)
                 RenameWorkspace("__tmp_load", outName, EnableLogging=False)
 

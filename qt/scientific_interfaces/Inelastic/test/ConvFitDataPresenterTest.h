@@ -9,9 +9,11 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "Analysis/ConvFitAddWorkspaceDialog.h"
 #include "Analysis/ConvFitDataPresenter.h"
 #include "Analysis/ConvFitModel.h"
 #include "Analysis/IIndirectFitDataView.h"
+#include "IndirectAddWorkspaceDialog.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
@@ -46,10 +48,8 @@ public:
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
   MOCK_METHOD2(addTableEntry, void(size_t row, FitDataRow newRow));
-  MOCK_CONST_METHOD0(workspaceIndexColumn, int());
-  MOCK_CONST_METHOD0(startXColumn, int());
-  MOCK_CONST_METHOD0(endXColumn, int());
-  MOCK_CONST_METHOD0(excludeColumn, int());
+  MOCK_METHOD3(updateNumCellEntry, void(double numEntry, size_t row, size_t column));
+  MOCK_METHOD1(getColumnIndexFromName, int(QString ColName));
   MOCK_METHOD0(clearTable, void());
   MOCK_CONST_METHOD2(getText, QString(int row, int column));
   MOCK_CONST_METHOD0(getSelectedIndexes, QModelIndexList());
@@ -160,6 +160,16 @@ public:
   void test_that_the_data_table_is_the_size_specified() {
     TS_ASSERT_EQUALS(m_dataTable->rowCount(), 6);
     TS_ASSERT_EQUALS(m_dataTable->columnCount(), 6);
+  }
+
+  void test_addWorkspaceFromDialog_returns_false_if_the_dialog_is_not_convfit() {
+    auto dialog = new IndirectAddWorkspaceDialog(nullptr);
+    TS_ASSERT(!m_presenter->addWorkspaceFromDialog(dialog));
+  }
+
+  void test_addWorkspaceFromDialog_returns_true_for_a_valid_dialog() {
+    auto dialog = new ConvFitAddWorkspaceDialog(nullptr);
+    TS_ASSERT(m_presenter->addWorkspaceFromDialog(dialog));
   }
 
   void test_updateTableFromModel_clears_table_and_adds_new_row_for_each_entry() {

@@ -49,7 +49,6 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             else SliceViewerView(self, Dimensions.get_dimensions_info(ws), model.can_normalize_workspace(), parent, window_flags, conf)
         )
         super().__init__(ws, self.view.data_view, model)
-
         self._logger = Logger("SliceViewer")
         self._peaks_presenter: PeaksViewerCollectionPresenter = None
         self._cutviewer_presenter = None
@@ -422,6 +421,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self.new_plot()
         finally:
             ws.unlock()
+
+    def show_view(self):
+        self.view.show()
 
     def rename_workspace(self, old_name, new_name):
         if self.model.workspace_equals(old_name):

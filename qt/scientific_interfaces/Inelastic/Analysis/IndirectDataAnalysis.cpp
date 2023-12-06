@@ -5,11 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysis.h"
+#include "IndirectSettings.h"
 
-#include "IndirectDataAnalysisConvFitTab.h"
-#include "IndirectDataAnalysisFqFitTab.h"
-#include "IndirectDataAnalysisIqtFitTab.h"
-#include "IndirectDataAnalysisMSDFitTab.h"
+#include "DataAnalysisTabFactory.h"
+#include "IndirectDataAnalysisTab.h"
 
 namespace MantidQt::CustomInterfaces::IDA {
 DECLARE_SUBWINDOW(IndirectDataAnalysis)
@@ -19,15 +18,11 @@ IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
   m_uiForm.setupUi(this);
   m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
-  // Allows us to get a handle on a tab using an enum, for example
-  // "m_tabs[ELWIN]".
-  // All tabs MUST appear here to be shown in interface.
-  // We make the assumption that each map key corresponds to the order in which
-  // the tabs appear.
-  m_tabs.emplace(MSD_FIT, new IndirectDataAnalysisMSDFitTab(m_uiForm.twIDATabs->widget(MSD_FIT)));
-  m_tabs.emplace(IQT_FIT, new IndirectDataAnalysisIqtFitTab(m_uiForm.twIDATabs->widget(IQT_FIT)));
-  m_tabs.emplace(CONV_FIT, new IndirectDataAnalysisConvFitTab(m_uiForm.twIDATabs->widget(CONV_FIT)));
-  m_tabs.emplace(FQ_FIT, new IndirectDataAnalysisFqFitTab(m_uiForm.twIDATabs->widget(FQ_FIT)));
+  auto const tabFactory = std::make_unique<DataAnalysisTabFactory>(m_uiForm.twIDATabs);
+  m_tabs.emplace(MSD_FIT, tabFactory->makeMSDFitTab(MSD_FIT));
+  m_tabs.emplace(IQT_FIT, tabFactory->makeIqtFitTab(IQT_FIT));
+  m_tabs.emplace(CONV_FIT, tabFactory->makeConvFitTab(CONV_FIT));
+  m_tabs.emplace(FQ_FIT, tabFactory->makeFqFitTab(FQ_FIT));
 }
 
 void IndirectDataAnalysis::applySettings(std::map<std::string, QVariant> const &settings) {
@@ -51,8 +46,7 @@ void IndirectDataAnalysis::initLayout() {
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
 
-  // Needed to initially apply the settings loaded on the settings GUI
-  applySettings(getInterfaceSettings());
+  IndirectInterface::initLayout();
 }
 
 std::string IndirectDataAnalysis::documentationPage() const { return "Inelastic Data Analysis"; }

@@ -107,6 +107,8 @@ public:
   QString getLoadBtnText() const;
   /// Sets the load button text
   void setLoadBtnText(const QString & /*text*/);
+  /// Sets the DataSelector to always load data inside a WorkspaceGroup
+  void setAlwaysLoadAsGroup(bool const loadAsGroup);
 
   // These are accessors/modifiers of the child FileFinderWidget
   /**
@@ -371,6 +373,8 @@ private:
   bool m_showLoad;
   /// Flag if optional
   bool m_isOptional;
+  /// Flag to always load data, placing it inside a WorkspaceGroup, even if there is 1 entry
+  bool m_alwaysLoadAsGroup;
 };
 
 } /* namespace MantidWidgets */

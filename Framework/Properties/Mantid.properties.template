@@ -241,6 +241,12 @@ plots.font=
 plots.xAxesScale = Linear
 plots.yAxesScale = Linear
 
+# Default x/y ranges for 2d plots
+plots.x_min =
+plots.x_max =
+plots.y_min =
+plots.y_max =
+
 # The default width of the lines for the axes
 plots.axesLineWidth = 1
 

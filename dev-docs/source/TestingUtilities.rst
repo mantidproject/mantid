@@ -48,3 +48,5 @@ be found in the ``testhelpers``-package.
    and deletes them automatically when the object is deleted. Basically
    a thin wrapper around `NamedTemporaryFile <https://docs.python.org/2/library/tempfile.html>`__
    from the tempfile package.
+- ``mtd.unique_name`` and ``mtd.unique_hidden_name`` - functions that allow you to create a workspace name that will be
+   unique to avoid colisions with other workspaces. This is useful for testing and temporary workspaces.

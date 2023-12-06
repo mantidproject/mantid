@@ -19,7 +19,7 @@ dependencies:
   - librdkafka>=1.6.0
   - lib3mf # windows only
   - muparser>=2.3.2
-  - matplotlib=3.6.*
+  - matplotlib=3.7.*
   - nexus=4.4.*
   - ninja>=1.10.2
   - numpy>=1.22,<1.25
@@ -35,7 +35,7 @@ dependencies:
   - pyyaml>=5.4.1
   - qscintilla2
   - qt=5.15.8 # Avoid unexpected qt upgrades
-  - qtconsole!=5.4.2 # 5.4.2 crashes the jupyter console. Bug was fixed in 5.4.3
+  - qtconsole>5.4.2,!=5.5.0 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
   - qtpy>=1.9.0
   - requests>=2.25.1
   - scipy>=1.10.0
@@ -47,7 +47,6 @@ dependencies:
   - versioningit>=2.1
   # Needed only for development
   - black  # may be out of sync with pre-commit
-  - cppcheck==2.10.3
+  - cppcheck==2.12.1
   - pre-commit==2.15 # Had to pin back to 2.15 as we can't handle changes made here (https://github.com/pre-commit/pre-commit/pull/2065 added in 2.16) on windows yet.
   - joblib
-

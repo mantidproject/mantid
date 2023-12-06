@@ -53,7 +53,7 @@ class IntervalList;
    to be typed, and what inputs allow the "OK" button to be pressed.
 
         TODO - perhaps the interval objects are useful elsewhere, in which
-   case those three classes are best in thier own header and source.
+   case those three classes are best in their own header and source.
 
         This dialog also enables one to choose how to do the plotting.
    One can choose between simple 1D plot, waterfall or tiled plot.

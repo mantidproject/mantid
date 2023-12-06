@@ -6,6 +6,7 @@ add_subdirectory(dataobjects)
 add_subdirectory(plots)
 add_subdirectory(utils)
 add_subdirectory(_plugins)
+add_subdirectory(_testing)
 
 set(TEST_PY_FILES ImportModuleTest.py SimpleAPITest.py SimpleAPILoadTest.py SimpleAPIFitTest.py
                   SimpleAPIRenameWorkspaceTest.py FitFunctionsTest.py

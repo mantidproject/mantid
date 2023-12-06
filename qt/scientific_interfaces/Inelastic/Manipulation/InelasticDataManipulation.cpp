@@ -9,6 +9,7 @@
 //----------------------
 #include "InelasticDataManipulation.h"
 
+#include "IndirectSettings.h"
 #include "InelasticDataManipulationElwinTab.h"
 #include "InelasticDataManipulationIqtTab.h"
 #include "InelasticDataManipulationMomentsTab.h"
@@ -59,7 +60,7 @@ void InelasticDataManipulation::initLayout() {
 
   // Create the tabs
   addTab<InelasticDataManipulationSymmetriseTab>("Symmetrise");
-  addTab<InelasticDataManipulationSqwTab>("S(Q, w)");
+  addMVPTab<InelasticDataManipulationSqwTab, InelasticDataManipulationSqwTabView>("S(Q, w)");
   addTab<InelasticDataManipulationMomentsTab>("Moments");
   addTab<InelasticDataManipulationElwinTab>("Elwin");
   addTab<InelasticDataManipulationIqtTab>("Iqt");
@@ -75,8 +76,7 @@ void InelasticDataManipulation::initLayout() {
   auto const facility = Mantid::Kernel::ConfigService::Instance().getFacility();
   filterUiForFacility(QString::fromStdString(facility.name()));
 
-  // Needed to initially apply the settings loaded on the settings GUI
-  applySettings(getInterfaceSettings());
+  IndirectInterface::initLayout();
 }
 
 void InelasticDataManipulation::applySettings(std::map<std::string, QVariant> const &settings) {

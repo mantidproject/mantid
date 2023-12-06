@@ -23,7 +23,6 @@
 #include "MantidKernel/Logger.h"
 
 #include <Poco/Environment.h>
-#include <QPointer>
 #include <QStringList>
 
 using namespace MantidQt::API;
@@ -39,11 +38,6 @@ std::once_flag DLLS_LOADED;
 
 // Track if message saying offline help is unavailable has been shown
 bool offlineHelpMsgDisplayed = false;
-
-QList<QPointer<UserSubWindow>> &existingInterfaces() {
-  static QList<QPointer<UserSubWindow>> existingInterfaces;
-  return existingInterfaces;
-}
 
 } // namespace
 
@@ -188,9 +182,6 @@ UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name, 
  */
 void InterfaceManager::notifyExistingInterfaces(UserSubWindow *newWindow) {
   auto &existingWindows = existingInterfaces();
-  existingWindows.erase(std::remove_if(existingWindows.begin(), existingWindows.end(),
-                                       [](QPointer<UserSubWindow> &window) { return window.isNull(); }),
-                        existingWindows.end());
 
   for (auto &window : existingWindows)
     window->otherUserSubWindowCreated(newWindow);
@@ -198,6 +189,14 @@ void InterfaceManager::notifyExistingInterfaces(UserSubWindow *newWindow) {
   newWindow->otherUserSubWindowCreated(existingWindows);
 
   existingWindows.append(newWindow);
+}
+
+QList<QPointer<UserSubWindow>> &InterfaceManager::existingInterfaces() {
+  static QList<QPointer<UserSubWindow>> existingSubWindows;
+  existingSubWindows.erase(std::remove_if(existingSubWindows.begin(), existingSubWindows.end(),
+                                          [](QPointer<UserSubWindow> &window) { return window.isNull(); }),
+                           existingSubWindows.end());
+  return existingSubWindows;
 }
 
 /**

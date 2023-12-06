@@ -14,6 +14,15 @@ namespace MantidQt::CustomInterfaces::IDA {
 ConvFitDataPresenter::ConvFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view)
     : IndirectFitDataPresenter(model, view) {}
 
+bool ConvFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) {
+  if (const auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {
+    addWorkspace(convDialog->workspaceName(), convDialog->workspaceIndices());
+    setResolution(convDialog->resolutionName());
+    return true;
+  }
+  return false;
+}
+
 std::unique_ptr<IAddWorkspaceDialog> ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
   dialog->setResolutionWSSuffices(getResolutionWSSuffices());

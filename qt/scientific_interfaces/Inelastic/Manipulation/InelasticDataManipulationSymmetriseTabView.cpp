@@ -20,12 +20,21 @@
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
 
+constexpr auto NUMERICAL_PRECISION = 2;
+
 namespace {
+
+QString makeNumber(double value) { return QString::number(value, 'g', NUMERICAL_PRECISION); }
+
+QPair<double, double> makeQPair(std::tuple<double, double> &axisRange) {
+  return QPair<double, double>(std::get<0>(axisRange), std::get<1>(axisRange));
+}
 
 QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
   auto const xValues = workspace->x(0);
   return QPair<double, double>(xValues.front(), xValues.back());
 }
+
 } // namespace
 
 using MantidQt::MantidWidgets::AxisID;
@@ -59,12 +68,12 @@ InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseT
   m_propTrees["SymmPropTree"]->setFactoryForManager(m_enumManager, enumEditorFactory);
 
   // Raw Properties
-  m_properties["EMin"] = m_dblManager->addProperty("EMin");
-  m_dblManager->setDecimals(m_properties["EMin"], numDecimals);
-  m_propTrees["SymmPropTree"]->addProperty(m_properties["EMin"]);
-  m_properties["EMax"] = m_dblManager->addProperty("EMax");
-  m_dblManager->setDecimals(m_properties["EMax"], numDecimals);
-  m_propTrees["SymmPropTree"]->addProperty(m_properties["EMax"]);
+  m_properties["Elow"] = m_dblManager->addProperty("Elow");
+  m_dblManager->setDecimals(m_properties["Elow"], numDecimals);
+  m_propTrees["SymmPropTree"]->addProperty(m_properties["Elow"]);
+  m_properties["Ehigh"] = m_dblManager->addProperty("Ehigh");
+  m_dblManager->setDecimals(m_properties["Ehigh"], numDecimals);
+  m_propTrees["SymmPropTree"]->addProperty(m_properties["Ehigh"]);
 
   QtProperty *rawPlotProps = m_grpManager->addProperty("Raw Plot");
   m_propTrees["SymmPropTree"]->addProperty(rawPlotProps);
@@ -73,7 +82,7 @@ InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseT
   m_dblManager->setDecimals(m_properties["PreviewSpec"], 0);
   rawPlotProps->addSubProperty(m_properties["PreviewSpec"]);
 
-  m_properties["ReflectType"] = m_enumManager->addProperty("Reflect Type");
+  m_properties["ReflectType"] = m_enumManager->addProperty("ReflectType");
   QStringList types;
   types << "Positive to Negative"
         << "Negative to Positive";
@@ -95,33 +104,29 @@ InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseT
   m_dblManager->setDecimals(m_properties["DeltaY"], numDecimals);
   m_propTrees["SymmPVPropTree"]->addProperty(m_properties["DeltaY"]);
 
-  auto const xLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::XBottom);
-  auto const yLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
-
-  // Indicators for Y value at each EMin position
-  auto negativeEMinYPos =
-      m_uiForm.ppRawPlot->addSingleSelector("NegativeEMinYPos", MantidWidgets::SingleSelector::YSINGLE, 0.0);
-  negativeEMinYPos->setColour(Qt::blue);
-  negativeEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
-
-  auto positiveEMinYPos =
-      m_uiForm.ppRawPlot->addSingleSelector("PositiveEMinYPos", MantidWidgets::SingleSelector::YSINGLE, 1.0);
-  positiveEMinYPos->setColour(Qt::red);
-  positiveEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
-
   // Indicator for centre of symmetry (x=0)
-  auto centreMarkRaw = m_uiForm.ppRawPlot->addSingleSelector("CentreMark", MantidWidgets::SingleSelector::XSINGLE, 0.0);
-  centreMarkRaw->setColour(Qt::cyan);
-  centreMarkRaw->setBounds(std::get<0>(xLimits), std::get<1>(xLimits));
+  auto centreMarkRaw = m_uiForm.ppRawPlot->addSingleSelector("CentreMark", MantidWidgets::SingleSelector::XSINGLE, 0.0,
+                                                             MantidWidgets::PlotLineStyle::Solid);
+  centreMarkRaw->setColour(Qt::red);
+  centreMarkRaw->disconnectMouseSignals();
+
+  // Horizontal Marker Lines
+  auto horzMarkFirst = m_uiForm.ppRawPlot->addSingleSelector("horzMarkFirst", MantidWidgets::SingleSelector::YSINGLE,
+                                                             0.1, MantidWidgets::PlotLineStyle::Dotted);
+  horzMarkFirst->setColour(Qt::blue);
+  auto horzMarkSecond = m_uiForm.ppRawPlot->addSingleSelector("horzMarkSecond", MantidWidgets::SingleSelector::YSINGLE,
+                                                              0.5, MantidWidgets::PlotLineStyle::Dotted);
+  horzMarkSecond->setColour(Qt::darkBlue);
 
   // Indicators for negative and positive X range values on X axis
   // The user can use these to move the X range
-  // Note that the max and min of the negative range selector corespond to the
+  // Note that the max and min of the negative range selector correspond to the
   // opposite X value
   // i.e. RS min is X max
-
-  auto positiveERaw = m_uiForm.ppRawPlot->addRangeSelector("PositiveE");
-  positiveERaw->setColour(Qt::darkMagenta);
+  auto const xLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::XBottom);
+  auto rangeESelector = m_uiForm.ppRawPlot->addRangeSelector("rangeE");
+  rangeESelector->setColour(Qt::darkGreen);
+  rangeESelector->setBounds(0.0, std::get<1>(xLimits));
 
   // SIGNAL/SLOT CONNECTIONS
   // Validate the E range when it is changed
@@ -134,8 +139,8 @@ InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseT
   // Preview symmetrise
   connect(m_uiForm.pbPreview, SIGNAL(clicked()), this, SIGNAL(previewClicked()));
   // X range selectors
-  connect(positiveERaw, SIGNAL(minValueChanged(double)), this, SLOT(xRangeMinChanged(double)));
-  connect(positiveERaw, SIGNAL(maxValueChanged(double)), this, SLOT(xRangeMaxChanged(double)));
+  connect(rangeESelector, SIGNAL(minValueChanged(double)), this, SLOT(xRangeLowChanged(double)));
+  connect(rangeESelector, SIGNAL(maxValueChanged(double)), this, SLOT(xRangeHighChanged(double)));
   // Handle running, plotting and saving
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SIGNAL(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SIGNAL(saveClicked()));
@@ -148,8 +153,10 @@ InelasticDataManipulationSymmetriseTabView::~InelasticDataManipulationSymmetrise
 
 void InelasticDataManipulationSymmetriseTabView::setDefaults() {
   // Set default X range values
-  m_dblManager->setValue(m_properties["EMax"], 0.5);
-  m_dblManager->setValue(m_properties["EMin"], 0.1);
+  m_dblManager->setValue(m_properties["Ehigh"], 0.5);
+  m_dblManager->setValue(m_properties["Elow"], 0.1);
+  auto rangeESelector = m_uiForm.ppRawPlot->getRangeSelector("rangeE");
+  rangeESelector->setRange(0.1, 0.5);
 
   // Set default reflection type
   m_enumManager->setValue(m_properties["ReflectType"], 0);
@@ -175,74 +182,13 @@ IndirectPlotOptionsView *InelasticDataManipulationSymmetriseTabView::getPlotOpti
 }
 
 /**
- * Verifies that the E Range is valid.
- *
- * @param prop QtProperty changed
- * @param value Value it was changed to (unused)
- */
-void InelasticDataManipulationSymmetriseTabView::verifyERange(QtProperty *prop, double value) {
-  UNUSED_ARG(value);
-
-  double eMin = m_dblManager->value(m_properties["EMin"]);
-  double eMax = m_dblManager->value(m_properties["EMax"]);
-
-  if (prop == m_properties["EMin"]) {
-    // If the value of EMin is negative try negating it to get a valid range
-    if (eMin < 0) {
-      eMin = -eMin;
-      m_dblManager->setValue(m_properties["EMin"], eMin);
-      return;
-    }
-    // If range is still invalid reset EMin to half EMax
-    else if (eMin > eMax) {
-      m_dblManager->setValue(m_properties["EMin"], eMax / 2);
-      return;
-    }
-  } else if (prop == m_properties["EMax"]) {
-    // If the value of EMax is negative try negating it to get a valid range
-    if (eMax < 0) {
-      eMax = -eMax;
-      m_dblManager->setValue(m_properties["EMax"], eMax);
-      return;
-    }
-    // If range is invalid reset EMax to double EMin
-    else if (eMin > eMax) {
-      m_dblManager->setValue(m_properties["EMax"], eMin * 2);
-      return;
-    }
-  }
-
-  // If we get this far then the E range is valid
-  // Update the range selectors with the new values.
-  updateRangeSelectors(prop, value);
-}
-
-/**
- * Updates position of XCut range selectors when used changed value of XCut.
- *
- * @param prop QtProperty changed
- * @param value Value it was changed to (unused)
- */
-void InelasticDataManipulationSymmetriseTabView::updateRangeSelectors(QtProperty *prop, double value) {
-  auto positiveERaw = m_uiForm.ppRawPlot->getRangeSelector("PositiveE");
-
-  value = fabs(value);
-
-  if (prop == m_properties["EMin"]) {
-    positiveERaw->setMinimum(value);
-  } else if (prop == m_properties["EMax"]) {
-    positiveERaw->setMaximum(value);
-  }
-}
-
-/**
  * Handles the X minimum value being changed from a range selector.
  *
  * @param value New range selector value
  */
-void InelasticDataManipulationSymmetriseTabView::xRangeMinChanged(double value) {
-  m_dblManager->setValue(m_properties["EMin"], std::abs(value));
-  m_uiForm.pbPreview->setEnabled(true);
+void InelasticDataManipulationSymmetriseTabView::xRangeLowChanged(double value) {
+  m_dblManager->setValue(m_properties["Elow"], value);
+  m_dblManager->setMinimum(m_properties["Ehigh"], value);
 }
 
 /**
@@ -250,28 +196,89 @@ void InelasticDataManipulationSymmetriseTabView::xRangeMinChanged(double value) 
  *
  * @param value New range selector value
  */
-void InelasticDataManipulationSymmetriseTabView::xRangeMaxChanged(double value) {
-  m_dblManager->setValue(m_properties["EMax"], std::abs(value));
-  m_uiForm.pbPreview->setEnabled(true);
+void InelasticDataManipulationSymmetriseTabView::xRangeHighChanged(double value) {
+  m_dblManager->setValue(m_properties["Ehigh"], value);
+  m_dblManager->setMaximum(m_properties["Elow"], value);
 }
 
+/**
+ * Updates boundaries and initial values for Selector and Data properties when changing between negative/positive side
+ * of spectrum.
+ *
+ * @param isPositive flag for spectrum positive side
+ * @param range Active spectra range
+ *
+ */
 void InelasticDataManipulationSymmetriseTabView::resetEDefaults(bool isPositive, QPair<double, double> range) {
-  if (isPositive) {
-    m_dblManager->setValue(m_properties["EMax"], range.second);
-    m_dblManager->setValue(m_properties["EMin"], range.second / 10);
-  } else {
-    m_dblManager->setValue(m_properties["EMax"], range.first);
-    m_dblManager->setValue(m_properties["EMin"], range.first / 10);
+  auto rangeESelector = m_uiForm.ppRawPlot->getRangeSelector("rangeE");
+
+  // Set Selector range boundaries
+  auto rangeReflect = isPositive ? QPair(0.0, range.second) : QPair(range.first, 0.0);
+  rangeESelector->setBounds(rangeReflect.first, rangeReflect.second);
+  m_dblManager->setRange(m_properties["Ehigh"], rangeReflect.first, rangeReflect.second);
+  m_dblManager->setRange(m_properties["Elow"], rangeReflect.first, rangeReflect.second);
+
+  // Set Initial selector range values
+  auto rangeInitial =
+      isPositive ? QPair(0.1 * range.second, 0.9 * range.second) : QPair(0.9 * range.first, 0.1 * range.first);
+  rangeESelector->setRange(rangeInitial.first, rangeInitial.second);
+  m_dblManager->setValue(m_properties["Ehigh"], rangeInitial.second);
+  m_dblManager->setValue(m_properties["Elow"], rangeInitial.first);
+}
+
+/**
+ * Verifies that the E Range is valid. Logs message guiding user on what's wrong with selection.
+ *
+ * @param QString with current workspace name.
+ *
+ * @return true if selected E range is valid for calling the symmetrise algorithm, false otherwise.
+ */
+bool InelasticDataManipulationSymmetriseTabView::verifyERange(QString const &workspaceName) {
+  MatrixWorkspace_sptr sampleWS =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
+  auto axisRange = getXRangeFromWorkspace(sampleWS);
+  auto Erange = QPair(getElow(), getEhigh());
+
+  bool const reflectType = m_enumManager->value(m_properties["ReflectType"]);
+  if ((reflectType == 0) && (Erange.first > abs(axisRange.first))) {
+    emit showMessageBox("Invalid Data Range: Elow is larger than the lower limit of spectrum.\nReduce Elow to " +
+                        makeNumber(abs(axisRange.first)));
+    return false;
+  } else if ((reflectType == 1) && (abs(Erange.second) > axisRange.second)) {
+    emit showMessageBox("Invalid Data Range: Ehigh is larger than the upper limit of spectrum.\nIncrease Ehigh to " +
+                        makeNumber(axisRange.second));
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Updates position of XCut range selectors when user changed value of XCut.
+ *
+ * @param prop QtProperty changed
+ * @param value Value it was changed to (unused)
+ */
+void InelasticDataManipulationSymmetriseTabView::updateRangeSelectors(QtProperty *prop, double value) {
+  auto rangeESelector = m_uiForm.ppRawPlot->getRangeSelector("rangeE");
+
+  if (prop == m_properties["Elow"]) {
+    rangeESelector->setMinimum(value);
+  } else if (prop == m_properties["Ehigh"]) {
+    rangeESelector->setMaximum(value);
   }
 }
 
 void InelasticDataManipulationSymmetriseTabView::reflectTypeChanged(QtProperty *prop, int value) {
-  if (prop->propertyName() == "Reflect Type") {
+  if (prop->propertyName() == "ReflectType") {
     QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
-    MatrixWorkspace_sptr sampleWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
-    auto const axisRange = getXRangeFromWorkspace(sampleWS);
-    resetEDefaults(value == 0, axisRange);
+
+    if (validate()) {
+      MatrixWorkspace_sptr sampleWS =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
+      auto const axisRange = getXRangeFromWorkspace(sampleWS);
+
+      resetEDefaults(value == 0, axisRange);
+    }
   }
 }
 
@@ -295,34 +302,14 @@ void InelasticDataManipulationSymmetriseTabView::plotNewData(QString const &work
   int minSpectrumRange = sampleWS->getSpectrum(0).getSpectrumNo();
   m_dblManager->setValue(m_properties["PreviewSpec"], static_cast<double>(minSpectrumRange));
 
-  updateMiniPlots();
-
   // Set the preview range to the maximum absolute X value
   auto const axisRange = getXRangeFromWorkspace(sampleWS);
-  double symmRange = std::max(fabs(axisRange.first), fabs(axisRange.second));
-
-  // Set valid range for range selectors
-  auto positiveESelector = m_uiForm.ppRawPlot->getRangeSelector("PositiveE");
-  positiveESelector->setBounds(axisRange.first, axisRange.second);
-  positiveESelector->setRange(0, symmRange);
 
   // Set some default (and valid) values for E range
   resetEDefaults(m_enumManager->value(m_properties["ReflectType"]) == 0, axisRange);
-
   updateMiniPlots();
 
-  auto const xLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::XBottom);
-  auto const yLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
-
-  // Set indicator positions
-  auto negativeEMinYPos = m_uiForm.ppRawPlot->getSingleSelector("NegativeEMinYPos");
-  negativeEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
-
-  auto positiveEMinYPos = m_uiForm.ppRawPlot->getSingleSelector("PositiveEMinYPos");
-  positiveEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
-
-  auto centreMarkRaw = m_uiForm.ppRawPlot->getSingleSelector("CentreMark");
-  centreMarkRaw->setBounds(std::get<0>(xLimits), std::get<1>(xLimits));
+  m_uiForm.pbPreview->setEnabled(true);
 }
 
 /**
@@ -347,10 +334,33 @@ void InelasticDataManipulationSymmetriseTabView::updateMiniPlots() {
   auto const axisRange = getXRangeFromWorkspace(input);
   m_uiForm.ppPreviewPlot->setAxisRange(axisRange, AxisID::XBottom);
   m_uiForm.ppPreviewPlot->replot();
+
+  // Update bounds for horizontal markers
+  auto verticalRange = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
+  updateHorizontalMarkers(makeQPair(verticalRange));
 }
 
 /**
- * Redraws mini plots when user changes previw range or spectrum.
+ * Updates limits for horizontal markers when user loads new spectra
+ *
+ * @param Y range for current workspace
+ *
+ */
+void InelasticDataManipulationSymmetriseTabView::updateHorizontalMarkers(QPair<double, double> yrange) {
+  auto horzMarkFirst = m_uiForm.ppRawPlot->getSingleSelector("horzMarkFirst");
+  auto horzMarkSecond = m_uiForm.ppRawPlot->getSingleSelector("horzMarkSecond");
+
+  horzMarkFirst->setBounds(yrange.first, yrange.second);
+  horzMarkSecond->setBounds(yrange.first, yrange.second);
+
+  double windowRange = yrange.second - yrange.first;
+  double markerSeparation = 0.1;
+  horzMarkFirst->setPosition(yrange.first + windowRange * markerSeparation);
+  horzMarkSecond->setPosition(yrange.second - windowRange * markerSeparation);
+}
+
+/**
+ * Redraws mini plots when user changes preview range or spectrum.
  *
  * @param prop QtProperty that was changed
  * @param value Value it was changed to
@@ -370,7 +380,7 @@ void InelasticDataManipulationSymmetriseTabView::replotNewSpectrum(double value)
     return;
   }
 
-  // If entered value is higer then set spectra number to highest valid value
+  // If entered value is higher then set spectra number to highest valid value
   if (value > maxSpectrumRange) {
     m_dblManager->setValue(m_properties["PreviewSpec"], maxSpectrumRange);
     return;
@@ -382,16 +392,9 @@ void InelasticDataManipulationSymmetriseTabView::replotNewSpectrum(double value)
 bool InelasticDataManipulationSymmetriseTabView::validate() {
   UserInputValidator uiv;
   validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Red);
-
-  // EMin and EMax must be positive
-  if (m_dblManager->value(m_properties["EMin"]) <= 0.0)
-    uiv.addErrorMessage("EMin must be positive.");
-  if (m_dblManager->value(m_properties["EMax"]) <= 0.0)
-    uiv.addErrorMessage("EMax must be positive.");
-
   auto const errorMessage = uiv.generateErrorMessage();
   if (!errorMessage.isEmpty())
-    showMessageBox(errorMessage);
+    emit showMessageBox(errorMessage);
   return errorMessage.isEmpty();
 }
 
@@ -399,9 +402,11 @@ void InelasticDataManipulationSymmetriseTabView::setRawPlotWatchADS(bool watchAD
   m_uiForm.ppRawPlot->watchADS(watchADS);
 }
 
-double InelasticDataManipulationSymmetriseTabView::getEMin() { return m_dblManager->value(m_properties["EMin"]); }
+double InelasticDataManipulationSymmetriseTabView::getElow() const { return m_dblManager->value(m_properties["Elow"]); }
 
-double InelasticDataManipulationSymmetriseTabView::getEMax() { return m_dblManager->value(m_properties["EMax"]); }
+double InelasticDataManipulationSymmetriseTabView::getEhigh() const {
+  return m_dblManager->value(m_properties["Ehigh"]);
+}
 
 double InelasticDataManipulationSymmetriseTabView::getPreviewSpec() {
   return m_dblManager->value(m_properties["PreviewSpec"]);
@@ -432,16 +437,6 @@ void InelasticDataManipulationSymmetriseTabView::previewAlgDone() {
   m_dblManager->setValue(m_properties["NegativeYValue"], negativeY);
   m_dblManager->setValue(m_properties["PositiveYValue"], positiveY);
   m_dblManager->setValue(m_properties["DeltaY"], deltaY);
-
-  auto const yLimits = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
-  // Set indicator positions
-  auto const negativeEMinYPos = m_uiForm.ppRawPlot->getSingleSelector("NegativeEMinYPos");
-  negativeEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
-  negativeEMinYPos->setPosition(negativeY);
-
-  auto const positiveEMinYPos = m_uiForm.ppRawPlot->getSingleSelector("PositiveEMinYPos");
-  positiveEMinYPos->setBounds(std::get<0>(yLimits), std::get<1>(yLimits));
-  positiveEMinYPos->setPosition(positiveY);
 
   // Plot preview plot
   size_t spectrumIndex = symmWS->getIndexFromSpectrumNumber(spectrumNumber);

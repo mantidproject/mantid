@@ -55,6 +55,10 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
     _ipf_filename = None
     _workspace_names = None
 
+    def alias(self):
+        """Alternative name for algorithm"""
+        return "ISISIndirectEnergyTransferWrapper"
+
     def category(self):
         return "Workflow\\Inelastic;Inelastic\\Indirect"
 

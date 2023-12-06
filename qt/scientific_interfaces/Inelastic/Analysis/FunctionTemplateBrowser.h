@@ -64,6 +64,7 @@ public:
   virtual void updateParameterNames(const QMap<int, QString> &parameterNames) = 0;
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clear() = 0;
+  virtual EstimationDataSelector getEstimationDataSelector() const = 0;
   virtual void updateParameterEstimationData(DataForParameterEstimationCollection &&data) = 0;
   virtual void estimateFunctionParameters() = 0;
   virtual void setBackgroundA0(double value) = 0;

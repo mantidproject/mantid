@@ -36,7 +36,7 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : Correc
   m_spectra = 0;
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraContour));
+      std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSlice));
 
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(newSample(const QString &)));
   connect(m_uiForm.dsContainer, SIGNAL(dataReady(const QString &)), this, SLOT(newContainer(const QString &)));
@@ -55,6 +55,7 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : Correc
   m_uiForm.dsSample->isOptional(true);
   m_uiForm.dsContainer->isOptional(true);
   m_uiForm.dsCorrections->isOptional(true);
+  m_uiForm.dsCorrections->setAlwaysLoadAsGroup(true);
 
   m_uiForm.spPreviewSpec->setMinimum(0);
   m_uiForm.spPreviewSpec->setMaximum(0);
@@ -186,7 +187,7 @@ void ApplyAbsorptionCorrections::run() {
 
   // get Sample Workspace
   auto const sampleWs = getADSWorkspace(m_sampleWorkspaceName);
-  absCorProps->setProperty("SampleWorkspace", sampleWs);
+  absCorProps->setProperty("SampleWorkspace", m_sampleWorkspaceName);
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
   // Get Can and Clone
@@ -425,18 +426,17 @@ bool ApplyAbsorptionCorrections::validate() {
   // Check input not empty
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
   uiv.checkDataSelectorIsValid("Corrections", m_uiForm.dsCorrections);
+  // Validate the container workspace
+  if (m_uiForm.ckUseCan->isChecked())
+    validateDataIsOneOf(uiv, m_uiForm.dsContainer, "Container", DataType::Red, {DataType::Sqw});
+
+  // Validate the sample workspace
+  validateDataIsOneOf(uiv, m_uiForm.dsSample, "Sample", DataType::Red, {DataType::Sqw});
+
+  // Validate the corrections workspace
+  validateDataIsOfType(uiv, m_uiForm.dsCorrections, "Corrections", DataType::Corrections);
 
   if (uiv.isAllInputValid()) {
-    // Validate the sample workspace
-    validateDataIsOneOf(uiv, m_uiForm.dsSample, "Sample", DataType::Red, {DataType::Sqw});
-
-    // Validate the container workspace
-    if (m_uiForm.ckUseCan->isChecked())
-      validateDataIsOneOf(uiv, m_uiForm.dsContainer, "Container", DataType::Red, {DataType::Sqw});
-
-    // Validate the corrections workspace
-    validateDataIsOfType(uiv, m_uiForm.dsCorrections, "Corrections", DataType::Corrections);
-
     // Check sample has the same number of Histograms as each of the workspaces in the corrections group
     m_correctionsGroupName = m_uiForm.dsCorrections->getCurrentDataName().toStdString();
     if (AnalysisDataService::Instance().doesExist(m_correctionsGroupName)) {

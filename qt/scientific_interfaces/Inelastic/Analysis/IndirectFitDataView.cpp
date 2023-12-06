@@ -6,10 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitDataView.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
+#include <QDoubleValidator>
 #include <QItemDelegate>
 #include <QRegExpValidator>
+#include <QStyledItemDelegate>
 
 using namespace Mantid::API;
+
+constexpr auto NUMERICAL_PRECISION = 6;
 
 namespace {
 
@@ -22,6 +26,8 @@ const QString REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
 const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
 const QString MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
 } // namespace Regexes
+
+QString makeNumber(double d) { return QString::number(d, 'f', NUMERICAL_PRECISION); }
 
 class ExcludeRegionDelegate : public QItemDelegate {
 public:
@@ -49,7 +55,26 @@ public:
   }
 };
 
-QString makeNumber(double d) { return QString::number(d, 'g', 6); }
+class NumericInputDelegate : public QStyledItemDelegate {
+
+public:
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &, const QModelIndex &) const override {
+
+    auto lineEdit = new QLineEdit(parent);
+    auto validator = new QDoubleValidator(parent);
+
+    validator->setDecimals(NUMERICAL_PRECISION);
+    validator->setNotation(QDoubleValidator::StandardNotation);
+    lineEdit->setValidator(validator);
+
+    return lineEdit;
+  }
+
+  void setEditorData(QWidget *editor, const QModelIndex &index) const override {
+    const auto value = index.model()->data(index, Qt::EditRole).toDouble();
+    static_cast<QLineEdit *>(editor)->setText(makeNumber(value));
+  }
+};
 
 QStringList defaultHeaders() {
   QStringList headers;
@@ -85,11 +110,15 @@ QTableWidget *IndirectFitDataView::getDataTable() const { return m_uiForm->tbFit
 void IndirectFitDataView::setHorizontalHeaders(const QStringList &headers) {
   m_uiForm->tbFitData->setColumnCount(headers.size());
   m_uiForm->tbFitData->setHorizontalHeaderLabels(headers);
+  m_HeaderLabels = headers;
 
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(0, QHeaderView::Stretch);
-  m_uiForm->tbFitData->setItemDelegateForColumn(headers.size() - 1,
-                                                std::make_unique<ExcludeRegionDelegate>().release());
+
+  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("StartX"), new NumericInputDelegate);
+  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("EndX"), new NumericInputDelegate);
+  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("Mask X Range"), new ExcludeRegionDelegate);
+
   m_uiForm->tbFitData->verticalHeader()->setVisible(false);
 }
 
@@ -114,27 +143,27 @@ void IndirectFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
 
   cell = std::make_unique<QTableWidgetItem>(QString::number(newRow.workspaceIndex));
   cell->setFlags(flags);
-  setCell(std::move(cell), row, workspaceIndexColumn());
+  setCell(std::move(cell), row, getColumnIndexFromName("WS Index"));
 
   cell = std::make_unique<QTableWidgetItem>(makeNumber(newRow.startX));
-  setCell(std::move(cell), row, startXColumn());
+  setCell(std::move(cell), row, getColumnIndexFromName("StartX"));
 
   cell = std::make_unique<QTableWidgetItem>(makeNumber(newRow.endX));
-  setCell(std::move(cell), row, endXColumn());
+  setCell(std::move(cell), row, getColumnIndexFromName("EndX"));
 
   cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.exclude));
-  setCell(std::move(cell), row, excludeColumn());
+  setCell(std::move(cell), row, getColumnIndexFromName("Mask X Range"));
+}
+
+void IndirectFitDataView::updateNumCellEntry(double numEntry, size_t row, size_t column) {
+  QTableWidgetItem *selectedItem;
+  selectedItem = m_uiForm->tbFitData->item(static_cast<int>(row), static_cast<int>(column));
+  selectedItem->setText(makeNumber(numEntry));
 }
 
 bool IndirectFitDataView::isTableEmpty() const { return m_uiForm->tbFitData->rowCount() == 0; }
 
-int IndirectFitDataView::workspaceIndexColumn() const { return 1; }
-
-int IndirectFitDataView::startXColumn() const { return 2; }
-
-int IndirectFitDataView::endXColumn() const { return 3; }
-
-int IndirectFitDataView::excludeColumn() const { return 4; }
+int IndirectFitDataView::getColumnIndexFromName(QString ColName) { return m_HeaderLabels.indexOf(ColName); }
 
 void IndirectFitDataView::clearTable() { m_uiForm->tbFitData->setRowCount(0); }
 

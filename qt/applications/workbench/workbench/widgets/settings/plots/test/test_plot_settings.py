@@ -17,8 +17,15 @@ from qtpy.QtCore import Qt
 
 class MockConfigService(object):
     def __init__(self):
-        self.getString = StrictMock(return_value="1")
+        self.getString = StrictMock(side_effect=self.get_string_side_effect)
         self.setString = StrictMock()
+        self.default_return = "1"
+        self.return_pairs = {}
+
+    def get_string_side_effect(self, config_var):
+        if config_var in self.return_pairs:
+            return self.return_pairs[config_var]
+        return self.default_return
 
 
 @start_qapplication
@@ -42,6 +49,10 @@ class PlotsSettingsTest(unittest.TestCase):
                 call(PlotProperties.X_AXES_SCALE.value),
                 call(PlotProperties.Y_AXES_SCALE.value),
                 call(PlotProperties.AXES_LINE_WIDTH.value),
+                call(PlotProperties.X_MIN.value),
+                call(PlotProperties.X_MAX.value),
+                call(PlotProperties.Y_MIN.value),
+                call(PlotProperties.Y_MAX.value),
                 call(PlotProperties.SHOW_TICKS_LEFT.value),
                 call(PlotProperties.SHOW_TICKS_BOTTOM.value),
                 call(PlotProperties.SHOW_TICKS_RIGHT.value),
@@ -143,6 +154,182 @@ class PlotsSettingsTest(unittest.TestCase):
 
         presenter.action_axes_line_width_changed(3.5)
         mock_ConfigService.setString.assert_called_once_with(PlotProperties.AXES_LINE_WIDTH.value, "3.5")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_x_min_changed(self, mock_ConfigService):
+        presenter = PlotSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_x_min_changed(3.2)
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.X_MIN.value, "3.2")
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_x_min_changed(1.5)
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.X_MIN.value, "1.5")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_x_max_changed(self, mock_ConfigService):
+        presenter = PlotSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_x_max_changed(3.2)
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.X_MAX.value, "3.2")
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_x_max_changed(1.5)
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.X_MAX.value, "1.5")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_y_min_changed(self, mock_ConfigService):
+        presenter = PlotSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_y_min_changed(3.2)
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.Y_MIN.value, "3.2")
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_y_min_changed(1.5)
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.Y_MIN.value, "1.5")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_y_max_changed(self, mock_ConfigService):
+        presenter = PlotSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_y_max_changed(3.2)
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.Y_MAX.value, "3.2")
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_y_max_changed(1.5)
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.Y_MAX.value, "1.5")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_x_min_box_and_check_box_disabled_if_no_value(self, mock_ConfigService):
+        mock_ConfigService.return_pairs = {PlotProperties.X_MIN.value: ""}
+
+        presenter = PlotSettings(None)
+
+        self.assertFalse(presenter.view.x_min.isEnabled())
+        self.assertFalse(presenter.view.x_min_box.isChecked())
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_x_max_box_and_check_box_disabled_if_no_value(self, mock_ConfigService):
+        mock_ConfigService.return_pairs = {PlotProperties.X_MAX.value: ""}
+
+        presenter = PlotSettings(None)
+
+        self.assertFalse(presenter.view.x_max.isEnabled())
+        self.assertFalse(presenter.view.x_max_box.isChecked())
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_y_min_box_and_check_box_disabled_if_no_value(self, mock_ConfigService):
+        mock_ConfigService.return_pairs = {PlotProperties.Y_MIN.value: ""}
+
+        presenter = PlotSettings(None)
+
+        self.assertFalse(presenter.view.y_min.isEnabled())
+        self.assertFalse(presenter.view.y_min_box.isChecked())
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_y_max_box_and_check_box_disabled_if_no_value(self, mock_ConfigService):
+        mock_ConfigService.return_pairs = {PlotProperties.Y_MAX.value: ""}
+
+        presenter = PlotSettings(None)
+
+        self.assertFalse(presenter.view.y_max.isEnabled())
+        self.assertFalse(presenter.view.y_max_box.isChecked())
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_x_min_box_and_check_box_enabled_if_value(self, mock_ConfigService):
+        mock_ConfigService.return_pairs = {PlotProperties.X_MIN.value: "50"}
+
+        presenter = PlotSettings(None)
+
+        self.assertTrue(presenter.view.x_min.isEnabled())
+        self.assertTrue(presenter.view.x_min_box.isChecked())
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_x_max_box_and_check_box_enabled_if_value(self, mock_ConfigService):
+        mock_ConfigService.return_pairs = {PlotProperties.X_MAX.value: "50"}
+
+        presenter = PlotSettings(None)
+
+        self.assertTrue(presenter.view.x_max.isEnabled())
+        self.assertTrue(presenter.view.x_max_box.isChecked())
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_y_min_box_and_check_box_enabled_if_value(self, mock_ConfigService):
+        mock_ConfigService.return_pairs = {PlotProperties.Y_MIN.value: "50"}
+
+        presenter = PlotSettings(None)
+
+        self.assertTrue(presenter.view.y_min.isEnabled())
+        self.assertTrue(presenter.view.y_min_box.isChecked())
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_y_max_box_and_check_box_enabled_if_value(self, mock_ConfigService):
+        mock_ConfigService.return_pairs = {PlotProperties.Y_MAX.value: "50"}
+
+        presenter = PlotSettings(None)
+
+        self.assertTrue(presenter.view.y_max.isEnabled())
+        self.assertTrue(presenter.view.y_max_box.isChecked())
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_x_min_checkbox_clears_property_when_disabled(self, mock_ConfigService):
+        mock_ConfigService.return_pairs = {PlotProperties.X_MIN.value: "50"}
+
+        presenter = PlotSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_x_min_box_changed(False)
+
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.X_MIN.value, "")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_x_max_checkbox_clears_property_when_disabled(self, mock_ConfigService):
+        mock_ConfigService.return_pairs = {PlotProperties.X_MAX.value: "50"}
+
+        presenter = PlotSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_x_max_box_changed(False)
+
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.X_MAX.value, "")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_y_min_checkbox_clears_property_when_disabled(self, mock_ConfigService):
+        mock_ConfigService.return_pairs = {PlotProperties.Y_MIN.value: "50"}
+
+        presenter = PlotSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_y_min_box_changed(False)
+
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.Y_MIN.value, "")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_y_max_checkbox_clears_property_when_disabled(self, mock_ConfigService):
+        mock_ConfigService.return_pairs = {PlotProperties.Y_MAX.value: "50"}
+
+        presenter = PlotSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_y_max_box_changed(False)
+
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.Y_MAX.value, "")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_enable_grid(self, mock_ConfigService):

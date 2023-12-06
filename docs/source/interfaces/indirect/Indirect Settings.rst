@@ -87,8 +87,8 @@ Glossary of Allowed Suffixes
 When **Restrict allowed input files by name** is ticked, the input data is restricted by name
 according to the suffixes below.
 
-Indirect Bayes Suffixes
-~~~~~~~~~~~~~~~~~~~~~~~
+Bayes Fitting Suffixes
+~~~~~~~~~~~~~~~~~~~~~~
 ResNorm
 #######
 

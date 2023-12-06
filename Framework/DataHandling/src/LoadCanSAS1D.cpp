@@ -22,6 +22,7 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/SAX/InputSource.h>
+#include <boost/algorithm/string.hpp>
 
 using Poco::XML::Document;
 using Poco::XML::DOMParser;
@@ -34,16 +35,15 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 namespace {
-int getGeometryID(const std::string &selection) {
+int getGeometryID(std::string selection) {
   int geometryID = 0;
-  if (selection == "Cylinder") {
+  boost::to_lower(selection);
+  if (selection == "cylinder") {
     geometryID = 1;
-  } else if (selection == "Flat plate") {
+  } else if (selection == "flatplate" || selection == "flat plate") {
     geometryID = 2;
-  } else if (selection == "Disc") {
+  } else if (selection == "disc") {
     geometryID = 3;
-  } else {
-    geometryID = 0;
   }
   return geometryID;
 }
@@ -400,7 +400,7 @@ void LoadCanSAS1D::createSampleInformation(const Poco::XML::Element *const sasEn
     auto geometryElement = sasCollimationElement->getChildElement("name");
     if (geometryElement) {
       auto geometry = geometryElement->innerText();
-      auto geometryID = getGeometryID(geometry);
+      auto geometryID = getGeometryID(std::move(geometry));
       sample.setGeometryFlag(geometryID);
     }
 

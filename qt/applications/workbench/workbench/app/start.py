@@ -7,7 +7,6 @@
 #  This file is part of the mantid workbench.
 import argparse
 import atexit
-import importlib
 import os
 import sys
 from sys import setswitchinterval
@@ -60,13 +59,6 @@ def qapplication():
 
         argv = sys.argv[:]
         argv[0] = APPNAME  # replace application name
-        # Workaround a segfault importing readline with PyQt5
-        # This is because PyQt5 messes up pystate (internal) modules_by_index
-        # so PyState_FindModule will return null instead of the module address.
-        # Readline (so far) is the only module that falls over during init as it blindly uses FindModules result
-        # The workaround mentioned in https://groups.google.com/forum/#!topic/leo-editor/ghiIN7irzY0
-        if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == "darwin":
-            importlib.import_module("readline")
 
         app = QApplication(argv)
         app.setOrganizationName(ORGANIZATION)

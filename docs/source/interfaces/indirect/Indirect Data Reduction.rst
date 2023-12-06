@@ -11,7 +11,7 @@ Overview
 
 The Indirect Data Reduction interface provides the initial reduction that
 is used to convert raw instrument data to S(Q, w) for analysis in the
-Indirect Data Analysis and Indirect Bayes interfaces.
+Inelastic Data Analysis and Bayes Fitting interfaces.
 
 The tabs shown on this interface will vary depending on the current default
 facility such that only tabs that will work with data from the facility are
@@ -138,8 +138,8 @@ Run
 Plot Spectra
   If enabled, it will plot the selected workspace indices in the selected output workspace.
 
-Plot Contour
-  If enabled, it will plot the selected output workspace as a contour plot.
+Open Slice Viewer
+  If enabled, it will open the slice viewer for the selected output workspace.
 
 Group Output
   This will place the output reduced files from a reduction into a group workspace.

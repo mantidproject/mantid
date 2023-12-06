@@ -7,6 +7,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include <iterator>
+#include <random>
 #include <sstream>
 
 namespace Mantid::API {
@@ -153,8 +154,9 @@ void AnalysisDataServiceImpl::rename(const std::string &oldName, const std::stri
  * Overridden remove member to delete its name held by the workspace itself.
  * It is important to do if the workspace isn't deleted after removal.
  * @param name The name of a workspace to remove.
+ * @return The workspace being removed from the ADS
  */
-void AnalysisDataServiceImpl::remove(const std::string &name) {
+Workspace_sptr AnalysisDataServiceImpl::remove(const std::string &name) {
   Workspace_sptr ws;
   try {
     ws = retrieve(name);
@@ -165,7 +167,57 @@ void AnalysisDataServiceImpl::remove(const std::string &name) {
   if (ws) {
     ws->setName("");
   }
+  return ws;
 }
+
+/**
+ * @brief random lowercase letter used for generating workspace name in
+ * unique_name and unique_hidden_name
+ * @return Random Char
+ */
+char AnalysisDataServiceImpl::getRandomLowercaseLetter() {
+  static const std::string alphabet = "abcdefghijklmnopqrstuvwxyz";
+  static std::random_device rd;
+  static std::mt19937 gen(rd());
+  static std::uniform_int_distribution<> dis(0, int(alphabet.size() - 1));
+  return alphabet[dis(gen)];
+}
+
+/**
+ * @brief generate a unique name that will not collide with any other workspace name
+ * @param n Size of the sequence (must be a positive number)
+ * @param prefix String to prefix the random name
+ * @param suffix String to suffix the random name
+ * @return String (prefix + n*random char + suffix)
+ */
+const std::string AnalysisDataServiceImpl::uniqueName(const int n, const std::string &prefix,
+                                                      const std::string &suffix) {
+  if (n <= 0) {
+    throw std::invalid_argument("n must be a positive number");
+  }
+  auto randomNameGenerator = [n]() {
+    std::string name;
+    for (int i = 0; i < n; ++i) {
+      name += getRandomLowercaseLetter();
+    }
+    return name;
+  };
+
+  // limit of (n * 10 * size of alphabet) to avoid infinite loop in case we can't find name that doesn't collide
+  for (int i = 0; i < (n * 260); i++) {
+    std::string wsName = prefix + randomNameGenerator() + suffix;
+    if (!doesExist(wsName)) {
+      return wsName;
+    }
+  }
+  throw std::runtime_error("Unable to generate unique workspace of length " + std::to_string(n));
+}
+
+/**
+ * @brief generate a unique hidden name to be used as a temporary workspace
+ * @return String ("__" + 9*random char)
+ */
+const std::string AnalysisDataServiceImpl::uniqueHiddenName() { return AnalysisDataServiceImpl::uniqueName(9, "__"); }
 
 /**
  * @brief Given a list of names retrieve the corresponding workspace handles

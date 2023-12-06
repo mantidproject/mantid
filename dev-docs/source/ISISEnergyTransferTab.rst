@@ -55,7 +55,7 @@ The presenter constructs both the view and model. The presenter undertakes the f
 
 ISIS Energy Transfer algorithm
 ++++++++++++++++++++++++++++++
-The presenter is involved in executing the core algorithm of the tab :code:`ISISIndirectEnergyTransferWrapper`.
+The presenter is involved in executing the core algorithm of the tab :code:`ISISIndirectEnergyTransfer`.
 Functions such as :code:`validate` ensure the algorithm parameters are valid. :code:`notifyRunClicked` serves as the event handler for algorithm execution
 when a run click event happens. In addition, :code:`algorithmComplete` does post-algorithm processing operations.
 
@@ -86,7 +86,7 @@ is the model of the tab.
 
 ISIS Indirect Energy Transfer Wrapper
 +++++++++++++++++++++++++++++++++++++
-:code:`ISISIndirectEnergyTransferWrapper` is the main algorithm in the tab. Various functions manage operations related to algorithm execution.
+:code:`ISISIndirectEnergyTransfer` is the main algorithm in the tab. Various functions manage operations related to algorithm execution.
 A series of setters configure algorithm parameters. :code:`validateRunData` employs :code:`IETDataValidator` to validate algorithm parameters.
 Execution of the algorithm takes place within :code:`runIETAlgorithm` post validation and parameters configuration.
 

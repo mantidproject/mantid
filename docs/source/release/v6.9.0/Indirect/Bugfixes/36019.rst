@@ -1,0 +1,1 @@
+- The :ref:`Indirect Diffraction <interface-indirect-diffraction>` interface will only use the 'bank' component for manual grouping if it exists, otherwise it will use 'diffraction'.

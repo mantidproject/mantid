@@ -15,6 +15,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataHandling/LoadNXcanSAS.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidKernel/Unit.h"
@@ -267,6 +268,50 @@ public:
     removeWorkspaceFromADS(outWsName);
   }
 
+  void test_that_1D_workspace_with_sample_set_is_loaded_correctly() {
+    // Arrange
+    NXcanSASTestParameters parameters;
+    removeFile(parameters.filename);
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
+    parameters.invalidDetectors = false;
+    parameters.hasDx = true;
+    parameters.geometry = "FlatPlate";
+    parameters.beamHeight = 23;
+    parameters.beamWidth = 12;
+    parameters.sampleThickness = 6;
+
+    parameters.isHistogram = true;
+
+    auto ws = provide1DWorkspace(parameters);
+    setXValuesOn1DWorkspace(ws, parameters.xmin, parameters.xmax);
+    parameters.idf = getIDFfromWorkspace(ws);
+    save_file_no_issues(ws, parameters);
+
+    const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
+
+    // Act
+    auto wsOut = load_file_no_issues(parameters, false /*load transmission*/, outWsName);
+
+    // Assert
+    // We need to convert the ws file back into point data since the would have
+    // loaded point data
+    auto toPointAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertToPointData");
+    std::string toPointOutputName("toPointOutput");
+    toPointAlg->initialize();
+    toPointAlg->setChild(true);
+    toPointAlg->setProperty("InputWorkspace", ws);
+    toPointAlg->setProperty("OutputWorkspace", toPointOutputName);
+    toPointAlg->execute();
+    MatrixWorkspace_sptr wsPoint = toPointAlg->getProperty("OutputWorkspace");
+
+    do_assert_load(wsPoint, wsOut, parameters);
+
+    // Clean up
+    removeFile(parameters.filename);
+    removeWorkspaceFromADS(outWsName);
+  }
+
 private:
   void removeWorkspaceFromADS(const std::string &toRemove) {
     if (AnalysisDataService::Instance().doesExist(toRemove)) {
@@ -305,6 +350,10 @@ private:
       std::string detectorsAsString = concatenateStringVector(parameters.detectors);
       saveAlg->setProperty("DetectorNames", detectorsAsString);
     }
+    saveAlg->setProperty("Geometry", parameters.geometry);
+    saveAlg->setProperty("SampleHeight", parameters.beamHeight);
+    saveAlg->setProperty("SampleWidth", parameters.beamWidth);
+    saveAlg->setProperty("SampleThickness", parameters.sampleThickness);
 
     if (transmission) {
       saveAlg->setProperty("Transmission", transmission);
@@ -376,6 +425,17 @@ private:
                          eps);
       }
     }
+  }
+
+  void do_assert_sample(const MatrixWorkspace_sptr &wsIn, const MatrixWorkspace_sptr &wsOut) {
+    auto &&sampleIn = wsIn->mutableSample();
+    auto &&sampleOut = wsOut->mutableSample();
+
+    TSM_ASSERT_EQUALS("Should load the geometry flag from the sample.", sampleIn.getGeometryFlag(),
+                      sampleOut.getGeometryFlag());
+    TSM_ASSERT_EQUALS("Should load the height of the aperture.", sampleIn.getHeight(), sampleOut.getHeight());
+    TSM_ASSERT_EQUALS("Should load the width of the aperture.", sampleIn.getWidth(), sampleOut.getWidth());
+    TSM_ASSERT_EQUALS("Should load the thickness of the sample.", sampleIn.getThickness(), sampleOut.getThickness());
   }
 
   void do_assert_sample_logs(const MatrixWorkspace_sptr &wsIn, const MatrixWorkspace_sptr &wsOut) {
@@ -459,6 +519,9 @@ private:
 
     // If applicable, ensure that axis1 are the same
     do_assert_axis1_values_are_the_same(wsIn, wsOut);
+
+    // Ensure that the sample information is the same.
+    do_assert_sample(wsIn, wsOut);
 
     // Ensure that both have the same basic logs
     do_assert_sample_logs(wsIn, wsOut);

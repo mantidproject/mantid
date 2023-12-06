@@ -163,9 +163,8 @@ Bugfixes
   from their default.
 - A bug where the output reduced files had large file sizes depending on the size of the batch
   being reduced from the :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>`
-  algorithm on the ISISEnergyTransfer interface has been fixed. The
-  :ref:`ISISIndirectEnergyTransferWrapper <algm-ISISIndirectEnergyTransferWrapper>` algorithm
-  should be used instead in order to avoid these large file sizes.
+  algorithm on the ISISEnergyTransfer interface has been fixed. The ``ISISIndirectEnergyTransferWrapper``
+  algorithm should be used instead in order to avoid these large file sizes.
 - A bug where using a cropped calibration file (from a previous run) on the ISISEnergyTransfer
   interface would cause an error has been fixed.
 - A bug where specifying a custom detector grouping for OSIRIS was not working has been fixed.

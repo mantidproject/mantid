@@ -119,12 +119,11 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
         self.declareProperty(name="MomentWorkspace", defaultValue="Moment", doc="The output Moment workspace.")
 
     def PyExec(self):
-
         self._setup()
         progress = Progress(self, 0.0, 0.05, 3)
 
         progress.report("Energy transfer")
-        scan_alg = self.createChildAlgorithm("ISISIndirectEnergyTransferWrapper", 0.05, 0.95)
+        scan_alg = self.createChildAlgorithm("ISISIndirectEnergyTransfer", 0.05, 0.95)
         scan_alg.setProperty("InputFiles", formatRuns(self._data_files, self._instrument_name))
         scan_alg.setProperty("SumFiles", self._sum_files)
         scan_alg.setProperty("LoadLogFiles", self._load_logs)

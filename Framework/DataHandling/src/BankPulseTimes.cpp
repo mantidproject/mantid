@@ -109,12 +109,11 @@ bool BankPulseTimes::arePulseTimesIncreasing() const {
  *  Handles a zero-sized vector
  *  @param times
  */
-BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times) {
+BankPulseTimes::BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times) : pulseTimes(times) {
   if (times.empty())
-    return;
-
-  pulseTimes = times;
-  periodNumbers = std::vector<int>(pulseTimes.size(), FirstPeriod); // TODO we are fixing this at 1 period for all
+    periodNumbers = std::vector<int>();
+  else
+    periodNumbers = std::vector<int>(pulseTimes.size(), FirstPeriod); // TODO we are fixing this at 1 period for all
 }
 
 //----------------------------------------------------------------------------------------------

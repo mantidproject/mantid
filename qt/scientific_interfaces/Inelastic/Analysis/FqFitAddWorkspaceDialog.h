@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllConfig.h"
 #include "IAddWorkspaceDialog.h"
 #include "ui_FqFitAddWorkspaceDialog.h"
 
@@ -13,7 +14,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class FqFitAddWorkspaceDialog : public IAddWorkspaceDialog {
+class MANTIDQT_INELASTIC_DLL FqFitAddWorkspaceDialog : public IAddWorkspaceDialog {
   Q_OBJECT
 public:
   explicit FqFitAddWorkspaceDialog(QWidget *parent);

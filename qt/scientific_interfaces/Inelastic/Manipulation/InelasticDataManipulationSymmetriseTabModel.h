@@ -29,10 +29,11 @@ public:
   void setEMin(double value);
   void setEMax(double value);
   void setIsPositiveReflect(bool value);
+  bool getIsPositiveReflect() const;
 
 private:
   std::string m_inputWorkspace;
-  std::string m_reflctedInputWorkspace;
+  std::string m_reflectedInputWorkspace;
   std::string m_negativeOutputWorkspace;
   std::string m_positiveOutputWorkspace;
   double m_eMin;

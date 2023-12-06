@@ -17,9 +17,9 @@ dependencies:
   - hdf5>=1.12,<1.13
   - jemalloc=5.2.0 # We have noticed 5.2.1 can cause a hang on older glibc versions (Cent OS 7, Ubuntu 18.04). Observed with import CaChannel and also our MeierTest.
   - jsoncpp>=1.9.4,<2
-  - libopenblas!=0.3.23,!=0.3.24 # pinned the same as macOS for consistency
+  - libopenblas!=0.3.23,!=0.3.24,!=0.3.25 # v0.3.25 causing system test failures on linux. Others are for macOS consistency.
   - librdkafka>=1.6.0
-  - matplotlib=3.6.*
+  - matplotlib=3.7.*
   - muparser>=2.3.2
   - nexus=4.4.*
   - ninja>=1.10.2
@@ -35,7 +35,7 @@ dependencies:
   - pyyaml>=5.4.1
   - qscintilla2
   - qt=5.15.8 # Avoid unexpected qt upgrades
-  - qtconsole!=5.4.2 # 5.4.2 crashes the jupyter console. Bug was fixed in 5.4.3
+  - qtconsole>5.4.2,!=5.5.0 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
   - qtpy>=1.9.0
   - qt-gtk-platformtheme # Use native theme on GTK-based systems, which provides a significantly better performing file browser.
   - requests>=2.25.1
@@ -57,8 +57,6 @@ dependencies:
   # Linux only
   - gxx_linux-64==10.3.*
   - libglu>=9.0.0
-  - readline<8.2
-  - filelock<3.10.2 # Pinned to prevent a segmentation fault when running doc tests
 
   # Needed for test suite on Linux
   - pciutils-libs-cos7-x86_64>=3.5.1
@@ -71,8 +69,6 @@ dependencies:
 
   # Development tooling
   - black  # may be out of sync with pre-commit
-  - cppcheck==2.10.3
+  - cppcheck==2.12.1
   - gcovr>=4.2
   - pre-commit>=2.12.0
-
-

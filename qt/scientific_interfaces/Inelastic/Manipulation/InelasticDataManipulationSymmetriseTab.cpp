@@ -43,6 +43,9 @@ InelasticDataManipulationSymmetriseTab::InelasticDataManipulationSymmetriseTab(Q
   // Handle running, plotting and saving
   connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
   connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
+  connect(m_view.get(), SIGNAL(showMessageBox(const QString &)), this, SIGNAL(showMessageBox(const QString &)));
+
+  m_model->setIsPositiveReflect(true);
   m_view->setDefaults();
 }
 
@@ -76,7 +79,7 @@ void InelasticDataManipulationSymmetriseTab::run() {
   // Handle algorithm completion signal
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
-  // Execute algorithm on seperate thread
+  // Execute the algorithm on a separated thread
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -108,9 +111,12 @@ void InelasticDataManipulationSymmetriseTab::preview() {
 
   m_view->setRawPlotWatchADS(false);
 
-  // Do nothing if no data has been laoded
+  // Do nothing if no data has been loaded
   QString workspaceName = m_view->getInputName();
   if (workspaceName.isEmpty())
+    return;
+
+  if (!m_view->verifyERange(workspaceName))
     return;
 
   long spectrumNumber = static_cast<long>(m_view->getPreviewSpec());
@@ -151,7 +157,7 @@ void InelasticDataManipulationSymmetriseTab::setFileExtensionsByName(bool filter
 }
 
 void InelasticDataManipulationSymmetriseTab::handleEnumValueChanged(QtProperty *prop, int value) {
-  if (prop->propertyName() == "Reflect Type") {
+  if (prop->propertyName() == "ReflectType") {
     m_model->setIsPositiveReflect(value == 0);
   }
 }
@@ -159,12 +165,13 @@ void InelasticDataManipulationSymmetriseTab::handleEnumValueChanged(QtProperty *
 void InelasticDataManipulationSymmetriseTab::handleDoubleValueChanged(QtProperty *prop, double value) {
   if (prop->propertyName() == "Spectrum No") {
     m_view->replotNewSpectrum(value);
-  } else if (prop->propertyName() == "EMin") {
-    m_view->verifyERange(prop, value);
-    m_model->setEMin(m_view->getEMin());
-  } else if (prop->propertyName() == "EMax") {
-    m_view->verifyERange(prop, value);
-    m_model->setEMax(m_view->getEMax());
+  } else {
+    m_view->updateRangeSelectors(prop, value);
+    if (prop->propertyName() == "Elow") {
+      m_model->getIsPositiveReflect() ? m_model->setEMin(value) : m_model->setEMax((-1) * value);
+    } else if (prop->propertyName() == "Ehigh") {
+      m_model->getIsPositiveReflect() ? m_model->setEMax(value) : m_model->setEMin((-1) * value);
+    }
   }
 }
 

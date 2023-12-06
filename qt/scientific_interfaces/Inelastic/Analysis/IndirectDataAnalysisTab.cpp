@@ -7,7 +7,7 @@
 #include "IndirectDataAnalysisTab.h"
 #include "IndirectSettingsHelper.h"
 
-#include "IndirectAddWorkspaceDialog.h"
+#include "FitTabConstants.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
@@ -67,11 +67,13 @@ size_t IndirectDataAnalysisTab::getNumberOfSpecificFunctionContained(const std::
   }
 }
 
-IndirectDataAnalysisTab::IndirectDataAnalysisTab(IndirectFittingModel *model, QWidget *parent)
-    : IndirectTab(parent), m_fittingModel(model), m_runButton() {}
+IndirectDataAnalysisTab::IndirectDataAnalysisTab(std::string const &tabName, bool const hasResolution, QWidget *parent)
+    : IndirectTab(parent), m_uiForm(new Ui::IndirectFitTab), m_tabName(tabName), m_hasResolution(hasResolution) {
+  m_uiForm->setupUi(parent);
+}
 
 void IndirectDataAnalysisTab::setup() {
-  connect(m_runButton, SIGNAL(clicked()), this, SLOT(runTab()));
+  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab()));
   updateResultOptions();
 
   connect(m_outOptionsPresenter.get(), SIGNAL(plotSpectra()), this, SLOT(plotSelectedSpectra()));
@@ -113,31 +115,26 @@ void IndirectDataAnalysisTab::connectFitPropertyBrowser() {
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(respondToFunctionChanged()));
 }
 
-void IndirectDataAnalysisTab::setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter) {
-  m_dataPresenter = std::move(presenter);
+void IndirectDataAnalysisTab::setupOutputOptionsPresenter(bool const editResults) {
+  m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(m_uiForm->ovOutputOptionsView);
+  m_outOptionsPresenter->setEditResultVisible(editResults);
 }
 
-void IndirectDataAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
-  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(view);
+void IndirectDataAnalysisTab::setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds) {
+  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(m_uiForm->dockArea->m_fitPlotView);
   m_plotPresenter->setFittingData(m_dataPresenter->getFittingData());
   m_plotPresenter->setFitOutput(m_fittingModel->getFitOutput());
+  if (xPlotBounds) {
+    m_plotPresenter->setXBounds(*xPlotBounds);
+  }
   m_plotPresenter->updatePlots();
 }
 
-void IndirectDataAnalysisTab::setOutputOptionsView(IIndirectFitOutputOptionsView *view) {
-  m_outOptionsPresenter = std::make_unique<IndirectFitOutputOptionsPresenter>(view);
+void IndirectDataAnalysisTab::setRunIsRunning(bool running) {
+  m_uiForm->pbRun->setText(running ? "Running..." : "Run");
 }
 
-void IndirectDataAnalysisTab::setFitPropertyBrowser(IndirectFitPropertyBrowser *browser) {
-  browser->init();
-  m_fitPropertyBrowser = browser;
-}
-
-void IndirectDataAnalysisTab::setRunButton(QPushButton *runButton) { m_runButton = runButton; }
-
-void IndirectDataAnalysisTab::setRunIsRunning(bool running) { m_runButton->setText(running ? "Running..." : "Run"); }
-
-void IndirectDataAnalysisTab::setRunEnabled(bool enable) { m_runButton->setEnabled(enable); }
+void IndirectDataAnalysisTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
 void IndirectDataAnalysisTab::setFileExtensionsByName(bool filter) {
   auto const tab = getTabName();
@@ -525,7 +522,7 @@ void IndirectDataAnalysisTab::setPDFWorkspace(std::string const &workspaceName) 
 
 void IndirectDataAnalysisTab::updateParameterEstimationData() {
   m_fitPropertyBrowser->updateParameterEstimationData(
-      m_dataPresenter->getDataForParameterEstimation(getEstimationDataSelector()));
+      m_dataPresenter->getDataForParameterEstimation(m_fitPropertyBrowser->getEstimationDataSelector()));
   const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(), getSelectedSpectrum());
   // If we haven't fit the data yet we may update the guess
   if (!isFit) {
@@ -636,7 +633,9 @@ void IndirectDataAnalysisTab::respondToDataChanged() {
 }
 
 void IndirectDataAnalysisTab::respondToDataAdded(IAddWorkspaceDialog const *dialog) {
-  addDataToModel(dialog);
+  if (m_dataPresenter->addWorkspaceFromDialog(dialog)) {
+    m_fittingModel->addDefaultParameters();
+  }
   updateDataReferences();
   auto displayNames = m_dataPresenter->createDisplayNames();
   m_plotPresenter->appendLastDataToSelection(displayNames);
@@ -677,11 +676,25 @@ void IndirectDataAnalysisTab::respondToFunctionChanged() {
   m_fittingModel->setFitTypeString(getFitTypeString());
 }
 
-void IndirectDataAnalysisTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
-    m_dataPresenter->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
-    m_fittingModel->addDefaultParameters();
+std::string IndirectDataAnalysisTab::getFitTypeString() const {
+  auto const multiDomainFunction = m_fittingModel->getFitFunction();
+  if (!multiDomainFunction || multiDomainFunction->nFunctions() == 0) {
+    return "NoCurrentFunction";
   }
+
+  std::string fitType{""};
+  for (auto fitFunctionName : FUNCTION_STRINGS) {
+    auto occurances = getNumberOfCustomFunctions(fitFunctionName.first);
+    if (occurances > 0) {
+      fitType += std::to_string(occurances) + fitFunctionName.second;
+    }
+  }
+
+  if (getNumberOfCustomFunctions("DeltaFunction") > 0) {
+    fitType += "Delta";
+  }
+
+  return fitType;
 }
 
 } // namespace IDA

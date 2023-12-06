@@ -79,6 +79,7 @@ public:
                                  const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void updatePlotGuess(const MatrixWorkspace_const_sptr &sampleWorkspace);
   void setErrorsEnabled(bool enabled);
+  EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void estimateFunctionParameters();
   void setBackgroundA0(double value);

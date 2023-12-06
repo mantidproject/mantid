@@ -9,8 +9,10 @@ from unittest import mock
 from unittest.mock import patch
 from numpy import isnan, nan
 
+from mantid import FunctionFactory
 from mantid.kernel import UnitParams, UnitParametersMap
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting import plot_model
+from mantid.api import CompositeFunction
 
 plot_model_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_model"
 
@@ -69,6 +71,19 @@ class FittingPlotModelTest(unittest.TestCase):
         self.assertEqual({"mocked_ws"}, self.model.plotted_workspaces)
         ax.remove_workspace_artists.assert_not_called()
 
+    def _get_fwhm_values(self, func_str, func_index):
+        comp_func = FunctionFactory.createInitialized(func_str)
+        peak_func_names = FunctionFactory.getPeakFunctionNames()
+        if isinstance(comp_func, CompositeFunction):
+            peak_funcs = [func for func in comp_func if func.name() in peak_func_names]
+            func = peak_funcs[func_index]
+        else:
+            func = comp_func
+        peak_func = FunctionFactory.Instance().createPeakFunction(func.name())
+        for param_index in range(0, func.nParams()):
+            peak_func.setParameter(param_index, func.getParameterValue(param_index))
+        return [peak_func.fwhm(), 0.0]
+
     def test_removing_all_workspaces_from_plot(self):
         self.model.plotted_workspaces.update({"mocked_ws", "mock_ws_2"})
         ax = mock.MagicMock()
@@ -78,6 +93,32 @@ class FittingPlotModelTest(unittest.TestCase):
         self.assertEqual(set(), self.model.plotted_workspaces)
         self.assertEqual(1, ax.cla.call_count)
 
+    def _setup_update_fit_test(self, mock_table_values, mock_ads, mock_get_diffs, func_str, peak_center_params=None):
+        if peak_center_params is None:
+            peak_center_params = []
+        mock_table = mock.MagicMock()
+        mock_table.toDict.return_value = mock_table_values
+        mock_ads.retrieve.return_value = mock_table
+        difc = 10000
+        params = UnitParametersMap()
+        params[UnitParams.difc] = difc
+        mock_get_diffs.return_value = params
+        fitprop = {
+            "properties": {
+                "InputWorkspace": "name1",
+                "Output": "name1",
+                "StartX": 50000,
+                "EndX": 52000,
+                "Function": func_str,
+                "ConvolveMembers": True,
+                "OutputCompositeMembers": True,
+            },
+            "status": "success",
+            "peak_centre_params": peak_center_params,
+            "version": 1,
+        }
+        return fitprop
+
     @patch(plot_model_path + ".FittingPlotModel._get_diff_constants")
     @patch(plot_model_path + ".FittingPlotModel.create_fit_tables")
     @patch(plot_model_path + ".ADS")
@@ -85,33 +126,13 @@ class FittingPlotModelTest(unittest.TestCase):
         mock_loaded_ws_list = mock.MagicMock()
         mock_active_ws_list = mock.MagicMock()
         mock_log_ws_name = mock.MagicMock()
-        mock_table = mock.MagicMock()
-        mock_table.toDict.return_value = {
+        mock_table_return_values = {
             "Name": ["f0.Height", "f0.PeakCentre", "f0.Sigma", "f1.Height", "f1.PeakCentre", "f1.Sigma", "Cost function value"],
             "Value": [11.0, 40000.0, 54.0, 10.0, 30000.0, 51.0, 1.0],
             "Error": [1.0, 10.0, 2.0, 1.0, 10.0, 2.0, 0.0],
         }
-        mock_ads.retrieve.return_value = mock_table
-        difc = 10000
-        params = UnitParametersMap()
-        params[UnitParams.difc] = difc
-        mock_get_diffs.return_value = params
         func_str = "name=Gaussian,Height=11,PeakCentre=40000,Sigma=54;name=Gaussian,Height=10,PeakCentre=30000,Sigma=51"
-        fitprop = {
-            "name": "Fit",
-            "properties": {
-                "ConvolveMembers": True,
-                "EndX": 52000,
-                "Function": func_str,
-                "InputWorkspace": "name1",
-                "Output": "name1",
-                "OutputCompositeMembers": True,
-                "StartX": 50000,
-            },
-            "status": "success",
-            "peak_centre_params": ["Gaussian_PeakCentre"],
-            "version": 1,
-        }
+        fitprop = self._setup_update_fit_test(mock_table_return_values, mock_ads, mock_get_diffs, func_str, ["Gaussian_PeakCentre"])
         self.model.update_fit([fitprop], mock_loaded_ws_list, mock_active_ws_list, mock_log_ws_name)
 
         self.assertEqual(self.model._fit_results["name1"]["model"], func_str)
@@ -122,10 +143,144 @@ class FittingPlotModelTest(unittest.TestCase):
                 "Gaussian_PeakCentre": [[40000.0, 10.0], [30000.0, 10.0]],
                 "Gaussian_PeakCentre_dSpacing": [[4.0, 1.0e-3], [3.0, 1.0e-3]],
                 "Gaussian_Sigma": [[54.0, 2.0], [51.0, 2.0]],
+                "Gaussian_fwhm": [self._get_fwhm_values(func_str, 0), self._get_fwhm_values(func_str, 1)],
             },
         )
         mock_create_fit_tables.assert_called_once_with(mock_loaded_ws_list, mock_active_ws_list, mock_log_ws_name)
         self.assertEqual(mock_get_diffs.call_count, 4)  # twice for each peak
+
+    @patch(plot_model_path + ".FittingPlotModel._convert_TOFerror_to_derror")
+    @patch(plot_model_path + ".FittingPlotModel._convert_TOF_to_d")
+    @patch(plot_model_path + ".FittingPlotModel._get_diff_constants")
+    @patch(plot_model_path + ".FittingPlotModel.create_fit_tables")
+    @patch(plot_model_path + ".ADS")
+    def test_update_fit_with_single_user_function(
+        self, mock_ads, mock_create_fit_tables, mock_get_diffs, mock_conv_tof_to_d, mock_conv_tof_e
+    ):
+        mock_loaded_ws_list = mock.MagicMock()
+        mock_active_ws_list = mock.MagicMock()
+        mock_log_ws_name = mock.MagicMock()
+        mock_conv_tof_to_d.return_value = 1.0
+        mock_conv_tof_e.return_value = 0.5
+        mock_table_return_values = {
+            "Name": ["A0", "Phi", "Nu", "Cost function value"],
+            "Value": [1.3, 0.01, 0.1, 1.7],
+            "Error": [0.5, 0.4, 4.5, 0.0],
+        }
+        func_str = "name=Bessel,A0=-1.03469,Phi=-0.017227,Nu=0.100225"
+        fitprop = self._setup_update_fit_test(mock_table_return_values, mock_ads, mock_get_diffs, func_str)
+
+        self.model.update_fit([fitprop], mock_loaded_ws_list, mock_active_ws_list, mock_log_ws_name)
+
+        self.assertEqual(self.model._fit_results["name1"]["model"], func_str)
+        self.assertEqual(
+            self.model._fit_results["name1"]["results"],
+            {"Bessel_A0": [[1.3, 0.5]], "Bessel_Phi": [[0.01, 0.4]], "Bessel_Nu": [[0.1, 4.5]]},
+        )
+
+    @patch(plot_model_path + ".FittingPlotModel._convert_TOFerror_to_derror")
+    @patch(plot_model_path + ".FittingPlotModel._convert_TOF_to_d")
+    @patch(plot_model_path + ".FittingPlotModel._get_diff_constants")
+    @patch(plot_model_path + ".FittingPlotModel.create_fit_tables")
+    @patch(plot_model_path + ".ADS")
+    def test_update_fit_with_single_peak_function(
+        self, mock_ads, mock_create_fit_tables, mock_get_diffs, mock_conv_tof_to_d, mock_conv_tof_e
+    ):
+        mock_loaded_ws_list = mock.MagicMock()
+        mock_active_ws_list = mock.MagicMock()
+        mock_log_ws_name = mock.MagicMock()
+        mock_conv_tof_to_d.return_value = 1.0
+        mock_conv_tof_e.return_value = 0.5
+        mock_table_return_values = {
+            "Name": ["Height", "Centre", "Radius", "Cost function value"],
+            "Value": [16.0, 38613.0, 0.65, 1.7],
+            "Error": [nan, nan, 0.0, 0.0],
+        }
+        mock_conv_tof_to_d.return_value = 1.0
+        mock_conv_tof_e.return_value = 0.5
+        func_str = "name=ElasticIsoRotDiff,Q=0.3,Height=20.2136,Centre=23666.0,Radius=0.98"
+        fitprop = self._setup_update_fit_test(mock_table_return_values, mock_ads, mock_get_diffs, func_str, ["ElasticIsoRotDiff_Centre"])
+
+        self.model.update_fit([fitprop], mock_loaded_ws_list, mock_active_ws_list, mock_log_ws_name)
+
+        self.assertEqual(self.model._fit_results["name1"]["model"], func_str)
+        self.assertEqual(
+            self.model._fit_results["name1"]["results"],
+            {
+                "ElasticIsoRotDiff_Height": [[16.0, nan]],
+                "ElasticIsoRotDiff_Centre": [[38613.0, nan]],
+                "ElasticIsoRotDiff_Centre_dSpacing": [[1.0, 0.5]],
+                "ElasticIsoRotDiff_Radius": [[0.65, 0.0]],
+                "ElasticIsoRotDiff_fwhm": [self._get_fwhm_values(func_str, 0)],
+            },
+        )
+
+    @patch(plot_model_path + ".FittingPlotModel._convert_TOFerror_to_derror")
+    @patch(plot_model_path + ".FittingPlotModel._convert_TOF_to_d")
+    @patch(plot_model_path + ".FittingPlotModel._get_diff_constants")
+    @patch(plot_model_path + ".FittingPlotModel.create_fit_tables")
+    @patch(plot_model_path + ".ADS")
+    def test_update_fit_with_composite_peak_and_user_function(
+        self, mock_ads, mock_create_fit_tables, mock_get_diffs, mock_conv_tof_to_d, mock_conv_tof_e
+    ):
+        mock_loaded_ws_list = mock.MagicMock()
+        mock_active_ws_list = mock.MagicMock()
+        mock_log_ws_name = mock.MagicMock()
+        mock_table_return_values = {
+            "Name": [
+                "f0.Height",
+                "f0.Centre",
+                "f0.Radius",
+                "f1.I",
+                "f1.A",
+                "f1.B",
+                "f1.X0",
+                "f1.S",
+                "f2.A0",
+                "f2.Phi",
+                "f2.Nu",
+                "Cost function value",
+            ],
+            "Value": [16.0, 38613.0, 0.65, 1600.0, 0.06, 0.02, 23695.6, 14.1, 1.3, 0.01, 0.1, 1.7],
+            "Error": [nan, nan, 0.0, 25.75, 0.0, 0.0, 0.65, 0.945, 0.5, 0.4, 4.5, 0.0],
+        }
+        mock_conv_tof_to_d.return_value = 1.0
+        mock_conv_tof_e.return_value = 0.5
+        func_str = (
+            "name=ElasticIsoRotDiff,Q=0.3,Height=20.2136,Centre=23666.0,Radius=0.98;"
+            "name=BackToBackExponential,I=1600.0,A=0.06,B=0.02,X0=23695.6,S=14.1,ties=(A=0.06,B=0.02);"
+            "name=Bessel,A0=-1.03469,Phi=-0.017227,Nu=0.100225"
+        )
+        fitprop = self._setup_update_fit_test(
+            mock_table_return_values,
+            mock_ads,
+            mock_get_diffs,
+            func_str,
+            peak_center_params=["ElasticIsoRotDiff_Centre", "BackToBackExponential_X0"],
+        )
+        self.model.update_fit([fitprop], mock_loaded_ws_list, mock_active_ws_list, mock_log_ws_name)
+
+        self.assertEqual(self.model._fit_results["name1"]["model"], func_str)
+        self.assertEqual(
+            self.model._fit_results["name1"]["results"],
+            {
+                "ElasticIsoRotDiff_Height": [[16.0, nan]],
+                "ElasticIsoRotDiff_Centre": [[38613.0, nan]],
+                "ElasticIsoRotDiff_Centre_dSpacing": [[1.0, 0.5]],
+                "ElasticIsoRotDiff_Radius": [[0.65, 0.0]],
+                "ElasticIsoRotDiff_fwhm": [self._get_fwhm_values(func_str, 0)],
+                "BackToBackExponential_I": [[1600.0, 25.75]],
+                "BackToBackExponential_A": [[0.06, 0.0]],
+                "BackToBackExponential_B": [[0.02, 0.0]],
+                "BackToBackExponential_X0": [[23695.6, 0.65]],
+                "BackToBackExponential_X0_dSpacing": [[1.0, 0.5]],
+                "BackToBackExponential_S": [[14.1, 0.945]],
+                "BackToBackExponential_fwhm": [self._get_fwhm_values(func_str, 1)],
+                "Bessel_A0": [[1.3, 0.5]],
+                "Bessel_Phi": [[0.01, 0.4]],
+                "Bessel_Nu": [[0.1, 4.5]],
+            },
+        )
 
     def setup_test_create_fit_tables(self, mock_create_ws, mock_create_table, mock_groupws):
         loaded_ws_list = ["name1", "name2"]

@@ -39,7 +39,8 @@ public:
 
 } // namespace
 
-ConvTemplateBrowser::ConvTemplateBrowser(QWidget *parent) : FunctionTemplateBrowser(parent), m_presenter(this) {
+ConvTemplateBrowser::ConvTemplateBrowser(std::unique_ptr<ConvFunctionModel> functionModel, QWidget *parent)
+    : FunctionTemplateBrowser(parent), m_presenter(this, std::move(functionModel)) {
   m_templateSubTypes.emplace_back(std::make_unique<LorentzianSubType>());
   m_templateSubTypes.emplace_back(std::make_unique<FitSubType>());
   m_templateSubTypes.emplace_back(std::make_unique<BackgroundSubType>());
@@ -321,6 +322,10 @@ void ConvTemplateBrowser::setParameterValueQuiet(ParamID id, double value, doubl
   auto prop = m_parameterReverseMap[id];
   m_parameterManager->setValue(prop, value);
   m_parameterManager->setError(prop, error);
+}
+
+EstimationDataSelector ConvTemplateBrowser::getEstimationDataSelector() const {
+  return m_presenter.getEstimationDataSelector();
 }
 
 void ConvTemplateBrowser::updateParameterEstimationData(DataForParameterEstimationCollection &&) {}

@@ -138,7 +138,7 @@ class SamplingImage(MantidImage):
         this limits the range that the data will be sampled. Return True or False if extents have changed.
         """
         new_extent = self.axes.get_xlim() + self.axes.get_ylim()
-        if new_extent != self.get_extent():
+        if list(new_extent) != self.get_extent():
             self.set_extent(new_extent)
             return True
         else:

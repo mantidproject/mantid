@@ -7,7 +7,6 @@
 #pragma once
 
 #include "Analysis/IDAFunctionParameterEstimation.h"
-#include "Analysis/IFQFitObserver.h"
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
 #include "SingleFunctionTemplateModel.h"
@@ -34,8 +33,7 @@ class MANTIDQT_INELASTIC_DLL SingleFunctionTemplatePresenter : public QObject {
   Q_OBJECT
 public:
   explicit SingleFunctionTemplatePresenter(SingleFunctionTemplateBrowser *view,
-                                           const std::map<std::string, std::string> &functionInitialisationStrings,
-                                           std::unique_ptr<IDAFunctionParameterEstimation> parameterEstimation);
+                                           std::unique_ptr<SingleFunctionTemplateModel> functionModel);
   void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings);
   void setFitType(const QString &name);
 
@@ -56,6 +54,7 @@ public:
   void setCurrentDataset(int i);
   void setDatasets(const QList<FunctionModelDataset> &datasets);
   void setErrorsEnabled(bool enabled);
+  EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
   void estimateFunctionParameters();
 
@@ -79,7 +78,7 @@ private:
   void setLocalParameterTie(const QString &parName, int i, const QString &tie);
   void updateView();
   SingleFunctionTemplateBrowser *m_view;
-  SingleFunctionTemplateModel m_model;
+  std::unique_ptr<SingleFunctionTemplateModel> m_model;
   EditLocalParameterDialog *m_editLocalParameterDialog;
 };
 

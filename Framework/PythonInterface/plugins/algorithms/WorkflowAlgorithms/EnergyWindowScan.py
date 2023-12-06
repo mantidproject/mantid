@@ -136,12 +136,11 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         self.declareProperty(name="ScanWorkspace", defaultValue="Scan", doc="Workspace for the scan results.")
 
     def PyExec(self):
-
         self._setup()
 
         process_prog = Progress(self, start=0.1, end=0.9, nreports=4)
         process_prog.report("Energy Transfer")
-        scan_alg = self.createChildAlgorithm("ISISIndirectEnergyTransferWrapper", 0.05, 0.95)
+        scan_alg = self.createChildAlgorithm("ISISIndirectEnergyTransfer", 0.05, 0.95)
         scan_alg.setProperty("InputFiles", self._data_files)
         scan_alg.setProperty("SumFiles", self._sum_files)
         scan_alg.setProperty("LoadLogFiles", self._load_logs)

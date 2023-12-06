@@ -100,7 +100,7 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
     actions = availableActions.get();
   actions.insert({"Plot Spectra", "Plot Spectra"});
   actions.insert({"Plot Bins", "Plot Bins"});
-  actions.insert({"Plot Contour", "Plot Contour"});
+  actions.insert({"Open Slice Viewer", "Open Slice Viewer"});
   actions.insert({"Plot Tiled", "Plot Tiled"});
   return actions;
 }
@@ -224,13 +224,13 @@ void IndirectPlotOptionsModel::plotBins(std::string const &binIndices) {
     m_plotter->plotBins(workspaceName.get(), binIndices, IndirectSettingsHelper::externalPlotErrorBars());
 }
 
-void IndirectPlotOptionsModel::plotContour() {
+void IndirectPlotOptionsModel::showSliceViewer() {
   auto const workspaceName = workspace();
   auto const unitName = unit();
 
   if (workspaceName) {
     std::string plotWorkspaceName = unitName ? convertUnit(workspaceName.get(), unitName.get()) : workspaceName.get();
-    m_plotter->plotContour(plotWorkspaceName);
+    m_plotter->showSliceViewer(plotWorkspaceName);
   }
 }
 

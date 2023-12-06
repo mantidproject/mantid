@@ -74,7 +74,6 @@ set(SRC_FILES
     src/TransformHKL.cpp
 )
 
-set(SRC_UNITY_IGNORE_FILES)
 set(INC_FILES
     inc/MantidCrystal/AddPeakHKL.h
     inc/MantidCrystal/AnvredCorrection.h
@@ -225,11 +224,6 @@ set(TEST_FILES
     StatisticsOfPeaksWorkspaceTest.h
     TransformHKLTest.h
 )
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(Crystal SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})

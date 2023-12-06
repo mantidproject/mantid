@@ -366,10 +366,14 @@ private:
     saveAlg->setProperty("Filename", parameters.filename);
     saveAlg->setProperty("InputWorkspace", workspace);
     saveAlg->setProperty("RadiationSource", parameters.radiationSource);
+    saveAlg->setProperty("Geometry", parameters.geometry);
+    saveAlg->setProperty("SampleHeight", parameters.beamHeight);
+    saveAlg->setProperty("SampleWidth", parameters.beamWidth);
     if (!parameters.detectors.empty()) {
       std::string detectorsAsString = concatenateStringVector(parameters.detectors);
       saveAlg->setProperty("DetectorNames", detectorsAsString);
     }
+    saveAlg->setProperty("SampleThickness", parameters.sampleThickness);
 
     if (transmission) {
       saveAlg->setProperty("Transmission", transmission);
@@ -435,6 +439,34 @@ private:
     TSM_ASSERT_EQUALS("Radiation sources should match.", radiationValue, radiationSource);
   }
 
+  void do_assert_aperture(H5::Group &aperture, const std::string &beamShape, const double &beamHeight,
+                          const double &beamWidth) {
+
+    auto numAttributes = aperture.getNumAttrs();
+    TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);
+
+    // canSAS_class and NX_class attribute
+    auto classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(aperture, sasclass);
+    TSM_ASSERT_EQUALS("Should be SASaperture class", classAttribute, sasInstrumentApertureClassAttr);
+    classAttribute = Mantid::DataHandling::H5Util::readAttributeAsString(aperture, nxclass);
+    TSM_ASSERT_EQUALS("Should be NXaperture class", classAttribute, nxInstrumentApertureClassAttr);
+
+    // beam_shape data set
+    auto beamShapeDataSet = aperture.openDataSet(sasInstrumentApertureShape);
+    auto beamShapeValue = Mantid::DataHandling::H5Util::readString(beamShapeDataSet);
+    TSM_ASSERT_EQUALS("Beam Shapes should match.", beamShapeValue, beamShape);
+
+    // beam_height data set
+    auto beamHeightDataSet = aperture.openDataSet(sasInstrumentApertureGapHeight);
+    auto beamHeightValue = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(beamHeightDataSet);
+    TSM_ASSERT_EQUALS("Beam height should match.", beamHeightValue[0], beamHeight);
+
+    // beam_width data set
+    auto beamWidthDataSet = aperture.openDataSet(sasInstrumentApertureGapWidth);
+    auto beamWidthValue = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(beamWidthDataSet);
+    TSM_ASSERT_EQUALS("Beam width should match.", beamWidthValue[0], beamWidth);
+  }
+
   void do_assert_detector(H5::Group &instrument, const std::vector<std::string> &detectors) {
     for (auto &detector : detectors) {
       std::string detectorName = sasInstrumentDetectorGroupName + detector;
@@ -477,8 +509,8 @@ private:
   }
 
   void do_assert_instrument(H5::Group &instrument, const std::string &instrumentName, const std::string &idf,
-                            const std::string &radiationSource, const std::vector<std::string> &detectors,
-                            bool invalidDetectors) {
+                            const std::string &radiationSource, const std::string &geometry, const double &beamHeight,
+                            const double &beamWidth, const std::vector<std::string> &detectors, bool invalidDetectors) {
     auto numAttributes = instrument.getNumAttrs();
     TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);
 
@@ -502,6 +534,10 @@ private:
     auto source = instrument.openGroup(sasInstrumentSourceGroupName);
     do_assert_source(source, radiationSource);
 
+    // Check aperture
+    auto aperture = instrument.openGroup(sasInstrumentApertureGroupName);
+    do_assert_aperture(aperture, geometry, beamHeight, beamWidth);
+
     // Check detectors
     if (!invalidDetectors) {
       do_assert_detector(instrument, detectors);
@@ -509,6 +545,16 @@ private:
       // Make sure that no SASdetector group exists
       do_assert_no_detectors(instrument);
     }
+  }
+
+  void do_assert_sample(H5::Group &sample, const double thickness) {
+    auto numAttributes = sample.getNumAttrs();
+    TSM_ASSERT_EQUALS("Should have 2 attribute", 2, numAttributes);
+
+    // sample thickness data set
+    auto thicknessDataSet = sample.openDataSet(sasInstrumentSampleThickness);
+    auto thicknessValue = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(thicknessDataSet);
+    TSM_ASSERT_EQUALS("Sample thickness should match.", thicknessValue[0], thickness);
   }
 
   void do_assert_process(H5::Group &process, const bool &hasSampleRuns, const bool &hasCanRuns,
@@ -840,7 +886,12 @@ private:
     // Check instrument
     auto instrument = entry.openGroup(sasInstrumentGroupName);
     do_assert_instrument(instrument, parameters.instrumentName, parameters.idf, parameters.radiationSource,
-                         parameters.detectors, parameters.invalidDetectors);
+                         parameters.geometry, parameters.beamHeight, parameters.beamWidth, parameters.detectors,
+                         parameters.invalidDetectors);
+
+    // Check Sample
+    auto sample = entry.openGroup(sasInstrumentSampleGroupAttr);
+    do_assert_sample(sample, parameters.sampleThickness);
 
     // Check process
     auto process = entry.openGroup(sasProcessGroupName);

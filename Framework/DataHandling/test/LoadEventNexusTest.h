@@ -936,6 +936,20 @@ public:
     }
   }
 
+  void test_load_file_with_empty_periods() {
+    // The file LARMOR00062766.nxs has the number of periods specified as 2, but actually
+    // only one period has any data in it. It should load, but only one workspace instead
+    // of two.
+    // See https://github.com/mantidproject/mantid/issues/33729 for details
+    LoadEventNexus loader;
+    loader.initialize();
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.setPropertyValue("Filename", "LARMOR00062766.nxs");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    auto ws = AnalysisDataService::Instance().retrieve("dummy");
+    TS_ASSERT(!ws->isGroup());
+  }
+
   void test_load_CG3_bad_event_id() {
     // The test file CG3_13118.nxs.h5 being loaded has:
     // bank1: all correct data, only events in this file should end up loaded (6052 events)

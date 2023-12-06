@@ -21,6 +21,16 @@ class SANSInstrument(Enum):
 
 
 @json_serializable
+class SANSDetector(Enum):
+    SANS2D_HAB = "front-detector"
+    SANS2D_LAB = "rear-detector"
+    LOQ_HAB = "HAB"
+    LOQ_LAB = "main-detector-bank"
+    LARMOR_LAB = "DetectorBench"
+    ZOOM_LAB = "rear-detector"
+
+
+@json_serializable
 class SANSFacility(Enum):
     NO_FACILITY = "No Facility"
     ISIS = "ISIS"

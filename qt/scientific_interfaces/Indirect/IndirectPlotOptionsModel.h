@@ -48,8 +48,8 @@ public:
 
   virtual void plotSpectra();
   virtual void plotBins(std::string const &binIndices);
-  virtual void plotContour();
   virtual void plotTiled();
+  virtual void showSliceViewer();
 
   boost::optional<std::string> singleDataPoint(MantidAxis const &axisType) const;
 

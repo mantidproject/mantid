@@ -361,13 +361,13 @@ pipeline {
       }
     }
 
-    stage ('Delete old non-main packages from Anaconda') {
+    stage ('Delete old nightly packages from Anaconda') {
       when {
         beforeAgent true
         beforeOptions true
         allOf {
             expression { env.PUBLISH_TO_ANACONDA == 'true' }
-            expression { env.ANACONDA_CHANNEL_LABEL != '' }
+            expression { env.ANACONDA_CHANNEL_LABEL.trim() == 'nightly' }
         }
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
@@ -428,7 +428,13 @@ pipeline {
 
 def git_branch_name() {
   name = scm.branches[0].name
-  if(name.contains("*/")) {
+  // Some jobs define a BRANCH_NAME parameter to allow customisable builds.
+  // In this case the value of scm.branches[0].name will literally be
+  // $BRANCH_NAME and instead we have to get it from the environment.
+  if(name.contains('$BRANCH_NAME')) {
+    name = env.BRANCH_NAME
+  }
+  else if(name.contains("*/")) {
     name = name.split("\\*/")[1]
   }
   return name

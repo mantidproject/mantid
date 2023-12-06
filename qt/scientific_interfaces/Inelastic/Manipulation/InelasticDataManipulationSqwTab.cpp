@@ -30,54 +30,28 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-InelasticDataManipulationSqwTab::InelasticDataManipulationSqwTab(QWidget *parent)
+InelasticDataManipulationSqwTab::InelasticDataManipulationSqwTab(QWidget *parent, ISqwView *view)
     : InelasticDataManipulationTab(parent), m_model(std::make_unique<InelasticDataManipulationSqwTabModel>()),
-      m_view(std::make_unique<InelasticDataManipulationSqwTabView>(parent)) {
+      m_view(view) {
+  m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
-      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraContour));
-  connectSignals();
+      std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSlice));
 }
 
 void InelasticDataManipulationSqwTab::setup() {}
 
 /**
- * Connects the signals in the interface.
- *
- */
-
-void InelasticDataManipulationSqwTab::connectSignals() {
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sqwAlgDone(bool)));
-
-  connect(m_view.get(), SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(QString const &)));
-  connect(m_view.get(), SIGNAL(qLowChanged(double)), this, SLOT(qLowChanged(double)));
-  connect(m_view.get(), SIGNAL(qWidthChanged(double)), this, SLOT(qWidthChanged(double)));
-  connect(m_view.get(), SIGNAL(qHighChanged(double)), this, SLOT(qHighChanged(double)));
-  connect(m_view.get(), SIGNAL(eLowChanged(double)), this, SLOT(eLowChanged(double)));
-  connect(m_view.get(), SIGNAL(eWidthChanged(double)), this, SLOT(eWidthChanged(double)));
-  connect(m_view.get(), SIGNAL(eHighChanged(double)), this, SLOT(eHighChanged(double)));
-  connect(m_view.get(), SIGNAL(rebinEChanged(int)), this, SLOT(rebinEChanged(int)));
-
-  connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
-  connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
-
-  connect(m_view.get(), SIGNAL(showMessageBox(const QString &)), this, SIGNAL(showMessageBox(const QString &)));
-
-  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), m_view.get(),
-          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
-}
-
-/**
  * Handles the event of data being loaded. Validates the loaded data.
  *
  */
-void InelasticDataManipulationSqwTab::handleDataReady(QString const &dataName) {
+void InelasticDataManipulationSqwTab::handleDataReady(std::string const &dataName) {
   if (m_view->validate()) {
-    m_model->setInputWorkspace(dataName.toStdString());
+    m_model->setInputWorkspace(dataName);
     try {
-      double eFixed = getEFixed(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName.toStdString()));
+      double eFixed = getEFixed(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName));
       m_model->setEFixed(eFixed);
     } catch (std::runtime_error const &ex) {
-      emit showMessageBox(ex.what());
+      m_view->showMessageBox(ex.what());
       return;
     }
     plotRqwContour();
@@ -90,7 +64,7 @@ bool InelasticDataManipulationSqwTab::validate() {
   auto const errorMessage = uiv.generateErrorMessage();
   // Show an error message if needed
   if (!errorMessage.isEmpty())
-    emit showMessageBox(errorMessage);
+    m_view->showMessageBox(errorMessage.toStdString());
   return errorMessage.isEmpty();
 }
 
@@ -98,6 +72,9 @@ void InelasticDataManipulationSqwTab::run() {
   m_model->setupRebinAlgorithm(m_batchAlgoRunner);
   m_model->setupSofQWAlgorithm(m_batchAlgoRunner);
   m_model->setupAddSampleLogAlgorithm(m_batchAlgoRunner);
+
+  m_view->setRunButtonText("Running...");
+  m_view->setEnableOutputOptions(false);
 
   m_batchAlgoRunner->executeBatch();
 }
@@ -107,11 +84,12 @@ void InelasticDataManipulationSqwTab::run() {
  *
  * @param error If the algorithm chain failed
  */
-void InelasticDataManipulationSqwTab::sqwAlgDone(bool error) {
+void InelasticDataManipulationSqwTab::runComplete(bool error) {
   if (!error) {
     setOutputPlotOptionsWorkspaces({m_model->getOutputWorkspace()});
-    m_view->setSaveEnabled(true);
   }
+  m_view->setRunButtonText("Run");
+  m_view->setEnableOutputOptions(!error);
 }
 
 /**
@@ -126,7 +104,7 @@ void InelasticDataManipulationSqwTab::plotRqwContour() {
       m_view->plotRqwContour(rqwWorkspace);
   } catch (std::exception const &ex) {
     g_log.warning(ex.what());
-    showMessageBox("Invalid file. Please load a valid reduced workspace.");
+    m_view->showMessageBox("Invalid file. Please load a valid reduced workspace.");
   }
 }
 
@@ -137,25 +115,25 @@ void InelasticDataManipulationSqwTab::setFileExtensionsByName(bool filter) {
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
-void InelasticDataManipulationSqwTab::runClicked() { runTab(); }
+void InelasticDataManipulationSqwTab::handleRunClicked() { runTab(); }
 
-void InelasticDataManipulationSqwTab::saveClicked() {
+void InelasticDataManipulationSqwTab::handleSaveClicked() {
   if (checkADSForPlotSaveWorkspace(m_model->getOutputWorkspace(), false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_model->getOutputWorkspace()));
   m_batchAlgoRunner->executeBatch();
 }
 
-void InelasticDataManipulationSqwTab::qLowChanged(double value) { m_model->setQMin(value); }
+void InelasticDataManipulationSqwTab::handleQLowChanged(double const value) { m_model->setQMin(value); }
 
-void InelasticDataManipulationSqwTab::qWidthChanged(double value) { m_model->setQWidth(value); }
+void InelasticDataManipulationSqwTab::handleQWidthChanged(double const value) { m_model->setQWidth(value); }
 
-void InelasticDataManipulationSqwTab::qHighChanged(double value) { m_model->setQMax(value); }
+void InelasticDataManipulationSqwTab::handleQHighChanged(double const value) { m_model->setQMax(value); }
 
-void InelasticDataManipulationSqwTab::eLowChanged(double value) { m_model->setEMin(value); }
+void InelasticDataManipulationSqwTab::handleELowChanged(double const value) { m_model->setEMin(value); }
 
-void InelasticDataManipulationSqwTab::eWidthChanged(double value) { m_model->setEWidth(value); }
+void InelasticDataManipulationSqwTab::handleEWidthChanged(double const value) { m_model->setEWidth(value); }
 
-void InelasticDataManipulationSqwTab::eHighChanged(double value) { m_model->setEMax(value); }
+void InelasticDataManipulationSqwTab::handleEHighChanged(double const value) { m_model->setEMax(value); }
 
-void InelasticDataManipulationSqwTab::rebinEChanged(int value) { m_model->setRebinInEnergy(value != 0); }
+void InelasticDataManipulationSqwTab::handleRebinEChanged(int const value) { m_model->setRebinInEnergy(value != 0); }
 } // namespace MantidQt::CustomInterfaces

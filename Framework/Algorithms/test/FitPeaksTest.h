@@ -1072,6 +1072,279 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Test that FitPeaks rejects a peak when
+   * the total count in the peak window is too low
+   * @brief test_lowPeakTotalCount
+   */
+  void test_lowPeakTotalCount() {
+    g_log.notice() << "TEST LOW PEAK TOTAL COUNT";
+    // generate an input workspace
+    const std::string data_ws_name("data_lptc");
+    generateTestDataGaussian(data_ws_name, 1 /*spectra*/, 300 /*data points*/, 1 /*peaks*/);
+
+    // create peak-center and fit-window workspaces for the peak generated above (X=5)
+    std::vector<int> peak_index_vec{0};
+    const std::string peak_center_ws_name = genPeakCenterWorkspace(peak_index_vec, "peakcenter_lptc", 1 /*spectra*/);
+    const std::string fit_window_ws_name =
+        genFitWindowWorkspace(peak_index_vec, "peakwindow_lptc", 1 /*spectra*/, 1.0 /*fit window halfwidth*/);
+
+    // initialize FitPeaks
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCentersWorkspace", peak_center_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitPeakWindowWorkspace", fit_window_ws_name));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("MinimumPeakTotalCount", 60.)); // higher than ~55, the total count in the peak window
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("MaxFitIterations", 200));
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (fitpeaks.isExecuted()) {
+      // check output workspaces
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
+
+      // retrieve fitted parameters
+      API::MatrixWorkspace_sptr peak_params_ws =
+          std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PeakPositionsWS3"));
+      TS_ASSERT(peak_params_ws);
+      // 1 input spectrum
+      TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 1);
+      // 1 input peak
+      TS_ASSERT_EQUALS(peak_params_ws->histogram(0).x().size(), 1);
+      // 1 peak fitted
+      const auto &fitted_positions_0 = peak_params_ws->histogram(0).y();
+      TS_ASSERT_EQUALS(fitted_positions_0.size(), 1);
+      // when the "minimum peak window count" check fails on an individual peak, FitPeaks sets the peak position to -4.
+      TS_ASSERT_DELTA(fitted_positions_0[0], -4, 0);
+
+      // clean algorithm-generated workspaces
+      API::AnalysisDataService::Instance().remove("PeakPositionsWS3");
+      API::AnalysisDataService::Instance().remove("PeakParametersWS3");
+      API::AnalysisDataService::Instance().remove("FittedPeaksWS3");
+    }
+
+    // clean input workspaces
+    API::AnalysisDataService::Instance().remove(peak_center_ws_name);
+    API::AnalysisDataService::Instance().remove(fit_window_ws_name);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that FitPeaks rejects the whole spectrum when
+   * the total count in the spectrum is too low
+   * @brief test_lowSpectrumTotalCount
+   */
+  void test_lowSpectrumTotalCount() {
+    g_log.notice() << "TEST LOW SPECTRUM TOTAL COUNT";
+    // generate an input workspace
+    const std::string data_ws_name("data_lstc");
+    generateTestDataGaussian(data_ws_name, 1 /*spectra*/, 300 /*data points*/, 2 /*peaks*/);
+
+    // create peak-center and fit-window workspaces for the 2 peaks generated above (at X=5 and X=10)
+    std::vector<int> peak_index_vec{0, 1};
+    const std::string peak_center_ws_name = genPeakCenterWorkspace(peak_index_vec, "peakcenter_lstc", 1 /*spectra*/);
+    const std::string fit_window_ws_name =
+        genFitWindowWorkspace(peak_index_vec, "peakwindow_lstc", 1 /*spectra*/, 1.0 /*fit window halfwidth*/);
+
+    // initialize FitPeaks
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 1));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCentersWorkspace", peak_center_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitPeakWindowWorkspace", fit_window_ws_name));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("MinimumPeakTotalCount", 500.)); // higher than ~320, the total count in the spectrum
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("MaxFitIterations", 200));
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (fitpeaks.isExecuted()) {
+      // check output workspaces
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
+
+      // retrieve fitted parameters
+      API::MatrixWorkspace_sptr peak_params_ws =
+          std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PeakPositionsWS3"));
+      TS_ASSERT(peak_params_ws);
+      // 1 input spectrum
+      TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 1);
+      // 2 input peaks
+      TS_ASSERT_EQUALS(peak_params_ws->histogram(0).x().size(), 2);
+      // 2 peaks fitting results
+      const auto &fitted_positions_0 = peak_params_ws->histogram(0).y();
+      TS_ASSERT_EQUALS(fitted_positions_0.size(), 2);
+      // when the "minimum peak window count" check fails on the whole spectrum, FitPeaks sets all peak position in the
+      // spectrum to -1.
+      TS_ASSERT_DELTA(fitted_positions_0[0], -1, 0);
+      TS_ASSERT_DELTA(fitted_positions_0[1], -1, 0);
+
+      // clean algorithm-generated workspaces
+      API::AnalysisDataService::Instance().remove("PeakPositionsWS3");
+      API::AnalysisDataService::Instance().remove("PeakParametersWS3");
+      API::AnalysisDataService::Instance().remove("FittedPeaksWS3");
+    }
+
+    // clean input workspaces
+    API::AnalysisDataService::Instance().remove(peak_center_ws_name);
+    API::AnalysisDataService::Instance().remove(fit_window_ws_name);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that FitPeaks rejects a peak when
+   * the observed peak height is too low
+   * @brief test_lowPeakObservedHeight
+   */
+  void test_lowPeakObservedHeight() {
+    g_log.notice() << "TEST LOW PEAK OBSERVED HEIGHT";
+
+    // generate an input workspace.  This will generate a gaussian peak at X=5 (peak center index is 100).
+    const std::string data_ws_name("data_lpoh");
+    generateTestDataGaussian(data_ws_name, 1 /*spectra*/, 300 /*data points*/, 1 /*peaks*/, 0.05 /*resolution*/);
+
+    // initialize FitPeaks
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 1));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("MinimumPeakHeight", 3.)); // higher than ~2, the input peak height
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("MaxFitIterations", 200));
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (fitpeaks.isExecuted()) {
+      // check output workspaces
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
+
+      // retrieve fitted parameters
+      API::MatrixWorkspace_sptr peak_params_ws =
+          std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PeakPositionsWS3"));
+      TS_ASSERT(peak_params_ws);
+      // 1 input spectrum
+      TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 1);
+      // 1 input peak
+      TS_ASSERT_EQUALS(peak_params_ws->histogram(0).x().size(), 1);
+      // 1 peak fitted
+      const auto &fitted_positions_0 = peak_params_ws->histogram(0).y();
+      TS_ASSERT_EQUALS(fitted_positions_0.size(), 1);
+
+      // If the estimated peak height is below the threshold, FitPeaks sets the peak position to -4.
+      TS_ASSERT_DELTA(fitted_positions_0[0], -4, 0);
+
+      // clean algorithm-generated workspaces
+      API::AnalysisDataService::Instance().remove("PeakPositionsWS3");
+      API::AnalysisDataService::Instance().remove("PeakParametersWS3");
+      API::AnalysisDataService::Instance().remove("FittedPeaksWS3");
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test that FitPeaks rejects a peak when
+   * the fitted peak height is too low
+   * @brief test_lowPeakFittedHeight
+   */
+  void test_lowPeakFittedHeight() {
+    g_log.notice() << "TEST LOW PEAK FITTED HEIGHT";
+
+    // generate an input workspace. This will generate a gaussian peak at X=5 (peak center index is 100).
+    const std::string data_ws_name("data_lpfh");
+    generateTestDataGaussian(data_ws_name, 1 /*spectra*/, 300 /*data points*/, 1 /*peaks*/, 0.05 /*resolution*/);
+
+    // Retrieve the generated workspace and intentionally set the peak maximum to a higher value.
+    // The purpose is to make the peak pass the pre-fit estimated height test, so that the peak could be rejected later,
+    // after fitting
+    API::MatrixWorkspace_sptr input_ws =
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(data_ws_name));
+    input_ws->mutableY(0)[100] = 5.;
+
+    // initialize FitPeaks
+    FitPeaks fitpeaks;
+    fitpeaks.initialize();
+    fitpeaks.setRethrows(true);
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("InputWorkspace", data_ws_name));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 1));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakFunction", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "5.0"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowBoundaryList", "2.5, 6.5"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("MinimumPeakHeight", 3.)); // higher than ~2, the input peak height
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("MaxFitIterations", 200));
+
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
+    TS_ASSERT(fitpeaks.isExecuted());
+    if (fitpeaks.isExecuted()) {
+      // check output workspaces
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
+      TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
+
+      // retrieve fitted parameters
+      API::MatrixWorkspace_sptr peak_params_ws =
+          std::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve("PeakPositionsWS3"));
+      TS_ASSERT(peak_params_ws);
+      // 1 input spectrum
+      TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 1);
+      // 1 input peak
+      TS_ASSERT_EQUALS(peak_params_ws->histogram(0).x().size(), 1);
+      // 1 peak fitted
+      const auto &fitted_positions_0 = peak_params_ws->histogram(0).y();
+      TS_ASSERT_EQUALS(fitted_positions_0.size(), 1);
+
+      // If the "minimum peak height" check fails after fitting, the peak position is set to -3.
+      TS_ASSERT_DELTA(fitted_positions_0[0], -3, 0);
+
+      // clean algorithm-generated workspaces
+      API::AnalysisDataService::Instance().remove("PeakPositionsWS3");
+      API::AnalysisDataService::Instance().remove("PeakParametersWS3");
+      API::AnalysisDataService::Instance().remove("FittedPeaksWS3");
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Test that FitPeaks rejects a peak which has a signal-to-noise ratio below threshold
    * @brief test_signalToNoiseRatio
    */
@@ -1103,15 +1376,8 @@ public:
     const std::string data_ws_name("data_s2nr");
     AnalysisDataService::Instance().addOrReplace(data_ws_name, WS);
 
-    // generate peak and background parameters
-    std::vector<string> par_names;
-    std::vector<double> par_values;
-    createGaussParameters(par_names, par_values);
-
-    // create a peak-index vector for 2 peaks (at X=5 and X=10)
+    // create peak-center and fit-window workspaces for the 2 peaks generated above (at X=5 and X=10)
     std::vector<int> peak_index_vec{0, 1};
-
-    // create peak-center and fit-window workspaces
     const std::string peak_center_ws_name = genPeakCenterWorkspace(peak_index_vec, "peakcenter_s2nr", 1 /*spectra*/);
     const std::string fit_window_ws_name =
         genFitWindowWorkspace(peak_index_vec, "peakwindow_s2nr", 1 /*spectra*/, 1.0 /*fit window halfwidth*/);
@@ -1131,10 +1397,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("MinimumSignalToNoiseRatio", 50.));
 
-    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
-    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
-    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3");
-    fitpeaks.setProperty("MaxFitIterations", 200);
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("MaxFitIterations", 200));
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.execute());
     TS_ASSERT(fitpeaks.isExecuted());
@@ -1156,7 +1422,7 @@ public:
       const auto &fitted_positions_0 = peak_params_ws->histogram(0).y();
       TS_ASSERT_EQUALS(fitted_positions_0.size(), 2); // with 2 peaks to fit
 
-      // If a check, such as signal-to-noise, fails, FitPeaks sets the peak position to -4.
+      // When the "signal-to-noise" check fails, FitPeaks sets the peak position to -4.
       TS_ASSERT_DELTA(fitted_positions_0[0], -4, 0);
       TS_ASSERT_DELTA(fitted_positions_0[1], 10.0, 1.E-2);
 
@@ -1327,8 +1593,6 @@ public:
 
     parnames.emplace_back("PeakCentre");
     parvalues.emplace_back(10.0);
-
-    return;
   }
 
   //----------------------------------------------------------------------------------------------

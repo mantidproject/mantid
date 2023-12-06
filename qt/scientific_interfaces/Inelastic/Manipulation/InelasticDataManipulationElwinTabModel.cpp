@@ -110,6 +110,7 @@ std::string InelasticDataManipulationElwinTabModel::createGroupedWorkspaces(Matr
     auto appendSpectra = AlgorithmManager::Instance().create("AppendSpectra");
     appendSpectra->setProperty("InputWorkspace1", workspace->getName() + "_extracted_spectra");
     appendSpectra->setProperty("InputWorkspace2", "specWSnext");
+    appendSpectra->setProperty("AppendYAxisLabels", true);
     appendSpectra->setProperty("OutputWorkspace", workspace->getName() + "_extracted_spectra");
     appendSpectra->execute();
   }

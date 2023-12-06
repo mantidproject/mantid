@@ -123,11 +123,15 @@ class LegendProperties(dict):
     def create_legend(cls, props, ax):
         # Imported here to prevent circular import.
         from mantid.plots.datafunctions import get_legend_handles
+        from matplotlib.layout_engine import TightLayoutEngine
 
         loc = ConfigService.getString("plots.legend.Location")
         font_size = float(ConfigService.getString("plots.legend.FontSize"))
         if not props:
-            legend_set_draggable(ax.legend(handles=get_legend_handles(ax), loc=loc, prop={"size": font_size}), True)
+            legend = ax.legend(handles=get_legend_handles(ax), loc=loc, prop={"size": font_size})
+            if type(ax.figure.get_layout_engine()) == TightLayoutEngine:
+                legend.set_in_layout(False)
+            legend_set_draggable(legend, True)
             return
 
         if "loc" in props.keys():
@@ -187,4 +191,9 @@ class LegendProperties(dict):
             text.set_color(props["entries_color"])
 
         legend.set_visible(props["visible"])
+
+        # Dragging the legend around in a tight layout plot causes some strange behaviour
+        if type(ax.figure.get_layout_engine()) == TightLayoutEngine:
+            legend.set_in_layout(False)
+
         legend_set_draggable(legend, True)

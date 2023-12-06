@@ -82,6 +82,9 @@ protected:
   std::map<std::string, double> getRangesFromInstrument(QString instName = "", QString analyser = "",
                                                         QString reflection = "");
 
+protected:
+  IndirectDataReduction *m_idrUI;
+
 private slots:
   void tabExecutionComplete(bool error);
 
@@ -89,7 +92,6 @@ private:
   virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };
 
   std::unique_ptr<IndirectPlotOptionsPresenter> m_plotOptionsPresenter;
-  IndirectDataReduction *m_idrUI;
   bool m_tabRunning;
 };
 } // namespace CustomInterfaces

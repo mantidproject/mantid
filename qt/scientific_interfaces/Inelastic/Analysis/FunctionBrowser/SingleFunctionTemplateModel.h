@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Analysis/IFQFitObserver.h"
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
 #include "MantidAPI/IFunction_fwd.h"
@@ -41,6 +40,7 @@ public:
   int getEnumIndex();
   void setGlobal(const QString &name, bool isGlobal);
 
+  EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
 
   void estimateFunctionParameters();

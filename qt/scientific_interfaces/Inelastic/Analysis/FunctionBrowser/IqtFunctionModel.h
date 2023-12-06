@@ -77,6 +77,7 @@ public:
   void removeBackground();
   bool hasBackground() const;
   void tieIntensities(bool on);
+  EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
 
   enum class ParamID {

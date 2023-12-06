@@ -29,6 +29,7 @@ public:
   IndirectFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
   ~IndirectFitDataPresenter();
   std::vector<IndirectFitData> *getFittingData();
+  virtual bool addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog);
   void addWorkspace(const std::string &workspaceName, const std::string &spectra);
   void setResolution(const std::string &name);
   void setSampleWSSuffices(const QStringList &suffices);
@@ -109,6 +110,8 @@ private:
   virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
   void setModelStartXAndEmit(double startX, FitDomainIndex row);
   void setModelEndXAndEmit(double endX, FitDomainIndex row);
+  void setTableStartXAndEmit(double X, int row, int column);
+  void setTableEndXAndEmit(double X, int row, int column);
   void setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row);
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   std::map<int, QModelIndex> getUniqueIndices(const QModelIndexList &selectedIndices);

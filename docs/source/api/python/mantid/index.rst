@@ -25,5 +25,6 @@ Submodules
    api/index
    plots/index
    utils/index
+   testing/index
    simpleapi
    fitfunctions

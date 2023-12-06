@@ -32,8 +32,8 @@ public:
   void updateMiniPlots();
   bool validate();
   void setRawPlotWatchADS(bool watchADS);
-  double getEMin();
-  double getEMax();
+  double getElow() const;
+  double getEhigh() const;
   double getPreviewSpec();
   QString getInputName();
   void previewAlgDone();
@@ -41,7 +41,7 @@ public:
   void enableRun(bool save);
   void updateRangeSelectors(QtProperty *prop, double value);
   void replotNewSpectrum(double value);
-  void verifyERange(QtProperty *prop, double value);
+  bool verifyERange(QString const &workspaceName);
 
 signals:
   void doubleValueChanged(QtProperty *, double);
@@ -53,12 +53,14 @@ signals:
   void showMessageBox(const QString &message);
 
 private slots:
-  void xRangeMaxChanged(double value);
-  void xRangeMinChanged(double value);
+  void xRangeLowChanged(double value);
+  void xRangeHighChanged(double value);
   void reflectTypeChanged(QtProperty *, int value);
 
 private:
   void resetEDefaults(bool isPositive, QPair<double, double> range);
+  void updateHorizontalMarkers(QPair<double, double> yrange);
+
   Ui::InelasticDataManipulationSymmetriseTab m_uiForm;
 
   /// Tree of the properties
