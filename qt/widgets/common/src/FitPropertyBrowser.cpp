@@ -2303,10 +2303,10 @@ void FitPropertyBrowser::hasConstraints(QtProperty *parProp, bool &hasTie, bool 
  */
 QtProperty *FitPropertyBrowser::getTieProperty(QtProperty *parProp) const {
   QList<QtProperty *> subs = parProp->subProperties();
-  for (auto &sub : subs) {
-    if (sub->propertyName() == "Tie") {
-      return sub;
-    }
+  if (auto sub =
+          std::find_if(std::cbegin(subs), std::cend(subs), [](const auto x) { return (*x).propertyName() == "Tie"; });
+      sub != std::end(subs)) {
+    return *sub;
   }
   return nullptr;
 }
@@ -3006,21 +3006,17 @@ void FitPropertyBrowser::setWorkspaceProperties() {
     if (!xName.isEmpty()) {
       m_columnManager->setValue(m_xColumn, columns.indexOf(xName));
     } else {
-      foreach (QString name, columns) {
-        if (name != yName) {
-          m_columnManager->setValue(m_xColumn, columns.indexOf(name));
-          break;
-        }
+      if (auto name = std::find_if(std::cbegin(columns), std::cend(columns), [&](const auto x) { return x != yName; });
+          name != std::end(columns)) {
+        m_columnManager->setValue(m_xColumn, columns.indexOf(*name));
       }
     }
     if (!yName.isEmpty()) {
       m_columnManager->setValue(m_yColumn, columns.indexOf(yName));
     } else {
-      foreach (QString name, columns) {
-        if (name != xName) {
-          m_columnManager->setValue(m_yColumn, columns.indexOf(name));
-          break;
-        }
+      if (auto name = std::find_if(std::cbegin(columns), std::cend(columns), [&](const auto x) { return x != xName; });
+          name != std::end(columns)) {
+        m_columnManager->setValue(m_yColumn, columns.indexOf(*name));
       }
     }
     columns.prepend("");

@@ -1469,9 +1469,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowse
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3353
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3359
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3362
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:2287
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3012
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3022
 checkLevelNormal:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/pixmaps.cpp:12824
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:229
 uninitvar:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidTreeWidget.cpp:251
