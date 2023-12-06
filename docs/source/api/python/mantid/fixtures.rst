@@ -7,6 +7,9 @@
     :undoc-members:
     :show-inheritance:
 
+
+.. _pytest_fixtures:
+
 Usage
 -----
 To make the fixtures available to your tests, add the following line to your conftest.py file:
