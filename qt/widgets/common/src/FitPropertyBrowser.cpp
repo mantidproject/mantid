@@ -2728,7 +2728,7 @@ void FitPropertyBrowser::sequentialFit() {
   }
 }
 
-void FitPropertyBrowser::findPeaks(std::unique_ptr<FindPeakStrategyGeneric> findPeakStrategy) {
+void FitPropertyBrowser::findPeaks(const std::unique_ptr<FindPeakStrategyGeneric> findPeakStrategy) {
   std::string wsName{workspaceName()};
   if (wsName.empty()) {
     QMessageBox::critical(this, "Mantid - Error", "Workspace name is not set");
@@ -3292,7 +3292,7 @@ QString FitPropertyBrowser::addFunction(const QString &fnName) {
 }
 
 bool FitPropertyBrowser::createAndAddFunction(const Mantid::API::MatrixWorkspace_sptr inputWS, const size_t peakIndex,
-                                              std::unique_ptr<FindPeakStrategyGeneric> &findPeakStrategy) {
+                                              const std::unique_ptr<FindPeakStrategyGeneric> &findPeakStrategy) {
   bool validFn = false;
   auto f = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
       Mantid::API::FunctionFactory::Instance().createFunction(defaultPeakType()));
