@@ -2305,7 +2305,7 @@ QtProperty *FitPropertyBrowser::getTieProperty(QtProperty *parProp) const {
   QList<QtProperty *> subs = parProp->subProperties();
   if (auto sub =
           std::find_if(std::cbegin(subs), std::cend(subs), [](const auto x) { return (*x).propertyName() == "Tie"; });
-      sub != std::end(subs)) {
+      sub != std::cend(subs)) {
     return *sub;
   }
   return nullptr;
@@ -3007,7 +3007,7 @@ void FitPropertyBrowser::setWorkspaceProperties() {
       m_columnManager->setValue(m_xColumn, columns.indexOf(xName));
     } else {
       if (auto name = std::find_if(std::cbegin(columns), std::cend(columns), [&](const auto x) { return x != yName; });
-          name != std::end(columns)) {
+          name != std::cend(columns)) {
         m_columnManager->setValue(m_xColumn, columns.indexOf(*name));
       }
     }
@@ -3015,7 +3015,7 @@ void FitPropertyBrowser::setWorkspaceProperties() {
       m_columnManager->setValue(m_yColumn, columns.indexOf(yName));
     } else {
       if (auto name = std::find_if(std::cbegin(columns), std::cend(columns), [&](const auto x) { return x != xName; });
-          name != std::end(columns)) {
+          name != std::cend(columns)) {
         m_columnManager->setValue(m_yColumn, columns.indexOf(*name));
       }
     }
