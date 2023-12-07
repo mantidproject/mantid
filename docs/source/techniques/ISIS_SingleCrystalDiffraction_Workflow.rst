@@ -75,8 +75,8 @@ The updated positions are stored in an .xml file, the path to the file is return
   CalculateUMatrix(PeaksWorkspace=peaks_ws, a=5.6402, b=5.6402, c=5.6402,
                    alpha=90, beta=90, gamma=90)
 
-  save_dir = r"/babylon/Public/UserName/"
-  detcal_path = sxd.calibrate_sxd_panels(wsname, pk_wsname, save_dir, tol=0.2)
+  save_dir = r"<put-correct-save-path>"
+  detcal_path = sxd.calibrate_sxd_panels(wsname, peaks_ws, save_dir, tol=0.2)
 
 2. Reduce a sequence of runs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -168,13 +168,15 @@ The reduction proceeds as follows:
                 'OptimiseXWindowSize': True, 'ThresholdIoverSigma': 15}
 
     # integrate and save each run
+    peak_type = PEAK_TYPE.FOUND
+    integration_type = INTEGRATION_TYPE.SKEW
     for run in runs:
         skew_args = {**skew_args, 'OutputFile': path.join(save_dir, f"{run}_{peak_type.value}_int.pdf")}
-        sxd.integrate_data(INTEGRATION_TYPE.SKEW, PEAK_TYPE.FOUND, run=run, **skew_args)
-        sxd.save_peak_table(run, PEAK_TYPE.FOUND, INTEGRATION_TYPE.SKEW, save_dir, save_format='SHELX')
+        sxd.integrate_data(integration_type, peak_type, run=run, **skew_args)
+        sxd.save_peak_table(run, peak_type, integration_type, save_dir, save_format='SHELX')
 
     # save combined table
-    sxd.save_all_peaks(PEAK_TYPE.FOUND, INTEGRATION_TYPE.SKEW, save_dir=save_dir, save_format=fmt)
+    sxd.save_all_peaks(peak_type, integration_type, save_dir=save_dir, save_format=fmt)
 
 .. _isis-single-crystal-diffraction-wish-ref:
 
@@ -414,7 +416,7 @@ b. Q Integration (with satellites)
         wish.predict_peaks(MinDSpacing=0.75, WavelengthMin=0.85,
                            ReflectionCondition='Body centred', run=run)
         # satellite
-        wish.predict_peaks(peak_type=PEAK_TYPE.SATELLITE, run=run
+        wish.predict_peaks(peak_type=PEAK_TYPE.SATELLITE, run=run,
                            ModVector1="0.5,0,0", ModVector2="0,0.5,0", ModVector3="0,0,0.5",
                            MaxOrder=1, CrossTerms=False, RequirePeaksOnDetector=True,
                            ReflectionCondition='Body centred')
