@@ -1243,9 +1243,10 @@ variableScope:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/MuonWorkspaceCreatio
 variableScope:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/MuonWorkspaceCreationHelper.cpp:142
 variableScope:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/MuonWorkspaceCreationHelper.cpp:244
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/AlignAndFocusPowder.cpp:1141
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/AlignAndFocusPowder.cpp:1166
+shadowFunction:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/AlignAndFocusPowder.cpp:1148
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/AlignAndFocusPowder.cpp:1173
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/AlignAndFocusPowder.cpp:1180
+shadowFunction:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/AlignAndFocusPowder.cpp:1187
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/DgsConvertToEnergyTransfer.cpp:99
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/HFIRDarkCurrentSubtraction.cpp:157
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/ExtractQENSMembers.cpp:298
