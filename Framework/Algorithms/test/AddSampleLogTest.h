@@ -219,6 +219,7 @@ public:
    */
   void test_instrumentWithParameters() {
     const std::string wkspName("SNAP_det_pos");
+    const Mantid::Kernel::V3D ORIGIN(0, 0, 0);
 
     // load the empty instrument
     Mantid::DataHandling::LoadEmptyInstrument loadAlg;
@@ -239,25 +240,34 @@ public:
     constexpr double det_arc2{104.95};
 
     // add the logs for detector information and make sure the logs are set correctly
+    // none of these update the instrument
     ExecuteAlgorithm(ws, "det_lin1", "Number Series", "0.045", det_lin1);
     ExecuteAlgorithm(ws, "det_lin2", "Number Series", "0.043", det_lin2);
     ExecuteAlgorithm(ws, "det_arc1", "Number Series", "-65.3", det_arc1);
-    // last call requests for the instrument to be updated, the other function parameters are the default values
+    ExecuteAlgorithm(ws, "det_arc2", "Number Series", "104.95", det_arc2);
+
+    // not updating the instrument puts the banks at the origin
+    const auto westPosBad = ws->getInstrument()->getComponentByName("West")->getPos();
+    const auto eastPosBad = ws->getInstrument()->getComponentByName("East")->getPos();
+    TS_ASSERT_EQUALS(westPosBad, ORIGIN);
+    TS_ASSERT_EQUALS(eastPosBad, ORIGIN);
+
+    // re-run the last call and requests for the instrument to be updated, the other function parameters are the default
+    // values
     ExecuteAlgorithm(ws, "det_arc2", "Number Series", "104.95", det_arc2, false, "", "AutoDetect", false, true);
 
     // positions for the center of SNAP's two sides
-    const auto westPos = ws->getInstrument()->getComponentByName("West")->getPos();
-    const auto eastPos = ws->getInstrument()->getComponentByName("East")->getPos();
+    const auto westPosGood = ws->getInstrument()->getComponentByName("West")->getPos();
+    const auto eastPosGood = ws->getInstrument()->getComponentByName("East")->getPos();
 
     // check the center angles from downstream
     // V3D::angle returns radians
     const Mantid::Kernel::V3D downstream(0, 0, 1);
-    TS_ASSERT_EQUALS(westPos.angle(downstream) * 180 / M_PI, abs(det_arc1));
-    TS_ASSERT_EQUALS(eastPos.angle(downstream) * 180 / M_PI, abs(det_arc2));
+    TS_ASSERT_EQUALS(westPosGood.angle(downstream) * 180 / M_PI, abs(det_arc1));
+    TS_ASSERT_EQUALS(eastPosGood.angle(downstream) * 180 / M_PI, abs(det_arc2));
 
     // check the center distance - detector is 0.5m + det_lin motor
-    const Mantid::Kernel::V3D origin(0, 0, 0);
-    TS_ASSERT_EQUALS(westPos.distance(origin), 0.5 + det_lin1);
-    TS_ASSERT_EQUALS(eastPos.distance(origin), 0.5 + det_lin2);
+    TS_ASSERT_EQUALS(westPosGood.distance(ORIGIN), 0.5 + det_lin1);
+    TS_ASSERT_EQUALS(eastPosGood.distance(ORIGIN), 0.5 + det_lin2);
   }
 };
