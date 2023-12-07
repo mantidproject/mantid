@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/Common/FitPropertyBrowserFindPeaksExt.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 
+#include <QEventLoop>
 #include <QHash>
 #include <QString>
 #include <QStringList>
