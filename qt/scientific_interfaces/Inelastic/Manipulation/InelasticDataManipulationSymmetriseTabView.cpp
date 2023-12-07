@@ -45,7 +45,7 @@ namespace MantidQt::CustomInterfaces {
 /** Constructor
  */
 InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseTabView(QWidget *parent)
-    : m_presenter(), m_batchAlgoRunner() {
+    : m_presenter() {
   m_uiForm.setupUi(parent);
 
   m_dblManager = new QtDoublePropertyManager();
@@ -158,10 +158,6 @@ void InelasticDataManipulationSymmetriseTabView::subscribePresenter(ISymmetriseP
   m_presenter = presenter;
 }
 
-void InelasticDataManipulationSymmetriseTabView::subscribeAlgoRunner(MantidQt::API::BatchAlgorithmRunner *algoRunner) {
-  m_batchAlgoRunner = algoRunner;
-}
-
 void InelasticDataManipulationSymmetriseTabView::setDefaults() {
   // Set default X range values
   m_dblManager->setValue(m_properties["Ehigh"], 0.5);
@@ -200,11 +196,13 @@ void InelasticDataManipulationSymmetriseTabView::notifyDataReady(QString const &
   m_presenter->handleDataReady(dataName.toStdString());
 }
 
-void InelasticDataManipulationSymmetriseTabView::notifyRunClicked() { m_presenter->handleRunClicked(); }
+void InelasticDataManipulationSymmetriseTabView::notifyRunClicked() { m_presenter->handleRunOrPreviewClicked(false); }
+
+void InelasticDataManipulationSymmetriseTabView::notifyPreviewClicked() {
+  m_presenter->handleRunOrPreviewClicked(true);
+}
 
 void InelasticDataManipulationSymmetriseTabView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
-
-void InelasticDataManipulationSymmetriseTabView::notifyPreviewClicked() { m_presenter->handlePreviewClicked(); }
 /**
  * Handles the X minimum value being changed from a range selector.
  *

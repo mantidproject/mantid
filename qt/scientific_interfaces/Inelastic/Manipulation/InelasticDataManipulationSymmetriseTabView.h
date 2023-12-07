@@ -10,7 +10,6 @@
 #include "ISymmetriseView.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
@@ -28,7 +27,6 @@ public:
   ~InelasticDataManipulationSymmetriseTabView();
 
   void subscribePresenter(ISymmetrisePresenter *presenter) override;
-  void subscribeAlgoRunner(MantidQt::API::BatchAlgorithmRunner *algoRunner) override;
 
   void setDefaults() override;
   IndirectPlotOptionsView *getPlotOptions() const override;
@@ -78,7 +76,6 @@ private:
   QtEnumPropertyManager *m_enumManager;
 
   ISymmetrisePresenter *m_presenter;
-  MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

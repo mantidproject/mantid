@@ -29,7 +29,6 @@ InelasticDataManipulationSymmetriseTab::InelasticDataManipulationSymmetriseTab(Q
     : InelasticDataManipulationTab(parent), m_adsInstance(Mantid::API::AnalysisDataService::Instance()), m_view(view),
       m_model(std::make_unique<InelasticDataManipulationSymmetriseTabModel>()), m_isPreview(false) {
   m_view->subscribePresenter(this);
-  m_view->subscribeAlgoRunner(m_batchAlgoRunner);
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
 
@@ -45,7 +44,10 @@ void InelasticDataManipulationSymmetriseTab::setup() {}
 
 bool InelasticDataManipulationSymmetriseTab::validate() { return m_view->validate(); }
 
-void InelasticDataManipulationSymmetriseTab::handleRunClicked() { runTab(); }
+void InelasticDataManipulationSymmetriseTab::handleRunOrPreviewClicked(bool isPreview) {
+  setIsPreview(isPreview);
+  runTab();
+}
 
 /**
  * Handles saving of workspace
@@ -56,16 +58,41 @@ void InelasticDataManipulationSymmetriseTab::handleSaveClicked() {
   m_batchAlgoRunner->executeBatch();
 }
 
+/** Handles running the algorithm either from run button or preview button. Set with m_isPreview flag.
+ *
+ */
 void InelasticDataManipulationSymmetriseTab::run() {
   m_view->setRawPlotWatchADS(false);
 
-  auto const outputWorkspaceName = m_model->setupSymmetriseAlgorithm(m_batchAlgoRunner);
+  // There should never really be unexecuted algorithms in the queue, but it is
+  // worth warning in case of possible weirdness
+  size_t batchQueueLength = m_batchAlgoRunner->queueLength();
+  if (batchQueueLength > 0)
+    g_log.warning() << "Batch queue already contains " << batchQueueLength << " algorithms!\n";
 
-  // Set the workspace name for Python script export
-  m_pythonExportWsName = outputWorkspaceName;
-  // Execute the algorithm on a separated thread
-  setIsPreview(false);
+  // Return if no data has been loaded
+  auto const dataWorkspaceName = m_view->getDataName();
+  if (dataWorkspaceName.empty())
+    return;
+  // Return if E range is incorrect
+  if (!m_view->verifyERange(dataWorkspaceName))
+    return;
+
+  if (m_isPreview) {
+    long spectrumNumber = static_cast<long>(m_view->getPreviewSpec());
+    std::vector<long> spectraRange(2, spectrumNumber);
+
+    m_model->setupPreviewAlgorithm(m_batchAlgoRunner, spectraRange);
+  } else {
+    auto const outputWorkspaceName = m_model->setupSymmetriseAlgorithm(m_batchAlgoRunner);
+    // Set the workspace name for Python script export
+    m_pythonExportWsName = outputWorkspaceName;
+  }
+
+  // Execute the algorithm(s) on a separated thread
   m_batchAlgoRunner->executeBatchAsync();
+  // Now enable the run function
+  m_view->enableRun(true);
 }
 
 /**
@@ -80,48 +107,11 @@ void InelasticDataManipulationSymmetriseTab::runComplete(bool error) {
   if (m_isPreview) {
     m_view->previewAlgDone();
   } else {
-    m_view->setRawPlotWatchADS(true);
     setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
     // Enable save and plot
     m_view->enableSave(true);
   }
-}
-
-/**
- * Handles a request to preview the symmetrise.
- *
- * Runs Symmetrise on the current spectrum and plots in preview mini plot.
- *
- * @see InelasticDataManipulationSymmetriseTab::previewAlgDone()
- */
-void InelasticDataManipulationSymmetriseTab::handlePreviewClicked() {
-
-  m_view->setRawPlotWatchADS(false);
-
-  // Do nothing if no data has been loaded
-  std::string workspaceName = m_view->getDataName();
-  if (workspaceName.empty())
-    return;
-
-  if (!m_view->verifyERange(workspaceName))
-    return;
-
-  long spectrumNumber = static_cast<long>(m_view->getPreviewSpec());
-  std::vector<long> spectraRange(2, spectrumNumber);
-
-  m_model->setupPreviewAlgorithm(m_batchAlgoRunner, spectraRange);
-
-  // There should never really be unexecuted algorithms in the queue, but it is
-  // worth warning in case of possible weirdness
-  size_t batchQueueLength = m_batchAlgoRunner->queueLength();
-  if (batchQueueLength > 0)
-    g_log.warning() << "Batch queue already contains " << batchQueueLength << " algorithms!\n";
-
-  setIsPreview(true);
-  m_batchAlgoRunner->executeBatchAsync();
-
-  // Now enable the run function
-  m_view->enableRun(true);
+  m_view->setRawPlotWatchADS(true);
 }
 
 void InelasticDataManipulationSymmetriseTab::setFileExtensionsByName(bool filter) {

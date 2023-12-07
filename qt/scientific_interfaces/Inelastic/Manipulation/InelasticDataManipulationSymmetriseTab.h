@@ -40,8 +40,7 @@ public:
   virtual void handleReflectTypeChanged(int value) = 0;
   virtual void handleDoubleValueChanged(std::string const &propname, double value) = 0;
   virtual void handleDataReady(std::string const &dataName) = 0;
-  virtual void handlePreviewClicked() = 0;
-  virtual void handleRunClicked() = 0;
+  virtual void handleRunOrPreviewClicked(bool isPreview) = 0;
   virtual void handleSaveClicked() = 0;
 };
 
@@ -63,8 +62,7 @@ public:
   void handleReflectTypeChanged(int value) override;
   void handleDoubleValueChanged(std::string const &propname, double value) override;
   void handleDataReady(std::string const &dataName) override;
-  void handlePreviewClicked() override;
-  void handleRunClicked() override;
+  void handleRunOrPreviewClicked(bool isPreview) override;
   void handleSaveClicked() override;
 
   void setIsPreview(bool preview);

@@ -8,7 +8,6 @@
 
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 #include <QStringList>
 
@@ -26,7 +25,6 @@ class MANTIDQT_INELASTIC_DLL ISymmetriseView {
 
 public:
   virtual void subscribePresenter(ISymmetrisePresenter *presenter) = 0;
-  virtual void subscribeAlgoRunner(MantidQt::API::BatchAlgorithmRunner *algoRunner) = 0;
 
   virtual void setDefaults() = 0;
   virtual IndirectPlotOptionsView *getPlotOptions() const = 0;
