@@ -25,25 +25,13 @@ namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-InelasticDataManipulationSymmetriseTab::InelasticDataManipulationSymmetriseTab(QWidget *parent)
-    : InelasticDataManipulationTab(parent), m_adsInstance(Mantid::API::AnalysisDataService::Instance()),
-      m_view(std::make_unique<InelasticDataManipulationSymmetriseTabView>(parent)),
-      m_model(std::make_unique<InelasticDataManipulationSymmetriseTabModel>()) {
+InelasticDataManipulationSymmetriseTab::InelasticDataManipulationSymmetriseTab(QWidget *parent, ISymmetriseView *view)
+    : InelasticDataManipulationTab(parent), m_adsInstance(Mantid::API::AnalysisDataService::Instance()), m_view(view),
+      m_model(std::make_unique<InelasticDataManipulationSymmetriseTabModel>()), m_isPreview(false) {
+  m_view->subscribePresenter(this);
+  m_view->subscribeAlgoRunner(m_batchAlgoRunner);
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
-
-  // SIGNAL/SLOT CONNECTIONS
-  // Preview symmetrise
-  connect(m_view.get(), SIGNAL(doubleValueChanged(QtProperty *, double)), this,
-          SLOT(handleDoubleValueChanged(QtProperty *, double)));
-  connect(m_view.get(), SIGNAL(enumValueChanged(QtProperty *, int)), this,
-          SLOT(handleEnumValueChanged(QtProperty *, int)));
-  connect(m_view.get(), SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(QString const &)));
-  connect(m_view.get(), SIGNAL(previewClicked()), this, SLOT(preview()));
-  // Handle running, plotting and saving
-  connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
-  connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
-  connect(m_view.get(), SIGNAL(showMessageBox(const QString &)), this, SIGNAL(showMessageBox(const QString &)));
 
   m_model->setIsPositiveReflect(true);
   m_view->setDefaults();
@@ -57,12 +45,12 @@ void InelasticDataManipulationSymmetriseTab::setup() {}
 
 bool InelasticDataManipulationSymmetriseTab::validate() { return m_view->validate(); }
 
-void InelasticDataManipulationSymmetriseTab::runClicked() { runTab(); }
+void InelasticDataManipulationSymmetriseTab::handleRunClicked() { runTab(); }
 
 /**
  * Handles saving of workspace
  */
-void InelasticDataManipulationSymmetriseTab::saveClicked() {
+void InelasticDataManipulationSymmetriseTab::handleSaveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName), QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatch();
@@ -75,27 +63,28 @@ void InelasticDataManipulationSymmetriseTab::run() {
 
   // Set the workspace name for Python script export
   m_pythonExportWsName = outputWorkspaceName;
-
-  // Handle algorithm completion signal
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
-
   // Execute the algorithm on a separated thread
+  setIsPreview(false);
   m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**
- * Handle plotting result workspace.
+ * Handle plotting result or preview workspace.
  *
  * @param error If the algorithm failed
  */
-void InelasticDataManipulationSymmetriseTab::algorithmComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
-  m_view->setRawPlotWatchADS(true);
+void InelasticDataManipulationSymmetriseTab::runComplete(bool error) {
   if (error)
     return;
-  setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
-  // Enable save and plot
-  m_view->enableSave(true);
+
+  if (m_isPreview) {
+    m_view->previewAlgDone();
+  } else {
+    m_view->setRawPlotWatchADS(true);
+    setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
+    // Enable save and plot
+    m_view->enableSave(true);
+  }
 }
 
 /**
@@ -105,15 +94,13 @@ void InelasticDataManipulationSymmetriseTab::algorithmComplete(bool error) {
  *
  * @see InelasticDataManipulationSymmetriseTab::previewAlgDone()
  */
-void InelasticDataManipulationSymmetriseTab::preview() {
-  // Handle algorithm completion signal
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(previewAlgDone(bool)));
+void InelasticDataManipulationSymmetriseTab::handlePreviewClicked() {
 
   m_view->setRawPlotWatchADS(false);
 
   // Do nothing if no data has been loaded
-  QString workspaceName = m_view->getInputName();
-  if (workspaceName.isEmpty())
+  std::string workspaceName = m_view->getDataName();
+  if (workspaceName.empty())
     return;
 
   if (!m_view->verifyERange(workspaceName))
@@ -130,23 +117,11 @@ void InelasticDataManipulationSymmetriseTab::preview() {
   if (batchQueueLength > 0)
     g_log.warning() << "Batch queue already contains " << batchQueueLength << " algorithms!\n";
 
+  setIsPreview(true);
   m_batchAlgoRunner->executeBatchAsync();
 
   // Now enable the run function
   m_view->enableRun(true);
-}
-
-/**
- * Handles completion of the preview algorithm.
- *
- * @param error If the algorithm failed
- */
-void InelasticDataManipulationSymmetriseTab::previewAlgDone(bool error) {
-  if (error)
-    return;
-  m_view->previewAlgDone();
-  // Don't want this to trigger when the algorithm is run for all spectra
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(previewAlgDone(bool)));
 }
 
 void InelasticDataManipulationSymmetriseTab::setFileExtensionsByName(bool filter) {
@@ -156,31 +131,31 @@ void InelasticDataManipulationSymmetriseTab::setFileExtensionsByName(bool filter
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
-void InelasticDataManipulationSymmetriseTab::handleEnumValueChanged(QtProperty *prop, int value) {
-  if (prop->propertyName() == "ReflectType") {
-    m_model->setIsPositiveReflect(value == 0);
-  }
+void InelasticDataManipulationSymmetriseTab::handleReflectTypeChanged(int value) {
+  m_model->setIsPositiveReflect(value == 0);
 }
 
-void InelasticDataManipulationSymmetriseTab::handleDoubleValueChanged(QtProperty *prop, double value) {
-  if (prop->propertyName() == "Spectrum No") {
+void InelasticDataManipulationSymmetriseTab::handleDoubleValueChanged(std::string const &propName, double value) {
+  if (propName == "Spectrum No") {
     m_view->replotNewSpectrum(value);
   } else {
-    m_view->updateRangeSelectors(prop, value);
-    if (prop->propertyName() == "Elow") {
+    m_view->updateRangeSelectors(propName, value);
+    if (propName == "Elow") {
       m_model->getIsPositiveReflect() ? m_model->setEMin(value) : m_model->setEMax((-1) * value);
-    } else if (prop->propertyName() == "Ehigh") {
+    } else if (propName == "Ehigh") {
       m_model->getIsPositiveReflect() ? m_model->setEMax(value) : m_model->setEMin((-1) * value);
     }
   }
 }
 
-void InelasticDataManipulationSymmetriseTab::handleDataReady(QString const &dataName) {
+void InelasticDataManipulationSymmetriseTab::handleDataReady(std::string const &dataName) {
   if (m_view->validate()) {
     m_view->plotNewData(dataName);
   }
-  m_model->setWorkspaceName(dataName);
+  m_model->setWorkspaceName(QString(dataName.data()));
 }
+
+void InelasticDataManipulationSymmetriseTab::setIsPreview(bool preview) { m_isPreview = preview; }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

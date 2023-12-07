@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InelasticDataManipulationSymmetriseTabView.h"
 #include "IndirectDataValidationHelper.h"
+#include "InelasticDataManipulationSymmetriseTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -43,8 +44,10 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseTabView(QWidget *parent) {
+InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseTabView(QWidget *parent)
+    : m_presenter(), m_batchAlgoRunner() {
   m_uiForm.setupUi(parent);
+
   m_dblManager = new QtDoublePropertyManager();
   m_grpManager = new QtGroupPropertyManager();
   m_enumManager = new QtEnumPropertyManager(); // "Suggestion"
@@ -131,25 +134,33 @@ InelasticDataManipulationSymmetriseTabView::InelasticDataManipulationSymmetriseT
   // SIGNAL/SLOT CONNECTIONS
   // Validate the E range when it is changed
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SIGNAL(doubleValueChanged(QtProperty *, double)));
-  connect(m_enumManager, SIGNAL(valueChanged(QtProperty *, int)), this, SIGNAL(enumValueChanged(QtProperty *, int)));
-  connect(m_enumManager, SIGNAL(valueChanged(QtProperty *, int)), this, SLOT(reflectTypeChanged(QtProperty *, int)));
+          SLOT(notifyDoubleValueChanged(QtProperty *, double)));
+  connect(m_enumManager, SIGNAL(valueChanged(QtProperty *, int)), this,
+          SLOT(notifyReflectTypeChanged(QtProperty *, int)));
   // Plot miniplot when file has finished loading
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SIGNAL(dataReady(QString const &)));
+  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SLOT(notifyDataReady(QString const &)));
   // Preview symmetrise
-  connect(m_uiForm.pbPreview, SIGNAL(clicked()), this, SIGNAL(previewClicked()));
+  connect(m_uiForm.pbPreview, SIGNAL(clicked()), this, SLOT(notifyPreviewClicked()));
   // X range selectors
-  connect(rangeESelector, SIGNAL(minValueChanged(double)), this, SLOT(xRangeLowChanged(double)));
-  connect(rangeESelector, SIGNAL(maxValueChanged(double)), this, SLOT(xRangeHighChanged(double)));
+  connect(rangeESelector, SIGNAL(minValueChanged(double)), this, SLOT(notifyXrangeLowChanged(double)));
+  connect(rangeESelector, SIGNAL(maxValueChanged(double)), this, SLOT(notifyXrangeHighChanged(double)));
   // Handle running, plotting and saving
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SIGNAL(runClicked()));
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SIGNAL(saveClicked()));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(notifyRunClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
 }
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
 InelasticDataManipulationSymmetriseTabView::~InelasticDataManipulationSymmetriseTabView() {}
+
+void InelasticDataManipulationSymmetriseTabView::subscribePresenter(ISymmetrisePresenter *presenter) {
+  m_presenter = presenter;
+}
+
+void InelasticDataManipulationSymmetriseTabView::subscribeAlgoRunner(MantidQt::API::BatchAlgorithmRunner *algoRunner) {
+  m_batchAlgoRunner = algoRunner;
+}
 
 void InelasticDataManipulationSymmetriseTabView::setDefaults() {
   // Set default X range values
@@ -177,16 +188,29 @@ void InelasticDataManipulationSymmetriseTabView::setDefaults() {
   m_uiForm.dsInput->isForRunFiles(false);
 }
 
-IndirectPlotOptionsView *InelasticDataManipulationSymmetriseTabView::getPlotOptions() {
+IndirectPlotOptionsView *InelasticDataManipulationSymmetriseTabView::getPlotOptions() const {
   return m_uiForm.ipoPlotOptions;
 }
 
+void InelasticDataManipulationSymmetriseTabView::notifyDoubleValueChanged(QtProperty *prop, double value) {
+  m_presenter->handleDoubleValueChanged(prop->propertyName().toStdString(), value);
+}
+
+void InelasticDataManipulationSymmetriseTabView::notifyDataReady(QString const &dataName) {
+  m_presenter->handleDataReady(dataName.toStdString());
+}
+
+void InelasticDataManipulationSymmetriseTabView::notifyRunClicked() { m_presenter->handleRunClicked(); }
+
+void InelasticDataManipulationSymmetriseTabView::notifySaveClicked() { m_presenter->handleSaveClicked(); }
+
+void InelasticDataManipulationSymmetriseTabView::notifyPreviewClicked() { m_presenter->handlePreviewClicked(); }
 /**
  * Handles the X minimum value being changed from a range selector.
  *
  * @param value New range selector value
  */
-void InelasticDataManipulationSymmetriseTabView::xRangeLowChanged(double value) {
+void InelasticDataManipulationSymmetriseTabView::notifyXrangeLowChanged(double value) {
   m_dblManager->setValue(m_properties["Elow"], value);
   m_dblManager->setMinimum(m_properties["Ehigh"], value);
 }
@@ -196,11 +220,26 @@ void InelasticDataManipulationSymmetriseTabView::xRangeLowChanged(double value) 
  *
  * @param value New range selector value
  */
-void InelasticDataManipulationSymmetriseTabView::xRangeHighChanged(double value) {
+void InelasticDataManipulationSymmetriseTabView::notifyXrangeHighChanged(double value) {
   m_dblManager->setValue(m_properties["Ehigh"], value);
   m_dblManager->setMaximum(m_properties["Elow"], value);
 }
 
+void InelasticDataManipulationSymmetriseTabView::notifyReflectTypeChanged(QtProperty *prop, int value) {
+  if (prop->propertyName() == "ReflectType") {
+    QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
+
+    if (validate()) {
+      m_presenter->handleReflectTypeChanged(value);
+
+      MatrixWorkspace_sptr sampleWS =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
+      auto const axisRange = getXRangeFromWorkspace(sampleWS);
+
+      resetEDefaults(value == 0, axisRange);
+    }
+  }
+}
 /**
  * Updates boundaries and initial values for Selector and Data properties when changing between negative/positive side
  * of spectrum.
@@ -233,20 +272,19 @@ void InelasticDataManipulationSymmetriseTabView::resetEDefaults(bool isPositive,
  *
  * @return true if selected E range is valid for calling the symmetrise algorithm, false otherwise.
  */
-bool InelasticDataManipulationSymmetriseTabView::verifyERange(QString const &workspaceName) {
-  MatrixWorkspace_sptr sampleWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
+bool InelasticDataManipulationSymmetriseTabView::verifyERange(std::string const &workspaceName) {
+  MatrixWorkspace_sptr sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
   auto axisRange = getXRangeFromWorkspace(sampleWS);
   auto Erange = QPair(getElow(), getEhigh());
 
   bool const reflectType = m_enumManager->value(m_properties["ReflectType"]);
   if ((reflectType == 0) && (Erange.first > abs(axisRange.first))) {
-    emit showMessageBox("Invalid Data Range: Elow is larger than the lower limit of spectrum.\nReduce Elow to " +
-                        makeNumber(abs(axisRange.first)));
+    showMessageBox("Invalid Data Range: Elow is larger than the lower limit of spectrum.\nReduce Elow to " +
+                   makeNumber(abs(axisRange.first)).toStdString());
     return false;
   } else if ((reflectType == 1) && (abs(Erange.second) > axisRange.second)) {
-    emit showMessageBox("Invalid Data Range: Ehigh is larger than the upper limit of spectrum.\nIncrease Ehigh to " +
-                        makeNumber(axisRange.second));
+    showMessageBox("Invalid Data Range: Ehigh is larger than the upper limit of spectrum.\nIncrease Ehigh to " +
+                   makeNumber(axisRange.second).toStdString());
     return false;
   }
   return true;
@@ -258,35 +296,21 @@ bool InelasticDataManipulationSymmetriseTabView::verifyERange(QString const &wor
  * @param prop QtProperty changed
  * @param value Value it was changed to (unused)
  */
-void InelasticDataManipulationSymmetriseTabView::updateRangeSelectors(QtProperty *prop, double value) {
+void InelasticDataManipulationSymmetriseTabView::updateRangeSelectors(std::string const &propName, double value) {
   auto rangeESelector = m_uiForm.ppRawPlot->getRangeSelector("rangeE");
 
-  if (prop == m_properties["Elow"]) {
+  if (propName == "Elow") {
     rangeESelector->setMinimum(value);
-  } else if (prop == m_properties["Ehigh"]) {
+  } else if (propName == "Ehigh") {
     rangeESelector->setMaximum(value);
   }
 }
 
-void InelasticDataManipulationSymmetriseTabView::reflectTypeChanged(QtProperty *prop, int value) {
-  if (prop->propertyName() == "ReflectType") {
-    QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
-
-    if (validate()) {
-      MatrixWorkspace_sptr sampleWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
-      auto const axisRange = getXRangeFromWorkspace(sampleWS);
-
-      resetEDefaults(value == 0, axisRange);
-    }
-  }
-}
-
-void InelasticDataManipulationSymmetriseTabView::setFBSuffixes(QStringList const suffix) {
+void InelasticDataManipulationSymmetriseTabView::setFBSuffixes(QStringList const &suffix) {
   m_uiForm.dsInput->setFBSuffixes(suffix);
 }
 
-void InelasticDataManipulationSymmetriseTabView::setWSSuffixes(QStringList const suffix) {
+void InelasticDataManipulationSymmetriseTabView::setWSSuffixes(QStringList const &suffix) {
   m_uiForm.dsInput->setWSSuffixes(suffix);
 }
 
@@ -296,9 +320,9 @@ void InelasticDataManipulationSymmetriseTabView::setWSSuffixes(QStringList const
  *
  * @param workspaceName Name of the workspace that has been loaded
  */
-void InelasticDataManipulationSymmetriseTabView::plotNewData(QString const &workspaceName) {
+void InelasticDataManipulationSymmetriseTabView::plotNewData(std::string const &workspaceName) {
   // Set the preview spectrum number to the first spectrum in the workspace
-  auto sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName.toStdString());
+  auto sampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
   int minSpectrumRange = sampleWS->getSpectrum(0).getSpectrumNo();
   m_dblManager->setValue(m_properties["PreviewSpec"], static_cast<double>(minSpectrumRange));
 
@@ -394,7 +418,7 @@ bool InelasticDataManipulationSymmetriseTabView::validate() {
   validateDataIsOfType(uiv, m_uiForm.dsInput, "Sample", DataType::Red);
   auto const errorMessage = uiv.generateErrorMessage();
   if (!errorMessage.isEmpty())
-    emit showMessageBox(errorMessage);
+    showMessageBox(errorMessage.toStdString());
   return errorMessage.isEmpty();
 }
 
@@ -412,10 +436,12 @@ double InelasticDataManipulationSymmetriseTabView::getPreviewSpec() {
   return m_dblManager->value(m_properties["PreviewSpec"]);
 }
 
-QString InelasticDataManipulationSymmetriseTabView::getInputName() { return m_uiForm.dsInput->getCurrentDataName(); }
+std::string InelasticDataManipulationSymmetriseTabView::getDataName() const {
+  return m_uiForm.dsInput->getCurrentDataName().toStdString();
+}
 
 void InelasticDataManipulationSymmetriseTabView::previewAlgDone() {
-  QString workspaceName = getInputName();
+  QString workspaceName = QString::fromStdString(getDataName());
   int spectrumNumber = static_cast<int>(m_dblManager->value(m_properties["PreviewSpec"]));
 
   MatrixWorkspace_sptr sampleWS =
@@ -449,5 +475,9 @@ void InelasticDataManipulationSymmetriseTabView::previewAlgDone() {
 void InelasticDataManipulationSymmetriseTabView::enableSave(bool save) { m_uiForm.pbSave->setEnabled(save); }
 
 void InelasticDataManipulationSymmetriseTabView::enableRun(bool run) { m_uiForm.pbRun->setEnabled(run); }
+
+void InelasticDataManipulationSymmetriseTabView::showMessageBox(std::string const &message) const {
+  QMessageBox::information(parentWidget(), this->windowTitle(), QString::fromStdString(message));
+}
 
 } // namespace MantidQt::CustomInterfaces

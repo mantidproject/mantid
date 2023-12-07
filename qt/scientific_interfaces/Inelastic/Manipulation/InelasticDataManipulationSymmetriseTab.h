@@ -34,38 +34,51 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+class ISymmetrisePresenter {
+public:
+  virtual void handleReflectTypeChanged(int value) = 0;
+  virtual void handleDoubleValueChanged(std::string const &propname, double value) = 0;
+  virtual void handleDataReady(std::string const &dataName) = 0;
+  virtual void handlePreviewClicked() = 0;
+  virtual void handleRunClicked() = 0;
+  virtual void handleSaveClicked() = 0;
+};
+
 /** InelasticDataManipulationSymmetriseTab
 
   @author Dan Nixon
   @date 23/07/2014
 */
-class MANTIDQT_INELASTIC_DLL InelasticDataManipulationSymmetriseTab : public InelasticDataManipulationTab {
-  Q_OBJECT
-
+class MANTIDQT_INELASTIC_DLL InelasticDataManipulationSymmetriseTab : public InelasticDataManipulationTab,
+                                                                      public ISymmetrisePresenter {
 public:
-  InelasticDataManipulationSymmetriseTab(QWidget *parent = nullptr);
+  InelasticDataManipulationSymmetriseTab(QWidget *parent, ISymmetriseView *view);
   ~InelasticDataManipulationSymmetriseTab() override;
 
   void setup() override;
   void run() override;
   bool validate() override;
 
-private slots:
-  void handleEnumValueChanged(QtProperty *, int);
-  void handleDoubleValueChanged(QtProperty *, double);
-  void handleDataReady(QString const &dataName) override;
-  void algorithmComplete(bool error);
-  void preview();
-  void previewAlgDone(bool error);
+  void handleReflectTypeChanged(int value) override;
+  void handleDoubleValueChanged(std::string const &propname, double value) override;
+  void handleDataReady(std::string const &dataName) override;
+  void handlePreviewClicked() override;
+  void handleRunClicked() override;
+  void handleSaveClicked() override;
 
-  void runClicked();
-  void saveClicked();
+  void setIsPreview(bool preview);
+
+protected:
+  void runComplete(bool error) override;
 
 private:
   void setFileExtensionsByName(bool filter) override;
 
+  // wether batch algorunner is running preview or run buttons
+  bool m_isPreview;
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
-  std::unique_ptr<InelasticDataManipulationSymmetriseTabView> m_view;
+  ISymmetriseView *m_view;
   std::unique_ptr<InelasticDataManipulationSymmetriseTabModel> m_model;
 };
 } // namespace CustomInterfaces
