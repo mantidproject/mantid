@@ -1033,7 +1033,7 @@ void FitPropertyBrowser::popupMenu(const QPoint & /*unused*/) {
 /** Slot. Called to remove a function
  */
 void FitPropertyBrowser::deleteFunction() {
-  QtBrowserItem *ci = m_browser->currentItem();
+  const QtBrowserItem *const ci = m_browser->currentItem();
   PropertyHandler *h = getHandler()->findHandler(ci->property());
   removeFunction(h);
 }
@@ -1144,7 +1144,7 @@ std::string FitPropertyBrowser::minimizer(bool withProperties) const {
   QString minimStr = m_minimizers[i];
   // append minimizer properties as name=value pairs
   if (withProperties) {
-    foreach (QtProperty *prop, m_minimizerProperties) {
+    foreach (const QtProperty *const prop, m_minimizerProperties) {
       if (prop->propertyManager() == m_stringManager) {
         QString value = m_stringManager->value(prop);
         if (!value.isEmpty()) {
@@ -1445,11 +1445,11 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
     if (!h)
       return;
 
-    QtProperty *parProp = h->getParameterProperty(prop);
+    const QtProperty *const parProp = h->getParameterProperty(prop);
     if (!parProp)
       return;
 
-    QString parName = h->functionPrefix() + "." + parProp->propertyName();
+    const QString parName = h->functionPrefix() + "." + parProp->propertyName();
 
     const auto oldExp = getOldExpressionAsString(parName);
     const auto exp = m_stringManager->value(prop);
@@ -2251,8 +2251,8 @@ void FitPropertyBrowser::deleteTie() {
     // ithParameter = -1 => not found
     int ithParameter = -1;
     for (size_t i = 0; i < m_compositeFunction->nParams(); i++) {
-      Mantid::API::ParameterReference parameterRef(m_compositeFunction.get(), i);
-      Mantid::API::IFunction *function = parameterRef.getLocalFunction();
+      const Mantid::API::ParameterReference parameterRef(m_compositeFunction.get(), i);
+      const Mantid::API::IFunction *const function = parameterRef.getLocalFunction();
       // Pick out parameters with the same name as the one we're tying from
       if (function->parameterName(static_cast<int>(parameterRef.getLocalIndex())) == parName) {
         if (ithParameter == -1 && function == h->function().get()) // If this is the 'tied from'
@@ -2502,7 +2502,7 @@ void FitPropertyBrowser::setStringPropertyValue(QtProperty *prop, const QString 
 }
 
 QString FitPropertyBrowser::getStringPropertyValue(QtProperty *prop) const {
-  auto *manager = dynamic_cast<QtStringPropertyManager *>(prop->propertyManager());
+  const auto *const manager = dynamic_cast<QtStringPropertyManager *>(prop->propertyManager());
   if (manager)
     return manager->value(prop);
   else
@@ -2954,7 +2954,7 @@ void FitPropertyBrowser::setWorkspaceProperties() {
   // Settings group.
   // If not, there is no Custom Settings group and it goes in the regular
   // Settings group.
-  auto *settings = m_customSettingsGroup ? m_customSettingsGroup : m_settingsGroup;
+  const auto *const settings = m_customSettingsGroup ? m_customSettingsGroup : m_settingsGroup;
 
   if (settings->property()->subProperties().contains(m_evaluationType)) {
     settings->property()->removeSubProperty(m_evaluationType);
@@ -3109,23 +3109,23 @@ void FitPropertyBrowser::minimizerChanged() {
   for (auto property : properties) {
     QString propName = QString::fromStdString((*property).name());
     QtProperty *prop = nullptr;
-    if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(property)) {
+    if (const auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *const>(property)) {
       prop = m_boolManager->addProperty(propName);
       bool val = *prp;
       m_boolManager->setValue(prop, val);
-    } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(property)) {
+    } else if (const auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *const>(property)) {
       prop = this->addDoubleProperty(propName);
       double val = *prp;
       m_doubleManager->setValue(prop, val);
-    } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(property)) {
+    } else if (const auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *const>(property)) {
       prop = m_intManager->addProperty(propName);
       int val = *prp;
       m_intManager->setValue(prop, val);
-    } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<size_t> *>(property)) {
+    } else if (const auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<size_t> *const>(property)) {
       prop = m_intManager->addProperty(propName);
       size_t val = *prp;
       m_intManager->setValue(prop, static_cast<int>(val));
-    } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *>(property)) {
+    } else if (const auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *const>(property)) {
       prop = m_stringManager->addProperty(propName);
       QString val = QString::fromStdString(prp->value());
       m_stringManager->setValue(prop, val);
@@ -3191,7 +3191,7 @@ std::string FitPropertyBrowser::getFitAlgorithmOutputStatus() const { return m_f
  * Show online function help
  */
 void FitPropertyBrowser::functionHelp() {
-  PropertyHandler *handler = currentHandler();
+  const PropertyHandler *const handler = currentHandler();
   if (handler) {
     MantidQt::API::HelpWindow::showFitFunction(handler->ifun()->name());
   }
@@ -3320,7 +3320,7 @@ void FitPropertyBrowser::setPeakCentreOf(const QString &prefix, double value) {
 }
 
 double FitPropertyBrowser::getPeakCentreOf(const QString &prefix) {
-  auto handler = getPeakHandler(prefix);
+  const auto handler = getPeakHandler(prefix);
   return handler->centre();
 }
 
@@ -3331,7 +3331,7 @@ void FitPropertyBrowser::setPeakHeightOf(const QString &prefix, double value) {
 }
 
 double FitPropertyBrowser::getPeakHeightOf(const QString &prefix) {
-  auto handler = getPeakHandler(prefix);
+  const auto handler = getPeakHandler(prefix);
   return handler->height();
 }
 
@@ -3342,31 +3342,31 @@ void FitPropertyBrowser::setPeakFwhmOf(const QString &prefix, double value) {
 }
 
 double FitPropertyBrowser::getPeakFwhmOf(const QString &prefix) {
-  auto handler = getPeakHandler(prefix);
+  const auto handler = getPeakHandler(prefix);
   return handler->fwhm();
 }
 
 std::string FitPropertyBrowser::getWidthParameterNameOf(const QString &prefix) {
-  auto handler = getPeakHandler(prefix);
+  const auto handler = getPeakHandler(prefix);
   return handler->getWidthParameterName();
 }
 
 std::string FitPropertyBrowser::getCentreParameterNameOf(const QString &prefix) {
-  auto handler = getPeakHandler(prefix);
+  const auto handler = getPeakHandler(prefix);
   return handler->getCentreParameterName();
 }
 
 bool FitPropertyBrowser::isParameterExplicitlySetOf(const QString &prefix, const std::string &param) {
-  auto handler = getPeakHandler(prefix);
+  const auto handler = getPeakHandler(prefix);
   return handler->isParameterExplicitlySet(param);
 }
 
 QStringList FitPropertyBrowser::getPeakPrefixes() const {
   QStringList peaks;
-  auto parentHandler = getHandler();
-  auto nFunctions = parentHandler->cfun()->nFunctions();
+  const auto parentHandler = getHandler();
+  const auto nFunctions = parentHandler->cfun()->nFunctions();
   for (size_t i = 0; i < nFunctions; ++i) {
-    auto handler = parentHandler->getHandler(i);
+    const auto handler = parentHandler->getHandler(i);
     if (handler->pfun()) {
       peaks << handler->functionPrefix();
     }
