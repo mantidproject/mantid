@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>tof_powder_plot</class>
- <widget class="QWidget" name="tof_powder_plot">
+ <class>single_crystal_elastic_plot_widget</class>
+ <widget class="QWidget" name="single_crystal_elastic_plot_widget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,7 +23,7 @@
       <enum>QLayout::SetMinimumSize</enum>
      </property>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QHBoxLayout" name="hBL_dataset_selector">
        <property name="sizeConstraint">
         <enum>QLayout::SetMinimumSize</enum>
        </property>
@@ -45,7 +45,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer">
+        <spacer name="hS_dataset_selector">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -252,7 +252,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_2">
+        <spacer name="hS_plot_footer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>

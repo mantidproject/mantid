@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>omega_offset_dialog</class>
+ <widget class="QDialog" name="omega_offset_dialog">
   <property name="windowModality">
    <enum>Qt::NonModal</enum>
   </property>
@@ -50,7 +50,7 @@
     </widget>
    </item>
    <item row="0" column="0">
-    <widget class="QDoubleSpinBox" name="dSB_omegaoffset">
+    <widget class="QDoubleSpinBox" name="dSB_omega_offset">
      <property name="wrapping">
       <bool>true</bool>
      </property>

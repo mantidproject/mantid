@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>single_crystal_options_widget</class>
+ <widget class="QWidget" name="single_crystal_options_widget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -37,11 +37,11 @@
        </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="vBL_detector_efficiency_options">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <layout class="QHBoxLayout" name="hBL_sum_vana_sf_nsf">
           <item>
-           <spacer name="horizontalSpacer_2">
+           <spacer name="hS_sum_vana_sf_nsf">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -69,9 +69,9 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <layout class="QHBoxLayout" name="hBL_ignore_vana_fields">
           <item>
-           <spacer name="horizontalSpacer_4">
+           <spacer name="hS_ignore_vana_fields">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -121,12 +121,12 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_11" stretch="1,1,2,6,8">
+       <layout class="QHBoxLayout" name="hBL_background_factor" stretch="1,1,2,6,8">
         <property name="sizeConstraint">
          <enum>QLayout::SetFixedSize</enum>
         </property>
         <item>
-         <spacer name="horizontalSpacer">
+         <spacer name="hS_background_factor_left">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -152,7 +152,7 @@
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer_7">
+         <spacer name="hS_background_factor_middle">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -181,7 +181,7 @@
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer_8">
+         <spacer name="hS_background_factor_right">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -222,7 +222,7 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_5">
+       <spacer name="hS_normalisation">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -238,7 +238,7 @@
     </widget>
    </item>
    <item row="6" column="0">
-    <spacer name="verticalSpacer">
+    <spacer name="vS_left">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -427,7 +427,7 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_3">
+       <spacer name="hS_wavelength">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -443,7 +443,7 @@
     </widget>
    </item>
    <item row="6" column="2">
-    <spacer name="verticalSpacer_2">
+    <spacer name="vS_right">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -456,7 +456,7 @@
     </spacer>
    </item>
    <item row="4" column="2" rowspan="2">
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="gB_binning">
      <property name="title">
       <string>Binning Parameters</string>
      </property>
@@ -479,7 +479,7 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_18">
+       <layout class="QHBoxLayout" name="hBL_two_theta_and_omega_min">
         <property name="spacing">
          <number>30</number>
         </property>
@@ -487,7 +487,7 @@
          <number>15</number>
         </property>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_12" stretch="1,2">
+         <layout class="QHBoxLayout" name="hBL_two_theta_min" stretch="1,2">
           <property name="spacing">
            <number>15</number>
           </property>
@@ -517,7 +517,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_13" stretch="1,2">
+         <layout class="QHBoxLayout" name="hBL_omega_min" stretch="1,2">
           <property name="spacing">
            <number>15</number>
           </property>
@@ -546,7 +546,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_19">
+       <layout class="QHBoxLayout" name="hBL_two_theta_and_omega_max">
         <property name="spacing">
          <number>30</number>
         </property>
@@ -554,7 +554,7 @@
          <number>15</number>
         </property>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_14" stretch="1,2">
+         <layout class="QHBoxLayout" name="hBL_two_theta_max" stretch="1,2">
           <property name="spacing">
            <number>15</number>
           </property>
@@ -581,7 +581,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_15" stretch="1,2">
+         <layout class="QHBoxLayout" name="hBL_omega_max" stretch="1,2">
           <property name="spacing">
            <number>15</number>
           </property>
@@ -617,7 +617,7 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_20">
+       <layout class="QHBoxLayout" name="hBL_two_theta_and_omega_bin_size">
         <property name="spacing">
          <number>30</number>
         </property>
@@ -625,7 +625,7 @@
          <number>15</number>
         </property>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_17" stretch="1,2">
+         <layout class="QHBoxLayout" name="hBL_two_theta_bin_size" stretch="1,2">
           <property name="spacing">
            <number>15</number>
           </property>
@@ -652,7 +652,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_16" stretch="1,2">
+         <layout class="QHBoxLayout" name="hBL_omega_bin_size" stretch="1,2">
           <property name="spacing">
            <number>15</number>
           </property>
@@ -687,7 +687,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QHBoxLayout" name="hBL_nx">
         <item>
          <widget class="QLabel" name="l_hkl1">
           <property name="sizePolicy">
@@ -729,7 +729,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <layout class="QHBoxLayout" name="hBL_ny">
         <item>
          <widget class="QLabel" name="l_hkl2">
           <property name="maximumSize">
@@ -765,7 +765,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_8">
+       <layout class="QHBoxLayout" name="hBL_omega_offset">
         <item>
          <widget class="QLabel" name="l_omega_offset">
           <property name="maximumSize">
@@ -807,7 +807,7 @@
        </layout>
       </item>
       <item>
-       <spacer name="verticalSpacer_3">
+       <spacer name="vS_orientation">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -827,7 +827,7 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_9">
+       <layout class="QHBoxLayout" name="hBL_dx">
         <item>
          <widget class="QLabel" name="l_dx">
           <property name="maximumSize">
@@ -872,7 +872,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_10">
+       <layout class="QHBoxLayout" name="hBL_dy">
         <item>
          <widget class="QLabel" name="l_dy">
           <property name="maximumSize">
