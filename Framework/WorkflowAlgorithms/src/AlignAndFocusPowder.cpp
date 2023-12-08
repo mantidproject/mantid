@@ -1145,9 +1145,9 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename, const std:
     alg->executeAsChildAlg();
 
     m_groupWS = alg->getProperty("OutputWorkspace");
-    const std::string name = m_instName + "_group";
-    AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
-    this->setPropertyValue(PropertyNames::GROUP_WKSP, name);
+    const std::string groupname = m_instName + "_group";
+    AnalysisDataService::Instance().addOrReplace(groupname, m_groupWS);
+    this->setPropertyValue(PropertyNames::GROUP_WKSP, groupname);
   } else { // let LoadDiffCal sort out everything
     g_log.information() << "Loading Calibration file \"" << calFilename << "\"";
     if (!groupFilename.empty())
@@ -1170,23 +1170,23 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename, const std:
     if (loadGrouping) {
       m_groupWS = alg->getProperty("OutputGroupingWorkspace");
 
-      const std::string name = m_instName + "_group";
-      AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
-      this->setPropertyValue(PropertyNames::GROUP_WKSP, name);
+      const std::string groupname = m_instName + "_group";
+      AnalysisDataService::Instance().addOrReplace(groupname, m_groupWS);
+      this->setPropertyValue(PropertyNames::GROUP_WKSP, groupname);
     }
     if (loadCalibration) {
       m_calibrationWS = alg->getProperty("OutputCalWorkspace");
 
-      const std::string name = m_instName + "_cal";
-      AnalysisDataService::Instance().addOrReplace(name, m_calibrationWS);
-      this->setPropertyValue(PropertyNames::CAL_WKSP, name);
+      const std::string calname = m_instName + "_cal";
+      AnalysisDataService::Instance().addOrReplace(calname, m_calibrationWS);
+      this->setPropertyValue(PropertyNames::CAL_WKSP, calname);
     }
     if (loadMask) {
       m_maskWS = alg->getProperty("OutputMaskWorkspace");
 
-      const std::string name = m_instName + "_mask";
-      AnalysisDataService::Instance().addOrReplace(name, m_maskWS);
-      this->setPropertyValue(PropertyNames::MASK_WKSP, name);
+      const std::string maskname = m_instName + "_mask";
+      AnalysisDataService::Instance().addOrReplace(maskname, m_maskWS);
+      this->setPropertyValue(PropertyNames::MASK_WKSP, maskname);
     }
   }
 }
