@@ -47,7 +47,7 @@ try:
         r"""
         Fixture that returns a string guaranteed not to represent an already existing workspace so that it can be
         associated to a new workspace. The workspace will be deleted when the function exists or upon exception.
-        This fixutre has no input parameters and depends on the clean_workspace fixture.
+        This fixture has no input parameters and depends on the clean_workspace fixture.
 
         :yields: unique string to be used as a workspace name
         """
