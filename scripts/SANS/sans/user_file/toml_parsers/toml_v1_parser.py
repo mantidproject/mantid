@@ -170,9 +170,8 @@ class _TomlV1ParserImpl(TomlParserImplBase):
         front = self.get_val("front_centre", det_config_dict)
         all = self.get_val("all_centre", det_config_dict)
 
-        if self.reduction_mode.reduction_mode is ReductionMode.LAB:
+        if self.reduction_mode.reduction_mode in [ReductionMode.LAB, ReductionMode.HAB]:
             update_translations(DetectorType.LAB, rear)
-        elif self.reduction_mode.reduction_mode is ReductionMode.HAB:
             update_translations(DetectorType.HAB, front)
         elif self.reduction_mode.reduction_mode in [ReductionMode.ALL, ReductionMode.MERGED]:
             if self.instrument is SANSInstrument.LOQ:
