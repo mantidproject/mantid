@@ -61,7 +61,7 @@ void InelasticDataManipulation::initLayout() {
   // Create the tabs
   addTab<InelasticDataManipulationSymmetriseTab>("Symmetrise");
   addMVPTab<InelasticDataManipulationSqwTab, InelasticDataManipulationSqwTabView>("S(Q, w)");
-  addMVPTab<InelasticDataManipulationMomentsTab, InelasticDataManipulationMomentsTabView>("Moments");
+  addTab<InelasticDataManipulationMomentsTab>("Moments");
   addTab<InelasticDataManipulationElwinTab>("Elwin");
   addTab<InelasticDataManipulationIqtTab>("Iqt");
 

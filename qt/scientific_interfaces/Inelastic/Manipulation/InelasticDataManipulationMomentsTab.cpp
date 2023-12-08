@@ -22,12 +22,28 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-InelasticDataManipulationMomentsTab::InelasticDataManipulationMomentsTab(QWidget *parent, IMomentsView *view)
+InelasticDataManipulationMomentsTab::InelasticDataManipulationMomentsTab(QWidget *parent)
     : InelasticDataManipulationTab(parent), m_model(std::make_unique<InelasticDataManipulationMomentsTabModel>()),
-      m_view(view) {
-  m_view->subscribePresenter(this);
+      m_view(std::make_unique<InelasticDataManipulationMomentsTabView>(parent)) {
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra, "0,2,4"));
+
+  m_view->setupProperties();
+
+  connect(m_view.get(), SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady(const QString &)));
+  connect(m_view.get(), SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
+  connect(m_view.get(), SIGNAL(scaleChanged(int)), this, SLOT(handleScaleChanged(int)));
+  connect(m_view.get(), SIGNAL(scaleValueChanged(double)), this, SLOT(handleScaleValueChanged(double)));
+  connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
+  connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
+
+  // Update the preview plot when the algorithm completes
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(momentsAlgComplete(bool)));
+
+  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), m_view.get(),
+          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
+
+  connect(m_view.get(), SIGNAL(showMessageBox(const QString &)), this, SIGNAL(showMessageBox(const QString &)));
 }
 
 void InelasticDataManipulationMomentsTab::setup() {}
@@ -36,7 +52,7 @@ void InelasticDataManipulationMomentsTab::setup() {}
  * Handles the event of data being loaded. Validates the loaded data.
  *
  */
-void InelasticDataManipulationMomentsTab::handleDataReady(std::string const &dataName) {
+void InelasticDataManipulationMomentsTab::handleDataReady(QString const &dataName) {
   if (m_view->validate()) {
     m_model->setInputWorkspace(m_view->getDataName());
     plotNewData(dataName);
@@ -46,7 +62,7 @@ void InelasticDataManipulationMomentsTab::handleDataReady(std::string const &dat
 /**
  * Handles the scale checkbox being changed.
  */
-void InelasticDataManipulationMomentsTab::handleScaleChanged(bool state) { m_model->setScale(state); }
+void InelasticDataManipulationMomentsTab::handleScaleChanged(int state) { m_model->setScale(state == Qt::Checked); }
 
 /**
  * Handles the scale value being changed.
@@ -60,29 +76,28 @@ bool InelasticDataManipulationMomentsTab::validate() { return true; }
  * Clears previous plot data (in both preview and raw plot) and sets the new
  * range bars
  */
-
-void InelasticDataManipulationMomentsTab::plotNewData(std::string const &filename) {
+void InelasticDataManipulationMomentsTab::plotNewData(QString const &filename) {
 
   m_view->plotNewData(filename);
-  auto const range = getXRangeFromWorkspace(filename);
+  auto const range = getXRangeFromWorkspace(filename.toStdString());
   m_view->setPlotPropertyRange(range);
   m_view->setRangeSelector(range);
   m_view->replot();
 }
 
 /**
- * Handles when numeric value of properties in the property manager are updated.
+ * Handles when properties in the property manager are updated.
  *
  * Performs validation and updated preview plot.
  *
- * @param propName :: The property being updated
+ * @param prop :: The property being updated
  * @param val :: The new value for the property
  */
-void InelasticDataManipulationMomentsTab::handleValueChanged(std::string const &propName, double value) {
-  if (propName == "EMin") {
-    m_model->setEMin(value);
-  } else if (propName == "EMax") {
-    m_model->setEMax(value);
+void InelasticDataManipulationMomentsTab::updateProperties(QtProperty *prop, double val) {
+  if (prop->propertyName() == "EMin") {
+    m_model->setEMin(val);
+  } else if (prop->propertyName() == "EMax") {
+    m_model->setEMax(val);
   }
 }
 
@@ -91,7 +106,7 @@ void InelasticDataManipulationMomentsTab::handleValueChanged(std::string const &
  *
  * @param error True if the algorithm exited due to error, false otherwise
  */
-void InelasticDataManipulationMomentsTab::runComplete(bool error) {
+void InelasticDataManipulationMomentsTab::momentsAlgComplete(bool error) {
   if (error)
     return;
 
@@ -103,8 +118,7 @@ void InelasticDataManipulationMomentsTab::runComplete(bool error) {
 
   setOutputPlotOptionsWorkspaces({m_model->getOutputWorkspace()});
 
-  m_view->plotOutput(m_model->getOutputWorkspace());
-  m_view->getPlotOptions()->setIndicesLineEditEnabled(true);
+  m_view->plotOutput(QString::fromStdString(m_model->getOutputWorkspace()));
 }
 
 void InelasticDataManipulationMomentsTab::setFileExtensionsByName(bool filter) {
@@ -117,12 +131,12 @@ void InelasticDataManipulationMomentsTab::setFileExtensionsByName(bool filter) {
 /**
  * Handle when Run is clicked
  */
-void InelasticDataManipulationMomentsTab::handleRunClicked() { runTab(); }
+void InelasticDataManipulationMomentsTab::runClicked() { runTab(); }
 
 /**
  * Handles saving of workspaces
  */
-void InelasticDataManipulationMomentsTab::handleSaveClicked() {
+void InelasticDataManipulationMomentsTab::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_model->getOutputWorkspace(), false))
     addSaveWorkspaceToQueue(m_model->getOutputWorkspace());
   m_batchAlgoRunner->executeBatchAsync();

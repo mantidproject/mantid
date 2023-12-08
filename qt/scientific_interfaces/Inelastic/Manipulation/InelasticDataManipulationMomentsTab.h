@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IMomentsView.h"
 #include "InelasticDataManipulationMomentsTabModel.h"
 #include "InelasticDataManipulationMomentsTabView.h"
 #include "InelasticDataManipulationTab.h"
@@ -18,18 +17,6 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-class IMomentsPresenter {
-public:
-  virtual void handleDataReady(std::string const &dataName) = 0;
-
-  virtual void handleScaleChanged(bool state) = 0;
-  virtual void handleScaleValueChanged(double const value) = 0;
-  virtual void handleValueChanged(std::string const &propName, double value) = 0;
-
-  virtual void handleRunClicked() = 0;
-  virtual void handleSaveClicked() = 0;
-};
 /** InelasticDataManipulationMomentsTab : Calculates the S(Q,w) Moments of the provided data with
   the user specified range and scale factor
 
@@ -37,34 +24,36 @@ public:
   @author Samuel Jackson
   @date 13/08/2013
 */
-class MANTIDQT_INELASTIC_DLL InelasticDataManipulationMomentsTab : public InelasticDataManipulationTab,
-                                                                   public IMomentsPresenter {
+class MANTIDQT_INELASTIC_DLL InelasticDataManipulationMomentsTab : public InelasticDataManipulationTab {
+  Q_OBJECT
 
 public:
-  InelasticDataManipulationMomentsTab(QWidget *parent, IMomentsView *view);
+  InelasticDataManipulationMomentsTab(QWidget *parent = nullptr);
   ~InelasticDataManipulationMomentsTab() = default;
 
   void setup() override;
   void run() override;
   bool validate() override;
 
-  void handleDataReady(std::string const &dataName) override;
+protected slots:
+  /// Slot to update the guides when the range properties change
+  void updateProperties(QtProperty *prop, double val);
+  /// Called when the algorithm completes to update preview plot
+  void momentsAlgComplete(bool error);
+  /// Slots for plot and save
+  void runClicked();
+  void saveClicked();
 
-  void handleScaleChanged(bool state) override;
-  void handleScaleValueChanged(double const value) override;
-  void handleValueChanged(std::string const &propName, double value) override;
-
-  void handleRunClicked() override;
-  void handleSaveClicked() override;
-
-protected:
-  void runComplete(bool error) override;
+private slots:
+  void handleDataReady(QString const &dataName) override;
+  void handleScaleChanged(int state);
+  void handleScaleValueChanged(double value);
 
 private:
-  void plotNewData(std::string const &filename);
+  void plotNewData(QString const &filename);
   void setFileExtensionsByName(bool filter) override;
   std::unique_ptr<InelasticDataManipulationMomentsTabModel> m_model;
-  IMomentsView *m_view;
+  std::unique_ptr<InelasticDataManipulationMomentsTabView> m_view;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
