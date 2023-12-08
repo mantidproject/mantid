@@ -24,7 +24,7 @@ using Mantid::Types::Core::DateAndTime;
 
 class AddSampleLogTest : public CxxTest::TestSuite {
 private:
-  void setStarEndTime(MatrixWorkspace_sptr &ws) {
+  void setStartEndTime(MatrixWorkspace_sptr &ws) {
     ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"), DateAndTime("2013-12-18T13:42:00"));
   }
 
@@ -66,7 +66,7 @@ public:
 
   void test_NumberSeries() {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    this->setStarEndTime(ws);
+    this->setStartEndTime(ws);
     ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "1.234", 1.234);
     ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "2.456", 2.456);
     // Only double is allowed if using default type
@@ -77,7 +77,7 @@ public:
 
   void test_Units() {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    this->setStarEndTime(ws);
+    this->setStartEndTime(ws);
     ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234, false, "myUnit");
     ExecuteAlgorithm(ws, "My New Name", "Number", "963", 963, false, "differentUnit");
     ExecuteAlgorithm(ws, "My Name", "String", "My Value", 0.0, false, "stringUnit");
@@ -85,7 +85,7 @@ public:
 
   void test_number_type() {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    this->setStarEndTime(ws);
+    this->setStartEndTime(ws);
     ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234, false, "myUnit", "Double");
     ExecuteAlgorithm(ws, "My New Name", "Number", "963", 963, false, "differentUnit", "Int");
     // Can force '963' to be interpreted as a double
@@ -231,7 +231,7 @@ public:
     // get the workspace
     MatrixWorkspace_sptr ws =
         std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wkspName));
-    this->setStarEndTime(ws);
+    this->setStartEndTime(ws);
 
     // values taken from logs of SNAP_57514
     constexpr double det_lin1{0.045};
