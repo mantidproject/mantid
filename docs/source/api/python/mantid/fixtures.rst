@@ -12,7 +12,7 @@
 
 Usage
 -----
-To make the fixtures available to your tests, add the following line to your conftest.py file:
+To make the fixtures available to your tests, add the following line, after any imports, to your conftest.py file:
 
 .. testcode::
 

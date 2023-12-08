@@ -45,7 +45,7 @@ try:
     @pytest.fixture
     def temp_workspace_name(clean_workspace):
         r"""
-        Fixture that returns a string guaranteed not to represent an already existing workpsace so that it can be
+        Fixture that returns a string guaranteed not to represent an already existing workspace so that it can be
         associated to a new workspace. The workspace will be deleted when the function exists or upon exception.
         This fixutre has no input parameters and depends on the clean_workspace fixture.
 
@@ -61,4 +61,4 @@ try:
         return _temp_workspace
 
 except ImportError:
-    logger.debug("Pytest not installed, pytest fixtures are unavailable")
+    logger.warning("Pytest not installed, pytest fixtures are unavailable")
