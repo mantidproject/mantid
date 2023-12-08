@@ -1,0 +1,1 @@
+- Fixed intermittent error in Slice Viewer when reopening after a change in support for nonorthogonal axes.
