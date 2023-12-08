@@ -62,13 +62,13 @@ void InelasticDataManipulation::initLayout() {
   addMVPTab<InelasticDataManipulationSymmetriseTab, InelasticDataManipulationSymmetriseTabView>("Symmetrise");
   addMVPTab<InelasticDataManipulationSqwTab, InelasticDataManipulationSqwTabView>("S(Q, w)");
   addMVPTab<InelasticDataManipulationMomentsTab, InelasticDataManipulationMomentsTabView>("Moments");
-  addTab<InelasticDataManipulationElwinTab>("Elwin");
+  addMVPTab<InelasticDataManipulationElwinTab, InelasticDataManipulationElwinTabView>("Elwin");
   addTab<InelasticDataManipulationIqtTab>("Iqt");
 
   connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
   // Connect "?" (Help) Button
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  // Connect the Python export buton
+  // Connect the Python export button
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this, SLOT(exportTabPython()));
   // Connect the "Manage User Directories" Button
   connect(m_uiForm.pbManageDirectories, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
