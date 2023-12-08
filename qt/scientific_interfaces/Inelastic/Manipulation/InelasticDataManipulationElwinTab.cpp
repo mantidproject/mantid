@@ -84,49 +84,23 @@ public:
   ~ScopedFalse() { m_ref = m_oldValue; }
 };
 
-QStringList getSampleWSSuffices() {
-  QStringList const wsSampleSuffixes{"red", "sqw"};
-  return wsSampleSuffixes;
-}
-
-QStringList getSampleFBSuffices() {
-  QStringList const fbSampleSuffixes{"red.*", "sqw.*"};
-  return fbSampleSuffixes;
-}
-
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
 using namespace IDA;
-InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *parent)
-    : InelasticDataManipulationTab(parent), m_view(std::make_unique<InelasticDataManipulationElwinTabView>(parent)),
+InelasticDataManipulationElwinTab::InelasticDataManipulationElwinTab(QWidget *parent, IElwinView *view)
+    : InelasticDataManipulationTab(parent), m_view(view),
       m_model(std::make_unique<InelasticDataManipulationElwinTabModel>()),
       m_dataModel(std::make_unique<IndirectFitDataModel>()), m_selectedSpectrum(0) {
-
+  m_view->subscribePresenter(this);
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
-  connect(m_view.get(), SIGNAL(showMessageBox(const QString &)), this, SIGNAL(showMessageBox(const QString &)));
-  connect(m_view.get(), SIGNAL(addDataClicked()), this, SLOT(showAddWorkspaceDialog()));
-  connect(m_view.get(), SIGNAL(removeDataClicked()), this, SLOT(removeSelectedData()));
-
-  m_parent = dynamic_cast<InelasticDataManipulation *>(parent);
 }
 
 InelasticDataManipulationElwinTab::~InelasticDataManipulationElwinTab() {}
 
 void InelasticDataManipulationElwinTab::setup() {
-  connect(m_view.get(), SIGNAL(filesFound()), this, SLOT(checkLoadedFiles()));
-  connect(m_view.get(), SIGNAL(previewIndexChanged(int)), this, SLOT(checkNewPreviewSelected(int)));
-  connect(m_view.get(), SIGNAL(selectedSpectrumChanged(int)), this, SLOT(handlePreviewSpectrumChanged(int)));
-  connect(m_view.get(), SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(handleValueChanged(QtProperty *, double)));
-  connect(m_view.get(), SIGNAL(valueChanged(QtProperty *, bool)), this, SLOT(handleValueChanged(QtProperty *, bool)));
-
-  // Handle plot and save
-  connect(m_view.get(), SIGNAL(runClicked()), this, SLOT(runClicked()));
-  connect(m_view.get(), SIGNAL(saveClicked()), this, SLOT(saveClicked()));
-  connect(m_view.get(), SIGNAL(plotPreviewClicked()), this, SLOT(plotCurrentPreview()));
-
+  m_view->setup();
   updateAvailableSpectra();
 }
 
@@ -186,7 +160,6 @@ void InelasticDataManipulationElwinTab::runFileInput() {
   m_model->setupElasticWindowMultiple(m_batchAlgoRunner, workspaceBaseName, inputGroupWsName, m_view->getLogName(),
                                       m_view->getLogValue());
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(unGroupInput(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
@@ -214,7 +187,6 @@ void InelasticDataManipulationElwinTab::runWorkspaceInput() {
   m_model->setupElasticWindowMultiple(m_batchAlgoRunner, "ELWIN_workspace_output", inputGroupWsName,
                                       m_view->getLogName(), m_view->getLogValue());
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(unGroupInput(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
@@ -224,8 +196,7 @@ void InelasticDataManipulationElwinTab::runWorkspaceInput() {
 /**
  * Ungroups the output after the execution of the algorithm
  */
-void InelasticDataManipulationElwinTab::unGroupInput(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(unGroupInput(bool)));
+void InelasticDataManipulationElwinTab::runComplete(bool error) {
   m_view->setRunIsRunning(false);
 
   if (!error) {
@@ -244,10 +215,10 @@ void InelasticDataManipulationElwinTab::unGroupInput(bool error) {
 }
 
 void InelasticDataManipulationElwinTab::checkForELTWorkspace() {
-  auto const workspaceName = getOutputBasename().toStdString() + "_elt";
+  auto const workspaceName = getOutputBasename() + "_elt";
   if (!doesExistInADS(workspaceName))
-    showMessageBox("ElasticWindowMultiple successful. \nThe _elt workspace "
-                   "was not produced - temperatures were not found.");
+    m_view->showMessageBox("ElasticWindowMultiple successful. \nThe _elt workspace "
+                           "was not produced - temperatures were not found.");
 }
 
 bool InelasticDataManipulationElwinTab::validate() {
@@ -271,7 +242,7 @@ bool InelasticDataManipulationElwinTab::validate() {
 
   auto const errorMessage = uiv.generateErrorMessage();
   if (!errorMessage.isEmpty())
-    showMessageBox(errorMessage);
+    m_view->showMessageBox(errorMessage.toStdString());
   return errorMessage.isEmpty();
 }
 
@@ -280,22 +251,22 @@ void InelasticDataManipulationElwinTab::setFileExtensionsByName(bool filter) {
   m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
 }
 
-void InelasticDataManipulationElwinTab::handleValueChanged(QtProperty *prop, double value) {
-  if (prop->propertyName() == "IntegrationStart") {
+void InelasticDataManipulationElwinTab::handleValueChanged(std::string const &propName, double value) {
+  if (propName == "IntegrationStart") {
     m_model->setIntegrationStart(value);
-  } else if (prop->propertyName() == "IntegrationEnd") {
+  } else if (propName == "IntegrationEnd") {
     m_model->setIntegrationEnd(value);
-  } else if (prop->propertyName() == "BackgroundStart") {
+  } else if (propName == "BackgroundStart") {
     m_model->setBackgroundStart(value);
-  } else if (prop->propertyName() == "BackgroundEnd") {
+  } else if (propName == "BackgroundEnd") {
     m_model->setBackgroundEnd(value);
   }
 }
 
-void InelasticDataManipulationElwinTab::handleValueChanged(QtProperty *prop, bool value) {
-  if (prop->propertyName() == "BackgroundSubtraction") {
+void InelasticDataManipulationElwinTab::handleValueChanged(std::string const &propName, bool value) {
+  if (propName == "BackgroundSubtraction") {
     m_model->setBackgroundSubtraction(value);
-  } else if (prop->propertyName() == "Normalise") {
+  } else if (propName == "Normalise") {
     m_model->setNormalise(value);
   }
 }
@@ -309,8 +280,8 @@ void InelasticDataManipulationElwinTab::newInputFiles() {
   m_view->clearPreviewFile();
   m_view->newInputFiles();
 
-  QString const wsname = m_view->getPreviewWorkspaceName(0);
-  auto const inputWs = getADSMatrixWorkspace(wsname.toStdString());
+  std::string const wsname = m_view->getPreviewWorkspaceName(0);
+  auto const inputWs = getADSMatrixWorkspace(wsname);
   setInputWorkspace(inputWs);
 }
 
@@ -326,8 +297,8 @@ void InelasticDataManipulationElwinTab::newInputFilesFromDialog(IAddWorkspaceDia
 
   m_view->newInputFilesFromDialog(dialog);
 
-  QString const wsname = m_view->getPreviewWorkspaceName(0);
-  auto const inputWs = getADSMatrixWorkspace(wsname.toStdString());
+  std::string const wsname = m_view->getPreviewWorkspaceName(0);
+  auto const inputWs = getADSMatrixWorkspace(wsname);
   setInputWorkspace(inputWs);
 }
 
@@ -339,22 +310,23 @@ void InelasticDataManipulationElwinTab::newInputFilesFromDialog(IAddWorkspaceDia
  * @param index Index of the new selected file
  */
 
-void InelasticDataManipulationElwinTab::checkNewPreviewSelected(int index) {
+void InelasticDataManipulationElwinTab::handlePreviewIndexChanged(int index) {
   auto const workspaceName = m_view->getPreviewWorkspaceName(index);
   auto const filename = m_view->getPreviewFilename(index);
 
-  if (!workspaceName.isEmpty()) {
-    if (!filename.isEmpty())
+  if (!workspaceName.empty()) {
+    if (!filename.empty())
       newPreviewFileSelected(workspaceName, filename);
     else
       newPreviewWorkspaceSelected(workspaceName);
   }
 }
 
-void InelasticDataManipulationElwinTab::newPreviewFileSelected(const QString &workspaceName, const QString &filename) {
+void InelasticDataManipulationElwinTab::newPreviewFileSelected(const std::string &workspaceName,
+                                                               const std::string &filename) {
   auto loadHistory = m_view->isLoadHistory();
-  if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
-    auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
+  if (loadFile(QString::fromStdString(filename), QString::fromStdString(workspaceName), -1, -1, loadHistory)) {
+    auto const workspace = getADSMatrixWorkspace(workspaceName);
 
     setInputWorkspace(workspace);
 
@@ -364,9 +336,9 @@ void InelasticDataManipulationElwinTab::newPreviewFileSelected(const QString &wo
   }
 }
 
-void InelasticDataManipulationElwinTab::newPreviewWorkspaceSelected(const QString &workspaceName) {
+void InelasticDataManipulationElwinTab::newPreviewWorkspaceSelected(const std::string &workspaceName) {
   if (m_view->getCurrentInputIndex() == 1) {
-    auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
+    auto const workspace = getADSMatrixWorkspace(workspaceName);
     setInputWorkspace(workspace);
     updateAvailableSpectra();
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
@@ -376,6 +348,9 @@ void InelasticDataManipulationElwinTab::newPreviewWorkspaceSelected(const QStrin
 void InelasticDataManipulationElwinTab::handlePreviewSpectrumChanged(int spectrum) {
   if (m_view->getPreviewSpec())
     setSelectedSpectrum(spectrum);
+  std::cout << "Spectrum " << spectrum << std::endl;
+  std::cout << "Preview Spectrum " << m_view->getPreviewSpec() << std::endl;
+  std::cout << getInputWorkspace() << "  selected: " << getSelectedSpectrum() << std::endl;
   m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
 }
 
@@ -408,7 +383,7 @@ void InelasticDataManipulationElwinTab::updateIntegrationRange() {
   }
 }
 
-void InelasticDataManipulationElwinTab::runClicked() {
+void InelasticDataManipulationElwinTab::handleRunClicked() {
   clearOutputPlotOptionsWorkspaces();
   runTab();
 }
@@ -416,73 +391,27 @@ void InelasticDataManipulationElwinTab::runClicked() {
 /**
  * Handles saving of workspaces
  */
-void InelasticDataManipulationElwinTab::saveClicked() {
+void InelasticDataManipulationElwinTab::handleSaveClicked() {
   for (auto const &name : getOutputWorkspaceNames())
     addSaveWorkspaceToQueue(name);
   m_batchAlgoRunner->executeBatchAsync();
 }
 
 std::vector<std::string> InelasticDataManipulationElwinTab::getOutputWorkspaceNames() {
-  auto outputNames = attachPrefix(getOutputWorkspaceSuffices(), getOutputBasename().toStdString());
+  auto outputNames = attachPrefix(getOutputWorkspaceSuffices(), getOutputBasename());
   removeElementsIf(outputNames, [](std::string const &workspaceName) { return !doesExistInADS(workspaceName); });
   return outputNames;
 }
 
-QString InelasticDataManipulationElwinTab::getOutputBasename() {
-  return getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
+std::string InelasticDataManipulationElwinTab::getOutputBasename() {
+  return getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName)).toStdString();
 }
 
-std::unique_ptr<IAddWorkspaceDialog> InelasticDataManipulationElwinTab::getAddWorkspaceDialog(QWidget *parent) const {
-  return std::make_unique<IndirectAddWorkspaceDialog>(parent);
-}
-
-void InelasticDataManipulationElwinTab::showAddWorkspaceDialog() {
-  if (!m_addWorkspaceDialog)
-    m_addWorkspaceDialog = getAddWorkspaceDialog(m_parent);
-  m_addWorkspaceDialog->setWSSuffices(getSampleWSSuffices());
-  m_addWorkspaceDialog->setFBSuffices(getSampleFBSuffices());
-  m_addWorkspaceDialog->updateSelectedSpectra();
-  m_addWorkspaceDialog->show();
-  connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
-  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
-}
-
-void InelasticDataManipulationElwinTab::closeDialog() {
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
-  m_addWorkspaceDialog->close();
-  m_addWorkspaceDialog = nullptr;
-}
-
-void InelasticDataManipulationElwinTab::addData() { checkData(m_addWorkspaceDialog.get()); }
-
-/** This method checks whether a Workspace or a File is being uploaded through the AddWorkspaceDialog
- * A File requiresd additional checks to ensure a file of the correct type is being loaded. The Workspace list is
- * already filtered.
- */
-void InelasticDataManipulationElwinTab::checkData(IAddWorkspaceDialog const *dialog) {
-  try {
-    const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog);
-    if (indirectDialog) {
-      // getFileName will be empty if the addWorkspaceDialog is set to Workspace instead of File.
-      if (indirectDialog->getFileName().empty()) {
-        addData(dialog);
-      } else
-        addDataFromFile(dialog);
-    } else
-      (throw std::invalid_argument("Unable to access IndirectAddWorkspaceDialog"));
-
-  } catch (const std::runtime_error &ex) {
-    displayWarning(ex.what());
-  }
-}
-
-void InelasticDataManipulationElwinTab::addData(IAddWorkspaceDialog const *dialog) {
+void InelasticDataManipulationElwinTab::handleAddData(IAddWorkspaceDialog const *dialog) {
   try {
     addDataToModel(dialog);
     updateTableFromModel();
-    emit dataAdded();
-    emit dataChanged();
+
     newInputFilesFromDialog(dialog);
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
   } catch (const std::runtime_error &ex) {
@@ -490,7 +419,7 @@ void InelasticDataManipulationElwinTab::addData(IAddWorkspaceDialog const *dialo
   }
 }
 
-void InelasticDataManipulationElwinTab::addDataFromFile(IAddWorkspaceDialog const *dialog) {
+void InelasticDataManipulationElwinTab::handleAddDataFromFile(IAddWorkspaceDialog const *dialog) {
   try {
     UserInputValidator uiv;
     const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog);
@@ -500,13 +429,14 @@ void InelasticDataManipulationElwinTab::addDataFromFile(IAddWorkspaceDialog cons
     if (suffixes.size() < 1) {
       uiv.addErrorMessage("The input files must be all _red or all _sqw.");
       m_view->clearInputFiles();
-      closeDialog();
+      // m_view->CloseDialog();
     }
-    QString error = uiv.generateErrorMessage();
-    showMessageBox(error);
+    std::string error = uiv.generateErrorMessage().toStdString();
 
-    if (error.isEmpty()) {
-      addData(dialog);
+    if (error.empty()) {
+      handleAddData(dialog);
+    } else {
+      m_view->showMessageBox(error);
     }
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
@@ -526,7 +456,7 @@ void InelasticDataManipulationElwinTab::updateTableFromModel() {
   }
 }
 
-void InelasticDataManipulationElwinTab::removeSelectedData() {
+void InelasticDataManipulationElwinTab::handleRemoveSelectedData() {
   auto selectedIndices = m_view->getSelectedData();
   std::sort(selectedIndices.begin(), selectedIndices.end());
   for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {
@@ -550,14 +480,14 @@ void InelasticDataManipulationElwinTab::updateAvailableSpectra() {
 }
 
 size_t InelasticDataManipulationElwinTab::findWorkspaceID() {
-  auto currentWorkspace = m_view->getCurrentPreview().toStdString();
+  auto currentWorkspace = m_view->getCurrentPreview();
   auto allWorkspaces = m_dataModel->getWorkspaceNames();
   auto findWorkspace = find(allWorkspaces.begin(), allWorkspaces.end(), currentWorkspace);
   size_t workspaceID = findWorkspace - allWorkspaces.begin();
   return workspaceID;
 }
 
-void InelasticDataManipulationElwinTab::checkLoadedFiles() {
+void InelasticDataManipulationElwinTab::handleFilesFound() {
   if (validate()) {
     newInputFiles();
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
@@ -599,7 +529,7 @@ void InelasticDataManipulationElwinTab::setInputWorkspace(MatrixWorkspace_sptr i
  * Plots the current preview workspace, if none is set, plots
  * the selected spectrum of the current input workspace.
  */
-void InelasticDataManipulationElwinTab::plotCurrentPreview() {
+void InelasticDataManipulationElwinTab::handlePlotPreviewClicked() {
   auto const previewWs = getPreviewPlotWorkspace();
   auto const inputWs = getInputWorkspace();
   auto const index = boost::numeric_cast<size_t>(m_selectedSpectrum);
@@ -616,7 +546,7 @@ void InelasticDataManipulationElwinTab::plotCurrentPreview() {
   } else if (inputWs && index < inputWs->getNumberHistograms()) {
     m_plotter->plotSpectra(inputWs->getName(), std::to_string(index), errorBars);
   } else
-    showMessageBox("Workspace not found - data may not be loaded.");
+    m_view->showMessageBox("Workspace not found - data may not be loaded.");
 }
 
 /**
