@@ -16,12 +16,13 @@
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
-auto const expDecay = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
-  return std::unordered_map<std::string, double>{{"Height", 1.0}, {"Lifetime", 1.0}};
+auto const lorentzian = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
+  (void)x;
+  return std::unordered_map<std::string, double>{{"Amplitude", y[1]}};
 };
 
 auto const estimators =
-    std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{{"ExpDecay", expDecay}};
+    std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{{"Lorentzian", lorentzian}};
 
 } // namespace
 
@@ -49,6 +50,7 @@ void ConvFunctionModel::setModel() {
     m_globals.push_back(ParamID::TEMPERATURE);
   }
   m_model.setGlobalParameters(makeGlobalList());
+  estimateFunctionParameters();
 }
 
 void ConvFunctionModel::setFunction(IFunction_sptr fun) {
@@ -262,8 +264,17 @@ void ConvFunctionModel::removeBackground() {
 bool ConvFunctionModel::hasBackground() const { return m_backgroundType != BackgroundType::None; }
 
 EstimationDataSelector ConvFunctionModel::getEstimationDataSelector() const {
-  return [](const Mantid::MantidVec &, const Mantid::MantidVec &,
-            const std::pair<double, double>) -> DataForParameterEstimation { return DataForParameterEstimation{}; };
+  return [](const Mantid::MantidVec &x, const Mantid::MantidVec &y,
+            const std::pair<double, double> &range) -> DataForParameterEstimation {
+    (void)range;
+
+    auto const maxElement = std::max_element(y.cbegin(), y.cend());
+    if (maxElement == y.cend())
+      return DataForParameterEstimation{{}, {}};
+
+    auto const maxElementIndex = std::distance(y.cbegin(), maxElement);
+    return DataForParameterEstimation{{x[0], x[maxElementIndex]}, {y[0], *maxElement}};
+  };
 }
 
 void ConvFunctionModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
