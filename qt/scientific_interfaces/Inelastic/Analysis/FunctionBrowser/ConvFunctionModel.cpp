@@ -21,8 +21,14 @@ auto const lorentzian = [](Mantid::MantidVec const &x, Mantid::MantidVec const &
   return std::unordered_map<std::string, double>{{"Amplitude", y[1]}};
 };
 
+auto const sqeFunction = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
+  (void)x;
+  return std::unordered_map<std::string, double>{{"Height", y[1]}};
+};
+
 auto const estimators = std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{
-    {"Lorentzian", lorentzian}, {"LorentzianN", lorentzian}};
+    {"Lorentzian", lorentzian},        {"LorentzianN", lorentzian},       {"TeixeiraWaterSQE", sqeFunction},
+    {"FickDiffusionSQE", sqeFunction}, {"ChudleyElliotSQE", sqeFunction}, {"HallRossSQE", sqeFunction}};
 
 } // namespace
 
