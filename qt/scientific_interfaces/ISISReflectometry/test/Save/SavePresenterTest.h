@@ -40,24 +40,28 @@ public:
       : m_view(), m_savePath("/foo/bar/"), m_fileFormat(NamedFormat::Custom), m_prefix("testoutput_"),
         m_includeHeader(true), m_separator(","), m_includeQResolution(true) {}
 
+  void tearDown() override {
+    // Verifying and clearing of expectations happens when mock variables are destroyed.
+    // Some of our mocks are created as member variables and will exist until all tests have run, so we need to
+    // explicitly verify and clear them after each test.
+    verifyAndClear();
+  }
+
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
     auto presenter = makePresenter();
-    verifyAndClear();
   }
 
   void testSetWorkspaceListOnConstruction() {
     auto workspaceNames = createWorkspaces();
     expectSetWorkspaceListFromADS(workspaceNames);
     auto presenter = makePresenter();
-    verifyAndClear();
   }
 
   void testSetDefaultSavePathOnConstruction() {
     auto const path = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
     EXPECT_CALL(m_view, setSavePath(path)).Times(1);
     auto presenter = makePresenter();
-    verifyAndClear();
   }
 
   void testNotifyPopulateWorkspaceList() {
@@ -65,7 +69,6 @@ public:
     auto workspaceNames = createWorkspaces();
     expectSetWorkspaceListFromADS(workspaceNames);
     presenter.notifyPopulateWorkspaceList();
-    verifyAndClear();
   }
 
   void testUpdateWorkspaceList() {
@@ -76,7 +79,6 @@ public:
     createWorkspace("ws2");
     expectSetWorkspaceListFromADS({"ws1", "ws2"});
     presenter.notifyPopulateWorkspaceList();
-    verifyAndClear();
   }
 
   void testNotifyPopulateWorkspaceListExcludesInvalidWorkspaceTypes() {
@@ -90,7 +92,6 @@ public:
     // "tableWS" and "groupWS" should not be included in the workspace list
     expectSetWorkspaceListFromADS({"ws1", "ws2", "ws3", "ws4"});
     presenter.notifyPopulateWorkspaceList();
-    verifyAndClear();
   }
 
   void testNotifyFilterWorkspaceList() {
@@ -104,7 +105,6 @@ public:
     EXPECT_CALL(m_view, clearWorkspaceList()).Times(1);
     EXPECT_CALL(m_view, setWorkspaceList(filteredWorkspaces)).Times(1);
     presenter.notifyFilterWorkspaceList();
-    verifyAndClear();
   }
 
   void testNotifyFilterWorkspaceListByRegex() {
@@ -119,7 +119,6 @@ public:
     EXPECT_CALL(m_view, clearWorkspaceList()).Times(1);
     EXPECT_CALL(m_view, setWorkspaceList(filteredWorkspaces)).Times(1);
     presenter.notifyFilterWorkspaceList();
-    verifyAndClear();
   }
 
   void testNotifyFilterWorkspaceListWithInvalidRegex() {
@@ -134,7 +133,6 @@ public:
     EXPECT_CALL(m_view, clearWorkspaceList()).Times(1);
     EXPECT_CALL(m_view, setWorkspaceList(filteredWorkspaces)).Times(1);
     presenter.notifyFilterWorkspaceList();
-    verifyAndClear();
   }
 
   void testNotifyPopulateParametersList() {
@@ -150,7 +148,6 @@ public:
     EXPECT_CALL(m_view, getCurrentWorkspaceName()).Times(1).WillOnce(Return(currentWorkspace));
     EXPECT_CALL(m_view, setParametersList(expectedLogs)).Times(1);
     presenter.notifyPopulateParametersList();
-    verifyAndClear();
   }
 
   void testNotifySaveSelectedWorkspacesWithLogs() {
@@ -162,7 +159,6 @@ public:
     EXPECT_CALL(m_view, getSelectedWorkspaces()).Times(1).WillOnce(Return(selectedWorkspaces));
     expectSaveWorkspaces(selectedWorkspaces, logs);
     presenter.notifySaveSelectedWorkspaces();
-    verifyAndClear();
   }
 
   void testNotifySaveSelectedWorkspacesWhenNothingSelected() {
@@ -171,7 +167,6 @@ public:
     EXPECT_CALL(m_view, getSelectedWorkspaces()).Times(1).WillOnce(Return(emptyWorkspaceList));
     EXPECT_CALL(m_view, noWorkspacesSelected()).Times(1);
     presenter.notifySaveSelectedWorkspaces();
-    verifyAndClear();
   }
 
   void testNotifyAutosaveDisabled() {
@@ -179,7 +174,6 @@ public:
     // There are no calls to the view
     EXPECT_CALL(m_view, disableSaveIndividualRowsCheckbox()).Times(1);
     presenter.notifyAutosaveDisabled();
-    verifyAndClear();
   }
 
   void testNotifyAutosaveEnabled() {
@@ -187,7 +181,6 @@ public:
     expectGetValidSaveDirectory();
     EXPECT_CALL(m_view, enableSaveIndividualRowsCheckbox()).Times(1);
     presenter.notifyAutosaveEnabled();
-    verifyAndClear();
   }
 
   void testNotifyAutosaveEnabledWithInvalidPath() {
@@ -197,28 +190,24 @@ public:
     EXPECT_CALL(m_view, disallowAutosave()).Times(1);
     EXPECT_CALL(m_view, errorInvalidSaveDirectory()).Times(1);
     presenter.notifyAutosaveEnabled();
-    verifyAndClear();
   }
 
   void testNotifySaveIndividualRowsEnabled() {
     auto presenter = makePresenter();
     // There are no calls to the view
     presenter.notifySaveIndividualRowsEnabled();
-    verifyAndClear();
   }
 
   void testNotifySaveIndividualRowsDisabled() {
     auto presenter = makePresenter();
     // There are no calls to the view
     presenter.notifySaveIndividualRowsDisabled();
-    verifyAndClear();
   }
 
   void testShouldAutosaveGroupRowsFalseByDefault() {
     auto presenter = makePresenter();
     bool saveRows = presenter.shouldAutosaveGroupRows();
     TS_ASSERT(!saveRows);
-    verifyAndClear();
   }
 
   void testShouldAutosaveGroupRowsWhenSaveIndividualRowsIsEnabled() {
@@ -226,7 +215,6 @@ public:
     presenter.notifySaveIndividualRowsEnabled();
     bool saveRows = presenter.shouldAutosaveGroupRows();
     TS_ASSERT(saveRows);
-    verifyAndClear();
   }
 
   void testShouldAutosaveGroupRowsWhenSaveIndividualRowsIsDisabled() {
@@ -234,7 +222,6 @@ public:
     presenter.notifySaveIndividualRowsDisabled();
     bool saveRows = presenter.shouldAutosaveGroupRows();
     TS_ASSERT(!saveRows);
-    verifyAndClear();
   }
 
   void testNotifySavePathChangedWithAutosaveOn() {
@@ -242,7 +229,6 @@ public:
     enableAutosave(presenter);
     expectGetValidSaveDirectory();
     presenter.notifySavePathChanged();
-    verifyAndClear();
   }
 
   void testNotifySavePathChangedWithAutosaveOff() {
@@ -250,7 +236,6 @@ public:
     disableAutosave(presenter);
     EXPECT_CALL(m_view, getSavePath()).Times(0);
     presenter.notifySavePathChanged();
-    verifyAndClear();
   }
 
   void testNotifySavePathChangedWithInvalidPath() {
@@ -259,7 +244,6 @@ public:
     expectGetInvalidSaveDirectory();
     EXPECT_CALL(m_view, warnInvalidSaveDirectory()).Times(1);
     presenter.notifySavePathChanged();
-    verifyAndClear();
   }
 
   void testControlsEnabledWhenReductionPaused() {
@@ -270,7 +254,6 @@ public:
     EXPECT_CALL(m_view, enableAutosaveControls()).Times(1);
     expectFileFormatAndLocationControlsEnabled();
     presenter.notifyReductionPaused();
-    verifyAndClear();
   }
 
   void testAutosaveControlsDisabledWhenReductionResumedWithAutosaveOn() {
@@ -279,7 +262,6 @@ public:
     expectProcessing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
     presenter.notifyReductionResumed();
-    verifyAndClear();
   }
 
   void testFileControlsDisabledWhenReductionResumedWithAutosaveOn() {
@@ -288,7 +270,6 @@ public:
     expectProcessing();
     expectFileFormatAndLocationControlsDisabled();
     presenter.notifyReductionResumed();
-    verifyAndClear();
   }
 
   void testFileControlsEnabledWhenReductionResumedWithAutosaveOff() {
@@ -297,7 +278,6 @@ public:
     expectProcessing();
     expectFileFormatAndLocationControlsEnabled();
     presenter.notifyReductionResumed();
-    verifyAndClear();
   }
 
   void testAutosaveControlsDisabledWhenReductionResumedWithAutosaveOff() {
@@ -306,7 +286,6 @@ public:
     expectProcessing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
     presenter.notifyReductionResumed();
-    verifyAndClear();
   }
 
   void testAutosaveControlsDisabledWhenAutoreductionResumedWithAutosaveOn() {
@@ -315,7 +294,6 @@ public:
     expectAutoreducing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
     presenter.notifyAutoreductionResumed();
-    verifyAndClear();
   }
 
   void testFileControlsDisabledWhenAutoreductionResumedWithAutosaveOn() {
@@ -324,7 +302,6 @@ public:
     expectAutoreducing();
     expectFileFormatAndLocationControlsDisabled();
     presenter.notifyAutoreductionResumed();
-    verifyAndClear();
   }
 
   void testFileControlsEnabledWhenAutoreductionResumedWithAutosaveOff() {
@@ -333,7 +310,6 @@ public:
     expectAutoreducing();
     expectFileFormatAndLocationControlsEnabled();
     presenter.notifyAutoreductionResumed();
-    verifyAndClear();
   }
 
   void testAutosaveControlsDisabledWhenAutoreductionResumedWithAutosaveOff() {
@@ -342,26 +318,22 @@ public:
     expectAutoreducing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
     presenter.notifyAutoreductionResumed();
-    verifyAndClear();
   }
 
   void testAutosaveDisabledNotifiesMainPresenter() {
     auto presenter = makePresenter();
     presenter.notifyAutosaveDisabled();
-    verifyAndClear();
   }
 
   void testAutosaveEnabledNotifiesMainPresenter() {
     auto presenter = makePresenter();
     presenter.notifyAutosaveEnabled();
-    verifyAndClear();
   }
 
   void testNotifyMainPresenterSettingsChanged() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_mainPresenter, setBatchUnsaved());
     presenter.notifySettingsChanged();
-    verifyAndClear();
   }
 
   void testLogListEnabledForCustomFormatIfHeaderEnabled() {
@@ -370,7 +342,6 @@ public:
     expectHeaderOptionEnabled();
     expectLogListEnabled();
     presenter.notifySettingsChanged();
-    verifyAndClear();
   }
 
   void testLogListDisabledForCustomFormatIfHeaderDisabled() {
@@ -379,64 +350,49 @@ public:
     expectHeaderOptionDisabled();
     expectLogListDisabled();
     presenter.notifySettingsChanged();
-    verifyAndClear();
   }
 
   void testCustomOptionsEnabledForCustomFormat() {
     auto presenter = makePresenter();
     expectFileFormat(NamedFormat::Custom);
+    expectQResolutionEnabled();
     expectCustomOptionsEnabled();
     presenter.notifySettingsChanged();
-    verifyAndClear();
   }
 
-  void testLogListEnabledForILLCosmosFormat() {
-    auto presenter = makePresenter();
-    expectFileFormat(NamedFormat::ILLCosmos);
-    expectLogListEnabled();
-    presenter.notifySettingsChanged();
-    verifyAndClear();
-  }
+  void testLogListEnabledForILLCosmosFormat() { checkLogListStateForFileFormat(NamedFormat::ILLCosmos, true); }
 
   void testCustomOptionsDisabledForILLCosmosFormat() {
-    auto presenter = makePresenter();
-    expectFileFormat(NamedFormat::ILLCosmos);
-    expectCustomOptionsDisabled();
-    presenter.notifySettingsChanged();
-    verifyAndClear();
+    checkCustomOptionsStateForFileFormat(NamedFormat::ILLCosmos, false);
   }
 
-  void testLogListDisabledForANSTOFormat() {
-    auto presenter = makePresenter();
-    expectFileFormat(NamedFormat::ANSTO);
-    expectLogListDisabled();
-    presenter.notifySettingsChanged();
-    verifyAndClear();
+  void testQResolutionDisabledForILLCosmosFormat() {
+    checkQResolutionStateForFileFormat(NamedFormat::ILLCosmos, false);
   }
 
-  void testCustomOptionsDisabledForANSTOFormat() {
-    auto presenter = makePresenter();
-    expectFileFormat(NamedFormat::ANSTO);
-    expectCustomOptionsDisabled();
-    presenter.notifySettingsChanged();
-    verifyAndClear();
-  }
+  void testLogListDisabledForANSTOFormat() { checkLogListStateForFileFormat(NamedFormat::ANSTO, false); }
 
-  void testLogListDisabledForThreeColumnFormat() {
-    auto presenter = makePresenter();
-    expectFileFormat(NamedFormat::ThreeColumn);
-    expectLogListDisabled();
-    presenter.notifySettingsChanged();
-    verifyAndClear();
-  }
+  void testCustomOptionsDisabledForANSTOFormat() { checkCustomOptionsStateForFileFormat(NamedFormat::ANSTO, false); }
+
+  void testQResolutionDisabledForANSTOFormat() { checkQResolutionStateForFileFormat(NamedFormat::ANSTO, false); }
+
+  void testLogListDisabledForThreeColumnFormat() { checkLogListStateForFileFormat(NamedFormat::ThreeColumn, false); }
 
   void testCustomOptionsDisabledForThreeColumnFormat() {
-    auto presenter = makePresenter();
-    expectFileFormat(NamedFormat::ThreeColumn);
-    expectCustomOptionsDisabled();
-    presenter.notifySettingsChanged();
-    verifyAndClear();
+    checkCustomOptionsStateForFileFormat(NamedFormat::ThreeColumn, false);
   }
+
+  void testQResolutionDisabledForThreeColumnFormat() {
+    checkQResolutionStateForFileFormat(NamedFormat::ThreeColumn, false);
+  }
+
+  void testLogListDisabledForORSOAsciiFormat() { checkLogListStateForFileFormat(NamedFormat::ORSOAscii, false); }
+
+  void testCustomOptionsDisabledForORSOAsciiFormat() {
+    checkCustomOptionsStateForFileFormat(NamedFormat::ORSOAscii, false);
+  }
+
+  void testQResolutionEnabledForORSOAsciiFormat() { checkQResolutionStateForFileFormat(NamedFormat::ORSOAscii, true); }
 
 private:
   SavePresenter makePresenter() {
@@ -490,13 +446,10 @@ private:
     return workspaceNames;
   }
 
-  /* Set the presenter up so that autosave is enabled. This clears any
-   * expectations caused by its own calls so do this before setting
-   * expectations in the calling fuction */
+  /* Set the presenter up so that autosave is enabled */
   void enableAutosave(SavePresenter &presenter) {
     expectGetValidSaveDirectory();
     presenter.notifyAutosaveEnabled();
-    verifyAndClear();
   }
 
   /* Set the presenter up so that autosave is disabled */
@@ -566,16 +519,48 @@ private:
 
   void expectLogListDisabled() { EXPECT_CALL(m_view, disableLogList()).Times(1); }
 
+  void expectQResolutionEnabled() { EXPECT_CALL(m_view, enableQResolutionCheckBox()).Times(1); }
+
+  void expectQResolutionDisabled() { EXPECT_CALL(m_view, disableQResolutionCheckBox()).Times(1); }
+
   void expectCustomOptionsEnabled() {
     EXPECT_CALL(m_view, enableHeaderCheckBox()).Times(1);
-    EXPECT_CALL(m_view, enableQResolutionCheckBox()).Times(1);
     EXPECT_CALL(m_view, enableSeparatorButtonGroup()).Times(1);
   }
 
   void expectCustomOptionsDisabled() {
     EXPECT_CALL(m_view, disableHeaderCheckBox()).Times(1);
-    EXPECT_CALL(m_view, disableQResolutionCheckBox()).Times(1);
     EXPECT_CALL(m_view, disableSeparatorButtonGroup()).Times(1);
+  }
+
+  void checkQResolutionStateForFileFormat(NamedFormat format, bool isEnabled) {
+    auto presenter = makePresenter();
+    expectFileFormat(format);
+    if (isEnabled)
+      expectQResolutionEnabled();
+    else
+      expectQResolutionDisabled();
+    presenter.notifySettingsChanged();
+  }
+
+  void checkLogListStateForFileFormat(NamedFormat format, bool isEnabled) {
+    auto presenter = makePresenter();
+    expectFileFormat(format);
+    if (isEnabled)
+      expectLogListEnabled();
+    else
+      expectLogListDisabled();
+    presenter.notifySettingsChanged();
+  }
+
+  void checkCustomOptionsStateForFileFormat(NamedFormat format, bool isEnabled) {
+    auto presenter = makePresenter();
+    expectFileFormat(format);
+    if (isEnabled)
+      expectCustomOptionsEnabled();
+    else
+      expectCustomOptionsDisabled();
+    presenter.notifySettingsChanged();
   }
 
   NiceMock<MockSaveView> m_view;
