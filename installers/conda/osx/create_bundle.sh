@@ -224,11 +224,13 @@ fi
 # Create basic directory structure.
 mkdir -p "$bundle_contents"/{Resources,MacOS}
 
-# Create conda environment internally. --copy ensures no symlinks are used
+# Create conda environment internally.
+# --copy ensures no symlinks are used
+# --platform osx-64 is required to allow ARM-based systems to install the osx-64 mantid packages.
 bundle_conda_prefix="$bundle_contents"/Resources
 
 echo "Creating Conda environment in '$bundle_conda_prefix'"
-"$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
+"$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy --platform osx-64 \
   --channel "$conda_channel" --channel conda-forge --yes \
   mantidworkbench \
   jq  # used for processing the version string
