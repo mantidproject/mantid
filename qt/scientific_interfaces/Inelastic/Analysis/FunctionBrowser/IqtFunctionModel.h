@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "Analysis/IDAFunctionParameterEstimation.h"
 #include "Analysis/ParameterEstimation.h"
 #include "DllConfig.h"
 #include "MantidAPI/IFunction_fwd.h"
@@ -79,6 +80,7 @@ public:
   void tieIntensities(bool on);
   EstimationDataSelector getEstimationDataSelector() const;
   void updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void estimateFunctionParameters();
 
   enum class ParamID {
     EXP1_HEIGHT,
@@ -114,8 +116,6 @@ private:
   std::string buildExpDecayFunctionString() const;
   std::string buildStretchExpFunctionString() const;
   std::string buildBackgroundFunctionString() const;
-  void estimateStretchExpParameters();
-  void estimateExpParameters();
   void addGlobal(const QString &parName);
   void removeGlobal(const QString &parName);
   QStringList makeGlobalList() const;
@@ -126,6 +126,7 @@ private:
   QString m_background;
   DataForParameterEstimationCollection m_estimationData;
   QList<ParamID> m_globals;
+  std::unique_ptr<IDAFunctionParameterEstimation> m_parameterEstimation;
 };
 
 } // namespace IDA
