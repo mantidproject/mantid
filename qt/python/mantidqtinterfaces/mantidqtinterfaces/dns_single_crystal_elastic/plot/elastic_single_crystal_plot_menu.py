@@ -88,16 +88,6 @@ class DNSElasticSCPlotViewMenu(QMenu):
     def _gouraud_changed(self):
         self.sig_replot.emit("gouraud")
 
-    def deactivate_quadmesh(self, deactivate=True):
-        # quadmesh only possible on rectangular grid
-        # if not rectangular change to triangulation
-        self.disconnect()
-        if deactivate:
-            self._menu_axes.set_intp(0)
-            self.ac_trimesh.setChecked(True)
-        self.ac_quadmesh.setEnabled(not deactivate)
-        self.connect()
-
 
 class PlotTypeMenu(QMenu):
     def __init__(self, parent):
@@ -117,7 +107,6 @@ class PlotTypeMenu(QMenu):
         p_tag.addAction(action_triangulation_mesh)
         p_tag.addAction(action_quad_mesh)
         p_tag.addAction(action_scatter_mesh)
-        # p_tag.triggered.connect(self.type_changed)
         self.p_tag = p_tag
         self.action_triangulation_mesh = action_triangulation_mesh
         self.action_quad_mesh = action_quad_mesh
@@ -125,17 +114,7 @@ class PlotTypeMenu(QMenu):
         # connecting signals
         self.p_tag.triggered.connect(self._type_changed)
 
-    def deactivate_quadmesh(self, deactivate=True):
-        # quadmesh only possible on rectangular grid
-        # if not rectangular change to triangulation
-        if deactivate:
-            # self.ac_inp_off.setChecked(True)
-            self.action_triangulation_mesh.setChecked(True)
-            # self.type_changed()
-        self.action_quad_mesh.setEnabled(not deactivate)
-
     def _type_changed(self):
-        # plot_type = self.get_value()
         self.parent.sig_replot.emit("type")
 
     def set_type(self, ptype):
@@ -172,11 +151,6 @@ class AxesMenu(QMenu):
         qag.addAction(action_hkl)
         qag.setExclusive(True)
         # connect Signals
-        # action_switch_axis.toggled.connect(parent.axis_change)
-        # action_fix_aspect.toggled.connect(parent.axis_change)
-        # ac_gouraud.toggled.connect(parent.axis_change)
-        # i_pag.triggered.connect(parent.axis_change)
-        # qag.triggered.connect(parent.axis_change)
         self.qag = qag
         self.action_switch_axis = action_switch_axis
         self.action_fix_aspect = action_fix_aspect
