@@ -25,7 +25,7 @@ public:
   void setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::vector<long> spectraRange);
   std::string setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner);
   void reflectNegativeToPositive();
-  void setWorkspaceName(std::string workspaceName);
+  void setWorkspaceName(std::string const &workspaceName);
   void setEMin(double value);
   void setEMax(double value);
   void setIsPositiveReflect(bool value);

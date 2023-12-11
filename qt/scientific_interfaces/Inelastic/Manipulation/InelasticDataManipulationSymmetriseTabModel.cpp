@@ -83,7 +83,7 @@ void InelasticDataManipulationSymmetriseTabModel::reflectNegativeToPositive() {
   sortXAxisAlg->execute();
 }
 
-void InelasticDataManipulationSymmetriseTabModel::setWorkspaceName(std::string workspaceName) {
+void InelasticDataManipulationSymmetriseTabModel::setWorkspaceName(std::string const &workspaceName) {
   m_inputWorkspace = workspaceName;
   m_reflectedInputWorkspace = m_inputWorkspace + "_reflected";
   // the last 4 characters in the workspace name are '_red' the ouput workspace name is inserting '_sym' before that
