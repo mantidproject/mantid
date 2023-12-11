@@ -122,9 +122,9 @@ void InelasticDataManipulationElwinTab::runFileInput() {
   std::string inputGroupWsName = "IDA_Elwin_Input";
 
   QFileInfo firstFileInfo(inputFilenames[0]);
-  const auto filename = firstFileInfo.baseName();
+  const auto filename = firstFileInfo.baseName().toStdString();
 
-  auto workspaceBaseName = filename.left(filename.lastIndexOf("_"));
+  auto workspaceBaseName = filename.substr(0, filename.find_last_of("_"));
 
   if (inputFilenames.size() > 1) {
     QFileInfo fileInfo(inputFilenames[inputFilenames.length() - 1]);
@@ -140,10 +140,10 @@ void InelasticDataManipulationElwinTab::runFileInput() {
     }
     // reassemble workspace base name with additional run number
     runNumber = runNumber.substr(runNumberStart, strLength);
-    auto baseName = firstFileInfo.baseName();
-    const auto prefix = baseName.left(baseName.indexOf("_"));
-    const auto suffix = baseName.right(baseName.length() - baseName.indexOf("_"));
-    workspaceBaseName = prefix + QString::fromStdString("-" + runNumber) + suffix;
+    auto baseName = firstFileInfo.baseName().toStdString();
+    const auto prefix = baseName.substr(baseName.find_last_of("_"));
+    const auto suffix = baseName.substr(baseName.length() - baseName.find_last_of("_"));
+    workspaceBaseName = prefix + "-" + runNumber + suffix;
   }
 
   // Load input files
@@ -163,7 +163,7 @@ void InelasticDataManipulationElwinTab::runFileInput() {
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
-  m_pythonExportWsName = (workspaceBaseName + "_elwin_eq2").toStdString();
+  m_pythonExportWsName = workspaceBaseName + "_elwin_eq2";
 }
 
 void InelasticDataManipulationElwinTab::runWorkspaceInput() {
@@ -348,9 +348,6 @@ void InelasticDataManipulationElwinTab::newPreviewWorkspaceSelected(const std::s
 void InelasticDataManipulationElwinTab::handlePreviewSpectrumChanged(int spectrum) {
   if (m_view->getPreviewSpec())
     setSelectedSpectrum(spectrum);
-  std::cout << "Spectrum " << spectrum << std::endl;
-  std::cout << "Preview Spectrum " << m_view->getPreviewSpec() << std::endl;
-  std::cout << getInputWorkspace() << "  selected: " << getSelectedSpectrum() << std::endl;
   m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
 }
 
