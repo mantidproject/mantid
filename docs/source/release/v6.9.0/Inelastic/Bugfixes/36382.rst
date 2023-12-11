@@ -1,1 +1,1 @@
-- A bug where the ``Run`` and ``Ouput Options`` appeared squished on Inelastic interfaces has been fixed.
+- A bug where the ``Run`` and ``Output Options`` appeared squished on Inelastic interfaces has been fixed.
