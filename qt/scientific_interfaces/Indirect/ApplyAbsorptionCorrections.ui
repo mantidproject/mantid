@@ -23,9 +23,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-139</y>
-        <width>710</width>
-        <height>863</height>
+        <y>0</y>
+        <width>717</width>
+        <height>829</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -316,18 +316,6 @@
        </item>
        <item>
         <widget class="QGroupBox" name="gbRun">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>45</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>45</height>
-          </size>
-         </property>
          <property name="title">
           <string>Run</string>
          </property>
@@ -376,12 +364,6 @@
        </item>
        <item>
         <widget class="QGroupBox" name="gbOutput">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>56</height>
-          </size>
-         </property>
          <property name="title">
           <string>Output Options</string>
          </property>
@@ -429,6 +411,11 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Common/DataSelector.h</header>
+  </customwidget>
+  <customwidget>
    <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>
    <extends>QWidget</extends>
    <header>IndirectPlotOptionsView.h</header>
@@ -439,11 +426,6 @@
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::DataSelector</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/DataSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
