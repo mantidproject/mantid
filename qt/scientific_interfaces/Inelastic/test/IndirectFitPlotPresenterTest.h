@@ -47,7 +47,7 @@ MultiDomainFunction_sptr getFunctionWithWorkspaceName(std::string const &workspa
 } // namespace
 
 /// Mock object to mock the view
-class MockIndirectFitPlotView : public IIndirectFitPlotView {
+class MockIndirectFitPlotView final : public IIndirectFitPlotView {
 public:
   MOCK_METHOD1(subscribePresenter, void(IIndirectFitPlotPresenter *presenter));
 
@@ -125,7 +125,7 @@ public:
     /// IndirectFittingModel is mocked instead - which is a good
     /// substitute anyway
     auto model = std::make_unique<IndirectFitPlotModel>();
-    m_view = std::make_unique<NiceMock<MockIndirectFitPlotView>>();
+    m_view = std::make_unique<MockIndirectFitPlotView>();
     m_presenter = std::make_unique<IndirectFitPlotPresenter>(m_view.get(), std::move(model));
 
     m_workspace = createWorkspaceWithInstrument(6, 5);

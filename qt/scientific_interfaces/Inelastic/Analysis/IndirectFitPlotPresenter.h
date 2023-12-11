@@ -114,8 +114,8 @@ private:
 
   void plotSpectrum(WorkspaceIndex spectrum) const;
 
-  std::unique_ptr<IndirectFitPlotModel> m_model;
   IIndirectFitPlotView *m_view;
+  std::unique_ptr<IndirectFitPlotModel> m_model;
 
   std::unique_ptr<Widgets::MplCpp::ExternalPlotter> m_plotter;
 };
