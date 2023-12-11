@@ -60,8 +60,9 @@ void IDAFunctionParameterEstimation::addParameterEstimationFunction(std::string 
 // Estimate the function parameters for the input function
 // If the input function exists in the stored map it will update the function
 // parameters in-place.
-void IDAFunctionParameterEstimation::estimateFunctionParameters(Mantid::API::IFunction_sptr &function,
-                                                                const DataForParameterEstimation &estimationData) {
+void IDAFunctionParameterEstimation::estimateFunctionParameters(
+    Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData,
+    std::optional<Mantid::API::CompositeFunction_sptr> parentComposite, std::optional<std::size_t> functionIndex) {
   if (!function) {
     return;
   }
@@ -69,18 +70,10 @@ void IDAFunctionParameterEstimation::estimateFunctionParameters(Mantid::API::IFu
   if (auto composite = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(function)) {
     for (auto i = 0u; i < composite->nFunctions(); ++i) {
       auto childFunction = composite->getFunction(i);
-      estimateSingleFunctionParameters(childFunction, estimationData, composite, i);
+      estimateFunctionParameters(childFunction, estimationData, composite, i);
     }
   } else {
-    estimateSingleFunctionParameters(function, estimationData);
-  }
-}
-
-void IDAFunctionParameterEstimation::estimateSingleFunctionParameters(
-    Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData,
-    std::optional<Mantid::API::CompositeFunction_sptr> composite, std::optional<std::size_t> functionIndex) {
-  if (function) {
-    auto const parameterEstimatorName = nameForParameterEstimator(function, composite, functionIndex);
+    auto const parameterEstimatorName = nameForParameterEstimator(function, parentComposite, functionIndex);
     if (m_funcMap.find(parameterEstimatorName) != m_funcMap.end()) {
       m_funcMap[parameterEstimatorName](function, estimationData);
     }

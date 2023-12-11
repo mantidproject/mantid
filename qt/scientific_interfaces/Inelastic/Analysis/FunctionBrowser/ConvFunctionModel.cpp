@@ -21,8 +21,8 @@ auto const lorentzian = [](Mantid::MantidVec const &x, Mantid::MantidVec const &
   return std::unordered_map<std::string, double>{{"Amplitude", y[1]}};
 };
 
-auto const estimators =
-    std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{{"Lorentzian", lorentzian}};
+auto const estimators = std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{
+    {"Lorentzian", lorentzian}, {"LorentzianN", lorentzian}};
 
 } // namespace
 
