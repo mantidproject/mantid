@@ -11,12 +11,27 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 
+#include <map>
+
+namespace {
+using namespace MantidQt::CustomInterfaces::IDA;
+
+auto const expDecay = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
+  return std::unordered_map<std::string, double>{{"Height", 1.0}, {"Lifetime", 1.0}};
+};
+
+auto const estimators =
+    std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{{"ExpDecay", expDecay}};
+
+} // namespace
+
 namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace MantidWidgets;
 using namespace Mantid::API;
 
-ConvFunctionModel::ConvFunctionModel() = default;
+ConvFunctionModel::ConvFunctionModel()
+    : m_parameterEstimation(std::make_unique<IDAFunctionParameterEstimation>(estimators)) {}
 
 void ConvFunctionModel::clearData() {
   m_fitType = FitType::None;
@@ -253,6 +268,17 @@ EstimationDataSelector ConvFunctionModel::getEstimationDataSelector() const {
 
 void ConvFunctionModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
+}
+
+void ConvFunctionModel::estimateFunctionParameters() {
+  if (m_estimationData.size() != static_cast<size_t>(getNumberDomains())) {
+    return;
+  }
+  // Estimate function parameters - parameters are updated in-place.
+  for (int i = 0; i < getNumberDomains(); ++i) {
+    auto function = getSingleFunction(i);
+    m_parameterEstimation->estimateFunctionParameters(function, m_estimationData[i]);
+  }
 }
 
 void ConvFunctionModel::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {

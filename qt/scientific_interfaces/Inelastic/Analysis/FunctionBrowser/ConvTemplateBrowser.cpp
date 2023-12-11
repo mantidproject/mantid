@@ -328,9 +328,11 @@ EstimationDataSelector ConvTemplateBrowser::getEstimationDataSelector() const {
   return m_presenter.getEstimationDataSelector();
 }
 
-void ConvTemplateBrowser::updateParameterEstimationData(DataForParameterEstimationCollection &&) {}
+void ConvTemplateBrowser::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
+  m_presenter.updateParameterEstimationData(std::move(data));
+}
 
-void ConvTemplateBrowser::estimateFunctionParameters() {}
+void ConvTemplateBrowser::estimateFunctionParameters() { m_presenter.estimateFunctionParameters(); }
 
 void ConvTemplateBrowser::setBackgroundA0(double value) { m_presenter.setBackgroundA0(value); }
 
