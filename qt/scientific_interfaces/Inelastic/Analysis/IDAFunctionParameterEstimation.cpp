@@ -57,9 +57,26 @@ void IDAFunctionParameterEstimation::addParameterEstimationFunction(std::string 
                                                                     ParameterEstimateSetter function) {
   m_funcMap.insert(std::make_pair(functionName, std::move(function)));
 }
-// Estimate the function parameters for the input function
-// If the input function exists in the stored map it will update the function
-// parameters in-place.
+
+void IDAFunctionParameterEstimation::estimateFunctionParameters(
+    Mantid::API::IFunction_sptr &function, const DataForParameterEstimationCollection &estimationData) {
+  if (!function) {
+    return;
+  }
+
+  // Estimate function parameters - parameters are updated in-place.
+  if (auto composite = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(function)) {
+    if (estimationData.size() != composite->nFunctions()) {
+      return;
+    }
+
+    for (auto i = 0u; i < composite->nFunctions(); ++i) {
+      auto childFunction = composite->getFunction(i);
+      estimateFunctionParameters(childFunction, estimationData[i]);
+    }
+  }
+}
+
 void IDAFunctionParameterEstimation::estimateFunctionParameters(
     Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData,
     std::optional<Mantid::API::CompositeFunction_sptr> parentComposite, std::optional<std::size_t> functionIndex) {

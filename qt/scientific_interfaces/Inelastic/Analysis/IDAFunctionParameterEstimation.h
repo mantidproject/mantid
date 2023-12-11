@@ -27,11 +27,14 @@ public:
   IDAFunctionParameterEstimation(std::unordered_map<std::string, ParameterEstimator> estimators);
   void addParameterEstimationFunction(std::string const &functionName, ParameterEstimateSetter function);
   void estimateFunctionParameters(Mantid::API::IFunction_sptr &function,
+                                  const DataForParameterEstimationCollection &estimationData);
+
+private:
+  void estimateFunctionParameters(Mantid::API::IFunction_sptr &function,
                                   const DataForParameterEstimation &estimationData,
                                   std::optional<Mantid::API::CompositeFunction_sptr> parentComposite = std::nullopt,
                                   std::optional<std::size_t> functionIndex = std::nullopt);
 
-private:
   std::map<std::string, ParameterEstimateSetter> m_funcMap;
 };
 
