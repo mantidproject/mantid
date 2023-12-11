@@ -1636,10 +1636,10 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     observeFinish(alg);
     Poco::ActiveResult<bool> result(alg->executeAsync());
-    m_fitAlgParameters = alg->toString();
     while (!result.available()) {
       QCoreApplication::processEvents();
     }
+    m_fitAlgParameters = alg->toString();
     if (!result.error().empty()) {
       emit algorithmFailed();
     }
