@@ -167,21 +167,21 @@ class BaseSX(ABC):
             mantid.SetGoniometer(Workspace=ws, EnableLogging=False, **axis_dict)
 
     @staticmethod
-    def convert_ws_to_MD(wsname, md_name=None, frame="Q (lab frame)"):
+    def convert_ws_to_MD(ws, md_name=None, frame="Q (lab frame)"):
         if md_name is None:
-            md_name = wsname + "_MD"
-        xunit = BaseSX.get_xunit(wsname)  # get initial xunit
-        BaseSX._normalise_by_bin_width_in_k(wsname)  # normalise by bin-width in K = 2pi/lambda
+            md_name = BaseSX.retrieve(ws).name() + "_MD"
+        xunit = BaseSX.get_xunit(ws)  # get initial xunit
+        BaseSX._normalise_by_bin_width_in_k(ws)  # normalise by bin-width in K = 2pi/lambda
         wsMD = mantid.ConvertToDiffractionMDWorkspace(
-            InputWorkspace=wsname,
+            InputWorkspace=ws,
             OutputWorkspace=md_name,
             LorentzCorrection=True,
             OneEventPerBin=False,
             OutputDimensions=frame,
             EnableLogging=False,
         )
-        BaseSX._normalise_by_bin_width_in_k(wsname, undo=True)  # normalise by bin-width in K = 2pi/lambda
-        mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target=xunit, EnableLogging=False)
+        BaseSX._normalise_by_bin_width_in_k(ws, undo=True)  # normalise by bin-width in K = 2pi/lambda
+        mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target=xunit, EnableLogging=False)
         mantid.DeleteWorkspace("PreprocessedDetectorsWS")
         return wsMD
 
