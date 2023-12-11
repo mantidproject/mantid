@@ -142,7 +142,7 @@ void InelasticDataManipulationSymmetriseTab::handleDataReady(std::string const &
   if (m_view->validate()) {
     m_view->plotNewData(dataName);
   }
-  m_model->setWorkspaceName(QString(dataName.data()));
+  m_model->setWorkspaceName(dataName);
 }
 
 void InelasticDataManipulationSymmetriseTab::setIsPreview(bool preview) { m_isPreview = preview; }

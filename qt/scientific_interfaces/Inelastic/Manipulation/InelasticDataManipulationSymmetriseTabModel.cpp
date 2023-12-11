@@ -83,15 +83,15 @@ void InelasticDataManipulationSymmetriseTabModel::reflectNegativeToPositive() {
   sortXAxisAlg->execute();
 }
 
-void InelasticDataManipulationSymmetriseTabModel::setWorkspaceName(QString workspaceName) {
-  m_inputWorkspace = workspaceName.toStdString();
+void InelasticDataManipulationSymmetriseTabModel::setWorkspaceName(std::string workspaceName) {
+  m_inputWorkspace = workspaceName;
   m_reflectedInputWorkspace = m_inputWorkspace + "_reflected";
-  // the last 4 characters in the workspace name are '_red' the ouput weorkspace name is inserting '_sym' before that
+  // the last 4 characters in the workspace name are '_red' the ouput workspace name is inserting '_sym' before that
   // '_red'
-  m_positiveOutputWorkspace =
-      (workspaceName.left(workspaceName.length() - 4) + "_sym" + "_pn" + workspaceName.right(4)).toStdString();
-  m_negativeOutputWorkspace =
-      (workspaceName.left(workspaceName.length() - 4) + "_sym" + "_np" + workspaceName.right(4)).toStdString();
+  m_positiveOutputWorkspace = workspaceName.substr(0, workspaceName.size() - 4) + "_sym_pn" +
+                              workspaceName.substr(workspaceName.size() - 4, workspaceName.size());
+  m_negativeOutputWorkspace = workspaceName.substr(0, workspaceName.size() - 4) + "_sym_np" +
+                              workspaceName.substr(workspaceName.size() - 4, workspaceName.size());
 }
 
 void InelasticDataManipulationSymmetriseTabModel::setEMin(double value) { m_eMin = value; }

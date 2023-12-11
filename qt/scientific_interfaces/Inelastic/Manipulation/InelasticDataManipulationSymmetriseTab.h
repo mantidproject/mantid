@@ -73,11 +73,11 @@ protected:
 private:
   void setFileExtensionsByName(bool filter) override;
 
-  // wether batch algorunner is running preview or run buttons
-  bool m_isPreview;
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
   ISymmetriseView *m_view;
   std::unique_ptr<InelasticDataManipulationSymmetriseTabModel> m_model;
+  // wether batch algorunner is running preview or run buttons
+  bool m_isPreview;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
