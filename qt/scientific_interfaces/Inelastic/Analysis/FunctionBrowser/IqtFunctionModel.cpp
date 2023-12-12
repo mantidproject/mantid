@@ -123,6 +123,8 @@ void IqtFunctionModel::setFunction(IFunction_sptr fun) {
   m_model.setFunction(fun);
 }
 
+IFunction_sptr IqtFunctionModel::getFullFunction() const { return m_model.getFullFunction(); }
+
 IFunction_sptr IqtFunctionModel::getFitFunction() const { return m_model.getFitFunction(); }
 
 bool IqtFunctionModel::hasFunction() const { return m_model.hasFunction(); }
@@ -260,7 +262,7 @@ void IqtFunctionModel::updateParameterEstimationData(DataForParameterEstimationC
 }
 
 void IqtFunctionModel::estimateFunctionParameters() {
-  m_parameterEstimation->estimateFunctionParameters(getFitFunction(), m_estimationData);
+  m_parameterEstimation->estimateFunctionParameters(getFullFunction(), m_estimationData);
 }
 
 QString IqtFunctionModel::setBackgroundA0(double value) {

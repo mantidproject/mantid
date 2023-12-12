@@ -125,7 +125,7 @@ void SingleFunctionTemplateModel::updateParameterEstimationData(DataForParameter
 }
 
 void SingleFunctionTemplateModel::estimateFunctionParameters() {
-  m_parameterEstimation->estimateFunctionParameters(getFitFunction(), m_estimationData);
+  m_parameterEstimation->estimateFunctionParameters(getFullFunction(), m_estimationData);
 }
 
 void SingleFunctionTemplateModel::setGlobal(const QString &name, bool isGlobal) {

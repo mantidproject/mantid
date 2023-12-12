@@ -43,6 +43,11 @@ void FunctionModel::setFunction(IFunction_sptr fun) {
   }
 }
 
+IFunction_sptr FunctionModel::getFullFunction() const {
+  // It is important that this does not return a copy/clone of the function
+  return m_function;
+}
+
 IFunction_sptr FunctionModel::getFitFunction() const {
   if (!m_function)
     return m_function;

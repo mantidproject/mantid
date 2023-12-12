@@ -151,6 +151,8 @@ void ConvFunctionModel::checkSingleFunction(const IFunction_sptr &fun, bool &isL
   }
 }
 
+IFunction_sptr ConvFunctionModel::getFullFunction() const { return m_model.getFullFunction(); }
+
 IFunction_sptr ConvFunctionModel::getFitFunction() const { return m_model.getFitFunction(); }
 
 void ConvFunctionModel::setQValues(const std::vector<double> &qValues) { m_qValues = qValues; }
@@ -288,7 +290,7 @@ void ConvFunctionModel::updateParameterEstimationData(DataForParameterEstimation
 }
 
 void ConvFunctionModel::estimateFunctionParameters() {
-  m_parameterEstimation->estimateFunctionParameters(getFitFunction(), m_estimationData);
+  m_parameterEstimation->estimateFunctionParameters(getFullFunction(), m_estimationData);
 }
 
 void ConvFunctionModel::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {

@@ -11,7 +11,7 @@
 
 namespace {
 
-std::string nameForParameterEstimator(Mantid::API::IFunction_sptr &function,
+std::string nameForParameterEstimator(Mantid::API::IFunction_sptr const &function,
                                       std::optional<Mantid::API::CompositeFunction_sptr> composite,
                                       std::optional<std::size_t> functionIndex) {
   auto functionName = function->name();
@@ -31,7 +31,7 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 IDAFunctionParameterEstimation::ParameterEstimateSetter
 parameterEstimateSetter(IDAFunctionParameterEstimation::ParameterEstimator estimator) {
-  return [estimator](Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData) {
+  return [estimator](Mantid::API::IFunction_sptr const &function, const DataForParameterEstimation &estimationData) {
     auto const y = estimationData.y;
     auto const x = estimationData.x;
     if (x.size() != 2 || y.size() != 2) {
@@ -59,7 +59,7 @@ void IDAFunctionParameterEstimation::addParameterEstimationFunction(std::string 
 }
 
 void IDAFunctionParameterEstimation::estimateFunctionParameters(
-    Mantid::API::IFunction_sptr &function, const DataForParameterEstimationCollection &estimationData) {
+    Mantid::API::IFunction_sptr const &function, const DataForParameterEstimationCollection &estimationData) {
   if (!function) {
     return;
   }
@@ -78,7 +78,7 @@ void IDAFunctionParameterEstimation::estimateFunctionParameters(
 }
 
 void IDAFunctionParameterEstimation::estimateFunctionParameters(
-    Mantid::API::IFunction_sptr &function, const DataForParameterEstimation &estimationData,
+    Mantid::API::IFunction_sptr const &function, const DataForParameterEstimation &estimationData,
     std::optional<Mantid::API::CompositeFunction_sptr> parentComposite, std::optional<std::size_t> functionIndex) {
   if (!function) {
     return;

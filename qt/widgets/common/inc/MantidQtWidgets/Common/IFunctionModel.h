@@ -30,6 +30,7 @@ public:
   void clear();
   int getNumberLocalFunctions() const;
   virtual void setFunction(IFunction_sptr fun) = 0;
+  virtual IFunction_sptr getFullFunction() const = 0;
   virtual IFunction_sptr getFitFunction() const = 0;
   virtual bool hasFunction() const = 0;
   virtual void addFunction(const QString &prefix, const QString &funStr) = 0;

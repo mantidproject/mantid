@@ -30,6 +30,7 @@ class MANTIDQT_INELASTIC_DLL ConvFunctionModel : public IFunctionModel {
 public:
   ConvFunctionModel();
   void setFunction(IFunction_sptr fun) override;
+  IFunction_sptr getFullFunction() const override;
   IFunction_sptr getFitFunction() const override;
   bool hasFunction() const override;
   void addFunction(const QString &prefix, const QString &funStr) override;
