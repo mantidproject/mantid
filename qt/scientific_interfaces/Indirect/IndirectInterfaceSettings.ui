@@ -107,14 +107,14 @@
          <item row="0" column="0">
           <widget class="QLabel" name="lbDeveloperFeatureFlags">
            <property name="text">
-            <string>Developer feature flags</string>
+            <string>Developer feature flags (requires interface restart)</string>
            </property>
           </widget>
          </item>
          <item row="0" column="1">
           <widget class="QLineEdit" name="leDeveloperFeatureFlags">
            <property name="toolTip">
-            <string>Enter flags for features currently under development. Each flag should be separated by a space.</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enter flags for features currently under development. Each flag should be separated by a space.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Requires interface restart to take effect.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>

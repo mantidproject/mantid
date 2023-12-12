@@ -74,6 +74,7 @@ Developer Feature Flags
   option should only be used for testing features which are still under development. When
   Users are satisfied with the new feature, the "development flag" in question should be
   removed from the software, and the feature should be made permanently available.
+  **The interface must be restarted for changes to take effect**.
 
 
 Glossary of Allowed Suffixes
