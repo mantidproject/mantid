@@ -13,7 +13,8 @@
 namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitOutputOptionsView::IndirectFitOutputOptionsView(QWidget *parent)
-    : API::MantidWidget(parent), m_outputOptions(std::make_unique<Ui::IndirectFitOutputOptions>()) {
+    : API::MantidWidget(parent), m_editResultsDialog(),
+      m_outputOptions(std::make_unique<Ui::IndirectFitOutputOptions>()), m_presenter() {
   m_outputOptions->setupUi(this);
 
   connect(m_outputOptions->cbGroupWorkspace, SIGNAL(currentIndexChanged(QString const &)), this,
