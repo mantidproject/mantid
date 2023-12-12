@@ -1767,4 +1767,3 @@ constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/An
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp:66
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FunctionBrowser/SingleFunctionTemplatePresenter.cpp:158
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.cpp:186
-passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Manipulation/InelasticDataManipulationSymmetriseTabModel.cpp:86
