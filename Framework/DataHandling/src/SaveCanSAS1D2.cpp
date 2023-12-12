@@ -77,6 +77,13 @@ void SaveCanSAS1D2::init() {
   declareProperty("CanScatterRunNumber", "", "The run number for the can scatter workspace. Optional.");
   declareProperty("CanDirectRunNumber", "", "The run number for the can direct workspace. Optional.");
   declareProperty("OneSpectrumPerFile", false, "If true, each spectrum will be saved in an invididual file");
+
+  declareProperty(
+      "BackgroundSubtractionWorkspace", "",
+      "The name of the workspace used in the scaled background subtraction, to be included in the metadata. Optional.");
+  declareProperty(
+      "BackgroundSubtractionScaleFactor", "",
+      "The scale factor used in the scaled background subtraction, to be included in the metadata. Optional.");
 }
 
 /// Overwrites Algorithm method
