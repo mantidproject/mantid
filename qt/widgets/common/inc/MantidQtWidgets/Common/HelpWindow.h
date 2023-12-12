@@ -8,6 +8,7 @@
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <QString>
+#include <QWidget>
 #include <string>
 
 // forward declarations
