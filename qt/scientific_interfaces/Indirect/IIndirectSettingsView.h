@@ -8,6 +8,9 @@
 
 #include "DllConfig.h"
 
+#include <string>
+#include <vector>
+
 #include <QWidget>
 
 namespace MantidQt {
@@ -28,6 +31,9 @@ public:
 
   virtual void setPlotErrorBarsChecked(bool check) = 0;
   virtual bool isPlotErrorBarsChecked() const = 0;
+
+  virtual void setDeveloperFeatureFlags(QStringList const &flags) = 0;
+  virtual QStringList developerFeatureFlags() const = 0;
 
   virtual void setApplyText(QString const &text) = 0;
   virtual void setApplyEnabled(bool enable) = 0;

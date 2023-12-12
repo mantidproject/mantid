@@ -70,9 +70,9 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="gbInterfaceSettings">
+       <widget class="QGroupBox" name="gbBasicSettings">
         <property name="title">
-         <string>Interface Settings</string>
+         <string>Basic</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
@@ -92,6 +92,29 @@
            </property>
            <property name="checked">
             <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="gbAdvancedSettings">
+        <property name="title">
+         <string>Advanced</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="QLabel" name="lbDeveloperFeatureFlags">
+           <property name="text">
+            <string>Developer feature flags</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="leDeveloperFeatureFlags">
+           <property name="toolTip">
+            <string>Enter flags for features currently under development. Each flag should be separated by a space.</string>
            </property>
           </widget>
          </item>
