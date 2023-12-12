@@ -40,8 +40,8 @@ Facility
   Allows you to choose the selected facility.
 
 
-Interface Settings
-------------------
+Basic
+-----
 
 This section contains settings which are more specific to the Indirect interfaces.
 
@@ -57,6 +57,23 @@ Restrict allowed input files by name
 Plot error bars for external plots
   If ticked, this will ensure that error bars are plotted on any plots which are plotted
   externally (i.e. in a separate window) from the indirect interfaces.
+
+
+Advanced
+--------
+
+This section contains settings which are for use by more advanced users of the software.
+
+Options
+~~~~~~~
+
+Developer Feature Flags
+  This will allow you to provide a "development flag" that serves as a toggle for specific
+  features which are currently under development. This will facilitate rapid prototyping
+  of new features, and will also shorten the feedback loop for developers. Note that this
+  option should only be used for testing features which are still under development. When
+  Users are satisfied with the new feature, the "development flag" in question should be
+  removed from the software, and the feature should be made permanently available.
 
 
 Glossary of Allowed Suffixes
