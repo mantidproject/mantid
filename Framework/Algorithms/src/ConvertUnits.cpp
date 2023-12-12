@@ -219,8 +219,8 @@ MatrixWorkspace_sptr ConvertUnits::executeUnitConversion(const API::MatrixWorksp
     outputWS = this->removeUnphysicalBins(outputWS);
 
   // Rebin the data to common bins if requested, and if necessary
-  bool alignBins = getProperty("AlignBins");
-  if (alignBins && !outputWS->isCommonBins())
+  bool doAlignBins = getProperty("AlignBins");
+  if (doAlignBins && !outputWS->isCommonBins())
     outputWS = this->alignBins(outputWS);
 
   // If appropriate, put back the bin width division into Y/E.

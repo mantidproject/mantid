@@ -97,15 +97,15 @@ void CrystalStructure::setReflectionConditionFromSpaceGroup(const SpaceGroup_con
   m_centering.reset();
 
   // First letter is centering
-  std::string centering = spaceGroup->hmSymbol().substr(0, 1);
+  std::string centeringSymbol = spaceGroup->hmSymbol().substr(0, 1);
 
-  if (centering == "R") {
-    centering = "Robv";
+  if (centeringSymbol == "R") {
+    centeringSymbol = "Robv";
   }
 
   const auto &reflectionConditions = getAllReflectionConditions();
   for (auto &reflectionCondition : reflectionConditions) {
-    if (reflectionCondition->getSymbol() == centering) {
+    if (reflectionCondition->getSymbol() == centeringSymbol) {
       m_centering = reflectionCondition;
       break;
     }

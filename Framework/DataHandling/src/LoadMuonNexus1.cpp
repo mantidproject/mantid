@@ -900,9 +900,9 @@ int LoadMuonNexus1::confidence(Kernel::NexusDescriptor &descriptor) const {
 
     auto &file = descriptor.data();
     file.openPath(root + "/" + versionField);
-    int32_t version = 0;
-    file.getData(&version);
-    if (version != 1)
+    int32_t IDFversion = 0;
+    file.getData(&IDFversion);
+    if (IDFversion != 1)
       return 0;
 
     file.openPath(root + "/analysis");

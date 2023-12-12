@@ -420,13 +420,13 @@ void FindPeaksConvolve::outputResults() {
 std::unordered_map<std::string, API::ITableWorkspace_sptr>
 FindPeaksConvolve::createOutputTables(const std::vector<std::string> &outputTblNames) {
   std::unordered_map<std::string, API::ITableWorkspace_sptr> outputTbls;
-  for (const auto &name : outputTblNames) {
-    auto tbl = outputTbls.emplace(name, API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
+  for (const auto &outputTblName : outputTblNames) {
+    auto tbl = outputTbls.emplace(outputTblName, API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
     tbl.first->second->addColumn("int", "SpecIndex");
     for (size_t i{0}; i < m_maxPeakCount; i++) {
-      tbl.first->second->addColumn("double", name + "_" + std::to_string(i));
+      tbl.first->second->addColumn("double", outputTblName + "_" + std::to_string(i));
     }
-    API::AnalysisDataService::Instance().addOrReplace(name, tbl.first->second);
+    API::AnalysisDataService::Instance().addOrReplace(outputTblName, tbl.first->second);
   }
   return outputTbls;
 }
@@ -449,14 +449,14 @@ std::string FindPeaksConvolve::populateOutputWorkspaces(
   for (size_t i{0}; i < m_peakResults.size(); i++) {
     const auto spec = std::move(m_peakResults[i]);
     if (!spec.empty()) {
-      for (const auto &name : outputTblNames) {
-        auto tbl = outputTbls.find(name);
+      for (const auto &outputTblName : outputTblNames) {
+        auto tbl = outputTbls.find(outputTblName);
         API::TableRow row{tbl->second->appendRow()};
         row << m_specNums[i];
         for (size_t peak_i{0}; peak_i < m_maxPeakCount; peak_i++) {
           if (peak_i < spec.size()) {
             auto peak = spec[peak_i];
-            row << peak.getAttribute(name);
+            row << peak.getAttribute(outputTblName);
           } else {
             row << std::nan("");
           }

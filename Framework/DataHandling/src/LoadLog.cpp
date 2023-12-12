@@ -378,10 +378,10 @@ bool LoadLog::LoadSNSText() {
   }
   // Now add all the full logs to the workspace
   for (size_t i = 0; i < numCols; i++) {
-    std::string name = props[i]->name();
-    if (localWorkspace->mutableRun().hasProperty(name)) {
-      localWorkspace->mutableRun().removeLogData(name);
-      g_log.information() << "Log data named " << name << " already existed and was overwritten.\n";
+    std::string propName = props[i]->name();
+    if (localWorkspace->mutableRun().hasProperty(propName)) {
+      localWorkspace->mutableRun().removeLogData(propName);
+      g_log.information() << "Log data named " << propName << " already existed and was overwritten.\n";
     }
     localWorkspace->mutableRun().addLogData(props[i]);
   }

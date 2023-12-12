@@ -1035,8 +1035,8 @@ void LoadFITS::mapHeaderKeys() {
     return;
 
   // If a map file is selected, use that.
-  std::string name = getPropertyValue(g_HEADER_MAP_NAME);
-  std::ifstream fStream(name.c_str());
+  std::string headerMapFileName = getPropertyValue(g_HEADER_MAP_NAME);
+  std::ifstream fStream(headerMapFileName.c_str());
 
   try {
     // Ensure valid file
@@ -1065,7 +1065,7 @@ void LoadFITS::mapHeaderKeys() {
 
       fStream.close();
     } else {
-      throw std::runtime_error("Error while trying to read header keys mapping file: " + name);
+      throw std::runtime_error("Error while trying to read header keys mapping file: " + headerMapFileName);
     }
   } catch (...) {
     g_log.error("Cannot load specified map file, using property values "

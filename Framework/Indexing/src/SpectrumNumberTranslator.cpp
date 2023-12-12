@@ -132,11 +132,11 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(const std::vector<Spectr
   checkUniqueSpectrumNumbers();
   std::call_once(m_mapSetup, &SpectrumNumberTranslator::setupSpectrumNumberToIndexMap, this);
   std::vector<size_t> indices;
-  for (const auto &spectrumNumber : spectrumNumbers) {
-    checkPartitionContainsValue(m_spectrumNumberToPartition, spectrumNumber);
+  for (const auto &specNumber : spectrumNumbers) {
+    checkPartitionContainsValue(m_spectrumNumberToPartition, specNumber);
 
-    if (m_spectrumNumberToPartition.at(spectrumNumber) == m_partition)
-      indices.emplace_back(find(m_spectrumNumberToIndex, spectrumNumber)->second);
+    if (m_spectrumNumberToPartition.at(specNumber) == m_partition)
+      indices.emplace_back(find(m_spectrumNumberToIndex, specNumber)->second);
   }
   return SpectrumIndexSet(indices, m_spectrumNumberToIndex.size());
 }
@@ -155,8 +155,8 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(const std::vector<Global
 
 PartitionIndex SpectrumNumberTranslator::partitionOf(const GlobalSpectrumIndex globalIndex) const {
   checkUniqueSpectrumNumbers();
-  const auto spectrumNumber = m_globalSpectrumNumbers[static_cast<size_t>(globalIndex)];
-  return m_spectrumNumberToPartition.at(spectrumNumber);
+  const auto specNumber = m_globalSpectrumNumbers[static_cast<size_t>(globalIndex)];
+  return m_spectrumNumberToPartition.at(specNumber);
 }
 
 void SpectrumNumberTranslator::checkUniqueSpectrumNumbers() const {

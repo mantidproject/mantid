@@ -568,11 +568,11 @@ std::string FitScriptGeneratorModel::getParameterConstraint(FitDomainIndex domai
 }
 
 void FitScriptGeneratorModel::checkParameterIsInAllDomains(std::string const &globalParameter) const {
-  auto const hasParameter = [&globalParameter](auto const &fitDomain) {
+  auto const domainHasParameter = [&globalParameter](auto const &fitDomain) {
     return fitDomain->hasParameter(globalParameter);
   };
 
-  if (!std::all_of(m_fitDomains.cbegin(), m_fitDomains.cend(), hasParameter))
+  if (!std::all_of(m_fitDomains.cbegin(), m_fitDomains.cend(), domainHasParameter))
     throw std::invalid_argument(globalParameter + " cannot be global because it doesn't exist for ALL domains.");
 }
 
@@ -581,12 +581,12 @@ void FitScriptGeneratorModel::checkGlobalParameterhasNoTies(std::string const &g
     return !fitDomain->isParameterActive(globalParameter);
   };
 
-  auto const hasGlobalTie = [&globalParameter](GlobalTie const &globalTie) {
+  auto const parameterHasGlobalTie = [&globalParameter](GlobalTie const &globalTie) {
     return globalParameter == removeTopFunctionIndex(globalTie.m_parameter);
   };
 
   if (std::any_of(m_fitDomains.cbegin(), m_fitDomains.cend(), isNotActive) ||
-      std::any_of(m_globalTies.cbegin(), m_globalTies.cend(), hasGlobalTie))
+      std::any_of(m_globalTies.cbegin(), m_globalTies.cend(), parameterHasGlobalTie))
     throw std::invalid_argument(globalParameter + " cannot be global because it already has a "
                                                   "tie in at least one of the domains.");
 }

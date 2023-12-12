@@ -53,9 +53,9 @@ void PeaksInRegion::init() {
 }
 
 void PeaksInRegion::validateExtentsInput() const {
-  const size_t numberOfFaces = this->numberOfFaces();
+  const size_t facesN = this->numberOfFaces();
   std::stringstream outbuff;
-  if (m_extents.size() != numberOfFaces) {
+  if (m_extents.size() != facesN) {
     throw std::invalid_argument("Six commma separated entries for the extents expected");
   }
   if (m_extents[0] > m_extents[1]) {
@@ -126,8 +126,8 @@ VecVecV3D PeaksInRegion::createFaces() const {
   V3D point7(m_extents[maxXIndex], m_extents[maxYIndex], m_extents[maxZIndex]);
   V3D point8(m_extents[maxXIndex], m_extents[minYIndex], m_extents[maxZIndex]);
 
-  const int numberOfFaces = this->numberOfFaces();
-  VecVecV3D faces(numberOfFaces);
+  const int facesN = this->numberOfFaces();
+  VecVecV3D faces(facesN);
   int faceIndex = 0;
   faces[faceIndex++] = {point1, point5, point6}; // These define a
                                                  // face normal to x

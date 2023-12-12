@@ -40,17 +40,17 @@ TopicInfo::TopicInfo(InstrumentInfo *inst, const Poco::XML::Element *elem) : m_n
     g_log.warning() << "Kafka topic provided without a suitable name for instrument " << inst->name()
                     << ". No attempts will be made to connect to this topic." << std::endl;
 
-  std::string type = elem->getAttribute("type");
+  std::string topicType = elem->getAttribute("type");
 
-  if (type == "event")
+  if (topicType == "event")
     m_type = TopicType::Event;
-  else if (type == "chopper")
+  else if (topicType == "chopper")
     m_type = TopicType::Chopper;
-  else if (type == "sample")
+  else if (topicType == "sample")
     m_type = TopicType::Sample;
-  else if (type == "run")
+  else if (topicType == "run")
     m_type = TopicType::Run;
-  else if (type == "monitor")
+  else if (topicType == "monitor")
     m_type = TopicType::Monitor;
   else
     g_log.warning() << "Kafka topic provided without a suitable type for instrument " << inst->name()

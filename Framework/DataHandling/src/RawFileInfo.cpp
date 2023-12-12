@@ -226,7 +226,7 @@ void RawFileInfo::exec() {
     sample_table->addColumn("int", "e_eqname"); //< dunno
 
     const auto nameLength = static_cast<int>(strlen(isis_raw.spb.e_name));
-    std::string name(isis_raw.spb.e_name, nameLength);
+    std::string sampleName(isis_raw.spb.e_name, nameLength);
 
     API::TableRow t = sample_table->appendRow();
     t << isis_raw.spb.e_posn << isis_raw.spb.e_type << isis_raw.spb.e_geom << static_cast<double>(isis_raw.spb.e_thick)
@@ -237,7 +237,7 @@ void RawFileInfo::exec() {
       << static_cast<double>(isis_raw.spb.samp_cs_abs) << static_cast<double>(isis_raw.spb.e_dens)
       << static_cast<double>(isis_raw.spb.e_canthick) << static_cast<double>(isis_raw.spb.e_canxsect)
       << static_cast<double>(isis_raw.spb.can_cs_inc) << static_cast<double>(isis_raw.spb.can_cs_abs)
-      << static_cast<double>(isis_raw.spb.can_nd) << name << isis_raw.spb.e_equip << isis_raw.spb.e_eqname;
+      << static_cast<double>(isis_raw.spb.can_nd) << sampleName << isis_raw.spb.e_equip << isis_raw.spb.e_eqname;
 
     setProperty("SampleParameterTable", sample_table);
   }

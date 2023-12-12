@@ -527,8 +527,8 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(vector<string>
   stringstream dbss;
   set<string>::iterator setiter;
   for (setiter = paramstofitset.begin(); setiter != paramstofitset.end(); ++setiter) {
-    string name = *setiter;
-    dbss << setw(20) << name;
+    string paramName = *setiter;
+    dbss << setw(20) << paramName;
   }
   g_log.notice() << "Parameters to refine: " << dbss.str() << '\n';
 

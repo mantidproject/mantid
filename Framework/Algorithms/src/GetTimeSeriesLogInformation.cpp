@@ -246,21 +246,21 @@ TableWorkspace_sptr GetTimeSeriesLogInformation::generateStatisticTable() {
 
   // 1. Integer part
   for (auto &intmapiter : m_intInfoMap) {
-    string name = intmapiter.first;
+    string text = intmapiter.first;
     size_t value = intmapiter.second;
 
     TableRow newrow = tablews->appendRow();
-    newrow << name << static_cast<double>(value);
+    newrow << text << static_cast<double>(value);
   }
 
   // 2. Double part
   map<string, double>::iterator dblmapiter;
   for (dblmapiter = m_dblInfoMap.begin(); dblmapiter != m_dblInfoMap.end(); ++dblmapiter) {
-    string name = dblmapiter->first;
+    string text = dblmapiter->first;
     double value = dblmapiter->second;
 
     TableRow newrow = tablews->appendRow();
-    newrow << name << value;
+    newrow << text << value;
   }
 
   return tablews;

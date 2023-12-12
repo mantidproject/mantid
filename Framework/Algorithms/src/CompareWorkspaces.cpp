@@ -1251,14 +1251,14 @@ void CompareWorkspaces::doTableComparison(const API::ITableWorkspace_const_sptr 
   }
 
   const bool checkAllData = getProperty("CheckAllData");
-  const bool relErr = getProperty("ToleranceRelErr");
+  const bool isRelErr = getProperty("ToleranceRelErr");
   const double tolerance = getProperty("Tolerance");
   bool mismatch = false;
   for (size_t i = 0; i < numCols; ++i) {
     const auto c1 = tws1->getColumn(i);
     const auto c2 = tws2->getColumn(i);
 
-    if (relErr) {
+    if (isRelErr) {
       if (!c1->equalsRelErr(*c2, tolerance)) {
         mismatch = true;
       }

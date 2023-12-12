@@ -21,16 +21,16 @@ FunctionModelDataset::FunctionModelDataset(QString workspaceName, FunctionModelS
  * @returns the names given to each domain (i.e. spectrum) in this dataset.
  */
 QStringList FunctionModelDataset::domainNames() const {
-  const auto numberOfSpectra = m_spectra.size().value;
-  if (numberOfSpectra == 0u)
+  const auto numOfSpectra = m_spectra.size().value;
+  if (numOfSpectra == 0u)
     throw std::runtime_error("There are no spectra in this Dataset.");
-  if (numberOfSpectra == 1u)
+  if (numOfSpectra == 1u)
     return QStringList(m_workspaceName);
   else {
-    QStringList domainNames;
+    QStringList domains;
     for (const auto &spectrum : m_spectra)
-      domainNames << m_workspaceName + " (" + QString::number(spectrum.value) + ")";
-    return domainNames;
+      domains << m_workspaceName + " (" + QString::number(spectrum.value) + ")";
+    return domains;
   }
 }
 

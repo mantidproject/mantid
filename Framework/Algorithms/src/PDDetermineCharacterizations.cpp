@@ -215,7 +215,7 @@ void PDDetermineCharacterizations::getInformationFromTable(const double frequenc
  * @return
  */
 double PDDetermineCharacterizations::getLogValue(const API::Run &run, const std::string &propName) {
-  std::vector<std::string> names = getProperty(propName);
+  std::vector<std::string> propNames = getProperty(propName);
 
   std::string label = "frequency";
   if (propName == WL_PROP_NAME)
@@ -229,26 +229,26 @@ double PDDetermineCharacterizations::getLogValue(const API::Run &run, const std:
     validUnits.insert("Hz");
   }
 
-  for (auto &name : names) {
-    if (run.hasProperty(name)) {
-      const std::string units = run.getProperty(name)->units();
+  for (auto &propertyName : propNames) {
+    if (run.hasProperty(propertyName)) {
+      const std::string units = run.getProperty(propertyName)->units();
 
       if (validUnits.find(units) != validUnits.end()) {
-        const double value = run.getLogAsSingleValue(name, Kernel::Math::TimeAveragedMean);
+        const double value = run.getLogAsSingleValue(propertyName, Kernel::Math::TimeAveragedMean);
         if (value == 0.) {
           std::stringstream msg;
-          msg << "'" << name << "' has a mean value of zero " << units;
+          msg << "'" << propertyName << "' has a mean value of zero " << units;
           g_log.information(msg.str());
         } else {
           std::stringstream msg;
-          msg << "Found " << label << " in log '" << name << "' with mean value " << value << " " << units;
+          msg << "Found " << label << " in log '" << propertyName << "' with mean value " << value << " " << units;
           g_log.information(msg.str());
           return value;
         }
       } else {
         std::stringstream msg;
-        msg << "When looking at " << name << " log encountered unknown units '" << units << "' for " << label << ":"
-            << units;
+        msg << "When looking at " << propertyName << " log encountered unknown units '" << units << "' for " << label
+            << ":" << units;
         g_log.warning(msg.str());
       }
     }
@@ -257,8 +257,8 @@ double PDDetermineCharacterizations::getLogValue(const API::Run &run, const std:
   // generate an exception if it gets here because the log wasn't found
   std::stringstream msg;
   msg << "Failed to determine " << label << " because none of the logs ";
-  for (auto &name : names) {
-    msg << "\"" << name << "\" ";
+  for (auto &propertyName : propNames) {
+    msg << "\"" << propertyName << "\" ";
   }
   msg << "exist";
   throw std::runtime_error(msg.str());

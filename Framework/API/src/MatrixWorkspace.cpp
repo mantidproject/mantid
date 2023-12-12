@@ -328,10 +328,10 @@ void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
         spec.setDetectorIDs(map.getDetectorIDsForSpectrumNo(spec.getSpectrumNo()));
       else
         spec.setDetectorIDs(map.getDetectorIDsForSpectrumIndex(j));
-    } catch (std::out_of_range &e) {
+    } catch (std::out_of_range &exception) {
       // Get here if the spectrum number is not in the map.
       spec.clearDetectorIDs();
-      g_log.debug(e.what());
+      g_log.debug(exception.what());
       g_log.debug() << "Spectrum number " << spec.getSpectrumNo() << " not in map.\n";
     }
   }
@@ -689,9 +689,9 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
 
   // determine the data range
   for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; workspaceIndex++) {
-    const auto &dataX = this->x(workspaceIndex);
-    const double xfront = dataX.front();
-    const double xback = dataX.back();
+    const auto &xData = this->x(workspaceIndex);
+    const double xfront = xData.front();
+    const double xback = xData.back();
     if (std::isfinite(xfront) && std::isfinite(xback)) {
       if (xfront < xmin)
         xmin = xfront;
@@ -725,34 +725,34 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
   PARALLEL_FOR_IF(this->threadSafe())
   for (int wksp_index = 0; wksp_index < static_cast<int>(this->getNumberHistograms()); wksp_index++) {
     // Get Handle to data
-    const Mantid::MantidVec &x = this->readX(wksp_index);
-    const auto &y = this->y(wksp_index);
+    const Mantid::MantidVec &xData = this->readX(wksp_index);
+    const auto &yData = this->y(wksp_index);
     // If it is a 1D workspace, no need to integrate
-    if ((x.size() <= 1 + histogramOffset) && (!y.empty())) {
-      out[wksp_index] = y[0];
+    if ((xData.size() <= 1 + histogramOffset) && (!yData.empty())) {
+      out[wksp_index] = yData[0];
     } else {
       // Iterators for limits - whole range by default
       Mantid::MantidVec::const_iterator lowit, highit;
-      lowit = x.begin();
-      highit = x.end() - histogramOffset;
+      lowit = xData.begin();
+      highit = xData.end() - histogramOffset;
 
       // But maybe we don't want the entire range?
       if (!entireRange) {
         // If the first element is lower that the xmin then search for new lowit
         if ((*lowit) < minX)
-          lowit = std::lower_bound(x.begin(), x.end(), minX);
+          lowit = std::lower_bound(xData.begin(), xData.end(), minX);
         // If the last element is higher that the xmax then search for new highit
         if (*(highit - 1 + histogramOffset) > maxX)
-          highit = std::upper_bound(lowit, x.end(), maxX);
+          highit = std::upper_bound(lowit, xData.end(), maxX);
       }
 
       // Get the range for the y vector
-      Mantid::MantidVec::difference_type distmin = std::distance(x.begin(), lowit);
-      Mantid::MantidVec::difference_type distmax = std::distance(x.begin(), highit);
+      Mantid::MantidVec::difference_type distmin = std::distance(xData.begin(), lowit);
+      Mantid::MantidVec::difference_type distmax = std::distance(xData.begin(), highit);
       double sum(0.0);
       if (distmin <= distmax) {
         // Integrate
-        sum = std::accumulate(y.begin() + distmin, y.begin() + distmax, 0.0, accumulate_if_finite);
+        sum = std::accumulate(yData.begin() + distmin, yData.begin() + distmax, 0.0, accumulate_if_finite);
       }
       // Save it in the vector
       out[wksp_index] = sum;
@@ -1136,10 +1136,10 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex, const size_t &binInd
   // If the weight is not 0, NaN and Inf values are set to 0,
   // whereas other values are scaled by (1 - weight)
   if (weight != 0.) {
-    double &y = this->mutableY(workspaceIndex)[binIndex];
-    (std::isnan(y) || std::isinf(y)) ? y = 0. : y *= (1 - weight);
-    double &e = this->mutableE(workspaceIndex)[binIndex];
-    (std::isnan(e) || std::isinf(e)) ? e = 0. : e *= (1 - weight);
+    double &yData = this->mutableY(workspaceIndex)[binIndex];
+    (std::isnan(yData) || std::isinf(yData)) ? yData = 0. : yData *= (1 - weight);
+    double &eData = this->mutableE(workspaceIndex)[binIndex];
+    (std::isnan(eData) || std::isinf(eData)) ? eData = 0. : eData *= (1 - weight);
   }
 }
 
@@ -1203,11 +1203,11 @@ std::vector<size_t> MatrixWorkspace::maskedBinsIndices(const size_t &workspaceIn
     throw Kernel::Exception::IndexError(workspaceIndex, 0, "MatrixWorkspace::maskedBins");
   }
 
-  auto maskedBins = it->second;
+  auto maskedBinsList = it->second;
   std::vector<size_t> maskedIds;
-  maskedIds.reserve(maskedBins.size());
+  maskedIds.reserve(maskedBinsList.size());
 
-  std::transform(maskedBins.begin(), maskedBins.end(), std::back_inserter(maskedIds),
+  std::transform(maskedBinsList.begin(), maskedBinsList.end(), std::back_inserter(maskedIds),
                  [](const auto &mb) { return mb.first; });
   return maskedIds;
 }
@@ -1669,25 +1669,25 @@ signal_t MatrixWorkspace::getSignalAtCoord(const coord_t *coords,
       return std::numeric_limits<double>::quiet_NaN();
     }
 
-    double y = yVals[i];
+    double yVal = yVals[i];
     // What is our normalization factor?
     switch (normalization) {
     case NoNormalization:
-      return y;
+      return yVal;
     case VolumeNormalization: {
       // Divide the signal by the area
       auto volume = yBinSize * (xVals[i + 1] - xVals[i]);
       if (volume == 0.0) {
         return std::numeric_limits<double>::quiet_NaN();
       }
-      return y / volume;
+      return yVal / volume;
     }
     case NumEventsNormalization:
       // Not yet implemented, may not make sense
-      return y;
+      return yVal;
     }
     // This won't happen
-    return y;
+    return yVal;
   } else {
     return std::numeric_limits<double>::quiet_NaN();
   }
@@ -2066,11 +2066,11 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
   const auto &detInfo = detectorInfo();
   const auto &allDetIDs = detInfo.detectorIDs();
   const auto &specDefs = m_indexInfo->spectrumDefinitions();
-  const auto size = static_cast<int64_t>(m_indexInfo->size());
+  const auto indexInfoSize = static_cast<int64_t>(m_indexInfo->size());
   enum class ErrorCode { None, InvalidDetIndex, InvalidTimeIndex };
   std::atomic<ErrorCode> errorValue(ErrorCode::None);
 #pragma omp parallel for
-  for (int64_t i = 0; i < size; ++i) {
+  for (int64_t i = 0; i < indexInfoSize; ++i) {
     auto &spec = getSpectrum(i);
     // Prevent setting flags that require spectrum definition updates
     spec.setMatrixWorkspace(nullptr, i);

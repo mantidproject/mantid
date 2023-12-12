@@ -243,16 +243,16 @@ bool PseudoVoigt::estimate_parameter_value() {
     // calculate intensity
     double eta = getParameter(0);
     double gamma = getParameter(3);
-    double intensity = m_height / 2. / (1 + (sqrt(M_PI * M_LN2) - 1) * eta) * (M_PI * gamma);
-    setParameter(1, intensity, false);
-    g_log.debug() << "Estimate peak intensity = " << intensity << "\n";
+    double peakIntensity = m_height / 2. / (1 + (sqrt(M_PI * M_LN2) - 1) * eta) * (M_PI * gamma);
+    setParameter(1, peakIntensity, false);
+    g_log.debug() << "Estimate peak intensity = " << peakIntensity << "\n";
   } else if (to_calculate_index == 3) {
     // calculate peak width
     double eta = getParameter(0);
-    double intensity = getParameter(1);
+    double peakIntensity = getParameter(1);
 
-    g_log.debug() << "Intensity = " << intensity << ", height = " << m_height << ", mixing = " << eta << "\n";
-    double gamma = intensity * 2 * (1 + (sqrt(M_PI * M_LN2) - 1) * eta) / (M_PI * m_height);
+    g_log.debug() << "Intensity = " << peakIntensity << ", height = " << m_height << ", mixing = " << eta << "\n";
+    double gamma = peakIntensity * 2 * (1 + (sqrt(M_PI * M_LN2) - 1) * eta) / (M_PI * m_height);
     if (gamma < 1.E-10) {
       g_log.debug() << "Peak width (H or Gamma) = " << gamma << ". Set 1.E-2 instead"
                     << "\n";

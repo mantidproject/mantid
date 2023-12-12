@@ -81,10 +81,10 @@ size_t IndirectFitDataModel::getNumberOfSpectra(WorkspaceID workspaceID) const {
 
 size_t IndirectFitDataModel::getNumberOfDomains() const {
   size_t init(0);
-  auto const getNumberOfSpectra = [](size_t sum, auto const &fittingData) {
+  auto const numberOfSpectra = [](size_t sum, auto const &fittingData) {
     return sum + fittingData.numberOfSpectra().value;
   };
-  return std::accumulate(m_fittingData->cbegin(), m_fittingData->cend(), init, getNumberOfSpectra);
+  return std::accumulate(m_fittingData->cbegin(), m_fittingData->cend(), init, numberOfSpectra);
 }
 
 std::vector<double> IndirectFitDataModel::getQValuesForData() const {

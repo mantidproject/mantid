@@ -320,8 +320,8 @@ void CalculatePolynomialBackground::exec() {
   const std::string minimizer = getProperty(Prop::MINIMIZER);
   const auto polyDegree = static_cast<size_t>(static_cast<int>(getProperty(Prop::POLY_DEGREE)));
   const std::vector<double> initialParams(polyDegree + 1, 0.1);
-  const auto name = makeNameString(polyDegree);
-  const auto fitFunction = makeFunctionString(name, initialParams);
+  const auto polyDegreeStr = makeNameString(polyDegree);
+  const auto fitFunction = makeFunctionString(polyDegreeStr, initialParams);
   const auto nHistograms = static_cast<int64_t>(inWS->getNumberHistograms());
   API::Progress progress(this, 0, 1.0, nHistograms);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *outWS))
@@ -330,7 +330,7 @@ void CalculatePolynomialBackground::exec() {
     const bool logging{false};
     auto fit = createChildAlgorithm("Fit", 0, 0, logging);
     const auto parameters = executeFit(*fit, fitFunction, inWS, i, inputRanges, costFunction, minimizer);
-    evaluateInPlace(name, parameters, *outWS, i);
+    evaluateInPlace(polyDegreeStr, parameters, *outWS, i);
     progress.report();
     PARALLEL_END_INTERRUPT_REGION
   }

@@ -962,9 +962,9 @@ void LoadFullprofResolution::getTableRowNumbers(const API::ITableWorkspace_sptr 
   size_t numrows = tablews->rowCount();
   for (size_t i = 0; i < numrows; ++i) {
     TableRow row = tablews->getRow(i);
-    std::string name;
-    row >> name;
-    parammap.emplace(name, i);
+    std::string paramName;
+    row >> paramName;
+    parammap.emplace(paramName, i);
   }
 }
 
