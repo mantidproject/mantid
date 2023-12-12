@@ -45,6 +45,10 @@ QStringList developerFeatureFlags() {
   return getSetting(INDIRECT_SETTINGS_GROUP, FEATURE_FLAGS_PROPERTY).toStringList();
 }
 
+bool hasDevelopmentFlag(std::string const &flag) {
+  return developerFeatureFlags().contains(QString::fromStdString(flag));
+}
+
 void setRestrictInputDataByName(bool restricted) {
   setSetting(INDIRECT_SETTINGS_GROUP, RESTRICT_DATA_PROPERTY, restricted);
 }

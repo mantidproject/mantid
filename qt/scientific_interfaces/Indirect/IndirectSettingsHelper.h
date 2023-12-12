@@ -17,6 +17,7 @@ MANTIDQT_INDIRECT_DLL void setDeveloperFeatureFlags(QStringList const &flags);
 MANTIDQT_INDIRECT_DLL bool restrictInputDataByName();
 MANTIDQT_INDIRECT_DLL bool externalPlotErrorBars();
 MANTIDQT_INDIRECT_DLL QStringList developerFeatureFlags();
+MANTIDQT_INDIRECT_DLL bool hasDevelopmentFlag(std::string const &flag);
 
 } // namespace IndirectSettingsHelper
 } // namespace CustomInterfaces
