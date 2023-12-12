@@ -125,8 +125,6 @@ class DNSElasticSCPlotModel(DNSObsModel):
 
     def get_format_coord(self, axis_type):
         # adds z and hkl label to cursor position
-        # this is somehow bad since it backlinks the model function
-        # from the view
         def format_coord(x, y):
             h, k, l, z, error = get_hkl_intensity_from_cursor(self._single_crystal_map, axis_type, x, y)
             return f"x = {x: 2.4f}, y = {y: 2.4f}, hkl = ({h: 2.2f}, {k: 2.2f}, {l: 2.2f}),\n Intensity = {z: 6.4f} ± {error:6.4f}"

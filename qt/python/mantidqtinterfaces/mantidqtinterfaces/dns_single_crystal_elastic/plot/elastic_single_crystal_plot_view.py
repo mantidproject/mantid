@@ -158,8 +158,8 @@ class DNSElasticSCPlotView(DNSView):
             omega_offset_dialog.exec_()
 
     # gui options
-    def create_subfigure(self, gridhelper=None):
-        self.single_crystal_plot = DNSScPlot(self, self.canvas.figure, gridhelper)
+    def create_subfigure(self, grid_helper=None):
+        self.single_crystal_plot = DNSScPlot(self, self.canvas.figure, grid_helper)
 
     def get_axis_type(self):
         return self.views_menu.get_value()

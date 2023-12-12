@@ -20,11 +20,11 @@ from mpl_toolkits.axisartist import Subplot
 class DNSScPlot:
     # pylint: disable=too-many-public-methods
 
-    def __init__(self, parent, figure, gridhelper):
+    def __init__(self, parent, figure, grid_helper):
         super().__init__()
         self._fig = figure
         self._fig.clf()
-        ax1 = Subplot(self._fig, 1, 1, 1, grid_helper=gridhelper)
+        ax1 = Subplot(self._fig, 1, 1, 1, grid_helper=grid_helper)
         self._ax = self._fig.add_subplot(ax1)
         self._ax.set_visible(False)
         self._parent = parent
@@ -83,10 +83,9 @@ class DNSScPlot:
         if self._pm is not None:
             self._pm.set_cmap(cmap)
 
-    # setting ax stuff
-    def set_axis_labels(self, xlabel, ylabel):
-        self._ax.set_xlabel(xlabel)
-        self._ax.set_ylabel(ylabel)
+    def set_axis_labels(self, x_label, y_label):
+        self._ax.set_xlabel(x_label)
+        self._ax.set_ylabel(y_label)
 
     def set_format_coord(self, format_coord):
         self._ax.format_coord = format_coord
@@ -113,12 +112,12 @@ class DNSScPlot:
         else:
             self._ax.grid(0)
 
-    def set_aspect_ratio(self, asp_ratio):
-        self._ax.set_aspect(asp_ratio, anchor="NW")
+    def set_aspect_ratio(self, aspect_ratio):
+        self._ax.set_aspect(aspect_ratio, anchor="NW")
 
     # projections
 
-    def set_projections(self, xproj, yproj):
+    def set_projections(self, x_proj, y_proj):
         self.remove_projections()
         divider = make_axes_locatable(self._ax)
         self._ax_hist[0] = divider.append_axes("top", 1.2, pad=0.1, sharex=self._ax)
@@ -129,8 +128,8 @@ class DNSScPlot:
         self._ax_hist[1].set_ymargin(0)
         self._ax_hist[0].axis["bottom"].major_ticklabels.set_visible(False)
         self._ax_hist[1].axis["left"].major_ticklabels.set_visible(False)
-        self._ax_hist[0].plot(xproj[0], xproj[1])
-        self._ax_hist[1].plot(yproj[1], yproj[0])
+        self._ax_hist[0].plot(x_proj[0], x_proj[1])
+        self._ax_hist[1].plot(y_proj[1], y_proj[0])
 
     def remove_projections(self):
         if hasattr(self, "_ax_hist") and self._ax_hist[0] is not None:
@@ -151,15 +150,15 @@ class DNSScPlot:
         if self._ax:
             self._ax.figure.clear()
 
-    def plot_triangulation(self, triang, z, cmap, edgecolors, shading):
+    def plot_triangulation(self, triang, z, cmap, edge_colors, shading):
         # pylint: disable=too-many-arguments
         self._ax.set_visible(True)
-        self._pm = self._ax.tripcolor(triang, z, cmap=cmap, edgecolors=edgecolors, shading=shading)
+        self._pm = self._ax.tripcolor(triang, z, cmap=cmap, edgecolors=edge_colors, shading=shading)
 
-    def plot_quadmesh(self, x, y, z, cmap, edgecolors, shading):
+    def plot_quadmesh(self, x, y, z, cmap, edge_colors, shading):
         # pylint: disable=too-many-arguments
         self._ax.set_visible(True)
-        self._pm = self._ax.pcolormesh(x, y, z, cmap=cmap, edgecolors=edgecolors, shading=shading)
+        self._pm = self._ax.pcolormesh(x, y, z, cmap=cmap, edgecolors=edge_colors, shading=shading)
 
     def plot_scatter(self, x, y, z, cmap):
         self._ax.set_visible(True)
