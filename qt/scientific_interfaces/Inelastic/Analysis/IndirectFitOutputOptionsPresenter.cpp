@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitOutputOptionsPresenter.h"
+#include "IndirectDataAnalysisTab.h"
 
 #include <utility>
 
@@ -12,29 +13,12 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsView *view)
-    : QObject(nullptr), m_model(std::make_unique<IndirectFitOutputOptionsModel>()), m_view(view) {
-  setUpPresenter();
-}
-
-IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(IIndirectFitOutputOptionsModel *model,
-                                                                     IIndirectFitOutputOptionsView *view)
-    : QObject(nullptr), m_model(model), m_view(view) {
-  setUpPresenter();
-}
-
-IndirectFitOutputOptionsPresenter::~IndirectFitOutputOptionsPresenter() = default;
-
-void IndirectFitOutputOptionsPresenter::setUpPresenter() {
+IndirectFitOutputOptionsPresenter::IndirectFitOutputOptionsPresenter(
+    IIndirectDataAnalysisTab *tab, IIndirectFitOutputOptionsView *view,
+    std::unique_ptr<IIndirectFitOutputOptionsModel> model)
+    : m_tab(tab), m_view(view), m_model(std::move(model)) {
   setMultiWorkspaceOptionsVisible(false);
-
-  connect(m_view, SIGNAL(groupWorkspaceChanged(std::string const &)), this,
-          SLOT(setAvailablePlotOptions(std::string const &)));
-
-  connect(m_view, SIGNAL(plotClicked()), this, SLOT(plotResult()));
-  connect(m_view, SIGNAL(plotClicked()), this, SIGNAL(plotSpectra()));
-  connect(m_view, SIGNAL(saveClicked()), this, SLOT(saveResult()));
-  connect(m_view, SIGNAL(editResultClicked()), this, SLOT(editResult()));
+  m_view->subscribePresenter(this);
 }
 
 void IndirectFitOutputOptionsPresenter::setMultiWorkspaceOptionsVisible(bool visible) {
@@ -43,7 +27,7 @@ void IndirectFitOutputOptionsPresenter::setMultiWorkspaceOptionsVisible(bool vis
   m_view->setWorkspaceComboBoxVisible(false);
 }
 
-void IndirectFitOutputOptionsPresenter::setAvailablePlotOptions(std::string const &selectedGroup) {
+void IndirectFitOutputOptionsPresenter::handleGroupWorkspaceChanged(std::string const &selectedGroup) {
   auto const resultSelected = m_model->isResultGroupSelected(selectedGroup);
   setPlotTypes(selectedGroup);
   m_view->setWorkspaceComboBoxVisible(!resultSelected);
@@ -78,10 +62,11 @@ void IndirectFitOutputOptionsPresenter::setPlotTypes(std::string const &selected
 
 void IndirectFitOutputOptionsPresenter::removePDFWorkspace() { m_model->removePDFWorkspace(); }
 
-void IndirectFitOutputOptionsPresenter::plotResult() {
+void IndirectFitOutputOptionsPresenter::handlePlotClicked() {
   setPlotting(true);
   try {
     plotResult(m_view->getSelectedGroupWorkspace());
+    m_tab->plotSelectedSpectra();
   } catch (std::runtime_error const &ex) {
     displayWarning(ex.what());
   }
@@ -94,7 +79,7 @@ void IndirectFitOutputOptionsPresenter::plotResult(std::string const &selectedGr
     m_model->plotPDF(m_view->getSelectedWorkspace(), m_view->getSelectedPlotType());
 }
 
-void IndirectFitOutputOptionsPresenter::saveResult() {
+void IndirectFitOutputOptionsPresenter::handleSaveClicked() {
   setSaving(true);
   try {
     m_model->saveResult();
@@ -139,24 +124,9 @@ std::vector<SpectrumToPlot> IndirectFitOutputOptionsPresenter::getSpectraToPlot(
 
 void IndirectFitOutputOptionsPresenter::setEditResultVisible(bool visible) { m_view->setEditResultVisible(visible); }
 
-void IndirectFitOutputOptionsPresenter::editResult() {
-  m_editResultsDialog = getEditResultsDialog(m_view->parentWidget());
-  m_editResultsDialog->setWorkspaceSelectorSuffices({"_Result"});
-  m_editResultsDialog->show();
-  connect(m_editResultsDialog.get(), SIGNAL(replaceSingleFitResult()), this, SLOT(replaceSingleFitResult()));
-  connect(m_editResultsDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeEditResultDialog()));
-}
-
-std::unique_ptr<IndirectEditResultsDialog>
-IndirectFitOutputOptionsPresenter::getEditResultsDialog(QWidget *parent) const {
-  return std::make_unique<IndirectEditResultsDialog>(parent);
-}
-
-void IndirectFitOutputOptionsPresenter::replaceSingleFitResult() {
-  auto const inputName = m_editResultsDialog->getSelectedInputWorkspaceName();
-  auto const singleBinName = m_editResultsDialog->getSelectedSingleFitWorkspaceName();
-  auto const outputName = m_editResultsDialog->getOutputWorkspaceName();
-
+void IndirectFitOutputOptionsPresenter::handleReplaceSingleFitResult(std::string const &inputName,
+                                                                     std::string const &singleBinName,
+                                                                     std::string const &outputName) {
   setEditingResult(true);
   replaceSingleFitResult(inputName, singleBinName, outputName);
   setEditingResult(false);
@@ -173,17 +143,9 @@ void IndirectFitOutputOptionsPresenter::replaceSingleFitResult(std::string const
 }
 
 void IndirectFitOutputOptionsPresenter::setEditingResult(bool editing) {
-  m_editResultsDialog->setReplaceFitResultText(editing ? "Processing..." : "Replace Fit Result");
-  m_editResultsDialog->setReplaceFitResultEnabled(!editing);
   setPlotEnabled(!editing);
   setEditResultEnabled(!editing);
   setSaveEnabled(!editing);
-}
-
-void IndirectFitOutputOptionsPresenter::closeEditResultDialog() {
-  disconnect(m_editResultsDialog.get(), SIGNAL(replaceSingleFitResult()), this, SLOT(replaceSingleFitResult()));
-  disconnect(m_editResultsDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeEditResultDialog()));
-  m_editResultsDialog->close();
 }
 
 void IndirectFitOutputOptionsPresenter::displayWarning(std::string const &message) { m_view->displayWarning(message); }

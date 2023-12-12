@@ -33,7 +33,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL IndirectDataAnalysisTab : public IndirectTab {
+class MANTIDQT_INELASTIC_DLL IIndirectDataAnalysisTab {
+public:
+  virtual void plotSelectedSpectra() = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL IndirectDataAnalysisTab : public IndirectTab, public IIndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
@@ -76,6 +81,8 @@ public:
   std::string getTabName() const noexcept { return m_tabName; }
   bool hasResolution() const noexcept { return m_hasResolution; }
   void setFileExtensionsByName(bool filter);
+
+  void plotSelectedSpectra() override;
 
 protected:
   IndirectFittingModel *getFittingModel() const;
@@ -153,7 +160,6 @@ protected slots:
   void respondToFunctionChanged();
 
 private slots:
-  void plotSelectedSpectra();
   void respondToSingleResolutionLoaded();
   void respondToDataChanged();
   void respondToDataAdded(IAddWorkspaceDialog const *dialog);
