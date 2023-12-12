@@ -181,9 +181,9 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         "BackgroundSubtractionWorkspace": ""
         if state.background_subtraction.workspace is None
         else str(state.background_subtraction.workspace),
-        "BackgroundSubtractionScaleFactor": ""
+        "BackgroundSubtractionScaleFactor": 0.0
         if state.background_subtraction.scale_factor is None
-        else str(state.background_subtraction.scale_factor),
+        else float(state.background_subtraction.scale_factor),
     }
 
     # --------------------------------

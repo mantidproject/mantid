@@ -138,7 +138,7 @@ class SANSSave(DataProcessorAlgorithm):
         )
         self.declareProperty(
             "BackgroundSubtractionScaleFactor",
-            "",
+            0.0,
             direction=Direction.Input,
             doc="The scale factor the BackgroundSubtractionWorkspace is multiplied by before subtraction. Can be blank.",
         )

@@ -304,9 +304,9 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
   auto const &bgsubWsName = getPropertyValue("BackgroundSubtractionWorkspace");
   auto const &bgsubScaleFactor = getPropertyValue("BackgroundSubtractionScaleFactor");
   if (!bgsubWsName.empty()) {
-    sasProcess += "\n\t\t\t<term name=\"scaled_background_subtraction_workspace\">";
+    sasProcess += "\n\t\t\t<term name=\"scaled_bgsub_workspace\">";
     sasProcess += bgsubWsName + "</term>";
-    sasProcess += "\n\t\t\t<term name=\"scaled_background_subtraction_scale_factor\">";
+    sasProcess += "\n\t\t\t<term name=\"scaled_bgsub_scale_factor\">";
     sasProcess += bgsubScaleFactor + "</term>";
   }
 
