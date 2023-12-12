@@ -25,8 +25,8 @@ class DNSElasticSCPlotPresenter(DNSObserver):
 
         # plot parameter
         self._plot_param = ObjectDict()
-        self._plot_param.gridstate = 0
-        self._plot_param.gridhelper = None
+        self._plot_param.grid_state = 0
+        self._plot_param.grid_helper = None
         self._plot_param.colormap_name = "jet"
         self._plot_param.fontsize = 1
         self._plot_param.lines = 0
@@ -49,7 +49,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         else:
             self.view.single_crystal_plot.remove_projections()
             self._plot()
-        self.view.sig_change_cb_range_on_zoom.connect(self._change_cb_range)
+        self.view.sig_change_cb_range_on_zoom.connect(self._change_color_bar_range)
 
     def _calculate_projections(self, switch=False):
         xlim, ylim = self.view.single_crystal_plot.get_active_limits()
@@ -77,7 +77,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         options = self.param_dict["elastic_single_crystal_options"]
         self.model.create_single_crystal_map(data_array, options, initial_values)
         self._change_grid_state(draw=False, change=False)
-        self.view.create_subfigure(self._plot_param.gridhelper)
+        self.view.create_subfigure(self._plot_param.grid_helper)
         self._want_plot(axis_type["plot_type"])
         self._change_grid_state(draw=False, change=False)
         self._set_aspect_ratio()
@@ -169,19 +169,19 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.single_crystal_plot.set_aspect_ratio(ratio)
 
     def _change_crystal_axes_grid(self):
-        self._plot_param.gridstate = self._plot_param.gridstate % 4
-        self._plot_param.gridhelper = self._create_gridhelper()
+        self._plot_param.grid_state = self._plot_param.grid_state % 4
+        self._plot_param.grid_helper = self._create_grid_helper()
         self.view.single_crystal_plot.set_grid(major=True)
 
     def _change_normal_grid(self):
-        self._plot_param.gridstate = self._plot_param.gridstate % 3
-        self._plot_param.gridhelper = None
-        self.view.single_crystal_plot.set_grid(major=self._plot_param.gridstate, minor=self._plot_param.gridstate // 2)
+        self._plot_param.grid_state = self._plot_param.grid_state % 3
+        self._plot_param.grid_helper = None
+        self.view.single_crystal_plot.set_grid(major=self._plot_param.grid_state, minor=self._plot_param.grid_state // 2)
 
     def _change_grid_state(self, draw=True, change=True):
         own_dict = self.view.get_state()
         if change:
-            self._plot_param.gridstate = self._plot_param.gridstate + 1
+            self._plot_param.grid_state = self._plot_param.grid_state + 1
         if own_dict["crystal_axes"]:
             self._change_crystal_axes_grid()
         else:
@@ -190,13 +190,13 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self.view.draw()
 
     def _change_crystal_axes(self):
-        self._plot_param.gridstate = 1
+        self._plot_param.grid_state = 1
         self._plot()
 
-    def _create_gridhelper(self):
+    def _create_grid_helper(self):
         axis_type = self.view.get_axis_type()
         a, b, c, d = self.model.get_changing_hkl_components()
-        return get_grid_helper(self._plot_param.gridhelper, self._plot_param.gridstate, a, b, c, d, axis_type["switch"])
+        return get_grid_helper(self._plot_param.grid_helper, self._plot_param.grid_state, a, b, c, d, axis_type["switch"])
 
     def _set_colormap(self):
         cmap = self._get_plot_styles()[0]
@@ -238,9 +238,9 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         xlim, ylim, _dummy, _dummy = self._get_current_limits(zoom=False)
         self.view.single_crystal_plot.set_xlim(xlim)
         self.view.single_crystal_plot.set_ylim(ylim)
-        self._change_cb_range(zoom=False)
+        self._change_color_bar_range(zoom=False)
 
-    def _change_cb_range(self, zoom=True):
+    def _change_color_bar_range(self, zoom=True):
         xlim, ylim, zlim, _dummy = self._get_current_limits(zoom)
         self.view.single_crystal_plot.set_zlim(zlim)
         if zoom:  # saving zoom state to apply to all plots
@@ -267,7 +267,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
             self.view.single_crystal_plot.set_ylim(dy_lim)
             self._plot_param.xlim = dx_lim
             self._plot_param.ylim = dy_lim
-            self._change_cb_range(zoom=True)
+            self._change_color_bar_range(zoom=True)
         self.view.single_crystal_plot.connect_ylim_change()
 
     def _get_current_xy_lim(self, zoom=False):
@@ -340,7 +340,7 @@ class DNSElasticSCPlotPresenter(DNSObserver):
         self.view.sig_change_colormap.connect(self._set_colormap)
         self.view.sig_change_log.connect(self._set_log)
         self.view.sig_change_linestyle.connect(self._change_linestyle)
-        self.view.sig_change_cb_range_on_zoom.connect(self._change_cb_range)
+        self.view.sig_change_cb_range_on_zoom.connect(self._change_color_bar_range)
         self.view.sig_manual_lim_changed.connect(self._manual_lim_changed)
         self._plotted_script_number = 0
         self.view.sig_change_grid.connect(self._change_grid_state)

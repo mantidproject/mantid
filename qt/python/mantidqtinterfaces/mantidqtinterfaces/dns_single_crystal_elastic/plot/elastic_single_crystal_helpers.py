@@ -92,11 +92,9 @@ def get_hkl_intensity_from_cursor(single_crystal_map, axis_type, x, y):
 
 
 # functions used by get_hkl_intensity_from_cursor()
-
-
 def closest_mesh_point(x_mesh, y_mesh, x, y):
-    cp = np.add(np.square(x_mesh - x), np.square(y_mesh - y)).argmin()
-    return cp
+    closest_point = np.add(np.square(x_mesh - x), np.square(y_mesh - y)).argmin()
+    return closest_point
 
 
 def hkl_to_hklx(hkl, q=None, d=None, x=None):
