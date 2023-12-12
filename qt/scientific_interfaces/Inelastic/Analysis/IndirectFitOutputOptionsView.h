@@ -64,7 +64,6 @@ private slots:
   void notifySaveClicked();
   void notifyReplaceSingleFitResult();
   void handleEditResultClicked();
-  void handleCloseEditResultDialog();
 
 private:
   IndirectEditResultsDialog *m_editResultsDialog;

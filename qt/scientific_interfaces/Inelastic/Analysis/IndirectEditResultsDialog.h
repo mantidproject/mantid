@@ -32,7 +32,6 @@ public:
 
 signals:
   void replaceSingleFitResult();
-  void closeDialog();
 
 private slots:
   void setOutputWorkspaceName();

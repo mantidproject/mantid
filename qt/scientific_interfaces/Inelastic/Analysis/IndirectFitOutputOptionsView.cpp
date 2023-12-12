@@ -118,16 +118,10 @@ void IndirectFitOutputOptionsView::setEditResultVisible(bool visible) {
 
 void IndirectFitOutputOptionsView::handleEditResultClicked() {
   m_editResultsDialog = new IndirectEditResultsDialog(this);
+  m_editResultsDialog->setAttribute(Qt::WA_DeleteOnClose);
   m_editResultsDialog->setWorkspaceSelectorSuffices({"_Result"});
   m_editResultsDialog->show();
   connect(m_editResultsDialog, SIGNAL(replaceSingleFitResult()), this, SLOT(notifyReplaceSingleFitResult()));
-  connect(m_editResultsDialog, SIGNAL(closeDialog()), this, SLOT(handleCloseEditResultDialog()));
-}
-
-void IndirectFitOutputOptionsView::handleCloseEditResultDialog() {
-  disconnect(m_editResultsDialog, SIGNAL(replaceSingleFitResult()), this, SLOT(notifyReplaceSingleFitResult()));
-  disconnect(m_editResultsDialog, SIGNAL(closeDialog()), this, SLOT(closeEditResultDialog()));
-  m_editResultsDialog->close();
 }
 
 void IndirectFitOutputOptionsView::displayWarning(std::string const &message) {
