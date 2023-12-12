@@ -82,7 +82,7 @@ void SaveCanSAS1D2::init() {
       "BackgroundSubtractionWorkspace", "",
       "The name of the workspace used in the scaled background subtraction, to be included in the metadata. Optional.");
   declareProperty(
-      "BackgroundSubtractionScaleFactor", "",
+      "BackgroundSubtractionScaleFactor", 0.0,
       "The scale factor used in the scaled background subtraction, to be included in the metadata. Optional.");
 }
 
@@ -298,6 +298,16 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
     const auto can_direct_run = getPropertyValue("CanDirectRunNumber");
     sasProcess += "\n\t\t\t<term name=\"can_direct_run\">";
     sasProcess += can_direct_run + "</term>";
+  }
+
+  // Scaled Background Subtraction information.
+  auto const &bgsubWsName = getPropertyValue("BackgroundSubtractionWorkspace");
+  auto const &bgsubScaleFactor = getPropertyValue("BackgroundSubtractionScaleFactor");
+  if (!bgsubWsName.empty()) {
+    sasProcess += "\n\t\t\t<term name=\"scaled_background_subtraction_workspace\">";
+    sasProcess += bgsubWsName + "</term>";
+    sasProcess += "\n\t\t\t<term name=\"scaled_background_subtraction_scale_factor\">";
+    sasProcess += bgsubScaleFactor + "</term>";
   }
 
   // Reduction process note, if available
