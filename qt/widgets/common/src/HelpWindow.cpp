@@ -51,10 +51,12 @@ void HelpWindow::showAlgorithm(const std::string &name, const int version) {
   showAlgorithm(QString(name.c_str()), version);
 }
 
-void HelpWindow::showAlgorithm(const QString &name, const int version) {
+void HelpWindow::showAlgorithm(const QString &name, const int version, QWidget *parent) {
   InterfaceManager interfaceManager;
   MantidHelpInterface *gui = interfaceManager.createHelpWindow();
   if (gui) {
+    if (parent != nullptr)
+      gui->setParent(parent);
     gui->showAlgorithm(name, version);
   } else {
     // Open online help

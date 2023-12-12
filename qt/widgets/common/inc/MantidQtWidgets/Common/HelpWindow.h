@@ -22,7 +22,7 @@ public:
   static void showPage(const QString &url);
   static void showPage(const QUrl &url);
   static void showAlgorithm(const std::string &name = std::string(), const int version = -1);
-  static void showAlgorithm(const QString &name, const int version = -1);
+  static void showAlgorithm(const QString &name, const int version = -1, QWidget *parent = nullptr);
   static void showConcept(const std::string &name = std::string());
   static void showConcept(const QString &name);
   static void showFitFunction(const std::string &name = std::string());
