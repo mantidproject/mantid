@@ -10,6 +10,7 @@
 #include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -80,6 +81,9 @@ void AddSampleLog::init() {
                   "If specified as True, then then the "
                   "time stamps are relative to the run "
                   "start time of the target workspace.");
+  declareProperty("UpdateInstrumentParameters", false,
+                  "Update instrument parameters to account for new log. "
+                  "This will update detector positions that depend on motors, for example.");
 }
 
 /**
@@ -139,7 +143,10 @@ void AddSampleLog::exec() {
     addSingleValueProperty(theRun, propName, propValue, propUnit, propNumberType);
   }
 
-  return;
+  // update parameters based on the new log information if requested
+  const bool updateInstrumentParams = getProperty("UpdateInstrumentParameters");
+  if (updateInstrumentParams && expinfo_ws->getInstrument()->isParametrized())
+    expinfo_ws->populateInstrumentParameters();
 }
 
 /** Add a single value property
