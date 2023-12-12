@@ -11,7 +11,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDTypes.h"
 
-#include <unordered_map>
+#include <map>
 
 namespace Mantid {
 
@@ -88,7 +88,7 @@ private:
   /// Input TOF data
   API::MatrixWorkspace_const_sptr m_inputWS;
   /// Sorted indices to correct
-  std::unordered_map<size_t, size_t> m_indices;
+  std::map<size_t, size_t> m_indices;
   /// Function that defines the mass profile
   std::string m_profileFunction;
   /// The number of peaks in spectrum

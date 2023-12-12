@@ -68,8 +68,8 @@ void IDAFunctionParameterEstimation::estimateFunctionParameters(Mantid::API::IFu
 
   if (auto composite = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(function)) {
     for (auto i = 0u; i < composite->nFunctions(); ++i) {
-      auto function = composite->getFunction(i);
-      estimateSingleFunctionParameters(function, estimationData, composite, i);
+      auto childFunction = composite->getFunction(i);
+      estimateSingleFunctionParameters(childFunction, estimationData, composite, i);
     }
   } else {
     estimateSingleFunctionParameters(function, estimationData);

@@ -9,14 +9,13 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
+
 #include <map>
-
-namespace MantidQt::CustomInterfaces::IDA {
-
-using namespace MantidWidgets;
-using namespace Mantid::API;
+#include <tuple>
 
 namespace {
+using namespace MantidQt::CustomInterfaces::IDA;
+
 std::map<IqtFunctionModel::ParamID, QString> g_paramName{{IqtFunctionModel::ParamID::EXP1_HEIGHT, "Height"},
                                                          {IqtFunctionModel::ParamID::EXP1_LIFETIME, "Lifetime"},
                                                          {IqtFunctionModel::ParamID::EXP2_HEIGHT, "Height"},
@@ -25,9 +24,40 @@ std::map<IqtFunctionModel::ParamID, QString> g_paramName{{IqtFunctionModel::Para
                                                          {IqtFunctionModel::ParamID::STRETCH_LIFETIME, "Lifetime"},
                                                          {IqtFunctionModel::ParamID::STRETCH_STRETCHING, "Stretching"},
                                                          {IqtFunctionModel::ParamID::BG_A0, "A0"}};
+
+std::tuple<double, double> calculateLifetimeAndHeight(Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
+  auto lifeTime = (x[1] - x[0]) / (log(y[0]) - log(y[1]));
+  if (lifeTime <= 0)
+    lifeTime = 1.0;
+  auto const height = y[0] * exp(x[0] / lifeTime);
+  return {lifeTime, height};
 }
 
-IqtFunctionModel::IqtFunctionModel() = default;
+auto const expDecay = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
+  auto const [lifetime, height] = calculateLifetimeAndHeight(x, y);
+  return std::unordered_map<std::string, double>{{"Height", height}, {"Lifetime", lifetime}};
+};
+
+auto const expDecayN = [](Mantid::MantidVec const &x, Mantid::MantidVec const &y) {
+  auto const [lifetime, height] = calculateLifetimeAndHeight(x, y);
+
+  // Initialise small additional exp with 10% of amplitude and double the lifetime (if the lifetime is
+  // too short it will correlate with any constant background)
+  return std::unordered_map<std::string, double>{{"Height", 0.1 * height}, {"Lifetime", 2.0 * lifetime}};
+};
+
+auto const estimators = std::unordered_map<std::string, IDAFunctionParameterEstimation::ParameterEstimator>{
+    {"ExpDecay", expDecay}, {"ExpDecayN", expDecayN}, {"StretchExp", expDecay}};
+
+} // namespace
+
+namespace MantidQt::CustomInterfaces::IDA {
+
+using namespace MantidWidgets;
+using namespace Mantid::API;
+
+IqtFunctionModel::IqtFunctionModel()
+    : m_parameterEstimation(std::make_unique<IDAFunctionParameterEstimation>(estimators)) {}
 
 void IqtFunctionModel::clearData() {
   m_numberOfExponentials = 0;
@@ -167,9 +197,7 @@ void IqtFunctionModel::setNumberOfExponentials(int n) {
   m_model.setFunctionString(buildFunctionString());
   m_model.setGlobalParameters(makeGlobalList());
   setCurrentValues(oldValues);
-  if (m_numberOfExponentials > 0) {
-    estimateExpParameters();
-  }
+  estimateFunctionParameters();
 }
 
 int IqtFunctionModel::getNumberOfExponentials() const { return m_numberOfExponentials; }
@@ -180,9 +208,7 @@ void IqtFunctionModel::setStretchExponential(bool on) {
   m_model.setFunctionString(buildFunctionString());
   m_model.setGlobalParameters(makeGlobalList());
   setCurrentValues(oldValues);
-  if (on) {
-    estimateStretchExpParameters();
-  }
+  estimateFunctionParameters();
 }
 
 bool IqtFunctionModel::hasStretchExponential() const { return m_hasStretchExponential; }
@@ -231,6 +257,17 @@ EstimationDataSelector IqtFunctionModel::getEstimationDataSelector() const {
 
 void IqtFunctionModel::updateParameterEstimationData(DataForParameterEstimationCollection &&data) {
   m_estimationData = std::move(data);
+}
+
+void IqtFunctionModel::estimateFunctionParameters() {
+  if (m_estimationData.size() != static_cast<size_t>(getNumberDomains())) {
+    return;
+  }
+  // Estimate function parameters - parameters are updated in-place.
+  for (int i = 0; i < getNumberDomains(); ++i) {
+    auto function = getSingleFunction(i);
+    m_parameterEstimation->estimateFunctionParameters(function, m_estimationData[i]);
+  }
 }
 
 QString IqtFunctionModel::setBackgroundA0(double value) {
@@ -529,58 +566,6 @@ std::string IqtFunctionModel::buildStretchExpFunctionString() const {
 
 std::string IqtFunctionModel::buildBackgroundFunctionString() const {
   return "name=FlatBackground,A0=0,constraints=(A0>0)";
-}
-
-void IqtFunctionModel::estimateStretchExpParameters() {
-  auto const heightName = getParameterName(ParamID::STRETCH_HEIGHT);
-  auto const lifeTimeName = getParameterName(ParamID::STRETCH_LIFETIME);
-  auto const stretchingName = getParameterName(ParamID::STRETCH_STRETCHING);
-  if (!heightName || !lifeTimeName || !stretchingName)
-    return;
-  assert(getNumberDomains() == static_cast<int>(m_estimationData.size()));
-  for (auto i = 0; i < getNumberDomains(); ++i) {
-    auto const &x = m_estimationData[i].x;
-    auto const &y = m_estimationData[i].y;
-    auto lifeTime = (x[1] - x[0]) / (log(y[0]) - log(y[1]));
-    if (lifeTime <= 0)
-      lifeTime = 1.0;
-    auto const height = y[0] * exp(x[0] / lifeTime);
-    setLocalParameterValue(*heightName, i, height);
-    setLocalParameterValue(*lifeTimeName, i, lifeTime);
-    setLocalParameterValue(*stretchingName, i, 1.0);
-  }
-}
-
-void IqtFunctionModel::estimateExpParameters() {
-  auto const heightName1 = getParameterName(ParamID::EXP1_HEIGHT);
-  auto const lifeTimeName1 = getParameterName(ParamID::EXP1_LIFETIME);
-  auto const heightName2 = getParameterName(ParamID::EXP2_HEIGHT);
-  auto const lifeTimeName2 = getParameterName(ParamID::EXP2_LIFETIME);
-  if (!heightName1 || !lifeTimeName1)
-    return;
-  if (m_numberOfExponentials > 1) {
-    if (!heightName2 || !lifeTimeName2)
-      return;
-  }
-  assert(getNumberDomains() == static_cast<int>(m_estimationData.size()));
-  for (auto i = 0; i < getNumberDomains(); ++i) {
-    // estimate first exp
-    auto const &x = m_estimationData[i].x;
-    auto const &y = m_estimationData[i].y;
-    auto lifeTime = (x[1] - x[0]) / (log(y[0]) - log(y[1]));
-    if (!(lifeTime > 0))
-      lifeTime = 1.0;
-    auto const height = y[0] * exp(x[0] / lifeTime);
-    setLocalParameterValue(*heightName1, i, height);
-    setLocalParameterValue(*lifeTimeName1, i, lifeTime);
-    if (m_numberOfExponentials > 1) {
-      // arbitrarily initialise small additional exp with 10% of amplitude and
-      // double the lifetime (if the lifetime is too short it will correlate
-      // with any constant background.
-      setLocalParameterValue(*heightName2, i, 0.1 * height);
-      setLocalParameterValue(*lifeTimeName2, i, 2 * lifeTime);
-    }
-  }
 }
 
 QString IqtFunctionModel::buildFunctionString() const {

@@ -553,6 +553,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             return self.get_sliceinfo().is_xy_q_frame()
 
     def get_extra_image_info_columns(self, xdata, ydata):
+        if self.view is None:
+            return {"H": "0", "K": "0", "L": "0"}
+
         qdims = [i for i, v in enumerate(self.view.data_view.dimensions.qflags) if v]
 
         if len(qdims) != 3 or self.get_frame() != SpecialCoordinateSystem.HKL:

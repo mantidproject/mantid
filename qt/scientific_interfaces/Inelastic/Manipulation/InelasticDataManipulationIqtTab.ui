@@ -249,12 +249,6 @@
    </item>
    <item>
     <widget class="QGroupBox" name="ErrorCalc">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>65</height>
-      </size>
-     </property>
      <property name="title">
       <string>Monte Carlo Error Calculation</string>
      </property>
@@ -296,12 +290,6 @@
       </item>
       <item>
        <widget class="QLabel" name="label">
-        <property name="maximumSize">
-         <size>
-          <width>130</width>
-          <height>16777215</height>
-         </size>
-        </property>
         <property name="text">
          <string>Number of Iterations:</string>
         </property>
@@ -309,12 +297,6 @@
       </item>
       <item alignment="Qt::AlignLeft">
        <widget class="QSpinBox" name="spIterations">
-        <property name="minimumSize">
-         <size>
-          <width>60</width>
-          <height>26</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>The number of iterations to use when calculating errors.</string>
         </property>
