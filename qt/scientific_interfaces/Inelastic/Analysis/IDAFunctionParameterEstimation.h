@@ -7,8 +7,11 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunction.h"
 #include "ParameterEstimation.h"
+
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -27,6 +30,11 @@ public:
                                   const DataForParameterEstimation &estimationData);
 
 private:
+  void estimateSingleFunctionParameters(Mantid::API::IFunction_sptr &function,
+                                        const DataForParameterEstimation &estimationData,
+                                        std::optional<Mantid::API::CompositeFunction_sptr> composite = std::nullopt,
+                                        std::optional<std::size_t> functionIndex = std::nullopt);
+
   std::map<std::string, ParameterEstimateSetter> m_funcMap;
 };
 
