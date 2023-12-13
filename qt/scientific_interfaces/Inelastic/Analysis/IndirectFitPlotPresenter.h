@@ -36,7 +36,7 @@ public:
   virtual void handleBackgroundChanged(double value) = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL IndirectFitPlotPresenter : public IIndirectFitPlotPresenter {
+class MANTIDQT_INELASTIC_DLL IndirectFitPlotPresenter final : public IIndirectFitPlotPresenter {
 
 public:
   IndirectFitPlotPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitPlotView *view,
