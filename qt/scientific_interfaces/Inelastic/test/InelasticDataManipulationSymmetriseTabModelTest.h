@@ -69,10 +69,10 @@ public:
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void test_preview_positive_setup() {
-    QString inputWS = "Workspace_name_red";
+    std::string inputWS = "Workspace_name_red";
     m_workspace = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(5, 6, true);
 
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(inputWS.toStdString(), m_workspace);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(inputWS, m_workspace);
     MantidQt::API::BatchAlgorithmRunner batch;
 
     m_model->setEMin(0.05);
@@ -96,10 +96,10 @@ public:
   }
 
   void test_preview_negative_setup() {
-    QString inputWS = "Workspace_name_red";
+    std::string inputWS = "Workspace_name_red";
     m_workspace = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(5, 6, true);
 
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(inputWS.toStdString(), m_workspace);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(inputWS, m_workspace);
     MantidQt::API::BatchAlgorithmRunner batch;
 
     m_model->setEMin(0.05);
@@ -123,10 +123,10 @@ public:
   }
 
   void test_run_positive_setup() {
-    QString inputWS = "Workspace_name_red";
+    std::string inputWS = "Workspace_name_red";
     m_workspace = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(5, 6, true);
 
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(inputWS.toStdString(), m_workspace);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(inputWS, m_workspace);
     MantidQt::API::BatchAlgorithmRunner batch;
 
     m_model->setEMin(0.05);
@@ -148,10 +148,10 @@ public:
   }
 
   void test_run_negative_setup() {
-    QString inputWS = "Workspace_name_red";
+    std::string inputWS = "Workspace_name_red";
     m_workspace = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(5, 6, true);
 
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(inputWS.toStdString(), m_workspace);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(inputWS, m_workspace);
     MantidQt::API::BatchAlgorithmRunner batch;
 
     m_model->setEMin(0.05);
