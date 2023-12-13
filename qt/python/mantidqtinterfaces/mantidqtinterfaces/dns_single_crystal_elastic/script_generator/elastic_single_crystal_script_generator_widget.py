@@ -9,14 +9,14 @@
 DNS script generator widget for elastic single crystal data.
 """
 
-# yapf: disable
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_widget import DNSWidget
 from mantidqtinterfaces.dns_powder_tof.script_generator.common_script_generator_view import DNSScriptGeneratorView
-from mantidqtinterfaces.dns_single_crystal_elastic.script_generator.elastic_single_crystal_script_generator_model import \
-    DNSElasticSCScriptGeneratorModel
-from mantidqtinterfaces.dns_single_crystal_elastic.script_generator.elastic_single_crystal_script_generator_presenter import \
-    DNSElasticSCScriptGeneratorPresenter
-# yapf: enable
+from mantidqtinterfaces.dns_single_crystal_elastic.script_generator.elastic_single_crystal_script_generator_model import (
+    DNSElasticSCScriptGeneratorModel,
+)
+from mantidqtinterfaces.dns_single_crystal_elastic.script_generator.elastic_single_crystal_script_generator_presenter import (
+    DNSElasticSCScriptGeneratorPresenter,
+)
 
 
 class DNSElasticSCScriptGeneratorWidget(DNSWidget):
