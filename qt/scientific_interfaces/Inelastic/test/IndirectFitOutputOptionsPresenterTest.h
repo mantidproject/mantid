@@ -14,10 +14,10 @@
 #include "Analysis/IndirectDataAnalysisTab.h"
 #include "Analysis/IndirectFitOutputOptionsPresenter.h"
 #include "Analysis/IndirectFitOutputOptionsView.h"
+#include "DataAnalysisMockObjects.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
-#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
@@ -29,82 +29,6 @@ namespace {
 std::vector<std::string> getThreeParameters() { return {"Amplitude", "HWHM", "PeakCentre"}; }
 
 } // namespace
-
-GNU_DIAG_OFF_SUGGEST_OVERRIDE
-
-class MockIndirectDataAnalysisTab : public IIndirectDataAnalysisTab {
-public:
-  MOCK_METHOD0(plotSelectedSpectra, void());
-};
-
-/// Mock object to mock the view
-class MockIndirectFitOutputOptionsView final : public IIndirectFitOutputOptionsView {
-public:
-  /// Public Methods
-  MOCK_METHOD1(subscribePresenter, void(IIndirectFitOutputOptionsPresenter *presenter));
-
-  MOCK_METHOD1(setGroupWorkspaceComboBoxVisible, void(bool visible));
-  MOCK_METHOD1(setWorkspaceComboBoxVisible, void(bool visible));
-
-  MOCK_METHOD0(clearPlotWorkspaces, void());
-  MOCK_METHOD0(clearPlotTypes, void());
-  MOCK_METHOD1(setAvailablePlotWorkspaces, void(std::vector<std::string> const &workspaceNames));
-  MOCK_METHOD1(setAvailablePlotTypes, void(std::vector<std::string> const &parameterNames));
-
-  MOCK_METHOD1(setPlotGroupWorkspaceIndex, void(int index));
-  MOCK_METHOD1(setPlotWorkspacesIndex, void(int index));
-  MOCK_METHOD1(setPlotTypeIndex, void(int index));
-
-  MOCK_CONST_METHOD0(getSelectedGroupWorkspace, std::string());
-  MOCK_CONST_METHOD0(getSelectedWorkspace, std::string());
-  MOCK_CONST_METHOD0(getSelectedPlotType, std::string());
-
-  MOCK_METHOD1(setPlotText, void(std::string const &text));
-  MOCK_METHOD1(setSaveText, void(std::string const &text));
-
-  MOCK_METHOD1(setPlotExtraOptionsEnabled, void(bool enable));
-  MOCK_METHOD1(setPlotEnabled, void(bool enable));
-  MOCK_METHOD1(setEditResultEnabled, void(bool enable));
-  MOCK_METHOD1(setSaveEnabled, void(bool enable));
-
-  MOCK_METHOD1(setEditResultVisible, void(bool visible));
-
-  MOCK_METHOD1(displayWarning, void(std::string const &message));
-};
-
-/// Mock object to mock the model
-class MockIndirectFitOutputOptionsModel : public IIndirectFitOutputOptionsModel {
-public:
-  /// Public Methods
-  MOCK_METHOD1(setResultWorkspace, void(WorkspaceGroup_sptr groupWorkspace));
-  MOCK_METHOD1(setPDFWorkspace, void(WorkspaceGroup_sptr groupWorkspace));
-  MOCK_CONST_METHOD0(getResultWorkspace, WorkspaceGroup_sptr());
-  MOCK_CONST_METHOD0(getPDFWorkspace, WorkspaceGroup_sptr());
-
-  MOCK_METHOD0(removePDFWorkspace, void());
-
-  MOCK_CONST_METHOD1(isSelectedGroupPlottable, bool(std::string const &selectedGroup));
-  MOCK_CONST_METHOD0(isResultGroupPlottable, bool());
-  MOCK_CONST_METHOD0(isPDFGroupPlottable, bool());
-
-  MOCK_METHOD0(clearSpectraToPlot, void());
-  MOCK_CONST_METHOD0(getSpectraToPlot, std::vector<SpectrumToPlot>());
-
-  MOCK_METHOD1(plotResult, void(std::string const &plotType));
-  MOCK_METHOD2(plotPDF, void(std::string const &workspaceName, std::string const &plotType));
-
-  MOCK_CONST_METHOD0(saveResult, void());
-
-  MOCK_CONST_METHOD1(getWorkspaceParameters, std::vector<std::string>(std::string const &selectedGroup));
-  MOCK_CONST_METHOD0(getPDFWorkspaceNames, std::vector<std::string>());
-
-  MOCK_CONST_METHOD1(isResultGroupSelected, bool(std::string const &selectedGroup));
-
-  MOCK_METHOD3(replaceFitResult,
-               void(std::string const &inputName, std::string const &singleBinName, std::string const &outputName));
-};
-
-GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class IndirectFitOutputOptionsPresenterTest : public CxxTest::TestSuite {
 public:

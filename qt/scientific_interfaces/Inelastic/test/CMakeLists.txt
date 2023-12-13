@@ -25,6 +25,8 @@ set(TEST_FILES
     InelasticDataManipulationSymmetriseTabModelTest.h
 )
 
+set(TEST_HELPERS ../../Indirect/IndirectDataValidationHelper.cpp DataAnalysisMockObjects.h)
+
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesInelasticTestInitialization.h)
 
 mtd_add_qt_tests(
@@ -32,7 +34,7 @@ mtd_add_qt_tests(
   QT_VERSION 5
   SRC ${TEST_FILES}
   INCLUDE_DIRS ../../../../Framework/DataObjects/inc ../
-  TEST_HELPER_SRCS ../../Indirect/IndirectDataValidationHelper.cpp
+  TEST_HELPER_SRCS ${TEST_HELPERS}
   LINK_LIBS ${CORE_MANTIDLIBS}
             Mantid::DataObjects
             gmock

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotPresenter.h"
+#include "IndirectDataAnalysisTab.h"
 #include "IndirectSettingsHelper.h"
 
 #include <QTimer>
@@ -27,9 +28,9 @@ struct HoldRedrawing {
 
 using namespace Mantid::API;
 
-IndirectFitPlotPresenter::IndirectFitPlotPresenter(IIndirectFitPlotView *view,
+IndirectFitPlotPresenter::IndirectFitPlotPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitPlotView *view,
                                                    std::unique_ptr<IndirectFitPlotModel> model)
-    : m_view(view), m_model(std::move(model)), m_plotter(std::make_unique<ExternalPlotter>()) {
+    : m_tab(tab), m_view(view), m_model(std::move(model)), m_plotter(std::make_unique<ExternalPlotter>()) {
   m_view->subscribePresenter(this);
 }
 

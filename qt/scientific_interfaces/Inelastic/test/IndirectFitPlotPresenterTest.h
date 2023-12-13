@@ -14,20 +14,18 @@
 #include "Analysis/IndirectFitPlotPresenter.h"
 #include "Analysis/IndirectFitPlotView.h"
 #include "Analysis/IndirectFittingModel.h"
+#include "DataAnalysisMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
-#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
-
-GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 namespace {
 MultiDomainFunction_sptr getFunction(std::string const &functionString) {
@@ -46,70 +44,6 @@ MultiDomainFunction_sptr getFunctionWithWorkspaceName(std::string const &workspa
 }
 } // namespace
 
-/// Mock object to mock the view
-class MockIndirectFitPlotView final : public IIndirectFitPlotView {
-public:
-  MOCK_METHOD1(subscribePresenter, void(IIndirectFitPlotPresenter *presenter));
-
-  MOCK_METHOD1(watchADS, void(bool watch));
-
-  MOCK_CONST_METHOD0(getSelectedSpectrum, WorkspaceIndex());
-  MOCK_CONST_METHOD0(getSelectedSpectrumIndex, FitDomainIndex());
-  MOCK_CONST_METHOD0(getSelectedDataIndex, WorkspaceID());
-  MOCK_CONST_METHOD0(dataSelectionSize, WorkspaceID());
-  MOCK_CONST_METHOD0(isPlotGuessChecked, bool());
-
-  MOCK_METHOD2(setAvailableSpectra, void(WorkspaceIndex minimum, WorkspaceIndex maximum));
-  MOCK_METHOD2(setAvailableSpectra, void(std::vector<WorkspaceIndex>::const_iterator const &from,
-                                         std::vector<WorkspaceIndex>::const_iterator const &to));
-
-  MOCK_METHOD1(setMinimumSpectrum, void(int minimum));
-  MOCK_METHOD1(setMaximumSpectrum, void(int maximum));
-  MOCK_METHOD1(setPlotSpectrum, void(WorkspaceIndex spectrum));
-  MOCK_METHOD1(appendToDataSelection, void(std::string const &dataName));
-  MOCK_METHOD2(setNameInDataSelection, void(std::string const &dataName, WorkspaceID workspaceID));
-  MOCK_METHOD0(clearDataSelection, void());
-
-  MOCK_METHOD4(plotInTopPreview, void(QString const &name, Mantid::API::MatrixWorkspace_sptr workspace,
-                                      WorkspaceIndex spectrum, Qt::GlobalColor colour));
-  MOCK_METHOD4(plotInBottomPreview, void(QString const &name, Mantid::API::MatrixWorkspace_sptr workspace,
-                                         WorkspaceIndex spectrum, Qt::GlobalColor colour));
-
-  MOCK_METHOD1(removeFromTopPreview, void(QString const &name));
-  MOCK_METHOD1(removeFromBottomPreview, void(QString const &name));
-
-  MOCK_METHOD1(enableFitSingleSpectrum, void(bool enable));
-  MOCK_METHOD1(enablePlotGuess, void(bool enable));
-  MOCK_METHOD1(enableSpectrumSelection, void(bool enable));
-  MOCK_METHOD1(enableFitRangeSelection, void(bool enable));
-
-  MOCK_METHOD1(setFitSingleSpectrumText, void(QString const &text));
-  MOCK_METHOD1(setFitSingleSpectrumEnabled, void(bool enable));
-
-  MOCK_METHOD1(setBackgroundLevel, void(double value));
-
-  MOCK_METHOD2(setFitRange, void(double minimum, double maximum));
-  MOCK_METHOD1(setFitRangeMinimum, void(double minimum));
-  MOCK_METHOD1(setFitRangeMaximum, void(double maximum));
-  MOCK_METHOD1(setFitRangeBounds, void(std::pair<double, double> const &bounds));
-
-  MOCK_METHOD1(setBackgroundRangeVisible, void(bool visible));
-  MOCK_METHOD1(setHWHMRangeVisible, void(bool visible));
-
-  MOCK_METHOD1(allowRedraws, void(bool state));
-  MOCK_METHOD0(redrawPlots, void());
-
-  MOCK_CONST_METHOD1(displayMessage, void(std::string const &message));
-
-  MOCK_METHOD1(setHWHMMinimum, void(double minimum));
-  MOCK_METHOD1(setHWHMMaximum, void(double maximum));
-  MOCK_METHOD2(setHWHMRange, void(double minimum, double maximum));
-
-  MOCK_METHOD0(clearPreviews, void());
-};
-
-GNU_DIAG_ON_SUGGEST_OVERRIDE
-
 class IndirectFitPlotPresenterTest : public CxxTest::TestSuite {
 public:
   /// Needed to make sure everything is initialized
@@ -124,9 +58,10 @@ public:
     /// Presenter takes an IndirectFittingModel. This means the
     /// IndirectFittingModel is mocked instead - which is a good
     /// substitute anyway
+    m_tab = std::make_unique<NiceMock<MockIndirectDataAnalysisTab>>();
     auto model = std::make_unique<IndirectFitPlotModel>();
     m_view = std::make_unique<MockIndirectFitPlotView>();
-    m_presenter = std::make_unique<IndirectFitPlotPresenter>(m_view.get(), std::move(model));
+    m_presenter = std::make_unique<IndirectFitPlotPresenter>(m_tab.get(), m_view.get(), std::move(model));
 
     m_workspace = createWorkspaceWithInstrument(6, 5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
@@ -431,6 +366,7 @@ public:
   }
 
 private:
+  std::unique_ptr<NiceMock<MockIndirectDataAnalysisTab>> m_tab;
   std::unique_ptr<MockIndirectFitPlotView> m_view;
   std::unique_ptr<IndirectFitPlotPresenter> m_presenter;
 

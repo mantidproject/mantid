@@ -122,7 +122,8 @@ void IndirectDataAnalysisTab::setupOutputOptionsPresenter(bool const editResults
 
 void IndirectDataAnalysisTab::setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds) {
   auto model = std::make_unique<IndirectFitPlotModel>();
-  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(m_uiForm->dockArea->m_fitPlotView, std::move(model));
+  m_plotPresenter =
+      std::make_unique<IndirectFitPlotPresenter>(this, m_uiForm->dockArea->m_fitPlotView, std::move(model));
   m_plotPresenter->setFittingData(m_dataPresenter->getFittingData());
   m_plotPresenter->setFitOutput(m_fittingModel->getFitOutput());
   if (xPlotBounds) {
