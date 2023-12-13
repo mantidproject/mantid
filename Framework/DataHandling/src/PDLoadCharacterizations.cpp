@@ -156,8 +156,8 @@ void PDLoadCharacterizations::exec() {
   wksp->addColumn("double", "tof_max");
   wksp->addColumn("double", "wavelength_min");
   wksp->addColumn("double", "wavelength_max");
-  for (const auto &name : canColumnNames) {
-    wksp->addColumn("str", name); // all will be strings
+  for (const auto &canColumnName : canColumnNames) {
+    wksp->addColumn("str", canColumnName); // all will be strings
   }
 
   // first file is assumed to be version 0
@@ -228,11 +228,11 @@ std::vector<std::string> PDLoadCharacterizations::getFilenames() {
   int v0_index = -1;
   int v1_index = -1;
   for (size_t i = 0; i < filenamesFromPropertyUnraveld.size(); ++i) {
-    const int version = getVersion(filenamesFromPropertyUnraveld[i]);
-    g_log.debug() << "Found version " << version << " in \"" << filenamesFromPropertyUnraveld[i] << "\"\n";
-    if (version == 0)
+    const int versionFromFile = getVersion(filenamesFromPropertyUnraveld[i]);
+    g_log.debug() << "Found version " << versionFromFile << " in \"" << filenamesFromPropertyUnraveld[i] << "\"\n";
+    if (versionFromFile == 0)
       v0_index = static_cast<int>(i);
-    else if (version == 1)
+    else if (versionFromFile == 1)
       v1_index = static_cast<int>(i);
   }
 

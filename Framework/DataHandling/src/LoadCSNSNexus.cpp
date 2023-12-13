@@ -128,10 +128,10 @@ std::vector<std::string> LoadCSNSNexus::getGPPDModules(const std::string &bankNa
   m_file->openGroup("instrument", "NXinstrument");
   auto entries = m_file->getEntries();
   for (const auto &it : entries) {
-    const auto &name = it.first;
-    if (name.compare(0, 7, "module" + std::to_string(firstModuleId)) == 0 ||
-        name.compare(0, 7, "module" + std::to_string(secondModuleId)) == 0) {
-      data.emplace_back(name);
+    const auto &moduleName = it.first;
+    if (moduleName.compare(0, 7, "module" + std::to_string(firstModuleId)) == 0 ||
+        moduleName.compare(0, 7, "module" + std::to_string(secondModuleId)) == 0) {
+      data.emplace_back(moduleName);
     }
   }
   m_file->closeGroup();
@@ -165,11 +165,11 @@ std::vector<std::string> LoadCSNSNexus::getModules(const std::string &inst,
   if (inst == "SANS" || inst == "MR")
     data.push_back("module1");
   else if (inst == "GPPD") {
-    for (const auto &name : inputNames) {
-      if (name.compare(0, 4, "bank") == 0)
-        data = getGPPDModules(name);
+    for (const auto &moduleName : inputNames) {
+      if (moduleName.compare(0, 4, "bank") == 0)
+        data = getGPPDModules(moduleName);
       else
-        data.push_back(name);
+        data.push_back(moduleName);
     }
   }
   return data;
@@ -186,8 +186,8 @@ std::vector<int64_t> LoadCSNSNexus::getPixelId(const std::vector<std::string> &i
   m_file->openGroup(m_entry, "NXentry");
   m_file->openGroup("instrument", "NXinstrument");
   auto entries = m_file->getEntries();
-  for (const auto &name : inputList) {
-    auto it = entries.find(name);
+  for (const auto &entryName : inputList) {
+    auto it = entries.find(entryName);
     if (it != entries.end()) {
       m_file->openGroup(it->first, it->second);
       m_file->readData("pixel_id", _tmp);
@@ -211,9 +211,9 @@ std::vector<uint32_t> LoadCSNSNexus::getTimeBin(const std::string &typeName) {
   m_file->openGroup(m_entry, "NXentry");
   m_file->openGroup("instrument", "NXinstrument");
   auto entries = m_file->getEntries();
-  for (const auto &[name, nodeType] : entries) {
-    if ((name.compare(0, 6, typeName) == 0) || (name.compare(0, 7, typeName) == 0)) {
-      m_file->openGroup(name, nodeType);
+  for (const auto &[entryName, nodeType] : entries) {
+    if ((entryName.compare(0, 6, typeName) == 0) || (entryName.compare(0, 7, typeName) == 0)) {
+      m_file->openGroup(entryName, nodeType);
       m_file->readData("time_of_flight", tmp);
       m_file->closeGroup();
       break;
@@ -237,8 +237,8 @@ std::vector<uint32_t> LoadCSNSNexus::getHistData(const std::vector<std::string> 
   m_file->openGroup("csns", "NXentry");
   m_file->openGroup("histogram_data", "NXcollection");
   auto entries = m_file->getEntries();
-  for (const auto &name : inputList) {
-    auto it = entries.find(name);
+  for (const auto &entryName : inputList) {
+    auto it = entries.find(entryName);
     if (it != entries.end()) {
       m_file->openGroup(it->first, it->second);
       m_file->readData("histogram_data", tmp);
@@ -315,8 +315,8 @@ LoadCSNSNexus::getEventData(const std::vector<std::string> &inputList, const std
   m_file->openGroup(m_entry, "NXentry");
   m_file->openGroup("event_data", "NXcollection");
   auto entries = m_file->getEntries();
-  for (auto const &name : inputList) {
-    auto it = entries.find(name);
+  for (auto const &entryName : inputList) {
+    auto it = entries.find(entryName);
     if (it != entries.end()) {
       m_file->openGroup(it->first, it->second);
       m_file->readData("event_pulse_time", t0_tmp);

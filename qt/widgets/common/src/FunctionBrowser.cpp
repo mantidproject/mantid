@@ -45,11 +45,11 @@ using namespace Mantid::Kernel;
  */
 FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi, const std::vector<std::string> &categories)
     : QWidget(parent) {
-  auto view = new FunctionTreeView(this, multi, categories);
-  m_presenter = std::make_unique<FunctionMultiDomainPresenter>(view);
+  auto treeView = new FunctionTreeView(this, multi, categories);
+  m_presenter = std::make_unique<FunctionMultiDomainPresenter>(treeView);
   QHBoxLayout *layout = new QHBoxLayout(this);
   layout->setMargin(0);
-  layout->addWidget(view);
+  layout->addWidget(treeView);
   connect(m_presenter.get(), SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
   connect(m_presenter.get(), SIGNAL(parameterChanged(const QString &, const QString &)), this,
           SIGNAL(parameterChanged(const QString &, const QString &)));

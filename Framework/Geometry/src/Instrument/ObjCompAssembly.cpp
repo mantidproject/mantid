@@ -373,7 +373,7 @@ std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   }
 
   // Get information about the shape and size of a detector
-  std::string type;
+  std::string detectorType;
   detail::ShapeInfo::GeometryShape otype;
   std::vector<Kernel::V3D> vectors;
   double radius, height, innerRadius;
@@ -383,9 +383,9 @@ std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   }
   obj->GetObjectGeom(otype, vectors, innerRadius, radius, height);
   if (otype == detail::ShapeInfo::GeometryShape::CUBOID) {
-    type = "box";
+    detectorType = "box";
   } else if (otype == detail::ShapeInfo::GeometryShape::CYLINDER) {
-    type = "cylinder";
+    detectorType = "cylinder";
   } else {
     throw std::runtime_error("IDF \"outline\" option is only allowed for assemblies containing "
                              "components of types \"box\" or \"cylinder\".");
@@ -504,7 +504,7 @@ std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
 
   // form the input string for the ShapeFactory
   std::ostringstream obj_str;
-  if (type == "box") {
+  if (detectorType == "box") {
     hx = hy = 0;
     height = 0;
     V3D p0 = vectors[0];
@@ -557,7 +557,7 @@ std::shared_ptr<IObject> ObjCompAssembly::createOutline() {
     obj_str << "\"  />";
     obj_str << "</cuboid>";
 
-  } else if (type == "cylinder") {
+  } else if (detectorType == "cylinder") {
     // the outline is one detector height short
     hz += height;
     // shift Cmass to the end of the cylinder where the first detector is

@@ -210,19 +210,19 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
         size_t colData = this->splitIntoColumns(data, line);
         if (colNames > 0 && colNames == colTypes && colTypes == colData) {
           // we seem to have a table workspace
-          // if we have no already created a workspace
+          // if we have not already created a workspace
           if (!ws) {
             ws = std::make_shared<DataObjects::TableWorkspace>();
             // create the columns
             auto itName = names.begin();
             auto itTypes = types.begin();
             for (size_t i = 0; i < colNames; i++) {
-              std::string name = *itName;
+              std::string colName = *itName;
               std::string type = *itTypes;
               // trim the strings
-              boost::trim(name);
+              boost::trim(colName);
               boost::trim(type);
-              ws->addColumn(type, name);
+              ws->addColumn(type, colName);
               itName++;
               itTypes++;
             }

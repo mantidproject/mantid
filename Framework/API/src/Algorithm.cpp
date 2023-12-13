@@ -417,8 +417,8 @@ void Algorithm::cacheInputWorkspaceHistories() {
       if (!isADSValidator(strArrayProp->getValidator()))
         continue;
       const auto &wsNames((*strArrayProp)());
-      for (const auto &name : wsNames) {
-        cacheHistories(ads.retrieve(name));
+      for (const auto &wsName : wsNames) {
+        cacheHistories(ads.retrieve(wsName));
       }
     }
   }
@@ -985,8 +985,8 @@ IAlgorithm_sptr Algorithm::fromString(const std::string &input) {
  */
 IAlgorithm_sptr Algorithm::fromJson(const Json::Value &serialized) {
   const std::string algName = serialized["name"].asString();
-  const int version = serialized.get("version", -1).asInt();
-  auto alg = AlgorithmManager::Instance().createUnmanaged(algName, version);
+  const int versionNumber = serialized.get("version", -1).asInt();
+  auto alg = AlgorithmManager::Instance().createUnmanaged(algName, versionNumber);
   alg->initialize();
   alg->setProperties(serialized["properties"]);
   return alg;
@@ -1156,7 +1156,7 @@ void Algorithm::logAlgorithmInfo() const {
  */
 bool Algorithm::checkGroups() {
   size_t numGroups = 0;
-  bool processGroups = false;
+  bool doProcessGroups = false;
 
   // Unroll the groups or single inputs into vectors of workspaces
   const auto &ads = AnalysisDataService::Instance();
@@ -1183,7 +1183,7 @@ bool Algorithm::checkGroups() {
     // If the property is of type WorkspaceGroup then don't unroll
     if (wsGroup && !wsGroupProp) {
       numGroups++;
-      processGroups = true;
+      doProcessGroups = true;
       m_unrolledInputWorkspaces.emplace_back(wsGroup->getAllItems());
     } else {
       // Single Workspace. Treat it as a "group" with only one member
@@ -1199,7 +1199,7 @@ bool Algorithm::checkGroups() {
 
   // No groups? Get out.
   if (numGroups == 0)
-    return processGroups;
+    return doProcessGroups;
 
   // ---- Confirm that all the groups are the same size -----
   // Index of the single group
@@ -1236,7 +1236,7 @@ bool Algorithm::checkGroups() {
   } // end for each group
 
   // If you get here, then the groups are compatible
-  return processGroups;
+  return doProcessGroups;
 }
 
 /**

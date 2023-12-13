@@ -164,7 +164,7 @@ void FunctionTreeView::createBrowser() {
 
   // create editor factories
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(this);
-  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(this);
+  DoubleEditorFactory *dblEditorFactory = new DoubleEditorFactory(this);
   ParameterEditorFactory *paramEditorFactory = new ParameterEditorFactory(this);
 
   QtAbstractEditorFactory<ParameterPropertyManager> *parameterEditorFactory(nullptr);
@@ -189,17 +189,17 @@ void FunctionTreeView::createBrowser() {
   // assign factories to property managers
   m_browser->setFactoryForManager(m_parameterManager, parameterEditorFactory);
   m_browser->setFactoryForManager(m_attributeStringManager, lineEditFactory);
-  m_browser->setFactoryForManager(m_attributeDoubleManager, doubleEditorFactory);
+  m_browser->setFactoryForManager(m_attributeDoubleManager, dblEditorFactory);
   m_browser->setFactoryForManager(m_attributeIntManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_attributeBoolManager, checkBoxFactory);
   m_browser->setFactoryForManager(m_indexManager, lineEditFactory);
   m_browser->setFactoryForManager(m_tieManager, lineEditFactory);
-  m_browser->setFactoryForManager(m_constraintManager, doubleEditorFactory);
+  m_browser->setFactoryForManager(m_constraintManager, dblEditorFactory);
   m_browser->setFactoryForManager(m_filenameManager, filenameDialogEditorFactory);
   m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
   m_browser->setFactoryForManager(m_workspaceManager, workspaceEditorFactory);
   m_browser->setFactoryForManager(m_attributeSizeManager, spinBoxFactory);
-  m_browser->setFactoryForManager(m_attributeVectorDoubleManager, doubleEditorFactory);
+  m_browser->setFactoryForManager(m_attributeVectorDoubleManager, dblEditorFactory);
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));

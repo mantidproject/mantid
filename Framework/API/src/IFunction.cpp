@@ -860,8 +860,8 @@ void IFunction::Attribute::setVector(const std::vector<double> &v) {
   evaluateValidator(v);
 
   try {
-    auto &value = boost::get<std::vector<double>>(m_data);
-    value.assign(v.begin(), v.end());
+    auto &data = boost::get<std::vector<double>>(m_data);
+    data.assign(v.begin(), v.end());
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
                              " attribute "

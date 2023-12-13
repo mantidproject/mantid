@@ -49,12 +49,12 @@ void SaveReflectometryAscii::init() {
   setPropertySettings("LogList", std::make_unique<VisibleWhenProperty>(std::move(mft), std::move(cus), OR));
   declareProperty("WriteHeader", false, "Whether to write header lines.");
   setPropertySettings("WriteHeader", std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom"));
-  std::vector<std::string> separator = {"comma", "space", "tab"};
+  std::vector<std::string> sep = {"comma", "space", "tab"};
   declareProperty("WriteResolution", true,
                   "Whether to compute resolution values and write them as fourth "
                   "data column.");
   setPropertySettings("WriteResolution", std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom"));
-  declareProperty("Separator", "tab", std::make_shared<StringListValidator>(separator),
+  declareProperty("Separator", "tab", std::make_shared<StringListValidator>(sep),
                   "The separator used for splitting data columns.");
   setPropertySettings("Separator", std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom"));
   declareProperty("Theta", 0.0, "The angle (in deg) used to calculate wavelength from momentum exchange.");

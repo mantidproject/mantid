@@ -421,19 +421,19 @@ void MessageDisplay::initActions() {
  */
 void MessageDisplay::initFormats() {
   m_formats.clear();
-  QTextCharFormat format;
+  QTextCharFormat textFormat;
 
-  format.setForeground(Qt::red);
-  m_formats[Message::Priority::PRIO_ERROR] = format;
+  textFormat.setForeground(Qt::red);
+  m_formats[Message::Priority::PRIO_ERROR] = textFormat;
 
-  format.setForeground(QColor::fromRgb(255, 100, 0));
-  m_formats[Message::Priority::PRIO_WARNING] = format;
+  textFormat.setForeground(QColor::fromRgb(255, 100, 0));
+  m_formats[Message::Priority::PRIO_WARNING] = textFormat;
 
-  format.setForeground(Qt::gray);
-  m_formats[Message::Priority::PRIO_INFORMATION] = format;
+  textFormat.setForeground(Qt::gray);
+  m_formats[Message::Priority::PRIO_INFORMATION] = textFormat;
 
-  format.setForeground(Qt::darkBlue);
-  m_formats[Message::Priority::PRIO_NOTICE] = format;
+  textFormat.setForeground(Qt::darkBlue);
+  m_formats[Message::Priority::PRIO_NOTICE] = textFormat;
 }
 
 /**

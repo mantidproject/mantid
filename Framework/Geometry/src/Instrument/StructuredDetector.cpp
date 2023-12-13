@@ -391,11 +391,11 @@ Detector *StructuredDetector::addDetector(CompAssembly *parent, const std::strin
   yrb -= ypos;
   ylb -= ypos;
 
-  std::shared_ptr<Mantid::Geometry::IObject> shape =
+  std::shared_ptr<Mantid::Geometry::IObject> detectorShape =
       ShapeFactory{}.createHexahedralShape(xlb, xlf, xrf, xrb, ylb, ylf, yrf, yrb);
 
   // Create detector
-  auto detector = new Detector(name, id, shape, parent);
+  auto detector = new Detector(name, id, detectorShape, parent);
 
   // Set detector position relative to parent
   V3D pos(xpos, ypos, 0);

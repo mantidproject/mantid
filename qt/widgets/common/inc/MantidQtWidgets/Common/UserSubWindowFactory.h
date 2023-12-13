@@ -91,9 +91,9 @@ template <typename TYPE> void UserSubWindowFactoryImpl::subscribe() {
   saveAliasNames<TYPE>(realName);
 
   // Make a record of each interface's categories.
-  const QStringList categories = TYPE::categoryInfo().split(";", Qt::SkipEmptyParts);
+  const QStringList interfaceCategories = TYPE::categoryInfo().split(";", Qt::SkipEmptyParts);
   QSet<QString> result;
-  foreach (const QString category, categories) { result.insert(category.trimmed()); }
+  foreach (const QString category, interfaceCategories) { result.insert(category.trimmed()); }
   m_categoryLookup[QString::fromStdString(realName)] = result;
 }
 

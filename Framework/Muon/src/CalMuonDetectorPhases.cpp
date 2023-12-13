@@ -391,10 +391,10 @@ void CalMuonDetectorPhases::getGroupingFromInstrument(const API::MatrixWorkspace
   const auto grouping = loader->getGroupingFromIDF();
   size_t nGroups = grouping->groups.size();
   for (size_t iGroup = 0; iGroup < nGroups; iGroup++) {
-    const std::string name = grouping->groupNames[iGroup];
-    if (name == "fwd" || name == "left") {
+    const std::string groupName = grouping->groupNames[iGroup];
+    if (groupName == "fwd" || groupName == "left") {
       fwdRange = grouping->groups[iGroup];
-    } else if (name == "bwd" || name == "bkwd" || name == "right") {
+    } else if (groupName == "bwd" || groupName == "bkwd" || groupName == "right") {
       bwdRange = grouping->groups[iGroup];
     }
   }

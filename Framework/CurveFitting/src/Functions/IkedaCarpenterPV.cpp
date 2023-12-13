@@ -386,8 +386,8 @@ void IkedaCarpenterPV::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorks
     // convert inital parameters that depend on x axis to correct units so
     // inital guess is reasonable
     auto tof = Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    const auto centre = getParameter("X0");
-    const auto scaleFactor = centre / convertValue(centre, tof, workspace, wi);
+    const auto peakCentre = getParameter("X0");
+    const auto scaleFactor = peakCentre / convertValue(peakCentre, tof, workspace, wi);
     if (scaleFactor != 0) {
       if (isActive(parameterIndex("Alpha0")))
         setParameter("Alpha0", getParameter("Alpha0") * scaleFactor);

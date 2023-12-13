@@ -85,8 +85,8 @@ void SaveNXTomo::exec() {
  */
 bool SaveNXTomo::processGroups() {
   try {
-    std::string name = getPropertyValue("InputWorkspaces");
-    WorkspaceGroup_sptr groupWS = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
+    std::string wsName = getPropertyValue("InputWorkspaces");
+    WorkspaceGroup_sptr groupWS = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
 
     for (int i = 0; i < groupWS->getNumberOfEntries(); ++i) {
       m_workspaces.emplace_back(std::dynamic_pointer_cast<Workspace2D>(groupWS->getItem(i)));

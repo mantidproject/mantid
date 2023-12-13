@@ -132,7 +132,7 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
         // ... store its name and version and check that all other files have
         // loaders with the same name and version.
         const std::string loaderName = loader->name();
-        int version = loader->version();
+        int firstFileLoaderVersion = loader->version();
 
         // std::string ext =
         // fileNames[0].substr(fileNames[0].find_last_of("."));
@@ -155,7 +155,7 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
           } else {
             loader = getFileLoader(fileNames[i]);
 
-            if (loaderName != loader->name() || version != loader->version())
+            if (loaderName != loader->name() || firstFileLoaderVersion != loader->version())
               throw std::runtime_error("Cannot load multiple files when more "
                                        "than one Loader is needed.");
           }
@@ -245,10 +245,10 @@ void Load::declareLoaderProperties(const API::IAlgorithm_sptr &loader) {
   // THIS IS A COPY as the properties are mutated as we move through them
   const std::vector<Property *> existingProps = this->getProperties();
   for (auto existingProp : existingProps) {
-    const std::string &name = existingProp->name();
+    const std::string &propName = existingProp->name();
     // Wipe all properties except the Load native ones
-    if (m_baseProps.find(name) == m_baseProps.end()) {
-      this->removeProperty(name);
+    if (m_baseProps.find(propName) == m_baseProps.end()) {
+      this->removeProperty(propName);
     }
   }
 
@@ -473,9 +473,9 @@ void Load::loadMultipleFiles() {
  */
 API::IAlgorithm_sptr Load::createLoader(const double startProgress, const double endProgress,
                                         const bool logging) const {
-  std::string name = getPropertyValue("LoaderName");
-  int version = getProperty("LoaderVersion");
-  auto loader = API::AlgorithmManager::Instance().createUnmanaged(name, version);
+  std::string loaderName = getPropertyValue("LoaderName");
+  int loaderVersion = getProperty("LoaderVersion");
+  auto loader = API::AlgorithmManager::Instance().createUnmanaged(loaderName, loaderVersion);
   loader->initialize();
   if (!loader) {
     throw std::runtime_error("Cannot create loader for \"" + getPropertyValue("Filename") + "\"");

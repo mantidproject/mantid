@@ -85,9 +85,9 @@ void LoadMcStasNexus::exec() {
   WorkspaceGroup_sptr outputGroup(new WorkspaceGroup);
 
   for (auto it = entries.begin(); it != itend; ++it) {
-    std::string name = it->first;
+    std::string entryName = it->first;
     std::string type = it->second;
-    nxFile.openGroup(name, type);
+    nxFile.openGroup(entryName, type);
     auto dataEntries = nxFile.getEntries();
 
     for (auto &dataEntry : dataEntries) {

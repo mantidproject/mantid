@@ -173,10 +173,10 @@ boost::optional<std::string> IndirectPlotOptionsModel::indices() const { return 
 bool IndirectPlotOptionsModel::validateIndices(std::string const &indices, MantidAxis const &axisType) const {
   auto &ads = AnalysisDataService::Instance();
   if (!indices.empty() && m_workspaceName && ads.doesExist(m_workspaceName.get())) {
-    if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(m_workspaceName.get())) {
+    if (auto const matrixWs = ads.retrieveWS<MatrixWorkspace>(m_workspaceName.get())) {
       if (axisType == MantidAxis::Spectrum)
-        return validateSpectra(workspace, indices);
-      return validateBins(workspace, indices);
+        return validateSpectra(matrixWs, indices);
+      return validateBins(matrixWs, indices);
     }
   }
   return false;
@@ -251,10 +251,10 @@ boost::optional<std::string> IndirectPlotOptionsModel::checkWorkspaceSize(std::s
                                                                           MantidAxis const &axisType) const {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName)) {
-    if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
+    if (auto const matrixWs = ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
       if (axisType == MantidAxis::Spectrum)
-        return checkWorkspaceSpectrumSize(workspace);
-      return checkWorkspaceBinSize(workspace);
+        return checkWorkspaceSpectrumSize(matrixWs);
+      return checkWorkspaceBinSize(matrixWs);
     }
   }
   return boost::none;

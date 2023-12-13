@@ -1341,12 +1341,12 @@ void SNSLiveEventDataListener::initMonitorWorkspace() {
 // workspace has been initialized...)
 bool SNSLiveEventDataListener::haveRequiredLogs() {
   bool allFound = true;
-  const Run &run = m_eventBuffer->run();
+  const Run &experimentRun = m_eventBuffer->run();
   auto it = m_requiredLogs.begin();
   while (it != m_requiredLogs.end() && allFound) {
-    if (!run.hasProperty(*it)) {
+    if (!experimentRun.hasProperty(*it)) {
       allFound = false;
-    } else if (run.getProperty(*it)->size() == 0) {
+    } else if (experimentRun.getProperty(*it)->size() == 0) {
       allFound = false;
     }
 

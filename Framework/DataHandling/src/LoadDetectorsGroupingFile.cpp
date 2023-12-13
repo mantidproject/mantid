@@ -215,10 +215,10 @@ void LoadDetectorsGroupingFile::setByComponents() {
   for (auto &componentMap : m_groupComponentsMap) {
     g_log.debug() << "Group ID = " << componentMap.first << " With " << componentMap.second.size() << " Components\n";
 
-    for (auto &name : componentMap.second) {
+    for (auto &componentName : componentMap.second) {
 
       // a) get component
-      Geometry::IComponent_const_sptr component = m_instrument->getComponentByName(name);
+      Geometry::IComponent_const_sptr component = m_instrument->getComponentByName(componentName);
 
       // b) component -> component assembly --> children (more than detectors)
       std::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -226,7 +226,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
       std::vector<Geometry::IComponent_const_sptr> children;
       asmb->getChildren(children, true);
 
-      g_log.debug() << "Component Name = " << name << "  Component ID = " << component->getComponentID()
+      g_log.debug() << "Component Name = " << componentName << "  Component ID = " << component->getComponentID()
                     << "Number of Children = " << children.size() << '\n';
 
       for (const auto &child : children) {

@@ -81,11 +81,11 @@ void LoadMcStas::exec() {
 
   // McStas Nexus only ever have one top level entry
   auto entry = entries.begin();
-  std::string name = entry->first;
+  std::string entryName = entry->first;
   std::string type = entry->second;
 
   // open top entry - open data entry
-  nxFile.openGroup(name, type);
+  nxFile.openGroup(entryName, type);
   nxFile.openGroup("data", "NXdetector");
 
   auto dataEntries = nxFile.getEntries();

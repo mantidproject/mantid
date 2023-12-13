@@ -61,9 +61,9 @@ void WorkspaceBoundingBox::findNewCenterPosition() {
     if (!isValidIndex(i))
       continue;
 
-    const V3D position = spectrumInfo.position(i);
+    const V3D pos = spectrumInfo.position(i);
 
-    if (this->symmetricRegionContainsPoint(position.X(), position.Y()) && includeInIntegration(position)) {
+    if (this->symmetricRegionContainsPoint(pos.X(), pos.Y()) && includeInIntegration(pos)) {
       totalCount += updatePositionAndReturnCount(i);
     }
   }
@@ -127,10 +127,10 @@ bool WorkspaceBoundingBox::isValidIndex(const std::size_t index) const {
  */
 double WorkspaceBoundingBox::updatePositionAndReturnCount(const std::size_t index) {
   const auto counts = this->countsValue(index);
-  const auto &position = this->position(index);
+  const auto &pos = this->position(index);
 
-  this->m_centerXPosCurr += counts * position.X();
-  this->m_centerYPosCurr += counts * position.Y();
+  this->m_centerXPosCurr += counts * pos.X();
+  this->m_centerYPosCurr += counts * pos.Y();
 
   return counts;
 }
@@ -141,9 +141,9 @@ double WorkspaceBoundingBox::updatePositionAndReturnCount(const std::size_t inde
  *  @param index :: index of spectrum data
  */
 void WorkspaceBoundingBox::updateMinMax(const std::size_t index) {
-  const auto &position = this->position(index);
-  const double x = position.X();
-  const double y = position.Y();
+  const auto &pos = this->position(index);
+  const double x = pos.X();
+  const double y = pos.Y();
 
   this->m_xPosMin = std::min(x, this->m_xPosMin);
   this->m_xPosMax = std::max(x, this->m_xPosMax);
