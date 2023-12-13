@@ -14,11 +14,11 @@
 #include "Analysis/FqFitModel.h"
 #include "Analysis/FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "Analysis/IndirectFitDataView.h"
+#include "DataAnalysisMockObjects.h"
 #include "IndirectAddWorkspaceDialog.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
-#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
@@ -47,82 +47,6 @@ std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
 
 } // namespace
 
-GNU_DIAG_OFF_SUGGEST_OVERRIDE
-
-/// Mock object to mock the view
-class MockFqFitDataView : public IIndirectFitDataView {
-public:
-  /// Public Methods
-  MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
-  MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
-  MOCK_METHOD2(addTableEntry, void(size_t row, FitDataRow newRow));
-  MOCK_METHOD3(updateNumCellEntry, void(double numEntry, size_t row, size_t column));
-  MOCK_METHOD1(getColumnIndexFromName, int(QString ColName));
-  MOCK_METHOD0(clearTable, void());
-  MOCK_CONST_METHOD2(getText, QString(int row, int column));
-  MOCK_CONST_METHOD0(getSelectedIndexes, QModelIndexList());
-  /// Public slots
-  MOCK_METHOD1(displayWarning, void(std::string const &warning));
-};
-
-/// Mock object to mock the model
-class MockIndirectFitDataModel : public IIndirectFitDataModel {
-public:
-  /// Public Methods
-  MOCK_METHOD0(getFittingData, std::vector<IndirectFitData> *());
-  MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const std::string &spectra));
-  MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const FunctionModelSpectra &spectra));
-  MOCK_METHOD2(addWorkspace, void(MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra));
-  MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(WorkspaceID workspaceID));
-  MOCK_CONST_METHOD1(getWorkspace, MatrixWorkspace_sptr(FitDomainIndex index));
-  MOCK_CONST_METHOD0(getWorkspaceNames, std::vector<std::string>());
-  MOCK_CONST_METHOD0(getNumberOfWorkspaces, WorkspaceID());
-  MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName));
-
-  MOCK_METHOD2(setSpectra, void(const std::string &spectra, WorkspaceID workspaceID));
-  MOCK_METHOD2(setSpectra, void(FunctionModelSpectra &&spectra, WorkspaceID workspaceID));
-  MOCK_METHOD2(setSpectra, void(const FunctionModelSpectra &spectra, WorkspaceID workspaceID));
-  MOCK_CONST_METHOD1(getSpectra, FunctionModelSpectra(WorkspaceID workspaceID));
-  MOCK_CONST_METHOD1(getSpectrum, size_t(FitDomainIndex index));
-  MOCK_CONST_METHOD1(getNumberOfSpectra, size_t(WorkspaceID workspaceID));
-
-  MOCK_METHOD0(clear, void());
-
-  MOCK_CONST_METHOD0(getNumberOfDomains, size_t());
-  MOCK_CONST_METHOD2(getDomainIndex, FitDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum));
-  MOCK_CONST_METHOD1(getSubIndices, std::pair<WorkspaceID, WorkspaceIndex>(FitDomainIndex));
-
-  MOCK_CONST_METHOD0(getQValuesForData, std::vector<double>());
-  MOCK_CONST_METHOD0(getResolutionsForFit, std::vector<std::pair<std::string, size_t>>());
-  MOCK_CONST_METHOD1(createDisplayName, std::string(WorkspaceID workspaceID));
-
-  MOCK_METHOD1(removeWorkspace, void(WorkspaceID workspaceID));
-  MOCK_METHOD1(removeDataByIndex, void(FitDomainIndex fitDomainIndex));
-
-  MOCK_METHOD3(setStartX, void(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum));
-  MOCK_METHOD2(setStartX, void(double startX, WorkspaceID workspaceID));
-  MOCK_METHOD2(setStartX, void(double startX, FitDomainIndex fitDomainIndex));
-  MOCK_METHOD3(setEndX, void(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum));
-  MOCK_METHOD2(setEndX, void(double endX, WorkspaceID workspaceID));
-  MOCK_METHOD2(setEndX, void(double endX, FitDomainIndex fitDomainIndex));
-  MOCK_METHOD3(setExcludeRegion, void(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum));
-  MOCK_METHOD2(setExcludeRegion, void(const std::string &exclude, FitDomainIndex index));
-  MOCK_METHOD1(removeSpecialValues, void(const std::string &name));
-  MOCK_METHOD1(setResolution, bool(const std::string &name));
-  MOCK_METHOD2(setResolution, bool(const std::string &name, WorkspaceID workspaceID));
-  MOCK_CONST_METHOD2(getFittingRange, std::pair<double, double>(WorkspaceID workspaceID, WorkspaceIndex spectrum));
-  MOCK_CONST_METHOD1(getFittingRange, std::pair<double, double>(FitDomainIndex index));
-  MOCK_CONST_METHOD2(getExcludeRegion, std::string(WorkspaceID workspaceID, WorkspaceIndex spectrum));
-  MOCK_CONST_METHOD1(getExcludeRegion, std::string(FitDomainIndex index));
-  MOCK_CONST_METHOD2(getExcludeRegionVector, std::vector<double>(WorkspaceID workspaceID, WorkspaceIndex spectrum));
-  MOCK_CONST_METHOD1(getExcludeRegionVector, std::vector<double>(FitDomainIndex index));
-};
-
-/// Mock object to mock the model
-class MockFqFitModel : public FqFitModel {};
-
-GNU_DIAG_ON_SUGGEST_OVERRIDE
-
 class FqFitDataPresenterTest : public CxxTest::TestSuite {
 public:
   /// Needed to make sure everything is initialized
@@ -133,7 +57,7 @@ public:
   static void destroySuite(FqFitDataPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_view = std::make_unique<NiceMock<MockFqFitDataView>>();
+    m_view = std::make_unique<NiceMock<MockFitDataView>>();
     m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
 
     m_dataTable = createEmptyTableWidget(6, 5);
@@ -203,7 +127,7 @@ public:
 private:
   std::unique_ptr<QTableWidget> m_dataTable;
 
-  std::unique_ptr<MockFqFitDataView> m_view;
+  std::unique_ptr<MockFitDataView> m_view;
   std::unique_ptr<MockIndirectFitDataModel> m_model;
   std::unique_ptr<FqFitDataPresenter> m_presenter;
 
