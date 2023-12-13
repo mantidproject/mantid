@@ -229,8 +229,8 @@ create_plist "$bundle_contents" "$bundle_name" "$bundle_icon" "$version"
 
 # Create DMG using `create-dmg` tool:
 # https://github.com/sindresorhus/create-dmg
-# temp DMG name used to get around 27 character limit
+# `create-dmg` returns error code by default due to lack of signing - this is suppressed using a command list.
+# Failure of the following `mv` command likely signifies `create-dmg` error.
 version_name="$bundle_name"-"$version"
-temp_dmg_name="tmp_mwb-${version}"
-create-dmg "$BUILD_DIR"/"$bundle_dirname" --dmg-title=$temp_dmg_name
-mv "${temp_dmg_name}.dmg" "{$version_name}.dmg"
+create-dmg "$BUILD_DIR"/"$bundle_dirname" || true
+mv "${bundle_name} ${$version}.dmg" "{$version_name}.dmg"
