@@ -109,6 +109,6 @@ void Corrections::exportTabPython() {
   m_tabs[currentTab]->exportPythonScript();
 }
 
-std::string Corrections::documentationPage() const { return "Indirect Corrections"; }
+std::string Corrections::documentationPage() const { return "Inelastic Corrections"; }
 
 } // namespace MantidQt::CustomInterfaces

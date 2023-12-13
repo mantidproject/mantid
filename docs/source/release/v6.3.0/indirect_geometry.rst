@@ -16,7 +16,7 @@ Improvements
 ------------
 - Based on existing options for ``AnalysisMode`` in the :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` algorithm, two new options were introduced to allow reduction and analysis of spectra in the TOF domain
   without automatically carrying out a Y space analysis afterwards.
-- Added a validation check to the :ref:`Apply Absorption Corrections Tab<indirect_apply_absorp_correct>` in the :ref:`Corrections GUI<interface-indirect-corrections>` that makes sure the sample workspace and corrections workspaces all have the same number of histograms.
+- Added a validation check to the :ref:`Apply Absorption Corrections Tab<apply_absorp_correct>` in the :ref:`Corrections GUI<interface-inelastic-corrections>` that makes sure the sample workspace and corrections workspaces all have the same number of histograms.
 - The Indirect Simulation :ref:`DensityOfStates interface <DensityOfStates_Interface>` (and corresponding :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` algorithm) can import force constants data
   from CASTEP or Phonopy calculations, then sample an appropriate q-point mesh on-the-fly to create a phonon DOS. This feature requires the Euphonic library to be installed. This library is
   included in the Windows package, but for other platforms an installer is provided in the Script Repository.

@@ -1,7 +1,7 @@
-.. _interface-indirect-corrections:
+.. _interface-inelastic-corrections:
 
-Indirect Corrections
-====================
+Inelastic Corrections
+=====================
 
 .. contents:: Table of Contents
   :local:
@@ -23,7 +23,7 @@ Action Buttons
 
 Settings
   Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
-  customize the settings for the Indirect interfaces.
+  customize the settings for this interface.
 
 ?
   Opens this help page.
@@ -419,13 +419,13 @@ Container Radius
 Sample Height
   Height of the sample in :math:`cm`.
 
-.. _indirect_apply_absorp_correct:
+.. _apply_absorp_correct:
 
 Apply Absorption Corrections
 ----------------------------
 
 The Apply Corrections tab applies the corrections calculated in the Calculate Paalman
-Pings or Calculate Monte Carlo Absorption tabs of the Indirect Data Corrections interface.
+Pings or Calculate Monte Carlo Absorption tabs of the Inelastic Data Corrections interface.
 
 This uses the :ref:`ApplyPaalmanPingsCorrection
 <algm-ApplyPaalmanPingsCorrection>` algorithm to apply absorption corrections in
@@ -499,4 +499,4 @@ Open Slice Viewer
 Save Result
   If enabled the result will be saved as a NeXus file in the default save directory.
 
-.. categories:: Interfaces Indirect
+.. categories:: Interfaces Inelastic
