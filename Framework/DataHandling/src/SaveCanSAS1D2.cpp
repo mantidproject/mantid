@@ -278,7 +278,7 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
   if (m_transcan_ws) {
     std::string can_run;
     if (m_transcan_ws->run().hasProperty("run_number")) {
-      Kernel::Property *logP = m_transcan_ws->run().getLogData("run_number");
+      Kernel::Property const *const logP = m_transcan_ws->run().getLogData("run_number");
       can_run = logP->value();
     } else {
       g_log.debug() << "Didn't find RunNumber log in workspace. Writing "
