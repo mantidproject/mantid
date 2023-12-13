@@ -59,7 +59,7 @@ void InelasticDataManipulation::initLayout() {
   m_uiForm.pbSettings->setIcon(IndirectSettings::icon());
 
   // Create the tabs
-  addTab<InelasticDataManipulationSymmetriseTab>("Symmetrise");
+  addMVPTab<InelasticDataManipulationSymmetriseTab, InelasticDataManipulationSymmetriseTabView>("Symmetrise");
   addMVPTab<InelasticDataManipulationSqwTab, InelasticDataManipulationSqwTabView>("S(Q, w)");
   addMVPTab<InelasticDataManipulationMomentsTab, InelasticDataManipulationMomentsTabView>("Moments");
   addTab<InelasticDataManipulationElwinTab>("Elwin");
