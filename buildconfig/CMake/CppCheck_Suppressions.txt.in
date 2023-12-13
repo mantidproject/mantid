@@ -594,7 +594,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/Load.cpp:258
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/GroupDetectors2.cpp:1149
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadANSTOHelper.cpp:210
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadAscii2.cpp:211
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadANSTOHelper.cpp:433
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadANSTOHelper.cpp:436
 variableScope:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadAscii2.cpp:411
 variableScope:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadAscii2.cpp:487
 duplicateConditionalAssign:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:307
