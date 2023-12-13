@@ -233,4 +233,4 @@ create_plist "$bundle_contents" "$bundle_name" "$bundle_icon" "$version"
 # Failure of the following `mv` command likely signifies `create-dmg` error.
 version_name="$bundle_name"-"$version"
 create-dmg "$BUILD_DIR"/"$bundle_dirname" || true
-mv "${bundle_name} ${$version}.dmg" "{$version_name}.dmg"
+mv "${bundle_name} ${version}.dmg" "${version_name}.dmg"
