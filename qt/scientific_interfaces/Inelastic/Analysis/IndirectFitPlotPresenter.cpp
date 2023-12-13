@@ -6,9 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectDataAnalysisTab.h"
+#include "IndirectFitPlotView.h"
 #include "IndirectSettingsHelper.h"
-
-#include <QTimer>
 
 #include <utility>
 

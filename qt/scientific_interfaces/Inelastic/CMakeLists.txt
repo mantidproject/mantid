@@ -85,7 +85,6 @@ set(MOC_FILES
     Analysis/IndirectFitDataView.h
     Analysis/IndirectFitOutputOptionsView.h
     Analysis/IndirectFitPlotView.h
-    Analysis/IndirectFitPlotPresenter.h
     Analysis/IndirectFitPropertyBrowser.h
     Analysis/FunctionBrowser/ConvTemplateBrowser.h
     Analysis/FunctionBrowser/ConvTemplatePresenter.h
@@ -133,6 +132,7 @@ set(INC_FILES
     Analysis/IndirectFitOutputOptionsModel.h
     Analysis/IndirectFitOutputOptionsPresenter.h
     Analysis/IndirectFitPlotModel.h
+    Analysis/IndirectFitPlotPresenter.h
     Analysis/IndirectFittingModel.h
     Analysis/ParameterEstimation.h
     Analysis/FunctionBrowser/ConvFunctionModel.h

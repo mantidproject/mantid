@@ -7,7 +7,6 @@
 #pragma once
 
 #include "IndirectFitPlotModel.h"
-#include "IndirectFitPlotView.h"
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
@@ -15,9 +14,9 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-using namespace MantidWidgets;
 
 class IIndirectDataAnalysisTab;
+class IIndirectFitPlotView;
 
 class MANTIDQT_INELASTIC_DLL IIndirectFitPlotPresenter {
 public:
@@ -37,8 +36,7 @@ public:
   virtual void handleBackgroundChanged(double value) = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL IndirectFitPlotPresenter : public QObject, public IIndirectFitPlotPresenter {
-  Q_OBJECT
+class MANTIDQT_INELASTIC_DLL IndirectFitPlotPresenter : public IIndirectFitPlotPresenter {
 
 public:
   IndirectFitPlotPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitPlotView *view,
