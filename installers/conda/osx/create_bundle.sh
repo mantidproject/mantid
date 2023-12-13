@@ -11,7 +11,7 @@
 # The bundle is created from a pre-packaged conda version
 # and removes any excess that is not necessary in a standalone
 # bundle
-set -e
+set -ex
 
 # Constants
 HERE="$(dirname "$0")"
@@ -230,4 +230,4 @@ create_plist "$bundle_contents" "$bundle_name" "$bundle_icon" "$version"
 # Create DMG using `create-dmg` tool:
 # https://github.com/sindresorhus/create-dmg
 version_name="$bundle_name"-"$version"
-create-dmg "$version_name"
+create-dmg $bundle_conda_prefix --dmg-title="$version_name"
