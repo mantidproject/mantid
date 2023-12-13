@@ -517,6 +517,7 @@ protected:
   FunctionTreeView::AProperty apply(const int &i) const override {
     m_browser->m_attributeIntManager->blockSignals(true);
     QtProperty *prop = m_browser->m_attributeIntManager->addProperty(m_attName);
+    prop->setEnabled(i < std::numeric_limits<int>::max());
     m_browser->m_attributeIntManager->setValue(prop, i);
     m_browser->m_attributeIntManager->blockSignals(false);
     return m_browser->addProperty(m_parent, prop);
