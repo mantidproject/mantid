@@ -87,46 +87,16 @@ class DNSElasticSCOptionsPresenter(DNSCommonOptionsPresenter):
         if own_options["get_wavelength"]:
             self._determine_wavelength()
 
-    def process_commandline_request(self, command_line_options):
-        self.view.set_single_state_by_name("use_dx_dy", True)
-        for command in ["dx", "dy", "omega_offset", "hkl1", "hkl2", "det_efficiency", "flipping_ratio"]:
-            if command in command_line_options:
-                self.view.set_single_state_by_name(command, command_line_options[command])
-
     def get_option_dict(self):
         """
         Return own options from view.
         """
         if self.view is not None:
             self.own_dict.update(self.view.get_state())
-            o_dic = self.own_dict
-            o_dic["hkl1"] = self.model.convert_hkl_string(o_dic["hkl1"])
-            o_dic["hkl2"] = self.model.convert_hkl_string(o_dic["hkl2"])
-            if not self.own_dict.get("use_dx_dy", False):
-                o_dic["dx"], o_dic["dy"] = self.model.get_dx_dy(o_dic)
         return self.own_dict
-
-    def _evaluate_two_theta_max_bin_size(self):
-        if self.param_dict["file_selector"]["full_data"] and not self._get_automatic_binning_state():
-            own_options = self.get_option_dict()
-            two_theta_max = own_options["two_theta_max"]
-            two_theta_min = own_options["two_theta_min"]
-            self.view._map["two_theta_bin_size"].setMaximum(two_theta_max - two_theta_min)
-
-    def _evaluate_omega_max_bin_size(self):
-        if self.param_dict["file_selector"]["full_data"] and not self._get_automatic_binning_state():
-            own_options = self.get_option_dict()
-            omega_max = own_options["omega_max"]
-            omega_min = own_options["omega_min"]
-            self.view._map["omega_bin_size"].setMaximum(omega_max - omega_min)
 
     def _attach_signal_slots(self):
         self.view.sig_get_wavelength.connect(self._determine_wavelength)
-        self.view.sig_two_theta_min_changed.connect(self._evaluate_two_theta_max_bin_size)
-        self.view.sig_two_theta_max_changed.connect(self._evaluate_two_theta_max_bin_size)
-        self.view.sig_omega_min_changed.connect(self._evaluate_omega_max_bin_size)
-        self.view.sig_omega_max_changed.connect(self._evaluate_omega_max_bin_size)
-        self.view.sig_auto_binning_clicked.connect(self._set_manual_two_theta_binning_lims)
         self.view.sig_auto_binning_clicked.connect(self._set_auto_two_theta_binning)
         self.view.sig_auto_binning_clicked.connect(self._set_manual_omega_binning_lims)
         self.view.sig_auto_binning_clicked.connect(self._set_auto_omega_binning)

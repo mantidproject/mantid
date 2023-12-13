@@ -11,7 +11,6 @@ Sub widget for DNS single crystal elastic plot view handling of the list of plot
 
 from qtpy.QtCore import QObject
 from qtpy.QtCore import Signal
-
 from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_plot_list import DNSPlotListModel
 
 

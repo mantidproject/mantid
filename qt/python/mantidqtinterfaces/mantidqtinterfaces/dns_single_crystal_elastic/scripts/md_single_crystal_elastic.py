@@ -9,7 +9,6 @@
 DNS script helpers for reduction of single crystal elastic data.
 """
 
-# pylint: disable=unused-import
 from mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic import flipping_ratio_correction, raise_error, background_subtraction
 
 __all__ = ("background_subtraction", "flipping_ratio_correction")

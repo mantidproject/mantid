@@ -62,6 +62,13 @@ class DNSElasticSCOptionsView(DNSView):
             "dy": self._content.dSB_dy,
         }
 
+        self._map["use_dx_dy"].setChecked(True)
+        self._map["dx"].setValue(3.672)
+        self._map["dy"].setValue(6.539)
+        self._map["corrections"].setEnabled(False)
+        self._map["lattice_parameters"].setEnabled(False)
+        self._map["orientation"].setEnabled(False)
+        self._map["binning"].setEnabled(False)
         # connect signals
         self._attach_signal_slots()
 
