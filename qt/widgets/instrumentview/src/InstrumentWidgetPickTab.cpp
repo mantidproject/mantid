@@ -739,7 +739,11 @@ void InstrumentWidgetPickTab::initSurface() {
   if (p3d) {
     connect(p3d, SIGNAL(finishedMove()), this, SLOT(updatePlotMultipleDetectors()));
   }
+  if (m_infoController != nullptr)
+    delete m_infoController;
   m_infoController = new ComponentInfoController(this, m_instrWidget, m_selectionInfoDisplay);
+  if (m_plotController != nullptr)
+    delete m_plotController;
   m_plotController = new DetectorPlotController(this, m_instrWidget, m_plot);
   m_plotController->setTubeXUnits(static_cast<IWPickXUnits>(m_tubeXUnitsCache));
   m_plotController->setPlotType(static_cast<IWPickPlotType>(m_plotTypeCache));
