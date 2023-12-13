@@ -9,7 +9,7 @@
 #include "IndirectInterface.h"
 #include "IndirectTab.h"
 
-#include "ui_IndirectCorrections.h"
+#include "ui_Corrections.h"
 
 #include "MantidKernel/ConfigService.h"
 #include <Poco/NObserver.h>
@@ -29,13 +29,13 @@ enum CorrectionTabChoice { CONTAINER_SUBTRACTION, CALC_CORR, ABSORPTION_CORRECTI
 class CorrectionsTab;
 
 /**
- * The IndirectCorrections class is the main class that handles the interface
+ * The Corrections class is the main class that handles the interface
  * and controls
  * its tabs.
  *
  * Is a friend to the CorrectionsTab class.
  */
-class IndirectCorrections : public IndirectInterface {
+class Corrections : public IndirectInterface {
   Q_OBJECT
 
   /// Allow CorrectionsTab to have access.
@@ -47,7 +47,7 @@ public:
   // This interface's categories.
   static QString categoryInfo() { return "Indirect"; }
   /// Default Constructor
-  explicit IndirectCorrections(QWidget *parent = nullptr);
+  explicit Corrections(QWidget *parent = nullptr);
 
 private:
   /// Initialize the layout
@@ -72,10 +72,10 @@ private:
   void applySettings(std::map<std::string, QVariant> const &settings) override;
 
   /// UI form containing all Qt elements.
-  Ui::IndirectCorrections m_uiForm;
+  Ui::Corrections m_uiForm;
 
   /// Change Observer for ConfigService (monitors user directories)
-  Poco::NObserver<IndirectCorrections, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+  Poco::NObserver<Corrections, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
 
   /// Map of unsigned int (TabChoice enum values) to tabs.
   std::map<unsigned int, CorrectionsTab *> m_tabs;
