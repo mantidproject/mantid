@@ -229,5 +229,8 @@ create_plist "$bundle_contents" "$bundle_name" "$bundle_icon" "$version"
 
 # Create DMG using `create-dmg` tool:
 # https://github.com/sindresorhus/create-dmg
+# temp DMG name used to get around 27 character limit
 version_name="$bundle_name"-"$version"
-create-dmg $bundle_conda_prefix --dmg-title="$version_name"
+temp_dmg_name="tmp_mwb_${version_name}"
+create-dmg "$BUILD_DIR"/"$bundle_dirname" --dmg-title=$temp_dmg_name
+mv "${temp_dmg_name}.dmg" "{$version_name}.dmg"
