@@ -269,6 +269,7 @@ void DoublePulseFit::runFitAlgorith(const Mantid::API::IAlgorithm_sptr &fitAlg,
   const bool convolveMembers = getProperty("ConvolveMembers");
   const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
   const bool calcErrors = getProperty("CalcErrors");
+  const bool doCreateOutput = getProperty("CreateOutput");
   const bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   const bool outputParametersOnly = getProperty("OutputParametersOnly");
 
@@ -287,7 +288,7 @@ void DoublePulseFit::runFitAlgorith(const Mantid::API::IAlgorithm_sptr &fitAlg,
   fitAlg->setProperty("CalcErrors", calcErrors);
   fitAlg->setProperty("OutputCompositeMembers", outputCompositeMembers);
   fitAlg->setProperty("ConvolveMembers", convolveMembers);
-  fitAlg->setProperty("CreateOutput", getProperty("CreateOutput"));
+  fitAlg->setProperty("CreateOutput", doCreateOutput);
   fitAlg->setProperty("OutputParametersOnly", outputParametersOnly);
   fitAlg->setProperty("Output", getPropertyValue("Output"));
   fitAlg->executeAsChildAlg();
