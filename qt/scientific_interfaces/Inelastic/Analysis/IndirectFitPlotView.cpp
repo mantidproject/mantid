@@ -333,7 +333,7 @@ void IndirectFitPlotView::notifySelectedFitDataChanged(int index) {
 // Required due to a bug in qt causing the valueChanged signal to be emitted
 // twice due to the long amount of time taken to complete the necessary actions
 void IndirectFitPlotView::notifyDelayedPlotSpectrumChanged() {
-  QTimer::singleShot(150, this, SLOT(emitPlotSpectrumChanged()));
+  QTimer::singleShot(150, this, SLOT(notifyPlotSpectrumChanged()));
 }
 
 void IndirectFitPlotView::notifyPlotSpectrumChanged() {
