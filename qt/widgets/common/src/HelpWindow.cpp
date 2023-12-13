@@ -56,8 +56,7 @@ void HelpWindow::showAlgorithm(const QString &name, const int version, QWidget *
   MantidHelpInterface *gui = interfaceManager.createHelpWindow();
   if (gui) {
     if (parent != nullptr)
-      gui->setParent(parent);
-    gui->setWindowModality(Qt::WindowModal);
+      gui->setParent(parent, Qt::Dialog);
     gui->showAlgorithm(name, version);
   } else {
     // Open online help
