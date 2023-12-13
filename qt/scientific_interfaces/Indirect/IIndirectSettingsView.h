@@ -8,9 +8,8 @@
 
 #include "DllConfig.h"
 
-#include <string>
-#include <vector>
-
+#include <QString>
+#include <QStringList>
 #include <QWidget>
 
 namespace MantidQt {

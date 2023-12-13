@@ -6,6 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "DllConfig.h"
+
+#include <string>
+
+#include <QStringList>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IndirectSettingsHelper {

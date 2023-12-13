@@ -72,7 +72,7 @@ Developer Feature Flags
   features which are currently under development. This will facilitate rapid prototyping
   of new features, and will also shorten the feedback loop for developers. Note that this
   option should only be used for testing features which are still under development. When
-  Users are satisfied with the new feature, the "development flag" in question should be
+  users are satisfied with the new feature, the "development flag" in question should be
   removed from the software, and the feature should be made permanently available.
   **The interface must be restarted for changes to take effect**.
 
