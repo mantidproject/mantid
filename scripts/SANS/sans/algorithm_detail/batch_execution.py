@@ -1633,7 +1633,8 @@ def save_workspace_to_file(
     save_options = {"InputWorkspace": workspace_name}
     save_options.update({"Filename": file_name, "Transmission": transmission_name, "TransmissionCan": transmission_can_name})
     save_options.update(additional_run_numbers)
-    save_options.update(additional_metadata)
+    if workspace_name.endswith("_bgsub"):
+        save_options.update(additional_metadata)
 
     if SaveType.NEXUS in file_formats:
         save_options.update({"Nexus": True})
