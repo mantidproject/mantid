@@ -21,7 +21,14 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockIndirectDataAnalysisTab : public IIndirectDataAnalysisTab {
 public:
-  MOCK_METHOD0(plotSelectedSpectra, void());
+  MOCK_METHOD2(handleSingleFitClicked, void(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex));
+  MOCK_METHOD1(handleStartXChanged, void(double startX));
+  MOCK_METHOD1(handleEndXChanged, void(double endX));
+  MOCK_METHOD0(handlePlotSpectrumChanged, void());
+  MOCK_METHOD1(handleFwhmChanged, void(double fwhm));
+  MOCK_METHOD1(handleBackgroundChanged, void(double background));
+
+  MOCK_METHOD0(handlePlotSelectedSpectra, void());
 };
 
 class MockIndirectFitPlotView final : public IIndirectFitPlotView {

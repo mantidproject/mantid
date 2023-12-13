@@ -39,13 +39,13 @@ void IndirectFitPlotPresenter::handleSelectedFitDataChanged(WorkspaceID workspac
   updateAvailableSpectra();
   updatePlots();
   updateGuess();
-  emit selectedFitDataChanged(workspaceID);
+  m_tab->handlePlotSpectrumChanged();
 }
 
 void IndirectFitPlotPresenter::handlePlotSpectrumChanged(WorkspaceIndex spectrum) {
   setActiveSpectrum(spectrum);
   updatePlots();
-  emit plotSpectrumChanged();
+  m_tab->handlePlotSpectrumChanged();
 }
 
 void IndirectFitPlotPresenter::watchADS(bool watch) { m_view->watchADS(watch); }
@@ -86,9 +86,9 @@ void IndirectFitPlotPresenter::updateRangeSelectors() {
   updateHWHMSelector();
 }
 
-void IndirectFitPlotPresenter::handleStartXChanged(double value) { emit startXChanged(value); }
+void IndirectFitPlotPresenter::handleStartXChanged(double value) { m_tab->handleStartXChanged(value); }
 
-void IndirectFitPlotPresenter::handleEndXChanged(double value) { emit endXChanged(value); }
+void IndirectFitPlotPresenter::handleEndXChanged(double value) { m_tab->handleEndXChanged(value); }
 
 void IndirectFitPlotPresenter::handleHWHMMaximumChanged(double minimum) {
   m_view->setHWHMMaximum(m_model->calculateHWHMMaximum(minimum));
@@ -119,7 +119,7 @@ void IndirectFitPlotPresenter::updateDataSelection(std::vector<std::string> disp
   setActiveIndex(WorkspaceID{0});
   setActiveSpectrum(WorkspaceIndex{0});
   updateAvailableSpectra();
-  emitSelectedFitDataChanged();
+  m_tab->handlePlotSpectrumChanged();
 }
 
 void IndirectFitPlotPresenter::updateAvailableSpectra() {
@@ -295,18 +295,13 @@ void IndirectFitPlotPresenter::plotSpectrum(WorkspaceIndex spectrum) const {
 }
 
 void IndirectFitPlotPresenter::handleFitSingleSpectrum() {
-  emit fitSingleSpectrum(m_model->getActiveWorkspaceID(), m_model->getActiveWorkspaceIndex());
+  m_tab->handleSingleFitClicked(m_model->getActiveWorkspaceID(), m_model->getActiveWorkspaceIndex());
 }
 
 void IndirectFitPlotPresenter::handleFWHMChanged(double minimum, double maximum) {
-  emit fwhmChanged(maximum - minimum);
+  m_tab->handleFwhmChanged(maximum - minimum);
 }
 
-void IndirectFitPlotPresenter::handleBackgroundChanged(double value) { emit backgroundChanged(value); }
-
-void IndirectFitPlotPresenter::emitSelectedFitDataChanged() {
-  const auto index = m_view->getSelectedDataIndex();
-  emit selectedFitDataChanged(index);
-}
+void IndirectFitPlotPresenter::handleBackgroundChanged(double value) { m_tab->handleBackgroundChanged(value); }
 
 } // namespace MantidQt::CustomInterfaces::IDA

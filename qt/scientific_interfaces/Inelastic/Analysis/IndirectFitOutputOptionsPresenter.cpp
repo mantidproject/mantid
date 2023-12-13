@@ -66,7 +66,7 @@ void IndirectFitOutputOptionsPresenter::handlePlotClicked() {
   setPlotting(true);
   try {
     plotResult(m_view->getSelectedGroupWorkspace());
-    m_tab->plotSelectedSpectra();
+    m_tab->handlePlotSelectedSpectra();
   } catch (std::runtime_error const &ex) {
     displayWarning(ex.what());
   }

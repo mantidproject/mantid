@@ -35,7 +35,16 @@ namespace IDA {
 
 class MANTIDQT_INELASTIC_DLL IIndirectDataAnalysisTab {
 public:
-  virtual void plotSelectedSpectra() = 0;
+  // Used by FitPlotPresenter
+  virtual void handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) = 0;
+  virtual void handleStartXChanged(double startX) = 0;
+  virtual void handleEndXChanged(double endX) = 0;
+  virtual void handlePlotSpectrumChanged() = 0;
+  virtual void handleFwhmChanged(double fwhm) = 0;
+  virtual void handleBackgroundChanged(double background) = 0;
+
+  // Used by FitOutputOptionsPresenter
+  virtual void handlePlotSelectedSpectra() = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL IndirectDataAnalysisTab : public IndirectTab, public IIndirectDataAnalysisTab {
@@ -82,7 +91,16 @@ public:
   bool hasResolution() const noexcept { return m_hasResolution; }
   void setFileExtensionsByName(bool filter);
 
-  void plotSelectedSpectra() override;
+  void handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) override;
+  void handlePlotSpectrumChanged() override;
+  void handleFwhmChanged(double fwhm) override;
+  void handleBackgroundChanged(double background) override;
+
+  void handlePlotSelectedSpectra() override;
+
+public slots:
+  void handleStartXChanged(double startX) override;
+  void handleEndXChanged(double endX) override;
 
 protected:
   IndirectFittingModel *getFittingModel() const;
@@ -114,7 +132,6 @@ protected:
 private:
   void setup() override;
   bool validate() override;
-  void connectPlotPresenter();
   void connectFitPropertyBrowser();
   void connectDataPresenter();
   void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
@@ -141,13 +158,10 @@ protected slots:
   void setModelEndX(double endX);
   void tableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
   void tableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
-  void handleStartXChanged(double startX);
-  void handleEndXChanged(double endX);
   void updateFitOutput(bool error);
   void updateSingleFitOutput(bool error);
   void fitAlgorithmComplete(bool error);
   void singleFit();
-  void singleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum);
   void executeFit();
   void updateParameterValues();
   void updateParameterValues(const std::unordered_map<std::string, ParameterValue> &parameters);
@@ -164,9 +178,6 @@ private slots:
   void respondToDataChanged();
   void respondToDataAdded(IAddWorkspaceDialog const *dialog);
   void respondToDataRemoved();
-  void respondToPlotSpectrumChanged();
-  void respondToFwhmChanged(double);
-  void respondToBackgroundChanged(double value);
 };
 
 } // namespace IDA

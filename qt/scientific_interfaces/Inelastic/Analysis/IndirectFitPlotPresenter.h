@@ -87,15 +87,6 @@ public:
   void handleFWHMChanged(double minimum, double maximum) override;
   void handleBackgroundChanged(double value) override;
 
-signals:
-  void selectedFitDataChanged(WorkspaceID /*_t1*/);
-  void plotSpectrumChanged();
-  void fitSingleSpectrum(WorkspaceID /*_t1*/, WorkspaceIndex /*_t2*/);
-  void startXChanged(double /*_t1*/);
-  void endXChanged(double /*_t1*/);
-  void fwhmChanged(double /*_t1*/);
-  void backgroundChanged(double /*_t1*/);
-
 private:
   void disableAllDataSelection();
   void enableAllDataSelection();
@@ -112,7 +103,6 @@ private:
   void setHWHM(double value);
   void updateBackgroundSelector();
   void updateFitRangeSelector();
-  void emitSelectedFitDataChanged();
   void setActiveIndex(WorkspaceID workspaceID);
 
   void plotSpectrum(WorkspaceIndex spectrum) const;
