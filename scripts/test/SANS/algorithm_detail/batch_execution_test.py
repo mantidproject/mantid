@@ -336,8 +336,25 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
 
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
-    def test_that_save_workspace_to_file_includes_metadata_in_options(self, mock_alg_manager):
+    def test_that_non_subtracted_save_workspace_to_file_does_not_include_metadata_in_options(self, mock_alg_manager):
         ws_name = "wsName"
+        filename = "fileName"
+        additional_run_numbers = {}
+        additional_metadata = {"BackgroundSubtractionWorkspace": "tobesubtracted", "BackgroundSubtractionScaleFactor": "1.25"}
+
+        save_workspace_to_file(ws_name, [], filename, additional_run_numbers, additional_metadata)
+
+        expected_options = {
+            "InputWorkspace": ws_name,
+            "Filename": filename,
+            "Transmission": "",
+            "TransmissionCan": "",
+        }
+        mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
+
+    @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
+    def test_that_subtracted_save_workspace_to_file_does_include_metadata_in_options(self, mock_alg_manager):
+        ws_name = "wsName_bgsub"
         filename = "fileName"
         additional_run_numbers = {}
         additional_metadata = {"BackgroundSubtractionWorkspace": "tobesubtracted", "BackgroundSubtractionScaleFactor": "1.25"}
