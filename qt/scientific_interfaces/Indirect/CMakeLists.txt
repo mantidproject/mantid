@@ -1,15 +1,9 @@
 set(SRC_FILES
-    AbsorptionCorrections.cpp
-    ApplyAbsorptionCorrections.cpp
-    CalculatePaalmanPings.cpp
-    ContainerSubtraction.cpp
-    CorrectionsTab.cpp
     DensityOfStates.cpp
     ILLEnergyTransfer.cpp
     ISISCalibration.cpp
     ISISDiagnostics.cpp
     IndirectAddWorkspaceDialog.cpp
-    IndirectCorrections.cpp
     IndirectDataReduction.cpp
     IndirectDataReductionTab.cpp
     IndirectDataValidationHelper.cpp
@@ -41,17 +35,11 @@ set(SRC_FILES
 )
 
 set(MOC_FILES
-    AbsorptionCorrections.h
-    ApplyAbsorptionCorrections.h
-    CalculatePaalmanPings.h
-    ContainerSubtraction.h
-    CorrectionsTab.h
     DensityOfStates.h
     IAddWorkspaceDialog.h
     IIndirectSettingsView.h
     ILLEnergyTransfer.h
     IndirectAddWorkspaceDialog.h
-    IndirectCorrections.h
     IndirectDataReduction.h
     IndirectDataReductionTab.h
     IndirectDiffractionReduction.h
@@ -91,17 +79,12 @@ set(INC_FILES
 )
 
 set(UI_FILES
-    AbsorptionCorrections.ui
-    ApplyAbsorptionCorrections.ui
-    CalculatePaalmanPings.ui
-    ContainerSubtraction.ui
     DensityOfStates.ui
     ILLEnergyTransfer.ui
     ISISCalibration.ui
     ISISDiagnostics.ui
     Reduction/ISISEnergyTransfer.ui
     IndirectAddWorkspaceDialog.ui
-    IndirectCorrections.ui
     IndirectDataReduction.ui
     IndirectDiffractionReduction.ui
     IndirectInstrumentConfig.ui

@@ -9,6 +9,7 @@
 #include "IndirectPlotOptionsPresenter.h"
 #include "IndirectTab.h"
 
+#include "DllConfig.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
@@ -60,7 +61,7 @@ private:
   double m_numberDensity;
 };
 
-class MANTIDQT_INDIRECT_DLL CorrectionsTab : public IndirectTab {
+class MANTIDQT_INELASTIC_DLL CorrectionsTab : public IndirectTab {
   Q_OBJECT
 
 public:

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "CorrectionsTab.h"
+#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -15,7 +16,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL ApplyAbsorptionCorrections : public CorrectionsTab {
+class MANTIDQT_INELASTIC_DLL ApplyAbsorptionCorrections : public CorrectionsTab {
   Q_OBJECT
 
 public:

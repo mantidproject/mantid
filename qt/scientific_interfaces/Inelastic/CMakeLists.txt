@@ -47,6 +47,12 @@ set(SRC_FILES
     BayesFitting/Quasi.cpp
     BayesFitting/ResNorm.cpp
     BayesFitting/Stretch.cpp
+    Corrections/AbsorptionCorrections.cpp
+    Corrections/ApplyAbsorptionCorrections.cpp
+    Corrections/CalculatePaalmanPings.cpp
+    Corrections/ContainerSubtraction.cpp
+    Corrections/CorrectionsTab.cpp
+    Corrections/IndirectCorrections.cpp
     Manipulation/InelasticDataManipulation.cpp
     Manipulation/InelasticDataManipulationElwinTab.cpp
     Manipulation/InelasticDataManipulationElwinTabModel.cpp
@@ -99,6 +105,12 @@ set(MOC_FILES
     BayesFitting/Quasi.h
     BayesFitting/ResNorm.h
     BayesFitting/Stretch.h
+    Corrections/AbsorptionCorrections.h
+    Corrections/ApplyAbsorptionCorrections.h
+    Corrections/CalculatePaalmanPings.h
+    Corrections/ContainerSubtraction.h
+    Corrections/CorrectionsTab.h
+    Corrections/IndirectCorrections.h
     Manipulation/InelasticDataManipulation.h
     Manipulation/InelasticDataManipulationElwinTab.h
     Manipulation/InelasticDataManipulationElwinTabView.h
@@ -162,6 +174,11 @@ set(UI_FILES
     BayesFitting/Quasi.ui
     BayesFitting/ResNorm.ui
     BayesFitting/Stretch.ui
+    Corrections/AbsorptionCorrections.ui
+    Corrections/ApplyAbsorptionCorrections.ui
+    Corrections/CalculatePaalmanPings.ui
+    Corrections/ContainerSubtraction.ui
+    Corrections/IndirectCorrections.ui
     Manipulation/InelasticDataManipulation.ui
     Manipulation/InelasticDataManipulationElwinTab.ui
     Manipulation/InelasticDataManipulationIqtTab.ui
