@@ -45,7 +45,7 @@ public:
   /// The name of the interface as registered into the factory
   static std::string name() { return "Corrections"; }
   // This interface's categories.
-  static QString categoryInfo() { return "Indirect"; }
+  static QString categoryInfo() { return "Inelastic"; }
   /// Default Constructor
   explicit Corrections(QWidget *parent = nullptr);
 
