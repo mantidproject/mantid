@@ -479,8 +479,8 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   PARALLEL_CHECK_INTERRUPT_REGION
 
   if (failedDetectorCount != 0) {
-    g_log.information() << "Unable to calculate sample-detector distance for " << failedDetectorCount
-                        << " spectra. Masking spectrum.\n";
+    g_log.warning() << "Unable to calculate sample-detector distance for " << failedDetectorCount
+                    << " spectra. Masking spectrum.\n";
   }
   if (m_inputEvents)
     eventWS->clearMRU();
