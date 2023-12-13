@@ -124,34 +124,6 @@ function add_string_to_plist() {
   /usr/libexec/PlistBuddy -c "Add :$key string $string_value" "$filepath"
 }
 
-function create_disk_image() {
-  local version_name=$1
-  echo "Creating disk image '$version_name.dmg'"
-  # Add additional DragNDrop facilities
-  #   Add link to Applications
-  #   Pad out the image so that we can make changes went mounted
-  #   Store a background image
-  ln -s /Applications "$BUILD_DIR"/Applications
-  mkdir "$BUILD_DIR/.background"
-  cp "$HERE/dmg_background.png" "$BUILD_DIR/.background/background.png"
-  padding_filename=".dummy-padding-file"
-  mkfile 1m "$BUILD_DIR/$padding_filename"
-
-  # Set Finder background
-  hdiutil create -ov -srcfolder "$BUILD_DIR" -volname "$version_name" -fs HFS+ -format UDRW "$TEMP_IMAGE"
-  volume_name=$(hdiutil attach "$TEMP_IMAGE" | perl -n -e '/\/Volumes\/(.+)/ && print $1')
-  trap "on_exit $volume_name" RETURN
-  volume_path=/Volumes/"$volume_name"
-  rm "$volume_path"/"$padding_filename"
-  sed -e "s/@BUNDLE_NAME@/$bundle_name/" "$HERE/dmg_setup.scpt.in" > "$TEMP_OSA_SCPT"
-  osascript "$TEMP_OSA_SCPT" "$version_name"
-  ensure_volume_detached "$volume_name"
-
-  # Create final compressed dmg
-  test -f "$version_name".dmg && rm -f "$version_name".dmg
-  hdiutil convert "$TEMP_IMAGE" -format UDBZ -imagekey zlib-level=9 -o "$version_name".dmg
-}
-
 # Print usage and exit
 function usage() {
   local exitcode=$1
@@ -255,16 +227,7 @@ fixup_reexport_paths "$bundle_conda_prefix"
 add_resources "$bundle_contents" "$bundle_name" "$bundle_icon"
 create_plist "$bundle_contents" "$bundle_name" "$bundle_icon" "$version"
 
-# Create DMG, including custom background and /Applications link
-# These steps were extracted from how cpack achieves this:
-# https://github.com/Kitware/CMake/blob/859241d2bbaae83f06c44bc21ab0dbd38725a3fc/Source/CPack/cmCPackDragNDropGenerator.cxx
-# Steps:
-#   - Create dummy 1MB file for space on the filesystem to store changes
-#   - Create temporary dmgtrap
-#   - Mount temporary dmg
-#   - Remove dummy padding
-#   - Execute apple script to set background and create .DS_Store in mounted directory
-#   - Detach temporary image
-#   - Create final, compressed image
+# Create DMG using `create-dmg` tool:
+# https://github.com/sindresorhus/create-dmg
 version_name="$bundle_name"-"$version"
-create_disk_image "$version_name"
+create-dmg "$version_name"
