@@ -7,6 +7,8 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Exception.h"
 
+#include <nexus/NeXusException.hpp>
+
 namespace Mantid::Geometry {
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
@@ -272,6 +274,11 @@ void OrientedLattice::saveNexus(::NeXus::File *file, const std::string &group) c
   std::vector<int> dims(2, 3); // 3x3 matrix
   file->writeData("orientation_matrix", ub, dims);
 
+  // Save the modulated UB matrix
+  std::vector<double> modUB = this->ModUB.getVector();
+  file->writeData("modulated_orientation_matrix", modUB, dims);
+  file->writeData("maximum_order", this->getMaxOrder());
+
   file->closeGroup();
 }
 
@@ -287,6 +294,18 @@ void OrientedLattice::loadNexus(::NeXus::File *file, const std::string &group) {
   DblMatrix ubMat(ub);
   // This will set the lattice parameters and the U matrix:
   this->setUB(ubMat);
+
+  try {
+    std::vector<double> modUB;
+    file->readData("modulated_orientation_matrix", modUB);
+    DblMatrix ModUBMat(modUB);
+    this->setModUB(ModUBMat);
+    int maxOrder;
+    file->readData("maximum_order", maxOrder);
+    this->setMaxOrder(maxOrder);
+  } catch (::NeXus::Exception &) {
+    // Old files don't have these. Ignore
+  }
   file->closeGroup();
 }
 

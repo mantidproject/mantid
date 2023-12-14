@@ -81,6 +81,20 @@ public:
     th.createFile("OrientedLatticeTest.nxs");
     DblMatrix U(3, 3, true);
     OrientedLattice u(1, 2, 3, 90, 89, 88);
+    u.setMaxOrder(1);
+
+    DblMatrix modUB(3, 3);
+    modUB[0][0] = 1.;
+    modUB[1][0] = 2.;
+    modUB[2][0] = 3.;
+    modUB[0][1] = 4.;
+    modUB[1][1] = 5.;
+    modUB[2][1] = 6.;
+    modUB[0][2] = 7.;
+    modUB[1][2] = 8.;
+    modUB[2][2] = 9.;
+    u.setModUB(modUB);
+
     u.saveNexus(th.file.get(), "lattice");
     th.reopenFile();
 
@@ -93,6 +107,8 @@ public:
     TS_ASSERT_DELTA(u2.alpha(), 90.0, 1e-5);
     TS_ASSERT_DELTA(u2.beta(), 89.0, 1e-5);
     TS_ASSERT_DELTA(u2.gamma(), 88.0, 1e-5);
+    TS_ASSERT_EQUALS(u2.getMaxOrder(), 1);
+    TS_ASSERT_EQUALS(u2.getModUB(), modUB);
   }
 
   /** @author Alex Buts, fixed by Andrei Savici */

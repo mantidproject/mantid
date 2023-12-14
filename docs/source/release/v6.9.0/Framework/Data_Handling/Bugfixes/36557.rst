@@ -1,0 +1,1 @@
+- Fixed modulation information in oriented lattice not being saved and loaded to NeXus files
