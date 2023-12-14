@@ -85,9 +85,6 @@ void IndirectDataAnalysisTab::connectDataPresenter() {
           SLOT(tableStartXChanged(double, WorkspaceID, WorkspaceIndex)));
   connect(m_dataPresenter.get(), SIGNAL(endXChanged(double, WorkspaceID, WorkspaceIndex)), this,
           SLOT(tableEndXChanged(double, WorkspaceID, WorkspaceIndex)));
-
-  connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this, SLOT(respondToDataChanged()));
-  connect(m_dataPresenter.get(), SIGNAL(dataRemoved()), this, SLOT(respondToDataRemoved()));
 }
 
 void IndirectDataAnalysisTab::connectFitPropertyBrowser() {
@@ -599,7 +596,7 @@ void IndirectDataAnalysisTab::updateResultOptions() {
   m_outOptionsPresenter->setSaveEnabled(isFit);
 }
 
-void IndirectDataAnalysisTab::respondToDataChanged() {
+void IndirectDataAnalysisTab::handleDataChanged() {
   updateDataReferences();
   m_fittingModel->removeFittingData();
   m_plotPresenter->updateAvailableSpectra();
@@ -619,7 +616,7 @@ void IndirectDataAnalysisTab::handleDataAdded(IAddWorkspaceDialog const *dialog)
   updateParameterEstimationData();
 }
 
-void IndirectDataAnalysisTab::respondToDataRemoved() {
+void IndirectDataAnalysisTab::handleDataRemoved() {
   m_fittingModel->removeDefaultParameters();
   updateDataReferences();
   auto displayNames = m_dataPresenter->createDisplayNames();

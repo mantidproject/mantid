@@ -123,7 +123,7 @@ void IndirectFitDataPresenter::handleAddData(IAddWorkspaceDialog const *dialog) 
   try {
     m_tab->handleDataAdded(dialog);
     updateTableFromModel();
-    emit dataChanged();
+    m_tab->handleDataChanged();
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
   }
@@ -257,8 +257,8 @@ void IndirectFitDataPresenter::removeSelectedData() {
     m_model->removeDataByIndex(FitDomainIndex(item->second.row()));
   }
   updateTableFromModel();
-  emit dataRemoved();
-  emit dataChanged();
+  m_tab->handleDataRemoved();
+  m_tab->handleDataChanged();
 }
 
 void IndirectFitDataPresenter::unifyRangeToSelectedData() {

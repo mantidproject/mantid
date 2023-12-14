@@ -37,6 +37,8 @@ class MANTIDQT_INELASTIC_DLL IIndirectDataAnalysisTab {
 public:
   // Used by FitDataPresenter
   virtual void handleDataAdded(IAddWorkspaceDialog const *dialog) = 0;
+  virtual void handleDataChanged() = 0;
+  virtual void handleDataRemoved() = 0;
 
   // Used by FitPlotPresenter
   virtual void handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) = 0;
@@ -95,6 +97,8 @@ public:
   void setFileExtensionsByName(bool filter);
 
   void handleDataAdded(IAddWorkspaceDialog const *dialog) override;
+  void handleDataChanged() override;
+  void handleDataRemoved() override;
 
   void handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) override;
   void handlePlotSpectrumChanged() override;
@@ -177,10 +181,6 @@ protected slots:
   void updateDataReferences();
   void updateResultOptions();
   void respondToFunctionChanged();
-
-private slots:
-  void respondToDataChanged();
-  void respondToDataRemoved();
 };
 
 } // namespace IDA
