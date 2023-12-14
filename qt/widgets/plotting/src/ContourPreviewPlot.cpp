@@ -102,8 +102,8 @@ void ContourPreviewPlot::setCanvasColour(QColor const &colour) { m_canvas->gcf()
 void ContourPreviewPlot::setWorkspace(const MatrixWorkspace_sptr &workspace) {
   if (workspace) {
     auto axes = m_canvas->gca<MantidAxes>();
+    axes.relim();
     axes.pcolormesh(workspace);
-
     m_canvas->draw();
   } else {
     g_log.warning("Cannot plot a null workspace.");
