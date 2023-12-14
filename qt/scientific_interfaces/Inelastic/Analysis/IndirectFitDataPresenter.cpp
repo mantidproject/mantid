@@ -12,20 +12,6 @@
 
 #include "Common/IndirectAddWorkspaceDialog.h"
 
-namespace {
-
-class ScopedFalse {
-  bool &m_ref;
-  bool m_oldValue;
-
-public:
-  // this sets the input bool to false whilst this object is in scope and then
-  // resets it to its old value when this object drops out of scope.
-  explicit ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) { m_ref = false; }
-  ~ScopedFalse() { m_ref = m_oldValue; }
-};
-} // namespace
-
 namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model,
@@ -121,7 +107,6 @@ void IndirectFitDataPresenter::handleAddData(IAddWorkspaceDialog const *dialog) 
 }
 
 void IndirectFitDataPresenter::updateTableFromModel() {
-  ScopedFalse _signalBlock(m_emitCellChanged);
   m_view->clearTable();
   for (auto domainIndex = FitDomainIndex{0}; domainIndex < getNumberOfDomains(); domainIndex++) {
     addTableEntry(domainIndex);
@@ -172,10 +157,6 @@ void IndirectFitDataPresenter::addTableEntry(FitDomainIndex row) {
 }
 
 void IndirectFitDataPresenter::handleCellChanged(int row, int column) {
-  if (!m_emitCellChanged) {
-    return;
-  }
-
   if (m_view->getColumnIndexFromName("StartX") == column) {
     setTableStartXAndEmit(m_view->getText(row, column).toDouble(), row, column);
   } else if (m_view->getColumnIndexFromName("EndX") == column) {

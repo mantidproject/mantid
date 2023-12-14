@@ -105,7 +105,6 @@ private:
   void setTableEndXAndEmit(double X, int row, int column);
   void setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row);
   std::map<int, QModelIndex> getUniqueIndices(const QModelIndexList &selectedIndices);
-  bool m_emitCellChanged = true;
 };
 
 } // namespace IDA
