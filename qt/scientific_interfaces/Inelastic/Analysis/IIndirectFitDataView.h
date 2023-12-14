@@ -58,11 +58,7 @@ public slots:
   virtual void displayWarning(std::string const &warning) = 0;
 
 signals:
-  void resolutionLoaded(QString const & /*_t1*/);
-  void cellChanged(int, int);
   void addClicked();
-  void removeClicked();
-  void unifyClicked();
 };
 } // namespace IDA
 } // namespace CustomInterfaces

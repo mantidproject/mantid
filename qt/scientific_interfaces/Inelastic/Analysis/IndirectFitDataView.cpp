@@ -102,11 +102,11 @@ IndirectFitDataView::IndirectFitDataView(const QStringList &headers, QWidget *pa
 
   setHorizontalHeaders(headers);
 
-  connect(m_uiForm->tbFitData, SIGNAL(cellChanged(int, int)), this, SIGNAL(cellChanged(int, int)));
-  connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SIGNAL(addClicked()));
   connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
-  connect(m_uiForm->pbRemove, SIGNAL(clicked()), this, SIGNAL(removeClicked()));
-  connect(m_uiForm->pbUnify, SIGNAL(clicked()), this, SIGNAL(unifyClicked()));
+  connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SIGNAL(addClicked()));
+  connect(m_uiForm->pbRemove, SIGNAL(clicked()), this, SLOT(notifyRemoveClicked()));
+  connect(m_uiForm->pbUnify, SIGNAL(clicked()), this, SLOT(notifyUnifyClicked()));
+  connect(m_uiForm->tbFitData, SIGNAL(cellChanged(int, int)), this, SLOT(notifyCellChanged(int, int)));
 }
 
 void IndirectFitDataView::subscribePresenter(IIndirectFitDataPresenter *presenter) { m_presenter = presenter; }
@@ -211,6 +211,12 @@ IAddWorkspaceDialog *IndirectFitDataView::getAddWorkspaceDialog() {
 }
 
 void IndirectFitDataView::notifyAddData() { m_presenter->handleAddData(m_addWorkspaceDialog); }
+
+void IndirectFitDataView::notifyRemoveClicked() { m_presenter->handleRemoveClicked(); }
+
+void IndirectFitDataView::notifyUnifyClicked() { m_presenter->handleUnifyClicked(); }
+
+void IndirectFitDataView::notifyCellChanged(int row, int column) { m_presenter->handleCellChanged(row, column); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

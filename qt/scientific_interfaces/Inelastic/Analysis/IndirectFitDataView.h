@@ -70,6 +70,11 @@ protected:
   IAddWorkspaceDialog *m_addWorkspaceDialog;
   IIndirectFitDataPresenter *m_presenter;
 
+private slots:
+  void notifyRemoveClicked();
+  void notifyUnifyClicked();
+  void notifyCellChanged(int row, int column);
+
 private:
   QStringList m_HeaderLabels;
   void setHorizontalHeaders(const QStringList &headers);

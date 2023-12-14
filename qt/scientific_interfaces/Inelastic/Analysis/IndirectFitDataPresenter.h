@@ -28,6 +28,9 @@ class IIndirectDataAnalysisTab;
 class MANTIDQT_INELASTIC_DLL IIndirectFitDataPresenter {
 public:
   virtual void handleAddData(IAddWorkspaceDialog const *dialog) = 0;
+  virtual void handleRemoveClicked() = 0;
+  virtual void handleUnifyClicked() = 0;
+  virtual void handleCellChanged(int row, int column) = 0;
 };
 
 class MANTIDQT_INELASTIC_DLL IndirectFitDataPresenter : public QObject,
@@ -79,6 +82,9 @@ public:
   };
 
   void handleAddData(IAddWorkspaceDialog const *dialog) override;
+  void handleRemoveClicked() override;
+  void handleUnifyClicked() override;
+  void handleCellChanged(int row, int column) override;
 
 signals:
   void requestedAddWorkspaceDialog();
@@ -91,11 +97,6 @@ protected:
   IIndirectDataAnalysisTab *m_tab;
   IIndirectFitDataModel *m_model;
   IIndirectFitDataView *m_view;
-
-private slots:
-  void handleCellChanged(int row, int column);
-  void removeSelectedData();
-  void unifyRangeToSelectedData();
 
 private:
   void setModelStartXAndEmit(double startX, FitDomainIndex row);

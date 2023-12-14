@@ -35,12 +35,6 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectDataAnalysisTab *tab
   observeReplace(true);
 
   connect(m_view, SIGNAL(addClicked()), this, SIGNAL(requestedAddWorkspaceDialog()));
-
-  connect(m_view, SIGNAL(removeClicked()), this, SLOT(removeSelectedData()));
-
-  connect(m_view, SIGNAL(unifyClicked()), this, SLOT(unifyRangeToSelectedData()));
-
-  connect(m_view, SIGNAL(cellChanged(int, int)), this, SLOT(handleCellChanged(int, int)));
 }
 
 IndirectFitDataPresenter::~IndirectFitDataPresenter() { observeReplace(false); }
@@ -243,7 +237,7 @@ std::map<int, QModelIndex> IndirectFitDataPresenter::getUniqueIndices(const QMod
 /**
  * Removes selected rows, with no repeats
  */
-void IndirectFitDataPresenter::removeSelectedData() {
+void IndirectFitDataPresenter::handleRemoveClicked() {
   auto selectedIndices = m_view->getSelectedIndexes();
   if (selectedIndices.size() == 0) {
     // check that there are selected indexes.
@@ -258,7 +252,7 @@ void IndirectFitDataPresenter::removeSelectedData() {
   m_tab->handleDataChanged();
 }
 
-void IndirectFitDataPresenter::unifyRangeToSelectedData() {
+void IndirectFitDataPresenter::handleUnifyClicked() {
   auto selectedIndices = m_view->getSelectedIndexes();
   if (selectedIndices.size() == 0) {
     // check that there are selected indexes.
