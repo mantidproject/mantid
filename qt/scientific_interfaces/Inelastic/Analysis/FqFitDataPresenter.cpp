@@ -31,7 +31,7 @@ private:
 };
 
 template <typename Predicate>
-std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(TextAxis *axis,
+std::pair<std::vector<std::string>, std::vector<std::size_t>> findAxisLabels(TextAxis const *axis,
                                                                              Predicate const &predicate) {
   std::vector<std::string> labels;
   std::vector<std::size_t> spectra;
@@ -361,7 +361,7 @@ void FqFitDataPresenter::addTableEntry(FitDomainIndex row) {
 
   auto subIndices = m_model->getSubIndices(row);
   const auto workspace = m_model->getWorkspace(subIndices.first);
-  const auto axis = dynamic_cast<Mantid::API::TextAxis *>(workspace->getAxis(1));
+  const auto axis = dynamic_cast<Mantid::API::TextAxis const *>(workspace->getAxis(1));
   const auto parameter = axis->label(subIndices.second.value);
 
   const auto workspaceIndex = m_model->getSpectrum(row);

@@ -1523,10 +1523,8 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectome
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.cpp:786
 passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferValidator.cpp:100
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferModelUtils.h:99
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FqFitDataPresenter.cpp:34
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FqFitDataPresenter.cpp:374
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/FqFitDataPresenter.cpp:22
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitDataView.h:35
+virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitDataView.h:41
 returnTempReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitData.cpp:127
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IndirectFitData.cpp:93
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Inelastic/Analysis/IqtFitModel.cpp:47

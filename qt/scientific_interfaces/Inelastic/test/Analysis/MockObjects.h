@@ -241,7 +241,7 @@ public:
                              MantidQt::CustomInterfaces::UserInputValidator &validator));
   MOCK_METHOD2(addTableEntry, void(size_t row, FitDataRow newRow));
   MOCK_METHOD3(updateNumCellEntry, void(double numEntry, size_t row, size_t column));
-  MOCK_METHOD1(getColumnIndexFromName, int(QString ColName));
+  MOCK_METHOD1(getColumnIndexFromName, int(std::string const &ColName));
   MOCK_METHOD0(clearTable, void());
   MOCK_CONST_METHOD2(getText, QString(int row, int column));
   MOCK_CONST_METHOD0(getSelectedIndexes, QModelIndexList());

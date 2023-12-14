@@ -169,7 +169,9 @@ void IndirectFitDataView::updateNumCellEntry(double numEntry, size_t row, size_t
 
 bool IndirectFitDataView::isTableEmpty() const { return m_uiForm->tbFitData->rowCount() == 0; }
 
-int IndirectFitDataView::getColumnIndexFromName(QString ColName) { return m_HeaderLabels.indexOf(ColName); }
+int IndirectFitDataView::getColumnIndexFromName(std::string const &ColName) {
+  return m_HeaderLabels.indexOf(QString::fromStdString(ColName));
+}
 
 void IndirectFitDataView::clearTable() { m_uiForm->tbFitData->setRowCount(0); }
 
