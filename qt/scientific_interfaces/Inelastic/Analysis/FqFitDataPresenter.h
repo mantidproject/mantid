@@ -11,9 +11,6 @@
 #include "FunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "IndirectFitDataPresenter.h"
 
-#include <QComboBox>
-#include <QSpacerItem>
-
 namespace {
 struct FqFitParameters {
   std::vector<std::string> widths;
@@ -35,7 +32,7 @@ public:
 };
 
 class MANTIDQT_INELASTIC_DLL FqFitDataPresenter : public IndirectFitDataPresenter, public IFqFitDataPresenter {
-  Q_OBJECT
+
 public:
   FqFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model, IIndirectFitDataView *view);
   bool addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) override;
@@ -47,17 +44,12 @@ public:
   void handleWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspace) override;
   void handleParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type) override;
 
-private slots:
-  void setActiveParameterType(const std::string &type);
-  void updateActiveWorkspaceID(WorkspaceID index);
-
-signals:
-  void spectrumChanged(WorkspaceIndex);
-
 protected:
   void addTableEntry(FitDomainIndex row) override;
 
 private:
+  void setActiveParameterType(const std::string &type);
+  void updateActiveWorkspaceID(WorkspaceID index);
   void updateParameterOptions(FqFitAddWorkspaceDialog *dialog, const FqFitParameters &parameters);
   void updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters &parameters);
   std::vector<std::string> getParameterTypes(FqFitParameters &parameters) const;

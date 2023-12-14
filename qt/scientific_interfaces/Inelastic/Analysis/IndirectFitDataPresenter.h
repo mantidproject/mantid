@@ -15,8 +15,6 @@
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include <QObject>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -33,10 +31,8 @@ public:
   virtual void handleCellChanged(int row, int column) = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL IndirectFitDataPresenter : public QObject,
-                                                        public AnalysisDataServiceObserver,
-                                                        public IIndirectFitDataPresenter {
-  Q_OBJECT
+class MANTIDQT_INELASTIC_DLL IndirectFitDataPresenter : public IIndirectFitDataPresenter,
+                                                        public AnalysisDataServiceObserver {
 public:
   IndirectFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model, IIndirectFitDataView *view);
   ~IndirectFitDataPresenter();

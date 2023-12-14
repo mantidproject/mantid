@@ -90,7 +90,6 @@ set(MOC_FILES
     Analysis/IndirectDataAnalysis.h
     Analysis/IndirectDataAnalysisTab.h
     Analysis/FqFitAddWorkspaceDialog.h
-    Analysis/FqFitDataPresenter.h
     Analysis/FqFitDataView.h
     Analysis/FitStatusWidget.h
     Analysis/FunctionTemplateBrowser.h
@@ -98,7 +97,6 @@ set(MOC_FILES
     Analysis/IIndirectFitOutputOptionsView.h
     Analysis/IndirectDockWidgetArea.h
     Analysis/IndirectEditResultsDialog.h
-    Analysis/IndirectFitDataPresenter.h
     Analysis/IndirectFitDataView.h
     Analysis/IndirectFitOutputOptionsView.h
     Analysis/IndirectFitPlotView.h
@@ -147,6 +145,7 @@ set(INC_FILES
     PrecompiledHeader.h
     Analysis/ConvFitDataPresenter.h
     Analysis/DataAnalysisTabFactory.h
+    Analysis/FqFitDataPresenter.h
     Analysis/IDAFunctionParameterEstimation.h
     Analysis/FqFitModel.h
     Analysis/IqtFitModel.h
@@ -155,6 +154,7 @@ set(INC_FILES
     Analysis/FitTabConstants.h
     Analysis/IIndirectFitDataModel.h
     Analysis/IndirectFitDataModel.h
+    Analysis/IndirectFitDataPresenter.h
     Analysis/IIndirectFitOutput.h
     Analysis/IIndirectFitOutputOptionsModel.h
     Analysis/IIndirectFitPlotView.h
