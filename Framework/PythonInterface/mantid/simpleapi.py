@@ -478,7 +478,8 @@ def CutMD(*args, **kwargs):  # noqa: C901
     # Now check that all the kwargs we've got are correct
     for key in kwargs.keys():
         if key not in algm:
-            raise RuntimeError("Unknown property: {0}".format(key))
+            msg = f"'{key}' is an invalid keyword argument for {algm.name()}-v{algm.version()}"
+            raise TypeError(msg)
 
     # We're now going to build to_process, which is the list of workspaces we want to process.
     to_process = list()
@@ -935,8 +936,12 @@ def set_properties(alg_object, *args, **kwargs):
             else:
                 alg_object.setProperty(key, new_value)
         except (RuntimeError, TypeError, ValueError) as e:
-            msg = 'Problem setting "{}" in {}-v{}: {}'.format(name, alg_object.name(), alg_object.version(), str(e))
-            raise e.__class__(msg) from e
+            if str(e).startswith("Unknown property search object"):
+                msg = f"'{name}' is an invalid keyword argument for {alg_object.name()}-v{alg_object.version()}"
+                raise TypeError(msg)
+            else:
+                msg = 'Problem setting "{}" in {}-v{}: {}'.format(name, alg_object.name(), alg_object.version(), str(e))
+                raise e.__class__(msg) from e
 
     # end
     if len(args) > 0:
