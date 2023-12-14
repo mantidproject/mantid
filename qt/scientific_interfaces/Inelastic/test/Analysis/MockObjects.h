@@ -15,7 +15,9 @@
 #include "Analysis/IIndirectFitDataView.h"
 #include "Analysis/IIndirectFitOutputOptionsModel.h"
 #include "Analysis/IIndirectFitOutputOptionsView.h"
+#include "Analysis/IIndirectFitPlotView.h"
 #include "Analysis/IndirectDataAnalysisTab.h"
+#include "IAddWorkspaceDialog.h"
 
 #include <string>
 #include <utility>
@@ -28,6 +30,12 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockIndirectDataAnalysisTab : public IIndirectDataAnalysisTab {
 public:
   virtual ~MockIndirectDataAnalysisTab() = default;
+
+  MOCK_METHOD1(handleDataAdded, void(MantidQt::CustomInterfaces::IDA::IAddWorkspaceDialog const *dialog));
+  MOCK_METHOD0(handleDataChanged, void());
+  MOCK_METHOD0(handleDataRemoved, void());
+  MOCK_METHOD3(handleTableStartXChanged, void(double startX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex));
+  MOCK_METHOD3(handleTableEndXChanged, void(double endX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex));
 
   MOCK_METHOD2(handleSingleFitClicked, void(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex));
   MOCK_METHOD1(handleStartXChanged, void(double startX));
@@ -226,6 +234,8 @@ class MockFitDataView : public IIndirectFitDataView {
 public:
   virtual ~MockFitDataView() = default;
 
+  MOCK_METHOD1(subscribePresenter, void(IIndirectFitDataPresenter *presenter));
+
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
   MOCK_METHOD1(validate, MantidQt::CustomInterfaces::UserInputValidator &(
                              MantidQt::CustomInterfaces::UserInputValidator &validator));
@@ -235,6 +245,11 @@ public:
   MOCK_METHOD0(clearTable, void());
   MOCK_CONST_METHOD2(getText, QString(int row, int column));
   MOCK_CONST_METHOD0(getSelectedIndexes, QModelIndexList());
+
+  MOCK_METHOD1(setSampleWSSuffices, void(const QStringList &suffices));
+  MOCK_METHOD1(setSampleFBSuffices, void(const QStringList &suffices));
+  MOCK_METHOD1(setResolutionWSSuffices, void(const QStringList &suffices));
+  MOCK_METHOD1(setResolutionFBSuffices, void(const QStringList &suffices));
 
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
 };

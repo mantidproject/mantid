@@ -41,12 +41,13 @@ public:
   static void destroySuite(ConvFitDataPresenterTest *suite) { delete suite; }
 
   void setUp() override {
+    m_tab = std::make_unique<NiceMock<MockIndirectDataAnalysisTab>>();
     m_view = std::make_unique<NiceMock<MockFitDataView>>();
     m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
 
     m_dataTable = createEmptyTableWidget(6, 6);
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
-    m_presenter = std::make_unique<ConvFitDataPresenter>(std::move(m_model.get()), std::move(m_view.get()));
+    m_presenter = std::make_unique<ConvFitDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
 
     m_workspace = createWorkspace(6);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
@@ -114,6 +115,7 @@ public:
 private:
   std::unique_ptr<QTableWidget> m_dataTable;
 
+  std::unique_ptr<NiceMock<MockIndirectDataAnalysisTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitDataView>> m_view;
   std::unique_ptr<NiceMock<MockIndirectFitDataModel>> m_model;
   std::unique_ptr<ConvFitDataPresenter> m_presenter;

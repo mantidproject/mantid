@@ -105,11 +105,12 @@ public:
   static void destroySuite(IndirectFitDataPresenterTest *suite) { delete suite; }
 
   void setUp() override {
+    m_tab = std::make_unique<NiceMock<MockIndirectDataAnalysisTab>>();
     m_view = std::make_unique<NiceMock<MockFitDataView>>();
     m_model = std::make_unique<NiceMock<MockIndirectFitDataModel>>();
     m_table = createEmptyTableWidget(5, 5);
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_table.get()));
-    m_presenter = std::make_unique<IndirectFitDataPresenter>(std::move(m_model.get()), std::move(m_view.get()));
+    m_presenter = std::make_unique<IndirectFitDataPresenter>(m_tab.get(), m_model.get(), m_view.get());
     m_workspace = createWorkspace(5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("WorkspaceName", m_workspace);
   }
@@ -163,26 +164,34 @@ public:
 
   void test_that_setSampleWSSuffices_will_set_the_sample_workspace_suffices_in_the_view() {
     QStringList const suffices{"suffix1", "suffix2"};
+
+    EXPECT_CALL(*m_view, setSampleWSSuffices(suffices)).Times(Exactly(1));
+
     m_presenter->setSampleWSSuffices(suffices);
-    TS_ASSERT_EQUALS(m_presenter->getSampleWSSuffices(), suffices);
   }
 
   void test_that_setSampleFBSuffices_will_set_the_sample_file_suffices_in_the_view() {
     QStringList const suffices{"suffix1", "suffix2"};
+
+    EXPECT_CALL(*m_view, setSampleFBSuffices(suffices)).Times(Exactly(1));
+
     m_presenter->setSampleFBSuffices(suffices);
-    TS_ASSERT_EQUALS(m_presenter->getSampleFBSuffices(), suffices);
   }
 
   void test_that_setResolutionWSSuffices_will_set_the_Resolution_workspace_suffices_in_the_view() {
     QStringList const suffices{"suffix1", "suffix2"};
+
+    EXPECT_CALL(*m_view, setResolutionWSSuffices(suffices)).Times(Exactly(1));
+
     m_presenter->setResolutionWSSuffices(suffices);
-    TS_ASSERT_EQUALS(m_presenter->getResolutionWSSuffices(), suffices);
   }
 
   void test_that_setResolutionFBSuffices_will_set_the_Resolution_file_suffices_in_the_view() {
     QStringList const suffices{"suffix1", "suffix2"};
+
+    EXPECT_CALL(*m_view, setResolutionFBSuffices(suffices)).Times(Exactly(1));
+
     m_presenter->setResolutionFBSuffices(suffices);
-    TS_ASSERT_EQUALS(m_presenter->getResolutionFBSuffices(), suffices);
   }
 
   void test_getResolutionsForFit_calls_from_model() {
@@ -235,6 +244,7 @@ private:
 
   std::unique_ptr<QTableWidget> m_table;
 
+  std::unique_ptr<NiceMock<MockIndirectDataAnalysisTab>> m_tab;
   std::unique_ptr<NiceMock<MockFitDataView>> m_view;
   std::unique_ptr<NiceMock<MockIndirectFitDataModel>> m_model;
   std::unique_ptr<IndirectFitDataPresenter> m_presenter;
