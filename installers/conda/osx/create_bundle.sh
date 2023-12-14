@@ -231,7 +231,7 @@ create_plist "$bundle_contents" "$bundle_name" "$bundle_icon" "$version"
 # https://github.com/sindresorhus/create-dmg
 # `create-dmg` returns error code by default due to lack of signing - this is suppressed using a command list.
 # Failure of the following `mv` command likely signifies `create-dmg` error.
-export path=$path:/opt/homebrew/bin/
+export PATH=$PATH:/opt/homebrew/bin/
 version_name="$bundle_name"-"$version"
 create-dmg "$BUILD_DIR"/"$bundle_dirname" || true
 mv "${bundle_name} ${version}.dmg" "${version_name}.dmg"
