@@ -110,7 +110,7 @@ class SimpleAPITest(unittest.TestCase):
 
     def test_function_call_raises_RuntimeError_when_passed_incorrect_args(self):
         for func_call in (simpleapi.LoadNexus, simpleapi.Load):
-            self.assertRaises(RuntimeError, func_call, NotAProperty=1)
+            self.assertRaises(TypeError, func_call, NotAProperty=1)
 
     def test_function_call_returns_tuple_when_a_single_argument_is_provided(self):
         dataX = numpy.linspace(start=1, stop=3, num=11)
