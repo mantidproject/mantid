@@ -69,12 +69,11 @@ protected:
   QStringList m_fbResolutionSuffixes;
 
   IAddWorkspaceDialog *m_addWorkspaceDialog;
+  IIndirectFitDataPresenter *m_presenter;
 
 private:
   QStringList m_HeaderLabels;
   void setHorizontalHeaders(const QStringList &headers);
-
-  IIndirectFitDataPresenter *m_presenter;
 };
 
 } // namespace IDA

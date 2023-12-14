@@ -27,7 +27,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INELASTIC_DLL FqFitDataPresenter : public IndirectFitDataPresenter {
+class MANTIDQT_INELASTIC_DLL IFqFitDataPresenter {
+public:
+  virtual void handleWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspace) = 0;
+  virtual void handleParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type) = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL FqFitDataPresenter : public IndirectFitDataPresenter, public IFqFitDataPresenter {
   Q_OBJECT
 public:
   FqFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model, IIndirectFitDataView *view);
@@ -36,9 +42,10 @@ public:
   void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) override;
   void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true) override;
 
+  void handleWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspace) override;
+  void handleParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type) override;
+
 private slots:
-  void dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type);
-  void setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspace);
   void setActiveParameterType(const std::string &type);
   void updateActiveWorkspaceID();
   void updateActiveWorkspaceID(WorkspaceID index);

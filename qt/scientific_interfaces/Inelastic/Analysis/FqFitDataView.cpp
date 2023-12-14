@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FqFitDataView.h"
 #include "FqFitAddWorkspaceDialog.h"
+#include "FqFitDataPresenter.h"
 
 #include <QComboBox>
 #include <QHeaderView>
@@ -38,11 +39,23 @@ IAddWorkspaceDialog *FqFitDataView::getAddWorkspaceDialog() {
 
   connect(m_addWorkspaceDialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
   connect(m_addWorkspaceDialog, SIGNAL(workspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
-          SLOT(setDialogParameterNames(FqFitAddWorkspaceDialog *, const std::string &)));
+          SLOT(notifyWorkspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)));
   connect(m_addWorkspaceDialog, SIGNAL(parameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
-          SLOT(dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *, const std::string &)));
+          SLOT(notifyParameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)));
 
   return m_addWorkspaceDialog;
+}
+
+void FqFitDataView::notifyWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {
+  if (auto presenter = dynamic_cast<FqFitDataPresenter *>(m_presenter)) {
+    presenter->handleWorkspaceChanged(dialog, workspaceName);
+  }
+}
+
+void FqFitDataView::notifyParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type) {
+  if (auto presenter = dynamic_cast<FqFitDataPresenter *>(m_presenter)) {
+    presenter->handleParameterTypeChanged(dynamic_cast<FqFitAddWorkspaceDialog *>(m_addWorkspaceDialog), type);
+  }
 }
 
 void FqFitDataView::addTableEntry(size_t row, FitDataRow newRow) {

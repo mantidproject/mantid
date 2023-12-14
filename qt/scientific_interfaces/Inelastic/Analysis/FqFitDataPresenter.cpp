@@ -254,7 +254,7 @@ void FqFitDataPresenter::updateActiveWorkspaceID() { m_activeWorkspaceID = m_mod
 
 void FqFitDataPresenter::updateActiveWorkspaceID(WorkspaceID index) { m_activeWorkspaceID = index; }
 
-void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {
+void FqFitDataPresenter::handleWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {
   FqFitParameters parameters;
   try {
     auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
@@ -267,7 +267,7 @@ void FqFitDataPresenter::setDialogParameterNames(FqFitAddWorkspaceDialog *dialog
   updateParameterOptions(dialog, parameters);
 }
 
-void FqFitDataPresenter::dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog, const std::string &type) {
+void FqFitDataPresenter::handleParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type) {
   const auto workspaceName = dialog->workspaceName();
   if (!workspaceName.empty() && m_adsInstance.doesExist(workspaceName)) {
     auto workspace = m_adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
