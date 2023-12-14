@@ -31,9 +31,6 @@ public:
 protected:
   ConvFitDataView(const QStringList &headers, QWidget *parent = nullptr);
   IAddWorkspaceDialog *getAddWorkspaceDialog() override;
-
-private:
-  ConvFitAddWorkspaceDialog *m_addWorkspaceDialog;
 };
 
 } // namespace IDA

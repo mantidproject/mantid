@@ -68,11 +68,12 @@ protected:
   QStringList m_wsResolutionSuffixes;
   QStringList m_fbResolutionSuffixes;
 
+  IAddWorkspaceDialog *m_addWorkspaceDialog;
+
 private:
   QStringList m_HeaderLabels;
   void setHorizontalHeaders(const QStringList &headers);
 
-  IndirectAddWorkspaceDialog *m_addWorkspaceDialog;
   IIndirectFitDataPresenter *m_presenter;
 };
 

@@ -35,9 +35,10 @@ ConvFitDataView::ConvFitDataView(const QStringList &headers, QWidget *parent) : 
 
 IAddWorkspaceDialog *ConvFitDataView::getAddWorkspaceDialog() {
   m_addWorkspaceDialog = new ConvFitAddWorkspaceDialog(parentWidget());
-  m_addWorkspaceDialog->setResolutionWSSuffices(m_wsResolutionSuffixes);
-  m_addWorkspaceDialog->setResolutionFBSuffices(m_fbResolutionSuffixes);
-
+  if (auto dialog = dynamic_cast<ConvFitAddWorkspaceDialog *>(m_addWorkspaceDialog)) {
+    dialog->setResolutionWSSuffices(m_wsResolutionSuffixes);
+    dialog->setResolutionFBSuffices(m_fbResolutionSuffixes);
+  }
   connect(m_addWorkspaceDialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
 
   return m_addWorkspaceDialog;

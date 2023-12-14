@@ -30,9 +30,6 @@ public:
 protected:
   FqFitDataView(const QStringList &headers, QWidget *parent = nullptr);
   IAddWorkspaceDialog *getAddWorkspaceDialog() override;
-
-private:
-  FqFitAddWorkspaceDialog *m_addWorkspaceDialog;
 };
 
 } // namespace IDA
