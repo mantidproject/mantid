@@ -72,7 +72,7 @@ public:
 
   template <typename FitDataPresenter> void setUpFitDataPresenter() {
     m_dataPresenter =
-        std::make_unique<FitDataPresenter>(m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
+        std::make_unique<FitDataPresenter>(this, m_fittingModel->getFitDataModel(), m_uiForm->dockArea->m_fitDataView);
   }
 
   void setupOutputOptionsPresenter(bool const editResults = false);

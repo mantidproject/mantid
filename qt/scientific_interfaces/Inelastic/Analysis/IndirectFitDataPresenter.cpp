@@ -27,8 +27,9 @@ public:
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view)
-    : m_model(model), m_view(view) {
+IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model,
+                                                   IIndirectFitDataView *view)
+    : m_tab(tab), m_model(model), m_view(view) {
   m_view->subscribePresenter(this);
   observeReplace(true);
 
