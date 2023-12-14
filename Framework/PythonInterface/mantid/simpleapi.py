@@ -704,10 +704,16 @@ def _check_mandatory_args(algorithm, _algm_object, error, *args, **kwargs):
         if len(valid_str) > 0 and p not in kwargs.keys():
             missing_arg_list.append(p)
     if len(missing_arg_list) != 0:
-        raise RuntimeError("%s argument(s) not supplied to %s" % (missing_arg_list, algorithm))
+        # raise TypeError similar to python
+        missing_arg_list = [f"'{arg}'" for arg in missing_arg_list]
+        raise TypeError(f"{algorithm} missing required arguments: " + ", ".join(missing_arg_list))
     # If the error was not caused by missing property the algorithm specific error should suffice
     else:
-        raise RuntimeError(str(error))
+        msg = f"in running {algorithm}: {str(error)}"
+        if "Some invalid Properties found" in str(error):
+            raise TypeError(msg)
+        else:
+            raise RuntimeError(msg)
 
 
 # ------------------------ General simple function calls ----------------------
