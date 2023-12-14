@@ -656,7 +656,8 @@ def _get_mandatory_args(func_name, required_args, *args, **kwargs):
             val = dict_containing_key[key]
             return val
         except KeyError:
-            raise RuntimeError("%s argument not supplied to %s function" % (str(key), func_name))
+            # raise TypeError similar to python
+            raise TypeError(f"{func_name} missing required argument: '{key}'")
 
     nrequired = len(required_args)
     npositional = len(args)
@@ -936,10 +937,12 @@ def set_properties(alg_object, *args, **kwargs):
             else:
                 alg_object.setProperty(key, new_value)
         except (RuntimeError, TypeError, ValueError) as e:
-            if str(e).startswith("Unknown property search object"):
+            if str(e).startswith("Unknown property search object") or "is an invalid keyword argument for" in str(e):
+                # raise TypeError similar to python
                 msg = f"'{name}' is an invalid keyword argument for {alg_object.name()}-v{alg_object.version()}"
                 raise TypeError(msg)
             else:
+                # re-raise the error with clearer message
                 msg = 'Problem setting "{}" in {}-v{}: {}'.format(name, alg_object.name(), alg_object.version(), str(e))
                 raise e.__class__(msg) from e
 
