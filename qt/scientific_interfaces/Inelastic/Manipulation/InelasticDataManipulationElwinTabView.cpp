@@ -289,7 +289,9 @@ QModelIndexList InelasticDataManipulationElwinTabView::getSelectedData() {
   return m_uiForm.tbElwinData->selectionModel()->selectedIndexes();
 }
 
-API::FileFinderWidget *InelasticDataManipulationElwinTabView::getFileFinderWidget() { return m_uiForm.dsInputFiles; }
+MantidQt::API::FileFinderWidget *InelasticDataManipulationElwinTabView::getFileFinderWidget() {
+  return m_uiForm.dsInputFiles;
+}
 
 void InelasticDataManipulationElwinTabView::setFBSuffixes(QStringList const &suffix) {
   m_uiForm.dsInputFiles->setFileExtensions(suffix);

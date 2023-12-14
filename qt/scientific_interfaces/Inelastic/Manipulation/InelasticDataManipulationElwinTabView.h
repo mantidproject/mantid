@@ -42,10 +42,10 @@ public:
 
   void newPreviewFileSelected(const MatrixWorkspace_sptr &workspace) override;
   int getCurrentInputIndex() override;
-  API::FileFinderWidget *getFileFinderWidget() override;
+  MantidQt::API::FileFinderWidget *getFileFinderWidget() override;
 
-  void plotInput(MatrixWorkspace_sptr inputWS, int spectrum);
-  void newInputFiles();
+  void plotInput(MatrixWorkspace_sptr inputWS, int spectrum) override;
+  void newInputFiles() override;
   void newInputFilesFromDialog(IAddWorkspaceDialog const *dialog) override;
   void clearPreviewFile() override;
   void clearInputFiles() override;
@@ -123,9 +123,10 @@ private:
   virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
 
   IElwinPresenter *m_presenter;
-  Ui::InelasticDataManipulationElwinTab m_uiForm;
-  std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   QtTreePropertyBrowser *m_elwTree;
+  std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
+
+  Ui::InelasticDataManipulationElwinTab m_uiForm;
   QtDoublePropertyManager *m_dblManager;
   QtBoolPropertyManager *m_blnManager;
   QtGroupPropertyManager *m_grpManager;

@@ -9,6 +9,8 @@
 #include "DllConfig.h"
 #include "IAddWorkspaceDialog.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
+#include <QModelIndexList>
 #include <QStringList>
 
 #include <memory>
@@ -35,7 +37,7 @@ public:
 
   virtual void newPreviewFileSelected(const Mantid::API::MatrixWorkspace_sptr &workspace) = 0;
   virtual int getCurrentInputIndex() = 0;
-  virtual API::FileFinderWidget *getFileFinderWidget() = 0;
+  virtual MantidQt::API::FileFinderWidget *getFileFinderWidget() = 0;
 
   virtual void plotInput(Mantid::API::MatrixWorkspace_sptr inputWS, int spectrum) = 0;
   virtual void newInputFiles() = 0;
