@@ -939,7 +939,7 @@ cppcheckError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/ReflectometryTransfo
 cppcheckError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/FakeMD.cpp:0
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/WorkspaceSingleValue.cpp:93
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/CrystalStructure.cpp:100
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/OrientedLattice.cpp:234
+shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/OrientedLattice.cpp:236
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/NiggliCell.cpp:233
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/SpaceGroup.cpp:54
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ScalarUtils.cpp:389
