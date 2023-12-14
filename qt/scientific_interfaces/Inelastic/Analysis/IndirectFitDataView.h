@@ -24,10 +24,10 @@ class IAddWorkspaceDialog;
 class IndirectAddWorkspaceDialog;
 class IIndirectFitDataPresenter;
 
-class MANTIDQT_INELASTIC_DLL IndirectFitDataView : public IIndirectFitDataView {
+class MANTIDQT_INELASTIC_DLL IndirectFitDataView : public QTabWidget, public IIndirectFitDataView {
   Q_OBJECT
 public:
-  IndirectFitDataView(QWidget *parent = nullptr);
+  IndirectFitDataView(QWidget *parent);
   ~IndirectFitDataView() override = default;
 
   void subscribePresenter(IIndirectFitDataPresenter *presenter) override;
@@ -48,15 +48,13 @@ public:
   void setResolutionWSSuffices(const QStringList &suffices) override;
   void setResolutionFBSuffices(const QStringList &suffices) override;
 
-public slots:
-  void showAddWorkspaceDialog();
   void displayWarning(const std::string &warning) override;
 
 protected slots:
   void notifyAddData();
 
 protected:
-  IndirectFitDataView(const QStringList &headers, QWidget *parent = nullptr);
+  IndirectFitDataView(const QStringList &headers, QWidget *parent);
   virtual IAddWorkspaceDialog *getAddWorkspaceDialog();
 
   std::unique_ptr<Ui::IndirectFitDataView> m_uiForm;
@@ -71,6 +69,7 @@ protected:
   IIndirectFitDataPresenter *m_presenter;
 
 private slots:
+  void showAddWorkspaceDialog();
   void notifyRemoveClicked();
   void notifyUnifyClicked();
   void notifyCellChanged(int row, int column);

@@ -97,7 +97,7 @@ namespace IDA {
 IndirectFitDataView::IndirectFitDataView(QWidget *parent) : IndirectFitDataView(defaultHeaders(), parent) {}
 
 IndirectFitDataView::IndirectFitDataView(const QStringList &headers, QWidget *parent)
-    : IIndirectFitDataView(parent), m_uiForm(new Ui::IndirectFitDataView) {
+    : QTabWidget(parent), m_uiForm(new Ui::IndirectFitDataView) {
   m_uiForm->setupUi(this);
 
   setHorizontalHeaders(headers);

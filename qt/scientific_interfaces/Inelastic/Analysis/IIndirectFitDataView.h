@@ -10,8 +10,6 @@
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include <QObject>
-#include <QTabWidget>
 #include <QTableWidget>
 
 namespace MantidQt {
@@ -30,13 +28,9 @@ struct FitDataRow {
   std::string parameter;
 };
 
-class MANTIDQT_INELASTIC_DLL IIndirectFitDataView : public QTabWidget {
-  Q_OBJECT
+class MANTIDQT_INELASTIC_DLL IIndirectFitDataView {
 
 public:
-  IIndirectFitDataView(QWidget *parent = nullptr) : QTabWidget(parent){};
-  virtual ~IIndirectFitDataView() = default;
-
   virtual void subscribePresenter(IIndirectFitDataPresenter *presenter) = 0;
 
   virtual QTableWidget *getDataTable() const = 0;
@@ -54,11 +48,7 @@ public:
   virtual void setResolutionWSSuffices(const QStringList &suffices) = 0;
   virtual void setResolutionFBSuffices(const QStringList &suffices) = 0;
 
-public slots:
   virtual void displayWarning(std::string const &warning) = 0;
-
-signals:
-  void addClicked();
 };
 } // namespace IDA
 } // namespace CustomInterfaces
