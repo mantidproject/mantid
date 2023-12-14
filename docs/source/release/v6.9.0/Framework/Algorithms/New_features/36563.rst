@@ -1,0 +1,1 @@
+- Improve the error messages when calling Algorithms with either missing arguments or invalid arguments. The type of the exceptions is changed from ``RuntimeError`` to ``TypeError`` to be more consistent with python itself.
