@@ -90,16 +90,9 @@ def load_binned(workspace_name, binning, params, path, file_numbers, standard):
 
 
 def vanadium_correction(workspace_name, vana_set=None, ignore_vana_fields=False, sum_vana_sf_nsf=False):
-    # pylint: disable=too-many-locals
-
     """
     Correction of workspace for detector efficiency, angular coverage, lorentz
     factor based on vanadium data
-
-    Key-Arguments
-    vana_set = used Vanadium data, if not given fields matching sample are used
-    ignore_vana_fields = if True fields of vanadium files will be ignored
-    sum_vana_sf_nsf ) if True SF and NSF channels of vanadium are summed
     """
     vana_sum = None
     vana_sum_norm = None
@@ -126,39 +119,6 @@ def vanadium_correction(workspace_name, vana_set=None, ignore_vana_fields=False,
                     norm_list.append(vana_norm)
             vana_sum = sum(vana_list)
             vana_sum_norm = sum(norm_list)
-        else:
-            raise_error("Need to give vanadium dataset explicit if you want all vanadium files to be added.")
-    elif sum_vana_sf_nsf:
-        polarization = field_name.split("_")[0]
-        vana_nsf = "_".join(("vana", polarization, "nsf"))
-        vana_sf = "_".join(("vana", polarization, "sf"))
-        vana_nsf_norm = "_".join((vana_nsf, "norm"))
-        vana_sf_norm = "_".join((vana_sf, "norm"))
-        try:
-            vana_sf = mtd[vana_sf]
-            vana_sf_norm = mtd[vana_sf_norm]
-        except KeyError:
-            raise_error(f"No vanadium file for {polarization}_sf . You can choose to ignore vanadium fields in the options.")
-            return mtd[workspace_name]
-        try:
-            vana_nsf = mtd[vana_nsf]
-            vana_nsf_norm = mtd[vana_nsf_norm]
-        except KeyError:
-            raise_error(f"No vanadium file for {polarization}_nsf. You can choose to ignore vanadium fields in the options.")
-            return mtd[workspace_name]
-        vana_sum = vana_sf + vana_nsf
-        vana_sum_norm = vana_sf_norm + vana_nsf_norm
-    else:
-        vana_name = "_".join(("vana", field_name))
-        vana_norm = "_".join((vana_name, "norm"))
-        try:
-            vana_sum = mtd[vana_name]
-            vana_sum_norm = mtd[vana_norm]
-        except KeyError:
-            raise_error(f"No vanadium file for {field_name}. You can choose to ignore vanadium fields in the options.")
-            return mtd[workspace_name]
-    # common code, which will be run regardless of the case
-
     sum_signal = np.nan_to_num(vana_sum.getSignalArray())
     total_signal = np.sum(sum_signal)
     sum_error = np.nan_to_num(vana_sum.getErrorSquaredArray())
@@ -167,10 +127,8 @@ def vanadium_correction(workspace_name, vana_set=None, ignore_vana_fields=False,
     total_signal_norm = np.sum(sum_signal_norm)
     sum_error_norm = np.nan_to_num(vana_sum_norm.getErrorSquaredArray())
     total_error_norm = np.sum(sum_error_norm)
-
     vana_total = CreateSingleValuedWorkspace(DataValue=total_signal, ErrorValue=np.sqrt(total_error))
     vana_total_norm = CreateSingleValuedWorkspace(DataValue=total_signal_norm, ErrorValue=np.sqrt(total_error_norm))
-
     coef_u = vana_sum / vana_total
     coef_norm = vana_sum_norm / vana_total_norm
     coef = coef_u / coef_norm
