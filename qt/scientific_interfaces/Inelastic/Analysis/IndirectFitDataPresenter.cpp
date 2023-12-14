@@ -42,8 +42,6 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectDataAnalysisTab *tab
   connect(m_view, SIGNAL(unifyClicked()), this, SLOT(unifyRangeToSelectedData()));
 
   connect(m_view, SIGNAL(cellChanged(int, int)), this, SLOT(handleCellChanged(int, int)));
-  connect(m_view, SIGNAL(startXChanged(double)), this, SIGNAL(startXChanged(double)));
-  connect(m_view, SIGNAL(endXChanged(double)), this, SIGNAL(endXChanged(double)));
 }
 
 IndirectFitDataPresenter::~IndirectFitDataPresenter() { observeReplace(false); }

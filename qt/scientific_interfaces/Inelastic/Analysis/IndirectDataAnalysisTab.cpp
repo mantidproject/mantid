@@ -85,10 +85,7 @@ void IndirectDataAnalysisTab::connectDataPresenter() {
           SLOT(tableStartXChanged(double, WorkspaceID, WorkspaceIndex)));
   connect(m_dataPresenter.get(), SIGNAL(endXChanged(double, WorkspaceID, WorkspaceIndex)), this,
           SLOT(tableEndXChanged(double, WorkspaceID, WorkspaceIndex)));
-  connect(m_dataPresenter.get(), SIGNAL(startXChanged(double)), this, SLOT(handleStartXChanged(double)));
-  connect(m_dataPresenter.get(), SIGNAL(endXChanged(double)), this, SLOT(handleEndXChanged(double)));
 
-  connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this, SLOT(respondToSingleResolutionLoaded()));
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this, SLOT(respondToDataChanged()));
   connect(m_dataPresenter.get(), SIGNAL(dataRemoved()), this, SLOT(respondToDataRemoved()));
 }
@@ -600,12 +597,6 @@ void IndirectDataAnalysisTab::updateResultOptions() {
   m_outOptionsPresenter->setPlotEnabled(isFit);
   m_outOptionsPresenter->setEditResultEnabled(isFit);
   m_outOptionsPresenter->setSaveEnabled(isFit);
-}
-
-void IndirectDataAnalysisTab::respondToSingleResolutionLoaded() {
-  setModelFitFunction();
-  m_plotPresenter->updatePlots();
-  m_plotPresenter->updateGuessAvailability();
 }
 
 void IndirectDataAnalysisTab::respondToDataChanged() {

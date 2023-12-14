@@ -84,13 +84,10 @@ protected slots:
   void showAddWorkspaceDialog();
 
 signals:
-  void singleResolutionLoaded();
   void dataRemoved();
   void dataChanged();
   void startXChanged(double, WorkspaceID, WorkspaceIndex);
-  void startXChanged(double);
   void endXChanged(double, WorkspaceID, WorkspaceIndex);
-  void endXChanged(double);
   void requestedAddWorkspaceDialog();
 
 protected:

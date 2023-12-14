@@ -179,7 +179,6 @@ protected slots:
   void respondToFunctionChanged();
 
 private slots:
-  void respondToSingleResolutionLoaded();
   void respondToDataChanged();
   void respondToDataRemoved();
 };

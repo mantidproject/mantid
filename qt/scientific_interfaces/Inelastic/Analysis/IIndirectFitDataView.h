@@ -65,8 +65,6 @@ signals:
   void addClicked();
   void removeClicked();
   void unifyClicked();
-  void startXChanged(double);
-  void endXChanged(double);
 };
 } // namespace IDA
 } // namespace CustomInterfaces
