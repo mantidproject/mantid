@@ -38,6 +38,7 @@ class DNSElasticSCOptionsView(DNSView):
             "flipping_ratio": self._content.cB_flipping_ratio,
             "subtract_background_from_sample": self._content.cB_subtract_background_from_sample,
             "background_factor": self._content.dSB_background_factor,
+            "binning": self._content.gB_binning,
             "automatic_binning": self._content.cB_automatic_binning,
             "two_theta_min": self._content.dSB_two_theta_min,
             "two_theta_max": self._content.dSB_two_theta_max,
@@ -45,12 +46,14 @@ class DNSElasticSCOptionsView(DNSView):
             "omega_min": self._content.dSB_omega_min,
             "omega_max": self._content.dSB_omega_max,
             "omega_bin_size": self._content.dSB_omega_bin_size,
+            "lattice_parameters": self._content.gB_lattice_parameter,
             "a": self._content.dSB_a,
             "b": self._content.dSB_b,
             "c": self._content.dSB_c,
             "alpha": self._content.dSB_alpha,
             "beta": self._content.dSB_beta,
             "gamma": self._content.dSB_gamma,
+            "orientation": self._content.gB_orientation,
             "hkl1": self._content.lE_hkl1,
             "hkl2": self._content.lE_hkl2,
             "omega_offset": self._content.dSB_omega_offset,
@@ -98,12 +101,7 @@ class DNSElasticSCOptionsView(DNSView):
             self._map["sum_vana_sf_nsf"].setChecked(False)
 
     def _disable_lattice(self, state):
-        self._map["a"].setEnabled(not state)
-        self._map["b"].setEnabled(not state)
-        self._map["c"].setEnabled(not state)
-        self._map["alpha"].setEnabled(not state)
-        self._map["beta"].setEnabled(not state)
-        self._map["gamma"].setEnabled(not state)
+        self._map["lattice_parameters"].setEnabled(not state)
         self._map["dx"].setEnabled(state)
         self._map["dy"].setEnabled(state)
 
