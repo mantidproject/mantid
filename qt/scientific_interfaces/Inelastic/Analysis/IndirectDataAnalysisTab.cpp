@@ -77,7 +77,6 @@ void IndirectDataAnalysisTab::setup() {
   updateResultOptions();
 
   connectDataPresenter();
-  connectPlotPresenter();
   connectFitPropertyBrowser();
 }
 
@@ -96,19 +95,6 @@ void IndirectDataAnalysisTab::connectDataPresenter() {
   connect(m_dataPresenter.get(), SIGNAL(dataRemoved()), this, SLOT(respondToDataRemoved()));
 }
 
-void IndirectDataAnalysisTab::connectPlotPresenter() {
-  connect(m_plotPresenter.get(), SIGNAL(fitSingleSpectrum(WorkspaceID, WorkspaceIndex)), this,
-          SLOT(singleFit(WorkspaceID, WorkspaceIndex)));
-  connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this, SLOT(handleStartXChanged(double)));
-  connect(m_plotPresenter.get(), SIGNAL(endXChanged(double)), this, SLOT(handleEndXChanged(double)));
-
-  connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(WorkspaceID)), this,
-          SLOT(respondToPlotSpectrumChanged()));
-  connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged()), this, SLOT(respondToPlotSpectrumChanged()));
-  connect(m_plotPresenter.get(), SIGNAL(fwhmChanged(double)), this, SLOT(respondToFwhmChanged(double)));
-  connect(m_plotPresenter.get(), SIGNAL(backgroundChanged(double)), this, SLOT(respondToBackgroundChanged(double)));
-}
-
 void IndirectDataAnalysisTab::connectFitPropertyBrowser() {
   connect(m_fitPropertyBrowser, SIGNAL(functionChanged()), this, SLOT(respondToFunctionChanged()));
 }
@@ -121,7 +107,9 @@ void IndirectDataAnalysisTab::setupOutputOptionsPresenter(bool const editResults
 }
 
 void IndirectDataAnalysisTab::setupPlotView(std::optional<std::pair<double, double>> const &xPlotBounds) {
-  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(m_uiForm->dockArea->m_fitPlotView);
+  auto model = std::make_unique<IndirectFitPlotModel>();
+  m_plotPresenter =
+      std::make_unique<IndirectFitPlotPresenter>(this, m_uiForm->dockArea->m_fitPlotView, std::move(model));
   m_plotPresenter->setFittingData(m_dataPresenter->getFittingData());
   m_plotPresenter->setFitOutput(m_fittingModel->getFitOutput());
   if (xPlotBounds) {
@@ -376,7 +364,7 @@ void IndirectDataAnalysisTab::updateFitStatus() {
 /**
  * Plots the spectra corresponding to the selected parameters
  */
-void IndirectDataAnalysisTab::plotSelectedSpectra() {
+void IndirectDataAnalysisTab::handlePlotSelectedSpectra() {
   enableFitButtons(false);
   plotSelectedSpectra(m_outOptionsPresenter->getSpectraToPlot());
   enableFitButtons(true);
@@ -423,9 +411,9 @@ std::vector<std::string> IndirectDataAnalysisTab::getFitParameterNames() const {
 /**
  * Executes the single fit algorithm defined in this indirect fit analysis tab.
  */
-void IndirectDataAnalysisTab::singleFit() { singleFit(getSelectedDataIndex(), getSelectedSpectrum()); }
+void IndirectDataAnalysisTab::singleFit() { handleSingleFitClicked(getSelectedDataIndex(), getSelectedSpectrum()); }
 
-void IndirectDataAnalysisTab::singleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+void IndirectDataAnalysisTab::handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (validate()) {
     m_activeSpectrumIndex = spectrum;
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
@@ -650,18 +638,18 @@ void IndirectDataAnalysisTab::respondToDataRemoved() {
   updateParameterEstimationData();
 }
 
-void IndirectDataAnalysisTab::respondToPlotSpectrumChanged() {
+void IndirectDataAnalysisTab::handlePlotSpectrumChanged() {
   auto const index = m_plotPresenter->getSelectedDomainIndex();
   m_fitPropertyBrowser->setCurrentDataset(index);
 }
 
-void IndirectDataAnalysisTab::respondToFwhmChanged(double fwhm) {
+void IndirectDataAnalysisTab::handleFwhmChanged(double fwhm) {
   m_fittingModel->setFWHM(fwhm, m_plotPresenter->getActiveWorkspaceID());
   updateFitBrowserParameterValues();
   m_plotPresenter->updateGuess();
 }
 
-void IndirectDataAnalysisTab::respondToBackgroundChanged(double value) {
+void IndirectDataAnalysisTab::handleBackgroundChanged(double value) {
   m_fittingModel->setBackground(value, m_plotPresenter->getActiveWorkspaceID());
   m_fitPropertyBrowser->setBackgroundA0(value);
   setModelFitFunction();

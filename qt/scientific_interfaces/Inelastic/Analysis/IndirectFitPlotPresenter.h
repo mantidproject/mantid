@@ -7,7 +7,6 @@
 #pragma once
 
 #include "IndirectFitPlotModel.h"
-#include "IndirectFitPlotView.h"
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
@@ -15,13 +14,33 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-using namespace MantidWidgets;
 
-class MANTIDQT_INELASTIC_DLL IndirectFitPlotPresenter : public QObject {
-  Q_OBJECT
+class IIndirectDataAnalysisTab;
+class IIndirectFitPlotView;
+
+class MANTIDQT_INELASTIC_DLL IIndirectFitPlotPresenter {
+public:
+  virtual void handleSelectedFitDataChanged(WorkspaceID workspaceID) = 0;
+  virtual void handlePlotSpectrumChanged(WorkspaceIndex spectrum) = 0;
+  virtual void handlePlotCurrentPreview() = 0;
+  virtual void handlePlotGuess(bool doPlotGuess) = 0;
+  virtual void handleFitSingleSpectrum() = 0;
+
+  virtual void handleStartXChanged(double value) = 0;
+  virtual void handleEndXChanged(double value) = 0;
+
+  virtual void handleHWHMMinimumChanged(double maximum) = 0;
+  virtual void handleHWHMMaximumChanged(double minimum) = 0;
+
+  virtual void handleFWHMChanged(double minimum, double maximum) = 0;
+  virtual void handleBackgroundChanged(double value) = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL IndirectFitPlotPresenter final : public IIndirectFitPlotPresenter {
 
 public:
-  IndirectFitPlotPresenter(IIndirectFitPlotView *view);
+  IndirectFitPlotPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitPlotView *view,
+                           std::unique_ptr<IndirectFitPlotModel> model);
 
   void watchADS(bool watch);
 
@@ -38,12 +57,11 @@ public:
 
   void setXBounds(std::pair<double, double> const &bounds);
 
-public slots:
-  void setStartX(double /*startX*/);
-  void setEndX(double /*endX*/);
   void setActiveSpectrum(WorkspaceIndex spectrum);
-  void updatePlotSpectrum(WorkspaceIndex spectrum);
   void updateRangeSelectors();
+
+  void setStartX(double value);
+  void setEndX(double value);
   void appendLastDataToSelection(std::vector<std::string> displayNames);
   void updateDataSelection(std::vector<std::string> displayNames);
   void updateAvailableSpectra();
@@ -52,28 +70,20 @@ public slots:
   void updateGuess();
   void updateGuessAvailability();
 
-  void disableSpectrumPlotSelection();
+  void handleSelectedFitDataChanged(WorkspaceID workspaceID) override;
+  void handlePlotSpectrumChanged(WorkspaceIndex spectrum) override;
+  void handlePlotCurrentPreview() override;
+  void handlePlotGuess(bool doPlotGuess) override;
+  void handleFitSingleSpectrum() override;
 
-signals:
-  void selectedFitDataChanged(WorkspaceID /*_t1*/);
-  void plotSpectrumChanged();
-  void fitSingleSpectrum(WorkspaceID /*_t1*/, WorkspaceIndex /*_t2*/);
-  void startXChanged(double /*_t1*/);
-  void endXChanged(double /*_t1*/);
-  void fwhmChanged(double /*_t1*/);
-  void backgroundChanged(double /*_t1*/);
+  void handleStartXChanged(double value) override;
+  void handleEndXChanged(double value) override;
 
-private slots:
-  void setActiveIndex(WorkspaceID workspaceID);
-  void setHWHMMaximum(double minimum);
-  void setHWHMMinimum(double maximum);
-  void plotGuess(bool doPlotGuess);
-  void updateFitRangeSelector();
-  void plotCurrentPreview();
-  void emitFitSingleSpectrum();
-  void emitFWHMChanged(double minimum, double maximum);
-  void handleSelectedFitDataChanged(WorkspaceID workspaceID);
-  void handlePlotSpectrumChanged(WorkspaceIndex spectrum);
+  void handleHWHMMinimumChanged(double maximum) override;
+  void handleHWHMMaximumChanged(double minimum) override;
+
+  void handleFWHMChanged(double minimum, double maximum) override;
+  void handleBackgroundChanged(double value) override;
 
 private:
   void disableAllDataSelection();
@@ -90,12 +100,14 @@ private:
   void updateHWHMSelector();
   void setHWHM(double value);
   void updateBackgroundSelector();
-  void emitSelectedFitDataChanged();
+  void updateFitRangeSelector();
+  void setActiveIndex(WorkspaceID workspaceID);
 
   void plotSpectrum(WorkspaceIndex spectrum) const;
 
-  std::unique_ptr<IndirectFitPlotModel> m_model;
+  IIndirectDataAnalysisTab *m_tab;
   IIndirectFitPlotView *m_view;
+  std::unique_ptr<IndirectFitPlotModel> m_model;
 
   std::unique_ptr<Widgets::MplCpp::ExternalPlotter> m_plotter;
 };
