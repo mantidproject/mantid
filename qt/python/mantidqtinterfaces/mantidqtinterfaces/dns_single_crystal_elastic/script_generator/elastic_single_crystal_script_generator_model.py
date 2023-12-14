@@ -47,7 +47,6 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def script_maker(self, options, paths, file_selector=None):
         self._script = []
-
         # shortcuts for options
         self._vana_correction = options["corrections"] and options["det_efficiency"]
         self._nicr_correction = options["corrections"] and options["flipping_ratio"]
@@ -117,8 +116,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
             "from mantidqtinterfaces.dns_single_crystal_elastic.scripts.md_single_crystal_elastic import "
             "vanadium_correction, flipping_ratio_correction",
             "from mantidqtinterfaces.dns_single_crystal_elastic.scripts.md_single_crystal_elastic import background_subtraction",
-            "from mantid.simpleapi import ConvertMDHistoToMatrixWorkspace, mtd",
-            "from mantid.simpleapi import SaveAscii, SaveNexus",
+            "from mantid.simpleapi import ConvertMDHistoToMatrixWorkspace, mtd, SaveAscii, SaveNexus",
             "",
         ]
         return lines
@@ -162,8 +160,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
 
         lines = [
             f"binning = {{'two_theta_binning': {two_theta_binning},\n"
-            f"           'omega_binning': {omega_binning}}} # min, max,"
-            " number_of_bins"
+            f"           'omega_binning': {omega_binning}}} # min, max, number_of_bins"
         ]
         return lines
 
@@ -191,10 +188,8 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _get_vana_correction_string(self):
         return (
-            f"{self._spacing}vanadium_correction(workspace, "
-            " vana_set=standard_data['vana'], "
-            f"ignore_vana_fields={self._ignore_vana}, "
-            f"sum_vana_sf_nsf={self._sum_sf_nsf})"
+            f"{self._spacing}vanadium_correction(workspace, vana_set=standard_data['vana'], "
+            f"ignore_vana_fields={self._ignore_vana}, sum_vana_sf_nsf={self._sum_sf_nsf})"
         )
 
     def _get_sample_corrections_lines(self):
@@ -214,17 +209,14 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
     def _get_ascii_save_string(self):
         if self._ascii:
             return (
-                f"{self._spacing}"
-                "SaveAscii('mat_{}'.format(workspace), "
-                f"'{self._export_path}/"
-                "{}.csv'.format(workspace)"
-                ", WriteSpectrumID=False)"
+                f"{self._spacing}SaveAscii('mat_{{}}'.format(workspace), "
+                f"'{self._export_path}/{{}}.csv'.format(workspace), WriteSpectrumID=False)"
             )
         return ""
 
     def _get_nexus_save_string(self):
         if self._nexus:
-            return f"{self._spacing}" "SaveNexus('mat_{}'.format(workspace), " f"'{self._export_path}/" "{}.nxs'.format(" "workspace))"
+            return f"{self._spacing}SaveNexus('mat_{{}}'.format(workspace), '{self._export_path}/{{}}.nxs'.format(workspace))"
         return ""
 
     def _get_save_string(self):
@@ -238,8 +230,7 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
             "",
             "# convert the output sample MDHistoWorkspaces to MatrixWorkspaces",
             "# and save the data into the directory specified for Export",
-            f"{self._loop}{self._spacing}ConvertMDHistoToMatrixWorkspace"
-            "(workspace, Outputworkspace='mat_{}'.format(workspace), "
+            f"{self._loop}{self._spacing}ConvertMDHistoToMatrixWorkspace(workspace, Outputworkspace='mat_{{}}'.format(workspace), "
             f"Normalization='NoNormalization'){save_string}",
             "",
         ]
@@ -332,46 +323,37 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         if self._corrections and not self._standard_data:
             return "Standard data have to be selected to perform reduction of sample data."
         if self._bank_positions_not_compatible():
-            return "Detector rotation angles of the selected standard data" " do not match the angles of the selected sample data."
+            return "Detector rotation angles of the selected standard data do not match the angles of the selected sample data."
         if self._vana_correction and self._vana_not_in_standard():
             return (
-                "Detector efficiency correction option is chosen, "
-                "but detector bank rotation angles of the selected "
-                "vanadium files do not correspond to those of the "
-                "selected sample files."
+                "Detector efficiency correction option is chosen, but detector bank rotation angles of the selected vanadium files "
+                "do not correspond to those of the selected sample files."
             )
         if self._vana_correction and self._empty_not_in_standard():
             return (
                 "Detector efficiency correction option is chosen, "
                 'but detector bank rotation angles of the selected "empty" '
-                "files do not correspond to those of the selected "
-                "sample files."
+                "files do not correspond to those of the selected sample files."
             )
         if self._nicr_correction and self._nicr_not_in_standard():
             return (
-                "Flipping ratio correction option is chosen, but "
-                "detector bank rotation angles of the selected NiCr "
-                "files do not correspond to those of the selected "
-                "sample files."
+                "Flipping ratio correction option is chosen, but detector bank rotation angles of the selected NiCr "
+                "files do not correspond to those of the selected sample files."
             )
         if self._nicr_correction and self._empty_not_in_standard():
             return (
                 "Flipping ratio correction option is chosen, but "
                 'detector bank rotation angles of the selected "empty" '
-                "files do not correspond to those of the selected "
-                "sample files."
+                "files do not correspond to those of the selected sample files."
             )
         if self._sample_background_correction and self._empty_not_in_standard():
             return (
                 "Background subtraction from sample is chosen, but "
                 'detector bank rotation angles of the selected "empty" '
-                "files do not correspond to those of the selected "
-                "sample files."
+                "files do not correspond to those of the selected sample files."
             )
         if self._nicr_correction and self._flipping_ratio_not_possible()[0]:
             return (
-                "Flipping ratio correction option is chosen, but "
-                "an incomplete set of pairs of SF and NSF measurements "
-                "is found for the following bank rotation angles: "
-                f"{self._flipping_ratio_not_possible()[1]}"
+                "Flipping ratio correction option is chosen, but an incomplete set of pairs of SF and NSF measurements "
+                f"is found for the following bank rotation angles: {self._flipping_ratio_not_possible()[1]}"
             )
