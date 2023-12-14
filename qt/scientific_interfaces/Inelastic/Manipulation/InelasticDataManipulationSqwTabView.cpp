@@ -120,6 +120,7 @@ void InelasticDataManipulationSqwTabView::setEnableOutputOptions(bool const enab
 }
 
 void InelasticDataManipulationSqwTabView::plotRqwContour(MatrixWorkspace_sptr rqwWorkspace) {
+  m_uiForm.rqwPlot2D->clearPlot();
   m_uiForm.rqwPlot2D->setWorkspace(rqwWorkspace);
 }
 
