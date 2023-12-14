@@ -85,7 +85,6 @@ protected slots:
 
 signals:
   void singleResolutionLoaded();
-  void dataAdded(IAddWorkspaceDialog const *);
   void dataRemoved();
   void dataChanged();
   void startXChanged(double, WorkspaceID, WorkspaceIndex);

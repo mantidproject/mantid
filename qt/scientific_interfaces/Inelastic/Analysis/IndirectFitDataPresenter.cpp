@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitDataPresenter.h"
+#include "IndirectDataAnalysisTab.h"
 
 #include <map>
 #include <utility>
@@ -122,7 +123,7 @@ void IndirectFitDataPresenter::showAddWorkspaceDialog() { m_view->showAddWorkspa
 
 void IndirectFitDataPresenter::handleAddData(IAddWorkspaceDialog const *dialog) {
   try {
-    emit dataAdded(dialog);
+    m_tab->handleDataAdded(dialog);
     updateTableFromModel();
     emit dataChanged();
   } catch (const std::runtime_error &ex) {

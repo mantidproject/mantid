@@ -90,8 +90,6 @@ void IndirectDataAnalysisTab::connectDataPresenter() {
 
   connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this, SLOT(respondToSingleResolutionLoaded()));
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this, SLOT(respondToDataChanged()));
-  connect(m_dataPresenter.get(), SIGNAL(dataAdded(IAddWorkspaceDialog const *)), this,
-          SLOT(respondToDataAdded(IAddWorkspaceDialog const *)));
   connect(m_dataPresenter.get(), SIGNAL(dataRemoved()), this, SLOT(respondToDataRemoved()));
 }
 
@@ -620,7 +618,7 @@ void IndirectDataAnalysisTab::respondToDataChanged() {
   updateResultOptions();
 }
 
-void IndirectDataAnalysisTab::respondToDataAdded(IAddWorkspaceDialog const *dialog) {
+void IndirectDataAnalysisTab::handleDataAdded(IAddWorkspaceDialog const *dialog) {
   if (m_dataPresenter->addWorkspaceFromDialog(dialog)) {
     m_fittingModel->addDefaultParameters();
   }

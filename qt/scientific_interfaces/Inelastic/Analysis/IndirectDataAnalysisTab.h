@@ -35,6 +35,9 @@ namespace IDA {
 
 class MANTIDQT_INELASTIC_DLL IIndirectDataAnalysisTab {
 public:
+  // Used by FitDataPresenter
+  virtual void handleDataAdded(IAddWorkspaceDialog const *dialog) = 0;
+
   // Used by FitPlotPresenter
   virtual void handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) = 0;
   virtual void handleStartXChanged(double startX) = 0;
@@ -90,6 +93,8 @@ public:
   std::string getTabName() const noexcept { return m_tabName; }
   bool hasResolution() const noexcept { return m_hasResolution; }
   void setFileExtensionsByName(bool filter);
+
+  void handleDataAdded(IAddWorkspaceDialog const *dialog) override;
 
   void handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) override;
   void handlePlotSpectrumChanged() override;
@@ -176,7 +181,6 @@ protected slots:
 private slots:
   void respondToSingleResolutionLoaded();
   void respondToDataChanged();
-  void respondToDataAdded(IAddWorkspaceDialog const *dialog);
   void respondToDataRemoved();
 };
 
