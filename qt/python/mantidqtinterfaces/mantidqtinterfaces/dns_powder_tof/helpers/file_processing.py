@@ -23,7 +23,9 @@ def filter_filenames(all_datafiles, start, end):
     """
     filtered = []
     for filename in all_datafiles:
-        number = int(filename.replace(".d_dat", "").split("_")[-1])
+        digit_patterns = re.findall(r"\d+", filename)
+        empty_delimiter = ""
+        number = int(empty_delimiter.join(digit_patterns))
         if end >= number >= start:
             filtered.append(filename)
     return filtered
@@ -37,7 +39,7 @@ def return_filelist(data_dir):
     if not os.path.isdir(data_dir):
         return []
     for file_name in sorted(os.listdir(data_dir)):
-        if re.match(r".*?_[0-9]+.d_dat", file_name):
+        if file_name.endswith(".d_dat"):
             filelist.append(file_name)
     return filelist
 
@@ -89,7 +91,7 @@ def load_txt(filename, current_dir=None):
     else:
         current_path = filename
     with open(current_path, "r", encoding="utf8") as my_file:
-        txt = my_file.readlines()
+        txt = my_file.read()
     return txt
 
 
