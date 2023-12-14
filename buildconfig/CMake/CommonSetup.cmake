@@ -226,13 +226,6 @@ if(ENABLE_PRECOMMIT)
     if(NOT PRE_COMMIT_RESULT EQUAL "0")
       message(FATAL_ERROR "Pre-commit install failed with ${PRE_COMMIT_RESULT}")
     endif()
-    # Create pre-commit script wrapper to use mantid third party python for pre-commit
-    file(TO_CMAKE_PATH $ENV{CONDA_PREFIX} CONDA_SHELL_PATH)
-    file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
-    file(
-      WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit"
-      "#!/usr/bin/env sh\n${CONDA_SHELL_PATH}/Scripts/wrappers/conda/python.bat ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py"
-    )
   else() # linux and osx
     execute_process(
       COMMAND bash -c "${PRE_COMMIT_EXE} install"
