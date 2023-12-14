@@ -35,7 +35,6 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectDataAnalysisTab *tab
   observeReplace(true);
 
   connect(m_view, SIGNAL(addClicked()), this, SIGNAL(requestedAddWorkspaceDialog()));
-  connect(m_view, SIGNAL(addClicked()), this, SLOT(showAddWorkspaceDialog()));
 
   connect(m_view, SIGNAL(removeClicked()), this, SLOT(removeSelectedData()));
 
@@ -116,8 +115,6 @@ std::vector<std::pair<std::string, size_t>> IndirectFitDataPresenter::getResolut
 UserInputValidator &IndirectFitDataPresenter::validate(UserInputValidator &validator) {
   return m_view->validate(validator);
 }
-
-void IndirectFitDataPresenter::showAddWorkspaceDialog() { m_view->showAddWorkspaceDialog(); }
 
 void IndirectFitDataPresenter::handleAddData(IAddWorkspaceDialog const *dialog) {
   try {

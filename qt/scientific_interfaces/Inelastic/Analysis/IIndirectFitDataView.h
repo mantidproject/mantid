@@ -54,8 +54,6 @@ public:
   virtual void setResolutionWSSuffices(const QStringList &suffices) = 0;
   virtual void setResolutionFBSuffices(const QStringList &suffices) = 0;
 
-  virtual void showAddWorkspaceDialog() = 0;
-
 public slots:
   virtual void displayWarning(std::string const &warning) = 0;
 

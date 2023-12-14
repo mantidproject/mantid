@@ -80,9 +80,6 @@ public:
 
   void handleAddData(IAddWorkspaceDialog const *dialog) override;
 
-protected slots:
-  void showAddWorkspaceDialog();
-
 signals:
   void requestedAddWorkspaceDialog();
 

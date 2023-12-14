@@ -48,9 +48,8 @@ public:
   void setResolutionWSSuffices(const QStringList &suffices) override;
   void setResolutionFBSuffices(const QStringList &suffices) override;
 
-  void showAddWorkspaceDialog() override;
-
 public slots:
+  void showAddWorkspaceDialog();
   void displayWarning(const std::string &warning) override;
 
 protected slots:
