@@ -19,8 +19,6 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectDataAnalysisTab *tab
     : m_tab(tab), m_model(model), m_view(view) {
   m_view->subscribePresenter(this);
   observeReplace(true);
-
-  connect(m_view, SIGNAL(addClicked()), this, SIGNAL(requestedAddWorkspaceDialog()));
 }
 
 IndirectFitDataPresenter::~IndirectFitDataPresenter() { observeReplace(false); }

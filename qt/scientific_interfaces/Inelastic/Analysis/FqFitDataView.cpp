@@ -27,7 +27,9 @@ QStringList FqFitHeaders() {
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-FqFitDataView::FqFitDataView(QWidget *parent) : FqFitDataView(FqFitHeaders(), parent) {}
+FqFitDataView::FqFitDataView(QWidget *parent) : FqFitDataView(FqFitHeaders(), parent) {
+  connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SLOT(notifyAddClicked()));
+}
 
 FqFitDataView::FqFitDataView(const QStringList &headers, QWidget *parent) : IndirectFitDataView(headers, parent) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
@@ -44,6 +46,12 @@ IAddWorkspaceDialog *FqFitDataView::getAddWorkspaceDialog() {
           SLOT(notifyParameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)));
 
   return m_addWorkspaceDialog;
+}
+
+void FqFitDataView::notifyAddClicked() {
+  if (auto presenter = dynamic_cast<FqFitDataPresenter *>(m_presenter)) {
+    presenter->handleAddClicked();
+  }
 }
 
 void FqFitDataView::notifyWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {

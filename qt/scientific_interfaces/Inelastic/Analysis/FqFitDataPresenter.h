@@ -29,6 +29,7 @@ namespace IDA {
 
 class MANTIDQT_INELASTIC_DLL IFqFitDataPresenter {
 public:
+  virtual void handleAddClicked() = 0;
   virtual void handleWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspace) = 0;
   virtual void handleParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type) = 0;
 };
@@ -42,12 +43,12 @@ public:
   void setActiveWidth(std::size_t widthIndex, WorkspaceID dataIndex, bool single = true) override;
   void setActiveEISF(std::size_t eisfIndex, WorkspaceID dataIndex, bool single = true) override;
 
+  void handleAddClicked() override;
   void handleWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspace) override;
   void handleParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type) override;
 
 private slots:
   void setActiveParameterType(const std::string &type);
-  void updateActiveWorkspaceID();
   void updateActiveWorkspaceID(WorkspaceID index);
 
 signals:

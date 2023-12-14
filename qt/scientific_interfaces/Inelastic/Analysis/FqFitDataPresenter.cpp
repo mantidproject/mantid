@@ -200,9 +200,7 @@ namespace MantidQt::CustomInterfaces::IDA {
 FqFitDataPresenter::FqFitDataPresenter(IIndirectDataAnalysisTab *tab, IIndirectFitDataModel *model,
                                        IIndirectFitDataView *view)
     : IndirectFitDataPresenter(tab, model, view), m_activeParameterType("Width"), m_activeWorkspaceID(WorkspaceID{0}),
-      m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {
-  connect(this, SIGNAL(requestedAddWorkspaceDialog()), this, SLOT(updateActiveWorkspaceID()));
-}
+      m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {}
 
 bool FqFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dialog) {
   if (const auto fqFitDialog = dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
@@ -250,9 +248,9 @@ void FqFitDataPresenter::addWorkspace(const std::string &workspaceName, const st
 
 void FqFitDataPresenter::setActiveParameterType(const std::string &type) { m_activeParameterType = type; }
 
-void FqFitDataPresenter::updateActiveWorkspaceID() { m_activeWorkspaceID = m_model->getNumberOfWorkspaces(); }
-
 void FqFitDataPresenter::updateActiveWorkspaceID(WorkspaceID index) { m_activeWorkspaceID = index; }
+
+void FqFitDataPresenter::handleAddClicked() { updateActiveWorkspaceID(m_model->getNumberOfWorkspaces()); }
 
 void FqFitDataPresenter::handleWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, const std::string &workspaceName) {
   FqFitParameters parameters;

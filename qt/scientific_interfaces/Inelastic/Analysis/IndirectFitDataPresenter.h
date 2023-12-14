@@ -86,9 +86,6 @@ public:
   void handleUnifyClicked() override;
   void handleCellChanged(int row, int column) override;
 
-signals:
-  void requestedAddWorkspaceDialog();
-
 protected:
   IIndirectFitDataView const *getView() const;
   void displayWarning(const std::string &warning);
