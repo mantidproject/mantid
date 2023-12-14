@@ -797,7 +797,7 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/Compos
 cppcheckError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/ReflectometryTransform.cpp:0
 cppcheckError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/FakeMD.cpp:0
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/WorkspaceSingleValue.cpp:93
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/OrientedLattice.cpp:234
+shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/OrientedLattice.cpp:236
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/NiggliCell.cpp:233
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/SpaceGroup.cpp:54
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/ScalarUtils.cpp:389
