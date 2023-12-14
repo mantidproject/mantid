@@ -23,7 +23,14 @@ namespace IDA {
 
 using namespace MantidWidgets;
 
-class MANTIDQT_INELASTIC_DLL IndirectFitDataPresenter : public QObject, public AnalysisDataServiceObserver {
+class MANTIDQT_INELASTIC_DLL IIndirectFitDataPresenter {
+public:
+  virtual void handleAddData(IAddWorkspaceDialog const *dialog) = 0;
+};
+
+class MANTIDQT_INELASTIC_DLL IndirectFitDataPresenter : public QObject,
+                                                        public AnalysisDataServiceObserver,
+                                                        public IIndirectFitDataPresenter {
   Q_OBJECT
 public:
   IndirectFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
@@ -42,10 +49,7 @@ public:
   void setEndX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
 
   std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const;
-  QStringList getSampleWSSuffices() const;
-  QStringList getSampleFBSuffices() const;
-  QStringList getResolutionWSSuffices() const;
-  QStringList getResolutionFBSuffices() const;
+
   void updateTableFromModel();
   WorkspaceID getNumberOfWorkspaces() const;
   size_t getNumberOfDomains() const;
@@ -72,10 +76,10 @@ public:
     UNUSED_ARG(single);
   };
 
+  void handleAddData(IAddWorkspaceDialog const *dialog) override;
+
 protected slots:
   void showAddWorkspaceDialog();
-
-  virtual void closeDialog();
 
 signals:
   void singleResolutionLoaded();
@@ -90,30 +94,23 @@ signals:
 
 protected:
   IIndirectFitDataView const *getView() const;
-  void addData(IAddWorkspaceDialog const *dialog);
   void displayWarning(const std::string &warning);
   virtual void addTableEntry(FitDomainIndex row);
-  QStringList m_wsSampleSuffixes;
-  QStringList m_fbSampleSuffixes;
-  QStringList m_wsResolutionSuffixes;
-  QStringList m_fbResolutionSuffixes;
+
   IIndirectFitDataModel *m_model;
   IIndirectFitDataView *m_view;
 
 private slots:
-  void addData();
   void handleCellChanged(int row, int column);
   void removeSelectedData();
   void unifyRangeToSelectedData();
 
 private:
-  virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;
   void setModelStartXAndEmit(double startX, FitDomainIndex row);
   void setModelEndXAndEmit(double endX, FitDomainIndex row);
   void setTableStartXAndEmit(double X, int row, int column);
   void setTableEndXAndEmit(double X, int row, int column);
   void setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row);
-  std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   std::map<int, QModelIndex> getUniqueIndices(const QModelIndexList &selectedIndices);
   bool m_emitCellChanged = true;
 };

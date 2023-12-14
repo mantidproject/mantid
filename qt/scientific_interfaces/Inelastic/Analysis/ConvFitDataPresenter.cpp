@@ -23,13 +23,6 @@ bool ConvFitDataPresenter::addWorkspaceFromDialog(IAddWorkspaceDialog const *dia
   return false;
 }
 
-std::unique_ptr<IAddWorkspaceDialog> ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
-  auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
-  dialog->setResolutionWSSuffices(getResolutionWSSuffices());
-  dialog->setResolutionFBSuffices(getResolutionFBSuffices());
-  return dialog;
-}
-
 void ConvFitDataPresenter::addTableEntry(FitDomainIndex row) {
   const auto &name = m_model->getWorkspace(row)->getName();
   auto resolutionVector = m_model->getResolutionsForFit();

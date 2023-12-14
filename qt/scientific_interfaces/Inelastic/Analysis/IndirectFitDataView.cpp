@@ -5,6 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitDataView.h"
+#include "IndirectFitDataPresenter.h"
+
+#include "IndirectAddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include <QDoubleValidator>
 #include <QItemDelegate>
@@ -105,6 +108,8 @@ IndirectFitDataView::IndirectFitDataView(const QStringList &headers, QWidget *pa
   connect(m_uiForm->pbUnify, SIGNAL(clicked()), this, SIGNAL(unifyClicked()));
 }
 
+void IndirectFitDataView::subscribePresenter(IIndirectFitDataPresenter *presenter) { m_presenter = presenter; }
+
 QTableWidget *IndirectFitDataView::getDataTable() const { return m_uiForm->tbFitData; }
 
 void IndirectFitDataView::setHorizontalHeaders(const QStringList &headers) {
@@ -178,6 +183,33 @@ QString IndirectFitDataView::getText(int row, int column) const {
 QModelIndexList IndirectFitDataView::getSelectedIndexes() const {
   return m_uiForm->tbFitData->selectionModel()->selectedIndexes();
 }
+
+void IndirectFitDataView::setSampleWSSuffices(const QStringList &suffixes) { m_wsSampleSuffixes = suffixes; }
+
+void IndirectFitDataView::setSampleFBSuffices(const QStringList &suffixes) { m_fbSampleSuffixes = suffixes; }
+
+void IndirectFitDataView::setResolutionWSSuffices(const QStringList &suffixes) { m_wsResolutionSuffixes = suffixes; }
+
+void IndirectFitDataView::setResolutionFBSuffices(const QStringList &suffixes) { m_fbResolutionSuffixes = suffixes; }
+
+void IndirectFitDataView::showAddWorkspaceDialog() {
+  auto dialog = getAddWorkspaceDialog();
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->setWSSuffices(m_wsSampleSuffixes);
+  dialog->setFBSuffices(m_fbSampleSuffixes);
+  dialog->updateSelectedSpectra();
+  dialog->show();
+}
+
+IAddWorkspaceDialog *IndirectFitDataView::getAddWorkspaceDialog() {
+  m_addWorkspaceDialog = new IndirectAddWorkspaceDialog(parentWidget());
+
+  connect(m_addWorkspaceDialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
+
+  return m_addWorkspaceDialog;
+}
+
+void IndirectFitDataView::notifyAddData() { m_presenter->handleAddData(m_addWorkspaceDialog); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

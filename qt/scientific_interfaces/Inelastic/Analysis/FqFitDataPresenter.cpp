@@ -357,15 +357,6 @@ void FqFitDataPresenter::setActiveEISF(std::size_t eisfIndex, WorkspaceID worksp
     logger.warning("Invalid EISF index specified.");
 }
 
-std::unique_ptr<IAddWorkspaceDialog> FqFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
-  auto dialog = std::make_unique<FqFitAddWorkspaceDialog>(parent);
-  connect(dialog.get(), SIGNAL(workspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
-          SLOT(setDialogParameterNames(FqFitAddWorkspaceDialog *, const std::string &)));
-  connect(dialog.get(), SIGNAL(parameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
-          SLOT(dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *, const std::string &)));
-  return dialog;
-}
-
 void FqFitDataPresenter::addTableEntry(FitDomainIndex row) {
   const auto &name = m_model->getWorkspace(row)->getName();
 

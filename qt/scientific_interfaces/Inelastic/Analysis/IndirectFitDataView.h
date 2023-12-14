@@ -20,11 +20,17 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+class IAddWorkspaceDialog;
+class IndirectAddWorkspaceDialog;
+class IIndirectFitDataPresenter;
+
 class MANTIDQT_INELASTIC_DLL IndirectFitDataView : public IIndirectFitDataView {
   Q_OBJECT
 public:
   IndirectFitDataView(QWidget *parent = nullptr);
   ~IndirectFitDataView() override = default;
+
+  void subscribePresenter(IIndirectFitDataPresenter *presenter) override;
 
   QTableWidget *getDataTable() const override;
   bool isTableEmpty() const;
@@ -37,17 +43,37 @@ public:
   QString getText(int row, int column) const override;
   QModelIndexList getSelectedIndexes() const override;
 
+  void setSampleWSSuffices(const QStringList &suffices) override;
+  void setSampleFBSuffices(const QStringList &suffices) override;
+  void setResolutionWSSuffices(const QStringList &suffices) override;
+  void setResolutionFBSuffices(const QStringList &suffices) override;
+
+  void showAddWorkspaceDialog() override;
+
 public slots:
   void displayWarning(const std::string &warning) override;
 
+protected slots:
+  void notifyAddData();
+
 protected:
   IndirectFitDataView(const QStringList &headers, QWidget *parent = nullptr);
+  virtual IAddWorkspaceDialog *getAddWorkspaceDialog();
+
   std::unique_ptr<Ui::IndirectFitDataView> m_uiForm;
   void setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, size_t column);
+
+  QStringList m_wsSampleSuffixes;
+  QStringList m_fbSampleSuffixes;
+  QStringList m_wsResolutionSuffixes;
+  QStringList m_fbResolutionSuffixes;
 
 private:
   QStringList m_HeaderLabels;
   void setHorizontalHeaders(const QStringList &headers);
+
+  IndirectAddWorkspaceDialog *m_addWorkspaceDialog;
+  IIndirectFitDataPresenter *m_presenter;
 };
 
 } // namespace IDA

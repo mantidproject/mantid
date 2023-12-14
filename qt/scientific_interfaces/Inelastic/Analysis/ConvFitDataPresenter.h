@@ -23,9 +23,6 @@ public:
 
 protected:
   void addTableEntry(FitDomainIndex row) override;
-
-private:
-  std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
 };
 
 } // namespace IDA

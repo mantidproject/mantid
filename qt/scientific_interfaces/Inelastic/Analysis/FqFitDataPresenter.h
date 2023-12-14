@@ -50,7 +50,6 @@ protected:
   void addTableEntry(FitDomainIndex row) override;
 
 private:
-  std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const override;
   void updateParameterOptions(FqFitAddWorkspaceDialog *dialog, const FqFitParameters &parameters);
   void updateParameterTypes(FqFitAddWorkspaceDialog *dialog, FqFitParameters &parameters);
   std::vector<std::string> getParameterTypes(FqFitParameters &parameters) const;

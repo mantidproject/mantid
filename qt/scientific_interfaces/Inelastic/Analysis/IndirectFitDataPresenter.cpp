@@ -29,6 +29,7 @@ namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view)
     : m_model(model), m_view(view) {
+  m_view->subscribePresenter(this);
   observeReplace(true);
 
   connect(m_view, SIGNAL(addClicked()), this, SIGNAL(requestedAddWorkspaceDialog()));
@@ -68,16 +69,20 @@ void IndirectFitDataPresenter::setResolution(const std::string &name) {
   }
 }
 
-void IndirectFitDataPresenter::setSampleWSSuffices(const QStringList &suffixes) { m_wsSampleSuffixes = suffixes; }
+void IndirectFitDataPresenter::setSampleWSSuffices(const QStringList &suffixes) {
+  m_view->setSampleWSSuffices(suffixes);
+}
 
-void IndirectFitDataPresenter::setSampleFBSuffices(const QStringList &suffixes) { m_fbSampleSuffixes = suffixes; }
+void IndirectFitDataPresenter::setSampleFBSuffices(const QStringList &suffixes) {
+  m_view->setSampleFBSuffices(suffixes);
+}
 
 void IndirectFitDataPresenter::setResolutionWSSuffices(const QStringList &suffixes) {
-  m_wsResolutionSuffixes = suffixes;
+  m_view->setResolutionWSSuffices(suffixes);
 }
 
 void IndirectFitDataPresenter::setResolutionFBSuffices(const QStringList &suffixes) {
-  m_fbResolutionSuffixes = suffixes;
+  m_view->setResolutionFBSuffices(suffixes);
 }
 
 void IndirectFitDataPresenter::setStartX(double startX, WorkspaceID workspaceID) {
@@ -108,43 +113,13 @@ std::vector<std::pair<std::string, size_t>> IndirectFitDataPresenter::getResolut
   return m_model->getResolutionsForFit();
 }
 
-QStringList IndirectFitDataPresenter::getSampleWSSuffices() const { return m_wsSampleSuffixes; }
-
-QStringList IndirectFitDataPresenter::getSampleFBSuffices() const { return m_fbSampleSuffixes; }
-
-QStringList IndirectFitDataPresenter::getResolutionWSSuffices() const { return m_wsResolutionSuffixes; }
-
-QStringList IndirectFitDataPresenter::getResolutionFBSuffices() const { return m_fbResolutionSuffixes; }
-
 UserInputValidator &IndirectFitDataPresenter::validate(UserInputValidator &validator) {
   return m_view->validate(validator);
 }
 
-void IndirectFitDataPresenter::showAddWorkspaceDialog() {
-  if (!m_addWorkspaceDialog)
-    m_addWorkspaceDialog = getAddWorkspaceDialog(m_view->parentWidget());
-  m_addWorkspaceDialog->setWSSuffices(getSampleWSSuffices());
-  m_addWorkspaceDialog->setFBSuffices(getSampleFBSuffices());
-  m_addWorkspaceDialog->updateSelectedSpectra();
-  m_addWorkspaceDialog->show();
-  connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
-  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
-}
+void IndirectFitDataPresenter::showAddWorkspaceDialog() { m_view->showAddWorkspaceDialog(); }
 
-std::unique_ptr<IAddWorkspaceDialog> IndirectFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
-  return std::make_unique<IndirectAddWorkspaceDialog>(parent);
-}
-
-void IndirectFitDataPresenter::addData() { addData(m_addWorkspaceDialog.get()); }
-
-void IndirectFitDataPresenter::closeDialog() {
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
-  m_addWorkspaceDialog->close();
-  m_addWorkspaceDialog = nullptr;
-}
-
-void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
+void IndirectFitDataPresenter::handleAddData(IAddWorkspaceDialog const *dialog) {
   try {
     emit dataAdded(dialog);
     updateTableFromModel();

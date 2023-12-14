@@ -18,6 +18,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+class IIndirectFitDataPresenter;
+
 struct FitDataRow {
   std::string name;
   std::string exclude;
@@ -35,6 +37,8 @@ public:
   IIndirectFitDataView(QWidget *parent = nullptr) : QTabWidget(parent){};
   virtual ~IIndirectFitDataView() = default;
 
+  virtual void subscribePresenter(IIndirectFitDataPresenter *presenter) = 0;
+
   virtual QTableWidget *getDataTable() const = 0;
 
   virtual UserInputValidator &validate(UserInputValidator &validator) = 0;
@@ -44,6 +48,13 @@ public:
   virtual void clearTable() = 0;
   virtual QString getText(int row, int column) const = 0;
   virtual QModelIndexList getSelectedIndexes() const = 0;
+
+  virtual void setSampleWSSuffices(const QStringList &suffices) = 0;
+  virtual void setSampleFBSuffices(const QStringList &suffices) = 0;
+  virtual void setResolutionWSSuffices(const QStringList &suffices) = 0;
+  virtual void setResolutionFBSuffices(const QStringList &suffices) = 0;
+
+  virtual void showAddWorkspaceDialog() = 0;
 
 public slots:
   virtual void displayWarning(std::string const &warning) = 0;

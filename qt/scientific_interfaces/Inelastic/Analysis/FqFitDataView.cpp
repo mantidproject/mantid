@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FqFitDataView.h"
+#include "FqFitAddWorkspaceDialog.h"
 
 #include <QComboBox>
 #include <QHeaderView>
@@ -30,6 +31,18 @@ FqFitDataView::FqFitDataView(QWidget *parent) : FqFitDataView(FqFitHeaders(), pa
 FqFitDataView::FqFitDataView(const QStringList &headers, QWidget *parent) : IndirectFitDataView(headers, parent) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(1, QHeaderView::Stretch);
+}
+
+IAddWorkspaceDialog *FqFitDataView::getAddWorkspaceDialog() {
+  m_addWorkspaceDialog = new FqFitAddWorkspaceDialog(parentWidget());
+
+  connect(m_addWorkspaceDialog, SIGNAL(addData()), this, SLOT(notifyAddData()));
+  connect(m_addWorkspaceDialog, SIGNAL(workspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
+          SLOT(setDialogParameterNames(FqFitAddWorkspaceDialog *, const std::string &)));
+  connect(m_addWorkspaceDialog, SIGNAL(parameterTypeChanged(FqFitAddWorkspaceDialog *, const std::string &)), this,
+          SLOT(dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *, const std::string &)));
+
+  return m_addWorkspaceDialog;
 }
 
 void FqFitDataView::addTableEntry(size_t row, FitDataRow newRow) {
