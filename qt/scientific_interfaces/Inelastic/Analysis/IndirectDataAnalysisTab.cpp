@@ -76,15 +76,7 @@ void IndirectDataAnalysisTab::setup() {
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runTab()));
   updateResultOptions();
 
-  connectDataPresenter();
   connectFitPropertyBrowser();
-}
-
-void IndirectDataAnalysisTab::connectDataPresenter() {
-  connect(m_dataPresenter.get(), SIGNAL(startXChanged(double, WorkspaceID, WorkspaceIndex)), this,
-          SLOT(tableStartXChanged(double, WorkspaceID, WorkspaceIndex)));
-  connect(m_dataPresenter.get(), SIGNAL(endXChanged(double, WorkspaceID, WorkspaceIndex)), this,
-          SLOT(tableEndXChanged(double, WorkspaceID, WorkspaceIndex)));
 }
 
 void IndirectDataAnalysisTab::connectFitPropertyBrowser() {
@@ -192,14 +184,15 @@ void IndirectDataAnalysisTab::setModelEndX(double endX) {
   m_dataPresenter->setStartX(endX, dataIndex, getSelectedSpectrum());
 }
 
-void IndirectDataAnalysisTab::tableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+void IndirectDataAnalysisTab::handleTableStartXChanged(double startX, WorkspaceID workspaceID,
+                                                       WorkspaceIndex spectrum) {
   if (isRangeCurrentlySelected(workspaceID, spectrum)) {
     m_plotPresenter->setStartX(startX);
     m_plotPresenter->updateGuess();
   }
 }
 
-void IndirectDataAnalysisTab::tableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+void IndirectDataAnalysisTab::handleTableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (isRangeCurrentlySelected(workspaceID, spectrum)) {
     m_plotPresenter->setEndX(endX);
     m_plotPresenter->updateGuess();

@@ -199,7 +199,7 @@ void IndirectFitDataPresenter::setTableStartXAndEmit(double X, int row, int colu
 
   m_model->setStartX(X, subIndices.first, subIndices.second);
   m_view->updateNumCellEntry(m_model->getFittingRange(row).first, row, column);
-  emit startXChanged(m_model->getFittingRange(row).first, subIndices.first, subIndices.second);
+  m_tab->handleTableStartXChanged(m_model->getFittingRange(row).first, subIndices.first, subIndices.second);
 }
 
 void IndirectFitDataPresenter::setTableEndXAndEmit(double X, int row, int column) {
@@ -207,21 +207,21 @@ void IndirectFitDataPresenter::setTableEndXAndEmit(double X, int row, int column
 
   m_model->setEndX(X, subIndices.first, subIndices.second);
   m_view->updateNumCellEntry(m_model->getFittingRange(row).second, row, column);
-  emit endXChanged(m_model->getFittingRange(row).second, subIndices.first, subIndices.second);
+  m_tab->handleTableEndXChanged(m_model->getFittingRange(row).second, subIndices.first, subIndices.second);
 }
 
 void IndirectFitDataPresenter::setModelStartXAndEmit(double startX, FitDomainIndex row) {
   auto subIndices = m_model->getSubIndices(row);
 
   m_model->setStartX(startX, subIndices.first, subIndices.second);
-  emit startXChanged(startX, subIndices.first, subIndices.second);
+  m_tab->handleTableStartXChanged(startX, subIndices.first, subIndices.second);
 }
 
 void IndirectFitDataPresenter::setModelEndXAndEmit(double endX, FitDomainIndex row) {
   auto subIndices = m_model->getSubIndices(row);
 
   m_model->setEndX(endX, subIndices.first, subIndices.second);
-  emit endXChanged(endX, subIndices.first, subIndices.second);
+  m_tab->handleTableEndXChanged(endX, subIndices.first, subIndices.second);
 }
 
 void IndirectFitDataPresenter::setModelExcludeAndEmit(const std::string &exclude, FitDomainIndex row) {

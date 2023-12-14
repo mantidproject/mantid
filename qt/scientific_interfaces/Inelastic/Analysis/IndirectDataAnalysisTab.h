@@ -39,6 +39,8 @@ public:
   virtual void handleDataAdded(IAddWorkspaceDialog const *dialog) = 0;
   virtual void handleDataChanged() = 0;
   virtual void handleDataRemoved() = 0;
+  virtual void handleTableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) = 0;
+  virtual void handleTableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) = 0;
 
   // Used by FitPlotPresenter
   virtual void handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) = 0;
@@ -99,6 +101,8 @@ public:
   void handleDataAdded(IAddWorkspaceDialog const *dialog) override;
   void handleDataChanged() override;
   void handleDataRemoved() override;
+  void handleTableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) override;
+  void handleTableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) override;
 
   void handleSingleFitClicked(WorkspaceID workspaceID, WorkspaceIndex workspaceIndex) override;
   void handlePlotSpectrumChanged() override;
@@ -142,7 +146,6 @@ private:
   void setup() override;
   bool validate() override;
   void connectFitPropertyBrowser();
-  void connectDataPresenter();
   void plotSelectedSpectra(std::vector<SpectrumToPlot> const &spectra);
   void plotSpectrum(std::string const &workspaceName, std::size_t const &index);
   std::string getOutputBasename() const;
@@ -165,8 +168,6 @@ protected slots:
   void setModelFitFunction();
   void setModelStartX(double startX);
   void setModelEndX(double endX);
-  void tableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
-  void tableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
   void updateFitOutput(bool error);
   void updateSingleFitOutput(bool error);
   void fitAlgorithmComplete(bool error);
