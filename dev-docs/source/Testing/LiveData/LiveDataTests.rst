@@ -8,7 +8,7 @@ Live Data Testing
 
 Introduction
 ------------
-A video example of using multiple live streams and full direct elastic data reduction can be seen `here <http://files.mantidproject.org/videos/LiveData.htm>`__.
+A video example of using multiple live streams and full direct elastic data reduction can be seen `here <../../_static/videos/LiveData.htm>`__.
 
 The rest of this document describes some examples you can run yourself using a fake instrument which simulates the arrival of new data.
 For all of these tests you will need to change your Facility to ``TEST_LIVE``, as described below.
