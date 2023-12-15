@@ -15,7 +15,7 @@
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 #include "MantidQtWidgets/MplCpp/Plot.h"
-#include <iostream>
+
 #include <utility>
 
 using Mantid::API::MatrixWorkspace_sptr;
