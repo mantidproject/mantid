@@ -7,8 +7,8 @@
 #include "IndirectDataAnalysisTab.h"
 
 #include "Common/SettingsHelper.h"
-#include "IndirectFitPlotView.h"
 #include "FitTabConstants.h"
+#include "IndirectFitPlotView.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"

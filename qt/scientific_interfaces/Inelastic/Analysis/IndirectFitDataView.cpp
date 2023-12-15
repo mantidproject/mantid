@@ -7,7 +7,7 @@
 #include "IndirectFitDataView.h"
 #include "IndirectFitDataPresenter.h"
 
-#include "IndirectAddWorkspaceDialog.h"
+#include "Common/IndirectAddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include <QDoubleValidator>
 #include <QItemDelegate>

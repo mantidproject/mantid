@@ -62,7 +62,7 @@ void FqFitDataView::notifyWorkspaceChanged(FqFitAddWorkspaceDialog *dialog, cons
 
 void FqFitDataView::notifyParameterTypeChanged(FqFitAddWorkspaceDialog *dialog, const std::string &type) {
   if (auto presenter = dynamic_cast<FqFitDataPresenter *>(m_presenter)) {
-    presenter->handleParameterTypeChanged(dynamic_cast<FqFitAddWorkspaceDialog *>(m_addWorkspaceDialog), type);
+    presenter->handleParameterTypeChanged(dialog, type);
   }
 }
 
