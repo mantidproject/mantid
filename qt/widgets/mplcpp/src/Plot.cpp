@@ -15,6 +15,7 @@
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 #include "MantidQtWidgets/MplCpp/Plot.h"
+#include <iostream>
 #include <utility>
 
 using Mantid::API::MatrixWorkspace_sptr;
@@ -34,6 +35,8 @@ Python::Object functionsModule() { return Python::NewRef(PyImport_ImportModule("
 Python::Object sviewerModule() {
   return Python::NewRef(PyImport_ImportModule("mantidqt.widgets.sliceviewer.presenters.presenter"));
 }
+
+Python::Object userConfModule() { return Python::NewRef(PyImport_ImportModule("workbench.config")); }
 
 /**
  * Construct a Python list from a vector of strings
@@ -169,7 +172,12 @@ Python::Object sliceviewer(const Workspace_sptr &workspace) {
   try {
     const Python::Object py_workspace = Python::NewRef(Python::ToPythonValue<Workspace_sptr>()(workspace));
     const Python::Object args = Python::NewRef(Py_BuildValue("(O)", py_workspace.ptr()));
-    auto sw = sviewerModule().attr("SliceViewer")(*args);
+    // Get a ref to the CONF singleton
+    const auto conf = userConfModule().attr("CONF");
+    Python::Dict kwargs;
+    kwargs["conf"] = conf;
+
+    auto sw = sviewerModule().attr("SliceViewer")(*args, **kwargs);
     return sw.attr("show_view")();
   } catch (Python::ErrorAlreadySet &) {
     throw PythonException();
