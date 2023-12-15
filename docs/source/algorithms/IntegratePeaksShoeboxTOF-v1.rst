@@ -6,16 +6,35 @@
 
 .. properties::
 
+Background
+-----------
+
+Fixed mask/shoebox integration methods have previously been developed for Time-of-flight (TOF) neutron diffraction [1]_.
+For monochromatic neutron diffractometers, a dynamic shoebox method that optimised the shoebox dimensions on a 2D
+detector by maximising the Intensity/sigma ratio of each peak has been shown to improve the R-factors obtained [2]_.
+
+This algorithm generalises the 2D dynamic shoebox integration of [2]_ to 3D peaks in TOF Laue,
+and several improvements have been made to suit TOF Laue data
+
+1. Avoids nearby peaks that are closer to another peak position when optimising shoebox position
+
+2. The shoebox dimensions of weak peaks can be obtained from nearby stronger peaks with scaling of the TOF dimension
+to account for the instrument resolution)
+
+
 Description
 -----------
 
-This is an algorithm to integrate single-crystal Bragg peaks in a :ref:`MatrixWorkspace <MatrixWorkspace>` by
-summing up counts in a shoebox of size ``NRows`` and ``NCols`` on the detector and ``NBins`` along the Time-of-flight
-(TOF) direction which can be specified in one of two ways:
+This is an algorithm to integrate single-crystal Bragg peaks in a :ref:`MatrixWorkspace <MatrixWorkspace>`.
+An initial integration is performed by summing up the counts in a fixed shoebox of user specified size ``NRows`` and
+``NCols`` on the detector and ``NBins`` along the TOF direction. The dimensions of the shoebox are then optionally
+optimised to maximise I/sigma.
 
-1. Provide ``NBins`` - number of TOF bins in the kernel
+The default ``Nbins`` can be specified in one of two ways:
 
-2. Setting ``GetNBinsFromBackToBackParams=True`` and providing ``NFWHM`` - in which case ``NBins``  will be NFWHM x FWHM
+1. Provide ``NBins`` directly - number of TOF bins in the kernel
+
+2. Setting ``GetNBinsFromBackToBackParams=True`` and providing ``NFWHM`` - in which case ``NBins`` will be NFWHM x FWHM
    of a :ref:`BackToBackExponential <func-BackToBackExponential>` peak at the center of each detector panel/bank at the
    middle of the spectrum.
 
@@ -27,14 +46,14 @@ the background shell as in the peak region.
 
 The algorithm proceeds as follows:
 
-1. Take a window of the data, ``NShoeboxInWindow`` the size of the shoebox (``NRows`` x ``NCols`` x ``NBins``)
+1. Take a window of the data, ``NShoeboxInWindow`` the size of the initial user specified shoebox (``NRows`` x ``NCols`` x ``NBins``)
 
 2. Convolve the shoebox kernel with the data in the window to find the position with largest Intensity/sigma
    (closest to the predicted peak position than to any other peaks in the table).
 
 3. Integrate using the shoebox at the optimal position
 
-4. If the peak is strong (Intensity/sigma < ``WeakPeakThreshold``) and ``OptimiseShoebox=True`` then optimise the shoebox
+4. If the peak is strong (Intensity/sigma > ``WeakPeakThreshold``) and ``OptimiseShoebox=True`` then optimise the shoebox
    dimensions to maximise Intensity/sigma
 
 5. If the peak is weak, it can be integrated using the initial shoebox (``WeakPeakStrategy="Fix"``) or using the
@@ -80,6 +99,12 @@ Usage
 
     I/sigma = 100.49
 
+References
+----------
+
+.. [1] Wilkinson, C., and A. J. Schultz. (1989) J. Appl. Cryst. 22.2, 110-114.
+
+.. [2] Wilkinson, C., Khamis, H. W., Stansfield, R. F. D. & McIntyre, G. J. (1988). J. Appl. Cryst. 21, 471-478.
 
 .. categories::
 
