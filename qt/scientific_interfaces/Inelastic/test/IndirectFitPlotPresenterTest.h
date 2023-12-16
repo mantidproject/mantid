@@ -15,7 +15,6 @@
 #include "Analysis/IndirectFitPlotView.h"
 #include "Analysis/IndirectFittingModel.h"
 #include "DataAnalysisMockObjects.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -46,9 +45,6 @@ MultiDomainFunction_sptr getFunctionWithWorkspaceName(std::string const &workspa
 
 class IndirectFitPlotPresenterTest : public CxxTest::TestSuite {
 public:
-  /// Needed to make sure everything is initialized
-  IndirectFitPlotPresenterTest() { FrameworkManager::Instance(); }
-
   static IndirectFitPlotPresenterTest *createSuite() { return new IndirectFitPlotPresenterTest(); }
 
   static void destroySuite(IndirectFitPlotPresenterTest *suite) { delete suite; }

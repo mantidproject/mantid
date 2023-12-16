@@ -65,6 +65,10 @@ public:
     m_parameterEstimators = std::make_unique<IDAFunctionParameterEstimation>(estimators);
   }
 
+  static IDAFunctionParameterEstimationTest *createSuite() { return new IDAFunctionParameterEstimationTest(); }
+
+  static void destroySuite(IDAFunctionParameterEstimationTest *suite) { delete suite; }
+
   void test_estimateFunctionParameters_does_nothing_if_nDataPoints_is_too_small() {
     auto multiDomainFunction = createMultiDomainFunction("name=LinearBackground", "name=ExpDecay");
 

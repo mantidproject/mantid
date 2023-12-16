@@ -10,7 +10,6 @@
 
 #include "Analysis/IndirectFitOutputOptionsModel.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
@@ -52,9 +51,6 @@ std::vector<SpectrumToPlot> getExpectedParameterSpectra(std::size_t const &numbe
 
 class IndirectFitOutputOptionsModelTest : public CxxTest::TestSuite {
 public:
-  /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  IndirectFitOutputOptionsModelTest() { FrameworkManager::Instance(); }
-
   static IndirectFitOutputOptionsModelTest *createSuite() { return new IndirectFitOutputOptionsModelTest(); }
 
   static void destroySuite(IndirectFitOutputOptionsModelTest *suite) { delete suite; }

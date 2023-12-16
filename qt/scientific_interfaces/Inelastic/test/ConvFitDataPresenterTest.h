@@ -15,8 +15,6 @@
 #include "Analysis/IIndirectFitDataView.h"
 #include "DataAnalysisMockObjects.h"
 #include "IndirectAddWorkspaceDialog.h"
-
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
@@ -38,9 +36,6 @@ std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
 
 class ConvFitDataPresenterTest : public CxxTest::TestSuite {
 public:
-  /// Needed to make sure everything is initialized
-  ConvFitDataPresenterTest() { FrameworkManager::Instance(); }
-
   static ConvFitDataPresenterTest *createSuite() { return new ConvFitDataPresenterTest(); }
 
   static void destroySuite(ConvFitDataPresenterTest *suite) { delete suite; }

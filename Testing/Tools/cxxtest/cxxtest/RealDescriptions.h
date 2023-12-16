@@ -164,14 +164,15 @@ namespace CxxTest
 
         void createSuite()
         {
-            setSuite( S::createSuite() );
+            setSuite(S::createSuite());
+            std::cout << "\n" << typeid(S).name();
         }
 
         void destroySuite()
         {
             S *s = realSuite();
             setSuite( 0 );
-            S::destroySuite( s );
+            S::destroySuite(s);
         }
 
         S **_suite;

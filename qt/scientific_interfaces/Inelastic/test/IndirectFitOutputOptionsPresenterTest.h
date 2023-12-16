@@ -16,7 +16,6 @@
 #include "Analysis/IndirectFitOutputOptionsView.h"
 #include "DataAnalysisMockObjects.h"
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
@@ -32,9 +31,6 @@ std::vector<std::string> getThreeParameters() { return {"Amplitude", "HWHM", "Pe
 
 class IndirectFitOutputOptionsPresenterTest : public CxxTest::TestSuite {
 public:
-  /// Needed to make sure everything is initialized
-  IndirectFitOutputOptionsPresenterTest() { FrameworkManager::Instance(); }
-
   static IndirectFitOutputOptionsPresenterTest *createSuite() { return new IndirectFitOutputOptionsPresenterTest(); }
 
   static void destroySuite(IndirectFitOutputOptionsPresenterTest *suite) { delete suite; }

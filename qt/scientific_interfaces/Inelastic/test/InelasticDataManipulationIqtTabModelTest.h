@@ -69,8 +69,11 @@ DECLARE_ALGORITHM(TransformToIqt)
 
 class InelasticDataManipulationIqtTabModelTest : public CxxTest::TestSuite {
 public:
-  /// Needed to make sure everything is initialized
-  InelasticDataManipulationIqtTabModelTest() = default;
+  static InelasticDataManipulationIqtTabModelTest *createSuite() {
+    return new InelasticDataManipulationIqtTabModelTest();
+  }
+
+  static void destroySuite(InelasticDataManipulationIqtTabModelTest *suite) { delete suite; }
 
   void setUp() override { m_model = std::make_unique<InelasticDataManipulationIqtTabModel>(); }
 

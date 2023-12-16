@@ -18,7 +18,6 @@
 #include "DataAnalysisMockObjects.h"
 #include "IndirectAddWorkspaceDialog.h"
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -101,9 +100,6 @@ GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class IndirectFitDataPresenterTest : public CxxTest::TestSuite {
 public:
-  /// Needed to make sure everything is initialized
-  IndirectFitDataPresenterTest() { FrameworkManager::Instance(); }
-
   static IndirectFitDataPresenterTest *createSuite() { return new IndirectFitDataPresenterTest(); }
 
   static void destroySuite(IndirectFitDataPresenterTest *suite) { delete suite; }

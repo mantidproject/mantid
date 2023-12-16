@@ -13,7 +13,6 @@
 #include "Analysis/FunctionTemplateBrowser.h"
 #include "Analysis/IndirectFitPropertyBrowser.h"
 #include "Analysis/ParameterEstimation.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -81,9 +80,6 @@ GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class IndirectFitPropertyBrowserTest : public CxxTest::TestSuite {
 public:
-  /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  IndirectFitPropertyBrowserTest() { FrameworkManager::Instance(); }
-
   static IndirectFitPropertyBrowserTest *createSuite() { return new IndirectFitPropertyBrowserTest(); }
 
   static void destroySuite(IndirectFitPropertyBrowserTest *suite) { delete suite; }

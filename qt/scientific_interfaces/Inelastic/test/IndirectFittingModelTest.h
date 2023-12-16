@@ -11,7 +11,6 @@
 
 #include "Analysis/IndirectFittingModel.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -77,9 +76,6 @@ IAlgorithm_sptr getExecutedFitAlgorithm(std::unique_ptr<IndirectFittingModel> &m
 
 class IndirectFittingModelTest : public CxxTest::TestSuite {
 public:
-  /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  IndirectFittingModelTest() { FrameworkManager::Instance(); }
-
   static IndirectFittingModelTest *createSuite() { return new IndirectFittingModelTest(); }
 
   static void destroySuite(IndirectFittingModelTest *suite) { delete suite; }

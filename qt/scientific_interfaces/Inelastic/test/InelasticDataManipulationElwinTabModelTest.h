@@ -75,8 +75,11 @@ DECLARE_ALGORITHM(ElasticWindowMultiple)
 
 class InelasticDataManipulationElwinTabModelTest : public CxxTest::TestSuite {
 public:
-  /// Needed to make sure everything is initialized
-  InelasticDataManipulationElwinTabModelTest() = default;
+  static InelasticDataManipulationElwinTabModelTest *createSuite() {
+    return new InelasticDataManipulationElwinTabModelTest();
+  }
+
+  static void destroySuite(InelasticDataManipulationElwinTabModelTest *suite) { delete suite; }
 
   void setUp() override { m_model = std::make_unique<InelasticDataManipulationElwinTabModel>(); }
 

@@ -61,8 +61,11 @@ DECLARE_ALGORITHM(Symmetrise)
 
 class InelasticDataManipulationSymmetriseTabModelTest : public CxxTest::TestSuite {
 public:
-  /// Needed to make sure everything is initialized
-  InelasticDataManipulationSymmetriseTabModelTest() = default;
+  static InelasticDataManipulationSymmetriseTabModelTest *createSuite() {
+    return new InelasticDataManipulationSymmetriseTabModelTest();
+  }
+
+  static void destroySuite(InelasticDataManipulationSymmetriseTabModelTest *suite) { delete suite; }
 
   void setUp() override { m_model = std::make_unique<InelasticDataManipulationSymmetriseTabModel>(); }
 

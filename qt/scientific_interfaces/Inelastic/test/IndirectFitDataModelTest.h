@@ -29,7 +29,9 @@ using namespace MantidQt::MantidWidgets;
 
 class IndirectFitDataModelTest : public CxxTest::TestSuite {
 public:
-  IndirectFitDataModelTest() = default;
+  static IndirectFitDataModelTest *createSuite() { return new IndirectFitDataModelTest(); }
+
+  static void destroySuite(IndirectFitDataModelTest *suite) { delete suite; }
 
   void setUp() override {
     m_fitData = std::make_unique<IndirectFitDataModel>();
