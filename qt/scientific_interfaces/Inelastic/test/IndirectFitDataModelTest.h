@@ -56,6 +56,7 @@ public:
 
     auto alg = AlgorithmManager::Instance().create("CreateWorkspace");
     alg->initialize();
+    alg->setLogging(false);
     alg->setAlwaysStoreInADS(true);
     alg->setProperty("OutputWorkspace", "NAN");
     alg->setProperty("DataX", x);

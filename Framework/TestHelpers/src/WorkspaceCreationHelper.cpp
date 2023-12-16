@@ -211,7 +211,9 @@ Workspace2D_sptr create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool 
     retVal->getSpectrum(i).setDetectorID(i);
     retVal->getSpectrum(i).setSpectrumNo(i);
   }
-  retVal = maskSpectra(retVal, maskedWorkspaceIndices);
+  if (maskedWorkspaceIndices.size() > 0) {
+    retVal = maskSpectra(retVal, maskedWorkspaceIndices);
+  }
   return retVal;
 }
 
