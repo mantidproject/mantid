@@ -233,7 +233,7 @@ public:
   void test_updateFitStatusData_does_not_throw() {
 
     auto browser = std::make_unique<IndirectFitPropertyBrowser>();
-    auto templateBrowser = std::make_unique<MockFunctionTemplateBrowser>();
+    auto templateBrowser = std::make_unique<NiceMock<MockFunctionTemplateBrowser>>();
     browser->setFunctionTemplateBrowser(templateBrowser.get());
     browser->init();
 
@@ -298,6 +298,6 @@ public:
 
 private:
   std::unique_ptr<IndirectFitPropertyBrowser> m_browser;
-  std::unique_ptr<MockFunctionTemplateBrowser> m_templateBrowser;
+  std::unique_ptr<NiceMock<MockFunctionTemplateBrowser>> m_templateBrowser;
   std::unique_ptr<FitOptionsBrowser> m_fitOptionsBrowser;
 };

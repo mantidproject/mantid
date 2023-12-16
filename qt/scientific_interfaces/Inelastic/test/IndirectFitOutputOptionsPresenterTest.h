@@ -41,7 +41,7 @@ public:
 
   void setUp() override {
     m_tab = std::make_unique<NiceMock<MockIndirectDataAnalysisTab>>();
-    m_view = std::make_unique<MockIndirectFitOutputOptionsView>();
+    m_view = std::make_unique<NiceMock<MockIndirectFitOutputOptionsView>>();
     auto model = std::make_unique<NiceMock<MockIndirectFitOutputOptionsModel>>();
     m_model = model.get();
 
@@ -317,7 +317,7 @@ public:
 
 private:
   std::unique_ptr<NiceMock<MockIndirectDataAnalysisTab>> m_tab;
-  std::unique_ptr<MockIndirectFitOutputOptionsView> m_view;
+  std::unique_ptr<NiceMock<MockIndirectFitOutputOptionsView>> m_view;
   NiceMock<MockIndirectFitOutputOptionsModel> *m_model;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_presenter;
 };

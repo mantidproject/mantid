@@ -127,8 +127,8 @@ public:
 private:
   std::unique_ptr<QTableWidget> m_dataTable;
 
-  std::unique_ptr<MockFitDataView> m_view;
-  std::unique_ptr<MockIndirectFitDataModel> m_model;
+  std::unique_ptr<NiceMock<MockFitDataView>> m_view;
+  std::unique_ptr<NiceMock<MockIndirectFitDataModel>> m_model;
   std::unique_ptr<FqFitDataPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;

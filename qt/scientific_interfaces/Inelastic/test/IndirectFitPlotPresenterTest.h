@@ -60,7 +60,7 @@ public:
     /// substitute anyway
     m_tab = std::make_unique<NiceMock<MockIndirectDataAnalysisTab>>();
     auto model = std::make_unique<IndirectFitPlotModel>();
-    m_view = std::make_unique<MockIndirectFitPlotView>();
+    m_view = std::make_unique<NiceMock<MockIndirectFitPlotView>>();
     m_presenter = std::make_unique<IndirectFitPlotPresenter>(m_tab.get(), m_view.get(), std::move(model));
 
     m_workspace = createWorkspaceWithInstrument(6, 5);
@@ -367,7 +367,7 @@ public:
 
 private:
   std::unique_ptr<NiceMock<MockIndirectDataAnalysisTab>> m_tab;
-  std::unique_ptr<MockIndirectFitPlotView> m_view;
+  std::unique_ptr<NiceMock<MockIndirectFitPlotView>> m_view;
   std::unique_ptr<IndirectFitPlotPresenter> m_presenter;
 
   MatrixWorkspace_sptr m_workspace;
