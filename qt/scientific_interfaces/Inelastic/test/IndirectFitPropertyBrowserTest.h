@@ -72,7 +72,6 @@ public:
   MOCK_METHOD1(parameterChanged, void(QtProperty *));
   MOCK_METHOD1(parameterButtonClicked, void(QtProperty *));
   // Private methods
-  MOCK_METHOD0(createBrowser, void());
   MOCK_METHOD0(createProperties, void());
 };
 
@@ -89,7 +88,6 @@ public:
     m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(nullptr, FittingMode::SEQUENTIAL_AND_SIMULTANEOUS);
     m_browser->init();
     m_templateBrowser = std::make_unique<NiceMock<MockFunctionTemplateBrowser>>();
-    EXPECT_CALL(*m_templateBrowser, createBrowser());
     EXPECT_CALL(*m_templateBrowser, createProperties());
     m_browser->setFunctionTemplateBrowser(m_templateBrowser.get());
   }
