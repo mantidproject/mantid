@@ -14,11 +14,11 @@
 #include "Analysis/IndirectFitPlotPresenter.h"
 #include "Analysis/IndirectFitPlotView.h"
 #include "Analysis/IndirectFittingModel.h"
-#include "DataAnalysisMockObjects.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MockObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;

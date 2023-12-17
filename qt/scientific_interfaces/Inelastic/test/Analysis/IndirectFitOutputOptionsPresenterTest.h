@@ -14,7 +14,7 @@
 #include "Analysis/IndirectDataAnalysisTab.h"
 #include "Analysis/IndirectFitOutputOptionsPresenter.h"
 #include "Analysis/IndirectFitOutputOptionsView.h"
-#include "DataAnalysisMockObjects.h"
+#include "MockObjects.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 

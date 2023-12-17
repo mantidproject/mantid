@@ -25,7 +25,7 @@ set(TEST_FILES
     Manipulation/InelasticDataManipulationSymmetriseTabModelTest.h
 )
 
-set(TEST_HELPERS ../../Indirect/IndirectDataValidationHelper.cpp Analysis/DataAnalysisMockObjects.h)
+set(TEST_HELPERS ../../Indirect/IndirectDataValidationHelper.cpp Analysis/MockObjects.h)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesInelasticTestInitialization.h)
 

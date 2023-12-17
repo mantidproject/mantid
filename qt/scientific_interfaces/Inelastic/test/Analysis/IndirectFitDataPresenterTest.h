@@ -15,8 +15,8 @@
 #include "Analysis/IndirectFitDataView.h"
 #include "Analysis/IndirectFittingModel.h"
 #include "Analysis/ParameterEstimation.h"
-#include "DataAnalysisMockObjects.h"
 #include "IndirectAddWorkspaceDialog.h"
+#include "MockObjects.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
