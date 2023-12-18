@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Dict
+from typing import Dict, Any
 from copy import deepcopy
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
@@ -178,14 +178,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         "CanScatterRunNumber": "" if data.can_scatter is None else str(data.can_scatter),
         "CanDirectRunNumber": "" if data.can_direct is None else str(data.can_direct),
     }
-    additional_metadata = {
-        "BackgroundSubtractionWorkspace": ""
-        if state.background_subtraction.workspace is None
-        else str(state.background_subtraction.workspace),
-        "BackgroundSubtractionScaleFactor": 0.0
-        if state.background_subtraction.scale_factor is None
-        else float(state.background_subtraction.scale_factor),
-    }
+    additional_metadata = {}
 
     # --------------------------------
     # Perform output of all workspaces
@@ -1325,7 +1318,7 @@ def save_to_file(
     reduction_packages: list,
     save_can: bool,
     additional_run_numbers: Dict[str, str],
-    additional_metadata: Dict[str, str],
+    additional_metadata: Dict[str, Any],
     event_slice_optimisation: bool = False,
 ):
     """
@@ -1344,12 +1337,14 @@ def save_to_file(
 
     state = reduction_packages[0].state
     save_info = state.save
+    scaled_bg_info = state.background_subtraction
     file_formats = save_info.file_format
     for to_save in workspaces_names_to_save:
         if isinstance(to_save, tuple):
             for i, ws_name_to_save in enumerate(to_save[0]):
                 transmission = to_save[1][i] if to_save[1] else ""
                 transmission_can = to_save[2][i] if to_save[2] else ""
+                _add_scaled_background_metadata_if_relevant(scaled_bg_info, ws_name_to_save, additional_metadata)
                 save_workspace_to_file(
                     ws_name_to_save,
                     file_formats,
@@ -1360,7 +1355,15 @@ def save_to_file(
                     transmission_can,
                 )
         else:
+            _add_scaled_background_metadata_if_relevant(scaled_bg_info, str(to_save), additional_metadata)
             save_workspace_to_file(to_save, file_formats, to_save, additional_run_numbers, additional_metadata)
+
+
+def _add_scaled_background_metadata_if_relevant(bg_state, ws_name: str, metadata: dict[str, Any]):
+    if not ws_name.endswith(SCALED_BGSUB_SUFFIX):
+        return
+    metadata["BackgroundSubtractionWorkspace"] = str(bg_state.workspace)
+    metadata["BackgroundSubtractionScaleFactor"] = float(bg_state.scale_factor)
 
 
 def delete_reduced_workspaces(reduction_packages, include_non_transmission=True):
@@ -1635,8 +1638,7 @@ def save_workspace_to_file(
     save_options = {"InputWorkspace": workspace_name}
     save_options.update({"Filename": file_name, "Transmission": transmission_name, "TransmissionCan": transmission_can_name})
     save_options.update(additional_run_numbers)
-    if workspace_name.endswith(SCALED_BGSUB_SUFFIX):
-        save_options.update(additional_metadata)
+    save_options.update(additional_metadata)
 
     if SaveType.NEXUS in file_formats:
         save_options.update({"Nexus": True})
