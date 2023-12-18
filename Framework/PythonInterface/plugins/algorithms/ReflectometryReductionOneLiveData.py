@@ -209,7 +209,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         return "s2vgap" if self._instrument == "OFFSPEC" else "S2VG"
 
     def _alternative_s2vg_name(self):
-        return "S1VG" if self._instrument == "OFFSPEC" else "s2vg"
+        return "S2VG" if self._instrument == "OFFSPEC" else "s2vg"
 
     def _get_double_or_none(self, propertyName):
         value = self.getProperty(propertyName)
