@@ -111,16 +111,16 @@ class ShoeboxResult:
         fig.suptitle(self.title)
 
     def plot_shoebox(self, iax, ax, rect_func):
-        cen = self.ipos.copy()
-        cen.pop(iax)
+        center_peak_pos = self.ipos.copy()
+        center_peak_pos.pop(iax)
         # plot peak region
         shape = self.peak_shape.copy()
         shape.pop(iax)
-        self._plot_rect(ax, cen, shape, rect_func)
+        self._plot_rect(ax, center_peak_pos, shape, rect_func)
         # plot kernel (incl. bg shell)
         shape = self.kernel_shape.copy()
         shape.pop(iax)
-        self._plot_rect(ax, cen, shape, rect_func, ls="--")
+        self._plot_rect(ax, center_peak_pos, shape, rect_func, ls="--")
 
     def _plot_rect(self, ax, cen, shape, rect_func, ls="-"):
         bottom_left = [cen[1] - shape[1] // 2 - 0.5, cen[0] - shape[0] // 2 - 0.5]
