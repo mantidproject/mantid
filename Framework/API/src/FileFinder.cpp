@@ -365,7 +365,13 @@ std::vector<IArchiveSearch_sptr> FileFinderImpl::getArchiveSearch(const Kernel::
 }
 
 std::string FileFinderImpl::findRun(const std::string &hintstr, const std::vector<std::string> &exts,
-                                    const bool useExtsOnly, std::string &errors) const {
+                                    const bool useExtsOnly) const {
+  std::string errors = "";
+  return this->findRun(hintstr, errors, exts);
+}
+
+std::string FileFinderImpl::findRun(const std::string &hintstr, std::string &errors,
+                                    const std::vector<std::string> &exts, const bool useExtsOnly) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << exts.size() << "])\n";
 

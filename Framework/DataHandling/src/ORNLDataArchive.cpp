@@ -197,7 +197,8 @@ std::string ORNLDataArchive::getArchivePath(const std::set<std::string> &basenam
 
 std::string ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
                                             const std::vector<std::string> &suffixes, std::string &errors) const {
-  return this->getArchivePath(basenames, suffixes, std::move(std::string()));
+  (void)errors;
+  return this->getArchivePath(basenames, suffixes);
 }
 
 void ORNLDataArchive::setONCat(ONCat_uptr oncat) { m_oncat = std::move(oncat); }

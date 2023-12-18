@@ -44,7 +44,9 @@ public:
   bool getCaseSensitive() const;
   static std::vector<IArchiveSearch_sptr> getArchiveSearch(const Kernel::FacilityInfo &facility);
   std::string findRun(const std::string &hintstr, const std::vector<std::string> &exts = {},
-                      const bool useExtsOnly = false, std::string &errors = std::string()) const;
+                      const bool useExtsOnly = false) const;
+  std::string findRun(const std::string &hintstr, std::string &errors, const std::vector<std::string> &exts = {},
+                      const bool useExtsOnly = false) const;
   std::vector<std::string> findRuns(const std::string &hintstr, const std::vector<std::string> &exts = {},
                                     const bool useExtsOnly = false) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.

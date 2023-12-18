@@ -35,7 +35,8 @@ constexpr std::string_view URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unix
 
 std::string ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
                                             const std::vector<std::string> &exts) const {
-  return this->getArchivePath(filenames, exts, std::move(std::string()));
+  std::string errors = "";
+  return this->getArchivePath(filenames, exts, errors);
 }
 
 /**
