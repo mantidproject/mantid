@@ -37,14 +37,14 @@ class MANTID_API_DLL FileFinderImpl {
 public:
   std::string getFullPath(const std::string &filename, const bool ignoreDirs = false) const;
   std::string getPath(const std::vector<IArchiveSearch_sptr> &archs, const std::set<std::string> &filenames,
-                      const std::vector<std::string> &exts) const;
+                      const std::vector<std::string> &exts, std::string &errors) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   std::string makeFileName(const std::string &hint, const Kernel::InstrumentInfo &instrument) const;
   void setCaseSensitive(const bool cs);
   bool getCaseSensitive() const;
-  std::vector<IArchiveSearch_sptr> getArchiveSearch(const Kernel::FacilityInfo &facility) const;
+  static std::vector<IArchiveSearch_sptr> getArchiveSearch(const Kernel::FacilityInfo &facility);
   std::string findRun(const std::string &hintstr, const std::vector<std::string> &exts = {},
-                      const bool useExtsOnly = false) const;
+                      const bool useExtsOnly = false, std::string &errors = std::string()) const;
   std::vector<std::string> findRuns(const std::string &hintstr, const std::vector<std::string> &exts = {},
                                     const bool useExtsOnly = false) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
@@ -69,7 +69,7 @@ private:
   std::string extractAllowedSuffix(std::string &userString) const;
   std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hint) const;
   std::string getArchivePath(const std::vector<IArchiveSearch_sptr> &archs, const std::set<std::string> &filenames,
-                             const std::vector<std::string> &exts) const;
+                             const std::vector<std::string> &exts, std::string &errors) const;
   std::string toUpper(const std::string &src) const;
   /// glob option - set to case sensitive or insensitive
   int m_globOption;

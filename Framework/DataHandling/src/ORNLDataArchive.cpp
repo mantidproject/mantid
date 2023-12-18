@@ -97,7 +97,7 @@ DECLARE_ARCHIVESEARCH(ORNLDataArchive, SNSDataSearch)
  *     empty string.
  */
 std::string ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
-                                            const std::vector<std::string> &suffixes) const {
+                                            const std::vector<std::string> &suffixes, std::string &errors) const {
   if (basenames.size() == 0) {
     return NOT_FOUND;
   }

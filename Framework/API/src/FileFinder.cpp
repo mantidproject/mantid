@@ -325,7 +325,7 @@ std::string FileFinderImpl::getExtension(const std::string &filename, const std:
   return "";
 }
 
-std::vector<IArchiveSearch_sptr> FileFinderImpl::getArchiveSearch(const Kernel::FacilityInfo &facility) const {
+std::vector<IArchiveSearch_sptr> FileFinderImpl::getArchiveSearch(const Kernel::FacilityInfo &facility) {
   std::vector<IArchiveSearch_sptr> archs;
 
   // get the searchive option from config service and format it
@@ -365,7 +365,7 @@ std::vector<IArchiveSearch_sptr> FileFinderImpl::getArchiveSearch(const Kernel::
 }
 
 std::string FileFinderImpl::findRun(const std::string &hintstr, const std::vector<std::string> &exts,
-                                    const bool useExtsOnly) const {
+                                    const bool useExtsOnly, std::string &errors) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << exts.size() << "])\n";
 
@@ -461,7 +461,7 @@ std::string FileFinderImpl::findRun(const std::string &hintstr, const std::vecto
   // determine which archive search facilities to use
   std::vector<IArchiveSearch_sptr> archs = getArchiveSearch(facility);
 
-  std::string path = getPath(archs, filenames, uniqueExts);
+  std::string path = getPath(archs, filenames, uniqueExts, errors);
   if (!path.empty()) {
     g_log.information() << "found path = " << path << '\n';
     return path;
@@ -656,8 +656,8 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
  *  or an empty string otherwise.
  */
 std::string FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
-                                           const std::set<std::string> &filenames,
-                                           const std::vector<std::string> &exts) const {
+                                           const std::set<std::string> &filenames, const std::vector<std::string> &exts,
+                                           std::string &errors) const {
   g_log.debug() << "getArchivePath([IArchiveSearch_sptr], [ ";
   for (const auto &iter : filenames)
     g_log.debug() << iter << " ";
@@ -670,7 +670,7 @@ std::string FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr
   for (const auto &arch : archs) {
     try {
       g_log.debug() << "Getting archive path for requested files\n";
-      path = arch->getArchivePath(filenames, exts);
+      path = arch->getArchivePath(filenames, exts, errors);
       if (!path.empty()) {
         return path;
       }
@@ -692,8 +692,8 @@ std::string FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr
  *  or an empty string otherwise.
  */
 std::string FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
-                                    const std::set<std::string> &filenames,
-                                    const std::vector<std::string> &exts) const {
+                                    const std::set<std::string> &filenames, const std::vector<std::string> &exts,
+                                    std::string &errors) const {
   std::string path;
 
   std::vector<std::string> extensions;
@@ -743,7 +743,7 @@ std::string FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &arch
   // Search the archive
   if (!archs.empty()) {
     g_log.debug() << "Search the archives\n";
-    const std::string archivePath = getArchivePath(archs, filenames, exts);
+    const std::string archivePath = getArchivePath(archs, filenames, exts, errors);
     try {
       if (!archivePath.empty() && Poco::File(archivePath).exists()) {
         return archivePath;

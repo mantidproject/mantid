@@ -42,7 +42,7 @@ constexpr std::string_view URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unix
  * @returns The full path to the first found
  */
 std::string ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
-                                            const std::vector<std::string> &exts) const {
+                                            const std::vector<std::string> &exts, std::string &errors) const {
   if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
     for (const auto &filename : filenames) {
       g_log.debug() << filename << ")\n";
@@ -64,6 +64,11 @@ std::string ISISDataArchive::getArchivePath(const std::set<std::string> &filenam
       std::string fullPath = getCorrectExtension(path_without_extension, exts);
       if (!fullPath.empty())
         return fullPath;
+#ifdef __linux__
+      errors +=
+          "\nIf you are an IDAaaS user, and your file is in the ISIS archive, then check if the archive is mounted. If it is not mounted, \
+                \nthen click Applications->Data->Experiment Archive (Staff Only), and enter your federal ID credentials with 'clrc' as the domain.";
+#endif // __linux__
     }
   }
   return "";
