@@ -9,6 +9,9 @@
 #include "MantidAPI/FileProperty.h"
 
 #include "MantidKernel/ConfigService.h"
+#ifdef __linux__
+#include "MantidKernel/FacilityInfo.h"
+#endif // __linux__
 #include "MantidKernel/MultiFileValidator.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyHelper.h"
@@ -392,8 +395,19 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
             doThrow = true;
           }
           if (doThrow) {
-            throw std::runtime_error("Unable to find file matching the string \"" + unresolvedFileName +
-                                     "\", please check the data search directories.");
+            auto errorMsg = "Unable to find file matching the string \"" + unresolvedFileName +
+                            "\", please check the data search directories.";
+#ifdef __linux__
+            const auto &facility = Kernel::ConfigService::Instance().getFacility();
+            // get the searchive option from config service and format it
+            std::string archiveOpt = Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
+            std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(), tolower);
+            if (facility.name() == "ISIS" && (archiveOpt == "on" || archiveOpt == "isis"))
+              errorMsg +=
+                  "\nIf you are an IDAaaS user, and your file is in the ISIS archive, then check if the archive is mounted. If it is not mounted, \
+                \nthen click Applications->Data->Experiment Archive (Staff Only), and enter your federal ID credentials with 'clrc' as the domain.";
+#endif // __linux__
+            throw std::runtime_error(errorMsg);
           } else {
             // if the fullyResolvedFile is empty, it means it failed to find the
             // file so keep the unresolvedFileName as a hint to be displayed
