@@ -33,6 +33,11 @@ constexpr std::string_view URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unix
 #endif
 } // namespace
 
+std::string ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
+                                            const std::vector<std::string> &exts) const {
+  return this->getArchivePath(filenames, exts, std::move(std::string()));
+}
+
 /**
  * Query the ISIS archive for a set of filenames and vector of extensions. The
  * method gets a path to each of the filenames, and then loops over the

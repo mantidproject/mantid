@@ -25,8 +25,10 @@ namespace DataHandling {
 
 class MANTID_DATAHANDLING_DLL ORNLDataArchive : public API::IArchiveSearch {
 public:
+  std::string getArchivePath(const std::set<std::string> &basenames,
+                             const std::vector<std::string> &suffixes) const override;
   std::string getArchivePath(const std::set<std::string> &basenames, const std::vector<std::string> &suffixes,
-                             std::string &errors = std::string()) const override;
+                             std::string &errors) const override;
 
   //////////////////////////////////////////////////////////////////////
   // Exposed publicly for testing purposes only.
