@@ -33,6 +33,7 @@ from sans.common.constants import (
     REDUCED_HAB_AND_LAB_WORKSPACE_FOR_MERGED_REDUCTION,
     CAN_COUNT_AND_NORM_FOR_OPTIMIZATION,
     CAN_AND_SAMPLE_WORKSPACE,
+    SCALED_BGSUB_SUFFIX,
 )
 from sans.common.file_information import get_extension_for_file_type, SANSFileInformationFactory
 from sans.gui_logic.plotting import get_plotting_module
@@ -1633,7 +1634,7 @@ def save_workspace_to_file(
     save_options = {"InputWorkspace": workspace_name}
     save_options.update({"Filename": file_name, "Transmission": transmission_name, "TransmissionCan": transmission_can_name})
     save_options.update(additional_run_numbers)
-    if workspace_name.endswith("_bgsub"):
+    if workspace_name.endswith(SCALED_BGSUB_SUFFIX):
         save_options.update(additional_metadata)
 
     if SaveType.NEXUS in file_formats:
@@ -1655,7 +1656,7 @@ def save_workspace_to_file(
 
 def subtract_scaled_background(reduction_package, scaled_ws_name: str):
     def run_minus_alg():
-        output_name = ws_name + "_bgsub"
+        output_name = ws_name + SCALED_BGSUB_SUFFIX
         minus_options["LHSWorkspace"] = ws_name
         minus_options["OutputWorkspace"] = output_name
         minus_alg = create_unmanaged_algorithm(minus_name, **minus_options)
