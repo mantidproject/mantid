@@ -467,7 +467,7 @@ int StructuredDetector::interceptSurface(Track & /*track*/) const {
 
 /// Finds the approximate solid angle covered by the component when viewed from
 /// the point given
-double StructuredDetector::solidAngle(const V3D & /*observer*/) const {
+double StructuredDetector::solidAngle(const Geometry::SolidAngleParams /*params*/) const {
   throw Kernel::Exception::NotImplementedError("StructuredDetector::solidAngle() is not implemented.");
 }
 
