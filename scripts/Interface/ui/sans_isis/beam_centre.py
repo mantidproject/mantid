@@ -152,13 +152,9 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
     def enable_update_rear(self, enabled):
         self.update_rear_radio.setChecked(enabled)
 
-    def set_scale_millimeters(self):
-        self.rear_centre_label.setText("Centre Position - Rear (mm)")
-        self.front_centre_label.setText("Centre Position - Front (mm)")
-
-    def set_scale_meters(self):
-        self.rear_centre_label.setText("Centre Position - Rear (m)")
-        self.front_centre_label.setText("Centre Position - Front (m)")
+    def set_position_unit(self, unit: str):
+        self.rear_centre_label.setText(f"Centre Position - Rear ({unit})")
+        self.front_centre_label.setText(f"Centre Position - Front ({unit})")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Properties

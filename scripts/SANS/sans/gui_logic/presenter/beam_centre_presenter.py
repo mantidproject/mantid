@@ -130,11 +130,11 @@ class BeamCentrePresenter(object):
         self._beam_centre_model.front_pos_1 = getattr(state_model, "front_pos_1")
         self._beam_centre_model.front_pos_2 = getattr(state_model, "front_pos_2")
 
-    def set_scale_to_meters(self, enable: bool) -> None:
-        if enable:
-            self._view.set_scale_meters()
+    def set_meters_mode_enabled(self, is_meters: bool) -> None:
+        if is_meters:
+            self._view.set_position_unit("m")
             return
-        self._view.set_scale_millimeters()
+        self._view.set_position_unit("mm")
 
     def update_centre_positions(self):
         rear_pos_1 = self._beam_centre_model.rear_pos_1
