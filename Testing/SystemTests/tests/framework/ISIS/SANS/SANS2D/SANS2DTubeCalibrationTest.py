@@ -40,7 +40,6 @@ class SANS2DTubeCalibrationTest:
             Background=10,
             VerticalOffset=-0.005,
             CValueThreshold=6.0,
-            SaveIntegratedWorkspaces=False,
         )
 
     @staticmethod

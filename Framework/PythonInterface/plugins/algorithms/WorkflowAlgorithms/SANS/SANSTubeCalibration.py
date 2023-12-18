@@ -185,11 +185,10 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             doc="The location to save the calibration result out to as a Nexus file.",
         )
         self.declareProperty(
-            Prop.SAVE_INPUT_WS,
-            True,
-            direction=Direction.Input,
-            doc="Save input workspaces after loading and integrating."
-            "The files will be saved to the default save location specified in your Mantid user directories.",
+            FileProperty(name=Prop.SAVE_INPUT_WS, defaultValue="", action=FileAction.OptionalDirectory),
+            doc="If specified, the input workspaces will be saved to this directory after loading and integrating."
+            "This location will also be searched, along with your Mantid user directories, to find previously "
+            "saved input workspace when loading.",
         )
 
     def validateInputs(self):
@@ -214,6 +213,11 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             cvalues_filepath = self._set_filepath_extension(cvalues_filepath, self._CVALUES_FILE_EXT)
             if Path(cvalues_filepath).is_file():
                 issues[Prop.CVALUE_FILE] = "The CValues file already exists"
+
+        input_ws_save_dir = self.getProperty(Prop.SAVE_INPUT_WS).value
+        if input_ws_save_dir:
+            if not Path(input_ws_save_dir).is_dir():
+                issues[Prop.SAVE_INPUT_WS] = "The directory for saving the integrated input workspaces does not exist."
 
         return issues
 
@@ -534,10 +538,17 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             pass
 
         saved_file_name = self._SAVED_INPUT_DATA_PREFIX + data_file
+        save_input_directory = self.getProperty(Prop.SAVE_INPUT_WS).value
+        if save_input_directory:
+            save_filepath = Path(save_input_directory).joinpath(self._set_filepath_extension(saved_file_name, self._NEXUS_SUFFIX))
+        else:
+            save_filepath = None
+
+        file_to_load = str(save_filepath) if save_filepath and save_filepath.is_file() else saved_file_name
         try:
-            alg = self._create_child_alg("Load", True, Filename=saved_file_name, OutputWorkspace=ws_name)
+            alg = self._create_child_alg("Load", True, Filename=file_to_load, OutputWorkspace=ws_name)
             alg.execute()
-            self.log().notice(f"Loaded saved file from {saved_file_name}.")
+            self.log().notice(f"Loaded saved file from {file_to_load}.")
             return mtd[ws_name]
         except (ValueError, RuntimeError):
             pass
@@ -556,8 +567,8 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         rebin_alg.execute()
         ws = mtd[ws_name]
 
-        if self.getProperty(Prop.SAVE_INPUT_WS).value:
-            self._save_as_nexus(ws, saved_file_name)
+        if save_filepath:
+            self._save_as_nexus(ws, str(save_filepath))
 
         return ws
 
