@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectCorrections</class>
- <widget class="QMainWindow" name="IndirectCorrections">
+ <class>Corrections</class>
+ <widget class="QMainWindow" name="Corrections">
   <property name="geometry">
    <rect>
     <x>0</x>

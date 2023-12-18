@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndirectCorrections.h"
+#include "Corrections.h"
 #include "AbsorptionCorrections.h"
 #include "ApplyAbsorptionCorrections.h"
 #include "CalculatePaalmanPings.h"
@@ -12,10 +12,10 @@
 #include "IndirectSettings.h"
 
 namespace MantidQt::CustomInterfaces {
-DECLARE_SUBWINDOW(IndirectCorrections)
+DECLARE_SUBWINDOW(Corrections)
 
-IndirectCorrections::IndirectCorrections(QWidget *parent)
-    : IndirectInterface(parent), m_changeObserver(*this, &IndirectCorrections::handleDirectoryChange) {
+Corrections::Corrections(QWidget *parent)
+    : IndirectInterface(parent), m_changeObserver(*this, &Corrections::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 
   // Allows us to get a handle on a tab using an enum, for example
@@ -32,7 +32,7 @@ IndirectCorrections::IndirectCorrections(QWidget *parent)
 /**
  * @param :: the detected close event
  */
-void IndirectCorrections::closeEvent(QCloseEvent * /*unused*/) {
+void Corrections::closeEvent(QCloseEvent * /*unused*/) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 
@@ -41,7 +41,7 @@ void IndirectCorrections::closeEvent(QCloseEvent * /*unused*/) {
  *
  * @param pNf :: notification
  */
-void IndirectCorrections::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
+void Corrections::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
   std::string key = pNf->key();
 
   if (key == "defaultsave.directory")
@@ -51,7 +51,7 @@ void IndirectCorrections::handleDirectoryChange(Mantid::Kernel::ConfigValChangeN
 /**
  * Initialised the layout of the interface.  MUST be called.
  */
-void IndirectCorrections::initLayout() {
+void Corrections::initLayout() {
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
@@ -73,12 +73,12 @@ void IndirectCorrections::initLayout() {
 /**
  * Allow Python to be called locally.
  */
-void IndirectCorrections::initLocalPython() { loadSettings(); }
+void Corrections::initLocalPython() { loadSettings(); }
 
 /**
  * Load the settings saved for this interface.
  */
-void IndirectCorrections::loadSettings() {
+void Corrections::loadSettings() {
   QSettings settings;
   QString settingsGroup = "CustomInterfaces/IndirectAnalysis/";
   QString saveDir =
@@ -95,7 +95,7 @@ void IndirectCorrections::loadSettings() {
   settings.endGroup();
 }
 
-void IndirectCorrections::applySettings(std::map<std::string, QVariant> const &settings) {
+void Corrections::applySettings(std::map<std::string, QVariant> const &settings) {
   for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
     tab->second->filterInputData(settings.at("RestrictInput").toBool());
   }
@@ -104,11 +104,11 @@ void IndirectCorrections::applySettings(std::map<std::string, QVariant> const &s
 /**
  * Handles exporting a Python script for the current tab.
  */
-void IndirectCorrections::exportTabPython() {
+void Corrections::exportTabPython() {
   unsigned int currentTab = m_uiForm.twTabs->currentIndex();
   m_tabs[currentTab]->exportPythonScript();
 }
 
-std::string IndirectCorrections::documentationPage() const { return "Indirect Corrections"; }
+std::string Corrections::documentationPage() const { return "Inelastic Corrections"; }
 
 } // namespace MantidQt::CustomInterfaces

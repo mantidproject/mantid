@@ -9,6 +9,7 @@
 #include "CorrectionsTab.h"
 #include "ui_AbsorptionCorrections.h"
 
+#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -17,7 +18,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL AbsorptionCorrections : public CorrectionsTab {
+class MANTIDQT_INELASTIC_DLL AbsorptionCorrections : public CorrectionsTab {
   Q_OBJECT
 
 public:

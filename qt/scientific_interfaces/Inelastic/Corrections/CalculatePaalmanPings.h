@@ -7,6 +7,7 @@
 #pragma once
 
 #include "CorrectionsTab.h"
+#include "DllConfig.h"
 #include "ui_CalculatePaalmanPings.h"
 
 #include "MantidGeometry/Instrument_fwd.h"
@@ -17,7 +18,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INDIRECT_DLL CalculatePaalmanPings : public CorrectionsTab {
+class MANTIDQT_INELASTIC_DLL CalculatePaalmanPings : public CorrectionsTab {
   Q_OBJECT
 
 public:

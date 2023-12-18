@@ -7,11 +7,12 @@
 #pragma once
 
 #include "CorrectionsTab.h"
+#include "DllConfig.h"
 #include "ui_ContainerSubtraction.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INDIRECT_DLL ContainerSubtraction : public CorrectionsTab {
+class MANTIDQT_INELASTIC_DLL ContainerSubtraction : public CorrectionsTab {
   Q_OBJECT
 
 public:
