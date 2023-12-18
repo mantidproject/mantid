@@ -22,6 +22,7 @@ from mantid.kernel import (
     EnabledWhenProperty,
     PropertyCriterion,
 )
+from dataclasses import dataclass
 import numpy as np
 from scipy.ndimage import uniform_filter
 from scipy.signal import convolve
@@ -38,13 +39,14 @@ class PEAK_STATUS(Enum):
     NO_PEAK = "No peak detected."
 
 
+@dataclass
 class WeakPeak:
-    def __init__(self, ipk, ispec, tof, tof_fwhm, ipks_near):
-        self.ipk = ipk
-        self.ispec = ispec  # spectrum at center of kernel that corresponds to max I/sigma from convolution
-        self.tof = tof  # TOF at center of kernel that corresponds to max I/sigma from convolution
-        self.tof_fwhm = tof_fwhm
-        self.ipks_near = ipks_near
+    ipk: int
+    ispec: int  # spectrum at center of kernel that corresponds to max I/sigma from convolution
+    tof: float  # TOF at center of kernel that corresponds to max I/sigma from convolution
+    tof_fwhm: float
+    tof_bin_width: float
+    ipks_near: np.ndarray
 
 
 class ShoeboxResult:
@@ -347,8 +349,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 nrows = self.getProperty("NRows").value  # get these inside loop as overwritten if shoebox optimised
                 ncols = self.getProperty("NCols").value
                 ispec = ws.getIndicesFromDetectorIDs([detid])[0]
-                itof = ws.yIndexOfX(pk_tof, ispec)
-                bin_width = np.diff(ws.readX(ispec)[itof : itof + 2])[0]  # used later to scale intensity
+                bin_width = get_bin_width_at_tof(ws, ispec, pk_tof)  # used later to scale intensity
                 if get_nbins_from_b2bexp_params:
                     fwhm = get_fwhm_from_back_to_back_params(peak, ws, detid)
                     nbins = max(3, int(nfwhm * fwhm / bin_width)) if fwhm is not None else self.getProperty("NBins").value
@@ -361,7 +362,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 peak_data = array_converter.get_peak_data(
                     peak, detid, bank_name, nshoebox * kernel.shape[0], nshoebox * kernel.shape[1], nrows_edge, ncols_edge
                 )
-                x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, ispec, kernel, nshoebox)
+                x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, kernel, nshoebox)
 
                 # perform initial integration
                 intens_over_sig = convolve_shoebox(y, esq, kernel)
@@ -385,7 +386,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     # look for possible strong peaks at any TOF in the window (won't know if strong until all pks integrated)
                     ipks_near, _ = find_ipks_in_window(ws, peaks, ispecs, ipk)
                     fwhm = fwhm if get_nbins_from_b2bexp_params else None  # not calculated but not going to be used
-                    weak_peaks_list.append(WeakPeak(ipk, ispecs[ipos[0], ipos[1]], x[ipos[-1]], fwhm, ipks_near))
+                    weak_peaks_list.append(WeakPeak(ipk, ispecs[ipos[0], ipos[1]], x[ipos[-1]], fwhm, bin_width, ipks_near))
                 else:
                     if status == PEAK_STATUS.STRONG:
                         ipks_strong.append(ipk)
@@ -432,22 +433,25 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     strong_pk_fwhm = get_fwhm_from_back_to_back_params(strong_pk, ws, strong_pk.getDetectorID())
                     ratio = weak_pk.tof_fwhm / strong_pk_fwhm
                 else:
-                    # scale assuming dTOF/TOF = const
+                    # scale assuming resolution dTOF/TOF = const
                     ratio = pk_tof / strong_pk.getTOF()
+                # scale ratio by bin widths at the two TOFs (can be different if log-binning)
+                ispec_strong = ws.getIndicesFromDetectorIDs([strong_pk.getDetectorID()])[0]
+                ratio = ratio * get_bin_width_at_tof(ws, ispec_strong, strong_pk.getTOF()) / weak_pk.tof_bin_width
                 nbins = max(3, round_up_to_odd_number(int(nbins * ratio)))
                 kernel = make_kernel(nrows, ncols, nbins)
                 # get data array in peak region (keep same window size, nshoebox, for plotting)
                 peak_data = array_converter.get_peak_data(
                     peak, peak.getDetectorID(), bank_name, nshoebox * kernel.shape[0], nshoebox * kernel.shape[1], nrows_edge, ncols_edge
                 )
-                x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, ispec, kernel, nshoebox)
+                x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, kernel, nshoebox)
                 # integrate at previously found ipos
                 ipos = [*np.argwhere(ispecs == weak_pk.ispec)[0], np.argmin(abs(x - weak_pk.tof))]
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
                 intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
                 # scale summed intensity by bin width to get integrated area
-                intens = intens * bin_width
-                sigma = sigma * bin_width
+                intens = intens * weak_pk.tof_bin_width
+                sigma = sigma * weak_pk.tof_bin_width
                 set_peak_intensity(peak, intens, sigma, do_lorz_cor)
                 if output_file:
                     # save result for plotting
@@ -490,6 +494,11 @@ def round_up_to_odd_number(number):
     return number
 
 
+def get_bin_width_at_tof(ws, ispec, tof):
+    itof = ws.yIndexOfX(tof, ispec)
+    return ws.readX(ispec)[itof + 1] - ws.readX(ispec)[itof]
+
+
 def plot_integration_results(output_file, results, prog_reporter):
     # import inside this function as not allowed to import at point algorithms are registered
     from matplotlib.pyplot import subplots, close
@@ -518,11 +527,12 @@ def calc_angle_between_peaks(pk1, pk2):
     return abs(pk1.getQLabFrame().angle(pk2.getQLabFrame()))
 
 
-def get_and_clip_data_arrays(ws, peak_data, pk_tof, ispec, kernel, nshoebox):
+def get_and_clip_data_arrays(ws, peak_data, pk_tof, kernel, nshoebox):
     x, y, esq, ispecs = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
     x = x[peak_data.irow, peak_data.icol, :]  # take x at peak centre, should be same for all detectors
+    ispec = ispecs[peak_data.irow, peak_data.icol]
     # crop data array to TOF region of peak using shoebox dimension
-    itof = ws.yIndexOfX(pk_tof, ispec)  # need index in y now (note x values are points even if were edges)
+    itof = ws.yIndexOfX(pk_tof, int(ispec))  # need index in y now (note x values are points even if were edges)
     tof_slice = slice(
         int(np.clip(itof - nshoebox * kernel.shape[-1] // 2, a_min=0, a_max=len(x))),
         int(np.clip(itof + nshoebox * kernel.shape[-1] // 2, a_min=0, a_max=len(x))),
