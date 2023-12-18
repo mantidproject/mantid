@@ -11,7 +11,7 @@ import re
 from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, Measurement
 from orsopy.fileio import Reduction, Software
 from orsopy.fileio.orso import Orso, OrsoDataset, save_orso
-from orsopy.fileio.base import Column, ErrorColumn
+from orsopy.fileio.base import Column, ErrorColumn, File
 
 from mantid.kernel import version
 from enum import Enum
@@ -69,6 +69,18 @@ class MantidORSODataset:
 
     def set_doi(self, doi: str) -> None:
         self._header.data_source.experiment.doi = doi
+
+    def add_measurement_file(
+        self, is_data_file, filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None
+    ) -> None:
+        file = File(filename, timestamp, comment)
+
+        if is_data_file:
+            self._header.data_source.measurement.data_files.append(file)
+        else:
+            if self._header.data_source.measurement.additional_files is None:
+                self._header.data_source.measurement.additional_files = []
+            self._header.data_source.measurement.additional_files.append(file)
 
     def _create_mandatory_header(
         self, ws, dataset_name: str, reduction_timestamp: datetime, creator_name: str, creator_affiliation: str

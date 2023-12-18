@@ -7,10 +7,11 @@
 from mantid.utils.reflectometry.orso_helper import MantidORSODataColumns, MantidORSODataset, MantidORSOSaver
 
 from mantid.kernel import Direction
-from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, FileProperty, FileAction, PythonAlgorithm, PropertyMode
+from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, FileProperty, FileAction, PythonAlgorithm, PropertyMode, FileFinder
 
 from pathlib import Path
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, List
+import re
 
 
 class Prop:
@@ -147,6 +148,14 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         dataset.set_proposal_id(rb_number)
         dataset.set_doi(doi)
 
+        reduction_workflow_histories = self._get_reduction_workflow_alg_histories(ws)
+        if not reduction_workflow_histories:
+            self.log().warning(f"Unable to find history for {self._REDUCTION_WORKFLOW_ALG} - some metadata will be excluded from the file.")
+            return
+
+        for file in self._get_individual_angle_files(ws, reduction_workflow_histories):
+            dataset.add_measurement_file(True, file)
+
     def _get_rb_number_and_doi(self, run) -> Union[Tuple[str, str], Tuple[None, None]]:
         """
         Check if the experiment RB number can be found in the workspace logs.
@@ -198,6 +207,37 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             )
             return None
 
+    def _get_individual_angle_files(self, ws, reduction_workflow_histories) -> List[str]:
+        """
+        Find the names of the individual angle files that were used in the reduction
+        """
+        angle_files = []
+        instrument = ws.getInstrument().getName()
+
+        for history in reduction_workflow_histories:
+            input_runs = history.getPropertyValue("InputRunList")
+            try:
+                angle_files.extend(self._get_file_names_from_run_numbers(input_runs, instrument))
+            except RuntimeError:
+                self.log().warning(
+                    f"Could not find all angle filenames for run(s) {input_runs}. Angle file information will be excluded from the file."
+                )
+                return []
+        return angle_files
+
+    @staticmethod
+    def _get_file_names_from_run_numbers(run_numbers: str, instrument_name: str) -> List[str]:
+        """
+        Get the fully qualified file names from a string of comma-separated run numbers.
+        """
+        # If the run number part is all digits then append the instrument name to ensure we look up the correct run
+        # files. If we don't do this we will look up files for the user's default instrument, which isn't guaranteed
+        # to match the reduced workspace instrument.
+        run_list = [f"{instrument_name}{run}" if re.search(r"\D+", run.split(".")[0]) is None else run for run in run_numbers.split(",")]
+
+        filepaths = FileFinder.findRuns(",".join(run_list))
+        return [Path(filepath).name for filepath in filepaths]
+
     def _get_reduction_alg_history(self, ws):
         """
         Find the first occurrence of the reduction algorithm in the workspace history, otherwise return None
@@ -216,6 +256,16 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                         return child_history
 
         return None
+
+    def _get_reduction_workflow_alg_histories(self, ws):
+        """
+        Return a list containing all the occurrences of the reduction workflow algorithm in the workspace history
+        """
+        ws_history = ws.getHistory()
+        if ws_history.empty():
+            return []
+
+        return [history for history in ws_history.getAlgorithmHistories() if history.name() == self._REDUCTION_WORKFLOW_ALG]
 
 
 # Register algorithm with Mantid

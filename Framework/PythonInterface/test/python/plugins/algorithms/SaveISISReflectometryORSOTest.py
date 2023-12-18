@@ -72,10 +72,24 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     def test_create_file_from_workspace_with_reduction_history(self):
         # Check that relevant information is extracted from the history produced by the ISIS Reflectometry reduction
         resolution = 0.02
-        reduced_ws = self._get_ws_from_reduction("INTER13460", resolution, "IvsQ_binned_13460")
+        reduced_ws = self._get_ws_from_reduction("INTER13460, 13461, 13462.nxs", resolution, "IvsQ_13460+13461+13462")
         SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
 
-        header_values_to_check = self._get_header_values_expected_from_reduced_ws_history(reduced_ws)
+        expected_input_run_files = ["INTER00013460.nxs", "INTER00013461.nxs", "INTER00013462.nxs"]
+        header_values_to_check = self._get_header_values_expected_from_reduced_ws(reduced_ws, expected_input_run_files)
+
+        self._check_file_contents(header_values_to_check, reduced_ws, resolution)
+
+    def test_file_metadata_matches_reduced_workspace_instrument_when_save_after_default_instrument_changed(self):
+        self.assertTrue(config["default.instrument"] == "INTER")
+        resolution = 0.02
+        reduced_ws = self._get_ws_from_reduction("13460", resolution, "IvsQ_binned_13460")
+
+        config["default.instrument"] = "OFFSPEC"
+        SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
+
+        expected_input_run_files = ["INTER00013460.nxs"]
+        header_values_to_check = self._get_header_values_expected_from_reduced_ws(reduced_ws, expected_input_run_files)
 
         self._check_file_contents(header_values_to_check, reduced_ws, resolution)
 
@@ -87,7 +101,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
 
-        header_values_to_check = self._get_header_values_expected_from_reduced_ws_history(reduced_ws)
+        header_values_to_check = self._get_header_values_expected_from_reduced_ws(reduced_ws)
 
         self._check_file_contents(header_values_to_check, reduced_ws, resolution)
 
@@ -151,9 +165,9 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     def _set_units_as_momentum_transfer(self, ws):
         ws.getAxis(0).setUnit(self._Q_UNIT)
 
-    def _get_ws_from_reduction(self, input_run, resolution, reduced_ws_name):
+    def _get_ws_from_reduction(self, input_runs, resolution, reduced_ws_name):
         args = {
-            "InputRunList": input_run,
+            "InputRunList": input_runs,
             "ProcessingInstructions": "4",
             "ThetaIn": 0.5,
             "WavelengthMin": 2,
@@ -166,7 +180,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         return AnalysisDataService.retrieve(reduced_ws_name)
 
-    def _get_header_values_expected_from_reduced_ws_history(self, reduced_ws):
+    def _get_header_values_expected_from_reduced_ws(self, reduced_ws, expected_input_run_files=None):
         expected_header_values = []
         history = self._get_reduction_history_for_reduced_ws(reduced_ws)
         self.assertIsNotNone(history)
@@ -179,6 +193,12 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         )
 
         expected_header_values.append(f"data_set: {reduced_ws.name()}")
+
+        if expected_input_run_files:
+            angle_files_entry = ["#     data_files:\n"]
+            for run_file in expected_input_run_files:
+                angle_files_entry.append(f"#     - file: {run_file}\n")
+            expected_header_values.append("".join(angle_files_entry))
 
         return expected_header_values
 
@@ -193,6 +213,14 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
                         return child_history
 
         return None
+
+    def _get_reduction_workflow_histories_for_reduced_ws(self, reduced_ws):
+        workflow_histories = []
+        for history in reduced_ws.getHistory().getAlgorithmHistories():
+            if history.name() == self._REDUCTION_WORKFLOW_ALG:
+                workflow_histories.append(history)
+
+        return workflow_histories
 
     def _check_file_contents(self, header_values_to_check, ws, resolution, excluded_header_values=None):
         self._check_file_header(header_values_to_check, excluded_header_values)
