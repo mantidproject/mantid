@@ -585,6 +585,8 @@ def find_nearest_peak_in_data_window(data, ispecs, x, ws, peaks, ipk, irow, icol
                 else:
                     continue  # executed if inner loop did not break (i.e. pixel closer to nearby peak than this peak)
                 break  # execute if inner loop did break and else branch ignored (i.e. found bin closest to this peak)
+            else:
+                break
         return imax_nearest  # could be None if no peak found
     else:
         # no nearby peaks - return position of maximum in data
