@@ -478,7 +478,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
 def get_nearest_strong_peak(peaks, peak, results, ipks_near, ipks_strong):
     ipks_near_strong = []
     for ipk_near in ipks_near:
-        if results[ipk_near].status == PEAK_STATUS.STRONG:
+        if results[ipk_near] and results[ipk_near].status == PEAK_STATUS.STRONG:
             ipks_near_strong.append(int(ipk_near))
     if not ipks_near_strong:
         # no peaks in detector window at any TOF, look in all table
@@ -621,14 +621,14 @@ def find_nearest_peak_in_data_window(data, ispecs, x, ws, peaks, ipk, irow, icol
 
 
 def find_ipks_in_window(ws, peaks, ispecs, ipk, tof_min=None, tof_max=None):
-    ispecs_peaks = ws.getIndicesFromDetectorIDs([int(p.getDetectorID()) for p in peaks])
+    ispecs_peaks = np.asarray(ws.getIndicesFromDetectorIDs([int(p.getDetectorID()) for p in peaks]))
     ipks_near = np.isin(ispecs_peaks, ispecs)
     if tof_min and tof_max:
         tofs = peaks.column("TOF")
         ipks_near = np.logical_and.reduce((tofs >= tof_min, tofs <= tof_max, ipks_near))
     ipks_near = np.flatnonzero(ipks_near)  # convert to index
     ipks_near = np.delete(ipks_near, np.where(ipks_near == ipk))  # remove the peak of interest
-    return ipks_near, ispecs_peaks
+    return ipks_near, ispecs_peaks[ipks_near]
 
 
 def integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges=None):
