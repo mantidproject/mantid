@@ -15,11 +15,11 @@ class EnggFitTOFFromPeaksTest(unittest.TestCase):
         Handle in/out property issues appropriately.
         """
         # No InputWorkspace property (required)
-        self.assertRaises(RuntimeError, EnggFitTOFFromPeaks, OutParametersTable="param_table")
+        self.assertRaises(TypeError, EnggFitTOFFromPeaks, OutParametersTable="param_table")
 
         table = CreateEmptyTableWorkspace(OutputWorkspace="some_tbl_name")
         # This property doesn't belong here
-        self.assertRaises(RuntimeError, EnggFitTOFFromPeaks, FittedPeaks=table, ExpectedPeaks="0.6, 0.9")
+        self.assertRaises(TypeError, EnggFitTOFFromPeaks, FittedPeaks=table, ExpectedPeaks="0.6, 0.9")
 
     def test_runs_ok_3peaks(self):
         """

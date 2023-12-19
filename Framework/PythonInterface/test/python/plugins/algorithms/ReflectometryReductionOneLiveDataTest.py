@@ -170,7 +170,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self._check_history(workspace, expected)
 
     def test_missing_inputs(self):
-        self.assertRaises(RuntimeError, ReflectometryReductionOneLiveData)
+        self.assertRaises(TypeError, ReflectometryReductionOneLiveData)
 
     def test_invalid_input_workspace(self):
         self.assertRaises(ValueError, ReflectometryReductionOneLiveData, InputWorkspace="bad")
@@ -180,7 +180,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
 
     def test_invalid_property(self):
         self.assertRaises(
-            RuntimeError,
+            TypeError,
             ReflectometryReductionOneLiveData,
             InputWorkspace=self.__class__._input_ws,
             OutputWorkspace="output",

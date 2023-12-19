@@ -11,7 +11,6 @@ import mantid.simpleapi as sapi
 
 
 class EnggCalibrateTest(unittest.TestCase):
-
     _data_ws = None
     _van_curves_ws = None
     _van_integ_tbl = None
@@ -42,22 +41,20 @@ class EnggCalibrateTest(unittest.TestCase):
         """
 
         # No InputWorkspace property (required)
-        self.assertRaises(RuntimeError, sapi.EnggCalibrate, File="foo", Bank="1")
+        self.assertRaises(TypeError, sapi.EnggCalibrate, File="foo", Bank="1")
 
         # Wrong (mispelled) InputWorkspace property
-        self.assertRaises(RuntimeError, sapi.EnggCalibrate, InputWorkpace="anything_goes", Bank="2")
+        self.assertRaises(TypeError, sapi.EnggCalibrate, InputWorkpace="anything_goes", Bank="2")
 
         # mispelled ExpectedPeaks
         tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace="test_table")
-        self.assertRaises(
-            RuntimeError, sapi.EnggCalibrate, Inputworkspace=self.__class__._data_ws, DetectorPositions=tbl, Bank="2", Peaks="2"
-        )
+        self.assertRaises(TypeError, sapi.EnggCalibrate, Inputworkspace=self.__class__._data_ws, DetectorPositions=tbl, Bank="2", Peaks="2")
 
         # mispelled DetectorPositions
-        self.assertRaises(RuntimeError, sapi.EnggCalibrate, InputWorkspace=self.__class__._data_ws, Detectors=tbl, Bank="2", Peaks="2")
+        self.assertRaises(TypeError, sapi.EnggCalibrate, InputWorkspace=self.__class__._data_ws, Detectors=tbl, Bank="2", Peaks="2")
 
         # There's no output workspace
-        self.assertRaises(RuntimeError, sapi.EnggCalibrate, InputWorkspace=self.__class__._data_ws, Bank="1")
+        self.assertRaises(TypeError, sapi.EnggCalibrate, InputWorkspace=self.__class__._data_ws, Bank="1")
 
     def test_fails_gracefully(self):
         """
@@ -66,7 +63,7 @@ class EnggCalibrateTest(unittest.TestCase):
 
         # This should produce 'given peak center ... is outside of data range' warnings
         # and finally raise after a 'some peaks not found' error
-        self.assertRaises(RuntimeError, sapi.EnggCalibrate, InputWorkspace=self.__class__._data_ws, ExpectedPeaks=[0.2, 0.4], Bank="2")
+        self.assertRaises(TypeError, sapi.EnggCalibrate, InputWorkspace=self.__class__._data_ws, ExpectedPeaks=[0.2, 0.4], Bank="2")
 
     def test_runs_ok_without_reliable_peaks(self):
         """
