@@ -358,7 +358,7 @@ class GetAllNamesToSaveTest(unittest.TestCase):
 
     @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
     @mock.patch("sans.algorithm_detail.batch_execution.save_workspace_to_file")
-    def test_that_subtracted_save_to_file_does_not_includes_metadata_in_options(self, mock_save_func, mock_names_func):
+    def test_that_subtracted_save_to_file_includes_metadata_in_options(self, mock_save_func, mock_names_func):
         state = mock.MagicMock()
         save_info_mock = mock.MagicMock()
         scaled_bg_mock = mock.MagicMock()
