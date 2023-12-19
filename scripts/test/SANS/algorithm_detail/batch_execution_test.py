@@ -21,8 +21,10 @@ from sans.algorithm_detail.batch_execution import (
     subtract_scaled_background,
     check_for_background_workspace_in_ads,
     group_bgsub_if_required,
+    save_to_file,
 )
 from sans.common.enums import SaveType, ReductionMode
+from sans.common.constants import SCALED_BGSUB_SUFFIX
 
 
 class ADSMock(object):
@@ -334,6 +336,50 @@ class GetAllNamesToSaveTest(unittest.TestCase):
             "CanDirectRunNumber": "8",
         }
         mock_alg_manager.assert_called_once_with("SANSSave", **expected_options)
+
+    @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
+    @mock.patch("sans.algorithm_detail.batch_execution.save_workspace_to_file")
+    def test_that_non_subtracted_save_to_file_does_not_include_metadata_in_options(self, mock_save_func, mock_names_func):
+        state = mock.MagicMock()
+        save_info_mock = mock.MagicMock()
+        scaled_bg_mock = mock.MagicMock()
+        scaled_bg_mock.workspace = "scaled_ws"
+        scaled_bg_mock.scale_factor = 0.5
+        file_formats_mock = mock.MagicMock()
+        save_info_mock.file_format = file_formats_mock
+        state.save = save_info_mock
+        state.background_subtraction = scaled_bg_mock
+        reduction_package = mock.MagicMock()
+        reduction_package.state = state
+
+        mock_names_func.return_value = ["unsubbed_ws"]
+        save_to_file([reduction_package], False, {}, {})
+        mock_save_func.assert_called_with("unsubbed_ws", file_formats_mock, "unsubbed_ws", {}, {})
+
+    @mock.patch("sans.algorithm_detail.batch_execution.get_all_names_to_save")
+    @mock.patch("sans.algorithm_detail.batch_execution.save_workspace_to_file")
+    def test_that_subtracted_save_to_file_does_not_includes_metadata_in_options(self, mock_save_func, mock_names_func):
+        state = mock.MagicMock()
+        save_info_mock = mock.MagicMock()
+        scaled_bg_mock = mock.MagicMock()
+        scaled_bg_mock.workspace = "scaled_ws"
+        scaled_bg_mock.scale_factor = 0.5
+        file_formats_mock = mock.MagicMock()
+        save_info_mock.file_format = file_formats_mock
+        state.save = save_info_mock
+        state.background_subtraction = scaled_bg_mock
+        reduction_package = mock.MagicMock()
+        reduction_package.state = state
+
+        mock_names_func.return_value = ["subbed_ws" + SCALED_BGSUB_SUFFIX]
+        save_to_file([reduction_package], False, {}, {})
+        mock_save_func.assert_called_with(
+            "subbed_ws" + SCALED_BGSUB_SUFFIX,
+            file_formats_mock,
+            "subbed_ws" + SCALED_BGSUB_SUFFIX,
+            {},
+            {"BackgroundSubtractionWorkspace": "scaled_ws", "BackgroundSubtractionScaleFactor": 0.5},
+        )
 
     @mock.patch("sans.algorithm_detail.batch_execution.create_unmanaged_algorithm")
     def test_that_subtracted_save_workspace_to_file_does_include_metadata_in_options(self, mock_alg_manager):
