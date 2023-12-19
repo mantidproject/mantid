@@ -27,6 +27,7 @@ class DNSElasticSCOptionsView(DNSView):
         super().__init__(parent)
         self._content = load_ui(__file__, "elastic_single_crystal_options.ui", baseinstance=self)
         self._map = {
+            "all_options": self._content,
             "wavelength": self._content.dSB_wavelength,
             "get_wavelength": self._content.cB_get_wavelength,
             "norm_time": self._content.rB_norm_time,
@@ -65,10 +66,8 @@ class DNSElasticSCOptionsView(DNSView):
         self._map["use_dx_dy"].setChecked(True)
         self._map["dx"].setValue(3.672)
         self._map["dy"].setValue(6.539)
-        self._map["corrections"].setEnabled(False)
-        self._map["lattice_parameters"].setEnabled(False)
-        self._map["orientation"].setEnabled(False)
-        self._map["binning"].setEnabled(False)
+        self._map["corrections"].setChecked(False)
+        self._map["all_options"].setEnabled(False)
         # connect signals
         self._attach_signal_slots()
 
