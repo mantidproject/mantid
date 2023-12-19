@@ -12,16 +12,11 @@ DNS script generator model for elastic single crystal data.
 from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset import DNSElasticDataset
 from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import get_normalisation
 from mantidqtinterfaces.dns_powder_tof.script_generator.common_script_generator_model import DNSScriptGeneratorModel
-
 import numpy as np
 from mantid.simpleapi import mtd
 
 
 class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
-    # pylint: disable=too-many-instance-attributes
-    # having the options as instance attributes, is much better readable
-    # none of them are public
-
     def __init__(self, parent):
         super().__init__(parent)
         self._data_arrays = {}
@@ -31,15 +26,6 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         self._standard_data = None
         self._loop = None
         self._spacing = None
-        self._vana_correction = None
-        self._nicr_correction = None
-        self._sample_background_correction = None
-        self._background_factor = None
-        self._ignore_vana = None
-        self._sum_sf_nsf = None
-        self._non_magnetic = None
-        self._xyz = None
-        self._corrections = None
         self._export_path = None
         self._ascii = None
         self._nexus = None
@@ -59,47 +45,22 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         self._ascii = paths["ascii"] and paths["export"] and bool(self._export_path)
         self._nexus = paths["nexus"] and paths["export"] and bool(self._export_path)
         self._norm = get_normalisation(options)
-
         self._setup_sample_data(paths, file_selector)
-        self._setup_standard_data(paths, file_selector)
         self._set_loop()
-        # validate if input makes sense, otherwise return
-        # an empty script and error message
-        error = self._check_errors_in_selected_files()
-        if error:
-            self._script = [""]
-            error_message = error
-        else:
-            error_message = ""
-            # starting writing script
-            self._add_lines_to_script(self._get_header_lines())
-            self._add_lines_to_script(self._get_sample_data_lines())
-            self._add_lines_to_script(self._get_standard_data_lines())
-            self._add_lines_to_script(self._get_param_lines(options))
-            self._add_lines_to_script(self._get_binning_lines(options))
-            self._add_lines_to_script(self._get_load_data_lines())
-            self._add_lines_to_script(self._get_subtract_bg_from_standard_lines())
-            self._add_lines_to_script(self._get_sample_corrections_lines())
-            self._add_lines_to_script(self._get_nicr_cor_lines())
-            save_string = self._get_save_string()
-            self._add_lines_to_script(self._get_convert_to_matrix_lines(save_string))
-
+        error_message = ""
+        # starting writing script
+        self._add_lines_to_script(self._get_header_lines())
+        self._add_lines_to_script(self._get_sample_data_lines())
+        self._add_lines_to_script(self._get_param_lines(options))
+        self._add_lines_to_script(self._get_binning_lines(options))
+        self._add_lines_to_script(self._get_load_data_lines())
+        save_string = self._get_save_string()
+        self._add_lines_to_script(self._get_convert_to_matrix_lines(save_string))
         return self._script, error_message
 
     def _setup_sample_data(self, paths, file_selector):
         self._sample_data = DNSElasticDataset(data=file_selector["full_data"], path=paths["data_dir"], is_sample=True)
         self._plot_list = self._sample_data.create_subtract()
-
-    def _setup_standard_data(self, paths, file_selector):
-        if self._corrections:
-            self._standard_data = DNSElasticDataset(
-                data=file_selector["standard_data_tree_model"],
-                path=paths["standards_dir"],
-                is_sample=False,
-                banks=self._sample_data["banks"],
-                fields=self._sample_data["fields"],
-                ignore_van=self._ignore_vana,
-            )
 
     def _set_loop(self):
         if len(self._sample_data.keys()) == 1:
@@ -113,9 +74,6 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
     def _get_header_lines():
         lines = [
             "from mantidqtinterfaces.dns_single_crystal_elastic.scripts.md_single_crystal_elastic import load_all",
-            "from mantidqtinterfaces.dns_single_crystal_elastic.scripts.md_single_crystal_elastic import "
-            "vanadium_correction, flipping_ratio_correction",
-            "from mantidqtinterfaces.dns_single_crystal_elastic.scripts.md_single_crystal_elastic import background_subtraction",
             "from mantid.simpleapi import ConvertMDHistoToMatrixWorkspace, mtd, SaveAscii, SaveNexus",
             "",
         ]
@@ -123,11 +81,6 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _get_sample_data_lines(self):
         return [f"sample_data = {self._sample_data.format_dataset()}"]
-
-    def _get_standard_data_lines(self):
-        if self._corrections:
-            return [f"standard_data = {self._standard_data.format_dataset()}"]
-        return [""]
 
     def _get_param_lines(self, options):
         return [
@@ -157,7 +110,6 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         omega_bin_edge_max = options["omega_max"] + options["omega_bin_size"] / 2
         omega_num_bins = int(round((omega_bin_edge_max - omega_bin_edge_min) / options["omega_bin_size"]))
         omega_binning = [omega_bin_edge_min, omega_bin_edge_max, omega_num_bins]
-
         lines = [
             f"binning = {{'two_theta_binning': {two_theta_binning},\n"
             f"           'omega_binning': {omega_binning}}} # min, max, number_of_bins"
@@ -169,41 +121,6 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         if self._corrections:
             lines += ["wss_standard = load_all(standard_data, binning, params, standard=True)"]
         lines += [""]
-        return lines
-
-    def _get_subtract_bg_from_standard_lines(self):
-        lines = []
-        if self._vana_correction or self._nicr_correction:
-            lines = [
-                "# subtract background from vanadium and nicr",
-                "for sample, workspacelist in wss_standard.items(): "
-                "\n    for workspace in workspacelist:"
-                "\n        background_subtraction(workspace)",
-                "",
-            ]
-        return lines
-
-    def _get_background_string(self):
-        return f"{self._spacing}background_subtraction(workspace, factor={self._background_factor})"
-
-    def _get_vana_correction_string(self):
-        return (
-            f"{self._spacing}vanadium_correction(workspace, vana_set=standard_data['vana'], "
-            f"ignore_vana_fields={self._ignore_vana}, sum_vana_sf_nsf={self._sum_sf_nsf})"
-        )
-
-    def _get_sample_corrections_lines(self):
-        background_string = self._get_background_string()
-        vana_correction_string = self._get_vana_correction_string()
-        lines = []
-        if self._sample_background_correction or self._vana_correction:
-            lines = ["# correct sample data", f"{self._loop}{background_string}{vana_correction_string}"]
-        return lines
-
-    def _get_nicr_cor_lines(self):
-        lines = []
-        if self._nicr_correction:
-            lines = [f"{self._loop}{self._spacing}flipping_ratio_correction(workspace)"]
         return lines
 
     def _get_ascii_save_string(self):
@@ -248,57 +165,6 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
             }
         return self._plot_list, self._data_arrays
 
-    def _vana_not_in_standard(self):
-        return "vana" not in self._standard_data.data_dic.keys()
-
-    def _nicr_not_in_standard(self):
-        return "nicr" not in self._standard_data.data_dic.keys()
-
-    def _empty_not_in_standard(self):
-        return "empty" not in self._standard_data.data_dic.keys()
-
-    def _flipping_ratio_not_possible(self):
-        selected_angle_fields_data = self._sample_data["angle_fields_data"]
-        flipping_ratio_possibility_list = []
-        incomplete_banks_list = []
-        for det_bank_angle in selected_angle_fields_data.keys():
-            sf_fields = sorted([field for field in selected_angle_fields_data[det_bank_angle] if field.endswith("_sf")])
-            sf_fields_components = [field.replace("_sf", "") for field in sf_fields]
-            nsf_fields = sorted([field for field in selected_angle_fields_data[det_bank_angle] if field.endswith("_nsf")])
-            nsf_fields_components = [field.replace("_nsf", "") for field in nsf_fields]
-            if nsf_fields_components == sf_fields_components:
-                flipping_ratio_possible = True
-            else:
-                flipping_ratio_possible = False
-                incomplete_banks_list.append(det_bank_angle)
-            flipping_ratio_possibility_list.append(flipping_ratio_possible)
-        is_possible = all(flipping_ratio_possibility_list)
-        angles = ", ".join(map(str, sorted(incomplete_banks_list)))
-        return not is_possible, angles
-
-    def _bank_positions_not_compatible(self, tol=0.05):
-        if self._corrections:
-            sorted_sample_banks = np.array(sorted(self._sample_data["banks"]))
-            sorted_standard_banks = np.array(sorted(self._standard_data["banks"]))
-            sample_banks_size = sorted_sample_banks.size
-            standard_banks_size = sorted_standard_banks.size
-            if sample_banks_size == standard_banks_size:
-                banks_match = np.allclose(sorted_sample_banks, sorted_standard_banks, atol=tol)
-            elif sample_banks_size < standard_banks_size:
-                count = 0
-                for sample_element in sorted_sample_banks:
-                    for standard_element in sorted_standard_banks:
-                        if np.allclose(sample_element, standard_element, atol=tol):
-                            print(sample_element)
-                            count += 1
-                if count == sample_banks_size:
-                    banks_match = True
-                else:
-                    banks_match = False
-            else:
-                banks_match = False
-            return not banks_match
-
     def _get_sample_data_omega_binning_array(self, options):
         min = round(options["omega_min"], 1)
         max = round(options["omega_max"], 1)
@@ -312,48 +178,3 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         bin_size = options["two_theta_bin_size"]
         binning_array = np.arange(min, max + bin_size, bin_size)
         return binning_array
-
-    def _check_errors_in_selected_files(self):
-        """
-        If any inconsistencies are found in the files selected for
-        data reduction, then this method will return a string with
-        the corresponding error_message. If no inconsistencies are
-        found then the empty string will be returned.
-        """
-        if self._corrections and not self._standard_data:
-            return "Standard data have to be selected to perform reduction of sample data."
-        if self._bank_positions_not_compatible():
-            return "Detector rotation angles of the selected standard data do not match the angles of the selected sample data."
-        if self._vana_correction and self._vana_not_in_standard():
-            return (
-                "Detector efficiency correction option is chosen, but detector bank rotation angles of the selected vanadium files "
-                "do not correspond to those of the selected sample files."
-            )
-        if self._vana_correction and self._empty_not_in_standard():
-            return (
-                "Detector efficiency correction option is chosen, "
-                'but detector bank rotation angles of the selected "empty" '
-                "files do not correspond to those of the selected sample files."
-            )
-        if self._nicr_correction and self._nicr_not_in_standard():
-            return (
-                "Flipping ratio correction option is chosen, but detector bank rotation angles of the selected NiCr "
-                "files do not correspond to those of the selected sample files."
-            )
-        if self._nicr_correction and self._empty_not_in_standard():
-            return (
-                "Flipping ratio correction option is chosen, but "
-                'detector bank rotation angles of the selected "empty" '
-                "files do not correspond to those of the selected sample files."
-            )
-        if self._sample_background_correction and self._empty_not_in_standard():
-            return (
-                "Background subtraction from sample is chosen, but "
-                'detector bank rotation angles of the selected "empty" '
-                "files do not correspond to those of the selected sample files."
-            )
-        if self._nicr_correction and self._flipping_ratio_not_possible()[0]:
-            return (
-                "Flipping ratio correction option is chosen, but an incomplete set of pairs of SF and NSF measurements "
-                f"is found for the following bank rotation angles: {self._flipping_ratio_not_possible()[1]}"
-            )

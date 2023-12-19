@@ -13,7 +13,6 @@ from mantidqtinterfaces.dns_powder_tof.script_generator.common_script_generator_
 
 
 class DNSElasticSCScriptGeneratorPresenter(DNSScriptGeneratorPresenter):
-    # pass the view and model into the presenter
     def __init__(self, name=None, parent=None, view=None, model=None):
         super().__init__(parent=parent, name=name, view=view, model=model)
         self._plot_list = []
