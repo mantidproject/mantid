@@ -245,7 +245,7 @@ public:
     // Turn off the archive searching
     ConfigService::Instance().setString("datasearch.searcharchive", "Off");
 
-    std::string path = FileFinder::Instance().findRun("CNCS7860");
+    std::string path = FileFinder::Instance().findRun("CNCS7860").result();
     TS_ASSERT(path.find("CNCS_7860_event.nxs") != std::string::npos);
     Poco::File file(path);
     TS_ASSERT(file.exists());
@@ -256,7 +256,7 @@ public:
     ConfigService::Instance().setString("default.facility", "ISIS");
 
     ConfigService::Instance().setString("datasearch.searcharchive", "Off");
-    std::string path = FileFinder::Instance().findRun("CSP78173");
+    std::string path = FileFinder::Instance().findRun("CSP78173").result();
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
     Poco::File file(path);
     TS_ASSERT(file.exists());
@@ -382,7 +382,7 @@ public:
     ConfigService::Instance().setString("default.facility", "ISIS");
 
     ConfigService::Instance().setString("datasearch.searcharchive", "Off");
-    std::string path = FileFinder::Instance().findRun("CSP78173.raw");
+    std::string path = FileFinder::Instance().findRun("CSP78173.raw").result();
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
     Poco::File file(path);
     TS_ASSERT(file.exists());
@@ -414,7 +414,7 @@ public:
     // By default case sensitive is on
     fileFinder.setCaseSensitive(false);
 
-    std::string path = fileFinder.findRun("CSp78173.Raw");
+    std::string path = fileFinder.findRun("CSp78173.Raw").result();
 #ifdef _WIN32
     TS_ASSERT(path.find("CSp78173.Raw") != std::string::npos);
 #else
@@ -428,7 +428,7 @@ public:
 
     // turn on case sensitive - this one should fail on none windows
     FileFinder::Instance().setCaseSensitive(true);
-    std::string pathOn = fileFinder.findRun("CSp78173.Raw");
+    std::string pathOn = fileFinder.findRun("CSp78173.Raw").result();
     Poco::File fileOn(pathOn);
 
     std::string pathOn2 = FileFinder::Instance().getFullPath("unit_TeSTinG/IDF_for_UNiT_TESTiNG.xMl");

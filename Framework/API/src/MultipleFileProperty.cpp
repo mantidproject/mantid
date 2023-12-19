@@ -373,10 +373,18 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
         // If a default ext has been specified/found, then use it.
         std::string errors = "";
         if (!defaultExt.empty()) {
-          fullyResolvedFile =
-              FileFinder::Instance().findRun(unresolvedFileName, errors, std::vector<std::string>(1, defaultExt));
+          auto run = FileFinder::Instance().findRun(unresolvedFileName, std::vector<std::string>(1, defaultExt));
+          if (run)
+            fullyResolvedFile = run.result();
+          else
+            errors += run.errors();
+
         } else {
-          fullyResolvedFile = FileFinder::Instance().findRun(unresolvedFileName, errors, m_exts);
+          auto run = FileFinder::Instance().findRun(unresolvedFileName, m_exts);
+          if (run)
+            fullyResolvedFile = run.result();
+          else
+            errors += run.errors();
         }
         if (fullyResolvedFile.empty()) {
           bool doThrow = false;

@@ -322,6 +322,7 @@ set(INC_FILES
     inc/MantidAPI/RefAxis.h
     inc/MantidAPI/RegionSelectorObserver.h
     inc/MantidAPI/ResizeRectangularDetectorHelper.h
+    inc/MantidAPI/Result.h
     inc/MantidAPI/Run.h
     inc/MantidAPI/Sample.h
     inc/MantidAPI/SampleShapeValidator.h

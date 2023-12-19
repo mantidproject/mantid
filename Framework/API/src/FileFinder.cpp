@@ -364,20 +364,14 @@ std::vector<IArchiveSearch_sptr> FileFinderImpl::getArchiveSearch(const Kernel::
   return archs;
 }
 
-std::string FileFinderImpl::findRun(const std::string &hintstr, const std::vector<std::string> &exts,
-                                    const bool useExtsOnly) const {
-  std::string errors = "";
-  return this->findRun(hintstr, errors, exts);
-}
-
-std::string FileFinderImpl::findRun(const std::string &hintstr, std::string &errors,
-                                    const std::vector<std::string> &exts, const bool useExtsOnly) const {
+const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintstr, const std::vector<std::string> &exts,
+                                                       const bool useExtsOnly) const {
   std::string hint = Kernel::Strings::strip(hintstr);
   g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << exts.size() << "])\n";
 
   // if partial filename or run number is not supplied, return here
   if (hint.empty())
-    return "";
+    return API::Result<std::string>("", "File not found.");
 
   // if it looks like a full filename just do a quick search for it
   Poco::Path hintPath(hint);
@@ -390,7 +384,7 @@ std::string FileFinderImpl::findRun(const std::string &hintstr, std::string &err
       try {
         if (Poco::File(path).exists()) {
           g_log.information() << "found path = " << path << '\n';
-          return path;
+          return API::Result<std::string>(path);
         }
       } catch (Poco::Exception &) {
       }
@@ -431,7 +425,7 @@ std::string FileFinderImpl::findRun(const std::string &hintstr, std::string &err
   }
 
   if (filename.empty())
-    return "";
+    return API::Result<std::string>("", "File not found");
 
   // Look first at the original filename then for case variations. This is
   // important
@@ -467,8 +461,8 @@ std::string FileFinderImpl::findRun(const std::string &hintstr, std::string &err
   // determine which archive search facilities to use
   std::vector<IArchiveSearch_sptr> archs = getArchiveSearch(facility);
 
-  std::string path = getPath(archs, filenames, uniqueExts, errors);
-  if (!path.empty()) {
+  auto path = getPath(archs, filenames, uniqueExts);
+  if (path) {
     g_log.information() << "found path = " << path << '\n';
     return path;
   } else {
@@ -477,7 +471,7 @@ std::string FileFinderImpl::findRun(const std::string &hintstr, std::string &err
 
   g_log.information() << "Unable to find file path for " << hint << "\n";
 
-  return "";
+  return API::Result<std::string>("", "File not found.");
 }
 
 /**
@@ -661,9 +655,9 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
  * search locations
  *  or an empty string otherwise.
  */
-std::string FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
-                                           const std::set<std::string> &filenames, const std::vector<std::string> &exts,
-                                           std::string &errors) const {
+const API::Result<std::string> FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
+                                                              const std::set<std::string> &filenames,
+                                                              const std::vector<std::string> &exts) const {
   g_log.debug() << "getArchivePath([IArchiveSearch_sptr], [ ";
   for (const auto &iter : filenames)
     g_log.debug() << iter << " ";
@@ -672,18 +666,17 @@ std::string FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr
     g_log.debug() << iter << " ";
   g_log.debug() << "])\n";
 
-  std::string path;
   for (const auto &arch : archs) {
     try {
       g_log.debug() << "Getting archive path for requested files\n";
-      path = arch->getArchivePath(filenames, exts, errors);
-      if (!path.empty()) {
+      auto path = arch->getArchivePath(filenames, exts);
+      if (path) {
         return path;
       }
     } catch (...) {
     }
   }
-  return path;
+  return API::Result<std::string>("", "File not found.");
 }
 
 /**
@@ -697,9 +690,9 @@ std::string FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr
  * search locations
  *  or an empty string otherwise.
  */
-std::string FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
-                                    const std::set<std::string> &filenames, const std::vector<std::string> &exts,
-                                    std::string &errors) const {
+const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &archs,
+                                                       const std::set<std::string> &filenames,
+                                                       const std::vector<std::string> &exts) const {
   std::string path;
 
   std::vector<std::string> extensions;
@@ -723,7 +716,7 @@ std::string FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &arch
           const Poco::Path filePath(searchPath, filename + extension);
           const Poco::File file(filePath);
           if (file.exists())
-            return filePath.toString();
+            return API::Result<std::string>(filePath.toString());
 
         } catch (Poco::Exception &) { /* File does not exist, just carry on. */
         }
@@ -737,11 +730,11 @@ std::string FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &arch
       try {
         if (!path.empty() && Poco::File(path).exists()) {
           g_log.debug() << "path returned from getFullPath() = " << path << '\n';
-          return path;
+          return API::Result<std::string>(path);
         }
       } catch (std::exception &e) {
         g_log.error() << "Cannot open file " << path << ": " << e.what() << '\n';
-        return "";
+        return API::Result<std::string>("", "Cannot open file.");
       }
     }
   }
@@ -749,19 +742,19 @@ std::string FileFinderImpl::getPath(const std::vector<IArchiveSearch_sptr> &arch
   // Search the archive
   if (!archs.empty()) {
     g_log.debug() << "Search the archives\n";
-    const std::string archivePath = getArchivePath(archs, filenames, exts, errors);
+    const auto archivePath = getArchivePath(archs, filenames, exts);
     try {
-      if (!archivePath.empty() && Poco::File(archivePath).exists()) {
+      if (archivePath && Poco::File(archivePath.result()).exists()) {
         return archivePath;
       }
     } catch (std::exception &e) {
       g_log.error() << "Cannot open file " << archivePath << ": " << e.what() << '\n';
-      return "";
+      return API::Result<std::string>("", "Cannot open file.");
     }
 
   } // archs
 
-  return "";
+  return API::Result<std::string>("", "File not found.");
 }
 
 std::string FileFinderImpl::toUpper(const std::string &src) const {
