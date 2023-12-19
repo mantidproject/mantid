@@ -190,6 +190,24 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual(2.2, move.detectors[ReductionMode.LAB.value].sample_centre_pos1)
         self.assertEqual(3.6, move.detectors[ReductionMode.LAB.value].sample_centre_pos2)
 
+    def test_loaded_correctly_when_on_single_bank_instrument(self):
+        input_dict = {
+            "instrument": {"name": "LARMOR"},
+            "detector": {
+                "configuration": {
+                    "all_centre": {"x": 2, "y": 3.4},
+                    "front_centre": {"x": 2.1, "y": 3.5},
+                    "rear_centre": {"x": 2.2, "y": 3.6},
+                    "selected_detector": "front",
+                }
+            },
+        }
+        parser = self._setup_parser(input_dict)
+        move = parser.get_state_move(None)
+        self.assertTrue(ReductionMode.HAB.value not in move.detectors.keys())
+        self.assertEqual(2.2, move.detectors[ReductionMode.LAB.value].sample_centre_pos1)
+        self.assertEqual(3.6, move.detectors[ReductionMode.LAB.value].sample_centre_pos2)
+
     def test_rear_front_maps_to_enum_correctly(self):
         for user_input, enum_val in [
             ("rear", ReductionMode.LAB),
