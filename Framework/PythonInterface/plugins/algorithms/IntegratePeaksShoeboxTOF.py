@@ -335,7 +335,6 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=peaks.getNumberPeaks())
         for ipk, peak in enumerate(peaks):
             prog_reporter.report("Integrating")
-            status = PEAK_STATUS.NO_PEAK
             intens, sigma = 0.0, 0.0
 
             detid = peak.getDetectorID()
@@ -363,24 +362,27 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     peak, detid, bank_name, nshoebox * kernel.shape[0], nshoebox * kernel.shape[1], nrows_edge, ncols_edge
                 )
                 x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, kernel, nshoebox)
-
-                # perform initial integration
-                intens_over_sig = convolve_shoebox(y, esq, kernel)
-
-                # identify best shoebox position near peak
                 ix = np.argmin(abs(x - pk_tof))
-                ipos = find_nearest_peak_in_data_window(intens_over_sig, ispecs, x, ws, peaks, ipk, peak_data.irow, peak_data.icol, ix)
-
-                # perform final integration if required
+                ipos_predicted = [peak_data.irow, peak_data.icol, ix]
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
-                if ipos is not None:
-                    # integrate at that position (without smoothing I/sigma)
-                    intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
-                    if status == PEAK_STATUS.STRONG and do_optimise_shoebox:
-                        ipos, (nrows, ncols, nbins) = optimise_shoebox(y, esq, (nrows, ncols, nbins), ipos)
-                        kernel = make_kernel(nrows, ncols, nbins)
-                        # re-integrate but this time check for overlap with edge
-                        intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+
+                intens, sigma, status, ispecs, ipos, nrows, ncols, nbins = integrate_peak(
+                    ws,
+                    peaks,
+                    ipk,
+                    kernel,
+                    nrows,
+                    ncols,
+                    nbins,
+                    x,
+                    y,
+                    esq,
+                    ispecs,
+                    ipos_predicted,
+                    det_edges,
+                    weak_peak_threshold,
+                    do_optimise_shoebox,
+                )
 
                 if status == PEAK_STATUS.WEAK and do_optimise_shoebox and weak_peak_strategy == "NearestStrongPeak":
                     # look for possible strong peaks at any TOF in the window (won't know if strong until all pks integrated)
@@ -409,22 +411,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 bank_name = peaks.column("BankName")[ipk]
                 pk_tof = peak.getTOF()
                 # find nearest strong peak to get shoebox dimensions from
-                ipks_near_strong = []
-                for ipk_near in weak_pk.ipks_near:
-                    if results[ipk_near].status == PEAK_STATUS.STRONG:
-                        ipks_near_strong.append(int(ipk_near))
-                if not ipks_near_strong:
-                    # no peaks in detector window at any TOF, look in all table
-                    ipks_near_strong = ipks_strong
-                # loop over strong peaks and find nearest peak
-                ipk_strong = None
-                angle_min = np.inf
-                for ipk_near in ipks_near_strong:
-                    angle = calc_angle_between_peaks(peak, peaks.getPeak(ipk_near))
-                    if angle < angle_min:
-                        angle_min = angle
-                        ipk_strong = ipk_near
-                strong_pk = peaks.getPeak(ipk_strong)
+                ipk_strong, strong_pk = get_nearest_strong_peak(peaks, peak, results, weak_pk.ipks_near, ipks_strong)
                 # get peak shape and make kernel
                 nrows, ncols, nbins = results[ipk_strong].peak_shape
                 # scale TOF extent
@@ -486,6 +473,46 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             return alg.getProperty("OutputWorkspace").value
         else:
             return None
+
+
+def get_nearest_strong_peak(peaks, peak, results, ipks_near, ipks_strong):
+    ipks_near_strong = []
+    for ipk_near in ipks_near:
+        if results[ipk_near].status == PEAK_STATUS.STRONG:
+            ipks_near_strong.append(int(ipk_near))
+    if not ipks_near_strong:
+        # no peaks in detector window at any TOF, look in all table
+        ipks_near_strong = ipks_strong
+    # loop over strong peaks and find nearest peak
+    ipk_strong = None
+    angle_min = np.inf
+    for ipk_near in ipks_near_strong:
+        angle = calc_angle_between_peaks(peak, peaks.getPeak(ipk_near))
+        if angle < angle_min:
+            angle_min = angle
+            ipk_strong = ipk_near
+    return ipk_strong, peaks.getPeak(ipk_strong)
+
+
+def integrate_peak(
+    ws, peaks, ipk, kernel, nrows, ncols, nbins, x, y, esq, ispecs, ipos_predicted, det_edges, weak_peak_threshold, do_optimise_shoebox
+):
+    # perform initial integration
+    intens_over_sig = convolve_shoebox(y, esq, kernel)
+
+    # identify best shoebox position near peak
+    ipos = find_nearest_peak_in_data_window(intens_over_sig, ispecs, x, ws, peaks, ipk, *ipos_predicted)
+
+    # perform final integration if required
+    if ipos is not None:
+        # integrate at that position (without smoothing I/sigma)
+        intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+        if status == PEAK_STATUS.STRONG and do_optimise_shoebox:
+            ipos, (nrows, ncols, nbins) = optimise_shoebox(y, esq, (nrows, ncols, nbins), ipos)
+            kernel = make_kernel(nrows, ncols, nbins)
+            # re-integrate but this time check for overlap with edge
+            intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+    return intens, sigma, status, ispecs, ipos, nrows, ncols, nbins
 
 
 def round_up_to_odd_number(number):
