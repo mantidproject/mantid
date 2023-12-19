@@ -29,16 +29,16 @@ class EnggFitPeaksTest(unittest.TestCase):
         )
 
         # No InputWorkspace property (required)
-        self.assertRaises(RuntimeError, EnggFitPeaks, WorkspaceIndex=0, ExpectedPeaks="0.51, 0.72")
+        self.assertRaises(TypeError, EnggFitPeaks, WorkspaceIndex=0, ExpectedPeaks="0.51, 0.72")
 
         # Wrong WorkspaceIndex value
-        self.assertRaises(RuntimeError, EnggFitPeaks, InputWorkspace=ws_name, WorkspaceIndex=-3, ExpectedPeaks="0.51, 0.72")
+        self.assertRaises(TypeError, EnggFitPeaks, InputWorkspace=ws_name, WorkspaceIndex=-3, ExpectedPeaks="0.51, 0.72")
 
         # Wrong property
-        self.assertRaises(RuntimeError, EnggFitPeaks, InputWorkspace=ws_name, BankPixelFoo=33, WorkspaceIndex=0, ExpectedPeaks="0.51, 0.72")
+        self.assertRaises(TypeError, EnggFitPeaks, InputWorkspace=ws_name, BankPixelFoo=33, WorkspaceIndex=0, ExpectedPeaks="0.51, 0.72")
 
         # missing FittedPeaks output property
-        self.assertRaises(RuntimeError, EnggFitPeaks, InputWorkspace=ws_name, WorkspaceIndex=0, ExpectedPeaks="0.51, 0.72")
+        self.assertRaises(TypeError, EnggFitPeaks, InputWorkspace=ws_name, WorkspaceIndex=0, ExpectedPeaks="0.51, 0.72")
 
         # Wrong ExpectedPeaks value
         self.assertRaises(ValueError, EnggFitPeaks, InputWorkspace=ws_name, WorkspaceIndex=0, ExpectedPeaks="a")
@@ -130,9 +130,9 @@ class EnggFitPeaksTest(unittest.TestCase):
             Random=1,
         )
         # these should raise because of issues with the peak center - data range
-        self.assertRaises(RuntimeError, EnggFitPeaks, sws, 0, [0.5, 2.5])
+        self.assertRaises(TypeError, EnggFitPeaks, sws, 0, [0.5, 2.5])
         EditInstrumentGeometry(Workspace=sws, L2=[1.0], Polar=[90], PrimaryFlightPath=50)
-        self.assertRaises(RuntimeError, EnggFitPeaks, sws, 0, [1.1, 3])
+        self.assertRaises(TypeError, EnggFitPeaks, sws, 0, [1.1, 3])
 
         # this should fail because of nan/infinity issues
         peak_def = "name=BackToBackExponential, I=12000, A=1, B=1.5, X0=10000, S=350"
@@ -140,7 +140,7 @@ class EnggFitPeaksTest(unittest.TestCase):
             Function="User Defined", UserDefinedFunction=peak_def, NumBanks=1, BankPixelWidth=1, XMin=10000, XMax=30000, BinWidth=10
         )
         EditInstrumentGeometry(Workspace=sws, L2=[1.0], Polar=[35], PrimaryFlightPath=35)
-        self.assertRaises(RuntimeError, EnggFitPeaks, sws, 0, [1, 2.3, 3])
+        self.assertRaises(TypeError, EnggFitPeaks, sws, 0, [1, 2.3, 3])
 
         # this should fail because FindPeaks doesn't initialize/converge well
         peak_def = "name=BackToBackExponential, I=90000, A=0.1, B=0.5, X0=5000, S=400"
@@ -148,7 +148,7 @@ class EnggFitPeaksTest(unittest.TestCase):
             Function="User Defined", UserDefinedFunction=peak_def, NumBanks=1, BankPixelWidth=1, XMin=2000, XMax=30000, BinWidth=10
         )
         EditInstrumentGeometry(Workspace=sws, L2=[1.0], Polar=[90], PrimaryFlightPath=50)
-        self.assertRaises(RuntimeError, EnggFitPeaks, sws, 0, [0.6])
+        self.assertRaises(TypeError, EnggFitPeaks, sws, 0, [0.6])
 
     def test_fails_ok_1peak(self):
         """
@@ -159,7 +159,7 @@ class EnggFitPeaksTest(unittest.TestCase):
             Function="User Defined", UserDefinedFunction=peak_def, NumBanks=1, BankPixelWidth=1, XMin=0, XMax=25000, BinWidth=10
         )
         EditInstrumentGeometry(Workspace=sws, L2=[1.5], Polar=[90], PrimaryFlightPath=45)
-        self.assertRaises(RuntimeError, EnggFitPeaks, sws, WorkspaceIndex=0, ExpectedPeaks="0.542")
+        self.assertRaises(TypeError, EnggFitPeaks, sws, WorkspaceIndex=0, ExpectedPeaks="0.542")
 
     def test_2peaks_fails_1(self):
         """
