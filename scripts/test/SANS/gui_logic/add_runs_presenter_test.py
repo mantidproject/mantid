@@ -38,6 +38,7 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
         mock_view = mock.create_autospec(AddRunsPage, spec_set=True)
         mock_view.sum = FakeSignal()
         mock_view.outFileChanged = FakeSignal()
+        mock_view.customOutFileChanged = FakeSignal()
         mock_view.saveDirectoryClicked = FakeSignal()
         return mock_view
 
