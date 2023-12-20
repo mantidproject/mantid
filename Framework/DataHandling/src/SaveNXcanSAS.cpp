@@ -404,14 +404,10 @@ void createNote(H5::Group &group) {
  * save
  * @param secondEntryValue: string containing the second value to save
  */
-void addNoteToProcess(H5::Group &group, const std::string &firstEntryName, const std::string &firstEntryValue,
-                      const std::string &secondEntryName, const std::string &secondEntryValue) {
+void addProcessEntry(H5::Group &group, const std::string &entryName, const std::string &entryValue) {
   auto process = group.openGroup(sasProcessGroupName);
-  auto note = process.openGroup(sasNoteGroupName);
-
   // Populate note
-  Mantid::DataHandling::H5Util::write(note, firstEntryName, firstEntryValue);
-  Mantid::DataHandling::H5Util::write(note, secondEntryName, secondEntryValue);
+  Mantid::DataHandling::H5Util::write(process, entryName, entryValue);
 }
 
 WorkspaceDimensionality getWorkspaceDimensionality(const Mantid::API::MatrixWorkspace_sptr &workspace) {
@@ -908,21 +904,19 @@ void SaveNXcanSAS::exec() {
     addProcess(sasEntry, workspace);
   }
 
-  if (transmissionCan || transmissionSample) {
-    createNote(sasEntry);
-    if (transmissionCan)
-      addNoteToProcess(sasEntry, sasProcessTermCanScatter, canScatterRun, sasProcessTermCanDirect, canDirectRun);
-    if (transmissionSample)
-      addNoteToProcess(sasEntry, sasProcessTermSampleTrans, sampleTransmissionRun, sasProcessTermSampleDirect,
-                       sampleDirectRun);
+  if (transmissionCan) {
+    addProcessEntry(sasEntry, sasProcessTermCanScatter, canScatterRun);
+    addProcessEntry(sasEntry, sasProcessTermCanDirect, canDirectRun);
+  }
+  if (transmissionSample) {
+    addProcessEntry(sasEntry, sasProcessTermSampleTrans, sampleTransmissionRun);
+    addProcessEntry(sasEntry, sasProcessTermSampleDirect, sampleDirectRun);
   }
 
   if (!scaledBgSubWorkspace.empty()) {
     progress.report("Adding scaled background subtraction information.");
-    auto process = sasEntry.openGroup(sasProcessGroupName);
-    auto note = process.openGroup(sasNoteGroupName);
-    Mantid::DataHandling::H5Util::write(note, sasProcessTermScaledBgSubWorkspace, scaledBgSubWorkspace);
-    Mantid::DataHandling::H5Util::write(note, sasProcessTermScaledBgSubScaleFactor, scaledBgSubScaleFactor);
+    addProcessEntry(sasEntry, sasProcessTermScaledBgSubWorkspace, scaledBgSubWorkspace);
+    addProcessEntry(sasEntry, sasProcessTermScaledBgSubScaleFactor, scaledBgSubScaleFactor);
   }
 
   // Add the transmissions for sample
