@@ -110,6 +110,7 @@ class AddRunsPagePresenter(object):
     def _connect_to_view(self, view):
         view.sum.connect(self._handle_sum)
         view.outFileChanged.connect(self._handle_out_file_changed)
+        view.customOutFileChanged.connect(self._handle_custom_outfile_check_changed)
         view.saveDirectoryClicked.connect(self._handle_output_directory_changed)
 
     def _make_base_file_name_from_selection(self, run_selection):
