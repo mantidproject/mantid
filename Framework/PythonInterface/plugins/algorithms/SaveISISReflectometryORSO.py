@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.utils.reflectometry.orso_helper import MantidORSODataColumns, MantidORSODataset, MantidORSOSaver
 
-from mantid.kernel import Direction
-from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, FileProperty, FileAction, PythonAlgorithm, PropertyMode, FileFinder
+from mantid.kernel import Direction, config
+from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, FileProperty, FileAction, PythonAlgorithm, PropertyMode
 
 from pathlib import Path
 from typing import Optional, Tuple, Union, List
@@ -228,10 +228,8 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             theta = history.getPropertyValue("ThetaIn")
             try:
                 angle_files.extend([(file, theta) for file in self._get_file_names_from_run_numbers(input_runs, instrument_name)])
-            except RuntimeError:
-                self.log().warning(
-                    f"Could not find all filenames for run(s) {input_runs}. Angle file information will be excluded from the file."
-                )
+            except RuntimeError as ex:
+                self.log().warning(f"{ex}. Angle file information will be excluded from the file.")
                 return []
         return angle_files
 
@@ -254,10 +252,8 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             try:
                 add_run_file_names(history.getPropertyValue("FirstTransmissionRunList"), first_trans_files)
                 add_run_file_names(history.getPropertyValue("SecondTransmissionRunList"), second_trans_files)
-            except RuntimeError:
-                self.log().warning(
-                    "Could not find all filenames for transmission run(s). Transmission file information will be excluded from the file."
-                )
+            except RuntimeError as ex:
+                self.log().warning(f"{ex}. Transmission file information will be excluded from the file.")
                 return [], []
 
         return list(first_trans_files.keys()), list(second_trans_files.keys())
@@ -267,13 +263,42 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         """
         Get the fully qualified file names from a string of comma-separated run numbers.
         """
-        # If the run number part is all digits then append the instrument name to ensure we look up the correct run
-        # files. If we don't do this we will look up files for the user's default instrument, which isn't guaranteed
-        # to match the reduced workspace instrument.
-        run_list = [f"{instrument_name}{run}" if re.search(r"\D+", run.split(".")[0]) is None else run for run in run_numbers.split(",")]
+        # If the run number part is all digits then append the instrument name and Nexus file extension, with the
+        # correct instrument padding, to give the full file name.
+        # We do this manually because using the FileFinder is too slow for this algorithm. We can't guarantee
+        # that it will be possible to retrieve this from the history of ReflectometryISISLoadAndProcess either.
+        file_names = []
+        ext = ".nxs"
+        run_num_width = config.getInstrument(instrument_name).zeroPadding(0)
 
-        filepaths = FileFinder.findRuns(",".join(run_list))
-        return [Path(filepath).name for filepath in filepaths]
+        def is_only_digits(str_to_check):
+            return re.search(r"\D+", str_to_check) is None
+
+        for run in run_numbers.split(","):
+            # The ISIS Reflectometry GUI is fairly flexible about what can be entered, so this could be a run number
+            # or file name, with or without padding. Less commonly, it could be a workspace name, which we will exclude
+            # from the ORSO metadata.
+            filename_part = run.split(".")[0]
+            if not filename_part:
+                raise RuntimeError(f"Cannot convert run {run} to a full file name")
+
+            # Get the run number part of the run information
+            run_number_part = None
+            if is_only_digits(filename_part):
+                # This must be the run number
+                run_number_part = filename_part
+            elif filename_part.startswith(instrument_name):
+                # Get the part of the filename left once the instrument prefix is removed
+                maybe_run_num = filename_part.split(instrument_name)[1]
+                if is_only_digits(maybe_run_num):
+                    run_number_part = maybe_run_num
+
+            if not run_number_part:
+                raise RuntimeError(f"Cannot convert run {run} to a full file name for instrument {instrument_name}")
+
+            file_names.append(f"{instrument_name}{run_number_part.rjust(run_num_width, '0')}{ext}")
+
+        return file_names
 
     def _get_reduction_alg_history(self, ws):
         """

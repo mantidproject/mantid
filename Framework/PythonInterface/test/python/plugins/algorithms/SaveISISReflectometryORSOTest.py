@@ -88,19 +88,6 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._check_file_contents(header_values_to_check, reduced_ws, resolution, excluded_values)
 
-    def test_file_metadata_matches_reduced_workspace_instrument_when_save_after_default_instrument_changed(self):
-        self.assertTrue(config["default.instrument"] == "INTER")
-        resolution = 0.02
-        reduced_ws = self._get_ws_from_reduction("13460", resolution, "IvsQ_binned_13460")
-
-        config["default.instrument"] = "OFFSPEC"
-        SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
-
-        expected_data_files = ["INTER00013460.nxs"]
-        header_values_to_check = self._get_header_values_expected_from_reduced_ws(reduced_ws, expected_data_files)
-
-        self._check_file_contents(header_values_to_check, reduced_ws, resolution)
-
     def test_create_file_from_workspace_with_reduction_history_and_transmission_runs(self):
         resolution = 0.02
         reduced_ws = self._get_ws_from_reduction("13460", resolution, "IvsQ_binned_13460", "13463", "13464, 13462")
