@@ -13,7 +13,7 @@ namespace API {
 
 template <typename T> class MANTID_API_DLL Result {
 public:
-  Result(T result, std::string errors = "") : m_result(result), m_errors(errors) {}
+  Result(T result, std::string errors = "") : m_result(std::move(result)), m_errors(std::move(errors)) {}
 
   // accessors
   inline const T &result() const { return m_result; }
