@@ -134,12 +134,12 @@ int ObjComponent::interceptSurface(Track &track) const {
 
 /** Finds the approximate solid angle covered by the component when viewed from
  * the point given
- *  @param observer :: The position from which the component is being viewed
+ *  @param params :: The position from which the component is being viewed, and number of cylinder slices
  *  @returns The solid angle in steradians
  *  @throw NullPointerException if the underlying geometrical Object has not
  * been set
  */
-double ObjComponent::solidAngle(const Geometry::SolidAngleParams params) const {
+double ObjComponent::solidAngle(const Geometry::SolidAngleParams &params) const {
   if (m_map) {
     if (hasComponentInfo()) {
       return m_map->componentInfo().solidAngle(index(), params);

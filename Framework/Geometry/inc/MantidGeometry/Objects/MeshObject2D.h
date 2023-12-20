@@ -47,8 +47,8 @@ public:
   MeshObject2D *clone() const override;
   MeshObject2D *cloneWithMaterial(const Kernel::Material &material) const override;
   int getName() const override;
-  double solidAngle(const SolidAngleParams params) const override;
-  double solidAngle(const SolidAngleParams params, const Kernel::V3D &scaleFactor) const override;
+  double solidAngle(const SolidAngleParams &params) const override;
+  double solidAngle(const SolidAngleParams &params, const Kernel::V3D &scaleFactor) const override;
   bool operator==(const MeshObject2D &other) const;
   const BoundingBox &getBoundingBox() const override;
   const static double MinThickness;

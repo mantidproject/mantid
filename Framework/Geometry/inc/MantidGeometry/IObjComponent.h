@@ -68,7 +68,7 @@ public:
 
   /// Finds the approximate solid angle covered by the component when viewed
   /// from the point given
-  virtual double solidAngle(const Geometry::SolidAngleParams params) const = 0;
+  virtual double solidAngle(const Geometry::SolidAngleParams &params) const = 0;
 
   /// Try to find a point that lies within (or on) the object
   virtual int getPointInObject(Kernel::V3D &point) const = 0;

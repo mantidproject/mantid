@@ -55,9 +55,9 @@ public:
   virtual int interceptSurface(Geometry::Track &) const = 0;
   virtual double distance(const Geometry::Track &) const = 0;
   // Solid angle
-  virtual double solidAngle(const SolidAngleParams params) const = 0;
+  virtual double solidAngle(const SolidAngleParams &params) const = 0;
   // Solid angle with a scaling of the object
-  virtual double solidAngle(const SolidAngleParams params, const Kernel::V3D &scaleFactor) const = 0;
+  virtual double solidAngle(const SolidAngleParams &params, const Kernel::V3D &scaleFactor) const = 0;
   /// Return cached value of axis-aligned bounding box
   virtual const BoundingBox &getBoundingBox() const = 0;
   /// Calculate (or return cached value of) Axis Aligned Bounding box

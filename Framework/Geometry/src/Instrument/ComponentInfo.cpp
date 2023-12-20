@@ -248,7 +248,7 @@ void ComponentInfo::setScaleFactor(const size_t componentIndex, const Kernel::V3
   m_componentInfo->setScaleFactor(componentIndex, Kernel::toVector3d(scaleFactor));
 }
 
-double ComponentInfo::solidAngle(const size_t componentIndex, const Geometry::SolidAngleParams params) const {
+double ComponentInfo::solidAngle(const size_t componentIndex, const Geometry::SolidAngleParams &params) const {
   if (!hasValidShape(componentIndex))
     throw Kernel::Exception::NullPointerException("ComponentInfo::solidAngle", "shape");
   // This is the observer position in the shape's coordinate system.

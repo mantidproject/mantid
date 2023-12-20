@@ -270,7 +270,7 @@ void MeshObject::getBoundingBox(double &xmax, double &ymax, double &zmax, double
  * @param params :: point to measure solid angle from, and number of cylinder slices.
  * @return :: estimate of solid angle of object.
  */
-double MeshObject::solidAngle(const SolidAngleParams params) const {
+double MeshObject::solidAngle(const SolidAngleParams &params) const {
   double solidAngleSum(0), solidAngleNegativeSum(0);
   Kernel::V3D vertex1, vertex2, vertex3;
   for (size_t i = 0; this->getTriangle(i, vertex1, vertex2, vertex3); ++i) {
@@ -298,7 +298,7 @@ double MeshObject::solidAngle(const SolidAngleParams params) const {
  * @param scaleFactor :: Kernel::V3D giving scaling of the object
  * @return :: estimate of solid angle of object.
  */
-double MeshObject::solidAngle(const SolidAngleParams params, const Kernel::V3D &scaleFactor) const {
+double MeshObject::solidAngle(const SolidAngleParams &params, const Kernel::V3D &scaleFactor) const {
   std::vector<Kernel::V3D> scaledVertices;
   scaledVertices.reserve(m_vertices.size());
   std::transform(m_vertices.cbegin(), m_vertices.cend(), std::back_inserter(scaledVertices),

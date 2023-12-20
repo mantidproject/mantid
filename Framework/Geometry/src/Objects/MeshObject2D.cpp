@@ -304,7 +304,7 @@ int MeshObject2D::getName() const {
  * @param params
  * @return
  */
-double MeshObject2D::solidAngle(const SolidAngleParams params) const {
+double MeshObject2D::solidAngle(const SolidAngleParams &params) const {
   double solidAngleSum(0);
   Kernel::V3D vertex1, vertex2, vertex3;
   for (size_t i = 0; getTriangle(i, m_triangles, m_vertices, vertex1, vertex2, vertex3); ++i) {
@@ -316,7 +316,7 @@ double MeshObject2D::solidAngle(const SolidAngleParams params) const {
   return solidAngleSum;
 }
 
-double MeshObject2D::solidAngle(const SolidAngleParams params, const Kernel::V3D &scaleFactor) const {
+double MeshObject2D::solidAngle(const SolidAngleParams &params, const Kernel::V3D &scaleFactor) const {
   std::vector<Kernel::V3D> scaledVertices;
   scaledVertices.reserve(m_vertices.size());
   std::transform(m_vertices.cbegin(), m_vertices.cend(), std::back_inserter(scaledVertices),

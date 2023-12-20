@@ -1212,7 +1212,7 @@ TrackDirection CSGObject::calcValidTypeBy3Points(const Kernel::V3D &prePt, const
  * @return :: estimate of solid angle of object. Accuracy depends on object
  * shape.
  */
-double CSGObject::solidAngle(const SolidAngleParams params) const {
+double CSGObject::solidAngle(const SolidAngleParams &params) const {
   if (this->numberOfTriangles() > 30000)
     return rayTraceSolidAngle(params.observer());
   return triangulatedSolidAngle(params);
@@ -1226,7 +1226,7 @@ double CSGObject::solidAngle(const SolidAngleParams params) const {
  * @return :: estimate of solid angle of object. Accuracy depends on
  * triangulation quality.
  */
-double CSGObject::solidAngle(const SolidAngleParams params, const Kernel::V3D &scaleFactor) const {
+double CSGObject::solidAngle(const SolidAngleParams &params, const Kernel::V3D &scaleFactor) const {
   return triangulatedSolidAngle(params, scaleFactor);
 }
 
@@ -1353,13 +1353,13 @@ double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
  * @param params :: Point from which solid angle is required, and number of cylinder slices
  * @return the solid angle
  */
-double CSGObject::triangulatedSolidAngle(const SolidAngleParams params) const {
+double CSGObject::triangulatedSolidAngle(const SolidAngleParams &params) const {
   //
   // Because the triangles from OC are not consistently ordered wrt their
   // outward normal internal points give incorrect solid angle. Surface
   // points are difficult to get right with the triangle based method.
   // Hence catch these two (unlikely) cases.
-  const auto observer = params.observer();
+  const auto &observer = params.observer();
   const BoundingBox &boundingBox = this->getBoundingBox();
   if (boundingBox.isNonNull() && boundingBox.isPointInside(observer)) {
     if (isValid(observer)) {
@@ -1440,13 +1440,13 @@ double CSGObject::triangulatedSolidAngle(const SolidAngleParams params) const {
  *only (not observer)
  * @return the solid angle
  */
-double CSGObject::triangulatedSolidAngle(const SolidAngleParams params, const V3D &scaleFactor) const {
+double CSGObject::triangulatedSolidAngle(const SolidAngleParams &params, const V3D &scaleFactor) const {
   //
   // Because the triangles from OC are not consistently ordered wrt their
   // outward normal internal points give incorrect solid angle. Surface
   // points are difficult to get right with the triangle based method.
   // Hence catch these two (unlikely) cases.
-  const auto observer = params.observer();
+  const auto &observer = params.observer();
   const BoundingBox &boundingBox = this->getBoundingBox();
   double sx = scaleFactor[0], sy = scaleFactor[1], sz = scaleFactor[2];
   const V3D sObserver = observer;

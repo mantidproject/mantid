@@ -126,13 +126,13 @@ public:
   double distance(const Track &track) const override;
 
   // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
-  double solidAngle(const SolidAngleParams params) const override;
+  double solidAngle(const SolidAngleParams &params) const override;
   // Solid angle with a scaling of the object
-  double solidAngle(const SolidAngleParams params, const Kernel::V3D &scaleFactor) const override;
+  double solidAngle(const SolidAngleParams &params, const Kernel::V3D &scaleFactor) const override;
   // solid angle via triangulation
-  double triangulatedSolidAngle(const SolidAngleParams params) const;
+  double triangulatedSolidAngle(const SolidAngleParams &params) const;
   // Solid angle via triangulation with scaling factor for object size
-  double triangulatedSolidAngle(const SolidAngleParams params, const Kernel::V3D &scaleFactor) const;
+  double triangulatedSolidAngle(const SolidAngleParams &params, const Kernel::V3D &scaleFactor) const;
   // solid angle via ray tracing
   double rayTraceSolidAngle(const Kernel::V3D &observer) const;
 
