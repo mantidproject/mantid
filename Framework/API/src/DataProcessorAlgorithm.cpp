@@ -233,7 +233,7 @@ Workspace_sptr GenericDataProcessorAlgorithm<Base>::load(const std::string &inpu
       // Get facility extensions
       FacilityInfo facilityInfo = ConfigService::Instance().getFacility();
       const std::vector<std::string> facilityExts = facilityInfo.extensions();
-      foundFile = FileFinder::Instance().findRun(inputData, facilityExts);
+      foundFile = FileFinder::Instance().findRun(inputData, facilityExts).result();
     }
 
     if (!foundFile.empty()) {

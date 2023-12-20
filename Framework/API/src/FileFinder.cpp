@@ -606,9 +606,9 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
 
         std::string path;
         if (boost::algorithm::istarts_with(hint, "PG3")) {
-          path = findRun(instrSName + run, exts, useExtsOnly);
+          path = findRun(instrSName + run, exts, useExtsOnly).result();
         } else {
-          path = findRun(p1.first + run, exts, useExtsOnly);
+          path = findRun(p1.first + run, exts, useExtsOnly).result();
         }
 
         if (!path.empty()) {
@@ -627,12 +627,12 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
       if (boost::algorithm::istarts_with(hint, "PG3")) {
         if (h == hints.begin()) {
           instrSName = "PG3";
-          path = findRun(*h, exts, useExtsOnly);
+          path = findRun(*h, exts, useExtsOnly).result();
         } else {
-          path = findRun(instrSName + *h, exts, useExtsOnly);
+          path = findRun(instrSName + *h, exts, useExtsOnly).result();
         }
       } else {
-        path = findRun(*h, exts, useExtsOnly);
+        path = findRun(*h, exts, useExtsOnly).result();
       }
       if (!path.empty()) {
         res.emplace_back(path);
