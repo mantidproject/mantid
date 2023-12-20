@@ -38,6 +38,8 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _REDUCTION_ALG = "ReflectometryReductionOneAuto"
     _REDUCTION_WORKFLOW_ALG = "ReflectometryISISLoadAndProcess"
     _Q_UNIT = "MomentumTransfer"
+    _FIRST_TRANS_COMMENT = "First transmission run"
+    _SECOND_TRANS_COMMENT = "Second transmission run"
 
     def setUp(self):
         self._oldFacility = config["default.facility"]
@@ -75,10 +77,11 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         reduced_ws = self._get_ws_from_reduction("INTER13460, 13461, 13462.nxs", resolution, "IvsQ_13460+13461+13462")
         SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
 
-        expected_input_run_files = ["INTER00013460.nxs", "INTER00013461.nxs", "INTER00013462.nxs"]
-        header_values_to_check = self._get_header_values_expected_from_reduced_ws(reduced_ws, expected_input_run_files)
+        expected_data_files = ["INTER00013460.nxs", "INTER00013461.nxs", "INTER00013462.nxs"]
+        header_values_to_check = self._get_header_values_expected_from_reduced_ws(reduced_ws, expected_data_files)
+        excluded_values = [f"#     additional_files:\n"]
 
-        self._check_file_contents(header_values_to_check, reduced_ws, resolution)
+        self._check_file_contents(header_values_to_check, reduced_ws, resolution, excluded_values)
 
     def test_file_metadata_matches_reduced_workspace_instrument_when_save_after_default_instrument_changed(self):
         self.assertTrue(config["default.instrument"] == "INTER")
@@ -88,8 +91,24 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         config["default.instrument"] = "OFFSPEC"
         SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
 
-        expected_input_run_files = ["INTER00013460.nxs"]
-        header_values_to_check = self._get_header_values_expected_from_reduced_ws(reduced_ws, expected_input_run_files)
+        expected_data_files = ["INTER00013460.nxs"]
+        header_values_to_check = self._get_header_values_expected_from_reduced_ws(reduced_ws, expected_data_files)
+
+        self._check_file_contents(header_values_to_check, reduced_ws, resolution)
+
+    def test_create_file_from_workspace_with_reduction_history_and_transmission_runs(self):
+        resolution = 0.02
+        reduced_ws = self._get_ws_from_reduction("13460", resolution, "IvsQ_binned_13460", "13463", "13464, 13462")
+        SaveISISReflectometryORSO(InputWorkspace=reduced_ws, Filename=self._output_filename)
+
+        expected_data_files = ["INTER00013460.nxs"]
+        expected_additional_file_entries = {
+            "INTER00013463.nxs": self._FIRST_TRANS_COMMENT,
+            "INTER00013464.nxs": self._SECOND_TRANS_COMMENT,
+            "INTER00013462.nxs": self._SECOND_TRANS_COMMENT,
+        }
+        header_values_to_check = self._get_header_values_expected_from_reduced_ws(reduced_ws, expected_data_files)
+        header_values_to_check.append(self._expected_additional_file_header_values(expected_additional_file_entries))
 
         self._check_file_contents(header_values_to_check, reduced_ws, resolution)
 
@@ -165,7 +184,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     def _set_units_as_momentum_transfer(self, ws):
         ws.getAxis(0).setUnit(self._Q_UNIT)
 
-    def _get_ws_from_reduction(self, input_runs, resolution, reduced_ws_name):
+    def _get_ws_from_reduction(self, input_runs, resolution, reduced_ws_name, first_trans_runs=None, second_trans_runs=None):
         args = {
             "InputRunList": input_runs,
             "ProcessingInstructions": "4",
@@ -175,12 +194,16 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             "I0MonitorIndex": 1,
             "MomentumTransferStep": resolution,
         }
+        if first_trans_runs:
+            args["FirstTransmissionRunList"] = first_trans_runs
+        if second_trans_runs:
+            args["SecondTransmissionRunList"] = second_trans_runs
         alg = create_algorithm("ReflectometryISISLoadAndProcess", **args)
         alg.setRethrows(True)
         assertRaisesNothing(self, alg.execute)
         return AnalysisDataService.retrieve(reduced_ws_name)
 
-    def _get_header_values_expected_from_reduced_ws(self, reduced_ws, expected_input_run_files=None):
+    def _get_header_values_expected_from_reduced_ws(self, reduced_ws, expected_data_files=None):
         expected_header_values = []
         history = self._get_reduction_history_for_reduced_ws(reduced_ws)
         self.assertIsNotNone(history)
@@ -194,13 +217,29 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         expected_header_values.append(f"data_set: {reduced_ws.name()}")
 
-        if expected_input_run_files:
-            angle_files_entry = ["#     data_files:\n"]
-            for run_file in expected_input_run_files:
-                angle_files_entry.append(f"#     - file: {run_file}\n")
-            expected_header_values.append("".join(angle_files_entry))
+        if expected_data_files:
+            expected_header_values.append(self._expected_data_file_header_values(expected_data_files))
 
         return expected_header_values
+
+    @staticmethod
+    def _expected_data_file_header_values(expected_files):
+        files_entry = [f"#     data_files:\n"]
+
+        for run_file in expected_files:
+            files_entry.append(f"#     - file: {run_file}\n")
+
+        return "".join(files_entry)
+
+    @staticmethod
+    def _expected_additional_file_header_values(expected_entries):
+        files_entry = [f"#     additional_files:\n"]
+
+        for run_file, comment in expected_entries.items():
+            files_entry.append(f"#     - file: {run_file}\n")
+            files_entry.append(f"#       comment: {comment}\n")
+
+        return "".join(files_entry)
 
     def _get_reduction_history_for_reduced_ws(self, reduced_ws):
         for history in reversed(reduced_ws.getHistory().getAlgorithmHistories()):

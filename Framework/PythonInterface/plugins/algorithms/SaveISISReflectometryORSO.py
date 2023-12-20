@@ -12,6 +12,7 @@ from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, FileProperty, 
 from pathlib import Path
 from typing import Optional, Tuple, Union, List
 import re
+from collections import OrderedDict
 
 
 class Prop:
@@ -153,8 +154,17 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             self.log().warning(f"Unable to find history for {self._REDUCTION_WORKFLOW_ALG} - some metadata will be excluded from the file.")
             return
 
-        for file in self._get_individual_angle_files(ws, reduction_workflow_histories):
+        instrument_name = ws.getInstrument().getName()
+
+        for file in self._get_individual_angle_files(instrument_name, reduction_workflow_histories):
             dataset.add_measurement_file(True, file)
+
+        first_trans_files, second_trans_files = self._get_transmission_files(instrument_name, reduction_workflow_histories)
+        for file in first_trans_files:
+            dataset.add_measurement_file(False, file, comment="First transmission run")
+
+        for file in second_trans_files:
+            dataset.add_measurement_file(False, file, comment="Second transmission run")
 
     def _get_rb_number_and_doi(self, run) -> Union[Tuple[str, str], Tuple[None, None]]:
         """
@@ -207,23 +217,49 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             )
             return None
 
-    def _get_individual_angle_files(self, ws, reduction_workflow_histories) -> List[str]:
+    def _get_individual_angle_files(self, instrument_name, reduction_workflow_histories) -> List[str]:
         """
         Find the names of the individual angle files that were used in the reduction
         """
         angle_files = []
-        instrument = ws.getInstrument().getName()
 
         for history in reduction_workflow_histories:
             input_runs = history.getPropertyValue("InputRunList")
             try:
-                angle_files.extend(self._get_file_names_from_run_numbers(input_runs, instrument))
+                angle_files.extend(self._get_file_names_from_run_numbers(input_runs, instrument_name))
             except RuntimeError:
                 self.log().warning(
-                    f"Could not find all angle filenames for run(s) {input_runs}. Angle file information will be excluded from the file."
+                    f"Could not find all filenames for run(s) {input_runs}. Angle file information will be excluded from the file."
                 )
                 return []
         return angle_files
+
+    def _get_transmission_files(self, instrument_name, reduction_workflow_histories) -> Tuple[List[str], List[str]]:
+        """
+        Find the names of the transmission files that were used in the reduction
+        """
+        # We use an ordered dictionary to ensure that duplicates are excluded and that the files always appear in the
+        # same order in the .ort file. Fixing the order makes it easier for us to write automated tests.
+        first_trans_files = OrderedDict()
+        second_trans_files = OrderedDict()
+
+        def add_run_file_names(run_list, trans_files):
+            if not run_list:
+                return
+            for file_name in self._get_file_names_from_run_numbers(run_list, instrument_name):
+                trans_files[file_name] = None
+
+        for history in reduction_workflow_histories:
+            try:
+                add_run_file_names(history.getPropertyValue("FirstTransmissionRunList"), first_trans_files)
+                add_run_file_names(history.getPropertyValue("SecondTransmissionRunList"), second_trans_files)
+            except RuntimeError:
+                self.log().warning(
+                    "Could not find all filenames for transmission run(s). Transmission file information will be excluded from the file."
+                )
+                return [], []
+
+        return list(first_trans_files.keys()), list(second_trans_files.keys())
 
     @staticmethod
     def _get_file_names_from_run_numbers(run_numbers: str, instrument_name: str) -> List[str]:
