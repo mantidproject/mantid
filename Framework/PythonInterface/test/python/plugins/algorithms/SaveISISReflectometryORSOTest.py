@@ -61,6 +61,11 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             "facility: ISIS",
             f"creator:\n#     name: {self._SAVE_ALG}\n#     affiliation: {MantidORSODataset.SOFTWARE_NAME}\n#",
         ]
+        self._runs_and_angles = {
+            "INTER00013460.nxs": "0.5",
+            "INTER00013461.nxs": "0.5",
+            "INTER00013462.nxs": "0.5",
+        }
 
     def tearDown(self):
         """
@@ -222,12 +227,12 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         return expected_header_values
 
-    @staticmethod
-    def _expected_data_file_header_values(expected_files):
+    def _expected_data_file_header_values(self, expected_entries):
         files_entry = [f"#     data_files:\n"]
 
-        for run_file in expected_files:
+        for run_file in expected_entries:
             files_entry.append(f"#     - file: {run_file}\n")
+            files_entry.append(f"#       comment: Incident angle {self._runs_and_angles[run_file]}\n")
 
         return "".join(files_entry)
 

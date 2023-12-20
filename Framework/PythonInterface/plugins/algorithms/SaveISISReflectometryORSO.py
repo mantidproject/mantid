@@ -156,8 +156,8 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         instrument_name = ws.getInstrument().getName()
 
-        for file in self._get_individual_angle_files(instrument_name, reduction_workflow_histories):
-            dataset.add_measurement_file(True, file)
+        for file, theta in self._get_individual_angle_files(instrument_name, reduction_workflow_histories):
+            dataset.add_measurement_file(True, file, comment=f"Incident angle {theta}")
 
         first_trans_files, second_trans_files = self._get_transmission_files(instrument_name, reduction_workflow_histories)
         for file in first_trans_files:
@@ -217,7 +217,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             )
             return None
 
-    def _get_individual_angle_files(self, instrument_name, reduction_workflow_histories) -> List[str]:
+    def _get_individual_angle_files(self, instrument_name, reduction_workflow_histories) -> List[Tuple[str, str]]:
         """
         Find the names of the individual angle files that were used in the reduction
         """
@@ -225,8 +225,9 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         for history in reduction_workflow_histories:
             input_runs = history.getPropertyValue("InputRunList")
+            theta = history.getPropertyValue("ThetaIn")
             try:
-                angle_files.extend(self._get_file_names_from_run_numbers(input_runs, instrument_name))
+                angle_files.extend([(file, theta) for file in self._get_file_names_from_run_numbers(input_runs, instrument_name)])
             except RuntimeError:
                 self.log().warning(
                     f"Could not find all filenames for run(s) {input_runs}. Angle file information will be excluded from the file."
