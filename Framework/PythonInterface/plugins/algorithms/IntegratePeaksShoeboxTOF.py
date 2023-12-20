@@ -404,7 +404,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             set_peak_intensity(peak, intens, sigma, do_lorz_cor)
 
         if len(ipks_strong):
+            prog_reporter.resetNumSteps(int(len(weak_peaks_list)), start=0.0, end=1.0)
             for weak_pk in weak_peaks_list:
+                prog_reporter.report("Re-integrating weak peaks")
                 # get peak
                 ipk = weak_pk.ipk
                 peak = peaks.getPeak(ipk)
