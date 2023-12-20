@@ -15,7 +15,7 @@ Ui_AddRunsPage, _ = load_ui(__file__, "add_runs_page.ui")
 class AddRunsPage(QtWidgets.QWidget, Ui_AddRunsPage):
     sum = Signal()
     outFileChanged = Signal()
-    customOutFileChanged = Signal()
+    customOutFileChanged = Signal(bool)
     saveDirectoryClicked = Signal()
 
     def __init__(self, parent=None):

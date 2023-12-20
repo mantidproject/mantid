@@ -149,6 +149,12 @@ class AddRunsPagePresenter(object):
     def _handle_out_file_changed(self):
         self._use_generated_file_name = False
 
+    def _handle_custom_outfile_check_changed(self, enabled):
+        if enabled:
+            self._use_generated_file_name = False
+            return
+        self._use_generated_file_name = True
+
     @staticmethod
     def _output_directory_is_not_empty(settings):
         return settings.save_directory
