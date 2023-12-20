@@ -11,7 +11,7 @@
 namespace Mantid {
 namespace API {
 
-template <typename T> class MANTID_API_DLL Result {
+template <typename T> class Result {
 public:
   Result(T result, std::string errors = "") : m_result(std::move(result)), m_errors(std::move(errors)) {}
 
