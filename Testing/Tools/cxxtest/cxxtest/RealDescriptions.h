@@ -14,6 +14,8 @@
 #include <cxxtest/TestSuite.h>
 #include <cxxtest/GlobalFixture.h>
 
+#include <iostream>
+
 namespace CxxTest
 {
     class RealTestDescription : public TestDescription
