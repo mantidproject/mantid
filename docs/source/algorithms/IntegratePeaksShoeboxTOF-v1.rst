@@ -19,7 +19,7 @@ and several improvements have been made to suit TOF Laue data
 1. Avoids nearby peaks that are closer to another peak position when optimising shoebox position
 
 2. The shoebox dimensions of weak peaks can be obtained from nearby stronger peaks with scaling of the TOF dimension
-to account for the instrument resolution)
+to account for the instrument resolution.
 
 
 Description
