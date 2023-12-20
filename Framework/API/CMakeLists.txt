@@ -459,6 +459,7 @@ set(TEST_FILES
     ProjectionTest.h
     RawCountValidatorTest.h
     ResizeRectangularDetectorHelperTest.h
+    ResultTest.h
     RunTest.h
     SampleShapeValidatorTest.h
     SampleTest.h
