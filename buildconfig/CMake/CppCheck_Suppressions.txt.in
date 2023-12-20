@@ -866,9 +866,9 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGe
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:320
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:473
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:563
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:1672
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:1677
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:1682
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:1676
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:1681
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:1686
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheWriter.cpp:83
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:702
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:909
