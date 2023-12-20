@@ -60,6 +60,12 @@ class AddRunsPage(QtWidgets.QWidget, Ui_AddRunsPage):
     def disable_summation_settings(self):
         self.summation_settings_view().setEnabled(False)
 
+    def enable_output_file_name_edit(self):
+        self.fileNameEdit.setEnabled(True)
+
+    def disable_output_file_name_edit(self):
+        self.fileNameEdit.setEnabled(False)
+
     def display_save_directory_box(self, title, default_path):
         filename = QtWidgets.QFileDialog.getExistingDirectory(self, title, default_path, QtWidgets.QFileDialog.ShowDirsOnly)
         return filename

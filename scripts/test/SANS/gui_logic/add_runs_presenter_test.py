@@ -273,6 +273,20 @@ class BaseFileNameTest(AddRunsPagePresenterTestCase):
 
         self.view.set_out_file_name.assert_called_with("LOQ00006-add")
 
+    def test_custom_filename_box_disabled_when_custom_filename_unchecked(self):
+        run_summation = mock.MagicMock()
+        _ = self._make_presenter(run_summation)
+        self.view.customOutFileChanged.emit(False)
+
+        self.view.disable_output_file_name_edit.assert_called_once()
+
+    def test_custom_filename_box_enabled_when_custom_filename_checked(self):
+        run_summation = mock.MagicMock()
+        _ = self._make_presenter(run_summation)
+        self.view.customOutFileChanged.emit(True)
+
+        self.view.enable_output_file_name_edit.assert_called_once()
+
 
 class SumButtonTest(AddRunsPagePresenterTestCase):
     def setUp(self):
